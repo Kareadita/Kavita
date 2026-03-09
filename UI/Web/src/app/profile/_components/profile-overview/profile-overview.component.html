@@ -8,7 +8,7 @@
         [nextPageLoader]="stream.nextPageLoader"
       >
         <ng-template #carouselItem let-item>
-          <app-series-card [series]="item" [libraryId]="item.libraryId"/>
+          <app-entity-card [entity]="item" [config]="seriesConfig()" />
         </ng-template>
       </app-carousel-reel>
     }

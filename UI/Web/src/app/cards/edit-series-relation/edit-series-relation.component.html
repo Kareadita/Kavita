@@ -5,7 +5,7 @@
       {{t('description-part-1')}} <a [href]="WikiLink.SeriesRelationships" target="_blank" rel="noopener noreferrer" referrerpolicy="no-referrer">{{t('description-part-2')}}</a>
     </p>
 
-    @if (relations.length > 0) {
+    @if (relations().length > 0) {
       <div class="row">
         <label class="form-label col-md-7">{{t('target-series')}}</label>
         <label class="form-label col-md-5">{{t('relationship')}}</label>
@@ -13,12 +13,12 @@
     }
 
     <form>
-      @for(relation of relations; let idx = $index; track relation.id) {
+      @for(relation of relations(); let idx = $index; track relation.id) {
         <div class="row">
           <div class="col-sm-12 col-md-12 col-lg-7 mb-3">
             <app-typeahead (selectedData)="updateSeries($event, relation)" [settings]="relation.typeaheadSettings" id="relation--{{idx}}" [focus]="focusTypeahead">
               <ng-template #badgeItem let-item let-position="idx">
-                {{item.name}} ({{libraryNames[item.libraryId]}})
+                {{item.name}} ({{libraryNames()[item.libraryId]}})
               </ng-template>
               <ng-template #optionItem let-item let-position="idx" let-value="value">
                 @if (item.name.toLowerCase().trim().indexOf(value.toLowerCase().trim()) >= 0) {
@@ -26,7 +26,7 @@
                 } @else {
                   {{item.localizedName}}
                 }
-                ({{libraryNames[item.libraryId]}})
+                ({{libraryNames()[item.libraryId]}})
               </ng-template>
             </app-typeahead>
           </div>

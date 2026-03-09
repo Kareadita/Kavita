@@ -1,0 +1,61 @@
+using System.IO;
+using System.Threading;
+using System.Threading.Tasks;
+using Kavita.Models.Entities.Enums;
+using Kavita.Models.Entities.Interfaces;
+
+namespace Kavita.API.Services;
+
+public interface IImageService
+{
+    void ExtractImages(string fileFilePath, string targetDirectory, int fileCount = 1);
+    string GetCoverImage(string path, string fileName, string outputDirectory, EncodeFormat encodeFormat, CoverImageSize size);
+
+    /// <summary>
+    /// Creates a Thumbnail version of a base64 image
+    /// </summary>
+    /// <param name="encodedImage">base64 encoded image</param>
+    /// <param name="fileName"></param>
+    /// <param name="encodeFormat">Convert and save as encoding format</param>
+    /// <param name="thumbnailWidth">Width of thumbnail</param>
+    /// <param name="targetDirectory">If null, will write to <see cref="DirectoryService.CoverImageDirectory"/></param>
+    /// <returns>File name with extension of the file. </returns>
+    string CreateThumbnailFromBase64(string encodedImage, string fileName, EncodeFormat encodeFormat, int thumbnailWidth = 320, string? targetDirectory = null);
+    /// <summary>
+    /// Writes out a thumbnail by stream input
+    /// </summary>
+    /// <param name="stream"></param>
+    /// <param name="fileName"></param>
+    /// <param name="outputDirectory"></param>
+    /// <param name="encodeFormat"></param>
+    /// <returns></returns>
+    string WriteCoverThumbnail(Stream stream, string fileName, string outputDirectory, EncodeFormat encodeFormat, CoverImageSize size = CoverImageSize.Default);
+    /// <summary>
+    /// Writes out a thumbnail by file path input
+    /// </summary>
+    /// <param name="sourceFile"></param>
+    /// <param name="fileName"></param>
+    /// <param name="outputDirectory"></param>
+    /// <param name="encodeFormat"></param>
+    /// <returns></returns>
+    string WriteCoverThumbnail(string sourceFile, string fileName, string outputDirectory, EncodeFormat encodeFormat, CoverImageSize size = CoverImageSize.Default);
+
+    /// <summary>
+    /// Converts the passed image to encoding and outputs it in the same directory
+    /// </summary>
+    /// <param name="filePath">Full path to the image to convert</param>
+    /// <param name="outputPath">Where to output the file</param>
+    /// <param name="encodeFormat">Encoding Format</param>
+    /// <param name="ct"></param>
+    /// <returns>File of written encoded image</returns>
+    Task<string> ConvertToEncodingFormat(string filePath, string outputPath, EncodeFormat encodeFormat, CancellationToken ct = default);
+
+    /// <summary>
+    /// Performs I/O to determine if the file is a valid Image
+    /// </summary>
+    /// <param name="filePath"></param>
+    /// <param name="ct"></param>
+    /// <returns></returns>
+    Task<bool> IsImage(string filePath, CancellationToken ct = default);
+    void UpdateColorScape(IHasCoverImage entity);
+}

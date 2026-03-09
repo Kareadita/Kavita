@@ -1,0 +1,30 @@
+.queue-item {
+  &-info {
+    min-width: 0;
+  }
+
+  &-actions {
+    align-self: flex-start;
+    padding-top: 2px;
+  }
+}
+
+.item-title {
+  display: block;
+  color: inherit;
+  text-decoration: none;
+
+  &:hover {
+    text-decoration: underline;
+  }
+}
+
+.dl-info-row {
+  display: flex;
+  justify-content: space-between;
+  font-variant-numeric: tabular-nums;
+}
+
+.dl-speed {
+  text-align: right;
+}

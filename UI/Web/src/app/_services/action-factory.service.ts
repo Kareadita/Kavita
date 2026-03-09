@@ -1,9 +1,9 @@
-import {inject, Injectable} from '@angular/core';
-import {map, Observable, shareReplay} from 'rxjs';
+import {effect, inject, Injectable} from '@angular/core';
+import {EMPTY, map, shareReplay} from 'rxjs';
 import {Chapter} from '../_models/chapter';
 import {UserCollection} from '../_models/collection-tag';
 import {Device} from '../_models/device/device';
-import {Library} from '../_models/library/library';
+import {Library, LibraryType} from '../_models/library/library';
 import {ReadingList} from '../_models/reading-list';
 import {Series} from '../_models/series';
 import {Volume} from '../_models/volume';
@@ -16,170 +16,17 @@ import {Person} from "../_models/metadata/person";
 import {User} from '../_models/user/user';
 import {Annotation} from "../book-reader/_models/annotations/annotation";
 import {ClientDevice} from "../_models/client-device";
+import {PageBookmark} from "../_models/readers/page-bookmark";
+import {ActionService} from "./action.service";
+import {ActionItem, ActionShouldRenderFunc} from "../_models/actionables/action-item";
+import {Action} from "../_models/actionables/action";
+import {ActionResultCallback} from "../_models/actionables/action-result";
 
-export enum Action {
-  Submenu = -1,
-  /**
-   * Mark entity as read
-   */
-  MarkAsRead = 0,
-  /**
-   * Mark entity as unread
-   */
-  MarkAsUnread = 1,
-  /**
-   * Invoke a Scan on Series/Library
-   */
-  Scan = 2,
-  /**
-   * Delete the entity
-   */
-  Delete = 3,
-  /**
-   * Open edit modal
-   */
-  Edit = 4,
-  /**
-   * Open details modal
-   */
-  Info = 5,
-  /**
-   * Invoke a refresh covers
-   */
-  RefreshMetadata = 6,
-  /**
-   * Download the entity
-   */
-  Download = 7,
-  /**
-   * Invoke an Analyze Files which calculates word count
-   */
-  AnalyzeFiles = 8,
-  /**
-   * Read in incognito mode aka no progress tracking
-   */
-  IncognitoRead = 9,
-  /**
-   * Add to reading list
-   */
-  AddToReadingList = 10,
-  /**
-   * Add to collection
-   */
-  AddToCollection = 11,
-  /**
-   * Essentially a download, but handled differently. Needed so card bubbles it up for handling
-   */
-  DownloadBookmark = 12,
-  /**
-   * Open Series detail page for said series
-   */
-  ViewSeries = 13,
-  /**
-   * Open the reader for entity
-   */
-  Read = 14,
-  /**
-   * Add to user's Want to Read List
-   */
-  AddToWantToReadList = 15,
-  /**
-   * Remove from user's Want to Read List
-   */
-  RemoveFromWantToReadList = 16,
-  /**
-   * Send to a device
-   */
-  SendTo = 17,
-  /**
-   * Import some data into Kavita
-   */
-  Import = 18,
-  /**
-   * Removes the Series from On Deck inclusion
-   */
-  RemoveFromOnDeck = 19,
-  AddRuleGroup = 20,
-  RemoveRuleGroup = 21,
-  MarkAsVisible = 22,
-  MarkAsInvisible = 23,
-  /**
-   * Promotes the underlying item (Reading List, Collection)
-   */
-  Promote = 24,
-  UnPromote = 25,
-  /**
-   * Invoke refresh covers as false to generate colorscapes
-   */
-  GenerateColorScape = 26,
-  /**
-   * Copy settings from one entity to another
-   */
-  CopySettings = 27,
-  /**
-   * Match an entity with an upstream system
-   */
-  Match = 28,
-  /**
-   * Merge two (or more?) entities
-   */
-  Merge = 29,
-  /**
-   * Add to a reading profile
-   */
-  SetReadingProfile = 30,
-  /**
-   * Remove the reading profile from the entity
-   */
-  ClearReadingProfile = 31,
-  Export = 32,
-  Like = 33,
-  UnLike = 34,
-}
-
-/**
- * Callback for an action
- */
-export type ActionCallback<T> = (action: ActionItem<T>, entity: T) => void;
-export type ActionShouldRenderFunc<T> = (action: ActionItem<T>, entity: T, user: User) => boolean;
-
-export interface ActionItem<T> {
-  title: string;
-  description: string;
-  action: Action;
-  callback: ActionCallback<T>;
-  /**
-   * Roles required to be present for ActionItem to show. If empty, assumes anyone can see. At least one needs to apply.
-   */
-  requiredRoles: Role[];
-  /**
-   * @deprecated Use required Roles instead
-   */
-  requiresAdmin?: boolean;
-  children: Array<ActionItem<T>>;
-  /**
-   * An optional class which applies to an item. ie) danger on a delete action
-   */
-  class?: string;
-  /**
-   * Indicates that there exists a separate list will be loaded from an API.
-   * Rule: If using this, only one child should exist in children with the Action for dynamicList.
-   */
-  dynamicList?: Observable<{title: string, data: any}[]> | undefined;
-  /**
-   * Extra data that needs to be sent back from the card item. Used mainly for dynamicList. This will be the item from dyanamicList return
-   */
-  _extra?: {title: string, data: any};
-  /**
-   * Will call on each action to determine if it should show for the appropriate entity based on state and user
-   */
-  shouldRender: ActionShouldRenderFunc<T>;
-}
 
 /**
  * Entities that can be actioned upon
  */
-export type ActionableEntity = Volume | Series | Chapter | ReadingList | UserCollection | Person | Library | SideNavStream | SmartFilter | ClientDevice | null;
+export type ActionableEntity = Volume | Series | Chapter | ReadingList | UserCollection | Person | Library | SideNavStream | SmartFilter | ClientDevice | PageBookmark | null;
 
 @Injectable({
   providedIn: 'root',
@@ -187,6 +34,7 @@ export type ActionableEntity = Volume | Series | Chapter | ReadingList | UserCol
 export class ActionFactoryService {
   private accountService = inject(AccountService);
   private deviceService = inject(DeviceService);
+  private actionService = inject(ActionService);
 
   private libraryActions: Array<ActionItem<Library>> = [];
   private seriesActions: Array<ActionItem<Series>> = [];
@@ -194,78 +42,163 @@ export class ActionFactoryService {
   private chapterActions: Array<ActionItem<Chapter>> = [];
   private collectionTagActions: Array<ActionItem<UserCollection>> = [];
   private readingListActions: Array<ActionItem<ReadingList>> = [];
-  private bookmarkActions: Array<ActionItem<Series>> = [];
+  private bookmarkActions: Array<ActionItem<PageBookmark>> = [];
   private personActions: Array<ActionItem<Person>> = [];
   private sideNavStreamActions: Array<ActionItem<SideNavStream>> = [];
   private smartFilterActions: Array<ActionItem<SmartFilter>> = [];
-  private sideNavHomeActions: Array<ActionItem<void>> = [];
+  private sideNavHomeActions: Array<ActionItem<{}>> = [];
   private annotationActions: Array<ActionItem<Annotation>> = [];
   private clientDeviceActions: Array<ActionItem<ClientDevice>> = [];
 
   constructor() {
-    this.accountService.currentUser$.subscribe((_) => {
+    this._resetActions();
+    effect(() => {
+      this.accountService.currentUser();
       this._resetActions();
     });
   }
 
-  getLibraryActions(callback: ActionCallback<Library>, shouldRenderFunc: ActionShouldRenderFunc<Library> = this.dummyShouldRender) {
-    return this.applyCallbackToList(this.libraryActions, callback, shouldRenderFunc) as ActionItem<Library>[];
+  getLibraryActions(shouldRenderFunc: ActionShouldRenderFunc<Library> = this.basicReadRender) {
+    return this.applyCallbackToList(
+      this.libraryActions,
+      (action, entity) => this.actionService.handleLibraryAction(action, entity),
+      shouldRenderFunc
+    );
   }
 
-  getSeriesActions(callback: ActionCallback<Series>, shouldRenderFunc: ActionShouldRenderFunc<Series> = this.basicReadRender) {
-    return this.applyCallbackToList(this.seriesActions, callback, shouldRenderFunc);
+  getSeriesActions(shouldRenderFunc: ActionShouldRenderFunc<Series> = this.basicReadRender) {
+    return this.applyCallbackToList(
+      this.seriesActions,
+      (action, entity) => this.actionService.handleSeriesAction(action, entity),
+      shouldRenderFunc
+    );
   }
 
-  getSideNavStreamActions(callback: ActionCallback<SideNavStream>, shouldRenderFunc: ActionShouldRenderFunc<SideNavStream> = this.dummyShouldRender) {
-    return this.applyCallbackToList(this.sideNavStreamActions, callback, shouldRenderFunc);
+  getVolumeActions(seriesId: number, libraryId: number, libraryType: LibraryType, shouldRenderFunc: ActionShouldRenderFunc<Volume> = this.basicReadRender) {
+    return this.applyCallbackToList(
+      this.volumeActions,
+      (action, entity) => this.actionService.handleVolumeAction(action, entity, seriesId, libraryId, libraryType),
+      shouldRenderFunc
+    );
   }
 
-  getSmartFilterActions(callback: ActionCallback<SmartFilter>, shouldRenderFunc: ActionShouldRenderFunc<SmartFilter> = this.dummyShouldRender) {
-    return this.applyCallbackToList(this.smartFilterActions, callback, shouldRenderFunc);
+  getChapterActions(seriesId: number, libraryId: number, libraryType: LibraryType, shouldRenderFunc: ActionShouldRenderFunc<Chapter> = this.basicReadRender) {
+    return this.applyCallbackToList(
+      this.chapterActions,
+      (action, entity) => this.actionService.handleChapterAction(action, entity, seriesId, libraryId, libraryType),
+      shouldRenderFunc
+    );
   }
 
-  getVolumeActions(callback: ActionCallback<Volume>, shouldRenderFunc: ActionShouldRenderFunc<Volume> = this.basicReadRender) {
-    return this.applyCallbackToList(this.volumeActions, callback, shouldRenderFunc);
+  getBookmarkActions(contextFunc: () => {seriesId: number, libraryId: number, seriesName: string}, shouldRenderFunc: ActionShouldRenderFunc<PageBookmark> = this.basicReadRender) {
+    return this.applyCallbackToList(
+      this.bookmarkActions,
+      (action, entity) => this.actionService.handleBookmarkAction(action, entity, contextFunc),
+      shouldRenderFunc
+    );
   }
 
-  getChapterActions(callback: ActionCallback<Chapter>, shouldRenderFunc: ActionShouldRenderFunc<Chapter> = this.basicReadRender) {
-    return this.applyCallbackToList(this.chapterActions, callback, shouldRenderFunc);
+  getReadingListActions(shouldRenderFunc: ActionShouldRenderFunc<ReadingList> = this.basicReadRender) {
+    return this.applyCallbackToList(
+      this.readingListActions,
+      (action, entity) => this.actionService.handleReadingListAction(action, entity),
+      shouldRenderFunc
+    );
   }
 
-  getCollectionTagActions(callback: ActionCallback<UserCollection>, shouldRenderFunc: ActionShouldRenderFunc<UserCollection> = this.dummyShouldRender) {
-    return  this.applyCallbackToList(this.collectionTagActions, callback, shouldRenderFunc);
+  getCollectionTagActions(shouldRenderFunc: ActionShouldRenderFunc<UserCollection> = this.basicReadRender) {
+    return this.applyCallbackToList(
+      this.collectionTagActions,
+      (action, entity) => this.actionService.handleCollectionAction(action, entity),
+      shouldRenderFunc
+    );
   }
 
-  getReadingListActions(callback: ActionCallback<ReadingList>, shouldRenderFunc: ActionShouldRenderFunc<ReadingList> = this.dummyShouldRender) {
-    return this.applyCallbackToList(this.readingListActions, callback, shouldRenderFunc);
+  getAnnotationActions(shouldRenderFunc: ActionShouldRenderFunc<Annotation> = this.basicReadRender) {
+    return this.applyCallbackToList(
+      this.annotationActions,
+      (action, entity) => this.actionService.handleAnnotationAction(action, entity),
+      shouldRenderFunc
+    );
   }
 
-  getBookmarkActions(callback: ActionCallback<Series>, shouldRenderFunc: ActionShouldRenderFunc<Series> = this.dummyShouldRender) {
-    return this.applyCallbackToList(this.bookmarkActions, callback, shouldRenderFunc);
+  getClientDeviceActions(shouldRenderFunc: ActionShouldRenderFunc<ClientDevice> = this.basicReadRender) {
+    return this.applyCallbackToList(
+      this.clientDeviceActions,
+      (action, entity) => this.actionService.handleClientDeviceAction(action, entity),
+      shouldRenderFunc
+    );
   }
 
-  getPersonActions(callback: ActionCallback<Person>, shouldRenderFunc: ActionShouldRenderFunc<Person> = this.dummyShouldRender) {
-    return this.applyCallbackToList(this.personActions, callback, shouldRenderFunc);
+  getPersonActions(shouldRenderFunc: ActionShouldRenderFunc<Person> = this.basicReadRender) {
+    return this.applyCallbackToList(
+      this.personActions,
+      (action, entity) => this.actionService.handlePersonAction(action, entity),
+      shouldRenderFunc
+    );
   }
 
-  getSideNavHomeActions(callback: ActionCallback<void>, shouldRenderFunc: ActionShouldRenderFunc<void> = this.dummyShouldRender) {
-    return this.applyCallbackToList(this.sideNavHomeActions, callback, shouldRenderFunc);
+  getSmartFilterActions(allFilters: SmartFilter[], shouldRenderFunc: ActionShouldRenderFunc<SmartFilter> = this.basicReadRender) {
+    return this.applyCallbackToList(
+      this.smartFilterActions,
+      (action, entity) => this.actionService.handleSmartFilterAction(action, entity, allFilters),
+      shouldRenderFunc
+    );
   }
 
-  getAnnotationActions(callback: ActionCallback<Annotation>, shouldRenderFunc: ActionShouldRenderFunc<Annotation> = this.dummyShouldRender) {
-    return this.applyCallbackToList(this.annotationActions, callback, shouldRenderFunc);
+
+  getSideNavStreamActions(shouldRenderFunc: ActionShouldRenderFunc<SideNavStream> = this.basicReadRender) {
+    return this.applyCallbackToList(
+      this.sideNavStreamActions,
+      (action, entity) => this.actionService.handleSideNavStreamAction(action, entity),
+      shouldRenderFunc
+    );
   }
 
-  getClientDeviceActions(callback: ActionCallback<ClientDevice>, shouldRenderFunc: ActionShouldRenderFunc<ClientDevice> = this.dummyShouldRender) {
-    return this.applyCallbackToList(this.clientDeviceActions, callback, shouldRenderFunc);
+  getSideNavHomeActions(shouldRenderFunc: ActionShouldRenderFunc<{}> = this.basicReadRender) {
+    // If the caller doesn't pass a render function, assume that readonly users cannot perform actions
+    const renderFunc = shouldRenderFunc === this.basicReadRender
+      ? (action: ActionItem<any>, entity: any, user: User) => !this.accountService.hasReadOnlyRole()
+      : shouldRenderFunc;
+
+    return this.applyCallbackToList(
+      this.sideNavHomeActions,
+      (action, entity) => this.actionService.handleSideNavHomeStream(action, entity),
+      renderFunc
+    );
   }
 
-  dummyCallback(action: ActionItem<any>, entity: any) {}
+  getBulkLibraryActions(shouldRenderFunc: ActionShouldRenderFunc<Library> = this.basicReadRender) {
+
+    const filteredActions = this.flattenActions<Library>(this.libraryActions).filter(a => {
+      return [Action.Delete, Action.GenerateColorScape, Action.RefreshMetadata, Action.CopySettings].includes(a.action);
+    });
+
+    filteredActions.push({
+      _extra: undefined,
+      class: undefined,
+      description: '',
+      dynamicList: undefined,
+      action: Action.CopySettings,
+      callback: this.dummyCallback,
+      shouldRender: shouldRenderFunc,
+      children: [],
+      requiredRoles: [Role.Admin],
+      title: 'copy-settings'
+    });
+
+    return this.applyCallbackToList(
+      filteredActions,
+      (action, entity) => this.actionService.handleBulkLibraryAction(action, entity),
+      shouldRenderFunc
+    );
+  }
+
+  dummyCallback(action: ActionItem<any>, entity: any) { return EMPTY; }
   dummyShouldRender(action: ActionItem<any>, entity: any, user: User) {return true;}
   basicReadRender(action: ActionItem<any>, entity: any, user: User) {
     if (entity === null || entity === undefined) return true;
     if (!entity.hasOwnProperty('pagesRead') && !entity.hasOwnProperty('pages')) return true;
-
     switch (action.action) {
       case(Action.MarkAsRead):
         return entity.pagesRead < entity.pages;
@@ -276,13 +209,6 @@ export class ActionFactoryService {
     }
   }
 
-  filterSendToAction(actions: Array<ActionItem<Chapter>>, chapter: Chapter) {
-    // if (chapter.files.filter(f => f.format === MangaFormat.EPUB || f.format === MangaFormat.PDF).length !== chapter.files.length) {
-    //   // Remove Send To as it doesn't apply
-    //   return actions.filter(item => item.title !== 'Send To');
-    // }
-    return actions;
-  }
 
   getActionablesForSettingsPage(actions: Array<ActionItem<any>>, blacklist: Array<Action> = []) {
     const tasks = [];
@@ -317,29 +243,6 @@ export class ActionFactoryService {
     return tasks.filter(t => !blacklist.includes(t.action));
   }
 
-  getBulkLibraryActions(callback: ActionCallback<Library>, shouldRenderFunc:  ActionShouldRenderFunc<Library> = this.dummyShouldRender) {
-
-    // Scan is currently not supported due to the backend not being able to handle it yet
-    const actions = this.flattenActions<Library>(this.libraryActions).filter(a => {
-      return [Action.Delete, Action.GenerateColorScape, Action.RefreshMetadata, Action.CopySettings].includes(a.action);
-    });
-
-    actions.push({
-      _extra: undefined,
-      class: undefined,
-      description: '',
-      dynamicList: undefined,
-      action: Action.CopySettings,
-      callback: this.dummyCallback,
-      shouldRender: shouldRenderFunc,
-      children: [],
-      requiredRoles: [Role.Admin],
-      requiresAdmin: true,
-      title: 'copy-settings'
-    })
-    return this.applyCallbackToList(actions, callback, shouldRenderFunc) as ActionItem<Library>[];
-  }
-
   flattenActions<T>(actions: Array<ActionItem<T>>): Array<ActionItem<T>> {
     return actions.reduce<Array<ActionItem<T>>>((flatArray, action) => {
       if (action.action !== Action.Submenu) {
@@ -362,9 +265,9 @@ export class ActionFactoryService {
         action: Action.Scan,
         title: 'scan-library',
         description: 'scan-library-tooltip',
+
         callback: this.dummyCallback,
         shouldRender: this.dummyShouldRender,
-        requiresAdmin: true,
         requiredRoles: [Role.Admin],
         children: [],
       },
@@ -372,18 +275,18 @@ export class ActionFactoryService {
         action: Action.Submenu,
         title: 'reading-profiles',
         description: '',
+
         callback: this.dummyCallback,
         shouldRender: this.dummyShouldRender,
-        requiresAdmin: false,
         requiredRoles: [],
         children: [
           {
             action: Action.SetReadingProfile,
             title: 'set-reading-profile',
             description: 'set-reading-profile-tooltip',
+
             callback: this.dummyCallback,
             shouldRender: this.dummyShouldRender,
-            requiresAdmin: false,
             requiredRoles: [],
             children: [],
           },
@@ -391,9 +294,10 @@ export class ActionFactoryService {
             action: Action.ClearReadingProfile,
             title: 'clear-reading-profile',
             description: 'clear-reading-profile-tooltip',
+
             callback: this.dummyCallback,
             shouldRender: this.dummyShouldRender,
-            requiresAdmin: false,
+
             requiredRoles: [],
             children: [],
           },
@@ -403,18 +307,20 @@ export class ActionFactoryService {
         action: Action.Submenu,
         title: 'others',
         description: '',
+
         callback: this.dummyCallback,
         shouldRender: this.dummyShouldRender,
-        requiresAdmin: true,
+
         requiredRoles: [Role.Admin],
         children: [
           {
             action: Action.RefreshMetadata,
             title: 'refresh-covers',
             description: 'refresh-covers-tooltip',
+
             callback: this.dummyCallback,
             shouldRender: this.dummyShouldRender,
-            requiresAdmin: true,
+
             requiredRoles: [Role.Admin],
             children: [],
           },
@@ -422,9 +328,10 @@ export class ActionFactoryService {
             action: Action.GenerateColorScape,
             title: 'generate-colorscape',
             description: 'generate-colorscape-tooltip',
+
             callback: this.dummyCallback,
             shouldRender: this.dummyShouldRender,
-            requiresAdmin: true,
+
             requiredRoles: [Role.Admin],
             children: [],
           },
@@ -432,9 +339,10 @@ export class ActionFactoryService {
             action: Action.Delete,
             title: 'delete',
             description: 'delete-tooltip',
+
             callback: this.dummyCallback,
             shouldRender: this.dummyShouldRender,
-            requiresAdmin: true,
+
             requiredRoles: [Role.Admin],
             children: [],
           },
@@ -444,9 +352,10 @@ export class ActionFactoryService {
         action: Action.Edit,
         title: 'settings',
         description: 'settings-tooltip',
+
         callback: this.dummyCallback,
         shouldRender: this.dummyShouldRender,
-        requiresAdmin: true,
+
         requiredRoles: [Role.Admin],
         children: [],
       },
@@ -457,9 +366,10 @@ export class ActionFactoryService {
         action: Action.Edit,
         title: 'edit',
         description: 'edit-tooltip',
+
         callback: this.dummyCallback,
         shouldRender: this.dummyShouldRender,
-        requiresAdmin: false,
+
         requiredRoles: [],
         children: [],
       },
@@ -467,9 +377,10 @@ export class ActionFactoryService {
         action: Action.Delete,
         title: 'delete',
         description: 'delete-tooltip',
+
         callback: this.dummyCallback,
         shouldRender: this.dummyShouldRender,
-        requiresAdmin: false,
+
         requiredRoles: [],
         class: 'danger',
         children: [],
@@ -478,9 +389,10 @@ export class ActionFactoryService {
         action: Action.Promote,
         title: 'promote',
         description: 'promote-tooltip',
+
         callback: this.dummyCallback,
         shouldRender: this.dummyShouldRender,
-        requiresAdmin: false,
+
         requiredRoles: [],
         children: [],
       },
@@ -488,9 +400,10 @@ export class ActionFactoryService {
         action: Action.UnPromote,
         title: 'unpromote',
         description: 'unpromote-tooltip',
+
         callback: this.dummyCallback,
         shouldRender: this.dummyShouldRender,
-        requiresAdmin: false,
+
         requiredRoles: [],
         children: [],
       },
@@ -501,9 +414,10 @@ export class ActionFactoryService {
         action: Action.MarkAsRead,
         title: 'mark-as-read',
         description: 'mark-as-read-tooltip',
+
         callback: this.dummyCallback,
         shouldRender: this.dummyShouldRender,
-        requiresAdmin: false,
+
         requiredRoles: [],
         children: [],
       },
@@ -511,9 +425,10 @@ export class ActionFactoryService {
         action: Action.MarkAsUnread,
         title: 'mark-as-unread',
         description: 'mark-as-unread-tooltip',
+
         callback: this.dummyCallback,
         shouldRender: this.dummyShouldRender,
-        requiresAdmin: false,
+
         requiredRoles: [],
         children: [],
       },
@@ -521,9 +436,10 @@ export class ActionFactoryService {
         action: Action.Scan,
         title: 'scan-series',
         description: 'scan-series-tooltip',
+
         callback: this.dummyCallback,
         shouldRender: this.dummyShouldRender,
-        requiresAdmin: true,
+
         requiredRoles: [Role.Admin],
         children: [],
       },
@@ -531,18 +447,20 @@ export class ActionFactoryService {
         action: Action.Submenu,
         title: 'add-to',
         description: '',
+
         callback: this.dummyCallback,
         shouldRender: this.dummyShouldRender,
-        requiresAdmin: false,
+
         requiredRoles: [],
         children: [
           {
             action: Action.AddToWantToReadList,
             title: 'add-to-want-to-read',
             description: 'add-to-want-to-read-tooltip',
+
             callback: this.dummyCallback,
             shouldRender: this.dummyShouldRender,
-            requiresAdmin: false,
+
             requiredRoles: [],
             children: [],
           },
@@ -550,9 +468,10 @@ export class ActionFactoryService {
             action: Action.RemoveFromWantToReadList,
             title: 'remove-from-want-to-read',
             description: 'remove-to-want-to-read-tooltip',
+
             callback: this.dummyCallback,
             shouldRender: this.dummyShouldRender,
-            requiresAdmin: false,
+
             requiredRoles: [],
             children: [],
           },
@@ -560,9 +479,10 @@ export class ActionFactoryService {
             action: Action.AddToReadingList,
             title: 'add-to-reading-list',
             description: 'add-to-reading-list-tooltip',
+
             callback: this.dummyCallback,
             shouldRender: this.dummyShouldRender,
-            requiresAdmin: false,
+
             requiredRoles: [],
             children: [],
           },
@@ -570,9 +490,10 @@ export class ActionFactoryService {
             action: Action.AddToCollection,
             title: 'add-to-collection',
             description: 'add-to-collection-tooltip',
+
             callback: this.dummyCallback,
             shouldRender: this.dummyShouldRender,
-            requiresAdmin: false,
+
             requiredRoles: [],
             children: [],
           }
@@ -582,18 +503,20 @@ export class ActionFactoryService {
         action: Action.Submenu,
         title: 'send-to',
         description: 'send-to-tooltip',
+
         callback: this.dummyCallback,
         shouldRender: this.dummyShouldRender,
-        requiresAdmin: false,
+
         requiredRoles: [],
         children: [
           {
             action: Action.SendTo,
             title: '',
             description: '',
+
             callback: this.dummyCallback,
             shouldRender: this.dummyShouldRender,
-            requiresAdmin: false,
+
             requiredRoles: [],
             dynamicList: this.deviceService.devices$.pipe(map((devices: Array<Device>) => devices.map(d => {
               return {'title': d.name, 'data': d};
@@ -606,18 +529,20 @@ export class ActionFactoryService {
         action: Action.Submenu,
         title: 'reading-profiles',
         description: '',
+
         callback: this.dummyCallback,
         shouldRender: this.dummyShouldRender,
-        requiresAdmin: false,
+
         requiredRoles: [],
         children: [
           {
             action: Action.SetReadingProfile,
             title: 'set-reading-profile',
             description: 'set-reading-profile-tooltip',
+
             callback: this.dummyCallback,
             shouldRender: this.dummyShouldRender,
-            requiresAdmin: false,
+
             requiredRoles: [],
             children: [],
           },
@@ -625,9 +550,10 @@ export class ActionFactoryService {
             action: Action.ClearReadingProfile,
             title: 'clear-reading-profile',
             description: 'clear-reading-profile-tooltip',
+
             callback: this.dummyCallback,
             shouldRender: this.dummyShouldRender,
-            requiresAdmin: false,
+
             requiredRoles: [],
             children: [],
           },
@@ -637,18 +563,20 @@ export class ActionFactoryService {
         action: Action.Submenu,
         title: 'others',
         description: '',
+
         callback: this.dummyCallback,
         shouldRender: this.dummyShouldRender,
-        requiresAdmin: true,
+
         requiredRoles: [],
         children: [
           {
             action: Action.RefreshMetadata,
             title: 'refresh-covers',
             description: 'refresh-covers-tooltip',
+
             callback: this.dummyCallback,
             shouldRender: this.dummyShouldRender,
-            requiresAdmin: true,
+
             requiredRoles: [Role.Admin],
             children: [],
           },
@@ -656,9 +584,10 @@ export class ActionFactoryService {
             action: Action.GenerateColorScape,
             title: 'generate-colorscape',
             description: 'generate-colorscape-tooltip',
+
             callback: this.dummyCallback,
             shouldRender: this.dummyShouldRender,
-            requiresAdmin: true,
+
             requiredRoles: [Role.Admin],
             children: [],
           },
@@ -666,9 +595,10 @@ export class ActionFactoryService {
             action: Action.AnalyzeFiles,
             title: 'analyze-files',
             description: 'analyze-files-tooltip',
+
             callback: this.dummyCallback,
             shouldRender: this.dummyShouldRender,
-            requiresAdmin: true,
+
             requiredRoles: [Role.Admin],
             children: [],
           },
@@ -676,9 +606,10 @@ export class ActionFactoryService {
             action: Action.Delete,
             title: 'delete',
             description: 'delete-tooltip',
+
             callback: this.dummyCallback,
             shouldRender: this.dummyShouldRender,
-            requiresAdmin: true,
+
             requiredRoles: [Role.Admin],
             class: 'danger',
             children: [],
@@ -689,9 +620,10 @@ export class ActionFactoryService {
         action: Action.Match,
         title: 'match',
         description: 'match-tooltip',
+
         callback: this.dummyCallback,
         shouldRender: this.dummyShouldRender,
-        requiresAdmin: true,
+
         requiredRoles: [Role.Admin],
         children: [],
       },
@@ -699,9 +631,10 @@ export class ActionFactoryService {
         action: Action.Download,
         title: 'download',
         description: 'download-tooltip',
+
         callback: this.dummyCallback,
         shouldRender: this.dummyShouldRender,
-        requiresAdmin: false,
+
         requiredRoles: [Role.Download],
         children: [],
       },
@@ -709,9 +642,10 @@ export class ActionFactoryService {
         action: Action.Edit,
         title: 'edit',
         description: 'edit-tooltip',
+
         callback: this.dummyCallback,
         shouldRender: this.dummyShouldRender,
-        requiresAdmin: true,
+
         requiredRoles: [Role.Admin],
         children: [],
       },
@@ -722,9 +656,10 @@ export class ActionFactoryService {
         action: Action.IncognitoRead,
         title: 'read-incognito',
         description: 'read-incognito-tooltip',
+
         callback: this.dummyCallback,
         shouldRender: this.dummyShouldRender,
-        requiresAdmin: false,
+
         requiredRoles: [],
         children: [],
       },
@@ -732,9 +667,10 @@ export class ActionFactoryService {
         action: Action.MarkAsRead,
         title: 'mark-as-read',
         description: 'mark-as-read-tooltip',
+
         callback: this.dummyCallback,
         shouldRender: this.dummyShouldRender,
-        requiresAdmin: false,
+
         requiredRoles: [],
         children: [],
       },
@@ -742,9 +678,10 @@ export class ActionFactoryService {
         action: Action.MarkAsUnread,
         title: 'mark-as-unread',
         description: 'mark-as-unread-tooltip',
+
         callback: this.dummyCallback,
         shouldRender: this.dummyShouldRender,
-        requiresAdmin: false,
+
         requiredRoles: [],
         children: [],
       },
@@ -752,18 +689,20 @@ export class ActionFactoryService {
         action: Action.Submenu,
         title: 'add-to',
         description: '=',
+
         callback: this.dummyCallback,
         shouldRender: this.dummyShouldRender,
-        requiresAdmin: false,
+
         requiredRoles: [],
         children: [
           {
             action: Action.AddToReadingList,
             title: 'add-to-reading-list',
             description: 'add-to-reading-list-tooltip',
+
             callback: this.dummyCallback,
             shouldRender: this.dummyShouldRender,
-            requiresAdmin: false,
+
             requiredRoles: [],
             children: [],
           }
@@ -773,18 +712,20 @@ export class ActionFactoryService {
         action: Action.Submenu,
         title: 'send-to',
         description: 'send-to-tooltip',
+
         callback: this.dummyCallback,
         shouldRender: this.dummyShouldRender,
-        requiresAdmin: false,
+
         requiredRoles: [],
         children: [
           {
             action: Action.SendTo,
             title: '',
             description: '',
+
             callback: this.dummyCallback,
             shouldRender: this.dummyShouldRender,
-            requiresAdmin: false,
+
             requiredRoles: [],
             dynamicList: this.deviceService.devices$.pipe(map((devices: Array<Device>) => devices.map(d => {
               return {'title': d.name, 'data': d};
@@ -797,18 +738,20 @@ export class ActionFactoryService {
         action: Action.Submenu,
         title: 'others',
         description: '',
+
         callback: this.dummyCallback,
         shouldRender: this.dummyShouldRender,
-        requiresAdmin: false,
+
         requiredRoles: [],
         children: [
           {
             action: Action.Delete,
             title: 'delete',
             description: 'delete-tooltip',
+
             callback: this.dummyCallback,
             shouldRender: this.dummyShouldRender,
-            requiresAdmin: true,
+
             requiredRoles: [Role.Admin],
             children: [],
           },
@@ -816,9 +759,10 @@ export class ActionFactoryService {
             action: Action.Download,
             title: 'download',
             description: 'download-tooltip',
+
             callback: this.dummyCallback,
             shouldRender: this.dummyShouldRender,
-            requiresAdmin: false,
+
             requiredRoles: [],
             children: [],
           },
@@ -828,9 +772,10 @@ export class ActionFactoryService {
         action: Action.Edit,
         title: 'details',
         description: 'edit-tooltip',
+
         callback: this.dummyCallback,
         shouldRender: this.dummyShouldRender,
-        requiresAdmin: false,
+
         requiredRoles: [],
         children: [],
       },
@@ -841,9 +786,10 @@ export class ActionFactoryService {
         action: Action.IncognitoRead,
         title: 'read-incognito',
         description: 'read-incognito-tooltip',
+
         callback: this.dummyCallback,
         shouldRender: this.dummyShouldRender,
-        requiresAdmin: false,
+
         requiredRoles: [],
         children: [],
       },
@@ -851,9 +797,10 @@ export class ActionFactoryService {
         action: Action.MarkAsRead,
         title: 'mark-as-read',
         description: 'mark-as-read-tooltip',
+
         callback: this.dummyCallback,
         shouldRender: this.dummyShouldRender,
-        requiresAdmin: false,
+
         requiredRoles: [],
         children: [],
       },
@@ -861,9 +808,10 @@ export class ActionFactoryService {
         action: Action.MarkAsUnread,
         title: 'mark-as-unread',
         description: 'mark-as-unread-tooltip',
+
         callback: this.dummyCallback,
         shouldRender: this.dummyShouldRender,
-        requiresAdmin: false,
+
         requiredRoles: [],
         children: [],
       },
@@ -871,18 +819,20 @@ export class ActionFactoryService {
         action: Action.Submenu,
         title: 'add-to',
         description: '',
+
         callback: this.dummyCallback,
         shouldRender: this.dummyShouldRender,
-        requiresAdmin: false,
+
         requiredRoles: [],
         children: [
           {
             action: Action.AddToReadingList,
             title: 'add-to-reading-list',
             description: 'add-to-reading-list-tooltip',
+
             callback: this.dummyCallback,
             shouldRender: this.dummyShouldRender,
-            requiresAdmin: false,
+
             requiredRoles: [],
             children: [],
           }
@@ -892,18 +842,20 @@ export class ActionFactoryService {
         action: Action.Submenu,
         title: 'send-to',
         description: 'send-to-tooltip',
+
         callback: this.dummyCallback,
         shouldRender: this.dummyShouldRender,
-        requiresAdmin: false,
+
         requiredRoles: [],
         children: [
           {
             action: Action.SendTo,
             title: '',
             description: '',
+
             callback: this.dummyCallback,
             shouldRender: this.dummyShouldRender,
-            requiresAdmin: false,
+
             requiredRoles: [],
             dynamicList: this.deviceService.devices$.pipe(map((devices: Array<Device>) => devices.map(d => {
               return {'title': d.name, 'data': d};
@@ -917,18 +869,20 @@ export class ActionFactoryService {
         action: Action.Submenu,
         title: 'others',
         description: '',
+
         callback: this.dummyCallback,
         shouldRender: this.dummyShouldRender,
-        requiresAdmin: false,
+
         requiredRoles: [],
         children: [
           {
             action: Action.Delete,
             title: 'delete',
             description: 'delete-tooltip',
+
             callback: this.dummyCallback,
             shouldRender: this.dummyShouldRender,
-            requiresAdmin: true,
+
             requiredRoles: [Role.Admin],
             children: [],
           },
@@ -936,9 +890,10 @@ export class ActionFactoryService {
             action: Action.Download,
             title: 'download',
             description: 'download-tooltip',
+
             callback: this.dummyCallback,
             shouldRender: this.dummyShouldRender,
-            requiresAdmin: false,
+
             requiredRoles: [Role.Download],
             children: [],
           },
@@ -948,9 +903,10 @@ export class ActionFactoryService {
         action: Action.Edit,
         title: 'edit',
         description: 'edit-tooltip',
+
         callback: this.dummyCallback,
         shouldRender: this.dummyShouldRender,
-        requiresAdmin: false,
+
         requiredRoles: [],
         children: [],
       },
@@ -961,9 +917,10 @@ export class ActionFactoryService {
         action: Action.Edit,
         title: 'edit',
         description: 'edit-tooltip',
+
         callback: this.dummyCallback,
         shouldRender: this.dummyShouldRender,
-        requiresAdmin: false,
+
         requiredRoles: [],
         children: [],
       },
@@ -971,9 +928,10 @@ export class ActionFactoryService {
         action: Action.Delete,
         title: 'delete',
         description: 'delete-tooltip',
+
         callback: this.dummyCallback,
         shouldRender: this.dummyShouldRender,
-        requiresAdmin: false,
+
         requiredRoles: [],
         class: 'danger',
         children: [],
@@ -982,9 +940,10 @@ export class ActionFactoryService {
         action: Action.Promote,
         title: 'promote',
         description: 'promote-tooltip',
+
         callback: this.dummyCallback,
         shouldRender: this.dummyShouldRender,
-        requiresAdmin: false,
+
         requiredRoles: [],
         children: [],
       },
@@ -992,9 +951,10 @@ export class ActionFactoryService {
         action: Action.UnPromote,
         title: 'unpromote',
         description: 'unpromote-tooltip',
+
         callback: this.dummyCallback,
         shouldRender: this.dummyShouldRender,
-        requiresAdmin: false,
+
         requiredRoles: [],
         children: [],
       },
@@ -1005,9 +965,10 @@ export class ActionFactoryService {
         action: Action.Edit,
         title: 'edit',
         description: 'edit-person-tooltip',
+
         callback: this.dummyCallback,
         shouldRender: this.dummyShouldRender,
-        requiresAdmin: true,
+
         requiredRoles: [Role.Admin],
         children: [],
       },
@@ -1015,9 +976,10 @@ export class ActionFactoryService {
         action: Action.Merge,
         title: 'merge',
         description: 'merge-person-tooltip',
+
         callback: this.dummyCallback,
         shouldRender: this.dummyShouldRender,
-        requiresAdmin: true,
+
         requiredRoles: [Role.Admin],
         children: [],
       }
@@ -1028,19 +990,21 @@ export class ActionFactoryService {
         action: Action.ViewSeries,
         title: 'view-series',
         description: 'view-series-tooltip',
+
         callback: this.dummyCallback,
         shouldRender: this.dummyShouldRender,
-        requiresAdmin: false,
+
         requiredRoles: [],
         children: [],
       },
       {
-        action: Action.DownloadBookmark,
+        action: Action.Download,
         title: 'download',
         description: 'download-tooltip',
+
         callback: this.dummyCallback,
         shouldRender: this.dummyShouldRender,
-        requiresAdmin: false,
+
         requiredRoles: [],
         children: [],
       },
@@ -1048,10 +1012,11 @@ export class ActionFactoryService {
         action: Action.Delete,
         title: 'clear',
         description: 'delete-tooltip',
+
         callback: this.dummyCallback,
         shouldRender: this.dummyShouldRender,
         class: 'danger',
-        requiresAdmin: false,
+
         requiredRoles: [],
         children: [],
       },
@@ -1062,9 +1027,10 @@ export class ActionFactoryService {
         action: Action.MarkAsVisible,
         title: 'mark-visible',
         description: 'mark-visible-tooltip',
+
         callback: this.dummyCallback,
         shouldRender: this.dummyShouldRender,
-        requiresAdmin: false,
+
         requiredRoles: [],
         children: [],
       },
@@ -1072,9 +1038,10 @@ export class ActionFactoryService {
         action: Action.MarkAsInvisible,
         title: 'mark-invisible',
         description: 'mark-invisible-tooltip',
+
         callback: this.dummyCallback,
         shouldRender: this.dummyShouldRender,
-        requiresAdmin: false,
+
         requiredRoles: [],
         children: [],
       },
@@ -1085,9 +1052,10 @@ export class ActionFactoryService {
         action: Action.Edit,
         title: 'rename',
         description: 'rename-tooltip',
+
         callback: this.dummyCallback,
         shouldRender: this.dummyShouldRender,
-        requiresAdmin: false,
+
         requiredRoles: [],
         children: [],
       },
@@ -1095,9 +1063,10 @@ export class ActionFactoryService {
         action: Action.Delete,
         title: 'delete',
         description: 'delete-tooltip',
+
         callback: this.dummyCallback,
         shouldRender: this.dummyShouldRender,
-        requiresAdmin: false,
+
         requiredRoles: [],
         children: [],
       },
@@ -1108,9 +1077,9 @@ export class ActionFactoryService {
         action: Action.Edit,
         title: 'reorder',
         description: '',
+
         callback: this.dummyCallback,
         shouldRender: this.dummyShouldRender,
-        requiresAdmin: false,
         requiredRoles: [],
         children: [],
       }
@@ -1121,6 +1090,7 @@ export class ActionFactoryService {
         action: Action.Delete,
         title: 'delete',
         description: '',
+
         callback: this.dummyCallback,
         shouldRender: this.dummyShouldRender,
         requiredRoles: [],
@@ -1130,6 +1100,7 @@ export class ActionFactoryService {
         action: Action.Export,
         title: 'export',
         description: '',
+
         callback: this.dummyCallback,
         shouldRender: this.dummyShouldRender,
         requiredRoles: [],
@@ -1139,6 +1110,7 @@ export class ActionFactoryService {
         action: Action.Like,
         title: 'like',
         description: '',
+
         callback: this.dummyCallback,
         shouldRender: this.dummyShouldRender,
         requiredRoles: [],
@@ -1148,6 +1120,7 @@ export class ActionFactoryService {
         action: Action.UnLike,
         title: 'unlike',
         description: '',
+
         callback: this.dummyCallback,
         shouldRender: this.dummyShouldRender,
         requiredRoles: [],
@@ -1160,6 +1133,7 @@ export class ActionFactoryService {
         action: Action.Edit,
         title: 'edit-device-name',
         description: '',
+
         callback: this.dummyCallback,
         shouldRender: this.dummyShouldRender,
         requiredRoles: [],
@@ -1169,6 +1143,7 @@ export class ActionFactoryService {
         action: Action.Delete,
         title: 'delete',
         description: '',
+
         callback: this.dummyCallback,
         shouldRender: this.dummyShouldRender,
         requiredRoles: [],
@@ -1179,7 +1154,7 @@ export class ActionFactoryService {
 
   }
 
-  private applyCallback(action: ActionItem<any>, callback: ActionCallback<any>, shouldRenderFunc: ActionShouldRenderFunc<any>) {
+  private applyCallback(action: ActionItem<any>, callback: ActionResultCallback<any>, shouldRenderFunc: ActionShouldRenderFunc<any>) {
     action.callback = callback;
     action.shouldRender = shouldRenderFunc;
 
@@ -1194,7 +1169,7 @@ export class ActionFactoryService {
   }
 
   public applyCallbackToList<T>(list: Array<ActionItem<T>>,
-                             callback: ActionCallback<T>,
+                             callback: ActionResultCallback<any>,
                              shouldRenderFunc: ActionShouldRenderFunc<T> = this.dummyShouldRender): Array<ActionItem<T>> {
     // Create a clone of the list to ensure we aren't affecting the default state
     const actions = list.map((a) => {
@@ -1205,6 +1180,7 @@ export class ActionFactoryService {
 
     return actions;
   }
+
 
   // Checks the whole tree for the action and returns true if it exists
   public hasAction(actions: Array<ActionItem<any>>, action: Action) {

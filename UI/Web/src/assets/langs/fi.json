@@ -134,5 +134,8 @@
     },
     "manage-tasks-settings": {
         "cleanup-label": "Puhdistus"
+    },
+    "version-update-modal": {
+        "close": "{{common.close}}"
     }
 }

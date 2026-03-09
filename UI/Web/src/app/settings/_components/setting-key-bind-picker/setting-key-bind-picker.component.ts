@@ -59,6 +59,7 @@ export class SettingKeyBindPickerComponent implements ControlValueAccessor, OnDe
   target = input.required<KeyBindTarget>();
   index = input.required<number>();
   duplicated = input.required<boolean>();
+  tooltipPlacement = input<string>('auto');
 
   selectedKeyBind = signal<KeyBind>({key: KeyCode.Empty});
   disabled = signal(false);
@@ -68,7 +69,7 @@ export class SettingKeyBindPickerComponent implements ControlValueAccessor, OnDe
   protected readonly subscriptions = signal<Subscription[]>([]);
   protected readonly isListening = computed(() => this.subscriptions().length > 0);
   protected readonly tagBadgeCursor = computed(() =>
-    this.accountService.isReadOnly() ? TagBadgeCursor.NotAllowed : TagBadgeCursor.Clickable);
+    this.accountService.hasReadOnlyRole() ? TagBadgeCursor.NotAllowed : TagBadgeCursor.Clickable);
 
   constructor() {
     effect(() => {
@@ -111,7 +112,7 @@ export class SettingKeyBindPickerComponent implements ControlValueAccessor, OnDe
   }
 
   startListening() {
-    if (this.isListening() || this.accountService.isReadOnly()) return;
+    if (this.isListening() || this.accountService.hasReadOnlyRole()) return;
 
     this.keyBindService.disabled.set(true);
 

@@ -1,48 +1,49 @@
 <div class="main-container container-fluid">
   <ng-container *transloco="let t; prefix: 'collection-detail'">
     <div #companionBar>
-      @if (series) {
-        <app-side-nav-companion-bar [hasFilter]="true" (filterOpen)="filterOpen.emit($event)" [filterActive]="filterActive">
+      @if (series()) {
+        <app-side-nav-companion-bar [hasFilter]="true" (filterOpen)="filterOpen.emit($event)" [filterActive]="filterActive()">
           <ng-container title>
-            @if (collectionTag) {
+            @if (collectionTag()) {
               <h4>
-                <app-promoted-icon [promoted]="collectionTag.promoted" />
-                <span class="ms-2">{{collectionTag.title}}</span>
-                <app-card-actionables [entity]="collectionTag" [disabled]="actionInProgress" [actions]="collectionTagActions" [labelBy]="collectionTag.title" iconClass="fa-ellipsis-v" />
+                <app-promoted-icon [promoted]="collectionTag()!.promoted" />
+                <span class="ms-2">{{collectionTag()!.title}}</span>
+                <app-card-actionables [entity]="collectionTag()!" [disabled]="actionInProgress()" [actions]="collectionTagActions()"
+                                      [labelBy]="collectionTag()!.title" iconClass="fa-ellipsis-v" (actionHandler)="handleActionCallback($event)" />
               </h4>
             }
-            <h5 subtitle class="ms-2 subtitle-with-actionables">{{t('item-count', {num: series.length})}}</h5>
+            <h5 subtitle class="ms-2 subtitle-with-actionables">{{t('item-count', {num: series().length})}}</h5>
           </ng-container>
         </app-side-nav-companion-bar>
       }
 
     </div>
 
-    @if (collectionTag) {
+    @if (collectionTag()) {
       <div class="container-fluid">
-        @if (summary.length > 0 || collectionTag.source !== ScrobbleProvider.Kavita) {
+        @if (summary().length > 0 || collectionTag()!.source !== ScrobbleProvider.Kavita) {
           <div class="row mb-3">
             <div class="col-md-2 col-xs-4 col-sm-6 d-none d-sm-block">
-              <app-image [styles]="{'max-width': '481px'}" [imageUrl]="imageService.getCollectionCoverImage(collectionTag.id)" />
+              <app-image [styles]="{'max-width': '481px'}" [imageUrl]="imageService.getCollectionCoverImage(collectionTag()!.id)" />
 
-              @if (collectionTag.source !== ScrobbleProvider.Kavita && collectionTag.missingSeriesFromSource !== null
-              && series.length !== collectionTag.totalSourceCount && collectionTag.totalSourceCount > 0) {
+              @if (collectionTag()!.source !== ScrobbleProvider.Kavita && collectionTag()!.missingSeriesFromSource !== null
+              && series().length !== collectionTag()!.totalSourceCount && collectionTag()!.totalSourceCount > 0) {
                 <div class="under-image">
-                  <app-image [imageUrl]="collectionTag.source | providerImage"
+                  <app-image [imageUrl]="collectionTag()!.source | providerImage"
                              width="16px" height="16px"
-                             [ngbTooltip]="collectionTag.source | scrobbleProviderName" tabindex="0" />
-                  <span class="ms-2 me-2">{{t('sync-progress', {title: series.length + ' / ' + collectionTag.totalSourceCount})}}</span>
-                  <i class="fa-solid fa-question-circle" aria-hidden="true" [ngbTooltip]="t('last-sync', {date: collectionTag.lastSyncUtc | date: 'short' | defaultDate })"></i>
+                             [ngbTooltip]="collectionTag()!.source | scrobbleProviderName" tabindex="0" />
+                  <span class="ms-2 me-2">{{t('sync-progress', {title: series().length + ' / ' + collectionTag()!.totalSourceCount})}}</span>
+                  <i class="fa-solid fa-question-circle" aria-hidden="true" [ngbTooltip]="t('last-sync', {date: collectionTag()!.lastSyncUtc | date: 'short' | defaultDate })"></i>
                 </div>
               }
             </div>
             <div class="col-md-10 col-xs-8 col-sm-6 mt-2">
-              @if (summary.length > 0) {
+              @if (summary().length > 0) {
                 <div class="mb-2">
-                  <app-read-more [text]="summary" [useResponsiveLength]="true" />
+                  <app-read-more [text]="summary()" [useResponsiveLength]="true" />
                 </div>
 
-                @if (collectionTag.source !== ScrobbleProvider.Kavita) {
+                @if (collectionTag()!.source !== ScrobbleProvider.Kavita) {
                   <div class="mt-2 mb-2">
                     <button class="btn btn-outline-primary" (click)="openSyncDetailDrawer()">Sync Details</button>
                   </div>
@@ -53,29 +54,28 @@
           </div>
         }
 
-        @if (filter) {
+        @if (filter()) {
           <app-card-detail-layout
-                                  [isLoading]="isLoading"
-                                  [items]="series"
-                                  [pagination]="pagination"
-                                  [filterSettings]="filterSettings"
+                                  [isLoading]="isLoading()"
+                                  [items]="series()"
+                                  [pagination]="pagination()"
+                                  [filterSettings]="filterSettings()"
                                   [filterOpen]="filterOpen"
                                   [trackByIdentity]="trackByIdentity"
-                                  [jumpBarKeys]="jumpbarKeys"
+                                  [jumpBarKeys]="jumpbarKeys()"
                                   (applyFilter)="updateFilter($event)">
 
             <ng-template #topBar>
-              <app-bulk-operations [actionCallback]="bulkActionCallback" />
+              <app-bulk-operations />
             </ng-template>
 
             <ng-template #cardItem let-item let-position="idx">
-              <app-series-card [series]="item" [libraryId]="item.libraryId" (reload)="loadPage()"
-                               (selection)="bulkSelectionService.handleCardSelection('series', position, series.length, $event)"
-                               [selected]="bulkSelectionService.isCardSelected('series', position)" [allowSelection]="true"
+              <app-series-card [series]="item" (reload)="loadPage()" (dataChanged)="updateSeries($event)"
+                               [index]="position" [maxIndex]="series().length" [allowSelection]="true"
                />
             </ng-template>
 
-            @if(!filterActive && series.length === 0) {
+            @if(!filterActive() && series().length === 0) {
               <div>
                 <ng-template #noData>
                   {{t('no-data')}}
@@ -83,7 +83,7 @@
               </div>
             }
 
-            @if(filterActive && series.length === 0) {
+            @if(filterActive() && series().length === 0) {
               <div>
                 <ng-template #noData>
                   {{t('no-data-filtered')}}

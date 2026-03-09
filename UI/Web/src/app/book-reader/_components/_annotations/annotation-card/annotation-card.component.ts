@@ -3,11 +3,10 @@ import {
   Component,
   computed,
   effect,
-  EventEmitter,
   inject,
   input,
   model,
-  Output,
+  output,
   signal,
   Signal
 } from '@angular/core';
@@ -96,12 +95,12 @@ export class AnnotationCardComponent {
   inBookReader = input<boolean>(false);
 
   selected = input<boolean>(false);
-  @Output() delete = new EventEmitter();
-  @Output() navigate = new EventEmitter<Annotation>();
+  readonly delete = output();
+  readonly navigate = output<Annotation>();
   /**
    * Fire when the checkbox is pressed, with the last known state (inverse of checked state)
    */
-  @Output() selection = new EventEmitter<boolean>();
+  readonly selection = output<boolean>();
 
   titleColor: Signal<string>;
   hasClicked = signal<boolean>(false);
@@ -170,7 +169,7 @@ export class AnnotationCardComponent {
     if (!annotation) return;
 
     this.annotationService.delete(annotation.id).subscribe(_ => {
-      this.delete.emit();
+      this.delete.emit(undefined);
     });
   }
 }

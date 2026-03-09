@@ -6,7 +6,7 @@ import {
   inject,
   Input,
   OnInit,
-  Output,
+  output,
   signal
 } from '@angular/core';
 import {ReaderService} from "../../../_services/reader.service";
@@ -41,7 +41,7 @@ export class PersonalTableOfContentsComponent implements OnInit {
   @Input({required: true}) chapterId!: number;
   @Input({required: true}) pageNum: number = 0;
   @Input({required: true}) tocRefresh!: EventEmitter<void>;
-  @Output() loadChapter: EventEmitter<PersonalToCEvent> = new EventEmitter();
+  readonly loadChapter = output<PersonalToCEvent>();
 
 
   ptocBookmarks = signal<PersonalToC[]>([]);

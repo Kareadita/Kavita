@@ -11,7 +11,7 @@
 
     <form [formGroup]="formGroup">
       <div class="mt-2">
-        <app-setting-item [title]="t('title')" (editMode)="updateEditMode($event)" [isEditMode]="!isViewMode()" [showEdit]="hasLicense()" [fixedExtras]="true">
+        <app-setting-item [title]="t('title')" (isEditModeChange)="updateEditMode($event)" [isEditMode]="!isViewMode()" [showEdit]="hasLicense()" [fixedExtras]="true">
           <ng-template #titleExtra>
             <button class="btn btn-icon btn-sm" (click)="loadLicenseInfo(true)">
               @if (isChecking()) {

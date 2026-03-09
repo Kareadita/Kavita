@@ -7,10 +7,9 @@ form {
 }
 
 input {
-    width: 15px;
-    opacity: 1px;
+    width: 0.9375rem;
     position: relative;
-    left: 4px;
+    left: 0.25rem;
     border: none;
 }
 
@@ -22,12 +21,12 @@ input {
 }
 
 .close-offset {
-    right: 29px !important;
+    right: 1.8125rem !important;
     top: 29% !important;
 }
 
 .typeahead-input {
-    padding: 0px 6px;
+    padding: 0 0.375rem;
     display: inline-block;
     width: 100%;
     overflow: hidden;
@@ -35,9 +34,9 @@ input {
     z-index: 1;
     box-sizing: border-box;
     box-shadow: none;
-    border-radius: 4px;
+    border-radius: 0.25rem;
     cursor: text;
-    min-height: 38px;
+    min-height: 2.375rem;
 
     background-color: var(--input-bg-color);
     border: 1px solid var(--input-border-color);
@@ -51,26 +50,26 @@ input {
         outline: 0 !important;
         border-radius: .28571429rem;
         display: inline-block !important;
-        padding: 0px !important;
-        min-height: 0px !important;
+        padding: 0 !important;
+        min-height: 0 !important;
         max-width: 100% !important;
-        margin: 0px !important;
+        margin: 0 !important;
         text-indent: 0 !important;
         line-height: inherit !important;
         box-shadow: none !important;
     }
     input:empty {
-        padding-top: 6px !important;
+        padding-top: 0.375rem !important;
     }
 }
 
 .open .input-group-text {
-    border-bottom-left-radius: 0px;
+    border-bottom-left-radius: 0;
 }
 
 .open .typeahead-input {
-    border-bottom-left-radius: 0px;
-    border-bottom-right-radius: 0px;
+    border-bottom-left-radius: 0;
+    border-bottom-right-radius: 0;
 }
 
 .dropdown {
@@ -78,22 +77,22 @@ input {
     min-width: 10rem;
     background: var(--input-bg-color);
     z-index: 1000;
-    border-radius: 4px;
-    margin-top: -1px;
-    border-top-left-radius: 0px;
-    border-top-right-radius: 0px;
+    border-radius: 0.25rem;
+    margin-top: -0.0625rem;
+    border-top-left-radius: 0;
+    border-top-right-radius: 0;
     position: absolute;
-    max-height: 400px;
+    max-height: 25rem;
     overflow-y: auto;
     overflow-x: hidden;
 
     .list-group {
-        border-top-left-radius: 0px;
-        border-top-right-radius: 0px;
+        border-top-left-radius: 0;
+        border-top-right-radius: 0;
     }
 
     .list-group-item {
-        padding: 5px 10px;
+        padding: 0.3125rem 0.625rem;
         width: 100%;
     }
 
@@ -106,7 +105,7 @@ input {
 
 .spinner-border {
     position: absolute;
-    right: 10px;
+    right: 0.625rem;
     margin: auto;
     cursor: pointer;
     top: 30%;
@@ -122,4 +121,41 @@ input {
     .list-group-item:last-child {
         border-bottom-color: var(--list-group-hover-text-color);
     }
+}
+
+.dropdown {
+  overflow: auto;
+}
+
+.slide-in-from-top {
+  animation: slideDown 200ms ease-out;
+}
+
+.slide-out-to-top {
+  animation: slideUp 200ms ease-out;
+}
+
+@keyframes slideDown {
+  from {
+    max-height: 0;
+    opacity: 0;
+    overflow: hidden;
+  }
+  to {
+    max-height: 25rem;
+    opacity: 1;
+    overflow: auto;
+  }
+}
+
+@keyframes slideUp {
+  from {
+    max-height: 25rem;
+    opacity: 1;
+  }
+  to {
+    max-height: 0;
+    opacity: 0;
+    overflow: hidden;
+  }
 }

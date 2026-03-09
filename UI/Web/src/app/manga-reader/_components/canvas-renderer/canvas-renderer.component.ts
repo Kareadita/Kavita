@@ -4,12 +4,11 @@ import {
   ChangeDetectorRef,
   Component, DestroyRef,
   ElementRef,
-  EventEmitter,
   inject,
   Input,
   OnInit,
-  Output,
-  ViewChild
+  output,
+  viewChild
 } from '@angular/core';
 import { filter, map, Observable, of, tap } from 'rxjs';
 import { PageSplitOption } from 'src/app/_models/preferences/page-split-option';
@@ -48,10 +47,10 @@ export class CanvasRendererComponent implements OnInit, AfterViewInit, ImageRend
   @Input({required: true}) bookmark$!: Observable<number>;
   @Input({required: true}) showClickOverlay$!: Observable<boolean>;
   @Input() imageFit$!: Observable<FITTING_OPTION>;
-  @Output() imageHeight: EventEmitter<number> = new EventEmitter<number>();
+  readonly imageHeight = output<number>();
 
 
-  @ViewChild('content') canvas: ElementRef | undefined;
+  readonly canvas = viewChild<ElementRef>('content');
   private ctx!: CanvasRenderingContext2D;
 
   currentImageSplitPart: SPLIT_PAGE_PART = SPLIT_PAGE_PART.NO_SPLIT;
@@ -119,9 +118,10 @@ export class CanvasRendererComponent implements OnInit, AfterViewInit, ImageRend
       takeUntilDestroyed(this.destroyRef),
       tap(_ => {
         if (this.currentImageSplitPart === SPLIT_PAGE_PART.NO_SPLIT) return;
-        if (!this.canvas) return;
+        const canvas = this.canvas();
+        if (!canvas) return;
 
-        const elements = [this.canvas?.nativeElement];
+        const elements = [canvas?.nativeElement];
         this.mangaReaderService.applyBookmarkEffect(elements);
       })
     ).subscribe(() => {});
@@ -133,8 +133,9 @@ export class CanvasRendererComponent implements OnInit, AfterViewInit, ImageRend
   }
 
   ngAfterViewInit() {
-    if (this.canvas) {
-      this.ctx = this.canvas.nativeElement.getContext('2d', { alpha: false });
+    const canvas = this.canvas();
+    if (canvas) {
+      this.ctx = canvas.nativeElement.getContext('2d', { alpha: false });
     }
   }
 
@@ -197,7 +198,8 @@ export class CanvasRendererComponent implements OnInit, AfterViewInit, ImageRend
   renderPage(img: Array<HTMLImageElement | null>) {
     this.renderWithCanvas = false;
     if (img === null || img.length === 0 || img[0] === null) return;
-    if (!this.ctx || !this.canvas) return;
+    const canvas = this.canvas();
+    if (!this.ctx || !canvas) return;
     this.canvasImage = img[0];
     this.cdRef.markForCheck();
 
@@ -216,11 +218,11 @@ export class CanvasRendererComponent implements OnInit, AfterViewInit, ImageRend
     this.setCanvasSize();
 
     if (needsSplitting && this.currentImageSplitPart === SPLIT_PAGE_PART.LEFT_PART) {
-      this.canvas.nativeElement.width = this.canvasImage.width / 2;
+      canvas.nativeElement.width = this.canvasImage.width / 2;
       this.ctx.drawImage(this.canvasImage, 0, 0, this.canvasImage.width, this.canvasImage.height, 0, 0, this.canvasImage.width, this.canvasImage.height);
       this.cdRef.markForCheck();
     } else if (needsSplitting && this.currentImageSplitPart === SPLIT_PAGE_PART.RIGHT_PART) {
-      this.canvas.nativeElement.width = this.canvasImage.width / 2;
+      canvas.nativeElement.width = this.canvasImage.width / 2;
       this.ctx.drawImage(this.canvasImage, 0, 0, this.canvasImage.width, this.canvasImage.height, -this.canvasImage.width / 2, 0, this.canvasImage.width, this.canvasImage.height);
       this.cdRef.markForCheck();
     }
@@ -256,17 +258,18 @@ export class CanvasRendererComponent implements OnInit, AfterViewInit, ImageRend
    */
    setCanvasSize() {
     if (this.canvasImage == null) return;
-    if (!this.ctx || !this.canvas) { return; }
+    const canvas = this.canvas();
+    if (!this.ctx || !canvas) { return; }
     const canvasLimit = this.isSafari ? 16_777_216 : 124_992_400;
     const needsScaling = this.canvasImage.width * this.canvasImage.height > canvasLimit;
     if (needsScaling) {
-      this.canvas.nativeElement.width = this.isSafari ? 4_096 : 16_384;
-      this.canvas.nativeElement.height = this.isSafari ? 4_096 : 16_384;
+      canvas.nativeElement.width = this.isSafari ? 4_096 : 16_384;
+      canvas.nativeElement.height = this.isSafari ? 4_096 : 16_384;
     } else {
-      this.canvas.nativeElement.width = this.canvasImage.width;
-      this.canvas.nativeElement.height = this.canvasImage.height;
+      canvas.nativeElement.width = this.canvasImage.width;
+      canvas.nativeElement.height = this.canvasImage.height;
     }
-    this.imageHeight.emit(this.canvas.nativeElement.height);
+    this.imageHeight.emit(canvas.nativeElement.height);
     this.cdRef.markForCheck();
   }
 

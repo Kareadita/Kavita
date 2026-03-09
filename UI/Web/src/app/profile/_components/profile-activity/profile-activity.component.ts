@@ -163,16 +163,16 @@ export class ProfileActivityComponent {
   }
 
   protected displayInfo(item: ReadingHistoryItem): void {
-    const [_, component] = this.modalService.open(ListSelectModalComponent<{entry: ReadingHistoryItem, chapter: ReadingHistoryChapterItem}>, {
+    const ref = this.modalService.open(ListSelectModalComponent<{entry: ReadingHistoryItem, chapter: ReadingHistoryChapterItem}>, {
       size: 'lg',
       centered: true
     });
 
-    component.title.set(item.seriesName);
-    component.showConfirm.set(false);
-    component.inputItems.set(item.chapters.map(c => ({ value: {entry: item, chapter: c}, label: `${c.label}` })));
-    component.itemTemplate.set(this.chapterInfoRow());
-    component.itemsBeforeVirtual.set(5);
+    ref.setInput('title', item.seriesName);
+    ref.setInput('showConfirm', false);
+    ref.setInput('inputItems', item.chapters.map(c => ({ value: {entry: item, chapter: c}, label: `${c.label}` })));
+    ref.setInput('itemTemplate', this.chapterInfoRow());
+    ref.setInput('itemsBeforeVirtual', 5);
   }
 
   updateFilter(event: StatsFilter): void {

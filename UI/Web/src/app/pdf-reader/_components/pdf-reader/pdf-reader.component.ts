@@ -4,13 +4,13 @@ import {
   Component,
   computed,
   DestroyRef,
+  effect,
   ElementRef,
   HostListener,
   inject,
   OnDestroy,
   OnInit,
-  signal,
-  ViewChild
+  viewChild
 } from '@angular/core';
 import {ActivatedRoute, Router} from '@angular/router';
 import {
@@ -75,7 +75,7 @@ export class PdfReaderComponent implements OnInit, OnDestroy {
 
   protected readonly ScrollModeType = ScrollModeType;
 
-  @ViewChild('container') container!: ElementRef;
+  readonly container = viewChild.required<ElementRef>('container');
 
   libraryId!: number;
   seriesId!: number;
@@ -123,7 +123,7 @@ export class PdfReaderComponent implements OnInit, OnDestroy {
   /**
    * True if Preferences.DataSaver is true
    */
-  disableLoadingIndicator = signal(false);
+  disableLoadingIndicator = computed(() => this.accountService.userPreferences()?.dataSaver);
   isLoading: boolean = true;
   /**
    * How much of the current document is loaded
@@ -137,7 +137,7 @@ export class PdfReaderComponent implements OnInit, OnDestroy {
   isSearchOpen: boolean = false;
 
   canDownload = computed(() =>
-    this.accountService.hasDownloadRole(this.accountService.currentUserSignal()!)
+    this.accountService.hasDownloadRole()
   );
 
   constructor() {
@@ -150,6 +150,14 @@ export class PdfReaderComponent implements OnInit, OnDestroy {
         () => this.closeReader(),
         [KeyBindTarget.Escape],
       );
+
+      effect(() => {
+        const prefs = this.accountService.userPreferences();
+        if (prefs) {
+          pdfDefaultOptions.disableAutoFetch = prefs.dataSaver;
+          this.cdRef.markForCheck();
+        }
+      });
   }
 
   @HostListener('window:resize', ['$event'])
@@ -207,17 +215,12 @@ export class PdfReaderComponent implements OnInit, OnDestroy {
 
     window.addEventListener('keydown', this.downloadHandler, { capture: true });
 
-    this.accountService.currentUser$.pipe(take(1)).subscribe(user => {
-      if (user) {
-        this.user = user;
-        this.init();
-      }
-    });
+    this.init();
   }
 
   private downloadHandler = (event: KeyboardEvent) => {
     if (event.ctrlKey && event.key.toLowerCase() === 's') {
-      if (!this.accountService.hasDownloadRole(this.accountService.currentUserSignal()!)) {
+      if (!this.accountService.hasDownloadRole()) {
         event.preventDefault();
         event.stopImmediatePropagation(); // Stops ALL other handlers
       }
@@ -228,7 +231,7 @@ export class PdfReaderComponent implements OnInit, OnDestroy {
   calcScrollbarNeeded() {
     const viewContainer = this.document.querySelector('#viewerContainer');
     if (viewContainer == null) return;
-    this.scrollbarNeeded = viewContainer.scrollHeight > this.container?.nativeElement?.clientHeight;
+    this.scrollbarNeeded = viewContainer.scrollHeight > this.container()?.nativeElement?.clientHeight;
     this.cdRef.markForCheck();
   }
 
@@ -290,9 +293,6 @@ export class PdfReaderComponent implements OnInit, OnDestroy {
     this.backgroundColor = this.themeMap[this.theme].background;
     this.fontColor = this.themeMap[this.theme].font; // TODO: Move this to an observable or something
 
-    this.disableLoadingIndicator.set(this.user.preferences.dataSaver);
-    pdfDefaultOptions.disableAutoFetch = this.user.preferences.dataSaver;
-
     this.calcScrollbarNeeded();
 
     this.bookService.getBookInfo(this.chapterId).subscribe(info => {
@@ -315,7 +315,7 @@ export class PdfReaderComponent implements OnInit, OnDestroy {
       }
       this.cdRef.markForCheck();
     });
-    setTimeout(() => this.readerService.enableWakeLock(this.container.nativeElement), 1000);
+    setTimeout(() => this.readerService.enableWakeLock(this.container().nativeElement), 1000);
   }
 
   /**

@@ -8,7 +8,7 @@ import {Series} from 'src/app/_models/series';
 import {Volume} from 'src/app/_models/volume';
 import {translate} from "@jsverse/transloco";
 import {DOCUMENT} from "@angular/common";
-import {ActionItem} from "../../_services/action-factory.service";
+import {ActionItem} from "../../_models/actionables/action-item";
 
 export enum KEY_CODES {
   RIGHT_ARROW = 'ArrowRight',
@@ -40,10 +40,6 @@ export class UtilityService {
 
   mangaFormatKeys: string[] = [];
 
-
-  sortChapters = (a: Chapter, b: Chapter) => {
-    return a.minNumber - b.minNumber;
-  }
 
   mangaFormatToText(format: MangaFormat): string {
     if (this.mangaFormatKeys === undefined || this.mangaFormatKeys.length === 0) {

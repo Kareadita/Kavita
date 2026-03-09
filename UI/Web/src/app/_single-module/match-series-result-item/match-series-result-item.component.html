@@ -1,49 +1,50 @@
 <ng-container *transloco="let t; prefix:'match-series-result-item'">
-<div class="match-item-container p-3 mt-3 {{isDarkMode ? 'dark' : 'light'}}">
+<div class="match-item-container p-3 mt-3 {{isDarkMode() ? 'dark' : 'light'}}">
   <div class="d-flex clickable match-item" (click)="selectItem()">
     <div class="me-1">
-      @if (item.series.coverUrl) {
-        <app-image class="me-3 search-result" width="100px" [imageUrl]="item.series.coverUrl" />
+      @let coverUrl = item().series.coverUrl;
+      @if (coverUrl) {
+        <app-image class="me-3 search-result" width="100px" [imageUrl]="coverUrl" />
       }
     </div>
     <div class="ms-1">
-      <div><span class="title">{{item.series.name}}</span> <span class="me-1 float-end">({{item.matchRating | translocoPercent}})</span></div>
+      <div><span class="title">{{item().series.name}}</span> <span class="me-1 float-end">({{item().matchRating | translocoPercent}})</span></div>
       <div class="text-muted">
-        @for(synm of item.series.synonyms; track synm; let last = $last) {
+        @for(synm of item().series.synonyms; track synm; let last = $last) {
           {{synm}}
           @if (!last) {
             <span>, </span>
           }
         }
       </div>
-      @if (item.series.summary) {
+      @if (item().series.summary) {
         <div>
-          <app-read-more [text]="item.series.summary" [showToggle]="false" />
-          <span class="me-1"><a (click)="$event.stopPropagation()" [href]="item.series.siteUrl" rel="noreferrer noopener" target="_blank">{{t('details')}}</a></span>
+          <app-read-more [text]="item().series.summary ?? ''" [showToggle]="false" />
+          <span class="me-1"><a (click)="$event.stopPropagation()" [href]="item().series.siteUrl" rel="noreferrer noopener" target="_blank">{{t('details')}}</a></span>
         </div>
       }
     </div>
   </div>
 
-  @if (isSelected) {
+  @if (isSelected()) {
     <div class="d-flex p-1 justify-content-center">
       <app-loading [absolute]="false" [loading]="true" />
       <span class="ms-2">{{t('updating-metadata-status')}}</span>
     </div>
   } @else {
     <div class="d-flex pt-3 justify-content-between">
-      @if ((item.series.volumes || 0) > 0 || (item.series.chapters || 0) > 0) {
-        @if (item.series.plusMediaFormat === PlusMediaFormat.Comic) {
-          <span class="me-1">{{t('issue-count', {num: item.series.chapters})}}</span>
+      @if ((item().series.volumes || 0) > 0 || (item().series.chapters || 0) > 0) {
+        @if (item().series.plusMediaFormat === PlusMediaFormat.Comic) {
+          <span class="me-1">{{t('issue-count', {num: item().series.chapters})}}</span>
         } @else {
-          <span class="me-1">{{t('volume-count', {num: item.series.volumes})}}</span>
-          <span class="me-1">{{t('chapter-count', {num: item.series.chapters})}}</span>
+          <span class="me-1">{{t('volume-count', {num: item().series.volumes})}}</span>
+          <span class="me-1">{{t('chapter-count', {num: item().series.chapters})}}</span>
         }
       } @else {
         <span class="me-1">{{t('releasing')}}</span>
       }
 
-      <span class="me-1">{{item.series.plusMediaFormat | plusMediaFormat}}</span>
+      <span class="me-1">{{item().series.plusMediaFormat | plusMediaFormat}}</span>
     </div>
   }
 

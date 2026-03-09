@@ -1,5 +1,5 @@
 .toolbar-icon {
-    font-size: 19px;
+    font-size: 1.1875rem;
 }
 
 .btn-icon {
@@ -7,12 +7,12 @@
 }
 
 .book-title {
-    margin: 8px 0 4px !important;
+    margin: 0.5rem 0 0.25rem !important;
 }
 
 // Override since it's not coming from library
 ::ng-deep #presentationMode {
-    margin: 3px 0 4px !important;
+    margin: 0.1875rem 0 0.25rem !important;
 }
 
 ::ng-deep .dark > ngx-extended-pdf-viewer .treeItem>a {
@@ -21,7 +21,7 @@
 
 .loading-message-container {
   text-align: center;
-  min-width: 200px;
+  min-width: 12.5rem;
 }
 
 .progress-container {
@@ -37,15 +37,15 @@ $pagination-opacity: 0;
 
 //$pagination-color: red;
 //$pagination-opacity: 0.7;
-$action-bar-height: 36px;
-$loading-bar-height: 24px;
+$action-bar-height: 2.25rem;
+$loading-bar-height: 1.5rem;
 
 // Tap to Paginate
 
 
 .right {
   position: absolute;
-  right: 0px;
+  right: 0;
   top: $action-bar-height;
   width: 20vw;
   z-index: 3;
@@ -57,7 +57,7 @@ $loading-bar-height: 24px;
   height: 100%;
 
   &.immersive {
-    top: 0px;
+    top: 0;
   }
 
   &.no-pointer-events {
@@ -70,7 +70,7 @@ $loading-bar-height: 24px;
 // This class pushes the click area to the left a bit to let users click the scrollbar
 .right-with-scrollbar {
   position: absolute;
-  right: 17px;
+  right: 1.0625rem;
   top: $action-bar-height;
   width: 18vw;
   z-index: 3;
@@ -83,13 +83,13 @@ $loading-bar-height: 24px;
   cursor: pointer;
 
   &.immersive {
-    top: 0px;
+    top: 0;
   }
 }
 
 .left {
   position: absolute;
-  left: 0px;
+  left: 0;
   top: $action-bar-height;
   width: 20vw;
   background: $pagination-color;
@@ -102,7 +102,7 @@ $loading-bar-height: 24px;
   cursor: pointer;
 
   &.immersive {
-    top: 0px;
+    top: 0;
   }
 }
 

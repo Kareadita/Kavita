@@ -1,10 +1,7 @@
-import {ChangeDetectionStrategy, ChangeDetectorRef, Component, DestroyRef, inject, OnInit} from '@angular/core';
+import {ChangeDetectionStrategy, ChangeDetectorRef, Component, computed, effect, inject} from '@angular/core';
 import {FormControl, FormGroup, ReactiveFormsModule, Validators} from '@angular/forms';
 import {ToastrService} from 'ngx-toastr';
-import {shareReplay} from 'rxjs';
-import {User} from 'src/app/_models/user/user';
 import {AccountService} from 'src/app/_services/account.service';
-import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import {ApiKeyComponent} from '../api-key/api-key.component';
 import {NgbTooltip} from '@ng-bootstrap/ng-bootstrap';
 import {translate, TranslocoDirective} from "@jsverse/transloco";
@@ -18,30 +15,29 @@ import {DefaultValuePipe} from "../../_pipes/default-value.pipe";
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [NgbTooltip, ReactiveFormsModule, ApiKeyComponent, TranslocoDirective, SettingItemComponent, DefaultValuePipe]
 })
-export class ChangeEmailComponent implements OnInit {
+export class ChangeEmailComponent {
 
-  private readonly destroyRef = inject(DestroyRef);
   private readonly toastr = inject(ToastrService);
   private readonly cdRef = inject(ChangeDetectorRef);
   protected readonly accountService = inject(AccountService);
 
   form: FormGroup = new FormGroup({});
-  user: User | undefined = undefined;
   errors: string[] = [];
   isEditMode: boolean = false;
   emailLink: string = '';
   emailConfirmed: boolean = true;
   hasValidEmail: boolean = true;
-  canEdit: boolean = false;
+  canEdit = computed(() => !this.accountService.hasReadOnlyRole());
 
 
   protected get email() { return this.form.get('email'); }
 
 
-  ngOnInit(): void {
-    this.accountService.currentUser$.pipe(takeUntilDestroyed(this.destroyRef), shareReplay()).subscribe(user => {
-      this.user = user!;
-      this.canEdit = !this.accountService.hasReadOnlyRole(user!);
+  constructor() {
+    effect(() => {
+      const user = this.accountService.currentUser();
+      if (!user) return;
+
       this.form.addControl('email', new FormControl(user?.email, [Validators.required, Validators.email]));
       this.form.addControl('password', new FormControl('', [Validators.required]));
       this.cdRef.markForCheck();
@@ -60,13 +56,13 @@ export class ChangeEmailComponent implements OnInit {
   }
 
   resetForm() {
-    this.form.get('email')?.setValue(this.user?.email);
+    this.form.get('email')?.setValue(this.accountService.currentUser()!.email);
     this.errors = [];
     this.cdRef.markForCheck();
   }
 
   saveForm() {
-    if (this.user === undefined) { return; }
+    if (this.accountService.currentUser() === undefined) { return; }
 
     const model = this.form.value;
     this.errors = [];
@@ -81,7 +77,6 @@ export class ChangeEmailComponent implements OnInit {
       }
 
       this.accountService.refreshAccount().subscribe(user => {
-        this.user = user;
         this.resetForm();
         this.cdRef.markForCheck();
       });

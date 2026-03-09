@@ -1,3 +1,16 @@
+.highlight-new-font {
+  animation: highlight-bg 2s ease-out;
+}
+
+@keyframes highlight-bg {
+  from {
+    background-color: var(--primary-color);
+  }
+  to {
+    background-color: var(--list-group-item-bg-color);
+  }
+}
+
 .pill {
   font-size: .8rem;
   background-color: var(--card-bg-color);
@@ -5,12 +18,12 @@
 }
 
 .scroller {
-  max-height: calc(100dvh - 180px);
+  max-height: calc(100dvh - 11.25rem);
   overflow-y: auto;
   scrollbar-gutter: stable;
 
   @media (max-width: 576px) {
-    max-height: calc(100dvh - 480px);
+    max-height: calc(100dvh - 30rem);
   }
 }
 
@@ -34,9 +47,9 @@
 ngx-file-drop ::ng-deep > div {
   // styling for the outer drop box
   width: 100%;
-  border: 2px solid var(--primary-color);
-  border-radius: 5px;
-  height: 100px;
+  border: 0.125rem solid var(--primary-color);
+  border-radius: 0.3125rem;
+  height: 6.25rem;
   margin: auto;
 
   > div {

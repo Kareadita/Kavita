@@ -1,0 +1,26 @@
+namespace Kavita.Models.Constants;
+
+public static class TaskSchedulerConstants
+{
+    public const string ScanQueue = "scan";
+    public const string DefaultQueue = "default";
+    public const string RemoveFromWantToReadTaskId = "remove-from-want-to-read";
+    public const string UpdateYearlyStatsTaskId = "update-yearly-stats";
+    public const string SyncThemesTaskId = "sync-themes";
+    public const string CheckForUpdateId = "check-updates";
+    public const string CleanupDbTaskId = "cleanup-db";
+    public const string CleanupTaskId = "cleanup";
+    public const string BackupTaskId = "backup";
+    public const string ScanLibrariesTaskId = "scan-libraries";
+    public const string ReportStatsTaskId = "report-stats";
+    public const string CheckScrobblingTokensId = "check-scrobbling-tokens";
+    public const string ProcessScrobblingEventsId = "process-scrobbling-events";
+    public const string ProcessProcessedScrobblingEventsId = "process-processed-scrobbling-events";
+    public const string LicenseCheckId = "license-check";
+    public const string KavitaPlusDataRefreshId = "kavita+-data-refresh";
+    public const string KavitaPlusStackSyncId = "kavita+-stack-sync";
+    public const string KavitaPlusWantToReadSyncId = "kavita+-want-to-read-sync";
+    public const string ReadingHistoryAggregationId = "reading-history-aggregation";
+    public const string AuthKeyExpirationId = "auth-key-expiration";
+    public const string EnsureSideNavId = "ensure-sidenav";
+}

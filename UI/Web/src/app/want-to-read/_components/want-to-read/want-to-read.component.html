@@ -24,13 +24,12 @@
                                 (applyFilter)="updateFilter($event)">
 
           <ng-template #topBar>
-            <app-bulk-operations [actionCallback]="bulkActionCallback" />
+            <app-bulk-operations />
           </ng-template>
 
           <ng-template #cardItem let-item let-position="idx">
-            <app-series-card [series]="item" [libraryId]="item.libraryId" (reload)="removeSeries($event)"
-                             (selection)="bulkSelectionService.handleCardSelection('series', position, series.length, $event)"
-                             [selected]="bulkSelectionService.isCardSelected('series', position)" [allowSelection]="true"
+            <app-series-card [series]="item" (reload)="removeSeries($event)"
+                             [index]="position" [maxIndex]="series.length" [allowSelection]="true"
              />
           </ng-template>
 

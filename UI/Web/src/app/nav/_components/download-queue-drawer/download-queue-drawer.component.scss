@@ -1,0 +1,39 @@
+.download-queue-drawer {
+  height: 100%;
+  overflow-y: auto;
+}
+
+.section-label {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--text-muted-color);
+  text-decoration: none;
+
+  &:hover {
+    text-decoration: none;
+  }
+}
+
+:host {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+
+  .setting-section-break {
+    margin: 0.5rem 0;
+  }
+
+  .section-break-lg {
+    margin: 1rem 0;
+    border-bottom: 1px solid var(--drawer-section-break-color, var(--bs-border-color));
+  }
+}
+
+.collapse-chevron {
+  font-size: 0.65rem;
+  transition: transform 0.2s ease;
+
+  &.expanded {
+    transform: rotate(90deg);
+  }
+}

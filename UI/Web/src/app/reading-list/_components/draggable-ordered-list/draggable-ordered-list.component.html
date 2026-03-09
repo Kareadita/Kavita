@@ -1,14 +1,14 @@
 <ng-container *transloco="let t; prefix: 'draggable-ordered-list'">
-    @if (items.length > virtualizeAfter) {
+    @if (localItems().length > virtualizeAfter()) {
       <div class="example-list list-group-flush">
-        <virtual-scroller #scroll [items]="items" [bufferAmount]="BufferAmount" [parentScroll]="parentScroll">
-          @for (item of scroll.viewPortItems; track trackByIdentity(i, item); let i = $index) {
+        <virtual-scroller #scroll [items]="localItems()" [bufferAmount]="bufferAmount()" [parentScroll]="parentScroll()!">
+          @for (item of scroll.viewPortItems; track trackByIdentity()(i, item); let i = $index) {
             <div class="example-box">
               <div class="d-flex list-container">
                 <ng-container [ngTemplateOutlet]="handle" [ngTemplateOutletContext]="{ $implicit: item, idx: i, isVirtualized: true }" />
-                <ng-container [ngTemplateOutlet]="itemTemplate" [ngTemplateOutletContext]="{ $implicit: item, idx: i }" />
+                <ng-container [ngTemplateOutlet]="itemTemplate()" [ngTemplateOutletContext]="{ $implicit: item, idx: i }" />
 
-                @if (showRemoveButton) {
+                @if (showRemoveButton()) {
                   <ng-container [ngTemplateOutlet]="removeBtn" [ngTemplateOutletContext]="{$implicit: item, idx: i}" />
                 }
 
@@ -18,16 +18,16 @@
         </virtual-scroller>
       </div>
     } @else {
-      <div cdkDropList class="{{items.length > 0 ? 'example-list list-group-flush' : ''}}" (cdkDropListDropped)="drop($event)">
-        @for(item of items; track item; let i = $index) {
+      <div cdkDropList class="{{localItems().length > 0 ? 'example-list list-group-flush' : ''}}" (cdkDropListDropped)="drop($event)">
+        @for(item of localItems(); track trackByIdentity()(i, item); let i = $index) {
           <div class="example-box" cdkDrag
                [cdkDragData]="item" cdkDragBoundary=".example-list"
-               [cdkDragDisabled]="accessibilityMode || disabled || bulkMode" cdkDragPreviewContainer="parent">
+               [cdkDragDisabled]="accessibilityMode() || disabled() || bulkMode()" cdkDragPreviewContainer="parent">
             <div class="d-flex list-container">
               <ng-container [ngTemplateOutlet]="handle" [ngTemplateOutletContext]="{ $implicit: item, idx: i, isVirtualized: false }" />
-              <ng-container [ngTemplateOutlet]="itemTemplate" [ngTemplateOutletContext]="{ $implicit: item, idx: i }" />
+              <ng-container [ngTemplateOutlet]="itemTemplate()" [ngTemplateOutletContext]="{ $implicit: item, idx: i }" />
 
-              @if (showRemoveButton) {
+              @if (showRemoveButton()) {
                 <ng-container [ngTemplateOutlet]="removeBtn" [ngTemplateOutletContext]="{$implicit: item, idx: i}" />
               }
 
@@ -39,16 +39,16 @@
 
     <ng-template #handle let-item let-idx="idx" let-isVirtualized="isVirtualized">
         <div class="me-3 align-middle">
-          @if (accessibilityMode || bulkMode) {
-            <div class="align-middle" [ngClass]="{'accessibility-padding': accessibilityMode, 'bulk-padding': bulkMode}">
-              @if (accessibilityMode) {
+          @if (accessibilityMode() || bulkMode()) {
+            <div class="align-middle" [ngClass]="{'accessibility-padding': accessibilityMode(), 'bulk-padding': bulkMode()}">
+              @if (accessibilityMode()) {
                 <label for="reorder-{{idx}}" class="form-label visually-hidden">{{t('reorder-label')}}</label>
                 <input id="reorder-{{idx}}" class="form-control manual-input" type="number" inputmode="numeric" min="0"
-                       [max]="items.length - 1" [value]="item.order"
+                       [max]="localItems().length - 1" [value]="item.order"
                        (focusout)="updateIndex(idx, item)" (keydown.enter)="updateIndex(idx, item)" aria-describedby="instructions">
               }
 
-              @if (bulkMode) {
+              @if (bulkMode()) {
                 <label for="select-{{idx}}" class="form-label visually-hidden">{{t('bulk-select-label')}}</label>
                 <input id="select-{{idx}}" class="form-check-input mt-0" type="checkbox" (change)="selectItem($event, idx)"
                        [ngModel]="bulkSelectionService.isCardSelected('sideNavStream', idx)" [ngModelOptions]="{standalone: true}">
@@ -58,14 +58,14 @@
             </div>
           }
 
-          @if (!isVirtualized && !(accessibilityMode || bulkMode) && !disabled) {
+          @if (!isVirtualized && !(accessibilityMode() || bulkMode()) && !disabled()) {
             <i class="fa fa-grip-vertical drag-handle" aria-hidden="true" cdkDragHandle></i>
           }
         </div>
     </ng-template>
 
     <ng-template #removeBtn let-item let-idx>
-        <button class="btn btn-icon float-end" (click)="removeItem(item, idx)" [disabled]="disableRemove">
+        <button class="btn btn-icon float-end" (click)="removeItem(item, idx)" [disabled]="disableRemove()">
             <i class="fa fa-times" aria-hidden="true"></i>
             <span class="visually-hidden" attr.aria-labelledby="item.id--{{idx}}">{{t('remove-item-alt')}}</span>
         </button>

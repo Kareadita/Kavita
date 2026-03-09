@@ -1,11 +1,10 @@
 import {
   ChangeDetectionStrategy,
-  ChangeDetectorRef,
-  Component, ContentChild,
-  EventEmitter,
-  inject,
-  Input,
-  Output, TemplateRef
+  Component,
+  contentChild,
+  input,
+  model,
+  TemplateRef
 } from '@angular/core';
 import {NgTemplateOutlet} from "@angular/common";
 import {TranslocoDirective} from "@jsverse/transloco";
@@ -22,23 +21,18 @@ import {TranslocoDirective} from "@jsverse/transloco";
 })
 export class SettingTitleComponent {
 
-  private readonly cdRef = inject(ChangeDetectorRef);
-
-  @Input({required:true}) title: string = '';
+  title = input.required<string>();
   /**
    * If passed, will generate a proper label element. Requires `id` to be passed as well
    */
-  @Input() labelId: string | undefined = undefined;
-  @Input() id: string | undefined = undefined;
-  @Input() canEdit: boolean = true;
-  @Input() isEditMode: boolean = false;
-  @Output() editMode = new EventEmitter<boolean>();
-  @ContentChild('extra') titleExtraRef!: TemplateRef<any>;
+  labelId = input<string | undefined>();
+  id = input<string | undefined>();
+  canEdit = input(true);
+  isEditMode = model(false);
+  titleExtraRef = contentChild<TemplateRef<any>>('extra');
 
   toggleViewMode() {
-    this.isEditMode = !this.isEditMode;
-    this.editMode.emit(this.isEditMode);
-    this.cdRef.markForCheck();
+    this.isEditMode.set(!this.isEditMode());
   }
 
 }

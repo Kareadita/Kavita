@@ -1,0 +1,267 @@
+using System;
+using System.IO;
+using System.IO.Abstractions;
+using System.Linq;
+using System.Security.Cryptography;
+using System.Threading.Tasks;
+using Kavita.API.Database;
+using Kavita.API.Services;
+using Kavita.Common;
+using Kavita.Common.EnvironmentInfo;
+using Kavita.Database;
+using Kavita.Models.Entities.Enums;
+using Kavita.Models.Entities.User;
+using Kavita.Server.Logging;
+using Kavita.Server.ManualMigrations.v0._7._14;
+using Kavita.Server.ManualMigrations.v0._8._2;
+using Kavita.Server.ManualMigrations.v0._8._4;
+using Kavita.Services;
+using Kavita.Services.SignalR;
+using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Server.Kestrel.Core;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
+using NetVips;
+using Serilog;
+using Serilog.Events;
+using Serilog.Formatting.Display;
+using Serilog.Sinks.AspNetCore.SignalR.Extensions;
+using Log = Serilog.Log;
+
+namespace Kavita.Server;
+
+public class Program
+{
+    private static readonly int HttpPort = Configuration.Port;
+
+    protected Program()
+    {
+    }
+
+    public static async Task Main(string[] args)
+    {
+        Console.OutputEncoding = System.Text.Encoding.UTF8;
+        Log.Logger = new LoggerConfiguration()
+            .WriteTo.Console(new MessageTemplateTextFormatter(LogLevelOptions.OutputTemplate))
+            .MinimumLevel
+            .Information()
+            .CreateBootstrapLogger();
+
+        var directoryService = new DirectoryService(null!, new FileSystem());
+
+
+        // Check if this is the first time running and if so, rename appsettings-init.json to appsettings.json
+        HandleFirstRunConfiguration();
+
+
+        // Before anything, check if JWT has been generated properly or if user still has default
+        EnsureJwtTokenKey();
+
+        try
+        {
+            var host = CreateHostBuilder(args).Build();
+
+            using var scope = host.Services.CreateScope();
+            var services = scope.ServiceProvider;
+            var unitOfWork = services.GetRequiredService<IUnitOfWork>();
+
+            try
+            {
+                var logger = services.GetRequiredService<ILogger<Program>>();
+                var context = services.GetRequiredService<DataContext>();
+
+                var pendingMigrations = await context.Database.GetPendingMigrationsAsync();
+                var isDbCreated = await context.Database.CanConnectAsync();
+                if (isDbCreated && pendingMigrations.Any())
+                {
+                    logger.LogInformation("Performing backup as migrations are needed. Backup will be kavita.db in temp folder");
+                    var migrationDirectory = await GetMigrationDirectory(context, directoryService);
+                    directoryService.ExistOrCreate(migrationDirectory);
+
+                    if (!directoryService.FileSystem.File.Exists(
+                            directoryService.FileSystem.Path.Join(migrationDirectory, "kavita.db")))
+                    {
+                        directoryService.CopyFileToDirectory(directoryService.FileSystem.Path.Join(directoryService.ConfigDirectory, "kavita.db"), migrationDirectory);
+                        logger.LogInformation("Database backed up to {MigrationDirectory}", migrationDirectory);
+                    }
+                }
+
+                // Apply Before manual migrations that need to run before actual migrations
+                if (isDbCreated)
+                {
+                    Task.Run(async () =>
+                        {
+                            // Apply all migrations on startup
+                            logger.LogInformation("Running Manual Migrations");
+
+                            try
+                            {
+                                // v0.7.14
+                                await new MigrateWantToReadExport(directoryService).RunAsync(context, logger);
+
+                                // v0.8.2
+                                await ManualMigrateSwitchToWal.Migrate(context, logger);
+
+                                // v0.8.4
+                                await ManualMigrateEncodeSettings.Migrate(context, logger);
+                            }
+                            catch (Exception)
+                            {
+                                /* Swallow */
+                            }
+
+                            await unitOfWork.CommitAsync();
+                            logger.LogInformation("Running Manual Migrations - complete");
+                        }).GetAwaiter()
+                        .GetResult();
+                }
+
+
+
+                await context.Database.MigrateAsync();
+
+
+                await Seed.SeedRoles(services.GetRequiredService<RoleManager<AppRole>>());
+                await Seed.SeedSettings(context, directoryService);
+                await Seed.SeedThemes(context);
+                await Seed.SeedFonts(context);
+                await Seed.SeedDefaultStreams(unitOfWork);
+                await Seed.SeedDefaultSideNavStreams(unitOfWork);
+                await Seed.SeedMetadataSettings(context);
+                await Seed.SeedDefaultHighlightSlots(unitOfWork);
+            }
+            catch (Exception ex)
+            {
+                var logger = services.GetRequiredService<ILogger<Program>>();
+                var context = services.GetRequiredService<DataContext>();
+                var migrationDirectory = await GetMigrationDirectory(context, directoryService);
+
+                logger.LogCritical(ex, "A migration failed during startup. Restoring backup from {MigrationDirectory} and exiting", migrationDirectory);
+                directoryService.CopyFileToDirectory(directoryService.FileSystem.Path.Join(migrationDirectory, "kavita.db"), directoryService.ConfigDirectory);
+
+                return;
+            }
+
+            // Update the logger with the log level
+            var settings = await unitOfWork.SettingsRepository.GetSettingsDtoAsync();
+            LogLevelOptions.SwitchLogLevel(settings.LoggingLevel);
+
+            InitNetVips();
+
+            await host.RunAsync();
+        } catch (Exception ex)
+        {
+            Log.Fatal(ex, "Host terminated unexpectedly");
+        } finally
+        {
+            await Log.CloseAndFlushAsync();
+        }
+    }
+
+    private static void EnsureJwtTokenKey()
+    {
+        if (Configuration.CheckIfJwtTokenSet() || Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") == Environments.Development) return;
+
+        Log.Logger.Information("Generating JWT TokenKey for encrypting user sessions...");
+        var rBytes = new byte[256];
+        RandomNumberGenerator.Create().GetBytes(rBytes);
+        Configuration.JwtToken = Convert.ToBase64String(rBytes).Replace("/", string.Empty);
+    }
+
+    private static void HandleFirstRunConfiguration()
+    {
+        var firstRunConfigFilePath = Path.Join(Directory.GetCurrentDirectory(), "config/appsettings-init.json");
+        var actualRunConfigFilePath = Path.Join(Directory.GetCurrentDirectory(), "config/appsettings.json");
+        if (File.Exists(firstRunConfigFilePath) && !File.Exists(actualRunConfigFilePath))
+        {
+            File.Move(firstRunConfigFilePath, actualRunConfigFilePath);
+        }
+    }
+
+    private static async Task<string> GetMigrationDirectory(DataContext context, IDirectoryService directoryService)
+    {
+        string? currentVersion = null;
+        try
+        {
+            if (!await context.ServerSetting.AnyAsync()) return "vUnknown";
+            currentVersion =
+                (await context.ServerSetting.SingleOrDefaultAsync(s =>
+                    s.Key == ServerSettingKey.InstallVersion))?.Value;
+        }
+        catch (Exception)
+        {
+            // ignored
+        }
+
+        if (string.IsNullOrEmpty(currentVersion))
+        {
+            currentVersion = "vUnknown";
+        }
+
+        var migrationDirectory = directoryService.FileSystem.Path.Join(directoryService.TempDirectory,
+            "migration", currentVersion);
+        return migrationDirectory;
+    }
+
+    private static IHostBuilder CreateHostBuilder(string[] args) =>
+        Host.CreateDefaultBuilder(args)
+            .UseSerilog((_, services, configuration) =>
+            {
+                LogLevelOptions.CreateConfig(configuration)
+                    .WriteTo.SignalRSink<LogHub, ILogHub>(
+                        LogEventLevel.Information,
+                        services);
+            })
+            .ConfigureAppConfiguration((hostingContext, config) =>
+            {
+                config.Sources.Clear();
+
+                var env = hostingContext.HostingEnvironment;
+
+                config.AddJsonFile("config/appsettings.json", optional: true, reloadOnChange: false)
+                    .AddJsonFile($"config/appsettings.{env.EnvironmentName}.json",
+                        optional: true, reloadOnChange: false);
+            })
+            .ConfigureWebHostDefaults(webBuilder =>
+            {
+                webBuilder.UseKestrel((opts) =>
+                {
+                    var ipAddresses = Configuration.IpAddresses;
+                    if (OsInfo.IsDocker || string.IsNullOrEmpty(ipAddresses) || ipAddresses.Equals(Configuration.DefaultIpAddresses))
+                    {
+                        opts.ListenAnyIP(HttpPort, options => { options.Protocols = HttpProtocols.Http1AndHttp2; });
+                    }
+                    else
+                    {
+                        foreach (var ipAddress in ipAddresses.Split(',', StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries))
+                        {
+                            try
+                            {
+                                var address = System.Net.IPAddress.Parse(ipAddress.Trim());
+                                opts.Listen(address, HttpPort, options => { options.Protocols = HttpProtocols.Http1AndHttp2; });
+                            }
+                            catch (Exception ex)
+                            {
+                                Log.Fatal(ex, "Could not parse ip address {IPAddress}", ipAddress);
+                            }
+                        }
+                    }
+                });
+
+                webBuilder.UseStartup<Startup>();
+            });
+
+    /// <summary>
+    /// Ensure NetVips does not cache
+    /// </summary>
+    /// <remarks>https://github.com/kleisauke/net-vips/issues/6#issuecomment-394379299</remarks>
+    private static void InitNetVips()
+    {
+        Cache.MaxFiles = 0;
+
+    }
+}

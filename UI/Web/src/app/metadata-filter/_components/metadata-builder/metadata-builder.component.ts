@@ -3,12 +3,11 @@ import {
   ChangeDetectorRef,
   Component,
   DestroyRef,
-  EventEmitter,
   inject,
   input,
   Input,
   OnInit,
-  Output
+  output
 } from '@angular/core';
 import {MetadataService} from 'src/app/_services/metadata.service';
 import {UtilityService} from 'src/app/shared/_services/utility.service';
@@ -46,8 +45,8 @@ export class MetadataBuilderComponent<TFilter extends number = number, TSort ext
    */
   @Input() statementLimit = 0;
   entityType = input.required<ValidFilterEntity>();
-  @Output() update: EventEmitter<FilterV2<TFilter, TSort>> = new EventEmitter<FilterV2<TFilter, TSort>>();
-  @Output() apply: EventEmitter<void> = new EventEmitter<void>();
+  readonly update = output<FilterV2<TFilter, TSort>>();
+  readonly apply = output<void>();
 
   private readonly cdRef = inject(ChangeDetectorRef);
   private readonly metadataService = inject(MetadataService);

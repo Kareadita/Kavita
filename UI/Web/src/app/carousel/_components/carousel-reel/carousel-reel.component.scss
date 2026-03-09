@@ -11,7 +11,7 @@
 .carousel-container {
     .section-title {
         font-weight: 400;
-        margin-left: 5px;
+        margin-left: 0.3125rem;
         color: var(--carousel-header-text-color);
         text-decoration: var(--carousel-header-text-decoration);
 
@@ -31,11 +31,11 @@
 
 ::ng-deep swiper-slide {
   width: auto !important;
-  margin: 0 .25rem;
+  margin: 0 .5rem;
 }
 
 ::ng-deep swiper-container {
-    margin-bottom: 10px;
+    margin-bottom: 0.625rem;
 }
 
 ::ng-deep swiper-slide:last-child {

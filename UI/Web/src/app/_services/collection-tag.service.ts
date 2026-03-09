@@ -4,9 +4,10 @@ import {environment} from 'src/environments/environment';
 import {UserCollection} from '../_models/collection-tag';
 import {TextResonse} from '../_types/text-response';
 import {MalStack} from "../_models/collection/mal-stack";
-import {Action, ActionItem} from "./action-factory.service";
 import {User} from "../_models/user/user";
-import {AccountService} from "./account.service";
+import {AccountService, Role} from "./account.service";
+import {ActionItem} from "../_models/actionables/action-item";
+import {Action} from "../_models/actionables/action";
 
 @Injectable({
   providedIn: 'root'
@@ -18,6 +19,10 @@ export class CollectionTagService {
 
   baseUrl = environment.apiUrl;
 
+  getCollectionById(collectionId: number) {
+    return this.httpClient.get<UserCollection>(this.baseUrl + 'collection/single?collectionId=' + collectionId);
+  }
+
   allCollections(ownedOnly = false) {
     return this.httpClient.get<UserCollection[]>(this.baseUrl + 'collection?ownedOnly=' + ownedOnly);
   }
@@ -27,7 +32,7 @@ export class CollectionTagService {
   }
 
   updateTag(tag: UserCollection) {
-    return this.httpClient.post(this.baseUrl + 'collection/update', tag, TextResonse);
+    return this.httpClient.post<UserCollection>(this.baseUrl + 'collection/update', tag);
   }
 
   promoteMultipleCollections(tags: Array<number>, promoted: boolean) {
@@ -59,7 +64,7 @@ export class CollectionTagService {
   }
 
   actionListFilter(action: ActionItem<UserCollection>, user: User) {
-    const canPromote = this.accountService.hasAdminRole(user) || this.accountService.hasPromoteRole(user);
+    const canPromote = this.accountService.hasRole(user, Role.Admin) || this.accountService.hasRole(user, Role.Promote);
     const isPromotionAction = action.action == Action.Promote || action.action == Action.UnPromote;
 
     if (isPromotionAction) return canPromote;

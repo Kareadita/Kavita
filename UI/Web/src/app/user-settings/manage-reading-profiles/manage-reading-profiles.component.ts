@@ -147,7 +147,7 @@ export class ManageReadingProfilesComponent implements OnInit {
 
   constructor() {
     effect(() => {
-      const user = this.accountService.currentUserSignal();
+      const user = this.accountService.currentUser();
       if (user) {
         this.user = user;
       }
@@ -349,18 +349,18 @@ export class ManageReadingProfilesComponent implements OnInit {
   protected setDevices() {
     if (this.selectedProfile == null) return;
 
-    const [modal, component] = this.modalService.open(ListSelectModalComponent);
+    const ref = this.modalService.open(ListSelectModalComponent);
     const profileName = this.readingProfileForm?.get('name')?.value || this.selectedProfile.name;
-    component.title.set(translate('manage-reading-profiles.select-devices-for', {name: profileName}));
-    component.multiSelect.set(true);
-    component.requireConfirmation.set(true);
-    component.preSelectedItems.set(this.selectedProfile.deviceIds ?? []);
-    component.inputItems.set(this.devices.map(d => ({
+    ref.setInput('title', translate('manage-reading-profiles.select-devices-for', {name: profileName}));
+    ref.setInput('multiSelect', true);
+    ref.setInput('requireConfirmation', true);
+    ref.setInput('preSelectedItems', this.selectedProfile.deviceIds ?? []);
+    ref.setInput('inputItems', this.devices.map(d => ({
       label: d.friendlyName,
       value: d.id
     })));
 
-    modal.closed.pipe(
+    ref.closed.pipe(
       filter(devices => !!devices),
       switchMap((devices: number[]) => {
         return this.readingProfileService.setDevices(this.selectedProfile!.id, devices).pipe(map(() => devices))

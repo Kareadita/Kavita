@@ -2,12 +2,12 @@
   <div class="card-item-container card">
     <div class="overlay">
       <app-image [styles]="{'border-radius': '.25rem .25rem 0 0'}" height="232.91px" width="160px" classes="extreme-blur"
-        [imageUrl]="imageUrl" />
+        [imageUrl]="imageUrl()" />
 
       <div class="card-overlay"></div>
     </div>
 
-    @if (entity.title | safeHtml; as info) {
+    @if (entity().title | safeHtml; as info) {
       @if (info !== '') {
         <div class="card-body meta-title">
           <div class="card-content d-flex flex-column pt-2 pb-2 justify-content-center align-items-center text-center">
@@ -20,7 +20,7 @@
 
     <div class="card-title-container">
       <span class="card-title" tabindex="0">
-        {{title}}
+        {{title()}}
       </span>
     </div>
 

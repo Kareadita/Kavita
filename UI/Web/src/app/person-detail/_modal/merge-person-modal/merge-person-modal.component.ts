@@ -15,6 +15,7 @@ import {Observable, of} from "rxjs";
 import {Series} from "../../../_models/series";
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import {AsyncPipe} from "@angular/common";
+import {modalSaved} from "../../../_models/modal/modal-result";
 
 @Component({
   selector: 'app-merge-person-modal',
@@ -51,12 +52,12 @@ export class MergePersonModalComponent implements OnInit {
     }
 
     this.personService.mergePerson(this.person.id, this.mergee.id).subscribe(person => {
-      this.modal.close({success: true, person: person});
+      this.modal.close(modalSaved(person));
     })
   }
 
   close() {
-    this.modal.close({success: false, person: this.person});
+    this.modal.dismiss();
   }
 
   ngOnInit(): void {

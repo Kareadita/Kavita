@@ -1,0 +1,162 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+      <OutputType>Exe</OutputType>
+      <AnalysisMode>Default</AnalysisMode>
+      <TargetFramework>net10.0</TargetFramework>
+      <EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
+      <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
+      <TieredPGO>true</TieredPGO>
+      <TieredCompilation>true</TieredCompilation>
+      <ApplicationIcon>../favicon.ico</ApplicationIcon>
+      <Nullable>enable</Nullable>
+      <LangVersion>latestmajor</LangVersion>
+      <EFCoreHostAssets>false</EFCoreHostAssets>
+      <ImplicitUsings>disable</ImplicitUsings>
+    </PropertyGroup>
+
+  <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
+    <DebugSymbols>false</DebugSymbols>
+    <ApplicationIcon>../favicon.ico</ApplicationIcon>
+    <DocumentationFile>bin\$(Configuration)\$(AssemblyName).xml</DocumentationFile>
+  </PropertyGroup>
+
+  <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
+    <DocumentationFile>bin\$(Configuration)\$(AssemblyName).xml</DocumentationFile>
+    <NoWarn>1701;1702;1591</NoWarn>
+  </PropertyGroup>
+
+  <!-- Ignore XML comments -->
+  <PropertyGroup>
+    <GenerateDocumentationFile>True</GenerateDocumentationFile>
+    <NoWarn>$(NoWarn);1591</NoWarn>
+    <NoWarn>$(NoWarn);CA1873</NoWarn>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <SatelliteResourceLanguages>en</SatelliteResourceLanguages>
+  </PropertyGroup>
+
+  <!-- Set the Product and Version info for our own projects -->
+  <PropertyGroup>
+    <Product>Kavita</Product>
+    <Company>kareadita.github.io</Company>
+    <Copyright>Copyright 2020-$([System.DateTime]::Now.ToString('yyyy')) kavitareader.com (GNU General Public v3)</Copyright>
+
+    <AssemblyConfiguration>$(Configuration)-dev</AssemblyConfiguration>
+
+    <GenerateAssemblyFileVersionAttribute>false</GenerateAssemblyFileVersionAttribute>
+    <GenerateAssemblyInformationalVersionAttribute>false</GenerateAssemblyInformationalVersionAttribute>
+    <GenerateAssemblyConfigurationAttribute>false</GenerateAssemblyConfigurationAttribute>
+
+    <Deterministic Condition="$(AssemblyVersion.EndsWith('*'))">False</Deterministic>
+  </PropertyGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\Kavita.API\Kavita.API.csproj" />
+      <ProjectReference Include="..\Kavita.Common\Kavita.Common.csproj" />
+      <ProjectReference Include="..\Kavita.Database\Kavita.Database.csproj" />
+      <ProjectReference Include="..\Kavita.Models\Kavita.Models.csproj" />
+      <ProjectReference Include="..\Kavita.Services\Kavita.Services.csproj" />
+    </ItemGroup>
+
+  <ItemGroup>
+    <None Remove="obj\**" />
+    <None Remove="cache\**" />
+    <None Remove="backups\**" />
+    <None Remove="logs\**" />
+    <None Remove="temp\**" />
+    <None Remove="config\kavita.log" />
+    <None Remove="config\kavita.db" />
+    <None Remove="config\covers\**" />
+    <None Remove="wwwroot\**" />
+    <None Remove="config\cache\cache-long\**" />
+    <None Remove="config\cache\**" />
+    <None Remove="config\logs\**" />
+    <None Remove="config\covers\**" />
+    <None Remove="config\bookmarks\**" />
+    <None Remove="config\backups\**" />
+    <None Remove="config\temp\**" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Remove="obj\**" />
+    <Compile Remove="cache\**" />
+    <Compile Remove="backups\**" />
+    <Compile Remove="logs\**" />
+    <Compile Remove="temp\**" />
+    <Compile Remove="covers\**" />
+    <Compile Remove="wwwroot\**" />
+    <Compile Remove="config\cache\**" />
+    <Compile Remove="cache\cache-long\**" />
+    <Compile Remove="config\logs\**" />
+    <Compile Remove="config\covers\**" />
+    <Compile Remove="config\bookmarks\**" />
+    <Compile Remove="config\backups\**" />
+    <Compile Remove="config\temp\**" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Remove="obj\**" />
+    <EmbeddedResource Remove="cache\**" />
+    <EmbeddedResource Remove="backups\**" />
+    <EmbeddedResource Remove="logs\**" />
+    <EmbeddedResource Remove="temp\**" />
+    <EmbeddedResource Remove="covers\**" />
+    <EmbeddedResource Remove="config\covers\**" />
+    <EmbeddedResource Remove="config\backups\**" />
+    <EmbeddedResource Remove="config\logs\**" />
+    <EmbeddedResource Remove="config\temp\**" />
+    <EmbeddedResource Remove="config\stats\**" />
+    <EmbeddedResource Remove="wwwroot\**" />
+    <EmbeddedResource Remove="config\cache\**" />
+    <EmbeddedResource Remove="config\bookmarks\**" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Remove="obj\**" />
+    <Content Remove="cache\**" />
+    <Content Remove="backups\**" />
+    <Content Remove="logs\**" />
+    <Content Remove="temp\**" />
+    <Content Remove="config\stats\**" />
+    <Content Remove="config\cache\**" />
+    <Content Remove="config\backups\**" />
+    <Content Remove="config\logs\**" />
+    <Content Remove="config\temp\**" />
+    <Content Remove="config\stats\**" />
+    <Content Condition=" '$(Configuration)' == 'Release' " Remove="appsettings.Development.json" />
+    <Content Update="appsettings.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Remove="covers\**" />
+    <Content Remove="config\covers\**" />
+    <Content Update="bin\$(Configuration)\$(AssemblyName).xml">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Remove="config\bookmarks\**" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="config\fonts\" />
+    <Folder Include="config\themes" />
+    <Content Include="EmailTemplates\**">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Assets\**">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Folder Include="Extensions\KavitaPlus\" />
+    <Content Include="I18N\**">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="wwwroot\**">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+
+  <ItemGroup>
+    <_DeploymentManifestIconFile Remove="favicon.ico" />
+  </ItemGroup>
+
+</Project>

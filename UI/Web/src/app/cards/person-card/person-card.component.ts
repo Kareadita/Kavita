@@ -2,19 +2,15 @@ import {
   ChangeDetectionStrategy,
   ChangeDetectorRef,
   Component,
-  ContentChild,
-  DestroyRef,
-  EventEmitter,
+  contentChild,
   HostListener,
   inject,
   Input,
-  Output,
+  output,
   TemplateRef
 } from '@angular/core';
-import {ActionItem} from "../../_services/action-factory.service";
 import {ImageService} from "../../_services/image.service";
 import {BulkSelectionService} from "../bulk-selection.service";
-import {MessageHubService} from "../../_services/message-hub.service";
 import {ScrollService} from "../../_services/scroll.service";
 import {NgbTooltip} from "@ng-bootstrap/ng-bootstrap";
 import {CardActionablesComponent} from "../../_single-module/card-actionables/card-actionables.component";
@@ -24,6 +20,7 @@ import {Person} from "../../_models/metadata/person";
 import {FormsModule} from "@angular/forms";
 import {ImageComponent} from "../../shared/image/image.component";
 import {TranslocoDirective} from "@jsverse/transloco";
+import {ActionItem} from "../../_models/actionables/action-item";
 
 
 @Component({
@@ -42,10 +39,8 @@ import {TranslocoDirective} from "@jsverse/transloco";
 })
 export class PersonCardComponent {
 
-  private readonly destroyRef = inject(DestroyRef);
   public readonly imageService = inject(ImageService);
   public readonly bulkSelectionService = inject(BulkSelectionService);
-  private readonly messageHub = inject(MessageHubService);
   private readonly scrollService = inject(ScrollService);
   private readonly cdRef = inject(ChangeDetectorRef);
 
@@ -80,12 +75,12 @@ export class PersonCardComponent {
   /**
    * Event emitted when item is clicked
    */
-  @Output() clicked = new EventEmitter<string>();
+  readonly clicked = output<string>();
   /**
    * When the card is selected.
    */
-  @Output() selection = new EventEmitter<boolean>();
-  @ContentChild('subtitle') subtitleTemplate!: TemplateRef<any>;
+  readonly selection = output<boolean>();
+  subtitleTemplate = contentChild<TemplateRef<any>>('subtitle');
 
   tooltipTitle: string = this.title;
   /**

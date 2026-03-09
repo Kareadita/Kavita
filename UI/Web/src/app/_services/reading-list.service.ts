@@ -1,5 +1,5 @@
 import {HttpClient, HttpParams} from '@angular/common/http';
-import { Injectable, inject } from '@angular/core';
+import {inject, Injectable} from '@angular/core';
 import {map} from 'rxjs/operators';
 import {environment} from 'src/environments/environment';
 import {UtilityService} from '../shared/_services/utility.service';
@@ -8,7 +8,8 @@ import {PaginatedResult} from '../_models/pagination';
 import {ReadingList, ReadingListCast, ReadingListInfo, ReadingListItem} from '../_models/reading-list';
 import {CblImportSummary} from '../_models/reading-list/cbl/cbl-import-summary';
 import {TextResonse} from '../_types/text-response';
-import {Action, ActionItem} from './action-factory.service';
+import {ActionItem} from "../_models/actionables/action-item";
+import {Action} from "../_models/actionables/action";
 
 @Injectable({
   providedIn: 'root'
@@ -98,9 +99,6 @@ export class ReadingListService {
 
     if (isPromotionAction) return canPromote;
     return true;
-
-    // if (readingList?.promoted && !isAdmin) return false;
-    // return true;
   }
 
   nameExists(name: string) {

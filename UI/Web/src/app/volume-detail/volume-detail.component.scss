@@ -2,7 +2,7 @@
 
 .virtual-scroller, virtual-scroller {
   width: 100%;
-  max-height: calc(var(--vh)*100 - 170px);
+  max-height: calc(var(--vh)*100 - 10.625rem);
 }
 
 // This is responsible for ensuring we scroll down and only tabs and companion bar is visible
@@ -14,10 +14,10 @@
 }
 .card-container{
   display: grid;
-  grid-template-columns: repeat(auto-fill, 160px);
+  grid-template-columns: repeat(auto-fill, 10rem);
   grid-gap: 0.5rem;
   justify-content: space-around;
-  padding-bottom: 20px;
+  padding-bottom: 1.25rem;
 }
 
 

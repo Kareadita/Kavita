@@ -1,4 +1,4 @@
-import {Component, ContentChild, inject, Input, TemplateRef} from '@angular/core';
+import {ChangeDetectionStrategy, Component, inject, input, TemplateRef} from '@angular/core';
 import {NgbActiveModal} from "@ng-bootstrap/ng-bootstrap";
 import {NgTemplateOutlet} from "@angular/common";
 import {TranslocoDirective} from "@jsverse/transloco";
@@ -11,13 +11,14 @@ import {TranslocoDirective} from "@jsverse/transloco";
     TranslocoDirective
   ],
   templateUrl: './generic-table-modal.component.html',
-  styleUrl: './generic-table-modal.component.scss'
+  styleUrl: './generic-table-modal.component.scss',
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class GenericTableModalComponent {
-
+  // TODO: Maybe delete this?
   public readonly modalService = inject(NgbActiveModal);
 
-  @Input({required: true}) title: string = '';
-  @Input() bodyTemplate!: TemplateRef<any>;
+  title = input.required<string>();
+  bodyTemplate = input.required<TemplateRef<any>>();
 
 }

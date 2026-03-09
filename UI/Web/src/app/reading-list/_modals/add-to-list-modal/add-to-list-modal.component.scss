@@ -1,9 +1,0 @@
-
-.clickable:hover, .clickable:focus {
-    background-color: var(--primary-color);
-}
-
-.scrollable-modal {
-    max-height: calc(var(--vh) * 100 - 198px);
-    overflow: auto;
-}

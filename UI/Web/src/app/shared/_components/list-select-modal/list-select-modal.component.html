@@ -40,7 +40,7 @@
       }
     </form>
 
-    <ul class="list-group mt-4">
+    <ul class="list-group">
       @if (!loading()) {
 
         @if (itemsBeforeVirtualValue && itemsValue.length > itemsBeforeVirtualValue) {
@@ -86,12 +86,22 @@
 
   @if (showFooter()) {
     <div class="modal-footer">
-      <button type="button" class="btn btn-secondary" (click)="close()">{{t('common.close')}}</button>
+      @if (showCreate()) {
+        <div class="input-group">
+          <label class="form-label visually-hidden" for="create-input">{{createLabel() ?? ''}}</label>
+          <input id="create-input" type="text" class="form-control"
+                 [formControl]="createControl" [placeholder]="createLabel() ?? ''">
+          <button type="button" class="btn btn-primary" [disabled]="isCreating() || createControl.invalid" (click)="create()">
+            {{createButtonLabel() ?? t('common.create')}}
+          </button>
+        </div>
+      } @else {
+        <button type="button" class="btn btn-secondary" (click)="close()">{{t('common.close')}}</button>
 
-      @if (showConfirm()) {
-        <button type="button" class="btn btn-primary" (click)="confirm()" [disabled]="invalidSelection">{{t('common.confirm')}}</button>
+        @if (showConfirm()) {
+          <button type="button" class="btn btn-primary" (click)="confirm()" [disabled]="invalidSelection">{{t('common.confirm')}}</button>
+        }
       }
-
     </div>
   }
 
@@ -100,7 +110,7 @@
 <ng-template #defaultTemplate let-item let-selectedItems='selectedItems'>
   <div class="fw-bold">{{item.label | sentenceCase}}</div>
 
-  @if (selectedItems && selectedItems.includes(item)) {
+  @if (!showCreate() && selectedItems && selectedItems.includes(item)) {
     <span class="pill p-1 ms-1">{{ selectedText() }}</span>
   }
 </ng-template>

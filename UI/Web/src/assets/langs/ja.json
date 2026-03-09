@@ -494,14 +494,6 @@
     "announcements": {
         "title": "お知らせ"
     },
-    "out-of-date-modal": {
-        "title": "遅れをとらないでください！",
-        "close": "{{common.close}}",
-        "subtitle": "インストールが {{count}} バージョン以上古いようです!",
-        "description-1": "Kavita の最新バージョンを実行できるようにアップグレードすることを検討してください。",
-        "description-2": "更新方法については、<a href='https://wiki.kavitareader.com/guides/updating/' target='_blank' rel='noreferrer noopener'>wiki</a> をご覧ください。",
-        "description-3": "まだアップデートされていない具体的な理由がある場合は、ぜひ古いバージョンを使い続けている理由を教えて下さい! Discord で、アップグレードの妨げになっている要因をお聞かせください。"
-    },
     "changelog": {
         "installed": "インストール済",
         "download": "ダウンロード",
@@ -743,12 +735,6 @@
         "read-more": "もっと読む",
         "read-less": "折りたたむ"
     },
-    "update-notification-modal": {
-        "title": "新しいアップデートが利用可能になりました!",
-        "close": "{{common.close}}",
-        "help": "更新方法",
-        "download": "ダウンロード"
-    },
     "side-nav-companion-bar": {
         "page-settings-title": "{{series-detail.page-settings-title}}",
         "open-filter-and-sort": "フィルターとソーティングを開く",
@@ -910,7 +896,8 @@
         "no-data": "{{common.no-data}}"
     },
     "card-item": {
-        "cannot-read": "読むことができません"
+        "cannot-read": "読むことができません",
+        "select": "選択"
     },
     "details-tab": {
         "writers-title": "{{metadata-fields.writers-title}}",
@@ -1616,7 +1603,7 @@
         "translator-label": "翻訳",
         "read-progress-label": "読書進捗",
         "unread": "未読",
-        "read": "読む",
+        "read": "読書済み",
         "in-progress": "進行状況",
         "rating-label": "評価",
         "age-rating-label": "{{metadata-fields.age-rating-title}}",
@@ -1794,7 +1781,8 @@
         "id-label": "{{edit-chapter-modal.id-label}}",
         "files-label": "{{edit-chapter-modal.files-label}}",
         "cover-image-description": "{{edit-series-modal.cover-image-description}}",
-        "title": "編集"
+        "title": "編集",
+        "read-time-label": "{{edit-chapter-modal.read-time-label}}"
     },
     "day-breakdown": {
         "title": "日別の内訳",
@@ -2188,7 +2176,10 @@
         "confirm-force-delete-font": "このフォントは現在使用中です。強制的に削除しますか？削除すると、デフォルトのフォントに戻ります。",
         "font-in-use": "フォントは 1 人以上のユーザーによって使用されているため、削除できません。",
         "scrobble-gen-init": "過去の読書履歴と評価から Scrobble イベントを生成し、接続されたサービスと同期するジョブをキューに追加しました。",
-        "webtoon-override": "Webtoon を検知しました。Webtoon モードに切り替えます。"
+        "webtoon-override": "Webtoon を検知しました。Webtoon モードに切り替えます。",
+        "confirm-delete-collection": "コレクションを削除してもよろしいですか? 元に戻すことはできません。",
+        "confirm-delete-annotations": "注釈を削除してもよろしいですか? 元に戻すことはできません。",
+        "annotations-deleted": "注釈を削除しました"
     },
     "actionable": {
         "scan-library": "ライブラリのスキャン",
@@ -2400,20 +2391,6 @@
         "overview-tab": "概要",
         "management-tab": "管理",
         "activity-tab": "アクティビティ"
-    },
-    "new-version-modal": {
-        "title": "Kavita が更新されました!",
-        "description": "Kavita の新しいバージョンが利用可能です。更新してアップデートしてください。",
-        "known-issues": "{{changelog.known-issues}}",
-        "theme": "{{changelog.theme}}",
-        "removed": "{{changelog.removed}}",
-        "api": "{{changelog.api}}",
-        "added": "{{changelog.added}}",
-        "developer": "{{changelog.developer}}",
-        "close": "{{common.close}}",
-        "refresh": "更新",
-        "fixed": "{{changelog.fixed}}",
-        "changed": "{{changelog.changed}}"
     },
     "changelog-update-item": {
         "known-issues": "既知の問題",
@@ -3410,5 +3387,38 @@
     "profile-image": {
         "edit-image-alt": "画像を編集",
         "reset-image-alt": "画像をリセット"
+    },
+    "version-update-modal": {
+        "close": "{{common.close}}",
+        "out-of-date": {
+            "title": "遅れをとらないでください！",
+            "subtitle": "インストールが {{count}} バージョン以上古いようです!",
+            "description-1": "Kavita の最新バージョンを実行できるようにアップグレードすることを検討してください。",
+            "description-2": "更新方法については、<a href='https://wiki.kavitareader.com/guides/updating/' target='_blank' rel='noreferrer noopener'>wiki</a> をご覧ください。",
+            "description-3": "まだアップデートされていない具体的な理由がある場合は、ぜひ古いバージョンを使い続けている理由を教えて下さい! Discord で、アップグレードの妨げになっている要因をお聞かせください。"
+        },
+        "new-version": {
+            "title": "Kavita が更新されました!",
+            "description": "Kavita の新しいバージョンが利用可能です。更新してアップデートしてください。",
+            "refresh": "更新"
+        },
+        "update-notification": {
+            "title": "新しいアップデートが利用可能になりました!",
+            "help": "更新方法",
+            "download": "ダウンロード"
+        }
+    },
+    "title": {
+        "reading-list": "読書リスト",
+        "home": "ホーム",
+        "bookmarks": "ブックマーク",
+        "collections": "コレクション",
+        "browse-genres": "ジャンルを表示",
+        "browse-tags": "タグを表示",
+        "want-to-read": "後で読む",
+        "reading-lists": "読書リスト",
+        "settings": "設定",
+        "all-series": "すべてのシリーズ",
+        "profile": "{{username}} さんのプロフィール"
     }
 }

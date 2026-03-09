@@ -1,5 +1,5 @@
-$image-height: 232.91px;
-$image-width: 160px;
+$image-height: 14.5569rem;
+$image-width: 10rem;
 
 .card-item-container {
   width: $image-width;
@@ -7,25 +7,25 @@ $image-width: 160px;
 
 .error-banner {
   width: $image-width;
-  height: 18px;
+  height: 1.125rem;
   background-color: var(--toast-error-bg-color);
-  font-size: 12px;
+  font-size: 0.75rem;
   color: white;
   text-transform: uppercase;
   text-align: center;
 
   position: absolute;
-  top: 0px;
-  right: 0px;
+  top: 0;
+  right: 0;
 }
 
 .selected-highlight {
-  outline: 2px solid var(--primary-color);
+  outline: 0.125rem solid var(--primary-color);
 }
 
 .progress-banner {
   width: $image-width;
-  height: 5px;
+  height: 0.3125rem;
 
   .progress {
     color: var(--card-progress-bar-color);
@@ -34,15 +34,15 @@ $image-width: 160px;
 }
 
 .download {
-  width: 80px;
-  height: 80px;
+  width: 5rem;
+  height: 5rem;
   position: absolute;
   top: 25%;
   right: 30%;
 }
 
 .badge-container {
-  border-radius: 4px;
+  border-radius: 0.25rem;
   display: block;
   height: $image-height;
   left: 0;
@@ -50,13 +50,13 @@ $image-width: 160px;
   pointer-events: none;
   position: absolute;
   top: 0;
-  width: 160px;
+  width: 10rem;
 }
 
 .not-read-badge {
   position: absolute;
   top: calc(-1 * (var(--card-progress-triangle-size) / 2));
-  right: -14px;
+  right: -0.875rem;
   z-index: 1000;
   height: var(--card-progress-triangle-size);
   width: var(--card-progress-triangle-size);
@@ -66,8 +66,8 @@ $image-width: 160px;
 
 .bulk-mode {
   position: absolute;
-  top: 5px;
-  left: 5px;
+  top: 0.3125rem;
+  left: 0.3125rem;
   visibility: hidden;
 
   &.always-show {
@@ -77,8 +77,8 @@ $image-width: 160px;
   }
 
   input[type="checkbox"] {
-    width: 20px;
-    height: 20px;
+    width: 1.25rem;
+    height: 1.25rem;
     color: var(--checkbox-bg-color);
   }
 }
@@ -117,10 +117,10 @@ $image-width: 160px;
       top: 0;
       left: 0;
       width: 100%;
-      height: 232.91px;
+      height: 14.5569rem;
       transition: all 0.2s;
-      border-top-left-radius: 4px;
-      border-top-right-radius: 4px;
+      border-top-left-radius: 0.25rem;
+      border-top-right-radius: 0.25rem;
 
       &:hover {
         background-color: var(--card-overlay-hover-bg-color);
@@ -130,7 +130,7 @@ $image-width: 160px;
       .overlay-information--centered {
         position: absolute;
         background-color: rgba(0, 0, 0, 0.7);
-        border-radius: 50px;
+        border-radius: 3.125rem;
         top: 50%;
         left: 50%;
         transform: translate(-50%, -50%);
@@ -145,8 +145,8 @@ $image-width: 160px;
   }
 
   .count {
-    top: 5px;
-    right: 10px;
+    top: 0.3125rem;
+    right: 0.625rem;
     position: absolute;
   }
 }
@@ -156,26 +156,26 @@ $image-width: 160px;
 }
 
 .library {
-  font-size: 13px;
+  font-size: 0.8125rem;
   text-decoration: none;
-  margin-top: 0px;
+  margin-top: 0;
 }
 
 .card-title-container {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 0 5px;
+    padding: 0 0.3125rem;
 
     :first-child {
-      min-width: 22px;
+      min-width: 1.375rem;
     }
 
     .card-title {
       font-size: 0.8rem;
       margin: 0;
       text-align: center;
-      max-width: 90px;
+      max-width: 5.625rem;
 
       a {
         overflow: hidden;
@@ -185,15 +185,15 @@ $image-width: 160px;
 }
 
 .card-actions {
-  min-width: 15.82px;
+  min-width: 0.9888rem;
 }
 
 .card-format {
-  min-width: 22px;
+  min-width: 1.375rem;
 }
 
 ::ng-deep app-card-actionables .dropdown .dropdown-toggle {
-  padding: 0 5px;
+  padding: 0 0.3125rem;
 }
 
 .meta-title {
@@ -205,9 +205,9 @@ $image-width: 160px;
 .card-title {
   font-size: 0.8rem;
   margin: 0;
-  padding: 10px 0;
+  padding: 0.625rem 0;
   text-align: center;
-  max-width: 120px;
+  max-width: 7.5rem;
 
   a {
     overflow: hidden;
@@ -216,7 +216,7 @@ $image-width: 160px;
 }
 
 .card-body > div:nth-child(2) {
-  height: 40px;
+  height: 2.5rem;
   overflow: hidden;
   -webkit-line-clamp: 2;
   display: -webkit-box;
@@ -229,7 +229,7 @@ $image-width: 160px;
   visibility: hidden;
   display: none;
     .card-title {
-      padding: 10px;
+      padding: 0.625rem;
     }
 }
 
@@ -239,11 +239,11 @@ $image-width: 160px;
 .expected {
   .overlay-information--centered {
     div {
-      height: 32px;
-      width: 32px;
+      height: 2rem;
+      width: 2rem;
       i {
         font-size: 1.4rem;
-        line-height: 32px;
+        line-height: 2rem;
       }
     }
   }

@@ -1,5 +1,5 @@
 import {HttpClient} from '@angular/common/http';
-import {DestroyRef, effect, inject, Injectable} from '@angular/core';
+import {effect, inject, Injectable} from '@angular/core';
 import {DOCUMENT, Location} from '@angular/common';
 import {Router} from '@angular/router';
 import {environment} from 'src/environments/environment';
@@ -18,7 +18,6 @@ import {PersonalToC} from "../_models/readers/personal-toc";
 import {FilterV2} from "../_models/metadata/v2/filter-v2";
 import NoSleep from 'nosleep.js';
 import {Volume} from "../_models/volume";
-import {UtilityService} from "../shared/_services/utility.service";
 import {translate} from "@jsverse/transloco";
 import {ToastrService} from "ngx-toastr";
 import {FilterField} from "../_models/metadata/v2/filter-field";
@@ -29,6 +28,7 @@ import {take, takeUntil} from "rxjs/operators";
 import {SeriesService} from "./series.service";
 import {Series} from "../_models/series";
 import {RereadPrompt} from "../_models/readers/reread-prompt";
+import {mediumModal} from "../_models/modal/modal-options";
 
 enum RereadPromptResult {
   Cancel = 0,
@@ -47,8 +47,6 @@ const MS_IN_DAY = 1000 * 60 * 60 * 24;
 })
 export class ReaderService {
 
-  private readonly destroyRef = inject(DestroyRef);
-  private readonly utilityService = inject(UtilityService);
   private readonly router = inject(Router);
   private readonly location = inject(Location);
   private readonly accountService = inject(AccountService);
@@ -672,24 +670,22 @@ export class ReaderService {
     ).catch(err => console.error(err)));
   }
 
-  private handlePrompt(prompt: RereadPrompt, incognitoMode: boolean) {
+  private handlePrompt<T>(prompt: RereadPrompt, incognitoMode: boolean) {
     if (incognitoMode) return of({prompt: prompt, result: RereadPromptResult.ReadIncognito});
 
     if (!prompt.shouldPrompt) return of({prompt: prompt, result: RereadPromptResult.Continue});
 
 
-    const [modal, component] = this.modalService.open(ListSelectModalComponent, {
-      centered: true,
-    });
+    const ref = this.modalService.open<ListSelectModalComponent<T>>(ListSelectModalComponent, mediumModal());
 
-    component.showFooter.set(false);
-    component.title.set(translate('reread-modal.title'));
+    ref.setInput('showFooter', false);
+    ref.setInput('title', translate('reread-modal.title'));
 
     if (prompt.timePrompt) {
-      component.description.set(translate('reread-modal.description-time-passed',
-        { days: prompt.daysSinceLastRead, name: prompt.chapterOnReread.label }));
+      ref.setInput('description', translate('reread-modal.description-time-passed',
+        { days: prompt.daysSinceLastRead, name: prompt.chapterOnReread.label }))
     } else {
-      component.description.set(translate('reread-modal.description-full-read', { name: prompt.chapterOnReread.label }));
+      ref.setInput('description', translate('reread-modal.description-full-read', { name: prompt.chapterOnReread.label }))
     }
 
     const options = [
@@ -703,10 +699,10 @@ export class ReaderService {
 
     options.push({label: translate('reread-modal.cancel'), value: RereadPromptResult.Cancel});
 
-    component.inputItems.set(options);
+    ref.setInput('inputItems', options);
 
-    return modal.closed.pipe(
-      takeUntil(modal.dismissed),
+    return ref.closed.pipe(
+      takeUntil(ref.dismissed),
       take(1),
       map(res => ({prompt: prompt, result: res as RereadPromptResult})),
       catchError(() => of({prompt: prompt, result: RereadPromptResult.Cancel}))

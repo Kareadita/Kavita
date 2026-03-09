@@ -1,8 +1,8 @@
 $center-width: 50%;
 $side-width: 25%;
 
-$dash-width: 3px;
-$pointer-offset: 5px;
+$dash-width: 0.1875rem;
+$pointer-offset: 0.3125rem;
 
 @use '../../.././../manga-reader-common';
 
@@ -54,7 +54,7 @@ $pointer-offset: 5px;
 }
 
 .bottom-menu {
-    padding: 20px 20px;
+    padding: 1.25rem 1.25rem;
 }
 
 
@@ -66,23 +66,60 @@ $pointer-offset: 5px;
   color: var(--manga-reader-overlay-text-color);
 }
 
+/* Enter/leave classes applied by Angular automatically */
+.slide-in-top {
+  animation: enter-from-top 200ms cubic-bezier(.4, 0, .2, 1);
+}
+
+.slide-out-top {
+  animation: leave-to-top 200ms cubic-bezier(.4, 0, .2, 1);
+}
+
+.slide-in-bottom {
+  animation: enter-from-bottom 200ms cubic-bezier(.4, 0, .2, 1);
+}
+
+.slide-out-bottom {
+  animation: leave-to-bottom 200ms cubic-bezier(.4, 0, .2, 1);
+}
+
+@keyframes enter-from-top {
+  from { transform: translateY(-100%); }
+  to   { transform: translateY(0); }
+}
+
+@keyframes leave-to-top {
+  from { transform: translateY(0); }
+  to   { transform: translateY(-100%); }
+}
+
+@keyframes enter-from-bottom {
+  from { transform: translateY(100%); }
+  to   { transform: translateY(0); }
+}
+
+@keyframes leave-to-bottom {
+  from { transform: translateY(0); }
+  to   { transform: translateY(100%); }
+}
+
 @media(min-width: 600px) {
   .overlay .left .i {
-      left: 20px;
+      left: 1.25rem;
   }
   .overlay .right .i {
-      right: 20px;
+      right: 1.25rem;
   }
 }
 
 // Splitting Icon
 .split {
-    height: 20px;
-    width: 40px;
+    height: 1.25rem;
+    width: 2.5rem;
     z-index: 1;
     top: 0;
     overflow: hidden;
-    border: 2px solid #ccc;
+    border: 0.125rem solid #ccc;
     vertical-align: sub;
     display: inline-block;
 
@@ -92,19 +129,19 @@ $pointer-offset: 5px;
 
     /* Control the left side */
     .left-side {
-        height: 20px;
-        width: 20px;
+        height: 1.25rem;
+        width: 1.25rem;
         background-color: rgba(255, 255, 255, 0.6);
-        margin-top: -16px;
+        margin-top: -1rem;
     }
 
     /* Control the right side */
     .right-side {
-        height: 20px;
-        margin-left: 20px;
-        width: 20px;
+        height: 1.25rem;
+        margin-left: 1.25rem;
+        width: 1.25rem;
         background-color: rgba(255, 255, 255, 0.6);
-        margin-top: -16px;
+        margin-top: -1rem;
     }
 
     .none {
@@ -116,32 +153,32 @@ $pointer-offset: 5px;
   }
 
   .split-double {
-    height: 20px;
+    height: 1.25rem;
     display: inline-block;
     font-size: .7em;
 
     .right {
-      left: -7px;
+      left: -0.4375rem;
     }
   }
 
   ::ng-deep {
     .custom-slider .ngx-slider .ngx-slider-bar {
       background: #e9ffe2;
-      height: 2px;
+      height: 0.125rem;
     }
     .custom-slider .ngx-slider .ngx-slider-selection {
       background: var(--primary-color);
     }
 
     .custom-slider .ngx-slider .ngx-slider-pointer {
-      width: 8px;
-      height: 16px;
+      width: 0.5rem;
+      height: 1rem;
       top: auto; /* to remove the default positioning */
       bottom: 0;
       background-color: var(--primary-color); // #333;
-      border-top-left-radius: 3px;
-      border-top-right-radius: 3px;
+      border-top-left-radius: 0.1875rem;
+      border-top-right-radius: 0.1875rem;
     }
 
     .custom-slider .ngx-slider .ngx-slider-pointer:after {
@@ -149,7 +186,7 @@ $pointer-offset: 5px;
     }
 
     .custom-slider .ngx-slider .ngx-slider-bubble {
-      bottom: 14px;
+      bottom: 0.875rem;
       font-weight: bold;
     }
 
@@ -161,12 +198,12 @@ $pointer-offset: 5px;
 
 
     .custom-slider .ngx-slider .ngx-slider-tick {
-      width: 1px;
-      height: 10px;
-      margin-left: 4px;
+      width: 0.0625rem;
+      height: 0.625rem;
+      margin-left: 0.25rem;
       border-radius: 0;
       background: #ffe4d1;
-      top: -1px;
+      top: -0.0625rem;
     }
 
     .custom-slider .ngx-slider .ngx-slider-tick.ngx-slider-selected {
@@ -188,13 +225,13 @@ $pointer-offset: 5px;
 
     i {
         color: white;
-        font-size: 42px;
+        font-size: 2.625rem;
     }
 
     .right {
       position: absolute;
-      right: 0px;
-      top: 0px;
+      right: 0;
+      top: 0;
       width: $side-width;
       background: $pagination-bg;
       max-height: calc(var(--vh)*100);
@@ -203,8 +240,8 @@ $pointer-offset: 5px;
 
     .top {
         position: absolute;
-        right: 0px;
-        top: 0px;
+        right: 0;
+        top: 0;
         width: 100%;
         background: $pagination-bg;
         z-index: 100;
@@ -212,8 +249,8 @@ $pointer-offset: 5px;
 
     .left {
         position: absolute;
-        left: 0px;
-        top: 0px;
+        left: 0;
+        top: 0;
         width: $side-width;
         background: $pagination-bg;
         max-height: calc(var(--vh)*100);
@@ -222,8 +259,8 @@ $pointer-offset: 5px;
 
     .bottom {
         position: fixed; // I couldn't figure out how to do this with abs, so only the bottom bar will not be scrollable
-        left: 0px;
-        bottom: 0px;
+        left: 0;
+        bottom: 0;
         width: 100%;
         background: $pagination-bg;
         z-index: 100;

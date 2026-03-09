@@ -1,5 +1,5 @@
 <ng-container *transloco="let t; prefix: 'collection-owner'">
-  @if (accountService.currentUser$ | async; as user) {
+  @if (accountService.currentUser()) {
     <div class="fw-light text-accent">
       {{t('collection-created-label', {owner: collection.owner})}}
       @if(collection.source !== ScrobbleProvider.Kavita) {

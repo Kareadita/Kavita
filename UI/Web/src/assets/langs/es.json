@@ -459,14 +459,6 @@
     "announcements": {
         "title": "Noticias"
     },
-    "out-of-date-modal": {
-        "title": "¡No te quedes atrás!",
-        "close": "{{common.close}}",
-        "subtitle": "¡Parece que tu instalación lleva más de {{count}} versiones de retraso!",
-        "description-1": "Considere actualizar para ejecutar la versión más reciente de Kavita.",
-        "description-2": "Eche un vistazo a nuestra <a href='https://wiki.kavitareader.com/guides/updating/' target='_blank' rel='noreferrer noopener'>wiki</a> para obtener instrucciones sobre cómo actualizar.",
-        "description-3": "Si hay una razón específica por la que aún no has actualizado, ¡nos encantaría saber qué te mantienes en una versión obsoleta! Deténgase en nuestro discord y háganos saber qué está bloqueando su camino a la actualización."
-    },
     "changelog": {
         "installed": "Instalado",
         "download": "Descarga",
@@ -687,12 +679,6 @@
     "read-more": {
         "read-more": "Leer más",
         "read-less": "Leer menos"
-    },
-    "update-notification-modal": {
-        "title": "Nueva actualización disponible!",
-        "close": "{{common.close}}",
-        "help": "Cómo actualizar",
-        "download": "Descargar"
     },
     "side-nav-companion-bar": {
         "page-settings-title": "{{series-detail.page-settings-title}}",
@@ -2257,19 +2243,6 @@
         "feature-requests": "Petición de funciones",
         "known-issues": "Problemas conocidos"
     },
-    "new-version-modal": {
-        "developer": "{{changelog.developer}}",
-        "close": "{{common.close}}",
-        "fixed": "{{changelog.fixed}}",
-        "api": "{{changelog.api}}",
-        "refresh": "Refrescar",
-        "title": "¡Kavita fue actualizado!",
-        "description": "Una nueva versión de Kavita está disponible. Refresca para actualizar.",
-        "added": "{{changelog.added}}",
-        "changed": "{{changelog.changed}}",
-        "theme": "{{changelog.theme}}",
-        "removed": "{{changelog.removed}}"
-    },
     "manage-user-tokens": {
         "mal-header": "MAL",
         "username-header": "Nombre de usuario",
@@ -2407,5 +2380,25 @@
         "pdf-theme-tooltip": "Color del tema para el lector",
         "reading-profile-series-settings-title": "Serie",
         "reading-profile-library-settings-title": "Biblioteca"
+    },
+    "version-update-modal": {
+        "close": "{{common.close}}",
+        "out-of-date": {
+            "title": "¡No te quedes atrás!",
+            "subtitle": "¡Parece que tu instalación lleva más de {{count}} versiones de retraso!",
+            "description-1": "Considere actualizar para ejecutar la versión más reciente de Kavita.",
+            "description-2": "Eche un vistazo a nuestra <a href='https://wiki.kavitareader.com/guides/updating/' target='_blank' rel='noreferrer noopener'>wiki</a> para obtener instrucciones sobre cómo actualizar.",
+            "description-3": "Si hay una razón específica por la que aún no has actualizado, ¡nos encantaría saber qué te mantienes en una versión obsoleta! Deténgase en nuestro discord y háganos saber qué está bloqueando su camino a la actualización."
+        },
+        "new-version": {
+            "title": "¡Kavita fue actualizado!",
+            "description": "Una nueva versión de Kavita está disponible. Refresca para actualizar.",
+            "refresh": "Refrescar"
+        },
+        "update-notification": {
+            "title": "Nueva actualización disponible!",
+            "help": "Cómo actualizar",
+            "download": "Descargar"
+        }
     }
 }

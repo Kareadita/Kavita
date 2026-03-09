@@ -100,7 +100,7 @@ export class SeriesService {
   }
 
   updateSeries(model: any) {
-    return this.httpClient.post(this.baseUrl + 'series/update', model);
+    return this.httpClient.post<Series>(this.baseUrl + 'series/update', model);
   }
 
   markRead(seriesId: number) {
@@ -143,7 +143,8 @@ export class SeriesService {
     return this.httpClient.post<Series[]>(url, data, {observe: 'response', params}).pipe(
       map(response => {
         return this.utilityService.createPaginatedResult(response, new PaginatedResult<Series[]>());
-    }));
+      })
+    );
   }
 
   isWantToRead(seriesId: number) {
@@ -166,7 +167,8 @@ export class SeriesService {
     return this.httpClient.post<Series[]>(url, data, {observe: 'response', params}).pipe(
       map(response => {
         return this.utilityService.createPaginatedResult(response, new PaginatedResult<Series[]>());
-    }));
+      })
+    );
   }
 
 

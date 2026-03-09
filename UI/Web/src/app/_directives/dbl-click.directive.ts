@@ -1,4 +1,4 @@
-import {Directive, EventEmitter, HostListener, Output} from '@angular/core';
+import {Directive, HostListener, output} from '@angular/core';
 
 @Directive({
   selector: '[appDblClick]',
@@ -6,8 +6,8 @@ import {Directive, EventEmitter, HostListener, Output} from '@angular/core';
 })
 export class DblClickDirective {
 
-  @Output() singleClick = new EventEmitter<Event>();
-  @Output() doubleClick = new EventEmitter<Event>();
+  readonly singleClick = output<Event>();
+  readonly doubleClick = output<Event>();
 
   private lastTapTime = 0;
   private tapTimeout = 300; // Time threshold for a double tap (in milliseconds)

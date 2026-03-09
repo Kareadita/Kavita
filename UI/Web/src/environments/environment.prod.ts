@@ -1,4 +1,5 @@
-import { getBaseUrl } from "src/app/base-url.provider";
+import {getBaseUrl} from "src/app/_providers/base-url.provider";
+
 const BASE_URL = getBaseUrl();
 
 export const environment = {

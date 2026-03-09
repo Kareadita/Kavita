@@ -2,17 +2,17 @@
 .color-box-container {
   display: flex;
   align-items: center;
-  margin: 10px 0;
+  margin: 0.625rem 0;
 }
 
 .color-box {
-  width: 20px;
-  height: 20px;
+  width: 1.25rem;
+  height: 1.25rem;
   border: 1px solid #000;
-  margin-right: 10px;
+  margin-right: 0.625rem;
 }
 
 .hex-code {
-  font-size: 16px;
+  font-size: 1rem;
   color: var(--primary-color);
 }

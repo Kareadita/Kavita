@@ -444,12 +444,6 @@
     "announcements": {
         "title": "Aankondigingen"
     },
-    "out-of-date-modal": {
-        "close": "{{common.close}}",
-        "title": "Blijf niet achter!",
-        "subtitle": "Het lijkt erop dat je installatie meer dan {{count}} versies achterloopt!",
-        "description-1": "Overweeg een upgrade zodat je de nieuwste versie van Kavita gebruikt."
-    },
     "changelog": {
         "installed": "Geïnstalleerd",
         "download": "Download",
@@ -634,12 +628,6 @@
     "read-more": {
         "read-more": "Toon meer",
         "read-less": "Toon minder"
-    },
-    "update-notification-modal": {
-        "title": "Nieuwe update beschikbaar!",
-        "close": "{{common.close}}",
-        "help": "Hoe te updaten",
-        "download": "Download"
     },
     "side-nav-companion-bar": {
         "page-settings-title": "{{series-detail.page-settings-title}}",
@@ -1624,20 +1612,6 @@
         "installed": "{{changelog.installed}}",
         "known-issues": "Bekende problemen"
     },
-    "new-version-modal": {
-        "added": "{{changelog.added}}",
-        "changed": "{{changelog.changed}}",
-        "fixed": "{{changelog.fixed}}",
-        "developer": "{{changelog.developer}}",
-        "theme": "{{changelog.theme}}",
-        "removed": "{{changelog.removed}}",
-        "known-issues": "{{changelog.known-issues}}",
-        "close": "{{common.close}}",
-        "refresh": "Vernieuwen",
-        "title": "Kavita is bijgewerkt!",
-        "description": "Er is een nieuwe versie van Kavita beschikbaar. Vernieuw om te updaten.",
-        "api": "{{changelog.api}}"
-    },
     "match-series-modal": {
         "search": "Zoeken",
         "close": "{{common.close}}",
@@ -1752,5 +1726,23 @@
         "client-id-label": "Client ID",
         "require-verified-email-label": "Vereist geverifieerde emails",
         "advanced-title": "Geavanceerde instellingen"
+    },
+    "version-update-modal": {
+        "close": "{{common.close}}",
+        "out-of-date": {
+            "title": "Blijf niet achter!",
+            "subtitle": "Het lijkt erop dat je installatie meer dan {{count}} versies achterloopt!",
+            "description-1": "Overweeg een upgrade zodat je de nieuwste versie van Kavita gebruikt."
+        },
+        "new-version": {
+            "title": "Kavita is bijgewerkt!",
+            "description": "Er is een nieuwe versie van Kavita beschikbaar. Vernieuw om te updaten.",
+            "refresh": "Vernieuwen"
+        },
+        "update-notification": {
+            "title": "Nieuwe update beschikbaar!",
+            "help": "Hoe te updaten",
+            "download": "Download"
+        }
     }
 }

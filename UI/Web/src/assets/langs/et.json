@@ -191,9 +191,6 @@
         "count": "{{count}} {{customize-dashboard-modal.title-smart-filters}}",
         "create": "{{common.create}}"
     },
-    "out-of-date-modal": {
-        "close": "{{common.close}}"
-    },
     "invite-user": {
         "close": "{{common.close}}",
         "email": "{{common.email}}",
@@ -272,9 +269,6 @@
         "reading-lists-title": "{{side-nav.reading-lists}}"
     },
     "external-rating": {
-        "close": "{{common.close}}"
-    },
-    "update-notification-modal": {
         "close": "{{common.close}}"
     },
     "side-nav-companion-bar": {
@@ -659,5 +653,10 @@
     },
     "actionable": {
         "clear": "{{common.clear}}"
+    },
+    "version-update-modal": {
+        "close": "{{common.close}}",
+        "out-of-date": {},
+        "update-notification": {}
     }
 }

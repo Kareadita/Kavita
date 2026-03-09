@@ -1,0 +1,39 @@
+﻿using System.Threading.Tasks;
+using Kavita.Database;
+using Kavita.Models.Entities.History;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
+
+namespace Kavita.Server.ManualMigrations.v0._7._14;
+
+/// <summary>
+/// For the v0.7.14 release, one of the nightlies had bad data that would cause issues. This drops those records
+/// </summary>
+public static class MigrateClearNightlyExternalSeriesRecords
+{
+    public static async Task Migrate(DataContext dataContext, ILogger<Program> logger)
+    {
+        if (await dataContext.ManualMigrationHistory.AnyAsync(m => m.Name == "MigrateClearNightlyExternalSeriesRecords"))
+        {
+            return;
+        }
+
+        logger.LogCritical(
+            "Running MigrateClearNightlyExternalSeriesRecords migration - Please be patient, this may take some time. This is not an error");
+
+        dataContext.ExternalSeriesMetadata.RemoveRange(dataContext.ExternalSeriesMetadata);
+        dataContext.ExternalRating.RemoveRange(dataContext.ExternalRating);
+        dataContext.ExternalRecommendation.RemoveRange(dataContext.ExternalRecommendation);
+        dataContext.ExternalReview.RemoveRange(dataContext.ExternalReview);
+
+        dataContext.ManualMigrationHistory.Add(new ManualMigrationHistory()
+        {
+            Name = "MigrateClearNightlyExternalSeriesRecords",
+        });
+
+        await dataContext.SaveChangesAsync();
+
+        logger.LogCritical(
+            "Running MigrateClearNightlyExternalSeriesRecords migration - Completed. This is not an error");
+    }
+}

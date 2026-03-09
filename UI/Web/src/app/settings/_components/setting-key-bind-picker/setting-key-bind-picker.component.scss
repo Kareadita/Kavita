@@ -1,9 +1,9 @@
 .typing-cursor {
   display: inline-block;
-  width: 1px;
+  width: 0.0625rem;
   height: 1em;
   background-color: currentColor;
-  margin-left: 2px;
+  margin-left: 0.125rem;
   vertical-align: text-bottom;
   animation: blink 1s step-end infinite;
 }

@@ -7,8 +7,6 @@ import {
 } from '@angular/core';
 import {AppComponent} from './app/app.component';
 import {NgCircleProgressModule} from 'ng-circle-progress';
-import {ToastrModule} from 'ngx-toastr';
-import {BrowserAnimationsModule} from '@angular/platform-browser/animations';
 import {routes} from './app/app-routing.module';
 import {bootstrapApplication, BrowserModule, Title} from '@angular/platform-browser';
 import {jwtInterceptor} from './app/_interceptors/jwt.interceptor';
@@ -24,23 +22,30 @@ import {getSaver, SAVER} from "./app/_providers/saver.provider";
 import {APP_BASE_HREF, PlatformLocation} from "@angular/common";
 import {provideTranslocoPersistTranslations} from '@jsverse/transloco-persist-translations';
 import {HttpLoader} from "./httpLoader";
-import {register as registerSwiperElements} from 'swiper/element/bundle';
-import {ColorPickerModule} from "@iplab/ngx-color-picker";
 import {clientInfoInterceptor} from "./app/_interceptors/client-info.interceptor";
 import {
   PreloadAllModules,
   provideRouter,
+  TitleStrategy,
   withComponentInputBinding,
-  withInMemoryScrolling, withNavigationErrorHandler,
+  withInMemoryScrolling,
+  withNavigationErrorHandler,
   withPreloading
 } from "@angular/router";
+import {KavitaTitleStrategy} from "./app/_services/kavita-title.strategy";
 import {routingErrorHandler} from "./app/_interceptors/routing-error.handler";
-import {registerECharts} from "./echarts";
+import {NgbModalConfig, NgbRatingConfig} from "@ng-bootstrap/ng-bootstrap";
+import {DefaultModalOptions} from "./app/_models/modal/modal-options";
+import {ToastNoAnimationModule} from "ngx-toastr";
+import {MessageHubService} from "src/app/_services/message-hub.service";
+import {DownloadService} from "./app/shared/_services/download.service";
+import {LibraryService} from "./app/_services/library.service";
 
 const disableAnimations = !('animate' in document.documentElement);
+if (disableAnimations) {
+  document.documentElement.classList.add('no-animations');
+}
 
-registerSwiperElements();
-registerECharts();
 
 function transformLanguageCodes(arr: Array<string>) {
     const transformedArray: Array<string> = [];
@@ -109,7 +114,7 @@ function getBaseHref(platformLocation: PlatformLocation): string {
 
 
 function loadUserLocale(transloco: TranslocoService, accountService: AccountService) {
-  const user = accountService.currentUserSignal();
+  const user = accountService.currentUser();
   const locale = user?.preferences?.locale || localStorage.getItem(AccountService.localeKey) || 'en';
 
   transloco.setActiveLang(locale);
@@ -121,34 +126,52 @@ function loadUserLocale(transloco: TranslocoService, accountService: AccountServ
  */
 function bootstrapUser() {
   const accountService = inject(AccountService);
+  const messageHubService = inject(MessageHubService);
+  const downloadService = inject(DownloadService);
+  const libraryService = inject(LibraryService);
   const transloco = inject(TranslocoService);
 
+  // Load user from localStorage so refreshAccount() and locale loading can proceed
+  const localUser = accountService.getUserFromLocalStorage();
+  if (localUser) {
+    accountService.setCurrentUser(localUser, false);
+  }
+
   return firstValueFrom(accountService.isOidcAuthenticated().pipe(
-    switchMap((isOidc)=> isOidc ? accountService.getAccount() : of(null)),
-    catchError(() => of(null)),
-    tap(user => {
-      if (!user) {
-        accountService.setCurrentUser(accountService.getUserFromLocalStorage());
+    switchMap(isOidc => {
+      if (isOidc) {
+        return accountService.getAccount();
       }
+      return accountService.refreshAccount();
     }),
+    catchError(() => of(null)),
     switchMap(() => loadUserLocale(transloco, accountService)),
+    switchMap(() => {
+      const user = accountService.currentUser();
+      if (user) {
+        messageHubService.createHubConnection(user);
+        return libraryService.cacheLibraryInfo().pipe(
+          tap(() => downloadService.restoreQueue())
+        );
+      }
+      return of(null);
+    }),
   ));
 }
+
 
 bootstrapApplication(AppComponent, {
     providers: [
         importProvidersFrom(BrowserModule,
-          BrowserAnimationsModule.withConfig({ disableAnimations }),
           LazyLoadImageModule,
-          ToastrModule.forRoot({
+          ToastNoAnimationModule.forRoot({
             positionClass: 'toast-bottom-right',
             preventDuplicates: true,
             timeOut: 6000,
             countDuplicates: true,
             autoDismiss: true
           }),
-          NgCircleProgressModule.forRoot(),
-          ColorPickerModule,
+          NgCircleProgressModule.forRoot()
         ),
         provideRouter(routes,
           withComponentInputBinding(),
@@ -166,6 +189,7 @@ bootstrapApplication(AppComponent, {
           ttl: environment.production ? 129600 : 0 // 1.5 days in seconds for prod
         }),
         Title,
+        { provide: TitleStrategy, useClass: KavitaTitleStrategy },
         { provide: SAVER, useFactory: getSaver },
         {
           provide: APP_BASE_HREF,
@@ -174,7 +198,18 @@ bootstrapApplication(AppComponent, {
         },
         provideHttpClient(withInterceptors([jwtInterceptor, errorInterceptor, clientInfoInterceptor]), withFetch()),
         provideAppInitializer(() => bootstrapUser()),
-        provideZoneChangeDetection()
+        provideZoneChangeDetection(),
+        {
+          provide: NgbModalConfig,
+          useFactory: () => Object.assign(new NgbModalConfig(), DefaultModalOptions) satisfies Partial<NgbModalConfig>
+        },
+        {
+          provide: NgbRatingConfig,
+          useFactory: () => Object.assign(new NgbRatingConfig(), {
+            max: 5,
+            resettable: true,
+          } satisfies Partial<NgbRatingConfig>)
+        }
     ]
 } as ApplicationConfig)
 .catch(err => console.error(err));

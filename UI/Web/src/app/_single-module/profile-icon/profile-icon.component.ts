@@ -1,4 +1,4 @@
-import {ChangeDetectionStrategy, Component, DestroyRef, effect, inject, input, signal} from '@angular/core';
+import {ChangeDetectionStrategy, Component, computed, DestroyRef, inject, input, signal} from '@angular/core';
 import {ImageService} from "../../_services/image.service";
 import {ImageComponent} from "../../shared/image/image.component";
 import {EVENTS, MessageHubService} from "../../_services/message-hub.service";
@@ -27,8 +27,15 @@ export class ProfileIconComponent {
    */
   processEvents = input<boolean>(true);
 
-  currentImageUrl = signal<string>('');
+  private readonly randomSeed = signal<number>(0);
   noImage = signal<boolean>(false);
+
+  currentImageUrl = computed(() => {
+    const userId = this.userId();
+    const seed = this.randomSeed();
+    const url = this.imageService.getUserCoverImage(userId);
+    return seed > 0 ? `${url}&random=${seed}` : url;
+  });
 
   constructor() {
     this.hubService.messages$.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(res => {
@@ -37,7 +44,7 @@ export class ProfileIconComponent {
 
       if (res.event === EVENTS.CoverUpdate) {
         const updateEvent = res.payload as CoverUpdateEvent;
-        if (imageUrl === undefined || imageUrl === null || imageUrl === '') return;
+        if (!imageUrl) return;
         const entityType = this.imageService.getEntityTypeFromUrl(imageUrl);
         if (entityType === updateEvent.entityType) {
           const tokens = imageUrl.split('?')[1].split('&');
@@ -48,17 +55,11 @@ export class ProfileIconComponent {
             id = id.split('&')[0];
           }
           if (id === (updateEvent.id + '')) {
-            this.currentImageUrl.set(this.imageService.randomize(imageUrl))
+            this.noImage.set(false);
+            this.randomSeed.update(v => v + 1);
           }
         }
       }
-    });
-
-    effect(() => {
-      const userId = this.userId();
-
-      // Set default image
-      this.currentImageUrl.set(this.imageService.getUserCoverImage(userId));
     });
   }
 

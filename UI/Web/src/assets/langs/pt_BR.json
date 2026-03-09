@@ -494,14 +494,6 @@
     "announcements": {
         "title": "Anúncios"
     },
-    "out-of-date-modal": {
-        "title": "Não fique para trás!",
-        "close": "{{common.close}}",
-        "subtitle": "Parece que sua instalação está mais de {{count}} versões atrasada!",
-        "description-1": "Considere atualizar para executar a versão mais recente do Kavita.",
-        "description-2": "Dê uma olhada em nosso <a href='https://wiki.kavitareader.com/guides/updating/' target='_blank' rel='noreferrer noopener'>wiki</a> para obter instruções sobre como atualizar.",
-        "description-3": "Se houver um motivo específico para você ainda não ter atualizado, adoraríamos saber o que o mantém em uma versão desatualizada! Visite nosso discord e conte-nos o que está bloqueando seu caminho de atualização."
-    },
     "changelog": {
         "installed": "Instalado",
         "download": "Baixar",
@@ -747,12 +739,6 @@
         "read-more": "Leia Mais",
         "read-less": "Leia Menos"
     },
-    "update-notification-modal": {
-        "title": "Nova Atualização Disponível!",
-        "close": "{{common.close}}",
-        "help": "Como Atualizar",
-        "download": "Baixar"
-    },
     "side-nav-companion-bar": {
         "page-settings-title": "{{series-detail.page-settings-title}}",
         "open-filter-and-sort": "Abrir Filtragem e Classificação",
@@ -914,7 +900,9 @@
         "no-data": "{{common.no-data}}"
     },
     "card-item": {
-        "cannot-read": "Não foi Possível Ler"
+        "cannot-read": "Não foi Possível Ler",
+        "select": "Selecionar",
+        "read": "ler"
     },
     "details-tab": {
         "writers-title": "{{metadata-fields.writers-title}}",
@@ -964,7 +952,8 @@
         "applied": "{{theme-manager.applied}}"
     },
     "download-indicator": {
-        "progress": "{{percentage}}% baixado"
+        "progress": "{{percentage}}% baixado",
+        "completed": "Download completo"
     },
     "edit-series-relation": {
         "description-part-1": "Não tem certeza de qual relacionamento adicionar? Veja nosso",
@@ -1419,7 +1408,8 @@
         "no-data": "Não há muita coisa acontecendo aqui",
         "left-to-process": "Restante para Processar: {{leftToProcess}} / {{totalToProcess}}",
         "download-in-queue": "{{num}} downloads na Fila",
-        "reading-now": "{{num}} lendo agora"
+        "reading-now": "{{num}} lendo agora",
+        "downloads-active": "{{count}} download(s) em andamento"
     },
     "shortcuts-modal": {
         "title": "Atalhos de Teclado",
@@ -1814,7 +1804,8 @@
         "size-label": "{{edit-chapter-modal.size-label}}",
         "id-label": "{{edit-chapter-modal.id-label}}",
         "files-label": "{{edit-chapter-modal.files-label}}",
-        "cover-image-description": "{{edit-series-modal.cover-image-description}}"
+        "cover-image-description": "{{edit-series-modal.cover-image-description}}",
+        "read-time-label": "{{edit-chapter-modal.read-time-label}}"
     },
     "day-breakdown": {
         "title": "Divisão por Dia",
@@ -1867,7 +1858,8 @@
         "vols-and-chapters": "{{volCount}} Volumes / {{chpCount}} Capítulos",
         "remove-from-want-to-read": "{{actionable.remove-from-want-to-read}}",
         "add-to-want-to-read": "{{actionable.add-to-want-to-read}}",
-        "provided-by-label": "Fornecido por"
+        "provided-by-label": "Fornecido por",
+        "story-and-art-label": "História & Arte"
     },
     "next-expected-card": {
         "title": "~{{date}}",
@@ -2208,7 +2200,11 @@
         "font-in-use": "Não foi possível excluir porque a fonte está em uso por um ou mais usuários.",
         "k+-resend-welcome-email-success": "Um e-mail foi enviado para o seu e-mail Kavita+",
         "confirm-delete-auth-key": "Tem certeza de que deseja excluir esta chave de autenticação?",
-        "profile-unauthorized": "Este usuário não está compartilhando seu perfil"
+        "profile-unauthorized": "Este usuário não está compartilhando seu perfil",
+        "confirm-delete-collection": "Você tem certeza de que quer deletar a coleção? Isso não pode ser desfeito.",
+        "confirm-delete-annotations": "Você tem certeza de que quer deletar as anotações? Isso não pode ser desfeito.",
+        "annotations-deleted": "Anotação excluída",
+        "redownload-confirm": "Você já baixou {{title}} em {{date}}. Quer baixar de novo?"
     },
     "read-time-pipe": {
         "less-than-hour": "<1 Hora",
@@ -2495,20 +2491,6 @@
         "installed": "{{changelog.installed}}",
         "feature-requests": "Solicitações de Recursos",
         "known-issues": "Problemas Conhecidos"
-    },
-    "new-version-modal": {
-        "title": "Kavita foi atualizado!",
-        "description": "Uma nova versão do Kavita está disponível. Baixe para atualizar.",
-        "added": "{{changelog.added}}",
-        "changed": "{{changelog.changed}}",
-        "fixed": "{{changelog.fixed}}",
-        "developer": "{{changelog.developer}}",
-        "theme": "{{changelog.theme}}",
-        "removed": "{{changelog.removed}}",
-        "api": "{{changelog.api}}",
-        "close": "{{common.close}}",
-        "refresh": "Atualizar",
-        "known-issues": "{{changelog.known-issues}}"
     },
     "manage-matched-metadata": {
         "title": "Metadados Correspondidos",
@@ -3410,5 +3392,81 @@
         "pages-count": "{{num}} páginas",
         "words-read-by-year-title": "Palavras lidas por ano",
         "words-count": "{{num}} palavras"
+    },
+    "version-update-modal": {
+        "close": "{{common.close}}",
+        "out-of-date": {
+            "title": "Não fique para trás!",
+            "subtitle": "Parece que sua instalação está mais de {{count}} versões atrasada!",
+            "description-1": "Considere atualizar para executar a versão mais recente do Kavita.",
+            "description-2": "Dê uma olhada em nosso <a href='https://wiki.kavitareader.com/guides/updating/' target='_blank' rel='noreferrer noopener'>wiki</a> para obter instruções sobre como atualizar.",
+            "description-3": "Se houver um motivo específico para você ainda não ter atualizado, adoraríamos saber o que o mantém em uma versão desatualizada! Visite nosso discord e conte-nos o que está bloqueando seu caminho de atualização."
+        },
+        "new-version": {
+            "title": "Kavita foi atualizado!",
+            "description": "Uma nova versão do Kavita está disponível. Baixe para atualizar.",
+            "refresh": "Atualizar"
+        },
+        "update-notification": {
+            "title": "Nova Atualização Disponível!",
+            "help": "Como Atualizar",
+            "download": "Baixar"
+        }
+    },
+    "title": {
+        "reading-list": "Listas de Leitura",
+        "home": "Pagina Inicial",
+        "bookmarks": "Marcadores",
+        "collections": "Coleções",
+        "browse-genres": "Navegar por Gêneros",
+        "browse-tags": "Navegar por Etiquetas",
+        "want-to-read": "Quero Ler",
+        "reading-lists": "Listas de Leitura",
+        "settings": "Configurações",
+        "all-series": "Todas as Séries",
+        "profile": "Perfil de {{username}}"
+    },
+    "download-queue-drawer": {
+        "title": "Downloads",
+        "cancel": "{{common.cancel}}",
+        "cancel-all": "Cancelar Tudo",
+        "retry": "Retentar",
+        "retry-all": "Retentar Todos",
+        "clear": "Limpar",
+        "empty": "Sem downloads",
+        "close": "{{common.close}}",
+        "paused-after-refresh": "{{ count }} item(ns) pausados — prontos para retomar",
+        "resume": "Resumir",
+        "pause": "Pausar",
+        "paused": "Pausado",
+        "clear-all": "Limpar Tudo",
+        "failed-from-auth": "Não Autenticado, atualizar navegador",
+        "failed-interrupted": "Interrompido pela atualização da página",
+        "tab-downloading": "Baixando",
+        "tab-completed": "Concluído",
+        "today": "Hoje",
+        "older": "Mais antigos",
+        "queued": "{{download-queue-status-pipe.queued}}",
+        "preparing": "{{download-queue-status-pipe.preparing}}",
+        "downloading": "{{download-queue-status-pipe.downloading}}",
+        "completed": "{{download-queue-status-pipe.completed}}",
+        "failed": "{{download-queue-status-pipe.failed}}",
+        "cancelled": "{{download-queue-status-pipe.cancelled}}"
+    },
+    "download-queue-item": {
+        "retry": "{{download-queue-drawer.retry}}",
+        "cancel": "{{common.cancel}}",
+        "remove": "Remover"
+    },
+    "download-queue-status-pipe": {
+        "queued": "Enfileirado",
+        "preparing": "Preparando",
+        "downloading": "Baixando",
+        "completed": "Concluído",
+        "failed": "Falhado",
+        "cancelled": "Cancelado"
+    },
+    "download-queue-widget": {
+        "title": "{{download-queue-drawer.title}}"
     }
 }

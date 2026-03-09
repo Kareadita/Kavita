@@ -1,10 +1,10 @@
 .stat-list-card {
   display: flex;
   background-color: var(--elevation-layer2-dark-solid);
-  border-radius: 8px;
+  border-radius: 0.5rem;
   overflow: hidden;
   min-width: 0; // Allow flexbox to shrink
-  height: 305px;
+  height: 19.0625rem;
   width: 100%;
 
   // Remove featured image on mobile, show on md+
@@ -20,16 +20,16 @@
 
 .featured-image {
   position: relative;
-  flex: 0 0 180px; // Slightly smaller default
+  flex: 0 0 11.25rem; // Slightly smaller default
   background-color: var(--elevation-layer2-dark-solid);
 
   // Scale up on larger screens
   @media (min-width: 992px) {
-    flex: 0 0 200px;
+    flex: 0 0 12.5rem;
   }
 
   @media (min-width: 1200px) {
-    flex: 0 0 230px;
+    flex: 0 0 14.375rem;
   }
 
   app-image {
@@ -78,7 +78,7 @@
   font-weight: 600;
   text-transform: uppercase;
   font-size: 0.85rem;
-  letter-spacing: 0.5px;
+  letter-spacing: 0.0312rem;
   color: var(--body-text-color);
 
   // Truncate long titles on small screens
@@ -91,7 +91,7 @@
 .stat-list-label {
   font-size: 0.75rem;
   text-transform: uppercase;
-  letter-spacing: 0.5px;
+  letter-spacing: 0.0312rem;
   color: var(--text-muted-color);
   flex-shrink: 0; // Keep label visible
 }
@@ -112,9 +112,9 @@
   }
 
   &:focus-visible {
-    outline: 2px solid var(--primary-color);
-    outline-offset: 2px;
-    border-radius: 2px;
+    outline: 0.125rem solid var(--primary-color);
+    outline-offset: 0.125rem;
+    border-radius: 0.125rem;
   }
 }
 
@@ -158,9 +158,9 @@
 }
 
 .accent-bar {
-  width: 3px;
+  width: 0.1875rem;
   height: 1.25rem;
-  border-radius: 2px;
+  border-radius: 0.125rem;
   background-color: var(--elevation-layer6);
   flex-shrink: 0;
 }
@@ -197,9 +197,9 @@
   }
 
   &:focus-visible {
-    outline: 2px solid var(--primary-color);
-    outline-offset: 2px;
-    border-radius: 2px;
+    outline: 0.125rem solid var(--primary-color);
+    outline-offset: 0.125rem;
+    border-radius: 0.125rem;
   }
 }
 
@@ -217,9 +217,9 @@
   }
 
   &:focus-visible {
-    outline: 2px solid var(--primary-color);
-    outline-offset: 2px;
-    border-radius: 2px;
+    outline: 0.125rem solid var(--primary-color);
+    outline-offset: 0.125rem;
+    border-radius: 0.125rem;
   }
 
   .item-name {

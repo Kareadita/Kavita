@@ -1,7 +1,7 @@
 
 <app-user-scrobble-history />
 
-@if(accountService.isAdmin$ | async) {
+@if(accountService.hasAdminRole()) {
   <div class="setting-section-break"></div>
   <div class="mt-4">
     <app-manage-scrobble-errors (scrobbleCount)="updateScrobbleErrorCount($event)" />

@@ -79,7 +79,7 @@
       --bs-btn-active-color: #fff;
       --bs-btn-active-bg: #6c757d;
       --bs-btn-active-border-color: #6c757d;
-      --bs-btn-active-shadow: inset 0 3px 5px rgba(0, 0, 0, 0.125);
+      --bs-btn-active-shadow: inset 0 0.1875rem 0.3125rem rgba(0, 0, 0, 0.125);
       --bs-btn-disabled-color: #6c757d;
       --bs-btn-disabled-bg: transparent;
       --bs-btn-disabled-border-color: #6c757d;
@@ -111,7 +111,7 @@
     color: var(--btn-secondary-outline-hover-text-color);
     background-color: var(--btn-secondary-outline-hover-bg-color);
     border-color: var(--btn-secondary-outline-hover-border-color);
-    box-shadow: inset 0px -2px 0px 0px var(--btn-secondary-outline-text-color);
+    box-shadow: inset 0 -0.125rem 0 0 var(--btn-secondary-outline-text-color);
     border-bottom-left-radius: 0;
     border-bottom-right-radius: 0;
 

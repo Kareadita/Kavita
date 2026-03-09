@@ -319,9 +319,6 @@
         "create": "{{common.create}}",
         "title": "Tüm Akıllı Filtreler"
     },
-    "out-of-date-modal": {
-        "close": "{{common.close}}"
-    },
     "invite-user": {
         "close": "{{common.close}}",
         "email": "{{common.email}}",
@@ -482,12 +479,6 @@
         "kavita-rating-title": "Puanınız",
         "critic": "{{review-card.critic}}"
     },
-    "update-notification-modal": {
-        "close": "{{common.close}}",
-        "download": "İndir",
-        "title": "Yeni Güncelleme Mevcut!",
-        "help": "Nasıl Güncellenir"
-    },
     "side-nav-companion-bar": {
         "page-settings-title": "{{series-detail.page-settings-title}}",
         "filter-and-sort-alt": "Sırala / Filtrele"
@@ -498,7 +489,7 @@
         "customize": "{{settings.customize}}",
         "back": "Geri",
         "home": "Ana Sayfa",
-        "collections": "Koleksiyonlar",
+        "collections": "Derlemler",
         "reading-lists": "Okuma Listeleri",
         "edit": "{{common.edit}}",
         "all-series": "Tüm Seriler",
@@ -802,7 +793,7 @@
     },
     "all-collections": {
         "item-count": "{{common.item-count}}",
-        "title": "Koleksiyonlar",
+        "title": "Derlemler",
         "create-one-part-2": "bir"
     },
     "reading-lists": {
@@ -864,7 +855,7 @@
         "close": "{{common.close}}",
         "loading": "{{common.loading}}",
         "tags": "Etiketler",
-        "collections": "Koleksiyonlar",
+        "collections": "Derlemler",
         "chapters": "Bölümler",
         "annotations": "{{tabs.annotations-tab}}",
         "files": "Dosyalar",
@@ -932,7 +923,8 @@
         "off": "{{reader-settings.off}}",
         "left-to-right-alt": "Soldan Sağa",
         "right-to-left-alt": "Sağdan Sola",
-        "fullscreen": "Tam Ekran"
+        "fullscreen": "Tam Ekran",
+        "bookmarks-title": "Yer imleri"
     },
     "metadata-filter": {
         "filter-title": "{{common.filter}}",
@@ -944,7 +936,7 @@
         "age-rating-label": "{{metadata-fields.age-rating-title}}",
         "language-label": "{{metadata-fields.language-title}}",
         "character-label": "Karakter",
-        "collections-label": "Koleksiyonlar",
+        "collections-label": "Derlemler",
         "ascending-alt": "Artan",
         "descending-alt": "Azalan",
         "read": "Oku",
@@ -1212,7 +1204,7 @@
         "libraries": "{{common.libraries}}",
         "penciller": "Çizer",
         "inker": "Mürekkepçi",
-        "want-to-read": "Okumak İstiyorum",
+        "want-to-read": "Okuyacaklarım",
         "user-rating": "Kullanıcı Puanı",
         "read-date": "Okuma Tarihi",
         "read-progress": "Okunma İlerlemesi",
@@ -1637,19 +1629,6 @@
         "feature-requests": "Özellik Talepleri",
         "installed": "{{changelog.installed}}"
     },
-    "new-version-modal": {
-        "refresh": "Tazele",
-        "title": "Kavita güncellendi!",
-        "added": "{{changelog.added}}",
-        "changed": "{{changelog.changed}}",
-        "fixed": "{{changelog.fixed}}",
-        "developer": "{{changelog.developer}}",
-        "theme": "{{changelog.theme}}",
-        "removed": "{{changelog.removed}}",
-        "known-issues": "{{changelog.known-issues}}",
-        "api": "{{changelog.api}}",
-        "close": "{{common.close}}"
-    },
     "manage-matched-metadata": {
         "library-name-header": "Kütüphane",
         "series-name-header": "Seriler",
@@ -1727,7 +1706,9 @@
         "page-num-label": "{{book-reader.page-num-label}}",
         "text-header": "Metin",
         "no-data": "{{common.no-data}}",
-        "image-header": "Resim"
+        "image-header": "Resim",
+        "title": "Yer imleri",
+        "close": "{{common.close}}"
     },
     "pdf-scroll-mode-pipe": {
         "vertical": "Dikey",
@@ -2203,5 +2184,29 @@
         "title": "{{personName}}",
         "close": "{{common.close}}",
         "save": "{{common.save}}"
+    },
+    "version-update-modal": {
+        "close": "{{common.close}}",
+        "new-version": {
+            "title": "Kavita güncellendi!",
+            "refresh": "Tazele"
+        },
+        "update-notification": {
+            "download": "İndir",
+            "title": "Yeni Güncelleme Mevcut!",
+            "help": "Nasıl Güncellenir"
+        }
+    },
+    "title": {
+        "collections": "Derlemler",
+        "reading-list": "Okuma Listeleri",
+        "reading-lists": "Okuma Listeleri",
+        "settings": "Ayarlar",
+        "all-series": "Tüm Seriler",
+        "profile": "{{username}}'in profili",
+        "home": "Ana sayfa",
+        "bookmarks": "Yer imleri",
+        "browse-tags": "Etiketlere gözat",
+        "want-to-read": "Okuyacaklarım"
     }
 }

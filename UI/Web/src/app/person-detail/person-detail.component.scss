@@ -1,18 +1,18 @@
 .main-container {
-  margin-top: 10px;
-  padding: 0 0 0 10px;
+  margin-top: 0.625rem;
+  padding: 0 0 0 0.625rem;
 
   .person-badge {
     background: var(--card-bg-color);
-    max-height: 200px;
-    height: 200px;
-    width: 200px;
+    max-height: 12.5rem;
+    height: 12.5rem;
+    width: 12.5rem;
     border-radius: 50%;
     overflow: hidden;
 
     i {
-      max-height: 128px;
-      height: 128px;
+      max-height: 8rem;
+      height: 8rem;
       font-size: 8rem;
     }
   }

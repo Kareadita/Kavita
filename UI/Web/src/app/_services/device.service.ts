@@ -1,6 +1,6 @@
 import {HttpClient} from '@angular/common/http';
-import {inject, Injectable} from '@angular/core';
-import {ReplaySubject, shareReplay, tap} from 'rxjs';
+import {DestroyRef, inject, Injectable, signal} from '@angular/core';
+import {EMPTY, switchMap, tap} from 'rxjs';
 import {environment} from 'src/environments/environment';
 import {Device} from '../_models/device/device';
 import {DevicePlatform} from '../_models/device/device-platform';
@@ -8,35 +8,41 @@ import {TextResonse} from '../_types/text-response';
 import {AccountService} from './account.service';
 import {ClientDevice} from "../_models/client-device";
 import {map} from "rxjs/operators";
-import {toSignal} from "@angular/core/rxjs-interop";
+import {takeUntilDestroyed, toObservable} from "@angular/core/rxjs-interop";
 
 @Injectable({
   providedIn: 'root'
 })
 export class DeviceService {
-  private httpClient = inject(HttpClient);
-  private accountService = inject(AccountService);
+  private readonly httpClient = inject(HttpClient);
+  private readonly accountService = inject(AccountService);
+  private readonly destroyRef = inject(DestroyRef);
 
 
-  baseUrl = environment.apiUrl;
+  readonly baseUrl = environment.apiUrl;
 
-  private readonly devicesSource: ReplaySubject<Device[]> = new ReplaySubject<Device[]>(1);
-  public readonly devices$ = this.devicesSource.asObservable().pipe(shareReplay());
-  public readonly devicesSignal = toSignal(this.devices$, { initialValue: [] });
+
+
+  private readonly _devices = signal<Device[]>([]);
+  public readonly devices = this._devices.asReadonly();
+  public readonly devices$ = toObservable(this.devices);
 
 
 
   constructor() {
-    // Ensure we are authenticated before we make an authenticated api call.
-    this.accountService.currentUser$.subscribe(user => {
-      if (!user) {
-        this.devicesSource.next([]);
-        return;
-      }
 
-      this.httpClient.get<Device[]>(this.baseUrl + 'device', {}).subscribe(data => {
-        this.devicesSource.next(data);
-      });
+    // Ensure we are authenticated before we make an authenticated api call.
+    toObservable(this.accountService.currentUser).pipe(
+      switchMap(user => {
+        if (!user) {
+          this._devices.set([]);
+          return EMPTY;
+        }
+        return this.httpClient.get<Device[]>(this.baseUrl + 'device');
+      }),
+      takeUntilDestroyed(this.destroyRef)
+    ).subscribe(data => {
+      if (data) this._devices.set([...data])
     });
   }
 
@@ -54,7 +60,7 @@ export class DeviceService {
 
   getEmailDevices() {
     return this.httpClient.get<Device[]>(this.baseUrl + 'device', {}).pipe(tap(data => {
-      this.devicesSource.next(data);
+      this._devices.set([...data]);
     }));
   }
 

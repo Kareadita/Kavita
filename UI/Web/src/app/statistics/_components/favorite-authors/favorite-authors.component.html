@@ -14,7 +14,7 @@
     }
 
 
-    @for (fAuthor of favAuthors; track fAuthor.authorName + $index) {
+    @for (fAuthor of favAuthors; track fAuthor.authorName + fAuthor.authorId) {
       <div class="row mb-4 align-items-start">
 
         <div class="col-12 col-md-4 d-flex flex-row align-items-center text-center">

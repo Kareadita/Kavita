@@ -72,7 +72,7 @@
                 <div class="ms-2">{{ an.createdUtc | utcToLocalDate | date: 'shortDate' }}</div>
               </div>
 
-              @if (an.ownerUsername === accountService.currentUserSignal()?.username) {
+              @if (an.ownerUsername === accountService.currentUser()?.username) {
                 <button class="btn btn-primary" (click)="switchToEditMode()">{{t('edit')}}</button>
                 <button class="btn btn-danger" (click)="delete()">{{t('delete')}}</button>
               }
@@ -100,7 +100,7 @@
     @if (annotation() && formGroup) {
       <form [formGroup]="formGroup" novalidate>
         <div class="d-flex justify-content-center">
-          <blockquote class="text-muted pb-2 small fw-lighter mx-3 mx-md-4 mx-lg-5" style="max-width: 800px; width: 100%;">
+          <blockquote class="text-muted pb-2 small fw-lighter mx-3 mx-md-4 mx-lg-5" style="max-width: 50rem; width: 100%;">
             <div id="render-target" #renderTarget>
               <p class="content-quote mb-0" [innerHTML]="totalText()"></p>
             </div>

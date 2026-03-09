@@ -3,7 +3,7 @@
     background-color: rgba(0,0,0,0.5);
 }
 .active {
-    border: 2px solid red;
+    border: 0.125rem solid red;
 }
 
 .full-opacity {
@@ -12,7 +12,7 @@
 
 .spacer {
     width: 100%;
-    height: 300px;
+    height: 18.75rem;
     cursor: pointer;
 
     .animate {
@@ -25,7 +25,7 @@
     }
 
   .empty-space {
-    height: 200px;
+    height: 12.5rem;
   }
 }
 
@@ -47,7 +47,7 @@ img, .full-width {
       transform: translateY(0);
     }
     50% {
-      transform: translateY(-10px);
+      transform: translateY(-0.625rem);
     }
 }
 
