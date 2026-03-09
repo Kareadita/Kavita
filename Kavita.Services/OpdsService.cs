@@ -10,6 +10,7 @@ using Kavita.API.Database;
 using Kavita.API.Errors;
 using Kavita.API.Services;
 using Kavita.API.Services.Reading;
+using Kavita.API.Services.ReadingLists;
 using Kavita.Common.Helpers;
 using Kavita.Models.DTOs;
 using Kavita.Models.DTOs.Filtering;

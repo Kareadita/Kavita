@@ -7,6 +7,7 @@ using Kavita.API.Database;
 using Kavita.API.Services;
 using Kavita.API.Services.Metadata;
 using Kavita.API.Services.Reading;
+using Kavita.API.Services.ReadingLists;
 using Kavita.Models.Constants;
 using Kavita.Models.Entities.Enums;
 using Kavita.Models.Extensions;

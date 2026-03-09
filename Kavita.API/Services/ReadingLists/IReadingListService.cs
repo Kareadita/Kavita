@@ -7,7 +7,7 @@ using Kavita.Models.Entities;
 using Kavita.Models.Entities.Enums;
 using Kavita.Models.Entities.User;
 
-namespace Kavita.API.Services.Reading;
+namespace Kavita.API.Services.ReadingLists;
 
 public interface IReadingListService
 {
@@ -19,8 +19,7 @@ public interface IReadingListService
     Task<AppUser?> UserHasReadingListAccess(int readingListId, string username);
     Task<bool> DeleteReadingList(int readingListId, AppUser user);
     Task CalculateReadingListAgeRating(ReadingList readingList);
-    Task<bool> AddChaptersToReadingList(int seriesId, IList<int> chapterIds,
-        ReadingList readingList);
+    Task<bool> AddChaptersToReadingList(int seriesId, IList<int> chapterIds, ReadingList readingList);
 
     Task<CblImportSummaryDto> ValidateCblFile(int userId, CblReadingList cblReading, bool useComicLibraryMatching = false);
     Task<CblImportSummaryDto> CreateReadingListFromCbl(int userId, CblReadingList cblReading, bool dryRun = false, bool useComicLibraryMatching = false);
