@@ -51,7 +51,7 @@ export class ReviewsComponent {
         chapterId: this.chapter()?.id,
         tagline: '',
         body: ''
-      });
+      } as any as UserReview);
     }
 
     modalRef.closed.subscribe((closeResult) => {

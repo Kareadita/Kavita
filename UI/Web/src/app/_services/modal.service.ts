@@ -1,8 +1,14 @@
-import {ComponentRef, inject, Injectable, Type} from '@angular/core';
+import {ComponentRef, inject, Injectable, InputSignal, ModelSignal, Type, WritableSignal} from '@angular/core';
 import {NgbModal, NgbModalOptions, NgbModalRef} from '@ng-bootstrap/ng-bootstrap';
 
+export type UnwrapSignal<T> =
+  T extends ModelSignal<infer R> ? R :
+  T extends InputSignal<infer R> ? R :
+  T extends WritableSignal<infer R> ? R :
+  T;
+
 export interface TypedModalRef<C> extends NgbModalRef {
-  setInput<K extends string>(key: K, value: unknown): void;
+  setInput<K extends keyof C>(key: K, value: UnwrapSignal<C[K]>): void;
 }
 
 @Injectable({
@@ -17,9 +23,12 @@ export class ModalService {
   open<C>(content: Type<C>, options?: NgbModalOptions): TypedModalRef<C> {
     const ref = this.modal.open(content, options) as TypedModalRef<C>;
 
-    ref.setInput = (key: string, value: unknown) => {
-      const componentRef: ComponentRef<C> = (ref as any)['_contentRef'].componentRef;
-      componentRef.setInput(key, value);
+    ref.setInput = <K extends keyof C>(key: K, value: UnwrapSignal<C[K]>) => {
+      const componentRef: ComponentRef<C> = (ref as any)['_contentRef']?.componentRef;
+
+      if (componentRef) {
+        componentRef.setInput(key as string, value);
+      }
     };
 
     return ref;

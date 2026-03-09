@@ -101,7 +101,7 @@ export class ActionService {
   private readonly sideNavService = inject(NavService);
   private readonly filterService = inject(FilterService);
 
-  private readingListModalRef: TypedModalRef<ListSelectModalComponent<ReadingList>> | null = null;
+  private readingListModalRef: TypedModalRef<BulkSetReadingProfileModalComponent> |  TypedModalRef<ListSelectModalComponent<ReadingList>> | null = null;
   private collectionModalRef: TypedModalRef<ListSelectModalComponent<UserCollection>> | null = null;
 
 
@@ -899,7 +899,7 @@ export class ActionService {
 
       case Action.AddToReadingList: {
         if (this.readingListModalRef != null) return EMPTY;
-        const rlRef = this.modalService.open(ListSelectModalComponent, addToModal()) as TypedModalRef<ListSelectModalComponent<ReadingList>>;
+        const rlRef = this.modalService.open(ListSelectModalComponent<ReadingList>, addToModal());
         this.readingListModalRef = rlRef;
 
         const bulkSeriesIds = series.map(s => s.id);

@@ -40,6 +40,7 @@ export class ReviewCardComponent {
       ref = this.modalService.open(ReviewCardModalComponent);
     }
 
+    // @ts-ignore, TS isn't smart enough to merge the inputs and doesn't understand this works
     ref.setInput('review', this.review());
     ref.closed.subscribe((res: ReviewModalCloseEvent | undefined) => {
       if (res) {
