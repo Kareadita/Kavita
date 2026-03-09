@@ -52,7 +52,7 @@ public class AccountController(UserManager<AppUser> userManager,
     IEmailService emailService, IEventHub eventHub,
     ILocalizationService localizationService,
     IAuthenticationSchemeProvider authenticationSchemeProvider,
-    IAuthKeyService authKeyService) : BaseApiController
+    IAuthKeyService authKeyService, IOidcService oidcService) : BaseApiController
 {
     // Hardcoded to avoid localization multiple enumeration: https://github.com/Kareadita/Kavita/issues/2829
     private const string BadCredentialsMessage = "Your credentials are not correct";
@@ -69,6 +69,25 @@ public class AccountController(UserManager<AppUser> userManager,
     {
         var oidcScheme = await authenticationSchemeProvider.GetSchemeAsync(IdentityServiceExtensions.OpenIdConnect);
         return Ok(oidcScheme != null && HttpContext.Request.Cookies.ContainsKey(OidcService.CookieName));
+    }
+
+    /// <summary>
+    /// Remove the OIDC link for the authenticated user. This action will also remove the authentication cookie.
+    /// The caller should take note and redirect to login if no other authentication is currently present (I.e. JWT)
+    /// </summary>
+    /// <returns></returns>
+    [HttpPost("clear-oidc-link")]
+    public async Task<IActionResult> ClearOidcLink()
+    {
+        await oidcService.ClearOidcIdForUser(UserId, HttpContext.RequestAborted);
+
+        // OIDC is no longer connected, remove cookie
+        if (HttpContext.Request.Cookies.ContainsKey(OidcService.CookieName))
+        {
+            HttpContext.Response.Cookies.Delete(OidcService.CookieName);
+        }
+
+        return Ok();
     }
 
     /// <summary>

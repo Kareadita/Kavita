@@ -3610,6 +3610,13 @@
         "desktop": "Desktop"
     },
 
+    "account-settings": {
+        "oidc": "{{login.oidc}}",
+        "unlink-oidc": "Remove OIDC link",
+        "confirm-unlink": "Are you sure you want to remove your OIDC link?",
+        "confirm-unlink-extra": "If you are currently authenticated with the OIDC account, you will be logged out. You can link again on email at any time."
+    },
+
     "manage-reading-profiles": {
         "description": "Not all your series may be read in the same way, set up distinct reading profiles per library/series/device to make getting back in your series as seamless as possible.",
         "extra-tip": "Assign reading profiles via the action menu on series and libraries, or in bulk. When changing settings in a reader, a hidden profile is created that remembers your choices for that series (not for pdfs). This profile is removed when you assign one of your own reading profiles to the series. More information can be found on the",
