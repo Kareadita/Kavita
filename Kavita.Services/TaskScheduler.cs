@@ -221,7 +221,7 @@ public class TaskScheduler : ITaskScheduler
             service => service.AggregateYesterdaysActivity(CancellationToken.None),
             "5 0 * * *", RecurringJobOptions); // 12:05 AM daily
 
-        await ScheduleKavitaPlusTasks(cancellationToken);
+        BackgroundJob.Enqueue(() => ScheduleKavitaPlusTasks(CancellationToken.None));
     }
 
     private static bool IsInvalidCronSetting(string setting)
@@ -233,7 +233,7 @@ public class TaskScheduler : ITaskScheduler
     {
         // KavitaPlus based (needs license check)
         var license = (await _unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.LicenseKey, cancellationToken)).Value;
-        if (string.IsNullOrEmpty(license) || !await _licenseService.HasActiveSubscription(license, cancellationToken)) // TODO: Need to convert this to a non-blocking request
+        if (string.IsNullOrEmpty(license) || !await _licenseService.HasActiveSubscription(license, cancellationToken))
         {
             return;
         }

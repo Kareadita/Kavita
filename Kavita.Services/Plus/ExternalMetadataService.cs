@@ -384,7 +384,7 @@ public class ExternalMetadataService : IExternalMetadataService
             }
             catch (FlurlHttpException ex)
             {
-                var errorMessage = await ex.GetResponseStringAsync();
+                var errorMessage = await ex.GetResponseStringAsync() ?? string.Empty;
                 // Trim quotes if the response is a JSON string
                 errorMessage = errorMessage.Trim('"');
 
