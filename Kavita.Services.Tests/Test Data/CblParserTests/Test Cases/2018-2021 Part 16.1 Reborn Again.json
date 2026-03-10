@@ -1,0 +1,1052 @@
+{
+  "fileDetails": {
+    "UUID": "a59e4ad5-0d51-4afe-b0f5-6d3e01eb7cc7",
+    "version": 1.0
+  },
+  "listDetails": {
+    "name": "Part 16.1 Reborn Again",
+    "startYear": 2021,
+    "endYear": 2022,
+    "publisher": "Marvel",
+    "type": "universal",
+    "tags": ["avengers", "marvel guides", "fresh start"],
+    "relationships": [
+      {
+        "name": "Part 15.4 Trial by Fire",
+        "UUID": "e1eecedf-df97-4ab4-a476-ee85204e3b78",
+        "relationship": "previous"
+      },
+      {
+        "name": "Part 16.2 Sinister War",
+        "UUID": "507e7444-8f5f-46fc-a2cc-17f08c000982",
+        "relationship": "following"
+      }
+    ],
+    "source": [
+      {
+        "name": "Marvel Guides",
+        "url": "https://marvelguides.com/fresh-start-finale-reading-order"
+      }
+    ]
+  },
+  "issueList": [
+    {
+      "seriesName": "Heroes Reborn",
+      "seriesStartYear": 2021,
+      "issueNumber": "1",
+      "issueCoverDate": "2021-07-01",
+      "id": [
+        {
+          "name": "comicvine",
+          "series": "135903",
+          "issue": "847511"
+        },
+        {
+          "name": "metron",
+          "series": "2139",
+          "issue": "29926"
+        }
+      ]
+    },
+    {
+      "seriesName": "Heroes Reborn: Hyperion & the Imperial Guard",
+      "seriesStartYear": 2021,
+      "issueNumber": "1",
+      "issueCoverDate": "2021-07-01",
+      "id": [
+        {
+          "name": "comicvine",
+          "series": "136023",
+          "issue": "848853"
+        },
+        {
+          "name": "metron",
+          "series": "2176",
+          "issue": "30391"
+        }
+      ]
+    },
+    {
+      "seriesName": "Heroes Reborn",
+      "seriesStartYear": 2021,
+      "issueNumber": "2",
+      "issueCoverDate": "2021-07-01",
+      "id": [
+        {
+          "name": "comicvine",
+          "series": "135903",
+          "issue": "848852"
+        },
+        {
+          "name": "metron",
+          "series": "2139",
+          "issue": "30381"
+        }
+      ]
+    },
+    {
+      "seriesName": "Heroes Reborn: Peter Parker, The Amazing Shutterbug",
+      "seriesStartYear": 2021,
+      "issueNumber": "1",
+      "issueCoverDate": "2021-07-01",
+      "id": [
+        {
+          "name": "comicvine",
+          "series": "136024",
+          "issue": "848854"
+        },
+        {
+          "name": "metron",
+          "series": "2175",
+          "issue": "30390"
+        }
+      ]
+    },
+    {
+      "seriesName": "Heroes Reborn",
+      "seriesStartYear": 2021,
+      "issueNumber": "3",
+      "issueCoverDate": "2021-07-01",
+      "id": [
+        {
+          "name": "comicvine",
+          "series": "135903",
+          "issue": "851308"
+        },
+        {
+          "name": "metron",
+          "series": "2139",
+          "issue": "30658"
+        }
+      ]
+    },
+    {
+      "seriesName": "Heroes Reborn: Magneto & the Mutant Force",
+      "seriesStartYear": 2021,
+      "issueNumber": "1",
+      "issueCoverDate": "2021-07-01",
+      "id": [
+        {
+          "name": "comicvine",
+          "series": "136388",
+          "issue": "855617"
+        },
+        {
+          "name": "metron",
+          "series": "2224",
+          "issue": "31011"
+        }
+      ]
+    },
+    {
+      "seriesName": "Heroes Reborn",
+      "seriesStartYear": 2021,
+      "issueNumber": "4",
+      "issueCoverDate": "2021-07-01",
+      "id": [
+        {
+          "name": "comicvine",
+          "series": "135903",
+          "issue": "855615"
+        },
+        {
+          "name": "metron",
+          "series": "2139",
+          "issue": "31074"
+        }
+      ]
+    },
+    {
+      "seriesName": "Heroes Reborn: Marvel Double Action",
+      "seriesStartYear": 2021,
+      "issueNumber": "1",
+      "issueCoverDate": "2021-08-01",
+      "id": [
+        {
+          "name": "comicvine",
+          "series": "136619",
+          "issue": "857653"
+        },
+        {
+          "name": "metron",
+          "series": "2231",
+          "issue": "31285"
+        }
+      ]
+    },
+    {
+      "seriesName": "Heroes Reborn: Young Squadron",
+      "seriesStartYear": 2021,
+      "issueNumber": "1",
+      "issueCoverDate": "2021-07-01",
+      "id": [
+        {
+          "name": "comicvine",
+          "series": "136390",
+          "issue": "855621"
+        },
+        {
+          "name": "metron",
+          "series": "2225",
+          "issue": "31009"
+        }
+      ]
+    },
+    {
+      "seriesName": "Heroes Reborn: Siege Society",
+      "seriesStartYear": 2021,
+      "issueNumber": "1",
+      "issueCoverDate": "2021-07-01",
+      "id": [
+        {
+          "name": "comicvine",
+          "series": "136389",
+          "issue": "855618"
+        },
+        {
+          "name": "metron",
+          "series": "2226",
+          "issue": "31008"
+        }
+      ]
+    },
+    {
+      "seriesName": "Heroes Reborn: Night-Gwen",
+      "seriesStartYear": 2021,
+      "issueNumber": "1",
+      "issueCoverDate": "2021-08-01",
+      "id": [
+        {
+          "name": "comicvine",
+          "series": "136813",
+          "issue": "858876"
+        },
+        {
+          "name": "metron",
+          "series": "2278",
+          "issue": "31666"
+        }
+      ]
+    },
+    {
+      "seriesName": "Heroes Reborn: American Knights",
+      "seriesStartYear": 2021,
+      "issueNumber": "1",
+      "issueCoverDate": "2021-08-01",
+      "id": [
+        {
+          "name": "comicvine",
+          "series": "136618",
+          "issue": "857652"
+        },
+        {
+          "name": "metron",
+          "series": "2230",
+          "issue": "31284"
+        }
+      ]
+    },
+    {
+      "seriesName": "Heroes Reborn",
+      "seriesStartYear": 2021,
+      "issueNumber": "5",
+      "issueCoverDate": "2021-08-01",
+      "id": [
+        {
+          "name": "comicvine",
+          "series": "135903",
+          "issue": "857651"
+        },
+        {
+          "name": "metron",
+          "series": "2139",
+          "issue": "31273"
+        }
+      ]
+    },
+    {
+      "seriesName": "Heroes Reborn: Squadron Savage",
+      "seriesStartYear": 2021,
+      "issueNumber": "1",
+      "issueCoverDate": "2021-08-01",
+      "id": [
+        {
+          "name": "comicvine",
+          "series": "136814",
+          "issue": "858877"
+        },
+        {
+          "name": "metron",
+          "series": "2279",
+          "issue": "31667"
+        }
+      ]
+    },
+    {
+      "seriesName": "Heroes Reborn: Weapon X & Final Flight",
+      "seriesStartYear": 2021,
+      "issueNumber": "1",
+      "issueCoverDate": "2021-08-01",
+      "id": [
+        {
+          "name": "comicvine",
+          "series": "136946",
+          "issue": "861677"
+        },
+        {
+          "name": "metron",
+          "series": "2314",
+          "issue": "32144"
+        }
+      ]
+    },
+    {
+      "seriesName": "Heroes Reborn",
+      "seriesStartYear": 2021,
+      "issueNumber": "6",
+      "issueCoverDate": "2021-08-01",
+      "id": [
+        {
+          "name": "comicvine",
+          "series": "135903",
+          "issue": "858875"
+        },
+        {
+          "name": "metron",
+          "series": "2139",
+          "issue": "31656"
+        }
+      ]
+    },
+    {
+      "seriesName": "Heroes Reborn",
+      "seriesStartYear": 2021,
+      "issueNumber": "7",
+      "issueCoverDate": "2021-08-01",
+      "id": [
+        {
+          "name": "comicvine",
+          "series": "135903",
+          "issue": "861676"
+        },
+        {
+          "name": "metron",
+          "series": "2139",
+          "issue": "32136"
+        }
+      ]
+    },
+    {
+      "seriesName": "Heroes Return",
+      "seriesStartYear": 2021,
+      "issueNumber": "1",
+      "issueCoverDate": "2021-08-01",
+      "id": [
+        {
+          "name": "comicvine",
+          "series": "137049",
+          "issue": "863929"
+        },
+        {
+          "name": "metron",
+          "series": "2335",
+          "issue": "32504"
+        }
+      ]
+    },
+    {
+      "seriesName": "Thor Annual",
+      "seriesStartYear": 2021,
+      "issueNumber": "1",
+      "issueCoverDate": "2021-09-01",
+      "id": [
+        {
+          "name": "comicvine",
+          "series": "137700",
+          "issue": "872888"
+        },
+        {
+          "name": "metron",
+          "series": "2482",
+          "issue": "34189"
+        }
+      ]
+    },
+    {
+      "seriesName": "Guardians of the Galaxy Annual",
+      "seriesStartYear": 2021,
+      "issueNumber": "1",
+      "issueCoverDate": "2021-10-01",
+      "id": [
+        {
+          "name": "comicvine",
+          "series": "138051",
+          "issue": "877064"
+        },
+        {
+          "name": "metron",
+          "series": "2502",
+          "issue": "35353"
+        }
+      ]
+    },
+    {
+      "seriesName": "Miles Morales: Spider-Man Annual",
+      "seriesStartYear": 2021,
+      "issueNumber": "1",
+      "issueCoverDate": "2021-10-01",
+      "id": [
+        {
+          "name": "comicvine",
+          "series": "138346",
+          "issue": "880931"
+        },
+        {
+          "name": "metron",
+          "series": "2566",
+          "issue": "36477"
+        }
+      ]
+    },
+    {
+      "seriesName": "Avengers Annual",
+      "seriesStartYear": 2021,
+      "issueNumber": "1",
+      "issueCoverDate": "2021-10-01",
+      "id": [
+        {
+          "name": "comicvine",
+          "series": "138528",
+          "issue": "882057"
+        },
+        {
+          "name": "metron",
+          "series": "2597",
+          "issue": "36817"
+        }
+      ]
+    },
+    {
+      "seriesName": "Black Cat",
+      "seriesStartYear": 2020,
+      "issueNumber": "8",
+      "issueCoverDate": "2021-09-01",
+      "id": [
+        {
+          "name": "comicvine",
+          "series": "132631",
+          "issue": "874551"
+        }
+      ]
+    },
+    {
+      "seriesName": "Black Cat",
+      "seriesStartYear": 2020,
+      "issueNumber": "9",
+      "issueCoverDate": "2021-10-01",
+      "id": [
+        {
+          "name": "comicvine",
+          "series": "132631",
+          "issue": "880919"
+        }
+      ]
+    },
+    {
+      "seriesName": "Black Cat",
+      "seriesStartYear": 2020,
+      "issueNumber": "10",
+      "issueCoverDate": "2021-11-01",
+      "id": [
+        {
+          "name": "comicvine",
+          "series": "132631",
+          "issue": "886958"
+        }
+      ]
+    },
+    {
+      "seriesName": "Giant-Sized Black Cat: Infinity Score",
+      "seriesStartYear": 2021,
+      "issueNumber": "1",
+      "id": [
+        {
+          "name": "comicvine",
+          "series": "140355",
+          "issue": "897333"
+        }
+      ]
+    },
+    {
+      "seriesName": "Thor",
+      "seriesStartYear": 2020,
+      "issueNumber": "15",
+      "issueCoverDate": "2021-09-01",
+      "id": [
+        {
+          "name": "comicvine",
+          "series": "123862",
+          "issue": "871610"
+        },
+        {
+          "name": "metron",
+          "series": "949",
+          "issue": "33813"
+        }
+      ]
+    },
+    {
+      "seriesName": "Thor",
+      "seriesStartYear": 2020,
+      "issueNumber": "16",
+      "issueCoverDate": "2021-10-01",
+      "id": [
+        {
+          "name": "comicvine",
+          "series": "123862",
+          "issue": "882080"
+        },
+        {
+          "name": "metron",
+          "series": "949",
+          "issue": "36813"
+        }
+      ]
+    },
+    {
+      "seriesName": "Thor",
+      "seriesStartYear": 2020,
+      "issueNumber": "17",
+      "issueCoverDate": "2021-11-01",
+      "id": [
+        {
+          "name": "comicvine",
+          "series": "123862",
+          "issue": "886976"
+        },
+        {
+          "name": "metron",
+          "series": "949",
+          "issue": "38591"
+        }
+      ]
+    },
+    {
+      "seriesName": "Thor",
+      "seriesStartYear": 2020,
+      "issueNumber": "18",
+      "issueCoverDate": "2021-12-01",
+      "id": [
+        {
+          "name": "comicvine",
+          "series": "123862",
+          "issue": "890614"
+        },
+        {
+          "name": "metron",
+          "series": "949",
+          "issue": "39489"
+        }
+      ]
+    },
+    {
+      "seriesName": "Thor",
+      "seriesStartYear": 2020,
+      "issueNumber": "19",
+      "issueCoverDate": "2022-01-01",
+      "id": [
+        {
+          "name": "comicvine",
+          "series": "123862",
+          "issue": "895350"
+        },
+        {
+          "name": "metron",
+          "series": "949",
+          "issue": "40300"
+        }
+      ]
+    },
+    {
+      "seriesName": "Thor",
+      "seriesStartYear": 2020,
+      "issueNumber": "20",
+      "issueCoverDate": "2022-03-01",
+      "id": [
+        {
+          "name": "comicvine",
+          "series": "123862",
+          "issue": "901347"
+        },
+        {
+          "name": "metron",
+          "series": "949",
+          "issue": "42150"
+        }
+      ]
+    },
+    {
+      "seriesName": "Thor",
+      "seriesStartYear": 2020,
+      "issueNumber": "21",
+      "issueCoverDate": "2022-03-01",
+      "id": [
+        {
+          "name": "comicvine",
+          "series": "123862",
+          "issue": "904778"
+        },
+        {
+          "name": "metron",
+          "series": "949",
+          "issue": "42931"
+        }
+      ]
+    },
+    {
+      "seriesName": "Thor",
+      "seriesStartYear": 2020,
+      "issueNumber": "22",
+      "issueCoverDate": "2022-04-01",
+      "id": [
+        {
+          "name": "comicvine",
+          "series": "123862",
+          "issue": "907435"
+        },
+        {
+          "name": "metron",
+          "series": "949",
+          "issue": "43543"
+        }
+      ]
+    },
+    {
+      "seriesName": "Thor",
+      "seriesStartYear": 2020,
+      "issueNumber": "23",
+      "issueCoverDate": "2022-05-01",
+      "id": [
+        {
+          "name": "comicvine",
+          "series": "123862",
+          "issue": "910495"
+        },
+        {
+          "name": "metron",
+          "series": "949",
+          "issue": "44168"
+        }
+      ]
+    },
+    {
+      "seriesName": "Iron Man",
+      "seriesStartYear": 2020,
+      "issueNumber": "3",
+      "issueCoverDate": "2021-01-01",
+      "id": [
+        {
+          "name": "comicvine",
+          "series": "130396",
+          "issue": "817711"
+        },
+        {
+          "name": "metron",
+          "series": "1540",
+          "issue": "18856"
+        }
+      ]
+    },
+    {
+      "seriesName": "Iron Man",
+      "seriesStartYear": 2020,
+      "issueNumber": "4",
+      "issueCoverDate": "2021-02-01",
+      "id": [
+        {
+          "name": "comicvine",
+          "series": "130396",
+          "issue": "821496"
+        },
+        {
+          "name": "metron",
+          "series": "1540",
+          "issue": "19963"
+        }
+      ]
+    },
+    {
+      "seriesName": "Iron Man",
+      "seriesStartYear": 2020,
+      "issueNumber": "5",
+      "issueCoverDate": "2021-03-01",
+      "id": [
+        {
+          "name": "comicvine",
+          "series": "130396",
+          "issue": "824027"
+        },
+        {
+          "name": "metron",
+          "series": "1540",
+          "issue": "22253"
+        }
+      ]
+    },
+    {
+      "seriesName": "Iron Man",
+      "seriesStartYear": 2020,
+      "issueNumber": "6",
+      "issueCoverDate": "2021-04-01",
+      "id": [
+        {
+          "name": "comicvine",
+          "series": "130396",
+          "issue": "828856"
+        },
+        {
+          "name": "metron",
+          "series": "1540",
+          "issue": "25227"
+        }
+      ]
+    },
+    {
+      "seriesName": "Black Panther",
+      "seriesStartYear": 2022,
+      "issueNumber": "1",
+      "issueCoverDate": "2022-01-01",
+      "id": [
+        {
+          "name": "comicvine",
+          "series": "140222",
+          "issue": "895386"
+        },
+        {
+          "name": "metron",
+          "series": "2832",
+          "issue": "40295"
+        }
+      ]
+    },
+    {
+      "seriesName": "Black Panther",
+      "seriesStartYear": 2022,
+      "issueNumber": "2",
+      "issueCoverDate": "2022-02-01",
+      "id": [
+        {
+          "name": "comicvine",
+          "series": "140222",
+          "issue": "899164"
+        },
+        {
+          "name": "metron",
+          "series": "2832",
+          "issue": "41341"
+        }
+      ]
+    },
+    {
+      "seriesName": "Black Panther",
+      "seriesStartYear": 2022,
+      "issueNumber": "3",
+      "issueCoverDate": "2022-03-01",
+      "id": [
+        {
+          "name": "comicvine",
+          "series": "140222",
+          "issue": "904772"
+        },
+        {
+          "name": "metron",
+          "series": "2832",
+          "issue": "42923"
+        }
+      ]
+    },
+    {
+      "seriesName": "Black Panther",
+      "seriesStartYear": 2022,
+      "issueNumber": "4",
+      "issueCoverDate": "2022-05-01",
+      "id": [
+        {
+          "name": "comicvine",
+          "series": "140222",
+          "issue": "909678"
+        },
+        {
+          "name": "metron",
+          "series": "2832",
+          "issue": "43648"
+        }
+      ]
+    },
+    {
+      "seriesName": "Black Panther",
+      "seriesStartYear": 2022,
+      "issueNumber": "5",
+      "issueCoverDate": "2022-06-01",
+      "id": [
+        {
+          "name": "comicvine",
+          "series": "140222",
+          "issue": "916298"
+        },
+        {
+          "name": "metron",
+          "series": "2832",
+          "issue": "44882"
+        }
+      ]
+    },
+    {
+      "seriesName": "Black Panther",
+      "seriesStartYear": 2022,
+      "issueNumber": "6",
+      "issueCoverDate": "2022-08-01",
+      "id": [
+        {
+          "name": "comicvine",
+          "series": "140222",
+          "issue": "928655"
+        },
+        {
+          "name": "metron",
+          "series": "2832",
+          "issue": "47834"
+        }
+      ]
+    },
+    {
+      "seriesName": "Black Panther",
+      "seriesStartYear": 2022,
+      "issueNumber": "7",
+      "issueCoverDate": "2022-09-01",
+      "id": [
+        {
+          "name": "comicvine",
+          "series": "140222",
+          "issue": "934989"
+        },
+        {
+          "name": "metron",
+          "series": "2832",
+          "issue": "49702"
+        }
+      ]
+    },
+    {
+      "seriesName": "Black Panther",
+      "seriesStartYear": 2022,
+      "issueNumber": "8",
+      "issueCoverDate": "2022-10-01",
+      "id": [
+        {
+          "name": "comicvine",
+          "series": "140222",
+          "issue": "941558"
+        },
+        {
+          "name": "metron",
+          "series": "2832",
+          "issue": "50688"
+        }
+      ]
+    },
+    {
+      "seriesName": "Eternals: Celestia",
+      "seriesStartYear": 2021,
+      "issueNumber": "1",
+      "issueCoverDate": "2021-12-01",
+      "id": [
+        {
+          "name": "comicvine",
+          "series": "139433",
+          "issue": "888648"
+        },
+        {
+          "name": "metron",
+          "series": "2728",
+          "issue": "38891"
+        }
+      ]
+    },
+    {
+      "seriesName": "Free Comic Book Day 2021: Avengers/Hulk",
+      "seriesStartYear": 2021,
+      "issueNumber": "1",
+      "issueCoverDate": "2021-10-01",
+      "id": [
+        {
+          "name": "comicvine",
+          "series": "138340",
+          "issue": "880888"
+        }
+      ]
+    },
+    {
+      "seriesName": "Avengers",
+      "seriesStartYear": 2018,
+      "issueNumber": "46",
+      "issueCoverDate": "2021-09-01",
+      "id": [
+        {
+          "name": "comicvine",
+          "series": "110496",
+          "issue": "868606"
+        },
+        {
+          "name": "metron",
+          "series": "61",
+          "issue": "33670"
+        }
+      ]
+    },
+    {
+      "seriesName": "Avengers",
+      "seriesStartYear": 2018,
+      "issueNumber": "47",
+      "issueCoverDate": "2021-10-01",
+      "id": [
+        {
+          "name": "comicvine",
+          "series": "110496",
+          "issue": "877061"
+        },
+        {
+          "name": "metron",
+          "series": "61",
+          "issue": "35346"
+        }
+      ]
+    },
+    {
+      "seriesName": "Winter Guard",
+      "seriesStartYear": 2021,
+      "issueNumber": "1",
+      "issueCoverDate": "2021-10-01",
+      "id": [
+        {
+          "name": "comicvine",
+          "series": "138533",
+          "issue": "882082"
+        },
+        {
+          "name": "metron",
+          "series": "2602",
+          "issue": "36816"
+        }
+      ]
+    },
+    {
+      "seriesName": "Winter Guard",
+      "seriesStartYear": 2021,
+      "issueNumber": "2",
+      "issueCoverDate": "2021-11-01",
+      "id": [
+        {
+          "name": "comicvine",
+          "series": "138533",
+          "issue": "886977"
+        },
+        {
+          "name": "metron",
+          "series": "2602",
+          "issue": "38592"
+        }
+      ]
+    },
+    {
+      "seriesName": "Winter Guard",
+      "seriesStartYear": 2021,
+      "issueNumber": "3",
+      "issueCoverDate": "2022-01-01",
+      "id": [
+        {
+          "name": "comicvine",
+          "series": "138533",
+          "issue": "892247"
+        },
+        {
+          "name": "metron",
+          "series": "2602",
+          "issue": "39790"
+        }
+      ]
+    },
+    {
+      "seriesName": "Winter Guard",
+      "seriesStartYear": 2021,
+      "issueNumber": "4",
+      "issueCoverDate": "2022-02-01",
+      "id": [
+        {
+          "name": "comicvine",
+          "series": "138533",
+          "issue": "896096"
+        },
+        {
+          "name": "metron",
+          "series": "2602",
+          "issue": "40630"
+        }
+      ]
+    },
+    {
+      "seriesName": "Avengers",
+      "seriesStartYear": 2018,
+      "issueNumber": "48",
+      "issueCoverDate": "2021-11-01",
+      "id": [
+        {
+          "name": "comicvine",
+          "series": "110496",
+          "issue": "882898"
+        },
+        {
+          "name": "metron",
+          "series": "61",
+          "issue": "37084"
+        }
+      ]
+    },
+    {
+      "seriesName": "Avengers",
+      "seriesStartYear": 2018,
+      "issueNumber": "49",
+      "issueCoverDate": "2021-12-01",
+      "id": [
+        {
+          "name": "comicvine",
+          "series": "110496",
+          "issue": "889468"
+        },
+        {
+          "name": "metron",
+          "series": "61",
+          "issue": "39369"
+        }
+      ]
+    },
+    {
+      "seriesName": "Avengers",
+      "seriesStartYear": 2018,
+      "issueNumber": "50",
+      "issueCoverDate": "2022-02-01",
+      "id": [
+        {
+          "name": "comicvine",
+          "series": "110496",
+          "issue": "896105"
+        },
+        {
+          "name": "metron",
+          "series": "61",
+          "issue": "40620"
+        }
+      ]
+    }
+  ]
+}

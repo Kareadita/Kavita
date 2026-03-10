@@ -9,10 +9,9 @@ using Kavita.API.Services;
 using Kavita.API.Services.Helpers;
 using Kavita.API.Services.Metadata;
 using Kavita.API.Services.Plus;
-using Kavita.API.Services.Reading;
+using Kavita.API.Services.ReadingLists;
 using Kavita.API.Services.Scanner;
 using Kavita.API.Services.SignalR;
-using Kavita.Database;
 using Kavita.Models;
 using Kavita.Models.Builders;
 using Kavita.Models.Entities;
@@ -64,10 +63,11 @@ public class ScannerHelper
         return library;
     }
 
-    public ScannerService CreateServices(DirectoryService ds = null, IFileSystem fs = null)
+    public ScannerService CreateServices(DirectoryService? ds = null, IFileSystem? fs = null)
     {
         fs ??= new FileSystem();
         ds ??= new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), fs);
+
         var archiveService = new ArchiveService(Substitute.For<ILogger<ArchiveService>>(), ds,
             Substitute.For<IImageService>(), Substitute.For<IMediaErrorService>());
         var readingItemService = new ReadingItemService(archiveService, Substitute.For<IBookService>(),
@@ -158,9 +158,9 @@ public class ScannerHelper
             var fileDir = Path.GetDirectoryName(fullPath);
 
             // Create the directory if it doesn't exist
-            if (!Directory.Exists(fileDir))
+            if (!string.IsNullOrEmpty(fileDir) && !Directory.Exists(fileDir))
             {
-                Directory.CreateDirectory(fileDir);
+                Directory.CreateDirectory(fileDir!);
                 Console.WriteLine($"Created directory: {fileDir}");
             }
 
