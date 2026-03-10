@@ -5,8 +5,10 @@ using System.Threading.Tasks;
 using Kavita.API.Attributes;
 using Kavita.API.Services;
 using Kavita.API.Services.Reading;
+using Kavita.API.Services.ReadingLists;
 using Kavita.Models.Constants;
 using Kavita.Models.DTOs.ReadingLists.CBL;
+using Kavita.Models.DTOs.ReadingLists.CBL.V1;
 using Kavita.Server.Attributes;
 using Kavita.Services.Reading;
 using Microsoft.AspNetCore.Http;
@@ -18,10 +20,7 @@ namespace Kavita.Server.Controllers;
 /// <summary>
 /// Responsible for the CBL import flow
 /// </summary>
-public class CblController(
-    IReadingListService readingListService,
-    IDirectoryService directoryService)
-    : BaseApiController
+public class CblController( IReadingListService readingListService, IDirectoryService directoryService) : BaseApiController
 {
     /// <summary>
     /// The first step in a cbl import. This validates the cbl file that if an import occured, would it be successful.

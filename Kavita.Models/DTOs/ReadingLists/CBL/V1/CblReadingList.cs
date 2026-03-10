@@ -1,7 +1,7 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using System.Xml.Serialization;
 
-namespace Kavita.Models.DTOs.ReadingLists.CBL;
+namespace Kavita.Models.DTOs.ReadingLists.CBL.V1;
 
 
 [XmlRoot(ElementName="Books")]
@@ -12,6 +12,9 @@ public sealed record CblBooks
 }
 
 
+/// <summary>
+/// Top-level V1 XML CBL reading list. Deserialized from .cbl/.xml files
+/// </summary>
 [XmlRoot(ElementName="ReadingList")]
 public sealed record CblReadingList
 {

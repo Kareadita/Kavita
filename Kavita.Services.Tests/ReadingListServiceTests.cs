@@ -12,6 +12,7 @@ using Kavita.Database.Tests;
 using Kavita.Models.Builders;
 using Kavita.Models.DTOs.ReadingLists;
 using Kavita.Models.DTOs.ReadingLists.CBL;
+using Kavita.Models.DTOs.ReadingLists.CBL.V1;
 using Kavita.Models.Entities;
 using Kavita.Models.Entities.Enums;
 using Kavita.Models.Entities.User;

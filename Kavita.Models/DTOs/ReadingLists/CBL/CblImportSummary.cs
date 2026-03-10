@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.ComponentModel;
+using Kavita.Models.DTOs.ReadingLists.CBL.V1;
 
 namespace Kavita.Models.DTOs.ReadingLists.CBL;
 
