@@ -3,11 +3,14 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using System.Globalization;
+using System.Text.Json;
 using System.Xml;
 using System.Xml.Serialization;
 using Kavita.API.Database;
 using Kavita.API.Services;
 using Kavita.Models.DTOs.ReadingLists.CBL.V1;
+using Kavita.Models.DTOs.ReadingLists.CBL.V2;
 using Kavita.Models.Entities;
 using Kavita.Models.Entities.Enums;
 using Microsoft.EntityFrameworkCore;
@@ -56,17 +59,22 @@ public class CblExportService(IUnitOfWork unitOfWork, IDirectoryService director
 
         if (asV2)
         {
-            throw new NotSupportedException("V2 export is not yet implemented.");
+            var jsonFileName = $"{readingListId}-{sanitizedName}.json";
+            var jsonFilePath = Path.Combine(outputDir, jsonFileName);
+
+            var v2 = BuildCblV2Root(readingList, items);
+            SerializeV2(v2, jsonFilePath);
+
+            return jsonFilePath;
         }
 
-        const string extension = ".cbl";
-        var fileName = $"{readingListId}-{sanitizedName}{extension}";
-        var filePath = Path.Combine(outputDir, fileName);
+        var cblFileName = $"{readingListId}-{sanitizedName}.cbl";
+        var cblFilePath = Path.Combine(outputDir, cblFileName);
 
         var cbl = BuildCblReadingList(readingList, items);
-        SerializeV1(cbl, filePath);
+        SerializeV1(cbl, cblFilePath);
 
-        return filePath;
+        return cblFilePath;
     }
 
     public static CblReadingList BuildCblReadingList(ReadingList readingList, IList<ReadingListItem> items)
@@ -115,6 +123,71 @@ public class CblExportService(IUnitOfWork unitOfWork, IDirectoryService director
         using var stream = File.Create(filePath);
         using var writer = XmlWriter.Create(stream, settings);
         serializer.Serialize(writer, cbl);
+    }
+
+    public static CblV2Root BuildCblV2Root(ReadingList readingList, IList<ReadingListItem> items)
+    {
+        var publisher = GetMostCommonPerson(items, PersonRole.Publisher);
+        var imprint = GetMostCommonPerson(items, PersonRole.Imprint);
+
+        var issues = new List<CblV2Issue>();
+        foreach (var item in items)
+        {
+            var coverDate = item.Chapter.ReleaseDate != DateTime.MinValue
+                ? item.Chapter.ReleaseDate.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture)
+                : string.Empty;
+
+            var seriesStartYear = item.Series.Metadata?.ReleaseYear is > 0
+                ? item.Series.Metadata.ReleaseYear
+                : (int?)null;
+
+            issues.Add(new CblV2Issue
+            {
+                SeriesName = item.Series.Name,
+                SeriesStartYear = seriesStartYear,
+                IssueNumber = item.Chapter.Range,
+                IssueCoverDate = coverDate,
+                IssueType = string.Empty,
+                Id = null, // TODO: When we expand Chapter-level external metadata, create this
+            });
+        }
+
+        return new CblV2Root
+        {
+            FileDetails = new CblV2FileDetails
+            {
+                UUID = Guid.NewGuid().ToString(),
+                Version = 1.0,
+            },
+            ListDetails = new CblV2ListDetails
+            {
+                Name = readingList.Title,
+                Description = readingList.Summary ?? string.Empty,
+                StartYear = readingList.StartingYear > 0 ? readingList.StartingYear : null,
+                EndYear = readingList.EndingYear > 0 ? readingList.EndingYear : null,
+                Publisher = publisher ?? string.Empty,
+                Imprint = imprint ?? string.Empty,
+                Type = string.Empty,
+                Tags = [],
+                CoverImageURLs = [],
+                Relationships = [],
+                Source = [],
+            },
+            IssueList = issues,
+            Notes = string.Empty,
+        };
+    }
+
+    public static void SerializeV2(CblV2Root root, string filePath)
+    {
+        var options = new JsonSerializerOptions
+        {
+            WriteIndented = true,
+            DefaultIgnoreCondition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull,
+        };
+
+        var json = JsonSerializer.Serialize(root, options);
+        File.WriteAllText(filePath, json);
     }
 
     public static string MapMangaFormatToFileType(MangaFormat format)

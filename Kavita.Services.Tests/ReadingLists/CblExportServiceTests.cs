@@ -223,6 +223,160 @@ public class CblExportServiceTests
 
     #endregion
 
+    #region BuildCblV2Root
+
+    [Fact]
+    public void ExportV2_BasicReadingList()
+    {
+        var readingList = CreateReadingList();
+        var items = new List<ReadingListItem>
+        {
+            CreateItem(0, "Batman", "1", "2016", new DateTime(2016, 6, 15)),
+            CreateItem(1, "Superman", "10", "2011", new DateTime(2013, 3, 1)),
+        };
+
+        // Set ReleaseYear on series metadata
+        items[0].Series.Metadata.ReleaseYear = 2016;
+        items[1].Series.Metadata.ReleaseYear = 2011;
+
+        var result = CblExportService.BuildCblV2Root(readingList, items);
+
+        Assert.NotNull(result.FileDetails);
+        Assert.Equal(1.0, result.FileDetails.Version);
+        Assert.False(string.IsNullOrEmpty(result.FileDetails.UUID));
+
+        Assert.Equal("Test List", result.ListDetails.Name);
+        Assert.Equal("A test reading list", result.ListDetails.Description);
+        Assert.Equal(2020, result.ListDetails.StartYear);
+        Assert.Equal(2021, result.ListDetails.EndYear);
+
+        Assert.Equal(2, result.IssueList.Count);
+
+        var first = result.IssueList[0];
+        Assert.Equal("Batman", first.SeriesName);
+        Assert.Equal("1", first.IssueNumber);
+        Assert.Equal(2016, first.SeriesStartYear);
+        Assert.Equal("2016-06-15", first.IssueCoverDate);
+        Assert.Null(first.Id);
+
+        var second = result.IssueList[1];
+        Assert.Equal("Superman", second.SeriesName);
+        Assert.Equal("10", second.IssueNumber);
+        Assert.Equal(2011, second.SeriesStartYear);
+        Assert.Equal("2013-03-01", second.IssueCoverDate);
+    }
+
+    [Fact]
+    public void ExportV2_EmptyItems()
+    {
+        var readingList = CreateReadingList();
+        var items = new List<ReadingListItem>();
+
+        var result = CblExportService.BuildCblV2Root(readingList, items);
+
+        Assert.Equal("Test List", result.ListDetails.Name);
+        Assert.Empty(result.IssueList);
+        Assert.Equal(string.Empty, result.ListDetails.Publisher);
+        Assert.Equal(string.Empty, result.ListDetails.Imprint);
+    }
+
+    [Fact]
+    public void ExportV2_DefaultReleaseDate_EmptyCoverDate()
+    {
+        var readingList = CreateReadingList();
+        var items = new List<ReadingListItem>
+        {
+            CreateItem(0, "Batman", "1", "2016"),
+        };
+
+        var result = CblExportService.BuildCblV2Root(readingList, items);
+
+        Assert.Equal(string.Empty, result.IssueList[0].IssueCoverDate);
+        Assert.Null(result.IssueList[0].SeriesStartYear);
+    }
+
+    [Fact]
+    public void ExportV2_PublisherFromMostCommonPerson()
+    {
+        var readingList = CreateReadingList();
+        var publisher = new Person
+        {
+            Id = 1,
+            Name = "Marvel",
+            NormalizedName = "marvel",
+            Description = string.Empty,
+            PrimaryColor = string.Empty,
+            SecondaryColor = string.Empty,
+        };
+
+        var items = new List<ReadingListItem>
+        {
+            CreateItem(0, "Spider-Man", "1", "2018"),
+            CreateItem(1, "Avengers", "1", "2018"),
+        };
+
+        items[0].Series.Metadata.People = new List<SeriesMetadataPeople>
+        {
+            new() { Role = PersonRole.Publisher, Person = publisher },
+        };
+        items[1].Series.Metadata.People = new List<SeriesMetadataPeople>
+        {
+            new() { Role = PersonRole.Publisher, Person = publisher },
+        };
+
+        var result = CblExportService.BuildCblV2Root(readingList, items);
+
+        Assert.Equal("Marvel", result.ListDetails.Publisher);
+    }
+
+    [Fact]
+    public void ExportV2_RoundTrip()
+    {
+        var readingList = CreateReadingList(title: "V2 Round Trip", summary: "Testing V2 round trip");
+        var items = new List<ReadingListItem>
+        {
+            CreateItem(0, "Batman", "1", "2016", new DateTime(2016, 6, 15)),
+            CreateItem(1, "Superman", "10", "2011", new DateTime(2013, 3, 1)),
+        };
+        items[0].Series.Metadata.ReleaseYear = 2016;
+        items[1].Series.Metadata.ReleaseYear = 2011;
+
+        var v2 = CblExportService.BuildCblV2Root(readingList, items);
+
+        var tempFile = Path.Combine(Path.GetTempPath(), $"cbl-export-test-{Guid.NewGuid()}.json");
+        try
+        {
+            CblExportService.SerializeV2(v2, tempFile);
+
+            var parsed = CblParser.ParseV2(tempFile);
+
+            Assert.Equal("V2 Round Trip", parsed.Name);
+            Assert.Equal("Testing V2 round trip", parsed.Summary);
+            Assert.Equal(2020, parsed.StartYear);
+            Assert.Equal(2021, parsed.EndYear);
+
+            Assert.Equal(2, parsed.Items.Count);
+
+            var first = parsed.Items[0];
+            Assert.Equal("Batman", first.SeriesName);
+            Assert.Equal("1", first.Number);
+            Assert.Equal("2016", first.Volume);
+            Assert.Equal("2016", first.Year);
+
+            var second = parsed.Items[1];
+            Assert.Equal("Superman", second.SeriesName);
+            Assert.Equal("10", second.Number);
+            Assert.Equal("2011", second.Volume);
+            Assert.Equal("2013", second.Year);
+        }
+        finally
+        {
+            if (File.Exists(tempFile)) File.Delete(tempFile);
+        }
+    }
+
+    #endregion
+
     #region GetMostCommonPerson
 
     [Fact]
