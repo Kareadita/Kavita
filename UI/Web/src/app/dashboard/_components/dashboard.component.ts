@@ -134,7 +134,7 @@ export class DashboardComponent {
       }
     });
 
-    this.licenseService.hasValidLicense()
+    this.licenseService.hasAnyLicense()
       .pipe(
         filter((hasLic: boolean) => hasLic),
         switchMap(_ => this.scrobblingService.hasTokenExpired(ScrobbleProvider.AniList)),
@@ -142,7 +142,6 @@ export class DashboardComponent {
       if (hasExpired) {
         this.toastr.error(translate('toasts.anilist-token-expired'));
       }
-      this.cdRef.markForCheck();
     });
   }
 

@@ -15,6 +15,7 @@
   <ItemGroup>
     <PackageReference Include="CsvHelper" Version="33.1.0" />
     <PackageReference Include="MailKit" Version="4.15.1" />
+    <PackageReference Include="Markdig" Version="1.1.1" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="10.0.3">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
@@ -29,7 +30,6 @@
     <PackageReference Include="Hangfire.InMemory" Version="1.0.0" />
     <PackageReference Include="Hangfire.MaximumConcurrentExecutions" Version="1.1.0" />
     <PackageReference Include="HtmlAgilityPack" Version="1.12.4" />
-    <PackageReference Include="MarkdownDeep.NET.Core" Version="1.5.0.4" />
     <PackageReference Include="Hangfire.AspNetCore" Version="1.8.23" />
     <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="10.0.3" />
     <PackageReference Include="Microsoft.AspNetCore.Authentication.OpenIdConnect" Version="10.0.3" />

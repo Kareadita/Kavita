@@ -14,6 +14,7 @@ using Kavita.Models.DTOs;
 using Kavita.Models.DTOs.Metadata.Browse;
 using Kavita.Models.DTOs.Metadata.Browse.Requests;
 using Kavita.Models.DTOs.Person;
+using Kavita.Models.DTOs.Recommendation;
 using Kavita.Models.DTOs.SignalR;
 using Kavita.Models.Entities.Enums;
 using Kavita.Server.Attributes;
@@ -219,6 +220,7 @@ public class PersonController(
     {
         return Ok(await unitOfWork.PersonRepository.GetSeriesKnownFor(personId, UserId));
     }
+
 
     /// <summary>
     /// Returns all individual chapters by role. Limited to 20 results.

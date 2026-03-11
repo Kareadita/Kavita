@@ -541,14 +541,14 @@ public class SeriesRepository(DataContext context, IMapper mapper) : ISeriesRepo
         return seriesChapters;
     }
 
-    public async Task<long> GetFilesizeForSeriesAsync(int seriesId, CancellationToken ct = default)
+    public async Task<long> GetFilesizeAsync(int seriesId, CancellationToken ct = default)
     {
         return await context.Volume
             .Where(v => v.SeriesId == seriesId)
             .SumAsync(v => v.Chapters.Sum(c => c.Files.Sum(f => f.Bytes)), cancellationToken: ct);
     }
 
-    public async Task<Dictionary<int, long>> GetFilesizeForMultipleSeriesAsync(IList<int> seriesIds, CancellationToken ct = default)
+    public async Task<Dictionary<int, long>> GetFilesizesAsync(IList<int> seriesIds, CancellationToken ct = default)
     {
         return await seriesIds.BatchToDictionaryAsync(50, batch =>
             context.Volume

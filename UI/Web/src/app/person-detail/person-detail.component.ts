@@ -25,7 +25,6 @@ import {ActionFactoryService} from "../_services/action-factory.service";
 import {translate, TranslocoDirective} from "@jsverse/transloco";
 import {ChapterCardComponent} from "../cards/chapter-card/chapter-card.component";
 import {ThemeService} from "../_services/theme.service";
-import {ToastrService} from "ngx-toastr";
 import {LicenseService} from "../_services/license.service";
 import {SafeUrlPipe} from "../_pipes/safe-url.pipe";
 import {EVENTS, MessageHubService} from "../_services/message-hub.service";
@@ -74,7 +73,6 @@ export class PersonDetailComponent {
   protected readonly accountService = inject(AccountService);
   protected readonly licenseService = inject(LicenseService);
   private readonly themeService = inject(ThemeService);
-  private readonly toastr = inject(ToastrService);
   private readonly messageHubService = inject(MessageHubService)
   private readonly metadataService = inject(MetadataService)
 
@@ -120,9 +118,7 @@ export class PersonDetailComponent {
     }
 
     // Fetch series known for this person
-    this.personService.getSeriesMostKnownFor(person.id).pipe(
-      takeUntilDestroyed(this.destroyRef)
-    ).subscribe(series => this.works.set(series));
+    this.personService.getSeriesMostKnownFor(person.id).subscribe(series => this.works.set(series));
   }
 
   createFilter(roles: PersonRole[]) {

@@ -1,4 +1,4 @@
-<div [ngClass]="{'no-transitions' : transitionState()}">
+<div [class.no-animations]="transitionState()" [class.no-transitions]="transitionState()" [class.animate-disabled]="transitionState()">
   @let currentUser = accountService.currentUser();
     @if (currentUser && (navService.navbarVisible$ | async) === true) {
       <div class="fullpage-background">

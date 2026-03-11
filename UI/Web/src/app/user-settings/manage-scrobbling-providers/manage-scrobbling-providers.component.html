@@ -1,14 +1,14 @@
 <ng-container *transloco="let t; prefix:'scrobbling-providers'">
 
-  <app-setting-title [title]="t('title')" [canEdit]="hasValidLicense" [isEditMode]="!isViewMode" (isEditModeChange)="updateEditMode($event)" />
+  <app-setting-title [title]="t('title')" [canEdit]="hasValidLicense()" [isEditMode]="!isViewMode()" (isEditModeChange)="updateEditMode($event)" />
 
-  @if (loaded) {
-    @if(!hasValidLicense) {
+  @if (isLoaded()) {
+    @if(!hasValidLicense()) {
       {{t('requires', {product: 'Kavita+'})}}
     } @else {
       <form [formGroup]="formGroup">
         <div class="row">
-          <app-scrobble-provider-item [token]="aniListToken" [provider]="ScrobbleProvider.AniList" [isEditMode]="!isViewMode">
+          <app-scrobble-provider-item [token]="aniListToken" [provider]="ScrobbleProvider.AniList" [isEditMode]="!isViewMode()">
             <ng-template #edit>
               <p>{{t('instructions', {service: ScrobbleProvider.AniList | scrobbleProviderName})}}</p>
               <p class="text-muted">{{t('anilist-used-for')}}</p>
@@ -28,7 +28,7 @@
           </app-scrobble-provider-item>
         </div>
         <div class="row mt-2">
-          <app-scrobble-provider-item [token]="malToken" [provider]="ScrobbleProvider.Mal" [isEditMode]="!isViewMode">
+          <app-scrobble-provider-item [token]="malToken" [provider]="ScrobbleProvider.Mal" [isEditMode]="!isViewMode()">
             <ng-template #edit>
                 <span class="md-4">
                   <p>{{t('mal-instructions', {service: ScrobbleProvider.Mal | scrobbleProviderName})}}</p>
@@ -52,6 +52,6 @@
       </form>
     }
   } @else {
-    <app-loading [loading]="!loaded" [message]="t('loading')" />
+    <app-loading [loading]="!isLoaded()" [message]="t('loading')" />
   }
 </ng-container>

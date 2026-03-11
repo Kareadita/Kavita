@@ -268,14 +268,14 @@ public class ChapterRepository(DataContext context, IMapper mapper) : IChapterRe
             .ToListAsync(ct);
     }
 
-    public async Task<long> GetFilesizeForChapterAsync(int chapterId, CancellationToken ct = default)
+    public async Task<long> GetFilesizeAsync(int chapterId, CancellationToken ct = default)
     {
         return await context.MangaFile
             .Where(c => c.ChapterId == chapterId)
             .SumAsync(c => c.Bytes, cancellationToken: ct);
     }
 
-    public async Task<Dictionary<int, long>> GetFilesizeForChaptersAsync(IList<int> chapterIds, CancellationToken ct = default)
+    public async Task<Dictionary<int, long>> GetFilesizesAsync(IList<int> chapterIds, CancellationToken ct = default)
     {
         return await chapterIds.BatchToDictionaryAsync(50, batch =>
             context.MangaFile

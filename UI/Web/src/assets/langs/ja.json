@@ -896,7 +896,8 @@
         "no-data": "{{common.no-data}}"
     },
     "card-item": {
-        "cannot-read": "読むことができません"
+        "cannot-read": "読むことができません",
+        "select": "選択"
     },
     "details-tab": {
         "writers-title": "{{metadata-fields.writers-title}}",
@@ -1602,7 +1603,7 @@
         "translator-label": "翻訳",
         "read-progress-label": "読書進捗",
         "unread": "未読",
-        "read": "読む",
+        "read": "読書済み",
         "in-progress": "進行状況",
         "rating-label": "評価",
         "age-rating-label": "{{metadata-fields.age-rating-title}}",
@@ -1780,7 +1781,8 @@
         "id-label": "{{edit-chapter-modal.id-label}}",
         "files-label": "{{edit-chapter-modal.files-label}}",
         "cover-image-description": "{{edit-series-modal.cover-image-description}}",
-        "title": "編集"
+        "title": "編集",
+        "read-time-label": "{{edit-chapter-modal.read-time-label}}"
     },
     "day-breakdown": {
         "title": "日別の内訳",
@@ -2174,7 +2176,10 @@
         "confirm-force-delete-font": "このフォントは現在使用中です。強制的に削除しますか？削除すると、デフォルトのフォントに戻ります。",
         "font-in-use": "フォントは 1 人以上のユーザーによって使用されているため、削除できません。",
         "scrobble-gen-init": "過去の読書履歴と評価から Scrobble イベントを生成し、接続されたサービスと同期するジョブをキューに追加しました。",
-        "webtoon-override": "Webtoon を検知しました。Webtoon モードに切り替えます。"
+        "webtoon-override": "Webtoon を検知しました。Webtoon モードに切り替えます。",
+        "confirm-delete-collection": "コレクションを削除してもよろしいですか? 元に戻すことはできません。",
+        "confirm-delete-annotations": "注釈を削除してもよろしいですか? 元に戻すことはできません。",
+        "annotations-deleted": "注釈を削除しました"
     },
     "actionable": {
         "scan-library": "ライブラリのスキャン",
@@ -3402,5 +3407,18 @@
             "help": "更新方法",
             "download": "ダウンロード"
         }
+    },
+    "title": {
+        "reading-list": "読書リスト",
+        "home": "ホーム",
+        "bookmarks": "ブックマーク",
+        "collections": "コレクション",
+        "browse-genres": "ジャンルを表示",
+        "browse-tags": "タグを表示",
+        "want-to-read": "後で読む",
+        "reading-lists": "読書リスト",
+        "settings": "設定",
+        "all-series": "すべてのシリーズ",
+        "profile": "{{username}} さんのプロフィール"
     }
 }

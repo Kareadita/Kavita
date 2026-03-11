@@ -1,6 +1,4 @@
-import {ChangeDetectionStrategy, Component, computed, effect, inject, OnInit, signal} from '@angular/core';
-import {LicenseService} from "../../_services/license.service";
-import {Router} from "@angular/router";
+import {ChangeDetectionStrategy, Component, DestroyRef, inject, OnInit, signal} from '@angular/core';
 import {translate, TranslocoDirective} from "@jsverse/transloco";
 import {ImageComponent} from "../../shared/image/image.component";
 import {ImageService} from "../../_services/image.service";
@@ -16,7 +14,7 @@ import {MatchStateOptionPipe} from "../../_pipes/match-state.pipe";
 import {UtcToLocalTimePipe} from "../../_pipes/utc-to-local-time.pipe";
 import {debounceTime, distinctUntilChanged, switchMap, tap} from "rxjs";
 import {DefaultValuePipe} from "../../_pipes/default-value.pipe";
-import {ColumnMode, NgxDatatableModule} from "@siemens/ngx-datatable";
+import {NgxDatatableModule} from "@siemens/ngx-datatable";
 import {LibraryNamePipe} from "../../_pipes/library-name.pipe";
 import {APP_BASE_HREF, AsyncPipe} from "@angular/common";
 import {EVENTS, MessageHubService} from "../../_services/message-hub.service";
@@ -27,6 +25,7 @@ import {ExternalMatchRateLimitErrorEvent} from "../../_models/events/external-ma
 import {ToastrService} from "ngx-toastr";
 import {ResponsiveTableComponent} from "../../shared/_components/responsive-table/responsive-table.component";
 import {Pagination} from "../../_models/pagination";
+import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 
 @Component({
   selector: 'app-manage-matched-metadata',
@@ -49,19 +48,17 @@ import {Pagination} from "../../_models/pagination";
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class ManageMatchedMetadataComponent implements OnInit {
-  protected readonly ColumnMode = ColumnMode;
   protected readonly MatchStateOption = MatchStateOption;
   protected readonly allMatchStates = allMatchStates.filter(m => m !== MatchStateOption.Matched); // Matched will have too many
   protected readonly allLibraryTypes = allKavitaPlusMetadataApplicableTypes;
 
-  private readonly licenseService = inject(LicenseService);
   private readonly actionService = inject(ActionService);
-  private readonly router = inject(Router);
   private readonly manageService = inject(ManageService);
   private readonly messageHub = inject(MessageHubService);
   private readonly toastr = inject(ToastrService);
   protected readonly imageService = inject(ImageService);
   protected readonly baseUrl = inject(APP_BASE_HREF);
+  protected readonly destroyRef = inject(DestroyRef);
 
   isLoading = signal(true);
   data = signal<ManageMatchSeries[]>([]);
@@ -79,41 +76,34 @@ export class ManageMatchedMetadataComponent implements OnInit {
   trackBy = (idx: number, item: ManageMatchSeries) => `${item.isMatched}_${item.series.name}_${idx}`;
 
   ngOnInit() {
-    this.licenseService.hasValidLicense$.subscribe(license => {
-      if (!license) {
-        // Navigate home
-        this.router.navigate(['/']);
-        return;
+    this.messageHub.messages$.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(message => {
+      if (message.event == EVENTS.ScanSeries) {
+        const evt = message.payload as ScanSeriesEvent;
+        if (this.data().filter(d => d.series.id === evt.seriesId).length > 0) {
+          this.loadData();
+        }
       }
 
-      this.messageHub.messages$.subscribe(message => {
-        if (message.event == EVENTS.ScanSeries) {
-          const evt = message.payload as ScanSeriesEvent;
-          if (this.data().filter(d => d.series.id === evt.seriesId).length > 0) {
-            this.loadData();
-          }
-        }
-
-        if (message.event == EVENTS.ExternalMatchRateLimitError) {
-          const evt = message.payload as ExternalMatchRateLimitErrorEvent;
-          this.toastr.error(translate('toasts.external-match-rate-error', {seriesName: evt.seriesName}))
-        }
-      });
-
-      this.filterGroup.valueChanges.pipe(
-        debounceTime(300),
-        distinctUntilChanged(),
-        tap(_ => {
-          this.isLoading.set(true);
-        }),
-        switchMap(_ => this.loadData()),
-        tap(_ => {
-          this.isLoading.set(false);
-        }),
-      ).subscribe();
-
-      this.loadData().subscribe();
+      if (message.event == EVENTS.ExternalMatchRateLimitError) {
+        const evt = message.payload as ExternalMatchRateLimitErrorEvent;
+        this.toastr.error(translate('toasts.external-match-rate-error', {seriesName: evt.seriesName}))
+      }
     });
+
+    this.filterGroup.valueChanges.pipe(
+      debounceTime(300),
+      distinctUntilChanged(),
+      tap(_ => {
+        this.isLoading.set(true);
+      }),
+      switchMap(_ => this.loadData()),
+      tap(_ => {
+        this.isLoading.set(false);
+      }),
+      takeUntilDestroyed(this.destroyRef)
+    ).subscribe();
+
+    this.loadData().subscribe();
   }
 
   onPageChange(page: number) {

@@ -11,6 +11,7 @@ public class ReadingListItem
     /// </summary>
     public int Order { get; set; }
 
+
     // Relationship
     public ReadingList ReadingList { get; set; } = null!;
     public int ReadingListId { get; set; }

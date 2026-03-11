@@ -15,9 +15,11 @@ using Kavita.Common.Extensions;
 using Kavita.Common.Helpers;
 using Kavita.Models.DTOs.SignalR;
 using Kavita.Models.DTOs.Update;
-using MarkdownDeep;
+using Kavita.Services.Extensions;
+using Markdig;
 using Microsoft.Extensions.Logging;
 using Microsoft.Net.Http.Headers;
+using Markdown = Markdig.Markdown;
 
 namespace Kavita.Services;
 
@@ -54,7 +56,8 @@ public partial class VersionUpdaterService : IVersionUpdaterService
 {
     private readonly ILogger<VersionUpdaterService> _logger;
     private readonly IEventHub _eventHub;
-    private readonly Markdown _markdown = new MarkdownDeep.Markdown();
+    private readonly MarkdownPipeline _markdownPipeline = new MarkdownPipelineBuilder().UseGithub().Build();
+
 #pragma warning disable S1075
     private const string GithubLatestReleasesUrl = "https://api.github.com/repos/Kareadita/Kavita/releases/latest";
     private const string GithubAllReleasesUrl = "https://api.github.com/repos/Kareadita/Kavita/releases";
@@ -160,11 +163,11 @@ public partial class VersionUpdaterService : IVersionUpdaterService
                     Removed = sections.TryGetValue("Removed", out var removed) ? removed : [],
                     Theme = sections.TryGetValue("Theme", out var theme) ? theme : [],
                     Developer = sections.TryGetValue("Developer", out var developer) ? developer : [],
-                    KnownIssues = sections.TryGetValue("KnownIssues", out var knownIssues) ? knownIssues : [],
+                    KnownIssues = sections.TryGetValue("Known Issues", out var knownIssues) ? knownIssues : [],
                     Api = sections.TryGetValue("Api", out var api) ? api : [],
                     FeatureRequests = sections.TryGetValue("Feature Requests", out var frs) ? frs : [],
-                    BlogPart = _markdown.Transform(blogPart.Trim()),
-                    UpdateBody = _markdown.Transform(prInfo.Body.Trim())
+                    BlogPart = Markdown.ToHtml(blogPart.Trim(), _markdownPipeline),
+                    UpdateBody = Markdown.ToHtml(prInfo.Body.Trim(), _markdownPipeline)
                 };
 
                 nightlyDtos.Add(nightlyDto);
@@ -523,9 +526,10 @@ public partial class VersionUpdaterService : IVersionUpdaterService
         var updateVersion = new Version(update.Tag_Name.Replace("v", string.Empty));
         var currentVersion = BuildInfo.Version.ToString(4);
 
-        var bodyHtml = _markdown.Transform(update.Body.Trim());
+
+        var bodyHtml = Markdown.ToHtml(update.Body.Trim(), _markdownPipeline);
         var parsedSections = ParseReleaseBody(update.Body);
-        var blogPart = _markdown.Transform(ExtractBlogPart(update.Body).Trim());
+        var blogPart = Markdown.ToHtml(ExtractBlogPart(update.Body).Trim(), _markdownPipeline);
 
         return new UpdateNotificationDto()
         {

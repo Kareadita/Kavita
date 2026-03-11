@@ -41,7 +41,8 @@ public partial class EntityNamingService : IEntityNamingService
     public string FormatChapterTitle(LibraryType libraryType, ChapterDto chapter,
         string? chapterLabel = null, string? issueLabel = null, string? bookLabel = null)
     {
-        return FormatChapterTitle(libraryType, chapter.IsSpecial, chapter.Range, chapter.Title,
+        var title = string.IsNullOrEmpty(chapter.TitleName) ? Parser.CleanSpecialTitle(chapter.Title) : chapter.TitleName;
+        return FormatChapterTitle(libraryType, chapter.IsSpecial, chapter.Range, title,
             chapterLabel, issueLabel, bookLabel);
     }
 
@@ -50,7 +51,7 @@ public partial class EntityNamingService : IEntityNamingService
     {
         if (isSpecial)
         {
-            return Parser.CleanSpecialTitle(title!);
+            return title!;
         }
 
         chapterLabel ??= DefaultChapterLabel;

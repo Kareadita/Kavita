@@ -19,9 +19,8 @@ public class ReadingList : IEntityDate, IHasCoverImage
     /// A normalized string used to check if the reading list already exists in the DB
     /// </summary>
     public required string NormalizedTitle { get; set; }
-    public string? Summary { get; set; }
     /// <summary>
-    /// Reading lists that are promoted are only done by admins
+    /// Promotion allows non-owners to view the list
     /// </summary>
     public bool Promoted { get; set; }
     public string? CoverImage { get; set; }
@@ -29,17 +28,19 @@ public class ReadingList : IEntityDate, IHasCoverImage
     public string? SecondaryColor { get; set; }
     public bool CoverImageLocked { get; set; }
 
-    /// <summary>
-    /// The highest age rating from all Series within the reading list
-    /// </summary>
-    /// <remarks>Introduced in v0.6</remarks>
-    public required AgeRating AgeRating { get; set; } = AgeRating.Unknown;
 
     public ICollection<ReadingListItem> Items { get; set; } = null!;
     public DateTime Created { get; set; }
     public DateTime LastModified { get; set; }
     public DateTime CreatedUtc { get; set; }
     public DateTime LastModifiedUtc { get; set; }
+
+    #region Metadata
+    public string? Summary { get; set; }
+    /// <summary>
+    /// The highest age rating from all Series within the reading list
+    /// </summary>
+    public required AgeRating AgeRating { get; set; } = AgeRating.Unknown;
     /// <summary>
     /// Minimum Year the Reading List starts
     /// </summary>
@@ -56,6 +57,7 @@ public class ReadingList : IEntityDate, IHasCoverImage
     /// Maximum Month the Reading List starts
     /// </summary>
     public int EndingMonth { get; set; }
+    #endregion
 
     // Relationships
     public int AppUserId { get; set; }
