@@ -329,6 +329,7 @@ public class ReadingListRepository(DataContext context, IMapper mapper) : IReadi
 
         return await context.AppUserProgresses
             .Where(p => chapterIdsQuery.Contains(p.ChapterId) && p.AppUserId == userId)
+            .AsNoTracking()
             .AnyAsync(ct);
     }
 
