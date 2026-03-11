@@ -380,12 +380,10 @@ export class EntityCardComponent<T> implements OnInit {
     const result = event as ActionResult<any>;
     switch (result.effect) {
       case 'update':
-        console.log('handle actionable result - update')
         this.dataChanged.emit(result.entity);
         break;
       case 'remove':
       case 'reload':
-        console.log('handle actionable result - reload')
         this.reload.emit(result.entity?.id ?? 0);
         break;
       case 'none':

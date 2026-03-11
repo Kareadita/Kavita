@@ -239,7 +239,6 @@ class SeriesDetailComponent implements OnInit, AfterViewInit {
   });
 
   activeTabId = TabID.Storyline;
-  downloadInProgress: boolean = false;
   mobileSeriesImgBackground = this.themeService.getCssVariable('--mobile-series-img-background');
 
   isLoading = signal<boolean>(true);
@@ -561,14 +560,9 @@ class SeriesDetailComponent implements OnInit, AfterViewInit {
         this.router.navigate(['library', this.libraryId()]);
         break;
       case 'reload':
-        this.loadSeries(this.seriesId(), true);
+        this.loadPageSource.next(true);
         break;
       case 'none':
-        if (result.action === Action.Download) {
-          if (this.downloadInProgress) return;
-          this.downloadInProgress = true;
-          this.cdRef.markForCheck();
-        }
         break;
     }
   }
@@ -896,10 +890,12 @@ class SeriesDetailComponent implements OnInit, AfterViewInit {
     patchEntitySignal(this.chapters, c);
     patchEntitySignal(this.specials, c);
     patchEntitySignal(this.storylineChapters, c);
+    this.setContinuePoint();
   }
 
   updateVolume(c: Volume) {
     patchEntitySignal(this.volumes, c);
+    this.setContinuePoint();
   }
 
   protected readonly LibraryType = LibraryType;
