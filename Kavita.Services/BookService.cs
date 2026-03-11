@@ -1003,7 +1003,8 @@ public partial class BookService(
             var bookPages = await book.GetReadingOrderAsync();
             var pageList = bookPages.ToList();
 
-            // Off-by-one fix for completed books
+            // Completed books have endPage equal to pageList.Count (For the UI); We need to adjust this shift
+            // To calculate the read words correctly
             if (endPage == pageList.Count)
             {
                 endPage--;

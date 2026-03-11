@@ -1,5 +1,6 @@
 import {ComponentRef, inject, Injectable, InputSignal, ModelSignal, Type, WritableSignal} from '@angular/core';
 import {NgbModal, NgbModalOptions, NgbModalRef} from '@ng-bootstrap/ng-bootstrap';
+import {environment} from "src/environments/environment";
 
 export type UnwrapSignal<T> =
   T extends ModelSignal<infer R> ? R :
@@ -28,7 +29,15 @@ export class ModalService {
 
       if (componentRef) {
         componentRef.setInput(key as string, value);
+        return;
       }
+
+      // Throw an error in development, so we're sure to catch these issues
+      if (!environment.production) {
+        throw new Error('ModalService.setInput: componentRef is not available; input "' + String(key) + '" was not set.');
+      }
+
+      console.warn('ModalService.setInput: componentRef is not available; input "' + String(key) + '" was not set.');
     };
 
     return ref;
