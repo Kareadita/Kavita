@@ -76,7 +76,8 @@ export class ProfileOverviewComponent {
           .getCurrentlyReading(memberId, 0, 20)
           .pipe(map(pr => pr.result), seriesMapper),
         nextPageLoader: (pageNum, pageSize) => this.seriesService
-          .getCurrentlyReading(memberId, pageNum, pageSize),
+          .getCurrentlyReading(memberId, pageNum, pageSize)
+          .pipe(map(pr => pr.result), seriesMapper),
       },
       {
         title: translate('profile-overview.want-to-read'),
@@ -84,7 +85,8 @@ export class ProfileOverviewComponent {
           .getWantToRead(0, 20, undefined, memberId)
           .pipe(map(pr => pr.result), seriesMapper),
         nextPageLoader: (pageNum, pageSize) => this.seriesService
-          .getWantToRead(pageNum, pageSize, undefined, memberId),
+          .getWantToRead(pageNum, pageSize, undefined, memberId)
+          .pipe(map(pr => pr.result), seriesMapper),
       },
       {
         title: translate('profile-overview.just-finished-reading'),
@@ -92,7 +94,8 @@ export class ProfileOverviewComponent {
           .getAllSeriesV2(0, 20, JustFinishedReadingFilter, QueryContext.None, memberId)
           .pipe(map(pr => pr.result), seriesMapper),
         nextPageLoader: (pageNum, pageSize) => this.seriesService
-          .getAllSeriesV2(pageNum, pageSize, JustFinishedReadingFilter, QueryContext.None, memberId),
+          .getAllSeriesV2(pageNum, pageSize, JustFinishedReadingFilter, QueryContext.None, memberId)
+          .pipe(map(pr => pr.result), seriesMapper),
       }
     ];
   });

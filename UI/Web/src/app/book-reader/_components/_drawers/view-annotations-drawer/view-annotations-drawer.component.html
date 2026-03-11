@@ -34,9 +34,9 @@
       @if (filteredAnnotations.length > 8) {
         <virtual-scroller
           #scroll
-          [items]="annotations() | filter: filterList"
+          [items]="filteredAnnotations"
         >
-          <div class="#container">
+          <div #container>
             @for (annotation of scroll.viewPortItems; track annotation.id) {
               <app-annotation-card
                 [annotation]="annotation"

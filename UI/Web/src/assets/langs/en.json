@@ -3614,7 +3614,7 @@
         "oidc": "{{login.oidc}}",
         "unlink-oidc": "Remove OIDC link",
         "confirm-unlink": "Are you sure you want to remove your OIDC link?",
-        "confirm-unlink-extra": "If you are currently authenticated with the OIDC account, you will be logged out. You can link again on email at any time."
+        "confirm-unlink-extra": "If you are currently authenticated with the OIDC account, you will be logged out. You can link again via email at any time."
     },
 
     "manage-reading-profiles": {

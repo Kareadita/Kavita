@@ -9,8 +9,7 @@ import {
 } from "src/app/user-settings/manage-scrobbling-providers/manage-scrobbling-providers.component";
 import {AccountService} from "src/app/_services/account.service";
 import {ConfirmService} from "src/app/shared/confirm.service";
-import {fromPromise} from "rxjs/internal/observable/innerFrom";
-import {EMPTY, filter, switchMap, tap} from "rxjs";
+import {EMPTY, filter, switchMap, from} from "rxjs";
 import {ImageComponent} from "src/app/shared/image/image.component";
 import {translate, TranslocoDirective} from "@jsverse/transloco";
 
@@ -34,7 +33,7 @@ export class AccountSettingsComponent {
   private readonly confirmService = inject(ConfirmService);
 
   protected clearOidcLink() {
-    fromPromise(this.confirmService.confirm(translate('account-settings.confirm-unlink'), {
+    from(this.confirmService.confirm(translate('account-settings.confirm-unlink'), {
       ...this.confirmService.defaultConfirm,
       content: translate('account-settings.confirm-unlink-extra'),
       header: translate('account-settings.confirm-unlink'),

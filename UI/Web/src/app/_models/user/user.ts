@@ -6,7 +6,7 @@ import {AuthKey} from "./auth-key";
 // This interface is only used for login and storing/retrieving JWT from local storage
 export interface User extends IHasCover {
   id: number;
-  oidcId: string;
+  oidcId: string | null;
   username: string;
   token: string;
   refreshToken: string;
