@@ -634,7 +634,7 @@ export class DownloadService {
       this.debugLog(`downloadSeries() decomposed into ${items.length} items (${detail.volumes.length} vols, ${detail.chapters.length + detail.specials.length} chapters)`);
 
       const userPrefs = this.accountService.userPreferences();
-      if (skipSizePrompt || (userPrefs?.promptForDownloadSize && items.length > 0)) {
+      if (!skipSizePrompt && userPrefs?.promptForDownloadSize && items.length > 0) {
         // Single size call for the whole series, single confirm dialog
         this.downloadSeriesSize(series.id).pipe(
           switchMap(async size => this.confirmSize(size, 'series')),
