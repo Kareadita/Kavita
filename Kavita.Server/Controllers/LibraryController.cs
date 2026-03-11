@@ -198,7 +198,7 @@ public class LibraryController(
     /// <summary>
     /// Return a specific library
     /// </summary>
-    /// <remarks>If the user is not an admin, only id, type, and name will be returned (<see cref="LiteLibraryDto"/></remarks>
+    /// <remarks>If the user is not an admin, only id, type, and name will be returned (<see cref="LiteLibraryDto"/>)</remarks>
     /// <returns></returns>
     [HttpGet]
     [LibraryAccess]

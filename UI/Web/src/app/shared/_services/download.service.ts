@@ -74,7 +74,7 @@ export class DownloadService {
   private IOS_SIZE_WARNING = 209_715_200;
 
   /** Set to true to enable verbose download queue logging in the browser console. */
-  private readonly debug = true;
+  private readonly debug = false;
 
   private debugLog(...args: any[]) {
     if (this.debug) console.log('[DownloadService]', ...args);

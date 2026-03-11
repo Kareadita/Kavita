@@ -52,6 +52,8 @@ export class LicenseService {
         this._hasValidLicense.set(res?.isActive || false);
       }),
       catchError(error => {
+        console.error(error);
+        this._hasValidLicense.set(false);
         return throwError(error); // Rethrow the error to propagate it further
       })
     );

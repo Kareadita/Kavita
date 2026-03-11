@@ -90,24 +90,38 @@ export class UtilityService {
   }
 
   isVolume(d: any) {
-    return d != null && d.hasOwnProperty('chapters');
+    return d != null
+      && typeof d === 'object'
+      && ('_type' in d && d._type === 'Volume'
+        || 'chapters' in d);
   }
 
   isChapter(d: any) {
-    return d != null && d.hasOwnProperty('volumeId');
+    return d != null
+      && typeof d === 'object'
+      && ('_type' in d && d._type === 'Chapter'
+        || 'volumeId' in d);
   }
 
   isSeries(d: any) {
-    return d != null && d.hasOwnProperty('originalName');
+    return d != null
+      && typeof d === 'object'
+      && ('_type' in d && d._type === 'Series'
+        || 'originalName' in d);
   }
 
-  // TODO: We need a better way
   isReadingList(d: any) {
-     return d != null && d.hasOwnProperty('title') && d.hasOwnProperty('startingYear');
+    return d != null
+      && typeof d === 'object'
+      && '_type' in d
+      && d._type === 'ReadingList';
   }
 
-  isUserCollection(d: any) {
-     return d != null && d.hasOwnProperty('title') && d.hasOwnProperty('itemCount') && !d.hasOwnProperty('startingYear');
+  isUserCollection(d: unknown) {
+    return d != null
+      && typeof d === 'object'
+      && '_type' in d
+      && d._type === 'UserCollection';
   }
 
   asVolume(d: any) {

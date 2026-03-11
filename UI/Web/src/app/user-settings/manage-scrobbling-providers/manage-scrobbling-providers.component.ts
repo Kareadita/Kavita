@@ -49,6 +49,7 @@ export class ManageScrobblingProvidersComponent implements OnInit {
 
     if (!this.hasValidLicense()) {
       this.isLoaded.set(true);
+      return;
     }
 
     this.scrobblingService.getAniListToken().subscribe(token => {

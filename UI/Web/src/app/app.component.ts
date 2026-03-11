@@ -65,6 +65,8 @@ export class AppComponent implements OnInit {
         console.log('User has animations off, disabling ngbBootstrap')
         this.ngbCanvasConfig.animation = false;
         document.documentElement.classList.add('no-animations', 'animate-disabled');
+      } else {
+        // TODO: Let's move this logic into theme service/function because when we undo, we need to respect motion preferences  
       }
     })
 

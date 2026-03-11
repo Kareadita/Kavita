@@ -2,7 +2,6 @@
 using Kavita.API.Database;
 using Kavita.API.Services.Reading;
 using Kavita.Models.DTOs.Progress;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Kavita.Server.Controllers;

@@ -22,4 +22,6 @@ export interface UserCollection {
   missingSeriesFromSource: string | null;
   ageRating: AgeRating;
   itemCount: number;
+
+  readonly _type: 'UserCollection';
 }

@@ -88,5 +88,5 @@ export interface Series extends IHasCover, IHasReadingTime, IHasProgress {
    * Min number of reads across all chapters
    */
   totalReads: number;
-
+  readonly _type: 'Series';
 }

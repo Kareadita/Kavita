@@ -113,8 +113,7 @@ public class DownloadController(
     /// </summary>
     /// <param name="request"></param>
     /// <returns></returns>
-    [ReadingListAccess]
-    [HttpGet("bulk-readinglist-size")]
+    [HttpPost("bulk-readinglist-size")]
     public async Task<ActionResult<Dictionary<int, long>>> GetBulkReadingListSize(BulkReadingListSizeRequest request)
     {
         return Ok(await unitOfWork.ReadingListRepository.GetFilesizesAsync(request.ReadingListIds, UserId));
@@ -136,6 +135,7 @@ public class DownloadController(
     /// Downloads all chapters within a volume. If the chapters are multiple zips, they will all be zipped up.
     /// </summary>
     /// <param name="volumeId"></param>
+    /// <param name="correlationId">Only for UI</param>
     /// <returns></returns>
     [VolumeAccess]
     [HttpGet("volume")]
