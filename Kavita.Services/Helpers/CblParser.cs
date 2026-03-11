@@ -1,26 +1,28 @@
 using System;
-using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
-using System.Linq;
 using System.Text.Json;
-using System.Text.Json.Serialization;
 using System.Xml.Serialization;
 using Kavita.Models.DTOs.ReadingLists.CBL;
 using Kavita.Models.DTOs.ReadingLists.CBL.V1;
 using Kavita.Models.DTOs.ReadingLists.CBL.V2;
 
-namespace Kavita.Services.ReadingLists;
+namespace Kavita.Services.Helpers;
 
 /// <summary>
 /// Responsible for reading v1 and v2 specs into a common format
 /// </summary>
-public class CblParserService
+public static class CblParser
 {
+    private static readonly JsonSerializerOptions JsonSerializerOptions = new JsonSerializerOptions()
+    {
+        PropertyNameCaseInsensitive = true,
+    };
+
     /// <summary>
     /// Auto-detect format by file extension and parse accordingly.
     /// </summary>
-    public ParsedCblReadingList Parse(string filePath)
+    public static ParsedCblReadingList Parse(string filePath)
     {
         var ext = Path.GetExtension(filePath).ToLowerInvariant();
         return ext switch
@@ -34,7 +36,7 @@ public class CblParserService
     /// <summary>
     /// Parse a v1 XML CBL file into the unified model.
     /// </summary>
-    public ParsedCblReadingList ParseV1(string filePath)
+    public static ParsedCblReadingList ParseV1(string filePath)
     {
         var serializer = new XmlSerializer(typeof(CblReadingList));
         using var stream = File.OpenRead(filePath);
@@ -90,14 +92,10 @@ public class CblParserService
     /// Parse a v2 JSON CBL file into the unified model.
     /// </summary>
     /// <remarks>https://github.com/ComicReadingLists/json-cbl-standard/blob/main/schema/1.0/comic-reading-list.schema.json</remarks>
-    public ParsedCblReadingList ParseV2(string filePath)
+    public static ParsedCblReadingList ParseV2(string filePath)
     {
         var json = File.ReadAllText(filePath);
-        var options = new JsonSerializerOptions
-        {
-            PropertyNameCaseInsensitive = true,
-        };
-        var v2 = JsonSerializer.Deserialize<CblV2Root>(json, options);
+        var v2 = JsonSerializer.Deserialize<CblV2Root>(json, JsonSerializerOptions);
 
         var result = new ParsedCblReadingList
         {
@@ -113,8 +111,8 @@ public class CblParserService
             Publisher = v2.ListDetails?.Publisher ?? string.Empty,
             Imprint = v2.ListDetails?.Imprint ?? string.Empty,
             ListType = MapListType(v2.ListDetails?.Type),
-            Tags = v2.ListDetails?.Tags ?? new List<string>(),
-            CoverImageUrls = v2.ListDetails?.CoverImageURLs ?? new List<string>(),
+            Tags = v2.ListDetails?.Tags ?? [],
+            CoverImageUrls = v2.ListDetails?.CoverImageURLs ?? [],
         };
 
         if (v2.ListDetails?.Relationships != null)
@@ -191,7 +189,7 @@ public class CblParserService
         };
     }
 
-    private static CblListType MapListType(string type)
+    private static CblListType MapListType(string? type)
     {
         if (string.IsNullOrEmpty(type)) return CblListType.Unknown;
 

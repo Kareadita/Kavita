@@ -1,4 +1,5 @@
 using Kavita.Models.DTOs.ReadingLists.CBL;
+using Kavita.Services.Helpers;
 using Kavita.Services.ReadingLists;
 
 namespace Kavita.Services.Tests.ReadingLists;
@@ -6,7 +7,7 @@ namespace Kavita.Services.Tests.ReadingLists;
 public class CblParserTests
 {
     private readonly string _testDirectory = Path.Join(Directory.GetCurrentDirectory(), "../../../Test Data/CblParserTests/Test Cases");
-    private readonly CblParserService _parser = new();
+    private readonly CblParser _parser = new();
 
     #region V1 Spec
 
@@ -14,7 +15,7 @@ public class CblParserTests
     public void ParseV1Test_NoSpecial()
     {
         const string filename = "[DC Comics] Aquaman- Death of a Prince (WEB-CBRO).cbl";
-        var result = _parser.ParseV1(Path.Join(_testDirectory, filename));
+        var result = CblParser.ParseV1(Path.Join(_testDirectory, filename));
 
         Assert.Equal(1, result.SchemaVersion);
         Assert.Equal("[DC Comics] Aquaman- Death of a Prince (WEB-CBRO)", result.Name);
@@ -59,7 +60,7 @@ public class CblParserTests
     public void ParseV1Test_Special()
     {
         const string filename = "BOOM! Power Rangers Simplified 1a.cbl";
-        var result = _parser.ParseV1(Path.Join(_testDirectory, filename));
+        var result = CblParser.ParseV1(Path.Join(_testDirectory, filename));
 
         Assert.Equal("Simplified Power Rangers 1a", result.Name);
         Assert.Equal(164, result.Items.Count);
@@ -86,7 +87,7 @@ public class CblParserTests
     public void ParseV1Test_DatabaseElementCaptured()
     {
         const string filename = "[DC Comics] Aquaman- Death of a Prince (WEB-CBRO).cbl";
-        var result = _parser.ParseV1(Path.Join(_testDirectory, filename));
+        var result = CblParser.ParseV1(Path.Join(_testDirectory, filename));
 
         // Every item in this file has a Database element
         foreach (var item in result.Items)
@@ -107,7 +108,7 @@ public class CblParserTests
     public void ParseV2Test()
     {
         const string filename = "2018-2021 Part 16.1 Reborn Again.json";
-        var result = _parser.ParseV2(Path.Join(_testDirectory, filename));
+        var result = CblParser.ParseV2(Path.Join(_testDirectory, filename));
 
         // File details
         Assert.Equal("a59e4ad5-0d51-4afe-b0f5-6d3e01eb7cc7", result.Uuid);
@@ -181,7 +182,7 @@ public class CblParserTests
     public void ParseV2Test_AutoDetect()
     {
         const string filename = "2018-2021 Part 16.1 Reborn Again.json";
-        var result = _parser.Parse(Path.Join(_testDirectory, filename));
+        var result = CblParser.Parse(Path.Join(_testDirectory, filename));
 
         Assert.Equal("a59e4ad5-0d51-4afe-b0f5-6d3e01eb7cc7", result.Uuid);
         Assert.Equal("Part 16.1 Reborn Again", result.Name);
@@ -192,7 +193,7 @@ public class CblParserTests
     public void ParseV1Test_AutoDetect()
     {
         const string filename = "[DC Comics] Aquaman- Death of a Prince (WEB-CBRO).cbl";
-        var result = _parser.Parse(Path.Join(_testDirectory, filename));
+        var result = CblParser.Parse(Path.Join(_testDirectory, filename));
 
         Assert.Equal("[DC Comics] Aquaman- Death of a Prince (WEB-CBRO)", result.Name);
         Assert.Equal(25, result.Items.Count);
