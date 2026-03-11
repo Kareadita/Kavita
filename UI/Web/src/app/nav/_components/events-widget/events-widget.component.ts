@@ -11,7 +11,7 @@ import {User} from 'src/app/_models/user/user';
 import {AccountService} from 'src/app/_services/account.service';
 import {EVENTS, Message, MessageHubService} from 'src/app/_services/message-hub.service';
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
-import {NgClass, NgStyle} from '@angular/common';
+import {NgStyle} from '@angular/common';
 import {TranslocoDirective} from "@jsverse/transloco";
 import {RouterLink} from "@angular/router";
 import {ReadingSessionUpdateEvent} from "../../../_models/events/reading-session-close-event";
@@ -22,7 +22,7 @@ import {VersionService} from "../../../_services/version.service";
   templateUrl: './events-widget.component.html',
   styleUrls: ['./events-widget.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [NgClass, NgbPopover, NgStyle, TranslocoDirective, RouterLink]
+  imports: [NgbPopover, NgStyle, TranslocoDirective, RouterLink]
 })
 export class EventsWidgetComponent implements OnInit {
   public readonly downloadService = inject(DownloadService);
