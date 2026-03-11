@@ -266,7 +266,7 @@ public class ExternalMetadataService : IExternalMetadataService
         // Get from Kavita+ API the Full Series metadata with rec/rev and cache to ExternalMetadata tables
         try
         {
-            return await FetchExternalMetadataForSeries(seriesId, libraryType, data, ct);
+            return await FetchExternalMetadataForSeries(seriesId, libraryType, data, false, ct);
         }
         catch (KavitaException ex)
         {
@@ -297,7 +297,7 @@ public class ExternalMetadataService : IExternalMetadataService
                     CbrId = cbrId,
                     MediaFormat = series.Library.Type.ConvertToPlusMediaFormat(series.Format),
                     SeriesName = series.Name // Required field, not used since AniList/Mal Id are passed
-                }, ct);
+                }, true, ct);
 
             if (metadata.Series == null)
             {
@@ -362,8 +362,9 @@ public class ExternalMetadataService : IExternalMetadataService
     /// <param name="seriesId"></param>
     /// <param name="libraryType"></param>
     /// <param name="data"></param>
+    /// <param name="ct"></param>
     /// <returns></returns>
-    private async Task<SeriesDetailPlusDto> FetchExternalMetadataForSeries(int seriesId, LibraryType libraryType, PlusSeriesRequestDto data, CancellationToken ct = default)
+    private async Task<SeriesDetailPlusDto> FetchExternalMetadataForSeries(int seriesId, LibraryType libraryType, PlusSeriesRequestDto data, bool fromMatchFlow = false, CancellationToken ct = default)
     {
 
         var series = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(seriesId, SeriesIncludes.Library, ct);
@@ -453,7 +454,7 @@ public class ExternalMetadataService : IExternalMetadataService
 
             // If there is metadata and the user has metadata download turned on
             var madeMetadataModification = false;
-            if (result.Series != null && series.Library.AllowMetadataMatching)
+            if (result.Series != null && (series.Library.AllowMetadataMatching || fromMatchFlow))
             {
                 externalSeriesMetadata.Series = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(seriesId, ct: ct);
 

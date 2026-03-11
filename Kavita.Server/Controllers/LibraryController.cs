@@ -198,12 +198,10 @@ public class LibraryController(
     /// <summary>
     /// Return a specific library
     /// </summary>
-    /// <remarks>If the user is not an admin, only id, type, and name will be returned</remarks>
+    /// <remarks>If the user is not an admin, only id, type, and name will be returned (<see cref="LiteLibraryDto"/>)</remarks>
     /// <returns></returns>
     [HttpGet]
     [LibraryAccess]
-    [ProducesResponseType<LibraryDto>(StatusCodes.Status200OK)]
-    [ProducesResponseType<LiteLibraryDto>(StatusCodes.Status200OK)]
     public async Task<ActionResult<LibraryDto?>> GetLibrary(int libraryId)
     {
         if (User.IsInRole(PolicyConstants.AdminRole))

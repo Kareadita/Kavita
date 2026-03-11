@@ -115,11 +115,11 @@ export class SettingsComponent {
   private readonly cdRef = inject(ChangeDetectorRef);
   private readonly destroyRef = inject(DestroyRef);
   private readonly router = inject(Router);
-  private readonly licenseService = inject(LicenseService);
+  protected readonly licenseService = inject(LicenseService);
   protected readonly accountService = inject(AccountService);
 
   fragment: SettingsTabId = SettingsTabId.Account;
-  hasActiveLicense = computed(() => this.licenseService.hasValidLicenseSignal());
+  hasActiveLicense = computed(() => this.licenseService.hasValidLicense());
 
   constructor() {
     this.route.fragment.pipe(tap(frag => {

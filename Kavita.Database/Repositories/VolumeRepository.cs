@@ -215,7 +215,7 @@ public class VolumeRepository(DataContext context, IMapper mapper) : IVolumeRepo
             .ToListAsync(ct))!;
     }
 
-    public async Task<long> GetFilesizeForVolumeAsync(int volumeId, CancellationToken ct = default)
+    public async Task<long> GetFilesizeAsync(int volumeId, CancellationToken ct = default)
     {
         return await context.Chapter
             .Where(c => volumeId == c.VolumeId)
@@ -224,7 +224,7 @@ public class VolumeRepository(DataContext context, IMapper mapper) : IVolumeRepo
             .SumAsync(f => f.Bytes, cancellationToken: ct);
     }
 
-    public async Task<Dictionary<int, long>> GetFilesizeForVolumesAsync(IList<int> volumeIds, CancellationToken ct = default)
+    public async Task<Dictionary<int, long>> GetFilesizesAsync(IList<int> volumeIds, CancellationToken ct = default)
     {
         return await volumeIds.BatchToDictionaryAsync(50, batch =>
             context.Chapter

@@ -199,7 +199,14 @@ public class LicenseService(
     }
 
 
-
+    /// <summary>
+    /// Removes this installId from Kavita+, essentially allowing the user to re-register an instance
+    /// </summary>
+    /// <param name="license"></param>
+    /// <param name="email"></param>
+    /// <param name="ct"></param>
+    /// <returns></returns>
+    /// <exception cref="KavitaException"></exception>
     public async Task<bool> ResetLicense(string license, string email, CancellationToken ct = default)
     {
         try

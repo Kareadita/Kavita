@@ -239,7 +239,6 @@ class SeriesDetailComponent implements OnInit, AfterViewInit {
   });
 
   activeTabId = TabID.Storyline;
-  downloadInProgress: boolean = false;
   mobileSeriesImgBackground = this.themeService.getCssVariable('--mobile-series-img-background');
 
   isLoading = signal<boolean>(true);
@@ -248,7 +247,7 @@ class SeriesDetailComponent implements OnInit, AfterViewInit {
 
   libraryAllowsScrobbling  = signal<boolean>(false);
   isScrobbling = signal<boolean>(true);
-  showScrobbleControls = computed(() => this.licenseService.hasValidLicenseSignal() && this.libraryAllowsScrobbling());
+  showScrobbleControls = computed(() => this.licenseService.hasValidLicense() && this.libraryAllowsScrobbling());
 
   currentlyReadingChapter = signal<Chapter | null>(null);
   continueReadingTitle = computed(() => {
@@ -324,7 +323,7 @@ class SeriesDetailComponent implements OnInit, AfterViewInit {
   unreadCount = signal(0);
   totalCount = signal(0);
   seriesActions = computed(() => {
-    const hasLicense = this.licenseService.hasValidLicenseSignal();
+    const hasLicense = this.licenseService.hasValidLicense();
     let actions = this.actionFactoryService.getSeriesActions()
       .filter(action => action.action !== Action.Edit);
     if (!hasLicense) {
@@ -409,7 +408,7 @@ class SeriesDetailComponent implements OnInit, AfterViewInit {
   });
 
   trackStoryLineIdentity = (index: number, item: StoryLineItem) => item.isChapter ? `${item.chapter!.data.id}_ch_storyline` : `${item.volume!.data.id}_vol_storyline`;
-  
+
   /**
    * Related Series. Sorted by backend
    */
@@ -561,14 +560,9 @@ class SeriesDetailComponent implements OnInit, AfterViewInit {
         this.router.navigate(['library', this.libraryId()]);
         break;
       case 'reload':
-        this.loadSeries(this.seriesId(), true);
+        this.loadPageSource.next(true);
         break;
       case 'none':
-        if (result.action === Action.Download) {
-          if (this.downloadInProgress) return;
-          this.downloadInProgress = true;
-          this.cdRef.markForCheck();
-        }
         break;
     }
   }
@@ -758,10 +752,11 @@ class SeriesDetailComponent implements OnInit, AfterViewInit {
     } else {
       if (libType == LibraryType.Comic || libType == LibraryType.ComicVine) {
         if (this.chapters().length === 0) {
-          if (this.specials().length > 0) {
-            this.activeTabId = TabID.Specials;
-          } else {
+
+          if (this.volumes().length > 0) {
             this.activeTabId = TabID.Volumes;
+          } else if (this.specials().length > 0) {
+            this.activeTabId = TabID.Specials;
           }
         } else {
           this.activeTabId = TabID.Chapters;
@@ -896,10 +891,12 @@ class SeriesDetailComponent implements OnInit, AfterViewInit {
     patchEntitySignal(this.chapters, c);
     patchEntitySignal(this.specials, c);
     patchEntitySignal(this.storylineChapters, c);
+    this.setContinuePoint();
   }
 
   updateVolume(c: Volume) {
     patchEntitySignal(this.volumes, c);
+    this.setContinuePoint();
   }
 
   protected readonly LibraryType = LibraryType;

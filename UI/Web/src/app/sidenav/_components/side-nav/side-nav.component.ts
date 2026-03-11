@@ -9,9 +9,9 @@ import {Library, LibraryType} from '../../../_models/library/library';
 import {AccountService} from '../../../_services/account.service';
 import {ActionFactoryService} from '../../../_services/action-factory.service';
 import {NavService} from '../../../_services/nav.service';
-import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
+import {takeUntilDestroyed, toObservable} from "@angular/core/rxjs-interop";
 import {BehaviorSubject, merge, Observable, of, ReplaySubject, startWith, switchMap} from "rxjs";
-import {AsyncPipe, NgClass} from "@angular/common";
+import {AsyncPipe} from "@angular/common";
 import {SideNavItemComponent} from "../side-nav-item/side-nav-item.component";
 import {FilterPipe} from "../../../_pipes/filter.pipe";
 import {FormsModule} from "@angular/forms";
@@ -34,7 +34,7 @@ import {ActionResult} from "../../../_models/actionables/action-result";
 @Component({
   selector: 'app-side-nav',
   imports: [SideNavItemComponent, CardActionablesComponent, FilterPipe, FormsModule, TranslocoDirective, NgbTooltip,
-    NgClass, AsyncPipe, CdkDropList, CdkDrag],
+    AsyncPipe, CdkDropList, CdkDrag],
   templateUrl: './side-nav.component.html',
   styleUrls: ['./side-nav.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
@@ -67,6 +67,8 @@ export class SideNavComponent {
   editMode: boolean = false;
   totalSize = 0;
   isReadOnly = this.accountService.hasReadOnlyRole;
+
+  readonly hasValidLicense$ = toObservable(this.licenseService.hasValidLicense);
 
   private showAllSubject = new BehaviorSubject<boolean>(false);
   showAll$ = this.showAllSubject.asObservable();
@@ -151,7 +153,7 @@ export class SideNavComponent {
       this.destroyRef,
       (e) => this.router.navigate(['/settings'], { fragment: SettingsTabId.Scrobbling}),
       [KeyBindTarget.NavigateToScrobbling],
-      {condition$: this.licenseService.hasValidLicense$},
+      {condition$: this.hasValidLicense$},
     );
 
     effect(() => {

@@ -556,6 +556,9 @@ public class SeriesController(
     /// </summary>
     /// <param name="match"></param>
     /// <param name="seriesId"></param>
+    /// <param name="aniListId"></param>
+    /// <param name="malId"></param>
+    /// <param name="cbrId"></param>
     /// <returns></returns>
     [HttpPost("update-match")]
     [Authorize(Policy = PolicyGroups.AdminPolicy)]

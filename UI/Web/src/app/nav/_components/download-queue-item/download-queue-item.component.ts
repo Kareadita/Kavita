@@ -29,9 +29,11 @@ export class DownloadQueueItemComponent {
   readonly imageUrl = computed(() => {
     const item = this.item();
 
-    return item.entityType === 'volume'
-      ? this.imageService.getVolumeCoverImage(item.entityId)
-      : this.imageService.getChapterCoverImage(item.entityId)
+    switch (item.entityType) {
+      case 'volume': return this.imageService.getVolumeCoverImage(item.entityId);
+      case 'chapter': return this.imageService.getChapterCoverImage(item.entityId);
+      case 'readinglist-item': return this.imageService.getChapterCoverImage(item.chapterId!);
+    }
   });
 
   readonly statusBadgeColor = computed<TagBadgeColor>(() => {

@@ -110,7 +110,7 @@ export class EntityTitleService {
         if (number === LooseLeafOrSpecial) {
           renderText = this.translocoService.translate('entity-title.chapter') + ' - ';
         } else {
-          renderText = this.translocoService.translate('entity-title.chapter') + ' ' + number + ' - ';
+          renderText = this.translocoService.translate('entity-title.chapter', {num: number}) + ' - ';
         }
       }
       renderText += titleName;
@@ -123,7 +123,7 @@ export class EntityTitleService {
 
       if (number !== LooseLeafOrSpecial) {
         if (isChapter) {
-          renderText = this.translocoService.translate('entity-title.chapter') + ' ' + number;
+          renderText = this.translocoService.translate('entity-title.chapter', {num: number});
         } else {
           renderText = volumeTitle;
         }
@@ -144,7 +144,7 @@ export class EntityTitleService {
 
     if (number !== LooseLeafOrSpecial) {
       if (isChapter) {
-        renderText = this.translocoService.translate('entity-title.chapter') + ' ' + number;
+        renderText = this.translocoService.translate('entity-title.chapter', {num: number});
       } else {
         renderText = volumeTitle;
       }
@@ -162,7 +162,7 @@ export class EntityTitleService {
 
     if (titleName && prioritizeTitleName) {
       if (isChapter && includeChapter) {
-        renderText = this.translocoService.translate('entity-title.issue-num') + ' ' + number + ' - ';
+        renderText = this.translocoService.translate('entity-title.issue-num', {num: number}) + ' - ';
       }
       renderText += titleName;
     } else {
@@ -172,7 +172,7 @@ export class EntityTitleService {
         }
       }
       renderText += number !== LooseLeafOrSpecial
-        ? (isChapter ? this.translocoService.translate('entity-title.issue-num') + ' ' + number : volumeTitle)
+        ? (isChapter ? this.translocoService.translate('entity-title.issue-num', {num: number}) : volumeTitle)
         : this.translocoService.translate('entity-title.special');
     }
 

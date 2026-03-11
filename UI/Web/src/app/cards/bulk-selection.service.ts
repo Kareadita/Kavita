@@ -61,7 +61,6 @@ export class BulkSelectionService {
   public isShiftDown: boolean = false;
 
   private actionsSource = new ReplaySubject<ActionItem<any>[]>(1);
-  public actions$ = this.actionsSource.asObservable();
   public actionsSignal = toSignal(this.actionsSource);
 
   private selectionsSource = new ReplaySubject<number>(1);
@@ -216,7 +215,7 @@ export class BulkSelectionService {
     }
 
     if (this.hasDataSource('collection')) {
-      const actions = this.applyFilterToList(this.actionFactory.getCollectionTagActions(shouldRender), [Action.Promote, Action.UnPromote, Action.Delete]);
+      const actions = this.applyFilterToList(this.actionFactory.getCollectionTagActions(shouldRender), [Action.Promote, Action.UnPromote, Action.Delete, Action.Download]);
       return this.wireBulkCallback(actions, (action) => {
         const collections = this.resolveEntities<UserCollection>('collection');
         return this.actionService.handleBulkCollectionAction(action, collections);
@@ -224,7 +223,7 @@ export class BulkSelectionService {
     }
 
     if (this.hasDataSource('readingList')) {
-      const actions = this.applyFilterToList(this.actionFactory.getReadingListActions(shouldRender), [Action.Promote, Action.UnPromote, Action.Delete]);
+      const actions = this.applyFilterToList(this.actionFactory.getReadingListActions(shouldRender), [Action.Promote, Action.UnPromote, Action.Delete, Action.Download]);
       return this.wireBulkCallback(actions, (action) => {
         const readingLists = this.resolveEntities<ReadingList>('readingList');
         return this.actionService.handleBulkReadingListAction(action, readingLists);

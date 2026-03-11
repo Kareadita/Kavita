@@ -89,16 +89,24 @@ export class UtilityService {
     return input.toUpperCase().replace(reg, '') === filter.toUpperCase().replace(reg, '');
   }
 
-  isVolume(d: any) {
+  isVolume(d: unknown) {
     return d != null && d.hasOwnProperty('chapters');
   }
 
-  isChapter(d: any) {
+  isChapter(d: unknown) {
     return d != null && d.hasOwnProperty('volumeId');
   }
 
-  isSeries(d: any) {
+  isSeries(d: unknown) {
     return d != null && d.hasOwnProperty('originalName');
+  }
+
+  isReadingList(d: unknown) {
+    return d != null && d.hasOwnProperty('title') && d.hasOwnProperty('startingYear');
+  }
+
+  isUserCollection(d: unknown) {
+    return d != null && d.hasOwnProperty('title') && d.hasOwnProperty('itemCount') && !d.hasOwnProperty('startingYear');
   }
 
   asVolume(d: any) {

@@ -1,7 +1,7 @@
 import {inject, Injectable} from '@angular/core';
 import {environment} from "../../environments/environment";
-import { HttpClient } from "@angular/common/http";
-import {KavitaLocale, Language} from "../_models/metadata/language";
+import {HttpClient} from "@angular/common/http";
+import {KavitaLocale} from "../_models/metadata/language";
 import {ReplaySubject, tap} from "rxjs";
 import {TranslocoService} from "@jsverse/transloco";
 
@@ -25,12 +25,14 @@ export class LocalizationService {
     }));
   }
 
-  refreshTranslations(lang: string) {
+  refreshTranslations(newLang: string) {
 
     // Clear the cached translation
-    localStorage.removeItem(`@@TRANSLOCO_PERSIST_TRANSLATIONS/${lang}`);
+    localStorage.removeItem(`@transloco/translations`);
+    localStorage.removeItem(`@transloco/translations/timestamp`);
 
     // Reload the translation
-    return this.translocoService.load(lang);
+    this.translocoService.setActiveLang(newLang);
+    return this.translocoService.load(newLang);
   }
 }

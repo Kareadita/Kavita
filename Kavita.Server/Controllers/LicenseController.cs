@@ -96,6 +96,11 @@ public class LicenseController(
     }
 
 
+    /// <summary>
+    /// Break the registration between Kavita+ and this instance
+    /// </summary>
+    /// <param name="dto"></param>
+    /// <returns></returns>
     [HttpPost("reset")]
     [Authorize(PolicyGroups.AdminPolicy)]
     public async Task<ActionResult> ResetLicense(UpdateLicenseDto dto)

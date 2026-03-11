@@ -4,9 +4,10 @@
   @let sideNavCollapsed = navService.sideNavCollapsedSignal();
 
   @if (accountService.currentUser()) {
-    <div class="side-nav-container" [ngClass]="{'closed' : sideNavCollapsed,
-    'hidden': !sideNavVisible,
-    'no-donate': (licenseService.hasValidLicense$ | async) === true}">
+    <div class="side-nav-container"
+         [class.no-donate]="licenseService.hasValidLicense()"
+         [class.closed]="sideNavCollapsed"
+         [class.hidden]="!sideNavVisible">
       <div class="side-nav" cdkDropList (cdkDropListDropped)="reorderDrop($event)" [cdkDropListDisabled]="accountService.hasReadOnlyRole()">
 
 
@@ -107,13 +108,12 @@
   }
 
   @if (breakpointService.isTabletOrBelow()) {
-    <div class="side-nav-overlay" (click)="toggleNavBar()" [ngClass]="{'closed' : sideNavCollapsed}"></div>
+    <div class="side-nav-overlay" (click)="toggleNavBar()" [class.closed]="sideNavCollapsed"></div>
   }
 
-  <div class="sidenav-bottom" [ngClass]="{'closed' : sideNavCollapsed,
-      'hidden': !sideNavVisible || (licenseService.hasValidLicense$ | async) === true}">
-    @if ((licenseService.hasValidLicense$ | async) === false) {
-      <app-side-nav-item [ngClass]="'donate'" icon="fa-heart"
+  <div class="sidenav-bottom" [class.closed]="sideNavCollapsed" [class.hidden]="!sideNavVisible || licenseService.hasValidLicense()">
+    @if (!licenseService.hasValidLicense()) {
+      <app-side-nav-item class="donate" icon="fa-heart"
                         [ngbTooltip]="t('donate-tooltip')"
                         [link]="WikiLink.Donation"
                         [external]="true" />

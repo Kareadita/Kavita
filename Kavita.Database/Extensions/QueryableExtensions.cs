@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
+using System.Threading;
 using System.Threading.Tasks;
 using Kavita.API.Repositories;
 using Kavita.Models.DTOs.Annotations;
@@ -20,7 +21,7 @@ public static class QueryableExtensions
 {
     private const float DefaultTolerance = 0.001f;
 
-    public static Task<AgeRestriction> GetUserAgeRestriction(this DbSet<AppUser> queryable, int userId)
+    public static Task<AgeRestriction> GetUserAgeRestriction(this DbSet<AppUser> queryable, int userId, CancellationToken ct = default)
     {
         if (userId < 1)
         {
@@ -38,7 +39,7 @@ public static class QueryableExtensions
                     AgeRating = u.AgeRestriction,
                     IncludeUnknowns = u.AgeRestrictionIncludeUnknowns
                 })
-            .SingleAsync();
+            .SingleAsync(ct);
     }
 
 

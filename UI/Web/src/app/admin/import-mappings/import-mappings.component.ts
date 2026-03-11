@@ -40,7 +40,7 @@ import {NgTemplateOutlet} from "@angular/common";
 import {Router} from "@angular/router";
 import {LicenseService} from "../../_services/license.service";
 import {SettingsTabId} from "../../sidenav/preference-nav/preference-nav.component";
-import {toObservable, toSignal} from "@angular/core/rxjs-interop";
+import {toSignal} from "@angular/core/rxjs-interop";
 
 enum Step {
   Import = 0,
@@ -195,7 +195,7 @@ export class ImportMappingsComponent implements OnInit {
 
     this.settingsService.updateMetadataSettings(newSettings).subscribe({
       next: () => {
-        const fragment = this.licenseService.hasValidLicenseSignal()
+        const fragment = this.licenseService.hasValidLicense()
           ? SettingsTabId.Metadata : SettingsTabId.ManageMetadata;
 
         this.router.navigate(['settings'], { fragment: fragment });

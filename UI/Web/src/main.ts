@@ -43,7 +43,7 @@ import {LibraryService} from "./app/_services/library.service";
 
 const disableAnimations = !('animate' in document.documentElement);
 if (disableAnimations) {
-  document.documentElement.classList.add('no-animations');
+  document.documentElement.classList.add('no-animations', 'animate-disabled');
 }
 
 

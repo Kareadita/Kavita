@@ -294,11 +294,11 @@ public class ReadingListRepository(DataContext context, IMapper mapper) : IReadi
     public async Task<IEnumerable<ReadingListDto>> GetReadingListDtosForChapterAndUserAsync(int userId, int chapterId,
         bool includePromoted, CancellationToken ct = default)
     {
-        var user = await context.AppUser.FirstAsync(u => u.Id == userId, ct);
+        var ageRestriction = await context.AppUser.GetUserAgeRestriction(userId, ct: ct);
 
         var query = context.ReadingList
             .Where(l => l.AppUserId == userId || (includePromoted && l.Promoted ))
-            .RestrictAgainstAgeRestriction(user.GetAgeRestriction())
+            .RestrictAgainstAgeRestriction(ageRestriction)
             .Where(l => l.Items.Any(i => i.ChapterId == chapterId))
             .AsSplitQuery()
             .OrderBy(l => l.Title)
@@ -438,6 +438,39 @@ public class ReadingListRepository(DataContext context, IMapper mapper) : IReadi
     public Task<int> GetReadingListItemCountAsync(int readingListId, int userId, CancellationToken ct = default)
     {
         return context.ReadingListItem.Where(rli => rli.ReadingListId == readingListId).CountAsync(ct);
+    }
+
+    public async Task<long> GetFilesizeAsync(int readingListId, int userId, CancellationToken ct = default)
+    {
+        var ageRestriction = await context.AppUser.GetUserAgeRestriction(userId, ct: ct);
+
+        return await context.ReadingList
+            .Where(l => l.Id == readingListId && (l.AppUserId == userId || l.Promoted))
+            .RestrictAgainstAgeRestriction(ageRestriction)
+            .SelectMany(l => l.Items)
+            .SelectMany(i => i.Chapter.Files)
+            .SumAsync(f => f.Bytes, ct);
+    }
+
+    public async Task<Dictionary<int, long>> GetFilesizesAsync(IList<int> readingListIds, int userId, CancellationToken ct = default)
+    {
+        var ageRestriction = await context.AppUser.GetUserAgeRestriction(userId, ct: ct);
+
+        return await readingListIds.BatchToDictionaryAsync(50, batch =>
+            context.ReadingList
+                .Where(l => batch.Contains(l.Id) && (l.AppUserId == userId || l.Promoted))
+                .RestrictAgainstAgeRestriction(ageRestriction)
+                .Select(l => new
+                {
+                    l.Id,
+                    Bytes = l.Items
+                        .SelectMany(i => i.Chapter.Files)
+                        .Sum(f => f.Bytes)
+                })
+                .ToDictionaryAsync(
+                    x => x.Id,
+                    x => x.Bytes,
+                    cancellationToken: ct));
     }
 
 

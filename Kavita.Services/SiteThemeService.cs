@@ -17,12 +17,14 @@ using Kavita.Models.DTOs.SignalR;
 using Kavita.Models.DTOs.Theme;
 using Kavita.Models.Entities;
 using Kavita.Models.Entities.Enums.Theme;
+using Kavita.Services.Extensions;
 using Kavita.Services.Scanner;
-using MarkdownDeep;
+using Markdig;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Logging;
 using Microsoft.Net.Http.Headers;
 using Newtonsoft.Json;
+using Markdown = Markdig.Markdown;
 
 namespace Kavita.Services;
 
@@ -64,7 +66,7 @@ public class ThemeService(
     IMemoryCache cache)
     : IThemeService
 {
-    private readonly Markdown _markdown = new();
+    private readonly MarkdownPipeline _markdownPipeline = new MarkdownPipelineBuilder().UseGithub().Build();
 
     private readonly MemoryCacheEntryOptions _cacheOptions = new MemoryCacheEntryOptions()
         .SetSize(1)
@@ -198,7 +200,7 @@ public class ThemeService(
         var tempDownloadFile = await GithubReadme.DownloadFileAsync(directoryService.TempDirectory);
 
         // Read file into Markdown
-        var htmlContent  = _markdown.Transform(await directoryService.FileSystem.File.ReadAllTextAsync(tempDownloadFile));
+        var htmlContent  = Markdown.ToHtml(await directoryService.FileSystem.File.ReadAllTextAsync(tempDownloadFile), _markdownPipeline);
         var htmlDoc = new HtmlDocument();
         htmlDoc.LoadHtml(htmlContent);
 

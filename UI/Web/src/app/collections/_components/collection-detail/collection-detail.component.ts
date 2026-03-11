@@ -97,13 +97,12 @@ export class CollectionDetailComponent implements AfterContentChecked {
   protected readonly ScrobbleProvider = ScrobbleProvider;
 
   scrollingBlock = viewChild<ElementRef<HTMLDivElement>>('scrollingBlock');
-  companionBar = viewChild<ElementRef<HTMLDivElement>>('companionBar');
 
   collectionId = input(0, {transform: numberAttribute});
   collectionTag = getWritableResolvedData(this.route, 'collection');
   summary = computed(() => (this.collectionTag()?.summary ?? '').replace(/\n/g, '<br>'));
 
-  user = this.accountService.currentUser;
+  readonly user = this.accountService.currentUser;
 
   isLoading = signal(true);
   series = signal<Array<Series>>([]);

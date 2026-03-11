@@ -1,4 +1,14 @@
-import {ChangeDetectionStrategy, Component, computed, DestroyRef, inject, input, signal} from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  computed,
+  DestroyRef,
+  inject,
+  input,
+  OnInit,
+  Signal,
+  signal
+} from '@angular/core';
 import {ImageService} from "../../_services/image.service";
 import {ImageComponent} from "../../shared/image/image.component";
 import {EVENTS, MessageHubService} from "../../_services/message-hub.service";
@@ -14,7 +24,7 @@ import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
   styleUrl: './profile-icon.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class ProfileIconComponent {
+export class ProfileIconComponent implements OnInit {
   protected readonly imageService = inject(ImageService);
   protected readonly hubService = inject(MessageHubService);
   protected readonly destroyRef = inject(DestroyRef);
@@ -30,14 +40,16 @@ export class ProfileIconComponent {
   private readonly randomSeed = signal<number>(0);
   noImage = signal<boolean>(false);
 
-  currentImageUrl = computed(() => {
-    const userId = this.userId();
-    const seed = this.randomSeed();
-    const url = this.imageService.getUserCoverImage(userId);
-    return seed > 0 ? `${url}&random=${seed}` : url;
-  });
+  currentImageUrl!: Signal<string>;
 
-  constructor() {
+  ngOnInit() {
+    this.currentImageUrl = computed(() => {
+      const userId = this.userId();
+      const seed = this.randomSeed();
+      const url = this.imageService.getUserCoverImage(userId);
+      return seed > 0 ? `${url}&random=${seed}` : url;
+    });
+
     this.hubService.messages$.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(res => {
       if (!this.processEvents()) return;
       const imageUrl = this.currentImageUrl();

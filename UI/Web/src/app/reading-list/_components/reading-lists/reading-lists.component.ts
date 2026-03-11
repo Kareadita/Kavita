@@ -9,7 +9,6 @@ import {
   TemplateRef,
   viewChild
 } from '@angular/core';
-import {ToastrService} from 'ngx-toastr';
 import {JumpKey} from 'src/app/_models/jumpbar/jump-key';
 import {PaginatedResult, Pagination} from 'src/app/_models/pagination';
 import {ReadingList} from 'src/app/_models/reading-list';
@@ -47,7 +46,6 @@ import {PromotedIconComponent} from "../../../shared/_components/promoted-icon/p
 export class ReadingListsComponent implements OnInit {
   private readingListService = inject(ReadingListService);
   private readonly accountService = inject(AccountService);
-  private readonly toastr = inject(ToastrService);
   private readonly jumpbarService = inject(JumpbarService);
   private readonly cdRef = inject(ChangeDetectorRef);
   private readonly cardConfigFactory = inject(CardConfigFactory);
