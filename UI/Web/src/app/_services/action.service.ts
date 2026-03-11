@@ -651,7 +651,7 @@ export class ActionService {
         );
 
       case Action.Download:
-        this.downloadService.download('readinglist', readingList, 0, 0);
+        this.downloadService.download('readingList', readingList, 0, 0);
         return of(this.fromAction(action, readingList, 'none'));
 
       case Action.Edit:
@@ -1240,7 +1240,7 @@ export class ActionService {
         );
 
       case Action.Download:
-        for (const rl of readingLists) { this.downloadService.download('readinglist', rl, 0, 0); }
+        for (const rl of readingLists) { this.downloadService.download('readingList', rl, 0, 0); }
         return of(this.fromAction(action, readingLists, 'none'));
 
       default:

@@ -37,7 +37,7 @@ const bytesPipe = new BytesPipe();
 /**
  * Valid entity types for downloading
  */
-export type DownloadEntityType = 'volume' | 'chapter' | 'series' | 'bookmark' | 'logs' | 'readinglist' | 'readinglist-item' | 'collection';
+export type DownloadEntityType = 'volume' | 'chapter' | 'series' | 'bookmark' | 'logs' | 'readingList' | 'readingListItem' | 'collection';
 /**
  * Valid entities for downloading. Undefined exclusively for logs.
  */
@@ -240,7 +240,7 @@ export class DownloadService {
       case 'chapter':  return (downloadEntity as Chapter).minNumber + '';
       case 'bookmark': return '';
       case 'logs':     return '';
-      case 'readinglist-item': return (downloadEntity as ReadingListItem).title;
+      case 'readingListItem': return (downloadEntity as ReadingListItem).title;
     }
     return '';
   }
@@ -268,7 +268,7 @@ export class DownloadService {
       case 'logs':
         this.downloadLogsBlob();
         break;
-      case 'readinglist':
+      case 'readingList':
         this.downloadReadingList(entity as ReadingList);
         break;
       case 'collection':

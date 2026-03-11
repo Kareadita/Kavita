@@ -27,5 +27,4 @@ export interface Volume extends IHasCover, IHasReadingTime, IHasProgress {
   coverImageLocked: boolean;
   primaryColor: string;
   secondaryColor: string;
-  readonly _type: 'Volume';
 }

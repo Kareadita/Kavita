@@ -44,8 +44,6 @@ export interface ReadingList extends IHasCover {
   endingMonth: number;
   itemCount: number;
   ageRating: AgeRating;
-
-  readonly _type: 'ReadingList';
 }
 
 export interface ReadingListInfo extends IHasReadingTime, IHasReadingTime {

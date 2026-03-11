@@ -89,39 +89,24 @@ export class UtilityService {
     return input.toUpperCase().replace(reg, '') === filter.toUpperCase().replace(reg, '');
   }
 
-  isVolume(d: any) {
-    return d != null
-      && typeof d === 'object'
-      && ('_type' in d && d._type === 'Volume'
-        || 'chapters' in d);
+  isVolume(d: unknown) {
+    return d != null && d.hasOwnProperty('chapters');
   }
 
-  isChapter(d: any) {
-    return d != null
-      && typeof d === 'object'
-      && ('_type' in d && d._type === 'Chapter'
-        || 'volumeId' in d);
+  isChapter(d: unknown) {
+    return d != null && d.hasOwnProperty('volumeId');
   }
 
-  isSeries(d: any) {
-    return d != null
-      && typeof d === 'object'
-      && ('_type' in d && d._type === 'Series'
-        || 'originalName' in d);
+  isSeries(d: unknown) {
+    return d != null && d.hasOwnProperty('originalName');
   }
 
-  isReadingList(d: any) {
-    return d != null
-      && typeof d === 'object'
-      && '_type' in d
-      && d._type === 'ReadingList';
+  isReadingList(d: unknown) {
+    return d != null && d.hasOwnProperty('title') && d.hasOwnProperty('startingYear');
   }
 
   isUserCollection(d: unknown) {
-    return d != null
-      && typeof d === 'object'
-      && '_type' in d
-      && d._type === 'UserCollection';
+    return d != null && d.hasOwnProperty('title') && d.hasOwnProperty('itemCount') && !d.hasOwnProperty('startingYear');
   }
 
   asVolume(d: any) {

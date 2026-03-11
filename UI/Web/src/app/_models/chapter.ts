@@ -108,6 +108,4 @@ export interface Chapter extends IHasCast, IHasReadingTime, IHasCover, IHasProgr
   titleNameLocked: boolean;
   sortOrderLocked: boolean;
   releaseDateLocked: boolean;
-
-  readonly _type: 'Chapter';
 }
