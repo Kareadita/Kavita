@@ -115,9 +115,9 @@ export class AppComponent implements OnInit {
     this.ngbCanvasConfig.animation = !shouldDisable;
 
     if (shouldDisable) {
-      document.documentElement.classList.add('no-animations', 'animate-disabled');
+      document.documentElement.classList.add('animate-disabled');
     } else {
-      document.documentElement.classList.remove('no-animations', 'animate-disabled');
+      document.documentElement.classList.remove('animate-disabled');
     }
   }
 

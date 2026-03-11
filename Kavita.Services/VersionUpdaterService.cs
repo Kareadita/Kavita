@@ -166,8 +166,8 @@ public partial class VersionUpdaterService : IVersionUpdaterService
                     KnownIssues = sections.TryGetValue("Known Issues", out var knownIssues) ? knownIssues : [],
                     Api = sections.TryGetValue("Api", out var api) ? api : [],
                     FeatureRequests = sections.TryGetValue("Feature Requests", out var frs) ? frs : [],
-                    BlogPart = Markdown.Parse(blogPart.Trim(), _markdownPipeline).ToHtml(),
-                    UpdateBody = Markdown.Parse(prInfo.Body.Trim(), _markdownPipeline).ToHtml()
+                    BlogPart = Markdown.ToHtml(blogPart.Trim(), _markdownPipeline),
+                    UpdateBody = Markdown.ToHtml(prInfo.Body.Trim(), _markdownPipeline)
                 };
 
                 nightlyDtos.Add(nightlyDto);
@@ -527,9 +527,9 @@ public partial class VersionUpdaterService : IVersionUpdaterService
         var currentVersion = BuildInfo.Version.ToString(4);
 
 
-        var bodyHtml = Markdown.Parse(update.Body.Trim(), _markdownPipeline).ToHtml();
+        var bodyHtml = Markdown.ToHtml(update.Body.Trim(), _markdownPipeline);
         var parsedSections = ParseReleaseBody(update.Body);
-        var blogPart = Markdown.Parse(ExtractBlogPart(update.Body).Trim(), _markdownPipeline).ToHtml();
+        var blogPart = Markdown.ToHtml(ExtractBlogPart(update.Body).Trim(), _markdownPipeline);
 
         return new UpdateNotificationDto()
         {
