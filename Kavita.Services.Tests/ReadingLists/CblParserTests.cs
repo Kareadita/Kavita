@@ -7,7 +7,6 @@ namespace Kavita.Services.Tests.ReadingLists;
 public class CblParserTests
 {
     private readonly string _testDirectory = Path.Join(Directory.GetCurrentDirectory(), "../../../Test Data/CblParserTests/Test Cases");
-    private readonly CblParser _parser = new();
 
     #region V1 Spec
 
