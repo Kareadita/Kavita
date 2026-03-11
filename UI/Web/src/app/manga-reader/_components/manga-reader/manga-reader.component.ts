@@ -1091,7 +1091,8 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
       let page = results.progress.pageNum;
 
-      // Progress for the last page is saved as maxPages, correct this here to be used as page number
+      // When a chapter is completed, we store the last page (maxPages - 1) as progress maxPages
+      // We need to correct for this when using it pageNum again. See setPageNum method for the correction logic
       if (page === this.maxPages) {
         page--;
       }
