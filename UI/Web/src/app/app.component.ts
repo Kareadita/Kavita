@@ -58,17 +58,15 @@ export class AppComponent implements OnInit {
 
 
   constructor() {
+    const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
 
     effect(() => {
-      const animationsDisabled = this.transitionState();
-      if (animationsDisabled) {
-        console.log('User has animations off, disabling ngbBootstrap')
-        this.ngbCanvasConfig.animation = false;
-        document.documentElement.classList.add('no-animations', 'animate-disabled');
-      } else {
-        // TODO: Let's move this logic into theme service/function because when we undo, we need to respect motion preferences  
-      }
-    })
+      this.applyAnimationState(this.transitionState(), reducedMotion.matches);
+    });
+
+    reducedMotion.addEventListener('change', () => {
+      this.applyAnimationState(this.transitionState(), reducedMotion.matches);
+    });
 
     // Close any open modals when a route change occurs
     this.router.events
@@ -111,6 +109,17 @@ export class AppComponent implements OnInit {
     this.themeService.setColorScape('');
   }
 
+
+  private applyAnimationState(userDisabled: boolean, reducedMotion: boolean) {
+    const shouldDisable = userDisabled || reducedMotion;
+    this.ngbCanvasConfig.animation = !shouldDisable;
+
+    if (shouldDisable) {
+      document.documentElement.classList.add('no-animations', 'animate-disabled');
+    } else {
+      document.documentElement.classList.remove('no-animations', 'animate-disabled');
+    }
+  }
 
   setCurrentUser() {
     const user = this.accountService.currentUser();
