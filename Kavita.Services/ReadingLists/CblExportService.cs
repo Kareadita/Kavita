@@ -14,6 +14,7 @@ using Kavita.Models.DTOs.ReadingLists.CBL.V2;
 using Kavita.Models.Entities;
 using Kavita.Models.Entities.Enums;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 
 namespace Kavita.Services.ReadingLists;
 
@@ -24,57 +25,64 @@ public interface ICblExportService
     /// </summary>
     /// <param name="readingListId"></param>
     /// <param name="userId"></param>
-    /// <param name="asV2">Export as CBLv2 (JSON). Currently not supported.</param>
+    /// <param name="asV2">Export as CBLv2 (JSON)</param>
     /// <returns>Full file path of the exported file, or null if reading list not found</returns>
     Task<string?> ExportReadingList(int readingListId, int userId, bool asV2 = false);
 }
 
-public class CblExportService(IUnitOfWork unitOfWork, IDirectoryService directoryService) : ICblExportService
+public class CblExportService(IUnitOfWork unitOfWork, IDirectoryService directoryService, ILogger<CblExportService> logger) : ICblExportService
 {
     /// <inheritdoc />
     public async Task<string?> ExportReadingList(int readingListId, int userId, bool asV2 = false)
     {
-        var readingList = await unitOfWork.DataContext.ReadingList
-            .AsNoTracking()
-            .FirstOrDefaultAsync(rl => rl.Id == readingListId);
-
-        if (readingList == null) return null;
-
-        var items = await unitOfWork.DataContext.ReadingListItem
-            .AsNoTracking()
-            .Where(rli => rli.ReadingListId == readingListId)
-            .OrderBy(rli => rli.Order)
-            .Include(rli => rli.Chapter)
-            .Include(rli => rli.Volume)
-            .Include(rli => rli.Series)
-                .ThenInclude(s => s.Metadata)
-                    .ThenInclude(m => m.People)
-                        .ThenInclude(smp => smp.Person)
-            .ToListAsync();
-
-        var outputDir = Path.Combine(directoryService.TempDirectory, userId.ToString(), "cbl-export");
-        Directory.CreateDirectory(outputDir);
-
-        var sanitizedName = SanitizeFileName(readingList.Title);
-
-        if (asV2)
+        try
         {
-            var jsonFileName = $"{readingListId}-{sanitizedName}.json";
-            var jsonFilePath = Path.Combine(outputDir, jsonFileName);
+            var readingList = await unitOfWork.DataContext.ReadingList
+                .AsNoTracking()
+                .FirstOrDefaultAsync(rl => rl.Id == readingListId);
 
-            var v2 = BuildCblV2Root(readingList, items);
-            SerializeV2(v2, jsonFilePath);
+            if (readingList == null) return null;
 
-            return jsonFilePath;
+            var items = await unitOfWork.DataContext.ReadingListItem
+                .AsNoTracking()
+                .Where(rli => rli.ReadingListId == readingListId)
+                .OrderBy(rli => rli.Order)
+                .Include(rli => rli.Chapter)
+                .Include(rli => rli.Volume)
+                .Include(rli => rli.Series)
+                .ThenInclude(s => s.Metadata)
+                .ThenInclude(m => m.People)
+                .ThenInclude(smp => smp.Person)
+                .ToListAsync();
+
+            var outputDir = Path.Combine(directoryService.TempDirectory, userId.ToString(), "cbl-export");
+            Directory.CreateDirectory(outputDir);
+
+            var sanitizedName = SanitizeFileName(readingList.Title);
+
+            if (asV2)
+            {
+                var jsonFileName = $"{readingListId}-{sanitizedName}.json";
+                var jsonFilePath = Path.Combine(outputDir, jsonFileName);
+
+                var v2 = BuildCblV2Root(readingList, items);
+                SerializeV2(v2, jsonFilePath);
+
+                return jsonFilePath;
+            }
+
+            var cblFileName = $"{readingListId}-{sanitizedName}.cbl";
+            var cblFilePath = Path.Combine(outputDir, cblFileName);
+
+            var cbl = BuildCblReadingList(readingList, items);
+            SerializeV1(cbl, cblFilePath);
+
+            return cblFilePath;
+        } catch (Exception e)
+        {
+            logger.LogError(e, "Error while exporting reading list: {ReadingListId}", readingListId);
+            return null;
         }
-
-        var cblFileName = $"{readingListId}-{sanitizedName}.cbl";
-        var cblFilePath = Path.Combine(outputDir, cblFileName);
-
-        var cbl = BuildCblReadingList(readingList, items);
-        SerializeV1(cbl, cblFilePath);
-
-        return cblFilePath;
     }
 
     public static CblReadingList BuildCblReadingList(ReadingList readingList, IList<ReadingListItem> items)
