@@ -752,10 +752,11 @@ class SeriesDetailComponent implements OnInit, AfterViewInit {
     } else {
       if (libType == LibraryType.Comic || libType == LibraryType.ComicVine) {
         if (this.chapters().length === 0) {
-          if (this.specials().length > 0) {
-            this.activeTabId = TabID.Specials;
-          } else {
+
+          if (this.volumes().length > 0) {
             this.activeTabId = TabID.Volumes;
+          } else if (this.specials().length > 0) {
+            this.activeTabId = TabID.Specials;
           }
         } else {
           this.activeTabId = TabID.Chapters;
