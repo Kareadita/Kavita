@@ -61,6 +61,7 @@ export class ManageCustomKeyBindsComponent implements OnInit {
   private readonly destroyRef = inject(DestroyRef);
   private readonly licenseService = inject(LicenseService);
   private readonly document = inject(DOCUMENT);
+  protected readonly isReadOnly = this.accountService.hasReadOnlyRole;
 
   protected keyBindForm!: KeyBindFormGroup;
 
@@ -89,6 +90,10 @@ export class ManageCustomKeyBindsComponent implements OnInit {
 
     this.keyBindForm = this.fb.group(groupConfig);
     this.duplicatedKeyBinds.set(this.extractDuplicated(keyBinds)); // Set initial
+
+    if (this.isReadOnly()) {
+      this.keyBindForm.disable({ emitEvent: false });
+    }
 
     this.keyBindForm.valueChanges.pipe(
       takeUntilDestroyed(this.destroyRef),

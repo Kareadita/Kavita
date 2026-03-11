@@ -19,7 +19,7 @@
          [attr.aria-label]="t('warning-duplicated-control', {target: target(), index: index() + 1})"></i>
     }
 
-    @if (!control().valid) {
+    @if (!control().valid && !control().disabled) {
       <i class="fa fa-warning text-danger ms-2"
          [attr.aria-label]="t('errors-control', {target: target(), index: index() + 1})"></i>
     }
