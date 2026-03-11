@@ -110,7 +110,7 @@ export class EntityTitleService {
         if (number === LooseLeafOrSpecial) {
           renderText = this.translocoService.translate('entity-title.chapter') + ' - ';
         } else {
-          renderText = this.translocoService.translate('entity-title.chapter') + ' ' + number + ' - ';
+          renderText = this.translocoService.translate('entity-title.chapter', {num: number}) + ' - ';
         }
       }
       renderText += titleName;
