@@ -358,6 +358,10 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
    * For instance, when we invoke a scroll action, but another scroll is scheduled to be triggered afterward
    */
   hasDelayedScroll: boolean = false;
+  /**
+   * A timeout for a delayed scroll event. This is used to de-dupe multiple scroll events during a delayed scroll.
+   */
+  delayedScrollEventTimeout: any = undefined;
 
 
   readonly bookContainerElemRef = viewChild.required<ElementRef<HTMLDivElement>>('bookContainer');
@@ -761,6 +765,13 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
    * Updates the TOC current page anchor, last scene path and saves progress
    */
   handleScrollEvent(bypassSave: boolean = false) {
+    // If a scroll is pending (e.g. initial load), do not update/save progress based on the intermediate scroll position
+    // (e.g. top of page). Delay the progress event until the pending scroll finished.
+    if (this.hasDelayedScroll) {
+      this.clearTimeout(this.delayedScrollEventTimeout); // clear to avoid multiple triggers
+      this.delayedScrollEventTimeout = setTimeout(() => this.handleScrollEvent(bypassSave), SCROLL_DELAY);
+      return;
+    }
 
     // TODO: See if we can move this to a service for ToC
     // Highlight the current chapter we are on
@@ -810,6 +821,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   ngOnDestroy(): void {
     this.clearTimeout(this.clickToPaginateVisualOverlayTimeout);
     this.clearTimeout(this.clickToPaginateVisualOverlayTimeout2);
+    this.clearTimeout(this.delayedScrollEventTimeout);
 
     this.readerService.disableWakeLock();
 
@@ -1025,6 +1037,9 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
    * @private
    */
   private snapScrollOnResize() {
+    // If a scroll is pending, let it finish, to not snap to the current (potentially incorrect) position.
+    if (this.hasDelayedScroll) return;
+
     const layoutMode = this.layoutMode();
     if (layoutMode === BookPageLayoutMode.Default) return;
 
@@ -1444,7 +1459,6 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
     // we need to click the document before arrow keys will scroll down.
     this.reader().nativeElement.focus();
-    afterFrame(() => this.handleScrollEvent()); // Will set lastSeenXPath
     this.isLoading.set(false);
     this.cdRef.markForCheck();
 
@@ -1462,6 +1476,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       setTimeout(() => {
         this.hasDelayedScroll = false;
         lambda();
+        afterFrame(() => this.handleScrollEvent());
       }, SCROLL_DELAY)
     });
   }
