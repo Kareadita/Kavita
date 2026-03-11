@@ -169,10 +169,10 @@ export class ManageUserPreferencesComponent implements OnInit {
 
       if (this.isReadOnly()) {
         this.settingsForm.disable({ emitEvent: false });
-        }
-        
+      }
+
       this.settingsForm.markAsPristine();
-        
+
       // Automatically save settings as we edit them
       this.settingsForm.valueChanges.pipe(
         distinctUntilChanged(),
