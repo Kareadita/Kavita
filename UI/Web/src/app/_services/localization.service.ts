@@ -32,6 +32,7 @@ export class LocalizationService {
     localStorage.removeItem(`@transloco/translations/timestamp`);
 
     // Reload the translation
+    this.translocoService.setActiveLang(newLang);
     return this.translocoService.load(newLang);
   }
 }
