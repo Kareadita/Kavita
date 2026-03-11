@@ -50,7 +50,6 @@ public class LicenseController(
     /// </summary>
     /// <returns></returns>
     [HttpGet("has-license")]
-    [Authorize(PolicyGroups.AdminPolicy)]
     public async Task<ActionResult<bool>> HasLicense()
     {
         return Ok(!string.IsNullOrEmpty(
