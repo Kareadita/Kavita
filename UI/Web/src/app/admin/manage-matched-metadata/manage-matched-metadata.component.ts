@@ -1,4 +1,4 @@
-import {ChangeDetectionStrategy, Component, inject, OnInit, signal} from '@angular/core';
+import {ChangeDetectionStrategy, Component, DestroyRef, inject, OnInit, signal} from '@angular/core';
 import {translate, TranslocoDirective} from "@jsverse/transloco";
 import {ImageComponent} from "../../shared/image/image.component";
 import {ImageService} from "../../_services/image.service";
@@ -25,6 +25,7 @@ import {ExternalMatchRateLimitErrorEvent} from "../../_models/events/external-ma
 import {ToastrService} from "ngx-toastr";
 import {ResponsiveTableComponent} from "../../shared/_components/responsive-table/responsive-table.component";
 import {Pagination} from "../../_models/pagination";
+import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 
 @Component({
   selector: 'app-manage-matched-metadata',
@@ -57,6 +58,7 @@ export class ManageMatchedMetadataComponent implements OnInit {
   private readonly toastr = inject(ToastrService);
   protected readonly imageService = inject(ImageService);
   protected readonly baseUrl = inject(APP_BASE_HREF);
+  protected readonly destroyRef = inject(DestroyRef);
 
   isLoading = signal(true);
   data = signal<ManageMatchSeries[]>([]);
@@ -74,7 +76,7 @@ export class ManageMatchedMetadataComponent implements OnInit {
   trackBy = (idx: number, item: ManageMatchSeries) => `${item.isMatched}_${item.series.name}_${idx}`;
 
   ngOnInit() {
-    this.messageHub.messages$.subscribe(message => {
+    this.messageHub.messages$.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(message => {
       if (message.event == EVENTS.ScanSeries) {
         const evt = message.payload as ScanSeriesEvent;
         if (this.data().filter(d => d.series.id === evt.seriesId).length > 0) {
@@ -98,6 +100,7 @@ export class ManageMatchedMetadataComponent implements OnInit {
       tap(_ => {
         this.isLoading.set(false);
       }),
+      takeUntilDestroyed(this.destroyRef)
     ).subscribe();
 
     this.loadData().subscribe();

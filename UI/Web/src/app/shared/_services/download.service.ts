@@ -597,7 +597,7 @@ export class DownloadService {
         ).subscribe(() => {
 
           collectionSeries.result.forEach(s => {
-            this.downloadSeries(s, collection.id);
+            this.downloadSeries(s, collection.id, true);
           });
         });
       } else {
@@ -621,7 +621,7 @@ export class DownloadService {
     });
   }
 
-  private downloadSeries(series: Series, collectionId = 0) {
+  private downloadSeries(series: Series, collectionId = 0, skipSizePrompt = false) {
     this.debugLog('downloadSeries()', series.name);
     this.seriesService.getSeriesDetail(series.id).pipe(
       takeUntilDestroyed(this.destroyRef)
@@ -634,7 +634,7 @@ export class DownloadService {
       this.debugLog(`downloadSeries() decomposed into ${items.length} items (${detail.volumes.length} vols, ${detail.chapters.length + detail.specials.length} chapters)`);
 
       const userPrefs = this.accountService.userPreferences();
-      if (userPrefs?.promptForDownloadSize && items.length > 0) {
+      if (skipSizePrompt || (userPrefs?.promptForDownloadSize && items.length > 0)) {
         // Single size call for the whole series, single confirm dialog
         this.downloadSeriesSize(series.id).pipe(
           switchMap(async size => this.confirmSize(size, 'series')),
