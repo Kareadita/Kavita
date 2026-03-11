@@ -401,11 +401,14 @@ export class AccountService {
     return this.httpClient.post<Preferences>(this.baseUrl + 'users/update-preferences', userPreferences).pipe(map(settings => {
       const current = this._currentUser();
       if (current) {
+        const localeChange = current.preferences.locale != settings.locale;
         this.setCurrentUser({ ...current, preferences: settings }, false);
 
-        // Update the locale on disk (for logout and compact-number pipe)
-        localStorage.setItem(AccountService.localeKey, settings.locale);
-        this.localizationService.refreshTranslations(settings.locale);
+        if (localeChange) {
+          // Update the locale on disk (for logout and compact-number pipe)
+          localStorage.setItem(AccountService.localeKey, settings.locale);
+          this.localizationService.refreshTranslations(settings.locale);
+        }
       }
       return settings;
     }), takeUntilDestroyed(this.destroyRef));
