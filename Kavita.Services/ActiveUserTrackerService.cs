@@ -6,7 +6,6 @@ using System.Threading.Tasks;
 using Kavita.API.Database;
 using Kavita.API.Services;
 using Kavita.Common.Helpers;
-using Kavita.Models.Entities.User;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
