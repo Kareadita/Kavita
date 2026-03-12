@@ -108,9 +108,9 @@ export class EntityTitleService {
     if (titleName !== '' && prioritizeTitleName) {
       if (isChapter && includeChapter) {
         if (number === LooseLeafOrSpecial) {
-          renderText = this.translocoService.translate('entity-title.chapter') + ' - ';
+          renderText = this.translocoService.translate('entity-title.chapter-num') + ' - ';
         } else {
-          renderText = this.translocoService.translate('entity-title.chapter', {num: number}) + ' - ';
+          renderText = this.translocoService.translate('entity-title.chapter-num', {num: number}) + ' - ';
         }
       }
       renderText += titleName;
@@ -123,12 +123,12 @@ export class EntityTitleService {
 
       if (number !== LooseLeafOrSpecial) {
         if (isChapter) {
-          renderText = this.translocoService.translate('entity-title.chapter', {num: number});
+          renderText = this.translocoService.translate('entity-title.chapter-num', {num: number});
         } else {
           renderText = volumeTitle;
         }
       } else if (fallbackToVolume && isChapter && volumeTitle) {
-        renderText = this.translocoService.translate('entity-title.vol-num', {num: volumeTitle});
+        renderText = this.translocoService.translate('entity-title.volume-num', {num: volumeTitle});
       } else if (fallbackToVolume && isChapter) {
         renderText = this.translocoService.translate('entity-title.single-volume');
       } else {
@@ -144,7 +144,7 @@ export class EntityTitleService {
 
     if (number !== LooseLeafOrSpecial) {
       if (isChapter) {
-        renderText = this.translocoService.translate('entity-title.chapter', {num: number});
+        renderText = this.translocoService.translate('entity-title.chapter-num', {num: number});
       } else {
         renderText = volumeTitle;
       }

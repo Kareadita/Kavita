@@ -20,7 +20,12 @@ import {UtcToLocalDatePipe} from '../../_pipes/utc-to-locale-date.pipe';
 import {EVENTS, MessageHubService} from "../../_services/message-hub.service";
 import {NotificationProgressEvent} from "../../_models/events/notification-progress-event";
 import {SeriesService} from "../../_services/series.service";
-import {DownloadEntityType, DistilledDownloadEntityType, DownloadQueueItem, DownloadQueueStatus} from '../_models/download-queue-item';
+import {
+  DistilledDownloadEntityType,
+  DownloadEntityType,
+  DownloadQueueItem,
+  DownloadQueueStatus
+} from '../_models/download-queue-item';
 import {DownloadStorageService} from './download-storage.service';
 import {normalizeTimestamp} from "../../../libs/download-timestamp";
 import {ReadingList, ReadingListItem} from "../../_models/reading-list";
@@ -34,9 +39,7 @@ export const DEBOUNCE_TIME = 100;
 
 const bytesPipe = new BytesPipe();
 
-/**
- * Valid entities for downloading. Undefined exclusively for logs.
- */
+/** Valid entities for downloading. Undefined exclusively for logs */
 export type DownloadEntity = Series | Volume | Chapter | PageBookmark[] | ReadingList | ReadingListItem | UserCollection | undefined;
 
 @Injectable({

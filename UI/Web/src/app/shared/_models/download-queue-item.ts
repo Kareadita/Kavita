@@ -43,7 +43,7 @@ export interface DownloadQueueItem {
   queuedAt: string | number;
   /** Present only for in-memory items; stripped before IndexedDB persistence and absent on restored items. */
   entity?: Volume | Chapter | ReadingListItem;
-  /** For readinglist-item: the chapter ID to use for the download endpoint. Persisted to IDB. */
+  /** For ReadingListItem: the chapter ID to use for the download endpoint. Persisted to IDB. */
   chapterId?: number;
   /** Predicted backend filename used to match SignalR progress events */
   downloadName: string;

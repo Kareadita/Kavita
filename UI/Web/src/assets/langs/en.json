@@ -173,8 +173,8 @@
         "delete-selected-label": "Delete selected",
         "no-data": "{{common.no-data}}",
         "volume-and-chapter-num": "Volume {{v}} Chapter {{n}}",
-        "volume-num": "Volume {{num}}",
-        "chapter-num": "Chapter {{num}}",
+        "volume-num": "{{entity-title.volume-num}}",
+        "chapter-num": "{{entity-title.chapter-num}}",
         "rating": "Rating {{r}}",
         "not-applicable": "Not Applicable",
         "processed": "Processed",
@@ -1594,10 +1594,10 @@
 
     "entity-title": {
         "special": "Special",
-        "issue-num": "{{common.issue-hash-num}}",
-        "chapter": "{{common.chapter-num}}",
-        "book-num": "{{common.book-num-shorthand}}",
-        "vol-num": "{{user-scrobble-history.volume-num}}",
+        "issue-num": "Issue #{{num}}",
+        "chapter-num": "Chapter {{num}}",
+        "book-num": "Book {{num}}",
+        "volume-num": "Volume {{num}}",
         "single-volume": "Single Volume"
     },
 
@@ -3798,11 +3798,6 @@
         "book-num-shorthand": "Book {{num}}",
         "issue-num-shorthand": "#{{num}}",
         "volume-num-shorthand": "Vol {{num}}",
-        "book-nums": "Books",
-        "issue-nums": "Issues",
-        "chapter-nums": "Chapters",
-        "volume-nums": "Volumes",
-        "roles": "Roles",
         "libraries": "Libraries"
     }
 
