@@ -116,6 +116,7 @@ import {patchEntitySignal, patchSignalArray} from "../../../../libs/patch";
 import {ModalService} from "../../../_services/modal.service";
 import {getResolvedData} from "../../../../libs/route-util";
 import {ExternalSeries} from "../../../_models/series-detail/external-series";
+import {EntityTitleService} from "../../../_services/entity-title.service";
 
 
 enum TabID {
@@ -182,6 +183,7 @@ class SeriesDetailComponent implements OnInit, AfterViewInit {
   private readonly location = inject(Location);
   private readonly document = inject(DOCUMENT);
   protected readonly breakpointService = inject(BreakpointService);
+  private readonly entityTitleService = inject(EntityTitleService);
 
   readonly scrollingBlock = viewChild<ElementRef<HTMLDivElement>>('scrollingBlock');
 
@@ -358,7 +360,7 @@ class SeriesDetailComponent implements OnInit, AfterViewInit {
 
 
   seriesCoverImage = computed(() => this.imageService.getSeriesCoverImage(this.seriesId()));
-  chapterTabName = computed(() => this.utilityService.formatChapterName(this.libraryType()));
+  chapterTabName = computed(() => this.entityTitleService.formatChapterName(this.libraryType(), true));
   nextExpectedChapter = signal<NextExpectedChapter | null>(null);
   loadPageSource = new ReplaySubject<boolean>(1);
   loadPage$ = this.loadPageSource.asObservable();

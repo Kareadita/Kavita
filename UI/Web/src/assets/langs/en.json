@@ -1598,7 +1598,14 @@
         "chapter-num": "Chapter {{num}}",
         "book-num": "Book {{num}}",
         "volume-num": "Volume {{num}}",
-        "single-volume": "Single Volume"
+        "single-volume": "Single Volume",
+
+        "book-title": "Book",
+        "book-title-plural": "Books",
+        "issue-title": "Issue",
+        "issue-title-plural": "Issues",
+        "chapter-title": "Chapter",
+        "chapter-title-plural": "Chapters"
     },
 
     "external-series-card": {

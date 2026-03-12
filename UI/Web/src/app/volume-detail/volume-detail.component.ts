@@ -88,6 +88,7 @@ import {ModalService} from "../_services/modal.service";
 import {getResolvedData, getWritableResolvedData} from "../../libs/route-util";
 import {ModalResult} from "../_models/modal/modal-result";
 import {ChapterCardComponent} from "../cards/chapter-card/chapter-card.component";
+import {EntityTitleService} from "../_services/entity-title.service";
 
 enum TabID {
   Chapters = 'chapters-tab',
@@ -191,6 +192,7 @@ export class VolumeDetailComponent implements OnInit {
   private readonly chapterService = inject(ChapterService);
   private readonly annotationService = inject(AnnotationService);
   protected readonly breakpointService = inject(BreakpointService);
+  private readonly entityTitleService = inject(EntityTitleService);
 
   readonly scrollingBlock = viewChild<ElementRef<HTMLDivElement>>('scrollingBlock');
 
@@ -326,7 +328,7 @@ export class VolumeDetailComponent implements OnInit {
     return Math.max(...chapters.map(c => c.ageRating));
   });
 
-  chapterTabName = computed(() => this.utilityService.formatChapterName(this.libraryType(), false, false, true));
+  chapterTabName = computed(() => this.entityTitleService.formatChapterName(this.libraryType(), true));
   reviewCount = computed(() => this.userReviews().length + this.plusReviews().length);
 
 

@@ -12,9 +12,30 @@ export class EntityTitleService {
   private readonly translocoService = inject(TranslocoService);
   private readonly utilityService = inject(UtilityService);
 
-  computeTitle(
-    entity: Volume | Chapter,
-    libraryType: LibraryType | number,
+
+  /**
+   * Formats a Chapter name based on the library it's in
+   * @param libraryType
+   * @param plural Pluralize word
+   * @returns
+   */
+  formatChapterName(libraryType: LibraryType, plural: boolean = false) {
+    const pluralKeyPart = plural ? '-plural' : '';
+
+    switch(libraryType) {
+      case LibraryType.Book:
+      case LibraryType.LightNovel:
+        return this.translocoService.translate('entity-title.book-title' + pluralKeyPart);
+      case LibraryType.Comic:
+      case LibraryType.ComicVine:
+        return this.translocoService.translate('entity-title.issue-title' + pluralKeyPart);
+      case LibraryType.Images:
+      case LibraryType.Manga:
+        return this.translocoService.translate('entity-title.chapter-title' + pluralKeyPart);
+    }
+  }
+
+  computeTitle(entity: Volume | Chapter, libraryType: LibraryType | number,
     options?: {
       prioritizeTitleName?: boolean;
       fallbackToVolume?: boolean;
