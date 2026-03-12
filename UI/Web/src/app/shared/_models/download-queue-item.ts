@@ -1,13 +1,29 @@
-import {Volume} from "../../_models/volume";
-import {Chapter} from "../../_models/chapter";
-import {ReadingListItem} from "../../_models/reading-list";
+import {Volume} from '../../_models/volume';
+import {Chapter} from '../../_models/chapter';
+import {ReadingListItem} from '../../_models/reading-list';
+
+/** All valid entity types for downloading */
+export enum DownloadEntityType {
+  Series = 'series',
+  Volume = 'volume',
+  Chapter = 'chapter',
+  ReadingListItem = 'readingListItem',
+  ReadingList = 'readingList',
+  Collection = 'collection',
+  Bookmark = 'bookmark',
+  Logs = 'logs',
+}
+
+/** Distilled types that actually enter the queue (volumes, chapters, reading list items) */
+export type DistilledDownloadEntityType =
+  DownloadEntityType.Volume | DownloadEntityType.Chapter | DownloadEntityType.ReadingListItem;
 
 export type DownloadQueueStatus = 'queued' | 'preparing' | 'downloading' | 'completed' | 'failed' | 'cancelled';
 
 export interface DownloadQueueItem {
   id: number;
   /** Atomic unit of download, series/reading-list/collection always decompose to these */
-  entityType: 'volume' | 'chapter' | 'readinglist-item';
+  entityType: DistilledDownloadEntityType;
   entityId: number;
   libraryId: number;
   seriesId: number;

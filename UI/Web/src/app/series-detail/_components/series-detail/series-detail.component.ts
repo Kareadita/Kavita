@@ -1,4 +1,5 @@
 import {DOCUMENT, Location, NgClass, NgStyle, NgTemplateOutlet} from '@angular/common';
+import {DownloadEntityType} from '../../../shared/_models/download-queue-item';
 import {
   AfterViewInit,
   ChangeDetectionStrategy,
@@ -151,6 +152,7 @@ interface StoryLineItem {
 })
 class SeriesDetailComponent implements OnInit, AfterViewInit {
 
+  protected readonly DownloadEntityType = DownloadEntityType;
   private readonly destroyRef = inject(DestroyRef);
   private readonly route = inject(ActivatedRoute);
   private readonly seriesService = inject(SeriesService);

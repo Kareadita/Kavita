@@ -1,3 +1,4 @@
+import {DownloadEntityType} from '../shared/_models/download-queue-item';
 import {
   ChangeDetectionStrategy,
   ChangeDetectorRef,
@@ -168,6 +169,7 @@ interface VolumeCast extends IHasCast {
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class VolumeDetailComponent implements OnInit {
+  protected readonly DownloadEntityType = DownloadEntityType;
   private readonly document = inject(DOCUMENT);
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);

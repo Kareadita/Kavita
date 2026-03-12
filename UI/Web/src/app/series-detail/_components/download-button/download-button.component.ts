@@ -1,6 +1,7 @@
 import {ChangeDetectionStrategy, Component, computed, inject, input} from '@angular/core';
 import {AccountService} from "../../../_services/account.service";
-import {DownloadService} from "../../../shared/_services/download.service";
+import {DownloadService} from '../../../shared/_services/download.service';
+import {DownloadEntityType} from '../../../shared/_models/download-queue-item';
 import {NgbTooltip} from "@ng-bootstrap/ng-bootstrap";
 import {TranslocoDirective} from "@jsverse/transloco";
 import {Chapter} from "../../../_models/chapter";
@@ -25,7 +26,7 @@ export class DownloadButtonComponent {
   entity = input.required<Series | Volume | Chapter>();
   seriesId = input.required<number>();
   libraryId = input.required<number>();
-  entityType = input<'series' | 'volume' | 'chapter'>('series');
+  entityType = input<DownloadEntityType>(DownloadEntityType.Series);
 
   isDownloading = computed(() => {
     const item = this.downloadService.getItemForEntity(this.entity());

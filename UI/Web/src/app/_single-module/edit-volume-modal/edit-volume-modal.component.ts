@@ -18,7 +18,8 @@ import {ImageService} from "../../_services/image.service";
 import {UploadService} from "../../_services/upload.service";
 import {AccountService} from "../../_services/account.service";
 import {ActionService} from "../../_services/action.service";
-import {DownloadService} from "../../shared/_services/download.service";
+import {DownloadService} from '../../shared/_services/download.service';
+import {DownloadEntityType} from '../../shared/_models/download-queue-item';
 import {LibraryType} from "../../_models/library/library";
 import {PersonRole} from "../../_models/metadata/person";
 import {forkJoin} from "rxjs";
@@ -165,7 +166,7 @@ export class EditVolumeModalComponent implements OnInit {
         });
         break;
       case Action.Download:
-        this.downloadService.download('volume', this.volume, this.libraryId, this.seriesId);
+        this.downloadService.download(DownloadEntityType.Volume, this.volume, this.libraryId, this.seriesId);
         break;
     }
   }

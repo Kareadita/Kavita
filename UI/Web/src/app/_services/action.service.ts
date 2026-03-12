@@ -34,7 +34,8 @@ import {
 } from "../cards/_modals/bulk-set-reading-profile-modal/bulk-set-reading-profile-modal.component";
 import {EditSeriesModalComponent} from "../cards/_modals/edit-series-modal/edit-series-modal.component";
 import {EditVolumeModalComponent} from "../_single-module/edit-volume-modal/edit-volume-modal.component";
-import {DownloadService} from "../shared/_services/download.service";
+import {DownloadService} from '../shared/_services/download.service';
+import {DownloadEntityType} from '../shared/_models/download-queue-item';
 import {ReadingProfileService} from "./reading-profile.service";
 import {Action} from "../_models/actionables/action";
 import {ActionItem} from "../_models/actionables/action-item";
@@ -330,7 +331,7 @@ export class ActionService {
       }
 
       case Action.Download:
-        this.downloadService.download('series', series, series.libraryId, series.id);
+        this.downloadService.download(DownloadEntityType.Series, series, series.libraryId, series.id);
         return of(this.fromAction(action, series, 'none'));
 
       case Action.AddToWantToReadList:
@@ -486,7 +487,7 @@ export class ActionService {
       }
 
       case Action.Download:
-        this.downloadService.download('volume', volume, libraryId, seriesId);
+        this.downloadService.download(DownloadEntityType.Volume, volume, libraryId, seriesId);
         return of(this.fromAction(action, volume, 'none'));
 
       default:
@@ -535,7 +536,7 @@ export class ActionService {
         );
 
       case Action.Download:
-        this.downloadService.download('chapter', chapter, libraryId, seriesId);
+        this.downloadService.download(DownloadEntityType.Chapter, chapter, libraryId, seriesId);
         return of(this.fromAction(action, chapter, 'none'));
 
       case Action.Edit:
@@ -626,7 +627,7 @@ export class ActionService {
         );
 
       case Action.Download:
-        this.downloadService.download('bookmark', [bookmark], 0, 0);
+        this.downloadService.download(DownloadEntityType.Bookmark, [bookmark], 0, 0);
         return of(this.fromAction(action, bookmark, 'none'));
 
       case Action.ViewSeries:
@@ -653,7 +654,7 @@ export class ActionService {
         );
 
       case Action.Download:
-        this.downloadService.download('readingList', readingList, 0, 0);
+        this.downloadService.download(DownloadEntityType.ReadingList, readingList, 0, 0);
         return of(this.fromAction(action, readingList, 'none'));
 
       case Action.Edit:
@@ -707,7 +708,7 @@ export class ActionService {
           map(() => this.fromAction(action, {...collection, promoted: false}, 'update'))
         );
       case Action.Download:
-        this.downloadService.download('collection', collection, 0, 0);
+        this.downloadService.download(DownloadEntityType.Collection, collection, 0, 0);
         return of(this.fromAction(action, collection, 'none'));
 
       default:
@@ -1033,7 +1034,7 @@ export class ActionService {
       }
 
       case Action.Download:
-        for (const s of series) { this.downloadService.download('series', s, s.libraryId, s.id); }
+        for (const s of series) { this.downloadService.download(DownloadEntityType.Series, s, s.libraryId, s.id); }
         return of(this.fromAction(action, series, 'none'));
 
       default:
@@ -1172,7 +1173,7 @@ export class ActionService {
   handleBulkBookmarkAction(action: ActionItem<any>, bookmarks: PageBookmark[], seriesIds: number[]): Observable<ActionResult<PageBookmark[]>> {
     switch (action.action) {
       case Action.Download:
-        this.downloadService.download('bookmark', bookmarks, 0, 0);
+        this.downloadService.download(DownloadEntityType.Bookmark, bookmarks, 0, 0);
         return of(this.fromAction(action, bookmarks, 'none'));
 
       case Action.Delete:
@@ -1211,7 +1212,7 @@ export class ActionService {
         );
 
       case Action.Download:
-        for (let c of collections) this.downloadService.download('collection', c, 0, 0);
+        for (let c of collections) this.downloadService.download(DownloadEntityType.Collection, c, 0, 0);
         return of(this.fromAction(action, collections, 'none'));
 
       default:
@@ -1242,7 +1243,7 @@ export class ActionService {
         );
 
       case Action.Download:
-        for (const rl of readingLists) { this.downloadService.download('readingList', rl, 0, 0); }
+        for (const rl of readingLists) { this.downloadService.download(DownloadEntityType.ReadingList, rl, 0, 0); }
         return of(this.fromAction(action, readingLists, 'none'));
 
       default:

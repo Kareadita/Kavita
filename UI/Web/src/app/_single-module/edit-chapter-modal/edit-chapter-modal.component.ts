@@ -26,7 +26,8 @@ import {ImageService} from "../../_services/image.service";
 import {UploadService} from "../../_services/upload.service";
 import {MetadataService} from "../../_services/metadata.service";
 import {ActionService} from "../../_services/action.service";
-import {DownloadService} from "../../shared/_services/download.service";
+import {DownloadService} from '../../shared/_services/download.service';
+import {DownloadEntityType} from '../../shared/_models/download-queue-item';
 import {SettingItemComponent} from "../../settings/_components/setting-item/setting-item.component";
 import {TypeaheadComponent} from "../../typeahead/_components/typeahead.component";
 import {concat, forkJoin, Observable, of, tap} from "rxjs";
@@ -296,7 +297,7 @@ export class EditChapterModalComponent implements OnInit {
         });
         break;
       case Action.Download:
-        this.downloadService.download('chapter', this.chapter, this.libraryId, this.seriesId);
+        this.downloadService.download(DownloadEntityType.Chapter, this.chapter, this.libraryId, this.seriesId);
         break;
     }
   }
