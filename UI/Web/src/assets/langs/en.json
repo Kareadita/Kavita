@@ -2922,7 +2922,8 @@
         "today": "Today",
         "yesterday": "Yesterday",
         "pagination-label": "Activity pagination",
-        "page-info": "Page {{current}} of {{total}} ({{items}} total records)"
+        "page-info": "Page {{current}} of {{total}} ({{items}} total records)",
+        "num-more": "{{num}} more"
     },
 
     "user-stats-info-cards": {
