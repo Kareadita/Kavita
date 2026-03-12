@@ -30,13 +30,13 @@ jobs:
         run: dotnet restore
 
       - name: Build project
-        run: dotnet build API/API.csproj --configuration Debug --output ./build-output
+        run: dotnet build Kavita.Server/Kavita.Server.csproj --configuration Debug --output ./build-output
 
 
       - name: Get Swashbuckle version
         id: swashbuckle-version
         run: |
-          VERSION=$(grep -o '<PackageReference Include="Swashbuckle.AspNetCore" Version="[^"]*"' API/API.csproj | grep -o 'Version="[^"]*"' | cut -d'"' -f2)
+          VERSION=$(grep -o '<PackageReference Include="Swashbuckle.AspNetCore" Version="[^"]*"' Kavita.Server/Kavita.Server.csproj | grep -o 'Version="[^"]*"' | cut -d'"' -f2)
           echo "VERSION=$VERSION" >> $GITHUB_OUTPUT
           echo "Found Swashbuckle.AspNetCore version: $VERSION"
 
