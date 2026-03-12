@@ -16,18 +16,11 @@ namespace Kavita.Services;
 /// <summary>
 /// Responsible to track userId via <see cref="UpdateUserAsActiveMiddleware"/>. Flushes the queue every 5 mins.
 /// </summary>
-public sealed class ActiveUserTrackerService : IActiveUserTrackerService, IHostedService
+public sealed class ActiveUserTrackerService( IServiceScopeFactory serviceScopeFactory, ILogger<ActiveUserTrackerService> logger)
+    : IActiveUserTrackerService, IHostedService
 {
-    private readonly IServiceScopeFactory _serviceScopeFactory;
-    private readonly ILogger<ActiveUserTrackerService> _logger;
     private readonly RateLimiter _rateLimiter = new(1, TimeSpan.FromMinutes(5), refillBetween: false);
     private readonly ConcurrentDictionary<int, DateTime> _pendingUpdates = new();
-
-    public ActiveUserTrackerService(IServiceScopeFactory serviceScopeFactory, ILogger<ActiveUserTrackerService> logger)
-    {
-        _serviceScopeFactory = serviceScopeFactory;
-        _logger = logger;
-    }
 
     /// <summary>
     /// Enqueue that the userId was seen
@@ -54,7 +47,7 @@ public sealed class ActiveUserTrackerService : IActiveUserTrackerService, IHoste
 
         try
         {
-            using var scope = _serviceScopeFactory.CreateScope();
+            using var scope = serviceScopeFactory.CreateScope();
             var context = scope.ServiceProvider.GetRequiredService<IDataContext>();
 
             await context.Users
@@ -70,7 +63,7 @@ public sealed class ActiveUserTrackerService : IActiveUserTrackerService, IHoste
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Failed to bulk update LastActive for {Count} users", userIds.Count);
+            logger.LogError(ex, "Failed to bulk update LastActive for {Count} users", userIds.Count);
         }
     }
 
@@ -78,7 +71,7 @@ public sealed class ActiveUserTrackerService : IActiveUserTrackerService, IHoste
 
     public async Task StopAsync(CancellationToken cancellationToken)
     {
-        _logger.LogInformation("Flushing pending LastActive updates before shutdown");
+        logger.LogInformation("Flushing pending LastActive updates before shutdown");
         await FlushAsync(cancellationToken);
     }
 }

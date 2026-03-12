@@ -521,11 +521,11 @@ export class DownloadService {
     URL.revokeObjectURL(url);
   }
 
-  private getEntityDownloadSize(entityType: string, id: number) {
+  private getEntityDownloadSize(entityType: DownloadEntityType.Series | DownloadEntityType.Volume | DownloadEntityType.Chapter, id: number) {
     return this.httpClient.get<number>(this.baseUrl + `download/${entityType}-size?${entityType}Id=${id}`);
   }
 
-  private getBulkEntityDownloadSize(entityType: string, ids: number[]) {
+  private getBulkEntityDownloadSize(entityType: DownloadEntityType.Series | DownloadEntityType.Volume | DownloadEntityType.Chapter, ids: number[]) {
     const data = {} as any;
     data[entityType + 'Ids'] = ids;
     return this.httpClient.post<Record<number, number>>(this.baseUrl + `download/bulk-${entityType}-size`, data);

@@ -46,12 +46,10 @@ public class RateLimiter(int maxRequests, TimeSpan duration, bool refillBetween 
             if (timeSinceLastRefill >= duration)
             {
                 _tokenBuckets[key] = (Tokens: maxRequests, LastRefill: now);
-                Console.WriteLine($"Tokens Refilled to Max: {maxRequests}");
             }
             else if (tokensToAdd > 0 && refillBetween)
             {
                 _tokenBuckets[key] = (Tokens: Math.Min(maxRequests, _tokenBuckets[key].Tokens + tokensToAdd), LastRefill: now);
-                Console.WriteLine($"Tokens Refilled: {_tokenBuckets[key].Tokens}");
             }
         }
     }

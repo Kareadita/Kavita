@@ -129,7 +129,7 @@ export class EntityTitleService {
     if (titleName !== '' && prioritizeTitleName) {
       if (isChapter && includeChapter) {
         if (number === LooseLeafOrSpecial) {
-          renderText = this.translocoService.translate('entity-title.chapter-num') + ' - ';
+          renderText = this.translocoService.translate('entity-title.chapter-title') + ' - ';
         } else {
           renderText = this.translocoService.translate('entity-title.chapter-num', {num: number}) + ' - ';
         }
