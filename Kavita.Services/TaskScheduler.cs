@@ -75,6 +75,7 @@ public class TaskScheduler : ITaskScheduler
     public const string ReadingHistoryAggregationId = TaskSchedulerConstants.ReadingHistoryAggregationId;
     public const string AuthKeyExpirationId = TaskSchedulerConstants.AuthKeyExpirationId;
     public const string EnsureSideNavId = TaskSchedulerConstants.EnsureSideNavId;
+    public const string FlushUserActiveTaskId = TaskSchedulerConstants.FlushUserActiveTaskId;
 
     private const int BaseRetryDelay = 60; // 1-minute
 
@@ -220,6 +221,10 @@ public class TaskScheduler : ITaskScheduler
         RecurringJob.AddOrUpdate<IReadingHistoryService>(ReadingHistoryAggregationId,
             service => service.AggregateYesterdaysActivity(CancellationToken.None),
             "5 0 * * *", RecurringJobOptions); // 12:05 AM daily
+
+        RecurringJob.AddOrUpdate<IActiveUserTrackerService>(FlushUserActiveTaskId,
+            service => service.FlushAsync(CancellationToken.None),
+            "*/5 * * * *", RecurringJobOptions);
 
         BackgroundJob.Enqueue(() => ScheduleKavitaPlusTasks(CancellationToken.None));
     }

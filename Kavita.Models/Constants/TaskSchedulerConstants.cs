@@ -23,4 +23,5 @@ public static class TaskSchedulerConstants
     public const string ReadingHistoryAggregationId = "reading-history-aggregation";
     public const string AuthKeyExpirationId = "auth-key-expiration";
     public const string EnsureSideNavId = "ensure-sidenav";
+    public const string FlushUserActiveTaskId = "flush-user-active";
 }

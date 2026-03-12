@@ -1,6 +1,6 @@
-﻿using System;
+using System;
 using System.Threading.Tasks;
-using Kavita.API.Database;
+using Kavita.API.Services;
 using Kavita.API.Store;
 using Kavita.Models.Entities.User;
 using Microsoft.AspNetCore.Http;
@@ -14,14 +14,14 @@ namespace Kavita.Server.Middleware;
 /// <param name="next"></param>
 public class UpdateUserAsActiveMiddleware(RequestDelegate next)
 {
-    public async Task InvokeAsync(HttpContext context, IUserContext userContext, IUnitOfWork unitOfWork)
+    public async Task InvokeAsync(HttpContext context, IUserContext userContext, IActiveUserTrackerService tracker)
     {
         try
         {
             var userId = userContext.GetUserId();
             if (userId > 0)
             {
-                await unitOfWork.UserRepository.UpdateUserAsActive(userId.Value);
+                tracker.RecordActive(userId.Value);
             }
         }
         catch (Exception)

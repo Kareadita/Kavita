@@ -607,14 +607,6 @@ public class UserRepository(DataContext context, UserManager<AppUser> userManage
             .ToListAsync(ct);
     }
 
-    public async Task UpdateUserAsActive(int userId, CancellationToken ct = default)
-    {
-        await context.Set<AppUser>()
-            .Where(u => u.Id == userId)
-            .ExecuteUpdateAsync(setters => setters
-                .SetProperty(u => u.LastActiveUtc, DateTime.UtcNow)
-                .SetProperty(u => u.LastActive, DateTime.Now), ct);
-    }
 
     /// <summary> Retrieve all reviews (series and chapter) for a given user, respecting profile privacy settings and age restrictions.
     /// </summary>

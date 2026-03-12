@@ -114,7 +114,6 @@ public class ReadingListController(
         {
             return BadRequest(await localizationService.Translate(UserId, "reading-list-permission"));
         }
-
         if (await readingListService.UpdateReadingListItemPosition(dto)) return Ok(await localizationService.Translate(UserId, "reading-list-updated"));
 
 
