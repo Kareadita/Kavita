@@ -287,9 +287,7 @@
         "color-theme-title": "வண்ண கருப்பொருள்"
     },
     "entity-title": {
-        "chapter": "{{பொதுவான. அத்தியாயம்-நம்}}",
         "book-num": "{{common.book-num-sorthand}}}",
-        "vol-num": "{{பயனர்-ச்கிராப்-இச்டரி.வோலூம்-நம்}}",
         "single-volume": "ஒற்றை தொகுதி",
         "issue-num": "{{comman.issue-hash-num}}",
         "special": "சிறப்பு"
@@ -1086,11 +1084,7 @@
         "chapter-num-shorthand": "Ch {{num}}",
         "book-num-shorthand": "நூல் {{num}}",
         "issue-num-shorthand": "#{{num}}",
-        "volume-num-shorthand": "Vol {{num}}",
-        "book-nums": "புத்தகங்கள்",
-        "issue-nums": "சிக்கல்கள்",
-        "chapter-nums": "பாடங்கள்",
-        "volume-nums": "தொகுதிகள்"
+        "volume-num-shorthand": "Vol {{num}}"
     },
     "relationship-pipe": {
         "doujinshi": "டசின்சி",

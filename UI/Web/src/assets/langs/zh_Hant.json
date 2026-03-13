@@ -921,10 +921,8 @@
     },
     "entity-title": {
         "issue-num": "{{common.issue-hash-num}}",
-        "chapter": "{{common.chapter-num}}",
         "book-num": "{{common.book-num-shorthand}}",
         "special": "特集",
-        "vol-num": "{{user-scrobble-history.volume-num}}",
         "single-volume": "單卷"
     },
     "manage-media-issues": {
@@ -1985,9 +1983,6 @@
         "save": "保存",
         "create": "創建",
         "issue-hash-num": "期＃",
-        "book-nums": "書籍",
-        "chapter-nums": "章節",
-        "issue-nums": "期數",
         "read": "閱讀",
         "clear": "清空",
         "filter": "篩選",
@@ -2013,7 +2008,6 @@
         "issue-num-shorthand": "#{{num}}",
         "book-num-shorthand": "第{{num}}本",
         "volume-num-shorthand": "第{{num}}卷",
-        "volume-nums": "卷",
         "issue-num": "期",
         "add": "新增",
         "select-all": "全選",
@@ -2024,7 +2018,6 @@
         "unknown": "未知",
         "confirm": "確認",
         "selected": "已選取",
-        "roles": "角色",
         "libraries": "書庫"
     },
     "download-indicator": {

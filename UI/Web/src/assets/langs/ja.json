@@ -50,8 +50,8 @@
         "is-processed-header": "処理済み",
         "no-data": "{{common.no-data}}",
         "volume-and-chapter-num": "第 {{v}} 巻 第 {{n}} 章",
-        "volume-num": "第 {{num}} 巻",
-        "chapter-num": "第 {{num}} 章",
+        "volume-num": "{{entity-title.volume-num}}",
+        "chapter-num": "{{entity-title.chapter-num}}",
         "rating": "レーティング {{r}}",
         "not-applicable": "該当なし",
         "processed": "処理済み",
@@ -897,7 +897,8 @@
     },
     "card-item": {
         "cannot-read": "読むことができません",
-        "select": "選択"
+        "select": "選択",
+        "read": "既読"
     },
     "details-tab": {
         "writers-title": "{{metadata-fields.writers-title}}",
@@ -947,7 +948,8 @@
         "applied": "{{theme-manager.applied}}"
     },
     "download-indicator": {
-        "progress": "{{percentage}}% ダウンロードされました"
+        "progress": "{{percentage}}% ダウンロードされました",
+        "completed": "ダウンロード完了"
     },
     "edit-series-relation": {
         "description-part-1": "どの関係を追加すべきかわからない場合は、以下をご覧ください。",
@@ -971,11 +973,17 @@
     },
     "entity-title": {
         "special": "スペシャル",
-        "issue-num": "{{common.issue-hash-num}}",
-        "chapter": "{{common.chapter-num}}",
-        "book-num": "{{common.book-num-shorthand}}",
-        "vol-num": "{{user-scrobble-history.volume-num}}",
-        "single-volume": "単巻"
+        "issue-num": "第 {{num}} 号",
+        "book-num": "第 {{num}} 冊",
+        "single-volume": "単巻",
+        "chapter-num": "第 {{num}} 章",
+        "volume-num": "第 {{num}} 巻",
+        "book-title": "冊",
+        "book-title-plural": "冊",
+        "issue-title": "号",
+        "issue-title-plural": "号",
+        "chapter-title": "章",
+        "chapter-title-plural": "章"
     },
     "external-series-card": {
         "open-external": "外部を開く"
@@ -1402,7 +1410,8 @@
         "no-data": "詳しくはこちら",
         "left-to-process": "未処理: {{leftToProcess}} / {{totalToProcess}}",
         "download-in-queue": "キュー内のダウンロード数 {{num}} 件",
-        "reading-now": "現在 {{num}} 人が読書中です"
+        "reading-now": "現在 {{num}} 人が読書中です",
+        "downloads-active": "{{count}} 件のダウンロードが進行中です"
     },
     "shortcuts-modal": {
         "title": "キーボードショートカット",
@@ -1525,9 +1534,9 @@
         "even": "見開き (偶数)"
     },
     "infinite-scroller": {
-        "continuous-reading-prev-chapter-alt": "スクロールし前章へ",
+        "continuous-reading-prev-chapter-alt": "上にスクロールして前の章へ移動",
         "continuous-reading-prev-chapter": "前章",
-        "continuous-reading-next-chapter-alt": "スクロールし次章へ",
+        "continuous-reading-next-chapter-alt": "上にスクロールして次の章へ移動",
         "continuous-reading-next-chapter": "次章"
     },
     "manga-reader": {
@@ -1835,7 +1844,8 @@
         "vols-and-chapters": "{{volCount}} 巻 / {{chpCount}} 章",
         "remove-from-want-to-read": "{{actionable.remove-from-want-to-read}}",
         "add-to-want-to-read": "{{actionable.add-to-want-to-read}}",
-        "provided-by-label": "提供:"
+        "provided-by-label": "提供:",
+        "story-and-art-label": "原作・作画"
     },
     "next-expected-card": {
         "title": "~{{date}}",
@@ -1975,7 +1985,8 @@
         "edit-smart-filter": "{{name}} を編集",
         "name-label": "名前",
         "required-field": "スマートフィルターには名前が必要です",
-        "filter-name-unique": "スマートフィルター名は一意である必要があります"
+        "filter-name-unique": "スマートフィルター名は一意である必要があります",
+        "no-content": "このスマートフィルターはダッシュボードに結果を表示しません"
     },
     "edit-external-source-item": {
         "not-unique": "外部ソースはこのホストに存在します。 重複していないことを確認してください",
@@ -2124,7 +2135,7 @@
         "confirm-regen-covers": "表紙を更新すると、すべての表紙画像が再計算されます。これは負荷の高い操作です。代わりにスキャンを実行してもよろしいですか?",
         "confirm-delete-multiple-series": "{{count}} 個のシリーズを削除してもよろしいですか? ディスク上のファイルは変更されません。",
         "confirm-delete-series": "このシリーズを削除してもよろしいですか? ディスク上のファイルは変更されません。",
-        "alert-bad-theme": "テーマには無効または安全でないCSSが含まれています。これを修正するには、管理者に連絡してください。デフォルトでダークテーマに設定されます。",
+        "alert-bad-theme": "テーマに無効または安全でない CSS が含まれています。修正するには管理者にご連絡ください。ダークテーマがデフォルトで使用されます。",
         "confirm-library-delete": "{{name}} ライブラリを削除してもよろしいですか? この操作は元に戻せません。",
         "confirm-library-type-change": "ライブラリの種類を変更すると、異なる解析ルールで新たなスキャンが実行され、シリーズが再作成される可能性があります。そのため、進行状況やブックマークが失われる可能性があります。変更する前にバックアップを作成してください。続行してもよろしいですか?",
         "confirm-download-size": "{{entityType}} は {{size}}です｡続行しますか?",
@@ -2179,7 +2190,8 @@
         "webtoon-override": "Webtoon を検知しました。Webtoon モードに切り替えます。",
         "confirm-delete-collection": "コレクションを削除してもよろしいですか? 元に戻すことはできません。",
         "confirm-delete-annotations": "注釈を削除してもよろしいですか? 元に戻すことはできません。",
-        "annotations-deleted": "注釈を削除しました"
+        "annotations-deleted": "注釈を削除しました",
+        "redownload-confirm": "{{title}} は以前 {{date}} にダウンロードされています。再ダウンロードしますか?"
     },
     "actionable": {
         "scan-library": "ライブラリのスキャン",
@@ -2343,10 +2355,6 @@
         "issue-num": "号",
         "chapter-num": "章",
         "volume-num": "巻",
-        "issue-nums": "号",
-        "chapter-nums": "章",
-        "volume-nums": "巻",
-        "book-nums": "冊",
         "chapter-count": "{{num}} 章",
         "issue-num-shorthand": "#{{num}}",
         "volume-num-shorthand": "第 {{num}} 巻",
@@ -2357,8 +2365,7 @@
         "unknown": "不明",
         "confirm": "確認",
         "selected": "選択済み",
-        "libraries": "ライブラリ",
-        "roles": "役割"
+        "libraries": "ライブラリ"
     },
     "tabs": {
         "details-tab": "詳細",
@@ -2913,7 +2920,7 @@
         "disable-width-override-tooltip": "画面が指定のサイズ (ブレークポイント) 以上、または以下の場合は、幅の上書き設定を適用しません"
     },
     "manage-auth-keys": {
-        "auth-keys-title": "APIキーの管理",
+        "auth-keys-title": "認証キーの管理",
         "delete": "{{common.delete}}",
         "clients-opds-url-label": "{{user-preferences.clients-opds-url-label}}",
         "clients-opds-alert": "{{user-preferences.clients-opds-alert}}",
@@ -3096,7 +3103,8 @@
         "info-alt": "詳細情報",
         "today": "今日",
         "yesterday": "昨日",
-        "pagination-label": "アクティビティの表示設定"
+        "pagination-label": "アクティビティの表示設定",
+        "num-more": "{{num}} 以上"
     },
     "user-stats-info-cards": {
         "pages-count": "{{num}} ページ",
@@ -3420,5 +3428,54 @@
         "settings": "設定",
         "all-series": "すべてのシリーズ",
         "profile": "{{username}} さんのプロフィール"
+    },
+    "download-queue-drawer": {
+        "title": "ダウンロード",
+        "cancel": "{{common.cancel}}",
+        "cancel-all": "すべてキャンセル",
+        "retry": "再試行",
+        "retry-all": "すべて再試行",
+        "clear": "消去",
+        "empty": "ダウンロードがありません",
+        "close": "{{common.close}}",
+        "paused-after-refresh": "{{ count }} 件のダウンロードが一時停止中 — 再開準備完了",
+        "resume": "再開",
+        "pause": "一時停止",
+        "paused": "一時停止中",
+        "clear-all": "すべて消去",
+        "failed-from-auth": "認証されていません。ブラウザーを再読み込みしてください",
+        "failed-interrupted": "ページの更新により中断されました",
+        "tab-downloading": "ダウンロード中",
+        "tab-completed": "完了",
+        "today": "今日",
+        "older": "古い",
+        "queued": "{{download-queue-status-pipe.queued}}",
+        "preparing": "{{download-queue-status-pipe.preparing}}",
+        "downloading": "{{download-queue-status-pipe.downloading}}",
+        "completed": "{{download-queue-status-pipe.completed}}",
+        "failed": "{{download-queue-status-pipe.failed}}",
+        "cancelled": "{{download-queue-status-pipe.cancelled}}"
+    },
+    "download-queue-item": {
+        "retry": "{{download-queue-drawer.retry}}",
+        "cancel": "{{common.cancel}}",
+        "remove": "除去"
+    },
+    "download-queue-status-pipe": {
+        "queued": "キューに登録",
+        "preparing": "準備中",
+        "downloading": "ダウンロード中",
+        "completed": "完了",
+        "failed": "失敗",
+        "cancelled": "取消"
+    },
+    "download-queue-widget": {
+        "title": "{{download-queue-drawer.title}}"
+    },
+    "account-settings": {
+        "oidc": "{{login.oidc}}",
+        "unlink-oidc": "OIDC リンクを削除",
+        "confirm-unlink": "OIDC リンクを削除してもよろしいですか?",
+        "confirm-unlink-extra": "現在 OIDC アカウントで認証されている場合、ログアウトされます。メール経由でいつでも再連携できます。"
     }
 }

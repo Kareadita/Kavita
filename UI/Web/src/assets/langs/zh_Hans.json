@@ -952,7 +952,8 @@
         "applied": "{{theme-manager.applied}}"
     },
     "download-indicator": {
-        "progress": "{{percentage}}% 已下载"
+        "progress": "{{percentage}}% 已下载",
+        "completed": "下载完成"
     },
     "edit-series-relation": {
         "description-part-1": "不确定添加哪一种关联？请查看",
@@ -977,10 +978,8 @@
     "entity-title": {
         "special": "特刊",
         "issue-num": "{{common.issue-hash-num}}",
-        "chapter": "{{common.chapter-num}}",
         "book-num": "{{common.book-num-shorthand}}",
-        "single-volume": "单卷",
-        "vol-num": "{{user-scrobble-history.volume-num}}"
+        "single-volume": "单卷"
     },
     "external-series-card": {
         "open-external": "打开外部链接"
@@ -1407,7 +1406,8 @@
         "no-data": "无运行",
         "left-to-process": "待处理进度： {{leftToProcess}} / {{totalToProcess}}",
         "download-in-queue": "{{num}} 队列中的下载",
-        "reading-now": "{{num}} 正在阅读"
+        "reading-now": "{{num}} 正在阅读",
+        "downloads-active": "{{count}} 正在下载"
     },
     "shortcuts-modal": {
         "title": "热键",
@@ -1951,7 +1951,7 @@
     },
     "customize-dashboard-modal": {
         "title-smart-filters": "智筛选",
-        "dashboard": "仪表盘",
+        "dashboard": "仪表板",
         "sidenav": "侧边栏",
         "external-sources": "外部源",
         "smart-filters": "智能筛选",
@@ -1997,7 +1997,8 @@
         "name-label": "名称",
         "filter-name-unique": "智能筛选器名称必须是唯一的",
         "save": "{{common.save}}",
-        "required-field": "智能筛选器需要一个名称"
+        "required-field": "智能筛选器需要一个名称",
+        "no-content": "此智能筛选器在仪表板上没有结果"
     },
     "edit-external-source-item": {
         "not-unique": "此主机外部源已存在，请确保您没有重复记录",
@@ -2201,7 +2202,8 @@
         "profile-unauthorized": "此用户未分享其个人配置文件",
         "confirm-delete-collection": "您确定要删除此收藏吗？此操作无法撤销。",
         "confirm-delete-annotations": "您确定要删除这些注释吗？此操作无法撤销。",
-        "annotations-deleted": "注释已删除"
+        "annotations-deleted": "注释已删除",
+        "redownload-confirm": "您之前在 {{date}} 下载过 {{title}}。您想重新下载吗？"
     },
     "read-time-pipe": {
         "less-than-hour": "<1 小时",
@@ -2408,15 +2410,10 @@
         "book-num-shorthand": "书籍 {{num}}",
         "issue-num-shorthand": "#{{num}}",
         "volume-num-shorthand": "卷 {{num}}",
-        "book-nums": "书籍",
-        "issue-nums": "期",
-        "chapter-nums": "章节",
-        "volume-nums": "卷",
         "chapter-count": "{{num}} 章",
         "no-data": "无数据",
         "issue-count": "{{num}} 期",
         "unknown": "未知",
-        "roles": "角色",
         "libraries": "资料库",
         "confirm": "确认",
         "selected": "已选"
@@ -3422,5 +3419,54 @@
         "settings": "设置",
         "all-series": "所有系列",
         "profile": "{{username}}'的配置文件"
+    },
+    "download-queue-drawer": {
+        "title": "下载",
+        "cancel": "{{common.cancel}}",
+        "cancel-all": "全部取消",
+        "retry": "重试",
+        "retry-all": "全部重试",
+        "clear": "清除",
+        "empty": "无下载",
+        "close": "{{common.close}}",
+        "paused-after-refresh": "{{ count }} 个项目已暂停 — 准备恢复",
+        "resume": "恢复",
+        "pause": "暂停",
+        "paused": "暂停",
+        "clear-all": "全部清除",
+        "failed-from-auth": "未通过身份验证，请刷新浏览器",
+        "failed-interrupted": "页面刷新中断",
+        "tab-downloading": "下载",
+        "tab-completed": "完成",
+        "today": "今天",
+        "older": "旧的",
+        "queued": "{{download-queue-status-pipe.queued}}",
+        "preparing": "{{download-queue-status-pipe.preparing}}",
+        "downloading": "{{download-queue-status-pipe.downloading}}",
+        "completed": "{{download-queue-status-pipe.completed}}",
+        "failed": "{{download-queue-status-pipe.failed}}",
+        "cancelled": "{{download-queue-status-pipe.cancelled}}"
+    },
+    "download-queue-item": {
+        "retry": "{{download-queue-drawer.retry}}",
+        "cancel": "{{common.cancel}}",
+        "remove": "删除"
+    },
+    "download-queue-status-pipe": {
+        "queued": "已排队",
+        "preparing": "准备中",
+        "downloading": "下载",
+        "completed": "完成",
+        "failed": "失败",
+        "cancelled": "取消"
+    },
+    "download-queue-widget": {
+        "title": "{{download-queue-drawer.title}}"
+    },
+    "account-settings": {
+        "oidc": "{{login.oidc}}",
+        "unlink-oidc": "移除 OIDC 链接",
+        "confirm-unlink": "您确定要移除 OIDC 连接吗？",
+        "confirm-unlink-extra": "如果您当前已通过 OIDC 帐户进行身份验证，您将被强制登出。您可以随时通过电子邮件重新登录。"
     }
 }

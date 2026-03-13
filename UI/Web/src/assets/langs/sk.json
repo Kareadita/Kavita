@@ -959,9 +959,7 @@
     "entity-title": {
         "special": "Špeciál",
         "issue-num": "{{common.issue-hash-num}}",
-        "chapter": "{{common.chapter-num}}",
         "book-num": "{{common.book-num-shorthand}}",
-        "vol-num": "{{user-scrobble-history. objem-num}}",
         "single-volume": "Jeden zväzok"
     },
     "external-series-card": {
@@ -2281,15 +2279,10 @@
         "book-num-shorthand": "Book {{num}}",
         "volume-num-shorthand": "Zv {{num}}",
         "issue-num-shorthand": "#{{num}}",
-        "book-nums": "Knihy",
-        "chapter-nums": "Kapitoly",
-        "volume-nums": "Zväzky",
-        "issue-nums": "Vydania",
         "chapter-count": "{{num}} kapitol",
         "no-data": "Žiadne údaje",
         "issue-count": "{{num}} Problémov",
         "unknown": "Neznámy",
-        "roles": "Roly",
         "libraries": "Knižnice",
         "selected": "Vybrané"
     },

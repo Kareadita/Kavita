@@ -833,9 +833,7 @@
     "entity-title": {
         "special": "Speciaal",
         "issue-num": "{{common.issue-hash-num}}",
-        "chapter": "{{common.chapter-num}}",
-        "book-num": "{{common.book-num-shorthand}}",
-        "vol-num": "{{user-scrobble-history.volume-num}}"
+        "book-num": "{{common.book-num-shorthand}}"
     },
     "external-series-card": {
         "open-external": "Open extern"
@@ -1565,7 +1563,6 @@
         "required": "{{validation.required-field}}"
     },
     "common": {
-        "book-nums": "Boeken",
         "book-num-shorthand": "Boek {{num}}",
         "chapter-num": "Hoofdstuk",
         "book-num": "Boek",
@@ -1585,7 +1582,6 @@
         "save": "Opslaan",
         "cancel": "Annuleren",
         "close": "Sluiten",
-        "chapter-nums": "Hoofdstukken",
         "issue-num-shorthand": "#{{num}}",
         "series-count": "{{num}} Series",
         "promoted": "Uitgelicht",

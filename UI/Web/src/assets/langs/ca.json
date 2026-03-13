@@ -384,10 +384,6 @@
         "chapter-num-shorthand": "Cap. {{num}}",
         "book-num-shorthand": "Llibre {{num}}",
         "volume-num": "Volum",
-        "book-nums": "Llibres",
-        "issue-nums": "Números",
-        "chapter-nums": "Capítols",
-        "volume-nums": "Volums",
         "chapter-count": "{{num}} capítols"
     },
     "edit-device-modal": {

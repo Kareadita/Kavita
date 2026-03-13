@@ -772,11 +772,9 @@
     },
     "entity-title": {
         "issue-num": "{{common.issue-hash-num}}",
-        "chapter": "{{common.chapter-num}}",
         "book-num": "{{common.book-num-shorthand}}",
         "single-volume": "Enkel Volym",
-        "special": "Special",
-        "vol-num": "{{user-scrobble-history.volume-num}}"
+        "special": "Special"
     },
     "manage-media-issues": {
         "filter-label": "{{common.filter}}",
@@ -2195,7 +2193,6 @@
         "read": "Läs",
         "reset-to-default": "Återställ till Standard",
         "select-all": "Markera Alla",
-        "book-nums": "Böcker",
         "save": "Spara",
         "reset": "Återställ",
         "chapter-count": "{{num}} Kapitel",
@@ -2213,10 +2210,7 @@
         "username": "Användarnamn",
         "password": "Lösenord",
         "book-num-shorthand": "Bok {{num}}",
-        "volume-nums": "Volymer",
         "add": "Lägg till",
-        "issue-nums": "Nummer",
-        "chapter-nums": "Kapitel",
         "chapter-num-shorthand": "Kap {{num}}",
         "volume-num": "Volym",
         "email": "E-post",
@@ -2230,7 +2224,6 @@
         "issue-count": "{{num}} Nummer",
         "confirm": "Bekräfta",
         "selected": "Markerad",
-        "roles": "Roller",
         "libraries": "Bibliotek"
     },
     "carousel-reel": {

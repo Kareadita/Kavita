@@ -952,7 +952,8 @@
         "applied": "{{theme-manager.applied}}"
     },
     "download-indicator": {
-        "progress": "{{percentage}}% íoslódáilte"
+        "progress": "{{percentage}}% íoslódáilte",
+        "completed": "Íoslódáil críochnaithe"
     },
     "edit-series-relation": {
         "description-part-1": "Níl tú cinnte cén gaol atá le cur leis? Féach ar ár",
@@ -977,9 +978,7 @@
     "entity-title": {
         "special": "Speisialta",
         "issue-num": "{{common.issue-hash-num}}",
-        "chapter": "{{common.chapter-num}}",
         "book-num": "{{common.book-num-shorthand}}",
-        "vol-num": "{{user-scrobble-history.volume-num}}",
         "single-volume": "Imleabhar Aonair"
     },
     "external-series-card": {
@@ -1407,7 +1406,8 @@
         "no-data": "Níl mórán ar siúl anseo",
         "left-to-process": "Fágtha le Próiseáil: {{leftToProcess}} / {{totalToProcess}}",
         "download-in-queue": "{{num}} íoslódálacha sa Scuaine",
-        "reading-now": "{{num}} ag léamh anois"
+        "reading-now": "{{num}} ag léamh anois",
+        "downloads-active": "{{count}} íoslódáil ar siúl"
     },
     "shortcuts-modal": {
         "title": "Aicearraí Méarchláir",
@@ -2201,7 +2201,8 @@
         "profile-unauthorized": "Níl an t-úsáideoir seo ag roinnt a phróifíl",
         "confirm-delete-collection": "An bhfuil tú cinnte gur mian leat an bailiúchán a scriosadh? Ní féidir é seo a chealú.",
         "confirm-delete-annotations": "An bhfuil tú cinnte gur mian leat na nótaí a scriosadh? Ní féidir é seo a chealú.",
-        "annotations-deleted": "Scriosadh an nóta"
+        "annotations-deleted": "Scriosadh an nóta",
+        "redownload-confirm": "D’íoslódáil tú {{title}} roimhe seo ar {{date}}. Ar mhaith leat é a athíoslódáil?"
     },
     "read-time-pipe": {
         "less-than-hour": "<1 Uair",
@@ -2408,15 +2409,10 @@
         "book-num-shorthand": "Leabhar {{num}}",
         "issue-num-shorthand": "#{{num}}",
         "volume-num-shorthand": "Goid {{num}}",
-        "book-nums": "Leabhair",
-        "issue-nums": "Saincheisteanna",
-        "chapter-nums": "Caibidlí",
-        "volume-nums": "Imleabhair",
         "chapter-count": "{{num}} Caibidlí",
         "no-data": "Uimh Sonraí",
         "issue-count": "{{num}} Fadhbanna",
         "unknown": "Gan aithne",
-        "roles": "Róil",
         "libraries": "Leabharlanna",
         "confirm": "Deimhnigh",
         "selected": "Roghnaithe"
@@ -3422,5 +3418,48 @@
         "settings": "Socruithe",
         "all-series": "Gach Sraith",
         "profile": "Próifíl {{username}}"
+    },
+    "download-queue-drawer": {
+        "title": "Íoslódálacha",
+        "cancel": "{{common.cancel}}",
+        "cancel-all": "Cealaigh Gach Rud",
+        "retry": "Déan iarracht arís",
+        "retry-all": "Déan iarracht arís ar fad",
+        "clear": "Glan",
+        "empty": "Gan aon íoslódálacha",
+        "close": "{{common.close}}",
+        "paused-after-refresh": "{{ count }} mír(eanna) curtha ar sos — réidh le atosú",
+        "resume": "Atosú",
+        "pause": "Sos",
+        "paused": "Sosaithe",
+        "clear-all": "Glan Gach Rud",
+        "failed-from-auth": "Gan Fíordheimhniú, athnuachan an brabhsálaí",
+        "failed-interrupted": "Cuireadh isteach air ag athnuachan leathanaigh",
+        "tab-downloading": "Ag íoslódáil",
+        "tab-completed": "Críochnaithe",
+        "today": "Inniu",
+        "older": "Níos sine",
+        "queued": "{{download-queue-status-pipe.queued}}",
+        "preparing": "{{download-queue-status-pipe.preparing}}",
+        "downloading": "{{download-queue-status-pipe.downloading}}",
+        "completed": "{{download-queue-status-pipe.completed}}",
+        "failed": "{{download-queue-status-pipe.failed}}",
+        "cancelled": "{{download-queue-status-pipe.cancelled}}"
+    },
+    "download-queue-item": {
+        "retry": "{{download-queue-drawer.retry}}",
+        "cancel": "{{common.cancel}}",
+        "remove": "Bain"
+    },
+    "download-queue-status-pipe": {
+        "queued": "Sa scuaine",
+        "preparing": "Ag ullmhú",
+        "downloading": "Ag íoslódáil",
+        "completed": "Críochnaithe",
+        "failed": "Theip air",
+        "cancelled": "Cealaithe"
+    },
+    "download-queue-widget": {
+        "title": "{{download-queue-drawer.title}}"
     }
 }
