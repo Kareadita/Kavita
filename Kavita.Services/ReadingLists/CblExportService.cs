@@ -55,14 +55,14 @@ public class CblExportService(IUnitOfWork unitOfWork, IDirectoryService director
                 .ThenInclude(smp => smp.Person)
                 .ToListAsync();
 
-            var outputDir = Path.Combine(directoryService.TempDirectory, userId.ToString(), "cbl-export");
+            var outputDir = Path.Combine(directoryService.TempDirectory, userId.ToString(), "cbl-export", $"{readingListId}");
             Directory.CreateDirectory(outputDir);
 
             var sanitizedName = SanitizeFileName(readingList.Title);
 
             if (asV2)
             {
-                var jsonFileName = $"{readingListId}-{sanitizedName}.json";
+                var jsonFileName = $"{sanitizedName}.json";
                 var jsonFilePath = Path.Combine(outputDir, jsonFileName);
 
                 var v2 = BuildCblV2Root(readingList, items);
@@ -71,7 +71,7 @@ public class CblExportService(IUnitOfWork unitOfWork, IDirectoryService director
                 return jsonFilePath;
             }
 
-            var cblFileName = $"{readingListId}-{sanitizedName}.cbl";
+            var cblFileName = $"{sanitizedName}.cbl";
             var cblFilePath = Path.Combine(outputDir, cblFileName);
 
             var cbl = BuildCblReadingList(readingList, items);

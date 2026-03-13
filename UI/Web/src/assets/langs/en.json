@@ -3565,7 +3565,11 @@
         "export": "Export",
         "like": "Like",
         "unlike": "Remove likes",
-        "edit-device-name": "Edit Name"
+        "edit-device-name": "Edit Name",
+        "export-v1": "CBL v1",
+        "export-v1-tooltip": "Use CBL v1 (XML)",
+        "export-v2": "CBL v2",
+        "export-v2-tooltip": "Use CBL v2 (JSON)"
     },
 
     "preferences": {

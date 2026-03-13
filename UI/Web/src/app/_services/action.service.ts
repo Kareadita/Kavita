@@ -669,6 +669,16 @@ export class ActionService {
           tap(() => this.toastr.success(translate('toasts.reading-list-unpromoted'))),
           map(() => this.fromAction(action, {...readingList, promoted: false}, 'update'))
         );
+
+      case Action.ExportAsV1:
+        return this.downloadService.exportReadingList(readingList.id, readingList.title).pipe(
+          map(() => this.fromAction(action, readingList, 'none'))
+        );
+      case Action.ExportAsV2:
+        return this.downloadService.exportReadingList(readingList.id, readingList.title, true).pipe(
+          map(() => this.fromAction(action, readingList, 'none'))
+        );
+
       default:
         return of(this.fromAction(action, readingList, 'none'));
     }

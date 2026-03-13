@@ -522,6 +522,26 @@ export class DownloadService {
     URL.revokeObjectURL(url);
   }
 
+
+  exportReadingList(readingListId: number, readingListName: string, asV2 = false) {
+    return this.httpClient.post(
+      this.baseUrl + `readinglist/export-as-cbl?readingListId=${readingListId}&asV2=${asV2}`, {},
+      { observe: 'response', responseType: 'blob' }
+    ).pipe(
+      tap((response) => {
+        const disposition = response.headers.get('Content-Disposition') ?? '';
+        const filename = this.parseContentDisposition(disposition, `${readingListName}.${asV2 ? 'cbl' : 'json'}`);
+        const url = URL.createObjectURL(response.body!);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = filename;
+        a.click();
+        URL.revokeObjectURL(url);
+      }),
+      takeUntilDestroyed(this.destroyRef)
+    );
+  }
+
   private getEntityDownloadSize(entityType: 'series' | 'volume' | 'chapter' | 'readinglist', id: number) {
     return this.httpClient.get<number>(this.baseUrl + `download/${entityType}-size?${entityType}Id=${id}`);
   }

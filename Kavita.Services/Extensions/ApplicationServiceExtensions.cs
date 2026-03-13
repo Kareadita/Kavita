@@ -12,6 +12,7 @@ using Kavita.Services.HostedServices;
 using Kavita.Services.Metadata;
 using Kavita.Services.Plus;
 using Kavita.Services.Reading;
+using Kavita.Services.ReadingLists;
 using Kavita.Services.Scanner;
 using Kavita.Services.SignalR;
 using Microsoft.Extensions.DependencyInjection;
@@ -56,6 +57,7 @@ public static class ApplicationServiceExtensions
         services.AddScoped<IFontService, FontService>();
         services.AddScoped<IAnnotationService, AnnotationService>();
         services.AddScoped<IOpdsService, OpdsService>();
+        services.AddScoped<ICblExportService, CblExportService>();
 
         services.AddScoped<IScannerService, ScannerService>();
         services.AddScoped<IProcessSeries, ProcessSeries>();

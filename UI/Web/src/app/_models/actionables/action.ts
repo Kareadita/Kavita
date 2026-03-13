@@ -112,4 +112,8 @@ export enum Action {
   Export = 32,
   Like = 33,
   UnLike = 34,
+  /** Export as CBLv1 */
+  ExportAsV1 = 35,
+  /** Export as CBLv2 */
+  ExportAsV2 = 36,
 }
