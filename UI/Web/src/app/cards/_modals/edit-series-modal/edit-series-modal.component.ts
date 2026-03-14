@@ -56,22 +56,27 @@ import {Volume} from "../../../_models/volume";
 import {SettingButtonComponent} from "../../../settings/_components/setting-button/setting-button.component";
 import {SettingItemComponent} from "../../../settings/_components/setting-item/setting-item.component";
 import {LicenseService} from "../../../_services/license.service";
-import {AsyncPipe, DecimalPipe, NgTemplateOutlet, TitleCasePipe} from "@angular/common";
+import {DecimalPipe, NgTemplateOutlet, TitleCasePipe} from "@angular/common";
 import {BreakpointService} from "../../../_services/breakpoint.service";
 import {ActionFactoryService} from "../../../_services/action-factory.service";
 import {ActionItem} from "../../../_models/actionables/action-item";
 import {Action} from "../../../_models/actionables/action";
 import {modalSaved} from "../../../_models/modal/modal-result";
+import {
+  EditExternalMetadataComponent
+} from "../../../../shared/_components/edit-external-metadata/edit-external-metadata.component";
+
 
 enum TabID {
-  General = 0,
-  Metadata = 1,
-  People = 2,
-  WebLinks = 3,
-  CoverImage = 4,
-  Related = 5,
-  Info = 6,
-  Tasks = 7
+  General = 'general-tab',
+  CoverImage = 'cover-image-tab',
+  Info = 'info-tab',
+  People = 'people-tab',
+  Tasks = 'tasks-tab',
+  Metadata = 'metadata-tab',
+  WebLinks = 'weblinks-tab',
+  Related = 'related-tab',
+  ExternalMetadataIds = 'external-ids-tab'
 }
 
 @Component({
@@ -101,9 +106,9 @@ enum TabID {
     SettingButtonComponent,
     SettingItemComponent,
     NgTemplateOutlet,
-    AsyncPipe,
     DecimalPipe,
     TitleCasePipe,
+    EditExternalMetadataComponent,
   ],
   templateUrl: './edit-series-modal.component.html',
   styleUrls: ['./edit-series-modal.component.scss'],
@@ -142,8 +147,7 @@ export class EditSeriesModalComponent implements OnInit {
   tasks = this.actionFactoryService.getActionablesForSettingsPage(
     this.actionFactoryService.getSeriesActions(), this.blacklist);
   volumeCollapsed: any = {};
-  tabs = ['general-tab', 'metadata-tab', 'people-tab', 'web-links-tab', 'cover-image-tab', 'related-tab', 'info-tab', 'tasks-tab'];
-  active = this.tabs[0];
+  active = TabID.General;
   editSeriesForm!: FormGroup;
   libraryName: string | undefined = undefined;
   size: number = 0;
@@ -499,11 +503,14 @@ export class EditSeriesModalComponent implements OnInit {
 
 
   save() {
-    const model = this.editSeriesForm.value;
+    const model = this.editSeriesForm.getRawValue();
     const selectedIndex = this.editSeriesForm.get('coverImageIndex')?.value || 0;
 
     const apis = [
-      this.seriesService.updateMetadata(this.metadata)
+      this.seriesService.updateMetadata(this.metadata),
+      this.seriesService.updateSeries(model).pipe(
+        tap(result => updatedSeries = result)
+      )
     ];
 
     // We only need to call updateSeries if we changed name, sort name, or localized name or reset a cover image
@@ -522,9 +529,9 @@ export class EditSeriesModalComponent implements OnInit {
       ));
     } else {
       // We need to ensure we at least update or get the series to return it to action service
-      apis.push(this.seriesService.getSeries(this.series.id).pipe(
-        tap(result => updatedSeries = result)
-      ));
+      // apis.push(this.seriesService.getSeries(this.series.id).pipe(
+      //   tap(result => updatedSeries = result)
+      // ));
     }
 
 
@@ -539,6 +546,7 @@ export class EditSeriesModalComponent implements OnInit {
       delay(10),
       last()
     ).subscribe(() => {
+      console.log('Updated series: ', updatedSeries);
       this.modal.close(modalSaved(updatedSeries ?? model, selectedIndex > 0 || this.coverImageReset));
     });
   }

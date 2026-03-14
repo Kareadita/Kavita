@@ -1,12 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
+using Kavita.Models.DTOs.Common;
 using Kavita.Models.DTOs.Metadata;
 using Kavita.Models.DTOs.Person;
 using Kavita.Models.Entities.Enums;
 
 namespace Kavita.Models.DTOs;
 
-public sealed record UpdateChapterDto
+#nullable enable
+
+public sealed record UpdateChapterDto : IUpdateExternalMetadataIds
 {
     public int Id { get; init; }
     public string Summary { get; set; } = string.Empty;
@@ -92,4 +95,11 @@ public sealed record UpdateChapterDto
     /// </summary>
     /// <remarks>This should not be confused with Title which is used for special filenames.</remarks>
     public string TitleName { get; set; } = string.Empty;
+
+    public int? AniListId { get; set; }
+    public long? MalId { get; set; }
+    public int? HardcoverId { get; set; }
+    public long? MetronId { get; set; }
+    public string? ComicVineId { get; set; }
+    public long? MangaBakaId { get; set; }
 }

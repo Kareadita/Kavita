@@ -8,7 +8,7 @@ using Kavita.Models.Entities.User;
 
 namespace Kavita.Models.Entities;
 
-public class Series : IEntityDate, IHasReadTimeEstimate, IHasCoverImage
+public class Series : IEntityDate, IHasReadTimeEstimate, IHasCoverImage, IHasMetadataIds
 {
     public int Id { get; set; }
     /// <summary>
@@ -16,11 +16,11 @@ public class Series : IEntityDate, IHasReadTimeEstimate, IHasCoverImage
     /// </summary>
     public required string Name { get; set; }
     /// <summary>
-    /// Used internally for name matching. <see cref="Services.Tasks.Scanner.Parser.Parser.Normalize"/>
+    /// Used internally for name matching. <see cref="Kavita.Services.Tasks.Scanner.Parser.Parser.Normalize"/>
     /// </summary>
     public required string NormalizedName { get; set; }
     /// <summary>
-    /// Used internally for localized name matching. <see cref="Services.Tasks.Scanner.Parser.Parser.Normalize"/>
+    /// Used internally for localized name matching. <see cref="Kavita.Services.Tasks.Scanner.Parser.Parser.Normalize"/>
     /// </summary>
     public required string NormalizedLocalizedName { get; set; }
     /// <summary>
@@ -114,6 +114,15 @@ public class Series : IEntityDate, IHasReadTimeEstimate, IHasCoverImage
     /// If the series was unable to match, it will be blacklisted until a manual metadata match overrides it
     /// </summary>
     public bool IsBlacklisted { get; set; }
+    #endregion
+
+    #region Metadata
+    public int AniListId { get; set; }
+    public long MalId { get; set; }
+    public int HardcoverId { get; set; }
+    public long MetronId { get; set; }
+    public string ComicVineId { get; set; }
+    public long MangaBakaId { get; set; }
     #endregion
 
     public SeriesMetadata Metadata { get; set; } = null!;

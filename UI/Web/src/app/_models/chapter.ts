@@ -8,11 +8,12 @@ import {IHasCast} from "./common/i-has-cast";
 import {IHasReadingTime} from "./common/i-has-reading-time";
 import {IHasCover} from "./common/i-has-cover";
 import {IHasProgress} from "./common/i-has-progress";
+import {IHasMetadataIds} from "./common/i-has-metadata-ids";
 
 export const LooseLeafOrDefaultNumber = -100000;
 export const SpecialVolumeNumber = 100000;
 
-export interface Chapter extends IHasCast, IHasReadingTime, IHasCover, IHasProgress {
+export interface Chapter extends IHasCast, IHasReadingTime, IHasCover, IHasProgress, IHasMetadataIds {
   id: number;
   range: string;
   /**
@@ -69,6 +70,13 @@ export interface Chapter extends IHasCast, IHasReadingTime, IHasCover, IHasProgr
    */
   totalCount: number;
   totalReads: number;
+
+  aniListId: number;
+  malId: number;
+  hardcoverId: number;
+  metronId: number;
+  comicVineId: string | null;
+  mangaBakaId: number;
 
   genres: Array<Genre>;
   tags: Array<Tag>;

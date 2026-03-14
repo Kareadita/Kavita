@@ -380,7 +380,7 @@ export class LibrarySettingsModalComponent implements OnInit {
   }
 
   async save() {
-    const model = this.libraryForm.value;
+    const model = this.libraryForm.getRawValue();
     model.folders = this.selectedFolders;
     model.fileGroupTypes = [];
     for(let fileTypeGroup of allFileTypeGroup) {

@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Globalization;
 using Kavita.Models.Entities.Enums;
 using Kavita.Models.Entities.Interfaces;
 using Kavita.Models.Entities.Metadata;
@@ -11,7 +10,7 @@ using Kavita.Models.Entities.User;
 
 namespace Kavita.Models.Entities;
 
-public class Chapter : IEntityDate, IHasReadTimeEstimate, IHasCoverImage, IHasKPlusMetadata
+public class Chapter : IEntityDate, IHasReadTimeEstimate, IHasCoverImage, IHasKPlusMetadata, IHasMetadataIds
 {
     public int Id { get; set; }
     /// <summary>
@@ -39,10 +38,6 @@ public class Chapter : IEntityDate, IHasReadTimeEstimate, IHasCoverImage, IHasKP
     /// Can the sort order be updated on scan or is it locked from UI
     /// </summary>
     public bool SortOrderLocked { get; set; }
-    /// <summary>
-    /// The files that represent this Chapter
-    /// </summary>
-    public ICollection<MangaFile> Files { get; set; } = null!;
     public DateTime Created { get; set; }
     public DateTime LastModified { get; set; }
     public DateTime CreatedUtc { get; set; }
@@ -137,6 +132,15 @@ public class Chapter : IEntityDate, IHasReadTimeEstimate, IHasCoverImage, IHasKP
     /// </summary>
     public float AverageExternalRating { get; set; } = 0f;
 
+    #region Metadata
+    public int AniListId { get; set; }
+    public long MalId { get; set; }
+    public int HardcoverId { get; set; }
+    public long MetronId { get; set; }
+    public string? ComicVineId { get; set; }
+    public long MangaBakaId { get; set; }
+    #endregion
+
     #region Locks
 
     public bool AgeRatingLocked { get; set; }
@@ -175,9 +179,12 @@ public class Chapter : IEntityDate, IHasReadTimeEstimate, IHasCoverImage, IHasKP
     public ICollection<AppUserChapterRating> Ratings { get; set; } = [];
 
     public ICollection<AppUserProgress> UserProgress { get; set; }
+    /// <summary>
+    /// The files that represent this Chapter
+    /// </summary>
+    public ICollection<MangaFile> Files { get; set; } = null!;
 
 
-    // Relationships
     public Volume Volume { get; set; } = null!;
     public int VolumeId { get; set; }
 

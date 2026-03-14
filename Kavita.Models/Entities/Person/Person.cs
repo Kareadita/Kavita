@@ -38,7 +38,6 @@ public class Person : IHasCoverImage
     /// </summary>
     /// <remarks>Kavita+ Only</remarks>
     public string? HardcoverId { get; set; }
-
     /// <summary>
     /// https://metron.cloud/creator/{slug}/
     /// </summary>

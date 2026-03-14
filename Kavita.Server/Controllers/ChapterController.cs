@@ -11,9 +11,12 @@ using Kavita.Common.Extensions;
 using Kavita.Models.Constants;
 using Kavita.Models.DTOs;
 using Kavita.Models.DTOs.SignalR;
+using Kavita.Models.Entities;
 using Kavita.Models.Entities.Enums;
+using Kavita.Models.Entities.Interfaces;
 using Kavita.Models.Entities.MetadataMatching;
 using Kavita.Server.Attributes;
+using Kavita.Server.Helpers;
 using Kavita.Services.Helpers;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -247,6 +250,8 @@ public class ChapterController(
             );
         }
 
+        ExternalMetadataIdHelper.SetExternalMetadataIds(chapter, dto);
+
 
         #region Genres
         chapter.Genres ??= [];
@@ -411,6 +416,7 @@ public class ChapterController(
 
         return Ok();
     }
+
 
     /// <summary>
     /// Returns Ratings and Reviews for an individual Chapter

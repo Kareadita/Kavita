@@ -11,8 +11,8 @@
           <ul ngbNav #nav="ngbNav" [(activeId)]="active" class="nav-pills" [destroyOnHide]="false"
               orientation="{{breakpointService.isMobile() ? 'horizontal' : 'vertical'}}" style="min-width: 8.4375rem;">
 
-            <li [ngbNavItem]="tabs[TabID.General]">
-              <a ngbNavLink>{{t(tabs[TabID.General])}}</a>
+            <li [ngbNavItem]="TabID.General">
+              <a ngbNavLink>{{t(TabID.General)}}</a>
               <ng-template ngbNavContent>
                 <div class="row">
                   <div class="mb-3" style="width: 100%">
@@ -88,8 +88,8 @@
             </li>
 
             @if (metadata) {
-              <li [ngbNavItem]="tabs[TabID.Metadata]">
-                <a ngbNavLink>{{t(tabs[TabID.Metadata])}}</a>
+              <li [ngbNavItem]="TabID.Metadata">
+                <a ngbNavLink>{{t(TabID.Metadata)}}</a>
                 <ng-template ngbNavContent>
 
                   <div class="row">
@@ -219,8 +219,8 @@
             }
 
 
-            <li [ngbNavItem]="tabs[TabID.People]">
-              <a ngbNavLink>{{t(tabs[TabID.People])}}</a>
+            <li [ngbNavItem]="TabID.People">
+              <a ngbNavLink>{{t(TabID.People)}}</a>
               <ng-template ngbNavContent>
                 <div class="row">
                   <div class="mb-3">
@@ -500,8 +500,8 @@
             </li>
 
             @if (metadata) {
-              <li [ngbNavItem]="tabs[TabID.WebLinks]">
-                <a ngbNavLink>{{t(tabs[TabID.WebLinks])}}</a>
+              <li [ngbNavItem]="TabID.WebLinks">
+                <a ngbNavLink>{{t(TabID.WebLinks)}}</a>
                 <ng-template ngbNavContent>
                   <p>{{t('web-link-description')}}</p>
                   <app-edit-list [items]="WebLinks" [label]="t('web-link-label')" (updateItems)="updateWeblinks($event)" />
@@ -509,8 +509,19 @@
               </li>
             }
 
-            <li [ngbNavItem]="tabs[TabID.CoverImage]">
-              <a ngbNavLink>{{t(tabs[TabID.CoverImage])}}</a>
+            <!--External Metadata Ids-->
+            @if (accountService.hasAdminRole()) {
+              <li [ngbNavItem]="TabID.ExternalMetadataIds">
+                <a ngbNavLink>{{t(TabID.ExternalMetadataIds)}}</a>
+                <ng-template ngbNavContent>
+                  <app-edit-external-metadata [form]="editSeriesForm" [entity]="series"/>
+                </ng-template>
+              </li>
+            }
+
+
+            <li [ngbNavItem]="TabID.CoverImage">
+              <a ngbNavLink>{{t(TabID.CoverImage)}}</a>
               <ng-template ngbNavContent>
                 <p class="alert alert-warning" role="alert">
                   {{t('cover-image-description')}}
@@ -519,15 +530,15 @@
               </ng-template>
             </li>
 
-            <li [ngbNavItem]="tabs[TabID.Related]">
-              <a ngbNavLink>{{t(tabs[TabID.Related])}}</a>
+            <li [ngbNavItem]="TabID.Related">
+              <a ngbNavLink>{{t(TabID.Related)}}</a>
               <ng-template ngbNavContent>
                 <app-edit-series-relation [series]="series" [save]="saveNestedComponents" />
               </ng-template>
             </li>
 
-            <li [ngbNavItem]="tabs[TabID.Info]">
-              <a ngbNavLink>{{t(tabs[TabID.Info])}}</a>
+            <li [ngbNavItem]="TabID.Info">
+              <a ngbNavLink>{{t(TabID.Info)}}</a>
               <ng-template ngbNavContent>
                 <h5>{{t('info-title')}}</h5>
 
@@ -746,8 +757,8 @@
               </ng-template>
             </li>
 
-            <li [ngbNavItem]="tabs[TabID.Tasks]">
-              <a ngbNavLink>{{t(tabs[TabID.Tasks])}}</a>
+            <li [ngbNavItem]="TabID.Tasks">
+              <a ngbNavLink>{{t(TabID.Tasks)}}</a>
               <ng-template ngbNavContent>
                 @for(task of tasks; track task.action) {
                   @if (accountService.canCurrentUserInvokeAction(task.action)) {

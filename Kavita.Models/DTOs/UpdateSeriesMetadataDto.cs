@@ -1,4 +1,6 @@
-﻿namespace Kavita.Models.DTOs;
+﻿using Kavita.Models.DTOs.Common;
+
+namespace Kavita.Models.DTOs;
 
 public sealed record UpdateSeriesMetadataDto
 {

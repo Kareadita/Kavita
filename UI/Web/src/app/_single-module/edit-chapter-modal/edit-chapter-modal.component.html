@@ -521,6 +521,15 @@
             </li>
           }
 
+          <!--External Metadata Ids-->
+          @if (accountService.hasAdminRole()) {
+            <li [ngbNavItem]="TabID.ExternalMetadataIds">
+              <a ngbNavLink>{{t(TabID.ExternalMetadataIds)}}</a>
+              <ng-template ngbNavContent>
+                <app-edit-external-metadata [form]="editForm" [entity]="chapter"/>
+              </ng-template>
+            </li>
+          }
 
           <!-- Cover Tab -->
           @if (accountService.hasAdminRole())

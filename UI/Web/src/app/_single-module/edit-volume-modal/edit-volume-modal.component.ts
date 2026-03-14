@@ -29,6 +29,11 @@ import {ActionFactoryService} from "../../_services/action-factory.service";
 import {ActionItem} from "../../_models/actionables/action-item";
 import {Action} from "../../_models/actionables/action";
 import {modalDeleted, modalSaved} from "../../_models/modal/modal-result";
+import {
+  EditExternalMetadataComponent
+} from "../../../shared/_components/edit-external-metadata/edit-external-metadata.component";
+import {VolumeService} from "../../_services/volume.service";
+import {UpdateVolume} from "../../_models/update-volume";
 
 enum TabID {
   General = 'general-tab',
@@ -36,6 +41,7 @@ enum TabID {
   Info = 'info-tab',
   Tasks = 'tasks-tab',
   Progress = 'progress-tab',
+  ExternalMetadataIds = 'external-ids-tab'
 }
 
 
@@ -59,7 +65,8 @@ enum TabID {
     DefaultDatePipe,
     UtcToLocalTimePipe,
     BytesPipe,
-    ReadTimePipe
+    ReadTimePipe,
+    EditExternalMetadataComponent
   ],
   templateUrl: './edit-volume-modal.component.html',
   styleUrl: './edit-volume-modal.component.scss',
@@ -75,12 +82,8 @@ export class EditVolumeModalComponent implements OnInit {
   private readonly actionFactoryService = inject(ActionFactoryService);
   private readonly actionService = inject(ActionService);
   private readonly downloadService = inject(DownloadService);
+  private readonly volumeService = inject(VolumeService);
   protected readonly breakpointService = inject(BreakpointService);
-
-  protected readonly TabID = TabID;
-  protected readonly Action = Action;
-  protected readonly PersonRole = PersonRole;
-  protected readonly MangaFormat = MangaFormat;
 
   @Input({required: true}) volume!: Volume;
   @Input({required: true}) libraryType!: LibraryType;
@@ -129,9 +132,14 @@ export class EditVolumeModalComponent implements OnInit {
   }
 
   save() {
+    const model = this.editForm.getRawValue();
     const selectedIndex = this.editForm.get('coverImageIndex')?.value || 0;
 
-    const apis = [];
+    const updateData = {id: this.volume.id, ...model} as UpdateVolume;
+
+    const apis = [
+      this.volumeService.updateVolume(updateData)
+    ];
 
     if (selectedIndex > 0 || this.coverImageReset) {
       apis.push(this.uploadService.updateVolumeCoverImage(this.volume.id, this.selectedCover, !this.coverImageReset));
@@ -189,4 +197,9 @@ export class EditVolumeModalComponent implements OnInit {
     });
     this.cdRef.markForCheck();
   }
+
+  protected readonly TabID = TabID;
+  protected readonly Action = Action;
+  protected readonly PersonRole = PersonRole;
+  protected readonly MangaFormat = MangaFormat;
 }

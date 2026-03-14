@@ -50,6 +50,9 @@ import {ActionItem} from "../../_models/actionables/action-item";
 import {Action} from "../../_models/actionables/action";
 import {ActionFactoryService} from "../../_services/action-factory.service";
 import {modalDeleted, modalSaved} from "../../_models/modal/modal-result";
+import {
+  EditExternalMetadataComponent
+} from "../../../shared/_components/edit-external-metadata/edit-external-metadata.component";
 
 enum TabID {
   General = 'general-tab',
@@ -59,6 +62,7 @@ enum TabID {
   Tasks = 'tasks-tab',
   Tags = 'tags-tab',
   Weblinks = 'weblinks-tab', // TODO: Weblinks are not implemented
+  ExternalMetadataIds = 'external-ids-tab'
 }
 
 const blackList = [Action.Edit, Action.IncognitoRead, Action.AddToReadingList];
@@ -89,6 +93,7 @@ const blackList = [Action.Edit, Action.IncognitoRead, Action.AddToReadingList];
     ImageComponent,
     SafeHtmlPipe,
     ReadTimePipe,
+    EditExternalMetadataComponent,
   ],
   templateUrl: './edit-chapter-modal.component.html',
   styleUrl: './edit-chapter-modal.component.scss',
@@ -232,7 +237,7 @@ export class EditChapterModalComponent implements OnInit {
   }
 
   save() {
-    const model = this.editForm.value;
+    const model = this.editForm.getRawValue();
     const selectedIndex = this.editForm.get('coverImageIndex')?.value || 0;
 
     // Patch in data from the model that is not typeahead (as those are updated during setting)

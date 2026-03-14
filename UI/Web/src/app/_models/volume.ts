@@ -3,8 +3,9 @@ import {HourEstimateRange} from './series-detail/hour-estimate-range';
 import {IHasCover} from "./common/i-has-cover";
 import {IHasReadingTime} from "./common/i-has-reading-time";
 import {IHasProgress} from "./common/i-has-progress";
+import {IHasMetadataIds} from "./common/i-has-metadata-ids";
 
-export interface Volume extends IHasCover, IHasReadingTime, IHasProgress {
+export interface Volume extends IHasCover, IHasReadingTime, IHasProgress, IHasMetadataIds {
   id: number;
   minNumber: number;
   maxNumber: number;
@@ -27,4 +28,11 @@ export interface Volume extends IHasCover, IHasReadingTime, IHasProgress {
   coverImageLocked: boolean;
   primaryColor: string;
   secondaryColor: string;
+
+  aniListId: number;
+  malId: number;
+  hardcoverId: number;
+  metronId: number;
+  comicVineId: string | null;
+  mangaBakaId: number;
 }

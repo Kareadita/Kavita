@@ -2548,11 +2548,12 @@
         "general-tab": "{{tabs.general-tab}}",
         "metadata-tab": "{{tabs.metadata-tab}}",
         "people-tab": "{{tabs.people-tab}}",
-        "web-links-tab": "{{tabs.weblink-tab}}",
+        "weblinks-tab": "{{tabs.weblink-tab}}",
         "cover-image-tab": "{{tabs.cover-tab}}",
         "related-tab": "{{tabs.related-tab}}",
         "info-tab": "{{tabs.info-tab}}",
         "tasks-tab": "{{tabs.tasks-tab}}",
+        "external-ids-tab": "{{tabs.external-ids-tab}}",
 
         "genres-label": "{{metadata-fields.genres-title}}",
         "tags-label": "{{metadata-fields.tags-title}}",
@@ -2649,6 +2650,7 @@
         "general-tab": "{{tabs.general-tab}}",
         "people-tab": "{{tabs.people-tab}}",
         "weblink-tab": "{{tabs.weblink-tab}}",
+        "external-ids-tab": "{{tabs.external-ids-tab}}",
         "field-locked-alt": "{{edit-series-modal.field-locked-alt}}",
         "cover-image-tab": "{{tabs.cover-tab}}",
         "tasks-tab": "{{tabs.tasks-tab}}",
@@ -2679,6 +2681,7 @@
         "cover-image-tab": "{{tabs.cover-tab}}",
         "tasks-tab": "{{tabs.tasks-tab}}",
         "info-tab": "{{tabs.info-tab}}",
+        "external-ids-tab": "{{tabs.external-ids-tab}}",
         "read-time-label": "{{edit-chapter-modal.read-time-label}}",
 
         "pages-label": "{{edit-chapter-modal.pages-label}}",
@@ -3700,6 +3703,15 @@
       "hidden": "{{amount}} items hidden due to invalid state"
     },
 
+    "edit-external-metadata": {
+        "aniListId-label": "AniList Id",
+        "malId-label": "MAL Id",
+        "mangaBakaId-label": "MangaBaka Id",
+        "hardcoverId-label": "Hardcover Id",
+        "comicVineId-label": "Comic Vine Id",
+        "metronId-label": "Metron Id"
+    },
+
 
     "validation": {
         "required-field": "This field is required",
@@ -3749,7 +3761,8 @@
         "annotations-tab": "Annotations",
         "overview-tab": "Overview",
         "management-tab": "Management",
-        "activity-tab": "Activity"
+        "activity-tab": "Activity",
+        "external-ids-tab": "External Ids"
     },
 
     "common": {

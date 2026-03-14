@@ -5,7 +5,7 @@ using Kavita.Models.Entities.Interfaces;
 
 namespace Kavita.Models.Entities;
 
-public class Volume : IEntityDate, IHasReadTimeEstimate, IHasCoverImage
+public class Volume : IEntityDate, IHasReadTimeEstimate, IHasCoverImage, IHasMetadataIds
 {
     public int Id { get; set; }
     /// <summary>
@@ -53,6 +53,15 @@ public class Volume : IEntityDate, IHasReadTimeEstimate, IHasCoverImage
     public int MinHoursToRead { get; set; }
     public int MaxHoursToRead { get; set; }
     public float AvgHoursToRead { get; set; }
+
+    #region Metadata
+    public int AniListId { get; set; }
+    public long MalId { get; set; }
+    public int HardcoverId { get; set; }
+    public long MetronId { get; set; }
+    public string ComicVineId { get; set; }
+    public long MangaBakaId { get; set; }
+    #endregion
 
 
     // Relationships

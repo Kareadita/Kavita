@@ -59,7 +59,7 @@ export class ReviewModalComponent implements OnInit {
 
   }
   save() {
-    const model = this.reviewGroup.value;
+    const model = this.reviewGroup.getRawValue();
     if (model.reviewBody.length < this.minLength) {
       return;
     }

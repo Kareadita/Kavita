@@ -21,6 +21,7 @@ using Kavita.Models.Entities.Enums;
 using Kavita.Models.Entities.MetadataMatching;
 using Kavita.Server.Attributes;
 using Kavita.Server.Extensions;
+using Kavita.Server.Helpers;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
@@ -177,6 +178,8 @@ public class SeriesController(
 
         series.SortNameLocked = updateSeries.SortNameLocked;
         series.LocalizedNameLocked = updateSeries.LocalizedNameLocked;
+
+        ExternalMetadataIdHelper.SetExternalMetadataIds(series, updateSeries);
 
 
         var needsRefreshMetadata = false;

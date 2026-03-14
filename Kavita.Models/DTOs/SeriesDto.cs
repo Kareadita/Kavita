@@ -5,7 +5,7 @@ using Kavita.Models.Entities.Interfaces;
 namespace Kavita.Models.DTOs;
 #nullable enable
 
-public sealed record SeriesDto : IHasReadTimeEstimate, IHasCoverImage
+public sealed record SeriesDto : IHasReadTimeEstimate, IHasCoverImage, IHasMetadataIds
 {
     /// <inheritdoc cref="API.Entities.Series.Id"/>
     public int Id { get; init; }
@@ -98,6 +98,15 @@ public sealed record SeriesDto : IHasReadTimeEstimate, IHasCoverImage
     public string? PrimaryColor { get; set; } = string.Empty;
     /// <inheritdoc cref="API.Entities.Series.SecondaryColor"/>
     public string? SecondaryColor { get; set; } = string.Empty;
+    #endregion
+
+    #region Metadata
+    public int AniListId { get; set; }
+    public long MalId { get; set; }
+    public int HardcoverId { get; set; }
+    public long MetronId { get; set; }
+    public string? ComicVineId { get; set; }
+    public long MangaBakaId { get; set; }
     #endregion
 
     public void ResetColorScape()

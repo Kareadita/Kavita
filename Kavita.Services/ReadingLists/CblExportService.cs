@@ -23,6 +23,7 @@ public interface ICblExportService
     /// <summary>
     /// Exports the reading list to a temp file on disk.
     /// </summary>
+    /// <remarks>Will overwrite existing files</remarks>
     /// <param name="readingListId"></param>
     /// <param name="userId"></param>
     /// <param name="asV2">Export as CBLv2 (JSON)</param>
@@ -98,7 +99,7 @@ public class CblExportService(IUnitOfWork unitOfWork, IDirectoryService director
             books.Add(new CblBook
             {
                 Series = item.Series.Name,
-                Number = item.Chapter.Range,
+                Number = item.Chapter.Range, // Range can leak internal encodings. Need to understand how to map this.
                 Volume = item.Volume.Name, // TODO: If the library is Comic type, we can try and parse from Kavita Series first. Need to test with real user files
                 Year = year,
                 Format = item.Chapter.IsSpecial ? "Annual" : string.Empty, // TODO: Confirm with CBL Group on how to handle Format

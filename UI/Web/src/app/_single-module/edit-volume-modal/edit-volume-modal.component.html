@@ -8,6 +8,17 @@
       <form [formGroup]="editForm">
         <ul ngbNav #nav="ngbNav" [(activeId)]="activeId" class="nav-pills" orientation="{{breakpointService.isMobile() ? 'horizontal' : 'vertical'}}" style="min-width: 8.4375rem;">
 
+          <!--External Metadata Ids-->
+          @if (accountService.hasAdminRole()) {
+            <li [ngbNavItem]="TabID.ExternalMetadataIds">
+              <a ngbNavLink>{{t(TabID.ExternalMetadataIds)}}</a>
+              <ng-template ngbNavContent>
+                <app-edit-external-metadata [form]="editForm" [entity]="volume"/>
+              </ng-template>
+            </li>
+          }
+
+
           <!-- Info Tab -->
           <li [ngbNavItem]="TabID.Info">
             <a ngbNavLink>{{t(TabID.Info)}}</a>

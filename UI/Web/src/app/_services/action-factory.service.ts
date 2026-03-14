@@ -478,7 +478,7 @@ export class ActionFactoryService {
           {
             action: Action.RemoveFromWantToReadList,
             title: 'remove-from-want-to-read',
-            description: 'remove-to-want-to-read-tooltip',
+            description: 'remove-from-want-to-read-tooltip',
 
             callback: this.dummyCallback,
             shouldRender: this.dummyShouldRender,
