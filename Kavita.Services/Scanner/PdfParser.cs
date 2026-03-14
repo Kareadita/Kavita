@@ -14,21 +14,21 @@ public class PdfParser(IDirectoryService directoryService) : DefaultParser(direc
         var ret = new ParserInfo
         {
             Filename = Path.GetFileName(filePath),
-            Format = Scanner.Parser.ParseFormat(filePath),
-            Title = Scanner.Parser.RemoveExtensionIfSupported(fileName)!,
-            FullFilePath = Scanner.Parser.NormalizePath(filePath),
+            Format = Parser.ParseFormat(filePath),
+            Title = Parser.RemoveExtensionIfSupported(fileName)!,
+            FullFilePath = Parser.NormalizePath(filePath),
             Series = string.Empty,
             ComicInfo = comicInfo,
-            Chapters = Scanner.Parser.ParseChapter(fileName, type)
+            Chapters = Parser.ParseChapter(fileName, type)
         };
 
         if (type == LibraryType.Book)
         {
-            ret.Chapters = Scanner.Parser.DefaultChapter;
+            ret.Chapters = Parser.DefaultChapter;
         }
 
-        ret.Series = Scanner.Parser.ParseSeries(fileName, type);
-        ret.Volumes = Scanner.Parser.ParseVolume(fileName, type);
+        ret.Series = Parser.ParseSeries(fileName, type);
+        ret.Volumes = Parser.ParseVolume(fileName, type);
 
         if (ret.Series == string.Empty)
         {
@@ -36,17 +36,17 @@ public class PdfParser(IDirectoryService directoryService) : DefaultParser(direc
             ParseFromFallbackFolders(filePath, rootPath, type, ref ret);
         }
 
-        var edition = Scanner.Parser.ParseEdition(fileName);
+        var edition = Parser.ParseEdition(fileName);
         if (!string.IsNullOrEmpty(edition))
         {
-            ret.Series = Scanner.Parser.CleanTitle(ret.Series.Replace(edition, string.Empty), type is LibraryType.Comic);
+            ret.Series = Parser.CleanTitle(ret.Series.Replace(edition, string.Empty), type is LibraryType.Comic);
             ret.Edition = edition;
         }
 
-        var isSpecial = Scanner.Parser.IsSpecial(fileName, type);
+        var isSpecial = Parser.IsSpecial(fileName, type);
         // We must ensure that we can only parse a special out. As some files will have v20 c171-180+Omake and that
         // could cause a problem as Omake is a special term, but there is valid volume/chapter information.
-        if (Scanner.Parser.IsDefaultChapter(ret.Chapters) && Scanner.Parser.IsLooseLeafVolume(ret.Volumes) && isSpecial)
+        if (Parser.IsDefaultChapter(ret.Chapters) && Parser.IsLooseLeafVolume(ret.Volumes) && isSpecial)
         {
             ret.IsSpecial = true;
             // NOTE: This can cause some complications, we should try to be a bit less aggressive to fallback to folder
@@ -54,12 +54,12 @@ public class PdfParser(IDirectoryService directoryService) : DefaultParser(direc
         }
 
         // If we are a special with marker, we need to ensure we use the correct series name. we can do this by falling back to Folder name
-        if (Scanner.Parser.HasSpecialMarker(fileName))
+        if (Parser.HasSpecialMarker(fileName))
         {
             ret.IsSpecial = true;
-            ret.SpecialIndex = Scanner.Parser.ParseSpecialIndex(fileName);
-            ret.Chapters = Scanner.Parser.DefaultChapter;
-            ret.Volumes = Scanner.Parser.SpecialVolume;
+            ret.SpecialIndex = Parser.ParseSpecialIndex(fileName);
+            ret.Chapters = Parser.DefaultChapter;
+            ret.Volumes = Parser.SpecialVolume;
 
             var tempRootPath = rootPath;
             if (rootPath.EndsWith("Specials") || rootPath.EndsWith("Specials/"))
@@ -82,11 +82,11 @@ public class PdfParser(IDirectoryService directoryService) : DefaultParser(direc
         }
 
 
-        if (Scanner.Parser.IsDefaultChapter(ret.Chapters) && Scanner.Parser.IsLooseLeafVolume(ret.Volumes) && type == LibraryType.Book)
+        if (Parser.IsDefaultChapter(ret.Chapters) && Parser.IsLooseLeafVolume(ret.Volumes) && type == LibraryType.Book)
         {
             ret.IsSpecial = true;
-            ret.Chapters = Scanner.Parser.DefaultChapter;
-            ret.Volumes = Scanner.Parser.SpecialVolume;
+            ret.Chapters = Parser.DefaultChapter;
+            ret.Volumes = Parser.SpecialVolume;
             ParseFromFallbackFolders(filePath, rootPath, type, ref ret);
         }
 
@@ -105,11 +105,11 @@ public class PdfParser(IDirectoryService directoryService) : DefaultParser(direc
 
         if (string.IsNullOrEmpty(ret.Series))
         {
-            ret.Series = Scanner.Parser.CleanTitle(fileName, type is LibraryType.Comic);
+            ret.Series = Parser.CleanTitle(fileName, type is LibraryType.Comic);
         }
 
         // Pdfs may have .pdf in the series name, remove that
-        if (Scanner.Parser.IsPdf(filePath) && ret.Series.ToLower().EndsWith(".pdf"))
+        if (Parser.IsPdf(filePath) && ret.Series.ToLower().EndsWith(".pdf"))
         {
             ret.Series = ret.Series.Substring(0, ret.Series.Length - ".pdf".Length);
         }
@@ -117,7 +117,7 @@ public class PdfParser(IDirectoryService directoryService) : DefaultParser(direc
         // v0.8.x: Introducing a change where Specials will go in a separate Volume with a reserved number
         if (ret.IsSpecial)
         {
-            ret.Volumes = $"{Scanner.Parser.SpecialVolumeNumber}";
+            ret.Volumes = $"{Parser.SpecialVolumeNumber}";
         }
 
         return string.IsNullOrEmpty(ret.Series) ? null : ret;
@@ -131,6 +131,6 @@ public class PdfParser(IDirectoryService directoryService) : DefaultParser(direc
     /// <returns></returns>
     public override bool IsApplicable(string filePath, LibraryType type)
     {
-        return Scanner.Parser.IsPdf(filePath);
+        return Parser.IsPdf(filePath);
     }
 }

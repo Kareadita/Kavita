@@ -1,8 +1,10 @@
 using Kavita.Models.Entities;
 using Kavita.Models.Entities.Enums;
+using Kavita.Models.Entities.Interfaces;
 using Kavita.Models.Metadata;
 
 namespace Kavita.Models.Parser;
+#nullable enable
 
 /// <summary>
 /// This represents all parsed information from a single file
@@ -83,5 +85,32 @@ public class ParserInfo
     /// </summary>
     public ComicInfo? ComicInfo { get; set; }
 
-
+    /// <summary>
+    /// Extracted from Notes/Weblink fields, not explicitly part of spec
+    /// </summary>
+    public int? AniListId { get; set; }
+    /// <summary>
+    /// Extracted from Notes field, not explicitly part of spec
+    /// </summary>
+    public long? MalId { get; set; }
+    /// <summary>
+    /// Extracted from Notes field, not explicitly part of spec
+    /// </summary>
+    public int? HardcoverId { get; set; }
+    /// <summary>
+    /// Extracted from Notes field, not explicitly part of spec
+    /// </summary>
+    public long? MetronId { get; set; }
+    /// <summary>
+    /// Extracted from Notes field, not explicitly part of spec
+    /// </summary>
+    public string? ComicVineId { get; set; }
+    /// <summary>
+    /// If the ComicVine slug starts with 4050, it's a Volume/Series Id
+    /// </summary>
+    public string? ComicVineSeriesId { get; set; }
+    /// <summary>
+    /// Extracted from Notes field, not explicitly part of spec
+    /// </summary>
+    public long? MangaBakaId { get; set; }
 }

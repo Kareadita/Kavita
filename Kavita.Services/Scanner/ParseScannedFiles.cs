@@ -81,7 +81,7 @@ public class ParseScannedFiles
         Library library, bool forceCheck, GlobMatcher matcher, List<ScanResult> result, string fileExtensions)
     {
         var allDirectories = _directoryService.GetAllDirectories(folderPath, matcher)
-            .Select(Scanner.Parser.NormalizePath)
+            .Select(Parser.NormalizePath)
             .OrderByDescending(d => d.Length)
             .ToList();
 
@@ -247,10 +247,10 @@ public class ParseScannedFiles
     private async Task<IList<ScanResult>> ScanSingleDirectory(string folderPath, IDictionary<string, IList<SeriesModified>> seriesPaths, Library library, bool forceCheck, List<ScanResult> result,
         string fileExtensions, GlobMatcher matcher)
     {
-        var normalizedPath = Scanner.Parser.NormalizePath(folderPath);
+        var normalizedPath = Parser.NormalizePath(folderPath);
         var libraryRoot =
             library.Folders.FirstOrDefault(f =>
-                normalizedPath.Contains(Scanner.Parser.NormalizePath(f.Path)))?.Path ??
+                normalizedPath.Contains(Parser.NormalizePath(f.Path)))?.Path ??
             folderPath;
 
         await _eventHub.SendMessageAsync(MessageFactory.NotificationProgress,
@@ -286,7 +286,7 @@ public class ParseScannedFiles
         return new ScanResult()
         {
             Files = files,
-            Folder = Scanner.Parser.NormalizePath(folderPath),
+            Folder = Parser.NormalizePath(folderPath),
             LibraryRoot = libraryRoot,
             HasChanged = hasChanged
         };
@@ -637,7 +637,7 @@ public class ParseScannedFiles
             case 1:
                 return seriesForLocalized[0];
             case <= 2:
-                return seriesForLocalized.FirstOrDefault(s => !s.Equals(Scanner.Parser.Normalize(localizedSeries)));
+                return seriesForLocalized.FirstOrDefault(s => !s.Equals(Parser.Normalize(localizedSeries)));
             default:
                 _logger.LogError(
                     "[ScannerService] Multiple series detected across scan results that contain localized series. " +
@@ -692,7 +692,7 @@ public class ParseScannedFiles
     /// <param name="library"></param>
     private async Task ParseFiles(ScanResult result, IDictionary<string, IList<SeriesModified>> seriesPaths, Library library)
     {
-        var normalizedFolder = Scanner.Parser.NormalizePath(result.Folder);
+        var normalizedFolder = Parser.NormalizePath(result.Folder);
 
         // If folder hasn't changed, generate fake ParserInfos
         if (!result.HasChanged)
@@ -778,7 +778,7 @@ public class ParseScannedFiles
             if (specialTreatment)
             {
                 chapters = infos
-                    .OrderByNatural(info => Scanner.Parser.RemoveExtensionIfSupported(info.Filename)!)
+                    .OrderByNatural(info => Parser.RemoveExtensionIfSupported(info.Filename)!)
                     .ToList();
 
                 foreach (var chapter in chapters)
@@ -800,7 +800,7 @@ public class ParseScannedFiles
             {
                 // Use MinNumber in case there is a range, as otherwise sort order will cause it to be processed last
                 var chapterNum =
-                    $"{Scanner.Parser.MinNumberFromRange(chapter.Chapters).ToString(CultureInfo.InvariantCulture)}";
+                    $"{Parser.MinNumberFromRange(chapter.Chapters).ToString(CultureInfo.InvariantCulture)}";
                 if (float.TryParse(chapterNum, NumberStyles.Any, CultureInfo.InvariantCulture, out var parsedChapter))
                 {
                     // Parsed successfully, use the numeric value

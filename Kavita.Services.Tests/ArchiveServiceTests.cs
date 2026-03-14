@@ -329,6 +329,18 @@ public class ArchiveServiceTests
         Assert.Equal("https://www.comixology.com/BTOOOM/digital-comic/450184", comicInfo.Web);
     }
 
+    // [Fact]
+    // public void CanParseMetadataIdFromComicInfo()
+    // {
+    //     var testDirectory = Path.Join(Directory.GetCurrentDirectory(), "../../../Test Data/ArchiveService/ComicInfos");
+    //     var archive = Path.Join(testDirectory, "metadata_from_notes.cbz");
+    //     var comicInfo = _archiveService.GetComicInfo(archive);
+    //
+    //     Assert.NotNull(comicInfo);
+    //     Assert.Equal("Scraped metadata from ComicVine [CVDB734524]", comicInfo.Notes);
+    //     Assert.Equal("734524", comicInfo.ComicVineId);
+    // }
+
     #endregion
 
     #region CanParseComicInfo_DefaultNumberIsBlank

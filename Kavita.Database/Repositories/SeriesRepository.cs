@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using AutoMapper;
 using AutoMapper.QueryableExtensions;
 using Kavita.API.Repositories;
+using Kavita.API.Services.Helpers;
 using Kavita.API.Services.Plus;
 using Kavita.API.Services.Reading;
 using Kavita.Common.Extensions;
@@ -629,16 +630,15 @@ public class SeriesRepository(DataContext context, IMapper mapper) : ISeriesRepo
                 AltSeriesName = series.LocalizedName,
                 AniListId = series.ExternalSeriesMetadata.AniListId != 0
                     ? series.ExternalSeriesMetadata.AniListId
-                    : ScrobblingHelper.ExtractId<int?>(series.Metadata.WebLinks, ScrobblingHelper.AniListWeblinkWebsite),
+                    : WeblinkParser.GetAniListId(series.Metadata.WebLinks),
                 MalId = series.ExternalSeriesMetadata.MalId != 0
                     ? series.ExternalSeriesMetadata.MalId
-                    : ScrobblingHelper.ExtractId<long?>(series.Metadata.WebLinks, ScrobblingHelper.MalWeblinkWebsite),
+                    : WeblinkParser.GetMalId(series.Metadata.WebLinks),
                 CbrId = series.ExternalSeriesMetadata.CbrId,
                 GoogleBooksId = !string.IsNullOrEmpty(series.ExternalSeriesMetadata.GoogleBooksId)
                     ? series.ExternalSeriesMetadata.GoogleBooksId
-                    : ScrobblingHelper.ExtractId<string?>(series.Metadata.WebLinks, ScrobblingHelper.GoogleBooksWeblinkWebsite),
-                MangaDexId = ScrobblingHelper.ExtractId<string?>(series.Metadata.WebLinks,
-                    ScrobblingHelper.MangaDexWeblinkWebsite),
+                    : WeblinkParser.GetGoogleBooksId(series.Metadata.WebLinks),
+                MangaDexId = WeblinkParser.GetMangaDexId(series.Metadata.WebLinks),
                 VolumeCount = series.Volumes.Count,
                 ChapterCount = series.Volumes.SelectMany(v => v.Chapters).Count(c => !c.IsSpecial),
                 Year = series.Metadata.ReleaseYear

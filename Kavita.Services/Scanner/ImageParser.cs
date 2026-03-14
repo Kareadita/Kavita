@@ -18,12 +18,12 @@ public class ImageParser(IDirectoryService directoryService) : DefaultParser(dir
         var ret = new ParserInfo
         {
             Series = directoryName,
-            Volumes = Scanner.Parser.LooseLeafVolume,
-            Chapters = Scanner.Parser.DefaultChapter,
+            Volumes = Parser.LooseLeafVolume,
+            Chapters = Parser.DefaultChapter,
             ComicInfo = comicInfo,
             Format = MangaFormat.Image,
             Filename = Path.GetFileName(filePath),
-            FullFilePath = Scanner.Parser.NormalizePath(filePath),
+            FullFilePath = Parser.NormalizePath(filePath),
             Title = fileName,
         };
         ParseFromFallbackFolders(filePath, libraryRoot, LibraryType.Image, ref ret);
@@ -31,13 +31,13 @@ public class ImageParser(IDirectoryService directoryService) : DefaultParser(dir
         if (IsEmptyOrDefault(ret.Volumes, ret.Chapters))
         {
             ret.IsSpecial = true;
-            ret.Volumes = Scanner.Parser.SpecialVolume;
+            ret.Volumes = Parser.SpecialVolume;
         }
 
         // Override the series name, as fallback folders needs it to try and parse folder name
         if (string.IsNullOrEmpty(ret.Series) || ret.Series.Equals(directoryName))
         {
-            ret.Series = Scanner.Parser.CleanTitle(directoryName);
+            ret.Series = Parser.CleanTitle(directoryName);
         }
 
 
@@ -52,6 +52,6 @@ public class ImageParser(IDirectoryService directoryService) : DefaultParser(dir
     /// <returns></returns>
     public override bool IsApplicable(string filePath, LibraryType type)
     {
-        return type == LibraryType.Image && Scanner.Parser.IsImage(filePath);
+        return type == LibraryType.Image && Parser.IsImage(filePath);
     }
 }

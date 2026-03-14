@@ -1,5 +1,6 @@
 using System.Linq;
 using Kavita.API.Services;
+using Kavita.Common.Helpers;
 using Kavita.Models.Entities.Enums;
 using Kavita.Models.Metadata;
 using Kavita.Models.Parser;
@@ -40,17 +41,17 @@ public abstract class DefaultParser(IDirectoryService directoryService) : IDefau
     public void ParseFromFallbackFolders(string filePath, string rootPath, LibraryType type, ref ParserInfo ret)
     {
         var fallbackFolders = directoryService.GetFoldersTillRoot(rootPath, filePath)
-            .Where(f => !Scanner.Parser.IsSpecial(f, type))
+            .Where(f => !Parser.IsSpecial(f, type))
             .ToList();
 
         if (fallbackFolders.Count == 0)
         {
             var rootFolderName = directoryService.FileSystem.DirectoryInfo.New(rootPath).Name;
-            var series = Scanner.Parser.ParseSeries(rootFolderName, type);
+            var series = Parser.ParseSeries(rootFolderName, type);
 
             if (string.IsNullOrEmpty(series))
             {
-                ret.Series = Scanner.Parser.CleanTitle(rootFolderName, type is LibraryType.Comic);
+                ret.Series = Parser.CleanTitle(rootFolderName, type is LibraryType.Comic);
                 return;
             }
 
@@ -65,18 +66,18 @@ public abstract class DefaultParser(IDirectoryService directoryService) : IDefau
         {
             var folder = fallbackFolders[i];
 
-            var parsedVolume = Scanner.Parser.ParseVolume(folder, type);
-            var parsedChapter = Scanner.Parser.ParseChapter(folder, type);
+            var parsedVolume = Parser.ParseVolume(folder, type);
+            var parsedChapter = Parser.ParseChapter(folder, type);
 
-            var isLooseLeafVolume = Scanner.Parser.IsLooseLeafVolume(parsedVolume);
-            var isDefaultChapter = Scanner.Parser.IsDefaultChapter(parsedChapter);
+            var isLooseLeafVolume = Parser.IsLooseLeafVolume(parsedVolume);
+            var isDefaultChapter = Parser.IsDefaultChapter(parsedChapter);
 
-            if ((string.IsNullOrEmpty(ret.Volumes) || Scanner.Parser.IsLooseLeafVolume(ret.Volumes))
+            if ((string.IsNullOrEmpty(ret.Volumes) || Parser.IsLooseLeafVolume(ret.Volumes))
                 && !string.IsNullOrEmpty(parsedVolume) && !isLooseLeafVolume)
             {
                 ret.Volumes = parsedVolume;
             }
-            if ((string.IsNullOrEmpty(ret.Chapters) || ret.Chapters.Equals(Scanner.Parser.DefaultChapter))
+            if ((string.IsNullOrEmpty(ret.Chapters) || ret.Chapters.Equals(Parser.DefaultChapter))
                 && !string.IsNullOrEmpty(parsedChapter) && !isDefaultChapter)
             {
                 ret.Chapters = parsedChapter;
@@ -85,11 +86,11 @@ public abstract class DefaultParser(IDirectoryService directoryService) : IDefau
             // Generally users group in series folders. Let's try to parse series from the top folder
             if (!folder.Equals(ret.Series) && i == fallbackFolders.Count - 1)
             {
-                var series = Scanner.Parser.ParseSeries(folder, type);
+                var series = Parser.ParseSeries(folder, type);
 
                 if (string.IsNullOrEmpty(series))
                 {
-                    ret.Series = Scanner.Parser.CleanTitle(folder, type is LibraryType.Comic);
+                    ret.Series = Parser.CleanTitle(folder, type is LibraryType.Comic);
                     break;
                 }
 
@@ -123,11 +124,11 @@ public abstract class DefaultParser(IDirectoryService directoryService) : IDefau
             info.LocalizedSeries = info.ComicInfo.LocalizedSeries.Trim();
         }
 
-        if (!string.IsNullOrEmpty(info.ComicInfo.Format) && Scanner.Parser.HasComicInfoSpecial(info.ComicInfo.Format))
+        if (!string.IsNullOrEmpty(info.ComicInfo.Format) && Parser.HasComicInfoSpecial(info.ComicInfo.Format))
         {
             info.IsSpecial = true;
-            info.Chapters = Scanner.Parser.DefaultChapter;
-            info.Volumes = Scanner.Parser.SpecialVolume;
+            info.Chapters = Parser.DefaultChapter;
+            info.Volumes = Parser.SpecialVolume;
         }
 
         // Patch is SeriesSort from ComicInfo
@@ -142,7 +143,37 @@ public abstract class DefaultParser(IDirectoryService directoryService) : IDefau
 
     protected static bool IsEmptyOrDefault(string volumes, string chapters)
     {
-        return (string.IsNullOrEmpty(chapters) || Scanner.Parser.IsDefaultChapter(chapters)) &&
-               (string.IsNullOrEmpty(volumes) || Scanner.Parser.IsLooseLeafVolume(volumes));
+        return (string.IsNullOrEmpty(chapters) || Parser.IsDefaultChapter(chapters)) &&
+               (string.IsNullOrEmpty(volumes) || Parser.IsLooseLeafVolume(volumes));
+    }
+
+    /// <summary>
+    /// Attempts to fill in as much information as possible from Notes then Weblinks fields
+    /// for different metadata Ids
+    /// </summary>
+    /// <param name="info"></param>
+    protected static void ParseExternalIdsFromNotesAndWeblinks(ParserInfo info)
+    {
+        var notes = info.ComicInfo?.Notes;
+        var weblinks = info.ComicInfo?.Web;
+
+        info.AniListId = WeblinkParser.GetAniListId(weblinks);
+        info.MalId = WeblinkParser.GetMalId(weblinks);
+
+        var comicvineId = Parser.ParseComicVineIdFromComicInfoNote(notes);
+        var parsedCvWeblink = WeblinkParser.GetComicVineId(weblinks);
+        info.ComicVineId = !string.IsNullOrEmpty(comicvineId)
+            ? comicvineId
+            : parsedCvWeblink.Item1;
+        if (parsedCvWeblink.Item2)
+        {
+            info.ComicVineSeriesId = parsedCvWeblink.Item1;
+        }
+
+        var metronId = Parser.ParseMetronIdFromComicInfoNote(notes);
+        info.MetronId = !string.IsNullOrEmpty(metronId)
+            ? long.Parse(metronId)
+            : 0L;
+
     }
 }

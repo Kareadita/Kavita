@@ -312,7 +312,7 @@ public class LocalizationService : ILocalizationService
     {
         try
         {
-            var jsonObject = System.Text.Json.JsonDocument.Parse(fileContent);
+            var jsonObject = JsonDocument.Parse(fileContent);
 
             int totalKeys = 0;
             int nonEmptyValues = 0;
@@ -355,7 +355,7 @@ public class LocalizationService : ILocalizationService
         {
             foreach (var property in element.EnumerateObject())
             {
-                if (property.Value.ValueKind == System.Text.Json.JsonValueKind.String)
+                if (property.Value.ValueKind == JsonValueKind.String)
                 {
                     totalKeys++;
                     var value = property.Value.GetString();
@@ -371,7 +371,7 @@ public class LocalizationService : ILocalizationService
                 }
             }
         }
-        else if (element.ValueKind == System.Text.Json.JsonValueKind.Array)
+        else if (element.ValueKind == JsonValueKind.Array)
         {
             foreach (var item in element.EnumerateArray())
             {
@@ -380,23 +380,23 @@ public class LocalizationService : ILocalizationService
         }
     }
 
-    private void CountEntries(System.Text.Json.JsonElement element, ref int total, ref int translated)
+    private void CountEntries(JsonElement element, ref int total, ref int translated)
     {
-        if (element.ValueKind == System.Text.Json.JsonValueKind.Object)
+        if (element.ValueKind == JsonValueKind.Object)
         {
             foreach (var property in element.EnumerateObject())
             {
                 CountEntries(property.Value, ref total, ref translated);
             }
         }
-        else if (element.ValueKind == System.Text.Json.JsonValueKind.Array)
+        else if (element.ValueKind == JsonValueKind.Array)
         {
             foreach (var item in element.EnumerateArray())
             {
                 CountEntries(item, ref total, ref translated);
             }
         }
-        else if (element.ValueKind == System.Text.Json.JsonValueKind.String)
+        else if (element.ValueKind == JsonValueKind.String)
         {
             total++;
             string value = element.GetString();

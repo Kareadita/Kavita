@@ -1,8 +1,9 @@
 <ng-container *transloco="let t; prefix: 'edit-external-metadata'">
-  <form [formGroup]="form()">
+  @let formGroup = form();
+  <form [formGroup]="formGroup">
     <div class="row">
       @for(key of metadataIds; track key) {
-        <div class="col-md-6 col-sm-12">
+        <div class="col-md-6 col-sm-12 mb-3">
 
           <app-setting-item [title]="t(key + '-label')" [toggleOnViewClick]="false" [showEdit]="false">
             <ng-template #view>

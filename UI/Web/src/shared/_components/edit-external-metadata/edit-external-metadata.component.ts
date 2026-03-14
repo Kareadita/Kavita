@@ -55,9 +55,10 @@ export class EditExternalMetadataComponent implements OnInit {
     return 'number';
   }
 
-  getKeyInputMode(key: string) {
-    if (key === 'comicVineId') return 'text';
-    return 'numeric';
+
+  hasValue(key: string) {
+    const control = this.form().get(key);
+    return control && control.value;
   }
 
 }

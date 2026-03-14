@@ -4,6 +4,8 @@ using System.Globalization;
 using System.Threading;
 using System.Threading.Tasks;
 using Hangfire;
+using Kavita.API.Services.Helpers;
+using Kavita.Common.Helpers;
 using Kavita.Models.DTOs.Scrobbling;
 using Kavita.Models.Entities;
 using Kavita.Models.Entities.Enums;
@@ -127,92 +129,16 @@ public static class ScrobblingHelper
 
     public static long? GetMalId(Series series)
     {
-        var malId = ExtractId<long?>(series.Metadata.WebLinks, MalWeblinkWebsite);
-        return malId ?? series.ExternalSeriesMetadata?.MalId;
+        return WeblinkParser.GetMalId(series.Metadata.WebLinks) ?? series.ExternalSeriesMetadata?.MalId;
     }
 
-    public static long? GetMalId(string weblinks)
-    {
-        return ExtractId<long?>(weblinks, MalWeblinkWebsite);
-    }
 
     public static int? GetAniListId(Series seriesWithExternalMetadata)
     {
-        var aniListId = ExtractId<int?>(seriesWithExternalMetadata.Metadata.WebLinks, AniListWeblinkWebsite);
+        var aniListId = WeblinkParser.GetAniListId(seriesWithExternalMetadata.Metadata.WebLinks);
         return aniListId ?? seriesWithExternalMetadata.ExternalSeriesMetadata?.AniListId;
     }
 
-    public static int? GetAniListId(string weblinks)
-    {
-        return ExtractId<int?>(weblinks, AniListWeblinkWebsite);
-    }
-
-    /// <summary>
-    /// Extract an Id from a given weblink
-    /// </summary>
-    /// <param name="webLinks"></param>
-    /// <param name="website"></param>
-    /// <returns></returns>
-    public static T? ExtractId<T>(string webLinks, string website)
-    {
-        var index = WeblinkExtractionMap[website];
-        foreach (var webLink in webLinks.Split(','))
-        {
-            if (!webLink.StartsWith(website)) continue;
-
-            var tokens = webLink.Split(website)[1].Split('/');
-            var value = tokens[index];
-
-            if (typeof(T) == typeof(int?))
-            {
-                if (int.TryParse(value, CultureInfo.InvariantCulture, out var intValue)) return (T)(object)intValue;
-            }
-            else if (typeof(T) == typeof(int))
-            {
-                if (int.TryParse(value, CultureInfo.InvariantCulture, out var intValue)) return (T)(object)intValue;
-
-                return default;
-            }
-            else if (typeof(T) == typeof(long?))
-            {
-                if (long.TryParse(value, CultureInfo.InvariantCulture, out var longValue)) return (T)(object)longValue;
-            }
-            else if (typeof(T) == typeof(string))
-            {
-                return (T)(object)value;
-            }
-        }
-
-        return default;
-    }
-
-    /// <summary>
-    /// Generate a URL from a given ID and website
-    /// </summary>
-    /// <typeparam name="T">Type of the ID (e.g., int, long, string)</typeparam>
-    /// <param name="id">The ID to embed in the URL</param>
-    /// <param name="website">The base website URL</param>
-    /// <returns>The generated URL or null if the website is not supported</returns>
-    public static string? GenerateUrl<T>(T id, string website)
-    {
-        if (!WeblinkExtractionMap.ContainsKey(website))
-        {
-            return null; // Unsupported website
-        }
-
-        if (Equals(id, default(T)))
-        {
-            throw new ArgumentNullException(nameof(id), "ID cannot be null.");
-        }
-
-        // Ensure the type of the ID matches supported types
-        if (typeof(T) == typeof(int) || typeof(T) == typeof(long) || typeof(T) == typeof(string))
-        {
-            return $"{website}{id}";
-        }
-
-        throw new ArgumentException("Unsupported ID type. Supported types are int, long, and string.", nameof(id));
-    }
 
     public static string CreateUrl(string url, long? id)
     {

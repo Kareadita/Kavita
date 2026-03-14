@@ -703,6 +703,22 @@ public static partial class Parser
         MatchOptions, RegexTimeout
     );
 
+    /// <summary>
+    /// ComicTagger pattern for ComicInfo.Notes field
+    /// </summary>
+    /// <remarks>Scraped metadata from ComicVine [CVDB734524]</remarks>
+    private static readonly Regex ComicVineScrapperRegex =  new Regex(
+        @"ComicVine\s\[CVDB(?<Id>\d+)\]",
+        MatchOptions, RegexTimeout);
+
+    /// <summary>
+    /// Metron pattern for ComicInfo.Notes field
+    /// </summary>
+    /// <remarks>Tagged with MetronTagger-4.4.0 using info from Metron on 2025-12-24 12:32:18. [issue_id:156409]</remarks>
+    private static readonly Regex MetronScrapperRegex =  new Regex(
+        @"MetronTagger-.*\[issue_id:(?<Id>\d+)\]",
+        MatchOptions, RegexTimeout);
+
 
 
     public static MangaFormat ParseFormat(string filePath)
@@ -1175,7 +1191,7 @@ public static partial class Parser
 
     public static string? ExtractFilename(string fileUrl)
     {
-        var matches = Parser.CssImageUrlRegex.Matches(fileUrl);
+        var matches = CssImageUrlRegex.Matches(fileUrl);
         foreach (Match match in matches)
         {
             if (!match.Success) continue;
@@ -1309,7 +1325,25 @@ public static partial class Parser
     public static bool IsLikelyValidAsin(string? asin)
     {
         if (string.IsNullOrEmpty(asin)) return false;
-        return AsinRegex.Match(asin).Success;
+        return AsinRegex.IsMatch(asin);
+    }
+
+    public static string? ParseComicVineIdFromComicInfoNote(string? note)
+    {
+        if (string.IsNullOrEmpty(note)) return null;
+        var match = ComicVineScrapperRegex.Match(note);
+        if (!match.Success) return null;
+
+        return match.Groups["Id"].Value;
+    }
+
+    public static string? ParseMetronIdFromComicInfoNote(string? note)
+    {
+        if (string.IsNullOrEmpty(note)) return null;
+        var match = MetronScrapperRegex.Match(note);
+        if (!match.Success) return null;
+
+        return match.Groups["Id"].Value;
     }
 
 
