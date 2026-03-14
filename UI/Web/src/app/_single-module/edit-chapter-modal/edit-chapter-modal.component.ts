@@ -50,11 +50,11 @@ import {ActionItem} from "../../_models/actionables/action-item";
 import {Action} from "../../_models/actionables/action";
 import {ActionFactoryService} from "../../_services/action-factory.service";
 import {modalDeleted, modalSaved} from "../../_models/modal/modal-result";
-import {
-  EditExternalMetadataComponent
-} from "../../../shared/_components/edit-external-metadata/edit-external-metadata.component";
 import {Tabs} from "../../_models/tabs";
 import {TabTitlePipe} from "../../_pipes/tab-title.pipe";
+import {
+  EditExternalMetadataFormComponent
+} from "../../shared/_components/edit-external-metadata-form/edit-external-metadata-form.component";
 
 
 const blackList = [Action.Edit, Action.IncognitoRead, Action.AddToReadingList];
@@ -85,8 +85,8 @@ const blackList = [Action.Edit, Action.IncognitoRead, Action.AddToReadingList];
     ImageComponent,
     SafeHtmlPipe,
     ReadTimePipe,
-    EditExternalMetadataComponent,
     TabTitlePipe,
+    EditExternalMetadataFormComponent,
   ],
   templateUrl: './edit-chapter-modal.component.html',
   styleUrl: './edit-chapter-modal.component.scss',

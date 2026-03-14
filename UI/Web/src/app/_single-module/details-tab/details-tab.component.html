@@ -24,6 +24,16 @@
     </div>
   }
 
+  @let metadataEntity = entity();
+  @if(metadataEntity) {
+    <div class="mb-3 ms-1">
+      <h4 class="header">{{t('external-metadata-title')}}</h4>
+      <div class="ms-3">
+        <app-external-metadata-detail [entity]="metadataEntity" />
+      </div>
+    </div>
+  }
+
   @if (showGenres()) {
     <div class="mb-3 ms-1">
       <h4 class="header">{{t('genres-title')}}</h4>

@@ -1510,7 +1510,8 @@
         "length-title": "{{edit-chapter-modal.words-label}}",
         "age-rating-title": "{{metadata-fields.age-rating-title}}",
         "folder-path-title": "Folder path",
-        "file-path-title": "Files"
+        "file-path-title": "Files",
+        "external-metadata-title": "External Metadata"
     },
 
     "related-tab": {
@@ -3655,7 +3656,7 @@
       "hidden": "{{amount}} items hidden due to invalid state"
     },
 
-    "edit-external-metadata": {
+    "edit-external-metadata-form": {
         "aniListId-label": "AniList Id",
         "malId-label": "MAL Id",
         "mangaBakaId-label": "MangaBaka Id",

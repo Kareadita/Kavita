@@ -1,0 +1,15 @@
+<ng-container *transloco="let t; prefix: 'edit-external-metadata-form'">
+<div class="row">
+  @for(key of metadataIds; track key) {
+    <div class="col-md-6 col-sm-12 mb-3">
+      <span class="fw-bold">{{t(key + '-label')}}</span>
+      @let value = entity()[key];
+      @if (value === 0) {
+        <div>{{null | defaultValue}}</div>
+      } @else {
+        <div>{{entity()[key] | defaultValue}}</div>
+      }
+    </div>
+  }
+</div>
+</ng-container>

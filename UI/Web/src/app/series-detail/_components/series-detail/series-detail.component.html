@@ -362,6 +362,7 @@
               <ng-template ngbNavContent>
                 @defer (when activeTabId === Tabs.Details; prefetch on idle) {
                   <app-details-tab [metadata]="seriesMetadataValue"
+                                   [entity]="seriesValue"
                                    [genres]="seriesMetadataValue.genres"
                                    [tags]="seriesMetadataValue.tags"
                                    [webLinks]="weblinksValue"

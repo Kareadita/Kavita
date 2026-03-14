@@ -228,6 +228,7 @@
           <ng-template ngbNavContent>
             @defer (when activeTabId === Tabs.Details; prefetch on idle) {
               <app-details-tab [metadata]="volumeCast()"
+                               [entity]="volume()"
                                [genres]="genres()"
                                [tags]="tags()"
                                [files]="files()"

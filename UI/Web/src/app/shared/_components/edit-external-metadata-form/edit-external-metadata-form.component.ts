@@ -1,10 +1,10 @@
 import {ChangeDetectionStrategy, Component, input, OnInit} from '@angular/core';
 import {FormControl, FormGroup, FormsModule, ReactiveFormsModule} from "@angular/forms";
-import {IHasMetadataIds} from "../../../app/_models/common/i-has-metadata-ids";
+import {IHasMetadataIds} from "../../../_models/common/i-has-metadata-ids";
 import {TranslocoDirective} from "@jsverse/transloco";
-import {SettingItemComponent} from "../../../app/settings/_components/setting-item/setting-item.component";
+import {SettingItemComponent} from "../../../settings/_components/setting-item/setting-item.component";
 
-const METADATA_DEFAULTS: Required<IHasMetadataIds> = {
+export const HAS_METADATA_DEFAULTS: Required<IHasMetadataIds> = {
   aniListId: 0,
   malId: 0,
   mangaBakaId: 0,
@@ -18,30 +18,30 @@ export type MetadataIdsForm = FormGroup<{
 }>;
 
 @Component({
-  selector: 'app-edit-external-metadata',
+  selector: 'app-edit-external-metadata-form',
   imports: [
     TranslocoDirective,
     SettingItemComponent,
     FormsModule,
     ReactiveFormsModule
   ],
-  templateUrl: './edit-external-metadata.component.html',
-  styleUrl: './edit-external-metadata.component.scss',
+  templateUrl: './edit-external-metadata-form.component.html',
+  styleUrl: './edit-external-metadata-form.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class EditExternalMetadataComponent implements OnInit {
+export class EditExternalMetadataFormComponent implements OnInit {
 
   form = input.required<FormGroup>();
   entity = input.required<IHasMetadataIds>();
 
-  protected readonly metadataIds = Object.keys(METADATA_DEFAULTS) as (keyof IHasMetadataIds)[];
+  protected readonly metadataIds = Object.keys(HAS_METADATA_DEFAULTS) as (keyof IHasMetadataIds)[];
 
 
   ngOnInit() {
     const form = this.form();
     const entity = this.entity();
 
-    (Object.keys(METADATA_DEFAULTS) as (keyof IHasMetadataIds)[]).forEach((key) => {
+    (Object.keys(HAS_METADATA_DEFAULTS) as (keyof IHasMetadataIds)[]).forEach((key) => {
       if (!form.contains(key)) {
         form.addControl(key, new FormControl(entity[key] ?? null));
       } else {
@@ -54,11 +54,4 @@ export class EditExternalMetadataComponent implements OnInit {
     if (key === 'comicVineId') return 'text';
     return 'number';
   }
-
-
-  hasValue(key: string) {
-    const control = this.form().get(key);
-    return control && control.value;
-  }
-
 }

@@ -16,6 +16,12 @@ import {MangaFormat} from "../../_models/manga-format";
 import {SafeUrlPipe} from "../../_pipes/safe-url.pipe";
 import {AccountService} from "../../_services/account.service";
 import {MangaFile} from "../../_models/manga-file";
+import {Series} from "../../_models/series";
+import {Volume} from "../../_models/volume";
+import {Chapter} from "../../_models/chapter";
+import {
+  ExternalMetadataDetailComponent
+} from "../../shared/_components/external-metadata-detail/external-metadata-detail.component";
 
 @Component({
   selector: 'app-details-tab',
@@ -26,6 +32,8 @@ import {MangaFile} from "../../_models/manga-file";
     ImageComponent,
     BadgeExpanderComponent,
     SafeUrlPipe,
+    ExternalMetadataDetailComponent,
+
   ],
   templateUrl: './details-tab.component.html',
   styleUrl: './details-tab.component.scss',
@@ -42,6 +50,7 @@ export class DetailsTabComponent {
   protected readonly MangaFormat = MangaFormat;
 
   metadata = input.required<IHasCast>();
+  entity = input<Series | Volume | Chapter>();
   genres = input<Genre[]>([]);
   tags = input<Tag[]>([]);
   webLinks = input<string[]>([]);

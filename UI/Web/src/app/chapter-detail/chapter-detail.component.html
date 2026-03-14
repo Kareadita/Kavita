@@ -171,6 +171,7 @@
             <ng-template ngbNavContent>
               @defer (when activeTabId === Tabs.Details; prefetch on idle) {
                 <app-details-tab [metadata]="chapterValue"
+                                 [entity]="chapterValue"
                                  [genres]="chapterValue.genres"
                                  [tags]="chapterValue.tags"
                                  [webLinks]="weblinks()"

@@ -13,7 +13,7 @@
             <li [ngbNavItem]="Tabs.ExternalMetadataIds">
               <a ngbNavLink>{{Tabs.ExternalMetadataIds | tabTitle}}</a>
               <ng-template ngbNavContent>
-                <app-edit-external-metadata [form]="editForm" [entity]="volume"/>
+                <app-edit-external-metadata-form [form]="editForm" [entity]="volume"/>
               </ng-template>
             </li>
           }
