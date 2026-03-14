@@ -427,7 +427,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   // Renderer interaction
   readerSettings$!: Observable<ReaderSetting>;
   private webtoonLastClickTime = 0;
-  private webtoonClickTimeout: any = null;
+  private webtoonClickTimeout: ReturnType<typeof setTimeout> | null = null;
   private currentImage: Subject<HTMLImageElement | null> = new ReplaySubject(1);
   currentImage$: Observable<HTMLImageElement | null> = this.currentImage.asObservable().pipe(
     shareReplay({refCount: true, bufferSize: 2})
@@ -2020,15 +2020,18 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       return;
     }
 
-    if (y < viewportHeight * tapZoneSize) {
+    const inTopZone = y < viewportHeight * tapZoneSize;
+    const inBottomZone = y > viewportHeight * (1 - tapZoneSize);
+
+    if (inTopZone) {
       this.scrollByViewport(-1);
-    } else if (y > viewportHeight * (1 - tapZoneSize)) {
+    } else if (inBottomZone) {
       this.scrollByViewport(1);
     } else {
       // Center zone — single click = toggleMenu, double click = bookmarkPage
       const now = Date.now();
       if (now - this.webtoonLastClickTime < 300) {
-        clearTimeout(this.webtoonClickTimeout);
+        clearTimeout(this.webtoonClickTimeout!);
         this.bookmarkPage(event);
       } else {
         this.webtoonClickTimeout = setTimeout(() => {
@@ -2045,7 +2048,9 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     const y = event.clientY;
     const viewportHeight = window.innerHeight;
     const tapZoneSize = 0.25;
-    return y < viewportHeight * tapZoneSize || y > viewportHeight * (1 - tapZoneSize);
+    const inTopZone = y < viewportHeight * tapZoneSize;
+    const inBottomZone = y > viewportHeight * (1 - tapZoneSize);
+    return inTopZone || inBottomZone;
   }
 
   scrollByViewport(direction: 1 | -1) {
