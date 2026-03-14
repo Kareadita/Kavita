@@ -10,8 +10,8 @@
         <form [formGroup]="editForm">
           <ul ngbNav #nav="ngbNav" [(activeId)]="active" class="nav-pills" orientation="{{breakpointService.isMobile() ? 'horizontal' : 'vertical'}}" style="min-width: 8.4375rem;">
 
-            <li [ngbNavItem]="TabID.General">
-              <a ngbNavLink>{{t(TabID.General)}}</a>
+            <li [ngbNavItem]="Tabs.General">
+              <a ngbNavLink>{{Tabs.General | tabTitle}}</a>
               <ng-template ngbNavContent>
                 <div class="row g-0">
                   <div class="mb-3">
@@ -105,8 +105,8 @@
               </ng-template>
             </li>
 
-            <li [ngbNavItem]="TabID.Aliases">
-              <a ngbNavLink>{{t(TabID.Aliases)}}</a>
+            <li [ngbNavItem]="Tabs.Aliases">
+              <a ngbNavLink>{{Tabs.Aliases | tabTitle}}</a>
               <ng-template ngbNavContent>
                 <h5>{{t('aliases-label')}}</h5>
                 <div class="text-muted mb-2">{{t('aliases-tooltip')}}</div>
@@ -119,8 +119,8 @@
             </li>
 
 
-            <li [ngbNavItem]="TabID.CoverImage">
-              <a ngbNavLink>{{t(TabID.CoverImage)}}</a>
+            <li [ngbNavItem]="Tabs.CoverImage">
+              <a ngbNavLink>{{Tabs.CoverImage | tabTitle}}</a>
               <ng-template ngbNavContent>
                 <p class="alert alert-primary" role="alert">
                   {{t('cover-image-description')}}

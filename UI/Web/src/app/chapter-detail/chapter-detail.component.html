@@ -166,10 +166,10 @@
         <ul ngbNav #nav="ngbNav" [(activeId)]="activeTabId" class="nav nav-tabs" (navChange)="onNavChange($event)">
 
         @if (showDetailsTab()) {
-          <li [ngbNavItem]="TabID.Details">
-            <a ngbNavLink>{{t('details-tab')}}</a>
+          <li [ngbNavItem]="Tabs.Details">
+            <a ngbNavLink>{{Tabs.Details | tabTitle}}</a>
             <ng-template ngbNavContent>
-              @defer (when activeTabId === TabID.Details; prefetch on idle) {
+              @defer (when activeTabId === Tabs.Details; prefetch on idle) {
                 <app-details-tab [metadata]="chapterValue"
                                  [genres]="chapterValue.genres"
                                  [tags]="chapterValue.tags"
@@ -183,26 +183,26 @@
 
         @let highlights = annotations();
         @if (highlights.length > 0) {
-          <li [ngbNavItem]="TabID.Annotations">
+          <li [ngbNavItem]="Tabs.Annotations">
             <a ngbNavLink>
-              {{t(TabID.Annotations)}}
+              {{Tabs.Annotations | tabTitle}}
               <span class="badge rounded-pill text-bg-secondary">{{highlights.length}}</span>
             </a>
             <ng-template ngbNavContent>
-              @defer (when activeTabId === TabID.Annotations; prefetch on idle) {
+              @defer (when activeTabId === Tabs.Annotations; prefetch on idle) {
                 <app-annotations-tab [annotations]="annotations()" [scrollingBlock]="scrollingBlock" />
               }
             </ng-template>
           </li>
         }
 
-        <li [ngbNavItem]="TabID.Reviews">
+        <li [ngbNavItem]="Tabs.Reviews">
           <a ngbNavLink>
-            {{t('reviews-tab')}}
+            {{Tabs.Reviews | tabTitle}}
             <span class="badge rounded-pill text-bg-secondary">{{totalReviewCount()}}</span>
           </a>
           <ng-template ngbNavContent>
-            @defer (when activeTabId === TabID.Reviews; prefetch on idle) {
+            @defer (when activeTabId === Tabs.Reviews; prefetch on idle) {
               <app-reviews [userReviews]="userReviews()" [plusReviews]="plusReviews()"
                            [series]="seriesValue" [chapter]="chapterValue" [volumeId]="chapterValue.volumeId" />
             }
@@ -210,10 +210,10 @@
         </li>
 
         @if(readingLists().length > 0) {
-          <li [ngbNavItem]="TabID.Related">
-            <a ngbNavLink>{{t('related-tab')}}</a>
+          <li [ngbNavItem]="Tabs.Related">
+            <a ngbNavLink>{{Tabs.Related | tabTitle}}</a>
             <ng-template ngbNavContent>
-              @defer (when activeTabId === TabID.Related; prefetch on idle) {
+              @defer (when activeTabId === Tabs.Related; prefetch on idle) {
                 <app-related-tab [readingLists]="readingLists()" (reload)="handleRelatedReload($event)" (dataChanged)="handleRelatedReload($event)" />
               }
             </ng-template>

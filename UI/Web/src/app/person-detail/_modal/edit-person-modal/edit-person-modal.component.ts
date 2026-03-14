@@ -30,12 +30,8 @@ import {ToastrService} from "ngx-toastr";
 import {EditListComponent} from "../../../shared/edit-list/edit-list.component";
 import {BreakpointService} from "../../../_services/breakpoint.service";
 import {modalSaved} from "../../../_models/modal/modal-result";
-
-enum TabID {
-  General = 'general-tab',
-  Aliases = 'aliases-tab',
-  CoverImage = 'cover-image-tab',
-}
+import {Tabs} from "../../../_models/tabs";
+import {TabTitlePipe} from "../../../_pipes/tab-title.pipe";
 
 @Component({
   selector: 'app-edit-person-modal',
@@ -50,7 +46,8 @@ enum TabID {
     CoverImageChooserComponent,
     SettingItemComponent,
     NgbNavLink,
-    EditListComponent
+    EditListComponent,
+    TabTitlePipe
   ],
   templateUrl: './edit-person-modal.component.html',
   styleUrl: './edit-person-modal.component.scss',
@@ -67,11 +64,11 @@ export class EditPersonModalComponent implements OnInit {
   protected readonly toastr = inject(ToastrService);
   protected readonly breakpointService = inject(BreakpointService);
 
-  protected readonly TabID = TabID;
+  protected readonly Tabs = Tabs;
 
   @Input({required: true}) person!: Person;
 
-  active = TabID.General;
+  active = Tabs.General;
   editForm: FormGroup = new FormGroup({
     name: new FormControl('', [Validators.required]),
     description: new FormControl('', []),

@@ -1,27 +1,27 @@
 <ng-container *transloco="let t; prefix: 'customize-dashboard-modal'">
   <p>{{t('description')}}</p>
   <ul ngbNav #nav="ngbNav" [(activeId)]="activeTab" class="nav-pills" orientation="horizontal" style="min-width: 9.625rem;">
-    <li [ngbNavItem]="TabID.Dashboard">
-      <a ngbNavLink>{{t(TabID.Dashboard)}}</a>
+    <li [ngbNavItem]="Tabs.Dashboard">
+      <a ngbNavLink>{{Tabs.Dashboard | tabTitle}}</a>
       <ng-template ngbNavContent>
         <app-customize-dashboard-streams />
       </ng-template>
     </li>
 
-    <li [ngbNavItem]="TabID.SideNav">
-      <a ngbNavLink>{{t(TabID.SideNav)}}</a>
+    <li [ngbNavItem]="Tabs.SideNav">
+      <a ngbNavLink>{{Tabs.SideNav | tabTitle}}</a>
       <ng-template ngbNavContent>
         <app-customize-sidenav-streams />
       </ng-template>
     </li>
-    <li [ngbNavItem]="TabID.SmartFilters">
-      <a ngbNavLink>{{t(TabID.SmartFilters)}}</a>
+    <li [ngbNavItem]="Tabs.SmartFilters">
+      <a ngbNavLink>{{Tabs.SmartFilters | tabTitle}}</a>
       <ng-template ngbNavContent>
         <app-manage-smart-filters />
       </ng-template>
     </li>
-    <li [ngbNavItem]="TabID.ExternalSources">
-      <a ngbNavLink>{{t(TabID.ExternalSources)}}</a>
+    <li [ngbNavItem]="Tabs.ExternalSources">
+      <a ngbNavLink>{{Tabs.ExternalSources | tabTitle}}</a>
       <ng-template ngbNavContent>
         <app-manage-external-sources />
       </ng-template>

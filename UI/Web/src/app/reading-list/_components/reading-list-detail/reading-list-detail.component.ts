@@ -15,7 +15,6 @@ import {
 import {ActivatedRoute, Router, RouterLink} from '@angular/router';
 import {DecimalPipe, DOCUMENT, formatDate, Location, NgClass, NgStyle} from '@angular/common';
 import {ToastrService} from 'ngx-toastr';
-import {ConfirmService} from 'src/app/shared/confirm.service';
 import {UtilityService} from 'src/app/shared/_services/utility.service';
 import {LibraryType} from 'src/app/_models/library/library';
 import {MangaFormat} from 'src/app/_models/manga-format';
@@ -66,12 +65,9 @@ import {ActionItem} from "../../../_models/actionables/action-item";
 import {Action} from "../../../_models/actionables/action";
 import {ActionResult} from "../../../_models/actionables/action-result";
 import {getWritableResolvedData} from "../../../../libs/route-util";
+import {Tabs} from "../../../_models/tabs";
+import {TabTitlePipe} from "../../../_pipes/tab-title.pipe";
 
-enum TabID {
-  Storyline = 'storyline-tab',
-  Volumes = 'volume-tab',
-  Details = 'details-tab',
-}
 
 @Component({
   selector: 'app-reading-list-detail',
@@ -83,7 +79,7 @@ enum TabID {
     LoadingComponent, DraggableOrderedListComponent,
     ReadingListItemComponent, NgClass, DecimalPipe, TranslocoDirective, ReactiveFormsModule,
     NgbNav, NgbNavContent, NgbNavLink, NgbTooltip,
-    RouterLink, VirtualScrollerModule, NgStyle, NgbNavOutlet, NgbNavItem, PromotedIconComponent, DefaultValuePipe, DetailsTabComponent]
+    RouterLink, VirtualScrollerModule, NgStyle, NgbNavOutlet, NgbNavItem, PromotedIconComponent, DefaultValuePipe, DetailsTabComponent, TabTitlePipe]
 })
 export class ReadingListDetailComponent implements OnInit {
   private readonly document = inject<Document>(DOCUMENT);
@@ -96,7 +92,6 @@ export class ReadingListDetailComponent implements OnInit {
   protected readonly imageService = inject(ImageService);
   private readonly accountService = inject(AccountService);
   private readonly toastr = inject(ToastrService);
-  private readonly confirmService = inject(ConfirmService);
   private readonly libraryService = inject(LibraryService);
   private readonly readerService = inject(ReaderService);
   private readonly location = inject(Location);
@@ -104,7 +99,7 @@ export class ReadingListDetailComponent implements OnInit {
   protected readonly breakpointService = inject(BreakpointService);
 
   protected readonly MangaFormat = MangaFormat;
-  protected readonly TabID = TabID;
+  protected readonly Tabs = Tabs;
   protected readonly encodeURIComponent = encodeURIComponent;
 
   scrollingBlock = viewChild<ElementRef<HTMLDivElement>>('scrollingBlock');
@@ -153,7 +148,7 @@ export class ReadingListDetailComponent implements OnInit {
   editMode = signal(false);
 
   libraryTypes = signal<{[key: number]: LibraryType}>({});
-  activeTabId = TabID.Storyline;
+  activeTabId = Tabs.Storyline;
   isOwnedReadingList = computed(() => this.actions().filter(a => a.action === Action.Edit).length > 0);
   rlInfo = signal<ReadingListInfo | null>(null);
   castInfo = signal<IHasCast>({
@@ -376,14 +371,14 @@ export class ReadingListDetailComponent implements OnInit {
     this.updateUrl(event.nextId);
   }
 
-  private updateUrl(activeTab: TabID) {
+  private updateUrl(activeTab: Tabs) {
     const tokens = this.location.path().split('#');
     const newUrl = `${tokens[0]}#${activeTab}`;
     this.location.replaceState(newUrl)
   }
 
   switchTabsToDetail() {
-    this.activeTabId = TabID.Details;
+    this.activeTabId = Tabs.Details;
     setTimeout(() => {
       const tabElem = this.document.querySelector('#details-tab');
       if (tabElem) {

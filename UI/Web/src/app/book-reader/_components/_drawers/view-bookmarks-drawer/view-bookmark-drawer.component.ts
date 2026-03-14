@@ -1,4 +1,4 @@
-import {ChangeDetectionStrategy, Component, effect, EventEmitter, inject, input, model, signal} from '@angular/core';
+import {ChangeDetectionStrategy, Component, effect, EventEmitter, inject, model, signal} from '@angular/core';
 import {TranslocoDirective} from "@jsverse/transloco";
 import {
   NgbActiveOffcanvas,
@@ -17,11 +17,8 @@ import {
   PersonalTableOfContentsComponent,
   PersonalToCEvent
 } from "../../personal-table-of-contents/personal-table-of-contents.component";
-
-enum TabID {
-  Image = 1,
-  Text = 2
-}
+import {Tabs} from "../../../../_models/tabs";
+import {TabTitlePipe} from "../../../../_pipes/tab-title.pipe";
 
 export interface LoadPageEvent {
   pageNumber: number;
@@ -40,7 +37,8 @@ export interface LoadPageEvent {
     NgbNavLink,
     PersonalTableOfContentsComponent,
     NgbNavOutlet,
-    NgbNavItem
+    NgbNavItem,
+    TabTitlePipe
   ],
   templateUrl: './view-bookmark-drawer.component.html',
   styleUrl: './view-bookmark-drawer.component.scss',
@@ -69,8 +67,8 @@ export class ViewBookmarkDrawerComponent {
   refreshPToC: EventEmitter<void> = new EventEmitter<void>();
   loadPtoc: EventEmitter<LoadPageEvent | null> = new EventEmitter<LoadPageEvent | null>();
 
-  tocId: TabID = TabID.Image;
-  protected readonly TabID = TabID;
+  tocId: Tabs = Tabs.BookmarkImageTab;
+  protected readonly Tabs = Tabs;
 
 
   constructor() {

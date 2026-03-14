@@ -115,19 +115,8 @@ import {patchEntitySignal, patchSignalArray} from "../../../../libs/patch";
 import {ModalService} from "../../../_services/modal.service";
 import {getResolvedData} from "../../../../libs/route-util";
 import {ExternalSeries} from "../../../_models/series-detail/external-series";
-
-
-enum TabID {
-  Related = 'related-tab',
-  Specials = 'specials-tab',
-  Storyline = 'storyline-tab',
-  Volumes = 'volume-tab',
-  Chapters = 'chapter-tab',
-  Recommendations = 'recommendations-tab',
-  Reviews = 'reviews-tab',
-  Details = 'details-tab',
-  Annotations = 'annotations-tab'
-}
+import {Tabs} from "../../../_models/tabs";
+import {TabTitlePipe} from "../../../_pipes/tab-title.pipe";
 
 interface StoryLineItem {
   chapter?: ChapterCardEntity;
@@ -147,7 +136,7 @@ interface StoryLineItem {
     TranslocoDirective, NgTemplateOutlet, NextExpectedCardComponent,
     NgClass, DetailsTabComponent, DefaultValuePipe, ExternalRatingComponent, ReadMoreComponent, RouterLink, BadgeExpanderComponent,
     PublicationStatusPipe, MetadataDetailRowComponent, DownloadButtonComponent, RelatedTabComponent, CoverImageComponent, ReviewsComponent,
-    AnnotationsTabComponent, ReadingProgressStatusPipePipe, ReadingProgressIconPipePipe, EntityCardComponent]
+    AnnotationsTabComponent, ReadingProgressStatusPipePipe, ReadingProgressIconPipePipe, EntityCardComponent, TabTitlePipe]
 })
 class SeriesDetailComponent implements OnInit, AfterViewInit {
 
@@ -238,7 +227,7 @@ class SeriesDetailComponent implements OnInit, AfterViewInit {
     return this.accountService.hasAdminRole();
   });
 
-  activeTabId = TabID.Storyline;
+  activeTabId = Tabs.Storyline;
   mobileSeriesImgBackground = this.themeService.getCssVariable('--mobile-series-img-background');
 
   isLoading = signal<boolean>(true);
@@ -444,8 +433,8 @@ class SeriesDetailComponent implements OnInit, AfterViewInit {
 
     this.bulkSelectionService.registerResolver(() => {
       // Tab-dependent chapter array
-      let chapterArray = this.activeTabId === TabID.Chapters ? this.chapters() : this.storylineChapters();
-      const offset = this.activeTabId === TabID.Storyline ? this.volumes().length : 0;
+      let chapterArray = this.activeTabId === Tabs.Chapters ? this.chapters() : this.storylineChapters();
+      const offset = this.activeTabId === Tabs.Storyline ? this.volumes().length : 0;
 
       const volIndices = this.bulkSelectionService.getSelectedCardsForSource('volume');
       const chIndices = this.bulkSelectionService.getSelectedCardsForSource('chapter');
@@ -526,8 +515,8 @@ class SeriesDetailComponent implements OnInit, AfterViewInit {
 
 
     this.route.fragment.pipe(tap(frag => {
-      if (frag !== null && this.activeTabId !== (frag as TabID)) {
-        this.activeTabId = frag as TabID;
+      if (frag !== null && this.activeTabId !== (frag as Tabs)) {
+        this.activeTabId = frag as Tabs;
         this.updateUrl(this.activeTabId);
         this.cdRef.markForCheck();
       }
@@ -543,7 +532,7 @@ class SeriesDetailComponent implements OnInit, AfterViewInit {
     this.cdRef.markForCheck();
   }
 
-  updateUrl(activeTab: TabID) {
+  updateUrl(activeTab: Tabs) {
     const tokens = this.location.path().split('#');
     const newUrl = `${tokens[0]}#${activeTab}`;
     this.location.replaceState(newUrl)
@@ -636,28 +625,28 @@ class SeriesDetailComponent implements OnInit, AfterViewInit {
 
       if (!this.router.url.includes('#')) {
         this.updateSelectedTab();
-      } else if (this.activeTabId != TabID.Storyline) {
+      } else if (this.activeTabId != Tabs.Storyline) {
         // Validate that the tab we are selected is still there (in case this comes from a messageHub)
         switch (this.activeTabId) {
-          case TabID.Related:
+          case Tabs.Related:
             if (!this.hasRelations()) this.updateSelectedTab();
             break;
-          case TabID.Specials:
+          case Tabs.Specials:
             if (!this.hasSpecials()) this.updateSelectedTab();
             break;
-          case TabID.Volumes:
+          case Tabs.Volumes:
             if (this.volumes().length === 0) this.updateSelectedTab();
             break;
-          case TabID.Chapters:
+          case Tabs.Chapters:
             if (this.chapters().length === 0) this.updateSelectedTab();
             break;
-          case TabID.Recommendations:
+          case Tabs.Recommendations:
             if (!this.hasRecommendations()) this.updateSelectedTab();
             break;
-          case TabID.Reviews:
+          case Tabs.Reviews:
             if (this.reviews().length === 0) this.updateSelectedTab();
             break;
-          case TabID.Details:
+          case Tabs.Details:
             break;
         }
       }
@@ -735,12 +724,12 @@ class SeriesDetailComponent implements OnInit, AfterViewInit {
       if (this.volumes().length === 0) {
         if (this.specials().length === 0 && this.storylineChapters().length > 0) {
           // NOTE: This is an edge case caused by bad parsing of pdf files. Once the new pdf parser is in place, this should be removed
-          this.activeTabId = TabID.Storyline;
+          this.activeTabId = Tabs.Storyline;
         } else {
-          this.activeTabId = TabID.Specials;
+          this.activeTabId = Tabs.Specials;
         }
       } else {
-        this.activeTabId = TabID.Volumes;
+        this.activeTabId = Tabs.Volumes;
       }
       this.updateUrl(this.activeTabId);
       this.cdRef.markForCheck();
@@ -748,21 +737,21 @@ class SeriesDetailComponent implements OnInit, AfterViewInit {
     }
 
     if (this.volumes().length === 0 && this.chapters().length === 0 && this.specials().length > 0) {
-      this.activeTabId = TabID.Specials;
+      this.activeTabId = Tabs.Specials;
     } else {
       if (libType == LibraryType.Comic || libType == LibraryType.ComicVine) {
         if (this.chapters().length === 0) {
 
           if (this.volumes().length > 0) {
-            this.activeTabId = TabID.Volumes;
+            this.activeTabId = Tabs.Volumes;
           } else if (this.specials().length > 0) {
-            this.activeTabId = TabID.Specials;
+            this.activeTabId = Tabs.Specials;
           }
         } else {
-          this.activeTabId = TabID.Chapters;
+          this.activeTabId = Tabs.Chapters;
         }
       } else {
-        this.activeTabId = TabID.Storyline;
+        this.activeTabId = Tabs.Storyline;
       }
     }
 
@@ -876,7 +865,7 @@ class SeriesDetailComponent implements OnInit, AfterViewInit {
   }
 
   switchTabsToDetail() {
-    this.activeTabId = TabID.Details;
+    this.activeTabId = Tabs.Details;
     this.cdRef.markForCheck();
 
     setTimeout(() => {
@@ -900,7 +889,7 @@ class SeriesDetailComponent implements OnInit, AfterViewInit {
   }
 
   protected readonly LibraryType = LibraryType;
-  protected readonly TabID = TabID;
+  protected readonly Tabs = Tabs;
   protected readonly LooseLeafOrSpecialNumber = LooseLeafOrDefaultNumber;
   protected readonly SpecialVolumeNumber = SpecialVolumeNumber;
   protected readonly SettingsTabId = SettingsTabId;

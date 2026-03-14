@@ -14,8 +14,8 @@
           <!-- General Tab -->
           @if (accountService.hasAdminRole())
           {
-            <li [ngbNavItem]="TabID.General">
-              <a ngbNavLink>{{t(TabID.General)}}</a>
+            <li [ngbNavItem]="Tabs.General">
+              <a ngbNavLink>{{Tabs.General | tabTitle}}</a>
               <ng-template ngbNavContent>
                 <div class="row">
                   <div class="col-md-9 col-sm-12 mb-3">
@@ -163,8 +163,8 @@
           <!-- Tags Tab -->
           @if (accountService.hasAdminRole())
           {
-            <li [ngbNavItem]="TabID.Tags">
-              <a ngbNavLink>{{t(TabID.Tags)}}</a>
+            <li [ngbNavItem]="Tabs.Tags">
+              <a ngbNavLink>{{Tabs.Tags | tabTitle}}</a>
               <ng-template ngbNavContent>
                 <!-- genre & tag -->
                 <div class="row">
@@ -334,8 +334,8 @@
           <!-- People Tab -->
           @if (accountService.hasAdminRole())
           {
-            <li [ngbNavItem]="TabID.People">
-              <a ngbNavLink>{{t(TabID.People)}}</a>
+            <li [ngbNavItem]="Tabs.People">
+              <a ngbNavLink>{{Tabs.People | tabTitle}}</a>
               <ng-template ngbNavContent>
                 <!-- writer & cover artist -->
                 <div class="row">
@@ -523,8 +523,8 @@
 
           <!--External Metadata Ids-->
           @if (accountService.hasAdminRole()) {
-            <li [ngbNavItem]="TabID.ExternalMetadataIds">
-              <a ngbNavLink>{{t(TabID.ExternalMetadataIds)}}</a>
+            <li [ngbNavItem]="Tabs.ExternalMetadataIds">
+              <a ngbNavLink>{{Tabs.ExternalMetadataIds | tabTitle}}</a>
               <ng-template ngbNavContent>
                 <app-edit-external-metadata [form]="editForm" [entity]="chapter"/>
               </ng-template>
@@ -534,8 +534,8 @@
           <!-- Cover Tab -->
           @if (accountService.hasAdminRole())
           {
-            <li [ngbNavItem]="TabID.CoverImage">
-              <a ngbNavLink>{{t(TabID.CoverImage)}}</a>
+            <li [ngbNavItem]="Tabs.CoverImage">
+              <a ngbNavLink>{{Tabs.CoverImage | tabTitle}}</a>
               <ng-template ngbNavContent>
                 <p class="alert alert-warning" role="alert">
                   {{t('cover-image-description')}}
@@ -547,8 +547,8 @@
           }
 
           <!-- Info Tab -->
-          <li [ngbNavItem]="TabID.Info">
-            <a ngbNavLink>{{t(TabID.Info)}}</a>
+          <li [ngbNavItem]="Tabs.Info">
+            <a ngbNavLink>{{Tabs.Info | tabTitle}}</a>
             <ng-template ngbNavContent>
               <div class="row">
                 <div class="col-lg-6 col-md-12 pe-2">
@@ -652,8 +652,8 @@
 
 
           <!-- Tasks Tab -->
-          <li [ngbNavItem]="TabID.Tasks">
-            <a ngbNavLink>{{t(TabID.Tasks)}}</a>
+          <li [ngbNavItem]="Tabs.Tasks">
+            <a ngbNavLink>{{Tabs.Tasks | tabTitle}}</a>
             <ng-template ngbNavContent>
               @for(task of tasks; track task.action) {
                 @if (accountService.canCurrentUserInvokeAction(task.action)) {

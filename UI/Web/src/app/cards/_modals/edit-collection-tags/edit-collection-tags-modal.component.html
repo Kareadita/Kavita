@@ -7,8 +7,8 @@
   <div class="modal-body scrollable-modal {{breakpointService.isMobile() ? '' : 'd-flex'}}">
     <ul ngbNav #nav="ngbNav" [(activeId)]="active" class="nav-pills"
         orientation="{{breakpointService.isMobile() ? 'horizontal' : 'vertical'}}" style="min-width: 8.4375rem;">
-      <li [ngbNavItem]="TabID.General">
-        <a ngbNavLink>{{t(TabID.General)}}</a>
+      <li [ngbNavItem]="Tabs.General">
+        <a ngbNavLink>{{Tabs.General | tabTitle}}</a>
         <ng-template ngbNavContent>
           <form [formGroup]="collectionTagForm">
             <div class="row g-0 mb-3">
@@ -49,8 +49,8 @@
       </li>
 
       @if (tag().source === ScrobbleProvider.Kavita) {
-        <li [ngbNavItem]="TabID.Series">
-          <a ngbNavLink>{{t(TabID.Series)}}</a>
+        <li [ngbNavItem]="Tabs.Series">
+          <a ngbNavLink>{{Tabs.Series | tabTitle}}</a>
           <ng-template ngbNavContent>
             @if (!isLoading) {
               <div class="list-group">
@@ -95,8 +95,8 @@
         </li>
       }
 
-      <li [ngbNavItem]="TabID.CoverImage">
-        <a ngbNavLink>{{t(TabID.CoverImage)}}</a>
+      <li [ngbNavItem]="Tabs.CoverImage">
+        <a ngbNavLink>{{Tabs.CoverImage | tabTitle}}</a>
         <ng-template ngbNavContent>
           <app-cover-image-chooser [(imageUrls)]="imageUrls" (imageSelected)="updateSelectedIndex($event)"
                                    (selectedBase64Url)="updateSelectedImage($event)" [showReset]="tag().coverImageLocked"
@@ -105,8 +105,8 @@
       </li>
 
       @if (tag().source !== ScrobbleProvider.Kavita) {
-        <li [ngbNavItem]="TabID.Info">
-          <a ngbNavLink>{{t(TabID.Info)}}</a>
+        <li [ngbNavItem]="Tabs.Info">
+          <a ngbNavLink>{{Tabs.Info | tabTitle}}</a>
           <ng-template ngbNavContent>
             <div class="row g-0 mb-2">
               <div class="col-md-6">

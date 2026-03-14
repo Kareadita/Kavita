@@ -177,10 +177,10 @@
         <div class="carousel-tabs-container mb-2">
           <ul ngbNav #nav="ngbNav" [(activeId)]="activeTabId" class="nav nav-tabs" [destroyOnHide]="false" (navChange)="onNavChange($event)">
 
-              <li [ngbNavItem]="TabID.Storyline">
-                <a ngbNavLink>{{t(TabID.Storyline)}}</a>
+              <li [ngbNavItem]="Tabs.Storyline">
+                <a ngbNavLink>{{Tabs.Storyline | tabTitle}}</a>
                 <ng-template ngbNavContent>
-                  @defer (when activeTabId === TabID.Storyline; prefetch on idle) {
+                  @defer (when activeTabId === Tabs.Storyline; prefetch on idle) {
                     <div class="row mb-1 scroll-container" #scrollingBlock>
                       @if (items().length === 0 && !isLoading()) {
                         <div class="mx-auto" style="width: 12.5rem;">
@@ -218,10 +218,10 @@
 
 
             @if (rlInfo() && castInfo()) {
-              <li [ngbNavItem]="TabID.Details" id="details-tab">
-                <a ngbNavLink>{{t(TabID.Details)}}</a>
+              <li [ngbNavItem]="Tabs.Details" id="details-tab">
+                <a ngbNavLink>{{Tabs.Details | tabTitle}}</a>
                 <ng-template ngbNavContent>
-                  @defer (when activeTabId === TabID.Details; prefetch on idle) {
+                  @defer (when activeTabId === Tabs.Details; prefetch on idle) {
                     <app-details-tab [metadata]="castInfo()"
                                      [suppressEmptyGenres]="true"
                                      [suppressEmptyTags]="true"

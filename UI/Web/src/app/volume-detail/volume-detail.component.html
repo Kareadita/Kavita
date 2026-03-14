@@ -157,13 +157,13 @@
 
     <div class="carousel-tabs-container mb-2">
       <ul ngbNav #nav="ngbNav" [(activeId)]="activeTabId" class="nav nav-tabs" (navChange)="onNavChange($event)">
-        <li [ngbNavItem]="TabID.Chapters">
+        <li [ngbNavItem]="Tabs.Chapters">
           <a ngbNavLink>
             {{chapterTabName()}}
             <span class="badge rounded-pill text-bg-secondary">{{volume().chapters.length}}</span>
           </a>
           <ng-template ngbNavContent>
-            @defer (when activeTabId === TabID.Chapters; prefetch on idle) {
+            @defer (when activeTabId === Tabs.Chapters; prefetch on idle) {
               <virtual-scroller #scroll [items]="chapters()" [bufferAmount]="1" [parentScroll]="scrollingBlock" [childHeight]="1">
                 <div class="card-container row g-0" #container>
                   @for(item of scroll.viewPortItems; let idx = $index; track item.id + '_chapter') {
@@ -184,10 +184,10 @@
         </li>
 
         @if (volume().chapters.length === 1 && readingLists().length > 0) {
-          <li [ngbNavItem]="TabID.Related">
-            <a ngbNavLink>{{t('related-tab')}}</a>
+          <li [ngbNavItem]="Tabs.Related">
+            <a ngbNavLink>{{Tabs.Related | tabTitle}}</a>
             <ng-template ngbNavContent>
-              @defer (when activeTabId === TabID.Related; prefetch on idle) {
+              @defer (when activeTabId === Tabs.Related; prefetch on idle) {
                 <app-related-tab [readingLists]="readingLists()" (reload)="handleRelatedReload($event)" (dataChanged)="handleRelatedReload($event)" />
               }
             </ng-template>
@@ -195,13 +195,13 @@
         }
 
         @if (volume().chapters.length === 1 && annotations().length > 0) {
-          <li [ngbNavItem]="TabID.Annotations">
+          <li [ngbNavItem]="Tabs.Annotations">
             <a ngbNavLink>
-              {{t(TabID.Annotations)}}
+              {{Tabs.Annotations | tabTitle}}
               <span class="badge rounded-pill text-bg-secondary">{{annotations().length}}</span>
             </a>
             <ng-template ngbNavContent>
-              @defer (when activeTabId === TabID.Annotations; prefetch on idle) {
+              @defer (when activeTabId === Tabs.Annotations; prefetch on idle) {
                 <app-annotations-tab [annotations]="annotations()" [scrollingBlock]="scrollingBlock" />
               }
             </ng-template>
@@ -209,13 +209,13 @@
         }
 
         @if (volume().chapters.length === 1) {
-          <li [ngbNavItem]="TabID.Reviews">
+          <li [ngbNavItem]="Tabs.Reviews">
             <a ngbNavLink>
-              {{t('reviews-tab')}}
+              {{Tabs.Reviews | tabTitle}}
               <span class="badge rounded-pill text-bg-secondary">{{reviewCount()}}</span>
             </a>
             <ng-template ngbNavContent>
-              @defer (when activeTabId === TabID.Reviews; prefetch on idle) {
+              @defer (when activeTabId === Tabs.Reviews; prefetch on idle) {
                 <app-reviews [userReviews]="userReviews()" [plusReviews]="plusReviews()"
                              [series]="series()" [volumeId]="volumeId()" [chapter]="volume().chapters[0]" />
               }
@@ -223,10 +223,10 @@
           </li>
         }
 
-        <li [ngbNavItem]="TabID.Details" id="details-tab">
-          <a ngbNavLink>{{t('details-tab')}}</a>
+        <li [ngbNavItem]="Tabs.Details" id="details-tab">
+          <a ngbNavLink>{{Tabs.Details | tabTitle}}</a>
           <ng-template ngbNavContent>
-            @defer (when activeTabId === TabID.Details; prefetch on idle) {
+            @defer (when activeTabId === Tabs.Details; prefetch on idle) {
               <app-details-tab [metadata]="volumeCast()"
                                [genres]="genres()"
                                [tags]="tags()"

@@ -19,22 +19,20 @@ import {ReadingListService} from 'src/app/_services/reading-list.service';
 import {UploadService} from 'src/app/_services/upload.service';
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import {CoverImageChooserComponent} from '../../../cards/cover-image-chooser/cover-image-chooser.component';
-import {AsyncPipe, NgTemplateOutlet} from '@angular/common';
+import {NgTemplateOutlet} from '@angular/common';
 import {translate, TranslocoDirective} from "@jsverse/transloco";
 import {BreakpointService} from "../../../_services/breakpoint.service";
 import {modalSaved} from "../../../_models/modal/modal-result";
-
-enum TabID {
-  General = 'general-tab',
-  CoverImage = 'cover-image-tab'
-}
+import {Tabs} from "../../../_models/tabs";
+import {TabTitlePipe} from "../../../_pipes/tab-title.pipe";
 
 @Component({
     selector: 'app-edit-reading-list-modal',
     templateUrl: './edit-reading-list-modal.component.html',
     styleUrls: ['./edit-reading-list-modal.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush,
-    imports: [NgbNav, NgbNavItem, NgbNavItemRole, NgbNavLink, NgbNavContent, ReactiveFormsModule, NgbTooltip, NgTemplateOutlet, CoverImageChooserComponent, NgbNavOutlet, AsyncPipe, TranslocoDirective]
+  imports: [NgbNav, NgbNavItem, NgbNavItemRole, NgbNavLink, NgbNavContent, ReactiveFormsModule, NgbTooltip,
+    NgTemplateOutlet, CoverImageChooserComponent, NgbNavOutlet, TranslocoDirective, TabTitlePipe]
 })
 export class EditReadingListModalComponent implements OnInit {
   private readonly ngModal = inject(NgbActiveModal);
@@ -58,9 +56,9 @@ export class EditReadingListModalComponent implements OnInit {
   selectedCover: string = '';
   coverImageLocked: boolean = false;
   imageUrls: Array<string> = [];
-  active = TabID.General;
+  active = Tabs.General;
 
-  protected readonly TabID = TabID;
+  protected readonly Tabs = Tabs;
 
   ngOnInit(): void {
     this.reviewGroup = new FormGroup({

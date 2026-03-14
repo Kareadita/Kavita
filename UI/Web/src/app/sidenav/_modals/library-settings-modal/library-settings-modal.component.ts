@@ -61,14 +61,8 @@ import {Action} from "../../../_models/actionables/action";
 import {ActionItem} from "../../../_models/actionables/action-item";
 import {modalSaved} from "../../../_models/modal/modal-result";
 import {ModalService} from "../../../_services/modal.service";
-
-enum TabID {
-  General = 'general-tab',
-  Folder = 'folder-tab',
-  Cover = 'cover-tab',
-  Advanced = 'advanced-tab',
-  Tasks = 'tasks-tab'
-}
+import {Tabs} from "../../../_models/tabs";
+import {TabTitlePipe} from "../../../_pipes/tab-title.pipe";
 
 enum StepID {
   General = 0,
@@ -81,7 +75,7 @@ enum StepID {
   selector: 'app-library-settings-modal',
   imports: [NgbModalModule, NgbNavLink, NgbNavItem, NgbNavContent, ReactiveFormsModule, NgbTooltip,
     SentenceCasePipe, NgbNav, NgbNavOutlet, CoverImageChooserComponent, TranslocoModule, DefaultDatePipe,
-    FileTypeGroupPipe, EditListComponent, SettingItemComponent, SettingSwitchComponent, SettingButtonComponent, LibraryTypeSubtitlePipe, NgTemplateOutlet, DatePipe, TypeaheadComponent],
+    FileTypeGroupPipe, EditListComponent, SettingItemComponent, SettingSwitchComponent, SettingButtonComponent, LibraryTypeSubtitlePipe, NgTemplateOutlet, DatePipe, TypeaheadComponent, TabTitlePipe],
   templateUrl: './library-settings-modal.component.html',
   styleUrls: ['./library-settings-modal.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
@@ -103,14 +97,14 @@ export class LibrarySettingsModalComponent implements OnInit {
   protected readonly breakpointService = inject(BreakpointService);
 
   protected readonly LibraryType = LibraryType;
-  protected readonly TabID = TabID;
+  protected readonly Tabs = Tabs;
   protected readonly WikiLink = WikiLink;
   protected readonly Action = Action;
   protected readonly libraryTypePipe = new LibraryTypePipe();
 
   @Input({required: true}) library!: Library | undefined;
 
-  active = TabID.General;
+  active = Tabs.General;
   imageUrls: Array<string> = [];
   protected readonly excludePatternTooltip = `<span>` + translate('library-settings-modal.exclude-patterns-tooltip') +
   `<a class="ms-1" href="${WikiLink.ScannerExclude}" rel="noopener noreferrer" target="_blank">${translate('library-settings-modal.help')}` +
@@ -421,13 +415,13 @@ export class LibrarySettingsModalComponent implements OnInit {
     this.setupStep++;
     switch(this.setupStep) {
       case StepID.Folder:
-        this.active = TabID.Folder;
+        this.active = Tabs.Folder;
         break;
       case StepID.Cover:
-        this.active = TabID.Cover;
+        this.active = Tabs.CoverImage;
         break;
       case StepID.Advanced:
-        this.active = TabID.Advanced;
+        this.active = Tabs.Advanced;
         break;
     }
     this.cdRef.markForCheck();

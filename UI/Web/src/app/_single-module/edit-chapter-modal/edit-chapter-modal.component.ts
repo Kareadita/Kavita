@@ -53,17 +53,9 @@ import {modalDeleted, modalSaved} from "../../_models/modal/modal-result";
 import {
   EditExternalMetadataComponent
 } from "../../../shared/_components/edit-external-metadata/edit-external-metadata.component";
+import {Tabs} from "../../_models/tabs";
+import {TabTitlePipe} from "../../_pipes/tab-title.pipe";
 
-enum TabID {
-  General = 'general-tab',
-  CoverImage = 'cover-image-tab',
-  Info = 'info-tab',
-  People = 'people-tab',
-  Tasks = 'tasks-tab',
-  Tags = 'tags-tab',
-  Weblinks = 'weblinks-tab', // TODO: Weblinks are not implemented
-  ExternalMetadataIds = 'external-ids-tab'
-}
 
 const blackList = [Action.Edit, Action.IncognitoRead, Action.AddToReadingList];
 
@@ -94,6 +86,7 @@ const blackList = [Action.Edit, Action.IncognitoRead, Action.AddToReadingList];
     SafeHtmlPipe,
     ReadTimePipe,
     EditExternalMetadataComponent,
+    TabTitlePipe,
   ],
   templateUrl: './edit-chapter-modal.component.html',
   styleUrl: './edit-chapter-modal.component.scss',
@@ -120,7 +113,7 @@ export class EditChapterModalComponent implements OnInit {
   @Input({required: true}) libraryId!: number;
   @Input({required: true}) seriesId!: number;
 
-  activeId = TabID.General;
+  activeId = Tabs.General;
   editForm: FormGroup = new FormGroup({});
   selectedCover: string = '';
   coverImageReset = false;
@@ -151,7 +144,7 @@ export class EditChapterModalComponent implements OnInit {
   constructor() {
     effect(() => {
       if (!this.accountService.hasAdminRole()) {
-        this.activeId = TabID.Info;
+        this.activeId = Tabs.Info;
         this.cdRef.markForCheck();
       }
     });
@@ -512,7 +505,7 @@ export class EditChapterModalComponent implements OnInit {
     return this.peopleSettings[role];
   }
 
-  protected readonly TabID = TabID;
+  protected readonly Tabs = Tabs;
   protected readonly Action = Action;
   protected readonly PersonRole = PersonRole;
   protected readonly MangaFormat = MangaFormat;

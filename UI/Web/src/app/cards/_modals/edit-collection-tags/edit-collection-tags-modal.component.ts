@@ -45,20 +45,15 @@ import {SelectionModel} from "../../../typeahead/_models/selection-model";
 import {UtcToLocalTimePipe} from "../../../_pipes/utc-to-local-time.pipe";
 import {BreakpointService} from "../../../_services/breakpoint.service";
 import {modalSaved} from "../../../_models/modal/modal-result";
+import {Tabs} from "../../../_models/tabs";
+import {TabTitlePipe} from "../../../_pipes/tab-title.pipe";
 
-
-enum TabID {
-  General = 'general-tab',
-  CoverImage = 'cover-image-tab',
-  Series = 'series-tab',
-  Info = 'info-tab'
-}
 
 @Component({
   selector: 'app-edit-collection-tags',
   imports: [NgbNav, NgbNavItem, NgbNavLink, NgbNavContent, ReactiveFormsModule, FormsModule, NgbPagination,
     CoverImageChooserComponent, NgbNavOutlet, NgbTooltip, TranslocoDirective, NgTemplateOutlet, FilterPipe, DefaultDatePipe,
-    SafeHtmlPipe, SafeUrlPipe, DecimalPipe, UtcToLocalTimePipe],
+    SafeHtmlPipe, SafeUrlPipe, DecimalPipe, UtcToLocalTimePipe, TabTitlePipe],
   templateUrl: './edit-collection-tags-modal.component.html',
   styleUrls: ['./edit-collection-tags-modal.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
@@ -92,7 +87,7 @@ export class EditCollectionTagsModalComponent implements OnInit {
   selectAll: boolean = true;
   libraryNames!: any;
   collectionTagForm!: FormGroup;
-  active = TabID.General;
+  active = Tabs.General;
   imageUrls: Array<string> = [];
   selectedCover: string = '';
   formGroup = new FormGroup({'filter': new FormControl('', [])});
@@ -260,6 +255,6 @@ export class EditCollectionTagsModalComponent implements OnInit {
     this.cdRef.markForCheck();
   }
 
-  protected readonly TabID = TabID;
+  protected readonly Tabs = Tabs;
   protected readonly ScrobbleProvider = ScrobbleProvider;
 }

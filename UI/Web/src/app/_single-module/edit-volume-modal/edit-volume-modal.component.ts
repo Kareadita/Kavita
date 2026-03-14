@@ -34,15 +34,8 @@ import {
 } from "../../../shared/_components/edit-external-metadata/edit-external-metadata.component";
 import {VolumeService} from "../../_services/volume.service";
 import {UpdateVolume} from "../../_models/update-volume";
-
-enum TabID {
-  General = 'general-tab',
-  CoverImage = 'cover-image-tab',
-  Info = 'info-tab',
-  Tasks = 'tasks-tab',
-  Progress = 'progress-tab',
-  ExternalMetadataIds = 'external-ids-tab'
-}
+import {Tabs} from "../../_models/tabs";
+import {TabTitlePipe} from "../../_pipes/tab-title.pipe";
 
 
 @Component({
@@ -66,7 +59,8 @@ enum TabID {
     UtcToLocalTimePipe,
     BytesPipe,
     ReadTimePipe,
-    EditExternalMetadataComponent
+    EditExternalMetadataComponent,
+    TabTitlePipe
   ],
   templateUrl: './edit-volume-modal.component.html',
   styleUrl: './edit-volume-modal.component.scss',
@@ -90,7 +84,7 @@ export class EditVolumeModalComponent implements OnInit {
   @Input({required: true}) libraryId!: number;
   @Input({required: true}) seriesId!: number;
 
-  activeId = TabID.Info;
+  activeId = Tabs.Info;
   editForm: FormGroup = new FormGroup({});
   selectedCover: string = '';
   coverImageReset = false;
@@ -106,7 +100,7 @@ export class EditVolumeModalComponent implements OnInit {
 
   constructor() {
     if (!this.accountService.hasAdminRole()) {
-      this.activeId = TabID.Info;
+      this.activeId = Tabs.Info;
       this.cdRef.markForCheck();
     }
   }
@@ -198,7 +192,7 @@ export class EditVolumeModalComponent implements OnInit {
     this.cdRef.markForCheck();
   }
 
-  protected readonly TabID = TabID;
+  protected readonly Tabs = Tabs;
   protected readonly Action = Action;
   protected readonly PersonRole = PersonRole;
   protected readonly MangaFormat = MangaFormat;

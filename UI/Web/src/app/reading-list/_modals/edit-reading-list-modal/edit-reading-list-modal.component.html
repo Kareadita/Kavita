@@ -7,8 +7,8 @@
   <div class="modal-body scrollable-modal {{breakpointService.isMobile() ? '' : 'd-flex'}}">
     <ul ngbNav #nav="ngbNav" [(activeId)]="active" class="nav-pills"
       orientation="{{breakpointService.isMobile() ? 'horizontal' : 'vertical'}}" style="min-width: 8.4375rem;">
-      <li [ngbNavItem]="TabID.General">
-        <a ngbNavLink>{{t(TabID.General)}}</a>
+      <li [ngbNavItem]="Tabs.General">
+        <a ngbNavLink>{{Tabs.General | tabTitle}}</a>
         <ng-template ngbNavContent>
           <form [formGroup]="reviewGroup">
             <div class="row g-0 mb-3">
@@ -129,8 +129,8 @@
                     </form>
                   </ng-template>
                 </li>
-                <li [ngbNavItem]="TabID.CoverImage">
-                  <a ngbNavLink>{{t(TabID.CoverImage)}}</a>
+                <li [ngbNavItem]="Tabs.CoverImage">
+                  <a ngbNavLink>{{Tabs.CoverImage | tabTitle}}</a>
                   <ng-template ngbNavContent>
                     <app-cover-image-chooser [(imageUrls)]="imageUrls" (imageSelected)="updateSelectedIndex($event)" (selectedBase64Url)="updateSelectedImage($event)" [showReset]="readingList.coverImageLocked" (resetClicked)="handleReset()" />
                   </ng-template>

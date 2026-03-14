@@ -87,14 +87,8 @@ import {ModalService} from "../_services/modal.service";
 import {getResolvedData, getWritableResolvedData} from "../../libs/route-util";
 import {ModalResult} from "../_models/modal/modal-result";
 import {ChapterCardComponent} from "../cards/chapter-card/chapter-card.component";
-
-enum TabID {
-  Chapters = 'chapters-tab',
-  Related = 'related-tab',
-  Reviews = 'reviews-tab', // Only applicable for books
-  Details = 'details-tab',
-  Annotations = 'annotations-tab'
-}
+import {Tabs} from "../_models/tabs";
+import {TabTitlePipe} from "../_pipes/tab-title.pipe";
 
 interface VolumeCast extends IHasCast {
   characterLocked: boolean;
@@ -161,7 +155,8 @@ interface VolumeCast extends IHasCast {
     UtcToLocalDatePipe,
     ReadingProgressStatusPipePipe,
     ReadingProgressIconPipePipe,
-    ChapterCardComponent
+    ChapterCardComponent,
+    TabTitlePipe
   ],
   templateUrl: './volume-detail.component.html',
   styleUrl: './volume-detail.component.scss',
@@ -206,7 +201,7 @@ export class VolumeDetailComponent implements OnInit {
 
   isLoading = signal(true);
 
-  activeTabId = TabID.Chapters;
+  activeTabId = Tabs.Chapters;
   readingLists = signal<ReadingList[]>([]);
 
   // Only populated if the volume has exactly one chapter
@@ -393,8 +388,8 @@ export class VolumeDetailComponent implements OnInit {
     this.themeService.setColorScape(this.volume()!.primaryColor, this.volume()!.secondaryColor);
 
     this.route.fragment.pipe(tap(frag => {
-      if (frag !== null && this.activeTabId !== (frag as TabID)) {
-        this.activeTabId = frag as TabID;
+      if (frag !== null && this.activeTabId !== (frag as Tabs)) {
+        this.activeTabId = frag as Tabs;
         this.updateUrl(this.activeTabId);
         this.cdRef.markForCheck();
       }
@@ -458,7 +453,7 @@ export class VolumeDetailComponent implements OnInit {
     this.cdRef.markForCheck();
   }
 
-  updateUrl(activeTab: TabID) {
+  updateUrl(activeTab: Tabs) {
     const tokens = this.location.path().split('#');
     const newUrl = `${tokens[0]}#${activeTab}`;
     this.location.replaceState(newUrl)
@@ -487,7 +482,7 @@ export class VolumeDetailComponent implements OnInit {
 
 
   switchTabsToDetail() {
-    this.activeTabId = TabID.Details;
+    this.activeTabId = Tabs.Details;
     this.cdRef.markForCheck();
     setTimeout(() => {
       const tabElem = this.document.querySelector('#details-tab');
@@ -515,7 +510,7 @@ export class VolumeDetailComponent implements OnInit {
 
   protected readonly Breakpoint = Breakpoint;
   protected readonly AgeRating = AgeRating;
-  protected readonly TabID = TabID;
+  protected readonly Tabs = Tabs;
   protected readonly FilterField = FilterField;
   protected readonly encodeURIComponent = encodeURIComponent;
 }

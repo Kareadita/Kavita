@@ -201,10 +201,10 @@
         <ul ngbNav #nav="ngbNav" [(activeId)]="activeTabId" class="nav nav-tabs" [destroyOnHide]="false" (navChange)="onNavChange($event)">
 
           @if (shouldShowStorylineTabValue) {
-            <li [ngbNavItem]="TabID.Storyline">
-              <a ngbNavLink>{{t(TabID.Storyline)}}</a>
+            <li [ngbNavItem]="Tabs.Storyline">
+              <a ngbNavLink>{{Tabs.Storyline | tabTitle}}</a>
               <ng-template ngbNavContent>
-                @defer (when activeTabId === TabID.Storyline; prefetch on idle) {
+                @defer (when activeTabId === Tabs.Storyline; prefetch on idle) {
                   <virtual-scroller #scroll [items]="storylineItems()" [bufferAmount]="1" [parentScroll]="scrollingBlock" [childHeight]="1">
 
                     <div class="card-container row g-0" #container>
@@ -216,7 +216,7 @@
                         }
                       }
 
-                      <ng-container [ngTemplateOutlet]="estimatedNextCard" [ngTemplateOutletContext]="{tabId: TabID.Storyline}" />
+                      <ng-container [ngTemplateOutlet]="estimatedNextCard" [ngTemplateOutletContext]="{tabId: Tabs.Storyline}" />
                     </div>
                   </virtual-scroller>
                 }
@@ -226,19 +226,19 @@
 
 
           @if (shouldShowVolumeTabValue) {
-            <li [ngbNavItem]="TabID.Volumes">
+            <li [ngbNavItem]="Tabs.Volumes">
               <a ngbNavLink>
-                {{useBookLogicValue ? t('books-tab') : t('volumes-tab')}}
+                {{(useBookLogicValue ? Tabs.Books : Tabs.Volumes) | tabTitle}}
                 <span class="badge rounded-pill text-bg-secondary">{{volumes().length}}</span>
               </a>
               <ng-template ngbNavContent>
-                @defer (when activeTabId === TabID.Volumes; prefetch on idle) {
+                @defer (when activeTabId === Tabs.Volumes; prefetch on idle) {
                   <virtual-scroller #scroll [items]="volumeEntities()" [parentScroll]="scrollingBlock" [childHeight]="1">
                     <div class="card-container row g-0" #container>
                       @for (item of scroll.viewPortItems; let idx = $index; track item.data.id + '_volumes') {
                         <ng-container [ngTemplateOutlet]="nonChapterVolumeCard" [ngTemplateOutletContext]="{$implicit: item, scroll: scroll, idx: idx, totalLength: volumeEntities().length}" />
                       }
-                      <ng-container [ngTemplateOutlet]="estimatedNextCard" [ngTemplateOutletContext]="{tabId: TabID.Volumes}" />
+                      <ng-container [ngTemplateOutlet]="estimatedNextCard" [ngTemplateOutletContext]="{tabId: Tabs.Volumes}" />
                     </div>
                   </virtual-scroller>
                 }
@@ -247,19 +247,19 @@
           }
 
           @if (showChapterTab()) {
-            <li [ngbNavItem]="TabID.Chapters">
+            <li [ngbNavItem]="Tabs.Chapters">
               <a ngbNavLink>
                 {{chapterTabName()}}
                 <span class="badge rounded-pill text-bg-secondary">{{chapterEntities().length}}</span>
               </a>
               <ng-template ngbNavContent>
-                @defer (when activeTabId === TabID.Chapters; prefetch on idle) {
+                @defer (when activeTabId === Tabs.Chapters; prefetch on idle) {
                   <virtual-scroller #scroll [items]="chapterEntities()" [parentScroll]="scrollingBlock" [childHeight]="1">
                     <div class="card-container row g-0" #container>
                       @for (item of scroll.viewPortItems; let idx = $index; track item.data.id + '_chapters') {
                         <ng-container [ngTemplateOutlet]="nonSpecialChapterCard" [ngTemplateOutletContext]="{$implicit: item, scroll: scroll, idx: idx, totalLength: chapterEntities().length}" />
                       }
-                      <ng-container [ngTemplateOutlet]="estimatedNextCard" [ngTemplateOutletContext]="{tabId: TabID.Chapters}" />
+                      <ng-container [ngTemplateOutlet]="estimatedNextCard" [ngTemplateOutletContext]="{tabId: Tabs.Chapters}" />
                     </div>
                   </virtual-scroller>
                 }
@@ -268,13 +268,13 @@
           }
 
           @if (hasSpecials()) {
-            <li [ngbNavItem]="TabID.Specials">
+            <li [ngbNavItem]="Tabs.Specials">
               <a ngbNavLink>
-                {{t(TabID.Specials)}}
+                {{Tabs.Specials | tabTitle}}
                 <span class="badge rounded-pill text-bg-secondary">{{specialEntities().length}}</span>
               </a>
               <ng-template ngbNavContent>
-                @defer (when activeTabId === TabID.Specials; prefetch on idle) {
+                @defer (when activeTabId === Tabs.Specials; prefetch on idle) {
                   <virtual-scroller #scroll [items]="specialEntities()" [parentScroll]="scrollingBlock" [childHeight]="1">
                     <div class="card-container row g-0" #container>
                       @for(item of scroll.viewPortItems; let idx = $index; track item.data.id + '_specials') {
@@ -288,13 +288,13 @@
           }
 
           @if (annotations().length > 0) {
-            <li [ngbNavItem]="TabID.Annotations">
+            <li [ngbNavItem]="Tabs.Annotations">
               <a ngbNavLink>
-                {{t(TabID.Annotations)}}
+                {{Tabs.Annotations | tabTitle}}
                 <span class="badge rounded-pill text-bg-secondary">{{annotations().length}}</span>
               </a>
               <ng-template ngbNavContent>
-                @defer (when activeTabId === TabID.Annotations; prefetch on idle) {
+                @defer (when activeTabId === Tabs.Annotations; prefetch on idle) {
                   <app-annotations-tab [annotations]="annotations()" [displaySeries]="true" [scrollingBlock]="scrollingBlock" />
                 }
               </ng-template>
@@ -302,13 +302,13 @@
           }
 
           @if (totalRelatedCount() > 0) {
-            <li [ngbNavItem]="TabID.Related">
+            <li [ngbNavItem]="Tabs.Related">
               <a ngbNavLink>
-                {{t(TabID.Related)}}
+                {{Tabs.Related | tabTitle}}
                 <span class="badge rounded-pill text-bg-secondary">{{totalRelatedCount()}}</span>
               </a>
               <ng-template ngbNavContent>
-                @defer (when activeTabId === TabID.Related; prefetch on idle) {
+                @defer (when activeTabId === Tabs.Related; prefetch on idle) {
                   <app-related-tab [readingLists]="readingLists()"
                                    [collections]="collections()"
                                    [relations]="relations()"
@@ -321,13 +321,13 @@
           }
 
           @if (hasRecommendations()) {
-            <li [ngbNavItem]="TabID.Recommendations">
+            <li [ngbNavItem]="Tabs.Recommendations">
               <a ngbNavLink>
-                {{t(TabID.Recommendations)}}
+                {{Tabs.Recommendations | tabTitle}}
                 <span class="badge rounded-pill text-bg-secondary">{{combinedRecs().length}}</span>
               </a>
               <ng-template ngbNavContent>
-                @defer (when activeTabId === TabID.Recommendations; prefetch on idle) {
+                @defer (when activeTabId === Tabs.Recommendations; prefetch on idle) {
                   <virtual-scroller #scroll [items]="combinedRecs()" [parentScroll]="scrollingBlock" [childHeight]="1">
                     <div class="card-container row g-0" #container>
                       @for(item of scroll.viewPortItems; let idx = $index; track idx) {
@@ -344,23 +344,23 @@
             </li>
           }
 
-          <li [ngbNavItem]="TabID.Reviews">
+          <li [ngbNavItem]="Tabs.Reviews">
             <a ngbNavLink>
-              {{t(TabID.Reviews)}}
+              {{Tabs.Reviews | tabTitle}}
               <span class="badge rounded-pill text-bg-secondary">{{reviewCount()}}</span>
             </a>
             <ng-template ngbNavContent>
-              @defer (when activeTabId === TabID.Reviews; prefetch on idle) {
+              @defer (when activeTabId === Tabs.Reviews; prefetch on idle) {
                 <app-reviews [userReviews]="reviews()" [plusReviews]="plusReviews()" [series]="seriesValue" />
               }
             </ng-template>
           </li>
 
           @if (seriesMetadataValue && showDetailsTabValue) {
-            <li [ngbNavItem]="TabID.Details" id="details-tab">
-              <a ngbNavLink>{{t(TabID.Details)}}</a>
+            <li [ngbNavItem]="Tabs.Details" id="details-tab">
+              <a ngbNavLink>{{Tabs.Details | tabTitle}}</a>
               <ng-template ngbNavContent>
-                @defer (when activeTabId === TabID.Details; prefetch on idle) {
+                @defer (when activeTabId === Tabs.Details; prefetch on idle) {
                   <app-details-tab [metadata]="seriesMetadataValue"
                                    [genres]="seriesMetadataValue.genres"
                                    [tags]="seriesMetadataValue.tags"
@@ -381,16 +381,16 @@
     <ng-template #estimatedNextCard let-tabId="tabId">
       @if (nextExpectedChapterValue) {
         @switch (tabId) {
-          @case (TabID.Volumes) {
+          @case (Tabs.Volumes) {
             @if (nextExpectedChapterValue.volumeNumber !== SpecialVolumeNumber && nextExpectedChapterValue.chapterNumber === LooseLeafOrSpecialNumber) {
               <app-next-expected-card class="col-auto mt-2 mb-2" [entity]="nextExpectedChapterValue"
                                       [imageUrl]="seriesCoverImageValue" />
             }
           }
-          @case (TabID.Chapters) {
+          @case (Tabs.Chapters) {
             <app-next-expected-card class="col-auto mt-2 mb-2" [entity]="nextExpectedChapterValue" [imageUrl]="seriesCoverImageValue" />
           }
-          @case (TabID.Storyline) {
+          @case (Tabs.Storyline) {
             <app-next-expected-card class="col-auto mt-2 mb-2" [entity]="nextExpectedChapterValue" [imageUrl]="seriesCoverImageValue" />
           }
         }

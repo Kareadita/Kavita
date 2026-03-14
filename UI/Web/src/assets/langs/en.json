@@ -772,7 +772,7 @@
 
     "all-filters": {
         "title": "All Smart Filters",
-        "count": "{{count}} {{customize-dashboard-modal.title-smart-filters}}",
+        "count": "{{count}} {{tabs.smart-filters-tab}}",
         "create": "{{common.create}}"
     },
 
@@ -1058,9 +1058,7 @@
         "close": "{{common.close}}",
         "no-data": "{{common.no-data}}",
         "page-num-label": "{{book-reader.page-num-label}}",
-        "load-bookmark": "Load",
-        "image-header": "Image",
-        "text-header": "Text"
+        "load-bookmark": "Load"
     },
 
     "page-chapter-label-pipe": {
@@ -1168,16 +1166,6 @@
         "remove-from-want-to-read": "{{actionable.remove-from-want-to-read}}",
         "add-to-want-to-read": "{{actionable.add-to-want-to-read}}",
         "edit-series-alt": "Edit Information",
-        "reviews-tab": "{{tabs.reviews-tab}}",
-        "storyline-tab": "{{tabs.storyline-tab}}",
-        "books-tab": "{{tabs.books-tab}}",
-        "volumes-tab": "{{tabs.volumes-tab}}",
-        "specials-tab": "{{tabs.specials-tab}}",
-        "related-tab": "{{tabs.related-tab}}",
-        "details-tab": "{{tabs.details-tab}}",
-        "annotations-tab": "{{tabs.annotations-tab}}",
-        "info-tab": "{{tabs.info-tab}}",
-        "recommendations-tab": "{{tabs.recommendations-tab}}",
         "send-to": "File emailed to {{deviceName}}",
         "no-pages": "{{toasts.no-pages}}",
         "no-chapters": "There are no chapters to this volume. Cannot read.",
@@ -1356,11 +1344,6 @@
         "close": "{{common.close}}",
         "edit-title": "Edit {{name}}",
         "add-title": "Add Library",
-        "general-tab": "{{tabs.general-tab}}",
-        "folder-tab": "{{tabs.folder-tab}}",
-        "cover-tab": "{{tabs.cover-tab}}",
-        "advanced-tab": "{{tabs.advanced-tab}}",
-        "tasks-tab": "{{tabs.tasks-tab}}",
         "name-label": "Name",
         "library-name-unique": "Library name must be unique",
         "last-scanned-label": "Last Scanned:",
@@ -1937,10 +1920,6 @@
         "save": "{{common.save}}",
         "close": "{{common.close}}",
         "cancel": "{{common.cancel}}",
-        "general-tab": "{{tabs.general-tab}}",
-        "cover-image-tab": "{{tabs.cover-tab}}",
-        "info-tab": "{{tabs.info-tab}}",
-        "series-tab": "{{tabs.series-tab}}",
         "name-label": "Name",
         "name-validation": "Name must be unique",
         "promote-label": "Promote",
@@ -2128,8 +2107,6 @@
         "cover-artists-title": "{{metadata-fields.cover-artists-title}}",
         "publishers-title": "{{metadata-fields.publishers-title}}",
         "items-title": "Items",
-        "storyline-tab": "{{series-detail.storyline-tab}}",
-        "details-tab": "{{series-detail.details-tab}}",
         "edit-alt": "{{common.edit}}",
         "edit-label": "Edit Mode",
         "date-range-title": "Date Range",
@@ -2301,8 +2278,6 @@
 
     "edit-reading-list-modal": {
         "title": "Edit Reading List: {{name}}",
-        "general-tab": "{{tabs.general-tab}}",
-        "cover-image-tab": "{{tabs.cover-tab}}",
         "close": "{{common.close}}",
         "save": "{{common.save}}",
         "year-validation": "Must be greater than 1000, 0 or blank",
@@ -2647,16 +2622,9 @@
         "age-rating-label": "{{edit-series-modal.age-rating-label}}",
         "web-link-description": "{{edit-series-modal.web-link-description}}",
         "web-link-label": "{{edit-series-modal.web-link-label}}",
-        "general-tab": "{{tabs.general-tab}}",
-        "people-tab": "{{tabs.people-tab}}",
-        "weblink-tab": "{{tabs.weblink-tab}}",
         "external-ids-tab": "{{tabs.external-ids-tab}}",
         "field-locked-alt": "{{edit-series-modal.field-locked-alt}}",
-        "cover-image-tab": "{{tabs.cover-tab}}",
-        "tasks-tab": "{{tabs.tasks-tab}}",
-        "info-tab": "{{tabs.info-tab}}",
         "cover-image-description": "{{edit-series-modal.cover-image-description}}",
-        "tags-tab": "{{tabs.tags-tab}}",
 
         "pages-label": "Pages",
         "words-label": "Length",
@@ -2697,9 +2665,6 @@
 
     "edit-person-modal": {
         "title": "{{personName}} Details",
-        "general-tab": "{{edit-series-modal.general-tab}}",
-        "cover-image-tab": "{{edit-series-modal.cover-image-tab}}",
-        "aliases-tab": "Aliases",
         "close": "{{common.close}}",
         "name-label": "{{edit-series-modal.name-label}}",
         "mal-id-label": "MAL Id",
@@ -2806,8 +2771,6 @@
 
     "server-stats": {
         "stats-title": "Explore",
-        "stats-tab": "{{tabs.stats-tab}}",
-        "management-tab": "{{tabs.management-tab}}",
 
         "total-series-label": "Total Series",
         "total-series-tooltip": "Total Series: {{count}}",
@@ -2868,10 +2831,6 @@
         "time-reading-label": "Total Read Time:",
         "avg-reading-per-week-label": "Avg Per Week:",
         "stats-title": "A look at {{username}}'s journey through {{libraryName}}",
-        "overview-tab": "{{tabs.overview-tab}}",
-        "stats-tab": "{{tabs.stats-tab}}",
-        "reviews-tab": "{{tabs.reviews-tab}}",
-        "activity-tab": "{{tabs.activity-tab}}",
         "no-reviews": "No Reviews yet",
         "total-reads-badge": "{{reads}} Reads",
         "k+-badge": "K+ Subscriber"
@@ -3138,11 +3097,7 @@
     },
 
     "customize-dashboard-modal": {
-        "title-smart-filters": "Smart Filters",
-        "dashboard": "Dashboard",
-        "sidenav": "Side Nav",
-        "external-sources": "External Sources",
-        "smart-filters": "Smart Filters",
+        "title-smart-filters": "{{tabs.smart-filters-tab}}",
         "description": "You can customize different aspects of Kavita by reordering, toggling visibility, and binding smart filters/external sources to your home page or side nav."
     },
 
@@ -3151,7 +3106,7 @@
         "add": "{{common.add}}",
         "filter": "{{common.filter}}",
         "clear": "{{common.clear}}",
-        "smart-filter-title": "{{customize-dashboard-modal.title-smart-filters}}"
+        "smart-filter-title": "{{tabs.smart-filters-tab}}"
     },
 
     "customize-sidenav-streams": {
@@ -3160,8 +3115,8 @@
         "add": "{{common.add}}",
         "filter": "{{common.filter}}",
         "clear": "{{common.clear}}",
-        "smart-filters-title": "Smart Filters",
-        "external-sources-title": "{{customize-dashboard-modal.external-sources}}",
+        "smart-filters-title": "{{tabs.smart-filters-tab}}",
+        "external-sources-title": "{{tabs.external-sources-tab}}",
         "reorder-when-filter-present": "You cannot reorder items via drag & drop while a filter is present. Use {{customize-sidenav-streams.order-numbers-label}}",
         "order-numbers-label": "{{reading-list-detail.order-numbers-label}}",
         "bulk-mode-label": "Bulk Mode"
@@ -3631,7 +3586,6 @@
         "set-devices": "Set Devices",
         "select-devices-for": "Set devices for {{name}}",
 
-        "image-reader-settings-title": "Image Reader",
         "reading-direction-label": "Reading Direction",
         "reading-direction-tooltip": "Direction to click to move to next page. Right to Left means you click on left side of screen to move to next page.",
         "scaling-option-label": "Scaling Options",
@@ -3660,7 +3614,6 @@
         "disable-width-override-tooltip": "Prevent the width override from taking effect when your screen is at least the configured breakpoint or smaller",
         "reset": "{{common.reset}}",
 
-        "book-reader-settings-title": "Book Reader",
         "tap-to-paginate-label": "Tap to Paginate",
         "tap-to-paginate-tooltip": "Should the sides of the book reader screen allow tapping on it to move to prev/next page",
         "immersive-mode-label": "Immersive Mode",
@@ -3682,7 +3635,6 @@
         "margin-book-label": "Margin",
         "margin-book-tooltip": "How much spacing on each side of the screen. This will override to 0 on mobile devices regardless of this setting.",
 
-        "pdf-reader-settings-title": "PDF Reader",
         "pdf-scroll-mode-label": "Scroll Mode",
         "pdf-scroll-mode-tooltip": "How you scroll through pages. Vertical/Horizontal and Tap to Paginate (no scroll)",
         "pdf-spread-mode-label": "Spread Mode",
@@ -3762,7 +3714,17 @@
         "overview-tab": "Overview",
         "management-tab": "Management",
         "activity-tab": "Activity",
-        "external-ids-tab": "External Ids"
+        "external-ids-tab": "External Ids",
+        "aliases-tab": "Aliases",
+        "chapters-tab": "Chapters",
+        "dashboard-tab": "Dashboard",
+        "sidenav-tab": "Side Nav",
+        "external-sources-tab": "External Sources",
+        "image-reader-tab": "Image Reader",
+        "book-reader-tab": "Book Reader",
+        "pdf-reader-tab": "PDF Reader",
+        "bookmark-image-tab": "Image",
+        "bookmark-text-tab": "Text"
     },
 
     "common": {

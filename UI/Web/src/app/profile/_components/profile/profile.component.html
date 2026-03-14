@@ -56,38 +56,38 @@
     <div class="carousel-tabs-container mb-2 ms-md-2 me-md-2 w-auto">
       <ul ngbNav #nav="ngbNav" [(activeId)]="activeTabId" class="nav nav-tabs" [destroyOnHide]="true" syncUrlFragment>
 
-        <li [ngbNavItem]="TabID.Overview">
-          <a ngbNavLink>{{t(TabID.Overview)}}</a>
+        <li [ngbNavItem]="Tabs.Overview">
+          <a ngbNavLink>{{Tabs.Overview | tabTitle}}</a>
           <ng-template ngbNavContent>
-            @defer (when activeTabId === TabID.Overview; prefetch on idle) {
+            @defer (when activeTabId === Tabs.Overview; prefetch on idle) {
               <app-profile-overview [memberInfo]="memberInfo()" />
             }
           </ng-template>
         </li>
 
-        <li [ngbNavItem]="TabID.Stats">
-          <a ngbNavLink>{{t(TabID.Stats)}}</a>
+        <li [ngbNavItem]="Tabs.Stats">
+          <a ngbNavLink>{{Tabs.Stats | tabTitle}}</a>
           <ng-template ngbNavContent>
-            @defer (when activeTabId === TabID.Stats; prefetch on idle) {
+            @defer (when activeTabId === Tabs.Stats; prefetch on idle) {
               <app-profile-stats [userId]="memberInfo().id" [username]="username" />
             }
           </ng-template>
 
 
-        <li [ngbNavItem]="TabID.Reviews">
-          <a ngbNavLink>{{t(TabID.Reviews)}}</a>
+        <li [ngbNavItem]="Tabs.Reviews">
+          <a ngbNavLink>{{Tabs.Reviews | tabTitle}}</a>
           <ng-template ngbNavContent>
-            @defer (when activeTabId === TabID.Reviews; prefetch on idle) {
+            @defer (when activeTabId === Tabs.Reviews; prefetch on idle) {
               <app-profile-review-list [memberInfo]="user" />
             }
           </ng-template>
         </li>
 
         @if (accountService.userId() === memberInfo().id) {
-          <li [ngbNavItem]="TabID.Activity">
-            <a ngbNavLink>{{t(TabID.Activity)}}</a>
+          <li [ngbNavItem]="Tabs.Activity">
+            <a ngbNavLink>{{Tabs.Activity | tabTitle}}</a>
             <ng-template ngbNavContent>
-              @defer (when activeTabId === TabID.Activity; prefetch on idle) {
+              @defer (when activeTabId === Tabs.Activity; prefetch on idle) {
                 <app-profile-activity [memberInfo]="user" />
               }
             </ng-template>

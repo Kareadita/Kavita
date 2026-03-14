@@ -68,12 +68,9 @@ import {DeviceService} from "../../_services/device.service";
 import {ModalService} from "../../_services/modal.service";
 import {ListSelectModalComponent} from "../../shared/_components/list-select-modal/list-select-modal.component";
 import {ClientDevice} from "../../_models/client-device";
+import {TabTitlePipe} from "../../_pipes/tab-title.pipe";
+import {Tabs} from "../../_models/tabs";
 
-enum TabId {
-  ImageReader = "image-reader",
-  BookReader = "book-reader",
-  PdfReader = "pdf-reader",
-}
 
 @Component({
   selector: 'app-manage-reading-profiles',
@@ -106,7 +103,8 @@ enum TabId {
     LoadingComponent,
     NgbTooltip,
     BreakpointPipe,
-    SettingColorPickerComponent
+    SettingColorPickerComponent,
+    TabTitlePipe
   ],
   templateUrl: './manage-reading-profiles.component.html',
   styleUrl: './manage-reading-profiles.component.scss',
@@ -134,7 +132,7 @@ export class ManageReadingProfilesComponent implements OnInit {
   devices: ClientDevice[] = [];
   readingProfiles: ReadingProfile[] = [];
   user!: User;
-  activeTabId = TabId.ImageReader;
+  activeTabId = Tabs.ImageReader;
   loading = true;
 
   selectedProfile: ReadingProfile | null = null;
@@ -383,7 +381,7 @@ export class ManageReadingProfilesComponent implements OnInit {
   protected readonly readerModes = readingModes;
   protected readonly bookWritingStyles = bookWritingStyles;
   protected readonly pdfScrollModes = pdfScrollModes;
-  protected readonly TabId = TabId;
+  protected readonly Tabs = Tabs;
   protected readonly ReadingProfileKind = ReadingProfileKind;
   protected readonly WikiLink = WikiLink;
   protected readonly breakPoints = breakPoints;

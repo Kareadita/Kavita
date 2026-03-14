@@ -72,10 +72,10 @@
               <div class="carousel-tabs-container mb-2">
                 <ul ngbNav #nav="ngbNav" [(activeId)]="activeTabId" class="nav nav-tabs">
 
-                  <li [ngbNavItem]="TabId.ImageReader">
-                    <a ngbNavLink (click)="activeTabId = TabId.ImageReader">{{t('image-reader-settings-title')}}</a>
+                  <li [ngbNavItem]="Tabs.ImageReader">
+                    <a ngbNavLink (click)="activeTabId = Tabs.ImageReader">{{Tabs.ImageReader | tabTitle}}</a>
                     <ng-template ngbNavContent>
-                      @defer (when activeTabId === TabId.ImageReader; prefetch on idle) {
+                      @defer (when activeTabId === Tabs.ImageReader; prefetch on idle) {
                         <div>
                           <div class="row g-0 mt-4 mb-4">
                             <app-setting-item [title]="t('reading-direction-label')" [subtitle]="t('reading-direction-tooltip')">
@@ -282,10 +282,10 @@
                     </ng-template>
                   </li>
 
-                  <li [ngbNavItem]="TabId.BookReader">
-                    <a ngbNavLink (click)="activeTabId = TabId.BookReader">{{t('book-reader-settings-title')}}</a>
+                  <li [ngbNavItem]="Tabs.BookReader">
+                    <a ngbNavLink (click)="activeTabId = Tabs.BookReader">{{Tabs.BookReader | tabTitle}}</a>
                     <ng-template ngbNavContent>
-                      @defer (when activeTabId === TabId.BookReader; prefetch on idle) {
+                      @defer (when activeTabId === Tabs.BookReader; prefetch on idle) {
                         @if (selectedProfile !== null && readingProfileForm !== null) {
                           <div>
                             <div class="row g-0 mt-4 mb-4">
@@ -449,10 +449,10 @@
                     </ng-template>
                   </li>
 
-                  <li [ngbNavItem]="TabId.PdfReader">
-                    <a ngbNavLink (click)="activeTabId = TabId.PdfReader">{{t('pdf-reader-settings-title')}}</a>
+                  <li [ngbNavItem]="Tabs.PdfReader">
+                    <a ngbNavLink (click)="activeTabId = Tabs.PdfReader">{{Tabs.PdfReader | tabTitle}}</a>
                     <ng-template ngbNavContent>
-                      @defer (when activeTabId === TabId.PdfReader; prefetch on idle) {
+                      @defer (when activeTabId === Tabs.PdfReader; prefetch on idle) {
                         <div>
                           <div class="row g-0 mt-4 mb-4">
                             <app-setting-item [title]="t('pdf-spread-mode-label')" [subtitle]="t('pdf-spread-mode-tooltip')">

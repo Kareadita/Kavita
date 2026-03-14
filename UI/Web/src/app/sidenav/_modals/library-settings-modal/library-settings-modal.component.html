@@ -14,8 +14,8 @@
       <ul ngbNav #nav="ngbNav" [(activeId)]="active" class="nav-pills"
           orientation="{{breakpointService.isMobile() ? 'horizontal' : 'vertical'}}" style="min-width: 8.4375rem;">
 
-        <li [ngbNavItem]="TabID.General">
-          <a ngbNavLink>{{t(TabID.General)}}</a>
+        <li [ngbNavItem]="Tabs.General">
+          <a ngbNavLink>{{Tabs.General | tabTitle}}</a>
           <ng-template ngbNavContent>
             <div class="mb-3">
               <label for="library-name" class="form-label">{{t('name-label')}}</label>
@@ -70,8 +70,8 @@
         </li>
 
 
-        <li [ngbNavItem]="TabID.Folder" [disabled]="isAddLibrary && setupStep < 1">
-          <a ngbNavLink>{{t(TabID.Folder)}}</a>
+        <li [ngbNavItem]="Tabs.Folder" [disabled]="isAddLibrary && setupStep < 1">
+          <a ngbNavLink>{{Tabs.Folder | tabTitle}}</a>
           <ng-template ngbNavContent>
 
             @if (filesAtRoot().length > 0) {
@@ -110,8 +110,8 @@
           </ng-template>
         </li>
 
-        <li [ngbNavItem]="TabID.Cover" [disabled]="isAddLibrary && setupStep < 2">
-          <a ngbNavLink>{{t(TabID.Cover)}}</a>
+        <li [ngbNavItem]="Tabs.CoverImage" [disabled]="isAddLibrary && setupStep < 2">
+          <a ngbNavLink>{{Tabs.CoverImage | tabTitle}}</a>
           <ng-template ngbNavContent>
             @if (isAddLibrary) {
               <p class="alert alert-warning" role="alert">{{t('cover-description')}}</p>
@@ -124,8 +124,8 @@
           </ng-template>
         </li>
 
-        <li [ngbNavItem]="TabID.Advanced" [disabled]="isAddLibrary && setupStep < 3">
-          <a ngbNavLink>{{t(TabID.Advanced)}}</a>
+        <li [ngbNavItem]="Tabs.Advanced" [disabled]="isAddLibrary && setupStep < 3">
+          <a ngbNavLink>{{Tabs.Advanced | tabTitle}}</a>
           <ng-template ngbNavContent>
             <div class="row g-0 mt-4 mb-4">
               <app-setting-item [title]="t('file-type-group-label')" [showEdit]="false" [canEdit]="false"
@@ -277,8 +277,8 @@
 
         <!-- Only show tasks on edit flow -->
         @if (!isAddLibrary) {
-          <li [ngbNavItem]="TabID.Tasks">
-            <a ngbNavLink>{{t(TabID.Tasks)}}</a>
+          <li [ngbNavItem]="Tabs.Tasks">
+            <a ngbNavLink>{{Tabs.Tasks | tabTitle}}</a>
             <ng-template ngbNavContent>
               @for(task of tasks; track task.action) {
                 <div class="mt-3 mb-3">

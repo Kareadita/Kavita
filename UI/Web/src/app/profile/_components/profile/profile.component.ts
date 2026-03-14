@@ -35,13 +35,9 @@ import {NavTabUrlDirective} from "../../../_directives/nav-tab-url.directive";
 import {AccountService} from "../../../_services/account.service";
 import {ProfileActivityComponent} from "../profile-activity/profile-activity.component";
 import {KavitaTitleStrategy} from "../../../_services/kavita-title.strategy";
+import {Tabs} from "../../../_models/tabs";
+import {TabTitlePipe} from "../../../_pipes/tab-title.pipe";
 
-enum TabID {
-  Overview = 'overview-tab',
-  Stats = 'stats-tab',
-  Reviews = 'reviews-tab',
-  Activity = 'activity-tab'
-}
 
 @Component({
   selector: 'app-profile',
@@ -69,6 +65,7 @@ enum TabID {
     TimeDurationPipe,
     NavTabUrlDirective,
     ProfileActivityComponent,
+    TabTitlePipe,
   ],
   templateUrl: './profile.component.html',
   styleUrl: './profile.component.scss',
@@ -96,7 +93,7 @@ export class ProfileComponent {
   protected readonly userStatsResource = this.statsService.getUserStatisticsResource(() => this.userId());
 
 
-  activeTabId = TabID.Overview;
+  activeTabId = Tabs.Overview;
 
 
   totalReads = computed(() => {
@@ -121,13 +118,13 @@ export class ProfileComponent {
   constructor() {
     const initialFragment = this.route.snapshot.fragment;
     if (initialFragment) {
-      this.activeTabId = initialFragment as TabID;
+      this.activeTabId = initialFragment as Tabs;
       this.cdRef.markForCheck();
     }
 
     // TODO: If ngBootstrap ever supports signal-based activeTabId, we can move this into syncUrlFragment directive
     this.route.fragment.pipe(tap(frag => {
-      const fragId = frag as TabID;
+      const fragId = frag as Tabs;
       if (frag !== null && this.activeTabId !== fragId) {
         this.updateUrl(fragId);
         this.activeTabId = fragId;
@@ -144,7 +141,7 @@ export class ProfileComponent {
   }
 
 
-  updateUrl(activeTab: TabID) {
+  updateUrl(activeTab: Tabs) {
     const tokens = this.location.path().split('#');
     const newUrl = `${tokens[0]}#${activeTab}`;
     this.location.replaceState(newUrl)
@@ -153,7 +150,7 @@ export class ProfileComponent {
 
 
 
-  protected readonly TabID = TabID;
+  protected readonly Tabs = Tabs;
   protected readonly window = window;
 
 }

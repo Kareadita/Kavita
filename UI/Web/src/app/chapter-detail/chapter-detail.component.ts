@@ -78,13 +78,8 @@ import {BreakpointService} from "../_services/breakpoint.service";
 import {ActionFactoryService} from "../_services/action-factory.service";
 import {ModalService} from "../_services/modal.service";
 import {getResolvedData, getWritableResolvedData} from "../../libs/route-util";
-
-enum TabID {
-  Related = 'related-tab',
-  Reviews = 'review-tab',
-  Details = 'details-tab',
-  Annotations = 'annotations-tab'
-}
+import {Tabs} from "../_models/tabs";
+import {TabTitlePipe} from "../_pipes/tab-title.pipe";
 
 @Component({
   selector: 'app-chapter-detail',
@@ -121,7 +116,8 @@ enum TabID {
     UtcToLocalTimePipe,
     UtcToLocalDatePipe,
     ReadingProgressStatusPipePipe,
-    ReadingProgressIconPipePipe
+    ReadingProgressIconPipePipe,
+    TabTitlePipe
   ],
   templateUrl: './chapter-detail.component.html',
   styleUrl: './chapter-detail.component.scss',
@@ -197,7 +193,7 @@ export class ChapterDetailComponent implements OnInit {
   })
   mobileSeriesImgBackground = this.themeService.getCssVariable('--mobile-series-img-background');
 
-  activeTabId = TabID.Details;
+  activeTabId = Tabs.Details;
 
   chapterActions = computed(() => this.actionFactoryService.getChapterActions(this.seriesId(), this.libraryId(), this.libraryType()));
   totalReviewCount = computed(() => this.userReviews().length + this.plusReviews().length);
@@ -250,16 +246,16 @@ export class ChapterDetailComponent implements OnInit {
     this.loadReadingListsForChapter(this.chapterId());
 
     this.route.fragment.pipe(tap(frag => {
-      if (frag !== null && this.activeTabId !== (frag as TabID)) {
-        this.activeTabId = frag as TabID;
+      if (frag !== null && this.activeTabId !== (frag as Tabs)) {
+        this.activeTabId = frag as Tabs;
         this.updateUrl(this.activeTabId);
         this.cdRef.markForCheck();
       }
     }), takeUntilDestroyed(this.destroyRef)).subscribe();
 
 
-    if (!this.showDetailsTab() && this.activeTabId === TabID.Details) {
-      this.activeTabId = TabID.Reviews;
+    if (!this.showDetailsTab() && this.activeTabId === Tabs.Details) {
+      this.activeTabId = Tabs.Reviews;
     }
 
     this.isLoading.set(false);
@@ -311,7 +307,7 @@ export class ChapterDetailComponent implements OnInit {
     this.cdRef.markForCheck();
   }
 
-  updateUrl(activeTab: TabID) {
+  updateUrl(activeTab: Tabs) {
     const tokens = this.location.path().split('#');
     const newUrl = `${tokens[0]}#${activeTab}`;
     this.location.replaceState(newUrl)
@@ -322,7 +318,7 @@ export class ChapterDetailComponent implements OnInit {
   }
 
   switchTabsToDetail() {
-    this.activeTabId = TabID.Details;
+    this.activeTabId = Tabs.Details;
     this.cdRef.markForCheck();
   }
 
@@ -333,7 +329,7 @@ export class ChapterDetailComponent implements OnInit {
   }
 
   protected readonly AgeRating = AgeRating;
-  protected readonly TabID = TabID;
+  protected readonly Tabs = Tabs;
   protected readonly FilterField = FilterField;
   protected readonly LibraryType = LibraryType;
   protected readonly encodeURIComponent = encodeURIComponent;

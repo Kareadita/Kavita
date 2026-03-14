@@ -6,36 +6,33 @@ import {ManageSmartFiltersComponent} from "../manage-smart-filters/manage-smart-
 import {NgbNav, NgbNavContent, NgbNavItem, NgbNavLink, NgbNavOutlet} from "@ng-bootstrap/ng-bootstrap";
 import {TranslocoDirective} from "@jsverse/transloco";
 import {WikiLink} from 'src/app/_models/wiki';
+import {Tabs} from "../../../_models/tabs";
+import {TabTitlePipe} from "../../../_pipes/tab-title.pipe";
 
-enum TabID {
-  Dashboard = 'dashboard',
-  SideNav = 'sidenav',
-  SmartFilters = 'smart-filters',
-  ExternalSources = 'external-sources'
-}
 
 @Component({
     selector: 'app-manage-customization',
-    imports: [
-        CustomizeDashboardStreamsComponent,
-        CustomizeSidenavStreamsComponent,
-        ManageExternalSourcesComponent,
-        ManageSmartFiltersComponent,
-        NgbNav,
-        NgbNavContent,
-        NgbNavLink,
-        TranslocoDirective,
-        NgbNavItem,
-        NgbNavOutlet
-    ],
+  imports: [
+    CustomizeDashboardStreamsComponent,
+    CustomizeSidenavStreamsComponent,
+    ManageExternalSourcesComponent,
+    ManageSmartFiltersComponent,
+    NgbNav,
+    NgbNavContent,
+    NgbNavLink,
+    TranslocoDirective,
+    NgbNavItem,
+    NgbNavOutlet,
+    TabTitlePipe
+  ],
     templateUrl: './manage-customization.component.html',
     styleUrl: './manage-customization.component.scss',
     changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class ManageCustomizationComponent {
 
-  activeTab = TabID.Dashboard;
+  activeTab = Tabs.Dashboard;
 
-  protected readonly TabID = TabID;
+  protected readonly Tabs = Tabs;
   protected readonly WikiLink = WikiLink;
 }

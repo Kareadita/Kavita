@@ -65,19 +65,9 @@ import {modalSaved} from "../../../_models/modal/modal-result";
 import {
   EditExternalMetadataComponent
 } from "../../../../shared/_components/edit-external-metadata/edit-external-metadata.component";
+import {Tabs} from "../../../_models/tabs";
+import {TabTitlePipe} from "../../../_pipes/tab-title.pipe";
 
-
-enum TabID {
-  General = 'general-tab',
-  CoverImage = 'cover-image-tab',
-  Info = 'info-tab',
-  People = 'people-tab',
-  Tasks = 'tasks-tab',
-  Metadata = 'metadata-tab',
-  WebLinks = 'weblinks-tab',
-  Related = 'related-tab',
-  ExternalMetadataIds = 'external-ids-tab'
-}
 
 @Component({
   selector: 'app-edit-series-modal',
@@ -109,6 +99,7 @@ enum TabID {
     DecimalPipe,
     TitleCasePipe,
     EditExternalMetadataComponent,
+    TabTitlePipe,
   ],
   templateUrl: './edit-series-modal.component.html',
   styleUrls: ['./edit-series-modal.component.scss'],
@@ -131,7 +122,7 @@ export class EditSeriesModalComponent implements OnInit {
   private readonly actionFactoryService = inject(ActionFactoryService);
   protected readonly breakpointService = inject(BreakpointService);
 
-  protected readonly TabID = TabID;
+  protected readonly Tabs = Tabs;
   protected readonly PersonRole = PersonRole;
   protected readonly Action = Action;
 
@@ -147,7 +138,7 @@ export class EditSeriesModalComponent implements OnInit {
   tasks = this.actionFactoryService.getActionablesForSettingsPage(
     this.actionFactoryService.getSeriesActions(), this.blacklist);
   volumeCollapsed: any = {};
-  active = TabID.General;
+  active = Tabs.General;
   editSeriesForm!: FormGroup;
   libraryName: string | undefined = undefined;
   size: number = 0;

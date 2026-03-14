@@ -6,28 +6,25 @@ import {ReactiveFormsModule} from "@angular/forms";
 import {StatsFilter} from "../../_models/stats-filter";
 import {ServerStatsStatsTabComponent} from "../server-stats-stats-tab/server-stats-stats-tab.component";
 import {ServerStatsMgmtTabComponent} from "../server-stats-mgmt-tab/server-stats-mgmt-tab.component";
-
-enum TabID {
-  Stats = 'stats-tab',
-  Management = 'management-tab',
-}
+import {Tabs} from "../../../_models/tabs";
+import {TabTitlePipe} from "../../../_pipes/tab-title.pipe";
 
 @Component({
     selector: 'app-server-stats',
     templateUrl: './server-stats.component.html',
     styleUrls: ['./server-stats.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [TranslocoDirective, ReactiveFormsModule, NgbNav, NgbNavContent, NgbNavLink, NgbNavItem, NgbNavOutlet, ServerStatsStatsTabComponent, ServerStatsMgmtTabComponent]
+  imports: [TranslocoDirective, ReactiveFormsModule, NgbNav, NgbNavContent, NgbNavLink, NgbNavItem, NgbNavOutlet, ServerStatsStatsTabComponent, ServerStatsMgmtTabComponent, TabTitlePipe]
 })
 export class ServerStatsComponent {
   protected readonly accountService = inject(AccountService);
 
 
-  activeTabId = TabID.Stats;
+  activeTabId = Tabs.Stats;
 
   userId = computed(() => this.accountService.currentUser()?.id);
   readonly filter = signal<StatsFilter | undefined>(undefined);
   readonly year = signal<number>(new Date().getFullYear());
 
-  protected readonly TabID = TabID;
+  protected readonly Tabs = Tabs;
 }
