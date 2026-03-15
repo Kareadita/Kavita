@@ -150,6 +150,9 @@ public class CblExportService(IUnitOfWork unitOfWork, IDirectoryService director
                 ? item.Series.Metadata.ReleaseYear
                 : (int?)null;
 
+            // TODO: If library type is Comics, we need to remove (YEAR/Vol)
+            var seriesName = item.Series.Name;
+
             issues.Add(new CblV2Issue
             {
                 SeriesName = item.Series.Name,
@@ -157,7 +160,7 @@ public class CblExportService(IUnitOfWork unitOfWork, IDirectoryService director
                 IssueNumber = item.Chapter.Range,
                 IssueCoverDate = coverDate,
                 IssueType = string.Empty,
-                Id = null, // TODO: When we expand Chapter-level external metadata, create this
+                Id = GetExternalIds(item.Chapter, seriesName)
             });
         }
 
@@ -185,6 +188,62 @@ public class CblExportService(IUnitOfWork unitOfWork, IDirectoryService director
             IssueList = issues,
             Notes = string.Empty,
         };
+    }
+
+    private static List<CblV2ExternalId> GetExternalIds(Chapter chapter, string seriesName)
+    {
+        var results = new List<CblV2ExternalId>();
+        if (chapter.AniListId > 0)
+        {
+            results.Add(new CblV2ExternalId()
+            {
+                Issue = chapter.AniListId.ToString(),
+                Name = "anilist",
+                Series = seriesName
+            });
+        }
+
+        if (chapter.MalId > 0)
+        {
+            results.Add(new CblV2ExternalId()
+            {
+                Issue = chapter.MalId.ToString(),
+                Name = "malist",
+                Series = seriesName
+            });
+        }
+
+        if (!string.IsNullOrEmpty(chapter.ComicVineId))
+        {
+            results.Add(new CblV2ExternalId()
+            {
+                Issue = chapter.ComicVineId,
+                Name = "cv",
+                Series = seriesName
+            });
+        }
+
+        if (chapter.MetronId > 0)
+        {
+            results.Add(new CblV2ExternalId()
+            {
+                Issue = chapter.MetronId.ToString(),
+                Name = "metron",
+                Series = seriesName
+            });
+        }
+
+        if (chapter.HardcoverId > 0)
+        {
+            results.Add(new CblV2ExternalId()
+            {
+                Issue = chapter.HardcoverId.ToString(),
+                Name = "hardcover",
+                Series = seriesName
+            });
+        }
+
+        return results;
     }
 
     public static void SerializeV2(CblV2Root root, string filePath)
