@@ -118,6 +118,7 @@ import {getResolvedData} from "../../../../libs/route-util";
 import {ExternalSeries} from "../../../_models/series-detail/external-series";
 import {Tabs} from "../../../_models/tabs";
 import {TabTitlePipe} from "../../../_pipes/tab-title.pipe";
+import {EntityTitleService} from "../../../_services/entity-title.service";
 
 interface StoryLineItem {
   chapter?: ChapterCardEntity;

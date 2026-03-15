@@ -4,7 +4,8 @@ import {TranslocoService} from "@jsverse/transloco";
 
 @Pipe({
   name: 'tabTitle',
-  pure: true
+  pure: true,
+  standalone: true
 })
 export class TabTitlePipe implements PipeTransform {
   private readonly translocoService = inject(TranslocoService);

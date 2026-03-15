@@ -90,6 +90,7 @@ import {ModalResult} from "../_models/modal/modal-result";
 import {ChapterCardComponent} from "../cards/chapter-card/chapter-card.component";
 import {Tabs} from "../_models/tabs";
 import {TabTitlePipe} from "../_pipes/tab-title.pipe";
+import {EntityTitleService} from "../_services/entity-title.service";
 
 interface VolumeCast extends IHasCast {
   characterLocked: boolean;

@@ -498,10 +498,7 @@ export class EditSeriesModalComponent implements OnInit {
     const selectedIndex = this.editSeriesForm.get('coverImageIndex')?.value || 0;
 
     const apis = [
-      this.seriesService.updateMetadata(this.metadata),
-      this.seriesService.updateSeries(model).pipe(
-        tap(result => updatedSeries = result)
-      )
+      this.seriesService.updateMetadata(this.metadata)
     ];
 
     // We only need to call updateSeries if we changed name, sort name, or localized name or reset a cover image
@@ -515,20 +512,15 @@ export class EditSeriesModalComponent implements OnInit {
       model.sortNameLocked = this.series.sortNameLocked;
       model.localizedNameLocked = this.series.localizedNameLocked;
       model.language = this.metadata.language;
-      apis.push(this.seriesService.updateSeries(model).pipe(
-        tap(result => updatedSeries = result)
-      ));
-    } else {
-      // We need to ensure we at least update or get the series to return it to action service
-      // apis.push(this.seriesService.getSeries(this.series.id).pipe(
-      //   tap(result => updatedSeries = result)
-      // ));
     }
-
 
     if (selectedIndex > 0 || this.coverImageReset) {
       apis.push(this.uploadService.updateSeriesCoverImage(model.id, this.selectedCover, !this.coverImageReset));
     }
+
+    apis.push(this.seriesService.updateSeries(model).pipe(
+      tap(result => updatedSeries = result)
+    ));
 
     this.saveNestedComponents.emit();
 
@@ -537,7 +529,6 @@ export class EditSeriesModalComponent implements OnInit {
       delay(10),
       last()
     ).subscribe(() => {
-      console.log('Updated series: ', updatedSeries);
       this.modal.close(modalSaved(updatedSeries ?? model, selectedIndex > 0 || this.coverImageReset));
     });
   }

@@ -529,7 +529,7 @@ export class DownloadService {
     ).pipe(
       tap((response) => {
         const disposition = response.headers.get('Content-Disposition') ?? '';
-        const filename = this.parseContentDisposition(disposition, `${readingListName}.${asV2 ? 'cbl' : 'json'}`);
+        const filename = this.parseContentDisposition(disposition, `${readingListName}.${asV2 ? 'json' : 'cbl'}`);
         const url = URL.createObjectURL(response.body!);
         const a = document.createElement('a');
         a.href = url;
