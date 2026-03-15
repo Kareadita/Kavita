@@ -413,7 +413,6 @@ public class ExternalMetadataService : IExternalMetadataService
                 return _defaultReturn;
             }
 
-
             // Clear out existing results
             var externalSeriesMetadata = await GetOrCreateExternalSeriesMetadataForSeries(seriesId, series);
             _unitOfWork.ExternalSeriesMetadataRepository.Remove(externalSeriesMetadata.ExternalReviews);
@@ -548,6 +547,7 @@ public class ExternalMetadataService : IExternalMetadataService
         madeModification = UpdateReleaseYear(series, settings, externalMetadata) || madeModification;
         madeModification = UpdateLocalizedName(series, settings, externalMetadata) || madeModification;
         madeModification = await UpdatePublicationStatus(series, settings, externalMetadata) || madeModification;
+        madeModification = UpdateExternalIds(series, settings, externalMetadata) || madeModification;
 
         // Apply field mappings
         GenerateGenreAndTagLists(externalMetadata, settings, ref processedTags, ref processedGenres);
@@ -566,6 +566,8 @@ public class ExternalMetadataService : IExternalMetadataService
         madeModification = await UpdateCoverImage(series, settings, externalMetadata) || madeModification;
 
         madeModification = await UpdateChapters(series, settings, externalMetadata) || madeModification;
+
+
 
         return madeModification;
     }
@@ -1094,6 +1096,24 @@ public class ExternalMetadataService : IExternalMetadataService
         return false;
     }
 
+    private static bool UpdateExternalIds(Series series, MetadataSettingsDto _, ExternalSeriesDetailDto externalMetadata)
+    {
+        var madeModification = false;
+        if (externalMetadata.AniListId is > 0)
+        {
+            series.AniListId = externalMetadata.AniListId.Value;
+            madeModification = true;
+        }
+
+        if (externalMetadata.MALId is > 0)
+        {
+            series.MalId = externalMetadata.MALId.Value;
+            madeModification = true;
+        }
+
+        return madeModification;
+    }
+
 
     private async Task<bool> UpdateChapters(Series series, MetadataSettingsDto settings,
         ExternalSeriesDetailDto externalMetadata)
@@ -1111,7 +1131,7 @@ public class ExternalMetadataService : IExternalMetadataService
                 externalMetadata.ChapterDtos,
                 chapter => chapter.Range,
                 dto => dto.IssueNumber,
-                (chapter, dto) => (chapter, dto) // Create a tuple of matched pairs
+                (chapter, dto) => (chapter, dto)
             )
             .ToList();
 
