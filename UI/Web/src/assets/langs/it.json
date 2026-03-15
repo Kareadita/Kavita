@@ -882,10 +882,8 @@
     "entity-title": {
         "special": "Speciale",
         "issue-num": "{{common.issue-hash-num}}",
-        "chapter": "{{common.chapter-num}}",
         "book-num": "{{common.book-num-shorthand}}",
-        "single-volume": "Volume Singolo",
-        "vol-num": "{{user-scrobble-history.volume-num}}"
+        "single-volume": "Volume Singolo"
     },
     "external-series-card": {
         "open-external": "Apri Esternamente"
@@ -2132,13 +2130,9 @@
         "issue-num": "Numero",
         "chapter-num": "Capitolo",
         "volume-num": "Volume",
-        "book-nums": "Libri",
         "issue-num-shorthand": "#{{num}}",
         "chapter-count": "{{num}} Capitoli",
-        "volume-nums": "Volumi",
         "no-data": "Nessun Dato",
-        "issue-nums": "Numeri",
-        "chapter-nums": "Capitoli",
         "chapter-num-shorthand": "Ch {{num}}",
         "volume-num-shorthand": "Vol {{num}}",
         "book-num-shorthand": "Libro {{num}}"
@@ -2361,23 +2355,23 @@
         "client-id-label": "Client ID"
     },
     "version-update-modal": {
-      "close": "{{common.close}}",
-      "out-of-date": {
-        "title": "Non restare indietro!",
-        "subtitle": "Sembra che la tua installazione sia più di {{count}} versioni indietro!",
-        "description-1": "Per favore, effettua un aggiornamento in modo da utilizzare la versione più recente di Kavita.",
-        "description-2": "Dai un'occhiata al nostro <a href='https://wiki.kavitareader.com/guides/updating/' target='_blank' rel='noreferrer noopener'>wiki</a> per le istruzioni su come aggiornare.",
-        "description-3": "Se c'è un motivo specifico per cui non hai ancora aggiornato, ci piacerebbe sapere cosa ti spinge a restare su una versione obsoleta! Vieni a trovarci su Discord e facci sapere cosa sta bloccando il tuo percorso di aggiornamento."
-      },
-      "new-version": {
-        "title": "Kavita è stato aggiornato!",
-        "description": "È disponibile una nuova versione di Kavita. Aggiorna la pagina per applicarla.",
-        "refresh": "Aggiorna"
-      },
-      "update-notification": {
-        "title": "Nuovo Aggiornamento Disponibile!",
-        "help": "Come aggiornare",
-        "download": "Scaricamento"
-      }
+        "close": "{{common.close}}",
+        "out-of-date": {
+            "title": "Non restare indietro!",
+            "subtitle": "Sembra che la tua installazione sia più di {{count}} versioni indietro!",
+            "description-1": "Per favore, effettua un aggiornamento in modo da utilizzare la versione più recente di Kavita.",
+            "description-2": "Dai un'occhiata al nostro <a href='https://wiki.kavitareader.com/guides/updating/' target='_blank' rel='noreferrer noopener'>wiki</a> per le istruzioni su come aggiornare.",
+            "description-3": "Se c'è un motivo specifico per cui non hai ancora aggiornato, ci piacerebbe sapere cosa ti spinge a restare su una versione obsoleta! Vieni a trovarci su Discord e facci sapere cosa sta bloccando il tuo percorso di aggiornamento."
+        },
+        "new-version": {
+            "title": "Kavita è stato aggiornato!",
+            "description": "È disponibile una nuova versione di Kavita. Aggiorna la pagina per applicarla.",
+            "refresh": "Aggiorna"
+        },
+        "update-notification": {
+            "title": "Nuovo Aggiornamento Disponibile!",
+            "help": "Come aggiornare",
+            "download": "Scaricamento"
+        }
     }
 }

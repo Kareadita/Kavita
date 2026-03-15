@@ -49,8 +49,8 @@
         "is-processed-header": "Je zpracováno",
         "no-data": "{{common.no-data}}",
         "volume-and-chapter-num": "Svazek {{v}} Kapitola {{n}}",
-        "volume-num": "Svazek {{num}}",
-        "chapter-num": "Kapitola {{num}}",
+        "volume-num": "{{entity-title.volume-num}}",
+        "chapter-num": "{{entity-title.chapter-num}}",
         "rating": "Hodnocení {{r}}",
         "not-applicable": "Nelze použít",
         "processed": "Zpracováno",
@@ -950,12 +950,18 @@
         "no-data": "Zatím nebyly vytvořeny žádné sbírky"
     },
     "entity-title": {
-        "issue-num": "{{common.issue-hash-num}}",
-        "chapter": "{{common.chapter-num}}",
-        "book-num": "{{common.book-num-shorthand}}",
+        "issue-num": "Vydání #{{num}}",
+        "book-num": "Kniha {{num}}",
         "special": "Speciální",
-        "vol-num": "{{user-scrobble-history.volume-num}}",
-        "single-volume": "Jeden svazek"
+        "single-volume": "Jeden svazek",
+        "chapter-num": "Kapitola {{num}}",
+        "volume-num": "Svazek {{num}}",
+        "book-title": "Kniha",
+        "book-title-plural": "Knihy",
+        "issue-title": "Vydání",
+        "issue-title-plural": "Vydání",
+        "chapter-title": "Kapitola",
+        "chapter-title-plural": "Kapitoly"
     },
     "manage-media-issues": {
         "filter-label": "{{common.filter}}",
@@ -1344,7 +1350,8 @@
         "left-to-process": "Zbývá zpracovat: {{leftToProcess}} / {{totalToProcess}}",
         "active-events-title": "Aktivní události:",
         "download-in-queue": "{{num}} stahování ve frontě",
-        "reading-now": "{{num}} právě čte"
+        "reading-now": "{{num}} právě čte",
+        "downloads-active": "{{count}} stahování probíhá"
     },
     "shortcuts-modal": {
         "close": "{{common.close}}",
@@ -1805,7 +1812,8 @@
         "filter-name-unique": "Názvy chytrých filtrů musí být jedinečné",
         "edit": "{{common.edit}}",
         "close": "{{common.close}}",
-        "cancel": "{{common.cancel}}"
+        "cancel": "{{common.cancel}}",
+        "no-content": "Tento inteligentní filtr nemá žádné výsledky na ovládacím panelu"
     },
     "edit-external-source-item": {
         "save": "{{common.save}}",
@@ -2277,7 +2285,8 @@
         "no-data": "{{common.no-data}}"
     },
     "download-indicator": {
-        "progress": "{{procentage}}% staženo"
+        "progress": "{{procentage}}% staženo",
+        "completed": "Stahování dokončeno"
     },
     "default-date-pipe": {
         "never": "Nikdy"
@@ -2404,7 +2413,8 @@
         "profile-unauthorized": "Tento uživatel nesdílí svůj profil",
         "confirm-delete-collection": "Opravdu chcete sbírku smazat? Tento úkon nelze vrátit zpět.",
         "confirm-delete-annotations": "Opravdu chcete odstranit poznámky? Tento úkon nelze vrátit zpět.",
-        "annotations-deleted": "Anotace smazána"
+        "annotations-deleted": "Anotace smazána",
+        "redownload-confirm": "Dříve jste si stáhli {{title}} dne {{date}}. Chcete jej stáhnout znovu?"
     },
     "preferences": {
         "split-right-to-left": "Rozdělit zprava doleva",
@@ -2454,7 +2464,6 @@
         "issue-num-shorthand": "#{{num}}",
         "volume-num-shorthand": "Svaz {{num}}",
         "filter": "Filtr",
-        "issue-nums": "Vydání",
         "help": "Nápověda",
         "delete": "Odstranit",
         "read": "Číst",
@@ -2468,9 +2477,6 @@
         "issue-hash-num": "Vydání #",
         "issue-num": "Vydání",
         "chapter-num-shorthand": "Kap {{num}}",
-        "book-nums": "Knihy",
-        "chapter-nums": "Kapitoly",
-        "volume-nums": "Svazky",
         "remove": "Odstranit",
         "chapter-num": "Kapitola",
         "username": "Uživatelské jméno",
@@ -2490,7 +2496,6 @@
         "no-data": "Žádná data",
         "issue-count": "{{num}} Vydání",
         "unknown": "Neznámý",
-        "roles": "Role",
         "libraries": "Knihovny",
         "confirm": "Potvrdit",
         "selected": "Vybrané"
@@ -3382,7 +3387,8 @@
         "today": "Dnes",
         "yesterday": "Včera",
         "pagination-label": "Stránkování aktivit",
-        "page-info": "Strana {{current}} z {{total}} (celkem {{items}} záznamů)"
+        "page-info": "Strana {{current}} z {{total}} (celkem {{items}} záznamů)",
+        "num-more": "{{num}} dalších"
     },
     "user-stats-info-cards": {
         "pages-read-by-year-title": "Počet přečtených stránek za rok",
@@ -3422,5 +3428,54 @@
         "settings": "Nastavení",
         "all-series": "Všechny série",
         "profile": "Profil uživatele {{username}}"
+    },
+    "download-queue-drawer": {
+        "title": "Stahování",
+        "cancel": "{{common.cancel}}",
+        "cancel-all": "Zrušit vše",
+        "retry": "Opakovat",
+        "retry-all": "Opakovat vše",
+        "clear": "Vyčistit",
+        "empty": "Žádné stahování",
+        "close": "{{common.close}}",
+        "paused-after-refresh": "{{ count }} položek pozastaveno — připraveno k obnovení",
+        "resume": "Obnovit",
+        "pause": "Pozastavit",
+        "paused": "Pozastaveno",
+        "clear-all": "Vymazat vše",
+        "failed-from-auth": "Nejste přihlášeni, obnovte prohlížeč",
+        "failed-interrupted": "Přerušeno obnovením stránky",
+        "tab-downloading": "Stahuji",
+        "tab-completed": "Dokončeno",
+        "today": "Dnes",
+        "older": "Starší",
+        "queued": "{{download-queue-status-pipe.queued}}",
+        "preparing": "{{download-queue-status-pipe.preparing}}",
+        "downloading": "{{download-queue-status-pipe.downloading}}",
+        "completed": "{{download-queue-status-pipe.completed}}",
+        "failed": "{{download-queue-status-pipe.failed}}",
+        "cancelled": "{{download-queue-status-pipe.cancelled}}"
+    },
+    "download-queue-item": {
+        "retry": "{{download-queue-drawer.retry}}",
+        "cancel": "{{common.cancel}}",
+        "remove": "Odebrat"
+    },
+    "download-queue-status-pipe": {
+        "queued": "Ve frontě",
+        "preparing": "Připravuji",
+        "downloading": "Stahuji",
+        "completed": "Dokončeno",
+        "failed": "Selhalo",
+        "cancelled": "Zrušeno"
+    },
+    "download-queue-widget": {
+        "title": "{{download-queue-drawer.title}}"
+    },
+    "account-settings": {
+        "oidc": "{{login.oidc}}",
+        "unlink-oidc": "Odebrat odkaz OIDC",
+        "confirm-unlink": "Opravdu chcete odstranit odkaz OIDC?",
+        "confirm-unlink-extra": "Pokud jste aktuálně přihlášeni pomocí účtu OIDC, budete odhlášeni. Kdykoli se můžete znovu propojit prostřednictvím e-mailu."
     }
 }

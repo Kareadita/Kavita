@@ -173,8 +173,8 @@
         "delete-selected-label": "Delete selected",
         "no-data": "{{common.no-data}}",
         "volume-and-chapter-num": "Volume {{v}} Chapter {{n}}",
-        "volume-num": "Volume {{num}}",
-        "chapter-num": "Chapter {{num}}",
+        "volume-num": "{{entity-title.volume-num}}",
+        "chapter-num": "{{entity-title.chapter-num}}",
         "rating": "Rating {{r}}",
         "not-applicable": "Not Applicable",
         "processed": "Processed",
@@ -1578,11 +1578,18 @@
 
     "entity-title": {
         "special": "Special",
-        "issue-num": "{{common.issue-hash-num}}",
-        "chapter": "{{common.chapter-num}}",
-        "book-num": "{{common.book-num-shorthand}}",
-        "vol-num": "{{user-scrobble-history.volume-num}}",
-        "single-volume": "Single Volume"
+        "issue-num": "Issue #{{num}}",
+        "chapter-num": "Chapter {{num}}",
+        "book-num": "Book {{num}}",
+        "volume-num": "Volume {{num}}",
+        "single-volume": "Single Volume",
+
+        "book-title": "Book",
+        "book-title-plural": "Books",
+        "issue-title": "Issue",
+        "issue-title-plural": "Issues",
+        "chapter-title": "Chapter",
+        "chapter-title-plural": "Chapters"
     },
 
     "external-series-card": {
@@ -2878,7 +2885,8 @@
         "today": "Today",
         "yesterday": "Yesterday",
         "pagination-label": "Activity pagination",
-        "page-info": "Page {{current}} of {{total}} ({{items}} total records)"
+        "page-info": "Page {{current}} of {{total}} ({{items}} total records)",
+        "num-more": "{{num}} more"
     },
 
     "user-stats-info-cards": {
@@ -3145,7 +3153,8 @@
         "edit-smart-filter": "Edit {{name}}",
         "name-label": "Name",
         "required-field": "Smart Filters need a name",
-        "filter-name-unique": "Smart Filter names must be unique"
+        "filter-name-unique": "Smart Filter names must be unique",
+        "no-content": "This smart filter has no results on the dashboard"
     },
 
     "edit-external-source-item": {
@@ -3572,6 +3581,13 @@
         "desktop": "Desktop"
     },
 
+    "account-settings": {
+        "oidc": "{{login.oidc}}",
+        "unlink-oidc": "Remove OIDC link",
+        "confirm-unlink": "Are you sure you want to remove your OIDC link?",
+        "confirm-unlink-extra": "If you are currently authenticated with the OIDC account, you will be logged out. You can link again via email at any time."
+    },
+
     "manage-reading-profiles": {
         "description": "Not all your series may be read in the same way, set up distinct reading profiles per library/series/device to make getting back in your series as seamless as possible.",
         "extra-tip": "Assign reading profiles via the action menu on series and libraries, or in bulk. When changing settings in a reader, a hidden profile is created that remembers your choices for that series (not for pdfs). This profile is removed when you assign one of your own reading profiles to the series. More information can be found on the",
@@ -3770,11 +3786,6 @@
         "book-num-shorthand": "Book {{num}}",
         "issue-num-shorthand": "#{{num}}",
         "volume-num-shorthand": "Vol {{num}}",
-        "book-nums": "Books",
-        "issue-nums": "Issues",
-        "chapter-nums": "Chapters",
-        "volume-nums": "Volumes",
-        "roles": "Roles",
         "libraries": "Libraries"
     }
 

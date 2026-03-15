@@ -1,12 +1,10 @@
 import {HttpParams} from '@angular/common/http';
 import {inject, Injectable} from '@angular/core';
 import {Chapter} from 'src/app/_models/chapter';
-import {LibraryType} from 'src/app/_models/library/library';
 import {MangaFormat} from 'src/app/_models/manga-format';
 import {PaginatedResult} from 'src/app/_models/pagination';
 import {Series} from 'src/app/_models/series';
 import {Volume} from 'src/app/_models/volume';
-import {translate} from "@jsverse/transloco";
 import {DOCUMENT} from "@angular/common";
 import {ActionItem} from "../../_models/actionables/action-item";
 
@@ -48,34 +46,6 @@ export class UtilityService {
 
     return this.mangaFormatKeys.filter(item => MangaFormat[format] === item)[0];
   }
-
-  /**
-   * Formats a Chapter name based on the library it's in
-   * @param libraryType
-   * @param includeHash For comics only, includes a # which is used for numbering on cards
-   * @param includeSpace Add a space at the end of the string. if includeHash and includeSpace are true, only hash will be at the end.
-   * @param plural Pluralize word
-   * @returns
-   */
-   formatChapterName(libraryType: LibraryType, includeHash: boolean = false, includeSpace: boolean = false, plural: boolean = false) {
-    const extra = plural ? 's' : '';
-
-     switch(libraryType) {
-      case LibraryType.Book:
-      case LibraryType.LightNovel:
-        return translate('common.book-num' + extra) + (includeSpace ? ' ' : '');
-      case LibraryType.Comic:
-      case LibraryType.ComicVine:
-        if (includeHash) {
-          return translate('common.issue-hash-num');
-        }
-        return translate('common.issue-num' + extra) + (includeSpace ? ' ' : '');
-      case LibraryType.Images:
-      case LibraryType.Manga:
-        return translate('common.chapter-num' + extra) + (includeSpace ? ' ' : '');
-    }
-  }
-
 
   filter(input: string, filter: string): boolean {
     if (input === null || filter === null || input === undefined || filter === undefined) return false;

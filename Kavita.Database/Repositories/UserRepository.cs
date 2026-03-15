@@ -607,17 +607,8 @@ public class UserRepository(DataContext context, UserManager<AppUser> userManage
             .ToListAsync(ct);
     }
 
-    public async Task UpdateUserAsActive(int userId, CancellationToken ct = default)
-    {
-        await context.Set<AppUser>()
-            .Where(u => u.Id == userId)
-            .ExecuteUpdateAsync(setters => setters
-                .SetProperty(u => u.LastActiveUtc, DateTime.UtcNow)
-                .SetProperty(u => u.LastActive, DateTime.Now), ct);
-    }
 
-    /// <summary>
-    /// Retrieve all reviews (series and chapter) for a given user, respecting profile privacy settings and age restrictions.
+    /// <summary> Retrieve all reviews (series and chapter) for a given user, respecting profile privacy settings and age restrictions.
     /// </summary>
     /// <param name="userId">UserId of source user</param>
     /// <param name="requestingUserId">Viewer UserId</param>
@@ -625,7 +616,8 @@ public class UserRepository(DataContext context, UserManager<AppUser> userManage
     /// <param name="ratingFilter">Rating, only applies to series/chapters rated. Will show everything greater or equal to</param>
     /// <param name="ct"></param>
     /// <returns></returns>
-    public async Task<IList<UserReviewExtendedDto>> GetAllReviewsForUser(int userId, int requestingUserId, string? query = null, float? ratingFilter = null, CancellationToken ct = default)
+    public async Task<IList<UserReviewExtendedDto>> GetAllReviewsForUser(int userId, int requestingUserId,
+        string? query = null, float? ratingFilter = null, CancellationToken ct = default)
     {
         var bypassPreferences = userId == requestingUserId;
         if (!bypassPreferences)
@@ -639,7 +631,7 @@ public class UserRepository(DataContext context, UserManager<AppUser> userManage
             }
         }
 
-        var userRating = await context.AppUser.GetUserAgeRestriction(requestingUserId);
+        var userRating = await context.AppUser.GetUserAgeRestriction(requestingUserId, ct: ct);
 
         // Get series-level reviews
         var seriesReviews = await context.AppUserRating

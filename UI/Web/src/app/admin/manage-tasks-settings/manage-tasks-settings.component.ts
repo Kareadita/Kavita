@@ -19,6 +19,7 @@ import {
 import {ServerService} from 'src/app/_services/server.service';
 import {Job} from 'src/app/_models/job/job';
 import {DownloadService} from 'src/app/shared/_services/download.service';
+import {DownloadEntityType} from 'src/app/shared/_models/download-queue-item';
 import {DefaultValuePipe} from '../../_pipes/default-value.pipe';
 import {AsyncPipe, TitleCasePipe} from '@angular/common';
 import {translate, TranslocoModule} from "@jsverse/transloco";
@@ -112,7 +113,7 @@ export class ManageTasksSettingsComponent implements OnInit {
     {
       name: 'download-logs-task',
       description: 'download-logs-task-desc',
-      api: defer(() => of(this.downloadService.download('logs', undefined, 0, 0))),
+      api: defer(() => of(this.downloadService.download(DownloadEntityType.Logs, undefined, 0, 0))),
       successMessage: ''
     },
     {

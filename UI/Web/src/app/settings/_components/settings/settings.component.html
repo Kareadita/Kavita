@@ -237,13 +237,7 @@
           @case (SettingsTabId.Account) {
             @defer (prefetch on idle) {
               <div class="col-xxl-6 col-12">
-                <app-change-email />
-                <div class="setting-section-break"></div>
-                <app-change-password />
-                <div class="setting-section-break"></div>
-                <app-change-age-restriction />
-                <div class="setting-section-break"></div>
-                <app-manage-scrobbling-providers />
+                <app-account-settings />
               </div>
             }
           }

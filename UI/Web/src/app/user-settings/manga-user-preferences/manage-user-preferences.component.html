@@ -9,7 +9,7 @@
       <ng-container>
 
         <div class="row g-0 mt-4 mb-4">
-          <app-setting-item [title]="t('locale-label')" [subtitle]="t('locale-tooltip')" labelId="locale">
+          <app-setting-item [title]="t('locale-label')" [subtitle]="t('locale-tooltip')" labelId="locale" [canEdit]="!isReadOnly()">
             <ng-template #view>
               {{Locale | titlecase}}
             </ng-template>
@@ -98,7 +98,7 @@
 
         <div class="row g-0 mt-4 mb-4">
           @if (settingsForm.get('promptForRereadsAfter'); as control) {
-            <app-setting-item [title]="t('prompt-for-rereads-after-label')" [subtitle]="t('prompt-for-rereads-after-tooltip')">
+            <app-setting-item [title]="t('prompt-for-rereads-after-label')" [subtitle]="t('prompt-for-rereads-after-tooltip')" [canEdit]="!isReadOnly()">
               <ng-template #view>
                 <span> {{control.value}} </span>
               </ng-template>
@@ -119,7 +119,7 @@
                 [isCollapsed]="false"
                 [canCollapse]="false"
                 [selectedSlotIndex]="0"
-                [isEditMode]="true"
+                [isEditMode]="!isReadOnly()"
                 [allowEditMode]="false"
               />
             </ng-template>
@@ -186,7 +186,7 @@
               [showEdit]="false" [canEdit]="false"
             >
               <ng-template #view>
-                <app-typeahead [settings]="libraryTypeAheadSettings()" (selectedData)="syncFormWithTypeahead($event)">
+                <app-typeahead [settings]="libraryTypeAheadSettings()" (selectedData)="syncFormWithTypeahead($event)" [disabled]="isReadOnly()">
                   <ng-template #optionItem let-lib>
                     {{lib.name}}
                   </ng-template>
@@ -201,7 +201,7 @@
 
         <div class="row g-0 mt-4">
           @if (settingsForm.get('socialPreferences')!.get('socialMaxAgeRating'); as control) {
-            <app-setting-item [control]="control" [title]="t('social-max-age-rating-label')" [subtitle]="t('social-max-age-rating-tooltip')">
+            <app-setting-item [control]="control" [title]="t('social-max-age-rating-label')" [subtitle]="t('social-max-age-rating-tooltip')" [canEdit]="!isReadOnly()">
               <ng-template #view>
                 {{control.value | ageRating}}
               </ng-template>

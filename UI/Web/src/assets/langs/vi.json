@@ -646,10 +646,8 @@
     },
     "entity-title": {
         "issue-num": "{{common.issue-hash-num}}",
-        "chapter": "{{common.chapter-num}}",
         "book-num": "{{common.book-num-shorthand}}",
         "special": "Đặc Biệt",
-        "vol-num": "{{user-scrobble-history.volume-num}}",
         "single-volume": "Tập Lẻ"
     },
     "manage-media-issues": {
@@ -2065,7 +2063,6 @@
         "cancel": "Hủy",
         "create": "Tạo Mới",
         "reset": "Đặt lại",
-        "volume-nums": "Tập",
         "edit": "Sửa",
         "reset-to-default": "Đặt lại về Mặc Định",
         "close": "Đóng",
@@ -2085,8 +2082,6 @@
         "read": "Đọc",
         "loading": "Đang tải…",
         "series-count": "{{num}} Series",
-        "issue-nums": "Vấn đề",
-        "chapter-nums": "Chương",
         "book-num": "Sách",
         "issue-num": "Vấn đề",
         "volume-num": "Tập",
@@ -2094,7 +2089,6 @@
         "book-num-shorthand": "Sách {{num}}",
         "issue-num-shorthand": "#{{num}}",
         "volume-num-shorthand": "Tập {{num}}",
-        "book-nums": "Sách",
         "select-all": "Chọn Tất Cả",
         "issue-hash-num": "Vấn đề #",
         "save": "Lưu lại",

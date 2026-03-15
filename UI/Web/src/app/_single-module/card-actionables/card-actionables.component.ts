@@ -118,7 +118,8 @@ export class CardActionablesComponent implements OnDestroy {
     subMenu.open();
   }
 
-  closeAllSubmenus() {
+  closeAllSubmenus(topLevel = false) {
+    if (!topLevel) return;
     // Clear any existing timeout to avoid race conditions
     if (this.closeTimeout) {
       clearTimeout(this.closeTimeout);

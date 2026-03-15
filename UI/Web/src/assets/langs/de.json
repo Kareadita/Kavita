@@ -50,8 +50,8 @@
         "is-processed-header": "Wird verarbeitet",
         "no-data": "{{common.no-data}}",
         "volume-and-chapter-num": "Band {{v}} Kapitel {{n}}",
-        "volume-num": "Band {{num}}",
-        "chapter-num": "Kapitel {{num}}",
+        "volume-num": "{{entity-title.volume-num}}",
+        "chapter-num": "{{entity-title.chapter-num}}",
         "rating": "Bewertung {{r}}",
         "not-applicable": "Nicht anwendbar",
         "processed": "Verarbeitet",
@@ -900,7 +900,9 @@
         "no-data": "{{common.no-data}}"
     },
     "card-item": {
-        "cannot-read": "Nicht lesbar"
+        "cannot-read": "Nicht lesbar",
+        "select": "Auswählen",
+        "read": "lesen"
     },
     "details-tab": {
         "writers-title": "{{metadata-fields.writers-title}}",
@@ -950,7 +952,8 @@
         "applied": "{{theme-manager.applied}}"
     },
     "download-indicator": {
-        "progress": "{{percentage}}% heruntergeladen"
+        "progress": "{{percentage}}% heruntergeladen",
+        "completed": "Download abgeschlossen"
     },
     "edit-series-relation": {
         "description-part-1": "Sie wissen nicht, welche Beziehung Sie hinzufügen sollen? Siehe unser",
@@ -974,11 +977,17 @@
     },
     "entity-title": {
         "special": "Spezial",
-        "issue-num": "{{common.issue-hash-num}}",
-        "chapter": "{{common.chapter-num}}",
-        "book-num": "{{common.book-num-shorthand}}",
+        "issue-num": "Ausgabe Nr. {{num}}",
+        "book-num": "Buch {{num}}",
         "single-volume": "Einzelband",
-        "vol-num": "{{user-scrobble-history.volume-num}}"
+        "chapter-num": "Kapitel {{num}}",
+        "volume-num": "Band {{num}}",
+        "book-title": "Bücher",
+        "book-title-plural": "Bücher",
+        "issue-title": "Ausgabe",
+        "issue-title-plural": "Ausgaben",
+        "chapter-title": "Kapitel",
+        "chapter-title-plural": "Kapitel"
     },
     "external-series-card": {
         "open-external": "Extern öffnen"
@@ -1405,7 +1414,8 @@
         "no-data": "Hier ist nicht viel los",
         "left-to-process": "Noch zu bearbeiten: {{leftToProcess}} / {{totalToProcess}}",
         "download-in-queue": "{{num}} Downloads in der Warteschlange",
-        "reading-now": "{{num}} wird gerade gelesen"
+        "reading-now": "{{num}} wird gerade gelesen",
+        "downloads-active": "{{count}} Download(s) werden gerade durchgeführt"
     },
     "shortcuts-modal": {
         "title": "Tastaturkurzbefehle",
@@ -1800,7 +1810,8 @@
         "files-label": "{{edit-chapter-modal.files-label}}",
         "cover-image-description": "{{edit-series-modal.cover-image-description}}",
         "pages-label": "{{edit-chapter-modal.pages-label}}",
-        "words-label": "{{edit-chapter-modal.words-label}}"
+        "words-label": "{{edit-chapter-modal.words-label}}",
+        "read-time-label": "{{edit-chapter-modal.read-time-label}}"
     },
     "day-breakdown": {
         "title": "Tagesaufteilung",
@@ -1853,7 +1864,8 @@
         "vols-and-chapters": "{{volCount}} Bände / {{chpCount}} Kapitel",
         "remove-from-want-to-read": "{{actionable.remove-from-want-to-read}}",
         "add-to-want-to-read": "{{actionable.add-to-want-to-read}}",
-        "provided-by-label": "Zur Verfügung gestellt von"
+        "provided-by-label": "Zur Verfügung gestellt von",
+        "story-and-art-label": "Geschichte & Kunst"
     },
     "next-expected-card": {
         "title": "~{{date}}",
@@ -1993,7 +2005,8 @@
         "edit": "{{common.edit}}",
         "save": "{{common.save}}",
         "edit-smart-filter": "Bearbeite {{name}}",
-        "filter-name-unique": "Die Namen der intelligenten Filter müssen eindeutig sein"
+        "filter-name-unique": "Die Namen der intelligenten Filter müssen eindeutig sein",
+        "no-content": "Dieser intelligente Filter hat keine Ergebnisse auf dem Dashboard"
     },
     "edit-external-source-item": {
         "not-unique": "Für diesen Host existiert eine externe Quelle. Stellen Sie sicher, dass Sie keine Duplikate haben",
@@ -2194,7 +2207,11 @@
         "font-in-use": "Kann nicht gelöscht werden, da die Schriftart von einem oder mehreren Benutzern verwendet wird.",
         "k+-resend-welcome-email-success": "Eine E-Mail wurde an Ihre Kavita+-E-Mail-Adresse gesendet",
         "confirm-delete-auth-key": "Sind Sie sicher, dass Sie diesen Authentifizierungsschlüssel löschen möchten?",
-        "profile-unauthorized": "Dieser Benutzer teilt sein Profil nicht"
+        "profile-unauthorized": "Dieser Benutzer teilt sein Profil nicht",
+        "redownload-confirm": "Sie haben {{title}} bereits am {{date}} heruntergeladen. Möchten Sie es erneut herunterladen?",
+        "confirm-delete-collection": "Möchten Sie die Sammlung wirklich löschen? Dieser Vorgang kann nicht rückgängig gemacht werden.",
+        "confirm-delete-annotations": "Möchten Sie die Anmerkungen wirklich löschen? Dieser Vorgang kann nicht rückgängig gemacht werden.",
+        "annotations-deleted": "Anmerkung gelöscht"
     },
     "read-time-pipe": {
         "less-than-hour": "<1 Stunde",
@@ -2401,15 +2418,10 @@
         "book-num-shorthand": "Buch {{num}}",
         "issue-num-shorthand": "#{{num}}",
         "volume-num-shorthand": "Bd {{num}}",
-        "book-nums": "Bücher",
-        "issue-nums": "Ausgaben",
-        "chapter-nums": "Kapitel",
-        "volume-nums": "Bände",
         "no-data": "Keine Daten",
         "chapter-count": "{{num}} Kapitel",
         "issue-count": "{{num}} Ausgaben",
         "unknown": "Unbekannt",
-        "roles": "Rollen",
         "libraries": "Bibliotheken",
         "confirm": "Bestätigen",
         "selected": "Ausgewählt"
@@ -3324,7 +3336,8 @@
         "today": "Heute",
         "yesterday": "Gestern",
         "pagination-label": "Aktivitäten-Paginierung",
-        "page-info": "Seite {{current}} von {{total}} ({{items}} Ergebnisse insgesamt)"
+        "page-info": "Seite {{current}} von {{total}} ({{items}} Ergebnisse insgesamt)",
+        "num-more": "{{num}} weitere"
     },
     "client-device-type-pipe": {
         "mobile": "Mobile",
@@ -3402,5 +3415,67 @@
             "help": "Wie man updatet",
             "download": "Herunterladen"
         }
+    },
+    "title": {
+        "reading-list": "Leselisten",
+        "home": "Startseite",
+        "bookmarks": "Lesezeichen",
+        "collections": "Sammlungen",
+        "browse-genres": "Genres durchsuchen",
+        "browse-tags": "Tags durchsuchen",
+        "want-to-read": "Möchte ich lesen",
+        "reading-lists": "Leselisten",
+        "settings": "Einstellungen",
+        "all-series": "Alle Serien",
+        "profile": "Profil von {{username}}"
+    },
+    "download-queue-drawer": {
+        "title": "Downloads",
+        "cancel": "{{common.cancel}}",
+        "cancel-all": "Alle abbrechen",
+        "retry": "Wiederholen",
+        "retry-all": "Alle wiederholen",
+        "clear": "Löschen",
+        "empty": "Keine Downloads",
+        "close": "{{common.close}}",
+        "paused-after-refresh": "{{ count }} Artikel angehalten – bereit zur Fortsetzung",
+        "resume": "Fortsetzen",
+        "pause": "Pause",
+        "paused": "Angehalten",
+        "clear-all": "Alle löschen",
+        "failed-from-auth": "Nicht authentifiziert, Browser aktualisieren",
+        "failed-interrupted": "Durch Seitenaktualisierung unterbrochen",
+        "tab-downloading": "Herunterladen",
+        "tab-completed": "Abgeschlossen",
+        "today": "Heute",
+        "older": "Älter",
+        "queued": "{{download-queue-status-pipe.queued}}",
+        "preparing": "{{download-queue-status-pipe.preparing}}",
+        "downloading": "{{download-queue-status-pipe.downloading}}",
+        "completed": "{{download-queue-status-pipe.completed}}",
+        "failed": "{{download-queue-status-pipe.failed}}",
+        "cancelled": "{{download-queue-status-pipe.cancelled}}"
+    },
+    "download-queue-item": {
+        "retry": "{{download-queue-drawer.retry}}",
+        "cancel": "{{common.cancel}}",
+        "remove": "Entfernen"
+    },
+    "download-queue-status-pipe": {
+        "queued": "In der Warteschlange",
+        "preparing": "Vorbereitung",
+        "downloading": "Herunterladen",
+        "completed": "Abgeschlossen",
+        "failed": "Fehlgeschlagen",
+        "cancelled": "abgebrochen"
+    },
+    "download-queue-widget": {
+        "title": "{{download-queue-drawer.title}}"
+    },
+    "account-settings": {
+        "oidc": "{{login.oidc}}",
+        "unlink-oidc": "OIDC-Link entfernen",
+        "confirm-unlink": "Sind Sie sicher, dass Sie Ihre OIDC-Verbindung entfernen möchten?",
+        "confirm-unlink-extra": "Wenn Sie derzeit mit dem OIDC-Konto authentifiziert sind, werden Sie abgemeldet. Sie können jederzeit erneut eine Verknüpfung per E-Mail herstellen."
     }
 }

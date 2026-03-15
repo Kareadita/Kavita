@@ -15,26 +15,26 @@
             <i class="fa {{iconClass()}}" aria-hidden="true"></i>
           </button>
           <div ngbDropdownMenu attr.aria-labelledby="{{labelId}}">
-            <ng-container *ngTemplateOutlet="submenu; context: { list: filteredActions() }" />
+            <ng-container *ngTemplateOutlet="submenu; context: { list: filteredActions(), topLevel: true }" />
           </div>
         </div>
-        <ng-template #submenu let-list="list">
+        <ng-template #submenu let-list="list" let-topLevel="topLevel">
           @for(action of list; track action.title) {
             <!-- Non Submenu items -->
             @if (action.children === undefined || action?.children?.length === 0 || action.dynamicList !== undefined) {
               @if (action.dynamicList !== undefined && (action.dynamicList | async | dynamicList); as dList) {
                 @for(dynamicItem of dList; track dynamicItem.title) {
-                  <button ngbDropdownItem (click)="performDynamicClick($event, action, dynamicItem)">{{dynamicItem.title}}</button>
+                  <button ngbDropdownItem (mouseenter)="closeAllSubmenus(topLevel)" (click)="performDynamicClick($event, action, dynamicItem)">{{dynamicItem.title}}</button>
                 }
               } @else {
-                <button ngbDropdownItem (click)="performAction($event, action)">{{t(action.title)}}</button>
+                <button ngbDropdownItem (mouseenter)="closeAllSubmenus(topLevel)" (click)="performAction($event, action)">{{t(action.title)}}</button>
               }
             } @else {
               @if (shouldRenderSubMenu(action, action.children?.[0].dynamicList | async)) {
                 <!-- Submenu items -->
                 <div ngbDropdown #subMenuHover="ngbDropdown" placement="right left"
                      (click)="openSubmenu(action.title, subMenuHover)"
-                     (mouseenter)="openSubmenu(action.title, subMenuHover)"
+                     (mouseenter)="cancelCloseSubmenus(); openSubmenu(action.title, subMenuHover)"
                      (mouseover)="preventEvent($event)"
                      class="submenu-wrapper">
 
@@ -46,7 +46,7 @@
                   }
 
                   <div ngbDropdownMenu attr.aria-labelledby="actions-{{action.title}}">
-                    <ng-container *ngTemplateOutlet="submenu; context: { list: action.children }" />
+                    <ng-container *ngTemplateOutlet="submenu; context: { list: action.children, topLevel: false }" />
                   </div>
                 </div>
               }

@@ -82,6 +82,7 @@ import {KeyBindEvent, KeyBindService} from "../../../_services/key-bind.service"
 import {KeyBindTarget} from "../../../_models/preferences/preferences";
 import {mediumModal} from "../../../_models/modal/modal-options";
 import {ModalService, TypedModalRef} from "../../../_services/modal.service";
+import {EntityTitleService} from "../../../_services/entity-title.service";
 
 
 const PREFETCH_PAGES = 10;
@@ -145,6 +146,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   protected readonly utilityService = inject(UtilityService);
   protected readonly mangaReaderService = inject(MangaReaderService);
   private readonly keyBindService = inject(KeyBindService);
+  private readonly entityTitleService = inject(EntityTitleService);
 
   protected readonly KeyDirection = KeyDirection;
   protected readonly ReaderMode = ReaderMode;
@@ -1087,8 +1089,17 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       this.continuousChapterInfos[ChapterInfoPosition.Current] = results.chapterInfo;
       this.volumeId = results.chapterInfo.volumeId;
       this.maxPages = results.chapterInfo.pages;
+
+
       let page = results.progress.pageNum;
-      if (page >= this.maxPages) {
+
+      // When a chapter is completed, we store the last page (maxPages - 1) as progress maxPages
+      // We need to correct for this when using it pageNum again. See setPageNum method for the correction logic
+      if (page === this.maxPages) {
+        page--;
+      }
+
+      if (page > this.maxPages) {
         page = !firstLoad ? 0 : this.maxPages - 1;
       }
 
@@ -1508,12 +1519,12 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       const newRoute = this.readerService.getNextChapterUrl(this.router.url, this.chapterId, this.incognitoMode, this.readingListMode, this.readingListId);
       window.history.replaceState({}, '', newRoute);
       this.init(false);
-      const msg = translate(direction === 'Next' ? 'toasts.load-next-chapter' : 'toasts.load-prev-chapter', {entity: this.utilityService.formatChapterName(this.libraryType).toLowerCase()});
+      const msg = translate(direction === 'Next' ? 'toasts.load-next-chapter' : 'toasts.load-prev-chapter', {entity: this.entityTitleService.formatChapterName(this.libraryType).toLowerCase()});
       this.toastr.info(msg, '', {timeOut: 3000});
     } else {
       // This will only happen if no actual chapter can be found
       const msg = translate(direction === 'Next' ? 'toasts.no-next-chapter' : 'toasts.no-prev-chapter',
-        {entity: this.utilityService.formatChapterName(this.libraryType).toLowerCase()});
+        {entity: this.entityTitleService.formatChapterName(this.libraryType).toLowerCase()});
       this.toastr.warning(msg);
       this.isLoading = false;
       if (direction === 'Prev') {

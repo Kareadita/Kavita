@@ -952,7 +952,8 @@
         "applied": "{{theme-manager.applied}}"
     },
     "download-indicator": {
-        "progress": "{{percentage}}% 다운로드 됨"
+        "progress": "{{percentage}}% 다운로드 됨",
+        "completed": "다운로드 완료"
     },
     "edit-series-relation": {
         "description-part-1": "어떤 관계를 추가해야 할지 잘 모르시겠습니까? 우리를 참조하십시오",
@@ -977,9 +978,7 @@
     "entity-title": {
         "special": "스페셜",
         "issue-num": "{{common.issue-hash-num}}",
-        "chapter": "{{common.chapter-num}}",
         "book-num": "{{common.book-num-shorthand}}",
-        "vol-num": "{{user-scrobble-history.volume-num}}",
         "single-volume": "단권"
     },
     "external-series-card": {
@@ -1407,7 +1406,8 @@
         "no-data": "아무것도 없습니다",
         "left-to-process": "처리할 남은 항목: {{leftToProcess}} / {{totalToProcess}}",
         "download-in-queue": "대기열에서 {{num}} 다운로드",
-        "reading-now": "{{num}}명이 읽는 중"
+        "reading-now": "{{num}}명이 읽는 중",
+        "downloads-active": "{{count}}개 다운로드 진행 중"
     },
     "shortcuts-modal": {
         "title": "키보드 단축키",
@@ -2201,7 +2201,8 @@
         "profile-unauthorized": "이 사용자는 프로필을 공유하지 않습니다",
         "confirm-delete-collection": "이 컬렉션을 삭제하시겠습니까? 이 작업은 되돌릴 수 없습니다.",
         "confirm-delete-annotations": "주석을 삭제하시겠습니까? 이 작업은 되돌릴 수 없습니다.",
-        "annotations-deleted": "주석 삭제됨"
+        "annotations-deleted": "주석 삭제됨",
+        "redownload-confirm": "{{title}} 항목을 {{date}}에 다운로드했습니다. 다시 다운로드하시겠습니까?"
     },
     "read-time-pipe": {
         "less-than-hour": "<1시간",
@@ -2408,15 +2409,10 @@
         "book-num-shorthand": "{{num}} 권",
         "issue-num-shorthand": "#{{num}}",
         "volume-num-shorthand": "{{num}} 권",
-        "book-nums": "권(책) 목록",
-        "issue-nums": "호(이슈) 목록",
-        "chapter-nums": "화(챕터) 목록",
-        "volume-nums": "권(볼륨) 목록",
         "no-data": "데이터 없음",
         "chapter-count": "{{num}} 챕터",
         "issue-count": "{{num}} 권",
         "unknown": "알수없음",
-        "roles": "역할",
         "libraries": "라이브러리",
         "confirm": "확인",
         "selected": "선택"
@@ -3422,5 +3418,48 @@
         "settings": "설정",
         "all-series": "모든 시리즈",
         "profile": "{{username}}의 프로필"
+    },
+    "download-queue-drawer": {
+        "title": "다운로드",
+        "cancel": "{{common.cancel}}",
+        "cancel-all": "모두 취소",
+        "retry": "재시도",
+        "retry-all": "모두 재시도",
+        "clear": "제거",
+        "empty": "다운로드 없음",
+        "close": "{{common.close}}",
+        "paused-after-refresh": "{{ count }}개 항목 일시정지됨 — 재시작 대기 중",
+        "resume": "재시작",
+        "pause": "일시정지",
+        "paused": "일시정지됨",
+        "clear-all": "모두 제거",
+        "failed-from-auth": "인증되지 않음, 브라우저 새로고침",
+        "failed-interrupted": "페이지 새로고침으로 중단됨",
+        "tab-downloading": "다운로드 중",
+        "tab-completed": "완료됨",
+        "today": "오늘",
+        "older": "예전",
+        "queued": "{{download-queue-status-pipe.queued}}",
+        "preparing": "{{download-queue-status-pipe.preparing}}",
+        "downloading": "{{download-queue-status-pipe.downloading}}",
+        "completed": "{{download-queue-status-pipe.completed}}",
+        "failed": "{{download-queue-status-pipe.failed}}",
+        "cancelled": "{{download-queue-status-pipe.cancelled}}"
+    },
+    "download-queue-item": {
+        "retry": "{{download-queue-drawer.retry}}",
+        "cancel": "{{common.cancel}}",
+        "remove": "제거"
+    },
+    "download-queue-status-pipe": {
+        "queued": "대기 중",
+        "preparing": "준비 중",
+        "downloading": "다운로드 중",
+        "completed": "완료됨",
+        "failed": "실패",
+        "cancelled": "취소됨"
+    },
+    "download-queue-widget": {
+        "title": "{{download-queue-drawer.title}}"
     }
 }

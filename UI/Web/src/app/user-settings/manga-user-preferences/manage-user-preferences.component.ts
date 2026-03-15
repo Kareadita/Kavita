@@ -90,6 +90,7 @@ export class ManageUserPreferencesComponent implements OnInit {
   private readonly libraryService = inject(LibraryService);
   private readonly fb = inject(NonNullableFormBuilder);
   private readonly metadataService = inject(MetadataService);
+  protected readonly isReadOnly = this.accountService.hasReadOnlyRole;
 
 
   loading = signal(true);
@@ -166,11 +167,17 @@ export class ManageUserPreferencesComponent implements OnInit {
         })
       });
 
+      if (this.isReadOnly()) {
+        this.settingsForm.disable({ emitEvent: false });
+      }
+
+      this.settingsForm.markAsPristine();
+
       // Automatically save settings as we edit them
       this.settingsForm.valueChanges.pipe(
         distinctUntilChanged(),
         debounceTime(100),
-        filter(_ => this.settingsForm.valid),
+        filter(_ => this.settingsForm.valid && this.settingsForm.dirty),
         takeUntilDestroyed(this.destroyRef),
         switchMap(_ => {
           const data = this.packSettings();

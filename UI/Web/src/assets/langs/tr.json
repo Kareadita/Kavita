@@ -629,11 +629,9 @@
     },
     "entity-title": {
         "issue-num": "{{common.issue-hash-num}}",
-        "chapter": "{{common.chapter-num}}",
         "book-num": "{{common.book-num-shorthand}}",
         "single-volume": "Tek cilt",
-        "special": "Özel",
-        "vol-num": "{{user-scrobble-history.volume-num}}"
+        "special": "Özel"
     },
     "manage-media-issues": {
         "filter-label": "{{common.filter}}",
@@ -1301,12 +1299,9 @@
         "filter": "Filtre",
         "unknown": "Bilinmeyen",
         "submit": "Gönder",
-        "book-nums": "Kitaplar",
         "no-data": "Veri Yok",
-        "chapter-nums": "Bölümler",
         "libraries": "Kütüphaneler",
         "issue-num": "Sorun",
-        "issue-nums": "Sorunlar",
         "volume-num": "Cilt",
         "issue-hash-num": "Sorun #",
         "book-num-shorthand": "Kitap {{num}}",
@@ -1317,11 +1312,9 @@
         "chapter-num-shorthand": "Bl {{num}}",
         "issue-num-shorthand": "#{{num}}",
         "volume-num-shorthand": "C {{num}}",
-        "volume-nums": "Ciltler",
         "deselect-all": "Tümünün Seçimini Kaldır",
         "confirm": "Onayla",
-        "selected": "Seçilen",
-        "roles": "Roller"
+        "selected": "Seçilen"
     },
     "tabs": {
         "account-tab": "Hesap",

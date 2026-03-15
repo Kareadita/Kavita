@@ -55,12 +55,17 @@
               </ng-container>
 
               <div class="row mt-2">
-                @for (chapter of entry.chapters.slice(0, 5); track chapter.chapterId) {
+                @for (chapter of entry.chapters.slice(0, 5); track chapter.chapterId + '_' + chapter.pagesRead) {
                   <div class="col-auto d-none d-sm-block chapter-cover"
                        [routerLink]="['/library', entry.libraryId, 'series', entry.seriesId, 'chapter', chapter.chapterId]">
                     <app-image [imageUrl]="imageService.getChapterCoverImage(chapter.chapterId)" class="d-block" [ngbTooltip]="chapter.label"
                                style="width: 2.5rem; height: auto;"/>
                   </div>
+                }
+                @let nonSlicedLength = entry.chapters.length - 5;
+                @if (nonSlicedLength > 0) {
+                  <i class="fa-solid fa-ellipsis my-auto" tabindex="0" [title]="t('num-more', {num: nonSlicedLength})"></i>
+                  <span class="visually-hidden">{{t('num-more', {num: nonSlicedLength})}}</span>
                 }
               </div>
             </div>

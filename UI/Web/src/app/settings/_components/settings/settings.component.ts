@@ -62,6 +62,7 @@ import {FontManagerComponent} from "../../../user-settings/font-manager/font-man
 import {ServerActivityComponent} from "../../../admin/server-activity/server-activity.component";
 import {ServerDevicesComponent} from "../../../admin/server-devices/server-devices.component";
 import {ManageCustomKeyBindsComponent} from "../../../user-settings/custom-key-binds/manage-custom-key-binds.component";
+import {AccountSettingsComponent} from "src/app/user-settings/account-settings/account-settings.component";
 
 @Component({
   selector: 'app-settings',
@@ -103,7 +104,8 @@ import {ManageCustomKeyBindsComponent} from "../../../user-settings/custom-key-b
     ServerActivityComponent,
     ServerDevicesComponent,
     ManageCustomKeyBindsComponent,
-    ManageAuthKeysComponent
+    ManageAuthKeysComponent,
+    AccountSettingsComponent
   ],
   templateUrl: './settings.component.html',
   styleUrl: './settings.component.scss',

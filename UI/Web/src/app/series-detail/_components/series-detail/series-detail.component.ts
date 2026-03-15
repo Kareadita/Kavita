@@ -1,4 +1,5 @@
 import {DOCUMENT, Location, NgClass, NgStyle, NgTemplateOutlet} from '@angular/common';
+import {DownloadEntityType} from '../../../shared/_models/download-queue-item';
 import {
   AfterViewInit,
   ChangeDetectionStrategy,
@@ -140,6 +141,7 @@ interface StoryLineItem {
 })
 class SeriesDetailComponent implements OnInit, AfterViewInit {
 
+  protected readonly DownloadEntityType = DownloadEntityType;
   private readonly destroyRef = inject(DestroyRef);
   private readonly route = inject(ActivatedRoute);
   private readonly seriesService = inject(SeriesService);
@@ -169,6 +171,7 @@ class SeriesDetailComponent implements OnInit, AfterViewInit {
   private readonly location = inject(Location);
   private readonly document = inject(DOCUMENT);
   protected readonly breakpointService = inject(BreakpointService);
+  private readonly entityTitleService = inject(EntityTitleService);
 
   readonly scrollingBlock = viewChild<ElementRef<HTMLDivElement>>('scrollingBlock');
 
@@ -345,7 +348,7 @@ class SeriesDetailComponent implements OnInit, AfterViewInit {
 
 
   seriesCoverImage = computed(() => this.imageService.getSeriesCoverImage(this.seriesId()));
-  chapterTabName = computed(() => this.utilityService.formatChapterName(this.libraryType()));
+  chapterTabName = computed(() => this.entityTitleService.formatChapterName(this.libraryType(), true));
   nextExpectedChapter = signal<NextExpectedChapter | null>(null);
   loadPageSource = new ReplaySubject<boolean>(1);
   loadPage$ = this.loadPageSource.asObservable();

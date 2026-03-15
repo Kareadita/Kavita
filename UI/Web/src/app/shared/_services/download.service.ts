@@ -20,7 +20,12 @@ import {UtcToLocalDatePipe} from '../../_pipes/utc-to-locale-date.pipe';
 import {EVENTS, MessageHubService} from "../../_services/message-hub.service";
 import {NotificationProgressEvent} from "../../_models/events/notification-progress-event";
 import {SeriesService} from "../../_services/series.service";
-import {DownloadQueueItem, DownloadQueueStatus} from '../_models/download-queue-item';
+import {
+  DistilledDownloadEntityType,
+  DownloadEntityType,
+  DownloadQueueItem,
+  DownloadQueueStatus
+} from '../_models/download-queue-item';
 import {DownloadStorageService} from './download-storage.service';
 import {normalizeTimestamp} from "../../../libs/download-timestamp";
 import {ReadingList, ReadingListItem} from "../../_models/reading-list";
@@ -34,13 +39,7 @@ export const DEBOUNCE_TIME = 100;
 
 const bytesPipe = new BytesPipe();
 
-/**
- * Valid entity types for downloading
- */
-export type DownloadEntityType = 'volume' | 'chapter' | 'series' | 'bookmark' | 'logs' | 'readingList' | 'readingListItem' | 'collection';
-/**
- * Valid entities for downloading. Undefined exclusively for logs.
- */
+/** Valid entities for downloading. Undefined exclusively for logs */
 export type DownloadEntity = Series | Volume | Chapter | PageBookmark[] | ReadingList | ReadingListItem | UserCollection | undefined;
 
 @Injectable({
@@ -235,12 +234,12 @@ export class DownloadService {
    */
   downloadSubtitle(downloadEntityType: DownloadEntityType | undefined, downloadEntity: DownloadEntity | undefined) {
     switch (downloadEntityType) {
-      case 'series':   return (downloadEntity as Series).name;
-      case 'volume':   return (downloadEntity as Volume).minNumber + '';
-      case 'chapter':  return (downloadEntity as Chapter).minNumber + '';
-      case 'bookmark': return '';
-      case 'logs':     return '';
-      case 'readingListItem': return (downloadEntity as ReadingListItem).title;
+      case DownloadEntityType.Series:   return (downloadEntity as Series).name;
+      case DownloadEntityType.Volume:   return (downloadEntity as Volume).minNumber + '';
+      case DownloadEntityType.Chapter:  return (downloadEntity as Chapter).minNumber + '';
+      case DownloadEntityType.Bookmark: return '';
+      case DownloadEntityType.Logs:     return '';
+      case DownloadEntityType.ReadingListItem: return (downloadEntity as ReadingListItem).title;
     }
     return '';
   }
@@ -253,25 +252,25 @@ export class DownloadService {
    */
   download(entityType: DownloadEntityType, entity: DownloadEntity, libraryId: number, seriesId: number) {
     switch (entityType) {
-      case 'series':
+      case DownloadEntityType.Series:
         this.downloadSeries(entity as Series);
         break;
-      case 'volume':
+      case DownloadEntityType.Volume:
         this.downloadVolume(entity as Volume, libraryId, seriesId);
         break;
-      case 'chapter':
-        this.enqueueSingle(entity as Chapter, 'chapter', '', libraryId, seriesId);
+      case DownloadEntityType.Chapter:
+        this.enqueueSingle(entity as Chapter, DownloadEntityType.Chapter, '', libraryId, seriesId);
         break;
-      case 'bookmark':
+      case DownloadEntityType.Bookmark:
         this.downloadBookmarksBlob(entity as PageBookmark[]);
         break;
-      case 'logs':
+      case DownloadEntityType.Logs:
         this.downloadLogsBlob();
         break;
-      case 'readingList':
+      case DownloadEntityType.ReadingList:
         this.downloadReadingList(entity as ReadingList);
         break;
-      case 'collection':
+      case DownloadEntityType.Collection:
         this.downloadCollection(entity as UserCollection);
         break;
     }
@@ -282,9 +281,9 @@ export class DownloadService {
    * Downloads multiple volumes and chapters in bulk, using only 2 HTTP size calls total.
    */
   downloadBulk(volumes: Volume[], chapters: Chapter[], libraryId = 0, seriesId = 0) {
-    const items: Array<{ entity: Volume | Chapter; entityType: 'volume' | 'chapter' }> = [
-      ...volumes.map(v => ({ entity: v as Volume, entityType: 'volume' as const })),
-      ...chapters.map(c => ({ entity: c as Chapter, entityType: 'chapter' as const })),
+    const items: Array<{ entity: Volume | Chapter; entityType: DownloadEntityType.Volume | DownloadEntityType.Chapter }> = [
+      ...volumes.map(v => ({ entity: v as Volume, entityType: DownloadEntityType.Volume as const })),
+      ...chapters.map(c => ({ entity: c as Chapter, entityType: DownloadEntityType.Chapter as const })),
     ];
     if (items.length === 0) return;
     this.enqueueItems(items, '', libraryId, seriesId);
@@ -459,7 +458,7 @@ export class DownloadService {
     }
 
     // Volume/Chapter: O(1) Map lookup for active
-    const entityType = this.utilityService.isVolume(entity) ? 'volume' : 'chapter';
+    const entityType = this.utilityService.isVolume(entity) ? DownloadEntityType.Volume : DownloadEntityType.Chapter;
     const key = this._indexKey(entityType, (entity as Volume | Chapter).id);
     const active = this._activeIndex.get(key);
     if (active && ['queued', 'preparing', 'downloading'].includes(active.status)) return active;
@@ -542,30 +541,30 @@ export class DownloadService {
     );
   }
 
-  private getEntityDownloadSize(entityType: 'series' | 'volume' | 'chapter' | 'readinglist', id: number) {
+  private getEntityDownloadSize(entityType: DownloadEntityType, id: number) {
     return this.httpClient.get<number>(this.baseUrl + `download/${entityType}-size?${entityType}Id=${id}`);
   }
 
-  private getBulkEntityDownloadSize(entityType: 'series' | 'volume' | 'chapter' | 'readinglist', ids: number[]) {
+  private getBulkEntityDownloadSize(entityType: DownloadEntityType.Series | DownloadEntityType.Volume | DownloadEntityType.Chapter, ids: number[]) {
     const data = {} as any;
     data[entityType + 'Ids'] = ids;
     return this.httpClient.post<Record<number, number>>(this.baseUrl + `download/bulk-${entityType}-size`, data);
   }
 
   private downloadSeriesSize(seriesId: number) {
-    return this.getEntityDownloadSize('series', seriesId);
+    return this.getEntityDownloadSize(DownloadEntityType.Series, seriesId);
   }
 
   private downloadBulkVolumeSizes(volumeIds: number[]) {
-    return this.getBulkEntityDownloadSize('volume', volumeIds);
+    return this.getBulkEntityDownloadSize(DownloadEntityType.Volume, volumeIds);
   }
 
   private downloadBulkChapterSizes(chapterIds: number[]) {
-    return this.getBulkEntityDownloadSize('chapter', chapterIds);
+    return this.getBulkEntityDownloadSize(DownloadEntityType.Chapter, chapterIds);
   }
 
   private downloadVolumeSize(volumeId: number) {
-    return this.getEntityDownloadSize('volume', volumeId);
+    return this.getEntityDownloadSize(DownloadEntityType.Volume, volumeId);
   }
 
 
@@ -574,18 +573,18 @@ export class DownloadService {
 
     // Volumes can be either a bunch of chapters or just 1
     if (volume.chapters.length === 1) {
-      this.enqueueSingle(volume, 'volume', '', libraryId, seriesId);
+      this.enqueueSingle(volume, DownloadEntityType.Volume, '', libraryId, seriesId);
       return;
     }
     this.debugLog(`downloadVolume() decomposed into ${volume.chapters.length} items`);
 
-    const items = volume.chapters.map(c => ({ entity: c as Chapter, entityType: 'chapter' as const }));
+    const items = volume.chapters.map(c => ({ entity: c as Chapter, entityType: DownloadEntityType.Chapter as const }));
 
     const userPrefs = this.accountService.userPreferences();
     if (userPrefs?.promptForDownloadSize && items.length > 0) {
       // Single size call for the whole series, single confirm dialog
       this.downloadVolumeSize(volume.id).pipe(
-        switchMap(async size => this.confirmSize(size, 'volume')),
+        switchMap(async size => this.confirmSize(size, DownloadEntityType.Volume)),
         filter(confirmed => confirmed),
         takeUntilDestroyed(this.destroyRef)
       ).subscribe(() => this.enqueueItems(items, '', libraryId, seriesId));
@@ -609,9 +608,9 @@ export class DownloadService {
 
       if (userPrefs?.promptForDownloadSize && collectionSeries.result.length > 0) {
         const seriesIds = collectionSeries.result.map(s => s.id);
-        this.getBulkEntityDownloadSize('series', seriesIds).pipe(
+        this.getBulkEntityDownloadSize(DownloadEntityType.Series, seriesIds).pipe(
           map(r => Object.values(r).reduce((acc, curr) => acc + curr, 0)),
-          switchMap(async size => this.confirmSize(size, 'series')),
+          switchMap(async size => this.confirmSize(size, DownloadEntityType.Series)),
           filter(confirmed => confirmed),
           takeUntilDestroyed(this.destroyRef)
         ).subscribe(() => {
@@ -636,7 +635,7 @@ export class DownloadService {
       this.readingListService.getListItems(readingList.id);
 
     items$.subscribe((items: ReadingListItem[]) => {
-      const rliItems = items.map(item => ({ entity: item as ReadingListItem, entityType: 'readinglist-item' as const }));
+      const rliItems = items.map(item => ({ entity: item as ReadingListItem, entityType: DownloadEntityType.ReadingListItem as const }));
       this.enqueueItems(rliItems, readingList.title, 0, 0, readingList.id);
     });
   }
@@ -646,10 +645,10 @@ export class DownloadService {
     this.seriesService.getSeriesDetail(series.id).pipe(
       takeUntilDestroyed(this.destroyRef)
     ).subscribe(detail => {
-      const items: Array<{ entity: Volume | Chapter; entityType: 'volume' | 'chapter' }> = [
-        ...detail.volumes.map(v => ({ entity: v as Volume, entityType: 'volume' as const })),
-        ...detail.chapters.map(c => ({ entity: c as Chapter, entityType: 'chapter' as const })),
-        ...detail.specials.map(c => ({ entity: c as Chapter, entityType: 'chapter' as const })),
+      const items: Array<{ entity: Volume | Chapter; entityType: DownloadEntityType.Volume | DownloadEntityType.Chapter }> = [
+        ...detail.volumes.map(v => ({ entity: v as Volume, entityType: DownloadEntityType.Volume as const })),
+        ...detail.chapters.map(c => ({ entity: c as Chapter, entityType: DownloadEntityType.Chapter as const })),
+        ...detail.specials.map(c => ({ entity: c as Chapter, entityType: DownloadEntityType.Chapter as const })),
       ];
       this.debugLog(`downloadSeries() decomposed into ${items.length} items (${detail.volumes.length} vols, ${detail.chapters.length + detail.specials.length} chapters)`);
 
@@ -657,7 +656,7 @@ export class DownloadService {
       if (!skipSizePrompt && userPrefs?.promptForDownloadSize && items.length > 0) {
         // Single size call for the whole series, single confirm dialog
         this.downloadSeriesSize(series.id).pipe(
-          switchMap(async size => this.confirmSize(size, 'series')),
+          switchMap(async size => this.confirmSize(size, DownloadEntityType.Series)),
           filter(confirmed => confirmed),
           takeUntilDestroyed(this.destroyRef)
         ).subscribe(() => this.enqueueItems(items, series.name, series.libraryId, series.id, 0, collectionId));
@@ -667,22 +666,22 @@ export class DownloadService {
     });
   }
 
-  private enqueueItems(items: Array<{ entity: Volume | Chapter | ReadingListItem; entityType: 'volume' | 'chapter' | 'readinglist-item' }>, seriesName: string, libraryId: number, seriesId = 0, readingListId = 0, collectionId = 0) {
+  private enqueueItems(items: Array<{ entity: Volume | Chapter | ReadingListItem; entityType: DistilledDownloadEntityType }>, seriesName: string, libraryId: number, seriesId = 0, readingListId = 0, collectionId = 0) {
     this.debugLog(`enqueueItems() adding ${items.length} items for series "${seriesName}"`);
 
-    const volumeItems = items.filter(i => i.entityType === 'volume');
-    const chapterItems = items.filter(i => i.entityType === 'chapter');
-    const rliItems = items.filter(i => i.entityType === 'readinglist-item');
+    const volumeItems = items.filter(i => i.entityType === DownloadEntityType.Volume);
+    const chapterItems = items.filter(i => i.entityType === DownloadEntityType.Chapter);
+    const rliItems = items.filter(i => i.entityType === DownloadEntityType.ReadingListItem);
 
     const volSizes$ = volumeItems.length > 0
-      ? this.getBulkEntityDownloadSize('volume', volumeItems.map(i => i.entity.id))
+      ? this.getBulkEntityDownloadSize(DownloadEntityType.Volume, volumeItems.map(i => i.entity.id))
       : of({} as Record<number, number>);
     const chSizes$ = chapterItems.length > 0
-      ? this.getBulkEntityDownloadSize('chapter', chapterItems.map(i => i.entity.id))
+      ? this.getBulkEntityDownloadSize(DownloadEntityType.Chapter, chapterItems.map(i => i.entity.id))
       : of({} as Record<number, number>);
     // ReadingListItems download via the chapter endpoint, so fetch chapter sizes using chapterId
     const rliSizes$ = rliItems.length > 0
-      ? this.getBulkEntityDownloadSize('chapter', rliItems.map(i => (i.entity as ReadingListItem).chapterId))
+      ? this.getBulkEntityDownloadSize(DownloadEntityType.Chapter, rliItems.map(i => (i.entity as ReadingListItem).chapterId))
       : of({} as Record<number, number>);
 
     forkJoin([volSizes$, chSizes$, rliSizes$]).pipe(
@@ -692,13 +691,13 @@ export class DownloadService {
         let size: number;
 
         switch (item.entityType) {
-          case "volume":
+          case DownloadEntityType.Volume:
             size = volMap[item.entity.id] ?? 0;
             break;
-          case "chapter":
+          case DownloadEntityType.Chapter:
             size = chMap[item.entity.id] ?? 0;
             break;
-          case "readinglist-item":
+          case DownloadEntityType.ReadingListItem:
             size = rlMap[(item.entity as ReadingListItem).chapterId] ?? 0;
             break;
         }
@@ -709,9 +708,9 @@ export class DownloadService {
     });
   }
 
-  private enqueueSingle(entity: Volume | Chapter, entityType: 'volume' | 'chapter', seriesName: string, libraryId: number, seriesId = 0, readingListId = 0, collectionId = 0) {
+  private enqueueSingle(entity: Volume | Chapter, entityType: DownloadEntityType.Volume | DownloadEntityType.Chapter, seriesName: string, libraryId: number, seriesId = 0, readingListId = 0, collectionId = 0) {
     const user = this.accountService.currentUser();
-    const sizeCall$ = entityType === 'volume'
+    const sizeCall$ = entityType === DownloadEntityType.Volume
       ? this.downloadBulkVolumeSizes([entity.id]).pipe(map(m => m[entity.id] ?? 0))
       : this.downloadBulkChapterSizes([entity.id]).pipe(map(m => m[entity.id] ?? 0));
 
@@ -754,7 +753,7 @@ export class DownloadService {
     }
   }
 
-  private async addToQueue(entity: Volume | Chapter | ReadingListItem, entityType: 'volume' | 'chapter' | 'readinglist-item', seriesName: string, libraryId: number, estimatedSize = 0, seriesId = 0, readingListId = 0, collectionId = 0, skipRedownloadPrompt = false) {
+  private async addToQueue(entity: Volume | Chapter | ReadingListItem, entityType: DistilledDownloadEntityType, seriesName: string, libraryId: number, estimatedSize = 0, seriesId = 0, readingListId = 0, collectionId = 0, skipRedownloadPrompt = false) {
     seriesName = await this.resolveSeriesName(seriesName, seriesId);
     const entityId = entity.id;
     const key = this._indexKey(entityType, entityId);
@@ -797,11 +796,11 @@ export class DownloadService {
     let downloadName: string;
     let chapterId: number | undefined;
 
-    if (entityType === 'volume') {
+    if (entityType === DownloadEntityType.Volume) {
       const vol = entity as Volume;
       subLabel = vol.minNumber + '';
       downloadName = seriesName ? `${seriesName} - Volume ${vol.name}` : `Volume ${vol.name}`;
-    } else if (entityType === 'readinglist-item') {
+    } else if (entityType === DownloadEntityType.ReadingListItem) {
       const rli = entity as ReadingListItem;
       subLabel = rli.title;
       downloadName = seriesName ? `${seriesName} - ${rli.title}` : rli.title;
@@ -877,10 +876,10 @@ export class DownloadService {
       return;
     }
 
-    // readinglistitem downloads via the chapter endpoint using chapterId
-    const endpoint = item.entityType === 'readinglist-item' ? 'chapter' : item.entityType;
-    const idKey = endpoint === 'volume' ? 'volumeId' : 'chapterId';
-    const idValue = item.entityType === 'readinglist-item' ? item.chapterId! : item.entityId;
+    // readingListItem downloads via the chapter endpoint using chapterId
+    const endpoint = item.entityType === DownloadEntityType.ReadingListItem ? DownloadEntityType.Chapter : item.entityType;
+    const idKey = endpoint === DownloadEntityType.Volume ? 'volumeId' : 'chapterId';
+    const idValue = item.entityType === DownloadEntityType.ReadingListItem ? item.chapterId! : item.entityId;
     const url = `${this.baseUrl}download/${endpoint}` +
                 `?${idKey}=${idValue}` +
                 `&correlationId=${item.id}` +

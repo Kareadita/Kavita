@@ -1,26 +1,28 @@
 import {ChangeDetectionStrategy, Component, computed, inject, input} from '@angular/core';
-import {MemberInfo} from "../../../_models/user/member-info";
+import {MemberInfo} from "src/app/_models/user/member-info";
 import {AsyncPipe} from "@angular/common";
 import {
   CarouselReelComponent,
   NextPageLoader
-} from "../../../carousel/_components/carousel-reel/carousel-reel.component";
-import {map, Observable} from "rxjs";
+} from "src/app/carousel/_components/carousel-reel/carousel-reel.component";
+import {map, Observable, OperatorFunction} from "rxjs";
 import {translate, TranslocoDirective} from "@jsverse/transloco";
-import {SeriesService} from "../../../_services/series.service";
-import {FilterV2} from "../../../_models/metadata/v2/filter-v2";
-import {FilterCombination} from "../../../_models/metadata/v2/filter-combination";
-import {FilterStatement} from "../../../_models/metadata/v2/filter-statement";
-import {FilterComparison} from "../../../_models/metadata/v2/filter-comparison";
-import {FilterField} from "../../../_models/metadata/v2/filter-field";
-import {SortField} from "../../../_models/metadata/series-filter";
-import {QueryContext} from "../../../_models/metadata/v2/query-context";
-import {EntityCardComponent} from "../../../cards/entity-card/entity-card.component";
-import {CardConfigFactory} from "../../../_services/card-config-factory.service";
+import {SeriesService} from "src/app/_services/series.service";
+import {FilterV2} from "src/app/_models/metadata/v2/filter-v2";
+import {FilterCombination} from "src/app/_models/metadata/v2/filter-combination";
+import {FilterStatement} from "src/app/_models/metadata/v2/filter-statement";
+import {FilterComparison} from "src/app/_models/metadata/v2/filter-comparison";
+import {FilterField} from "src/app/_models/metadata/v2/filter-field";
+import {SortField} from "src/app/_models/metadata/series-filter";
+import {QueryContext} from "src/app/_models/metadata/v2/query-context";
+import {EntityCardComponent} from "src/app/cards/entity-card/entity-card.component";
+import {CardConfigFactory} from "src/app/_services/card-config-factory.service";
+import {CardEntityFactory, SeriesCardEntity} from "src/app/_models/card/card-entity";
+import {Series} from "src/app/_models/series";
 
 type OverviewStream = {
   title: string;
-  api: Observable<any[]>;
+  api: Observable<SeriesCardEntity[]>;
   nextPageLoader: NextPageLoader;
 }
 
@@ -63,31 +65,37 @@ export class ProfileOverviewComponent {
 
   streams = computed<OverviewStream[]>(() => {
     const memberId = this.memberInfo().id;
+    const seriesMapper: OperatorFunction<Series[], SeriesCardEntity[]> = map(
+      series => series.map(s => CardEntityFactory.series(s))
+    );
 
     return [
       {
         title: translate('profile-overview.currently-reading'),
         api: this.seriesService
           .getCurrentlyReading(memberId, 0, 20)
-          .pipe(map(pr => pr.result)),
+          .pipe(map(pr => pr.result), seriesMapper),
         nextPageLoader: (pageNum, pageSize) => this.seriesService
-          .getCurrentlyReading(memberId, pageNum, pageSize),
+          .getCurrentlyReading(memberId, pageNum, pageSize)
+          .pipe(map(pr => pr.result), seriesMapper),
       },
       {
         title: translate('profile-overview.want-to-read'),
         api: this.seriesService
           .getWantToRead(0, 20, undefined, memberId)
-          .pipe(map(pr => pr.result)),
+          .pipe(map(pr => pr.result), seriesMapper),
         nextPageLoader: (pageNum, pageSize) => this.seriesService
-          .getWantToRead(pageNum, pageSize, undefined, memberId),
+          .getWantToRead(pageNum, pageSize, undefined, memberId)
+          .pipe(map(pr => pr.result), seriesMapper),
       },
       {
         title: translate('profile-overview.just-finished-reading'),
         api: this.seriesService
           .getAllSeriesV2(0, 20, JustFinishedReadingFilter, QueryContext.None, memberId)
-          .pipe(map(pr => pr.result)),
+          .pipe(map(pr => pr.result), seriesMapper),
         nextPageLoader: (pageNum, pageSize) => this.seriesService
-          .getAllSeriesV2(pageNum, pageSize, JustFinishedReadingFilter, QueryContext.None, memberId),
+          .getAllSeriesV2(pageNum, pageSize, JustFinishedReadingFilter, QueryContext.None, memberId)
+          .pipe(map(pr => pr.result), seriesMapper),
       }
     ];
   });

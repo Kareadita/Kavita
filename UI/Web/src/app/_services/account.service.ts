@@ -283,7 +283,7 @@ export class AccountService {
     }
   }
 
-  logout(skipAutoLogin: boolean = false) {
+  logout(skipAutoLogin: boolean = false, skipOidcLogout: boolean = false) {
     const user = this._currentUser();
     if (!user) return;
 
@@ -292,7 +292,7 @@ export class AccountService {
     this.stopRefreshTokenTimer();
     this.messageHub.stopHubConnection();
 
-    if (!user.token) {
+    if (!skipOidcLogout && !user.token) {
       window.location.href = this.baseUrl.substring(0, environment.apiUrl.indexOf("api")) + 'oidc/logout';
       return;
     }
@@ -320,6 +320,10 @@ export class AccountService {
   isOidcAuthenticated() {
     return this.httpClient.get<string>(this.baseUrl + 'account/oidc-authenticated', TextResonse)
       .pipe(map(res => res == "true"));
+  }
+
+  clearOidcLink() {
+    return this.httpClient.post(this.baseUrl + 'account/clear-oidc-link', {});
   }
 
   isEmailConfirmed() {

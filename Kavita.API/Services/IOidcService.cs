@@ -35,4 +35,12 @@ public interface IOidcService
     /// <param name="ct"></param>
     /// <returns></returns>
     Task ClearOidcIds(CancellationToken ct = default);
+
+    /// <summary>
+    /// Remove <see cref="AppUser.OidcId"/> from the given user
+    /// </summary>
+    /// <param name="userId"></param>
+    /// <param name="ct"></param>
+    /// <returns></returns>
+    Task ClearOidcIdForUser(int userId, CancellationToken ct = default);
 }

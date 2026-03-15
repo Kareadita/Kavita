@@ -978,10 +978,8 @@
     "entity-title": {
         "special": "Especial",
         "issue-num": "{{common.issue-hash-num}}",
-        "chapter": "{{common.chapter-num}}",
         "book-num": "{{common.book-num-shorthand}}",
-        "single-volume": "Volume Único",
-        "vol-num": "{{user-scrobble-history.volume-num}}"
+        "single-volume": "Volume Único"
     },
     "external-series-card": {
         "open-external": "Abrir Externamente"
@@ -1999,7 +1997,8 @@
         "edit-smart-filter": "Editar {{name}}",
         "name-label": "Nome",
         "required-field": "Filtros inteligentes precisam de um nome",
-        "filter-name-unique": "Os nomes dos Filtros Inteligentes devem ser exclusivos"
+        "filter-name-unique": "Os nomes dos Filtros Inteligentes devem ser exclusivos",
+        "no-content": "Esse filtro inteligente não tem resultados no painel"
     },
     "edit-external-source-item": {
         "not-unique": "Existe uma fonte externa com este host. Certifique-se de não ter duplicatas",
@@ -2411,15 +2410,10 @@
         "book-num-shorthand": "Livro {{num}}",
         "issue-num-shorthand": "#{{num}}",
         "volume-num-shorthand": "Vol. {{num}}",
-        "book-nums": "Livros",
-        "issue-nums": "Edições",
-        "chapter-nums": "Capítulos",
-        "volume-nums": "Volumes",
         "chapter-count": "{{num}} Capítulos",
         "no-data": "Sem Dados",
         "issue-count": "{{num}} Edições",
         "unknown": "Desconhecido",
-        "roles": "Papéis",
         "libraries": "Bibliotecas",
         "confirm": "Confirmar",
         "selected": "Selecionado"
@@ -3468,5 +3462,11 @@
     },
     "download-queue-widget": {
         "title": "{{download-queue-drawer.title}}"
+    },
+    "account-settings": {
+        "oidc": "{{login.oidc}}",
+        "unlink-oidc": "Remover o link OIDC",
+        "confirm-unlink": "Você tem certeza de que quer remover seu link OIDC?",
+        "confirm-unlink-extra": "Se você estiver atualmente autenticado com a conta OIDC, será deslogado. Você pode linkar novamente por e-mail a qualquer momento."
     }
 }

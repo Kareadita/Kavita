@@ -158,25 +158,25 @@
           </div>
         }
         <div class="row pt-4 ms-2 me-2 mb-2">
-          <div class="col">
-            <button class="btn btn-icon" (click)="setReadingDirection();resetMenuCloseTimer();" [disabled]="readerMode === ReaderMode.Webtoon || readerMode === ReaderMode.UpDown" aria-describedby="reading-direction" [title]="t('reading-direction-tooltip') + readingDirection === ReadingDirection.LeftToRight ? t('left-to-right-alt') : t('right-to-left-alt')">
+          <div class="col d-flex justify-content-center">
+            <button class="btn btn-icon" (click)="setReadingDirection();resetMenuCloseTimer();" [disabled]="readerMode === ReaderMode.Webtoon || readerMode === ReaderMode.UpDown" aria-describedby="reading-direction" [title]="t('reading-direction-tooltip') + (readingDirection === ReadingDirection.LeftToRight ? t('left-to-right-alt') : t('right-to-left-alt'))">
               <i class="fa fa-angle-double-{{readingDirection === ReadingDirection.LeftToRight ? 'right' : 'left'}}" aria-hidden="true"></i>
               <span id="reading-direction" class="visually-hidden">{{readingDirection === ReadingDirection.LeftToRight ? t('left-to-right-alt') : t('right-to-left-alt')}}</span>
             </button>
           </div>
-          <div class="col">
+          <div class="col d-flex justify-content-center">
             <button class="btn btn-icon" [title]="t('reading-mode-tooltip')" (click)="toggleReaderMode();resetMenuCloseTimer();">
               <i class="fa {{readerMode | readerModeIcon}}" aria-hidden="true"></i>
               <span class="visually-hidden">{{t('reading-mode-tooltip')}}</span>
             </button>
           </div>
-          <div class="col">
+          <div class="col d-flex justify-content-center">
             <button class="btn btn-icon" title="{{isFullscreen ? t('collapse') : t('fullscreen')}}" (click)="toggleFullscreen();resetMenuCloseTimer();">
               <i class="fa {{isFullscreen | fullscreenIcon}}" aria-hidden="true"></i>
               <span class="visually-hidden">{{isFullscreen ? t('collapse') : t('fullscreen')}}</span>
             </button>
           </div>
-          <div class="col">
+          <div class="col d-flex justify-content-center">
             <button class="btn btn-icon" [title]="t('settings-tooltip')" (click)="settingsOpen = !settingsOpen;resetMenuCloseTimer();">
               <i class="fa fa-sliders-h" aria-hidden="true"></i>
               <span class="visually-hidden">{{t('settings-tooltip')}}</span>

@@ -537,6 +537,7 @@ public class SeriesController(
     /// </summary>
     /// <param name="dto"></param>
     /// <returns></returns>
+    [KPlus]
     [HttpPost("match")]
     [Authorize(Policy = PolicyGroups.AdminPolicy)]
     public async Task<ActionResult<IList<ExternalSeriesMatchDto>>> MatchSeries(MatchSeriesDto dto)
@@ -563,6 +564,7 @@ public class SeriesController(
     /// <param name="malId"></param>
     /// <param name="cbrId"></param>
     /// <returns></returns>
+    [KPlus]
     [HttpPost("update-match")]
     [Authorize(Policy = PolicyGroups.AdminPolicy)]
     public ActionResult UpdateSeriesMatch([FromQuery] int seriesId, [FromQuery] int? aniListId, [FromQuery] long? malId, [FromQuery] int? cbrId)
@@ -578,6 +580,7 @@ public class SeriesController(
     /// <param name="seriesId"></param>
     /// <param name="dontMatch"></param>
     /// <returns></returns>
+    [KPlus]
     [HttpPost("dont-match")]
     [Authorize(Policy = PolicyGroups.AdminPolicy)]
     public async Task<ActionResult> UpdateDontMatch([FromQuery] int seriesId, [FromQuery] bool dontMatch)

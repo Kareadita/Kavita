@@ -46,16 +46,16 @@
 
                   <div class="float-end">
                     @if (array.controls.length < MAX_KEYBINDS_PER_TARGET) {
-                      <button class="btn btn-sm" (click)="addKeyBind(element.target)" [ngbTooltip]="t('add', {target: settingDesc.title})">
+                      <button class="btn btn-sm" (click)="addKeyBind(element.target)" [disabled]="isReadOnly()" [ngbTooltip]="t('add', {target: settingDesc.title})">
                         <i class="fa fa-add" [attr.aria-label]="t('add', {target: element.target})"></i>
                       </button>
                     }
 
-                    <button class="btn btn-sm" (click)="resetKeybindsToDefaults(element.target)" [ngbTooltip]="t('reset', {target: settingDesc.title})">
+                    <button class="btn btn-sm" (click)="resetKeybindsToDefaults(element.target)" [disabled]="isReadOnly()" [ngbTooltip]="t('reset', {target: settingDesc.title})">
                       <i class="fa fa-recycle" [attr.aria-label]="t('reset', {target: element.target})"></i>
                     </button>
 
-                    @if (!array.valid) {
+                    @if (!array.valid && !array.disabled) {
                       <i class="fa fa-warning text-danger"
                          [attr.aria-label]="t('errors-array', {target: element.target})"
                          [ngbTooltip]="errorToolTip(element.target, -1, array.errors)">

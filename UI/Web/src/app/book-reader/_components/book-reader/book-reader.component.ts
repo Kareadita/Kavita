@@ -71,6 +71,7 @@ import {KeyBindService} from "../../../_services/key-bind.service";
 import {KeyBindTarget} from "../../../_models/preferences/preferences";
 import {BreakpointService} from "../../../_services/breakpoint.service";
 import {KavitaTitleStrategy} from "../../../_services/kavita-title.strategy";
+import {EntityTitleService} from "../../../_services/entity-title.service";
 
 
 interface HistoryPoint {
@@ -151,6 +152,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   private readonly fontService = inject(FontService);
   private readonly keyBindService = inject(KeyBindService);
   protected readonly breakpointService = inject(BreakpointService);
+  private readonly entityTitleService = inject(EntityTitleService);
 
   libraryId!: number;
   seriesId!: number;
@@ -358,6 +360,10 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
    * For instance, when we invoke a scroll action, but another scroll is scheduled to be triggered afterward
    */
   hasDelayedScroll: boolean = false;
+  /**
+   * A timeout for a delayed scroll event. This is used to de-dupe multiple scroll events during a delayed scroll.
+   */
+  delayedScrollEventTimeout: any = undefined;
 
 
   readonly bookContainerElemRef = viewChild.required<ElementRef<HTMLDivElement>>('bookContainer');
@@ -761,6 +767,13 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
    * Updates the TOC current page anchor, last scene path and saves progress
    */
   handleScrollEvent(bypassSave: boolean = false) {
+    // If a scroll is pending (e.g. initial load), do not update/save progress based on the intermediate scroll position
+    // (e.g. top of page). Delay the progress event until the pending scroll finished.
+    if (this.hasDelayedScroll) {
+      this.clearTimeout(this.delayedScrollEventTimeout); // clear to avoid multiple triggers
+      this.delayedScrollEventTimeout = setTimeout(() => this.handleScrollEvent(bypassSave), SCROLL_DELAY);
+      return;
+    }
 
     // TODO: See if we can move this to a service for ToC
     // Highlight the current chapter we are on
@@ -810,6 +823,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   ngOnDestroy(): void {
     this.clearTimeout(this.clickToPaginateVisualOverlayTimeout);
     this.clearTimeout(this.clickToPaginateVisualOverlayTimeout2);
+    this.clearTimeout(this.delayedScrollEventTimeout);
 
     this.readerService.disableWakeLock();
 
@@ -1025,6 +1039,9 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
    * @private
    */
   private snapScrollOnResize() {
+    // If a scroll is pending, let it finish, to not snap to the current (potentially incorrect) position.
+    if (this.hasDelayedScroll) return;
+
     const layoutMode = this.layoutMode();
     if (layoutMode === BookPageLayoutMode.Default) return;
 
@@ -1132,7 +1149,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       // Load chapter Id onto route but don't reload
       const newRoute = this.readerService.getNextChapterUrl(this.router.url, this.chapterId, this.incognitoMode(), this.readingListMode, this.readingListId);
       window.history.replaceState({}, '', newRoute);
-      const msg = translate(direction === 'Next' ? 'toasts.load-next-chapter' : 'toasts.load-prev-chapter', {entity: this.utilityService.formatChapterName(this.libraryType).toLowerCase()});
+      const msg = translate(direction === 'Next' ? 'toasts.load-next-chapter' : 'toasts.load-prev-chapter', {entity: this.entityTitleService.formatChapterName(this.libraryType).toLowerCase()});
       this.toastr.info(msg, '', {timeOut: 3000});
       this.cdRef.markForCheck();
       this.init(false);
@@ -1140,7 +1157,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     }
 
     // This will only happen if no actual chapter can be found
-    const msg = translate(direction === 'Next' ? 'toasts.no-next-chapter' : 'toasts.no-prev-chapter', {entity: this.utilityService.formatChapterName(this.libraryType).toLowerCase()});
+    const msg = translate(direction === 'Next' ? 'toasts.no-next-chapter' : 'toasts.no-prev-chapter', {entity: this.entityTitleService.formatChapterName(this.libraryType).toLowerCase()});
     this.toastr.warning(msg);
     this.isLoading.set(false);
     if (direction === 'Prev') {
@@ -1444,7 +1461,6 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
     // we need to click the document before arrow keys will scroll down.
     this.reader().nativeElement.focus();
-    afterFrame(() => this.handleScrollEvent()); // Will set lastSeenXPath
     this.isLoading.set(false);
     this.cdRef.markForCheck();
 
@@ -1462,6 +1478,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       setTimeout(() => {
         this.hasDelayedScroll = false;
         lambda();
+        afterFrame(() => this.handleScrollEvent());
       }, SCROLL_DELAY)
     });
   }

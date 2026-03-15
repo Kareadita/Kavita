@@ -206,5 +206,22 @@
     "kavitaplus-restricted": "Esto está restringido a Kavita+",
     "password-authentication-disabled": "La autentificación por medio de contraseñas ha sido desabilitada, identifícate por medio de OpenID Connect",
     "oidc-managed": "Los usuarios administrados por OIDC no se pueden editar.",
-    "cannot-change-identity-provider-original-user": "No se puede cambiar el ID de la cuenta de administrador original"
+    "cannot-change-identity-provider-original-user": "No se puede cambiar el ID de la cuenta de administrador original",
+    "oidc-invalid-authority": "La Autoridad OIDC es inválida",
+    "client-device-doesnt-exist": "El Dispositivo Cliente no existe",
+    "annotation-failed-create": "Fallo al crear la anotación, intenta nuevamente",
+    "annotation-delete": "No se pudo borrar la anotación",
+    "opds-continue-reading-title": "Continuar leyendo a partir de: {0}",
+    "sidenav-stream-only-delete-smart-filter": "Solo los flujos de filtros inteligentes pueden ser borrados del Navegador Lateral",
+    "dashboard-stream-only-delete-smart-filter": "Solo los flujos de filtros inteligentes pueden ser borrados del panel",
+    "smart-filter-name-required": "Nombre de Filtro Inteligente requerido",
+    "smart-filter-system-name": "No se puede usar el nombre de un flujo proveído por el sistema",
+    "aliases-have-overlap": "Uno o más aliases se sobreponen con otras personas, no se puede actualizar",
+    "generated-reading-profile-name": "Generado a partir de {0}",
+    "genre-doesnt-exist": "Género no existe",
+    "font-url-not-allowed": "Cargar una Fuente por url solo es permitido desde Google Fonts",
+    "annotation-export-failed": "No fue posible exportar las Anotaciones, verificar logs",
+    "download-not-allowed": "El usuario no tiene permisos de descarga",
+    "auth-key-unique": "El nombre de la clave de autenticación debe ser único para tu cuenta",
+    "role-restricted": "Acceso restringido: Tu rol no te permite hacer esta acción"
 }

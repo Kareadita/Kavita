@@ -975,9 +975,7 @@
     "entity-title": {
         "special": "Spécial",
         "issue-num": "{{common.issue-hash-num}}",
-        "chapter": "{{common.chapter-num}}",
         "book-num": "{{common.book-num-shorthand}}",
-        "vol-num": "{{user-scrobble-history.volume-num}}",
         "single-volume": "Volume unique"
     },
     "external-series-card": {
@@ -2401,15 +2399,10 @@
         "book-num-shorthand": "Livre {{num}}",
         "issue-num-shorthand": "#{{num}}",
         "volume-num-shorthand": "Vol {{num}}",
-        "book-nums": "Livres",
-        "issue-nums": "Numéros",
-        "chapter-nums": "Chapitres",
-        "volume-nums": "Volumes",
         "chapter-count": "{{num}} chapitres",
         "no-data": "Aucune donnée",
         "issue-count": "{{num}} Numéros",
         "unknown": "Inconnu",
-        "roles": "Roles",
         "libraries": "Bibliothèques",
         "confirm": "Confirmer",
         "selected": "Sélectionné"

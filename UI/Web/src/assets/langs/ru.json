@@ -836,9 +836,7 @@
     },
     "entity-title": {
         "issue-num": "{{common.issue-hash-num}}",
-        "chapter": "{{common.chapter-num}}",
         "book-num": "{{common.book-num-shorthand}}",
-        "vol-num": "{{user-scrobble-history.volume-num}}",
         "single-volume": "Одиночный том",
         "special": "Спешл"
     },
@@ -1801,9 +1799,6 @@
         "chapter-num": "Глава",
         "volume-num": "Том",
         "book-num-shorthand": "Книга {{num}}",
-        "chapter-nums": "Главы",
-        "volume-nums": "Тома",
-        "book-nums": "Книги",
         "issue-num-shorthand": "#{{num}}",
         "volume-num-shorthand": "Том {{num}}",
         "chapter-num-shorthand": "Глава {{num}}",

@@ -12,6 +12,8 @@ import {Series} from "../../_models/series";
 import {Chapter} from "../../_models/chapter";
 import {ModalService} from "../../_services/modal.service";
 import {AccountService} from "../../_services/account.service";
+import {RatingAuthority} from "src/app/_models/rating";
+import {ScrobbleProvider} from "src/app/_services/scrobbling.service";
 
 @Component({
   selector: 'app-reviews',
@@ -38,6 +40,7 @@ export class ReviewsComponent {
   myReviews = computed(() => this.userReviews().filter(r => r.username === this.accountService.currentUser()!.username && !r.isExternal));
 
   openReviewModal() {
+    const user = this.accountService.currentUser()!;
     const userReview = this.myReviews();
 
     const modalRef = this.modalService.open(ReviewModalComponent);
@@ -46,11 +49,17 @@ export class ReviewsComponent {
       modalRef.setInput('review', userReview[0]);
     } else {
       modalRef.setInput('review', {
+        userId: user.id,
+        username: user.username,
+        libraryId: this.series().libraryId,
         seriesId: this.series().id,
-        volumeId: this.volumeId(),
         chapterId: this.chapter()?.id,
         tagline: '',
-        body: ''
+        body: '',
+        score: 0,
+        isExternal: false,
+        provider: ScrobbleProvider.Kavita,
+        authority: RatingAuthority.User,
       });
     }
 

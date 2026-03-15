@@ -658,7 +658,7 @@ public class OpdsController(
     /// <param name="filename">Not used. Only for Chunky to allow download links</param>
     /// <returns></returns>
     [ChapterAccess]
-    [Authorize(PolicyConstants.DownloadRole)]
+    [Authorize(PolicyGroups.DownloadPolicy)]
     [HttpGet("{apiKey}/series/{seriesId}/volume/{volumeId}/chapter/{chapterId}/download/{filename}")]
     public async Task<ActionResult> DownloadFile(string apiKey, int seriesId, int volumeId, int chapterId, string filename)
     {

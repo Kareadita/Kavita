@@ -670,13 +670,13 @@ export class ReaderService {
     ).catch(err => console.error(err)));
   }
 
-  private handlePrompt<T>(prompt: RereadPrompt, incognitoMode: boolean) {
+  private handlePrompt(prompt: RereadPrompt, incognitoMode: boolean) {
     if (incognitoMode) return of({prompt: prompt, result: RereadPromptResult.ReadIncognito});
 
     if (!prompt.shouldPrompt) return of({prompt: prompt, result: RereadPromptResult.Continue});
 
 
-    const ref = this.modalService.open<ListSelectModalComponent<T>>(ListSelectModalComponent, mediumModal());
+    const ref = this.modalService.open<ListSelectModalComponent<RereadPromptResult>>(ListSelectModalComponent, mediumModal());
 
     ref.setInput('showFooter', false);
     ref.setInput('title', translate('reread-modal.title'));

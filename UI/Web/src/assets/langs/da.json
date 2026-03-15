@@ -502,7 +502,6 @@
     },
     "entity-title": {
         "issue-num": "{{common.issue-hash-num}}",
-        "chapter": "{{common.chapter-num}}",
         "book-num": "{{common.book-num-shorthand}}"
     },
     "manage-media-issues": {
@@ -1149,8 +1148,6 @@
         "title": "Meddelelser"
     },
     "version-update-modal": {
-        "close": "{{common.close}}",
-        "out-of-date": {},
-        "update-notification": {}
+        "close": "{{common.close}}"
     }
 }

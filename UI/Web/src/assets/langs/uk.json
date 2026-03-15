@@ -785,10 +785,8 @@
     },
     "entity-title": {
         "issue-num": "{{common.issue-hash-num}}",
-        "chapter": "{{common.chapter-num}}",
         "book-num": "{{common.book-num-shorthand}}",
         "special": "Спеціальний",
-        "vol-num": "{{user-scrobble-history.volume-num}}",
         "single-volume": "Один том"
     },
     "manage-media-issues": {
@@ -2897,11 +2895,6 @@
         "book-num-shorthand": "Книга {{num}}",
         "issue-num-shorthand": "#{{num}}",
         "volume-num-shorthand": "Том {{num}}",
-        "book-nums": "Книги",
-        "issue-nums": "Проблеми",
-        "chapter-nums": "Розділи",
-        "volume-nums": "Обсяги",
-        "roles": "Ролі",
         "libraries": "Бібліотеки",
         "confirm": "Підтвердити",
         "selected": "Вибрано"
