@@ -221,6 +221,7 @@
     "genre-doesnt-exist": "Genre doesn't exist",
     "font-url-not-allowed": "Uploading a Font by url is only allowed from Google Fonts",
     "annotation-export-failed": "Unable to export Annotations, check logs",
+    "cbl-export-failed": "Unable to export CBL file, check logs",
     "download-not-allowed": "User does not have download permissions",
     "auth-key-unique": "The Auth Key name must be unique to your account",
     "role-restricted": "Access forbidden: Your role does not permit this action"
