@@ -1,14 +1,6 @@
 import {ChangeDetectionStrategy, ChangeDetectorRef, Component, computed, DestroyRef, inject} from '@angular/core';
-import {
-  ChangeAgeRestrictionComponent
-} from "../../../user-settings/change-age-restriction/change-age-restriction.component";
-import {ChangeEmailComponent} from "../../../user-settings/change-email/change-email.component";
-import {ChangePasswordComponent} from "../../../user-settings/change-password/change-password.component";
 import {ManageDevicesComponent} from "../../../user-settings/manage-devices/manage-devices.component";
 import {ManageAuthKeysComponent} from "../../../user-settings/manage-auth-keys/manage-auth-keys.component";
-import {
-  ManageScrobblingProvidersComponent
-} from "../../../user-settings/manage-scrobbling-providers/manage-scrobbling-providers.component";
 import {
   ManageUserPreferencesComponent
 } from "../../../user-settings/manga-user-preferences/manage-user-preferences.component";
@@ -63,15 +55,12 @@ import {ServerActivityComponent} from "../../../admin/server-activity/server-act
 import {ServerDevicesComponent} from "../../../admin/server-devices/server-devices.component";
 import {ManageCustomKeyBindsComponent} from "../../../user-settings/custom-key-binds/manage-custom-key-binds.component";
 import {AccountSettingsComponent} from "src/app/user-settings/account-settings/account-settings.component";
+import {CblManagerComponent} from "../../../user-settings/cbl-manager/cbl-manager.component";
 
 @Component({
   selector: 'app-settings',
   imports: [
-    ChangeAgeRestrictionComponent,
-    ChangeEmailComponent,
-    ChangePasswordComponent,
     ManageDevicesComponent,
-    ManageScrobblingProvidersComponent,
     ManageUserPreferencesComponent,
     SideNavCompanionBarComponent,
     ThemeManagerComponent,
@@ -105,7 +94,8 @@ import {AccountSettingsComponent} from "src/app/user-settings/account-settings/a
     ServerDevicesComponent,
     ManageCustomKeyBindsComponent,
     ManageAuthKeysComponent,
-    AccountSettingsComponent
+    AccountSettingsComponent,
+    CblManagerComponent
   ],
   templateUrl: './settings.component.html',
   styleUrl: './settings.component.scss',

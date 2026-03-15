@@ -11,6 +11,7 @@ using Kavita.Models.DTOs.ReadingLists.CBL;
 using Kavita.Models.DTOs.ReadingLists.CBL.V1;
 using Kavita.Server.Attributes;
 using Kavita.Services.Reading;
+using Kavita.Services.ReadingLists;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Swashbuckle.AspNetCore.Annotations;
@@ -20,7 +21,7 @@ namespace Kavita.Server.Controllers;
 /// <summary>
 /// Responsible for the CBL import flow
 /// </summary>
-public class CblController( IReadingListService readingListService, IDirectoryService directoryService) : BaseApiController
+public class CblController(IReadingListService readingListService, IDirectoryService directoryService, ICblGithubService cblGithubService) : BaseApiController
 {
     /// <summary>
     /// The first step in a cbl import. This validates the cbl file that if an import occured, would it be successful.
@@ -126,6 +127,16 @@ public class CblController( IReadingListService readingListService, IDirectorySe
             });
         }
 
+    }
+
+
+    [HttpGet("browse")]
+    [DisallowRole(PolicyConstants.ReadOnlyRole)]
+    public async Task<ActionResult<CblRepoBrowseResultDto>> BrowseCblRepo([FromQuery] string path = "")
+    {
+        if (path.Contains("..") || path.Contains("http://")) return BadRequest();
+
+        return Ok(await cblGithubService.BrowseRepo(path));
     }
 
     private async Task<CblReadingList> SaveAndLoadCblFile(IFormFile file)

@@ -201,8 +201,7 @@ public partial class VersionUpdaterService : IVersionUpdaterService
         try
         {
             var prInfo = await $"{GithubPullsUrl}{prNumber}"
-                .WithHeader(HeaderNames.Accept, "application/json")
-                .WithHeader(HeaderNames.UserAgent, "Kavita")
+                .WithGithubHeaders()
                 .GetJsonAsync<PullRequestInfo>();
 
             // Cache the result
@@ -233,8 +232,7 @@ public partial class VersionUpdaterService : IVersionUpdaterService
             var nightlyReleases = new List<NightlyInfo>();
 
             var commits = await GithubBranchCommitsUrl
-                .WithHeader(HeaderNames.Accept, "application/json")
-                .WithHeader(HeaderNames.UserAgent, "Kavita")
+                .WithGithubHeaders()
                 .GetJsonAsync<IList<CommitInfo>>();
 
             var commitList = commits.ToList();

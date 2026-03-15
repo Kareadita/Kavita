@@ -1,0 +1,146 @@
+<ng-container *transloco="let t; prefix:'browse-cbl-repo-modal'">
+  <div class="modal-header">
+    <h4 class="modal-title" id="modal-basic-title">{{t('title')}}</h4>
+    <button type="button" class="btn-close" [attr.aria-label]="t('close')" (click)="close()"></button>
+  </div>
+
+  <div class="modal-body">
+    <!-- Rate limit warning -->
+    @if (rateLimit()?.isLow && !fromCache()) {
+      <div class="alert alert-warning d-flex align-items-center mb-2" role="alert">
+        <i class="fa-solid fa-triangle-exclamation me-2" aria-hidden="true"></i>
+        <span>
+          {{t('rate-limit-warning', {remaining: rateLimit()?.remaining})}}
+          @if (rateLimit()?.resetsAtUtc; as resetsAt) {
+            {{t('rate-limit-resets', {time: resetsAt})}}
+          }
+        </span>
+      </div>
+    }
+
+    <!-- Breadcrumb navigation -->
+    <nav [attr.aria-label]="t('breadcrumb-alt-label')">
+      @if (routeStackPeek() !== undefined) {
+        <ol class="breadcrumb">
+          <li class="breadcrumb-item">
+            <a href="javascript:void(0);" (click)="navigateTo(-1)">
+              <i class="fa-solid fa-house" [attr.aria-label]="t('root-alt-label')"></i>
+            </a>
+          </li>
+          @for (route of routeItems(); track route; let index = $index; let last = $last) {
+            <li class="breadcrumb-item" [class.active]="last" [attr.aria-current]="last ? 'page' : null">
+              @if (last) {
+                {{route}}
+              } @else {
+                <a href="javascript:void(0);" (click)="navigateTo(index)">{{route}}</a>
+              }
+            </li>
+          }
+        </ol>
+      } @else {
+        <div class="breadcrumb mb-0">{{t('instructions')}}</div>
+      }
+    </nav>
+
+    <!-- File browser table -->
+    <table class="table table-striped scrollable" [attr.aria-label]="t('file-browser-label')">
+      <thead>
+      <tr>
+        <th scope="col" style="width: 2.5rem;">
+          <span class="visually-hidden">{{t('type-header')}}</span>
+        </th>
+        <th scope="col">{{t('name-header')}}</th>
+        <th scope="col" style="width: 2.5rem;">
+          @if (files().length > 0) {
+            <input
+              type="checkbox"
+              class="form-check-input"
+              [checked]="allFilesSelected()"
+              (change)="toggleAllFiles()"
+              [attr.aria-label]="t('select-all-files')"
+            />
+          }
+        </th>
+      </tr>
+      </thead>
+      <tbody>
+      <!-- Back row -->
+        @if (routeStackPeek() !== undefined || routeItems().length > 0) {
+          <tr class="clickable" (click)="goBack()" role="button">
+            <td><i class="fa-solid fa-arrow-turn-up" aria-hidden="true"></i></td>
+            <td colspan="2">...</td>
+          </tr>
+        }
+
+      <!-- Loading -->
+        @if (loading()) {
+          <tr>
+            <td colspan="3" class="text-center py-3">
+              <app-loading [loading]="loading()" />
+            </td>
+          </tr>
+        } @else {
+          <!-- Folders -->
+          @for (folder of folders(); track folder.path) {
+            <tr class="clickable" (click)="openFolder(folder)" role="button">
+              <td><i class="fa-regular fa-folder" aria-hidden="true"></i></td>
+              <td>{{folder.name}}</td>
+              <td></td>
+            </tr>
+          }
+
+          <!-- Files -->
+          @for (file of files(); track file.path) {
+            <tr
+              class="clickable"
+              [class.selected-row]="isSelected(file)"
+              (click)="toggleFileSelection(file)"
+              role="button"
+              [attr.aria-selected]="isSelected(file)"
+            >
+              <td><i class="fa-regular fa-file" aria-hidden="true"></i></td>
+              <td>{{file.name}}</td>
+              <td (click)="$event.stopPropagation()">
+                <input
+                  type="checkbox"
+                  class="form-check-input"
+                  [checked]="isSelected(file)"
+                  (change)="toggleFileSelection(file)"
+                  [attr.aria-label]="t('select-file-alt-label', {name: file.name})"
+                />
+              </td>
+            </tr>
+          }
+
+          <!-- Empty state -->
+          @if (folders().length === 0 && files().length === 0) {
+            <tr>
+              <td colspan="3" class="text-center text-muted py-3">{{t('empty-directory')}}</td>
+            </tr>
+          }
+        }
+      </tbody>
+    </table>
+  </div>
+
+  <div class="modal-footer">
+    @if (fromCache()) {
+      <span class="text-muted me-auto" style="font-size: 0.85rem;">
+        <i class="fa-solid fa-database me-1" aria-hidden="true"></i>
+        {{t('served-from-cache')}}
+      </span>
+    }
+    <button type="button" class="btn btn-secondary" (click)="close()">{{t('cancel')}}</button>
+    <button
+      type="button"
+      class="btn btn-primary"
+      [disabled]="!hasSelection()"
+      (click)="download()"
+    >
+      {{t('download')}}
+      @if (hasSelection()) {
+        <span class="badge bg-light text-primary ms-1">{{selectionCount()}}</span>
+      }
+    </button>
+  </div>
+</ng-container>

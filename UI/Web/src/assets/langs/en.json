@@ -1994,6 +1994,7 @@
         "font": "Epub Fonts",
         "customize": "Customize",
         "cbl-import": "CBL Reading List",
+        "cbl-import-v2": "CBL Manager",
         "mal-stack-import": "MAL Stack",
         "admin-public-metadata": "Manage Metadata"
     },
@@ -2045,6 +2046,31 @@
         "key-bind-tooltip-page-down": "Move one page downwards",
         "key-bind-title-offset-double-page": "Offset double page",
         "key-bind-tooltip-offset-double-page": "Offset pages for double page spread alignment"
+    },
+
+    "cbl-manager": {
+        "browse-repo": "Browse CBLs",
+        "description": ""
+    },
+
+    "browse-cbl-repo-modal": {
+        "title": "CBL Repo Browser",
+        "rate-limit-warning": "Kavita is coming close to hitting Rate Limit for Github! You have {{remaining}} calls left.",
+        "rate-limit-resets": "Rate Limit resets {{time}}",
+        "breadcrumb-alt-label": "Breadcrumbs",
+        "root-alt-label": "Root folder",
+        "instructions": "Browse for CBL files to download. Downloaded files will be kept in sync with your library.",
+        "file-browser-label": "CBL Repo Browser",
+        "type-header": "File Type",
+        "name-header": "Name",
+        "select-all-files": "Select All",
+        "loading": "{{common.loading}}",
+        "select-file-alt-label": "Select File: {{name}}",
+        "empty-directory": "Empty Directory",
+        "cancel": "{{common.cancel}}",
+        "served-from-cache": "Served from Cache",
+        "download": "Download"
+
     },
 
     "collection-detail": {

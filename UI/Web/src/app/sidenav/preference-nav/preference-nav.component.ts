@@ -68,7 +68,8 @@ export enum SettingsTabId {
   Scrobbling = 'scrobbling',
   ScrobblingHolds = 'scrobble-holds',
   Customize = 'customize',
-  CBLImport = 'cbl-import'
+  CBLImport = 'cbl-import',
+  CBLImportV2 = 'cbl-import-v2',
 }
 
 export enum SettingSectionId {
@@ -268,6 +269,7 @@ export class PreferenceNavComponent implements AfterViewInit {
         children: [
           new SideNavItem(SettingsTabId.MappingsImport, [Role.Admin]),
           new SideNavItem(SettingsTabId.CBLImport, [], undefined, [Role.ReadOnly]),
+          new SideNavItem(SettingsTabId.CBLImportV2, [], undefined, [Role.ReadOnly]),
           SideNavItem.kPlusOnly(SettingsTabId.MALStackImport),
         ]
       },

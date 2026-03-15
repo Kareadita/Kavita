@@ -57,7 +57,9 @@ public static class ApplicationServiceExtensions
         services.AddScoped<IFontService, FontService>();
         services.AddScoped<IAnnotationService, AnnotationService>();
         services.AddScoped<IOpdsService, OpdsService>();
+
         services.AddScoped<ICblExportService, CblExportService>();
+        services.AddScoped<ICblGithubService, CblGithubService>();
 
         services.AddScoped<IScannerService, ScannerService>();
         services.AddScoped<IProcessSeries, ProcessSeries>();
