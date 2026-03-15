@@ -60,6 +60,7 @@ public static class ApplicationServiceExtensions
 
         services.AddScoped<ICblExportService, CblExportService>();
         services.AddScoped<ICblGithubService, CblGithubService>();
+        services.AddScoped<ICblImportService, CblImportService>();
 
         services.AddScoped<IScannerService, ScannerService>();
         services.AddScoped<IProcessSeries, ProcessSeries>();

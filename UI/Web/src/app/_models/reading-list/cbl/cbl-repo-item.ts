@@ -5,4 +5,6 @@ export interface CblRepoItem {
   sha: string;
   size: number;
   downloadUrl: string | null;
+  existingReadingListId: number | null;
+  alreadySynced: boolean;
 }

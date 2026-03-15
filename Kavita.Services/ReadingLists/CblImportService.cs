@@ -4,7 +4,7 @@ using Kavita.Models.DTOs.ReadingLists.CBL;
 
 namespace Kavita.Services.ReadingLists;
 
-public class CblImporterService : ICblImportService
+public class CblImportService : ICblImportService
 {
     public Task ValidateList(int userId, string filePath, CblImportOptions options)
     {

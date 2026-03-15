@@ -2069,7 +2069,8 @@
         "empty-directory": "Empty Directory",
         "cancel": "{{common.cancel}}",
         "served-from-cache": "Served from Cache",
-        "download": "Download"
+        "download": "Download",
+        "owned-label": "Owned"
 
     },
 

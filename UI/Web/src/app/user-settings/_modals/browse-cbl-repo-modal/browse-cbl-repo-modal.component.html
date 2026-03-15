@@ -99,7 +99,15 @@
               [attr.aria-selected]="isSelected(file)"
             >
               <td><i class="fa-regular fa-file" aria-hidden="true"></i></td>
-              <td>{{file.name}}</td>
+              <td>
+                {{file.name}}
+                @if (file.alreadySynced) {
+                  <span class="badge bg-success ms-1">
+                    <i class="fa-solid fa-check me-1" aria-hidden="true"></i>
+                    <span>{{t('owned-label')}}</span>
+                  </span>
+                }
+              </td>
               <td (click)="$event.stopPropagation()">
                 <input
                   type="checkbox"

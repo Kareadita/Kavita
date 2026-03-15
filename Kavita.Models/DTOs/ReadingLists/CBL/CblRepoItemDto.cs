@@ -12,6 +12,9 @@ public class CblRepoItemDto
     public string Sha { get; set; } = string.Empty;
     public long Size { get; set; }
     public string? DownloadUrl { get; set; }
+
+    public int? ExistingReadingListId { get; set; }
+    public bool AlreadySynced => ExistingReadingListId.HasValue;
 }
 
 public class CblRepoBrowseResultDto

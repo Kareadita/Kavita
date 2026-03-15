@@ -20,6 +20,8 @@ import {ThemeProvider} from "../../_models/preferences/site-theme";
 import {LoadingComponent} from "../../shared/loading/loading.component";
 import {TranslocoDirective} from "@jsverse/transloco";
 import {BrowseCblRepoModalComponent} from "../_modals/browse-cbl-repo-modal/browse-cbl-repo-modal.component";
+import {CblService} from "../../_services/cbl.service";
+import {CblRepoItem} from "../../_models/reading-list/cbl/cbl-repo-item";
 
 @Component({
   selector: 'app-cbl-manager',
@@ -41,6 +43,7 @@ export class CblManagerComponent implements OnInit {
   private readonly confirmService = inject(ConfirmService);
   private readonly modalService = inject(ModalService);
   private readonly readingListService = inject(ReadingListService);
+  private readonly cblService = inject(CblService);
 
   files: NgxFileDropEntry[] = [];
   acceptableExtensions = ['.css'].join(',');
@@ -60,6 +63,20 @@ export class CblManagerComponent implements OnInit {
   openBrowseModal() {
     this.selectedList.set(undefined);
     const ref = this.modalService.open(BrowseCblRepoModalComponent);
+    ref.closed.subscribe((selected: CblRepoItem[]) => {
+      if (!selected || selected.length === 0) return;
+      this.isUploadingCbl.set(true);
+      this.cblService.importFromRepo(selected).subscribe({
+        next: () => {
+          this.toastr.success(`Imported ${selected.length} reading list(s) from repo`);
+          this.isUploadingCbl.set(false);
+        },
+        error: () => {
+          this.toastr.error('Failed to import from repo');
+          this.isUploadingCbl.set(false);
+        }
+      });
+    });
   }
 
   selectList(list: ReadingList | undefined) {

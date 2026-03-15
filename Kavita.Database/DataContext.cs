@@ -8,6 +8,7 @@ using Kavita.Database.Extensions;
 using Kavita.Models.DTOs.Progress;
 using Kavita.Models.Entities;
 using Kavita.Models.Entities.Enums;
+using Kavita.Models.Entities.Enums.ReadingList;
 using Kavita.Models.Entities.Enums.User;
 using Kavita.Models.Entities.Enums.UserPreferences;
 using Kavita.Models.Entities.History;
@@ -128,6 +129,13 @@ public sealed class DataContext : IdentityDbContext<AppUser, AppRole, int,
         builder.Entity<AppUserCollection>()
             .Property(b => b.AgeRating)
             .HasDefaultValue(AgeRating.Unknown);
+
+        #region Reading List
+        builder.Entity<ReadingList>()
+            .Property(b => b.Provider)
+            .HasDefaultValue(ReadingListProvider.None);
+        #endregion
+
 
         #region Library
 
@@ -303,7 +311,6 @@ public sealed class DataContext : IdentityDbContext<AppUser, AppRole, int,
             .HasDefaultValue(new List<int>());
 
         #endregion
-
 
         #region Reading Sessions & History
         builder.Entity<AppUserReadingSession>()

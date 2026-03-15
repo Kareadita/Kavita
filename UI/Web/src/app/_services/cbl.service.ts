@@ -1,7 +1,8 @@
 import {inject, Injectable} from '@angular/core';
-import {HttpClient, HttpParams} from "@angular/common/http";
-import {environment} from "../../environments/environment";
-import {CblRepoBrowseResult} from "../_models/reading-list/cbl/cbl-repo-browse-result";
+import {HttpClient, HttpParams} from '@angular/common/http';
+import {environment} from '../../environments/environment';
+import {CblRepoBrowseResult} from '../_models/reading-list/cbl/cbl-repo-browse-result';
+import {CblRepoItem} from '../_models/reading-list/cbl/cbl-repo-item';
 
 @Injectable({
   providedIn: 'root',
@@ -16,5 +17,9 @@ export class CblService {
       params = params.append('path', path);
     }
     return this.httpClient.get<CblRepoBrowseResult>(this.baseUrl + 'cbl/browse', {params: params});
+  }
+
+  importFromRepo(items: CblRepoItem[]) {
+    return this.httpClient.post(this.baseUrl + 'cbl/repo-import', {items});
   }
 }

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using Kavita.Models.Entities.Enums;
+using Kavita.Models.Entities.Enums.ReadingList;
 using Kavita.Models.Entities.Interfaces;
 using Kavita.Models.Entities.User;
 
@@ -28,6 +29,54 @@ public class ReadingList : IEntityDate, IHasCoverImage
     public string? SecondaryColor { get; set; }
     public bool CoverImageLocked { get; set; }
 
+    /// <summary>
+    /// A list of tags associtated with the RL
+    /// </summary>
+    /// <remarks>Can be populated via API/UI or from CBLv2</remarks>
+    //public ICollection<Tag> Tags { get; set; }
+
+    /// <summary>
+    /// Determines how the list was created and if it's syncable.
+    /// </summary>
+    public ReadingListProvider Provider { get; set; } = ReadingListProvider.None;
+
+    /// <summary>
+    /// The repo-relative path used as the stable sync key (e.g. "Marvel/Spider-Man.cbl").
+    /// This is the primary identifier for re-fetching — more stable than DownloadUrl.
+    /// </summary>
+    public string? SourcePath { get; set; }
+
+    /// <summary>
+    /// Cached raw download URL for convenience. Reconstructable from SourcePath if needed.
+    /// </summary>
+    public string? DownloadUrl { get; set; }
+
+    /// <summary>
+    /// Git SHA of the file content at last sync. Used for change detection only — if the
+    /// remote SHA differs from this value, the file has changed upstream.
+    /// </summary>
+    public string? ShaHash { get; set; }
+
+    /// <summary>
+    /// When we last checked the remote for changes (compared SHA). This can happen
+    /// without downloading — a metadata-only check via the Contents API.
+    /// </summary>
+    public DateTime? LastSyncCheckUtc { get; set; }
+
+    /// <summary>
+    /// When we last actually downloaded and applied the CBL content.
+    /// Only updated when ShaHash changes and we pull new content.
+    /// </summary>
+    public DateTime? LastSyncedUtc { get; set; }
+
+    public bool CanSync => Provider == ReadingListProvider.Url
+                           && !string.IsNullOrEmpty(SourcePath);
+
+    /// <summary>
+    /// Checks if the remote SHA differs from our stored hash.
+    /// </summary>
+    public bool HasRemoteChange(string remoteSha)
+        => !string.Equals(ShaHash, remoteSha, StringComparison.Ordinal);
 
     public ICollection<ReadingListItem> Items { get; set; } = null!;
     public DateTime Created { get; set; }
