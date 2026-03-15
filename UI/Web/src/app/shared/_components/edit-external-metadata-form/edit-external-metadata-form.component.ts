@@ -13,10 +13,6 @@ export const HAS_METADATA_DEFAULTS: Required<IHasMetadataIds> = {
   metronId: 0,
 };
 
-export type MetadataIdsForm = FormGroup<{
-  [K in keyof Required<IHasMetadataIds>]: FormControl<IHasMetadataIds[K] | null>
-}>;
-
 @Component({
   selector: 'app-edit-external-metadata-form',
   imports: [
