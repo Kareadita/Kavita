@@ -645,11 +645,30 @@ export class DownloadService {
     this.seriesService.getSeriesDetail(series.id).pipe(
       takeUntilDestroyed(this.destroyRef)
     ).subscribe(detail => {
+
+      // Ensure that virtual volumes aren't downloaded 
+      const chapterIdsInRealVolumes = new Set<number>(
+        detail.volumes
+          .filter(v => v.chapters.length === 1)
+          .flatMap(v => v.chapters.map(c => c.id))
+      );
+
       const items: Array<{ entity: Volume | Chapter; entityType: DownloadEntityType.Volume | DownloadEntityType.Chapter }> = [
-        ...detail.volumes.map(v => ({ entity: v as Volume, entityType: DownloadEntityType.Volume as const })),
-        ...detail.chapters.map(c => ({ entity: c as Chapter, entityType: DownloadEntityType.Chapter as const })),
-        ...detail.specials.map(c => ({ entity: c as Chapter, entityType: DownloadEntityType.Chapter as const })),
+        // Real volumes (single-chapter) — download as volume
+        ...detail.volumes
+          .filter(v => v.chapters.length === 1)
+          .map(v => ({ entity: v as Volume, entityType: DownloadEntityType.Volume as const })),
+        // Chapters not already covered by a real volume
+        ...detail.chapters
+          .filter(c => !chapterIdsInRealVolumes.has(c.id))
+          .map(c => ({ entity: c as Chapter, entityType: DownloadEntityType.Chapter as const })),
+        // Specials — no overlap
+        ...detail.specials.map(c => ({
+          entity: c as Chapter,
+          entityType: DownloadEntityType.Chapter as const,
+        })),
       ];
+
       this.debugLog(`downloadSeries() decomposed into ${items.length} items (${detail.volumes.length} vols, ${detail.chapters.length + detail.specials.length} chapters)`);
 
       const userPrefs = this.accountService.userPreferences();
