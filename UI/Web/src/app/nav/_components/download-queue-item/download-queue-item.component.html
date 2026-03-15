@@ -13,6 +13,7 @@
         <span class="ps-1 pe-1">&bull;</span>
         <span>{{ timeDisplay() | timeAgo }}</span>
       </div>
+
       @if (showSize()) {
         <div class="text-muted small dl-info-row">
           <span>{{ item().estimatedSize | bytes }}</span>

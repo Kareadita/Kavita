@@ -34,6 +34,8 @@ import {UserCollection} from "../../_models/collection-tag";
 import {FilterField} from "../../_models/metadata/v2/filter-field";
 import {FilterComparison} from "../../_models/metadata/v2/filter-comparison";
 import {FilterCombination} from "../../_models/metadata/v2/filter-combination";
+import {EntityTitleService} from "../../_services/entity-title.service";
+import {LibraryService} from "../../_services/library.service";
 
 export const DEBOUNCE_TIME = 100;
 
@@ -58,6 +60,8 @@ export class DownloadService {
   private readonly storage = inject(DownloadStorageService);
   private readonly translocoService = inject(TranslocoService);
   private readonly save = inject(SAVER);
+  private readonly entityTitleService = inject(EntityTitleService);
+  private readonly libraryService = inject(LibraryService);
 
   private readonly SERIES_NAME_CACHE_MAX = 50;
   private _seriesNameCache = new Map<number, string>();
@@ -646,7 +650,7 @@ export class DownloadService {
       takeUntilDestroyed(this.destroyRef)
     ).subscribe(detail => {
 
-      // Ensure that virtual volumes aren't downloaded 
+      // Ensure that virtual volumes aren't downloaded
       const chapterIdsInRealVolumes = new Set<number>(
         detail.volumes
           .filter(v => v.chapters.length === 1)
@@ -772,7 +776,9 @@ export class DownloadService {
     }
   }
 
-  private async addToQueue(entity: Volume | Chapter | ReadingListItem, entityType: DistilledDownloadEntityType, seriesName: string, libraryId: number, estimatedSize = 0, seriesId = 0, readingListId = 0, collectionId = 0, skipRedownloadPrompt = false) {
+  private async addToQueue(entity: Volume | Chapter | ReadingListItem, entityType: DistilledDownloadEntityType,
+                           seriesName: string, libraryId: number, estimatedSize = 0, seriesId = 0, readingListId = 0,
+                           collectionId = 0, skipRedownloadPrompt = false) {
     seriesName = await this.resolveSeriesName(seriesName, seriesId);
     const entityId = entity.id;
     const key = this._indexKey(entityType, entityId);
@@ -815,50 +821,56 @@ export class DownloadService {
     let downloadName: string;
     let chapterId: number | undefined;
 
-    if (entityType === DownloadEntityType.Volume) {
-      const vol = entity as Volume;
-      subLabel = vol.minNumber + '';
-      downloadName = seriesName ? `${seriesName} - Volume ${vol.name}` : `Volume ${vol.name}`;
-    } else if (entityType === DownloadEntityType.ReadingListItem) {
-      const rli = entity as ReadingListItem;
-      subLabel = rli.title;
-      downloadName = seriesName ? `${seriesName} - ${rli.title}` : rli.title;
-      chapterId = rli.chapterId;
-      libraryId = rli.libraryId;
-      seriesId = rli.seriesId;
-    } else {
-      const ch = entity as Chapter;
-      subLabel = ch.minNumber + '';
-      downloadName = seriesName ? `${seriesName} - Chapter ${ch.minNumber}` : `Chapter ${ch.minNumber}`;
-    }
+    this.libraryService.getLibraryType(libraryId).subscribe(libType => {
 
-    const label = downloadName;
+      if (entityType === DownloadEntityType.Volume) {
+        const vol = entity as Volume;
+        subLabel = vol.minNumber + '';
+        //downloadName = seriesName ? `${seriesName} - Volume ${vol.name}` : `Volume ${vol.name}`;
+        downloadName = this.entityTitleService.computeTitle(vol, libType, {includeVolume: true});
+      } else if (entityType === DownloadEntityType.ReadingListItem) {
+        const rli = entity as ReadingListItem;
+        subLabel = rli.title;
+        downloadName = seriesName ? `${seriesName} - ${rli.title}` : rli.title;
+        chapterId = rli.chapterId;
+        libraryId = rli.libraryId;
+        seriesId = rli.seriesId;
+      } else {
+        const ch = entity as Chapter;
+        subLabel = ch.minNumber + '';
+        const chName = this.entityTitleService.computeTitle(ch, libType, {prioritizeTitleName: false});
+        downloadName = seriesName ? `${seriesName} - ${chName}` : chName;
+      }
 
-    const item: DownloadQueueItem = {
-      id,
-      entityType,
-      entityId,
-      libraryId,
-      seriesId,
-      label,
-      subLabel,
-      seriesName,
-      estimatedSize,
-      status: 'queued',
-      progress: 0,
-      errorMessage: '',
-      retryCount: 0,
-      queuedAt: DateTime.utc().toISO()!,
-      entity,
-      downloadName,
-      readingListId,
-      collectionId,
-      ...(chapterId !== undefined ? { chapterId } : {}),
-    };
+      const label = downloadName;
 
-    this.activeQueue.update(q => [...q, item]);
-    this._rebuildActiveIndex();
-    this.storage.save(item);
+      const item: DownloadQueueItem = {
+        id,
+        entityType,
+        entityId,
+        libraryId,
+        seriesId,
+        label,
+        subLabel,
+        seriesName,
+        estimatedSize,
+        status: 'queued',
+        progress: 0,
+        errorMessage: '',
+        retryCount: 0,
+        queuedAt: DateTime.utc().toISO()!,
+        entity,
+        downloadName,
+        readingListId,
+        collectionId,
+        ...(chapterId !== undefined ? { chapterId } : {}),
+      };
+
+      this.activeQueue.update(q => [...q, item]);
+      this._rebuildActiveIndex();
+      this.storage.save(item);
+
+    });
   }
 
   resumeQueue() {
