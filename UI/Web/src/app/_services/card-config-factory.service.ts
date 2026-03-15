@@ -262,8 +262,8 @@ export class CardConfigFactory {
         if ([LibraryType.LightNovel || LibraryType.Book].includes(params.libraryType)) {
           return v.name;
         }
-        if (v.hasOwnProperty('chapters') && v.chapters.length > 0 && v.chapters[0].titleName) {
-          v.chapters[0].titleName
+        if (v.hasOwnProperty('chapters') && v.chapters.length === 1 && v.chapters[0].titleName) {
+          return v.chapters[0].titleName;
         }
 
         return v.name;
