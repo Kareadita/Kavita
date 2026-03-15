@@ -817,9 +817,17 @@ export class DownloadService {
     const id = this._nextId++;
     this.debugLog(`addToQueue() id=${id} type=${entityType} entityId=${entityId} series="${seriesName}"`);
 
+    // Resolve ReadingListItem overrides BEFORE fetching libType
+    let chapterId: number | undefined;
+    if (entityType === DownloadEntityType.ReadingListItem) {
+      const rli = entity as ReadingListItem;
+      chapterId = rli.chapterId;
+      libraryId = rli.libraryId;
+      seriesId = rli.seriesId;
+    }
+
     let subLabel: string;
     let downloadName: string;
-    let chapterId: number | undefined;
 
     const libType = await firstValueFrom(this.libraryService.getLibraryType(libraryId));
     if (entityType === DownloadEntityType.Volume) {
@@ -830,9 +838,6 @@ export class DownloadService {
       const rli = entity as ReadingListItem;
       subLabel = rli.title;
       downloadName = seriesName ? `${seriesName} - ${rli.title}` : rli.title;
-      chapterId = rli.chapterId;
-      libraryId = rli.libraryId;
-      seriesId = rli.seriesId;
     } else {
       const ch = entity as Chapter;
       subLabel = ch.minNumber + '';
