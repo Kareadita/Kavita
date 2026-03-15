@@ -821,56 +821,52 @@ export class DownloadService {
     let downloadName: string;
     let chapterId: number | undefined;
 
-    this.libraryService.getLibraryType(libraryId).subscribe(libType => {
+    const libType = await firstValueFrom(this.libraryService.getLibraryType(libraryId));
+    if (entityType === DownloadEntityType.Volume) {
+      const vol = entity as Volume;
+      subLabel = vol.minNumber + '';
+      downloadName = this.entityTitleService.computeTitle(vol, libType, {includeVolume: true});
+    } else if (entityType === DownloadEntityType.ReadingListItem) {
+      const rli = entity as ReadingListItem;
+      subLabel = rli.title;
+      downloadName = seriesName ? `${seriesName} - ${rli.title}` : rli.title;
+      chapterId = rli.chapterId;
+      libraryId = rli.libraryId;
+      seriesId = rli.seriesId;
+    } else {
+      const ch = entity as Chapter;
+      subLabel = ch.minNumber + '';
+      const chName = this.entityTitleService.computeTitle(ch, libType, {prioritizeTitleName: false});
+      downloadName = seriesName ? `${seriesName} - ${chName}` : chName;
+    }
 
-      if (entityType === DownloadEntityType.Volume) {
-        const vol = entity as Volume;
-        subLabel = vol.minNumber + '';
-        //downloadName = seriesName ? `${seriesName} - Volume ${vol.name}` : `Volume ${vol.name}`;
-        downloadName = this.entityTitleService.computeTitle(vol, libType, {includeVolume: true});
-      } else if (entityType === DownloadEntityType.ReadingListItem) {
-        const rli = entity as ReadingListItem;
-        subLabel = rli.title;
-        downloadName = seriesName ? `${seriesName} - ${rli.title}` : rli.title;
-        chapterId = rli.chapterId;
-        libraryId = rli.libraryId;
-        seriesId = rli.seriesId;
-      } else {
-        const ch = entity as Chapter;
-        subLabel = ch.minNumber + '';
-        const chName = this.entityTitleService.computeTitle(ch, libType, {prioritizeTitleName: false});
-        downloadName = seriesName ? `${seriesName} - ${chName}` : chName;
-      }
+    const label = downloadName;
 
-      const label = downloadName;
+    const item: DownloadQueueItem = {
+      id,
+      entityType,
+      entityId,
+      libraryId,
+      seriesId,
+      label,
+      subLabel,
+      seriesName,
+      estimatedSize,
+      status: 'queued',
+      progress: 0,
+      errorMessage: '',
+      retryCount: 0,
+      queuedAt: DateTime.utc().toISO()!,
+      entity,
+      downloadName,
+      readingListId,
+      collectionId,
+      ...(chapterId !== undefined ? { chapterId } : {}),
+    };
 
-      const item: DownloadQueueItem = {
-        id,
-        entityType,
-        entityId,
-        libraryId,
-        seriesId,
-        label,
-        subLabel,
-        seriesName,
-        estimatedSize,
-        status: 'queued',
-        progress: 0,
-        errorMessage: '',
-        retryCount: 0,
-        queuedAt: DateTime.utc().toISO()!,
-        entity,
-        downloadName,
-        readingListId,
-        collectionId,
-        ...(chapterId !== undefined ? { chapterId } : {}),
-      };
-
-      this.activeQueue.update(q => [...q, item]);
-      this._rebuildActiveIndex();
-      this.storage.save(item);
-
-    });
+    this.activeQueue.update(q => [...q, item]);
+    this._rebuildActiveIndex();
+    this.storage.save(item);
   }
 
   resumeQueue() {
