@@ -488,7 +488,7 @@
     },
     "all-filters": {
         "title": "Alle Smart-Filter",
-        "count": "{{count}} {{customize-dashboard-modal.title-smart-filters}}",
+        "count": "{{count}} {{tabs.smart-filters-tab}}",
         "create": "{{common.create}}"
     },
     "announcements": {
@@ -663,15 +663,6 @@
         "remove-from-want-to-read": "{{actionable.remove-from-want-to-read}}",
         "add-to-want-to-read": "{{actionable.add-to-want-to-read}}",
         "edit-series-alt": "Informationen bearbeiten",
-        "reviews-tab": "{{tabs.reviews-tab}}",
-        "storyline-tab": "{{tabs.storyline-tab}}",
-        "books-tab": "{{tabs.books-tab}}",
-        "volumes-tab": "{{tabs.volumes-tab}}",
-        "specials-tab": "{{tabs.specials-tab}}",
-        "related-tab": "{{tabs.related-tab}}",
-        "details-tab": "{{tabs.details-tab}}",
-        "info-tab": "{{tabs.info-tab}}",
-        "recommendations-tab": "{{tabs.recommendations-tab}}",
         "send-to": "Datei wurde an {{deviceName}} gesendet",
         "no-pages": "{{toasts.no-pages}}",
         "no-chapters": "Zu diesem Band gibt es keine Kapitel. Kann nicht gelesen werden.",
@@ -695,7 +686,6 @@
         "publication-status-tooltip": "Status der Publikation",
         "on": "{{reader-settings.on}}",
         "off": "{{reader-settings.off}}",
-        "annotations-tab": "{{tabs.annotations-tab}}",
         "loading": "{{common.loading}}",
         "read-count-tooltip": "Gelesen insgesamt"
     },
@@ -767,11 +757,6 @@
         "close": "{{common.close}}",
         "edit-title": "Bearbeite {{name}}",
         "add-title": "Bibliothek hinzufügen",
-        "general-tab": "{{tabs.general-tab}}",
-        "folder-tab": "{{tabs.folder-tab}}",
-        "cover-tab": "{{tabs.cover-tab}}",
-        "advanced-tab": "{{tabs.advanced-tab}}",
-        "tasks-tab": "{{tabs.tasks-tab}}",
         "name-label": "Name",
         "library-name-unique": "Bibliothek Name muss einmalig sein",
         "last-scanned-label": "Zuletzt gescannt:",
@@ -928,7 +913,8 @@
         "length-title": "{{edit-chapter-modal.words-label}}",
         "age-rating-title": "{{metadata-fields.age-rating-title}}",
         "file-path-title": "Dateien",
-        "folder-path-title": "Ordnerpfad"
+        "folder-path-title": "Ordnerpfad",
+        "external-metadata-title": "Externe Metadaten"
     },
     "related-tab": {
         "reading-lists-title": "{{reading-lists.title}}",
@@ -1263,10 +1249,6 @@
         "save": "{{common.save}}",
         "close": "{{common.close}}",
         "cancel": "{{common.cancel}}",
-        "general-tab": "{{tabs.general-tab}}",
-        "cover-image-tab": "{{tabs.cover-tab}}",
-        "info-tab": "{{tabs.info-tab}}",
-        "series-tab": "{{tabs.series-tab}}",
         "name-label": "Name",
         "name-validation": "Der Name muss einzigartig sein",
         "promote-label": "Werbung für",
@@ -1392,11 +1374,9 @@
         "reorder-alt": "Einträge anordnen",
         "dnd-warning": "Drag & Drop ist auf Mobilgeräten oder bei einer Leseliste mit mehr als 100 Einträgen nicht verfügbar.",
         "writers-title": "{{metadata-fields.writers-title}}",
-        "details-tab": "{{series-detail.details-tab}}",
         "publishers-title": "{{metadata-fields.publishers-title}}",
         "items-title": "Artikel",
         "cover-artists-title": "{{metadata-fields.cover-artists-title}}",
-        "storyline-tab": "{{series-detail.storyline-tab}}",
         "more-alt": "{{series-detail.more-alt}}",
         "date-range-title": "Datumsbereich",
         "edit-alt": "{{common.edit}}",
@@ -1483,8 +1463,6 @@
     },
     "edit-reading-list-modal": {
         "title": "Leseliste bearbeiten: {{name}}",
-        "general-tab": "{{tabs.general-tab}}",
-        "cover-image-tab": "{{tabs.cover-tab}}",
         "close": "{{common.close}}",
         "save": "{{common.save}}",
         "year-validation": "Muss größer als 1000, 0 oder leer sein",
@@ -1677,7 +1655,6 @@
         "general-tab": "{{tabs.general-tab}}",
         "metadata-tab": "{{tabs.metadata-tab}}",
         "people-tab": "{{tabs.people-tab}}",
-        "web-links-tab": "{{tabs.weblink-tab}}",
         "cover-image-tab": "{{tabs.cover-tab}}",
         "related-tab": "{{tabs.related-tab}}",
         "info-tab": "{{tabs.info-tab}}",
@@ -1742,7 +1719,9 @@
         "specials-volume": "Specials",
         "release-year-validation": "{{validation.year-validation}}",
         "volumes-title": "{{tab.volumes-tab}}",
-        "no-data": "{{common.no-data}}"
+        "no-data": "{{common.no-data}}",
+        "weblinks-tab": "{{tabs.weblink-tab}}",
+        "external-ids-tab": "{{tabs.external-ids-tab}}"
     },
     "edit-chapter-modal": {
         "title": "bearbeiten",
@@ -1772,15 +1751,8 @@
         "age-rating-label": "{{edit-series-modal.age-rating-label}}",
         "web-link-description": "{{edit-series-modal.web-link-description}}",
         "web-link-label": "{{edit-series-modal.web-link-label}}",
-        "general-tab": "{{tabs.general-tab}}",
-        "people-tab": "{{tabs.people-tab}}",
-        "weblink-tab": "{{tabs.weblink-tab}}",
         "field-locked-alt": "{{edit-series-modal.field-locked-alt}}",
-        "cover-image-tab": "{{tabs.cover-tab}}",
-        "tasks-tab": "{{tabs.tasks-tab}}",
-        "info-tab": "{{tabs.info-tab}}",
         "cover-image-description": "{{edit-series-modal.cover-image-description}}",
-        "tags-tab": "{{tabs.tags-tab}}",
         "pages-label": "Seiten",
         "words-label": "Länge",
         "pages-count": "{{series-detail.pages-count}}",
@@ -1793,7 +1765,8 @@
         "last-read-label": "{{sort-field-pipe.read-progress}}",
         "range-hours": "{{value}} {{hourWord}}",
         "read-time-label": "Lesezeit",
-        "files-label": "Dateien"
+        "files-label": "Dateien",
+        "external-ids-tab": "{{tabs.external-ids-tab}}"
     },
     "edit-volume-modal": {
         "title": "bearbeiten",
@@ -1811,7 +1784,8 @@
         "cover-image-description": "{{edit-series-modal.cover-image-description}}",
         "pages-label": "{{edit-chapter-modal.pages-label}}",
         "words-label": "{{edit-chapter-modal.words-label}}",
-        "read-time-label": "{{edit-chapter-modal.read-time-label}}"
+        "read-time-label": "{{edit-chapter-modal.read-time-label}}",
+        "external-ids-tab": "{{tabs.external-ids-tab}}"
     },
     "day-breakdown": {
         "title": "Tagesaufteilung",
@@ -1905,8 +1879,6 @@
         "popular-decades-title": "Beliebte Jahrzehnte",
         "popular-genres-title": "Beliebte Genres",
         "popular-tags-title": "Beliebte Tags",
-        "stats-tab": "{{tabs.stats-tab}}",
-        "management-tab": "{{tabs.management-tab}}",
         "users": "Nutzer",
         "readers": "Leser",
         "popular-reading-lists-title": "Meistgelesene Leselisten",
@@ -1958,11 +1930,7 @@
         "remove-rule": "Zeile entfernen"
     },
     "customize-dashboard-modal": {
-        "title-smart-filters": "Intelligente Filter",
-        "dashboard": "Dashboard",
-        "sidenav": "Seitennavigation",
-        "external-sources": "Externe Quellen",
-        "smart-filters": "Intelligente Filter",
+        "title-smart-filters": "{{tabs.smart-filters-tab}}",
         "description": "Sie können verschiedene Aspekte von Kavita anpassen, indem Sie die Reihenfolge ändern, die Sichtbarkeit umschalten und intelligente Filter/externe Quellen an Ihre Startseite oder Navigationsleiste binden."
     },
     "customize-dashboard-streams": {
@@ -1970,7 +1938,7 @@
         "add": "{{common.add}}",
         "filter": "{{common.filter}}",
         "clear": "{{common.clear}}",
-        "smart-filter-title": "{{customize-dashboard-modal.title-smart-filters}}"
+        "smart-filter-title": "{{tabs.smart-filters-tab}}"
     },
     "customize-sidenav-streams": {
         "no-data": "Alle Smart-Filter zur Seitennavigation hinzugefügt oder noch keine erstellt.",
@@ -1978,8 +1946,8 @@
         "add": "{{common.add}}",
         "filter": "{{common.filter}}",
         "clear": "{{common.clear}}",
-        "smart-filters-title": "Smart Filter",
-        "external-sources-title": "{{customize-dashboard-modal.external-sources}}",
+        "smart-filters-title": "{{tabs.smart-filters-tab}}",
+        "external-sources-title": "{{tabs.external-sources-tab}}",
         "reorder-when-filter-present": "Sie können keine Artikel per Drag & Drop neu anordnen, solange ein Filter vorhanden ist. Verwenden Sie {{customize-sidenav-streams.order-numbers-label}}",
         "order-numbers-label": "{{reading-list-detail.order-numbers-label}}",
         "bulk-mode-label": "Bulk-Modus"
@@ -2299,7 +2267,11 @@
         "export": "Export",
         "like": "Like",
         "unlike": "Likes entfernen",
-        "edit-device-name": "Name bearbeiten"
+        "edit-device-name": "Name bearbeiten",
+        "export-v1": "CBL v1",
+        "export-v1-tooltip": "CBL v1 (XML) verwenden",
+        "export-v2": "CBL v2",
+        "export-v2-tooltip": "CBL v2 (JSON) verwenden"
     },
     "preferences": {
         "left-to-right": "Links nach rechts",
@@ -2381,7 +2353,18 @@
         "annotations-tab": "Anmerkungen",
         "overview-tab": "Übersicht",
         "management-tab": "Verwaltung",
-        "activity-tab": "Aktivität"
+        "activity-tab": "Aktivität",
+        "external-ids-tab": "Externe IDs",
+        "aliases-tab": "Aliase",
+        "chapters-tab": "Kapitel",
+        "dashboard-tab": "Dashboard",
+        "sidenav-tab": "Seitenleiste",
+        "external-sources-tab": "Externe Quellen",
+        "image-reader-tab": "Bildlesegerät",
+        "book-reader-tab": "Buchlesegerät",
+        "pdf-reader-tab": "PDF-Reader",
+        "bookmark-image-tab": "Bild",
+        "bookmark-text-tab": "Text"
     },
     "common": {
         "reset-to-default": "Auf Standard zurücksetzen",
@@ -2456,15 +2439,12 @@
         "description-label": "Beschreibung",
         "cover-image-description-extra": "Alternativ können Sie ein Cover von CoversDB herunterladen, sofern verfügbar.",
         "download-coversdb": "Download von CoversDB",
-        "cover-image-tab": "{{edit-series-modal.cover-image-tab}}",
-        "general-tab": "{{edit-series-modal.general-tab}}",
         "close": "{{common.close}}",
         "name-label": "{{edit-series-modal.name-label}}",
         "required-field": "{{validation.required-field}}",
         "cover-image-description": "{{edit-series-modal.cover-image-description}}",
         "save": "{{common.save}}",
         "aliases-tooltip": "Wenn eine Serie mit einem Alias einer Person versehen ist, wird diese Person zugewiesen, anstatt eine neue Person anzulegen. Wenn Sie einen Alias löschen, müssen Sie die Serie erneut scannen, damit die Änderung übernommen wird.",
-        "aliases-tab": "Aliases",
         "aliases-label": "Aliase bearbeiten",
         "alias-overlap": "Dieser Alias verweist bereits auf eine andere Person oder ist der Name dieser Person. Bitte erwäge, sie zusammenzuführen.",
         "mal-tooltip-character": "https://myanimelist.net/character/{MalId}/",
@@ -2472,7 +2452,7 @@
         "invalid-amazon-code": "Die ASIN sollte mit B0 oder BT beginnen"
     },
     "changelog-update-item": {
-        "download": "Download",
+        "download": "Herunterladen",
         "added": "Hinzugefügt",
         "changed": "Geändert",
         "fixed": "Repariert",
@@ -2633,7 +2613,7 @@
         "read-only": "Nur Lesen",
         "admin": "Admin",
         "promote": "Promote",
-        "download": "Download",
+        "download": "Herunterladen",
         "change-password": "Passwort ändern"
     },
     "log-level-pipe": {
@@ -2662,7 +2642,6 @@
         "tap-to-paginate-tooltip": "Sollten die Seiten des E-Book-Reader-Bildschirms durch Antippen umblätterbar sein vorherige/nächste Seite",
         "show-screen-hints-tooltip": "Zeige eine Überlagerung an, um den Bereich und die Richtung der Paginierung besser zu verstehen",
         "font-size-book-tooltip": "Prozentuale Skalierung für die Schriftart im Buch",
-        "pdf-reader-settings-title": "PDF Reader",
         "line-height-book-label": "Zeilenabstand",
         "layout-mode-book-tooltip": "Wie Inhalte angeordnet werden sollen. Der Bildlauf entspricht dem Aufbau des Buches. 1 oder 2 Spalten passen zur Höhe des Geräts und es passen 1 oder 2 Spalten Text pro Seite",
         "profiles-title": "Ihre Leseprofil",
@@ -2672,7 +2651,6 @@
         "no-selected": "Kein Profil ausgewählt",
         "confirm": "Möchten Sie das Leseprofil {{name}} wirklich löschen?",
         "selection-tip": "Wählen Sie ein Profil aus der Liste aus oder erstellen Sie oben rechts ein neues Profil",
-        "image-reader-settings-title": "Bild Reader",
         "reading-direction-label": "Leserichtung",
         "reading-direction-tooltip": "Klicken Sie hier, um zur nächsten Seite zu gelangen. Von rechts nach links bedeutet, dass Sie auf die linke Seite des Bildschirms klicken, um zur nächsten Seite zu gelangen.",
         "scaling-option-label": "Skalierungsoptionen",
@@ -2695,7 +2673,6 @@
         "allow-auto-webtoon-reader-label": "Automatischer Webtoon-Lesemodus",
         "allow-auto-webtoon-reader-tooltip": "Wechseln Sie in den Webtoon-Reader-Modus, wenn die Seiten wie ein Webtoon aussehen. Es können einige Fehlalarme auftreten.",
         "width-override-tooltip": "Breite von Bildern im Reader überschreiben",
-        "book-reader-settings-title": "Buch Reader",
         "tap-to-paginate-label": "Zum Blättern antippen",
         "immersive-mode-label": "Immersiver Modus",
         "reading-direction-book-label": "Leserichtung",
@@ -2875,8 +2852,8 @@
         "default-roles-label": "{{common.roles}}",
         "default-libraries-label": "{{common.libraries}}",
         "tls-required": "Der OIDC-Anbieter muss TLS (HTTPS) verwenden",
-        "reset-label": "IDs zurücksetzen",
-        "reset-tooltip": "Setzen Sie die externen IDs aller Benutzer zurück. Verwenden Sie diese Option, um die Verknüpfungen zwischen Benutzern in Kavita und Ihrem Identitätsanbieter zurückzusetzen",
+        "reset-label": "ids zurücksetzen",
+        "reset-tooltip": "Setzen Sie die externen IDs aller Benutzer zurück. Verwenden Sie diese Funktion, um die Verknüpfungen zwischen Benutzern in Kavita und Ihrem Identitätsanbieter zurückzusetzen",
         "reset-confirm": "Sind Sie sicher, dass Sie die externen IDs aller Benutzer zurücksetzen möchten?",
         "reset-success": "Externe IDs für alle Benutzer zurückgesetzt, bitte erneut authentifizieren, um die Verknüpfung herzustellen",
         "auto-save-required": "Sie haben wichtige Einstellungen geändert. Bitte speichern Sie diese automatisch, um sie beizubehalten",
@@ -2944,8 +2921,6 @@
     "view-bookmark-drawer": {
         "title": "Lesezeichen",
         "load-bookmark": "Laden",
-        "image-header": "Bild",
-        "text-header": "Text",
         "close": "{{common.close}}",
         "no-data": "{{common.no-data}}",
         "page-num-label": "{{book-reader.page-num-label}}"
@@ -3178,11 +3153,7 @@
         "stats-title": "Ein Blick auf {{username}}s Reise durch {{libraryName}}",
         "no-reviews": "Noch keine Bewertungen",
         "total-reads-badge": "{{reads}} Gelesen",
-        "k+-badge": "K+ Abonnent",
-        "overview-tab": "{{tabs.overview-tab}}",
-        "stats-tab": "{{tabs.stats-tab}}",
-        "reviews-tab": "{{tabs.reviews-tab}}",
-        "activity-tab": "{{tabs.activity-tab}}"
+        "k+-badge": "K+ Abonnent"
     },
     "profile-review-list": {
         "no-data": "Keine Bewertungen oder Bewertungen werden nicht geteilt",
@@ -3425,7 +3396,7 @@
         "browse-tags": "Tags durchsuchen",
         "want-to-read": "Möchte ich lesen",
         "reading-lists": "Leselisten",
-        "settings": "Einstellungen",
+        "settings": "Optionen",
         "all-series": "Alle Serien",
         "profile": "Profil von {{username}}"
     },
@@ -3477,5 +3448,13 @@
         "unlink-oidc": "OIDC-Link entfernen",
         "confirm-unlink": "Sind Sie sicher, dass Sie Ihre OIDC-Verbindung entfernen möchten?",
         "confirm-unlink-extra": "Wenn Sie derzeit mit dem OIDC-Konto authentifiziert sind, werden Sie abgemeldet. Sie können jederzeit erneut eine Verknüpfung per E-Mail herstellen."
+    },
+    "edit-external-metadata-form": {
+        "aniListId-label": "AniList-ID",
+        "malId-label": "MAL-ID",
+        "mangaBakaId-label": "MangaBaka-ID",
+        "hardcoverId-label": "Hardcover-ID",
+        "comicVineId-label": "Comic Vine-ID",
+        "metronId-label": "Metron-ID"
     }
 }
