@@ -33,6 +33,7 @@ public class BasicParser(IDirectoryService directoryService, IDefaultParser imag
             FullFilePath = Parser.NormalizePath(filePath),
             Series = Parser.ParseSeries(fileName, type),
             ComicInfo = comicInfo,
+            Volumes = Parser.ParseVolume(fileName, type),
             Chapters = Parser.ParseChapter(fileName, type),
         };
 
