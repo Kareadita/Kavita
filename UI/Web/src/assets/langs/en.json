@@ -1046,7 +1046,9 @@
         "create": "Create",
         "contains-spoilers-label": "{{annotation-card.contains-spoilers-label}}",
         "edit": "Edit",
-        "delete": "Delete"
+        "delete": "Delete",
+        "read-more": "{{read-more.read-more}}",
+        "read-less": "{{read-more.read-less}}"
     },
 
     "quill-wrapper": {
