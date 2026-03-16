@@ -5,7 +5,7 @@ using Kavita.Models.Entities.Enums.ReadingList;
 using Kavita.Models.Entities.Interfaces;
 using Kavita.Models.Entities.User;
 
-namespace Kavita.Models.Entities;
+namespace Kavita.Models.Entities.ReadingLists;
 
 #nullable enable
 

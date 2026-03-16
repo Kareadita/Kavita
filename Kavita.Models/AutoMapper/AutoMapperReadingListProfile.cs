@@ -3,6 +3,7 @@ using System.Linq;
 using AutoMapper;
 using Kavita.Models.DTOs.ReadingLists;
 using Kavita.Models.Entities;
+using Kavita.Models.Entities.ReadingLists;
 
 namespace Kavita.Models.AutoMapper;
 

@@ -4,6 +4,7 @@ using Kavita.API.Repositories;
 using Kavita.Models.Entities;
 using Kavita.Models.Entities.Metadata;
 using Kavita.Models.Entities.Person;
+using Kavita.Models.Entities.ReadingLists;
 using Kavita.Models.Entities.User;
 using Microsoft.EntityFrameworkCore;
 

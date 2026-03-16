@@ -162,7 +162,7 @@ public class CblGithubService : ICblGithubService
             var items = await response.GetJsonAsync<List<GithubContentItem>>();
 
             var result = items
-                .Where(i => i.Name != ".gitignore") // Gitignore files somehow slip thru
+                .Where(i => !i.Name.StartsWith('.')) // Insure .github or other meta files/directories are excluded
                 .Where(i => i.Type == "dir" || i.Name.EndsWith(CblExtension, StringComparison.OrdinalIgnoreCase) || i.Name.EndsWith(Cblv2Extension, StringComparison.OrdinalIgnoreCase))
                 .Select(i => new CblRepoItemDto
                 {

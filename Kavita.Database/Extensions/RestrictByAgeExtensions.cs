@@ -3,6 +3,7 @@ using System.Linq;
 using Kavita.Models.Entities;
 using Kavita.Models.Entities.Enums;
 using Kavita.Models.Entities.Person;
+using Kavita.Models.Entities.ReadingLists;
 using Kavita.Models.Entities.User;
 
 namespace Kavita.Database.Extensions;

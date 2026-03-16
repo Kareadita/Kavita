@@ -7,6 +7,7 @@ using Kavita.Models.DTOs.Person;
 using Kavita.Models.DTOs.ReadingLists;
 using Kavita.Models.Entities;
 using Kavita.Models.Entities.Enums;
+using Kavita.Models.Entities.ReadingLists;
 
 namespace Kavita.API.Repositories;
 

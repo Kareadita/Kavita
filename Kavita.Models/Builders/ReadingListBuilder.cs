@@ -2,6 +2,7 @@
 using Kavita.Common.Extensions;
 using Kavita.Models.Entities;
 using Kavita.Models.Entities.Enums;
+using Kavita.Models.Entities.ReadingLists;
 
 namespace Kavita.Models.Builders;
 

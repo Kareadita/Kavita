@@ -1,4 +1,5 @@
 ﻿using Kavita.Models.Entities;
+using Kavita.Models.Entities.ReadingLists;
 using Kavita.Models.Entities.User;
 using Kavita.Models.Helpers;
 

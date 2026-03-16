@@ -145,32 +145,25 @@ public class CblController(IReadingListService readingListService, IDirectorySer
             var content = await cblGithubService.GetFileContent(item.Path);
             var fullPath = SaveCblFileFromContent(content, userId, item.Name);
 
-            try
+            var summary = await cblImporterService.UpsertReadingList(userId, fullPath, new CblImportOptions(),
+                new CblImportDecisions());
+
+            if (summary.Success == CblImportResult.Fail) continue;
+
+            // Set sync tracking fields on the reading list
+            var readingList = await dataContext.ReadingList
+                .FirstOrDefaultAsync(rl => rl.AppUserId == userId && rl.SourcePath == item.Path);
+
+            if (readingList != null)
             {
-                await cblImporterService.UpsertReadingList(userId, fullPath, new CblImportOptions(),
-                    new CblImportDecisions());
-
-                // Set sync tracking fields on the reading list
-                var readingList = await dataContext.ReadingList
-                    .FirstOrDefaultAsync(rl => rl.AppUserId == userId && rl.SourcePath == item.Path);
-
-                if (readingList != null)
-                {
-                    readingList.Provider = ReadingListProvider.Url;
-                    readingList.SourcePath = item.Path;
-                    readingList.DownloadUrl = item.DownloadUrl;
-                    readingList.ShaHash = item.Sha;
-                    readingList.LastSyncedUtc = DateTime.UtcNow;
-                    readingList.LastSyncCheckUtc = DateTime.UtcNow;
-                    await dataContext.SaveChangesAsync();
-                }
+                readingList.Provider = ReadingListProvider.Url;
+                readingList.SourcePath = item.Path;
+                readingList.DownloadUrl = item.DownloadUrl;
+                readingList.ShaHash = item.Sha;
+                readingList.LastSyncedUtc = DateTime.UtcNow;
+                readingList.LastSyncCheckUtc = DateTime.UtcNow;
+                await dataContext.SaveChangesAsync();
             }
-            catch (Exception ex)
-            {
-
-            }
-
-
         }
 
         return Ok();

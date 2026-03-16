@@ -98,6 +98,14 @@ public sealed record CblBookResult
     /// </summary>
     public string ReadingListName { get; set; }
     public CblImportReason Reason { get; set; }
+    /// <summary>
+    /// Which matching tier resolved this item (null if not processed by new matcher)
+    /// </summary>
+    public CblMatchTier? MatchTier { get; set; }
+    /// <summary>
+    /// When a SeriesCollision occurs, the candidate series the user can choose from
+    /// </summary>
+    public IList<CblSeriesCandidate> Candidates { get; set; }
 
     public CblBookResult(CblBook book)
     {
@@ -106,11 +114,24 @@ public sealed record CblBookResult
         Number = book.Number;
     }
 
+    public CblBookResult(ParsedCblItem item)
+    {
+        Series = item.SeriesName;
+        Volume = item.Volume;
+        Number = item.Number;
+        Order = item.Order;
+    }
+
     public CblBookResult()
     {
 
     }
 }
+
+/// <summary>
+/// A candidate series for user disambiguation when multiple series match a CBL name
+/// </summary>
+public sealed record CblSeriesCandidate(int SeriesId, int LibraryId, string SeriesName);
 
 /// <summary>
 /// Represents the summary from the Import of a given CBL

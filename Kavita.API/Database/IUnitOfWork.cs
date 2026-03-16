@@ -35,6 +35,7 @@ public interface IUnitOfWork
     IEpubFontRepository EpubFontRepository { get; }
     IReadingSessionRepository ReadingSessionRepository { get; }
     IClientDeviceRepository ClientDeviceRepository { get; }
+    IReadingListRemapRuleRepository RemapRuleRepository { get; }
     bool Commit();
     Task<bool> CommitAsync(CancellationToken ct = default);
     bool HasChanges();

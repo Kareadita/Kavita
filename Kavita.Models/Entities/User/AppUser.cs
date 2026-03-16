@@ -7,6 +7,7 @@ using Kavita.Common.Helpers;
 using Kavita.Models.Entities.Enums;
 using Kavita.Models.Entities.Interfaces;
 using Kavita.Models.Entities.Progress;
+using Kavita.Models.Entities.ReadingLists;
 using Kavita.Models.Entities.Scrobble;
 using Microsoft.AspNetCore.Identity;
 

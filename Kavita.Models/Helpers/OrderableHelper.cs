@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using Kavita.Models.Entities;
+using Kavita.Models.Entities.ReadingLists;
 using Kavita.Models.Entities.User;
 
 namespace Kavita.Models.Helpers;

@@ -22,6 +22,7 @@ using Kavita.Models.DTOs.ReadingLists.CBL.V1;
 using Kavita.Models.DTOs.SignalR;
 using Kavita.Models.Entities;
 using Kavita.Models.Entities.Enums;
+using Kavita.Models.Entities.ReadingLists;
 using Kavita.Models.Entities.User;
 using Kavita.Models.Extensions;
 using Kavita.Models.Helpers;

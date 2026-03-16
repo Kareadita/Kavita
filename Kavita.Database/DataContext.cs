@@ -17,6 +17,7 @@ using Kavita.Models.Entities.Metadata;
 using Kavita.Models.Entities.MetadataMatching;
 using Kavita.Models.Entities.Person;
 using Kavita.Models.Entities.Progress;
+using Kavita.Models.Entities.ReadingLists;
 using Kavita.Models.Entities.Scrobble;
 using Kavita.Models.Entities.User;
 using Microsoft.AspNetCore.DataProtection.EntityFrameworkCore;
@@ -98,6 +99,8 @@ public sealed class DataContext : IdentityDbContext<AppUser, AppRole, int,
     public DbSet<ClientDeviceHistory> ClientDeviceHistory { get; set; } = null!;
     public DbSet<AppUserAuthKey> AppUserAuthKey { get; set; } = null!;
 
+    public DbSet<ReadingListRemapRule> ReadingListRemapRule { get; set; } = null!;
+
     public DbSet<DataProtectionKey> DataProtectionKeys { get; set; } = null!;
 
 
@@ -134,6 +137,32 @@ public sealed class DataContext : IdentityDbContext<AppUser, AppRole, int,
         builder.Entity<ReadingList>()
             .Property(b => b.Provider)
             .HasDefaultValue(ReadingListProvider.None);
+
+        builder.Entity<ReadingListRemapRule>(entity =>
+        {
+            entity.HasOne(r => r.Series)
+                .WithMany()
+                .HasForeignKey(r => r.SeriesId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            entity.HasOne(r => r.Volume)
+                .WithMany()
+                .HasForeignKey(r => r.VolumeId)
+                .OnDelete(DeleteBehavior.SetNull);
+
+            entity.HasOne(r => r.Chapter)
+                .WithMany()
+                .HasForeignKey(r => r.ChapterId)
+                .OnDelete(DeleteBehavior.SetNull);
+
+            entity.HasOne(r => r.AppUser)
+                .WithMany()
+                .HasForeignKey(r => r.AppUserId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            entity.HasIndex(r => new { r.NormalizedCblSeriesName, r.AppUserId })
+                .HasDatabaseName("IX_ReadingListRemapRule_NormalizedCblSeriesName_AppUserId");
+        });
         #endregion
 
 

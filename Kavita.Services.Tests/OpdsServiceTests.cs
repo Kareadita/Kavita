@@ -20,6 +20,7 @@ using Kavita.Models.DTOs.OPDS.Requests;
 using Kavita.Models.DTOs.Progress;
 using Kavita.Models.Entities;
 using Kavita.Models.Entities.Enums;
+using Kavita.Models.Entities.ReadingLists;
 using Kavita.Models.Entities.User;
 using Kavita.Services.Builders;
 using Kavita.Services.Reading;

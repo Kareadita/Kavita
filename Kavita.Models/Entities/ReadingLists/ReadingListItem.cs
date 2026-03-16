@@ -1,4 +1,4 @@
-﻿namespace Kavita.Models.Entities;
+﻿namespace Kavita.Models.Entities.ReadingLists;
 
 public class ReadingListItem
 {

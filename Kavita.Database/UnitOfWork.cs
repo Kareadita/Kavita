@@ -51,6 +51,7 @@ public class UnitOfWork : IUnitOfWork
         EpubFontRepository = new EpubFontRepository(_context, _mapper);
         ReadingSessionRepository = new ReadingSessionRepository(_context, _mapper);
         ClientDeviceRepository = new ClientDeviceRepository(_context, _mapper);
+        RemapRuleRepository = new ReadingListRemapRuleRepository(_context);
     }
 
     /// <summary>
@@ -85,6 +86,7 @@ public class UnitOfWork : IUnitOfWork
     public IEpubFontRepository EpubFontRepository { get;  }
     public IReadingSessionRepository ReadingSessionRepository { get;  }
     public IClientDeviceRepository ClientDeviceRepository { get; }
+    public IReadingListRemapRuleRepository RemapRuleRepository { get; }
 
     /// <summary>
     /// Commits changes to the DB. Completes the open transaction.
