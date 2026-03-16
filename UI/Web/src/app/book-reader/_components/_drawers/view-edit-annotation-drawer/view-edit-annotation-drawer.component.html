@@ -104,7 +104,7 @@
             <div id="render-target" #renderTarget>
               <p class="content-quote mb-0" [class.clamped]="!quoteExpanded()" [innerHTML]="totalText()"></p>
             </div>
-            <a class="quote-toggle" (click)="quoteExpanded.set(!quoteExpanded())">
+            <a class="quote-toggle" (click)="quoteExpanded.set(!quoteExpanded())" role="button" href="javascript:void(0);">
               <i aria-hidden="true" class="fa mx-1" [class.fa-caret-down]="!quoteExpanded()" [class.fa-caret-up]="quoteExpanded()"></i>
               {{quoteExpanded() ? t('read-less') : t('read-more')}}
             </a>
