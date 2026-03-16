@@ -100,7 +100,7 @@
     @if (annotation() && formGroup) {
       <form [formGroup]="formGroup" novalidate>
         <div class="d-flex justify-content-center">
-          <blockquote class="text-muted pb-2 small fw-lighter mx-3 mx-md-4 mx-lg-5" style="max-width: flex; width: 90%;">
+          <blockquote class="text-muted pb-2 small fw-lighter mx-3 mx-md-4 mx-lg-5 mx-auto" style="max-width: 90%;">
             <div id="render-target" #renderTarget>
               <p class="content-quote mb-0" [class.clamped]="!quoteExpanded()" [innerHTML]="totalText()"></p>
             </div>
