@@ -50,8 +50,8 @@
         "is-processed-header": "An bhfuil Próiseáilte",
         "no-data": "{{common.no-data}}",
         "volume-and-chapter-num": "Imleabhar {{v}} Caibidil {{n}}",
-        "volume-num": "Imleabhar {{num}}",
-        "chapter-num": "Caibidil {{num}}",
+        "volume-num": "{{entity-title.volume-num}}",
+        "chapter-num": "{{entity-title.chapter-num}}",
         "rating": "Rátáil {{r}}",
         "not-applicable": "Neamhbhainteach",
         "processed": "Próiseáilte",
@@ -663,15 +663,6 @@
         "remove-from-want-to-read": "{{actionable.remove-from-want-to-read}}",
         "add-to-want-to-read": "{{actionable.add-to-want-to-read}}",
         "edit-series-alt": "Cuir Eolas in Eagar",
-        "reviews-tab": "{{tabs.reviews-tab}}",
-        "storyline-tab": "{{tabs.storyline-tab}}",
-        "books-tab": "{{tabs.books-tab}}",
-        "volumes-tab": "{{tabs.volumes-tab}}",
-        "specials-tab": "{{tabs.specials-tab}}",
-        "related-tab": "{{tabs.related-tab}}",
-        "details-tab": "{{tabs.details-tab}}",
-        "info-tab": "{{tabs.info-tab}}",
-        "recommendations-tab": "{{tabs.recommendations-tab}}",
         "send-to": "Comhad ar ríomhphost chuig {{deviceName}}",
         "no-pages": "{{toasts.no-pages}}",
         "no-chapters": "Níl aon chaibidlí san imleabhar seo. Ní féidir léamh.",
@@ -695,7 +686,6 @@
         "publication-status-tooltip": "Stádas Foilseacháin",
         "off": "{{reader-settings.off}}",
         "on": "{{reader-settings.on}}",
-        "annotations-tab": "{{tabs.annotations-tab}}",
         "loading": "{{common.loading}}",
         "read-count-tooltip": "Líon Iomlán na Léamha"
     },
@@ -767,11 +757,6 @@
         "close": "{{common.close}}",
         "edit-title": "Cuir {{name}} in eagar",
         "add-title": "Cuir Leabharlann Leis",
-        "general-tab": "{{tabs.general-tab}}",
-        "folder-tab": "{{tabs.folder-tab}}",
-        "cover-tab": "{{tabs.cover-tab}}",
-        "advanced-tab": "{{tabs.advanced-tab}}",
-        "tasks-tab": "{{tabs.tasks-tab}}",
         "name-label": "Ainm",
         "library-name-unique": "Caithfidh ainm na leabharlainne a bheith uathúil",
         "last-scanned-label": "An scanadh is déanaí:",
@@ -977,9 +962,17 @@
     },
     "entity-title": {
         "special": "Speisialta",
-        "issue-num": "{{common.issue-hash-num}}",
-        "book-num": "{{common.book-num-shorthand}}",
-        "single-volume": "Imleabhar Aonair"
+        "issue-num": "Eisiúint #{{num}}",
+        "book-num": "Leabhar {{num}}",
+        "single-volume": "Imleabhar Aonair",
+        "chapter-num": "Caibidil {{num}}",
+        "volume-num": "Imleabhar {{num}}",
+        "book-title": "Leabhar",
+        "book-title-plural": "Leabhair",
+        "issue-title": "Saincheist",
+        "issue-title-plural": "Saincheisteanna",
+        "chapter-title": "Caibidil",
+        "chapter-title-plural": "Caibidlí"
     },
     "external-series-card": {
         "open-external": "Oscail Seachtrach"
@@ -1255,10 +1248,6 @@
         "save": "{{common.save}}",
         "close": "{{common.close}}",
         "cancel": "{{common.cancel}}",
-        "general-tab": "{{tabs.general-tab}}",
-        "cover-image-tab": "{{tabs.cover-tab}}",
-        "info-tab": "{{tabs.info-tab}}",
-        "series-tab": "{{tabs.series-tab}}",
         "name-label": "Ainm",
         "name-validation": "Caithfidh an t-ainm a bheith uathúil",
         "promote-label": "Cur chun cinn",
@@ -1389,8 +1378,6 @@
         "items-title": "Míreanna",
         "reorder-alt": "Míreanna a Athordú",
         "publishers-title": "{{metadata-fields.publishers-title}}",
-        "storyline-tab": "{{series-detail.storyline-tab}}",
-        "details-tab": "{{series-detail.details-tab}}",
         "edit-alt": "{{common.edit}}",
         "loading-alt": "{{pdf-reader.loading-message}}"
     },
@@ -1475,8 +1462,6 @@
     },
     "edit-reading-list-modal": {
         "title": "Cuir Liosta Léitheoireachta in Eagar: {{name}}",
-        "general-tab": "{{tabs.general-tab}}",
-        "cover-image-tab": "{{tabs.cover-tab}}",
         "close": "{{common.close}}",
         "save": "{{common.save}}",
         "year-validation": "Ní mór a bheith níos mó ná 1000, 0 nó bán",
@@ -1669,7 +1654,6 @@
         "general-tab": "{{tabs.general-tab}}",
         "metadata-tab": "{{tabs.metadata-tab}}",
         "people-tab": "{{tabs.people-tab}}",
-        "web-links-tab": "{{tabs.weblink-tab}}",
         "cover-image-tab": "{{tabs.cover-tab}}",
         "related-tab": "{{tabs.related-tab}}",
         "info-tab": "{{tabs.info-tab}}",
@@ -1764,15 +1748,8 @@
         "age-rating-label": "{{edit-series-modal.age-rating-label}}",
         "web-link-description": "{{edit-series-modal.web-link-description}}",
         "web-link-label": "{{edit-series-modal.web-link-label}}",
-        "general-tab": "{{tabs.general-tab}}",
-        "people-tab": "{{tabs.people-tab}}",
-        "weblink-tab": "{{tabs.weblink-tab}}",
         "field-locked-alt": "{{edit-series-modal.field-locked-alt}}",
-        "cover-image-tab": "{{tabs.cover-tab}}",
-        "tasks-tab": "{{tabs.tasks-tab}}",
-        "info-tab": "{{tabs.info-tab}}",
         "cover-image-description": "{{edit-series-modal.cover-image-description}}",
-        "tags-tab": "{{tabs.tags-tab}}",
         "pages-label": "Leathanaigh",
         "words-label": "Fad",
         "pages-count": "{{series-detail.pages-count}}",
@@ -1894,8 +1871,6 @@
         "people": "Daoine",
         "genres": "{{metadata-fields.genres-title}}",
         "stats-title": "Taiscéal",
-        "stats-tab": "{{tabs.stats-tab}}",
-        "management-tab": "{{tabs.management-tab}}",
         "popular-decades-title": "Deich mBliana Coitianta",
         "popular-genres-title": "Seánraí Coitianta",
         "popular-tags-title": "Clibeanna Coitianta",
@@ -1951,10 +1926,6 @@
     },
     "customize-dashboard-modal": {
         "title-smart-filters": "Scagairí Cliste",
-        "dashboard": "Deais",
-        "sidenav": "Taobh Nascleanúint",
-        "external-sources": "Foinsí Seachtracha",
-        "smart-filters": "Scagairí Cliste",
         "description": "Is féidir leat gnéithe éagsúla de Kavita a shaincheapadh trí athordú a dhéanamh, trí infheictheacht a scoránú, agus trí scagairí cliste/foinsí seachtracha a cheangal le do leathanach baile nó le do thaobh nav."
     },
     "customize-dashboard-streams": {
@@ -1997,7 +1968,8 @@
         "filter-name-unique": "Caithfidh ainmneacha Scagaire Cliste a bheith uathúil",
         "cancel": "{{common.cancel}}",
         "edit-smart-filter": "Cuir {{name}} in eagar",
-        "close": "{{common.close}}"
+        "close": "{{common.close}}",
+        "no-content": "Níl aon torthaí ag an scagaire cliste seo ar an deais"
     },
     "edit-external-source-item": {
         "not-unique": "Tá foinse sheachtrach ann leis an óstach seo. Cinntigh nach bhfuil dúbailtí agat",
@@ -2337,7 +2309,7 @@
     },
     "entity-type": {
         "volume": "Imleabhar",
-        "chapter": "Caibidil",
+        "chapter": "caibidil",
         "series": "sraith",
         "bookmark": "Leabharmharc",
         "logs": "Loganna"
@@ -2435,8 +2407,6 @@
         "no-info": "Gan aon eolas faoin Duine seo"
     },
     "edit-person-modal": {
-        "general-tab": "{{edit-series-modal.general-tab}}",
-        "cover-image-tab": "{{edit-series-modal.cover-image-tab}}",
         "title": "Sonraí {{personName}}",
         "name-label": "{{edit-series-modal.name-label}}",
         "required-field": "{{validation.required-field}}",
@@ -2455,7 +2425,6 @@
         "hardcover-tooltip": "https://hardcover.app/authors/{HardcoverId}",
         "download-coversdb": "Íoslódáil ó CoverDB",
         "aliases-label": "Cuir leasainmneacha in eagar",
-        "aliases-tab": "Leasainmneacha",
         "aliases-tooltip": "Nuair a chuirtear leasainm duine ar shraith, sanntar an duine sin seachas duine nua a chruthú. Agus leasainm á scriosadh, beidh ort an tsraith a athscanadh le go dtabharfar faoi deara an t-athrú.",
         "alias-overlap": "Tá an leasainm seo ag tagairt do dhuine eile cheana féin nó is é ainm an duine seo é, smaoinigh ar iad a chumasc.",
         "mal-tooltip-character": "https://myanimelist.net/character/{MalId}/",
@@ -2676,7 +2645,6 @@
         "add": "{{common.add}}",
         "add-tooltip": "Sábhálfar do phróifíl nua tar éis athrú a dhéanamh uirthi",
         "make-default": "Socraigh mar réamhshocrú",
-        "image-reader-settings-title": "Léitheoir Íomhánna",
         "scaling-option-label": "Roghanna Scálúcháin",
         "page-splitting-label": "Scoilteadh Leathanaigh",
         "reading-mode-label": "Mód Léitheoireachta",
@@ -2692,7 +2660,6 @@
         "allow-auto-webtoon-reader-tooltip": "Athraigh go mód Léitheora Gréasáin má tá cuma gréasáin ar leathanaigh. D’fhéadfadh roinnt torthaí dearfacha bréagacha tarlú.",
         "width-override-label": "{{manga-reader.width-override-label}}",
         "reset": "{{common.reset}}",
-        "book-reader-settings-title": "Léitheoir Leabhar",
         "tap-to-paginate-label": "Tapáil chun Leathanachú",
         "tap-to-paginate-tooltip": "An gceadaíonn taobhanna scáileán an léitheora leabhar tapáil air chun bogadh go dtí an leathanach roimhe/an chéad leathanach eile",
         "immersive-mode-label": "Mód Tumtha",
@@ -2709,7 +2676,6 @@
         "line-height-book-label": "Spásáil Líne",
         "line-height-book-tooltip": "Cé mhéad spás idir línte an leabhair",
         "margin-book-label": "Corrlach",
-        "pdf-reader-settings-title": "Léitheoir PDF",
         "pdf-scroll-mode-label": "Mód Scrollaigh",
         "reading-profile-series-settings-title": "Sraith",
         "pdf-theme-label": "Téama",
@@ -2937,9 +2903,7 @@
         "close": "{{common.close}}",
         "no-data": "{{common.no-data}}",
         "page-num-label": "{{book-reader.page-num-label}}",
-        "load-bookmark": "Luchtaigh",
-        "image-header": "Íomhá",
-        "text-header": "Téacs"
+        "load-bookmark": "Luchtaigh"
     },
     "page-chapter-label-pipe": {
         "page-only": "— Leathanach {{pageNumber}}",
@@ -3153,16 +3117,12 @@
         "title": "Próifíl {{username}}",
         "joined-label": "Chuaigh isteach:",
         "stats-title": "Súil ar thuras {{username}} trí {{libraryName}}",
-        "overview-tab": "{{tabs.overview-tab}}",
-        "stats-tab": "{{tabs.stats-tab}}",
-        "reviews-tab": "{{tabs.reviews-tab}}",
         "no-reviews": "Gan aon léirmheasanna fós",
         "total-reads-badge": "Léamha {{reads}}",
         "k+-badge": "Síntiúsóir K+",
         "last-read-label": "Léamh Deiridh:",
         "time-reading-label": "Am Léitheoireachta Iomlán:",
-        "avg-reading-per-week-label": "Meán in aghaidh na seachtaine:",
-        "activity-tab": "{{tabs.activity-tab}}"
+        "avg-reading-per-week-label": "Meán in aghaidh na seachtaine:"
     },
     "profile-review-list": {
         "no-data": "Gan aon léirmheasanna nó níl léirmheasanna á roinnt",
@@ -3378,7 +3338,8 @@
         "today": "Inniu",
         "yesterday": "Inné",
         "pagination-label": "Leathanachú gníomhaíochta",
-        "page-info": "Leathanach {{current}} de {{total}} ({{items}} taifead san iomlán)"
+        "page-info": "Leathanach {{current}} de {{total}} ({{items}} taifead san iomlán)",
+        "num-more": "{{num}} eile"
     },
     "user-stats-info-cards": {
         "pages-read-by-year-title": "Leathanaigh léite de réir bliana",
@@ -3461,5 +3422,11 @@
     },
     "download-queue-widget": {
         "title": "{{download-queue-drawer.title}}"
+    },
+    "account-settings": {
+        "oidc": "{{login.oidc}}",
+        "unlink-oidc": "Bain nasc OIDC",
+        "confirm-unlink": "An bhfuil tú cinnte gur mian leat do nasc OIDC a bhaint?",
+        "confirm-unlink-extra": "Má tá tú fíordheimhnithe faoi láthair leis an gcuntas OIDC, déanfar tú a logáil amach. Is féidir leat nascadh arís trí ríomhphost ag am ar bith."
     }
 }

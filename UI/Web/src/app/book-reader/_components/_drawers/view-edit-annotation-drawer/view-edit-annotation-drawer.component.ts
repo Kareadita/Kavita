@@ -7,6 +7,7 @@ import {
   inject,
   model,
   OnInit,
+  signal,
   Signal,
   viewChild,
   ViewContainerRef
@@ -97,6 +98,8 @@ export class ViewEditAnnotationDrawerComponent implements OnInit {
   isEditOrCreateMode: Signal<boolean>
   titleColor: Signal<string>;
   totalText!: Signal<SafeHtml>;
+
+  quoteExpanded = signal(false);
 
   formGroup!: FormGroup<{
     note: FormControl<object>,
