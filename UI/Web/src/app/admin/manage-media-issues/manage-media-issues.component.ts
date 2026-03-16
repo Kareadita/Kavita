@@ -3,10 +3,9 @@ import {
   ChangeDetectorRef,
   Component,
   DestroyRef,
-  EventEmitter,
   inject,
   OnInit,
-  Output
+  output
 } from '@angular/core';
 import {filter, shareReplay} from 'rxjs';
 import {KavitaMediaError} from '../_models/media-error';
@@ -31,7 +30,7 @@ import {ResponsiveTableComponent} from "../../shared/_components/responsive-tabl
 })
 export class ManageMediaIssuesComponent implements OnInit {
 
-  @Output() alertCount = new EventEmitter<number>();
+  readonly alertCount = output<number>();
 
   private readonly serverService = inject(ServerService);
   private readonly messageHub = inject(MessageHubService);

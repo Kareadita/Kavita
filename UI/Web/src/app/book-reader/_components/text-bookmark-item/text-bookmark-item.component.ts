@@ -1,4 +1,4 @@
-import {Component, EventEmitter, inject, input, Output} from '@angular/core';
+import {Component, inject, input, output} from '@angular/core';
 import {PersonalToC} from "../../../_models/readers/personal-toc";
 import {NgbTooltip} from "@ng-bootstrap/ng-bootstrap";
 import {TranslocoDirective} from "@jsverse/transloco";
@@ -16,8 +16,8 @@ import {ReaderService} from "../../../_services/reader.service";
 export class TextBookmarkItemComponent {
   bookmark = input.required<PersonalToC>();
 
-  @Output() loadBookmark =  new EventEmitter<PersonalToC>();
-  @Output() removeBookmark =  new EventEmitter<PersonalToC>();
+  readonly loadBookmark = output<PersonalToC>();
+  readonly removeBookmark = output<PersonalToC>();
 
   private readonly readerService = inject(ReaderService);
 

@@ -4,12 +4,13 @@ import {
   Component,
   computed,
   DestroyRef,
+  effect,
   inject,
   input
 } from '@angular/core';
 import {Location, TitleCasePipe} from '@angular/common';
 import {MemberInfo} from "../../../_models/user/member-info";
-import {translate, TranslocoDirective} from "@jsverse/transloco";
+import {TranslocoDirective} from "@jsverse/transloco";
 import {ImageService} from "../../../_services/image.service";
 import {TimeAgoPipe} from "../../../_pipes/time-ago.pipe";
 import {NgbNav, NgbNavContent, NgbNavItem, NgbNavLink, NgbNavOutlet} from "@ng-bootstrap/ng-bootstrap";
@@ -31,16 +32,12 @@ import {ProfileStatsComponent} from "../profile-stats/profile-stats.component";
 import {SentenceCasePipe} from "../../../_pipes/sentence-case.pipe";
 import {TimeDurationPipe} from "../../../_pipes/time-duration.pipe";
 import {NavTabUrlDirective} from "../../../_directives/nav-tab-url.directive";
-import {Title} from "@angular/platform-browser";
 import {AccountService} from "../../../_services/account.service";
 import {ProfileActivityComponent} from "../profile-activity/profile-activity.component";
+import {KavitaTitleStrategy} from "../../../_services/kavita-title.strategy";
+import {Tabs} from "../../../_models/tabs";
+import {TabTitlePipe} from "../../../_pipes/tab-title.pipe";
 
-enum TabID {
-  Overview = 'overview-tab',
-  Stats = 'stats-tab',
-  Reviews = 'reviews-tab',
-  Activity = 'activity-tab'
-}
 
 @Component({
   selector: 'app-profile',
@@ -68,6 +65,7 @@ enum TabID {
     TimeDurationPipe,
     NavTabUrlDirective,
     ProfileActivityComponent,
+    TabTitlePipe,
   ],
   templateUrl: './profile.component.html',
   styleUrl: './profile.component.scss',
@@ -81,7 +79,7 @@ export class ProfileComponent {
   protected readonly imageService = inject(ImageService);
   private readonly statsService = inject(StatisticsService);
   protected readonly licenseService = inject(LicenseService);
-  private readonly titleService = inject(Title);
+  private readonly kavitaTitleStrategy = inject(KavitaTitleStrategy);
   protected readonly accountService = inject(AccountService);
   private readonly cdRef = inject(ChangeDetectorRef);
 
@@ -95,7 +93,7 @@ export class ProfileComponent {
   protected readonly userStatsResource = this.statsService.getUserStatisticsResource(() => this.userId());
 
 
-  activeTabId = TabID.Overview;
+  activeTabId = Tabs.Overview;
 
 
   totalReads = computed(() => {
@@ -120,13 +118,13 @@ export class ProfileComponent {
   constructor() {
     const initialFragment = this.route.snapshot.fragment;
     if (initialFragment) {
-      this.activeTabId = initialFragment as TabID;
+      this.activeTabId = initialFragment as Tabs;
       this.cdRef.markForCheck();
     }
 
     // TODO: If ngBootstrap ever supports signal-based activeTabId, we can move this into syncUrlFragment directive
     this.route.fragment.pipe(tap(frag => {
-      const fragId = frag as TabID;
+      const fragId = frag as Tabs;
       if (frag !== null && this.activeTabId !== fragId) {
         this.updateUrl(fragId);
         this.activeTabId = fragId;
@@ -134,11 +132,16 @@ export class ProfileComponent {
       }
     }), takeUntilDestroyed(this.destroyRef)).subscribe();
 
-    this.titleService.setTitle(translate('profile.title', {username: this.accountService.currentUserSignal()!.username}));
+    effect(() => {
+      const info = this.memberInfo();
+      if (info) {
+        this.kavitaTitleStrategy.setTranslatedTitle('title.profile', {username: info.username});
+      }
+    });
   }
 
 
-  updateUrl(activeTab: TabID) {
+  updateUrl(activeTab: Tabs) {
     const tokens = this.location.path().split('#');
     const newUrl = `${tokens[0]}#${activeTab}`;
     this.location.replaceState(newUrl)
@@ -147,7 +150,7 @@ export class ProfileComponent {
 
 
 
-  protected readonly TabID = TabID;
+  protected readonly Tabs = Tabs;
   protected readonly window = window;
 
 }

@@ -1,6 +1,8 @@
 {
     "login": {
-        "forgot-password": "Heu oblidat la contrasenya?"
+        "forgot-password": "Heu oblidat la contrasenya?",
+        "title": "Inici de sessió amb el teu compte",
+        "submit": "Accedir"
     },
     "dashboard": {
         "no-libraries": "Encara no s'ha configurat cap biblioteca. Creeu-ne una de nova a",
@@ -61,10 +63,6 @@
         "known-issues": "Problemes coneguts",
         "api": "API",
         "theme": "Tema"
-    },
-    "new-version-modal": {
-        "title": "S'ha actualitzat el Kavita.",
-        "refresh": "Actualitza"
     },
     "change-password": {
         "current-password-label": "Contrasenya actual",
@@ -386,10 +384,6 @@
         "chapter-num-shorthand": "Cap. {{num}}",
         "book-num-shorthand": "Llibre {{num}}",
         "volume-num": "Volum",
-        "book-nums": "Llibres",
-        "issue-nums": "Números",
-        "chapter-nums": "Capítols",
-        "volume-nums": "Volums",
         "chapter-count": "{{num}} capítols"
     },
     "edit-device-modal": {
@@ -408,7 +402,6 @@
         "errored": "Hi ha un error de codificació en el filtre. Cal recrear-lo."
     },
     "customize-dashboard-modal": {
-        "smart-filters": "Filtres intel·ligents",
         "title-smart-filters": "Filtres intel·ligents"
     },
     "import-cbl-modal": {
@@ -469,5 +462,12 @@
     },
     "restriction-selector": {
         "no-restriction": "Cap restricció"
+    },
+    "version-update-modal": {
+        "close": "{{common.close}}",
+        "new-version": {
+            "title": "S'ha actualitzat el Kavita.",
+            "refresh": "Actualitza"
+        }
     }
 }

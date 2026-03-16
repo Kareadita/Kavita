@@ -444,12 +444,6 @@
     "announcements": {
         "title": "Aankondigingen"
     },
-    "out-of-date-modal": {
-        "close": "{{common.close}}",
-        "title": "Blijf niet achter!",
-        "subtitle": "Het lijkt erop dat je installatie meer dan {{count}} versies achterloopt!",
-        "description-1": "Overweeg een upgrade zodat je de nieuwste versie van Kavita gebruikt."
-    },
     "changelog": {
         "installed": "Geïnstalleerd",
         "download": "Download",
@@ -581,15 +575,6 @@
         "remove-from-want-to-read": "{{actionable.remove-from-want-to-read}}",
         "add-to-want-to-read": "{{actionable.add-to-want-to-read}}",
         "edit-series-alt": "Informatie bewerken",
-        "reviews-tab": "{{tabs.reviews-tab}}",
-        "storyline-tab": "{{tabs.storyline-tab}}",
-        "books-tab": "{{tabs.books-tab}}",
-        "volumes-tab": "{{tabs.volumes-tab}}",
-        "specials-tab": "{{tabs.specials-tab}}",
-        "related-tab": "{{tabs.related-tab}}",
-        "details-tab": "{{tabs.details-tab}}",
-        "info-tab": "{{tabs.info-tab}}",
-        "recommendations-tab": "{{tabs.recommendations-tab}}",
         "send-to": "Bestand gemaild naar {{deviceName}}",
         "no-pages": "{{toasts.no-pages}}",
         "no-chapters": "Er zijn geen hoofdstukken in dit boek. Kan niet lezen.",
@@ -635,12 +620,6 @@
         "read-more": "Toon meer",
         "read-less": "Toon minder"
     },
-    "update-notification-modal": {
-        "title": "Nieuwe update beschikbaar!",
-        "close": "{{common.close}}",
-        "help": "Hoe te updaten",
-        "download": "Download"
-    },
     "side-nav-companion-bar": {
         "page-settings-title": "{{series-detail.page-settings-title}}",
         "open-filter-and-sort": "Open Filteren en sorteren",
@@ -667,11 +646,6 @@
         "close": "{{common.close}}",
         "edit-title": "Bewerk {{name}}",
         "add-title": "Bibliotheek toevoegen",
-        "general-tab": "{{tabs.general-tab}}",
-        "folder-tab": "{{tabs.folder-tab}}",
-        "cover-tab": "{{tabs.cover-tab}}",
-        "advanced-tab": "{{tabs.advanced-tab}}",
-        "tasks-tab": "{{tabs.tasks-tab}}",
         "name-label": "Naam",
         "library-name-unique": "Bibliotheeknaam moet uniek zijn",
         "last-scanned-label": "Laatst Gescand:",
@@ -845,9 +819,7 @@
     "entity-title": {
         "special": "Speciaal",
         "issue-num": "{{common.issue-hash-num}}",
-        "chapter": "{{common.chapter-num}}",
-        "book-num": "{{common.book-num-shorthand}}",
-        "vol-num": "{{user-scrobble-history.volume-num}}"
+        "book-num": "{{common.book-num-shorthand}}"
     },
     "external-series-card": {
         "open-external": "Open extern"
@@ -1048,10 +1020,6 @@
         "save": "{{common.save}}",
         "close": "{{common.close}}",
         "cancel": "{{common.cancel}}",
-        "general-tab": "{{tabs.general-tab}}",
-        "cover-image-tab": "{{tabs.cover-tab}}",
-        "info-tab": "{{tabs.info-tab}}",
-        "series-tab": "{{tabs.series-tab}}",
         "name-label": "Naam",
         "name-validation": "Naam moet uniek zijn",
         "promote-label": "Promoot",
@@ -1189,8 +1157,6 @@
     },
     "edit-reading-list-modal": {
         "title": "Leeslijst bewerken: {{name}}",
-        "general-tab": "{{tabs.general-tab}}",
-        "cover-image-tab": "{{tabs.cover-tab}}",
         "close": "{{common.close}}",
         "save": "{{common.save}}",
         "year-validation": "Moet groter zijn dan 1000, 0 of blanco",
@@ -1331,7 +1297,6 @@
         "general-tab": "{{tabs.general-tab}}",
         "metadata-tab": "{{tabs.metadata-tab}}",
         "people-tab": "{{tabs.people-tab}}",
-        "web-links-tab": "{{tabs.weblink-tab}}",
         "cover-image-tab": "{{tabs.cover-tab}}",
         "related-tab": "{{tabs.related-tab}}",
         "info-tab": "{{tabs.info-tab}}",
@@ -1413,15 +1378,8 @@
         "age-rating-label": "{{edit-series-modal.age-rating-label}}",
         "web-link-description": "{{edit-series-modal.web-link-description}}",
         "web-link-label": "{{edit-series-modal.web-link-label}}",
-        "general-tab": "{{tabs.general-tab}}",
-        "people-tab": "{{tabs.people-tab}}",
-        "weblink-tab": "{{tabs.weblink-tab}}",
         "field-locked-alt": "{{edit-series-modal.field-locked-alt}}",
-        "cover-image-tab": "{{tabs.cover-tab}}",
-        "tasks-tab": "{{tabs.tasks-tab}}",
-        "info-tab": "{{tabs.info-tab}}",
         "cover-image-description": "{{edit-series-modal.cover-image-description}}",
-        "tags-tab": "{{tabs.tags-tab}}",
         "size-label": "{{edit-series-modal.size-title}}",
         "links-label": "{{metadata-fields.links-title}}",
         "last-read-label": "{{sort-field-pipe.read-progress}}"
@@ -1489,11 +1447,7 @@
         "remove-rule": "Rij verwijderen"
     },
     "customize-dashboard-modal": {
-        "title-smart-filters": "Slimme filters",
-        "dashboard": "Dashboard",
-        "sidenav": "Zijnavigatie",
-        "external-sources": "Externe bronnen",
-        "smart-filters": "Slimme filters"
+        "title-smart-filters": "Slimme filters"
     },
     "customize-dashboard-streams": {
         "no-data": "Alle slimme filters toegevoegd aan Dashboard of nog geen gemaakt.",
@@ -1577,7 +1531,6 @@
         "required": "{{validation.required-field}}"
     },
     "common": {
-        "book-nums": "Boeken",
         "book-num-shorthand": "Boek {{num}}",
         "chapter-num": "Hoofdstuk",
         "book-num": "Boek",
@@ -1597,7 +1550,6 @@
         "save": "Opslaan",
         "cancel": "Annuleren",
         "close": "Sluiten",
-        "chapter-nums": "Hoofdstukken",
         "issue-num-shorthand": "#{{num}}",
         "series-count": "{{num}} Series",
         "promoted": "Uitgelicht",
@@ -1623,20 +1575,6 @@
         "published-label": "Gepubliceerd: ",
         "installed": "{{changelog.installed}}",
         "known-issues": "Bekende problemen"
-    },
-    "new-version-modal": {
-        "added": "{{changelog.added}}",
-        "changed": "{{changelog.changed}}",
-        "fixed": "{{changelog.fixed}}",
-        "developer": "{{changelog.developer}}",
-        "theme": "{{changelog.theme}}",
-        "removed": "{{changelog.removed}}",
-        "known-issues": "{{changelog.known-issues}}",
-        "close": "{{common.close}}",
-        "refresh": "Vernieuwen",
-        "title": "Kavita is bijgewerkt!",
-        "description": "Er is een nieuwe versie van Kavita beschikbaar. Vernieuw om te updaten.",
-        "api": "{{changelog.api}}"
     },
     "match-series-modal": {
         "search": "Zoeken",
@@ -1752,5 +1690,23 @@
         "client-id-label": "Client ID",
         "require-verified-email-label": "Vereist geverifieerde emails",
         "advanced-title": "Geavanceerde instellingen"
+    },
+    "version-update-modal": {
+        "close": "{{common.close}}",
+        "out-of-date": {
+            "title": "Blijf niet achter!",
+            "subtitle": "Het lijkt erop dat je installatie meer dan {{count}} versies achterloopt!",
+            "description-1": "Overweeg een upgrade zodat je de nieuwste versie van Kavita gebruikt."
+        },
+        "new-version": {
+            "title": "Kavita is bijgewerkt!",
+            "description": "Er is een nieuwe versie van Kavita beschikbaar. Vernieuw om te updaten.",
+            "refresh": "Vernieuwen"
+        },
+        "update-notification": {
+            "title": "Nieuwe update beschikbaar!",
+            "help": "Hoe te updaten",
+            "download": "Download"
+        }
     }
 }

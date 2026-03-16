@@ -3,8 +3,9 @@ import {Volume} from './volume';
 import {IHasCover} from "./common/i-has-cover";
 import {IHasReadingTime} from "./common/i-has-reading-time";
 import {IHasProgress} from "./common/i-has-progress";
+import {IHasMetadataIds} from "./common/i-has-metadata-ids";
 
-export interface Series extends IHasCover, IHasReadingTime, IHasProgress {
+export interface Series extends IHasCover, IHasReadingTime, IHasProgress, IHasMetadataIds {
   id: number;
   name: string;
   /**
@@ -32,6 +33,7 @@ export interface Series extends IHasCover, IHasReadingTime, IHasProgress {
   userRating: number;
   hasUserRated: boolean;
   libraryId: number;
+  libraryName: string;
   /**
    * DateTime the entity was created
    */
@@ -87,5 +89,4 @@ export interface Series extends IHasCover, IHasReadingTime, IHasProgress {
    * Min number of reads across all chapters
    */
   totalReads: number;
-
 }

@@ -1,10 +1,9 @@
-import {inject, Injectable} from '@angular/core';
+import {inject, Injectable, signal} from '@angular/core';
 import {HttpClient} from "@angular/common/http";
-import {catchError, map, ReplaySubject, tap, throwError} from "rxjs";
+import {catchError, map, tap, throwError} from "rxjs";
 import {environment} from "../../environments/environment";
 import {TextResonse} from '../_types/text-response';
 import {LicenseInfo} from "../_models/kavitaplus/license-info";
-import {toSignal} from "@angular/core/rxjs-interop";
 
 @Injectable({
   providedIn: 'root'
@@ -12,14 +11,11 @@ import {toSignal} from "@angular/core/rxjs-interop";
 export class LicenseService {
   private readonly httpClient = inject(HttpClient);
 
-  baseUrl = environment.apiUrl;
+  private readonly baseUrl = environment.apiUrl;
 
-  private readonly hasValidLicenseSource = new ReplaySubject<boolean>(1);
-  /**
-   * Does the user have an active license
-   */
-  public readonly hasValidLicense$ = this.hasValidLicenseSource.asObservable();
-  public readonly hasValidLicenseSignal = toSignal(this.hasValidLicense$, {initialValue: false});
+  private readonly _hasValidLicense = signal<boolean>(false);
+  /** Does the user have an active license */
+  public readonly hasValidLicense = this._hasValidLicense.asReadonly();
 
 
   /**
@@ -29,15 +25,16 @@ export class LicenseService {
     return this.httpClient.delete<string>(this.baseUrl + 'license', TextResonse).pipe(
       map(res => res === "true"),
       tap(_ => {
-        this.hasValidLicenseSource.next(false)
+        this._hasValidLicense.set(false);
       }),
       catchError(error => {
-        this.hasValidLicenseSource.next(false);
+        this._hasValidLicense.set(false);
         return throwError(error); // Rethrow the error to propagate it further
       })
     );
   }
 
+  /** Break the registration between Kavita+ and this instance */
   resetLicense(license: string, email: string) {
     return this.httpClient.post<string>(this.baseUrl + 'license/reset', {license, email}, TextResonse);
   }
@@ -52,29 +49,32 @@ export class LicenseService {
   licenseInfo(forceCheck: boolean = false) {
     return this.httpClient.get<LicenseInfo | null>(this.baseUrl + `license/info?forceCheck=${forceCheck}`).pipe(
       tap(res => {
-        this.hasValidLicenseSource.next(res?.isActive || false)
+        this._hasValidLicense.set(res?.isActive || false);
       }),
       catchError(error => {
-        this.hasValidLicenseSource.next(false);
+        console.error(error);
+        this._hasValidLicense.set(false);
         return throwError(error); // Rethrow the error to propagate it further
       })
     );
   }
 
-  hasValidLicense(forceCheck: boolean = false) {
+  /** Checks with the Server if the user has an active license. Force check will passthru to K+ */
+  checkForValidLicense(forceCheck: boolean = false) {
     return this.httpClient.get<string>(this.baseUrl + 'license/valid-license?forceCheck=' + forceCheck, TextResonse)
       .pipe(
         map(res => res === "true"),
-        tap(res => {
-          this.hasValidLicenseSource.next(res)
+        tap(value => {
+          this._hasValidLicense.set(value);
         }),
         catchError(error => {
-          this.hasValidLicenseSource.next(false);
+          this._hasValidLicense.set(false);
           return throwError(error); // Rethrow the error to propagate it further
         })
       );
   }
 
+  /** Has any license registered with the instance. Does not validate against Kavita+ API */
   hasAnyLicense() {
     return this.httpClient.get<string>(this.baseUrl + 'license/has-license', TextResonse)
       .pipe(

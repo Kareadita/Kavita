@@ -1,5 +1,5 @@
-$image-height: 232.91px;
-$image-width: 160px;
+$image-height: 14.5569rem;
+$image-width: 10rem;
 
 .card-img-top {
     width: $image-width;
@@ -9,14 +9,14 @@ $image-width: 160px;
 
 
 .selected {
-    outline: 5px solid var(--primary-color);
+    outline: 0.3125rem solid var(--primary-color);
     outline-width: medium;
-    outline-offset: -1px;
+    outline-offset: -0.0625rem;
 }
 
 .chooser {
     display: grid;
-    grid-template-columns: repeat(auto-fill, 160px);
+    grid-template-columns: repeat(auto-fill, 10rem);
     grid-gap: 0.5rem;
     justify-content: space-around;
 }
@@ -24,9 +24,9 @@ $image-width: 160px;
 ngx-file-drop ::ng-deep > div {
     // styling for the outer drop box
     width: 100%;
-    border: 2px solid var(--primary-color);
-    border-radius: 5px;
-    height: 100px;
+    border: 0.125rem solid var(--primary-color);
+    border-radius: 0.3125rem;
+    height: 6.25rem;
     margin: auto;
 
     > div {

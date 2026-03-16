@@ -33,8 +33,6 @@ bld/
 
 # Visual Studio 2015/2017 cache/options directory
 .vs/
-# Uncomment if you have tasks that create the project's static files in wwwroot
-#wwwroot/
 
 # Visual Studio 2017 auto generated files
 Generated\ Files/
@@ -485,64 +483,64 @@ Thumbs.db
 ssl/
 
 # App specific
-/API/kavita.db
-/API/kavita.db-shm
-/API/kavita.db-wal
-/API/Hangfire.db
-/API/Hangfire-log.db
-API/cache/
-/API/wwwroot/
-/API/cache/
-/API/temp/
+/Kavita.Server/kavita.db
+/Kavita.Server/kavita.db-shm
+/Kavita.Server/kavita.db-wal
+/Kavita.Server/Hangfire.db
+/Kavita.Server/Hangfire-log.db
+Kavita.Server/cache/
+/Kavita.Server/wwwroot/
+/Kavita.Server/cache/
+/Kavita.Server/temp/
 _temp/
 _output/
-API/stats/
+Kavita.Server/stats/
 UI/Web/dist/
-/API.Tests/Extensions/Test Data/modified on run.txt
+/Kavita.Services.Tests/Extensions/Test Data/modified on run.txt
 
 # All config files/folders in config except appsettings.json
-/API/config-bak/
-/API/config-bak/*.*
-/API/config-bak/**/
-/API/config/covers/
-/API/config/logs/
-/API/config/backups/
-/API/config/cache/
-/API/config/fonts/
-/API/config/temp/
-/API/config/themes/
-/API/config/stats/
-/API/config/bookmarks/
-/API/config/favicons/
-/API/config/cache-long/
-/API/config/*.db-shm
-/API/config/*.db-wal
-/API/config/*.db-journal
-/API/config/*.db
-/API/config/*.bak
-/API/config/*.backup
-/API/config/*.csv
-/API/config/Hangfire.db
-/API/config/Hangfire-log.db
-API/config/covers/
-API/config/images/*
-API/config/stats/*
-API/config/stats/app_stats.json
-API/config/pre-metadata/
-API/config/post-metadata/
-API/config/*.csv
-API.Tests/TestResults/
+/Kavita.Server/config-bak/
+/Kavita.Server/config-bak/*.*
+/Kavita.Server/config-bak/**/
+/Kavita.Server/config/covers/
+/Kavita.Server/config/logs/
+/Kavita.Server/config/backups/
+/Kavita.Server/config/cache/
+/Kavita.Server/config/fonts/
+/Kavita.Server/config/temp/
+/Kavita.Server/config/themes/
+/Kavita.Server/config/stats/
+/Kavita.Server/config/bookmarks/
+/Kavita.Server/config/favicons/
+/Kavita.Server/config/cache-long/
+/Kavita.Server/config/*.db-shm
+/Kavita.Server/config/*.db-wal
+/Kavita.Server/config/*.db-journal
+/Kavita.Server/config/*.db
+/Kavita.Server/config/*.bak
+/Kavita.Server/config/*.backup
+/Kavita.Server/config/*.csv
+/Kavita.Server/config/Hangfire.db
+/Kavita.Server/config/Hangfire-log.db
+Kavita.Server/config/covers/
+Kavita.Server/config/images/*
+Kavita.Server/config/stats/*
+Kavita.Server/config/stats/app_stats.json
+Kavita.Server/config/pre-metadata/
+Kavita.Server/config/post-metadata/
+Kavita.Server/config/*.csv
+Kavita.Services.Tests/TestResults/
 UI/Web/.vscode/settings.json
-/API.Tests/Services/Test Data/ArchiveService/CoverImages/output/*
+/Kavita.Services.Tests/Test Data/ArchiveService/CoverImages/output/*
 UI/Web/.angular/
 BenchmarkDotNet.Artifacts
 .claude/
-API/config/*backup.zip
+Kavita.Server/config/*backup.zip
 
 
-API.Tests/Services/Test Data/ImageService/**/*_output*
-API.Tests/Services/Test Data/ImageService/**/*_baseline*
-API.Tests/Services/Test Data/ImageService/**/*.html
+Kavita.Services.Tests/Test Data/ImageService/**/*_output*.*
+Kavita.Services.Tests/Test Data/ImageService/**/*_baseline*
+Kavita.Services.Tests/Test Data/ImageService/**/*.html
+Kavita.Services.Tests/Test Data/ScannerService/ScanTests/**/*
 
-
-API.Tests/Services/Test Data/ScannerService/ScanTests/**/*
+Kavita.Server/config/appsettings.*.json

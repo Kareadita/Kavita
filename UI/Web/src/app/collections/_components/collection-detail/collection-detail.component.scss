@@ -1,12 +1,12 @@
 .main-container {
-  margin-top: 10px;
-  padding: 0 0 0 10px;
+  margin-top: 0.625rem;
+  padding: 0 0 0 0.625rem;
 }
 
 
 .poster {
   width: 100%;
-  max-width: 300px;
+  max-width: 18.75rem;
 }
 
 @media(max-width: var(--grid-breakpoints-sm)) {
@@ -23,17 +23,17 @@
 
 .card-container {
   display: grid;
-  grid-template-columns: repeat(auto-fill, 160px);
+  grid-template-columns: repeat(auto-fill, 10rem);
   grid-gap: 0.5rem;
   justify-content: space-around;
-  padding-bottom: 20px;
+  padding-bottom: 1.25rem;
 }
 
 
 .virtual-scroller, virtual-scroller {
   width: 100%;
-  height: calc(100vh - 85px);
-  max-height: calc(var(--vh)*100 - 170px);
+  height: calc(100vh - 5.3125rem);
+  max-height: calc(var(--vh)*100 - 10.625rem);
 }
 
 h2 {
@@ -44,7 +44,7 @@ h2 {
 .under-image {
   background-color: var(--breadcrumb-bg-color);
   color: white;
-  border-bottom-left-radius: 5px;
-  border-bottom-right-radius: 5px;
+  border-bottom-left-radius: 0.3125rem;
+  border-bottom-right-radius: 0.3125rem;
   text-align: center;
 }

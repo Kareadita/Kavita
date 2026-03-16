@@ -11,7 +11,6 @@ import {
 import {FormControl, FormGroup, ReactiveFormsModule, Validators} from '@angular/forms';
 import {
   NgbActiveModal,
-  NgbModal,
   NgbModalModule,
   NgbNav,
   NgbNavContent,
@@ -50,8 +49,6 @@ import {WikiLink} from "../../../_models/wiki";
 import {SettingItemComponent} from "../../../settings/_components/setting-item/setting-item.component";
 import {SettingSwitchComponent} from "../../../settings/_components/setting-switch/setting-switch.component";
 import {SettingButtonComponent} from "../../../settings/_components/setting-button/setting-button.component";
-import {Action, ActionFactoryService, ActionItem} from "../../../_services/action-factory.service";
-import {ActionService} from "../../../_services/action.service";
 import {LibraryTypePipe} from "../../../_pipes/library-type.pipe";
 import {LibraryTypeSubtitlePipe} from "../../../_pipes/library-type-subtitle.pipe";
 import {TypeaheadComponent} from "../../../typeahead/_components/typeahead.component";
@@ -59,14 +56,13 @@ import {setupLanguageSettings, TypeaheadSettings} from "../../../typeahead/_mode
 import {Language} from "../../../_models/metadata/language";
 import {MetadataService} from "../../../_services/metadata.service";
 import {BreakpointService} from "../../../_services/breakpoint.service";
-
-enum TabID {
-  General = 'general-tab',
-  Folder = 'folder-tab',
-  Cover = 'cover-tab',
-  Advanced = 'advanced-tab',
-  Tasks = 'tasks-tab'
-}
+import {ActionFactoryService} from "../../../_services/action-factory.service";
+import {Action} from "../../../_models/actionables/action";
+import {ActionItem} from "../../../_models/actionables/action-item";
+import {modalSaved} from "../../../_models/modal/modal-result";
+import {ModalService} from "../../../_services/modal.service";
+import {Tabs} from "../../../_models/tabs";
+import {TabTitlePipe} from "../../../_pipes/tab-title.pipe";
 
 enum StepID {
   General = 0,
@@ -79,7 +75,7 @@ enum StepID {
   selector: 'app-library-settings-modal',
   imports: [NgbModalModule, NgbNavLink, NgbNavItem, NgbNavContent, ReactiveFormsModule, NgbTooltip,
     SentenceCasePipe, NgbNav, NgbNavOutlet, CoverImageChooserComponent, TranslocoModule, DefaultDatePipe,
-    FileTypeGroupPipe, EditListComponent, SettingItemComponent, SettingSwitchComponent, SettingButtonComponent, LibraryTypeSubtitlePipe, NgTemplateOutlet, DatePipe, TypeaheadComponent],
+    FileTypeGroupPipe, EditListComponent, SettingItemComponent, SettingSwitchComponent, SettingButtonComponent, LibraryTypeSubtitlePipe, NgTemplateOutlet, DatePipe, TypeaheadComponent, TabTitlePipe],
   templateUrl: './library-settings-modal.component.html',
   styleUrls: ['./library-settings-modal.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
@@ -90,26 +86,25 @@ export class LibrarySettingsModalComponent implements OnInit {
   protected readonly modal = inject(NgbActiveModal);
   private readonly destroyRef = inject(DestroyRef);
   private readonly uploadService = inject(UploadService);
-  private readonly modalService = inject(NgbModal);
+  private readonly modalService = inject(ModalService);
   private readonly confirmService = inject(ConfirmService);
   private readonly libraryService = inject(LibraryService);
   private readonly toastr = inject(ToastrService);
   private readonly cdRef = inject(ChangeDetectorRef);
   private readonly imageService = inject(ImageService);
   private readonly actionFactoryService = inject(ActionFactoryService);
-  private readonly actionService = inject(ActionService);
   private readonly metadataService = inject(MetadataService);
   protected readonly breakpointService = inject(BreakpointService);
 
   protected readonly LibraryType = LibraryType;
-  protected readonly TabID = TabID;
+  protected readonly Tabs = Tabs;
   protected readonly WikiLink = WikiLink;
   protected readonly Action = Action;
   protected readonly libraryTypePipe = new LibraryTypePipe();
 
   @Input({required: true}) library!: Library | undefined;
 
-  active = TabID.General;
+  active = Tabs.General;
   imageUrls: Array<string> = [];
   protected readonly excludePatternTooltip = `<span>` + translate('library-settings-modal.exclude-patterns-tooltip') +
   `<a class="ms-1" href="${WikiLink.ScannerExclude}" rel="noopener noreferrer" target="_blank">${translate('library-settings-modal.help')}` +
@@ -366,8 +361,8 @@ export class LibrarySettingsModalComponent implements OnInit {
     this.setValues();
   }
 
-  close(returnVal= false) {
-    this.modal.close(returnVal);
+  close() {
+    this.modal.dismiss();
   }
 
   forceScan() {
@@ -379,7 +374,7 @@ export class LibrarySettingsModalComponent implements OnInit {
   }
 
   async save() {
-    const model = this.libraryForm.value;
+    const model = this.libraryForm.getRawValue();
     model.folders = this.selectedFolders;
     model.fileGroupTypes = [];
     for(let fileTypeGroup of allFileTypeGroup) {
@@ -403,15 +398,15 @@ export class LibrarySettingsModalComponent implements OnInit {
         if (!await this.confirmService.confirm(translate('toasts.confirm-library-type-change'))) return;
       }
 
-      this.libraryService.update(model).subscribe(() => {
-        this.close(true);
+      this.libraryService.update(model).subscribe((updatedLib) => {
+        this.modal.close(modalSaved(updatedLib));
       });
     } else {
       model.folders = model.folders.map((item: string) => item.startsWith('\\') ? item.substr(1, item.length) : item);
       model.type = parseInt(model.type, 10);
-      this.libraryService.create(model).subscribe(() => {
+      this.libraryService.create(model).subscribe((lib) => {
         this.toastr.success(translate('toasts.library-created'));
-        this.close(true);
+        this.modal.close(modalSaved(lib));
       });
     }
   }
@@ -420,13 +415,13 @@ export class LibrarySettingsModalComponent implements OnInit {
     this.setupStep++;
     switch(this.setupStep) {
       case StepID.Folder:
-        this.active = TabID.Folder;
+        this.active = Tabs.Folder;
         break;
       case StepID.Cover:
-        this.active = TabID.Cover;
+        this.active = Tabs.CoverImage;
         break;
       case StepID.Advanced:
-        this.active = TabID.Advanced;
+        this.active = Tabs.Advanced;
         break;
     }
     this.cdRef.markForCheck();
@@ -446,7 +441,7 @@ export class LibrarySettingsModalComponent implements OnInit {
   }
 
   openDirectoryPicker() {
-    const modalRef = this.modalService.open(DirectoryPickerComponent, { scrollable: true, size: 'lg' });
+    const modalRef = this.modalService.open(DirectoryPickerComponent);
     modalRef.closed.subscribe((closeResult: DirectoryPickerResult) => {
       if (closeResult.success) {
         if (!this.selectedFolders.includes(closeResult.folderPath)) {
@@ -481,25 +476,12 @@ export class LibrarySettingsModalComponent implements OnInit {
 
   getTasks() {
     const blackList = [Action.Edit];
-    return this.actionFactoryService.getActionablesForSettingsPage(this.actionFactoryService.getLibraryActions(this.runTask.bind(this)), blackList);
+    return this.actionFactoryService.getActionablesForSettingsPage(this.actionFactoryService.getLibraryActions(), blackList);
   }
 
-  async runTask(action: ActionItem<Library>) {
-    switch (action.action) {
-      case Action.Scan:
-        await this.actionService.scanLibrary(this.library!);
-        break;
-      case Action.RefreshMetadata:
-        await this.actionService.refreshLibraryMetadata(this.library!);
-        break;
-      case Action.GenerateColorScape:
-        await this.actionService.refreshLibraryMetadata(this.library!, undefined, false);
-        break;
-      case Action.Delete:
-        await this.actionService.deleteLibrary(this.library!, () => {
-          this.modal.dismiss();
-        });
-        break;
+  runTask(task: ActionItem<Library>) {
+    if (task.callback) {
+      task.callback(task, this.library!).subscribe();
     }
   }
 

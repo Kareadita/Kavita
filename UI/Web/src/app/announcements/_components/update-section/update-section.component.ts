@@ -1,4 +1,4 @@
-import {ChangeDetectionStrategy, Component, Input} from '@angular/core';
+import {ChangeDetectionStrategy, Component, input} from '@angular/core';
 
 @Component({
     selector: 'app-update-section',
@@ -8,6 +8,6 @@ import {ChangeDetectionStrategy, Component, Input} from '@angular/core';
     changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class UpdateSectionComponent {
-  @Input({required: true}) items: Array<string> = [];
-  @Input({required: true}) title: string = '';
+  items = input.required<string[]>();
+  title = input.required<string>();
 }

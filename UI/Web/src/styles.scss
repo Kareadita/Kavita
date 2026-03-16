@@ -102,9 +102,9 @@ app-root {
 
 ::-webkit-scrollbar-thumb {
   background-clip: padding-box;
-  border: 3px solid transparent;
-  border-radius: 8px;
-  min-height: 50px;
+  border: 0.1875rem solid transparent;
+  border-radius: 0.5rem;
+  min-height: 3.125rem;
 }
 
 body {
@@ -124,7 +124,23 @@ body {
 }
 
 .setting-section-break {
-  height: 1px;
+  height: 0.0625rem;
   background-color: var(--setting-break-color);
-  margin: 30px 0;
+  margin: 1.875rem 0;
+}
+
+// Handle reduced motion
+@media (prefers-reduced-motion: reduce), (update: slow) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+// Handle disable animation
+.no-animations *, .no-animations *::before, .no-animations *::after {
+  animation-duration: 0.01ms !important;
+  animation-iteration-count: 1 !important;
+  transition-duration: 0.01ms !important;
 }

@@ -29,12 +29,9 @@ import {AccountService} from "../../../_services/account.service";
 import {ToastrService} from "ngx-toastr";
 import {EditListComponent} from "../../../shared/edit-list/edit-list.component";
 import {BreakpointService} from "../../../_services/breakpoint.service";
-
-enum TabID {
-  General = 'general-tab',
-  Aliases = 'aliases-tab',
-  CoverImage = 'cover-image-tab',
-}
+import {modalSaved} from "../../../_models/modal/modal-result";
+import {Tabs} from "../../../_models/tabs";
+import {TabTitlePipe} from "../../../_pipes/tab-title.pipe";
 
 @Component({
   selector: 'app-edit-person-modal',
@@ -49,7 +46,8 @@ enum TabID {
     CoverImageChooserComponent,
     SettingItemComponent,
     NgbNavLink,
-    EditListComponent
+    EditListComponent,
+    TabTitlePipe
   ],
   templateUrl: './edit-person-modal.component.html',
   styleUrl: './edit-person-modal.component.scss',
@@ -66,11 +64,11 @@ export class EditPersonModalComponent implements OnInit {
   protected readonly toastr = inject(ToastrService);
   protected readonly breakpointService = inject(BreakpointService);
 
-  protected readonly TabID = TabID;
+  protected readonly Tabs = Tabs;
 
   @Input({required: true}) person!: Person;
 
-  active = TabID.General;
+  active = Tabs.General;
   editForm: FormGroup = new FormGroup({
     name: new FormControl('', [Validators.required]),
     description: new FormControl('', []),
@@ -116,7 +114,7 @@ export class EditPersonModalComponent implements OnInit {
 
 
   close() {
-    this.modal.close({success: false, coverImageUpdate: false});
+    this.modal.dismiss();
   }
 
   save() {
@@ -144,7 +142,7 @@ export class EditPersonModalComponent implements OnInit {
 
     // Run api calls in sequency to prevent them from overwriting each-other in a race condition
     concat(...apis).subscribe(_ => {
-      this.modal.close({success: true, coverImageUpdate: hasCoverChanges, person: person});
+      this.modal.close(modalSaved(person, hasCoverChanges));
     });
   }
 

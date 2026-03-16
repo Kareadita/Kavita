@@ -1,0 +1,18 @@
+<ng-container *transloco="let t; prefix:'download-queue-widget'">
+  @if (downloadService.hasActiveDownloads() || downloadService.completedTodayCount() > 0 || downloadService.olderCompletedCount() > 0 || downloadService.failedItems().length > 0) {
+    <div class="nav-item">
+      <button class="btn btn-icon position-relative" (click)="openDownloadQueue()" [title]="t('title')" [attr.aria-label]="t('title')">
+        <i class="fa fa-download nav"
+           [class.colored]="downloadService.hasActiveDownloads() && !downloadService.isPaused()"
+           [class.text-warning]="downloadService.isPaused() && downloadService.queuedItems().length > 0"
+           aria-hidden="true"></i>
+        @if (downloadService.isPaused() && downloadService.queuedItems().length > 0) {
+          <i class="fa-solid fa-circle-pause text-warning pause-overlay" aria-hidden="true"></i>
+        }
+        @if (downloadService.totalActiveCount() > 0) {
+          <span class="badge bg-primary position-absolute top-0 start-100 translate-middle badge rounded-pill dl-count-pill">{{ downloadService.totalActiveCount() }}</span>
+        }
+      </button>
+    </div>
+  }
+</ng-container>

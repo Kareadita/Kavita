@@ -211,15 +211,6 @@
         "remove-from-want-to-read": "{{actionable.remove-from-want-to-read}}",
         "add-to-want-to-read": "{{actionable.add-to-want-to-read}}",
         "edit-series-alt": "தகவலைத் திருத்தவும்",
-        "reviews-tab": "{{tabs.reviews-tab}}}",
-        "storyline-tab": "{{tabs.storyline-tab}}}",
-        "books-tab": "{{tabs.books-tab}}",
-        "volumes-tab": "{{tabs.volumes-tab}}}",
-        "specials-tab": "{{tabs.specials-tab}}}",
-        "related-tab": "{{tabs.-related-tab}}}",
-        "details-tab": "{{tabs.details-tab}}}",
-        "info-tab": "{{tabs.info தாவல்}}}",
-        "recommendations-tab": "{{tabs.recommentations-tab}}",
         "send-to": "கோப்பு {{deviceName}} க்கு மின்னஞ்சல் செய்யப்பட்டது",
         "no-chapters": "இந்த தொகுதிக்கு அத்தியாயங்கள் எதுவும் இல்லை. படிக்க முடியாது.",
         "cover-change": "உங்கள் உலாவி படத்தைப் புதுப்பிக்க ஒரு மணித்துளி வரை ஆகலாம். அதுவரை, பழைய படம் சில பக்கங்களில் காட்டப்படலாம்.",
@@ -243,12 +234,6 @@
     },
     "badge-expander": {
         "more-items": "மேலும் {{count}} மேலும்"
-    },
-    "update-notification-modal": {
-        "title": "புதிய புதுப்பிப்பு கிடைக்கிறது!",
-        "close": "{{common.close}}",
-        "help": "புதுப்பிப்பது எப்படி",
-        "download": "பதிவிறக்கம்"
     },
     "side-nav-companion-bar": {
         "page-settings-title": "{{தொடர்-detail.page-settings-title}}",
@@ -293,9 +278,7 @@
         "color-theme-title": "வண்ண கருப்பொருள்"
     },
     "entity-title": {
-        "chapter": "{{பொதுவான. அத்தியாயம்-நம்}}",
         "book-num": "{{common.book-num-sorthand}}}",
-        "vol-num": "{{பயனர்-ச்கிராப்-இச்டரி.வோலூம்-நம்}}",
         "single-volume": "ஒற்றை தொகுதி",
         "issue-num": "{{comman.issue-hash-num}}",
         "special": "சிறப்பு"
@@ -438,7 +421,6 @@
         "general-tab": "{{tabs.jenoral-tab}}}",
         "metadata-tab": "{{tabs.metadata-tab}}}",
         "people-tab": "{{tabs.people-tab}}}",
-        "web-links-tab": "{{tabs.weblink-tab}}}",
         "cover-image-tab": "{{tabs.cover-tab}}}",
         "related-tab": "{{tabs.-related-tab}}}",
         "info-tab": "{{tabs.info தாவல்}}}",
@@ -512,10 +494,6 @@
         "save": "{{common.save}}",
         "close": "{{common.close}}",
         "cancel": "{{common.cancel}}",
-        "general-tab": "{{tabs.jenoral-tab}}}",
-        "cover-image-tab": "{{tabs.cover-tab}}}",
-        "info-tab": "{{tabs.info தாவல்}}}",
-        "series-tab": "{{tabs.series-tab}}}",
         "name-label": "பெயர்",
         "deselect-all": "{{பொதுவான.",
         "name-validation": "பெயர் தனித்துவமாக இருக்க வேண்டும்",
@@ -558,21 +536,14 @@
         "location-label": "{{வடிகட்டி-புலம்-பைப்.லேசன்}}",
         "language-label": "{{edit-series-modal.language-lable}}",
         "age-rating-label": "{{திருத்து-சீரிச்-மோடல்.சேச்-ரேட்டிங்-லேபிள்}}",
-        "general-tab": "{{tabs.jenoral-tab}}}",
-        "people-tab": "{{tabs.people-tab}}}",
         "inker-label": "{{edit-series-modal.inker-label}}",
         "editor-label": "{{edit-series-modal.editor-label}}",
         "colorist-label": "{{edit-series-modal.colorist-label}}}",
         "character-label": "{{edit-series-modal.charter-label}}",
         "translator-label": "{{திருத்து-series-modal.translator-label}}}",
         "team-label": "{{வடிகட்டி-புலம்-பைப்.டீம்}}}",
-        "weblink-tab": "{{tabs.weblink-tab}}}",
         "field-locked-alt": "{{edit-series-modal.field-locked-alt}}}",
-        "cover-image-tab": "{{tabs.cover-tab}}}",
-        "tasks-tab": "{{tabs.tasks-tab}}",
-        "info-tab": "{{tabs.info தாவல்}}}",
         "cover-image-description": "{{edit-series-modal.cover-image-description}}",
-        "tags-tab": "{{tabs.tags-tab}}}",
         "pages-label": "பக்கங்கள்",
         "words-label": "நீளம்",
         "pages-count": "{{num}} பக்கங்கள்",
@@ -706,8 +677,6 @@
         "starting-title": "தொடங்குகிறது",
         "promote-label": "ஊக்குவிக்கவும்",
         "title": "படித்தல் பட்டியலைத் திருத்து: {{name}}",
-        "general-tab": "{{tabs.jenoral-tab}}}",
-        "cover-image-tab": "{{tabs.cover-tab}}}",
         "close": "{{common.close}}",
         "save": "{{common.save}}",
         "year-validation": "1000, 0 அல்லது காலியாக இருக்க வேண்டும்",
@@ -1092,11 +1061,7 @@
         "chapter-num-shorthand": "Ch {{num}}",
         "book-num-shorthand": "நூல் {{num}}",
         "issue-num-shorthand": "#{{num}}",
-        "volume-num-shorthand": "Vol {{num}}",
-        "book-nums": "புத்தகங்கள்",
-        "issue-nums": "சிக்கல்கள்",
-        "chapter-nums": "பாடங்கள்",
-        "volume-nums": "தொகுதிகள்"
+        "volume-num-shorthand": "Vol {{num}}"
     },
     "relationship-pipe": {
         "doujinshi": "டசின்சி",
@@ -1617,14 +1582,6 @@
     "announcements": {
         "title": "அறிவிப்புகள்"
     },
-    "out-of-date-modal": {
-        "title": "பின்னால் விழ வேண்டாம்!",
-        "close": "{{common.close}}",
-        "subtitle": "உங்கள் நிறுவல் பின்னால் {{count}} பதிப்புகளை விட அதிகம் என்று தெரிகிறது!",
-        "description-1": "தயவுசெய்து மேம்படுத்துவதைக் கவனியுங்கள், இதனால் நீங்கள் கவிதாவின் அண்மைக் கால பதிப்பை இயக்குகிறீர்கள்.",
-        "description-2": "எங்கள் <a href='https://wiki.kavitareader.com/guides/updating/' target='_blank' rel='noreferrer noopener'> விக்கி </a> ஐப் பாருங்கள்.",
-        "description-3": "நீங்கள் புதுப்பிக்காத ஒரு குறிப்பிட்ட காரணம் இருந்தால், காலாவதியான பதிப்பில் உங்களை வைத்திருப்பது என்ன என்பதை அறிய விரும்புகிறோம்! எங்கள் முரண்பாட்டால் நிறுத்தி, உங்கள் மேம்படுத்தல் பாதையைத் தடுப்பதை எங்களுக்குத் தெரியப்படுத்துங்கள்."
-    },
     "changelog": {
         "installed": "நிறுவப்பட்டது",
         "download": "பதிவிறக்கம்",
@@ -1734,11 +1691,6 @@
         "close": "{{common.close}}",
         "edit-title": "திருத்து {{name}}",
         "add-title": "நூலகத்தைச் சேர்க்கவும்",
-        "general-tab": "{{tabs.jenoral-tab}}}",
-        "folder-tab": "{{tabs.folder-tab}}}",
-        "cover-tab": "{{tabs.cover-tab}}}",
-        "advanced-tab": "{{tabs.advanced-tab}}",
-        "tasks-tab": "{{tabs.tasks-tab}}",
         "name-label": "பெயர்",
         "library-name-unique": "நூலக பெயர் தனித்துவமாக இருக்க வேண்டும்",
         "last-scanned-label": "கடைசியாக ச்கேன்:",
@@ -2031,8 +1983,6 @@
     },
     "edit-person-modal": {
         "title": "{{personName}} விவரங்கள்",
-        "general-tab": "{{edit-series-modal.general-tab}}}",
-        "cover-image-tab": "{{edit-series-modal.cover-image-tab}}}",
         "close": "{{common.close}}",
         "name-label": "{{edit-series-modal.name-label}}",
         "mal-id-label": "ஐடியுடன்",
@@ -2113,11 +2063,7 @@
         "remove-rule": "வரிசையை அகற்று"
     },
     "customize-dashboard-modal": {
-        "title-smart-filters": "அறிவுள்ள வடிப்பான்கள்",
-        "dashboard": "முகப்புப்பெட்டி",
-        "sidenav": "பக்க நடுவண்",
-        "external-sources": "வெளிப்புற ஆதாரங்கள்",
-        "smart-filters": "அறிவுள்ள வடிப்பான்கள்"
+        "title-smart-filters": "அறிவுள்ள வடிப்பான்கள்"
     },
     "customize-dashboard-streams": {
         "no-data": "அனைத்து அறிவுள்ள வடிப்பான்களும் டாச்போர்டில் சேர்க்கப்பட்டுள்ளன அல்லது எதுவும் இதுவரை உருவாக்கப்படவில்லை.",
@@ -2169,5 +2115,20 @@
         "less-than-hour": "<1 மணி நேரம்",
         "hour": "மணி",
         "hours": "மணி"
+    },
+    "version-update-modal": {
+        "close": "{{common.close}}",
+        "out-of-date": {
+            "title": "பின்னால் விழ வேண்டாம்!",
+            "subtitle": "உங்கள் நிறுவல் பின்னால் {{count}} பதிப்புகளை விட அதிகம் என்று தெரிகிறது!",
+            "description-1": "தயவுசெய்து மேம்படுத்துவதைக் கவனியுங்கள், இதனால் நீங்கள் கவிதாவின் அண்மைக் கால பதிப்பை இயக்குகிறீர்கள்.",
+            "description-2": "எங்கள் <a href='https://wiki.kavitareader.com/guides/updating/' target='_blank' rel='noreferrer noopener'> விக்கி </a> ஐப் பாருங்கள்.",
+            "description-3": "நீங்கள் புதுப்பிக்காத ஒரு குறிப்பிட்ட காரணம் இருந்தால், காலாவதியான பதிப்பில் உங்களை வைத்திருப்பது என்ன என்பதை அறிய விரும்புகிறோம்! எங்கள் முரண்பாட்டால் நிறுத்தி, உங்கள் மேம்படுத்தல் பாதையைத் தடுப்பதை எங்களுக்குத் தெரியப்படுத்துங்கள்."
+        },
+        "update-notification": {
+            "title": "புதிய புதுப்பிப்பு கிடைக்கிறது!",
+            "help": "புதுப்பிப்பது எப்படி",
+            "download": "பதிவிறக்கம்"
+        }
     }
 }

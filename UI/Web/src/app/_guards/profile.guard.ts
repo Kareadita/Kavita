@@ -16,7 +16,7 @@ export const profileGuard: CanActivateFn = (route, state) => {
   const toastr = inject(ToastrService);
 
   // If this is my profile, allow
-  if (accountService.currentUserSignal()?.id === userId) {
+  if (accountService.currentUser()?.id === userId) {
     return true;
   }
 

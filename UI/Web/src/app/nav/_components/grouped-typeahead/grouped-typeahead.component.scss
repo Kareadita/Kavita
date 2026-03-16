@@ -3,27 +3,27 @@
 }
 
 .btn-close {
-    margin-top: 8px;
+    margin-top: 0.5rem;
     font-size: 0.8rem;
     position: absolute;
-    right: 5px;
+    right: 0.3125rem;
 }
 
 .input-hint {
   font-size: 0.8rem;
-  margin-top: 3px;
-  margin-bottom: 3px;
-  margin-right: 9px;
+  margin-top: 0.1875rem;
+  margin-bottom: 0.1875rem;
+  margin-right: 0.5625rem;
   border: 1px solid var(--input-hint-border-color, lightgrey);
   color: var(--input-hint-text-color);
-  border-radius: 4px;
-  padding: 2px;
+  border-radius: 0.25rem;
+  padding: 0.125rem;
 }
 
 
 .typeahead-input {
   border: 1px solid transparent;
-  border-radius: 4px;
+  border-radius: 0.25rem;
   overflow: hidden;
   position: relative;
   z-index: 1;
@@ -32,7 +32,7 @@
   cursor: text;
   background-color: var(--searchbar-bg-color);
   color: var(--body-text-color);
-  min-height: 32px;
+  min-height: 2rem;
   transition-property: all;
   transition-duration: 0.3s;
   display: block;
@@ -41,23 +41,23 @@
   .search {
     display: flex;
     position: relative;
-    min-height: 32px;
+    min-height: 2rem;
 
     .btn-close {
       position: unset;
       margin-top: unset;
       align-self: center;
-      margin: 0 8px;
+      margin: 0 0.5rem;
     }
   }
 
 
   input {
     width: 100%;
-    padding: 0px 6px;
+    padding: 0 0.375rem;
     outline: 0 !important;
     border-radius: .28571429rem;
-    margin: 0px !important;
+    margin: 0 !important;
     text-indent: 0 !important;
     line-height: inherit !important;
     box-shadow: none !important;
@@ -66,7 +66,7 @@
     display: block;
     opacity: 1;
     position: relative;
-    left: 4px;
+    left: 0.25rem;
     border: none;
     background-color: transparent;
 
@@ -124,18 +124,18 @@
 
 .dropdown {
     width: 100vw;
-    top: 55px; //header offset
+    top: 3.4375rem; //header offset
     position: fixed;
     justify-content: center;
     left: 0;
     overflow-y: auto;
     display: flex;
     flex-wrap: wrap;
-    margin-top: 9px;
+    margin-top: 0.5625rem;
 }
 
 .list-group {
-    max-width: 600px;
+    max-width: 37.5rem;
     z-index:1000;
     overflow-y: auto;
     overflow-x: hidden;
@@ -156,24 +156,24 @@
 }
 
 .list-group-item {
-    padding: 5px 10px;
+    padding: 0.3125rem 0.625rem;
 }
 
 
 li {
     list-style: none;
-    border-radius: 0px !important;
+    border-radius: 0 !important;
     margin: 0 !important;
 }
 
 ul ul {
-    border-radius: 0px !important;
+    border-radius: 0 !important;
 }
 
 
 .spinner-border {
     position: absolute;
-    right: 10px;
+    right: 0.625rem;
     margin: auto;
     cursor: pointer;
     top: 30%;

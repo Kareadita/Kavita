@@ -1,4 +1,4 @@
-import {ChangeDetectionStrategy, Component, EventEmitter, inject, Input, Output} from '@angular/core';
+import {ChangeDetectionStrategy, Component, inject, Input, output} from '@angular/core';
 import {LibraryType} from 'src/app/_models/library/library';
 import {MangaFormat} from 'src/app/_models/manga-format';
 import {ReadingListItem} from 'src/app/_models/reading-list';
@@ -15,8 +15,8 @@ import {ItemRemoveEvent} from "../draggable-ordered-list/draggable-ordered-list.
   selector: 'app-reading-list-item',
   templateUrl: './reading-list-item.component.html',
   styleUrls: ['./reading-list-item.component.scss'],
+  imports: [ImageComponent, NgbProgressbar, DatePipe, TranslocoDirective, SeriesFormatComponent, ReadMoreComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [ImageComponent, NgbProgressbar, DatePipe, TranslocoDirective, SeriesFormatComponent, ReadMoreComponent]
 })
 export class ReadingListItemComponent {
 
@@ -34,8 +34,8 @@ export class ReadingListItemComponent {
    */
   @Input() promoted: boolean = false;
 
-  @Output() read: EventEmitter<ReadingListItem> = new EventEmitter();
-  @Output() remove: EventEmitter<ItemRemoveEvent> = new EventEmitter();
+  read = output<ReadingListItem>();
+  remove = output<ItemRemoveEvent>();
 
   readChapter(item: ReadingListItem) {
     this.read.emit(item);

@@ -1,9 +1,9 @@
 <ng-container *transloco="let t; prefix:'spoiler'">
-  <div (click)="toggle()" [attr.aria-expanded]="!isCollapsed" class="btn spoiler" tabindex="0">
-    @if (isCollapsed) {
+  <div (click)="toggle()" [attr.aria-expanded]="!isCollapsed()" class="btn spoiler" tabindex="0">
+    @if (isCollapsed()) {
       <span>{{t('click-to-show')}}</span>
     } @else {
-      <div [innerHTML]="html | safeHtml"></div>
+      <div [innerHTML]="html() | safeHtml"></div>
     }
   </div>
 </ng-container>

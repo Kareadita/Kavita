@@ -1,16 +1,17 @@
 <ng-container *transloco="let t">
 
   <div class="modal-header">
-    <h4 class="modal-title" id="modal-basic-title">{{title}}</h4>
-    <button type="button" class="btn-close" [attr.aria-label]="t('common.close')" (click)="modalService.close()"></button>
+    <h4 class="modal-title" id="modal-basic-title">{{title()}}</h4>
+    <button type="button" class="btn-close" [attr.aria-label]="t('common.close')" (click)="modal.dismiss()"></button>
   </div>
   <div class="modal-body">
-    <a [href]="image | safeUrl" target="_blank" rel="noopener noreferrer">
-      <app-image [imageUrl]="image" />
+    @let imageUrl = image()! | safeUrl;
+    <a [href]="imageUrl" target="_blank" rel="noopener noreferrer">
+      <app-image [imageUrl]="imageUrl!" />
     </a>
   </div>
   <div class="modal-footer">
-    <button type="button" class="btn btn-secondary" (click)="modalService.close()">{{t('common.cancel')}}</button>
+    <button type="button" class="btn btn-secondary" (click)="modal.dismiss()">{{t('common.cancel')}}</button>
   </div>
 
 </ng-container>

@@ -3,15 +3,15 @@
   <div class="carousel-tabs-container mb-2 ms-md-2 me-md-2 w-auto">
     <ul ngbNav #nav="ngbNav" [(activeId)]="activeTabId" class="nav nav-tabs" [destroyOnHide]="true">
 
-      <li [ngbNavItem]="TabID.Stats">
-        <a ngbNavLink>{{t(TabID.Stats)}}</a>
+      <li [ngbNavItem]="Tabs.Stats">
+        <a ngbNavLink>{{Tabs.Stats | tabTitle}}</a>
         <ng-template ngbNavContent>
           <app-server-stats-stats-tab />
         </ng-template>
       </li>
 
-      <li [ngbNavItem]="TabID.Management">
-        <a ngbNavLink>{{t(TabID.Management)}}</a>
+      <li [ngbNavItem]="Tabs.Management">
+        <a ngbNavLink>{{Tabs.Management | tabTitle}}</a>
         <ng-template ngbNavContent>
           <app-server-stats-mgmt-tab />
         </ng-template>

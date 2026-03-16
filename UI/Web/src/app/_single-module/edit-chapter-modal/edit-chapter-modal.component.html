@@ -9,13 +9,13 @@
       <form [formGroup]="editForm">
         <ul ngbNav #nav="ngbNav" [(activeId)]="activeId" class="nav-pills"
             [destroyOnHide]="false"
-            orientation="{{breakpointService.isMobile() ? 'horizontal' : 'vertical'}}" style="min-width: 135px;">
+            orientation="{{breakpointService.isMobile() ? 'horizontal' : 'vertical'}}" style="min-width: 8.4375rem;">
 
           <!-- General Tab -->
-          @if (user && accountService.hasAdminRole(user))
+          @if (accountService.hasAdminRole())
           {
-            <li [ngbNavItem]="TabID.General">
-              <a ngbNavLink>{{t(TabID.General)}}</a>
+            <li [ngbNavItem]="Tabs.General">
+              <a ngbNavLink>{{Tabs.General | tabTitle}}</a>
               <ng-template ngbNavContent>
                 <div class="row">
                   <div class="col-md-9 col-sm-12 mb-3">
@@ -161,10 +161,10 @@
 
 
           <!-- Tags Tab -->
-          @if (user && accountService.hasAdminRole(user))
+          @if (accountService.hasAdminRole())
           {
-            <li [ngbNavItem]="TabID.Tags">
-              <a ngbNavLink>{{t(TabID.Tags)}}</a>
+            <li [ngbNavItem]="Tabs.Tags">
+              <a ngbNavLink>{{Tabs.Tags | tabTitle}}</a>
               <ng-template ngbNavContent>
                 <!-- genre & tag -->
                 <div class="row">
@@ -332,10 +332,10 @@
 
 
           <!-- People Tab -->
-          @if (user && accountService.hasAdminRole(user))
+          @if (accountService.hasAdminRole())
           {
-            <li [ngbNavItem]="TabID.People">
-              <a ngbNavLink>{{t(TabID.People)}}</a>
+            <li [ngbNavItem]="Tabs.People">
+              <a ngbNavLink>{{Tabs.People | tabTitle}}</a>
               <ng-template ngbNavContent>
                 <!-- writer & cover artist -->
                 <div class="row">
@@ -521,12 +521,21 @@
             </li>
           }
 
+          <!--External Metadata Ids-->
+          @if (accountService.hasAdminRole()) {
+            <li [ngbNavItem]="Tabs.ExternalMetadataIds">
+              <a ngbNavLink>{{Tabs.ExternalMetadataIds | tabTitle}}</a>
+              <ng-template ngbNavContent>
+                <app-edit-external-metadata-form [form]="editForm" [entity]="chapter"/>
+              </ng-template>
+            </li>
+          }
 
           <!-- Cover Tab -->
-          @if (user && accountService.hasAdminRole(user))
+          @if (accountService.hasAdminRole())
           {
-            <li [ngbNavItem]="TabID.CoverImage">
-              <a ngbNavLink>{{t(TabID.CoverImage)}}</a>
+            <li [ngbNavItem]="Tabs.CoverImage">
+              <a ngbNavLink>{{Tabs.CoverImage | tabTitle}}</a>
               <ng-template ngbNavContent>
                 <p class="alert alert-warning" role="alert">
                   {{t('cover-image-description')}}
@@ -538,8 +547,8 @@
           }
 
           <!-- Info Tab -->
-          <li [ngbNavItem]="TabID.Info">
-            <a ngbNavLink>{{t(TabID.Info)}}</a>
+          <li [ngbNavItem]="Tabs.Info">
+            <a ngbNavLink>{{Tabs.Info | tabTitle}}</a>
             <ng-template ngbNavContent>
               <div class="row">
                 <div class="col-lg-6 col-md-12 pe-2">
@@ -624,7 +633,7 @@
                 </div>
               }
 
-              @if (accountService.isAdmin$ | async) {
+              @if (accountService.hasAdminRole()) {
                 <div class="row">
                   <app-setting-item [title]="t('files-label')" [toggleOnViewClick]="false" [showEdit]="false">
                     <ng-template #view>
@@ -643,11 +652,11 @@
 
 
           <!-- Tasks Tab -->
-          <li [ngbNavItem]="TabID.Tasks">
-            <a ngbNavLink>{{t(TabID.Tasks)}}</a>
+          <li [ngbNavItem]="Tabs.Tasks">
+            <a ngbNavLink>{{Tabs.Tasks | tabTitle}}</a>
             <ng-template ngbNavContent>
               @for(task of tasks; track task.action) {
-                @if (accountService.canInvokeAction(user, task.action)) {
+                @if (accountService.canCurrentUserInvokeAction(task.action)) {
                   <div class="mt-3 mb-3">
                     <app-setting-button [subtitle]="task.description">
                       <button class="btn btn-{{task.action === Action.Delete ? 'danger' : 'secondary'}} btn-sm mb-2" (click)="runTask(task)">{{task.title}}</button>

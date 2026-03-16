@@ -4,8 +4,11 @@ namespace Kavita.Common.Extensions;
 
 public static class PathExtensions
 {
-    public static string GetParentDirectory(string filePath)
+    public static string GetFullPathWithoutExtension(this string filepath)
     {
-        return Path.GetDirectoryName(filePath);
+        if (string.IsNullOrEmpty(filepath)) return filepath;
+        var extension = Path.GetExtension(filepath);
+        if (string.IsNullOrEmpty(extension)) return filepath;
+        return Path.GetFullPath(filepath.Replace(extension, string.Empty));
     }
 }

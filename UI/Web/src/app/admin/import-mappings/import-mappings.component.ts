@@ -1,4 +1,4 @@
-import {Component, computed, inject, OnInit, signal, ViewChild} from '@angular/core';
+import {Component, computed, inject, OnInit, signal, viewChild} from '@angular/core';
 import {translate, TranslocoDirective, TranslocoPipe} from "@jsverse/transloco";
 import {StepTrackerComponent, TimelineStep} from "../../reading-list/_components/step-tracker/step-tracker.component";
 import {WikiLink} from "../../_models/wiki";
@@ -40,7 +40,7 @@ import {NgTemplateOutlet} from "@angular/common";
 import {Router} from "@angular/router";
 import {LicenseService} from "../../_services/license.service";
 import {SettingsTabId} from "../../sidenav/preference-nav/preference-nav.component";
-import {toObservable, toSignal} from "@angular/core/rxjs-interop";
+import {toSignal} from "@angular/core/rxjs-interop";
 
 enum Step {
   Import = 0,
@@ -77,7 +77,7 @@ export class ImportMappingsComponent implements OnInit {
   private readonly settingsService = inject(SettingsService);
   private readonly toastr = inject(ToastrService);
 
-  @ViewChild(ManageMetadataMappingsComponent) manageMetadataMappingsComponent!: ManageMetadataMappingsComponent;
+  readonly manageMetadataMappingsComponent = viewChild.required(ManageMetadataMappingsComponent);
 
   steps: TimelineStep[] = [
     {title: translate('import-mappings.import-step'), index: Step.Import, active: true, icon: 'fa-solid fa-file-arrow-up'},
@@ -185,7 +185,7 @@ export class ImportMappingsComponent implements OnInit {
     if (!res) return;
 
     const newSettings = res.resultingMetadataSettings;
-    const data = this.manageMetadataMappingsComponent.packData();
+    const data = this.manageMetadataMappingsComponent().packData();
 
     // Update settings with data from the final step
     newSettings.whitelist = data.whitelist;
@@ -195,7 +195,7 @@ export class ImportMappingsComponent implements OnInit {
 
     this.settingsService.updateMetadataSettings(newSettings).subscribe({
       next: () => {
-        const fragment = this.licenseService.hasValidLicenseSignal()
+        const fragment = this.licenseService.hasValidLicense()
           ? SettingsTabId.Metadata : SettingsTabId.ManageMetadata;
 
         this.router.navigate(['settings'], { fragment: fragment });

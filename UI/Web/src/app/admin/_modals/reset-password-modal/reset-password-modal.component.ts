@@ -1,4 +1,4 @@
-import {Component, inject, Input} from '@angular/core';
+import {Component, inject, input} from '@angular/core';
 import {FormControl, FormGroup, ReactiveFormsModule, Validators} from '@angular/forms';
 import {NgbActiveModal} from '@ng-bootstrap/ng-bootstrap';
 import {Member} from 'src/app/_models/auth/member';
@@ -19,7 +19,7 @@ export class ResetPasswordModalComponent {
   private readonly accountService = inject(AccountService);
   protected readonly modal = inject(NgbActiveModal);
 
-  @Input({required: true}) member!: Member;
+  member = input.required<Member>();
 
   errorMessage = '';
   resetPasswordForm: FormGroup = new FormGroup({
@@ -28,14 +28,14 @@ export class ResetPasswordModalComponent {
 
 
   save() {
-    this.accountService.resetPassword(this.member.username, this.resetPasswordForm.value.password,'').subscribe(() => {
+    this.accountService.resetPassword(this.member().username, this.resetPasswordForm.value.password,'').subscribe(() => {
       this.toastr.success(translate('toasts.password-updated'))
       this.modal.close();
     });
   }
 
   close() {
-    this.modal.close();
+    this.modal.dismiss();
   }
 
 }

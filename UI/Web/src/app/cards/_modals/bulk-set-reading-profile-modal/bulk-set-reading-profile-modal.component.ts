@@ -1,21 +1,10 @@
-import {
-  AfterViewInit,
-  ChangeDetectorRef,
-  Component, computed,
-  ElementRef,
-  inject,
-  Input,
-  model,
-  OnInit, signal, TemplateRef, viewChild,
-  ViewChild
-} from '@angular/core';
+import {Component, computed, inject, input, OnInit, signal, TemplateRef, viewChild} from '@angular/core';
 import {NgbActiveModal} from "@ng-bootstrap/ng-bootstrap";
 import {ToastrService} from "ngx-toastr";
-import {FormControl, FormGroup, ReactiveFormsModule} from "@angular/forms";
+import {ReactiveFormsModule} from "@angular/forms";
 import {translate, TranslocoDirective} from "@jsverse/transloco";
 import {ReadingProfileService} from "../../../_services/reading-profile.service";
-import {ReadingProfile, ReadingProfileKind} from "../../../_models/preferences/reading-profiles";
-import {FilterPipe} from "../../../_pipes/filter.pipe";
+import {ReadingProfile} from "../../../_models/preferences/reading-profiles";
 import {SentenceCasePipe} from "../../../_pipes/sentence-case.pipe";
 import {ListSelectModalComponent} from "../../../shared/_components/list-select-modal/list-select-modal.component";
 import {ClientDevice} from "../../../_models/client-device";
@@ -45,8 +34,8 @@ export class BulkSetReadingProfileModalComponent implements OnInit {
   /**
    * Series Ids to add to Reading Profile
    */
-  @Input() seriesIds: Array<number> = [];
-  @Input() libraryId: number | undefined;
+  seriesIds = input<number[]>([]);
+  libraryId = input<number | undefined>();
 
   private profiles = signal<ReadingProfile[]>([]);
   private currentlyBoundProfiles = signal<ReadingProfile[]>([]);
@@ -61,12 +50,15 @@ export class BulkSetReadingProfileModalComponent implements OnInit {
     this.currentlyBoundProfiles().map(profile => profile.id));
 
   ngOnInit(): void {
-    if (this.libraryId !== undefined) {
-      this.readingProfileService.getForLibrary(this.libraryId).subscribe(profiles => {
+    const seriesIds = this.seriesIds();
+    const libraryId = this.libraryId();
+
+    if (libraryId !== undefined) {
+      this.readingProfileService.getForLibrary(libraryId).subscribe(profiles => {
         this.currentlyBoundProfiles.set(profiles)
       });
-    } else if (this.seriesIds.length === 1) {
-      this.readingProfileService.getAllForSeries(this.seriesIds[0]).subscribe(profiles => {
+    } else if (seriesIds.length === 1) {
+      this.readingProfileService.getAllForSeries(seriesIds[0]).subscribe(profiles => {
         this.currentlyBoundProfiles.set(profiles);
       });
     }
@@ -118,29 +110,30 @@ export class BulkSetReadingProfileModalComponent implements OnInit {
   addToProfile(profileIds: number | number[]) {
     profileIds = Array.isArray(profileIds) ? profileIds : [profileIds];
 
-    if (this.seriesIds.length == 1) {
-      this.readingProfileService.addToSeries(profileIds, this.seriesIds[0]).subscribe(() => {
+    const seriesIds = this.seriesIds();
+    const libraryId = this.libraryId();
+
+    if (seriesIds.length == 1) {
+      this.readingProfileService.addToSeries(profileIds, seriesIds[0]).subscribe(() => {
         this.toastr.success(translate('toasts.series-bound-to-reading-profile', {amount: profileIds.length}));
         this.modal.close();
       });
       return;
     }
 
-    if (this.seriesIds.length > 1) {
-      this.readingProfileService.bulkAddToSeries(profileIds, this.seriesIds).subscribe(() => {
+    if (seriesIds.length > 1) {
+      this.readingProfileService.bulkAddToSeries(profileIds, seriesIds).subscribe(() => {
         this.toastr.success(translate('toasts.series-bound-to-reading-profile', {amount: profileIds.length}));
         this.modal.close();
       });
       return;
     }
 
-    if (this.libraryId) {
-      this.readingProfileService.addToLibrary(profileIds, this.libraryId).subscribe(() => {
+    if (libraryId) {
+      this.readingProfileService.addToLibrary(profileIds, libraryId).subscribe(() => {
         this.toastr.success(translate('toasts.library-bound-to-reading-profile', {amount: profileIds.length}));
         this.modal.close();
       });
     }
   }
-
-  protected readonly ReadingProfileKind = ReadingProfileKind;
 }

@@ -7,8 +7,9 @@ import {
   DestroyRef,
   inject,
   signal,
-  ViewChild
+  viewChild
 } from '@angular/core';
+import {DownloadQueueWidgetComponent} from '../download-queue-widget/download-queue-widget.component';
 import {Router, RouterLink, RouterLinkActive} from '@angular/router';
 import {Chapter} from 'src/app/_models/chapter';
 import {UserCollection} from 'src/app/_models/collection-tag';
@@ -24,7 +25,7 @@ import {NavService} from 'src/app/_services/nav.service';
 import {SearchService} from 'src/app/_services/search.service';
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import {SentenceCasePipe} from '../../../_pipes/sentence-case.pipe';
-import {NgbDropdown, NgbDropdownItem, NgbDropdownMenu, NgbDropdownToggle, NgbModal} from '@ng-bootstrap/ng-bootstrap';
+import {NgbDropdown, NgbDropdownItem, NgbDropdownMenu, NgbDropdownToggle} from '@ng-bootstrap/ng-bootstrap';
 import {EventsWidgetComponent} from '../events-widget/events-widget.component';
 import {SeriesFormatComponent} from '../../../shared/series-format/series-format.component';
 import {ImageComponent} from '../../../shared/image/image.component';
@@ -47,6 +48,7 @@ import {QuillViewComponent} from "ngx-quill";
 import {AnnotationService} from "../../../_services/annotation.service";
 import {ProfileIconComponent} from "../../../_single-module/profile-icon/profile-icon.component";
 import {BreakpointService} from "../../../_services/breakpoint.service";
+import {ModalService} from "../../../_services/modal.service";
 
 @Component({
   selector: 'app-nav-header',
@@ -55,7 +57,7 @@ import {BreakpointService} from "../../../_services/breakpoint.service";
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [RouterLink, RouterLinkActive, GroupedTypeaheadComponent, ImageComponent,
     SeriesFormatComponent, EventsWidgetComponent, NgbDropdown, NgbDropdownToggle, NgbDropdownMenu, NgbDropdownItem,
-    SentenceCasePipe, TranslocoDirective, CollectionOwnerComponent, PromotedIconComponent, QuillViewComponent, ProfileIconComponent]
+    SentenceCasePipe, TranslocoDirective, CollectionOwnerComponent, PromotedIconComponent, QuillViewComponent, ProfileIconComponent, DownloadQueueWidgetComponent]
 })
 export class NavHeaderComponent {
 
@@ -68,20 +70,21 @@ export class NavHeaderComponent {
   protected readonly navService = inject(NavService);
   protected readonly imageService = inject(ImageService);
   protected readonly breakpointService = inject(BreakpointService);
-  protected readonly modalService = inject(NgbModal);
+  protected readonly modalService = inject(ModalService);
   protected readonly metadataService = inject(MetadataService);
   private readonly annotationService = inject(AnnotationService);
   private readonly document = inject(DOCUMENT);
 
-  @ViewChild('search') searchViewRef!: any;
+
+  readonly searchViewRef = viewChild.required<any>('search');
 
 
   profileLink = computed(() => {
-    return ['/profile', this.accountService.currentUserSignal()?.id ?? ''];
+    return ['/profile', this.accountService.currentUser()?.id ?? ''];
   });
 
   currentUser = computed(() => {
-    return this.accountService.currentUserSignal();
+    return this.accountService.currentUser();
   });
 
   isLoading = signal<boolean>(false);
@@ -129,7 +132,7 @@ export class NavHeaderComponent {
   }
 
   clearSearch() {
-    this.searchViewRef.clear();
+    this.searchViewRef().clear();
     this.searchTerm = '';
     this.searchResults = new SearchResultGroup();
     this.cdRef.markForCheck();

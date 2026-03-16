@@ -1,13 +1,15 @@
 import {
   ChangeDetectionStrategy,
   ChangeDetectorRef,
-  Component, computed,
-  ContentChild,
+  Component,
+  computed,
+  contentChild,
   CUSTOM_ELEMENTS_SCHEMA,
-  EventEmitter,
-  inject, input,
-  Input, model,
-  Output, signal,
+  inject,
+  input,
+  Input,
+  output,
+  signal,
   TemplateRef
 } from '@angular/core';
 import {Swiper} from 'swiper/types';
@@ -15,10 +17,12 @@ import {register} from 'swiper/element/bundle';
 import {NgClass, NgTemplateOutlet} from '@angular/common';
 import {TranslocoDirective} from "@jsverse/transloco";
 import {CardActionablesComponent} from "../../../_single-module/card-actionables/card-actionables.component";
-import {ActionItem} from "../../../_services/action-factory.service";
 import {SafeUrlPipe} from "../../../_pipes/safe-url.pipe";
 import {map, Observable, tap} from "rxjs";
 import {PaginatedResult} from "../../../_models/pagination";
+import {ActionItem} from "../../../_models/actionables/action-item";
+import {ActionResult} from "../../../_models/actionables/action-result";
+import {ActionableEntity} from "../../../_services/action-factory.service";
 
 register();
 
@@ -36,8 +40,9 @@ export class CarouselReelComponent {
 
   private readonly cdRef = inject(ChangeDetectorRef);
 
-  @ContentChild('carouselItem') carouselItemTemplate!: TemplateRef<any>;
-  @ContentChild('promptToAdd') promptToAddTemplate!: TemplateRef<any>;
+  readonly carouselItemTemplate = contentChild.required<TemplateRef<any>>('carouselItem');
+  readonly promptToAddTemplate = contentChild.required<TemplateRef<any>>('promptToAdd');
+  readonly noDataTemplate = contentChild<TemplateRef<any>>('noData');
   @Input() items: any[] = [];
   @Input() title = '';
   /**
@@ -58,8 +63,14 @@ export class CarouselReelComponent {
    * Actionables to render to the left of the title
    */
   @Input() actionables: Array<ActionItem<any>> = [];
-  @Output() sectionClick = new EventEmitter<string>();
-  @Output() handleAction = new EventEmitter<ActionItem<any>>();
+  /**
+   * If using actionables, this is the entity to allow Action.Service to handle logic
+   */
+  @Input() actionableEntity: ActionableEntity = null;
+  readonly sectionClick = output<string>();
+  readonly handleAction = output<ActionItem<any>>();
+
+  readonly actionHandler = output<ActionResult<any>>();
 
   currentPage = signal<number>(1);
   pageSize = input(20);
@@ -139,8 +150,7 @@ export class CarouselReelComponent {
     this.cdRef.markForCheck();
   }
 
-
-  performAction(action: ActionItem<any>) {
-    this.handleAction.emit(action);
+  performAction(event: ActionResult<any>) {
+    this.actionHandler.emit(event);
   }
 }

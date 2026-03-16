@@ -1,8 +1,6 @@
 <ng-container *transloco="let t; prefix: 'customize-sidenav-streams'">
   <form [formGroup]="listForm">
-    <ng-template #topBar>
-     <app-bulk-operations [modalMode]="false" [actionCallback]="bulkActionCallback" />
-    </ng-template>
+    <app-bulk-operations />
 
     @if (items.length > 3) {
       <div class="row g-0 mb-2">
@@ -31,7 +29,7 @@
     </div>
 
 
-    <div style="max-height: 500px; overflow-y: auto">
+    <div style="max-height: 31.25rem; overflow-y: auto">
       <app-draggable-ordered-list [items]="items | filter: filterSideNavStreams" (orderUpdated)="orderUpdated($event)"
                                   [accessibilityMode]="pageOperationsForm.get('accessibilityMode')!.value"
                                   [showRemoveButton]="false" [disabled]="listForm.get('filterSideNavStream')!.value"

@@ -12,39 +12,32 @@ import {DefaultDatePipe} from "../../_pipes/default-date.pipe";
 import {UtcToLocalTimePipe} from "../../_pipes/utc-to-local-time.pipe";
 import {BytesPipe} from "../../_pipes/bytes.pipe";
 import {ReadTimePipe} from "../../_pipes/read-time.pipe";
-import {Action, ActionFactoryService, ActionItem} from "../../_services/action-factory.service";
 import {Volume} from "../../_models/volume";
 import {UtilityService} from "../../shared/_services/utility.service";
 import {ImageService} from "../../_services/image.service";
 import {UploadService} from "../../_services/upload.service";
 import {AccountService} from "../../_services/account.service";
 import {ActionService} from "../../_services/action.service";
-import {DownloadService} from "../../shared/_services/download.service";
+import {DownloadService} from '../../shared/_services/download.service';
+import {DownloadEntityType} from '../../shared/_models/download-queue-item';
 import {LibraryType} from "../../_models/library/library";
 import {PersonRole} from "../../_models/metadata/person";
 import {forkJoin} from "rxjs";
 import {MangaFormat} from 'src/app/_models/manga-format';
 import {MangaFile} from "../../_models/manga-file";
-import {User} from "../../_models/user/user";
 import {BreakpointService} from "../../_services/breakpoint.service";
+import {ActionFactoryService} from "../../_services/action-factory.service";
+import {ActionItem} from "../../_models/actionables/action-item";
+import {Action} from "../../_models/actionables/action";
+import {modalDeleted, modalSaved} from "../../_models/modal/modal-result";
+import {VolumeService} from "../../_services/volume.service";
+import {UpdateVolume} from "../../_models/update-volume";
+import {Tabs} from "../../_models/tabs";
+import {TabTitlePipe} from "../../_pipes/tab-title.pipe";
+import {
+  EditExternalMetadataFormComponent
+} from "../../shared/_components/edit-external-metadata-form/edit-external-metadata-form.component";
 
-enum TabID {
-  General = 'general-tab',
-  CoverImage = 'cover-image-tab',
-  Info = 'info-tab',
-  Tasks = 'tasks-tab',
-  Progress = 'progress-tab',
-}
-
-export interface EditVolumeModalCloseResult {
-  success: boolean;
-  volume: Volume;
-  coverImageUpdate: boolean;
-  needsReload: boolean;
-  isDeleted: boolean;
-}
-
-const blackList = [Action.Edit, Action.IncognitoRead, Action.AddToReadingList];
 
 @Component({
   selector: 'app-edit-volume-modal',
@@ -66,7 +59,9 @@ const blackList = [Action.Edit, Action.IncognitoRead, Action.AddToReadingList];
     DefaultDatePipe,
     UtcToLocalTimePipe,
     BytesPipe,
-    ReadTimePipe
+    ReadTimePipe,
+    TabTitlePipe,
+    EditExternalMetadataFormComponent
   ],
   templateUrl: './edit-volume-modal.component.html',
   styleUrl: './edit-volume-modal.component.scss',
@@ -82,26 +77,20 @@ export class EditVolumeModalComponent implements OnInit {
   private readonly actionFactoryService = inject(ActionFactoryService);
   private readonly actionService = inject(ActionService);
   private readonly downloadService = inject(DownloadService);
+  private readonly volumeService = inject(VolumeService);
   protected readonly breakpointService = inject(BreakpointService);
-
-  protected readonly TabID = TabID;
-  protected readonly Action = Action;
-  protected readonly PersonRole = PersonRole;
-  protected readonly MangaFormat = MangaFormat;
 
   @Input({required: true}) volume!: Volume;
   @Input({required: true}) libraryType!: LibraryType;
   @Input({required: true}) libraryId!: number;
   @Input({required: true}) seriesId!: number;
 
-  activeId = TabID.Info;
+  activeId = Tabs.Info;
   editForm: FormGroup = new FormGroup({});
   selectedCover: string = '';
   coverImageReset = false;
-  user!: User;
 
-
-  tasks = this.actionFactoryService.getActionablesForSettingsPage(this.actionFactoryService.getVolumeActions(this.runTask.bind(this)), blackList);
+  tasks = this.actionFactoryService.getActionablesForSettingsPage(this.actionFactoryService.getVolumeActions(this.seriesId, this.libraryId, this.libraryType), this.blacklist);
   /**
    * A copy of the chapter from init. This is used to compare values for name fields to see if lock was modified
    */
@@ -111,14 +100,14 @@ export class EditVolumeModalComponent implements OnInit {
   files: Array<MangaFile> = [];
 
   constructor() {
-    this.accountService.currentUser$.subscribe(user => {
-      this.user = user!;
-
-      if (!this.accountService.hasAdminRole(user!)) {
-        this.activeId = TabID.Info;
-      }
+    if (!this.accountService.hasAdminRole()) {
+      this.activeId = Tabs.Info;
       this.cdRef.markForCheck();
-    });
+    }
+  }
+
+  get blacklist() {
+    return [Action.Edit, Action.IncognitoRead, Action.AddToReadingList];
   }
 
 
@@ -138,16 +127,22 @@ export class EditVolumeModalComponent implements OnInit {
   }
 
   save() {
+    const model = this.editForm.getRawValue();
     const selectedIndex = this.editForm.get('coverImageIndex')?.value || 0;
 
-    const apis = [];
+    const updateData = {id: this.volume.id, ...model} as UpdateVolume;
+
+    const apis = [
+      this.volumeService.updateVolume(updateData)
+    ];
 
     if (selectedIndex > 0 || this.coverImageReset) {
       apis.push(this.uploadService.updateVolumeCoverImage(this.volume.id, this.selectedCover, !this.coverImageReset));
     }
 
     forkJoin(apis).subscribe(results => {
-      this.modal.close({success: true, volume: this.volume, coverImageUpdate: selectedIndex > 0 || this.coverImageReset, needsReload: false, isDeleted: false} as EditVolumeModalCloseResult);
+      const needsCoverUpdate = selectedIndex > 0 || this.coverImageReset;
+      this.modal.close(modalSaved(this.volume, needsCoverUpdate));
     });
   }
 
@@ -169,11 +164,11 @@ export class EditVolumeModalComponent implements OnInit {
       case Action.Delete:
         await this.actionService.deleteVolume(this.volume.id, (b) => {
           if (!b) return;
-          this.modal.close({success: b, volume: this.volume, coverImageUpdate: false, needsReload: true, isDeleted: b} as EditVolumeModalCloseResult);
+          this.modal.close(modalDeleted(this.volume));
         });
         break;
       case Action.Download:
-        this.downloadService.download('volume', this.volume);
+        this.downloadService.download(DownloadEntityType.Volume, this.volume, this.libraryId, this.seriesId);
         break;
     }
   }
@@ -197,4 +192,9 @@ export class EditVolumeModalComponent implements OnInit {
     });
     this.cdRef.markForCheck();
   }
+
+  protected readonly Tabs = Tabs;
+  protected readonly Action = Action;
+  protected readonly PersonRole = PersonRole;
+  protected readonly MangaFormat = MangaFormat;
 }

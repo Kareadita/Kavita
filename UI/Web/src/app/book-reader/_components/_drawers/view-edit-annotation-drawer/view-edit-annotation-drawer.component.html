@@ -72,7 +72,7 @@
                 <div class="ms-2">{{ an.createdUtc | utcToLocalDate | date: 'shortDate' }}</div>
               </div>
 
-              @if (an.ownerUsername === accountService.currentUserSignal()?.username) {
+              @if (an.ownerUsername === accountService.currentUser()?.username) {
                 <button class="btn btn-primary" (click)="switchToEditMode()">{{t('edit')}}</button>
                 <button class="btn btn-danger" (click)="delete()">{{t('delete')}}</button>
               }

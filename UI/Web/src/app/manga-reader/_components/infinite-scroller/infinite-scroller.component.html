@@ -16,7 +16,7 @@
   }
 
   @if (atTop) {
-    <div #topSpacer class="spacer top" role="alert" (click)="loadPrevChapter.emit()">
+    <div #topSpacer class="spacer top" role="alert" (click)="loadPrevChapter.emit(undefined)">
       <div class="empty-space"></div>
       <div>
         <button class="btn btn-icon mx-auto">
@@ -38,7 +38,7 @@
            [style.width]="widthOverride()"
            class="mx-auto {{pageNum === item.page && showDebugOutline() ? 'active': ''}} {{areImagesWiderThanWindow ? 'full-width' : ''}}"
            rel="nofollow"
-           alt="image"
+           alt="image {{item.page}}"
            (load)="onImageLoad($event)"
            id="page-{{item.page}}"
            [attr.page]="item.page"
@@ -47,7 +47,7 @@
     }
   </div>
 
-  <div #bottomSpacer class="spacer bottom" role="alert" (click)="loadNextChapter.emit()">
+  <div #bottomSpacer class="spacer bottom" role="alert" (click)="loadNextChapter.emit(undefined)">
     <div>
       <button class="btn btn-icon mx-auto">
         <i class="fa fa-angle-double-down animate" aria-hidden="true"></i>

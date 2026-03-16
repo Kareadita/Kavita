@@ -6,14 +6,14 @@ h2 {
 }
 
 .main-container {
-  margin-top: 10px;
-  max-width: 1920px;
-  padding: 0 20px;
+  margin-top: 0.625rem;
+  max-width: 120rem;
+  padding: 0 1.25rem;
 }
 
 ::ng-deep .content-wrapper:not(.closed) {
   .scale {
-    width: calc(100dvw - 200px) !important;
+    width: calc(100dvw - 12.5rem) !important;
 
 
   }

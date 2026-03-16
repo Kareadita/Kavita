@@ -4,7 +4,7 @@ import {AccountService} from '../_services/account.service';
 
 export const jwtInterceptor: HttpInterceptorFn = (req, next) => {
   const accountService = inject(AccountService);
-  const user = accountService.currentUserSignal();
+  const user = accountService.currentUser();
 
   if (user?.token) {
     req = req.clone({

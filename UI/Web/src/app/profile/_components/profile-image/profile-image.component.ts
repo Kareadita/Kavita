@@ -7,7 +7,7 @@ import {
   input,
   model,
   signal,
-  ViewChild
+  viewChild
 } from '@angular/core';
 import {ImageService} from "../../../_services/image.service";
 import {AccountService} from "../../../_services/account.service";
@@ -39,7 +39,7 @@ export class ProfileImageComponent {
   private readonly uploadService = inject(UploadService);
   private readonly toastr = inject(ToastrService);
 
-  @ViewChild('fileInput') fileInput!: ElementRef<HTMLInputElement>;
+  readonly fileInput = viewChild.required<ElementRef<HTMLInputElement>>('fileInput');
 
   userId = input.required<number>();
   showEditButton = input<boolean>(true);
@@ -54,11 +54,11 @@ export class ProfileImageComponent {
   imageSelected: ImageUploadResult | null = null;
 
   canUploadImage = computed(() => {
-    return this.accountService.currentUserSignal()?.id === this.userId();
+    return this.accountService.currentUser()?.id === this.userId();
   });
 
   canDeleteImage = computed(() => {
-    return this.accountService.currentUserSignal()?.coverImage && !this.uploadInProgress() && this.showEditButton();
+    return this.accountService.currentUser()?.coverImage && !this.uploadInProgress() && this.showEditButton();
   });
 
   isImageUploadMode = computed(() => {
@@ -73,7 +73,7 @@ export class ProfileImageComponent {
 
   openFileSelector(): void {
     if (!this.uploadInProgress()) {
-      this.fileInput.nativeElement.click();
+      this.fileInput().nativeElement.click();
     }
   }
 

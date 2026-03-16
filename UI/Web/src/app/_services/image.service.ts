@@ -1,9 +1,8 @@
-import {DestroyRef, inject, Injectable} from '@angular/core';
+import {computed, DestroyRef, inject, Injectable} from '@angular/core';
 import {environment} from 'src/environments/environment';
 import {ThemeService} from './theme.service';
 import {AccountService} from './account.service';
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
-import {ImageOnlyName} from "../_models/user/auth-key";
 
 @Injectable({
   providedIn: 'root'
@@ -14,8 +13,8 @@ export class ImageService {
 
   private readonly destroyRef = inject(DestroyRef);
   baseUrl = environment.apiUrl;
-  apiKey: string = '';
-  encodedKey: string = '';
+  apiKey = this.accountService.currentUserImageAuthKey;
+  encodedKey = computed(() => encodeURIComponent(this.apiKey()!));
   public placeholderImage = 'assets/images/image-placeholder.dark-min.png';
   public errorImage = 'assets/images/error-placeholder2.dark-min.png';
   public resetCoverImage = 'assets/images/image-reset-cover-min.png';
@@ -37,14 +36,6 @@ export class ImageService {
         this.noPersonImage = 'assets/images/error-person-missing.min.png';
       }
     });
-
-    this.accountService.currentUser$.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(user => {
-      if (user) {
-        // Get the image-only key from the auth keys
-        this.apiKey = user.authKeys.filter(k => k.name === ImageOnlyName)[0].key;
-        this.encodedKey = encodeURIComponent(this.apiKey);
-      }
-    });
   }
 
   /**
@@ -60,51 +51,51 @@ export class ImageService {
   }
 
   getPersonImage(personId: number) {
-    return `${this.baseUrl}image/person-cover?personId=${personId}&apiKey=${this.encodedKey}`;
+    return `${this.baseUrl}image/person-cover?personId=${personId}&apiKey=${this.encodedKey()}`;
   }
 
   getUserCoverImage(userId: number) {
-    return `${this.baseUrl}image/user-cover?userId=${userId}&apiKey=${this.encodedKey}`;
+    return `${this.baseUrl}image/user-cover?userId=${userId}&apiKey=${this.encodedKey()}`;
   }
 
   getLibraryCoverImage(libraryId: number) {
-    return `${this.baseUrl}image/library-cover?libraryId=${libraryId}&apiKey=${this.encodedKey}`;
+    return `${this.baseUrl}image/library-cover?libraryId=${libraryId}&apiKey=${this.encodedKey()}`;
   }
 
   getVolumeCoverImage(volumeId: number) {
-    return `${this.baseUrl}image/volume-cover?volumeId=${volumeId}&apiKey=${this.encodedKey}`;
+    return `${this.baseUrl}image/volume-cover?volumeId=${volumeId}&apiKey=${this.encodedKey()}`;
   }
 
   getSeriesCoverImage(seriesId: number) {
-    return `${this.baseUrl}image/series-cover?seriesId=${seriesId}&apiKey=${this.encodedKey}`;
+    return `${this.baseUrl}image/series-cover?seriesId=${seriesId}&apiKey=${this.encodedKey()}`;
   }
 
   getCollectionCoverImage(collectionTagId: number) {
-    return `${this.baseUrl}image/collection-cover?collectionTagId=${collectionTagId}&apiKey=${this.encodedKey}`;
+    return `${this.baseUrl}image/collection-cover?collectionTagId=${collectionTagId}&apiKey=${this.encodedKey()}`;
   }
 
   getReadingListCoverImage(readingListId: number) {
-    return `${this.baseUrl}image/readinglist-cover?readingListId=${readingListId}&apiKey=${this.encodedKey}`;
+    return `${this.baseUrl}image/readinglist-cover?readingListId=${readingListId}&apiKey=${this.encodedKey()}`;
   }
 
   getChapterCoverImage(chapterId: number) {
-    return `${this.baseUrl}image/chapter-cover?chapterId=${chapterId}&apiKey=${this.encodedKey}`;
+    return `${this.baseUrl}image/chapter-cover?chapterId=${chapterId}&apiKey=${this.encodedKey()}`;
   }
 
   getBookmarkedImage(chapterId: number, pageNum: number, imageOffset: number = 0) {
-    return `${this.baseUrl}image/bookmark?chapterId=${chapterId}&apiKey=${this.encodedKey}&pageNum=${pageNum}&imageOffset=${imageOffset}`;
+    return `${this.baseUrl}image/bookmark?chapterId=${chapterId}&apiKey=${this.encodedKey()}&pageNum=${pageNum}&imageOffset=${imageOffset}`;
   }
 
   getWebLinkImage(url: string) {
-    return `${this.baseUrl}image/web-link?url=${encodeURIComponent(url)}&apiKey=${this.encodedKey}`;
+    return `${this.baseUrl}image/web-link?url=${encodeURIComponent(url)}&apiKey=${this.encodedKey()}`;
   }
 
   getPublisherImage(name: string) {
-    return `${this.baseUrl}image/publisher?publisherName=${encodeURIComponent(name)}&apiKey=${this.encodedKey}`;
+    return `${this.baseUrl}image/publisher?publisherName=${encodeURIComponent(name)}&apiKey=${this.encodedKey()}`;
   }
 
   getCoverUploadImage(filename: string) {
-    return `${this.baseUrl}image/cover-upload?filename=${encodeURIComponent(filename)}&apiKey=${this.encodedKey}`;
+    return `${this.baseUrl}image/cover-upload?filename=${encodeURIComponent(filename)}&apiKey=${this.encodedKey()}`;
   }
 
   updateErroredWebLinkImage(event: any) {

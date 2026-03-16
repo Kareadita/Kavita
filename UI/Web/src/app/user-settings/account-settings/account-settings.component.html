@@ -1,0 +1,28 @@
+<ng-container *transloco="let t; prefix: 'account-settings'">
+  <app-change-email />
+
+  <div class="setting-section-break"></div>
+
+  <app-change-password />
+
+  @if (accountService.currentUser()?.oidcId) {
+    <div class="setting-section-break"></div>
+
+    <h6 class="section-title">
+      <app-image imageUrl="assets/icons/open-id-connect-logo.svg" height="16px" width="16px" />
+      {{t('oidc')}}
+    </h6>
+
+    <button class="btn btn-danger mt-4" (click)="clearOidcLink()">
+      {{t('unlink-oidc')}}
+    </button>
+  }
+
+  <div class="setting-section-break"></div>
+
+  <app-change-age-restriction />
+
+  <div class="setting-section-break"></div>
+
+  <app-manage-scrobbling-providers />
+</ng-container>

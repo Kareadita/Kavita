@@ -363,14 +363,6 @@
         "create": "{{common.create}}",
         "title": "Minden intelligens szűrő"
     },
-    "out-of-date-modal": {
-        "close": "{{common.close}}",
-        "title": "Ne maradj le!",
-        "subtitle": "Úgy tűnik, a telepítésed több mint {{count}} verzióval van lemaradva!",
-        "description-1": "Kérjük, fontold meg a frissítést, hogy a Kavita legújabb verzióját használd.",
-        "description-2": "A frissítéssel kapcsolatos utasításokért tekintse meg a <a href='https://wiki.kavitareader.com/guides/updating/' target='_blank' rel='noreferrer noopener'>wikinket</a>.",
-        "description-3": "Ha van valami konkrét oka annak, hogy még nem frissítettél, szeretnénk tudni, hogy mi tart vissza egy elavult verziónál! Látogass el a Discord oldalunkra, és tudasd velünk, mi akadályozza a frissítési folyamatot."
-    },
     "invite-user": {
         "close": "{{common.close}}",
         "email": "{{common.email}}",
@@ -491,15 +483,6 @@
         "read": "{{common.read}}",
         "remove-from-want-to-read": "{{actionable.remove-from-want-to-read}}",
         "add-to-want-to-read": "{{actionable.add-to-want-to-read}}",
-        "reviews-tab": "{{tabs.reviews-tab}}",
-        "storyline-tab": "{{tabs.storyline-tab}}",
-        "books-tab": "{{tabs.books-tab}}",
-        "volumes-tab": "{{tabs.volumes-tab}}",
-        "specials-tab": "{{tabs.specials-tab}}",
-        "related-tab": "{{tabs.related-tab}}",
-        "details-tab": "{{tabs.details-tab}}",
-        "info-tab": "{{tabs.info-tab}}",
-        "recommendations-tab": "{{tabs.recommendations-tab}}",
         "no-pages": "{{toasts.no-pages}}",
         "writers-title": "{{metadata-fields.writers-title}}",
         "cover-artists-title": "{{metadata-fields.cover-artists-title}}",
@@ -550,12 +533,6 @@
         "kavita-rating-title": "Az Ön értékelése",
         "critic": "{{review-card.critic}}"
     },
-    "update-notification-modal": {
-        "close": "{{common.close}}",
-        "title": "Új frissítés elérhető!",
-        "help": "Frissítés módja",
-        "download": "Letöltés"
-    },
     "side-nav-companion-bar": {
         "page-settings-title": "{{series-detail.page-settings-title}}",
         "open-filter-and-sort": "Szűrés és rendezés megnyitása",
@@ -582,11 +559,6 @@
     },
     "library-settings-modal": {
         "close": "{{common.close}}",
-        "general-tab": "{{tabs.general-tab}}",
-        "folder-tab": "{{tabs.folder-tab}}",
-        "cover-tab": "{{tabs.cover-tab}}",
-        "advanced-tab": "{{tabs.advanced-tab}}",
-        "tasks-tab": "{{tabs.tasks-tab}}",
         "reset": "{{common.reset}}",
         "cancel": "{{common.cancel}}",
         "save": "{{common.save}}",
@@ -705,7 +677,6 @@
     },
     "entity-title": {
         "issue-num": "{{common.issue-hash-num}}",
-        "chapter": "{{common.chapter-num}}",
         "book-num": "{{common.book-num-shorthand}}"
     },
     "manage-media-issues": {
@@ -871,10 +842,6 @@
         "save": "{{common.save}}",
         "close": "{{common.close}}",
         "cancel": "{{common.cancel}}",
-        "general-tab": "{{tabs.general-tab}}",
-        "cover-image-tab": "{{tabs.cover-tab}}",
-        "info-tab": "{{tabs.info-tab}}",
-        "series-tab": "{{tabs.series-tab}}",
         "deselect-all": "{{common.deselect-all}}",
         "select-all": "{{common.select-all}}",
         "filter-label": "{{common.filter}}",
@@ -985,8 +952,6 @@
         "reading-list-label": "Olvasási lista"
     },
     "edit-reading-list-modal": {
-        "general-tab": "{{tabs.general-tab}}",
-        "cover-image-tab": "{{tabs.cover-tab}}",
         "close": "{{common.close}}",
         "save": "{{common.save}}",
         "required-field": "{{validation.required-field}}",
@@ -1113,7 +1078,6 @@
         "general-tab": "{{tabs.general-tab}}",
         "metadata-tab": "{{tabs.metadata-tab}}",
         "people-tab": "{{tabs.people-tab}}",
-        "web-links-tab": "{{tabs.weblink-tab}}",
         "cover-image-tab": "{{tabs.cover-tab}}",
         "related-tab": "{{tabs.related-tab}}",
         "info-tab": "{{tabs.info-tab}}",
@@ -1192,15 +1156,8 @@
         "age-rating-label": "{{edit-series-modal.age-rating-label}}",
         "web-link-description": "{{edit-series-modal.web-link-description}}",
         "web-link-label": "{{edit-series-modal.web-link-label}}",
-        "general-tab": "{{tabs.general-tab}}",
-        "people-tab": "{{tabs.people-tab}}",
-        "weblink-tab": "{{tabs.weblink-tab}}",
         "field-locked-alt": "{{edit-series-modal.field-locked-alt}}",
-        "cover-image-tab": "{{tabs.cover-tab}}",
-        "tasks-tab": "{{tabs.tasks-tab}}",
-        "info-tab": "{{tabs.info-tab}}",
         "cover-image-description": "{{edit-series-modal.cover-image-description}}",
-        "tags-tab": "{{tabs.tags-tab}}",
         "size-label": "{{edit-series-modal.size-title}}",
         "links-label": "{{metadata-fields.links-title}}",
         "last-read-label": "{{sort-field-pipe.read-progress}}"
@@ -1484,20 +1441,6 @@
         "installed": "{{changelog.installed}}",
         "feature-requests": "Funkciókérés",
         "known-issues": "Ismert hibák"
-    },
-    "new-version-modal": {
-        "title": "Kavita frissült!",
-        "description": "Elérhető a Kavita új verziója. Frissítse az oldalt a frissítéshez.",
-        "added": "{{changelog.added}}",
-        "changed": "{{changelog.changed}}",
-        "fixed": "{{changelog.fixed}}",
-        "developer": "{{changelog.developer}}",
-        "theme": "{{changelog.theme}}",
-        "removed": "{{changelog.removed}}",
-        "known-issues": "{{changelog.known-issues}}",
-        "api": "{{changelog.api}}",
-        "close": "{{common.close}}",
-        "refresh": "Frissítés"
     },
     "manage-matched-metadata": {
         "title": "Egyező metaadatok",
@@ -1863,9 +1806,7 @@
         "close": "{{common.close}}",
         "no-data": "{{common.no-data}}",
         "page-num-label": "{{book-reader.page-num-label}}",
-        "load-bookmark": "Töltés",
-        "image-header": "Kép",
-        "text-header": "Szöveg"
+        "load-bookmark": "Töltés"
     },
     "badge-expander": {
         "more-items": "és még {{count}}"
@@ -1968,5 +1909,25 @@
         "delete": "Törölje a(z) {{bookmarkName}} könyvjelzőt",
         "no-match": "Nincsenek könyvjelzők, amelyek megfelelnek a szűrőnek",
         "filter-label": "{{common.filter}}"
+    },
+    "version-update-modal": {
+        "close": "{{common.close}}",
+        "out-of-date": {
+            "title": "Ne maradj le!",
+            "subtitle": "Úgy tűnik, a telepítésed több mint {{count}} verzióval van lemaradva!",
+            "description-1": "Kérjük, fontold meg a frissítést, hogy a Kavita legújabb verzióját használd.",
+            "description-2": "A frissítéssel kapcsolatos utasításokért tekintse meg a <a href='https://wiki.kavitareader.com/guides/updating/' target='_blank' rel='noreferrer noopener'>wikinket</a>.",
+            "description-3": "Ha van valami konkrét oka annak, hogy még nem frissítettél, szeretnénk tudni, hogy mi tart vissza egy elavult verziónál! Látogass el a Discord oldalunkra, és tudasd velünk, mi akadályozza a frissítési folyamatot."
+        },
+        "new-version": {
+            "title": "Kavita frissült!",
+            "description": "Elérhető a Kavita új verziója. Frissítse az oldalt a frissítéshez.",
+            "refresh": "Frissítés"
+        },
+        "update-notification": {
+            "title": "Új frissítés elérhető!",
+            "help": "Frissítés módja",
+            "download": "Letöltés"
+        }
     }
 }

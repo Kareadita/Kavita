@@ -1,21 +1,24 @@
-import {Component, inject, Input} from '@angular/core';
-import { FormControl, FormGroup, ReactiveFormsModule } from '@angular/forms';
-import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
-import { FilterPipe } from '../../../../_pipes/filter.pipe';
+import {ChangeDetectionStrategy, Component, computed, inject, input} from '@angular/core';
+import {FormControl, FormGroup, ReactiveFormsModule} from '@angular/forms';
+import {NgbActiveModal} from '@ng-bootstrap/ng-bootstrap';
+import {FilterPipe} from '../../../../_pipes/filter.pipe';
 import {TranslocoDirective} from "@jsverse/transloco";
 
 @Component({
-    selector: 'app-generic-list-modal',
-    templateUrl: './generic-list-modal.component.html',
-    styleUrls: ['./generic-list-modal.component.scss'],
-    imports: [ReactiveFormsModule, FilterPipe, TranslocoDirective]
+  selector: 'app-generic-list-modal',
+  templateUrl: './generic-list-modal.component.html',
+  styleUrls: ['./generic-list-modal.component.scss'],
+  imports: [ReactiveFormsModule, FilterPipe, TranslocoDirective],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class GenericListModalComponent {
   private readonly modal = inject(NgbActiveModal);
 
-  @Input() items: Array<string> = [];
-  @Input() title: string = '';
-  @Input() clicked: ((item: string) => void) | undefined = undefined;
+  items = input<string[]>([]);
+  title = input<string>('');
+  clicked = input<((item: string) => void) | undefined>(undefined);
+
+  needsFilter = computed(() => this.items().length >= 5);
 
   listForm: FormGroup = new FormGroup({
     'filterQuery': new FormControl('', [])
@@ -26,12 +29,13 @@ export class GenericListModalComponent {
   }
 
   close() {
-    this.modal.close();
+    this.modal.dismiss();
   }
 
   handleClick(item: string) {
-    if (this.clicked) {
-      this.clicked(item);
+    const clickFn = this.clicked();
+    if (clickFn) {
+      clickFn(item);
     }
   }
 }

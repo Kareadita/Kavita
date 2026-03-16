@@ -1,14 +1,14 @@
 <ng-container *transloco="let t; prefix: 'common'">
-  @if (loading) {
-    @if (absolute) {
+  @if (loading()) {
+    @if (absolute()) {
       <div class="position-absolute top-50 start-50 translate-middle" style="z-index: 999">
-        <div class="spinner-border {{size}} text-primary" role="status">
+        <div class="spinner-border {{size()}} text-primary" role="status">
           <span class="visually-hidden">{{t('loading')}}</span>
         </div>
       </div>
     } @else {
       <div class="d-flex justify-content-center">
-        <div class="spinner-border {{size}} text-primary" role="status">
+        <div class="spinner-border {{size()}} text-primary" role="status">
           <span class="visually-hidden">{{t('loading')}}</span>
         </div>
       </div>

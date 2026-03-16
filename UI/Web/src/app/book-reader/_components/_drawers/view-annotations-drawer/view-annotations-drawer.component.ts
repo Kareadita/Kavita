@@ -1,4 +1,4 @@
-import {ChangeDetectionStrategy, Component, EventEmitter, inject, Output, Signal} from '@angular/core';
+import {ChangeDetectionStrategy, Component, inject, Signal, output} from '@angular/core';
 import {NgbActiveOffcanvas} from "@ng-bootstrap/ng-bootstrap";
 import {TranslocoDirective} from "@jsverse/transloco";
 import {AnnotationCardComponent} from "../../_annotations/annotation-card/annotation-card.component";
@@ -11,6 +11,7 @@ import {
   ResizeMode
 } from "../../../../shared/_components/off-canvas-resize/off-canvas-resize.component";
 import {AccountService} from "../../../../_services/account.service";
+import {VirtualScrollerModule} from "@iharbeck/ngx-virtual-scroller";
 
 @Component({
   selector: 'app-view-annotations-drawer',
@@ -19,7 +20,8 @@ import {AccountService} from "../../../../_services/account.service";
     AnnotationCardComponent,
     FilterPipe,
     ReactiveFormsModule,
-    OffCanvasResizeComponent
+    OffCanvasResizeComponent,
+    VirtualScrollerModule
   ],
   templateUrl: './view-annotations-drawer.component.html',
   styleUrl: './view-annotations-drawer.component.scss',
@@ -31,7 +33,7 @@ export class ViewAnnotationsDrawerComponent {
   private readonly annotationService = inject(AnnotationService);
   protected readonly accountService = inject(AccountService);
 
-  @Output() loadAnnotation: EventEmitter<Annotation> = new EventEmitter();
+  readonly loadAnnotation = output<Annotation>();
 
   annotations: Signal<Annotation[]> = this.annotationService.annotations;
   formGroup = new FormGroup({

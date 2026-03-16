@@ -1,11 +1,11 @@
 .img-max-width {
     hr {
-        border: solid 2px rgba(var(--primary-color), 0.5) !important;
+        border: solid 0.125rem rgba(var(--primary-color), 0.5) !important;
     }
 
     img {
         max-width: 100%;
-        max-height: 800px;
+        max-height: 50rem;
     }
 
     h1 {

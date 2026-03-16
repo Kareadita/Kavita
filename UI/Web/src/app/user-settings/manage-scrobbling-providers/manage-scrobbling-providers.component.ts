@@ -1,11 +1,10 @@
-import {ChangeDetectorRef, Component, DestroyRef, inject, OnInit} from '@angular/core';
+import {ChangeDetectorRef, Component, inject, OnInit, signal} from '@angular/core';
 import {FormControl, FormGroup, ReactiveFormsModule, Validators} from "@angular/forms";
 import {translate, TranslocoDirective} from "@jsverse/transloco";
 import {AccountService} from "../../_services/account.service";
 import {ScrobbleProvider, ScrobblingService} from "../../_services/scrobbling.service";
 import {ToastrService} from "ngx-toastr";
 import {LoadingComponent} from "../../shared/loading/loading.component";
-import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import {ScrobbleProviderItemComponent} from "../scrobble-provider-item/scrobble-provider-item.component";
 import {ScrobbleProviderNamePipe} from "../../_pipes/scrobble-provider-name.pipe";
 import {SettingTitleComponent} from "../../settings/_components/setting-title/setting-title.component";
@@ -30,13 +29,12 @@ export class ManageScrobblingProvidersComponent implements OnInit {
   private readonly scrobblingService = inject(ScrobblingService);
   private readonly toastr = inject(ToastrService);
   private readonly cdRef = inject(ChangeDetectorRef);
-  private readonly destroyRef = inject(DestroyRef);
   private readonly licenseService = inject(LicenseService);
   private readonly confirmService = inject(ConfirmService);
 
   protected readonly ScrobbleProvider = ScrobbleProvider;
 
-  hasValidLicense: boolean = false;
+  hasValidLicense = this.licenseService.hasValidLicense;
 
   formGroup: FormGroup = new FormGroup({});
   aniListToken: string = '';
@@ -44,35 +42,30 @@ export class ManageScrobblingProvidersComponent implements OnInit {
   malUsername: string = '';
 
 
-  isViewMode: boolean = true;
-  loaded: boolean = false;
-
-  constructor() {
-    this.licenseService.hasValidLicense$.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(res => {
-      this.hasValidLicense = res;
-      this.cdRef.markForCheck();
-      if (this.hasValidLicense) {
-        this.scrobblingService.getAniListToken().subscribe(token => {
-          this.aniListToken = token;
-          this.formGroup.get('aniListToken')?.setValue(token);
-          this.loaded = true;
-          this.cdRef.markForCheck();
-        });
-        this.scrobblingService.getMalToken().subscribe(dto => {
-          this.malToken = dto.accessToken;
-          this.malUsername = dto.username;
-          this.formGroup.get('malToken')?.setValue(this.malToken);
-          this.formGroup.get('malUsername')?.setValue(this.malUsername);
-          this.cdRef.markForCheck();
-        });
-      } else {
-        this.loaded = true;
-        this.cdRef.markForCheck();
-      }
-    });
-  }
+  isViewMode = signal<boolean>(true);
+  isLoaded = signal<boolean>(false);
 
   ngOnInit(): void {
+
+    if (!this.hasValidLicense()) {
+      this.isLoaded.set(true);
+      return;
+    }
+
+    this.scrobblingService.getAniListToken().subscribe(token => {
+      this.aniListToken = token;
+      this.formGroup.get('aniListToken')?.setValue(token);
+      this.isLoaded.set(true);
+      this.cdRef.markForCheck();
+    });
+    this.scrobblingService.getMalToken().subscribe(dto => {
+      this.malToken = dto.accessToken;
+      this.malUsername = dto.username;
+      this.formGroup.get('malToken')?.setValue(this.malToken);
+      this.formGroup.get('malUsername')?.setValue(this.malUsername);
+      this.cdRef.markForCheck();
+    });
+
     this.formGroup.addControl('aniListToken', new FormControl('', [Validators.required]));
     this.formGroup.addControl('malClientId', new FormControl('', [Validators.required]));
     this.formGroup.addControl('malUsername', new FormControl('', [Validators.required]));
@@ -130,7 +123,7 @@ export class ManageScrobblingProvidersComponent implements OnInit {
   }
 
   updateEditMode(mode: boolean) {
-    this.isViewMode = !mode;
+    this.isViewMode.set(!mode);
     this.resetForm();
     this.cdRef.markForCheck();
   }

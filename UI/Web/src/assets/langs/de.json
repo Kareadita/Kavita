@@ -50,8 +50,8 @@
         "is-processed-header": "Wird verarbeitet",
         "no-data": "{{common.no-data}}",
         "volume-and-chapter-num": "Band {{v}} Kapitel {{n}}",
-        "volume-num": "Band {{num}}",
-        "chapter-num": "Kapitel {{num}}",
+        "volume-num": "{{entity-title.volume-num}}",
+        "chapter-num": "{{entity-title.chapter-num}}",
         "rating": "Bewertung {{r}}",
         "not-applicable": "Nicht anwendbar",
         "processed": "Verarbeitet",
@@ -488,19 +488,11 @@
     },
     "all-filters": {
         "title": "Alle Smart-Filter",
-        "count": "{{count}} {{customize-dashboard-modal.title-smart-filters}}",
+        "count": "{{count}} {{tabs.smart-filters-tab}}",
         "create": "{{common.create}}"
     },
     "announcements": {
         "title": "Mitteilungen"
-    },
-    "out-of-date-modal": {
-        "title": "Fall nicht zurück!",
-        "close": "{{common.close}}",
-        "subtitle": "Es sieht so aus, als sei Ihre Installation mehr als {{count}} Versionen im Rückstand!",
-        "description-1": "Bitte erwägen Sie ein Upgrade, damit Sie die neueste Version von Kavita verwenden.",
-        "description-2": "Schauen Sie auf <a href='https://wiki.kavitareader.com/guides/updating/' target='_blank' rel='noreferrer noopener'>wiki</a> , um Anweisungen zu erhalten, wie Sie ein Update ausführen können.",
-        "description-3": "Wenn es einen bestimmten Grund gibt, warum Sie noch kein Update durchgeführt haben, würden wir gerne wissen, warum Sie weiterhin eine veraltete Version verwenden! Besuchen Sie unseren Discord-Server und teilen Sie uns mit, was Sie daran hindert, ein Upgrade durchzuführen."
     },
     "changelog": {
         "installed": "Installiert",
@@ -671,15 +663,6 @@
         "remove-from-want-to-read": "{{actionable.remove-from-want-to-read}}",
         "add-to-want-to-read": "{{actionable.add-to-want-to-read}}",
         "edit-series-alt": "Informationen bearbeiten",
-        "reviews-tab": "{{tabs.reviews-tab}}",
-        "storyline-tab": "{{tabs.storyline-tab}}",
-        "books-tab": "{{tabs.books-tab}}",
-        "volumes-tab": "{{tabs.volumes-tab}}",
-        "specials-tab": "{{tabs.specials-tab}}",
-        "related-tab": "{{tabs.related-tab}}",
-        "details-tab": "{{tabs.details-tab}}",
-        "info-tab": "{{tabs.info-tab}}",
-        "recommendations-tab": "{{tabs.recommendations-tab}}",
         "send-to": "Datei wurde an {{deviceName}} gesendet",
         "no-pages": "{{toasts.no-pages}}",
         "no-chapters": "Zu diesem Band gibt es keine Kapitel. Kann nicht gelesen werden.",
@@ -703,7 +686,6 @@
         "publication-status-tooltip": "Status der Publikation",
         "on": "{{reader-settings.on}}",
         "off": "{{reader-settings.off}}",
-        "annotations-tab": "{{tabs.annotations-tab}}",
         "loading": "{{common.loading}}",
         "read-count-tooltip": "Gelesen insgesamt"
     },
@@ -747,12 +729,6 @@
         "read-more": "Mehr lesen",
         "read-less": "Weniger lesen"
     },
-    "update-notification-modal": {
-        "title": "Neue Version verfügbar!",
-        "close": "{{common.close}}",
-        "help": "Wie man updatet",
-        "download": "Herunterladen"
-    },
     "side-nav-companion-bar": {
         "page-settings-title": "{{series-detail.page-settings-title}}",
         "open-filter-and-sort": "Öffne Filter und Sortieren",
@@ -781,11 +757,6 @@
         "close": "{{common.close}}",
         "edit-title": "Bearbeite {{name}}",
         "add-title": "Bibliothek hinzufügen",
-        "general-tab": "{{tabs.general-tab}}",
-        "folder-tab": "{{tabs.folder-tab}}",
-        "cover-tab": "{{tabs.cover-tab}}",
-        "advanced-tab": "{{tabs.advanced-tab}}",
-        "tasks-tab": "{{tabs.tasks-tab}}",
         "name-label": "Name",
         "library-name-unique": "Bibliothek Name muss einmalig sein",
         "last-scanned-label": "Zuletzt gescannt:",
@@ -914,7 +885,9 @@
         "no-data": "{{common.no-data}}"
     },
     "card-item": {
-        "cannot-read": "Nicht lesbar"
+        "cannot-read": "Nicht lesbar",
+        "select": "Auswählen",
+        "read": "lesen"
     },
     "details-tab": {
         "writers-title": "{{metadata-fields.writers-title}}",
@@ -940,7 +913,8 @@
         "length-title": "{{edit-chapter-modal.words-label}}",
         "age-rating-title": "{{metadata-fields.age-rating-title}}",
         "file-path-title": "Dateien",
-        "folder-path-title": "Ordnerpfad"
+        "folder-path-title": "Ordnerpfad",
+        "external-metadata-title": "Externe Metadaten"
     },
     "related-tab": {
         "reading-lists-title": "{{reading-lists.title}}",
@@ -964,7 +938,8 @@
         "applied": "{{theme-manager.applied}}"
     },
     "download-indicator": {
-        "progress": "{{percentage}}% heruntergeladen"
+        "progress": "{{percentage}}% heruntergeladen",
+        "completed": "Download abgeschlossen"
     },
     "edit-series-relation": {
         "description-part-1": "Sie wissen nicht, welche Beziehung Sie hinzufügen sollen? Siehe unser",
@@ -988,11 +963,17 @@
     },
     "entity-title": {
         "special": "Spezial",
-        "issue-num": "{{common.issue-hash-num}}",
-        "chapter": "{{common.chapter-num}}",
-        "book-num": "{{common.book-num-shorthand}}",
+        "issue-num": "Ausgabe Nr. {{num}}",
+        "book-num": "Buch {{num}}",
         "single-volume": "Einzelband",
-        "vol-num": "{{user-scrobble-history.volume-num}}"
+        "chapter-num": "Kapitel {{num}}",
+        "volume-num": "Band {{num}}",
+        "book-title": "Bücher",
+        "book-title-plural": "Bücher",
+        "issue-title": "Ausgabe",
+        "issue-title-plural": "Ausgaben",
+        "chapter-title": "Kapitel",
+        "chapter-title-plural": "Kapitel"
     },
     "external-series-card": {
         "open-external": "Extern öffnen"
@@ -1268,10 +1249,6 @@
         "save": "{{common.save}}",
         "close": "{{common.close}}",
         "cancel": "{{common.cancel}}",
-        "general-tab": "{{tabs.general-tab}}",
-        "cover-image-tab": "{{tabs.cover-tab}}",
-        "info-tab": "{{tabs.info-tab}}",
-        "series-tab": "{{tabs.series-tab}}",
         "name-label": "Name",
         "name-validation": "Der Name muss einzigartig sein",
         "promote-label": "Werbung für",
@@ -1397,11 +1374,9 @@
         "reorder-alt": "Einträge anordnen",
         "dnd-warning": "Drag & Drop ist auf Mobilgeräten oder bei einer Leseliste mit mehr als 100 Einträgen nicht verfügbar.",
         "writers-title": "{{metadata-fields.writers-title}}",
-        "details-tab": "{{series-detail.details-tab}}",
         "publishers-title": "{{metadata-fields.publishers-title}}",
         "items-title": "Artikel",
         "cover-artists-title": "{{metadata-fields.cover-artists-title}}",
-        "storyline-tab": "{{series-detail.storyline-tab}}",
         "more-alt": "{{series-detail.more-alt}}",
         "date-range-title": "Datumsbereich",
         "edit-alt": "{{common.edit}}",
@@ -1419,7 +1394,8 @@
         "no-data": "Hier ist nicht viel los",
         "left-to-process": "Noch zu bearbeiten: {{leftToProcess}} / {{totalToProcess}}",
         "download-in-queue": "{{num}} Downloads in der Warteschlange",
-        "reading-now": "{{num}} wird gerade gelesen"
+        "reading-now": "{{num}} wird gerade gelesen",
+        "downloads-active": "{{count}} Download(s) werden gerade durchgeführt"
     },
     "shortcuts-modal": {
         "title": "Tastaturkurzbefehle",
@@ -1487,8 +1463,6 @@
     },
     "edit-reading-list-modal": {
         "title": "Leseliste bearbeiten: {{name}}",
-        "general-tab": "{{tabs.general-tab}}",
-        "cover-image-tab": "{{tabs.cover-tab}}",
         "close": "{{common.close}}",
         "save": "{{common.save}}",
         "year-validation": "Muss größer als 1000, 0 oder leer sein",
@@ -1681,7 +1655,6 @@
         "general-tab": "{{tabs.general-tab}}",
         "metadata-tab": "{{tabs.metadata-tab}}",
         "people-tab": "{{tabs.people-tab}}",
-        "web-links-tab": "{{tabs.weblink-tab}}",
         "cover-image-tab": "{{tabs.cover-tab}}",
         "related-tab": "{{tabs.related-tab}}",
         "info-tab": "{{tabs.info-tab}}",
@@ -1746,7 +1719,9 @@
         "specials-volume": "Specials",
         "release-year-validation": "{{validation.year-validation}}",
         "volumes-title": "{{tab.volumes-tab}}",
-        "no-data": "{{common.no-data}}"
+        "no-data": "{{common.no-data}}",
+        "weblinks-tab": "{{tabs.weblink-tab}}",
+        "external-ids-tab": "{{tabs.external-ids-tab}}"
     },
     "edit-chapter-modal": {
         "title": "bearbeiten",
@@ -1776,15 +1751,8 @@
         "age-rating-label": "{{edit-series-modal.age-rating-label}}",
         "web-link-description": "{{edit-series-modal.web-link-description}}",
         "web-link-label": "{{edit-series-modal.web-link-label}}",
-        "general-tab": "{{tabs.general-tab}}",
-        "people-tab": "{{tabs.people-tab}}",
-        "weblink-tab": "{{tabs.weblink-tab}}",
         "field-locked-alt": "{{edit-series-modal.field-locked-alt}}",
-        "cover-image-tab": "{{tabs.cover-tab}}",
-        "tasks-tab": "{{tabs.tasks-tab}}",
-        "info-tab": "{{tabs.info-tab}}",
         "cover-image-description": "{{edit-series-modal.cover-image-description}}",
-        "tags-tab": "{{tabs.tags-tab}}",
         "pages-label": "Seiten",
         "words-label": "Länge",
         "pages-count": "{{series-detail.pages-count}}",
@@ -1797,7 +1765,8 @@
         "last-read-label": "{{sort-field-pipe.read-progress}}",
         "range-hours": "{{value}} {{hourWord}}",
         "read-time-label": "Lesezeit",
-        "files-label": "Dateien"
+        "files-label": "Dateien",
+        "external-ids-tab": "{{tabs.external-ids-tab}}"
     },
     "edit-volume-modal": {
         "title": "bearbeiten",
@@ -1814,7 +1783,9 @@
         "files-label": "{{edit-chapter-modal.files-label}}",
         "cover-image-description": "{{edit-series-modal.cover-image-description}}",
         "pages-label": "{{edit-chapter-modal.pages-label}}",
-        "words-label": "{{edit-chapter-modal.words-label}}"
+        "words-label": "{{edit-chapter-modal.words-label}}",
+        "read-time-label": "{{edit-chapter-modal.read-time-label}}",
+        "external-ids-tab": "{{tabs.external-ids-tab}}"
     },
     "day-breakdown": {
         "title": "Tagesaufteilung",
@@ -1867,7 +1838,8 @@
         "vols-and-chapters": "{{volCount}} Bände / {{chpCount}} Kapitel",
         "remove-from-want-to-read": "{{actionable.remove-from-want-to-read}}",
         "add-to-want-to-read": "{{actionable.add-to-want-to-read}}",
-        "provided-by-label": "Zur Verfügung gestellt von"
+        "provided-by-label": "Zur Verfügung gestellt von",
+        "story-and-art-label": "Geschichte & Kunst"
     },
     "next-expected-card": {
         "title": "~{{date}}",
@@ -1907,8 +1879,6 @@
         "popular-decades-title": "Beliebte Jahrzehnte",
         "popular-genres-title": "Beliebte Genres",
         "popular-tags-title": "Beliebte Tags",
-        "stats-tab": "{{tabs.stats-tab}}",
-        "management-tab": "{{tabs.management-tab}}",
         "users": "Nutzer",
         "readers": "Leser",
         "popular-reading-lists-title": "Meistgelesene Leselisten",
@@ -1960,11 +1930,7 @@
         "remove-rule": "Zeile entfernen"
     },
     "customize-dashboard-modal": {
-        "title-smart-filters": "Intelligente Filter",
-        "dashboard": "Dashboard",
-        "sidenav": "Seitennavigation",
-        "external-sources": "Externe Quellen",
-        "smart-filters": "Intelligente Filter",
+        "title-smart-filters": "{{tabs.smart-filters-tab}}",
         "description": "Sie können verschiedene Aspekte von Kavita anpassen, indem Sie die Reihenfolge ändern, die Sichtbarkeit umschalten und intelligente Filter/externe Quellen an Ihre Startseite oder Navigationsleiste binden."
     },
     "customize-dashboard-streams": {
@@ -1972,7 +1938,7 @@
         "add": "{{common.add}}",
         "filter": "{{common.filter}}",
         "clear": "{{common.clear}}",
-        "smart-filter-title": "{{customize-dashboard-modal.title-smart-filters}}"
+        "smart-filter-title": "{{tabs.smart-filters-tab}}"
     },
     "customize-sidenav-streams": {
         "no-data": "Alle Smart-Filter zur Seitennavigation hinzugefügt oder noch keine erstellt.",
@@ -1980,8 +1946,8 @@
         "add": "{{common.add}}",
         "filter": "{{common.filter}}",
         "clear": "{{common.clear}}",
-        "smart-filters-title": "Smart Filter",
-        "external-sources-title": "{{customize-dashboard-modal.external-sources}}",
+        "smart-filters-title": "{{tabs.smart-filters-tab}}",
+        "external-sources-title": "{{tabs.external-sources-tab}}",
         "reorder-when-filter-present": "Sie können keine Artikel per Drag & Drop neu anordnen, solange ein Filter vorhanden ist. Verwenden Sie {{customize-sidenav-streams.order-numbers-label}}",
         "order-numbers-label": "{{reading-list-detail.order-numbers-label}}",
         "bulk-mode-label": "Bulk-Modus"
@@ -2007,7 +1973,8 @@
         "edit": "{{common.edit}}",
         "save": "{{common.save}}",
         "edit-smart-filter": "Bearbeite {{name}}",
-        "filter-name-unique": "Die Namen der intelligenten Filter müssen eindeutig sein"
+        "filter-name-unique": "Die Namen der intelligenten Filter müssen eindeutig sein",
+        "no-content": "Dieser intelligente Filter hat keine Ergebnisse auf dem Dashboard"
     },
     "edit-external-source-item": {
         "not-unique": "Für diesen Host existiert eine externe Quelle. Stellen Sie sicher, dass Sie keine Duplikate haben",
@@ -2208,7 +2175,11 @@
         "font-in-use": "Kann nicht gelöscht werden, da die Schriftart von einem oder mehreren Benutzern verwendet wird.",
         "k+-resend-welcome-email-success": "Eine E-Mail wurde an Ihre Kavita+-E-Mail-Adresse gesendet",
         "confirm-delete-auth-key": "Sind Sie sicher, dass Sie diesen Authentifizierungsschlüssel löschen möchten?",
-        "profile-unauthorized": "Dieser Benutzer teilt sein Profil nicht"
+        "profile-unauthorized": "Dieser Benutzer teilt sein Profil nicht",
+        "redownload-confirm": "Sie haben {{title}} bereits am {{date}} heruntergeladen. Möchten Sie es erneut herunterladen?",
+        "confirm-delete-collection": "Möchten Sie die Sammlung wirklich löschen? Dieser Vorgang kann nicht rückgängig gemacht werden.",
+        "confirm-delete-annotations": "Möchten Sie die Anmerkungen wirklich löschen? Dieser Vorgang kann nicht rückgängig gemacht werden.",
+        "annotations-deleted": "Anmerkung gelöscht"
     },
     "read-time-pipe": {
         "less-than-hour": "<1 Stunde",
@@ -2296,7 +2267,11 @@
         "export": "Export",
         "like": "Like",
         "unlike": "Likes entfernen",
-        "edit-device-name": "Name bearbeiten"
+        "edit-device-name": "Name bearbeiten",
+        "export-v1": "CBL v1",
+        "export-v1-tooltip": "CBL v1 (XML) verwenden",
+        "export-v2": "CBL v2",
+        "export-v2-tooltip": "CBL v2 (JSON) verwenden"
     },
     "preferences": {
         "left-to-right": "Links nach rechts",
@@ -2378,7 +2353,18 @@
         "annotations-tab": "Anmerkungen",
         "overview-tab": "Übersicht",
         "management-tab": "Verwaltung",
-        "activity-tab": "Aktivität"
+        "activity-tab": "Aktivität",
+        "external-ids-tab": "Externe IDs",
+        "aliases-tab": "Aliase",
+        "chapters-tab": "Kapitel",
+        "dashboard-tab": "Dashboard",
+        "sidenav-tab": "Seitenleiste",
+        "external-sources-tab": "Externe Quellen",
+        "image-reader-tab": "Bildlesegerät",
+        "book-reader-tab": "Buchlesegerät",
+        "pdf-reader-tab": "PDF-Reader",
+        "bookmark-image-tab": "Bild",
+        "bookmark-text-tab": "Text"
     },
     "common": {
         "reset-to-default": "Auf Standard zurücksetzen",
@@ -2415,15 +2401,10 @@
         "book-num-shorthand": "Buch {{num}}",
         "issue-num-shorthand": "#{{num}}",
         "volume-num-shorthand": "Bd {{num}}",
-        "book-nums": "Bücher",
-        "issue-nums": "Ausgaben",
-        "chapter-nums": "Kapitel",
-        "volume-nums": "Bände",
         "no-data": "Keine Daten",
         "chapter-count": "{{num}} Kapitel",
         "issue-count": "{{num}} Ausgaben",
         "unknown": "Unbekannt",
-        "roles": "Rollen",
         "libraries": "Bibliotheken",
         "confirm": "Bestätigen",
         "selected": "Ausgewählt"
@@ -2458,15 +2439,12 @@
         "description-label": "Beschreibung",
         "cover-image-description-extra": "Alternativ können Sie ein Cover von CoversDB herunterladen, sofern verfügbar.",
         "download-coversdb": "Download von CoversDB",
-        "cover-image-tab": "{{edit-series-modal.cover-image-tab}}",
-        "general-tab": "{{edit-series-modal.general-tab}}",
         "close": "{{common.close}}",
         "name-label": "{{edit-series-modal.name-label}}",
         "required-field": "{{validation.required-field}}",
         "cover-image-description": "{{edit-series-modal.cover-image-description}}",
         "save": "{{common.save}}",
         "aliases-tooltip": "Wenn eine Serie mit einem Alias einer Person versehen ist, wird diese Person zugewiesen, anstatt eine neue Person anzulegen. Wenn Sie einen Alias löschen, müssen Sie die Serie erneut scannen, damit die Änderung übernommen wird.",
-        "aliases-tab": "Aliases",
         "aliases-label": "Aliase bearbeiten",
         "alias-overlap": "Dieser Alias verweist bereits auf eine andere Person oder ist der Name dieser Person. Bitte erwäge, sie zusammenzuführen.",
         "mal-tooltip-character": "https://myanimelist.net/character/{MalId}/",
@@ -2474,7 +2452,7 @@
         "invalid-amazon-code": "Die ASIN sollte mit B0 oder BT beginnen"
     },
     "changelog-update-item": {
-        "download": "Download",
+        "download": "Herunterladen",
         "added": "Hinzugefügt",
         "changed": "Geändert",
         "fixed": "Repariert",
@@ -2516,20 +2494,6 @@
         "sent-tooltip": "Gesendet",
         "not-sent-tooltip": "Nicht gesendet",
         "no-data": "{{common.no-data}}"
-    },
-    "new-version-modal": {
-        "title": "Kavita wurde aktualisiert!",
-        "description": "Eine neue Version von Kavita ist verfügbar. Aktualisieren Sie zum Update.",
-        "refresh": "Aktualisieren",
-        "developer": "{{changelog.developer}}",
-        "close": "{{common.close}}",
-        "api": "{{changelog.api}}",
-        "added": "{{changelog.added}}",
-        "changed": "{{changelog.changed}}",
-        "fixed": "{{changelog.fixed}}",
-        "theme": "{{changelog.theme}}",
-        "removed": "{{changelog.removed}}",
-        "known-issues": "{{changelog.known-issues}}"
     },
     "manage-matched-metadata": {
         "title": "Passende Metadaten",
@@ -2649,7 +2613,7 @@
         "read-only": "Nur Lesen",
         "admin": "Admin",
         "promote": "Promote",
-        "download": "Download",
+        "download": "Herunterladen",
         "change-password": "Passwort ändern"
     },
     "log-level-pipe": {
@@ -2678,7 +2642,6 @@
         "tap-to-paginate-tooltip": "Sollten die Seiten des E-Book-Reader-Bildschirms durch Antippen umblätterbar sein vorherige/nächste Seite",
         "show-screen-hints-tooltip": "Zeige eine Überlagerung an, um den Bereich und die Richtung der Paginierung besser zu verstehen",
         "font-size-book-tooltip": "Prozentuale Skalierung für die Schriftart im Buch",
-        "pdf-reader-settings-title": "PDF Reader",
         "line-height-book-label": "Zeilenabstand",
         "layout-mode-book-tooltip": "Wie Inhalte angeordnet werden sollen. Der Bildlauf entspricht dem Aufbau des Buches. 1 oder 2 Spalten passen zur Höhe des Geräts und es passen 1 oder 2 Spalten Text pro Seite",
         "profiles-title": "Ihre Leseprofil",
@@ -2688,7 +2651,6 @@
         "no-selected": "Kein Profil ausgewählt",
         "confirm": "Möchten Sie das Leseprofil {{name}} wirklich löschen?",
         "selection-tip": "Wählen Sie ein Profil aus der Liste aus oder erstellen Sie oben rechts ein neues Profil",
-        "image-reader-settings-title": "Bild Reader",
         "reading-direction-label": "Leserichtung",
         "reading-direction-tooltip": "Klicken Sie hier, um zur nächsten Seite zu gelangen. Von rechts nach links bedeutet, dass Sie auf die linke Seite des Bildschirms klicken, um zur nächsten Seite zu gelangen.",
         "scaling-option-label": "Skalierungsoptionen",
@@ -2711,7 +2673,6 @@
         "allow-auto-webtoon-reader-label": "Automatischer Webtoon-Lesemodus",
         "allow-auto-webtoon-reader-tooltip": "Wechseln Sie in den Webtoon-Reader-Modus, wenn die Seiten wie ein Webtoon aussehen. Es können einige Fehlalarme auftreten.",
         "width-override-tooltip": "Breite von Bildern im Reader überschreiben",
-        "book-reader-settings-title": "Buch Reader",
         "tap-to-paginate-label": "Zum Blättern antippen",
         "immersive-mode-label": "Immersiver Modus",
         "reading-direction-book-label": "Leserichtung",
@@ -2891,8 +2852,8 @@
         "default-roles-label": "{{common.roles}}",
         "default-libraries-label": "{{common.libraries}}",
         "tls-required": "Der OIDC-Anbieter muss TLS (HTTPS) verwenden",
-        "reset-label": "IDs zurücksetzen",
-        "reset-tooltip": "Setzen Sie die externen IDs aller Benutzer zurück. Verwenden Sie diese Option, um die Verknüpfungen zwischen Benutzern in Kavita und Ihrem Identitätsanbieter zurückzusetzen",
+        "reset-label": "ids zurücksetzen",
+        "reset-tooltip": "Setzen Sie die externen IDs aller Benutzer zurück. Verwenden Sie diese Funktion, um die Verknüpfungen zwischen Benutzern in Kavita und Ihrem Identitätsanbieter zurückzusetzen",
         "reset-confirm": "Sind Sie sicher, dass Sie die externen IDs aller Benutzer zurücksetzen möchten?",
         "reset-success": "Externe IDs für alle Benutzer zurückgesetzt, bitte erneut authentifizieren, um die Verknüpfung herzustellen",
         "auto-save-required": "Sie haben wichtige Einstellungen geändert. Bitte speichern Sie diese automatisch, um sie beizubehalten",
@@ -2960,8 +2921,6 @@
     "view-bookmark-drawer": {
         "title": "Lesezeichen",
         "load-bookmark": "Laden",
-        "image-header": "Bild",
-        "text-header": "Text",
         "close": "{{common.close}}",
         "no-data": "{{common.no-data}}",
         "page-num-label": "{{book-reader.page-num-label}}"
@@ -3194,11 +3153,7 @@
         "stats-title": "Ein Blick auf {{username}}s Reise durch {{libraryName}}",
         "no-reviews": "Noch keine Bewertungen",
         "total-reads-badge": "{{reads}} Gelesen",
-        "k+-badge": "K+ Abonnent",
-        "overview-tab": "{{tabs.overview-tab}}",
-        "stats-tab": "{{tabs.stats-tab}}",
-        "reviews-tab": "{{tabs.reviews-tab}}",
-        "activity-tab": "{{tabs.activity-tab}}"
+        "k+-badge": "K+ Abonnent"
     },
     "profile-review-list": {
         "no-data": "Keine Bewertungen oder Bewertungen werden nicht geteilt",
@@ -3352,7 +3307,8 @@
         "today": "Heute",
         "yesterday": "Gestern",
         "pagination-label": "Aktivitäten-Paginierung",
-        "page-info": "Seite {{current}} von {{total}} ({{items}} Ergebnisse insgesamt)"
+        "page-info": "Seite {{current}} von {{total}} ({{items}} Ergebnisse insgesamt)",
+        "num-more": "{{num}} weitere"
     },
     "client-device-type-pipe": {
         "mobile": "Mobile",
@@ -3410,5 +3366,95 @@
         "pages-count": "{{num}} Seiten",
         "words-read-by-year-title": "Wörter nach Jahr gelesen",
         "words-count": "{{num}} Wörter"
+    },
+    "version-update-modal": {
+        "close": "{{common.close}}",
+        "out-of-date": {
+            "title": "Fall nicht zurück!",
+            "subtitle": "Es sieht so aus, als sei Ihre Installation mehr als {{count}} Versionen im Rückstand!",
+            "description-1": "Bitte erwägen Sie ein Upgrade, damit Sie die neueste Version von Kavita verwenden.",
+            "description-2": "Schauen Sie auf <a href='https://wiki.kavitareader.com/guides/updating/' target='_blank' rel='noreferrer noopener'>wiki</a> , um Anweisungen zu erhalten, wie Sie ein Update ausführen können.",
+            "description-3": "Wenn es einen bestimmten Grund gibt, warum Sie noch kein Update durchgeführt haben, würden wir gerne wissen, warum Sie weiterhin eine veraltete Version verwenden! Besuchen Sie unseren Discord-Server und teilen Sie uns mit, was Sie daran hindert, ein Upgrade durchzuführen."
+        },
+        "new-version": {
+            "title": "Kavita wurde aktualisiert!",
+            "description": "Eine neue Version von Kavita ist verfügbar. Aktualisieren Sie zum Update.",
+            "refresh": "Aktualisieren"
+        },
+        "update-notification": {
+            "title": "Neue Version verfügbar!",
+            "help": "Wie man updatet",
+            "download": "Herunterladen"
+        }
+    },
+    "title": {
+        "reading-list": "Leselisten",
+        "home": "Startseite",
+        "bookmarks": "Lesezeichen",
+        "collections": "Sammlungen",
+        "browse-genres": "Genres durchsuchen",
+        "browse-tags": "Tags durchsuchen",
+        "want-to-read": "Möchte ich lesen",
+        "reading-lists": "Leselisten",
+        "settings": "Optionen",
+        "all-series": "Alle Serien",
+        "profile": "Profil von {{username}}"
+    },
+    "download-queue-drawer": {
+        "title": "Downloads",
+        "cancel": "{{common.cancel}}",
+        "cancel-all": "Alle abbrechen",
+        "retry": "Wiederholen",
+        "retry-all": "Alle wiederholen",
+        "clear": "Löschen",
+        "empty": "Keine Downloads",
+        "close": "{{common.close}}",
+        "paused-after-refresh": "{{ count }} Artikel angehalten – bereit zur Fortsetzung",
+        "resume": "Fortsetzen",
+        "pause": "Pause",
+        "paused": "Angehalten",
+        "clear-all": "Alle löschen",
+        "failed-from-auth": "Nicht authentifiziert, Browser aktualisieren",
+        "failed-interrupted": "Durch Seitenaktualisierung unterbrochen",
+        "tab-downloading": "Herunterladen",
+        "tab-completed": "Abgeschlossen",
+        "today": "Heute",
+        "older": "Älter",
+        "queued": "{{download-queue-status-pipe.queued}}",
+        "preparing": "{{download-queue-status-pipe.preparing}}",
+        "downloading": "{{download-queue-status-pipe.downloading}}",
+        "completed": "{{download-queue-status-pipe.completed}}",
+        "failed": "{{download-queue-status-pipe.failed}}",
+        "cancelled": "{{download-queue-status-pipe.cancelled}}"
+    },
+    "download-queue-item": {
+        "retry": "{{download-queue-drawer.retry}}",
+        "cancel": "{{common.cancel}}",
+        "remove": "Entfernen"
+    },
+    "download-queue-status-pipe": {
+        "queued": "In der Warteschlange",
+        "preparing": "Vorbereitung",
+        "downloading": "Herunterladen",
+        "completed": "Abgeschlossen",
+        "failed": "Fehlgeschlagen",
+        "cancelled": "abgebrochen"
+    },
+    "download-queue-widget": {
+        "title": "{{download-queue-drawer.title}}"
+    },
+    "account-settings": {
+        "oidc": "{{login.oidc}}",
+        "unlink-oidc": "OIDC-Link entfernen",
+        "confirm-unlink": "Sind Sie sicher, dass Sie Ihre OIDC-Verbindung entfernen möchten?",
+        "confirm-unlink-extra": "Wenn Sie derzeit mit dem OIDC-Konto authentifiziert sind, werden Sie abgemeldet. Sie können jederzeit erneut eine Verknüpfung per E-Mail herstellen."
+    },
+    "edit-external-metadata-form": {
+        "aniListId-label": "AniList-ID",
+        "malId-label": "MAL-ID",
+        "mangaBakaId-label": "MangaBaka-ID",
+        "hardcoverId-label": "Hardcover-ID",
+        "comicVineId-label": "Comic Vine-ID",
+        "metronId-label": "Metron-ID"
     }
 }

@@ -1,12 +1,12 @@
 import {
   AfterContentInit,
   ChangeDetectionStrategy,
-  ChangeDetectorRef,
   Component,
-  ContentChild,
+  contentChild,
   ElementRef,
   inject,
-  Input,
+  input,
+  signal,
   TemplateRef
 } from '@angular/core';
 import {NgTemplateOutlet} from "@angular/common";
@@ -26,24 +26,19 @@ import {SafeHtmlPipe} from "../../../_pipes/safe-html.pipe";
 })
 export class SettingSwitchComponent implements AfterContentInit {
 
-  private readonly cdRef = inject(ChangeDetectorRef);
   private readonly elementRef = inject(ElementRef);
 
-  @Input({required:true}) title: string = '';
-  @Input() subtitle: string | undefined = undefined;
-  @Input() id: string | undefined = undefined;
-  @ContentChild('switch') switchRef!: TemplateRef<any>;
-
-  /**
-   * For wiring up with a real label
-   */
-  labelId: string = '';
+  title = input.required<string>();
+  subtitle = input<string | undefined>();
+  id = input<string | undefined>();
+  /** For wiring up with a real label */
+  labelId = signal('');
+  switchRef = contentChild<TemplateRef<any>>('switch');
 
   ngAfterContentInit(): void {
     setTimeout(() => {
-      if (this.id) {
-        this.labelId = this.id;
-        this.cdRef.markForCheck();
+      if (this.id()) {
+        this.labelId.set(this.id()!);
         return;
       }
 
@@ -54,8 +49,7 @@ export class SettingSwitchComponent implements AfterContentInit {
       inputElement.id = this.generateId();
 
       if (inputElement && inputElement.id) {
-        this.labelId = inputElement.id;
-        this.cdRef.markForCheck();
+        this.labelId.set(inputElement.id);
       } else {
         console.warn('No input with ID found in app-setting-switch. For accessibility, please ensure the input has an ID.');
       }

@@ -6,13 +6,12 @@ import {AuthKey} from "./auth-key";
 // This interface is only used for login and storing/retrieving JWT from local storage
 export interface User extends IHasCover {
   id: number;
+  oidcId: string | null;
   username: string;
   token: string;
   refreshToken: string;
   roles: string[];
   preferences: Preferences;
-  // ApiKey is deprecated in favor of AuthKeys
-  //apiKey: string;
   email: string;
   ageRestriction: AgeRestriction;
   hasRunScrobbleEventGeneration: boolean;

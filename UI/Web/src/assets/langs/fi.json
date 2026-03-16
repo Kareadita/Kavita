@@ -27,8 +27,6 @@
         "scrobbling-tab": "{{tabs.scrobbling-tab}}"
     },
     "customize-dashboard-modal": {
-        "smart-filters": "Älykkäät suodattimet",
-        "external-sources": "Ulkoiset lähteet",
         "title-smart-filters": "Älykkäät suodattimet"
     },
     "tabs": {
@@ -134,5 +132,8 @@
     },
     "manage-tasks-settings": {
         "cleanup-label": "Puhdistus"
+    },
+    "version-update-modal": {
+        "close": "{{common.close}}"
     }
 }

@@ -61,13 +61,14 @@ export class ManageCustomKeyBindsComponent implements OnInit {
   private readonly destroyRef = inject(DestroyRef);
   private readonly licenseService = inject(LicenseService);
   private readonly document = inject(DOCUMENT);
+  protected readonly isReadOnly = this.accountService.hasReadOnlyRole;
 
   protected keyBindForm!: KeyBindFormGroup;
 
   protected duplicatedKeyBinds = signal<Partial<Record<KeyBindTarget, number[]>>>({});
   protected filteredKeyBindGroups = computed(() => {
-    const roles = this.accountService.currentUserSignal()!.roles;
-    const hasKPlus = this.licenseService.hasValidLicenseSignal();
+    const roles = this.accountService.currentUser()!.roles;
+    const hasKPlus = this.licenseService.hasValidLicense();
 
     return KeyBindGroups.map(g => {
       g.elements = g.elements.filter(e => {
@@ -89,6 +90,10 @@ export class ManageCustomKeyBindsComponent implements OnInit {
 
     this.keyBindForm = this.fb.group(groupConfig);
     this.duplicatedKeyBinds.set(this.extractDuplicated(keyBinds)); // Set initial
+
+    if (this.isReadOnly()) {
+      this.keyBindForm.disable({ emitEvent: false });
+    }
 
     this.keyBindForm.valueChanges.pipe(
       takeUntilDestroyed(this.destroyRef),
@@ -147,7 +152,7 @@ export class ManageCustomKeyBindsComponent implements OnInit {
 
   private combinePreferences(customKeyBinds: Partial<Record<KeyBindTarget, KeyBind[]>>): Preferences {
     return {
-      ...this.accountService.currentUserSignal()!.preferences,
+      ...this.accountService.currentUser()!.preferences,
       customKeyBinds,
     };
   }
@@ -177,7 +182,7 @@ export class ManageCustomKeyBindsComponent implements OnInit {
    * @param key
    */
   resetKeybindsToDefaults(key: KeyBindTarget) {
-    if (this.accountService.isReadOnly()) return;
+    if (this.accountService.hasReadOnlyRole()) return;
 
     this.keyBindForm.setControl(key, this.fb.array(this.toFormControls(DefaultKeyBinds[key]), this.keyBindArrayValidator()));
   }
@@ -187,7 +192,7 @@ export class ManageCustomKeyBindsComponent implements OnInit {
    * @param key
    */
   addKeyBind(key: KeyBindTarget) {
-    if (this.accountService.isReadOnly()) return;
+    if (this.accountService.hasReadOnlyRole()) return;
 
     const array = this.getFormArray(key);
     if (!array) return;
@@ -212,7 +217,7 @@ export class ManageCustomKeyBindsComponent implements OnInit {
    * @param index
    */
   removeKeyBind(key: KeyBindTarget, index: number) {
-    if (this.accountService.isReadOnly()) return;
+    if (this.accountService.hasReadOnlyRole()) return;
 
     const array = this.getFormArray(key);
     if (!array) return;

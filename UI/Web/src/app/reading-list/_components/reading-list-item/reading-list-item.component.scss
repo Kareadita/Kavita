@@ -1,13 +1,13 @@
-$image-height: 125px;
+$image-height: 7.8125rem;
 $clamp-lines: 3;
 
 .reading-list-item {
-  max-height: 140px;
-  height: 140px;
+  max-height: 8.75rem;
+  height: 8.75rem;
 }
 
 .progress-banner {
-    height: 5px;
+    height: 0.3125rem;
 
     .progress {
         color: var(--card-progress-bar-color);
@@ -16,19 +16,19 @@ $clamp-lines: 3;
 }
 
 .badge-container {
-    border-radius: 4px;
+    border-radius: 0.25rem;
     display: block;
     height: $image-height;
     overflow: hidden;
     pointer-events: none;
     position: absolute;
-    width: 106px;
+    width: 6.625rem;
 }
 
 .not-read-badge {
     position: relative;
-    top: -125px;
-    left: 78px;
+    top: -7.8125rem;
+    left: 4.875rem;
     width: 0;
     height: 0;
     border-style: solid;
@@ -68,10 +68,10 @@ $clamp-lines: 3;
     .actions {
         display:flex;
         flex-direction: column-reverse;
-        margin-left: 10px;
+        margin-left: 0.625rem;
 
         .btn-primary {
-            margin-bottom: 10px;
+            margin-bottom: 0.625rem;
             margin-left: 0 !important;
         }
     }

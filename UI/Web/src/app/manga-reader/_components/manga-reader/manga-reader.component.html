@@ -10,8 +10,8 @@
       </div>
     }
     @if (menuOpen) {
-      <div class="fixed-top overlay" [@slideFromTop]="menuOpen">
-        <div style="display: flex; margin-top: 5px;">
+      <div class="fixed-top overlay" animate.enter="slide-in-top" animate.leave="slide-out-top">
+        <div style="display: flex; margin-top: 0.3125rem;">
           <button class="btn btn-icon" style="height: 100%" [title]="t('back')" (click)="closeReader()">
             <i class="fa fa-arrow-left" aria-hidden="true"></i>
             <span class="visually-hidden">{{t('back')}}</span>
@@ -36,7 +36,7 @@
               <i class="fa-regular fa-rectangle-list" aria-hidden="true"></i>
               <span class="visually-hidden">{{t('shortcuts-menu-alt')}}</span>
             </button>
-            @if (!bookmarkMode() && hasBookmarkRights) {
+            @if (!bookmarkMode() && hasBookmarkRights()) {
               <button class="btn btn-icon" role="checkbox" [attr.aria-checked]="CurrentPageBookmarked"
                       title="{{t(CurrentPageBookmarked ? 'unbookmark-page-tooltip' : 'bookmark-page-tooltip')}}" (click)="bookmarkPage()">
                 <i class="{{CurrentPageBookmarked ? 'fa' : 'far'}} fa-bookmark" aria-hidden="true"></i>
@@ -136,7 +136,7 @@
     </div>
 
     @if (menuOpen) {
-      <div class="fixed-bottom overlay"  [@slideFromBottom]="menuOpen">
+      <div class="fixed-bottom overlay"  animate.enter="slide-in-bottom" animate.leave="slide-out-bottom">
         @if (pageOptions !== undefined && pageOptions.ceil !== undefined) {
           <div class="mb-3">
             <span class="visually-hidden" id="slider-info"></span>
@@ -158,25 +158,25 @@
           </div>
         }
         <div class="row pt-4 ms-2 me-2 mb-2">
-          <div class="col">
-            <button class="btn btn-icon" (click)="setReadingDirection();resetMenuCloseTimer();" [disabled]="readerMode === ReaderMode.Webtoon || readerMode === ReaderMode.UpDown" aria-describedby="reading-direction" [title]="t('reading-direction-tooltip') + readingDirection === ReadingDirection.LeftToRight ? t('left-to-right-alt') : t('right-to-left-alt')">
+          <div class="col d-flex justify-content-center">
+            <button class="btn btn-icon" (click)="setReadingDirection();resetMenuCloseTimer();" [disabled]="readerMode === ReaderMode.Webtoon || readerMode === ReaderMode.UpDown" aria-describedby="reading-direction" [title]="t('reading-direction-tooltip') + (readingDirection === ReadingDirection.LeftToRight ? t('left-to-right-alt') : t('right-to-left-alt'))">
               <i class="fa fa-angle-double-{{readingDirection === ReadingDirection.LeftToRight ? 'right' : 'left'}}" aria-hidden="true"></i>
               <span id="reading-direction" class="visually-hidden">{{readingDirection === ReadingDirection.LeftToRight ? t('left-to-right-alt') : t('right-to-left-alt')}}</span>
             </button>
           </div>
-          <div class="col">
+          <div class="col d-flex justify-content-center">
             <button class="btn btn-icon" [title]="t('reading-mode-tooltip')" (click)="toggleReaderMode();resetMenuCloseTimer();">
               <i class="fa {{readerMode | readerModeIcon}}" aria-hidden="true"></i>
               <span class="visually-hidden">{{t('reading-mode-tooltip')}}</span>
             </button>
           </div>
-          <div class="col">
+          <div class="col d-flex justify-content-center">
             <button class="btn btn-icon" title="{{isFullscreen ? t('collapse') : t('fullscreen')}}" (click)="toggleFullscreen();resetMenuCloseTimer();">
               <i class="fa {{isFullscreen | fullscreenIcon}}" aria-hidden="true"></i>
               <span class="visually-hidden">{{isFullscreen ? t('collapse') : t('fullscreen')}}</span>
             </button>
           </div>
-          <div class="col">
+          <div class="col d-flex justify-content-center">
             <button class="btn btn-icon" [title]="t('settings-tooltip')" (click)="settingsOpen = !settingsOpen;resetMenuCloseTimer();">
               <i class="fa fa-sliders-h" aria-hidden="true"></i>
               <span class="visually-hidden">{{t('settings-tooltip')}}</span>
@@ -305,7 +305,7 @@
                 </div>
 
 
-                <div class="col-md-6 col-sm-12">
+                <div class="d-flex flex-column flex-sm-row gap-2">
                   <button class="btn btn-primary"
                           [disabled]="readingProfile.kind !== ReadingProfileKind.Implicit || !parentReadingProfile"
                           (click)="updateParentPref()">

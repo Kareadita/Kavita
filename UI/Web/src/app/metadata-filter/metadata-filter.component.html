@@ -1,8 +1,10 @@
 <ng-container *transloco="let t; prefix: 'metadata-filter'">
   @if (toggleService.toggleState$ | async; as isOpen) {
     @if (breakpointService.isTabletOrAbove()) {
-      <div [@inOutAnimation]>
-        <ng-container [ngTemplateOutlet]="filterSection" [ngTemplateOutletContext]="{isOpen: isOpen}" />
+      <div class="filter-animate-wrapper" animate.enter="filter-enter" animate.leave="filter-leave">
+        <div class="filter-animate-inner">
+          <ng-container [ngTemplateOutlet]="filterSection" [ngTemplateOutletContext]="{isOpen: isOpen}" />
+        </div>
       </div>
     } @else {
       <div>
@@ -39,7 +41,7 @@
             <div class="col-md-3 col-sm-9">
               <label for="sort-options" class="form-label">{{t('sort-by-label')}}</label>
               <app-sort-button [disabled]="filterSettings().sortDisabled" (isAscendingChange)="updateSortOrder($event)" [isAscending]="isAscendingSort" />
-              <select id="sort-options" class="form-select" formControlName="sortField" style="height: 38px;">
+              <select id="sort-options" class="form-select" formControlName="sortField" style="height: 2.375rem;">
                 @for(field of sortFieldOptions(); track field.value) {
                   <option [value]="field.value">{{field.title}}</option>
                 }
@@ -82,7 +84,7 @@
           <i class="fa-solid fa-floppy-disk" aria-hidden="true"></i>
           {{t('save')}}
         </button>
-        <ng-container [ngTemplateOutlet]="extraButtonsRef" />
+        <ng-container [ngTemplateOutlet]="extraButtonsRef()" />
       </div>
     </div>
   </ng-template>

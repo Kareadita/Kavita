@@ -283,14 +283,6 @@
         "create": "{{common.create}}",
         "title": "Tất Cả Bộ Lọc"
     },
-    "out-of-date-modal": {
-        "close": "{{common.close}}",
-        "description-3": "Nếu có lý do cụ thể nào khiến bạn chưa cập nhật, chúng tôi rất muốn biết lý do khiến bạn vẫn sử dụng phiên bản cũ! Hãy ghé qua discord của chúng tôi và cho chúng tôi biết lý do khiến bạn không nâng cấp.",
-        "title": "Đừng tụt hậu!",
-        "subtitle": "Có vẻ như bản cài đặt của bạn chậm hơn {{count}} phiên bản!",
-        "description-1": "Vui lòng cân nhắc nâng cấp để bạn có thể chạy phiên bản Kavita mới nhất.",
-        "description-2": "Hãy tham khảo <a href='https://wiki.kavitareader.com/guides/updating/' target='_blank' rel='noreferrer noopener'>wiki</a> của chúng tôi để biết hướng dẫn về cách cập nhật."
-    },
     "invite-user": {
         "close": "{{common.close}}",
         "email": "{{common.email}}",
@@ -401,15 +393,6 @@
         "read": "{{common.read}}",
         "remove-from-want-to-read": "{{actionable.remove-from-want-to-read}}",
         "add-to-want-to-read": "{{actionable.add-to-want-to-read}}",
-        "reviews-tab": "{{tabs.reviews-tab}}",
-        "storyline-tab": "{{tabs.storyline-tab}}",
-        "books-tab": "{{tabs.books-tab}}",
-        "volumes-tab": "{{tabs.volumes-tab}}",
-        "specials-tab": "{{tabs.specials-tab}}",
-        "related-tab": "{{tabs.related-tab}}",
-        "details-tab": "{{tabs.details-tab}}",
-        "info-tab": "{{tabs.info-tab}}",
-        "recommendations-tab": "{{tabs.recommendations-tab}}",
         "no-pages": "{{toasts.no-pages}}",
         "writers-title": "{{metadata-fields.writers-title}}",
         "cover-artists-title": "{{metadata-fields.cover-artists-title}}",
@@ -464,12 +447,6 @@
         "kavita-tooltip": "Xếp hạng của bạn + Tổng thể",
         "kavita-rating-title": "Xếp hạng của bạn"
     },
-    "update-notification-modal": {
-        "close": "{{common.close}}",
-        "help": "Hướng Dẫn Cập Nhật",
-        "title": "Đã có bản cập nhật mới!",
-        "download": "Tải Xuống"
-    },
     "side-nav-companion-bar": {
         "page-settings-title": "{{series-detail.page-settings-title}}",
         "open-filter-and-sort": "Mở Bộ Lọc và Sắp Xếp",
@@ -493,11 +470,6 @@
     },
     "library-settings-modal": {
         "close": "{{common.close}}",
-        "general-tab": "{{tabs.general-tab}}",
-        "folder-tab": "{{tabs.folder-tab}}",
-        "cover-tab": "{{tabs.cover-tab}}",
-        "advanced-tab": "{{tabs.advanced-tab}}",
-        "tasks-tab": "{{tabs.tasks-tab}}",
         "reset": "{{common.reset}}",
         "cancel": "{{common.cancel}}",
         "save": "{{common.save}}",
@@ -660,10 +632,8 @@
     },
     "entity-title": {
         "issue-num": "{{common.issue-hash-num}}",
-        "chapter": "{{common.chapter-num}}",
         "book-num": "{{common.book-num-shorthand}}",
         "special": "Đặc Biệt",
-        "vol-num": "{{user-scrobble-history.volume-num}}",
         "single-volume": "Tập Lẻ"
     },
     "manage-media-issues": {
@@ -905,10 +875,6 @@
         "save": "{{common.save}}",
         "close": "{{common.close}}",
         "cancel": "{{common.cancel}}",
-        "general-tab": "{{tabs.general-tab}}",
-        "cover-image-tab": "{{tabs.cover-tab}}",
-        "info-tab": "{{tabs.info-tab}}",
-        "series-tab": "{{tabs.series-tab}}",
         "deselect-all": "{{common.deselect-all}}",
         "select-all": "{{common.select-all}}",
         "filter-label": "{{common.filter}}",
@@ -1073,8 +1039,6 @@
         "reading-list-label": "Danh Sách Đọc"
     },
     "edit-reading-list-modal": {
-        "general-tab": "{{tabs.general-tab}}",
-        "cover-image-tab": "{{tabs.cover-tab}}",
         "close": "{{common.close}}",
         "save": "{{common.save}}",
         "required-field": "{{validation.required-field}}",
@@ -1207,7 +1171,6 @@
         "general-tab": "{{tabs.general-tab}}",
         "metadata-tab": "{{tabs.metadata-tab}}",
         "people-tab": "{{tabs.people-tab}}",
-        "web-links-tab": "{{tabs.weblink-tab}}",
         "cover-image-tab": "{{tabs.cover-tab}}",
         "related-tab": "{{tabs.related-tab}}",
         "info-tab": "{{tabs.info-tab}}",
@@ -1297,15 +1260,8 @@
         "age-rating-label": "{{edit-series-modal.age-rating-label}}",
         "web-link-description": "{{edit-series-modal.web-link-description}}",
         "web-link-label": "{{edit-series-modal.web-link-label}}",
-        "general-tab": "{{tabs.general-tab}}",
-        "people-tab": "{{tabs.people-tab}}",
-        "weblink-tab": "{{tabs.weblink-tab}}",
         "field-locked-alt": "{{edit-series-modal.field-locked-alt}}",
-        "cover-image-tab": "{{tabs.cover-tab}}",
-        "tasks-tab": "{{tabs.tasks-tab}}",
-        "info-tab": "{{tabs.info-tab}}",
         "cover-image-description": "{{edit-series-modal.cover-image-description}}",
-        "tags-tab": "{{tabs.tags-tab}}",
         "size-label": "{{edit-series-modal.size-title}}",
         "links-label": "{{metadata-fields.links-title}}",
         "last-read-label": "{{sort-field-pipe.read-progress}}",
@@ -1399,10 +1355,6 @@
         "popular-libraries-title": "Thư Viện Phổ Biến"
     },
     "customize-dashboard-modal": {
-        "dashboard": "Bảng Điều Khiển",
-        "sidenav": "Thanh Điều Hướng Bên",
-        "external-sources": "Nguồn bên ngoài",
-        "smart-filters": "Bộ lọc thông minh",
         "title-smart-filters": "Bộ Lọc Thông Minh"
     },
     "customize-dashboard-streams": {
@@ -1826,8 +1778,6 @@
         "required-field": "{{validations.required-field}}",
         "cover-image-description": "{{edit-series-modal.cover-image-description}}",
         "save": "{{common.save}}",
-        "general-tab": "{{edit-series-modal.general-tab}}",
-        "cover-image-tab": "{{edit-series-modal.cover-image-tab}}",
         "mal-tooltip": "https://myanimelist.net/people/{MalId}/",
         "anilist-tooltip": "https://anilist.co/staff/{AniListId}/",
         "hardcover-tooltip": "https://hardcover.app/authors/{HardcoverId}",
@@ -2079,7 +2029,6 @@
         "cancel": "Hủy",
         "create": "Tạo Mới",
         "reset": "Đặt lại",
-        "volume-nums": "Tập",
         "edit": "Sửa",
         "reset-to-default": "Đặt lại về Mặc Định",
         "close": "Đóng",
@@ -2099,8 +2048,6 @@
         "read": "Đọc",
         "loading": "Đang tải…",
         "series-count": "{{num}} Series",
-        "issue-nums": "Vấn đề",
-        "chapter-nums": "Chương",
         "book-num": "Sách",
         "issue-num": "Vấn đề",
         "volume-num": "Tập",
@@ -2108,7 +2055,6 @@
         "book-num-shorthand": "Sách {{num}}",
         "issue-num-shorthand": "#{{num}}",
         "volume-num-shorthand": "Tập {{num}}",
-        "book-nums": "Sách",
         "select-all": "Chọn Tất Cả",
         "issue-hash-num": "Vấn đề #",
         "save": "Lưu lại",
@@ -2168,5 +2114,20 @@
         "count-header": "Đếm",
         "visualisation-label": "Hình Ảnh Hóa",
         "data-table-label": "Bảng Dữ Liệu"
+    },
+    "version-update-modal": {
+        "close": "{{common.close}}",
+        "out-of-date": {
+            "title": "Đừng tụt hậu!",
+            "subtitle": "Có vẻ như bản cài đặt của bạn chậm hơn {{count}} phiên bản!",
+            "description-1": "Vui lòng cân nhắc nâng cấp để bạn có thể chạy phiên bản Kavita mới nhất.",
+            "description-2": "Hãy tham khảo <a href='https://wiki.kavitareader.com/guides/updating/' target='_blank' rel='noreferrer noopener'>wiki</a> của chúng tôi để biết hướng dẫn về cách cập nhật.",
+            "description-3": "Nếu có lý do cụ thể nào khiến bạn chưa cập nhật, chúng tôi rất muốn biết lý do khiến bạn vẫn sử dụng phiên bản cũ! Hãy ghé qua discord của chúng tôi và cho chúng tôi biết lý do khiến bạn không nâng cấp."
+        },
+        "update-notification": {
+            "title": "Đã có bản cập nhật mới!",
+            "help": "Hướng Dẫn Cập Nhật",
+            "download": "Tải Xuống"
+        }
     }
 }

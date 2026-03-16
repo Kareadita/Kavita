@@ -1,7 +1,16 @@
-import {ChangeDetectionStrategy, ChangeDetectorRef, Component, DestroyRef, inject, Input, OnInit} from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  ChangeDetectorRef,
+  Component,
+  DestroyRef,
+  effect,
+  inject,
+  Input,
+  OnInit
+} from '@angular/core';
 import {UtilityService} from "../../shared/_services/utility.service";
 import {FormControl, FormGroup, FormsModule, ReactiveFormsModule, Validators} from "@angular/forms";
-import {AsyncPipe, NgClass, NgTemplateOutlet, TitleCasePipe} from "@angular/common";
+import {NgClass, NgTemplateOutlet, TitleCasePipe} from "@angular/common";
 import {NgbActiveModal, NgbNav, NgbNavContent, NgbNavItem, NgbNavLink, NgbNavOutlet} from "@ng-bootstrap/ng-bootstrap";
 import {TranslocoDirective} from "@jsverse/transloco";
 import {AccountService} from "../../_services/account.service";
@@ -16,9 +25,9 @@ import {AgeRatingDto} from "../../_models/metadata/age-rating-dto";
 import {ImageService} from "../../_services/image.service";
 import {UploadService} from "../../_services/upload.service";
 import {MetadataService} from "../../_services/metadata.service";
-import {Action, ActionFactoryService, ActionItem} from "../../_services/action-factory.service";
 import {ActionService} from "../../_services/action.service";
-import {DownloadService} from "../../shared/_services/download.service";
+import {DownloadService} from '../../shared/_services/download.service';
+import {DownloadEntityType} from '../../shared/_models/download-queue-item';
 import {SettingItemComponent} from "../../settings/_components/setting-item/setting-item.component";
 import {TypeaheadComponent} from "../../typeahead/_components/typeahead.component";
 import {concat, forkJoin, Observable, of, tap} from "rxjs";
@@ -37,26 +46,17 @@ import {SafeHtmlPipe} from "../../_pipes/safe-html.pipe";
 import {ReadTimePipe} from "../../_pipes/read-time.pipe";
 import {ChapterService} from "../../_services/chapter.service";
 import {AgeRating} from "../../_models/metadata/age-rating";
-import {User} from "../../_models/user/user";
 import {BreakpointService} from "../../_services/breakpoint.service";
+import {ActionItem} from "../../_models/actionables/action-item";
+import {Action} from "../../_models/actionables/action";
+import {ActionFactoryService} from "../../_services/action-factory.service";
+import {modalDeleted, modalSaved} from "../../_models/modal/modal-result";
+import {Tabs} from "../../_models/tabs";
+import {TabTitlePipe} from "../../_pipes/tab-title.pipe";
+import {
+  EditExternalMetadataFormComponent
+} from "../../shared/_components/edit-external-metadata-form/edit-external-metadata-form.component";
 
-enum TabID {
-  General = 'general-tab',
-  CoverImage = 'cover-image-tab',
-  Info = 'info-tab',
-  People = 'people-tab',
-  Tasks = 'tasks-tab',
-  Tags = 'tags-tab',
-  Weblinks = 'weblinks-tab', // TODO: Weblinks are not implemented
-}
-
-export interface EditChapterModalCloseResult {
-  success: boolean;
-  chapter: Chapter;
-  coverImageUpdate: boolean;
-  needsReload: boolean;
-  isDeleted: boolean;
-}
 
 const blackList = [Action.Edit, Action.IncognitoRead, Action.AddToReadingList];
 
@@ -68,7 +68,6 @@ const blackList = [Action.Edit, Action.IncognitoRead, Action.AddToReadingList];
     NgbNavContent,
     NgbNavLink,
     TranslocoDirective,
-    AsyncPipe,
     NgbNavOutlet,
     ReactiveFormsModule,
     NgbNavItem,
@@ -87,6 +86,8 @@ const blackList = [Action.Edit, Action.IncognitoRead, Action.AddToReadingList];
     ImageComponent,
     SafeHtmlPipe,
     ReadTimePipe,
+    TabTitlePipe,
+    EditExternalMetadataFormComponent,
   ],
   templateUrl: './edit-chapter-modal.component.html',
   styleUrl: './edit-chapter-modal.component.scss',
@@ -113,7 +114,7 @@ export class EditChapterModalComponent implements OnInit {
   @Input({required: true}) libraryId!: number;
   @Input({required: true}) seriesId!: number;
 
-  activeId = TabID.General;
+  activeId = Tabs.General;
   editForm: FormGroup = new FormGroup({});
   selectedCover: string = '';
   coverImageReset = false;
@@ -127,20 +128,28 @@ export class EditChapterModalComponent implements OnInit {
   genres: Genre[] = [];
   ageRatings: Array<AgeRatingDto> = [];
 
-  tasks = this.actionFactoryService.getActionablesForSettingsPage(this.actionFactoryService.getChapterActions(this.runTask.bind(this)), blackList);
+  tasks = this.actionFactoryService.getActionablesForSettingsPage(
+    this.actionFactoryService.getChapterActions(this.seriesId, this.libraryId, this.libraryType), blackList);
   /**
    * A copy of the chapter from init. This is used to compare values for name fields to see if lock was modified
    */
   initChapter!: Chapter;
   imageUrls: Array<string> = [];
   size: number = 0;
-  user!: User;
 
   get WebLinks() {
     if (this.chapter.webLinks === '') return [];
     return this.chapter.webLinks.split(',');
   }
 
+  constructor() {
+    effect(() => {
+      if (!this.accountService.hasAdminRole()) {
+        this.activeId = Tabs.Info;
+        this.cdRef.markForCheck();
+      }
+    });
+  }
 
 
   ngOnInit() {
@@ -148,16 +157,6 @@ export class EditChapterModalComponent implements OnInit {
     this.imageUrls.push(this.imageService.getChapterCoverImage(this.chapter.id));
 
     this.size = this.utilityService.asChapter(this.chapter).files.reduce((sum, v) => sum + v.bytes, 0);
-    this.accountService.currentUser$.pipe(takeUntilDestroyed(this.destroyRef), tap(u => {
-      if (!u) return;
-      this.user = u;
-
-      if (!this.accountService.hasAdminRole(this.user)) {
-        this.activeId = TabID.Info;
-      }
-      this.cdRef.markForCheck();
-
-    })).subscribe();
 
     this.editForm.addControl('titleName', new FormControl(this.chapter.titleName, []));
     this.editForm.addControl('sortOrder', new FormControl(Math.max(0, this.chapter.sortOrder), [Validators.required, Validators.min(0)]));
@@ -232,7 +231,7 @@ export class EditChapterModalComponent implements OnInit {
   }
 
   save() {
-    const model = this.editForm.value;
+    const model = this.editForm.getRawValue();
     const selectedIndex = this.editForm.get('coverImageIndex')?.value || 0;
 
     // Patch in data from the model that is not typeahead (as those are updated during setting)
@@ -262,7 +261,8 @@ export class EditChapterModalComponent implements OnInit {
     }
 
     concat(...apis).subscribe(results => {
-      this.modal.close({success: true, chapter: model, coverImageUpdate: selectedIndex > 0 || this.coverImageReset, needsReload: needsReload, isDeleted: false} as EditChapterModalCloseResult);
+      const needsCoverUpdate = selectedIndex > 0 || this.coverImageReset;
+      this.modal.close(modalSaved(model, needsCoverUpdate));
     });
   }
 
@@ -291,11 +291,11 @@ export class EditChapterModalComponent implements OnInit {
       case Action.Delete:
         await this.actionService.deleteChapter(this.chapter.id, (b) => {
           if (!b) return;
-          this.modal.close({success: b, chapter: this.chapter, coverImageUpdate: false, needsReload: true, isDeleted: b} as EditChapterModalCloseResult);
+          this.modal.close(modalDeleted(this.chapter));
         });
         break;
       case Action.Download:
-        this.downloadService.download('chapter', this.chapter);
+        this.downloadService.download(DownloadEntityType.Chapter, this.chapter, this.libraryId, this.seriesId);
         break;
     }
   }
@@ -506,7 +506,7 @@ export class EditChapterModalComponent implements OnInit {
     return this.peopleSettings[role];
   }
 
-  protected readonly TabID = TabID;
+  protected readonly Tabs = Tabs;
   protected readonly Action = Action;
   protected readonly PersonRole = PersonRole;
   protected readonly MangaFormat = MangaFormat;
