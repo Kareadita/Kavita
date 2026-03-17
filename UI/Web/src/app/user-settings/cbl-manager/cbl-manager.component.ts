@@ -15,7 +15,7 @@ import {ModalService} from "../../_services/modal.service";
 import {NgTemplateOutlet} from "@angular/common";
 import {FileSystemFileEntry, NgxFileDropEntry, NgxFileDropModule} from "ngx-file-drop";
 import {ReadingListService} from "../../_services/reading-list.service";
-import {ReadingList} from "../../_models/reading-list";
+import {ReadingList, ReadingListProvider} from '../../_models/reading-list';
 import {LoadingComponent} from "../../shared/loading/loading.component";
 import {TranslocoDirective} from "@jsverse/transloco";
 import {BrowseCblRepoModalComponent} from "../_modals/browse-cbl-repo-modal/browse-cbl-repo-modal.component";
@@ -23,6 +23,8 @@ import {CblService} from '../../_services/cbl.service';
 import {CblRepoItem} from '../../_models/reading-list/cbl/cbl-repo-item';
 import {CblImportResult} from '../../_models/reading-list/cbl/cbl-import-result.enum';
 import {FormControl, FormGroup, ReactiveFormsModule} from '@angular/forms';
+import {PromotedIconComponent} from '../../shared/_components/promoted-icon/promoted-icon.component';
+import {ReadingListProviderPipe} from "../../_pipes/reading-list-provider.pipe";
 
 @Component({
   selector: 'app-cbl-manager',
@@ -31,7 +33,9 @@ import {FormControl, FormGroup, ReactiveFormsModule} from '@angular/forms';
     NgxFileDropModule,
     LoadingComponent,
     TranslocoDirective,
-    ReactiveFormsModule
+    ReactiveFormsModule,
+    PromotedIconComponent,
+    ReadingListProviderPipe
   ],
   templateUrl: './cbl-manager.component.html',
   styleUrl: './cbl-manager.component.scss',
@@ -39,6 +43,7 @@ import {FormControl, FormGroup, ReactiveFormsModule} from '@angular/forms';
 })
 export class CblManagerComponent implements OnInit {
   private readonly destroyRef = inject(DestroyRef);
+  protected readonly ReadingListProvider = ReadingListProvider;
   protected readonly accountService = inject(AccountService);
   private readonly toastr = inject(ToastrService);
   private readonly cdRef = inject(ChangeDetectorRef);
@@ -58,6 +63,28 @@ export class CblManagerComponent implements OnInit {
 
   selectedList = signal<ReadingList | undefined>(undefined);
   showUploadFlow = computed(() => this.selectedList() === undefined);
+
+  searchTerm = signal<string>('');
+  providerFilter = signal<ReadingListProvider | null>(null);
+  hasUpdateFilter = signal<boolean>(false);
+
+  filteredLists = computed(() => {
+    let lists = this.allLists();
+    const term = this.searchTerm().toLowerCase().trim();
+    const provider = this.providerFilter();
+    const hasUpdate = this.hasUpdateFilter();
+
+    if (term) {
+      lists = lists.filter(l => l.title.toLowerCase().includes(term));
+    }
+    if (provider !== null) {
+      lists = lists.filter(l => l.provider === provider);
+    }
+    if (hasUpdate) {
+      lists = lists.filter(l => l.hasRemoteChange);
+    }
+    return lists;
+  });
 
   ngOnInit() {
     this.readingListService.getReadingLists(false).subscribe(lists => {
@@ -135,6 +162,10 @@ export class CblManagerComponent implements OnInit {
         this.isUploadingCbl.set(false);
       }
     });
+  }
+
+  setProviderFilter(provider: ReadingListProvider | null) {
+    this.providerFilter.set(this.providerFilter() === provider ? null : provider);
   }
 
   private refreshLists() {

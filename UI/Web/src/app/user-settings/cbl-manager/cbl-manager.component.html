@@ -12,23 +12,49 @@
 
 
   <div class="row g-0 theme-container">
-    <div class="col-lg-3 col-md-5 col-sm-7 col-xs-7 scroller">
+    <div class="col-lg-5 col-md-6 col-sm-7 col-xs-7 scroller">
       <div class="pe-2">
+        <div class="mb-2">
+          <input type="text" class="form-control form-control-sm" [placeholder]="t('search-placeholder')"
+                 [value]="searchTerm()" (input)="searchTerm.set($any($event.target).value)" />
+        </div>
+
+        <div class="d-flex align-items-center justify-content-between mb-2">
+          <div class="form-check form-switch mb-0">
+            <input class="form-check-input" type="checkbox" id="hasUpdateFilter"
+                   [checked]="hasUpdateFilter()" (change)="hasUpdateFilter.set($any($event.target).checked)">
+            <label class="form-check-label" for="hasUpdateFilter">{{t('filter-has-update')}}</label>
+          </div>
+
+          <div class="btn-group btn-group-sm">
+            <button type="button" class="btn" [class.btn-primary]="providerFilter() === null"
+                    [class.btn-outline-primary]="providerFilter() !== null"
+                    (click)="setProviderFilter(null)">{{t('filter-all')}}</button>
+            <button type="button" class="btn" [class.btn-primary]="providerFilter() === ReadingListProvider.None"
+                    [class.btn-outline-primary]="providerFilter() !== ReadingListProvider.None"
+                    (click)="setProviderFilter(ReadingListProvider.None)">{{t('filter-local')}}</button>
+            <button type="button" class="btn" [class.btn-primary]="providerFilter() === ReadingListProvider.File"
+                    [class.btn-outline-primary]="providerFilter() !== ReadingListProvider.File"
+                    (click)="setProviderFilter(ReadingListProvider.File)">{{t('provider-file')}}</button>
+            <button type="button" class="btn" [class.btn-primary]="providerFilter() === ReadingListProvider.Url"
+                    [class.btn-outline-primary]="providerFilter() !== ReadingListProvider.Url"
+                    (click)="setProviderFilter(ReadingListProvider.Url)">{{t('provider-url')}}</button>
+          </div>
+        </div>
+
+        <div class="fw-bold section-header mb-1">{{t('downloaded')}}</div>
+
         <ul style="height: 100%" class="list-group list-group-flush">
-
-          <li class="list-group-item d-flex justify-content-between align-items-start" style="height: 2.5rem" aria-hidden="true">
-            <div class="fw-bold section-header">{{t('downloaded')}}</div>
-          </li>
-
-          @for (readingList of allLists(); track readingList.id) {
+          @for (readingList of filteredLists(); track readingList.id) {
             <ng-container [ngTemplateOutlet]="themeOption" [ngTemplateOutletContext]="{ $implicit: readingList, downloaded: true}" />
+          } @empty {
+            <li class="list-group-item text-muted">{{t('no-results')}}</li>
           }
-
         </ul>
       </div>
     </div>
 
-    <div class="col-lg-9 col-md-7 col-sm-4 col-xs-4 ps-3">
+    <div class="col-lg-7 col-md-6 col-sm-4 col-xs-4 ps-3">
       <form [formGroup]="form">
       <div class="card p-3">
 
@@ -140,16 +166,21 @@
 
   <ng-template #themeOption let-item let-downloaded="downloaded">
     @if (item !== undefined) {
-
-      <li class="list-group-item d-flex justify-content-between align-items-start {{selectedList() && selectedList()?.title === item.title ? 'active' : ''}}" (click)="selectList(item)">
+      <li class="list-group-item d-flex justify-content-between align-items-start clickable rounded mt-1"
+          [class.active]="selectedList() && selectedList()?.id === item.id"
+          (click)="selectList(item)">
         <div class="ms-2 me-auto">
-          <div class="fw-bold">{{item.title}}</div>
-
-<!--          @if (item.provider !== ThemeProvider.System && item.compatibleVersion) {-->
-<!--            <span class="pill p-1 me-1 version">v{{item.compatibleVersion}}</span>-->
-<!--          } @else if (item.hasOwnProperty('lastCompatibleVersion')) {-->
-<!--            <span class="pill p-1 me-1 version">v{{item.lastCompatibleVersion}}</span>-->
-<!--          }-->
+          <div class="fw-bold">
+            <app-promoted-icon [promoted]="item.promoted" />
+            {{item.title}}
+          </div>
+          <span class="pill p-1 me-1">{{item.itemCount}} {{t('items-count')}}</span>
+          @if (item.canSync) {
+            <span class="pill p-1 me-1 provider">{{item.provider | readingListProvider}}</span>
+          }
+          @if (item.hasRemoteChange) {
+            <span class="pill p-1 me-1 update-available">{{t('update-available')}}</span>
+          }
         </div>
       </li>
     }

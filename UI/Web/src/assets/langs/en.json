@@ -2050,13 +2050,26 @@
 
     "cbl-manager": {
         "browse-repo": "Browse CBLs",
-        "description": "",
+        "description": "You can import Reading Lists from file, url, or browse the CBL Repo. Lists created from an online source will automatically update in the background or on demand.",
         "url": "Url to CBL",
         "preview-default": "Upload your own CBL v1/v2 file for import",
         "enter-an-url-pre-title": "{{font-manager.enter-an-url-pre-title}}",
         "drag-n-drop": "{{cover-image-chooser.drag-n-drop}}",
         "upload": "{{cover-image-chooser.upload}}",
-        "upload-continued": "a cbl file"
+        "upload-continued": "a cbl file",
+        "downloaded": "Downloaded",
+        "url-label": "Url",
+        "load": "Load",
+        "back": "Back",
+        "items-count": "items",
+        "provider-url": "URL",
+        "provider-file": "File",
+        "update-available": "Update available",
+        "search-placeholder": "Search reading lists...",
+        "filter-has-update": "Has update",
+        "filter-all": "All",
+        "filter-local": "Local",
+        "no-results": "No matching reading lists"
     },
 
     "browse-cbl-repo-modal": {
@@ -2222,6 +2235,12 @@
 
     "download-queue-widget": {
         "title": "{{download-queue-drawer.title}}"
+    },
+
+    "reading-list-provider-pipe": {
+        "none": "System",
+        "file": "File",
+        "url": "Url"
     },
 
     "shortcuts-modal": {
