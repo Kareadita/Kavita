@@ -129,16 +129,16 @@ public class DeprecatedController(
     /// <summary>
     /// Replaces chapter cover image and locks it with a base64 encoded image. This will update the parent volume's cover image.
     /// </summary>
-    /// <param name="uploadFileDto">Does not use Url property</param>
+    /// <param name="uploadCoverFileDto">Does not use Url property</param>
     /// <returns></returns>
     [Authorize(Policy = PolicyGroups.AdminPolicy)]
     [HttpPost("upload/reset-chapter-lock")]
     [Obsolete("Use LockCover in UploadFileDto, will be removed in v0.9.0")]
-    public async Task<ActionResult> ResetChapterLock(UploadFileDto uploadFileDto)
+    public async Task<ActionResult> ResetChapterLock(UploadCoverFileDto uploadCoverFileDto)
     {
         try
         {
-            var chapter = await unitOfWork.ChapterRepository.GetChapterAsync(uploadFileDto.Id);
+            var chapter = await unitOfWork.ChapterRepository.GetChapterAsync(uploadCoverFileDto.Id);
             if (chapter == null) return BadRequest(await localizationService.Translate(UserId, "chapter-doesnt-exist"));
             var originalFile = chapter.CoverImage;
 
@@ -163,7 +163,7 @@ public class DeprecatedController(
         }
         catch (Exception e)
         {
-            logger.LogError(e, "There was an issue resetting cover lock for Chapter {Id}", uploadFileDto.Id);
+            logger.LogError(e, "There was an issue resetting cover lock for Chapter {Id}", uploadCoverFileDto.Id);
             await unitOfWork.RollbackAsync();
         }
 

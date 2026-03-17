@@ -95,27 +95,27 @@ public class UploadController : BaseApiController
     /// <summary>
     /// Replaces series cover image and locks it with a base64 encoded image
     /// </summary>
-    /// <param name="uploadFileDto"></param>
+    /// <param name="uploadCoverFileDto"></param>
     /// <returns></returns>
     [Authorize(Policy = PolicyGroups.AdminPolicy)]
     [RequestSizeLimit(ControllerConstants.MaxUploadSizeBytes)]
     [HttpPost("series")]
-    public async Task<ActionResult> UploadSeriesCoverImageFromUrl(UploadFileDto uploadFileDto)
+    public async Task<ActionResult> UploadSeriesCoverImageFromUrl(UploadCoverFileDto uploadCoverFileDto)
     {
         // Check if Url is non empty, request the image and place in temp, then ask image service to handle it.
         // See if we can do this all in memory without touching underlying system
         try
         {
-            var series = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(uploadFileDto.Id);
+            var series = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(uploadCoverFileDto.Id);
 
             if (series == null) return BadRequest(await _localizationService.Translate(UserId, "series-doesnt-exist"));
 
             var filePath = string.Empty;
             var lockState = false;
-            if (!string.IsNullOrEmpty(uploadFileDto.Url))
+            if (!string.IsNullOrEmpty(uploadCoverFileDto.Url))
             {
-                filePath = await CreateThumbnail(uploadFileDto, $"{ImageService.GetSeriesFormat(uploadFileDto.Id)}");
-                lockState = uploadFileDto.LockCover;
+                filePath = await CreateThumbnail(uploadCoverFileDto, $"{ImageService.GetSeriesFormat(uploadCoverFileDto.Id)}");
+                lockState = uploadCoverFileDto.LockCover;
             }
 
             series.CoverImage = filePath;
@@ -128,7 +128,7 @@ public class UploadController : BaseApiController
             if (_unitOfWork.HasChanges())
             {
                 // Refresh covers
-                if (string.IsNullOrEmpty(uploadFileDto.Url))
+                if (string.IsNullOrEmpty(uploadCoverFileDto.Url))
                 {
                     await _taskScheduler.RefreshSeriesMetadata(series.LibraryId, series.Id, true);
                 }
@@ -142,7 +142,7 @@ public class UploadController : BaseApiController
         }
         catch (Exception e)
         {
-            _logger.LogError(e, "There was an issue uploading cover image for Series {Id}", uploadFileDto.Id);
+            _logger.LogError(e, "There was an issue uploading cover image for Series {Id}", uploadCoverFileDto.Id);
             await _unitOfWork.RollbackAsync();
         }
 
@@ -152,17 +152,17 @@ public class UploadController : BaseApiController
     /// <summary>
     /// Replaces collection tag cover image and locks it with a base64 encoded image
     /// </summary>
-    /// <param name="uploadFileDto"></param>
+    /// <param name="uploadCoverFileDto"></param>
     /// <returns></returns>
     [HttpPost("collection")]
     [RequestSizeLimit(ControllerConstants.MaxUploadSizeBytes)]
-    public async Task<ActionResult> UploadCollectionCoverImageFromUrl(UploadFileDto uploadFileDto)
+    public async Task<ActionResult> UploadCollectionCoverImageFromUrl(UploadCoverFileDto uploadCoverFileDto)
     {
         // Check if Url is non empty, request the image and place in temp, then ask image service to handle it.
         // See if we can do this all in memory without touching underlying system
         try
         {
-            var tag = await _unitOfWork.CollectionTagRepository.GetCollectionAsync(uploadFileDto.Id);
+            var tag = await _unitOfWork.CollectionTagRepository.GetCollectionAsync(uploadCoverFileDto.Id);
             if (tag == null) return BadRequest(await _localizationService.Translate(UserId, "collection-doesnt-exist"));
 
             if (!User.IsInRole(PolicyConstants.AdminRole) && tag.AppUserId != UserId)
@@ -170,10 +170,10 @@ public class UploadController : BaseApiController
 
             var filePath = string.Empty;
             var lockState = false;
-            if (!string.IsNullOrEmpty(uploadFileDto.Url))
+            if (!string.IsNullOrEmpty(uploadCoverFileDto.Url))
             {
-                filePath = await CreateThumbnail(uploadFileDto, $"{ImageService.GetCollectionTagFormat(uploadFileDto.Id)}");
-                lockState = uploadFileDto.LockCover;
+                filePath = await CreateThumbnail(uploadCoverFileDto, $"{ImageService.GetCollectionTagFormat(uploadCoverFileDto.Id)}");
+                lockState = uploadCoverFileDto.LockCover;
             }
 
             tag.CoverImage = filePath;
@@ -192,7 +192,7 @@ public class UploadController : BaseApiController
         }
         catch (Exception e)
         {
-            _logger.LogError(e, "There was an issue uploading cover image for Collection Tag {Id}", uploadFileDto.Id);
+            _logger.LogError(e, "There was an issue uploading cover image for Collection Tag {Id}", uploadCoverFileDto.Id);
             await _unitOfWork.RollbackAsync();
         }
 
@@ -203,29 +203,29 @@ public class UploadController : BaseApiController
     /// Replaces reading list cover image and locks it with a base64 encoded image
     /// </summary>
     /// <remarks>This is the only API that can be called by non-admins, but the authenticated user must have a readinglist permission</remarks>
-    /// <param name="uploadFileDto"></param>
+    /// <param name="uploadCoverFileDto"></param>
     /// <returns></returns>
     [RequestSizeLimit(ControllerConstants.MaxUploadSizeBytes)]
     [HttpPost("reading-list")]
-    public async Task<ActionResult> UploadReadingListCoverImageFromUrl(UploadFileDto uploadFileDto)
+    public async Task<ActionResult> UploadReadingListCoverImageFromUrl(UploadCoverFileDto uploadCoverFileDto)
     {
         // Check if Url is non-empty, request the image and place in temp, then ask image service to handle it.
         // See if we can do this all in memory without touching underlying system
-        if (await _readingListService.UserHasReadingListAccess(uploadFileDto.Id, Username!) == null)
+        if (await _readingListService.UserHasReadingListAccess(uploadCoverFileDto.Id, Username!) == null)
             return Unauthorized(await _localizationService.Translate(UserId, "access-denied"));
 
         try
         {
-            var readingList = await _unitOfWork.ReadingListRepository.GetReadingListByIdAsync(uploadFileDto.Id);
+            var readingList = await _unitOfWork.ReadingListRepository.GetReadingListByIdAsync(uploadCoverFileDto.Id);
             if (readingList == null) return BadRequest(await _localizationService.Translate(UserId, "reading-list-doesnt-exist"));
 
 
             var filePath = string.Empty;
             var lockState = false;
-            if (!string.IsNullOrEmpty(uploadFileDto.Url))
+            if (!string.IsNullOrEmpty(uploadCoverFileDto.Url))
             {
-                filePath = await CreateThumbnail(uploadFileDto, $"{ImageService.GetReadingListFormat(uploadFileDto.Id)}");
-                lockState = uploadFileDto.LockCover;
+                filePath = await CreateThumbnail(uploadCoverFileDto, $"{ImageService.GetReadingListFormat(uploadCoverFileDto.Id)}");
+                lockState = uploadCoverFileDto.LockCover;
             }
 
 
@@ -245,46 +245,46 @@ public class UploadController : BaseApiController
         }
         catch (Exception e)
         {
-            _logger.LogError(e, "There was an issue uploading cover image for Reading List {Id}", uploadFileDto.Id);
+            _logger.LogError(e, "There was an issue uploading cover image for Reading List {Id}", uploadCoverFileDto.Id);
             await _unitOfWork.RollbackAsync();
         }
 
         return BadRequest(await _localizationService.Translate(UserId, "generic-cover-reading-list-save"));
     }
 
-    private async Task<string> CreateThumbnail(UploadFileDto uploadFileDto, string filename)
+    private async Task<string> CreateThumbnail(UploadCoverFileDto uploadCoverFileDto, string filename)
     {
         var settings = await _unitOfWork.SettingsRepository.GetSettingsDtoAsync();
         var encodeFormat = settings.EncodeMediaAs;
         var coverImageSize = settings.CoverImageSize;
 
-        return _imageService.CreateThumbnailFromBase64(uploadFileDto.Url,
+        return _imageService.CreateThumbnailFromBase64(uploadCoverFileDto.Url,
             filename, encodeFormat, coverImageSize.GetDimensions().Width);
     }
 
     /// <summary>
     /// Replaces chapter cover image and locks it with a base64 encoded image. This will update the parent volume's cover image.
     /// </summary>
-    /// <param name="uploadFileDto"></param>
+    /// <param name="uploadCoverFileDto"></param>
     /// <returns></returns>
     [Authorize(Policy = PolicyGroups.AdminPolicy)]
     [RequestSizeLimit(ControllerConstants.MaxUploadSizeBytes)]
     [HttpPost("chapter")]
-    public async Task<ActionResult> UploadChapterCoverImageFromUrl(UploadFileDto uploadFileDto)
+    public async Task<ActionResult> UploadChapterCoverImageFromUrl(UploadCoverFileDto uploadCoverFileDto)
     {
         // Check if Url is non empty, request the image and place in temp, then ask image service to handle it.
         // See if we can do this all in memory without touching underlying system
         try
         {
-            var chapter = await _unitOfWork.ChapterRepository.GetChapterAsync(uploadFileDto.Id);
+            var chapter = await _unitOfWork.ChapterRepository.GetChapterAsync(uploadCoverFileDto.Id);
             if (chapter == null) return BadRequest(await _localizationService.Translate(UserId, "chapter-doesnt-exist"));
 
             var filePath = string.Empty;
             var lockState = false;
-            if (!string.IsNullOrEmpty(uploadFileDto.Url))
+            if (!string.IsNullOrEmpty(uploadCoverFileDto.Url))
             {
-                filePath = await CreateThumbnail(uploadFileDto, $"{ImageService.GetChapterFormat(uploadFileDto.Id, chapter.VolumeId)}");
-                lockState = uploadFileDto.LockCover;
+                filePath = await CreateThumbnail(uploadCoverFileDto, $"{ImageService.GetChapterFormat(uploadCoverFileDto.Id, chapter.VolumeId)}");
+                lockState = uploadCoverFileDto.LockCover;
             }
 
             chapter.CoverImage = filePath;
@@ -304,7 +304,7 @@ public class UploadController : BaseApiController
                 await _unitOfWork.CommitAsync();
 
                 // Refresh covers
-                if (string.IsNullOrEmpty(uploadFileDto.Url))
+                if (string.IsNullOrEmpty(uploadCoverFileDto.Url))
                 {
                     var series = (await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(volume!.SeriesId))!;
                     await _taskScheduler.RefreshSeriesMetadata(series.LibraryId, series.Id, true);
@@ -321,7 +321,7 @@ public class UploadController : BaseApiController
         }
         catch (Exception e)
         {
-            _logger.LogError(e, "There was an issue uploading cover image for Chapter {Id}", uploadFileDto.Id);
+            _logger.LogError(e, "There was an issue uploading cover image for Chapter {Id}", uploadCoverFileDto.Id);
             await _unitOfWork.RollbackAsync();
         }
 
@@ -332,26 +332,26 @@ public class UploadController : BaseApiController
     /// Replaces volume cover image and locks it with a base64 encoded image.
     /// </summary>
     /// <remarks>This will not update the underlying chapter</remarks>
-    /// <param name="uploadFileDto"></param>
+    /// <param name="uploadCoverFileDto"></param>
     /// <returns></returns>
     [Authorize(Policy = PolicyGroups.AdminPolicy)]
     [RequestSizeLimit(ControllerConstants.MaxUploadSizeBytes)]
     [HttpPost("volume")]
-    public async Task<ActionResult> UploadVolumeCoverImageFromUrl(UploadFileDto uploadFileDto)
+    public async Task<ActionResult> UploadVolumeCoverImageFromUrl(UploadCoverFileDto uploadCoverFileDto)
     {
         // Check if Url is non empty, request the image and place in temp, then ask image service to handle it.
         // See if we can do this all in memory without touching underlying system
         try
         {
-            var volume = await _unitOfWork.VolumeRepository.GetVolumeByIdAsync(uploadFileDto.Id, VolumeIncludes.Chapters);
+            var volume = await _unitOfWork.VolumeRepository.GetVolumeByIdAsync(uploadCoverFileDto.Id, VolumeIncludes.Chapters);
             if (volume == null) return BadRequest(await _localizationService.Translate(UserId, "volume-doesnt-exist"));
 
             var filePath = string.Empty;
             var lockState = false;
-            if (!string.IsNullOrEmpty(uploadFileDto.Url))
+            if (!string.IsNullOrEmpty(uploadCoverFileDto.Url))
             {
-                filePath = await CreateThumbnail(uploadFileDto, $"{ImageService.GetVolumeFormat(uploadFileDto.Id)}");
-                lockState = uploadFileDto.LockCover;
+                filePath = await CreateThumbnail(uploadCoverFileDto, $"{ImageService.GetVolumeFormat(uploadCoverFileDto.Id)}");
+                lockState = uploadCoverFileDto.LockCover;
             }
 
             volume.CoverImage = filePath;
@@ -364,7 +364,7 @@ public class UploadController : BaseApiController
                 await _unitOfWork.CommitAsync();
 
                 // Refresh covers
-                if (string.IsNullOrEmpty(uploadFileDto.Url))
+                if (string.IsNullOrEmpty(uploadCoverFileDto.Url))
                 {
                     var series = (await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(volume.SeriesId))!;
                     await _taskScheduler.RefreshSeriesMetadata(series.LibraryId, series.Id, true);
@@ -372,7 +372,7 @@ public class UploadController : BaseApiController
 
 
                 await _eventHub.SendMessageAsync(MessageFactory.CoverUpdate,
-                    MessageFactory.CoverUpdateEvent(uploadFileDto.Id, MessageFactoryEntityTypes.Volume), false);
+                    MessageFactory.CoverUpdateEvent(uploadCoverFileDto.Id, MessageFactoryEntityTypes.Volume), false);
                 await _eventHub.SendMessageAsync(MessageFactory.CoverUpdate,
                     MessageFactory.CoverUpdateEvent(volume.Id, MessageFactoryEntityTypes.Chapter), false);
                 return Ok();
@@ -381,7 +381,7 @@ public class UploadController : BaseApiController
         }
         catch (Exception e)
         {
-            _logger.LogError(e, "There was an issue uploading cover image for Volume {Id}", uploadFileDto.Id);
+            _logger.LogError(e, "There was an issue uploading cover image for Volume {Id}", uploadCoverFileDto.Id);
             await _unitOfWork.RollbackAsync();
         }
 
@@ -392,19 +392,19 @@ public class UploadController : BaseApiController
     /// <summary>
     /// Replaces library cover image with a base64 encoded image. If empty string passed, will reset to null.
     /// </summary>
-    /// <param name="uploadFileDto"></param>
+    /// <param name="uploadCoverFileDto"></param>
     /// <returns></returns>
     [Authorize(Policy = PolicyGroups.AdminPolicy)]
     [RequestSizeLimit(ControllerConstants.MaxUploadSizeBytes)]
     [HttpPost("library")]
-    public async Task<ActionResult> UploadLibraryCoverImageFromUrl(UploadFileDto uploadFileDto)
+    public async Task<ActionResult> UploadLibraryCoverImageFromUrl(UploadCoverFileDto uploadCoverFileDto)
     {
-        var library = await _unitOfWork.LibraryRepository.GetLibraryForIdAsync(uploadFileDto.Id);
+        var library = await _unitOfWork.LibraryRepository.GetLibraryForIdAsync(uploadCoverFileDto.Id);
         if (library == null) return BadRequest("This library does not exist");
 
         // Check if Url is non empty, request the image and place in temp, then ask image service to handle it.
         // See if we can do this all in memory without touching underlying system
-        if (string.IsNullOrEmpty(uploadFileDto.Url))
+        if (string.IsNullOrEmpty(uploadCoverFileDto.Url))
         {
             library.CoverImage = null;
             library.ResetColorScape();
@@ -421,8 +421,8 @@ public class UploadController : BaseApiController
 
         try
         {
-            var filePath = await CreateThumbnail(uploadFileDto,
-                $"{ImageService.GetLibraryFormat(uploadFileDto.Id)}");
+            var filePath = await CreateThumbnail(uploadCoverFileDto,
+                $"{ImageService.GetLibraryFormat(uploadCoverFileDto.Id)}");
 
             if (!string.IsNullOrEmpty(filePath))
             {
@@ -442,7 +442,7 @@ public class UploadController : BaseApiController
         }
         catch (Exception e)
         {
-            _logger.LogError(e, "There was an issue uploading cover image for Library {Id}", uploadFileDto.Id);
+            _logger.LogError(e, "There was an issue uploading cover image for Library {Id}", uploadCoverFileDto.Id);
             await _unitOfWork.RollbackAsync();
         }
 
@@ -453,24 +453,24 @@ public class UploadController : BaseApiController
     /// <summary>
     /// Replaces person tag cover image and locks it with a base64 encoded image
     /// </summary>
-    /// <param name="uploadFileDto"></param>
+    /// <param name="uploadCoverFileDto"></param>
     /// <returns></returns>
     [Authorize(Policy = PolicyGroups.AdminPolicy)]
     [RequestSizeLimit(ControllerConstants.MaxUploadSizeBytes)]
     [HttpPost("person")]
-    public async Task<ActionResult> UploadPersonCoverImageFromUrl(UploadFileDto uploadFileDto)
+    public async Task<ActionResult> UploadPersonCoverImageFromUrl(UploadCoverFileDto uploadCoverFileDto)
     {
         try
         {
-            var person = await _unitOfWork.PersonRepository.GetPersonById(uploadFileDto.Id);
+            var person = await _unitOfWork.PersonRepository.GetPersonById(uploadCoverFileDto.Id);
             if (person == null) return BadRequest(await _localizationService.Translate(UserId, "person-doesnt-exist"));
 
-            await _coverDbService.SetPersonCoverByUrl(person, uploadFileDto.Url, chooseBetterImage: false);
+            await _coverDbService.SetPersonCoverByUrl(person, uploadCoverFileDto.Url, chooseBetterImage: false);
             return Ok();
         }
         catch (Exception e)
         {
-            _logger.LogError(e, "There was an issue uploading cover image for Person {Id}", uploadFileDto.Id);
+            _logger.LogError(e, "There was an issue uploading cover image for Person {Id}", uploadCoverFileDto.Id);
             await _unitOfWork.RollbackAsync();
         }
 
@@ -482,26 +482,26 @@ public class UploadController : BaseApiController
     /// Replaces user cover image and locks it with a base64 encoded image
     /// </summary>
     /// <remarks>You MUST be the user in question</remarks>
-    /// <param name="uploadFileDto"></param>
+    /// <param name="uploadCoverFileDto"></param>
     /// <returns></returns>
     [HttpPost("user")]
     [DisallowRole(PolicyConstants.ReadOnlyRole)]
     [RequestSizeLimit(ControllerConstants.MaxUploadSizeBytes)]
-    public async Task<ActionResult> UploadUserCoverImageFromUrl(UploadFileDto uploadFileDto)
+    public async Task<ActionResult> UploadUserCoverImageFromUrl(UploadCoverFileDto uploadCoverFileDto)
     {
         try
         {
-            if (uploadFileDto.Id != UserId) return NotFound();
+            if (uploadCoverFileDto.Id != UserId) return NotFound();
 
-            var user = await _unitOfWork.UserRepository.GetUserByIdAsync(uploadFileDto.Id);
+            var user = await _unitOfWork.UserRepository.GetUserByIdAsync(uploadCoverFileDto.Id);
             if (user == null) return BadRequest(await _localizationService.Translate(UserId, "user-doesnt-exist"));
 
-            await _coverDbService.SetUserCoverByUrl(user, uploadFileDto.Url, chooseBetterImage: false);
+            await _coverDbService.SetUserCoverByUrl(user, uploadCoverFileDto.Url, chooseBetterImage: false);
             return Ok();
         }
         catch (Exception e)
         {
-            _logger.LogError(e, "There was an issue uploading cover image for User {Id}", uploadFileDto.Id);
+            _logger.LogError(e, "There was an issue uploading cover image for User {Id}", uploadCoverFileDto.Id);
             await _unitOfWork.RollbackAsync();
         }
 

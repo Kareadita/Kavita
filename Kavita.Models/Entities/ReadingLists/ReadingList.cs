@@ -35,6 +35,7 @@ public class ReadingList : IEntityDate, IHasCoverImage
     /// <remarks>Can be populated via API/UI or from CBLv2</remarks>
     //public ICollection<Tag> Tags { get; set; }
 
+
     /// <summary>
     /// Determines how the list was created and if it's syncable.
     /// </summary>

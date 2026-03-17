@@ -11,6 +11,8 @@ using Kavita.Models.DTOs.ReadingLists.CBL.V1;
 using Kavita.Models.Entities.Enums.ReadingList;
 using Kavita.Server.Attributes;
 using Kavita.Services.Reading;
+using Flurl.Http;
+using Kavita.Models.DTOs.Uploads;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -129,6 +131,87 @@ public class CblController(IReadingListService readingListService, IDirectorySer
         }
     }
 
+    [HttpPost("file-import")]
+    [DisallowRole(PolicyConstants.ReadOnlyRole)]
+    public async Task<ActionResult<CblImportSummaryDto>> ImportCblFromFile(IFormFile cblFile)
+    {
+        var userId = UserId;
+        var filename = cblFile.FileName;
+
+        var ext = Path.GetExtension(filename);
+        if (!ext.Equals(".cbl", StringComparison.OrdinalIgnoreCase)
+            && !ext.Equals(".json", StringComparison.OrdinalIgnoreCase))
+        {
+            return BadRequest("Only .cbl and .json files are allowed");
+        }
+
+        if (filename.Contains(".exe", StringComparison.OrdinalIgnoreCase))
+        {
+            return BadRequest("Invalid filename");
+        }
+
+        var fullPath = await SaveCblFile(cblFile, userId, filename);
+
+        try
+        {
+            var summary = await cblImporterService.UpsertReadingList(
+                userId, fullPath, new CblImportOptions(), new CblImportDecisions());
+            summary.FileName = filename;
+            return Ok(summary);
+        }
+        finally
+        {
+            if (System.IO.File.Exists(fullPath))
+            {
+                System.IO.File.Delete(fullPath);
+            }
+        }
+    }
+
+    [HttpPost("upload-cbl-file")]
+    [DisallowRole(PolicyConstants.ReadOnlyRole)]
+    public async Task<ActionResult<CblImportSummaryDto>> UploadCblFromUrl(UploadUrlDto dto)
+    {
+        var dir = GetCblManagerFolder(UserId);
+        Directory.CreateDirectory(dir);
+
+        string fullPath;
+        string filename;
+        try
+        {
+            fullPath = await dto.Url.DownloadFileAsync(dir);
+            filename = Path.GetFileName(fullPath);
+        }
+        catch (FlurlHttpException)
+        {
+            return BadRequest("Unable to download file from URL");
+        }
+
+        var ext = Path.GetExtension(filename);
+        if (!ext.Equals(".cbl", StringComparison.OrdinalIgnoreCase)
+            && !ext.Equals(".json", StringComparison.OrdinalIgnoreCase))
+        {
+            if (System.IO.File.Exists(fullPath)) System.IO.File.Delete(fullPath);
+            return BadRequest("Only .cbl and .json files are allowed");
+        }
+
+        try
+        {
+            var summary = await cblImporterService.UpsertReadingList(
+                UserId, fullPath, new CblImportOptions(), new CblImportDecisions());
+            summary.FileName = filename;
+            return Ok(summary);
+        }
+        finally
+        {
+            if (System.IO.File.Exists(fullPath))
+            {
+                System.IO.File.Delete(fullPath);
+            }
+        }
+    }
+
+
     /// <summary>
     /// Imports from the Repo browser. Downloads selected CBL files from GitHub and upserts reading lists.
     /// </summary>
@@ -204,7 +287,7 @@ public class CblController(IReadingListService readingListService, IDirectorySer
 
     private async Task<string> SaveCblFile(IFormFile file, int userId, string filename)
     {
-        var dir = Path.Join(directoryService.TempDirectory, $"{userId}", "cbl-manager-download");
+        var dir = GetCblManagerFolder(userId);
         Directory.CreateDirectory(dir);
         var outputFile = Path.Join(dir, filename);
         await using var stream = System.IO.File.Create(outputFile);
@@ -215,7 +298,7 @@ public class CblController(IReadingListService readingListService, IDirectorySer
 
     private string SaveCblFileFromContent(string content, int userId, string filename)
     {
-        var dir = Path.Join(directoryService.TempDirectory, $"{userId}", "cbl-manager-download");
+        var dir = GetCblManagerFolder(userId);
         Directory.CreateDirectory(dir);
         var outputFile = Path.Join(dir, filename);
         System.IO.File.WriteAllText(outputFile, content);
@@ -230,5 +313,10 @@ public class CblController(IReadingListService readingListService, IDirectorySer
         await file.CopyToAsync(stream);
         stream.Close();
         return ReadingListService.LoadCblFromPath(outputFile);
+    }
+
+    private string GetCblManagerFolder(int userId)
+    {
+        return Path.Join(directoryService.TempDirectory, $"{userId}", "cbl-manager-download");
     }
 }

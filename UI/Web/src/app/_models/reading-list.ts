@@ -25,6 +25,15 @@ export interface ReadingListItem {
   summary?: string;
 }
 
+export enum ReadingListProvider {
+  /** Default, List created within Kavita. No Sync capabilities */
+  None = 0,
+  /** Created by File upload. No Sync capabilities */
+  File = 1,
+  /** Downloaded via CBL Manager or direct Url feed */
+  Url = 2
+}
+
 export interface ReadingList extends IHasCover {
   id: number;
   title: string;
@@ -44,6 +53,15 @@ export interface ReadingList extends IHasCover {
   endingMonth: number;
   itemCount: number;
   ageRating: AgeRating;
+
+  sourcePath: string | null;
+  downloadUrl: string | null;
+  shareUrl: string | null;
+  provider: ReadingListProvider;
+  lastSyncCheckUtc: Date | null;
+  lastSyncedDate: Date | null;
+  canSync: boolean;
+  hasRemoteChange: boolean;
 }
 
 export interface ReadingListInfo extends IHasReadingTime, IHasReadingTime {

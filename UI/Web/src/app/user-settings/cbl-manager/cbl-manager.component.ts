@@ -16,12 +16,13 @@ import {NgTemplateOutlet} from "@angular/common";
 import {FileSystemFileEntry, NgxFileDropEntry, NgxFileDropModule} from "ngx-file-drop";
 import {ReadingListService} from "../../_services/reading-list.service";
 import {ReadingList} from "../../_models/reading-list";
-import {ThemeProvider} from "../../_models/preferences/site-theme";
 import {LoadingComponent} from "../../shared/loading/loading.component";
 import {TranslocoDirective} from "@jsverse/transloco";
 import {BrowseCblRepoModalComponent} from "../_modals/browse-cbl-repo-modal/browse-cbl-repo-modal.component";
-import {CblService} from "../../_services/cbl.service";
-import {CblRepoItem} from "../../_models/reading-list/cbl/cbl-repo-item";
+import {CblService} from '../../_services/cbl.service';
+import {CblRepoItem} from '../../_models/reading-list/cbl/cbl-repo-item';
+import {CblImportResult} from '../../_models/reading-list/cbl/cbl-import-result.enum';
+import {FormControl, FormGroup, ReactiveFormsModule} from '@angular/forms';
 
 @Component({
   selector: 'app-cbl-manager',
@@ -29,7 +30,8 @@ import {CblRepoItem} from "../../_models/reading-list/cbl/cbl-repo-item";
     NgTemplateOutlet,
     NgxFileDropModule,
     LoadingComponent,
-    TranslocoDirective
+    TranslocoDirective,
+    ReactiveFormsModule
   ],
   templateUrl: './cbl-manager.component.html',
   styleUrl: './cbl-manager.component.scss',
@@ -45,8 +47,11 @@ export class CblManagerComponent implements OnInit {
   private readonly readingListService = inject(ReadingListService);
   private readonly cblService = inject(CblService);
 
+  form = new FormGroup({
+    cblUrl: new FormControl('', [])
+  });
   files: NgxFileDropEntry[] = [];
-  acceptableExtensions = ['.css'].join(',');
+  acceptableExtensions = ['.cbl', '.json'].join(',');
   uploadMode = signal<'file' | 'url' | 'all'>('all');
   isUploadingCbl = signal<boolean>(false);
   allLists = signal<ReadingList[]>([]);
@@ -92,17 +97,49 @@ export class CblManagerComponent implements OnInit {
       const fileEntry = droppedFile.fileEntry as FileSystemFileEntry;
 
       fileEntry.file((file: File) => {
-        this.isUploadingCbl.set(false);
-        // this.themeService.uploadTheme(file, droppedFile).subscribe(t => {
-        //   this.isUploadingTheme = false;
-        //   this.downloadedThemes.push(t);
-        //   this.selectTheme(t);
-        //   this.cdRef.markForCheck();
-        // });
+        this.cblService.importFromFile(file, droppedFile).subscribe({
+          next: (summary) => {
+            if (summary.success === CblImportResult.Fail) {
+              this.toastr.error('Failed to import CBL file');
+            } else {
+              this.toastr.success('Imported reading list from file');
+            }
+            this.isUploadingCbl.set(false);
+            this.files = [];
+            this.refreshLists();
+          },
+          error: () => {
+            this.toastr.error('Failed to upload CBL file');
+            this.isUploadingCbl.set(false);
+            this.files = [];
+          }
+        });
       });
     }
   }
 
+  uploadFromUrl() {
+    const url = this.form.get('cblUrl')?.value?.trim();
+    if (!url) return;
 
-  protected readonly ThemeProvider = ThemeProvider;
+    this.isUploadingCbl.set(true);
+    this.cblService.importFromUrl(url).subscribe({
+      next: (summary) => {
+        // TODO: I will hook this up with the importer modal next, temp code
+        this.form.get('cblUrl')!.setValue('');
+        this.isUploadingCbl.set(false);
+        this.refreshLists();
+      },
+      error: () => {
+        this.toastr.error('Failed to download CBL file');
+        this.isUploadingCbl.set(false);
+      }
+    });
+  }
+
+  private refreshLists() {
+    this.readingListService.getReadingLists(false).subscribe(lists => {
+      this.allLists.set(lists.result);
+    });
+  }
 }

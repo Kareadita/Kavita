@@ -1,6 +1,6 @@
 ﻿namespace Kavita.Models.DTOs.Uploads;
 
-public sealed record UploadFileDto
+public sealed record UploadCoverFileDto
 {
     /// <summary>
     /// Id of the Entity
