@@ -46,7 +46,7 @@ jobs:
           dotnet tool install Swashbuckle.AspNetCore.Cli --version ${{ steps.swashbuckle-version.outputs.VERSION }}
 
       - name: Generate OpenAPI file
-        run: dotnet swagger tofile --output openapi.json ./build-output/API.dll v1
+        run: dotnet swagger tofile --output openapi.json ./build-output/Kavita.Server.dll v1
 
       - name: Check for changes
         id: git-check
