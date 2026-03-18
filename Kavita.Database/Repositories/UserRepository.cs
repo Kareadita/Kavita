@@ -225,7 +225,7 @@ public class UserRepository(DataContext context, UserManager<AppUser> userManage
             .ToListAsync(ct);
     }
 
-    public async Task<bool> HasAccessToLibrary(int libraryId, int userId, CancellationToken ct = default)
+    public async Task<bool> HasAccessToLibrary(int userId, int libraryId, CancellationToken ct = default)
     {
         return await context.Library
             .Include(l => l.AppUsers)
