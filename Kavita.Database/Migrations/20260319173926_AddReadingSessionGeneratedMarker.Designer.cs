@@ -14,7 +14,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Kavita.Database.Migrations
 {
     [DbContext(typeof(DataContext))]
-    [Migration("20260318125856_AddReadingSessionGeneratedMarker")]
+    [Migration("20260319173926_AddReadingSessionGeneratedMarker")]
     partial class AddReadingSessionGeneratedMarker
     {
         /// <inheritdoc />
@@ -1494,13 +1494,13 @@ namespace Kavita.Database.Migrations
                     b.Property<DateTime?>("EndTimeUtc")
                         .HasColumnType("TEXT");
 
-                    b.Property<bool>("Generated")
-                        .HasColumnType("INTEGER");
-
                     b.Property<bool>("IsActive")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER")
                         .HasDefaultValue(true);
+
+                    b.Property<bool>("IsGenerated")
+                        .HasColumnType("INTEGER");
 
                     b.Property<DateTime>("LastModified")
                         .HasColumnType("TEXT");

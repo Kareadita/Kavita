@@ -143,7 +143,7 @@ public sealed class ReadingSessionService : IReadingSessionService, IDisposable,
                 {
                     AppUserId = userId,
                     IsActive = false,
-                    Generated = true,
+                    IsGenerated = true,
                     ActivityData = []
                 };
 

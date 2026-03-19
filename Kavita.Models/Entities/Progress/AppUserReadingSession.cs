@@ -21,7 +21,7 @@ public class AppUserReadingSession : IEntityDate
     /// <summary>
     /// True if the session was generated and not from progress events. (I.e. mark as read)
     /// </summary>
-    public bool Generated { get; set; } = false;
+    public bool IsGenerated { get; set; } = false;
     /// <summary>
     /// Actual activity data recorded during the session
     /// </summary>
