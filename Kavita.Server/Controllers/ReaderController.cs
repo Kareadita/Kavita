@@ -309,13 +309,13 @@ public class ReaderController(ICacheService cacheService,
 
         await readerService.MarkChaptersAsRead(user, dto.SeriesId, [chapter]);
 
+        await unitOfWork.CommitAsync();
+
         if (dto.GenerateReadingSession)
         {
             BackgroundJob.Enqueue<IReadingSessionService>(s
                 => s.GenerateReadingSessionForChapters(UserId, dto.SeriesId, progressDictionary, CancellationToken.None));
         }
-
-        await unitOfWork.CommitAsync();
 
         return Ok();
     }
