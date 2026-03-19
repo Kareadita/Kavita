@@ -137,13 +137,22 @@ public class ScannerService(
 
         // This is basically rework of what's already done in Library Watcher but is needed if invoked via API
         var parentDirectory = directoryService.GetParentDirectoryName(folder);
-        if (string.IsNullOrEmpty(parentDirectory)) return;
+        if (string.IsNullOrEmpty(parentDirectory))
+        {
+            logger.LogWarning("[ScannerService] Scan folder invoked for {Folder} but parent directory is empty. Dropping request", folder);
+            return;
+        }
 
         var libraries = (await unitOfWork.LibraryRepository.GetLibraryDtosAsync()).ToList();
         var libraryFolders = libraries.SelectMany(l => l.Folders);
         var libraryFolder = libraryFolders.Select(Parser.Normalize).FirstOrDefault(f => f.Contains(parentDirectory));
 
-        if (string.IsNullOrEmpty(libraryFolder)) return;
+        if (string.IsNullOrEmpty(libraryFolder))
+        {
+            logger.LogWarning("[ScannerService] Scan folder invoked for {Folder} but no matching library found. Dropping request", folder);
+            return;
+        }
+
         var library = libraries.Find(l => l.Folders.Select(Parser.NormalizePath).Contains(libraryFolder));
 
         if (library != null)
