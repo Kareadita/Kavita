@@ -35,6 +35,7 @@ import {
   DatatableRowDetailTemplateDirective,
 } from '@siemens/ngx-datatable';
 import {NgbTooltip} from '@ng-bootstrap/ng-bootstrap';
+import {CdkScrollable} from '@angular/cdk/scrolling';
 
 export interface CblIssueRow {
   result: CblBookResult;
@@ -60,6 +61,7 @@ export interface CblIssueRow {
     DatatableRowDetailDirective,
     DatatableRowDetailTemplateDirective,
     NgbTooltip,
+    CdkScrollable,
   ],
   templateUrl: './import-cbl-modal.component.html',
   styleUrl: './import-cbl-modal.component.scss',
@@ -318,6 +320,7 @@ export class ImportCblModalComponent implements OnInit {
     settings.selectionCompareFn = (a: SearchResult, b: SearchResult) => {
       return a.seriesId === b.seriesId;
     };
+    settings.dropdownPosition = 'body';
 
     return settings;
   }
@@ -353,6 +356,7 @@ export class ImportCblModalComponent implements OnInit {
     settings.selectionCompareFn = (a: Chapter, b: Chapter) => {
       return a.id === b.id;
     };
+    settings.dropdownPosition = 'body';
 
     return settings;
   }

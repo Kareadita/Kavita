@@ -72,6 +72,11 @@ export class TypeaheadSettings<T> {
      * An optional, but recommended trackby identity function to help Angular render the list better
      */
     trackByIdentityFn!: (index: number, value: T) => string;
+    /**
+     * Where to render the dropdown. 'relative' (default) uses position: absolute within the form.
+     * 'body' renders via CDK overlay attached to the document body, avoiding overflow: hidden clipping.
+     */
+    dropdownPosition: 'relative' | 'body' = 'relative';
 }
 
 /**

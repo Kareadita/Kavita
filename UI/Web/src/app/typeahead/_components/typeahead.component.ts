@@ -17,6 +17,7 @@ import {
   TemplateRef,
   viewChild
 } from '@angular/core';
+import {CdkConnectedOverlay, CdkOverlayOrigin, ConnectedPosition, ScrollStrategy, ScrollStrategyOptions} from '@angular/cdk/overlay';
 import {FormControl, FormGroup, ReactiveFormsModule} from '@angular/forms';
 import {Observable, ReplaySubject} from 'rxjs';
 import {auditTime, filter, map, shareReplay, switchMap, take, tap} from 'rxjs/operators';
@@ -29,7 +30,7 @@ import {SelectionModel} from "../_models/selection-model";
 
 @Component({
   selector: 'app-typeahead',
-  imports: [TagBadgeComponent, ReactiveFormsModule, TranslocoDirective, AsyncPipe, NgTemplateOutlet, NgClass],
+  imports: [TagBadgeComponent, ReactiveFormsModule, TranslocoDirective, AsyncPipe, NgTemplateOutlet, NgClass, CdkConnectedOverlay, CdkOverlayOrigin],
   templateUrl: './typeahead.component.html',
   styleUrls: ['./typeahead.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
@@ -69,8 +70,20 @@ export class TypeaheadComponent implements OnInit {
 
 
   readonly inputElem = viewChild.required<ElementRef<HTMLInputElement>>('input');
+  readonly triggerEl = viewChild.required<ElementRef<HTMLDivElement>>('triggerEl');
   readonly optionTemplate = contentChild.required<TemplateRef<any>>('optionItem');
   readonly badgeTemplate = contentChild.required<TemplateRef<any>>('badgeItem');
+
+  protected triggerWidth = 0;
+  protected readonly overlayPositions: ConnectedPosition[] = [
+    { originX: 'start', originY: 'bottom', overlayX: 'start', overlayY: 'top' },
+    { originX: 'start', originY: 'top', overlayX: 'start', overlayY: 'bottom' },
+  ];
+  protected readonly repositionScrollStrategy: ScrollStrategy = inject(ScrollStrategyOptions).reposition();
+
+  get useOverlay(): boolean {
+    return this.settings?.dropdownPosition === 'body';
+  }
 
   optionSelection!: SelectionModel<any>;
 
@@ -335,6 +348,9 @@ export class TypeaheadComponent implements OnInit {
     setTimeout(() => {
       this.typeaheadControl.setValue(this.typeaheadControl.value);
       this.hasFocus = true;
+      if (this.useOverlay) {
+        this.triggerWidth = this.triggerEl().nativeElement.getBoundingClientRect().width;
+      }
     });
   }
 
@@ -356,6 +372,9 @@ export class TypeaheadComponent implements OnInit {
 
       inputElem.nativeElement.focus();
       this.hasFocus = true;
+      if (this.useOverlay) {
+        this.triggerWidth = this.triggerEl().nativeElement.getBoundingClientRect().width;
+      }
     }
 
 

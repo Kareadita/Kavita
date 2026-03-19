@@ -1,7 +1,7 @@
 <ng-container *transloco="let t; prefix:'typeahead'">
   @if(settings) {
     <form [formGroup]="typeaheadForm">
-      <div class="input-group {{hasFocus ? 'open': ''}} {{locked ? 'lock-active' : ''}}">
+      <div class="input-group {{hasFocus ? 'open': ''}} {{locked ? 'lock-active' : ''}}" #triggerEl cdkOverlayOrigin #trigger="cdkOverlayOrigin">
         @if (settings.showLocked) {
           <span class="input-group-text clickable" (click)="toggleLock($event)"><i class="fa fa-lock" aria-hidden="true"></i>
           <span class="visually-hidden">{{t('locked-field')}}</span>
@@ -39,35 +39,56 @@
         </div>
       </div>
 
-      @if (filteredOptions | async; as options) {
-        @if (hasFocus) {
-          <div class="dropdown"
-               animate.enter="slide-in-from-top"
-               animate.leave="slide-out-to-top">
-            <ul class="list-group results" #results>
-              @if (showAddItem) {
-                <li class="list-group-item add-item" role="option" (mouseenter)="focusedIndex = 0; updateHighlight();" (click)="addNewItem(typeaheadControl.value)">
-                  {{t('add-item', {item: typeaheadControl.value})}}
-                </li>
-              }
+      <!-- Dropdown content template -->
+      <ng-template #dropdownContent let-options>
+        <div class="dropdown" [class.dropdown-overlay]="useOverlay"
+             animate.enter="slide-in-from-top"
+             animate.leave="slide-out-to-top">
+          <ul class="list-group results" #results>
+            @if (showAddItem) {
+              <li class="list-group-item add-item" role="option" (mouseenter)="focusedIndex = 0; updateHighlight();" (click)="addNewItem(typeaheadControl.value)">
+                {{t('add-item', {item: typeaheadControl.value})}}
+              </li>
+            }
 
-              @for(option of options; track settings.trackByIdentityFn(index, option); let index = $index) {
-                <li (click)="handleOptionClick(option)"
-                    class="list-group-item" role="option" [attr.data-index]="index"
-                    (mouseenter)="focusedIndex = index + (showAddItem ? 1 : 0); updateHighlight();">
-                  <ng-container [ngTemplateOutlet]="optionTemplate()" [ngTemplateOutletContext]="{ $implicit: option, idx: index, value:  typeaheadControl.value }" />
-                </li>
-              }
+            @for(option of options; track settings.trackByIdentityFn(index, option); let index = $index) {
+              <li (click)="handleOptionClick(option)"
+                  class="list-group-item" role="option" [attr.data-index]="index"
+                  (mouseenter)="focusedIndex = index + (showAddItem ? 1 : 0); updateHighlight();">
+                <ng-container [ngTemplateOutlet]="optionTemplate()" [ngTemplateOutletContext]="{ $implicit: option, idx: index, value:  typeaheadControl.value }" />
+              </li>
+            }
 
-              @if (options.length === 0 && !showAddItem) {
-                <li class="list-group-item no-hover" role="listitem">
-                  {{t('no-data')}}{{settings.addIfNonExisting ? t('add-custom-item') : ''}}
-                </li>
-              }
-            </ul>
-          </div>
+            @if (options.length === 0 && !showAddItem) {
+              <li class="list-group-item no-hover" role="listitem">
+                {{t('no-data')}}{{settings.addIfNonExisting ? t('add-custom-item') : ''}}
+              </li>
+            }
+          </ul>
+        </div>
+      </ng-template>
+
+      <!-- Relative mode (default) -->
+      @if (!useOverlay) {
+        @if (filteredOptions | async; as options) {
+          @if (hasFocus) {
+            <ng-container *ngTemplateOutlet="dropdownContent; context: { $implicit: options }" />
+          }
         }
       }
+
+      <!-- Body/overlay mode -->
+      <ng-template cdkConnectedOverlay
+        [cdkConnectedOverlayOrigin]="trigger"
+        [cdkConnectedOverlayOpen]="hasFocus && useOverlay"
+        [cdkConnectedOverlayWidth]="triggerWidth"
+        [cdkConnectedOverlayPositions]="overlayPositions"
+        [cdkConnectedOverlayPush]="true"
+        [cdkConnectedOverlayScrollStrategy]="repositionScrollStrategy">
+        @if (filteredOptions | async; as options) {
+          <ng-container *ngTemplateOutlet="dropdownContent; context: { $implicit: options }" />
+        }
+      </ng-template>
     </form>
   }
 </ng-container>

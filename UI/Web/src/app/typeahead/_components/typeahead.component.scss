@@ -127,6 +127,10 @@ input {
   overflow: auto;
 }
 
+.dropdown-overlay {
+  position: static;
+}
+
 .slide-in-from-top {
   animation: slideDown 200ms ease-out;
 }

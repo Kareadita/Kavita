@@ -11,7 +11,8 @@
     <button type="button" class="btn-close" [attr.aria-label]="t('close')" (click)="dismiss()"></button>
   </div>
 
-  <div class="modal-body">
+  <!--cdkScrollable is to ensure when we scroll the modal, the typeahead option keeps up-->
+  <div class="modal-body" cdkScrollable>
     @if (isProcessing()) {
       <div class="text-center py-4">
         <app-loading [loading]="true" />
