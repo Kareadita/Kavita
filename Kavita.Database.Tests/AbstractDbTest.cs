@@ -68,6 +68,7 @@ public abstract class AbstractDbTest(ITestOutputHelper testOutputHelper): Abstra
             directoryService.BackupDirectory.Returns(BackupDirectory);
 
             await Seed.SeedSettings(context, directoryService);
+            context.ChangeTracker.Clear();
 
             var cacheSetting = await context.ServerSetting.Where(s => s.Key == ServerSettingKey.CacheDirectory).SingleAsync();
             cacheSetting.Value = CacheDirectory;
