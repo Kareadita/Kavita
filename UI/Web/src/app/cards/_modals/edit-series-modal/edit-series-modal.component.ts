@@ -514,13 +514,13 @@ export class EditSeriesModalComponent implements OnInit {
       model.language = this.metadata.language;
     }
 
-    if (selectedIndex > 0 || this.coverImageReset) {
-      apis.push(this.uploadService.updateSeriesCoverImage(model.id, this.selectedCover, !this.coverImageReset));
-    }
-
     apis.push(this.seriesService.updateSeries(model).pipe(
       tap(result => updatedSeries = result)
     ));
+
+    if (selectedIndex > 0 || this.coverImageReset) {
+      apis.push(this.uploadService.updateSeriesCoverImage(model.id, this.selectedCover, !this.coverImageReset));
+    }
 
     this.saveNestedComponents.emit();
 
