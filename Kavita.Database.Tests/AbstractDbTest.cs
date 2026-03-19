@@ -69,19 +69,19 @@ public abstract class AbstractDbTest(ITestOutputHelper testOutputHelper): Abstra
 
             await Seed.SeedSettings(context, directoryService);
 
-            var setting = await context.ServerSetting.Where(s => s.Key == ServerSettingKey.CacheDirectory).SingleAsync();
-            setting.Value = CacheDirectory;
+            var cacheSetting = await context.ServerSetting.Where(s => s.Key == ServerSettingKey.CacheDirectory).SingleAsync();
+            cacheSetting.Value = CacheDirectory;
 
-            setting = await context.ServerSetting.Where(s => s.Key == ServerSettingKey.BackupDirectory).SingleAsync();
-            setting.Value = BackupDirectory;
+            var backupSetting = await context.ServerSetting.Where(s => s.Key == ServerSettingKey.BackupDirectory).SingleAsync();
+            backupSetting.Value = BackupDirectory;
 
-            setting = await context.ServerSetting.Where(s => s.Key == ServerSettingKey.BookmarkDirectory).SingleAsync();
-            setting.Value = BookmarkDirectory;
+            var bookmarkSetting = await context.ServerSetting.Where(s => s.Key == ServerSettingKey.BookmarkDirectory).SingleAsync();
+            bookmarkSetting.Value = BookmarkDirectory;
 
-            setting = await context.ServerSetting.Where(s => s.Key == ServerSettingKey.TotalLogs).SingleAsync();
-            setting.Value = "10";
+            var logSetting = await context.ServerSetting.Where(s => s.Key == ServerSettingKey.TotalLogs).SingleAsync();
+            logSetting.Value = "10";
 
-            context.ServerSetting.Update(setting);
+            await context.SaveChangesAsync();
 
 
             context.Library.Add(new LibraryBuilder("Manga")
