@@ -402,7 +402,6 @@
         "errored": "Hi ha un error de codificació en el filtre. Cal recrear-lo."
     },
     "customize-dashboard-modal": {
-        "smart-filters": "Filtres intel·ligents",
         "title-smart-filters": "Filtres intel·ligents"
     },
     "import-cbl-modal": {

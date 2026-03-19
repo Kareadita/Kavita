@@ -3,7 +3,7 @@
         <TargetFramework>net10.0</TargetFramework>
         <Company>kavitareader.com</Company>
         <Product>Kavita</Product>
-        <AssemblyVersion>0.8.9.20</AssemblyVersion>
+        <AssemblyVersion>0.8.9.21</AssemblyVersion>
         <NeutralLanguage>en</NeutralLanguage>
         <TieredPGO>true</TieredPGO>
     </PropertyGroup>

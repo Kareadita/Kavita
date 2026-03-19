@@ -36,7 +36,7 @@ jobs:
       - name: Get Swashbuckle version
         id: swashbuckle-version
         run: |
-          VERSION=$(grep -o '<PackageReference Include="Swashbuckle.AspNetCore" Version="[^"]*"' Kavita.Server/Kavita.Server.csproj | grep -o 'Version="[^"]*"' | cut -d'"' -f2)
+          VERSION=$(grep -o '<PackageReference Include="Swashbuckle.AspNetCore" Version="[^"]*"' Kavita.Services/Kavita.Services.csproj | grep -o 'Version="[^"]*"' | cut -d'"' -f2)
           echo "VERSION=$VERSION" >> $GITHUB_OUTPUT
           echo "Found Swashbuckle.AspNetCore version: $VERSION"
 
