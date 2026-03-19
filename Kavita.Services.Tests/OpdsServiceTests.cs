@@ -24,6 +24,7 @@ using Kavita.Models.Entities.ReadingLists;
 using Kavita.Models.Entities.User;
 using Kavita.Services.Builders;
 using Kavita.Services.Reading;
+using Kavita.Services.ReadingLists;
 using Kavita.Services.Scanner;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Logging;

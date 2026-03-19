@@ -10,11 +10,9 @@ using Kavita.Common.Extensions;
 using Kavita.Database;
 using Kavita.Models.Constants;
 using Kavita.Models.DTOs.ReadingLists.CBL;
-using Kavita.Models.DTOs.ReadingLists.CBL.V1;
 using Kavita.Models.Entities.Enums.ReadingList;
 using Kavita.Models.Entities.ReadingLists;
 using Kavita.Server.Attributes;
-using Kavita.Services.Reading;
 using Flurl.Http;
 using Kavita.Models.DTOs.ReadingLists.CBL.Import;
 using Kavita.Models.DTOs.ReadingLists.CBL.RemapRules;
@@ -378,16 +376,6 @@ public class CblController(IReadingListService readingListService, IDirectorySer
         var outputFile = Path.Join(dir, filename);
         System.IO.File.WriteAllText(outputFile, content);
         return outputFile;
-    }
-
-    private async Task<CblReadingList> SaveAndLoadCblFile(IFormFile file)
-    {
-        var filename = Path.GetRandomFileName();
-        var outputFile = Path.Join(directoryService.TempDirectory, filename);
-        await using var stream = System.IO.File.Create(outputFile);
-        await file.CopyToAsync(stream);
-        stream.Close();
-        return ReadingListService.LoadCblFromPath(outputFile);
     }
 
     private string GetCblManagerFolder(int userId)

@@ -12,8 +12,6 @@ using Kavita.Models.Builders;
 using Kavita.Models.DTOs.ReadingLists.CBL;
 using Kavita.Models.DTOs.ReadingLists.CBL.Import;
 using Kavita.Models.DTOs.ReadingLists.CBL.Internal;
-using Kavita.Models.Entities;
-using Kavita.Models.Entities.Enums.ReadingList;
 using Kavita.Models.Entities.ReadingLists;
 using Kavita.Services.Helpers;
 using Microsoft.Extensions.Logging;
