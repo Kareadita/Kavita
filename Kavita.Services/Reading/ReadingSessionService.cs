@@ -96,33 +96,7 @@ public sealed class ReadingSessionService : IReadingSessionService, IDisposable,
         }
     }
 
-    public async Task GenerateReadingSessionForSeries(int userId, int seriesId, CancellationToken ct = default)
-    {
-        using var scope = _serviceScopeFactory.CreateScope();
-        var context = scope.ServiceProvider.GetRequiredService<IDataContext>();
-
-        var chapters = await context.Chapter
-            .Where(cp => cp.Volume.SeriesId == seriesId)
-            .Select(cp => cp.Id)
-            .ToListAsync(ct);
-
-        await GenerateReadingSessionForChapters(userId, seriesId, chapters, ct);
-    }
-
-    public async Task GenerateReadingSessionForVolumes(int userId, int seriesId, List<int> volumeIds, CancellationToken ct = default)
-    {
-        using var scope = _serviceScopeFactory.CreateScope();
-        var context = scope.ServiceProvider.GetRequiredService<IDataContext>();
-
-        var chapters = await context.Chapter
-            .Where(cp => volumeIds.Contains(cp.VolumeId) && cp.Volume.SeriesId == seriesId)
-            .Select(cp => cp.Id)
-            .ToListAsync(ct);
-
-        await GenerateReadingSessionForChapters(userId, seriesId, chapters, ct);
-    }
-
-    public async Task GenerateReadingSessionForChapters(int userId, int seriesId, List<int> chapterIds, CancellationToken ct = default)
+    public async Task GenerateReadingSessionForChapters(int userId, int seriesId, Dictionary<int, int> chaptersMap, CancellationToken ct = default)
     {
         using var scope = _serviceScopeFactory.CreateScope();
 
@@ -133,6 +107,8 @@ public sealed class ReadingSessionService : IReadingSessionService, IDisposable,
         var series = await context.Series.FirstOrDefaultAsync(s => s.Id == seriesId, ct);
         if (series == null) throw new KavitaNotFoundException();
 
+        var chapterIds = chaptersMap.Keys.ToList();
+
         var chapters = await context.Chapter
             .Where(cp => chapterIds.Contains(cp.Id) && cp.Volume.SeriesId == seriesId)
             .OrderByDescending(cp => cp.SortOrder)
@@ -142,7 +118,9 @@ public sealed class ReadingSessionService : IReadingSessionService, IDisposable,
         Dictionary<int, HourEstimateRangeDto> estimatedHoursByChapter = [];
         foreach (var chapterId in chapters.Select(cp => cp.Id))
         {
-            estimatedHoursByChapter[chapterId] = await readerService.GetEstimateToCompletionForChapter(userId, seriesId, chapterId);
+            var page = chaptersMap[chapterId];
+            estimatedHoursByChapter[chapterId] = await readerService
+                .GetEstimateFromPageForChapter(userId, seriesId, chapterId, page);
         }
 
         var chapterSchedule = ScheduleChapters(estimatedHoursByChapter, DateTime.Now);

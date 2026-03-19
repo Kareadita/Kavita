@@ -143,10 +143,10 @@ public class ReadingSessionServiceBackfillTests(ITestOutputHelper helper): Abstr
         await context.SaveChangesAsync();
 
         // Return no estimate for chapter 1
-        readerService.GetEstimateToCompletionForChapter(1, 1, 1)
+        readerService.GetEstimateFromPageForChapter(1, 1, 1, 0)
             .Returns(AvgEstimate(0f));
 
-        await readingSessionService.GenerateReadingSessionForChapters(1, 1, [1]);
+        await readingSessionService.GenerateReadingSessionForChapters(1, 1, new Dictionary<int, int> { { 1, 0 }});
 
         Assert.Empty(await context.AppUserReadingSession.ToListAsync());
     }
@@ -179,13 +179,17 @@ public class ReadingSessionServiceBackfillTests(ITestOutputHelper helper): Abstr
         var ch1 = series.Volumes[0].Chapters.First(c => c.SortOrder == 1);
         var ch2 = series.Volumes[0].Chapters.First(c => c.SortOrder == 2);
 
-        readerService.GetEstimateToCompletionForChapter(1, series.Id, ch1.Id)
+        readerService.GetEstimateFromPageForChapter(1, series.Id, ch1.Id, 0)
             .Returns(AvgEstimate(1f, 10)); // 1 hour
-        readerService.GetEstimateToCompletionForChapter(1, series.Id, ch2.Id)
+        readerService.GetEstimateFromPageForChapter(1, series.Id, ch2.Id, 0)
             .Returns(AvgEstimate(1f, 10)); // 1 hour
 
         var user = await context.AppUser.FirstAsync();
-        await readingSessionService.GenerateReadingSessionForChapters(user.Id, series.Id, [ch1.Id, ch2.Id]);
+        await readingSessionService.GenerateReadingSessionForChapters(user.Id, series.Id, new Dictionary<int, int>
+        {
+            { ch1.Id, 0 },
+            { ch2.Id, 0 },
+        });
 
         var session = await context.AppUserReadingSession.SingleAsync();
 
@@ -227,13 +231,17 @@ public class ReadingSessionServiceBackfillTests(ITestOutputHelper helper): Abstr
         const float ch1Hours = 2f;
         const float ch2Hours = 3f;
 
-        readerService.GetEstimateToCompletionForChapter(1, series.Id, ch1.Id)
+        readerService.GetEstimateFromPageForChapter(1, series.Id, ch1.Id, 0)
             .Returns(AvgEstimate(ch1Hours, 100));
-        readerService.GetEstimateToCompletionForChapter(1, series.Id, ch2.Id)
+        readerService.GetEstimateFromPageForChapter(1, series.Id, ch2.Id, 0)
             .Returns(AvgEstimate(ch2Hours, 100));
 
         var user = await context.AppUser.FirstAsync();
-        await readingSessionService.GenerateReadingSessionForChapters(user.Id, series.Id, [ch1.Id, ch2.Id]);
+        await readingSessionService.GenerateReadingSessionForChapters(user.Id, series.Id, new Dictionary<int, int>
+        {
+            { ch1.Id, 0 },
+            { ch2.Id, 0 },
+        });
 
         var session = await context.AppUserReadingSession.SingleAsync();
 
@@ -274,13 +282,17 @@ public class ReadingSessionServiceBackfillTests(ITestOutputHelper helper): Abstr
         var ch1 = series.Volumes[0].Chapters.First(c => c.SortOrder == 1);
         var ch2 = series.Volumes[0].Chapters.First(c => c.SortOrder == 2);
 
-        readerService.GetEstimateToCompletionForChapter(1, series.Id, ch1.Id)
+        readerService.GetEstimateFromPageForChapter(1, series.Id, ch1.Id, 0)
             .Returns(AvgEstimate(13f, 100));
-        readerService.GetEstimateToCompletionForChapter(1, series.Id, ch2.Id)
+        readerService.GetEstimateFromPageForChapter(1, series.Id, ch2.Id, 0)
             .Returns(AvgEstimate(13f, 100));
 
         var user = await context.AppUser.FirstAsync();
-        await readingSessionService.GenerateReadingSessionForChapters(user.Id, series.Id, [ch1.Id, ch2.Id]);
+        await readingSessionService.GenerateReadingSessionForChapters(user.Id, series.Id, new Dictionary<int, int>
+        {
+            { ch1.Id, 0 },
+            { ch2.Id, 0 },
+        });
 
         var sessions = await context.AppUserReadingSession.ToListAsync();
         Assert.Equal(2, sessions.Count);

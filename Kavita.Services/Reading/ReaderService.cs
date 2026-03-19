@@ -652,6 +652,36 @@ public class ReaderService(IUnitOfWork unitOfWork, ILogger<ReaderService> logger
         return GetTimeEstimate(0, pagesLeft, false);
     }
 
+    public async Task<HourEstimateRangeDto> GetEstimateFromPageForChapter(int userId, int seriesId, int chapterId, int page)
+    {
+        var series = await unitOfWork.SeriesRepository.GetSeriesDtoByIdAsync(seriesId, userId);
+        var chapter = await unitOfWork.ChapterRepository.GetChapterDtoAsync(chapterId, userId);
+        if (series == null || chapter == null)
+            throw new KavitaException(await localizationService.Translate(userId, "generic-error"));
+
+        if (page == chapter.PagesRead) return new HourEstimateRangeDto();
+
+        if (series.Format == MangaFormat.Epub)
+        {
+            // Get the word counts for all the pages
+            var pageCounts = await bookService.GetWordCountsPerPage(chapter.Files.First().FilePath); // TODO: Cache
+            if (pageCounts == null) return GetTimeEstimate(series.WordCount, 0, true);
+
+            // Sum character counts only for pages that have been read
+            var totalCharactersRead = pageCounts
+                .Where(kvp => kvp.Key <= chapter.PagesRead && kvp.Key >= page)
+                .Sum(kvp => kvp.Value);
+
+            var progressCount = WordCountAnalyzerService.GetWordCount(totalCharactersRead);
+            var wordsRead = series.WordCount - progressCount;
+            return GetTimeEstimate(wordsRead, 0, true);
+        }
+
+        var pagesRead = Math.Max(0, chapter.PagesRead - page);
+
+        return GetTimeEstimate(0, pagesRead, false);
+    }
+
     public static HourEstimateRangeDto GetTimeEstimate(long wordCount, int pageCount, bool isEpub)
     {
         if (isEpub)

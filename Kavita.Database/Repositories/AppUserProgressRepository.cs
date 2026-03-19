@@ -261,6 +261,27 @@ public class AppUserProgressRepository(DataContext context, IMapper mapper) : IA
             .ToListAsync(ct);
     }
 
+    public Task<Dictionary<int, int>> GetUserProgressForChaptersBySeries(int userId, int seriesId, CancellationToken ct = default)
+    {
+        return context.AppUserProgresses
+            .Where(p => p.SeriesId == seriesId && p.AppUserId == userId)
+            .ToDictionaryAsync(p => p.ChapterId, p => p.PagesRead, ct);
+    }
+
+    public Task<Dictionary<int, int>> GetUserProgressForChaptersByVolumes(int userId, int seriesId, List<int> volumeIds, CancellationToken ct = default)
+    {
+        return context.AppUserProgresses
+            .Where(p => p.SeriesId == seriesId && volumeIds.Contains(p.VolumeId) && p.AppUserId == userId)
+            .ToDictionaryAsync(p => p.ChapterId, p => p.PagesRead, ct);
+    }
+
+    public Task<Dictionary<int, int>> GetUserProgressForChaptersByChapters(int userId, int seriesId, List<int> chapterIds, CancellationToken ct = default)
+    {
+        return context.AppUserProgresses
+            .Where(p => p.SeriesId == seriesId && chapterIds.Contains(p.ChapterId) && p.AppUserId == userId)
+            .ToDictionaryAsync(p => p.ChapterId, p => p.PagesRead, ct);
+    }
+
     public async Task<AppUserProgress?> GetUserProgressAsync(int chapterId, int userId, CancellationToken ct = default)
     {
         return await context.AppUserProgresses

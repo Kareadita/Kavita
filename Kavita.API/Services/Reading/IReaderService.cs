@@ -34,4 +34,5 @@ public interface IReaderService
     Task<RereadDto> CheckVolumeForReRead(int userId, int volumeId, int seriesId, int libraryId);
     Task<RereadDto> CheckChapterForReRead(int userId, int chapterId, int seriesId, int libraryId);
     Task<HourEstimateRangeDto> GetEstimateToCompletionForChapter(int userId, int seriesId, int chapterId);
+    Task<HourEstimateRangeDto> GetEstimateFromPageForChapter(int userId, int seriesId, int chapterId, int page);
 }

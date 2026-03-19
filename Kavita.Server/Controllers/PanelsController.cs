@@ -12,10 +12,11 @@ namespace Kavita.Server.Controllers;
 /// <summary>
 /// For the Panels app explicitly
 /// </summary>
-public class PanelsController(IReaderService readerService, IUnitOfWork unitOfWork, IReadingSessionService readingSessionService) : BaseApiController
+public class PanelsController(IReaderService readerService, IUnitOfWork unitOfWork) : BaseApiController
 {
     /// <summary>
-    /// Saves the progress of a given chapter.
+    /// Saves the progress of a given chapter. This will generate a reading session with the estimated time from the
+    /// last progress till the current
     /// </summary>
     /// <param name="dto"></param>
     /// <param name="apiKey"></param>
@@ -29,12 +30,14 @@ public class PanelsController(IReaderService readerService, IUnitOfWork unitOfWo
         var chapter = await unitOfWork.ChapterRepository.GetChapterAsync(dto.ChapterId);
         if (chapter == null) return NotFound();
 
-        if (dto.PageNum >= chapter.Pages)
-        {
-            await readingSessionService.GenerateReadingSessionForChapters(UserId, dto.SeriesId, [dto.ChapterId], HttpContext.RequestAborted);
-        }
+        var progressMap = await unitOfWork.AppUserProgressRepository
+            .GetUserProgressForChaptersByChapters(UserId, dto.SeriesId, [dto.ChapterId]);
 
-        await readerService.SaveReadingProgress(dto, UserId, dto.PageNum < chapter.Pages);
+        await readerService.SaveReadingProgress(dto, UserId, false);
+
+        BackgroundJob.Enqueue<IReadingSessionService>(s
+            => s.GenerateReadingSessionForChapters(UserId, dto.SeriesId, progressMap, CancellationToken.None));
+
         return Ok();
     }
 

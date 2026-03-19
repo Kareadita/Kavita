@@ -43,7 +43,7 @@ public class ReaderController(ICacheService cacheService,
     IReaderService readerService, IBookmarkService bookmarkService, IEventHub eventHub,
     IScrobblingService scrobblingService,
     ILocalizationService localizationService,
-    IBookService bookService, IReadingSessionService readingSessionService) : BaseApiController
+    IBookService bookService) : BaseApiController
 {
 
     /// <summary>
@@ -287,6 +287,11 @@ public class ReaderController(ICacheService cacheService,
         return Ok(info);
     }
 
+    /// <summary>
+    /// Mark a single chapter as read
+    /// </summary>
+    /// <param name="dto"></param>
+    /// <returns></returns>
     [HttpPost("mark-chapter-read")]
     public async Task<ActionResult> MarkChapterAsRead(MarkChapterReadDto dto)
     {
@@ -299,12 +304,16 @@ public class ReaderController(ICacheService cacheService,
         var chapter = await unitOfWork.ChapterRepository.GetChapterAsync(dto.ChapterId);
         if (chapter == null) return NotFound();
 
-        if (dto.GenerateReadingSession)
-        {
-            await readingSessionService.GenerateReadingSessionForChapters(UserId, dto.SeriesId, [dto.ChapterId], HttpContext.RequestAborted);
-        }
+        var progressDictionary = await unitOfWork.AppUserProgressRepository
+            .GetUserProgressForChaptersByChapters(UserId, dto.SeriesId, [dto.ChapterId], HttpContext.RequestAborted);
 
         await readerService.MarkChaptersAsRead(user, dto.SeriesId, [chapter]);
+
+        if (dto.GenerateReadingSession)
+        {
+            BackgroundJob.Enqueue<IReadingSessionService>(s
+                => s.GenerateReadingSessionForChapters(UserId, dto.SeriesId, progressDictionary, CancellationToken.None));
+        }
 
         await unitOfWork.CommitAsync();
 
@@ -322,13 +331,13 @@ public class ReaderController(ICacheService cacheService,
     {
         var user = await unitOfWork.UserRepository.GetUserByUsernameAsync(Username!, AppUserIncludes.Progress);
         if (user == null) return Unauthorized();
+
+
+        var progressDictionary = await unitOfWork.AppUserProgressRepository
+            .GetUserProgressForChaptersBySeries(UserId, markReadDto.SeriesId, HttpContext.RequestAborted);
+
         try
         {
-            if (markReadDto.GenerateReadingSession)
-            {
-                await readingSessionService.GenerateReadingSessionForSeries(UserId, markReadDto.SeriesId, HttpContext.RequestAborted);
-            }
-
             await readerService.MarkSeriesAsRead(user, markReadDto.SeriesId);
         }
         catch (KavitaException ex)
@@ -340,6 +349,14 @@ public class ReaderController(ICacheService cacheService,
 
         BackgroundJob.Enqueue(() => scrobblingService.ScrobbleReadingUpdate(user.Id, markReadDto.SeriesId));
         BackgroundJob.Enqueue(() => unitOfWork.SeriesRepository.ClearOnDeckRemoval(markReadDto.SeriesId, user.Id));
+
+        if (markReadDto.GenerateReadingSession)
+        {
+            BackgroundJob.Enqueue<IReadingSessionService>(s
+                => s.GenerateReadingSessionForChapters(UserId, markReadDto.SeriesId, progressDictionary, CancellationToken.None));
+        }
+
+
         return Ok();
     }
 
@@ -394,14 +411,12 @@ public class ReaderController(ICacheService cacheService,
 
         var chapters = await unitOfWork.ChapterRepository.GetChaptersAsync(markVolumeReadDto.VolumeId);
         if (user == null) return Unauthorized();
+
+        var progressDictionary = await unitOfWork.AppUserProgressRepository
+            .GetUserProgressForChaptersByVolumes(UserId, markVolumeReadDto.SeriesId, [markVolumeReadDto.VolumeId], HttpContext.RequestAborted);
+
         try
         {
-
-            if (markVolumeReadDto.GenerateReadingSession)
-            {
-                await readingSessionService.GenerateReadingSessionForVolumes(UserId, markVolumeReadDto.SeriesId, [markVolumeReadDto.VolumeId], HttpContext.RequestAborted);
-            }
-
             await readerService.MarkChaptersAsRead(user, markVolumeReadDto.SeriesId, chapters);
 
         }
@@ -419,6 +434,13 @@ public class ReaderController(ICacheService cacheService,
 
         BackgroundJob.Enqueue(() => scrobblingService.ScrobbleReadingUpdate(user.Id, markVolumeReadDto.SeriesId));
         BackgroundJob.Enqueue(() => unitOfWork.SeriesRepository.ClearOnDeckRemoval(markVolumeReadDto.SeriesId, user.Id));
+
+        if (markVolumeReadDto.GenerateReadingSession)
+        {
+            BackgroundJob.Enqueue<IReadingSessionService>(s
+                => s.GenerateReadingSessionForChapters(UserId, markVolumeReadDto.SeriesId, progressDictionary, CancellationToken.None));
+        }
+
         return Ok();
     }
 
@@ -435,16 +457,16 @@ public class ReaderController(ICacheService cacheService,
         if (user == null) return Unauthorized();
         user.Progresses ??= [];
 
-        if (dto.GenerateReadingSession)
-        {
-            await readingSessionService.GenerateReadingSessionForVolumes(UserId, dto.SeriesId, [.. dto.VolumeIds], HttpContext.RequestAborted);
-        }
-
         var chapterIds = await unitOfWork.VolumeRepository.GetChapterIdsByVolumeIds(dto.VolumeIds);
         foreach (var chapterId in dto.ChapterIds)
         {
             chapterIds.Add(chapterId);
         }
+
+        chapterIds = chapterIds.Distinct().ToList();
+
+        var progressDictionary = await unitOfWork.AppUserProgressRepository
+            .GetUserProgressForChaptersByChapters(UserId, dto.SeriesId, chapterIds.ToList(), HttpContext.RequestAborted);
 
         var chapters = await unitOfWork.ChapterRepository.GetChaptersByIdsAsync(chapterIds);
         await readerService.MarkChaptersAsRead(user, dto.SeriesId, chapters.ToList());
@@ -453,6 +475,12 @@ public class ReaderController(ICacheService cacheService,
 
         BackgroundJob.Enqueue(() => scrobblingService.ScrobbleReadingUpdate(user.Id, dto.SeriesId));
         BackgroundJob.Enqueue(() => unitOfWork.SeriesRepository.ClearOnDeckRemoval(dto.SeriesId, user.Id));
+
+        if (dto.GenerateReadingSession)
+        {
+            BackgroundJob.Enqueue<IReadingSessionService>(s
+                => s.GenerateReadingSessionForChapters(UserId, dto.SeriesId, progressDictionary, CancellationToken.None));
+        }
 
         return Ok();
     }
@@ -498,14 +526,6 @@ public class ReaderController(ICacheService cacheService,
         if (user == null) return Unauthorized();
         user.Progresses ??= new List<AppUserProgress>();
 
-        if (dto.GenerateReadingSession)
-        {
-            foreach (var sId in dto.SeriesIds)
-            {
-                await readingSessionService.GenerateReadingSessionForSeries(UserId, sId, HttpContext.RequestAborted);
-            }
-        }
-
         var volumes = await unitOfWork.VolumeRepository.GetVolumesForSeriesAsync(dto.SeriesIds.ToArray(), true);
         foreach (var volume in volumes)
         {
@@ -518,6 +538,12 @@ public class ReaderController(ICacheService cacheService,
         {
             BackgroundJob.Enqueue(() => scrobblingService.ScrobbleReadingUpdate(user.Id, sId));
             BackgroundJob.Enqueue(() => unitOfWork.SeriesRepository.ClearOnDeckRemoval(sId, user.Id));
+
+            var progressDictionary = await unitOfWork.AppUserProgressRepository
+                .GetUserProgressForChaptersBySeries(UserId, sId, HttpContext.RequestAborted);
+
+            BackgroundJob.Enqueue<IReadingSessionService>(s
+                => s.GenerateReadingSessionForChapters(UserId, sId, progressDictionary, CancellationToken.None));
         }
         return Ok();
     }
