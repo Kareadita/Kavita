@@ -8,10 +8,22 @@
     <div class="list-group list-group-flush">
       @for (rule of rules(); track rule.id) {
         <div class="list-group-item d-flex justify-content-between align-items-center py-2">
-          <div>
-            <code>{{rule.cblSeriesName || rule.normalizedCblSeriesName}}</code>
-            <i class="fa fa-arrow-right mx-2" aria-hidden="true"></i>
-            <span>{{rule.seriesNameAtMapping}}</span>
+          <div class="d-flex flex-column">
+            <div>
+              <code>{{rule.cblSeriesName || rule.normalizedCblSeriesName}}</code>
+              <i class="fa fa-arrow-right mx-2" aria-hidden="true"></i>
+              <span>{{rule.seriesNameAtMapping}}</span>
+            </div>
+            @if (rule.cblVolume || rule.cblNumber) {
+              <small class="text-muted">
+                @if (rule.cblVolume) {
+                  {{t('vol', {volume: rule.cblVolume})}}
+                }
+                @if (rule.cblNumber) {
+                  {{t('issue', {number: rule.cblNumber})}}
+                }
+              </small>
+            }
           </div>
           @if (rule.appUserId !== null) {
             <button class="btn btn-sm btn-outline-danger" (click)="deleteRule(rule)"

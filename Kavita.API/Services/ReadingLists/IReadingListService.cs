@@ -23,8 +23,6 @@ public interface IReadingListService
     Task CalculateReadingListAgeRating(ReadingList readingList);
     Task<bool> AddChaptersToReadingList(int seriesId, IList<int> chapterIds, ReadingList readingList);
 
-    Task<CblImportSummaryDto> ValidateCblFile(int userId, CblReadingList cblReading, bool useComicLibraryMatching = false);
-    Task<CblImportSummaryDto> CreateReadingListFromCbl(int userId, CblReadingList cblReading, bool dryRun = false, bool useComicLibraryMatching = false);
     Task CalculateStartAndEndDates(ReadingList readingListWithItems);
     /// <summary>
     /// This is expected to be called from ProcessSeries and has the Full Series present. Will generate on the default admin user.

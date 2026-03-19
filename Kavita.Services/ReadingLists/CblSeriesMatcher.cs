@@ -346,7 +346,7 @@ internal static class CblSeriesMatcher
         if (options.PreferComicVineMatching)
         {
             var comicFiltered = filtered.Where(s => s.Library != null &&
-                (s.Library.Type == LibraryType.Comic || s.Library.Type == LibraryType.ComicVine)).ToList();
+                s.Library.Type is LibraryType.Comic or LibraryType.ComicVine).ToList();
             if (comicFiltered.Count > 0) filtered = comicFiltered;
         }
 

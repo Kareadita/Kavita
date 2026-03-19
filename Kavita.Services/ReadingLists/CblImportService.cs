@@ -54,7 +54,13 @@ public class CblImportService(IUnitOfWork unitOfWork, ICblGithubService cblGithu
         }
 
         var matchResults = await RunMatchingPipeline(userId, cbl, options);
-        return BuildSummary(cbl, filePath, matchResults);
+        var summary = BuildSummary(cbl, filePath, matchResults);
+
+        var existingList = await unitOfWork.ReadingListRepository
+            .GetReadingListByTitleAsync(cbl.Name, userId);
+        summary.IsUpdate = existingList != null;
+
+        return summary;
     }
 
     public async Task<CblImportSummaryDto> UpsertReadingList(int userId, string filePath, CblImportOptions options, CblImportDecisions decisions)
@@ -116,6 +122,7 @@ public class CblImportService(IUnitOfWork unitOfWork, ICblGithubService cblGithu
         // Find or create reading list
         var readingList = await unitOfWork.ReadingListRepository
             .GetReadingListByTitleAsync(cbl.Name, userId);
+        var isUpdate = readingList != null;
 
         if (readingList == null)
         {
@@ -173,7 +180,9 @@ public class CblImportService(IUnitOfWork unitOfWork, ICblGithubService cblGithu
 
         await unitOfWork.CommitAsync();
 
-        return BuildSummary(cbl, filePath, matchResults);
+        var summary = BuildSummary(cbl, filePath, matchResults);
+        summary.IsUpdate = isUpdate;
+        return summary;
     }
 
     public async Task SyncReadingList(int userId, int readingListId)
@@ -181,7 +190,7 @@ public class CblImportService(IUnitOfWork unitOfWork, ICblGithubService cblGithu
         var readingList = await unitOfWork.ReadingListRepository
             .GetReadingListByIdAsync(readingListId, ReadingListIncludes.Items);
 
-        if (readingList == null || !readingList.CanSync || readingList.AppUserId != userId)
+        if (readingList is not {CanSync: true} || readingList.AppUserId != userId)
         {
             logger.LogWarning("Cannot sync reading list {ReadingListId} — not found, not syncable, or wrong user", readingListId);
             return;

@@ -1,4 +1,7 @@
+using Kavita.Models.Entities.Enums.ReadingList;
+
 namespace Kavita.Models.DTOs.ReadingLists.CBL;
+#nullable enable
 
 /// <summary>
 /// Request body for the finalize-import endpoint
@@ -7,6 +10,10 @@ public record CblFinalizeRequestDto
 {
     public string FileName { get; set; } = string.Empty;
     public CblImportDecisions Decisions { get; set; } = new();
+    /// <summary>
+    /// Import source type (File, Url, or None)
+    /// </summary>
+    public ReadingListProvider Provider { get; set; } = ReadingListProvider.None;
     /// <summary>
     /// Optional repo-relative path for sync tracking
     /// </summary>

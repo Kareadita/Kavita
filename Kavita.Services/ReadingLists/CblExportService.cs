@@ -99,13 +99,13 @@ public class CblExportService(IUnitOfWork unitOfWork, IDirectoryService director
 
             books.Add(new CblBook
             {
-                Series = item.Series.Name,
+                Series = item.Series.Name, // TODO: If this is a Series (Volume) format, strip the (Volume) part out
                 Number = item.Chapter.Range, // Range can leak internal encodings. Need to understand how to map this.
                 Volume = item.Volume.Name, // TODO: If the library is Comic type, we can try and parse from Kavita Series first. Need to test with real user files
                 Year = year,
-                Format = item.Chapter.IsSpecial ? "Annual" : string.Empty, // TODO: Confirm with CBL Group on how to handle Format
+                Format = string.Empty,
                 FileType = MapMangaFormatToFileType(item.Series.Format),
-                Database = null, // TODO: If we have ComicVine metadata id in Chapter, populate this
+                Database = null, // TODO: If we have ComicVine metadata id in Chapter, populate this (NOTE: CBL Group confirmed I can do any external metadata)
             });
         }
 

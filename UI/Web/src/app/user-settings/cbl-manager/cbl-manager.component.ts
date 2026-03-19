@@ -12,12 +12,12 @@ import {AccountService} from '../../_services/account.service';
 import {ToastrService} from 'ngx-toastr';
 import {ConfirmService} from '../../shared/confirm.service';
 import {ModalService} from '../../_services/modal.service';
-import {NgTemplateOutlet} from '@angular/common';
+import {DatePipe, NgTemplateOutlet} from '@angular/common';
 import {FileSystemFileEntry, NgxFileDropEntry, NgxFileDropModule} from 'ngx-file-drop';
 import {ReadingListService} from '../../_services/reading-list.service';
 import {ReadingList, ReadingListProvider} from '../../_models/reading-list';
 import {LoadingComponent} from '../../shared/loading/loading.component';
-import {TranslocoDirective} from '@jsverse/transloco';
+import {translate, TranslocoDirective} from '@jsverse/transloco';
 import {BrowseCblRepoModalComponent} from '../_modals/browse-cbl-repo-modal/browse-cbl-repo-modal.component';
 import {ImportCblModalComponent} from '../_modals/import-cbl-modal/import-cbl-modal.component';
 import {CblService} from '../../_services/cbl.service';
@@ -26,7 +26,12 @@ import {CblSavedFile} from '../../_models/reading-list/cbl/cbl-saved-file';
 import {FormControl, FormGroup, ReactiveFormsModule} from '@angular/forms';
 import {PromotedIconComponent} from '../../shared/_components/promoted-icon/promoted-icon.component';
 import {ReadingListProviderPipe} from '../../_pipes/reading-list-provider.pipe';
-import {forkJoin} from "rxjs";
+import {forkJoin} from 'rxjs';
+import {ImageService} from '../../_services/image.service';
+import {ReadMoreComponent} from '../../shared/read-more/read-more.component';
+import {ImageComponent} from '../../shared/image/image.component';
+import {AgeRatingPipe} from '../../_pipes/age-rating.pipe';
+import {RouterLink} from '@angular/router';
 
 @Component({
   selector: 'app-cbl-manager',
@@ -37,7 +42,12 @@ import {forkJoin} from "rxjs";
     TranslocoDirective,
     ReactiveFormsModule,
     PromotedIconComponent,
-    ReadingListProviderPipe
+    ReadingListProviderPipe,
+    ReadMoreComponent,
+    ImageComponent,
+    AgeRatingPipe,
+    RouterLink,
+    DatePipe
   ],
   templateUrl: './cbl-manager.component.html',
   styleUrl: './cbl-manager.component.scss',
@@ -53,6 +63,7 @@ export class CblManagerComponent implements OnInit {
   private readonly modalService = inject(ModalService);
   private readonly readingListService = inject(ReadingListService);
   private readonly cblService = inject(CblService);
+  protected readonly imageService = inject(ImageService);
 
   form = new FormGroup({
     cblUrl: new FormControl('', [])
@@ -168,6 +179,16 @@ export class CblManagerComponent implements OnInit {
 
   setProviderFilter(provider: ReadingListProvider | null) {
     this.providerFilter.set(this.providerFilter() === provider ? null : provider);
+  }
+
+  async deleteList(list: ReadingList) {
+    const confirmed = await this.confirmService.confirm(translate('toasts.confirm-delete-reading-list'));
+    if (!confirmed) return;
+    this.readingListService.delete(list.id).subscribe(() => {
+      this.selectedList.set(undefined);
+      this.refreshLists();
+      this.toastr.success(translate('toasts.reading-list-deleted'));
+    });
   }
 
   private openImportModal(savedFiles: CblSavedFile[]) {

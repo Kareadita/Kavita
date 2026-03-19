@@ -11,5 +11,6 @@ export interface CblImportSummary {
     fileName: string;
     results: Array<CblBookResult>;
     success: CblImportResult;
+    isUpdate: boolean;
     successfulInserts: Array<CblBookResult>;
 }

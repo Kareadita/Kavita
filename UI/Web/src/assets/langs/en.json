@@ -2094,7 +2094,13 @@
         "filter-has-update": "Has update",
         "filter-all": "All",
         "filter-local": "Local",
-        "no-results": "No matching reading lists"
+        "no-results": "No matching reading lists",
+        "add": "Add",
+        "sync": "Sync",
+        "delete": "Delete",
+        "view-list": "View Reading List",
+        "last-synced": "Last synced {{date}}",
+        "source": "Source"
     },
 
     "import-cbl-modal": {
@@ -2130,14 +2136,18 @@
         "undo": "Undo",
         "remap-rule-used": "Matched via remap rule",
         "import-success": "Successfully imported {{count}} reading list(s)",
-        "processing": "Processing..."
+        "processing": "Processing...",
+        "new-list": "New",
+        "update-list": "Update"
     },
 
     "manage-remap-rules-modal": {
         "title": "Manage Remap Rules",
         "close": "Close",
         "no-rules": "No remap rules saved",
-        "delete-rule": "Delete"
+        "delete-rule": "Delete",
+        "vol": "Vol. {{volume}}",
+        "issue": "#{{number}}"
     },
 
     "browse-cbl-repo-modal": {

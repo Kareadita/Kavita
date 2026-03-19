@@ -1,3 +1,5 @@
+using Kavita.Models.Entities.Enums.ReadingList;
+
 namespace Kavita.Models.DTOs.ReadingLists.CBL;
 #nullable enable
 
@@ -14,6 +16,10 @@ public record CblSavedFileDto
     /// Server-side filename in cbl-manager-download/
     /// </summary>
     public string FileName { get; set; } = string.Empty;
+    /// <summary>
+    /// Import source type (File, Url, or None)
+    /// </summary>
+    public ReadingListProvider Provider { get; set; } = ReadingListProvider.None;
     /// <summary>
     /// Repo-relative path (null for file/URL sources)
     /// </summary>

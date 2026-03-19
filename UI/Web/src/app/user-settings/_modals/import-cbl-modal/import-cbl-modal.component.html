@@ -20,7 +20,14 @@
       </div>
     } @else if (currentSummary(); as summary) {
       <!-- File name -->
-      <h5 class="mb-3">{{summary.cblName || currentFile().name}}</h5>
+      <h5 class="mb-3">
+        {{summary.cblName || currentFile().name}}
+        @if (summary.isUpdate) {
+          <span class="badge bg-info ms-2">{{t('update-list')}}</span>
+        } @else {
+          <span class="badge bg-success ms-2">{{t('new-list')}}</span>
+        }
+      </h5>
 
       <!-- Summary bar -->
       <div class="d-flex gap-3 mb-3">

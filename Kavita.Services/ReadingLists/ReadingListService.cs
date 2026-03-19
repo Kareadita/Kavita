@@ -534,62 +534,62 @@ public class ReadingListService(
     /// <param name="userId"></param>
     /// <param name="cblReading"></param>
     /// <param name="useComicLibraryMatching">When true, will force ComicVine library naming conventions: Series (Year) for Series name matching.</param>
-    public async Task<CblImportSummaryDto> ValidateCblFile(int userId, CblReadingList cblReading, bool useComicLibraryMatching = false)
-    {
-        var importSummary = new CblImportSummaryDto
-        {
-            CblName = cblReading.Name,
-            Success = CblImportResult.Success,
-            Results = [],
-            SuccessfulInserts = []
-        };
-
-        if (IsCblEmpty(cblReading, importSummary, out var readingListFromCbl)) return readingListFromCbl;
-
-        // Is there another reading list with the same name on the user's account?
-        if (await unitOfWork.ReadingListRepository.ReadingListExistsForUser(cblReading.Name, userId))
-        {
-            importSummary.Success = CblImportResult.Fail;
-            importSummary.Results.Add(new CblBookResult
-            {
-                Reason = CblImportReason.NameConflict,
-                ReadingListName = cblReading.Name
-            });
-        }
-
-
-        var uniqueSeries = GetUniqueSeries(cblReading, useComicLibraryMatching);
-        var userSeries =
-            (await unitOfWork.SeriesRepository.GetAllSeriesByNameAsync(uniqueSeries, userId, SeriesIncludes.Chapters)).ToList();
-
-        if (userSeries.Count == 0)
-        {
-            // Report that no series exist in the reading list
-            importSummary.Results.Add(new CblBookResult
-            {
-                Reason = CblImportReason.AllSeriesMissing
-            });
-            importSummary.Success = CblImportResult.Fail;
-            return importSummary;
-        }
-
-        var conflicts = FindCblImportConflicts(userSeries);
-        if (!conflicts.Any()) return importSummary;
-
-        importSummary.Success = CblImportResult.Fail;
-        foreach (var conflict in conflicts)
-        {
-            importSummary.Results.Add(new CblBookResult
-            {
-                Reason = CblImportReason.SeriesCollision,
-                Series = conflict.Name,
-                LibraryId = conflict.LibraryId,
-                SeriesId = conflict.Id,
-            });
-        }
-
-        return importSummary;
-    }
+    // public async Task<CblImportSummaryDto> ValidateCblFile(int userId, CblReadingList cblReading, bool useComicLibraryMatching = false)
+    // {
+    //     var importSummary = new CblImportSummaryDto
+    //     {
+    //         CblName = cblReading.Name,
+    //         Success = CblImportResult.Success,
+    //         Results = [],
+    //         SuccessfulInserts = []
+    //     };
+    //
+    //     if (IsCblEmpty(cblReading, importSummary, out var readingListFromCbl)) return readingListFromCbl;
+    //
+    //     // Is there another reading list with the same name on the user's account?
+    //     if (await unitOfWork.ReadingListRepository.ReadingListExistsForUser(cblReading.Name, userId))
+    //     {
+    //         importSummary.Success = CblImportResult.Fail;
+    //         importSummary.Results.Add(new CblBookResult
+    //         {
+    //             Reason = CblImportReason.NameConflict,
+    //             ReadingListName = cblReading.Name
+    //         });
+    //     }
+    //
+    //
+    //     var uniqueSeries = GetUniqueSeries(cblReading, useComicLibraryMatching);
+    //     var userSeries =
+    //         (await unitOfWork.SeriesRepository.GetAllSeriesByNameAsync(uniqueSeries, userId, SeriesIncludes.Chapters)).ToList();
+    //
+    //     if (userSeries.Count == 0)
+    //     {
+    //         // Report that no series exist in the reading list
+    //         importSummary.Results.Add(new CblBookResult
+    //         {
+    //             Reason = CblImportReason.AllSeriesMissing
+    //         });
+    //         importSummary.Success = CblImportResult.Fail;
+    //         return importSummary;
+    //     }
+    //
+    //     var conflicts = FindCblImportConflicts(userSeries);
+    //     if (!conflicts.Any()) return importSummary;
+    //
+    //     importSummary.Success = CblImportResult.Fail;
+    //     foreach (var conflict in conflicts)
+    //     {
+    //         importSummary.Results.Add(new CblBookResult
+    //         {
+    //             Reason = CblImportReason.SeriesCollision,
+    //             Series = conflict.Name,
+    //             LibraryId = conflict.LibraryId,
+    //             SeriesId = conflict.Id,
+    //         });
+    //     }
+    //
+    //     return importSummary;
+    // }
 
     private static string GetSeriesFormatting(CblBook book, bool useComicLibraryMatching)
     {
@@ -610,175 +610,175 @@ public class ReadingListService(
     /// <param name="dryRun"></param>
     /// <param name="useComicLibraryMatching">When true, will force ComicVine library naming conventions: Series (Year) for Series name matching.</param>
     /// <returns></returns>
-    public async Task<CblImportSummaryDto> CreateReadingListFromCbl(int userId, CblReadingList cblReading, bool dryRun = false, bool useComicLibraryMatching = false)
-    {
-        var user = await unitOfWork.UserRepository.GetUserByIdAsync(userId, AppUserIncludes.ReadingListsWithItems);
-        logger.LogDebug("Importing {ReadingListName} CBL for User {UserName}", cblReading.Name, user!.UserName);
-        var importSummary = new CblImportSummaryDto
-        {
-            CblName = cblReading.Name,
-            Success = CblImportResult.Success,
-            Results = new List<CblBookResult>(),
-            SuccessfulInserts = new List<CblBookResult>()
-        };
+    // public async Task<CblImportSummaryDto> CreateReadingListFromCbl(int userId, CblReadingList cblReading, bool dryRun = false, bool useComicLibraryMatching = false)
+    // {
+    //     var user = await unitOfWork.UserRepository.GetUserByIdAsync(userId, AppUserIncludes.ReadingListsWithItems);
+    //     logger.LogDebug("Importing {ReadingListName} CBL for User {UserName}", cblReading.Name, user!.UserName);
+    //     var importSummary = new CblImportSummaryDto
+    //     {
+    //         CblName = cblReading.Name,
+    //         Success = CblImportResult.Success,
+    //         Results = new List<CblBookResult>(),
+    //         SuccessfulInserts = new List<CblBookResult>()
+    //     };
+    //
+    //     var uniqueSeries = GetUniqueSeries(cblReading, useComicLibraryMatching);
+    //     var userSeries =
+    //         (await unitOfWork.SeriesRepository.GetAllSeriesByNameAsync(uniqueSeries, userId, SeriesIncludes.Chapters)).ToList();
+    //     var allSeries = userSeries.ToDictionary(s => s.NormalizedName);
+    //     var allSeriesLocalized = userSeries.ToDictionary(s => s.NormalizedLocalizedName);
+    //
+    //     var readingListNameNormalized = Parser.Normalize(cblReading.Name);
+    //
+    //     // Get all the user's reading lists
+    //     var allReadingLists = (user.ReadingLists).ToDictionary(s => s.NormalizedTitle);
+    //     if (!allReadingLists.TryGetValue(readingListNameNormalized, out var readingList))
+    //     {
+    //         readingList = new ReadingListBuilder(cblReading.Name).WithSummary(cblReading.Summary).Build();
+    //         user.ReadingLists.Add(readingList);
+    //     }
+    //     else
+    //     {
+    //         // Reading List exists, check if we own it
+    //         if (user.ReadingLists.All(l => l.NormalizedTitle != readingListNameNormalized))
+    //         {
+    //             importSummary.Results.Add(new CblBookResult
+    //             {
+    //                 Reason = CblImportReason.NameConflict
+    //             });
+    //             importSummary.Success = CblImportResult.Fail;
+    //             return importSummary;
+    //         }
+    //     }
+    //
+    //     readingList.Items ??= new List<ReadingListItem>();
+    //     foreach (var (book, i) in cblReading.Books.Book.Select((value, i) => ( value, i )))
+    //     {
+    //         var normalizedSeries = Parser.Normalize(GetSeriesFormatting(book, useComicLibraryMatching));
+    //         if (!allSeries.TryGetValue(normalizedSeries, out var bookSeries) && !allSeriesLocalized.TryGetValue(normalizedSeries, out bookSeries))
+    //         {
+    //             importSummary.Results.Add(new CblBookResult(book)
+    //             {
+    //                 Reason = CblImportReason.SeriesMissing,
+    //                 Order = i
+    //             });
+    //             continue;
+    //         }
+    //         // Prioritize lookup by Volume then Chapter, but allow fallback to just Chapter
+    //         var bookVolume = string.IsNullOrEmpty(book.Volume)
+    //             ? Parser.LooseLeafVolume
+    //             : book.Volume;
+    //         var matchingVolume = bookSeries.Volumes.Find(v => bookVolume == v.Name)
+    //                              ?? bookSeries.Volumes.GetLooseLeafVolumeOrDefault()
+    //                              ?? bookSeries.Volumes.GetSpecialVolumeOrDefault();
+    //         if (matchingVolume == null)
+    //         {
+    //             importSummary.Results.Add(new CblBookResult(book)
+    //             {
+    //                 Reason = CblImportReason.VolumeMissing,
+    //                 LibraryId = bookSeries.LibraryId,
+    //                 Order = i
+    //             });
+    //             continue;
+    //         }
+    //
+    //         // We need to handle default chapter or empty string when it's just a volume
+    //         var bookNumber = string.IsNullOrEmpty(book.Number)
+    //             ? Parser.DefaultChapter
+    //             : book.Number;
+    //         var chapter = matchingVolume.Chapters.FirstOrDefault(c => c.Range == bookNumber);
+    //         if (chapter == null)
+    //         {
+    //             importSummary.Results.Add(new CblBookResult(book)
+    //             {
+    //                 Reason = CblImportReason.ChapterMissing,
+    //                 LibraryId = bookSeries.LibraryId,
+    //                 Order = i
+    //             });
+    //             continue;
+    //         }
+    //
+    //         // See if a matching item already exists
+    //         ExistsOrAddReadingListItem(readingList, bookSeries.Id, matchingVolume.Id, chapter.Id);
+    //         importSummary.SuccessfulInserts.Add(new CblBookResult(book)
+    //         {
+    //             Reason = CblImportReason.Success,
+    //             Order = i
+    //         });
+    //     }
+    //
+    //     if (importSummary.SuccessfulInserts.Count != cblReading.Books.Book.Count || importSummary.Results.Count > 0)
+    //     {
+    //         importSummary.Success = CblImportResult.Partial;
+    //     }
+    //
+    //     if (importSummary.SuccessfulInserts.Count == 0 && importSummary.Results.Count == cblReading.Books.Book.Count)
+    //     {
+    //         importSummary.Success = CblImportResult.Fail;
+    //     }
+    //
+    //     if (dryRun) return importSummary;
+    //
+    //     await CalculateReadingListAgeRating(readingList);
+    //     await CalculateStartAndEndDates(readingList);
+    //
+    //     // For CBL Import only we override pre-calculated dates
+    //     if (NumberHelper.IsValidMonth(cblReading.StartMonth)) readingList.StartingMonth = cblReading.StartMonth;
+    //     if (NumberHelper.IsValidYear(cblReading.StartYear)) readingList.StartingYear = cblReading.StartYear;
+    //     if (NumberHelper.IsValidMonth(cblReading.EndMonth)) readingList.EndingMonth = cblReading.EndMonth;
+    //     if (NumberHelper.IsValidYear(cblReading.EndYear)) readingList.EndingYear = cblReading.EndYear;
+    //
+    //     if (!string.IsNullOrEmpty(readingList.Summary?.Trim()))
+    //     {
+    //         readingList.Summary = readingList.Summary?.Trim();
+    //     }
+    //
+    //     // If there are no items, don't create a blank list
+    //     if (!unitOfWork.HasChanges() || readingList.Items.Count == 0) return importSummary;
+    //
+    //
+    //     imageService.UpdateColorScape(readingList);
+    //     await unitOfWork.CommitAsync();
+    //
+    //
+    //     return importSummary;
+    // }
 
-        var uniqueSeries = GetUniqueSeries(cblReading, useComicLibraryMatching);
-        var userSeries =
-            (await unitOfWork.SeriesRepository.GetAllSeriesByNameAsync(uniqueSeries, userId, SeriesIncludes.Chapters)).ToList();
-        var allSeries = userSeries.ToDictionary(s => s.NormalizedName);
-        var allSeriesLocalized = userSeries.ToDictionary(s => s.NormalizedLocalizedName);
-
-        var readingListNameNormalized = Parser.Normalize(cblReading.Name);
-
-        // Get all the user's reading lists
-        var allReadingLists = (user.ReadingLists).ToDictionary(s => s.NormalizedTitle);
-        if (!allReadingLists.TryGetValue(readingListNameNormalized, out var readingList))
-        {
-            readingList = new ReadingListBuilder(cblReading.Name).WithSummary(cblReading.Summary).Build();
-            user.ReadingLists.Add(readingList);
-        }
-        else
-        {
-            // Reading List exists, check if we own it
-            if (user.ReadingLists.All(l => l.NormalizedTitle != readingListNameNormalized))
-            {
-                importSummary.Results.Add(new CblBookResult
-                {
-                    Reason = CblImportReason.NameConflict
-                });
-                importSummary.Success = CblImportResult.Fail;
-                return importSummary;
-            }
-        }
-
-        readingList.Items ??= new List<ReadingListItem>();
-        foreach (var (book, i) in cblReading.Books.Book.Select((value, i) => ( value, i )))
-        {
-            var normalizedSeries = Parser.Normalize(GetSeriesFormatting(book, useComicLibraryMatching));
-            if (!allSeries.TryGetValue(normalizedSeries, out var bookSeries) && !allSeriesLocalized.TryGetValue(normalizedSeries, out bookSeries))
-            {
-                importSummary.Results.Add(new CblBookResult(book)
-                {
-                    Reason = CblImportReason.SeriesMissing,
-                    Order = i
-                });
-                continue;
-            }
-            // Prioritize lookup by Volume then Chapter, but allow fallback to just Chapter
-            var bookVolume = string.IsNullOrEmpty(book.Volume)
-                ? Parser.LooseLeafVolume
-                : book.Volume;
-            var matchingVolume = bookSeries.Volumes.Find(v => bookVolume == v.Name)
-                                 ?? bookSeries.Volumes.GetLooseLeafVolumeOrDefault()
-                                 ?? bookSeries.Volumes.GetSpecialVolumeOrDefault();
-            if (matchingVolume == null)
-            {
-                importSummary.Results.Add(new CblBookResult(book)
-                {
-                    Reason = CblImportReason.VolumeMissing,
-                    LibraryId = bookSeries.LibraryId,
-                    Order = i
-                });
-                continue;
-            }
-
-            // We need to handle default chapter or empty string when it's just a volume
-            var bookNumber = string.IsNullOrEmpty(book.Number)
-                ? Parser.DefaultChapter
-                : book.Number;
-            var chapter = matchingVolume.Chapters.FirstOrDefault(c => c.Range == bookNumber);
-            if (chapter == null)
-            {
-                importSummary.Results.Add(new CblBookResult(book)
-                {
-                    Reason = CblImportReason.ChapterMissing,
-                    LibraryId = bookSeries.LibraryId,
-                    Order = i
-                });
-                continue;
-            }
-
-            // See if a matching item already exists
-            ExistsOrAddReadingListItem(readingList, bookSeries.Id, matchingVolume.Id, chapter.Id);
-            importSummary.SuccessfulInserts.Add(new CblBookResult(book)
-            {
-                Reason = CblImportReason.Success,
-                Order = i
-            });
-        }
-
-        if (importSummary.SuccessfulInserts.Count != cblReading.Books.Book.Count || importSummary.Results.Count > 0)
-        {
-            importSummary.Success = CblImportResult.Partial;
-        }
-
-        if (importSummary.SuccessfulInserts.Count == 0 && importSummary.Results.Count == cblReading.Books.Book.Count)
-        {
-            importSummary.Success = CblImportResult.Fail;
-        }
-
-        if (dryRun) return importSummary;
-
-        await CalculateReadingListAgeRating(readingList);
-        await CalculateStartAndEndDates(readingList);
-
-        // For CBL Import only we override pre-calculated dates
-        if (NumberHelper.IsValidMonth(cblReading.StartMonth)) readingList.StartingMonth = cblReading.StartMonth;
-        if (NumberHelper.IsValidYear(cblReading.StartYear)) readingList.StartingYear = cblReading.StartYear;
-        if (NumberHelper.IsValidMonth(cblReading.EndMonth)) readingList.EndingMonth = cblReading.EndMonth;
-        if (NumberHelper.IsValidYear(cblReading.EndYear)) readingList.EndingYear = cblReading.EndYear;
-
-        if (!string.IsNullOrEmpty(readingList.Summary?.Trim()))
-        {
-            readingList.Summary = readingList.Summary?.Trim();
-        }
-
-        // If there are no items, don't create a blank list
-        if (!unitOfWork.HasChanges() || readingList.Items.Count == 0) return importSummary;
-
-
-        imageService.UpdateColorScape(readingList);
-        await unitOfWork.CommitAsync();
-
-
-        return importSummary;
-    }
-
-    private static IList<Series> FindCblImportConflicts(IEnumerable<Series> userSeries)
-    {
-        var dict = new HashSet<string>();
-        return userSeries.Where(series => !dict.Add(series.NormalizedName)).ToList();
-    }
-
-    private static bool IsCblEmpty(CblReadingList cblReading, CblImportSummaryDto importSummary,
-        out CblImportSummaryDto readingListFromCbl)
-    {
-        readingListFromCbl = new CblImportSummaryDto();
-        if (cblReading.Books == null || cblReading.Books.Book.Count == 0)
-        {
-            importSummary.Results.Add(new CblBookResult
-            {
-                Reason = CblImportReason.EmptyFile
-            });
-            importSummary.Success = CblImportResult.Fail;
-            readingListFromCbl = importSummary;
-            return true;
-        }
-
-        return false;
-    }
-
-    private static void ExistsOrAddReadingListItem(ReadingList readingList, int seriesId, int volumeId, int chapterId)
-    {
-        var readingListItem =
-            readingList.Items.FirstOrDefault(item =>
-                item.SeriesId == seriesId && item.ChapterId == chapterId);
-        if (readingListItem != null) return;
-
-        readingListItem = new ReadingListItemBuilder(readingList.Items.Count, seriesId,
-            volumeId, chapterId).Build();
-        readingList.Items.Add(readingListItem);
-    }
+    // private static IList<Series> FindCblImportConflicts(IEnumerable<Series> userSeries)
+    // {
+    //     var dict = new HashSet<string>();
+    //     return userSeries.Where(series => !dict.Add(series.NormalizedName)).ToList();
+    // }
+    //
+    // private static bool IsCblEmpty(CblReadingList cblReading, CblImportSummaryDto importSummary,
+    //     out CblImportSummaryDto readingListFromCbl)
+    // {
+    //     readingListFromCbl = new CblImportSummaryDto();
+    //     if (cblReading.Books == null || cblReading.Books.Book.Count == 0)
+    //     {
+    //         importSummary.Results.Add(new CblBookResult
+    //         {
+    //             Reason = CblImportReason.EmptyFile
+    //         });
+    //         importSummary.Success = CblImportResult.Fail;
+    //         readingListFromCbl = importSummary;
+    //         return true;
+    //     }
+    //
+    //     return false;
+    // }
+    //
+    // private static void ExistsOrAddReadingListItem(ReadingList readingList, int seriesId, int volumeId, int chapterId)
+    // {
+    //     var readingListItem =
+    //         readingList.Items.FirstOrDefault(item =>
+    //             item.SeriesId == seriesId && item.ChapterId == chapterId);
+    //     if (readingListItem != null) return;
+    //
+    //     readingListItem = new ReadingListItemBuilder(readingList.Items.Count, seriesId,
+    //         volumeId, chapterId).Build();
+    //     readingList.Items.Add(readingListItem);
+    // }
 
     public static CblReadingList LoadCblFromPath(string path)
     {

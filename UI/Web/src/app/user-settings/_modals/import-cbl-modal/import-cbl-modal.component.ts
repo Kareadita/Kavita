@@ -248,7 +248,7 @@ export class ImportCblModalComponent implements OnInit {
       } : undefined;
 
       try {
-        await this.cblService.finalizeImport(file.fileName, decisions, repoMeta).toPromise();
+        await this.cblService.finalizeImport(file.fileName, decisions, file.provider, repoMeta).toPromise();
       } catch {
         this.toastr.error(translate('toasts.failed-to-import', {name: file.name}));
       }

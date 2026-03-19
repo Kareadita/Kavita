@@ -24,6 +24,30 @@ ngx-file-drop ::ng-deep > div {
   color: var(--primary-color);
 }
 
+.scroller {
+  max-height: calc(100dvh - 11.25rem);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+
+  @media (max-width: 576px) {
+    max-height: calc(100dvh - 30rem);
+  }
+
+  > div {
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+    height: 100%;
+  }
+}
+
+.list-scroll {
+  overflow-y: auto;
+  min-height: 0;
+  flex: 1 1 auto;
+}
+
 .pill {
   font-size: .8rem;
   background-color: var(--card-bg-color);
@@ -37,4 +61,17 @@ ngx-file-drop ::ng-deep > div {
 
 .btn-group .btn {
   font-size: 0.8rem;
+}
+
+.detail-cover {
+  width: 80px;
+  min-width: 80px;
+  height: 120px;
+
+  ::ng-deep img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 0.25rem;
+  }
 }

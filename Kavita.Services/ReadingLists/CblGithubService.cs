@@ -5,7 +5,6 @@ using System.Linq;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Threading.Tasks;
-using Flurl;
 using Flurl.Http;
 using Kavita.API.Services;
 using Kavita.API.Services.ReadingLists;
@@ -16,11 +15,11 @@ using Kavita.Models.DTOs.Misc;
 using Kavita.Models.DTOs.ReadingLists.CBL;
 using Kavita.Services.Extensions;
 using Microsoft.Extensions.Logging;
-using Microsoft.Net.Http.Headers;
+
 
 namespace Kavita.Services.ReadingLists;
 
-internal class GithubContentItem
+internal sealed record GithubContentItem
 {
     [JsonPropertyName("name")]
     public string Name { get; set; } = string.Empty;
@@ -39,15 +38,15 @@ internal class GithubContentItem
 /// <summary>
 /// File-backed cache structure. Each directory path maps to its cached listing + fetch timestamp.
 /// </summary>
-public class CblRepoCache
+public sealed record CblRepoCache
 {
-    public Dictionary<string, CachedDirectory> Directories { get; set; } = new();
+    public Dictionary<string, CachedDirectory> Directories { get; init; } = new();
 }
 
-public class CachedDirectory
+public sealed record CachedDirectory
 {
-    public DateTime FetchedAtUtc { get; set; }
-    public List<CblRepoItemDto> Items { get; set; } = [];
+    public DateTime FetchedAtUtc { get; init; }
+    public List<CblRepoItemDto> Items { get; init; } = [];
 }
 
 

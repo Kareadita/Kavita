@@ -2,9 +2,14 @@
 
   <div class="position-relative">
     @if (!accountService.hasReadOnlyRole()) {
-      <button class="btn btn-outline-primary position-absolute custom-position" (click)="openBrowseModal()" [title]="t('add')">
-        <i class="fa fa-plus" aria-hidden="true"></i><span class="phone-hidden ms-1">{{t('browse-repo')}}</span>
-      </button>
+      <div class="position-absolute custom-position d-flex gap-2">
+        <button class="btn btn-outline-primary" (click)="selectedList.set(undefined)" [title]="t('add')">
+          <i class="fa fa-plus" aria-hidden="true"></i><span class="phone-hidden ms-1">{{t('add')}}</span>
+        </button>
+        <button class="btn btn-outline-primary" (click)="openBrowseModal()" [title]="t('browse-repo')">
+          <i class="fa fa-globe" aria-hidden="true"></i><span class="phone-hidden ms-1">{{t('browse-repo')}}</span>
+        </button>
+      </div>
     }
   </div>
 
@@ -44,7 +49,7 @@
 
         <div class="fw-bold section-header mb-1">{{t('downloaded')}}</div>
 
-        <ul style="height: 100%" class="list-group list-group-flush">
+        <ul class="list-group list-group-flush list-scroll">
           @for (readingList of filteredLists(); track readingList.id) {
             <ng-container [ngTemplateOutlet]="readingListOption" [ngTemplateOutletContext]="{ $implicit: readingList}" />
           } @empty {
@@ -58,6 +63,7 @@
       <form [formGroup]="form">
       <div class="card p-3">
 
+        @let selectedItem = selectedList();
         @if (showUploadFlow()) {
           <div class="row pb-4">
             <div class="mx-auto">
@@ -72,7 +78,7 @@
 
           @if (files && files.length > 0) {
             <app-loading [loading]="isUploadingCbl()" />
-          } @else if (accountService.hasAdminRole()) {
+          } @else if (!accountService.hasReadOnlyRole()) {
             <ngx-file-drop (onFileDrop)="dropped($event)" [accept]="acceptableExtensions" [directory]="false"
                            dropZoneClassName="file-upload" contentClassName="file-upload-zone">
 
@@ -122,41 +128,71 @@
 
             </ngx-file-drop>
           }
+        } @else if(selectedItem) {
+
+          <div class="d-flex gap-3">
+            <app-image class="detail-cover" [imageUrl]="imageService.getReadingListCoverImage(selectedItem.id)" />
+
+            <div class="flex-grow-1">
+              <div class="d-flex justify-content-between align-items-start">
+                <h4 class="mb-1">{{selectedItem.title}}</h4>
+                <div class="d-flex gap-2">
+                  @if (!accountService.hasReadOnlyRole()) {
+                    <button class="btn btn-outline-danger btn-sm" (click)="deleteList(selectedItem)">
+                      <i class="fa fa-trash-alt" aria-hidden="true"></i><span class="phone-hidden ms-1">{{t('delete')}}</span>
+                    </button>
+                  }
+                  @if (selectedItem.canSync) {
+                    <button class="btn btn-primary btn-sm" [disabled]="!selectedItem.hasRemoteChange">{{t('sync')}}</button>
+                  }
+                </div>
+              </div>
+
+              @if (selectedItem.canSync) {
+                <span class="pill p-1 me-1 provider">{{selectedItem.provider | readingListProvider}}</span>
+              }
+
+              <div class="text-muted mt-1" style="font-size: 0.9rem;">
+                @if (selectedItem.ageRating) {
+                  <span>{{selectedItem.ageRating | ageRating}}</span>
+                }
+                @if (selectedItem.startingYear > 0) {
+                  @if (selectedItem.ageRating) {
+                    <span> · </span>
+                  }
+                  <span>{{selectedItem.startingMonth}}/{{selectedItem.startingYear}} – {{selectedItem.endingMonth}}/{{selectedItem.endingYear}}</span>
+                }
+                @if (selectedItem.ageRating || selectedItem.startingYear > 0) {
+                  <span> · </span>
+                }
+                <span>{{selectedItem.itemCount}} {{t('items-count')}}</span>
+              </div>
+            </div>
+          </div>
+
+          @if (selectedItem.summary) {
+            <div class="mt-3">
+              <app-read-more [text]="selectedItem.summary" />
+            </div>
+          }
+
+          <div class="mt-3">
+            <a class="btn btn-outline-primary btn-sm" [routerLink]="'/lists/' + selectedItem.id">
+              {{t('view-list')}} <i class="fa fa-arrow-right ms-1" aria-hidden="true"></i>
+            </a>
+          </div>
+
+          @if (selectedItem.canSync && selectedItem.lastSyncedDate) {
+            <div class="mt-3 text-muted" style="font-size: 0.8rem;">
+              <span>{{t('last-synced', {date: (selectedItem.lastSyncedDate | date)})}}</span>
+              @if (selectedItem.downloadUrl) {
+                <span> · {{t('source')}}: {{selectedItem.downloadUrl}}</span>
+              }
+            </div>
+          }
 
         } @else {
-          <h4>
-            {{selectedList()?.title}}
-<!--            <div class="float-end">-->
-<!--              @if (selectedList().isSiteTheme) {-->
-<!--                @if (selectedList().name !== 'Dark' && canUseThemes()) {-->
-<!--                  <button class="btn btn-danger me-1" (click)="deleteTheme(selectedList().site!)">{{t('delete')}}</button>-->
-<!--                }-->
-<!--                @if (accountService.hasAdminRole()) {-->
-<!--                  <button class="btn btn-secondary me-1" [disabled]="selectedList().site?.isDefault" (click)="updateDefault(selectedList().site!)">{{t('set-default')}}</button>-->
-<!--                }-->
-<!--                <button class="btn btn-primary me-1" [disabled]="currentTheme && selectedList().name === currentTheme.name" (click)="applyTheme(selectedList().site!)">{{t('apply')}}</button>-->
-<!--              } @else if (canUseThemes()) {-->
-<!--                <button class="btn btn-primary" [disabled]="selectedList().downloadable?.alreadyDownloaded" (click)="downloadTheme(selectedList().downloadable!)">{{t('download')}}</button>-->
-<!--              }-->
-<!--            </div>-->
-          </h4>
-<!--          @if(!selectedList().isSiteTheme) {-->
-<!--            <p>{{selectedList().downloadable!.description | defaultValue}}</p>-->
-
-<!--            <app-carousel-reel [items]="selectedList().downloadable!.previewUrls" [title]="t('preview-title')">-->
-<!--              <ng-template #carouselItem let-item>-->
-<!--                <app-image [imageUrl]="item" height="108px" width="260px" (click)="previewImage(item)" />-->
-<!--              </ng-template>-->
-<!--            </app-carousel-reel>-->
-<!--          } @else {-->
-<!--            <p>{{selectedList().site!.description | defaultValue}}</p>-->
-
-<!--            <app-carousel-reel [items]="selectedList().site!.previewUrls" [title]="t('preview-title')">-->
-<!--              <ng-template #carouselItem let-item>-->
-<!--                <app-image [imageUrl]="item" height="108px" width="260px" (click)="previewImage(item)" />-->
-<!--              </ng-template>-->
-<!--            </app-carousel-reel>-->
-<!--          }-->
+          <p>You lack the ability to interact with this content.</p>
         }
       </div>
       </form>

@@ -6,6 +6,7 @@ import {CblRepoItem} from '../_models/reading-list/cbl/cbl-repo-item';
 import {CblImportSummary} from '../_models/reading-list/cbl/cbl-import-summary';
 import {CblSavedFile} from '../_models/reading-list/cbl/cbl-saved-file';
 import {CblImportDecisions} from '../_models/reading-list/cbl/cbl-import-decisions';
+import {ReadingListProvider} from '../_models/reading-list';
 import {RemapRule} from '../_models/reading-list/cbl/remap-rule';
 import {NgxFileDropEntry} from 'ngx-file-drop';
 
@@ -42,11 +43,12 @@ export class CblService {
     return this.httpClient.post<CblImportSummary>(this.baseUrl + 'cbl/re-validate', {fileName});
   }
 
-  finalizeImport(fileName: string, decisions: CblImportDecisions,
+  finalizeImport(fileName: string, decisions: CblImportDecisions, provider: ReadingListProvider,
     repoMeta?: { repoPath: string; downloadUrl: string; sha: string }) {
     return this.httpClient.post<CblImportSummary>(this.baseUrl + 'cbl/finalize-import', {
       fileName,
       decisions,
+      provider,
       ...repoMeta
     });
   }

@@ -38,50 +38,50 @@ public class CblController(IReadingListService readingListService, IDirectorySer
     /// <param name="cbl">FormBody with parameter name of cbl</param>
     /// <param name="useComicVineMatching">Use comic vine matching or not. Defaults to false</param>
     /// <returns></returns>
-    [HttpPost("validate")]
-    [SwaggerIgnore]
-    public async Task<ActionResult<CblImportSummaryDto>> ValidateCbl(IFormFile cbl, [FromQuery] bool useComicVineMatching = false)
-    {
-        var userId = UserId;
-        try
-        {
-            var cblReadingList = await SaveAndLoadCblFile(cbl);
-            var importSummary = await readingListService.ValidateCblFile(userId, cblReadingList, useComicVineMatching);
-            importSummary.FileName = cbl.FileName;
-
-            return Ok(importSummary);
-        }
-        catch (ArgumentNullException)
-        {
-            return Ok(new CblImportSummaryDto
-            {
-                FileName = cbl.FileName,
-                Success = CblImportResult.Fail,
-                Results =
-                [
-                    new CblBookResult
-                    {
-                        Reason = CblImportReason.InvalidFile
-                    }
-                ]
-            });
-        }
-        catch (InvalidOperationException)
-        {
-            return Ok(new CblImportSummaryDto
-            {
-                FileName = cbl.FileName,
-                Success = CblImportResult.Fail,
-                Results =
-                [
-                    new CblBookResult
-                    {
-                        Reason = CblImportReason.InvalidFile
-                    }
-                ]
-            });
-        }
-    }
+    // [HttpPost("validate")]
+    // [SwaggerIgnore]
+    // public async Task<ActionResult<CblImportSummaryDto>> ValidateCbl(IFormFile cbl, [FromQuery] bool useComicVineMatching = false)
+    // {
+    //     var userId = UserId;
+    //     try
+    //     {
+    //         var cblReadingList = await SaveAndLoadCblFile(cbl);
+    //         var importSummary = await readingListService.ValidateCblFile(userId, cblReadingList, useComicVineMatching);
+    //         importSummary.FileName = cbl.FileName;
+    //
+    //         return Ok(importSummary);
+    //     }
+    //     catch (ArgumentNullException)
+    //     {
+    //         return Ok(new CblImportSummaryDto
+    //         {
+    //             FileName = cbl.FileName,
+    //             Success = CblImportResult.Fail,
+    //             Results =
+    //             [
+    //                 new CblBookResult
+    //                 {
+    //                     Reason = CblImportReason.InvalidFile
+    //                 }
+    //             ]
+    //         });
+    //     }
+    //     catch (InvalidOperationException)
+    //     {
+    //         return Ok(new CblImportSummaryDto
+    //         {
+    //             FileName = cbl.FileName,
+    //             Success = CblImportResult.Fail,
+    //             Results =
+    //             [
+    //                 new CblBookResult
+    //                 {
+    //                     Reason = CblImportReason.InvalidFile
+    //                 }
+    //             ]
+    //         });
+    //     }
+    // }
 
 
     /// <summary>
@@ -91,50 +91,50 @@ public class CblController(IReadingListService readingListService, IDirectorySer
     /// <param name="dryRun">If true, will only emulate the import but not perform. This should be done to preview what will happen</param>
     /// <param name="useComicVineMatching">Use comic vine matching or not. Defaults to false</param>
     /// <returns></returns>
-    [SwaggerIgnore]
-    [HttpPost("import")]
-    [DisallowRole(PolicyConstants.ReadOnlyRole)]
-    public async Task<ActionResult<CblImportSummaryDto>> ImportCbl(IFormFile cbl, [FromQuery] bool dryRun = false, [FromQuery] bool useComicVineMatching = false)
-    {
-        try
-        {
-            var userId = UserId;
-            var cblReadingList = await SaveAndLoadCblFile(cbl);
-            var importSummary = await readingListService.CreateReadingListFromCbl(userId, cblReadingList, dryRun, useComicVineMatching);
-            importSummary.FileName = cbl.FileName;
-
-            return Ok(importSummary);
-        } catch (ArgumentNullException)
-        {
-            return Ok(new CblImportSummaryDto
-            {
-                FileName = cbl.FileName,
-                Success = CblImportResult.Fail,
-                Results =
-                [
-                    new CblBookResult
-                    {
-                        Reason = CblImportReason.InvalidFile
-                    }
-                ]
-            });
-        }
-        catch (InvalidOperationException)
-        {
-            return Ok(new CblImportSummaryDto
-            {
-                FileName = cbl.FileName,
-                Success = CblImportResult.Fail,
-                Results =
-                [
-                    new CblBookResult
-                    {
-                        Reason = CblImportReason.InvalidFile
-                    }
-                ]
-            });
-        }
-    }
+    // [SwaggerIgnore]
+    // [HttpPost("import")]
+    // [DisallowRole(PolicyConstants.ReadOnlyRole)]
+    // public async Task<ActionResult<CblImportSummaryDto>> ImportCbl(IFormFile cbl, [FromQuery] bool dryRun = false, [FromQuery] bool useComicVineMatching = false)
+    // {
+    //     try
+    //     {
+    //         var userId = UserId;
+    //         var cblReadingList = await SaveAndLoadCblFile(cbl);
+    //         var importSummary = await readingListService.CreateReadingListFromCbl(userId, cblReadingList, dryRun, useComicVineMatching);
+    //         importSummary.FileName = cbl.FileName;
+    //
+    //         return Ok(importSummary);
+    //     } catch (ArgumentNullException)
+    //     {
+    //         return Ok(new CblImportSummaryDto
+    //         {
+    //             FileName = cbl.FileName,
+    //             Success = CblImportResult.Fail,
+    //             Results =
+    //             [
+    //                 new CblBookResult
+    //                 {
+    //                     Reason = CblImportReason.InvalidFile
+    //                 }
+    //             ]
+    //         });
+    //     }
+    //     catch (InvalidOperationException)
+    //     {
+    //         return Ok(new CblImportSummaryDto
+    //         {
+    //             FileName = cbl.FileName,
+    //             Success = CblImportResult.Fail,
+    //             Results =
+    //             [
+    //                 new CblBookResult
+    //                 {
+    //                     Reason = CblImportReason.InvalidFile
+    //                 }
+    //             ]
+    //         });
+    //     }
+    // }
 
     /// <summary>
     /// Saves an uploaded CBL file to disk without importing. Returns the saved file info.
@@ -163,7 +163,8 @@ public class CblController(IReadingListService readingListService, IDirectorySer
         return Ok(new CblSavedFileDto
         {
             Name = filename,
-            FileName = filename
+            FileName = filename,
+            Provider = ReadingListProvider.File
         });
     }
 
@@ -200,7 +201,8 @@ public class CblController(IReadingListService readingListService, IDirectorySer
         return Ok(new CblSavedFileDto
         {
             Name = filename,
-            FileName = filename
+            FileName = filename,
+            Provider = ReadingListProvider.Url
         });
     }
 
@@ -224,6 +226,7 @@ public class CblController(IReadingListService readingListService, IDirectorySer
             {
                 Name = item.Name,
                 FileName = item.Name,
+                Provider = ReadingListProvider.Url,
                 RepoPath = item.Path,
                 DownloadUrl = item.DownloadUrl,
                 Sha = item.Sha
@@ -254,7 +257,7 @@ public class CblController(IReadingListService readingListService, IDirectorySer
     }
 
     /// <summary>
-    /// Finalizes the import of a saved CBL file with user decisions. Optionally sets sync tracking fields.
+    /// Finalizes the import of a saved CBL file with user decisions
     /// </summary>
     [HttpPost("finalize-import")]
     [DisallowRole(PolicyConstants.ReadOnlyRole)]
@@ -274,21 +277,30 @@ public class CblController(IReadingListService readingListService, IDirectorySer
                 userId, fullPath, new CblImportOptions(), dto.Decisions);
             summary.FileName = dto.FileName;
 
-            // Set sync tracking fields for repo items
-            if (!string.IsNullOrEmpty(dto.RepoPath) && summary.Success != CblImportResult.Fail)
+            // Set provider and sync tracking fields
+            if (summary.Success != CblImportResult.Fail && dto.Provider != ReadingListProvider.None)
             {
-                var readingList = await dataContext.ReadingList
-                    .FirstOrDefaultAsync(rl => rl.AppUserId == userId && rl.SourcePath == dto.RepoPath);
+                var readingList = await unitOfWork.ReadingListRepository
+                    .GetReadingListByTitleAsync(summary.CblName, userId);
 
                 if (readingList != null)
                 {
-                    readingList.Provider = ReadingListProvider.Url;
-                    readingList.SourcePath = dto.RepoPath;
-                    readingList.DownloadUrl = dto.DownloadUrl;
-                    readingList.ShaHash = dto.Sha;
-                    readingList.LastSyncedUtc = DateTime.UtcNow;
-                    readingList.LastSyncCheckUtc = DateTime.UtcNow;
-                    await dataContext.SaveChangesAsync();
+                    readingList.Provider = dto.Provider;
+
+                    // Repo-specific sync tracking
+                    if (!string.IsNullOrEmpty(dto.RepoPath))
+                    {
+                        readingList.SourcePath = dto.RepoPath;
+                        readingList.DownloadUrl = dto.DownloadUrl;
+                        readingList.ShaHash = dto.Sha;
+                        readingList.LastSyncedUtc = DateTime.UtcNow;
+                        readingList.LastSyncCheckUtc = DateTime.UtcNow;
+                    }
+
+                    await readingListService.CalculateReadingListAgeRating(readingList);
+                    await readingListService.CalculateStartAndEndDates(readingList);
+
+                    await unitOfWork.CommitAsync();
                 }
             }
 

@@ -154,5 +154,9 @@ public sealed record CblImportSummaryDto
     public ICollection<CblBookResult> Results { get; set; }
     public CblImportResult Success { get; set; }
     public ICollection<CblBookResult> SuccessfulInserts { get; set; }
+    /// <summary>
+    /// Are we updating a pre-existing list or not
+    /// </summary>
+    public bool IsUpdate { get; set; }
 
 }
