@@ -1,4 +1,4 @@
-namespace Kavita.Models.DTOs.ReadingLists.CBL;
+namespace Kavita.Models.DTOs.ReadingLists.CBL.Internal;
 
 /// <summary>
 /// Known external comic database providers used for issue/series identification.

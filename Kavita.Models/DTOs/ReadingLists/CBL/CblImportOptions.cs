@@ -2,7 +2,7 @@
 
 namespace Kavita.Models.DTOs.ReadingLists.CBL;
 
-public record CblImportOptions
+public sealed record CblImportOptions
 {
     /// <summary>
     /// Weighs ComicVine Matching higher

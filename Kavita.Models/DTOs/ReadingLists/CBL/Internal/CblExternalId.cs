@@ -1,4 +1,4 @@
-namespace Kavita.Models.DTOs.ReadingLists.CBL;
+namespace Kavita.Models.DTOs.ReadingLists.CBL.Internal;
 
 /// <summary>
 /// A resolved external-database reference for a series/issue pair.

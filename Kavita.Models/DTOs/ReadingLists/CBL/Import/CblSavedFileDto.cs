@@ -1,6 +1,6 @@
 using Kavita.Models.Entities.Enums.ReadingList;
 
-namespace Kavita.Models.DTOs.ReadingLists.CBL;
+namespace Kavita.Models.DTOs.ReadingLists.CBL.Import;
 #nullable enable
 
 /// <summary>

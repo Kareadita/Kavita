@@ -1,4 +1,4 @@
-namespace Kavita.Models.DTOs.ReadingLists.CBL;
+namespace Kavita.Models.DTOs.ReadingLists.CBL.Internal;
 
 /// <summary>
 /// A link to a related reading list (e.g. prequel, sequel, companion)

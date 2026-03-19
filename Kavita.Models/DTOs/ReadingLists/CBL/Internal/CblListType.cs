@@ -1,4 +1,4 @@
-namespace Kavita.Models.DTOs.ReadingLists.CBL;
+namespace Kavita.Models.DTOs.ReadingLists.CBL.Internal;
 
 /// <summary>
 /// Classification of a CBL reading list, indicating its scope or purpose.

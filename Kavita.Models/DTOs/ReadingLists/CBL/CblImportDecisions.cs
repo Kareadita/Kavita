@@ -5,7 +5,7 @@ namespace Kavita.Models.DTOs.ReadingLists.CBL;
 /// <summary>
 /// Represents a set of decisions against ambiguity in CBL Import
 /// </summary>
-public record CblImportDecisions
+public sealed record CblImportDecisions
 {
     /// <summary>
     /// Per-item user resolutions keyed by the item's Order index
@@ -20,7 +20,7 @@ public record CblImportDecisions
 /// <summary>
 /// A user's explicit resolution for a single CBL item
 /// </summary>
-public record CblItemDecision
+public sealed record CblItemDecision
 {
     public int SeriesId { get; set; }
     public int VolumeId { get; set; }

@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.Text.Json.Serialization;
+using Kavita.Models.DTOs.ReadingLists.CBL.Internal;
 
 namespace Kavita.Models.DTOs.ReadingLists.CBL.V2;
 

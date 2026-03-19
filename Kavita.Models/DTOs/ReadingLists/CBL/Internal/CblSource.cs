@@ -1,4 +1,4 @@
-namespace Kavita.Models.DTOs.ReadingLists.CBL;
+namespace Kavita.Models.DTOs.ReadingLists.CBL.Internal;
 
 /// <summary>
 /// An external source from which a reading list was derived

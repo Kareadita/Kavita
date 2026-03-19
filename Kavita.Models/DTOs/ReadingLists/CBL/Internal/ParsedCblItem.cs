@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 
-namespace Kavita.Models.DTOs.ReadingLists.CBL;
+namespace Kavita.Models.DTOs.ReadingLists.CBL.Internal;
 
 /// <summary>
 /// A single issue/book entry in a unified (V1+V2) parsed reading list

@@ -6,7 +6,7 @@ namespace Kavita.Models.DTOs.ReadingLists.CBL;
 /// <summary>
 /// Request body for the finalize-import endpoint
 /// </summary>
-public record CblFinalizeRequestDto
+public sealed record CblFinalizeRequestDto
 {
     public string FileName { get; set; } = string.Empty;
     public CblImportDecisions Decisions { get; set; } = new();

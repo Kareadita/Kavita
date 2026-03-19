@@ -4,6 +4,7 @@ using System.IO;
 using System.Text.Json;
 using System.Xml.Serialization;
 using Kavita.Models.DTOs.ReadingLists.CBL;
+using Kavita.Models.DTOs.ReadingLists.CBL.Internal;
 using Kavita.Models.DTOs.ReadingLists.CBL.V1;
 using Kavita.Models.DTOs.ReadingLists.CBL.V2;
 

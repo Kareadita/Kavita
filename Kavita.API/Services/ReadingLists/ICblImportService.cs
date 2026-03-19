@@ -1,5 +1,6 @@
 using System.Threading.Tasks;
 using Kavita.Models.DTOs.ReadingLists.CBL;
+using Kavita.Models.DTOs.ReadingLists.CBL.Import;
 
 namespace Kavita.API.Services.ReadingLists;
 

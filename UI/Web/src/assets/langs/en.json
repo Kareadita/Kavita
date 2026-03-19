@@ -2018,8 +2018,7 @@
         "theme": "Theme",
         "font": "Epub Fonts",
         "customize": "Customize",
-        "cbl-import": "CBL Reading List",
-        "cbl-import-v2": "CBL Manager",
+        "cbl-import": "CBL Manager",
         "mal-stack-import": "MAL Stack",
         "admin-public-metadata": "Manage Metadata"
     },

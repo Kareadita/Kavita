@@ -301,18 +301,11 @@
           @case (SettingsTabId.CBLImport) {
             @defer (prefetch on idle) {
               <div class="scale col-md-12">
-                <app-import-cbl />
-              </div>
-            }
-          }
-
-          @case (SettingsTabId.CBLImportV2) {
-            @defer (prefetch on idle) {
-              <div class="scale col-md-12">
                 <app-cbl-manager />
               </div>
             }
           }
+
 
           @case (SettingsTabId.ReadingProfiles) {
             @defer (prefetch on idle) {

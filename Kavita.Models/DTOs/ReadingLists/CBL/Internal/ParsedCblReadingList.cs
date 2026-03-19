@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 
-namespace Kavita.Models.DTOs.ReadingLists.CBL;
+namespace Kavita.Models.DTOs.ReadingLists.CBL.Internal;
 
 /// <summary>
 /// Unified reading list model produced by parsing either a V1 XML or V2 JSON CBL file

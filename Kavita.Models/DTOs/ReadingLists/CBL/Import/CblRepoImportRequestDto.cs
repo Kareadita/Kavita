@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 
-namespace Kavita.Models.DTOs.ReadingLists.CBL;
+namespace Kavita.Models.DTOs.ReadingLists.CBL.Import;
 
 public class CblRepoImportRequestDto
 {

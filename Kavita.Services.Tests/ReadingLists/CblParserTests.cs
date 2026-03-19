@@ -1,4 +1,5 @@
 using Kavita.Models.DTOs.ReadingLists.CBL;
+using Kavita.Models.DTOs.ReadingLists.CBL.Internal;
 using Kavita.Services.Helpers;
 using Kavita.Services.ReadingLists;
 

@@ -33,7 +33,6 @@ import {
 import {
   ImportMalCollectionComponent
 } from "../../../collections/_components/import-mal-collection/import-mal-collection.component";
-import {ImportCblComponent} from "../../../reading-list/_components/import-cbl/import-cbl.component";
 import {LicenseService} from "../../../_services/license.service";
 import {ManageMatchedMetadataComponent} from "../../../admin/manage-matched-metadata/manage-matched-metadata.component";
 import {ManageUserTokensComponent} from "../../../admin/manage-user-tokens/manage-user-tokens.component";
@@ -79,7 +78,6 @@ import {CblManagerComponent} from "../../../user-settings/cbl-manager/cbl-manage
     ManageMediaIssuesComponent,
     ManageCustomizationComponent,
     ImportMalCollectionComponent,
-    ImportCblComponent,
     ManageMatchedMetadataComponent,
     ManageUserTokensComponent,
     EmailHistoryComponent,

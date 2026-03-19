@@ -16,11 +16,12 @@ using Kavita.Models.Entities.ReadingLists;
 using Kavita.Server.Attributes;
 using Kavita.Services.Reading;
 using Flurl.Http;
+using Kavita.Models.DTOs.ReadingLists.CBL.Import;
+using Kavita.Models.DTOs.ReadingLists.CBL.RemapRules;
 using Kavita.Models.DTOs.Uploads;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using Swashbuckle.AspNetCore.Annotations;
 
 namespace Kavita.Server.Controllers;
 
@@ -31,111 +32,6 @@ public class CblController(IReadingListService readingListService, IDirectorySer
     ICblGithubService cblGithubService, DataContext dataContext, ICblImportService cblImporterService,
     IUnitOfWork unitOfWork) : BaseApiController
 {
-    /// <summary>
-    /// The first step in a cbl import. This validates the cbl file that if an import occured, would it be successful.
-    /// If this returns errors, the cbl will always be rejected by Kavita.
-    /// </summary>
-    /// <param name="cbl">FormBody with parameter name of cbl</param>
-    /// <param name="useComicVineMatching">Use comic vine matching or not. Defaults to false</param>
-    /// <returns></returns>
-    // [HttpPost("validate")]
-    // [SwaggerIgnore]
-    // public async Task<ActionResult<CblImportSummaryDto>> ValidateCbl(IFormFile cbl, [FromQuery] bool useComicVineMatching = false)
-    // {
-    //     var userId = UserId;
-    //     try
-    //     {
-    //         var cblReadingList = await SaveAndLoadCblFile(cbl);
-    //         var importSummary = await readingListService.ValidateCblFile(userId, cblReadingList, useComicVineMatching);
-    //         importSummary.FileName = cbl.FileName;
-    //
-    //         return Ok(importSummary);
-    //     }
-    //     catch (ArgumentNullException)
-    //     {
-    //         return Ok(new CblImportSummaryDto
-    //         {
-    //             FileName = cbl.FileName,
-    //             Success = CblImportResult.Fail,
-    //             Results =
-    //             [
-    //                 new CblBookResult
-    //                 {
-    //                     Reason = CblImportReason.InvalidFile
-    //                 }
-    //             ]
-    //         });
-    //     }
-    //     catch (InvalidOperationException)
-    //     {
-    //         return Ok(new CblImportSummaryDto
-    //         {
-    //             FileName = cbl.FileName,
-    //             Success = CblImportResult.Fail,
-    //             Results =
-    //             [
-    //                 new CblBookResult
-    //                 {
-    //                     Reason = CblImportReason.InvalidFile
-    //                 }
-    //             ]
-    //         });
-    //     }
-    // }
-
-
-    /// <summary>
-    /// Performs the actual import (assuming dryRun = false)
-    /// </summary>
-    /// <param name="cbl">FormBody with parameter name of cbl</param>
-    /// <param name="dryRun">If true, will only emulate the import but not perform. This should be done to preview what will happen</param>
-    /// <param name="useComicVineMatching">Use comic vine matching or not. Defaults to false</param>
-    /// <returns></returns>
-    // [SwaggerIgnore]
-    // [HttpPost("import")]
-    // [DisallowRole(PolicyConstants.ReadOnlyRole)]
-    // public async Task<ActionResult<CblImportSummaryDto>> ImportCbl(IFormFile cbl, [FromQuery] bool dryRun = false, [FromQuery] bool useComicVineMatching = false)
-    // {
-    //     try
-    //     {
-    //         var userId = UserId;
-    //         var cblReadingList = await SaveAndLoadCblFile(cbl);
-    //         var importSummary = await readingListService.CreateReadingListFromCbl(userId, cblReadingList, dryRun, useComicVineMatching);
-    //         importSummary.FileName = cbl.FileName;
-    //
-    //         return Ok(importSummary);
-    //     } catch (ArgumentNullException)
-    //     {
-    //         return Ok(new CblImportSummaryDto
-    //         {
-    //             FileName = cbl.FileName,
-    //             Success = CblImportResult.Fail,
-    //             Results =
-    //             [
-    //                 new CblBookResult
-    //                 {
-    //                     Reason = CblImportReason.InvalidFile
-    //                 }
-    //             ]
-    //         });
-    //     }
-    //     catch (InvalidOperationException)
-    //     {
-    //         return Ok(new CblImportSummaryDto
-    //         {
-    //             FileName = cbl.FileName,
-    //             Success = CblImportResult.Fail,
-    //             Results =
-    //             [
-    //                 new CblBookResult
-    //                 {
-    //                     Reason = CblImportReason.InvalidFile
-    //                 }
-    //             ]
-    //         });
-    //     }
-    // }
-
     /// <summary>
     /// Saves an uploaded CBL file to disk without importing. Returns the saved file info.
     /// </summary>

@@ -4,6 +4,8 @@ using System.Globalization;
 using System.Linq;
 using Kavita.Common.Extensions;
 using Kavita.Models.DTOs.ReadingLists.CBL;
+using Kavita.Models.DTOs.ReadingLists.CBL.Import;
+using Kavita.Models.DTOs.ReadingLists.CBL.Internal;
 using Kavita.Models.Entities;
 using Kavita.Models.Entities.Enums;
 using Kavita.Models.Entities.ReadingLists;
