@@ -31,6 +31,8 @@
 
     <ItemGroup>
       <Content Include="..\Kavita.Server\config\appsettings.json">
+        <Link>config\appsettings.json</Link>
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       </Content>
     </ItemGroup>
 
