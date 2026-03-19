@@ -18,5 +18,7 @@ export interface CblBookResult {
   readingListName: string;
   reason: CblImportReason;
   matchTier: CblMatchTier | null;
+  chapterId: number;
+  chapterTitle: string;
   candidates: CblSeriesCandidate[];
 }

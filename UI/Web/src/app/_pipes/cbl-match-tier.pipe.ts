@@ -19,6 +19,8 @@ export class CblMatchTierPipe implements PipeTransform {
         return this.translocoService.translate('cbl-match-tier-pipe.external-id');
       case CblMatchTier.ExactName:
         return this.translocoService.translate('cbl-match-tier-pipe.exact-name');
+        case CblMatchTier.ComicVineNaming:
+        return this.translocoService.translate('cbl-match-tier-pipe.comicvine-naming');
       case CblMatchTier.ArticleStripped:
         return this.translocoService.translate('cbl-match-tier-pipe.article-stripped');
       case CblMatchTier.ReprintStripped:

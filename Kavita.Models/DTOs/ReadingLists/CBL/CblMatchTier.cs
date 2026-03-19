@@ -19,21 +19,25 @@ public enum CblMatchTier
     /// </summary>
     ExactName = 2,
     /// <summary>
+    /// Comic Vine naming pattern: Series (VolumeNumber)
+    /// </summary>
+    ComicVineNaming = 3,
+    /// <summary>
     /// Matched after stripping leading articles (The, A, An, etc.)
     /// </summary>
-    ArticleStripped = 3,
+    ArticleStripped = 4,
     /// <summary>
     /// Matched after stripping reprint/edition suffixes
     /// </summary>
-    ReprintStripped = 4,
+    ReprintStripped = 5,
     /// <summary>
     /// Matched via the AlternateSeries field on a chapter
     /// </summary>
-    AlternateSeries = 5,
+    AlternateSeries = 6,
     /// <summary>
     /// Resolved by explicit user decision
     /// </summary>
-    UserDecision = 6,
+    UserDecision = 7,
     /// <summary>
     /// Could not be matched to any Kavita entity
     /// </summary>

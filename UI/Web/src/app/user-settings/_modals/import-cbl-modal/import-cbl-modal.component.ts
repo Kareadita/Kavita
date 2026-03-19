@@ -36,6 +36,7 @@ import {
 } from '@siemens/ngx-datatable';
 import {NgbTooltip} from '@ng-bootstrap/ng-bootstrap';
 import {CdkScrollable} from '@angular/cdk/scrolling';
+import {RouterLink} from '@angular/router';
 
 export interface CblIssueRow {
   result: CblBookResult;
@@ -62,6 +63,7 @@ export interface CblIssueRow {
     DatatableRowDetailTemplateDirective,
     NgbTooltip,
     CdkScrollable,
+    RouterLink,
   ],
   templateUrl: './import-cbl-modal.component.html',
   styleUrl: './import-cbl-modal.component.scss',

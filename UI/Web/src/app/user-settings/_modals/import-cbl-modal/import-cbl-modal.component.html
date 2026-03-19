@@ -30,7 +30,6 @@
         }
       </div>
 
-      <!-- Unified datatable -->
       <ngx-datatable
         class="bootstrap"
         [rows]="allRows()"
@@ -124,7 +123,7 @@
         <ngx-datatable-column [width]="50" [sortable]="false" [draggable]="false" [resizeable]="false">
           <ng-template ngx-datatable-header-template>#</ng-template>
           <ng-template let-row="row" ngx-datatable-cell-template>
-            {{row.result.order}}
+            {{row.result.order + 1}}
           </ng-template>
         </ngx-datatable-column>
 
@@ -163,6 +162,20 @@
               </span>
             } @else {
               <span class="badge bg-danger">{{row.result.reason | cblImportReason}}</span>
+            }
+          </ng-template>
+        </ngx-datatable-column>
+
+        <!-- Matched Chapter -->
+        <ngx-datatable-column [width]="150" [sortable]="false" [draggable]="false" [resizeable]="false">
+          <ng-template ngx-datatable-header-template>{{t('col-matched')}}</ng-template>
+          <ng-template let-row="row" ngx-datatable-cell-template>
+            @if (row.result.reason === CblImportReason.Success && row.result.chapterId > 0) {
+              <a [routerLink]="['/library', row.result.libraryId, 'series', row.result.seriesId, 'chapter', row.result.chapterId]"
+                 fragment="details-tab"
+                 target="_blank">
+                {{row.result.chapterTitle}}
+              </a>
             }
           </ng-template>
         </ngx-datatable-column>

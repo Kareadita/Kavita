@@ -103,6 +103,14 @@ public sealed record CblBookResult
     /// </summary>
     public CblMatchTier? MatchTier { get; set; }
     /// <summary>
+    /// The matched chapter's ID (0 if not matched)
+    /// </summary>
+    public int ChapterId { get; set; }
+    /// <summary>
+    /// Display title of the matched chapter (e.g., range or title)
+    /// </summary>
+    public string ChapterTitle { get; set; } = string.Empty;
+    /// <summary>
     /// When a SeriesCollision occurs, the candidate series the user can choose from
     /// </summary>
     public IList<CblSeriesCandidate> Candidates { get; set; }

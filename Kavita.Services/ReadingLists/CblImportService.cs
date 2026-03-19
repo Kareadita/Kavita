@@ -101,7 +101,13 @@ public class CblImportService(IUnitOfWork unitOfWork, ICblGithubService cblGithu
                 {
                     matchResults[order] = (
                         new MatchedItem(decision.SeriesId, decision.VolumeId, decision.ChapterId, CblMatchTier.UserDecision),
-                        new CblBookResult(item) { Reason = CblImportReason.Success, MatchTier = CblMatchTier.UserDecision }
+                        new CblBookResult(item)
+                        {
+                            Reason = CblImportReason.Success,
+                            MatchTier = CblMatchTier.UserDecision,
+                            SeriesId = decision.SeriesId,
+                            ChapterId = decision.ChapterId
+                        }
                     );
                 }
             }
