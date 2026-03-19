@@ -293,15 +293,20 @@ public class ReaderController(ICacheService cacheService,
         var user = await unitOfWork.UserRepository.GetUserByIdAsync(UserId, AppUserIncludes.Progress, HttpContext.RequestAborted);
         if (user == null) return Unauthorized();
 
+        if (!await unitOfWork.UserRepository.HasAccessToChapter(UserId, dto.ChapterId))
+            return NotFound();
+
         var chapter = await unitOfWork.ChapterRepository.GetChapterAsync(dto.ChapterId);
         if (chapter == null) return NotFound();
 
         if (dto.GenerateReadingSession)
         {
-            await readingSessionService.GenerateReadingSessionForChapters(UserId, dto.SeriesId, [dto.ChapterId], CancellationToken.None);
+            await readingSessionService.GenerateReadingSessionForChapters(UserId, dto.SeriesId, [dto.ChapterId], HttpContext.RequestAborted);
         }
 
         await readerService.MarkChaptersAsRead(user, dto.SeriesId, [chapter]);
+
+        await unitOfWork.CommitAsync();
 
         return Ok();
     }
@@ -321,7 +326,7 @@ public class ReaderController(ICacheService cacheService,
         {
             if (markReadDto.GenerateReadingSession)
             {
-                await readingSessionService.GenerateReadingSessionForSeries(UserId, markReadDto.SeriesId, CancellationToken.None);
+                await readingSessionService.GenerateReadingSessionForSeries(UserId, markReadDto.SeriesId, HttpContext.RequestAborted);
             }
 
             await readerService.MarkSeriesAsRead(user, markReadDto.SeriesId);
@@ -394,7 +399,7 @@ public class ReaderController(ICacheService cacheService,
 
             if (markVolumeReadDto.GenerateReadingSession)
             {
-                await readingSessionService.GenerateReadingSessionForVolumes(UserId, markVolumeReadDto.SeriesId, [markVolumeReadDto.VolumeId], CancellationToken.None);
+                await readingSessionService.GenerateReadingSessionForVolumes(UserId, markVolumeReadDto.SeriesId, [markVolumeReadDto.VolumeId], HttpContext.RequestAborted);
             }
 
             await readerService.MarkChaptersAsRead(user, markVolumeReadDto.SeriesId, chapters);
@@ -432,7 +437,7 @@ public class ReaderController(ICacheService cacheService,
 
         if (dto.GenerateReadingSession)
         {
-            await readingSessionService.GenerateReadingSessionForVolumes(UserId, dto.SeriesId, [.. dto.VolumeIds], CancellationToken.None);
+            await readingSessionService.GenerateReadingSessionForVolumes(UserId, dto.SeriesId, [.. dto.VolumeIds], HttpContext.RequestAborted);
         }
 
         var chapterIds = await unitOfWork.VolumeRepository.GetChapterIdsByVolumeIds(dto.VolumeIds);
@@ -497,7 +502,7 @@ public class ReaderController(ICacheService cacheService,
         {
             foreach (var sId in dto.SeriesIds)
             {
-                await readingSessionService.GenerateReadingSessionForSeries(UserId, sId, CancellationToken.None);
+                await readingSessionService.GenerateReadingSessionForSeries(UserId, sId, HttpContext.RequestAborted);
             }
         }
 

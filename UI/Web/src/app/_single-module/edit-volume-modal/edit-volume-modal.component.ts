@@ -22,7 +22,7 @@ import {DownloadService} from '../../shared/_services/download.service';
 import {DownloadEntityType} from '../../shared/_models/download-queue-item';
 import {LibraryType} from "../../_models/library/library";
 import {PersonRole} from "../../_models/metadata/person";
-import {concat, forkJoin} from "rxjs";
+import {concat} from "rxjs";
 import {MangaFormat} from 'src/app/_models/manga-format';
 import {MangaFile} from "../../_models/manga-file";
 import {BreakpointService} from "../../_services/breakpoint.service";

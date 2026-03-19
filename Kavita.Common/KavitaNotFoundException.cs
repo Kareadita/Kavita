@@ -3,7 +3,7 @@ using System;
 namespace Kavita.Common;
 
 /// <summary>
-/// Exception that is catched by the exception middleware, and return NotFound
+/// Exception that is caught by the exception middleware, and returns NotFound
 /// </summary>
 public class KavitaNotFoundException: Exception
 {

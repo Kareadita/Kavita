@@ -211,8 +211,9 @@ public class ReaderService(IUnitOfWork unitOfWork, ILogger<ReaderService> logger
     /// </summary>
     /// <param name="progressDto"></param>
     /// <param name="userId"></param>
+    /// <param name="saveToReadingSession"></param>
     /// <returns></returns>
-    public async Task<bool> SaveReadingProgress(ProgressDto progressDto, int userId)
+    public async Task<bool> SaveReadingProgress(ProgressDto progressDto, int userId, bool saveToReadingSession = true)
     {
         // Don't let user save past total pages.
         var pageInfo = await CapPageToChapter(progressDto.ChapterId, progressDto.PageNum);
@@ -261,7 +262,11 @@ public class ReaderService(IUnitOfWork unitOfWork, ILogger<ReaderService> logger
 
             if (!unitOfWork.HasChanges() || await unitOfWork.CommitAsync())
             {
-                BackgroundJob.Enqueue(() => readingSessionService.UpdateProgress(userId, progressDto, clientInfoAccessor.Current, clientInfoAccessor.CurrentDeviceId));
+
+                if (saveToReadingSession)
+                {
+                    BackgroundJob.Enqueue(() => readingSessionService.UpdateProgress(userId, progressDto, clientInfoAccessor.Current, clientInfoAccessor.CurrentDeviceId));
+                }
 
                 var user = await unitOfWork.UserRepository.GetUserByIdAsync(userId);
                 await eventHub.SendMessageAsync(MessageFactory.UserProgressUpdate,

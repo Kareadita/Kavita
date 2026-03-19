@@ -31,10 +31,10 @@ public class PanelsController(IReaderService readerService, IUnitOfWork unitOfWo
 
         if (dto.PageNum >= chapter.Pages)
         {
-            await readingSessionService.GenerateReadingSessionForChapters(UserId, dto.SeriesId, [dto.ChapterId], CancellationToken.None);
+            await readingSessionService.GenerateReadingSessionForChapters(UserId, dto.SeriesId, [dto.ChapterId], HttpContext.RequestAborted);
         }
 
-        await readerService.SaveReadingProgress(dto, UserId);
+        await readerService.SaveReadingProgress(dto, UserId, dto.PageNum < chapter.Pages);
         return Ok();
     }
 
