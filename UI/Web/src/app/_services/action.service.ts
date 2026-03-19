@@ -173,7 +173,9 @@ export class ActionService {
   handleSeriesAction(action: ActionItem<Series>, series: Series) {
     switch (action.action) {
       case Action.MarkAsRead:
-        return this.seriesService.markRead(series.id).pipe(
+      case Action.MarkAsReadWithSession:
+        const generateReadingSession = action.action === Action.MarkAsReadWithSession;
+        return this.seriesService.markRead(series.id, generateReadingSession).pipe(
           tap(() => this.toastr.success(translate('toasts.entity-read', {name: series.name}))),
           map(() => this.fromAction(action, { ...series, pagesRead: series.pages }, 'update'))
         );
@@ -381,7 +383,9 @@ export class ActionService {
   handleVolumeAction(action: ActionItem<Volume>, volume: Volume, seriesId: number, libraryId: number, libraryType: LibraryType) {
     switch (action.action) {
       case Action.MarkAsRead:
-        return this.readerService.markVolumeRead(seriesId, volume.id).pipe(
+      case Action.MarkAsReadWithSession:
+        const generateReadingSession = action.action === Action.MarkAsReadWithSession;
+        return this.readerService.markVolumeRead(seriesId, volume.id, generateReadingSession).pipe(
           tap(() => this.toastr.success(translate('toasts.mark-read'))),
           map(() => {
             const updated = {
@@ -503,7 +507,9 @@ export class ActionService {
     switch (action.action) {
 
       case Action.MarkAsRead:
-        return this.readerService.saveProgress(libraryId, seriesId, chapter.volumeId, chapter.id, chapter.pages).pipe(
+      case Action.MarkAsReadWithSession:
+        const generateReadingSession = action.action === Action.MarkAsReadWithSession;
+        return this.readerService.markChapterRead(seriesId, chapter.id, generateReadingSession).pipe(
           tap(() => this.toastr.success(translate('toasts.mark-read'))),
           map(() => {
             const updated = {
@@ -515,7 +521,7 @@ export class ActionService {
         );
 
       case Action.MarkAsUnread:
-        return this.readerService.saveProgress(libraryId, seriesId, chapter.volumeId, chapter.id, 9).pipe(
+        return this.readerService.saveProgress(libraryId, seriesId, chapter.volumeId, chapter.id, 0).pipe(
           tap(() => this.toastr.success(translate('toasts.mark-unread'))),
           map(() => {
             const updated = {
@@ -883,7 +889,9 @@ export class ActionService {
   handleBulkSeriesAction(action: ActionItem<any>, series: Series[]): Observable<ActionResult<Series[]>> {
     switch (action.action) {
       case Action.MarkAsRead:
-        return this.readerService.markMultipleSeriesRead(series.map(s => s.id)).pipe(
+      case Action.MarkAsReadWithSession:
+        const generateReadingSession = action.action === Action.MarkAsReadWithSession;
+        return this.readerService.markMultipleSeriesRead(series.map(s => s.id), generateReadingSession).pipe(
           tap(() => {
             series.forEach(s => s.pagesRead = s.pages);
             this.toastr.success(translate('toasts.mark-read'));
@@ -1055,7 +1063,9 @@ export class ActionService {
   handleBulkVolumeChapterAction(action: ActionItem<any>, volumes: Volume[], chapters: Chapter[], seriesId: number, libraryId = 0): Observable<ActionResult<any[]>> {
     switch (action.action) {
       case Action.MarkAsRead:
-        return this.readerService.markMultipleRead(seriesId, volumes.map(v => v.id), chapters.map(c => c.id)).pipe(
+      case Action.MarkAsReadWithSession:
+        const generateReadingSession = action.action === Action.MarkAsReadWithSession;
+        return this.readerService.markMultipleRead(seriesId, volumes.map(v => v.id), chapters.map(c => c.id), generateReadingSession).pipe(
           tap(() => {
             volumes.forEach(v => {
               v.pagesRead = v.pages;

@@ -103,8 +103,8 @@ export class SeriesService {
     return this.httpClient.post<Series>(this.baseUrl + 'series/update', model);
   }
 
-  markRead(seriesId: number) {
-    return this.httpClient.post<void>(this.baseUrl + 'reader/mark-read', {seriesId});
+  markRead(seriesId: number, generateReadingSession: boolean = false) {
+    return this.httpClient.post<void>(this.baseUrl + 'reader/mark-read', {seriesId, generateReadingSession});
   }
 
   markUnread(seriesId: number) {

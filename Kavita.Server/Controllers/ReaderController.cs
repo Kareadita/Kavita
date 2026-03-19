@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using Hangfire;
 using Kavita.API.Attributes;
@@ -18,6 +19,7 @@ using Kavita.Models.DTOs.Filtering.v2;
 using Kavita.Models.DTOs.Progress;
 using Kavita.Models.DTOs.Reader;
 using Kavita.Models.DTOs.SignalR;
+using Kavita.Models.Entities;
 using Kavita.Models.Entities.Enums;
 using Kavita.Models.Entities.Progress;
 using Kavita.Models.Entities.User;
@@ -41,7 +43,7 @@ public class ReaderController(ICacheService cacheService,
     IReaderService readerService, IBookmarkService bookmarkService, IEventHub eventHub,
     IScrobblingService scrobblingService,
     ILocalizationService localizationService,
-    IBookService bookService) : BaseApiController
+    IBookService bookService, IReadingSessionService readingSessionService) : BaseApiController
 {
 
     /// <summary>
@@ -285,6 +287,25 @@ public class ReaderController(ICacheService cacheService,
         return Ok(info);
     }
 
+    [HttpPost("mark-chapter-read")]
+    public async Task<ActionResult> MarkChapterAsRead(MarkChapterReadDto dto)
+    {
+        var user = await unitOfWork.UserRepository.GetUserByIdAsync(UserId, AppUserIncludes.Progress, HttpContext.RequestAborted);
+        if (user == null) return Unauthorized();
+
+        var chapter = await unitOfWork.ChapterRepository.GetChapterAsync(dto.ChapterId);
+        if (chapter == null) return NotFound();
+
+        if (dto.GenerateReadingSession)
+        {
+            await readingSessionService.GenerateReadingSessionForChapters(UserId, dto.SeriesId, [dto.ChapterId], CancellationToken.None);
+        }
+
+        await readerService.MarkChaptersAsRead(user, dto.SeriesId, [chapter]);
+
+        return Ok();
+    }
+
 
     /// <summary>
     /// Marks a Series as read. All volumes and chapters will be marked as read during this process.
@@ -298,6 +319,11 @@ public class ReaderController(ICacheService cacheService,
         if (user == null) return Unauthorized();
         try
         {
+            if (markReadDto.GenerateReadingSession)
+            {
+                await readingSessionService.GenerateReadingSessionForSeries(UserId, markReadDto.SeriesId, CancellationToken.None);
+            }
+
             await readerService.MarkSeriesAsRead(user, markReadDto.SeriesId);
         }
         catch (KavitaException ex)
@@ -365,6 +391,12 @@ public class ReaderController(ICacheService cacheService,
         if (user == null) return Unauthorized();
         try
         {
+
+            if (markVolumeReadDto.GenerateReadingSession)
+            {
+                await readingSessionService.GenerateReadingSessionForVolumes(UserId, markVolumeReadDto.SeriesId, [markVolumeReadDto.VolumeId], CancellationToken.None);
+            }
+
             await readerService.MarkChaptersAsRead(user, markVolumeReadDto.SeriesId, chapters);
 
         }
@@ -397,6 +429,11 @@ public class ReaderController(ICacheService cacheService,
         var user = await unitOfWork.UserRepository.GetUserByUsernameAsync(Username!, AppUserIncludes.Progress);
         if (user == null) return Unauthorized();
         user.Progresses ??= [];
+
+        if (dto.GenerateReadingSession)
+        {
+            await readingSessionService.GenerateReadingSessionForVolumes(UserId, dto.SeriesId, [.. dto.VolumeIds], CancellationToken.None);
+        }
 
         var chapterIds = await unitOfWork.VolumeRepository.GetChapterIdsByVolumeIds(dto.VolumeIds);
         foreach (var chapterId in dto.ChapterIds)
@@ -455,6 +492,14 @@ public class ReaderController(ICacheService cacheService,
         var user = await unitOfWork.UserRepository.GetUserByUsernameAsync(Username!, AppUserIncludes.Progress);
         if (user == null) return Unauthorized();
         user.Progresses ??= new List<AppUserProgress>();
+
+        if (dto.GenerateReadingSession)
+        {
+            foreach (var sId in dto.SeriesIds)
+            {
+                await readingSessionService.GenerateReadingSessionForSeries(UserId, sId, CancellationToken.None);
+            }
+        }
 
         var volumes = await unitOfWork.VolumeRepository.GetVolumesForSeriesAsync(dto.SeriesIds.ToArray(), true);
         foreach (var volume in volumes)
@@ -863,30 +908,7 @@ public class ReaderController(ICacheService cacheService,
     [ResponseCache(CacheProfileName = ResponseCacheProfiles.Hour, VaryByQueryKeys = ["seriesId", "chapterId"])]
     public async Task<ActionResult<HourEstimateRangeDto>> GetEstimateToCompletionForChapter(int seriesId, int chapterId)
     {
-        var userId = UserId;
-        var series = await unitOfWork.SeriesRepository.GetSeriesDtoByIdAsync(seriesId, userId);
-        var chapter = await unitOfWork.ChapterRepository.GetChapterDtoAsync(chapterId, userId);
-        if (series == null || chapter == null) return BadRequest(await localizationService.Translate(UserId, "generic-error"));
-
-        if (series.Format == MangaFormat.Epub)
-        {
-            // Get the word counts for all the pages
-            var pageCounts = await bookService.GetWordCountsPerPage(chapter.Files.First().FilePath); // TODO: Cache
-            if (pageCounts == null) return ReaderService.GetTimeEstimate(series.WordCount, 0, true);
-
-            // Sum character counts only for pages that have been read
-            var totalCharactersRead = pageCounts
-                .Where(kvp => kvp.Key <= chapter.PagesRead)
-                .Sum(kvp => kvp.Value);
-
-            var progressCount = WordCountAnalyzerService.GetWordCount(totalCharactersRead);
-            var wordsLeft = series.WordCount - progressCount;
-            return ReaderService.GetTimeEstimate(wordsLeft, 0, true);
-        }
-
-        var pagesLeft = chapter.Pages - chapter.PagesRead;
-
-        return Ok(ReaderService.GetTimeEstimate(0, pagesLeft, false));
+        return Ok(await readerService.GetEstimateToCompletionForChapter(UserId, seriesId, chapterId));
     }
 
 

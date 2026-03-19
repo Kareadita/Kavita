@@ -5,4 +5,5 @@ namespace Kavita.Models.DTOs.Reader;
 public sealed record MarkMultipleSeriesAsReadDto
 {
     public IReadOnlyList<int> SeriesIds { get; init; } = default!;
+    public bool GenerateReadingSession { get; init; }
 }

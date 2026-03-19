@@ -22,6 +22,7 @@ using Kavita.Models.Entities.Progress;
 using Kavita.Models.Entities.User;
 using Kavita.Services.Comparators;
 using Kavita.Services.Extensions;
+using Kavita.Services.Metadata;
 using Kavita.Services.Scanner;
 using Microsoft.Extensions.Logging;
 
@@ -30,7 +31,7 @@ namespace Kavita.Services.Reading;
 public class ReaderService(IUnitOfWork unitOfWork, ILogger<ReaderService> logger, IEventHub eventHub, IImageService imageService,
     IDirectoryService directoryService, IScrobblingService scrobblingService, IReadingSessionService readingSessionService,
     IClientInfoAccessor clientInfoAccessor, ISeriesService seriesService, IEntityNamingService namingService,
-    ILocalizationService localizationService)
+    ILocalizationService localizationService, IBookService bookService)
     : IReaderService
 {
     private readonly ChapterSortComparerDefaultLast _chapterSortComparerDefaultLast = ChapterSortComparerDefaultLast.Default;
@@ -42,7 +43,7 @@ public class ReaderService(IUnitOfWork unitOfWork, ILogger<ReaderService> logger
     private const float MinPagesPerMinute = IReaderService.MinPagesPerMinute;
     private const float MaxPagesPerMinute = IReaderService.MaxPagesPerMinute;
     public const float AvgWordsPerHour = IReaderService.AvgWordsPerHour;
-    public const float AvgPagesPerMinute = IReaderService.AvgWordsPerHour;
+    public const float AvgPagesPerMinute = IReaderService.AvgPagesPerMinute;
 
 
     public static string FormatBookmarkFolderPath(string baseDirectory, int userId, int seriesId, int chapterId)
@@ -618,6 +619,34 @@ public class ReaderService(IUnitOfWork unitOfWork, ILogger<ReaderService> logger
         }
     }
 
+    public async Task<HourEstimateRangeDto> GetEstimateToCompletionForChapter(int userId, int seriesId, int chapterId)
+    {
+        var series = await unitOfWork.SeriesRepository.GetSeriesDtoByIdAsync(seriesId, userId);
+        var chapter = await unitOfWork.ChapterRepository.GetChapterDtoAsync(chapterId, userId);
+        if (series == null || chapter == null)
+            throw new KavitaException(await localizationService.Translate(userId, "generic-error"));
+
+        if (series.Format == MangaFormat.Epub)
+        {
+            // Get the word counts for all the pages
+            var pageCounts = await bookService.GetWordCountsPerPage(chapter.Files.First().FilePath); // TODO: Cache
+            if (pageCounts == null) return GetTimeEstimate(series.WordCount, 0, true);
+
+            // Sum character counts only for pages that have been read
+            var totalCharactersRead = pageCounts
+                .Where(kvp => kvp.Key <= chapter.PagesRead)
+                .Sum(kvp => kvp.Value);
+
+            var progressCount = WordCountAnalyzerService.GetWordCount(totalCharactersRead);
+            var wordsLeft = series.WordCount - progressCount;
+            return GetTimeEstimate(wordsLeft, 0, true);
+        }
+
+        var pagesLeft = chapter.Pages - chapter.PagesRead;
+
+        return GetTimeEstimate(0, pagesLeft, false);
+    }
+
     public static HourEstimateRangeDto GetTimeEstimate(long wordCount, int pageCount, bool isEpub)
     {
         if (isEpub)
@@ -629,7 +658,8 @@ public class ReaderService(IUnitOfWork unitOfWork, ILogger<ReaderService> logger
             {
                 MinHours = Math.Min(minHours, maxHours),
                 MaxHours = Math.Max(minHours, maxHours),
-                AvgHours = wordCount / AvgWordsPerHour
+                AvgHours = wordCount / AvgWordsPerHour,
+                WordCount = wordCount
             };
         }
 
@@ -640,7 +670,8 @@ public class ReaderService(IUnitOfWork unitOfWork, ILogger<ReaderService> logger
         {
             MinHours = Math.Min(minHoursPages, maxHoursPages),
             MaxHours = Math.Max(minHoursPages, maxHoursPages),
-            AvgHours = pageCount / AvgPagesPerMinute / 60F
+            AvgHours = pageCount / AvgPagesPerMinute / 60F,
+            PageCount = pageCount
         };
     }
 

@@ -1472,6 +1472,7 @@
         "items-selected": "{{num}} items selected",
         "mark-as-unread": "Mark as Unread",
         "mark-as-read": "Mark as Read",
+        "mark-as-read-with-session": "Mark as Read with Session",
         "deselect-all": "{{common.deselect-all}}"
     },
 
@@ -2886,7 +2887,8 @@
         "yesterday": "Yesterday",
         "pagination-label": "Activity pagination",
         "page-info": "Page {{current}} of {{total}} ({{items}} total records)",
-        "num-more": "{{num}} more"
+        "num-more": "{{num}} more",
+        "generated-session-tooltip": "This reading session has been automatically generated based on an estimate"
     },
 
     "user-stats-info-cards": {
@@ -3467,6 +3469,8 @@
         "edit-tooltip": "Edit settings or details",
         "mark-as-read": "Mark as Read",
         "mark-as-read-tooltip": "Mark progress as fully read",
+        "mark-as-read-with-session": "Mark as Read with Session",
+        "mark-as-read-with-session-tooltip": "Mark progress as fully read and generate a session for it",
         "mark-as-unread": "Mark as Unread",
         "mark-as-unread-tooltip": "Mark progress as not read",
         "scan-series": "Scan Series",

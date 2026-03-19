@@ -3,4 +3,5 @@
 public sealed record MarkReadDto
 {
     public int SeriesId { get; init; }
+    public bool GenerateReadingSession { get; init; }
 }

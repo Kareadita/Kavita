@@ -54,7 +54,8 @@ public class ReaderServiceRereadTests
             Substitute.For<IClientInfoAccessor>(),
             _seriesService,
             Substitute.For<IEntityNamingService>(),
-            Substitute.For<ILocalizationService>()
+            Substitute.For<ILocalizationService>(),
+            Substitute.For<IBookService>()
         );
     }
 

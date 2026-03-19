@@ -201,6 +201,7 @@ export class ActionFactoryService {
     if (!entity.hasOwnProperty('pagesRead') && !entity.hasOwnProperty('pages')) return true;
     switch (action.action) {
       case(Action.MarkAsRead):
+      case(Action.MarkAsReadWithSession):
         return entity.pagesRead < entity.pages;
       case(Action.MarkAsUnread):
         return entity.pagesRead !== 0;
@@ -422,7 +423,7 @@ export class ActionFactoryService {
 
     this.seriesActions = [
       {
-        action: Action.MarkAsRead,
+        action: Action.Submenu,
         title: 'mark-as-read',
         description: 'mark-as-read-tooltip',
 
@@ -430,7 +431,30 @@ export class ActionFactoryService {
         shouldRender: this.dummyShouldRender,
 
         requiredRoles: [],
-        children: [],
+        children: [
+          {
+            action: Action.MarkAsRead,
+            title: 'mark-as-read',
+            description: 'mark-as-read-tooltip',
+
+            callback: this.dummyCallback,
+            shouldRender: this.dummyShouldRender,
+
+            requiredRoles: [],
+            children: [],
+          },
+          {
+            action: Action.MarkAsReadWithSession,
+            title: 'mark-as-read-with-session',
+            description: 'mark-as-read-with-session-tooltip',
+
+            callback: this.dummyCallback,
+            shouldRender: this.dummyShouldRender,
+
+            requiredRoles: [],
+            children: [],
+          }
+        ],
       },
       {
         action: Action.MarkAsUnread,
@@ -675,7 +699,7 @@ export class ActionFactoryService {
         children: [],
       },
       {
-        action: Action.MarkAsRead,
+        action: Action.Submenu,
         title: 'mark-as-read',
         description: 'mark-as-read-tooltip',
 
@@ -683,7 +707,30 @@ export class ActionFactoryService {
         shouldRender: this.dummyShouldRender,
 
         requiredRoles: [],
-        children: [],
+        children: [
+          {
+            action: Action.MarkAsRead,
+            title: 'mark-as-read',
+            description: 'mark-as-read-tooltip',
+
+            callback: this.dummyCallback,
+            shouldRender: this.dummyShouldRender,
+
+            requiredRoles: [],
+            children: [],
+          },
+          {
+            action: Action.MarkAsReadWithSession,
+            title: 'mark-as-read-with-session',
+            description: 'mark-as-read-with-session-tooltip',
+
+            callback: this.dummyCallback,
+            shouldRender: this.dummyShouldRender,
+
+            requiredRoles: [],
+            children: [],
+          }
+        ],
       },
       {
         action: Action.MarkAsUnread,
@@ -805,7 +852,7 @@ export class ActionFactoryService {
         children: [],
       },
       {
-        action: Action.MarkAsRead,
+        action: Action.Submenu,
         title: 'mark-as-read',
         description: 'mark-as-read-tooltip',
 
@@ -813,7 +860,30 @@ export class ActionFactoryService {
         shouldRender: this.dummyShouldRender,
 
         requiredRoles: [],
-        children: [],
+        children: [
+          {
+            action: Action.MarkAsRead,
+            title: 'mark-as-read',
+            description: 'mark-as-read-tooltip',
+
+            callback: this.dummyCallback,
+            shouldRender: this.dummyShouldRender,
+
+            requiredRoles: [],
+            children: [],
+          },
+          {
+            action: Action.MarkAsReadWithSession,
+            title: 'mark-as-read-with-session',
+            description: 'mark-as-read-with-session-tooltip',
+
+            callback: this.dummyCallback,
+            shouldRender: this.dummyShouldRender,
+
+            requiredRoles: [],
+            children: [],
+          }
+        ],
       },
       {
         action: Action.MarkAsUnread,

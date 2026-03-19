@@ -1,4 +1,7 @@
-﻿using System.Threading.Tasks;
+﻿using System.Collections.Generic;
+using System.Threading;
+using System.Threading.Tasks;
+using Hangfire;
 using Kavita.API.Database;
 using Kavita.API.Services.Reading;
 using Kavita.Models.DTOs.Progress;
@@ -9,7 +12,7 @@ namespace Kavita.Server.Controllers;
 /// <summary>
 /// For the Panels app explicitly
 /// </summary>
-public class PanelsController(IReaderService readerService, IUnitOfWork unitOfWork) : BaseApiController
+public class PanelsController(IReaderService readerService, IUnitOfWork unitOfWork, IReadingSessionService readingSessionService) : BaseApiController
 {
     /// <summary>
     /// Saves the progress of a given chapter.
@@ -20,6 +23,17 @@ public class PanelsController(IReaderService readerService, IUnitOfWork unitOfWo
     [HttpPost("save-progress")]
     public async Task<ActionResult> SaveProgress(ProgressDto dto, [FromQuery] string apiKey)
     {
+        if (!await unitOfWork.UserRepository.HasAccessToChapter(UserId, dto.ChapterId))
+            return NotFound();
+
+        var chapter = await unitOfWork.ChapterRepository.GetChapterAsync(dto.ChapterId);
+        if (chapter == null) return NotFound();
+
+        if (dto.PageNum >= chapter.Pages)
+        {
+            await readingSessionService.GenerateReadingSessionForChapters(UserId, dto.SeriesId, [dto.ChapterId], CancellationToken.None);
+        }
+
         await readerService.SaveReadingProgress(dto, UserId);
         return Ok();
     }

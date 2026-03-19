@@ -24,7 +24,12 @@ public class ExceptionMiddleware(RequestDelegate next, ILogger<ExceptionMiddlewa
         }
         catch (Exception ex) when (ex is KavitaUnauthenticatedUserException or UnauthorizedAccessException)
         {
-            context.Response.StatusCode = (int) HttpStatusCode.Unauthorized;
+            context.Response.StatusCode = (int)HttpStatusCode.Unauthorized;
+            await context.Response.CompleteAsync();
+        }
+        catch (Exception ex) when (ex is KavitaNotFoundException)
+        {
+            context.Response.StatusCode = (int)HttpStatusCode.NotFound;
             await context.Response.CompleteAsync();
         }
         catch (Exception ex)

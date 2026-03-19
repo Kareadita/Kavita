@@ -16,4 +16,5 @@ public sealed record MarkVolumesReadDto
     /// A list of additional Chapters to mark as read
     /// </summary>
     public IReadOnlyList<int> ChapterIds { get; set; } = default!;
+    public bool GenerateReadingSession { get; init; }
 }

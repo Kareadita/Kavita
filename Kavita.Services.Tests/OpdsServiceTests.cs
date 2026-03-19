@@ -47,7 +47,7 @@ public class OpdsServiceTests(ITestOutputHelper testOutputHelper) : AbstractDbTe
             Substitute.For<IEventHub>(), Substitute.For<IImageService>(), ds,
             Substitute.For<IScrobblingService>(), Substitute.For<IReadingSessionService>(),
             Substitute.For<IClientInfoAccessor>(), Substitute.For<ISeriesService>(), Substitute.For<IEntityNamingService>(),
-            Substitute.For<ILocalizationService>());
+            Substitute.For<ILocalizationService>(), Substitute.For<IBookService>());
 
         var localizationService =
             new LocalizationService(ds, new MockHostingEnvironment(), Substitute.For<IMemoryCache>(), unitOfWork);

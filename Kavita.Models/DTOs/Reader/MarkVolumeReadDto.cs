@@ -4,4 +4,5 @@ public sealed record MarkVolumeReadDto
 {
     public int SeriesId { get; init; }
     public int VolumeId { get; init; }
+    public bool GenerateReadingSession { get; init; }
 }

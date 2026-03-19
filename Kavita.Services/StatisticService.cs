@@ -1659,6 +1659,7 @@ public class StatisticService(ILogger<StatisticService> logger, IDataContext con
             {
                 a.Id,
                 a.AppUserReadingSessionId,
+                a.ReadingSession.Generated,
                 a.StartTimeUtc,
                 EndTimeUtc = a.EndTimeUtc!.Value,
 
@@ -1777,6 +1778,7 @@ public class StatisticService(ILogger<StatisticService> logger, IDataContext con
                 {
                     SessionDataIds =  x.Select(s => s.Id).ToList(),
                     SessionId = first.AppUserReadingSessionId,
+                    GeneratedSession = first.Generated,
                     StartTimeUtc = startTime,
                     EndTimeUtc = endTime,
                     LocalDate = localStart.Date,
