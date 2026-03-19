@@ -20,6 +20,19 @@ public class ReadingListRemapRuleRepository(DataContext context) : IReadingListR
             .ToListAsync(ct);
     }
 
+    public async Task<IList<ReadingListRemapRule>> GetRulesForUserAsync(int userId, CancellationToken ct = default)
+    {
+        return await context.ReadingListRemapRule
+            .Where(r => r.AppUserId == userId || r.AppUserId == null)
+            .OrderByDescending(r => r.AppUserId.HasValue)
+            .ToListAsync(ct);
+    }
+
+    public async Task<ReadingListRemapRule?> GetByIdAsync(int id, CancellationToken ct = default)
+    {
+        return await context.ReadingListRemapRule.FindAsync([id], ct);
+    }
+
     public void Add(ReadingListRemapRule rule)
     {
         context.ReadingListRemapRule.Add(rule);

@@ -116,9 +116,9 @@ internal static class CblSeriesMatcher
             var normalizedName = item.SeriesName.ToNormalized();
 
             // Tier 0: Remap rules
-            if (TryMatchByRemapRule(item, normalizedName, rulesByName, out var ruleMatch))
+            if (TryMatchByRemapRule(item, normalizedName, rulesByName, matchedSeries, out var remapResult))
             {
-                results[item.Order] = (ruleMatch, new CblBookResult(item) { Reason = CblImportReason.Success, MatchTier = CblMatchTier.RemapRule });
+                results[item.Order] = remapResult!.Value;
                 continue;
             }
 
@@ -152,9 +152,11 @@ internal static class CblSeriesMatcher
     }
 
     private static bool TryMatchByRemapRule(ParsedCblItem item, string normalizedName,
-        Dictionary<string, List<ReadingListRemapRule>> rulesByName, out MatchedItem match)
+        Dictionary<string, List<ReadingListRemapRule>> rulesByName,
+        IList<Series> matchedSeries,
+        out (MatchedItem? Match, CblBookResult Result)? resolvedResult)
     {
-        match = null!;
+        resolvedResult = null;
         if (!rulesByName.TryGetValue(normalizedName, out var rules)) return false;
 
         // Try most specific first (volume + number), then less specific
@@ -171,12 +173,29 @@ internal static class CblSeriesMatcher
 
         if (rule.ChapterId.HasValue && rule.VolumeId.HasValue)
         {
-            match = new MatchedItem(rule.SeriesId, rule.VolumeId.Value, rule.ChapterId.Value, CblMatchTier.RemapRule);
+            resolvedResult = (
+                new MatchedItem(rule.SeriesId, rule.VolumeId.Value, rule.ChapterId.Value, CblMatchTier.RemapRule),
+                new CblBookResult(item) { Reason = CblImportReason.Success, MatchTier = CblMatchTier.RemapRule }
+            );
             return true;
         }
 
-        // Rule only mapped to series — we still need to resolve chapter
-        return false;
+        // Rule only mapped to series — resolve chapter within the mapped series
+        var series = matchedSeries.FirstOrDefault(s => s.Id == rule.SeriesId);
+        if (series != null)
+        {
+            resolvedResult = ResolveChapter(item, series, CblMatchTier.RemapRule);
+            return true;
+        }
+
+        // Series from the rule wasn't in our pre-fetched data — report as series matched but chapter unresolved
+        resolvedResult = (null, new CblBookResult(item)
+        {
+            Reason = CblImportReason.ChapterMissing,
+            MatchTier = CblMatchTier.RemapRule,
+            SeriesId = rule.SeriesId
+        });
+        return true;
     }
 
     private static bool TryMatchByExternalId(ParsedCblItem item,

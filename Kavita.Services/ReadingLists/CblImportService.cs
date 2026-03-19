@@ -294,6 +294,21 @@ public class CblImportService(IUnitOfWork unitOfWork, ICblGithubService cblGithu
             .GetAllSeriesByNameAsync(allNormalizedNames, userId, options.ApplicableLibraries,
                 SeriesIncludes.Chapters | SeriesIncludes.Metadata)).ToList();
 
+        // Also fetch series referenced by remap rules that weren't caught by name matching
+        var remapSeriesIds = remapRules
+            .Where(r => !r.ChapterId.HasValue || !r.VolumeId.HasValue)
+            .Select(r => r.SeriesId)
+            .Where(id => matchedSeries.All(s => s.Id != id))
+            .Distinct()
+            .ToList();
+
+        if (remapSeriesIds.Count > 0)
+        {
+            var remapSeries = await unitOfWork.SeriesRepository
+                .GetSeriesByIdsAsync(remapSeriesIds);
+            matchedSeries.AddRange(remapSeries);
+        }
+
         // We'll run AlternateSeries for all names, the matcher will only use it as fallback
         var alternateSeriesChapters = await unitOfWork.ChapterRepository
             .GetChaptersByAlternateSeriesAsync(directNormalizedNames, userLibraryIds);

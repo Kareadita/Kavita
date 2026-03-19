@@ -537,7 +537,6 @@ public class SeriesService(
         }
 
         var specials = new List<ChapterDto>();
-        // Why isn't this doing a check if chapter is not special as it wont get included
         var chapters = volumes
             .SelectMany(v => v.Chapters
                 .Select(c =>

@@ -46,7 +46,7 @@
 
         <ul style="height: 100%" class="list-group list-group-flush">
           @for (readingList of filteredLists(); track readingList.id) {
-            <ng-container [ngTemplateOutlet]="themeOption" [ngTemplateOutletContext]="{ $implicit: readingList, downloaded: true}" />
+            <ng-container [ngTemplateOutlet]="readingListOption" [ngTemplateOutletContext]="{ $implicit: readingList}" />
           } @empty {
             <li class="list-group-item text-muted">{{t('no-results')}}</li>
           }
@@ -164,7 +164,7 @@
   </div>
 
 
-  <ng-template #themeOption let-item let-downloaded="downloaded">
+  <ng-template #readingListOption let-item>
     @if (item !== undefined) {
       <li class="list-group-item d-flex justify-content-between align-items-start clickable rounded mt-1"
           [class.active]="selectedList() && selectedList()?.id === item.id"

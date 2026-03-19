@@ -4,6 +4,9 @@ import {environment} from '../../environments/environment';
 import {CblRepoBrowseResult} from '../_models/reading-list/cbl/cbl-repo-browse-result';
 import {CblRepoItem} from '../_models/reading-list/cbl/cbl-repo-item';
 import {CblImportSummary} from '../_models/reading-list/cbl/cbl-import-summary';
+import {CblSavedFile} from '../_models/reading-list/cbl/cbl-saved-file';
+import {CblImportDecisions} from '../_models/reading-list/cbl/cbl-import-decisions';
+import {RemapRule} from '../_models/reading-list/cbl/remap-rule';
 import {NgxFileDropEntry} from 'ngx-file-drop';
 
 @Injectable({
@@ -22,16 +25,49 @@ export class CblService {
   }
 
   importFromRepo(items: CblRepoItem[]) {
-    return this.httpClient.post(this.baseUrl + 'cbl/repo-import', {items});
+    return this.httpClient.post<CblSavedFile[]>(this.baseUrl + 'cbl/repo-import', {items});
   }
 
   importFromUrl(url: string) {
-    return this.httpClient.post<CblImportSummary>(this.baseUrl + 'cbl/upload-cbl-file', {url});
+    return this.httpClient.post<CblSavedFile>(this.baseUrl + 'cbl/upload-cbl-file', {url});
   }
 
   importFromFile(file: File, fileEntry: NgxFileDropEntry) {
     const formData = new FormData();
     formData.append('cblFile', file, fileEntry.relativePath);
-    return this.httpClient.post<CblImportSummary>(this.baseUrl + 'cbl/file-import', formData);
+    return this.httpClient.post<CblSavedFile>(this.baseUrl + 'cbl/file-import', formData);
+  }
+
+  reValidate(fileName: string) {
+    return this.httpClient.post<CblImportSummary>(this.baseUrl + 'cbl/re-validate', {fileName});
+  }
+
+  finalizeImport(fileName: string, decisions: CblImportDecisions,
+    repoMeta?: { repoPath: string; downloadUrl: string; sha: string }) {
+    return this.httpClient.post<CblImportSummary>(this.baseUrl + 'cbl/finalize-import', {
+      fileName,
+      decisions,
+      ...repoMeta
+    });
+  }
+
+  getRemapRules() {
+    return this.httpClient.get<RemapRule[]>(this.baseUrl + 'cbl/remap-rules');
+  }
+
+  createRemapRule(cblSeriesName: string, seriesId: number, issueDetail?: {
+    cblVolume?: string; cblNumber?: string; volumeId?: number; chapterId?: number;
+  }) {
+    return this.httpClient.post<RemapRule>(this.baseUrl + 'cbl/remap-rules', {
+      cblSeriesName, seriesId, ...issueDetail
+    });
+  }
+
+  updateRemapRule(id: number, update: { volumeId?: number; chapterId?: number; cblVolume?: string; cblNumber?: string }) {
+    return this.httpClient.put<RemapRule>(this.baseUrl + 'cbl/remap-rules/' + id, update);
+  }
+
+  deleteRemapRule(id: number) {
+    return this.httpClient.delete<void>(this.baseUrl + 'cbl/remap-rules/' + id);
   }
 }

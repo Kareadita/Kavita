@@ -46,6 +46,11 @@ public class ReadingListRemapRule
     public Chapter? Chapter { get; set; }
 
     /// <summary>
+    /// The original CBL series name as it appeared in the file (for display)
+    /// </summary>
+    public string CblSeriesName { get; set; } = string.Empty;
+
+    /// <summary>
     /// Snapshot of the series name at time of mapping creation (for auditing)
     /// </summary>
     public string SeriesNameAtMapping { get; set; } = string.Empty;

@@ -615,6 +615,30 @@
         "failure": "Failure"
     },
 
+    "cbl-match-tier-pipe": {
+        "remap-rule": "Remap Rule",
+        "external-id": "External ID",
+        "exact-name": "Exact Name",
+        "article-stripped": "Article Stripped",
+        "reprint-stripped": "Reprint Stripped",
+        "alternate-series": "Alternate Series",
+        "user-decision": "User Decision",
+        "unmatched": "Unmatched"
+    },
+
+    "cbl-import-reason-pipe": {
+        "chapter-missing": "Chapter Missing",
+        "volume-missing": "Volume Missing",
+        "series-missing": "Series Not Found",
+        "name-conflict": "Name Conflict",
+        "all-series-missing": "All Series Missing",
+        "empty-file": "Empty File",
+        "series-collision": "Multiple Series Match",
+        "all-chapter-missing": "All Chapters Missing",
+        "success": "Success",
+        "invalid-file": "Invalid File"
+    },
+
     "cbl-conflict-reason-pipe": {
         "all-series-missing": "Your account is missing access to all series in the list or Kavita does not have anything present in the list.",
         "chapter-missing": "{{series}}: Chapter {{chapter}} is missing from Kavita. This item will be skipped.",
@@ -2072,6 +2096,48 @@
         "no-results": "No matching reading lists"
     },
 
+    "import-cbl-modal": {
+        "title": "CBL Importer",
+        "close": "Close",
+        "matched-count": "{{count}} matched",
+        "issues-count": "{{count}} issues",
+        "matched-items-header": "Matched Items",
+        "issues-header": "Items Needing Attention",
+        "remap-rules-header": "Remap Rules",
+        "tier-label": "Matched via",
+        "skip-item": "Skip",
+        "select-series": "Search for series...",
+        "pick-candidate": "Select correct series",
+        "save-remap-prompt": "Save this mapping as a remap rule for future imports?",
+        "finalize": "Import All",
+        "finalize-single": "Import",
+        "previous-file": "Previous",
+        "next-file": "Next",
+        "file-counter": "File {{current}} of {{total}}",
+        "no-remap-rules": "No remap rules",
+        "delete-rule": "Delete",
+        "manage-rules": "Manage Remap Rules",
+        "col-series": "Series",
+        "col-vol-issue": "Vol / Issue",
+        "col-status": "Status",
+        "col-action": "Action",
+        "select-chapter": "Select the matching chapter...",
+        "resolve": "Resolve",
+        "expand": "Expand row",
+        "collapse": "Collapse row",
+        "undo": "Undo",
+        "remap-rule-used": "Matched via remap rule",
+        "import-success": "Successfully imported {{count}} reading list(s)",
+        "processing": "Processing..."
+    },
+
+    "manage-remap-rules-modal": {
+        "title": "Manage Remap Rules",
+        "close": "Close",
+        "no-rules": "No remap rules saved",
+        "delete-rule": "Delete"
+    },
+
     "browse-cbl-repo-modal": {
         "title": "CBL Repo Browser",
         "rate-limit-warning": "Kavita is coming close to hitting Rate Limit for Github! You have {{remaining}} calls left.",
@@ -2368,9 +2434,9 @@
         "configure-step": "Configure",
         "conflicts-step": "Resolve collisions",
         "finalize-step": "Finalize",
-        "prev": "{{import-cbl-modal.prev}}",
-        "import": "{{import-cbl-modal.import}}",
-        "next": "{{import-cbl-modal.next}}",
+        "prev": "{{import-cbl.prev}}",
+        "import": "{{import-cbl.import}}",
+        "next": "{{import-cbl.next}}",
         "save": "{{common.save}}",
 
         "import-description": "Upload a file you, or someone else, has exported to replace or merge with your current settings.",
@@ -2402,7 +2468,7 @@
         "finalize-title": "Preview of your settings, press save to finish your import"
     },
 
-    "import-cbl-modal": {
+    "import-cbl": {
         "close": "{{common.close}}",
         "title": "CBL Import",
         "help-label": "{{common.help}}",
@@ -3353,6 +3419,10 @@
 
 
     "toasts": {
+        "save-remap-rule": "Save \"{{from}} → {{to}}\" as a remap rule for future imports?",
+        "import-complete": "Import complete",
+        "failed-to-validate": "Failed to validate file",
+        "failed-to-import": "Failed to import {{name}}",
         "no-pages": "There are no pages. Kavita was not able to read this archive.",
         "scan-queued": "Scan queued for {{name}}",
         "server-settings-updated": "Server settings updated",

@@ -1,0 +1,32 @@
+<ng-container *transloco="let t; prefix:'manage-remap-rules-modal'">
+  <div class="modal-header">
+    <h4 class="modal-title">{{t('title')}}</h4>
+    <button type="button" class="btn-close" [attr.aria-label]="t('close')" (click)="close()"></button>
+  </div>
+
+  <div class="modal-body">
+    <div class="list-group list-group-flush">
+      @for (rule of rules(); track rule.id) {
+        <div class="list-group-item d-flex justify-content-between align-items-center py-2">
+          <div>
+            <code>{{rule.cblSeriesName || rule.normalizedCblSeriesName}}</code>
+            <i class="fa fa-arrow-right mx-2" aria-hidden="true"></i>
+            <span>{{rule.seriesNameAtMapping}}</span>
+          </div>
+          @if (rule.appUserId !== null) {
+            <button class="btn btn-sm btn-outline-danger" (click)="deleteRule(rule)"
+                    [title]="t('delete-rule')">
+              <i class="fa fa-trash" aria-hidden="true"></i>
+            </button>
+          }
+        </div>
+      } @empty {
+        <div class="list-group-item text-muted">{{t('no-rules')}}</div>
+      }
+    </div>
+  </div>
+
+  <div class="modal-footer">
+    <button class="btn btn-secondary" (click)="close()">{{t('close')}}</button>
+  </div>
+</ng-container>

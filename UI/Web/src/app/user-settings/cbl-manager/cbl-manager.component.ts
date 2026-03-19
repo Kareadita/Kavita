@@ -8,23 +8,25 @@ import {
   OnInit,
   signal
 } from '@angular/core';
-import {AccountService} from "../../_services/account.service";
-import {ToastrService} from "ngx-toastr";
-import {ConfirmService} from "../../shared/confirm.service";
-import {ModalService} from "../../_services/modal.service";
-import {NgTemplateOutlet} from "@angular/common";
-import {FileSystemFileEntry, NgxFileDropEntry, NgxFileDropModule} from "ngx-file-drop";
-import {ReadingListService} from "../../_services/reading-list.service";
+import {AccountService} from '../../_services/account.service';
+import {ToastrService} from 'ngx-toastr';
+import {ConfirmService} from '../../shared/confirm.service';
+import {ModalService} from '../../_services/modal.service';
+import {NgTemplateOutlet} from '@angular/common';
+import {FileSystemFileEntry, NgxFileDropEntry, NgxFileDropModule} from 'ngx-file-drop';
+import {ReadingListService} from '../../_services/reading-list.service';
 import {ReadingList, ReadingListProvider} from '../../_models/reading-list';
-import {LoadingComponent} from "../../shared/loading/loading.component";
-import {TranslocoDirective} from "@jsverse/transloco";
-import {BrowseCblRepoModalComponent} from "../_modals/browse-cbl-repo-modal/browse-cbl-repo-modal.component";
+import {LoadingComponent} from '../../shared/loading/loading.component';
+import {TranslocoDirective} from '@jsverse/transloco';
+import {BrowseCblRepoModalComponent} from '../_modals/browse-cbl-repo-modal/browse-cbl-repo-modal.component';
+import {ImportCblModalComponent} from '../_modals/import-cbl-modal/import-cbl-modal.component';
 import {CblService} from '../../_services/cbl.service';
 import {CblRepoItem} from '../../_models/reading-list/cbl/cbl-repo-item';
-import {CblImportResult} from '../../_models/reading-list/cbl/cbl-import-result.enum';
+import {CblSavedFile} from '../../_models/reading-list/cbl/cbl-saved-file';
 import {FormControl, FormGroup, ReactiveFormsModule} from '@angular/forms';
 import {PromotedIconComponent} from '../../shared/_components/promoted-icon/promoted-icon.component';
-import {ReadingListProviderPipe} from "../../_pipes/reading-list-provider.pipe";
+import {ReadingListProviderPipe} from '../../_pipes/reading-list-provider.pipe';
+import {forkJoin} from "rxjs";
 
 @Component({
   selector: 'app-cbl-manager',
@@ -89,7 +91,7 @@ export class CblManagerComponent implements OnInit {
   ngOnInit() {
     this.readingListService.getReadingLists(false).subscribe(lists => {
       this.allLists.set(lists.result);
-    })
+    });
   }
 
   openBrowseModal() {
@@ -99,12 +101,12 @@ export class CblManagerComponent implements OnInit {
       if (!selected || selected.length === 0) return;
       this.isUploadingCbl.set(true);
       this.cblService.importFromRepo(selected).subscribe({
-        next: () => {
-          this.toastr.success(`Imported ${selected.length} reading list(s) from repo`);
+        next: (savedFiles) => {
           this.isUploadingCbl.set(false);
+          this.openImportModal(savedFiles);
         },
         error: () => {
-          this.toastr.error('Failed to import from repo');
+          this.toastr.error('Failed to download from repo');
           this.isUploadingCbl.set(false);
         }
       });
@@ -119,30 +121,31 @@ export class CblManagerComponent implements OnInit {
     this.files = files;
     this.isUploadingCbl.set(true);
 
-    for (const droppedFile of files) {
-      if (!droppedFile.fileEntry.isFile) continue;
-      const fileEntry = droppedFile.fileEntry as FileSystemFileEntry;
-
-      fileEntry.file((file: File) => {
-        this.cblService.importFromFile(file, droppedFile).subscribe({
-          next: (summary) => {
-            if (summary.success === CblImportResult.Fail) {
-              this.toastr.error('Failed to import CBL file');
-            } else {
-              this.toastr.success('Imported reading list from file');
-            }
-            this.isUploadingCbl.set(false);
-            this.files = [];
-            this.refreshLists();
-          },
-          error: () => {
-            this.toastr.error('Failed to upload CBL file');
-            this.isUploadingCbl.set(false);
-            this.files = [];
-          }
+    const uploads$ = files
+      .filter(f => f.fileEntry.isFile)
+      .map(droppedFile => {
+        return new Promise<ReturnType<typeof this.cblService.importFromFile>>((resolve) => {
+          const fileEntry = droppedFile.fileEntry as FileSystemFileEntry;
+          fileEntry.file((file: File) => {
+            resolve(this.cblService.importFromFile(file, droppedFile));
+          });
         });
       });
-    }
+
+    Promise.all(uploads$).then(observables => {
+      forkJoin(observables).subscribe({
+        next: (savedFiles) => {
+          this.isUploadingCbl.set(false);
+          this.files = [];
+          this.openImportModal(savedFiles);
+        },
+        error: () => {
+          this.toastr.error('Failed to upload CBL file(s)');
+          this.isUploadingCbl.set(false);
+          this.files = [];
+        }
+      });
+    });
   }
 
   uploadFromUrl() {
@@ -151,11 +154,10 @@ export class CblManagerComponent implements OnInit {
 
     this.isUploadingCbl.set(true);
     this.cblService.importFromUrl(url).subscribe({
-      next: (summary) => {
-        // TODO: I will hook this up with the importer modal next, temp code
+      next: (savedFile) => {
         this.form.get('cblUrl')!.setValue('');
         this.isUploadingCbl.set(false);
-        this.refreshLists();
+        this.openImportModal([savedFile]);
       },
       error: () => {
         this.toastr.error('Failed to download CBL file');
@@ -168,9 +170,20 @@ export class CblManagerComponent implements OnInit {
     this.providerFilter.set(this.providerFilter() === provider ? null : provider);
   }
 
+  private openImportModal(savedFiles: CblSavedFile[]) {
+    const ref = this.modalService.open(ImportCblModalComponent, {size: 'xl', scrollable: true});
+    ref.setInput('savedFiles', savedFiles);
+    ref.closed.subscribe(() => {
+      this.refreshLists();
+    });
+    ref.dismissed.subscribe(() => {
+      this.refreshLists();
+    });
+  }
+
   private refreshLists() {
     this.readingListService.getReadingLists(false).subscribe(lists => {
-      this.allLists.set(lists.result);
+      this.allLists.set([...lists.result]);
     });
   }
 }

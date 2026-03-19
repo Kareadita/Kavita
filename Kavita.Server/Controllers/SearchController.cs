@@ -1,4 +1,6 @@
-﻿using System.Threading.Tasks;
+﻿using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 using Kavita.API.Database;
 using Kavita.API.Repositories;
 using Kavita.API.Services;
@@ -14,8 +16,8 @@ namespace Kavita.Server.Controllers;
 /// <summary>
 /// Responsible for the Search interface from the UI
 /// </summary>
-public class SearchController(IUnitOfWork unitOfWork, ILocalizationService localizationService)
-    : BaseApiController
+public class SearchController(IUnitOfWork unitOfWork, ILocalizationService localizationService,
+    IEntityNamingService namingService) : BaseApiController
 {
     /// <summary>
     /// Returns the series for the MangaFile id. If the user does not have access (shouldn't happen by the UI),
@@ -68,5 +70,31 @@ public class SearchController(IUnitOfWork unitOfWork, ILocalizationService local
             libraries, queryString, includeChapterAndFiles);
 
         return Ok(series);
+    }
+
+    /// <summary>
+    /// Returns all chapters for a given series with localized titles. Used for CBL chapter-level matching.
+    /// </summary>
+    [HttpGet("chapters-by-series")]
+    public async Task<ActionResult<IList<ChapterDto>>> GetChaptersBySeries([FromQuery] int seriesId)
+    {
+        if (!await unitOfWork.UserRepository.HasAccessToSeries(UserId, seriesId))
+            return Unauthorized();
+
+        var libraryType = await unitOfWork.LibraryRepository.GetLibraryTypeBySeriesIdAsync(seriesId);
+        var volumes = await unitOfWork.VolumeRepository.GetVolumesDtoAsync(seriesId, UserId);
+        var namingContext = await LocalizedNamingContext.CreateAsync(namingService, localizationService, UserId, libraryType);
+
+        var chapters = volumes
+            .SelectMany(v => v.Chapters.Select(c =>
+            {
+                c.VolumeTitle = namingContext.FormatVolumeName(v) ?? v.Name;
+                c.Title = namingContext.FormatChapterTitle(c);
+                return c;
+            }))
+            .OrderBy(c => c.SortOrder)
+            .ToList();
+
+        return Ok(chapters);
     }
 }

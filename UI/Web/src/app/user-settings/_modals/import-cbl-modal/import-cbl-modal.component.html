@@ -1,0 +1,227 @@
+<ng-container *transloco="let t; prefix:'import-cbl-modal'">
+  <div class="modal-header">
+    <h4 class="modal-title">
+      {{t('title')}}
+      @if (savedFiles().length > 1) {
+        <span class="badge bg-secondary ms-2">
+          {{t('file-counter', {current: currentFileIndex() + 1, total: savedFiles().length})}}
+        </span>
+      }
+    </h4>
+    <button type="button" class="btn-close" [attr.aria-label]="t('close')" (click)="dismiss()"></button>
+  </div>
+
+  <div class="modal-body">
+    @if (isProcessing()) {
+      <div class="text-center py-4">
+        <app-loading [loading]="true" />
+        <p class="mt-2 text-muted">{{t('processing')}}</p>
+      </div>
+    } @else if (currentSummary(); as summary) {
+      <!-- File name -->
+      <h5 class="mb-3">{{summary.cblName || currentFile().name}}</h5>
+
+      <!-- Summary bar -->
+      <div class="d-flex gap-3 mb-3">
+        <span class="badge bg-success fs-6">{{t('matched-count', {count: matchedCount()})}}</span>
+        @if (issueCount() > 0) {
+          <span class="badge text-bg-warning fs-6">{{t('issues-count', {count: issueCount()})}}</span>
+        }
+      </div>
+
+      <!-- Unified datatable -->
+      <ngx-datatable
+        class="bootstrap"
+        [rows]="allRows()"
+        [columnMode]="'force'"
+        rowHeight="auto"
+        [footerHeight]="0"
+        [scrollbarH]="false"
+        [rowClass]="getRowClass">
+
+        <!-- Row Detail for action area -->
+        <ngx-datatable-row-detail [rowHeight]="150">
+          <ng-template let-row="row" ngx-datatable-row-detail-template>
+            <div class="row-detail-action p-3 ps-5">
+              <!-- Series collision with candidates -->
+              @if (isSeriesCollision(row) && row.result.candidates.length > 0) {
+                <div class="mb-2">
+                  <label class="form-label small text-muted mb-1">{{t('pick-candidate')}}</label>
+                  <select class="form-select form-select-sm"
+                          (change)="onCandidateSelected(row, row.result.candidates[$any($event.target).selectedIndex - 1])">
+                    <option selected disabled>{{t('pick-candidate')}}</option>
+                    @for (candidate of row.result.candidates; track candidate.seriesId) {
+                      <option [value]="candidate.seriesId">{{candidate.seriesName}}</option>
+                    }
+                  </select>
+                </div>
+              }
+
+              <!-- Series missing: typeahead for series -->
+              @if (isSeriesMissing(row) || (isSeriesCollision(row) && (!row.result.candidates || row.result.candidates.length === 0))) {
+                <div class="mb-2">
+                  <label class="form-label small text-muted mb-1">{{t('select-series')}}</label>
+                  <app-typeahead [settings]="row.seriesTypeaheadSettings"
+                                 (selectedData)="onSeriesTypeaheadSelected(row, $event)">
+                    <ng-template #badgeItem let-item let-position="idx">
+                      {{item.name}} ({{libraryNames()[item.libraryId]}})
+                    </ng-template>
+                    <ng-template #optionItem let-item let-position="idx" let-value="value">
+                      @if (item.name.toLowerCase().trim().indexOf(value.toLowerCase().trim()) >= 0) {
+                        {{item.name}}
+                      } @else {
+                        {{item.localizedName}}
+                      }
+                      ({{libraryNames()[item.libraryId]}})
+                    </ng-template>
+                  </app-typeahead>
+                </div>
+              }
+
+              <!-- Chapter missing: typeahead for chapter -->
+              @if (isChapterMissing(row) && row.chapterTypeaheadSettings) {
+                <div class="mb-2">
+                  <label class="form-label small text-muted mb-1">{{t('select-chapter')}}</label>
+                  <app-typeahead [settings]="row.chapterTypeaheadSettings"
+                                 (selectedData)="onChapterTypeaheadSelected(row, $event)">
+                    <ng-template #badgeItem let-item let-position="idx">
+                      {{item.title}}
+                    </ng-template>
+                    <ng-template #optionItem let-item let-position="idx">
+                      <div class="d-flex align-items-center gap-2">
+                        <app-image [imageUrl]="item.coverImage" height="40px" width="30px" />
+                        <div>
+                          <div>{{item.title}}</div>
+                          @if (item.volumeTitle) {
+                            <small class="text-muted">{{item.volumeTitle}}</small>
+                          }
+                        </div>
+                      </div>
+                    </ng-template>
+                  </app-typeahead>
+                </div>
+              }
+            </div>
+          </ng-template>
+        </ngx-datatable-row-detail>
+
+        <!-- Status Icon -->
+        <ngx-datatable-column [width]="40" [sortable]="false" [draggable]="false" [resizeable]="false">
+          <ng-template ngx-datatable-header-template></ng-template>
+          <ng-template let-row="row" ngx-datatable-cell-template>
+            @if (row.result.reason === CblImportReason.Success) {
+              <i class="fa fa-check-circle text-success" aria-hidden="true"></i>
+            } @else if (row.skipped) {
+              <i class="fa fa-ban text-muted" aria-hidden="true"></i>
+            } @else {
+              <i class="fa fa-exclamation-circle text-warning" aria-hidden="true"></i>
+            }
+          </ng-template>
+        </ngx-datatable-column>
+
+        <!-- Order -->
+        <ngx-datatable-column [width]="50" [sortable]="false" [draggable]="false" [resizeable]="false">
+          <ng-template ngx-datatable-header-template>#</ng-template>
+          <ng-template let-row="row" ngx-datatable-cell-template>
+            {{row.result.order}}
+          </ng-template>
+        </ngx-datatable-column>
+
+        <!-- Series Name -->
+        <ngx-datatable-column [sortable]="false" [draggable]="false" [resizeable]="false">
+          <ng-template ngx-datatable-header-template>{{t('col-series')}}</ng-template>
+          <ng-template let-row="row" ngx-datatable-cell-template>
+            {{row.result.series}}
+          </ng-template>
+        </ngx-datatable-column>
+
+        <!-- Volume / Issue -->
+        <ngx-datatable-column [width]="120" [sortable]="false" [draggable]="false" [resizeable]="false">
+          <ng-template ngx-datatable-header-template>{{t('col-vol-issue')}}</ng-template>
+          <ng-template let-row="row" ngx-datatable-cell-template>
+            @if (row.result.volume) {
+              <span>Vol. {{row.result.volume}}</span>
+            }
+            @if (row.result.number) {
+              <span class="ms-1">#{{row.result.number}}</span>
+            }
+          </ng-template>
+        </ngx-datatable-column>
+
+        <!-- Status / Reason -->
+        <ngx-datatable-column [width]="180" [sortable]="false" [draggable]="false" [resizeable]="false">
+          <ng-template ngx-datatable-header-template>{{t('col-status')}}</ng-template>
+          <ng-template let-row="row" ngx-datatable-cell-template>
+            @if (row.result.reason === CblImportReason.Success && row.result.matchTier === 0) {
+              <span class="badge tier-badge tier-0" [ngbTooltip]="getRemapRuleTooltip(row)" container="body">
+                {{row.result.matchTier | cblMatchTier}}
+              </span>
+            } @else if (row.result.reason === CblImportReason.Success) {
+              <span class="badge tier-badge tier-{{row.result.matchTier}}">
+                {{row.result.matchTier | cblMatchTier}}
+              </span>
+            } @else {
+              <span class="badge bg-danger">{{row.result.reason | cblImportReason}}</span>
+            }
+          </ng-template>
+        </ngx-datatable-column>
+
+        <!-- Action Column -->
+        <ngx-datatable-column [width]="130" [sortable]="false" [draggable]="false" [resizeable]="false">
+          <ng-template ngx-datatable-header-template>{{t('col-action')}}</ng-template>
+          <ng-template let-row="row" let-expanded="expanded" ngx-datatable-cell-template>
+            @if (row.result.reason !== CblImportReason.Success) {
+              <div class="d-flex align-items-center gap-1">
+                @if (!row.skipped) {
+                  <button class="btn btn-sm btn-outline-primary" (click)="toggleExpandRow(row)"
+                          [title]="expanded ? t('collapse') : t('expand')">
+                    <i class="fa" [class.fa-chevron-down]="!expanded" [class.fa-chevron-up]="expanded" aria-hidden="true"></i>
+                    {{t('resolve')}}
+                  </button>
+                }
+                <button class="btn btn-sm btn-outline-secondary" (click)="toggleSkip(row)"
+                        [title]="t('skip-item')">
+                  @if (row.skipped) {
+                    <i class="fa fa-undo me-1" aria-hidden="true"></i>{{t('undo')}}
+                  } @else {
+                    <i class="fa fa-ban me-1" aria-hidden="true"></i>{{t('skip-item')}}
+                  }
+                </button>
+              </div>
+            }
+          </ng-template>
+        </ngx-datatable-column>
+      </ngx-datatable>
+    }
+  </div>
+
+  <div class="modal-footer d-flex justify-content-between">
+    <button class="btn btn-sm btn-outline-secondary" (click)="openRemapRulesModal()">
+      <i class="fa fa-cog me-1" aria-hidden="true"></i>
+      {{t('manage-rules')}} ({{remapRules().length}})
+    </button>
+
+    <div>
+      @if (savedFiles().length > 1) {
+        <button class="btn btn-secondary me-2" [disabled]="currentFileIndex() === 0 || isProcessing()"
+                (click)="previousFile()">
+          {{t('previous-file')}}
+        </button>
+        <button class="btn btn-secondary" [disabled]="currentFileIndex() >= savedFiles().length - 1 || isProcessing()"
+                (click)="nextFile()">
+          {{t('next-file')}}
+        </button>
+      }
+    </div>
+    <div>
+      <button class="btn btn-secondary me-2" (click)="dismiss()">{{t('close')}}</button>
+      <button class="btn btn-primary" [disabled]="isProcessing()" (click)="finalizeAll()">
+        @if (savedFiles().length > 1) {
+          {{t('finalize')}}
+        } @else {
+          {{t('finalize-single')}}
+        }
+      </button>
+    </div>
+  </div>
+</ng-container>

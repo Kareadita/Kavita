@@ -20,8 +20,8 @@ import {UtilityService} from "../../../shared/_services/utility.service";
 import {ToastrService} from "ngx-toastr";
 import {forkJoin} from "rxjs";
 import {CblImportSummary} from "../../../_models/reading-list/cbl/cbl-import-summary";
-import { WikiLink } from 'src/app/_models/wiki';
-import { CblImportResult } from 'src/app/_models/reading-list/cbl/cbl-import-result.enum';
+import {WikiLink} from 'src/app/_models/wiki';
+import {CblImportResult} from 'src/app/_models/reading-list/cbl/cbl-import-result.enum';
 
 
 interface FileStep {
@@ -68,9 +68,7 @@ export class ImportCblComponent {
   protected readonly utilityService = inject(UtilityService);
 
 
-  protected readonly CblImportResult = CblImportResult;
-  protected readonly Step = Step;
-  protected readonly WikiLink = WikiLink;
+
 
   readonly fileUpload = viewChild.required<ElementRef<HTMLInputElement>>('fileUpload');
 
@@ -263,4 +261,8 @@ export class ImportCblComponent {
       this.cdRef.markForCheck();
     });
   }
+
+  protected readonly CblImportResult = CblImportResult;
+  protected readonly Step = Step;
+  protected readonly WikiLink = WikiLink;
 }

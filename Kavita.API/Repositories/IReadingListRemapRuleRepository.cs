@@ -13,6 +13,8 @@ public interface IReadingListRemapRuleRepository
     /// ordered with user-specific rules before global rules.
     /// </summary>
     Task<IList<ReadingListRemapRule>> GetRulesForNamesAsync(IList<string> normalizedNames, int userId, CancellationToken ct = default);
+    Task<IList<ReadingListRemapRule>> GetRulesForUserAsync(int userId, CancellationToken ct = default);
+    Task<ReadingListRemapRule?> GetByIdAsync(int id, CancellationToken ct = default);
     void Add(ReadingListRemapRule rule);
     void Remove(ReadingListRemapRule rule);
 }
