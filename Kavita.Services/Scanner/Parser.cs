@@ -150,7 +150,7 @@ public static partial class Parser
 
 
 
-    [GeneratedRegex(@"(\(|\[)((완결?)|完)(\)|\])")]
+    [GeneratedRegex(@"(\((완결?|完)\)|\[(완결?|完)\])")]
     private static partial Regex HasEndMarkerRegex();
 
     private static readonly Regex[] MangaSeriesRegex =

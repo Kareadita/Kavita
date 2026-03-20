@@ -4,7 +4,7 @@ using Kavita.Models.Parser;
 namespace Kavita.Services.Helpers;
 
 /// <summary>
-/// Helps with figuring out Count and TotalCount during <c>ProcessSeries.UpdateChapterFromComicInfo</c>
+/// Helps with figuring out Count and TotalCount during <c>ProcessSeries.UpdateChapters</c>
 /// </summary>
 public static class ParsedCountHelper
 {

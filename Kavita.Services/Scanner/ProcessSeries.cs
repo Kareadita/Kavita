@@ -48,7 +48,7 @@ internal sealed record UpdateChapterComicInfoArgs
 {
     public required MetadataSettingsDto Settings { get; init; }
     public required Chapter Chapter { get; init; }
-    public required ParserInfo ParserInfo { get; init; }
+    public required ComicInfo? ComicInfo { get; init; }
     public required Dictionary<string, Person> DatabasePeople { get; init; }
     public bool ForceUpdate { get; init; } = false;
 }
@@ -728,7 +728,7 @@ public class ProcessSeries(
                 {
                     Settings = args.Settings,
                     Chapter = chapter,
-                    ParserInfo = info,
+                    ComicInfo = info.ComicInfo,
                     DatabasePeople = args.DatabasePeople,
                     ForceUpdate = args.ForceUpdate,
                 });
@@ -840,8 +840,7 @@ public class ProcessSeries(
 
     private async Task UpdateChapterFromComicInfo(UpdateChapterComicInfoArgs args)
     {
-        var parserInfo = args.ParserInfo;
-        var comicInfo = parserInfo.ComicInfo;
+        var comicInfo = args.ComicInfo;
         var chapter = args.Chapter;
 
         if (comicInfo == null) return;

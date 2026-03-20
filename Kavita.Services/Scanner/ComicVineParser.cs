@@ -19,7 +19,10 @@ public class ComicVineParser(IDirectoryService directoryService) : DefaultParser
     /// </summary>
     /// <param name="filePath"></param>
     /// <param name="rootPath"></param>
+    /// <param name="libraryRoot"></param>
     /// <param name="type"></param>
+    /// <param name="enableMetadata"></param>
+    /// <param name="comicInfo"></param>
     /// <returns></returns>
     public override ParserInfo? Parse(string filePath, string rootPath, string libraryRoot, LibraryType type, bool enableMetadata = true, ComicInfo? comicInfo = null)
     {

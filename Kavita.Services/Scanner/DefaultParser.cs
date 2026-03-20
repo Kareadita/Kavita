@@ -1,4 +1,3 @@
-using System;
 using System.Linq;
 using Kavita.API.Services;
 using Kavita.Common.Helpers;
@@ -20,15 +19,16 @@ public interface IDefaultParser
 /// </summary>
 public abstract class DefaultParser(IDirectoryService directoryService) : IDefaultParser
 {
-
     /// <summary>
     /// Parses information out of a file path. Can fallback to using directory name if Series couldn't be parsed
     /// from filename.
     /// </summary>
     /// <param name="filePath"></param>
     /// <param name="rootPath">Root folder</param>
+    /// <param name="libraryRoot"></param>
     /// <param name="type">Allows different Regex to be used for parsing.</param>
     /// <param name="enableMetadata">Allows overriding data from metadata (ComicInfo/pdf/epub)</param>
+    /// <param name="comicInfo"></param>
     /// <returns><see cref="ParserInfo"/> or null if Series was empty</returns>
     public abstract ParserInfo? Parse(string filePath, string rootPath, string libraryRoot, LibraryType type, bool enableMetadata = true, ComicInfo? comicInfo = null);
 
