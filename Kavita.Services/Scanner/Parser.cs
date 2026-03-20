@@ -23,7 +23,8 @@ public static partial class Parser
     public const int SpecialVolumeNumber = ParserConstants.SpecialVolumeNumber;
     public const string SpecialVolume = ParserConstants.SpecialVolume;
 
-    public static readonly TimeSpan RegexTimeout = TimeSpan.FromMilliseconds(500);
+    public const int RegexTimeoutMs = 500;
+    public static readonly TimeSpan RegexTimeout = TimeSpan.FromMilliseconds(RegexTimeoutMs);
 
     public const string ImageFileExtensions = @"(\.png|\.jpeg|\.jpg|\.webp|\.gif|\.avif)"; // Don't forget to update CoverChooser
     public const string ArchiveFileExtensions = @"\.cbz|\.zip|\.rar|\.cbr|\.tar.gz|\.7zip|\.7z|\.cb7|\.cbt";
@@ -150,7 +151,7 @@ public static partial class Parser
 
 
 
-    [GeneratedRegex(@"(\((완결?|完)\)|\[(완결?|完)\])")]
+    [GeneratedRegex(@"(\((완결?|完)\)|\[(완결?|完)\])", MatchOptions,  RegexTimeoutMs)]
     private static partial Regex HasEndMarkerRegex();
 
     private static readonly Regex[] MangaSeriesRegex =
@@ -1353,9 +1354,9 @@ public static partial class Parser
     }
 
 
-    [GeneratedRegex(SupportedExtensions)]
+    [GeneratedRegex(SupportedExtensions, MatchOptions,  RegexTimeoutMs)]
     private static partial Regex SupportedExtensionsRegex();
-    [GeneratedRegex(@"\d-{1}\d")]
+    [GeneratedRegex(@"\d-{1}\d", MatchOptions,  RegexTimeoutMs)]
     private static partial Regex NumberRangeRegex();
 
     public static bool IsDefaultChapter(string? chapterNumber)
