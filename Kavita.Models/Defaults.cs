@@ -13,7 +13,7 @@ namespace Kavita.Models;
 
 public static class Defaults
 {
-    public static readonly string DefaultFont = "Default";
+    public const string DefaultFont = "Default";
 
     /// <summary>
     /// Generated on Startup. Seed.SeedSettings must run before

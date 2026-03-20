@@ -1,3 +1,4 @@
+using System;
 using System.Linq;
 using Kavita.API.Services;
 using Kavita.Common.Helpers;
@@ -174,6 +175,18 @@ public abstract class DefaultParser(IDirectoryService directoryService) : IDefau
         info.MetronId = !string.IsNullOrEmpty(metronId)
             ? long.Parse(metronId)
             : 0L;
+    }
 
+    /// <summary>
+    /// Set the Highest Volume/Chapter numbers for utilization in the rest of the pipeline.
+    /// </summary>
+    /// <remarks>This ensures total counts work, and we avoid rechurning the strings </remarks>
+    /// <param name="info"></param>
+    protected static void FinalizeNumbers(ParserInfo info)
+    {
+        info.HighestChapter = Parser.MaxNumberFromRange(info.Chapters);
+        info.LowestChapter = Parser.MinNumberFromRange(info.Chapters);
+        info.HighestVolume = Parser.MaxNumberFromRange(info.Volumes);
+        info.LowestVolume = Parser.MinNumberFromRange(info.Volumes);
     }
 }

@@ -48,7 +48,7 @@ internal sealed record UpdateChapterComicInfoArgs
 {
     public required MetadataSettingsDto Settings { get; init; }
     public required Chapter Chapter { get; init; }
-    public required ComicInfo? ComicInfo { get; init; }
+    public required ParserInfo ParserInfo { get; init; }
     public required Dictionary<string, Person> DatabasePeople { get; init; }
     public bool ForceUpdate { get; init; } = false;
 }
@@ -696,9 +696,9 @@ public class ProcessSeries(
             // Add files
             AddOrUpdateFileForChapter(chapter, info, args.ForceUpdate);
 
-            chapter.Number = Parser.MinNumberFromRange(info.Chapters).ToString(CultureInfo.InvariantCulture);
-            chapter.MinNumber = Parser.MinNumberFromRange(info.Chapters);
-            chapter.MaxNumber = Parser.MaxNumberFromRange(info.Chapters);
+            chapter.Number = info.LowestChapter.ToString(CultureInfo.InvariantCulture);
+            chapter.MinNumber = info.LowestChapter;
+            chapter.MaxNumber = info.HighestChapter;
             chapter.Range = chapter.GetNumberTitle();
 
             if (!chapter.SortOrderLocked)
@@ -712,13 +712,23 @@ public class ProcessSeries(
                 chapter.Title = chapter.GetNumberTitle();
             }
 
+            // When setting TotalCount, we need to check against EndMarker and ComicInfo
+            var totalCount = ParsedCountHelper.GetTotalCount(info);
+            if (totalCount > 0)
+            {
+                chapter.TotalCount = totalCount.Value;
+            }
+
+            // This needs to check against both Number and Volume to calculate Count
+            chapter.Count = ParsedCountHelper.GetCalculatedCount(info);
+
             try
             {
                 await UpdateChapterFromComicInfo(new UpdateChapterComicInfoArgs
                 {
                     Settings = args.Settings,
                     Chapter = chapter,
-                    ComicInfo = info.ComicInfo,
+                    ParserInfo = info,
                     DatabasePeople = args.DatabasePeople,
                     ForceUpdate = args.ForceUpdate,
                 });
@@ -830,7 +840,8 @@ public class ProcessSeries(
 
     private async Task UpdateChapterFromComicInfo(UpdateChapterComicInfoArgs args)
     {
-        var comicInfo = args.ComicInfo;
+        var parserInfo = args.ParserInfo;
+        var comicInfo = parserInfo.ComicInfo;
         var chapter = args.Chapter;
 
         if (comicInfo == null) return;
@@ -899,15 +910,6 @@ public class ProcessSeries(
             chapter.ISBN = comicInfo.Isbn;
         }
 
-        if (comicInfo.Count > 0)
-        {
-            chapter.TotalCount = comicInfo.Count;
-        }
-
-        // This needs to check against both Number and Volume to calculate Count
-        chapter.Count = comicInfo.CalculatedCount();
-
-
         if (!chapter.ReleaseDateLocked && comicInfo.Year > 0)
         {
             var day = Math.Max(comicInfo.Day, 1);
@@ -946,6 +948,8 @@ public class ProcessSeries(
 
         logger.LogTrace("[TIME] Kavita took {Time} ms to create/update Chapter: {File}", sw.ElapsedMilliseconds, chapter.Files.First().FileName);
     }
+
+
 
     private async Task UpdateChapterGenres(Chapter chapter, IEnumerable<string> genreNames)
     {

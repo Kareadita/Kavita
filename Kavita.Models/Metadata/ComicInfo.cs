@@ -158,33 +158,4 @@ public class ComicInfo
         return Enum.GetValues<AgeRating>()
             .SingleOrDefault(t => t.ToDescription().ToUpperInvariant().Equals(value.ToUpperInvariant()), Entities.Enums.AgeRating.Unknown);
     }
-
-
-    /// <summary>
-    /// Uses both Volume and Number to make an educated guess as to what count refers to and it's highest number.
-    /// </summary>
-    /// <returns></returns>
-    public int CalculatedCount()
-    {
-        try
-        {
-            if (float.TryParse(Number, CultureInfo.InvariantCulture, out var chpCount) && chpCount > 0)
-            {
-                return (int) Math.Floor(chpCount);
-            }
-
-            if (float.TryParse(Volume, CultureInfo.InvariantCulture, out var volCount) && volCount > 0)
-            {
-                return (int) Math.Floor(volCount);
-            }
-        }
-        catch (Exception)
-        {
-            return 0;
-        }
-
-        return 0;
-    }
-
-
 }

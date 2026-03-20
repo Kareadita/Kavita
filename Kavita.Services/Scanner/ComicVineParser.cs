@@ -40,7 +40,8 @@ public class ComicVineParser(IDirectoryService directoryService) : DefaultParser
             Series = string.Empty,
             ComicInfo = comicInfo,
             Chapters = Parser.ParseChapter(fileName, type),
-            Volumes = Parser.ParseVolume(fileName, type)
+            Volumes = Parser.ParseVolume(fileName, type),
+            HasEndMarker = Parser.HasEndMarker(fileName)
         };
 
         ParseExternalIdsFromNotesAndWeblinks(info);
@@ -95,7 +96,7 @@ public class ComicVineParser(IDirectoryService directoryService) : DefaultParser
             info.Series = Parser.CleanTitle(directoryName, true);
         }
 
-
+        FinalizeNumbers(info);
         return string.IsNullOrEmpty(info.Series) ? null : info;
     }
 
