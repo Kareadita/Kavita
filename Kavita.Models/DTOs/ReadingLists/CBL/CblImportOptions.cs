@@ -2,6 +2,7 @@
 
 namespace Kavita.Models.DTOs.ReadingLists.CBL;
 
+// TODO: Validate if we want to keep this. From testing, it doesn't seem necessary
 public sealed record CblImportOptions
 {
     /// <summary>
