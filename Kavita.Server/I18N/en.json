@@ -224,5 +224,15 @@
     "cbl-export-failed": "Unable to export CBL file, check logs",
     "download-not-allowed": "User does not have download permissions",
     "auth-key-unique": "The Auth Key name must be unique to your account",
-    "role-restricted": "Access forbidden: Your role does not permit this action"
+    "role-restricted": "Access forbidden: Your role does not permit this action",
+
+
+
+    "email.auth-key-expired.subject": "Kavita - One or more Auth Keys has expired!",
+    "email.auth-key-expired.preheader": "Kavita - One or more Auth Keys has expired!",
+    "email.auth-key-expired.header": "One or more Auth Keys Expired!",
+    "email.auth-key-expired.description": "You will no longer be able to authenticate until you rotate the key.",
+    "email.auth-key-expired.rotate-cta": "ROTATE",
+    "email.auth-key-expired.fallback-link-label": "If the button above does not work, please find the link here: {0}"
+
 }

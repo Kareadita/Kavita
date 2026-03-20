@@ -77,9 +77,10 @@ public class EmailService(
         };
 
         var settings = await unitOfWork.SettingsRepository.GetSettingsDtoAsync();
+        var defaultAdmin = await unitOfWork.UserRepository.GetDefaultAdminUser();
         if (!IsValidEmail(adminEmail))
         {
-            var defaultAdmin = await unitOfWork.UserRepository.GetDefaultAdminUser();
+
             result.ErrorMessage = await localizationService.Translate(defaultAdmin.Id, "account-email-invalid");
             result.Successful = false;
             return result;
@@ -87,11 +88,12 @@ public class EmailService(
 
         if (!settings.IsEmailSetup())
         {
-            var defaultAdmin = await unitOfWork.UserRepository.GetDefaultAdminUser();
             result.ErrorMessage = await localizationService.Translate(defaultAdmin.Id, "email-settings-invalid");
             result.Successful = false;
             return result;
         }
+
+        await SendAuthKeyExpiredEmail(defaultAdmin.Id, []);
 
         var placeholders = new List<KeyValuePair<string, string>>
         {
@@ -256,15 +258,22 @@ public class EmailService(
         {
             new ("{{UserName}}", user.UserName!),
             new ("{{AuthKeyFragment}}", await BuildFragment(AuthKeyExpiredFragment, d)),
-            new ("{{Link}}", $"{settings.HostName}/settings#account" ),
+            new ("{{Link}}", $"{settings.HostName}/settings#account"),
+
+            new ("{{email.auth-key-expired.header}}", await localizationService.Translate(userId, "email.auth-key-expired.header")),
+            new ("{{email.auth-key-expired.description}}", await localizationService.Translate(userId, "email.auth-key-expired.description")),
+            new ("{{email.auth-key-expired.rotate-cta}}", await localizationService.Translate(userId, "email.auth-key-expired.rotate-cta")),
+            new ("{{email.auth-key-expired.fallback-link-label}}", await localizationService.Translate(userId, "email.auth-key-expired.fallback-link-label")),
         };
+
+
 
         var emailOptions = new EmailOptionsDto()
         {
-            Subject = "Kavita - One or more Auth Keys has expired!",
+            Subject = await localizationService.Translate(userId, "email.auth-key-expired.subject"),
             Template = AuthKeyExpiredTemplate,
-            Body = UpdatePlaceHolders(await GetEmailBody(TokenExpirationTemplate), placeholders),
-            Preheader = "Kavita - One or more Auth Keys has expired!",
+            Body = UpdatePlaceHolders(await GetEmailBody(AuthKeyExpiredTemplate), placeholders),
+            Preheader = await localizationService.Translate(userId, "email.auth-key-expired.preheader"),
             ToEmails = new List<string>()
             {
                 user.Email
