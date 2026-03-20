@@ -22,7 +22,7 @@ import {DownloadService} from '../../shared/_services/download.service';
 import {DownloadEntityType} from '../../shared/_models/download-queue-item';
 import {LibraryType} from "../../_models/library/library";
 import {PersonRole} from "../../_models/metadata/person";
-import {forkJoin} from "rxjs";
+import {concat} from "rxjs";
 import {MangaFormat} from 'src/app/_models/manga-format';
 import {MangaFile} from "../../_models/manga-file";
 import {BreakpointService} from "../../_services/breakpoint.service";
@@ -140,7 +140,7 @@ export class EditVolumeModalComponent implements OnInit {
       apis.push(this.uploadService.updateVolumeCoverImage(this.volume.id, this.selectedCover, !this.coverImageReset));
     }
 
-    forkJoin(apis).subscribe(results => {
+    concat(...apis).subscribe(() => {
       const needsCoverUpdate = selectedIndex > 0 || this.coverImageReset;
       this.modal.close(modalSaved(this.volume, needsCoverUpdate));
     });

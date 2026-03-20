@@ -47,6 +47,9 @@
                 </div>
                 <span class="entry-date text-muted small text-nowrap">
                   {{ formatEntryDate(entry) }}
+                  @if (entry.isGeneratedSession) {
+                    <i class="fa fa-circle text-danger" tabindex="0" ngbTooltip="{{t('generated-session-tooltip')}}"></i>
+                  }
                 </span>
               </div>
 

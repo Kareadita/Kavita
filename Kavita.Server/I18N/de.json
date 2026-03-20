@@ -223,5 +223,6 @@
     "annotation-export-failed": "Anmerkungen können nicht exportiert werden, überprüfen Sie die Protokolle",
     "client-device-doesnt-exist": "Client-Gerät existiert nicht",
     "auth-key-unique": "Der Name des Authentifizierungsschlüssels muss für Ihr Konto eindeutig sein",
-    "role-restricted": "Zugriff verboten: Ihre Rolle erlaubt diese Aktion nicht"
+    "role-restricted": "Zugriff verboten: Ihre Rolle erlaubt diese Aktion nicht",
+    "cbl-export-failed": "CBL-Datei kann nicht exportiert werden, Logdatei überprüfen"
 }

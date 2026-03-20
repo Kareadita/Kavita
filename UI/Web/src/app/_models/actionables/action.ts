@@ -116,4 +116,8 @@ export enum Action {
   ExportAsV1 = 35,
   /** Export as CBLv2 */
   ExportAsV2 = 36,
+  /**
+   * Marks the entity as read while creating a fake reading session
+   */
+  MarkAsReadWithSession = 37,
 }

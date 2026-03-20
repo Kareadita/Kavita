@@ -11,12 +11,26 @@
 
 .content-quote {
   color: var(--drawer-text-color);
-  max-height: 20rem;
-  overflow: hidden;
-  display: -webkit-box;
-  line-clamp: 2;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
+  white-space: pre-wrap;
+  word-wrap: break-word;
+
+  &.clamped {
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+}
+
+.quote-toggle {
+  font-size: 0.8rem;
+  cursor: pointer;
+  color: var(--primary-color);
+
+  &:hover {
+    text-decoration: underline;
+  }
 }
 
 .annotation-meta {

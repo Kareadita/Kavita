@@ -2,12 +2,12 @@
   "openapi": "3.0.4",
   "info": {
     "title": "Kavita",
-    "description": "Kavita provides a set of APIs that are authenticated by JWT. JWT token can be copied from local storage. Assume all fields of a payload are required. Built against v0.8.9.11",
+    "description": "Kavita provides a set of APIs that are authenticated by JWT. JWT token can be copied from local storage. Assume all fields of a payload are required. Built against v0.8.9.22",
     "license": {
       "name": "GPL-3.0",
       "url": "https://github.com/Kareadita/Kavita/blob/develop/LICENSE"
     },
-    "version": "0.8.9.11"
+    "version": "0.8.9.22"
   },
   "servers": [
     {
@@ -32,7 +32,7 @@
         "tags": [
           "Account"
         ],
-        "summary": "Returns true if OIDC authentication cookies are present and the API.Extensions.IdentityServiceExtensions.OpenIdConnect\nscheme has been registered",
+        "summary": "Returns true if OIDC authentication cookies are present and the Kavita.Server.Extensions.IdentityServiceExtensions.OpenIdConnect\nscheme has been registered",
         "description": "Makes no guarantee about their validity",
         "responses": {
           "200": {
@@ -54,6 +54,19 @@
                 }
               }
             }
+          }
+        }
+      }
+    },
+    "/api/Account/clear-oidc-link": {
+      "post": {
+        "tags": [
+          "Account"
+        ],
+        "summary": "Remove the OIDC link for the authenticated user. This action will also remove the authentication cookie.\nThe caller should take note and redirect to login if no other authentication is currently present (I.e. JWT)",
+        "responses": {
+          "200": {
+            "description": "OK"
           }
         }
       }
@@ -307,7 +320,7 @@
         "tags": [
           "Account"
         ],
-        "summary": "Get All Roles back. See API.Constants.PolicyConstants",
+        "summary": "Get All Roles back. See Kavita.Models.Constants.PolicyConstants",
         "responses": {
           "200": {
             "description": "OK",
@@ -430,7 +443,7 @@
           "Account"
         ],
         "summary": "Update the user account. This can only affect Username, Email (will require confirming), Roles, and Library access.",
-        "description": "Users who's API.Entities.AppUser.IdentityProvider is not API.Entities.Enums.IdentityProvider.Kavita cannot be edited if API.DTOs.Settings.OidcConfigDto.SyncUserSettings is true",
+        "description": "Users who's Kavita.Models.Entities.User.AppUser.IdentityProvider is not Kavita.Models.Entities.Enums.IdentityProvider.Kavita cannot be edited if Kavita.Models.DTOs.Settings.OidcConfigDto.SyncUserSettings is true",
         "requestBody": {
           "description": "",
           "content": {
@@ -1168,7 +1181,6 @@
           {
             "name": "PageSize",
             "in": "query",
-            "description": "If set to 0, will set as MaxInt",
             "schema": {
               "type": "integer",
               "format": "int32"
@@ -1638,7 +1650,6 @@
           {
             "name": "PageSize",
             "in": "query",
-            "description": "If set to 0, will set as MaxInt",
             "schema": {
               "type": "integer",
               "format": "int32"
@@ -2717,7 +2728,6 @@
           {
             "name": "PageSize",
             "in": "query",
-            "description": "If set to 0, will set as MaxInt",
             "schema": {
               "type": "integer",
               "format": "int32"
@@ -2885,7 +2895,6 @@
           {
             "name": "PageSize",
             "in": "query",
-            "description": "If set to 0, will set as MaxInt",
             "schema": {
               "type": "integer",
               "format": "int32"
@@ -2964,7 +2973,6 @@
           {
             "name": "PageSize",
             "in": "query",
-            "description": "If set to 0, will set as MaxInt",
             "schema": {
               "type": "integer",
               "format": "int32"
@@ -3053,7 +3061,6 @@
           {
             "name": "PageSize",
             "in": "query",
-            "description": "If set to 0, will set as MaxInt",
             "schema": {
               "type": "integer",
               "format": "int32"
@@ -3477,7 +3484,6 @@
           {
             "name": "PageSize",
             "in": "query",
-            "description": "If set to 0, will set as MaxInt",
             "schema": {
               "type": "integer",
               "format": "int32"
@@ -3545,7 +3551,6 @@
           {
             "name": "PageSize",
             "in": "query",
-            "description": "If set to 0, will set as MaxInt",
             "schema": {
               "type": "integer",
               "format": "int32"
@@ -3613,7 +3618,6 @@
           {
             "name": "PageSize",
             "in": "query",
-            "description": "If set to 0, will set as MaxInt",
             "schema": {
               "type": "integer",
               "format": "int32"
@@ -3690,7 +3694,6 @@
           {
             "name": "PageSize",
             "in": "query",
-            "description": "If set to 0, will set as MaxInt",
             "schema": {
               "type": "integer",
               "format": "int32"
@@ -3758,7 +3761,6 @@
           {
             "name": "PageSize",
             "in": "query",
-            "description": "If set to 0, will set as MaxInt",
             "schema": {
               "type": "integer",
               "format": "int32"
@@ -4293,29 +4295,17 @@
           "content": {
             "application/json": {
               "schema": {
-                "type": "array",
-                "items": {
-                  "type": "integer",
-                  "format": "int32"
-                }
+                "$ref": "#/components/schemas/BulkVolumeSizeRequest"
               }
             },
             "text/json": {
               "schema": {
-                "type": "array",
-                "items": {
-                  "type": "integer",
-                  "format": "int32"
-                }
+                "$ref": "#/components/schemas/BulkVolumeSizeRequest"
               }
             },
             "application/*+json": {
               "schema": {
-                "type": "array",
-                "items": {
-                  "type": "integer",
-                  "format": "int32"
-                }
+                "$ref": "#/components/schemas/BulkVolumeSizeRequest"
               }
             }
           }
@@ -4411,29 +4401,17 @@
           "content": {
             "application/json": {
               "schema": {
-                "type": "array",
-                "items": {
-                  "type": "integer",
-                  "format": "int32"
-                }
+                "$ref": "#/components/schemas/BulkChapterSizeRequest"
               }
             },
             "text/json": {
               "schema": {
-                "type": "array",
-                "items": {
-                  "type": "integer",
-                  "format": "int32"
-                }
+                "$ref": "#/components/schemas/BulkChapterSizeRequest"
               }
             },
             "application/*+json": {
               "schema": {
-                "type": "array",
-                "items": {
-                  "type": "integer",
-                  "format": "int32"
-                }
+                "$ref": "#/components/schemas/BulkChapterSizeRequest"
               }
             }
           }
@@ -4518,6 +4496,112 @@
         }
       }
     },
+    "/api/Download/readinglist-size": {
+      "get": {
+        "tags": [
+          "Download"
+        ],
+        "summary": "Returns the filesize for all items of a reading list that the requesting user has access to",
+        "parameters": [
+          {
+            "name": "readingListId",
+            "in": "query",
+            "description": "",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "integer",
+                  "format": "int64"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "integer",
+                  "format": "int64"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "integer",
+                  "format": "int64"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/Download/bulk-readinglist-size": {
+      "post": {
+        "tags": [
+          "Download"
+        ],
+        "summary": "Returns the mapping of readinglist -> size",
+        "requestBody": {
+          "description": "",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BulkReadingListSizeRequest"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BulkReadingListSizeRequest"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/BulkReadingListSizeRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": {
+                    "type": "integer",
+                    "format": "int64"
+                  }
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": {
+                    "type": "integer",
+                    "format": "int64"
+                  }
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": {
+                    "type": "integer",
+                    "format": "int64"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/Download/bulk-series-size": {
       "post": {
         "tags": [
@@ -4529,29 +4613,17 @@
           "content": {
             "application/json": {
               "schema": {
-                "type": "array",
-                "items": {
-                  "type": "integer",
-                  "format": "int32"
-                }
+                "$ref": "#/components/schemas/BulkSeriesSizeRequest"
               }
             },
             "text/json": {
               "schema": {
-                "type": "array",
-                "items": {
-                  "type": "integer",
-                  "format": "int32"
-                }
+                "$ref": "#/components/schemas/BulkSeriesSizeRequest"
               }
             },
             "application/*+json": {
               "schema": {
-                "type": "array",
-                "items": {
-                  "type": "integer",
-                  "format": "int32"
-                }
+                "$ref": "#/components/schemas/BulkSeriesSizeRequest"
               }
             }
           }
@@ -4611,6 +4683,7 @@
           {
             "name": "correlationId",
             "in": "query",
+            "description": "Only for UI",
             "schema": {
               "type": "string"
             }
@@ -4830,7 +4903,7 @@
           "Filter"
         ],
         "summary": "Delete the smart filter for the authenticated user",
-        "description": "User must not be in API.Constants.PolicyConstants.ReadOnlyRole",
+        "description": "User must not be in Kavita.Models.Constants.PolicyConstants.ReadOnlyRole",
         "parameters": [
           {
             "name": "filterId",
@@ -5034,14 +5107,6 @@
             "schema": {
               "type": "integer",
               "format": "int32"
-            }
-          },
-          {
-            "name": "apiKey",
-            "in": "query",
-            "description": "",
-            "schema": {
-              "type": "string"
             }
           }
         ],
@@ -5907,7 +5972,7 @@
           "Library"
         ],
         "summary": "Return a specific library",
-        "description": "If the user is not an admin, only id, type, and name will be returned",
+        "description": "If the user is not an admin, only id, type, and name will be returned (Kavita.Models.DTOs.LiteLibraryDto)",
         "parameters": [
           {
             "name": "libraryId",
@@ -5924,17 +5989,17 @@
             "content": {
               "text/plain": {
                 "schema": {
-                  "$ref": "#/components/schemas/LiteLibraryDto"
+                  "$ref": "#/components/schemas/LibraryDto"
                 }
               },
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/LiteLibraryDto"
+                  "$ref": "#/components/schemas/LibraryDto"
                 }
               },
               "text/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/LiteLibraryDto"
+                  "$ref": "#/components/schemas/LibraryDto"
                 }
               }
             }
@@ -6754,7 +6819,9 @@
         "tags": [
           "License"
         ],
+        "summary": "Break the registration between Kavita+ and this instance",
         "requestBody": {
+          "description": "",
           "content": {
             "application/json": {
               "schema": {
@@ -6868,7 +6935,6 @@
           {
             "name": "PageSize",
             "in": "query",
-            "description": "If set to 0, will set as MaxInt",
             "schema": {
               "type": "integer",
               "format": "int32"
@@ -6954,7 +7020,6 @@
                 4
               ],
               "type": "integer",
-              "description": "For complex queries, Library has certain restrictions where the library should not be included in results.\nThis enum dictates which field to use for the lookup.",
               "format": "int32",
               "default": 1
             }
@@ -8483,7 +8548,7 @@
         "tags": [
           "Panels"
         ],
-        "summary": "Saves the progress of a given chapter.",
+        "summary": "Saves the progress of a given chapter. This will generate a reading session with the estimated time from the\nlast progress till the current",
         "parameters": [
           {
             "name": "apiKey",
@@ -8776,7 +8841,6 @@
           {
             "name": "PageSize",
             "in": "query",
-            "description": "If set to 0, will set as MaxInt",
             "schema": {
               "type": "integer",
               "format": "int32"
@@ -8784,6 +8848,7 @@
           }
         ],
         "requestBody": {
+          "description": "",
           "content": {
             "application/json": {
               "schema": {
@@ -9257,23 +9322,17 @@
             "content": {
               "text/plain": {
                 "schema": {
-                  "type": "string",
-                  "format": "date-time",
-                  "nullable": true
+                  "$ref": "#/components/schemas/AuthKeyExpiresAtDto"
                 }
               },
               "application/json": {
                 "schema": {
-                  "type": "string",
-                  "format": "date-time",
-                  "nullable": true
+                  "$ref": "#/components/schemas/AuthKeyExpiresAtDto"
                 }
               },
               "text/json": {
                 "schema": {
-                  "type": "string",
-                  "format": "date-time",
-                  "nullable": true
+                  "$ref": "#/components/schemas/AuthKeyExpiresAtDto"
                 }
               }
             }
@@ -9877,6 +9936,39 @@
                 }
               }
             }
+          }
+        }
+      }
+    },
+    "/api/Reader/mark-chapter-read": {
+      "post": {
+        "tags": [
+          "Reader"
+        ],
+        "summary": "Mark a single chapter as read",
+        "requestBody": {
+          "description": "",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MarkChapterReadDto"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MarkChapterReadDto"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/MarkChapterReadDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
           }
         }
       }
@@ -11001,6 +11093,7 @@
           {
             "name": "libraryId",
             "in": "query",
+            "description": "",
             "schema": {
               "type": "integer",
               "format": "int32"
@@ -11272,7 +11365,6 @@
           {
             "name": "PageSize",
             "in": "query",
-            "description": "If set to 0, will set as MaxInt",
             "schema": {
               "type": "integer",
               "format": "int32"
@@ -12193,6 +12285,39 @@
         }
       }
     },
+    "/api/ReadingList/export-as-cbl": {
+      "post": {
+        "tags": [
+          "ReadingList"
+        ],
+        "summary": "Export a Reading List to CBL format",
+        "parameters": [
+          {
+            "name": "readingListId",
+            "in": "query",
+            "description": "",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "asV2",
+            "in": "query",
+            "description": "",
+            "schema": {
+              "type": "boolean",
+              "default": false
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
     "/api/reading-profile/all": {
       "get": {
         "tags": [
@@ -12378,7 +12503,7 @@
           {
             "name": "deviceId",
             "in": "query",
-            "description": "Defaults to currently active device",
+            "description": "Defaults to the currently active device",
             "schema": {
               "type": "integer",
               "format": "int32"
@@ -12548,7 +12673,7 @@
           {
             "name": "deviceId",
             "in": "query",
-            "description": "Defaults to currently active device",
+            "description": "Defaults to the currently active device",
             "schema": {
               "type": "integer",
               "format": "int32"
@@ -13379,10 +13504,10 @@
                 1,
                 2,
                 3,
-                4
+                4,
+                5
               ],
               "type": "integer",
-              "description": "Misleading name but is the source of data (like a review coming from AniList)",
               "format": "int32"
             }
           }
@@ -13483,7 +13608,6 @@
           {
             "name": "PageSize",
             "in": "query",
-            "description": "If set to 0, will set as MaxInt",
             "schema": {
               "type": "integer",
               "format": "int32"
@@ -13935,7 +14059,6 @@
           {
             "name": "PageSize",
             "in": "query",
-            "description": "If set to 0, will set as MaxInt",
             "schema": {
               "type": "integer",
               "format": "int32"
@@ -14082,7 +14205,9 @@
         "tags": [
           "Series"
         ],
+        "summary": "Deletes multiple series from Kavita at once",
         "requestBody": {
+          "description": "",
           "content": {
             "application/json": {
               "schema": {
@@ -14163,10 +14288,12 @@
         "tags": [
           "Series"
         ],
+        "summary": "Returns a single Volume with progress information and Chapters",
         "parameters": [
           {
             "name": "volumeId",
             "in": "query",
+            "description": "",
             "schema": {
               "type": "integer",
               "format": "int32"
@@ -14202,10 +14329,12 @@
         "tags": [
           "Series"
         ],
+        "summary": "Returns a single Chapter with progress information",
         "parameters": [
           {
             "name": "chapterId",
             "in": "query",
+            "description": "",
             "schema": {
               "type": "integer",
               "format": "int32"
@@ -14304,7 +14433,6 @@
           {
             "name": "PageSize",
             "in": "query",
-            "description": "If set to 0, will set as MaxInt",
             "schema": {
               "type": "integer",
               "format": "int32"
@@ -14382,7 +14510,6 @@
           {
             "name": "PageSize",
             "in": "query",
-            "description": "If set to 0, will set as MaxInt",
             "schema": {
               "type": "integer",
               "format": "int32"
@@ -14440,7 +14567,6 @@
           {
             "name": "PageSize",
             "in": "query",
-            "description": "If set to 0, will set as MaxInt",
             "schema": {
               "type": "integer",
               "format": "int32"
@@ -14477,7 +14603,6 @@
                 4
               ],
               "type": "integer",
-              "description": "For complex queries, Library has certain restrictions where the library should not be included in results.\nThis enum dictates which field to use for the lookup.",
               "format": "int32",
               "default": 1
             }
@@ -14554,7 +14679,6 @@
           {
             "name": "PageSize",
             "in": "query",
-            "description": "If set to 0, will set as MaxInt",
             "schema": {
               "type": "integer",
               "format": "int32"
@@ -14646,7 +14770,6 @@
           {
             "name": "PageSize",
             "in": "query",
-            "description": "If set to 0, will set as MaxInt",
             "schema": {
               "type": "integer",
               "format": "int32"
@@ -14893,7 +15016,6 @@
           {
             "name": "PageSize",
             "in": "query",
-            "description": "If set to 0, will set as MaxInt",
             "schema": {
               "type": "integer",
               "format": "int32"
@@ -14996,7 +15118,7 @@
         "tags": [
           "Series"
         ],
-        "summary": "Get the age rating for the API.Entities.Enums.AgeRating enum value",
+        "summary": "Get the age rating for the Kavita.Models.Entities.Enums.AgeRating enum value",
         "parameters": [
           {
             "name": "ageRating",
@@ -15112,7 +15234,6 @@
                 14
               ],
               "type": "integer",
-              "description": "Represents a relationship between Series",
               "format": "int32"
             }
           }
@@ -15398,6 +15519,7 @@
           {
             "name": "aniListId",
             "in": "query",
+            "description": "",
             "schema": {
               "type": "integer",
               "format": "int32"
@@ -15406,6 +15528,7 @@
           {
             "name": "malId",
             "in": "query",
+            "description": "",
             "schema": {
               "type": "integer",
               "format": "int64"
@@ -15414,6 +15537,7 @@
           {
             "name": "cbrId",
             "in": "query",
+            "description": "",
             "schema": {
               "type": "integer",
               "format": "int32"
@@ -16952,12 +17076,9 @@
           {
             "name": "TimeZoneId",
             "in": "query",
-            "description": "Timezone of the user, will zone to this TimeZone",
             "schema": {
-              "type": "string",
-              "example": "America/Los_Angeles"
-            },
-            "example": "America/Los_Angeles"
+              "type": "string"
+            }
           },
           {
             "name": "EndDate",
@@ -17091,12 +17212,9 @@
           {
             "name": "TimeZoneId",
             "in": "query",
-            "description": "Timezone of the user, will zone to this TimeZone",
             "schema": {
-              "type": "string",
-              "example": "America/Los_Angeles"
-            },
-            "example": "America/Los_Angeles"
+              "type": "string"
+            }
           },
           {
             "name": "EndDate",
@@ -17424,12 +17542,9 @@
           {
             "name": "TimeZoneId",
             "in": "query",
-            "description": "Timezone of the user, will zone to this TimeZone",
             "schema": {
-              "type": "string",
-              "example": "America/Los_Angeles"
-            },
-            "example": "America/Los_Angeles"
+              "type": "string"
+            }
           },
           {
             "name": "EndDate",
@@ -17518,12 +17633,9 @@
           {
             "name": "TimeZoneId",
             "in": "query",
-            "description": "Timezone of the user, will zone to this TimeZone",
             "schema": {
-              "type": "string",
-              "example": "America/Los_Angeles"
-            },
-            "example": "America/Los_Angeles"
+              "type": "string"
+            }
           },
           {
             "name": "EndDate",
@@ -17600,7 +17712,7 @@
         "tags": [
           "Stats"
         ],
-        "summary": "Returns top 10 genres that user likes reading",
+        "summary": "Returns the top 10 genres that the user likes reading",
         "parameters": [
           {
             "name": "StartDate",
@@ -17613,12 +17725,9 @@
           {
             "name": "TimeZoneId",
             "in": "query",
-            "description": "Timezone of the user, will zone to this TimeZone",
             "schema": {
-              "type": "string",
-              "example": "America/Los_Angeles"
-            },
-            "example": "America/Los_Angeles"
+              "type": "string"
+            }
           },
           {
             "name": "EndDate",
@@ -17691,12 +17800,9 @@
           {
             "name": "TimeZoneId",
             "in": "query",
-            "description": "Timezone of the user, will zone to this TimeZone",
             "schema": {
-              "type": "string",
-              "example": "America/Los_Angeles"
-            },
-            "example": "America/Los_Angeles"
+              "type": "string"
+            }
           },
           {
             "name": "EndDate",
@@ -17768,12 +17874,9 @@
           {
             "name": "TimeZoneId",
             "in": "query",
-            "description": "Timezone of the user, will zone to this TimeZone",
             "schema": {
-              "type": "string",
-              "example": "America/Los_Angeles"
-            },
-            "example": "America/Los_Angeles"
+              "type": "string"
+            }
           },
           {
             "name": "EndDate",
@@ -17844,12 +17947,9 @@
           {
             "name": "TimeZoneId",
             "in": "query",
-            "description": "Timezone of the user, will zone to this TimeZone",
             "schema": {
-              "type": "string",
-              "example": "America/Los_Angeles"
-            },
-            "example": "America/Los_Angeles"
+              "type": "string"
+            }
           },
           {
             "name": "EndDate",
@@ -17920,12 +18020,9 @@
           {
             "name": "TimeZoneId",
             "in": "query",
-            "description": "Timezone of the user, will zone to this TimeZone",
             "schema": {
-              "type": "string",
-              "example": "America/Los_Angeles"
-            },
-            "example": "America/Los_Angeles"
+              "type": "string"
+            }
           },
           {
             "name": "EndDate",
@@ -17997,12 +18094,9 @@
           {
             "name": "TimeZoneId",
             "in": "query",
-            "description": "Timezone of the user, will zone to this TimeZone",
             "schema": {
-              "type": "string",
-              "example": "America/Los_Angeles"
-            },
-            "example": "America/Los_Angeles"
+              "type": "string"
+            }
           },
           {
             "name": "EndDate",
@@ -18074,12 +18168,9 @@
           {
             "name": "TimeZoneId",
             "in": "query",
-            "description": "Timezone of the user, will zone to this TimeZone",
             "schema": {
-              "type": "string",
-              "example": "America/Los_Angeles"
-            },
-            "example": "America/Los_Angeles"
+              "type": "string"
+            }
           },
           {
             "name": "EndDate",
@@ -18203,12 +18294,9 @@
           {
             "name": "TimeZoneId",
             "in": "query",
-            "description": "Timezone of the user, will zone to this TimeZone",
             "schema": {
-              "type": "string",
-              "example": "America/Los_Angeles"
-            },
-            "example": "America/Los_Angeles"
+              "type": "string"
+            }
           },
           {
             "name": "EndDate",
@@ -18319,12 +18407,9 @@
           {
             "name": "TimeZoneId",
             "in": "query",
-            "description": "Timezone of the user, will zone to this TimeZone",
             "schema": {
-              "type": "string",
-              "example": "America/Los_Angeles"
-            },
-            "example": "America/Los_Angeles"
+              "type": "string"
+            }
           },
           {
             "name": "EndDate",
@@ -18356,7 +18441,6 @@
           {
             "name": "PageSize",
             "in": "query",
-            "description": "If set to 0, will set as MaxInt",
             "schema": {
               "type": "integer",
               "format": "int32"
@@ -20183,10 +20267,12 @@
         "tags": [
           "Volume"
         ],
+        "summary": "Delete the Volume from the DB",
         "parameters": [
           {
             "name": "volumeId",
             "in": "query",
+            "description": "",
             "schema": {
               "type": "integer",
               "format": "int32"
@@ -20217,12 +20303,64 @@
         }
       }
     },
+    "/api/Volume/update": {
+      "post": {
+        "tags": [
+          "Volume"
+        ],
+        "summary": "Updates the information on the Volume",
+        "requestBody": {
+          "description": "",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateVolumeDto"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateVolumeDto"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateVolumeDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/VolumeDto"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/VolumeDto"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/VolumeDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/Volume/multiple": {
       "post": {
         "tags": [
           "Volume"
         ],
+        "summary": "Delete multiple Volumes from the DB",
         "requestBody": {
+          "description": "",
           "content": {
             "application/json": {
               "schema": {
@@ -20295,7 +20433,6 @@
           {
             "name": "PageSize",
             "in": "query",
-            "description": "If set to 0, will set as MaxInt",
             "schema": {
               "type": "integer",
               "format": "int32"
@@ -20481,7 +20618,6 @@
               -1
             ],
             "type": "integer",
-            "description": "Represents Age Rating for content.",
             "format": "int32"
           },
           "title": {
@@ -20518,12 +20654,10 @@
               -1
             ],
             "type": "integer",
-            "description": "The maximum age rating a user has access to. -1 if not applicable",
             "format": "int32"
           },
           "includeUnknowns": {
-            "type": "boolean",
-            "description": "Are Unknowns explicitly allowed against age rating"
+            "type": "boolean"
           }
         },
         "additionalProperties": false
@@ -20555,22 +20689,18 @@
           },
           "xPath": {
             "type": "string",
-            "description": "Starting point of the Highlight",
             "nullable": true
           },
           "endingXPath": {
             "type": "string",
-            "description": "Ending point of the Highlight. Can be the same as API.DTOs.Reader.AnnotationDto.XPath",
             "nullable": true
           },
           "selectedText": {
             "type": "string",
-            "description": "The text selected.",
             "nullable": true
           },
           "comment": {
             "type": "string",
-            "description": "Rich text Comment",
             "nullable": true
           },
           "commentHtml": {
@@ -20583,17 +20713,14 @@
           },
           "chapterTitle": {
             "type": "string",
-            "description": "Title of the TOC Chapter within Epub (not Chapter Entity)",
             "nullable": true
           },
           "context": {
             "type": "string",
-            "description": "A calculated selection of the surrounding text. This does not update after creation.",
             "nullable": true
           },
           "highlightCount": {
             "type": "integer",
-            "description": "The number of characters selected",
             "format": "int32"
           },
           "containsSpoiler": {
@@ -20605,7 +20732,6 @@
           },
           "selectedSlotIndex": {
             "type": "integer",
-            "description": "Selected Highlight Slot Index [0-4]",
             "format": "int32"
           },
           "likes": {
@@ -20668,7 +20794,6 @@
               -1
             ],
             "type": "integer",
-            "description": "The age rating of the series this annotation is linked to",
             "format": "int32"
           },
           "createdUtc": {
@@ -20680,8 +20805,7 @@
             "format": "date-time"
           }
         },
-        "additionalProperties": false,
-        "description": "Represents an annotation on a book"
+        "additionalProperties": false
       },
       "AnnotationFilterStatementDto": {
         "type": "object",
@@ -20748,8 +20872,7 @@
             "type": "boolean"
           }
         },
-        "additionalProperties": false,
-        "description": "All Sorting Options for a query related to Annotation Entity"
+        "additionalProperties": false
       },
       "AppUserCollectionDto": {
         "type": "object",
@@ -20789,12 +20912,10 @@
               -1
             ],
             "type": "integer",
-            "description": "Represents Age Rating for content.",
             "format": "int32"
           },
           "coverImage": {
             "type": "string",
-            "description": "This is used to tell the UI if it should request a Cover Image or not. If null or empty, it has not been set.",
             "nullable": true
           },
           "primaryColor": {
@@ -20810,17 +20931,14 @@
           },
           "itemCount": {
             "type": "integer",
-            "description": "Number of Series in the Collection",
             "format": "int32"
           },
           "owner": {
             "type": "string",
-            "description": "Owner of the Collection",
             "nullable": true
           },
           "lastSyncUtc": {
             "type": "string",
-            "description": "Last time Kavita Synced the Collection with an upstream source (for non Kavita sourced collections)",
             "format": "date-time"
           },
           "source": {
@@ -20829,25 +20947,22 @@
               1,
               2,
               3,
-              4
+              4,
+              5
             ],
             "type": "integer",
-            "description": "Who created/manages the list. Non-Kavita lists are not editable by the user, except to promote",
             "format": "int32"
           },
           "sourceUrl": {
             "type": "string",
-            "description": "For Non-Kavita sourced collections, the url to sync from",
             "nullable": true
           },
           "totalSourceCount": {
             "type": "integer",
-            "description": "Total number of items as of the last sync. Not applicable for Kavita managed collections.",
             "format": "int32"
           },
           "missingSeriesFromSource": {
             "type": "string",
-            "description": "A \n separated string of all missing series",
             "nullable": true
           }
         },
@@ -20857,12 +20972,10 @@
         "type": "object",
         "properties": {
           "embedProgressIndicator": {
-            "type": "boolean",
-            "description": "Embed Progress Indicator in Title"
+            "type": "boolean"
           },
           "includeContinueFrom": {
-            "type": "boolean",
-            "description": "Insert a \"Continue From X\" entry in OPDS fields to avoid finding your last reading point (Emulates Kavita's Continue button)"
+            "type": "boolean"
           }
         },
         "additionalProperties": false
@@ -20871,16 +20984,13 @@
         "type": "object",
         "properties": {
           "shareReviews": {
-            "type": "boolean",
-            "description": "UI Site Global Setting: Should series reviews be shared with all users in the server"
+            "type": "boolean"
           },
           "shareAnnotations": {
-            "type": "boolean",
-            "description": "UI Site Global Setting: Share your annotations with other users"
+            "type": "boolean"
           },
           "viewOtherAnnotations": {
-            "type": "boolean",
-            "description": "UI Site Global Setting: See other users' annotations while reading"
+            "type": "boolean"
           },
           "socialLibraries": {
             "type": "array",
@@ -20888,7 +20998,6 @@
               "type": "integer",
               "format": "int32"
             },
-            "description": "UI Site Global Setting: For which libraries should social features be enabled",
             "nullable": true
           },
           "socialMaxAgeRating": {
@@ -20911,16 +21020,13 @@
               -1
             ],
             "type": "integer",
-            "description": "UI Site Global Setting: Highest age rating for which social features are enabled",
             "format": "int32"
           },
           "socialIncludeUnknowns": {
-            "type": "boolean",
-            "description": "UI Site Global Setting: Enable social features for unknown age ratings"
+            "type": "boolean"
           },
           "shareProfile": {
-            "type": "boolean",
-            "description": "UI Site Global Setting: Enable sharing of Profile with other users"
+            "type": "boolean"
           }
         },
         "additionalProperties": false
@@ -20938,12 +21044,10 @@
           },
           "key": {
             "type": "string",
-            "description": "Actual key",
             "nullable": true
           },
           "name": {
             "type": "string",
-            "description": "Name of the key",
             "nullable": true
           },
           "createdAtUtc": {
@@ -20952,7 +21056,6 @@
           },
           "expiresAtUtc": {
             "type": "string",
-            "description": "An Optional time which the Key expires",
             "format": "date-time",
             "nullable": true
           },
@@ -20967,8 +21070,21 @@
               1
             ],
             "type": "integer",
-            "description": "Kavita will have a short-lived key",
             "format": "int32"
+          }
+        },
+        "additionalProperties": false
+      },
+      "AuthKeyExpiresAtDto": {
+        "required": [
+          "expiresAt"
+        ],
+        "type": "object",
+        "properties": {
+          "expiresAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
           }
         },
         "additionalProperties": false
@@ -21010,17 +21126,14 @@
         "properties": {
           "title": {
             "type": "string",
-            "description": "Name of the Chapter",
             "nullable": true
           },
           "part": {
             "type": "string",
-            "description": "A part represents the id of the anchor so we can scroll to it. 01_values.xhtml#h_sVZPaxUSy/",
             "nullable": true
           },
           "page": {
             "type": "integer",
-            "description": "Page Number to load for the chapter",
             "format": "int32"
           },
           "children": {
@@ -21057,7 +21170,6 @@
               4
             ],
             "type": "integer",
-            "description": "Represents the format of the file",
             "format": "int32"
           },
           "seriesName": {
@@ -21121,12 +21233,10 @@
           },
           "imageOffset": {
             "type": "integer",
-            "description": "Only applicable for Epubs",
             "format": "int32"
           },
           "xPath": {
             "type": "string",
-            "description": "Only applicable for Epubs",
             "nullable": true
           },
           "series": {
@@ -21134,7 +21244,6 @@
           },
           "chapterTitle": {
             "type": "string",
-            "description": "Not required, will be filled out at API before saving to the DB",
             "nullable": true
           }
         },
@@ -21156,7 +21265,6 @@
               4
             ],
             "type": "integer",
-            "description": "Represents the format of the file",
             "format": "int32"
           },
           "seriesId": {
@@ -21188,7 +21296,6 @@
             "items": {
               "$ref": "#/components/schemas/FileDimensionDto"
             },
-            "description": "List of all files with their inner archive structure maintained in filename and dimensions",
             "nullable": true
           },
           "doublePairs": {
@@ -21197,7 +21304,6 @@
               "type": "integer",
               "format": "int32"
             },
-            "description": "For Double Page reader, this will contain snap points to ensure the reader always resumes on correct page",
             "nullable": true
           }
         },
@@ -21238,12 +21344,10 @@
         "properties": {
           "id": {
             "type": "integer",
-            "description": "Not used - For parity with Series Filter",
             "format": "int32"
           },
           "name": {
             "type": "string",
-            "description": "Not used - For parity with Series Filter",
             "nullable": true
           },
           "statements": {
@@ -21266,7 +21370,6 @@
           },
           "limitTo": {
             "type": "integer",
-            "description": "Limit the number of rows returned. Defaults to not applying a limit (aka 0)",
             "format": "int32"
           }
         },
@@ -21288,12 +21391,10 @@
           },
           "seriesCount": {
             "type": "integer",
-            "description": "Number of Series this Entity is on",
             "format": "int32"
           },
           "chapterCount": {
             "type": "integer",
-            "description": "Number of Chapters this Entity is on",
             "format": "int32"
           }
         },
@@ -21341,22 +21442,18 @@
           },
           "asin": {
             "type": "string",
-            "description": "ASIN for person",
             "nullable": true
           },
           "aniListId": {
             "type": "integer",
-            "description": "https://anilist.co/staff/{AniListId}/",
             "format": "int32"
           },
           "malId": {
             "type": "integer",
-            "description": "https://myanimelist.net/people/{MalId}/\nhttps://myanimelist.net/character/{MalId}/CharacterName",
             "format": "int64"
           },
           "hardcoverId": {
             "type": "string",
-            "description": "https://hardcover.app/authors/{HardcoverId}",
             "nullable": true
           },
           "webLinks": {
@@ -21364,7 +21461,6 @@
             "items": {
               "type": "string"
             },
-            "description": "Web links derived from the various id of external websites",
             "nullable": true
           },
           "roles": {
@@ -21389,34 +21485,28 @@
               "type": "integer",
               "format": "int32"
             },
-            "description": "All roles as if returned by the /api/person/roles endpoint",
             "nullable": true
           },
           "seriesCount": {
             "type": "integer",
-            "description": "Number of Series this Person is the Writer for",
             "format": "int32"
           },
           "chapterCount": {
             "type": "integer",
-            "description": "Number of Issues this Person is the Writer for",
             "format": "int32"
           }
         },
-        "additionalProperties": false,
-        "description": "Used to browse writers and click in to see their series"
+        "additionalProperties": false
       },
       "BrowsePersonFilterDto": {
         "type": "object",
         "properties": {
           "id": {
             "type": "integer",
-            "description": "Not used - For parity with Series Filter",
             "format": "int32"
           },
           "name": {
             "type": "string",
-            "description": "Not used - For parity with Series Filter",
             "nullable": true
           },
           "statements": {
@@ -21439,7 +21529,6 @@
           },
           "limitTo": {
             "type": "integer",
-            "description": "Limit the number of rows returned. Defaults to not applying a limit (aka 0)",
             "format": "int32"
           }
         },
@@ -21461,12 +21550,10 @@
           },
           "seriesCount": {
             "type": "integer",
-            "description": "Number of Series this Entity is on",
             "format": "int32"
           },
           "chapterCount": {
             "type": "integer",
-            "description": "Number of Chapters this Entity is on",
             "format": "int32"
           }
         },
@@ -21490,7 +21577,49 @@
         },
         "additionalProperties": false
       },
+      "BulkChapterSizeRequest": {
+        "type": "object",
+        "properties": {
+          "chapterIds": {
+            "type": "array",
+            "items": {
+              "type": "integer",
+              "format": "int32"
+            },
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "BulkReadingListSizeRequest": {
+        "type": "object",
+        "properties": {
+          "readingListIds": {
+            "type": "array",
+            "items": {
+              "type": "integer",
+              "format": "int32"
+            },
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
       "BulkRemoveBookmarkForSeriesDto": {
+        "type": "object",
+        "properties": {
+          "seriesIds": {
+            "type": "array",
+            "items": {
+              "type": "integer",
+              "format": "int32"
+            },
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "BulkSeriesSizeRequest": {
         "type": "object",
         "properties": {
           "seriesIds": {
@@ -21543,6 +21672,20 @@
           },
           "visibility": {
             "type": "boolean"
+          }
+        },
+        "additionalProperties": false
+      },
+      "BulkVolumeSizeRequest": {
+        "type": "object",
+        "properties": {
+          "volumeIds": {
+            "type": "array",
+            "items": {
+              "type": "integer",
+              "format": "int32"
+            },
+            "nullable": true
           }
         },
         "additionalProperties": false
@@ -21618,27 +21761,22 @@
             "items": {
               "$ref": "#/components/schemas/MangaFileDto"
             },
-            "description": "The files that represent this Chapter",
             "nullable": true
           },
           "pagesRead": {
             "type": "integer",
-            "description": "Calculated at API time. Number of pages read for this Chapter for logged-in user.",
             "format": "int32"
           },
           "totalReads": {
             "type": "integer",
-            "description": "Total number of complete reads",
             "format": "int32"
           },
           "lastReadingProgressUtc": {
             "type": "string",
-            "description": "The last time a chapter was read by current authenticated user",
             "format": "date-time"
           },
           "lastReadingProgress": {
             "type": "string",
-            "description": "The last time a chapter was read by current authenticated user",
             "format": "date-time"
           },
           "coverImageLocked": {
@@ -21692,7 +21830,6 @@
               -1
             ],
             "type": "integer",
-            "description": "Represents Age Rating for content.",
             "format": "int32"
           },
           "wordCount": {
@@ -21701,7 +21838,6 @@
           },
           "volumeTitle": {
             "type": "string",
-            "description": "Formatted Volume title ie) Volume 2.",
             "nullable": true
           },
           "minHoursToRead": {
@@ -21827,7 +21963,6 @@
             "items": {
               "$ref": "#/components/schemas/TagDto"
             },
-            "description": "Collection of all Tags from underlying chapters for a Series",
             "nullable": true
           },
           "publicationStatus": {
@@ -21943,32 +22078,51 @@
             "format": "int32",
             "nullable": true,
             "readOnly": true
+          },
+          "aniListId": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "malId": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "hardcoverId": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "metronId": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "comicVineId": {
+            "type": "string",
+            "nullable": true
+          },
+          "mangaBakaId": {
+            "type": "integer",
+            "format": "int64"
           }
         },
-        "additionalProperties": false,
-        "description": "A Chapter is the lowest grouping of a reading medium. A Chapter contains a set of MangaFiles which represents the underlying\nfile (abstracted from type)."
+        "additionalProperties": false
       },
       "ChapterInfoDto": {
         "type": "object",
         "properties": {
           "chapterNumber": {
             "type": "string",
-            "description": "The Chapter Number",
             "nullable": true
           },
           "volumeNumber": {
             "type": "string",
-            "description": "The Volume Number",
             "nullable": true
           },
           "volumeId": {
             "type": "integer",
-            "description": "Volume entity Id",
             "format": "int32"
           },
           "seriesName": {
             "type": "string",
-            "description": "Series Name",
             "nullable": true
           },
           "seriesFormat": {
@@ -21980,17 +22134,14 @@
               4
             ],
             "type": "integer",
-            "description": "Series Format",
             "format": "int32"
           },
           "seriesId": {
             "type": "integer",
-            "description": "Series entity Id",
             "format": "int32"
           },
           "libraryId": {
             "type": "integer",
-            "description": "Library entity Id",
             "format": "int32"
           },
           "libraryType": {
@@ -22003,46 +22154,37 @@
               5
             ],
             "type": "integer",
-            "description": "Library type",
             "format": "int32"
           },
           "chapterTitle": {
             "type": "string",
-            "description": "Chapter's title if set via ComicInfo.xml (Title field)",
             "nullable": true
           },
           "pages": {
             "type": "integer",
-            "description": "Total Number of pages in this Chapter",
             "format": "int32"
           },
           "fileName": {
             "type": "string",
-            "description": "File name of the chapter",
             "nullable": true
           },
           "isSpecial": {
-            "type": "boolean",
-            "description": "If this is marked as a special in Kavita"
+            "type": "boolean"
           },
           "subtitle": {
             "type": "string",
-            "description": "The subtitle to render on the reader",
             "nullable": true
           },
           "title": {
             "type": "string",
-            "description": "Series Title",
             "nullable": true
           },
           "seriesTotalPages": {
             "type": "integer",
-            "description": "Total pages for the series",
             "format": "int32"
           },
           "seriesTotalPagesRead": {
             "type": "integer",
-            "description": "Total pages read for the series",
             "format": "int32"
           },
           "pageDimensions": {
@@ -22050,7 +22192,6 @@
             "items": {
               "$ref": "#/components/schemas/FileDimensionDto"
             },
-            "description": "List of all files with their inner archive structure maintained in filename and dimensions",
             "nullable": true
           },
           "doublePairs": {
@@ -22059,12 +22200,10 @@
               "type": "integer",
               "format": "int32"
             },
-            "description": "For Double Page reader, this will contain snap points to ensure the reader always resumes on correct page",
             "nullable": true
           }
         },
-        "additionalProperties": false,
-        "description": "Information about the Chapter for the Reader to render"
+        "additionalProperties": false
       },
       "ChapterMetadataDto": {
         "type": "object",
@@ -22184,7 +22323,6 @@
             "items": {
               "$ref": "#/components/schemas/TagDto"
             },
-            "description": "Collection of all Tags from underlying chapters for a Series",
             "nullable": true
           },
           "ageRating": {
@@ -22207,7 +22345,6 @@
               -1
             ],
             "type": "integer",
-            "description": "Represents Age Rating for content.",
             "format": "int32"
           },
           "releaseDate": {
@@ -22227,32 +22364,26 @@
           },
           "summary": {
             "type": "string",
-            "description": "Summary for the Chapter/Issue",
             "nullable": true
           },
           "language": {
             "type": "string",
-            "description": "Language for the Chapter/Issue",
             "nullable": true
           },
           "count": {
             "type": "integer",
-            "description": "Number in the TotalCount of issues",
             "format": "int32"
           },
           "totalCount": {
             "type": "integer",
-            "description": "Total number of issues for the series",
             "format": "int32"
           },
           "wordCount": {
             "type": "integer",
-            "description": "Number of Words for this chapter. Only applies to Epub",
             "format": "int64"
           }
         },
-        "additionalProperties": false,
-        "description": "Exclusively metadata about a given chapter"
+        "additionalProperties": false
       },
       "CheckForFilesInFolderRootsDto": {
         "type": "object",
@@ -22276,7 +22407,6 @@
           },
           "friendlyName": {
             "type": "string",
-            "description": "User-friendly name, defaults to generated name like \"Chrome on Windows\"",
             "nullable": true
           },
           "uiFingerprint": {
@@ -22333,12 +22463,10 @@
         "properties": {
           "userAgent": {
             "type": "string",
-            "description": "Raw User-Agent string from request header",
             "nullable": true
           },
           "ipAddress": {
             "type": "string",
-            "description": "Client IP address (respecting X-Forwarded-For if present)",
             "nullable": true
           },
           "authType": {
@@ -22349,7 +22477,6 @@
               3
             ],
             "type": "integer",
-            "description": "How the user authenticated (JWT token vs API key)",
             "format": "int32"
           },
           "clientType": {
@@ -22363,22 +22490,18 @@
               6
             ],
             "type": "integer",
-            "description": "Parsed client type from User-Agent or custom Kavita header\nExamples: Web App, OPDS Reader, KOReader, Tachiyomi, etc.",
             "format": "int32"
           },
           "appVersion": {
             "type": "string",
-            "description": "Application version (from web app or mobile app)",
             "nullable": true
           },
           "browser": {
             "type": "string",
-            "description": "Browser name (Chrome, Firefox, Safari, Edge) - Web clients only",
             "nullable": true
           },
           "browserVersion": {
             "type": "string",
-            "description": "Browser version - Web clients only",
             "nullable": true
           },
           "platform": {
@@ -22391,29 +22514,24 @@
               5
             ],
             "type": "integer",
-            "description": "Platform/OS (Windows, macOS, Linux, iOS, Android)",
             "format": "int32"
           },
           "deviceType": {
             "type": "string",
-            "description": "Device type (Desktop, Mobile, Tablet)",
             "nullable": true
           },
           "screenWidth": {
             "type": "integer",
-            "description": "Screen width in pixels - Web clients only",
             "format": "int32",
             "nullable": true
           },
           "screenHeight": {
             "type": "integer",
-            "description": "Screen height in pixels - Web clients only",
             "format": "int32",
             "nullable": true
           },
           "orientation": {
             "type": "string",
-            "description": "Screen orientation (portrait, landscape) - Web clients only",
             "nullable": true
           }
         },
@@ -22424,7 +22542,6 @@
         "properties": {
           "collectionTagId": {
             "type": "integer",
-            "description": "Collection Tag Id",
             "format": "int32"
           },
           "collectionTagTitle": {
@@ -22437,7 +22554,6 @@
               "type": "integer",
               "format": "int32"
             },
-            "description": "Series Ids to add onto Collection Tag",
             "nullable": true
           }
         },
@@ -22455,8 +22571,7 @@
             "nullable": true
           }
         },
-        "additionalProperties": false,
-        "description": "A set of colors for the color scape system in the UI"
+        "additionalProperties": false
       },
       "ConfirmEmailDto": {
         "required": [
@@ -22559,8 +22674,7 @@
             "nullable": true
           },
           "includeType": {
-            "type": "boolean",
-            "description": "Include copying over the type"
+            "type": "boolean"
           }
         },
         "additionalProperties": false
@@ -22585,7 +22699,6 @@
               3
             ],
             "type": "integer",
-            "description": "Platform of the device. If not know, defaults to \"Custom\"",
             "format": "int32"
           },
           "emailAddress": {
@@ -22666,17 +22779,14 @@
             "nullable": true
           },
           "isProvided": {
-            "type": "boolean",
-            "description": "Is System Provided"
+            "type": "boolean"
           },
           "order": {
             "type": "integer",
-            "description": "Sort Order on the Dashboard",
             "format": "int32"
           },
           "smartFilterEncoded": {
             "type": "string",
-            "description": "If Not IsProvided, the appropriate smart filter",
             "nullable": true
           },
           "smartFilterId": {
@@ -22693,7 +22803,6 @@
               5
             ],
             "type": "integer",
-            "description": "For system provided",
             "format": "int32"
           },
           "visible": {
@@ -22707,12 +22816,10 @@
         "properties": {
           "value": {
             "type": "string",
-            "description": "The day of the readings",
             "format": "date-time"
           },
           "count": {
             "type": "integer",
-            "description": "Number of pages read",
             "format": "int64"
           },
           "format": {
@@ -22724,7 +22831,6 @@
               4
             ],
             "type": "integer",
-            "description": "Format of those files",
             "format": "int32"
           }
         },
@@ -22761,8 +22867,7 @@
             "nullable": true
           }
         },
-        "additionalProperties": false,
-        "description": "For requesting an encoded filter to be decoded"
+        "additionalProperties": false
       },
       "DeleteChaptersDto": {
         "type": "object",
@@ -22846,12 +22951,10 @@
         "properties": {
           "name": {
             "type": "string",
-            "description": "Name of the directory",
             "nullable": true
           },
           "fullPath": {
             "type": "string",
-            "description": "Full Directory Path",
             "nullable": true
           }
         },
@@ -22877,12 +22980,10 @@
         "properties": {
           "name": {
             "type": "string",
-            "description": "Theme Name",
             "nullable": true
           },
           "cssUrl": {
             "type": "string",
-            "description": "Url to download css file",
             "nullable": true
           },
           "cssFile": {
@@ -22894,40 +22995,32 @@
             "items": {
               "type": "string"
             },
-            "description": "Url to preview image",
             "nullable": true
           },
           "alreadyDownloaded": {
-            "type": "boolean",
-            "description": "If Already downloaded"
+            "type": "boolean"
           },
           "sha": {
             "type": "string",
-            "description": "Sha of the file",
             "nullable": true
           },
           "path": {
             "type": "string",
-            "description": "Path of the Folder the files reside in",
             "nullable": true
           },
           "author": {
             "type": "string",
-            "description": "Author of the theme",
             "nullable": true
           },
           "lastCompatibleVersion": {
             "type": "string",
-            "description": "Last version tested against",
             "nullable": true
           },
           "isCompatible": {
-            "type": "boolean",
-            "description": "If version compatible with version"
+            "type": "boolean"
           },
           "description": {
             "type": "string",
-            "description": "Small blurb about the Theme",
             "nullable": true
           }
         },
@@ -22938,18 +23031,14 @@
         "properties": {
           "id": {
             "type": "integer",
-            "description": "The device Id",
             "format": "int32"
           },
           "name": {
             "type": "string",
-            "description": "A name given to this device",
-            "nullable": true,
-            "example": "Pixel 3a, John's Kindle"
+            "nullable": true
           },
           "emailAddress": {
             "type": "string",
-            "description": "An email address associated with the device (ie Kindle). Will be used with Send to functionality",
             "nullable": true
           },
           "platform": {
@@ -22960,12 +23049,10 @@
               3
             ],
             "type": "integer",
-            "description": "Platform (ie) Windows 10",
             "format": "int32"
           }
         },
-        "additionalProperties": false,
-        "description": "A Device is an entity that can receive data from Kavita (kindle)"
+        "additionalProperties": false
       },
       "EmailHistoryDto": {
         "type": "object",
@@ -23011,8 +23098,7 @@
             "nullable": true
           }
         },
-        "additionalProperties": false,
-        "description": "Represents if Test Email Service URL was successful or not and if any error occured"
+        "additionalProperties": false
       },
       "EpubFontDto": {
         "type": "object",
@@ -23111,8 +23197,7 @@
             "nullable": true
           }
         },
-        "additionalProperties": false,
-        "description": "Information about an individual issue/chapter/book from Kavita+"
+        "additionalProperties": false
       },
       "ExternalSeriesDetailDto": {
         "type": "object",
@@ -23152,7 +23237,6 @@
               5
             ],
             "type": "integer",
-            "description": "Represents PlusMediaFormat",
             "format": "int32"
           },
           "siteUrl": {
@@ -23194,10 +23278,10 @@
               1,
               2,
               3,
-              4
+              4,
+              5
             ],
             "type": "integer",
-            "description": "Misleading name but is the source of data (like a review coming from AniList)",
             "format": "int32"
           },
           "startDate": {
@@ -23245,12 +23329,10 @@
             "items": {
               "$ref": "#/components/schemas/ExternalChapterDto"
             },
-            "description": "Only from CBR for API.Services.Plus.ScrobbleProvider.Cbr. Full metadata about issues",
             "nullable": true
           }
         },
-        "additionalProperties": false,
-        "description": "This is AniListSeries"
+        "additionalProperties": false
       },
       "ExternalSeriesDto": {
         "required": [
@@ -23292,10 +23374,10 @@
               1,
               2,
               3,
-              4
+              4,
+              5
             ],
             "type": "integer",
-            "description": "Misleading name but is the source of data (like a review coming from AniList)",
             "format": "int32"
           }
         },
@@ -23350,7 +23432,6 @@
             "items": {
               "type": "string"
             },
-            "description": "Do not allow any Genre/Tag in this list to be written to Kavita",
             "nullable": true
           },
           "whitelist": {
@@ -23358,7 +23439,6 @@
             "items": {
               "type": "string"
             },
-            "description": "Only allow these Tags to be written to Kavita",
             "nullable": true
           },
           "ageRatingMappings": {
@@ -23383,10 +23463,8 @@
                 -1
               ],
               "type": "integer",
-              "description": "Represents Age Rating for content.",
               "format": "int32"
             },
-            "description": "Any Genres or Tags that if present, will trigger an Age Rating Override. Highest rating will be prioritized for matching.",
             "nullable": true
           },
           "fieldMappings": {
@@ -23394,12 +23472,10 @@
             "items": {
               "$ref": "#/components/schemas/MetadataFieldMappingDto"
             },
-            "description": "A list of rules that allow mapping a genre/tag to another genre/tag",
             "nullable": true
           }
         },
-        "additionalProperties": false,
-        "description": "Decoupled from API.DTOs.KavitaPlus.Metadata.MetadataSettingsDto to allow reuse without requiring the full metadata settings in\nAPI.DTOs.Settings.ImportFieldMappingsDto"
+        "additionalProperties": false
       },
       "FieldMappingsImportResultDto": {
         "type": "object",
@@ -23415,7 +23491,6 @@
             "items": {
               "type": "string"
             },
-            "description": "Keys of the conflicting age ratings mappings",
             "nullable": true
           }
         },
@@ -23438,9 +23513,7 @@
           },
           "fileName": {
             "type": "string",
-            "description": "The filename of the cached file. If this was nested in a subfolder, the foldername will be appended with _",
-            "nullable": true,
-            "example": "chapter01_page01.png"
+            "nullable": true
           },
           "isWide": {
             "type": "boolean"
@@ -23453,7 +23526,6 @@
         "properties": {
           "totalFileSize": {
             "type": "integer",
-            "description": "Total bytes for all files",
             "format": "int64"
           },
           "fileBreakdown": {
@@ -23482,7 +23554,6 @@
               4
             ],
             "type": "integer",
-            "description": "Represents the format of the file",
             "format": "int32"
           },
           "totalSize": {
@@ -23510,10 +23581,8 @@
                 4
               ],
               "type": "integer",
-              "description": "Represents the format of the file",
               "format": "int32"
             },
-            "description": "The type of Formats you want to be returned. An empty list will return all formats back",
             "nullable": true
           },
           "readStatus": {
@@ -23525,7 +23594,6 @@
               "type": "integer",
               "format": "int32"
             },
-            "description": "A list of library ids to restrict search to. Defaults to all libraries by passing empty list",
             "nullable": true
           },
           "genres": {
@@ -23534,7 +23602,6 @@
               "type": "integer",
               "format": "int32"
             },
-            "description": "A list of Genre ids to restrict search to. Defaults to all genres by passing an empty list",
             "nullable": true
           },
           "writers": {
@@ -23543,7 +23610,6 @@
               "type": "integer",
               "format": "int32"
             },
-            "description": "A list of Writers to restrict search to. Defaults to all Writers by passing an empty list",
             "nullable": true
           },
           "penciller": {
@@ -23552,7 +23618,6 @@
               "type": "integer",
               "format": "int32"
             },
-            "description": "A list of Penciller ids to restrict search to. Defaults to all Pencillers by passing an empty list",
             "nullable": true
           },
           "inker": {
@@ -23561,7 +23626,6 @@
               "type": "integer",
               "format": "int32"
             },
-            "description": "A list of Inker ids to restrict search to. Defaults to all Inkers by passing an empty list",
             "nullable": true
           },
           "colorist": {
@@ -23570,7 +23634,6 @@
               "type": "integer",
               "format": "int32"
             },
-            "description": "A list of Colorist ids to restrict search to. Defaults to all Colorists by passing an empty list",
             "nullable": true
           },
           "letterer": {
@@ -23579,7 +23642,6 @@
               "type": "integer",
               "format": "int32"
             },
-            "description": "A list of Letterer ids to restrict search to. Defaults to all Letterers by passing an empty list",
             "nullable": true
           },
           "coverArtist": {
@@ -23588,7 +23650,6 @@
               "type": "integer",
               "format": "int32"
             },
-            "description": "A list of CoverArtist ids to restrict search to. Defaults to all CoverArtists by passing an empty list",
             "nullable": true
           },
           "editor": {
@@ -23597,7 +23658,6 @@
               "type": "integer",
               "format": "int32"
             },
-            "description": "A list of Editor ids to restrict search to. Defaults to all Editors by passing an empty list",
             "nullable": true
           },
           "publisher": {
@@ -23606,7 +23666,6 @@
               "type": "integer",
               "format": "int32"
             },
-            "description": "A list of Publisher ids to restrict search to. Defaults to all Publishers by passing an empty list",
             "nullable": true
           },
           "character": {
@@ -23615,7 +23674,6 @@
               "type": "integer",
               "format": "int32"
             },
-            "description": "A list of Character ids to restrict search to. Defaults to all Characters by passing an empty list",
             "nullable": true
           },
           "translators": {
@@ -23624,7 +23682,6 @@
               "type": "integer",
               "format": "int32"
             },
-            "description": "A list of Translator ids to restrict search to. Defaults to all Translatorss by passing an empty list",
             "nullable": true
           },
           "collectionTags": {
@@ -23633,7 +23690,6 @@
               "type": "integer",
               "format": "int32"
             },
-            "description": "A list of Collection Tag ids to restrict search to. Defaults to all Collection Tags by passing an empty list",
             "nullable": true
           },
           "tags": {
@@ -23642,12 +23698,10 @@
               "type": "integer",
               "format": "int32"
             },
-            "description": "A list of Tag ids to restrict search to. Defaults to all Tags by passing an empty list",
             "nullable": true
           },
           "rating": {
             "type": "integer",
-            "description": "Will return back everything with the rating and above\nAPI.Entities.AppUserRating.Rating",
             "format": "int32"
           },
           "sortOptions": {
@@ -23675,10 +23729,8 @@
                 -1
               ],
               "type": "integer",
-              "description": "Represents Age Rating for content.",
               "format": "int32"
             },
-            "description": "Age Ratings. Empty list will return everything back",
             "nullable": true
           },
           "languages": {
@@ -23686,7 +23738,6 @@
             "items": {
               "type": "string"
             },
-            "description": "Languages (ISO 639-1 code) to filter by. Empty list will return everything back",
             "nullable": true
           },
           "publicationStatus": {
@@ -23702,12 +23753,10 @@
               "type": "integer",
               "format": "int32"
             },
-            "description": "Publication statuses to filter by. Empty list will return everything back",
             "nullable": true
           },
           "seriesNameQuery": {
             "type": "string",
-            "description": "An optional name string to filter by. Empty string will ignore.",
             "nullable": true
           },
           "releaseYearRange": {
@@ -23780,7 +23829,6 @@
               33
             ],
             "type": "integer",
-            "description": "Represents the field which will dictate the value type and the Extension used for filtering",
             "format": "int32"
           },
           "value": {
@@ -23795,12 +23843,10 @@
         "properties": {
           "id": {
             "type": "integer",
-            "description": "Not used in the UI.",
             "format": "int32"
           },
           "name": {
             "type": "string",
-            "description": "The name of the filter",
             "nullable": true
           },
           "statements": {
@@ -23823,12 +23869,10 @@
           },
           "limitTo": {
             "type": "integer",
-            "description": "Limit the number of rows returned. Defaults to not applying a limit (aka 0)",
             "format": "int32"
           }
         },
-        "additionalProperties": false,
-        "description": "Metadata filtering for v2 API only"
+        "additionalProperties": false
       },
       "FullProgressDto": {
         "type": "object",
@@ -23870,8 +23914,7 @@
             "nullable": true
           }
         },
-        "additionalProperties": false,
-        "description": "A full progress Record from the DB (not all data, only what's needed for API)"
+        "additionalProperties": false
       },
       "GenreTagDto": {
         "required": [
@@ -23936,17 +23979,14 @@
           },
           "chapterId": {
             "type": "integer",
-            "description": "Chapter Id if this is a chapter. Not guaranteed to be set.",
             "format": "int32"
           },
           "volumeId": {
             "type": "integer",
-            "description": "Volume Id if this is a chapter. Not guaranteed to be set.",
             "format": "int32"
           },
           "id": {
             "type": "integer",
-            "description": "This is used only on the UI. It is just index of being added.",
             "format": "int32"
           },
           "format": {
@@ -23958,17 +23998,14 @@
               4
             ],
             "type": "integer",
-            "description": "Represents the format of the file",
             "format": "int32"
           },
           "count": {
             "type": "integer",
-            "description": "Number of items that are updated. This provides a sort of grouping when multiple chapters are added per Volume/Series",
             "format": "int32"
           }
         },
-        "additionalProperties": false,
-        "description": "This is a representation of a Series with some amount of underlying files within it. This is used for Recently Updated Series section"
+        "additionalProperties": false
       },
       "HighlightSlot": {
         "type": "object",
@@ -23992,22 +24029,26 @@
         "properties": {
           "minHours": {
             "type": "integer",
-            "description": "Min hours to read the selection",
             "format": "int32"
           },
           "maxHours": {
             "type": "integer",
-            "description": "Max hours to read the selection",
             "format": "int32"
           },
           "avgHours": {
             "type": "number",
-            "description": "Estimated average hours to read the selection",
             "format": "float"
+          },
+          "wordCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "pageCount": {
+            "type": "integer",
+            "format": "int32"
           }
         },
-        "additionalProperties": false,
-        "description": "A range of time to read a selection (series, chapter, etc)"
+        "additionalProperties": false
       },
       "ImportFieldMappingsDto": {
         "type": "object",
@@ -24030,7 +24071,6 @@
               1
             ],
             "type": "integer",
-            "description": "How Kavita should import the new settings",
             "format": "int32"
           },
           "resolution": {
@@ -24040,24 +24080,19 @@
               2
             ],
             "type": "integer",
-            "description": "Default conflict resolution, override with API.DTOs.ImportSettingsDto.AgeRatingConflictResolutions and !:FieldMappingsConflictResolutions",
             "format": "int32"
           },
           "whitelist": {
-            "type": "boolean",
-            "description": "Import !:MetadataSettingsDto.Whitelist"
+            "type": "boolean"
           },
           "blacklist": {
-            "type": "boolean",
-            "description": "Import !:MetadataSettingsDto.Blacklist"
+            "type": "boolean"
           },
           "ageRatings": {
-            "type": "boolean",
-            "description": "Import !:MetadataSettingsDto.AgeRatingMappings"
+            "type": "boolean"
           },
           "fieldMappings": {
-            "type": "boolean",
-            "description": "Import !:MetadataSettingsDto.FieldMappings"
+            "type": "boolean"
           },
           "ageRatingConflictResolutions": {
             "type": "object",
@@ -24068,10 +24103,8 @@
                 2
               ],
               "type": "integer",
-              "description": "How Kavita should resolve conflicts",
               "format": "int32"
             },
-            "description": "Override the API.DTOs.ImportSettingsDto.Resolution for specific age ratings",
             "nullable": true
           }
         },
@@ -24089,8 +24122,7 @@
             "format": "int32"
           }
         },
-        "additionalProperties": false,
-        "description": "Represents a range between two int/float/double"
+        "additionalProperties": false
       },
       "Int32StatCount": {
         "type": "object",
@@ -24121,7 +24153,6 @@
             "items": {
               "type": "string"
             },
-            "description": "List of Roles to assign to user. If admin not present, Pleb will be applied.\nIf admin present, all libraries will be granted access and will ignore those from DTO.",
             "nullable": true
           },
           "libraries": {
@@ -24130,7 +24161,6 @@
               "type": "integer",
               "format": "int32"
             },
-            "description": "A list of libraries to grant access to",
             "nullable": true
           },
           "ageRestriction": {
@@ -24144,16 +24174,13 @@
         "properties": {
           "emailLink": {
             "type": "string",
-            "description": "Email link used to setup the user account",
             "nullable": true
           },
           "emailSent": {
-            "type": "boolean",
-            "description": "Was an email sent (ie is this server accessible)"
+            "type": "boolean"
           },
           "invalidEmail": {
-            "type": "boolean",
-            "description": "When a user has an invalid email and is attempting to perform a flow."
+            "type": "boolean"
           }
         },
         "additionalProperties": false
@@ -24163,23 +24190,19 @@
         "properties": {
           "id": {
             "type": "string",
-            "description": "Job Id",
             "nullable": true
           },
           "title": {
             "type": "string",
-            "description": "Human Readable title for the Job",
             "nullable": true
           },
           "createdAtUtc": {
             "type": "string",
-            "description": "When the job was created",
             "format": "date-time",
             "nullable": true
           },
           "lastExecutionUtc": {
             "type": "string",
-            "description": "Last time the job was run",
             "format": "date-time",
             "nullable": true
           },
@@ -24195,22 +24218,18 @@
         "properties": {
           "size": {
             "type": "integer",
-            "description": "Number of items in this Key",
             "format": "int32"
           },
           "key": {
             "type": "string",
-            "description": "Code to use in URL (url encoded)",
             "nullable": true
           },
           "title": {
             "type": "string",
-            "description": "What is visible to user",
             "nullable": true
           }
         },
-        "additionalProperties": false,
-        "description": "Represents an individual button in a Jump Bar"
+        "additionalProperties": false
       },
       "KavitaLocale": {
         "type": "object",
@@ -24271,49 +24290,40 @@
         "properties": {
           "document": {
             "type": "string",
-            "description": "This is the Koreader hash of the book. It is used to identify the book.",
             "nullable": true
           },
           "device_id": {
             "type": "string",
-            "description": "A randomly generated id from the koreader device. Only used to maintain the Koreader interface.",
             "nullable": true
           },
           "device": {
             "type": "string",
-            "description": "The Koreader device name. Only used to maintain the Koreader interface.",
             "nullable": true
           },
           "percentage": {
             "type": "number",
-            "description": "Percent progress of the book. Only used to maintain the Koreader interface.",
             "format": "float"
           },
           "progress": {
             "type": "string",
-            "description": "An XPath string read by Koreader to determine the location within the epub.\nEssentially, it is Koreader's equivalent to ProgressDto.BookScrollId.",
             "nullable": true
           },
           "timestamp": {
             "type": "integer",
-            "description": "Last Progress in Unix seconds since epoch",
             "format": "int64"
           }
         },
-        "additionalProperties": false,
-        "description": "This is the interface for receiving and sending updates to Koreader. The only fields\nthat are actually used are the Document and Progress fields."
+        "additionalProperties": false
       },
       "KoreaderProgressUpdateDto": {
         "type": "object",
         "properties": {
           "document": {
             "type": "string",
-            "description": "This is the Koreader hash of the book. It is used to identify the book.",
             "nullable": true
           },
           "timestamp": {
             "type": "string",
-            "description": "UTC Timestamp to return to KOReader",
             "format": "date-time"
           }
         },
@@ -24362,41 +24372,32 @@
           },
           "lastScanned": {
             "type": "string",
-            "description": "Last time Library was scanned",
             "format": "date-time"
           },
           "coverImage": {
             "type": "string",
-            "description": "An optional Cover Image or null",
             "nullable": true
           },
           "folderWatching": {
-            "type": "boolean",
-            "description": "If Folder Watching is enabled for this library"
+            "type": "boolean"
           },
           "includeInDashboard": {
-            "type": "boolean",
-            "description": "Include Library series on Dashboard Streams"
+            "type": "boolean"
           },
           "includeInRecommended": {
-            "type": "boolean",
-            "description": "Include Library series on Recommended Streams"
+            "type": "boolean"
           },
           "manageCollections": {
-            "type": "boolean",
-            "description": "Should this library create and manage collections from Metadata"
+            "type": "boolean"
           },
           "manageReadingLists": {
-            "type": "boolean",
-            "description": "Should this library create and manage reading lists from Metadata"
+            "type": "boolean"
           },
           "includeInSearch": {
-            "type": "boolean",
-            "description": "Include library series in Search"
+            "type": "boolean"
           },
           "allowScrobbling": {
-            "type": "boolean",
-            "description": "Should this library allow Scrobble events to emit from it"
+            "type": "boolean"
           },
           "folders": {
             "type": "array",
@@ -24406,8 +24407,7 @@
             "nullable": true
           },
           "collapseSeriesRelationships": {
-            "type": "boolean",
-            "description": "When showing series, only parent series or series with no relationships will be returned"
+            "type": "boolean"
           },
           "libraryFileTypes": {
             "type": "array",
@@ -24419,10 +24419,8 @@
                 4
               ],
               "type": "integer",
-              "description": "Represents a set of file types that can be scanned",
               "format": "int32"
             },
-            "description": "The types of file type groups the library will scan for",
             "nullable": true
           },
           "excludePatterns": {
@@ -24430,20 +24428,16 @@
             "items": {
               "type": "string"
             },
-            "description": "A set of globs that will exclude matching content from being scanned",
             "nullable": true
           },
           "allowMetadataMatching": {
-            "type": "boolean",
-            "description": "Allow any series within this Library to download metadata."
+            "type": "boolean"
           },
           "enableMetadata": {
-            "type": "boolean",
-            "description": "Allow Kavita to read metadata (ComicInfo.xml, Epub, PDF)"
+            "type": "boolean"
           },
           "removePrefixForSortName": {
-            "type": "boolean",
-            "description": "Should Kavita remove sort articles \"The\" for the sort name"
+            "type": "boolean"
           },
           "inheritWebLinksFromFirstChapter": {
             "type": "boolean"
@@ -24473,69 +24467,34 @@
         "properties": {
           "expirationDate": {
             "type": "string",
-            "description": "If cancelled, will represent cancellation date. If not, will represent repayment date",
             "format": "date-time"
           },
           "isActive": {
-            "type": "boolean",
-            "description": "If cancelled or not"
+            "type": "boolean"
           },
           "isCancelled": {
-            "type": "boolean",
-            "description": "If will be or is cancelled"
+            "type": "boolean"
           },
           "isValidVersion": {
-            "type": "boolean",
-            "description": "Is the installed version valid for Kavita+ (aka within 3 releases)"
+            "type": "boolean"
           },
           "registeredEmail": {
             "type": "string",
-            "description": "The email on file",
             "nullable": true
           },
           "totalMonthsSubbed": {
             "type": "integer",
-            "description": "Number of months user has been subscribed",
             "format": "int32"
           },
           "hasLicense": {
-            "type": "boolean",
-            "description": "A license is stored within Kavita"
+            "type": "boolean"
           },
           "installId": {
             "type": "string",
-            "description": "InstallId which can be given to support",
             "nullable": true
           }
         },
         "additionalProperties": false
-      },
-      "LiteLibraryDto": {
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "name": {
-            "type": "string",
-            "nullable": true
-          },
-          "type": {
-            "enum": [
-              0,
-              1,
-              2,
-              3,
-              4,
-              5
-            ],
-            "type": "integer",
-            "format": "int32"
-          }
-        },
-        "additionalProperties": false,
-        "description": "This is a LibraryDto that non-admins can resolve that has the core information they need"
       },
       "LoginDto": {
         "type": "object",
@@ -24550,7 +24509,6 @@
           },
           "apiKey": {
             "type": "string",
-            "description": "If ApiKey is passed, will ignore username/password for validation",
             "nullable": true
           }
         },
@@ -24593,12 +24551,10 @@
           },
           "existingId": {
             "type": "integer",
-            "description": "If an existing collection exists within Kavita",
             "format": "int32"
           }
         },
-        "additionalProperties": false,
-        "description": "Represents an Interest Stack from MAL"
+        "additionalProperties": false
       },
       "MalUserInfoDto": {
         "required": [
@@ -24613,12 +24569,10 @@
           },
           "accessToken": {
             "type": "string",
-            "description": "This is actually the Client Id",
             "nullable": true
           }
         },
-        "additionalProperties": false,
-        "description": "Information about a User's MAL connection"
+        "additionalProperties": false
       },
       "ManageMatchFilterDto": {
         "type": "object",
@@ -24632,12 +24586,10 @@
               4
             ],
             "type": "integer",
-            "description": "Represents an option in the UI layer for Filtering",
             "format": "int32"
           },
           "libraryType": {
             "type": "integer",
-            "description": "Library Type in int form. -1 indicates to ignore the field.",
             "format": "int32"
           },
           "searchTerm": {
@@ -24672,17 +24624,14 @@
           },
           "filePath": {
             "type": "string",
-            "description": "Absolute path to the archive file (normalized)",
             "nullable": true
           },
           "pages": {
             "type": "integer",
-            "description": "Number of pages for the given file",
             "format": "int32"
           },
           "bytes": {
             "type": "integer",
-            "description": "How many bytes make up this file",
             "format": "int64"
           },
           "format": {
@@ -24694,7 +24643,6 @@
               4
             ],
             "type": "integer",
-            "description": "Represents the format of the file",
             "format": "int32"
           },
           "created": {
@@ -24703,12 +24651,10 @@
           },
           "extension": {
             "type": "string",
-            "description": "File extension",
             "nullable": true
           },
           "koreaderHash": {
             "type": "string",
-            "description": "A hash of the document using Koreader's unique hashing algorithm",
             "nullable": true
           }
         },
@@ -24726,12 +24672,28 @@
               4
             ],
             "type": "integer",
-            "description": "Represents the format of the file",
             "format": "int32"
           },
           "count": {
             "type": "integer",
             "format": "int64"
+          }
+        },
+        "additionalProperties": false
+      },
+      "MarkChapterReadDto": {
+        "type": "object",
+        "properties": {
+          "seriesId": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "chapterId": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "generateReadingSession": {
+            "type": "boolean"
           }
         },
         "additionalProperties": false
@@ -24746,6 +24708,9 @@
               "format": "int32"
             },
             "nullable": true
+          },
+          "generateReadingSession": {
+            "type": "boolean"
           }
         },
         "additionalProperties": false
@@ -24756,6 +24721,9 @@
           "seriesId": {
             "type": "integer",
             "format": "int32"
+          },
+          "generateReadingSession": {
+            "type": "boolean"
           }
         },
         "additionalProperties": false
@@ -24770,6 +24738,9 @@
           "volumeId": {
             "type": "integer",
             "format": "int32"
+          },
+          "generateReadingSession": {
+            "type": "boolean"
           }
         },
         "additionalProperties": false
@@ -24787,7 +24758,6 @@
               "type": "integer",
               "format": "int32"
             },
-            "description": "A list of Volumes to mark read",
             "nullable": true
           },
           "chapterIds": {
@@ -24796,33 +24766,30 @@
               "type": "integer",
               "format": "int32"
             },
-            "description": "A list of additional Chapters to mark as read",
             "nullable": true
+          },
+          "generateReadingSession": {
+            "type": "boolean"
           }
         },
-        "additionalProperties": false,
-        "description": "This is used for bulk updating a set of volume and or chapters in one go"
+        "additionalProperties": false
       },
       "MatchSeriesDto": {
         "type": "object",
         "properties": {
           "dontMatch": {
-            "type": "boolean",
-            "description": "When set, Kavita will stop attempting to match this series and will not perform any scrobbling"
+            "type": "boolean"
           },
           "seriesId": {
             "type": "integer",
-            "description": "Series Id to pull internal metadata from to improve matching",
             "format": "int32"
           },
           "query": {
             "type": "string",
-            "description": "Free form text to query for. Can be a url and ids will be parsed from it",
             "nullable": true
           }
         },
-        "additionalProperties": false,
-        "description": "Used for matching a series with Kavita+ for metadata and scrobbling"
+        "additionalProperties": false
       },
       "MediaErrorDto": {
         "required": [
@@ -24833,22 +24800,18 @@
         "properties": {
           "extension": {
             "type": "string",
-            "description": "Format Type (RAR, ZIP, 7Zip, Epub, PDF)",
             "nullable": true
           },
           "filePath": {
             "type": "string",
-            "description": "Full Filepath to the file that has some issue",
             "nullable": true
           },
           "comment": {
             "type": "string",
-            "description": "Developer defined string",
             "nullable": true
           },
           "details": {
             "type": "string",
-            "description": "Exception message",
             "nullable": true
           },
           "createdUtc": {
@@ -24874,8 +24837,7 @@
             "nullable": true
           },
           "isPending": {
-            "type": "boolean",
-            "description": "If the member is still pending or not"
+            "type": "boolean"
           },
           "ageRestriction": {
             "$ref": "#/components/schemas/AgeRestrictionDto"
@@ -24916,12 +24878,10 @@
               1
             ],
             "type": "integer",
-            "description": "Who provides the identity of the user",
             "format": "int32"
           }
         },
-        "additionalProperties": false,
-        "description": "Represents a member of a Kavita server."
+        "additionalProperties": false
       },
       "MemberInfoDto": {
         "type": "object",
@@ -24974,17 +24934,14 @@
           },
           "sourceValue": {
             "type": "string",
-            "description": "The string in the source",
             "nullable": true
           },
           "destinationValue": {
             "type": "string",
-            "description": "Write the string as this in the Destination (can also just be the Source)",
             "nullable": true
           },
           "excludeFromSource": {
-            "type": "boolean",
-            "description": "If true, the tag will be Moved over vs Copied over"
+            "type": "boolean"
           }
         },
         "additionalProperties": false
@@ -24997,7 +24954,6 @@
             "items": {
               "type": "string"
             },
-            "description": "Do not allow any Genre/Tag in this list to be written to Kavita",
             "nullable": true
           },
           "whitelist": {
@@ -25005,7 +24961,6 @@
             "items": {
               "type": "string"
             },
-            "description": "Only allow these Tags to be written to Kavita",
             "nullable": true
           },
           "ageRatingMappings": {
@@ -25030,10 +24985,8 @@
                 -1
               ],
               "type": "integer",
-              "description": "Represents Age Rating for content.",
               "format": "int32"
             },
-            "description": "Any Genres or Tags that if present, will trigger an Age Rating Override. Highest rating will be prioritized for matching.",
             "nullable": true
           },
           "fieldMappings": {
@@ -25041,64 +24994,49 @@
             "items": {
               "$ref": "#/components/schemas/MetadataFieldMappingDto"
             },
-            "description": "A list of rules that allow mapping a genre/tag to another genre/tag",
             "nullable": true
           },
           "enabled": {
-            "type": "boolean",
-            "description": "If writing any sort of metadata from upstream (AniList, Hardcover) source is allowed"
+            "type": "boolean"
           },
           "enableExtendedMetadataProcessing": {
-            "type": "boolean",
-            "description": "Enable processing of metadata outside K+; e.g. disk and API"
+            "type": "boolean"
           },
           "enableSummary": {
-            "type": "boolean",
-            "description": "Allow the Summary to be written"
+            "type": "boolean"
           },
           "enablePublicationStatus": {
-            "type": "boolean",
-            "description": "Allow Publication status to be derived and updated"
+            "type": "boolean"
           },
           "enableRelationships": {
-            "type": "boolean",
-            "description": "Allow Relationships between series to be set"
+            "type": "boolean"
           },
           "enablePeople": {
-            "type": "boolean",
-            "description": "Allow People to be created (including downloading images)"
+            "type": "boolean"
           },
           "enableStartDate": {
-            "type": "boolean",
-            "description": "Allow Start date to be set within the Series"
+            "type": "boolean"
           },
           "enableLocalizedName": {
-            "type": "boolean",
-            "description": "Allow setting the Localized name"
+            "type": "boolean"
           },
           "enableCoverImage": {
-            "type": "boolean",
-            "description": "Allow setting the cover image"
+            "type": "boolean"
           },
           "enableChapterSummary": {
-            "type": "boolean",
-            "description": "Allow Summary to be set within Chapter/Issue"
+            "type": "boolean"
           },
           "enableChapterReleaseDate": {
-            "type": "boolean",
-            "description": "Allow Release Date to be set within Chapter/Issue"
+            "type": "boolean"
           },
           "enableChapterTitle": {
-            "type": "boolean",
-            "description": "Allow Title to be set within Chapter/Issue"
+            "type": "boolean"
           },
           "enableChapterPublisher": {
-            "type": "boolean",
-            "description": "Allow Publisher to be set within Chapter/Issue"
+            "type": "boolean"
           },
           "enableChapterCoverImage": {
-            "type": "boolean",
-            "description": "Allow setting the cover image for the Chapter/Issue"
+            "type": "boolean"
           },
           "enableGenres": {
             "type": "boolean"
@@ -25107,8 +25045,7 @@
             "type": "boolean"
           },
           "firstLastPeopleNaming": {
-            "type": "boolean",
-            "description": "For Authors and Writers, how should names be stored (Exclusively applied for AniList). This does not affect Character names."
+            "type": "boolean"
           },
           "overrides": {
             "type": "array",
@@ -25130,10 +25067,8 @@
                 14
               ],
               "type": "integer",
-              "description": "Represents which field that can be written to as an override when already locked",
               "format": "int32"
             },
-            "description": "A list of overrides that will enable writing to locked fields",
             "nullable": true
           },
           "personRoles": {
@@ -25158,7 +25093,6 @@
               "type": "integer",
               "format": "int32"
             },
-            "description": "Which Roles to allow metadata downloading for",
             "nullable": true
           }
         },
@@ -25235,13 +25169,11 @@
           },
           "expectedDate": {
             "type": "string",
-            "description": "Null if not applicable",
             "format": "date-time",
             "nullable": true
           },
           "title": {
             "type": "string",
-            "description": "The localized title to render on the card",
             "nullable": true
           }
         },
@@ -25251,53 +25183,42 @@
         "type": "object",
         "properties": {
           "autoLogin": {
-            "type": "boolean",
-            "description": "Automatically redirect to the Oidc login screen"
+            "type": "boolean"
           },
           "disablePasswordAuthentication": {
-            "type": "boolean",
-            "description": "Disables password authentication for non-admin users"
+            "type": "boolean"
           },
           "providerName": {
             "type": "string",
-            "description": "Name of your provider, used to display on the login screen",
             "nullable": true
           },
           "authority": {
             "type": "string",
-            "description": "Optional OpenID Connect Authority URL. Not managed in DB. Managed in appsettings.json and synced to DB.",
             "nullable": true
           },
           "clientId": {
             "type": "string",
-            "description": "Optional OpenID Connect ClientId, defaults to kavita. Not managed in DB. Managed in appsettings.json and synced to DB.",
             "nullable": true
           },
           "secret": {
             "type": "string",
-            "description": "Optional OpenID Connect Secret. Not managed in DB. Managed in appsettings.json and synced to DB.",
             "nullable": true
           },
           "provisionAccounts": {
-            "type": "boolean",
-            "description": "If true, auto creates a new account when someone logs in via OpenID Connect"
+            "type": "boolean"
           },
           "requireVerifiedEmail": {
-            "type": "boolean",
-            "description": "Require emails to be verified by the OpenID Connect provider when creating accounts on login"
+            "type": "boolean"
           },
           "syncUserSettings": {
-            "type": "boolean",
-            "description": "Overwrite Kavita roles, libraries and age rating with OpenIDConnect provided roles on log in."
+            "type": "boolean"
           },
           "rolesPrefix": {
             "type": "string",
-            "description": "A prefix that all roles Kavita checks for during sync must have",
             "nullable": true
           },
           "rolesClaim": {
             "type": "string",
-            "description": "The JWT claim roles are mapped under, defaults to System.Security.Claims.ClaimTypes.Role",
             "nullable": true
           },
           "customScopes": {
@@ -25305,7 +25226,6 @@
             "items": {
               "type": "string"
             },
-            "description": "Custom scopes Kavita should request from your OIDC provider",
             "nullable": true
           },
           "defaultRoles": {
@@ -25343,7 +25263,6 @@
               -1
             ],
             "type": "integer",
-            "description": "Represents Age Rating for content.",
             "format": "int32"
           },
           "defaultIncludeUnknowns": {
@@ -25351,27 +25270,22 @@
           },
           "enabled": {
             "type": "boolean",
-            "description": "Returns true if the !:OidcPublicConfigDto.Authority has been set",
             "readOnly": true
           }
         },
-        "additionalProperties": false,
-        "description": "All configuration regarding OIDC"
+        "additionalProperties": false
       },
       "OidcPublicConfigDto": {
         "type": "object",
         "properties": {
           "autoLogin": {
-            "type": "boolean",
-            "description": "Automatically redirect to the Oidc login screen"
+            "type": "boolean"
           },
           "disablePasswordAuthentication": {
-            "type": "boolean",
-            "description": "Disables password authentication for non-admin users"
+            "type": "boolean"
           },
           "providerName": {
             "type": "string",
-            "description": "Name of your provider, used to display on the login screen",
             "nullable": true
           },
           "enabled": {
@@ -25413,7 +25327,6 @@
             "additionalProperties": {
               "$ref": "#/components/schemas/ParseResultDto"
             },
-            "description": "The requested name to the parsed result. Does not include errored items",
             "nullable": true
           },
           "errors": {
@@ -25422,12 +25335,10 @@
               "type": "string",
               "nullable": true
             },
-            "description": "The requested name to parse maps to the Error exception",
             "nullable": true
           },
           "errorCounts": {
             "type": "integer",
-            "description": "Count of errored items",
             "format": "int32",
             "readOnly": true
           }
@@ -25474,18 +25385,15 @@
         "properties": {
           "personId": {
             "type": "integer",
-            "description": "The person to check against",
             "format": "int32"
           },
           "name": {
             "minLength": 1,
-            "type": "string",
-            "description": "The persons name in the form. In case it differs from the one in the database"
+            "type": "string"
           },
           "alias": {
             "minLength": 1,
-            "type": "string",
-            "description": "The alias to check"
+            "type": "string"
           }
         },
         "additionalProperties": false
@@ -25532,22 +25440,18 @@
           },
           "asin": {
             "type": "string",
-            "description": "ASIN for person",
             "nullable": true
           },
           "aniListId": {
             "type": "integer",
-            "description": "https://anilist.co/staff/{AniListId}/",
             "format": "int32"
           },
           "malId": {
             "type": "integer",
-            "description": "https://myanimelist.net/people/{MalId}/\nhttps://myanimelist.net/character/{MalId}/CharacterName",
             "format": "int64"
           },
           "hardcoverId": {
             "type": "string",
-            "description": "https://hardcover.app/authors/{HardcoverId}",
             "nullable": true
           },
           "webLinks": {
@@ -25555,7 +25459,6 @@
             "items": {
               "type": "string"
             },
-            "description": "Web links derived from the various id of external websites",
             "nullable": true
           },
           "roles": {
@@ -25580,7 +25483,6 @@
               "type": "integer",
               "format": "int32"
             },
-            "description": "All roles as if returned by the /api/person/roles endpoint",
             "nullable": true
           }
         },
@@ -25651,12 +25553,10 @@
         "properties": {
           "destId": {
             "type": "integer",
-            "description": "The id of the person being merged into",
             "format": "int32"
           },
           "srcId": {
             "type": "integer",
-            "description": "The id of the person being merged. This person will be removed, and become an alias of API.DTOs.PersonMergeDto.DestId",
             "format": "int32"
           }
         },
@@ -25678,8 +25578,7 @@
             "type": "boolean"
           }
         },
-        "additionalProperties": false,
-        "description": "All Sorting Options for a query related to Person Entity"
+        "additionalProperties": false
       },
       "PersonalToCDto": {
         "required": [
@@ -25700,27 +25599,22 @@
           },
           "pageNumber": {
             "type": "integer",
-            "description": "The page to bookmark",
             "format": "int32"
           },
           "title": {
             "type": "string",
-            "description": "The title of the bookmark. Defaults to Page {PageNumber} if not set",
             "nullable": true
           },
           "bookScrollId": {
             "type": "string",
-            "description": "For Book Reader, represents the nearest passed anchor on the screen that can be used to resume scroll point. If empty, the ToC point is the beginning of the page",
             "nullable": true
           },
           "selectedText": {
             "type": "string",
-            "description": "Text of the bookmark",
             "nullable": true
           },
           "chapterTitle": {
             "type": "string",
-            "description": "Title of the Chapter this PToC was created in",
             "nullable": true
           }
         },
@@ -25792,7 +25686,6 @@
           },
           "bookScrollId": {
             "type": "string",
-            "description": "For EPUB reader, this can be an optional string of the id of a part marker, to help resume reading position\non pages that combine multiple \"chapters\".",
             "nullable": true
           },
           "lastModifiedUtc": {
@@ -25874,10 +25767,10 @@
               1,
               2,
               3,
-              4
+              4,
+              5
             ],
             "type": "integer",
-            "description": "Misleading name but is the source of data (like a review coming from AniList)",
             "format": "int32"
           },
           "authority": {
@@ -25940,8 +25833,7 @@
             "format": "float"
           }
         },
-        "additionalProperties": false,
-        "description": "Represents a single User's reading event"
+        "additionalProperties": false
       },
       "ReadStatus": {
         "type": "object",
@@ -25956,8 +25848,7 @@
             "type": "boolean"
           }
         },
-        "additionalProperties": false,
-        "description": "Represents the Reading Status. This is a flag and allows multiple statues"
+        "additionalProperties": false
       },
       "ReadTimeByHourDto": {
         "type": "object",
@@ -26018,7 +25909,6 @@
           },
           "wordsRead": {
             "type": "integer",
-            "description": "Only applicable for Book entries",
             "format": "int32"
           },
           "totalPages": {
@@ -26137,6 +26027,9 @@
             "type": "integer",
             "format": "int32"
           },
+          "isGeneratedSession": {
+            "type": "boolean"
+          },
           "startTimeUtc": {
             "type": "string",
             "format": "date-time"
@@ -26166,7 +26059,6 @@
               4
             ],
             "type": "integer",
-            "description": "Represents the format of the file",
             "format": "int32"
           },
           "chapters": {
@@ -26222,15 +26114,13 @@
             "nullable": true
           },
           "promoted": {
-            "type": "boolean",
-            "description": "Reading lists that are promoted are only done by admins"
+            "type": "boolean"
           },
           "coverImageLocked": {
             "type": "boolean"
           },
           "coverImage": {
             "type": "string",
-            "description": "This is used to tell the UI if it should request a Cover Image or not. If null or empty, it has not been set.",
             "nullable": true
           },
           "primaryColor": {
@@ -26243,27 +26133,22 @@
           },
           "itemCount": {
             "type": "integer",
-            "description": "Number of Items in the Reading List",
             "format": "int32"
           },
           "startingYear": {
             "type": "integer",
-            "description": "Minimum Year the Reading List starts",
             "format": "int32"
           },
           "startingMonth": {
             "type": "integer",
-            "description": "Minimum Month the Reading List starts",
             "format": "int32"
           },
           "endingYear": {
             "type": "integer",
-            "description": "Maximum Year the Reading List starts",
             "format": "int32"
           },
           "endingMonth": {
             "type": "integer",
-            "description": "Maximum Month the Reading List starts",
             "format": "int32"
           },
           "ageRating": {
@@ -26286,12 +26171,10 @@
               -1
             ],
             "type": "integer",
-            "description": "The highest age rating from all Series within the reading list",
             "format": "int32"
           },
           "ownerUserName": {
             "type": "string",
-            "description": "Username of the User that owns (in the case of a promoted list)",
             "nullable": true
           }
         },
@@ -26302,17 +26185,14 @@
         "properties": {
           "pages": {
             "type": "integer",
-            "description": "Total Pages across all Reading List Items",
             "format": "int32"
           },
           "wordCount": {
             "type": "integer",
-            "description": "Total Word count across all Reading List Items",
             "format": "int64"
           },
           "isAllEpub": {
-            "type": "boolean",
-            "description": "Are ALL Reading List Items epub"
+            "type": "boolean"
           },
           "minHoursToRead": {
             "type": "integer",
@@ -26365,7 +26245,6 @@
               4
             ],
             "type": "integer",
-            "description": "Represents the format of the file",
             "format": "int32"
           },
           "pagesRead": {
@@ -26418,29 +26297,24 @@
           },
           "releaseDate": {
             "type": "string",
-            "description": "Release Date from Chapter",
             "format": "date-time",
             "nullable": true
           },
           "readingListId": {
             "type": "integer",
-            "description": "Used internally only",
             "format": "int32"
           },
           "lastReadingProgressUtc": {
             "type": "string",
-            "description": "The last time a reading list item (underlying chapter) was read by current authenticated user",
             "format": "date-time",
             "nullable": true
           },
           "fileSize": {
             "type": "integer",
-            "description": "File size of underlying item",
             "format": "int64"
           },
           "summary": {
             "type": "string",
-            "description": "The chapter summary",
             "nullable": true
           },
           "isSpecial": {
@@ -26541,25 +26415,20 @@
         "properties": {
           "libraryId": {
             "type": "integer",
-            "description": "Library Id series belongs to",
             "format": "int32"
           },
           "seriesId": {
             "type": "integer",
-            "description": "Series Id",
             "format": "int32"
           },
           "forceUpdate": {
-            "type": "boolean",
-            "description": "Should the task force opening/re-calculation."
+            "type": "boolean"
           },
           "forceColorscape": {
-            "type": "boolean",
-            "description": "Should the task force re-calculation of colorscape."
+            "type": "boolean"
           }
         },
-        "additionalProperties": false,
-        "description": "Used for running some task against a Series."
+        "additionalProperties": false
       },
       "RegisterDto": {
         "required": [
@@ -26574,7 +26443,6 @@
           },
           "email": {
             "type": "string",
-            "description": "An email to register with. Optional. Provides Forgot Password functionality",
             "nullable": true
           },
           "password": {
@@ -26590,7 +26458,6 @@
         "properties": {
           "sourceSeriesId": {
             "type": "integer",
-            "description": "The parent relationship Series",
             "format": "int32"
           },
           "sequels": {
@@ -26749,20 +26616,16 @@
         "type": "object",
         "properties": {
           "shouldPrompt": {
-            "type": "boolean",
-            "description": "Should the prompt be shown"
+            "type": "boolean"
           },
           "timePrompt": {
-            "type": "boolean",
-            "description": "If the prompt is triggered because of time, false when triggered because of fully read"
+            "type": "boolean"
           },
           "fullReread": {
-            "type": "boolean",
-            "description": "True if the entity is not atomic and will be fully reread on reread (I.e. rereading a series on volume)"
+            "type": "boolean"
           },
           "daysSinceLastRead": {
             "type": "integer",
-            "description": "Days elapsed since API.DTOs.Reader.RereadDto.ChapterOnReread was last read",
             "format": "int32"
           },
           "chapterOnContinue": {
@@ -26783,18 +26646,15 @@
         "properties": {
           "userName": {
             "minLength": 1,
-            "type": "string",
-            "description": "The Username of the User"
+            "type": "string"
           },
           "password": {
             "maxLength": 256,
             "minLength": 6,
-            "type": "string",
-            "description": "The new password"
+            "type": "string"
           },
           "oldPassword": {
             "type": "string",
-            "description": "The old, existing password. If an admin is performing the change, this is not required. Otherwise, it is.",
             "nullable": true
           }
         },
@@ -26851,33 +26711,27 @@
         "properties": {
           "apiKey": {
             "type": "string",
-            "description": "Api key for a user with Admin permissions",
             "nullable": true
           },
           "folderPath": {
             "type": "string",
-            "description": "Folder Path to Scan",
             "nullable": true
           },
           "abortOnNoSeriesMatch": {
-            "type": "boolean",
-            "description": "If true, only runs the scan if a matches series is found. I.e. prevent library scans"
+            "type": "boolean"
           }
         },
-        "additionalProperties": false,
-        "description": "DTO for requesting a folder to be scanned"
+        "additionalProperties": false
       },
       "ScrobbleErrorDto": {
         "type": "object",
         "properties": {
           "comment": {
             "type": "string",
-            "description": "Developer defined string",
             "nullable": true
           },
           "details": {
             "type": "string",
-            "description": "List of providers that could not",
             "nullable": true
           },
           "seriesId": {
@@ -26975,21 +26829,17 @@
               6
             ],
             "type": "integer",
-            "description": "Which field to sort on",
             "format": "int32"
           },
           "isDescending": {
-            "type": "boolean",
-            "description": "If the sort should be a descending sort"
+            "type": "boolean"
           },
           "query": {
             "type": "string",
-            "description": "A query to search against",
             "nullable": true
           },
           "includeReviews": {
-            "type": "boolean",
-            "description": "Include reviews in the result - Note: Review Scrobbling is disabled"
+            "type": "boolean"
           }
         },
         "additionalProperties": false
@@ -27052,7 +26902,6 @@
               4
             ],
             "type": "integer",
-            "description": "Represents the format of the file",
             "format": "int32"
           },
           "libraryName": {
@@ -27147,8 +26996,7 @@
             "nullable": true
           }
         },
-        "additionalProperties": false,
-        "description": "Represents all Search results for a query"
+        "additionalProperties": false
       },
       "SendSeriesToEmailDeviceDto": {
         "type": "object",
@@ -27239,7 +27087,6 @@
             "items": {
               "$ref": "#/components/schemas/ChapterDto"
             },
-            "description": "Specials for the Series. These will have their title and range cleaned to remove the special marker and prepare",
             "nullable": true
           },
           "chapters": {
@@ -27247,7 +27094,6 @@
             "items": {
               "$ref": "#/components/schemas/ChapterDto"
             },
-            "description": "All Chapters, excluding Specials and single chapters (0 chapter) for a volume",
             "nullable": true
           },
           "volumes": {
@@ -27255,7 +27101,6 @@
             "items": {
               "$ref": "#/components/schemas/VolumeDto"
             },
-            "description": "Just the Volumes for the Series (Excludes Volume 0)",
             "nullable": true
           },
           "storylineChapters": {
@@ -27263,22 +27108,18 @@
             "items": {
               "$ref": "#/components/schemas/ChapterDto"
             },
-            "description": "These are chapters that are in Volume 0 and should be read AFTER the volumes",
             "nullable": true
           },
           "unreadCount": {
             "type": "integer",
-            "description": "How many chapters are unread",
             "format": "int32"
           },
           "totalCount": {
             "type": "integer",
-            "description": "How many chapters are there",
             "format": "int32"
           }
         },
-        "additionalProperties": false,
-        "description": "This is a special DTO for a UI page in Kavita. This performs sorting and grouping and returns exactly what UI requires for layout.\nThis is subject to change, do not rely on this Data model."
+        "additionalProperties": false
       },
       "SeriesDetailPlusDto": {
         "type": "object",
@@ -27304,8 +27145,7 @@
             "$ref": "#/components/schemas/ExternalSeriesDetailDto"
           }
         },
-        "additionalProperties": false,
-        "description": "All the data from Kavita+ for Series Detail"
+        "additionalProperties": false
       },
       "SeriesDto": {
         "type": "object",
@@ -27347,26 +27187,21 @@
           },
           "userRating": {
             "type": "number",
-            "description": "Rating from logged-in user",
             "format": "float"
           },
           "hasUserRated": {
-            "type": "boolean",
-            "description": "If the user has set the rating or not"
+            "type": "boolean"
           },
           "totalReads": {
             "type": "integer",
-            "description": "Min API.DTOs.ChapterDto.TotalReads across the series",
             "format": "int32"
           },
           "pagesRead": {
             "type": "integer",
-            "description": "Sum of pages read from linked Volumes. Calculated at API-time.",
             "format": "int32"
           },
           "latestReadDate": {
             "type": "string",
-            "description": "DateTime representing last time the series was Read. Calculated at API-time.",
             "format": "date-time"
           },
           "format": {
@@ -27378,7 +27213,6 @@
               4
             ],
             "type": "integer",
-            "description": "Represents the format of the file",
             "format": "int32"
           },
           "created": {
@@ -27444,6 +27278,30 @@
           "secondaryColor": {
             "type": "string",
             "nullable": true
+          },
+          "aniListId": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "malId": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "hardcoverId": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "metronId": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "comicVineId": {
+            "type": "string",
+            "nullable": true
+          },
+          "mangaBakaId": {
+            "type": "integer",
+            "format": "int64"
           }
         },
         "additionalProperties": false
@@ -27477,7 +27335,6 @@
             "items": {
               "$ref": "#/components/schemas/GenreTagDto"
             },
-            "description": "Genres for the Series",
             "nullable": true
           },
           "tags": {
@@ -27485,7 +27342,6 @@
             "items": {
               "$ref": "#/components/schemas/TagDto"
             },
-            "description": "Collection of all Tags from underlying chapters for a Series",
             "nullable": true
           },
           "writers": {
@@ -27599,27 +27455,22 @@
               -1
             ],
             "type": "integer",
-            "description": "Highest Age Rating from all Chapters",
             "format": "int32"
           },
           "releaseYear": {
             "type": "integer",
-            "description": "Earliest Year from all chapters",
             "format": "int32"
           },
           "language": {
             "type": "string",
-            "description": "Language of the content (BCP-47 code)",
             "nullable": true
           },
           "maxCount": {
             "type": "integer",
-            "description": "Max number of issues/volumes in the series (Max of Volume/Issue field in ComicInfo)",
             "format": "int32"
           },
           "totalCount": {
             "type": "integer",
-            "description": "Total number of issues/volumes for the series",
             "format": "int32"
           },
           "publicationStatus": {
@@ -27631,12 +27482,10 @@
               4
             ],
             "type": "integer",
-            "description": "Publication status of the Series",
             "format": "int32"
           },
           "webLinks": {
             "type": "string",
-            "description": "A comma-separated list of Urls",
             "nullable": true
           },
           "languageLocked": {
@@ -27646,12 +27495,10 @@
             "type": "boolean"
           },
           "ageRatingLocked": {
-            "type": "boolean",
-            "description": "Locked by user so metadata updates from scan loop will not override AgeRating"
+            "type": "boolean"
           },
           "publicationStatusLocked": {
-            "type": "boolean",
-            "description": "Locked by user so metadata updates from scan loop will not override PublicationStatus"
+            "type": "boolean"
           },
           "genresLocked": {
             "type": "boolean"
@@ -27741,7 +27588,6 @@
               14
             ],
             "type": "integer",
-            "description": "Represents a relationship between Series",
             "format": "int32"
           },
           "provider": {
@@ -27750,10 +27596,10 @@
               1,
               2,
               3,
-              4
+              4,
+              5
             ],
             "type": "integer",
-            "description": "Misleading name but is the source of data (like a review coming from AniList)",
             "format": "int32"
           },
           "plusMediaFormat": {
@@ -27765,7 +27611,6 @@
               5
             ],
             "type": "integer",
-            "description": "Represents PlusMediaFormat",
             "format": "int32"
           }
         },
@@ -27823,32 +27668,26 @@
         "properties": {
           "installId": {
             "type": "string",
-            "description": "Unique Id that represents a unique install",
             "nullable": true
           },
           "isDocker": {
-            "type": "boolean",
-            "description": "If the Kavita install is using Docker"
+            "type": "boolean"
           },
           "kavitaVersion": {
             "type": "string",
-            "description": "Version of Kavita",
             "nullable": true
           },
           "firstInstallDate": {
             "type": "string",
-            "description": "The Date Kavita was first installed",
             "format": "date-time",
             "nullable": true
           },
           "firstInstallVersion": {
             "type": "string",
-            "description": "The Version of Kavita on the first run",
             "nullable": true
           }
         },
-        "additionalProperties": false,
-        "description": "This is just for the Server tab on UI"
+        "additionalProperties": false
       },
       "ServerSettingDto": {
         "type": "object",
@@ -27871,35 +27710,28 @@
           },
           "loggingLevel": {
             "type": "string",
-            "description": "Logging level for server. Managed in appsettings.json.",
             "nullable": true
           },
           "port": {
             "type": "integer",
-            "description": "Port the server listens on. Managed in appsettings.json.",
             "format": "int32"
           },
           "ipAddresses": {
             "type": "string",
-            "description": "Comma separated list of ip addresses the server listens on. Managed in appsettings.json",
             "nullable": true
           },
           "allowStatCollection": {
-            "type": "boolean",
-            "description": "Allows anonymous information to be collected and sent to KavitaStats"
+            "type": "boolean"
           },
           "enableOpds": {
-            "type": "boolean",
-            "description": "Enables OPDS connections to be made to the server."
+            "type": "boolean"
           },
           "baseUrl": {
             "type": "string",
-            "description": "Base Url for the kavita. Requires restart to take effect.",
             "nullable": true
           },
           "bookmarksDirectory": {
             "type": "string",
-            "description": "Where Bookmarks are stored.",
             "nullable": true
           },
           "installVersion": {
@@ -27908,7 +27740,6 @@
           },
           "installId": {
             "type": "string",
-            "description": "Represents a unique Id to this Kavita installation. Only used in Stats to identify unique installs.",
             "nullable": true
           },
           "encodeMediaAs": {
@@ -27918,42 +27749,33 @@
               2
             ],
             "type": "integer",
-            "description": "The format that should be used when saving media for Kavita",
-            "format": "int32",
-            "example": "This includes things like: Covers, Bookmarks, Favicons"
+            "format": "int32"
           },
           "totalBackups": {
             "type": "integer",
-            "description": "The amount of Backups before cleanup",
             "format": "int32"
           },
           "enableFolderWatching": {
-            "type": "boolean",
-            "description": "If Kavita should watch the library folders and process changes"
+            "type": "boolean"
           },
           "totalLogs": {
             "type": "integer",
-            "description": "Total number of days worth of logs to keep at a given time.",
             "format": "int32"
           },
           "hostName": {
             "type": "string",
-            "description": "The Host name (ie Reverse proxy domain name) for the server",
             "nullable": true
           },
           "cacheSize": {
             "type": "integer",
-            "description": "The size in MB for Caching API data",
             "format": "int64"
           },
           "onDeckProgressDays": {
             "type": "integer",
-            "description": "How many Days since today in the past for reading progress, should content be considered for On Deck, before it gets removed automatically",
             "format": "int32"
           },
           "onDeckUpdateDays": {
             "type": "integer",
-            "description": "How many Days since today in the past for chapter updates, should content be considered for On Deck, before it gets removed automatically",
             "format": "int32"
           },
           "coverImageSize": {
@@ -27964,7 +27786,6 @@
               4
             ],
             "type": "integer",
-            "description": "How large the cover images should be",
             "format": "int32"
           },
           "pdfRenderResolution": {
@@ -27974,7 +27795,6 @@
               3
             ],
             "type": "integer",
-            "description": "How large rendered PDF images should be",
             "format": "int32"
           },
           "smtpConfig": {
@@ -27985,18 +27805,15 @@
           },
           "firstInstallDate": {
             "type": "string",
-            "description": "The Date Kavita was first installed",
             "format": "date-time",
             "nullable": true
           },
           "firstInstallVersion": {
             "type": "string",
-            "description": "The Version of Kavita on the first run",
             "nullable": true
           },
           "statsApiHits": {
             "type": "integer",
-            "description": "How many times Kavita has hit the Stats API",
             "format": "int32"
           }
         },
@@ -28059,17 +27876,14 @@
             "nullable": true
           },
           "isProvided": {
-            "type": "boolean",
-            "description": "Is System Provided"
+            "type": "boolean"
           },
           "order": {
             "type": "integer",
-            "description": "Sort Order on the Dashboard",
             "format": "int32"
           },
           "smartFilterEncoded": {
             "type": "string",
-            "description": "If Not IsProvided, the appropriate smart filter",
             "nullable": true
           },
           "smartFilterId": {
@@ -28079,7 +27893,6 @@
           },
           "externalSourceId": {
             "type": "integer",
-            "description": "External Source Url if configured",
             "format": "int32"
           },
           "externalSource": {
@@ -28098,7 +27911,6 @@
               9
             ],
             "type": "integer",
-            "description": "For system provided",
             "format": "int32"
           },
           "visible": {
@@ -28129,22 +27941,18 @@
           },
           "name": {
             "type": "string",
-            "description": "Name of the Theme",
             "nullable": true
           },
           "normalizedName": {
             "type": "string",
-            "description": "Normalized name for lookups",
             "nullable": true
           },
           "fileName": {
             "type": "string",
-            "description": "File path to the content. Stored under API.Services.DirectoryService.SiteThemeDirectory.\nMust be a .css file",
             "nullable": true
           },
           "isDefault": {
-            "type": "boolean",
-            "description": "Only one theme can have this. Will auto-set this as default for new user accounts"
+            "type": "boolean"
           },
           "provider": {
             "enum": [
@@ -28152,7 +27960,6 @@
               2
             ],
             "type": "integer",
-            "description": "Where did the theme come from",
             "format": "int32"
           },
           "previewUrls": {
@@ -28164,17 +27971,14 @@
           },
           "description": {
             "type": "string",
-            "description": "Information about the theme",
             "nullable": true
           },
           "author": {
             "type": "string",
-            "description": "Author of the Theme (only applies to non-system provided themes)",
             "nullable": true
           },
           "compatibleVersion": {
             "type": "string",
-            "description": "Last compatible version. System provided will always be most current",
             "nullable": true
           },
           "selector": {
@@ -28183,8 +27987,7 @@
             "readOnly": true
           }
         },
-        "additionalProperties": false,
-        "description": "Represents a set of css overrides the user can upload to Kavita and will load into webui"
+        "additionalProperties": false
       },
       "SmartFilterDto": {
         "required": [
@@ -28203,7 +28006,6 @@
           },
           "filter": {
             "type": "string",
-            "description": "This is the Filter url encoded. It is decoded and reconstructed into a API.DTOs.Filtering.v2.FilterV2Dto",
             "nullable": true
           }
         },
@@ -28241,12 +28043,10 @@
           },
           "sizeLimit": {
             "type": "integer",
-            "description": "Limit in bytes for allowing files to be added as attachments. Defaults to 25MB",
             "format": "int32"
           },
           "customizedTemplates": {
-            "type": "boolean",
-            "description": "Should Kavita use config/templates for Email templates or the default ones"
+            "type": "boolean"
           }
         },
         "additionalProperties": false
@@ -28274,8 +28074,7 @@
             "type": "boolean"
           }
         },
-        "additionalProperties": false,
-        "description": "Sorting Options for a query"
+        "additionalProperties": false
       },
       "SpreadStatsDto": {
         "type": "object",
@@ -28338,27 +28137,22 @@
             "items": {
               "$ref": "#/components/schemas/MangaFileDto"
             },
-            "description": "The files that represent this Chapter",
             "nullable": true
           },
           "pagesRead": {
             "type": "integer",
-            "description": "Calculated at API time. Number of pages read for this Chapter for logged-in user.",
             "format": "int32"
           },
           "totalReads": {
             "type": "integer",
-            "description": "Total number of complete reads",
             "format": "int32"
           },
           "lastReadingProgressUtc": {
             "type": "string",
-            "description": "The last time a chapter was read by current authenticated user",
             "format": "date-time"
           },
           "lastReadingProgress": {
             "type": "string",
-            "description": "The last time a chapter was read by current authenticated user",
             "format": "date-time"
           },
           "coverImageLocked": {
@@ -28412,7 +28206,6 @@
               -1
             ],
             "type": "integer",
-            "description": "Represents Age Rating for content.",
             "format": "int32"
           },
           "wordCount": {
@@ -28542,7 +28335,6 @@
             "items": {
               "$ref": "#/components/schemas/TagDto"
             },
-            "description": "Collection of all Tags from underlying chapters for a Series",
             "nullable": true
           },
           "publicationStatus": {
@@ -28659,6 +28451,30 @@
             "nullable": true,
             "readOnly": true
           },
+          "aniListId": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "malId": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "hardcoverId": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "metronId": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "comicVineId": {
+            "type": "string",
+            "nullable": true
+          },
+          "mangaBakaId": {
+            "type": "integer",
+            "format": "int64"
+          },
           "seriesId": {
             "type": "integer",
             "format": "int32"
@@ -28684,8 +28500,7 @@
             "nullable": true
           }
         },
-        "additionalProperties": false,
-        "description": "Used on Person Profile page"
+        "additionalProperties": false
       },
       "StatBucketDto": {
         "type": "object",
@@ -28696,7 +28511,6 @@
           },
           "rangeEnd": {
             "type": "integer",
-            "description": "Null for the last range (1000+)",
             "format": "int32",
             "nullable": true
           },
@@ -28706,12 +28520,10 @@
           },
           "percentage": {
             "type": "number",
-            "description": "Percentage of total chapters",
             "format": "double"
           }
         },
-        "additionalProperties": false,
-        "description": "A bucket of items (fixed) from 0-X, X-X*2"
+        "additionalProperties": false
       },
       "StringBreakDownDto": {
         "type": "object",
@@ -28809,12 +28621,10 @@
           },
           "comicsTime": {
             "type": "number",
-            "description": "Amount of time read on Comic libraries",
             "format": "float"
           },
           "booksTime": {
             "type": "number",
-            "description": "Amount of time read on",
             "format": "float"
           },
           "mangaTime": {
@@ -28851,7 +28661,6 @@
               -1
             ],
             "type": "integer",
-            "description": "Represents Age Rating for content.",
             "format": "int32"
           },
           "includeUnknowns": {
@@ -28876,7 +28685,6 @@
             "items": {
               "$ref": "#/components/schemas/GenreTagDto"
             },
-            "description": "Genres for the Chapter",
             "nullable": true
           },
           "tags": {
@@ -28884,7 +28692,6 @@
             "items": {
               "$ref": "#/components/schemas/TagDto"
             },
-            "description": "Collection of all Tags from underlying chapters for a Chapter",
             "nullable": true
           },
           "writers": {
@@ -28998,17 +28805,14 @@
               -1
             ],
             "type": "integer",
-            "description": "Highest Age Rating from all Chapters",
             "format": "int32"
           },
           "language": {
             "type": "string",
-            "description": "Language of the content (BCP-47 code)",
             "nullable": true
           },
           "ageRatingLocked": {
-            "type": "boolean",
-            "description": "Locked by user so metadata updates from scan loop will not override AgeRating"
+            "type": "boolean"
           },
           "titleNameLocked": {
             "type": "boolean"
@@ -29072,16 +28876,13 @@
           },
           "sortOrder": {
             "type": "number",
-            "description": "The sorting order of the Chapter. Inherits from MinNumber, but can be overridden.",
             "format": "float"
           },
           "sortOrderLocked": {
-            "type": "boolean",
-            "description": "Can the sort order be updated on scan or is it locked from UI"
+            "type": "boolean"
           },
           "webLinks": {
             "type": "string",
-            "description": "Comma-separated link of urls to external services that have some relation to the Chapter",
             "nullable": true
           },
           "isbn": {
@@ -29090,12 +28891,39 @@
           },
           "releaseDate": {
             "type": "string",
-            "description": "Date which chapter was released",
             "format": "date-time"
           },
           "titleName": {
             "type": "string",
-            "description": "Chapter title",
+            "nullable": true
+          },
+          "aniListId": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "malId": {
+            "type": "integer",
+            "format": "int64",
+            "nullable": true
+          },
+          "hardcoverId": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "metronId": {
+            "type": "integer",
+            "format": "int64",
+            "nullable": true
+          },
+          "comicVineId": {
+            "type": "string",
+            "nullable": true
+          },
+          "mangaBakaId": {
+            "type": "integer",
+            "format": "int64",
             "nullable": true
           }
         },
@@ -29150,7 +28978,6 @@
               3
             ],
             "type": "integer",
-            "description": "Platform of the device. If not know, defaults to \"Custom\"",
             "format": "int32"
           },
           "emailAddress": {
@@ -29265,17 +29092,14 @@
                 4
               ],
               "type": "integer",
-              "description": "Represents a set of file types that can be scanned",
               "format": "int32"
-            },
-            "description": "What types of files to allow the scanner to pickup"
+            }
           },
           "excludePatterns": {
             "type": "array",
             "items": {
               "type": "string"
-            },
-            "description": "A set of Glob patterns that the scanner will exclude processing"
+            }
           }
         },
         "additionalProperties": false
@@ -29310,17 +29134,14 @@
         "properties": {
           "license": {
             "type": "string",
-            "description": "License Key received from Kavita+",
             "nullable": true
           },
           "email": {
             "type": "string",
-            "description": "Email registered with Stripe",
             "nullable": true
           },
           "discordId": {
             "type": "string",
-            "description": "Optional DiscordId",
             "nullable": true
           }
         },
@@ -29339,53 +29160,42 @@
         "properties": {
           "currentVersion": {
             "type": "string",
-            "description": "Current installed Version",
             "nullable": true
           },
           "updateVersion": {
             "type": "string",
-            "description": "Semver of the release version\n<example>0.4.3</example>",
             "nullable": true
           },
           "updateBody": {
             "type": "string",
-            "description": "Release body in HTML",
             "nullable": true
           },
           "updateTitle": {
             "type": "string",
-            "description": "Title of the release",
             "nullable": true
           },
           "updateUrl": {
             "type": "string",
-            "description": "Github Url",
             "nullable": true
           },
           "isDocker": {
-            "type": "boolean",
-            "description": "If this install is within Docker"
+            "type": "boolean"
           },
           "isPrerelease": {
-            "type": "boolean",
-            "description": "Is this a pre-release"
+            "type": "boolean"
           },
           "publishDate": {
             "type": "string",
-            "description": "Date of the publish",
             "nullable": true
           },
           "isOnNightlyInRelease": {
-            "type": "boolean",
-            "description": "Is the server on a nightly within this release"
+            "type": "boolean"
           },
           "isReleaseNewer": {
-            "type": "boolean",
-            "description": "Is the server on an older version"
+            "type": "boolean"
           },
           "isReleaseEqual": {
-            "type": "boolean",
-            "description": "Is the server on this version"
+            "type": "boolean"
           },
           "added": {
             "type": "array",
@@ -29452,12 +29262,10 @@
           },
           "blogPart": {
             "type": "string",
-            "description": "The part above the changelog part",
             "nullable": true
           }
         },
-        "additionalProperties": false,
-        "description": "Update Notification denoting a new release available for user to update to"
+        "additionalProperties": false
       },
       "UpdatePersonDto": {
         "required": [
@@ -29695,8 +29503,7 @@
             "format": "int32"
           }
         },
-        "additionalProperties": false,
-        "description": "DTO for moving a reading list item to another position within the same list"
+        "additionalProperties": false
       },
       "UpdateRelatedSeriesDto": {
         "type": "object",
@@ -29835,6 +29642,35 @@
           },
           "localizedNameLocked": {
             "type": "boolean"
+          },
+          "aniListId": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "malId": {
+            "type": "integer",
+            "format": "int64",
+            "nullable": true
+          },
+          "hardcoverId": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "metronId": {
+            "type": "integer",
+            "format": "int64",
+            "nullable": true
+          },
+          "comicVineId": {
+            "type": "string",
+            "nullable": true
+          },
+          "mangaBakaId": {
+            "type": "integer",
+            "format": "int64",
+            "nullable": true
           }
         },
         "additionalProperties": false
@@ -29885,8 +29721,7 @@
             "format": "int32"
           },
           "positionIncludesInvisible": {
-            "type": "boolean",
-            "description": "If the API.DTOs.Dashboard.UpdateStreamPositionDto.ToPosition has taken into account non-visible items"
+            "type": "boolean"
           }
         },
         "additionalProperties": false
@@ -29907,7 +29742,6 @@
             "items": {
               "type": "string"
             },
-            "description": "List of Roles to assign to user. If admin not present, Pleb will be applied.\nIf admin present, all libraries will be granted access and will ignore those from DTO.",
             "nullable": true
           },
           "libraries": {
@@ -29916,7 +29750,6 @@
               "type": "integer",
               "format": "int32"
             },
-            "description": "A list of libraries to grant access to",
             "nullable": true
           },
           "ageRestriction": {
@@ -29932,7 +29765,6 @@
               1
             ],
             "type": "integer",
-            "description": "Who provides the identity of the user",
             "format": "int32"
           }
         },
@@ -29957,6 +29789,45 @@
         },
         "additionalProperties": false
       },
+      "UpdateVolumeDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "aniListId": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "malId": {
+            "type": "integer",
+            "format": "int64",
+            "nullable": true
+          },
+          "hardcoverId": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "metronId": {
+            "type": "integer",
+            "format": "int64",
+            "nullable": true
+          },
+          "comicVineId": {
+            "type": "string",
+            "nullable": true
+          },
+          "mangaBakaId": {
+            "type": "integer",
+            "format": "int64",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
       "UpdateWantToReadDto": {
         "type": "object",
         "properties": {
@@ -29966,12 +29837,10 @@
               "type": "integer",
               "format": "int32"
             },
-            "description": "List of Series Ids that will be Added/Removed",
             "nullable": true
           }
         },
-        "additionalProperties": false,
-        "description": "A list of Series to pass when working with Want To Read APIs"
+        "additionalProperties": false
       },
       "UploadFileDto": {
         "required": [
@@ -29982,17 +29851,14 @@
         "properties": {
           "id": {
             "type": "integer",
-            "description": "Id of the Entity",
             "format": "int32"
           },
           "url": {
             "type": "string",
-            "description": "Base Url encoding of the file to upload from (can be null)",
             "nullable": true
           },
           "lockCover": {
-            "type": "boolean",
-            "description": "Lock the cover or not"
+            "type": "boolean"
           }
         },
         "additionalProperties": false
@@ -30005,8 +29871,7 @@
         "properties": {
           "url": {
             "minLength": 1,
-            "type": "string",
-            "description": "External url"
+            "type": "string"
           }
         },
         "additionalProperties": false
@@ -30017,6 +29882,10 @@
           "id": {
             "type": "integer",
             "format": "int32"
+          },
+          "oidcId": {
+            "type": "string",
+            "nullable": true
           },
           "username": {
             "type": "string",
@@ -30061,7 +29930,6 @@
               1
             ],
             "type": "integer",
-            "description": "Who provides the identity of the user",
             "format": "int32"
           },
           "created": {
@@ -30077,7 +29945,6 @@
             "items": {
               "$ref": "#/components/schemas/AuthKeyDto"
             },
-            "description": "Only System-provided Auth Keys",
             "nullable": true
           },
           "coverImage": {
@@ -30104,12 +29971,10 @@
           },
           "pageSize": {
             "type": "integer",
-            "description": "If set to 0, will set as MaxInt",
             "format": "int32"
           }
         },
-        "additionalProperties": false,
-        "description": "User params should be used together with [FromQuery] to add optional pagination to endpoint. If no pagination params are\nprovided, the default (int.MaxValue) will be used. When adding pagination to an endpoint, ensure the UI sets the correct\nquery params."
+        "additionalProperties": false
       },
       "UserPreferencesDto": {
         "required": [
@@ -30282,22 +30147,18 @@
         "properties": {
           "totalPagesRead": {
             "type": "integer",
-            "description": "Total number of pages read",
             "format": "int64"
           },
           "totalWordsRead": {
             "type": "integer",
-            "description": "Total number of words read",
             "format": "int64"
           },
           "timeSpentReading": {
             "type": "integer",
-            "description": "Total time spent reading",
             "format": "int64"
           },
           "lastActiveUtc": {
             "type": "string",
-            "description": "Last time user read anything",
             "format": "date-time",
             "nullable": true
           },
@@ -30495,7 +30356,6 @@
               1
             ],
             "type": "integer",
-            "description": "Represents the writing styles for the book-reader",
             "format": "int32"
           },
           "bookReaderThemeName": {
@@ -30529,7 +30389,6 @@
               3
             ],
             "type": "integer",
-            "description": "Enum values match PdfViewer's enums",
             "format": "int32"
           },
           "pdfSpreadMode": {
@@ -30549,22 +30408,18 @@
         "properties": {
           "tagline": {
             "type": "string",
-            "description": "A tagline for the review",
             "nullable": true
           },
           "body": {
             "type": "string",
-            "description": "The main review",
             "nullable": true
           },
           "bodyJustText": {
             "type": "string",
-            "description": "The main body with just text, for review preview",
             "nullable": true
           },
           "seriesId": {
             "type": "integer",
-            "description": "The series this is for",
             "format": "int32"
           },
           "chapterId": {
@@ -30574,17 +30429,14 @@
           },
           "libraryId": {
             "type": "integer",
-            "description": "The library this series belongs in",
             "format": "int32"
           },
           "username": {
             "type": "string",
-            "description": "The user who wrote this",
             "nullable": true
           },
           "userId": {
             "type": "integer",
-            "description": "UserId of the reviewer, only applicable for API.Services.Plus.ScrobbleProvider.Kavita",
             "format": "int32"
           },
           "totalVotes": {
@@ -30601,17 +30453,14 @@
           },
           "score": {
             "type": "integer",
-            "description": "How many upvotes this review has gotten",
             "format": "int32"
           },
           "siteUrl": {
             "type": "string",
-            "description": "If External, the url of the review",
             "nullable": true
           },
           "isExternal": {
-            "type": "boolean",
-            "description": "Does this review come from an external Source"
+            "type": "boolean"
           },
           "provider": {
             "enum": [
@@ -30619,10 +30468,10 @@
               1,
               2,
               3,
-              4
+              4,
+              5
             ],
             "type": "integer",
-            "description": "If this review is External, which Provider did it come from",
             "format": "int32"
           },
           "authority": {
@@ -30631,12 +30480,10 @@
               1
             ],
             "type": "integer",
-            "description": "Source of the Rating",
             "format": "int32"
           }
         },
-        "additionalProperties": false,
-        "description": "Represents a User Review for a given Series"
+        "additionalProperties": false
       },
       "UserReviewExtendedDto": {
         "type": "object",
@@ -30647,12 +30494,10 @@
           },
           "body": {
             "type": "string",
-            "description": "The main review",
             "nullable": true
           },
           "seriesId": {
             "type": "integer",
-            "description": "The series this is for",
             "format": "int32"
           },
           "chapterId": {
@@ -30662,12 +30507,10 @@
           },
           "libraryId": {
             "type": "integer",
-            "description": "The library this series belongs in",
             "format": "int32"
           },
           "username": {
             "type": "string",
-            "description": "The user who wrote this",
             "nullable": true
           },
           "rating": {
@@ -30719,8 +30562,7 @@
             "type": "boolean"
           }
         },
-        "additionalProperties": false,
-        "description": "Represents information around a user's tokens and their status"
+        "additionalProperties": false
       },
       "VolumeDto": {
         "type": "object",
@@ -30743,7 +30585,6 @@
           },
           "number": {
             "type": "integer",
-            "description": "This will map to MinNumber. Number was removed in v0.7.13.8/v0.7.14",
             "format": "int32",
             "deprecated": true
           },
@@ -30765,12 +30606,10 @@
           },
           "created": {
             "type": "string",
-            "description": "When chapter was created in local server time",
             "format": "date-time"
           },
           "lastModified": {
             "type": "string",
-            "description": "When chapter was last modified in local server time",
             "format": "date-time"
           },
           "seriesId": {
@@ -30811,6 +30650,30 @@
           "secondaryColor": {
             "type": "string",
             "nullable": true
+          },
+          "aniListId": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "malId": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "hardcoverId": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "metronId": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "comicVineId": {
+            "type": "string",
+            "nullable": true
+          },
+          "mangaBakaId": {
+            "type": "integer",
+            "format": "int64"
           }
         },
         "additionalProperties": false
@@ -30892,7 +30755,7 @@
     },
     {
       "name": "Device",
-      "description": "Responsible interacting and creating Devices"
+      "description": "Responsible for interacting and creating Devices"
     },
     {
       "name": "Download",

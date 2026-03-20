@@ -60,7 +60,7 @@ public class SeriesFilterTests(ITestOutputHelper outputHelper): AbstractDbTest(o
             Substitute.For<IDirectoryService>(), Substitute.For<IScrobblingService>(),
             Substitute.For<IReadingSessionService>(), Substitute.For<IClientInfoAccessor>(),
             Substitute.For<ISeriesService>(), Substitute.For<IEntityNamingService>(),
-            Substitute.For<ILocalizationService>());
+            Substitute.For<ILocalizationService>(), Substitute.For<IBookService>());
 
         // Select Partial and set pages read to 5 on first chapter
         var partialSeries = await unitOfWork.SeriesRepository.GetSeriesByIdAsync(2);
@@ -203,7 +203,7 @@ public class SeriesFilterTests(ITestOutputHelper outputHelper): AbstractDbTest(o
             Substitute.For<IScrobblingService>(),
             Substitute.For<IReadingSessionService>(), Substitute.For<IClientInfoAccessor>(),
             Substitute.For<ISeriesService>(), Substitute.For<IEntityNamingService>(),
-            Substitute.For<ILocalizationService>());
+            Substitute.For<ILocalizationService>(), Substitute.For<IBookService>());
 
         // Set progress to 99.99% (99/100 pages read)
         var series = await unitOfWork.SeriesRepository.GetSeriesByIdAsync(1);

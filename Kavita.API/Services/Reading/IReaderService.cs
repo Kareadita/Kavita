@@ -21,7 +21,7 @@ public interface IReaderService
     Task MarkSeriesAsUnread(AppUser user, int seriesId);
     Task MarkChaptersAsRead(AppUser user, int seriesId, IList<Chapter> chapters);
     Task MarkChaptersAsUnread(AppUser user, int seriesId, IList<Chapter> chapters);
-    Task<bool> SaveReadingProgress(ProgressDto progressDto, int userId);
+    Task<bool> SaveReadingProgress(ProgressDto progressDto, int userId, bool saveToReadingSession = true);
     int CapPageToChapter(Chapter chapter, int page);
     Task<int> GetNextChapterIdAsync(int seriesId, int volumeId, int currentChapterId, int userId);
     Task<int> GetPrevChapterIdAsync(int seriesId, int volumeId, int currentChapterId, int userId);
@@ -33,4 +33,6 @@ public interface IReaderService
     Task<RereadDto> CheckSeriesForReRead(int userId, int seriesId, int libraryId);
     Task<RereadDto> CheckVolumeForReRead(int userId, int volumeId, int seriesId, int libraryId);
     Task<RereadDto> CheckChapterForReRead(int userId, int chapterId, int seriesId, int libraryId);
+    Task<HourEstimateRangeDto> GetEstimateToCompletionForChapter(int userId, int seriesId, int chapterId);
+    Task<HourEstimateRangeDto> GetEstimateFromPageForChapter(int userId, int seriesId, int chapterId, int page);
 }

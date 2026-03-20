@@ -28,4 +28,11 @@
       <ProjectReference Include="..\Kavita.Common\Kavita.Common.csproj" />
     </ItemGroup>
 
+    <ItemGroup>
+      <Content Include="..\Kavita.Server\config\appsettings.json">
+        <Link>config\appsettings.json</Link>
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </Content>
+    </ItemGroup>
+
 </Project>

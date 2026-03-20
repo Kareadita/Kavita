@@ -77,7 +77,7 @@ public static partial class AnnotationHelper
                 // Add remaining text
                 if (currentPos < originalText.Length)
                 {
-                    elem.AppendChild(HtmlNode.CreateNode(originalText.Substring(currentPos)));
+                    elem.AppendChild(HtmlNode.CreateNode(originalText.Substring(currentPos + 1)));
                 }
             }
             catch (Exception ex)
@@ -256,7 +256,7 @@ public static partial class AnnotationHelper
         // Add text after highlight
         if (endPos < originalText.Length)
         {
-            element.AppendChild(HtmlNode.CreateNode(originalText.Substring(endPos)));
+            element.AppendChild(HtmlNode.CreateNode(originalText.Substring(endPos + 1)));
         }
     }
 

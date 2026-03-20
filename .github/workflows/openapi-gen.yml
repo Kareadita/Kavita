@@ -36,7 +36,7 @@ jobs:
       - name: Get Swashbuckle version
         id: swashbuckle-version
         run: |
-          VERSION=$(grep -o '<PackageReference Include="Swashbuckle.AspNetCore" Version="[^"]*"' Kavita.Server/Kavita.Server.csproj | grep -o 'Version="[^"]*"' | cut -d'"' -f2)
+          VERSION=$(grep -o '<PackageReference Include="Swashbuckle.AspNetCore" Version="[^"]*"' Kavita.Services/Kavita.Services.csproj | grep -o 'Version="[^"]*"' | cut -d'"' -f2)
           echo "VERSION=$VERSION" >> $GITHUB_OUTPUT
           echo "Found Swashbuckle.AspNetCore version: $VERSION"
 
@@ -46,7 +46,7 @@ jobs:
           dotnet tool install Swashbuckle.AspNetCore.Cli --version ${{ steps.swashbuckle-version.outputs.VERSION }}
 
       - name: Generate OpenAPI file
-        run: dotnet swagger tofile --output openapi.json ./build-output/API.dll v1
+        run: dotnet swagger tofile --output openapi.json ./build-output/Kavita.Server.dll v1
 
       - name: Check for changes
         id: git-check

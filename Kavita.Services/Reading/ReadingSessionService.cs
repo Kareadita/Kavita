@@ -4,11 +4,16 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using AutoMapper;
 using Kavita.API.Database;
 using Kavita.API.Services;
 using Kavita.API.Services.Reading;
 using Kavita.API.Services.SignalR;
+using Kavita.Common;
+using Kavita.Database.Extensions;
+using Kavita.Models.DTOs;
 using Kavita.Models.DTOs.Progress;
+using Kavita.Models.DTOs.Reader;
 using Kavita.Models.DTOs.SignalR;
 using Kavita.Models.Entities;
 using Kavita.Models.Entities.Enums;
@@ -90,6 +95,123 @@ public sealed class ReadingSessionService : IReadingSessionService, IDisposable,
             userLock.Release();
         }
     }
+
+    public async Task GenerateReadingSessionForChapters(int userId, int seriesId, Dictionary<int, int> chaptersMap, CancellationToken ct = default)
+    {
+        using var scope = _serviceScopeFactory.CreateScope();
+
+        var context = scope.ServiceProvider.GetRequiredService<IDataContext>();
+        var readerService = scope.ServiceProvider.GetRequiredService<IReaderService>();
+        var mapper = scope.ServiceProvider.GetRequiredService<IMapper>();
+
+        var series = await context.Series.FirstOrDefaultAsync(s => s.Id == seriesId, ct);
+        if (series == null) throw new KavitaNotFoundException();
+
+        var chapterIds = chaptersMap.Keys.ToList();
+
+        var chapters = await context.Chapter
+            .Where(cp => chapterIds.Contains(cp.Id) && cp.Volume.SeriesId == seriesId)
+            .OrderByDescending(cp => cp.SortOrder)
+            .ProjectToWithProgress<Chapter, ChapterDto>(mapper, userId)
+            .ToListAsync(ct);
+
+        Dictionary<int, HourEstimateRangeDto> estimatedHoursByChapter = [];
+        foreach (var chapterId in chapters.Select(cp => cp.Id))
+        {
+            var page = chaptersMap[chapterId];
+            estimatedHoursByChapter[chapterId] = await readerService
+                .GetEstimateFromPageForChapter(userId, seriesId, chapterId, page);
+        }
+
+        var chapterSchedule = ScheduleChapters(estimatedHoursByChapter, DateTime.Now);
+
+        AppUserReadingSession? currentSession = null;
+        DateTime? currentSessionDate = null;
+        List<AppUserReadingSession> addedSessions = [];
+
+        foreach (var chapter in chapters)
+        {
+            var estimate = estimatedHoursByChapter[chapter.Id];
+            if (estimate is { PageCount: 0, WordCount: 0 }) continue;
+
+            var schedule = chapterSchedule[chapter.Id];
+            var chapterDate = schedule.Start.Date;
+
+            if (currentSession == null || chapterDate != currentSessionDate)
+            {
+                currentSession = new AppUserReadingSession
+                {
+                    AppUserId = userId,
+                    IsActive = false,
+                    IsGenerated = true,
+                    ActivityData = []
+                };
+
+                addedSessions.Add(currentSession);
+                context.AppUserReadingSession.Add(currentSession);
+
+                currentSessionDate = chapterDate;
+            }
+
+            currentSession.ActivityData.Add(new AppUserReadingSessionActivityData
+            {
+                LibraryId = series.LibraryId,
+                SeriesId = seriesId,
+                VolumeId = chapter.VolumeId,
+                ChapterId = chapter.Id,
+                StartPage = chapter.PagesRead,
+                EndPage = chapter.Pages,
+                StartTime = schedule.Start,
+                StartTimeUtc = schedule.Start.ToUniversalTime(),
+                EndTime = schedule.End,
+                EndTimeUtc = schedule.End.ToUniversalTime(),
+                PagesRead = estimate.PageCount,
+                WordsRead = (int) estimate.WordCount,
+                TotalPages = chapter.Pages,
+                TotalWords = chapter.WordCount,
+                Format = series.Format,
+            });
+        }
+
+        foreach (var s in addedSessions)
+        {
+            s.StartTime = s.ActivityData.Min(ad => ad.StartTime);
+            s.StartTimeUtc = s.ActivityData.Min(ad => ad.StartTimeUtc);
+            s.EndTime = s.ActivityData.Max(ad => ad.EndTime);
+            s.EndTimeUtc = s.ActivityData.Max(ad => ad.EndTimeUtc);
+        }
+
+        await context.SaveChangesAsync(ct);
+    }
+
+    public static Dictionary<int, (DateTime Start, DateTime End)> ScheduleChapters(
+        Dictionary<int, HourEstimateRangeDto> estimatedHoursByChapter, DateTime currentEnd)
+    {
+        var schedule = new Dictionary<int, (DateTime Start, DateTime End)>();
+
+        foreach (var (chapterId, estimateRangeDto) in estimatedHoursByChapter)
+        {
+            // Don't allow chapters to go over 24h.
+            var actualEstimate = Math.Min(estimateRangeDto.AvgHours, 24);
+
+            var duration = TimeSpan.FromHours(actualEstimate);
+            var start = currentEnd - duration;
+
+            // If start is on a different day, push the whole chapter to end at midnight of current End's day
+            if (start.Date < currentEnd.Date)
+            {
+                var midnight = currentEnd.Date; // midnight = start of currentEnd's date
+                start = midnight - duration;
+                currentEnd = midnight;
+            }
+
+            schedule[chapterId] = (start, currentEnd);
+            currentEnd = start;
+        }
+
+        return schedule;
+    }
+
 
     private async Task<AppUserReadingSession> GetOrCreateSessionAsync(int userId, ProgressDto dto, IDataContext context)
     {

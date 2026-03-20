@@ -19,6 +19,10 @@ public class AppUserReadingSession : IEntityDate
     public DateTime? EndTimeUtc { get; set; }
     public bool IsActive { get; set; } = true;
     /// <summary>
+    /// True if the session was generated and not from progress events. (I.e. mark as read)
+    /// </summary>
+    public bool IsGenerated { get; set; } = false;
+    /// <summary>
     /// Actual activity data recorded during the session
     /// </summary>
     public IList<AppUserReadingSessionActivityData> ActivityData { get; set; }

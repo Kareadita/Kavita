@@ -1,4 +1,7 @@
-﻿using System.Threading.Tasks;
+﻿using System.Collections.Generic;
+using System.Threading;
+using System.Threading.Tasks;
+using Hangfire;
 using Kavita.API.Database;
 using Kavita.API.Services.Reading;
 using Kavita.Models.DTOs.Progress;
@@ -12,7 +15,8 @@ namespace Kavita.Server.Controllers;
 public class PanelsController(IReaderService readerService, IUnitOfWork unitOfWork) : BaseApiController
 {
     /// <summary>
-    /// Saves the progress of a given chapter.
+    /// Saves the progress of a given chapter. This will generate a reading session with the estimated time from the
+    /// last progress till the current
     /// </summary>
     /// <param name="dto"></param>
     /// <param name="apiKey"></param>
@@ -20,7 +24,20 @@ public class PanelsController(IReaderService readerService, IUnitOfWork unitOfWo
     [HttpPost("save-progress")]
     public async Task<ActionResult> SaveProgress(ProgressDto dto, [FromQuery] string apiKey)
     {
-        await readerService.SaveReadingProgress(dto, UserId);
+        if (!await unitOfWork.UserRepository.HasAccessToChapter(UserId, dto.ChapterId))
+            return NotFound();
+
+        var chapter = await unitOfWork.ChapterRepository.GetChapterAsync(dto.ChapterId);
+        if (chapter == null) return NotFound();
+
+        var progressMap = await unitOfWork.AppUserProgressRepository
+            .GetUserProgressForChaptersByChapters(UserId, dto.SeriesId, [dto.ChapterId]);
+
+        await readerService.SaveReadingProgress(dto, UserId, false);
+
+        BackgroundJob.Enqueue<IReadingSessionService>(s
+            => s.GenerateReadingSessionForChapters(UserId, dto.SeriesId, progressMap, CancellationToken.None));
+
         return Ok();
     }
 

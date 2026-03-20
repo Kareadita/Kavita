@@ -3,6 +3,7 @@ import {MangaFormat} from "../manga-format";
 export interface ReadingHistoryItem {
   sessionDataIds: number[];
   id: number;
+  isGeneratedSession: boolean;
   sessionId: number;
   startTimeUtc: string;
   endTimeUtc: string;

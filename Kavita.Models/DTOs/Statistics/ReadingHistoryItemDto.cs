@@ -8,6 +8,7 @@ public sealed record ReadingHistoryItemDto
 {
     public List<int> SessionDataIds { get; set; }
     public int SessionId { get; set; }
+    public bool IsGeneratedSession { get; set; }
     public DateTime StartTimeUtc { get; set; }
     public DateTime EndTimeUtc { get; set; }
     public DateTime LocalDate { get; set; } // For UI grouping by day

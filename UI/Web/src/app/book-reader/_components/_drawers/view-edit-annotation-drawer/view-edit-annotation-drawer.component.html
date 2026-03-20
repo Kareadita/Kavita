@@ -100,10 +100,14 @@
     @if (annotation() && formGroup) {
       <form [formGroup]="formGroup" novalidate>
         <div class="d-flex justify-content-center">
-          <blockquote class="text-muted pb-2 small fw-lighter mx-3 mx-md-4 mx-lg-5" style="max-width: 50rem; width: 100%;">
+          <blockquote class="text-muted pb-2 small fw-lighter mx-3 mx-md-4 mx-lg-5 mx-auto" style="max-width: 90%;">
             <div id="render-target" #renderTarget>
-              <p class="content-quote mb-0" [innerHTML]="totalText()"></p>
+              <p class="content-quote mb-0" [class.clamped]="!quoteExpanded()" [innerHTML]="totalText()"></p>
             </div>
+            <a class="quote-toggle" (click)="quoteExpanded.set(!quoteExpanded())" role="button" href="javascript:void(0);">
+              <i aria-hidden="true" class="fa mx-1" [class.fa-caret-down]="!quoteExpanded()" [class.fa-caret-up]="quoteExpanded()"></i>
+              {{quoteExpanded() ? t('read-less') : t('read-more')}}
+            </a>
             <cite class="float-end mb-1 annotation-meta">{{annotation()! | pageChapterLabel}}</cite>
           </blockquote>
         </div>

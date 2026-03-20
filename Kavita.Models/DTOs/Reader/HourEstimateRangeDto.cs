@@ -17,4 +17,14 @@ public sealed record HourEstimateRangeDto
     /// Estimated average hours to read the selection
     /// </summary>
     public float AvgHours { get; init; } = 1f;
+
+    /// <summary>
+    /// The word count that led to this estimation
+    /// </summary>
+    public long WordCount { get; init; }
+
+    /// <summary>
+    /// The page count that led to this estimation
+    /// </summary>
+    public int PageCount { get; init; }
 }

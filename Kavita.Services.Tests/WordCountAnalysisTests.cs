@@ -35,7 +35,7 @@ public class WordCountAnalysisTests(ITestOutputHelper outputHelper): AbstractDbT
             new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), new MockFileSystem()),
             Substitute.For<IScrobblingService>(), Substitute.For<IReadingSessionService>(),
             Substitute.For<IClientInfoAccessor>(), Substitute.For<ISeriesService>(), Substitute.For<IEntityNamingService>(),
-            Substitute.For<ILocalizationService>());
+            Substitute.For<ILocalizationService>(), Substitute.For<IBookService>());
     }
 
     [Fact]

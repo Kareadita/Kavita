@@ -3,7 +3,7 @@
   width: 25rem;
 
   .card-body {
-    height: 7.78rem;
+    height: 10rem;
     overflow: auto;
   }
 }
@@ -11,10 +11,12 @@
 .content-quote {
   color: var(--drawer-text-color);
   max-height: 20rem;
-  overflow: hidden;
+  overflow-y: hidden;
+  white-space: pre-wrap;
+  word-wrap: break-word;
   display: -webkit-box;
-  line-clamp: 2;
-  -webkit-line-clamp: 2;
+  line-clamp: 4;
+  -webkit-line-clamp: 4;
   -webkit-box-orient: vertical;
 }
 
