@@ -1407,7 +1407,7 @@ public class SeriesRepository(DataContext context, IMapper mapper) : ISeriesRepo
             .RestrictAgainstAgeRestriction(userRating)
             .AsSplitQuery()
             .AsNoTracking()
-            .ProjectTo<SeriesDto>(mapper.ConfigurationProvider)
+            .ProjectToWithProgress<Series, SeriesDto>(mapper.ConfigurationProvider, userId)
             .ToListAsync(ct);
     }
 
@@ -1845,7 +1845,7 @@ public class SeriesRepository(DataContext context, IMapper mapper) : ISeriesRepo
     {
         var libraryIds = context.Library.GetUserLibraries(userId);
         var usersSeriesIds = GetSeriesIdsForLibraryIds(libraryIds);
-        var userRating = await context.AppUser.GetUserAgeRestriction(userId);
+        var userRating = await context.AppUser.GetUserAgeRestriction(userId, ct: ct);
 
         return new RelatedSeriesDto()
         {
@@ -1872,7 +1872,7 @@ public class SeriesRepository(DataContext context, IMapper mapper) : ISeriesRepo
                 .RestrictAgainstAgeRestriction(userRating)
                 .AsSplitQuery()
                 .AsNoTracking()
-                .ProjectTo<SeriesDto>(mapper.ConfigurationProvider)
+                .ProjectToWithProgress<Series, SeriesDto>(mapper.ConfigurationProvider, userId)
                 .ToListAsync(ct),
             Editions = await GetRelatedSeriesQuery(seriesId, usersSeriesIds, RelationKind.Edition, userRating, ct)
         };
