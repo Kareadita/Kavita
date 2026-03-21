@@ -1,5 +1,5 @@
 import {ChangeDetectionStrategy, Component, computed, inject, input, OnInit, signal} from '@angular/core';
-import {NgbActiveModal, NgbModal} from '@ng-bootstrap/ng-bootstrap';
+import {NgbActiveModal, NgbModal, NgbTooltip} from '@ng-bootstrap/ng-bootstrap';
 import {translate, TranslocoDirective} from '@jsverse/transloco';
 import {CblSavedFile} from '../../../_models/reading-list/cbl/cbl-saved-file';
 import {CblImportSummary} from '../../../_models/reading-list/cbl/cbl-import-summary';
@@ -33,10 +33,10 @@ import {
   DataTableColumnHeaderDirective,
   DatatableComponent,
 } from '@siemens/ngx-datatable';
-import {NgbTooltip} from '@ng-bootstrap/ng-bootstrap';
 import {CdkScrollable} from '@angular/cdk/scrolling';
 import {RouterLink} from '@angular/router';
 import {EntityTitleComponent} from '../../../cards/entity-title/entity-title.component';
+import {modalSaved} from "../../../_models/modal/modal-result";
 
 export interface CblIssueRow {
   result: CblBookResult;
@@ -124,10 +124,6 @@ export class ImportCblModalComponent implements OnInit {
     this.libraryService.getLibraryNames().subscribe(names => {
       this.libraryNames.set(names);
     });
-  }
-
-  close() {
-    this.modal.close();
   }
 
   dismiss() {
@@ -355,7 +351,7 @@ export class ImportCblModalComponent implements OnInit {
 
     this.isProcessing.set(false);
     this.toastr.success(translate('toasts.import-complete'));
-    this.modal.close(true);
+    this.modal.close(modalSaved(true));
   }
 
   private buildAllRows(summary: CblImportSummary) {
