@@ -183,8 +183,11 @@ export class BulkSelectionService {
    * Returns the appropriate set of supported actions for the given mix of cards, pre-wired with callback2.
    */
   getActions(): ActionItem<any>[] {
-    const allowedActions = [Action.AddToReadingList, Action.MarkAsRead, Action.MarkAsUnread, Action.AddToCollection,
-      Action.Delete, Action.AddToWantToReadList, Action.RemoveFromWantToReadList, Action.SetReadingProfile, Action.Download];
+    const allowedActions = [
+      Action.AddToReadingList, Action.MarkAsRead, Action.MarkAsReadWithSession, Action.MarkAsUnread,
+      Action.AddToCollection, Action.Delete, Action.AddToWantToReadList, Action.RemoveFromWantToReadList,
+      Action.SetReadingProfile, Action.Download,
+    ];
     const shouldRender = this.registeredShouldRender ?? this.actionFactory.dummyShouldRender;
 
     if (this.hasDataSource('series')) {
