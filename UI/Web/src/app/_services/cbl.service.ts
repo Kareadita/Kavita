@@ -72,4 +72,16 @@ export class CblService {
   deleteRemapRule(id: number) {
     return this.httpClient.delete<void>(this.baseUrl + 'cbl/remap-rules/' + id);
   }
+
+  getAllRemapRules() {
+    return this.httpClient.get<RemapRule[]>(this.baseUrl + 'cbl/remap-rules/all');
+  }
+
+  promoteRule(id: number) {
+    return this.httpClient.post<RemapRule>(this.baseUrl + 'cbl/remap-rules/' + id + '/promote', {});
+  }
+
+  demoteRule(id: number) {
+    return this.httpClient.post<RemapRule>(this.baseUrl + 'cbl/remap-rules/' + id + '/demote', {});
+  }
 }

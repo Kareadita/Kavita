@@ -62,7 +62,8 @@ namespace Kavita.Database.Migrations
                     ChapterId = table.Column<int>(type: "INTEGER", nullable: true),
                     CblSeriesName = table.Column<string>(type: "TEXT", nullable: false),
                     SeriesNameAtMapping = table.Column<string>(type: "TEXT", nullable: false),
-                    AppUserId = table.Column<int>(type: "INTEGER", nullable: true),
+                    IsGlobal = table.Column<bool>(type: "INTEGER", nullable: false),
+                    AppUserId = table.Column<int>(type: "INTEGER", nullable: false),
                     CreatedUtc = table.Column<DateTime>(type: "TEXT", nullable: false)
                 },
                 constraints: table =>
@@ -105,9 +106,9 @@ namespace Kavita.Database.Migrations
                 column: "ChapterId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_ReadingListRemapRule_NormalizedCblSeriesName_AppUserId",
+                name: "IX_ReadingListRemapRule_NormalizedCblSeriesName_IsGlobal_AppUserId",
                 table: "ReadingListRemapRule",
-                columns: new[] { "NormalizedCblSeriesName", "AppUserId" });
+                columns: new[] { "NormalizedCblSeriesName", "IsGlobal", "AppUserId" });
 
             migrationBuilder.CreateIndex(
                 name: "IX_ReadingListRemapRule_SeriesId",

@@ -173,6 +173,7 @@ public class CblImportService(IUnitOfWork unitOfWork, ICblGithubService cblGithu
                     ChapterId = decision.ChapterId > 0 ? decision.ChapterId : null,
                     SeriesNameAtMapping = series?.Name ?? string.Empty,
                     AppUserId = userId,
+                    IsGlobal = false,
                     CreatedUtc = DateTime.UtcNow
                 });
             }

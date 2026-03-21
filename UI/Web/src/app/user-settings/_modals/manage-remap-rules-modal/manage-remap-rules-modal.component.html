@@ -17,20 +17,25 @@
             @if (rule.cblVolume || rule.cblNumber) {
               <small class="text-muted">
                 @if (rule.cblVolume) {
-                  {{t('vol', {volume: rule.cblVolume})}}
+                  {{t('volume-num', {num: rule.cblVolume})}}
                 }
                 @if (rule.cblNumber) {
-                  {{t('issue', {number: rule.cblNumber})}}
+                  {{t('issue-num', {num: rule.cblNumber})}}
                 }
               </small>
             }
           </div>
-          @if (rule.appUserId !== null) {
-            <button class="btn btn-sm btn-outline-danger" (click)="deleteRule(rule)"
-                    [title]="t('delete-rule')">
-              <i class="fa fa-trash" aria-hidden="true"></i>
-            </button>
-          }
+          <div class="d-flex align-items-center gap-2">
+            @if (rule.isGlobal) {
+              <span class="badge bg-info">{{t('global')}}</span>
+            }
+            @if (rule.appUserId === currentUserId()) {
+              <button class="btn btn-sm btn-outline-danger" (click)="deleteRule(rule)"
+                      [title]="t('delete-rule')">
+                <i class="fa fa-trash" aria-hidden="true"></i>
+              </button>
+            }
+          </div>
         </div>
       } @empty {
         <div class="list-group-item text-muted">{{t('no-rules')}}</div>

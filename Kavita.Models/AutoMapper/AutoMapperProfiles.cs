@@ -20,6 +20,7 @@ using Kavita.Models.DTOs.Person;
 using Kavita.Models.DTOs.Progress;
 using Kavita.Models.DTOs.Reader;
 using Kavita.Models.DTOs.ReadingLists;
+using Kavita.Models.DTOs.ReadingLists.CBL.RemapRules;
 using Kavita.Models.DTOs.Recommendation;
 using Kavita.Models.DTOs.Scrobbling;
 using Kavita.Models.DTOs.Search;
@@ -332,6 +333,10 @@ public class AutoMapperProfiles : Profile
         CreateMap<ClientDevice, ClientDeviceDto>()
             .ForMember(dest => dest.OwnerUserId, opt => opt.MapFrom(src => src.AppUserId))
             .ForMember(dest => dest.OwnerUsername, opt => opt.MapFrom(src => src.AppUser.UserName));
+
+        CreateMap<ReadingListRemapRule, RemapRuleDto>()
+            .ForMember(dest => dest.CreatedByUserName,
+                opt => opt.MapFrom(src => src.AppUser != null ? src.AppUser.UserName : string.Empty));
 
         CreateMap<AppUserRating, UserReviewExtendedDto>()
             .ForMember(dest => dest.Body,

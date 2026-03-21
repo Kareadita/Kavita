@@ -1,0 +1,347 @@
+<ng-container *transloco="let t; prefix:'manage-remap-rules'">
+
+  <div class="position-relative">
+    <button class="btn btn-outline-primary position-absolute custom-position" [disabled]="isReadOnly()" (click)="toggleCreateForm()">
+      <i class="fa fa-plus" aria-hidden="true"></i><span class="phone-hidden ms-1">{{t('create-rule')}}</span>
+    </button>
+  </div>
+
+  <!-- Create Rule Form -->
+  @if (showCreateForm()) {
+    <div class="card mb-3 mt-5">
+      <div class="card-body">
+        <h5 class="card-title">{{t('new-rule-title')}}</h5>
+        <div class="row g-3 align-items-end">
+          <div class="col-md-4">
+            <label class="form-label">{{t('cbl-series-name-label')}}</label>
+            <input type="text" class="form-control" [(ngModel)]="newCblSeriesName" [placeholder]="t('cbl-series-name-placeholder')">
+          </div>
+          <div class="col-md-5">
+            <label class="form-label">{{t('kavita-series-label')}}</label>
+            <app-typeahead [settings]="seriesSettings" (selectedData)="onSeriesSelected($event)" id="remap-series">
+              <ng-template #optionItem let-item let-position="idx" let-value="value">
+                {{item.name}}
+              </ng-template>
+              <ng-template #badgeItem let-item let-position="idx">
+                {{item.name}}
+              </ng-template>
+            </app-typeahead>
+          </div>
+          <div class="col-md-3">
+            <button class="btn btn-primary me-2" [disabled]="!newCblSeriesName.trim() || !selectedSeries" (click)="createRule()">
+              {{t('save')}}
+            </button>
+            <button class="btn btn-outline-secondary" (click)="toggleCreateForm()">
+              {{t('cancel')}}
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  }
+
+  <!-- My Rules Section -->
+  <h3 class="my-3">{{t('my-rules-header')}}</h3>
+
+  <app-responsive-table [rows]="myRules()" [trackByFn]="trackBy">
+    <ng-template #tableTemplate>
+      <ngx-datatable
+        class="bootstrap"
+        [rows]="myRules()"
+        [columnMode]="'flex'"
+        rowHeight="auto"
+        [footerHeight]="50"
+        [limit]="15"
+      >
+        <ngx-datatable-column prop="cblSeriesName" [sortable]="true" [draggable]="false" [resizeable]="false" [flexGrow]="3">
+          <ng-template let-column="column" ngx-datatable-header-template>
+            {{t('cbl-name-col')}}
+          </ng-template>
+          <ng-template let-item="row" ngx-datatable-cell-template>
+            {{item.cblSeriesName || item.normalizedCblSeriesName}}
+          </ng-template>
+        </ngx-datatable-column>
+
+        <ngx-datatable-column prop="seriesNameAtMapping" [sortable]="true" [draggable]="false" [resizeable]="false" [flexGrow]="3">
+          <ng-template let-column="column" ngx-datatable-header-template>
+            {{t('maps-to-col')}}
+          </ng-template>
+          <ng-template let-item="row" ngx-datatable-cell-template>
+            {{item.seriesNameAtMapping}}
+          </ng-template>
+        </ngx-datatable-column>
+
+        <ngx-datatable-column prop="cblVolume" [sortable]="false" [draggable]="false" [resizeable]="false" [flexGrow]="2">
+          <ng-template let-column="column" ngx-datatable-header-template>
+            {{t('vol-issue-col')}}
+          </ng-template>
+          <ng-template let-item="row" ngx-datatable-cell-template>
+            @if (item.cblVolume) {
+              {{t('volume-number', {num: item.cblVolume})}}
+            }
+            @if (item.cblNumber) {
+              {{t('issue-number', {num: item.cblNumber})}}
+            }
+          </ng-template>
+        </ngx-datatable-column>
+
+        <ngx-datatable-column prop="createdUtc" [sortable]="true" [draggable]="false" [resizeable]="false" [flexGrow]="2">
+          <ng-template let-column="column" ngx-datatable-header-template>
+            {{t('created-col')}}
+          </ng-template>
+          <ng-template let-item="row" ngx-datatable-cell-template>
+            {{item.createdUtc | date:'shortDate'}}
+          </ng-template>
+        </ngx-datatable-column>
+
+        <ngx-datatable-column name="actions" [sortable]="false" [draggable]="false" [resizeable]="false" [flexGrow]="2">
+          <ng-template let-column="column" ngx-datatable-header-template />
+          <ng-template let-item="row" ngx-datatable-cell-template>
+            <div class="float-end">
+              <button class="btn btn-danger btn-sm me-2" (click)="deleteRule(item)">
+                <i class="fa fa-trash" aria-hidden="true"></i>
+                <span class="visually-hidden">{{t('delete')}}</span>
+              </button>
+              @if (isAdmin()) {
+                <button class="btn btn-outline-primary btn-sm" (click)="promoteRule(item)" [title]="t('promote-tooltip')">
+                  <i class="fa fa-globe" aria-hidden="true"></i>
+                  <span class="phone-hidden ms-1">{{t('promote')}}</span>
+                </button>
+              }
+            </div>
+          </ng-template>
+        </ngx-datatable-column>
+      </ngx-datatable>
+    </ng-template>
+
+    <ng-template #cardTemplate let-item let-idx="index">
+      <div class="card mb-3">
+        <div class="card-body">
+          <div class="d-flex justify-content-between align-items-start mb-2">
+            <h5 class="card-title mb-0">{{item.cblSeriesName || item.normalizedCblSeriesName}}</h5>
+            <div>
+              <button class="btn btn-danger btn-sm me-1" (click)="deleteRule(item)">
+                <i class="fa fa-trash" aria-hidden="true"></i>
+              </button>
+              @if (isAdmin()) {
+                <button class="btn btn-outline-primary btn-sm" (click)="promoteRule(item)">
+                  <i class="fa fa-globe" aria-hidden="true"></i>
+                </button>
+              }
+            </div>
+          </div>
+          <div class="row g-2">
+            <div class="col-12">
+              <div class="text-muted small">{{t('maps-to-col')}}</div>
+              <div>{{item.seriesNameAtMapping}}</div>
+            </div>
+            @if (item.cblVolume || item.cblNumber) {
+              <div class="col-12">
+                <div class="text-muted small">{{t('vol-issue-col')}}</div>
+                <div>
+                  @if (item.cblVolume) { Vol. {{item.cblVolume}} }
+                  @if (item.cblNumber) { #{{item.cblNumber}} }
+                </div>
+              </div>
+            }
+          </div>
+        </div>
+      </div>
+    </ng-template>
+  </app-responsive-table>
+
+  <!-- Global Rules Section -->
+  <div class="setting-section-break"></div>
+  <h3 class="my-3">{{t('global-rules-header')}}</h3>
+
+  <app-responsive-table [rows]="globalRules()" [trackByFn]="trackBy">
+    <ng-template #tableTemplate>
+      <ngx-datatable
+        class="bootstrap"
+        [rows]="globalRules()"
+        [columnMode]="'flex'"
+        rowHeight="auto"
+        [footerHeight]="50"
+        [limit]="15"
+      >
+        <ngx-datatable-column prop="cblSeriesName" [sortable]="true" [draggable]="false" [resizeable]="false" [flexGrow]="3">
+          <ng-template let-column="column" ngx-datatable-header-template>
+            {{t('cbl-name-col')}}
+          </ng-template>
+          <ng-template let-item="row" ngx-datatable-cell-template>
+            {{item.cblSeriesName || item.normalizedCblSeriesName}}
+          </ng-template>
+        </ngx-datatable-column>
+
+        <ngx-datatable-column prop="seriesNameAtMapping" [sortable]="true" [draggable]="false" [resizeable]="false" [flexGrow]="3">
+          <ng-template let-column="column" ngx-datatable-header-template>
+            {{t('maps-to-col')}}
+          </ng-template>
+          <ng-template let-item="row" ngx-datatable-cell-template>
+            {{item.seriesNameAtMapping}}
+          </ng-template>
+        </ngx-datatable-column>
+
+        <ngx-datatable-column prop="cblVolume" [sortable]="false" [draggable]="false" [resizeable]="false" [flexGrow]="2">
+          <ng-template let-column="column" ngx-datatable-header-template>
+            {{t('vol-issue-col')}}
+          </ng-template>
+          <ng-template let-item="row" ngx-datatable-cell-template>
+            @if (item.cblVolume) {
+              {{t('volume-number', {num: item.cblVolume})}}
+            }
+            @if (item.cblNumber) {
+              {{t('issue-number', {num: item.cblNumber})}}
+            }
+          </ng-template>
+        </ngx-datatable-column>
+
+        <ngx-datatable-column prop="createdByUserName" [sortable]="true" [draggable]="false" [resizeable]="false" [flexGrow]="2">
+          <ng-template let-column="column" ngx-datatable-header-template>
+            {{t('created-by-col')}}
+          </ng-template>
+          <ng-template let-item="row" ngx-datatable-cell-template>
+            {{item.createdByUserName}}
+          </ng-template>
+        </ngx-datatable-column>
+
+        <ngx-datatable-column prop="createdUtc" [sortable]="true" [draggable]="false" [resizeable]="false" [flexGrow]="2">
+          <ng-template let-column="column" ngx-datatable-header-template>
+            {{t('created-col')}}
+          </ng-template>
+          <ng-template let-item="row" ngx-datatable-cell-template>
+            {{item.createdUtc | date:'shortDate'}}
+          </ng-template>
+        </ngx-datatable-column>
+
+        <ngx-datatable-column name="actions" [sortable]="false" [draggable]="false" [resizeable]="false" [flexGrow]="1">
+          <ng-template let-column="column" ngx-datatable-header-template />
+          <ng-template let-item="row" ngx-datatable-cell-template>
+            @if (isAdmin()) {
+              <div class="float-end">
+                <button class="btn btn-outline-warning btn-sm" (click)="demoteRule(item)" [title]="t('demote-tooltip')">
+                  <i class="fa fa-arrow-down" aria-hidden="true"></i>
+                  <span class="phone-hidden ms-1">{{t('demote')}}</span>
+                </button>
+              </div>
+            }
+          </ng-template>
+        </ngx-datatable-column>
+      </ngx-datatable>
+    </ng-template>
+
+    <ng-template #cardTemplate let-item let-idx="index">
+      <div class="card mb-3">
+        <div class="card-body">
+          <div class="d-flex justify-content-between align-items-start mb-2">
+            <div>
+              <h5 class="card-title mb-0">{{item.cblSeriesName || item.normalizedCblSeriesName}}</h5>
+              <small class="text-muted">{{t('by')}} {{item.createdByUserName}}</small>
+            </div>
+            @if (isAdmin()) {
+              <button class="btn btn-outline-warning btn-sm" (click)="demoteRule(item)">
+                <i class="fa fa-arrow-down" aria-hidden="true"></i>
+              </button>
+            }
+          </div>
+          <div class="row g-2">
+            <div class="col-12">
+              <div class="text-muted small">{{t('maps-to-col')}}</div>
+              <div>{{item.seriesNameAtMapping}}</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </ng-template>
+  </app-responsive-table>
+
+  <!-- Other Users' Rules (Admin only) -->
+  @if (isAdmin() && otherUserRules().length > 0) {
+    <div class="setting-section-break"></div>
+    <h3 class="my-3">{{t('other-users-rules-header')}}</h3>
+
+    <app-responsive-table [rows]="otherUserRules()" [trackByFn]="trackBy">
+      <ng-template #tableTemplate>
+        <ngx-datatable
+          class="bootstrap"
+          [rows]="otherUserRules()"
+          [columnMode]="'flex'"
+          rowHeight="auto"
+          [footerHeight]="50"
+          [limit]="15"
+        >
+          <ngx-datatable-column prop="cblSeriesName" [sortable]="true" [draggable]="false" [resizeable]="false" [flexGrow]="3">
+            <ng-template let-column="column" ngx-datatable-header-template>
+              {{t('cbl-name-col')}}
+            </ng-template>
+            <ng-template let-item="row" ngx-datatable-cell-template>
+              {{item.cblSeriesName || item.normalizedCblSeriesName}}
+            </ng-template>
+          </ngx-datatable-column>
+
+          <ngx-datatable-column prop="seriesNameAtMapping" [sortable]="true" [draggable]="false" [resizeable]="false" [flexGrow]="3">
+            <ng-template let-column="column" ngx-datatable-header-template>
+              {{t('maps-to-col')}}
+            </ng-template>
+            <ng-template let-item="row" ngx-datatable-cell-template>
+              {{item.seriesNameAtMapping}}
+            </ng-template>
+          </ngx-datatable-column>
+
+          <ngx-datatable-column prop="createdByUserName" [sortable]="true" [draggable]="false" [resizeable]="false" [flexGrow]="2">
+            <ng-template let-column="column" ngx-datatable-header-template>
+              {{t('user-col')}}
+            </ng-template>
+            <ng-template let-item="row" ngx-datatable-cell-template>
+              {{item.createdByUserName}}
+            </ng-template>
+          </ngx-datatable-column>
+
+          <ngx-datatable-column prop="createdUtc" [sortable]="true" [draggable]="false" [resizeable]="false" [flexGrow]="2">
+            <ng-template let-column="column" ngx-datatable-header-template>
+              {{t('created-col')}}
+            </ng-template>
+            <ng-template let-item="row" ngx-datatable-cell-template>
+              {{item.createdUtc | date:'shortDate'}}
+            </ng-template>
+          </ngx-datatable-column>
+
+          <ngx-datatable-column name="actions" [sortable]="false" [draggable]="false" [resizeable]="false" [flexGrow]="1">
+            <ng-template let-column="column" ngx-datatable-header-template />
+            <ng-template let-item="row" ngx-datatable-cell-template>
+              <div class="float-end">
+                <button class="btn btn-outline-primary btn-sm" (click)="promoteRule(item)" [title]="t('promote-tooltip')">
+                  <i class="fa fa-globe" aria-hidden="true"></i>
+                  <span class="phone-hidden ms-1">{{t('promote')}}</span>
+                </button>
+              </div>
+            </ng-template>
+          </ngx-datatable-column>
+        </ngx-datatable>
+      </ng-template>
+
+      <ng-template #cardTemplate let-item let-idx="index">
+        <div class="card mb-3">
+          <div class="card-body">
+            <div class="d-flex justify-content-between align-items-start mb-2">
+              <div>
+                <h5 class="card-title mb-0">{{item.cblSeriesName || item.normalizedCblSeriesName}}</h5>
+                <small class="text-muted">{{item.createdByUserName}}</small>
+              </div>
+              <button class="btn btn-outline-primary btn-sm" (click)="promoteRule(item)">
+                <i class="fa fa-globe" aria-hidden="true"></i>
+              </button>
+            </div>
+            <div class="row g-2">
+              <div class="col-12">
+                <div class="text-muted small">{{t('maps-to-col')}}</div>
+                <div>{{item.seriesNameAtMapping}}</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </ng-template>
+    </app-responsive-table>
+  }
+
+</ng-container>

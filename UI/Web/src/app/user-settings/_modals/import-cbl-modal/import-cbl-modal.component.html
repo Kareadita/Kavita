@@ -147,10 +147,10 @@
           <ng-template ngx-datatable-header-template>{{t('col-vol-issue')}}</ng-template>
           <ng-template let-row="row" ngx-datatable-cell-template>
             @if (row.result.volume) {
-              <span>Vol. {{row.result.volume}}</span>
+              <span>{{t('volume-num', {num: row.result.volume})}}</span>
             }
             @if (row.result.number) {
-              <span class="ms-1">#{{row.result.number}}</span>
+              <span class="ms-1">{{t('issue-num', {num: row.result.number})}}</span>
             }
           </ng-template>
         </ngx-datatable-column>

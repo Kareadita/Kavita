@@ -17,6 +17,8 @@ using Flurl.Http;
 using Kavita.Models.DTOs.ReadingLists.CBL.Import;
 using Kavita.Models.DTOs.ReadingLists.CBL.RemapRules;
 using Kavita.Models.DTOs.Uploads;
+using AutoMapper;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -28,7 +30,7 @@ namespace Kavita.Server.Controllers;
 /// </summary>
 public class CblController(IReadingListService readingListService, IDirectoryService directoryService,
     ICblGithubService cblGithubService, DataContext dataContext, ICblImportService cblImporterService,
-    IUnitOfWork unitOfWork) : BaseApiController
+    IUnitOfWork unitOfWork, IMapper mapper) : BaseApiController
 {
     /// <summary>
     /// Saves an uploaded CBL file to disk without importing. Returns the saved file info.
@@ -216,20 +218,18 @@ public class CblController(IReadingListService readingListService, IDirectorySer
     public async Task<ActionResult<IList<RemapRuleDto>>> GetRemapRules()
     {
         var rules = await unitOfWork.RemapRuleRepository.GetRulesForUserAsync(UserId);
-        return Ok(rules.Select(r => new RemapRuleDto
-        {
-            Id = r.Id,
-            NormalizedCblSeriesName = r.NormalizedCblSeriesName,
-            CblSeriesName = r.CblSeriesName,
-            CblVolume = r.CblVolume,
-            CblNumber = r.CblNumber,
-            SeriesId = r.SeriesId,
-            VolumeId = r.VolumeId,
-            ChapterId = r.ChapterId,
-            SeriesNameAtMapping = r.SeriesNameAtMapping,
-            AppUserId = r.AppUserId,
-            CreatedUtc = r.CreatedUtc
-        }).ToList());
+        return Ok(mapper.Map<IList<RemapRuleDto>>(rules));
+    }
+
+    /// <summary>
+    /// Admin-only: returns all rules across all users.
+    /// </summary>
+    [Authorize(Policy = PolicyGroups.AdminPolicy)]
+    [HttpGet("remap-rules/all")]
+    public async Task<ActionResult<IList<RemapRuleDto>>> GetAllRemapRules()
+    {
+        var rules = await unitOfWork.RemapRuleRepository.GetAllRulesAsync();
+        return Ok(mapper.Map<IList<RemapRuleDto>>(rules));
     }
 
     /// <summary>
@@ -239,7 +239,7 @@ public class CblController(IReadingListService readingListService, IDirectorySer
     [DisallowRole(PolicyConstants.ReadOnlyRole)]
     public async Task<ActionResult<RemapRuleDto>> CreateRemapRule([FromBody] CreateRemapRuleDto dto)
     {
-        var series = await unitOfWork.SeriesRepository.GetSeriesByIdAsync(dto.SeriesId);
+        var series = await unitOfWork.SeriesRepository.GetSeriesByIdAsync(dto.SeriesId, ct: HttpContext.RequestAborted);
         if (series == null) return BadRequest("Series not found");
 
         var rule = new ReadingListRemapRule
@@ -253,26 +253,46 @@ public class CblController(IReadingListService readingListService, IDirectorySer
             ChapterId = dto.ChapterId,
             SeriesNameAtMapping = series.Name,
             AppUserId = UserId,
+            IsGlobal = false,
             CreatedUtc = DateTime.UtcNow
         };
 
         unitOfWork.RemapRuleRepository.Add(rule);
         await unitOfWork.CommitAsync();
 
-        return Ok(new RemapRuleDto
-        {
-            Id = rule.Id,
-            NormalizedCblSeriesName = rule.NormalizedCblSeriesName,
-            CblSeriesName = rule.CblSeriesName,
-            CblVolume = rule.CblVolume,
-            CblNumber = rule.CblNumber,
-            SeriesId = rule.SeriesId,
-            VolumeId = rule.VolumeId,
-            ChapterId = rule.ChapterId,
-            SeriesNameAtMapping = rule.SeriesNameAtMapping,
-            AppUserId = rule.AppUserId,
-            CreatedUtc = rule.CreatedUtc
-        });
+        return Ok(mapper.Map<RemapRuleDto>(rule));
+    }
+
+    /// <summary>
+    /// Promotes a remap rule to global scope. Admin-only.
+    /// </summary>
+    [Authorize(Policy = PolicyGroups.AdminPolicy)]
+    [DisallowRole(PolicyConstants.ReadOnlyRole)]
+    [HttpPost("remap-rules/{id}/promote")]
+    public async Task<ActionResult<RemapRuleDto>> PromoteRemapRule(int id)
+    {
+        var rule = await unitOfWork.RemapRuleRepository.GetByIdAsync(id, HttpContext.RequestAborted);
+        if (rule == null) return NotFound();
+        rule.IsGlobal = true;
+        await unitOfWork.CommitAsync();
+        return Ok(mapper.Map<RemapRuleDto>(rule));
+    }
+
+    /// <summary>
+    /// Demotes a global remap rule back to user-scoped. Admin-only.
+    /// </summary>
+    [Authorize(Policy = PolicyGroups.AdminPolicy)]
+    [DisallowRole(PolicyConstants.ReadOnlyRole)]
+    [HttpPost("remap-rules/{id}/demote")]
+    public async Task<ActionResult<RemapRuleDto>> DemoteRemapRule(int id)
+    {
+        var rule = await unitOfWork.RemapRuleRepository.GetByIdAsync(id, HttpContext.RequestAborted);
+        if (rule == null) return NotFound();
+
+        rule.IsGlobal = false;
+        await unitOfWork.CommitAsync();
+
+        return Ok(mapper.Map<RemapRuleDto>(rule));
     }
 
     /// <summary>
@@ -293,20 +313,7 @@ public class CblController(IReadingListService readingListService, IDirectorySer
 
         await unitOfWork.CommitAsync();
 
-        return Ok(new RemapRuleDto
-        {
-            Id = rule.Id,
-            NormalizedCblSeriesName = rule.NormalizedCblSeriesName,
-            CblSeriesName = rule.CblSeriesName,
-            CblVolume = rule.CblVolume,
-            CblNumber = rule.CblNumber,
-            SeriesId = rule.SeriesId,
-            VolumeId = rule.VolumeId,
-            ChapterId = rule.ChapterId,
-            SeriesNameAtMapping = rule.SeriesNameAtMapping,
-            AppUserId = rule.AppUserId,
-            CreatedUtc = rule.CreatedUtc
-        });
+        return Ok(mapper.Map<RemapRuleDto>(rule));
     }
 
     /// <summary>

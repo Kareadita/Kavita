@@ -56,10 +56,16 @@ public class ReadingListRemapRule
     public string SeriesNameAtMapping { get; set; } = string.Empty;
 
     /// <summary>
-    /// Null = global (admin-created) rule; otherwise scoped to this user
+    /// When true, this rule is visible to all users (admin-promoted).
+    /// AppUserId still tracks the original creator.
     /// </summary>
-    public int? AppUserId { get; set; }
-    public AppUser? AppUser { get; set; }
+    public bool IsGlobal { get; set; }
+
+    /// <summary>
+    /// The user who created this rule. Always required.
+    /// </summary>
+    public int AppUserId { get; set; }
+    public AppUser AppUser { get; set; } = null!;
 
     public DateTime CreatedUtc { get; set; }
 }

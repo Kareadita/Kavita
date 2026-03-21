@@ -14,7 +14,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Kavita.Database.Migrations
 {
     [DbContext(typeof(DataContext))]
-    [Migration("20260320124427_ReadingListSyncAndRemapRules")]
+    [Migration("20260321155910_ReadingListSyncAndRemapRules")]
     partial class ReadingListSyncAndRemapRules
     {
         /// <inheritdoc />
@@ -1773,7 +1773,7 @@ namespace Kavita.Database.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
 
-                    b.Property<int?>("AppUserId")
+                    b.Property<int>("AppUserId")
                         .HasColumnType("INTEGER");
 
                     b.Property<string>("CblNumber")
@@ -1791,6 +1791,9 @@ namespace Kavita.Database.Migrations
 
                     b.Property<DateTime>("CreatedUtc")
                         .HasColumnType("TEXT");
+
+                    b.Property<bool>("IsGlobal")
+                        .HasColumnType("INTEGER");
 
                     b.Property<string>("NormalizedCblSeriesName")
                         .IsRequired()
@@ -1816,8 +1819,8 @@ namespace Kavita.Database.Migrations
 
                     b.HasIndex("VolumeId");
 
-                    b.HasIndex("NormalizedCblSeriesName", "AppUserId")
-                        .HasDatabaseName("IX_ReadingListRemapRule_NormalizedCblSeriesName_AppUserId");
+                    b.HasIndex("NormalizedCblSeriesName", "IsGlobal", "AppUserId")
+                        .HasDatabaseName("IX_ReadingListRemapRule_NormalizedCblSeriesName_IsGlobal_AppUserId");
 
                     b.ToTable("ReadingListRemapRule");
                 });
@@ -4029,7 +4032,8 @@ namespace Kavita.Database.Migrations
                     b.HasOne("Kavita.Models.Entities.User.AppUser", "AppUser")
                         .WithMany()
                         .HasForeignKey("AppUserId")
-                        .OnDelete(DeleteBehavior.Cascade);
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.HasOne("Kavita.Models.Entities.Chapter", "Chapter")
                         .WithMany()

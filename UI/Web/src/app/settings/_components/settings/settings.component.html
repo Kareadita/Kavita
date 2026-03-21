@@ -92,6 +92,14 @@
             }
           }
 
+          @case (SettingsTabId.RemapRules) {
+            @defer (prefetch on idle) {
+              <div class="scale col-md-12">
+                <app-manage-remap-rules />
+              </div>
+            }
+          }
+
           @case (SettingsTabId.ManageMetadata) {
             @if (accountService.hasAdminRole()) {
               @defer (prefetch on idle) {

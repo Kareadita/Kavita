@@ -8,6 +8,8 @@ export interface RemapRule {
   volumeId: number | null;
   chapterId: number | null;
   seriesNameAtMapping: string;
-  appUserId: number | null;
+  appUserId: number;
+  isGlobal: boolean;
+  createdByUserName: string;
   createdUtc: string;
 }

@@ -51,7 +51,7 @@ public class UnitOfWork : IUnitOfWork
         EpubFontRepository = new EpubFontRepository(_context, _mapper);
         ReadingSessionRepository = new ReadingSessionRepository(_context, _mapper);
         ClientDeviceRepository = new ClientDeviceRepository(_context, _mapper);
-        RemapRuleRepository = new ReadingListRemapRuleRepository(_context);
+        RemapRuleRepository = new ReadingListRemapRuleRepository(_context, _mapper);
     }
 
     /// <summary>

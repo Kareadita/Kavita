@@ -160,8 +160,8 @@ public sealed class DataContext : IdentityDbContext<AppUser, AppRole, int,
                 .HasForeignKey(r => r.AppUserId)
                 .OnDelete(DeleteBehavior.Cascade);
 
-            entity.HasIndex(r => new { r.NormalizedCblSeriesName, r.AppUserId })
-                .HasDatabaseName("IX_ReadingListRemapRule_NormalizedCblSeriesName_AppUserId");
+            entity.HasIndex(r => new { r.NormalizedCblSeriesName, r.IsGlobal, r.AppUserId })
+                .HasDatabaseName("IX_ReadingListRemapRule_NormalizedCblSeriesName_IsGlobal_AppUserId");
         });
         #endregion
 

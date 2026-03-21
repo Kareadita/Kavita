@@ -14,6 +14,8 @@ public sealed record RemapRuleDto
     public int? VolumeId { get; set; }
     public int? ChapterId { get; set; }
     public string SeriesNameAtMapping { get; set; } = string.Empty;
-    public int? AppUserId { get; set; }
+    public int AppUserId { get; set; }
+    public bool IsGlobal { get; set; }
+    public string CreatedByUserName { get; set; } = string.Empty;
     public DateTime CreatedUtc { get; set; }
 }

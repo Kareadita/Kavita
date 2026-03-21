@@ -2,35 +2,59 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using AutoMapper;
+using AutoMapper.QueryableExtensions;
 using Kavita.API.Repositories;
+using Kavita.Models.DTOs.ReadingLists.CBL.RemapRules;
 using Kavita.Models.Entities;
 using Kavita.Models.Entities.ReadingLists;
 using Microsoft.EntityFrameworkCore;
 
 namespace Kavita.Database.Repositories;
 
-public class ReadingListRemapRuleRepository(DataContext context) : IReadingListRemapRuleRepository
+public class ReadingListRemapRuleRepository(DataContext context, IMapper mapper) : IReadingListRemapRuleRepository
 {
     public async Task<IList<ReadingListRemapRule>> GetRulesForNamesAsync(IList<string> normalizedNames, int userId, CancellationToken ct = default)
     {
         return await context.ReadingListRemapRule
             .Where(r => normalizedNames.Contains(r.NormalizedCblSeriesName)
-                        && (r.AppUserId == userId || r.AppUserId == null))
-            .OrderByDescending(r => r.AppUserId.HasValue) // user-specific first
+                        && (r.AppUserId == userId || r.IsGlobal))
+            .OrderByDescending(r => r.AppUserId == userId) // user-specific first
             .ToListAsync(ct);
     }
 
     public async Task<IList<ReadingListRemapRule>> GetRulesForUserAsync(int userId, CancellationToken ct = default)
     {
         return await context.ReadingListRemapRule
-            .Where(r => r.AppUserId == userId || r.AppUserId == null)
-            .OrderByDescending(r => r.AppUserId.HasValue)
+            .Include(r => r.AppUser)
+            .Where(r => r.AppUserId == userId || r.IsGlobal)
+            .OrderByDescending(r => r.AppUserId == userId)
             .ToListAsync(ct);
     }
 
     public async Task<ReadingListRemapRule?> GetByIdAsync(int id, CancellationToken ct = default)
     {
-        return await context.ReadingListRemapRule.FindAsync([id], ct);
+        return await context.ReadingListRemapRule
+            .Include(r => r.AppUser)
+            .FirstOrDefaultAsync(r => r.Id == id, ct);
+    }
+
+    public async Task<RemapRuleDto?> GetDtoByIdAsync(int id, CancellationToken ct = default)
+    {
+        return await context.ReadingListRemapRule
+            .Include(r => r.AppUser)
+            .Where(r => r.Id == id)
+            .ProjectTo<RemapRuleDto>(mapper.ConfigurationProvider)
+            .FirstOrDefaultAsync(ct);
+    }
+
+    public async Task<IList<ReadingListRemapRule>> GetAllRulesAsync(CancellationToken ct = default)
+    {
+        return await context.ReadingListRemapRule
+            .Include(r => r.AppUser)
+            .OrderByDescending(r => r.IsGlobal)
+            .ThenBy(r => r.NormalizedCblSeriesName)
+            .ToListAsync(ct);
     }
 
     public void Add(ReadingListRemapRule rule)
