@@ -29,9 +29,14 @@ public class KoreaderService(
     /// <param name="ct"></param>
     public async Task SaveProgress(KoreaderBookDto koreaderBookDto, int userId, CancellationToken ct = default)
     {
-        logger.LogDebug("Saving Koreader progress for User ({UserId}): {KoreaderProgress}", userId, koreaderBookDto.progress.Sanitize());
+        logger.LogDebug("Saving KOReader progress for User ({UserId}): {KoreaderProgress} - {KoreaderHash}",
+            userId, koreaderBookDto.progress.Sanitize(), koreaderBookDto.document);
         var file = await unitOfWork.MangaFileRepository.GetByKoreaderHash(koreaderBookDto.document, ct);
-        if (file == null) throw new KavitaException(await localizationService.Translate(userId, "file-missing"));
+        if (file == null)
+        {
+            logger.LogWarning("KOReader progress for unknown book: {BookHash}. Run a force scan on the series to generate KOReader hashes", koreaderBookDto.document);
+            throw new KavitaException(await localizationService.Translate(userId, "file-missing"));
+        }
 
         var userProgressDto = await unitOfWork.AppUserProgressRepository.GetUserProgressDtoAsync(file.ChapterId, userId, ct);
         if (userProgressDto == null)
@@ -42,7 +47,7 @@ public class KoreaderService(
             var volumeDto = await unitOfWork.VolumeRepository.GetVolumeByIdAsync(chapterDto.VolumeId, ct: ct);
             if (volumeDto == null) throw new KavitaException(await localizationService.Translate(userId, "volume-doesnt-exist"));
 
-            var seriesDto = await unitOfWork.SeriesRepository.GetSeriesDtoByIdAsync(volumeDto.SeriesId, userId);
+            var seriesDto = await unitOfWork.SeriesRepository.GetSeriesDtoByIdAsync(volumeDto.SeriesId, userId, ct);
             if (seriesDto == null) throw new KavitaException(await localizationService.Translate(userId, "series-doesnt-exist"));
 
             userProgressDto = new ProgressDto()
@@ -59,8 +64,9 @@ public class KoreaderService(
         var reportedProgress = koreaderBookDto.progress;
         KoreaderHelper.UpdateProgressDto(userProgressDto, koreaderBookDto.progress);
 
-        logger.LogDebug("Converted KOReader progress from {ProgressEncoding} to Page {PageNum} with ScrollId: {ScrollId}", reportedProgress.Sanitize(),
-            userProgressDto.PageNum, userProgressDto.BookScrollId?.Sanitize() ?? string.Empty);
+        logger.LogDebug("Converted KOReader progress from {ProgressEncoding} to Page {PageNum} with ScrollId: {ScrollId}. For Chapter {ChapterId} in Series {SeriesId}",
+            reportedProgress.Sanitize(), userProgressDto.PageNum, userProgressDto.BookScrollId?.Sanitize() ?? string.Empty,
+            userProgressDto.ChapterId, userProgressDto.SeriesId);
 
         // Normal saving from kavita will be //body/h2[1]
         await readerService.SaveReadingProgress(userProgressDto, userId);
@@ -78,7 +84,11 @@ public class KoreaderService(
         var settingsDto = await unitOfWork.SettingsRepository.GetSettingsDtoAsync(ct);
 
         var file = await unitOfWork.MangaFileRepository.GetByKoreaderHash(bookHash, ct);
-        if (file == null) throw new KavitaException(await localizationService.Translate(userId, "file-missing"));
+        if (file == null)
+        {
+            logger.LogWarning("KOReader progress for unknown book: {BookHash}. Run a force scan on the series to generate KOReader hashes", bookHash);
+            throw new KavitaException(await localizationService.Translate(userId, "file-missing"));
+        }
 
         var progressDto = await unitOfWork.AppUserProgressRepository.GetUserProgressDtoAsync(file.ChapterId, userId, ct);
 
