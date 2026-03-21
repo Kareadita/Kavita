@@ -30,11 +30,11 @@ public class KoreaderService(
     public async Task SaveProgress(KoreaderBookDto koreaderBookDto, int userId, CancellationToken ct = default)
     {
         logger.LogDebug("Saving KOReader progress for User ({UserId}): {KoreaderProgress} - {KoreaderHash}",
-            userId, koreaderBookDto.progress.Sanitize(), koreaderBookDto.document);
+            userId, koreaderBookDto.progress.Sanitize(), koreaderBookDto.document.Sanitize());
         var file = await unitOfWork.MangaFileRepository.GetByKoreaderHash(koreaderBookDto.document, ct);
         if (file == null)
         {
-            logger.LogWarning("KOReader progress for unknown book: {BookHash}. Run a force scan on the series to generate KOReader hashes", koreaderBookDto.document);
+            logger.LogWarning("KOReader progress for unknown book: {BookHash}. Run a force scan on the series to generate KOReader hashes", koreaderBookDto.document.Sanitize());
             throw new KavitaException(await localizationService.Translate(userId, "file-missing"));
         }
 
@@ -86,7 +86,7 @@ public class KoreaderService(
         var file = await unitOfWork.MangaFileRepository.GetByKoreaderHash(bookHash, ct);
         if (file == null)
         {
-            logger.LogWarning("KOReader progress for unknown book: {BookHash}. Run a force scan on the series to generate KOReader hashes", bookHash);
+            logger.LogWarning("KOReader progress for unknown book: {BookHash}. Run a force scan on the series to generate KOReader hashes", bookHash.Sanitize());
             throw new KavitaException(await localizationService.Translate(userId, "file-missing"));
         }
 
