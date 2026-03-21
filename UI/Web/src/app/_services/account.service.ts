@@ -1,4 +1,4 @@
-import {HttpClient} from '@angular/common/http';
+import {HttpClient, httpResource} from '@angular/common/http';
 import {computed, DestroyRef, inject, Injectable, signal} from '@angular/core';
 import {Observable, of} from 'rxjs';
 import {filter, map, switchMap, tap} from 'rxjs/operators';
@@ -428,8 +428,8 @@ export class AccountService {
     return undefined;
   }
 
-  getOpdsUrl() {
-    return this.httpClient.get<string>(this.baseUrl + 'account/opds-url', TextResonse);
+  opdsUrlRsc(keyName: () => string) {
+    return httpResource.text<string>(() =>this.baseUrl + 'account/opds-url?authKeyName=' + keyName());
   }
 
   getAuthKeys() {

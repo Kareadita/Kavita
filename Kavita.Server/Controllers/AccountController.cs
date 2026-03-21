@@ -1132,10 +1132,12 @@ public class AccountController(UserManager<AppUser> userManager,
     /// </summary>
     /// <returns></returns>
     [HttpGet("opds-url")]
-    public async Task<ActionResult<string>> GetOpdsUrl()
+    public async Task<ActionResult<string>> GetOpdsUrl([FromQuery] string? authKeyName = null)
     {
-        var user = await unitOfWork.UserRepository.GetUserByIdAsync(UserId);
         var serverSettings = await unitOfWork.SettingsRepository.GetSettingsDtoAsync();
+        if (!serverSettings.EnableOpds)
+            return BadRequest(await localizationService.Get("en", "opds-disabled"));
+
         var origin = HttpContext.Request.Scheme + "://" + HttpContext.Request.Host.Value;
         if (!string.IsNullOrEmpty(serverSettings.HostName)) origin = serverSettings.HostName;
 
@@ -1155,10 +1157,14 @@ public class AccountController(UserManager<AppUser> userManager,
             }
         }
 
+        authKeyName ??= AuthKeyHelper.OpdsKeyName;
         var opdsAuthKey = (await unitOfWork.UserRepository.GetAuthKeysForUserId(UserId))
-            .Where(k => k is {Name: AuthKeyHelper.OpdsKeyName, Provider: AuthKeyProvider.System})
+            .Where(k => k.Name == authKeyName)
             .Select(k => k.Key)
             .FirstOrDefault();
+
+        if (opdsAuthKey == null)
+            return NotFound();
 
         return Ok(origin + "/" + baseUrl + "api/opds/" + opdsAuthKey);
     }

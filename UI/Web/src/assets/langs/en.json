@@ -105,7 +105,8 @@
         "image-only": "Images",
         "add-auth-key": "New",
         "description": "An Auth Key is like a password. Rotating it will invalidate any existing clients.",
-        "copy-key": "{{common.copy}}"
+        "copy-key": "{{common.copy}}",
+        "clients-opds-error": "Failed to load OPDS url for key: {{key}}"
     },
 
     "create-auth-key": {
