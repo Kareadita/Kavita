@@ -6,7 +6,7 @@
 
   <div class="modal-body">
     <div class="list-group list-group-flush">
-      @for (rule of rules(); track rule.id) {
+      @for (rule of sortedRules(); track rule.id) {
         <div class="list-group-item d-flex justify-content-between align-items-center py-2">
           <div class="d-flex flex-column">
             <div>
@@ -22,6 +22,12 @@
                 @if (rule.cblNumber) {
                   {{t('issue-num', {num: rule.cblNumber})}}
                 }
+                @if (rule.chapterId) {
+                  <i class="fa fa-arrow-right mx-1" aria-hidden="true"></i>
+                  <app-entity-title [libraryType]="rule.libraryType"
+                                    [prioritizeTitleName]="false"
+                                    [entity]="buildChapterStub(rule)" />
+                }
               </small>
             }
           </div>
@@ -30,9 +36,9 @@
               <span class="badge bg-info">{{t('global')}}</span>
             }
             @if (rule.appUserId === currentUserId()) {
-              <button class="btn btn-sm btn-outline-danger" (click)="deleteRule(rule)"
-                      [title]="t('delete-rule')">
+              <button class="btn btn-sm btn-outline-danger" (click)="deleteRule(rule)">
                 <i class="fa fa-trash" aria-hidden="true"></i>
+                <span class="visually-hidden">{{t('delete-rule')}}</span>
               </button>
             }
           </div>

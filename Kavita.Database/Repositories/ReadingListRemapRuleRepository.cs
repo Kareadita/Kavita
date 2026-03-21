@@ -27,8 +27,11 @@ public class ReadingListRemapRuleRepository(DataContext context, IMapper mapper)
     {
         return await context.ReadingListRemapRule
             .Include(r => r.AppUser)
+            .Include(r => r.Chapter)
+            .Include(r => r.Series).ThenInclude(s => s.Library)
             .Where(r => r.AppUserId == userId || r.IsGlobal)
             .OrderByDescending(r => r.AppUserId == userId)
+            .ThenByDescending(r => r.CreatedUtc)
             .ToListAsync(ct);
     }
 

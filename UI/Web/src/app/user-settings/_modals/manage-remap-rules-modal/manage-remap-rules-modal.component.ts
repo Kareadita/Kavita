@@ -4,11 +4,14 @@ import {TranslocoDirective} from '@jsverse/transloco';
 import {CblService} from '../../../_services/cbl.service';
 import {AccountService} from '../../../_services/account.service';
 import {RemapRule} from '../../../_models/reading-list/cbl/remap-rule';
+import {Chapter} from '../../../_models/chapter';
+import {EntityTitleComponent} from '../../../cards/entity-title/entity-title.component';
 
 @Component({
   selector: 'app-manage-remap-rules-modal',
   imports: [
     TranslocoDirective,
+    EntityTitleComponent,
   ],
   templateUrl: './manage-remap-rules-modal.component.html',
   styleUrl: './manage-remap-rules-modal.component.scss',
@@ -23,6 +26,23 @@ export class ManageRemapRulesModalComponent implements OnInit {
   hasModifications = false;
   currentUserId = computed(() => this.accountService.currentUser()?.id ?? 0);
 
+  sortedRules = computed(() => {
+    const userId = this.currentUserId();
+    return [...this.rules()].sort((a, b) => {
+      // User's own rules first, global last
+      const aIsOwn = a.appUserId === userId && !a.isGlobal;
+      const bIsOwn = b.appUserId === userId && !b.isGlobal;
+      if (aIsOwn !== bIsOwn) return aIsOwn ? -1 : 1;
+
+      const aIsGlobal = a.isGlobal;
+      const bIsGlobal = b.isGlobal;
+      if (aIsGlobal !== bIsGlobal) return aIsGlobal ? 1 : -1;
+
+      // Within same group, most recently created first
+      return new Date(b.createdUtc).getTime() - new Date(a.createdUtc).getTime();
+    });
+  });
+
   ngOnInit() {
     this.cblService.getRemapRules().subscribe(rules => this.rules.set(rules));
   }
@@ -32,6 +52,15 @@ export class ManageRemapRulesModalComponent implements OnInit {
       this.rules.set(this.rules().filter(r => r.id !== rule.id));
       this.hasModifications = true;
     });
+  }
+
+  buildChapterStub(rule: RemapRule): Chapter {
+    return {
+      volumeId: 0,
+      range: rule.chapterRange,
+      titleName: rule.chapterTitleName !== rule.chapterRange ? rule.chapterTitleName : '',
+      isSpecial: rule.chapterIsSpecial,
+    } as Chapter;
   }
 
   close() {

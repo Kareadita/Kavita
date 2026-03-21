@@ -342,7 +342,15 @@ public class AutoMapperProfiles : Profile
 
         CreateMap<ReadingListRemapRule, RemapRuleDto>()
             .ForMember(dest => dest.CreatedByUserName,
-                opt => opt.MapFrom(src => src.AppUser != null ? src.AppUser.UserName : string.Empty));
+                opt => opt.MapFrom(src => src.AppUser != null ? src.AppUser.UserName : string.Empty))
+            .ForMember(dest => dest.ChapterRange,
+                opt => opt.MapFrom(src => src.Chapter != null ? src.Chapter.Range : string.Empty))
+            .ForMember(dest => dest.ChapterTitleName,
+                opt => opt.MapFrom(src => src.Chapter != null ? src.Chapter.TitleName : string.Empty))
+            .ForMember(dest => dest.ChapterIsSpecial,
+                opt => opt.MapFrom(src => src.Chapter != null && src.Chapter.IsSpecial))
+            .ForMember(dest => dest.LibraryType,
+                opt => opt.MapFrom(src => src.Series.Library != null ? src.Series.Library.Type : LibraryType.Comic));
 
         CreateMap<AppUserRating, UserReviewExtendedDto>()
             .ForMember(dest => dest.Body,
