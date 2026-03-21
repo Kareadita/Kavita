@@ -4,37 +4,32 @@
     @if (!opdsEnabled) {
       <div class="alert alert-warning" role="alert">{{t('clients-opds-alert')}}</div>
     }
-
-    <p>{{t('clients-opds-description')}}</p>
-
-
-    @if (isOpdsEnabledResource.value()) {
-      <div class="mt-4 d-flex flex-column flex-md-row align-items-md-center gap-3">
-
-        <div class="flex-grow-1">
-          @if (opdsUrlRsc.error()) {
-            <div class="alert alert-danger mb-0" role="alert">
-              {{t('clients-opds-error', {key: opdsAuthKeyModel()})}}
-            </div>
-          } @else {
-            <app-api-key
-              [title]="t('clients-opds-url-label')" [tooltipText]="t('clients-opds-url-tooltip') + ' ' + opdsUrlLink"
-              [hideData]="true" [key]="opdsUrlRsc.value() || ''" />
-          }
-        </div>
-
-        <div class="flex-shrink-0">
-          <label class="form-label d-none d-md-block">&nbsp;</label>
-          <select class="form-select" [formField]="opdsAuthKeyForm">
-            @for (authKey of authKeys(); track authKey.id) {
-              <option [value]="authKey.name">{{authKey.name}}</option>
-            }
-          </select>
-        </div>
-
-      </div>
-    }
   }
+
+  <p>{{t('clients-opds-description')}}</p>
+
+  <div class="mt-4 d-flex flex-column flex-md-row align-items-md-center gap-3">
+    <div class="flex-grow-1">
+      @if (opdsUrlRsc.error()) {
+        <div class="alert alert-danger mb-0" role="alert">
+          {{t('clients-opds-error', {key: opdsAuthKeyModel()})}}
+        </div>
+      } @else {
+        <app-api-key
+          [title]="t('clients-opds-url-label')" [tooltipText]="t('clients-opds-url-tooltip') + ' ' + opdsUrlLink"
+          [hideData]="true" [key]="opdsUrlRsc.value() || ''" />
+      }
+    </div>
+
+    <div class="flex-shrink-0">
+      <label class="form-label d-none d-md-block">&nbsp;</label>
+      <select class="form-select" [formField]="opdsAuthKeyForm">
+        @for (authKey of authKeys(); track authKey.id) {
+          <option [value]="authKey.name">{{authKey.name}}</option>
+        }
+      </select>
+    </div>
+  </div>
 
   <h4 class="mt-4">
     {{t('auth-keys-title')}}

@@ -1135,8 +1135,6 @@ public class AccountController(UserManager<AppUser> userManager,
     public async Task<ActionResult<string>> GetOpdsUrl([FromQuery] string? authKeyName = null)
     {
         var serverSettings = await unitOfWork.SettingsRepository.GetSettingsDtoAsync();
-        if (!serverSettings.EnableOpds)
-            return BadRequest(await localizationService.Get("en", "opds-disabled"));
 
         var origin = HttpContext.Request.Scheme + "://" + HttpContext.Request.Host.Value;
         if (!string.IsNullOrEmpty(serverSettings.HostName)) origin = serverSettings.HostName;
