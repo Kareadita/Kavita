@@ -1,0 +1,32 @@
+{
+  "libraryName": "Comics",
+  "libraryType": "Comic",
+  "series": [
+    {
+      "name": "Fables",
+      "ageRating": "Mature",
+      "volumes": [
+        {
+          "number": "1",
+          "chapters": [
+            { "number": "1", "comicVineId": "cv-111" },
+            { "number": "2", "metronId": 222 },
+            "3"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Batman",
+      "ageRating": "Teen",
+      "volumes": [
+        {
+          "number": "2016",
+          "chapters": [
+            { "number": "1", "comicVineId": "cv-999" }
+          ]
+        }
+      ]
+    }
+  ]
+}

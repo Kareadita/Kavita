@@ -5,6 +5,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using System.Globalization;
 using System.Text.Json;
+using System.Text.RegularExpressions;
 using System.Xml;
 using System.Xml.Serialization;
 using Kavita.API.Database;
@@ -32,7 +33,7 @@ public interface ICblExportService
     Task<string?> ExportReadingList(int readingListId, int userId, bool asV2 = false);
 }
 
-public class CblExportService(IUnitOfWork unitOfWork, IDirectoryService directoryService, ILogger<CblExportService> logger) : ICblExportService
+public partial class CblExportService(IUnitOfWork unitOfWork, IDirectoryService directoryService, ILogger<CblExportService> logger) : ICblExportService
 {
     /// <inheritdoc />
     public async Task<string?> ExportReadingList(int readingListId, int userId, bool asV2 = false)
@@ -97,13 +98,22 @@ public class CblExportService(IUnitOfWork unitOfWork, IDirectoryService director
                 ? item.Chapter.ReleaseDate.Year.ToString()
                 : string.Empty;
 
+            var seriesName = item.Series.Name;
+            var group = SeriesAndYearRegex().Matches(item.Series.Name);
+            if (group.Count > 1)
+            {
+                seriesName = group[0].Groups["Series"].Value;
+                year = group[0].Groups["Year"].Value;
+            }
+
+
             books.Add(new CblBook
             {
-                Series = item.Series.Name, // TODO: If this is a Series (Volume) format, strip the (Volume) part out
+                Series = seriesName,
                 Number = item.Chapter.Range, // Range can leak internal encodings. Need to understand how to map this.
                 Volume = item.Volume.Name, // TODO: If the library is Comic type, we can try and parse from Kavita Series first. Need to test with real user files
                 Year = year,
-                Format = string.Empty,
+                Format = (item.Series.Name.Contains("Annual") || item.Chapter.Range.Contains("Annual")) ? "Annual" : string.Empty, // We will only write "Annual" when we detect it in the Series Name
                 FileType = MapMangaFormatToFileType(item.Series.Format),
                 Database = null, // TODO: If we have ComicVine metadata id in Chapter, populate this (NOTE: CBL Group confirmed I can do any external metadata)
             });
@@ -288,4 +298,7 @@ public class CblExportService(IUnitOfWork unitOfWork, IDirectoryService director
         var invalid = Path.GetInvalidFileNameChars();
         return string.Concat(name.Select(c => invalid.Contains(c) ? '_' : c));
     }
+
+    [GeneratedRegex(@"(?<Series>.+)\((?<Year>\d{4})\)$")]
+    private static partial Regex SeriesAndYearRegex();
 }

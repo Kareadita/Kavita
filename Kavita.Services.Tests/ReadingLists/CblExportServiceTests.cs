@@ -254,7 +254,7 @@ public class CblExportServiceTests
         Assert.Equal("1", first.IssueNumber);
         Assert.Equal(2016, first.SeriesStartYear);
         Assert.Equal("2016-06-15", first.IssueCoverDate);
-        Assert.Null(first.Id);
+        Assert.Empty(first.Id);
 
         var second = result.IssueList[1];
         Assert.Equal("Superman", second.SeriesName);

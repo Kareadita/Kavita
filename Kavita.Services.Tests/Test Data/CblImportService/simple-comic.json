@@ -1,0 +1,18 @@
+{
+  "libraryName": "Comics",
+  "libraryType": "Comic",
+  "series": [
+    {
+      "name": "Fables",
+      "volumes": [
+        { "number": "1", "chapters": ["1", "2", "3"] }
+      ]
+    },
+    {
+      "name": "Batman",
+      "volumes": [
+        { "number": "2016", "chapters": ["1", "2"] }
+      ]
+    }
+  ]
+}
