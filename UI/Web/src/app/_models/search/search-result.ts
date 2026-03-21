@@ -9,4 +9,7 @@ export interface SearchResult {
     localizedName: string;
     sortName: string;
     format: MangaFormat;
+    releaseYear?: number;
+    volumeCount?: number;
+    chapterCount?: number;
 }

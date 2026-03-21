@@ -144,7 +144,10 @@ internal static class CblSeriesMatcher
                     SeriesId = extMatch.SeriesId,
                     LibraryId = extChapter.Volume.Series?.LibraryId ?? 0,
                     ChapterId = extChapter.Id,
-                    ChapterTitle = !string.IsNullOrEmpty(extChapter.TitleName) ? extChapter.TitleName : extChapter.Range
+                    ChapterTitle = !string.IsNullOrEmpty(extChapter.TitleName) ? extChapter.TitleName : extChapter.Range,
+                    ChapterNumber = extChapter.Range,
+                    MatchedSeriesName = extChapter.Volume.Series?.Name ?? string.Empty,
+                    LibraryType = extChapter.Volume.Series?.Library?.Type ?? LibraryType.Comic
                 });
                 continue;
             }
@@ -167,7 +170,10 @@ internal static class CblSeriesMatcher
                     SeriesId = altMatch.SeriesId,
                     LibraryId = altChapter.Volume.Series?.LibraryId ?? 0,
                     ChapterId = altChapter.Id,
-                    ChapterTitle = !string.IsNullOrEmpty(altChapter.TitleName) ? altChapter.TitleName : altChapter.Range
+                    ChapterTitle = !string.IsNullOrEmpty(altChapter.TitleName) ? altChapter.TitleName : altChapter.Range,
+                    ChapterNumber = altChapter.Range,
+                    MatchedSeriesName = altChapter.Volume.Series?.Name ?? string.Empty,
+                    LibraryType = altChapter.Volume.Series?.Library?.Type ?? LibraryType.Comic
                 });
                 continue;
             }
@@ -202,17 +208,21 @@ internal static class CblSeriesMatcher
         if (rule is {ChapterId: not null, VolumeId: not null})
         {
             var chapterTitle = string.Empty;
+            var chapterNumber = string.Empty;
             var libraryId = 0;
+            var libraryType = LibraryType.Comic;
             var ruleSeries = matchedSeries.FirstOrDefault(s => s.Id == rule.SeriesId);
             if (ruleSeries != null)
             {
                 libraryId = ruleSeries.LibraryId;
+                libraryType = ruleSeries.Library?.Type ?? LibraryType.Comic;
                 var ch = ruleSeries.Volumes?
                     .SelectMany(v => v.Chapters ?? [])
                     .FirstOrDefault(c => c.Id == rule.ChapterId.Value);
                 if (ch != null)
                 {
                     chapterTitle = !string.IsNullOrEmpty(ch.TitleName) ? ch.TitleName : ch.Range;
+                    chapterNumber = ch.Range;
                 }
             }
 
@@ -225,7 +235,10 @@ internal static class CblSeriesMatcher
                     SeriesId = rule.SeriesId,
                     LibraryId = libraryId,
                     ChapterId = rule.ChapterId.Value,
-                    ChapterTitle = chapterTitle
+                    ChapterTitle = chapterTitle,
+                    ChapterNumber = chapterNumber,
+                    MatchedSeriesName = ruleSeries?.Name ?? string.Empty,
+                    LibraryType = libraryType
                 }
             );
             return true;
@@ -244,7 +257,8 @@ internal static class CblSeriesMatcher
         {
             Reason = CblImportReason.ChapterMissing,
             MatchTier = CblMatchTier.RemapRule,
-            SeriesId = rule.SeriesId
+            SeriesId = rule.SeriesId,
+            MatchedSeriesName = rule.SeriesNameAtMapping ?? string.Empty
         });
         return true;
     }
@@ -368,6 +382,8 @@ internal static class CblSeriesMatcher
 
     private static (MatchedItem? Match, CblBookResult Result) ResolveChapter(ParsedCblItem item, Series series, CblMatchTier tier)
     {
+        var seriesLibraryType = series.Library?.Type ?? LibraryType.Comic;
+
         var volumes = series.Volumes;
         if (volumes == null || volumes.Count == 0)
         {
@@ -376,7 +392,9 @@ internal static class CblSeriesMatcher
                 Reason = CblImportReason.VolumeMissing,
                 MatchTier = tier,
                 SeriesId = series.Id,
-                LibraryId = series.LibraryId
+                LibraryId = series.LibraryId,
+                MatchedSeriesName = series.Name,
+                LibraryType = seriesLibraryType
             });
         }
 
@@ -404,7 +422,9 @@ internal static class CblSeriesMatcher
                     Reason = CblImportReason.VolumeMissing,
                     MatchTier = tier,
                     SeriesId = series.Id,
-                    LibraryId = series.LibraryId
+                    LibraryId = series.LibraryId,
+                    MatchedSeriesName = series.Name,
+                    LibraryType = seriesLibraryType
                 });
             }
         }
@@ -489,7 +509,9 @@ internal static class CblSeriesMatcher
                 Reason = CblImportReason.ChapterMissing,
                 MatchTier = tier,
                 SeriesId = series.Id,
-                LibraryId = series.LibraryId
+                LibraryId = series.LibraryId,
+                MatchedSeriesName = series.Name,
+                LibraryType = seriesLibraryType
             });
         }
 
@@ -502,7 +524,10 @@ internal static class CblSeriesMatcher
                 SeriesId = series.Id,
                 LibraryId = series.LibraryId,
                 ChapterId = chapter.Id,
-                ChapterTitle = !string.IsNullOrEmpty(chapter.TitleName) ? chapter.TitleName : chapter.Range
+                ChapterTitle = !string.IsNullOrEmpty(chapter.TitleName) ? chapter.TitleName : chapter.Range,
+                ChapterNumber = chapter.Range,
+                MatchedSeriesName = series.Name,
+                LibraryType = seriesLibraryType
             }
         );
     }

@@ -24,6 +24,11 @@ export function addToModal(): Partial<NgbModalOptions> {
   return {...DefaultModalOptions, size: 'md', fullscreen: 'sm'};
 }
 
+/** Fullscreen from the get-go*/
+export function fullscreenModal(): Partial<NgbModalOptions> {
+  return {...DefaultModalOptions, size: 'xl', fullscreen: true};
+}
+
 /** Non-dismissible - for refresh-required modals only */
 export function versionRefreshModal(): Partial<NgbModalOptions> {
   return {

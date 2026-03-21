@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using Kavita.Models.DTOs.ReadingLists.CBL.Internal;
+using Kavita.Models.Entities.Enums;
 
 namespace Kavita.Models.DTOs.ReadingLists.CBL.Import;
 #nullable enable
@@ -38,6 +39,18 @@ public sealed record CblBookResult
     /// Display title of the matched chapter (e.g., range or title)
     /// </summary>
     public string ChapterTitle { get; set; } = string.Empty;
+    /// <summary>
+    /// The Kavita series name this item matched to (empty if unmatched)
+    /// </summary>
+    public string MatchedSeriesName { get; set; } = string.Empty;
+    /// <summary>
+    /// The library type of the matched series (for entity-title rendering)
+    /// </summary>
+    public LibraryType LibraryType { get; set; }
+    /// <summary>
+    /// The raw chapter range/number (e.g. "5", "10.5") — separate from ChapterTitle
+    /// </summary>
+    public string ChapterNumber { get; set; } = string.Empty;
     /// <summary>
     /// When a SeriesCollision occurs, the candidate series the user can choose from
     /// </summary>

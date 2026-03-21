@@ -32,6 +32,7 @@ import {ReadMoreComponent} from '../../shared/read-more/read-more.component';
 import {ImageComponent} from '../../shared/image/image.component';
 import {AgeRatingPipe} from '../../_pipes/age-rating.pipe';
 import {RouterLink} from '@angular/router';
+import {fullscreenModal} from "../../_models/modal/modal-options";
 
 @Component({
   selector: 'app-cbl-manager',
@@ -192,12 +193,9 @@ export class CblManagerComponent implements OnInit {
   }
 
   private openImportModal(savedFiles: CblSavedFile[]) {
-    const ref = this.modalService.open(ImportCblModalComponent, {size: 'xl', scrollable: true});
+    const ref = this.modalService.open(ImportCblModalComponent, fullscreenModal());
     ref.setInput('savedFiles', savedFiles);
     ref.closed.subscribe(() => {
-      this.refreshLists();
-    });
-    ref.dismissed.subscribe(() => {
       this.refreshLists();
     });
   }

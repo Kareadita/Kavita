@@ -30,30 +30,139 @@
       </h5>
 
       <!-- Summary bar -->
-      <div class="d-flex gap-3 mb-3">
+      <div class="d-flex gap-3 mb-3 align-items-center">
         <span class="badge bg-success fs-6">{{t('matched-count', {count: matchedCount()})}}</span>
         @if (issueCount() > 0) {
           <span class="badge text-bg-warning fs-6">{{t('issues-count', {count: issueCount()})}}</span>
         }
+        <button class="btn btn-sm" [class.btn-outline-secondary]="showSuccessful()"
+                [class.btn-secondary]="!showSuccessful()"
+                (click)="showSuccessful.update(v => !v)">
+          <i class="fa" [class.fa-eye]="showSuccessful()" [class.fa-eye-slash]="!showSuccessful()" aria-hidden="true"></i>
+          {{showSuccessful() ? t('hide-matched') : t('show-matched')}}
+        </button>
       </div>
 
-      <ngx-datatable
-        class="bootstrap"
-        [rows]="allRows()"
-        [columnMode]="'force'"
-        rowHeight="auto"
-        [footerHeight]="0"
-        [scrollbarH]="false"
-        [rowClass]="getRowClass">
+      <div class="table-wrapper">
+        <ngx-datatable
+          class="bootstrap"
+          [rows]="visibleRows()"
+          [columnMode]="'force'"
+          rowHeight="auto"
+          [footerHeight]="0"
+          [scrollbarH]="false"
+          [rowClass]="getRowClass">
 
-        <!-- Row Detail for action area -->
-        <ngx-datatable-row-detail [rowHeight]="150">
-          <ng-template let-row="row" ngx-datatable-row-detail-template>
-            <div class="row-detail-action p-3 ps-5">
-              <!-- Series collision with candidates -->
-              @if (isSeriesCollision(row) && row.result.candidates.length > 0) {
-                <div class="mb-2">
-                  <label class="form-label small text-muted mb-1">{{t('pick-candidate')}}</label>
+          <!-- Order -->
+          <ngx-datatable-column [width]="20" [sortable]="false" [draggable]="false" [resizeable]="false">
+            <ng-template ngx-datatable-header-template>#</ng-template>
+            <ng-template let-row="row" ngx-datatable-cell-template>
+              @if (row.result.reason === CblImportReason.Success) {
+                <i class="fa fa-check-circle text-success" aria-hidden="true"></i>
+              } @else if (row.skipped) {
+                <i class="fa fa-ban text-muted" aria-hidden="true"></i>
+              } @else {
+                <i class="fa fa-exclamation-circle text-warning" aria-hidden="true"></i>
+              }
+              <span class="ms-2">{{row.result.order + 1}}</span>
+            </ng-template>
+          </ngx-datatable-column>
+
+          <!-- Requested Series -->
+          <ngx-datatable-column [sortable]="false" [draggable]="false" [resizeable]="false">
+            <ng-template ngx-datatable-header-template>{{t('col-series')}}</ng-template>
+            <ng-template let-row="row" ngx-datatable-cell-template>
+              {{row.result.series}}
+            </ng-template>
+          </ngx-datatable-column>
+
+          <!-- Requested Vol / Issue -->
+          <ngx-datatable-column [width]="100" [sortable]="false" [draggable]="false" [resizeable]="false">
+            <ng-template ngx-datatable-header-template>{{t('col-vol-issue')}}</ng-template>
+            <ng-template let-row="row" ngx-datatable-cell-template>
+              @if (row.result.volume) {
+                <span>{{t('volume-num', {num: row.result.volume})}}</span>
+              }
+              @if (row.result.number) {
+                <span class="ms-1">{{t('issue-num', {num: row.result.number})}}</span>
+              }
+            </ng-template>
+          </ngx-datatable-column>
+
+          <!-- Status / Reason -->
+          <ngx-datatable-column [width]="110" [sortable]="false" [draggable]="false" [resizeable]="false">
+            <ng-template ngx-datatable-header-template>{{t('col-status')}}</ng-template>
+            <ng-template let-row="row" ngx-datatable-cell-template>
+              @if (row.result.reason === CblImportReason.Success && row.result.matchTier === 0) {
+                <span class="badge tier-badge tier-0" [ngbTooltip]="getRemapRuleTooltip(row)" container="body">
+                  {{row.result.matchTier | cblMatchTier}}
+                </span>
+              } @else if (row.result.reason === CblImportReason.Success) {
+                <span class="badge tier-badge tier-{{row.result.matchTier}}">
+                  {{row.result.matchTier | cblMatchTier}}
+                </span>
+              } @else {
+                <span class="badge bg-danger">{{row.result.reason | cblImportReason}}</span>
+              }
+            </ng-template>
+          </ngx-datatable-column>
+
+          <!-- Matched Series -->
+          <ngx-datatable-column [width]="200" [sortable]="false" [draggable]="false" [resizeable]="false">
+            <ng-template ngx-datatable-header-template>{{t('col-matched-series')}}</ng-template>
+            <ng-template let-row="row" ngx-datatable-cell-template>
+
+              <!-- Inline series typeahead when this is the active editing row -->
+              @if (isEditingSeries(row)) {
+                <div class="d-flex align-items-center gap-1">
+                  <div class="flex-grow-1">
+                    <app-typeahead [settings]="activeSeriesTypeahead()!"
+                                   (selectedData)="onSeriesTypeaheadSelected(row, $event)">
+                      <ng-template #badgeItem let-item let-position="idx">
+                        {{item.name}} ({{libraryNames()[item.libraryId]}})
+                      </ng-template>
+                      <ng-template #optionItem let-item let-position="idx" let-value="value">
+                        <div class="d-flex align-items-center gap-2">
+                          <app-image [imageUrl]="imageService.getSeriesCoverImage(item.seriesId)"
+                                     height="40px" width="30px" />
+                          <div>
+                            <div>
+                              @if (item.name.toLowerCase().trim().indexOf(value.toLowerCase().trim()) >= 0) {
+                                {{item.name}}
+                              } @else {
+                                {{item.localizedName}}
+                              }
+                            </div>
+                            <small class="text-muted">
+                              {{item.libraryName}}
+                              @if (item.releaseYear && item.releaseYear > 0) { &middot; {{item.releaseYear}} }
+                              @if (item.chapterCount) { &middot; {{item.chapterCount}} issues }
+                            </small>
+                          </div>
+                        </div>
+                      </ng-template>
+                    </app-typeahead>
+                  </div>
+                  <button class="btn btn-sm btn-outline-secondary" (click)="cancelResolve()"
+                          [attr.aria-label]="t('cancel')">
+                    <i class="fa fa-times" aria-hidden="true"></i>
+                  </button>
+                </div>
+              } @else {
+                <!-- Read-only display: series name as link + pencil edit -->
+                @if (row.result.matchedSeriesName) {
+                  <a [routerLink]="['/library', row.result.libraryId, 'series', row.result.seriesId]"
+                     target="_blank">
+                    {{row.result.matchedSeriesName}}
+                  </a>
+                  <button class="btn btn-sm btn-link p-0 ms-1" (click)="startResolveSeries(row)"
+                          [attr.aria-label]="t('edit-match')">
+                    <i class="fa fa-pencil" aria-hidden="true"></i>
+                  </button>
+                }
+
+                <!-- Series collision with candidates (not actively editing) -->
+                @if (isSeriesCollision(row) && row.result.candidates?.length > 0 && activeRow() !== row) {
                   <select class="form-select form-select-sm"
                           (change)="onCandidateSelected(row, row.result.candidates[$any($event.target).selectedIndex - 1])">
                     <option selected disabled>{{t('pick-candidate')}}</option>
@@ -61,158 +170,85 @@
                       <option [value]="candidate.seriesId">{{candidate.seriesName}}</option>
                     }
                   </select>
-                </div>
-              }
-
-              <!-- Series missing: typeahead for series -->
-              @if (isSeriesMissing(row) || (isSeriesCollision(row) && (!row.result.candidates || row.result.candidates.length === 0))) {
-                <div class="mb-2">
-                  <label class="form-label small text-muted mb-1">{{t('select-series')}}</label>
-                  <app-typeahead [settings]="row.seriesTypeaheadSettings"
-                                 (selectedData)="onSeriesTypeaheadSelected(row, $event)">
-                    <ng-template #badgeItem let-item let-position="idx">
-                      {{item.name}} ({{libraryNames()[item.libraryId]}})
-                    </ng-template>
-                    <ng-template #optionItem let-item let-position="idx" let-value="value">
-                      @if (item.name.toLowerCase().trim().indexOf(value.toLowerCase().trim()) >= 0) {
-                        {{item.name}}
-                      } @else {
-                        {{item.localizedName}}
-                      }
-                      ({{libraryNames()[item.libraryId]}})
-                    </ng-template>
-                  </app-typeahead>
-                </div>
-              }
-
-              <!-- Chapter missing: typeahead for chapter -->
-              @if (isChapterMissing(row) && row.chapterTypeaheadSettings) {
-                <div class="mb-2">
-                  <label class="form-label small text-muted mb-1">{{t('select-chapter')}}</label>
-                  <app-typeahead [settings]="row.chapterTypeaheadSettings"
-                                 (selectedData)="onChapterTypeaheadSelected(row, $event)">
-                    <ng-template #badgeItem let-item let-position="idx">
-                      {{item.title}}
-                    </ng-template>
-                    <ng-template #optionItem let-item let-position="idx">
-                      <div class="d-flex align-items-center gap-2">
-                        <app-image [imageUrl]="item.coverImage" height="40px" width="30px" />
-                        <div>
-                          <div>{{item.title}}</div>
-                          @if (item.volumeTitle) {
-                            <small class="text-muted">{{item.volumeTitle}}</small>
-                          }
-                        </div>
-                      </div>
-                    </ng-template>
-                  </app-typeahead>
-                </div>
-              }
-            </div>
-          </ng-template>
-        </ngx-datatable-row-detail>
-
-        <!-- Status Icon -->
-        <ngx-datatable-column [width]="40" [sortable]="false" [draggable]="false" [resizeable]="false">
-          <ng-template ngx-datatable-header-template></ng-template>
-          <ng-template let-row="row" ngx-datatable-cell-template>
-            @if (row.result.reason === CblImportReason.Success) {
-              <i class="fa fa-check-circle text-success" aria-hidden="true"></i>
-            } @else if (row.skipped) {
-              <i class="fa fa-ban text-muted" aria-hidden="true"></i>
-            } @else {
-              <i class="fa fa-exclamation-circle text-warning" aria-hidden="true"></i>
-            }
-          </ng-template>
-        </ngx-datatable-column>
-
-        <!-- Order -->
-        <ngx-datatable-column [width]="50" [sortable]="false" [draggable]="false" [resizeable]="false">
-          <ng-template ngx-datatable-header-template>#</ng-template>
-          <ng-template let-row="row" ngx-datatable-cell-template>
-            {{row.result.order + 1}}
-          </ng-template>
-        </ngx-datatable-column>
-
-        <!-- Series Name -->
-        <ngx-datatable-column [sortable]="false" [draggable]="false" [resizeable]="false">
-          <ng-template ngx-datatable-header-template>{{t('col-series')}}</ng-template>
-          <ng-template let-row="row" ngx-datatable-cell-template>
-            {{row.result.series}}
-          </ng-template>
-        </ngx-datatable-column>
-
-        <!-- Volume / Issue -->
-        <ngx-datatable-column [width]="120" [sortable]="false" [draggable]="false" [resizeable]="false">
-          <ng-template ngx-datatable-header-template>{{t('col-vol-issue')}}</ng-template>
-          <ng-template let-row="row" ngx-datatable-cell-template>
-            @if (row.result.volume) {
-              <span>{{t('volume-num', {num: row.result.volume})}}</span>
-            }
-            @if (row.result.number) {
-              <span class="ms-1">{{t('issue-num', {num: row.result.number})}}</span>
-            }
-          </ng-template>
-        </ngx-datatable-column>
-
-        <!-- Status / Reason -->
-        <ngx-datatable-column [width]="180" [sortable]="false" [draggable]="false" [resizeable]="false">
-          <ng-template ngx-datatable-header-template>{{t('col-status')}}</ng-template>
-          <ng-template let-row="row" ngx-datatable-cell-template>
-            @if (row.result.reason === CblImportReason.Success && row.result.matchTier === 0) {
-              <span class="badge tier-badge tier-0" [ngbTooltip]="getRemapRuleTooltip(row)" container="body">
-                {{row.result.matchTier | cblMatchTier}}
-              </span>
-            } @else if (row.result.reason === CblImportReason.Success) {
-              <span class="badge tier-badge tier-{{row.result.matchTier}}">
-                {{row.result.matchTier | cblMatchTier}}
-              </span>
-            } @else {
-              <span class="badge bg-danger">{{row.result.reason | cblImportReason}}</span>
-            }
-          </ng-template>
-        </ngx-datatable-column>
-
-        <!-- Matched Chapter -->
-        <ngx-datatable-column [width]="150" [sortable]="false" [draggable]="false" [resizeable]="false">
-          <ng-template ngx-datatable-header-template>{{t('col-matched')}}</ng-template>
-          <ng-template let-row="row" ngx-datatable-cell-template>
-            @if (row.result.reason === CblImportReason.Success && row.result.chapterId > 0) {
-              <a [routerLink]="['/library', row.result.libraryId, 'series', row.result.seriesId, 'chapter', row.result.chapterId]"
-                 fragment="details-tab"
-                 target="_blank">
-                {{row.result.chapterTitle}}
-              </a>
-            }
-          </ng-template>
-        </ngx-datatable-column>
-
-        <!-- Action Column -->
-        <ngx-datatable-column [width]="130" [sortable]="false" [draggable]="false" [resizeable]="false">
-          <ng-template ngx-datatable-header-template>{{t('col-action')}}</ng-template>
-          <ng-template let-row="row" let-expanded="expanded" ngx-datatable-cell-template>
-            @if (row.result.reason !== CblImportReason.Success) {
-              <div class="d-flex align-items-center gap-1">
-                @if (!row.skipped) {
-                  <button class="btn btn-sm btn-outline-primary" (click)="toggleExpandRow(row)"
-                          [title]="expanded ? t('collapse') : t('expand')">
-                    <i class="fa" [class.fa-chevron-down]="!expanded" [class.fa-chevron-up]="expanded" aria-hidden="true"></i>
-                    {{t('resolve')}}
-                  </button>
                 }
-                <button class="btn btn-sm btn-outline-secondary" (click)="toggleSkip(row)"
-                        [title]="t('skip-item')">
-                  @if (row.skipped) {
-                    <i class="fa fa-undo me-1" aria-hidden="true"></i>{{t('undo')}}
-                  } @else {
-                    <i class="fa fa-ban me-1" aria-hidden="true"></i>{{t('skip-item')}}
-                  }
+              }
+            </ng-template>
+          </ngx-datatable-column>
+
+          <!-- Matched Issue -->
+          <ngx-datatable-column [width]="100" [sortable]="false" [draggable]="false" [resizeable]="false">
+            <ng-template ngx-datatable-header-template>{{t('col-matched-issue')}}</ng-template>
+            <ng-template let-row="row" ngx-datatable-cell-template>
+
+              <!-- Inline chapter typeahead when this is the active editing row -->
+              @if (isEditingChapter(row)) {
+                <div class="d-flex align-items-center gap-1">
+                  <div class="flex-grow-1">
+                    <app-typeahead [settings]="activeChapterTypeahead()!"
+                                   (selectedData)="onChapterTypeaheadSelected(row, $event)">
+                      <ng-template #badgeItem let-item let-position="idx">
+                        {{item.title}}
+                      </ng-template>
+                      <ng-template #optionItem let-item let-position="idx">
+                        <div class="d-flex align-items-center gap-2">
+                          <app-image [imageUrl]="item.coverImage" height="40px" width="30px" />
+                          <div>
+                            <div>{{item.title}}</div>
+                            @if (item.volumeTitle) {
+                              <small class="text-muted">{{item.volumeTitle}}</small>
+                            }
+                          </div>
+                        </div>
+                      </ng-template>
+                    </app-typeahead>
+                  </div>
+                  <button class="btn btn-sm btn-outline-secondary" (click)="cancelResolve()"
+                          [attr.aria-label]="t('cancel')">
+                    <i class="fa fa-times" aria-hidden="true"></i>
+                  </button>
+                </div>
+              } @else if (row.result.chapterId > 0) {
+                <!-- Read-only display: entity-title as link + pencil edit -->
+                <a [routerLink]="['/library', row.result.libraryId, 'series', row.result.seriesId, 'chapter', row.result.chapterId]"
+                   fragment="details-tab"
+                   target="_blank">
+                  <app-entity-title [libraryType]="row.result.libraryType"
+                                    [entity]="buildChapterStub(row.result)" />
+                </a>
+                <button class="btn btn-sm btn-link p-0 ms-1" (click)="startResolveChapter(row)"
+                        [attr.aria-label]="t('edit-match')">
+                  <i class="fa fa-pencil" aria-hidden="true"></i>
                 </button>
-              </div>
-            }
-          </ng-template>
-        </ngx-datatable-column>
-      </ngx-datatable>
+              }
+            </ng-template>
+          </ngx-datatable-column>
+
+          <!-- Action Column -->
+          <ngx-datatable-column [width]="30" [sortable]="false" [draggable]="false" [resizeable]="false">
+            <ng-template ngx-datatable-header-template>{{t('col-action')}}</ng-template>
+            <ng-template let-row="row" ngx-datatable-cell-template>
+              @if (row.result.reason !== CblImportReason.Success) {
+                <div class="d-flex align-items-center gap-1">
+                  @if (!row.skipped && activeRow() !== row) {
+                    <button class="btn btn-sm btn-outline-primary" (click)="startResolve(row)"
+                            [attr.aria-label]="t('resolve')">
+                      <i class="fa fa-wrench" aria-hidden="true"></i>
+                    </button>
+                  }
+                  <button class="btn btn-sm btn-outline-secondary" (click)="toggleSkip(row)"
+                          [attr.aria-label]="t('skip-item')">
+                    @if (row.skipped) {
+                      <i class="fa fa-undo" aria-hidden="true"></i>
+                    } @else {
+                      <i class="fa fa-ban" aria-hidden="true"></i>
+                    }
+                  </button>
+                </div>
+              }
+            </ng-template>
+          </ngx-datatable-column>
+        </ngx-datatable>
+      </div>
     }
   </div>
 

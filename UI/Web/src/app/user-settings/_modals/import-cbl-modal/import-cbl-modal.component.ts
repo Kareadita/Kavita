@@ -1,4 +1,4 @@
-import {ChangeDetectionStrategy, Component, computed, inject, input, OnInit, signal, viewChild} from '@angular/core';
+import {ChangeDetectionStrategy, Component, computed, inject, input, OnInit, signal} from '@angular/core';
 import {NgbActiveModal, NgbModal} from '@ng-bootstrap/ng-bootstrap';
 import {translate, TranslocoDirective} from '@jsverse/transloco';
 import {CblSavedFile} from '../../../_models/reading-list/cbl/cbl-saved-file';
@@ -24,6 +24,7 @@ import {CblMatchTierPipe} from '../../../_pipes/cbl-match-tier.pipe';
 import {CblImportReasonPipe} from '../../../_pipes/cbl-import-reason.pipe';
 import {ManageRemapRulesModalComponent} from '../manage-remap-rules-modal/manage-remap-rules-modal.component';
 import {ImageComponent} from '../../../shared/image/image.component';
+import {ImageService} from '../../../_services/image.service';
 import {map} from 'rxjs';
 import {LibraryService} from '../../../_services/library.service';
 import {
@@ -31,19 +32,16 @@ import {
   DataTableColumnDirective,
   DataTableColumnHeaderDirective,
   DatatableComponent,
-  DatatableRowDetailDirective,
-  DatatableRowDetailTemplateDirective,
 } from '@siemens/ngx-datatable';
 import {NgbTooltip} from '@ng-bootstrap/ng-bootstrap';
 import {CdkScrollable} from '@angular/cdk/scrolling';
 import {RouterLink} from '@angular/router';
+import {EntityTitleComponent} from '../../../cards/entity-title/entity-title.component';
 
 export interface CblIssueRow {
   result: CblBookResult;
   remapRuleId: number | null;
   skipped: boolean;
-  seriesTypeaheadSettings: TypeaheadSettings<SearchResult>;
-  chapterTypeaheadSettings: TypeaheadSettings<Chapter> | null;
 }
 
 @Component({
@@ -59,11 +57,10 @@ export interface CblIssueRow {
     DataTableColumnDirective,
     DataTableColumnCellDirective,
     DataTableColumnHeaderDirective,
-    DatatableRowDetailDirective,
-    DatatableRowDetailTemplateDirective,
     NgbTooltip,
     CdkScrollable,
     RouterLink,
+    EntityTitleComponent,
   ],
   templateUrl: './import-cbl-modal.component.html',
   styleUrl: './import-cbl-modal.component.scss',
@@ -78,11 +75,10 @@ export class ImportCblModalComponent implements OnInit {
   private readonly toastr = inject(ToastrService);
   private readonly utilityService = inject(UtilityService);
   private readonly libraryService = inject(LibraryService);
+  protected readonly imageService = inject(ImageService);
 
   protected readonly CblImportReason = CblImportReason;
   protected readonly CblImportResult = CblImportResult;
-
-  private readonly table = viewChild(DatatableComponent);
 
   savedFiles = input.required<CblSavedFile[]>();
 
@@ -96,8 +92,22 @@ export class ImportCblModalComponent implements OnInit {
   allRows = signal<CblIssueRow[]>([]);
   libraryNames = signal<Record<number, string>>({});
 
+  showSuccessful = signal(true);
+  visibleRows = computed(() => {
+    const rows = this.allRows();
+    return this.showSuccessful() ? rows : rows.filter(r => r.result.reason !== CblImportReason.Success);
+  });
+
   matchedCount = computed(() => this.allRows().filter(r => r.result.reason === CblImportReason.Success).length);
   issueCount = computed(() => this.allRows().filter(r => r.result.reason !== CblImportReason.Success && !r.skipped).length);
+
+  /** Lazy typeahead state — only one row can be resolving at a time */
+  activeRow = signal<CblIssueRow | null>(null);
+  activeSeriesTypeahead = signal<TypeaheadSettings<SearchResult> | null>(null);
+  activeChapterTypeahead = signal<TypeaheadSettings<Chapter> | null>(null);
+
+  /** Track the CBL series name of the row being resolved, so we can auto-continue after re-validation */
+  private pendingAutoEditSeries: string | null = null;
 
   getRowClass = (row: CblIssueRow) => {
     if (row.skipped) return 'skipped-row';
@@ -143,15 +153,29 @@ export class ImportCblModalComponent implements OnInit {
     if (!file) return;
 
     this.isProcessing.set(true);
+    this.cancelResolve();
     this.cblService.reValidate(file.fileName).subscribe({
       next: (summary) => {
         this.currentSummary.set(summary);
         this.buildAllRows(summary);
         this.isProcessing.set(false);
+
+        // Auto-continue: if a pending series was just resolved and is now chapter-missing, auto-edit
+        if (this.pendingAutoEditSeries) {
+          const seriesName = this.pendingAutoEditSeries;
+          this.pendingAutoEditSeries = null;
+          const row = this.allRows().find(r =>
+            r.result.series === seriesName && this.isChapterMissing(r)
+          );
+          if (row) {
+            this.startResolve(row);
+          }
+        }
       },
       error: () => {
         this.toastr.error(translate('toasts.failed-to-validate'));
         this.isProcessing.set(false);
+        this.pendingAutoEditSeries = null;
       }
     });
   }
@@ -174,6 +198,80 @@ export class ImportCblModalComponent implements OnInit {
     return row.result.reason !== CblImportReason.Success && !row.skipped;
   }
 
+  /** Whether this row needs a series typeahead */
+  needsSeriesTypeahead(row: CblIssueRow): boolean {
+    return this.isSeriesMissing(row) ||
+      (this.isSeriesCollision(row) && (!row.result.candidates || row.result.candidates.length === 0));
+  }
+
+  /** Whether this row is the active editing row showing a series typeahead */
+  isEditingSeries(row: CblIssueRow): boolean {
+    return this.activeRow() === row && this.activeSeriesTypeahead() !== null;
+  }
+
+  /** Whether this row is the active editing row showing a chapter typeahead */
+  isEditingChapter(row: CblIssueRow): boolean {
+    return this.activeRow() === row && this.activeChapterTypeahead() !== null;
+  }
+
+  /** Build a minimal Chapter stub for entity-title rendering */
+  buildChapterStub(result: CblBookResult): Chapter {
+    return {
+      volumeId: 0,
+      range: result.chapterNumber || result.chapterTitle,
+      titleName: result.chapterTitle !== result.chapterNumber ? result.chapterTitle : '',
+      isSpecial: false,
+    } as Chapter;
+  }
+
+  /** Auto-detect which typeahead to open based on row reason */
+  startResolve(row: CblIssueRow) {
+    if (this.isSeriesMissing(row) || this.isSeriesCollision(row) || row.result.reason === CblImportReason.Success) {
+      this.startResolveSeries(row);
+    } else if (this.isChapterMissing(row)) {
+      this.startResolveChapter(row);
+    }
+  }
+
+  /** Explicitly open the series typeahead for a row */
+  startResolveSeries(row: CblIssueRow) {
+    if (this.activeRow() === row && this.activeSeriesTypeahead() !== null) {
+      this.cancelResolve();
+      return;
+    }
+    this.clearActiveState();
+    this.activeRow.set(row);
+    this.activeSeriesTypeahead.set(this.createSeriesTypeahead(row.result));
+    this.allRows.set([...this.allRows()]);
+  }
+
+  /** Explicitly open the chapter typeahead for a row */
+  startResolveChapter(row: CblIssueRow) {
+    if (this.activeRow() === row && this.activeChapterTypeahead() !== null) {
+      this.cancelResolve();
+      return;
+    }
+    this.clearActiveState();
+    this.activeRow.set(row);
+    this.activeChapterTypeahead.set(
+      row.result.seriesId > 0 ? this.createChapterTypeahead(row.result.seriesId) : null
+    );
+    this.allRows.set([...this.allRows()]);
+  }
+
+  private clearActiveState() {
+    this.activeRow.set(null);
+    this.activeSeriesTypeahead.set(null);
+    this.activeChapterTypeahead.set(null);
+  }
+
+  cancelResolve() {
+    this.activeRow.set(null);
+    this.activeSeriesTypeahead.set(null);
+    this.activeChapterTypeahead.set(null);
+    this.allRows.set([...this.allRows()]);
+  }
+
   onCandidateSelected(row: CblIssueRow, candidate: CblSeriesCandidate) {
     this.handleSeriesSelection(row, candidate.seriesId, candidate.seriesName);
   }
@@ -181,6 +279,13 @@ export class ImportCblModalComponent implements OnInit {
   onSeriesTypeaheadSelected(row: CblIssueRow, event: SearchResult[]) {
     if (!event || event.length === 0) return;
     const selected = event[0];
+
+    // If editing a matched row and the user picked the same series, just cancel
+    if (row.result.reason === CblImportReason.Success && selected.seriesId === row.result.seriesId) {
+      this.cancelResolve();
+      return;
+    }
+
     this.handleSeriesSelection(row, selected.seriesId, selected.name);
   }
 
@@ -188,10 +293,6 @@ export class ImportCblModalComponent implements OnInit {
     if (!event || event.length === 0) return;
     const chapter = event[0];
     this.handleChapterSelection(row, chapter);
-  }
-
-  toggleExpandRow(row: CblIssueRow) {
-    this.table()?.rowDetail?.toggleExpandRow(row);
   }
 
   getRemapRuleTooltip(row: CblIssueRow): string {
@@ -205,12 +306,10 @@ export class ImportCblModalComponent implements OnInit {
   }
 
   toggleSkip(row: CblIssueRow) {
-    if (!row.skipped) {
-      // Collapse the detail row when skipping
-      this.table()?.rowDetail?.collapseAllRows();
+    if (this.activeRow() === row) {
+      this.cancelResolve();
     }
     row.skipped = !row.skipped;
-    // Force signal update
     this.allRows.set([...this.allRows()]);
   }
 
@@ -269,8 +368,6 @@ export class ImportCblModalComponent implements OnInit {
       result,
       remapRuleId: null,
       skipped: false,
-      seriesTypeaheadSettings: this.createSeriesTypeahead(result),
-      chapterTypeaheadSettings: result.seriesId > 0 ? this.createChapterTypeahead(result.seriesId) : null,
     }));
 
     this.allRows.set(rows);
@@ -282,9 +379,13 @@ export class ImportCblModalComponent implements OnInit {
     );
     if (!confirmed) return;
 
+    // Remember this series for auto-continue after re-validation
+    this.pendingAutoEditSeries = row.result.series;
+
     this.cblService.createRemapRule(row.result.series, seriesId).subscribe(rule => {
       row.remapRuleId = rule.id;
       this.remapRules.set([...this.remapRules(), rule]);
+      this.cancelResolve();
       this.validateCurrentFile();
     });
   }
@@ -298,6 +399,7 @@ export class ImportCblModalComponent implements OnInit {
     }).subscribe(rule => {
       row.remapRuleId = rule.id;
       this.remapRules.set([...this.remapRules(), rule]);
+      this.cancelResolve();
       this.validateCurrentFile();
     });
   }

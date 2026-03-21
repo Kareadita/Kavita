@@ -225,7 +225,13 @@ public class AutoMapperProfiles : Profile
             .ForMember(dest => dest.SeriesId,
                 opt => opt.MapFrom(src => src.Id))
             .ForMember(dest => dest.LibraryName,
-                opt => opt.MapFrom(src => src.Library.Name));
+                opt => opt.MapFrom(src => src.Library.Name))
+            .ForMember(dest => dest.ReleaseYear,
+                opt => opt.MapFrom(src => src.Metadata.ReleaseYear))
+            .ForMember(dest => dest.VolumeCount,
+                opt => opt.MapFrom(src => src.Volumes.Count))
+            .ForMember(dest => dest.ChapterCount,
+                opt => opt.MapFrom(src => src.Volumes.SelectMany(v => v.Chapters).Count()));
 
         CreateMap<Library, LiteLibraryDto>();
         CreateMap<Library, LibraryDto>()

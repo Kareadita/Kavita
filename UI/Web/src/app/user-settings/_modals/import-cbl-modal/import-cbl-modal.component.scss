@@ -20,12 +20,7 @@
   background-color: rgba(var(--bs-success-rgb), 0.05);
 }
 
-// Allow row detail to auto-size rather than using the fixed rowHeight value
-:host ::ng-deep .datatable-row-detail {
-  height: auto !important;
-  overflow: visible !important;
-}
-
-.row-detail-action {
-  border-top: 1px dashed var(--bs-border-color);
+.table-wrapper {
+  max-height: 60vh;
+  overflow-y: auto;
 }

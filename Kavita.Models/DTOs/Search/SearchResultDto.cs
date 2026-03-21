@@ -14,4 +14,8 @@ public sealed record SearchResultDto
     // Grouping information
     public string LibraryName { get; set; } = default!;
     public int LibraryId { get; set; }
+
+    public int ReleaseYear { get; init; }
+    public int VolumeCount { get; init; }
+    public int ChapterCount { get; init; }
 }
