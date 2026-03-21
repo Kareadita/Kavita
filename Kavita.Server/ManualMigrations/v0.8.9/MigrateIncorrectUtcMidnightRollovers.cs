@@ -47,6 +47,17 @@ public class MigrateIncorrectUtcTimes: ManualMigration
                     corrected = true;
                 }
 
+                if (!TimeZoneInfo.Local.IsInvalidTime(session.StartTime))
+                {
+                    session.StartTime = session.StartTime.AddHours(-1 * session.StartTime.Hour);
+                }
+
+                if (!TimeZoneInfo.Local.IsInvalidTime(session.StartTime))
+                {
+                    logger.LogWarning("Session {Id} has invalid start time {Time} not fixing UTC", session.Id, session.StartTime);
+                    continue;
+                }
+
                 var wantedStartUtc = TimeZoneInfo.ConvertTimeToUtc(session.StartTime);
                 if (session.StartTimeUtc != wantedStartUtc)
                 {
