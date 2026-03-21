@@ -71,14 +71,14 @@ public static class CblParser
                     IssueType = CblIssueType.Unknown,
                 };
 
-                if (book.Database != null)
+                foreach (var db in book.Databases)
                 {
-                    var provider = MapProviderName(book.Database.Name);
+                    var provider = MapProviderName(db.Name);
                     item.ExternalIds.Add(new CblExternalId
                     {
                         Provider = provider,
-                        SeriesId = book.Database.Series ?? string.Empty,
-                        IssueId = book.Database.Issue ?? string.Empty,
+                        SeriesId = db.Series ?? string.Empty,
+                        IssueId = db.Issue ?? string.Empty,
                     });
                 }
 

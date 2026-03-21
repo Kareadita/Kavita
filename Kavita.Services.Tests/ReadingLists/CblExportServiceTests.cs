@@ -1,3 +1,4 @@
+using Kavita.Models.DTOs.ReadingLists.CBL.Internal;
 using Kavita.Models.Entities;
 using Kavita.Models.Entities.Enums;
 using Kavita.Models.Entities.Metadata;
@@ -31,7 +32,8 @@ public class CblExportServiceTests
 
     private static ReadingListItem CreateItem(int order, string seriesName, string chapterRange,
         string volumeName, DateTime? releaseDate = null, bool isSpecial = false,
-        MangaFormat format = MangaFormat.Archive)
+        MangaFormat format = MangaFormat.Archive,
+        string? comicVineId = null, long metronId = 0, int aniListId = 0, long malId = 0, int hardcoverId = 0)
     {
         var series = new Series
         {
@@ -66,6 +68,11 @@ public class CblExportServiceTests
                 Range = chapterRange,
                 IsSpecial = isSpecial,
                 ReleaseDate = releaseDate ?? DateTime.MinValue,
+                ComicVineId = comicVineId,
+                MetronId = metronId,
+                AniListId = aniListId,
+                MalId = malId,
+                HardcoverId = hardcoverId,
             },
         };
     }
@@ -103,7 +110,7 @@ public class CblExportServiceTests
         Assert.Equal("2016", first.Year);
         Assert.Equal(string.Empty, first.Format);
         Assert.Equal("cbz", first.FileType);
-        Assert.Null(first.Database);
+        Assert.Empty(first.Databases);
 
         var last = result.Books.Book[2];
         Assert.Equal("Superman", last.Series);
@@ -162,6 +169,95 @@ public class CblExportServiceTests
         var result = CblExportService.BuildCblReadingList(readingList, items);
 
         Assert.Equal(string.Empty, result.Books.Book[0].Year);
+    }
+
+    [Fact]
+    public void ExportV1_ExternalIds_SingleProvider()
+    {
+        var readingList = CreateReadingList();
+        var items = new List<ReadingListItem>
+        {
+            CreateItem(0, "Batman", "1", "2016", new DateTime(2016, 6, 15), comicVineId: "cv-12345"),
+        };
+
+        var result = CblExportService.BuildCblReadingList(readingList, items);
+
+        var first = result.Books.Book[0];
+        Assert.Single(first.Databases);
+        Assert.Equal("cv", first.Databases[0].Name);
+        Assert.Equal("Batman", first.Databases[0].Series);
+        Assert.Equal("cv-12345", first.Databases[0].Issue);
+    }
+
+    [Fact]
+    public void ExportV1_ExternalIds_MultipleProviders()
+    {
+        var readingList = CreateReadingList();
+        var items = new List<ReadingListItem>
+        {
+            CreateItem(0, "Batman", "1", "2016", new DateTime(2016, 6, 15),
+                comicVineId: "cv-12345", metronId: 67890),
+        };
+
+        var result = CblExportService.BuildCblReadingList(readingList, items);
+
+        var first = result.Books.Book[0];
+        Assert.Equal(2, first.Databases.Count);
+        Assert.Equal("cv", first.Databases[0].Name);
+        Assert.Equal("cv-12345", first.Databases[0].Issue);
+        Assert.Equal("metron", first.Databases[1].Name);
+        Assert.Equal("67890", first.Databases[1].Issue);
+    }
+
+    [Fact]
+    public void ExportV1_ExternalIds_NoIds()
+    {
+        var readingList = CreateReadingList();
+        var items = new List<ReadingListItem>
+        {
+            CreateItem(0, "Batman", "1", "2016", new DateTime(2016, 6, 15)),
+        };
+
+        var result = CblExportService.BuildCblReadingList(readingList, items);
+
+        Assert.Empty(result.Books.Book[0].Databases);
+    }
+
+    [Fact]
+    public void ExportV1_ExternalIds_RoundTrip()
+    {
+        var readingList = CreateReadingList(title: "External ID Round Trip");
+        var items = new List<ReadingListItem>
+        {
+            CreateItem(0, "Batman", "1", "2016", new DateTime(2016, 6, 15),
+                comicVineId: "cv-12345", metronId: 67890),
+        };
+
+        var cbl = CblExportService.BuildCblReadingList(readingList, items);
+
+        var tempFile = Path.Combine(Path.GetTempPath(), $"cbl-extid-test-{Guid.NewGuid()}.cbl");
+        try
+        {
+            CblExportService.SerializeV1(cbl, tempFile);
+
+            var parsed = CblParser.ParseV1(tempFile);
+
+            Assert.Single(parsed.Items);
+            var item = parsed.Items[0];
+            Assert.Equal(2, item.ExternalIds.Count);
+
+            var cv = item.ExternalIds.First(e => e.Provider == CblExternalDbProvider.ComicVine);
+            Assert.Equal("cv-12345", cv.IssueId);
+            Assert.Equal("Batman", cv.SeriesId);
+
+            var metron = item.ExternalIds.First(e => e.Provider == CblExternalDbProvider.Metron);
+            Assert.Equal("67890", metron.IssueId);
+            Assert.Equal("Batman", metron.SeriesId);
+        }
+        finally
+        {
+            if (File.Exists(tempFile)) File.Delete(tempFile);
+        }
     }
 
     #endregion

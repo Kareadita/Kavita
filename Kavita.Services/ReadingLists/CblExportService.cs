@@ -115,7 +115,7 @@ public partial class CblExportService(IUnitOfWork unitOfWork, IDirectoryService 
                 Year = year,
                 Format = (item.Series.Name.Contains("Annual") || item.Chapter.Range.Contains("Annual")) ? "Annual" : string.Empty, // We will only write "Annual" when we detect it in the Series Name
                 FileType = MapMangaFormatToFileType(item.Series.Format),
-                Database = null, // TODO: If we have ComicVine metadata id in Chapter, populate this (NOTE: CBL Group confirmed I can do any external metadata)
+                Databases = GetV1Databases(item.Chapter, seriesName),
             });
         }
 
@@ -199,6 +199,28 @@ public partial class CblExportService(IUnitOfWork unitOfWork, IDirectoryService 
             IssueList = issues,
             Notes = string.Empty,
         };
+    }
+
+    private static List<CblBookDatabase> GetV1Databases(Chapter chapter, string seriesName)
+    {
+        var results = new List<CblBookDatabase>();
+
+        if (!string.IsNullOrEmpty(chapter.ComicVineId))
+            results.Add(new CblBookDatabase { Name = "cv", Series = seriesName, Issue = chapter.ComicVineId });
+
+        if (chapter.MetronId > 0)
+            results.Add(new CblBookDatabase { Name = "metron", Series = seriesName, Issue = chapter.MetronId.ToString() });
+
+        if (chapter.AniListId > 0)
+            results.Add(new CblBookDatabase { Name = "anilist", Series = seriesName, Issue = chapter.AniListId.ToString() });
+
+        if (chapter.MalId > 0)
+            results.Add(new CblBookDatabase { Name = "malist", Series = seriesName, Issue = chapter.MalId.ToString() });
+
+        if (chapter.HardcoverId > 0)
+            results.Add(new CblBookDatabase { Name = "hardcover", Series = seriesName, Issue = chapter.HardcoverId.ToString() });
+
+        return results;
     }
 
     private static List<CblV2ExternalId> GetExternalIds(Chapter chapter, string seriesName)

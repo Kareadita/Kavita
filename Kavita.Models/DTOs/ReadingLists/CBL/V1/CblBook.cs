@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using System.Xml.Serialization;
 
 namespace Kavita.Models.DTOs.ReadingLists.CBL.V1;
@@ -59,8 +60,8 @@ public sealed record CblBook
     [XmlAttribute("FileType")]
     public string FileType { get; set; }
     /// <summary>
-    /// External database reference (e.g. ComicVine)
+    /// External database references (e.g. ComicVine, Metron)
     /// </summary>
     [XmlElement("Database")]
-    public CblBookDatabase Database { get; set; }
+    public List<CblBookDatabase> Databases { get; set; } = [];
 }

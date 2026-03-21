@@ -176,22 +176,18 @@ public class CblTestHelper : IDisposable
                         Year = item.Year,
                     };
 
-                    if (item.ExternalIds.Count > 0)
+                    book.Databases = item.ExternalIds.Select(extId => new CblBookDatabase
                     {
-                        var extId = item.ExternalIds[0];
-                        book.Database = new CblBookDatabase
+                        Name = extId.Provider switch
                         {
-                            Name = extId.Provider switch
-                            {
-                                CblExternalDbProvider.ComicVine => "cv",
-                                CblExternalDbProvider.Metron => "metron",
-                                CblExternalDbProvider.GrandComicsDatabase => "gcd",
-                                _ => "unknown"
-                            },
-                            Series = extId.SeriesId,
-                            Issue = extId.IssueId
-                        };
-                    }
+                            CblExternalDbProvider.ComicVine => "cv",
+                            CblExternalDbProvider.Metron => "metron",
+                            CblExternalDbProvider.GrandComicsDatabase => "gcd",
+                            _ => "unknown"
+                        },
+                        Series = extId.SeriesId,
+                        Issue = extId.IssueId
+                    }).ToList();
 
                     return book;
                 }).ToList()
