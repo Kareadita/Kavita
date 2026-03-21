@@ -117,7 +117,7 @@ public class LibraryController(
         }
 
         // Assign all the necessary users with this library side nav
-        var userIds = admins.Select(u => u.Id).Append(UserId).ToList();
+        var userIds = admins.Select(u => u.Id).ToList();
         var userNeedingNewLibrary = (await unitOfWork.UserRepository.GetAllUsersAsync(AppUserIncludes.SideNavStreams))
             .Where(u => userIds.Contains(u.Id))
             .ToList();
