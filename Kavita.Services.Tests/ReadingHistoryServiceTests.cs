@@ -41,7 +41,7 @@ public class ReadingHistoryServiceTests(ITestOutputHelper testOutputHelper) : Ab
 
         // Create an active session dated for yesterday
         var yesterday= DateTime.Now.Date.AddDays(-1);
-        var yesterdayUtc = DateTime.UtcNow.Date.AddDays(-1);
+        var yesterdayUtc = yesterday.ToUniversalTime();
         await dataContext.AppUserReadingSession.AddAsync(new AppUserReadingSession()
         {
             ActivityData =
@@ -83,7 +83,7 @@ public class ReadingHistoryServiceTests(ITestOutputHelper testOutputHelper) : Ab
 
         // Create an active session dated for yesterday
         var yesterday= DateTime.Now.Date.AddDays(-1);
-        var yesterdayUtc = DateTime.UtcNow.Date.AddDays(-1);
+        var yesterdayUtc = yesterday.ToUniversalTime();
         var activityData = new AppUserReadingSessionActivityData(new ProgressDto()
         {
             ChapterId = 1, VolumeId = 1, LibraryId = 1, PageNum = 1, SeriesId = 1
@@ -111,7 +111,7 @@ public class ReadingHistoryServiceTests(ITestOutputHelper testOutputHelper) : Ab
         // Run the service
         await service.AggregateYesterdaysActivity();
 
-        // Check that there are no history items
+        // Check that there is exactly one item
         var historyItems = await dataContext.AppUserReadingHistory.ToListAsync();
         Assert.Single(historyItems);
         Assert.Single(historyItems[0].Data.Activities);
