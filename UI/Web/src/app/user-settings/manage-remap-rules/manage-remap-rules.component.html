@@ -188,10 +188,10 @@
           </ng-template>
           <ng-template let-item="row" ngx-datatable-cell-template>
             @if (item.cblVolume) {
-              {{t('volume-number', {num: item.cblVolume})}}
+              {{t('volume-num', {num: item.cblVolume})}}
             }
             @if (item.cblNumber) {
-              {{t('issue-number', {num: item.cblNumber})}}
+              {{t('issue-num', {num: item.cblNumber})}}
             }
           </ng-template>
         </ngx-datatable-column>
