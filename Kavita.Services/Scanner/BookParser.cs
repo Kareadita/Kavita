@@ -9,9 +9,9 @@ namespace Kavita.Services.Scanner;
 
 public class BookParser(IDirectoryService directoryService, IBookService bookService, BasicParser basicParser) : DefaultParser(directoryService)
 {
-    public override ParserInfo Parse(string filePath, string rootPath, string libraryRoot, LibraryType type, bool enableMetadata = true, ComicInfo comicInfo = null)
+    public override ParserInfo? Parse(string filePath, string rootPath, string libraryRoot, LibraryType type, bool enableMetadata = true, ComicInfo? comicInfo = null)
     {
-        ParserInfo info;
+        ParserInfo? info;
         if (enableMetadata)
         {
             info = bookService.ParseInfo(filePath);
@@ -29,6 +29,7 @@ public class BookParser(IDirectoryService directoryService, IBookService bookSer
                 Series = Parser.ParseSeries(fileName, type),
                 Chapters = Parser.ParseChapter(fileName, type),
                 Volumes = Parser.ParseVolume(fileName, type),
+                HasEndMarker = Parser.HasEndMarker(fileName)
             };
         }
 
@@ -68,6 +69,8 @@ public class BookParser(IDirectoryService directoryService, IBookService bookSer
                 }
             }
         }
+
+        FinalizeNumbers(info);
 
         return string.IsNullOrEmpty(info.Series) ? null : info;
     }

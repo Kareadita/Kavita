@@ -25,6 +25,7 @@ public class ImageParser(IDirectoryService directoryService) : DefaultParser(dir
             Filename = Path.GetFileName(filePath),
             FullFilePath = Parser.NormalizePath(filePath),
             Title = fileName,
+            HasEndMarker = Parser.HasEndMarker(fileName)
         };
         ParseFromFallbackFolders(filePath, libraryRoot, LibraryType.Image, ref ret);
 
@@ -40,6 +41,7 @@ public class ImageParser(IDirectoryService directoryService) : DefaultParser(dir
             ret.Series = Parser.CleanTitle(directoryName);
         }
 
+        FinalizeNumbers(ret);
 
         return string.IsNullOrEmpty(ret.Series) ? null : ret;
     }

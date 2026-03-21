@@ -4,7 +4,6 @@ using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
-using Kavita.Common.Constants;
 using Kavita.Common.Extensions;
 using Kavita.Models.Constants;
 using Kavita.Models.Entities.Enums;
@@ -24,7 +23,8 @@ public static partial class Parser
     public const int SpecialVolumeNumber = ParserConstants.SpecialVolumeNumber;
     public const string SpecialVolume = ParserConstants.SpecialVolume;
 
-    public static readonly TimeSpan RegexTimeout = TimeSpan.FromMilliseconds(500);
+    public const int RegexTimeoutMs = 500;
+    public static readonly TimeSpan RegexTimeout = TimeSpan.FromMilliseconds(RegexTimeoutMs);
 
     public const string ImageFileExtensions = @"(\.png|\.jpeg|\.jpg|\.webp|\.gif|\.avif)"; // Don't forget to update CoverChooser
     public const string ArchiveFileExtensions = @"\.cbz|\.zip|\.rar|\.cbr|\.tar.gz|\.7zip|\.7z|\.cb7|\.cbt";
@@ -149,6 +149,10 @@ public static partial class Parser
         @"(ch\.?|chapter|c)(\s|_)*(?<Chapter>\d+(\.\d+)?(-\d+(\.\d+)?)?)",
         MatchOptions, RegexTimeout);
 
+
+
+    [GeneratedRegex(@"(\((완결?|完)\)|\[(완결?|完)\])", MatchOptions,  RegexTimeoutMs)]
+    private static partial Regex HasEndMarkerRegex();
 
     private static readonly Regex[] MangaSeriesRegex =
     [
@@ -1043,14 +1047,10 @@ public static partial class Parser
             }
 
             // Check if there is a range or not
-            if (NumberRangeRegex().IsMatch(range))
-            {
+            if (!NumberRangeRegex().IsMatch(range)) return range.AsFloat();
 
-                var tokens = range.Replace("_", string.Empty).Split("-", StringSplitOptions.RemoveEmptyEntries);
-                return tokens.Min(t => t.AsFloat());
-            }
-
-            return range.AsFloat();
+            var tokens = range.Replace("_", string.Empty).Split("-", StringSplitOptions.RemoveEmptyEntries);
+            return tokens.Min(t => t.AsFloat());
         }
         catch (Exception)
         {
@@ -1070,14 +1070,11 @@ public static partial class Parser
             }
 
             // Check if there is a range or not
-            if (NumberRangeRegex().IsMatch(range))
-            {
+            if (!NumberRangeRegex().IsMatch(range)) return range.AsFloat();
 
-                var tokens = range.Replace("_", string.Empty).Split("-", StringSplitOptions.RemoveEmptyEntries);
-                return tokens.Max(t => t.AsFloat());
-            }
+            var tokens = range.Replace("_", string.Empty).Split("-", StringSplitOptions.RemoveEmptyEntries);
+            return tokens.Max(t => t.AsFloat());
 
-            return range.AsFloat();
         }
         catch (Exception)
         {
@@ -1182,6 +1179,16 @@ public static partial class Parser
     public static bool HasComicInfoSpecial(string comicInfoFormat)
     {
         return FormatTagSpecialKeywords.Contains(comicInfoFormat);
+    }
+
+    /// <summary>
+    /// Detects if there is an End Marker in the filename
+    /// </summary>
+    /// <param name="filename"></param>
+    /// <returns></returns>
+    public static bool HasEndMarker(string filename)
+    {
+        return HasEndMarkerRegex().IsMatch(filename);
     }
 
     private static string ReplaceUnderscores(string name)
@@ -1347,9 +1354,9 @@ public static partial class Parser
     }
 
 
-    [GeneratedRegex(SupportedExtensions)]
+    [GeneratedRegex(SupportedExtensions, MatchOptions,  RegexTimeoutMs)]
     private static partial Regex SupportedExtensionsRegex();
-    [GeneratedRegex(@"\d-{1}\d")]
+    [GeneratedRegex(@"\d-{1}\d", MatchOptions,  RegexTimeoutMs)]
     private static partial Regex NumberRangeRegex();
 
     public static bool IsDefaultChapter(string? chapterNumber)

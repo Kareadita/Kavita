@@ -35,6 +35,7 @@ public class BasicParser(IDirectoryService directoryService, IDefaultParser imag
             ComicInfo = comicInfo,
             Volumes = Parser.ParseVolume(fileName, type),
             Chapters = Parser.ParseChapter(fileName, type),
+            HasEndMarker = Parser.HasEndMarker(fileName)
         };
 
         ParseExternalIdsFromNotesAndWeblinks(ret);
@@ -122,6 +123,8 @@ public class BasicParser(IDirectoryService directoryService, IDefaultParser imag
         {
             ret.Volumes = Parser.SpecialVolume;
         }
+
+        FinalizeNumbers(ret);
 
         return ret.Series == string.Empty ? null : ret;
     }

@@ -19,15 +19,16 @@ public interface IDefaultParser
 /// </summary>
 public abstract class DefaultParser(IDirectoryService directoryService) : IDefaultParser
 {
-
     /// <summary>
     /// Parses information out of a file path. Can fallback to using directory name if Series couldn't be parsed
     /// from filename.
     /// </summary>
     /// <param name="filePath"></param>
     /// <param name="rootPath">Root folder</param>
+    /// <param name="libraryRoot"></param>
     /// <param name="type">Allows different Regex to be used for parsing.</param>
     /// <param name="enableMetadata">Allows overriding data from metadata (ComicInfo/pdf/epub)</param>
+    /// <param name="comicInfo"></param>
     /// <returns><see cref="ParserInfo"/> or null if Series was empty</returns>
     public abstract ParserInfo? Parse(string filePath, string rootPath, string libraryRoot, LibraryType type, bool enableMetadata = true, ComicInfo? comicInfo = null);
 
@@ -174,6 +175,18 @@ public abstract class DefaultParser(IDirectoryService directoryService) : IDefau
         info.MetronId = !string.IsNullOrEmpty(metronId)
             ? long.Parse(metronId)
             : 0L;
+    }
 
+    /// <summary>
+    /// Set the Highest Volume/Chapter numbers for utilization in the rest of the pipeline.
+    /// </summary>
+    /// <remarks>This ensures total counts work, and we avoid rechurning the strings </remarks>
+    /// <param name="info"></param>
+    protected static void FinalizeNumbers(ParserInfo info)
+    {
+        info.HighestChapter = Parser.MaxNumberFromRange(info.Chapters);
+        info.LowestChapter = Parser.MinNumberFromRange(info.Chapters);
+        info.HighestVolume = Parser.MaxNumberFromRange(info.Volumes);
+        info.LowestVolume = Parser.MinNumberFromRange(info.Volumes);
     }
 }

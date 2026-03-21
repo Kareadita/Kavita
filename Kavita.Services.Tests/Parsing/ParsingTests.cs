@@ -360,4 +360,27 @@ public class ParsingTests
     {
         Assert.DoesNotMatch($@"^{BalancedBracket}$", input);
     }
+
+    [Theory]
+    // (완결)
+    [InlineData("나에게만 허둥대는 상사의 이야기 04권 (완결)", true)]
+    [InlineData("나와 그녀의 하룻밤 영화 03권 [1512x] (완결)", true)]
+    [InlineData("데스노트 12권 [1080x] (완결)", true)]
+    [InlineData("데스완노트완결 12권 [1080x]", false)]
+    // (완)
+    [InlineData("불과 달의 노래 276화 (완)", true)]
+    [InlineData("부인함락 52권 (완)", true)]
+    [InlineData("신을 막아라 (완)", true)]
+    // (完)
+    [InlineData("러브크래프트 전집 4권(完)", true)]
+    [InlineData("서단 결정적 순간 2권 (完)", true)]
+    [InlineData("完영업사원 김유빈 150화(完)", true)]
+    // [완결]
+    [InlineData("토지 17권 [완결]", true)]
+    [InlineData("낯선 오후 2권 [완결]", true)]
+    [InlineData("낯선 오후 2권 (완결)", true)]
+    public void HasEndMarkerTests(string input, bool expected)
+    {
+        Assert.Equal(expected, HasEndMarker(input));
+    }
 }

@@ -188,6 +188,6 @@ public static partial class StringExtensions
         }
     }
 
-    [GeneratedRegex(@"^\s*(\d+(?:\.\d+)?)\s*([KMGTPE]?B)\s*$", RegexOptions.IgnoreCase)]
+    [GeneratedRegex(@"^\s*(\d+(?:\.\d+)?)\s*([KMGTPE]?B)\s*$", RegexOptions.IgnoreCase, 500)]
     private static partial Regex HumanReadableBytesRegex();
 }

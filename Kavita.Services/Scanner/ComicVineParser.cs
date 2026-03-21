@@ -19,7 +19,10 @@ public class ComicVineParser(IDirectoryService directoryService) : DefaultParser
     /// </summary>
     /// <param name="filePath"></param>
     /// <param name="rootPath"></param>
+    /// <param name="libraryRoot"></param>
     /// <param name="type"></param>
+    /// <param name="enableMetadata"></param>
+    /// <param name="comicInfo"></param>
     /// <returns></returns>
     public override ParserInfo? Parse(string filePath, string rootPath, string libraryRoot, LibraryType type, bool enableMetadata = true, ComicInfo? comicInfo = null)
     {
@@ -40,7 +43,8 @@ public class ComicVineParser(IDirectoryService directoryService) : DefaultParser
             Series = string.Empty,
             ComicInfo = comicInfo,
             Chapters = Parser.ParseChapter(fileName, type),
-            Volumes = Parser.ParseVolume(fileName, type)
+            Volumes = Parser.ParseVolume(fileName, type),
+            HasEndMarker = Parser.HasEndMarker(fileName)
         };
 
         ParseExternalIdsFromNotesAndWeblinks(info);
@@ -95,7 +99,7 @@ public class ComicVineParser(IDirectoryService directoryService) : DefaultParser
             info.Series = Parser.CleanTitle(directoryName, true);
         }
 
-
+        FinalizeNumbers(info);
         return string.IsNullOrEmpty(info.Series) ? null : info;
     }
 

@@ -8,7 +8,7 @@ namespace Kavita.Services.Scanner;
 
 public class PdfParser(IDirectoryService directoryService) : DefaultParser(directoryService)
 {
-    public override ParserInfo Parse(string filePath, string rootPath, string libraryRoot, LibraryType type, bool enableMetadata = true, ComicInfo comicInfo = null)
+    public override ParserInfo? Parse(string filePath, string rootPath, string libraryRoot, LibraryType type, bool enableMetadata = true, ComicInfo? comicInfo = null)
     {
         var fileName = directoryService.FileSystem.Path.GetFileNameWithoutExtension(filePath);
         var ret = new ParserInfo
@@ -19,7 +19,8 @@ public class PdfParser(IDirectoryService directoryService) : DefaultParser(direc
             FullFilePath = Parser.NormalizePath(filePath),
             Series = string.Empty,
             ComicInfo = comicInfo,
-            Chapters = Parser.ParseChapter(fileName, type)
+            Chapters = Parser.ParseChapter(fileName, type),
+            HasEndMarker = Parser.HasEndMarker(fileName)
         };
 
         if (type == LibraryType.Book)
@@ -119,6 +120,8 @@ public class PdfParser(IDirectoryService directoryService) : DefaultParser(direc
         {
             ret.Volumes = $"{Parser.SpecialVolumeNumber}";
         }
+
+        FinalizeNumbers(ret);
 
         return string.IsNullOrEmpty(ret.Series) ? null : ret;
     }

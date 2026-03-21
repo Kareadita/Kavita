@@ -1,6 +1,5 @@
 using Kavita.Models.Entities;
 using Kavita.Models.Entities.Enums;
-using Kavita.Models.Entities.Interfaces;
 using Kavita.Models.Metadata;
 
 namespace Kavita.Models.Parser;
@@ -113,4 +112,27 @@ public class ParserInfo
     /// Extracted from Notes field, not explicitly part of spec
     /// </summary>
     public long? MangaBakaId { get; set; }
+    /// <summary>
+    /// Has an explicit "End" marker like (완결) which tells Kavita to use that as the Count, assuming no Count defined in ComicInfo.
+    /// </summary>
+    public bool HasEndMarker { get; set; }
+
+
+    // Transformed logic
+    /// <summary>
+    /// Highest Volume from ComicInfo then Parsed
+    /// </summary>
+    public float HighestVolume { get; set; }
+    /// <summary>
+    /// Lowest Volume from ComicInfo then Parsed
+    /// </summary>
+    public float LowestVolume { get; set; }
+    /// <summary>
+    /// Highest Chapter from ComicInfo then Parsed
+    /// </summary>
+    public float HighestChapter { get; set; }
+    /// <summary>
+    /// Lowest Chapter from ComicInfo then Parsed
+    /// </summary>
+    public float LowestChapter { get; set; }
 }
