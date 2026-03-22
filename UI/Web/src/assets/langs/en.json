@@ -2193,7 +2193,7 @@
 
     "browse-cbl-repo-modal": {
         "title": "CBL Repo Browser",
-        "rate-limit-warning": "Kavita is coming close to hitting Rate Limit for Github! You have {{remaining}} calls left.",
+        "rate-limit-warning": "Kavita is coming close to hitting Rate Limit for GitHub! You have {{remaining}} calls left.",
         "rate-limit-resets": "Rate Limit resets {{time}}",
         "breadcrumb-alt-label": "Breadcrumbs",
         "root-alt-label": "Root folder",
