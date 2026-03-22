@@ -10,8 +10,6 @@ using MimeTypes;
 
 namespace Kavita.Server.Controllers;
 
-#nullable enable
-
 [Authorize]
 [ApiController]
 [Route("api/[controller]")]

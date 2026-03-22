@@ -72,7 +72,7 @@ public class CblImportService(IUnitOfWork unitOfWork, ICblGithubService cblGithu
         }
         catch (Exception ex)
         {
-            logger.LogError(ex, "Failed to parse CBL file: {FilePath}", filePath);
+            logger.LogError(ex, "Failed to parse CBL file: {FilePath}", filePath.Sanitize());
             return new CblImportSummaryDto
             {
                 CblName = string.Empty,
