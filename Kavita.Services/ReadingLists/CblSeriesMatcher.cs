@@ -194,12 +194,8 @@ internal static class CblSeriesMatcher
         if (!rulesByName.TryGetValue(normalizedName, out var rules)) return false;
 
         // Try most specific first (volume + number), then less specific
-        var rule = rules.FirstOrDefault(r =>
-                       !string.IsNullOrEmpty(r.CblVolume) && r.CblVolume == item.Volume &&
-                       !string.IsNullOrEmpty(r.CblNumber) && r.CblNumber == item.Number)
-                   ?? rules.FirstOrDefault(r =>
-                       !string.IsNullOrEmpty(r.CblNumber) && r.CblNumber == item.Number &&
-                       string.IsNullOrEmpty(r.CblVolume))
+        var rule = rules.FirstMatchVolumeAndIssueOrDefault(item)
+                   ?? rules.FirstMatchIssueOrDefault(item)
                    ?? rules.FirstOrDefault(r =>
                        string.IsNullOrEmpty(r.CblVolume) && string.IsNullOrEmpty(r.CblNumber));
 
