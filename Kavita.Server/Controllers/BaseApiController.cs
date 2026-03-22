@@ -113,4 +113,30 @@ public class BaseApiController : ControllerBase
             : File(content, contentType);
     }
 
+    /// <summary>
+    /// Ensures there is no malicious path in the fileName before use
+    /// </summary>
+    /// <param name="fileName"></param>
+    /// <returns></returns>
+    protected static bool ValidateFilename(string fileName)
+    {
+        if (string.IsNullOrWhiteSpace(fileName))
+        {
+            return false;
+        }
+
+        if (fileName.Contains("..", StringComparison.Ordinal))
+        {
+            return false;
+        }
+
+        if (fileName.IndexOf(Path.DirectorySeparatorChar) >= 0 ||
+            fileName.IndexOf(Path.AltDirectorySeparatorChar) >= 0)
+        {
+            return false;
+        }
+
+        return true;
+    }
+
 }

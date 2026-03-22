@@ -80,7 +80,7 @@ public class CblGithubService : ICblGithubService
         {
             if (DateTime.UtcNow - cached.FetchedAtUtc < CacheTtl)
             {
-                _logger.LogDebug("Cache hit for CBL repo path: {Path}", normalizedPath);
+                _logger.LogDebug("Cache hit for CBL repo path: {Path}", normalizedPath.Sanitize());
                 return new CblRepoBrowseResultDto
                 {
                     Items = cached.Items,
@@ -88,7 +88,7 @@ public class CblGithubService : ICblGithubService
                 };
             }
 
-            _logger.LogDebug("Cache expired for CBL repo path: {Path}", normalizedPath);
+            _logger.LogDebug("Cache expired for CBL repo path: {Path}", normalizedPath.Sanitize());
         }
 
         var (items, rateLimit) = await FetchDirectoryFromGithub(normalizedPath);
@@ -141,7 +141,7 @@ public class CblGithubService : ICblGithubService
 
     private async Task<(List<CblRepoItemDto> Items, GithubRateLimitDto RateLimit)> FetchDirectoryFromGithub(string path)
     {
-        _logger.LogDebug("Fetching CBL repo directory from GitHub: {Path}", path);
+        _logger.LogDebug("Fetching CBL repo directory from GitHub: {Path}", path.Sanitize());
 
         try
         {

@@ -543,4 +543,5 @@ Kavita.Services.Tests/Test Data/ImageService/**/*_baseline*
 Kavita.Services.Tests/Test Data/ImageService/**/*.html
 Kavita.Services.Tests/Test Data/ScannerService/ScanTests/**/*
 
+
 Kavita.Server/config/appsettings.*.json

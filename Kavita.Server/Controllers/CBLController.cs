@@ -30,7 +30,7 @@ namespace Kavita.Server.Controllers;
 /// </summary>
 public class CblController(IReadingListService readingListService, IDirectoryService directoryService,
     ICblGithubService cblGithubService, DataContext dataContext, ICblImportService cblImporterService,
-    IUnitOfWork unitOfWork, IMapper mapper) : BaseApiController
+    IUnitOfWork unitOfWork, IMapper mapper, ILocalizationService localizationService) : BaseApiController
 {
     /// <summary>
     /// Saves an uploaded CBL file to disk without importing. Returns the saved file info.
@@ -139,6 +139,8 @@ public class CblController(IReadingListService readingListService, IDirectorySer
     [DisallowRole(PolicyConstants.ReadOnlyRole)]
     public async Task<ActionResult<CblImportSummaryDto>> ReValidate([FromBody] CblReValidateRequestDto dto)
     {
+        if (!ValidateFilename(dto.FileName)) return BadRequest("Invalid filename");
+
         var userId = UserId;
         var fullPath = Path.Join(GetCblManagerFolder(userId), dto.FileName);
 
@@ -159,6 +161,8 @@ public class CblController(IReadingListService readingListService, IDirectorySer
     [DisallowRole(PolicyConstants.ReadOnlyRole)]
     public async Task<ActionResult<CblImportSummaryDto>> FinalizeImport([FromBody] CblFinalizeRequestDto dto)
     {
+        if (!ValidateFilename(dto.FileName)) return BadRequest("Invalid filename");
+
         var userId = UserId;
         var fullPath = Path.Join(GetCblManagerFolder(userId), dto.FileName);
 
@@ -240,7 +244,7 @@ public class CblController(IReadingListService readingListService, IDirectorySer
     public async Task<ActionResult<RemapRuleDto>> CreateRemapRule([FromBody] CreateRemapRuleDto dto)
     {
         var series = await unitOfWork.SeriesRepository.GetSeriesByIdAsync(dto.SeriesId, ct: HttpContext.RequestAborted);
-        if (series == null) return BadRequest("Series not found");
+        if (series == null) return BadRequest(await localizationService.Translate(UserId, "series-doesnt-exist"));
 
         var rule = new ReadingListRemapRule
         {
