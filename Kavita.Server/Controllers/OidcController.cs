@@ -6,6 +6,7 @@ using Kavita.Services;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Protocols;
 using Microsoft.IdentityModel.Protocols.OpenIdConnect;
@@ -42,7 +43,10 @@ public class OidcController([FromServices] ConfigurationManager<OpenIdConnectCon
         var res = await Request.HttpContext.AuthenticateAsync(CookieAuthenticationDefaults.AuthenticationScheme);
         if (configurationManager == null || !res.Succeeded || res.Properties == null || string.IsNullOrEmpty(res.Properties.GetTokenValue(OidcService.IdToken)))
         {
-            HttpContext.Response.Cookies.Delete(OidcService.CookieName);
+            HttpContext.Response.Cookies.Delete(OidcService.CookieName, new CookieOptions
+            {
+                Path = Configuration.BaseUrl,
+            });
             return Redirect(Configuration.BaseUrl);
         }
 
@@ -50,7 +54,10 @@ public class OidcController([FromServices] ConfigurationManager<OpenIdConnectCon
         var config = await configurationManager.GetConfigurationAsync();
         if (config == null || string.IsNullOrEmpty(config.EndSessionEndpoint))
         {
-            HttpContext.Response.Cookies.Delete(OidcService.CookieName);
+            HttpContext.Response.Cookies.Delete(OidcService.CookieName, new CookieOptions
+            {
+                Path = Configuration.BaseUrl,
+            });
             return Redirect(Configuration.BaseUrl);
         }
 
