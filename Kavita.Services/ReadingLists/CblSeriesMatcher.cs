@@ -42,22 +42,14 @@ internal static class CblSeriesMatcher
     public static Dictionary<string, (string OriginalName, CblMatchTier Tier)> GenerateAllNameVariants(IList<ParsedCblItem> items)
     {
         var variants = new Dictionary<string, (string, CblMatchTier)>();
-        var uniqueItems = items.DistinctBy(i => i.SeriesName).ToList();
+        var uniqueNames = items.DistinctBy(i => i.SeriesName).ToList();
 
-        foreach (var item in uniqueItems)
+        foreach (var item in uniqueNames)
         {
             var name = item.SeriesName;
-            var volumeNumber = item.Volume;
 
             // Tier 2: Exact normalized
             AddVariants(variants, name, CblMatchTier.ExactName, name);
-
-            // Tier 3: Comic Vine handling: Series (Volume)
-            var comicVineTitle = GetComicNamingPattern(name, volumeNumber);
-            if (!string.IsNullOrEmpty(volumeNumber) && !string.Equals(comicVineTitle, name, StringComparison.OrdinalIgnoreCase))
-            {
-                AddVariants(variants, comicVineTitle, CblMatchTier.ComicVineNaming, name);
-            }
 
             // Tier 4: Article stripped
             var sortTitle = BookSortTitlePrefixHelper.GetSortTitle(name);
@@ -71,6 +63,23 @@ internal static class CblSeriesMatcher
             if (!string.Equals(stripped, name, StringComparison.OrdinalIgnoreCase))
             {
                 AddVariants(variants, stripped, CblMatchTier.ReprintStripped, name);
+            }
+        }
+
+        // Tier 3: Comic Vine handling — distinct by (series, volume) since different
+        // volumes of the same series name produce different naming variants
+        // (e.g. "Batman" vol 2014 -> "Batman (2014)", "Batman" vol 1994 -> "Batman (1994)")
+        var uniqueSeriesVolumes = items
+            .Where(i => !string.IsNullOrEmpty(i.Volume))
+            .DistinctBy(i => (i.SeriesName, i.Volume))
+            .ToList();
+
+        foreach (var item in uniqueSeriesVolumes)
+        {
+            var comicVineTitle = GetComicNamingPattern(item.SeriesName, item.Volume);
+            if (!string.Equals(comicVineTitle, item.SeriesName, StringComparison.OrdinalIgnoreCase))
+            {
+                AddVariants(variants, comicVineTitle, CblMatchTier.ComicVineNaming, item.SeriesName);
             }
         }
 
@@ -240,23 +249,26 @@ internal static class CblSeriesMatcher
             return true;
         }
 
-        // Rule only mapped to series — resolve chapter within the mapped series
+        // Rule only mapped to series — resolve chapter within the mapped series.
+        // If volume/chapter resolution fails, fall through to lower tiers so the
+        // original CBL data can match via name variants (e.g. Comic naming "Series (Volume)").
+        // This prevents false positives where a series-only remap for "Batman" -> "Batman (2014)"
+        // would incorrectly capture a CBL entry with Volume="1994".
         var series = matchedSeries.FirstOrDefault(s => s.Id == rule.SeriesId);
         if (series != null)
         {
-            resolvedResult = ResolveChapter(item, series, CblMatchTier.RemapRule);
+            var resolved = ResolveChapter(item, series, CblMatchTier.RemapRule);
+            if (resolved.Result.Reason is CblImportReason.VolumeMissing or CblImportReason.ChapterMissing)
+            {
+                return false;
+            }
+
+            resolvedResult = resolved;
             return true;
         }
 
-        // Series from the rule wasn't in our pre-fetched data — report as series matched but chapter unresolved
-        resolvedResult = (null, new CblBookResult(item)
-        {
-            Reason = CblImportReason.ChapterMissing,
-            MatchTier = CblMatchTier.RemapRule,
-            SeriesId = rule.SeriesId,
-            MatchedSeriesName = rule.SeriesNameAtMapping ?? string.Empty
-        });
-        return true;
+        // Series from the rule wasn't in our pre-fetched data — fall through to lower tiers
+        return false;
     }
 
     private static bool TryMatchByExternalId(ParsedCblItem item,
@@ -303,11 +315,22 @@ internal static class CblSeriesMatcher
         // Try each tier in order
         foreach (var candidateTier in new[] { CblMatchTier.ExactName, CblMatchTier.ComicVineNaming, CblMatchTier.ArticleStripped, CblMatchTier.ReprintStripped })
         {
-            var variantsForTier = nameVariants
-                .Where(kv => kv.Value.Tier == candidateTier &&
-                             string.Equals(kv.Value.OriginalName, item.SeriesName, StringComparison.OrdinalIgnoreCase))
-                .Select(kv => kv.Key)
-                .ToList();
+            // For ComicVineNaming, use only the variant derived from this item's volume
+            // to avoid cross-matching (e.g. "Batman" vol 1994 matching "Batman (2014)")
+            List<string> variantsForTier;
+            if (candidateTier == CblMatchTier.ComicVineNaming && !string.IsNullOrEmpty(item.Volume))
+            {
+                var comicVineVariant = GetComicNamingPattern(item.SeriesName, item.Volume).ToNormalized();
+                variantsForTier = !string.IsNullOrEmpty(comicVineVariant) ? [comicVineVariant] : [];
+            }
+            else
+            {
+                variantsForTier = nameVariants
+                    .Where(kv => kv.Value.Tier == candidateTier &&
+                                 string.Equals(kv.Value.OriginalName, item.SeriesName, StringComparison.OrdinalIgnoreCase))
+                    .Select(kv => kv.Key)
+                    .ToList();
+            }
 
             foreach (var variant in variantsForTier)
             {

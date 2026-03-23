@@ -1,0 +1,18 @@
+{
+  "libraryName": "Comics",
+  "libraryType": "Comic",
+  "series": [
+    {
+      "name": "Batman (2014)",
+      "volumes": [
+        { "number": "2014", "chapters": ["1", "2", "3"] }
+      ]
+    },
+    {
+      "name": "Batman (1994)",
+      "volumes": [
+        { "number": "1994", "chapters": ["1", "2"] }
+      ]
+    }
+  ]
+}
