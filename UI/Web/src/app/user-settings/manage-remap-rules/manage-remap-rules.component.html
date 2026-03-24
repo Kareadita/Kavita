@@ -33,10 +33,10 @@
               </app-typeahead>
             </div>
             <div class="col-md-3">
-              <button class="btn btn-secondary me-2" (click)="toggleCreateForm()">
+              <button class="btn btn-secondary me-2" (click)="toggleCreateForm()" type="button">
                 {{t('cancel')}}
               </button>
-              <button class="btn btn-primary" [disabled]="!createForm.get('cblSeriesName')?.value?.trim() || !selectedSeries()" (click)="createRule()">
+              <button class="btn btn-primary" type="button" [disabled]="!createForm.get('cblSeriesName')?.value?.trim() || !selectedSeries()" (click)="createRule()">
                 {{t('save')}}
               </button>
             </div>

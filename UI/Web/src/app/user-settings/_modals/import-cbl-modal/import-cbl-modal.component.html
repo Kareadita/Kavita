@@ -208,7 +208,6 @@
                   </button>
                 </div>
               } @else if (row.result.chapterId > 0) {
-                <!-- Read-only display: entity-title as link + pencil edit -->
                 <a [routerLink]="['/library', row.result.libraryId, 'series', row.result.seriesId, 'chapter', row.result.chapterId]"
                    fragment="details-tab"
                    target="_blank">
