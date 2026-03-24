@@ -213,6 +213,9 @@
                    fragment="details-tab"
                    target="_blank">
                   <app-entity-title [libraryType]="row.result.libraryType"
+                                    [prioritizeTitleName]="false"
+                                    [includeChapter]="true"
+                                    [includeVolume]="true"
                                     [entity]="buildChapterStub(row.result)" />
                 </a>
                 <button class="btn btn-sm btn-link p-0 ms-1" (click)="startResolveChapter(row)"
@@ -232,7 +235,7 @@
                   @if (!row.skipped && activeRow() !== row) {
                     <button class="btn btn-sm btn-outline-primary" (click)="startResolve(row)"
                             [attr.aria-label]="t('resolve')">
-                      <i class="fa fa-wrench" aria-hidden="true"></i>
+                      <i class="fa fa-pencil" aria-hidden="true"></i>
                     </button>
                   }
                   <button class="btn btn-sm btn-outline-secondary" (click)="toggleSkip(row)"
