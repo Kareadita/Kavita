@@ -940,4 +940,222 @@ public class CblImportServiceTests : AbstractDbTest
     }
 
     #endregion
+
+    #region Group 9: Volume-Level Remap Rules
+
+    [Fact]
+    public async Task ValidateList_VolumeRemap_MatchesCorrectSeriesForMatchingVolume()
+    {
+        var (unitOfWork, context, _) = await CreateDatabase();
+        using var helper = new CblTestHelper(unitOfWork);
+        var seed = await helper.SeedLibrary("comic-multi-volume-series.json");
+
+        var batman2014Ids = seed.Lookup[("Batman (2014)", "2014", "1")];
+
+        // Volume-only remap: "Batman" vol 2014 -> Batman (2014) series
+        unitOfWork.RemapRuleRepository.Add(new ReadingListRemapRule
+        {
+            NormalizedCblSeriesName = "Batman".ToNormalized(),
+            CblSeriesName = "Batman",
+            CblVolume = "2014",
+            SeriesId = batman2014Ids.SeriesId,
+            SeriesNameAtMapping = "Batman (2014)",
+            AppUserId = seed.User.Id,
+            CreatedUtc = DateTime.UtcNow
+        });
+        await unitOfWork.CommitAsync();
+
+        var cbl = CblFileBuilder.Create("Volume Remap Test")
+            .AddBook("Batman", volume: "2014", number: "1")
+            .Build();
+
+        var filePath = helper.WriteCblToDisk(cbl);
+        var svc = helper.CreateImportService();
+        var summary = await svc.ValidateList(seed.User.Id, filePath, new CblImportOptions());
+
+        Assert.Equal(CblImportResult.Success, summary.Success);
+        Assert.Single(summary.SuccessfulInserts);
+        Assert.Equal(CblMatchTier.RemapRule, summary.SuccessfulInserts.First().MatchTier);
+        Assert.Equal(batman2014Ids.SeriesId, summary.SuccessfulInserts.First().SeriesId);
+    }
+
+    [Fact]
+    public async Task ValidateList_VolumeRemap_FallsThroughForNonMatchingVolume()
+    {
+        var (unitOfWork, context, _) = await CreateDatabase();
+        using var helper = new CblTestHelper(unitOfWork);
+        var seed = await helper.SeedLibrary("comic-multi-volume-series.json");
+
+        var batman2014Ids = seed.Lookup[("Batman (2014)", "2014", "1")];
+        var batman1994Ids = seed.Lookup[("Batman (1994)", "1994", "1")];
+
+        // Volume-only remap: "Batman" vol 2014 -> Batman (2014)
+        unitOfWork.RemapRuleRepository.Add(new ReadingListRemapRule
+        {
+            NormalizedCblSeriesName = "Batman".ToNormalized(),
+            CblSeriesName = "Batman",
+            CblVolume = "2014",
+            SeriesId = batman2014Ids.SeriesId,
+            SeriesNameAtMapping = "Batman (2014)",
+            AppUserId = seed.User.Id,
+            CreatedUtc = DateTime.UtcNow
+        });
+        await unitOfWork.CommitAsync();
+
+        // Request vol 1994 — should NOT match the vol 2014 remap, should fall through
+        var cbl = CblFileBuilder.Create("Volume Remap Fallthrough")
+            .AddBook("Batman", volume: "1994", number: "1")
+            .Build();
+
+        var filePath = helper.WriteCblToDisk(cbl);
+        var svc = helper.CreateImportService();
+        var summary = await svc.ValidateList(seed.User.Id, filePath, new CblImportOptions());
+
+        Assert.Equal(CblImportResult.Success, summary.Success);
+        Assert.Single(summary.SuccessfulInserts);
+        Assert.NotEqual(CblMatchTier.RemapRule, summary.SuccessfulInserts.First().MatchTier);
+        Assert.Equal(batman1994Ids.SeriesId, summary.SuccessfulInserts.First().SeriesId);
+    }
+
+    [Fact]
+    public async Task ValidateList_VolumeRemap_WithTargetVolumeId_ResolvesChaptersInOverrideVolume()
+    {
+        var (unitOfWork, context, _) = await CreateDatabase();
+        using var helper = new CblTestHelper(unitOfWork);
+        var seed = await helper.SeedLibrary("comic-multi-volume-series.json");
+
+        var batman2014Ids = seed.Lookup[("Batman (2014)", "2014", "2")];
+
+        // Volume-only remap with target VolumeId: "Batman" vol 2016 -> Batman (2014) vol 2014
+        unitOfWork.RemapRuleRepository.Add(new ReadingListRemapRule
+        {
+            NormalizedCblSeriesName = "Batman".ToNormalized(),
+            CblSeriesName = "Batman",
+            CblVolume = "2016",
+            SeriesId = batman2014Ids.SeriesId,
+            VolumeId = batman2014Ids.VolumeId,
+            SeriesNameAtMapping = "Batman (2014)",
+            AppUserId = seed.User.Id,
+            CreatedUtc = DateTime.UtcNow
+        });
+        await unitOfWork.CommitAsync();
+
+        var cbl = CblFileBuilder.Create("Volume Override Test")
+            .AddBook("Batman", volume: "2016", number: "2")
+            .Build();
+
+        var filePath = helper.WriteCblToDisk(cbl);
+        var svc = helper.CreateImportService();
+        var summary = await svc.ValidateList(seed.User.Id, filePath, new CblImportOptions());
+
+        Assert.Equal(CblImportResult.Success, summary.Success);
+        Assert.Single(summary.SuccessfulInserts);
+        Assert.Equal(CblMatchTier.RemapRule, summary.SuccessfulInserts.First().MatchTier);
+        Assert.Equal(batman2014Ids.SeriesId, summary.SuccessfulInserts.First().SeriesId);
+        Assert.Equal(batman2014Ids.ChapterId, summary.SuccessfulInserts.First().ChapterId);
+    }
+
+    [Fact]
+    public async Task ValidateList_VolumeAndIssueRemap_TakesPrecedenceOverVolumeOnly()
+    {
+        var (unitOfWork, context, _) = await CreateDatabase();
+        using var helper = new CblTestHelper(unitOfWork);
+        var seed = await helper.SeedLibrary("comic-multi-volume-series.json");
+
+        var batman2014Ch1 = seed.Lookup[("Batman (2014)", "2014", "1")];
+        var batman2014Ch2 = seed.Lookup[("Batman (2014)", "2014", "2")];
+
+        // Volume-only remap (less specific)
+        unitOfWork.RemapRuleRepository.Add(new ReadingListRemapRule
+        {
+            NormalizedCblSeriesName = "Batman".ToNormalized(),
+            CblSeriesName = "Batman",
+            CblVolume = "2014",
+            SeriesId = batman2014Ch1.SeriesId,
+            SeriesNameAtMapping = "Batman (2014)",
+            AppUserId = seed.User.Id,
+            CreatedUtc = DateTime.UtcNow
+        });
+
+        // Volume+issue remap (more specific)
+        unitOfWork.RemapRuleRepository.Add(new ReadingListRemapRule
+        {
+            NormalizedCblSeriesName = "Batman".ToNormalized(),
+            CblSeriesName = "Batman",
+            CblVolume = "2014",
+            CblNumber = "2",
+            SeriesId = batman2014Ch2.SeriesId,
+            VolumeId = batman2014Ch2.VolumeId,
+            ChapterId = batman2014Ch2.ChapterId,
+            SeriesNameAtMapping = "Batman (2014)",
+            AppUserId = seed.User.Id,
+            CreatedUtc = DateTime.UtcNow
+        });
+        await unitOfWork.CommitAsync();
+
+        var cbl = CblFileBuilder.Create("Vol+Issue Precedence Test")
+            .AddBook("Batman", volume: "2014", number: "2")
+            .Build();
+
+        var filePath = helper.WriteCblToDisk(cbl);
+        var svc = helper.CreateImportService();
+        var summary = await svc.ValidateList(seed.User.Id, filePath, new CblImportOptions());
+
+        Assert.Equal(CblImportResult.Success, summary.Success);
+        Assert.Single(summary.SuccessfulInserts);
+        Assert.Equal(CblMatchTier.RemapRule, summary.SuccessfulInserts.First().MatchTier);
+        // Volume+issue should win — specific chapter
+        Assert.Equal(batman2014Ch2.ChapterId, summary.SuccessfulInserts.First().ChapterId);
+    }
+
+    [Fact]
+    public async Task ValidateList_VolumeOnlyRemap_TakesPrecedenceOverSeriesOnly()
+    {
+        var (unitOfWork, context, _) = await CreateDatabase();
+        using var helper = new CblTestHelper(unitOfWork);
+        var seed = await helper.SeedLibrary("comic-multi-volume-series.json");
+
+        var batman2014Ids = seed.Lookup[("Batman (2014)", "2014", "1")];
+        var batman1994Ids = seed.Lookup[("Batman (1994)", "1994", "1")];
+
+        // Series-only remap: "Batman" -> Batman (1994)
+        unitOfWork.RemapRuleRepository.Add(new ReadingListRemapRule
+        {
+            NormalizedCblSeriesName = "Batman".ToNormalized(),
+            CblSeriesName = "Batman",
+            SeriesId = batman1994Ids.SeriesId,
+            SeriesNameAtMapping = "Batman (1994)",
+            AppUserId = seed.User.Id,
+            CreatedUtc = DateTime.UtcNow
+        });
+
+        // Volume-only remap: "Batman" vol 2014 -> Batman (2014)
+        unitOfWork.RemapRuleRepository.Add(new ReadingListRemapRule
+        {
+            NormalizedCblSeriesName = "Batman".ToNormalized(),
+            CblSeriesName = "Batman",
+            CblVolume = "2014",
+            SeriesId = batman2014Ids.SeriesId,
+            SeriesNameAtMapping = "Batman (2014)",
+            AppUserId = seed.User.Id,
+            CreatedUtc = DateTime.UtcNow
+        });
+        await unitOfWork.CommitAsync();
+
+        var cbl = CblFileBuilder.Create("Volume vs Series Precedence")
+            .AddBook("Batman", volume: "2014", number: "1")
+            .Build();
+
+        var filePath = helper.WriteCblToDisk(cbl);
+        var svc = helper.CreateImportService();
+        var summary = await svc.ValidateList(seed.User.Id, filePath, new CblImportOptions());
+
+        Assert.Equal(CblImportResult.Success, summary.Success);
+        Assert.Single(summary.SuccessfulInserts);
+        Assert.Equal(CblMatchTier.RemapRule, summary.SuccessfulInserts.First().MatchTier);
+        // Volume-only should win over series-only
+        Assert.Equal(batman2014Ids.SeriesId, summary.SuccessfulInserts.First().SeriesId);
+    }
+
+    #endregion
 }

@@ -14,22 +14,23 @@
               <i class="fa fa-arrow-right mx-2" aria-hidden="true"></i>
               <span>{{rule.seriesNameAtMapping}}</span>
             </div>
-            @if (rule.cblVolume || rule.cblNumber) {
-              <small class="text-muted">
-                @if (rule.cblVolume) {
-                  {{t('volume-num', {num: rule.cblVolume})}}
-                }
-                @if (rule.cblNumber) {
-                  {{t('issue-num', {num: rule.cblNumber})}}
-                }
-                @if (rule.chapterId) {
-                  <i class="fa fa-arrow-right mx-1" aria-hidden="true"></i>
-                  <app-entity-title [libraryType]="rule.libraryType"
-                                    [prioritizeTitleName]="false"
-                                    [entity]="buildChapterStub(rule)" />
-                }
-              </small>
-            }
+            <small class="text-muted">
+              @if (rule.cblVolume) {
+                {{t('volume-num', {num: rule.cblVolume})}}
+              }
+              @if (rule.cblNumber) {
+                {{t('issue-num', {num: rule.cblNumber})}}
+              }
+              @if (!rule.cblVolume && !rule.cblNumber) {
+                {{t('series-level')}}
+              }
+              @if (rule.chapterId) {
+                <i class="fa fa-arrow-right mx-1" aria-hidden="true"></i>
+                <app-entity-title [libraryType]="rule.libraryType"
+                                  [prioritizeTitleName]="false"
+                                  [entity]="buildChapterStub(rule)" />
+              }
+            </small>
           </div>
           <div class="d-flex align-items-center gap-2">
             @if (rule.isGlobal) {

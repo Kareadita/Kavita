@@ -205,6 +205,7 @@ internal static class CblSeriesMatcher
         // Try most specific first (volume + number), then less specific
         var rule = rules.FirstMatchVolumeAndIssueOrDefault(item)
                    ?? rules.FirstMatchIssueOrDefault(item)
+                   ?? rules.FirstMatchVolumeOrDefault(item)
                    ?? rules.FirstOrDefault(r =>
                        string.IsNullOrEmpty(r.CblVolume) && string.IsNullOrEmpty(r.CblNumber));
 
@@ -247,6 +248,29 @@ internal static class CblSeriesMatcher
                 }
             );
             return true;
+        }
+
+        // Volume-only remap with target VolumeId — resolve chapters within the override volume
+        if (rule is {VolumeId: not null, ChapterId: null})
+        {
+            var volSeries = matchedSeries.FirstOrDefault(s => s.Id == rule.SeriesId);
+            if (volSeries != null)
+            {
+                var targetVolume = volSeries.Volumes?.FirstOrDefault(v => v.Id == rule.VolumeId.Value);
+                if (targetVolume != null)
+                {
+                    var resolved = ResolveChapter(item, volSeries, CblMatchTier.RemapRule, targetVolume);
+                    if (resolved.Result.Reason is CblImportReason.ChapterMissing)
+                    {
+                        return false;
+                    }
+
+                    resolvedResult = resolved;
+                    return true;
+                }
+            }
+
+            return false;
         }
 
         // Rule only mapped to series — resolve chapter within the mapped series.
@@ -399,7 +423,8 @@ internal static class CblSeriesMatcher
         return filtered.Count == 1 ? filtered[0] : null;
     }
 
-    private static (MatchedItem? Match, CblBookResult Result) ResolveChapter(ParsedCblItem item, Series series, CblMatchTier tier)
+    private static (MatchedItem? Match, CblBookResult Result) ResolveChapter(
+        ParsedCblItem item, Series series, CblMatchTier tier, Volume? overrideVolume = null)
     {
         var seriesLibraryType = series.Library?.Type ?? LibraryType.Comic;
 
@@ -421,7 +446,12 @@ internal static class CblSeriesMatcher
         Volume? targetVolume = null;
         var volumeWasRequested = !string.IsNullOrEmpty(item.Volume);
 
-        if (volumeWasRequested)
+        if (overrideVolume != null)
+        {
+            targetVolume = overrideVolume;
+            volumeWasRequested = true;
+        }
+        else if (volumeWasRequested)
         {
             // Try to find by volume name/number
             if (float.TryParse(item.Volume, NumberStyles.Any, CultureInfo.InvariantCulture, out var volNum))

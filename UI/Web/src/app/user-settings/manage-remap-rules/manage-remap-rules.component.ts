@@ -39,6 +39,7 @@ export class ManageRemapRulesComponent implements OnInit {
 
   showCreateForm = signal(false);
   newCblSeriesName = '';
+  newCblVolume = '';
   selectedSeries: SearchResult | null = null;
 
   seriesSettings: TypeaheadSettings<SearchResult>;
@@ -102,13 +103,15 @@ export class ManageRemapRulesComponent implements OnInit {
 
   resetCreateForm() {
     this.newCblSeriesName = '';
+    this.newCblVolume = '';
     this.selectedSeries = null;
   }
 
   createRule() {
     if (!this.newCblSeriesName.trim() || !this.selectedSeries) return;
 
-    this.cblService.createRemapRule(this.newCblSeriesName.trim(), this.selectedSeries.seriesId).subscribe(rule => {
+    const issueDetail = this.newCblVolume.trim() ? { cblVolume: this.newCblVolume.trim() } : undefined;
+    this.cblService.createRemapRule(this.newCblSeriesName.trim(), this.selectedSeries.seriesId, issueDetail).subscribe(rule => {
       this.rules.update(rules => [...rules, rule]);
       this.showCreateForm.set(false);
       this.resetCreateForm();

@@ -16,7 +16,11 @@
             <label class="form-label">{{t('cbl-series-name-label')}}</label>
             <input type="text" class="form-control" [(ngModel)]="newCblSeriesName" [placeholder]="t('cbl-series-name-placeholder')">
           </div>
-          <div class="col-md-5">
+          <div class="col-md-2">
+            <label class="form-label">{{t('cbl-volume-label')}}</label>
+            <input type="text" class="form-control" [(ngModel)]="newCblVolume" [placeholder]="t('cbl-volume-placeholder')">
+          </div>
+          <div class="col-md-3">
             <label class="form-label">{{t('kavita-series-label')}}</label>
             <app-typeahead [settings]="seriesSettings" (selectedData)="onSeriesSelected($event)" id="remap-series">
               <ng-template #optionItem let-item let-position="idx" let-value="value">
@@ -135,15 +139,14 @@
               <div class="text-muted small">{{t('maps-to-col')}}</div>
               <div>{{item.seriesNameAtMapping}}</div>
             </div>
-            @if (item.cblVolume || item.cblNumber) {
-              <div class="col-12">
-                <div class="text-muted small">{{t('vol-issue-col')}}</div>
-                <div>
-                  @if (item.cblVolume) { Vol. {{item.cblVolume}} }
-                  @if (item.cblNumber) { #{{item.cblNumber}} }
-                </div>
+            <div class="col-12">
+              <div class="text-muted small">{{t('vol-issue-col')}}</div>
+              <div>
+                @if (item.cblVolume) { Vol. {{item.cblVolume}} }
+                @if (item.cblNumber) { #{{item.cblNumber}} }
+                @if (!item.cblVolume && !item.cblNumber) { {{t('series-level')}} }
               </div>
-            }
+            </div>
           </div>
         </div>
       </div>
@@ -248,6 +251,14 @@
             <div class="col-12">
               <div class="text-muted small">{{t('maps-to-col')}}</div>
               <div>{{item.seriesNameAtMapping}}</div>
+            </div>
+            <div class="col-12">
+              <div class="text-muted small">{{t('vol-issue-col')}}</div>
+              <div>
+                @if (item.cblVolume) { Vol. {{item.cblVolume}} }
+                @if (item.cblNumber) { #{{item.cblNumber}} }
+                @if (!item.cblVolume && !item.cblNumber) { {{t('series-level')}} }
+              </div>
             </div>
           </div>
         </div>

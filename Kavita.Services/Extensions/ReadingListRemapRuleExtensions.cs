@@ -21,7 +21,10 @@ public static class ReadingListRemapRuleExtensions
             string.IsNullOrEmpty(r.CblVolume));
     }
 
-
-
-
+    public static ReadingListRemapRule? FirstMatchVolumeOrDefault(this List<ReadingListRemapRule> rules, ParsedCblItem item)
+    {
+        return rules.FirstOrDefault(r =>
+            !string.IsNullOrEmpty(r.CblVolume) && r.CblVolume == item.Volume &&
+            string.IsNullOrEmpty(r.CblNumber));
+    }
 }
