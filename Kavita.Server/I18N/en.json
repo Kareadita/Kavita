@@ -229,10 +229,16 @@
 
 
     "email.auth-key-expired.subject": "Kavita - One or more Auth Keys has expired!",
-    "email.auth-key-expired.preheader": "Kavita - One or more Auth Keys has expired!",
     "email.auth-key-expired.header": "One or more Auth Keys Expired!",
     "email.auth-key-expired.description": "You will no longer be able to authenticate until you rotate the key.",
     "email.auth-key-expired.rotate-cta": "ROTATE",
-    "email.auth-key-expired.fallback-link-label": "If the button above does not work, please find the link here:"
+    "email.auth-key-expired.fallback-link-label": "If the button above does not work, please find the link here:",
+
+    "email.auth-key-expiring-soon.subject": "Kavita - You have Auth Keys expiring soon!",
+    "email.auth-key-expiring-soon.rotate-cta": "ROTATE",
+    "email.auth-key-expiring-soon.fallback-link-label": "If the button above does not work, please find the link here:",
+    "email.auth-key-expiring-fragment.name-header": "Name",
+    "email.auth-key-expiring-fragment.expires-header": "Expires (Days)"
+
 
 }

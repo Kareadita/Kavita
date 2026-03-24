@@ -16,6 +16,7 @@ using Kavita.Common.Extensions;
 using Kavita.Models.DTOs.Email;
 using Kavita.Models.Entities;
 using Kavita.Models.Entities.Enums;
+using Kavita.Models.Entities.Enums.User;
 using Kavita.Models.Entities.User;
 using MailKit.Security;
 using Microsoft.AspNetCore.Http;
@@ -95,7 +96,15 @@ public class EmailService(
         }
 
         // DEBUG CODE
-        await SendAuthKeyExpiredEmail(defaultAdmin.Id, []);
+        await SendAuthKeyExpiringSoonEmail(defaultAdmin.Id, [
+            new AppUserAuthKey()
+            {
+                Name = "test",
+                Provider = AuthKeyProvider.User,
+                Key = "123abc",
+                ExpiresAtUtc = DateTime.UtcNow.AddDays(7)
+            }
+        ]);
 
         var placeholders = new List<KeyValuePair<string, string>>
         {
@@ -228,16 +237,18 @@ public class EmailService(
             new ("{{Link}}", $"{settings.HostName}/settings#account" ),
         };
 
+        var subjectText = await localizationService.Translate(userId, "email.auth-key-expiring-soon.subject");
+        var subject = UpdatePlaceHolders(subjectText, placeholders);
+
+
+
         var emailOptions = new EmailOptionsDto()
         {
-            Subject = UpdatePlaceHolders("Kavita - Your {{Provider}} token will expire soon!", placeholders),
+            Subject = subject,
+            Preheader = subject,
             Template = TokenExpiringSoonTemplate,
             Body = UpdatePlaceHolders(await GetEmailBody(TokenExpiringSoonTemplate), placeholders),
-            Preheader = UpdatePlaceHolders("Kavita - Your {{Provider}} token will expire soon!", placeholders),
-            ToEmails = new List<string>()
-            {
-                user.Email
-            }
+            ToEmails = [user.Email!]
         };
 
         await SendEmail(emailOptions);
@@ -251,28 +262,18 @@ public class EmailService(
         var settings = await unitOfWork.SettingsRepository.GetSettingsDtoAsync();
         if (user == null || !IsValidEmail(user.Email) || !settings.IsEmailSetup()) return false;
 
-        var d = keys.Select(k => new List<KeyValuePair<string, string>>()
+        var perItemData = keys.Select(k => new List<KeyValuePair<string, string>>()
         {
             new("{{Name}}", k.Name),
         });
 
-        var placeholders = new List<KeyValuePair<string, string>>
-        {
-            new ("{{AuthKeyFragment}}", await BuildFragment(AuthKeyExpiredFragment, d)),
-            new ("{{Link}}", $"{settings.HostName}/settings#account"),
-        };
-
-        var body = UpdatePlaceHolders(await GetEmailBody(AuthKeyExpiredTemplate), placeholders);
-        body = await ResolveLocalizationKeys(body, "auth-key-expired", userId, placeholders);
-
-        var emailOptions = new EmailOptionsDto()
-        {
-            Subject = await localizationService.Translate(userId, "email.auth-key-expired.subject"),
-            Preheader = await localizationService.Translate(userId, "email.auth-key-expired.preheader"),
-            Template = AuthKeyExpiredTemplate,
-            Body = body,
-            ToEmails = [user.Email!]
-        };
+        var emailOptions = await CreateEmail()
+            .ForTemplate(AuthKeyExpiredTemplate)
+            .WithLocalization(userId, "auth-key-expired")
+            .WithPlaceholder("{{Link}}", $"{settings.HostName}/settings#account")
+            .WithFragment("{{AuthKeyFragment}}", AuthKeyExpiredFragment, perItemData)
+            .To(user.Email!)
+            .Build();
 
         await SendEmail(emailOptions);
 
@@ -286,31 +287,21 @@ public class EmailService(
         var settings = await unitOfWork.SettingsRepository.GetSettingsDtoAsync();
         if (user == null || !IsValidEmail(user.Email) || !settings.IsEmailSetup()) return false;
 
-        var d = keys.Select(k => new List<KeyValuePair<string, string>>()
+        var perItemData = keys.Select(k => new List<KeyValuePair<string, string>>()
         {
             new("{{Name}}", k.Name),
-            new("{{DaysLeft}}", (k.ExpiresAtUtc.Value - DateTime.UtcNow).Days.ToString())
+            new("{{DaysLeft}}", (k.ExpiresAtUtc.Value - DateTime.UtcNow).Days.ToString()),
+
         });
 
-
-        var placeholders = new List<KeyValuePair<string, string>>
-        {
-            new ("{{UserName}}", user.UserName!),
-            new ("{{AuthKeyFragment}}", await BuildFragment(AuthKeyExpiringFragment, d)),
-            new ("{{Link}}", $"{settings.HostName}/settings#clients" ),
-        };
-
-        var emailOptions = new EmailOptionsDto()
-        {
-            Subject = "Kavita - One or more Auth Keys will expire soon!",
-            Template = AuthKeyExpiringSoonTemplate,
-            Body = UpdatePlaceHolders(await GetEmailBody(AuthKeyExpiringSoonTemplate), placeholders),
-            Preheader = "Kavita - One or more Auth Keys will expire soon!",
-            ToEmails = new List<string>()
-            {
-                user.Email
-            }
-        };
+        var emailOptions = await CreateEmail()
+            .ForTemplate(AuthKeyExpiringSoonTemplate)
+            .WithLocalization(userId, "auth-key-expiring-soon")
+            .WithPlaceholder("{{Link}}", $"{settings.HostName}/settings#clients")
+            .WithFragment("{{AuthKeyFragment}}", AuthKeyExpiringFragment, perItemData,
+                fragmentLocalizationScope: "auth-key-expiring-fragment")
+            .To(user.Email!)
+            .Build();
 
         await SendEmail(emailOptions);
 
@@ -611,5 +602,141 @@ public class EmailService(
         }
 
         return UpdatePlaceHolders(body, placeholders);
+    }
+
+    private Task<string> TranslateKey(int userId, string key) => localizationService.Translate(userId, key);
+
+    private EmailBuilder CreateEmail() => new EmailBuilder(this);
+
+    private class EmailBuilder
+    {
+        private readonly EmailService _service;
+        private string? _templateName;
+        private int? _userId;
+        private string? _keyScope;
+        private string? _manualSubject;
+        private string? _manualPreheader;
+        private readonly List<KeyValuePair<string, string>> _placeholders = [];
+        private readonly List<FragmentEntry> _fragments = [];
+        private readonly List<string> _toEmails = [];
+        private readonly List<string> _attachments = [];
+
+        private record FragmentEntry(
+            string PlaceholderKey,
+            string FragmentTemplate,
+            IEnumerable<IList<KeyValuePair<string, string>>> PerItemPlaceholders,
+            string? LocalizationScope);
+
+        public EmailBuilder(EmailService service) => _service = service;
+
+        public EmailBuilder ForTemplate(string templateName)
+        {
+            _templateName = templateName;
+            return this;
+        }
+
+        public EmailBuilder WithLocalization(int userId, string keyScope)
+        {
+            _userId = userId;
+            _keyScope = keyScope;
+            return this;
+        }
+
+        public EmailBuilder WithSubject(string subject)
+        {
+            _manualSubject = subject;
+            return this;
+        }
+
+        public EmailBuilder WithPreheader(string preheader)
+        {
+            _manualPreheader = preheader;
+            return this;
+        }
+
+        public EmailBuilder WithPlaceholder(string key, string value)
+        {
+            _placeholders.Add(new KeyValuePair<string, string>(key, value));
+            return this;
+        }
+
+        public EmailBuilder WithFragment(string placeholderKey, string fragmentTemplate,
+            IEnumerable<IList<KeyValuePair<string, string>>> perItemPlaceholders,
+            string? fragmentLocalizationScope = null)
+        {
+            _fragments.Add(new FragmentEntry(placeholderKey, fragmentTemplate, perItemPlaceholders, fragmentLocalizationScope));
+            return this;
+        }
+
+        public EmailBuilder To(params string[] emails)
+        {
+            _toEmails.AddRange(emails);
+            return this;
+        }
+
+        public EmailBuilder WithAttachments(params string[] filePaths)
+        {
+            _attachments.AddRange(filePaths);
+            return this;
+        }
+
+        public async Task<EmailOptionsDto> Build()
+        {
+            // 1. Build fragments: load fragment template, replace per-item placeholders, concatenate.
+            //    Resolve localization using fragmentLocalizationScope if set, otherwise fall back to main keyScope.
+            //    Then second-pass placeholders.
+            foreach (var fragment in _fragments)
+            {
+                var fragmentHtml = await _service.BuildFragment(fragment.FragmentTemplate, fragment.PerItemPlaceholders);
+
+                var fragmentScope = fragment.LocalizationScope ?? _keyScope;
+                if (fragmentScope != null && _userId.HasValue)
+                {
+                    fragmentHtml = await _service.ResolveLocalizationKeys(fragmentHtml, fragmentScope, _userId.Value, _placeholders);
+                }
+
+                // 2. Inject fragment results as additional placeholders
+                _placeholders.Add(new KeyValuePair<string, string>(fragment.PlaceholderKey, fragmentHtml));
+            }
+
+            // 3. Load main template and first-pass placeholder replacement
+            var body = UpdatePlaceHolders(await _service.GetEmailBody(_templateName!), _placeholders);
+
+            // 4. Resolve body localization: {{email.{scope}.*}} regex → translate → second-pass placeholders
+            if (_keyScope != null && _userId.HasValue)
+            {
+                body = await _service.ResolveLocalizationKeys(body, _keyScope, _userId.Value, _placeholders);
+            }
+
+            // 5. Resolve subject/preheader: translate or use manual, then apply placeholder replacement
+            string subject;
+            string preheader;
+            if (_keyScope != null && _userId.HasValue)
+            {
+                subject = _manualSubject
+                    ?? await _service.TranslateKey(_userId.Value, $"email.{_keyScope}.subject");
+                preheader = _manualPreheader
+                    ?? await _service.TranslateKey(_userId.Value, $"email.{_keyScope}.preheader");
+            }
+            else
+            {
+                subject = _manualSubject ?? throw new InvalidOperationException("Subject is required when localization is not configured");
+                preheader = _manualPreheader ?? subject;
+            }
+
+            subject = UpdatePlaceHolders(subject, _placeholders);
+            preheader = UpdatePlaceHolders(preheader, _placeholders);
+
+
+            return new EmailOptionsDto
+            {
+                Subject = subject,
+                Preheader = preheader,
+                Template = _templateName!,
+                Body = body,
+                ToEmails = _toEmails,
+                Attachments = _attachments.Count > 0 ? _attachments : null
+            };
+        }
     }
 }
