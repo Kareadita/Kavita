@@ -128,6 +128,7 @@ public class DeviceService(
 
         var success = await emailService.SendFilesToEmail(new SendToDto()
         {
+            UserId = device.AppUserId,
             DestinationEmail = device.EmailAddress!,
             FilePaths = files.Select(m => m.FilePath)
         });

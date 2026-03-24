@@ -106,24 +106,14 @@ public class EmailService(
             }
         ]);
 
-        var placeholders = new List<KeyValuePair<string, string>>
-        {
-            new ("{{Host}}", settings.HostName),
-        };
-
         try
         {
-            var emailOptions = new EmailOptionsDto()
-            {
-                Subject = "Kavita - Email Test",
-                Template = EmailTestTemplate,
-                Body = UpdatePlaceHolders(await GetEmailBody(EmailTestTemplate), placeholders),
-                Preheader = "Kavita - Email Test",
-                ToEmails = new List<string>()
-                {
-                    adminEmail
-                },
-            };
+            var emailOptions = await CreateEmail()
+                .ForTemplate(EmailTestTemplate)
+                .WithLocalization(defaultAdmin.Id, "email-test")
+                .WithPlaceholder("{{Host}}", settings.HostName)
+                .To(adminEmail)
+                .Build();
 
             await SendEmail(emailOptions);
             result.Successful = true;
@@ -143,23 +133,13 @@ public class EmailService(
     /// <param name="data"></param>
     public async Task SendEmailChangeEmail(ConfirmationEmailDto data)
     {
-        var placeholders = new List<KeyValuePair<string, string>>
-        {
-            new ("{{InvitingUser}}", data.InvitingUser),
-            new ("{{Link}}", data.ServerConfirmationLink)
-        };
-
-        var emailOptions = new EmailOptionsDto()
-        {
-            Subject = UpdatePlaceHolders("Your email has been changed on {{InvitingUser}}'s Server", placeholders),
-            Template = EmailChangeTemplate,
-            Body = UpdatePlaceHolders(await GetEmailBody(EmailChangeTemplate), placeholders),
-            Preheader = UpdatePlaceHolders("Your email has been changed on {{InvitingUser}}'s Server", placeholders),
-            ToEmails = new List<string>()
-            {
-                data.EmailAddress
-            }
-        };
+        var emailOptions = await CreateEmail()
+            .ForTemplate(EmailChangeTemplate)
+            .WithLocalization(data.EmailUserId, "email-change")
+            .WithPlaceholder("{{InvitingUser}}", data.InvitingUser)
+            .WithPlaceholder("{{Link}}", data.ServerConfirmationLink)
+            .To(data.EmailAddress)
+            .Build();
 
         await SendEmail(emailOptions);
     }
@@ -200,24 +180,14 @@ public class EmailService(
         var settings = await unitOfWork.SettingsRepository.GetSettingsDtoAsync();
         if (user == null || !IsValidEmail(user.Email) || !settings.IsEmailSetup()) return false;
 
-        var placeholders = new List<KeyValuePair<string, string>>
-        {
-            new ("{{UserName}}", user.UserName!),
-            new ("{{Provider}}", provider.ToDescription()),
-            new ("{{Link}}", $"{settings.HostName}/settings#account" ),
-        };
-
-        var emailOptions = new EmailOptionsDto()
-        {
-            Subject = UpdatePlaceHolders("Kavita - Your {{Provider}} token has expired and scrobbling events have stopped", placeholders),
-            Template = TokenExpirationTemplate,
-            Body = UpdatePlaceHolders(await GetEmailBody(TokenExpirationTemplate), placeholders),
-            Preheader = UpdatePlaceHolders("Kavita - Your {{Provider}} token has expired and scrobbling events have stopped", placeholders),
-            ToEmails = new List<string>()
-            {
-                user.Email
-            }
-        };
+        var emailOptions = await CreateEmail()
+            .ForTemplate(TokenExpirationTemplate)
+            .WithLocalization(userId, "token-expired")
+            .WithPlaceholder("{{UserName}}", user.UserName!)
+            .WithPlaceholder("{{Provider}}", provider.ToDescription())
+            .WithPlaceholder("{{Link}}", $"{settings.HostName}/settings#account")
+            .To(user.Email!)
+            .Build();
 
         await SendEmail(emailOptions);
 
@@ -230,26 +200,14 @@ public class EmailService(
         var settings = await unitOfWork.SettingsRepository.GetSettingsDtoAsync();
         if (user == null || !IsValidEmail(user.Email) || !settings.IsEmailSetup()) return false;
 
-        var placeholders = new List<KeyValuePair<string, string>>
-        {
-            new ("{{UserName}}", user.UserName!),
-            new ("{{Provider}}", provider.ToDescription()),
-            new ("{{Link}}", $"{settings.HostName}/settings#account" ),
-        };
-
-        var subjectText = await localizationService.Translate(userId, "email.auth-key-expiring-soon.subject");
-        var subject = UpdatePlaceHolders(subjectText, placeholders);
-
-
-
-        var emailOptions = new EmailOptionsDto()
-        {
-            Subject = subject,
-            Preheader = subject,
-            Template = TokenExpiringSoonTemplate,
-            Body = UpdatePlaceHolders(await GetEmailBody(TokenExpiringSoonTemplate), placeholders),
-            ToEmails = [user.Email!]
-        };
+        var emailOptions = await CreateEmail()
+            .ForTemplate(TokenExpiringSoonTemplate)
+            .WithLocalization(userId, "token-expiring-soon")
+            .WithPlaceholder("{{UserName}}", user.UserName!)
+            .WithPlaceholder("{{Provider}}", provider.ToDescription())
+            .WithPlaceholder("{{Link}}", $"{settings.HostName}/settings#account")
+            .To(user.Email!)
+            .Build();
 
         await SendEmail(emailOptions);
 
@@ -318,24 +276,14 @@ public class EmailService(
         var settings = await unitOfWork.SettingsRepository.GetSettingsDtoAsync();
         if (!settings.IsEmailSetup()) return false;
 
-        var placeholders = new List<KeyValuePair<string, string>>
-        {
-            new ("{{InstallId}}", HashUtil.ServerToken()),
-            new ("{{Build}}", BuildInfo.Version.ToString()),
-        };
-
-        var emailOptions = new EmailOptionsDto()
-        {
-            Subject = UpdatePlaceHolders("Kavita+: A User needs manual registration", placeholders),
-            Template = KavitaPlusDebugTemplate,
-            Body = UpdatePlaceHolders(await GetEmailBody(KavitaPlusDebugTemplate), placeholders),
-            Preheader = UpdatePlaceHolders("Kavita+: A User needs manual registration", placeholders),
-            ToEmails =
-            [
-                // My kavita email
-                Encoding.UTF8.GetString(Convert.FromBase64String("a2F2aXRhcmVhZGVyQGdtYWlsLmNvbQ=="))
-            ]
-        };
+        var emailOptions = await CreateEmail()
+            .ForTemplate(KavitaPlusDebugTemplate)
+            .WithSubject("Kavita+: A User needs manual registration")
+            .WithPreheader("Kavita+: A User needs manual registration")
+            .WithPlaceholder("{{InstallId}}", HashUtil.ServerToken())
+            .WithPlaceholder("{{Build}}", BuildInfo.Version.ToString())
+            .To(Encoding.UTF8.GetString(Convert.FromBase64String("a2F2aXRhcmVhZGVyQGdtYWlsLmNvbQ==")))
+            .Build();
 
         await SendEmail(emailOptions);
 
@@ -348,23 +296,13 @@ public class EmailService(
     /// <param name="data"></param>
     public async Task SendInviteEmail(ConfirmationEmailDto data)
     {
-        var placeholders = new List<KeyValuePair<string, string>>
-        {
-            new ("{{InvitingUser}}", data.InvitingUser),
-            new ("{{Link}}", data.ServerConfirmationLink)
-        };
-
-        var emailOptions = new EmailOptionsDto()
-        {
-            Subject = UpdatePlaceHolders("You've been invited to join {{InvitingUser}}'s Kavita Server", placeholders),
-            Template = EmailConfirmTemplate,
-            Body = UpdatePlaceHolders(await GetEmailBody(EmailConfirmTemplate), placeholders),
-            Preheader = UpdatePlaceHolders("You've been invited to join {{InvitingUser}}'s Kavita Server", placeholders),
-            ToEmails = new List<string>()
-            {
-                data.EmailAddress
-            }
-        };
+        var emailOptions = await CreateEmail()
+            .ForTemplate(EmailConfirmTemplate)
+            .WithLocalization(data.EmailUserId, "email-confirm")
+            .WithPlaceholder("{{InvitingUser}}", data.InvitingUser)
+            .WithPlaceholder("{{Link}}", data.ServerConfirmationLink)
+            .To(data.EmailAddress)
+            .Build();
 
         await SendEmail(emailOptions);
     }
@@ -372,22 +310,12 @@ public class EmailService(
 
     public async Task<bool> SendForgotPasswordEmail(PasswordResetEmailDto dto)
     {
-        var placeholders = new List<KeyValuePair<string, string>>
-        {
-            new ("{{Link}}", dto.ServerConfirmationLink),
-        };
-
-        var emailOptions = new EmailOptionsDto()
-        {
-            Subject = UpdatePlaceHolders("A password reset has been requested", placeholders),
-            Template = EmailPasswordResetTemplate,
-            Body = UpdatePlaceHolders(await GetEmailBody(EmailPasswordResetTemplate), placeholders),
-            Preheader = "Email confirmation is required for continued access. Click the button to confirm your email.",
-            ToEmails =
-            [
-                dto.EmailAddress
-            ]
-        };
+        var emailOptions = await CreateEmail()
+            .ForTemplate(EmailPasswordResetTemplate)
+            .WithLocalization(dto.EmailUserId, "password-reset")
+            .WithPlaceholder("{{Link}}", dto.ServerConfirmationLink)
+            .To(dto.EmailAddress)
+            .Build();
 
         await SendEmail(emailOptions);
         return true;
@@ -398,15 +326,12 @@ public class EmailService(
         var serverSetting = await unitOfWork.SettingsRepository.GetSettingsDtoAsync();
         if (!serverSetting.IsEmailSetupForSendToDevice()) return false;
 
-        var emailOptions = new EmailOptionsDto()
-        {
-            Subject = "Send file from Kavita",
-            Preheader = "File(s) sent from Kavita",
-            ToEmails = [data.DestinationEmail],
-            Template = SendToDeviceTemplate,
-            Body = await GetEmailBody(SendToDeviceTemplate),
-            Attachments = data.FilePaths.ToList()
-        };
+        var emailOptions = await CreateEmail()
+            .ForTemplate(SendToDeviceTemplate)
+            .WithLocalization(data.UserId, "send-to-device")
+            .To(data.DestinationEmail)
+            .WithAttachments(data.FilePaths.ToArray())
+            .Build();
 
         await SendEmail(emailOptions);
         return true;
