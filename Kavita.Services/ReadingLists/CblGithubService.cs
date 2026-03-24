@@ -243,7 +243,11 @@ public class CblGithubService : ICblGithubService
 
     private static string BuildApiUrl(string path)
     {
-        return string.IsNullOrEmpty(path) ? ApiBase : $"{ApiBase}/{path}";
+        if (string.IsNullOrEmpty(path)) return ApiBase;
+
+        var encodedSegments = path.Split('/')
+            .Select(Uri.EscapeDataString);
+        return $"{ApiBase}/{string.Join("/", encodedSegments)}";
     }
 
     private static string NormalizePath(string path)
