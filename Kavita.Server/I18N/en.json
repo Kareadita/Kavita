@@ -233,6 +233,6 @@
     "email.auth-key-expired.header": "One or more Auth Keys Expired!",
     "email.auth-key-expired.description": "You will no longer be able to authenticate until you rotate the key.",
     "email.auth-key-expired.rotate-cta": "ROTATE",
-    "email.auth-key-expired.fallback-link-label": "If the button above does not work, please find the link here: {0}"
+    "email.auth-key-expired.fallback-link-label": "If the button above does not work, please find the link here:"
 
 }

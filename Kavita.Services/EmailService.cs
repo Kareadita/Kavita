@@ -5,6 +5,7 @@ using System.IO;
 using System.Linq;
 using System.Net;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Web;
 using Kavita.API.Database;
@@ -93,6 +94,7 @@ public class EmailService(
             return result;
         }
 
+        // DEBUG CODE
         await SendAuthKeyExpiredEmail(defaultAdmin.Id, []);
 
         var placeholders = new List<KeyValuePair<string, string>>
@@ -256,28 +258,20 @@ public class EmailService(
 
         var placeholders = new List<KeyValuePair<string, string>>
         {
-            new ("{{UserName}}", user.UserName!),
             new ("{{AuthKeyFragment}}", await BuildFragment(AuthKeyExpiredFragment, d)),
             new ("{{Link}}", $"{settings.HostName}/settings#account"),
-
-            new ("{{email.auth-key-expired.header}}", await localizationService.Translate(userId, "email.auth-key-expired.header")),
-            new ("{{email.auth-key-expired.description}}", await localizationService.Translate(userId, "email.auth-key-expired.description")),
-            new ("{{email.auth-key-expired.rotate-cta}}", await localizationService.Translate(userId, "email.auth-key-expired.rotate-cta")),
-            new ("{{email.auth-key-expired.fallback-link-label}}", await localizationService.Translate(userId, "email.auth-key-expired.fallback-link-label")),
         };
 
-
+        var body = UpdatePlaceHolders(await GetEmailBody(AuthKeyExpiredTemplate), placeholders);
+        body = await ResolveLocalizationKeys(body, "auth-key-expired", userId, placeholders);
 
         var emailOptions = new EmailOptionsDto()
         {
             Subject = await localizationService.Translate(userId, "email.auth-key-expired.subject"),
-            Template = AuthKeyExpiredTemplate,
-            Body = UpdatePlaceHolders(await GetEmailBody(AuthKeyExpiredTemplate), placeholders),
             Preheader = await localizationService.Translate(userId, "email.auth-key-expired.preheader"),
-            ToEmails = new List<string>()
-            {
-                user.Email
-            }
+            Template = AuthKeyExpiredTemplate,
+            Body = body,
+            ToEmails = [user.Email!]
         };
 
         await SendEmail(emailOptions);
@@ -593,5 +587,29 @@ public class EmailService(
         }
 
         return builder.ToString();
+    }
+
+    /// <summary>
+    /// Find all occurrences of {{email.{templateKey}.*}} and resolve them via the user's locale. Patches the email body with data
+    /// </summary>
+    /// <param name="body"></param>
+    /// <param name="templateKey">The template segment, e.g. "auth-key-expired"</param>
+    /// <param name="userId"></param>
+    /// <param name="placeholders">Placeholders that may need transformation after localization</param>
+    /// <returns></returns>
+    private async Task<string> ResolveLocalizationKeys(string body, string templateKey, int userId,
+        List<KeyValuePair<string, string>> placeholders)
+    {
+        var regex = new Regex(@"\{\{(email\." + Regex.Escape(templateKey) + @"\.[^}]+)\}\}");
+        var matches = regex.Matches(body);
+
+        foreach (Match match in matches)
+        {
+            var key = match.Groups[1].Value;
+            var translated = await localizationService.Translate(userId, key);
+            body = body.Replace(match.Value, translated);
+        }
+
+        return UpdatePlaceHolders(body, placeholders);
     }
 }
