@@ -11,35 +11,37 @@
     <div class="card mb-3 mt-5">
       <div class="card-body">
         <h5 class="card-title">{{t('new-rule-title')}}</h5>
-        <div class="row g-3 align-items-end">
-          <div class="col-md-4">
-            <label class="form-label">{{t('cbl-series-name-label')}}</label>
-            <input type="text" class="form-control" [(ngModel)]="newCblSeriesName" [placeholder]="t('cbl-series-name-placeholder')">
+        <form [formGroup]="createForm">
+          <div class="row g-3 align-items-end">
+            <div class="col-md-4">
+              <label class="form-label">{{t('cbl-series-name-label')}}</label>
+              <input type="text" class="form-control" formControlName="cblSeriesName" [placeholder]="t('cbl-series-name-placeholder')">
+            </div>
+            <div class="col-md-2">
+              <label class="form-label">{{t('cbl-volume-label')}}</label>
+              <input type="text" class="form-control" formControlName="cblVolume" [placeholder]="t('cbl-volume-placeholder')">
+            </div>
+            <div class="col-md-3">
+              <label class="form-label">{{t('kavita-series-label')}}</label>
+              <app-typeahead [settings]="seriesSettings" (selectedData)="onSeriesSelected($event)" id="remap-series">
+                <ng-template #optionItem let-item let-position="idx" let-value="value">
+                  {{item.name}}
+                </ng-template>
+                <ng-template #badgeItem let-item let-position="idx">
+                  {{item.name}}
+                </ng-template>
+              </app-typeahead>
+            </div>
+            <div class="col-md-3">
+              <button class="btn btn-secondary me-2" (click)="toggleCreateForm()">
+                {{t('cancel')}}
+              </button>
+              <button class="btn btn-primary" [disabled]="!createForm.get('cblSeriesName')?.value?.trim() || !selectedSeries()" (click)="createRule()">
+                {{t('save')}}
+              </button>
+            </div>
           </div>
-          <div class="col-md-2">
-            <label class="form-label">{{t('cbl-volume-label')}}</label>
-            <input type="text" class="form-control" [(ngModel)]="newCblVolume" [placeholder]="t('cbl-volume-placeholder')">
-          </div>
-          <div class="col-md-3">
-            <label class="form-label">{{t('kavita-series-label')}}</label>
-            <app-typeahead [settings]="seriesSettings" (selectedData)="onSeriesSelected($event)" id="remap-series">
-              <ng-template #optionItem let-item let-position="idx" let-value="value">
-                {{item.name}}
-              </ng-template>
-              <ng-template #badgeItem let-item let-position="idx">
-                {{item.name}}
-              </ng-template>
-            </app-typeahead>
-          </div>
-          <div class="col-md-3">
-            <button class="btn btn-primary me-2" [disabled]="!newCblSeriesName.trim() || !selectedSeries" (click)="createRule()">
-              {{t('save')}}
-            </button>
-            <button class="btn btn-outline-secondary" (click)="toggleCreateForm()">
-              {{t('cancel')}}
-            </button>
-          </div>
-        </div>
+        </form>
       </div>
     </div>
   }

@@ -13,7 +13,7 @@ import {translate, TranslocoDirective} from '@jsverse/transloco';
 import {NgxDatatableModule} from '@siemens/ngx-datatable';
 import {ResponsiveTableComponent} from '../../shared/_components/responsive-table/responsive-table.component';
 import {TypeaheadComponent} from '../../typeahead/_components/typeahead.component';
-import {FormsModule} from '@angular/forms';
+import {NonNullableFormBuilder, ReactiveFormsModule} from '@angular/forms';
 import {DatePipe} from '@angular/common';
 
 @Component({
@@ -21,7 +21,7 @@ import {DatePipe} from '@angular/common';
   templateUrl: './manage-remap-rules.component.html',
   styleUrls: ['./manage-remap-rules.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [TranslocoDirective, NgxDatatableModule, ResponsiveTableComponent, TypeaheadComponent, FormsModule, DatePipe]
+  imports: [TranslocoDirective, NgxDatatableModule, ResponsiveTableComponent, TypeaheadComponent, ReactiveFormsModule, DatePipe]
 })
 export class ManageRemapRulesComponent implements OnInit {
 
@@ -31,6 +31,7 @@ export class ManageRemapRulesComponent implements OnInit {
   private readonly toastr = inject(ToastrService);
   private readonly searchService = inject(SearchService);
   private readonly utilityService = inject(UtilityService);
+  private readonly fb = inject(NonNullableFormBuilder);
 
   rules = signal<RemapRule[]>([]);
   isAdmin = this.accountService.hasAdminRole;
@@ -38,10 +39,11 @@ export class ManageRemapRulesComponent implements OnInit {
   currentUserId = computed(() => this.accountService.currentUser()?.id ?? 0);
 
   showCreateForm = signal(false);
-  newCblSeriesName = '';
-  newCblVolume = '';
-  selectedSeries: SearchResult | null = null;
-
+  createForm = this.fb.group({
+    cblSeriesName: '',
+    cblVolume: '',
+  });
+  selectedSeries = signal<SearchResult | null>(null);
   seriesSettings: TypeaheadSettings<SearchResult>;
 
   myRules = computed(() => {
@@ -91,7 +93,7 @@ export class ManageRemapRulesComponent implements OnInit {
   }
 
   onSeriesSelected(event: SearchResult[]) {
-    this.selectedSeries = event.length > 0 ? event[0] : null;
+    this.selectedSeries.set(event.length > 0 ? event[0] : null);
   }
 
   toggleCreateForm() {
@@ -102,16 +104,17 @@ export class ManageRemapRulesComponent implements OnInit {
   }
 
   resetCreateForm() {
-    this.newCblSeriesName = '';
-    this.newCblVolume = '';
-    this.selectedSeries = null;
+    this.createForm.reset();
+    this.selectedSeries.set(null);
   }
 
   createRule() {
-    if (!this.newCblSeriesName.trim() || !this.selectedSeries) return;
+    const {cblSeriesName, cblVolume} = this.createForm.value;
+    const selectedSeries = this.selectedSeries();
+    if (!cblSeriesName?.trim() || !selectedSeries) return;
 
-    const issueDetail = this.newCblVolume.trim() ? { cblVolume: this.newCblVolume.trim() } : undefined;
-    this.cblService.createRemapRule(this.newCblSeriesName.trim(), this.selectedSeries.seriesId, issueDetail).subscribe(rule => {
+    const issueDetail = cblVolume?.trim() ? { cblVolume: cblVolume.trim() } : undefined;
+    this.cblService.createRemapRule(cblSeriesName.trim(), selectedSeries.seriesId, issueDetail).subscribe(rule => {
       this.rules.update(rules => [...rules, rule]);
       this.showCreateForm.set(false);
       this.resetCreateForm();
