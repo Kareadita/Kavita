@@ -460,6 +460,7 @@ public class AccountController(UserManager<AppUser> userManager,
                 BackgroundJob.Enqueue(() => emailService.SendEmailChangeEmail(new ConfirmationEmailDto()
                 {
                     EmailAddress = string.IsNullOrEmpty(user.Email) ? dto.Email : user.Email,
+                    LocaleUserId = user.Id,
                     InstallId = BuildInfo.Version.ToString(),
                     InvitingUser = invitingUser,
                     ServerConfirmationLink = emailLink
@@ -783,7 +784,7 @@ public class AccountController(UserManager<AppUser> userManager,
             var settings = await unitOfWork.SettingsRepository.GetSettingsDtoAsync();
             if (!emailService.IsValidEmail(dto.Email) || !settings.IsEmailSetup())
             {
-                logger.LogInformation("[Invite User] {Email} doesn't appear to be an email or email is not setup", dto.Email.Replace(Environment.NewLine, string.Empty));
+                logger.LogInformation("[Invite User] {Email} doesn't appear to be an email or email is not setup", dto.Email.Sanitize());
                 return Ok(new InviteUserResponse
                 {
                     EmailLink = emailLink,
@@ -795,6 +796,7 @@ public class AccountController(UserManager<AppUser> userManager,
             BackgroundJob.Enqueue(() => emailService.SendInviteEmail(new ConfirmationEmailDto()
             {
                 EmailAddress = dto.Email,
+                LocaleUserId = adminUser.Id, // Use the admin's locale for the invite to server
                 InvitingUser = adminUser.UserName,
                 ServerConfirmationLink = emailLink
             }));
@@ -1001,6 +1003,7 @@ public class AccountController(UserManager<AppUser> userManager,
         var installId = (await unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.InstallId)).Value;
         BackgroundJob.Enqueue(() => emailService.SendForgotPasswordEmail(new PasswordResetEmailDto()
         {
+            EmailUserId = user.Id,
             EmailAddress = user.Email,
             ServerConfirmationLink = emailLink,
             InstallId = installId
@@ -1097,6 +1100,7 @@ public class AccountController(UserManager<AppUser> userManager,
 
         BackgroundJob.Enqueue(() => emailService.SendInviteEmail(new ConfirmationEmailDto()
         {
+            LocaleUserId = user.Id,
             EmailAddress = user.Email!,
             InvitingUser = Username!,
             ServerConfirmationLink = emailLink,

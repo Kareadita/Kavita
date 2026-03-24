@@ -477,6 +477,7 @@ public class OidcService(ILogger<OidcService> logger, UserManager<AppUser> userM
             var invitingUser = await unitOfWork.UserRepository.GetDefaultAdminUser();
             BackgroundJob.Enqueue(() => emailService.SendEmailChangeEmail(new ConfirmationEmailDto()
             {
+                LocaleUserId = user.Id,
                 EmailAddress = string.IsNullOrEmpty(user.Email) ? email : user.Email,
                 InstallId = BuildInfo.Version.ToString(),
                 InvitingUser = invitingUser.UserName,

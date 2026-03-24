@@ -224,5 +224,63 @@
     "cbl-export-failed": "Unable to export CBL file, check logs",
     "download-not-allowed": "User does not have download permissions",
     "auth-key-unique": "The Auth Key name must be unique to your account",
-    "role-restricted": "Access forbidden: Your role does not permit this action"
+    "role-restricted": "Access forbidden: Your role does not permit this action",
+
+
+
+    "email.auth-key-expired.subject": "Kavita - One or more Auth Keys have expired!",
+    "email.auth-key-expired.header": "One or more Auth Keys Expired!",
+    "email.auth-key-expired.description": "You will no longer be able to authenticate until you rotate the key.",
+    "email.auth-key-expired.cta": "ROTATE",
+    "email.auth-key-expired.fallback-link-label": "If the button above does not work, please find the link here:",
+
+    "email.auth-key-expiring-soon.subject": "Kavita - You have Auth Keys expiring soon!",
+    "email.auth-key-expiring-soon.cta": "ROTATE",
+    "email.auth-key-expiring-soon.fallback-link-label": "If the button above does not work, please find the link here:",
+    "email.auth-key-expiring-fragment.name-header": "Name",
+    "email.auth-key-expiring-fragment.expires-header": "Expires (Days)",
+
+    "email.email-change.subject": "Your email has been changed on {{InvitingUser}}'s Server",
+    "email.email-change.title": "Email Change Update",
+    "email.email-change.description-1": "Your account's email has been updated on {{InvitingUser}}'s Kavita instance.",
+    "email.email-change.description-2": "Please click the following link to validate your email change. The email is not changed until you complete validation.",
+    "email.email-change.cta": "CONFIRM EMAIL",
+    "email.email-change.fallback-link-label": "If the button above does not work, please find the link here:",
+
+    "email.email-test.subject": "Kavita - Email Test",
+    "email.email-test.header": "This is a Test Email",
+    "email.email-test.description": "Congrats! Your instance of Kavita is setup to email correctly!",
+    "email.email-test.safe-notice": "If you did not perform this action, ignore this email. Your account is safe.",
+
+    "email.token-expired.subject": "Kavita - Your {{Provider}} token has expired and scrobbling events have stopped",
+    "email.token-expired.header": "Your {{Provider}} Token is Expired!",
+    "email.token-expired.description": "Kavita will stop syncing with {{Provider}} until you renew your token.",
+    "email.token-expired.cta": "RENEW",
+    "email.token-expired.fallback-link-label": "If the button above does not work, please find the link here:",
+
+    "email.token-expiring-soon.subject": "Kavita - Your {{Provider}} token will expire soon!",
+    "email.token-expiring-soon.header": "Your {{Provider}} Token will Expire soon!",
+    "email.token-expiring-soon.description": "Kavita will stop syncing with {{Provider}} until you renew your token.",
+    "email.token-expiring-soon.cta": "RENEW",
+    "email.token-expiring-soon.fallback-link-label": "If the button above does not work, please find the link here:",
+
+    "email.email-confirm.subject": "You've been invited to join {{InvitingUser}}'s Kavita Server",
+    "email.email-confirm.header": "You've Been Invited!",
+    "email.email-confirm.description": "You have been invited to {{InvitingUser}}'s Kavita instance.",
+    "email.email-confirm.description-2": "Please click the following link to setup an account for yourself and start reading.",
+    "email.email-confirm.cta": "ACCEPT INVITE",
+    "email.email-confirm.fallback-link-label": "If the button above does not work, please find the link here:",
+
+    "email.password-reset.subject": "Kavita - A password reset has been requested",
+    "email.password-reset.preheader": "You requested a password reset. Click the button to confirm your email and confirm the password change.",
+    "email.password-reset.header": "Forgot your password?",
+    "email.password-reset.description": "That's okay, it happens! Click on the button below to reset your password.",
+    "email.password-reset.safe-notice": "If you did not perform this action, ignore this email. Your account is safe.",
+    "email.password-reset.cta": "RESET YOUR PASSWORD",
+    "email.password-reset.fallback-link-label": "If the button above does not work, please find the link here:",
+
+    "email.send-to-device.subject": "Kavita - Send file from Kavita",
+    "email.send-to-device.preheader": "File(s) sent from Kavita",
+    "email.send-to-device.header": "You sent file(s) from Kavita",
+    "email.send-to-device.description": "Please find attached the file(s) you've sent."
 }
