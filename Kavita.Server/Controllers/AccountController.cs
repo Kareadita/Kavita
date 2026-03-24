@@ -460,7 +460,7 @@ public class AccountController(UserManager<AppUser> userManager,
                 BackgroundJob.Enqueue(() => emailService.SendEmailChangeEmail(new ConfirmationEmailDto()
                 {
                     EmailAddress = string.IsNullOrEmpty(user.Email) ? dto.Email : user.Email,
-                    EmailUserId = user.Id,
+                    LocaleUserId = user.Id,
                     InstallId = BuildInfo.Version.ToString(),
                     InvitingUser = invitingUser,
                     ServerConfirmationLink = emailLink
@@ -796,7 +796,7 @@ public class AccountController(UserManager<AppUser> userManager,
             BackgroundJob.Enqueue(() => emailService.SendInviteEmail(new ConfirmationEmailDto()
             {
                 EmailAddress = dto.Email,
-                EmailUserId = user.Id,
+                LocaleUserId = adminUser.Id, // Use the admin's locale for the invite to server
                 InvitingUser = adminUser.UserName,
                 ServerConfirmationLink = emailLink
             }));
@@ -1100,7 +1100,7 @@ public class AccountController(UserManager<AppUser> userManager,
 
         BackgroundJob.Enqueue(() => emailService.SendInviteEmail(new ConfirmationEmailDto()
         {
-            EmailUserId = user.Id,
+            LocaleUserId = user.Id,
             EmailAddress = user.Email!,
             InvitingUser = Username!,
             ServerConfirmationLink = emailLink,

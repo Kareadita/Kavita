@@ -4,9 +4,9 @@ public sealed record ConfirmationEmailDto
 {
     public string InvitingUser { get; init; } = default!;
     /// <summary>
-    /// Who is receiving the email
+    /// User Id to resolve the locale against
     /// </summary>
-    public required int EmailUserId { get; init; }
+    public required int LocaleUserId { get; init; }
     public string EmailAddress { get; init; } = default!;
     public string ServerConfirmationLink { get; init; } = default!;
     /// <summary>

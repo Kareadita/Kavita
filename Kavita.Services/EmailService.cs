@@ -95,17 +95,6 @@ public class EmailService(
             return result;
         }
 
-        // DEBUG CODE
-        await SendAuthKeyExpiringSoonEmail(defaultAdmin.Id, [
-            new AppUserAuthKey()
-            {
-                Name = "test",
-                Provider = AuthKeyProvider.User,
-                Key = "123abc",
-                ExpiresAtUtc = DateTime.UtcNow.AddDays(7)
-            }
-        ]);
-
         try
         {
             var emailOptions = await CreateEmail()
@@ -135,7 +124,7 @@ public class EmailService(
     {
         var emailOptions = await CreateEmail()
             .ForTemplate(EmailChangeTemplate)
-            .WithLocalization(data.EmailUserId, "email-change")
+            .WithLocalization(data.LocaleUserId, "email-change")
             .WithPlaceholder("{{InvitingUser}}", data.InvitingUser)
             .WithPlaceholder("{{Link}}", data.ServerConfirmationLink)
             .To(data.EmailAddress)
@@ -298,7 +287,7 @@ public class EmailService(
     {
         var emailOptions = await CreateEmail()
             .ForTemplate(EmailConfirmTemplate)
-            .WithLocalization(data.EmailUserId, "email-confirm")
+            .WithLocalization(data.LocaleUserId, "email-confirm")
             .WithPlaceholder("{{InvitingUser}}", data.InvitingUser)
             .WithPlaceholder("{{Link}}", data.ServerConfirmationLink)
             .To(data.EmailAddress)
