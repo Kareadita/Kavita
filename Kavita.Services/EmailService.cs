@@ -522,7 +522,7 @@ public class EmailService(
 
     private EmailBuilder CreateEmail() => new EmailBuilder(this);
 
-    private class EmailBuilder
+    private sealed class EmailBuilder
     {
         private readonly EmailService _service;
         private string? _templateName;
@@ -535,7 +535,7 @@ public class EmailService(
         private readonly List<string> _toEmails = [];
         private readonly List<string> _attachments = [];
 
-        private record FragmentEntry(
+        private sealed record FragmentEntry(
             string PlaceholderKey,
             string FragmentTemplate,
             IEnumerable<IList<KeyValuePair<string, string>>> PerItemPlaceholders,
@@ -596,6 +596,11 @@ public class EmailService(
 
         public async Task<EmailOptionsDto> Build()
         {
+
+            // Validate critical variables
+            if (string.IsNullOrEmpty(_templateName)) throw new InvalidOperationException("Template must be defined");
+            if (_toEmails.Count == 0) throw new InvalidOperationException("There must be at least one email to build");
+
             // 1. Build fragments: load fragment template, replace per-item placeholders, concatenate.
             //    Resolve localization using fragmentLocalizationScope if set, otherwise fall back to main keyScope.
             //    Then second-pass placeholders.
