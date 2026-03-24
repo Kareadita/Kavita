@@ -217,7 +217,7 @@ public class EmailService(
         var emailOptions = await CreateEmail()
             .ForTemplate(AuthKeyExpiredTemplate)
             .WithLocalization(userId, "auth-key-expired")
-            .WithPlaceholder("{{Link}}", $"{settings.HostName}/settings#account")
+            .WithPlaceholder("{{Link}}", $"{settings.HostName}/settings#clients")
             .WithFragment("{{AuthKeyFragment}}", AuthKeyExpiredFragment, perItemData)
             .To(user.Email!)
             .Build();
@@ -600,6 +600,7 @@ public class EmailService(
             // Validate critical variables
             if (string.IsNullOrEmpty(_templateName)) throw new InvalidOperationException("Template must be defined");
             if (_toEmails.Count == 0) throw new InvalidOperationException("There must be at least one email to build");
+            if (_keyScope == null && _manualSubject == null) throw new InvalidOperationException("Subject is required when localization is not configured");
 
             // 1. Build fragments: load fragment template, replace per-item placeholders, concatenate.
             //    Resolve localization using fragmentLocalizationScope if set, otherwise fall back to main keyScope.
@@ -634,12 +635,16 @@ public class EmailService(
             {
                 subject = _manualSubject
                     ?? await _service.TranslateKey(_userId.Value, $"email.{_keyScope}.subject");
-                preheader = _manualPreheader
-                    ?? await _service.TranslateKey(_userId.Value, $"email.{_keyScope}.preheader");
+
+                var preheaderKey = $"email.{_keyScope}.preheader";
+                var translatedPreheader = _manualPreheader
+                    ?? await _service.TranslateKey(_userId.Value, preheaderKey);
+                // If the key wasn't found (returned as-is), fall back to subject
+                preheader = translatedPreheader == preheaderKey ? subject : translatedPreheader;
             }
             else
             {
-                subject = _manualSubject ?? throw new InvalidOperationException("Subject is required when localization is not configured");
+                subject = _manualSubject!;
                 preheader = _manualPreheader ?? subject;
             }
 
