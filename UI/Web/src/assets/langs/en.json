@@ -3562,6 +3562,7 @@
         "confirm-download-size": "The {{entityType}} is {{size}}. Are you sure you want to continue?",
         "confirm-download-size-ios": "iOS has issues downloading files that are larger than 200MB, this download might not complete.",
         "redownload-confirm": "You've previously downloaded {{title}} on {{date}}. Do you want to redownload?",
+        "redownload-confirm-bulk": "You've previously downloaded (part of) {{title}}. Do you want to redownload these items?",
         "list-doesnt-exist": "This list doesn't exist",
         "confirm-delete-smart-filter": "Are you sure you want to delete this Smart Filter?",
         "smart-filter-deleted": "Smart Filter Deleted",

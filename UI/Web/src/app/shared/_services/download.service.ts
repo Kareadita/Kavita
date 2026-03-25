@@ -710,6 +710,16 @@ export class DownloadService {
     forkJoin([volSizes$, chSizes$, rliSizes$]).pipe(
       takeUntilDestroyed(this.destroyRef)
     ).subscribe(async ([volMap, chMap, rlMap]) => {
+
+      const hasReDownloads = items.some(i => {
+        const key = this._indexKey(i.entityType, i.entity.id);
+        return this._completedEntityIds.has(key);
+      });
+
+      const reDownload = hasReDownloads && await this.confirmService.confirm(
+        translate('toasts.redownload-confirm-bulk', { title: seriesName })
+      );
+
       for (const item of items) {
         let size: number;
 
@@ -725,7 +735,7 @@ export class DownloadService {
             break;
         }
 
-        await this.addToQueue(item.entity, item.entityType, seriesName, libraryId, size, seriesId, readingListId, collectionId, true);
+        await this.addToQueue(item.entity, item.entityType, seriesName, libraryId, size, seriesId, readingListId, collectionId, true, reDownload);
       }
       this.processQueue();
     });
@@ -778,7 +788,7 @@ export class DownloadService {
 
   private async addToQueue(entity: Volume | Chapter | ReadingListItem, entityType: DistilledDownloadEntityType,
                            seriesName: string, libraryId: number, estimatedSize = 0, seriesId = 0, readingListId = 0,
-                           collectionId = 0, skipRedownloadPrompt = false) {
+                           collectionId = 0, isBulk = false, reDownloadInBulk = false) {
     seriesName = await this.resolveSeriesName(seriesName, seriesId);
     const entityId = entity.id;
     const key = this._indexKey(entityType, entityId);
@@ -790,8 +800,8 @@ export class DownloadService {
     }
 
     // 2. Previously completed → skip silently in bulk, prompt for single downloads
-    if (this._completedEntityIds.has(key)) {
-      if (skipRedownloadPrompt) {
+    if (this._completedEntityIds.has(key) && (!isBulk || !reDownloadInBulk)) {
+      if (isBulk) {
         this.debugLog(`addToQueue() already completed, skipping in bulk - ${key}`);
         return;
       }
