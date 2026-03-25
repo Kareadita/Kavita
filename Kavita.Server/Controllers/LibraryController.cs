@@ -502,7 +502,7 @@ public class LibraryController(
     /// <returns></returns>
     [HttpDelete("delete-multiple")]
     [Authorize(Policy = PolicyGroups.AdminPolicy)]
-    public async Task<ActionResult<bool>> DeleteMultipleLibraries([FromQuery] List<int> libraryIds)
+    public async Task<ActionResult<bool>> DeleteMultipleLibraries([FromBody] List<int> libraryIds)
     {
         var username = Username!;
 
