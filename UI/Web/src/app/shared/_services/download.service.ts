@@ -305,14 +305,25 @@ export class DownloadService {
     setTimeout(() => this.processQueue(), 100);
   }
 
-  removeItem(id: number) {
+  removeItem(item: DownloadQueueItem) {
+    const id = item.id;
+
     // Check activeQueue first, then completedToday
     if (this.activeQueue().some(i => i.id === id)) {
       this.activeQueue.update(q => q.filter(i => i.id !== id));
       this._rebuildActiveIndex();
     } else {
       this.completedToday.update(q => q.filter(i => i.id !== id));
+      this._olderItems.update(q => q.filter(i => i.id !== id));
     }
+
+    // Only remove from _completedEntityIds if all instances of the item have been removed
+    if (!this.completedToday().some(i => i.entityId === item.entityId && i.entityType === item.entityType)
+    && !this._olderItems().some(i => i.entityId === item.entityId && i.entityType === item.entityType)
+    ) {
+      this._completedEntityIds.delete(this._indexKey(item.entityType, item.entityId));
+    }
+
     this.storage.delete(id);
   }
 

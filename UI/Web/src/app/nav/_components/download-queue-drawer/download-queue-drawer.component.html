@@ -42,7 +42,7 @@
                 [item]="active"
                 (cancelled)="downloadService.cancelDownload($event)"
                 (retry)="downloadService.retryDownload($event)"
-                (remove)="downloadService.removeItem($event)"
+                (remove)="downloadService.removeItem(active)"
                 (navigate)="navigateToItem($event)"
               />
               <div class="section-break-lg"></div>
@@ -60,7 +60,7 @@
                 <app-download-queue-item [item]="item"
                   (cancelled)="downloadService.cancelDownload($event)"
                   (retry)="downloadService.retryDownload($event)"
-                  (remove)="downloadService.removeItem($event)"
+                  (remove)="downloadService.removeItem(item)"
                   (navigate)="navigateToItem($event)"
                 />
                 @if (!last) { <div class="setting-section-break"></div> }
@@ -78,7 +78,7 @@
                   [item]="item"
                   (cancelled)="downloadService.cancelDownload($event)"
                   (retry)="downloadService.retryDownload($event)"
-                  (remove)="downloadService.removeItem($event)"
+                  (remove)="downloadService.removeItem(item)"
                   (navigate)="navigateToItem($event)"
                 />
                 @if (!last) { <div class="setting-section-break"></div> }
@@ -106,7 +106,7 @@
                     [item]="item"
                     (cancelled)="downloadService.cancelDownload($event)"
                     (retry)="downloadService.retryDownload($event)"
-                    (remove)="downloadService.removeItem($event)"
+                    (remove)="downloadService.removeItem(item)"
                     (navigate)="navigateToItem($event)"
                   />
                   @if (!last) { <div class="setting-section-break"></div> }
@@ -131,7 +131,7 @@
                       [item]="item"
                       (cancelled)="downloadService.cancelDownload($event)"
                       (retry)="downloadService.retryDownload($event)"
-                      (remove)="downloadService.removeItem($event)"
+                      (remove)="downloadService.removeItem(item)"
                       (navigate)="navigateToItem($event)"
                     />
                     @if (!last) { <div class="setting-section-break"></div> }
