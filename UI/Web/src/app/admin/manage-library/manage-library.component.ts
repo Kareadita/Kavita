@@ -11,7 +11,7 @@ import {
 } from '@angular/core';
 import {NgbTooltip} from '@ng-bootstrap/ng-bootstrap';
 import {ToastrService} from 'ngx-toastr';
-import {distinctUntilChanged, filter, take} from 'rxjs/operators';
+import {distinctUntilChanged, filter, finalize, take} from 'rxjs/operators';
 import {ConfirmService} from 'src/app/shared/confirm.service';
 import {
   LibrarySettingsModalComponent
@@ -33,7 +33,7 @@ import {LoadingComponent} from "../../shared/loading/loading.component";
 import {UtilityService} from "../../shared/_services/utility.service";
 import {ActionService} from "../../_services/action.service";
 import {CardActionablesComponent} from "../../_single-module/card-actionables/card-actionables.component";
-import {catchError} from "rxjs";
+import {tap} from "rxjs";
 import {
   CopySettingsFromLibraryModalComponent
 } from "../_modals/copy-settings-from-library-modal/copy-settings-from-library-modal.component";
@@ -239,16 +239,16 @@ export class ManageLibraryComponent implements OnInit {
         this.bulkMode = true;
         this.cdRef.markForCheck();
         const libIds = selected.map(l => l.id);
-        if (!await this.confirmService.confirm(translate('toasts.bulk-delete-libraries', {count: libIds.length}))) return;
-        this.libraryService.deleteMultiple(libIds)
-          .pipe(catchError((_, obs) => {
-            this.resetBulkMode();
-            return obs;
-          }))
-          .subscribe(() => {
-          this.getLibraries();
+        if (!await this.confirmService.confirm(translate('toasts.bulk-delete-libraries', {count: libIds.length}))) {
           this.resetBulkMode();
-        })
+          return;
+        }
+
+        this.libraryService.deleteMultiple(libIds)
+          .pipe(
+            tap(() => this.getLibraries()),
+            finalize(() => this.resetBulkMode()),
+          ).subscribe();
         break;
       case Action.CopySettings:
         // Remove the source library from the list
