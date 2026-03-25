@@ -263,23 +263,41 @@ public class AppUserProgressRepository(DataContext context, IMapper mapper) : IA
 
     public Task<Dictionary<int, int>> GetUserProgressForChaptersBySeries(int userId, int seriesId, CancellationToken ct = default)
     {
-        return context.AppUserProgresses
-            .Where(p => p.SeriesId == seriesId && p.AppUserId == userId)
-            .ToDictionaryAsync(p => p.ChapterId, p => p.PagesRead, ct);
+        return context.Chapter
+            .Where(c => c.Volume.SeriesId == seriesId)
+            .GroupJoin(
+                context.AppUserProgresses.Where(p => p.AppUserId == userId && p.SeriesId == seriesId),
+                c => c.Id,
+                p => p.ChapterId,
+                (c, progresses) => new { c.Id, PagesRead = progresses.Select(p => p.PagesRead).FirstOrDefault() }
+            )
+            .ToDictionaryAsync(x => x.Id, x => x.PagesRead, ct);
     }
 
     public Task<Dictionary<int, int>> GetUserProgressForChaptersByVolumes(int userId, int seriesId, List<int> volumeIds, CancellationToken ct = default)
     {
-        return context.AppUserProgresses
-            .Where(p => p.SeriesId == seriesId && volumeIds.Contains(p.VolumeId) && p.AppUserId == userId)
-            .ToDictionaryAsync(p => p.ChapterId, p => p.PagesRead, ct);
+        return context.Chapter
+            .Where(c => c.Volume.SeriesId == seriesId && volumeIds.Contains(c.VolumeId))
+            .GroupJoin(
+                context.AppUserProgresses.Where(p => p.AppUserId == userId && p.SeriesId == seriesId),
+                c => c.Id,
+                p => p.ChapterId,
+                (c, progresses) => new { c.Id, PagesRead = progresses.Select(p => p.PagesRead).FirstOrDefault() }
+            )
+            .ToDictionaryAsync(x => x.Id, x => x.PagesRead, ct);
     }
 
     public Task<Dictionary<int, int>> GetUserProgressForChaptersByChapters(int userId, int seriesId, List<int> chapterIds, CancellationToken ct = default)
     {
-        return context.AppUserProgresses
-            .Where(p => p.SeriesId == seriesId && chapterIds.Contains(p.ChapterId) && p.AppUserId == userId)
-            .ToDictionaryAsync(p => p.ChapterId, p => p.PagesRead, ct);
+        return context.Chapter
+            .Where(c => c.Volume.SeriesId == seriesId && chapterIds.Contains(c.Id))
+            .GroupJoin(
+                context.AppUserProgresses.Where(p => p.AppUserId == userId && p.SeriesId == seriesId),
+                c => c.Id,
+                p => p.ChapterId,
+                (c, progresses) => new { c.Id, PagesRead = progresses.Select(p => p.PagesRead).FirstOrDefault() }
+            )
+            .ToDictionaryAsync(x => x.Id, x => x.PagesRead, ct);
     }
 
     public async Task<AppUserProgress?> GetUserProgressAsync(int chapterId, int userId, CancellationToken ct = default)
