@@ -9,6 +9,7 @@ using Kavita.API.Services.Metadata;
 using Kavita.API.Services.Reading;
 using Kavita.API.Services.ReadingLists;
 using Kavita.API.Services.SignalR;
+using Kavita.Common;
 using Kavita.Common.Extensions;
 using Kavita.Models.Constants;
 using Kavita.Models.DTOs.SignalR;
@@ -139,6 +140,10 @@ public class UploadController : BaseApiController
                 return Ok();
             }
 
+        }
+        catch (KavitaException)
+        {
+            throw;
         }
         catch (Exception e)
         {

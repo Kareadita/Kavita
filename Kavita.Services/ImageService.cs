@@ -6,6 +6,7 @@ using System.Numerics;
 using System.Threading;
 using System.Threading.Tasks;
 using Kavita.API.Services;
+using Kavita.Common;
 using Kavita.Models.DTOs;
 using Kavita.Models.Entities.Enums;
 using Kavita.Models.Entities.Interfaces;
@@ -535,6 +536,10 @@ public class ImageService(ILogger<ImageService> logger, IDirectoryService direct
             thumbnail.WriteToFile(directoryService.FileSystem.Path.Join(targetDirectory, fileName));
 
             return fileName;
+        }
+        catch (FormatException e)
+        {
+            throw new KavitaException("Invalid Base64 string", e);
         }
         catch (Exception e)
         {
