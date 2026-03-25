@@ -114,7 +114,7 @@ import {EntityCardComponent} from "../../../cards/entity-card/entity-card.compon
 import {ModalResult} from "../../../_models/modal/modal-result";
 import {patchEntitySignal, patchSignalArray} from "../../../../libs/patch";
 import {ModalService} from "../../../_services/modal.service";
-import {getResolvedData} from "../../../../libs/route-util";
+import {getResolvedData, getWritableResolvedData} from "../../../../libs/route-util";
 import {ExternalSeries} from "../../../_models/series-detail/external-series";
 import {Tabs} from "../../../_models/tabs";
 import {TabTitlePipe} from "../../../_pipes/tab-title.pipe";
@@ -181,7 +181,7 @@ class SeriesDetailComponent implements OnInit, AfterViewInit {
   libraryId = input(0, {transform: numberAttribute });
   /** This will be {id,type,name} only for non-admin users */
   library = getResolvedData(this.route, 'library');
-  series = getResolvedData(this.route, 'series');
+  series = getWritableResolvedData(this.route, 'series');
 
   volumes = signal<Volume[]>([]);
   volumeEntities = computed(() => this.volumes().map(v => CardEntityFactory.volume(v, this.seriesId(), this.libraryId())));
@@ -562,6 +562,10 @@ class SeriesDetailComponent implements OnInit, AfterViewInit {
 
 
   loadSeries(seriesId: number, loadExternal: boolean = false) {
+    this.seriesService.getSeries(seriesId).subscribe(series => {
+      this.series.set(series);
+    });
+
     this.seriesService.getMetadata(seriesId).subscribe(metadata => {
       this.seriesMetadata.set({...metadata});
 

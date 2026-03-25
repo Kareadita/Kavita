@@ -36,7 +36,7 @@ import {
 import {FilterUtilitiesService} from "../shared/_services/filter-utilities.service";
 import {Chapter, LooseLeafOrDefaultNumber} from "../_models/chapter";
 import {LibraryType} from "../_models/library/library";
-import {tap} from "rxjs";
+import {filter, tap} from "rxjs";
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import {translate, TranslocoDirective} from "@jsverse/transloco";
 import {FilterComparison} from "../_models/metadata/v2/filter-comparison";
@@ -443,11 +443,10 @@ export class VolumeDetailComponent implements OnInit {
     ref.componentInstance.libraryId = this.libraryId();
     ref.componentInstance.seriesId = this.seriesId();
 
-    ref.closed.subscribe((res: ModalResult<Volume>) => {
-      if (res.success && res.data) {
-        this.volume.set({...res.data});
-      }
-    });
+    ref.closed.pipe(
+      filter((res: ModalResult<Volume>) => res.success),
+      tap(() => this.loadVolume())
+    ).subscribe();
   }
 
 
