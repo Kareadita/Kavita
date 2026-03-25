@@ -246,15 +246,16 @@ export class EditChapterModalComponent implements OnInit {
     this.chapter.titleName = model.titleName;
     this.chapter.summary = model.summary;
     this.chapter.isbn = model.isbn;
+    this.chapter.aniListId = model.aniListId;
+    this.chapter.comicVineId = model.comicVineId;
+    this.chapter.malId = model.malId;
+    this.chapter.hardcoverId = model.hardcoverId;
+    this.chapter.metronId = model.metronId;
 
 
     const apis = [
       this.chapterService.updateChapter(this.chapter)
     ];
-
-    // We only need to call updateSeries if we changed name, sort name, or localized name or reset a cover image
-    const needsReload = this.editForm.get('titleName')?.dirty || this.editForm.get('sortOrder')?.dirty;
-
 
     if (selectedIndex > 0 || this.coverImageReset) {
       apis.push(this.uploadService.updateChapterCoverImage(this.chapter.id, this.selectedCover, !this.coverImageReset));
