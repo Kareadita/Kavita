@@ -773,7 +773,7 @@ export class ActionService {
   handleClientDeviceAction(action: ActionItem<ClientDevice>, clientDevice: ClientDevice) {
     switch (action.action) {
       case Action.Delete:
-        return from(this.confirmService.confirm(translate('toasts.confirm-delete-annotations'))).pipe(
+        return from(this.confirmService.confirm(translate('toasts.confirm-delete-client-device'))).pipe(
           filter(confirmed => confirmed),
           switchMap(() => this.deviceService.deleteClientDevice(clientDevice.id)),
           map((success) => this.fromAction(action, clientDevice,  success ? 'remove' : 'none'))

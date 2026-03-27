@@ -3605,7 +3605,8 @@
         "confirm-force-delete-font": "This font is currently in use. Do you want to force delete it? This will force users back to the Default font.",
         "font-in-use": "Cannot delete as the font is in use by one or more users.",
         "k+-resend-welcome-email-success": "An email was sent to your Kavita+ email",
-        "profile-unauthorized": "This user is not sharing their profile"
+        "profile-unauthorized": "This user is not sharing their profile",
+        "confirm-delete-client-device": "Are you sure you want to delete this device?"
     },
 
     "read-time-pipe": {
