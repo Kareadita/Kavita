@@ -21,7 +21,6 @@ import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import {NgClass, NgTemplateOutlet} from '@angular/common';
 import {TranslocoDirective} from "@jsverse/transloco";
 import {map, startWith, tap} from "rxjs";
-import {AccountService} from "../../../_services/account.service";
 import {KeyBindEvent, KeyBindService} from "../../../_services/key-bind.service";
 import {KeyBindTarget} from "../../../_models/preferences/preferences";
 import {KeyBindPipe} from "../../../_pipes/key-bind.pipe";
@@ -39,9 +38,9 @@ export interface SearchEvent {
   imports: [ReactiveFormsModule, NgClass, NgTemplateOutlet, TranslocoDirective, KeyBindPipe]
 })
 export class GroupedTypeaheadComponent implements OnInit {
+
   private readonly destroyRef = inject(DestroyRef);
   private readonly cdRef = inject(ChangeDetectorRef);
-  private readonly accountService = inject(AccountService);
   protected readonly keyBindService = inject(KeyBindService);
 
   /**
@@ -127,19 +126,6 @@ export class GroupedTypeaheadComponent implements OnInit {
     this.close();
   }
 
-  @HostListener('document:keydown', ['$event'])
-  handleKeyPress(event: KeyboardEvent) {
-    switch(event.key) {
-      case KEY_CODES.ESC_KEY:
-        if (!this.hasFocus) { return; }
-        this.close();
-        event.stopPropagation();
-        break;
-      default:
-        break;
-    }
-  }
-
   private focusElement(e: KeyBindEvent) {
     const inputElem = this.inputElem();
     if (inputElem.nativeElement) {
@@ -158,6 +144,18 @@ export class GroupedTypeaheadComponent implements OnInit {
       (e) => this.focusElement(e),
       [KeyBindTarget.OpenSearch],
       {fireInEditable: true},
+    );
+
+    this.keyBindService.registerListener(
+      this.destroyRef,
+      (e) => {
+        if (this.hasFocus) {
+          this.close();
+          e.triggered = true;
+        }
+      },
+      [KeyBindTarget.Escape],
+      {markAsTriggered: false, fireInEditable: true},
     );
 
     this.searchSettingsForm.get('includeExtras')!.valueChanges.pipe(
@@ -256,6 +254,7 @@ export class GroupedTypeaheadComponent implements OnInit {
     this.hasFocus = false;
     this.cdRef.markForCheck();
     this.focusChanged.emit(this.hasFocus);
+    this.inputElem().nativeElement.blur();
   }
 
   open(event?: FocusEvent) {
