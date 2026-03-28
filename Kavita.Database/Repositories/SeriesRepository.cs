@@ -1869,18 +1869,18 @@ public class SeriesRepository(DataContext context, IMapper mapper) : ISeriesRepo
         return new RelatedSeriesDto()
         {
             SourceSeriesId = seriesId,
-            Adaptations = await GetRelatedSeriesQuery(seriesId, usersSeriesIds, RelationKind.Adaptation, userRating, ct),
-            Characters = await GetRelatedSeriesQuery(seriesId, usersSeriesIds, RelationKind.Character, userRating, ct),
-            Prequels = await GetRelatedSeriesQuery(seriesId, usersSeriesIds, RelationKind.Prequel, userRating, ct),
-            Sequels = await GetRelatedSeriesQuery(seriesId, usersSeriesIds, RelationKind.Sequel, userRating, ct),
-            Contains = await GetRelatedSeriesQuery(seriesId, usersSeriesIds, RelationKind.Contains, userRating, ct),
-            SideStories = await GetRelatedSeriesQuery(seriesId, usersSeriesIds, RelationKind.SideStory, userRating, ct),
-            SpinOffs = await GetRelatedSeriesQuery(seriesId, usersSeriesIds, RelationKind.SpinOff, userRating, ct),
-            Others = await GetRelatedSeriesQuery(seriesId, usersSeriesIds, RelationKind.Other, userRating, ct),
-            AlternativeSettings = await GetRelatedSeriesQuery(seriesId, usersSeriesIds, RelationKind.AlternativeSetting, userRating, ct),
-            AlternativeVersions = await GetRelatedSeriesQuery(seriesId, usersSeriesIds, RelationKind.AlternativeVersion, userRating, ct),
-            Doujinshis = await GetRelatedSeriesQuery(seriesId, usersSeriesIds, RelationKind.Doujinshi, userRating, ct),
-            Annuals = await GetRelatedSeriesQuery(seriesId, usersSeriesIds, RelationKind.Annual, userRating, ct),
+            Adaptations = await GetRelatedSeriesQuery(userId, seriesId, usersSeriesIds, RelationKind.Adaptation, userRating, ct),
+            Characters = await GetRelatedSeriesQuery(userId, seriesId, usersSeriesIds, RelationKind.Character, userRating, ct),
+            Prequels = await GetRelatedSeriesQuery(userId, seriesId, usersSeriesIds, RelationKind.Prequel, userRating, ct),
+            Sequels = await GetRelatedSeriesQuery(userId, seriesId, usersSeriesIds, RelationKind.Sequel, userRating, ct),
+            Contains = await GetRelatedSeriesQuery(userId, seriesId, usersSeriesIds, RelationKind.Contains, userRating, ct),
+            SideStories = await GetRelatedSeriesQuery(userId, seriesId, usersSeriesIds, RelationKind.SideStory, userRating, ct),
+            SpinOffs = await GetRelatedSeriesQuery(userId, seriesId, usersSeriesIds, RelationKind.SpinOff, userRating, ct),
+            Others = await GetRelatedSeriesQuery(userId, seriesId, usersSeriesIds, RelationKind.Other, userRating, ct),
+            AlternativeSettings = await GetRelatedSeriesQuery(userId, seriesId, usersSeriesIds, RelationKind.AlternativeSetting, userRating, ct),
+            AlternativeVersions = await GetRelatedSeriesQuery(userId, seriesId, usersSeriesIds, RelationKind.AlternativeVersion, userRating, ct),
+            Doujinshis = await GetRelatedSeriesQuery(userId, seriesId, usersSeriesIds, RelationKind.Doujinshi, userRating, ct),
+            Annuals = await GetRelatedSeriesQuery(userId, seriesId, usersSeriesIds, RelationKind.Annual, userRating, ct),
             Parent = await context.SeriesRelation
                 .Where(r => r.TargetSeriesId == seriesId
                             && usersSeriesIds.Contains(r.TargetSeriesId)
@@ -1893,7 +1893,7 @@ public class SeriesRepository(DataContext context, IMapper mapper) : ISeriesRepo
                 .AsNoTracking()
                 .ProjectToWithProgress<Series, SeriesDto>(mapper.ConfigurationProvider, userId)
                 .ToListAsync(ct),
-            Editions = await GetRelatedSeriesQuery(seriesId, usersSeriesIds, RelationKind.Edition, userRating, ct)
+            Editions = await GetRelatedSeriesQuery(userId, seriesId, usersSeriesIds, RelationKind.Edition, userRating, ct)
         };
     }
 
@@ -1904,7 +1904,7 @@ public class SeriesRepository(DataContext context, IMapper mapper) : ISeriesRepo
             .Select(s => s.Id);
     }
 
-    private async Task<IEnumerable<SeriesDto>> GetRelatedSeriesQuery(int seriesId, IEnumerable<int> usersSeriesIds,
+    private async Task<IEnumerable<SeriesDto>> GetRelatedSeriesQuery(int userId, int seriesId, IEnumerable<int> usersSeriesIds,
         RelationKind kind, AgeRestriction userRating, CancellationToken ct = default)
     {
         return await context.Series.SelectMany(s =>
@@ -1913,7 +1913,7 @@ public class SeriesRepository(DataContext context, IMapper mapper) : ISeriesRepo
             .RestrictAgainstAgeRestriction(userRating)
             .AsSplitQuery()
             .AsNoTracking()
-            .ProjectTo<SeriesDto>(mapper.ConfigurationProvider)
+            .ProjectToWithProgress<Series, SeriesDto>(mapper.ConfigurationProvider, userId)
             .ToListAsync(ct);
     }
 
