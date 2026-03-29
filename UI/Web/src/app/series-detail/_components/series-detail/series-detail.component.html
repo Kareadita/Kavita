@@ -378,13 +378,15 @@
               <a ngbNavLink>{{Tabs.Activity | tabTitle}}</a>
               <ng-template ngbNavContent>
                 @defer (when activeTabId == Tabs.Activity; prefetch on idle) {
-                  <app-reading-history-viewer
-                    [currentEntries]="readingHistory()"
-                    [pagination]="readingHistoryPagination()"
-                    [currentPage]="readingHistoryCurrentPage()"
-                    [isLoading]="isLoadingReadingHistory()"
-                    (pageChange)="loadReadingHistory($event.page)"
-                  />
+                  <div class="pb-3">
+                    <app-reading-history-viewer
+                      [currentEntries]="readingHistory()"
+                      [pagination]="readingHistoryPagination()"
+                      [currentPage]="readingHistoryCurrentPage()"
+                      [isLoading]="isLoadingReadingHistory()"
+                      (pageChange)="loadReadingHistory($event.page)"
+                    />
+                  </div>
                 }
               </ng-template>
             </li>
