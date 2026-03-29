@@ -455,7 +455,7 @@ public class StatsController(
     }
 
     /// <summary>
-    /// Return the authenticated users reading session history for a given series'
+    /// Return the authenticated users reading session history for a given series
     /// </summary>
     /// <param name="seriesId"></param>
     /// <param name="tzId"></param>

@@ -1649,7 +1649,7 @@ public class StatisticService(ILogger<StatisticService> logger, IDataContext con
     {
         var socialPreferences = await unitOfWork.UserRepository.GetSocialPreferencesForUser(userId, ct);
         var requestingUser = await unitOfWork.UserRepository.GetUserByIdAsync(requestingUserId, ct: ct);
-        if (requestingUser == null) return PagedList<ReadingHistoryItemDto>.Create([], 0, 0, 0);
+        if (requestingUser == null) return PagedList<ReadingHistoryItemDto>.Empty(userParams);
 
         var userTimeZone = GetTimeZoneOrUtc(filter.TimeZoneId);
 
@@ -1736,7 +1736,7 @@ public class StatisticService(ILogger<StatisticService> logger, IDataContext con
             .ToListAsync(ct);
 
         if (pageGroupKeys.Count == 0)
-            return PagedList<ReadingHistoryItemDto>.Create([], totalCount, userParams.PageNumber, userParams.PageSize);
+            return PagedList<ReadingHistoryItemDto>.Empty(totalCount, userParams);
 
         var sessionIds = pageGroupKeys.Select(k => k.AppUserReadingSessionId).ToHashSet();
         var seriesIds  = pageGroupKeys.Select(k => k.SeriesId).ToHashSet();
@@ -1846,7 +1846,7 @@ public class StatisticService(ILogger<StatisticService> logger, IDataContext con
                 };
         }).ToList();
 
-        return PagedList<ReadingHistoryItemDto>.Create(dtos, totalCount, userParams.PageNumber, userParams.PageSize);
+        return PagedList<ReadingHistoryItemDto>.Create(dtos, totalCount, userParams);
     }
 
     private async Task<int> GetAuthorsCount(HashSet<int> chapterIds, CancellationToken ct = default)

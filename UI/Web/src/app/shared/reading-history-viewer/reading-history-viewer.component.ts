@@ -64,8 +64,8 @@ export class ReadingHistoryViewerComponent {
 
   pageChange = output<{page: number, scroll: boolean}>();
 
-  protected totalPages = computed(() => this.pagination()?.totalPages ?? 1);
-  protected totalItems = computed(() => this.pagination()?.totalItems ?? 0);
+  protected readonly totalPages = computed(() => this.pagination()?.totalPages ?? 1);
+  protected readonly totalItems = computed(() => this.pagination()?.totalItems ?? 0);
 
   /**
    * Returns relative date string for today/yesterday, otherwise formatted date

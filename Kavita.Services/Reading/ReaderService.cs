@@ -637,7 +637,7 @@ public class ReaderService(IUnitOfWork unitOfWork, ILogger<ReaderService> logger
             var pageCounts = await bookService.GetWordCountsPerPage(chapter.Files.First().FilePath); // TODO: Cache
             if (pageCounts == null) return GetTimeEstimate(chapter.WordCount, 0, true);
 
-            // Sum character counts only for pages that have been read
+            // Sum character counts for unread pages
             var toReadCharacters = pageCounts
                 .Where(kvp => kvp.Key > chapter.PagesRead)
                 .Sum(kvp => kvp.Value);
@@ -666,7 +666,7 @@ public class ReaderService(IUnitOfWork unitOfWork, ILogger<ReaderService> logger
             var pageCounts = await bookService.GetWordCountsPerPage(chapter.Files.First().FilePath); // TODO: Cache
             if (pageCounts == null) return GetTimeEstimate(series.WordCount, 0, true);
 
-            // Sum character counts only for pages that have been read
+            // Sum character counts for unread pages
             var toReadCharacters = pageCounts
                 .Where(kvp => kvp.Key >= page)
                 .Sum(kvp => kvp.Value);

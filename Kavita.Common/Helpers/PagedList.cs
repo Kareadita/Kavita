@@ -23,4 +23,19 @@ public class PagedList<T> : List<T>
     {
         return new PagedList<T>(items, totalCount, pageNumber, pageSize);
     }
+
+    public static PagedList<T> Create(IEnumerable<T> items, int totalCount, UserParams userParams)
+    {
+        return Create(items, totalCount, userParams.PageNumber, userParams.PageSize);
+    }
+
+    public static PagedList<T> Empty(int totalCount, UserParams userParams)
+    {
+        return new PagedList<T>([], totalCount, userParams.PageNumber, userParams.PageSize);
+    }
+
+    public static PagedList<T> Empty(UserParams userParams)
+    {
+        return Empty(0, userParams);
+    }
 }
