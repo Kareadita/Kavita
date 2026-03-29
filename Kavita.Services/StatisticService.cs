@@ -1717,14 +1717,41 @@ public class StatisticService(ILogger<StatisticService> logger, IDataContext con
             .Where(a => a.EndTimeUtc != null)
             .OrderByDescending(a => a.StartTimeUtc);
 
-        // Get total count before pagination
-        var totalCount = await query.CountAsync(ct);
+        var groupedQuery = query
+            .GroupBy(a => new { a.AppUserReadingSessionId, a.SeriesId })
+            .Select(g => new
+            {
+                g.Key.AppUserReadingSessionId,
+                g.Key.SeriesId,
+                MinStart = g.Min(x => x.StartTimeUtc), // preserve ordering
+            })
+            .OrderByDescending(g => g.MinStart);
 
-        // Paginate and materialize
-        var items = await query
+        var totalCount = await groupedQuery.CountAsync(ct);
+
+        var pageGroupKeys = await groupedQuery
             .Skip((userParams.PageNumber - 1) * userParams.PageSize)
             .Take(userParams.PageSize)
+            .Select(g => new { g.AppUserReadingSessionId, g.SeriesId })
             .ToListAsync(ct);
+
+        if (pageGroupKeys.Count == 0)
+            return PagedList<ReadingHistoryItemDto>.Create([], totalCount, userParams.PageNumber, userParams.PageSize);
+
+        var sessionIds = pageGroupKeys.Select(k => k.AppUserReadingSessionId).ToHashSet();
+        var seriesIds  = pageGroupKeys.Select(k => k.SeriesId).ToHashSet();
+
+        var items = await query
+            .Where(a => sessionIds.Contains(a.AppUserReadingSessionId) && seriesIds.Contains(a.SeriesId))
+            .ToListAsync(ct);
+
+        var keySet = pageGroupKeys
+            .Select(k => (k.AppUserReadingSessionId, k.SeriesId))
+            .ToHashSet();
+
+        items = items
+            .Where(a => keySet.Contains((a.AppUserReadingSessionId, a.SeriesId)))
+            .ToList();
 
         var libraryTypes = items.Select(i => i.LibraryType).Distinct().ToList();
         var namingContexts = new Dictionary<LibraryType, LocalizedNamingContext>();
