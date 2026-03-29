@@ -1818,7 +1818,7 @@ public class StatisticService(ILogger<StatisticService> logger, IDataContext con
                         TotalPages = s.TotalPages,
                         Completed = s.EndPage >= s.TotalPages,
                     };
-                }).OrderBy(c => c.StartTimeUtc).ToList();
+                }).OrderByDescending(c => c.StartTimeUtc).ToList();
 
                 return new ReadingHistoryItemDto
                 {

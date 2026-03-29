@@ -111,9 +111,12 @@ public sealed class ReadingSessionService : IReadingSessionService, IDisposable,
 
         var chapters = await context.Chapter
             .Where(cp => chapterIds.Contains(cp.Id) && cp.Volume.SeriesId == seriesId)
-            .OrderByDescending(cp => cp.SortOrder)
+            .ApplyDefaultChapterOrdering()
             .ProjectToWithProgress<Chapter, ChapterDto>(mapper, userId)
             .ToListAsync(ct);
+
+        // ApplyDefaultChapterOrdering orders from first to last, we want last to first
+        chapters.Reverse();
 
         Dictionary<int, HourEstimateRangeDto> estimatedHoursByChapter = [];
         foreach (var chapterId in chapters.Select(cp => cp.Id))
