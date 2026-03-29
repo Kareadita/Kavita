@@ -542,8 +542,11 @@ public class ReaderController(ICacheService cacheService,
             var progressDictionary = await unitOfWork.AppUserProgressRepository
                 .GetUserProgressForChaptersBySeries(UserId, sId, HttpContext.RequestAborted);
 
-            BackgroundJob.Enqueue<IReadingSessionService>(s
-                => s.GenerateReadingSessionForChapters(UserId, sId, progressDictionary, CancellationToken.None));
+            if (dto.GenerateReadingSession)
+            {
+                BackgroundJob.Enqueue<IReadingSessionService>(s
+                    => s.GenerateReadingSessionForChapters(UserId, sId, progressDictionary, CancellationToken.None));
+            }
         }
         return Ok();
     }
