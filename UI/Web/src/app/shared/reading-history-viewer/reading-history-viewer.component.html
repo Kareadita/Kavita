@@ -1,0 +1,152 @@
+<ng-container *transloco="let t; prefix: 'profile-activity'">
+  @if (isLoading()) {
+    <div class="loading-container py-5">
+      <app-loading [loading]="true"></app-loading>
+    </div>
+  } @else if (pagination()?.totalItems === 0) {
+    <app-stats-no-data [message]="t('no-data')"/>
+  } @else {
+    @if (totalPages() > 1) {
+      <nav [attr.aria-label]="t('pagination-label')" class="d-flex justify-content-center my-3">
+        <ngb-pagination
+          [collectionSize]="totalItems()"
+          [page]="currentPage()"
+          [pageSize]="pageSize()"
+          [maxSize]="5"
+          [rotate]="true"
+          [ellipses]="true"
+          [boundaryLinks]="true"
+          (pageChange)="pageChange.emit({page: $event, scroll: false})"
+        />
+      </nav>
+    }
+
+    <div class="activity-list">
+      @for (entry of currentEntries(); track entry.sessionId) {
+        <div class="activity-entry p-3">
+          <div class="row g-3">
+            <div class="col-auto d-sm-block">
+              <app-image [imageUrl]="imageService.getSeriesCoverImage(entry.seriesId)" class="d-block"
+                         style="width: 5rem; height: auto;"/>
+            </div>
+
+            <div class="col">
+              <div class="d-flex align-items-start gap-2 mb-1">
+                <div class="d-flex align-items-center gap-2 flex-wrap flex-grow-1">
+                  <a [routerLink]="['/library', entry.libraryId, 'series', entry.seriesId]"
+                     class="text-decoration-none fw-medium">
+                    {{ entry.seriesName }}
+                  </a>
+                  <app-tag-badge>{{ entry.seriesFormat | mangaFormat }}</app-tag-badge>
+                </div>
+                <span class="entry-date text-muted small text-nowrap">
+                  {{ formatEntryDate(entry) }}
+                  @if (entry.isGeneratedSession) {
+                    <i class="fa fa-circle text-danger" tabindex="0" ngbTooltip="{{t('generated-session-tooltip')}}"></i>
+                  }
+                </span>
+              </div>
+
+              <ng-container [ngTemplateOutlet]="readStatsTemplate()"
+                            [ngTemplateOutletContext]="{ $implicit: entry, showInfo: true }">
+              </ng-container>
+
+              <div class="row mt-2">
+                @for (chapter of entry.chapters.slice(0, 5); track chapter.chapterId + '_' + chapter.pagesRead) {
+                  <div class="col-auto d-none d-sm-block chapter-cover"
+                       [routerLink]="['/library', entry.libraryId, 'series', entry.seriesId, 'chapter', chapter.chapterId]">
+                    <app-image [imageUrl]="imageService.getChapterCoverImage(chapter.chapterId)" class="d-block" [ngbTooltip]="chapter.label"
+                               style="width: 2.5rem; height: auto;"/>
+                  </div>
+                }
+                @let nonSlicedLength = entry.chapters.length - 5;
+                @if (nonSlicedLength > 0) {
+                  <i class="fa-solid fa-ellipsis my-auto" tabindex="0" [title]="t('num-more', {num: nonSlicedLength})"></i>
+                  <span class="visually-hidden">{{t('num-more', {num: nonSlicedLength})}}</span>
+                }
+              </div>
+            </div>
+          </div>
+        </div>
+      }
+    </div>
+
+    @if (totalPages() > 1) {
+      <nav [attr.aria-label]="t('pagination-label')" class="d-flex flex-column align-items-center my-3 gap-2">
+        <ngb-pagination
+          [collectionSize]="totalItems()"
+          [page]="currentPage()"
+          [pageSize]="pageSize()"
+          [maxSize]="5"
+          [rotate]="true"
+          [ellipses]="true"
+          [boundaryLinks]="true"
+          (pageChange)="pageChange.emit({page: $event, scroll: true})"
+        />
+        <span class="text-muted small">
+          {{ t('page-info', { current: currentPage(), total: totalPages(), items: totalItems() }) }}
+        </span>
+      </nav>
+    }
+  }
+</ng-container>
+
+
+<ng-template #chapterInfoRow let-item>
+  @let chapter = item.value.chapter;
+  @let entry = item.value.entry;
+
+  <div class="d-flex flex-grow-1 justify-content-between align-items-center"
+       [routerLink]="['/library', entry.libraryId, 'series', entry.seriesId, 'chapter', chapter.chapterId]">
+    <div class="col-auto d-none d-sm-block chapter-cover me-2">
+      <app-image [imageUrl]="imageService.getChapterCoverImage(chapter.chapterId)" class="d-block"
+                 style="width: 2.5rem; height: auto;"/>
+    </div>
+
+    <ng-container [ngTemplateOutlet]="readStatsTemplate()"
+                  [ngTemplateOutletContext]="{ $implicit: chapter, label: chapter.label }">
+    </ng-container>
+  </div>
+</ng-template>
+
+<ng-template #readStats let-entry let-label="label" let-showInfo="showInfo">
+  <div class="d-flex flex-wrap gap-3 small text-muted me-2 flex-grow-1" *transloco="let t; prefix: 'profile-activity'">
+
+    @if (label) {
+      <span class="d-flex align-items-center flex-grow-1 ms-5" id="label-{{entry.id}}">
+        {{label}}
+      </span>
+    }
+
+    <span [attr.aria-label]="t('duration')" class="d-flex align-items-center gap-1">
+      <i aria-hidden="true" class="fa-regular fa-clock"></i>
+      {{ entry.durationSeconds | duration }}
+    </span>
+
+    @if (entry.pagesRead > 0) {
+      <span [attr.aria-label]="t('pages-read')" class="d-flex align-items-center gap-1">
+        <i aria-hidden="true" class="fa-regular fa-file"></i>
+        {{t('pages-count', {num: entry.pagesRead | compactNumber})}}
+      </span>
+    }
+
+    @if (entry.wordsRead > 0) {
+      <span [attr.aria-label]="t('words-read')" class="d-flex align-items-center gap-1">
+         <i aria-hidden="true" class="fa fa-book"></i>
+        {{t('words-count', {num: entry.wordsRead | compactNumber})}}
+      </span>
+    }
+
+
+    <span [attr.aria-label]="t('time')" class="d-flex align-items-center gap-1">
+      {{ entry.startTimeUtc | utcToLocalTime:'shortTime' }} - {{ entry.endTimeUtc | utcToLocalTime:'shortTime' }}
+    </span>
+
+    @if (showInfo) {
+      <button class="btn btn-icon" (click)="displayInfo(entry)" aria-labelledby="label-{{entry.id}}">
+        <i class="fa fa-info" aria-hidden="true"></i>
+        <span class="visually-hidden">{{t('info-alt')}}</span>
+      </button>
+    }
+  </div>
+</ng-template>

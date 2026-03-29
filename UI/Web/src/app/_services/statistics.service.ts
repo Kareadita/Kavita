@@ -334,6 +334,21 @@ export class StatisticsService {
     );
   }
 
+  getReadingHistoryForSeries(
+    seriesId: number,
+    pageNum: number = 1,
+    itemsPerPage: number = 30,
+  ) {
+    const tzId = Intl.DateTimeFormat().resolvedOptions().timeZone;
+
+    return this.httpClient.get<ReadingHistoryItem[]>(
+      `${this.baseUrl}stats/reading-history/series/${seriesId}?tzId=${tzId}`,
+      { observe: 'response', params: this.utilityService.addPaginationIfExists(new HttpParams(), pageNum, itemsPerPage) }
+    ).pipe(
+      map(response => this.utilityService.createPaginatedResult<ReadingHistoryItem>(response))
+    );
+  }
+
   getReadingHistoryResource(
     statsFilter: () => StatsFilter | undefined,
     userId: () => number,

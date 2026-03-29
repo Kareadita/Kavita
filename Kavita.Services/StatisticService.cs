@@ -21,6 +21,7 @@ using Kavita.Models.DTOs.Stats.V3.ClientDevice;
 using Kavita.Models.Entities;
 using Kavita.Models.Entities.Enums;
 using Kavita.Models.Entities.Enums.UserPreferences;
+using Kavita.Models.Entities.Progress;
 using Kavita.Models.Entities.User;
 using Kavita.Services.Scanner;
 using Microsoft.EntityFrameworkCore;
@@ -1653,9 +1654,27 @@ public class StatisticService(ILogger<StatisticService> logger, IDataContext con
         var userTimeZone = GetTimeZoneOrUtc(filter.TimeZoneId);
 
         var query = context.AppUserReadingSessionActivityData
-            .ApplyStatsFilter(filter, userId, socialPreferences, requestingUser, isAggregate: false, onlyCompleted: false)
-            .WhereIf(filter.Libraries.Count > 0, a => filter.Libraries.Contains(a.LibraryId))
-            .Select(a => new
+            .ApplyStatsFilter(filter, userId, socialPreferences, requestingUser, isAggregate: false,
+                onlyCompleted: false)
+            .WhereIf(filter.Libraries.Count > 0, a => filter.Libraries.Contains(a.LibraryId));
+
+        return await GetReadingHistoryItems(userId, userTimeZone, query, userParams, ct);
+    }
+
+    public Task<PagedList<ReadingHistoryItemDto>> GetReadingHistoryItemsForSeries(int userId, int seriesId, string tzId,
+        UserParams userParams, CancellationToken ct = default)
+    {
+        var userTimeZone = GetTimeZoneOrUtc(tzId);
+
+        var query = context.AppUserReadingSessionActivityData
+            .Where(d => d.SeriesId == seriesId && d.ReadingSession.AppUserId == userId);
+
+        return GetReadingHistoryItems(userId, userTimeZone, query, userParams, ct);
+    }
+
+    private async Task<PagedList<ReadingHistoryItemDto>> GetReadingHistoryItems(int userId, TimeZoneInfo tz, IQueryable<AppUserReadingSessionActivityData> dataQuery, UserParams userParams, CancellationToken ct = default)
+    {
+        var query = dataQuery.Select(a => new
             {
                 a.Id,
                 a.AppUserReadingSessionId,
@@ -1728,7 +1747,7 @@ public class StatisticService(ILogger<StatisticService> logger, IDataContext con
 
                 var totalPages = x.Sum(s => s.TotalPages);
 
-                var localStart = TimeZoneInfo.ConvertTimeFromUtc(startTime, userTimeZone);
+                var localStart = TimeZoneInfo.ConvertTimeFromUtc(startTime, tz);
 
                 var chapters = x.Select(s =>
                 {

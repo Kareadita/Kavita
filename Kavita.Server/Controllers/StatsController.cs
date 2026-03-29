@@ -454,6 +454,26 @@ public class StatsController(
         return Ok(result);
     }
 
+    /// <summary>
+    /// Return the authenticated users reading session history for a given series'
+    /// </summary>
+    /// <param name="seriesId"></param>
+    /// <param name="tzId"></param>
+    /// <param name="userParams"></param>
+    /// <returns></returns>
+    [HttpGet("reading-history/series/{seriesId:int}")]
+    public async Task<ActionResult<PagedList<ReadingHistoryItemDto>>> GetReadingHistoryItemsForSeries(
+        int seriesId, [FromQuery] string tzId, [FromQuery] UserParams userParams)
+    {
+
+        var result = await statService.GetReadingHistoryItemsForSeries(UserId, seriesId,
+            tzId, userParams, HttpContext.RequestAborted);
+
+        Response.AddPaginationHeader(result.CurrentPage, result.PageSize, result.TotalCount, result.TotalPages);
+
+        return Ok(result);
+    }
+
     // TODO: Can we cache this? Can we make an attribute to cache methods based on keys?
     /// <summary>
     /// Cleans the stats filter to only include valid data. I.e. only requests libraries the user has access to

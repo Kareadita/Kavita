@@ -34,6 +34,7 @@ import {DurationPipe} from '../../../_pipes/duration.pipe';
 import {Pagination} from '../../../_models/pagination';
 import {NgbPagination, NgbTooltip} from '@ng-bootstrap/ng-bootstrap';
 import {UtcToLocalTimePipe} from "../../../_pipes/utc-to-local-time.pipe";
+import {ReadingHistoryViewerComponent} from "src/app/shared/reading-history-viewer/reading-history-viewer.component";
 
 
 @Component({
@@ -54,6 +55,7 @@ import {UtcToLocalTimePipe} from "../../../_pipes/utc-to-local-time.pipe";
     NgbPagination,
     NgbTooltip,
     UtcToLocalTimePipe,
+    ReadingHistoryViewerComponent,
   ],
   templateUrl: './profile-activity.component.html',
   styleUrl: './profile-activity.component.scss',
@@ -63,26 +65,18 @@ export class ProfileActivityComponent {
 
   private readonly statsService = inject(StatisticsService);
   protected readonly imageService = inject(ImageService);
-  private readonly modalService = inject(ModalService);
   private readonly destroyRef = inject(DestroyRef);
   private readonly document = inject(DOCUMENT);
 
   memberInfo = input.required<MemberInfo>();
   filter = signal<StatsFilter | undefined>(undefined);
 
-  chapterInfoRow = viewChild.required<TemplateRef<any>>('chapterInfoRow');
-  readStatsTemplate = viewChild.required<TemplateRef<any>>('readStats');
-
   protected readonly pageSize = 30;
 
-  // State signals
   protected currentEntries = signal<ReadingHistoryItem[]>([]);
   protected pagination = signal<Pagination | null>(null);
   protected isLoading = signal(false);
   protected currentPage = signal(1);
-
-  protected totalPages = computed(() => this.pagination()?.totalPages ?? 1);
-  protected totalItems = computed(() => this.pagination()?.totalItems ?? 0);
 
   constructor() {
     // React to filter/member changes - reset to page 1
@@ -133,46 +127,6 @@ export class ProfileActivityComponent {
     if (scroll) {
       this.document.querySelector('.activity-list')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }
-  }
-
-  /**
-   * Returns relative date string for today/yesterday, otherwise formatted date
-   */
-  protected formatEntryDate(entry: ReadingHistoryItem): string {
-    const [year, month, day] = entry.localDate.substring(0, 10).split('-').map(Number);
-    const entryDate = new Date(year, month - 1, day);
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-
-    const yesterday = new Date(today);
-    yesterday.setDate(yesterday.getDate() - 1);
-
-    if (entryDate.getTime() === today.getTime()) {
-      return translate('profile-activity.today');
-    }
-    if (entryDate.getTime() === yesterday.getTime()) {
-      return translate('profile-activity.yesterday');
-    }
-
-    // Format as "Jan 4, 2025"
-    return entryDate.toLocaleDateString(undefined, {
-      month: 'short',
-      day: 'numeric',
-      year: 'numeric'
-    });
-  }
-
-  protected displayInfo(item: ReadingHistoryItem): void {
-    const ref = this.modalService.open(ListSelectModalComponent<{entry: ReadingHistoryItem, chapter: ReadingHistoryChapterItem}>, {
-      size: 'lg',
-      centered: true
-    });
-
-    ref.setInput('title', item.seriesName);
-    ref.setInput('showConfirm', false);
-    ref.setInput('inputItems', item.chapters.map(c => ({ value: {entry: item, chapter: c}, label: `${c.label}` })));
-    ref.setInput('itemTemplate', this.chapterInfoRow());
-    ref.setInput('itemsBeforeVirtual', 5);
   }
 
   updateFilter(event: StatsFilter): void {
