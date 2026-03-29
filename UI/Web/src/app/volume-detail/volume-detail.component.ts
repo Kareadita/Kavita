@@ -471,6 +471,7 @@ export class VolumeDetailComponent implements OnInit {
   shouldRenderVolumeAction(action: ActionItem<Volume>, entity: Volume, _: User) {
     switch (action.action) {
       case(Action.MarkAsRead):
+      case(Action.MarkAsReadWithSession):
         return entity.pagesRead < entity.pages;
       case(Action.MarkAsUnread):
         return entity.pagesRead !== 0;

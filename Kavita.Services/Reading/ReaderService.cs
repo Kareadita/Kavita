@@ -635,15 +635,14 @@ public class ReaderService(IUnitOfWork unitOfWork, ILogger<ReaderService> logger
         {
             // Get the word counts for all the pages
             var pageCounts = await bookService.GetWordCountsPerPage(chapter.Files.First().FilePath); // TODO: Cache
-            if (pageCounts == null) return GetTimeEstimate(series.WordCount, 0, true);
+            if (pageCounts == null) return GetTimeEstimate(chapter.WordCount, 0, true);
 
             // Sum character counts only for pages that have been read
-            var totalCharactersRead = pageCounts
-                .Where(kvp => kvp.Key <= chapter.PagesRead)
+            var toReadCharacters = pageCounts
+                .Where(kvp => kvp.Key > chapter.PagesRead)
                 .Sum(kvp => kvp.Value);
 
-            var progressCount = WordCountAnalyzerService.GetWordCount(totalCharactersRead);
-            var wordsLeft = series.WordCount - progressCount;
+            var wordsLeft = WordCountAnalyzerService.GetWordCount(toReadCharacters);
             return GetTimeEstimate(wordsLeft, 0, true);
         }
 
@@ -668,13 +667,12 @@ public class ReaderService(IUnitOfWork unitOfWork, ILogger<ReaderService> logger
             if (pageCounts == null) return GetTimeEstimate(series.WordCount, 0, true);
 
             // Sum character counts only for pages that have been read
-            var totalCharactersRead = pageCounts
-                .Where(kvp => kvp.Key <= chapter.PagesRead && kvp.Key >= page)
+            var toReadCharacters = pageCounts
+                .Where(kvp => kvp.Key >= page)
                 .Sum(kvp => kvp.Value);
 
-            var progressCount = WordCountAnalyzerService.GetWordCount(totalCharactersRead);
-            var wordsRead = series.WordCount - progressCount;
-            return GetTimeEstimate(wordsRead, 0, true);
+            var progressCount = WordCountAnalyzerService.GetWordCount(toReadCharacters);
+            return GetTimeEstimate(progressCount, 0, true);
         }
 
         var pagesRead = Math.Max(0, chapter.PagesRead - page);
