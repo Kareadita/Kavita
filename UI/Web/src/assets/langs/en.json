@@ -2112,6 +2112,7 @@
         "close": "{{common.close}}",
         "matched-count": "{{count}} matched",
         "issues-count": "{{count}} issues",
+        "unmatched-count": "{{count}} missing",
         "matched-items-header": "Matched Items",
         "issues-header": "Items Needing Attention",
         "remap-rules-header": "Remap Rules",

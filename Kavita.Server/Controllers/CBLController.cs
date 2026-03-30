@@ -226,7 +226,7 @@ public class CblController(IReadingListService readingListService, IDirectorySer
     }
 
     /// <summary>
-    /// Admin-only: returns all rules across all users.
+    /// Returns all rules across all users
     /// </summary>
     [Authorize(Policy = PolicyGroups.AdminPolicy)]
     [HttpGet("remap-rules/all")]
@@ -237,7 +237,7 @@ public class CblController(IReadingListService readingListService, IDirectorySer
     }
 
     /// <summary>
-    /// Creates a new series-level remap rule.
+    /// Creates a new series-level remap rule. Does not allow duplicate rules.
     /// </summary>
     [HttpPost("remap-rules")]
     [DisallowRole(PolicyConstants.ReadOnlyRole)]

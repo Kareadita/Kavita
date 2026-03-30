@@ -99,7 +99,8 @@ export class ImportCblModalComponent implements OnInit {
   });
 
   matchedCount = computed(() => this.allRows().filter(r => r.result.reason === CblImportReason.Success).length);
-  issueCount = computed(() => this.allRows().filter(r => r.result.reason !== CblImportReason.Success && !r.skipped).length);
+  issueCount = computed(() => this.allRows().filter(r => r.result.reason !== CblImportReason.Success && !r.skipped && r.result.matchTier != CblMatchTier.Unmatched).length);
+  unmatchedCount = computed(() => this.allRows().filter(r => r.result.reason !== CblImportReason.Success && !r.skipped && r.result.matchTier == CblMatchTier.Unmatched).length);
 
   /** Lazy typeahead state — only one row can be resolving at a time */
   activeRow = signal<CblIssueRow | null>(null);
@@ -114,6 +115,24 @@ export class ImportCblModalComponent implements OnInit {
     if (row.result.reason === CblImportReason.Success) return 'matched-row';
     return 'issue-row';
   };
+
+  getMatchBadgeClass(matchTier: CblMatchTier) {
+    switch (matchTier) {
+      case CblMatchTier.RemapRule:
+      case CblMatchTier.ExternalId:
+      case CblMatchTier.ExactName:
+      case CblMatchTier.ComicVineNaming:
+      case CblMatchTier.ArticleStripped:
+      case CblMatchTier.ReprintStripped:
+      case CblMatchTier.AlternateSeries:
+        return 'success';
+      case CblMatchTier.UserDecision:
+        return 'warning';
+      case CblMatchTier.Unmatched:
+        return 'danger';
+
+    }
+  }
 
   ngOnInit() {
     this.cblService.getRemapRules().subscribe(rules => {
@@ -373,7 +392,7 @@ export class ImportCblModalComponent implements OnInit {
     const confirmed = await this.confirmService.confirm(
       translate('toasts.save-remap-rule', {from: row.result.series, to: seriesName})
     );
-    
+
     if (!confirmed) {
       return;
     }
@@ -463,4 +482,6 @@ export class ImportCblModalComponent implements OnInit {
 
     return settings;
   }
+
+  protected readonly CblMatchTier = CblMatchTier;
 }

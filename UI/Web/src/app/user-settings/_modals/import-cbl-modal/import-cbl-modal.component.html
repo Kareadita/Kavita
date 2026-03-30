@@ -31,15 +31,28 @@
 
       <!-- Summary bar -->
       <div class="d-flex gap-3 mb-3 align-items-center">
-        <span class="badge bg-success fs-6">{{t('matched-count', {count: matchedCount()})}}</span>
-        @if (issueCount() > 0) {
-          <span class="badge text-bg-warning fs-6">{{t('issues-count', {count: issueCount()})}}</span>
-        }
+
+        <div class="btn-group" role="group">
+          <input type="checkbox" class="btn-check" id="matched-btn" autocomplete="off">
+          <label class="btn btn-outline-success" for="matched-btn">{{t('matched-count', {count: matchedCount()})}}</label>
+
+          <input type="checkbox" class="btn-check" id="warnings-btn" autocomplete="off">
+          <label class="btn btn-outline-warning" for="warnings-btn">{{t('issues-count', {count: issueCount()})}}</label>
+
+          <input type="checkbox" class="btn-check" id="errors-btn" autocomplete="off">
+          <label class="btn btn-outline-danger" for="errors-btn">{{t('unmatched-count', {count: unmatchedCount()})}}</label>
+        </div>
+
         <button class="btn btn-sm" [class.btn-outline-secondary]="showSuccessful()"
                 [class.btn-secondary]="!showSuccessful()"
                 (click)="showSuccessful.update(v => !v)">
           <i class="fa" [class.fa-eye]="showSuccessful()" [class.fa-eye-slash]="!showSuccessful()" aria-hidden="true"></i>
           {{showSuccessful() ? t('hide-matched') : t('show-matched')}}
+        </button>
+
+        <button class="btn btn-sm btn-outline-secondary" (click)="validateCurrentFile()">
+          <i class="fa fa-refresh me-1" aria-hidden="true"></i>
+          {{t('refresh')}}
         </button>
       </div>
 
@@ -93,12 +106,12 @@
           <ngx-datatable-column [width]="110" [sortable]="false" [draggable]="false" [resizeable]="false">
             <ng-template ngx-datatable-header-template>{{t('col-status')}}</ng-template>
             <ng-template let-row="row" ngx-datatable-cell-template>
-              @if (row.result.reason === CblImportReason.Success && row.result.matchTier === 0) {
-                <span class="badge tier-badge tier-0" [ngbTooltip]="getRemapRuleTooltip(row)" container="body">
+              @if (row.result.reason === CblImportReason.Success && row.result.matchTier === CblMatchTier.RemapRule) {
+                <span class="badge tier-badge text-bg-{{getMatchBadgeClass(row.result.matchTier)}}" [ngbTooltip]="getRemapRuleTooltip(row)" container="body">
                   {{row.result.matchTier | cblMatchTier}}
                 </span>
               } @else if (row.result.reason === CblImportReason.Success) {
-                <span class="badge tier-badge tier-{{row.result.matchTier}}">
+                <span class="badge tier-badge text-bg-{{getMatchBadgeClass(row.result.matchTier)}}" >
                   {{row.result.matchTier | cblMatchTier}}
                 </span>
               } @else {
@@ -258,11 +271,6 @@
     <button class="btn btn-sm btn-outline-secondary" (click)="openRemapRulesModal()">
       <i class="fa fa-cog me-1" aria-hidden="true"></i>
       {{t('manage-rules')}} ({{remapRules().length}})
-    </button>
-
-    <button class="btn btn-sm btn-outline-secondary" (click)="validateCurrentFile()">
-      <i class="fa fa-refresh me-1" aria-hidden="true"></i>
-      {{t('refresh')}}
     </button>
 
     <div>

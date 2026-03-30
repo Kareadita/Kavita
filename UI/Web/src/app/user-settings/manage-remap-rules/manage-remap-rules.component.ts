@@ -113,6 +113,7 @@ export class ManageRemapRulesComponent implements OnInit {
     const selectedSeries = this.selectedSeries();
     if (!cblSeriesName?.trim() || !selectedSeries) return;
 
+
     const issueDetail = cblVolume?.trim() ? { cblVolume: cblVolume.trim() } : undefined;
     this.cblService.createRemapRule(cblSeriesName.trim(), selectedSeries.seriesId, issueDetail).subscribe(rule => {
       this.rules.update(rules => [...rules, rule]);
