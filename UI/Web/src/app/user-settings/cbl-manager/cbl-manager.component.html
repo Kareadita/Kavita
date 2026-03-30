@@ -3,7 +3,7 @@
   <div class="position-relative">
     @if (!accountService.hasReadOnlyRole()) {
       <div class="position-absolute custom-position d-flex gap-2">
-        <button class="btn btn-outline-primary" (click)="selectedList.set(undefined)" [title]="t('add')">
+        <button class="btn btn-outline-primary" [disabled]="selectedList() === undefined" (click)="selectedList.set(undefined)" [title]="t('add')">
           <i class="fa fa-plus" aria-hidden="true"></i><span class="phone-hidden ms-1">{{t('add')}}</span>
         </button>
         <button class="btn btn-outline-primary" (click)="openBrowseModal()" [title]="t('browse-repo')">
