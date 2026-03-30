@@ -1,4 +1,4 @@
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 using Kavita.Models.DTOs.ReadingLists.CBL;
 using Kavita.Models.DTOs.ReadingLists.CBL.Import;
 
@@ -7,11 +7,11 @@ namespace Kavita.API.Services.ReadingLists;
 
 public interface ICblImportService
 {
-    Task<CblImportSummaryDto> ValidateList(int userId, string filePath, CblImportOptions options);
+    Task<CblImportSummaryDto> ValidateList(int userId, string filePath);
     /// <summary>
     /// Creates a new RL or updates an existing
     /// </summary>
-    Task<CblImportSummaryDto> UpsertReadingList(int userId, string filePath, CblImportOptions options, CblImportDecisions decisions);
+    Task<CblImportSummaryDto> UpsertReadingList(int userId, string filePath, CblImportDecisions decisions);
     /// <summary>
     /// Checks for updates against upstream ReadingList files and attempts to Update reading list.
     /// </summary>

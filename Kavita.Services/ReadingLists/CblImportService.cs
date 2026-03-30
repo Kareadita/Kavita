@@ -21,7 +21,7 @@ namespace Kavita.Services.ReadingLists;
 public class CblImportService(IUnitOfWork unitOfWork, ICblGithubService cblGithubService,
     IDirectoryService directoryService, ILogger<CblImportService> logger) : ICblImportService
 {
-    public async Task<CblImportSummaryDto> ValidateList(int userId, string filePath, CblImportOptions options)
+    public async Task<CblImportSummaryDto> ValidateList(int userId, string filePath)
     {
         ParsedCblReadingList cbl;
         try
@@ -53,7 +53,7 @@ public class CblImportService(IUnitOfWork unitOfWork, ICblGithubService cblGithu
             };
         }
 
-        var matchResults = await RunMatchingPipeline(userId, cbl, options);
+        var matchResults = await RunMatchingPipeline(userId, cbl);
         var summary = BuildSummary(cbl, filePath, matchResults);
 
         var existingList = await unitOfWork.ReadingListRepository
@@ -63,7 +63,7 @@ public class CblImportService(IUnitOfWork unitOfWork, ICblGithubService cblGithu
         return summary;
     }
 
-    public async Task<CblImportSummaryDto> UpsertReadingList(int userId, string filePath, CblImportOptions options, CblImportDecisions decisions)
+    public async Task<CblImportSummaryDto> UpsertReadingList(int userId, string filePath, CblImportDecisions decisions)
     {
         ParsedCblReadingList cbl;
         try
@@ -95,7 +95,7 @@ public class CblImportService(IUnitOfWork unitOfWork, ICblGithubService cblGithu
             };
         }
 
-        var matchResults = await RunMatchingPipeline(userId, cbl, options);
+        var matchResults = await RunMatchingPipeline(userId, cbl);
 
         // Override with user decisions
         foreach (var (order, decision) in decisions.ItemResolutions)
@@ -222,8 +222,7 @@ public class CblImportService(IUnitOfWork unitOfWork, ICblGithubService cblGithu
             var cbl = CblParser.Parse(tempFile);
             if (cbl.Items.Count == 0) return;
 
-            var options = new CblImportOptions();
-            var matchResults = await RunMatchingPipeline(userId, cbl, options);
+            var matchResults = await RunMatchingPipeline(userId, cbl);
 
             // Clear existing items and re-add
             readingList.Items.Clear();
@@ -258,7 +257,7 @@ public class CblImportService(IUnitOfWork unitOfWork, ICblGithubService cblGithu
     }
 
     private async Task<Dictionary<int, (MatchedItem? Match, CblBookResult Result)>> RunMatchingPipeline(
-        int userId, ParsedCblReadingList cbl, CblImportOptions options)
+        int userId, ParsedCblReadingList cbl)
     {
         // Collect all unique normalized names + variants
         var nameVariants = CblSeriesMatcher.GenerateAllNameVariants(cbl.Items);
@@ -293,12 +292,6 @@ public class CblImportService(IUnitOfWork unitOfWork, ICblGithubService cblGithu
         // Get user's accessible library IDs
         var userLibraryIds = await unitOfWork.LibraryRepository.GetLibraryIdsForUserIdAsync(userId);
 
-        // TODO: Figure out if I want to keep this in final design
-        if (options.ApplicableLibraries is { Count: > 0 })
-        {
-            userLibraryIds = userLibraryIds.Where(options.ApplicableLibraries.Contains).ToList();
-        }
-
         // Batch DB queries
         var remapRules = await unitOfWork.RemapRuleRepository
             .GetRulesForNamesAsync(directNormalizedNames, userId);
@@ -307,7 +300,7 @@ public class CblImportService(IUnitOfWork unitOfWork, ICblGithubService cblGithu
             .GetChaptersByExternalIdsAsync(comicVineIds, metronIds, userLibraryIds);
 
         var matchedSeries = (await unitOfWork.SeriesRepository
-            .GetAllSeriesByNameAsync(allNormalizedNames, userId, options.ApplicableLibraries,
+            .GetAllSeriesByNameAsync(allNormalizedNames, userId,
                 SeriesIncludes.Chapters | SeriesIncludes.Metadata)).ToList();
 
         // Also fetch series referenced by remap rules that weren't caught by name matching
@@ -330,7 +323,7 @@ public class CblImportService(IUnitOfWork unitOfWork, ICblGithubService cblGithu
             .GetChaptersByAlternateSeriesAsync(directNormalizedNames, userLibraryIds);
 
         return CblSeriesMatcher.ResolveAll(cbl.Items, remapRules, externalIdChapters,
-            matchedSeries, alternateSeriesChapters, options);
+            matchedSeries, alternateSeriesChapters);
     }
 
     private static CblImportSummaryDto BuildSummary(ParsedCblReadingList cbl, string filePath,

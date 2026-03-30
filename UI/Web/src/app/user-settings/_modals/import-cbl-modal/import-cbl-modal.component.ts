@@ -373,7 +373,10 @@ export class ImportCblModalComponent implements OnInit {
     const confirmed = await this.confirmService.confirm(
       translate('toasts.save-remap-rule', {from: row.result.series, to: seriesName})
     );
-    if (!confirmed) return;
+    
+    if (!confirmed) {
+      return;
+    }
 
     // Remember this series for auto-continue after re-validation
     this.pendingAutoEditSeries = row.result.series;

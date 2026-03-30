@@ -33,7 +33,7 @@ public class CblImportServiceTests : AbstractDbTest
 
         var filePath = helper.WriteCblToDisk(cbl);
         var svc = helper.CreateImportService();
-        var summary = await svc.ValidateList(seed.User.Id, filePath, new CblImportOptions());
+        var summary = await svc.ValidateList(seed.User.Id, filePath);
 
         Assert.Equal(CblImportResult.Success, summary.Success);
         Assert.Equal(3, summary.SuccessfulInserts.Count);
@@ -56,7 +56,7 @@ public class CblImportServiceTests : AbstractDbTest
 
         var filePath = helper.WriteCblToDisk(cbl);
         var svc = helper.CreateImportService();
-        var summary = await svc.ValidateList(seed.User.Id, filePath, new CblImportOptions());
+        var summary = await svc.ValidateList(seed.User.Id, filePath);
 
         Assert.Equal(CblImportResult.Partial, summary.Success);
         Assert.Equal(2, summary.SuccessfulInserts.Count);
@@ -77,7 +77,7 @@ public class CblImportServiceTests : AbstractDbTest
 
         var filePath = helper.WriteCblToDisk(cbl);
         var svc = helper.CreateImportService();
-        var summary = await svc.ValidateList(seed.User.Id, filePath, new CblImportOptions());
+        var summary = await svc.ValidateList(seed.User.Id, filePath);
 
         Assert.Equal(CblImportResult.Fail, summary.Success);
         Assert.Contains(summary.Results, r => r.Reason == CblImportReason.SeriesMissing);
@@ -94,7 +94,7 @@ public class CblImportServiceTests : AbstractDbTest
 
         var filePath = helper.WriteCblToDisk(cbl);
         var svc = helper.CreateImportService();
-        var summary = await svc.ValidateList(seed.User.Id, filePath, new CblImportOptions());
+        var summary = await svc.ValidateList(seed.User.Id, filePath);
 
         Assert.Equal(CblImportResult.Fail, summary.Success);
         Assert.Contains(summary.Results, r => r.Reason == CblImportReason.EmptyFile);
@@ -119,7 +119,7 @@ public class CblImportServiceTests : AbstractDbTest
             ItemResolutions = new Dictionary<int, CblItemDecision>(),
             SaveAsRemapRules = false
         };
-        var summary = await svc.UpsertReadingList(seed.User.Id, filePath, new CblImportOptions(), decisions);
+        var summary = await svc.UpsertReadingList(seed.User.Id, filePath, decisions);
 
         Assert.False(summary.IsUpdate);
 
@@ -155,7 +155,7 @@ public class CblImportServiceTests : AbstractDbTest
 
         var filePath = helper.WriteCblToDisk(cbl);
         var svc = helper.CreateImportService();
-        var summary = await svc.ValidateList(seed.User.Id, filePath, new CblImportOptions());
+        var summary = await svc.ValidateList(seed.User.Id, filePath);
 
         Assert.True(summary.IsUpdate);
     }
@@ -173,7 +173,7 @@ public class CblImportServiceTests : AbstractDbTest
 
         var filePath = helper.WriteCblToDisk(cbl);
         var svc = helper.CreateImportService();
-        var summary = await svc.ValidateList(seed.User.Id, filePath, new CblImportOptions());
+        var summary = await svc.ValidateList(seed.User.Id, filePath);
 
         Assert.False(summary.IsUpdate);
     }
@@ -209,7 +209,7 @@ public class CblImportServiceTests : AbstractDbTest
             ItemResolutions = new Dictionary<int, CblItemDecision>(),
             SaveAsRemapRules = false
         };
-        var summary = await svc.UpsertReadingList(seed.User.Id, filePath, new CblImportOptions(), decisions);
+        var summary = await svc.UpsertReadingList(seed.User.Id, filePath, decisions);
 
         Assert.True(summary.IsUpdate);
 
@@ -249,7 +249,7 @@ public class CblImportServiceTests : AbstractDbTest
 
         var filePath = helper.WriteCblToDisk(cbl);
         var svc = helper.CreateImportService();
-        var summary = await svc.ValidateList(seed.User.Id, filePath, new CblImportOptions());
+        var summary = await svc.ValidateList(seed.User.Id, filePath);
 
         Assert.Equal(CblImportResult.Success, summary.Success);
         Assert.Single(summary.SuccessfulInserts);
@@ -286,7 +286,7 @@ public class CblImportServiceTests : AbstractDbTest
         // User1 should match via remap
         var filePath = helper.WriteCblToDisk(cbl);
         var svc = helper.CreateImportService();
-        var summary1 = await svc.ValidateList(seed.User.Id, filePath, new CblImportOptions());
+        var summary1 = await svc.ValidateList(seed.User.Id, filePath);
         Assert.Equal(CblImportResult.Success, summary1.Success);
 
         // User2 should NOT match (no remap, and "Fable" doesn't match "Fables" exactly)
@@ -294,7 +294,7 @@ public class CblImportServiceTests : AbstractDbTest
             .AddBook("Fable", volume: "1", number: "1")
             .Build();
         var filePath2 = helper.WriteCblToDisk(cbl2);
-        var summary2 = await svc.ValidateList(user2.Id, filePath2, new CblImportOptions());
+        var summary2 = await svc.ValidateList(user2.Id, filePath2);
         Assert.Contains(summary2.Results, r => r.Reason == CblImportReason.SeriesMissing);
     }
 
@@ -326,7 +326,7 @@ public class CblImportServiceTests : AbstractDbTest
             },
             SaveAsRemapRules = true
         };
-        await svc.UpsertReadingList(seed.User.Id, filePath, new CblImportOptions(), decisions);
+        await svc.UpsertReadingList(seed.User.Id, filePath, decisions);
 
         // Verify remap rule was persisted
         var rules = await unitOfWork.RemapRuleRepository.GetRulesForUserAsync(seed.User.Id);
@@ -375,7 +375,7 @@ public class CblImportServiceTests : AbstractDbTest
 
         var filePath = helper.WriteCblToDisk(cbl);
         var svc = helper.CreateImportService();
-        var summary = await svc.ValidateList(seed.User.Id, filePath, new CblImportOptions());
+        var summary = await svc.ValidateList(seed.User.Id, filePath);
 
         Assert.Equal(CblImportResult.Success, summary.Success);
         Assert.Equal(2, summary.SuccessfulInserts.Count);
@@ -426,7 +426,7 @@ public class CblImportServiceTests : AbstractDbTest
 
         var filePath = helper.WriteCblToDisk(cbl);
         var svc = helper.CreateImportService();
-        var summary = await svc.ValidateList(seed.User.Id, filePath, new CblImportOptions());
+        var summary = await svc.ValidateList(seed.User.Id, filePath);
 
         Assert.Equal(CblImportResult.Success, summary.Success);
         Assert.Single(summary.SuccessfulInserts);
@@ -466,7 +466,7 @@ public class CblImportServiceTests : AbstractDbTest
 
         var filePath = helper.WriteCblToDisk(cbl);
         var svc = helper.CreateImportService();
-        var summary = await svc.ValidateList(seed.User.Id, filePath, new CblImportOptions());
+        var summary = await svc.ValidateList(seed.User.Id, filePath);
 
         Assert.Equal(CblImportResult.Success, summary.Success);
         Assert.Single(summary.SuccessfulInserts);
@@ -517,7 +517,7 @@ public class CblImportServiceTests : AbstractDbTest
 
         var filePath = helper.WriteCblToDisk(cbl);
         var svc = helper.CreateImportService();
-        var summary = await svc.ValidateList(seed.User.Id, filePath, new CblImportOptions());
+        var summary = await svc.ValidateList(seed.User.Id, filePath);
 
         Assert.Equal(CblImportResult.Success, summary.Success);
         Assert.Single(summary.SuccessfulInserts);
@@ -547,7 +547,7 @@ public class CblImportServiceTests : AbstractDbTest
 
         var filePath = helper.WriteCblToDisk(cbl);
         var svc = helper.CreateImportService();
-        var summary = await svc.ValidateList(teenUser.Id, filePath, new CblImportOptions());
+        var summary = await svc.ValidateList(teenUser.Id, filePath);
 
         Assert.Equal(CblImportResult.Partial, summary.Success);
         // Batman (Teen) should succeed, Fables (Mature) should be missing
@@ -570,7 +570,7 @@ public class CblImportServiceTests : AbstractDbTest
 
         var filePath = helper.WriteCblToDisk(cbl);
         var svc = helper.CreateImportService();
-        var summary = await svc.ValidateList(seed.User.Id, filePath, new CblImportOptions());
+        var summary = await svc.ValidateList(seed.User.Id, filePath);
 
         Assert.Equal(CblImportResult.Success, summary.Success);
         Assert.Equal(2, summary.SuccessfulInserts.Count);
@@ -614,7 +614,7 @@ public class CblImportServiceTests : AbstractDbTest
 
         var filePath = helper.WriteCblToDisk(cbl);
         var svc = helper.CreateImportService();
-        var summary = await svc.ValidateList(teenUser.Id, filePath, new CblImportOptions());
+        var summary = await svc.ValidateList(teenUser.Id, filePath);
 
         Assert.Contains(summary.Results, r => r.Reason == CblImportReason.SeriesMissing);
     }
@@ -657,7 +657,7 @@ public class CblImportServiceTests : AbstractDbTest
 
         var filePath = helper.WriteCblToDisk(cbl);
         var svc = helper.CreateImportService();
-        var summary = await svc.ValidateList(teenUser.Id, filePath, new CblImportOptions());
+        var summary = await svc.ValidateList(teenUser.Id, filePath);
 
         Assert.Equal(CblImportResult.Success, summary.Success);
         Assert.Single(summary.SuccessfulInserts);
@@ -682,7 +682,7 @@ public class CblImportServiceTests : AbstractDbTest
 
         var filePath = helper.WriteCblToDisk(cbl);
         var svc = helper.CreateImportService();
-        var summary = await svc.ValidateList(seed.User.Id, filePath, new CblImportOptions());
+        var summary = await svc.ValidateList(seed.User.Id, filePath);
 
         Assert.Equal(CblImportResult.Success, summary.Success);
         Assert.Single(summary.SuccessfulInserts);
@@ -704,7 +704,7 @@ public class CblImportServiceTests : AbstractDbTest
 
         var filePath = helper.WriteCblToDisk(cbl);
         var svc = helper.CreateImportService();
-        var summary = await svc.ValidateList(seed.User.Id, filePath, new CblImportOptions());
+        var summary = await svc.ValidateList(seed.User.Id, filePath);
 
         Assert.Equal(CblImportResult.Success, summary.Success);
         Assert.Single(summary.SuccessfulInserts);
@@ -726,7 +726,7 @@ public class CblImportServiceTests : AbstractDbTest
 
         var filePath = helper.WriteCblToDisk(cbl);
         var svc = helper.CreateImportService();
-        var summary = await svc.ValidateList(seed.User.Id, filePath, new CblImportOptions());
+        var summary = await svc.ValidateList(seed.User.Id, filePath);
 
         Assert.Equal(CblImportResult.Success, summary.Success);
         Assert.Single(summary.SuccessfulInserts);
@@ -749,7 +749,7 @@ public class CblImportServiceTests : AbstractDbTest
 
         var filePath = helper.WriteCblToDisk(cbl);
         var svc = helper.CreateImportService();
-        var summary = await svc.ValidateList(seed.User.Id, filePath, new CblImportOptions());
+        var summary = await svc.ValidateList(seed.User.Id, filePath);
 
         Assert.Equal(CblImportResult.Success, summary.Success);
         Assert.Single(summary.SuccessfulInserts);
@@ -788,7 +788,7 @@ public class CblImportServiceTests : AbstractDbTest
 
         var filePath = helper.WriteCblToDisk(cbl);
         var svc = helper.CreateImportService();
-        var summary = await svc.ValidateList(user2.Id, filePath, new CblImportOptions());
+        var summary = await svc.ValidateList(user2.Id, filePath);
 
         Assert.Equal(CblImportResult.Fail, summary.Success);
     }
@@ -834,62 +834,11 @@ public class CblImportServiceTests : AbstractDbTest
 
         var filePath = helper.WriteCblToDisk(cbl);
         var svc = helper.CreateImportService();
-        var summary = await svc.ValidateList(user.Id, filePath, new CblImportOptions());
+        var summary = await svc.ValidateList(user.Id, filePath);
 
         Assert.Equal(CblImportResult.Partial, summary.Success);
         Assert.Single(summary.SuccessfulInserts);
         Assert.Equal("SeriesA", summary.SuccessfulInserts.First().Series);
-    }
-
-    [Fact]
-    public async Task ValidateList_ApplicableLibraries_RestrictsSearch()
-    {
-        var (unitOfWork, context, _) = await CreateDatabase();
-        using var helper = new CblTestHelper(unitOfWork);
-
-        // Seed two libraries
-        var libA = new LibraryBuilder("LibA", LibraryType.Comic)
-            .WithFolderPath(new FolderPathBuilder("/data/liba").Build())
-            .Build();
-        libA.Series = [new SeriesBuilder("SeriesA")
-            .WithVolume(new VolumeBuilder("1")
-                .WithChapter(new ChapterBuilder("1").Build())
-                .Build())
-            .Build()];
-
-        var libB = new LibraryBuilder("LibB", LibraryType.Comic)
-            .WithFolderPath(new FolderPathBuilder("/data/libb").Build())
-            .Build();
-        libB.Series = [new SeriesBuilder("SeriesB")
-            .WithVolume(new VolumeBuilder("1")
-                .WithChapter(new ChapterBuilder("1").Build())
-                .Build())
-            .Build()];
-
-        // User has access to both
-        var user = new AppUserBuilder("bothuser", "both@test.com")
-            .WithLibrary(libA)
-            .WithLibrary(libB)
-            .Build();
-        context.AppUser.Add(user);
-        await context.SaveChangesAsync();
-        context.ChangeTracker.Clear();
-
-        var cbl = CblFileBuilder.Create("Applicable Libs Test")
-            .AddBook("SeriesA", volume: "1", number: "1")
-            .AddBook("SeriesB", volume: "1", number: "1")
-            .Build();
-
-        var filePath = helper.WriteCblToDisk(cbl);
-        var svc = helper.CreateImportService();
-
-        // Only search in LibB
-        var options = new CblImportOptions { ApplicableLibraries = [libB.Id] };
-        var summary = await svc.ValidateList(user.Id, filePath, options);
-
-        Assert.Equal(CblImportResult.Partial, summary.Success);
-        Assert.Single(summary.SuccessfulInserts);
-        Assert.Equal("SeriesB", summary.SuccessfulInserts.First().Series);
     }
 
     #endregion
@@ -932,7 +881,7 @@ public class CblImportServiceTests : AbstractDbTest
 
         var filePath = helper.WriteCblToDisk(cbl);
         var svc = helper.CreateImportService();
-        var summary = await svc.ValidateList(user.Id, filePath, new CblImportOptions());
+        var summary = await svc.ValidateList(user.Id, filePath);
 
         Assert.Equal(CblImportResult.Success, summary.Success);
         Assert.Single(summary.SuccessfulInserts);
@@ -971,7 +920,7 @@ public class CblImportServiceTests : AbstractDbTest
 
         var filePath = helper.WriteCblToDisk(cbl);
         var svc = helper.CreateImportService();
-        var summary = await svc.ValidateList(seed.User.Id, filePath, new CblImportOptions());
+        var summary = await svc.ValidateList(seed.User.Id, filePath);
 
         Assert.Equal(CblImportResult.Success, summary.Success);
         Assert.Single(summary.SuccessfulInserts);
@@ -1009,7 +958,7 @@ public class CblImportServiceTests : AbstractDbTest
 
         var filePath = helper.WriteCblToDisk(cbl);
         var svc = helper.CreateImportService();
-        var summary = await svc.ValidateList(seed.User.Id, filePath, new CblImportOptions());
+        var summary = await svc.ValidateList(seed.User.Id, filePath);
 
         Assert.Equal(CblImportResult.Success, summary.Success);
         Assert.Single(summary.SuccessfulInserts);
@@ -1046,7 +995,7 @@ public class CblImportServiceTests : AbstractDbTest
 
         var filePath = helper.WriteCblToDisk(cbl);
         var svc = helper.CreateImportService();
-        var summary = await svc.ValidateList(seed.User.Id, filePath, new CblImportOptions());
+        var summary = await svc.ValidateList(seed.User.Id, filePath);
 
         Assert.Equal(CblImportResult.Success, summary.Success);
         Assert.Single(summary.SuccessfulInserts);
@@ -1099,7 +1048,7 @@ public class CblImportServiceTests : AbstractDbTest
 
         var filePath = helper.WriteCblToDisk(cbl);
         var svc = helper.CreateImportService();
-        var summary = await svc.ValidateList(seed.User.Id, filePath, new CblImportOptions());
+        var summary = await svc.ValidateList(seed.User.Id, filePath);
 
         Assert.Equal(CblImportResult.Success, summary.Success);
         Assert.Single(summary.SuccessfulInserts);
@@ -1148,7 +1097,7 @@ public class CblImportServiceTests : AbstractDbTest
 
         var filePath = helper.WriteCblToDisk(cbl);
         var svc = helper.CreateImportService();
-        var summary = await svc.ValidateList(seed.User.Id, filePath, new CblImportOptions());
+        var summary = await svc.ValidateList(seed.User.Id, filePath);
 
         Assert.Equal(CblImportResult.Success, summary.Success);
         Assert.Single(summary.SuccessfulInserts);

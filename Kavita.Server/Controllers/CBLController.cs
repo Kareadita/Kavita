@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -149,7 +149,7 @@ public class CblController(IReadingListService readingListService, IDirectorySer
             return BadRequest("File not found on server");
         }
 
-        var summary = await cblImporterService.ValidateList(userId, fullPath, new CblImportOptions());
+        var summary = await cblImporterService.ValidateList(userId, fullPath);
         summary.FileName = dto.FileName;
         return Ok(summary);
     }
@@ -174,7 +174,7 @@ public class CblController(IReadingListService readingListService, IDirectorySer
         try
         {
             var summary = await cblImporterService.UpsertReadingList(
-                userId, fullPath, new CblImportOptions(), dto.Decisions);
+                userId, fullPath, dto.Decisions);
             summary.FileName = dto.FileName;
 
             // Set provider and sync tracking fields
