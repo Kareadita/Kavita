@@ -31,24 +31,16 @@
 
       <!-- Summary bar -->
       <div class="d-flex gap-3 mb-3 align-items-center">
-
         <div class="btn-group" role="group">
-          <input type="checkbox" class="btn-check" id="matched-btn" autocomplete="off">
+          <input type="checkbox" class="btn-check" id="matched-btn" autocomplete="off" [checked]="showMatched()" (change)="toggleRowFilter('matched')">
           <label class="btn btn-outline-success" for="matched-btn">{{t('matched-count', {count: matchedCount()})}}</label>
 
-          <input type="checkbox" class="btn-check" id="warnings-btn" autocomplete="off">
+          <input type="checkbox" class="btn-check" id="warnings-btn" autocomplete="off" [checked]="showIssues()" (change)="toggleRowFilter('issues')">
           <label class="btn btn-outline-warning" for="warnings-btn">{{t('issues-count', {count: issueCount()})}}</label>
 
-          <input type="checkbox" class="btn-check" id="errors-btn" autocomplete="off">
+          <input type="checkbox" class="btn-check" id="errors-btn" autocomplete="off" [checked]="showUnmatched()" (change)="toggleRowFilter('unmatched')">
           <label class="btn btn-outline-danger" for="errors-btn">{{t('unmatched-count', {count: unmatchedCount()})}}</label>
         </div>
-
-        <button class="btn btn-sm" [class.btn-outline-secondary]="showSuccessful()"
-                [class.btn-secondary]="!showSuccessful()"
-                (click)="showSuccessful.update(v => !v)">
-          <i class="fa" [class.fa-eye]="showSuccessful()" [class.fa-eye-slash]="!showSuccessful()" aria-hidden="true"></i>
-          {{showSuccessful() ? t('hide-matched') : t('show-matched')}}
-        </button>
 
         <button class="btn btn-sm btn-outline-secondary" (click)="validateCurrentFile()">
           <i class="fa fa-refresh me-1" aria-hidden="true"></i>
@@ -246,12 +238,12 @@
                 <div class="d-flex align-items-center gap-1">
                   @if (!row.skipped && activeRow() !== row) {
                     <button class="btn btn-sm btn-outline-primary" (click)="startResolve(row)"
-                            [attr.aria-label]="t('resolve')">
+                            [attr.aria-label]="t('resolve')" [ngbTooltip]="t('resolve')">
                       <i class="fa fa-pencil" aria-hidden="true"></i>
                     </button>
                   }
                   <button class="btn btn-sm btn-outline-secondary" (click)="toggleSkip(row)"
-                          [attr.aria-label]="t('skip-item')">
+                          [attr.aria-label]="t('skip-item')" [ngbTooltip]="t('skip-item')">
                     @if (row.skipped) {
                       <i class="fa fa-undo" aria-hidden="true"></i>
                     } @else {

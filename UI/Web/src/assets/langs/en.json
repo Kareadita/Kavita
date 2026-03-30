@@ -2137,8 +2137,6 @@
         "col-action": "Action",
         "resolve": "Resolve",
         "select-chapter": "Select the matching chapter",
-        "hide-matched": "Hide Matched",
-        "show-matched": "Show Matched",
         "edit-match": "Edit match",
         "cancel": "Cancel",
         "undo": "Undo",

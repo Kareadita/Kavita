@@ -19,7 +19,6 @@ import {SearchResult} from '../../../_models/search/search-result';
 import {UtilityService} from '../../../shared/_services/utility.service';
 import {TypeaheadComponent} from '../../../typeahead/_components/typeahead.component';
 import {LoadingComponent} from '../../../shared/loading/loading.component';
-import {CblImportResult} from '../../../_models/reading-list/cbl/cbl-import-result.enum';
 import {CblMatchTierPipe} from '../../../_pipes/cbl-match-tier.pipe';
 import {CblImportReasonPipe} from '../../../_pipes/cbl-import-reason.pipe';
 import {ManageRemapRulesModalComponent} from '../manage-remap-rules-modal/manage-remap-rules-modal.component';
@@ -77,9 +76,6 @@ export class ImportCblModalComponent implements OnInit {
   private readonly libraryService = inject(LibraryService);
   protected readonly imageService = inject(ImageService);
 
-  protected readonly CblImportReason = CblImportReason;
-  protected readonly CblImportResult = CblImportResult;
-
   savedFiles = input.required<CblSavedFile[]>();
 
   currentFileIndex = signal(0);
@@ -90,25 +86,46 @@ export class ImportCblModalComponent implements OnInit {
 
   /** All rows (matched + issues) for the unified table */
   allRows = signal<CblIssueRow[]>([]);
+  classifiedRows = computed(() =>
+    this.allRows().map(r => ({
+      ...r,
+      category: this.classifyRow(r)
+    }))
+  );
   libraryNames = signal<Record<number, string>>({});
 
-  showSuccessful = signal(true);
+  showMatched = signal(true);
+  showIssues = signal(true);
+  showUnmatched = signal(true);
   visibleRows = computed(() => {
-    const rows = this.allRows();
-    return this.showSuccessful() ? rows : rows.filter(r => r.result.reason !== CblImportReason.Success);
+    const active = new Set<string>();
+    if (this.showMatched()) active.add('matched');
+    if (this.showIssues()) active.add('issue');
+    if (this.showUnmatched()) active.add('unmatched');
+
+    if (active.size === 0) return this.classifiedRows();
+
+    return this.classifiedRows().filter(r => active.has(r.category));
   });
 
-  matchedCount = computed(() => this.allRows().filter(r => r.result.reason === CblImportReason.Success).length);
-  issueCount = computed(() => this.allRows().filter(r => r.result.reason !== CblImportReason.Success && !r.skipped && r.result.matchTier != CblMatchTier.Unmatched).length);
-  unmatchedCount = computed(() => this.allRows().filter(r => r.result.reason !== CblImportReason.Success && !r.skipped && r.result.matchTier == CblMatchTier.Unmatched).length);
+  matchedCount = computed(() => this.classifiedRows().filter(r => r.category === 'matched').length);
+  issueCount = computed(() => this.classifiedRows().filter(r => r.category === 'issue').length);
+  unmatchedCount = computed(() => this.classifiedRows().filter(r => r.category === 'unmatched').length);
 
-  /** Lazy typeahead state — only one row can be resolving at a time */
+  /** Lazy typeahead state, only one row can be resolving at a time */
   activeRow = signal<CblIssueRow | null>(null);
   activeSeriesTypeahead = signal<TypeaheadSettings<SearchResult> | null>(null);
   activeChapterTypeahead = signal<TypeaheadSettings<Chapter> | null>(null);
 
   /** Track the CBL series name of the row being resolved, so we can auto-continue after re-validation */
   private pendingAutoEditSeries: string | null = null;
+
+  private classifyRow(r: CblIssueRow): 'matched' | 'issue' | 'unmatched' {
+    if (r.result.reason === CblImportReason.Success) return 'matched';
+    if (r.skipped) return 'matched';
+    if (r.result.matchTier != CblMatchTier.Unmatched) return 'unmatched';
+    return 'issue';
+  }
 
   getRowClass = (row: CblIssueRow) => {
     if (row.skipped) return 'skipped-row';
@@ -328,6 +345,16 @@ export class ImportCblModalComponent implements OnInit {
     this.allRows.set([...this.allRows()]);
   }
 
+  toggleRowFilter(category: 'matched' | 'issues' | 'unmatched') {
+    switch (category) {
+      case 'matched': this.showMatched.update(v => !v); break;
+      case 'issues': this.showIssues.update(v => !v); break;
+      case 'unmatched': this.showUnmatched.update(v => !v); break;
+    }
+  }
+
+
+
   openRemapRulesModal() {
     const ref = this.modalService.open(ManageRemapRulesModalComponent, {size: 'lg'});
     ref.closed.subscribe((hasModifications: boolean) => {
@@ -483,5 +510,6 @@ export class ImportCblModalComponent implements OnInit {
     return settings;
   }
 
+  protected readonly CblImportReason = CblImportReason;
   protected readonly CblMatchTier = CblMatchTier;
 }
