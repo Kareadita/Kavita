@@ -391,6 +391,56 @@ public class CblImportServiceTests : AbstractDbTest
         Assert.Equal(batman1994Ids.SeriesId, second.SeriesId);
     }
 
+    /// <summary>
+    /// Similar to <see cref="ValidateList_SeriesRemap_FallsThroughWhenVolumeDoesNotResolve"/> but focuses explicitly
+    /// on when there is a dedicate volume remap rule ane ensures Batman (2014) matches correctly
+    /// </summary>
+    [Fact]
+    public async Task ValidateList_SeriesVolumeRemap()
+    {
+        var (unitOfWork, context, _) = await CreateDatabase();
+        using var helper = new CblTestHelper(unitOfWork);
+        var seed = await helper.SeedLibrary("comic-multi-volume-series.json");
+
+        var batman2014Ids = seed.Lookup[("Batman (2014)", "2014", "1")];
+        var batman1994Ids = seed.Lookup[("Batman (1994)", "1994", "1")];
+
+        // Series-only remap: "Batman" -> "Batman (2014)"
+        unitOfWork.RemapRuleRepository.Add(new ReadingListRemapRule
+        {
+            NormalizedCblSeriesName = "Batman".ToNormalized(),
+            CblSeriesName = "Batman",
+            CblVolume = "2014",
+            SeriesId = batman2014Ids.SeriesId,
+            SeriesNameAtMapping = "Batman (2014)",
+            AppUserId = seed.User.Id,
+            CreatedUtc = DateTime.UtcNow
+        });
+        await unitOfWork.CommitAsync();
+
+        var cbl = CblFileBuilder.Create("Remap Fallthrough Test")
+            .AddBook("Batman", volume: "2014", number: "1") // Should match via remap
+            .AddBook("Batman", volume: "1994", number: "1") // Should NOT match via remap — must fall through
+            .Build();
+
+        var filePath = helper.WriteCblToDisk(cbl);
+        var svc = helper.CreateImportService();
+        var summary = await svc.ValidateList(seed.User.Id, filePath);
+
+        Assert.Equal(CblImportResult.Success, summary.Success);
+        Assert.Equal(2, summary.SuccessfulInserts.Count);
+
+        // First item: matched via remap rule to Batman (2014)
+        var first = summary.SuccessfulInserts.First(r => r.Volume == "2014");
+        Assert.Equal(CblMatchTier.RemapRule, first.MatchTier);
+        Assert.Equal(batman2014Ids.SeriesId, first.SeriesId);
+
+        // Second item: remap fell through, matched via ComicVine naming tier to Batman (1994)
+        var second = summary.SuccessfulInserts.First(r => r.Volume == "1994");
+        Assert.NotEqual(CblMatchTier.RemapRule, second.MatchTier);
+        Assert.Equal(batman1994Ids.SeriesId, second.SeriesId);
+    }
+
     #endregion
 
     #region Group 4: Issue-Level Remap Rules
