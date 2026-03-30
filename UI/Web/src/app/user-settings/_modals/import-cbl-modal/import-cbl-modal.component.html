@@ -260,6 +260,11 @@
       {{t('manage-rules')}} ({{remapRules().length}})
     </button>
 
+    <button class="btn btn-sm btn-outline-secondary" (click)="validateCurrentFile()">
+      <i class="fa fa-refresh me-1" aria-hidden="true"></i>
+      {{t('refresh')}}
+    </button>
+
     <div>
       @if (savedFiles().length > 1) {
         <button class="btn btn-secondary me-2" [disabled]="currentFileIndex() === 0 || isProcessing()"

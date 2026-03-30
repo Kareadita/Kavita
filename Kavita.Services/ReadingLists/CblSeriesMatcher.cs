@@ -218,6 +218,7 @@ internal static class CblSeriesMatcher
             var libraryId = 0;
             var libraryType = LibraryType.Comic;
             var ruleSeries = matchedSeries.FirstOrDefault(s => s.Id == rule.SeriesId);
+
             if (ruleSeries != null)
             {
                 libraryId = ruleSeries.LibraryId;
@@ -250,27 +251,21 @@ internal static class CblSeriesMatcher
             return true;
         }
 
-        // Volume-only remap with target VolumeId — resolve chapters within the override volume
+        // Volume-only remap with target VolumeId - resolve chapters within the override volume
         if (rule is {VolumeId: not null, ChapterId: null})
         {
             var volSeries = matchedSeries.FirstOrDefault(s => s.Id == rule.SeriesId);
-            if (volSeries != null)
-            {
-                var targetVolume = volSeries.Volumes?.FirstOrDefault(v => v.Id == rule.VolumeId.Value);
-                if (targetVolume != null)
-                {
-                    var resolved = ResolveChapter(item, volSeries, CblMatchTier.RemapRule, targetVolume);
-                    if (resolved.Result.Reason is CblImportReason.ChapterMissing)
-                    {
-                        return false;
-                    }
+            var targetVolume = volSeries?.Volumes?.FirstOrDefault(v => v.Id == rule.VolumeId.Value);
 
-                    resolvedResult = resolved;
-                    return true;
-                }
+            if (targetVolume == null) return false;
+            var resolved = ResolveChapter(item, volSeries!, CblMatchTier.RemapRule, targetVolume);
+            if (resolved.Result.Reason is CblImportReason.ChapterMissing)
+            {
+                return false;
             }
 
-            return false;
+            resolvedResult = resolved;
+            return true;
         }
 
         // Rule only mapped to series — resolve chapter within the mapped series.
