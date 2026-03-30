@@ -226,16 +226,6 @@ export class ImportCblModalComponent implements OnInit {
     return row.result.reason === CblImportReason.SeriesCollision;
   }
 
-  needsAction(row: CblIssueRow): boolean {
-    return row.result.reason !== CblImportReason.Success && !row.skipped;
-  }
-
-  /** Whether this row needs a series typeahead */
-  needsSeriesTypeahead(row: CblIssueRow): boolean {
-    return this.isSeriesMissing(row) ||
-      (this.isSeriesCollision(row) && (!row.result.candidates || row.result.candidates.length === 0));
-  }
-
   /** Whether this row is the active editing row showing a series typeahead */
   isEditingSeries(row: CblIssueRow): boolean {
     return this.activeRow() === row && this.activeSeriesTypeahead() !== null;
