@@ -246,6 +246,8 @@ public class CblController(IReadingListService readingListService, IDirectorySer
         var series = await unitOfWork.SeriesRepository.GetSeriesByIdAsync(dto.SeriesId, ct: HttpContext.RequestAborted);
         if (series == null) return BadRequest(await localizationService.Translate(UserId, "series-doesnt-exist"));
 
+        // TODO: Ensure no duplicate rules
+
         var rule = new ReadingListRemapRule
         {
             NormalizedCblSeriesName = dto.CblSeriesName.ToNormalized(),

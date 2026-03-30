@@ -103,7 +103,8 @@ export class ImportCblModalComponent implements OnInit {
     if (this.showIssues()) active.add('issue');
     if (this.showUnmatched()) active.add('unmatched');
 
-    if (active.size === 0) return this.classifiedRows();
+    if (active.size === 0) return [];
+    if (active.size === 3 || active.size === 0) return this.classifiedRows();
 
     return this.classifiedRows().filter(r => active.has(r.category));
   });
@@ -417,7 +418,9 @@ export class ImportCblModalComponent implements OnInit {
     // Remember this series for auto-continue after re-validation
     this.pendingAutoEditSeries = row.result.series;
 
-    this.cblService.createRemapRule(row.result.series, seriesId).subscribe(rule => {
+    this.cblService.createRemapRule(row.result.series, seriesId, {
+      cblVolume: row.result.volume || undefined, // Pass the volume if it's available to ensure volume-level mapping works
+    }).subscribe(rule => {
       row.remapRuleId = rule.id;
       this.remapRules.set([...this.remapRules(), rule]);
       this.cancelResolve();

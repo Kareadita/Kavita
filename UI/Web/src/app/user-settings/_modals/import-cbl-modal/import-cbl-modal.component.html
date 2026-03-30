@@ -123,10 +123,10 @@
                   <div class="flex-grow-1">
                     <app-typeahead [settings]="activeSeriesTypeahead()!"
                                    (selectedData)="onSeriesTypeaheadSelected(row, $event)">
-                      <ng-template #badgeItem let-item let-position="idx">
+                      <ng-template #badgeItem let-item>
                         {{item.name}} ({{libraryNames()[item.libraryId]}})
                       </ng-template>
-                      <ng-template #optionItem let-item let-position="idx" let-value="value">
+                      <ng-template #optionItem let-item let-value="value">
                         <div class="d-flex align-items-center gap-2">
                           <app-image [imageUrl]="imageService.getSeriesCoverImage(item.seriesId)"
                                      height="40px" width="30px" />
@@ -238,12 +238,12 @@
                 <div class="d-flex align-items-center gap-1">
                   @if (!row.skipped && activeRow() !== row) {
                     <button class="btn btn-sm btn-outline-primary" (click)="startResolve(row)"
-                            [attr.aria-label]="t('resolve')" [ngbTooltip]="t('resolve')">
+                            [attr.aria-label]="t('resolve')">
                       <i class="fa fa-pencil" aria-hidden="true"></i>
                     </button>
                   }
                   <button class="btn btn-sm btn-outline-secondary" (click)="toggleSkip(row)"
-                          [attr.aria-label]="t('skip-item')" [ngbTooltip]="t('skip-item')">
+                          [attr.aria-label]="t('skip-item')">
                     @if (row.skipped) {
                       <i class="fa fa-undo" aria-hidden="true"></i>
                     } @else {

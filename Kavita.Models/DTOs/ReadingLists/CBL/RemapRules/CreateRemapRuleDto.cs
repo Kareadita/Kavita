@@ -9,7 +9,7 @@ public sealed record CreateRemapRuleDto
     public string CblSeriesName { get; set; } = string.Empty;
     public int SeriesId { get; set; }
     /// <summary>
-    /// Optional: CBL volume string for issue-level rules
+    /// Optional: CBL volume string for issue/volume-level rules
     /// </summary>
     public string? CblVolume { get; set; }
     /// <summary>
