@@ -35,6 +35,18 @@ public interface ICblExportService
 
 public partial class CblExportService(IUnitOfWork unitOfWork, IDirectoryService directoryService, ILogger<CblExportService> logger) : ICblExportService
 {
+    private static readonly XmlWriterSettings CblV1XmlOptions = new XmlWriterSettings
+    {
+        Indent = true,
+        Encoding = System.Text.Encoding.UTF8,
+    };
+
+    private static readonly JsonSerializerOptions CblV2JsonOptions = new JsonSerializerOptions
+    {
+        WriteIndented = true,
+        DefaultIgnoreCondition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull,
+    };
+
     /// <inheritdoc />
     public async Task<string?> ExportReadingList(int readingListId, int userId, bool asV2 = false)
     {
@@ -140,14 +152,9 @@ public partial class CblExportService(IUnitOfWork unitOfWork, IDirectoryService 
     public static void SerializeV1(CblReadingList cbl, string filePath)
     {
         var serializer = new XmlSerializer(typeof(CblReadingList));
-        var settings = new XmlWriterSettings
-        {
-            Indent = true,
-            Encoding = System.Text.Encoding.UTF8,
-        };
 
         using var stream = File.Create(filePath);
-        using var writer = XmlWriter.Create(stream, settings);
+        using var writer = XmlWriter.Create(stream, CblV1XmlOptions);
         serializer.Serialize(writer, cbl);
     }
 
@@ -269,7 +276,7 @@ public partial class CblExportService(IUnitOfWork unitOfWork, IDirectoryService 
             {
                 Issue = chapter.ComicVineId,
                 Name = "cv",
-                Series = string.IsNullOrEmpty(series.ComicVineId) ? "0" : series.ComicVineId
+                Series = series.ComicVineId
             });
         }
 
@@ -279,7 +286,7 @@ public partial class CblExportService(IUnitOfWork unitOfWork, IDirectoryService 
             {
                 Issue = chapter.MetronId.ToString(),
                 Name = "metron",
-                Series = chapter.MetronId.ToString()
+                Series = series.MetronId.ToString()
             });
         }
 
@@ -289,7 +296,7 @@ public partial class CblExportService(IUnitOfWork unitOfWork, IDirectoryService 
             {
                 Issue = chapter.HardcoverId.ToString(),
                 Name = "hardcover",
-                Series = chapter.HardcoverId.ToString()
+                Series = series.HardcoverId.ToString()
             });
         }
 
@@ -298,13 +305,8 @@ public partial class CblExportService(IUnitOfWork unitOfWork, IDirectoryService 
 
     public static void SerializeV2(CblV2Root root, string filePath)
     {
-        var options = new JsonSerializerOptions
-        {
-            WriteIndented = true,
-            DefaultIgnoreCondition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull,
-        };
 
-        var json = JsonSerializer.Serialize(root, options);
+        var json = JsonSerializer.Serialize(root, CblV2JsonOptions);
         File.WriteAllText(filePath, json);
     }
 

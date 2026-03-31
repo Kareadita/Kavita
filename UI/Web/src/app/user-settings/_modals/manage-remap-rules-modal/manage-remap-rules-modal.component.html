@@ -17,7 +17,10 @@
             <small class="text-muted">
               @switch (rule.kind) {
                 @case (CblRemapRuleKind.Series) {
-                  {{t('series-level')}} {{t('volume-num', {num: rule.cblVolume})}}
+                  {{t('series-level')}}
+                  @if (rule.cblVolume) {
+                    {{t('volume-num', {num: rule.cblVolume})}}
+                  }
                 }
                 @case (CblRemapRuleKind.Volume) {
                   {{t('volume-num', {num: rule.cblVolume})}}

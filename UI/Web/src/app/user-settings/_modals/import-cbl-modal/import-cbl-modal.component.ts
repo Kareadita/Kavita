@@ -103,7 +103,7 @@ export class ImportCblModalComponent implements OnInit {
     if (this.showUnmatched()) active.add('unmatched');
 
     if (active.size === 0) return [];
-    if (active.size === 3 || active.size === 0) return this.classifiedRows();
+    if (active.size === 3) return this.classifiedRows();
 
     return this.classifiedRows().filter(r => active.has(r.category));
   });
