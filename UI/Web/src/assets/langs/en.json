@@ -2104,7 +2104,9 @@
         "delete": "{{common.delete}}",
         "view-list": "View Reading List",
         "last-synced": "Last synced {{date}}",
-        "source": "Source"
+        "source": "Source",
+        "can-sync": "Can Sync",
+        "not-authorized": "You lack the ability to interact with this content"
     },
 
     "import-cbl-modal": {

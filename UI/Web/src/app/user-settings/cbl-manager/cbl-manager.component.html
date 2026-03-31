@@ -149,7 +149,7 @@
               </div>
 
               @if (selectedItem.canSync) {
-                <span class="pill p-1 me-1 provider">{{selectedItem.provider | readingListProvider}}</span>
+                <span class="pill p-1 me-1 provider">{{t('can-sync')}}</span>
               }
 
               <div class="text-muted mt-1" style="font-size: 0.9rem;">
@@ -160,7 +160,7 @@
                   @if (selectedItem.ageRating) {
                     <span> · </span>
                   }
-                  <span>{{selectedItem.startingMonth}}/{{selectedItem.startingYear}} – {{selectedItem.endingMonth}}/{{selectedItem.endingYear}}</span>
+                  <span>{{selectedItem.startingYear}} – {{selectedItem.endingYear}}</span>
                 }
                 @if (selectedItem.ageRating || selectedItem.startingYear > 0) {
                   <span> · </span>
@@ -192,7 +192,7 @@
           }
 
         } @else {
-          <p>You lack the ability to interact with this content.</p>
+          <p>{{t('not-authorized')}}</p>
         }
       </div>
       </form>
