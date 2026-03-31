@@ -124,7 +124,7 @@ export class ImportCblModalComponent implements OnInit {
   private classifyRow(r: CblIssueRow): 'matched' | 'issue' | 'unmatched' {
     if (r.result.reason === CblImportReason.Success) return 'matched';
     if (r.skipped) return 'matched';
-    if (r.result.matchTier != CblMatchTier.Unmatched) return 'unmatched';
+    if (r.result.matchTier === CblMatchTier.Unmatched) return 'unmatched';
     return 'issue';
   }
 
@@ -229,12 +229,12 @@ export class ImportCblModalComponent implements OnInit {
 
   /** Whether this row is the active editing row showing a series typeahead */
   isEditingSeries(row: CblIssueRow): boolean {
-    return this.activeRow() === row && this.activeSeriesTypeahead() !== null;
+    return this.activeRow()?.result.order === row.result.order && this.activeSeriesTypeahead() !== null;
   }
 
   /** Whether this row is the active editing row showing a chapter typeahead */
   isEditingChapter(row: CblIssueRow): boolean {
-    return this.activeRow() === row && this.activeChapterTypeahead() !== null;
+    return this.activeRow()?.result.order === row.result.order && this.activeChapterTypeahead() !== null;
   }
 
   /** Build a minimal Chapter stub for entity-title rendering */

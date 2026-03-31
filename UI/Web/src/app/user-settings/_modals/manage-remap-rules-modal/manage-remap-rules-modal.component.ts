@@ -1,11 +1,12 @@
 import {ChangeDetectionStrategy, Component, computed, inject, OnInit, signal} from '@angular/core';
 import {NgbActiveModal} from '@ng-bootstrap/ng-bootstrap';
-import {TranslocoDirective} from '@jsverse/transloco';
+import {translate, TranslocoDirective} from '@jsverse/transloco';
 import {CblService} from '../../../_services/cbl.service';
 import {AccountService} from '../../../_services/account.service';
 import {RemapRule} from '../../../_models/reading-list/cbl/remap-rule';
 import {Chapter} from '../../../_models/chapter';
 import {EntityTitleComponent} from '../../../cards/entity-title/entity-title.component';
+import {ConfirmService} from "../../../shared/confirm.service";
 
 @Component({
   selector: 'app-manage-remap-rules-modal',
@@ -20,7 +21,8 @@ import {EntityTitleComponent} from '../../../cards/entity-title/entity-title.com
 export class ManageRemapRulesModalComponent implements OnInit {
   private readonly modal = inject(NgbActiveModal);
   private readonly cblService = inject(CblService);
-  private readonly accountService = inject(AccountService);
+  protected readonly accountService = inject(AccountService);
+  private readonly confirmService = inject(ConfirmService);
 
   rules = signal<RemapRule[]>([]);
   hasModifications = false;
@@ -47,7 +49,9 @@ export class ManageRemapRulesModalComponent implements OnInit {
     this.cblService.getRemapRules().subscribe(rules => this.rules.set(rules));
   }
 
-  deleteRule(rule: RemapRule) {
+  async deleteRule(rule: RemapRule) {
+    if (!await this.confirmService.confirm(translate('toasts.confirm-delete-cbl-remap-rule'))) return;
+
     this.cblService.deleteRemapRule(rule.id).subscribe(() => {
       this.rules.set(this.rules().filter(r => r.id !== rule.id));
       this.hasModifications = true;
@@ -64,6 +68,6 @@ export class ManageRemapRulesModalComponent implements OnInit {
   }
 
   close() {
-    this.modal.close(this.hasModifications);
+    this.modal.close(this.hasModifications); // TODO: Convert to modalSaved() approach
   }
 }
