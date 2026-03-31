@@ -237,36 +237,72 @@ public class CblController(IReadingListService readingListService, IDirectorySer
     }
 
     /// <summary>
-    /// Creates a new series-level remap rule. Does not allow duplicate rules.
+    /// Creates a new remap rule, or updates an existing one if a rule with the same
+    /// CBL matching key (normalized name + volume + number) already exists for this user.
+    /// When no explicit VolumeId is provided, attempts to auto-resolve a matching volume
+    /// on the target series from the CBL volume string.
     /// </summary>
     [HttpPost("remap-rules")]
     [DisallowRole(PolicyConstants.ReadOnlyRole)]
     public async Task<ActionResult<RemapRuleDto>> CreateRemapRule([FromBody] CreateRemapRuleDto dto)
     {
-        var series = await unitOfWork.SeriesRepository.GetSeriesByIdAsync(dto.SeriesId, ct: HttpContext.RequestAborted);
+        var ct = HttpContext.RequestAborted;
+        var series = await unitOfWork.SeriesRepository.GetSeriesByIdAsync(dto.SeriesId, ct: ct);
         if (series == null) return BadRequest(await localizationService.Translate(UserId, "series-doesnt-exist"));
 
-        // TODO: Ensure no duplicate rules
+        var normalizedName = dto.CblSeriesName.ToNormalized();
 
-        var rule = new ReadingListRemapRule
+        // Auto-resolve VolumeId when the caller didn't provide one and there's a CBL volume string
+        var volumeId = dto.VolumeId;
+        if (volumeId == null && dto.ChapterId == null && !string.IsNullOrEmpty(dto.CblVolume) && series.Volumes != null)
         {
-            NormalizedCblSeriesName = dto.CblSeriesName.ToNormalized(),
-            CblSeriesName = dto.CblSeriesName,
-            SeriesId = dto.SeriesId,
-            CblVolume = dto.CblVolume,
-            CblNumber = dto.CblNumber,
-            VolumeId = dto.VolumeId,
-            ChapterId = dto.ChapterId,
-            SeriesNameAtMapping = series.Name,
-            AppUserId = UserId,
-            IsGlobal = false,
-            CreatedUtc = DateTime.UtcNow
-        };
+            var realVolumes = series.Volumes
+                .Where(v => v.MinNumber is not (ParserConstants.LooseLeafVolumeNumber or ParserConstants.SpecialVolumeNumber))
+                .ToList();
 
-        unitOfWork.RemapRuleRepository.Add(rule);
+            if (realVolumes.Count > 0)
+            {
+                var matched = realVolumes.FirstOrDefault(v =>
+                    v.Name.Equals(dto.CblVolume, StringComparison.OrdinalIgnoreCase)
+                    || v.LookupName.Equals(dto.CblVolume, StringComparison.OrdinalIgnoreCase));
+                volumeId = matched?.Id;
+            }
+        }
+
+        // Check for an existing rule with the same CBL matching key for this user
+        var existing = await unitOfWork.RemapRuleRepository.GetExactRuleAsync(normalizedName, dto.CblVolume, dto.CblNumber, UserId, ct);
+
+        if (existing != null)
+        {
+            existing.SeriesId = dto.SeriesId;
+            existing.VolumeId = volumeId;
+            existing.ChapterId = dto.ChapterId;
+            existing.CblSeriesName = dto.CblSeriesName;
+            existing.SeriesNameAtMapping = series.Name;
+            existing.CreatedUtc = DateTime.UtcNow;
+        }
+        else
+        {
+            existing = new ReadingListRemapRule
+            {
+                NormalizedCblSeriesName = normalizedName,
+                CblSeriesName = dto.CblSeriesName,
+                SeriesId = dto.SeriesId,
+                CblVolume = dto.CblVolume,
+                CblNumber = dto.CblNumber,
+                VolumeId = volumeId,
+                ChapterId = dto.ChapterId,
+                SeriesNameAtMapping = series.Name,
+                AppUserId = UserId,
+                IsGlobal = false,
+                CreatedUtc = DateTime.UtcNow
+            };
+            unitOfWork.RemapRuleRepository.Add(existing);
+        }
+
         await unitOfWork.CommitAsync();
 
-        return Ok(mapper.Map<RemapRuleDto>(rule));
+        return Ok(mapper.Map<RemapRuleDto>(existing));
     }
 
     /// <summary>

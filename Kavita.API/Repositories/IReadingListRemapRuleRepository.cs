@@ -21,6 +21,10 @@ public interface IReadingListRemapRuleRepository
     /// Admin-only: returns all rules across all users, with user names.
     /// </summary>
     Task<IList<ReadingListRemapRule>> GetAllRulesAsync(CancellationToken ct = default);
+    /// <summary>
+    /// Finds an existing rule for the same user with the same CBL matching key (normalized name + volume + number).
+    /// </summary>
+    Task<ReadingListRemapRule?> GetExactRuleAsync(string normalizedCblSeriesName, string? cblVolume, string? cblNumber, int userId, CancellationToken ct = default);
     void Add(ReadingListRemapRule rule);
     void Remove(ReadingListRemapRule rule);
 }

@@ -61,6 +61,16 @@ public class ReadingListRemapRuleRepository(DataContext context, IMapper mapper)
             .ToListAsync(ct);
     }
 
+    public async Task<ReadingListRemapRule?> GetExactRuleAsync(string normalizedCblSeriesName, string? cblVolume, string? cblNumber, int userId, CancellationToken ct = default)
+    {
+        return await context.ReadingListRemapRule
+            .FirstOrDefaultAsync(r =>
+                r.NormalizedCblSeriesName == normalizedCblSeriesName
+                && r.CblVolume == cblVolume
+                && r.CblNumber == cblNumber
+                && r.AppUserId == userId, ct);
+    }
+
     public void Add(ReadingListRemapRule rule)
     {
         context.ReadingListRemapRule.Add(rule);
