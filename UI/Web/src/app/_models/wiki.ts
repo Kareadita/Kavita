@@ -23,4 +23,5 @@ export enum WikiLink {
   Guides = 'https://wiki.kavitareader.com/guides',
   ReadingProfiles = "https://wiki.kavitareader.com/guides/user-settings/reading-profiles/",
   EpubFontManager = "https://wiki.kavitareader.com/guides/epub-fonts/",
+  CblImportModal = 'https://wiki.kavitareader.com/guides/features/cbl-import/'
 }

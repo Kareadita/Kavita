@@ -2109,6 +2109,7 @@
 
     "import-cbl-modal": {
         "title": "CBL Importer",
+        "description": "On this screen you can build remap rules to automatically map series or issues to Kavita entities. Remap rules will apply to this and future lists.",
         "close": "{{common.close}}",
         "matched-count": "{{count}} matched",
         "issues-count": "{{count}} issues",
@@ -2120,7 +2121,6 @@
         "skip-item": "Skip",
         "select-series": "Search for series",
         "pick-candidate": "Select correct series",
-        "save-remap-prompt": "Save this mapping as a remap rule for future imports?",
         "finalize": "Import All",
         "finalize-single": "Import",
         "previous-file": "Previous",
@@ -2138,7 +2138,7 @@
         "resolve": "Resolve",
         "select-chapter": "Select the matching chapter",
         "edit-match": "Edit match",
-        "cancel": "Cancel",
+        "cancel": "{{common.cancel}}",
         "undo": "Undo",
         "remap-rule-used": "Matched via remap rule",
         "import-success": "Successfully imported {{count}} reading list(s)",
@@ -2147,7 +2147,8 @@
         "update-list": "Update",
         "volume-num": "{{common.volume-num-shorthand}}",
         "issue-num": "{{common.issue-num-shorthand}}",
-        "refresh": "Refresh"
+        "refresh": "Refresh",
+        "wiki": "Wiki"
     },
 
     "manage-remap-rules-modal": {
@@ -2209,7 +2210,8 @@
         "cancel": "{{common.cancel}}",
         "served-from-cache": "Served from Cache",
         "download": "Download",
-        "owned-label": "Owned"
+        "owned-label": "Owned",
+        "close": "{{common.close}}"
 
     },
 

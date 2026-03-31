@@ -12,7 +12,6 @@ import {CblSeriesCandidate} from '../../../_models/reading-list/cbl/cbl-series-c
 import {Chapter} from '../../../_models/chapter';
 import {CblService} from '../../../_services/cbl.service';
 import {SearchService} from '../../../_services/search.service';
-import {ConfirmService} from '../../../shared/confirm.service';
 import {ToastrService} from 'ngx-toastr';
 import {TypeaheadSettings} from '../../../typeahead/_models/typeahead-settings';
 import {SearchResult} from '../../../_models/search/search-result';
@@ -36,6 +35,7 @@ import {CdkScrollable} from '@angular/cdk/scrolling';
 import {RouterLink} from '@angular/router';
 import {EntityTitleComponent} from '../../../cards/entity-title/entity-title.component';
 import {modalSaved} from "../../../_models/modal/modal-result";
+import {WikiLink} from "../../../_models/wiki";
 
 export interface CblIssueRow {
   result: CblBookResult;
@@ -70,7 +70,6 @@ export class ImportCblModalComponent implements OnInit {
   private readonly modalService = inject(NgbModal);
   private readonly cblService = inject(CblService);
   private readonly searchService = inject(SearchService);
-  private readonly confirmService = inject(ConfirmService);
   private readonly toastr = inject(ToastrService);
   private readonly utilityService = inject(UtilityService);
   private readonly libraryService = inject(LibraryService);
@@ -296,7 +295,7 @@ export class ImportCblModalComponent implements OnInit {
   }
 
   onCandidateSelected(row: CblIssueRow, candidate: CblSeriesCandidate) {
-    this.handleSeriesSelection(row, candidate.seriesId, candidate.seriesName);
+    this.handleSeriesSelection(row, candidate.seriesId);
   }
 
   onSeriesTypeaheadSelected(row: CblIssueRow, event: SearchResult[]) {
@@ -309,7 +308,7 @@ export class ImportCblModalComponent implements OnInit {
       return;
     }
 
-    this.handleSeriesSelection(row, selected.seriesId, selected.name);
+    this.handleSeriesSelection(row, selected.seriesId);
   }
 
   onChapterTypeaheadSelected(row: CblIssueRow, event: Chapter[]) {
@@ -406,15 +405,7 @@ export class ImportCblModalComponent implements OnInit {
     this.allRows.set(rows);
   }
 
-  private async handleSeriesSelection(row: CblIssueRow, seriesId: number, seriesName: string) {
-    const confirmed = await this.confirmService.confirm(
-      translate('toasts.save-remap-rule', {from: row.result.series, to: seriesName})
-    );
-
-    if (!confirmed) {
-      return;
-    }
-
+  private async handleSeriesSelection(row: CblIssueRow, seriesId: number) {
     // Remember this series for auto-continue after re-validation
     this.pendingAutoEditSeries = row.result.series;
 
@@ -512,4 +503,5 @@ export class ImportCblModalComponent implements OnInit {
 
   protected readonly CblImportReason = CblImportReason;
   protected readonly CblMatchTier = CblMatchTier;
+  protected readonly WikiLink = WikiLink;
 }
