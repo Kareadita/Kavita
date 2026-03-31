@@ -283,6 +283,9 @@ internal static class CblSeriesMatcher
             {
                 resolved = ResolveChapter(item with { Volume = string.Empty }, series, CblMatchTier.RemapRule);
 
+                // Restore the original volume so the result shows what the CBL requested
+                resolved.Result.Volume = item.Volume;
+
                 // After the retry the remap is authoritative — return the result
                 // (success or failure) rather than falling through to lower tiers
                 // which would report SeriesMissing for a remapped name.
