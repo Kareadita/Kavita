@@ -1439,6 +1439,8 @@
         "font-size-label": "{{manage-reading-profiles.font-size-book-label}}",
         "line-spacing-label": "{{manage-reading-profiles.line-height-book-label}}",
         "margin-label": "{{manage-reading-profiles.margin-book-label}}",
+        "disable-bookmark-icon-label": "{{manage-reading-profiles.disable-bookmark-icon-label}}",
+        "disable-bookmark-icon-tooltip": "{{manage-reading-profiles.disable-bookmark-icon-tooltip}}",
         "reset-to-defaults": "Reset to Defaults",
         "update-parent": "Save to {{name}}",
         "loading": "loading",
@@ -3836,6 +3838,8 @@
         "line-height-book-tooltip": "How much spacing between the lines of the book",
         "margin-book-label": "Margin",
         "margin-book-tooltip": "How much spacing on each side of the screen. This will override to 0 on mobile devices regardless of this setting.",
+        "disable-bookmark-icon-label": "Disable Bookmark Icon",
+        "disable-bookmark-icon-tooltip": "Removes bookmark icons from images in the reader",
 
         "pdf-scroll-mode-label": "Scroll Mode",
         "pdf-scroll-mode-tooltip": "How you scroll through pages. Vertical/Horizontal and Tap to Paginate (no scroll)",

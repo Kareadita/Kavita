@@ -236,6 +236,7 @@ export class ManageReadingProfilesComponent implements OnInit {
     this.readingProfileForm.addControl('bookReaderLayoutMode', new FormControl(this.selectedProfile.bookReaderLayoutMode || BookPageLayoutMode.Default, []));
     this.readingProfileForm.addControl('bookReaderThemeName', new FormControl(this.selectedProfile.bookReaderThemeName || bookColorThemes[0].name, []));
     this.readingProfileForm.addControl('bookReaderImmersiveMode', new FormControl(this.selectedProfile.bookReaderImmersiveMode, []));
+    this.readingProfileForm.addControl('disableBookMarkIcon', new FormControl(this.selectedProfile.disableBookMarkIcon, []));
 
     // Pdf reader
     this.readingProfileForm.addControl('pdfTheme', new FormControl(this.selectedProfile.pdfTheme || PdfTheme.Dark, []));

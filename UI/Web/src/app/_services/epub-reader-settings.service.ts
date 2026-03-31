@@ -21,7 +21,7 @@ import {FontService} from "./font.service";
 import {BreakpointService} from "./breakpoint.service";
 
 export interface ReaderSettingUpdate {
-  setting: 'pageStyle' | 'clickToPaginate' | 'fullscreen' | 'writingStyle' | 'layoutMode' | 'readingDirection' | 'immersiveMode' | 'theme' | 'pageCalcMethod';
+  setting: 'pageStyle' | 'clickToPaginate' | 'fullscreen' | 'writingStyle' | 'layoutMode' | 'readingDirection' | 'immersiveMode' | 'theme' | 'pageCalcMethod' | 'disableBookMarkIcon';
   object: any;
 }
 
@@ -36,6 +36,7 @@ export type BookReadingProfileFormGroup = FormGroup<{
   bookReaderThemeName: FormControl<string>;
   bookReaderLayoutMode: FormControl<BookPageLayoutMode>;
   bookReaderImmersiveMode: FormControl<boolean>;
+  disableBookMarkIcon: FormControl<boolean>;
 }>
 
 @Injectable()
@@ -472,6 +473,7 @@ export class EpubReaderSettingsService {
       bookReaderThemeName: this.fb.control(profile.bookReaderThemeName),
       bookReaderLayoutMode: this.fb.control(this._layoutMode()),
       bookReaderImmersiveMode: this.fb.control(this._immersiveMode()),
+      disableBookMarkIcon: this.fb.control(profile.disableBookMarkIcon),
     });
 
     // Set up value change subscriptions
@@ -584,6 +586,12 @@ export class EpubReaderSettingsService {
       this._immersiveMode.set(immersiveMode);
 
       this.isUpdatingFromForm = false;
+    });
+
+    this.settingsForm.get('disableBookMarkIcon')?.valueChanges.pipe(
+     takeUntilDestroyed(this.destroyRef)
+    ).subscribe((disableBookMarkIcon: boolean) => {
+      this.settingUpdateSubject.next({ setting: 'disableBookMarkIcon', object: disableBookMarkIcon });
     });
 
 
