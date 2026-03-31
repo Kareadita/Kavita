@@ -226,6 +226,12 @@ public class CacheService(
                 extraPath = file.Id + string.Empty;
             }
 
+            if (!Path.Exists(file.FilePath))
+            {
+                logger.LogError("{File} does not exist on disk", file.FilePath);
+                throw new KavitaException($"File does not exist: {file.FilePath}");
+            }
+
             switch (file.Format)
             {
                 case MangaFormat.Archive:
@@ -234,11 +240,6 @@ public class CacheService(
                 case MangaFormat.Epub:
                 case MangaFormat.Pdf:
                 {
-                    if (!directoryService.FileSystem.File.Exists(files[0].FilePath))
-                    {
-                        logger.LogError("{File} does not exist on disk", files[0].FilePath);
-                        throw new KavitaException($"{files[0].FilePath} does not exist on disk");
-                    }
                     if (extractPdfImages)
                     {
                         readingItemService.Extract(file.FilePath, Path.Join(extractPath, extraPath), file.Format);
