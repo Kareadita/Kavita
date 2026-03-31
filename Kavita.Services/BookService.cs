@@ -22,6 +22,7 @@ using Kavita.Models.DTOs.Reader;
 using Kavita.Models.Entities;
 using Kavita.Models.Entities.Enums;
 using Kavita.Models.Entities.Enums.User;
+using Kavita.Models.Extensions;
 using Kavita.Models.Metadata;
 using Kavita.Models.Parser;
 using Kavita.Services.Extensions;

@@ -1,4 +1,6 @@
-﻿namespace Kavita.Models.Entities.Enums;
+﻿using Kavita.Models.Entities.Enums;
+
+namespace Kavita.Models.Extensions;
 
 public static class PdfRenderResolutionExtensions
 {
