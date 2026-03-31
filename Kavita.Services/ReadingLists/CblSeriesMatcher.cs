@@ -266,14 +266,24 @@ internal static class CblSeriesMatcher
         }
 
         // Rule only mapped to series — resolve chapter within the mapped series.
-        // If volume/chapter resolution fails, fall through to lower tiers so the
-        // original CBL data can match via name variants (e.g. Comic naming "Series (Volume)").
-        // This prevents false positives where a series-only remap for "Batman" -> "Batman (2014)"
-        // would incorrectly capture a CBL entry with Volume="1994".
+        // The user has explicitly declared this mapping, so we should resolve within
+        // the target series rather than falling through to lower tiers (which can never
+        // match a remapped name like "Zombie Tales" -> "Adventure Time").
         var series = matchedSeries.FirstOrDefault(s => s.Id == rule.SeriesId);
         if (series != null)
         {
             var resolved = ResolveChapter(item, series, CblMatchTier.RemapRule);
+
+            // If the CBL volume doesn't exist in the target series, retry without
+            // the volume so resolution falls back to the loose-leaf volume.
+            // This handles cases like a manga series with only loose issues being
+            // targeted by a remap from a Comic CBL entry that carries a year-volume.
+            if (resolved.Result.Reason is CblImportReason.VolumeMissing
+                && !string.IsNullOrEmpty(item.Volume))
+            {
+                resolved = ResolveChapter(item with { Volume = string.Empty }, series, CblMatchTier.RemapRule);
+            }
+
             if (resolved.Result.Reason is CblImportReason.VolumeMissing or CblImportReason.ChapterMissing)
             {
                 return false;

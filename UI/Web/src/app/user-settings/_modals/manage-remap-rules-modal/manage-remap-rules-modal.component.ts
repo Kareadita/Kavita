@@ -70,6 +70,6 @@ export class ManageRemapRulesModalComponent implements OnInit {
   }
 
   close() {
-    this.modal.close(this.hasModifications); // TODO: Convert to modalSaved() approach
+    this.modal.close(this.hasModifications);
   }
 }

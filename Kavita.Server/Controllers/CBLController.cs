@@ -300,7 +300,7 @@ public class CblController(IReadingListService readingListService, IDirectorySer
             unitOfWork.RemapRuleRepository.Add(existing);
         }
 
-        await unitOfWork.CommitAsync();
+        await unitOfWork.CommitAsync(ct);
 
         return Ok(mapper.Map<RemapRuleDto>(existing));
     }

@@ -351,7 +351,7 @@ export class ImportCblModalComponent implements OnInit {
     ref.closed.subscribe((hasModifications: boolean) => {
       if (hasModifications) {
         this.cblService.getRemapRules().subscribe(rules => {
-          this.remapRules.set(rules);
+          this.remapRules.set([...rules]);
           this.validateCurrentFile();
         });
       }
@@ -422,9 +422,13 @@ export class ImportCblModalComponent implements OnInit {
       cblVolume: row.result.volume || undefined, // Pass the volume if it's available to ensure volume-level mapping works
     }).subscribe(rule => {
       row.remapRuleId = rule.id;
-      this.remapRules.set([...this.remapRules(), rule]);
-      this.cancelResolve();
-      this.validateCurrentFile();
+
+      // The backend might have updated the ruleset, so refresh them
+      this.cblService.getRemapRules().subscribe(rules => {
+        this.remapRules.set([...rules]);
+        this.cancelResolve();
+        this.validateCurrentFile();
+      });
     });
   }
 
@@ -436,9 +440,12 @@ export class ImportCblModalComponent implements OnInit {
       chapterId: chapter.id,
     }).subscribe(rule => {
       row.remapRuleId = rule.id;
-      this.remapRules.set([...this.remapRules(), rule]);
-      this.cancelResolve();
-      this.validateCurrentFile();
+
+      this.cblService.getRemapRules().subscribe(rules => {
+        this.remapRules.set([...rules]);
+        this.cancelResolve();
+        this.validateCurrentFile();
+      });
     });
   }
 
