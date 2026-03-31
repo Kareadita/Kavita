@@ -52,7 +52,7 @@ export interface ReadingProfile {
   bookReaderThemeName: string;
   bookReaderLayoutMode: BookPageLayoutMode;
   bookReaderImmersiveMode: boolean;
-  disableBookMarkIcon: boolean;
+  bookReaderDisableBookmarkIcon: boolean;
 
   // PDF Reader
   pdfTheme: PdfTheme;

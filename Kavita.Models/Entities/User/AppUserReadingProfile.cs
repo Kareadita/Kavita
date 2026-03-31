@@ -142,7 +142,7 @@ public class AppUserReadingProfile
     /// <summary>
     /// Disables the bookmark icons in the Epub Reader
     /// </summary>
-    public bool DisableBookMarkIcon { get; set; } = false;
+    public bool BookReaderDisableBookmarkIcon { get; set; } = false;
     #endregion
 
     #region PdfReader

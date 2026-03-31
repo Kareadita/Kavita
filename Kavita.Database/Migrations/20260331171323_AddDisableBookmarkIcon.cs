@@ -11,7 +11,7 @@ namespace Kavita.Database.Migrations
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.AddColumn<bool>(
-                name: "DisableBookMarkIcon",
+                name: "BookReaderDisableBookmarkIcon",
                 table: "AppUserReadingProfiles",
                 type: "INTEGER",
                 nullable: false,
@@ -22,7 +22,7 @@ namespace Kavita.Database.Migrations
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropColumn(
-                name: "DisableBookMarkIcon",
+                name: "BookReaderDisableBookmarkIcon",
                 table: "AppUserReadingProfiles");
         }
     }
