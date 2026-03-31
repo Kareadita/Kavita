@@ -9,3 +9,7 @@ export enum CblMatchTier {
   UserDecision = 7,
   Unmatched = -1
 }
+
+export const allCblMatchTiers = Object.keys(CblMatchTier)
+  .filter(key => !isNaN(Number(key)) && parseInt(key, 10) >= 0)
+  .map(key => parseInt(key, 10)) as CblMatchTier[];

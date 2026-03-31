@@ -2,12 +2,12 @@
   "openapi": "3.0.4",
   "info": {
     "title": "Kavita",
-    "description": "Kavita provides a set of APIs that are authenticated by JWT. JWT token can be copied from local storage. Assume all fields of a payload are required. Built against v0.8.9.30",
+    "description": "Kavita provides a set of APIs that are authenticated by JWT. JWT token can be copied from local storage. Assume all fields of a payload are required. Built against v0.8.9.31",
     "license": {
       "name": "GPL-3.0",
       "url": "https://github.com/Kareadita/Kavita/blob/develop/LICENSE"
     },
-    "version": "0.8.9.30"
+    "version": "0.8.9.31"
   },
   "servers": [
     {
@@ -2212,7 +2212,7 @@
         "tags": [
           "Cbl"
         ],
-        "summary": "Creates a new series-level remap rule.",
+        "summary": "Creates a new remap rule, or updates an existing one if a rule with the same\nCBL matching key (normalized name + volume + number) already exists for this user.\nWhen no explicit VolumeId is provided, attempts to auto-resolve a matching volume\non the target series from the CBL volume string.",
         "requestBody": {
           "content": {
             "application/json": {
@@ -2261,7 +2261,7 @@
         "tags": [
           "Cbl"
         ],
-        "summary": "Admin-only: returns all rules across all users.",
+        "summary": "Returns all rules across all users",
         "responses": {
           "200": {
             "description": "OK",
@@ -27767,10 +27767,23 @@
             "format": "int32",
             "nullable": true
           },
+          "volumeNumber": {
+            "type": "string",
+            "nullable": true
+          },
           "chapterId": {
             "type": "integer",
             "format": "int32",
             "nullable": true
+          },
+          "kind": {
+            "enum": [
+              0,
+              1,
+              2
+            ],
+            "type": "integer",
+            "format": "int32"
           },
           "chapterRange": {
             "type": "string",

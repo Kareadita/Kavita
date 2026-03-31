@@ -2104,34 +2104,37 @@
         "filter-all": "All",
         "filter-local": "Local",
         "no-results": "No matching reading lists",
-        "add": "Add",
+        "add": "{{common.add}}",
         "sync": "Sync",
-        "delete": "Delete",
+        "delete": "{{common.delete}}",
         "view-list": "View Reading List",
         "last-synced": "Last synced {{date}}",
-        "source": "Source"
+        "source": "Source",
+        "can-sync": "Can Sync",
+        "not-authorized": "You lack the ability to interact with this content"
     },
 
     "import-cbl-modal": {
         "title": "CBL Importer",
+        "description": "On this screen you can build remap rules to automatically map series or issues to Kavita entities. Remap rules will apply to this and future lists.",
         "close": "{{common.close}}",
         "matched-count": "{{count}} matched",
         "issues-count": "{{count}} issues",
+        "unmatched-count": "{{count}} missing",
         "matched-items-header": "Matched Items",
         "issues-header": "Items Needing Attention",
         "remap-rules-header": "Remap Rules",
         "tier-label": "Matched via",
         "skip-item": "Skip",
-        "select-series": "Search for series...",
+        "select-series": "Search for series",
         "pick-candidate": "Select correct series",
-        "save-remap-prompt": "Save this mapping as a remap rule for future imports?",
         "finalize": "Import All",
         "finalize-single": "Import",
         "previous-file": "Previous",
         "next-file": "Next",
         "file-counter": "File {{current}} of {{total}}",
         "no-remap-rules": "No remap rules",
-        "delete-rule": "Delete",
+        "delete-rule": "{{common.delete}}",
         "manage-rules": "Manage Remap Rules",
         "col-series": "Requested Series",
         "col-vol-issue": "Requested Vol / Issue",
@@ -2140,30 +2143,31 @@
         "col-matched-issue": "Matched Issue",
         "col-action": "Action",
         "resolve": "Resolve",
-        "select-chapter": "Select the matching chapter...",
-        "hide-matched": "Hide Matched",
-        "show-matched": "Show Matched",
+        "select-chapter": "Select the matching chapter",
         "edit-match": "Edit match",
-        "cancel": "Cancel",
+        "cancel": "{{common.cancel}}",
         "undo": "Undo",
         "remap-rule-used": "Matched via remap rule",
         "import-success": "Successfully imported {{count}} reading list(s)",
-        "processing": "Processing...",
+        "processing": "Processing",
         "new-list": "New",
         "update-list": "Update",
         "volume-num": "{{common.volume-num-shorthand}}",
-        "issue-num": "{{common.issue-num-shorthand}}"
+        "issue-num": "{{common.issue-num-shorthand}}",
+        "refresh": "Refresh",
+        "wiki": "Wiki"
     },
 
     "manage-remap-rules-modal": {
         "title": "Manage Remap Rules",
         "close": "{{common.close}}",
         "no-rules": "No remap rules saved",
-        "delete-rule": "Delete",
+        "delete-rule": "{{common.delete}}",
         "volume-num": "{{common.volume-num-shorthand}}",
         "issue-num": "{{common.issue-num-shorthand}}",
         "global": "Global",
-        "series-level": "Series-level"
+        "series-level": "Series-level",
+        "volume-target": "{{common.volume-num-shorthand}}"
     },
 
     "manage-remap-rules": {
@@ -2189,11 +2193,6 @@
         "demote": "Demote",
         "demote-tooltip": "Demote to user rule",
         "by": "by",
-        "rule-created": "Remap rule created",
-        "rule-deleted": "Remap rule deleted",
-        "rule-promoted": "Rule promoted to global",
-        "rule-demoted": "Rule demoted to user scope",
-        "confirm-delete": "Are you sure you want to delete this remap rule?",
         "volume-num": "{{common.volume-num-shorthand}}",
         "issue-num": "{{common.issue-num-shorthand}}",
         "cbl-volume-label": "CBL Volume",
@@ -2218,7 +2217,8 @@
         "cancel": "{{common.cancel}}",
         "served-from-cache": "Served from Cache",
         "download": "Download",
-        "owned-label": "Owned"
+        "owned-label": "Owned",
+        "close": "{{common.close}}"
 
     },
 
@@ -3611,7 +3611,12 @@
         "font-in-use": "Cannot delete as the font is in use by one or more users.",
         "k+-resend-welcome-email-success": "An email was sent to your Kavita+ email",
         "profile-unauthorized": "This user is not sharing their profile",
-        "confirm-delete-client-device": "Are you sure you want to delete this device?"
+        "confirm-delete-client-device": "Are you sure you want to delete this device?",
+        "confirm-delete-cbl-remap-rule": "Are you sure you want to delete this remap rule?",
+        "cbl-remap-rule-created": "Remap rule created",
+        "cbl-remap-rule-deleted": "Remap rule deleted",
+        "cbl-remap-rule-promoted": "Rule promoted to global",
+        "cbl-remap-rule-demoted": "Rule demoted to user scope"
     },
 
     "read-time-pipe": {

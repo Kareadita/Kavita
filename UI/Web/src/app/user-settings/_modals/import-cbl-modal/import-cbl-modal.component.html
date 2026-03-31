@@ -19,6 +19,7 @@
         <p class="mt-2 text-muted">{{t('processing')}}</p>
       </div>
     } @else if (currentSummary(); as summary) {
+      <p>{{t('description')}} <a [href]="WikiLink.CblImportModal" rel="noopener noreferrer">{{t('wiki')}}</a></p>
       <!-- File name -->
       <h5 class="mb-3">
         {{summary.cblName || currentFile().name}}
@@ -31,15 +32,20 @@
 
       <!-- Summary bar -->
       <div class="d-flex gap-3 mb-3 align-items-center">
-        <span class="badge bg-success fs-6">{{t('matched-count', {count: matchedCount()})}}</span>
-        @if (issueCount() > 0) {
-          <span class="badge text-bg-warning fs-6">{{t('issues-count', {count: issueCount()})}}</span>
-        }
-        <button class="btn btn-sm" [class.btn-outline-secondary]="showSuccessful()"
-                [class.btn-secondary]="!showSuccessful()"
-                (click)="showSuccessful.update(v => !v)">
-          <i class="fa" [class.fa-eye]="showSuccessful()" [class.fa-eye-slash]="!showSuccessful()" aria-hidden="true"></i>
-          {{showSuccessful() ? t('hide-matched') : t('show-matched')}}
+        <div class="btn-group" role="group">
+          <input type="checkbox" class="btn-check" id="matched-btn" autocomplete="off" [checked]="showMatched()" (change)="toggleRowFilter('matched')">
+          <label class="btn btn-outline-success" for="matched-btn">{{t('matched-count', {count: matchedCount()})}}</label>
+
+          <input type="checkbox" class="btn-check" id="warnings-btn" autocomplete="off" [checked]="showIssues()" (change)="toggleRowFilter('issues')">
+          <label class="btn btn-outline-warning" for="warnings-btn">{{t('issues-count', {count: issueCount()})}}</label>
+
+          <input type="checkbox" class="btn-check" id="errors-btn" autocomplete="off" [checked]="showUnmatched()" (change)="toggleRowFilter('unmatched')">
+          <label class="btn btn-outline-danger" for="errors-btn">{{t('unmatched-count', {count: unmatchedCount()})}}</label>
+        </div>
+
+        <button class="btn btn-sm btn-outline-secondary" (click)="validateCurrentFile()">
+          <i class="fa fa-refresh me-1" aria-hidden="true"></i>
+          {{t('refresh')}}
         </button>
       </div>
 
@@ -90,15 +96,15 @@
           </ngx-datatable-column>
 
           <!-- Status / Reason -->
-          <ngx-datatable-column [width]="110" [sortable]="false" [draggable]="false" [resizeable]="false">
+          <ngx-datatable-column [width]="100" [sortable]="false" [draggable]="false" [resizeable]="false">
             <ng-template ngx-datatable-header-template>{{t('col-status')}}</ng-template>
             <ng-template let-row="row" ngx-datatable-cell-template>
-              @if (row.result.reason === CblImportReason.Success && row.result.matchTier === 0) {
-                <span class="badge tier-badge tier-0" [ngbTooltip]="getRemapRuleTooltip(row)" container="body">
+              @if (row.result.reason === CblImportReason.Success && row.result.matchTier === CblMatchTier.RemapRule) {
+                <span class="badge tier-badge text-bg-{{getMatchBadgeClass(row.result.matchTier)}}" [ngbTooltip]="getRemapRuleTooltip(row)" container="body">
                   {{row.result.matchTier | cblMatchTier}}
                 </span>
               } @else if (row.result.reason === CblImportReason.Success) {
-                <span class="badge tier-badge tier-{{row.result.matchTier}}">
+                <span class="badge tier-badge text-bg-{{getMatchBadgeClass(row.result.matchTier)}}" >
                   {{row.result.matchTier | cblMatchTier}}
                 </span>
               } @else {
@@ -118,10 +124,10 @@
                   <div class="flex-grow-1">
                     <app-typeahead [settings]="activeSeriesTypeahead()!"
                                    (selectedData)="onSeriesTypeaheadSelected(row, $event)">
-                      <ng-template #badgeItem let-item let-position="idx">
+                      <ng-template #badgeItem let-item>
                         {{item.name}} ({{libraryNames()[item.libraryId]}})
                       </ng-template>
-                      <ng-template #optionItem let-item let-position="idx" let-value="value">
+                      <ng-template #optionItem let-item let-value="value">
                         <div class="d-flex align-items-center gap-2">
                           <app-image [imageUrl]="imageService.getSeriesCoverImage(item.seriesId)"
                                      height="40px" width="30px" />
@@ -226,7 +232,7 @@
           </ngx-datatable-column>
 
           <!-- Action Column -->
-          <ngx-datatable-column [width]="30" [sortable]="false" [draggable]="false" [resizeable]="false">
+          <ngx-datatable-column [width]="60" [sortable]="false" [draggable]="false" [resizeable]="false">
             <ng-template ngx-datatable-header-template>{{t('col-action')}}</ng-template>
             <ng-template let-row="row" ngx-datatable-cell-template>
               @if (row.result.reason !== CblImportReason.Success) {
@@ -238,7 +244,7 @@
                     </button>
                   }
                   <button class="btn btn-sm btn-outline-secondary" (click)="toggleSkip(row)"
-                          [attr.aria-label]="t('skip-item')">
+                          [attr.aria-label]="t('skip-item')" [ngbTooltip]="t('skip-item')">
                     @if (row.skipped) {
                       <i class="fa fa-undo" aria-hidden="true"></i>
                     } @else {

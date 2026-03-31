@@ -12,14 +12,12 @@ import {CblSeriesCandidate} from '../../../_models/reading-list/cbl/cbl-series-c
 import {Chapter} from '../../../_models/chapter';
 import {CblService} from '../../../_services/cbl.service';
 import {SearchService} from '../../../_services/search.service';
-import {ConfirmService} from '../../../shared/confirm.service';
 import {ToastrService} from 'ngx-toastr';
 import {TypeaheadSettings} from '../../../typeahead/_models/typeahead-settings';
 import {SearchResult} from '../../../_models/search/search-result';
 import {UtilityService} from '../../../shared/_services/utility.service';
 import {TypeaheadComponent} from '../../../typeahead/_components/typeahead.component';
 import {LoadingComponent} from '../../../shared/loading/loading.component';
-import {CblImportResult} from '../../../_models/reading-list/cbl/cbl-import-result.enum';
 import {CblMatchTierPipe} from '../../../_pipes/cbl-match-tier.pipe';
 import {CblImportReasonPipe} from '../../../_pipes/cbl-import-reason.pipe';
 import {ManageRemapRulesModalComponent} from '../manage-remap-rules-modal/manage-remap-rules-modal.component';
@@ -37,6 +35,7 @@ import {CdkScrollable} from '@angular/cdk/scrolling';
 import {RouterLink} from '@angular/router';
 import {EntityTitleComponent} from '../../../cards/entity-title/entity-title.component';
 import {modalSaved} from "../../../_models/modal/modal-result";
+import {WikiLink} from "../../../_models/wiki";
 
 export interface CblIssueRow {
   result: CblBookResult;
@@ -71,14 +70,10 @@ export class ImportCblModalComponent implements OnInit {
   private readonly modalService = inject(NgbModal);
   private readonly cblService = inject(CblService);
   private readonly searchService = inject(SearchService);
-  private readonly confirmService = inject(ConfirmService);
   private readonly toastr = inject(ToastrService);
   private readonly utilityService = inject(UtilityService);
   private readonly libraryService = inject(LibraryService);
   protected readonly imageService = inject(ImageService);
-
-  protected readonly CblImportReason = CblImportReason;
-  protected readonly CblImportResult = CblImportResult;
 
   savedFiles = input.required<CblSavedFile[]>();
 
@@ -90,18 +85,34 @@ export class ImportCblModalComponent implements OnInit {
 
   /** All rows (matched + issues) for the unified table */
   allRows = signal<CblIssueRow[]>([]);
+  classifiedRows = computed(() =>
+    this.allRows().map(r => ({
+      ...r,
+      category: this.classifyRow(r)
+    }))
+  );
   libraryNames = signal<Record<number, string>>({});
 
-  showSuccessful = signal(true);
+  showMatched = signal(true);
+  showIssues = signal(true);
+  showUnmatched = signal(true);
   visibleRows = computed(() => {
-    const rows = this.allRows();
-    return this.showSuccessful() ? rows : rows.filter(r => r.result.reason !== CblImportReason.Success);
+    const active = new Set<string>();
+    if (this.showMatched()) active.add('matched');
+    if (this.showIssues()) active.add('issue');
+    if (this.showUnmatched()) active.add('unmatched');
+
+    if (active.size === 0) return [];
+    if (active.size === 3) return this.classifiedRows();
+
+    return this.classifiedRows().filter(r => active.has(r.category));
   });
 
-  matchedCount = computed(() => this.allRows().filter(r => r.result.reason === CblImportReason.Success).length);
-  issueCount = computed(() => this.allRows().filter(r => r.result.reason !== CblImportReason.Success && !r.skipped).length);
+  matchedCount = computed(() => this.classifiedRows().filter(r => r.category === 'matched').length);
+  issueCount = computed(() => this.classifiedRows().filter(r => r.category === 'issue').length);
+  unmatchedCount = computed(() => this.classifiedRows().filter(r => r.category === 'unmatched').length);
 
-  /** Lazy typeahead state — only one row can be resolving at a time */
+  /** Lazy typeahead state, only one row can be resolving at a time */
   activeRow = signal<CblIssueRow | null>(null);
   activeSeriesTypeahead = signal<TypeaheadSettings<SearchResult> | null>(null);
   activeChapterTypeahead = signal<TypeaheadSettings<Chapter> | null>(null);
@@ -109,11 +120,36 @@ export class ImportCblModalComponent implements OnInit {
   /** Track the CBL series name of the row being resolved, so we can auto-continue after re-validation */
   private pendingAutoEditSeries: string | null = null;
 
+  private classifyRow(r: CblIssueRow): 'matched' | 'issue' | 'unmatched' {
+    if (r.result.reason === CblImportReason.Success) return 'matched';
+    if (r.skipped) return 'matched';
+    if (r.result.matchTier === CblMatchTier.Unmatched) return 'unmatched';
+    return 'issue';
+  }
+
   getRowClass = (row: CblIssueRow) => {
     if (row.skipped) return 'skipped-row';
     if (row.result.reason === CblImportReason.Success) return 'matched-row';
     return 'issue-row';
   };
+
+  getMatchBadgeClass(matchTier: CblMatchTier) {
+    switch (matchTier) {
+      case CblMatchTier.RemapRule:
+      case CblMatchTier.ExternalId:
+      case CblMatchTier.ExactName:
+      case CblMatchTier.ComicVineNaming:
+      case CblMatchTier.ArticleStripped:
+      case CblMatchTier.ReprintStripped:
+      case CblMatchTier.AlternateSeries:
+        return 'success';
+      case CblMatchTier.UserDecision:
+        return 'warning';
+      case CblMatchTier.Unmatched:
+        return 'danger';
+
+    }
+  }
 
   ngOnInit() {
     this.cblService.getRemapRules().subscribe(rules => {
@@ -190,24 +226,14 @@ export class ImportCblModalComponent implements OnInit {
     return row.result.reason === CblImportReason.SeriesCollision;
   }
 
-  needsAction(row: CblIssueRow): boolean {
-    return row.result.reason !== CblImportReason.Success && !row.skipped;
-  }
-
-  /** Whether this row needs a series typeahead */
-  needsSeriesTypeahead(row: CblIssueRow): boolean {
-    return this.isSeriesMissing(row) ||
-      (this.isSeriesCollision(row) && (!row.result.candidates || row.result.candidates.length === 0));
-  }
-
   /** Whether this row is the active editing row showing a series typeahead */
   isEditingSeries(row: CblIssueRow): boolean {
-    return this.activeRow() === row && this.activeSeriesTypeahead() !== null;
+    return this.activeRow()?.result.order === row.result.order && this.activeSeriesTypeahead() !== null;
   }
 
   /** Whether this row is the active editing row showing a chapter typeahead */
   isEditingChapter(row: CblIssueRow): boolean {
-    return this.activeRow() === row && this.activeChapterTypeahead() !== null;
+    return this.activeRow()?.result.order === row.result.order && this.activeChapterTypeahead() !== null;
   }
 
   /** Build a minimal Chapter stub for entity-title rendering */
@@ -269,7 +295,7 @@ export class ImportCblModalComponent implements OnInit {
   }
 
   onCandidateSelected(row: CblIssueRow, candidate: CblSeriesCandidate) {
-    this.handleSeriesSelection(row, candidate.seriesId, candidate.seriesName);
+    this.handleSeriesSelection(row, candidate.seriesId);
   }
 
   onSeriesTypeaheadSelected(row: CblIssueRow, event: SearchResult[]) {
@@ -282,7 +308,7 @@ export class ImportCblModalComponent implements OnInit {
       return;
     }
 
-    this.handleSeriesSelection(row, selected.seriesId, selected.name);
+    this.handleSeriesSelection(row, selected.seriesId);
   }
 
   onChapterTypeaheadSelected(row: CblIssueRow, event: Chapter[]) {
@@ -309,12 +335,22 @@ export class ImportCblModalComponent implements OnInit {
     this.allRows.set([...this.allRows()]);
   }
 
+  toggleRowFilter(category: 'matched' | 'issues' | 'unmatched') {
+    switch (category) {
+      case 'matched': this.showMatched.update(v => !v); break;
+      case 'issues': this.showIssues.update(v => !v); break;
+      case 'unmatched': this.showUnmatched.update(v => !v); break;
+    }
+  }
+
+
+
   openRemapRulesModal() {
     const ref = this.modalService.open(ManageRemapRulesModalComponent, {size: 'lg'});
     ref.closed.subscribe((hasModifications: boolean) => {
       if (hasModifications) {
         this.cblService.getRemapRules().subscribe(rules => {
-          this.remapRules.set(rules);
+          this.remapRules.set([...rules]);
           this.validateCurrentFile();
         });
       }
@@ -369,20 +405,21 @@ export class ImportCblModalComponent implements OnInit {
     this.allRows.set(rows);
   }
 
-  private async handleSeriesSelection(row: CblIssueRow, seriesId: number, seriesName: string) {
-    const confirmed = await this.confirmService.confirm(
-      translate('toasts.save-remap-rule', {from: row.result.series, to: seriesName})
-    );
-    if (!confirmed) return;
-
+  private async handleSeriesSelection(row: CblIssueRow, seriesId: number) {
     // Remember this series for auto-continue after re-validation
     this.pendingAutoEditSeries = row.result.series;
 
-    this.cblService.createRemapRule(row.result.series, seriesId).subscribe(rule => {
+    this.cblService.createRemapRule(row.result.series, seriesId, {
+      cblVolume: row.result.volume || undefined, // Pass the volume if it's available to ensure volume-level mapping works
+    }).subscribe(rule => {
       row.remapRuleId = rule.id;
-      this.remapRules.set([...this.remapRules(), rule]);
-      this.cancelResolve();
-      this.validateCurrentFile();
+
+      // The backend might have updated the ruleset, so refresh them
+      this.cblService.getRemapRules().subscribe(rules => {
+        this.remapRules.set([...rules]);
+        this.cancelResolve();
+        this.validateCurrentFile();
+      });
     });
   }
 
@@ -394,9 +431,12 @@ export class ImportCblModalComponent implements OnInit {
       chapterId: chapter.id,
     }).subscribe(rule => {
       row.remapRuleId = rule.id;
-      this.remapRules.set([...this.remapRules(), rule]);
-      this.cancelResolve();
-      this.validateCurrentFile();
+
+      this.cblService.getRemapRules().subscribe(rules => {
+        this.remapRules.set([...rules]);
+        this.cancelResolve();
+        this.validateCurrentFile();
+      });
     });
   }
 
@@ -460,4 +500,8 @@ export class ImportCblModalComponent implements OnInit {
 
     return settings;
   }
+
+  protected readonly CblImportReason = CblImportReason;
+  protected readonly CblMatchTier = CblMatchTier;
+  protected readonly WikiLink = WikiLink;
 }

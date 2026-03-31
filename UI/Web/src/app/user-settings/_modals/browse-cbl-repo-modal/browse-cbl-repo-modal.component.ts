@@ -24,7 +24,7 @@ export class BrowseCblRepoModalComponent implements OnInit {
   private readonly cblService = inject(CblService);
 
   items = signal<CblRepoItem[]>([]);
-  selectedItems = signal<Set<string>>(new Set());
+  selectedItems = signal<CblRepoItem[]>([]);
   loading = signal(false);
   rateLimit = signal<GithubRateLimit | null>(null);
   fromCache = signal(false);
@@ -38,14 +38,14 @@ export class BrowseCblRepoModalComponent implements OnInit {
 
   folders = computed(() => this.items().filter(i => i.isDirectory));
   files = computed(() => this.items().filter(i => !i.isDirectory));
-  hasSelection = computed(() => this.selectedItems().size > 0);
-  selectionCount = computed(() => this.selectedItems().size);
+  hasSelection = computed(() => this.selectedItems().length > 0);
+  selectionCount = computed(() => this.selectedItems().length);
 
   allFilesSelected = computed(() => {
     const f = this.files();
     if (f.length === 0) return false;
     const sel = this.selectedItems();
-    return f.every(file => sel.has(file.path));
+    return f.every(file => sel.some(s => s.path === file.path));
   });
 
   ngOnInit() {
@@ -74,44 +74,32 @@ export class BrowseCblRepoModalComponent implements OnInit {
 
   toggleFileSelection(file: CblRepoItem) {
     this.selectedItems.update(current => {
-      const next = new Set(current);
-      if (next.has(file.path)) {
-        next.delete(file.path);
-      } else {
-        next.add(file.path);
+      if (current.some(s => s.path === file.path)) {
+        return current.filter(s => s.path !== file.path);
       }
-      return next;
+      return [...current, file];
     });
   }
 
   toggleAllFiles() {
     const files = this.files();
     if (this.allFilesSelected()) {
-      this.selectedItems.update(current => {
-        const next = new Set(current);
-        for (const file of files) {
-          next.delete(file.path);
-        }
-        return next;
-      });
+      const paths = new Set(files.map(f => f.path));
+      this.selectedItems.update(current => current.filter(s => !paths.has(s.path)));
     } else {
       this.selectedItems.update(current => {
-        const next = new Set(current);
-        for (const file of files) {
-          next.add(file.path);
-        }
-        return next;
+        const existing = new Set(current.map(s => s.path));
+        return [...current, ...files.filter(f => !existing.has(f.path))];
       });
     }
   }
 
   isSelected(file: CblRepoItem): boolean {
-    return this.selectedItems().has(file.path);
+    return this.selectedItems().some(s => s.path === file.path);
   }
 
   download() {
-    const selected = this.items().filter(i => this.selectedItems().has(i.path));
-    this.modal.close(selected);
+    this.modal.close(this.selectedItems());
   }
 
   close() {

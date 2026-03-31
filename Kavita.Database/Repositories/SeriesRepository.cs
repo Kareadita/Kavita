@@ -1557,24 +1557,6 @@ public class SeriesRepository(DataContext context, IMapper mapper) : ISeriesRepo
             .ToListAsync(ct);
     }
 
-    public async Task<IEnumerable<Series>> GetAllSeriesByNameAsync(IList<string> normalizedNames,
-        int userId, IList<int>? libraryIds, SeriesIncludes includes = SeriesIncludes.None, CancellationToken ct = default)
-    {
-        var userLibraryIds = await context.Library.GetUserLibraries(userId).ToListAsync(ct);
-        if (libraryIds is { Count: > 0 })
-        {
-            userLibraryIds = userLibraryIds.Where(libraryIds.Contains).ToList();
-        }
-        var userRating = await context.AppUser.GetUserAgeRestriction(userId, ct: ct);
-
-        return await context.Series
-            .Where(s => normalizedNames.Contains(s.NormalizedName) ||
-                        normalizedNames.Contains(s.NormalizedLocalizedName))
-            .Where(s => userLibraryIds.Contains(s.LibraryId))
-            .RestrictAgainstAgeRestriction(userRating)
-            .Includes(includes)
-            .ToListAsync(ct);
-    }
 
 
     /// <summary>

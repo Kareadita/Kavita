@@ -28,6 +28,7 @@ public class ReadingListRemapRuleRepository(DataContext context, IMapper mapper)
         return await context.ReadingListRemapRule
             .Include(r => r.AppUser)
             .Include(r => r.Chapter)
+            .Include(r => r.Volume)
             .Include(r => r.Series).ThenInclude(s => s.Library)
             .Where(r => r.AppUserId == userId || r.IsGlobal)
             .OrderByDescending(r => r.AppUserId == userId)
@@ -58,6 +59,16 @@ public class ReadingListRemapRuleRepository(DataContext context, IMapper mapper)
             .OrderByDescending(r => r.IsGlobal)
             .ThenBy(r => r.NormalizedCblSeriesName)
             .ToListAsync(ct);
+    }
+
+    public async Task<ReadingListRemapRule?> GetExactRuleAsync(string normalizedCblSeriesName, string? cblVolume, string? cblNumber, int userId, CancellationToken ct = default)
+    {
+        return await context.ReadingListRemapRule
+            .FirstOrDefaultAsync(r =>
+                r.NormalizedCblSeriesName == normalizedCblSeriesName
+                && r.CblVolume == cblVolume
+                && r.CblNumber == cblNumber
+                && r.AppUserId == userId, ct);
     }
 
     public void Add(ReadingListRemapRule rule)

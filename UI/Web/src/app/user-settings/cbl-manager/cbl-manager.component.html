@@ -3,7 +3,7 @@
   <div class="position-relative">
     @if (!accountService.hasReadOnlyRole()) {
       <div class="position-absolute custom-position d-flex gap-2">
-        <button class="btn btn-outline-primary" (click)="selectedList.set(undefined)" [title]="t('add')">
+        <button class="btn btn-outline-primary" [disabled]="selectedList() === undefined" (click)="selectedList.set(undefined)" [title]="t('add')">
           <i class="fa fa-plus" aria-hidden="true"></i><span class="phone-hidden ms-1">{{t('add')}}</span>
         </button>
         <button class="btn btn-outline-primary" (click)="openBrowseModal()" [title]="t('browse-repo')">
@@ -108,7 +108,7 @@
               </div>
 
               @if (selectedItem.canSync) {
-                <span class="pill p-1 me-1 provider">{{selectedItem.provider | readingListProvider}}</span>
+                <span class="pill p-1 me-1 provider">{{t('can-sync')}}</span>
               }
 
               <div class="text-muted mt-1" style="font-size: 0.9rem;">
@@ -119,7 +119,7 @@
                   @if (selectedItem.ageRating) {
                     <span> · </span>
                   }
-                  <span>{{selectedItem.startingMonth}}/{{selectedItem.startingYear}} – {{selectedItem.endingMonth}}/{{selectedItem.endingYear}}</span>
+                  <span>{{selectedItem.startingYear}} – {{selectedItem.endingYear}}</span>
                 }
                 @if (selectedItem.ageRating || selectedItem.startingYear > 0) {
                   <span> · </span>
@@ -151,7 +151,7 @@
           }
 
         } @else {
-          <p>You lack the ability to interact with this content.</p>
+          <p>{{t('not-authorized')}}</p>
         }
       </div>
     </div>

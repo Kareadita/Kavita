@@ -35,6 +35,18 @@ public interface ICblExportService
 
 public partial class CblExportService(IUnitOfWork unitOfWork, IDirectoryService directoryService, ILogger<CblExportService> logger) : ICblExportService
 {
+    private static readonly XmlWriterSettings CblV1XmlOptions = new XmlWriterSettings
+    {
+        Indent = true,
+        Encoding = System.Text.Encoding.UTF8,
+    };
+
+    private static readonly JsonSerializerOptions CblV2JsonOptions = new JsonSerializerOptions
+    {
+        WriteIndented = true,
+        DefaultIgnoreCondition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull,
+    };
+
     /// <inheritdoc />
     public async Task<string?> ExportReadingList(int readingListId, int userId, bool asV2 = false)
     {
@@ -98,24 +110,17 @@ public partial class CblExportService(IUnitOfWork unitOfWork, IDirectoryService 
                 ? item.Chapter.ReleaseDate.Year.ToString()
                 : string.Empty;
 
-            var seriesName = item.Series.Name;
-            var group = SeriesAndYearRegex().Matches(item.Series.Name);
-            if (group.Count > 1)
-            {
-                seriesName = group[0].Groups["Series"].Value;
-                year = group[0].Groups["Year"].Value;
-            }
-
+            var seriesName = GetSeriesAndYearFromName(item, ref year);
 
             books.Add(new CblBook
             {
                 Series = seriesName,
                 Number = item.Chapter.Range, // Range can leak internal encodings. Need to understand how to map this.
-                Volume = item.Volume.Name, // TODO: If the library is Comic type, we can try and parse from Kavita Series first. Need to test with real user files
+                Volume = item.Volume.Name, // NOTE: If the library is Comic type, we can try and parse from Kavita Series first. Need to test with real user files
                 Year = year,
                 Format = (item.Series.Name.Contains("Annual") || item.Chapter.Range.Contains("Annual")) ? "Annual" : string.Empty, // We will only write "Annual" when we detect it in the Series Name
                 FileType = MapMangaFormatToFileType(item.Series.Format),
-                Databases = GetV1Databases(item.Chapter, seriesName),
+                Databases = GetV1Databases(item.Chapter, item.Series),
             });
         }
 
@@ -131,17 +136,25 @@ public partial class CblExportService(IUnitOfWork unitOfWork, IDirectoryService 
         };
     }
 
+    private static string GetSeriesAndYearFromName(ReadingListItem item, ref string year)
+    {
+        var seriesName = item.Series.Name;
+        var group = SeriesAndYearRegex().Matches(item.Series.Name);
+        if (group.Count > 1)
+        {
+            seriesName = group[0].Groups["Series"].Value.Trim();
+            year = group[0].Groups["Year"].Value.Trim();
+        }
+
+        return seriesName;
+    }
+
     public static void SerializeV1(CblReadingList cbl, string filePath)
     {
         var serializer = new XmlSerializer(typeof(CblReadingList));
-        var settings = new XmlWriterSettings
-        {
-            Indent = true,
-            Encoding = System.Text.Encoding.UTF8,
-        };
 
         using var stream = File.Create(filePath);
-        using var writer = XmlWriter.Create(stream, settings);
+        using var writer = XmlWriter.Create(stream, CblV1XmlOptions);
         serializer.Serialize(writer, cbl);
     }
 
@@ -153,25 +166,26 @@ public partial class CblExportService(IUnitOfWork unitOfWork, IDirectoryService 
         var issues = new List<CblV2Issue>();
         foreach (var item in items)
         {
+            var year = string.Empty;
+            var seriesName = GetSeriesAndYearFromName(item, ref year);
+
             var coverDate = item.Chapter.ReleaseDate != DateTime.MinValue
                 ? item.Chapter.ReleaseDate.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture)
                 : string.Empty;
 
             var seriesStartYear = item.Series.Metadata?.ReleaseYear is > 0
                 ? item.Series.Metadata.ReleaseYear
-                : (int?)null;
+                : int.TryParse(year, out var parsedYear) ? parsedYear : (int?)null;
 
-            // TODO: If library type is Comics, we need to remove (YEAR/Vol)
-            var seriesName = item.Series.Name;
 
             issues.Add(new CblV2Issue
             {
-                SeriesName = item.Series.Name,
+                SeriesName = seriesName,
                 SeriesStartYear = seriesStartYear,
                 IssueNumber = item.Chapter.Range,
                 IssueCoverDate = coverDate,
                 IssueType = string.Empty,
-                Id = GetExternalIds(item.Chapter, seriesName)
+                Id = GetExternalIds(item.Chapter, item.Series)
             });
         }
 
@@ -201,29 +215,39 @@ public partial class CblExportService(IUnitOfWork unitOfWork, IDirectoryService 
         };
     }
 
-    private static List<CblBookDatabase> GetV1Databases(Chapter chapter, string seriesName)
+    private static List<CblBookDatabase> GetV1Databases(Chapter chapter, Series series)
     {
         var results = new List<CblBookDatabase>();
 
         if (!string.IsNullOrEmpty(chapter.ComicVineId))
-            results.Add(new CblBookDatabase { Name = "cv", Series = seriesName, Issue = chapter.ComicVineId });
+        {
+            if (!string.IsNullOrEmpty(series.ComicVineId))
+            {
+                results.Add(new CblBookDatabase { Name = "cv", Series = series.ComicVineId, Issue = chapter.ComicVineId });
+            }
+            else
+            {
+                results.Add(new CblBookDatabase { Name = "cv", Issue = chapter.ComicVineId });
+            }
+        }
+
 
         if (chapter.MetronId > 0)
-            results.Add(new CblBookDatabase { Name = "metron", Series = seriesName, Issue = chapter.MetronId.ToString() });
+            results.Add(new CblBookDatabase { Name = "metron", Issue = chapter.MetronId.ToString() });
 
         if (chapter.AniListId > 0)
-            results.Add(new CblBookDatabase { Name = "anilist", Series = seriesName, Issue = chapter.AniListId.ToString() });
+            results.Add(new CblBookDatabase { Name = "anilist", Series = chapter.AniListId.ToString(), Issue = chapter.AniListId.ToString() });
 
         if (chapter.MalId > 0)
-            results.Add(new CblBookDatabase { Name = "malist", Series = seriesName, Issue = chapter.MalId.ToString() });
+            results.Add(new CblBookDatabase { Name = "malist", Series = chapter.MalId.ToString(), Issue = chapter.MalId.ToString() });
 
         if (chapter.HardcoverId > 0)
-            results.Add(new CblBookDatabase { Name = "hardcover", Series = seriesName, Issue = chapter.HardcoverId.ToString() });
+            results.Add(new CblBookDatabase { Name = "hardcover", Issue = chapter.HardcoverId.ToString() });
 
         return results;
     }
 
-    private static List<CblV2ExternalId> GetExternalIds(Chapter chapter, string seriesName)
+    private static List<CblV2ExternalId> GetExternalIds(Chapter chapter, Series series)
     {
         var results = new List<CblV2ExternalId>();
         if (chapter.AniListId > 0)
@@ -232,7 +256,7 @@ public partial class CblExportService(IUnitOfWork unitOfWork, IDirectoryService 
             {
                 Issue = chapter.AniListId.ToString(),
                 Name = "anilist",
-                Series = seriesName
+                Series = chapter.AniListId.ToString()
             });
         }
 
@@ -242,7 +266,7 @@ public partial class CblExportService(IUnitOfWork unitOfWork, IDirectoryService 
             {
                 Issue = chapter.MalId.ToString(),
                 Name = "malist",
-                Series = seriesName
+                Series = chapter.MalId.ToString()
             });
         }
 
@@ -252,7 +276,7 @@ public partial class CblExportService(IUnitOfWork unitOfWork, IDirectoryService 
             {
                 Issue = chapter.ComicVineId,
                 Name = "cv",
-                Series = seriesName
+                Series = series.ComicVineId
             });
         }
 
@@ -262,7 +286,7 @@ public partial class CblExportService(IUnitOfWork unitOfWork, IDirectoryService 
             {
                 Issue = chapter.MetronId.ToString(),
                 Name = "metron",
-                Series = seriesName
+                Series = series.MetronId.ToString()
             });
         }
 
@@ -272,7 +296,7 @@ public partial class CblExportService(IUnitOfWork unitOfWork, IDirectoryService 
             {
                 Issue = chapter.HardcoverId.ToString(),
                 Name = "hardcover",
-                Series = seriesName
+                Series = series.HardcoverId.ToString()
             });
         }
 
@@ -281,13 +305,8 @@ public partial class CblExportService(IUnitOfWork unitOfWork, IDirectoryService 
 
     public static void SerializeV2(CblV2Root root, string filePath)
     {
-        var options = new JsonSerializerOptions
-        {
-            WriteIndented = true,
-            DefaultIgnoreCondition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull,
-        };
 
-        var json = JsonSerializer.Serialize(root, options);
+        var json = JsonSerializer.Serialize(root, CblV2JsonOptions);
         File.WriteAllText(filePath, json);
     }
 

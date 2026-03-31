@@ -42,23 +42,21 @@ internal static class CblSeriesMatcher
     public static Dictionary<string, (string OriginalName, CblMatchTier Tier)> GenerateAllNameVariants(IList<ParsedCblItem> items)
     {
         var variants = new Dictionary<string, (string, CblMatchTier)>();
-        var uniqueNames = items.DistinctBy(i => i.SeriesName).ToList();
+        var uniqueNames = items.Select(i => i.SeriesName).Distinct().ToList();
 
-        foreach (var item in uniqueNames)
+        foreach (var name in uniqueNames)
         {
-            var name = item.SeriesName;
-
-            // Tier 2: Exact normalized
+            // Exact normalized
             AddVariants(variants, name, CblMatchTier.ExactName, name);
 
-            // Tier 4: Article stripped
+            // Article stripped
             var sortTitle = BookSortTitlePrefixHelper.GetSortTitle(name);
             if (!string.Equals(sortTitle, name, StringComparison.OrdinalIgnoreCase))
             {
                 AddVariants(variants, sortTitle, CblMatchTier.ArticleStripped, name);
             }
 
-            // Tier 5: Reprint stripped
+            // Reprint stripped
             var stripped = StripReprintSuffix(name);
             if (!string.Equals(stripped, name, StringComparison.OrdinalIgnoreCase))
             {
@@ -94,8 +92,7 @@ internal static class CblSeriesMatcher
         IList<ReadingListRemapRule> remapRules,
         IList<Chapter> externalIdChapters,
         IList<Series> matchedSeries,
-        IList<Chapter> alternateSeriesChapters,
-        CblImportOptions options)
+        IList<Chapter> alternateSeriesChapters)
     {
         var results = new Dictionary<int, (MatchedItem? Match, CblBookResult Result)>();
 
@@ -162,7 +159,7 @@ internal static class CblSeriesMatcher
             }
 
             // Tiers 2-4: Name matching
-            if (TryMatchByName(item, nameVariants, seriesByNormalizedName, options, out var seriesMatch, out var tier))
+            if (TryMatchByName(item, nameVariants, seriesByNormalizedName, out var seriesMatch, out var tier))
             {
                 // Series resolved, now resolve chapter
                 results[item.Order] = ResolveChapter(item, seriesMatch, tier);
@@ -218,6 +215,7 @@ internal static class CblSeriesMatcher
             var libraryId = 0;
             var libraryType = LibraryType.Comic;
             var ruleSeries = matchedSeries.FirstOrDefault(s => s.Id == rule.SeriesId);
+
             if (ruleSeries != null)
             {
                 libraryId = ruleSeries.LibraryId;
@@ -250,38 +248,51 @@ internal static class CblSeriesMatcher
             return true;
         }
 
-        // Volume-only remap with target VolumeId — resolve chapters within the override volume
+        // Volume-only remap with target VolumeId - resolve chapters within the override volume
         if (rule is {VolumeId: not null, ChapterId: null})
         {
             var volSeries = matchedSeries.FirstOrDefault(s => s.Id == rule.SeriesId);
-            if (volSeries != null)
-            {
-                var targetVolume = volSeries.Volumes?.FirstOrDefault(v => v.Id == rule.VolumeId.Value);
-                if (targetVolume != null)
-                {
-                    var resolved = ResolveChapter(item, volSeries, CblMatchTier.RemapRule, targetVolume);
-                    if (resolved.Result.Reason is CblImportReason.ChapterMissing)
-                    {
-                        return false;
-                    }
+            var targetVolume = volSeries?.Volumes?.FirstOrDefault(v => v.Id == rule.VolumeId.Value);
 
-                    resolvedResult = resolved;
-                    return true;
-                }
+            if (targetVolume == null) return false;
+            var resolved = ResolveChapter(item, volSeries!, CblMatchTier.RemapRule, targetVolume);
+            if (resolved.Result.Reason is CblImportReason.ChapterMissing)
+            {
+                return false;
             }
 
-            return false;
+            resolvedResult = resolved;
+            return true;
         }
 
         // Rule only mapped to series — resolve chapter within the mapped series.
-        // If volume/chapter resolution fails, fall through to lower tiers so the
-        // original CBL data can match via name variants (e.g. Comic naming "Series (Volume)").
-        // This prevents false positives where a series-only remap for "Batman" -> "Batman (2014)"
-        // would incorrectly capture a CBL entry with Volume="1994".
+        // The user has explicitly declared this mapping, so we should resolve within
+        // the target series rather than falling through to lower tiers (which can never
+        // match a remapped name like "Zombie Tales" -> "Adventure Time").
         var series = matchedSeries.FirstOrDefault(s => s.Id == rule.SeriesId);
         if (series != null)
         {
             var resolved = ResolveChapter(item, series, CblMatchTier.RemapRule);
+
+            // If the CBL volume doesn't exist in the target series, retry without
+            // the volume so resolution falls back to the loose-leaf volume.
+            // This handles cases like a manga series with only loose issues being
+            // targeted by a remap from a Comic CBL entry that carries a year-volume.
+            if (resolved.Result.Reason is CblImportReason.VolumeMissing
+                && !string.IsNullOrEmpty(item.Volume))
+            {
+                resolved = ResolveChapter(item with { Volume = string.Empty }, series, CblMatchTier.RemapRule);
+
+                // Restore the original volume so the result shows what the CBL requested
+                resolved.Result.Volume = item.Volume;
+
+                // After the retry the remap is authoritative — return the result
+                // (success or failure) rather than falling through to lower tiers
+                // which would report SeriesMissing for a remapped name.
+                resolvedResult = resolved;
+                return true;
+            }
+
             if (resolved.Result.Reason is CblImportReason.VolumeMissing or CblImportReason.ChapterMissing)
             {
                 return false;
@@ -333,7 +344,6 @@ internal static class CblSeriesMatcher
     private static bool TryMatchByName(ParsedCblItem item,
         Dictionary<string, (string OriginalName, CblMatchTier Tier)> nameVariants,
         Dictionary<string, List<Series>> seriesByNormalizedName,
-        CblImportOptions options,
         out Series series, out CblMatchTier tier)
     {
         // Try each tier in order
@@ -370,7 +380,7 @@ internal static class CblSeriesMatcher
                 }
 
                 // Disambiguate
-                var disambiguated = DisambiguateSeries(candidates, item, options);
+                var disambiguated = DisambiguateSeries(candidates, item);
                 if (disambiguated != null)
                 {
                     series = disambiguated;
@@ -388,39 +398,18 @@ internal static class CblSeriesMatcher
         return false;
     }
 
-    private static Series? DisambiguateSeries(List<Series> candidates, ParsedCblItem item, CblImportOptions options)
+    private static Series? DisambiguateSeries(List<Series> candidates, ParsedCblItem item)
     {
-        var filtered = candidates;
-
-        // Filter by applicable libraries
-        if (options.ApplicableLibraries is { Count: > 0 })
-        {
-            var libFiltered = filtered.Where(s => options.ApplicableLibraries.Contains(s.LibraryId)).ToList();
-            if (libFiltered.Count > 0) filtered = libFiltered;
-        }
-
-        if (filtered.Count == 1) return filtered[0];
-
-        // Prefer Comic library type if PreferComicVineMatching
-        if (options.PreferComicVineMatching)
-        {
-            var comicFiltered = filtered.Where(s => s.Library != null &&
-                s.Library.Type is LibraryType.Comic or LibraryType.ComicVine).ToList();
-            if (comicFiltered.Count > 0) filtered = comicFiltered;
-        }
-
-        if (filtered.Count == 1) return filtered[0];
-
         // Match by year if available
         if (int.TryParse(item.Year, out var year) && year > 0)
         {
-            var yearFiltered = filtered.Where(s =>
+            var yearFiltered = candidates.Where(s =>
                 s.Metadata != null && s.Metadata.ReleaseYear == year).ToList();
             if (yearFiltered.Count == 1) return yearFiltered[0];
         }
 
         // Still ambiguous
-        return filtered.Count == 1 ? filtered[0] : null;
+        return candidates.Count == 1 ? candidates[0] : null;
     }
 
     private static (MatchedItem? Match, CblBookResult Result) ResolveChapter(
@@ -463,7 +452,7 @@ internal static class CblSeriesMatcher
             targetVolume ??= volumes.FirstOrDefault(v =>
                 string.Equals(v.Name, item.Volume, StringComparison.OrdinalIgnoreCase));
 
-            // Volume was explicitly requested but not found — report as VolumeMissing
+            // Volume was explicitly requested but not found, report as VolumeMissing
             if (targetVolume == null)
             {
                 return (null, new CblBookResult(item)
@@ -479,7 +468,7 @@ internal static class CblSeriesMatcher
         }
         else
         {
-            // No volume specified — use loose leaf
+            // No volume specified, use loose-leaf
             targetVolume = volumes.GetLooseLeafVolumeOrDefault();
         }
 
@@ -640,12 +629,9 @@ internal static class CblSeriesMatcher
         var trimmed = name.Trim();
         foreach (var suffix in ReprintSuffixes)
         {
-            if (trimmed.EndsWith(suffix, StringComparison.OrdinalIgnoreCase))
-            {
-                var stripped = trimmed[..^suffix.Length].TrimEnd(' ', '-', ':');
-                if (!string.IsNullOrWhiteSpace(stripped))
-                    return stripped;
-            }
+            if (!trimmed.EndsWith(suffix, StringComparison.OrdinalIgnoreCase)) continue;
+            var stripped = trimmed[..^suffix.Length].TrimEnd(' ', '-', ':');
+            if (!string.IsNullOrWhiteSpace(stripped)) return stripped;
         }
 
         return name;

@@ -113,34 +113,35 @@ export class ManageRemapRulesComponent implements OnInit {
     const selectedSeries = this.selectedSeries();
     if (!cblSeriesName?.trim() || !selectedSeries) return;
 
+
     const issueDetail = cblVolume?.trim() ? { cblVolume: cblVolume.trim() } : undefined;
     this.cblService.createRemapRule(cblSeriesName.trim(), selectedSeries.seriesId, issueDetail).subscribe(rule => {
       this.rules.update(rules => [...rules, rule]);
       this.showCreateForm.set(false);
       this.resetCreateForm();
-      this.toastr.success(translate('manage-remap-rules.rule-created'));
+      this.toastr.success(translate('toasts.cbl-remap-rule-created'));
     });
   }
 
   async deleteRule(rule: RemapRule) {
-    if (!await this.confirmService.confirm(translate('manage-remap-rules.confirm-delete'))) return;
+    if (!await this.confirmService.confirm(translate('toasts.confirm-delete-cbl-remap-rule'))) return;
     this.cblService.deleteRemapRule(rule.id).subscribe(() => {
       this.rules.update(rules => rules.filter(r => r.id !== rule.id));
-      this.toastr.success(translate('manage-remap-rules.rule-deleted'));
+      this.toastr.success(translate('toasts.cbl-remap-rule-deleted'));
     });
   }
 
   promoteRule(rule: RemapRule) {
     this.cblService.promoteRule(rule.id).subscribe(updated => {
       this.rules.update(rules => rules.map(r => r.id === updated.id ? updated : r));
-      this.toastr.success(translate('manage-remap-rules.rule-promoted'));
+      this.toastr.success(translate('toasts.cbl-remap-rule-promoted'));
     });
   }
 
   demoteRule(rule: RemapRule) {
     this.cblService.demoteRule(rule.id).subscribe(updated => {
       this.rules.update(rules => rules.map(r => r.id === updated.id ? updated : r));
-      this.toastr.success(translate('manage-remap-rules.rule-demoted'));
+      this.toastr.success(translate('toasts.cbl-remap-rule-demoted'));
     });
   }
 }

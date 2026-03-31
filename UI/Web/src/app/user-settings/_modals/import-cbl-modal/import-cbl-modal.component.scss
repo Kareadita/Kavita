@@ -4,14 +4,6 @@
   cursor: default;
 }
 
-.tier-0 { background-color: var(--bs-info); color: white; cursor: help; }
-.tier-1 { background-color: var(--bs-primary); color: white; }
-.tier-2 { background-color: var(--bs-success); color: white; }
-.tier-3 { background-color: #6f42c1; color: white; }
-.tier-4 { background-color: #d63384; color: white; }
-.tier-5 { background-color: #fd7e14; color: white; }
-.tier-6 { background-color: var(--bs-secondary); color: white; }
-
 :host ::ng-deep .skipped-row {
   color: var(--bs-secondary-color) !important;
 }
