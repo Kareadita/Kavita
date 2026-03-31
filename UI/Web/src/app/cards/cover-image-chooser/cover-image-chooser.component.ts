@@ -10,13 +10,17 @@ import {DOCUMENT} from '@angular/common';
 import {ImageComponent} from "../../shared/image/image.component";
 import {translate, TranslocoModule} from "@jsverse/transloco";
 import {ColorscapeService} from "../../_services/colorscape.service";
+import {
+  FileDragAndDropUploadComponent
+} from "src/app/shared/file-drag-and-drop-upload/file-drag-and-drop-upload.component";
 
 @Component({
   selector: 'app-cover-image-chooser',
   imports: [
-      NgxFileDropModule,
-      ImageComponent,
-      TranslocoModule
+    NgxFileDropModule,
+    ImageComponent,
+    TranslocoModule,
+    FileDragAndDropUploadComponent
   ],
   templateUrl: './cover-image-chooser.component.html',
   styleUrls: ['./cover-image-chooser.component.scss'],
@@ -83,9 +87,7 @@ export class CoverImageChooserComponent {
       };
       img.onerror = () => {
         this.toastr.error(translate('errors.rejected-cover-upload'));
-        this.coverImageUrl.set('');
       };
-      this.coverImageUrl.set('');
       return;
     }
 
@@ -109,8 +111,7 @@ export class CoverImageChooserComponent {
     }
   }
 
-  loadImage(url?: string) {
-    url = url || this.coverImageUrl().trim();
+  loadImage(url: string) {
     if (!url || url === '') return;
 
     this.uploadService.uploadByUrl(url).subscribe(filename => {
@@ -120,21 +121,8 @@ export class CoverImageChooserComponent {
       img.onload = () => this.handleUrlImageAdd(img);
       img.onerror = () => {
         this.toastr.error(translate('errors.rejected-cover-upload'));
-        this.coverImageUrl.set('');
       };
-      this.coverImageUrl.set('');
     });
-  }
-
-  changeMode(mode: 'url') {
-    this.mode.set(mode);
-    this.setupEnterHandler();
-
-    setTimeout(() => (this.document.querySelector('#load-image') as HTMLInputElement)?.focus(), 10);
-  }
-
-  setMode(mode: 'file' | 'url' | 'all') {
-    this.mode.set(mode);
   }
 
   public dropped(files: NgxFileDropEntry[]) {
@@ -178,30 +166,5 @@ export class CoverImageChooserComponent {
   reset() {
     this.resetClicked.emit(undefined);
     this.selectedIndex.set(-1);
-  }
-
-  setupEnterHandler() {
-    setTimeout(() => {
-      const elem = document.querySelector('input[id="load-image"]');
-      if (elem == null) return;
-      fromEvent(elem, 'keydown')
-        .pipe(takeWhile(() => this.mode() === 'url')).subscribe((event) => {
-          const evt = <KeyboardEvent>event;
-          switch(evt.key) {
-            case KEY_CODES.ENTER:
-            {
-              this.loadImage();
-              break;
-            }
-
-            case KEY_CODES.ESC_KEY:
-              this.mode.set('all');
-              event.stopPropagation();
-              break;
-            default:
-              break;
-          }
-        });
-    });
   }
 }

@@ -352,8 +352,6 @@
         "active-theme": "Active",
         "updated-toastr": "Site default has been updated to {{name}}",
         "delete": "{{common.delete}}",
-        "drag-n-drop": "{{cover-image-chooser.drag-n-drop}}",
-        "upload": "{{cover-image-chooser.upload}}",
         "upload-continued": "a css file",
         "preview-default": "Select a theme first",
         "preview-default-admin": "Select a theme first or upload one manually",
@@ -361,19 +359,24 @@
         "add": "{{common.add}}"
     },
 
-    "font-manager": {
-        "description": "Kavita's epub reader comes with a few build-in fonts, add your own fonts here. Upload a file, or use a google fonts url. See the <a href='{{wikiLink}}' target='_blank' rel='noreferrer noopener'>wiki</a> for more information.",
+    "file-drag-and-drop-upload": {
+        "drag-n-drop": "{{cover-image-chooser.drag-n-drop}}",
+        "upload": "{{cover-image-chooser.upload}}",
         "enter-an-url-pre-title": "Enter an {{url}}",
         "url": "url",
+        "url-label": "Url",
+        "back": "Back",
+        "load": "Load"
+    },
+
+    "font-manager": {
+        "description": "Kavita's epub reader comes with a few build-in fonts, add your own fonts here. Upload a file, or use a google fonts url. See the <a href='{{wikiLink}}' target='_blank' rel='noreferrer noopener'>wiki</a> for more information.",
         "add": "{{common.add}}",
         "drag-n-drop": "{{cover-image-chooser.drag-n-drop}}",
         "upload": "{{cover-image-chooser.upload}}",
         "upload-continued": "a font file",
         "preview-default": "Upload your own font via file or Google Font url",
         "delete": "{{common.delete}}",
-        "url-label": "Url",
-        "back": "Back",
-        "load": "Load",
         "no-preview": "This font cannot be previewed. This will take the default style from the book.",
         "brown-fox": "The quick brown fox jumps over the lazy dog",
         "filter-system-fonts-label": "Filter System Fonts"
@@ -1557,7 +1560,7 @@
         "url": "Url",
         "drag-n-drop": "Drag and drop",
         "upload": "Upload",
-        "upload-continued": "an image",
+        "upload-continued": "image",
         "url-label": "Url",
         "load": "Load",
         "back": "Back",

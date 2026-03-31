@@ -20,6 +20,9 @@ import {ReactiveFormsModule} from "@angular/forms";
 import {LoadingComponent} from "../../shared/loading/loading.component";
 import {PreviewImageModalComponent} from "../../shared/_components/carousel-modal/preview-image-modal.component";
 import {ModalService} from "../../_services/modal.service";
+import {
+  FileDragAndDropUploadComponent
+} from "src/app/shared/file-drag-and-drop-upload/file-drag-and-drop-upload.component";
 
 interface ThemeContainer {
   downloadable?: DownloadableSiteTheme;
@@ -35,7 +38,7 @@ interface ThemeContainer {
     changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [SentenceCasePipe, TranslocoDirective, CarouselReelComponent,
     ImageComponent, DefaultValuePipe, NgTemplateOutlet, NgxFileDropModule,
-    ReactiveFormsModule, LoadingComponent]
+    ReactiveFormsModule, LoadingComponent, FileDragAndDropUploadComponent]
 })
 export class ThemeManagerComponent {
   private readonly destroyRef = inject(DestroyRef);
