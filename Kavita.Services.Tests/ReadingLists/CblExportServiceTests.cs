@@ -185,7 +185,7 @@ public class CblExportServiceTests
         var first = result.Books.Book[0];
         Assert.Single(first.Databases);
         Assert.Equal("cv", first.Databases[0].Name);
-        Assert.Equal("Batman", first.Databases[0].Series);
+        Assert.Null(first.Databases[0].Series); // Series is the series id and not the Series name
         Assert.Equal("cv-12345", first.Databases[0].Issue);
     }
 
@@ -248,11 +248,9 @@ public class CblExportServiceTests
 
             var cv = item.ExternalIds.First(e => e.Provider == CblExternalDbProvider.ComicVine);
             Assert.Equal("cv-12345", cv.IssueId);
-            Assert.Equal("Batman", cv.SeriesId);
 
             var metron = item.ExternalIds.First(e => e.Provider == CblExternalDbProvider.Metron);
             Assert.Equal("67890", metron.IssueId);
-            Assert.Equal("Batman", metron.SeriesId);
         }
         finally
         {

@@ -282,6 +282,12 @@ internal static class CblSeriesMatcher
                 && !string.IsNullOrEmpty(item.Volume))
             {
                 resolved = ResolveChapter(item with { Volume = string.Empty }, series, CblMatchTier.RemapRule);
+
+                // After the retry the remap is authoritative — return the result
+                // (success or failure) rather than falling through to lower tiers
+                // which would report SeriesMissing for a remapped name.
+                resolvedResult = resolved;
+                return true;
             }
 
             if (resolved.Result.Reason is CblImportReason.VolumeMissing or CblImportReason.ChapterMissing)

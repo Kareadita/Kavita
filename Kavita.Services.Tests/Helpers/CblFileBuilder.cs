@@ -20,7 +20,7 @@ public class CblFileBuilder
     public static CblFileBuilder Create(string name) => new(name);
 
     public CblFileBuilder AddBook(string series, string volume = "", string number = "",
-        List<CblExternalId>? externalIds = null)
+        string year = "", List<CblExternalId>? externalIds = null)
     {
         _items.Add(new ParsedCblItem
         {
@@ -28,6 +28,7 @@ public class CblFileBuilder
             SeriesName = series,
             Volume = volume,
             Number = number,
+            Year = year,
             ExternalIds = externalIds ?? []
         });
         return this;

@@ -232,7 +232,7 @@
           </ngx-datatable-column>
 
           <!-- Action Column -->
-          <ngx-datatable-column [width]="30" [sortable]="false" [draggable]="false" [resizeable]="false">
+          <ngx-datatable-column [width]="40" [sortable]="false" [draggable]="false" [resizeable]="false">
             <ng-template ngx-datatable-header-template>{{t('col-action')}}</ng-template>
             <ng-template let-row="row" ngx-datatable-cell-template>
               @if (row.result.reason !== CblImportReason.Success) {

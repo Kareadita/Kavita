@@ -1,0 +1,19 @@
+{
+  "libraryName": "Manga",
+  "libraryType": "Manga",
+  "series": [
+    {
+      "name": "Adventure Time",
+      "volumes": [
+        { "number": "-100000", "chapters": ["1", "2", "3", "4", "5"] }
+      ]
+    },
+    {
+      "name": "One Piece",
+      "volumes": [
+        { "number": "1", "chapters": ["1", "2", "3"] },
+        { "number": "2", "chapters": ["4", "5", "6"] }
+      ]
+    }
+  ]
+}

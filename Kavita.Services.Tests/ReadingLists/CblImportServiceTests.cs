@@ -336,65 +336,6 @@ public class CblImportServiceTests : AbstractDbTest
             r.SeriesId == fablesIds.SeriesId);
     }
 
-    /// <summary>
-    /// A series-only remap (CblVolume=null) must not cause false positives when the CBL
-    /// contains multiple entries that share the same series name but differ by volume.
-    /// In Comic libraries the volume year is appended to the series name, so
-    /// "Batman" Vol 2014 -> "Batman (2014)" and "Batman" Vol 1994 -> "Batman (1994)".
-    /// A remap rule mapping "Batman" -> "Batman (2014)" should only succeed when
-    /// the volume actually resolves within "Batman (2014)". When the CBL entry has
-    /// Volume="1994", the remap should fall through and let Tier 3 (ComicVine naming)
-    /// resolve it to "Batman (1994)" instead.
-    /// </summary>
-    [Fact]
-    public async Task ValidateList_SeriesRemap_FallsThroughWhenVolumeDoesNotResolve()
-    {
-        var (unitOfWork, context, _) = await CreateDatabase();
-        using var helper = new CblTestHelper(unitOfWork);
-        var seed = await helper.SeedLibrary("comic-multi-volume-series.json");
-
-        var batman2014Ids = seed.Lookup[("Batman (2014)", "2014", "1")];
-        var batman1994Ids = seed.Lookup[("Batman (1994)", "1994", "1")];
-
-        // Series-only remap: "Batman" -> "Batman (2014)"
-        unitOfWork.RemapRuleRepository.Add(new ReadingListRemapRule
-        {
-            NormalizedCblSeriesName = "Batman".ToNormalized(),
-            CblSeriesName = "Batman",
-            SeriesId = batman2014Ids.SeriesId,
-            SeriesNameAtMapping = "Batman (2014)",
-            AppUserId = seed.User.Id,
-            CreatedUtc = DateTime.UtcNow
-        });
-        await unitOfWork.CommitAsync();
-
-        var cbl = CblFileBuilder.Create("Remap Fallthrough Test")
-            .AddBook("Batman", volume: "2014", number: "1") // Should match via remap
-            .AddBook("Batman", volume: "1994", number: "1") // Should NOT match via remap — must fall through
-            .Build();
-
-        var filePath = helper.WriteCblToDisk(cbl);
-        var svc = helper.CreateImportService();
-        var summary = await svc.ValidateList(seed.User.Id, filePath);
-
-        Assert.Equal(CblImportResult.Success, summary.Success);
-        Assert.Equal(2, summary.SuccessfulInserts.Count);
-
-        // First item: matched via remap rule to Batman (2014)
-        var first = summary.SuccessfulInserts.First(r => r.Volume == "2014");
-        Assert.Equal(CblMatchTier.RemapRule, first.MatchTier);
-        Assert.Equal(batman2014Ids.SeriesId, first.SeriesId);
-
-        // Second item: remap fell through, matched via ComicVine naming tier to Batman (1994)
-        var second = summary.SuccessfulInserts.First(r => r.Volume == "1994");
-        Assert.NotEqual(CblMatchTier.RemapRule, second.MatchTier);
-        Assert.Equal(batman1994Ids.SeriesId, second.SeriesId);
-    }
-
-    /// <summary>
-    /// Similar to <see cref="ValidateList_SeriesRemap_FallsThroughWhenVolumeDoesNotResolve"/> but focuses explicitly
-    /// on when there is a dedicate volume remap rule ane ensures Batman (2014) matches correctly
-    /// </summary>
     [Fact]
     public async Task ValidateList_SeriesVolumeRemap()
     {
@@ -1154,6 +1095,504 @@ public class CblImportServiceTests : AbstractDbTest
         Assert.Equal(CblMatchTier.RemapRule, summary.SuccessfulInserts.First().MatchTier);
         // Volume-only should win over series-only
         Assert.Equal(batman2014Ids.SeriesId, summary.SuccessfulInserts.First().SeriesId);
+    }
+
+    #endregion
+
+    #region Group 10: Series Remap — Volume Fallback to Loose-Leaf
+
+    /// <summary>
+    /// When a series-level remap targets a manga series with only loose-leaf issues,
+    /// the CBL volume (e.g. "2005") doesn't exist in the target series. The matcher
+    /// should fall back to loose-leaf volume and resolve the chapter there.
+    /// </summary>
+    [Fact]
+    public async Task ValidateList_SeriesRemap_FallsBackToLooseLeafWhenVolumeMissing()
+    {
+        var (unitOfWork, context, _) = await CreateDatabase();
+        using var helper = new CblTestHelper(unitOfWork);
+        var seed = await helper.SeedLibrary("manga-loose-leaf.json");
+
+        var adventureTimeIds = seed.Lookup[("Adventure Time", "-100000", "1")];
+
+        // Series-level remap: "Zombie Tales" -> Adventure Time (manga, loose-leaf only)
+        unitOfWork.RemapRuleRepository.Add(new ReadingListRemapRule
+        {
+            NormalizedCblSeriesName = "Zombie Tales".ToNormalized(),
+            CblSeriesName = "Zombie Tales",
+            SeriesId = adventureTimeIds.SeriesId,
+            SeriesNameAtMapping = "Adventure Time",
+            AppUserId = seed.User.Id,
+            CreatedUtc = DateTime.UtcNow
+        });
+        await unitOfWork.CommitAsync();
+
+        // CBL has Volume="2005" which doesn't exist in Adventure Time
+        var cbl = CblFileBuilder.Create("Loose Leaf Fallback Test")
+            .AddBook("Zombie Tales", volume: "2005", number: "1")
+            .Build();
+
+        var filePath = helper.WriteCblToDisk(cbl);
+        var svc = helper.CreateImportService();
+        var summary = await svc.ValidateList(seed.User.Id, filePath);
+
+        Assert.Equal(CblImportResult.Success, summary.Success);
+        Assert.Single(summary.SuccessfulInserts);
+        Assert.Equal(CblMatchTier.RemapRule, summary.SuccessfulInserts.First().MatchTier);
+        Assert.Equal(adventureTimeIds.SeriesId, summary.SuccessfulInserts.First().SeriesId);
+    }
+
+    /// <summary>
+    /// Even with the loose-leaf fallback, if the chapter doesn't exist in the
+    /// loose-leaf volume either, the result should still report failure.
+    /// </summary>
+    [Fact]
+    public async Task ValidateList_SeriesRemap_LooseLeafFallback_ChapterMissing()
+    {
+        var (unitOfWork, context, _) = await CreateDatabase();
+        using var helper = new CblTestHelper(unitOfWork);
+        var seed = await helper.SeedLibrary("manga-loose-leaf.json");
+
+        var adventureTimeIds = seed.Lookup[("Adventure Time", "-100000", "1")];
+
+        unitOfWork.RemapRuleRepository.Add(new ReadingListRemapRule
+        {
+            NormalizedCblSeriesName = "Zombie Tales".ToNormalized(),
+            CblSeriesName = "Zombie Tales",
+            SeriesId = adventureTimeIds.SeriesId,
+            SeriesNameAtMapping = "Adventure Time",
+            AppUserId = seed.User.Id,
+            CreatedUtc = DateTime.UtcNow
+        });
+        await unitOfWork.CommitAsync();
+
+        // Verify the rule was actually persisted
+        var rules = await unitOfWork.RemapRuleRepository.GetRulesForUserAsync(seed.User.Id);
+        Assert.NotEmpty(rules);
+
+        // Chapter 99 doesn't exist anywhere in Adventure Time
+        var cbl = CblFileBuilder.Create("Missing Chapter Test")
+            .AddBook("Zombie Tales", volume: "2005", number: "99")
+            .Build();
+
+        var filePath = helper.WriteCblToDisk(cbl);
+        var svc = helper.CreateImportService();
+        var summary = await svc.ValidateList(seed.User.Id, filePath);
+
+        Assert.Equal(CblImportResult.Fail, summary.Success);
+        Assert.Contains(summary.Results, r => r.Reason == CblImportReason.ChapterMissing);
+    }
+
+    /// <summary>
+    /// When the series-level remap targets a Comic series where the volume DOES exist,
+    /// the fallback should NOT activate — the volume should resolve directly.
+    /// </summary>
+    [Fact]
+    public async Task ValidateList_SeriesRemap_VolumeExistsInTarget_NoFallback()
+    {
+        var (unitOfWork, context, _) = await CreateDatabase();
+        using var helper = new CblTestHelper(unitOfWork);
+        var seed = await helper.SeedLibrary("comic-multi-volume-series.json");
+
+        var batman2014Ids = seed.Lookup[("Batman (2014)", "2014", "1")];
+
+        // Series-level remap: "Dark Knight" -> Batman (2014)
+        unitOfWork.RemapRuleRepository.Add(new ReadingListRemapRule
+        {
+            NormalizedCblSeriesName = "Dark Knight".ToNormalized(),
+            CblSeriesName = "Dark Knight",
+            SeriesId = batman2014Ids.SeriesId,
+            SeriesNameAtMapping = "Batman (2014)",
+            AppUserId = seed.User.Id,
+            CreatedUtc = DateTime.UtcNow
+        });
+        await unitOfWork.CommitAsync();
+
+        // Volume 2014 exists in Batman (2014) — should resolve directly, no fallback needed
+        var cbl = CblFileBuilder.Create("Direct Volume Match Test")
+            .AddBook("Dark Knight", volume: "2014", number: "1")
+            .Build();
+
+        var filePath = helper.WriteCblToDisk(cbl);
+        var svc = helper.CreateImportService();
+        var summary = await svc.ValidateList(seed.User.Id, filePath);
+
+        Assert.Equal(CblImportResult.Success, summary.Success);
+        Assert.Single(summary.SuccessfulInserts);
+        Assert.Equal(CblMatchTier.RemapRule, summary.SuccessfulInserts.First().MatchTier);
+        Assert.Equal(batman2014Ids.SeriesId, summary.SuccessfulInserts.First().SeriesId);
+        Assert.Equal(batman2014Ids.ChapterId, summary.SuccessfulInserts.First().ChapterId);
+    }
+
+    /// <summary>
+    /// Series-level remap with multiple CBL entries: some volumes exist in the target,
+    /// some fall back to loose-leaf.
+    /// </summary>
+    [Fact]
+    public async Task ValidateList_SeriesRemap_MultipleEntries_MixedResolution()
+    {
+        var (unitOfWork, context, _) = await CreateDatabase();
+        using var helper = new CblTestHelper(unitOfWork);
+        var seed = await helper.SeedLibrary("manga-loose-leaf.json");
+
+        var ch1Ids = seed.Lookup[("Adventure Time", "-100000", "1")];
+        var ch3Ids = seed.Lookup[("Adventure Time", "-100000", "3")];
+
+        unitOfWork.RemapRuleRepository.Add(new ReadingListRemapRule
+        {
+            NormalizedCblSeriesName = "Zombie Tales".ToNormalized(),
+            CblSeriesName = "Zombie Tales",
+            SeriesId = ch1Ids.SeriesId,
+            SeriesNameAtMapping = "Adventure Time",
+            AppUserId = seed.User.Id,
+            CreatedUtc = DateTime.UtcNow
+        });
+        await unitOfWork.CommitAsync();
+
+        var cbl = CblFileBuilder.Create("Mixed Resolution Test")
+            .AddBook("Zombie Tales", volume: "2005", number: "1")
+            .AddBook("Zombie Tales", volume: "2005", number: "3")
+            .Build();
+
+        var filePath = helper.WriteCblToDisk(cbl);
+        var svc = helper.CreateImportService();
+        var summary = await svc.ValidateList(seed.User.Id, filePath);
+
+        Assert.Equal(CblImportResult.Success, summary.Success);
+        Assert.Equal(2, summary.SuccessfulInserts.Count);
+        Assert.All(summary.SuccessfulInserts, r => Assert.Equal(CblMatchTier.RemapRule, r.MatchTier));
+    }
+
+    #endregion
+
+    #region Group 11: Name Matching Tiers
+
+    /// <summary>
+    /// Tier 3: Comic naming pattern — "Batman" with Volume="2014" should match series "Batman (2014)"
+    /// </summary>
+    [Fact]
+    public async Task ValidateList_ComicNamingPattern_MatchesTier3()
+    {
+        var (unitOfWork, _, _) = await CreateDatabase();
+        using var helper = new CblTestHelper(unitOfWork);
+        var seed = await helper.SeedLibrary("comic-multi-volume-series.json");
+
+        var batman2014Ids = seed.Lookup[("Batman (2014)", "2014", "1")];
+
+        var cbl = CblFileBuilder.Create("Comic Naming Test")
+            .AddBook("Batman", volume: "2014", number: "1")
+            .Build();
+
+        var filePath = helper.WriteCblToDisk(cbl);
+        var svc = helper.CreateImportService();
+        var summary = await svc.ValidateList(seed.User.Id, filePath);
+
+        Assert.Equal(CblImportResult.Success, summary.Success);
+        Assert.Single(summary.SuccessfulInserts);
+        Assert.Equal(CblMatchTier.ComicVineNaming, summary.SuccessfulInserts.First().MatchTier);
+        Assert.Equal(batman2014Ids.SeriesId, summary.SuccessfulInserts.First().SeriesId);
+    }
+
+    /// <summary>
+    /// Tier 4: Article-stripped — "The Fables" should match series "Fables" with articles removed
+    /// </summary>
+    [Fact]
+    public async Task ValidateList_ArticleStripped_MatchesTier4()
+    {
+        var (unitOfWork, _, _) = await CreateDatabase();
+        using var helper = new CblTestHelper(unitOfWork);
+        var seed = await helper.SeedLibrary("simple-comic.json");
+
+        var cbl = CblFileBuilder.Create("Article Stripped Test")
+            .AddBook("The Fables", volume: "1", number: "1")
+            .Build();
+
+        var filePath = helper.WriteCblToDisk(cbl);
+        var svc = helper.CreateImportService();
+        var summary = await svc.ValidateList(seed.User.Id, filePath);
+
+        Assert.Equal(CblImportResult.Success, summary.Success);
+        Assert.Single(summary.SuccessfulInserts);
+        Assert.Equal(CblMatchTier.ArticleStripped, summary.SuccessfulInserts.First().MatchTier);
+    }
+
+    /// <summary>
+    /// Tier 5: Reprint-stripped — "Fables Deluxe Edition" should match "Fables" with suffix removed
+    /// </summary>
+    [Fact]
+    public async Task ValidateList_ReprintStripped_MatchesTier5()
+    {
+        var (unitOfWork, _, _) = await CreateDatabase();
+        using var helper = new CblTestHelper(unitOfWork);
+        var seed = await helper.SeedLibrary("simple-comic.json");
+
+        var cbl = CblFileBuilder.Create("Reprint Stripped Test")
+            .AddBook("Fables Deluxe Edition", volume: "1", number: "1")
+            .Build();
+
+        var filePath = helper.WriteCblToDisk(cbl);
+        var svc = helper.CreateImportService();
+        var summary = await svc.ValidateList(seed.User.Id, filePath);
+
+        Assert.Equal(CblImportResult.Success, summary.Success);
+        Assert.Single(summary.SuccessfulInserts);
+        Assert.Equal(CblMatchTier.ReprintStripped, summary.SuccessfulInserts.First().MatchTier);
+    }
+
+    #endregion
+
+    #region Group 12: Global Remap Rules
+
+    [Fact]
+    public async Task ValidateList_GlobalRemap_AppliesForAnyUser()
+    {
+        var (unitOfWork, context, _) = await CreateDatabase();
+        using var helper = new CblTestHelper(unitOfWork);
+        var seed = await helper.SeedLibrary("simple-comic.json", "user1");
+
+        var user2 = await helper.AddUser("user2", seed.Library);
+
+        var fablesIds = seed.Lookup[("Fables", "1", "1")];
+
+        // Add global remap rule (created by user1, visible to all)
+        unitOfWork.RemapRuleRepository.Add(new ReadingListRemapRule
+        {
+            NormalizedCblSeriesName = "Fable".ToNormalized(),
+            CblSeriesName = "Fable",
+            SeriesId = fablesIds.SeriesId,
+            SeriesNameAtMapping = "Fables",
+            AppUserId = seed.User.Id,
+            IsGlobal = true,
+            CreatedUtc = DateTime.UtcNow
+        });
+        await unitOfWork.CommitAsync();
+
+        var cbl = CblFileBuilder.Create("Global Remap Test")
+            .AddBook("Fable", volume: "1", number: "1")
+            .Build();
+
+        var filePath = helper.WriteCblToDisk(cbl);
+        var svc = helper.CreateImportService();
+
+        // Both users should match via global remap
+        var summary1 = await svc.ValidateList(seed.User.Id, filePath);
+        Assert.Equal(CblImportResult.Success, summary1.Success);
+        Assert.Equal(CblMatchTier.RemapRule, summary1.SuccessfulInserts.First().MatchTier);
+
+        var cbl2 = CblFileBuilder.Create("Global Remap Test 2")
+            .AddBook("Fable", volume: "1", number: "1")
+            .Build();
+        var filePath2 = helper.WriteCblToDisk(cbl2);
+        var summary2 = await svc.ValidateList(user2.Id, filePath2);
+        Assert.Equal(CblImportResult.Success, summary2.Success);
+        Assert.Equal(CblMatchTier.RemapRule, summary2.SuccessfulInserts.First().MatchTier);
+    }
+
+    [Fact]
+    public async Task ValidateList_UserRemap_TakesPrecedenceOverGlobal()
+    {
+        var (unitOfWork, context, _) = await CreateDatabase();
+        using var helper = new CblTestHelper(unitOfWork);
+        var seed = await helper.SeedLibrary("simple-comic.json", "user1");
+
+        var user2 = await helper.AddUser("user2", seed.Library);
+
+        var fablesIds = seed.Lookup[("Fables", "1", "1")];
+        var batmanIds = seed.Lookup[("Batman", "2016", "1")];
+
+        // Global remap created by user2: "Fable" -> Batman
+        unitOfWork.RemapRuleRepository.Add(new ReadingListRemapRule
+        {
+            NormalizedCblSeriesName = "Fable".ToNormalized(),
+            CblSeriesName = "Fable",
+            SeriesId = batmanIds.SeriesId,
+            SeriesNameAtMapping = "Batman",
+            AppUserId = user2.Id,
+            IsGlobal = true,
+            CreatedUtc = DateTime.UtcNow
+        });
+
+        // User-specific remap for user1: "Fable" -> Fables (should win)
+        unitOfWork.RemapRuleRepository.Add(new ReadingListRemapRule
+        {
+            NormalizedCblSeriesName = "Fable".ToNormalized(),
+            CblSeriesName = "Fable",
+            SeriesId = fablesIds.SeriesId,
+            SeriesNameAtMapping = "Fables",
+            AppUserId = seed.User.Id,
+            CreatedUtc = DateTime.UtcNow
+        });
+        await unitOfWork.CommitAsync();
+
+        var cbl = CblFileBuilder.Create("User vs Global Precedence")
+            .AddBook("Fable", volume: "1", number: "1")
+            .Build();
+
+        var filePath = helper.WriteCblToDisk(cbl);
+        var svc = helper.CreateImportService();
+        var summary = await svc.ValidateList(seed.User.Id, filePath);
+
+        Assert.Equal(CblImportResult.Success, summary.Success);
+        Assert.Single(summary.SuccessfulInserts);
+        // User-specific rule should win — matched to Fables, not Batman
+        Assert.Equal(fablesIds.SeriesId, summary.SuccessfulInserts.First().SeriesId);
+    }
+
+    #endregion
+
+    #region Group 13: Series Disambiguation
+
+    /// <summary>
+    /// When two series share the same name, the CBL Year field should disambiguate.
+    /// </summary>
+    [Fact]
+    public async Task ValidateList_SeriesDisambiguation_ByYear()
+    {
+        var (unitOfWork, context, _) = await CreateDatabase();
+        using var helper = new CblTestHelper(unitOfWork);
+
+        var library = new LibraryBuilder("Comics", LibraryType.Comic)
+            .WithFolderPath(new FolderPathBuilder("/data/comics").Build())
+            .Build();
+
+        var series2000 = new SeriesBuilder("Fables")
+            .WithMetadata(new SeriesMetadataBuilder().WithReleaseYear(2000).Build())
+            .WithVolume(new VolumeBuilder("1")
+                .WithChapter(new ChapterBuilder("1").Build())
+                .Build())
+            .Build();
+
+        var series2020 = new SeriesBuilder("Fables")
+            .WithMetadata(new SeriesMetadataBuilder().WithReleaseYear(2020).Build())
+            .WithVolume(new VolumeBuilder("1")
+                .WithChapter(new ChapterBuilder("1").Build())
+                .Build())
+            .Build();
+
+        library.Series = [series2000, series2020];
+
+        var user = new AppUserBuilder("disambiguser", "disambig@test.com")
+            .WithLibrary(library)
+            .Build();
+        context.AppUser.Add(user);
+        await context.SaveChangesAsync();
+        context.ChangeTracker.Clear();
+
+        // CBL entry with Year="2020" should match the 2020 series
+        var cbl = CblFileBuilder.Create("Disambiguation Test")
+            .AddBook("Fables", volume: "1", number: "1", year: "2020")
+            .Build();
+
+        var filePath = helper.WriteCblToDisk(cbl);
+        var svc = helper.CreateImportService();
+        var summary = await svc.ValidateList(user.Id, filePath);
+
+        Assert.Equal(CblImportResult.Success, summary.Success);
+        Assert.Single(summary.SuccessfulInserts);
+        Assert.Equal(series2020.Id, summary.SuccessfulInserts.First().SeriesId);
+    }
+
+    #endregion
+
+    #region Group 14: Issue-Only Remap Rules
+
+    /// <summary>
+    /// An issue-only remap (CblNumber set, CblVolume empty) should match any CBL entry
+    /// with that issue number regardless of volume.
+    /// </summary>
+    [Fact]
+    public async Task ValidateList_IssueOnlyRemap_MatchesRegardlessOfVolume()
+    {
+        var (unitOfWork, context, _) = await CreateDatabase();
+        using var helper = new CblTestHelper(unitOfWork);
+        var seed = await helper.SeedLibrary("simple-comic.json");
+
+        var ch2Ids = seed.Lookup[("Fables", "1", "2")];
+
+        // Issue-only remap: Fables #2 (any volume)
+        unitOfWork.RemapRuleRepository.Add(new ReadingListRemapRule
+        {
+            NormalizedCblSeriesName = "Fables".ToNormalized(),
+            CblSeriesName = "Fables",
+            CblNumber = "2",
+            SeriesId = ch2Ids.SeriesId,
+            VolumeId = ch2Ids.VolumeId,
+            ChapterId = ch2Ids.ChapterId,
+            SeriesNameAtMapping = "Fables",
+            AppUserId = seed.User.Id,
+            CreatedUtc = DateTime.UtcNow
+        });
+        await unitOfWork.CommitAsync();
+
+        // CBL with volume="5" (doesn't exist) but issue #2 should still match via issue-only remap
+        var cbl = CblFileBuilder.Create("Issue Only Remap Test")
+            .AddBook("Fables", volume: "5", number: "2")
+            .Build();
+
+        var filePath = helper.WriteCblToDisk(cbl);
+        var svc = helper.CreateImportService();
+        var summary = await svc.ValidateList(seed.User.Id, filePath);
+
+        Assert.Equal(CblImportResult.Success, summary.Success);
+        Assert.Single(summary.SuccessfulInserts);
+        Assert.Equal(CblMatchTier.RemapRule, summary.SuccessfulInserts.First().MatchTier);
+        Assert.Equal(ch2Ids.ChapterId, summary.SuccessfulInserts.First().ChapterId);
+    }
+
+    #endregion
+
+    #region Group 15: Chapter Resolution Edge Cases
+
+    /// <summary>
+    /// When no chapter number is specified in the CBL entry, should default to first chapter in volume.
+    /// </summary>
+    [Fact]
+    public async Task ValidateList_NoChapterNumber_DefaultsToFirstChapter()
+    {
+        var (unitOfWork, _, _) = await CreateDatabase();
+        using var helper = new CblTestHelper(unitOfWork);
+        var seed = await helper.SeedLibrary("simple-comic.json");
+
+        var ch1Ids = seed.Lookup[("Fables", "1", "1")];
+
+        var cbl = CblFileBuilder.Create("No Chapter Number Test")
+            .AddBook("Fables", volume: "1")
+            .Build();
+
+        var filePath = helper.WriteCblToDisk(cbl);
+        var svc = helper.CreateImportService();
+        var summary = await svc.ValidateList(seed.User.Id, filePath);
+
+        Assert.Equal(CblImportResult.Success, summary.Success);
+        Assert.Single(summary.SuccessfulInserts);
+        Assert.Equal(ch1Ids.ChapterId, summary.SuccessfulInserts.First().ChapterId);
+    }
+
+    /// <summary>
+    /// When no volume is specified, chapters should be searched across all volumes.
+    /// </summary>
+    [Fact]
+    public async Task ValidateList_NoVolume_SearchesAcrossAllVolumes()
+    {
+        var (unitOfWork, _, _) = await CreateDatabase();
+        using var helper = new CblTestHelper(unitOfWork);
+        var seed = await helper.SeedLibrary("manga-loose-leaf.json");
+
+        // One Piece has Volume 1 (chapters 1-3) and Volume 2 (chapters 4-6)
+        var ch5Ids = seed.Lookup[("One Piece", "2", "5")];
+
+        // No volume specified, chapter 5 is in volume 2
+        var cbl = CblFileBuilder.Create("Cross Volume Search Test")
+            .AddBook("One Piece", number: "5")
+            .Build();
+
+        var filePath = helper.WriteCblToDisk(cbl);
+        var svc = helper.CreateImportService();
+        var summary = await svc.ValidateList(seed.User.Id, filePath);
+
+        Assert.Equal(CblImportResult.Success, summary.Success);
+        Assert.Single(summary.SuccessfulInserts);
+        Assert.Equal(ch5Ids.ChapterId, summary.SuccessfulInserts.First().ChapterId);
     }
 
     #endregion
