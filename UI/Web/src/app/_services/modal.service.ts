@@ -5,7 +5,6 @@ import {environment} from "src/environments/environment";
 export type UnwrapSignal<T> =
   T extends ModelSignal<infer R> ? R :
   T extends InputSignal<infer R> ? R :
-  T extends WritableSignal<infer R> ? R :
   T;
 
 export interface TypedModalRef<C> extends NgbModalRef {
