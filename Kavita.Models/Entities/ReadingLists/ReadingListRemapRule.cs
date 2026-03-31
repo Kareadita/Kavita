@@ -1,4 +1,5 @@
 using System;
+using Kavita.Models.Entities.Enums.ReadingList;
 using Kavita.Models.Entities.User;
 
 namespace Kavita.Models.Entities.ReadingLists;
@@ -68,4 +69,9 @@ public class ReadingListRemapRule
     public AppUser AppUser { get; set; } = null!;
 
     public DateTime CreatedUtc { get; set; }
+
+    public CblRemapRuleKind GetKind() =>
+        ChapterId != null ? CblRemapRuleKind.Chapter :
+        VolumeId != null ? CblRemapRuleKind.Volume :
+        CblRemapRuleKind.Series;
 }

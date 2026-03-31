@@ -4,6 +4,7 @@ import {translate, TranslocoDirective} from '@jsverse/transloco';
 import {CblService} from '../../../_services/cbl.service';
 import {AccountService} from '../../../_services/account.service';
 import {RemapRule} from '../../../_models/reading-list/cbl/remap-rule';
+import {CblRemapRuleKind} from '../../../_models/reading-list/cbl/cbl-remap-rule-kind.enum';
 import {Chapter} from '../../../_models/chapter';
 import {EntityTitleComponent} from '../../../cards/entity-title/entity-title.component';
 import {ConfirmService} from "../../../shared/confirm.service";
@@ -23,6 +24,7 @@ export class ManageRemapRulesModalComponent implements OnInit {
   private readonly cblService = inject(CblService);
   protected readonly accountService = inject(AccountService);
   private readonly confirmService = inject(ConfirmService);
+  protected readonly CblRemapRuleKind = CblRemapRuleKind;
 
   rules = signal<RemapRule[]>([]);
   hasModifications = false;

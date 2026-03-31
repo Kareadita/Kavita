@@ -15,20 +15,27 @@
               <span>{{rule.seriesNameAtMapping}}</span>
             </div>
             <small class="text-muted">
-              @if (rule.cblVolume) {
-                {{t('volume-num', {num: rule.cblVolume})}}
-              }
-              @if (rule.cblNumber) {
-                {{t('issue-num', {num: rule.cblNumber})}}
-              }
-              @if (!rule.cblVolume && !rule.cblNumber) {
-                {{t('series-level')}}
-              }
-              @if (rule.chapterId) {
-                <i class="fa fa-arrow-right mx-1" aria-hidden="true"></i>
-                <app-entity-title [libraryType]="rule.libraryType"
-                                  [prioritizeTitleName]="false"
-                                  [entity]="buildChapterStub(rule)" />
+              @switch (rule.kind) {
+                @case (CblRemapRuleKind.Series) {
+                  {{t('series-level')}}
+                }
+                @case (CblRemapRuleKind.Volume) {
+                  {{t('volume-num', {num: rule.cblVolume})}}
+                  <i class="fa fa-arrow-right mx-1" aria-hidden="true"></i>
+                  {{t('volume-target', {num: rule.volumeNumber})}}
+                }
+                @case (CblRemapRuleKind.Chapter) {
+                  @if (rule.cblVolume) {
+                    {{t('volume-num', {num: rule.cblVolume})}}
+                  }
+                  @if (rule.cblNumber) {
+                    {{t('issue-num', {num: rule.cblNumber})}}
+                  }
+                  <i class="fa fa-arrow-right mx-1" aria-hidden="true"></i>
+                  <app-entity-title [libraryType]="rule.libraryType"
+                                    [prioritizeTitleName]="false"
+                                    [entity]="buildChapterStub(rule)" />
+                }
               }
             </small>
           </div>

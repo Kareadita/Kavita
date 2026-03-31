@@ -350,7 +350,11 @@ public class AutoMapperProfiles : Profile
             .ForMember(dest => dest.ChapterIsSpecial,
                 opt => opt.MapFrom(src => src.Chapter != null && src.Chapter.IsSpecial))
             .ForMember(dest => dest.LibraryType,
-                opt => opt.MapFrom(src => src.Series.Library != null ? src.Series.Library.Type : LibraryType.Comic));
+                opt => opt.MapFrom(src => src.Series.Library != null ? src.Series.Library.Type : LibraryType.Comic))
+            .ForMember(dest => dest.VolumeNumber,
+                opt => opt.MapFrom(src => src.Volume != null ? src.Volume.Name : string.Empty))
+            .ForMember(dest => dest.Kind,
+                opt => opt.MapFrom(src => src.GetKind()));
 
         CreateMap<AppUserRating, UserReviewExtendedDto>()
             .ForMember(dest => dest.Body,

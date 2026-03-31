@@ -2158,7 +2158,8 @@
         "volume-num": "{{common.volume-num-shorthand}}",
         "issue-num": "{{common.issue-num-shorthand}}",
         "global": "Global",
-        "series-level": "Series-level"
+        "series-level": "Series-level",
+        "volume-target": "{{common.volume-num-shorthand}}"
     },
 
     "manage-remap-rules": {
