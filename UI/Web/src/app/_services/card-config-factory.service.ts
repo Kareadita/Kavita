@@ -75,7 +75,8 @@ export class CardConfigFactory {
    * Creates configuration for Series cards
    */
   forSeries(
-    params?: ConfigCardFactoryActionableParameters<Series>
+    params?: ConfigCardFactoryActionableParameters<Series>,
+    onDeck: boolean = false,
   ): ActionableCardConfiguration<Series> {
     const defaults: ActionableCardConfiguration<Series> = {
       allowSelection: false,
@@ -102,7 +103,7 @@ export class CardConfigFactory {
       showErrorFunc: (s) => s.pages === 0,
       ariaLabelFunc: (s) => s.name,
 
-      actionableFunc: (s) => this.actionFactory.getSeriesActions(),
+      actionableFunc: (s) => this.actionFactory.getSeriesActions(undefined, onDeck),
       readFunc: (s) => this.readerService.readSeries(s, false),
       clickFunc: (s) => this.router.navigate(['library', s.libraryId, 'series', s.id]),
 

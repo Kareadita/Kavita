@@ -93,7 +93,7 @@ export class DashboardComponent {
   streamCount: number = 0;
   streamsLoaded: number = 0;
 
-  seriesConfig = computed(() => this.cardConfigFactory.forSeries());
+  seriesConfig = computed(() => this.cardConfigFactory.forSeries(undefined, true));
   recentlyUpdatedConfig = computed(() => this.cardConfigFactory.forRecentlyUpdated({
     overrides: {
       readFunc: this.handleRecentlyAddedChapterRead.bind(this)

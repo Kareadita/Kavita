@@ -66,11 +66,16 @@ export class ActionFactoryService {
     );
   }
 
-  getSeriesActions(shouldRenderFunc: ActionShouldRenderFunc<Series> = this.basicReadRender) {
+  getSeriesActions(shouldRenderFunc: ActionShouldRenderFunc<Series> = this.basicReadRender, onDeck: boolean = false) {
     return this.applyCallbackToList(
       this.seriesActions,
       (action, entity) => this.actionService.handleSeriesAction(action, entity),
-      shouldRenderFunc
+      (action, entity, user) => {
+        if (action.action === Action.RemoveFromOnDeck)
+          return onDeck
+
+        return shouldRenderFunc(action, entity, user);
+      }
     );
   }
 
@@ -604,6 +609,17 @@ export class ActionFactoryService {
 
         requiredRoles: [],
         children: [
+          {
+            action: Action.RemoveFromOnDeck,
+            title: 'remove-from-on-deck',
+            description: 'remove-from-on-deck-tooltip',
+
+            callback: this.dummyCallback,
+            shouldRender: this.dummyShouldRender,
+
+            requiredRoles: [],
+            children: [],
+          },
           {
             action: Action.RefreshMetadata,
             title: 'refresh-covers',
