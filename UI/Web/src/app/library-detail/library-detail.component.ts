@@ -47,6 +47,8 @@ import {ActionResult} from "../_models/actionables/action-result";
 import {KavitaTitleStrategy} from "../_services/kavita-title.strategy";
 import {getWritableResolvedData} from "../../libs/route-util";
 import {JumpbarService} from "../_services/jumpbar.service";
+import {ProgressEvent} from "../_models/events/progress-event";
+import {NotificationProgressEvent} from "../_models/events/notification-progress-event";
 
 @Component({
     selector: 'app-library-detail',
@@ -165,6 +167,12 @@ export class LibraryDetailComponent implements OnInit {
         this.pagination.totalItems--;
         this.cdRef.markForCheck();
         this.refresh.emit();
+      } else if (event.event === EVENTS.NotificationProgress) {
+        const progressEvent = event.payload as NotificationProgressEvent;
+        if (progressEvent.body.libraryName === this.library().name && progressEvent.eventType === 'ended') {
+          this.loadPageSource.next(true);
+        }
+        return;
       }
     });
   }
