@@ -226,7 +226,7 @@ public class CacheService(
                 extraPath = file.Id + string.Empty;
             }
 
-            if (!Path.Exists(file.FilePath))
+            if (!directoryService.FileSystem.Path.Exists(file.FilePath))
             {
                 logger.LogError("{File} does not exist on disk", file.FilePath);
                 throw new KavitaException($"File does not exist: {file.FilePath}");
