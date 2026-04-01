@@ -73,8 +73,7 @@ export class ActionFactoryService {
       this.seriesActions,
       (action, entity) => this.actionService.handleSeriesAction(action, entity),
       (action, entity, user) => {
-        if (action.action === Action.RemoveFromOnDeck)
-          return onDeck
+        if (action.action === Action.RemoveFromOnDeck) return onDeck
 
         return shouldRenderFunc(action, entity, user);
       }
@@ -271,7 +270,7 @@ export class ActionFactoryService {
       switchMap(isSetup => {
         if (!isSetup) return of([]);
 
-        return this.deviceService.devices$
+        return this.deviceService.devices$;
       }),
       map((devices: Array<Device>) => devices.map(d => {
         return {'title': d.name, 'data': d};

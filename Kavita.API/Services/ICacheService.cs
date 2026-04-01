@@ -31,7 +31,7 @@ public interface ICacheService
     string GetCachedBookmarkPagePath(int seriesId, int page);
     string GetCachedFile(Chapter chapter);
     string GetCachedFile(int chapterId, string firstFilePath);
-    public void ExtractChapterFiles(string extractPath, IReadOnlyList<MangaFile> files, bool extractPdfImages = false);
+    Task ExtractChapterFiles(string extractPath, IReadOnlyList<MangaFile> files, bool extractPdfImages = false);
     Task<int> CacheBookmarkForSeries(int userId, int seriesId, CancellationToken ct = default);
     void CleanupBookmarkCache(int seriesId);
 }

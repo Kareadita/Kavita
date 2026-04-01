@@ -130,6 +130,8 @@ interface StoryLineItem {
   isChapter: boolean;
 }
 
+const READING_HISTORY_PAGE_SIZE = 10;
+
 @Component({
   selector: 'app-series-detail',
   templateUrl: './series-detail.component.html',
@@ -236,7 +238,6 @@ class SeriesDetailComponent implements OnInit, AfterViewInit {
   protected readonly readingHistoryPagination = signal<Pagination | null>(null);
   protected readonly isLoadingReadingHistory = signal(false);
   protected readonly readingHistoryCurrentPage = signal(1);
-  protected readonly readingHistoryPageSize = 10;
 
   isAdmin = computed(() => {
     return this.accountService.hasAdminRole();
@@ -577,7 +578,7 @@ class SeriesDetailComponent implements OnInit, AfterViewInit {
       this.series.set(series);
     });
 
-    this.loadReadingHistory(this.readingHistoryCurrentPage(), this.readingHistoryPageSize);
+    this.loadReadingHistory(this.readingHistoryCurrentPage(), READING_HISTORY_PAGE_SIZE);
 
     this.seriesService.getMetadata(seriesId).subscribe(metadata => {
       this.seriesMetadata.set({...metadata});
@@ -930,6 +931,7 @@ class SeriesDetailComponent implements OnInit, AfterViewInit {
   protected readonly AgeRating = AgeRating;
   protected readonly encodeURIComponent = encodeURIComponent;
   protected readonly Breakpoint = Breakpoint;
+  protected readonly READING_HISTORY_PAGE_SIZE = READING_HISTORY_PAGE_SIZE;
 }
 
 export default SeriesDetailComponent

@@ -1283,8 +1283,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
    * We can't use a wrapper due to potential for styling issues.
    */
   injectImageBookmarkIndicators(forceRefresh = false) {
-    if (this.readingProfile.bookReaderDisableBookmarkIcon)
-      return;
+    if (this.readingProfile.bookReaderDisableBookmarkIcon) return;
 
     const imgs = Array.from(this.readingSectionElemRef().nativeElement.querySelectorAll('img') ?? []);
 

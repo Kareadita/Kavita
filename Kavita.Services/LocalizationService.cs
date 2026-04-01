@@ -5,6 +5,7 @@ using System.Text.Json;
 using System.Threading.Tasks;
 using Kavita.API.Database;
 using Kavita.API.Services;
+using Kavita.API.Store;
 using Kavita.Models.DTOs;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Hosting;
@@ -18,6 +19,7 @@ public class LocalizationService : ILocalizationService
     private readonly IDirectoryService _directoryService;
     private readonly IMemoryCache _cache;
     private readonly IUnitOfWork _unitOfWork;
+    private readonly IUserContext _userContext;
 
     /// <summary>
     /// The locales for the UI
@@ -29,11 +31,13 @@ public class LocalizationService : ILocalizationService
 
 
     public LocalizationService(IDirectoryService directoryService,
-        IHostEnvironment environment, IMemoryCache cache, IUnitOfWork unitOfWork)
+        IHostEnvironment environment, IMemoryCache cache, IUnitOfWork unitOfWork, IUserContext userContext)
     {
         _directoryService = directoryService;
         _cache = cache;
         _unitOfWork = unitOfWork;
+        _userContext = userContext;
+
         if (environment.IsDevelopment())
         {
             _localizationDirectoryUi = directoryService.FileSystem.Path.Join(
@@ -116,13 +120,17 @@ public class LocalizationService : ILocalizationService
         return translatedString;
     }
 
-    /// <summary>
-    /// Returns a translated string for a given user's locale, falling back to english or the key if missing
-    /// </summary>
-    /// <param name="userId"></param>
-    /// <param name="key"></param>
-    /// <param name="args"></param>
-    /// <returns></returns>
+    public Task<string> Translate(string key, params object[] args)
+    {
+        var userId = _userContext.GetUserId();
+        if (userId.HasValue)
+        {
+            return Translate(userId.Value, key, args);
+        }
+
+        return Get("en", key, args);
+    }
+
     public async Task<string> Translate(int userId, string key, params object[] args)
     {
         var userLocale = await _unitOfWork.UserRepository.GetLocale(userId);

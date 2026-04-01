@@ -1,3 +1,8 @@
+"""
+Script to generate a test case json from an actual file system. Forward to users to help debug scanner issues
+
+Should be ran from the library root
+"""
 import os
 import json
 
