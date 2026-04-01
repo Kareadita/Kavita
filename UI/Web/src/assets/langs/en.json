@@ -1232,7 +1232,7 @@
         "progress": "Continue",
         "progress-incognito": "Continue incognito",
         "full-read": "Re-Read",
-        "full-read-incognito": "Reread incognito"
+        "full-read-incognito": "Re-Read incognito"
     },
 
     "match-series-modal": {
