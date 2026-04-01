@@ -27,7 +27,7 @@ export class EditExternalSourceItemComponent implements OnInit {
   ngOnInit(): void {
     this.formGroup.addControl('name', new FormControl(this.source.name, [Validators.required]));
     this.formGroup.addControl('host', new FormControl(this.source.host, [Validators.required, Validators.pattern(/^(http:|https:)+[^\s]+[\w]\/?$/)]));
-    this.formGroup.addControl('apiKey', new FormControl(this.source.apiKey, [Validators.required]));
+    this.formGroup.addControl('apiKey', new FormControl(this.source.apiKey, []));
     this.cdRef.markForCheck();
   }
 

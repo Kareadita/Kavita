@@ -1,4 +1,4 @@
-import {ChangeDetectionStrategy, Component, inject, input, output} from '@angular/core';
+import {ChangeDetectionStrategy, Component, computed, inject, input, output} from '@angular/core';
 import {APP_BASE_HREF, NgClass} from '@angular/common';
 import {SideNavStream} from "../../../_models/sidenav/sidenav-stream";
 import {StreamNamePipe} from "../../../_pipes/stream-name.pipe";
@@ -17,6 +17,16 @@ export class SidenavStreamListItemComponent {
   position = input.required<number>();
   hide = output<SideNavStream>();
   delete = output<SideNavStream>();
+
+  externalUrl = computed(() => {
+    const host = this.item().externalSource?.host;
+    const apiKey = this.item().externalSource?.apiKey;
+
+    if (!host)
+      return '';
+
+    return host + 'login' + (!!apiKey ? 'apiKey=' + apiKey : '');
+  })
 
   protected readonly SideNavStreamType = SideNavStreamType;
   protected readonly baseUrl = inject(APP_BASE_HREF);

@@ -92,7 +92,7 @@
               @case (SideNavStreamType.ExternalSource) {
                 <app-side-nav-item [editMode]="editMode" icon="fa-server"
                                    cdkDrag cdkDragBoundary=".side-nav-container" cdkDragPreviewContainer="parent"
-                                   [title]="navStream.name" [link]="navStream.externalSource.host + 'login?apiKey=' + navStream.externalSource.apiKey"
+                                   [title]="navStream.name" [link]="navStream.externalSource.host + 'login' + (!!navStream.externalSource.apiKey ? '?apiKey=' + navStream.externalSource.apiKey : '')"
                                    [external]="true" />
               }
 

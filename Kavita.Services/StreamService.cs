@@ -288,15 +288,14 @@ public class StreamService(
             throw new KavitaException("external-source-already-exists");
         }
 
-        if (string.IsNullOrEmpty(dto.ApiKey) || string.IsNullOrEmpty(dto.Name)) throw new KavitaException("external-source-required");
+        if (string.IsNullOrEmpty(dto.Name)) throw new KavitaException("external-source-required");
         if (!UrlHelper.StartsWithHttpOrHttps(dto.Host)) throw new KavitaException("external-source-host-format");
 
 
         var newSource = new AppUserExternalSource()
         {
             Name = dto.Name,
-            Host = UrlHelper.EnsureEndsWithSlash(
-                UrlHelper.EnsureStartsWithHttpOrHttps(dto.Host)),
+            Host = UrlHelper.EnsureEndsWithSlash(UrlHelper.EnsureStartsWithHttpOrHttps(dto.Host)),
             ApiKey = dto.ApiKey
         };
         user.ExternalSources.Add(newSource);
@@ -316,7 +315,7 @@ public class StreamService(
         if (source == null) throw new KavitaException("external-source-doesnt-exist");
         if (source.AppUserId != userId) throw new KavitaException("external-source-doesnt-exist");
 
-        if (string.IsNullOrEmpty(dto.ApiKey) || string.IsNullOrEmpty(dto.Host) || string.IsNullOrEmpty(dto.Name)) throw new KavitaException("external-source-required");
+        if (string.IsNullOrEmpty(dto.Host) || string.IsNullOrEmpty(dto.Name)) throw new KavitaException("external-source-required");
 
         source.Host = UrlHelper.EnsureEndsWithSlash(
             UrlHelper.EnsureStartsWithHttpOrHttps(dto.Host));

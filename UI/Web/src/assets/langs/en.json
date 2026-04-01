@@ -3345,6 +3345,7 @@
         "host-label": "Host",
         "name-label": "Name",
         "api-key-label": "API Key",
+        "api-key-tooltip": "Not required to auto login when the host uses OIDC",
         "save": "{{common.save}}",
         "edit": "{{common.edit}}",
         "cancel": "{{common.cancel}}",
