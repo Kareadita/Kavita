@@ -8,7 +8,7 @@ import {
   HostListener,
   inject,
   input,
-  model,
+  model, OnInit,
   TemplateRef
 } from '@angular/core';
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
@@ -29,7 +29,7 @@ import {AbstractControl} from "@angular/forms";
   styleUrl: './setting-item.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class SettingItemComponent {
+export class SettingItemComponent implements OnInit {
 
   private readonly elementRef = inject(ElementRef);
   private readonly destroyRef = inject(DestroyRef);
@@ -107,6 +107,21 @@ export class SettingItemComponent {
       if (this.control() != null && this.control()!.invalid) return;
       if (editMode) this.focusInput();
     });
+  }
+
+  ngOnInit() {
+    const control = this.control();
+    if (!control) return;
+
+    if (control.invalid) {
+      this.isEditMode.set(true);
+    }
+
+    control.valueChanges.pipe(
+      takeUntilDestroyed(this.destroyRef),
+      filter(() => control.invalid),
+      tap(() => this.isEditMode.set(true)),
+    ).subscribe();
   }
 
   toggleEditMode() {
