@@ -29,8 +29,7 @@
       <app-image [imageUrl]="imageService.getChapterCoverImage(item().chapterId)" width="80px" />
       @if (!editMode()) {
         <button class="btn btn-outline-primary btn-sm mt-1" (click)="readChapter(item())">
-          <i class="fa-solid fa-book" aria-hidden="true"></i>
-          <span class="visually-hidden">{{t('read')}}</span>
+          {{t('read')}}
         </button>
       }
     </div>
@@ -56,10 +55,10 @@
       <div class="meta-row">
         <a [routerLink]="seriesUrl()" class="series-link">{{item().seriesName}}</a>
         @if (writerName()) {
-          <span class="meta-person"><i class="fa-solid fa-pen-nib" aria-hidden="true"></i> {{writerName()}}</span>
+          <span class="meta-person d-none d-md-inline"><i class="fa-solid fa-pen-nib" aria-hidden="true"></i> {{writerName()}}</span>
         }
         @if (pencillerName()) {
-          <span class="meta-person"><i class="fa-solid fa-paintbrush" aria-hidden="true"></i> {{pencillerName()}}</span>
+          <span class="meta-person d-none d-md-inline"><i class="fa-solid fa-paintbrush" aria-hidden="true"></i> {{pencillerName()}}</span>
         }
         <span class="page-count">
           <i class="fa-regular fa-file" aria-hidden="true"></i> {{t('pages-count', {num: pages()})}}
@@ -68,7 +67,7 @@
 
       <!-- Summary with blur and fade -->
       @if (summary()) {
-        <div class="summary-text" [appBlurToggle]="shouldBlur()">
+        <div class="summary-text" [appBlurToggle]="shouldBlur()" [appBlurToggleEnabled]="blurEnabled()">
           {{summary()}}
         </div>
       }

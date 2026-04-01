@@ -45,10 +45,8 @@ export class ReadingListItemComponent {
     return Math.round((this.item().pagesRead / total) * 100);
   });
 
-  shouldBlur = computed(() => {
-    const prefs = this.accountService.userPreferences();
-    return prefs?.blurUnreadSummaries && this.isUnread();
-  });
+  blurEnabled = computed(() => !!this.accountService.userPreferences()?.blurUnreadSummaries);
+  shouldBlur = computed(() => this.blurEnabled() && this.isUnread());
 
   chapterDetailUrl = computed(() => {
     const item = this.item();
