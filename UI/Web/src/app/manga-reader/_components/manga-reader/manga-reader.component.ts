@@ -1463,13 +1463,19 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
 
-  loadNextChapter() {
+  loadNextChapter(saveMaxProgress: boolean = false) {
     if (this.nextPageDisabled || this.nextChapterDisabled || this.bookmarkMode()) {
       this.toastr.info(translate('manga-reader.no-next-chapter'));
       this.isLoading = false;
       this.cdRef.markForCheck();
       return;
      }
+
+
+    if (saveMaxProgress && !this.incognitoMode) {
+      this.readerService.saveProgress(this.libraryId, this.seriesId, this.volumeId, this.chapterId, this.maxPages + 1)
+        .subscribe();
+    }
 
     if (this.nextChapterId === CHAPTER_ID_NOT_FETCHED || this.nextChapterId === this.chapterId) {
       this.readerService.getNextChapter(this.seriesId, this.volumeId, this.chapterId, this.readingListId).subscribe(chapterId => {
