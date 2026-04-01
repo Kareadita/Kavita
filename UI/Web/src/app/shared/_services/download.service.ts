@@ -1,5 +1,5 @@
 import {HttpClient} from '@angular/common/http';
-import {computed, DestroyRef, inject, Injectable, signal} from '@angular/core';
+import {computed, DestroyRef, effect, inject, Injectable, signal} from '@angular/core';
 import {Series} from 'src/app/_models/series';
 import {environment} from 'src/environments/environment';
 import {ConfirmService} from '../confirm.service';
@@ -36,6 +36,7 @@ import {FilterComparison} from "../../_models/metadata/v2/filter-comparison";
 import {FilterCombination} from "../../_models/metadata/v2/filter-combination";
 import {EntityTitleService} from "../../_services/entity-title.service";
 import {LibraryService} from "../../_services/library.service";
+import NoSleep from "nosleep.js";
 
 export const DEBOUNCE_TIME = 100;
 
@@ -65,6 +66,7 @@ export class DownloadService {
 
   private readonly SERIES_NAME_CACHE_MAX = 50;
   private _seriesNameCache = new Map<number, string>();
+  private noSleep: NoSleep = new NoSleep();
 
   private baseUrl = environment.apiUrl;
   /**
@@ -183,6 +185,16 @@ export class DownloadService {
       takeUntilDestroyed(this.destroyRef)
     ).subscribe();
 
+    //
+    effect(() => {
+      const hasActiveDownloads = this.hasActiveDownloads();
+      if (hasActiveDownloads) {
+        this.noSleep.enable().catch(err => console.error(err));
+        return;
+      }
+
+      this.noSleep.disable();
+    });
   }
 
   /**
