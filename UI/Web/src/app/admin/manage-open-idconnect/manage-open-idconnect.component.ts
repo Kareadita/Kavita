@@ -21,7 +21,7 @@ import {
   ValidatorFn
 } from "@angular/forms";
 import {SettingsService} from "../settings.service";
-import {OidcConfig} from "../_models/oidc-config";
+import {AuthorityValidationResult, OidcConfig} from "../_models/oidc-config";
 import {SettingItemComponent} from "../../settings/_components/setting-item/setting-item.component";
 import {SettingSwitchComponent} from "../../settings/_components/setting-switch/setting-switch.component";
 import {debounceTime, distinctUntilChanged, filter, forkJoin, map, of, tap} from "rxjs";
@@ -47,6 +47,7 @@ import {environment} from "../../../environments/environment";
 import {SlicePipe} from "@angular/common";
 import {NgbTooltip} from "@ng-bootstrap/ng-bootstrap";
 import {ConfirmService} from "../../shared/confirm.service";
+import {AuthorityValidationResultPipe} from "./authority-validation-result.pipe";
 
 type OidcFormGroup = FormGroup<{
   autoLogin: FormControl<boolean>;
@@ -80,7 +81,8 @@ type OidcFormGroup = FormGroup<{
     SettingMultiCheckBox,
     SettingMultiTextFieldComponent,
     SlicePipe,
-    NgbTooltip
+    NgbTooltip,
+    AuthorityValidationResultPipe
   ],
   templateUrl: './manage-open-idconnect.component.html',
   styleUrl: './manage-open-idconnect.component.scss',
@@ -232,10 +234,10 @@ export class ManageOpenIDConnectComponent implements OnInit {
         return of({'invalidUri': {'uri': uri}} as ValidationErrors)
       }
 
-      return this.settingsService.ifValidAuthority(uri).pipe(map(ok => {
-        if (ok) return null;
+      return this.settingsService.ifValidAuthority(uri).pipe(map(validationResult => {
+        if (validationResult === AuthorityValidationResult.Success) return null;
 
-        return {'invalidUri': {'uri': uri}} as ValidationErrors;
+        return {'backendFailure': {'uri': uri, 'result': validationResult}} as ValidationErrors;
       }));
     }
   }

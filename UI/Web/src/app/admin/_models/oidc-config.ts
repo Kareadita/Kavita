@@ -23,3 +23,10 @@ export interface OidcConfig extends OidcPublicConfig {
   defaultIncludeUnknowns: boolean;
 }
 
+export enum AuthorityValidationResult {
+  Success = 0,
+  InvalidAuthority = 1,
+  Failure = 2,
+  NotApplicable = 3,
+  MissingHttps = 4,
+}

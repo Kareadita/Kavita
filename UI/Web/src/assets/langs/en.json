@@ -30,6 +30,14 @@
         "timeout": "OIDC resolution has timed out or an error has occurred"
     },
 
+    "authority-validation-result-pipe": {
+        "success": "Authority is valid",
+        "invalid-authority": "Kavita can load the OIDC configuration, but the issuer does not match",
+        "failure": "Kavita cannot load the OIDC configuration",
+        "not-applicable": "Kavita cannot validate the authority because it is not configured",
+        "missing-https": "{{manage-oidc-connect.tls-required}}"
+    },
+
     "manage-oidc-connect": {
         "save": "{{common.save}}",
         "reset-label": "Reset ids",
@@ -47,6 +55,7 @@
         "other-field-invalid": "{{validation.other-field-invalid}}",
         "invalid-uri": "{{validation.invalid-uri}}",
         "tls-required": "The OIDC provider must use tls (https)",
+        "checking-authority": "Checking if the authority is valid, please be patient...",
         "manual-save-label": "Changing provider settings requires a manual save",
 
         "authority-label": "Authority",

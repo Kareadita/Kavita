@@ -27,5 +27,5 @@ public interface ISettingsService
     /// <param name="authority"></param>
     /// <param name="ct"></param>
     /// <returns></returns>
-    Task<bool> IsValidAuthority(string authority, CancellationToken ct = default);
+    Task<AuthorityValidationResult> IsValidAuthority(string authority, CancellationToken ct = default);
 }

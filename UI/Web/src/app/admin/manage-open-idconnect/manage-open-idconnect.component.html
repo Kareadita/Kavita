@@ -18,7 +18,7 @@
           @if (settingsForm.get('authority'); as formControl) {
             <app-setting-item [title]="t('authority-label')" [subtitle]="t('authority-tooltip')">
               <ng-template #view>
-                {{formControl.value}}
+                {{formControl.value | defaultValue}}
               </ng-template>
               <ng-template #edit>
                 <input id="oid-authority" class="form-control"
@@ -32,6 +32,12 @@
                     }
                     @if (formControl.errors?.requireTls) {
                       <div>{{t('tls-required')}}</div>
+                    }
+                    @if (formControl.errors?.backendFailure) {
+                      <div>{{formControl.errors!.backendFailure.result | authorityValidationResult}}</div>
+                    }
+                    @if (formControl.pending) {
+                      <div>{{t('checking-authority')}}</div>
                     }
                   </div>
                 }

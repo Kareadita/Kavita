@@ -507,16 +507,16 @@ public class SettingsService(
         return updateSettingsDto;
     }
 
-    public async Task<bool> IsValidAuthority(string authority, CancellationToken ct = default)
+    public async Task<AuthorityValidationResult> IsValidAuthority(string authority, CancellationToken ct = default)
     {
         if (string.IsNullOrEmpty(authority))
         {
-            return false;
+            return AuthorityValidationResult.NotApplicable;
         }
 
         if (!_isDevelopment && !authority.StartsWith("https"))
         {
-            return false;
+            return AuthorityValidationResult.MissingHttps;
         }
 
         try
@@ -526,12 +526,12 @@ public class SettingsService(
 
             var json = await url.GetStringAsync(cancellationToken: ct);
             var config = OpenIdConnectConfiguration.Create(json);
-            return config.Issuer == authority;
+            return config.Issuer == authority ? AuthorityValidationResult.Success : AuthorityValidationResult.InvalidAuthority;
         }
         catch (Exception e)
         {
             logger.LogDebug(e, "OpenIdConfiguration failed: {Reason}", e.Message);
-            return false;
+            return AuthorityValidationResult.Failure;
         }
     }
 
@@ -599,7 +599,8 @@ public class SettingsService(
         if (currentConfig.Authority != updateSettingsDto.OidcConfig.Authority)
         {
             // Only check validity if we're changing into a value that would be used
-            if (!string.IsNullOrEmpty(updateSettingsDto.OidcConfig.Authority) && !await IsValidAuthority(updateSettingsDto.OidcConfig.Authority + string.Empty))
+            if (!string.IsNullOrEmpty(updateSettingsDto.OidcConfig.Authority)
+                && await IsValidAuthority(updateSettingsDto.OidcConfig.Authority + string.Empty) != AuthorityValidationResult.Success)
             {
                 throw new KavitaException("oidc-invalid-authority");
             }
