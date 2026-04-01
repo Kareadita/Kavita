@@ -193,7 +193,7 @@ public class CblImportService(IUnitOfWork unitOfWork, ICblGithubService cblGithu
 
         if (readingList is not {CanSync: true} || readingList.AppUserId != userId)
         {
-            logger.LogWarning("Cannot sync reading list {ReadingListId} — not found, not syncable, or wrong user", readingListId);
+            logger.LogWarning("Cannot sync reading list: {ReadingListId}. List is either not found, not syncable, or wrong user", readingListId);
             return;
         }
 
@@ -269,10 +269,8 @@ public class CblImportService(IUnitOfWork unitOfWork, ICblGithubService cblGithu
             .Distinct()
             .ToList();
 
-        foreach (var n in directNormalizedNames)
-        {
-            if (!allNormalizedNames.Contains(n)) allNormalizedNames.Add(n);
-        }
+        
+        allNormalizedNames.AddRange(directNormalizedNames.Where(n => !allNormalizedNames.Contains(n)));
 
         // Collect external IDs
         var comicVineIds = cbl.Items
