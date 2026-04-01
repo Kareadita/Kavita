@@ -190,14 +190,8 @@
                         <app-loading [loading]="isLoading()" />
                       }
 
-                      @if(formGroup.get('edit')?.value && (items().length > 100 || breakpointService.isMobile())) {
-                        <div class="alert alert-secondary mt-2" role="alert">
-                          {{t('dnd-warning')}}
-                        </div>
-                      }
-
                       <app-draggable-ordered-list [items]="items()" [accessibilityMode]="accessibilityMode()"
-                                                  [disabled]="!(formGroup.get('edit')?.value || false)"
+                                                  [disabled]="true"
                                                   (orderUpdated)="orderUpdated($event)"
                                                   (itemRemove)="removeItem($event)"
                                                   [showRemoveButton]="formGroup.get('edit')?.value || false"
@@ -205,10 +199,9 @@
 
                         <ng-template #draggableItem let-item let-position="idx">
                           <app-reading-list-item [ngClass]="{'content-container': items().length < 100, 'non-virtualized-container': items().length >= 100}" [item]="item"
-                                                 [position]="position" [libraryTypes]="libraryTypes()"
-                                                 [promoted]="item.promoted" (read)="readChapter($event)"
-                                                 (remove)="removeItem($event)"
-                                                 [showRemove]="false"/>
+                                                 [position]="position" [editMode]="formGroup.get('edit')?.value || false"
+                                                 (read)="readChapter($event)"
+                                                 (remove)="removeItem($event)" />
                         </ng-template>
                       </app-draggable-ordered-list>
                     </div>

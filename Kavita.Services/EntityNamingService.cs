@@ -175,6 +175,23 @@ public partial class EntityNamingService : IEntityNamingService
             bookLabel);
     }
 
+    public string FormatReadingListItemTitle(ReadingListItemChapterDto chapter, ReadingListItemVolumeDto volume,
+        LibraryType libraryType, MangaFormat format,
+        string? volumeLabel = null, string? chapterLabel = null, string? issueLabel = null, string? bookLabel = null)
+    {
+        return FormatReadingListItemTitle(
+            libraryType,
+            format,
+            chapter.Range,
+            volume.Name,
+            chapter.TitleName,
+            chapter.IsSpecial,
+            volumeLabel,
+            chapterLabel,
+            issueLabel,
+            bookLabel);
+    }
+
     public string FormatReadingListItemTitle( LibraryType libraryType, MangaFormat format, string? chapterNumber,
         string? volumeNumber, string? chapterTitleName, bool isSpecial, string? volumeLabel = null,
         string? chapterLabel = null, string? issueLabel = null, string? bookLabel = null)

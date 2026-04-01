@@ -2257,7 +2257,8 @@
     "reading-list-item": {
         "remove": "{{common.remove}}",
         "read": "{{common.read}}",
-        "released-label": "Released: {{date}}"
+        "released-label": "Released: {{date}}",
+        "pages-count": "{{series-detail.pages-count}}"
     },
 
     "stream-list-item": {
@@ -2290,7 +2291,6 @@
         "date-range-title": "Date Range",
         "more-alt": "{{series-detail.more-alt}}",
         "reorder-alt": "Reorder Items",
-        "dnd-warning": "Drag and drop is unavailable on mobile devices or when the reading list has more than 100 items.",
         "loading-alt": "{{pdf-reader.loading-message}}"
     },
 

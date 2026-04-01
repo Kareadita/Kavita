@@ -1,10 +1,5 @@
 @use "../../../theme/variables" as theme;
 
-.blur-text {
-  color: transparent;
-  text-shadow: 0 0 0.3125rem var(--body-text-color);
-}
-
 .read-more-cont {
   font-size: 0.8rem;
 
