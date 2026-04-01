@@ -9,6 +9,8 @@ import {
 } from "../../../shared/_components/off-canvas-resize/off-canvas-resize.component";
 import {DownloadQueueItemComponent} from "../download-queue-item/download-queue-item.component";
 import {DownloadQueueItem} from "../../../shared/_models/download-queue-item";
+import {UtilityService} from "../../../shared/_services/utility.service";
+import {BreakpointService} from "../../../_services/breakpoint.service";
 
 @Component({
   selector: 'app-download-queue-drawer',
@@ -18,9 +20,11 @@ import {DownloadQueueItem} from "../../../shared/_models/download-queue-item";
   imports: [TranslocoDirective, OffCanvasResizeComponent, DownloadQueueItemComponent, NgbNav, NgbNavItem, NgbNavLink, NgbNavContent, NgbNavOutlet, NgbCollapse]
 })
 export class DownloadQueueDrawerComponent {
+
   private readonly activeOffcanvas = inject(NgbActiveOffcanvas);
   private readonly router = inject(Router);
   readonly downloadService = inject(DownloadService);
+  readonly breakpointService = inject(BreakpointService);
 
   readonly activeTabId = signal<'downloading' | 'completed'>('downloading');
   olderCollapsed = true;
