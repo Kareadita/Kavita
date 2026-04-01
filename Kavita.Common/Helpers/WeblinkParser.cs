@@ -54,6 +54,7 @@ public static class WeblinkParser
     {
         var extractedId = ExtractId<string?>(weblinks, ComicVineWeblinkWebsite);
         if (string.IsNullOrEmpty(extractedId)) return Tuple.Create<string?, bool>(null, false);
+
         return Tuple.Create<string?, bool>(extractedId.Split('-')[1], extractedId.StartsWith("4050"));
     }
 
