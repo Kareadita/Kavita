@@ -7,18 +7,20 @@ using Kavita.API.Database;
 using Kavita.API.Repositories;
 using Kavita.API.Services;
 using Kavita.API.Services.ReadingLists;
+using Kavita.API.Services.SignalR;
 using Kavita.Common.Extensions;
 using Kavita.Models.Builders;
 using Kavita.Models.DTOs.ReadingLists.CBL;
 using Kavita.Models.DTOs.ReadingLists.CBL.Import;
 using Kavita.Models.DTOs.ReadingLists.CBL.Internal;
+using Kavita.Models.DTOs.SignalR;
 using Kavita.Models.Entities.ReadingLists;
 using Kavita.Services.Helpers;
 using Microsoft.Extensions.Logging;
 
 namespace Kavita.Services.ReadingLists;
 
-public class CblImportService(IUnitOfWork unitOfWork, ICblGithubService cblGithubService,
+public class CblImportService(IUnitOfWork unitOfWork, ICblGithubService cblGithubService, IEventHub eventHub,
     IDirectoryService directoryService, IReadingListService readingListService, ILogger<CblImportService> logger) : ICblImportService
 {
     public async Task<CblImportSummaryDto> ValidateList(int userId, string filePath)
@@ -218,9 +220,9 @@ public class CblImportService(IUnitOfWork unitOfWork, ICblGithubService cblGithu
 
         // Save to temp file for parsing
         var tempDir = Path.Join(directoryService.TempDirectory, $"{userId}", "cbl-sync");
-        Directory.CreateDirectory(tempDir);
+        directoryService.ExistOrCreate(tempDir);
         var tempFile = Path.Join(tempDir, $"sync-{readingListId}{GetExtension(readingList.SourcePath!)}");
-        await File.WriteAllTextAsync(tempFile, content);
+        await directoryService.FileSystem.File.WriteAllTextAsync(tempFile, content);
 
         try
         {
@@ -249,6 +251,12 @@ public class CblImportService(IUnitOfWork unitOfWork, ICblGithubService cblGithu
             // Re-run side effects like age ratings, etc
             await readingListService.CalculateReadingListAgeRating(readingList);
             await readingListService.CalculateStartAndEndDates(readingList);
+
+            await unitOfWork.CommitAsync();
+
+            // Inform the UI that the CBL was updated
+            await eventHub.SendMessageAsync(MessageFactory.ReadingListUpdated,
+                MessageFactory.ReadingListUpdatedEvent(readingListId), false);
         }
         catch (Exception ex)
         {
@@ -256,7 +264,7 @@ public class CblImportService(IUnitOfWork unitOfWork, ICblGithubService cblGithu
         }
         finally
         {
-            try { File.Delete(tempFile); } catch { /* best effort cleanup */ }
+            try { File.Delete(tempFile); } catch { /* The file will be cleaned up with nightly, okay to swallow */ }
         }
     }
 

@@ -3,6 +3,7 @@ using System.Xml.Serialization;
 using Kavita.API.Database;
 using Kavita.API.Services;
 using Kavita.API.Services.ReadingLists;
+using Kavita.API.Services.SignalR;
 using Kavita.Models.Builders;
 using Kavita.Models.DTOs.ReadingLists.CBL.Internal;
 using Kavita.Models.DTOs.ReadingLists.CBL.V1;
@@ -149,6 +150,7 @@ public class CblTestHelper : IDisposable
         return new CblImportService(
             _unitOfWork,
             Substitute.For<ICblGithubService>(),
+            Substitute.For<IEventHub>(),
             Substitute.For<IDirectoryService>(),
             Substitute.For<IReadingListService>(),
             Substitute.For<ILogger<CblImportService>>()

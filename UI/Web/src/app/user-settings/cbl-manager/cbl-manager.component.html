@@ -158,12 +158,12 @@
                 }
                 @if (selectedItem.startingYear > 0) {
                   @if (selectedItem.ageRating) {
-                    <span> · </span>
+                    <span> • </span>
                   }
                   <span>{{selectedItem.startingYear}} – {{selectedItem.endingYear}}</span>
                 }
                 @if (selectedItem.ageRating || selectedItem.startingYear > 0) {
-                  <span> · </span>
+                  <span> • </span>
                 }
                 <span>{{selectedItem.itemCount}} {{t('items-count')}}</span>
               </div>
@@ -186,7 +186,7 @@
             <div class="mt-3 text-muted" style="font-size: 0.8rem;">
               <span>{{t('last-synced', {date: (selectedItem.lastSyncedDate | date)})}}</span>
               @if (selectedItem.downloadUrl) {
-                <span> · {{t('source')}}: {{selectedItem.downloadUrl}}</span>
+                <span> • {{t('source')}}: {{selectedItem.downloadUrl}}</span>
               }
             </div>
           }

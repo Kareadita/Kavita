@@ -4,6 +4,7 @@ using Kavita.Models.DTOs.Account;
 using Kavita.Models.DTOs.Reader;
 using Kavita.Models.DTOs.Update;
 using Kavita.Models.Entities.Enums;
+using Kavita.Models.Entities.ReadingLists;
 
 namespace Kavita.Models.DTOs.SignalR;
 
@@ -182,6 +183,10 @@ public static class MessageFactory
     /// An Auth key has been deleted
     /// </summary>
     public const string AuthKeyDeleted = nameof(AuthKeyDeleted);
+    /// <summary>
+    /// A reading list was updated via a Sync Operation
+    /// </summary>
+    public const string ReadingListUpdated = nameof(ReadingListUpdated);
 
 
 
@@ -800,6 +805,18 @@ public static class MessageFactory
         return new SignalRMessage
         {
             Name = AuthKeyDeleted,
+            Body = new
+            {
+                Id = id
+            }
+        };
+    }
+
+    public static SignalRMessage ReadingListUpdatedEvent(int id)
+    {
+        return new SignalRMessage
+        {
+            Name = ReadingListUpdated,
             Body = new
             {
                 Id = id
