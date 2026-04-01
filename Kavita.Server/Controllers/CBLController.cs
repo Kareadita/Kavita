@@ -18,6 +18,8 @@ using Kavita.Models.DTOs.ReadingLists.CBL.Import;
 using Kavita.Models.DTOs.ReadingLists.CBL.RemapRules;
 using Kavita.Models.DTOs.Uploads;
 using AutoMapper;
+using Hangfire;
+using Kavita.Models.DTOs.SignalR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -32,6 +34,21 @@ public class CblController(IReadingListService readingListService, IDirectorySer
     ICblGithubService cblGithubService, DataContext dataContext, ICblImportService cblImporterService,
     IUnitOfWork unitOfWork, IMapper mapper, ILocalizationService localizationService) : BaseApiController
 {
+
+    /// <summary>
+    /// Enqueues the Reading List to be synced on a background thread. UI will be informed from <see cref="MessageFactory.ReadingListUpdate"/> event
+    /// </summary>
+    /// <param name="readingListId"></param>
+    /// <returns></returns>
+    [HttpPost("sync")]
+    [DisallowRole(PolicyConstants.ReadOnlyRole)]
+    [ReadingListAccess]
+    public ActionResult SyncReadingList([FromQuery] int readingListId)
+    {
+        BackgroundJob.Enqueue(() => cblImporterService.SyncReadingListAsync(UserId, readingListId));
+        return Ok();
+    }
+
     /// <summary>
     /// Saves an uploaded CBL file to disk without importing. Returns the saved file info.
     /// </summary>

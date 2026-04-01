@@ -9,6 +9,7 @@ import {CblImportDecisions} from '../_models/reading-list/cbl/cbl-import-decisio
 import {ReadingListProvider} from '../_models/reading-list';
 import {RemapRule} from '../_models/reading-list/cbl/remap-rule';
 import {NgxFileDropEntry} from 'ngx-file-drop';
+import {TextResonse} from "../_types/text-response";
 
 @Injectable({
   providedIn: 'root',
@@ -63,6 +64,10 @@ export class CblService {
     return this.httpClient.post<RemapRule>(this.baseUrl + 'cbl/remap-rules', {
       cblSeriesName, seriesId, ...issueDetail
     });
+  }
+
+  syncList(readingListId: number) {
+    return this.httpClient.post(this.baseUrl + 'cbl/sync?readingListId=' + readingListId, {}, TextResonse);
   }
 
   updateRemapRule(id: number, update: { volumeId?: number; chapterId?: number; cblVolume?: string; cblNumber?: string }) {

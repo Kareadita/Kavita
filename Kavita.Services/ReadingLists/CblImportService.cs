@@ -19,7 +19,7 @@ using Microsoft.Extensions.Logging;
 namespace Kavita.Services.ReadingLists;
 
 public class CblImportService(IUnitOfWork unitOfWork, ICblGithubService cblGithubService,
-    IDirectoryService directoryService, ILogger<CblImportService> logger) : ICblImportService
+    IDirectoryService directoryService, IReadingListService readingListService, ILogger<CblImportService> logger) : ICblImportService
 {
     public async Task<CblImportSummaryDto> ValidateList(int userId, string filePath)
     {
@@ -135,16 +135,7 @@ public class CblImportService(IUnitOfWork unitOfWork, ICblGithubService cblGithu
         }
 
         // Set metadata from CBL
-        if (!string.IsNullOrEmpty(cbl.Summary))
-            readingList.Summary = cbl.Summary;
-        if (cbl.StartYear > 0)
-            readingList.StartingYear = cbl.StartYear;
-        if (cbl.StartMonth > 0)
-            readingList.StartingMonth = cbl.StartMonth;
-        if (cbl.EndYear > 0)
-            readingList.EndingYear = cbl.EndYear;
-        if (cbl.EndMonth > 0)
-            readingList.EndingMonth = cbl.EndMonth;
+        SetMetadataFromParsedCbl(cbl, readingList);
 
         // Add resolved items
         foreach (var (order, (match, _)) in matchResults.OrderBy(kv => kv.Key))
@@ -186,7 +177,21 @@ public class CblImportService(IUnitOfWork unitOfWork, ICblGithubService cblGithu
         return summary;
     }
 
-    public async Task SyncReadingList(int userId, int readingListId)
+    private static void SetMetadataFromParsedCbl(ParsedCblReadingList cbl, ReadingList readingList)
+    {
+        if (!string.IsNullOrEmpty(cbl.Summary))
+            readingList.Summary = cbl.Summary;
+        if (cbl.StartYear > 0)
+            readingList.StartingYear = cbl.StartYear;
+        if (cbl.StartMonth > 0)
+            readingList.StartingMonth = cbl.StartMonth;
+        if (cbl.EndYear > 0)
+            readingList.EndingYear = cbl.EndYear;
+        if (cbl.EndMonth > 0)
+            readingList.EndingMonth = cbl.EndMonth;
+    }
+
+    public async Task SyncReadingListAsync(int userId, int readingListId)
     {
         var readingList = await unitOfWork.ReadingListRepository
             .GetReadingListByIdAsync(readingListId, ReadingListIncludes.Items);
@@ -234,17 +239,16 @@ public class CblImportService(IUnitOfWork unitOfWork, ICblGithubService cblGithu
             }
 
             // Update metadata
-            if (!string.IsNullOrEmpty(cbl.Summary))
-                readingList.Summary = cbl.Summary;
-            if (cbl.StartYear > 0)
-                readingList.StartingYear = cbl.StartYear;
-            if (cbl.EndYear > 0)
-                readingList.EndingYear = cbl.EndYear;
+            SetMetadataFromParsedCbl(cbl, readingList);
 
             readingList.LastSyncedUtc = DateTime.UtcNow;
             readingList.LastSyncCheckUtc = DateTime.UtcNow;
 
             await unitOfWork.CommitAsync();
+
+            // Re-run side effects like age ratings, etc
+            await readingListService.CalculateReadingListAgeRating(readingList);
+            await readingListService.CalculateStartAndEndDates(readingList);
         }
         catch (Exception ex)
         {
@@ -269,7 +273,7 @@ public class CblImportService(IUnitOfWork unitOfWork, ICblGithubService cblGithu
             .Distinct()
             .ToList();
 
-        
+
         allNormalizedNames.AddRange(directNormalizedNames.Where(n => !allNormalizedNames.Contains(n)));
 
         // Collect external IDs

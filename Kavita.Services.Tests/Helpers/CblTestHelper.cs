@@ -150,6 +150,7 @@ public class CblTestHelper : IDisposable
             _unitOfWork,
             Substitute.For<ICblGithubService>(),
             Substitute.For<IDirectoryService>(),
+            Substitute.For<IReadingListService>(),
             Substitute.For<ILogger<CblImportService>>()
         );
     }
