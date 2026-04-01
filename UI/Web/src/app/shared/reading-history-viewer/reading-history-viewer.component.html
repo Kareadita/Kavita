@@ -16,7 +16,7 @@
           [rotate]="true"
           [ellipses]="true"
           [boundaryLinks]="true"
-          (pageChange)="pageChange.emit({page: $event, scroll: false})"
+          (pageChange)="pageChange.emit({page: $event, pageSize: pageSize(), scroll: false})"
         />
       </nav>
     }
@@ -81,7 +81,7 @@
           [rotate]="true"
           [ellipses]="true"
           [boundaryLinks]="true"
-          (pageChange)="pageChange.emit({page: $event, scroll: true})"
+          (pageChange)="pageChange.emit({page: $event, pageSize: pageSize(), scroll: true})"
         />
         <span class="text-muted small">
           {{ t('page-info', { current: currentPage(), total: totalPages(), items: totalItems() }) }}

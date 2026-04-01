@@ -10,7 +10,8 @@
     [isLoading]="isLoading()"
     [pagination]="pagination()"
     [currentPage]="currentPage()"
-    (pageChange)="onPageChange($event.page, $event.scroll)"
+    [pageSize]="pageSize"
+    (pageChange)="onPageChange($event.page, $event.pageSize, $event.scroll)"
   />
 
 </ng-container>

@@ -384,7 +384,8 @@
                       [pagination]="readingHistoryPagination()"
                       [currentPage]="readingHistoryCurrentPage()"
                       [isLoading]="isLoadingReadingHistory()"
-                      (pageChange)="loadReadingHistory($event.page)"
+                      [pageSize]="readingHistoryPageSize"
+                      (pageChange)="loadReadingHistory($event.page, $event.pageSize)"
                     />
                   </div>
                 }

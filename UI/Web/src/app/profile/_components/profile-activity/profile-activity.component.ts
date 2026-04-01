@@ -1,39 +1,24 @@
 import {
   ChangeDetectionStrategy,
   Component,
-  computed,
   DestroyRef,
   inject,
   input,
-  signal,
-  TemplateRef,
-  viewChild
+  signal
 } from '@angular/core';
 import {takeUntilDestroyed, toObservable} from '@angular/core/rxjs-interop';
 import {combineLatest, distinctUntilChanged, filter, tap} from 'rxjs';
 import {MemberInfo} from '../../../_models/user/member-info';
-import {translate, TranslocoDirective} from '@jsverse/transloco';
+import {TranslocoDirective} from '@jsverse/transloco';
 import {StatisticsService} from '../../../_services/statistics.service';
-import {ReadingHistoryChapterItem, ReadingHistoryItem} from '../../../_models/stats/reading-history-item';
-import {LoadingComponent} from '../../../shared/loading/loading.component';
-import {DOCUMENT, NgTemplateOutlet, TitleCasePipe} from '@angular/common';
+import {ReadingHistoryItem} from '../../../_models/stats/reading-history-item';
+import {DOCUMENT, TitleCasePipe} from '@angular/common';
 import {StatsFilter} from '../../../statistics/_models/stats-filter';
-import {RouterLink} from '@angular/router';
 import {
   LibraryAndTimeSelectorComponent
 } from '../../../statistics/_components/library-and-time-selector/library-and-time-selector.component';
-import {StatsNoDataComponent} from '../../../common/stats-no-data/stats-no-data.component';
-import {MangaFormatPipe} from '../../../_pipes/manga-format.pipe';
-import {TagBadgeComponent} from '../../../shared/tag-badge/tag-badge.component';
-import {ImageComponent} from '../../../shared/image/image.component';
 import {ImageService} from '../../../_services/image.service';
-import {ModalService} from '../../../_services/modal.service';
-import {ListSelectModalComponent} from '../../../shared/_components/list-select-modal/list-select-modal.component';
-import {CompactNumberPipe} from '../../../_pipes/compact-number.pipe';
-import {DurationPipe} from '../../../_pipes/duration.pipe';
 import {Pagination} from '../../../_models/pagination';
-import {NgbPagination, NgbTooltip} from '@ng-bootstrap/ng-bootstrap';
-import {UtcToLocalTimePipe} from "../../../_pipes/utc-to-local-time.pipe";
 import {ReadingHistoryViewerComponent} from "src/app/shared/reading-history-viewer/reading-history-viewer.component";
 
 
@@ -41,20 +26,8 @@ import {ReadingHistoryViewerComponent} from "src/app/shared/reading-history-view
   selector: 'app-profile-activity',
   imports: [
     TranslocoDirective,
-    LoadingComponent,
-    RouterLink,
     LibraryAndTimeSelectorComponent,
-    StatsNoDataComponent,
-    MangaFormatPipe,
-    TagBadgeComponent,
-    ImageComponent,
     TitleCasePipe,
-    CompactNumberPipe,
-    NgTemplateOutlet,
-    DurationPipe,
-    NgbPagination,
-    NgbTooltip,
-    UtcToLocalTimePipe,
     ReadingHistoryViewerComponent,
   ],
   templateUrl: './profile-activity.component.html',
@@ -71,7 +44,7 @@ export class ProfileActivityComponent {
   memberInfo = input.required<MemberInfo>();
   filter = signal<StatsFilter | undefined>(undefined);
 
-  protected readonly pageSize = 30;
+  protected readonly pageSize = 10;
 
   protected currentEntries = signal<ReadingHistoryItem[]>([]);
   protected pagination = signal<Pagination | null>(null);
@@ -90,13 +63,13 @@ export class ProfileActivityComponent {
       ),
       tap(() => {
         this.currentPage.set(1);
-        this.loadPage(1);
+        this.loadPage(1, this.pageSize);
       }),
       takeUntilDestroyed(this.destroyRef)
     ).subscribe();
   }
 
-  private loadPage(page: number): void {
+  private loadPage(page: number, pageSize: number): void {
     const f = this.filter();
     const memberId = this.memberInfo()?.id;
 
@@ -104,7 +77,7 @@ export class ProfileActivityComponent {
 
     this.isLoading.set(true);
 
-    this.statsService.getReadingHistory(f, memberId, page, this.pageSize)
+    this.statsService.getReadingHistory(f, memberId, page, pageSize)
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: (result) => {
@@ -120,10 +93,10 @@ export class ProfileActivityComponent {
       });
   }
 
-  protected onPageChange(page: number, scroll: boolean): void {
+  protected onPageChange(page: number, pageSize: number, scroll: boolean): void {
     if (page === this.currentPage() || this.isLoading()) return;
 
-    this.loadPage(page);
+    this.loadPage(page, pageSize);
     if (scroll) {
       this.document.querySelector('.activity-list')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }

@@ -231,11 +231,12 @@ class SeriesDetailComponent implements OnInit, AfterViewInit {
     return items;
   });
 
-  protected readingHistory = signal<ReadingHistoryItem[]>([]);
-  protected hasReadingHistory = computed(() => this.readingHistory().length > 0);
-  protected readingHistoryPagination = signal<Pagination | null>(null);
-  protected isLoadingReadingHistory = signal(false);
-  protected readingHistoryCurrentPage = signal(1);
+  protected readonly readingHistory = signal<ReadingHistoryItem[]>([]);
+  protected readonly hasReadingHistory = computed(() => this.readingHistory().length > 0);
+  protected readonly readingHistoryPagination = signal<Pagination | null>(null);
+  protected readonly isLoadingReadingHistory = signal(false);
+  protected readonly readingHistoryCurrentPage = signal(1);
+  protected readonly readingHistoryPageSize = 10;
 
   isAdmin = computed(() => {
     return this.accountService.hasAdminRole();
@@ -576,7 +577,7 @@ class SeriesDetailComponent implements OnInit, AfterViewInit {
       this.series.set(series);
     });
 
-    this.loadReadingHistory();
+    this.loadReadingHistory(this.readingHistoryCurrentPage(), this.readingHistoryPageSize);
 
     this.seriesService.getMetadata(seriesId).subscribe(metadata => {
       this.seriesMetadata.set({...metadata});
@@ -726,10 +727,10 @@ class SeriesDetailComponent implements OnInit, AfterViewInit {
     return {series, relation} as RelatedSeriesPair;
   }
 
-  loadReadingHistory(page: number = 1) {
+  loadReadingHistory(page: number, pageSize: number) {
     this.isLoadingReadingHistory.set(true);
 
-    this.statisticsService.getReadingHistoryForSeries(this.seriesId(), page).pipe(
+    this.statisticsService.getReadingHistoryForSeries(this.seriesId(), page, pageSize).pipe(
       tap(result => {
         this.readingHistory.set(result.result);
         this.readingHistoryPagination.set(result.pagination);

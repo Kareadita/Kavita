@@ -337,7 +337,7 @@ export class StatisticsService {
   getReadingHistoryForSeries(
     seriesId: number,
     pageNum: number = 1,
-    itemsPerPage: number = 30,
+    itemsPerPage: number = 10,
   ) {
     const tzId = Intl.DateTimeFormat().resolvedOptions().timeZone;
 
