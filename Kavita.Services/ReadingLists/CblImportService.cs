@@ -264,7 +264,7 @@ public class CblImportService(IUnitOfWork unitOfWork, ICblGithubService cblGithu
         }
         finally
         {
-            try { File.Delete(tempFile); } catch { /* The file will be cleaned up with nightly, okay to swallow */ }
+            try { directoryService.FileSystem.File.Delete(tempFile); } catch { /* The file will be cleaned up with nightly, okay to swallow */ }
         }
     }
 
