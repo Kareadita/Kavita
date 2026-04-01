@@ -1,5 +1,5 @@
 import {effect, inject, Injectable} from '@angular/core';
-import {EMPTY, map, shareReplay} from 'rxjs';
+import {EMPTY, map, of, shareReplay, switchMap} from 'rxjs';
 import {Chapter} from '../_models/chapter';
 import {UserCollection} from '../_models/collection-tag';
 import {Device} from '../_models/device/device';
@@ -21,6 +21,7 @@ import {ActionService} from "./action.service";
 import {ActionItem, ActionShouldRenderFunc} from "../_models/actionables/action-item";
 import {Action} from "../_models/actionables/action";
 import {ActionResultCallback} from "../_models/actionables/action-result";
+import {SettingsService} from "../admin/settings.service";
 
 
 /**
@@ -35,6 +36,7 @@ export class ActionFactoryService {
   private accountService = inject(AccountService);
   private deviceService = inject(DeviceService);
   private actionService = inject(ActionService);
+  private settingsService = inject(SettingsService);
 
   private libraryActions: Array<ActionItem<Library>> = [];
   private seriesActions: Array<ActionItem<Series>> = [];
@@ -262,6 +264,20 @@ export class ActionFactoryService {
 
       return flatArray;
     }, [] as Array<ActionItem<T>>); // Explicitly defining the type of flatArray
+  }
+
+  private sendToChildren() {
+    return this.settingsService.isEmailSetup().pipe(
+      switchMap(isSetup => {
+        if (!isSetup) return of([]);
+
+        return this.deviceService.devices$
+      }),
+      map((devices: Array<Device>) => devices.map(d => {
+        return {'title': d.name, 'data': d};
+      })),
+      shareReplay(),
+    )
   }
 
 
@@ -558,9 +574,7 @@ export class ActionFactoryService {
             shouldRender: this.dummyShouldRender,
 
             requiredRoles: [],
-            dynamicList: this.deviceService.devices$.pipe(map((devices: Array<Device>) => devices.map(d => {
-              return {'title': d.name, 'data': d};
-            }), shareReplay())),
+            dynamicList: this.sendToChildren(),
             children: []
           }
         ],
@@ -801,9 +815,7 @@ export class ActionFactoryService {
             shouldRender: this.dummyShouldRender,
 
             requiredRoles: [],
-            dynamicList: this.deviceService.devices$.pipe(map((devices: Array<Device>) => devices.map(d => {
-              return {'title': d.name, 'data': d};
-            }), shareReplay())),
+            dynamicList: this.sendToChildren(),
             children: []
           }
         ],
@@ -954,9 +966,7 @@ export class ActionFactoryService {
             shouldRender: this.dummyShouldRender,
 
             requiredRoles: [],
-            dynamicList: this.deviceService.devices$.pipe(map((devices: Array<Device>) => devices.map(d => {
-              return {'title': d.name, 'data': d};
-            }), shareReplay())),
+            dynamicList: this.sendToChildren(),
             children: []
           }
         ],
