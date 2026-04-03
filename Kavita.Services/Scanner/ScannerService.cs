@@ -59,7 +59,8 @@ public class ScannerService(
     IDirectoryService directoryService,
     IReadingItemService readingItemService,
     IServiceScopeFactory scopeFactory,
-    IWordCountAnalyzerService wordCountAnalyzerService)
+    IWordCountAnalyzerService wordCountAnalyzerService,
+    IMediaErrorService mediaErrorService)
     : IScannerService
 {
     public const string Name = "ScannerService";
@@ -807,7 +808,7 @@ public class ScannerService(
     private async Task<Tuple<long, Dictionary<ParsedSeries, IList<ParserInfo>>>> ScanFiles(Library library, IList<string> dirs,
         bool isLibraryScan, bool forceChecks = false)
     {
-        var scanner = new ParseScannedFiles(logger, directoryService, readingItemService, eventHub);
+        var scanner = new ParseScannedFiles(logger, directoryService, readingItemService, eventHub, mediaErrorService);
         var scanWatch = Stopwatch.StartNew();
 
         var processedSeries = await scanner.ScanLibrariesForSeries(library, dirs,

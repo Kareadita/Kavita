@@ -28,6 +28,7 @@ public class ParseScannedFiles
     private readonly IDirectoryService _directoryService;
     private readonly IReadingItemService _readingItemService;
     private readonly IEventHub _eventHub;
+    private readonly IMediaErrorService _mediaErrorService;
 
     /// <summary>
     /// An instance of a pipeline for processing files and returning a Map of Series -> ParserInfos.
@@ -37,13 +38,15 @@ public class ParseScannedFiles
     /// <param name="directoryService">Directory Service</param>
     /// <param name="readingItemService">ReadingItemService Service for extracting information on a number of formats</param>
     /// <param name="eventHub">For firing off SignalR events</param>
+    /// <param name="mediaErrorService"></param>
     public ParseScannedFiles(ILogger logger, IDirectoryService directoryService,
-        IReadingItemService readingItemService, IEventHub eventHub)
+        IReadingItemService readingItemService, IEventHub eventHub, IMediaErrorService mediaErrorService)
     {
         _logger = logger;
         _directoryService = directoryService;
         _readingItemService = readingItemService;
         _eventHub = eventHub;
+        _mediaErrorService = mediaErrorService;
     }
 
     /// <summary>
@@ -338,6 +341,11 @@ public class ParseScannedFiles
         {
             _logger.LogCritical("[ScannerService] {SeriesName} @ {FileName} is empty when normalized, this file will not be ingested! The filename does not follow our guidelines or this is a bug in the parser, please report this! https://github.com/Kareadita/Kavita/issues",
                 info.Series, info.Filename);
+
+            _mediaErrorService.ReportMediaIssue(info.Filename, MediaErrorProducer.Scanner,
+                "Failed to parse a valid series name for a file",
+                $"{info.Series} is empty when normalized, this file will not be ingested! The filename does not follow our guidelines or this is a bug in the parser, please report this! https://github.com/Kareadita/Kavita/issues");
+
             return;
         }
 
