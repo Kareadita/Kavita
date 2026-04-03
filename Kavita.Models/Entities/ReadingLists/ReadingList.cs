@@ -70,7 +70,8 @@ public class ReadingList : IEntityDate, IHasCoverImage
     /// </summary>
     public DateTime? LastSyncedUtc { get; set; }
 
-    public bool CanSync => Provider == ReadingListProvider.Url
+    public bool CanSync => Provider != ReadingListProvider.None
+                           && Provider != ReadingListProvider.File
                            && !string.IsNullOrEmpty(SourcePath);
 
     /// <summary>

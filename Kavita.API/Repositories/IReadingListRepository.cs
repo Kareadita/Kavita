@@ -55,4 +55,8 @@ public interface IReadingListRepository
     Task<int> GetReadingListItemCountAsync(int readingListId, int userId, CancellationToken ct = default);
     Task<long> GetFilesizeAsync(int readingListId, int userId, CancellationToken ct = default);
     Task<Dictionary<int, long>> GetFilesizesAsync(IList<int> readingListIds, int userId, CancellationToken ct = default);
+    /// <summary>
+    /// Returns a map of UserId to ReadingListIds for all syncable reading lists that haven't been checked since the given threshold.
+    /// </summary>
+    Task<Dictionary<int, List<int>>> GetSyncableReadingListsAsync(DateTime lastCheckThreshold, CancellationToken ct = default);
 }

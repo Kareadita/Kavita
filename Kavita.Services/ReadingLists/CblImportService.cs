@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using Kavita.API.Database;
 using Kavita.API.Repositories;
@@ -208,6 +209,7 @@ public class CblImportService(IUnitOfWork unitOfWork, ICblGithubService cblGithu
         string content;
         try
         {
+            // TODO: Based on provider, let's get the content either via DL or Github
             content = await cblGithubService.GetFileContent(readingList.SourcePath!);
         }
         catch (Exception ex)
@@ -266,6 +268,49 @@ public class CblImportService(IUnitOfWork unitOfWork, ICblGithubService cblGithu
         {
             try { directoryService.FileSystem.File.Delete(tempFile); } catch { /* The file will be cleaned up with nightly, okay to swallow */ }
         }
+    }
+
+    /// <summary>
+    /// For every user with syncable cbl reading lists that haven't been checked within the last 3 days (LastSyncCheckUtc), attempt to update them.
+    /// </summary>
+    /// <remarks>Failures to match will be logged, but will not inhibit the process</remarks>
+    /// <param name="cancellationToken"></param>
+    /// <returns></returns>
+    public async Task SyncAllReadingLists(CancellationToken cancellationToken = default)
+    {
+        var syncThreshold = DateTime.UtcNow.AddDays(-3);
+        var syncableMap = await unitOfWork.ReadingListRepository
+            .GetSyncableReadingListsAsync(syncThreshold, cancellationToken);
+
+        if (syncableMap.Count == 0)
+        {
+            logger.LogInformation("CBL Sync: No reading lists due for sync");
+            return;
+        }
+
+        var totalSynced = 0;
+        var totalFailed = 0;
+
+        foreach (var (userId, readingListIds) in syncableMap)
+        {
+            foreach (var readingListId in readingListIds)
+            {
+                if (cancellationToken.IsCancellationRequested) return;
+
+                try
+                {
+                    await SyncReadingListAsync(userId, readingListId);
+                    totalSynced++;
+                }
+                catch (Exception ex)
+                {
+                    totalFailed++;
+                    logger.LogError(ex, "Failed to sync reading list {ReadingListId} for user {UserId}", readingListId, userId);
+                }
+            }
+        }
+
+        logger.LogInformation("CBL Sync complete: {Synced} synced, {Failed} failed", totalSynced, totalFailed);
     }
 
     private async Task<Dictionary<int, (MatchedItem? Match, CblBookResult Result)>> RunMatchingPipeline(
