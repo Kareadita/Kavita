@@ -336,7 +336,7 @@ public class ParseScannedFiles
         // But until this is reported, we should ignore it and play it safe!
         if (string.IsNullOrEmpty(info.Series.ToNormalized()))
         {
-            _logger.LogCritical("[ScannerService] {SeriesName} @ {FileName} is empty when normalized, this file will not be ingested! This is a bug in the scanner, please report this! https://github.com/Kareadita/Kavita/issues",
+            _logger.LogCritical("[ScannerService] {SeriesName} @ {FileName} is empty when normalized, this file will not be ingested! The filename does not follow our guidelines or this is a bug in the parser, please report this! https://github.com/Kareadita/Kavita/issues",
                 info.Series, info.Filename);
             return;
         }
