@@ -16,6 +16,11 @@
         <app-setting-cron-item [title]="t('cleanup-label')" [subtitle]="t('cleanup-tooltip')"
           [frequencies]="cleanupFrequencies" [(value)]="taskCleanup" />
       </div>
+      <div class="row g-0 mt-4 mb-4">
+        <app-setting-cron-item [title]="t('cbl-sync-label')" [subtitle]="t('cbl-sync-tooltip')"
+                               [(value)]="taskCblSync" />
+      </div>
+
 
       <div class="setting-section-break"></div>
 

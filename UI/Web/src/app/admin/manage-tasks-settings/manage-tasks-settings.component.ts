@@ -3,15 +3,7 @@ import {ToastrService} from 'ngx-toastr';
 import {SettingsService} from '../settings.service';
 import {ServerSettings} from '../_models/server-settings';
 import {shareReplay} from 'rxjs/operators';
-import {
-  catchError,
-  debounceTime,
-  defer,
-  Observable,
-  of,
-  switchMap,
-  tap
-} from 'rxjs';
+import {catchError, combineLatest, debounceTime, defer, Observable, of, switchMap, tap} from 'rxjs';
 import {ServerService} from 'src/app/_services/server.service';
 import {Job} from 'src/app/_models/job/job';
 import {DownloadService} from 'src/app/shared/_services/download.service';
@@ -29,7 +21,6 @@ import {ResponsiveTableComponent} from "../../shared/_components/responsive-tabl
 import {VersionService} from "../../_services/version.service";
 import {CronFrequency} from "../../shared/_models/cron-frequency";
 import {SettingCronItemComponent} from "../../settings/_components/setting-cron-item/setting-cron-item.component";
-import {combineLatest} from "rxjs";
 
 interface AdhocTask {
   name: string;
@@ -63,6 +54,7 @@ export class ManageTasksSettingsComponent implements OnInit {
   taskScan = signal('');
   taskBackup = signal('');
   taskCleanup = signal('');
+  taskCblSync = signal('');
 
   cleanupFrequencies: CronFrequency[] = [CronFrequency.Daily, CronFrequency.Weekly, CronFrequency.Custom];
 
@@ -139,28 +131,24 @@ export class ManageTasksSettingsComponent implements OnInit {
 
   trackBy = (index: number, item: Job) => `${item.id}`;
 
-  ngOnInit(): void {
-    this.settingsService.getServerSettings().subscribe(settings => {
-      this.serverSettings = settings;
+  // Auto-save when any cron signal changes — must be in constructor for toObservable() injection context
+  private readonly taskScan$ = toObservable(this.taskScan);
+  private readonly taskBackup$ = toObservable(this.taskBackup);
+  private readonly taskCleanup$ = toObservable(this.taskCleanup);
+  private readonly taskCblSync$ = toObservable(this.taskCblSync);
 
-      this.taskScan.set(settings.taskScan);
-      this.taskBackup.set(settings.taskBackup);
-      this.taskCleanup.set(settings.taskCleanup);
-
-      this.cdRef.markForCheck();
-    });
-
-    // Auto-save when any cron signal changes
+  constructor() {
     combineLatest([
-      toObservable(this.taskScan),
-      toObservable(this.taskBackup),
-      toObservable(this.taskCleanup)
+      this.taskScan$,
+      this.taskBackup$,
+      this.taskCleanup$,
+      this.taskCblSync$
     ]).pipe(
       debounceTime(500),
       // Skip until serverSettings is loaded
-      switchMap(([scan, backup, cleanup]) => {
+      switchMap(([scan, backup, cleanup, cblSync]) => {
         if (!this.serverSettings) return of(null);
-        const data = this.packData(scan, backup, cleanup);
+        const data = this.packData(scan, backup, cleanup, cblSync);
         return this.settingsService.updateServerSettings(data).pipe(catchError(err => {
           console.error(err);
           return of(null);
@@ -174,16 +162,30 @@ export class ManageTasksSettingsComponent implements OnInit {
       }),
       takeUntilDestroyed(this.destroyRef)
     ).subscribe();
+  }
+
+  ngOnInit(): void {
+    this.settingsService.getServerSettings().subscribe(settings => {
+      this.serverSettings = settings;
+
+      this.taskScan.set(settings.taskScan);
+      this.taskBackup.set(settings.taskBackup);
+      this.taskCleanup.set(settings.taskCleanup);
+      this.taskCblSync.set(settings.taskCblSync);
+
+      this.cdRef.markForCheck();
+    });
 
     this.recurringTasks$ = this.serverService.getRecurringJobs().pipe(shareReplay());
     this.cdRef.markForCheck();
   }
 
-  packData(scan: string, backup: string, cleanup: string) {
+  packData(scan: string, backup: string, cleanup: string, cblSync: string) {
     const modelSettings = Object.assign({}, this.serverSettings);
     modelSettings.taskScan = scan;
     modelSettings.taskBackup = backup;
     modelSettings.taskCleanup = cleanup;
+    modelSettings.taskCblSync = cblSync;
     return modelSettings;
   }
 

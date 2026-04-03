@@ -565,6 +565,13 @@ public class SettingsService(
             unitOfWork.SettingsRepository.Update(setting);
             return true;
         }
+
+        if (setting.Key == ServerSettingKey.TaskCblSync && updateSettingsDto.TaskCblSync != setting.Value)
+        {
+            setting.Value = updateSettingsDto.TaskCblSync;
+            unitOfWork.SettingsRepository.Update(setting);
+            return true;
+        }
         return false;
     }
 
