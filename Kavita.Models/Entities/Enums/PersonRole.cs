@@ -30,5 +30,9 @@ public enum PersonRole
     /// </summary>
     Imprint = 13,
     Team = 14,
-    Location = 15
+    Location = 15,
+    /// <summary>
+    /// The narrator of an audiobook
+    /// </summary>
+    Narrator = 16
 }

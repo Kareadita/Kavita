@@ -14,5 +14,7 @@ public enum FileTypeGroup
     [Description("Pdf")]
     Pdf = 3,
     [Description("Images")]
-    Images = 4
+    Images = 4,
+    [Description("Audio")]
+    Audio = 5
 }

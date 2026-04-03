@@ -213,6 +213,7 @@ public class Chapter : IEntityDate, IHasReadTimeEstimate, IHasCoverImage, IHasKP
             PersonRole.Imprint => ImprintLocked,
             PersonRole.Team => TeamLocked,
             PersonRole.Location => LocationLocked,
+            PersonRole.Narrator => false,
             _ => throw new ArgumentOutOfRangeException(nameof(role), role, null)
         };
     }

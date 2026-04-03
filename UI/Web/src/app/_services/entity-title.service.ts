@@ -32,6 +32,8 @@ export class EntityTitleService {
       case LibraryType.Images:
       case LibraryType.Manga:
         return this.translocoService.translate('entity-title.chapter-title' + pluralKeyPart);
+      case LibraryType.Audiobook:
+        return this.translocoService.translate('entity-title.track-title' + pluralKeyPart);
     }
   }
 
@@ -89,6 +91,8 @@ export class EntityTitleService {
         return this.calculateImageRenderText(isChapter, number, volumeTitle, fallbackToVolume);
       case LibraryType.LightNovel:
         return this.calculateLightNovelRenderText(titleName, prioritizeTitleName, fallbackToVolume, isChapter, number, volumeTitle);
+      case LibraryType.Audiobook:
+        return this.calculateBookRenderText(titleName, prioritizeTitleName, fallbackToVolume, isChapter, number, volumeTitle);
       default:
         return '';
     }

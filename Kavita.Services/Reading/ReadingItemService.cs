@@ -14,20 +14,23 @@ public class ReadingItemService : IReadingItemService
     private readonly IBookService _bookService;
     private readonly IImageService _imageService;
     private readonly IDirectoryService _directoryService;
+    private readonly IAudiobookService _audiobookService;
     private readonly ILogger<ReadingItemService> _logger;
     private readonly BasicParser _basicParser;
     private readonly ComicVineParser _comicVineParser;
     private readonly ImageParser _imageParser;
     private readonly BookParser _bookParser;
     private readonly PdfParser _pdfParser;
+    private readonly AudioParser _audioParser;
 
     public ReadingItemService(IArchiveService archiveService, IBookService bookService, IImageService imageService,
-        IDirectoryService directoryService, ILogger<ReadingItemService> logger)
+        IDirectoryService directoryService, ILogger<ReadingItemService> logger, IAudiobookService audiobookService)
     {
         _archiveService = archiveService;
         _bookService = bookService;
         _imageService = imageService;
         _directoryService = directoryService;
+        _audiobookService = audiobookService;
         _logger = logger;
 
         _imageParser = new ImageParser(directoryService);
@@ -35,6 +38,7 @@ public class ReadingItemService : IReadingItemService
         _bookParser = new BookParser(directoryService, bookService, _basicParser);
         _comicVineParser = new ComicVineParser(directoryService);
         _pdfParser = new PdfParser(directoryService);
+        _audioParser = new AudioParser(directoryService, audiobookService);
 
     }
 
@@ -112,6 +116,10 @@ public class ReadingItemService : IReadingItemService
             {
                 return 1;
             }
+            case MangaFormat.Audio:
+            {
+                return _audiobookService.GetDurationInSeconds(filePath);
+            }
             case MangaFormat.Unknown:
             default:
                 return 0;
@@ -132,6 +140,7 @@ public class ReadingItemService : IReadingItemService
             MangaFormat.Archive => _archiveService.GetCoverImage(filePath, fileName, _directoryService.CoverImageDirectory, encodeFormat, size),
             MangaFormat.Image => _imageService.GetCoverImage(filePath, fileName, _directoryService.CoverImageDirectory, encodeFormat, size),
             MangaFormat.Pdf => _bookService.GetCoverImage(filePath, fileName, _directoryService.CoverImageDirectory, encodeFormat, size),
+            MangaFormat.Audio => _audiobookService.GetCoverImage(filePath, fileName, _directoryService.CoverImageDirectory, encodeFormat, size),
             _ => string.Empty
         };
     }
@@ -159,6 +168,7 @@ public class ReadingItemService : IReadingItemService
                 break;
             case MangaFormat.Unknown:
             case MangaFormat.Epub:
+            case MangaFormat.Audio:
                 break;
             default:
                 throw new ArgumentOutOfRangeException(nameof(format), format, null);
@@ -190,6 +200,10 @@ public class ReadingItemService : IReadingItemService
         if (_pdfParser.IsApplicable(path, type))
         {
             return _pdfParser.Parse(path, rootPath, libraryRoot, type, enableMetadata, GetComicInfo(path, enableMetadata));
+        }
+        if (_audioParser.IsApplicable(path, type))
+        {
+            return _audioParser.Parse(path, rootPath, libraryRoot, type, enableMetadata, GetComicInfo(path, enableMetadata));
         }
         if (_basicParser.IsApplicable(path, type))
         {

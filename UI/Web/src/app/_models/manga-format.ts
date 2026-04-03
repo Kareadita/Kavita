@@ -5,7 +5,8 @@ export enum MangaFormat {
     ARCHIVE = 1,
     UNKNOWN = 2,
     EPUB = 3,
-    PDF = 4
+    PDF = 4,
+    AUDIO = 5
 }
 
 export const allMangaFormats= Object.keys(MangaFormat)

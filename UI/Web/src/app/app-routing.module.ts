@@ -116,6 +116,10 @@ export const routes: Routes = [
           {
             path: 'series/:seriesId/pdf',
             loadChildren: () => import('./_routes/pdf-reader.router.module').then(m => m.routes)
+          },
+          {
+            path: 'series/:seriesId/audio',
+            loadChildren: () => import('./_routes/audiobook-reader.router.module').then(m => m.routes)
           }
         ]
       },

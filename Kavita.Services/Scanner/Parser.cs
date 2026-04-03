@@ -34,9 +34,10 @@ public static partial class Parser
     private const string XmlRegexExtensions = @"\.xml";
     public const string MacOsMetadataFileStartsWith = @"._";
     public const string FontFileExtensions = @"\.[woff2|ttf|otf|woff]";
+    public const string AudioFileExtensions = @"\.m4b|\.mp3|\.flac|\.aac|\.ogg|\.m4a|\.opus|\.wma|\.wav|\.oga";
 
     public const string SupportedExtensions =
-        ArchiveFileExtensions + "|" + ImageFileExtensions + "|" + BookFileExtensions;
+        ArchiveFileExtensions + "|" + ImageFileExtensions + "|" + BookFileExtensions + "|" + AudioFileExtensions;
 
     private const RegexOptions MatchOptions =
         RegexOptions.IgnoreCase | RegexOptions.Compiled | RegexOptions.CultureInvariant;
@@ -103,6 +104,8 @@ public static partial class Parser
     private static readonly Regex XmlRegex = new(XmlRegexExtensions,
         MatchOptions, RegexTimeout);
     private static readonly Regex BookFileRegex = new(BookFileExtensions,
+        MatchOptions, RegexTimeout);
+    private static readonly Regex AudioFileRegex = new(AudioFileExtensions,
         MatchOptions, RegexTimeout);
     private static readonly Regex CoverImageRegex = new(@"(?<!back[\s_-])(?<!\(back )(?<!back)(?:^|[^a-zA-Z0-9])(!?cover|folder)(?![a-zA-Z0-9]|s\b)",
         MatchOptions, RegexTimeout);
@@ -731,6 +734,7 @@ public static partial class Parser
         if (IsImage(filePath)) return MangaFormat.Image;
         if (IsEpub(filePath)) return MangaFormat.Epub;
         if (IsPdf(filePath)) return MangaFormat.Pdf;
+        if (IsAudio(filePath)) return MangaFormat.Audio;
         return MangaFormat.Unknown;
     }
 
@@ -1136,6 +1140,11 @@ public static partial class Parser
     public static bool IsPdf(string filePath)
     {
         return Path.GetExtension(filePath).Equals(".pdf", StringComparison.InvariantCultureIgnoreCase);
+    }
+
+    public static bool IsAudio(string filePath)
+    {
+        return AudioFileRegex.IsMatch(Path.GetExtension(filePath));
     }
 
     /// <summary>

@@ -1,0 +1,138 @@
+<ng-container *transloco="let t; prefix: 'audiobook-reader'">
+  <div class="audiobook-reader">
+
+    <!-- Top bar -->
+    <div class="reader-topbar">
+      <button class="btn btn-icon" (click)="close()" [attr.aria-label]="t('close')">
+        <i class="fa fa-arrow-left"></i>
+      </button>
+      <div class="series-title text-truncate">
+        {{ audioInfo()?.seriesName ?? '' }}
+      </div>
+    </div>
+
+    <!-- Main content -->
+    <div class="reader-body">
+
+      <!-- Cover art -->
+      <div class="cover-container">
+        @if (coverUrl()) {
+          <img [src]="coverUrl()" class="cover-art" [alt]="audioInfo()?.bookTitle ?? ''" />
+        } @else {
+          <div class="cover-placeholder">
+            <i class="fa-solid fa-headphones"></i>
+          </div>
+        }
+      </div>
+
+      <!-- Track info -->
+      <div class="track-info">
+        <div class="track-title">{{ audioInfo()?.bookTitle ?? audioInfo()?.seriesName }}</div>
+        @if (audioInfo()?.author) {
+          <div class="track-meta">{{ audioInfo()!.author }}</div>
+        }
+        @if (audioInfo()?.narrator) {
+          <div class="track-meta narrator">{{ t('narrator-label') }}: {{ audioInfo()!.narrator }}</div>
+        }
+        @if (audioInfo()?.chapterTitle) {
+          <div class="track-chapter">{{ audioInfo()!.chapterTitle }}</div>
+        }
+      </div>
+
+      <!-- Progress / Seek -->
+      <div class="progress-section">
+        <input
+          type="range"
+          class="seek-bar"
+          min="0"
+          [max]="duration()"
+          [value]="currentTime()"
+          (input)="seek($event)"
+          [attr.aria-label]="t('play')"
+        />
+        <div class="time-display">
+          <span>{{ formatTime(currentTime()) }}</span>
+          <span>{{ formatTime(duration()) }}</span>
+        </div>
+      </div>
+
+      <!-- Controls -->
+      <div class="controls">
+        <!-- Previous chapter -->
+        <button
+          class="btn btn-icon control-btn"
+          (click)="navigateToPrev()"
+          [disabled]="prevChapterId() < 0"
+          [attr.aria-label]="t('previous-chapter')">
+          <i class="fa-solid fa-backward-step"></i>
+        </button>
+
+        <!-- Rewind 30s -->
+        <button class="btn btn-icon control-btn" (click)="skipBack()" [attr.aria-label]="t('rewind')">
+          <i class="fa-solid fa-rotate-left"></i>
+          <span class="skip-label">30</span>
+        </button>
+
+        <!-- Play/Pause -->
+        <button class="btn btn-icon control-btn play-btn" (click)="togglePlayPause()" [attr.aria-label]="isPlaying() ? t('pause') : t('play')">
+          @if (isLoading()) {
+            <i class="fa-solid fa-spinner fa-spin"></i>
+          } @else if (isPlaying()) {
+            <i class="fa-solid fa-pause"></i>
+          } @else {
+            <i class="fa-solid fa-play"></i>
+          }
+        </button>
+
+        <!-- Forward 30s -->
+        <button class="btn btn-icon control-btn" (click)="skipForward()" [attr.aria-label]="t('forward')">
+          <i class="fa-solid fa-rotate-right"></i>
+          <span class="skip-label">30</span>
+        </button>
+
+        <!-- Next chapter -->
+        <button
+          class="btn btn-icon control-btn"
+          (click)="navigateToNext()"
+          [disabled]="nextChapterId() < 0"
+          [attr.aria-label]="t('next-chapter')">
+          <i class="fa-solid fa-forward-step"></i>
+        </button>
+      </div>
+
+      <!-- Secondary controls: speed + volume -->
+      <div class="secondary-controls">
+        <button class="btn btn-sm speed-btn" (click)="cycleSpeed()" [attr.aria-label]="t('speed')">
+          {{ currentSpeed }}x
+        </button>
+
+        <div class="volume-control">
+          <i class="fa-solid fa-volume-low"></i>
+          <input
+            type="range"
+            class="volume-slider"
+            min="0"
+            max="1"
+            step="0.05"
+            [value]="volume()"
+            (input)="setVolume($event)"
+            [attr.aria-label]="t('volume')"
+          />
+          <i class="fa-solid fa-volume-high"></i>
+        </div>
+      </div>
+
+    </div><!-- /reader-body -->
+
+    <!-- Hidden audio element -->
+    <audio
+      #audioEl
+      [src]="streamUrl()"
+      preload="metadata"
+      (canplay)="onAudioCanPlay()"
+      (timeupdate)="onAudioTimeUpdate()"
+      (ended)="onAudioEnded()"
+    ></audio>
+
+  </div>
+</ng-container>

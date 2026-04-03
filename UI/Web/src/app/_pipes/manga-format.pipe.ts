@@ -23,6 +23,8 @@ export class MangaFormatPipe implements PipeTransform {
         return translate('manga-format-pipe.pdf');
       case MangaFormat.UNKNOWN:
         return translate('manga-format-pipe.unknown');
+      case MangaFormat.AUDIO:
+        return translate('manga-format-pipe.audio');
       default:
         return '';
     }

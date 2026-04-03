@@ -2,7 +2,8 @@ export enum FileTypeGroup {
   Archive = 1,
   Epub = 2,
   Pdf = 3,
-  Images = 4
+  Images = 4,
+  Audio = 5
 }
 
 export const allFileTypeGroup = Object.keys(FileTypeGroup)

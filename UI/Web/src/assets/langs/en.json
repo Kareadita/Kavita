@@ -745,7 +745,8 @@
         "archive": "Archive",
         "image": "Image",
         "pdf": "PDF",
-        "unknown": "Unknown"
+        "unknown": "Unknown",
+        "audio": "Audio"
     },
 
     "library-type-pipe": {
@@ -754,7 +755,8 @@
         "manga": "Manga",
         "comicVine": "Comic",
         "image": "Image",
-        "lightNovel": "Light Novel"
+        "lightNovel": "Light Novel",
+        "audiobook": "Audiobook"
     },
 
     "library-type-subtitle-pipe": {
@@ -763,7 +765,8 @@
         "manga": "Japanese comics with volume grouping support. Also handles some loose image configurations.",
         "comicVine": "Strict comic implementation based on Comic Vine metadata with integration for specialized tooling.",
         "image": "Loose image files with limited support. Must largely follow wiki documentation.",
-        "lightNovel": "Book library with special handling optimized for light novels"
+        "lightNovel": "Book library with special handling optimized for light novels",
+        "audiobook": "Audiobook library supporting M4B, MP3, FLAC, and other audio formats."
     },
 
     "age-rating-pipe": {
@@ -1442,7 +1445,25 @@
         "archive": "Archive",
         "epub": "Epub",
         "pdf": "Pdf",
-        "image": "Image"
+        "image": "Image",
+        "audio": "Audio"
+    },
+
+    "audiobook-reader": {
+        "play": "Play",
+        "pause": "Pause",
+        "rewind": "Rewind 30s",
+        "forward": "Forward 30s",
+        "speed": "Playback Speed",
+        "volume": "Volume",
+        "close": "Close",
+        "settings": "Settings",
+        "narrator-label": "Narrator",
+        "author-label": "Author",
+        "previous-chapter": "Previous",
+        "next-chapter": "Next",
+        "chapter-label": "Chapter",
+        "loading": "Loading audio…"
     },
 
     "reader-settings": {
@@ -1632,7 +1653,9 @@
         "issue-title": "Issue",
         "issue-title-plural": "Issues",
         "chapter-title": "Chapter",
-        "chapter-title-plural": "Chapters"
+        "chapter-title-plural": "Chapters",
+        "track-title": "Track",
+        "track-title-plural": "Tracks"
     },
 
     "external-series-card": {

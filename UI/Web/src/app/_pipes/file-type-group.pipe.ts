@@ -18,7 +18,8 @@ export class FileTypeGroupPipe implements PipeTransform {
         return translate('file-type-group-pipe.pdf');
       case FileTypeGroup.Images:
         return translate('file-type-group-pipe.image');
-
+      case FileTypeGroup.Audio:
+        return translate('file-type-group-pipe.audio');
     }
   }
 

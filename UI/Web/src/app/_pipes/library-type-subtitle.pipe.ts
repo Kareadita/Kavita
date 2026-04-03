@@ -23,7 +23,8 @@ export class LibraryTypeSubtitlePipe implements PipeTransform {
         return translate('library-type-subtitle-pipe.lightNovel');
       case LibraryType.ComicVine:
         return translate('library-type-subtitle-pipe.comicVine');
-
+      case LibraryType.Audiobook:
+        return translate('library-type-subtitle-pipe.audiobook');
     }
   }
 

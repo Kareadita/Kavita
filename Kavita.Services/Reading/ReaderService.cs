@@ -1062,6 +1062,8 @@ public class ReaderService(IUnitOfWork unitOfWork, ILogger<ReaderService> logger
             case LibraryType.Book:
             case LibraryType.LightNovel:
                 return "Book" + (includeSpace ? " " : string.Empty);
+            case LibraryType.Audiobook:
+                return "Track" + (includeSpace ? " " : string.Empty);
             default:
                 throw new ArgumentOutOfRangeException(nameof(libraryType), libraryType, null);
         }

@@ -96,6 +96,14 @@ public class LibraryController(
             library.AllowScrobbling = false;
         }
 
+        // Audiobook libraries do not support scrobbling or metadata matching
+        if (library.Type == LibraryType.Audiobook)
+        {
+            logger.LogInformation("Overrode Library {Name} to disable scrobbling and metadata matching since Audiobook libraries have no providers", dto.Name.Sanitize());
+            library.AllowScrobbling = false;
+            library.AllowMetadataMatching = false;
+        }
+
         unitOfWork.LibraryRepository.Add(library);
 
         var admins = (await unitOfWork.UserRepository.GetAdminUsersAsync()).ToList();
@@ -705,6 +713,14 @@ public class LibraryController(
         {
             logger.LogInformation("Overrode Library {Name} to disable scrobbling since there are no providers for Comics", dto.Name.Replace(Environment.NewLine, string.Empty));
             library.AllowScrobbling = false;
+        }
+
+        // Audiobook libraries do not support scrobbling or metadata matching
+        if (library.Type == LibraryType.Audiobook)
+        {
+            logger.LogInformation("Overrode Library {Name} to disable scrobbling and metadata matching since Audiobook libraries have no providers", dto.Name.Replace(Environment.NewLine, string.Empty));
+            library.AllowScrobbling = false;
+            library.AllowMetadataMatching = false;
         }
 
 

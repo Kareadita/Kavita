@@ -35,4 +35,9 @@ public enum LibraryType
     /// </summary>
     [Description("Comic")]
     ComicVine = 5,
+    /// <summary>
+    /// Audiobook library. Handles audio files (.m4b, .mp3, .flac, .aac, etc.)
+    /// </summary>
+    [Description("Audiobook")]
+    Audiobook = 6,
 }

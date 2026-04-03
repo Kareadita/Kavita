@@ -59,6 +59,7 @@
     <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="8.16.0" />
     <PackageReference Include="System.IO.Abstractions" Version="22.1.0" />
     <PackageReference Include="TimeZoneConverter" Version="7.2.0" />
+    <PackageReference Include="TagLibSharp" Version="2.3.0" />
     <PackageReference Include="VersOne.Epub" Version="3.3.5" />
     <PackageReference Include="YamlDotNet" Version="16.3.0" />
   </ItemGroup>

@@ -137,6 +137,6 @@ public class BasicParser(IDirectoryService directoryService, IDefaultParser imag
     /// <returns></returns>
     public override bool IsApplicable(string filePath, LibraryType type)
     {
-        return type != LibraryType.ComicVine && type != LibraryType.Image;
+        return type != LibraryType.ComicVine && type != LibraryType.Image && type != LibraryType.Audiobook;
     }
 }

@@ -229,6 +229,7 @@ export class LibrarySettingsModalComponent implements OnInit {
             this.libraryForm.get(FileTypeGroup.Images + '')?.setValue(true);
             this.libraryForm.get(FileTypeGroup.Pdf + '')?.setValue(false);
             this.libraryForm.get(FileTypeGroup.Epub + '')?.setValue(false);
+            this.libraryForm.get(FileTypeGroup.Audio + '')?.setValue(false);
             break;
           case LibraryType.Comic:
           case LibraryType.ComicVine:
@@ -236,24 +237,35 @@ export class LibrarySettingsModalComponent implements OnInit {
             this.libraryForm.get(FileTypeGroup.Images + '')?.setValue(false);
             this.libraryForm.get(FileTypeGroup.Pdf + '')?.setValue(false);
             this.libraryForm.get(FileTypeGroup.Epub + '')?.setValue(false);
+            this.libraryForm.get(FileTypeGroup.Audio + '')?.setValue(false);
             break;
           case LibraryType.Book:
             this.libraryForm.get(FileTypeGroup.Archive + '')?.setValue(false);
             this.libraryForm.get(FileTypeGroup.Images + '')?.setValue(false);
             this.libraryForm.get(FileTypeGroup.Pdf + '')?.setValue(true);
             this.libraryForm.get(FileTypeGroup.Epub + '')?.setValue(true);
+            this.libraryForm.get(FileTypeGroup.Audio + '')?.setValue(false);
             break;
           case LibraryType.LightNovel:
             this.libraryForm.get(FileTypeGroup.Archive + '')?.setValue(false);
             this.libraryForm.get(FileTypeGroup.Images + '')?.setValue(false);
             this.libraryForm.get(FileTypeGroup.Pdf + '')?.setValue(false);
             this.libraryForm.get(FileTypeGroup.Epub + '')?.setValue(true);
+            this.libraryForm.get(FileTypeGroup.Audio + '')?.setValue(false);
             break;
           case LibraryType.Images:
             this.libraryForm.get(FileTypeGroup.Archive + '')?.setValue(false);
             this.libraryForm.get(FileTypeGroup.Images + '')?.setValue(true);
             this.libraryForm.get(FileTypeGroup.Pdf + '')?.setValue(false);
             this.libraryForm.get(FileTypeGroup.Epub + '')?.setValue(false);
+            this.libraryForm.get(FileTypeGroup.Audio + '')?.setValue(false);
+            break;
+          case LibraryType.Audiobook:
+            this.libraryForm.get(FileTypeGroup.Archive + '')?.setValue(false);
+            this.libraryForm.get(FileTypeGroup.Images + '')?.setValue(false);
+            this.libraryForm.get(FileTypeGroup.Pdf + '')?.setValue(false);
+            this.libraryForm.get(FileTypeGroup.Epub + '')?.setValue(false);
+            this.libraryForm.get(FileTypeGroup.Audio + '')?.setValue(true);
             break;
         }
 

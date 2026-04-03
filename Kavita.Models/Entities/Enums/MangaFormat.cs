@@ -34,5 +34,11 @@ public enum MangaFormat
     /// PDF File
     /// </summary>
     [Description("PDF")]
-    Pdf = 4
+    Pdf = 4,
+    /// <summary>
+    /// Audio File
+    /// See <see cref="Services.Tasks.Scanner.Parser.Parser.AudioFileExtensions"/> for supported extensions
+    /// </summary>
+    [Description("Audio")]
+    Audio = 5
 }

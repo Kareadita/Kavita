@@ -107,6 +107,8 @@ export class ReaderService {
       return ['library', libraryId, 'series', seriesId, 'book', chapterId];
     } else if (format === MangaFormat.PDF) {
       return ['library', libraryId, 'series', seriesId, 'pdf', chapterId];
+    } else if (format === MangaFormat.AUDIO) {
+      return ['library', libraryId, 'series', seriesId, 'audio', chapterId];
     } else {
       return ['library', libraryId, 'series', seriesId, 'manga', chapterId];
     }

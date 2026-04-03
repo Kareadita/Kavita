@@ -181,6 +181,8 @@ export class SideNavComponent {
         return 'fa-book-open';
       case LibraryType.Images:
         return 'fa-images';
+      case LibraryType.Audiobook:
+        return 'fa-headphones';
     }
   }
 

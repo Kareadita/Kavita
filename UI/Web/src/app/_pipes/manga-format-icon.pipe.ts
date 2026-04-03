@@ -22,6 +22,8 @@ export class MangaFormatIconPipe implements PipeTransform {
         return 'fa-solid fa-file-pdf';
       case MangaFormat.UNKNOWN:
         return 'fa-solid fa-file-circle-question';
+      case MangaFormat.AUDIO:
+        return 'fa-solid fa-headphones';
     }
   }
 
