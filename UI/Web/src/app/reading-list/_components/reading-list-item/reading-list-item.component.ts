@@ -4,11 +4,12 @@ import {ImageService} from 'src/app/_services/image.service';
 import {NgbProgressbar} from '@ng-bootstrap/ng-bootstrap';
 import {DatePipe} from '@angular/common';
 import {ImageComponent} from '../../../shared/image/image.component';
-import {TranslocoDirective} from "@jsverse/transloco";
+import {translate, TranslocoDirective} from "@jsverse/transloco";
 import {ItemRemoveEvent} from "../draggable-ordered-list/draggable-ordered-list.component";
 import {RouterLink} from "@angular/router";
 import {AccountService} from "../../../_services/account.service";
 import {BlurToggleDirective} from "../../../_directives/blur-toggle.directive";
+import {LooseLeafOrDefaultNumber} from "../../../_models/chapter";
 
 @Component({
   selector: 'app-reading-list-item',
@@ -31,6 +32,15 @@ export class ReadingListItemComponent {
 
   chapterTitle = computed(() => this.item().chapter?.titleName || this.item().title);
   chapterNumber = computed(() => this.item().chapter?.range || this.item().chapterNumber);
+  renderChapterNumber = computed(() => {
+    const chNum = this.chapterNumber();
+    const volNum = this.item().volumeNumber;
+
+    if (chNum === LooseLeafOrDefaultNumber + '') {
+      return translate('common.volume-num-shorthand', {num: volNum});
+    }
+    return translate('common.issue-num-shorthand', {num: chNum})
+  })
   releaseDate = computed(() => this.item().chapter?.releaseDate || this.item().releaseDate);
   summary = computed(() => this.item().chapter?.summary || this.item().summary);
   pages = computed(() => this.item().chapter?.pages ?? this.item().pagesTotal);

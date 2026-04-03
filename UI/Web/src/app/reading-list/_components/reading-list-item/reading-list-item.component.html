@@ -34,17 +34,18 @@
       }
     </div>
 
+
     <!-- Content -->
     <div class="item-content">
       <!-- Title row -->
       <div class="title-row">
         <!-- Desktop: only issue number is a link -->
         <span class="d-none d-md-inline">
-          <a [routerLink]="chapterDetailUrl()" class="chapter-number">#{{chapterNumber()}}</a> {{chapterTitle()}}
+          <a [routerLink]="chapterDetailUrl()" class="chapter-number">{{renderChapterNumber()}}</a> {{chapterTitle()}}
         </span>
         <!-- Mobile: entire title is a link -->
         <a [routerLink]="chapterDetailUrl()" class="d-md-none">
-          <span class="chapter-number">#{{chapterNumber()}}</span> {{chapterTitle()}}
+          <span class="chapter-number">{{renderChapterNumber()}}</span> {{chapterTitle()}}
         </a>
         @if (releaseDate() !== '0001-01-01T00:00:00') {
           <span class="release-date">{{releaseDate() | date:'MMM. yyyy'}}</span>
