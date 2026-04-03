@@ -1,4 +1,5 @@
-﻿using System.IO.Abstractions;
+﻿using System.Collections.Concurrent;
+using System.IO.Abstractions;
 using System.IO.Abstractions.TestingHelpers;
 using Hangfire;
 using Kavita.API.Database;
@@ -586,5 +587,41 @@ public class ParseScannedFilesTests: AbstractDbTest
             await unitOfWork.SeriesRepository.GetFolderPathMap(postLib.Id), postLib);
         var changes = res.Count(sc => sc.HasChanged);
         Assert.Equal(2, changes);
+    }
+
+    [Fact]
+    public void TrackSeriesAcrossScanResults_MergingEverythingIntoSeriesWithNoMeaningfulInformation()
+    {
+        List<ScanResult> scanResults =
+        [
+            new()
+            {
+               ParserInfos = [
+                   // Should be ignored as the series does not contain meaningful information
+                   // Would previously suck all series into it (when having no localised series set)
+                   new ParserInfo
+                   {
+                       Series = "[&/"
+                   },
+                   new ParserInfo
+                   {
+                       Series = "Spice and Wolf"
+                   }
+                   ,new ParserInfo
+                   {
+                       Series = "Ikoku Nikki"
+                   }
+               ]
+            }
+        ];
+
+        ConcurrentDictionary<ParsedSeries, List<ParserInfo>> scannedSeries = [];
+
+        var psd = new ParseScannedFiles(Substitute.For<ILogger<ParseScannedFiles>>(), Substitute.For<IDirectoryService>(),
+            Substitute.For<IReadingItemService>(), Substitute.For<IEventHub>());
+
+        psd.TrackSeriesAcrossScanResults(scanResults, scannedSeries);
+
+        Assert.Equal(2, scannedSeries.Count);
     }
 }

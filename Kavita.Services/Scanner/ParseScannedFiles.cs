@@ -298,7 +298,7 @@ public class ParseScannedFiles
     /// </summary>
     /// <param name="scanResults">A collection of scan results</param>
     /// <param name="scannedSeries">A concurrent dictionary to store the tracked series</param>
-    private void TrackSeriesAcrossScanResults(IList<ScanResult> scanResults, ConcurrentDictionary<ParsedSeries, List<ParserInfo>> scannedSeries)
+    public void TrackSeriesAcrossScanResults(IList<ScanResult> scanResults, ConcurrentDictionary<ParsedSeries, List<ParserInfo>> scannedSeries)
     {
         // Flatten all ParserInfos from scanResults
         var allInfos = scanResults.SelectMany(sr => sr.ParserInfos).ToList();
@@ -330,6 +330,17 @@ public class ParseScannedFiles
     {
         if (info == null || info.Series == string.Empty) return;
 
+        // Do not ingest series with no meaningful information as title. These break merging as they'll all merge into each other
+        // They would also merge all series that don't have localised names previously
+        // This does create the edge case where some series may really not have any meaningful information.
+        // But until this is reported, we should ignore it and play it safe!
+        if (string.IsNullOrEmpty(info.Series.ToNormalized()))
+        {
+            _logger.LogCritical("[ScannerService] {SeriesName} @ {FileName} is empty when normalized, this file will not be ingested! This is a bug in the scanner, please report this! https://github.com/Kareadita/Kavita/issues",
+                info.Series, info.Filename);
+            return;
+        }
+
         // Check if normalized info.Series already exists and if so, update info to use that name instead
         info.Series = MergeName(scannedSeries, info);
 
@@ -342,9 +353,16 @@ public class ParseScannedFiles
         try
         {
             var existingKey = scannedSeries.Keys.SingleOrDefault(ps =>
-                ps.Format == info.Format && (ps.NormalizedName.Equals(normalizedSeries)
-                                             || ps.NormalizedName.Equals(normalizedLocalizedSeries)
-                                             || ps.NormalizedName.Equals(normalizedSortSeries)));
+            {
+                if (ps.Format != info.Format) return false;
+
+                // Never match on empty normalized names
+                if (string.IsNullOrEmpty(ps.NormalizedName)) return false;
+
+                return ps.NormalizedName.Equals(normalizedSeries)
+                       || ps.NormalizedName.Equals(normalizedLocalizedSeries)
+                       || ps.NormalizedName.Equals(normalizedSortSeries);
+            });
             existingKey ??= new ParsedSeries()
             {
                 Format = info.Format,
@@ -391,12 +409,7 @@ public class ParseScannedFiles
 
         try
         {
-            var existingName =
-                scannedSeries.SingleOrDefault(p =>
-                        (p.Key.NormalizedName.ToNormalized().Equals(normalizedSeries) ||
-                         p.Key.NormalizedName.ToNormalized().Equals(normalizedLocalSeries)) &&
-                        p.Key.Format == info.Format)
-                    .Key;
+            var existingName = scannedSeries.SingleOrDefault(MergeNameGuard).Key;
 
             if (existingName == null)
             {
@@ -411,10 +424,7 @@ public class ParseScannedFiles
         catch (Exception ex)
         {
             _logger.LogCritical("[ScannerService] Multiple series detected for {SeriesName} ({File})! This is critical to fix! There should only be 1", info.Series, info.FullFilePath);
-            var values = scannedSeries.Where(p =>
-                (p.Key.NormalizedName.ToNormalized() == normalizedSeries ||
-                 p.Key.NormalizedName.ToNormalized() == normalizedLocalSeries) &&
-                p.Key.Format == info.Format);
+            var values = scannedSeries.Where(MergeNameGuard);
 
             foreach (var pair in values)
             {
@@ -424,6 +434,16 @@ public class ParseScannedFiles
         }
 
         return info.Series;
+
+        bool MergeNameGuard(KeyValuePair<ParsedSeries, List<ParserInfo>> p)
+        {
+            if (p.Key.Format != info.Format) return false;
+
+            var key = p.Key.NormalizedName.ToNormalized();
+            if (string.IsNullOrEmpty(key)) return false;
+
+            return key.Equals(normalizedSeries) || key.Equals(normalizedLocalSeries);
+        }
     }
 
     /// <summary>
