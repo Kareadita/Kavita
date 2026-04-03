@@ -209,14 +209,7 @@ public class CblImportService(IUnitOfWork unitOfWork, ICblGithubService cblGithu
         string content;
         try
         {
-            if (string.IsNullOrEmpty(readingList.SourcePath) && !string.IsNullOrEmpty(readingList.DownloadUrl))
-            {
-                content = await cblGithubService.GetFileContent(readingList.SourcePath!);
-            }
-            else
-            {
-                content = await cblGithubService.GetFileContent(readingList.SourcePath!);
-            }
+            content = await cblGithubService.GetFileContent(readingList.SourcePath!);
         }
         catch (Exception ex)
         {

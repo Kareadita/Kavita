@@ -3616,7 +3616,8 @@
         "cbl-remap-rule-created": "Remap rule created",
         "cbl-remap-rule-deleted": "Remap rule deleted",
         "cbl-remap-rule-promoted": "Rule promoted to global",
-        "cbl-remap-rule-demoted": "Rule demoted to user scope"
+        "cbl-remap-rule-demoted": "Rule demoted to user scope",
+        "confirm-delete-read-from-readinglist": "Are you sure you want to remove all read issues from this reading list? This cannot be undone."
     },
 
     "read-time-pipe": {

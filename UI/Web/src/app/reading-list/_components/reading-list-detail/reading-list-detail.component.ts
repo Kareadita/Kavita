@@ -67,6 +67,7 @@ import {ActionResult} from "../../../_models/actionables/action-result";
 import {getWritableResolvedData} from "../../../../libs/route-util";
 import {Tabs} from "../../../_models/tabs";
 import {TabTitlePipe} from "../../../_pipes/tab-title.pipe";
+import {ConfirmService} from "../../../shared/confirm.service";
 
 
 @Component({
@@ -96,6 +97,7 @@ export class ReadingListDetailComponent implements OnInit {
   private readonly readerService = inject(ReaderService);
   private readonly location = inject(Location);
   private readonly destroyRef = inject(DestroyRef);
+  private readonly confirmService = inject(ConfirmService);
   protected readonly breakpointService = inject(BreakpointService);
 
   protected readonly MangaFormat = MangaFormat;
@@ -323,8 +325,10 @@ export class ReadingListDetailComponent implements OnInit {
     });
   }
 
-  removeRead() {
+  async removeRead() {
     if (!this.readingList()) return;
+
+    if (!await this.confirmService.confirm('toasts.confirm-delete-read-from-readinglist')) return;
 
     this.isLoading.set(true);
     this.readingListService.removeRead(this.readingList().id).subscribe((resp) => {
