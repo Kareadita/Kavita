@@ -209,8 +209,14 @@ public class CblImportService(IUnitOfWork unitOfWork, ICblGithubService cblGithu
         string content;
         try
         {
-            // TODO: Based on provider, let's get the content either via DL or Github
-            content = await cblGithubService.GetFileContent(readingList.SourcePath!);
+            if (string.IsNullOrEmpty(readingList.SourcePath) && !string.IsNullOrEmpty(readingList.DownloadUrl))
+            {
+                content = await cblGithubService.GetFileContent(readingList.SourcePath!);
+            }
+            else
+            {
+                content = await cblGithubService.GetFileContent(readingList.SourcePath!);
+            }
         }
         catch (Exception ex)
         {

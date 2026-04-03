@@ -134,7 +134,17 @@ public class CblGithubService : ICblGithubService
             throw new KavitaException($"No download URL available for {filePath}");
         }
 
-        return await item.DownloadUrl
+        return await DownloadByUrl(item.DownloadUrl);
+    }
+
+    /// <summary>
+    /// Downloads the content of a file
+    /// </summary>
+    /// <param name="url"></param>
+    /// <returns></returns>
+    private static async Task<string> DownloadByUrl(string url)
+    {
+        return await url
             .WithGithubHeaders()
             .GetStringAsync();
     }
