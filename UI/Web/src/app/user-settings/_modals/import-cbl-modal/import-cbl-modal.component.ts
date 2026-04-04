@@ -376,6 +376,10 @@ export class ImportCblModalComponent implements OnInit {
         repoPath: file.repoPath,
         downloadUrl: file.downloadUrl!,
         sha: file.sha!
+      } : file.downloadUrl ? {
+        repoPath: '',
+        downloadUrl: file.downloadUrl,
+        sha: ''
       } : undefined;
 
       try {

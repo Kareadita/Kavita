@@ -47,6 +47,9 @@ public class FileService : IFileService
     /// <param name="filepath"></param>
     /// <param name="sha"></param>
     /// <returns></returns>
+    public static string ComputeSha256(string content)
+        => Convert.ToHexString(SHA256.HashData(Encoding.UTF8.GetBytes(content)));
+
     public bool ValidateSha(string filepath, string sha)
     {
         if (!Exists(filepath)) return false;

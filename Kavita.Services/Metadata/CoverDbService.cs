@@ -61,9 +61,11 @@ public class CoverDbService : ICoverDbService
     /// </summary>
     private static readonly TimeSpan CacheDuration = TimeSpan.FromDays(1);
 
+    private readonly IUrlValidationService _urlValidationService;
+
     public CoverDbService(ILogger<CoverDbService> logger, IDirectoryService directoryService,
         IEasyCachingProviderFactory cacheFactory, IHostEnvironment env, IImageService imageService,
-        IUnitOfWork unitOfWork, IEventHub eventHub)
+        IUnitOfWork unitOfWork, IEventHub eventHub, IUrlValidationService urlValidationService)
     {
         _logger = logger;
         _directoryService = directoryService;
@@ -72,6 +74,7 @@ public class CoverDbService : ICoverDbService
         _imageService = imageService;
         _unitOfWork = unitOfWork;
         _eventHub = eventHub;
+        _urlValidationService = urlValidationService;
     }
 
     /// <summary>
@@ -93,6 +96,8 @@ public class CoverDbService : ICoverDbService
     /// </remarks>
     public async Task<string> DownloadFaviconAsync(string url, EncodeFormat encodeFormat, CancellationToken ct = default)
     {
+        await _urlValidationService.ValidateUrlAsync(url);
+
         // Parse the URL to get the domain (including subdomain)
         var uri = new Uri(url);
         var domain = uri.Host.Replace(Environment.NewLine, string.Empty);
@@ -280,7 +285,7 @@ public class CoverDbService : ICoverDbService
 
     private async Task<string> DownloadImageFromUrl(string filenameWithoutExtension, EncodeFormat encodeFormat, string url, string? targetDirectory = null)
     {
-        // default: I need to unit test this to ensure it works when overwriting, etc
+        await _urlValidationService.ValidateUrlAsync(url);
 
         // Target Directory defaults to CoverImageDirectory, but can be temp for when comparison between images is used
         targetDirectory ??= _directoryService.CoverImageDirectory;

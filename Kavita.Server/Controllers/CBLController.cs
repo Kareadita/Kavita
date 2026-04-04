@@ -14,6 +14,7 @@ using Kavita.Models.Entities.Enums.ReadingList;
 using Kavita.Models.Entities.ReadingLists;
 using Kavita.Server.Attributes;
 using Flurl.Http;
+using Kavita.Services;
 using Kavita.Models.DTOs.ReadingLists.CBL.Import;
 using Kavita.Models.DTOs.ReadingLists.CBL.RemapRules;
 using Kavita.Models.DTOs.Uploads;
@@ -32,7 +33,8 @@ namespace Kavita.Server.Controllers;
 /// </summary>
 public class CblController(IReadingListService readingListService, IDirectoryService directoryService,
     ICblGithubService cblGithubService, DataContext dataContext, ICblImportService cblImporterService,
-    IUnitOfWork unitOfWork, IMapper mapper, ILocalizationService localizationService) : BaseApiController
+    IUnitOfWork unitOfWork, IMapper mapper, ILocalizationService localizationService,
+    IUrlValidationService urlValidationService) : BaseApiController
 {
 
     /// <summary>
@@ -88,6 +90,15 @@ public class CblController(IReadingListService readingListService, IDirectorySer
     [DisallowRole(PolicyConstants.ReadOnlyRole)]
     public async Task<ActionResult<CblSavedFileDto>> SaveCblFromUrl(UploadUrlDto dto)
     {
+        try
+        {
+            await urlValidationService.ValidateUrlAsync(dto.Url);
+        }
+        catch (Exception ex)
+        {
+            return BadRequest(ex.Message);
+        }
+
         var dir = GetCblManagerFolder(UserId);
         Directory.CreateDirectory(dir);
 
@@ -115,7 +126,8 @@ public class CblController(IReadingListService readingListService, IDirectorySer
         {
             Name = filename,
             FileName = filename,
-            Provider = ReadingListProvider.Url
+            Provider = ReadingListProvider.Url,
+            DownloadUrl = dto.Url
         });
     }
 
@@ -210,6 +222,15 @@ public class CblController(IReadingListService readingListService, IDirectorySer
                         readingList.SourcePath = dto.RepoPath;
                         readingList.DownloadUrl = dto.DownloadUrl;
                         readingList.ShaHash = dto.Sha;
+                        readingList.LastSyncedUtc = DateTime.UtcNow;
+                        readingList.LastSyncCheckUtc = DateTime.UtcNow;
+                    }
+                    else if (!string.IsNullOrEmpty(dto.DownloadUrl))
+                    {
+                        // URL-only import — compute SHA from file content for change detection
+                        var fileContent = await directoryService.FileSystem.File.ReadAllTextAsync(fullPath);
+                        readingList.DownloadUrl = dto.DownloadUrl;
+                        readingList.ShaHash = FileService.ComputeSha256(fileContent);
                         readingList.LastSyncedUtc = DateTime.UtcNow;
                         readingList.LastSyncCheckUtc = DateTime.UtcNow;
                     }

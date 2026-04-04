@@ -153,6 +153,7 @@ public class CblTestHelper : IDisposable
             Substitute.For<IEventHub>(),
             Substitute.For<IDirectoryService>(),
             Substitute.For<IReadingListService>(),
+            Substitute.For<IUrlValidationService>(),
             Substitute.For<ILogger<CblImportService>>()
         );
     }
@@ -169,6 +170,7 @@ public class CblTestHelper : IDisposable
             Substitute.For<IEventHub>(),
             directoryService,
             readingListService,
+            Substitute.For<IUrlValidationService>(),
             Substitute.For<ILogger<CblImportService>>()
         );
     }

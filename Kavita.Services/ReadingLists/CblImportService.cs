@@ -17,12 +17,14 @@ using Kavita.Models.DTOs.ReadingLists.CBL.Internal;
 using Kavita.Models.DTOs.SignalR;
 using Kavita.Models.Entities.ReadingLists;
 using Kavita.Services.Helpers;
+using Flurl.Http;
 using Microsoft.Extensions.Logging;
 
 namespace Kavita.Services.ReadingLists;
 
 public class CblImportService(IUnitOfWork unitOfWork, ICblGithubService cblGithubService, IEventHub eventHub,
-    IDirectoryService directoryService, IReadingListService readingListService, ILogger<CblImportService> logger) : ICblImportService
+    IDirectoryService directoryService, IReadingListService readingListService, IUrlValidationService urlValidationService,
+    ILogger<CblImportService> logger) : ICblImportService
 {
     public async Task<CblImportSummaryDto> ValidateList(int userId, string filePath)
     {
@@ -205,24 +207,59 @@ public class CblImportService(IUnitOfWork unitOfWork, ICblGithubService cblGithu
             return;
         }
 
-        // Re-download from GitHub
         string content;
-        try
+        string? contentHash = null;
+
+        // Github-based list
+        if (!string.IsNullOrEmpty(readingList.SourcePath))
         {
-            content = await cblGithubService.GetFileContent(readingList.SourcePath!);
+            try
+            {
+                content = await cblGithubService.GetFileContent(readingList.SourcePath);
+            }
+            catch (Exception ex)
+            {
+                logger.LogError(ex, "Failed to download CBL content for sync: {SourcePath}", readingList.SourcePath);
+                readingList.LastSyncCheckUtc = DateTime.UtcNow;
+                await unitOfWork.CommitAsync();
+                return;
+            }
         }
-        catch (Exception ex)
+        else if (!string.IsNullOrEmpty(readingList.DownloadUrl))
         {
-            logger.LogError(ex, "Failed to download CBL content for sync: {SourcePath}", readingList.SourcePath);
-            readingList.LastSyncCheckUtc = DateTime.UtcNow;
-            await unitOfWork.CommitAsync();
+            // Url-based list
+            try
+            {
+                await urlValidationService.ValidateUrlAsync(readingList.DownloadUrl);
+                content = await readingList.DownloadUrl.GetStringAsync();
+            }
+            catch (Exception ex)
+            {
+                logger.LogError(ex, "Failed to download CBL content for sync from URL: {Url}", readingList.DownloadUrl);
+                readingList.LastSyncCheckUtc = DateTime.UtcNow;
+                await unitOfWork.CommitAsync();
+                return;
+            }
+
+            contentHash = FileService.ComputeSha256(content);
+            if (!readingList.HasRemoteChange(contentHash))
+            {
+                readingList.LastSyncCheckUtc = DateTime.UtcNow;
+                await unitOfWork.CommitAsync();
+                return;
+            }
+        }
+        else
+        {
+            logger.LogWarning("Reading list {ReadingListId} is marked syncable but has no SourcePath or DownloadUrl", readingListId);
             return;
         }
 
         // Save to temp file for parsing
         var tempDir = Path.Join(directoryService.TempDirectory, $"{userId}", "cbl-sync");
         directoryService.ExistOrCreate(tempDir);
-        var tempFile = Path.Join(tempDir, $"sync-{readingListId}{GetExtension(readingList.SourcePath!)}");
+        var sourceRef = readingList.SourcePath ?? readingList.DownloadUrl ?? $"list-{readingListId}";
+        var tempFile = Path.Join(tempDir, $"sync-{readingListId}{GetExtension(sourceRef)}");
         await directoryService.FileSystem.File.WriteAllTextAsync(tempFile, content);
 
         try
@@ -244,6 +281,10 @@ public class CblImportService(IUnitOfWork unitOfWork, ICblGithubService cblGithu
             // Update metadata
             SetMetadataFromParsedCbl(cbl, readingList);
 
+            if (contentHash != null)
+            {
+                readingList.ShaHash = contentHash;
+            }
             readingList.LastSyncedUtc = DateTime.UtcNow;
             readingList.LastSyncCheckUtc = DateTime.UtcNow;
 
@@ -261,7 +302,7 @@ public class CblImportService(IUnitOfWork unitOfWork, ICblGithubService cblGithu
         }
         catch (Exception ex)
         {
-            logger.LogError(ex, "Failed to sync reading list {ReadingListId} from {SourcePath}", readingListId, readingList.SourcePath);
+            logger.LogError(ex, "Failed to sync reading list {ReadingListId} from {Source}", readingListId, readingList.SourcePath ?? readingList.DownloadUrl);
         }
         finally
         {
