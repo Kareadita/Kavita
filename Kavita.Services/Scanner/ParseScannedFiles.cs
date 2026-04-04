@@ -28,6 +28,7 @@ public class ParseScannedFiles
     private readonly IDirectoryService _directoryService;
     private readonly IReadingItemService _readingItemService;
     private readonly IEventHub _eventHub;
+    private readonly IMediaErrorService _mediaErrorService;
 
     /// <summary>
     /// An instance of a pipeline for processing files and returning a Map of Series -> ParserInfos.
@@ -37,13 +38,15 @@ public class ParseScannedFiles
     /// <param name="directoryService">Directory Service</param>
     /// <param name="readingItemService">ReadingItemService Service for extracting information on a number of formats</param>
     /// <param name="eventHub">For firing off SignalR events</param>
+    /// <param name="mediaErrorService"></param>
     public ParseScannedFiles(ILogger logger, IDirectoryService directoryService,
-        IReadingItemService readingItemService, IEventHub eventHub)
+        IReadingItemService readingItemService, IEventHub eventHub, IMediaErrorService mediaErrorService)
     {
         _logger = logger;
         _directoryService = directoryService;
         _readingItemService = readingItemService;
         _eventHub = eventHub;
+        _mediaErrorService = mediaErrorService;
     }
 
     /// <summary>
@@ -298,7 +301,7 @@ public class ParseScannedFiles
     /// </summary>
     /// <param name="scanResults">A collection of scan results</param>
     /// <param name="scannedSeries">A concurrent dictionary to store the tracked series</param>
-    private void TrackSeriesAcrossScanResults(IList<ScanResult> scanResults, ConcurrentDictionary<ParsedSeries, List<ParserInfo>> scannedSeries)
+    public void TrackSeriesAcrossScanResults(IList<ScanResult> scanResults, ConcurrentDictionary<ParsedSeries, List<ParserInfo>> scannedSeries)
     {
         // Flatten all ParserInfos from scanResults
         var allInfos = scanResults.SelectMany(sr => sr.ParserInfos).ToList();
@@ -330,6 +333,22 @@ public class ParseScannedFiles
     {
         if (info == null || info.Series == string.Empty) return;
 
+        // Do not ingest series with no meaningful information as title. These break merging as they'll all merge into each other
+        // They would also merge all series that don't have localised names previously
+        // This does create the edge case where some series may really not have any meaningful information.
+        // But until this is reported, we should ignore it and play it safe!
+        if (string.IsNullOrEmpty(info.Series.ToNormalized()))
+        {
+            _logger.LogCritical("[ScannerService] {SeriesName} @ {FileName} is empty when normalized, this file will not be ingested! The filename does not follow our guidelines or this is a bug in the parser, please report this! https://github.com/Kareadita/Kavita/issues",
+                info.Series, info.Filename);
+
+            _mediaErrorService.ReportMediaIssue(info.Filename, MediaErrorProducer.Scanner,
+                "Failed to parse a valid series name for a file",
+                $"{info.Series} is empty when normalized, this file will not be ingested! The filename does not follow our guidelines or this is a bug in the parser, please report this! https://github.com/Kareadita/Kavita/issues");
+
+            return;
+        }
+
         // Check if normalized info.Series already exists and if so, update info to use that name instead
         info.Series = MergeName(scannedSeries, info);
 
@@ -341,10 +360,7 @@ public class ParseScannedFiles
 
         try
         {
-            var existingKey = scannedSeries.Keys.SingleOrDefault(ps =>
-                ps.Format == info.Format && (ps.NormalizedName.Equals(normalizedSeries)
-                                             || ps.NormalizedName.Equals(normalizedLocalizedSeries)
-                                             || ps.NormalizedName.Equals(normalizedSortSeries)));
+            var existingKey = scannedSeries.Keys.SingleOrDefault(Guard);
             existingKey ??= new ParsedSeries()
             {
                 Format = info.Format,
@@ -365,14 +381,19 @@ public class ParseScannedFiles
         }
         catch (Exception ex)
         {
+            #pragma warning disable S6667
             _logger.LogCritical("[ScannerService] {SeriesName} matches against multiple series in the parsed series. This indicates a critical kavita issue. Key will be skipped", info.Series);
-            foreach (var seriesKey in scannedSeries.Keys.Where(ps =>
-                         ps.Format == info.Format && (ps.NormalizedName.Equals(normalizedSeries)
-                                                      || ps.NormalizedName.Equals(normalizedLocalizedSeries)
-                                                      || ps.NormalizedName.Equals(normalizedSortSeries))))
+            #pragma warning restore S6667
+            foreach (var seriesKey in scannedSeries.Keys.Where(Guard))
             {
                 _logger.LogCritical("[ScannerService] Matches: '{SeriesName}' matches on '{SeriesKey}'", info.Series, seriesKey.Name);
             }
+        }
+
+        bool Guard(ParsedSeries series)
+        {
+            return MergeNameGuard(series.Format, series.NormalizedName, info.Format,
+                normalizedSeries, normalizedSortSeries, normalizedLocalizedSeries);
         }
     }
 
@@ -386,17 +407,14 @@ public class ParseScannedFiles
     /// <returns>Series Name to group this info into</returns>
     private string MergeName(ConcurrentDictionary<ParsedSeries, List<ParserInfo>> scannedSeries, ParserInfo info)
     {
-        var normalizedSeries = info.Series.ToNormalized();
-        var normalizedLocalSeries = info.LocalizedSeries.ToNormalized();
+
+        var normalizedName = info.Series.ToNormalized();
+        var normalizedSortName = info.SeriesSort.ToNormalized();
+        var normalizedLocalizedName = info.LocalizedSeries.ToNormalized();
 
         try
         {
-            var existingName =
-                scannedSeries.SingleOrDefault(p =>
-                        (p.Key.NormalizedName.ToNormalized().Equals(normalizedSeries) ||
-                         p.Key.NormalizedName.ToNormalized().Equals(normalizedLocalSeries)) &&
-                        p.Key.Format == info.Format)
-                    .Key;
+            var existingName = scannedSeries.SingleOrDefault(Guard).Key;
 
             if (existingName == null)
             {
@@ -410,11 +428,10 @@ public class ParseScannedFiles
         }
         catch (Exception ex)
         {
+            #pragma warning disable S6667
             _logger.LogCritical("[ScannerService] Multiple series detected for {SeriesName} ({File})! This is critical to fix! There should only be 1", info.Series, info.FullFilePath);
-            var values = scannedSeries.Where(p =>
-                (p.Key.NormalizedName.ToNormalized() == normalizedSeries ||
-                 p.Key.NormalizedName.ToNormalized() == normalizedLocalSeries) &&
-                p.Key.Format == info.Format);
+            #pragma warning restore S6667
+            var values = scannedSeries.Where(Guard);
 
             foreach (var pair in values)
             {
@@ -424,6 +441,31 @@ public class ParseScannedFiles
         }
 
         return info.Series;
+
+        bool Guard(KeyValuePair<ParsedSeries, List<ParserInfo>> p)
+        {
+            return MergeNameGuard(p.Key.Format, info.Series, info.Format,
+                normalizedName, normalizedSortName, normalizedLocalizedName);
+        }
+    }
+
+    /// <summary>
+    /// Checks if the given series should be merged into the other
+    /// </summary>
+    /// <param name="mergeIntoFormat"></param>
+    /// <param name="mergeIntoSeries">Normalised name of the series to be merged into</param>
+    /// <param name="format"></param>
+    /// <param name="normalizedNames"></param>
+    /// <returns></returns>
+    private static bool MergeNameGuard(
+        MangaFormat mergeIntoFormat, string mergeIntoSeries,
+        MangaFormat format, params string[] normalizedNames)
+    {
+        if (mergeIntoFormat != format) return false;
+
+        if (string.IsNullOrEmpty(mergeIntoSeries)) return false;
+
+        return normalizedNames.Any(n => n.Equals(mergeIntoSeries));
     }
 
     /// <summary>

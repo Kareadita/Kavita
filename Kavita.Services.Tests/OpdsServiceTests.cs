@@ -10,6 +10,7 @@ using Kavita.API.Services.Plus;
 using Kavita.API.Services.Reading;
 using Kavita.API.Services.ReadingLists;
 using Kavita.API.Services.SignalR;
+using Kavita.API.Store;
 using Kavita.Common.Helpers;
 using Kavita.Database;
 using Kavita.Database.Tests;
@@ -52,7 +53,7 @@ public class OpdsServiceTests(ITestOutputHelper testOutputHelper) : AbstractDbTe
             Substitute.For<ILocalizationService>(), Substitute.For<IBookService>());
 
         var localizationService =
-            new LocalizationService(ds, new MockHostingEnvironment(), Substitute.For<IMemoryCache>(), unitOfWork);
+            new LocalizationService(ds, new MockHostingEnvironment(), Substitute.For<IMemoryCache>(), unitOfWork, Substitute.For<IUserContext>());
 
         var namingService = new EntityNamingService();
 

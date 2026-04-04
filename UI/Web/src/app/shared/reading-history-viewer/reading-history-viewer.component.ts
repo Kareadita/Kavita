@@ -24,8 +24,7 @@ import {ImageService} from "src/app/_services/image.service";
 import {ReadingHistoryChapterItem, ReadingHistoryItem} from "src/app/_models/stats/reading-history-item";
 import {ListSelectModalComponent} from "src/app/shared/_components/list-select-modal/list-select-modal.component";
 import {ModalService} from "src/app/_services/modal.service";
-import {PaginatedResult, Pagination} from "src/app/_models/pagination";
-import {Observable} from "rxjs";
+import {Pagination} from "src/app/_models/pagination";
 
 @Component({
   selector: 'app-reading-history-viewer',
@@ -60,9 +59,9 @@ export class ReadingHistoryViewerComponent {
   pagination = input.required<Pagination | null>();
   isLoading = input(false);
   currentPage = input.required<number>();
-  pageSize = input(30);
+  pageSize = input.required<number>();
 
-  pageChange = output<{page: number, scroll: boolean}>();
+  pageChange = output<{page: number, pageSize: number, scroll: boolean}>();
 
   protected readonly totalPages = computed(() => this.pagination()?.totalPages ?? 1);
   protected readonly totalItems = computed(() => this.pagination()?.totalItems ?? 0);

@@ -139,6 +139,10 @@ public class AppUserReadingProfile
     /// </summary>
     /// <remarks>Defaults to false</remarks>
     public bool BookReaderImmersiveMode { get; set; } = false;
+    /// <summary>
+    /// Disables the bookmark icons in the Epub Reader
+    /// </summary>
+    public bool BookReaderDisableBookmarkIcon { get; set; } = false;
     #endregion
 
     #region PdfReader

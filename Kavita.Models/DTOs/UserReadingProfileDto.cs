@@ -21,47 +21,47 @@ public sealed record UserReadingProfileDto
 
     #region MangaReader
 
-    /// <inheritdoc cref="API.Entities.AppUserReadingProfile.ReadingDirection"/>
+    /// <inheritdoc cref="Kavita.Models.Entities.User.AppUserReadingProfile.ReadingDirection"/>
     [Required]
     public ReadingDirection ReadingDirection { get; set; }
 
-    /// <inheritdoc cref="API.Entities.AppUserReadingProfile.ScalingOption"/>
+    /// <inheritdoc cref="Kavita.Models.Entities.User.AppUserReadingProfile.ScalingOption"/>
     [Required]
     public ScalingOption ScalingOption { get; set; }
 
-    /// <inheritdoc cref="API.Entities.AppUserReadingProfile.PageSplitOption"/>
+    /// <inheritdoc cref="Kavita.Models.Entities.User.AppUserReadingProfile.PageSplitOption"/>
     [Required]
     public PageSplitOption PageSplitOption { get; set; }
 
-    /// <inheritdoc cref="API.Entities.AppUserReadingProfile.ReaderMode"/>
+    /// <inheritdoc cref="Kavita.Models.Entities.User.AppUserReadingProfile.ReaderMode"/>
     [Required]
     public ReaderMode ReaderMode { get; set; }
 
-    /// <inheritdoc cref="API.Entities.AppUserReadingProfile.AutoCloseMenu"/>
+    /// <inheritdoc cref="Kavita.Models.Entities.User.AppUserReadingProfile.AutoCloseMenu"/>
     [Required]
     public bool AutoCloseMenu { get; set; }
 
-    /// <inheritdoc cref="API.Entities.AppUserReadingProfile.ShowScreenHints"/>
+    /// <inheritdoc cref="Kavita.Models.Entities.User.AppUserReadingProfile.ShowScreenHints"/>
     [Required]
     public bool ShowScreenHints { get; set; } = true;
 
-    /// <inheritdoc cref="API.Entities.AppUserReadingProfile.EmulateBook"/>
+    /// <inheritdoc cref="Kavita.Models.Entities.User.AppUserReadingProfile.EmulateBook"/>
     [Required]
     public bool EmulateBook { get; set; }
 
-    /// <inheritdoc cref="API.Entities.AppUserReadingProfile.LayoutMode"/>
+    /// <inheritdoc cref="Kavita.Models.Entities.User.AppUserReadingProfile.LayoutMode"/>
     [Required]
     public LayoutMode LayoutMode { get; set; }
 
-    /// <inheritdoc cref="API.Entities.AppUserReadingProfile.BackgroundColor"/>
+    /// <inheritdoc cref="Kavita.Models.Entities.User.AppUserReadingProfile.BackgroundColor"/>
     [Required]
     public string BackgroundColor { get; set; } = "#000000";
 
-    /// <inheritdoc cref="API.Entities.AppUserReadingProfile.SwipeToPaginate"/>
+    /// <inheritdoc cref="Kavita.Models.Entities.User.AppUserReadingProfile.SwipeToPaginate"/>
     [Required]
     public bool SwipeToPaginate { get; set; }
 
-    /// <inheritdoc cref="API.Entities.AppUserReadingProfile.AllowAutomaticWebtoonReaderDetection"/>
+    /// <inheritdoc cref="Kavita.Models.Entities.User.AppUserReadingProfile.AllowAutomaticWebtoonReaderDetection"/>
     [Required]
     public bool AllowAutomaticWebtoonReaderDetection { get; set; }
 
@@ -75,31 +75,31 @@ public sealed record UserReadingProfileDto
 
     #region EpubReader
 
-    /// <inheritdoc cref="API.Entities.AppUserReadingProfile.BookReaderMargin"/>
+    /// <inheritdoc cref="Kavita.Models.Entities.User.AppUserReadingProfile.BookReaderMargin"/>
     [Required]
     public int BookReaderMargin { get; set; }
 
-    /// <inheritdoc cref="API.Entities.AppUserReadingProfile.BookReaderLineSpacing"/>
+    /// <inheritdoc cref="Kavita.Models.Entities.User.AppUserReadingProfile.BookReaderLineSpacing"/>
     [Required]
     public int BookReaderLineSpacing { get; set; }
 
-    /// <inheritdoc cref="API.Entities.AppUserReadingProfile.BookReaderFontSize"/>
+    /// <inheritdoc cref="Kavita.Models.Entities.User.AppUserReadingProfile.BookReaderFontSize"/>
     [Required]
     public int BookReaderFontSize { get; set; }
 
-    /// <inheritdoc cref="API.Entities.AppUserReadingProfile.BookReaderFontFamily"/>
+    /// <inheritdoc cref="Kavita.Models.Entities.User.AppUserReadingProfile.BookReaderFontFamily"/>
     [Required]
     public string BookReaderFontFamily { get; set; } = null!;
 
-    /// <inheritdoc cref="API.Entities.AppUserReadingProfile.BookReaderTapToPaginate"/>
+    /// <inheritdoc cref="Kavita.Models.Entities.User.AppUserReadingProfile.BookReaderTapToPaginate"/>
     [Required]
     public bool BookReaderTapToPaginate { get; set; }
 
-    /// <inheritdoc cref="API.Entities.AppUserReadingProfile.BookReaderReadingDirection"/>
+    /// <inheritdoc cref="Kavita.Models.Entities.User.AppUserReadingProfile.BookReaderReadingDirection"/>
     [Required]
     public ReadingDirection BookReaderReadingDirection { get; set; }
 
-    /// <inheritdoc cref="API.Entities.AppUserReadingProfile.BookReaderWritingStyle"/>
+    /// <inheritdoc cref="Kavita.Models.Entities.User.AppUserReadingProfile.BookReaderWritingStyle"/>
     [Required]
     public WritingStyle BookReaderWritingStyle { get; set; }
 
@@ -107,27 +107,31 @@ public sealed record UserReadingProfileDto
     [Required]
     public string BookReaderThemeName { get; set; } = null!;
 
-    /// <inheritdoc cref="API.Entities.AppUserReadingProfile.BookReaderLayoutMode"/>
+    /// <inheritdoc cref="Kavita.Models.Entities.User.AppUserReadingProfile.BookReaderLayoutMode"/>
     [Required]
     public BookPageLayoutMode BookReaderLayoutMode { get; set; }
 
-    /// <inheritdoc cref="API.Entities.AppUserReadingProfile.BookReaderImmersiveMode"/>
+    /// <inheritdoc cref="Kavita.Models.Entities.User.AppUserReadingProfile.BookReaderImmersiveMode"/>
     [Required]
     public bool BookReaderImmersiveMode { get; set; } = false;
+
+    /// <inheritdoc cref="Kavita.Models.Entities.User.AppUserReadingProfile.BookReaderImmersiveMode"/>
+    [Required]
+    public bool BookReaderDisableBookmarkIcon { get; set; } = false;
 
     #endregion
 
     #region PdfReader
 
-    /// <inheritdoc cref="API.Entities.AppUserReadingProfile.PdfTheme"/>
+    /// <inheritdoc cref="Kavita.Models.Entities.User.AppUserReadingProfile.PdfTheme"/>
     [Required]
     public PdfTheme PdfTheme { get; set; } = PdfTheme.Dark;
 
-    /// <inheritdoc cref="API.Entities.AppUserReadingProfile.PdfScrollMode"/>
+    /// <inheritdoc cref="Kavita.Models.Entities.User.AppUserReadingProfile.PdfScrollMode"/>
     [Required]
     public PdfScrollMode PdfScrollMode { get; set; } = PdfScrollMode.Vertical;
 
-    /// <inheritdoc cref="API.Entities.AppUserReadingProfile.PdfSpreadMode"/>
+    /// <inheritdoc cref="Kavita.Models.Entities.User.AppUserReadingProfile.PdfSpreadMode"/>
     [Required]
     public PdfSpreadMode PdfSpreadMode { get; set; } = PdfSpreadMode.None;
 

@@ -124,11 +124,11 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   readonly readingArea = viewChild.required<ElementRef>('readingArea');
   readonly canvas = viewChild<ElementRef>('content');
 
-  readonly canvasRenderer = viewChild.required(CanvasRendererComponent);
-  readonly singleRenderer = viewChild.required(SingleRendererComponent);
-  readonly doubleRenderer = viewChild.required(DoubleRendererComponent);
-  readonly doubleReverseRenderer = viewChild.required(DoubleReverseRendererComponent);
-  readonly doubleNoCoverRenderer = viewChild.required(DoubleNoCoverRendererComponent);
+  readonly canvasRenderer = viewChild(CanvasRendererComponent);
+  readonly singleRenderer = viewChild(SingleRendererComponent);
+  readonly doubleRenderer = viewChild(DoubleRendererComponent);
+  readonly doubleReverseRenderer = viewChild(DoubleReverseRendererComponent);
+  readonly doubleNoCoverRenderer = viewChild(DoubleNoCoverRendererComponent);
 
   private readonly destroyRef = inject(DestroyRef);
   private readonly route = inject(ActivatedRoute);
@@ -798,7 +798,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       if (needsSplitting) {
         // If we need to re-render, to ensure things layout properly, let's update paging direction & reset render
         this.pagingDirectionSubject.next(PAGING_DIRECTION.FORWARD);
-        this.canvasRenderer().reset();
+        this.canvasRenderer()?.reset();
         this.loadPage();
       }
     });
@@ -1389,14 +1389,14 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
     this.pagingDirectionSubject.next(PAGING_DIRECTION.FORWARD);
 
-    const pageAmount = Math.max(this.canvasRenderer().getPageAmount(PAGING_DIRECTION.FORWARD), this.singleRenderer().getPageAmount(PAGING_DIRECTION.FORWARD),
-                                this.doubleRenderer().getPageAmount(PAGING_DIRECTION.FORWARD),
-                                this.doubleReverseRenderer().getPageAmount(PAGING_DIRECTION.FORWARD),
-                                this.doubleNoCoverRenderer().getPageAmount(PAGING_DIRECTION.FORWARD)
+    const pageAmount = Math.max(this.canvasRenderer()!.getPageAmount(PAGING_DIRECTION.FORWARD), this.singleRenderer()!.getPageAmount(PAGING_DIRECTION.FORWARD),
+                                this.doubleRenderer()!.getPageAmount(PAGING_DIRECTION.FORWARD),
+                                this.doubleReverseRenderer()!.getPageAmount(PAGING_DIRECTION.FORWARD),
+                                this.doubleNoCoverRenderer()!.getPageAmount(PAGING_DIRECTION.FORWARD)
                               );
     // If we are on last page with split mode, we need to be able to progress, hence why we check if we could move backwards or not
     const isSplitRendering = [PageSplitOption.SplitRightToLeft, PageSplitOption.SplitRightToLeft].includes(parseInt(this.generalSettingsForm.get('pageSplitOption')?.value, 10));
-    const notInSplit = this.canvasRenderer().getPageAmount(PAGING_DIRECTION.BACKWARDS) === 0;
+    const notInSplit = this.canvasRenderer()!.getPageAmount(PAGING_DIRECTION.BACKWARDS) === 0;
     const isASpread = this.mangaReaderService.isWidePage(this.pageNum);
 
 
@@ -1424,14 +1424,14 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     this.pagingDirectionSubject.next(PAGING_DIRECTION.BACKWARDS);
 
 
-    const pageAmount = this.readerMode === ReaderMode.Webtoon ? 1 : Math.max(this.canvasRenderer().getPageAmount(PAGING_DIRECTION.BACKWARDS),
-                                this.singleRenderer().getPageAmount(PAGING_DIRECTION.BACKWARDS),
-                                this.doubleRenderer().getPageAmount(PAGING_DIRECTION.BACKWARDS),
-                                this.doubleNoCoverRenderer().getPageAmount(PAGING_DIRECTION.BACKWARDS),
-                                this.doubleReverseRenderer().getPageAmount(PAGING_DIRECTION.BACKWARDS)
+    const pageAmount = this.readerMode === ReaderMode.Webtoon ? 1 : Math.max(this.canvasRenderer()!.getPageAmount(PAGING_DIRECTION.BACKWARDS),
+                                this.singleRenderer()!.getPageAmount(PAGING_DIRECTION.BACKWARDS),
+                                this.doubleRenderer()!.getPageAmount(PAGING_DIRECTION.BACKWARDS),
+                                this.doubleNoCoverRenderer()!.getPageAmount(PAGING_DIRECTION.BACKWARDS),
+                                this.doubleReverseRenderer()!.getPageAmount(PAGING_DIRECTION.BACKWARDS)
                               );
 
-    const notInSplit = this.readerMode === ReaderMode.Webtoon ? true : this.canvasRenderer().shouldMovePrev();
+    const notInSplit = this.readerMode === ReaderMode.Webtoon ? true : this.canvasRenderer()!.shouldMovePrev();
 
     if ((this.pageNum - 1 < 0 && notInSplit)) {
       // Move to next volume/chapter automatically
@@ -1463,13 +1463,18 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
 
-  loadNextChapter() {
+  loadNextChapter(saveMaxProgress: boolean = false) {
     if (this.nextPageDisabled || this.nextChapterDisabled || this.bookmarkMode()) {
       this.toastr.info(translate('manga-reader.no-next-chapter'));
       this.isLoading = false;
       this.cdRef.markForCheck();
       return;
      }
+
+
+    if (saveMaxProgress && !this.incognitoMode) {
+      this.readerService.saveProgress(this.libraryId, this.seriesId, this.volumeId, this.chapterId, this.maxPages + 1).subscribe();
+    }
 
     if (this.nextChapterId === CHAPTER_ID_NOT_FETCHED || this.nextChapterId === this.chapterId) {
       this.readerService.getNextChapter(this.seriesId, this.volumeId, this.chapterId, this.readingListId).subscribe(chapterId => {
@@ -1838,23 +1843,36 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     // if canvasRenderer and doubleRenderer is undefined, then we are in webtoon mode
     const canvasRenderer = this.canvasRenderer();
     const doubleRenderer = this.doubleRenderer();
-    const isDouble = canvasRenderer !== undefined && doubleRenderer !== undefined && Math.max(canvasRenderer.getBookmarkPageCount(), this.singleRenderer().getBookmarkPageCount(),
-      doubleRenderer.getBookmarkPageCount(), this.doubleReverseRenderer().getBookmarkPageCount(), this.doubleNoCoverRenderer().getBookmarkPageCount()) > 1;
+    const isDouble = canvasRenderer !== undefined && doubleRenderer !== undefined && Math.max(canvasRenderer.getBookmarkPageCount(), this.singleRenderer()!.getBookmarkPageCount(),
+      doubleRenderer.getBookmarkPageCount(), this.doubleReverseRenderer()!.getBookmarkPageCount(), this.doubleNoCoverRenderer()!.getBookmarkPageCount()) > 1;
 
     if (this.CurrentPageBookmarked) {
-      let apis = [this.readerService.unbookmark(this.seriesId, this.volumeId, this.chapterId, pageNum)];
-      if (isDouble) apis.push(this.readerService.unbookmark(this.seriesId, this.volumeId, this.chapterId, pageNum + 1));
+      const apis = [this.readerService.unbookmark(this.seriesId, this.volumeId, this.chapterId, pageNum)];
+
+      if (isDouble) {
+        apis.push(this.readerService.unbookmark(this.seriesId, this.volumeId, this.chapterId, pageNum + 1));
+      }
+
       forkJoin(apis).subscribe(() => {
         delete this.bookmarks[pageNum];
+
         if (isDouble) delete this.bookmarks[pageNum + 1];
+
         this.cdRef.detectChanges();
       });
+
     } else {
-      let apis = [this.readerService.bookmark(this.seriesId, this.volumeId, this.chapterId, pageNum)];
-      if (isDouble) apis.push(this.readerService.bookmark(this.seriesId, this.volumeId, this.chapterId, pageNum + 1));
+      const apis = [this.readerService.bookmark(this.seriesId, this.volumeId, this.chapterId, pageNum)];
+
+      if (isDouble) {
+        apis.push(this.readerService.bookmark(this.seriesId, this.volumeId, this.chapterId, pageNum + 1));
+      }
+
       forkJoin(apis).subscribe(() => {
         this.bookmarks[pageNum] = this.chapterInfo()?.chapterTitle ?? '';
+
         if (isDouble) this.bookmarks[pageNum + 1] = this.chapterInfo()?.chapterTitle ?? '';
+
         this.cdRef.detectChanges();
       });
     }

@@ -23,7 +23,8 @@ public class CacheService(
     IUnitOfWork unitOfWork,
     IDirectoryService directoryService,
     IReadingItemService readingItemService,
-    IBookmarkService bookmarkService)
+    IBookmarkService bookmarkService,
+    ILocalizationService localizationService)
     : ICacheService
 {
     private static readonly ConcurrentDictionary<int, SemaphoreSlim> ExtractLocks = new();
@@ -172,7 +173,7 @@ public class CacheService(
             }
 
             var files = chapter?.Files.ToList();
-            ExtractChapterFiles(extractPath, files, extractPdfToImages);
+            await ExtractChapterFiles(extractPath, files, extractPdfToImages);
         } finally {
             extractLock.Release();
         }
@@ -188,7 +189,7 @@ public class CacheService(
     /// <param name="files"></param>
     /// <param name="extractPdfImages">Defaults to false, if true, will extract the images from the PDF renderer and not move the pdf file</param>
     /// <returns></returns>
-    public void ExtractChapterFiles(string extractPath, IReadOnlyList<MangaFile>? files, bool extractPdfImages = false)
+    public async Task ExtractChapterFiles(string extractPath, IReadOnlyList<MangaFile>? files, bool extractPdfImages = false)
     {
         if (files == null || files.Count == 0) return;
         var removeNonImages = true;
@@ -226,6 +227,12 @@ public class CacheService(
                 extraPath = file.Id + string.Empty;
             }
 
+            if (!directoryService.FileSystem.Path.Exists(file.FilePath))
+            {
+                logger.LogError("{File} does not exist on disk", file.FilePath);
+                throw new KavitaException(await localizationService.Translate("file-doesnt-exist"));
+            }
+
             switch (file.Format)
             {
                 case MangaFormat.Archive:
@@ -234,11 +241,6 @@ public class CacheService(
                 case MangaFormat.Epub:
                 case MangaFormat.Pdf:
                 {
-                    if (!directoryService.FileSystem.File.Exists(files[0].FilePath))
-                    {
-                        logger.LogError("{File} does not exist on disk", files[0].FilePath);
-                        throw new KavitaException($"{files[0].FilePath} does not exist on disk");
-                    }
                     if (extractPdfImages)
                     {
                         readingItemService.Extract(file.FilePath, Path.Join(extractPath, extraPath), file.Format);

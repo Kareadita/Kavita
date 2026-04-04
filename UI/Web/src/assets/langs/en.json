@@ -30,6 +30,14 @@
         "timeout": "OIDC resolution has timed out or an error has occurred"
     },
 
+    "authority-validation-result-pipe": {
+        "success": "Authority is valid",
+        "invalid-authority": "Kavita can load the OIDC configuration, but the issuer does not match",
+        "failure": "Kavita cannot load the OIDC configuration",
+        "not-applicable": "Kavita cannot validate the authority because it is not configured",
+        "missing-https": "{{manage-oidc-connect.tls-required}}"
+    },
+
     "manage-oidc-connect": {
         "save": "{{common.save}}",
         "reset-label": "Reset ids",
@@ -39,7 +47,7 @@
         "save-success": "Successfully updated your OIDC settings",
         "notice": "Notice",
         "restart-required": "Changing Provider or advanced settings requires a manual restart of Kavita to take effect.",
-        "auto-save-required": "You've changed critical settings, auto save to persist them",
+        "auto-save-required": "You've changed critical settings, manually save to persist them",
         "provider-title": "Provider",
         "provider-tooltip": "Provider settings require you to manually click Save. Kavita must be configured as a confidential client and needs a redirect URL. See the <a href='https://wiki.kavitareader.com/guides/admin-settings/open-id-connect/' target='_blank' rel='noreferrer noopener'>wiki</a> for more details.",
         "behavior-title": "Behavior",
@@ -47,6 +55,7 @@
         "other-field-invalid": "{{validation.other-field-invalid}}",
         "invalid-uri": "{{validation.invalid-uri}}",
         "tls-required": "The OIDC provider must use tls (https)",
+        "checking-authority": "Checking if the authority is valid, please be patient...",
         "manual-save-label": "Changing provider settings requires a manual save",
 
         "authority-label": "Authority",
@@ -352,8 +361,6 @@
         "active-theme": "Active",
         "updated-toastr": "Site default has been updated to {{name}}",
         "delete": "{{common.delete}}",
-        "drag-n-drop": "{{cover-image-chooser.drag-n-drop}}",
-        "upload": "{{cover-image-chooser.upload}}",
         "upload-continued": "a css file",
         "preview-default": "Select a theme first",
         "preview-default-admin": "Select a theme first or upload one manually",
@@ -361,19 +368,24 @@
         "add": "{{common.add}}"
     },
 
-    "font-manager": {
-        "description": "Kavita's epub reader comes with a few build-in fonts, add your own fonts here. Upload a file, or use a google fonts url. See the <a href='{{wikiLink}}' target='_blank' rel='noreferrer noopener'>wiki</a> for more information.",
+    "file-drag-and-drop-upload": {
+        "drag-n-drop": "{{cover-image-chooser.drag-n-drop}}",
+        "upload": "{{cover-image-chooser.upload}}",
         "enter-an-url-pre-title": "Enter an {{url}}",
         "url": "url",
+        "url-label": "Url",
+        "back": "Back",
+        "load": "Load"
+    },
+
+    "font-manager": {
+        "description": "Kavita's epub reader comes with a few build-in fonts, add your own fonts here. Upload a file, or use a google fonts url. See the <a href='{{wikiLink}}' target='_blank' rel='noreferrer noopener'>wiki</a> for more information.",
         "add": "{{common.add}}",
         "drag-n-drop": "{{cover-image-chooser.drag-n-drop}}",
         "upload": "{{cover-image-chooser.upload}}",
         "upload-continued": "a font file",
         "preview-default": "Upload your own font via file or Google Font url",
         "delete": "{{common.delete}}",
-        "url-label": "Url",
-        "back": "Back",
-        "load": "Load",
         "no-preview": "This font cannot be previewed. This will take the default style from the book.",
         "brown-fox": "The quick brown fox jumps over the lazy dog",
         "filter-system-fonts-label": "Filter System Fonts"
@@ -1229,7 +1241,7 @@
         "progress": "Continue",
         "progress-incognito": "Continue incognito",
         "full-read": "Re-Read",
-        "full-read-incognito": "Reread incognito"
+        "full-read-incognito": "Read incognito"
     },
 
     "match-series-modal": {
@@ -1439,6 +1451,8 @@
         "font-size-label": "{{manage-reading-profiles.font-size-book-label}}",
         "line-spacing-label": "{{manage-reading-profiles.line-height-book-label}}",
         "margin-label": "{{manage-reading-profiles.margin-book-label}}",
+        "disable-bookmark-icon-label": "{{manage-reading-profiles.disable-bookmark-icon-label}}",
+        "disable-bookmark-icon-tooltip": "{{manage-reading-profiles.disable-bookmark-icon-tooltip}}",
         "reset-to-defaults": "Reset to Defaults",
         "update-parent": "Save to {{name}}",
         "loading": "loading",
@@ -1555,7 +1569,7 @@
         "url": "Url",
         "drag-n-drop": "Drag and drop",
         "upload": "Upload",
-        "upload-continued": "an image",
+        "upload-continued": "image",
         "url-label": "Url",
         "load": "Load",
         "back": "Back",
@@ -3332,6 +3346,7 @@
         "host-label": "Host",
         "name-label": "Name",
         "api-key-label": "API Key",
+        "api-key-tooltip": "Not required to auto login when the host uses OIDC",
         "save": "{{common.save}}",
         "edit": "{{common.edit}}",
         "cancel": "{{common.cancel}}",
@@ -3847,6 +3862,8 @@
         "line-height-book-tooltip": "How much spacing between the lines of the book",
         "margin-book-label": "Margin",
         "margin-book-tooltip": "How much spacing on each side of the screen. This will override to 0 on mobile devices regardless of this setting.",
+        "disable-bookmark-icon-label": "Disable Bookmark Icon",
+        "disable-bookmark-icon-tooltip": "Removes bookmark icons from images in the reader",
 
         "pdf-scroll-mode-label": "Scroll Mode",
         "pdf-scroll-mode-tooltip": "How you scroll through pages. Vertical/Horizontal and Tap to Paginate (no scroll)",

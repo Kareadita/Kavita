@@ -16,9 +16,9 @@
       <ng-container>
         <div class="row g-0 mt-4 mb-4">
           @if (settingsForm.get('authority'); as formControl) {
-            <app-setting-item [title]="t('authority-label')" [subtitle]="t('authority-tooltip')">
+            <app-setting-item [title]="t('authority-label')" [subtitle]="t('authority-tooltip')" [control]="formControl">
               <ng-template #view>
-                {{formControl.value}}
+                {{formControl.value | defaultValue}}
               </ng-template>
               <ng-template #edit>
                 <input id="oid-authority" class="form-control"
@@ -33,6 +33,12 @@
                     @if (formControl.errors?.requireTls) {
                       <div>{{t('tls-required')}}</div>
                     }
+                    @if (formControl.errors?.backendFailure) {
+                      <div>{{formControl.errors!.backendFailure.result | authorityValidationResult}}</div>
+                    }
+                    @if (formControl.pending) {
+                      <div>{{t('checking-authority')}}</div>
+                    }
                   </div>
                 }
               </ng-template>
@@ -42,7 +48,7 @@
 
         <div class="row g-0 mt-4 mb-4">
           @if (settingsForm.get('clientId'); as formControl) {
-            <app-setting-item [title]="t('client-id-label')" [subtitle]="t('client-id-tooltip')">
+            <app-setting-item [title]="t('client-id-label')" [subtitle]="t('client-id-tooltip')" [control]="formControl">
               <ng-template #view>
                 {{formControl.value}}
               </ng-template>
@@ -69,7 +75,7 @@
 
         <div class="row g-0 mt-4 mb-4">
           @if (settingsForm.get('secret'); as formControl) {
-            <app-setting-item [title]="t('secret-label')" [subtitle]="t('secret-tooltip')">
+            <app-setting-item [title]="t('secret-label')" [subtitle]="t('secret-tooltip')" [control]="formControl">
               <ng-template #view>
                 {{formControl.value | slice:0:40 | defaultValue}}
               </ng-template>

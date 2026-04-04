@@ -297,7 +297,7 @@ public class SettingsController(
     /// <returns></returns>
     [Authorize(PolicyGroups.AdminPolicy)]
     [HttpPost("is-valid-authority")]
-    public async Task<ActionResult<bool>> IsValidAuthority([FromBody] AuthorityValidationDto authority)
+    public async Task<ActionResult<AuthorityValidationResult>> IsValidAuthority([FromBody] AuthorityValidationDto authority)
     {
         return Ok(await settingsService.IsValidAuthority(authority.Authority));
     }

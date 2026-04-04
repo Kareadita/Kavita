@@ -443,6 +443,18 @@
                                 </ng-template>
                               </app-setting-item>
                             </div>
+
+                            <div class="row g-0 mt-4 mb-4">
+                              <app-setting-switch [title]="t('disable-bookmark-icon-label')" [subtitle]="t('disable-bookmark-icon-tooltip')">
+                                <ng-template #switch>
+                                  <div class="form-check form-switch float-end">
+                                    <input type="checkbox" role="switch"
+                                           formControlName="bookReaderDisableBookmarkIcon" class="form-check-input"
+                                           aria-labelledby="disable-bookmark-icon-label">
+                                  </div>
+                                </ng-template>
+                              </app-setting-switch>
+                            </div>
                           </div>
                         }
                       }
@@ -502,6 +514,7 @@
                             </app-setting-item>
                           </div>
                         </div>
+
                       }
                     </ng-template>
                   </li>

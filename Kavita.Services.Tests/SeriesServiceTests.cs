@@ -6,6 +6,7 @@ using Kavita.API.Services;
 using Kavita.API.Services.Reading;
 using Kavita.API.Services.ReadingLists;
 using Kavita.API.Services.SignalR;
+using Kavita.API.Store;
 using Kavita.Common.Extensions;
 using Kavita.Database.Tests;
 using Kavita.Models.Builders;
@@ -53,7 +54,7 @@ public class SeriesServiceTests(ITestOutputHelper outputHelper): AbstractDbTest(
         var ds = new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), new FileSystem());
 
         var locService = new LocalizationService(ds, new MockHostingEnvironment(),
-            Substitute.For<IMemoryCache>(), Substitute.For<IUnitOfWork>());
+            Substitute.For<IMemoryCache>(), Substitute.For<IUnitOfWork>(), Substitute.For<IUserContext>());
 
         return new SeriesService(unitOfWork, Substitute.For<IEventHub>(),
             Substitute.For<ITaskScheduler>(), Substitute.For<ILogger<SeriesService>>(), locService,

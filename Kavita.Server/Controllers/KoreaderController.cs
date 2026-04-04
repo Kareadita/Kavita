@@ -42,6 +42,8 @@ public class KoreaderController(IKoreaderService koreaderService, ILogger<Koread
         }
         catch (KavitaException ex)
         {
+            logger.LogDebug(ex, "Koreader error saving progress for User ({UserName})", Username);
+
             return BadRequest(ex.Message);
         }
     }
@@ -73,6 +75,8 @@ public class KoreaderController(IKoreaderService koreaderService, ILogger<Koread
         }
         catch (KavitaException ex)
         {
+            logger.LogDebug(ex, "Koreader error getting progress for User ({UserName})", Username);
+
             return BadRequest(ex.Message);
         }
     }

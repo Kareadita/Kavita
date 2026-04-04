@@ -1,0 +1,15 @@
+ngx-file-drop ::ng-deep > div {
+  // styling for the outer drop box
+  width: 100%;
+  border: 0.125rem solid var(--primary-color);
+  border-radius: 0.3125rem;
+  height: 6.25rem;
+  margin: auto;
+
+  > div {
+    // styling for the inner box (template)
+    width: 100%;
+    display: inline-block;
+
+  }
+}

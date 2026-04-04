@@ -21,7 +21,7 @@ import {FontService} from "./font.service";
 import {BreakpointService} from "./breakpoint.service";
 
 export interface ReaderSettingUpdate {
-  setting: 'pageStyle' | 'clickToPaginate' | 'fullscreen' | 'writingStyle' | 'layoutMode' | 'readingDirection' | 'immersiveMode' | 'theme' | 'pageCalcMethod';
+  setting: 'pageStyle' | 'clickToPaginate' | 'fullscreen' | 'writingStyle' | 'layoutMode' | 'readingDirection' | 'immersiveMode' | 'theme' | 'pageCalcMethod' | 'bookReaderDisableBookmarkIcon';
   object: any;
 }
 
@@ -36,6 +36,7 @@ export type BookReadingProfileFormGroup = FormGroup<{
   bookReaderThemeName: FormControl<string>;
   bookReaderLayoutMode: FormControl<BookPageLayoutMode>;
   bookReaderImmersiveMode: FormControl<boolean>;
+  bookReaderDisableBookmarkIcon: FormControl<boolean>;
 }>
 
 @Injectable()
@@ -472,6 +473,7 @@ export class EpubReaderSettingsService {
       bookReaderThemeName: this.fb.control(profile.bookReaderThemeName),
       bookReaderLayoutMode: this.fb.control(this._layoutMode()),
       bookReaderImmersiveMode: this.fb.control(this._immersiveMode()),
+      bookReaderDisableBookmarkIcon: this.fb.control(profile.bookReaderDisableBookmarkIcon),
     });
 
     // Set up value change subscriptions
@@ -586,6 +588,12 @@ export class EpubReaderSettingsService {
       this.isUpdatingFromForm = false;
     });
 
+    this.settingsForm.get('bookReaderDisableBookmarkIcon')?.valueChanges.pipe(
+     takeUntilDestroyed(this.destroyRef)
+    ).subscribe((bookReaderDisableBookmarkIcon: boolean) => {
+      this.settingUpdateSubject.next({ setting: 'bookReaderDisableBookmarkIcon', object: bookReaderDisableBookmarkIcon });
+    });
+
 
     // Update implicit profile on form changes (debounced) - ONLY source of profile updates
     this.settingsForm.valueChanges.pipe(
@@ -649,6 +657,7 @@ export class EpubReaderSettingsService {
     data.bookReaderFontSize = modelSettings.bookReaderFontSize;
     data.bookReaderLineSpacing = modelSettings.bookReaderLineSpacing;
     data.bookReaderMargin = modelSettings.bookReaderMargin;
+    data.bookReaderDisableBookmarkIcon = modelSettings.bookReaderDisableBookmarkIcon;
 
     // Update from signals
     data.bookReaderTapToPaginate = this._clickToPaginate();

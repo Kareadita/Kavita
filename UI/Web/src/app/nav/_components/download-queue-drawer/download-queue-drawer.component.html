@@ -3,8 +3,8 @@
   <app-off-canvas-resize
     [resizeMode]="ResizeMode.Width"
     canvasPosition="end"
-    [minWidth]="300"
-    [maxWidth]="window.innerWidth*0.5"
+    [minWidth]="breakpointService.isTabletOrBelow() ? 200 : 300"
+    [maxWidth]="breakpointService.isTabletOrBelow() ? window.innerWidth : window.innerWidth*0.5"
   />
 
   <div class="offcanvas-header">

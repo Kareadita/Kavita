@@ -12,6 +12,9 @@ import {SiteThemeProviderPipe} from "../../../_pipes/site-theme-provider.pipe";
 import {translate, TranslocoDirective} from "@jsverse/transloco";
 import {WikiLink} from "../../../_models/wiki";
 import {ToastrService} from "ngx-toastr";
+import {
+  FileDragAndDropUploadComponent
+} from "src/app/shared/file-drag-and-drop-upload/file-drag-and-drop-upload.component";
 
 @Component({
   selector: 'app-font-manager',
@@ -25,6 +28,7 @@ import {ToastrService} from "ngx-toastr";
     NgTemplateOutlet,
     TranslocoDirective,
     NgStyle,
+    FileDragAndDropUploadComponent,
   ],
   templateUrl: './font-manager.component.html',
   styleUrl: './font-manager.component.scss',
@@ -61,11 +65,9 @@ export class FontManagerComponent implements OnInit {
 
   selectedFont = signal<EpubFont | undefined>(undefined);
   isUploadingFont = signal(false);
-  uploadMode = signal<'file' | 'url' | 'all'>('all');
   initialLoadComplete = signal(false);
 
   form: FormGroup = new FormGroup({
-    fontUrl: new FormControl('', []),
     filter: new FormControl(this.hideSystemFonts(), [])
   });
 
@@ -125,14 +127,10 @@ export class FontManagerComponent implements OnInit {
     this.isUploadingFont.set(true);
   }
 
-  uploadFromUrl() {
-    const url = this.form.get('fontUrl')?.value.trim();
-    if (!url || url === '') return;
-
+  uploadFromUrl(url: string) {
     this.isUploadingFont.set(true);
     this.fontService.uploadFromUrl(url).subscribe((f) => {
       this.addFont(f);
-      this.form.get('fontUrl')!.setValue('');
       this.isUploadingFont.set(false);
     });
   }

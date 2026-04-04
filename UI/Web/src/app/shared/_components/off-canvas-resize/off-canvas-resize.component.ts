@@ -11,6 +11,7 @@ import {
 import {DOCUMENT} from "@angular/common";
 import {filter, fromEvent, merge, tap} from "rxjs";
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
+import {isMobileChromium} from "../../../_helpers/browser";
 
 interface Dimensions {
   width: number;
@@ -132,7 +133,13 @@ export class OffCanvasResizeComponent implements OnInit {
     const mouseUp$ = fromEvent(this.document, 'mouseup');
     const touchEnd$ = fromEvent<TouchEvent>(this.document, 'touchend');
 
-    merge(mouseUp$, touchEnd$).pipe(
+    // Additional events for mobile Chromium workaround
+    const additionalEvents$ = isMobileChromium() ? [
+      fromEvent<TouchEvent>(this.document, 'touchcancel'),
+      fromEvent<PointerEvent>(this.document, 'pointerup')
+    ] : [];
+
+    merge(mouseUp$, touchEnd$, ...additionalEvents$).pipe(
       takeUntilDestroyed(this.destroyRef),
       filter(() => this.isDragging),
       tap(() => {

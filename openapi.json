@@ -2,12 +2,12 @@
   "openapi": "3.0.4",
   "info": {
     "title": "Kavita",
-    "description": "Kavita provides a set of APIs that are authenticated by JWT. JWT token can be copied from local storage. Assume all fields of a payload are required. Built against v0.8.9.31",
+    "description": "Kavita provides a set of APIs that are authenticated by JWT. JWT token can be copied from local storage. Assume all fields of a payload are required. Built against v0.8.9.33",
     "license": {
       "name": "GPL-3.0",
       "url": "https://github.com/Kareadita/Kavita/blob/develop/LICENSE"
     },
-    "version": "0.8.9.31"
+    "version": "0.8.9.33"
   },
   "servers": [
     {
@@ -17303,17 +17303,41 @@
             "content": {
               "text/plain": {
                 "schema": {
-                  "type": "boolean"
+                  "enum": [
+                    0,
+                    1,
+                    2,
+                    3,
+                    4
+                  ],
+                  "type": "integer",
+                  "format": "int32"
                 }
               },
               "application/json": {
                 "schema": {
-                  "type": "boolean"
+                  "enum": [
+                    0,
+                    1,
+                    2,
+                    3,
+                    4
+                  ],
+                  "type": "integer",
+                  "format": "int32"
                 }
               },
               "text/json": {
                 "schema": {
-                  "type": "boolean"
+                  "enum": [
+                    0,
+                    1,
+                    2,
+                    3,
+                    4
+                  ],
+                  "type": "integer",
+                  "format": "int32"
                 }
               }
             }
@@ -31479,6 +31503,7 @@
           "allowAutomaticWebtoonReaderDetection",
           "autoCloseMenu",
           "backgroundColor",
+          "bookReaderDisableBookmarkIcon",
           "bookReaderFontFamily",
           "bookReaderFontSize",
           "bookReaderImmersiveMode",
@@ -31677,6 +31702,9 @@
             "format": "int32"
           },
           "bookReaderImmersiveMode": {
+            "type": "boolean"
+          },
+          "bookReaderDisableBookmarkIcon": {
             "type": "boolean"
           },
           "pdfTheme": {

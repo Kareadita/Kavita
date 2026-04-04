@@ -1283,6 +1283,8 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
    * We can't use a wrapper due to potential for styling issues.
    */
   injectImageBookmarkIndicators(forceRefresh = false) {
+    if (this.readingProfile.bookReaderDisableBookmarkIcon) return;
+
     const imgs = Array.from(this.readingSectionElemRef().nativeElement.querySelectorAll('img') ?? []);
 
     const bookmarksForPage = (this.imageBookmarks() ?? []).filter(b => b.page === this.pageNum());
@@ -2088,7 +2090,10 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
         break;
       case 'theme':
         this.applyColorTheme(res.object as BookTheme);
-        return;
+        break;
+      case "bookReaderDisableBookmarkIcon":
+        this.applyBookmarkIcons(!(res.object as boolean));
+        break;
     }
   }
 
@@ -2252,6 +2257,16 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     }
 
     this.cdRef.markForCheck();
+  }
+
+  applyBookmarkIcons(show: boolean) {
+     if (show) {
+       this.injectImageBookmarkIndicators(true);
+       return;
+     }
+
+    const existingOverlays = this.readingSectionElemRef().nativeElement.querySelectorAll('.bookmark-overlay');
+    existingOverlays.forEach(overlay => overlay.remove());
   }
 
   updateReadingSectionHeight() {

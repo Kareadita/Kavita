@@ -38,7 +38,7 @@ export class TableOfContentsComponent {
 
     return chapters;
   });
-  isDisplayingChildrenOnly = computed(() => this.chapters().length === 1);
+  isDisplayingChildrenOnly = computed(() => this.displayedChapters().length === 1);
 
 
   readonly loadChapter = output<{

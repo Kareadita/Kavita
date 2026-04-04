@@ -57,29 +57,11 @@
           @if (files && files.length > 0) {
             <app-loading [loading]="isUploadingTheme" />
           } @else if (accountService.hasAdminRole()) {
-            <ngx-file-drop (onFileDrop)="dropped($event)" [accept]="acceptableExtensions" [directory]="false"
-                          dropZoneClassName="file-upload" contentClassName="file-upload-zone">
-
-              <ng-template ngx-file-drop-content-tmp let-openFileSelector="openFileSelector">
-                <div class="row g-0 mt-3 pb-3">
-                  <div class="mx-auto">
-                    <div class="row g-0 mb-3">
-                      <i class="fa fa-file-upload mx-auto" style="font-size: 1.5rem; width: 1.25rem;" aria-hidden="true"></i>
-                    </div>
-
-                    <div class="d-flex justify-content-center">
-                      <div class="d-flex justify-content-evenly">
-                        <span class="pe-0" href="javascript:void(0)">{{t('drag-n-drop')}}</span>
-                        <span class="ps-1 pe-1">•</span>
-                        <a class="pe-0" href="javascript:void(0)" (click)="openFileSelector()">{{t('upload')}}<span class="phone-hidden"> {{t('upload-continued')}}</span></a>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-              </ng-template>
-
-            </ngx-file-drop>
+            <app-file-drag-and-drop-upload
+              (dropped)="dropped($event)"
+              [uploadText]="t('upload-continued')"
+              [acceptableExtensions]="acceptableExtensions"
+            />
           }
 
         } @else {

@@ -75,7 +75,7 @@
           <div ngbAccordionCollapse>
             <div ngbAccordionBody>
               <ng-template>
-                <div class="controls" style="display:flex; justify-content:space-between; align-items:center;">
+                <div class="controls d-flex justify-content-between align-items-center">
                   <label id="readingdirection" class="form-label">{{t('reading-direction-label')}}</label>
                   <button (click)="toggleReadingDirection()" class="btn btn-icon" aria-labelledby="readingdirection" title="{{readingDirectionModel() === ReadingDirection.LeftToRight ? t('left-to-right') : t('right-to-left')}}">
                     <i class="fa {{readingDirectionModel() === ReadingDirection.LeftToRight ? 'fa-arrow-right' : 'fa-arrow-left'}} " aria-hidden="true"></i>
@@ -92,7 +92,7 @@
                   </button>
 
                 </div>
-                <div class="controls" style="display:flex; justify-content:space-between; align-items:center;">
+                <div class="controls d-flex justify-content-between align-items-center">
                   <label for="tap-pagination" class="form-label">{{t('tap-to-paginate-label')}}<i class="fa fa-info-circle ms-1" aria-hidden="true" placement="top" [ngbTooltip]="tapPaginationTooltip" role="button" tabindex="0" aria-describedby="tapPagination-help"></i></label>
                   <ng-template #tapPaginationTooltip>{{t('tap-to-paginate-tooltip')}}</ng-template>
                   <span class="visually-hidden" id="tapPagination-help">
@@ -103,7 +103,7 @@
                     <label>{{settingsForm.get('bookReaderTapToPaginate')?.value ? t('on') : t('off')}} </label>
                   </div>
                 </div>
-                <div class="controls" style="display:flex; justify-content:space-between; align-items:center;">
+                <div class="controls d-flex justify-content-between align-items-center">
                   <label for="immersive-mode" class="form-label">{{t('immersive-mode-label')}}<i class="fa fa-info-circle ms-1" aria-hidden="true" placement="top" [ngbTooltip]="immersiveModeTooltip" role="button" tabindex="0" aria-describedby="immersiveMode-help"></i></label>
                   <ng-template #immersiveModeTooltip>{{t('immersive-mode-tooltip')}}</ng-template>
                   <span class="visually-hidden" id="immersiveMode-help">
@@ -115,7 +115,19 @@
                   </div>
                 </div>
 
-                <div class="controls" style="display:flex; justify-content:space-between; align-items:center;">
+                <div class="controls d-flex justify-content-between align-items-center">
+                  <label for="disable-bookmark-icon" class="form-label">{{t('disable-bookmark-icon-label')}}<i class="fa fa-info-circle ms-1" aria-hidden="true" placement="top" [ngbTooltip]="disableBookmarkIconToolTip" role="button" tabindex="0" aria-describedby="disable-bookmark-icon-help"></i></label>
+                  <ng-template #disableBookmarkIconToolTip>{{t('disable-bookmark-icon-tooltip')}}</ng-template>
+                  <span class="visually-hidden" id="disable-bookmark-icon-help">
+                        <ng-container [ngTemplateOutlet]="disableBookmarkIconToolTip" />
+                    </span>
+                  <div class="form-check form-switch">
+                    <input type="checkbox" id="disable-bookmark-icon" formControlName="bookReaderDisableBookmarkIcon" class="form-check-input" aria-labelledby="disable-bookmark-icon-help" switch>
+                    <label>{{settingsForm.get('bookReaderDisableBookmarkIcon')?.value ? t('on') : t('off')}} </label>
+                  </div>
+                </div>
+
+                <div class="controls d-flex justify-content-between align-items-center">
                   <label id="fullscreen" class="form-label">{{t('fullscreen-label')}}<i class="fa fa-info-circle ms-1" aria-hidden="true" placement="top"
                                                                                         [ngbTooltip]="fullscreenTooltip" role="button" tabindex="1" aria-describedby="fullscreen-help"></i></label>
                   <ng-template #fullscreenTooltip>{{t('fullscreen-tooltip')}}</ng-template>

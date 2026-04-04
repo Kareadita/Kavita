@@ -14,7 +14,6 @@ import {AccountService} from "../../../_services/account.service";
 import {TranslocoDirective} from "@jsverse/transloco";
 import {ImageComponent} from "../../../shared/image/image.component";
 import {UploadService} from "../../../_services/upload.service";
-import {NgxFileDropModule} from "ngx-file-drop";
 import {ToastrService} from "ngx-toastr";
 
 interface ImageUploadResult {
@@ -27,7 +26,6 @@ interface ImageUploadResult {
   imports: [
     TranslocoDirective,
     ImageComponent,
-    NgxFileDropModule
   ],
   templateUrl: './profile-image.component.html',
   styleUrl: './profile-image.component.scss',

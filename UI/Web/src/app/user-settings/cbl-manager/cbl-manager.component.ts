@@ -25,6 +25,9 @@ import {AgeRatingPipe} from '../../_pipes/age-rating.pipe';
 import {RouterLink} from '@angular/router';
 import {editModal} from "../../_models/modal/modal-options";
 import {ModalResult} from "../../_models/modal/modal-result";
+import {
+  FileDragAndDropUploadComponent
+} from "src/app/shared/file-drag-and-drop-upload/file-drag-and-drop-upload.component";
 
 @Component({
   selector: 'app-cbl-manager',
@@ -40,7 +43,8 @@ import {ModalResult} from "../../_models/modal/modal-result";
     ImageComponent,
     AgeRatingPipe,
     RouterLink,
-    DatePipe
+    DatePipe,
+    FileDragAndDropUploadComponent
   ],
   templateUrl: './cbl-manager.component.html',
   styleUrl: './cbl-manager.component.scss',
@@ -56,12 +60,8 @@ export class CblManagerComponent implements OnInit {
   private readonly cblService = inject(CblService);
   protected readonly imageService = inject(ImageService);
 
-  form = new FormGroup({
-    cblUrl: new FormControl('', [])
-  });
   files: NgxFileDropEntry[] = [];
   acceptableExtensions = ['.cbl', '.json'].join(',');
-  uploadMode = signal<'file' | 'url' | 'all'>('all');
   isUploadingCbl = signal<boolean>(false);
   allLists = signal<ReadingList[]>([]);
 
@@ -150,14 +150,10 @@ export class CblManagerComponent implements OnInit {
     });
   }
 
-  uploadFromUrl() {
-    const url = this.form.get('cblUrl')?.value?.trim();
-    if (!url) return;
-
+  uploadFromUrl(url: string) {
     this.isUploadingCbl.set(true);
     this.cblService.importFromUrl(url).subscribe({
       next: (savedFile) => {
-        this.form.get('cblUrl')!.setValue('');
         this.isUploadingCbl.set(false);
         this.openImportModal([savedFile]);
       },
