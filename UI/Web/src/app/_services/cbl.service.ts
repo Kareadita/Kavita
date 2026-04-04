@@ -8,6 +8,7 @@ import {CblSavedFile} from '../_models/reading-list/cbl/cbl-saved-file';
 import {CblImportDecisions} from '../_models/reading-list/cbl/cbl-import-decisions';
 import {ReadingListProvider} from '../_models/reading-list';
 import {RemapRule} from '../_models/reading-list/cbl/remap-rule';
+import {Chapter} from '../_models/chapter';
 import {NgxFileDropEntry} from 'ngx-file-drop';
 import {TextResonse} from "../_types/text-response";
 
@@ -88,5 +89,14 @@ export class CblService {
 
   demoteRule(id: number) {
     return this.httpClient.post<RemapRule>(this.baseUrl + 'cbl/remap-rules/' + id + '/demote', {});
+  }
+
+  buildChapterStub(rule: RemapRule): Chapter {
+    return {
+      volumeId: 0,
+      range: rule.chapterRange,
+      titleName: rule.chapterTitleName !== rule.chapterRange ? rule.chapterTitleName : '',
+      isSpecial: rule.chapterIsSpecial,
+    } as Chapter;
   }
 }

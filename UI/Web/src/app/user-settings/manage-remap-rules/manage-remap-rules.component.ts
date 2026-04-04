@@ -6,7 +6,9 @@ import {ToastrService} from 'ngx-toastr';
 import {SearchService} from '../../_services/search.service';
 import {UtilityService} from '../../shared/_services/utility.service';
 import {RemapRule} from '../../_models/reading-list/cbl/remap-rule';
+import {CblRemapRuleKind} from '../../_models/reading-list/cbl/cbl-remap-rule-kind.enum';
 import {SearchResult} from '../../_models/search/search-result';
+import {Chapter} from '../../_models/chapter';
 import {TypeaheadSettings} from '../../typeahead/_models/typeahead-settings';
 import {map} from 'rxjs';
 import {translate, TranslocoDirective} from '@jsverse/transloco';
@@ -15,23 +17,28 @@ import {ResponsiveTableComponent} from '../../shared/_components/responsive-tabl
 import {TypeaheadComponent} from '../../typeahead/_components/typeahead.component';
 import {NonNullableFormBuilder, ReactiveFormsModule} from '@angular/forms';
 import {DatePipe} from '@angular/common';
+import {ImageComponent} from '../../shared/image/image.component';
+import {ImageService} from '../../_services/image.service';
+import {DefaultValuePipe} from "../../_pipes/default-value.pipe";
+import {EntityTitleComponent} from "../../cards/entity-title/entity-title.component";
 
 @Component({
   selector: 'app-manage-remap-rules',
   templateUrl: './manage-remap-rules.component.html',
   styleUrls: ['./manage-remap-rules.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [TranslocoDirective, NgxDatatableModule, ResponsiveTableComponent, TypeaheadComponent, ReactiveFormsModule, DatePipe]
+  imports: [TranslocoDirective, NgxDatatableModule, ResponsiveTableComponent, TypeaheadComponent, ReactiveFormsModule, DatePipe, ImageComponent, DefaultValuePipe, EntityTitleComponent]
 })
 export class ManageRemapRulesComponent implements OnInit {
 
-  private readonly cblService = inject(CblService);
+  protected readonly cblService = inject(CblService);
   private readonly accountService = inject(AccountService);
   private readonly confirmService = inject(ConfirmService);
   private readonly toastr = inject(ToastrService);
   private readonly searchService = inject(SearchService);
   private readonly utilityService = inject(UtilityService);
   private readonly fb = inject(NonNullableFormBuilder);
+  protected readonly imageService = inject(ImageService);
 
   rules = signal<RemapRule[]>([]);
   isAdmin = this.accountService.hasAdminRole;
@@ -42,8 +49,11 @@ export class ManageRemapRulesComponent implements OnInit {
   createForm = this.fb.group({
     cblSeriesName: '',
     cblVolume: '',
+    cblNumber: '',
   });
   selectedSeries = signal<SearchResult | null>(null);
+  selectedChapter = signal<Chapter | null>(null);
+  chapterSettings = signal<TypeaheadSettings<Chapter> | null>(null);
   seriesSettings: TypeaheadSettings<SearchResult>;
 
   myRules = computed(() => {
@@ -93,7 +103,19 @@ export class ManageRemapRulesComponent implements OnInit {
   }
 
   onSeriesSelected(event: SearchResult[]) {
-    this.selectedSeries.set(event.length > 0 ? event[0] : null);
+    const series = event.length > 0 ? event[0] : null;
+    this.selectedSeries.set(series);
+    this.selectedChapter.set(null);
+
+    if (series) {
+      this.chapterSettings.set(this.createChapterTypeahead(series.seriesId));
+    } else {
+      this.chapterSettings.set(null);
+    }
+  }
+
+  onChapterSelected(event: Chapter[]) {
+    this.selectedChapter.set(event.length > 0 ? event[0] : null);
   }
 
   toggleCreateForm() {
@@ -106,16 +128,30 @@ export class ManageRemapRulesComponent implements OnInit {
   resetCreateForm() {
     this.createForm.reset();
     this.selectedSeries.set(null);
+    this.selectedChapter.set(null);
+    this.chapterSettings.set(null);
   }
 
   createRule() {
-    const {cblSeriesName, cblVolume} = this.createForm.value;
+    const {cblSeriesName, cblVolume, cblNumber} = this.createForm.value;
     const selectedSeries = this.selectedSeries();
     if (!cblSeriesName?.trim() || !selectedSeries) return;
 
+    const chapter = this.selectedChapter();
+    const issueDetail: { cblVolume?: string; cblNumber?: string; volumeId?: number; chapterId?: number } = {};
 
-    const issueDetail = cblVolume?.trim() ? { cblVolume: cblVolume.trim() } : undefined;
-    this.cblService.createRemapRule(cblSeriesName.trim(), selectedSeries.seriesId, issueDetail).subscribe(rule => {
+    if (cblVolume?.trim()) issueDetail.cblVolume = cblVolume.trim();
+    if (cblNumber?.trim()) issueDetail.cblNumber = cblNumber.trim();
+    if (chapter) {
+      issueDetail.volumeId = chapter.volumeId;
+      issueDetail.chapterId = chapter.id;
+    }
+
+    this.cblService.createRemapRule(
+      cblSeriesName.trim(),
+      selectedSeries.seriesId,
+      Object.keys(issueDetail).length > 0 ? issueDetail : undefined
+    ).subscribe(rule => {
       this.rules.update(rules => [...rules, rule]);
       this.showCreateForm.set(false);
       this.resetCreateForm();
@@ -144,4 +180,42 @@ export class ManageRemapRulesComponent implements OnInit {
       this.toastr.success(translate('toasts.cbl-remap-rule-demoted'));
     });
   }
+
+  protected readonly CblRemapRuleKind = CblRemapRuleKind;
+
+  private createChapterTypeahead(seriesId: number): TypeaheadSettings<Chapter> {
+    const settings = new TypeaheadSettings<Chapter>();
+    settings.minCharacters = 0;
+    settings.multiple = false;
+    settings.id = 'remap-chapter-' + seriesId;
+    settings.unique = true;
+    settings.addIfNonExisting = false;
+    settings.fetchFn = (searchFilter: string) => this.searchService.getChaptersBySeries(seriesId).pipe(
+      map(chapters => {
+        if (!searchFilter) return chapters;
+        const lower = searchFilter.toLowerCase().trim();
+        return chapters.filter(c =>
+          c.title?.toLowerCase().includes(lower) ||
+          c.range?.toLowerCase().includes(lower) ||
+          c.titleName?.toLowerCase().includes(lower)
+        );
+      })
+    );
+    settings.trackByIdentityFn = (_idx, item) => item.id + '';
+    settings.compareFn = (options: Chapter[], filter: string) => {
+      if (!filter) return options;
+      const lower = filter.toLowerCase().trim();
+      return options.filter(c =>
+        c.title?.toLowerCase().includes(lower) ||
+        c.range?.toLowerCase().includes(lower) ||
+        c.titleName?.toLowerCase().includes(lower)
+      );
+    };
+    settings.selectionCompareFn = (a: Chapter, b: Chapter) => {
+      return a.id === b.id;
+    };
+
+    return settings;
+  }
+
 }

@@ -5,7 +5,6 @@ import {CblService} from '../../../_services/cbl.service';
 import {AccountService} from '../../../_services/account.service';
 import {RemapRule} from '../../../_models/reading-list/cbl/remap-rule';
 import {CblRemapRuleKind} from '../../../_models/reading-list/cbl/cbl-remap-rule-kind.enum';
-import {Chapter} from '../../../_models/chapter';
 import {EntityTitleComponent} from '../../../cards/entity-title/entity-title.component';
 import {ConfirmService} from "../../../shared/confirm.service";
 
@@ -21,7 +20,7 @@ import {ConfirmService} from "../../../shared/confirm.service";
 })
 export class ManageRemapRulesModalComponent implements OnInit {
   private readonly modal = inject(NgbActiveModal);
-  private readonly cblService = inject(CblService);
+  protected readonly cblService = inject(CblService);
   protected readonly accountService = inject(AccountService);
   private readonly confirmService = inject(ConfirmService);
   protected readonly CblRemapRuleKind = CblRemapRuleKind;
@@ -58,15 +57,6 @@ export class ManageRemapRulesModalComponent implements OnInit {
       this.rules.set(this.rules().filter(r => r.id !== rule.id));
       this.hasModifications = true;
     });
-  }
-
-  buildChapterStub(rule: RemapRule): Chapter {
-    return {
-      volumeId: 0,
-      range: rule.chapterRange,
-      titleName: rule.chapterTitleName !== rule.chapterRange ? rule.chapterTitleName : '',
-      isSpecial: rule.chapterIsSpecial,
-    } as Chapter;
   }
 
   close() {

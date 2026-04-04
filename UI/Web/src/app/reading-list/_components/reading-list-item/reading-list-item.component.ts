@@ -40,7 +40,7 @@ export class ReadingListItemComponent {
       return translate('common.volume-num-shorthand', {num: volNum});
     }
     return translate('common.issue-num-shorthand', {num: chNum})
-  })
+  });
   releaseDate = computed(() => this.item().chapter?.releaseDate || this.item().releaseDate);
   summary = computed(() => this.item().chapter?.summary || this.item().summary);
   pages = computed(() => this.item().chapter?.pages ?? this.item().pagesTotal);

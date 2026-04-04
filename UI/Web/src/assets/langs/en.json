@@ -2183,8 +2183,10 @@
         "global-rules-header": "Global Rules",
         "other-users-rules-header": "Other Users' Rules",
         "cbl-name-col": "CBL Name",
-        "maps-to-col": "Maps To",
-        "vol-issue-col": "Vol / Issue",
+        "cbl-volume-col": "CBL Volume",
+        "cbl-issue-col": "CBL Issue",
+        "mapped-series-col": "Mapped Series",
+        "mapped-vol-issue-col": "Mapped Vol / Issue",
         "created-col": "Created",
         "created-by-col": "Created By",
         "user-col": "User",
@@ -2198,6 +2200,9 @@
         "issue-num": "{{common.issue-num-shorthand}}",
         "cbl-volume-label": "CBL Volume",
         "cbl-volume-placeholder": "e.g. 2016",
+        "cbl-number-label": "CBL Issue #",
+        "cbl-number-placeholder": "e.g. 1",
+        "kavita-chapter-label": "Kavita Chapter (optional)",
         "series-level": "Series-level"
     },
 
