@@ -365,7 +365,14 @@ public class DirectoryService : IDirectoryService
             foreach (var file in di.EnumerateFiles())
             {
                 if (!file.Exists) continue;
-                file.Delete();
+                try
+                {
+                    file.Delete();
+                }
+                catch (Exception)
+                {
+                    /* Swallow exceptions where file is used by another process. This usually happens in dev */
+                }
             }
             foreach (var dir in di.EnumerateDirectories())
             {
