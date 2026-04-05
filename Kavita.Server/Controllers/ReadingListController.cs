@@ -293,6 +293,7 @@ public class ReadingListController(
             if (unitOfWork.HasChanges())
             {
                 await unitOfWork.CommitAsync();
+                await readingListService.UpdateReadingListCoverImage(readingList);
                 await eventHub.SendMessageAsync(MessageFactory.ReadingListUpdated,
                     MessageFactory.ReadingListUpdatedEvent(readingList.Id), false);
                 return Ok(await localizationService.Translate(UserId, "reading-list-updated"));
@@ -341,6 +342,7 @@ public class ReadingListController(
             if (unitOfWork.HasChanges())
             {
                 await unitOfWork.CommitAsync();
+                await readingListService.UpdateReadingListCoverImage(readingList);
                 await eventHub.SendMessageAsync(MessageFactory.ReadingListUpdated,
                     MessageFactory.ReadingListUpdatedEvent(readingList.Id), false);
                 return Ok(await localizationService.Translate(UserId, "reading-list-updated"));
@@ -387,6 +389,7 @@ public class ReadingListController(
             if (unitOfWork.HasChanges())
             {
                 await unitOfWork.CommitAsync();
+                await readingListService.UpdateReadingListCoverImage(readingList);
                 await eventHub.SendMessageAsync(MessageFactory.ReadingListUpdated,
                     MessageFactory.ReadingListUpdatedEvent(readingList.Id), false);
                 return Ok(await localizationService.Translate(UserId, "reading-list-updated"));
@@ -426,6 +429,7 @@ public class ReadingListController(
             if (unitOfWork.HasChanges())
             {
                 await unitOfWork.CommitAsync();
+                await readingListService.UpdateReadingListCoverImage(readingList);
                 await eventHub.SendMessageAsync(MessageFactory.ReadingListUpdated,
                     MessageFactory.ReadingListUpdatedEvent(readingList.Id), false);
                 return Ok(await localizationService.Translate(UserId, "reading-list-updated"));
@@ -462,6 +466,7 @@ public class ReadingListController(
             if (unitOfWork.HasChanges())
             {
                 await unitOfWork.CommitAsync();
+                await readingListService.UpdateReadingListCoverImage(readingList);
                 await eventHub.SendMessageAsync(MessageFactory.ReadingListUpdated,
                     MessageFactory.ReadingListUpdatedEvent(readingList.Id), false);
                 return Ok(await localizationService.Translate(UserId, "reading-list-updated"));

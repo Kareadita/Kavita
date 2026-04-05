@@ -15,16 +15,19 @@ using Kavita.Models.DTOs.ReadingLists.CBL;
 using Kavita.Models.DTOs.ReadingLists.CBL.Import;
 using Kavita.Models.DTOs.ReadingLists.CBL.Internal;
 using Kavita.Models.DTOs.SignalR;
+using Kavita.Models.Entities.Enums;
 using Kavita.Models.Entities.ReadingLists;
+using Kavita.Models.Extensions;
 using Kavita.Services.Helpers;
 using Flurl.Http;
+using Kavita.Common;
 using Microsoft.Extensions.Logging;
 
 namespace Kavita.Services.ReadingLists;
 
 public class CblImportService(IUnitOfWork unitOfWork, ICblGithubService cblGithubService, IEventHub eventHub,
     IDirectoryService directoryService, IReadingListService readingListService, IUrlValidationService urlValidationService,
-    ILogger<CblImportService> logger) : ICblImportService
+    IImageService imageService, ILogger<CblImportService> logger) : ICblImportService
 {
     public async Task<CblImportSummaryDto> ValidateList(int userId, string filePath)
     {
@@ -175,14 +178,12 @@ public class CblImportService(IUnitOfWork unitOfWork, ICblGithubService cblGithu
             }
         }
 
-        // TODO: If this is a v2, validate the coverimage url and set, otherwise if invalid, log and leave as-is.
-
-        // TODO: Check if we need to generate a cover image for RL
-
-
         await unitOfWork.CommitAsync();
 
+        // Generate cover image after commit so the reading list has an ID
+        await GenerateCoverForReadingList(readingList, cbl.CoverImageUrls);
 
+        await unitOfWork.CommitAsync();
 
         var summary = BuildSummary(cbl, filePath, matchResults);
         summary.IsUpdate = isUpdate;
@@ -201,6 +202,53 @@ public class CblImportService(IUnitOfWork unitOfWork, ICblGithubService cblGithu
             readingList.EndingYear = cbl.EndYear;
         if (cbl.EndMonth > 0)
             readingList.EndingMonth = cbl.EndMonth;
+    }
+
+    /// <summary>
+    /// Attempts to set a cover image on the reading list if not already locked/set.
+    /// First tries the v2 cover URL, then falls back to merged cover generation.
+    /// </summary>
+    /// <remarks>Does not commit changes</remarks>
+    private async Task GenerateCoverForReadingList(ReadingList readingList, IList<string> coverImageUrls)
+    {
+        if (readingList.CoverImageLocked || !string.IsNullOrEmpty(readingList.CoverImage)) return;
+
+        var settings = await unitOfWork.SettingsRepository.GetSettingsDtoAsync();
+
+        // Try v2 cover URL first
+        var coverUrl = coverImageUrls.FirstOrDefault();
+        if (!string.IsNullOrEmpty(coverUrl))
+        {
+            try
+            {
+                await urlValidationService.ValidateUrlAsync(coverUrl);
+                var fileName = await imageService.CreateThumbnailFromUrl(
+                    coverUrl,
+                    ImageService.GetReadingListFormat(readingList.Id),
+                    settings.EncodeMediaAs,
+                    settings.CoverImageSize.GetDimensions().Width);
+
+                if (!string.IsNullOrEmpty(fileName))
+                {
+                    readingList.CoverImage = fileName;
+                    imageService.UpdateColorScape(readingList);
+                    return;
+                }
+            }
+            catch (KavitaException ex)
+            {
+                logger.LogError(ex, "Cover URL for {ReadingListTitle} ({ReadingListId}) is not secure or valid, falling back to default generation",
+                    readingList.Title, readingList.Id);
+            }
+            catch (Exception ex)
+            {
+                logger.LogError(ex, "Failed to download cover from URL for {ReadingListTitle} ({ReadingListId}), falling back to default generation",
+                    readingList.Title, readingList.Id);
+            }
+        }
+
+        // Fallback to merged cover generation
+        await readingListService.GenerateReadingListCoverImage(readingList);
     }
 
     public async Task SyncReadingListAsync(int userId, int readingListId)
@@ -297,9 +345,10 @@ public class CblImportService(IUnitOfWork unitOfWork, ICblGithubService cblGithu
 
             await unitOfWork.CommitAsync();
 
-            // Re-run side effects like age ratings, etc
+            // Re-run side effects like age ratings, cover generation, etc
             await readingListService.CalculateReadingListAgeRating(readingList);
             await readingListService.CalculateStartAndEndDates(readingList);
+            await GenerateCoverForReadingList(readingList, cbl.CoverImageUrls);
 
             await unitOfWork.CommitAsync();
 

@@ -154,6 +154,7 @@ public class CblTestHelper : IDisposable
             Substitute.For<IDirectoryService>(),
             Substitute.For<IReadingListService>(),
             Substitute.For<IUrlValidationService>(),
+            Substitute.For<IImageService>(),
             Substitute.For<ILogger<CblImportService>>()
         );
     }
@@ -171,6 +172,7 @@ public class CblTestHelper : IDisposable
             directoryService,
             readingListService,
             Substitute.For<IUrlValidationService>(),
+            Substitute.For<IImageService>(),
             Substitute.For<ILogger<CblImportService>>()
         );
     }
