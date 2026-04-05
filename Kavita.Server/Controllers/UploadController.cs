@@ -69,9 +69,9 @@ public class UploadController : BaseApiController
         {
             await _urlValidationService.ValidateUrlAsync(dto.Url);
         }
-        catch (Exception ex)
+        catch (Exception)
         {
-            return BadRequest(ex.Message);
+            return BadRequest(await _localizationService.Translate(UserId, "url-not-valid"));
         }
 
         var dateString = $"{DateTime.UtcNow.ToShortDateString()}_{DateTime.UtcNow.ToLongTimeString()}".Replace('/', '_').Replace(':', '_');

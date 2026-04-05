@@ -210,7 +210,7 @@ public class TaskScheduler : ITaskScheduler
         }
         else
         {
-            _logger.LogDebug("Scheduling Cleanup Task for {Setting}", setting);
+            _logger.LogDebug("Scheduling CBL Sync Task for {Setting}", setting);
             RecurringJob.AddOrUpdate<CblImportService>(TaskCblSyncId, service => service.SyncAllReadingLists(CancellationToken.None),
                 CronConverter.ConvertToCronNotation(setting), RecurringJobOptions);
         }

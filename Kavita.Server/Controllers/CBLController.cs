@@ -38,7 +38,7 @@ public class CblController(IReadingListService readingListService, IDirectorySer
 {
 
     /// <summary>
-    /// Enqueues the Reading List to be synced on a background thread. UI will be informed from <see cref="MessageFactory.ReadingListUpdate"/> event
+    /// Enqueues the Reading List to be synced on a background thread. UI will be informed from <see cref="MessageFactory.ReadingListUpdated"/> event
     /// </summary>
     /// <param name="readingListId"></param>
     /// <returns></returns>

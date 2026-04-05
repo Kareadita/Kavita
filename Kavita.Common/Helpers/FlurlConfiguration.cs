@@ -63,12 +63,6 @@ public static class FlurlConfiguration
                 var handler = new SocketsHttpHandler
                 {
                     MaxAutomaticRedirections = 10,
-                    SslOptions = new SslClientAuthenticationOptions
-                    {
-#pragma warning disable S4830
-                        RemoteCertificateValidationCallback = (_, _, _, _) => true
-#pragma warning restore S4830
-                    },
                     ConnectCallback = async (context, ct) =>
                     {
                         var addresses = await Dns.GetHostAddressesAsync(context.DnsEndPoint.Host, ct);

@@ -74,9 +74,10 @@ export class ManageRemapRulesComponent implements OnInit {
       this.rules.update(rules => rules.map(r => r.id === editing.id ? rule : r));
     } else {
       this.rules.update(rules => [...rules, rule]);
+      this.toastr.success(translate('toasts.cbl-remap-rule-created'));
     }
+
     this.closeForm();
-    this.toastr.success(translate('toasts.cbl-remap-rule-created'));
   }
 
   onRuleCancelled() {
