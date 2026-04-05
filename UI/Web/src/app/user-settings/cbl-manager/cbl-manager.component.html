@@ -107,24 +107,34 @@
                 </div>
               </div>
 
-              @if (selectedItem.canSync) {
-                <span class="pill p-1 me-1 provider">{{t('can-sync')}}</span>
-              }
-
-              <div class="text-muted mt-1" style="font-size: 0.9rem;">
-                @if (selectedItem.ageRating) {
-                  <span>{{selectedItem.ageRating | ageRating}}</span>
-                }
-                @if (selectedItem.startingYear > 0) {
-                  @if (selectedItem.ageRating) {
-                    <span class="dot-separator mx-1"></span>
+              <div class="d-flex justify-content-between align-items-start mt-1">
+                <div class="d-flex">
+                  @if (selectedItem.canSync) {
+                    <span class="pill p-1 me-2 provider">{{t('can-sync')}}</span>
                   }
-                  <span>{{selectedItem.startingYear}} – {{selectedItem.endingYear}}</span>
+
+                  <div class="text-muted mt-1" style="font-size: 0.9rem;">
+                    @if (selectedItem.ageRating) {
+                      <span>{{selectedItem.ageRating | ageRating}}</span>
+                    }
+                    @if (selectedItem.startingYear > 0) {
+                      @if (selectedItem.ageRating) {
+                        <span class="dot-separator mx-1"></span>
+                      }
+                      <span>{{selectedItem.startingYear}} – {{selectedItem.endingYear}}</span>
+                    }
+                    @if (selectedItem.ageRating || selectedItem.startingYear > 0) {
+                      <span class="dot-separator mx-1"></span>
+                    }
+                    <span>{{selectedItem.itemCount}} {{t('items-count')}}</span>
+                  </div>
+                </div>
+
+                @if(selectedItem.hasRemoteChange) {
+                  <div class="d-flex gap-2">
+                    <span class="pill p-1 me-1  update-available">{{t('update-available')}}</span>
+                  </div>
                 }
-                @if (selectedItem.ageRating || selectedItem.startingYear > 0) {
-                  <span class="dot-separator mx-1"></span>
-                }
-                <span>{{selectedItem.itemCount}} {{t('items-count')}}</span>
               </div>
             </div>
           </div>
@@ -160,7 +170,7 @@
 
   <ng-template #readingListOption let-item>
     @if (item !== undefined) {
-      <li class="list-group-item d-flex justify-content-between align-items-start clickable rounded mt-1"
+      <li class="list-group-item d-flex justify-content-between align-items-start clickable mt-1"
           [class.active]="selectedList() && selectedList()?.id === item.id"
           (click)="selectList(item)">
         <div class="ms-2 me-auto">
