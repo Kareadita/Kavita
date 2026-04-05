@@ -47,8 +47,8 @@
         <a [routerLink]="chapterDetailUrl()" class="d-md-none">
           <span class="chapter-number">{{renderChapterNumber()}}</span> {{chapterTitle()}}
         </a>
-        @if (releaseDate() !== '0001-01-01T00:00:00') {
-          <span class="release-date">{{releaseDate() | date:'MMM. yyyy'}}</span>
+        @if (releaseDate() !== NULL_DATE) {
+          <span class="release-date">{{releaseDate() | dateYearRange | defaultValue}}</span>
         }
       </div>
 

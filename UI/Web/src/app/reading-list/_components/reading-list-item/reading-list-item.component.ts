@@ -2,7 +2,6 @@ import {ChangeDetectionStrategy, Component, computed, inject, input, output} fro
 import {ReadingListItem} from 'src/app/_models/reading-list';
 import {ImageService} from 'src/app/_services/image.service';
 import {NgbProgressbar} from '@ng-bootstrap/ng-bootstrap';
-import {DatePipe} from '@angular/common';
 import {ImageComponent} from '../../../shared/image/image.component';
 import {translate, TranslocoDirective} from "@jsverse/transloco";
 import {ItemRemoveEvent} from "../draggable-ordered-list/draggable-ordered-list.component";
@@ -10,12 +9,14 @@ import {RouterLink} from "@angular/router";
 import {AccountService} from "../../../_services/account.service";
 import {BlurToggleDirective} from "../../../_directives/blur-toggle.directive";
 import {LooseLeafOrDefaultNumber} from "../../../_models/chapter";
+import {DateYearRangePipe, NULL_DATE} from "../../../_pipes/date-year-range.pipe";
+import {DefaultValuePipe} from "../../../_pipes/default-value.pipe";
 
 @Component({
   selector: 'app-reading-list-item',
   templateUrl: './reading-list-item.component.html',
   styleUrls: ['./reading-list-item.component.scss'],
-  imports: [ImageComponent, NgbProgressbar, DatePipe, TranslocoDirective, RouterLink, BlurToggleDirective],
+  imports: [ImageComponent, NgbProgressbar, TranslocoDirective, RouterLink, BlurToggleDirective, DateYearRangePipe, DefaultValuePipe],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ReadingListItemComponent {
@@ -78,4 +79,6 @@ export class ReadingListItemComponent {
       position: item.order
     });
   }
+
+  protected readonly NULL_DATE = NULL_DATE;
 }

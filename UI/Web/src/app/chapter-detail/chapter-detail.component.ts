@@ -81,6 +81,7 @@ import {ModalService} from "../_services/modal.service";
 import {getResolvedData, getWritableResolvedData} from "../../libs/route-util";
 import {Tabs} from "../_models/tabs";
 import {TabTitlePipe} from "../_pipes/tab-title.pipe";
+import {NULL_DATE} from "../_pipes/date-year-range.pipe";
 
 @Component({
   selector: 'app-chapter-detail',
@@ -335,4 +336,5 @@ export class ChapterDetailComponent implements OnInit {
   protected readonly FilterField = FilterField;
   protected readonly LibraryType = LibraryType;
   protected readonly encodeURIComponent = encodeURIComponent;
+  protected readonly NULL_DATE = NULL_DATE;
 }
