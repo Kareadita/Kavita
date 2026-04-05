@@ -68,6 +68,7 @@ import {getWritableResolvedData} from "../../../../libs/route-util";
 import {Tabs} from "../../../_models/tabs";
 import {TabTitlePipe} from "../../../_pipes/tab-title.pipe";
 import {ConfirmService} from "../../../shared/confirm.service";
+import {ColorscapeService} from "../../../_services/colorscape.service";
 
 
 @Component({
@@ -80,7 +81,8 @@ import {ConfirmService} from "../../../shared/confirm.service";
     LoadingComponent, DraggableOrderedListComponent,
     ReadingListItemComponent, NgClass, DecimalPipe, TranslocoDirective, ReactiveFormsModule,
     NgbNav, NgbNavContent, NgbNavLink, NgbTooltip,
-    RouterLink, VirtualScrollerModule, NgStyle, NgbNavOutlet, NgbNavItem, PromotedIconComponent, DefaultValuePipe, DetailsTabComponent, TabTitlePipe]
+    RouterLink, VirtualScrollerModule, NgStyle, NgbNavOutlet, NgbNavItem,
+    PromotedIconComponent, DefaultValuePipe, DetailsTabComponent, TabTitlePipe]
 })
 export class ReadingListDetailComponent implements OnInit {
   private readonly document = inject<Document>(DOCUMENT);
@@ -99,6 +101,7 @@ export class ReadingListDetailComponent implements OnInit {
   private readonly destroyRef = inject(DestroyRef);
   private readonly confirmService = inject(ConfirmService);
   protected readonly breakpointService = inject(BreakpointService);
+  protected readonly colorscapeService = inject(ColorscapeService);
 
   protected readonly MangaFormat = MangaFormat;
   protected readonly Tabs = Tabs;
@@ -238,6 +241,10 @@ export class ReadingListDetailComponent implements OnInit {
 
   ngOnInit() {
     const id = this.readingListId();
+    
+    if (this.readingList().coverImage) {
+      this.colorscapeService.setColorScape(this.readingList().primaryColor, this.readingList().secondaryColor);
+    }
 
     this.readingListService.getAllPeople(id).subscribe(allPeople => {
       this.castInfo.set(allPeople);
