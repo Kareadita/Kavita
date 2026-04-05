@@ -1,4 +1,4 @@
-import {inject, Injectable} from '@angular/core';
+import {computed, inject, Injectable} from '@angular/core';
 import {NavigationStart, Router} from '@angular/router';
 import {Observable, ReplaySubject, tap} from 'rxjs';
 import {filter} from 'rxjs/operators';
@@ -150,12 +150,7 @@ export class BulkSelectionService {
     this.selectionsSource.next(0);
   }
 
-  hasSelections() {
-    const keys = Object.keys(this.selectedCards);
-    return keys.filter(key => {
-      return Object.values(this.selectedCards[key]).filter(item => item).length > 0;
-    }).length > 0;
-  }
+  readonly hasSelections = computed(() => (this.selectionSignal() ?? 0) > 0);
 
   totalSelections() {
     let sum = 0;
