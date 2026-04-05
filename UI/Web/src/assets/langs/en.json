@@ -2172,7 +2172,8 @@
     },
 
     "manage-remap-rules": {
-        "create-rule": "Create Rule",
+        "create-rule-title": "Create Rule",
+        "edit-rule-title": "Edit Remap Rule",
         "new-rule-title": "New Remap Rule",
         "cbl-series-name-label": "CBL Series Name",
         "cbl-series-name-placeholder": "Enter CBL series name...",
@@ -2203,7 +2204,8 @@
         "cbl-number-label": "CBL Issue #",
         "cbl-number-placeholder": "e.g. 1",
         "kavita-chapter-label": "Kavita Chapter (optional)",
-        "series-level": "Series-level"
+        "series-level": "Series-level",
+        "edit": "{{common.edit}}"
     },
 
     "browse-cbl-repo-modal": {

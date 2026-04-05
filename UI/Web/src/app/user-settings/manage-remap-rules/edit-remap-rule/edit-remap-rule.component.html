@@ -1,0 +1,69 @@
+<ng-container *transloco="let t; prefix:'manage-remap-rules'">
+  <div class="card mb-3 mt-5">
+    <div class="card-body">
+      <h5 class="card-title">{{rule() ? t('edit-rule-title') : t('new-rule-title')}}</h5>
+      <form [formGroup]="form">
+        <div class="row g-3 align-items-end">
+          <div class="col-md-4">
+            <label class="form-label">{{t('cbl-series-name-label')}}</label>
+            <input type="text" class="form-control" formControlName="cblSeriesName" [placeholder]="t('cbl-series-name-placeholder')">
+          </div>
+          <div class="col-md-2">
+            <label class="form-label">{{t('cbl-volume-label')}}</label>
+            <input type="text" class="form-control" formControlName="cblVolume" [placeholder]="t('cbl-volume-placeholder')">
+          </div>
+          <div class="col-md-2">
+            <label class="form-label">{{t('cbl-number-label')}}</label>
+            <input type="text" class="form-control" formControlName="cblNumber" [placeholder]="t('cbl-number-placeholder')">
+          </div>
+          <div class="col-md-4">
+            <label class="form-label">{{t('kavita-series-label')}}</label>
+            <app-typeahead [settings]="seriesSettings" [reset]="seriesReset" (selectedData)="onSeriesSelected($event)" id="remap-series">
+              <ng-template #optionItem let-item let-position="idx" let-value="value">
+                {{item.name}}
+              </ng-template>
+              <ng-template #badgeItem let-item let-position="idx">
+                {{item.name}}
+              </ng-template>
+            </app-typeahead>
+          </div>
+        </div>
+
+        @if (selectedSeries() && chapterSettings()) {
+          <div class="row g-3 align-items-end mt-1">
+            <div class="col-md-4">
+              <label class="form-label">{{t('kavita-chapter-label')}}</label>
+              <app-typeahead [settings]="chapterSettings()!" [reset]="chapterReset" (selectedData)="onChapterSelected($event)">
+                <ng-template #badgeItem let-item let-position="idx">
+                  {{item.title}}
+                </ng-template>
+                <ng-template #optionItem let-item let-position="idx">
+                  <div class="d-flex align-items-center gap-2">
+                    <app-image [imageUrl]="item.coverImage" height="40px" width="30px" />
+                    <div>
+                      <div>{{item.title}}</div>
+                      @if (item.volumeTitle) {
+                        <small class="text-muted">{{item.volumeTitle}}</small>
+                      }
+                    </div>
+                  </div>
+                </ng-template>
+              </app-typeahead>
+            </div>
+          </div>
+        }
+
+        <div class="row g-3 mt-1">
+          <div class="col-md-12 d-flex justify-content-end">
+            <button class="btn btn-secondary me-2" (click)="cancel()" type="button">
+              {{t('cancel')}}
+            </button>
+            <button class="btn btn-primary" type="button" [disabled]="!form.get('cblSeriesName')?.value?.trim() || !selectedSeries()" (click)="save()">
+              {{t('save')}}
+            </button>
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+</ng-container>

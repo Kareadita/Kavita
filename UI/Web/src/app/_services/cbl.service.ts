@@ -72,7 +72,7 @@ export class CblService {
   }
 
   updateRemapRule(id: number, update: { volumeId?: number; chapterId?: number; cblVolume?: string; cblNumber?: string }) {
-    return this.httpClient.put<RemapRule>(this.baseUrl + 'cbl/remap-rules/' + id, update);
+    return this.httpClient.post<RemapRule>(this.baseUrl + 'cbl/remap-rules/' + id, update);
   }
 
   deleteRemapRule(id: number) {

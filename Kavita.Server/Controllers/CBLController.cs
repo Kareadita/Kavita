@@ -378,7 +378,7 @@ public class CblController(IReadingListService readingListService, IDirectorySer
     /// <summary>
     /// Updates a remap rule with issue-level detail (volume/chapter).
     /// </summary>
-    [HttpPut("remap-rules/{id}")]
+    [HttpPost("remap-rules/{id}")]
     [DisallowRole(PolicyConstants.ReadOnlyRole)]
     public async Task<ActionResult<RemapRuleDto>> UpdateRemapRule(int id, [FromBody] UpdateRemapRuleDto dto)
     {
