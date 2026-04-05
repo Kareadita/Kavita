@@ -175,7 +175,14 @@ public class CblImportService(IUnitOfWork unitOfWork, ICblGithubService cblGithu
             }
         }
 
+        // TODO: If this is a v2, validate the coverimage url and set, otherwise if invalid, log and leave as-is.
+
+        // TODO: Check if we need to generate a cover image for RL
+
+
         await unitOfWork.CommitAsync();
+
+
 
         var summary = BuildSummary(cbl, filePath, matchResults);
         summary.IsUpdate = isUpdate;

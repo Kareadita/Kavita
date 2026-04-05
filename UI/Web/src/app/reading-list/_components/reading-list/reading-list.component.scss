@@ -1,0 +1,117 @@
+.reading-list-card {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  padding: 0.75rem 1rem;
+  height: 12.75rem;
+  overflow: hidden;
+  border: 1px solid var(--card-border-color);
+  border-radius: var(--card-border-radius);
+  background-color: var(--card-bg-color);
+  color: var(--card-text-color);
+  position: relative;
+
+}
+
+.selected-highlight {
+  outline: 0.125rem solid var(--primary-color);
+}
+
+// Title Row
+.title-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  min-width: 0;
+}
+
+.bulk-mode {
+  flex-shrink: 0;
+
+  .form-check-input {
+    cursor: pointer;
+  }
+}
+
+.title-link {
+  font-weight: 600;
+  font-size: 1rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  min-width: 0;
+}
+
+.actions {
+  margin-left: auto;
+  flex-shrink: 0;
+}
+
+// Metadata Line
+.meta-line {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  font-size: 0.85rem;
+  opacity: 0.7;
+}
+
+.separator {
+  margin: 0 0.125rem;
+}
+
+.body-row {
+  display: flex;
+  gap: 0.75rem;
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.cover-container {
+  flex-shrink: 0;
+  width: 6rem;
+  align-self: stretch;
+}
+
+.body-content {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+}
+
+.summary-text {
+  font-size: 0.8rem;
+  opacity: 0.85;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  word-break: break-word;
+  min-width: 0;
+}
+
+// Tag Row
+.tag-row {
+  display: flex;
+  gap: 0.375rem;
+  flex-wrap: nowrap;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+.tag-pill {
+  background-color: var(--card-bg-color);
+  border: 1px solid var(--card-border-color);
+  color: var(--card-text-color);
+  font-size: 0.75rem;
+  font-weight: 400;
+  white-space: nowrap;
+}
+
+.tag-more {
+  opacity: 0.6;
+}

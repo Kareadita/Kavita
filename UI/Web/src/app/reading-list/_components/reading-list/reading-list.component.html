@@ -1,0 +1,70 @@
+<ng-container *transloco="let t; prefix: 'reading-lists'">
+  <div class="reading-list-card"
+       [class.selected-highlight]="isSelected()"
+       (touchstart)="onTouchStart($event)"
+       (touchmove)="onTouchMove()"
+       (touchend)="onTouchEnd($event)">
+
+    <!-- Title Row: Checkbox + Promoted + Title + Kebab -->
+    <div class="title-row">
+      @if (config().allowSelection) {
+        <div class="bulk-mode"
+             [class.always-show]="bulkSelectionService.hasSelections()"
+             (click)="handleSelection($event)">
+          <input type="checkbox"
+                 class="form-check-input"
+                 [attr.aria-label]="'Select ' + title()"
+                 [ngModel]="isSelected()"
+                 [ngModelOptions]="{standalone: true}" />
+        </div>
+      }
+
+      <app-promoted-icon [promoted]="promoted()" />
+
+      <a class="title-link" [routerLink]="titleRoute()">{{title()}}</a>
+
+      @if (actionables().length > 0) {
+        <span class="actions">
+          <app-card-actionables
+            [entity]="actionableEntity()"
+            [actions]="actionables()"
+            [labelBy]="title()"
+            (actionHandler)="onActionResult($event)" />
+        </span>
+      }
+    </div>
+
+    <div class="body-row">
+      <div class="cover-container d-none d-sm-block">
+        <app-image [imageUrl]="coverUrl()" width="100%" height="100%"
+                   [styles]="{'border-radius': '0.25rem', 'object-fit': 'cover'}" />
+      </div>
+
+      <div class="body-content">
+        <div class="meta-line">
+          @let dr = startDate() | dateYearRange:endDate();
+          @if (dr) {
+            <span>{{dr}}</span>
+            <span class="separator">&middot;</span>
+          }
+          <span>{{t('item-count', {num: itemCount()})}}</span>
+        </div>
+
+        @if (summary()) {
+          <div class="summary-text">{{summary()}}</div>
+        }
+
+        @if (visibleTags().length > 0) {
+          <div class="tag-row">
+            @for (tag of visibleTags(); track tag) {
+              <span class="badge rounded-pill tag-pill">{{tag}}</span>
+            }
+            @if (remainingTagCount() > 0) {
+              <span class="badge rounded-pill tag-pill tag-more">+{{remainingTagCount()}}</span>
+            }
+          </div>
+        }
+      </div>
+    </div>
+  </div>
+</ng-container>
