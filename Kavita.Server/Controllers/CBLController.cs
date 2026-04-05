@@ -259,7 +259,7 @@ public class CblController(IReadingListService readingListService, IDirectorySer
     [HttpGet("remap-rules")]
     public async Task<ActionResult<IList<RemapRuleDto>>> GetRemapRules()
     {
-        var rules = await unitOfWork.RemapRuleRepository.GetRulesForUserAsync(UserId);
+        var rules = await unitOfWork.RemapRuleRepository.GetRuleDtosForUserAsync(UserId);
         return Ok(mapper.Map<IList<RemapRuleDto>>(rules));
     }
 
@@ -270,8 +270,7 @@ public class CblController(IReadingListService readingListService, IDirectorySer
     [HttpGet("remap-rules/all")]
     public async Task<ActionResult<IList<RemapRuleDto>>> GetAllRemapRules()
     {
-        var rules = await unitOfWork.RemapRuleRepository.GetAllRulesAsync();
-        return Ok(mapper.Map<IList<RemapRuleDto>>(rules));
+        return Ok(await unitOfWork.RemapRuleRepository.GetAllRuleDtosAsync());
     }
 
     /// <summary>
@@ -446,7 +445,7 @@ public class CblController(IReadingListService readingListService, IDirectorySer
         return Ok(result);
     }
 
-    private async Task<string> SaveCblFile(IFormFile file, int userId, string filename)
+    private async Task SaveCblFile(IFormFile file, int userId, string filename)
     {
         var dir = GetCblManagerFolder(userId);
         Directory.CreateDirectory(dir);
@@ -454,16 +453,14 @@ public class CblController(IReadingListService readingListService, IDirectorySer
         await using var stream = System.IO.File.Create(outputFile);
         await file.CopyToAsync(stream);
         stream.Close();
-        return outputFile;
     }
 
-    private string SaveCblFileFromContent(string content, int userId, string filename)
+    private void SaveCblFileFromContent(string content, int userId, string filename)
     {
         var dir = GetCblManagerFolder(userId);
         Directory.CreateDirectory(dir);
         var outputFile = Path.Join(dir, filename);
         System.IO.File.WriteAllText(outputFile, content);
-        return outputFile;
     }
 
     private string GetCblManagerFolder(int userId)

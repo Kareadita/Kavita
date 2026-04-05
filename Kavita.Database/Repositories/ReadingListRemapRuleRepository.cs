@@ -23,7 +23,7 @@ public class ReadingListRemapRuleRepository(DataContext context, IMapper mapper)
             .ToListAsync(ct);
     }
 
-    public async Task<IList<ReadingListRemapRule>> GetRulesForUserAsync(int userId, CancellationToken ct = default)
+    public async Task<IList<RemapRuleDto>> GetRuleDtosForUserAsync(int userId, CancellationToken ct = default)
     {
         return await context.ReadingListRemapRule
             .Include(r => r.AppUser)
@@ -33,6 +33,7 @@ public class ReadingListRemapRuleRepository(DataContext context, IMapper mapper)
             .Where(r => r.AppUserId == userId || r.IsGlobal)
             .OrderByDescending(r => r.AppUserId == userId)
             .ThenByDescending(r => r.CreatedUtc)
+            .ProjectTo<RemapRuleDto>(mapper.ConfigurationProvider)
             .ToListAsync(ct);
     }
 
@@ -52,12 +53,13 @@ public class ReadingListRemapRuleRepository(DataContext context, IMapper mapper)
             .FirstOrDefaultAsync(ct);
     }
 
-    public async Task<IList<ReadingListRemapRule>> GetAllRulesAsync(CancellationToken ct = default)
+    public async Task<IList<RemapRuleDto>> GetAllRuleDtosAsync(CancellationToken ct = default)
     {
         return await context.ReadingListRemapRule
             .Include(r => r.AppUser)
             .OrderByDescending(r => r.IsGlobal)
             .ThenBy(r => r.NormalizedCblSeriesName)
+            .ProjectTo<RemapRuleDto>(mapper.ConfigurationProvider)
             .ToListAsync(ct);
     }
 

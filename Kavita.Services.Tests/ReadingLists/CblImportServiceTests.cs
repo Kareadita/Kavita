@@ -335,7 +335,7 @@ public class CblImportServiceTests : AbstractDbTest
         await svc.UpsertReadingList(seed.User.Id, filePath, decisions);
 
         // Verify remap rule was persisted
-        var rules = await unitOfWork.RemapRuleRepository.GetRulesForUserAsync(seed.User.Id);
+        var rules = await unitOfWork.RemapRuleRepository.GetRuleDtosForUserAsync(seed.User.Id);
         Assert.NotEmpty(rules);
         Assert.Contains(rules, r =>
             r.NormalizedCblSeriesName == "Fables".ToNormalized() &&
@@ -1173,7 +1173,7 @@ public class CblImportServiceTests : AbstractDbTest
         await unitOfWork.CommitAsync();
 
         // Verify the rule was actually persisted
-        var rules = await unitOfWork.RemapRuleRepository.GetRulesForUserAsync(seed.User.Id);
+        var rules = await unitOfWork.RemapRuleRepository.GetRuleDtosForUserAsync(seed.User.Id);
         Assert.NotEmpty(rules);
 
         // Chapter 99 doesn't exist anywhere in Adventure Time
