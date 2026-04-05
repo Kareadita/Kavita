@@ -1,4 +1,4 @@
-import {inject, Injectable} from '@angular/core';
+import {computed, inject, Injectable} from '@angular/core';
 import {NavigationStart, Router} from '@angular/router';
 import {Observable, ReplaySubject, tap} from 'rxjs';
 import {filter} from 'rxjs/operators';
@@ -69,6 +69,7 @@ export class BulkSelectionService {
    */
   public readonly selections$ = this.selectionsSource.asObservable();
   public readonly selectionSignal = toSignal(this.selections$);
+  public readonly hasSelections = computed(() => (this.selectionSignal() ?? 0) > 0);
 
   constructor() {
     const router = inject(Router);
@@ -148,13 +149,6 @@ export class BulkSelectionService {
   deselectAll() {
     this.selectedCards = {};
     this.selectionsSource.next(0);
-  }
-
-  hasSelections() {
-    const keys = Object.keys(this.selectedCards);
-    return keys.filter(key => {
-      return Object.values(this.selectedCards[key]).filter(item => item).length > 0;
-    }).length > 0;
   }
 
   totalSelections() {
