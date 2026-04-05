@@ -1651,6 +1651,7 @@ public class CblImportServiceTests : AbstractDbTest
 
         // Set up mocks
         var githubService = Substitute.For<ICblGithubService>();
+        githubService.GetFileSha("test/list.cbl").Returns(Task.FromResult("new-sha"));
         githubService.GetFileContent("test/list.cbl").Returns(Task.FromResult(cblXml));
 
         var dirService = new DirectoryService(

@@ -241,7 +241,7 @@ export class ReadingListDetailComponent implements OnInit {
 
   ngOnInit() {
     const id = this.readingListId();
-    
+
     if (this.readingList().coverImage) {
       this.colorscapeService.setColorScape(this.readingList().primaryColor, this.readingList().secondaryColor);
     }
@@ -335,7 +335,7 @@ export class ReadingListDetailComponent implements OnInit {
   async removeRead() {
     if (!this.readingList()) return;
 
-    if (!await this.confirmService.confirm('toasts.confirm-delete-read-from-readinglist')) return;
+    if (!await this.confirmService.confirm(translate('toasts.confirm-delete-read-from-readinglist'))) return;
 
     this.isLoading.set(true);
     this.readingListService.removeRead(this.readingList().id).subscribe((resp) => {

@@ -3640,7 +3640,8 @@
         "cbl-remap-rule-deleted": "Remap rule deleted",
         "cbl-remap-rule-promoted": "Rule promoted to global",
         "cbl-remap-rule-demoted": "Rule demoted to user scope",
-        "confirm-delete-read-from-readinglist": "Are you sure you want to remove all read issues from this reading list? This cannot be undone."
+        "confirm-delete-read-from-readinglist": "Are you sure you want to remove all read issues from this reading list? This cannot be undone.",
+        "reading-list-sync-enqueued": "The Reading List has been enqueued for sync."
     },
 
     "read-time-pipe": {

@@ -263,13 +263,22 @@ public class CblImportService(IUnitOfWork unitOfWork, ICblGithubService cblGithu
         }
 
         string content;
-        string? contentHash = null;
+        string? contentHash;
 
         // Github-based list
         if (!string.IsNullOrEmpty(readingList.SourcePath))
         {
             try
             {
+                var remoteSha = await cblGithubService.GetFileSha(readingList.SourcePath);
+                if (!readingList.HasRemoteChange(remoteSha))
+                {
+                    readingList.LastSyncCheckUtc = DateTime.UtcNow;
+                    await unitOfWork.CommitAsync();
+                    return;
+                }
+
+                contentHash = remoteSha;
                 content = await cblGithubService.GetFileContent(readingList.SourcePath);
             }
             catch (Exception ex)

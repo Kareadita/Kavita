@@ -12,6 +12,10 @@ public interface ICblGithubService
     /// </summary>
     Task<CblRepoBrowseResultDto> BrowseRepo(string path = "", bool forceRefresh = false);
     /// <summary>
+    /// Returns the Git blob SHA for a file without downloading its content.
+    /// </summary>
+    Task<string> GetFileSha(string filePath);
+    /// <summary>
     /// Downloads the raw content of a .cbl file by its repo path.
     /// </summary>
     Task<string> GetFileContent(string filePath);

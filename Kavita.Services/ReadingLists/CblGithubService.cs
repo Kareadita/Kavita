@@ -121,6 +121,17 @@ public class CblGithubService : ICblGithubService
         _logger.LogInformation("CBL repo cache invalidated");
     }
 
+    public async Task<string> GetFileSha(string filePath)
+    {
+        var normalizedPath = NormalizePath(filePath);
+
+        var item = await BuildApiUrl(normalizedPath)
+            .WithGithubHeaders()
+            .GetJsonAsync<GithubContentItem>();
+
+        return item.Sha;
+    }
+
     public async Task<string> GetFileContent(string filePath)
     {
         var normalizedPath = NormalizePath(filePath);
