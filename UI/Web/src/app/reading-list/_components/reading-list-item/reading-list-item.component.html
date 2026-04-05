@@ -4,7 +4,7 @@
     <!-- Desktop: Image with overlay -->
     <div class="image-container d-none d-md-block">
       <div class="overlay">
-        <app-image [imageUrl]="imageService.getChapterCoverImage(item().chapterId)" width="106px" />
+        <app-image [imageUrl]="imageService.getChapterCoverImage(item().chapterId)" width="6.625rem" />
         @if (isUnread()) {
           <div class="not-read-badge"></div>
         }
@@ -14,10 +14,20 @@
           </div>
         }
         @if (!editMode()) {
-          <div class="overlay-information" (click)="readChapter(item())">
+          <div class="overlay-information" >
             <div class="overlay-information--centered">
-              <i class="fa-solid fa-book"  aria-hidden="true"></i>
-              <span class="visually-hidden">{{t('read')}}</span>
+              <span
+                class="card-title read-btn mx-auto"
+                style="width: auto;"
+                role="button"
+                tabindex="0"
+                (click)="readChapter(item())"
+                (keydown.enter)="readChapter(item())">
+              <div>
+                <i class="fa-solid fa-book" aria-hidden="true"></i>
+                <span class="visually-hidden">{{t('read')}}</span>
+              </div>
+            </span>
             </div>
           </div>
         }
@@ -26,7 +36,7 @@
 
     <!-- Mobile: image + read button -->
     <div class="d-md-none mobile-section">
-      <app-image [imageUrl]="imageService.getChapterCoverImage(item().chapterId)" width="80px" />
+      <app-image [imageUrl]="imageService.getChapterCoverImage(item().chapterId)" width="5rem" />
       @if (!editMode()) {
         <button class="btn btn-outline-primary btn-sm mt-1" (click)="readChapter(item())">
           {{t('read')}}
@@ -37,7 +47,6 @@
 
     <!-- Content -->
     <div class="item-content">
-      <!-- Title row -->
       <div class="title-row">
         <!-- Desktop: only issue number is a link -->
         <span class="d-none d-md-inline">
