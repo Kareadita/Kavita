@@ -2497,7 +2497,8 @@
         "series-count": "{{common.series-count}}",
         "restack-count": "{{num}} Restacks",
         "nothing-found": "Nothing found",
-        "track": "Track"
+        "track": "Track",
+        "by-author": "by {{author}}"
     },
 
     "import-mappings": {

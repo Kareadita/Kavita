@@ -639,7 +639,7 @@
                     <ng-template #view>
                       @for (file of chapter.files; track file.id) {
                         <div>
-                          <span>{{file.filePath}}</span><span class="ms-2 me-2">•</span><span>{{file.bytes | bytes}}</span>
+                          <span>{{file.filePath}}</span><span class="dot-separator mx-2"></span><span>{{file.bytes | bytes}}</span>
                         </div>
                       }
                     </ng-template>

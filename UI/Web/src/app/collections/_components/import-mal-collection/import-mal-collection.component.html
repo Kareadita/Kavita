@@ -10,9 +10,16 @@
         </div>
         <div>
           @if (stack.author) {
-            by {{stack.author}} •
+            {{t('by-author', {author: stack.author})}}
+            <span class="dot-separator mx-1"></span>
           }
-          {{t('series-count', {num: stack.seriesCount | number})}} • <span><i class="fa-solid fa-layer-group me-1" aria-hidden="true"></i>{{t('restack-count', {num: stack.restackCount | number})}}</span></div>
+          {{t('series-count', {num: stack.seriesCount | number})}}
+          <span class="dot-separator mx-1"></span>
+          <span>
+            <i class="fa-solid fa-layer-group me-1" aria-hidden="true"></i>
+            {{t('restack-count', {num: stack.restackCount | number})}}
+          </span>
+        </div>
       </li>
     } @empty {
       @if (isLoading) {

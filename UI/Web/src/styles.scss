@@ -136,6 +136,10 @@ body {
   text-shadow: 0 0 0.3125rem var(--body-text-color);
 }
 
+.dot-separator::before {
+  content: '•';
+}
+
 // Handle reduced motion
 @media (prefers-reduced-motion: reduce), (update: slow) {
   *, *::before, *::after {
