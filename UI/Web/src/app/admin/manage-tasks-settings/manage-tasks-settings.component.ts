@@ -3,7 +3,7 @@ import {ToastrService} from 'ngx-toastr';
 import {SettingsService} from '../settings.service';
 import {ServerSettings} from '../_models/server-settings';
 import {shareReplay} from 'rxjs/operators';
-import {catchError, combineLatest, debounceTime, defer, Observable, of, switchMap, tap} from 'rxjs';
+import {catchError, combineLatest, debounceTime, defer, Observable, of, skip, switchMap, tap} from 'rxjs';
 import {ServerService} from 'src/app/_services/server.service';
 import {Job} from 'src/app/_models/job/job';
 import {DownloadService} from 'src/app/shared/_services/download.service';
@@ -131,38 +131,12 @@ export class ManageTasksSettingsComponent implements OnInit {
 
   trackBy = (index: number, item: Job) => `${item.id}`;
 
-  // Auto-save when any cron signal changes — must be in constructor for toObservable() injection context
   private readonly taskScan$ = toObservable(this.taskScan);
   private readonly taskBackup$ = toObservable(this.taskBackup);
   private readonly taskCleanup$ = toObservable(this.taskCleanup);
   private readonly taskCblSync$ = toObservable(this.taskCblSync);
 
-  constructor() {
-    combineLatest([
-      this.taskScan$,
-      this.taskBackup$,
-      this.taskCleanup$,
-      this.taskCblSync$
-    ]).pipe(
-      debounceTime(500),
-      // Skip until serverSettings is loaded
-      switchMap(([scan, backup, cleanup, cblSync]) => {
-        if (!this.serverSettings) return of(null);
-        const data = this.packData(scan, backup, cleanup, cblSync);
-        return this.settingsService.updateServerSettings(data).pipe(catchError(err => {
-          console.error(err);
-          return of(null);
-        }));
-      }),
-      tap(settings => {
-        if (!settings) return;
-        this.serverSettings = settings;
-        this.recurringTasks$ = this.serverService.getRecurringJobs().pipe(shareReplay());
-        this.cdRef.markForCheck();
-      }),
-      takeUntilDestroyed(this.destroyRef)
-    ).subscribe();
-  }
+  constructor() {}
 
   ngOnInit(): void {
     this.settingsService.getServerSettings().subscribe(settings => {
@@ -172,6 +146,30 @@ export class ManageTasksSettingsComponent implements OnInit {
       this.taskBackup.set(settings.taskBackup);
       this.taskCleanup.set(settings.taskCleanup);
       this.taskCblSync.set(settings.taskCblSync);
+
+      combineLatest([
+        this.taskScan$,
+        this.taskBackup$,
+        this.taskCleanup$,
+        this.taskCblSync$
+      ]).pipe(
+        skip(1), // Skips the initial values being saved so we avoid a save with no changes
+        debounceTime(500),
+        switchMap(([scan, backup, cleanup, cblSync]) => {
+          const data = this.packData(scan, backup, cleanup, cblSync);
+          return this.settingsService.updateServerSettings(data).pipe(catchError(err => {
+            console.error(err);
+            return of(null);
+          }));
+        }),
+        tap(settings => {
+          if (!settings) return;
+          this.serverSettings = settings;
+          this.recurringTasks$ = this.serverService.getRecurringJobs().pipe(shareReplay());
+          this.cdRef.markForCheck();
+        }),
+        takeUntilDestroyed(this.destroyRef)
+      ).subscribe();
 
       this.cdRef.markForCheck();
     });
