@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using Flurl.Http;
 using Kavita.API.Services;
 using Kavita.Common;
+using Kavita.Common.Helpers;
 using Kavita.Models.DTOs;
 using Kavita.Models.Entities.Enums;
 using Kavita.Models.Entities.Interfaces;
@@ -555,7 +556,7 @@ public class ImageService(ILogger<ImageService> logger, IDirectoryService direct
     {
         try
         {
-            var imageStream = await url
+            var imageStream = await FlurlConfiguration.CreateSafeRequest(url)
                 .AllowHttpStatus("2xx,304")
                 .GetStreamAsync();
 

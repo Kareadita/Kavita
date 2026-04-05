@@ -15,6 +15,7 @@ using Kavita.API.Services.Metadata;
 using Kavita.API.Services.SignalR;
 using Kavita.Common;
 using Kavita.Common.Extensions;
+using Kavita.Common.Helpers;
 using Kavita.Models.Constants;
 using Kavita.Models.DTOs.SignalR;
 using Kavita.Models.Entities;
@@ -123,7 +124,8 @@ public class CoverDbService : ICoverDbService
 
         try
         {
-            var htmlContent = url.GetStringAsync(cancellationToken: ct).Result;
+            var htmlContent = FlurlConfiguration.CreateSafeRequest(url)
+                .GetStringAsync(cancellationToken: ct).Result;
             var htmlDocument = new HtmlDocument();
             htmlDocument.LoadHtml(htmlContent);
 
@@ -165,7 +167,7 @@ public class CoverDbService : ICoverDbService
 
             _logger.LogTrace("Fetching favicon from {Url}", finalUrl);
             // Download the favicon.ico file using Flurl
-            var faviconStream = await finalUrl
+            var faviconStream = await FlurlConfiguration.CreateSafeRequest(finalUrl)
                 .AllowHttpStatus("2xx,304")
                 .GetStreamAsync(cancellationToken: ct);
 

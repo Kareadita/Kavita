@@ -1,25 +1,25 @@
 using System;
-using System.Linq;
 using System.Net;
 using System.Net.Sockets;
 using System.Threading.Tasks;
 using Kavita.API.Services;
 using Kavita.Common;
+using Kavita.Common.Helpers;
 
 namespace Kavita.Services;
 
-public class UrlValidationService : IUrlValidationService
+public class UrlValidationService(ILocalizationService localizationService) : IUrlValidationService
 {
     public async Task ValidateUrlAsync(string url)
     {
         if (!Uri.TryCreate(url, UriKind.Absolute, out var uri))
         {
-            throw new KavitaException("URL is malformed");
+            throw new KavitaException(await localizationService.Translate("url-malformed"));
         }
 
         if (!string.Equals(uri.Scheme, "https", StringComparison.OrdinalIgnoreCase))
         {
-            throw new KavitaException("Only HTTPS URLs are allowed");
+            throw new KavitaException(await localizationService.Translate("url-https-only"));
         }
 
         IPAddress[] addresses;
@@ -29,57 +29,20 @@ public class UrlValidationService : IUrlValidationService
         }
         catch (SocketException)
         {
-            throw new KavitaException("Unable to resolve hostname");
+            throw new KavitaException(await localizationService.Translate("url-unable-to-resolve"));
         }
 
         if (addresses.Length == 0)
         {
-            throw new KavitaException("Unable to resolve hostname");
+            throw new KavitaException(await localizationService.Translate("url-unable-to-resolve"));
         }
 
         foreach (var address in addresses)
         {
-            var ipToCheck = address;
-
-            // Unwrap IPv6-mapped IPv4 addresses
-            if (ipToCheck.IsIPv4MappedToIPv6)
+            if (IpBlocklist.IsBlockedAddress(address))
             {
-                ipToCheck = ipToCheck.MapToIPv4();
-            }
-
-            if (IsBlockedAddress(ipToCheck))
-            {
-                throw new KavitaException("URL resolves to a blocked address");
+                throw new KavitaException(await localizationService.Translate("url-blocked-address"));
             }
         }
-    }
-
-    private static bool IsBlockedAddress(IPAddress address)
-    {
-        if (IPAddress.IsLoopback(address)) return true;
-
-        if (address.AddressFamily == AddressFamily.InterNetwork)
-        {
-            var bytes = address.GetAddressBytes();
-
-            // 10.0.0.0/8
-            if (bytes[0] == 10) return true;
-
-            // 172.16.0.0/12
-            if (bytes[0] == 172 && bytes[1] >= 16 && bytes[1] <= 31) return true;
-
-            // 192.168.0.0/16
-            if (bytes[0] == 192 && bytes[1] == 168) return true;
-
-            // 169.254.0.0/16 (link-local)
-            if (bytes[0] == 169 && bytes[1] == 254) return true;
-        }
-        else if (address.AddressFamily == AddressFamily.InterNetworkV6)
-        {
-            // fe80::/10 (link-local)
-            if (address.IsIPv6LinkLocal) return true;
-        }
-
-        return false;
     }
 }

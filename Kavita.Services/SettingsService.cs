@@ -524,7 +524,8 @@ public class SettingsService(
             var hasTrailingSlash = authority.EndsWith('/');
             var url = authority + (hasTrailingSlash ? string.Empty : "/") + ".well-known/openid-configuration";
 
-            var json = await url.GetStringAsync(cancellationToken: ct);
+            var json = await FlurlConfiguration.CreateSafeRequest(url)
+                .GetStringAsync(cancellationToken: ct);
             var config = OpenIdConnectConfiguration.Create(json);
             return config.Issuer == authority ? AuthorityValidationResult.Success : AuthorityValidationResult.InvalidAuthority;
         }

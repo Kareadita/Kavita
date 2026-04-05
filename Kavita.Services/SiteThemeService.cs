@@ -12,6 +12,7 @@ using Kavita.API.Services;
 using Kavita.API.Services.SignalR;
 using Kavita.Common;
 using Kavita.Common.EnvironmentInfo;
+using Kavita.Common.Helpers;
 using Kavita.Common.Extensions;
 using Kavita.Models.DTOs.SignalR;
 using Kavita.Models.DTOs.Theme;
@@ -255,7 +256,8 @@ public class ThemeService(
             directoryService.FileSystem.FileInfo.New(dto.CssUrl).Name);
         directoryService.DeleteFiles([existingTempFile]);
 
-        var tempDownloadFile = await dto.CssUrl.DownloadFileAsync(directoryService.TempDirectory);
+        var tempDownloadFile = await FlurlConfiguration.CreateSafeRequest(dto.CssUrl)
+            .DownloadFileAsync(directoryService.TempDirectory);
 
         // Validate the hash on the downloaded file
         // if (!_fileService.ValidateSha(tempDownloadFile, dto.Sha))
@@ -363,7 +365,8 @@ public class ThemeService(
 
             directoryService.DeleteFiles([tempLocation]);
 
-            var location = await cssFile.DownloadUrl.DownloadFileAsync(directoryService.TempDirectory);
+            var location = await FlurlConfiguration.CreateSafeRequest(cssFile.DownloadUrl)
+                .DownloadFileAsync(directoryService.TempDirectory);
             if (directoryService.FileSystem.File.Exists(location))
             {
                 directoryService.CopyFileToDirectory(location, directoryService.SiteThemeDirectory);
