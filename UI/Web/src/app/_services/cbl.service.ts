@@ -71,7 +71,7 @@ export class CblService {
     return this.httpClient.post(this.baseUrl + 'cbl/sync?readingListId=' + readingListId, {}, TextResonse);
   }
 
-  updateRemapRule(id: number, update: { volumeId?: number; chapterId?: number; cblVolume?: string; cblNumber?: string }) {
+  updateRemapRule(id: number, update: { seriesId?: number; cblSeriesName?: string; volumeId?: number; chapterId?: number; cblVolume?: string; cblNumber?: string }) {
     return this.httpClient.post<RemapRule>(this.baseUrl + 'cbl/remap-rules/' + id, update);
   }
 

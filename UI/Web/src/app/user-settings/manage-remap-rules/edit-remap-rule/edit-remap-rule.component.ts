@@ -111,11 +111,20 @@ export class EditRemapRuleComponent implements OnInit {
       issueDetail.chapterId = chapter.id;
     }
 
-    this.cblService.createRemapRule(
-      cblSeriesName.trim(),
-      selectedSeries.seriesId,
-      Object.keys(issueDetail).length > 0 ? issueDetail : undefined
-    ).subscribe(rule => {
+    const existingRule = this.rule();
+    const obs$ = existingRule
+      ? this.cblService.updateRemapRule(existingRule.id, {
+          cblSeriesName: cblSeriesName.trim(),
+          seriesId: selectedSeries.seriesId,
+          ...issueDetail,
+        })
+      : this.cblService.createRemapRule(
+          cblSeriesName.trim(),
+          selectedSeries.seriesId,
+          Object.keys(issueDetail).length > 0 ? issueDetail : undefined
+        );
+
+    obs$.subscribe(rule => {
       this.saved.emit(rule);
     });
   }

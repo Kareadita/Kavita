@@ -3,6 +3,8 @@
 
 public sealed record UpdateRemapRuleDto
 {
+    public string? CblSeriesName { get; set; }
+    public int? SeriesId { get; set; }
     public int? VolumeId { get; set; }
     public int? ChapterId { get; set; }
     public string? CblVolume { get; set; }

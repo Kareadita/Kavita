@@ -382,18 +382,54 @@ public class CblController(IReadingListService readingListService, IDirectorySer
     [DisallowRole(PolicyConstants.ReadOnlyRole)]
     public async Task<ActionResult<RemapRuleDto>> UpdateRemapRule(int id, [FromBody] UpdateRemapRuleDto dto)
     {
-        var rule = await unitOfWork.RemapRuleRepository.GetByIdAsync(id);
+        var ct = HttpContext.RequestAborted;
+        var rule = await unitOfWork.RemapRuleRepository.GetByIdAsync(id, ct);
         if (rule == null) return NotFound();
         if (rule.AppUserId != UserId) return Forbid();
+
+        if (dto.SeriesId.HasValue && dto.SeriesId.Value != rule.SeriesId)
+        {
+            var series = await unitOfWork.SeriesRepository.GetSeriesByIdAsync(dto.SeriesId.Value, ct: ct);
+            if (series == null) return BadRequest(await localizationService.Translate(UserId, "series-doesnt-exist"));
+
+            rule.SeriesId = dto.SeriesId.Value;
+            rule.SeriesNameAtMapping = series.Name;
+
+            if (!string.IsNullOrEmpty(dto.CblSeriesName))
+            {
+                rule.CblSeriesName = dto.CblSeriesName;
+                rule.NormalizedCblSeriesName = dto.CblSeriesName.ToNormalized();
+            }
+
+            // Auto-resolve VolumeId when not explicitly provided
+            if (dto.VolumeId == null && dto.ChapterId == null && !string.IsNullOrEmpty(dto.CblVolume) && series.Volumes != null)
+            {
+                var realVolumes = series.Volumes
+                    .Where(v => v.MinNumber is not (ParserConstants.LooseLeafVolumeNumber or ParserConstants.SpecialVolumeNumber))
+                    .ToList();
+
+                if (realVolumes.Count > 0)
+                {
+                    var matched = realVolumes.FirstOrDefault(v =>
+                        v.Name.Equals(dto.CblVolume, StringComparison.OrdinalIgnoreCase)
+                        || v.LookupName.Equals(dto.CblVolume, StringComparison.OrdinalIgnoreCase));
+                    dto.VolumeId = matched?.Id;
+                }
+            }
+        }
 
         rule.VolumeId = dto.VolumeId;
         rule.ChapterId = dto.ChapterId;
         rule.CblVolume = dto.CblVolume;
         rule.CblNumber = dto.CblNumber;
+        if (!string.IsNullOrEmpty(dto.CblSeriesName))
+        {
+            rule.CblSeriesName = dto.CblSeriesName;
+        }
 
-        await unitOfWork.CommitAsync();
+        await unitOfWork.CommitAsync(ct);
 
-        return Ok(await unitOfWork.RemapRuleRepository.GetDtoByIdAsync(id));
+        return Ok(await unitOfWork.RemapRuleRepository.GetDtoByIdAsync(id, ct));
     }
 
     /// <summary>
