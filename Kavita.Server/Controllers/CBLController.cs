@@ -340,7 +340,8 @@ public class CblController(IReadingListService readingListService, IDirectorySer
 
         await unitOfWork.CommitAsync(ct);
 
-        return Ok(mapper.Map<RemapRuleDto>(existing));
+        var resultDto = await unitOfWork.RemapRuleRepository.GetDtoByIdAsync(existing.Id, ct);
+        return Ok(resultDto);
     }
 
     /// <summary>
@@ -355,7 +356,7 @@ public class CblController(IReadingListService readingListService, IDirectorySer
         if (rule == null) return NotFound();
         rule.IsGlobal = true;
         await unitOfWork.CommitAsync();
-        return Ok(mapper.Map<RemapRuleDto>(rule));
+        return Ok(await unitOfWork.RemapRuleRepository.GetDtoByIdAsync(id, HttpContext.RequestAborted));
     }
 
     /// <summary>
@@ -372,7 +373,7 @@ public class CblController(IReadingListService readingListService, IDirectorySer
         rule.IsGlobal = false;
         await unitOfWork.CommitAsync();
 
-        return Ok(mapper.Map<RemapRuleDto>(rule));
+        return Ok(await unitOfWork.RemapRuleRepository.GetDtoByIdAsync(id, HttpContext.RequestAborted));
     }
 
     /// <summary>
@@ -393,7 +394,7 @@ public class CblController(IReadingListService readingListService, IDirectorySer
 
         await unitOfWork.CommitAsync();
 
-        return Ok(mapper.Map<RemapRuleDto>(rule));
+        return Ok(await unitOfWork.RemapRuleRepository.GetDtoByIdAsync(id));
     }
 
     /// <summary>

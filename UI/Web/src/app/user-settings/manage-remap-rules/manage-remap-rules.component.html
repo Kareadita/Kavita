@@ -131,18 +131,7 @@
             {{t('mapped-vol-issue-col')}}
           </ng-template>
           <ng-template let-item="row" ngx-datatable-cell-template>
-            @switch (item.kind) {
-              @case (CblRemapRuleKind.Series) {
-                {{t('series-level')}}
-              }
-              @default {
-                <app-entity-title [libraryType]="item.libraryType"
-                                  [prioritizeTitleName]="false"
-                                  [includeVolume]="true"
-                                  [includeChapter]="true"
-                                  [entity]="cblService.buildChapterStub(item)" />
-              }
-            }
+            {{item | cblRemapRuleChapterTitle | defaultValue}}
           </ng-template>
         </ngx-datatable-column>
 
@@ -212,18 +201,7 @@
             <div class="col-12">
               <div class="text-muted small">{{t('mapped-vol-issue-col')}}</div>
               <div>
-                @switch (item.kind) {
-                  @case (CblRemapRuleKind.Series) {
-                    {{t('series-level')}}
-                  }
-                  @default {
-                    <app-entity-title [libraryType]="item.libraryType"
-                                      [prioritizeTitleName]="false"
-                                      [includeVolume]="true"
-                                      [includeChapter]="true"
-                                      [entity]="cblService.buildChapterStub(item)" />
-                  }
-                }
+                {{item | cblRemapRuleChapterTitle | defaultValue}}
               </div>
             </div>
           </div>
@@ -287,18 +265,7 @@
             {{t('mapped-vol-issue-col')}}
           </ng-template>
           <ng-template let-item="row" ngx-datatable-cell-template>
-            @switch (item.kind) {
-              @case (CblRemapRuleKind.Series) {
-                {{t('series-level')}}
-              }
-              @default {
-                <app-entity-title [libraryType]="item.libraryType"
-                                  [prioritizeTitleName]="false"
-                                  [includeVolume]="true"
-                                  [includeChapter]="true"
-                                  [entity]="cblService.buildChapterStub(item)" />
-              }
-            }
+            {{item | cblRemapRuleChapterTitle | defaultValue}}
           </ng-template>
         </ngx-datatable-column>
 
@@ -367,18 +334,7 @@
             <div class="col-12">
               <div class="text-muted small">{{t('mapped-vol-issue-col')}}</div>
               <div>
-                @switch (item.kind) {
-                  @case (CblRemapRuleKind.Series) {
-                    {{t('series-level')}}
-                  }
-                  @default {
-                    <app-entity-title [libraryType]="item.libraryType"
-                                      [prioritizeTitleName]="false"
-                                      [includeVolume]="true"
-                                      [includeChapter]="true"
-                                      [entity]="cblService.buildChapterStub(item)" />
-                  }
-                }
+                {{item | cblRemapRuleChapterTitle | defaultValue}}
               </div>
             </div>
           </div>
@@ -443,18 +399,7 @@
               {{t('mapped-vol-issue-col')}}
             </ng-template>
             <ng-template let-item="row" ngx-datatable-cell-template>
-              @switch (item.kind) {
-                @case (CblRemapRuleKind.Series) {
-                  {{t('series-level')}}
-                }
-                @default {
-                  <app-entity-title [libraryType]="item.libraryType"
-                                    [prioritizeTitleName]="false"
-                                    [includeVolume]="true"
-                                    [includeChapter]="true"
-                                    [entity]="cblService.buildChapterStub(item)" />
-                }
-              }
+              {{item | cblRemapRuleChapterTitle | defaultValue}}
             </ng-template>
           </ngx-datatable-column>
 
@@ -519,18 +464,7 @@
               <div class="col-12">
                 <div class="text-muted small">{{t('mapped-vol-issue-col')}}</div>
                 <div>
-                  @switch (item.kind) {
-                    @case (CblRemapRuleKind.Series) {
-                      {{t('series-level')}}
-                    }
-                    @default {
-                      <app-entity-title [libraryType]="item.libraryType"
-                                        [prioritizeTitleName]="false"
-                                        [includeVolume]="true"
-                                        [includeChapter]="true"
-                                        [entity]="cblService.buildChapterStub(item)" />
-                    }
-                  }
+                  {{item | cblRemapRuleChapterTitle | defaultValue}}
                 </div>
               </div>
             </div>

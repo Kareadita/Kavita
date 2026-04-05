@@ -6,7 +6,6 @@ import {ToastrService} from 'ngx-toastr';
 import {SearchService} from '../../_services/search.service';
 import {UtilityService} from '../../shared/_services/utility.service';
 import {RemapRule} from '../../_models/reading-list/cbl/remap-rule';
-import {CblRemapRuleKind} from '../../_models/reading-list/cbl/cbl-remap-rule-kind.enum';
 import {SearchResult} from '../../_models/search/search-result';
 import {Chapter} from '../../_models/chapter';
 import {TypeaheadSettings} from '../../typeahead/_models/typeahead-settings';
@@ -19,19 +18,19 @@ import {NonNullableFormBuilder, ReactiveFormsModule} from '@angular/forms';
 import {DatePipe} from '@angular/common';
 import {ImageComponent} from '../../shared/image/image.component';
 import {ImageService} from '../../_services/image.service';
-import {DefaultValuePipe} from "../../_pipes/default-value.pipe";
-import {EntityTitleComponent} from "../../cards/entity-title/entity-title.component";
+import {DefaultValuePipe} from '../../_pipes/default-value.pipe';
+import {CblRemapRuleChapterTitlePipe} from '../../_pipes/cbl-remap-rule-chapter-title.pipe';
 
 @Component({
   selector: 'app-manage-remap-rules',
   templateUrl: './manage-remap-rules.component.html',
   styleUrls: ['./manage-remap-rules.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [TranslocoDirective, NgxDatatableModule, ResponsiveTableComponent, TypeaheadComponent, ReactiveFormsModule, DatePipe, ImageComponent, DefaultValuePipe, EntityTitleComponent]
+  imports: [TranslocoDirective, NgxDatatableModule, ResponsiveTableComponent, TypeaheadComponent, ReactiveFormsModule, DatePipe, ImageComponent, DefaultValuePipe, CblRemapRuleChapterTitlePipe]
 })
 export class ManageRemapRulesComponent implements OnInit {
 
-  protected readonly cblService = inject(CblService);
+  private readonly cblService = inject(CblService);
   private readonly accountService = inject(AccountService);
   private readonly confirmService = inject(ConfirmService);
   private readonly toastr = inject(ToastrService);
@@ -180,8 +179,6 @@ export class ManageRemapRulesComponent implements OnInit {
       this.toastr.success(translate('toasts.cbl-remap-rule-demoted'));
     });
   }
-
-  protected readonly CblRemapRuleKind = CblRemapRuleKind;
 
   private createChapterTypeahead(seriesId: number): TypeaheadSettings<Chapter> {
     const settings = new TypeaheadSettings<Chapter>();

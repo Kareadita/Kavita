@@ -99,4 +99,5 @@ export class CblService {
       isSpecial: rule.chapterIsSpecial,
     } as Chapter;
   }
+
 }
