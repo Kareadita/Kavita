@@ -53,7 +53,10 @@ const EMULATE_SCROLL_END_DEBOUNCE = 100;
  * See: https://github.com/Kareadita/Kavita/issues/3970
  */
 const INITIAL_LOAD_GRACE_PERIOD = 1000;
-
+/**
+ * How many times the Webtoon reader will retry failed images
+ */
+const MAX_FAILED_IMG_RETRIES = 3;
 /**
  * Bitwise enums for configuring how much debug information we want
  */
@@ -676,7 +679,7 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy, 
       const item = this.retryImages.dequeue();
       if (!item) continue;
 
-      console.log('Retrying failed load of page ' +  item.page, ' retry count: ' + item.retryCount)
+      this.debugLog('Retrying failed load of page ' +  item.page, ' retry count: ' + item.retryCount)
       // Skip stale (chapter id has changed)
       if (item?.chapterId !== this.chapterId) continue;
 
@@ -690,15 +693,16 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy, 
       const success = await this.waitForLoadOrError(pageElem);
 
       if (success) {
+        this.debugLog('Resolved a failed load for page: ', item.page);
         // Remove the error styling
         this.renderer.setStyle(pageElem, 'border', 'initial');
         this.onImageLoad({ target: pageElem });
-      } else if (item.retryCount < 3) {
+      } else if (item.retryCount < MAX_FAILED_IMG_RETRIES) {
         item.retryCount++;
         this.retryImages.enqueue(item);
         await this.delay(1000 * item.retryCount); // Backoff pressure
       } else {
-        console.log('Failed to load page ' + this.pageNum + ' after 3 retries');
+        console.error('Failed to load page ' + this.pageNum + ' after 3 retries');
       }
     }
 
