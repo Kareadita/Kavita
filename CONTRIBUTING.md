@@ -50,17 +50,23 @@ The backend may fail to start due to port 5000 already being in use. To fix this
 - Use 4 spaces instead of tabs, this is the default for VS 2019 and WebStorm (to my knowledge)
     - Use 2 spaces for UI files
 
-### Pull Requesting ###
-- Only make pull requests to develop, never main, if you make a PR to main we'll comment on it and close it
-- You're probably going to get some comments or questions from us, they will be to ensure consistency and maintainability
-- We'll try to respond to pull requests as soon as possible, if its been a day or two, please reach out to us, we may have missed it
-- Each PR should come from its own [feature branch](http://martinfowler.com/bliki/FeatureBranch.html) not develop in your fork, it should have a meaningful branch name (what is being added/fixed)
-    - new-feature (Bad)
-    - fix-bug (Bad)
-    - patch (Bad)
-    - develop (Bad)
-    - feature/parser-enhancements (Great)
-    - bugfix/book-issues (Great)
+## Pull Requests ##
+
+### 1. Use feature branches to develop
+Each PR should come from its own [feature branch](http://martinfowler.com/bliki/FeatureBranch.html) (not `develop` in your fork). It should have a meaningful branch name to describe what is being added/fixed.
+
+| Great Example | Bad Example |
+| - | - |
+| `feature/parser-enhancements` | `new-feature`  |
+| `bugfix/sidenav-mobile-overlap` | `fix-bug` |
+| `docs/contributing` | `contributiondocs` |
+
+### 2. Only make pull requests to `develop`
+If you make a PR to `main` we'll comment on it and close it.
+
+### 3. Review any of our comments or questions
+We review each PR for consistency and maintainability.
+We'll try to respond as soon as possible. If it's been a day or two, please reach out to us, we may have missed it.
 
 ## API Reference (Swagger) ##
  To view the full API documentation and test endpoints locally, run the server in Debug mode.
