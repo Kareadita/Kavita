@@ -16,27 +16,38 @@ Setup guides, FAQ, the more information we have on the [wiki](https://wiki.kavit
 - .NET 9.0+
 - dotnet tool install -g Swashbuckle.AspNetCore.Cli
 
-### Getting started ###
+## Getting Started ##
 
-1. Fork Kavita
-2. Clone the repository into your development machine. [*info*](https://docs.github.com/en/github/creating-cloning-and-archiving-repositories/cloning-a-repository-from-github)
-3. Install the required Node Packages
+### Fork and Clone Kavita
+
+Fork the repository on GitHub, then clone your fork onto your local development machine.
+
+### Frontend
+
+1. Install the required Node Packages
     - `cd Kavita/UI/Web`
     - `npm install`
     - `npm install -g @angular/cli`
-5. Start the frontend 
+2. Start the frontend 
     - `npm run start`
-6. Build the project in Visual Studio/Rider, Setting startup project to `Kavita.Server (Server)`
-7. Debug the project in Visual Studio/Rider
-8. Open http://localhost:4200
-9. (Deployment only) Run build.sh and pass the Runtime Identifier for your OS or just build.sh for all supported RIDs.
+3. Open http://localhost:4200
 
-### Debugging on Device ###
-- Run `npm run start-proxy` instead to have the Angular application proxy the requests to the backend.
+#### Debugging on Device
+  Run `npm run start-proxy` instead to have the Angular application proxy the requests to the backend.
 
-### Apple users
+### Backend
 
-The backend may fail to start due to port 5000 already being in use. To fix this, temporally turn off AirPlay Receiver in System Settings. You can re-enable it later, it will bind to a different port. You may need to do this again after an update or reboot.
+1. Build the project in Visual Studio/Rider, and set the startup project to `Kavita.Server (Server)`
+2. Debug the project in Visual Studio/Rider
+
+#### Troubleshooting: Apple users
+
+The backend may fail to start due to port 5000 already being in use. To fix this, **temporarily turn off AirPlay Receiver in System Settings.**
+
+You can re-enable the setting later, and it will bind to a different port. You may need to do this again after an update or reboot.
+
+### Deployment
+Run build.sh and pass the Runtime Identifier for your OS or just build.sh for all supported RIDs.
 
 ## Contributing Code ##
 
