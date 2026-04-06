@@ -124,8 +124,8 @@ public class CoverDbService : ICoverDbService
 
         try
         {
-            var htmlContent = FlurlConfiguration.CreateSafeRequest(url)
-                .GetStringAsync(cancellationToken: ct).Result;
+            var htmlContent = await FlurlConfiguration.CreateSafeRequest(url)
+                .GetStringAsync(cancellationToken: ct);
             var htmlDocument = new HtmlDocument();
             htmlDocument.LoadHtml(htmlContent);
 

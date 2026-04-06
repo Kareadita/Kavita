@@ -84,7 +84,8 @@ public static class FlurlConfiguration
                             }
                         }
 
-                        throw new KavitaException("Could not connect: all resolved addresses were blocked or unreachable (SSRF protection)");
+
+                        throw new KavitaException("url-blocked-address");
                     }
                 };
 
