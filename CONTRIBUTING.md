@@ -5,18 +5,17 @@ We're always looking for people to help make Kavita even better, there are a num
 ## Documentation ##
 Setup guides, FAQ, the more information we have on the [wiki](https://wiki.kavitareader.com/contributing) the better.
 
-## Development ##
+## Getting Started: Development Setup ##
 
 ### Tools required ###
-- Visual Studio 2019 or higher (https://www.visualstudio.com/vs/).  The community version is free and works fine. [Download it here](https://www.visualstudio.com/downloads/).
-- Rider (optional to Visual Studio, preferred editor) (https://www.jetbrains.com/rider/)  
-- HTML/Javascript editor of choice (VS Code/Sublime Text/Webstorm/Atom/etc)
+- .NET editor
+  - [Rider](https://www.jetbrains.com/rider/) (preferred)   
+  - [Visual Studio](https://www.visualstudio.com/downloads/) 2019 or higher
+- HTML/Javascript editor (VS Code/Sublime Text/Webstorm/Atom/etc)
 - [Git](https://git-scm.com/downloads)
 - [NodeJS](https://nodejs.org/en/download/) (Node 18.13.X or higher)
 - .NET 9.0+
 - dotnet tool install -g Swashbuckle.AspNetCore.Cli
-
-## Getting Started ##
 
 ### Fork and Clone Kavita
 
@@ -40,7 +39,7 @@ Fork the repository on GitHub, then clone your fork onto your local development 
 1. Build the project in Visual Studio/Rider, and set the startup project to `Kavita.Server (Server)`
 2. Debug the project in Visual Studio/Rider
 
-#### Troubleshooting: Apple users
+#### Troubleshooting for Apple users
 
 The backend may fail to start due to port 5000 already being in use. To fix this, **temporarily turn off AirPlay Receiver in System Settings.**
 
@@ -49,7 +48,7 @@ You can re-enable the setting later, and it will bind to a different port. You m
 ### Deployment
 Run build.sh and pass the Runtime Identifier for your OS or just build.sh for all supported RIDs.
 
-## Contributing Code ##
+## Contributing Code
 
 ### General Guidelines
 - If you're working on a requested feature, please comment on the [Github Issue](https://github.com/Kareadita/Kavita/issues "Github Issues") so work is not duplicated
@@ -59,12 +58,12 @@ Run build.sh and pass the Runtime Identifier for your OS or just build.sh for al
 - Add tests (unit/integration)
 - Reach out to us on Discord if you have any questions
 
-### Formatting ###
+### Formatting
 - Commit with *nix line endings for consistency (We checkout Windows and commit *nix)
 - Use 4 spaces instead of tabs, this is the default for VS 2019 and WebStorm (to our knowledge)
 - Use 2 spaces for UI files
 
-### Pull Requests ###
+### Pull Requests
 
 Feel free to make a pull request before work is complete, this will let us see where it's at and make comments/suggest improvements.
 
@@ -87,7 +86,7 @@ If you make a PR to `main` we'll comment on it and close it.
 We review each PR for consistency and maintainability.
 We'll try to respond as soon as possible. If it's been a day or two, please reach out to us, we may have missed it.
 
-## API Reference (Swagger) ##
+## API Reference (Swagger)
  To view the full API documentation and test endpoints locally, run the server in Debug mode.
 
 1. **Navigate to server directory:** `cd Kavita/Kavita.Server`
@@ -97,7 +96,7 @@ We'll try to respond as soon as possible. If it's been a day or two, please reac
 For any build issues run
 ` swagger tofile --output ../openapi.json API/bin/Debug/net8.0/API.dll v1` to see the error and correct it.
 
-## Building external scripts/apps ##
+## Building external scripts/apps
 We welcome anyone to build external scripts and applications. Reach out to us about publishing, we will link it from our wiki and Discord. 
 
 **Please do not use words like "Kavita reader" or "Kavita" as your explicit app name.** Use of "[name]: A Kavita Reader" is preferred. 
