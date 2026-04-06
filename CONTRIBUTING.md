@@ -62,14 +62,15 @@ The backend may fail to start due to port 5000 already being in use. To fix this
     - feature/parser-enhancements (Great)
     - bugfix/book-issues (Great)
 
-### Swagger API ###
-If you just want to play with Swagger, you can just
-- cd Kavita/Kavita.Server
-- dotnet run -c Debug
-- Go to http://localhost:5000/swagger/index.html
+## API Reference (Swagger) ##
+ To view the full API documentation and test endpoints locally, run the server in Debug mode.
 
-If you have a build issue around swagger run:
-` swagger tofile --output ../openapi.json API/bin/Debug/net8.0/API.dll v1` to see the error and correct it
+1. **Navigate to server directory:** `cd Kavita/Kavita.Server`
+2. **Start server:** `dotnet run -c Debug`        
+3. **Access the UI at:** http://localhost:5000/swagger/index.html
+
+For any build issues run
+` swagger tofile --output ../openapi.json API/bin/Debug/net8.0/API.dll v1` to see the error and correct it.
 
 ### Building external scripts/apps ###
 We welcome anyone to build external scripts and applications. Reach out to us about publishing, we will link from our wiki and discord. 
