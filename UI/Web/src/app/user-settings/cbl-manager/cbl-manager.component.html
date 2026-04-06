@@ -109,10 +109,6 @@
 
               <div class="d-flex justify-content-between align-items-start mt-1">
                 <div class="d-flex">
-                  @if (selectedItem.canSync) {
-                    <span class="pill p-1 me-2 provider">{{t('can-sync')}}</span>
-                  }
-
                   <div class="text-muted mt-1" style="font-size: 0.9rem;">
                     @if (selectedItem.ageRating) {
                       <span>{{selectedItem.ageRating | ageRating}}</span>
@@ -126,7 +122,11 @@
                     @if (selectedItem.ageRating || selectedItem.startingYear > 0) {
                       <span class="dot-separator mx-1"></span>
                     }
-                    <span>{{selectedItem.itemCount}} {{t('items-count')}}</span>
+                    <span>{{t('items-count', {num: selectedItem.itemCount})}}</span>
+
+                    @if (selectedItem.canSync) {
+                      <i class="fas fa-circle-question ms-2" tabindex="0" [ngbTooltip]="selectedItem.downloadUrl ?? selectedItem.sourcePath"></i>
+                    }
                   </div>
                 </div>
 
@@ -135,6 +135,17 @@
                     <span class="pill p-1 me-1  update-available">{{t('update-available')}}</span>
                   </div>
                 }
+              </div>
+
+              <div class="d-flex">
+                <div class="mt-1">
+                  @if (selectedItem.canSync) {
+                    <div class="mt-3 text-muted" style="font-size: 0.8rem;">
+                      <div>{{t('last-synced', {date: (selectedItem.lastSyncedUtc | utcToLocalDate | timeAgo)})}}</div>
+                      <div>{{t('last-checked', {date: (selectedItem.lastSyncCheckUtc | utcToLocalDate | timeAgo)})}}</div>
+                    </div>
+                  }
+                </div>
               </div>
             </div>
           </div>
@@ -150,15 +161,6 @@
               {{t('view-list')}} <i class="fa fa-arrow-right ms-1" aria-hidden="true"></i>
             </a>
           </div>
-
-          @if (selectedItem.canSync && selectedItem.lastSyncedDate) {
-            <div class="mt-3 text-muted" style="font-size: 0.8rem;">
-              <span>{{t('last-synced', {date: (selectedItem.lastSyncedDate | date)})}}</span>
-              @if (selectedItem.downloadUrl) {
-                <span> <span class="dot-separator"></span> {{t('source')}}: {{selectedItem.downloadUrl}}</span>
-              }
-            </div>
-          }
 
         } @else {
           <p>{{t('not-authorized')}}</p>

@@ -346,7 +346,7 @@ public class CblImportService(IUnitOfWork unitOfWork, ICblGithubService cblGithu
             // Update metadata
             SetMetadataFromParsedCbl(cbl, readingList);
 
-            if (contentHash != null)
+            if (!string.IsNullOrEmpty(contentHash))
             {
                 readingList.ShaHash = contentHash;
             }

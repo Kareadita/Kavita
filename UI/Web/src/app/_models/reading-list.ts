@@ -85,8 +85,8 @@ export interface ReadingList extends IHasCover {
   downloadUrl: string | null;
   shareUrl: string | null;
   provider: ReadingListProvider;
-  lastSyncCheckUtc: Date | null;
-  lastSyncedDate: Date | null;
+  lastSyncCheckUtc: string | null;
+  lastSyncedUtc: string | null;
   canSync: boolean;
   hasRemoteChange: boolean;
 }

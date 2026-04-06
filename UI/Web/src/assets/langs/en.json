@@ -2096,7 +2096,7 @@
         "url-label": "Url",
         "load": "Load",
         "back": "Back",
-        "items-count": "items",
+        "items-count": "{{num}} items",
         "provider-url": "URL",
         "provider-file": "File",
         "update-available": "Update available",
@@ -2109,9 +2109,8 @@
         "sync": "Sync",
         "delete": "{{common.delete}}",
         "view-list": "View Reading List",
-        "last-synced": "Last synced {{date}}",
-        "source": "Source",
-        "can-sync": "Can Sync",
+        "last-synced": "Last Synced: {{date}}",
+        "last-checked": "Last Checked: {{date}}",
         "not-authorized": "You lack the ability to interact with this content"
     },
 

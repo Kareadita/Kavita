@@ -3,7 +3,7 @@ import {AccountService} from '../../_services/account.service';
 import {ToastrService} from 'ngx-toastr';
 import {ConfirmService} from '../../shared/confirm.service';
 import {ModalService} from '../../_services/modal.service';
-import {DatePipe, NgTemplateOutlet} from '@angular/common';
+import {NgTemplateOutlet} from '@angular/common';
 import {FileSystemFileEntry, NgxFileDropEntry, NgxFileDropModule} from 'ngx-file-drop';
 import {ReadingListService} from '../../_services/reading-list.service';
 import {ReadingList, ReadingListProvider} from '../../_models/reading-list';
@@ -14,7 +14,7 @@ import {ImportCblModalComponent} from '../_modals/import-cbl-modal/import-cbl-mo
 import {CblService} from '../../_services/cbl.service';
 import {CblRepoItem} from '../../_models/reading-list/cbl/cbl-repo-item';
 import {CblSavedFile} from '../../_models/reading-list/cbl/cbl-saved-file';
-import {FormControl, FormGroup, ReactiveFormsModule} from '@angular/forms';
+import {ReactiveFormsModule} from '@angular/forms';
 import {PromotedIconComponent} from '../../shared/_components/promoted-icon/promoted-icon.component';
 import {ReadingListProviderPipe} from '../../_pipes/reading-list-provider.pipe';
 import {forkJoin} from 'rxjs';
@@ -28,6 +28,9 @@ import {ModalResult} from "../../_models/modal/modal-result";
 import {
   FileDragAndDropUploadComponent
 } from "src/app/shared/file-drag-and-drop-upload/file-drag-and-drop-upload.component";
+import {UtcToLocalDatePipe} from "../../_pipes/utc-to-locale-date.pipe";
+import {NgbTooltip} from "@ng-bootstrap/ng-bootstrap";
+import {TimeAgoPipe} from "../../_pipes/time-ago.pipe";
 
 @Component({
   selector: 'app-cbl-manager',
@@ -43,8 +46,10 @@ import {
     ImageComponent,
     AgeRatingPipe,
     RouterLink,
-    DatePipe,
-    FileDragAndDropUploadComponent
+    FileDragAndDropUploadComponent,
+    UtcToLocalDatePipe,
+    NgbTooltip,
+    TimeAgoPipe
   ],
   templateUrl: './cbl-manager.component.html',
   styleUrl: './cbl-manager.component.scss',
@@ -89,6 +94,8 @@ export class CblManagerComponent implements OnInit {
     }
     return lists;
   });
+
+
 
   ngOnInit() {
     this.readingListService.getReadingLists(false).subscribe(lists => {
