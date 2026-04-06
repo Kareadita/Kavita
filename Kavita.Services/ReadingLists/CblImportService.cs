@@ -21,6 +21,7 @@ using Kavita.Models.Extensions;
 using Kavita.Services.Helpers;
 using Flurl.Http;
 using Kavita.Common;
+using Kavita.Common.Helpers;
 using Microsoft.Extensions.Logging;
 
 namespace Kavita.Services.ReadingLists;
@@ -295,7 +296,7 @@ public class CblImportService(IUnitOfWork unitOfWork, ICblGithubService cblGithu
             try
             {
                 await urlValidationService.ValidateUrlAsync(readingList.DownloadUrl);
-                content = await readingList.DownloadUrl.GetStringAsync();
+                content = await FlurlConfiguration.CreateSafeRequest(readingList.DownloadUrl).GetStringAsync();
             }
             catch (Exception ex)
             {

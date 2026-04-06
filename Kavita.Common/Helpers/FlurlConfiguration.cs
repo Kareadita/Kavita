@@ -80,11 +80,11 @@ public static class FlurlConfiguration
                             catch
                             {
                                 socket.Dispose();
-                                throw;
+                                continue;
                             }
                         }
 
-                        throw new KavitaException("All resolved addresses are blocked (SSRF protection)");
+                        throw new KavitaException("Could not connect: all resolved addresses were blocked or unreachable (SSRF protection)");
                     }
                 };
 

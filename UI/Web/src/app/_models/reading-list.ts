@@ -8,7 +8,7 @@ import {IHasCast} from "./common/i-has-cast";
 export interface ReadingListItemChapter {
   id: number;
   range: string;
-  titleName: string;
+  titleName?: string;
   minNumber: number;
   maxNumber: number;
   sortOrder: number;
