@@ -32,9 +32,9 @@ import {TranslocoDirective} from "@jsverse/transloco";
 import {InfiniteScrollDirective} from "ngx-infinite-scroll";
 import {ReaderSetting} from "../../_models/reader-setting";
 import {SafeStylePipe} from "../../../_pipes/safe-style.pipe";
-import {UtilityService} from "../../../shared/_services/utility.service";
 import {ReadingProfile} from "../../../_models/preferences/reading-profiles";
 import {BreakpointService} from "../../../_services/breakpoint.service";
+import {Queue} from "../../../shared/data-structures/queue";
 
 /**
  * How much additional space should pass, past the original bottom of the document height before we trigger the next chapter load
@@ -85,13 +85,10 @@ const enum DEBUG_MODES {
 })
 export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy, AfterViewInit {
   private readonly document = inject<Document>(DOCUMENT);
-
-
   private readonly mangaReaderService = inject(MangaReaderService);
   private readonly readerService = inject(ReaderService);
   private readonly renderer = inject(Renderer2);
   private readonly scrollService = inject(ScrollService);
-  private readonly utilityService = inject(UtilityService);
   private readonly injector = inject(Injector);
   private readonly cdRef = inject(ChangeDetectorRef);
   private readonly destroyRef = inject(DestroyRef);
@@ -115,6 +112,7 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy, 
   @Input({required: true}) urlProvider!: (page: number) => string;
   @Input({required: true}) readerSettings$!: Observable<ReaderSetting>;
   @Input({required: true}) readingProfile!: ReadingProfile;
+  @Input({required: true}) chapterId!: number;
   readonly pageNumberChange = output<number>();
   readonly loadNextChapter = output<void>();
   readonly loadPrevChapter = output<void>();
@@ -135,6 +133,9 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy, 
    * Stores and emits all the src urls
    */
   webtoonImages: BehaviorSubject<WebtoonImage[]> = new BehaviorSubject<WebtoonImage[]>([]);
+  /** Urls that need to be retried for download **/
+  retryImages = new Queue<{page: number, src: string, chapterId: number, retryCount: number}>();
+  isProcessingRetries = false;
 
   /**
    * Responsible for calculating current page on screen and uses hooks to trigger prefetching.
@@ -196,7 +197,7 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy, 
   /**
    * Debug mode. Will show extra information. Use bitwise (|) operators between different modes to enable different output
    */
-  debugMode: DEBUG_MODES = DEBUG_MODES.None;
+  debugMode: DEBUG_MODES = DEBUG_MODES.Logs;
   /**
    * Debug mode. Will filter out any messages in here so they don't hit the log
    */
@@ -597,6 +598,7 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy, 
     this.recalculateImageWidth();
     this.imagesLoaded = {};
     this.webtoonImages.next([]);
+    this.retryImages = new Queue();
     this.atBottom = false;
     this.checkIfShouldTriggerContinuousReader();
     this.cdRef.markForCheck();
@@ -648,6 +650,70 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy, 
           this.cdRef.markForCheck();
       });
     }
+  }
+
+  onImageLoadError(event: any) {
+    const imagePage = this.readerService.imageUrlToPageNum(event.target.src);
+    const chapterId = this.readerService.imageUrlToChapterId(event.target.src);
+    this.debugLog('[Image Error] Failed to load page: ', imagePage);
+
+    // Let's set the height of the img since we already know it then retry
+    const dimensions = this.mangaReaderService.getPageDimensions(imagePage);
+    if (dimensions?.height) {
+      this.renderer.setStyle(event.target, 'height', dimensions?.height + 'px');
+      this.renderer.setStyle(event.target, 'border', '1px solid red');
+    }
+
+    this.retryImages.enqueue({retryCount: 0, page: imagePage, src: event.target.src, chapterId: chapterId});
+    this.processImageRetry();
+  }
+
+  private async processImageRetry() {
+    if (this.isProcessingRetries) return;
+    this.isProcessingRetries = true;
+
+    while (!this.retryImages.isEmpty()) {
+      const item = this.retryImages.dequeue();
+      if (!item) continue;
+
+      console.log('Retrying failed load of page ' +  item.page, ' retry count: ' + item.retryCount)
+      // Skip stale (chapter id has changed)
+      if (item?.chapterId !== this.chapterId) continue;
+
+      // Skip descoped DOM
+      const pageElem = this.document.querySelector('img#page-' + item.page) as HTMLImageElement;
+      if (!pageElem) continue;
+
+      const urlWithoutRetry = item.src.split('&retry=')[0];
+      pageElem.src = urlWithoutRetry + '&retry=' + item.retryCount;
+
+      const success = await this.waitForLoadOrError(pageElem);
+
+      if (success) {
+        // Remove the error styling
+        this.renderer.setStyle(pageElem, 'border', 'initial');
+        this.onImageLoad({ target: pageElem });
+      } else if (item.retryCount < 3) {
+        item.retryCount++;
+        this.retryImages.enqueue(item);
+        await this.delay(1000 * item.retryCount); // Backoff pressure
+      } else {
+        console.log('Failed to load page ' + this.pageNum + ' after 3 retries');
+      }
+    }
+
+    this.isProcessingRetries = false;
+  }
+
+  private delay(ms: number): Promise<void> {
+    return new Promise(resolve => setTimeout(resolve, ms));
+  }
+
+  private waitForLoadOrError(img: HTMLImageElement): Promise<boolean>  {
+    return new Promise(resolve => {
+      img.onload = () => resolve(true);
+      img.onerror = () => resolve(false);
+    });
   }
 
   handleBottomIntersection(entries: IntersectionObserverEntry[]) {
