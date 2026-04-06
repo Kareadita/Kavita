@@ -2,8 +2,11 @@
 
 We're always looking for people to help make Kavita even better, there are a number of ways to contribute.
 
-## Documentation ##
-Setup guides, FAQ, the more information we have on the [wiki](https://wiki.kavitareader.com/contributing) the better.
+## Contribute to the Wiki ##
+
+Our documentation is a community effort! You can fix a typo, clarify a setup step, or add a new FAQ to the wiki. The more information we have on the [wiki](https://wiki.kavitareader.com/contributing) the better.
+
+The docs are maintained in the [Wiki-Nextra](https://github.com/Kareadita/Wiki-Nextra) repository.
 
 ## Getting Started: Development Setup ##
 
