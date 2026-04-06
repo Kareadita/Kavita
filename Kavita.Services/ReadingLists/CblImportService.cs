@@ -252,7 +252,7 @@ public class CblImportService(IUnitOfWork unitOfWork, ICblGithubService cblGithu
         await readingListService.GenerateReadingListCoverImage(readingList);
     }
 
-    public async Task SyncReadingListAsync(int userId, int readingListId)
+    public async Task SyncReadingListAsync(int userId, int readingListId, bool force = false)
     {
         var readingList = await unitOfWork.ReadingListRepository
             .GetReadingListByIdAsync(readingListId, ReadingListIncludes.Items);
@@ -272,10 +272,8 @@ public class CblImportService(IUnitOfWork unitOfWork, ICblGithubService cblGithu
             try
             {
                 var remoteSha = await cblGithubService.GetFileSha(readingList.SourcePath);
-                if (!readingList.HasRemoteChange(remoteSha))
+                if (await CheckAndMarkIfNoChanges(readingList, remoteSha, force))
                 {
-                    readingList.LastSyncCheckUtc = DateTime.UtcNow;
-                    await unitOfWork.CommitAsync();
                     return;
                 }
 
@@ -307,10 +305,8 @@ public class CblImportService(IUnitOfWork unitOfWork, ICblGithubService cblGithu
             }
 
             contentHash = FileService.ComputeSha256(content);
-            if (!readingList.HasRemoteChange(contentHash))
+            if (await CheckAndMarkIfNoChanges(readingList, contentHash, force))
             {
-                readingList.LastSyncCheckUtc = DateTime.UtcNow;
-                await unitOfWork.CommitAsync();
                 return;
             }
         }
@@ -374,6 +370,17 @@ public class CblImportService(IUnitOfWork unitOfWork, ICblGithubService cblGithu
         {
             try { directoryService.FileSystem.File.Delete(tempFile); } catch { /* The file will be cleaned up with nightly, okay to swallow */ }
         }
+    }
+
+    private async Task<bool> CheckAndMarkIfNoChanges(ReadingList readingList, string hash, bool force)
+    {
+        if (force || readingList.HasRemoteChange(hash)) return false;
+
+        logger.LogDebug("Sync of Reading List {ReadingListTitle} ({ReadingListId}) has no remote changes", readingList.Title, readingList.Id);
+        readingList.LastSyncCheckUtc = DateTime.UtcNow;
+        await unitOfWork.CommitAsync();
+        return true;
+
     }
 
     /// <summary>

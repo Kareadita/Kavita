@@ -41,13 +41,14 @@ public class CblController(IReadingListService readingListService, IDirectorySer
     /// Enqueues the Reading List to be synced on a background thread. UI will be informed from <see cref="MessageFactory.ReadingListUpdated"/> event
     /// </summary>
     /// <param name="readingListId"></param>
+    /// <param name="force">Ignore Hash and force sync flow</param>
     /// <returns></returns>
     [HttpPost("sync")]
     [DisallowRole(PolicyConstants.ReadOnlyRole)]
     [ReadingListAccess]
-    public ActionResult SyncReadingList([FromQuery] int readingListId)
+    public ActionResult SyncReadingList([FromQuery] int readingListId, bool force = false)
     {
-        BackgroundJob.Enqueue(() => cblImporterService.SyncReadingListAsync(UserId, readingListId));
+        BackgroundJob.Enqueue(() => cblImporterService.SyncReadingListAsync(UserId, readingListId, force));
         return Ok();
     }
 

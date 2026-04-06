@@ -176,7 +176,7 @@ export class CblManagerComponent implements OnInit {
   }
 
   syncReadingList(list: ReadingList) {
-    this.cblService.syncList(list.id).subscribe(() => {
+    this.cblService.syncList(list.id, true).subscribe(() => {
       this.toastr.success(translate('toasts.reading-list-sync-enqueued'));
     });
   }

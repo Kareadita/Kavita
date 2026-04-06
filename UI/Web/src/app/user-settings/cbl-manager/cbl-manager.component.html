@@ -102,7 +102,7 @@
                     </button>
                   }
                   @if (selectedItem.canSync) {
-                    <button class="btn btn-primary btn-sm" (click)="syncReadingList(selectedItem)" [disabled]="!selectedItem.hasRemoteChange">{{t('sync')}}</button>
+                    <button class="btn btn-primary btn-sm" (click)="syncReadingList(selectedItem)">{{t('sync')}}</button>
                   }
                 </div>
               </div>

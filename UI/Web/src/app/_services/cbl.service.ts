@@ -67,8 +67,8 @@ export class CblService {
     });
   }
 
-  syncList(readingListId: number) {
-    return this.httpClient.post(this.baseUrl + 'cbl/sync?readingListId=' + readingListId, {}, TextResonse);
+  syncList(readingListId: number, force = false) {
+    return this.httpClient.post(this.baseUrl + `cbl/sync?readingListId=${readingListId}&force=${force}`, {}, TextResonse);
   }
 
   updateRemapRule(id: number, update: { seriesId?: number; cblSeriesName?: string; volumeId?: number; chapterId?: number; cblVolume?: string; cblNumber?: string }) {

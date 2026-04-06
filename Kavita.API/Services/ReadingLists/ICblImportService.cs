@@ -17,7 +17,7 @@ public interface ICblImportService
     /// Checks for updates against upstream ReadingList files and attempts to Update reading list
     /// </summary>
     /// <remarks>Does not prompt for validation, makes best guess</remarks>
-    Task SyncReadingListAsync(int userId, int readingListId);
+    Task SyncReadingListAsync(int userId, int readingListId, bool force = false);
     /// <summary>
     /// Iterates over all users and reading lists that are sync-applicable and attempts to sync them
     /// </summary>
