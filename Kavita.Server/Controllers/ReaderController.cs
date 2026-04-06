@@ -91,11 +91,6 @@ public class ReaderController(ICacheService cacheService,
     {
         if (page < 0) page = 0;
 
-        if (Random.Shared.Next(10) < 5)
-        {
-            return BadRequest(); // TODO: DEBUG CODE
-        }
-
         try
         {
             var chapter = await cacheService.Ensure(chapterId, extractPdf);
