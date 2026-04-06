@@ -38,21 +38,26 @@ Setup guides, FAQ, the more information we have on the [wiki](https://wiki.kavit
 
 The backend may fail to start due to port 5000 already being in use. To fix this, temporally turn off AirPlay Receiver in System Settings. You can re-enable it later, it will bind to a different port. You may need to do this again after an update or reboot.
 
-### Contributing Code ###
-- If you're adding a new, already requested feature, please comment on [Github Issues](https://github.com/Kareadita/Kavita/issues "Github Issues") so work is not duplicated (If you want to add something not already on there, please talk to us first)
-- Rebase from Kavita's develop branch, don't merge
+## Contributing Code ##
+
+### General Guidelines
+- If you're working on a requested feature, please comment on the [Github Issue](https://github.com/Kareadita/Kavita/issues "Github Issues") so work is not duplicated
+- If you want to add something without an existing issue, please talk to us first or open an issue
+- Rebase from Kavita's `develop` branch, don't merge
 - Make meaningful commits, or squash them
-- Feel free to make a pull request before work is complete, this will let us see where its at and make comments/suggest improvements
-- Reach out to us on the discord if you have any questions
 - Add tests (unit/integration)
+- Reach out to us on Discord if you have any questions
+
+### Formatting ###
 - Commit with *nix line endings for consistency (We checkout Windows and commit *nix)
-- One feature/bug fix per pull request to keep things clean and easy to understand
-- Use 4 spaces instead of tabs, this is the default for VS 2019 and WebStorm (to my knowledge)
-    - Use 2 spaces for UI files
+- Use 4 spaces instead of tabs, this is the default for VS 2019 and WebStorm (to our knowledge)
+- Use 2 spaces for UI files
 
-## Pull Requests ##
+### Pull Requests ###
 
-### 1. Use feature branches to develop
+Feel free to make a pull request before work is complete, this will let us see where it's at and make comments/suggest improvements.
+
+#### 1. Use feature branches to develop
 Each PR should come from its own [feature branch](http://martinfowler.com/bliki/FeatureBranch.html) (not `develop` in your fork). It should have a meaningful branch name to describe what is being added/fixed.
 
 | Great Example | Bad Example |
@@ -61,10 +66,13 @@ Each PR should come from its own [feature branch](http://martinfowler.com/bliki/
 | `bugfix/sidenav-mobile-overlap` | `fix-bug` |
 | `docs/contributing` | `contributiondocs` |
 
-### 2. Only make pull requests to `develop`
+#### 2. Don't submit large pull requests
+Make sure there is only one feature/bug fix per pull request to keep things clean and easy to understand.
+
+#### 3. Only make pull requests to `develop`
 If you make a PR to `main` we'll comment on it and close it.
 
-### 3. Review any of our comments or questions
+#### 4. Review our comments or questions
 We review each PR for consistency and maintainability.
 We'll try to respond as soon as possible. If it's been a day or two, please reach out to us, we may have missed it.
 
