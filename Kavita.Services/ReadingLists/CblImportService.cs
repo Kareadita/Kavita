@@ -326,9 +326,20 @@ public class CblImportService(IUnitOfWork unitOfWork, ICblGithubService cblGithu
         try
         {
             var cbl = CblParser.Parse(tempFile);
-            if (cbl.Items.Count == 0) return;
+            if (cbl.Items.Count == 0)
+            {
+                logger.LogWarning("Syncing of Reading List {ReadingListTitle} ({ReadingListId}) has 0 items from parsing, aborting", readingList.Title, readingList.Id);
+                return;
+            }
 
             var matchResults = await RunMatchingPipeline(userId, cbl);
+
+            // Validate there are at least results in case a bad file
+            if (matchResults.Count == 0)
+            {
+                logger.LogWarning("Syncing of Reading List {ReadingListTitle} ({ReadingListId}) has 0 matches, aborting", readingList.Title, readingList.Id);
+                return;
+            }
 
             // Clear existing items and re-add
             readingList.Items.Clear();
@@ -344,7 +355,7 @@ public class CblImportService(IUnitOfWork unitOfWork, ICblGithubService cblGithu
 
             if (!string.IsNullOrEmpty(contentHash))
             {
-                readingList.ShaHash = contentHash;
+                readingList.ShaHash = contentHash; // This is either Github Sha hash or the content hash
             }
             readingList.LastSyncedUtc = DateTime.UtcNow;
             readingList.LastSyncCheckUtc = DateTime.UtcNow;

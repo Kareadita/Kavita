@@ -10,14 +10,12 @@
   background-color: var(--card-bg-color);
   color: var(--card-text-color);
   position: relative;
-
 }
 
 .selected-highlight {
   outline: 0.125rem solid var(--primary-color);
 }
 
-// Title Row
 .title-row {
   display: flex;
   align-items: center;
@@ -47,7 +45,6 @@
   flex-shrink: 0;
 }
 
-// Metadata Line
 .meta-line {
   display: flex;
   align-items: center;
@@ -94,7 +91,6 @@
   min-width: 0;
 }
 
-// Tag Row
 .tag-row {
   display: flex;
   gap: 0.375rem;
