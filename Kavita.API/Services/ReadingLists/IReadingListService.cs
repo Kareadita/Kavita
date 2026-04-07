@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using Kavita.Common.Helpers;
 using Kavita.Models.DTOs.ReadingLists;
+using Kavita.Models.DTOs.ReadingLists.Request;
 using Kavita.Models.Entities;
 using Kavita.Models.Entities.Enums;
 using Kavita.Models.Entities.ReadingLists;

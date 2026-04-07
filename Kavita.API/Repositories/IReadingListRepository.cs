@@ -60,4 +60,6 @@ public interface IReadingListRepository
     /// Returns a map of UserId to ReadingListIds for all syncable reading lists that haven't been checked since the given threshold.
     /// </summary>
     Task<Dictionary<int, List<int>>> GetSyncableReadingListsAsync(DateTime lastCheckThreshold, CancellationToken ct = default);
+
+    Task<List<ReadingListTagDto>> GetAllReadingListTagDtosAsync(int userId, CancellationToken ct = default);
 }

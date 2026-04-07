@@ -112,10 +112,10 @@ export class ReadingListDetailComponent implements OnInit {
   protected readonly encodeURIComponent = encodeURIComponent;
 
   scrollingBlock = viewChild<ElementRef<HTMLDivElement>>('scrollingBlock');
-
   readingListId = input(0, {transform: numberAttribute});
-
   readingList = getWritableResolvedData(this.route, 'readingList');
+  
+
   readingListSummary = computed(() => {
     return (this.readingList()?.summary || '').replace(/\n/g, '<br>');
   });

@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 
 namespace Kavita.Models.DTOs.ReadingLists;
 
@@ -14,5 +15,6 @@ public sealed record UpdateReadingListDto
     public int StartingYear { get; set; } = 0;
     public int EndingMonth { get; set; } = 0;
     public int EndingYear { get; set; } = 0;
+    public IList<string> Tags { get; set; } = [];
 
 }

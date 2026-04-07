@@ -197,9 +197,11 @@ public class ReadingListRepository(DataContext context, IMapper mapper) : IReadi
         ReadingListIncludes includes = ReadingListIncludes.Items, CancellationToken ct = default)
     {
         var normalized = name.ToNormalized();
+        if (string.IsNullOrEmpty(normalized)) return null;
+
         return await context.ReadingList
             .Includes(includes)
-            .FirstOrDefaultAsync(x => x.NormalizedTitle != null && x.NormalizedTitle.Equals(normalized) && x.AppUserId == userId, ct);
+            .FirstOrDefaultAsync(x => normalized.Equals(x.NormalizedTitle) && x.AppUserId == userId, ct);
     }
 
     public async Task<IEnumerable<ReadingList>> GetReadingListsByIds(IList<int> ids,
@@ -539,5 +541,16 @@ public class ReadingListRepository(DataContext context, IMapper mapper) : IReadi
                 && (rl.LastSyncCheckUtc == null || rl.LastSyncCheckUtc < lastCheckThreshold))
             .GroupBy(rl => rl.AppUserId)
             .ToDictionaryAsync(g => g.Key, g => g.Select(rl => rl.Id).ToList(), ct);
+    }
+
+    public async Task<List<ReadingListTagDto>> GetAllReadingListTagDtosAsync(int userId, CancellationToken ct = default)
+    {
+        return await context.ReadingList
+            .Where(r => r.AppUserId == userId || r.Promoted)
+            .Include(r => r.Tags)
+            .SelectMany(r => r.Tags)
+            .Distinct()
+            .ProjectTo<ReadingListTagDto>(mapper.ConfigurationProvider)
+            .ToListAsync(ct);
     }
 }

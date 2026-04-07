@@ -22,7 +22,7 @@ import {TextResonse} from "../_types/text-response";
 import {QueryContext} from "../_models/metadata/v2/query-context";
 import {AgeRatingPipe} from "../_pipes/age-rating.pipe";
 import {MangaFormatPipe} from "../_pipes/manga-format.pipe";
-import {translate, TranslocoService} from "@jsverse/transloco";
+import {translate} from "@jsverse/transloco";
 import {LibraryService} from './library.service';
 import {CollectionTagService} from "./collection-tag.service";
 import {PaginatedResult} from "../_models/pagination";
@@ -38,15 +38,13 @@ import {AccountService} from "./account.service";
 import {MemberService} from "./member.service";
 import {RgbaColor} from "../book-reader/_models/annotations/highlight-slot";
 import {SeriesService} from "./series.service";
+import {ReadingListTag} from "../_models/reading-list/reading-list-tag";
 
 @Injectable({
   providedIn: 'root'
 })
 export class MetadataService {
-  private httpClient = inject(HttpClient);
-
-
-  private readonly translocoService = inject(TranslocoService);
+  private readonly httpClient = inject(HttpClient);
   private readonly libraryService = inject(LibraryService);
   private readonly collectionTagService = inject(CollectionTagService);
   private readonly utilityService = inject(UtilityService);
@@ -94,6 +92,11 @@ export class MetadataService {
       method += '?libraryIds=' + libraries.join(',');
     }
     return this.httpClient.get<Array<Tag>>(this.baseUrl + method);
+  }
+
+  getAllReadingListTags() {
+    let method = 'metadata/readinglist-tags'
+    return this.httpClient.get<Array<ReadingListTag>>(this.baseUrl + method);
   }
 
   getAllGenres(libraries?: Array<number>, context: QueryContext = QueryContext.None) {

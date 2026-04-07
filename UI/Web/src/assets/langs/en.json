@@ -2483,6 +2483,7 @@
         "month-validation": "Must be between 1 and 12 or blank",
         "name-unique-validation": "Name must be unique",
         "required-field": "{{validation.required-field}}",
+        "name-label": "{{edit-series-modal.name-label}}",
         "summary-label": "Summary",
         "year-label": "Year",
         "month-label": "Month",

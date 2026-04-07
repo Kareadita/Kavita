@@ -52,8 +52,8 @@ export class ReadingListService {
     return this.httpClient.post<ReadingList>(this.baseUrl + 'readinglist/create', {title});
   }
 
-  update(model: {readingListId: number, title?: string, summary?: string, promoted: boolean}) {
-    return this.httpClient.post(this.baseUrl + 'readinglist/update', model, TextResonse);
+  update(model: {readingListId: number, title?: string, summary?: string, promoted: boolean, tags: string[]}) {
+    return this.httpClient.post<ReadingList>(this.baseUrl + 'readinglist/update', model);
   }
 
   updateByMultiple(readingListId: number, seriesId: number, volumeIds: Array<number>,  chapterIds?: Array<number>) {
