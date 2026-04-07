@@ -754,6 +754,31 @@ public class CblImportServiceTests : AbstractDbTest
         Assert.NotEqual(CblMatchTier.ExternalId, summary.SuccessfulInserts.First().MatchTier);
     }
 
+    [Fact]
+    public async Task ValidateList_ExternalId_Kavita_DirectMatch()
+    {
+        var (unitOfWork, _, _) = await CreateDatabase();
+        using var helper = new CblTestHelper(unitOfWork);
+        var seed = await helper.SeedLibrary("rated-library.json");
+
+        // Fables vol 1 chapter 1 — get its DB-assigned chapter ID
+        var chapterId = seed.Lookup[("Fables", "1", "1")].ChapterId;
+
+        // Wrong series name forces external ID path — Kavita provider with the chapter's own ID
+        var cbl = CblFileBuilder.Create("Kavita ID Match Test")
+            .AddBook("WrongSeriesName", volume: "1", number: "1",
+                externalIds: [new CblExternalId { Provider = CblExternalDbProvider.Kavita, IssueId = chapterId.ToString() }])
+            .Build();
+
+        var filePath = helper.WriteCblToDisk(cbl);
+        var svc = helper.CreateImportService();
+        var summary = await svc.ValidateList(seed.User.Id, filePath);
+
+        Assert.Equal(CblImportResult.Success, summary.Success);
+        Assert.Single(summary.SuccessfulInserts);
+        Assert.Equal(CblMatchTier.ExternalId, summary.SuccessfulInserts.First().MatchTier);
+    }
+
     #endregion
 
     #region Group 7: Library Access
