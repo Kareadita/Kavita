@@ -12,7 +12,7 @@ namespace Kavita.Models.Entities.ReadingLists;
 /// <summary>
 /// This is a collection of <see cref="ReadingListItem"/> which represent individual chapters and an order.
 /// </summary>
-public class ReadingList : IEntityDate, IHasCoverImage
+public class ReadingList : IEntityDate, IHasCoverImage, IHasTags<ReadingListTag>
 {
     public int Id { get; init; }
     public required string Title { get; set; }
@@ -33,10 +33,10 @@ public class ReadingList : IEntityDate, IHasCoverImage
     public bool CoverImageLocked { get; set; }
 
     /// <summary>
-    /// A list of tags associtated with the RL
+    /// A list of tags associated with the list
     /// </summary>
     /// <remarks>Can be populated via API/UI or from CBLv2</remarks>
-    //public ICollection<Tag> Tags { get; set; }
+    public ICollection<ReadingListTag> Tags { get; set; } = new List<ReadingListTag>();
 
 
     /// <summary>
@@ -88,7 +88,7 @@ public class ReadingList : IEntityDate, IHasCoverImage
         => !string.Equals(ShaHash, remoteSha, StringComparison.Ordinal);
 
     public ICollection<ReadingListItem> Items { get; set; } = null!;
-    public ICollection<ReadingListTag> Tags { get; set; } = new List<ReadingListTag>();
+
     public DateTime Created { get; set; }
     public DateTime LastModified { get; set; }
     public DateTime CreatedUtc { get; set; }

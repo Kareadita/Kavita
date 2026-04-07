@@ -966,7 +966,7 @@ public class ExternalMetadataService : IExternalMetadataService
             .ToList();
         series.Metadata.Tags ??= [];
 
-        TagHelper.UpdateTagList(processedTags, series, allTags, tag =>
+        TagHelper.UpdateTagList(processedTags, series.Metadata.Tags, allTags, tag =>
         {
             series.Metadata.Tags.Add(tag);
             madeModification = true;
@@ -1015,7 +1015,7 @@ public class ExternalMetadataService : IExternalMetadataService
         series.Metadata.Genres ??= [];
         var exisitingGenres = series.Metadata.Genres;
 
-        GenreHelper.UpdateGenreList(processedGenres, series, allGenres, genre =>
+        TagHelper.UpdateTagList(processedGenres, series.Metadata.Genres, allGenres, genre =>
         {
             series.Metadata.Genres.Add(genre);
             madeModification = true;

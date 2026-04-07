@@ -255,12 +255,12 @@ public class ChapterController(
 
         #region Genres
         chapter.Genres ??= [];
-        await GenreHelper.UpdateChapterGenres(chapter, dto.Genres.Select(t => t.Title), unitOfWork);
+        await TagHelper.UpdateEntityTags(chapter.Genres, dto.Genres.Select(t => t.Title), unitOfWork.DataContext.Genre, unitOfWork);
         #endregion
 
         #region Tags
         chapter.Tags ??= [];
-        await TagHelper.UpdateChapterTags(chapter, dto.Tags.Select(t => t.Title), unitOfWork);
+        await TagHelper.UpdateEntityTags(chapter.Tags, dto.Tags.Select(t => t.Title), unitOfWork.DataContext.Tag, unitOfWork);
         #endregion
 
         #region People

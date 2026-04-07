@@ -148,7 +148,7 @@ public class SeriesService(
             {
                 var allGenres = (await unitOfWork.GenreRepository.GetAllGenresByNamesAsync(updateSeriesMetadataDto.SeriesMetadata.Genres.Select(t => Parser.Normalize(t.Title)), ct)).ToList();
                 series.Metadata.Genres ??= [];
-                GenreHelper.UpdateGenreList(updateSeriesMetadataDto.SeriesMetadata?.Genres, series, allGenres, genre =>
+                TagHelper.UpdateTagList(updateSeriesMetadataDto.SeriesMetadata?.Genres?.Select(t => t.Title).ToList(), series.Metadata.Genres, allGenres, genre =>
                 {
                     series.Metadata.Genres.Add(genre);
                 }, () => series.Metadata.GenresLocked = true);
@@ -165,7 +165,7 @@ public class SeriesService(
                     .GetAllTagsByNameAsync(updateSeriesMetadataDto.SeriesMetadata.Tags.Select(t => Parser.Normalize(t.Title)), ct))
                     .ToList();
                 series.Metadata.Tags ??= [];
-                TagHelper.UpdateTagList(updateSeriesMetadataDto.SeriesMetadata?.Tags, series, allTags, tag =>
+                TagHelper.UpdateTagList(updateSeriesMetadataDto.SeriesMetadata?.Tags?.Select(t => t.Title).ToList(), series.Metadata.Tags, allTags, tag =>
                 {
                     series.Metadata.Tags.Add(tag);
                 }, () => series.Metadata.TagsLocked = true);
