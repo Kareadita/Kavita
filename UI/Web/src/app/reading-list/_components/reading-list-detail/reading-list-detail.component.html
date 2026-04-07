@@ -107,6 +107,13 @@
                   <span class="fw-bold">{{t('items-title')}}</span>
                   <div>
                     {{t('item-count', {num: items().length | number})}}
+                    @let missingItems = readingList().itemCount - readingList().totalItemsAtImport;
+                    @if (missingItems > 0) {
+                      <span class="text-danger ms-1">
+                        (<i class="fa-solid fa-exclamation-circle me-1" aria-hidden="true"></i>
+                        {{t('missing-count', {num: missingItems})}})
+                      </span>
+                    }
                   </div>
                 </div>
               </div>

@@ -203,6 +203,8 @@ public class CblImportService(IUnitOfWork unitOfWork, ICblGithubService cblGithu
             readingList.EndingYear = cbl.EndYear;
         if (cbl.EndMonth > 0)
             readingList.EndingMonth = cbl.EndMonth;
+
+        readingList.TotalItemsAtImport = cbl.Items.Count;
     }
 
     /// <summary>

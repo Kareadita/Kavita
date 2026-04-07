@@ -109,30 +109,34 @@
 
               <div class="d-flex justify-content-between align-items-start mt-1">
                 <div class="d-flex">
-                  <div class="text-muted mt-1" style="font-size: 0.9rem;">
+                  <div class="mt-1" style="font-size: 0.9rem;">
                     @if (selectedItem.ageRating) {
+                      <app-age-rating-image [rating]="selectedItem.ageRating"/>
                       <span>{{selectedItem.ageRating | ageRating}}</span>
                     }
                     @if (selectedItem.startingYear > 0) {
                       @if (selectedItem.ageRating) {
                         <span class="dot-separator mx-1"></span>
                       }
-                      <span>{{selectedItem.startingYear}} – {{selectedItem.endingYear}}</span>
+                      <span> {{(selectedItem.startingYear | date) | dateYearRange:(selectedItem.endingYear | date)}}
+                      </span>
                     }
-                    @if (selectedItem.ageRating || selectedItem.startingYear > 0) {
-                      <span class="dot-separator mx-1"></span>
-                    }
-                    <span>{{t('items-count', {num: selectedItem.itemCount})}}</span>
 
-                    @if (selectedItem.canSync) {
-                      <i class="fas fa-circle-question ms-2" tabindex="0" [ngbTooltip]="selectedItem.downloadUrl ?? selectedItem.sourcePath"></i>
+                    @let missingItems = selectedItem.itemCount - selectedItem.totalItemsAtImport;
+                    @if (missingItems > 0) {
+                      <span class="text-danger ms-2">
+                        <i class="fa-solid fa-exclamation-circle me-1" aria-hidden="true"></i>
+                        {{t('missing-count', {num: missingItems})}}
+                      </span>
+                    } @else {
+                      <span class="ms-2">{{t('item-count', {num: selectedItem.itemCount})}}</span>
                     }
                   </div>
                 </div>
 
                 @if(selectedItem.hasRemoteChange) {
                   <div class="d-flex gap-2">
-                    <span class="pill p-1 me-1  update-available">{{t('update-available')}}</span>
+                    <span class="pill p-1 me-1 update-available">{{t('update-available')}}</span>
                   </div>
                 }
               </div>
@@ -143,6 +147,11 @@
                     <div class="mt-3 text-muted" style="font-size: 0.8rem;">
                       <div>{{t('last-synced', {date: (selectedItem.lastSyncedUtc | utcToLocalDate | timeAgo)})}}</div>
                       <div>{{t('last-checked', {date: (selectedItem.lastSyncCheckUtc | utcToLocalDate | timeAgo)})}}</div>
+                      @if (selectedItem.canSync) {
+                        <div>
+                          <a [href]="selectedItem.downloadUrl ?? selectedItem.sourcePath | safeUrl" target="_blank" rel="noopener noreferrer">{{t('source')}}</a>
+                        </div>
+                      }
                     </div>
                   }
                 </div>
@@ -180,7 +189,7 @@
             <app-promoted-icon [promoted]="item.promoted" />
             {{item.title}}
           </div>
-          <span class="pill p-1 me-1">{{item.itemCount}} {{t('items-count')}}</span>
+          <span class="pill p-1 me-1">{{t('item-count', {num: item.itemCount})}}</span>
           @if (item.canSync) {
             <span class="pill p-1 me-1 provider">{{item.provider | readingListProvider}}</span>
           }

@@ -79,6 +79,7 @@ export interface ReadingList extends IHasCover {
   endingYear: number;
   endingMonth: number;
   itemCount: number;
+  totalItemsAtImport: number;
   ageRating: AgeRating;
 
   sourcePath: string | null;

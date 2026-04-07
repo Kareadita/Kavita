@@ -2096,7 +2096,8 @@
         "url-label": "Url",
         "load": "Load",
         "back": "Back",
-        "items-count": "{{num}} items",
+        "item-count": "{{common.item-count}}",
+        "missing-count": "{{reading-list-detail.missing-count}}",
         "provider-url": "URL",
         "provider-file": "File",
         "update-available": "Update available",
@@ -2111,7 +2112,8 @@
         "view-list": "View Reading List",
         "last-synced": "Last Synced: {{date}}",
         "last-checked": "Last Checked: {{date}}",
-        "not-authorized": "You lack the ability to interact with this content"
+        "not-authorized": "You lack the ability to interact with this content",
+        "source": "Source"
     },
 
     "import-cbl-modal": {
@@ -2284,6 +2286,7 @@
 
     "reading-list-detail": {
         "item-count": "{{common.item-count}}",
+        "missing-count": "{{num}} missing",
         "page-settings-title": "Page Settings",
         "remove-read": "Remove Read",
         "order-numbers-label": "Order Numbers",

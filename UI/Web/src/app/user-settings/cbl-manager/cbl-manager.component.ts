@@ -3,7 +3,7 @@ import {AccountService} from '../../_services/account.service';
 import {ToastrService} from 'ngx-toastr';
 import {ConfirmService} from '../../shared/confirm.service';
 import {ModalService} from '../../_services/modal.service';
-import {NgTemplateOutlet} from '@angular/common';
+import {DatePipe, NgTemplateOutlet} from '@angular/common';
 import {FileSystemFileEntry, NgxFileDropEntry, NgxFileDropModule} from 'ngx-file-drop';
 import {ReadingListService} from '../../_services/reading-list.service';
 import {ReadingList, ReadingListProvider} from '../../_models/reading-list';
@@ -29,8 +29,10 @@ import {
   FileDragAndDropUploadComponent
 } from "src/app/shared/file-drag-and-drop-upload/file-drag-and-drop-upload.component";
 import {UtcToLocalDatePipe} from "../../_pipes/utc-to-locale-date.pipe";
-import {NgbTooltip} from "@ng-bootstrap/ng-bootstrap";
 import {TimeAgoPipe} from "../../_pipes/time-ago.pipe";
+import {AgeRatingImageComponent} from "../../_single-module/age-rating-image/age-rating-image.component";
+import {DateYearRangePipe} from "../../_pipes/date-year-range.pipe";
+import {SafeUrlPipe} from "../../_pipes/safe-url.pipe";
 
 @Component({
   selector: 'app-cbl-manager',
@@ -48,8 +50,11 @@ import {TimeAgoPipe} from "../../_pipes/time-ago.pipe";
     RouterLink,
     FileDragAndDropUploadComponent,
     UtcToLocalDatePipe,
-    NgbTooltip,
-    TimeAgoPipe
+    TimeAgoPipe,
+    AgeRatingImageComponent,
+    DateYearRangePipe,
+    DatePipe,
+    SafeUrlPipe
   ],
   templateUrl: './cbl-manager.component.html',
   styleUrl: './cbl-manager.component.scss',

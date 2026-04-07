@@ -72,6 +72,10 @@ public class ReadingList : IEntityDate, IHasCoverImage
     /// Only updated when ShaHash changes and we pull new content.
     /// </summary>
     public DateTime? LastSyncedUtc { get; set; }
+    /// <summary>
+    /// Total items at CBL Import, this helps track missing items. CBL Sync will update to the latest.
+    /// </summary>
+    public int TotalItemsAtImport { get; set; }
 
     public bool CanSync => Provider != ReadingListProvider.None
                            && Provider != ReadingListProvider.File
@@ -88,6 +92,8 @@ public class ReadingList : IEntityDate, IHasCoverImage
     public DateTime LastModified { get; set; }
     public DateTime CreatedUtc { get; set; }
     public DateTime LastModifiedUtc { get; set; }
+
+
 
     #region Metadata
     public string? Summary { get; set; }
