@@ -217,7 +217,8 @@ public class AutoMapperProfiles : Profile
         CreateMap<ReadingListTag, ReadingListTagDto>();
         CreateMap<ReadingList, ReadingListDto>()
             .ForMember(dest => dest.ItemCount, opt => opt.MapFrom(src => src.Items.Count))
-            .ForMember(dest => dest.OwnerUserName, opt => opt.MapFrom(src => src.AppUser.UserName));
+            .ForMember(dest => dest.OwnerUserName, opt => opt.MapFrom(src => src.AppUser.UserName))
+            .ForMember(dest => dest.Tags, opt => opt.MapFrom(src => src.Tags));
         CreateMap<ScrobbleError, ScrobbleErrorDto>();
         CreateMap<ChapterDto, TachiyomiChapterDto>();
         CreateMap<Chapter, TachiyomiChapterDto>();

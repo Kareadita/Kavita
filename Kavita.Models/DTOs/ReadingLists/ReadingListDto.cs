@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using Kavita.Models.Entities.Enums;
 using Kavita.Models.Entities.Enums.ReadingList;
 using Kavita.Models.Entities.Interfaces;
@@ -90,6 +91,7 @@ public sealed record ReadingListDto : IHasCoverImage
     /// Total items at CBL Import, this helps track missing items. CBL Sync will update to the latest.
     /// </summary>
     public int TotalItemsAtImport { get; set; }
+    public List<ReadingListTagDto> Tags { get; set; }
 
     public bool CanSync { get; set; }
     /// <summary>

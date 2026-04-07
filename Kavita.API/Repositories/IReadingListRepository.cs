@@ -17,6 +17,7 @@ public enum ReadingListIncludes
     None = 1 << 0,
     Items = 1 << 1,
     ItemChapter = 1 << 2,
+    Tags = 1 << 3,
 }
 
 public interface IReadingListRepository
