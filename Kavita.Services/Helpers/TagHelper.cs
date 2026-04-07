@@ -60,7 +60,7 @@ public static class TagHelper
             {
                 var tag = new T
                 {
-                    Title = normalizedToOriginal[nt].Trim().SentenceCase(),
+                    Title = normalizedToOriginal[nt].Trim(),
                     NormalizedTitle = nt
                 };
                 return tag;
