@@ -886,7 +886,6 @@ class SeriesDetailComponent implements OnInit, AfterViewInit {
     this.filterUtilityService.applyFilter(['all-series'], field, FilterComparison.Equal, `${value}`).subscribe();
   }
 
-
   toggleScrobbling(evt: any) {
     evt.stopPropagation();
 

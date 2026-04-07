@@ -13,7 +13,12 @@
             <h4 class="title mb-2">
             <span>
               <app-promoted-icon [promoted]="rl.promoted" />
-              <span class="ms-2">{{rl.title}}</span>
+              <span class="ms-2">{{rl.title}}
+                @let dateRange = dateRangeLabel();
+                @if(dateRange) {
+                  <span class="ms-1">({{dateRange}})</span>
+                }
+              </span>
               @if(isLoading()) {
                 <div class="spinner-border spinner-border-sm text-primary" role="status">
                   <span class="visually-hidden">{{t('loading-alt')}}</span>
@@ -98,32 +103,27 @@
             <div class="mt-2 upper-details">
               <div class="row g-0">
                 <div class="col-6 pe-5">
-<!--                  <span class="fw-bold">{{t('date-range-title')}}</span>-->
-<!--                  <div>-->
-<!--                    &lt;!&ndash;TODO: Move this up to title row and use dateYearRange&ndash;&gt;-->
-<!--                    {{dateRangeLabel() ?? (null | defaultValue)}}-->
-<!--                  </div>-->
                   <span class="fw-bold">{{t('tags-title')}}</span>
                   <div>
-                    @for(tag of readingList().tags; track tag.id; let last = $last;) {
-                      {{tag}}
-                      @if (!last) {
-                        <span>, </span>
-                      }
-                    } @empty {
-                      {{(null | defaultValue)}}
-                    }
+                    <app-badge-expander [items]="readingList().tags"
+                                        [itemsTillExpander]="3"
+                                        [allowToggle]="false"
+                                        (toggled)="switchTabsToDetail()">
+                      <ng-template #badgeExpanderItem let-item let-position="idx" let-last="last">
+                        <a href="javascript:void(0)" class="dark-exempt btn-icon" (click)="openFilter(FilterField.Tags, item.id)">{{item.title}}</a>
+                      </ng-template>
+                    </app-badge-expander>
                   </div>
                 </div>
                 <div class="col-6">
                   <span class="fw-bold">{{t('items-title')}}</span>
                   <div>
                     {{t('item-count', {num: items().length | number})}}
-                    @let missingItems = readingList().itemCount - readingList().totalItemsAtImport;
-                    @if (missingItems > 0) {
+                    @let missingCount = missingItems();
+                    @if (missingCount > 0) {
                       <span class="text-danger ms-1">
                         (<i class="fa-solid fa-exclamation-circle me-1" aria-hidden="true"></i>
-                        {{t('missing-count', {num: missingItems})}})
+                        {{t('missing-count', {num: missingCount})}})
                       </span>
                     }
                   </div>

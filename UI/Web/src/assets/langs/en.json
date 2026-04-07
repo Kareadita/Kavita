@@ -2305,7 +2305,8 @@
         "date-range-title": "Date Range",
         "more-alt": "{{series-detail.more-alt}}",
         "reorder-alt": "Reorder Items",
-        "loading-alt": "{{pdf-reader.loading-message}}"
+        "loading-alt": "{{pdf-reader.loading-message}}",
+        "tags-title": "{{metadata-fields.tags-title}}"
     },
 
     "events-widget": {
