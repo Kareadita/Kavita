@@ -17,7 +17,6 @@ using Kavita.Models.DTOs.ReadingLists.CBL.Internal;
 using Kavita.Models.DTOs.SignalR;
 using Kavita.Models.Entities.Enums;
 using Kavita.Models.Entities.ReadingLists;
-using Kavita.Models.Extensions;
 using Kavita.Services.Helpers;
 using Flurl.Http;
 using Kavita.Common;
@@ -130,7 +129,7 @@ public class CblImportService(IUnitOfWork unitOfWork, ICblGithubService cblGithu
 
         // Find or create reading list
         var readingList = await unitOfWork.ReadingListRepository
-            .GetReadingListByTitleAsync(cbl.Name, userId);
+            .GetReadingListByTitleAsync(cbl.Name, userId, ReadingListIncludes.Tags | ReadingListIncludes.Items);
         var isUpdate = readingList != null;
 
         if (readingList == null)
@@ -144,7 +143,7 @@ public class CblImportService(IUnitOfWork unitOfWork, ICblGithubService cblGithu
         }
 
         // Set metadata from CBL
-        SetMetadataFromParsedCbl(cbl, readingList);
+        await SetMetadataFromParsedCblAsync(cbl, readingList);
 
         // Add resolved items
         foreach (var (order, (match, _)) in matchResults.OrderBy(kv => kv.Key))
@@ -191,20 +190,39 @@ public class CblImportService(IUnitOfWork unitOfWork, ICblGithubService cblGithu
         return summary;
     }
 
-    private static void SetMetadataFromParsedCbl(ParsedCblReadingList cbl, ReadingList readingList)
+    private async Task SetMetadataFromParsedCblAsync(ParsedCblReadingList cbl, ReadingList readingList)
     {
-        if (!string.IsNullOrEmpty(cbl.Summary))
-            readingList.Summary = cbl.Summary;
-        if (cbl.StartYear > 0)
-            readingList.StartingYear = cbl.StartYear;
-        if (cbl.StartMonth > 0)
-            readingList.StartingMonth = cbl.StartMonth;
-        if (cbl.EndYear > 0)
-            readingList.EndingYear = cbl.EndYear;
-        if (cbl.EndMonth > 0)
-            readingList.EndingMonth = cbl.EndMonth;
-
         readingList.TotalItemsAtImport = cbl.Items.Count;
+
+        if (!string.IsNullOrEmpty(cbl.Summary))
+        {
+            readingList.Summary = cbl.Summary;
+        }
+
+        if (cbl.StartYear > 0)
+        {
+            readingList.StartingYear = cbl.StartYear;
+        }
+
+        if (cbl.StartMonth > 0)
+        {
+            readingList.StartingMonth = cbl.StartMonth;
+        }
+
+        if (cbl.EndYear > 0)
+        {
+            readingList.EndingYear = cbl.EndYear;
+        }
+
+        if (cbl.EndMonth > 0)
+        {
+            readingList.EndingMonth = cbl.EndMonth;
+        }
+
+        if (cbl.Tags.Count > 0)
+        {
+            await TagHelper.UpdateEntityTags(readingList.Tags, cbl.Tags, unitOfWork.DataContext.ReadingListTag, unitOfWork, false);
+        }
     }
 
     /// <summary>
@@ -257,7 +275,7 @@ public class CblImportService(IUnitOfWork unitOfWork, ICblGithubService cblGithu
     public async Task SyncReadingListAsync(int userId, int readingListId, bool force = false)
     {
         var readingList = await unitOfWork.ReadingListRepository
-            .GetReadingListByIdAsync(readingListId, ReadingListIncludes.Items);
+            .GetReadingListByIdAsync(readingListId, ReadingListIncludes.Tags | ReadingListIncludes.Items);
 
         if (readingList is not {CanSync: true} || readingList.AppUserId != userId)
         {
@@ -353,7 +371,7 @@ public class CblImportService(IUnitOfWork unitOfWork, ICblGithubService cblGithu
             }
 
             // Update metadata
-            SetMetadataFromParsedCbl(cbl, readingList);
+            await SetMetadataFromParsedCblAsync(cbl, readingList);
 
             if (!string.IsNullOrEmpty(contentHash))
             {
