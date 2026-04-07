@@ -18,7 +18,7 @@ import {ToastrService} from 'ngx-toastr';
 import {UtilityService} from 'src/app/shared/_services/utility.service';
 import {LibraryType} from 'src/app/_models/library/library';
 import {MangaFormat} from 'src/app/_models/manga-format';
-import {ReadingList, ReadingListInfo, ReadingListItem} from 'src/app/_models/reading-list';
+import {ReadingList, ReadingListInfo, ReadingListItem} from 'src/app/_models/reading-list/reading-list';
 import {AccountService} from 'src/app/_services/account.service';
 import {ActionFactoryService} from 'src/app/_services/action-factory.service';
 import {ActionService} from 'src/app/_services/action.service';

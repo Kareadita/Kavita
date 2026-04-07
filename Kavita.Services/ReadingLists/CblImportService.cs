@@ -456,6 +456,13 @@ public class CblImportService(IUnitOfWork unitOfWork, ICblGithubService cblGithu
         allNormalizedNames.AddRange(directNormalizedNames.Where(n => !allNormalizedNames.Contains(n)));
 
         // Collect external IDs
+        var kavitaIds = cbl.Items
+            .SelectMany(i => i.ExternalIds)
+            .Where(e => e.Provider == CblExternalDbProvider.Kavita && !string.IsNullOrEmpty(e.IssueId))
+            .Select(e => int.Parse(e.IssueId))
+            .Distinct()
+            .ToList();
+
         var comicVineIds = cbl.Items
             .SelectMany(i => i.ExternalIds)
             .Where(e => e.Provider == CblExternalDbProvider.ComicVine && !string.IsNullOrEmpty(e.IssueId))
@@ -478,7 +485,7 @@ public class CblImportService(IUnitOfWork unitOfWork, ICblGithubService cblGithu
             .GetRulesForNamesAsync(directNormalizedNames, userId);
 
         var externalIdChapters = await unitOfWork.ChapterRepository
-            .GetChaptersByExternalIdsAsync(comicVineIds, metronIds, userLibraryIds);
+            .GetChaptersByExternalIdsAsync(kavitaIds, comicVineIds, metronIds, userLibraryIds);
 
         var matchedSeries = (await unitOfWork.SeriesRepository
             .GetAllSeriesByNameAsync(allNormalizedNames, userId,

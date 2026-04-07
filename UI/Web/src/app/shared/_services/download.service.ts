@@ -28,7 +28,7 @@ import {
 } from '../_models/download-queue-item';
 import {DownloadStorageService} from './download-storage.service';
 import {normalizeTimestamp} from "../../../libs/download-timestamp";
-import {ReadingList, ReadingListItem} from "../../_models/reading-list";
+import {ReadingList, ReadingListItem} from "../../_models/reading-list/reading-list";
 import {ReadingListService} from "../../_services/reading-list.service";
 import {UserCollection} from "../../_models/collection-tag";
 import {FilterField} from "../../_models/metadata/v2/filter-field";

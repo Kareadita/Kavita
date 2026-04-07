@@ -11,7 +11,7 @@ import {
 } from '@angular/core';
 import {JumpKey} from 'src/app/_models/jumpbar/jump-key';
 import {PaginatedResult, Pagination} from 'src/app/_models/pagination';
-import {ReadingList} from 'src/app/_models/reading-list';
+import {ReadingList} from 'src/app/_models/reading-list/reading-list';
 import {AccountService} from 'src/app/_services/account.service';
 import {ActionService} from 'src/app/_services/action.service';
 import {JumpbarService} from 'src/app/_services/jumpbar.service';

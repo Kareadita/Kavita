@@ -438,16 +438,20 @@ public class ChapterRepository(DataContext context, IMapper mapper) : IChapterRe
             .FirstOrDefaultAsync(ct);
     }
 
-    public async Task<IList<Chapter>> GetChaptersByExternalIdsAsync(IList<string> comicVineIds, IList<long> metronIds, IList<int> libraryIds, CancellationToken ct = default)
+    public async Task<IList<Chapter>> GetChaptersByExternalIdsAsync(IList<int> kavitaIds, IList<string> comicVineIds,
+        IList<long> metronIds, IList<int> libraryIds, CancellationToken ct = default)
     {
-        if (comicVineIds.Count == 0 && metronIds.Count == 0) return [];
+        if (comicVineIds.Count == 0 && metronIds.Count == 0 && kavitaIds.Count == 0) return [];
 
         var query = context.Chapter
             .Include(c => c.Volume)
             .ThenInclude(v => v.Series)
             .Where(c => libraryIds.Contains(c.Volume.Series.LibraryId));
 
-        if (comicVineIds.Count > 0 && metronIds.Count > 0)
+        if (kavitaIds.Count > 0)
+        {
+            query = query.Where(c => kavitaIds.Contains(c.Id));
+        } else if (comicVineIds.Count > 0 && metronIds.Count > 0)
         {
             query = query.Where(c =>
                 (c.ComicVineId != null && comicVineIds.Contains(c.ComicVineId)) ||

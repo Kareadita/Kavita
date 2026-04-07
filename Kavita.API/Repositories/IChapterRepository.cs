@@ -62,9 +62,10 @@ public interface IChapterRepository
     Task<int?> GetSeriesIdForChapter(int chapterId, CancellationToken ct = default);
 
     /// <summary>
-    /// Fetches chapters matching by ComicVineId or MetronId, with Volume and Series included
+    /// Fetches chapters matching by ComicVineId or MetronId, with Volume and Series included.
+    /// If KavitaIds are passed, will prioritize over CV/Metron.
     /// </summary>
-    Task<IList<Chapter>> GetChaptersByExternalIdsAsync(IList<string> comicVineIds, IList<long> metronIds, IList<int> libraryIds, CancellationToken ct = default);
+    Task<IList<Chapter>> GetChaptersByExternalIdsAsync(IList<int> kavitaIds, IList<string> comicVineIds, IList<long> metronIds, IList<int> libraryIds, CancellationToken ct = default);
 
     /// <summary>
     /// Fetches chapters that have a non-empty AlternateSeries field from the specified libraries

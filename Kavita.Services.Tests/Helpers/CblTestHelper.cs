@@ -10,6 +10,7 @@ using Kavita.Models.DTOs.ReadingLists.CBL.V1;
 using Kavita.Models.Entities;
 using Kavita.Models.Entities.Enums;
 using Kavita.Models.Entities.User;
+using Kavita.Models.Extensions;
 using Kavita.Services.Builders;
 using Kavita.Services.ReadingLists;
 using Microsoft.Extensions.Logging;
@@ -223,13 +224,7 @@ public class CblTestHelper : IDisposable
 
                     book.Databases = item.ExternalIds.Select(extId => new CblBookDatabase
                     {
-                        Name = extId.Provider switch
-                        {
-                            CblExternalDbProvider.ComicVine => "cv",
-                            CblExternalDbProvider.Metron => "metron",
-                            CblExternalDbProvider.GrandComicsDatabase => "gcd",
-                            _ => "unknown"
-                        },
+                        Name = extId.Provider.ToShortName(),
                         Series = extId.SeriesId,
                         Issue = extId.IssueId
                     }).ToList();

@@ -7,6 +7,7 @@ using Kavita.Models.DTOs.ReadingLists.CBL;
 using Kavita.Models.DTOs.ReadingLists.CBL.Internal;
 using Kavita.Models.DTOs.ReadingLists.CBL.V1;
 using Kavita.Models.DTOs.ReadingLists.CBL.V2;
+using Kavita.Models.Extensions;
 
 namespace Kavita.Services.Helpers;
 
@@ -179,15 +180,7 @@ public static class CblParser
 
     private static CblExternalDbProvider MapProviderName(string name)
     {
-        if (string.IsNullOrEmpty(name)) return CblExternalDbProvider.Unknown;
-
-        return name.ToLowerInvariant() switch
-        {
-            "cv" or "comicvine" => CblExternalDbProvider.ComicVine,
-            "metron" => CblExternalDbProvider.Metron,
-            "gcd" or "grandcomicsdatabase" => CblExternalDbProvider.GrandComicsDatabase,
-            _ => CblExternalDbProvider.Unknown,
-        };
+        return CblExternalDbProviderExtensions.FromName(name);
     }
 
     private static CblListType MapListType(string? type)

@@ -1,5 +1,5 @@
 import {ChangeDetectionStrategy, Component, computed, inject, input, output} from '@angular/core';
-import {ReadingList} from "../../_models/reading-list";
+import {ReadingList} from "../../_models/reading-list/reading-list";
 import {CarouselReelComponent} from "../../carousel/_components/carousel-reel/carousel-reel.component";
 import {ImageService} from "../../_services/image.service";
 import {translate, TranslocoDirective} from "@jsverse/transloco";

@@ -105,7 +105,7 @@ public class CleanupService(
     /// </summary>
     public async Task DeleteSeriesCoverImages(CancellationToken ct = default)
     {
-        var images = await unitOfWork.SeriesRepository.GetAllCoverImagesAsync();
+        var images = await unitOfWork.SeriesRepository.GetAllCoverImagesAsync(ct);
         var files = directoryService.GetFiles(directoryService.CoverImageDirectory, ImageService.SeriesCoverImageRegex);
         directoryService.DeleteFiles(files.Where(file => !images.Contains(directoryService.FileSystem.Path.GetFileName(file))));
     }

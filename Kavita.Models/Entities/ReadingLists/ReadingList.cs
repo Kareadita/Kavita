@@ -88,6 +88,7 @@ public class ReadingList : IEntityDate, IHasCoverImage
         => !string.Equals(ShaHash, remoteSha, StringComparison.Ordinal);
 
     public ICollection<ReadingListItem> Items { get; set; } = null!;
+    public ICollection<ReadingListTag> Tags { get; set; } = new List<ReadingListTag>();
     public DateTime Created { get; set; }
     public DateTime LastModified { get; set; }
     public DateTime CreatedUtc { get; set; }

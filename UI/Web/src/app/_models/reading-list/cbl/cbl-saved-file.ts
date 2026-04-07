@@ -1,4 +1,4 @@
-import {ReadingListProvider} from '../../reading-list';
+import {ReadingListProvider} from '../reading-list';
 
 export interface CblSavedFile {
   name: string;

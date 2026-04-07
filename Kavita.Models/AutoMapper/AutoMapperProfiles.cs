@@ -214,6 +214,7 @@ public class AutoMapperProfiles : Profile
 
         CreateMap<AppUserBookmark, BookmarkDto>();
 
+        CreateMap<ReadingListTag, ReadingListTagDto>();
         CreateMap<ReadingList, ReadingListDto>()
             .ForMember(dest => dest.ItemCount, opt => opt.MapFrom(src => src.Items.Count))
             .ForMember(dest => dest.OwnerUserName, opt => opt.MapFrom(src => src.AppUser.UserName));

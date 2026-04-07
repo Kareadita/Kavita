@@ -5,7 +5,7 @@ import {environment} from 'src/environments/environment';
 import {UtilityService} from '../shared/_services/utility.service';
 import {Person, PersonRole} from '../_models/metadata/person';
 import {PaginatedResult} from '../_models/pagination';
-import {ReadingList, ReadingListCast, ReadingListInfo, ReadingListItem} from '../_models/reading-list';
+import {ReadingList, ReadingListCast, ReadingListInfo, ReadingListItem} from '../_models/reading-list/reading-list';
 import {TextResonse} from '../_types/text-response';
 import {ActionItem} from "../_models/actionables/action-item";
 import {Action} from "../_models/actionables/action";

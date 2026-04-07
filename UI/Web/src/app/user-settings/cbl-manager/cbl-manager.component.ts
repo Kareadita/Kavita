@@ -6,7 +6,7 @@ import {ModalService} from '../../_services/modal.service';
 import {DatePipe, NgTemplateOutlet} from '@angular/common';
 import {FileSystemFileEntry, NgxFileDropEntry, NgxFileDropModule} from 'ngx-file-drop';
 import {ReadingListService} from '../../_services/reading-list.service';
-import {ReadingList, ReadingListProvider} from '../../_models/reading-list';
+import {ReadingList, ReadingListProvider} from '../../_models/reading-list/reading-list';
 import {LoadingComponent} from '../../shared/loading/loading.component';
 import {translate, TranslocoDirective} from '@jsverse/transloco';
 import {BrowseCblRepoModalComponent} from '../_modals/browse-cbl-repo-modal/browse-cbl-repo-modal.component';

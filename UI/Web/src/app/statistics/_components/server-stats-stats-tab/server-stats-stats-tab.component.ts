@@ -22,7 +22,7 @@ import {FilterField} from "../../../_models/metadata/v2/filter-field";
 import {FilterCombination} from "../../../_models/metadata/v2/filter-combination";
 import {map} from "rxjs/operators";
 import {forkJoin, tap} from "rxjs";
-import {ReadingList} from "../../../_models/reading-list";
+import {ReadingList} from "../../../_models/reading-list/reading-list";
 import {PersonRolePipe} from "../../../_pipes/person-role.pipe";
 
 @Component({

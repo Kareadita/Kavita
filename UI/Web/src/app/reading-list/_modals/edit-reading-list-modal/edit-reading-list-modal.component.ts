@@ -12,7 +12,7 @@ import {
 } from '@ng-bootstrap/ng-bootstrap';
 import {ToastrService} from 'ngx-toastr';
 import {concat, debounceTime, distinctUntilChanged, switchMap, tap} from 'rxjs';
-import {ReadingList} from 'src/app/_models/reading-list';
+import {ReadingList} from 'src/app/_models/reading-list/reading-list';
 import {AccountService} from 'src/app/_services/account.service';
 import {ImageService} from 'src/app/_services/image.service';
 import {ReadingListService} from 'src/app/_services/reading-list.service';

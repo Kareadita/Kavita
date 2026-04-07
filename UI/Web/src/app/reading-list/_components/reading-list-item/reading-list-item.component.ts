@@ -1,5 +1,5 @@
 import {ChangeDetectionStrategy, Component, computed, inject, input, output} from '@angular/core';
-import {ReadingListItem} from 'src/app/_models/reading-list';
+import {ReadingListItem} from 'src/app/_models/reading-list/reading-list';
 import {ImageService} from 'src/app/_services/image.service';
 import {NgbProgressbar} from '@ng-bootstrap/ng-bootstrap';
 import {ImageComponent} from '../../../shared/image/image.component';

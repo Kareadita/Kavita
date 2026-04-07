@@ -98,9 +98,21 @@
             <div class="mt-2 upper-details">
               <div class="row g-0">
                 <div class="col-6 pe-5">
-                  <span class="fw-bold">{{t('date-range-title')}}</span>
+<!--                  <span class="fw-bold">{{t('date-range-title')}}</span>-->
+<!--                  <div>-->
+<!--                    &lt;!&ndash;TODO: Move this up to title row and use dateYearRange&ndash;&gt;-->
+<!--                    {{dateRangeLabel() ?? (null | defaultValue)}}-->
+<!--                  </div>-->
+                  <span class="fw-bold">{{t('tags-title')}}</span>
                   <div>
-                    {{dateRangeLabel() ?? (null | defaultValue)}}
+                    @for(tag of readingList().tags; track tag.id; let last = $last;) {
+                      {{tag}}
+                      @if (!last) {
+                        <span>, </span>
+                      }
+                    } @empty {
+                      {{(null | defaultValue)}}
+                    }
                   </div>
                 </div>
                 <div class="col-6">

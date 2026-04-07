@@ -16,7 +16,7 @@ import {UserCollection} from 'src/app/_models/collection-tag';
 import {Library} from 'src/app/_models/library/library';
 import {MangaFile} from 'src/app/_models/manga-file';
 import {Person} from 'src/app/_models/metadata/person';
-import {ReadingList} from 'src/app/_models/reading-list';
+import {ReadingList} from 'src/app/_models/reading-list/reading-list';
 import {SearchResult} from 'src/app/_models/search/search-result';
 import {SearchResultGroup} from 'src/app/_models/search/search-result-group';
 import {AccountService} from 'src/app/_services/account.service';

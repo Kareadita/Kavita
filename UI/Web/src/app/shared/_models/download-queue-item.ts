@@ -1,6 +1,6 @@
 import {Volume} from '../../_models/volume';
 import {Chapter} from '../../_models/chapter';
-import {ReadingListItem} from '../../_models/reading-list';
+import {ReadingListItem} from '../../_models/reading-list/reading-list';
 
 /** All valid entity types for downloading */
 export enum DownloadEntityType {

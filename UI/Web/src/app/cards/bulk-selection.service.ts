@@ -14,7 +14,7 @@ import {Chapter} from "../_models/chapter";
 import {Series} from "../_models/series";
 import {PageBookmark} from "../_models/readers/page-bookmark";
 import {UserCollection} from "../_models/collection-tag";
-import {ReadingList} from "../_models/reading-list";
+import {ReadingList} from "../_models/reading-list/reading-list";
 import {Annotation} from "../book-reader/_models/annotations/annotation";
 import {SideNavStream} from "../_models/sidenav/sidenav-stream";
 
