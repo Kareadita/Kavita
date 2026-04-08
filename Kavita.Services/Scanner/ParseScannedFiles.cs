@@ -444,7 +444,7 @@ public class ParseScannedFiles
 
         bool Guard(KeyValuePair<ParsedSeries, List<ParserInfo>> p)
         {
-            return MergeNameGuard(p.Key.Format, info.Series, info.Format,
+            return MergeNameGuard(p.Key.Format, p.Key.NormalizedName, info.Format,
                 normalizedName, normalizedSortName, normalizedLocalizedName);
         }
     }
