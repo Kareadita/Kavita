@@ -56,7 +56,7 @@ install methods and platforms.
 Got a great idea? Throw it up on [Discussions](https://github.com/Kareadita/Kavita/discussions/2529) or vote on another idea. Many great features in Kavita are driven by our community. 
 
 ## Notice
-Kavita is being actively developed and should be considered beta software until the 1.0 release.
+Kavita is being actively developed and should be considered beta software until the 1.0.0 release.
 Kavita may be subject to changes in how the platform functions as it is being built out toward the
 vision. You may lose data and have to restart. The Kavita team strives to avoid any data loss.
 
@@ -66,14 +66,14 @@ expenses related to Kavita. Back us through [OpenCollective](https://opencollect
 option which provides funding, and you get a benefit.
 
 ## Kavita+
-[Kavita+](https://wiki.kavitareader.com/kavita+) is a paid subscription that offers premium features that otherwise wouldn't be feasible to include in Kavita. It is ran and operated by majora2007, the creator and developer of Kavita.
+[Kavita+](https://wiki.kavitareader.com/kavita+) is a paid subscription that offers premium features that otherwise wouldn't be feasible to include in Kavita. It is run and operated by [majora2007](https://github.com/majora2007), the creator and primary developer of Kavita.
 
 If you are interested, you can use the promo code [`FIRSTTIME`](https://buy.stripe.com/00gcOQanFajG0hi5ko?prefilled_promo_code=FIRSTTIME) for your initial signup for a 50% discount on the first month (2$). This can be thought of as donating to Kavita's development and getting some sweet features out of it.
 
 **If you already contribute via OpenCollective, please reach out to majora2007 for a provisioned license.**
 
 ## Localization
-Thank you to [Weblate](https://hosted.weblate.org/engage/kavita/) who hosts our localization infrastructure pro bono. If you want to see Kavita in your language, please help us localize.
+Thank you to [Weblate](https://hosted.weblate.org/engage/kavita/) who hosts our localization infrastructure pro bono. If you want to see Kavita in your language, please help us localize. Drop by the discord and signup for the `Translator` role.
 
 <a href="https://hosted.weblate.org/engage/kavita/">
 <img src="https://hosted.weblate.org/widget/kavita/horizontal-auto.svg" alt="Translation status" />
@@ -86,7 +86,7 @@ allows you to easily spin up a server. 20% of app revenues are contributed back 
 
 ## Contributors
 
-This project exists thanks to all the people who contribute and downstream library maintainers. [Contribute](CONTRIBUTING.md).
+This project exists thanks to all the people who contribute and upstream library maintainers. [Contribute](CONTRIBUTING.md).
 <a href="https://github.com/Kareadita/Kavita/graphs/contributors">
 <img src="https://opencollective.com/kavita/contributors.svg?width=890&button=false&avatarHeight=42" />
 </a>
@@ -112,5 +112,5 @@ Support this project by becoming a sponsor. Your logo will show up here with a l
 
 ### License
 * [GNU GPL v3](http://www.gnu.org/licenses/gpl.html)
-* Copyright 2020-2024
+* Copyright 2020-2026
 
