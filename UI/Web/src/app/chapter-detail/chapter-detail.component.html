@@ -108,7 +108,7 @@
                 </div>
               </div>
               <div class="col-6">
-                @if (chapterValue.releaseDate !== '0001-01-01T00:00:00' && (libraryType() === LibraryType.ComicVine || libraryType() === LibraryType.Comic)) {
+                @if (chapterValue.releaseDate !== NULL_DATE && (libraryType() === LibraryType.ComicVine || libraryType() === LibraryType.Comic)) {
                   <span class="fw-bold">{{t('release-date-title')}}</span>
                   <div>
                     <a class="dark-exempt btn-icon" href="javascript:void(0);">{{chapterValue.releaseDate | utcToLocalTime: 'shortDate' | defaultDate:'—'}}</a>

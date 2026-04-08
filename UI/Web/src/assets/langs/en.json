@@ -1864,7 +1864,9 @@
         "library-database-backup-label": "Kavita Backup",
         "library-database-backup-tooltip": "How often Kavita will backup the database and other related files.",
         "cleanup-label": "Cleanup",
-        "cleanup-tooltip": "How often Kavita will run cleanup tasks. This can be heavy and should be performed at midnight in most cases",
+        "cleanup-tooltip": "How often Kavita will run cleanup tasks. This can be heavy and should be performed at midnight in most cases.",
+        "cbl-sync-label": "Reading List Sync",
+        "cbl-sync-tooltip": "How often Kavita will check for new updates to CBL Reading Lists. Defaults to daily at 4am.",
         "adhoc-tasks-title": "Ad-hoc Tasks",
         "job-title-header": "Job Title",
         "description-header": "Description",
@@ -1872,19 +1874,9 @@
         "reset-to-default": "{{common.reset-to-default}}",
         "reset": "{{common.reset}}",
         "save": "{{common.save}}",
-        "required": "{{validation.required-field}}",
-
-        "custom-label": "Custom Schedule (Cron Notation)",
-        "cron-notation": "This is not valid Cron Notation",
-
         "recurring-tasks-title": "{{title}}",
         "last-executed-header": "Last Executed",
         "cron-header": "Cron",
-
-        "disabled": "Disabled",
-        "daily": "Daily",
-        "weekly": "Weekly",
-        "custom": "Custom",
 
 
         "convert-media-task": "Convert Media to Target Encoding",
@@ -2180,7 +2172,8 @@
     },
 
     "manage-remap-rules": {
-        "create-rule": "Create Rule",
+        "create-rule-title": "Create Rule",
+        "edit-rule-title": "Edit Remap Rule",
         "new-rule-title": "New Remap Rule",
         "cbl-series-name-label": "CBL Series Name",
         "cbl-series-name-placeholder": "Enter CBL series name...",
@@ -2191,8 +2184,10 @@
         "global-rules-header": "Global Rules",
         "other-users-rules-header": "Other Users' Rules",
         "cbl-name-col": "CBL Name",
-        "maps-to-col": "Maps To",
-        "vol-issue-col": "Vol / Issue",
+        "cbl-volume-col": "CBL Volume",
+        "cbl-issue-col": "CBL Issue",
+        "mapped-series-col": "Mapped Series",
+        "mapped-vol-issue-col": "Mapped Vol / Issue",
         "created-col": "Created",
         "created-by-col": "Created By",
         "user-col": "User",
@@ -2206,7 +2201,11 @@
         "issue-num": "{{common.issue-num-shorthand}}",
         "cbl-volume-label": "CBL Volume",
         "cbl-volume-placeholder": "e.g. 2016",
-        "series-level": "Series-level"
+        "cbl-number-label": "CBL Issue #",
+        "cbl-number-placeholder": "e.g. 1",
+        "kavita-chapter-label": "Kavita Chapter (optional)",
+        "series-level": "Series-level",
+        "edit": "{{common.edit}}"
     },
 
     "browse-cbl-repo-modal": {
@@ -2271,7 +2270,8 @@
     "reading-list-item": {
         "remove": "{{common.remove}}",
         "read": "{{common.read}}",
-        "released-label": "Released: {{date}}"
+        "released-label": "Released: {{date}}",
+        "pages-count": "{{series-detail.pages-count}}"
     },
 
     "stream-list-item": {
@@ -2304,7 +2304,6 @@
         "date-range-title": "Date Range",
         "more-alt": "{{series-detail.more-alt}}",
         "reorder-alt": "Reorder Items",
-        "dnd-warning": "Drag and drop is unavailable on mobile devices or when the reading list has more than 100 items.",
         "loading-alt": "{{pdf-reader.loading-message}}"
     },
 
@@ -2498,7 +2497,8 @@
         "series-count": "{{common.series-count}}",
         "restack-count": "{{num}} Restacks",
         "nothing-found": "Nothing found",
-        "track": "Track"
+        "track": "Track",
+        "by-author": "by {{author}}"
     },
 
     "import-mappings": {
@@ -3441,6 +3441,19 @@
         "critical": "Critical"
     },
 
+    "cron-frequency-pipe": {
+        "disabled": "Disabled",
+        "daily": "Daily",
+        "weekly": "Weekly",
+        "custom": "Custom"
+    },
+
+    "setting-cron-item": {
+        "custom-label": "Custom Schedule (Cron Notation)",
+        "required-field": "{{validation.required-field}}",
+        "cron-notation": "This is not valid Cron Notation"
+    },
+
     "confirm": {
         "alert": "Alert",
         "confirm": "Confirm",
@@ -3626,7 +3639,9 @@
         "cbl-remap-rule-created": "Remap rule created",
         "cbl-remap-rule-deleted": "Remap rule deleted",
         "cbl-remap-rule-promoted": "Rule promoted to global",
-        "cbl-remap-rule-demoted": "Rule demoted to user scope"
+        "cbl-remap-rule-demoted": "Rule demoted to user scope",
+        "confirm-delete-read-from-readinglist": "Are you sure you want to remove all read issues from this reading list? This cannot be undone.",
+        "reading-list-sync-enqueued": "The Reading List has been enqueued for sync."
     },
 
     "read-time-pipe": {

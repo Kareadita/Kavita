@@ -8,11 +8,13 @@ using Kavita.API.Repositories;
 using Kavita.API.Services;
 using Kavita.API.Services.Reading;
 using Kavita.API.Services.ReadingLists;
+using Kavita.API.Services.SignalR;
 using Kavita.Common;
 using Kavita.Common.Helpers;
 using Kavita.Models.Constants;
 using Kavita.Models.DTOs.Person;
 using Kavita.Models.DTOs.ReadingLists;
+using Kavita.Models.DTOs.SignalR;
 using Kavita.Models.Entities.Enums;
 using Kavita.Server.Attributes;
 using Kavita.Server.Extensions;
@@ -28,7 +30,8 @@ public class ReadingListController(
     IUnitOfWork unitOfWork,
     IReadingListService readingListService,
     ILocalizationService localizationService,
-    ICblExportService  cblExportService)
+    ICblExportService  cblExportService,
+    IEventHub eventHub)
     : BaseApiController
 {
     /// <summary>
@@ -118,10 +121,17 @@ public class ReadingListController(
         {
             return BadRequest(await localizationService.Translate(UserId, "reading-list-permission"));
         }
-        if (await readingListService.UpdateReadingListItemPosition(dto)) return Ok(await localizationService.Translate(UserId, "reading-list-updated"));
 
+        if (!await readingListService.UpdateReadingListItemPosition(dto))
+        {
+            return BadRequest(await localizationService.Translate(UserId, "reading-list-position"));
+        }
 
-        return BadRequest(await localizationService.Translate(UserId, "reading-list-position"));
+        await eventHub.SendMessageAsync(MessageFactory.ReadingListUpdated,
+            MessageFactory.ReadingListUpdatedEvent(dto.ReadingListId), false);
+
+        return Ok(await localizationService.Translate(UserId, "reading-list-updated"));
+
     }
 
     /// <summary>
@@ -139,12 +149,15 @@ public class ReadingListController(
             return BadRequest(await localizationService.Translate(UserId, "reading-list-permission"));
         }
 
-        if (await readingListService.DeleteReadingListItem(dto))
+        if (!await readingListService.DeleteReadingListItem(dto))
         {
-            return Ok(await localizationService.Translate(UserId, "reading-list-updated"));
+            return BadRequest(await localizationService.Translate(UserId, "reading-list-item-delete"));
         }
 
-        return BadRequest(await localizationService.Translate(UserId, "reading-list-item-delete"));
+        await eventHub.SendMessageAsync(MessageFactory.ReadingListUpdated,
+            MessageFactory.ReadingListUpdatedEvent(dto.ReadingListId), false);
+
+        return Ok(await localizationService.Translate(UserId, "reading-list-updated"));
     }
 
     /// <summary>
@@ -162,12 +175,14 @@ public class ReadingListController(
             return BadRequest(await localizationService.Translate(UserId, "reading-list-permission"));
         }
 
-        if (await readingListService.RemoveFullyReadItems(readingListId, user))
+        if (!await readingListService.RemoveFullyReadItems(readingListId, user))
         {
-            return Ok(await localizationService.Translate(UserId, "reading-list-updated"));
+            return BadRequest(await localizationService.Translate(UserId, "reading-list-item-delete"));
         }
 
-        return BadRequest(await localizationService.Translate(UserId, "reading-list-item-delete"));
+        await eventHub.SendMessageAsync(MessageFactory.ReadingListUpdated,
+            MessageFactory.ReadingListUpdatedEvent(readingListId), false);
+        return Ok(await localizationService.Translate(UserId, "reading-list-updated"));
     }
 
     /// <summary>
@@ -236,6 +251,8 @@ public class ReadingListController(
         try
         {
             await readingListService.UpdateReadingList(readingList, dto);
+            await eventHub.SendMessageAsync(MessageFactory.ReadingListUpdated,
+                MessageFactory.ReadingListUpdatedEvent(readingList.Id), false);
         }
         catch (KavitaException ex)
         {
@@ -276,6 +293,9 @@ public class ReadingListController(
             if (unitOfWork.HasChanges())
             {
                 await unitOfWork.CommitAsync();
+                await readingListService.UpdateReadingListCoverImage(readingList);
+                await eventHub.SendMessageAsync(MessageFactory.ReadingListUpdated,
+                    MessageFactory.ReadingListUpdatedEvent(readingList.Id), false);
                 return Ok(await localizationService.Translate(UserId, "reading-list-updated"));
             }
         }
@@ -322,6 +342,9 @@ public class ReadingListController(
             if (unitOfWork.HasChanges())
             {
                 await unitOfWork.CommitAsync();
+                await readingListService.UpdateReadingListCoverImage(readingList);
+                await eventHub.SendMessageAsync(MessageFactory.ReadingListUpdated,
+                    MessageFactory.ReadingListUpdatedEvent(readingList.Id), false);
                 return Ok(await localizationService.Translate(UserId, "reading-list-updated"));
             }
         }
@@ -366,6 +389,9 @@ public class ReadingListController(
             if (unitOfWork.HasChanges())
             {
                 await unitOfWork.CommitAsync();
+                await readingListService.UpdateReadingListCoverImage(readingList);
+                await eventHub.SendMessageAsync(MessageFactory.ReadingListUpdated,
+                    MessageFactory.ReadingListUpdatedEvent(readingList.Id), false);
                 return Ok(await localizationService.Translate(UserId, "reading-list-updated"));
             }
         }
@@ -403,6 +429,9 @@ public class ReadingListController(
             if (unitOfWork.HasChanges())
             {
                 await unitOfWork.CommitAsync();
+                await readingListService.UpdateReadingListCoverImage(readingList);
+                await eventHub.SendMessageAsync(MessageFactory.ReadingListUpdated,
+                    MessageFactory.ReadingListUpdatedEvent(readingList.Id), false);
                 return Ok(await localizationService.Translate(UserId, "reading-list-updated"));
             }
         }
@@ -437,6 +466,9 @@ public class ReadingListController(
             if (unitOfWork.HasChanges())
             {
                 await unitOfWork.CommitAsync();
+                await readingListService.UpdateReadingListCoverImage(readingList);
+                await eventHub.SendMessageAsync(MessageFactory.ReadingListUpdated,
+                    MessageFactory.ReadingListUpdatedEvent(readingList.Id), false);
                 return Ok(await localizationService.Translate(UserId, "reading-list-updated"));
             }
         }

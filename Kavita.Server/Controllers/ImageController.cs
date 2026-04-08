@@ -120,7 +120,9 @@ public class ImageController(IUnitOfWork unitOfWork, IDirectoryService directory
         var path = Path.Join(directoryService.CoverImageDirectory, readingList.CoverImage);
         if (string.IsNullOrEmpty(path) || !directoryService.FileSystem.File.Exists(path))
         {
-            path = await readingListService.GenerateReadingListCoverImage(readingListId);
+            readingList.CoverImage = await readingListService.GenerateReadingListCoverImage(readingListId);
+            path = Path.Join(directoryService.CoverImageDirectory, readingList.CoverImage);
+            await unitOfWork.CommitAsync();
         }
 
         return PhysicalFile(path);

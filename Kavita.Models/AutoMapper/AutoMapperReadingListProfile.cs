@@ -1,8 +1,9 @@
-﻿using System;
+using System;
 using System.Linq;
 using AutoMapper;
 using Kavita.Models.DTOs.ReadingLists;
 using Kavita.Models.Entities;
+using Kavita.Models.Entities.Enums;
 using Kavita.Models.Entities.ReadingLists;
 
 namespace Kavita.Models.AutoMapper;
@@ -39,11 +40,11 @@ public class AutoMapperReadingListProfile : Profile
             .ForMember(dest => dest.LibraryType,
                 opt => opt.MapFrom(src => src.Series.Library.Type))
 
-            // Volume info
+            // Volume info (legacy)
             .ForMember(dest => dest.VolumeNumber,
                 opt => opt.MapFrom(src => src.Volume.Name))
 
-            // Chapter info
+            // Chapter info (legacy)
             .ForMember(dest => dest.ChapterNumber,
                 opt => opt.MapFrom(src => src.Chapter.Range))
             .ForMember(dest => dest.ChapterTitleName,
@@ -58,6 +59,51 @@ public class AutoMapperReadingListProfile : Profile
                 opt => opt.MapFrom(src => src.Chapter.IsSpecial))
             .ForMember(dest => dest.FileSize,
                 opt => opt.MapFrom(src => src.Chapter.Files.Sum(f => f.Bytes)))
+
+            // Nested Chapter DTO
+            .ForMember(dest => dest.Chapter, opt => opt.MapFrom(src => new ReadingListItemChapterDto
+            {
+                Id = src.Chapter.Id,
+                Range = src.Chapter.Range,
+                TitleName = src.Chapter.TitleName,
+                MinNumber = src.Chapter.MinNumber,
+                MaxNumber = src.Chapter.MaxNumber,
+                SortOrder = src.Chapter.SortOrder,
+                Pages = src.Chapter.Pages,
+                IsSpecial = src.Chapter.IsSpecial,
+                ReleaseDate = src.Chapter.ReleaseDate,
+                Summary = src.Chapter.Summary,
+                WriterName = src.Chapter.People
+                    .Where(p => p.Role == PersonRole.Writer)
+                    .OrderBy(p => p.OrderWeight)
+                    .Select(p => p.Person.Name)
+                    .FirstOrDefault(),
+                WriterId = src.Chapter.People
+                    .Where(p => p.Role == PersonRole.Writer)
+                    .OrderBy(p => p.OrderWeight)
+                    .Select(p => (int?)p.PersonId)
+                    .FirstOrDefault(),
+                PencillerName = src.Chapter.People
+                    .Where(p => p.Role == PersonRole.Penciller)
+                    .OrderBy(p => p.OrderWeight)
+                    .Select(p => p.Person.Name)
+                    .FirstOrDefault(),
+                PencillerId = src.Chapter.People
+                    .Where(p => p.Role == PersonRole.Penciller)
+                    .OrderBy(p => p.OrderWeight)
+                    .Select(p => (int?)p.PersonId)
+                    .FirstOrDefault()
+            }))
+
+            // Nested Volume DTO
+            .ForMember(dest => dest.Volume, opt => opt.MapFrom(src => new ReadingListItemVolumeDto
+            {
+                Id = src.Volume.Id,
+                Name = src.Volume.Name,
+                MinNumber = src.Volume.MinNumber,
+                MaxNumber = src.Volume.MaxNumber,
+                SeriesId = src.Volume.SeriesId
+            }))
 
             // Progress
             .ForMember(dest => dest.PagesRead,

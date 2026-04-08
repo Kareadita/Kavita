@@ -1,3 +1,6 @@
+using Kavita.API.Repositories;
+using Kavita.API.Services;
+using Kavita.API.Services.ReadingLists;
 using Kavita.Common.Extensions;
 using Kavita.Database.Tests;
 using Kavita.Models.Builders;
@@ -5,9 +8,12 @@ using Kavita.Models.DTOs.ReadingLists.CBL;
 using Kavita.Models.DTOs.ReadingLists.CBL.Import;
 using Kavita.Models.DTOs.ReadingLists.CBL.Internal;
 using Kavita.Models.Entities.Enums;
+using Kavita.Models.Entities.Enums.ReadingList;
 using Kavita.Models.Entities.ReadingLists;
 using Kavita.Services.Builders;
 using Kavita.Services.Tests.Helpers;
+using Microsoft.Extensions.Logging;
+using NSubstitute;
 using Xunit.Abstractions;
 
 namespace Kavita.Services.Tests.ReadingLists;
@@ -329,7 +335,7 @@ public class CblImportServiceTests : AbstractDbTest
         await svc.UpsertReadingList(seed.User.Id, filePath, decisions);
 
         // Verify remap rule was persisted
-        var rules = await unitOfWork.RemapRuleRepository.GetRulesForUserAsync(seed.User.Id);
+        var rules = await unitOfWork.RemapRuleRepository.GetRuleDtosForUserAsync(seed.User.Id);
         Assert.NotEmpty(rules);
         Assert.Contains(rules, r =>
             r.NormalizedCblSeriesName == "Fables".ToNormalized() &&
@@ -1167,7 +1173,7 @@ public class CblImportServiceTests : AbstractDbTest
         await unitOfWork.CommitAsync();
 
         // Verify the rule was actually persisted
-        var rules = await unitOfWork.RemapRuleRepository.GetRulesForUserAsync(seed.User.Id);
+        var rules = await unitOfWork.RemapRuleRepository.GetRuleDtosForUserAsync(seed.User.Id);
         Assert.NotEmpty(rules);
 
         // Chapter 99 doesn't exist anywhere in Adventure Time
@@ -1593,6 +1599,99 @@ public class CblImportServiceTests : AbstractDbTest
         Assert.Equal(CblImportResult.Success, summary.Success);
         Assert.Single(summary.SuccessfulInserts);
         Assert.Equal(ch5Ids.ChapterId, summary.SuccessfulInserts.First().ChapterId);
+    }
+
+    #endregion
+
+    #region Group 16: SyncReadingListAsync
+
+    [Fact]
+    public async Task SyncReadingListAsync_WithRemapRule_MatchesNewItemAndUpdatesMetadata()
+    {
+        var (unitOfWork, context, _) = await CreateDatabase();
+        using var helper = new CblTestHelper(unitOfWork);
+        var seed = await helper.SeedLibrary("simple-comic.json");
+
+        var fablesIds = seed.Lookup[("Fables", "1", "1")];
+        var batmanIds = seed.Lookup[("Batman", "2016", "1")];
+
+        // Pre-create a syncable reading list with 1 existing item (Fables #1)
+        var rl = new ReadingListBuilder("Sync Test")
+            .WithAppUserId(seed.User.Id)
+            .WithItem(new ReadingListItemBuilder(0, fablesIds.SeriesId, fablesIds.VolumeId, fablesIds.ChapterId).Build())
+            .Build();
+        rl.Provider = ReadingListProvider.Url;
+        rl.SourcePath = "test/list.cbl";
+        unitOfWork.ReadingListRepository.Add(rl);
+        await unitOfWork.CommitAsync();
+
+        // Add a remap rule: "Dark Knight" -> Batman series
+        unitOfWork.RemapRuleRepository.Add(new ReadingListRemapRule
+        {
+            NormalizedCblSeriesName = "Dark Knight".ToNormalized(),
+            CblSeriesName = "Dark Knight",
+            SeriesId = batmanIds.SeriesId,
+            SeriesNameAtMapping = "Batman",
+            AppUserId = seed.User.Id,
+            CreatedUtc = DateTime.UtcNow
+        });
+        await unitOfWork.CommitAsync();
+
+        // Build CBL with 2 items + metadata dates
+        var cbl = CblFileBuilder.Create("Sync Test")
+            .AddBook("Fables", volume: "1", number: "1")
+            .AddBook("Dark Knight", volume: "2016", number: "1")
+            .Build();
+        cbl.StartYear = 2020;
+        cbl.StartMonth = 3;
+        cbl.EndYear = 2021;
+        cbl.EndMonth = 6;
+
+        var cblXml = CblTestHelper.SerializeCblToXml(cbl);
+
+        // Set up mocks
+        var githubService = Substitute.For<ICblGithubService>();
+        githubService.GetFileSha("test/list.cbl").Returns(Task.FromResult("new-sha"));
+        githubService.GetFileContent("test/list.cbl").Returns(Task.FromResult(cblXml));
+
+        var dirService = new DirectoryService(
+            Substitute.For<ILogger<DirectoryService>>(),
+            new System.IO.Abstractions.FileSystem());
+
+        var readingListService = Substitute.For<IReadingListService>();
+
+        var svc = helper.CreateSyncImportService(githubService, dirService, readingListService);
+
+        // Act
+        await svc.SyncReadingListAsync(seed.User.Id, rl.Id);
+
+        // Re-fetch from DB to verify persisted state
+        var synced = await unitOfWork.ReadingListRepository
+            .GetReadingListByIdAsync(rl.Id, ReadingListIncludes.Items);
+
+        Assert.NotNull(synced);
+        Assert.Equal(2, synced!.Items.Count);
+
+        // Verify item ordering and entity mapping
+        var items = synced.Items.OrderBy(i => i.Order).ToList();
+        Assert.Equal(fablesIds.SeriesId, items[0].SeriesId);
+        Assert.Equal(fablesIds.ChapterId, items[0].ChapterId);
+        Assert.Equal(batmanIds.SeriesId, items[1].SeriesId);
+        Assert.Equal(batmanIds.ChapterId, items[1].ChapterId);
+
+        // Verify metadata updated from CBL
+        Assert.Equal(2020, synced.StartingYear);
+        Assert.Equal(3, synced.StartingMonth);
+        Assert.Equal(2021, synced.EndingYear);
+        Assert.Equal(6, synced.EndingMonth);
+
+        // Verify sync timestamps were set
+        Assert.NotNull(synced.LastSyncedUtc);
+        Assert.NotNull(synced.LastSyncCheckUtc);
+
+        // Verify side effect methods were invoked
+        await readingListService.Received(1).CalculateReadingListAgeRating(Arg.Any<ReadingList>());
+        await readingListService.Received(1).CalculateStartAndEndDates(Arg.Any<ReadingList>());
     }
 
     #endregion

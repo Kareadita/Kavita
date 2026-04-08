@@ -17,12 +17,16 @@ public static class WeblinkParser
     private const string AniListStaffWebsite = "https://anilist.co/staff/";
     private const string AniListCharacterWebsite = "https://anilist.co/character/";
     private const string HardcoverStaffWebsite = "https://hardcover.app/authors/";
+
+
     /// <summary>
-    /// ComicVine has a unique structure:
-    // https://comicvine.gamespot.com/batman-the-caped-crusader/4050-112794/
-    // https://comicvine.gamespot.com/batman-the-caped-crusader-6-volume-6/4000-907546/
-    // The 4050 implies this is a Series (TPB/Series) and 4000 implies single issue
+    /// The 4050 implies this is a Series (TPB/Series) and 4000 implies single issue
     /// </summary>
+    /// <remarks>
+    /// ComicVine has a unique structure:
+    /// <c>https://comicvine.gamespot.com/batman-the-caped-crusader/4050-112794/</c> (Series)
+    /// <c>https://comicvine.gamespot.com/batman-the-caped-crusader-6-volume-6/4000-907546/</c> (Issue)
+    /// </remarks>
     private const string ComicVineWeblinkWebsite = "https://comicvine.gamespot.com/";
 
     private static readonly Dictionary<string, int> WeblinkExtractionMap = new()
@@ -50,6 +54,7 @@ public static class WeblinkParser
     {
         var extractedId = ExtractId<string?>(weblinks, ComicVineWeblinkWebsite);
         if (string.IsNullOrEmpty(extractedId)) return Tuple.Create<string?, bool>(null, false);
+
         return Tuple.Create<string?, bool>(extractedId.Split('-')[1], extractedId.StartsWith("4050"));
     }
 

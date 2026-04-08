@@ -56,6 +56,7 @@ import {TabTitlePipe} from "../../_pipes/tab-title.pipe";
 import {
   EditExternalMetadataFormComponent
 } from "../../shared/_components/edit-external-metadata-form/edit-external-metadata-form.component";
+import {NULL_DATE} from "../../_pipes/date-year-range.pipe";
 
 
 const blackList = [Action.Edit, Action.IncognitoRead, Action.AddToReadingList];
@@ -165,7 +166,7 @@ export class EditChapterModalComponent implements OnInit {
     this.editForm.addControl('isbn', new FormControl(this.chapter.isbn, []));
     this.editForm.addControl('ageRating', new FormControl(this.chapter.ageRating, []));
 
-    if (this.chapter.releaseDate !== '0001-01-01T00:00:00') {
+    if (this.chapter.releaseDate !== NULL_DATE) {
       this.editForm.addControl('releaseDate', new FormControl(this.chapter.releaseDate.substring(0, 10), []));
     } else {
       this.editForm.addControl('releaseDate', new FormControl('', []));
@@ -236,7 +237,7 @@ export class EditChapterModalComponent implements OnInit {
 
     // Patch in data from the model that is not typeahead (as those are updated during setting)
     if (model.releaseDate === '') {
-      this.chapter.releaseDate = '0001-01-01T00:00:00';
+      this.chapter.releaseDate = NULL_DATE;
     } else {
       this.chapter.releaseDate = model.releaseDate + 'T00:00:00';
     }

@@ -10,7 +10,6 @@
     <!-- Card Image & Overlay Area -->
     <div class="overlay" (click)="handleClick($event)">
 
-      <!-- Cover Image -->
       <app-image
         [height]="cardHeight()"
         [width]="cardWidth()"
@@ -27,7 +26,6 @@
       <!-- Overlay gradient -->
       <div class="card-overlay"></div>
 
-      <!-- Unread Badge -->
       @if (entityProgress.pagesRead === 0 && entityProgress.pages > 0) {
         <div class="badge-container">
           <div class="not-read-badge"></div>
@@ -49,7 +47,6 @@
         </div>
       }
 
-      <!-- Count Badge -->
       @if (count() > 1) {
         <div class="count">
           <span class="badge bg-primary">{{ count() }}</span>
@@ -76,7 +73,6 @@
           <app-download-indicator [download]="downloadItem()" />
       </div>
 
-      <!-- Read Button (visible on hover) -->
       @if (!bulkSelectionService.hasSelections() && hasReadFunc()) {
         <div class="overlay-information">
           <div class="overlay-information--centered">
@@ -116,7 +112,6 @@
 
     <!-- Footer: Format Badge, Title, Actions -->
     <div class="card-title-container">
-      <!-- Format Badge (optional) -->
       @if (formatBadge()) {
         <app-series-format [format]="formatBadge()!" />
       } @else {

@@ -87,8 +87,9 @@ public sealed record ReadingListDto : IHasCoverImage
     /// </summary>
     public DateTime? LastSyncedUtc { get; set; }
 
-    public bool CanSync => Provider == ReadingListProvider.Url
-                           && !string.IsNullOrEmpty(SourcePath);
+    public bool CanSync => Provider != ReadingListProvider.None
+                           && Provider != ReadingListProvider.File
+                           && (!string.IsNullOrEmpty(SourcePath) || !string.IsNullOrEmpty(DownloadUrl));
     /// <summary>
     /// Checks if the remote SHA differs from our stored hash.
     /// </summary>

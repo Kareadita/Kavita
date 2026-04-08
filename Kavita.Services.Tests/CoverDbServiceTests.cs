@@ -37,7 +37,8 @@ public class CoverDbServiceTests(ITestOutputHelper outputHelper): AbstractDbTest
         var imageService = new ImageService(Substitute.For<ILogger<ImageService>>(), directoryService);
 
         var coverDbService = new CoverDbService(Substitute.For<ILogger<CoverDbService>>(), directoryService, CacheFactory,
-            Substitute.For<IHostEnvironment>(), imageService, unitOfWork, Substitute.For<IEventHub>());
+            Substitute.For<IHostEnvironment>(), imageService, unitOfWork, Substitute.For<IEventHub>(),
+            Substitute.For<IUrlValidationService>());
 
         return Task.FromResult<(IDirectoryService, ICoverDbService)>((directoryService, coverDbService));
     }

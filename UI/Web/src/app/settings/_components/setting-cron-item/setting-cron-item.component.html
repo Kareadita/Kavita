@@ -1,0 +1,38 @@
+<ng-container *transloco="let t; prefix: 'setting-cron-item'">
+  <app-setting-item [title]="title()" [subtitle]="subtitle()">
+    <ng-template #view>
+      @if (selectedFrequency() === CronFrequency.Custom) {
+        {{selectedFrequency() | cronFrequency}} ({{customCron()}})
+      } @else {
+        {{value() | cronFrequency}}
+      }
+    </ng-template>
+    <ng-template #edit>
+      <select class="form-select" [ngModel]="selectedFrequency()" (ngModelChange)="onFrequencyChange($event)">
+        @for (freq of frequencies(); track freq) {
+          <option [value]="freq">{{freq | cronFrequency}}</option>
+        }
+      </select>
+
+      @if (selectedFrequency() === CronFrequency.Custom) {
+        <div class="mt-3">
+          <label class="form-label">{{t('custom-label')}}</label>
+          <input class="form-control" type="text"
+                 [ngModel]="customCron()"
+                 (ngModelChange)="onCustomCronChange($event)"
+                 [class.is-invalid]="cronInvalid()">
+
+          @if (cronInvalid()) {
+            <div class="invalid-feedback" style="display: inline-block">
+              @if (!customCron()) {
+                <div>{{t('required-field')}}</div>
+              } @else {
+                <div>{{t('cron-notation')}}</div>
+              }
+            </div>
+          }
+        </div>
+      }
+    </ng-template>
+  </app-setting-item>
+</ng-container>

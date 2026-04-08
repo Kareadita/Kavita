@@ -524,7 +524,8 @@ public class SettingsService(
             var hasTrailingSlash = authority.EndsWith('/');
             var url = authority + (hasTrailingSlash ? string.Empty : "/") + ".well-known/openid-configuration";
 
-            var json = await url.GetStringAsync(cancellationToken: ct);
+            var json = await FlurlConfiguration.CreateSafeRequest(url)
+                .GetStringAsync(cancellationToken: ct);
             var config = OpenIdConnectConfiguration.Create(json);
             return config.Issuer == authority ? AuthorityValidationResult.Success : AuthorityValidationResult.InvalidAuthority;
         }
@@ -562,6 +563,13 @@ public class SettingsService(
         if (setting.Key == ServerSettingKey.TaskCleanup && updateSettingsDto.TaskCleanup != setting.Value)
         {
             setting.Value = updateSettingsDto.TaskCleanup;
+            unitOfWork.SettingsRepository.Update(setting);
+            return true;
+        }
+
+        if (setting.Key == ServerSettingKey.TaskCblSync && updateSettingsDto.TaskCblSync != setting.Value)
+        {
+            setting.Value = updateSettingsDto.TaskCblSync;
             unitOfWork.SettingsRepository.Update(setting);
             return true;
         }

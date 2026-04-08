@@ -2,24 +2,33 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using Kavita.API.Database;
 using Kavita.API.Repositories;
 using Kavita.API.Services;
 using Kavita.API.Services.ReadingLists;
+using Kavita.API.Services.SignalR;
 using Kavita.Common.Extensions;
 using Kavita.Models.Builders;
 using Kavita.Models.DTOs.ReadingLists.CBL;
 using Kavita.Models.DTOs.ReadingLists.CBL.Import;
 using Kavita.Models.DTOs.ReadingLists.CBL.Internal;
+using Kavita.Models.DTOs.SignalR;
+using Kavita.Models.Entities.Enums;
 using Kavita.Models.Entities.ReadingLists;
+using Kavita.Models.Extensions;
 using Kavita.Services.Helpers;
+using Flurl.Http;
+using Kavita.Common;
+using Kavita.Common.Helpers;
 using Microsoft.Extensions.Logging;
 
 namespace Kavita.Services.ReadingLists;
 
-public class CblImportService(IUnitOfWork unitOfWork, ICblGithubService cblGithubService,
-    IDirectoryService directoryService, ILogger<CblImportService> logger) : ICblImportService
+public class CblImportService(IUnitOfWork unitOfWork, ICblGithubService cblGithubService, IEventHub eventHub,
+    IDirectoryService directoryService, IReadingListService readingListService, IUrlValidationService urlValidationService,
+    IImageService imageService, ILogger<CblImportService> logger) : ICblImportService
 {
     public async Task<CblImportSummaryDto> ValidateList(int userId, string filePath)
     {
@@ -135,16 +144,7 @@ public class CblImportService(IUnitOfWork unitOfWork, ICblGithubService cblGithu
         }
 
         // Set metadata from CBL
-        if (!string.IsNullOrEmpty(cbl.Summary))
-            readingList.Summary = cbl.Summary;
-        if (cbl.StartYear > 0)
-            readingList.StartingYear = cbl.StartYear;
-        if (cbl.StartMonth > 0)
-            readingList.StartingMonth = cbl.StartMonth;
-        if (cbl.EndYear > 0)
-            readingList.EndingYear = cbl.EndYear;
-        if (cbl.EndMonth > 0)
-            readingList.EndingMonth = cbl.EndMonth;
+        SetMetadataFromParsedCbl(cbl, readingList);
 
         // Add resolved items
         foreach (var (order, (match, _)) in matchResults.OrderBy(kv => kv.Key))
@@ -181,41 +181,151 @@ public class CblImportService(IUnitOfWork unitOfWork, ICblGithubService cblGithu
 
         await unitOfWork.CommitAsync();
 
+        // Generate cover image after commit so the reading list has an ID
+        await GenerateCoverForReadingList(readingList, cbl.CoverImageUrls);
+
+        await unitOfWork.CommitAsync();
+
         var summary = BuildSummary(cbl, filePath, matchResults);
         summary.IsUpdate = isUpdate;
         return summary;
     }
 
-    public async Task SyncReadingList(int userId, int readingListId)
+    private static void SetMetadataFromParsedCbl(ParsedCblReadingList cbl, ReadingList readingList)
+    {
+        if (!string.IsNullOrEmpty(cbl.Summary))
+            readingList.Summary = cbl.Summary;
+        if (cbl.StartYear > 0)
+            readingList.StartingYear = cbl.StartYear;
+        if (cbl.StartMonth > 0)
+            readingList.StartingMonth = cbl.StartMonth;
+        if (cbl.EndYear > 0)
+            readingList.EndingYear = cbl.EndYear;
+        if (cbl.EndMonth > 0)
+            readingList.EndingMonth = cbl.EndMonth;
+    }
+
+    /// <summary>
+    /// Attempts to set a cover image on the reading list if not already locked/set.
+    /// First tries the v2 cover URL, then falls back to merged cover generation.
+    /// </summary>
+    /// <remarks>Does not commit changes</remarks>
+    private async Task GenerateCoverForReadingList(ReadingList readingList, IList<string> coverImageUrls)
+    {
+        if (readingList.CoverImageLocked || !string.IsNullOrEmpty(readingList.CoverImage)) return;
+
+        var settings = await unitOfWork.SettingsRepository.GetSettingsDtoAsync();
+
+        // Try v2 cover URL first
+        var coverUrl = coverImageUrls.FirstOrDefault();
+        if (!string.IsNullOrEmpty(coverUrl))
+        {
+            try
+            {
+                await urlValidationService.ValidateUrlAsync(coverUrl);
+                var fileName = await imageService.CreateThumbnailFromUrl(
+                    coverUrl,
+                    ImageService.GetReadingListFormat(readingList.Id),
+                    settings.EncodeMediaAs,
+                    settings.CoverImageSize.GetDimensions().Width);
+
+                if (!string.IsNullOrEmpty(fileName))
+                {
+                    readingList.CoverImage = fileName;
+                    imageService.UpdateColorScape(readingList);
+                    return;
+                }
+            }
+            catch (KavitaException ex)
+            {
+                logger.LogError(ex, "Cover URL for {ReadingListTitle} ({ReadingListId}) is not secure or valid, falling back to default generation",
+                    readingList.Title, readingList.Id);
+            }
+            catch (Exception ex)
+            {
+                logger.LogError(ex, "Failed to download cover from URL for {ReadingListTitle} ({ReadingListId}), falling back to default generation",
+                    readingList.Title, readingList.Id);
+            }
+        }
+
+        // Fallback to merged cover generation
+        await readingListService.GenerateReadingListCoverImage(readingList);
+    }
+
+    public async Task SyncReadingListAsync(int userId, int readingListId)
     {
         var readingList = await unitOfWork.ReadingListRepository
             .GetReadingListByIdAsync(readingListId, ReadingListIncludes.Items);
 
         if (readingList is not {CanSync: true} || readingList.AppUserId != userId)
         {
-            logger.LogWarning("Cannot sync reading list {ReadingListId} — not found, not syncable, or wrong user", readingListId);
+            logger.LogWarning("Cannot sync reading list: {ReadingListId}. List is either not found, not syncable, or wrong user", readingListId);
             return;
         }
 
-        // Re-download from GitHub
         string content;
-        try
+        string? contentHash;
+
+        // Github-based list
+        if (!string.IsNullOrEmpty(readingList.SourcePath))
         {
-            content = await cblGithubService.GetFileContent(readingList.SourcePath!);
+            try
+            {
+                var remoteSha = await cblGithubService.GetFileSha(readingList.SourcePath);
+                if (!readingList.HasRemoteChange(remoteSha))
+                {
+                    readingList.LastSyncCheckUtc = DateTime.UtcNow;
+                    await unitOfWork.CommitAsync();
+                    return;
+                }
+
+                contentHash = remoteSha;
+                content = await cblGithubService.GetFileContent(readingList.SourcePath);
+            }
+            catch (Exception ex)
+            {
+                logger.LogError(ex, "Failed to download CBL content for sync: {SourcePath}", readingList.SourcePath);
+                readingList.LastSyncCheckUtc = DateTime.UtcNow;
+                await unitOfWork.CommitAsync();
+                return;
+            }
         }
-        catch (Exception ex)
+        else if (!string.IsNullOrEmpty(readingList.DownloadUrl))
         {
-            logger.LogError(ex, "Failed to download CBL content for sync: {SourcePath}", readingList.SourcePath);
-            readingList.LastSyncCheckUtc = DateTime.UtcNow;
-            await unitOfWork.CommitAsync();
+            // Url-based list
+            try
+            {
+                await urlValidationService.ValidateUrlAsync(readingList.DownloadUrl);
+                content = await FlurlConfiguration.CreateSafeRequest(readingList.DownloadUrl).GetStringAsync();
+            }
+            catch (Exception ex)
+            {
+                logger.LogError(ex, "Failed to download CBL content for sync from URL: {Url}", readingList.DownloadUrl);
+                readingList.LastSyncCheckUtc = DateTime.UtcNow;
+                await unitOfWork.CommitAsync();
+                return;
+            }
+
+            contentHash = FileService.ComputeSha256(content);
+            if (!readingList.HasRemoteChange(contentHash))
+            {
+                readingList.LastSyncCheckUtc = DateTime.UtcNow;
+                await unitOfWork.CommitAsync();
+                return;
+            }
+        }
+        else
+        {
+            logger.LogWarning("Reading list {ReadingListId} is marked syncable but has no SourcePath or DownloadUrl", readingListId);
             return;
         }
 
         // Save to temp file for parsing
         var tempDir = Path.Join(directoryService.TempDirectory, $"{userId}", "cbl-sync");
-        Directory.CreateDirectory(tempDir);
-        var tempFile = Path.Join(tempDir, $"sync-{readingListId}{GetExtension(readingList.SourcePath!)}");
-        await File.WriteAllTextAsync(tempFile, content);
+        directoryService.ExistOrCreate(tempDir);
+        var sourceRef = readingList.SourcePath ?? readingList.DownloadUrl ?? $"list-{readingListId}";
+        var tempFile = Path.Join(tempDir, $"sync-{readingListId}{GetExtension(sourceRef)}");
+        await directoryService.FileSystem.File.WriteAllTextAsync(tempFile, content);
 
         try
         {
@@ -234,26 +344,79 @@ public class CblImportService(IUnitOfWork unitOfWork, ICblGithubService cblGithu
             }
 
             // Update metadata
-            if (!string.IsNullOrEmpty(cbl.Summary))
-                readingList.Summary = cbl.Summary;
-            if (cbl.StartYear > 0)
-                readingList.StartingYear = cbl.StartYear;
-            if (cbl.EndYear > 0)
-                readingList.EndingYear = cbl.EndYear;
+            SetMetadataFromParsedCbl(cbl, readingList);
 
+            if (contentHash != null)
+            {
+                readingList.ShaHash = contentHash;
+            }
             readingList.LastSyncedUtc = DateTime.UtcNow;
             readingList.LastSyncCheckUtc = DateTime.UtcNow;
 
             await unitOfWork.CommitAsync();
+
+            // Re-run side effects like age ratings, cover generation, etc
+            await readingListService.CalculateReadingListAgeRating(readingList);
+            await readingListService.CalculateStartAndEndDates(readingList);
+            await GenerateCoverForReadingList(readingList, cbl.CoverImageUrls);
+
+            await unitOfWork.CommitAsync();
+
+            // Inform the UI that the CBL was updated
+            await eventHub.SendMessageAsync(MessageFactory.ReadingListUpdated,
+                MessageFactory.ReadingListUpdatedEvent(readingListId), false);
         }
         catch (Exception ex)
         {
-            logger.LogError(ex, "Failed to sync reading list {ReadingListId} from {SourcePath}", readingListId, readingList.SourcePath);
+            logger.LogError(ex, "Failed to sync reading list {ReadingListId} from {Source}", readingListId, readingList.SourcePath ?? readingList.DownloadUrl);
         }
         finally
         {
-            try { File.Delete(tempFile); } catch { /* best effort cleanup */ }
+            try { directoryService.FileSystem.File.Delete(tempFile); } catch { /* The file will be cleaned up with nightly, okay to swallow */ }
         }
+    }
+
+    /// <summary>
+    /// For every user with syncable cbl reading lists that haven't been checked within the last 3 days (LastSyncCheckUtc), attempt to update them.
+    /// </summary>
+    /// <remarks>Failures to match will be logged, but will not inhibit the process</remarks>
+    /// <param name="cancellationToken"></param>
+    /// <returns></returns>
+    public async Task SyncAllReadingLists(CancellationToken cancellationToken = default)
+    {
+        var syncThreshold = DateTime.UtcNow.AddDays(-3);
+        var syncableMap = await unitOfWork.ReadingListRepository
+            .GetSyncableReadingListsAsync(syncThreshold, cancellationToken);
+
+        if (syncableMap.Count == 0)
+        {
+            logger.LogInformation("CBL Sync: No reading lists due for sync");
+            return;
+        }
+
+        var totalSynced = 0;
+        var totalFailed = 0;
+
+        foreach (var (userId, readingListIds) in syncableMap)
+        {
+            foreach (var readingListId in readingListIds)
+            {
+                if (cancellationToken.IsCancellationRequested) return;
+
+                try
+                {
+                    await SyncReadingListAsync(userId, readingListId);
+                    totalSynced++;
+                }
+                catch (Exception ex)
+                {
+                    totalFailed++;
+                    logger.LogError(ex, "Failed to sync reading list {ReadingListId} for user {UserId}", readingListId, userId);
+                }
+            }
+        }
+
+        logger.LogInformation("CBL Sync complete: {Synced} synced, {Failed} failed", totalSynced, totalFailed);
     }
 
     private async Task<Dictionary<int, (MatchedItem? Match, CblBookResult Result)>> RunMatchingPipeline(
@@ -269,10 +432,8 @@ public class CblImportService(IUnitOfWork unitOfWork, ICblGithubService cblGithu
             .Distinct()
             .ToList();
 
-        foreach (var n in directNormalizedNames)
-        {
-            if (!allNormalizedNames.Contains(n)) allNormalizedNames.Add(n);
-        }
+
+        allNormalizedNames.AddRange(directNormalizedNames.Where(n => !allNormalizedNames.Contains(n)));
 
         // Collect external IDs
         var comicVineIds = cbl.Items

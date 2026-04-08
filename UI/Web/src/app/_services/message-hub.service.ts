@@ -14,6 +14,7 @@ import {ExternalMatchRateLimitErrorEvent} from "../_models/events/external-match
 import {AnnotationUpdateEvent} from "../_models/events/annotation-update-event";
 import {toSignal} from "@angular/core/rxjs-interop";
 import {ReadingSessionCloseEvent, ReadingSessionUpdateEvent} from "../_models/events/reading-session-close-event";
+import {ReadingListUpdatedEvent} from "../_models/events/reading-list-updated-event";
 
 export enum EVENTS {
   UpdateAvailable = 'UpdateAvailable',
@@ -142,6 +143,10 @@ export enum EVENTS {
    * An Auth key has been deleted
    */
   AuthKeyDeleted = 'AuthKeyDeleted',
+  /**
+   * A Reading List was updated (like via Sync operation)
+   */
+  ReadingListUpdated = 'ReadingListUpdated'
 }
 
 export interface Message<T> {
@@ -382,6 +387,13 @@ export class MessageHubService {
       this.messagesSource.next({
         event: EVENTS.CoverUpdate,
         payload: resp.body
+      });
+    });
+
+    this.hubConnection.on(EVENTS.ReadingListUpdated, resp => {
+      this.messagesSource.next({
+        event: EVENTS.ReadingListUpdated,
+        payload: resp.body as ReadingListUpdatedEvent
       });
     });
 

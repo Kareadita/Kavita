@@ -42,6 +42,11 @@ public interface IEntityNamingService
     string FormatReadingListItemTitle(ReadingListItemDto item, string? volumeLabel = null, string? chapterLabel = null, string? issueLabel = null, string? bookLabel = null);
 
     /// <summary>
+    /// Formats a reading list item title from nested chapter/volume DTOs.
+    /// </summary>
+    string FormatReadingListItemTitle(ReadingListItemChapterDto chapter, ReadingListItemVolumeDto volume, LibraryType libraryType, MangaFormat format, string? volumeLabel = null, string? chapterLabel = null, string? issueLabel = null, string? bookLabel = null);
+
+    /// <summary>
     /// Formats a reading list item title from raw values.
     /// </summary>
     string FormatReadingListItemTitle( LibraryType libraryType, MangaFormat format, string? chapterNumber, string? volumeNumber, string? chapterTitleName, bool isSpecial, string? volumeLabel = null, string? chapterLabel = null, string? issueLabel = null, string? bookLabel = null);

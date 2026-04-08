@@ -153,7 +153,7 @@ public abstract class DefaultParser(IDirectoryService directoryService) : IDefau
     /// for different metadata Ids
     /// </summary>
     /// <param name="info"></param>
-    protected static void ParseExternalIdsFromNotesAndWeblinks(ParserInfo info)
+    public static void ParseExternalIdsFromNotesAndWeblinks(ParserInfo info)
     {
         var notes = info.ComicInfo?.Notes;
         var weblinks = info.ComicInfo?.Web;
@@ -163,12 +163,15 @@ public abstract class DefaultParser(IDirectoryService directoryService) : IDefau
 
         var comicvineId = Parser.ParseComicVineIdFromComicInfoNote(notes);
         var parsedCvWeblink = WeblinkParser.GetComicVineId(weblinks);
-        info.ComicVineId = !string.IsNullOrEmpty(comicvineId)
-            ? comicvineId
-            : parsedCvWeblink.Item1;
+        info.ComicVineId = comicvineId;
+
+        // If we have a seriesId, set it. Otherwise, we set the issue id
         if (parsedCvWeblink.Item2)
         {
             info.ComicVineSeriesId = parsedCvWeblink.Item1;
+        } else if (string.IsNullOrEmpty(comicvineId))
+        {
+            info.ComicVineId ??= parsedCvWeblink.Item1;
         }
 
         var metronId = Parser.ParseMetronIdFromComicInfoNote(notes);

@@ -11,6 +11,7 @@ public static class CronConverter
         "daily",
         "weekly"
     ];
+
     /// <summary>
     /// Converts to Cron Notation
     /// </summary>

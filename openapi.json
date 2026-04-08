@@ -2,12 +2,12 @@
   "openapi": "3.0.4",
   "info": {
     "title": "Kavita",
-    "description": "Kavita provides a set of APIs that are authenticated by JWT. JWT token can be copied from local storage. Assume all fields of a payload are required. Built against v0.8.9.33",
+    "description": "Kavita provides a set of APIs that are authenticated by JWT. JWT token can be copied from local storage. Assume all fields of a payload are required. Built against v0.8.9.35",
     "license": {
       "name": "GPL-3.0",
       "url": "https://github.com/Kareadita/Kavita/blob/develop/LICENSE"
     },
-    "version": "0.8.9.33"
+    "version": "0.8.9.35"
   },
   "servers": [
     {
@@ -1915,6 +1915,30 @@
         }
       }
     },
+    "/api/Cbl/sync": {
+      "post": {
+        "tags": [
+          "Cbl"
+        ],
+        "summary": "Enqueues the Reading List to be synced on a background thread. UI will be informed from Kavita.Models.DTOs.SignalR.MessageFactory.ReadingListUpdated event",
+        "parameters": [
+          {
+            "name": "readingListId",
+            "in": "query",
+            "description": "",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
     "/api/Cbl/file-import": {
       "post": {
         "tags": [
@@ -2378,7 +2402,7 @@
       }
     },
     "/api/Cbl/remap-rules/{id}": {
-      "put": {
+      "post": {
         "tags": [
           "Cbl"
         ],
@@ -27407,6 +27431,69 @@
         },
         "additionalProperties": false
       },
+      "ReadingListItemChapterDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "range": {
+            "type": "string",
+            "nullable": true
+          },
+          "titleName": {
+            "type": "string",
+            "nullable": true
+          },
+          "minNumber": {
+            "type": "number",
+            "format": "float"
+          },
+          "maxNumber": {
+            "type": "number",
+            "format": "float"
+          },
+          "sortOrder": {
+            "type": "number",
+            "format": "float"
+          },
+          "pages": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "isSpecial": {
+            "type": "boolean"
+          },
+          "releaseDate": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "summary": {
+            "type": "string",
+            "nullable": true
+          },
+          "writerName": {
+            "type": "string",
+            "nullable": true
+          },
+          "writerId": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "pencillerName": {
+            "type": "string",
+            "nullable": true
+          },
+          "pencillerId": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
       "ReadingListItemDto": {
         "type": "object",
         "properties": {
@@ -27451,19 +27538,23 @@
           },
           "pagesTotal": {
             "type": "integer",
-            "format": "int32"
+            "format": "int32",
+            "deprecated": true
           },
           "chapterNumber": {
             "type": "string",
-            "nullable": true
+            "nullable": true,
+            "deprecated": true
           },
           "volumeNumber": {
             "type": "string",
-            "nullable": true
+            "nullable": true,
+            "deprecated": true
           },
           "chapterTitleName": {
             "type": "string",
-            "nullable": true
+            "nullable": true,
+            "deprecated": true
           },
           "volumeId": {
             "type": "integer",
@@ -27496,7 +27587,8 @@
           "releaseDate": {
             "type": "string",
             "format": "date-time",
-            "nullable": true
+            "nullable": true,
+            "deprecated": true
           },
           "readingListId": {
             "type": "integer",
@@ -27509,14 +27601,49 @@
           },
           "fileSize": {
             "type": "integer",
-            "format": "int64"
+            "format": "int64",
+            "deprecated": true
           },
           "summary": {
             "type": "string",
-            "nullable": true
+            "nullable": true,
+            "deprecated": true
           },
           "isSpecial": {
-            "type": "boolean"
+            "type": "boolean",
+            "deprecated": true
+          },
+          "chapter": {
+            "$ref": "#/components/schemas/ReadingListItemChapterDto"
+          },
+          "volume": {
+            "$ref": "#/components/schemas/ReadingListItemVolumeDto"
+          }
+        },
+        "additionalProperties": false
+      },
+      "ReadingListItemVolumeDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "name": {
+            "type": "string",
+            "nullable": true
+          },
+          "minNumber": {
+            "type": "number",
+            "format": "float"
+          },
+          "maxNumber": {
+            "type": "number",
+            "format": "float"
+          },
+          "seriesId": {
+            "type": "integer",
+            "format": "int32"
           }
         },
         "additionalProperties": false
@@ -29010,6 +29137,10 @@
             "nullable": true
           },
           "taskCleanup": {
+            "type": "string",
+            "nullable": true
+          },
+          "taskCblSync": {
             "type": "string",
             "nullable": true
           },
@@ -30927,6 +31058,15 @@
       "UpdateRemapRuleDto": {
         "type": "object",
         "properties": {
+          "cblSeriesName": {
+            "type": "string",
+            "nullable": true
+          },
+          "seriesId": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
           "volumeId": {
             "type": "integer",
             "format": "int32",

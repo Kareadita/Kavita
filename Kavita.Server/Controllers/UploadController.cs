@@ -36,11 +36,12 @@ public class UploadController : BaseApiController
     private readonly IReadingListService _readingListService;
     private readonly ILocalizationService _localizationService;
     private readonly ICoverDbService _coverDbService;
+    private readonly IUrlValidationService _urlValidationService;
 
     /// <inheritdoc />
     public UploadController(IUnitOfWork unitOfWork, IImageService imageService, ILogger<UploadController> logger,
         ITaskScheduler taskScheduler, IDirectoryService directoryService, IEventHub eventHub, IReadingListService readingListService,
-        ILocalizationService localizationService, ICoverDbService coverDbService)
+        ILocalizationService localizationService, ICoverDbService coverDbService, IUrlValidationService urlValidationService)
     {
         _unitOfWork = unitOfWork;
         _imageService = imageService;
@@ -51,6 +52,7 @@ public class UploadController : BaseApiController
         _readingListService = readingListService;
         _localizationService = localizationService;
         _coverDbService = coverDbService;
+        _urlValidationService = urlValidationService;
     }
 
     /// <summary>
@@ -63,6 +65,15 @@ public class UploadController : BaseApiController
     [HttpPost("upload-by-url")]
     public async Task<ActionResult<string>> GetImageFromFile(UploadUrlDto dto)
     {
+        try
+        {
+            await _urlValidationService.ValidateUrlAsync(dto.Url);
+        }
+        catch (Exception)
+        {
+            return BadRequest(await _localizationService.Translate(UserId, "url-not-valid"));
+        }
+
         var dateString = $"{DateTime.UtcNow.ToShortDateString()}_{DateTime.UtcNow.ToLongTimeString()}".Replace('/', '_').Replace(':', '_');
         try
         {

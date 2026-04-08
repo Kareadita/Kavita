@@ -5,8 +5,10 @@ using System.Linq;
 using System.Numerics;
 using System.Threading;
 using System.Threading.Tasks;
+using Flurl.Http;
 using Kavita.API.Services;
 using Kavita.Common;
+using Kavita.Common.Helpers;
 using Kavita.Models.DTOs;
 using Kavita.Models.Entities.Enums;
 using Kavita.Models.Entities.Interfaces;
@@ -540,6 +542,30 @@ public class ImageService(ILogger<ImageService> logger, IDirectoryService direct
         catch (FormatException e)
         {
             throw new KavitaException("Invalid Base64 string", e);
+        }
+        catch (Exception e)
+        {
+            logger.LogError(e, "Error creating thumbnail from url");
+        }
+
+        return string.Empty;
+    }
+
+    /// <inheritdoc />
+    public async Task<string> CreateThumbnailFromUrl(string url, string fileName, EncodeFormat encodeFormat, int thumbnailWidth = ThumbnailWidth)
+    {
+        try
+        {
+            var imageStream = await FlurlConfiguration.CreateSafeRequest(url)
+                .AllowHttpStatus("2xx,304")
+                .GetStreamAsync();
+
+            using var thumbnail = Image.ThumbnailStream(imageStream, thumbnailWidth);
+
+            fileName += encodeFormat.GetExtension();
+            thumbnail.WriteToFile(directoryService.FileSystem.Path.Join(directoryService.CoverImageDirectory, fileName));
+
+            return fileName;
         }
         catch (Exception e)
         {

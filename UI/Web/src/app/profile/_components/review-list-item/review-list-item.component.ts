@@ -5,10 +5,10 @@ import {ImageComponent} from "../../../shared/image/image.component";
 import {ReadMoreComponent} from "../../../shared/read-more/read-more.component";
 import {UserReviewExtended} from "../../../_models/user-review";
 import {ImageService} from "../../../_services/image.service";
-import {CardActionablesComponent} from "../../../_single-module/card-actionables/card-actionables.component";
 import {NgbTooltip} from "@ng-bootstrap/ng-bootstrap";
 import {NgxStarsModule} from "ngx-stars";
 import {ThemeService} from "../../../_services/theme.service";
+import {NULL_DATE} from "../../../_pipes/date-year-range.pipe";
 
 @Component({
   selector: 'app-review-list-item',
@@ -58,4 +58,5 @@ export class ReviewListItemComponent {
 
   protected readonly starColor = this.themeService.getCssVariable('--rating-star-color');
 
+  protected readonly NULL_DATE = NULL_DATE;
 }

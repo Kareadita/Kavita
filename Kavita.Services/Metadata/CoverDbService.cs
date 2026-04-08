@@ -15,6 +15,7 @@ using Kavita.API.Services.Metadata;
 using Kavita.API.Services.SignalR;
 using Kavita.Common;
 using Kavita.Common.Extensions;
+using Kavita.Common.Helpers;
 using Kavita.Models.Constants;
 using Kavita.Models.DTOs.SignalR;
 using Kavita.Models.Entities;
@@ -61,9 +62,11 @@ public class CoverDbService : ICoverDbService
     /// </summary>
     private static readonly TimeSpan CacheDuration = TimeSpan.FromDays(1);
 
+    private readonly IUrlValidationService _urlValidationService;
+
     public CoverDbService(ILogger<CoverDbService> logger, IDirectoryService directoryService,
         IEasyCachingProviderFactory cacheFactory, IHostEnvironment env, IImageService imageService,
-        IUnitOfWork unitOfWork, IEventHub eventHub)
+        IUnitOfWork unitOfWork, IEventHub eventHub, IUrlValidationService urlValidationService)
     {
         _logger = logger;
         _directoryService = directoryService;
@@ -72,6 +75,7 @@ public class CoverDbService : ICoverDbService
         _imageService = imageService;
         _unitOfWork = unitOfWork;
         _eventHub = eventHub;
+        _urlValidationService = urlValidationService;
     }
 
     /// <summary>
@@ -93,6 +97,8 @@ public class CoverDbService : ICoverDbService
     /// </remarks>
     public async Task<string> DownloadFaviconAsync(string url, EncodeFormat encodeFormat, CancellationToken ct = default)
     {
+        await _urlValidationService.ValidateUrlAsync(url);
+
         // Parse the URL to get the domain (including subdomain)
         var uri = new Uri(url);
         var domain = uri.Host.Replace(Environment.NewLine, string.Empty);
@@ -118,7 +124,8 @@ public class CoverDbService : ICoverDbService
 
         try
         {
-            var htmlContent = url.GetStringAsync(cancellationToken: ct).Result;
+            var htmlContent = await FlurlConfiguration.CreateSafeRequest(url)
+                .GetStringAsync(cancellationToken: ct);
             var htmlDocument = new HtmlDocument();
             htmlDocument.LoadHtml(htmlContent);
 
@@ -160,7 +167,7 @@ public class CoverDbService : ICoverDbService
 
             _logger.LogTrace("Fetching favicon from {Url}", finalUrl);
             // Download the favicon.ico file using Flurl
-            var faviconStream = await finalUrl
+            var faviconStream = await FlurlConfiguration.CreateSafeRequest(finalUrl)
                 .AllowHttpStatus("2xx,304")
                 .GetStreamAsync(cancellationToken: ct);
 
@@ -280,7 +287,7 @@ public class CoverDbService : ICoverDbService
 
     private async Task<string> DownloadImageFromUrl(string filenameWithoutExtension, EncodeFormat encodeFormat, string url, string? targetDirectory = null)
     {
-        // default: I need to unit test this to ensure it works when overwriting, etc
+        await _urlValidationService.ValidateUrlAsync(url);
 
         // Target Directory defaults to CoverImageDirectory, but can be temp for when comparison between images is used
         targetDirectory ??= _directoryService.CoverImageDirectory;

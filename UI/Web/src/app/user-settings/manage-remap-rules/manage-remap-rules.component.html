@@ -1,49 +1,13 @@
 <ng-container *transloco="let t; prefix:'manage-remap-rules'">
 
   <div class="position-relative">
-    <button class="btn btn-outline-primary position-absolute custom-position" [disabled]="isReadOnly()" (click)="toggleCreateForm()">
-      <i class="fa fa-plus" aria-hidden="true"></i><span class="phone-hidden ms-1">{{t('create-rule')}}</span>
+    <button class="btn btn-outline-primary position-absolute custom-position" [disabled]="isReadOnly() || showForm()" (click)="openCreateForm()">
+      <i class="fa fa-plus" aria-hidden="true"></i><span class="phone-hidden ms-1">{{t('create-rule-title')}}</span>
     </button>
   </div>
 
-  <!-- Create Rule Form -->
-  @if (showCreateForm()) {
-    <div class="card mb-3 mt-5">
-      <div class="card-body">
-        <h5 class="card-title">{{t('new-rule-title')}}</h5>
-        <form [formGroup]="createForm">
-          <div class="row g-3 align-items-end">
-            <div class="col-md-4">
-              <label class="form-label">{{t('cbl-series-name-label')}}</label>
-              <input type="text" class="form-control" formControlName="cblSeriesName" [placeholder]="t('cbl-series-name-placeholder')">
-            </div>
-            <div class="col-md-2">
-              <label class="form-label">{{t('cbl-volume-label')}}</label>
-              <input type="text" class="form-control" formControlName="cblVolume" [placeholder]="t('cbl-volume-placeholder')">
-            </div>
-            <div class="col-md-3">
-              <label class="form-label">{{t('kavita-series-label')}}</label>
-              <app-typeahead [settings]="seriesSettings" (selectedData)="onSeriesSelected($event)" id="remap-series">
-                <ng-template #optionItem let-item let-position="idx" let-value="value">
-                  {{item.name}}
-                </ng-template>
-                <ng-template #badgeItem let-item let-position="idx">
-                  {{item.name}}
-                </ng-template>
-              </app-typeahead>
-            </div>
-            <div class="col-md-3">
-              <button class="btn btn-secondary me-2" (click)="toggleCreateForm()" type="button">
-                {{t('cancel')}}
-              </button>
-              <button class="btn btn-primary" type="button" [disabled]="!createForm.get('cblSeriesName')?.value?.trim() || !selectedSeries()" (click)="createRule()">
-                {{t('save')}}
-              </button>
-            </div>
-          </div>
-        </form>
-      </div>
-    </div>
+  @if (showForm()) {
+    <app-edit-remap-rule [rule]="editingRule()" (saved)="onRuleSaved($event)" (cancelled)="onRuleCancelled()" />
   }
 
   <!-- My Rules Section -->
@@ -68,26 +32,39 @@
           </ng-template>
         </ngx-datatable-column>
 
+        <ngx-datatable-column prop="cblVolume" [sortable]="false" [draggable]="false" [resizeable]="false" [flexGrow]="1">
+          <ng-template let-column="column" ngx-datatable-header-template>
+            {{t('cbl-volume-col')}}
+          </ng-template>
+          <ng-template let-item="row" ngx-datatable-cell-template>
+            {{item.cblVolume | defaultValue}}
+          </ng-template>
+        </ngx-datatable-column>
+
+        <ngx-datatable-column prop="cblNumber" [sortable]="false" [draggable]="false" [resizeable]="false" [flexGrow]="1">
+          <ng-template let-column="column" ngx-datatable-header-template>
+            {{t('cbl-issue-col')}}
+          </ng-template>
+          <ng-template let-item="row" ngx-datatable-cell-template>
+            {{item.cblNumber | defaultValue}}
+          </ng-template>
+        </ngx-datatable-column>
+
         <ngx-datatable-column prop="seriesNameAtMapping" [sortable]="true" [draggable]="false" [resizeable]="false" [flexGrow]="3">
           <ng-template let-column="column" ngx-datatable-header-template>
-            {{t('maps-to-col')}}
+            {{t('mapped-series-col')}}
           </ng-template>
           <ng-template let-item="row" ngx-datatable-cell-template>
             {{item.seriesNameAtMapping}}
           </ng-template>
         </ngx-datatable-column>
 
-        <ngx-datatable-column prop="cblVolume" [sortable]="false" [draggable]="false" [resizeable]="false" [flexGrow]="2">
+        <ngx-datatable-column [sortable]="false" [draggable]="false" [resizeable]="false" [flexGrow]="2">
           <ng-template let-column="column" ngx-datatable-header-template>
-            {{t('vol-issue-col')}}
+            {{t('mapped-vol-issue-col')}}
           </ng-template>
           <ng-template let-item="row" ngx-datatable-cell-template>
-            @if (item.cblVolume) {
-              {{t('volume-num', {num: item.cblVolume})}}
-            }
-            @if (item.cblNumber) {
-              {{t('issue-num', {num: item.cblNumber})}}
-            }
+            {{item | cblRemapRuleChapterTitle | defaultValue}}
           </ng-template>
         </ngx-datatable-column>
 
@@ -104,12 +81,16 @@
           <ng-template let-column="column" ngx-datatable-header-template />
           <ng-template let-item="row" ngx-datatable-cell-template>
             <div class="float-end">
-              <button class="btn btn-danger btn-sm me-2" (click)="deleteRule(item)">
+              <button class="btn btn-outline-secondary btn-sm me-2" [disabled]="showForm()" (click)="editRule(item)" [title]="t('edit')">
+                <i class="fa fa-pencil" aria-hidden="true"></i>
+                <span class="visually-hidden">{{t('edit')}}</span>
+              </button>
+              <button class="btn btn-danger btn-sm me-2" [disabled]="showForm()" (click)="deleteRule(item)">
                 <i class="fa fa-trash" aria-hidden="true"></i>
                 <span class="visually-hidden">{{t('delete')}}</span>
               </button>
               @if (isAdmin()) {
-                <button class="btn btn-outline-primary btn-sm" (click)="promoteRule(item)" [title]="t('promote-tooltip')">
+                <button class="btn btn-outline-primary btn-sm" [disabled]="showForm()" (click)="promoteRule(item)" [title]="t('promote-tooltip')">
                   <i class="fa fa-globe" aria-hidden="true"></i>
                   <span class="phone-hidden ms-1">{{t('promote')}}</span>
                 </button>
@@ -126,27 +107,42 @@
           <div class="d-flex justify-content-between align-items-start mb-2">
             <h5 class="card-title mb-0">{{item.cblSeriesName || item.normalizedCblSeriesName}}</h5>
             <div>
-              <button class="btn btn-danger btn-sm me-1" (click)="deleteRule(item)">
+              <button class="btn btn-outline-secondary btn-sm me-1" [disabled]="showForm()" (click)="editRule(item)">
+                <i class="fa fa-pencil" aria-hidden="true"></i>
+                <span class="phone-hidden ms-1">{{t('edit')}}</span>
+              </button>
+              <button class="btn btn-danger btn-sm me-1" [disabled]="showForm()" (click)="deleteRule(item)">
                 <i class="fa fa-trash" aria-hidden="true"></i>
               </button>
               @if (isAdmin()) {
-                <button class="btn btn-outline-primary btn-sm" (click)="promoteRule(item)">
+                <button class="btn btn-outline-primary btn-sm" [disabled]="showForm()" (click)="promoteRule(item)">
                   <i class="fa fa-globe" aria-hidden="true"></i>
                 </button>
               }
             </div>
           </div>
           <div class="row g-2">
+            @if (item.cblVolume || item.cblNumber) {
+              <div class="col-12">
+                <div class="text-muted small">{{t('cbl-volume-col')}} / {{t('cbl-issue-col')}}</div>
+                <div>
+                  @if (item.cblVolume) {
+                    {{t('volume-num', {num: item.cblVolume})}}
+                  }
+                  @if (item.cblNumber) {
+                    {{t('issue-num', {num: item.cblNumber})}}
+                  }
+                </div>
+              </div>
+            }
             <div class="col-12">
-              <div class="text-muted small">{{t('maps-to-col')}}</div>
+              <div class="text-muted small">{{t('mapped-series-col')}}</div>
               <div>{{item.seriesNameAtMapping}}</div>
             </div>
             <div class="col-12">
-              <div class="text-muted small">{{t('vol-issue-col')}}</div>
+              <div class="text-muted small">{{t('mapped-vol-issue-col')}}</div>
               <div>
-                @if (item.cblVolume) { Vol. {{item.cblVolume}} }
-                @if (item.cblNumber) { #{{item.cblNumber}} }
-                @if (!item.cblVolume && !item.cblNumber) { {{t('series-level')}} }
+                {{item | cblRemapRuleChapterTitle | defaultValue}}
               </div>
             </div>
           </div>
@@ -178,26 +174,39 @@
           </ng-template>
         </ngx-datatable-column>
 
+        <ngx-datatable-column prop="cblVolume" [sortable]="false" [draggable]="false" [resizeable]="false" [flexGrow]="1">
+          <ng-template let-column="column" ngx-datatable-header-template>
+            {{t('cbl-volume-col')}}
+          </ng-template>
+          <ng-template let-item="row" ngx-datatable-cell-template>
+            {{item.cblVolume}}
+          </ng-template>
+        </ngx-datatable-column>
+
+        <ngx-datatable-column prop="cblNumber" [sortable]="false" [draggable]="false" [resizeable]="false" [flexGrow]="1">
+          <ng-template let-column="column" ngx-datatable-header-template>
+            {{t('cbl-issue-col')}}
+          </ng-template>
+          <ng-template let-item="row" ngx-datatable-cell-template>
+            {{item.cblNumber}}
+          </ng-template>
+        </ngx-datatable-column>
+
         <ngx-datatable-column prop="seriesNameAtMapping" [sortable]="true" [draggable]="false" [resizeable]="false" [flexGrow]="3">
           <ng-template let-column="column" ngx-datatable-header-template>
-            {{t('maps-to-col')}}
+            {{t('mapped-series-col')}}
           </ng-template>
           <ng-template let-item="row" ngx-datatable-cell-template>
             {{item.seriesNameAtMapping}}
           </ng-template>
         </ngx-datatable-column>
 
-        <ngx-datatable-column prop="cblVolume" [sortable]="false" [draggable]="false" [resizeable]="false" [flexGrow]="2">
+        <ngx-datatable-column [sortable]="false" [draggable]="false" [resizeable]="false" [flexGrow]="2">
           <ng-template let-column="column" ngx-datatable-header-template>
-            {{t('vol-issue-col')}}
+            {{t('mapped-vol-issue-col')}}
           </ng-template>
           <ng-template let-item="row" ngx-datatable-cell-template>
-            @if (item.cblVolume) {
-              {{t('volume-num', {num: item.cblVolume})}}
-            }
-            @if (item.cblNumber) {
-              {{t('issue-num', {num: item.cblNumber})}}
-            }
+            {{item | cblRemapRuleChapterTitle | defaultValue}}
           </ng-template>
         </ngx-datatable-column>
 
@@ -219,12 +228,12 @@
           </ng-template>
         </ngx-datatable-column>
 
-        <ngx-datatable-column name="actions" [sortable]="false" [draggable]="false" [resizeable]="false" [flexGrow]="1">
+        <ngx-datatable-column name="actions" [sortable]="false" [draggable]="false" [resizeable]="false" [flexGrow]="2">
           <ng-template let-column="column" ngx-datatable-header-template />
           <ng-template let-item="row" ngx-datatable-cell-template>
             @if (isAdmin()) {
               <div class="float-end">
-                <button class="btn btn-outline-warning btn-sm" (click)="demoteRule(item)" [title]="t('demote-tooltip')">
+                <button class="btn btn-outline-warning btn-sm" [disabled]="showForm()" (click)="demoteRule(item)" [title]="t('demote-tooltip')">
                   <i class="fa fa-arrow-down" aria-hidden="true"></i>
                   <span class="phone-hidden ms-1">{{t('demote')}}</span>
                 </button>
@@ -244,22 +253,30 @@
               <small class="text-muted">{{t('by')}} {{item.createdByUserName}}</small>
             </div>
             @if (isAdmin()) {
-              <button class="btn btn-outline-warning btn-sm" (click)="demoteRule(item)">
+              <button class="btn btn-outline-warning btn-sm" [disabled]="showForm()" (click)="demoteRule(item)">
                 <i class="fa fa-arrow-down" aria-hidden="true"></i>
+                <span class="visually-hidden">{{t('demote')}}</span>
               </button>
             }
           </div>
           <div class="row g-2">
+            @if (item.cblVolume || item.cblNumber) {
+              <div class="col-12">
+                <div class="text-muted small">{{t('cbl-volume-col')}} / {{t('cbl-issue-col')}}</div>
+                <div>
+                  @if (item.cblVolume) { {{t('volume-num', {num: item.cblVolume})}} }
+                  @if (item.cblNumber) { {{t('issue-num', {num: item.cblNumber})}} }
+                </div>
+              </div>
+            }
             <div class="col-12">
-              <div class="text-muted small">{{t('maps-to-col')}}</div>
+              <div class="text-muted small">{{t('mapped-series-col')}}</div>
               <div>{{item.seriesNameAtMapping}}</div>
             </div>
             <div class="col-12">
-              <div class="text-muted small">{{t('vol-issue-col')}}</div>
+              <div class="text-muted small">{{t('mapped-vol-issue-col')}}</div>
               <div>
-                @if (item.cblVolume) { Vol. {{item.cblVolume}} }
-                @if (item.cblNumber) { #{{item.cblNumber}} }
-                @if (!item.cblVolume && !item.cblNumber) { {{t('series-level')}} }
+                {{item | cblRemapRuleChapterTitle | defaultValue}}
               </div>
             </div>
           </div>
@@ -292,12 +309,39 @@
             </ng-template>
           </ngx-datatable-column>
 
+          <ngx-datatable-column prop="cblVolume" [sortable]="false" [draggable]="false" [resizeable]="false" [flexGrow]="1">
+            <ng-template let-column="column" ngx-datatable-header-template>
+              {{t('cbl-volume-col')}}
+            </ng-template>
+            <ng-template let-item="row" ngx-datatable-cell-template>
+              {{item.cblVolume}}
+            </ng-template>
+          </ngx-datatable-column>
+
+          <ngx-datatable-column prop="cblNumber" [sortable]="false" [draggable]="false" [resizeable]="false" [flexGrow]="1">
+            <ng-template let-column="column" ngx-datatable-header-template>
+              {{t('cbl-issue-col')}}
+            </ng-template>
+            <ng-template let-item="row" ngx-datatable-cell-template>
+              {{item.cblNumber}}
+            </ng-template>
+          </ngx-datatable-column>
+
           <ngx-datatable-column prop="seriesNameAtMapping" [sortable]="true" [draggable]="false" [resizeable]="false" [flexGrow]="3">
             <ng-template let-column="column" ngx-datatable-header-template>
-              {{t('maps-to-col')}}
+              {{t('mapped-series-col')}}
             </ng-template>
             <ng-template let-item="row" ngx-datatable-cell-template>
               {{item.seriesNameAtMapping}}
+            </ng-template>
+          </ngx-datatable-column>
+
+          <ngx-datatable-column [sortable]="false" [draggable]="false" [resizeable]="false" [flexGrow]="2">
+            <ng-template let-column="column" ngx-datatable-header-template>
+              {{t('mapped-vol-issue-col')}}
+            </ng-template>
+            <ng-template let-item="row" ngx-datatable-cell-template>
+              {{item | cblRemapRuleChapterTitle | defaultValue}}
             </ng-template>
           </ngx-datatable-column>
 
@@ -323,7 +367,7 @@
             <ng-template let-column="column" ngx-datatable-header-template />
             <ng-template let-item="row" ngx-datatable-cell-template>
               <div class="float-end">
-                <button class="btn btn-outline-primary btn-sm" (click)="promoteRule(item)" [title]="t('promote-tooltip')">
+                <button class="btn btn-outline-primary btn-sm" [disabled]="showForm()" (click)="promoteRule(item)" [title]="t('promote-tooltip')">
                   <i class="fa fa-globe" aria-hidden="true"></i>
                   <span class="phone-hidden ms-1">{{t('promote')}}</span>
                 </button>
@@ -341,14 +385,29 @@
                 <h5 class="card-title mb-0">{{item.cblSeriesName || item.normalizedCblSeriesName}}</h5>
                 <small class="text-muted">{{item.createdByUserName}}</small>
               </div>
-              <button class="btn btn-outline-primary btn-sm" (click)="promoteRule(item)">
+              <button class="btn btn-outline-primary btn-sm" [disabled]="showForm()" (click)="promoteRule(item)">
                 <i class="fa fa-globe" aria-hidden="true"></i>
               </button>
             </div>
             <div class="row g-2">
+              @if (item.cblVolume || item.cblNumber) {
+                <div class="col-12">
+                  <div class="text-muted small">{{t('cbl-volume-col')}} / {{t('cbl-issue-col')}}</div>
+                  <div>
+                    @if (item.cblVolume) { {{t('volume-num', {num: item.cblVolume})}} }
+                    @if (item.cblNumber) { {{t('issue-num', {num: item.cblNumber})}} }
+                  </div>
+                </div>
+              }
               <div class="col-12">
-                <div class="text-muted small">{{t('maps-to-col')}}</div>
+                <div class="text-muted small">{{t('mapped-series-col')}}</div>
                 <div>{{item.seriesNameAtMapping}}</div>
+              </div>
+              <div class="col-12">
+                <div class="text-muted small">{{t('mapped-vol-issue-col')}}</div>
+                <div>
+                  {{item | cblRemapRuleChapterTitle | defaultValue}}
+                </div>
               </div>
             </div>
           </div>

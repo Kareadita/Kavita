@@ -151,6 +151,7 @@ public static class Seed
                 new() {Key = ServerSettingKey.TaskScan, Value = "daily"},
                 new() {Key = ServerSettingKey.TaskBackup, Value = "daily"},
                 new() {Key = ServerSettingKey.TaskCleanup, Value = "daily"},
+                new() {Key = ServerSettingKey.TaskCblSync, Value = "0 4 * * *"}, // 4am daily
                 new() {Key = ServerSettingKey.LoggingLevel, Value = "Debug"},
                 new()
                 {

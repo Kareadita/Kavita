@@ -27,6 +27,9 @@ public class ReadingList : IEntityDate, IHasCoverImage
     public string? CoverImage { get; set; }
     public string? PrimaryColor { get; set; }
     public string? SecondaryColor { get; set; }
+    /// <summary>
+    /// Denotes if the CoverImage has been overridden by the user. If so, it will not be updated during normal scan operations.
+    /// </summary>
     public bool CoverImageLocked { get; set; }
 
     /// <summary>
@@ -70,8 +73,9 @@ public class ReadingList : IEntityDate, IHasCoverImage
     /// </summary>
     public DateTime? LastSyncedUtc { get; set; }
 
-    public bool CanSync => Provider == ReadingListProvider.Url
-                           && !string.IsNullOrEmpty(SourcePath);
+    public bool CanSync => Provider != ReadingListProvider.None
+                           && Provider != ReadingListProvider.File
+                           && (!string.IsNullOrEmpty(SourcePath) || !string.IsNullOrEmpty(DownloadUrl));
 
     /// <summary>
     /// Checks if the remote SHA differs from our stored hash.

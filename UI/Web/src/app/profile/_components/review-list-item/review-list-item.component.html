@@ -47,7 +47,7 @@
     </div>
 
 
-    @if (item.createdUtc !== '0001-01-01T00:00:00') {
+    @if (item.createdUtc !== NULL_DATE) {
       <div class="footer d-flex justify-content-end align-items-center mt-2">
         <div class="text-muted small me-3">
           <span class="visually-hidden">{{t('created-alt')}}</span>

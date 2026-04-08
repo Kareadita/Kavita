@@ -1,13 +1,4 @@
-import {
-  ChangeDetectionStrategy,
-  ChangeDetectorRef,
-  Component,
-  computed,
-  DestroyRef,
-  inject,
-  OnInit,
-  signal
-} from '@angular/core';
+import {ChangeDetectionStrategy, Component, computed, inject, OnInit, signal} from '@angular/core';
 import {AccountService} from '../../_services/account.service';
 import {ToastrService} from 'ngx-toastr';
 import {ConfirmService} from '../../shared/confirm.service';
@@ -60,11 +51,9 @@ import {
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class CblManagerComponent implements OnInit {
-  private readonly destroyRef = inject(DestroyRef);
   protected readonly ReadingListProvider = ReadingListProvider;
   protected readonly accountService = inject(AccountService);
   private readonly toastr = inject(ToastrService);
-  private readonly cdRef = inject(ChangeDetectorRef);
   private readonly confirmService = inject(ConfirmService);
   private readonly modalService = inject(ModalService);
   private readonly readingListService = inject(ReadingListService);
@@ -177,6 +166,12 @@ export class CblManagerComponent implements OnInit {
 
   setProviderFilter(provider: ReadingListProvider | null) {
     this.providerFilter.set(this.providerFilter() === provider ? null : provider);
+  }
+
+  syncReadingList(list: ReadingList) {
+    this.cblService.syncList(list.id).subscribe(() => {
+      this.toastr.success(translate('toasts.reading-list-sync-enqueued'));
+    });
   }
 
   async deleteList(list: ReadingList) {

@@ -25,13 +25,10 @@
       </ng-template>
 
       <ng-template #cardItem let-item let-position="idx" >
-        <app-entity-card [entity]="item" [index]="position" [maxIndex]="listEntities().length" [config]="readingListConfig()"
-        (reload)="loadPage()" (dataChanged)="updateReadingList($event)">
-          <ng-template #title let-entity>
-            <app-promoted-icon [promoted]="entity.data.promoted" /> {{entity.data.title}}
-          </ng-template>
-        </app-entity-card>
-
+        <div class="px-1">
+          <app-reading-list [entity]="item" [index]="position" [maxIndex]="listEntities().length" [config]="readingListConfig()"
+                            (reload)="loadPage()" (dataChanged)="updateReadingList($event)" />
+        </div>
       </ng-template>
 
       <ng-template #noData>

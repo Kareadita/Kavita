@@ -177,44 +177,37 @@
         <div class="carousel-tabs-container mb-2">
           <ul ngbNav #nav="ngbNav" [(activeId)]="activeTabId" class="nav nav-tabs" [destroyOnHide]="false" (navChange)="onNavChange($event)">
 
-              <li [ngbNavItem]="Tabs.Storyline">
-                <a ngbNavLink>{{Tabs.Storyline | tabTitle}}</a>
-                <ng-template ngbNavContent>
-                  @defer (when activeTabId === Tabs.Storyline; prefetch on idle) {
-                    <div class="row mb-1 scroll-container" #scrollingBlock>
-                      @if (items().length === 0 && !isLoading()) {
-                        <div class="mx-auto" style="width: 12.5rem;">
-                          {{t('no-data')}}
-                        </div>
-                      } @else if(isLoading()) {
-                        <app-loading [loading]="isLoading()" />
-                      }
+            <li [ngbNavItem]="Tabs.Storyline">
+              <a ngbNavLink>{{Tabs.Storyline | tabTitle}}</a>
+              <ng-template ngbNavContent>
+                @defer (when activeTabId === Tabs.Storyline; prefetch on idle) {
+                  <div class="row mb-1 scroll-container" #scrollingBlock>
+                    @if (items().length === 0 && !isLoading()) {
+                      <div class="mx-auto" style="width: 12.5rem;">
+                        {{t('no-data')}}
+                      </div>
+                    } @else if(isLoading()) {
+                      <app-loading [loading]="isLoading()" />
+                    }
 
-                      @if(formGroup.get('edit')?.value && (items().length > 100 || breakpointService.isMobile())) {
-                        <div class="alert alert-secondary mt-2" role="alert">
-                          {{t('dnd-warning')}}
-                        </div>
-                      }
+                    <app-draggable-ordered-list [items]="items()" [accessibilityMode]="accessibilityMode()"
+                                                [disabled]="true"
+                                                (orderUpdated)="orderUpdated($event)"
+                                                (itemRemove)="removeItem($event)"
+                                                [showRemoveButton]="formGroup.get('edit')?.value || false"
+                                                [trackByIdentity]="trackByIdentity">
 
-                      <app-draggable-ordered-list [items]="items()" [accessibilityMode]="accessibilityMode()"
-                                                  [disabled]="!(formGroup.get('edit')?.value || false)"
-                                                  (orderUpdated)="orderUpdated($event)"
-                                                  (itemRemove)="removeItem($event)"
-                                                  [showRemoveButton]="formGroup.get('edit')?.value || false"
-                                                  [trackByIdentity]="trackByIdentity">
-
-                        <ng-template #draggableItem let-item let-position="idx">
-                          <app-reading-list-item [ngClass]="{'content-container': items().length < 100, 'non-virtualized-container': items().length >= 100}" [item]="item"
-                                                 [position]="position" [libraryTypes]="libraryTypes()"
-                                                 [promoted]="item.promoted" (read)="readChapter($event)"
-                                                 (remove)="removeItem($event)"
-                                                 [showRemove]="false"/>
-                        </ng-template>
-                      </app-draggable-ordered-list>
-                    </div>
-                  }
-                </ng-template>
-              </li>
+                      <ng-template #draggableItem let-item let-position="idx">
+                        <app-reading-list-item [ngClass]="{'content-container': items().length < 100, 'non-virtualized-container': items().length >= 100}" [item]="item"
+                                               [position]="position" [editMode]="formGroup.get('edit')?.value || false"
+                                               (read)="readChapter($event)"
+                                               (remove)="removeItem($event)" />
+                      </ng-template>
+                    </app-draggable-ordered-list>
+                  </div>
+                }
+              </ng-template>
+            </li>
 
 
             @if (rlInfo() && castInfo()) {

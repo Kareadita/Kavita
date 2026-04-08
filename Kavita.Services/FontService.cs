@@ -82,7 +82,8 @@ internal class GoogleFontsData
     public required int nanos { get; init; }
 }
 
-public class FontService(IDirectoryService directoryService, IUnitOfWork unitOfWork, ILogger<FontService> logger)
+public class FontService(IDirectoryService directoryService, IUnitOfWork unitOfWork, ILogger<FontService> logger,
+    IUrlValidationService urlValidationService)
     : IFontService
 {
     private const string SupportedFontUrlPrefix = "https://fonts.google.com/";
@@ -165,6 +166,7 @@ public class FontService(IDirectoryService directoryService, IUnitOfWork unitOfW
         var fontExt = Path.GetExtension(googleFontRef.filename);
         var fileName = $"{fontFamily}{fontExt}";
 
+        await urlValidationService.ValidateUrlAsync(googleFontRef.url);
         logger.LogDebug("Downloading font {FontFamily} to {FileName} from {Url}", fontFamily.Sanitize(), fileName.Sanitize(), googleFontRef.url);
         var path = await googleFontRef.url.DownloadFileAsync(directoryService.TempDirectory, fileName, cancellationToken: ct);
 

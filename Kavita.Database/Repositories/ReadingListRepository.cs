@@ -13,6 +13,7 @@ using Kavita.Models.DTOs.Person;
 using Kavita.Models.DTOs.ReadingLists;
 using Kavita.Models.Entities;
 using Kavita.Models.Entities.Enums;
+using Kavita.Models.Entities.Enums.ReadingList;
 using Kavita.Models.Entities.ReadingLists;
 using Kavita.Models.Extensions;
 using Microsoft.EntityFrameworkCore;
@@ -529,4 +530,14 @@ public class ReadingListRepository(DataContext context, IMapper mapper) : IReadi
     }
 
 
+    public async Task<Dictionary<int, List<int>>> GetSyncableReadingListsAsync(DateTime lastCheckThreshold, CancellationToken ct = default)
+    {
+        return await context.ReadingList
+            .Where(rl =>
+                rl.Provider == ReadingListProvider.Url
+                && (!string.IsNullOrEmpty(rl.SourcePath) || !string.IsNullOrEmpty(rl.DownloadUrl)) // Source Path for GH, Download Url for ProAdd
+                && (rl.LastSyncCheckUtc == null || rl.LastSyncCheckUtc < lastCheckThreshold))
+            .GroupBy(rl => rl.AppUserId)
+            .ToDictionaryAsync(g => g.Key, g => g.Select(rl => rl.Id).ToList(), ct);
+    }
 }

@@ -5,6 +5,31 @@ import {AgeRating} from "./metadata/age-rating";
 import {IHasReadingTime} from "./common/i-has-reading-time";
 import {IHasCast} from "./common/i-has-cast";
 
+export interface ReadingListItemChapter {
+  id: number;
+  range: string;
+  titleName?: string;
+  minNumber: number;
+  maxNumber: number;
+  sortOrder: number;
+  pages: number;
+  isSpecial: boolean;
+  releaseDate: string;
+  summary?: string;
+  writerName?: string;
+  writerId?: number;
+  pencillerName?: string;
+  pencillerId?: number;
+}
+
+export interface ReadingListItemVolume {
+  id: number;
+  name: string;
+  minNumber: number;
+  maxNumber: number;
+  seriesId: number;
+}
+
 export interface ReadingListItem {
   pagesRead: number;
   pagesTotal: number;
@@ -23,6 +48,8 @@ export interface ReadingListItem {
   libraryType: LibraryType;
   libraryName: string;
   summary?: string;
+  chapter: ReadingListItemChapter;
+  volume: ReadingListItemVolume;
 }
 
 export enum ReadingListProvider {

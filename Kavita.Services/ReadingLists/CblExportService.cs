@@ -10,6 +10,7 @@ using System.Xml;
 using System.Xml.Serialization;
 using Kavita.API.Database;
 using Kavita.API.Services;
+using Kavita.API.Services.ReadingLists;
 using Kavita.Models.DTOs.ReadingLists.CBL.V1;
 using Kavita.Models.DTOs.ReadingLists.CBL.V2;
 using Kavita.Models.Entities;
@@ -19,19 +20,6 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 
 namespace Kavita.Services.ReadingLists;
-
-public interface ICblExportService
-{
-    /// <summary>
-    /// Exports the reading list to a temp file on disk.
-    /// </summary>
-    /// <remarks>Will overwrite existing files</remarks>
-    /// <param name="readingListId"></param>
-    /// <param name="userId"></param>
-    /// <param name="asV2">Export as CBLv2 (JSON)</param>
-    /// <returns>Full file path of the exported file, or null if reading list not found</returns>
-    Task<string?> ExportReadingList(int readingListId, int userId, bool asV2 = false);
-}
 
 public partial class CblExportService(IUnitOfWork unitOfWork, IDirectoryService directoryService, ILogger<CblExportService> logger) : ICblExportService
 {

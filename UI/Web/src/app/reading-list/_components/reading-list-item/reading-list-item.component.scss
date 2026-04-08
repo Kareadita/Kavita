@@ -1,78 +1,173 @@
-$image-height: 7.8125rem;
-$clamp-lines: 3;
-
 .reading-list-item {
-  max-height: 8.75rem;
-  height: 8.75rem;
+  display: flex;
+  flex-direction: row;
+  gap: 0.75rem;
+  padding: 0.5rem 0;
 }
 
-.progress-banner {
-    height: 0.3125rem;
-
-    .progress {
-        color: var(--card-progress-bar-color);
-        background-color: transparent;
-    }
+.image-container {
+  flex-shrink: 0;
+  width: 106px;
 }
 
-.badge-container {
-    border-radius: 0.25rem;
-    display: block;
-    height: $image-height;
-    overflow: hidden;
-    pointer-events: none;
+.overlay {
+  position: relative;
+  border-radius: 0.25rem;
+  overflow: hidden;
+
+  .not-read-badge {
     position: absolute;
-    width: 6.625rem;
-}
-
-.not-read-badge {
-    position: relative;
-    top: -7.8125rem;
-    left: 4.875rem;
+    top: 0;
+    right: 0;
     width: 0;
     height: 0;
     border-style: solid;
     border-width: 0 var(--card-progress-triangle-size) var(--card-progress-triangle-size) 0;
     border-color: transparent var(--primary-color) transparent transparent;
+  }
+
+  .progress-banner {
+    height: 0.3125rem;
+
+    .progress {
+      color: var(--card-progress-bar-color);
+      background-color: transparent;
+    }
+  }
+
+  .overlay-information {
+    visibility: hidden;
+    display: none;
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    border-radius: 0.25rem;
+    transition: all 0.2s;
+    cursor: pointer;
+
+    &:hover {
+      background-color: var(--card-overlay-hover-bg-color);
+    }
+
+    &--centered {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      z-index: 115;
+      transform: translate(-50%, -50%);
+      background-color: rgba(0, 0, 0, 0.7);
+      border-radius: 3.125rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 2rem;
+      height: 2rem;
+
+      &:hover {
+        background-color: var(--primary-color) !important;
+      }
+
+      i {
+        font-size: 1rem;
+        color: white;
+      }
+    }
+  }
+
+  &:hover .overlay-information {
+    visibility: visible;
+    display: block;
+  }
 }
 
-::ng-deep .read-more-cont div {
-    -webkit-line-clamp: $clamp-lines;
-    -webkit-box-orient: vertical;
+.mobile-section {
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+
+.item-content {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.title-row {
+  display: flex;
+  align-items: baseline;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+
+  a {
+    font-weight: 600;
+    font-size: 1rem;
     overflow: hidden;
-    display:-webkit-box;
-    ;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    min-width: 0;
+  }
+
+  .chapter-number {
+    font-weight: 400;
+    opacity: 0.7;
+  }
+
+  .release-date {
+    margin-left: auto;
+    font-size: 0.8rem;
+    opacity: 0.7;
+    white-space: nowrap;
+  }
 }
 
-@media (max-width: 576px) {
-    ::ng-deep .read-more-cont div {
-        -webkit-line-clamp: $clamp-lines;
-        -webkit-box-orient: vertical;
-        overflow: hidden;
-        display:-webkit-box;
-        ;
+.meta-row {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+  font-size: 0.85rem;
+
+  .series-link {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    min-width: 0;
+  }
+
+  .meta-person {
+    opacity: 0.8;
+    white-space: nowrap;
+
+    i {
+      margin-right: 0.2rem;
     }
+  }
+
+  .page-count {
+    margin-left: auto;
+    opacity: 0.7;
+    white-space: nowrap;
+
+    i {
+      margin-right: 0.2rem;
+    }
+  }
 }
 
-@media (max-width: 800px) {
-    ::ng-deep .read-more-cont div {
-        -webkit-line-clamp: $clamp-lines;
-        -webkit-box-orient: vertical;
-        overflow: hidden;
-        display:-webkit-box;
-        ;
-    }
-}
-
-@media (max-width: 768px) {
-    .actions {
-        display:flex;
-        flex-direction: column-reverse;
-        margin-left: 0.625rem;
-
-        .btn-primary {
-            margin-bottom: 0.625rem;
-            margin-left: 0 !important;
-        }
-    }
+.summary-text {
+  font-size: 0.8rem;
+  opacity: 0.85;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  word-break: break-word;
+  max-width: 120ch;
 }

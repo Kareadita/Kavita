@@ -80,6 +80,7 @@ export class ReadingListService {
     return this.httpClient.delete(this.baseUrl + 'readinglist?readingListId=' + readingListId, TextResonse);
   }
 
+
   updatePosition(readingListId: number, readingListItemId: number, fromPosition: number, toPosition: number) {
     return this.httpClient.post(this.baseUrl + 'readinglist/update-position', {readingListId, readingListItemId, fromPosition, toPosition}, TextResonse);
   }

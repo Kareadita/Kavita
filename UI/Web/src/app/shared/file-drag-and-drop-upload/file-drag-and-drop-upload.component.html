@@ -42,11 +42,11 @@
                   <a href="javascript:void(0)" (click)="setMode(UploadMode.Url)">
                     <span class="phone-hidden">{{t('enter-an-url-pre-title', {url: urlText() ?? t('url')})}}</span>
                   </a>
-                  <span class="text-muted">•</span>
+                  <span class="text-muted dot-separator"></span>
                 }
 
                 <span>{{t('drag-n-drop')}}</span>
-                <span class="text-muted">•</span>
+                <span class="text-muted dot-separator"></span>
 
                 <a href="javascript:void(0)" (click)="openFileSelector()">
                   {{t('upload')}}

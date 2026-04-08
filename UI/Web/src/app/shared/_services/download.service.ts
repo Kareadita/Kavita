@@ -6,7 +6,7 @@ import {ConfirmService} from '../confirm.service';
 import {Chapter} from 'src/app/_models/chapter';
 import {Volume} from 'src/app/_models/volume';
 import {asyncScheduler, filter, firstValueFrom, forkJoin, of, tap} from 'rxjs';
-import {download} from '../_models/download';
+import {download, parseContentDisposition} from '../_models/download';
 import {PageBookmark} from 'src/app/_models/readers/page-bookmark';
 import {map, switchMap, throttleTime} from 'rxjs/operators';
 import {AccountService} from 'src/app/_services/account.service';
@@ -556,7 +556,7 @@ export class DownloadService {
     ).pipe(
       tap((response) => {
         const disposition = response.headers.get('Content-Disposition') ?? '';
-        const filename = this.parseContentDisposition(disposition, `${readingListName}.${asV2 ? 'json' : 'cbl'}`);
+        const filename = parseContentDisposition(disposition, `${readingListName}.${asV2 ? 'json' : 'cbl'}`);
         const url = URL.createObjectURL(response.body!);
         const a = document.createElement('a');
         a.href = url;
@@ -968,7 +968,7 @@ export class DownloadService {
       if (!response.body) throw new Error('No response body');
 
       const contentLength = +(response.headers.get('Content-Length') || 0);
-      const filename = this.parseContentDisposition(response.headers.get('Content-Disposition') || '', item.downloadName);
+      const filename = parseContentDisposition(response.headers.get('Content-Disposition') || '', item.downloadName);
 
       this.setStatus(item.id, 'downloading');
 
@@ -1043,31 +1043,6 @@ export class DownloadService {
       } else {
         this.markFailed(item.id, err.message || 'Download failed');
       }
-    }
-  }
-
-  /**
-   * Parse Content-Disposition header to extract filename, with fallback.
-   */
-  private parseContentDisposition(header: string, fallbackName: string): string {
-    if (!header) return fallbackName || 'download';
-    const tokens = header.split(';');
-
-    if (tokens.length < 2) return fallbackName || 'download';
-
-    let filename = tokens[1].replace('filename=', '').replace(/"/ig, '').trim();
-
-    if (filename.startsWith('download_') || filename.startsWith('kavita_download_')) {
-      const ext = filename.substring(filename.lastIndexOf('.'), filename.length);
-      if (fallbackName) return fallbackName + ext;
-
-      return filename.replace('kavita_', '').replace('download_', '');
-    }
-
-    try {
-      return decodeURIComponent(filename) || fallbackName || 'download';
-    } catch {
-      return filename || fallbackName || 'download';
     }
   }
 

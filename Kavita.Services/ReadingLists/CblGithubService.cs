@@ -121,6 +121,17 @@ public class CblGithubService : ICblGithubService
         _logger.LogInformation("CBL repo cache invalidated");
     }
 
+    public async Task<string> GetFileSha(string filePath)
+    {
+        var normalizedPath = NormalizePath(filePath);
+
+        var item = await BuildApiUrl(normalizedPath)
+            .WithGithubHeaders()
+            .GetJsonAsync<GithubContentItem>();
+
+        return item.Sha;
+    }
+
     public async Task<string> GetFileContent(string filePath)
     {
         var normalizedPath = NormalizePath(filePath);
@@ -134,7 +145,17 @@ public class CblGithubService : ICblGithubService
             throw new KavitaException($"No download URL available for {filePath}");
         }
 
-        return await item.DownloadUrl
+        return await DownloadByUrl(item.DownloadUrl);
+    }
+
+    /// <summary>
+    /// Downloads the content of a file
+    /// </summary>
+    /// <param name="url"></param>
+    /// <returns></returns>
+    private static async Task<string> DownloadByUrl(string url)
+    {
+        return await url
             .WithGithubHeaders()
             .GetStringAsync();
     }

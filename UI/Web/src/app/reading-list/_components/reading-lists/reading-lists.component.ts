@@ -6,8 +6,6 @@ import {
   inject,
   OnInit,
   signal,
-  TemplateRef,
-  viewChild
 } from '@angular/core';
 import {JumpKey} from 'src/app/_models/jumpbar/jump-key';
 import {PaginatedResult, Pagination} from 'src/app/_models/pagination';
@@ -27,21 +25,19 @@ import {WikiLink} from "../../../_models/wiki";
 import {BulkSelectionService} from "../../../cards/bulk-selection.service";
 import {BulkOperationsComponent} from "../../../cards/bulk-operations/bulk-operations.component";
 import {User} from "../../../_models/user/user";
-import {EntityCardComponent} from "../../../cards/entity-card/entity-card.component";
-import {CardEntity, CardEntityFactory, ReadingListCardEntity} from "../../../_models/card/card-entity";
+import {CardEntityFactory, ReadingListCardEntity} from "../../../_models/card/card-entity";
+import {ReadingListComponent} from "../reading-list/reading-list.component";
 import {CardConfigFactory} from "../../../_services/card-config-factory.service";
 import {ActionItem} from "../../../_models/actionables/action-item";
 import {Action} from "../../../_models/actionables/action";
 import {ActionResult} from "../../../_models/actionables/action-result";
-import {PromotedIconComponent} from "../../../shared/_components/promoted-icon/promoted-icon.component";
-
 @Component({
   selector: 'app-reading-lists',
   templateUrl: './reading-lists.component.html',
   styleUrls: ['./reading-lists.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [SideNavCompanionBarComponent, CardActionablesComponent, CardDetailLayoutComponent, DecimalPipe,
-    TranslocoDirective, BulkOperationsComponent, EntityCardComponent, PromotedIconComponent]
+    TranslocoDirective, BulkOperationsComponent, ReadingListComponent]
 })
 export class ReadingListsComponent implements OnInit {
   private readingListService = inject(ReadingListService);
@@ -54,14 +50,10 @@ export class ReadingListsComponent implements OnInit {
 
   protected readonly WikiLink = WikiLink;
 
-
-  protected titleTemplateRef = viewChild<TemplateRef<{ $implicit: CardEntity }>>('title');
-
-
   lists = signal<ReadingList[]>([]);
   listEntities = computed(() => this.lists().map(l => CardEntityFactory.readingList(l)));
   readingListConfig = computed(() => {
-    return this.cardConfigFactory.forReadingList({titleRef: this.titleTemplateRef(), shouldRenderAction: this.shouldRenderReadingListAction.bind(this)});
+    return this.cardConfigFactory.forReadingList({shouldRenderAction: this.shouldRenderReadingListAction.bind(this)});
   });
   isLoadingLists = signal<boolean>(false);
   pagination!: Pagination;

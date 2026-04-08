@@ -14,13 +14,13 @@ public interface IReadingListRemapRuleRepository
     /// ordered with user-specific rules before global rules.
     /// </summary>
     Task<IList<ReadingListRemapRule>> GetRulesForNamesAsync(IList<string> normalizedNames, int userId, CancellationToken ct = default);
-    Task<IList<ReadingListRemapRule>> GetRulesForUserAsync(int userId, CancellationToken ct = default);
+    Task<IList<RemapRuleDto>> GetRuleDtosForUserAsync(int userId, CancellationToken ct = default);
     Task<ReadingListRemapRule?> GetByIdAsync(int id, CancellationToken ct = default);
     Task<RemapRuleDto?> GetDtoByIdAsync(int id, CancellationToken ct = default);
     /// <summary>
-    /// Admin-only: returns all rules across all users, with user names.
+    /// Admin-only: returns all rules across all users, with usernames.
     /// </summary>
-    Task<IList<ReadingListRemapRule>> GetAllRulesAsync(CancellationToken ct = default);
+    Task<IList<RemapRuleDto>> GetAllRuleDtosAsync(CancellationToken ct = default);
     /// <summary>
     /// Finds an existing rule for the same user with the same CBL matching key (normalized name + volume + number).
     /// </summary>

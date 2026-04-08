@@ -14,10 +14,13 @@ using Kavita.Models.Entities.Enums.ReadingList;
 using Kavita.Models.Entities.ReadingLists;
 using Kavita.Server.Attributes;
 using Flurl.Http;
+using Kavita.Services;
 using Kavita.Models.DTOs.ReadingLists.CBL.Import;
 using Kavita.Models.DTOs.ReadingLists.CBL.RemapRules;
 using Kavita.Models.DTOs.Uploads;
 using AutoMapper;
+using Hangfire;
+using Kavita.Models.DTOs.SignalR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -30,8 +33,24 @@ namespace Kavita.Server.Controllers;
 /// </summary>
 public class CblController(IReadingListService readingListService, IDirectoryService directoryService,
     ICblGithubService cblGithubService, DataContext dataContext, ICblImportService cblImporterService,
-    IUnitOfWork unitOfWork, IMapper mapper, ILocalizationService localizationService) : BaseApiController
+    IUnitOfWork unitOfWork, IMapper mapper, ILocalizationService localizationService,
+    IUrlValidationService urlValidationService) : BaseApiController
 {
+
+    /// <summary>
+    /// Enqueues the Reading List to be synced on a background thread. UI will be informed from <see cref="MessageFactory.ReadingListUpdated"/> event
+    /// </summary>
+    /// <param name="readingListId"></param>
+    /// <returns></returns>
+    [HttpPost("sync")]
+    [DisallowRole(PolicyConstants.ReadOnlyRole)]
+    [ReadingListAccess]
+    public ActionResult SyncReadingList([FromQuery] int readingListId)
+    {
+        BackgroundJob.Enqueue(() => cblImporterService.SyncReadingListAsync(UserId, readingListId));
+        return Ok();
+    }
+
     /// <summary>
     /// Saves an uploaded CBL file to disk without importing. Returns the saved file info.
     /// </summary>
@@ -71,6 +90,15 @@ public class CblController(IReadingListService readingListService, IDirectorySer
     [DisallowRole(PolicyConstants.ReadOnlyRole)]
     public async Task<ActionResult<CblSavedFileDto>> SaveCblFromUrl(UploadUrlDto dto)
     {
+        try
+        {
+            await urlValidationService.ValidateUrlAsync(dto.Url);
+        }
+        catch (Exception ex)
+        {
+            return BadRequest(ex.Message);
+        }
+
         var dir = GetCblManagerFolder(UserId);
         Directory.CreateDirectory(dir);
 
@@ -98,7 +126,8 @@ public class CblController(IReadingListService readingListService, IDirectorySer
         {
             Name = filename,
             FileName = filename,
-            Provider = ReadingListProvider.Url
+            Provider = ReadingListProvider.Url,
+            DownloadUrl = dto.Url
         });
     }
 
@@ -196,6 +225,15 @@ public class CblController(IReadingListService readingListService, IDirectorySer
                         readingList.LastSyncedUtc = DateTime.UtcNow;
                         readingList.LastSyncCheckUtc = DateTime.UtcNow;
                     }
+                    else if (!string.IsNullOrEmpty(dto.DownloadUrl))
+                    {
+                        // URL-only import — compute SHA from file content for change detection
+                        var fileContent = await directoryService.FileSystem.File.ReadAllTextAsync(fullPath);
+                        readingList.DownloadUrl = dto.DownloadUrl;
+                        readingList.ShaHash = FileService.ComputeSha256(fileContent);
+                        readingList.LastSyncedUtc = DateTime.UtcNow;
+                        readingList.LastSyncCheckUtc = DateTime.UtcNow;
+                    }
 
                     await readingListService.CalculateReadingListAgeRating(readingList);
                     await readingListService.CalculateStartAndEndDates(readingList);
@@ -221,7 +259,7 @@ public class CblController(IReadingListService readingListService, IDirectorySer
     [HttpGet("remap-rules")]
     public async Task<ActionResult<IList<RemapRuleDto>>> GetRemapRules()
     {
-        var rules = await unitOfWork.RemapRuleRepository.GetRulesForUserAsync(UserId);
+        var rules = await unitOfWork.RemapRuleRepository.GetRuleDtosForUserAsync(UserId);
         return Ok(mapper.Map<IList<RemapRuleDto>>(rules));
     }
 
@@ -232,8 +270,7 @@ public class CblController(IReadingListService readingListService, IDirectorySer
     [HttpGet("remap-rules/all")]
     public async Task<ActionResult<IList<RemapRuleDto>>> GetAllRemapRules()
     {
-        var rules = await unitOfWork.RemapRuleRepository.GetAllRulesAsync();
-        return Ok(mapper.Map<IList<RemapRuleDto>>(rules));
+        return Ok(await unitOfWork.RemapRuleRepository.GetAllRuleDtosAsync());
     }
 
     /// <summary>
@@ -302,7 +339,8 @@ public class CblController(IReadingListService readingListService, IDirectorySer
 
         await unitOfWork.CommitAsync(ct);
 
-        return Ok(mapper.Map<RemapRuleDto>(existing));
+        var resultDto = await unitOfWork.RemapRuleRepository.GetDtoByIdAsync(existing.Id, ct);
+        return Ok(resultDto);
     }
 
     /// <summary>
@@ -317,7 +355,7 @@ public class CblController(IReadingListService readingListService, IDirectorySer
         if (rule == null) return NotFound();
         rule.IsGlobal = true;
         await unitOfWork.CommitAsync();
-        return Ok(mapper.Map<RemapRuleDto>(rule));
+        return Ok(await unitOfWork.RemapRuleRepository.GetDtoByIdAsync(id, HttpContext.RequestAborted));
     }
 
     /// <summary>
@@ -334,28 +372,64 @@ public class CblController(IReadingListService readingListService, IDirectorySer
         rule.IsGlobal = false;
         await unitOfWork.CommitAsync();
 
-        return Ok(mapper.Map<RemapRuleDto>(rule));
+        return Ok(await unitOfWork.RemapRuleRepository.GetDtoByIdAsync(id, HttpContext.RequestAborted));
     }
 
     /// <summary>
     /// Updates a remap rule with issue-level detail (volume/chapter).
     /// </summary>
-    [HttpPut("remap-rules/{id}")]
+    [HttpPost("remap-rules/{id}")]
     [DisallowRole(PolicyConstants.ReadOnlyRole)]
     public async Task<ActionResult<RemapRuleDto>> UpdateRemapRule(int id, [FromBody] UpdateRemapRuleDto dto)
     {
-        var rule = await unitOfWork.RemapRuleRepository.GetByIdAsync(id);
+        var ct = HttpContext.RequestAborted;
+        var rule = await unitOfWork.RemapRuleRepository.GetByIdAsync(id, ct);
         if (rule == null) return NotFound();
         if (rule.AppUserId != UserId) return Forbid();
+
+        if (dto.SeriesId.HasValue && dto.SeriesId.Value != rule.SeriesId)
+        {
+            var series = await unitOfWork.SeriesRepository.GetSeriesByIdAsync(dto.SeriesId.Value, ct: ct);
+            if (series == null) return BadRequest(await localizationService.Translate(UserId, "series-doesnt-exist"));
+
+            rule.SeriesId = dto.SeriesId.Value;
+            rule.SeriesNameAtMapping = series.Name;
+
+            if (!string.IsNullOrEmpty(dto.CblSeriesName))
+            {
+                rule.CblSeriesName = dto.CblSeriesName;
+                rule.NormalizedCblSeriesName = dto.CblSeriesName.ToNormalized();
+            }
+
+            // Auto-resolve VolumeId when not explicitly provided
+            if (dto.VolumeId == null && dto.ChapterId == null && !string.IsNullOrEmpty(dto.CblVolume) && series.Volumes != null)
+            {
+                var realVolumes = series.Volumes
+                    .Where(v => v.MinNumber is not (ParserConstants.LooseLeafVolumeNumber or ParserConstants.SpecialVolumeNumber))
+                    .ToList();
+
+                if (realVolumes.Count > 0)
+                {
+                    var matched = realVolumes.FirstOrDefault(v =>
+                        v.Name.Equals(dto.CblVolume, StringComparison.OrdinalIgnoreCase)
+                        || v.LookupName.Equals(dto.CblVolume, StringComparison.OrdinalIgnoreCase));
+                    dto.VolumeId = matched?.Id;
+                }
+            }
+        }
 
         rule.VolumeId = dto.VolumeId;
         rule.ChapterId = dto.ChapterId;
         rule.CblVolume = dto.CblVolume;
         rule.CblNumber = dto.CblNumber;
+        if (!string.IsNullOrEmpty(dto.CblSeriesName))
+        {
+            rule.CblSeriesName = dto.CblSeriesName;
+        }
 
-        await unitOfWork.CommitAsync();
+        await unitOfWork.CommitAsync(ct);
 
-        return Ok(mapper.Map<RemapRuleDto>(rule));
+        return Ok(await unitOfWork.RemapRuleRepository.GetDtoByIdAsync(id, ct));
     }
 
     /// <summary>
@@ -407,7 +481,7 @@ public class CblController(IReadingListService readingListService, IDirectorySer
         return Ok(result);
     }
 
-    private async Task<string> SaveCblFile(IFormFile file, int userId, string filename)
+    private async Task SaveCblFile(IFormFile file, int userId, string filename)
     {
         var dir = GetCblManagerFolder(userId);
         Directory.CreateDirectory(dir);
@@ -415,16 +489,14 @@ public class CblController(IReadingListService readingListService, IDirectorySer
         await using var stream = System.IO.File.Create(outputFile);
         await file.CopyToAsync(stream);
         stream.Close();
-        return outputFile;
     }
 
-    private string SaveCblFileFromContent(string content, int userId, string filename)
+    private void SaveCblFileFromContent(string content, int userId, string filename)
     {
         var dir = GetCblManagerFolder(userId);
         Directory.CreateDirectory(dir);
         var outputFile = Path.Join(dir, filename);
         System.IO.File.WriteAllText(outputFile, content);
-        return outputFile;
     }
 
     private string GetCblManagerFolder(int userId)

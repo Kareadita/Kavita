@@ -3,6 +3,7 @@ using System.Xml.Serialization;
 using Kavita.API.Database;
 using Kavita.API.Services;
 using Kavita.API.Services.ReadingLists;
+using Kavita.API.Services.SignalR;
 using Kavita.Models.Builders;
 using Kavita.Models.DTOs.ReadingLists.CBL.Internal;
 using Kavita.Models.DTOs.ReadingLists.CBL.V1;
@@ -149,14 +150,58 @@ public class CblTestHelper : IDisposable
         return new CblImportService(
             _unitOfWork,
             Substitute.For<ICblGithubService>(),
+            Substitute.For<IEventHub>(),
             Substitute.For<IDirectoryService>(),
+            Substitute.For<IReadingListService>(),
+            Substitute.For<IUrlValidationService>(),
+            Substitute.For<IImageService>(),
+            Substitute.For<ILogger<CblImportService>>()
+        );
+    }
+
+    // Overload so we can mock some of the services
+    public CblImportService CreateSyncImportService(
+        ICblGithubService githubService,
+        IDirectoryService directoryService,
+        IReadingListService readingListService)
+    {
+        return new CblImportService(
+            _unitOfWork,
+            githubService,
+            Substitute.For<IEventHub>(),
+            directoryService,
+            readingListService,
+            Substitute.For<IUrlValidationService>(),
+            Substitute.For<IImageService>(),
             Substitute.For<ILogger<CblImportService>>()
         );
     }
 
     public string WriteCblToDisk(ParsedCblReadingList cbl)
     {
-        var v1 = new CblReadingList
+        var tempPath = Path.Join(Path.GetTempPath(), $"kavita-test-{Guid.NewGuid()}.cbl");
+        _tempFiles.Add(tempPath);
+
+        var serializer = new XmlSerializer(typeof(CblReadingList));
+        using var stream = File.Create(tempPath);
+        serializer.Serialize(stream, ToCblV1(cbl));
+
+        return tempPath;
+    }
+
+    public static string SerializeCblToXml(ParsedCblReadingList cbl)
+    {
+        var serializer = new XmlSerializer(typeof(CblReadingList));
+        using var stream = new MemoryStream();
+        using var writer = new StreamWriter(stream, new System.Text.UTF8Encoding(false));
+        serializer.Serialize(writer, ToCblV1(cbl));
+        writer.Flush();
+        return System.Text.Encoding.UTF8.GetString(stream.ToArray());
+    }
+
+    private static CblReadingList ToCblV1(ParsedCblReadingList cbl)
+    {
+        return new CblReadingList
         {
             Name = cbl.Name,
             Summary = cbl.Summary,
@@ -193,15 +238,6 @@ public class CblTestHelper : IDisposable
                 }).ToList()
             }
         };
-
-        var tempPath = Path.Join(Path.GetTempPath(), $"kavita-test-{Guid.NewGuid()}.cbl");
-        _tempFiles.Add(tempPath);
-
-        var serializer = new XmlSerializer(typeof(CblReadingList));
-        using var stream = File.Create(tempPath);
-        serializer.Serialize(stream, v1);
-
-        return tempPath;
     }
 
     private static SeedChapter ParseChapterElement(JsonElement element)

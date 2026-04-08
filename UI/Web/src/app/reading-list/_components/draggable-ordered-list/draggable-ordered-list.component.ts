@@ -121,6 +121,7 @@ export class DraggableOrderedListComponent {
 
   selectItem(updatedVal: Event, index: number) {
     const boolVal = (updatedVal.target as HTMLInputElement).value == 'true';
+    // TODO: Bug here
     this.bulkSelectionService.handleCardSelection('sideNavStream', index, this.localItems().length, boolVal);
   }
 }

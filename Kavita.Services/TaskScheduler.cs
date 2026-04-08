@@ -21,6 +21,7 @@ using Kavita.Models.Entities.Enums;
 using Kavita.Models.Entities.Enums.User;
 using Kavita.Models.Extensions;
 using Kavita.Services.Plus;
+using Kavita.Services.ReadingLists;
 using Kavita.Services.Scanner;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
@@ -62,6 +63,7 @@ public class TaskScheduler : ITaskScheduler
     public const string CheckForUpdateId = TaskSchedulerConstants.CheckForUpdateId;
     public const string CleanupDbTaskId = TaskSchedulerConstants.CleanupDbTaskId;
     public const string CleanupTaskId = TaskSchedulerConstants.CleanupTaskId;
+    public const string TaskCblSyncId = TaskSchedulerConstants.TaskCblSyncId;
     public const string BackupTaskId = TaskSchedulerConstants.BackupTaskId;
     public const string ScanLibrariesTaskId = TaskSchedulerConstants.ScanLibrariesTaskId;
     public const string ReportStatsTaskId = TaskSchedulerConstants.ReportStatsTaskId;
@@ -196,6 +198,20 @@ public class TaskScheduler : ITaskScheduler
         {
             _logger.LogDebug("Scheduling Cleanup Task for {Setting}", setting);
             RecurringJob.AddOrUpdate(CleanupTaskId, () => _cleanupService.Cleanup(CancellationToken.None),
+                CronConverter.ConvertToCronNotation(setting), RecurringJobOptions);
+        }
+
+        setting = (await _unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.TaskCblSync, cancellationToken)).Value;
+        if (IsInvalidCronSetting(setting))
+        {
+            _logger.LogError("CBL Sync Task has invalid cron, defaulting to Daily");
+            RecurringJob.AddOrUpdate<CblImportService>(TaskCblSyncId, service => service.SyncAllReadingLists(CancellationToken.None),
+                "0 4 * * *", RecurringJobOptions);
+        }
+        else
+        {
+            _logger.LogDebug("Scheduling CBL Sync Task for {Setting}", setting);
+            RecurringJob.AddOrUpdate<CblImportService>(TaskCblSyncId, service => service.SyncAllReadingLists(CancellationToken.None),
                 CronConverter.ConvertToCronNotation(setting), RecurringJobOptions);
         }
 

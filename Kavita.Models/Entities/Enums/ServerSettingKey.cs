@@ -198,7 +198,7 @@ public enum ServerSettingKey
     [Description("FirstInstallVersion")]
     FirstInstallVersion = 39,
     /// <summary>
-    /// A Json object of type <see cref="API.DTOs.Settings.OidcConfigDto"/>
+    /// A Json object of type <see cref="Kavita.Models.DTOs.Settings.OidcConfigDto"/>
     /// </summary>
     [Description("OidcConfiguration")]
     OidcConfiguration = 40,
@@ -212,5 +212,10 @@ public enum ServerSettingKey
     /// </summary>
     /// <remarks>After a set amount, the Stats API will stop recording some information, like Average I/O time</remarks>
     [Description("StatsApiHits")]
-    StatsApiHits = 42
+    StatsApiHits = 42,
+    /// <summary>
+    /// When the CBL Sync task should run
+    /// </summary>
+    [Description("TaskCblSync")]
+    TaskCblSync = 43
 }
