@@ -2490,7 +2490,8 @@
         "ending-title": "Ending",
         "starting-title": "Starting",
         "promote-label": "{{actionable.promote}}",
-        "promote-tooltip": "Promotion means that the collection can be seen server-wide, not just for you. All series within this collection will still have user-access restrictions placed on them."
+        "promote-tooltip": "Promotion means that the collection can be seen server-wide, not just for you. All series within this collection will still have user-access restrictions placed on them.",
+        "tags-label": "{{metadata-fields.tags-title}}"
     },
 
     "import-mal-collection-modal": {

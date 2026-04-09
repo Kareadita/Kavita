@@ -33,6 +33,7 @@ import {TimeAgoPipe} from "../../_pipes/time-ago.pipe";
 import {AgeRatingImageComponent} from "../../_single-module/age-rating-image/age-rating-image.component";
 import {DateYearRangePipe} from "../../_pipes/date-year-range.pipe";
 import {SafeUrlPipe} from "../../_pipes/safe-url.pipe";
+import {NgbTooltip} from "@ng-bootstrap/ng-bootstrap";
 
 @Component({
   selector: 'app-cbl-manager',
@@ -54,7 +55,8 @@ import {SafeUrlPipe} from "../../_pipes/safe-url.pipe";
     AgeRatingImageComponent,
     DateYearRangePipe,
     DatePipe,
-    SafeUrlPipe
+    SafeUrlPipe,
+    NgbTooltip
   ],
   templateUrl: './cbl-manager.component.html',
   styleUrl: './cbl-manager.component.scss',
@@ -184,6 +186,12 @@ export class CblManagerComponent implements OnInit {
     this.cblService.syncList(list.id, true).subscribe(() => {
       this.toastr.success(translate('toasts.reading-list-sync-enqueued'));
     });
+  }
+
+  getMissingCount(rl: ReadingList) {
+    if (rl.totalItemsAtImport === 0) return 0;
+    if (rl.itemCount > rl.totalItemsAtImport) return 0;
+    return rl.totalItemsAtImport - rl.itemCount;
   }
 
   async deleteList(list: ReadingList) {

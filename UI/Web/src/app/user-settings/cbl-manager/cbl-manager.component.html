@@ -112,7 +112,6 @@
                   <div class="mt-1" style="font-size: 0.9rem;">
                     @if (selectedItem.ageRating) {
                       <app-age-rating-image [rating]="selectedItem.ageRating"/>
-                      <span>{{selectedItem.ageRating | ageRating}}</span>
                     }
                     @if (selectedItem.startingYear > 0) {
                       @if (selectedItem.ageRating) {
@@ -122,7 +121,7 @@
                       </span>
                     }
 
-                    @let missingItems = selectedItem.itemCount - selectedItem.totalItemsAtImport;
+                    @let missingItems = getMissingCount(selectedItem);
                     @if (missingItems > 0) {
                       <span class="text-danger ms-2">
                         <i class="fa-solid fa-exclamation-circle me-1" aria-hidden="true"></i>
@@ -188,8 +187,17 @@
           <div class="fw-bold">
             <app-promoted-icon [promoted]="item.promoted" />
             {{item.title}}
+            @let missingCount = getMissingCount(item);
+            @if (missingCount > 0) {
+              <span class="text-danger ms-1" [ngbTooltip]="t('missing-count', {num: missingCount})">
+              <i class="fa-solid fa-exclamation-circle me-1" aria-hidden="true"></i>
+            </span>
+            }
           </div>
+
           <span class="pill p-1 me-1">{{t('item-count', {num: item.itemCount})}}</span>
+
+
           @if (item.canSync) {
             <span class="pill p-1 me-1 provider">{{item.provider | readingListProvider}}</span>
           }
