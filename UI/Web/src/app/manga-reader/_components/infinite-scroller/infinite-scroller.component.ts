@@ -35,6 +35,7 @@ import {SafeStylePipe} from "../../../_pipes/safe-style.pipe";
 import {ReadingProfile} from "../../../_models/preferences/reading-profiles";
 import {BreakpointService} from "../../../_services/breakpoint.service";
 import {Queue} from "../../../shared/data-structures/queue";
+import {PullToLoadComponent} from "../../../shared/_components/pull-to-load/pull-to-load.component";
 
 /**
  * How much additional space should pass, past the original bottom of the document height before we trigger the next chapter load
@@ -84,7 +85,7 @@ const enum DEBUG_MODES {
     templateUrl: './infinite-scroller.component.html',
     styleUrls: ['./infinite-scroller.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush,
-    imports: [AsyncPipe, TranslocoDirective, InfiniteScrollDirective, SafeStylePipe]
+  imports: [AsyncPipe, TranslocoDirective, InfiniteScrollDirective, SafeStylePipe, PullToLoadComponent]
 })
 export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy, AfterViewInit {
   private readonly document = inject<Document>(DOCUMENT);

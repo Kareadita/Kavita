@@ -1,0 +1,54 @@
+:host {
+  display: block;
+}
+
+.container {
+  position: relative;
+  overflow: hidden;
+  touch-action: none;
+  user-select: none;
+  will-change: transform;
+  height: 300px;
+
+  &.releasing {
+    transition: transform var(--ptl-release-ms) ease-out;
+  }
+
+  &.triggered .bar {
+    opacity: 0.6;
+    transition: opacity var(--ptl-flash-ms) ease-out;
+  }
+}
+
+.content {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding-inline: 12px;
+  pointer-events: none;
+}
+
+.title {
+  font-size: 0.75rem;
+  white-space: nowrap;
+  opacity: 0.7;
+}
+
+.track {
+  flex: 1;
+  max-width: 120px;
+  height: 3px;
+  border-radius: 2px;
+  background: var(--pull-to-load-track, rgba(128, 128, 128, 0.25));
+  overflow: hidden;
+}
+
+.bar {
+  height: 100%;
+  border-radius: 2px;
+  background: var(--pull-to-load-bar, currentColor);
+  transition: width 60ms linear;
+}

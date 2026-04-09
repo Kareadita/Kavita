@@ -1,0 +1,20 @@
+<div
+  #container
+  class="container"
+  [style.height.px]="restingHeight"
+  [style.transform]="containerTransform()"
+  [style.transform-origin]="transformOrigin()"
+  [class.releasing]="isReleasing()"
+  [class.triggered]="isTriggered()"
+  aria-hidden="true"
+>
+  <div class="content">
+    <span class="title">{{ title() }}</span>
+    <div class="track">
+      <div
+        class="bar"
+        [style.width.%]="progressPercent()"
+      ></div>
+    </div>
+  </div>
+</div>

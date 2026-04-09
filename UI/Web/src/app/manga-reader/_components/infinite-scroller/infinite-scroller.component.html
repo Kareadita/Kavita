@@ -48,18 +48,20 @@
     }
   </div>
 
-  <div #bottomSpacer class="spacer bottom" role="alert" (click)="loadNextChapter.emit(undefined)">
-    <div>
-      <button class="btn btn-icon mx-auto">
-        <i class="fa fa-angle-double-down animate" aria-hidden="true"></i>
-      </button>
-      <span class="mx-auto text">{{t('continuous-reading-next-chapter')}}</span>
-      <button class="btn btn-icon mx-auto">
-        <i class="fa fa-angle-double-down animate" aria-hidden="true"></i>
-      </button>
-      <span class="visually-hidden">{{t('continuous-reading-next-chapter-alt')}}</span>
-    </div>
-    <div class="empty-space"></div>
+  <app-pull-to-load [direction]="'up'" [title]="t('continuous-reading-next-chapter')" [distance]="15" (triggered)="debugLog('next chp loaded')" />
+
+  <div #bottomSpacer class="" role="alert" (click)="loadNextChapter.emit(undefined)">
+<!--    <div>-->
+<!--      <button class="btn btn-icon mx-auto">-->
+<!--        <i class="fa fa-angle-double-down animate" aria-hidden="true"></i>-->
+<!--      </button>-->
+<!--      <span class="mx-auto text">{{t('continuous-reading-next-chapter')}}</span>-->
+<!--      <button class="btn btn-icon mx-auto">-->
+<!--        <i class="fa fa-angle-double-down animate" aria-hidden="true"></i>-->
+<!--      </button>-->
+<!--      <span class="visually-hidden">{{t('continuous-reading-next-chapter-alt')}}</span>-->
+<!--    </div>-->
+<!--    <div class="empty-space"></div>-->
   </div>
 
 </ng-container>
