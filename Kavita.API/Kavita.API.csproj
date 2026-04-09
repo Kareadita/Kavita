@@ -12,11 +12,11 @@
 
     <ItemGroup>
       <PackageReference Include="Hangfire" Version="1.8.23" />
-      <PackageReference Include="Microsoft.EntityFrameworkCore" Version="10.0.3" />
-      <PackageReference Include="Microsoft.EntityFrameworkCore.Abstractions" Version="10.0.3" />
+      <PackageReference Include="Microsoft.EntityFrameworkCore" Version="10.0.5" />
+      <PackageReference Include="Microsoft.EntityFrameworkCore.Abstractions" Version="10.0.5" />
       <PackageReference Include="Newtonsoft.Json" Version="13.0.4" />
       <PackageReference Include="System.IO.Abstractions" Version="22.1.0" />
-      <PackageReference Include="VersOne.Epub" Version="3.3.5" />
+      <PackageReference Include="VersOne.Epub" Version="3.3.6" />
     </ItemGroup>
 
 </Project>
