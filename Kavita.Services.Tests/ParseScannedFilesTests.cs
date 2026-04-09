@@ -635,4 +635,37 @@ public class ParseScannedFilesTests: AbstractDbTest
 
         Assert.Equal(2, scannedSeries.Count);
     }
+
+    [Fact]
+    public void TrackSeriesAcrossScanResults_Merging()
+    {
+        List<ScanResult> scanResults =
+        [
+            new()
+            {
+                ParserInfos = [
+                    new ParserInfo
+                    {
+                        Series = "Spice and Wolf"
+                    }
+                    ,new ParserInfo
+                    {
+                        Series = "Ookami to Koushinryou",
+                        LocalizedSeries = "Spice and Wolf"
+                    }
+                ]
+            }
+        ];
+
+        ConcurrentDictionary<ParsedSeries, List<ParserInfo>> scannedSeries = [];
+
+        var psd = new ParseScannedFiles(Substitute.For<ILogger<ParseScannedFiles>>(), Substitute.For<IDirectoryService>(),
+            Substitute.For<IReadingItemService>(), Substitute.For<IEventHub>(),
+            Substitute.For<IMediaErrorService>());
+
+        psd.TrackSeriesAcrossScanResults(scanResults, scannedSeries);
+
+        Assert.Single(scannedSeries);
+        Assert.Single(scannedSeries.Values.First().DistinctBy(x => x.Series));
+    }
 }

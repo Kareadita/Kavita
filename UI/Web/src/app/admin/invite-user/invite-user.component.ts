@@ -1,4 +1,4 @@
-import {ChangeDetectorRef, Component, computed, inject, OnInit, signal} from '@angular/core';
+import {ChangeDetectorRef, Component, computed, DestroyRef, inject, OnInit, signal} from '@angular/core';
 import {FormControl, FormGroup, NonNullableFormBuilder, ReactiveFormsModule, Validators} from '@angular/forms';
 import {NgbActiveModal} from '@ng-bootstrap/ng-bootstrap';
 import {ToastrService} from 'ngx-toastr';
@@ -16,13 +16,17 @@ import {
   MultiCheckBoxItem,
   SettingMultiCheckBox
 } from "../../settings/_components/setting-multi-check-box/setting-multi-check-box.component";
+import {debounceTime, distinctUntilChanged, Observable, startWith} from "rxjs";
+import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
+import {map} from "rxjs/operators";
+import {AsyncPipe} from "@angular/common";
 
 @Component({
     selector: 'app-invite-user',
     templateUrl: './invite-user.component.html',
     styleUrls: ['./invite-user.component.scss'],
-  imports: [ReactiveFormsModule,RestrictionSelectorComponent,
-    ApiKeyComponent, TranslocoDirective, SafeHtmlPipe, SettingMultiCheckBox]
+  imports: [ReactiveFormsModule, RestrictionSelectorComponent,
+    ApiKeyComponent, TranslocoDirective, SafeHtmlPipe, SettingMultiCheckBox, AsyncPipe]
 })
 export class InviteUserComponent implements OnInit {
 
@@ -31,6 +35,7 @@ export class InviteUserComponent implements OnInit {
   private readonly toastr = inject(ToastrService);
   protected readonly modal = inject(NgbActiveModal);
   private readonly libraryService = inject(LibraryService);
+  private readonly destroyRef = inject(DestroyRef);
 
   /**
    * Maintains if the backend is sending an email
@@ -60,6 +65,8 @@ export class InviteUserComponent implements OnInit {
       }}
   });
 
+  readOnlyWarning$!: Observable<string | undefined>;
+
 
   makeLink: (val: string) => string = (_: string) => {return this.emailLink};
 
@@ -70,6 +77,15 @@ export class InviteUserComponent implements OnInit {
 
   ngOnInit(): void {
     this.libraryService.getLibraries().subscribe(libraries => this.libraries.set(libraries));
+
+    this.readOnlyWarning$ = this.inviteForm.get('roles')!.valueChanges.pipe(
+      startWith([Role.Login]),
+      takeUntilDestroyed(this.destroyRef),
+      distinctUntilChanged(),
+      debounceTime(10),
+      map((roles: string[]) => roles.includes(Role.ReadOnly)),
+      map(readOnlySelected => readOnlySelected ? translate('edit-user.warning-read-only') : undefined),
+    );
   }
 
   close() {
