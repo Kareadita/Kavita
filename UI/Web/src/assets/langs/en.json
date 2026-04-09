@@ -2139,7 +2139,7 @@
         "delete-rule": "{{common.delete}}",
         "manage-rules": "Manage Remap Rules",
         "col-series": "Requested Series",
-        "col-vol-issue": "Requested Vol / Issue",
+        "col-vol-issue": "Req Vol / Issue",
         "col-status": "Status",
         "col-matched-series": "Matched Series",
         "col-matched-issue": "Matched Issue",

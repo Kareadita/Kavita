@@ -32,6 +32,7 @@ export interface ReadingListItemVolume {
 }
 
 export interface ReadingListItem {
+  id: number;
   pagesRead: number;
   pagesTotal: number;
   seriesName: string;
@@ -43,7 +44,6 @@ export interface ReadingListItem {
   chapterNumber: string;
   volumeNumber: string;
   libraryId: number;
-  id: number;
   releaseDate: string;
   title: string;
   libraryType: LibraryType;
