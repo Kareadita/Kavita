@@ -12,6 +12,7 @@ import {
   viewChild
 } from '@angular/core';
 import {DOCUMENT} from "@angular/common";
+import {BreakpointService} from "../../../_services/breakpoint.service";
 
 /** How long (ms) the user must be idle at the scroll boundary before scroll-driven progress arms. */
 const SCROLL_ARM_DELAY_MS = 100;
@@ -19,8 +20,11 @@ const SCROLL_ARM_DELAY_MS = 100;
 /** Resting height of the strip before arming. */
 const RESTING_HEIGHT_REM = 1.25;
 
-/** Expanded height when armed, giving the user a scroll-through region. */
-const ARMED_HEIGHT_REM = 18.75;
+/** Expanded height when armed on desktop, giving the user a scroll-through region. */
+const ARMED_HEIGHT_DESKTOP_REM = 18.75;
+
+/** Expanded height when armed on mobile — shorter drag distance for touch. */
+const ARMED_HEIGHT_MOBILE_REM = 9.375;
 
 const enum PullState {
   Idle,
@@ -53,6 +57,7 @@ export class PullToLoadComponent implements OnInit {
 
   private readonly document = inject(DOCUMENT);
   private readonly destroyRef = inject(DestroyRef);
+  private readonly breakpointService = inject(BreakpointService);
   private readonly container = viewChild.required<ElementRef<HTMLElement>>('container');
   private readonly triggerSentinel = viewChild.required<ElementRef<HTMLElement>>('triggerSentinel');
 
@@ -64,10 +69,13 @@ export class PullToLoadComponent implements OnInit {
 
   readonly progressPercent = computed(() => Math.min(this.progress() * 100, 100));
   readonly restingHeightRem = RESTING_HEIGHT_REM;
-  readonly armedHeightRem = ARMED_HEIGHT_REM;
+
+  readonly armedHeightRem = computed(() =>
+    this.breakpointService.isMobile() ? ARMED_HEIGHT_MOBILE_REM : ARMED_HEIGHT_DESKTOP_REM
+  );
 
   readonly containerHeight = computed(() =>
-    this.isArmed() || this.isTriggered() ? `${ARMED_HEIGHT_REM}rem` : `${RESTING_HEIGHT_REM}rem`
+    this.isArmed() || this.isTriggered() ? `${this.armedHeightRem()}rem` : `${RESTING_HEIGHT_REM}rem`
   );
 
   private armTimeoutId: ReturnType<typeof setTimeout> | null = null;

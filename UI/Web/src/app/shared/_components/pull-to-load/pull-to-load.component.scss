@@ -35,14 +35,14 @@
   max-width: 7.5rem;
   height: 0.1875rem;
   border-radius: 0.125rem;
-  background: var(--pull-to-load-track, rgba(128, 128, 128, 0.25));
+  background: white;
   overflow: hidden;
 }
 
 .bar {
   height: 100%;
   border-radius: 0.125rem;
-  background: var(--pull-to-load-bar, currentColor);
+  background: var(--primary-color);
   transition: width 60ms linear;
 }
 
