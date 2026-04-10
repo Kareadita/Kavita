@@ -98,6 +98,10 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy, 
   private readonly destroyRef = inject(DestroyRef);
   protected readonly breakpointService = inject(BreakpointService);
 
+  get scrollElement(): HTMLElement {
+    return this.isFullscreenMode ? this.readerElemRef.nativeElement : this.document.body;
+  }
+
   /**
    * Current page number aka what's recorded on screen
    */
@@ -126,8 +130,9 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy, 
   @Input() fullscreenToggled: ReplaySubject<boolean> = new ReplaySubject<boolean>();
 
   readonly bottomSpacer = viewChild.required<ElementRef>('bottomSpacer');
-  bottomSpacerIntersectionObserver: IntersectionObserver = new IntersectionObserver((entries) => this.handleBottomIntersection(entries),
-    { threshold: 1.0 });
+  // TODO(pull-to-load): Old continuous reader observer — remove once pull-to-load is validated
+  // bottomSpacerIntersectionObserver: IntersectionObserver = new IntersectionObserver((entries) => this.handleBottomIntersection(entries),
+  //   { threshold: 1.0 });
 
   darkness$: Observable<string> = of('brightness(100%)');
 
@@ -368,7 +373,8 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy, 
   }
 
   ngAfterViewInit() {
-    this.bottomSpacerIntersectionObserver.observe(this.bottomSpacer().nativeElement);
+    // TODO(pull-to-load): Old continuous reader observer — remove once pull-to-load is validated
+    // this.bottomSpacerIntersectionObserver.observe(this.bottomSpacer().nativeElement);
   }
 
   recalculateImageWidth() {
@@ -414,8 +420,8 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy, 
       this.cdRef.markForCheck();
     }
 
-    // Check if we hit the last page
-    this.checkIfShouldTriggerContinuousReader();
+    // TODO(pull-to-load): Old continuous reader check — remove once pull-to-load is validated
+    // this.checkIfShouldTriggerContinuousReader();
   }
 
   handleScrollEndEvent(event?: any) {
@@ -450,54 +456,10 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy, 
     return document.body.scrollTop;
   }
 
-  checkIfShouldTriggerContinuousReader() {
-    if (this.isScrolling || this.isInitialLoad) return;
-
-    if (this.scrollingDirection === PAGING_DIRECTION.FORWARD) {
-      const totalHeight = this.getTotalHeight();
-      const totalScroll = this.getTotalScroll();
-
-      // If we were at top but have started scrolling down past page 0, remove top spacer
-      if (this.atTop && this.pageNum > 0) {
-        this.atTop = false;
-        this.cdRef.markForCheck();
-      }
-
-      if (totalHeight != 0 && totalScroll >= totalHeight && !this.atBottom) {
-        this.atBottom = true;
-        this.cdRef.markForCheck();
-        this.setPageNum(this.totalPages);
-
-        // Scroll user back to original location
-        this.previousScrollHeightMinusTop = this.getScrollTop();
-        requestAnimationFrame(() => {
-          document.body.scrollTop = this.previousScrollHeightMinusTop + (SPACER_SCROLL_INTO_PX / 2);
-          this.cdRef.markForCheck();
-        });
-        this.checkIfShouldTriggerContinuousReader()
-      } else if (totalScroll >= totalHeight + SPACER_SCROLL_INTO_PX && this.atBottom) {
-        // This if statement will fire once we scroll into the spacer at all
-        this.moveToNextChapter();
-      }
-    } else {
-      // < 5 because debug mode and FF (mobile) can report non 0, despite being at 0
-      if (this.getScrollTop() < 5 && this.pageNum === 0 && !this.atTop) {
-        this.atBottom = false;
-        this.atTop = true;
-        this.cdRef.markForCheck();
-
-        // Scroll user back to original location
-        this.previousScrollHeightMinusTop = document.body.scrollHeight - document.body.scrollTop;
-
-        const reader = this.isFullscreenMode ? this.readerElemRef.nativeElement : this.document.body;
-        requestAnimationFrame(() => this.scrollService.scrollTo((SPACER_SCROLL_INTO_PX / 2), reader));
-      } else if (this.getScrollTop() < 5 && this.pageNum === 0 && this.atTop) {
-        // If already at top, then we are moving on
-        this.loadPrevChapter.emit(undefined);
-        this.cdRef.markForCheck();
-      }
-    }
-  }
+  // TODO(pull-to-load): Old continuous reader logic — remove once pull-to-load is validated
+  // checkIfShouldTriggerContinuousReader() {
+  //   ...
+  // }
 
   /**
    *
@@ -593,7 +555,8 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy, 
     this.webtoonImages.next([]);
     this.retryImages = new Queue();
     this.atBottom = false;
-    this.checkIfShouldTriggerContinuousReader();
+    // TODO(pull-to-load): Old continuous reader check — remove once pull-to-load is validated
+    // this.checkIfShouldTriggerContinuousReader();
     this.cdRef.markForCheck();
     const [startingIndex, endingIndex] = this.calculatePrefetchIndecies();
 
@@ -710,12 +673,13 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy, 
     });
   }
 
-  handleBottomIntersection(entries: IntersectionObserverEntry[]) {
-    if (entries.length > 0 && this.pageNum > this.totalPages - 5 && this.initFinished) {
-      this.debugLog('[Intersection] The whole bottom spacer is visible', entries[0].isIntersecting);
-      this.moveToNextChapter();
-    }
-  }
+  // TODO(pull-to-load): Old continuous reader observer callback — remove once pull-to-load is validated
+  // handleBottomIntersection(entries: IntersectionObserverEntry[]) {
+  //   if (entries.length > 0 && this.pageNum > this.totalPages - 5 && this.initFinished) {
+  //     this.debugLog('[Intersection] The whole bottom spacer is visible', entries[0].isIntersecting);
+  //     this.moveToNextChapter();
+  //   }
+  // }
 
   handleIntersection(entries: IntersectionObserverEntry[]) {
     if (!this.allImagesLoaded || this.isScrolling) {

@@ -1,10 +1,8 @@
 <div
   #container
   class="container"
-  [style.height.px]="restingHeight"
-  [style.transform]="containerTransform()"
-  [style.transform-origin]="transformOrigin()"
-  [class.releasing]="isReleasing()"
+  [style.height]="containerHeight()"
+  [class.armed]="isArmed()"
   [class.triggered]="isTriggered()"
   aria-hidden="true"
 >
@@ -17,4 +15,6 @@
       ></div>
     </div>
   </div>
+
+  <div #triggerSentinel class="trigger-sentinel"></div>
 </div>

@@ -15,7 +15,8 @@
     </div>
   }
 
-  @if (atTop) {
+  <!-- TODO(pull-to-load): Old top spacer — remove once pull-to-load is validated -->
+  <!--@if (atTop) {
     <div #topSpacer class="spacer top" role="alert" (click)="loadPrevChapter.emit(undefined)">
       <div class="empty-space"></div>
       <div>
@@ -29,7 +30,7 @@
         <span class="visually-hidden">{{t('continuous-reading-prev-chapter-alt')}}</span>
       </div>
     </div>
-  }
+  }-->
 
   <div infinite-scroll [infiniteScrollDistance]="1" [infiniteScrollThrottle]="50">
     @for(item of webtoonImages | async; let index = $index; track item.src) {
@@ -48,20 +49,13 @@
     }
   </div>
 
-  <app-pull-to-load [direction]="'up'" [title]="t('continuous-reading-next-chapter')" [distance]="15" (triggered)="debugLog('next chp loaded')" />
+  <app-pull-to-load
+    [direction]="'up'"
+    [title]="t('continuous-reading-next-chapter')"
+    [scrollContainer]="scrollElement"
+    (triggered)="moveToNextChapter()" />
 
-  <div #bottomSpacer class="" role="alert" (click)="loadNextChapter.emit(undefined)">
-<!--    <div>-->
-<!--      <button class="btn btn-icon mx-auto">-->
-<!--        <i class="fa fa-angle-double-down animate" aria-hidden="true"></i>-->
-<!--      </button>-->
-<!--      <span class="mx-auto text">{{t('continuous-reading-next-chapter')}}</span>-->
-<!--      <button class="btn btn-icon mx-auto">-->
-<!--        <i class="fa fa-angle-double-down animate" aria-hidden="true"></i>-->
-<!--      </button>-->
-<!--      <span class="visually-hidden">{{t('continuous-reading-next-chapter-alt')}}</span>-->
-<!--    </div>-->
-<!--    <div class="empty-space"></div>-->
-  </div>
+  <!-- TODO(pull-to-load): kept for viewChild.required ref — remove once pull-to-load is validated -->
+  <div #bottomSpacer style="display:none"></div>
 
 </ng-container>

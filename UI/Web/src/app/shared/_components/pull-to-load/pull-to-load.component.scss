@@ -5,29 +5,22 @@
 .container {
   position: relative;
   overflow: hidden;
-  touch-action: none;
   user-select: none;
-  will-change: transform;
-  height: 300px;
-
-  &.releasing {
-    transition: transform var(--ptl-release-ms) ease-out;
-  }
 
   &.triggered .bar {
     opacity: 0.6;
-    transition: opacity var(--ptl-flash-ms) ease-out;
   }
 }
 
 .content {
-  position: absolute;
-  inset: 0;
+  position: sticky;
+  top: 0;
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 8px;
-  padding-inline: 12px;
+  gap: 0.5rem;
+  padding-inline: 0.75rem;
+  height: 1.25rem;
   pointer-events: none;
 }
 
@@ -39,16 +32,25 @@
 
 .track {
   flex: 1;
-  max-width: 120px;
-  height: 3px;
-  border-radius: 2px;
+  max-width: 7.5rem;
+  height: 0.1875rem;
+  border-radius: 0.125rem;
   background: var(--pull-to-load-track, rgba(128, 128, 128, 0.25));
   overflow: hidden;
 }
 
 .bar {
   height: 100%;
-  border-radius: 2px;
+  border-radius: 0.125rem;
   background: var(--pull-to-load-bar, currentColor);
   transition: width 60ms linear;
+}
+
+.trigger-sentinel {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 0.0625rem;
+  pointer-events: none;
 }
