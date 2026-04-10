@@ -174,7 +174,7 @@
                 @if (formGroup.get('edit')?.value) {
                   @if (!rl.promoted && this.isOwnedReadingList()) {
                     <div class="col-auto">
-                      <button class="btn btn-sm btn-danger" (click)="removeRead()">
+                      <button class="btn btn-sm btn-outline-danger" (click)="removeRead()">
                         <i class="fa fa-check me-1" aria-hidden="true"></i>
                         {{t('remove-read')}}
                       </button>
@@ -200,6 +200,18 @@
               <a ngbNavLink>{{Tabs.Storyline | tabTitle}}</a>
               <ng-template ngbNavContent>
                 @defer (when activeTabId === Tabs.Storyline; prefetch on idle) {
+
+
+                  @if (items().length > 10 && !isLoading()) {
+                    <div class="row ms-0 mb-2 pe-2" >
+                      <label for="rl-filter" class="visually-hidden">{{t('filter-label')}}</label>
+                      <div class="input-group">
+                        <input type="text" class="form-control form-control-sm" formControlName="filter" id="rl-filter" [placeholder]="t('filter-label')">
+                      </div>
+
+                    </div>
+                  }
+
                   <div class="row mb-1 scroll-container" #scrollingBlock>
                     @if (items().length === 0 && !isLoading()) {
                       <div class="mx-auto" style="width: 12.5rem;">
@@ -211,6 +223,7 @@
 
                     <app-draggable-ordered-list [items]="items()" [accessibilityMode]="accessibilityMode()"
                                                 [disabled]="true"
+                                                [filterFn]="filterFn()"
                                                 (orderUpdated)="orderUpdated($event)"
                                                 (itemRemove)="removeItem($event)"
                                                 [showRemoveButton]="formGroup.get('edit')?.value || false"

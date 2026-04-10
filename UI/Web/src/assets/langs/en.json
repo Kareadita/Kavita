@@ -2306,7 +2306,8 @@
         "more-alt": "{{series-detail.more-alt}}",
         "reorder-alt": "Reorder Items",
         "loading-alt": "{{pdf-reader.loading-message}}",
-        "tags-title": "{{metadata-fields.tags-title}}"
+        "tags-title": "{{metadata-fields.tags-title}}",
+        "filter-label": "{{common.filter}}"
     },
 
     "events-widget": {

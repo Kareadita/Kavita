@@ -182,9 +182,25 @@ export class ReadingListDetailComponent implements OnInit {
     writers: []
   });
 
+  filterText = signal('');
+  filterFn = computed<((item: ReadingListItem) => boolean) | null>(() => {
+    const text = this.filterText();
+    if (!text) return null;
+    return (item: ReadingListItem) => {
+      return !!(item.title?.toLowerCase().includes(text)
+        || item.seriesName?.toLowerCase().includes(text)
+        || item.chapterNumber?.toLowerCase().includes(text)
+        || item.volumeNumber?.toLowerCase().includes(text)
+        || item.chapter?.titleName?.toLowerCase().includes(text)
+        || item.chapter?.writerName?.toLowerCase().includes(text)
+        || item.chapter?.pencillerName?.toLowerCase().includes(text));
+    };
+  });
+
   formGroup = new FormGroup({
     'edit': new FormControl(false, []),
     'accessibilityMode': new FormControl(false, []),
+    'filter': new FormControl('', []),
   });
 
   trackByIdentity: TrackByFunction<ReadingListItem> = (index, item) => `${item.order}_${item.title}_${item.summary?.length}_${item.pagesRead}_${item.chapterId}`;
@@ -215,6 +231,11 @@ export class ReadingListDetailComponent implements OnInit {
       tap(mode => {
         this.accessibilityMode.set(mode || this.breakpointService.isMobile());
       })
+    ).subscribe();
+
+    this.formGroup.get('filter')!.valueChanges.pipe(
+      takeUntilDestroyed(this.destroyRef),
+      tap(val => this.filterText.set((val || '').trim().toLowerCase()))
     ).subscribe();
 
     if (this.breakpointService.isMobile()) {
