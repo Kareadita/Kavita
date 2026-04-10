@@ -15,22 +15,11 @@
     </div>
   }
 
-  <!-- TODO(pull-to-load): Old top spacer — remove once pull-to-load is validated -->
-  <!--@if (atTop) {
-    <div #topSpacer class="spacer top" role="alert" (click)="loadPrevChapter.emit(undefined)">
-      <div class="empty-space"></div>
-      <div>
-        <button class="btn btn-icon mx-auto">
-          <i class="fa fa-angle-double-up animate" aria-hidden="true"></i>
-        </button>
-        <span class="mx-auto text">{{t('continuous-reading-prev-chapter')}}</span>
-        <button class="btn btn-icon mx-auto">
-          <i class="fa fa-angle-double-up animate" aria-hidden="true"></i>
-        </button>
-        <span class="visually-hidden">{{t('continuous-reading-prev-chapter-alt')}}</span>
-      </div>
-    </div>
-  }-->
+  <app-pull-to-load
+    [direction]="'down'"
+    [title]="t('continuous-reading-prev-chapter')"
+    [scrollContainer]="scrollElement"
+    (triggered)="loadPrevChapter.emit()" />
 
   <div infinite-scroll [infiniteScrollDistance]="1" [infiniteScrollThrottle]="50">
     @for(item of webtoonImages | async; let index = $index; track item.src) {

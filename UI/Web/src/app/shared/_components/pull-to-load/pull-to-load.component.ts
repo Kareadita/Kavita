@@ -77,9 +77,16 @@ export class PullToLoadComponent implements OnInit {
   readonly containerHeight = computed(() =>
     this.isArmed() || this.isTriggered() ? `${this.armedHeightRem()}rem` : `${RESTING_HEIGHT_REM}rem`
   );
+  readonly directionArrow = computed(() => {
+    switch (this.direction()) {
+      case 'down': return 'up';
+      case 'up': return 'down';
+    }
+  });
 
   private armTimeoutId: ReturnType<typeof setTimeout> | null = null;
   private scrollListener: (() => void) | null = null;
+  private isCompensatingScroll = false;
 
 
   ngOnInit(): void {
@@ -107,7 +114,7 @@ export class PullToLoadComponent implements OnInit {
   }
 
   private onScroll(): void {
-    if (this.disabled()) return;
+    if (this.disabled() || this.isCompensatingScroll) return;
 
     const currentState = this.state();
 
@@ -153,6 +160,13 @@ export class PullToLoadComponent implements OnInit {
 
       this.state.set(PullState.Armed);
       this.progress.set(0);
+
+      // When direction is 'down' (top spacer), the expansion pushes content downward.
+      // Wait for Angular to update the DOM height, then compensate scroll position
+      // so the user's view stays on the content with just the text bar visible.
+      if (this.direction() === 'down') {
+        requestAnimationFrame(() => this.adjustScrollTop(this.getExpansionDeltaPx()));
+      }
     }, SCROLL_ARM_DELAY_MS);
   }
 
@@ -218,9 +232,46 @@ export class PullToLoadComponent implements OnInit {
     this.clearArmTimeout();
 
     if (this.state() !== PullState.Triggered) {
+      const wasArmed = this.state() === PullState.Armed;
       this.state.set(PullState.Idle);
       this.progress.set(0);
+
+      if (wasArmed && this.direction() === 'down') {
+        this.adjustScrollTop(-this.getExpansionDeltaPx());
+      }
     }
+  }
+
+  private getExpansionDeltaPx(): number {
+    const rootFontSize = parseFloat(getComputedStyle(this.document.documentElement).fontSize) || 16;
+    return (this.armedHeightRem() - RESTING_HEIGHT_REM) * rootFontSize;
+  }
+
+  /**
+   * Adjusts scrollTop by a fixed amount. Sets a guard flag so the resulting
+   * scroll events are ignored and don't re-trigger state changes.
+   * The guard lasts two animation frames to cover the scroll event dispatch.
+   */
+  private adjustScrollTop(deltaPx: number): void {
+    this.isCompensatingScroll = true;
+
+    const scrollEl = this.resolveScrollElement();
+    if (scrollEl instanceof Window || scrollEl === this.document.body) {
+      const current = this.document.documentElement.scrollTop || this.document.body.scrollTop;
+      const target = Math.max(0, current + deltaPx);
+      this.document.documentElement.scrollTop = target;
+      this.document.body.scrollTop = target;
+    } else {
+      scrollEl.scrollTop = Math.max(0, scrollEl.scrollTop + deltaPx);
+    }
+
+    // Two rAF hops: first for the browser to process the scroll, second to
+    // ensure any resulting scroll event has been dispatched and ignored.
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        this.isCompensatingScroll = false;
+      });
+    });
   }
 
   /**

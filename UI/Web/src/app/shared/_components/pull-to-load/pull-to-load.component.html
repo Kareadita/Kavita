@@ -6,8 +6,12 @@
   [class.triggered]="isTriggered()"
   aria-hidden="true"
 >
-  <div class="content">
-    <span class="title">{{ title() }}</span>
+  <div class="content" [class.stick-bottom]="direction() === 'down'">
+    <span class="title">
+       <i class="fa fa-angle-double-{{directionArrow()}} animate" aria-hidden="true"></i>
+      {{ title() }}
+      <i class="fa fa-angle-double-{{directionArrow()}} animate" aria-hidden="true"></i>
+    </span>
     <div class="track">
       <div
         class="bar"

@@ -22,12 +22,21 @@
   padding-inline: 0.75rem;
   height: 1.25rem;
   pointer-events: none;
+
+  &.stick-bottom {
+    top: auto;
+    bottom: 0;
+  }
 }
 
 .title {
   font-size: 0.75rem;
   white-space: nowrap;
   opacity: 0.7;
+}
+
+.animate {
+  animation: move-up-down 1s linear infinite;
 }
 
 .track {
