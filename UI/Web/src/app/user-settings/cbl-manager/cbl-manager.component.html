@@ -148,7 +148,7 @@
                       <div>{{t('last-checked', {date: (selectedItem.lastSyncCheckUtc | utcToLocalDate | timeAgo)})}}</div>
                       @if (selectedItem.canSync) {
                         <div>
-                          <a [href]="selectedItem.downloadUrl ?? selectedItem.sourcePath | safeUrl" target="_blank" rel="noopener noreferrer">{{t('source')}}</a>
+                          <a [href]="(selectedItem.downloadUrl ?? selectedItem.sourcePath) | safeUrl" target="_blank" rel="noopener noreferrer">{{t('source')}}</a>
                         </div>
                       }
                     </div>

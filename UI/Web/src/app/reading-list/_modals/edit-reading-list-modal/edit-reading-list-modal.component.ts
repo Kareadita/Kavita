@@ -86,6 +86,7 @@ export class EditReadingListModalComponent implements OnInit {
     });
 
     this.coverImageLocked = this.readingList.coverImageLocked;
+    this.tags = this.readingList.tags;
 
     this.reviewGroup.get('title')?.valueChanges.pipe(
       debounceTime(100),

@@ -114,7 +114,7 @@ export class ReadingListDetailComponent implements OnInit {
   scrollingBlock = viewChild<ElementRef<HTMLDivElement>>('scrollingBlock');
   readingListId = input(0, {transform: numberAttribute});
   readingList = getWritableResolvedData(this.route, 'readingList');
-  
+
 
   readingListSummary = computed(() => {
     return (this.readingList()?.summary || '').replace(/\n/g, '<br>');
@@ -127,10 +127,15 @@ export class ReadingListDetailComponent implements OnInit {
     const rl = this.readingList();
     if (!rl || rl.startingYear === 0) return null;
 
-    const startDate = new Date(rl.startingYear, rl.startingMonth);
-    const endDate = rl.endingYear > 0 ? new Date(rl.endingYear, rl.endingMonth) : null;
+    // Reading list dates start with 1, JS Date starts with 0
+    const startMonth = rl.startingMonth > 0 ? rl.startingMonth - 1 : undefined;
+    const endMonth = rl.startingMonth > 0 ? rl.endingMonth - 1 : undefined;
 
-    return new DateYearRangePipe().transform(startDate, endDate);
+    const startDate = startMonth !== undefined ? new Date(rl.startingYear, startMonth) : new Date(rl.startingYear);
+    const endDate = rl.endingYear <= 0 ? null :
+      (endMonth !== undefined ? new Date(rl.endingYear, endMonth) : new Date(rl.endingYear));
+
+    return new DateYearRangePipe().transform(startDate, endDate, !!endMonth);
   });
 
   items = signal<Array<ReadingListItem>>([]);
