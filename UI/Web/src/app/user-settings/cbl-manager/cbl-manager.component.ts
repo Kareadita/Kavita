@@ -3,7 +3,7 @@ import {AccountService} from '../../_services/account.service';
 import {ToastrService} from 'ngx-toastr';
 import {ConfirmService} from '../../shared/confirm.service';
 import {ModalService} from '../../_services/modal.service';
-import {DatePipe, NgTemplateOutlet} from '@angular/common';
+import {NgTemplateOutlet} from '@angular/common';
 import {FileSystemFileEntry, NgxFileDropEntry, NgxFileDropModule} from 'ngx-file-drop';
 import {ReadingListService} from '../../_services/reading-list.service';
 import {ReadingList, ReadingListProvider} from '../../_models/reading-list/reading-list';
@@ -21,7 +21,6 @@ import {forkJoin} from 'rxjs';
 import {ImageService} from '../../_services/image.service';
 import {ReadMoreComponent} from '../../shared/read-more/read-more.component';
 import {ImageComponent} from '../../shared/image/image.component';
-import {AgeRatingPipe} from '../../_pipes/age-rating.pipe';
 import {RouterLink} from '@angular/router';
 import {editModal} from "../../_models/modal/modal-options";
 import {ModalResult} from "../../_models/modal/modal-result";
@@ -47,14 +46,11 @@ import {NgbTooltip} from "@ng-bootstrap/ng-bootstrap";
     ReadingListProviderPipe,
     ReadMoreComponent,
     ImageComponent,
-    AgeRatingPipe,
     RouterLink,
     FileDragAndDropUploadComponent,
     UtcToLocalDatePipe,
     TimeAgoPipe,
     AgeRatingImageComponent,
-    DateYearRangePipe,
-    DatePipe,
     SafeUrlPipe,
     NgbTooltip
   ],
@@ -74,6 +70,7 @@ export class CblManagerComponent implements OnInit {
 
   files: NgxFileDropEntry[] = [];
   acceptableExtensions = ['.cbl', '.json'].join(',');
+  private readonly dateYearRangePipe = new DateYearRangePipe();
   isUploadingCbl = signal<boolean>(false);
   allLists = signal<ReadingList[]>([]);
 
@@ -186,6 +183,20 @@ export class CblManagerComponent implements OnInit {
     this.cblService.syncList(list.id, true).subscribe(() => {
       this.toastr.success(translate('toasts.reading-list-sync-enqueued'));
     });
+  }
+
+  getDateRangeLabel(rl: ReadingList) {
+    if (!rl || rl.startingYear === 0) return null;
+
+    // Reading list dates start with 1, JS Date starts with 0
+    const startMonth = rl.startingMonth > 0 ? rl.startingMonth - 1 : undefined;
+    const endMonth = rl.startingMonth > 0 ? rl.endingMonth - 1 : undefined;
+
+    const startDate = startMonth !== undefined ? new Date(rl.startingYear, startMonth) : new Date(rl.startingYear);
+    const endDate = rl.endingYear <= 0 ? null :
+      (endMonth !== undefined ? new Date(rl.endingYear, endMonth) : new Date(rl.endingYear));
+
+    return this.dateYearRangePipe.transform(startDate, endDate, !!endMonth);
   }
 
   getMissingCount(rl: ReadingList) {

@@ -110,6 +110,7 @@ export class ReadingListDetailComponent implements OnInit {
   protected readonly MangaFormat = MangaFormat;
   protected readonly Tabs = Tabs;
   protected readonly encodeURIComponent = encodeURIComponent;
+  private readonly dateYearRangePipe = new DateYearRangePipe();
 
   scrollingBlock = viewChild<ElementRef<HTMLDivElement>>('scrollingBlock');
   readingListId = input(0, {transform: numberAttribute});
@@ -135,7 +136,7 @@ export class ReadingListDetailComponent implements OnInit {
     const endDate = rl.endingYear <= 0 ? null :
       (endMonth !== undefined ? new Date(rl.endingYear, endMonth) : new Date(rl.endingYear));
 
-    return new DateYearRangePipe().transform(startDate, endDate, !!endMonth);
+    return this.dateYearRangePipe.transform(startDate, endDate, !!endMonth);
   });
 
   items = signal<Array<ReadingListItem>>([]);

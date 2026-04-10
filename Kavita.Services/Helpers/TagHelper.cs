@@ -152,7 +152,7 @@ public static class TagHelper
             {
                 var newTag = new T
                 {
-                    Title = tagName.Trim().SentenceCase(),
+                    Title = tagName.Trim(),
                     NormalizedTitle = normalizedTitle
                 };
                 handleAdd(newTag);

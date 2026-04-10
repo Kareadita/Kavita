@@ -117,8 +117,10 @@
                       @if (selectedItem.ageRating) {
                         <span class="dot-separator mx-1"></span>
                       }
-                      <span> {{(selectedItem.startingYear | date) | dateYearRange:(selectedItem.endingYear | date)}}
-                      </span>
+                      @let dateRange = getDateRangeLabel(selectedItem);
+                      @if (dateRange) {
+                        <span>{{dateRange}}</span>
+                      }
                     }
 
                     @let missingItems = getMissingCount(selectedItem);
