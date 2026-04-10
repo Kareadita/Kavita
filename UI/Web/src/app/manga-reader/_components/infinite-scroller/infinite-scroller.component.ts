@@ -718,6 +718,7 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy, 
     } else if (pageNum < 0) {
       pageNum = 0;
     }
+
     this.pageNum = pageNum;
     this.pageNumberChange.emit(this.pageNum);
     this.cdRef.markForCheck();
