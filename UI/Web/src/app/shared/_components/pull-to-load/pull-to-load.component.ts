@@ -89,7 +89,7 @@ export class PullToLoadComponent implements OnInit {
   private isCompensatingScroll = false;
 
 
-  ngOnInit(): void {
+  ngOnInit() {
     this.setupScrollListener();
 
     this.destroyRef.onDestroy(() => {
@@ -102,7 +102,7 @@ export class PullToLoadComponent implements OnInit {
    * Idle: checks if the resting-height container is fully visible -> arms after delay
    * Armed: tracks scroll-through progress -> fires when sentinel is visible
    */
-  private setupScrollListener(): void {
+  private setupScrollListener() {
     this.teardownScrollListener();
 
     const scrollEl = this.resolveScrollElement();
@@ -113,7 +113,7 @@ export class PullToLoadComponent implements OnInit {
     this.scrollListener = () => scrollTarget.removeEventListener('scroll', onScroll);
   }
 
-  private onScroll(): void {
+  private onScroll() {
     if (this.disabled() || this.isCompensatingScroll) return;
 
     const currentState = this.state();
@@ -135,7 +135,7 @@ export class PullToLoadComponent implements OnInit {
    * Uses rect checks instead of IntersectionObserver to avoid issues with
    * ancestor CSS transforms (e.g. translate3d for hardware acceleration).
    */
-  private checkVisibilityForArming(): void {
+  private checkVisibilityForArming() {
     if (this.isFullyVisible(this.container().nativeElement)) {
       if (this.armTimeoutId === null) {
         this.startArmCountdown();
@@ -149,7 +149,7 @@ export class PullToLoadComponent implements OnInit {
    * After SCROLL_ARM_DELAY_MS of being fully visible, arm the component:
    * expand to full height and start tracking scroll progress.
    */
-  private startArmCountdown(): void {
+  private startArmCountdown() {
     this.clearArmTimeout();
 
     this.armTimeoutId = setTimeout(() => {
@@ -174,12 +174,12 @@ export class PullToLoadComponent implements OnInit {
    * In Armed state: compute progress as the fraction of the expanded container
    * that is visible in the viewport.
    */
-  private updateProgress(): void {
+  private updateProgress() {
     const el = this.container().nativeElement;
     const rect = el.getBoundingClientRect();
     const viewportHeight = this.getViewportHeight();
 
-    let visibleHeight: number;
+    let visibleHeight;
     if (this.direction() === 'up') {
       visibleHeight = Math.max(0, Math.min(viewportHeight - rect.top, rect.height));
     } else {
@@ -194,7 +194,7 @@ export class PullToLoadComponent implements OnInit {
    * In Armed state: check if the trigger sentinel at the far end of the
    * expanded container is fully visible. If so, the user has scrolled through.
    */
-  private checkTrigger(): void {
+  private checkTrigger() {
     if (this.isFullyVisible(this.triggerSentinel().nativeElement)) {
       this.fire();
     }
@@ -204,7 +204,7 @@ export class PullToLoadComponent implements OnInit {
    * In Armed state: if the container is no longer even partially visible,
    * the user scrolled away, disarm and shrink back.
    */
-  private checkDisarm(): void {
+  private checkDisarm() {
     const rect = this.container().nativeElement.getBoundingClientRect();
     const viewportHeight = this.getViewportHeight();
 
@@ -214,7 +214,7 @@ export class PullToLoadComponent implements OnInit {
     }
   }
 
-  private fire(): void {
+  private fire() {
     if (this.state() === PullState.Triggered) return;
 
     this.state.set(PullState.Triggered);
@@ -228,7 +228,8 @@ export class PullToLoadComponent implements OnInit {
     }, 200);
   }
 
-  private disarm(): void {
+  private disarm() {
+    console.log('disarming')
     this.clearArmTimeout();
 
     if (this.state() !== PullState.Triggered) {
@@ -242,7 +243,7 @@ export class PullToLoadComponent implements OnInit {
     }
   }
 
-  private getExpansionDeltaPx(): number {
+  private getExpansionDeltaPx() {
     const rootFontSize = parseFloat(getComputedStyle(this.document.documentElement).fontSize) || 16;
     return (this.armedHeightRem() - RESTING_HEIGHT_REM) * rootFontSize;
   }
@@ -252,7 +253,7 @@ export class PullToLoadComponent implements OnInit {
    * scroll events are ignored and don't re-trigger state changes.
    * The guard lasts two animation frames to cover the scroll event dispatch.
    */
-  private adjustScrollTop(deltaPx: number): void {
+  private adjustScrollTop(deltaPx: number) {
     this.isCompensatingScroll = true;
 
     const scrollEl = this.resolveScrollElement();
@@ -290,7 +291,7 @@ export class PullToLoadComponent implements OnInit {
       && rect.height > 0;
   }
 
-  private getViewportHeight(): number {
+  private getViewportHeight() {
     const scrollEl = this.resolveScrollElement();
     // For window or body, use the visual viewport height.
     // For other elements (e.g. fullscreen reader), use the element's client height.
@@ -306,21 +307,21 @@ export class PullToLoadComponent implements OnInit {
     return ref instanceof ElementRef ? ref.nativeElement : ref;
   }
 
-  private clearArmTimeout(): void {
+  private clearArmTimeout() {
     if (this.armTimeoutId !== null) {
       clearTimeout(this.armTimeoutId);
       this.armTimeoutId = null;
     }
   }
 
-  private teardownScrollListener(): void {
+  private teardownScrollListener() {
     if (this.scrollListener) {
       this.scrollListener();
       this.scrollListener = null;
     }
   }
 
-  private teardown(): void {
+  private teardown() {
     this.teardownScrollListener();
     this.clearArmTimeout();
   }

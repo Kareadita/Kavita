@@ -10,6 +10,10 @@
   &.triggered .bar {
     opacity: 0.6;
   }
+
+  &.armed .stick-bottom {
+    top: 17.56rem;
+  }
 }
 
 .content {
@@ -24,8 +28,10 @@
   pointer-events: none;
 
   &.stick-bottom {
-    top: auto;
-    bottom: 0;
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
   }
 }
 
@@ -62,4 +68,9 @@
   width: 100%;
   height: 0.0625rem;
   pointer-events: none;
+
+  &.at-top {
+    bottom: auto;
+    top: 0;
+  }
 }
