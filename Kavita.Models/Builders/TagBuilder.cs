@@ -14,7 +14,7 @@ public class TagBuilder : IEntityBuilder<Tag>
     {
         _tag = new Tag()
         {
-            Title = name.Trim().SentenceCase(),
+            Title = name.Trim(),
             NormalizedTitle = name.ToNormalized(),
             Chapters = [],
             SeriesMetadatas = []
