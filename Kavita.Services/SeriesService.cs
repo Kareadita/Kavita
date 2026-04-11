@@ -144,11 +144,12 @@ public class SeriesService(
 
 
             if (updateSeriesMetadataDto.SeriesMetadata?.Genres != null &&
-                updateSeriesMetadataDto.SeriesMetadata.Genres.Count != 0)
+                updateSeriesMetadataDto.SeriesMetadata.Genres.Count != 0 && !updateSeriesMetadataDto.SeriesMetadata.GenresLocked)
             {
                 var allGenres = (await unitOfWork.GenreRepository.GetAllGenresByNamesAsync(updateSeriesMetadataDto.SeriesMetadata.Genres.Select(t => Parser.Normalize(t.Title)), ct)).ToList();
                 series.Metadata.Genres ??= [];
-                TagHelper.UpdateTagList(updateSeriesMetadataDto.SeriesMetadata?.Genres?.Select(t => t.Title).ToList(), series.Metadata.Genres, allGenres, genre =>
+                TagHelper.UpdateTagList(updateSeriesMetadataDto.SeriesMetadata?.Genres.Select(t => t.Title).ToList(),
+                    series.Metadata.Genres, allGenres, genre =>
                 {
                     series.Metadata.Genres.Add(genre);
                 }, () => series.Metadata.GenresLocked = true);

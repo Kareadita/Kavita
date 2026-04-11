@@ -907,7 +907,7 @@ public class SeriesServiceTests(ITestOutputHelper outputHelper): AbstractDbTest(
             SeriesMetadata = new SeriesMetadataDto
             {
                 SeriesId = 1,
-                Genres = new List<GenreTagDto> {new () {Id = 1, Title = "Existing Genre"}},
+                Genres = new List<GenreTagDto> {new () {Id = 1, Title = "Non Existing Genre"}},
                 GenresLocked = true
             },
 
@@ -918,7 +918,7 @@ public class SeriesServiceTests(ITestOutputHelper outputHelper): AbstractDbTest(
         var series = await unitOfWork.SeriesRepository.GetSeriesByIdAsync(1);
         Assert.NotNull(series);
         Assert.NotNull(series.Metadata);
-        Assert.True(series.Metadata.Genres.Select(g => g.Title).All(g => g == "Existing Genre"));
+        Assert.True(series.Metadata.Genres.Select(g => g.Title).All(g2 => g2 == "Existing Genre"));
         Assert.True(series.Metadata.GenresLocked);
     }
 
