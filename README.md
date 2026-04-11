@@ -73,7 +73,7 @@ If you are interested, you can use the promo code [`FIRSTTIME`](https://buy.stri
 **If you already contribute via OpenCollective, please reach out to majora2007 for a provisioned license.**
 
 ## Localization
-Thank you to [Weblate](https://hosted.weblate.org/engage/kavita/) who hosts our localization infrastructure pro bono. If you want to see Kavita in your language, please help us localize. Drop by the discord and signup for the `Translator` role.
+Thank you to [Weblate](https://hosted.weblate.org/engage/kavita/) who hosts our localization infrastructure pro bono. If you want to see Kavita in your language, please help us localize. Drop by the discord and sign up for the `Translator` role.
 
 <a href="https://hosted.weblate.org/engage/kavita/">
 <img src="https://hosted.weblate.org/widget/kavita/horizontal-auto.svg" alt="Translation status" />

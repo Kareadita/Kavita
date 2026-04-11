@@ -631,14 +631,15 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy {
         if (success) {
           this.debugLog('Resolved a failed load for page: ', item.page);
           // Remove the error styling
-          this.renderer.setStyle(pageElem, 'border', 'initial');
+          this.renderer.removeStyle(pageElem, 'border');
+          this.renderer.removeStyle(pageElem, 'height');
           this.onImageLoad({ target: pageElem });
         } else if (item.retryCount < MAX_FAILED_IMG_RETRIES) {
           item.retryCount++;
           this.retryImages.enqueue(item);
           await this.delay(1000 * item.retryCount); // Backoff pressure
         } else {
-          console.error('Failed to load page ' + item.page + ' for chapter ' + item.chapterId + ' after 3 retries');
+          console.error('Failed to load page ' + item.page + ' for chapter ' + item.chapterId + ' after ' + MAX_FAILED_IMG_RETRIES + ' retries');
         }
       }
     } finally {
@@ -697,8 +698,6 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy {
    * @param scrollToPage Optional (default false) parameter to trigger scrolling to the newly set page
    */
   setPageNum(pageNum: number, scrollToPage: boolean = false) {
-    const isSamePage = pageNum === this.pageNum;
-
     if (pageNum >= this.totalPages) {
       pageNum = this.totalPages - 1;
     } else if (pageNum < 0) {

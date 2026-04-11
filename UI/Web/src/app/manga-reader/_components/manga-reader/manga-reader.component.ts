@@ -1641,10 +1641,10 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   setPageNum(pageNum: number) {
+    const clampedPageNum = Math.max(Math.min(pageNum, this.maxPages - 1), 0);
+    const isSamePage = clampedPageNum === pageNum;
 
-    const isSamePage = this.pageNum === pageNum;
-
-    this.pageNum = Math.max(Math.min(pageNum, this.maxPages - 1), 0);
+    this.pageNum = clampedPageNum;
     this.pageNumSubject.next({pageNum: this.pageNum, maxPages: this.maxPages});
     this.cdRef.markForCheck();
 

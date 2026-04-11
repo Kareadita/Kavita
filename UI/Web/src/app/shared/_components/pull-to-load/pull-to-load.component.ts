@@ -86,6 +86,7 @@ export class PullToLoadComponent {
   });
 
   private armTimeoutId: ReturnType<typeof setTimeout> | null = null;
+  private fireTimeoutId: ReturnType<typeof setTimeout> | null = null;
   private scrollListener: (() => void) | null = null;
   private isCompensatingScroll = false;
 
@@ -114,7 +115,6 @@ export class PullToLoadComponent {
     this.teardownScrollListener();
 
     const scrollEl = this.resolveScrollElement();
-    // Window scroll events fire on `document`, not `window` or `body`.
     const scrollTarget = scrollEl instanceof Window ? this.document.body : scrollEl;
 
     const onScroll = () => this.onScroll();
@@ -230,7 +230,7 @@ export class PullToLoadComponent {
     this.triggered.emit();
 
     // Reset after a brief flash so the component is ready for next use
-    setTimeout(() => {
+    this.fireTimeoutId = setTimeout(() => {
       this.progress.set(0);
       this.state.set(PullState.Idle);
     }, 200);
@@ -344,6 +344,13 @@ export class PullToLoadComponent {
     }
   }
 
+  private clearFireTimeout() {
+    if (this.fireTimeoutId !== null) {
+      clearTimeout(this.fireTimeoutId);
+      this.fireTimeoutId = null;
+    }
+  }
+
   private teardownScrollListener() {
     if (this.scrollListener) {
       this.scrollListener();
@@ -354,5 +361,6 @@ export class PullToLoadComponent {
   private teardown() {
     this.teardownScrollListener();
     this.clearArmTimeout();
+    this.clearFireTimeout();
   }
 }
