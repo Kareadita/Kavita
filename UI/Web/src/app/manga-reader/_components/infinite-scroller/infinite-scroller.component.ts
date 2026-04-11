@@ -632,7 +632,7 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy {
         this.retryImages.enqueue(item);
         await this.delay(1000 * item.retryCount); // Backoff pressure
       } else {
-        console.error('Failed to load page ' + this.pageNum + ' after 3 retries');
+        console.error('Failed to load page ' + item.page + ' for chapter ' + item.chapterId + ' after 3 retries');
       }
     }
 

@@ -3,10 +3,10 @@ import {
   Component,
   computed,
   DestroyRef,
+  effect,
   ElementRef,
   inject,
   input,
-  OnInit,
   output,
   signal,
   viewChild
@@ -39,7 +39,7 @@ const enum PullState {
   styleUrl: './pull-to-load.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class PullToLoadComponent implements OnInit {
+export class PullToLoadComponent {
   /** Which direction the user drags to trigger – "up" places the strip at the bottom of content. */
   readonly direction = input.required<'up' | 'down'>();
 
@@ -88,9 +88,13 @@ export class PullToLoadComponent implements OnInit {
   private scrollListener: (() => void) | null = null;
   private isCompensatingScroll = false;
 
-
-  ngOnInit() {
-    this.setupScrollListener();
+  constructor() {
+    effect(() => {
+      // Ensure we set up scroll listener when switching to fullscreen
+      this.scrollContainer();
+      this.disarm();
+      this.setupScrollListener();
+    });
 
     this.destroyRef.onDestroy(() => {
       this.teardown();
