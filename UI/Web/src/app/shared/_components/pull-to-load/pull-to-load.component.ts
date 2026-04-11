@@ -129,8 +129,6 @@ export class PullToLoadComponent {
 
     if (currentState === PullState.Triggered) return;
 
-    console.log('scroll handled')
-
     if (currentState === PullState.Idle) {
       this.checkVisibilityForArming();
     } else if (currentState === PullState.Armed) {

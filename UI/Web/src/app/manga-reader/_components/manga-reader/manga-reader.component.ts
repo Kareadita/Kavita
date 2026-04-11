@@ -1676,9 +1676,10 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     // We need to avoid calling this on first load (except if the chapter only has one page)
     if (!this.incognitoMode && !this.bookmarkMode() && (!this.inSetup || this.maxPages === 1)) {
       if (isSamePage) {
+        //console.log('Same page, dropping request: ', this.pageNum)
         return;
       }
-      this.readerService.saveProgress(this.libraryId, this.seriesId, this.volumeId, this.chapterId, tempPageNum).subscribe(() => {/* No operation */});
+      this.readerService.saveProgress(this.libraryId, this.seriesId, this.volumeId, this.chapterId, tempPageNum).subscribe();
     }
   }
 

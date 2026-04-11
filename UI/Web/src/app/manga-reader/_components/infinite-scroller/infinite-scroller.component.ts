@@ -18,7 +18,7 @@ import {
   Signal,
   SimpleChanges
 } from '@angular/core';
-import {BehaviorSubject, fromEvent, map, Observable, of, ReplaySubject, tap} from 'rxjs';
+import {BehaviorSubject, fromEvent, map, Observable, of, ReplaySubject, Subject, tap} from 'rxjs';
 import {debounceTime} from 'rxjs/operators';
 import {ReaderService} from '../../../_services/reader.service';
 import {PAGING_DIRECTION} from '../../_models/reader-enums';
@@ -117,6 +117,7 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy {
   @Input({required: true}) readerSettings$!: Observable<ReaderSetting>;
   @Input({required: true}) readingProfile!: ReadingProfile;
   @Input({required: true}) chapterId!: number;
+
   readonly pageNumberChange = output<number>();
   readonly loadNextChapter = output<void>();
   readonly loadPrevChapter = output<void>();
@@ -128,6 +129,8 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy {
   darkness$: Observable<string> = of('brightness(100%)');
 
   readerElemRef!: ElementRef<HTMLDivElement>;
+  /** This will update the output to allow for throttling, since we hit the page change on scroll event **/
+  private pageChangeSubject = new Subject<number>();
 
   /**
    * Stores and emits all the src urls
@@ -223,6 +226,12 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy {
     if (reader !== null) {
       this.readerElemRef = new ElementRef(reader as HTMLDivElement);
     }
+
+    this.pageChangeSubject.pipe(
+      debounceTime(300),
+      takeUntilDestroyed(this.destroyRef),
+      tap(page => this.pageNumberChange.emit(page)),
+    ).subscribe();
   }
 
   ngOnChanges(changes: SimpleChanges): void {
@@ -688,6 +697,8 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy {
    * @param scrollToPage Optional (default false) parameter to trigger scrolling to the newly set page
    */
   setPageNum(pageNum: number, scrollToPage: boolean = false) {
+    const isSamePage = pageNum === this.pageNum;
+
     if (pageNum >= this.totalPages) {
       pageNum = this.totalPages - 1;
     } else if (pageNum < 0) {
@@ -695,7 +706,8 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy {
     }
 
     this.pageNum = pageNum;
-    this.pageNumberChange.emit(this.pageNum);
+    this.pageChangeSubject.next(this.pageNum);
+
     this.cdRef.markForCheck();
 
     this.prefetchWebtoonImages();
