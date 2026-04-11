@@ -1,6 +1,5 @@
 import {AsyncPipe, DOCUMENT} from '@angular/common';
 import {
-  AfterViewInit,
   ChangeDetectionStrategy,
   ChangeDetectorRef,
   Component,
@@ -17,12 +16,10 @@ import {
   output,
   Renderer2,
   Signal,
-  SimpleChanges,
-  viewChild
+  SimpleChanges
 } from '@angular/core';
 import {BehaviorSubject, fromEvent, map, Observable, of, ReplaySubject, tap} from 'rxjs';
 import {debounceTime} from 'rxjs/operators';
-import {ScrollService} from 'src/app/_services/scroll.service';
 import {ReaderService} from '../../../_services/reader.service';
 import {PAGING_DIRECTION} from '../../_models/reader-enums';
 import {WebtoonImage} from '../../_models/webtoon-image';
@@ -87,12 +84,11 @@ const enum DEBUG_MODES {
     changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [AsyncPipe, TranslocoDirective, InfiniteScrollDirective, SafeStylePipe, PullToLoadComponent]
 })
-export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy, AfterViewInit {
+export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy {
   private readonly document = inject<Document>(DOCUMENT);
   private readonly mangaReaderService = inject(MangaReaderService);
   private readonly readerService = inject(ReaderService);
   private readonly renderer = inject(Renderer2);
-  private readonly scrollService = inject(ScrollService);
   private readonly injector = inject(Injector);
   private readonly cdRef = inject(ChangeDetectorRef);
   private readonly destroyRef = inject(DestroyRef);
@@ -128,11 +124,6 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy, 
   @Input() goToPage: BehaviorSubject<number> | undefined;
   @Input() bookmarkPage: ReplaySubject<number> = new ReplaySubject<number>();
   @Input() fullscreenToggled: ReplaySubject<boolean> = new ReplaySubject<boolean>();
-
-  readonly bottomSpacer = viewChild.required<ElementRef>('bottomSpacer');
-  // TODO(pull-to-load): Old continuous reader observer — remove once pull-to-load is validated
-  // bottomSpacerIntersectionObserver: IntersectionObserver = new IntersectionObserver((entries) => this.handleBottomIntersection(entries),
-  //   { threshold: 1.0 });
 
   darkness$: Observable<string> = of('brightness(100%)');
 
@@ -372,10 +363,6 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy, 
     }
   }
 
-  ngAfterViewInit() {
-    // TODO(pull-to-load): Old continuous reader observer — remove once pull-to-load is validated
-    // this.bottomSpacerIntersectionObserver.observe(this.bottomSpacer().nativeElement);
-  }
 
   recalculateImageWidth() {
     const [_, innerWidth] = this.getInnerDimensions();
@@ -401,7 +388,7 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy, 
 
   /**
    * On scroll in document, calculate if the user/javascript has scrolled to the current image element (and it's visible), update that scrolling has ended completely,
-   * and calculate the direction the scrolling is occuring. This is not used for prefetching.
+   * and calculate the direction the scrolling is occurring. This is not used for prefetching.
    * @param event Scroll Event
    */
   handleScrollEvent(event?: any) {
@@ -419,9 +406,6 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy, 
       this.isScrolling = false;
       this.cdRef.markForCheck();
     }
-
-    // TODO(pull-to-load): Old continuous reader check — remove once pull-to-load is validated
-    // this.checkIfShouldTriggerContinuousReader();
   }
 
   handleScrollEndEvent(event?: any) {
@@ -455,11 +439,6 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy, 
     }
     return document.body.scrollTop;
   }
-
-  // TODO(pull-to-load): Old continuous reader logic — remove once pull-to-load is validated
-  // checkIfShouldTriggerContinuousReader() {
-  //   ...
-  // }
 
   /**
    *
@@ -553,10 +532,8 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy, 
     this.recalculateImageWidth();
     this.imagesLoaded = {};
     this.webtoonImages.next([]);
-    this.retryImages = new Queue();
+    this.retryImages = new Queue<{page: number, src: string, chapterId: number, retryCount: number}>();
     this.atBottom = false;
-    // TODO(pull-to-load): Old continuous reader check — remove once pull-to-load is validated
-    // this.checkIfShouldTriggerContinuousReader();
     this.cdRef.markForCheck();
     const [startingIndex, endingIndex] = this.calculatePrefetchIndecies();
 
@@ -673,13 +650,6 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy, 
     });
   }
 
-  // TODO(pull-to-load): Old continuous reader observer callback — remove once pull-to-load is validated
-  // handleBottomIntersection(entries: IntersectionObserverEntry[]) {
-  //   if (entries.length > 0 && this.pageNum > this.totalPages - 5 && this.initFinished) {
-  //     this.debugLog('[Intersection] The whole bottom spacer is visible', entries[0].isIntersecting);
-  //     this.moveToNextChapter();
-  //   }
-  // }
 
   handleIntersection(entries: IntersectionObserverEntry[]) {
     if (!this.allImagesLoaded || this.isScrolling) {

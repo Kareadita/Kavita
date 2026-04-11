@@ -229,7 +229,6 @@ export class PullToLoadComponent implements OnInit {
   }
 
   private disarm() {
-    console.log('disarming')
     this.clearArmTimeout();
 
     if (this.state() !== PullState.Triggered) {
