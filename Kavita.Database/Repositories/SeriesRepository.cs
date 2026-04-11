@@ -237,7 +237,7 @@ public class SeriesRepository(DataContext context, IMapper mapper) : ISeriesRepo
     {
         const int maxRecords = 15;
         var searchQueryNormalized = searchQuery.ToNormalized();
-        var userRating = await context.AppUser.GetUserAgeRestriction(userId);
+        var userRating = await context.AppUser.GetUserAgeRestriction(userId, ct: ct);
 
         var justYear = _yearRegex.Match(searchQuery).Value;
         var hasYearInQuery = !string.IsNullOrEmpty(justYear);
@@ -841,7 +841,7 @@ public class SeriesRepository(DataContext context, IMapper mapper) : ISeriesRepo
     {
         // NOTE: Why do we even have libraryId when the filter has the actual libraryIds?
         var userLibraries = await GetUserLibrariesForFilteredQuery(libraryId, userId, queryContext, ct);
-        var userRating = await context.AppUser.GetUserAgeRestriction(userId);
+        var userRating = await context.AppUser.GetUserAgeRestriction(userId, ct: ct);
         var onlyParentSeries = await context.AppUserPreferences.Where(u => u.AppUserId == userId)
             .Select(u => u.CollapseSeriesRelationships)
             .SingleOrDefaultAsync(ct);
@@ -940,7 +940,7 @@ public class SeriesRepository(DataContext context, IMapper mapper) : ISeriesRepo
     {
         var userLibraries = await GetUserLibrariesForFilteredQuery(0, userId, queryContext, ct);
         var allLibraryCount = await context.Library.CountAsync(ct);
-        var userRating = await context.AppUser.GetUserAgeRestriction(userId);
+        var userRating = await context.AppUser.GetUserAgeRestriction(userId, ct: ct);
         var onlyParentSeries = await context.AppUserPreferences.Where(u => u.AppUserId == userId)
             .Select(u => u.CollapseSeriesRelationships)
             .SingleOrDefaultAsync(ct);
@@ -1226,7 +1226,7 @@ public class SeriesRepository(DataContext context, IMapper mapper) : ISeriesRepo
             .Where(library => library.AppUsers.Any(x => x.Id == userId))
             .AsSplitQuery()
             .Select(l => l.Id);
-        var userRating = await context.AppUser.GetUserAgeRestriction(userId);
+        var userRating = await context.AppUser.GetUserAgeRestriction(userId, ct: ct);
 
         return await context.Series
             .RestrictAgainstAgeRestriction(userRating)
@@ -1316,7 +1316,7 @@ public class SeriesRepository(DataContext context, IMapper mapper) : ISeriesRepo
     {
         userParams ??= UserParams.Default;
 
-        var userRating = await context.AppUser.GetUserAgeRestriction(userId);
+        var userRating = await context.AppUser.GetUserAgeRestriction(userId, ct: ct);
 
         var items = await GetRecentlyAddedChaptersQuery(userId, ct);
         if (userRating.AgeRating != AgeRating.NotApplicable)
@@ -1369,7 +1369,7 @@ public class SeriesRepository(DataContext context, IMapper mapper) : ISeriesRepo
         CancellationToken ct = default)
     {
         var libraryIds = context.AppUser.GetLibraryIdsForUser(userId);
-        var userRating = await context.AppUser.GetUserAgeRestriction(userId);
+        var userRating = await context.AppUser.GetUserAgeRestriction(userId, ct: ct);
 
         var usersSeriesIds = context.Series
             .Where(s => libraryIds.Contains(s.LibraryId))
@@ -1400,7 +1400,7 @@ public class SeriesRepository(DataContext context, IMapper mapper) : ISeriesRepo
             .Where(id => libraryId == 0 || id == libraryId);
         var usersSeriesIds = GetSeriesIdsForLibraryIds(libraryIds);
 
-        var userRating = await context.AppUser.GetUserAgeRestriction(userId);
+        var userRating = await context.AppUser.GetUserAgeRestriction(userId, ct: ct);
         // Because this can be called from an API, we need to provide an additional check if the genre has anything the
         // user with age restrictions can access
 
@@ -1447,7 +1447,7 @@ public class SeriesRepository(DataContext context, IMapper mapper) : ISeriesRepo
     public async Task<SeriesDto?> GetSeriesForMangaFile(int mangaFileId, int userId, CancellationToken ct = default)
     {
         var libraryIds = context.AppUser.GetLibraryIdsForUser(userId, 0, QueryContext.Search);
-        var userRating = await context.AppUser.GetUserAgeRestriction(userId);
+        var userRating = await context.AppUser.GetUserAgeRestriction(userId, ct: ct);
 
         return await context.MangaFile
             .Where(m => m.Id == mangaFileId)
@@ -1464,7 +1464,7 @@ public class SeriesRepository(DataContext context, IMapper mapper) : ISeriesRepo
     public async Task<SeriesDto?> GetSeriesForChapter(int chapterId, int userId, CancellationToken ct = default)
     {
         var libraryIds = context.AppUser.GetLibraryIdsForUser(userId);
-        var userRating = await context.AppUser.GetUserAgeRestriction(userId);
+        var userRating = await context.AppUser.GetUserAgeRestriction(userId, ct: ct);
         return await context.Chapter
             .Where(m => m.Id == chapterId)
             .AsSplitQuery()
@@ -1528,7 +1528,7 @@ public class SeriesRepository(DataContext context, IMapper mapper) : ISeriesRepo
         int userId, SeriesIncludes includes = SeriesIncludes.None, CancellationToken ct = default)
     {
         var libraryIds = context.Library.GetUserLibraries(userId);
-        var userRating = await context.AppUser.GetUserAgeRestriction(userId);
+        var userRating = await context.AppUser.GetUserAgeRestriction(userId, ct: ct);
 
         return await context.Series
             .Where(s => normalizedNames.Contains(s.NormalizedName) ||
@@ -1754,7 +1754,7 @@ public class SeriesRepository(DataContext context, IMapper mapper) : ISeriesRepo
             .Where(s => usersSeriesIds.Contains(s.SeriesId) && s.Rating > 4)
             .Select(p => p.SeriesId)
             .Distinct();
-        var userRating = await context.AppUser.GetUserAgeRestriction(userId);
+        var userRating = await context.AppUser.GetUserAgeRestriction(userId, ct: ct);
 
         var query = context.Series
             .Where(s => distinctSeriesIdsWithHighRating.Contains(s.Id))
@@ -1777,7 +1777,7 @@ public class SeriesRepository(DataContext context, IMapper mapper) : ISeriesRepo
             .Where(s => usersSeriesIds.Contains(s.SeriesId))
             .Select(p => p.SeriesId)
             .Distinct();
-        var userRating = await context.AppUser.GetUserAgeRestriction(userId);
+        var userRating = await context.AppUser.GetUserAgeRestriction(userId, ct: ct);
 
 
         var query = context.Series
@@ -1806,7 +1806,7 @@ public class SeriesRepository(DataContext context, IMapper mapper) : ISeriesRepo
             .Select(p => p.SeriesId)
             .Distinct();
 
-        var userRating = await context.AppUser.GetUserAgeRestriction(userId);
+        var userRating = await context.AppUser.GetUserAgeRestriction(userId, ct: ct);
 
 
         var query = context.Series

@@ -74,7 +74,7 @@ public class PersonRepository(DataContext context, IMapper mapper) : IPersonRepo
     public async Task<IList<PersonDto>> GetAllPeopleDtosForLibrariesAsync(int userId, List<int>? libraryIds = null,
         PersonIncludes includes = PersonIncludes.None, CancellationToken ct = default)
     {
-        var ageRating = await context.AppUser.GetUserAgeRestriction(userId);
+        var ageRating = await context.AppUser.GetUserAgeRestriction(userId, ct: ct);
         var userLibs = await context.Library.GetUserLibraries(userId).ToListAsync(ct);
 
         if (libraryIds is {Count: > 0})
@@ -123,7 +123,7 @@ public class PersonRepository(DataContext context, IMapper mapper) : IPersonRepo
     public async Task<IEnumerable<PersonRole>> GetRolesForPersonByName(int personId, int userId,
         CancellationToken ct = default)
     {
-        var ageRating = await context.AppUser.GetUserAgeRestriction(userId);
+        var ageRating = await context.AppUser.GetUserAgeRestriction(userId, ct: ct);
         var userLibs = context.Library.GetUserLibraries(userId);
 
         // Query roles from ChapterPeople
@@ -231,7 +231,7 @@ public class PersonRepository(DataContext context, IMapper mapper) : IPersonRepo
         PersonIncludes includes = PersonIncludes.Aliases, CancellationToken ct = default)
     {
         var normalized = name.ToNormalized();
-        var ageRating = await context.AppUser.GetUserAgeRestriction(userId);
+        var ageRating = await context.AppUser.GetUserAgeRestriction(userId, ct: ct);
         var userLibs = context.Library.GetUserLibraries(userId);
 
         return await context.Person
@@ -263,7 +263,7 @@ public class PersonRepository(DataContext context, IMapper mapper) : IPersonRepo
 
     public async Task<IEnumerable<SeriesDto>> GetSeriesKnownFor(int personId, int userId, CancellationToken ct = default)
     {
-        var ageRating = await context.AppUser.GetUserAgeRestriction(userId);
+        var ageRating = await context.AppUser.GetUserAgeRestriction(userId, ct: ct);
         var userLibs = await context.Library.GetUserLibraries(userId).ToListAsync(ct);
 
         return await context.Person
@@ -283,7 +283,7 @@ public class PersonRepository(DataContext context, IMapper mapper) : IPersonRepo
     public async Task<IEnumerable<StandaloneChapterDto>> GetChaptersForPersonByRole(int personId, int userId,
         PersonRole role, CancellationToken ct = default)
     {
-        var ageRating = await context.AppUser.GetUserAgeRestriction(userId);
+        var ageRating = await context.AppUser.GetUserAgeRestriction(userId, ct: ct);
         var userLibs = context.Library.GetUserLibraries(userId);
 
         return await context.ChapterPeople
@@ -350,7 +350,7 @@ public class PersonRepository(DataContext context, IMapper mapper) : IPersonRepo
     public async Task<IList<PersonDto>> GetAllPersonDtosAsync(int userId, PersonIncludes includes = PersonIncludes.None,
         CancellationToken ct = default)
     {
-        var ageRating = await context.AppUser.GetUserAgeRestriction(userId);
+        var ageRating = await context.AppUser.GetUserAgeRestriction(userId, ct: ct);
         var userLibs = context.Library.GetUserLibraries(userId);
 
         return await context.Person
@@ -365,7 +365,7 @@ public class PersonRepository(DataContext context, IMapper mapper) : IPersonRepo
     public async Task<IList<PersonDto>> GetAllPersonDtosByRoleAsync(int userId, PersonRole role,
         PersonIncludes includes = PersonIncludes.None, CancellationToken ct = default)
     {
-        var ageRating = await context.AppUser.GetUserAgeRestriction(userId);
+        var ageRating = await context.AppUser.GetUserAgeRestriction(userId, ct: ct);
         var userLibs = context.Library.GetUserLibraries(userId);
 
         return await context.Person

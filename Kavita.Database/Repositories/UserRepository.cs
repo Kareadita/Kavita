@@ -239,7 +239,7 @@ public class UserRepository(DataContext context, UserManager<AppUser> userManage
     /// <returns></returns>
     public async Task<bool> HasAccessToSeries(int userId, int seriesId, CancellationToken ct = default)
     {
-        var userRating = await context.AppUser.GetUserAgeRestriction(userId);
+        var userRating = await context.AppUser.GetUserAgeRestriction(userId, ct: ct);
         return await context.Series
             .Include(s => s.Library)
             .Where(s => s.Library.AppUsers.Any(user => user.Id == userId))
@@ -250,7 +250,7 @@ public class UserRepository(DataContext context, UserManager<AppUser> userManage
 
     public async Task<bool> HasAccessToVolume(int userId, int volumeId, CancellationToken ct = default)
     {
-        var userRating = await context.AppUser.GetUserAgeRestriction(userId);
+        var userRating = await context.AppUser.GetUserAgeRestriction(userId, ct: ct);
         return await context.Volume
             .Where(v => v.Id == volumeId)
             .Include(v => v.Series)
@@ -264,7 +264,7 @@ public class UserRepository(DataContext context, UserManager<AppUser> userManage
 
     public async Task<bool> HasAccessToChapter(int userId, int chapterId, CancellationToken ct = default)
     {
-        var userRating = await context.AppUser.GetUserAgeRestriction(userId);
+        var userRating = await context.AppUser.GetUserAgeRestriction(userId, ct: ct);
         return await context.Chapter
             .Include(c => c.Volume)
             .ThenInclude(v => v.Series)
@@ -277,7 +277,7 @@ public class UserRepository(DataContext context, UserManager<AppUser> userManage
 
     public async Task<bool> HasAccessToPerson(int userId, int personId, CancellationToken ct = default)
     {
-        var userRating = await context.AppUser.GetUserAgeRestriction(userId);
+        var userRating = await context.AppUser.GetUserAgeRestriction(userId, ct: ct);
         return await context.Person
             .RestrictAgainstAgeRestriction(userRating)
             .AnyAsync(p => p.Id == personId, ct);

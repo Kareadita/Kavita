@@ -101,7 +101,7 @@ public class GenreRepository(DataContext context, IMapper mapper) : IGenreReposi
     public async Task<IList<GenreTagDto>> GetAllGenreDtosForLibrariesAsync(int userId, IList<int>? libraryIds = null,
         QueryContext context1 = QueryContext.None, CancellationToken ct = default)
     {
-        var userRating = await context.AppUser.GetUserAgeRestriction(userId);
+        var userRating = await context.AppUser.GetUserAgeRestriction(userId, ct: ct);
         var userLibs = await context.Library.GetUserLibraries(userId, context1).ToListAsync(ct);
 
         if (libraryIds is {Count: > 0})
@@ -154,7 +154,7 @@ public class GenreRepository(DataContext context, IMapper mapper) : IGenreReposi
     public async Task<PagedList<BrowseGenreDto>> GetBrowseableGenre(int userId, UserParams userParams,
         CancellationToken ct = default)
     {
-        var ageRating = await context.AppUser.GetUserAgeRestriction(userId);
+        var ageRating = await context.AppUser.GetUserAgeRestriction(userId, ct: ct);
 
         var allLibrariesCount = await context.Library.CountAsync(ct);
         var userLibs = await context.Library.GetUserLibraries(userId).ToListAsync(ct);
