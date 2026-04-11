@@ -907,7 +907,7 @@ public class SeriesServiceTests(ITestOutputHelper outputHelper): AbstractDbTest(
             SeriesMetadata = new SeriesMetadataDto
             {
                 SeriesId = 1,
-                Genres = new List<GenreTagDto> {new () {Id = 1, Title = "Non Existing Genre"}},
+                Genres = new List<GenreTagDto> {new () {Id = 1, Title = "Existing Genre"}},
                 GenresLocked = true
             },
 
