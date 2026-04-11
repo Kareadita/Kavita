@@ -12,7 +12,7 @@
   }
 
   &.armed .stick-bottom {
-    top: 17.56rem; // PC
+    top: calc(100% - 1.25rem);
   }
 }
 

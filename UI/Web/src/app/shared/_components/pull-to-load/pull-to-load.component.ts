@@ -9,6 +9,7 @@ import {
   input,
   output,
   signal,
+  untracked,
   viewChild
 } from '@angular/core';
 import {DOCUMENT} from "@angular/common";
@@ -90,10 +91,12 @@ export class PullToLoadComponent {
 
   constructor() {
     effect(() => {
-      // Ensure we set up scroll listener when switching to fullscreen
+      // Ensure when changing to fullscreen, the scroll container is retracked, but don't run disarm in effect as it will break component
       this.scrollContainer();
-      this.disarm();
-      this.setupScrollListener();
+      untracked(() => {
+        this.disarm();
+        this.setupScrollListener();
+      });
     });
 
     this.destroyRef.onDestroy(() => {

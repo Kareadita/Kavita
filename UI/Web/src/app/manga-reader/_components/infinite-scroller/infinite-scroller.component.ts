@@ -35,10 +35,6 @@ import {Queue} from "../../../shared/data-structures/queue";
 import {PullToLoadComponent} from "../../../shared/_components/pull-to-load/pull-to-load.component";
 
 /**
- * How much additional space should pass, past the original bottom of the document height before we trigger the next chapter load
- */
-const SPACER_SCROLL_INTO_PX = 200;
-/**
  * Default debounce time from scroll and scrollend event listeners
  */
 const DEFAULT_SCROLL_DEBOUNCE = 20;
@@ -55,6 +51,10 @@ const INITIAL_LOAD_GRACE_PERIOD = 1000;
  * How many times the Webtoon reader will retry failed images
  */
 const MAX_FAILED_IMG_RETRIES = 3;
+/**
+ * How long to wait for an image load/error event before treating it as a failure
+ */
+const IMAGE_RETRY_TIMEOUT_MS = 10_000;
 /**
  * Bitwise enums for configuring how much debug information we want
  */
@@ -183,10 +183,6 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy {
     */
    isFullscreenMode: boolean = false;
    /**
-    * Keeps track of the previous scrolling height for restoring scroll position after we inject spacer block
-    */
-   previousScrollHeightMinusTop: number = 0;
-   /**
     * Tracks the first load, until all the initial prefetched images are loaded. We use this to reduce opacity so images can load without jerk.
     */
    initFinished: boolean = false;
@@ -197,7 +193,7 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy {
   /**
    * Debug mode. Will show extra information. Use bitwise (|) operators between different modes to enable different output
    */
-  debugMode: DEBUG_MODES = DEBUG_MODES.Logs;
+  debugMode: DEBUG_MODES = DEBUG_MODES.None;
   /**
    * Debug mode. Will filter out any messages in here so they don't hit the log
    */
@@ -605,48 +601,57 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy {
     if (this.isProcessingRetries) return;
     this.isProcessingRetries = true;
 
-    while (!this.retryImages.isEmpty()) {
-      const item = this.retryImages.dequeue();
-      if (!item) continue;
+    try {
+      while (!this.retryImages.isEmpty()) {
+        const item = this.retryImages.dequeue();
+        if (!item) continue;
 
-      this.debugLog('Retrying failed load of page ' +  item.page, ' retry count: ' + item.retryCount)
-      // Skip stale (chapter id has changed)
-      if (item?.chapterId !== this.chapterId) continue;
+        this.debugLog('Retrying failed load of page ' +  item.page, ' retry count: ' + item.retryCount)
+        // Skip stale (chapter id has changed)
+        if (item?.chapterId !== this.chapterId) continue;
 
-      // Skip descoped DOM
-      const pageElem = this.document.querySelector('img#page-' + item.page) as HTMLImageElement;
-      if (!pageElem) continue;
+        // Skip descoped DOM
+        const pageElem = this.document.querySelector('img#page-' + item.page) as HTMLImageElement;
+        if (!pageElem) continue;
 
-      const urlWithoutRetry = item.src.split('&retry=')[0];
-      pageElem.src = urlWithoutRetry + '&retry=' + item.retryCount;
+        const urlWithoutRetry = item.src.split('&retry=')[0];
+        pageElem.src = urlWithoutRetry + '&retry=' + item.retryCount;
 
-      const success = await this.waitForLoadOrError(pageElem);
+        const success = await this.waitForLoadOrError(pageElem);
 
-      if (success) {
-        this.debugLog('Resolved a failed load for page: ', item.page);
-        // Remove the error styling
-        this.renderer.setStyle(pageElem, 'border', 'initial');
-        this.onImageLoad({ target: pageElem });
-      } else if (item.retryCount < MAX_FAILED_IMG_RETRIES) {
-        item.retryCount++;
-        this.retryImages.enqueue(item);
-        await this.delay(1000 * item.retryCount); // Backoff pressure
-      } else {
-        console.error('Failed to load page ' + item.page + ' for chapter ' + item.chapterId + ' after 3 retries');
+        if (success) {
+          this.debugLog('Resolved a failed load for page: ', item.page);
+          // Remove the error styling
+          this.renderer.setStyle(pageElem, 'border', 'initial');
+          this.onImageLoad({ target: pageElem });
+        } else if (item.retryCount < MAX_FAILED_IMG_RETRIES) {
+          item.retryCount++;
+          this.retryImages.enqueue(item);
+          await this.delay(1000 * item.retryCount); // Backoff pressure
+        } else {
+          console.error('Failed to load page ' + item.page + ' for chapter ' + item.chapterId + ' after 3 retries');
+        }
       }
+    } finally {
+      this.isProcessingRetries = false;
     }
-
-    this.isProcessingRetries = false;
   }
 
   private delay(ms: number): Promise<void> {
     return new Promise(resolve => setTimeout(resolve, ms));
   }
 
-  private waitForLoadOrError(img: HTMLImageElement): Promise<boolean>  {
+  private waitForLoadOrError(img: HTMLImageElement): Promise<boolean> {
     return new Promise(resolve => {
-      img.onload = () => resolve(true);
-      img.onerror = () => resolve(false);
+      const cleanup = () => {
+        img.onload = null;
+        img.onerror = null;
+        clearTimeout(timer);
+      };
+      // Allow the image to load or timeout after ~10 seconds
+      const timer = setTimeout(() => { cleanup(); resolve(false); }, IMAGE_RETRY_TIMEOUT_MS);
+      img.onload = () => { cleanup(); resolve(true); };
+      img.onerror = () => { cleanup(); resolve(false); };
     });
   }
 
