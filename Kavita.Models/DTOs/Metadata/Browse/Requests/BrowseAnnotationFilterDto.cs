@@ -5,7 +5,7 @@ using Kavita.Models.DTOs.Filtering.v2;
 
 namespace Kavita.Models.DTOs.Metadata.Browse.Requests;
 
-public class BrowseAnnotationFilterDto
+public class BrowseAnnotationFilterDto : IFilterDto<AnnotationFilterStatementDto>
 {
     /// <summary>
     /// Not used - For parity with Series Filter

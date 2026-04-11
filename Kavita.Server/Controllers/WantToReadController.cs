@@ -42,7 +42,10 @@ public class WantToReadController(
         userParams ??= new UserParams();
 
         // Add profile privacy filter
-        filterDto.Statements.AddRange(await seriesService.GetProfilePrivacyStatements(wantToReadForUser, UserId));
+        foreach (var stmt in await seriesService.GetProfilePrivacyStatements(wantToReadForUser, UserId))
+        {
+            filterDto.Statements.Add(stmt);
+        }
 
         var pagedList = await unitOfWork.SeriesRepository.GetWantToReadForUserV2Async(wantToReadForUser, userParams, filterDto);
         Response.AddPaginationHeader(pagedList.CurrentPage, pagedList.PageSize, pagedList.TotalCount, pagedList.TotalPages);

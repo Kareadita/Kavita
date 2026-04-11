@@ -6,7 +6,7 @@ namespace Kavita.Models.DTOs.Filtering.v2;
 /// <summary>
 /// Metadata filtering for v2 API only
 /// </summary>
-public sealed record FilterV2Dto
+public sealed record FilterV2Dto : IFilterDto<FilterStatementDto>
 {
     /// <summary>
     /// Not used in the UI.
@@ -16,7 +16,7 @@ public sealed record FilterV2Dto
     /// The name of the filter
     /// </summary>
     public string? Name { get; set; }
-    public List<FilterStatementDto> Statements { get; set; } = [];
+    public ICollection<FilterStatementDto> Statements { get; set; } = [];
     public FilterCombination Combination { get; set; } = FilterCombination.And;
     public SortOptions? SortOptions { get; set; }
 

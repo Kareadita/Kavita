@@ -35,7 +35,6 @@ public class SeriesController(
     ITaskScheduler taskScheduler,
     IUnitOfWork unitOfWork,
     ISeriesService seriesService,
-    ILicenseService licenseService,
     IEasyCachingProviderFactory cachingProviderFactory,
     ILocalizationService localizationService,
     IExternalMetadataService externalMetadataService,
@@ -58,8 +57,7 @@ public class SeriesController(
     public async Task<ActionResult<PagedList<SeriesDto>>> GetSeriesForLibraryV2([FromQuery] UserParams userParams, [FromBody] FilterV2Dto filterDto)
     {
         var userId = UserId;
-        var series =
-            await unitOfWork.SeriesRepository.GetSeriesDtoForLibraryIdV2Async(userId, userParams, filterDto);
+        var series = await unitOfWork.SeriesRepository.GetSeriesDtoForLibraryIdV2Async(userId, userParams, filterDto);
 
         Response.AddPaginationHeader(series.CurrentPage, series.PageSize, series.TotalCount, series.TotalPages);
 
@@ -257,10 +255,12 @@ public class SeriesController(
     {
         var seriesForUser = userId ?? UserId;
 
-        filterDto.Statements.AddRange(await seriesService.GetProfilePrivacyStatements(seriesForUser, UserId));
+        foreach (var stmt in await seriesService.GetProfilePrivacyStatements(seriesForUser, UserId))
+        {
+            filterDto.Statements.Add(stmt);
+        }
 
-        var series =
-            await unitOfWork.SeriesRepository.GetSeriesDtoForLibraryIdV2Async(seriesForUser, userParams, filterDto, context);
+        var series = await unitOfWork.SeriesRepository.GetSeriesDtoForLibraryIdV2Async(seriesForUser, userParams, filterDto, context);
 
         Response.AddPaginationHeader(series.CurrentPage, series.PageSize, series.TotalCount, series.TotalPages);
 

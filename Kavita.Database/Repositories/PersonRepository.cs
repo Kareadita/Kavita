@@ -170,7 +170,8 @@ public class PersonRepository(DataContext context, IMapper mapper) : IPersonRepo
         var query = context.Person.AsNoTracking();
 
         // Apply filtering based on statements
-        query = BuildPersonFilterQuery(userId, filter, query);
+        query = FilterQueryBuilder.Apply(filter, query,
+            (stmt, q) => BuildPersonFilterGroup(userId, stmt, q));
 
         // Apply restrictions
         query = query.RestrictAgainstAgeRestriction(ageRating)
@@ -181,7 +182,7 @@ public class PersonRepository(DataContext context, IMapper mapper) : IPersonRepo
         // Apply sorting and limiting
         var sortedQuery = query.SortBy(filter.SortOptions);
 
-        var limitedQuery = ApplyPersonLimit(sortedQuery, filter.LimitTo);
+        var limitedQuery = sortedQuery.ApplyLimit(filter.LimitTo);
 
         return limitedQuery.Select(p => new BrowsePersonDto
         {
@@ -204,19 +205,6 @@ public class PersonRepository(DataContext context, IMapper mapper) : IPersonRepo
         });
     }
 
-    private static IQueryable<Person> BuildPersonFilterQuery(int userId, BrowsePersonFilterDto filterDto, IQueryable<Person> query)
-    {
-        if (filterDto.Statements == null || filterDto.Statements.Count == 0) return query;
-
-        var queries = filterDto.Statements
-            .Select(statement => BuildPersonFilterGroup(userId, statement, query))
-            .ToList();
-
-        return filterDto.Combination == FilterCombination.And
-            ? queries.Aggregate((q1, q2) => q1.Intersect(q2))
-            : queries.Aggregate((q1, q2) => q1.Union(q2));
-    }
-
     private static IQueryable<Person> BuildPersonFilterGroup(int userId, PersonFilterStatementDto statement, IQueryable<Person> query)
     {
         var value = PersonFilterFieldValueConverter.ConvertValue(statement.Field, statement.Value);
@@ -229,11 +217,6 @@ public class PersonRepository(DataContext context, IMapper mapper) : IPersonRepo
             PersonFilterField.ChapterCount => query.HasPersonChapterCount(true, statement.Comparison, (int)value),
             _ => throw new ArgumentOutOfRangeException(nameof(statement.Field), $"Unexpected value for field: {statement.Field}")
         };
-    }
-
-    private static IQueryable<Person> ApplyPersonLimit(IQueryable<Person> query, int limit)
-    {
-        return limit <= 0 ? query : query.Take(limit);
     }
 
     public async Task<Person?> GetPersonById(int personId, PersonIncludes includes = PersonIncludes.None,

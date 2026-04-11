@@ -5,7 +5,7 @@ using Kavita.Models.DTOs.Filtering.v2;
 namespace Kavita.Models.DTOs.Metadata.Browse.Requests;
 #nullable enable
 
-public sealed record BrowsePersonFilterDto
+public sealed record BrowsePersonFilterDto : IFilterDto<PersonFilterStatementDto>
 {
     /// <summary>
     /// Not used - For parity with Series Filter

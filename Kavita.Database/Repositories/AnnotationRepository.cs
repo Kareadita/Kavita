@@ -83,7 +83,7 @@ public class AnnotationRepository(DataContext context, IMapper mapper) : IAnnota
         var userPreferences = await context.AppUserPreferences.ToListAsync(ct);
 
         var libraryIds = context.AppUser.GetLibraryIdsForUser(userId);
-        var userRating = await context.AppUser.GetUserAgeRestriction(userId);
+        var userRating = await context.AppUser.GetUserAgeRestriction(userId, ct: ct);
 
         var seriesIdsWithAnnotations = await context.AppUserAnnotation
             .RestrictBySocialPreferences(userId, userPreferences)
@@ -111,41 +111,31 @@ public class AnnotationRepository(DataContext context, IMapper mapper) : IAnnota
 
         var query = context.AppUserAnnotation.AsNoTracking();
 
-        query = BuildAnnotationFilterQuery(userId, filter, query);
+        query = FilterQueryBuilder.Apply(filter, query,
+            BuildAnnotationFilterGroup,
+            preProcess: f =>
+            {
+                // Manual intervention for Highlight slots, as they are not user recognizable.
+                // But would make sense to miss match between users
+                if (f.Statements.Any(s => s.Field == AnnotationFilterField.HighlightSlot))
+                {
+                    f.Statements.Add(new AnnotationFilterStatementDto
+                    {
+                        Field = AnnotationFilterField.Owner,
+                        Comparison = FilterComparison.Equal,
+                        Value = $"{userId}",
+                    });
+                }
+            });
 
         query = query
             .WhereIf(allLibrariesCount != userLibs.Count, a => seriesIds.Contains(a.SeriesId))
             .RestrictBySocialPreferences(userId, userPreferences);
 
         var sortedQuery = query.SortBy(filter.SortOptions);
-        var limitedQuery = filter.LimitTo <= 0 ? sortedQuery : sortedQuery.Take(filter.LimitTo);
+        var limitedQuery = sortedQuery.ApplyLimit(filter.LimitTo);
 
         return limitedQuery.ProjectTo<AnnotationDto>(mapper.ConfigurationProvider);
-    }
-
-    private static IQueryable<AppUserAnnotation> BuildAnnotationFilterQuery(int userId, BrowseAnnotationFilterDto filter, IQueryable<AppUserAnnotation> query)
-    {
-        if (filter.Statements == null || filter.Statements.Count == 0) return query;
-
-        // Manual intervention for Highlight slots, as they are not user recognisable. But would make sense
-        // to miss match between users
-        if (filter.Statements.Any(s => s.Field == AnnotationFilterField.HighlightSlot))
-        {
-            filter.Statements.Add(new AnnotationFilterStatementDto
-            {
-                Field = AnnotationFilterField.Owner,
-                Comparison = FilterComparison.Equal,
-                Value = $"{userId}",
-            });
-        }
-
-        var queries = filter.Statements
-            .Select(statement => BuildAnnotationFilterGroup(statement, query))
-            .ToList();
-
-        return filter.Combination == FilterCombination.And
-            ? queries.Aggregate((q1, q2) => q1.Intersect(q2))
-            : queries.Aggregate((q1, q2) => q1.Union(q2));
     }
 
     private static IQueryable<AppUserAnnotation> BuildAnnotationFilterGroup(AnnotationFilterStatementDto statement, IQueryable<AppUserAnnotation> query)

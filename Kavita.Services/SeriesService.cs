@@ -942,7 +942,10 @@ public class SeriesService(
             ],
         };
 
-        filter.Statements.AddRange(await GetProfilePrivacyStatements(userId, requestingUserId, ct));
+        foreach (var stmt in await GetProfilePrivacyStatements(userId, requestingUserId, ct))
+        {
+            filter.Statements.Add(stmt);
+        }
 
         return await unitOfWork.SeriesRepository.GetSeriesDtoForLibraryIdV2Async(userId, userParams, filter, ct: ct);
     }

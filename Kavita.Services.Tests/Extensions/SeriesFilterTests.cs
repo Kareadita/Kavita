@@ -360,7 +360,7 @@ public class SeriesFilterTests(ITestOutputHelper outputHelper): AbstractDbTest(o
         var (unitOfWork, context, mapper) = await CreateDatabase();
         await SetupHasLanguage(context);
 
-        await Assert.ThrowsAsync<ArgumentOutOfRangeException>(async () =>
+        await Assert.ThrowsAsync<KavitaException>(async () =>
         {
             await context.Series.HasLanguage(true, FilterComparison.GreaterThan, ["en"]).ToListAsync();
         });
@@ -509,7 +509,7 @@ public class SeriesFilterTests(ITestOutputHelper outputHelper): AbstractDbTest(o
         var (unitOfWork, context, mapper) = await CreateDatabase();
         await SetupHasAverageRating(context);
 
-        await Assert.ThrowsAsync<ArgumentOutOfRangeException>(async () =>
+        await Assert.ThrowsAsync<KavitaException>(async () =>
         {
             await context.Series.HasAverageRating(true, (FilterComparison)999, 50).ToListAsync();
         });
@@ -636,7 +636,7 @@ public class SeriesFilterTests(ITestOutputHelper outputHelper): AbstractDbTest(o
         var (unitOfWork, context, mapper) = await CreateDatabase();
         await SetupHasPublicationStatus(context);
 
-        await Assert.ThrowsAsync<ArgumentOutOfRangeException>(async () =>
+        await Assert.ThrowsAsync<KavitaException>(async () =>
         {
             await context.Series.HasPublicationStatus(true, (FilterComparison)999, new List<PublicationStatus> { PublicationStatus.Cancelled }).ToListAsync();
         });
@@ -809,7 +809,7 @@ public class SeriesFilterTests(ITestOutputHelper outputHelper): AbstractDbTest(o
         var (unitOfWork, context, mapper) = await CreateDatabase();
         await SetupHasAgeRating(context);
 
-        await Assert.ThrowsAsync<ArgumentOutOfRangeException>(async () =>
+        await Assert.ThrowsAsync<KavitaException>(async () =>
         {
             await context.Series.HasAgeRating(true, (FilterComparison)999, new List<AgeRating> { AgeRating.G }).ToListAsync();
         });

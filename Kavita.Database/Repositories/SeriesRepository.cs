@@ -964,7 +964,8 @@ public class SeriesRepository(DataContext context, IMapper mapper) : ISeriesRepo
 
 
 
-        query = BuildFilterQuery(userId, filter, query);
+        query = FilterQueryBuilder.Apply(filter, query,
+            (stmt, q) => BuildFilterGroup(userId, stmt, q));
 
         query = query
             .WhereIf(allLibraryCount != userLibraries.Count && userLibraries.Count > 0, s => userLibraries.Contains(s.LibraryId))
@@ -974,10 +975,10 @@ public class SeriesRepository(DataContext context, IMapper mapper) : ISeriesRepo
             .RestrictAgainstAgeRestriction(userRating);
 
 
-        return ApplyLimit(query
+        return query
                 .Sort(userId, filter.SortOptions)
                 .AsSplitQuery()
-            , filter.LimitTo);
+                .ApplyLimit(filter.LimitTo);
     }
 
     private async Task<IQueryable<Series>> ApplyCollectionFilter(FilterV2Dto filter, IQueryable<Series> query,
@@ -1088,25 +1089,6 @@ public class SeriesRepository(DataContext context, IMapper mapper) : ISeriesRepo
         }
 
         return query;
-    }
-
-    private static IQueryable<Series> BuildFilterQuery(int userId, FilterV2Dto filterDto, IQueryable<Series> query)
-    {
-        if (filterDto.Statements == null || filterDto.Statements.Count == 0) return query;
-
-
-        var queries = filterDto.Statements
-            .Select(statement => BuildFilterGroup(userId, statement, query))
-            .ToList();
-
-        return filterDto.Combination == FilterCombination.And
-            ? queries.Aggregate((q1, q2) => q1.Intersect(q2))
-            : queries.Aggregate((q1, q2) => q1.Union(q2));
-    }
-
-    private static IQueryable<Series> ApplyLimit(IQueryable<Series> query, int limit)
-    {
-        return limit <= 0 ? query : query.Take(limit);
     }
 
     private static IQueryable<Series> BuildFilterGroup(int userId, FilterStatementDto statement, IQueryable<Series> query)
