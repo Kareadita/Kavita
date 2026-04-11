@@ -41,9 +41,10 @@ public static class PersonFilter
                 FilterComparison.NotEqual => queryable.Where(p =>
                     !p.SeriesMetadataPeople.Any(smp => roles.Contains(smp.Role)) &&
                     !p.ChapterPeople.Any(cmp => roles.Contains(cmp.Role))),
-                FilterComparison.Contains or FilterComparison.MustContains => queryable.Where(p =>
+                FilterComparison.Contains => queryable.Where(p =>
                     p.SeriesMetadataPeople.Any(smp => roles.Contains(smp.Role)) ||
                     p.ChapterPeople.Any(cmp => roles.Contains(cmp.Role))),
+                FilterComparison.MustContains => MustContainAllRoles(queryable, roles),
                 FilterComparison.NotContains => queryable.Where(p =>
                     !p.SeriesMetadataPeople.Any(smp => roles.Contains(smp.Role)) &&
                     !p.ChapterPeople.Any(cmp => roles.Contains(cmp.Role))),
@@ -114,5 +115,15 @@ public static class PersonFilter
                 _ => throw new ArgumentOutOfRangeException(nameof(comparison), comparison, "Filter Comparison is not supported")
             };
         }
+    }
+
+    private static IQueryable<Person> MustContainAllRoles(IQueryable<Person> queryable, IList<PersonRole> roles)
+    {
+        var queries = new List<IQueryable<Person>> { queryable };
+        queries.AddRange(roles.Select(role => queryable.Where(p =>
+            p.SeriesMetadataPeople.Any(smp => smp.Role == role) ||
+            p.ChapterPeople.Any(cmp => cmp.Role == role))));
+
+        return queries.Aggregate((q1, q2) => q1.Intersect(q2));
     }
 }
