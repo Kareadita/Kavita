@@ -4,6 +4,7 @@ import {translate} from "@jsverse/transloco";
 import {ValidFilterEntity} from "../metadata-filter/filter-settings";
 import {PersonFilterField} from "../_models/metadata/v2/person-filter-field";
 import {AnnotationsFilterField} from "../_models/metadata/v2/annotations-filter";
+import {ReadingListFilterField} from "../_models/metadata/v2/reading-list-filter-field";
 
 @Pipe({
   name: 'genericFilterField'
@@ -13,12 +14,14 @@ export class GenericFilterFieldPipe implements PipeTransform {
   transform<T extends number>(value: T, entityType: ValidFilterEntity): string {
 
     switch (entityType) {
-      case "annotation":
+      case 'annotation':
         return this.annotationsFilterField(value as AnnotationsFilterField);
-      case "series":
+      case 'series':
         return this.translateFilterField(value as FilterField);
-      case "person":
+      case 'person':
         return this.translatePersonFilterField(value as PersonFilterField);
+      case 'readinglist':
+        return this.translateReadingListFilterField(value as ReadingListFilterField);
     }
   }
 
@@ -56,6 +59,23 @@ export class GenericFilterFieldPipe implements PipeTransform {
         return translate('generic-filter-field-pipe.person-series-count');
       case PersonFilterField.ChapterCount:
         return translate('generic-filter-field-pipe.person-chapter-count');
+    }
+  }
+
+  private translateReadingListFilterField(value: ReadingListFilterField) {
+    switch (value) {
+      case ReadingListFilterField.Title:
+        return translate('generic-filter-field-pipe.readinglist-title');
+      case ReadingListFilterField.ReleaseYear:
+        return translate('generic-filter-field-pipe.readinglist-release-year');
+      case ReadingListFilterField.ItemCount:
+        return translate('generic-filter-field-pipe.readinglist-item-count');
+      case ReadingListFilterField.Tags:
+        return translate('generic-filter-field-pipe.readinglist-tags');
+      case ReadingListFilterField.Writer:
+        return translate('generic-filter-field-pipe.readinglist-writer');
+      case ReadingListFilterField.Artist:
+        return translate('generic-filter-field-pipe.readinglist-artist');
     }
   }
 

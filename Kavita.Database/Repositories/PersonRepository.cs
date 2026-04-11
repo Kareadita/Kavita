@@ -153,7 +153,7 @@ public class PersonRepository(DataContext context, IMapper mapper) : IPersonRepo
     public async Task<PagedList<BrowsePersonDto>> GetBrowsePersonDtos(int userId, BrowsePersonFilterDto filter,
         UserParams userParams, CancellationToken ct = default)
     {
-        var ageRating = await context.AppUser.GetUserAgeRestriction(userId);
+        var ageRating = await context.AppUser.GetUserAgeRestriction(userId, ct: ct);
 
         var query = await CreateFilteredPersonQueryable(userId, filter, ageRating, ct);
 

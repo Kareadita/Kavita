@@ -21,3 +21,10 @@ public sealed record AnnotationFilterStatementDto : IFilterStatement<AnnotationF
     public AnnotationFilterField Field { get; set; }
     public string Value { get; set; }
 }
+
+public sealed record ReadingListFilterStatementDto : IFilterStatement<ReadingListFilterField>
+{
+    public FilterComparison Comparison { get; set; }
+    public ReadingListFilterField Field { get; set; }
+    public string Value { get; set; }
+}

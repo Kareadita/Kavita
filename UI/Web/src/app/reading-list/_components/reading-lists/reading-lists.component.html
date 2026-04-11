@@ -1,12 +1,12 @@
 <div class="main-container container-fluid">
   <ng-container *transloco="let t; prefix: 'reading-lists'">
-    <app-side-nav-companion-bar>
+    <app-side-nav-companion-bar [hasFilter]="true" (filterOpen)="filterOpen.emit($event)">
       <h4 title>
         <span>{{t('title')}}</span>
         <app-card-actionables [actions]="globalActions" (actionHandler)="performGlobalAction($event)" />
       </h4>
-      @if (pagination) {
-        <h5 subtitle class="subtitle-with-actionables">{{t('item-count', {num: pagination.totalItems | number})}}</h5>
+      @if (pagination()) {
+        <h5 subtitle class="subtitle-with-actionables">{{t('item-count', {num: pagination()!.totalItems | number})}}</h5>
       }
 
     </app-side-nav-companion-bar>
@@ -14,10 +14,13 @@
     <app-card-detail-layout
       [isLoading]="isLoadingLists()"
       [items]="listEntities()"
-      [pagination]="pagination"
+      [pagination]="pagination()!"
       [jumpBarKeys]="jumpbarKeys()"
-      [filteringDisabled]="true"
       [trackByIdentity]="trackByIdentity"
+      [refresh]="refresh"
+      [filterSettings]="filterSettings()"
+      [filterOpen]="filterOpen"
+      (applyFilter)="updateFilter($event)"
     >
 
       <ng-template #topBar>
@@ -25,10 +28,6 @@
       </ng-template>
 
       <ng-template #cardItem let-item let-position="idx" >
-<!--        <div class="px-1">-->
-<!--          <app-reading-list [entity]="item" [index]="position" [maxIndex]="listEntities().length" [config]="readingListConfig()"-->
-<!--                            (reload)="loadPage()" (dataChanged)="updateReadingList($event)" />-->
-<!--        </div>-->
         <app-entity-card [entity]="item" [index]="position" [maxIndex]="listEntities().length" [config]="readingListConfig()"
                          (reload)="loadPage()" (dataChanged)="updateReadingList($event)">
           <ng-template #title let-entity>

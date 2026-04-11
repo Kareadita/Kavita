@@ -58,17 +58,6 @@ export class PersonService {
     );
   }
 
-  // getAuthorsToBrowse(filter: BrowsePersonFilter, pageNum?: number, itemsPerPage?: number) {
-  //   let params = new HttpParams();
-  //   params = this.utilityService.addPaginationIfExists(params, pageNum, itemsPerPage);
-  //
-  //   return this.httpClient.post<PaginatedResult<BrowsePerson[]>>(this.baseUrl + `person/all`, filter, {observe: 'response', params}).pipe(
-  //     map((response: any) => {
-  //       return this.utilityService.createPaginatedResult(response) as PaginatedResult<BrowsePerson[]>;
-  //     })
-  //   );
-  // }
-
   downloadCover(personId: number) {
     return this.httpClient.post<string>(this.baseUrl + 'person/fetch-cover?personId=' + personId, {}, TextResonse);
   }

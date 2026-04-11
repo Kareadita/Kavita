@@ -1,9 +1,10 @@
-import { Pipe, PipeTransform, inject } from '@angular/core';
+import {inject, Pipe, PipeTransform} from '@angular/core';
 import {SortField} from "../_models/metadata/series-filter";
 import {TranslocoService} from "@jsverse/transloco";
 import {ValidFilterEntity} from "../metadata-filter/filter-settings";
 import {PersonSortField} from "../_models/metadata/v2/person-sort-field";
 import {AnnotationsSortField} from "../_models/metadata/v2/annotations-filter";
+import {ReadingListSortField} from "../_models/metadata/v2/reading-list-sort-field";
 
 @Pipe({
   name: 'sortField',
@@ -22,6 +23,8 @@ export class SortFieldPipe implements PipeTransform {
         return this.seriesSortFields(value as SortField);
       case 'person':
         return this.personSortFields(value as PersonSortField);
+      case 'readinglist':
+        return this.readingListSortFields(value as ReadingListSortField);
 
     }
   }
@@ -47,6 +50,19 @@ export class SortFieldPipe implements PipeTransform {
         return this.translocoService.translate('sort-field-pipe.person-series-count');
       case PersonSortField.ChapterCount:
         return this.translocoService.translate('sort-field-pipe.person-chapter-count');
+    }
+  }
+
+  private readingListSortFields(value: ReadingListSortField) {
+    switch (value) {
+      case ReadingListSortField.ReleaseYearStart:
+        return this.translocoService.translate('sort-field-pipe.readinglist-releaseyear-start');
+      case ReadingListSortField.ReleaseYearEnd:
+        return this.translocoService.translate('sort-field-pipe.readinglist-releaseyear-end');
+      case ReadingListSortField.ItemCount:
+        return this.translocoService.translate('sort-field-pipe.readinglist-item-count');
+      case ReadingListSortField.Title:
+        return this.translocoService.translate('sort-field-pipe.readinglist-title');
 
     }
   }

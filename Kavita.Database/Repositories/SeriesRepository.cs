@@ -987,7 +987,7 @@ public class SeriesRepository(DataContext context, IMapper mapper) : ISeriesRepo
         var collectionStmt = filter.Statements.FirstOrDefault(stmt => stmt.Field == FilterField.CollectionTags);
         if (collectionStmt == null) return query;
 
-        var value = (IList<int>) FilterFieldValueConverter.ConvertValue(collectionStmt.Field, collectionStmt.Value);
+        var value = (IList<int>) SeriesFilterFieldValueConverter.ConvertValue(collectionStmt.Field, collectionStmt.Value);
 
         if (value.Count == 0)
         {
@@ -1094,7 +1094,7 @@ public class SeriesRepository(DataContext context, IMapper mapper) : ISeriesRepo
     private static IQueryable<Series> BuildFilterGroup(int userId, FilterStatementDto statement, IQueryable<Series> query)
     {
 
-        var value = FilterFieldValueConverter.ConvertValue(statement.Field, statement.Value);
+        var value = SeriesFilterFieldValueConverter.ConvertValue(statement.Field, statement.Value);
         return statement.Field switch
         {
             FilterField.Summary => query.HasSummary(true, statement.Comparison, (string) value),

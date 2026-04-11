@@ -105,13 +105,14 @@ public class MetadataController(IUnitOfWork unitOfWork, IExternalMetadataService
         return Ok(await unitOfWork.TagRepository.GetAllTagDtosForLibrariesAsync(UserId));
     }
 
+
     /// <summary>
     /// Fetches Reading List Tags from the instance
     /// </summary>
     /// <returns></returns>
     [HttpGet("readinglist-tags")]
     [ResponseCache(CacheProfileName = ResponseCacheProfiles.FiveMinute)]
-    public async Task<ActionResult<IList<ReadingListTagDto>>> GetAllGenres()
+    public async Task<ActionResult<IList<ReadingListTagDto>>> GetAllReadingListTags()
     {
         return Ok(await unitOfWork.ReadingListRepository.GetAllReadingListTagDtosAsync(UserId, HttpContext.RequestAborted));
     }

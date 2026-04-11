@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using Kavita.Common.Helpers;
+using Kavita.Models.DTOs.Metadata.Browse.Requests;
 using Kavita.Models.DTOs.Person;
 using Kavita.Models.DTOs.ReadingLists;
 using Kavita.Models.Entities;
@@ -62,4 +63,5 @@ public interface IReadingListRepository
     Task<Dictionary<int, List<int>>> GetSyncableReadingListsAsync(DateTime lastCheckThreshold, CancellationToken ct = default);
 
     Task<List<ReadingListTagDto>> GetAllReadingListTagDtosAsync(int userId, CancellationToken ct = default);
+    Task<PagedList<ReadingListDto>> GetBrowseReadingListDtos(int userId, BrowseReadingListFilterDto filter, UserParams userParams, CancellationToken ct = default);
 }

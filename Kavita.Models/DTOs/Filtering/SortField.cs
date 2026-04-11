@@ -47,8 +47,19 @@ public enum SortField
 
 public enum AnnotationSortField
 {
+    /// <summary>
+    /// Annotation Owner
+    /// </summary>
     Owner = 1,
     Created = 2,
     LastModified = 3,
     Color = 4,
+}
+
+public enum ReadingListSortField
+{
+    Title = 1,
+    ReleaseYearStart = 2,
+    ReleaseYearEnd = 3,
+    ItemCount = 4
 }

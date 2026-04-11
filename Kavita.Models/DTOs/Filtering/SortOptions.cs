@@ -26,3 +26,12 @@ public sealed record AnnotationSortOptions
     public AnnotationSortField SortField { get; set; }
     public bool IsAscending { get; set; } = true;
 }
+
+/// <summary>
+/// All Sorting Options for a query related to Reading List Entity
+/// </summary>
+public sealed record ReadingListSortOptions
+{
+    public ReadingListSortField SortField { get; set; }
+    public bool IsAscending { get; set; } = true;
+}

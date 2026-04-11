@@ -8,7 +8,12 @@ using AutoMapper.QueryableExtensions;
 using Kavita.API.Repositories;
 using Kavita.Common.Extensions;
 using Kavita.Common.Helpers;
+using Kavita.Database.Converters;
 using Kavita.Database.Extensions;
+using Kavita.Database.Extensions.Filters;
+using Kavita.Models.DTOs.Filtering.v2;
+using Kavita.Models.DTOs.Metadata.Browse;
+using Kavita.Models.DTOs.Metadata.Browse.Requests;
 using Kavita.Models.DTOs.Person;
 using Kavita.Models.DTOs.ReadingLists;
 using Kavita.Models.Entities;
@@ -75,14 +80,14 @@ public class ReadingListRepository(DataContext context, IMapper mapper) : IReadi
 
         return await context.ReadingList
             .WhereIf(readingListId != null, x => x.Id != readingListId)
-            .AnyAsync(x => x.NormalizedTitle != null && x.NormalizedTitle.Equals(normalized), ct);
+            .AnyAsync(x => normalized.Equals(x.NormalizedTitle), ct);
     }
 
     public async Task<bool> ReadingListExistsForUser(string name, int userId, CancellationToken ct = default)
     {
         var normalized = name.ToNormalized();
         return await context.ReadingList
-            .AnyAsync(x => x.NormalizedTitle != null && x.NormalizedTitle.Equals(normalized) && x.AppUserId == userId, ct);
+            .AnyAsync(x => normalized.Equals(x.NormalizedTitle) && x.AppUserId == userId, ct);
     }
 
     public IEnumerable<PersonDto> GetReadingListPeopleAsync(int readingListId, PersonRole role,
@@ -552,5 +557,57 @@ public class ReadingListRepository(DataContext context, IMapper mapper) : IReadi
             .Distinct()
             .ProjectTo<ReadingListTagDto>(mapper.ConfigurationProvider)
             .ToListAsync(ct);
+    }
+
+    public async Task<PagedList<ReadingListDto>> GetBrowseReadingListDtos(int userId, BrowseReadingListFilterDto filter,
+        UserParams userParams, CancellationToken ct = default)
+    {
+        var ageRating = await context.AppUser.GetUserAgeRestriction(userId, ct: ct);
+        var query = await CreateFilteredReadingListQueryable(userId, filter, ageRating, ct);
+
+        return await PagedList<ReadingListDto>.CreateAsync(query, userParams.PageNumber, userParams.PageSize, ct);
+    }
+
+    private Task<IQueryable<ReadingListDto>> CreateFilteredReadingListQueryable(int userId, BrowseReadingListFilterDto filter,
+        AgeRestriction ageRating, CancellationToken ct = default)
+    {
+        try
+        {
+            var query = context.ReadingList.AsNoTracking();
+
+            // Apply filtering based on statements
+            query = FilterQueryBuilder.Apply(filter, query,
+                (stmt, q) => BuildFilterGroup(userId, stmt, q));
+
+            // Apply restrictions
+            query = query.RestrictAgainstAgeRestriction(ageRating);
+
+            // Apply sorting and limiting
+            var sortedQuery = query.SortBy(filter.SortOptions);
+
+            var limitedQuery = sortedQuery.ApplyLimit(filter.LimitTo);
+
+            return Task.FromResult(limitedQuery.ProjectTo<ReadingListDto>(mapper.ConfigurationProvider));
+        }
+        catch (Exception exception)
+        {
+            return Task.FromException<IQueryable<ReadingListDto>>(exception);
+        }
+    }
+
+    private static IQueryable<ReadingList> BuildFilterGroup(int userId, ReadingListFilterStatementDto statement, IQueryable<ReadingList> query)
+    {
+        var value = ReadingListFilterFieldValueConverter.ConvertValue(statement.Field, statement.Value);
+
+        return statement.Field switch
+        {
+            ReadingListFilterField.Title => query.HasTitle(true, statement.Comparison, (string)value),
+            ReadingListFilterField.ReleaseYear => query.HasReleaseYear(true, statement.Comparison, (int) value),
+            ReadingListFilterField.ItemCount => query.HasItemCount(true, statement.Comparison, (int) value),
+            ReadingListFilterField.Tags => query.HasTags(true, statement.Comparison, (IList<int>) value),
+            ReadingListFilterField.Writer => query.HasPeople(true, statement.Comparison, (IList<int>) value, PersonRole.Writer),
+            ReadingListFilterField.Artist => query.HasPeople(true, statement.Comparison, (IList<int>) value, PersonRole.CoverArtist),
+            _ => throw new ArgumentOutOfRangeException(nameof(statement.Field), $"Unexpected value for field: {statement.Field}")
+        };
     }
 }

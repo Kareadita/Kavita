@@ -9,6 +9,9 @@ import {ReadingList, ReadingListCast, ReadingListInfo, ReadingListItem} from '..
 import {TextResonse} from '../_types/text-response';
 import {ActionItem} from "../_models/actionables/action-item";
 import {Action} from "../_models/actionables/action";
+import {FilterV2} from "../_models/metadata/v2/filter-v2";
+import {ReadingListFilterField} from "../_models/metadata/v2/reading-list-filter-field";
+import {ReadingListSortField} from "../_models/metadata/v2/reading-list-sort-field";
 
 @Injectable({
   providedIn: 'root'
@@ -32,6 +35,17 @@ export class ReadingListService {
     + '&sortByLastModified=' + sortByLastModified, {}, {observe: 'response', params}).pipe(
       map((response: any) => {
         return this.utilityService.createPaginatedResult(response, new PaginatedResult<ReadingList[]>());
+      })
+    );
+  }
+
+  getAllReadingLists(filter: FilterV2<ReadingListFilterField, ReadingListSortField>, pageNum?: number, itemsPerPage?: number) {
+    let params = new HttpParams();
+    params = this.utilityService.addPaginationIfExists(params, pageNum, itemsPerPage);
+
+    return this.httpClient.post<PaginatedResult<ReadingList[]>>(this.baseUrl + `readinglist/all`, filter, {observe: 'response', params}).pipe(
+      map((response: any) => {
+        return this.utilityService.createPaginatedResult(response) as PaginatedResult<ReadingList[]>;
       })
     );
   }

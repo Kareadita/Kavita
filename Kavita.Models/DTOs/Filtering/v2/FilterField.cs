@@ -91,3 +91,13 @@ public enum AnnotationFilterField
     Likes = 8,
     LikedBy = 9,
 }
+
+public enum ReadingListFilterField
+{
+    Title = 1,
+    ReleaseYear = 2,
+    ItemCount = 3,
+    Tags = 4,
+    Writer = 5,
+    Artist = 6,
+}

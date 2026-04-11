@@ -33,12 +33,14 @@ import {ValidFilterEntity} from "../metadata-filter/filter-settings";
 import {PersonFilterField} from "../_models/metadata/v2/person-filter-field";
 import {PersonRolePipe} from "../_pipes/person-role.pipe";
 import {PersonSortField} from "../_models/metadata/v2/person-sort-field";
-import {AnnotationsFilterField} from "../_models/metadata/v2/annotations-filter";
+import {AnnotationsFilterField, AnnotationsSortField} from "../_models/metadata/v2/annotations-filter";
 import {AccountService} from "./account.service";
 import {MemberService} from "./member.service";
 import {RgbaColor} from "../book-reader/_models/annotations/highlight-slot";
 import {SeriesService} from "./series.service";
 import {ReadingListTag} from "../_models/reading-list/reading-list-tag";
+import {ReadingListSortField} from "../_models/metadata/v2/reading-list-sort-field";
+import {ReadingListFilterField} from "../_models/metadata/v2/reading-list-filter-field";
 
 @Injectable({
   providedIn: 'root'
@@ -175,10 +177,24 @@ export class MetadataService {
       limitTo: 0,
       sortOptions: {
         isAscending: true,
-        sortField: (entityType === 'series' ? SortField.SortName : PersonSortField.Name) as TSort
+        sortField: this.getDefaultSortField(entityType) as TSort
       }
     };
   }
+
+  private getDefaultSortField(entityType: ValidFilterEntity) {
+    switch (entityType) {
+      case 'series':
+        return SortField.SortName;
+      case 'person':
+        return PersonSortField.Name;
+      case 'annotation':
+        return AnnotationsSortField.Owner;
+      case 'readinglist':
+        return ReadingListSortField.Title;
+    }
+  }
+
 
   createDefaultFilterStatement(entityType: ValidFilterEntity) {
     switch (entityType) {
@@ -192,6 +208,8 @@ export class MetadataService {
         return this.createFilterStatement(FilterField.SeriesName);
       case 'person':
         return this.createFilterStatement(PersonFilterField.Role, FilterComparison.Contains, `${PersonRole.CoverArtist},${PersonRole.Writer}`);
+      case 'readinglist':
+        return this.createFilterStatement(ReadingListFilterField.Title);
     }
   }
 
@@ -268,6 +286,8 @@ export class MetadataService {
         return this.getSeriesOptionsForFilterField(filterField as FilterField);
       case 'person':
         return this.getPersonOptionsForFilterField(filterField as PersonFilterField);
+      case 'readinglist':
+        return this.getReadingListOptionsForFilterField(filterField as ReadingListFilterField);
     }
   }
 
@@ -350,6 +370,21 @@ export class MetadataService {
       case FilterField.Location: return this.getPersonOptions(PersonRole.Location);
       case FilterField.Translators: return this.getPersonOptions(PersonRole.Translator);
       case FilterField.Writers: return this.getPersonOptions(PersonRole.Writer);
+    }
+
+    return of([]);
+  }
+
+  private getReadingListOptionsForFilterField(field: ReadingListFilterField) {
+    switch (field) {
+      case ReadingListFilterField.Tags:
+        return this.getAllReadingListTags().pipe(map(tags => tags.map(tag => {
+          return {value: tag.id, label: tag.title}
+        })));
+      case ReadingListFilterField.Writer:
+        return this.getPersonOptions(PersonRole.Writer)
+      case ReadingListFilterField.Artist:
+        return this.getPersonOptions(PersonRole.CoverArtist)
     }
 
     return of([]);

@@ -1,8 +1,9 @@
 import {
   ChangeDetectionStrategy,
-  ChangeDetectorRef,
   Component,
   computed,
+  DestroyRef,
+  EventEmitter,
   inject,
   OnInit,
   signal,
@@ -34,6 +35,19 @@ import {Action} from "../../../_models/actionables/action";
 import {ActionResult} from "../../../_models/actionables/action-result";
 import {EntityCardComponent} from "../../../cards/entity-card/entity-card.component";
 import {PromotedIconComponent} from "../../../shared/_components/promoted-icon/promoted-icon.component";
+import {FilterEvent} from "../../../_models/metadata/series-filter";
+import {ReadingListSortField} from "../../../_models/metadata/v2/reading-list-sort-field";
+import {ReadingListFilterField} from "../../../_models/metadata/v2/reading-list-filter-field";
+import {FilterUtilitiesService} from "../../../shared/_services/filter-utilities.service";
+import {FilterV2} from "../../../_models/metadata/v2/filter-v2";
+import {PersonFilterField} from "../../../_models/metadata/v2/person-filter-field";
+import {ReadingListFilterSettings} from "../../../metadata-filter/filter-settings";
+import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
+import {FilterStatement} from "../../../_models/metadata/v2/filter-statement";
+import {PersonRole} from "../../../_models/metadata/person";
+import {FilterComparison} from "../../../_models/metadata/v2/filter-comparison";
+import {ActivatedRoute} from "@angular/router";
+import {MetadataService} from "../../../_services/metadata.service";
 
 @Component({
   selector: 'app-reading-lists',
@@ -47,10 +61,13 @@ export class ReadingListsComponent implements OnInit {
   private readonly readingListService = inject(ReadingListService);
   private readonly accountService = inject(AccountService);
   private readonly jumpbarService = inject(JumpbarService);
-  private readonly cdRef = inject(ChangeDetectorRef);
+  private readonly destroyRef = inject(DestroyRef);
+  private readonly route = inject(ActivatedRoute);
   private readonly cardConfigFactory = inject(CardConfigFactory);
+  private readonly filterUtilityService = inject(FilterUtilitiesService);
   protected readonly bulkSelectionService = inject(BulkSelectionService);
   protected readonly actionService = inject(ActionService);
+  protected readonly metadataService = inject(MetadataService);
 
   protected titleTemplateRef = viewChild<TemplateRef<{ $implicit: CardEntity }>>('title');
 
@@ -60,14 +77,44 @@ export class ReadingListsComponent implements OnInit {
     return this.cardConfigFactory.forReadingList({titleRef: this.titleTemplateRef(), shouldRenderAction: this.shouldRenderReadingListAction.bind(this)});
   });
   isLoadingLists = signal<boolean>(false);
-  pagination!: Pagination;
+  pagination = signal<Pagination | null>(null);
   jumpbarKeys = signal<JumpKey[]>([]);
   actions: {[key: number]: Array<ActionItem<ReadingList>>} = {};
   globalActions: Array<ActionItem<any>> = []; // TODO: Why is this empty?
-  trackByIdentity = (index: number, item: ReadingListCardEntity) => `${item.data.id}_${item.data.title}_${item.data.promoted}`;
+  trackByIdentity = (index: number, item: ReadingListCardEntity) => `${item.data.id}`;
+
+  filterSettings = signal<ReadingListFilterSettings>(new ReadingListFilterSettings());
+  filterActive: boolean = false;
+  filterOpen: EventEmitter<boolean> = new EventEmitter();
+  refresh: EventEmitter<void> = new EventEmitter();
+  filter: FilterV2<ReadingListFilterField, ReadingListSortField> | undefined = undefined;
+  filterActiveCheck!: FilterV2<PersonFilterField>;
+
+
+  constructor() {
+    this.isLoadingLists.set(true);
+
+    this.route.data.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(data => {
+      this.filter = data['filter'] as FilterV2<ReadingListFilterField, ReadingListSortField>;
+
+      if (this.filter == null) {
+        this.filter = this.metadataService.createDefaultFilterDto('readinglist');
+        this.filter.statements.push(this.metadataService.createDefaultFilterStatement('readinglist') as FilterStatement<ReadingListFilterField>);
+      }
+
+      this.filterActiveCheck = this.filterUtilityService.createPersonV2Filter();
+      this.filterActiveCheck!.statements.push({value: `${PersonRole.Writer},${PersonRole.CoverArtist}`, field: PersonFilterField.Role, comparison: FilterComparison.Contains});
+      const d = this.filterSettings();
+      this.filterSettings.set({...d, presetsV2: this.filter});
+
+      console.log('filter settings: ', this.filterSettings());
+
+      this.loadPage();
+    });
+  }
 
   ngOnInit(): void {
-    this.loadPage();
+    //this.loadPage();
 
     this.bulkSelectionService.registerDataSource('readingList', () => this.lists());
     this.bulkSelectionService.registerPostAction((res: ActionResult<ReadingList>) => {
@@ -96,18 +143,18 @@ export class ReadingListsComponent implements OnInit {
 
   loadPage() {
     const page = this.getPage();
-    if (page != null) {
-      this.pagination.currentPage = parseInt(page, 10);
+    const pagination = this.pagination();
+    if (page != null && pagination) {
+      pagination.currentPage = parseInt(page, 10);
+      this.pagination.set(pagination);
     }
     this.isLoadingLists.set(true);
-    this.cdRef.markForCheck();
 
-    this.readingListService.getReadingLists(true, false).subscribe((readingLists: PaginatedResult<ReadingList[]>) => {
+    this.readingListService.getAllReadingLists(this.filter!).subscribe((readingLists: PaginatedResult<ReadingList[]>) => {
       this.lists.set(readingLists.result);
-      this.pagination = readingLists.pagination;
+      this.pagination.set(readingLists.pagination);
       this.jumpbarKeys.set(this.jumpbarService.getJumpKeys(readingLists.result, (rl: ReadingList) => rl.title));
       this.isLoadingLists.set(false);
-      this.cdRef.markForCheck();
     });
   }
 
@@ -127,6 +174,20 @@ export class ReadingListsComponent implements OnInit {
       default:
         return true;
     }
+  }
+
+  updateFilter(data: FilterEvent<ReadingListFilterField, ReadingListSortField>) {
+    if (data.filterV2 === undefined) return;
+    this.filter = data.filterV2;
+
+    if (data.isFirst) {
+      this.loadPage();
+      return;
+    }
+
+    this.filterUtilityService.updateUrlFromFilter(this.filter).subscribe((_) => {
+      this.loadPage();
+    });
   }
 
   protected readonly WikiLink = WikiLink;

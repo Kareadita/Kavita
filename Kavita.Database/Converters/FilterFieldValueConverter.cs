@@ -7,7 +7,7 @@ using Kavita.Models.Entities.Enums;
 
 namespace Kavita.Database.Converters;
 
-public static class FilterFieldValueConverter
+public static class SeriesFilterFieldValueConverter
 {
     public static object ConvertValue(FilterField field, string value)
     {

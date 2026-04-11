@@ -12,6 +12,7 @@ using Kavita.API.Services.SignalR;
 using Kavita.Common;
 using Kavita.Common.Helpers;
 using Kavita.Models.Constants;
+using Kavita.Models.DTOs.Metadata.Browse.Requests;
 using Kavita.Models.DTOs.Person;
 using Kavita.Models.DTOs.ReadingLists;
 using Kavita.Models.DTOs.ReadingLists.Request;
@@ -64,10 +65,27 @@ public class ReadingListController(
         bool includePromoted = true, bool sortByLastModified = false)
     {
         var items = await unitOfWork.ReadingListRepository.GetReadingListDtosForUserAsync(UserId, includePromoted,
-            userParams, sortByLastModified);
+            userParams, sortByLastModified, HttpContext.RequestAborted);
         Response.AddPaginationHeader(items.CurrentPage, items.PageSize, items.TotalCount, items.TotalPages);
 
         return Ok(items);
+    }
+
+    /// <summary>
+    /// Returns reading lists (paginated) for a given user.
+    /// </summary>
+    /// <param name="filter"></param>
+    /// <param name="userParams"></param>
+    /// <returns></returns>
+    [HttpPost("all")]
+    public async Task<ActionResult<PagedList<ReadingListDto>>> GetPeopleForBrowse(BrowseReadingListFilterDto filter, [FromQuery] UserParams? userParams)
+    {
+        userParams ??= UserParams.Default;
+
+        var list = await unitOfWork.ReadingListRepository.GetBrowseReadingListDtos(UserId, filter, userParams, HttpContext.RequestAborted);
+        Response.AddPaginationHeader(list.CurrentPage, list.PageSize, list.TotalCount, list.TotalPages);
+
+        return Ok(list);
     }
 
     /// <summary>

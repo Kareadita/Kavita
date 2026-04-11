@@ -11,6 +11,7 @@ using Kavita.Models.DTOs.KavitaPlus.Manage;
 using Kavita.Models.Entities;
 using Kavita.Models.Entities.Enums;
 using Kavita.Models.Entities.Person;
+using Kavita.Models.Entities.ReadingLists;
 using Kavita.Models.Entities.Scrobble;
 using Kavita.Models.Entities.User;
 using Microsoft.EntityFrameworkCore;
@@ -319,6 +320,27 @@ public static class QueryableExtensions
             PersonSortField.ChapterCount when sort.IsAscending => query.OrderBy(p => p.ChapterPeople.Count),
             PersonSortField.ChapterCount => query.OrderByDescending(p => p.ChapterPeople.Count),
             _ => query.OrderBy(p => p.Name),
+        };
+    }
+
+    public static IQueryable<ReadingList> SortBy(this IQueryable<ReadingList> query, ReadingListSortOptions? sort)
+    {
+        if (sort == null)
+        {
+            return query.OrderBy(p => p.Title);
+        }
+
+        return sort.SortField switch
+        {
+            ReadingListSortField.Title when sort.IsAscending => query.OrderBy(p => p.Title),
+            ReadingListSortField.Title  => query.OrderByDescending(p => p.Title),
+            ReadingListSortField.ReleaseYearStart when sort.IsAscending => query.OrderBy(r => r.StartingYear),
+            ReadingListSortField.ReleaseYearStart => query.OrderByDescending(r => r.StartingYear),
+            ReadingListSortField.ReleaseYearEnd when sort.IsAscending => query.OrderBy(r => r.EndingYear),
+            ReadingListSortField.ReleaseYearEnd => query.OrderByDescending(r => r.EndingYear),
+            ReadingListSortField.ItemCount when sort.IsAscending => query.OrderBy(r => r.Items.Count),
+            ReadingListSortField.ItemCount =>  query.OrderByDescending(r => r.Items.Count),
+            _ => query.OrderBy(p => p.Title),
         };
     }
 

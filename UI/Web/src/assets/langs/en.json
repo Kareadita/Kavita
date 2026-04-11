@@ -2718,7 +2718,11 @@
         "person-chapter-count": "Chapter Count",
         "annotation-owner": "Owner",
         "annotation-series": "Series name",
-        "annotation-color": "Color"
+        "annotation-color": "Color",
+        "readinglist-title": "Title",
+        "readinglist-releaseyear-start": "Release Year (Start)",
+        "readinglist-releaseyear-end": "Release Year (End)",
+        "readinglist-item-count": "Item Count"
     },
 
     "edit-series-modal": {
@@ -3506,7 +3510,13 @@
         "annotation-selection": "Highlight Text",
         "annotation-likes": "Likes",
         "annotation-liked-by": "Liked by",
-        "series": "{{tabs.series-tab}}"
+        "series": "{{tabs.series-tab}}",
+        "readinglist-title": "Title",
+        "readinglist-release-year": "{{sort-field-pipe.release-year}}",
+        "readinglist-item-count": "{{sort-field-pipe.readinglist-item-count}}",
+        "readinglist-tags": "{{metadata-fields.tags-title}}",
+        "readinglist-writer": "{{person-role-pipe.writer}}",
+        "readinglist-artist": "{{person-role-pipe.artist}}"
     },
 
 

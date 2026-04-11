@@ -45,8 +45,6 @@ import {Breakpoint, BreakpointService} from "../_services/breakpoint.service";
     MetadataBuilderComponent, NgClass, SortButtonComponent]
 })
 export class MetadataFilterComponent<TFilter extends number = number, TSort extends number = number> implements OnInit {
-
-
   private readonly destroyRef = inject(DestroyRef);
   public readonly utilityService = inject(UtilityService);
   private readonly cdRef = inject(ChangeDetectorRef);
