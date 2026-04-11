@@ -20,9 +20,10 @@ public static class AnnotationFilter
             return comparison switch
             {
                 FilterComparison.Equal => queryable.Where(a => a.AppUserId == ownerIds[0]),
+                FilterComparison.NotEqual => queryable.Where(a => a.AppUserId != ownerIds[0]),
                 FilterComparison.Contains => queryable.Where(a => ownerIds.Contains(a.AppUserId)),
                 FilterComparison.NotContains => queryable.Where(a => !ownerIds.Contains(a.AppUserId)),
-                FilterComparison.NotEqual => queryable.Where(a => a.AppUserId != ownerIds[0]),
+                FilterComparison.MustContains => queryable.Where(a => ownerIds.All(o => o == a.AppUserId)),
                 _ => throw new ArgumentOutOfRangeException(nameof(comparison), comparison, null),
             };
         }
@@ -132,6 +133,7 @@ public static class AnnotationFilter
                 FilterComparison.NotEqual => queryable.Where(a => a!.Likes.Contains(value[0])),
                 FilterComparison.Contains => queryable.Where(a => a.Likes.Any(value.Contains)),
                 FilterComparison.NotContains => queryable.Where(a => !a.Likes.Any(value.Contains)),
+                FilterComparison.MustContains => queryable.Where(a => a.Likes.All(value.Contains)),
                 _ => throw new ArgumentOutOfRangeException(nameof(comparison), comparison, null),
             };
         }

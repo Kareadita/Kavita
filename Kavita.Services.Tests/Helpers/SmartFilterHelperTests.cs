@@ -20,7 +20,7 @@ public class SmartFilterHelperTests
         var filter = SmartFilterHelper.Decode(encoded);
 
         Assert.Equal(10, filter.LimitTo);
-        Assert.Equal(SeriesSortField.CreatedDate, filter.SortOptions.SeriesSortField);
+        Assert.Equal(SeriesSortField.CreatedDate, filter.SortOptions.SortField);
         Assert.False(filter.SortOptions.IsAscending);
         Assert.Equal("Test" , filter.Name);
 
@@ -49,7 +49,7 @@ public class SmartFilterHelperTests
             Name = "Test",
             SortOptions = new SeriesSortOptionDto() {
                 IsAscending = false,
-                SeriesSortField = SeriesSortField.CreatedDate
+                SortField = SeriesSortField.CreatedDate
                 },
             LimitTo = 10,
             Combination = FilterCombination.And,
@@ -71,7 +71,7 @@ public class SmartFilterHelperTests
         AssertStatementSame(decoded.Statements.First(), filter.Statements.First());
         Assert.Equal("Test", decoded.Name);
         Assert.Equal(10, decoded.LimitTo);
-        Assert.Equal(SeriesSortField.CreatedDate, decoded.SortOptions.SeriesSortField);
+        Assert.Equal(SeriesSortField.CreatedDate, decoded.SortOptions.SortField);
         Assert.False(decoded.SortOptions.IsAscending);
     }
 
@@ -83,7 +83,7 @@ public class SmartFilterHelperTests
             Name = "Test",
             SortOptions = new SeriesSortOptionDto() {
                 IsAscending = false,
-                SeriesSortField = SeriesSortField.CreatedDate
+                SortField = SeriesSortField.CreatedDate
             },
             LimitTo = 10,
             Combination = FilterCombination.And,
@@ -108,7 +108,7 @@ public class SmartFilterHelperTests
 
         Assert.Equal("Test", decoded.Name);
         Assert.Equal(10, decoded.LimitTo);
-        Assert.Equal(SeriesSortField.CreatedDate, decoded.SortOptions.SeriesSortField);
+        Assert.Equal(SeriesSortField.CreatedDate, decoded.SortOptions.SortField);
         Assert.False(decoded.SortOptions.IsAscending);
     }
 

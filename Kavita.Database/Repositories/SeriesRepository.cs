@@ -917,10 +917,10 @@ public class SeriesRepository(DataContext context, IMapper mapper) : ISeriesRepo
         filter.SortOptions ??= new SeriesSortOptionDto()
         {
             IsAscending = true,
-            SeriesSortField = SeriesSortField.SortName
+            SortField = SeriesSortField.SortName
         };
 
-        query = filter.SortOptions.SeriesSortField switch
+        query = filter.SortOptions.SortField switch
         {
             SeriesSortField.SortName => query.DoOrderBy(s => s.SortName.ToLower(), filter.SortOptions),
             SeriesSortField.CreatedDate => query.DoOrderBy(s => s.Created, filter.SortOptions),

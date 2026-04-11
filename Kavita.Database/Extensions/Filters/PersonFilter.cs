@@ -35,6 +35,12 @@ public static class PersonFilter
 
             return comparison switch
             {
+                FilterComparison.Equal => queryable.Where(p =>
+                    p.SeriesMetadataPeople.Any(smp => roles.Contains(smp.Role)) ||
+                    p.ChapterPeople.Any(cmp => roles.Contains(cmp.Role))),
+                FilterComparison.NotEqual => queryable.Where(p =>
+                    !p.SeriesMetadataPeople.Any(smp => roles.Contains(smp.Role)) &&
+                    !p.ChapterPeople.Any(cmp => roles.Contains(cmp.Role))),
                 FilterComparison.Contains or FilterComparison.MustContains => queryable.Where(p =>
                     p.SeriesMetadataPeople.Any(smp => roles.Contains(smp.Role)) ||
                     p.ChapterPeople.Any(cmp => roles.Contains(cmp.Role))),

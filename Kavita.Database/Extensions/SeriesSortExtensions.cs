@@ -22,10 +22,10 @@ public static class SeriesSortExtensions
         sortOptions ??= new SeriesSortOptionDto()
         {
             IsAscending = true,
-            SeriesSortField = SeriesSortField.SortName
+            SortField = SeriesSortField.SortName
         };
 
-        query = sortOptions.SeriesSortField switch
+        query = sortOptions.SortField switch
         {
             SeriesSortField.SortName => query.DoOrderBy(s => s.SortName.ToLower(), sortOptions),
             SeriesSortField.CreatedDate => query.DoOrderBy(s => s.Created, sortOptions),

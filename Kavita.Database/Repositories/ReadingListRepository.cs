@@ -564,36 +564,33 @@ public class ReadingListRepository(DataContext context, IMapper mapper) : IReadi
         UserParams userParams, CancellationToken ct = default)
     {
         var ageRating = await context.AppUser.GetUserAgeRestriction(userId, ct: ct);
-        var query = await CreateFilteredReadingListQueryable(userId, filter, ageRating, ct);
+        var query = CreateFilteredReadingListQueryable(userId, filter, ageRating, ct);
 
         return await PagedList<ReadingListDto>.CreateAsync(query, userParams.PageNumber, userParams.PageSize, ct);
     }
 
-    private Task<IQueryable<ReadingListDto>> CreateFilteredReadingListQueryable(int userId, BrowseReadingListFilterDto filter,
+    private IQueryable<ReadingListDto> CreateFilteredReadingListQueryable(int userId, BrowseReadingListFilterDto filter,
         AgeRestriction ageRating, CancellationToken ct = default)
     {
-        try
-        {
-            var query = context.ReadingList.AsNoTracking();
+        var query = context.ReadingList
+            .Where(r => r.AppUserId == userId || r.Promoted)
+            .AsNoTracking();
 
-            // Apply filtering based on statements
-            query = FilterQueryBuilder.Apply(filter, query,
-                (stmt, q) => BuildFilterGroup(userId, stmt, q));
+        // Apply filtering based on statements
+        query = FilterQueryBuilder.Apply(filter, query,
+            (stmt, q) => BuildFilterGroup(userId, stmt, q));
 
-            // Apply restrictions
-            query = query.RestrictAgainstAgeRestriction(ageRating);
+        // Apply restrictions
+        query = query.RestrictAgainstAgeRestriction(ageRating);
 
-            // Apply sorting and limiting
-            var sortedQuery = query.SortBy(filter.SortOptions);
 
-            var limitedQuery = sortedQuery.ApplyLimit(filter.LimitTo);
 
-            return Task.FromResult(limitedQuery.ProjectTo<ReadingListDto>(mapper.ConfigurationProvider));
-        }
-        catch (Exception exception)
-        {
-            return Task.FromException<IQueryable<ReadingListDto>>(exception);
-        }
+        // Apply sorting and limiting
+        var sortedQuery = query.SortBy(filter.SortOptions);
+
+        var limitedQuery = sortedQuery.ApplyLimit(filter.LimitTo);
+
+        return limitedQuery.ProjectTo<ReadingListDto>(mapper.ConfigurationProvider);
     }
 
     private static IQueryable<ReadingList> BuildFilterGroup(int userId, ReadingListFilterStatementDto statement, IQueryable<ReadingList> query)

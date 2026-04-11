@@ -918,7 +918,7 @@ public class SeriesService(
             Combination = FilterCombination.And,
             SortOptions = new SeriesSortOptionDto
             {
-                SeriesSortField = SeriesSortField.ReadProgress,
+                SortField = SeriesSortField.ReadProgress,
                 IsAscending = false,
             },
             Statements = [

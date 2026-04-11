@@ -585,7 +585,7 @@ public static class SeriesFilter
                     EF.Functions.Like(s.LocalizedName, $"%{queryString}%") ||
                     EF.Functions.Like(s.SortName, $"%{queryString}%")),
                 FilterComparison.NotEqual => queryable.Where(s =>
-                    s.Name != queryString && s.OriginalName != queryString && s.LocalizedName != queryString &&
+                    s.Name != queryString || s.OriginalName != queryString || s.LocalizedName != queryString ||
                     s.SortName != queryString),
                 _ => throw new ArgumentOutOfRangeException(nameof(comparison), comparison,
                     "Filter Comparison is not supported")

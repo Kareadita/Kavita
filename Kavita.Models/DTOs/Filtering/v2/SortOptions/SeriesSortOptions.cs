@@ -7,7 +7,7 @@ namespace Kavita.Models.DTOs.Filtering.v2.SortOptions;
 /// </summary>
 public sealed record SeriesSortOptionDto
 {
-    public SeriesSortField SeriesSortField { get; set; }
+    public SeriesSortField SortField { get; set; }
     public bool IsAscending { get; set; } = true;
 }
 
