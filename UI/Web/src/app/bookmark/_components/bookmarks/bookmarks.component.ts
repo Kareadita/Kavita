@@ -14,7 +14,7 @@ import {FilterUtilitiesService} from 'src/app/shared/_services/filter-utilities.
 import {PageBookmark} from 'src/app/_models/readers/page-bookmark';
 import {Pagination} from 'src/app/_models/pagination';
 import {Series} from 'src/app/_models/series';
-import {FilterEvent, SortField} from 'src/app/_models/metadata/series-filter';
+import {FilterEvent, SeriesSortField} from 'src/app/_models/metadata/series-filter';
 import {ImageService} from 'src/app/_services/image.service';
 import {JumpbarService} from 'src/app/_services/jumpbar.service';
 import {ReaderService} from 'src/app/_services/reader.service';
@@ -102,7 +102,7 @@ export class BookmarksComponent {
 
   constructor() {
     this.route.data.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(data => {
-      this.filter = data['filter'] as FilterV2<FilterField, SortField>;
+      this.filter = data['filter'] as FilterV2<FilterField, SeriesSortField>;
 
       if (this.filter == null) {
         this.filter = this.metadataService.createDefaultFilterDto('series');
@@ -155,7 +155,7 @@ export class BookmarksComponent {
     this.refresh.emit();
   }
 
-  updateFilter(data: FilterEvent<FilterField, SortField>) {
+  updateFilter(data: FilterEvent<FilterField, SeriesSortField>) {
     if (data.filterV2 === undefined) return;
     this.filter = data.filterV2;
 

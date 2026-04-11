@@ -1,5 +1,5 @@
 import {FilterV2} from "../_models/metadata/v2/filter-v2";
-import {SortField} from "../_models/metadata/series-filter";
+import {SeriesSortField} from "../_models/metadata/series-filter";
 import {PersonSortField} from "../_models/metadata/v2/person-sort-field";
 import {PersonFilterField} from "../_models/metadata/v2/person-filter-field";
 import {FilterField} from "../_models/metadata/v2/filter-field";
@@ -27,7 +27,7 @@ export class FilterSettingsBase<TFilter extends number = number, TSort extends n
 /**
  * Filter Settings for Series entity
  */
-export class SeriesFilterSettings extends FilterSettingsBase<FilterField, SortField> {
+export class SeriesFilterSettings extends FilterSettingsBase<FilterField, SeriesSortField> {
   type: ValidFilterEntity = 'series';
   supportsSmartFilter = true;
 }

@@ -21,7 +21,7 @@ import {NavigationStart, Router} from '@angular/router';
 import {VirtualScrollerComponent, VirtualScrollerModule} from '@iharbeck/ngx-virtual-scroller';
 import {JumpKey} from 'src/app/_models/jumpbar/jump-key';
 import {Pagination} from 'src/app/_models/pagination';
-import {FilterEvent, SortField} from 'src/app/_models/metadata/series-filter';
+import {FilterEvent, SeriesSortField} from 'src/app/_models/metadata/series-filter';
 import {JumpbarService} from 'src/app/_services/jumpbar.service';
 import {LoadingComponent} from "../../shared/loading/loading.component";
 import {MetadataFilterComponent} from "../../metadata-filter/metadata-filter.component";
@@ -143,7 +143,7 @@ export class CardDetailLayoutComponent<TFilter extends number, TSort extends num
     if (this.filteringDisabled()) return false;
 
     const filter = this.filterSignal();
-    return filter?.sortOptions?.sortField != SortField.SortName || !filter?.sortOptions.isAscending;
+    return filter?.sortOptions?.sortField != SeriesSortField.SortName || !filter?.sortOptions.isAscending;
   });
 
   trackItem = (index: number, item: any) => this.trackByIdentity()(index, item);

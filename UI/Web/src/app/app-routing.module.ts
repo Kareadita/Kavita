@@ -7,6 +7,7 @@ import {volumeResolver} from "./_resolvers/volume.resolver";
 import {chapterResolver} from "./_resolvers/chapter.resolver";
 import {personResolver} from "./_resolvers/person.resolver";
 import {readingListResolver} from "./_resolvers/reading-list.resolver";
+import {UrlFilterResolver} from "./_resolvers/url-filter.resolver";
 
 export const routes: Routes = [
   {
@@ -65,7 +66,10 @@ export const routes: Routes = [
         path: 'lists',
         pathMatch: 'full',
         title: 'title.reading-lists',
-        loadComponent: () => import('./reading-list/_components/reading-lists/reading-lists.component').then(c => c.ReadingListsComponent)
+        loadComponent: () => import('./reading-list/_components/reading-lists/reading-lists.component').then(c => c.ReadingListsComponent),
+        resolve: {
+          filter: UrlFilterResolver
+        }
       },
       {
         path: 'lists/:readingListId',

@@ -17,7 +17,7 @@ import {SeriesAddedEvent} from '../_models/events/series-added-event';
 import {Library} from '../_models/library/library';
 import {Pagination} from '../_models/pagination';
 import {Series} from '../_models/series';
-import {FilterEvent, SortField} from '../_models/metadata/series-filter';
+import {FilterEvent, SeriesSortField} from '../_models/metadata/series-filter';
 import {ActionFactoryService} from '../_services/action-factory.service';
 import {LibraryService} from '../_services/library.service';
 import {EVENTS, MessageHubService} from '../_services/message-hub.service';
@@ -47,7 +47,6 @@ import {ActionResult} from "../_models/actionables/action-result";
 import {KavitaTitleStrategy} from "../_services/kavita-title.strategy";
 import {getWritableResolvedData} from "../../libs/route-util";
 import {JumpbarService} from "../_services/jumpbar.service";
-import {ProgressEvent} from "../_models/events/progress-event";
 import {NotificationProgressEvent} from "../_models/events/notification-progress-event";
 
 @Component({
@@ -115,7 +114,7 @@ export class LibraryDetailComponent implements OnInit {
     });
 
     this.route.data.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(data => {
-      this.filter = data['filter'] as FilterV2<FilterField, SortField>;
+      this.filter = data['filter'] as FilterV2<FilterField, SeriesSortField>;
 
       const defaultStmt = {field: FilterField.Libraries, value: this.libraryId() + '', comparison: FilterComparison.Equal};
 
@@ -177,7 +176,7 @@ export class LibraryDetailComponent implements OnInit {
     });
   }
 
-  updateFilter(data: FilterEvent<FilterField, SortField>) {
+  updateFilter(data: FilterEvent<FilterField, SeriesSortField>) {
     if (data.filterV2 === undefined) return;
     this.filter = data.filterV2;
 

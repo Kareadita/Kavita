@@ -13,7 +13,7 @@ import {debounceTime, map, shareReplay, take, tap, throttleTime} from 'rxjs/oper
 import {FilterUtilitiesService} from 'src/app/shared/_services/filter-utilities.service';
 import {Library} from 'src/app/_models/library/library';
 import {RecentlyAddedItem} from 'src/app/_models/recently-added-item';
-import {SortField} from 'src/app/_models/metadata/series-filter';
+import {SeriesSortField} from 'src/app/_models/metadata/series-filter';
 import {AccountService} from 'src/app/_services/account.service';
 import {ImageService} from 'src/app/_services/image.service';
 import {LibraryService} from 'src/app/_services/library.service';
@@ -289,7 +289,7 @@ export class DashboardComponent {
       params['title'] = translate('dashboard.recently-updated-title');
       const filter = this.metadataService.createDefaultFilterDto('series');
       if (filter.sortOptions) {
-        filter.sortOptions.sortField = SortField.LastChapterAdded;
+        filter.sortOptions.sortField = SeriesSortField.LastChapterAdded;
         filter.sortOptions.isAscending = false;
       }
       this.filterUtilityService.applyFilterWithParams(['all-series'], filter, params).subscribe();
@@ -302,7 +302,7 @@ export class DashboardComponent {
       filter.statements.push({field: FilterField.ReadProgress, comparison: FilterComparison.GreaterThan, value: '0'});
       filter.statements.push({field: FilterField.ReadProgress, comparison: FilterComparison.NotEqual, value: '100'});
       if (filter.sortOptions) {
-        filter.sortOptions.sortField = SortField.ReadProgress;
+        filter.sortOptions.sortField = SeriesSortField.ReadProgress;
         filter.sortOptions.isAscending = false;
       }
       this.filterUtilityService.applyFilterWithParams(['all-series'], filter, params).subscribe();
@@ -312,7 +312,7 @@ export class DashboardComponent {
       params['title'] = translate('dashboard.recently-added-title');
       const filter = this.metadataService.createDefaultFilterDto('series');
       if (filter.sortOptions) {
-        filter.sortOptions.sortField = SortField.Created;
+        filter.sortOptions.sortField = SeriesSortField.Created;
         filter.sortOptions.isAscending = false;
       }
       this.filterUtilityService.applyFilterWithParams(['all-series'], filter, params).subscribe();

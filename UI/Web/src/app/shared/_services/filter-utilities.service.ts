@@ -1,6 +1,6 @@
 import {inject, Injectable, PipeTransform} from '@angular/core';
 import {Params, Router} from '@angular/router';
-import {allSeriesSortFields, SortField} from 'src/app/_models/metadata/series-filter';
+import {allSeriesSortFields, SeriesSortField} from 'src/app/_models/metadata/series-filter';
 import {MetadataService} from "../../_services/metadata.service";
 import {FilterV2} from "../../_models/metadata/v2/filter-v2";
 import {FilterCombination} from "../../_models/metadata/v2/filter-combination";
@@ -28,7 +28,7 @@ import {
   AnnotationsFilterField
 } from "../../_models/metadata/v2/annotations-filter";
 import {allReadingListFilterFields, ReadingListFilterField} from "../../_models/metadata/v2/reading-list-filter-field";
-import {allReadingListSortFields} from "../../_models/metadata/v2/reading-list-sort-field";
+import {allReadingListSortFields, ReadingListSortField} from "../../_models/metadata/v2/reading-list-sort-field";
 
 export interface FieldOption<T extends number> {
   title: string,
@@ -113,7 +113,19 @@ export class FilterUtilitiesService {
       limitTo: 0,
       sortOptions: {
         isAscending: true,
-        sortField: SortField.SortName
+        sortField: SeriesSortField.SortName
+      },
+    };
+  }
+
+  createReadingListV2Filter(): FilterV2<ReadingListFilterField> {
+    return {
+      combination: FilterCombination.And,
+      statements: [],
+      limitTo: 0,
+      sortOptions: {
+        isAscending: true,
+        sortField: ReadingListSortField.Title
       },
     };
   }

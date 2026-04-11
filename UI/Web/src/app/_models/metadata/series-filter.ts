@@ -8,7 +8,7 @@ export interface FilterItem<T> {
 }
 
 
-export enum SortField {
+export enum SeriesSortField {
   SortName = 1,
   Created = 2,
   LastModified = 3,
@@ -27,9 +27,9 @@ export enum SortField {
   UserRating = 10,
 }
 
-export const allSeriesSortFields = Object.keys(SortField)
+export const allSeriesSortFields = Object.keys(SeriesSortField)
     .filter(key => !isNaN(Number(key)) && parseInt(key, 10) >= 0)
-    .map(key => parseInt(key, 10)) as SortField[];
+    .map(key => parseInt(key, 10)) as SeriesSortField[];
 
 export const mangaFormatFilters = [
     {

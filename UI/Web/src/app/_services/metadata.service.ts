@@ -11,7 +11,7 @@ import {allPeopleRoles, Person, PersonRole} from '../_models/metadata/person';
 import {Tag} from '../_models/tag';
 import {FilterComparison} from '../_models/metadata/v2/filter-comparison';
 import {FilterField} from '../_models/metadata/v2/filter-field';
-import {mangaFormatFilters, SortField} from "../_models/metadata/series-filter";
+import {mangaFormatFilters, SeriesSortField} from "../_models/metadata/series-filter";
 import {FilterCombination} from "../_models/metadata/v2/filter-combination";
 import {FilterV2} from "../_models/metadata/v2/filter-v2";
 import {FilterStatement} from "../_models/metadata/v2/filter-statement";
@@ -181,7 +181,7 @@ export class MetadataService {
   private getDefaultSortField(entityType: ValidFilterEntity) {
     switch (entityType) {
       case 'series':
-        return SortField.SortName;
+        return SeriesSortField.SortName;
       case 'person':
         return PersonSortField.Name;
       case 'annotation':

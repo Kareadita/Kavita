@@ -1,5 +1,5 @@
 import {inject, Pipe, PipeTransform} from '@angular/core';
-import {SortField} from "../_models/metadata/series-filter";
+import {SeriesSortField} from "../_models/metadata/series-filter";
 import {TranslocoService} from "@jsverse/transloco";
 import {ValidFilterEntity} from "../metadata-filter/filter-settings";
 import {PersonSortField} from "../_models/metadata/v2/person-sort-field";
@@ -20,7 +20,7 @@ export class SortFieldPipe implements PipeTransform {
       case "annotation":
         return this.getAnnotationSortFields(value as AnnotationsSortField);
       case 'series':
-        return this.seriesSortFields(value as SortField);
+        return this.seriesSortFields(value as SeriesSortField);
       case 'person':
         return this.personSortFields(value as PersonSortField);
       case 'readinglist':
@@ -67,27 +67,27 @@ export class SortFieldPipe implements PipeTransform {
     }
   }
 
-  private seriesSortFields(value: SortField) {
+  private seriesSortFields(value: SeriesSortField) {
     switch (value) {
-      case SortField.SortName:
+      case SeriesSortField.SortName:
         return this.translocoService.translate('sort-field-pipe.sort-name');
-      case SortField.Created:
+      case SeriesSortField.Created:
         return this.translocoService.translate('sort-field-pipe.created');
-      case SortField.LastModified:
+      case SeriesSortField.LastModified:
         return this.translocoService.translate('sort-field-pipe.last-modified');
-      case SortField.LastChapterAdded:
+      case SeriesSortField.LastChapterAdded:
         return this.translocoService.translate('sort-field-pipe.last-chapter-added');
-      case SortField.TimeToRead:
+      case SeriesSortField.TimeToRead:
         return this.translocoService.translate('sort-field-pipe.time-to-read');
-      case SortField.ReleaseYear:
+      case SeriesSortField.ReleaseYear:
         return this.translocoService.translate('sort-field-pipe.release-year');
-      case SortField.ReadProgress:
+      case SeriesSortField.ReadProgress:
         return this.translocoService.translate('sort-field-pipe.read-progress');
-      case SortField.AverageRating:
+      case SeriesSortField.AverageRating:
         return this.translocoService.translate('sort-field-pipe.average-rating');
-      case SortField.Random:
+      case SeriesSortField.Random:
         return this.translocoService.translate('sort-field-pipe.random');
-      case SortField.UserRating:
+      case SeriesSortField.UserRating:
           return this.translocoService.translate('sort-field-pipe.user-rating');
       }
   }

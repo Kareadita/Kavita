@@ -40,14 +40,12 @@ import {ReadingListSortField} from "../../../_models/metadata/v2/reading-list-so
 import {ReadingListFilterField} from "../../../_models/metadata/v2/reading-list-filter-field";
 import {FilterUtilitiesService} from "../../../shared/_services/filter-utilities.service";
 import {FilterV2} from "../../../_models/metadata/v2/filter-v2";
-import {PersonFilterField} from "../../../_models/metadata/v2/person-filter-field";
 import {ReadingListFilterSettings} from "../../../metadata-filter/filter-settings";
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import {FilterStatement} from "../../../_models/metadata/v2/filter-statement";
-import {PersonRole} from "../../../_models/metadata/person";
-import {FilterComparison} from "../../../_models/metadata/v2/filter-comparison";
 import {ActivatedRoute} from "@angular/router";
 import {MetadataService} from "../../../_services/metadata.service";
+import {UtilityService} from "../../../shared/_services/utility.service";
 
 @Component({
   selector: 'app-reading-lists',
@@ -65,6 +63,7 @@ export class ReadingListsComponent implements OnInit {
   private readonly route = inject(ActivatedRoute);
   private readonly cardConfigFactory = inject(CardConfigFactory);
   private readonly filterUtilityService = inject(FilterUtilitiesService);
+  private readonly utilityService = inject(UtilityService);
   protected readonly bulkSelectionService = inject(BulkSelectionService);
   protected readonly actionService = inject(ActionService);
   protected readonly metadataService = inject(MetadataService);
@@ -84,11 +83,11 @@ export class ReadingListsComponent implements OnInit {
   trackByIdentity = (index: number, item: ReadingListCardEntity) => `${item.data.id}`;
 
   filterSettings = signal<ReadingListFilterSettings>(new ReadingListFilterSettings());
-  filterActive: boolean = false;
+  filterActive = signal<boolean>(false);
   filterOpen: EventEmitter<boolean> = new EventEmitter();
   refresh: EventEmitter<void> = new EventEmitter();
   filter: FilterV2<ReadingListFilterField, ReadingListSortField> | undefined = undefined;
-  filterActiveCheck!: FilterV2<PersonFilterField>;
+  filterActiveCheck!: FilterV2<ReadingListFilterField>;
 
 
   constructor() {
@@ -102,8 +101,7 @@ export class ReadingListsComponent implements OnInit {
         this.filter.statements.push(this.metadataService.createDefaultFilterStatement('readinglist') as FilterStatement<ReadingListFilterField>);
       }
 
-      this.filterActiveCheck = this.filterUtilityService.createPersonV2Filter();
-      this.filterActiveCheck!.statements.push({value: `${PersonRole.Writer},${PersonRole.CoverArtist}`, field: PersonFilterField.Role, comparison: FilterComparison.Contains});
+      this.filterActiveCheck = this.filterUtilityService.createReadingListV2Filter();
       const d = this.filterSettings();
       this.filterSettings.set({...d, presetsV2: this.filter});
 
@@ -132,18 +130,8 @@ export class ReadingListsComponent implements OnInit {
     }
   }
 
-  getPage() {
-    const urlParams = new URLSearchParams(window.location.search);
-    return urlParams.get('page');
-  }
-
   loadPage() {
-    const page = this.getPage();
-    const pagination = this.pagination();
-    if (page != null && pagination) {
-      pagination.currentPage = parseInt(page, 10);
-      this.pagination.set(pagination);
-    }
+    this.filterActive.set(!this.utilityService.deepEqual(this.filter, this.filterActiveCheck));
     this.isLoadingLists.set(true);
 
     this.readingListService.getAllReadingLists(this.filter!).subscribe((readingLists: PaginatedResult<ReadingList[]>) => {
@@ -177,7 +165,6 @@ export class ReadingListsComponent implements OnInit {
     this.filter = data.filterV2;
 
     if (data.isFirst) {
-      this.loadPage();
       return;
     }
 

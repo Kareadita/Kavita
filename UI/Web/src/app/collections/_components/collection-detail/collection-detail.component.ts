@@ -23,7 +23,7 @@ import {UserCollection} from 'src/app/_models/collection-tag';
 import {SeriesAddedToCollectionEvent} from 'src/app/_models/events/series-added-to-collection-event';
 import {Pagination} from 'src/app/_models/pagination';
 import {Series} from 'src/app/_models/series';
-import {FilterEvent, SortField} from 'src/app/_models/metadata/series-filter';
+import {FilterEvent, SeriesSortField} from 'src/app/_models/metadata/series-filter';
 import {CollectionTagService} from 'src/app/_services/collection-tag.service';
 import {ImageService} from 'src/app/_services/image.service';
 import {JumpbarService} from 'src/app/_services/jumpbar.service';
@@ -134,7 +134,7 @@ export class CollectionDetailComponent implements AfterContentChecked {
       this.router.routeReuseStrategy.shouldReuseRoute = () => false;
 
       this.route.data.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(data => {
-        let filter = data['filter'] as FilterV2<FilterField, SortField>;
+        let filter = data['filter'] as FilterV2<FilterField, SeriesSortField>;
         const tag = this.collectionTag();
         const tagId = tag?.id ?? 0;
 
@@ -230,7 +230,7 @@ export class CollectionDetailComponent implements AfterContentChecked {
   }
 
 
-  updateFilter(data: FilterEvent<FilterField, SortField>) {
+  updateFilter(data: FilterEvent<FilterField, SeriesSortField>) {
     if (data.filterV2 === undefined) return;
     this.filter.set(data.filterV2);
 

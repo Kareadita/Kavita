@@ -20,7 +20,7 @@ import {SeriesRemovedEvent} from 'src/app/_models/events/series-removed-event';
 import {JumpKey} from 'src/app/_models/jumpbar/jump-key';
 import {Pagination} from 'src/app/_models/pagination';
 import {Series} from 'src/app/_models/series';
-import {FilterEvent, SortField} from 'src/app/_models/metadata/series-filter';
+import {FilterEvent, SeriesSortField} from 'src/app/_models/metadata/series-filter';
 import {ImageService} from 'src/app/_services/image.service';
 import {JumpbarService} from 'src/app/_services/jumpbar.service';
 import {EVENTS, MessageHubService} from 'src/app/_services/message-hub.service';
@@ -74,7 +74,7 @@ export class WantToReadComponent implements OnInit, AfterContentChecked {
   isLoading: boolean = true;
   series: Array<Series> = [];
   pagination: Pagination = new Pagination();
-  filter: FilterV2<FilterField, SortField> | undefined = undefined;
+  filter: FilterV2<FilterField, SeriesSortField> | undefined = undefined;
   filterSettings: SeriesFilterSettings = new SeriesFilterSettings();
   refresh: EventEmitter<void> = new EventEmitter();
 
@@ -109,7 +109,7 @@ export class WantToReadComponent implements OnInit, AfterContentChecked {
 
 
       this.route.data.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(data => {
-        this.filter = data['filter'] as FilterV2<FilterField, SortField>;
+        this.filter = data['filter'] as FilterV2<FilterField, SeriesSortField>;
 
         const defaultStmt = {field: FilterField.WantToRead, value: 'true', comparison: FilterComparison.Equal} as FilterStatement<FilterField>;
 
@@ -177,7 +177,7 @@ export class WantToReadComponent implements OnInit, AfterContentChecked {
     });
   }
 
-  updateFilter(data: FilterEvent<FilterField, SortField>) {
+  updateFilter(data: FilterEvent<FilterField, SeriesSortField>) {
     if (data.filterV2 === undefined) return;
     this.filter = data.filterV2;
 

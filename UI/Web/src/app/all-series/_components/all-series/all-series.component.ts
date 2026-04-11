@@ -15,7 +15,7 @@ import {UtilityService} from 'src/app/shared/_services/utility.service';
 import {JumpKey} from 'src/app/_models/jumpbar/jump-key';
 import {Pagination} from 'src/app/_models/pagination';
 import {Series} from 'src/app/_models/series';
-import {FilterEvent, SortField} from 'src/app/_models/metadata/series-filter';
+import {FilterEvent, SeriesSortField} from 'src/app/_models/metadata/series-filter';
 import {JumpbarService} from 'src/app/_services/jumpbar.service';
 import {EVENTS, Message, MessageHubService} from 'src/app/_services/message-hub.service';
 import {SeriesService} from 'src/app/_services/series.service';
@@ -67,7 +67,7 @@ export class AllSeriesComponent implements OnInit {
   series: Series[] = [];
   loadingSeries = false;
   pagination: Pagination = new Pagination();
-  filter: FilterV2<FilterField, SortField> | undefined = undefined;
+  filter: FilterV2<FilterField, SeriesSortField> | undefined = undefined;
   filterSettings: SeriesFilterSettings = new SeriesFilterSettings();
   filterOpen: EventEmitter<boolean> = new EventEmitter();
   filterActiveCheck!: FilterV2<FilterField>;
@@ -87,7 +87,7 @@ export class AllSeriesComponent implements OnInit {
     })
 
     this.route.data.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(data => {
-      this.filter = data['filter'] as FilterV2<FilterField, SortField>;
+      this.filter = data['filter'] as FilterV2<FilterField, SeriesSortField>;
 
       if (this.filter == null) {
         this.filter = this.metadataService.createDefaultFilterDto('series');
@@ -137,7 +137,7 @@ export class AllSeriesComponent implements OnInit {
     return this.title === translate('side-nav.all-series') && this.filter && this.filter.statements.length === 1 && this.filter.statements[0].comparison === FilterComparison.Equal
   }
 
-  updateFilter(data: FilterEvent<FilterField, SortField>) {
+  updateFilter(data: FilterEvent<FilterField, SeriesSortField>) {
     if (data.filterV2 === undefined) return;
     this.filter = data.filterV2;
 
