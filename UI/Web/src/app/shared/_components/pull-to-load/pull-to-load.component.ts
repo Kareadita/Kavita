@@ -12,8 +12,8 @@ import {
   untracked,
   viewChild
 } from '@angular/core';
-import {DOCUMENT} from "@angular/common";
-import {BreakpointService} from "../../../_services/breakpoint.service";
+import {DOCUMENT} from '@angular/common';
+import {BreakpointService} from '../../../_services/breakpoint.service';
 
 /** How long (ms) the user must be idle at the scroll boundary before scroll-driven progress arms. */
 const SCROLL_ARM_DELAY_MS = 100;
@@ -91,7 +91,8 @@ export class PullToLoadComponent {
 
   constructor() {
     effect(() => {
-      // Ensure when changing to fullscreen, the scroll container is retracked, but don't run disarm in effect as it will break component
+      // Track only scrollContainer — untracked prevents disarm/setup from
+      // registering state()/direction() as effect dependencies.
       this.scrollContainer();
       untracked(() => {
         this.disarm();
@@ -113,7 +114,8 @@ export class PullToLoadComponent {
     this.teardownScrollListener();
 
     const scrollEl = this.resolveScrollElement();
-    const scrollTarget = scrollEl instanceof Window ? this.document : scrollEl;
+    // Window scroll events fire on `document`, not `window` or `body`.
+    const scrollTarget = scrollEl instanceof Window ? this.document.body : scrollEl;
 
     const onScroll = () => this.onScroll();
     scrollTarget.addEventListener('scroll', onScroll, {passive: true});
@@ -127,6 +129,8 @@ export class PullToLoadComponent {
 
     if (currentState === PullState.Triggered) return;
 
+    console.log('scroll handled')
+
     if (currentState === PullState.Idle) {
       this.checkVisibilityForArming();
     } else if (currentState === PullState.Armed) {
@@ -138,7 +142,7 @@ export class PullToLoadComponent {
 
   /**
    * In Idle state: check if the container (at resting height) is fully visible
-   * in the viewport using getBoundingClientRect. If so, start the arm countdown.
+   * in the scroll container using getBoundingClientRect. If so, start the arm countdown.
    * Uses rect checks instead of IntersectionObserver to avoid issues with
    * ancestor CSS transforms (e.g. translate3d for hardware acceleration).
    */
@@ -179,18 +183,18 @@ export class PullToLoadComponent {
 
   /**
    * In Armed state: compute progress as the fraction of the expanded container
-   * that is visible in the viewport.
+   * that is visible within the scroll container.
    */
   private updateProgress() {
     const el = this.container().nativeElement;
     const rect = el.getBoundingClientRect();
-    const viewportHeight = this.getViewportHeight();
+    const [boundsTop, boundsBottom] = this.getScrollBounds();
 
     let visibleHeight;
     if (this.direction() === 'up') {
-      visibleHeight = Math.max(0, Math.min(viewportHeight - rect.top, rect.height));
+      visibleHeight = Math.max(0, Math.min(boundsBottom - rect.top, rect.height));
     } else {
-      visibleHeight = Math.max(0, Math.min(rect.bottom, rect.height));
+      visibleHeight = Math.max(0, Math.min(rect.bottom - boundsTop, rect.height));
     }
 
     const p = rect.height > 0 ? Math.min(visibleHeight / rect.height, 1) : 0;
@@ -208,15 +212,14 @@ export class PullToLoadComponent {
   }
 
   /**
-   * In Armed state: if the container is no longer even partially visible,
-   * the user scrolled away, disarm and shrink back.
+   * In Armed state: if the container is no longer even partially visible
+   * within the scroll container, the user scrolled away — disarm and shrink back.
    */
   private checkDisarm() {
     const rect = this.container().nativeElement.getBoundingClientRect();
-    const viewportHeight = this.getViewportHeight();
+    const [boundsTop, boundsBottom] = this.getScrollBounds();
 
-    // If the entire container is above the viewport or below it, disarm
-    if (rect.bottom < 0 || rect.top > viewportHeight) {
+    if (rect.bottom < boundsTop || rect.top > boundsBottom) {
       this.disarm();
     }
   }
@@ -263,7 +266,7 @@ export class PullToLoadComponent {
     this.isCompensatingScroll = true;
 
     const scrollEl = this.resolveScrollElement();
-    if (scrollEl instanceof Window || scrollEl === this.document.body) {
+    if (scrollEl instanceof Window) {
       const current = this.document.documentElement.scrollTop || this.document.body.scrollTop;
       const target = Math.max(0, current + deltaPx);
       this.document.documentElement.scrollTop = target;
@@ -282,35 +285,58 @@ export class PullToLoadComponent {
   }
 
   /**
-   * Checks whether an element is fully visible in the viewport using getBoundingClientRect.
+   * Checks whether an element is fully visible within the scroll container
+   * using getBoundingClientRect. For non-window scroll containers, coordinates
+   * are compared against the container's bounds rather than the browser viewport.
    * Immune to ancestor CSS transforms that break IntersectionObserver.
    */
   private isFullyVisible(el: HTMLElement): boolean {
     const rect = el.getBoundingClientRect();
-    const viewportHeight = this.getViewportHeight();
-    const viewportWidth = this.document.documentElement.clientWidth;
+    const [boundsTop, boundsLeft, boundsBottom, boundsRight] = this.getVisibleBounds();
 
-    return rect.top >= 0
-      && rect.left >= 0
-      && rect.bottom <= viewportHeight
-      && rect.right <= viewportWidth
+    // 2px tolerance accounts for sub-pixel rounding from translate3d hardware
+    // acceleration and fractional rem sizing of the trigger sentinel.
+    const tolerance = 2;
+
+    return rect.top >= boundsTop - tolerance
+      && rect.left >= boundsLeft - tolerance
+      && rect.bottom <= boundsBottom + tolerance
+      && rect.right <= boundsRight + tolerance
       && rect.height > 0;
   }
 
-  private getViewportHeight() {
+  /**
+   * Returns [top, left, bottom, right] bounds of the scroll container in
+   * viewport coordinates. For window this is the viewport rect; for a custom
+   * element it's that element's bounding client rect.
+   */
+  private getVisibleBounds(): [number, number, number, number] {
     const scrollEl = this.resolveScrollElement();
-    // For window or body, use the visual viewport height.
-    // For other elements (e.g. fullscreen reader), use the element's client height.
-    if (scrollEl instanceof Window || scrollEl === this.document.body) {
-      return this.document.documentElement.clientHeight;
+    if (scrollEl instanceof Window) {
+      return [0, 0, this.document.documentElement.clientHeight, this.document.documentElement.clientWidth];
     }
-    return scrollEl.clientHeight;
+    const r = scrollEl.getBoundingClientRect();
+    return [r.top, r.left, r.bottom, r.right];
   }
 
+  /**
+   * Returns [top, bottom] of the scroll container's visible area in viewport coordinates.
+   */
+  private getScrollBounds(): [number, number] {
+    const b = this.getVisibleBounds();
+    return [b[0], b[2]];
+  }
+
+  /**
+   * Resolves the actual scroll element. Normalizes `undefined` and `document.body`
+   * to `window` so that scroll listeners attach to `document` (where page-level
+   * scroll events actually fire) and viewport math uses consistent coordinates.
+   */
   private resolveScrollElement(): HTMLElement | Window {
     const ref = this.scrollContainer();
     if (!ref) return window;
-    return ref instanceof ElementRef ? ref.nativeElement : ref;
+    const el = ref instanceof ElementRef ? ref.nativeElement : ref;
+    return el === this.document.body ? window : el;
   }
 
   private clearArmTimeout() {
