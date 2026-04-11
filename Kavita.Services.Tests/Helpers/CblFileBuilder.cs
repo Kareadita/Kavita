@@ -10,7 +10,9 @@ public class CblFileBuilder
 {
     private readonly string _name;
     private readonly List<ParsedCblItem> _items = [];
+    private readonly List<string> _tags = [];
     private int _nextOrder;
+    private int _schemaVersion = 1;
 
     private CblFileBuilder(string name)
     {
@@ -18,6 +20,18 @@ public class CblFileBuilder
     }
 
     public static CblFileBuilder Create(string name) => new(name);
+
+    public CblFileBuilder AsV2()
+    {
+        _schemaVersion = 2;
+        return this;
+    }
+
+    public CblFileBuilder WithTags(params string[] tags)
+    {
+        _tags.AddRange(tags);
+        return this;
+    }
 
     public CblFileBuilder AddBook(string series, string volume = "", string number = "",
         string year = "", List<CblExternalId>? externalIds = null)
@@ -38,9 +52,10 @@ public class CblFileBuilder
     {
         return new ParsedCblReadingList
         {
-            SchemaVersion = 1,
+            SchemaVersion = _schemaVersion,
             Name = _name,
-            Items = new List<ParsedCblItem>(_items)
+            Items = new List<ParsedCblItem>(_items),
+            Tags = new List<string>(_tags)
         };
     }
 }

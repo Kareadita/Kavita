@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace Kavita.Models.DTOs.ReadingLists;
+namespace Kavita.Models.DTOs.ReadingLists.Request;
 
 /// <summary>
 /// DTO for moving a reading list item to another position within the same list

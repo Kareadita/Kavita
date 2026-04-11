@@ -1,15 +1,12 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text.RegularExpressions;
-using HtmlAgilityPack;
 using Kavita.Models.DTOs.SeriesDetail;
 
 namespace Kavita.Services.Helpers;
 
 public static class ReviewHelper
 {
-    private const int BodyTextLimit = 175;
     public static IEnumerable<UserReviewDto> SelectSpectrumOfReviews(IList<UserReviewDto> reviews)
     {
         IList<UserReviewDto> externalReviews;

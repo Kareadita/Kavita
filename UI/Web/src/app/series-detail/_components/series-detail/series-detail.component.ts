@@ -39,7 +39,7 @@ import {Chapter, LooseLeafOrDefaultNumber, SpecialVolumeNumber} from 'src/app/_m
 import {ScanSeriesEvent} from 'src/app/_models/events/scan-series-event';
 import {SeriesRemovedEvent} from 'src/app/_models/events/series-removed-event';
 import {LibraryType} from 'src/app/_models/library/library';
-import {ReadingList} from 'src/app/_models/reading-list';
+import {ReadingList} from 'src/app/_models/reading-list/reading-list';
 import {Series} from 'src/app/_models/series';
 import {RelatedSeries} from 'src/app/_models/series-detail/related-series';
 import {RelationKind} from 'src/app/_models/series-detail/relation-kind';
@@ -885,7 +885,6 @@ class SeriesDetailComponent implements OnInit, AfterViewInit {
   openFilter(field: FilterField, value: string | number) {
     this.filterUtilityService.applyFilter(['all-series'], field, FilterComparison.Equal, `${value}`).subscribe();
   }
-
 
   toggleScrobbling(evt: any) {
     evt.stopPropagation();

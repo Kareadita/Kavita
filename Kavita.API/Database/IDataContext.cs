@@ -87,6 +87,7 @@ public interface IDataContext : IDisposable
     DbSet<ClientDevice> ClientDevice { get; }
     DbSet<ClientDeviceHistory> ClientDeviceHistory { get; }
     DbSet<AppUserAuthKey> AppUserAuthKey { get; }
+    DbSet<ReadingListTag> ReadingListTag { get; }
 
     // Change Tracking and Saving
     ChangeTracker ChangeTracker { get; }

@@ -954,7 +954,7 @@ public class ProcessSeries(
     {
         try
         {
-            await GenreHelper.UpdateChapterGenres(chapter, genreNames, unitOfWork);
+            await TagHelper.UpdateEntityTags(chapter.Genres, genreNames, unitOfWork.DataContext.Genre, unitOfWork);
         }
         catch (Exception ex)
         {
@@ -966,7 +966,7 @@ public class ProcessSeries(
     {
         try
         {
-            await TagHelper.UpdateChapterTags(chapter, tagNames, unitOfWork);
+            await TagHelper.UpdateEntityTags(chapter.Tags, tagNames, unitOfWork.DataContext.Tag, unitOfWork);
         }
         catch (Exception ex)
         {

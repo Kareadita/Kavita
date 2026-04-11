@@ -1,7 +1,7 @@
 <ng-container *transloco="let t; prefix: 'draggable-ordered-list'">
-    @if (localItems().length > virtualizeAfter()) {
+    @if (filteredItems().length > virtualizeAfter()) {
       <div class="example-list list-group-flush">
-        <virtual-scroller #scroll [items]="localItems()" [bufferAmount]="bufferAmount()" [parentScroll]="parentScroll()!">
+        <virtual-scroller #scroll [items]="filteredItems()" [bufferAmount]="bufferAmount()" [parentScroll]="parentScroll()!">
           @for (item of scroll.viewPortItems; track trackByIdentity()(i, item); let i = $index) {
             <div class="example-box">
               <div class="d-flex list-container">
@@ -18,8 +18,8 @@
         </virtual-scroller>
       </div>
     } @else {
-      <div cdkDropList class="{{localItems().length > 0 ? 'example-list list-group-flush' : ''}}" (cdkDropListDropped)="drop($event)">
-        @for(item of localItems(); track trackByIdentity()(i, item); let i = $index) {
+      <div cdkDropList class="{{filteredItems().length > 0 ? 'example-list list-group-flush' : ''}}" (cdkDropListDropped)="drop($event)">
+        @for(item of filteredItems(); track trackByIdentity()(i, item); let i = $index) {
           <div class="example-box" cdkDrag
                [cdkDragData]="item" cdkDragBoundary=".example-list"
                [cdkDragDisabled]="accessibilityMode() || disabled() || bulkMode()" cdkDragPreviewContainer="parent">

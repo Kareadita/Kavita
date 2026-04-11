@@ -14,6 +14,7 @@ using Kavita.Common.Helpers;
 using Kavita.Models.Constants;
 using Kavita.Models.DTOs.Person;
 using Kavita.Models.DTOs.ReadingLists;
+using Kavita.Models.DTOs.ReadingLists.Request;
 using Kavita.Models.DTOs.SignalR;
 using Kavita.Models.Entities.Enums;
 using Kavita.Server.Attributes;
@@ -237,9 +238,10 @@ public class ReadingListController(
     /// <returns></returns>
     [HttpPost("update")]
     [DisallowRole(PolicyConstants.ReadOnlyRole)]
-    public async Task<ActionResult> UpdateList(UpdateReadingListDto dto)
+    public async Task<ActionResult<ReadingListDto>> UpdateList(UpdateReadingListDto dto)
     {
-        var readingList = await unitOfWork.ReadingListRepository.GetReadingListByIdAsync(dto.ReadingListId);
+        var ct = HttpContext.RequestAborted;
+        var readingList = await unitOfWork.ReadingListRepository.GetReadingListByIdAsync(dto.ReadingListId, ReadingListIncludes.Tags, ct: ct);
         if (readingList == null) return BadRequest(await localizationService.Translate(UserId, "reading-list-doesnt-exist"));
 
         var user = await readingListService.UserHasReadingListAccess(readingList.Id, Username!);
@@ -252,14 +254,14 @@ public class ReadingListController(
         {
             await readingListService.UpdateReadingList(readingList, dto);
             await eventHub.SendMessageAsync(MessageFactory.ReadingListUpdated,
-                MessageFactory.ReadingListUpdatedEvent(readingList.Id), false);
+                MessageFactory.ReadingListUpdatedEvent(readingList.Id), false, ct);
         }
         catch (KavitaException ex)
         {
             return BadRequest(await localizationService.Translate(UserId, ex.Message));
         }
 
-        return Ok(await localizationService.Translate(UserId, "reading-list-updated"));
+        return Ok(await unitOfWork.ReadingListRepository.GetReadingListDtoByIdAsync(readingList.Id, UserId, ct));
     }
 
     /// <summary>

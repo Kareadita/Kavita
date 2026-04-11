@@ -13,12 +13,12 @@ import {
   viewChild
 } from '@angular/core';
 import {ActivatedRoute, Router, RouterLink} from '@angular/router';
-import {DecimalPipe, DOCUMENT, formatDate, Location, NgClass, NgStyle} from '@angular/common';
+import {DecimalPipe, DOCUMENT, Location, NgClass, NgStyle} from '@angular/common';
 import {ToastrService} from 'ngx-toastr';
 import {UtilityService} from 'src/app/shared/_services/utility.service';
 import {LibraryType} from 'src/app/_models/library/library';
 import {MangaFormat} from 'src/app/_models/manga-format';
-import {ReadingList, ReadingListInfo, ReadingListItem} from 'src/app/_models/reading-list';
+import {ReadingList, ReadingListInfo, ReadingListItem} from 'src/app/_models/reading-list/reading-list';
 import {AccountService} from 'src/app/_services/account.service';
 import {ActionFactoryService} from 'src/app/_services/action-factory.service';
 import {ActionService} from 'src/app/_services/action.service';
@@ -55,7 +55,6 @@ import {CardActionablesComponent} from "../../../_single-module/card-actionables
 import {FormControl, FormGroup, ReactiveFormsModule} from "@angular/forms";
 import {VirtualScrollerModule} from "@iharbeck/ngx-virtual-scroller";
 import {PromotedIconComponent} from "../../../shared/_components/promoted-icon/promoted-icon.component";
-import {DefaultValuePipe} from "../../../_pipes/default-value.pipe";
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import {DetailsTabComponent} from "../../../_single-module/details-tab/details-tab.component";
 import {IHasCast} from "../../../_models/common/i-has-cast";
@@ -69,6 +68,10 @@ import {Tabs} from "../../../_models/tabs";
 import {TabTitlePipe} from "../../../_pipes/tab-title.pipe";
 import {ConfirmService} from "../../../shared/confirm.service";
 import {ColorscapeService} from "../../../_services/colorscape.service";
+import {DateYearRangePipe} from "../../../_pipes/date-year-range.pipe";
+import {FilterField} from "../../../_models/metadata/v2/filter-field";
+import {FilterComparison} from "../../../_models/metadata/v2/filter-comparison";
+import {FilterUtilitiesService} from "../../../shared/_services/filter-utilities.service";
 
 
 @Component({
@@ -82,7 +85,7 @@ import {ColorscapeService} from "../../../_services/colorscape.service";
     ReadingListItemComponent, NgClass, DecimalPipe, TranslocoDirective, ReactiveFormsModule,
     NgbNav, NgbNavContent, NgbNavLink, NgbTooltip,
     RouterLink, VirtualScrollerModule, NgStyle, NgbNavOutlet, NgbNavItem,
-    PromotedIconComponent, DefaultValuePipe, DetailsTabComponent, TabTitlePipe]
+    PromotedIconComponent, DetailsTabComponent, TabTitlePipe]
 })
 export class ReadingListDetailComponent implements OnInit {
   private readonly document = inject<Document>(DOCUMENT);
@@ -101,17 +104,19 @@ export class ReadingListDetailComponent implements OnInit {
   private readonly destroyRef = inject(DestroyRef);
   private readonly confirmService = inject(ConfirmService);
   protected readonly breakpointService = inject(BreakpointService);
-  protected readonly colorscapeService = inject(ColorscapeService);
+  private readonly colorscapeService = inject(ColorscapeService);
+  private readonly filterUtilityService = inject(FilterUtilitiesService);
 
   protected readonly MangaFormat = MangaFormat;
   protected readonly Tabs = Tabs;
   protected readonly encodeURIComponent = encodeURIComponent;
+  private readonly dateYearRangePipe = new DateYearRangePipe();
 
   scrollingBlock = viewChild<ElementRef<HTMLDivElement>>('scrollingBlock');
-
   readingListId = input(0, {transform: numberAttribute});
-
   readingList = getWritableResolvedData(this.route, 'readingList');
+
+
   readingListSummary = computed(() => {
     return (this.readingList()?.summary || '').replace(/\n/g, '<br>');
   });
@@ -123,24 +128,15 @@ export class ReadingListDetailComponent implements OnInit {
     const rl = this.readingList();
     if (!rl || rl.startingYear === 0) return null;
 
-    const formatMonth = (month: number) => {
-      if (month <= 0) return '';
-      return formatDate(new Date(2020, month - 1, 1), 'MMM', 'en-US');
-    };
+    // Reading list dates start with 1, JS Date starts with 0
+    const startMonth = rl.startingMonth > 0 ? rl.startingMonth - 1 : undefined;
+    const endMonth = rl.startingMonth > 0 ? rl.endingMonth - 1 : undefined;
 
-    let result = '';
+    const startDate = startMonth !== undefined ? new Date(rl.startingYear, startMonth) : new Date(rl.startingYear);
+    const endDate = rl.endingYear <= 0 ? null :
+      (endMonth !== undefined ? new Date(rl.endingYear, endMonth) : new Date(rl.endingYear));
 
-    if (rl.startingMonth > 0) result += formatMonth(rl.startingMonth);
-    if (rl.startingMonth > 0 && rl.startingYear > 0) result += ', ';
-    if (rl.startingYear > 0) result += rl.startingYear;
-    result += ' — ';
-    if (rl.endingYear > 0) {
-      if (rl.endingMonth > 0) result += formatMonth(rl.endingMonth);
-      if (rl.endingMonth > 0 && rl.endingYear > 0) result += ', ';
-      if (rl.endingYear > 0) result += rl.endingYear;
-    }
-
-    return result;
+    return this.dateYearRangePipe.transform(startDate, endDate, !!endMonth);
   });
 
   items = signal<Array<ReadingListItem>>([]);
@@ -151,6 +147,12 @@ export class ReadingListDetailComponent implements OnInit {
   isLoading = signal(false);
   accessibilityMode = signal(false);
   editMode = signal(false);
+  missingItems = computed(() => {
+    const rl = this.readingList();
+    if (rl.totalItemsAtImport === 0) return 0;
+    if (rl.itemCount > rl.totalItemsAtImport) return 0;
+    return rl.totalItemsAtImport - rl.itemCount;
+  });
 
   libraryTypes = signal<{[key: number]: LibraryType}>({});
   activeTabId = Tabs.Storyline;
@@ -186,9 +188,25 @@ export class ReadingListDetailComponent implements OnInit {
     writers: []
   });
 
+  filterText = signal('');
+  filterFn = computed<((item: ReadingListItem) => boolean) | null>(() => {
+    const text = this.filterText();
+    if (!text) return null;
+    return (item: ReadingListItem) => {
+      return !!(item.title?.toLowerCase().includes(text)
+        || item.seriesName?.toLowerCase().includes(text)
+        || item.chapterNumber?.toLowerCase().includes(text)
+        || item.volumeNumber?.toLowerCase().includes(text)
+        || item.chapter?.titleName?.toLowerCase().includes(text)
+        || item.chapter?.writerName?.toLowerCase().includes(text)
+        || item.chapter?.pencillerName?.toLowerCase().includes(text));
+    };
+  });
+
   formGroup = new FormGroup({
     'edit': new FormControl(false, []),
     'accessibilityMode': new FormControl(false, []),
+    'filter': new FormControl('', []),
   });
 
   trackByIdentity: TrackByFunction<ReadingListItem> = (index, item) => `${item.order}_${item.title}_${item.summary?.length}_${item.pagesRead}_${item.chapterId}`;
@@ -219,6 +237,11 @@ export class ReadingListDetailComponent implements OnInit {
       tap(mode => {
         this.accessibilityMode.set(mode || this.breakpointService.isMobile());
       })
+    ).subscribe();
+
+    this.formGroup.get('filter')!.valueChanges.pipe(
+      takeUntilDestroyed(this.destroyRef),
+      tap(val => this.filterText.set((val || '').trim().toLowerCase()))
     ).subscribe();
 
     if (this.breakpointService.isMobile()) {
@@ -398,5 +421,10 @@ export class ReadingListDetailComponent implements OnInit {
     }, 10);
   }
 
+  openFilter(field: FilterField, value: string | number) {
+    this.filterUtilityService.applyFilter(['lists', this.readingList().id], field, FilterComparison.Equal, `${value}`).subscribe();
+  }
+
   protected readonly Breakpoint = Breakpoint;
+  protected readonly FilterField = FilterField;
 }

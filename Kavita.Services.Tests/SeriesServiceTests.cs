@@ -619,7 +619,7 @@ public class SeriesServiceTests(ITestOutputHelper outputHelper): AbstractDbTest(
         var series = await unitOfWork.SeriesRepository.GetSeriesByIdAsync(1);
         Assert.NotNull(series);
         Assert.NotNull(series.Metadata);
-        Assert.Contains("New Genre".SentenceCase(), series.Metadata.Genres.Select(g => g.Title));
+        Assert.Contains("New Genre", series.Metadata.Genres.Select(g => g.Title));
     }
 
     [Fact]
@@ -654,7 +654,7 @@ public class SeriesServiceTests(ITestOutputHelper outputHelper): AbstractDbTest(
         var series = await unitOfWork.SeriesRepository.GetSeriesByIdAsync(1);
         Assert.NotNull(series);
         Assert.NotNull(series.Metadata);
-        Assert.True(series.Metadata.Genres.Select(g1 => g1.Title).All(g2 => g2 == "New Genre".SentenceCase()));
+        Assert.True(series.Metadata.Genres.Select(g1 => g1.Title).All(g2 => g2 == "New Genre"));
         Assert.False(series.Metadata.GenresLocked); // GenreLocked is false unless the UI Explicitly says it should be locked
     }
 
@@ -918,7 +918,7 @@ public class SeriesServiceTests(ITestOutputHelper outputHelper): AbstractDbTest(
         var series = await unitOfWork.SeriesRepository.GetSeriesByIdAsync(1);
         Assert.NotNull(series);
         Assert.NotNull(series.Metadata);
-        Assert.True(series.Metadata.Genres.Select(g => g.Title).All(g => g == "Existing Genre".SentenceCase()));
+        Assert.True(series.Metadata.Genres.Select(g => g.Title).All(g2 => g2 == "Existing Genre"));
         Assert.True(series.Metadata.GenresLocked);
     }
 
@@ -984,7 +984,7 @@ public class SeriesServiceTests(ITestOutputHelper outputHelper): AbstractDbTest(
         var series = await unitOfWork.SeriesRepository.GetSeriesByIdAsync(s.Id);
         Assert.NotNull(series);
         Assert.NotNull(series.Metadata);
-        Assert.Contains("New Genre".SentenceCase(), series.Metadata.Genres.Select(g => g.Title));
+        Assert.Contains("New Genre", series.Metadata.Genres.Select(g => g.Title));
         Assert.False(series.Metadata.GenresLocked); // Ensure the lock is not activated unless specified.
     }
 
@@ -1019,8 +1019,8 @@ public class SeriesServiceTests(ITestOutputHelper outputHelper): AbstractDbTest(
         var series = await unitOfWork.SeriesRepository.GetSeriesByIdAsync(s.Id);
         Assert.NotNull(series);
         Assert.NotNull(series.Metadata);
-        Assert.DoesNotContain("Existing Genre".SentenceCase(), series.Metadata.Genres.Select(g => g.Title));
-        Assert.Contains("New Genre".SentenceCase(), series.Metadata.Genres.Select(g => g.Title));
+        Assert.DoesNotContain("Existing Genre", series.Metadata.Genres.Select(g => g.Title));
+        Assert.Contains("New Genre", series.Metadata.Genres.Select(g => g.Title));
     }
 
     [Fact]
@@ -1087,7 +1087,7 @@ public class SeriesServiceTests(ITestOutputHelper outputHelper): AbstractDbTest(
         var series = await unitOfWork.SeriesRepository.GetSeriesByIdAsync(s.Id);
         Assert.NotNull(series);
         Assert.NotNull(series.Metadata);
-        Assert.Contains("New Tag".SentenceCase(), series.Metadata.Tags.Select(t => t.Title));
+        Assert.Contains("New Tag", series.Metadata.Tags.Select(t => t.Title));
     }
 
     [Fact]
@@ -1121,8 +1121,8 @@ public class SeriesServiceTests(ITestOutputHelper outputHelper): AbstractDbTest(
         var series = await unitOfWork.SeriesRepository.GetSeriesByIdAsync(s.Id);
         Assert.NotNull(series);
         Assert.NotNull(series.Metadata);
-        Assert.DoesNotContain("Existing Tag".SentenceCase(), series.Metadata.Tags.Select(t => t.Title));
-        Assert.Contains("New Tag".SentenceCase(), series.Metadata.Tags.Select(t => t.Title));
+        Assert.DoesNotContain("Existing Tag", series.Metadata.Tags.Select(t => t.Title));
+        Assert.Contains("New Tag", series.Metadata.Tags.Select(t => t.Title));
     }
 
     [Fact]

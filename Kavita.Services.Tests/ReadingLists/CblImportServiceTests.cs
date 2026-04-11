@@ -754,6 +754,31 @@ public class CblImportServiceTests : AbstractDbTest
         Assert.NotEqual(CblMatchTier.ExternalId, summary.SuccessfulInserts.First().MatchTier);
     }
 
+    [Fact]
+    public async Task ValidateList_ExternalId_Kavita_DirectMatch()
+    {
+        var (unitOfWork, _, _) = await CreateDatabase();
+        using var helper = new CblTestHelper(unitOfWork);
+        var seed = await helper.SeedLibrary("rated-library.json");
+
+        // Fables vol 1 chapter 1 — get its DB-assigned chapter ID
+        var chapterId = seed.Lookup[("Fables", "1", "1")].ChapterId;
+
+        // Wrong series name forces external ID path — Kavita provider with the chapter's own ID
+        var cbl = CblFileBuilder.Create("Kavita ID Match Test")
+            .AddBook("WrongSeriesName", volume: "1", number: "1",
+                externalIds: [new CblExternalId { Provider = CblExternalDbProvider.Kavita, IssueId = chapterId.ToString() }])
+            .Build();
+
+        var filePath = helper.WriteCblToDisk(cbl);
+        var svc = helper.CreateImportService();
+        var summary = await svc.ValidateList(seed.User.Id, filePath);
+
+        Assert.Equal(CblImportResult.Success, summary.Success);
+        Assert.Single(summary.SuccessfulInserts);
+        Assert.Equal(CblMatchTier.ExternalId, summary.SuccessfulInserts.First().MatchTier);
+    }
+
     #endregion
 
     #region Group 7: Library Access
@@ -1692,6 +1717,223 @@ public class CblImportServiceTests : AbstractDbTest
         // Verify side effect methods were invoked
         await readingListService.Received(1).CalculateReadingListAgeRating(Arg.Any<ReadingList>());
         await readingListService.Received(1).CalculateStartAndEndDates(Arg.Any<ReadingList>());
+    }
+
+    #endregion
+
+    #region Group 17: V2 Tags
+
+    [Fact]
+    public async Task UpsertReadingList_V2WithTags_CreatesTagsOnReadingList()
+    {
+        var (unitOfWork, _, _) = await CreateDatabase();
+        using var helper = new CblTestHelper(unitOfWork);
+        var seed = await helper.SeedLibrary("simple-comic.json");
+
+        var cbl = CblFileBuilder.Create("Tagged List")
+            .AsV2()
+            .WithTags("DC Comics", "Vertigo")
+            .AddBook("Fables", volume: "1", number: "1")
+            .Build();
+
+        var filePath = helper.WriteCblV2ToDisk(cbl);
+        var svc = helper.CreateImportService();
+        var decisions = new CblImportDecisions
+        {
+            ItemResolutions = new Dictionary<int, CblItemDecision>(),
+            SaveAsRemapRules = false
+        };
+        var summary = await svc.UpsertReadingList(seed.User.Id, filePath, decisions);
+
+        var rl = await unitOfWork.ReadingListRepository.GetReadingListByTitleAsync(
+            "Tagged List", seed.User.Id, ReadingListIncludes.Items | ReadingListIncludes.Tags);
+        Assert.NotNull(rl);
+        Assert.Equal(2, rl!.Tags.Count);
+        Assert.Contains(rl.Tags, t => t.Title == "DC Comics");
+        Assert.Contains(rl.Tags, t => t.Title == "Vertigo");
+    }
+
+    [Fact]
+    public async Task UpsertReadingList_V2WithTags_NormalizesTagTitles()
+    {
+        var (unitOfWork, _, _) = await CreateDatabase();
+        using var helper = new CblTestHelper(unitOfWork);
+        var seed = await helper.SeedLibrary("simple-comic.json");
+
+        var cbl = CblFileBuilder.Create("Normalized Tags")
+            .AsV2()
+            .WithTags("DC Comics", "dc comics", "DC COMICS")
+            .AddBook("Fables", volume: "1", number: "1")
+            .Build();
+
+        var filePath = helper.WriteCblV2ToDisk(cbl);
+        var svc = helper.CreateImportService();
+        var decisions = new CblImportDecisions
+        {
+            ItemResolutions = new Dictionary<int, CblItemDecision>(),
+            SaveAsRemapRules = false
+        };
+        await svc.UpsertReadingList(seed.User.Id, filePath, decisions);
+
+        var rl = await unitOfWork.ReadingListRepository.GetReadingListByTitleAsync(
+            "Normalized Tags", seed.User.Id, ReadingListIncludes.Items | ReadingListIncludes.Tags);
+        Assert.NotNull(rl);
+        Assert.Single(rl!.Tags);
+        Assert.Equal("DC Comics", rl.Tags.First().Title);
+    }
+
+    [Fact]
+    public async Task UpsertReadingList_V2WithEmptyTags_NoTagsCreated()
+    {
+        var (unitOfWork, _, _) = await CreateDatabase();
+        using var helper = new CblTestHelper(unitOfWork);
+        var seed = await helper.SeedLibrary("simple-comic.json");
+
+        var cbl = CblFileBuilder.Create("No Tags List")
+            .AsV2()
+            .AddBook("Fables", volume: "1", number: "1")
+            .Build();
+
+        var filePath = helper.WriteCblV2ToDisk(cbl);
+        var svc = helper.CreateImportService();
+        var decisions = new CblImportDecisions
+        {
+            ItemResolutions = new Dictionary<int, CblItemDecision>(),
+            SaveAsRemapRules = false
+        };
+        await svc.UpsertReadingList(seed.User.Id, filePath, decisions);
+
+        var rl = await unitOfWork.ReadingListRepository.GetReadingListByTitleAsync(
+            "No Tags List", seed.User.Id, ReadingListIncludes.Items | ReadingListIncludes.Tags);
+        Assert.NotNull(rl);
+        Assert.Empty(rl!.Tags);
+    }
+
+    [Fact]
+    public async Task UpsertReadingList_V2ReImportWithNewTags_MergesTags()
+    {
+        var (unitOfWork, _, _) = await CreateDatabase();
+        using var helper = new CblTestHelper(unitOfWork);
+        var seed = await helper.SeedLibrary("simple-comic.json");
+
+        // First import with one tag
+        var cbl1 = CblFileBuilder.Create("Merge Tags")
+            .AsV2()
+            .WithTags("Vertigo")
+            .AddBook("Fables", volume: "1", number: "1")
+            .Build();
+
+        var filePath1 = helper.WriteCblV2ToDisk(cbl1);
+        var svc = helper.CreateImportService();
+        var decisions = new CblImportDecisions
+        {
+            ItemResolutions = new Dictionary<int, CblItemDecision>(),
+            SaveAsRemapRules = false
+        };
+        await svc.UpsertReadingList(seed.User.Id, filePath1, decisions);
+
+        // Re-import with original tag plus a new one
+        var cbl2 = CblFileBuilder.Create("Merge Tags")
+            .AsV2()
+            .WithTags("Vertigo", "DC Comics")
+            .AddBook("Fables", volume: "1", number: "1")
+            .Build();
+
+        var filePath2 = helper.WriteCblV2ToDisk(cbl2);
+        await svc.UpsertReadingList(seed.User.Id, filePath2, decisions);
+
+        var rl = await unitOfWork.ReadingListRepository.GetReadingListByTitleAsync(
+            "Merge Tags", seed.User.Id, ReadingListIncludes.Items | ReadingListIncludes.Tags);
+        Assert.NotNull(rl);
+        Assert.Equal(2, rl!.Tags.Count);
+        Assert.Contains(rl.Tags, t => t.Title == "Vertigo");
+        Assert.Contains(rl.Tags, t => t.Title == "DC Comics");
+    }
+
+    [Fact]
+    public async Task UpsertReadingList_V2ReImportWithRemovedTags_RemovesTags()
+    {
+        var (unitOfWork, _, _) = await CreateDatabase();
+        using var helper = new CblTestHelper(unitOfWork);
+        var seed = await helper.SeedLibrary("simple-comic.json");
+
+        // First import with two tags
+        var cbl1 = CblFileBuilder.Create("Remove Tags")
+            .AsV2()
+            .WithTags("Vertigo", "DC Comics")
+            .AddBook("Fables", volume: "1", number: "1")
+            .Build();
+
+        var filePath1 = helper.WriteCblV2ToDisk(cbl1);
+        var svc = helper.CreateImportService();
+        var decisions = new CblImportDecisions
+        {
+            ItemResolutions = new Dictionary<int, CblItemDecision>(),
+            SaveAsRemapRules = false
+        };
+        await svc.UpsertReadingList(seed.User.Id, filePath1, decisions);
+
+        // Re-import with only one tag
+        var cbl2 = CblFileBuilder.Create("Remove Tags")
+            .AsV2()
+            .WithTags("Vertigo")
+            .AddBook("Fables", volume: "1", number: "1")
+            .Build();
+
+        var filePath2 = helper.WriteCblV2ToDisk(cbl2);
+        await svc.UpsertReadingList(seed.User.Id, filePath2, decisions);
+
+        var rl = await unitOfWork.ReadingListRepository.GetReadingListByTitleAsync(
+            "Remove Tags", seed.User.Id, ReadingListIncludes.Items | ReadingListIncludes.Tags);
+        Assert.NotNull(rl);
+        Assert.Single(rl!.Tags);
+        Assert.Equal("Vertigo", rl.Tags.First().Title);
+    }
+
+    [Fact]
+    public async Task UpsertReadingList_V2TagsSharedAcrossLists_ReusesSameEntity()
+    {
+        var (unitOfWork, context, _) = await CreateDatabase();
+        using var helper = new CblTestHelper(unitOfWork);
+        var seed = await helper.SeedLibrary("simple-comic.json");
+
+        var svc = helper.CreateImportService();
+        var decisions = new CblImportDecisions
+        {
+            ItemResolutions = new Dictionary<int, CblItemDecision>(),
+            SaveAsRemapRules = false
+        };
+
+        // First list with shared tag
+        var cbl1 = CblFileBuilder.Create("List A")
+            .AsV2()
+            .WithTags("Shared Tag")
+            .AddBook("Fables", volume: "1", number: "1")
+            .Build();
+        var filePath1 = helper.WriteCblV2ToDisk(cbl1);
+        await svc.UpsertReadingList(seed.User.Id, filePath1, decisions);
+
+        // Second list with same tag
+        var cbl2 = CblFileBuilder.Create("List B")
+            .AsV2()
+            .WithTags("Shared Tag")
+            .AddBook("Fables", volume: "1", number: "2")
+            .Build();
+        var filePath2 = helper.WriteCblV2ToDisk(cbl2);
+        await svc.UpsertReadingList(seed.User.Id, filePath2, decisions);
+
+        var rlA = await unitOfWork.ReadingListRepository.GetReadingListByTitleAsync(
+            "List A", seed.User.Id, ReadingListIncludes.Items | ReadingListIncludes.Tags);
+        var rlB = await unitOfWork.ReadingListRepository.GetReadingListByTitleAsync(
+            "List B", seed.User.Id, ReadingListIncludes.Items | ReadingListIncludes.Tags);
+
+        Assert.NotNull(rlA);
+        Assert.NotNull(rlB);
+        Assert.Single(rlA!.Tags);
+        Assert.Single(rlB!.Tags);
+
+        // Both lists should reference the same ReadingListTag entity (same Id)
+        Assert.Equal(rlA.Tags.First().Id, rlB.Tags.First().Id);
     }
 
     #endregion

@@ -12,7 +12,7 @@ namespace Kavita.Models.Entities.ReadingLists;
 /// <summary>
 /// This is a collection of <see cref="ReadingListItem"/> which represent individual chapters and an order.
 /// </summary>
-public class ReadingList : IEntityDate, IHasCoverImage
+public class ReadingList : IEntityDate, IHasCoverImage, IHasTags<ReadingListTag>
 {
     public int Id { get; init; }
     public required string Title { get; set; }
@@ -33,10 +33,10 @@ public class ReadingList : IEntityDate, IHasCoverImage
     public bool CoverImageLocked { get; set; }
 
     /// <summary>
-    /// A list of tags associtated with the RL
+    /// A list of tags associated with the list
     /// </summary>
     /// <remarks>Can be populated via API/UI or from CBLv2</remarks>
-    //public ICollection<Tag> Tags { get; set; }
+    public ICollection<ReadingListTag> Tags { get; set; } = new List<ReadingListTag>();
 
 
     /// <summary>
@@ -72,6 +72,10 @@ public class ReadingList : IEntityDate, IHasCoverImage
     /// Only updated when ShaHash changes and we pull new content.
     /// </summary>
     public DateTime? LastSyncedUtc { get; set; }
+    /// <summary>
+    /// Total items at CBL Import, this helps track missing items. CBL Sync will update to the latest.
+    /// </summary>
+    public int TotalItemsAtImport { get; set; }
 
     public bool CanSync => Provider != ReadingListProvider.None
                            && Provider != ReadingListProvider.File
@@ -84,10 +88,13 @@ public class ReadingList : IEntityDate, IHasCoverImage
         => !string.Equals(ShaHash, remoteSha, StringComparison.Ordinal);
 
     public ICollection<ReadingListItem> Items { get; set; } = null!;
+
     public DateTime Created { get; set; }
     public DateTime LastModified { get; set; }
     public DateTime CreatedUtc { get; set; }
     public DateTime LastModifiedUtc { get; set; }
+
+
 
     #region Metadata
     public string? Summary { get; set; }

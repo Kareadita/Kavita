@@ -1,36 +1,41 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
-using System.Collections.Immutable;
 using System.Linq;
 using System.Threading.Tasks;
 using Kavita.API.Database;
 using Kavita.Common.Extensions;
-using Kavita.Models.Builders;
-using Kavita.Models.DTOs.Metadata;
-using Kavita.Models.Entities;
+using Kavita.Models.Entities.Interfaces;
 using Microsoft.EntityFrameworkCore;
 
 namespace Kavita.Services.Helpers;
 
 public static class TagHelper
 {
-
-    public static async Task UpdateChapterTags(Chapter chapter, IEnumerable<string> tagNames, IUnitOfWork unitOfWork)
+    /// <summary>
+    /// Updates a tag collection on an entity (chapter, reading list, etc.) by adding/removing tags to match the provided names.
+    /// Creates new tags in the database if they don't exist yet.
+    /// </summary>
+    /// <param name="entityTags">The entity's tag collection (chapter.Tags, chapter.Genres, readingList.Tags)</param>
+    /// <param name="tagNames">The desired tag names</param>
+    /// <param name="dbSet">The DbSet for the tag type (unitOfWork.DataContext.Tag)</param>
+    /// <param name="unitOfWork">Unit of work for committing changes</param>
+    /// <param name="commitIfModified">When true (default), commits relationship changes at the end if anything was added/removed</param>
+    public static async Task UpdateEntityTags<T>(ICollection<T> entityTags, IEnumerable<string> tagNames,
+        DbSet<T> dbSet, IUnitOfWork unitOfWork, bool commitIfModified = true) where T : class, ITag, new()
     {
-        // Normalize tag names once and store them in a hash set for quick lookups
-        // Create a dictionary: normalized => original
+        // Normalize tag names once and store them in a dictionary for quick lookups
         var normalizedToOriginal = tagNames
             .Select(t => new { Original = t, Normalized = t.ToNormalized() })
-            .GroupBy(x => x.Normalized) // in case of duplicates
+            .GroupBy(x => x.Normalized)
             .ToDictionary(g => g.Key, g => g.First().Original);
 
         var normalizedTagsToAdd = new HashSet<string>(normalizedToOriginal.Keys);
-        var existingTagsSet = new HashSet<string>(chapter.Tags.Select(t => t.NormalizedTitle));
+        var existingTagsSet = new HashSet<string>(entityTags.Select(t => t.NormalizedTitle));
 
         var isModified = false;
 
         // Remove tags that are no longer present in the new list
-        var tagsToRemove = chapter.Tags
+        var tagsToRemove = entityTags
             .Where(t => !normalizedTagsToAdd.Contains(t.NormalizedTitle))
             .ToList();
 
@@ -38,102 +43,123 @@ public static class TagHelper
         {
             foreach (var tagToRemove in tagsToRemove)
             {
-                chapter.Tags.Remove(tagToRemove);
+                entityTags.Remove(tagToRemove);
             }
             isModified = true;
         }
 
         // Get all normalized titles for bulk lookup from the database
-        var existingTagTitles = await unitOfWork.DataContext.Tag
+        var existingDbTags = await dbSet
             .Where(t => normalizedTagsToAdd.Contains(t.NormalizedTitle))
             .ToDictionaryAsync(t => t.NormalizedTitle);
 
         // Find missing tags that are not already in the database
         var missingTags = normalizedTagsToAdd
-            .Where(nt => !existingTagTitles.ContainsKey(nt))
-            .Select(nt => new TagBuilder(normalizedToOriginal[nt]).Build())
+            .Where(nt => !existingDbTags.ContainsKey(nt))
+            .Select(nt =>
+            {
+                var tag = new T
+                {
+                    Title = normalizedToOriginal[nt].Trim(),
+                    NormalizedTitle = nt
+                };
+                return tag;
+            })
             .ToList();
 
         // Add missing tags to the database if any
         if (missingTags.Count != 0)
         {
-            unitOfWork.DataContext.Tag.AddRange(missingTags);
-            await unitOfWork.CommitAsync();  // Commit once after adding missing tags to avoid multiple DB calls
+            dbSet.AddRange(missingTags);
+            await unitOfWork.CommitAsync();
             isModified = true;
 
             // Update the dictionary with newly inserted tags for easier lookup
             foreach (var tag in missingTags)
             {
-                existingTagTitles[tag.NormalizedTitle] = tag;
+                existingDbTags[tag.NormalizedTitle] = tag;
             }
         }
 
-        // Add the new or existing tags to the chapter
+        // Add the new or existing tags to the entity
         foreach (var normalizedTitle in normalizedTagsToAdd)
         {
             if (existingTagsSet.Contains(normalizedTitle)) continue;
 
-            var tag = existingTagTitles[normalizedTitle];
-            chapter.Tags.Add(tag);
+            var tag = existingDbTags[normalizedTitle];
+            entityTags.Add(tag);
             isModified = true;
         }
 
-        // Commit changes if modifications were made to the chapter's tags
-        if (isModified)
+        // Commit changes if modifications were made
+        if (commitIfModified && isModified)
         {
             await unitOfWork.CommitAsync();
         }
     }
 
-
-    public static void UpdateTagList(ICollection<TagDto>? existingDbTags, Series series, IReadOnlyCollection<Tag> newTags, Action<Tag> handleAdd, Action onModified)
+    /// <summary>
+    /// Updates a tag list on a series metadata entity by matching input tag names against existing DB tags.
+    /// Used for series-level tag/genre updates where the caller provides all DB tags upfront.
+    /// </summary>
+    /// <param name="inputTags">The desired tag names (null = no-op)</param>
+    /// <param name="existingEntityTags">The entity's current tag collection (e.g. series.Metadata.Tags)</param>
+    /// <param name="allDbTags">All matching tags from the database for lookup</param>
+    /// <param name="handleAdd">Callback to add a tag to the entity</param>
+    /// <param name="onModified">Callback when any modification is made</param>
+    public static void UpdateTagList<T>(
+        ICollection<string>? inputTags,
+        ICollection<T> existingEntityTags,
+        IReadOnlyCollection<T> allDbTags,
+        Action<T> handleAdd,
+        Action onModified)
+        where T : class, ITag, new()
     {
-        UpdateTagList((existingDbTags ?? []).Select(t => t.Title).ToList(), series, newTags, handleAdd, onModified);
-    }
-
-    public static void UpdateTagList(ICollection<string>? existingDbTags, Series series, IReadOnlyCollection<Tag> newTags, Action<Tag> handleAdd, Action onModified)
-    {
-        if (existingDbTags == null) return;
+        if (inputTags == null) return;
 
         var isModified = false;
 
-        // Convert tags and existing genres to hash sets for quick lookups by normalized title
-        var existingTagSet = new HashSet<string>(existingDbTags.Select(t => t.ToNormalized()));
-        var dbTagSet = new HashSet<string>(series.Metadata.Tags.Select(g => g.NormalizedTitle));
+        // Convert input tags and existing entity tags to hash sets for quick lookups by normalized title
+        var inputTagSet = new HashSet<string>(inputTags.Select(t => t.ToNormalized()));
+        var existingTagSet = new HashSet<string>(existingEntityTags.Select(t => t.NormalizedTitle));
 
-        // Remove tags that are no longer present in the input tags
-        var existingTagsCopy = series.Metadata.Tags.ToList();  // Copy to avoid modifying collection while iterating
-        foreach (var existing in existingTagsCopy)
+        // Remove tags that are no longer present in the input
+        var existingCopy = existingEntityTags.ToList();
+        foreach (var existing in existingCopy)
         {
-            if (!existingTagSet.Contains(existing.NormalizedTitle)) // This correctly ensures removal of non-present tags
+            if (!inputTagSet.Contains(existing.NormalizedTitle))
             {
-                series.Metadata.Tags.Remove(existing);
+                existingEntityTags.Remove(existing);
                 isModified = true;
             }
         }
 
-        // Prepare a dictionary for quick lookup of genres from the `newTags` collection by normalized title
-        var allTagsDict = newTags.ToDictionary(t => t.NormalizedTitle);
+        // Prepare a dictionary for quick lookup from the allDbTags collection
+        var allTagsDict = allDbTags.ToDictionary(t => t.NormalizedTitle);
 
         // Add new tags from the input list
-        foreach (var tagDto in existingDbTags)
+        foreach (var tagName in inputTags)
         {
-            var normalizedTitle = tagDto.ToNormalized();
+            var normalizedTitle = tagName.ToNormalized();
 
-            if (dbTagSet.Contains(normalizedTitle)) continue; // This prevents re-adding existing genres
+            if (existingTagSet.Contains(normalizedTitle)) continue;
 
             if (allTagsDict.TryGetValue(normalizedTitle, out var existingTag))
             {
-                handleAdd(existingTag);  // Add existing tag from allTagsDict
+                handleAdd(existingTag);
             }
             else
             {
-                handleAdd(new TagBuilder(tagDto).Build());  // Add new genre if not found
+                var newTag = new T
+                {
+                    Title = tagName.Trim(),
+                    NormalizedTitle = normalizedTitle
+                };
+                handleAdd(newTag);
             }
             isModified = true;
         }
 
-        // Call onModified if any changes were made
         if (isModified)
         {
             onModified();

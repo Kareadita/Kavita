@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using Kavita.Models.Entities.Enums;
 using Kavita.Models.Entities.Enums.ReadingList;
 using Kavita.Models.Entities.Interfaces;
@@ -9,8 +10,8 @@ namespace Kavita.Models.DTOs.ReadingLists;
 public sealed record ReadingListDto : IHasCoverImage
 {
     public int Id { get; init; }
-    public string Title { get; set; } = default!;
-    public string Summary { get; set; } = default!;
+    public string Title { get; set; } = null!;
+    public string Summary { get; set; } = null!;
     /// <summary>
     /// Reading lists that are promoted are only done by admins
     /// </summary>
@@ -86,10 +87,13 @@ public sealed record ReadingListDto : IHasCoverImage
     /// Only updated when ShaHash changes and we pull new content.
     /// </summary>
     public DateTime? LastSyncedUtc { get; set; }
+    /// <summary>
+    /// Total items at CBL Import, this helps track missing items. CBL Sync will update to the latest.
+    /// </summary>
+    public int TotalItemsAtImport { get; set; }
+    public List<ReadingListTagDto> Tags { get; set; }
 
-    public bool CanSync => Provider != ReadingListProvider.None
-                           && Provider != ReadingListProvider.File
-                           && (!string.IsNullOrEmpty(SourcePath) || !string.IsNullOrEmpty(DownloadUrl));
+    public bool CanSync { get; set; }
     /// <summary>
     /// Checks if the remote SHA differs from our stored hash.
     /// </summary>

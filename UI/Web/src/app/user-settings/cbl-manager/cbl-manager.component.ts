@@ -3,10 +3,10 @@ import {AccountService} from '../../_services/account.service';
 import {ToastrService} from 'ngx-toastr';
 import {ConfirmService} from '../../shared/confirm.service';
 import {ModalService} from '../../_services/modal.service';
-import {DatePipe, NgTemplateOutlet} from '@angular/common';
+import {NgTemplateOutlet} from '@angular/common';
 import {FileSystemFileEntry, NgxFileDropEntry, NgxFileDropModule} from 'ngx-file-drop';
 import {ReadingListService} from '../../_services/reading-list.service';
-import {ReadingList, ReadingListProvider} from '../../_models/reading-list';
+import {ReadingList, ReadingListProvider} from '../../_models/reading-list/reading-list';
 import {LoadingComponent} from '../../shared/loading/loading.component';
 import {translate, TranslocoDirective} from '@jsverse/transloco';
 import {BrowseCblRepoModalComponent} from '../_modals/browse-cbl-repo-modal/browse-cbl-repo-modal.component';
@@ -14,20 +14,25 @@ import {ImportCblModalComponent} from '../_modals/import-cbl-modal/import-cbl-mo
 import {CblService} from '../../_services/cbl.service';
 import {CblRepoItem} from '../../_models/reading-list/cbl/cbl-repo-item';
 import {CblSavedFile} from '../../_models/reading-list/cbl/cbl-saved-file';
-import {FormControl, FormGroup, ReactiveFormsModule} from '@angular/forms';
+import {ReactiveFormsModule} from '@angular/forms';
 import {PromotedIconComponent} from '../../shared/_components/promoted-icon/promoted-icon.component';
 import {ReadingListProviderPipe} from '../../_pipes/reading-list-provider.pipe';
 import {forkJoin} from 'rxjs';
 import {ImageService} from '../../_services/image.service';
 import {ReadMoreComponent} from '../../shared/read-more/read-more.component';
 import {ImageComponent} from '../../shared/image/image.component';
-import {AgeRatingPipe} from '../../_pipes/age-rating.pipe';
 import {RouterLink} from '@angular/router';
 import {editModal} from "../../_models/modal/modal-options";
 import {ModalResult} from "../../_models/modal/modal-result";
 import {
   FileDragAndDropUploadComponent
 } from "src/app/shared/file-drag-and-drop-upload/file-drag-and-drop-upload.component";
+import {UtcToLocalDatePipe} from "../../_pipes/utc-to-locale-date.pipe";
+import {TimeAgoPipe} from "../../_pipes/time-ago.pipe";
+import {AgeRatingImageComponent} from "../../_single-module/age-rating-image/age-rating-image.component";
+import {DateYearRangePipe} from "../../_pipes/date-year-range.pipe";
+import {SafeUrlPipe} from "../../_pipes/safe-url.pipe";
+import {NgbTooltip} from "@ng-bootstrap/ng-bootstrap";
 
 @Component({
   selector: 'app-cbl-manager',
@@ -41,10 +46,13 @@ import {
     ReadingListProviderPipe,
     ReadMoreComponent,
     ImageComponent,
-    AgeRatingPipe,
     RouterLink,
-    DatePipe,
-    FileDragAndDropUploadComponent
+    FileDragAndDropUploadComponent,
+    UtcToLocalDatePipe,
+    TimeAgoPipe,
+    AgeRatingImageComponent,
+    SafeUrlPipe,
+    NgbTooltip
   ],
   templateUrl: './cbl-manager.component.html',
   styleUrl: './cbl-manager.component.scss',
@@ -62,6 +70,7 @@ export class CblManagerComponent implements OnInit {
 
   files: NgxFileDropEntry[] = [];
   acceptableExtensions = ['.cbl', '.json'].join(',');
+  private readonly dateYearRangePipe = new DateYearRangePipe();
   isUploadingCbl = signal<boolean>(false);
   allLists = signal<ReadingList[]>([]);
 
@@ -89,6 +98,8 @@ export class CblManagerComponent implements OnInit {
     }
     return lists;
   });
+
+
 
   ngOnInit() {
     this.readingListService.getReadingLists(false).subscribe(lists => {
@@ -169,9 +180,29 @@ export class CblManagerComponent implements OnInit {
   }
 
   syncReadingList(list: ReadingList) {
-    this.cblService.syncList(list.id).subscribe(() => {
+    this.cblService.syncList(list.id, true).subscribe(() => {
       this.toastr.success(translate('toasts.reading-list-sync-enqueued'));
     });
+  }
+
+  getDateRangeLabel(rl: ReadingList) {
+    if (!rl || rl.startingYear === 0) return null;
+
+    // Reading list dates start with 1, JS Date starts with 0
+    const startMonth = rl.startingMonth > 0 ? rl.startingMonth - 1 : undefined;
+    const endMonth = rl.startingMonth > 0 ? rl.endingMonth - 1 : undefined;
+
+    const startDate = startMonth !== undefined ? new Date(rl.startingYear, startMonth) : new Date(rl.startingYear);
+    const endDate = rl.endingYear <= 0 ? null :
+      (endMonth !== undefined ? new Date(rl.endingYear, endMonth) : new Date(rl.endingYear));
+
+    return this.dateYearRangePipe.transform(startDate, endDate, !!endMonth);
+  }
+
+  getMissingCount(rl: ReadingList) {
+    if (rl.totalItemsAtImport === 0) return 0;
+    if (rl.itemCount > rl.totalItemsAtImport) return 0;
+    return rl.totalItemsAtImport - rl.itemCount;
   }
 
   async deleteList(list: ReadingList) {

@@ -6,17 +6,33 @@ namespace Kavita.Models.DTOs.ReadingLists.CBL.Internal;
 public enum CblExternalDbProvider
 {
     /// <summary>
-    /// Comic Vine (comicvine.gamespot.com). Provider short-name: "cv"
+    /// Comic Vine (comicvine.gamespot.com)
     /// </summary>
     ComicVine,
     /// <summary>
-    /// Metron (metron.cloud). Provider short-name: "metron"
+    /// Metron (metron.cloud)
     /// </summary>
     Metron,
     /// <summary>
-    /// Grand Comics Database (comics.org). Provider short-name: "gcd"
+    /// Grand Comics Database (comics.org)
     /// </summary>
     GrandComicsDatabase,
+    /// <summary>
+    /// Kavita, unofficial
+    /// </summary>
+    Kavita,
+    /// <summary>
+    /// AniList, unofficial
+    /// </summary>
+    AniList,
+    /// <summary>
+    /// MyAnimeList, unofficial
+    /// </summary>
+    Mal,
+    /// <summary>
+    /// Hardcover, unofficial
+    /// </summary>
+    Hardcover,
     /// <summary>
     /// Unrecognised or missing provider
     /// </summary>

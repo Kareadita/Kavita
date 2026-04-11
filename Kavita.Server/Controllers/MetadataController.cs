@@ -13,6 +13,7 @@ using Kavita.Models.DTOs.Filtering;
 using Kavita.Models.DTOs.Metadata;
 using Kavita.Models.DTOs.Metadata.Browse;
 using Kavita.Models.DTOs.Person;
+using Kavita.Models.DTOs.ReadingLists;
 using Kavita.Models.DTOs.SeriesDetail;
 using Kavita.Models.Entities.Enums;
 using Kavita.Server.Extensions;
@@ -102,6 +103,17 @@ public class MetadataController(IUnitOfWork unitOfWork, IExternalMetadataService
             return Ok(await unitOfWork.TagRepository.GetAllTagDtosForLibrariesAsync(UserId, ids));
         }
         return Ok(await unitOfWork.TagRepository.GetAllTagDtosForLibrariesAsync(UserId));
+    }
+
+    /// <summary>
+    /// Fetches Reading List Tags from the instance
+    /// </summary>
+    /// <returns></returns>
+    [HttpGet("readinglist-tags")]
+    [ResponseCache(CacheProfileName = ResponseCacheProfiles.FiveMinute)]
+    public async Task<ActionResult<IList<ReadingListTagDto>>> GetAllGenres()
+    {
+        return Ok(await unitOfWork.ReadingListRepository.GetAllReadingListTagDtosAsync(UserId, HttpContext.RequestAborted));
     }
 
     /// <summary>

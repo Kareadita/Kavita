@@ -2,7 +2,7 @@ import {ChangeDetectionStrategy, ChangeDetectorRef, Component, computed, inject,
 import {RouterLink} from '@angular/router';
 import {FormsModule} from '@angular/forms';
 import {TranslocoDirective} from '@jsverse/transloco';
-import {ReadingList} from 'src/app/_models/reading-list';
+import {ReadingList} from 'src/app/_models/reading-list/reading-list';
 import {ReadingListCardEntity} from 'src/app/_models/card/card-entity';
 import {ActionableCardConfiguration, hasActionables} from 'src/app/_models/card/card-configuration';
 import {ActionItem} from 'src/app/_models/actionables/action-item';

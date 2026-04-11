@@ -143,15 +143,15 @@ public class SeriesService(
             }
 
 
-            if (updateSeriesMetadataDto.SeriesMetadata?.Genres != null &&
-                updateSeriesMetadataDto.SeriesMetadata.Genres.Count != 0)
+            if (updateSeriesMetadataDto.SeriesMetadata?.Genres is {Count: > 0})
             {
                 var allGenres = (await unitOfWork.GenreRepository.GetAllGenresByNamesAsync(updateSeriesMetadataDto.SeriesMetadata.Genres.Select(t => Parser.Normalize(t.Title)), ct)).ToList();
                 series.Metadata.Genres ??= [];
-                GenreHelper.UpdateGenreList(updateSeriesMetadataDto.SeriesMetadata?.Genres, series, allGenres, genre =>
-                {
-                    series.Metadata.Genres.Add(genre);
-                }, () => series.Metadata.GenresLocked = true);
+                TagHelper.UpdateTagList(updateSeriesMetadataDto.SeriesMetadata?.Genres.Select(t => t.Title).ToList(),
+                    series.Metadata.Genres, allGenres, genre =>
+                    {
+                        series.Metadata.Genres.Add(genre);
+                    }, () => series.Metadata.GenresLocked = true);
             }
             else
             {
@@ -162,13 +162,14 @@ public class SeriesService(
             if (updateSeriesMetadataDto.SeriesMetadata?.Tags is {Count: > 0})
             {
                 var allTags = (await unitOfWork.TagRepository
-                    .GetAllTagsByNameAsync(updateSeriesMetadataDto.SeriesMetadata.Tags.Select(t => Parser.Normalize(t.Title)), ct))
+                        .GetAllTagsByNameAsync(updateSeriesMetadataDto.SeriesMetadata.Tags.Select(t => Parser.Normalize(t.Title)), ct))
                     .ToList();
                 series.Metadata.Tags ??= [];
-                TagHelper.UpdateTagList(updateSeriesMetadataDto.SeriesMetadata?.Tags, series, allTags, tag =>
-                {
-                    series.Metadata.Tags.Add(tag);
-                }, () => series.Metadata.TagsLocked = true);
+                TagHelper.UpdateTagList(updateSeriesMetadataDto.SeriesMetadata?.Tags?.Select(t => t.Title).ToList(),
+                    series.Metadata.Tags, allTags, tag =>
+                    {
+                        series.Metadata.Tags.Add(tag);
+                    }, () => series.Metadata.TagsLocked = true);
             }
             else
             {

@@ -18,7 +18,7 @@ import {Chapter, LooseLeafOrDefaultNumber} from "../_models/chapter";
 
 import {Volume} from "../_models/volume";
 import {UserCollection} from "../_models/collection-tag";
-import {ReadingList} from "../_models/reading-list";
+import {ReadingList} from "../_models/reading-list/reading-list";
 import {LibraryType} from "../_models/library/library";
 import {MangaFormat} from "../_models/manga-format";
 import {User} from "../_models/user/user";

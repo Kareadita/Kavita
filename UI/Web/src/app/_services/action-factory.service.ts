@@ -4,7 +4,7 @@ import {Chapter} from '../_models/chapter';
 import {UserCollection} from '../_models/collection-tag';
 import {Device} from '../_models/device/device';
 import {Library, LibraryType} from '../_models/library/library';
-import {ReadingList} from '../_models/reading-list';
+import {ReadingList} from '../_models/reading-list/reading-list';
 import {Series} from '../_models/series';
 import {Volume} from '../_models/volume';
 import {AccountService, Role} from './account.service';

@@ -1,5 +1,5 @@
 import {inject, Pipe, PipeTransform} from '@angular/core';
-import {ReadingListProvider} from "../_models/reading-list";
+import {ReadingListProvider} from "../_models/reading-list/reading-list";
 import {TranslocoService} from "@jsverse/transloco";
 
 @Pipe({

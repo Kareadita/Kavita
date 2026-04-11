@@ -49,7 +49,7 @@ import {FilterField} from "../_models/metadata/v2/filter-field";
 import {FilterComparison} from "../_models/metadata/v2/filter-comparison";
 import {FilterUtilitiesService} from "../shared/_services/filter-utilities.service";
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
-import {ReadingList} from "../_models/reading-list";
+import {ReadingList} from "../_models/reading-list/reading-list";
 import {ReadingListService} from "../_services/reading-list.service";
 import {RelatedTabChangeEvent, RelatedTabComponent} from "../_single-module/related-tab/related-tab.component";
 import {BadgeExpanderComponent} from "../shared/badge-expander/badge-expander.component";

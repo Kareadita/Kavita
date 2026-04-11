@@ -111,6 +111,9 @@ internal static class CblSeriesMatcher
             .GroupBy(c => c.MetronId)
             .ToDictionary(g => g.Key, g => g.ToList());
 
+        var externalIdByKavitaId = externalIdChapters
+            .ToDictionary(c => c.Id, c => c);
+
         var nameVariants = GenerateAllNameVariants(items);
 
         // Build series lookup: normalized name -> list of series
@@ -141,7 +144,7 @@ internal static class CblSeriesMatcher
             }
 
             // Tier 1: External IDs
-            if (TryMatchByExternalId(item, externalIdByComicVine, externalIdByMetron, out var extMatch, out var extChapter))
+            if (TryMatchByExternalId(item, externalIdByKavitaId, externalIdByComicVine, externalIdByMetron, out var extMatch, out var extChapter))
             {
                 results[item.Order] = (extMatch, new CblBookResult(item)
                 {
@@ -307,12 +310,24 @@ internal static class CblSeriesMatcher
     }
 
     private static bool TryMatchByExternalId(ParsedCblItem item,
+        Dictionary<int, Chapter> byKavitaId,
         Dictionary<string, List<Chapter>> byComicVine,
         Dictionary<long, List<Chapter>> byMetron,
         out MatchedItem match, out Chapter matchedChapter)
     {
         foreach (var extId in item.ExternalIds)
         {
+            if (extId.Provider == CblExternalDbProvider.Kavita
+                && int.TryParse(extId.IssueId, out var kavitaChapterId))
+            {
+                if (byKavitaId.TryGetValue(kavitaChapterId, out var ch))
+                {
+                    match = new MatchedItem(ch.Volume.SeriesId, ch.VolumeId, ch.Id, CblMatchTier.ExternalId);
+                    matchedChapter = ch;
+                    return true;
+                }
+            }
+
             if (extId.Provider == CblExternalDbProvider.ComicVine && !string.IsNullOrEmpty(extId.IssueId))
             {
                 if (byComicVine.TryGetValue(extId.IssueId, out var chapters) && chapters.Count > 0)

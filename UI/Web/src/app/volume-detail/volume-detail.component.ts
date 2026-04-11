@@ -54,7 +54,7 @@ import {VirtualScrollerModule} from "@iharbeck/ngx-virtual-scroller";
 import {UtilityService} from "../shared/_services/utility.service";
 import {EditVolumeModalComponent} from "../_single-module/edit-volume-modal/edit-volume-modal.component";
 import {RelatedTabChangeEvent, RelatedTabComponent} from "../_single-module/related-tab/related-tab.component";
-import {ReadingList} from "../_models/reading-list";
+import {ReadingList} from "../_models/reading-list/reading-list";
 import {ReadingListService} from "../_services/reading-list.service";
 import {BadgeExpanderComponent} from "../shared/badge-expander/badge-expander.component";
 import {

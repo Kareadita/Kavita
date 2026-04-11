@@ -11,7 +11,7 @@ using Microsoft.EntityFrameworkCore;
 namespace Kavita.Models.Entities.Metadata;
 
 [Index(nameof(Id), nameof(SeriesId), IsUnique = true)]
-public class SeriesMetadata : IHasConcurrencyToken, IHasKPlusMetadata
+public class SeriesMetadata : IHasConcurrencyToken, IHasKPlusMetadata, IHasTags<Tag>
 {
     public int Id { get; set; }
 

@@ -630,7 +630,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
       if (pageNum >= maxPages - 10) {
         // Tell server to cache the next chapter
-        if (!this.nextChapterPrefetched && this.nextChapterId !== CHAPTER_ID_DOESNT_EXIST) {
+        if (!this.nextChapterPrefetched && this.nextChapterId !== CHAPTER_ID_DOESNT_EXIST && this.nextChapterId !== CHAPTER_ID_NOT_FETCHED) {
           this.readerService.getChapterInfo(this.nextChapterId).pipe(catchError(err => {
             this.nextChapterDisabled = true;
             console.error(err);
@@ -642,7 +642,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       }
 
       if (pageNum <= 10) {
-        if (!this.prevChapterPrefetched && this.prevChapterId !== CHAPTER_ID_DOESNT_EXIST) {
+        if (!this.prevChapterPrefetched && this.prevChapterId !== CHAPTER_ID_DOESNT_EXIST && this.prevChapterId !== CHAPTER_ID_NOT_FETCHED) {
           this.readerService.getChapterInfo(this.prevChapterId).pipe(catchError(err => {
             this.prevChapterDisabled = true;
             console.error(err);

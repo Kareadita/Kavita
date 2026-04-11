@@ -438,31 +438,45 @@ public class ChapterRepository(DataContext context, IMapper mapper) : IChapterRe
             .FirstOrDefaultAsync(ct);
     }
 
-    public async Task<IList<Chapter>> GetChaptersByExternalIdsAsync(IList<string> comicVineIds, IList<long> metronIds, IList<int> libraryIds, CancellationToken ct = default)
+    public async Task<IList<Chapter>> GetChaptersByExternalIdsAsync(IList<int> kavitaIds, IList<string> comicVineIds,
+        IList<long> metronIds, IList<int> libraryIds, CancellationToken ct = default)
     {
-        if (comicVineIds.Count == 0 && metronIds.Count == 0) return [];
+        if (comicVineIds.Count == 0 && metronIds.Count == 0 && kavitaIds.Count == 0) return [];
 
-        var query = context.Chapter
+        var results = new List<Chapter>();
+        const int chunkSize = 500;
+
+        foreach (var batch in kavitaIds.Chunk(chunkSize))
+        {
+            var batchList = batch.ToList();
+            results.AddRange(await BaseQuery()
+                .Where(c => batchList.Contains(c.Id))
+                .ToListAsync(ct));
+        }
+
+        foreach (var batch in comicVineIds.Chunk(chunkSize))
+        {
+            var batchList = batch.ToList();
+            results.AddRange(await BaseQuery()
+                .Where(c => c.ComicVineId != null && batchList.Contains(c.ComicVineId))
+                .ToListAsync(ct));
+        }
+
+        foreach (var batch in metronIds.Chunk(chunkSize))
+        {
+            var batchList = batch.ToList();
+            results.AddRange(await BaseQuery()
+                .Where(c => c.MetronId > 0 && batchList.Contains(c.MetronId))
+                .ToListAsync(ct));
+        }
+
+        // Dedupe as a chapter could match on multiple providers
+        return results.DistinctBy(c => c.Id).ToList();
+
+        IQueryable<Chapter> BaseQuery() => context.Chapter
             .Include(c => c.Volume)
             .ThenInclude(v => v.Series)
             .Where(c => libraryIds.Contains(c.Volume.Series.LibraryId));
-
-        if (comicVineIds.Count > 0 && metronIds.Count > 0)
-        {
-            query = query.Where(c =>
-                (c.ComicVineId != null && comicVineIds.Contains(c.ComicVineId)) ||
-                (c.MetronId > 0 && metronIds.Contains(c.MetronId)));
-        }
-        else if (comicVineIds.Count > 0)
-        {
-            query = query.Where(c => c.ComicVineId != null && comicVineIds.Contains(c.ComicVineId));
-        }
-        else
-        {
-            query = query.Where(c => c.MetronId > 0 && metronIds.Contains(c.MetronId));
-        }
-
-        return await query.ToListAsync(ct);
     }
 
     public async Task<IList<Chapter>> GetChaptersByAlternateSeriesAsync(IList<string> normalizedNames, IList<int> libraryIds, CancellationToken ct = default)

@@ -110,7 +110,10 @@ public class CblExportServiceTests
         Assert.Equal("2016", first.Year);
         Assert.Equal(string.Empty, first.Format);
         Assert.Equal("cbz", first.FileType);
-        Assert.Empty(first.Databases);
+        Assert.Single(first.Databases);
+        Assert.Equal("kavita", first.Databases[0].Name);
+        Assert.Equal("1", first.Databases[0].Series);
+        Assert.Equal("0", first.Databases[0].Issue);
 
         var last = result.Books.Book[2];
         Assert.Equal("Superman", last.Series);
@@ -183,10 +186,15 @@ public class CblExportServiceTests
         var result = CblExportService.BuildCblReadingList(readingList, items);
 
         var first = result.Books.Book[0];
-        Assert.Single(first.Databases);
-        Assert.Equal("cv", first.Databases[0].Name);
-        Assert.Null(first.Databases[0].Series); // Series is the series id and not the Series name
-        Assert.Equal("cv-12345", first.Databases[0].Issue);
+        Assert.Equal(2, first.Databases.Count);
+        // Kavita entry is always first
+        Assert.Equal("kavita", first.Databases[0].Name);
+        Assert.Equal("1", first.Databases[0].Series);
+        Assert.Equal("0", first.Databases[0].Issue);
+        // ComicVine entry
+        Assert.Equal("cv", first.Databases[1].Name);
+        Assert.Null(first.Databases[1].Series); // Series is the series id and not the Series name
+        Assert.Equal("cv-12345", first.Databases[1].Issue);
     }
 
     [Fact]
@@ -202,11 +210,16 @@ public class CblExportServiceTests
         var result = CblExportService.BuildCblReadingList(readingList, items);
 
         var first = result.Books.Book[0];
-        Assert.Equal(2, first.Databases.Count);
-        Assert.Equal("cv", first.Databases[0].Name);
-        Assert.Equal("cv-12345", first.Databases[0].Issue);
-        Assert.Equal("metron", first.Databases[1].Name);
-        Assert.Equal("67890", first.Databases[1].Issue);
+        Assert.Equal(3, first.Databases.Count);
+        // Kavita entry is always first
+        Assert.Equal("kavita", first.Databases[0].Name);
+        Assert.Equal("1", first.Databases[0].Series);
+        Assert.Equal("0", first.Databases[0].Issue);
+        // ComicVine and Metron follow
+        Assert.Equal("cv", first.Databases[1].Name);
+        Assert.Equal("cv-12345", first.Databases[1].Issue);
+        Assert.Equal("metron", first.Databases[2].Name);
+        Assert.Equal("67890", first.Databases[2].Issue);
     }
 
     [Fact]
@@ -220,7 +233,11 @@ public class CblExportServiceTests
 
         var result = CblExportService.BuildCblReadingList(readingList, items);
 
-        Assert.Empty(result.Books.Book[0].Databases);
+        var kavitaOnly = result.Books.Book[0].Databases;
+        Assert.Single(kavitaOnly);
+        Assert.Equal("kavita", kavitaOnly[0].Name);
+        Assert.Equal("1", kavitaOnly[0].Series);
+        Assert.Equal("0", kavitaOnly[0].Issue);
     }
 
     [Fact]
@@ -244,7 +261,11 @@ public class CblExportServiceTests
 
             Assert.Single(parsed.Items);
             var item = parsed.Items[0];
-            Assert.Equal(2, item.ExternalIds.Count);
+            Assert.Equal(3, item.ExternalIds.Count);
+
+            var kavita = item.ExternalIds.First(e => e.Provider == CblExternalDbProvider.Kavita);
+            Assert.Equal("1", kavita.SeriesId);
+            Assert.Equal("0", kavita.IssueId);
 
             var cv = item.ExternalIds.First(e => e.Provider == CblExternalDbProvider.ComicVine);
             Assert.Equal("cv-12345", cv.IssueId);
@@ -348,13 +369,20 @@ public class CblExportServiceTests
         Assert.Equal("1", first.IssueNumber);
         Assert.Equal(2016, first.SeriesStartYear);
         Assert.Equal("2016-06-15", first.IssueCoverDate);
-        Assert.Empty(first.Id);
+        Assert.Single(first.Id);
+        Assert.Equal("kavita", first.Id[0].Name);
+        Assert.Equal("1", first.Id[0].Series);
+        Assert.Equal("0", first.Id[0].Issue);
 
         var second = result.IssueList[1];
         Assert.Equal("Superman", second.SeriesName);
         Assert.Equal("10", second.IssueNumber);
         Assert.Equal(2011, second.SeriesStartYear);
         Assert.Equal("2013-03-01", second.IssueCoverDate);
+        Assert.Single(second.Id);
+        Assert.Equal("kavita", second.Id[0].Name);
+        Assert.Equal("2", second.Id[0].Series);
+        Assert.Equal("0", second.Id[0].Issue);
     }
 
     [Fact]

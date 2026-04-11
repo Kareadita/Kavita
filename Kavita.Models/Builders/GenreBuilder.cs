@@ -13,7 +13,7 @@ public class GenreBuilder : IEntityBuilder<Genre>
     {
         _genre = new Genre()
         {
-            Title = name.Trim().SentenceCase(),
+            Title = name.Trim(),
             NormalizedTitle = name.ToNormalized(),
             Chapters = [],
             SeriesMetadatas = []

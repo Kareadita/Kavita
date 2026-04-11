@@ -1,7 +1,7 @@
 import {ResolveFn, Router, UrlTree} from "@angular/router";
 import {inject} from "@angular/core";
 import {catchError, of, switchMap} from "rxjs";
-import {ReadingList} from "../_models/reading-list";
+import {ReadingList} from "../_models/reading-list/reading-list";
 import {ReadingListService} from "../_services/reading-list.service";
 
 export const readingListResolver: ResolveFn<ReadingList | UrlTree> = (route, state) => {

@@ -1,9 +1,10 @@
-import {LibraryType} from "./library/library";
-import {MangaFormat} from "./manga-format";
-import {IHasCover} from "./common/i-has-cover";
-import {AgeRating} from "./metadata/age-rating";
-import {IHasReadingTime} from "./common/i-has-reading-time";
-import {IHasCast} from "./common/i-has-cast";
+import {LibraryType} from "../library/library";
+import {MangaFormat} from "../manga-format";
+import {IHasCover} from "../common/i-has-cover";
+import {AgeRating} from "../metadata/age-rating";
+import {IHasReadingTime} from "../common/i-has-reading-time";
+import {IHasCast} from "../common/i-has-cast";
+import {ReadingListTag} from "./reading-list-tag";
 
 export interface ReadingListItemChapter {
   id: number;
@@ -31,6 +32,7 @@ export interface ReadingListItemVolume {
 }
 
 export interface ReadingListItem {
+  id: number;
   pagesRead: number;
   pagesTotal: number;
   seriesName: string;
@@ -42,7 +44,6 @@ export interface ReadingListItem {
   chapterNumber: string;
   volumeNumber: string;
   libraryId: number;
-  id: number;
   releaseDate: string;
   title: string;
   libraryType: LibraryType;
@@ -79,14 +80,16 @@ export interface ReadingList extends IHasCover {
   endingYear: number;
   endingMonth: number;
   itemCount: number;
+  totalItemsAtImport: number;
   ageRating: AgeRating;
+  tags: ReadingListTag[];
 
   sourcePath: string | null;
   downloadUrl: string | null;
   shareUrl: string | null;
   provider: ReadingListProvider;
-  lastSyncCheckUtc: Date | null;
-  lastSyncedDate: Date | null;
+  lastSyncCheckUtc: string | null;
+  lastSyncedUtc: string | null;
   canSync: boolean;
   hasRemoteChange: boolean;
 }

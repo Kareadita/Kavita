@@ -7,9 +7,11 @@ using Kavita.API.Services.SignalR;
 using Kavita.Models.Builders;
 using Kavita.Models.DTOs.ReadingLists.CBL.Internal;
 using Kavita.Models.DTOs.ReadingLists.CBL.V1;
+using Kavita.Models.DTOs.ReadingLists.CBL.V2;
 using Kavita.Models.Entities;
 using Kavita.Models.Entities.Enums;
 using Kavita.Models.Entities.User;
+using Kavita.Models.Extensions;
 using Kavita.Services.Builders;
 using Kavita.Services.ReadingLists;
 using Microsoft.Extensions.Logging;
@@ -189,6 +191,45 @@ public class CblTestHelper : IDisposable
         return tempPath;
     }
 
+    public string WriteCblV2ToDisk(ParsedCblReadingList cbl)
+    {
+        var tempPath = Path.Join(Path.GetTempPath(), $"kavita-test-{Guid.NewGuid()}.json");
+        _tempFiles.Add(tempPath);
+
+        var v2Root = ToCblV2(cbl);
+        var json = JsonSerializer.Serialize(v2Root, new JsonSerializerOptions { WriteIndented = true });
+        File.WriteAllText(tempPath, json);
+
+        return tempPath;
+    }
+
+    private static CblV2Root ToCblV2(ParsedCblReadingList cbl)
+    {
+        return new CblV2Root
+        {
+            FileDetails = new CblV2FileDetails
+            {
+                UUID = Guid.NewGuid().ToString(),
+                Version = 1.0
+            },
+            ListDetails = new CblV2ListDetails
+            {
+                Name = cbl.Name,
+                Description = cbl.Summary,
+                StartYear = cbl.StartYear > 0 ? cbl.StartYear : null,
+                EndYear = cbl.EndYear > 0 ? cbl.EndYear : null,
+                Tags = cbl.Tags,
+            },
+            IssueList = cbl.Items.Select(item => new CblV2Issue
+            {
+                SeriesName = item.SeriesName,
+                IssueNumber = item.Number,
+                SeriesStartYear = !string.IsNullOrEmpty(item.Volume) && int.TryParse(item.Volume, out var y) ? y : null,
+            }).ToList(),
+            Notes = cbl.Notes
+        };
+    }
+
     public static string SerializeCblToXml(ParsedCblReadingList cbl)
     {
         var serializer = new XmlSerializer(typeof(CblReadingList));
@@ -223,13 +264,7 @@ public class CblTestHelper : IDisposable
 
                     book.Databases = item.ExternalIds.Select(extId => new CblBookDatabase
                     {
-                        Name = extId.Provider switch
-                        {
-                            CblExternalDbProvider.ComicVine => "cv",
-                            CblExternalDbProvider.Metron => "metron",
-                            CblExternalDbProvider.GrandComicsDatabase => "gcd",
-                            _ => "unknown"
-                        },
+                        Name = extId.Provider.ToShortName(),
                         Series = extId.SeriesId,
                         Issue = extId.IssueId
                     }).ToList();

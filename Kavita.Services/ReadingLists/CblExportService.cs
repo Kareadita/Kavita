@@ -11,11 +11,13 @@ using System.Xml.Serialization;
 using Kavita.API.Database;
 using Kavita.API.Services;
 using Kavita.API.Services.ReadingLists;
+using Kavita.Models.DTOs.ReadingLists.CBL.Internal;
 using Kavita.Models.DTOs.ReadingLists.CBL.V1;
 using Kavita.Models.DTOs.ReadingLists.CBL.V2;
 using Kavita.Models.Entities;
 using Kavita.Models.Entities.Enums;
 using Kavita.Models.Entities.ReadingLists;
+using Kavita.Models.Extensions;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 
@@ -205,45 +207,61 @@ public partial class CblExportService(IUnitOfWork unitOfWork, IDirectoryService 
 
     private static List<CblBookDatabase> GetV1Databases(Chapter chapter, Series series)
     {
-        var results = new List<CblBookDatabase>();
+        var results = new List<CblBookDatabase>()
+        {
+            new CblBookDatabase()
+            {
+                Name = CblExternalDbProvider.Kavita.ToShortName(),
+                Series = series.Id.ToString(),
+                Issue = chapter.Id.ToString(),
+            }
+        };
 
         if (!string.IsNullOrEmpty(chapter.ComicVineId))
         {
             if (!string.IsNullOrEmpty(series.ComicVineId))
             {
-                results.Add(new CblBookDatabase { Name = "cv", Series = series.ComicVineId, Issue = chapter.ComicVineId });
+                results.Add(new CblBookDatabase { Name = CblExternalDbProvider.ComicVine.ToShortName(), Series = series.ComicVineId, Issue = chapter.ComicVineId });
             }
             else
             {
-                results.Add(new CblBookDatabase { Name = "cv", Issue = chapter.ComicVineId });
+                results.Add(new CblBookDatabase { Name = CblExternalDbProvider.ComicVine.ToShortName(), Issue = chapter.ComicVineId });
             }
         }
 
 
         if (chapter.MetronId > 0)
-            results.Add(new CblBookDatabase { Name = "metron", Issue = chapter.MetronId.ToString() });
+            results.Add(new CblBookDatabase { Name = CblExternalDbProvider.Metron.ToShortName(), Issue = chapter.MetronId.ToString() });
 
         if (chapter.AniListId > 0)
-            results.Add(new CblBookDatabase { Name = "anilist", Series = chapter.AniListId.ToString(), Issue = chapter.AniListId.ToString() });
+            results.Add(new CblBookDatabase { Name = CblExternalDbProvider.AniList.ToShortName(), Series = chapter.AniListId.ToString(), Issue = chapter.AniListId.ToString() });
 
         if (chapter.MalId > 0)
-            results.Add(new CblBookDatabase { Name = "malist", Series = chapter.MalId.ToString(), Issue = chapter.MalId.ToString() });
+            results.Add(new CblBookDatabase { Name = CblExternalDbProvider.Mal.ToShortName(), Series = chapter.MalId.ToString(), Issue = chapter.MalId.ToString() });
 
         if (chapter.HardcoverId > 0)
-            results.Add(new CblBookDatabase { Name = "hardcover", Issue = chapter.HardcoverId.ToString() });
+            results.Add(new CblBookDatabase { Name = CblExternalDbProvider.Hardcover.ToShortName(), Issue = chapter.HardcoverId.ToString() });
 
         return results;
     }
 
     private static List<CblV2ExternalId> GetExternalIds(Chapter chapter, Series series)
     {
-        var results = new List<CblV2ExternalId>();
+        var results = new List<CblV2ExternalId>()
+        {
+            new CblV2ExternalId()
+            {
+                Issue = chapter.Id.ToString(),
+                Name = CblExternalDbProvider.Kavita.ToShortName(),
+                Series = series.Id.ToString(),
+            }
+        };
         if (chapter.AniListId > 0)
         {
             results.Add(new CblV2ExternalId()
             {
                 Issue = chapter.AniListId.ToString(),
-                Name = "anilist",
+                Name = CblExternalDbProvider.AniList.ToShortName(),
                 Series = chapter.AniListId.ToString()
             });
         }
@@ -253,7 +271,7 @@ public partial class CblExportService(IUnitOfWork unitOfWork, IDirectoryService 
             results.Add(new CblV2ExternalId()
             {
                 Issue = chapter.MalId.ToString(),
-                Name = "malist",
+                Name = CblExternalDbProvider.Mal.ToShortName(),
                 Series = chapter.MalId.ToString()
             });
         }
@@ -263,7 +281,7 @@ public partial class CblExportService(IUnitOfWork unitOfWork, IDirectoryService 
             results.Add(new CblV2ExternalId()
             {
                 Issue = chapter.ComicVineId,
-                Name = "cv",
+                Name = CblExternalDbProvider.ComicVine.ToShortName(),
                 Series = series.ComicVineId
             });
         }
@@ -273,7 +291,7 @@ public partial class CblExportService(IUnitOfWork unitOfWork, IDirectoryService 
             results.Add(new CblV2ExternalId()
             {
                 Issue = chapter.MetronId.ToString(),
-                Name = "metron",
+                Name = CblExternalDbProvider.Metron.ToShortName(),
                 Series = series.MetronId.ToString()
             });
         }
@@ -283,7 +301,7 @@ public partial class CblExportService(IUnitOfWork unitOfWork, IDirectoryService 
             results.Add(new CblV2ExternalId()
             {
                 Issue = chapter.HardcoverId.ToString(),
-                Name = "hardcover",
+                Name = CblExternalDbProvider.Hardcover.ToShortName(),
                 Series = series.HardcoverId.ToString()
             });
         }

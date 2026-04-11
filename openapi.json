@@ -2,12 +2,12 @@
   "openapi": "3.0.4",
   "info": {
     "title": "Kavita",
-    "description": "Kavita provides a set of APIs that are authenticated by JWT. JWT token can be copied from local storage. Assume all fields of a payload are required. Built against v0.8.9.35",
+    "description": "Kavita provides a set of APIs that are authenticated by JWT. JWT token can be copied from local storage. Assume all fields of a payload are required. Built against v0.8.9.36",
     "license": {
       "name": "GPL-3.0",
       "url": "https://github.com/Kareadita/Kavita/blob/develop/LICENSE"
     },
-    "version": "0.8.9.35"
+    "version": "0.8.9.36"
   },
   "servers": [
     {
@@ -1929,6 +1929,15 @@
             "schema": {
               "type": "integer",
               "format": "int32"
+            }
+          },
+          {
+            "name": "force",
+            "in": "query",
+            "description": "Ignore Hash and force sync flow",
+            "schema": {
+              "type": "boolean",
+              "default": false
             }
           }
         ],
@@ -7916,6 +7925,45 @@
         }
       }
     },
+    "/api/Metadata/readinglist-tags": {
+      "get": {
+        "tags": [
+          "Metadata"
+        ],
+        "summary": "Fetches Reading List Tags from the instance",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ReadingListTagDto"
+                  }
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ReadingListTagDto"
+                  }
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ReadingListTagDto"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/Metadata/tags-with-counts": {
       "post": {
         "tags": [
@@ -12377,7 +12425,24 @@
         },
         "responses": {
           "200": {
-            "description": "OK"
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReadingListDto"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReadingListDto"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReadingListDto"
+                }
+              }
+            }
           }
         }
       }
@@ -27395,9 +27460,19 @@
             "format": "date-time",
             "nullable": true
           },
+          "totalItemsAtImport": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "tags": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ReadingListTagDto"
+            },
+            "nullable": true
+          },
           "canSync": {
-            "type": "boolean",
-            "readOnly": true
+            "type": "boolean"
           }
         },
         "additionalProperties": false
@@ -27644,6 +27719,28 @@
           "seriesId": {
             "type": "integer",
             "format": "int32"
+          }
+        },
+        "additionalProperties": false
+      },
+      "ReadingListTagDto": {
+        "required": [
+          "normalizedTitle",
+          "title"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "title": {
+            "type": "string",
+            "nullable": true
+          },
+          "normalizedTitle": {
+            "type": "string",
+            "nullable": true
           }
         },
         "additionalProperties": false
@@ -30910,6 +31007,13 @@
           "endingYear": {
             "type": "integer",
             "format": "int32"
+          },
+          "tags": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "nullable": true
           }
         },
         "additionalProperties": false

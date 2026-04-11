@@ -2096,7 +2096,8 @@
         "url-label": "Url",
         "load": "Load",
         "back": "Back",
-        "items-count": "items",
+        "item-count": "{{common.item-count}}",
+        "missing-count": "{{reading-list-detail.missing-count}}",
         "provider-url": "URL",
         "provider-file": "File",
         "update-available": "Update available",
@@ -2109,10 +2110,10 @@
         "sync": "Sync",
         "delete": "{{common.delete}}",
         "view-list": "View Reading List",
-        "last-synced": "Last synced {{date}}",
-        "source": "Source",
-        "can-sync": "Can Sync",
-        "not-authorized": "You lack the ability to interact with this content"
+        "last-synced": "Last Synced: {{date}}",
+        "last-checked": "Last Checked: {{date}}",
+        "not-authorized": "You lack the ability to interact with this content",
+        "source": "Source"
     },
 
     "import-cbl-modal": {
@@ -2138,7 +2139,7 @@
         "delete-rule": "{{common.delete}}",
         "manage-rules": "Manage Remap Rules",
         "col-series": "Requested Series",
-        "col-vol-issue": "Requested Vol / Issue",
+        "col-vol-issue": "Req Vol / Issue",
         "col-status": "Status",
         "col-matched-series": "Matched Series",
         "col-matched-issue": "Matched Issue",
@@ -2233,7 +2234,6 @@
     "collection-detail": {
         "no-data": "There are no items. Try adding a series.",
         "no-data-filtered": "No items match your current filter.",
-        "title-alt": "Kavita - {{collectionName}} Collection",
         "sync-progress": "Series Collected: {{title}}",
         "last-sync": "Last Sync: {{date}}",
         "item-count": "{{common.item-count}}"
@@ -2286,6 +2286,7 @@
 
     "reading-list-detail": {
         "item-count": "{{common.item-count}}",
+        "missing-count": "{{num}} missing",
         "page-settings-title": "Page Settings",
         "remove-read": "Remove Read",
         "order-numbers-label": "Order Numbers",
@@ -2304,7 +2305,9 @@
         "date-range-title": "Date Range",
         "more-alt": "{{series-detail.more-alt}}",
         "reorder-alt": "Reorder Items",
-        "loading-alt": "{{pdf-reader.loading-message}}"
+        "loading-alt": "{{pdf-reader.loading-message}}",
+        "tags-title": "{{metadata-fields.tags-title}}",
+        "filter-label": "{{common.filter}}"
     },
 
     "events-widget": {
@@ -2481,13 +2484,15 @@
         "month-validation": "Must be between 1 and 12 or blank",
         "name-unique-validation": "Name must be unique",
         "required-field": "{{validation.required-field}}",
+        "name-label": "{{edit-series-modal.name-label}}",
         "summary-label": "Summary",
         "year-label": "Year",
         "month-label": "Month",
         "ending-title": "Ending",
         "starting-title": "Starting",
         "promote-label": "{{actionable.promote}}",
-        "promote-tooltip": "Promotion means that the collection can be seen server-wide, not just for you. All series within this collection will still have user-access restrictions placed on them."
+        "promote-tooltip": "Promotion means that the collection can be seen server-wide, not just for you. All series within this collection will still have user-access restrictions placed on them.",
+        "tags-label": "{{metadata-fields.tags-title}}"
     },
 
     "import-mal-collection-modal": {

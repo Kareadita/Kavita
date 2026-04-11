@@ -1,4 +1,4 @@
-import {ReadingList, ReadingListItem} from "../reading-list";
+import {ReadingList, ReadingListItem} from "../reading-list/reading-list";
 import {Chapter} from "../chapter";
 import {Series} from "../series";
 import {RelationKind} from "../series-detail/relation-kind";

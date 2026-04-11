@@ -7,7 +7,7 @@ import {map} from "rxjs/operators";
 import {Volume} from "../app/_models/volume";
 import {Chapter} from "../app/_models/chapter";
 import {Person} from "../app/_models/metadata/person";
-import {ReadingList} from "../app/_models/reading-list";
+import {ReadingList} from "../app/_models/reading-list/reading-list";
 import {UserCollection} from "../app/_models/collection-tag";
 
 /**

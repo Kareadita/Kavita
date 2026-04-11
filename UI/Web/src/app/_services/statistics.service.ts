@@ -31,7 +31,7 @@ import {Library} from "../_models/library/library";
 import {Series} from "../_models/series";
 import {Tag} from "../_models/tag";
 import {Person, PersonRole} from "../_models/metadata/person";
-import {ReadingList} from "../_models/reading-list";
+import {ReadingList} from "../_models/reading-list/reading-list";
 import {ReadingHistoryItem} from "../_models/stats/reading-history-item";
 import {PaginatedResult} from "../_models/pagination";
 import {UtilityService} from "../shared/_services/utility.service";

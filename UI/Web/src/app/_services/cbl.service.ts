@@ -6,7 +6,7 @@ import {CblRepoItem} from '../_models/reading-list/cbl/cbl-repo-item';
 import {CblImportSummary} from '../_models/reading-list/cbl/cbl-import-summary';
 import {CblSavedFile} from '../_models/reading-list/cbl/cbl-saved-file';
 import {CblImportDecisions} from '../_models/reading-list/cbl/cbl-import-decisions';
-import {ReadingListProvider} from '../_models/reading-list';
+import {ReadingListProvider} from '../_models/reading-list/reading-list';
 import {RemapRule} from '../_models/reading-list/cbl/remap-rule';
 import {Chapter} from '../_models/chapter';
 import {NgxFileDropEntry} from 'ngx-file-drop';
@@ -67,8 +67,8 @@ export class CblService {
     });
   }
 
-  syncList(readingListId: number) {
-    return this.httpClient.post(this.baseUrl + 'cbl/sync?readingListId=' + readingListId, {}, TextResonse);
+  syncList(readingListId: number, force = false) {
+    return this.httpClient.post(this.baseUrl + `cbl/sync?readingListId=${readingListId}&force=${force}`, {}, TextResonse);
   }
 
   updateRemapRule(id: number, update: { seriesId?: number; cblSeriesName?: string; volumeId?: number; chapterId?: number; cblVolume?: string; cblNumber?: string }) {

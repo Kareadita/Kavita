@@ -14,6 +14,7 @@ using Kavita.Common.Extensions;
 using Kavita.Common.Helpers;
 using Kavita.Models.Builders;
 using Kavita.Models.DTOs.ReadingLists;
+using Kavita.Models.DTOs.ReadingLists.Request;
 using Kavita.Models.DTOs.SignalR;
 using Kavita.Models.Entities;
 using Kavita.Models.Entities.Enums;
@@ -21,6 +22,7 @@ using Kavita.Models.Entities.ReadingLists;
 using Kavita.Models.Entities.User;
 using Kavita.Models.Extensions;
 using Kavita.Models.Helpers;
+using Kavita.Services.Helpers;
 using Kavita.Services.Reading;
 using Kavita.Services.Scanner;
 using Microsoft.Extensions.Logging;
@@ -84,6 +86,13 @@ public class ReadingListService(
         readingList.NormalizedTitle = Parser.Normalize(readingList.Title);
         readingList.Promoted = dto.Promoted;
         readingList.CoverImageLocked = dto.CoverImageLocked;
+
+        if (readingList.Tags == null)
+        {
+            throw new ArgumentException("You must pass a Reading List with tags included");
+        }
+
+        await TagHelper.UpdateEntityTags(readingList.Tags, dto.Tags, unitOfWork.DataContext.ReadingListTag, unitOfWork, false);
 
 
         if (NumberHelper.IsValidMonth(dto.StartingMonth) || dto.StartingMonth == 0)

@@ -5,7 +5,6 @@
        (touchmove)="onTouchMove()"
        (touchend)="onTouchEnd($event)">
 
-    <!-- Title Row: Checkbox + Promoted + Title + Kebab -->
     <div class="title-row">
       @if (config().allowSelection) {
         <div class="bulk-mode"
@@ -45,7 +44,7 @@
           @let dr = startDate() | dateYearRange:endDate();
           @if (dr) {
             <span>{{dr}}</span>
-            <span class="separator">&middot;</span>
+            <span class="dot-separator"></span>
           }
           <span>{{t('item-count', {num: itemCount()})}}</span>
         </div>

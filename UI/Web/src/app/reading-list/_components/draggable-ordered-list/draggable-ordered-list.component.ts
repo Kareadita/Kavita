@@ -42,7 +42,16 @@ export class DraggableOrderedListComponent {
   protected readonly bulkSelectionService = inject(BulkSelectionService);
 
   readonly items = input<Array<any>>([]);
+  /**
+   * Optional filter function applied to items before rendering. Useful for search/filter UIs.
+   */
+  filterFn = input<((item: any) => boolean) | null>(null);
   protected readonly localItems = linkedSignal(() => [...this.items()]);
+  protected readonly filteredItems = computed(() => {
+    const fn = this.filterFn();
+    const all = this.localItems();
+    return fn ? all.filter(fn) : all;
+  });
   /**
    * After this many elements, drag and drop is disabled, and we use a virtualized list instead
    */
@@ -78,7 +87,7 @@ export class DraggableOrderedListComponent {
 
   itemTemplate = contentChild.required<TemplateRef<any>>('draggableItem');
 
-  protected readonly bufferAmount = computed(() => Math.floor(Math.min(this.localItems().length / 20, 20)));
+  protected readonly bufferAmount = computed(() => Math.floor(Math.min(this.filteredItems().length / 20, 20)));
   protected readonly selectionSignal = this.bulkSelectionService.selectionSignal;
 
   drop(event: CdkDragDrop<string[]>) {

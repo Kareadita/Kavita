@@ -295,6 +295,11 @@ public static class IncludesExtensions
                 .ThenInclude(ri => ri.Chapter);
         }
 
+        if (includes.HasFlag(ReadingListIncludes.Tags))
+        {
+            queryable = queryable.Include(r => r.Tags);
+        }
+
         return queryable.AsSplitQuery();
     }
 

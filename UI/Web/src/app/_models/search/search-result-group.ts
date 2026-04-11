@@ -5,7 +5,7 @@ import {SearchResult} from "./search-result";
 import {Tag} from "../tag";
 import {BookmarkSearchResult} from "./bookmark-search-result";
 import {Genre} from "../metadata/genre";
-import {ReadingList} from "../reading-list";
+import {ReadingList} from "../reading-list/reading-list";
 import {UserCollection} from "../collection-tag";
 import {Person} from "../metadata/person";
 import {Annotation} from "../../book-reader/_models/annotations/annotation";
