@@ -68,10 +68,6 @@ export class MetadataService {
     return this.httpClient.get<SeriesDetailPlus | null>(this.baseUrl + 'metadata/series-detail-plus?seriesId=' + seriesId + '&libraryType=' + libraryType);
   }
 
-  forceRefreshFromPlus(seriesId: number) {
-    return this.httpClient.post(this.baseUrl + 'metadata/force-refresh?seriesId=' + seriesId, {});
-  }
-
   getAllAgeRatings(libraries?: Array<number>) {
     let method = 'metadata/age-ratings'
     if (libraries != undefined && libraries.length > 0) {
@@ -303,7 +299,7 @@ export class MetadataService {
           return {value: lib.id, label: lib.name};
         })));
       case AnnotationsFilterField.HighlightSlots:
-        return of(this.highlightSlots().map((slot, idx) => {
+        return of(this.highlightSlots().map((slot, _) => {
           return {value: slot.slotNumber, label: translate('highlight-bar.slot-label', {slot: slot.slotNumber + 1}), color: slot.color}; // Slots start at 0
         }));
       case AnnotationsFilterField.Series:
