@@ -7,6 +7,8 @@ using System.Threading.Tasks;
 using Kavita.API.Repositories;
 using Kavita.Models.DTOs.Annotations;
 using Kavita.Models.DTOs.Filtering;
+using Kavita.Models.DTOs.Filtering.v2.SortFields;
+using Kavita.Models.DTOs.Filtering.v2.SortOptions;
 using Kavita.Models.DTOs.KavitaPlus.Manage;
 using Kavita.Models.Entities;
 using Kavita.Models.Entities.Enums;
@@ -304,7 +306,7 @@ public static class QueryableExtensions
         };
     }
 
-    public static IQueryable<Person> SortBy(this IQueryable<Person> query, PersonSortOptions? sort)
+    public static IQueryable<Person> SortBy(this IQueryable<Person> query, PersonSortOptionDto? sort)
     {
         if (sort == null)
         {
@@ -323,7 +325,7 @@ public static class QueryableExtensions
         };
     }
 
-    public static IQueryable<ReadingList> SortBy(this IQueryable<ReadingList> query, ReadingListSortOptions? sort)
+    public static IQueryable<ReadingList> SortBy(this IQueryable<ReadingList> query, ReadingListSortOptionDto? sort)
     {
         if (sort == null)
         {
@@ -344,7 +346,7 @@ public static class QueryableExtensions
         };
     }
 
-    public static IQueryable<AppUserAnnotation> SortBy(this IQueryable<AppUserAnnotation> query, AnnotationSortOptions? sort)
+    public static IQueryable<AppUserAnnotation> SortBy(this IQueryable<AppUserAnnotation> query, AnnotationSortOptionDto? sort)
     {
         if (sort == null)
         {
@@ -370,11 +372,11 @@ public static class QueryableExtensions
     /// </summary>
     /// <param name="query"></param>
     /// <param name="keySelector"></param>
-    /// <param name="sortOptions"></param>
+    /// <param name="sortOptionDto"></param>
     /// <returns></returns>
-    public static IOrderedQueryable<T> DoOrderBy<T, TKey>(this IQueryable<T> query, Expression<Func<T, TKey>> keySelector, SortOptions sortOptions)
+    public static IOrderedQueryable<T> DoOrderBy<T, TKey>(this IQueryable<T> query, Expression<Func<T, TKey>> keySelector, SeriesSortOptionDto sortOptionDto)
     {
-        return sortOptions.IsAscending ? query.OrderBy(keySelector) : query.OrderByDescending(keySelector);
+        return sortOptionDto.IsAscending ? query.OrderBy(keySelector) : query.OrderByDescending(keySelector);
     }
 
     public static IQueryable<Series> FilterMatchState(this IQueryable<Series> query, MatchStateOption stateOption)

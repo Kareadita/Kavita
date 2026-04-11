@@ -1,5 +1,7 @@
 ﻿using Kavita.Models.DTOs.Filtering;
 using Kavita.Models.DTOs.Filtering.v2;
+using Kavita.Models.DTOs.Filtering.v2.SortFields;
+using Kavita.Models.DTOs.Filtering.v2.SortOptions;
 using Kavita.Models.Entities.Enums;
 using Kavita.Services.Helpers;
 
@@ -18,14 +20,14 @@ public class SmartFilterHelperTests
         var filter = SmartFilterHelper.Decode(encoded);
 
         Assert.Equal(10, filter.LimitTo);
-        Assert.Equal(SortField.CreatedDate, filter.SortOptions.SortField);
+        Assert.Equal(SeriesSortField.CreatedDate, filter.SortOptions.SeriesSortField);
         Assert.False(filter.SortOptions.IsAscending);
         Assert.Equal("Test" , filter.Name);
 
         var list = filter.Statements.ToList();
-        AssertStatementSame(list[2], FilterField.SeriesName, FilterComparison.Matches, "a");
-        AssertStatementSame(list[1], FilterField.AgeRating, FilterComparison.Equal, (int) AgeRating.Unknown + string.Empty);
-        AssertStatementSame(list[0], FilterField.Genres, FilterComparison.Equal, "95");
+        AssertStatementSame(list[2], SeriesFilterField.SeriesName, FilterComparison.Matches, "a");
+        AssertStatementSame(list[1], SeriesFilterField.AgeRating, FilterComparison.Equal, (int) AgeRating.Unknown + string.Empty);
+        AssertStatementSame(list[0], SeriesFilterField.Genres, FilterComparison.Equal, "95");
     }
 
     [Fact]
@@ -45,9 +47,9 @@ public class SmartFilterHelperTests
         var filter = new FilterV2Dto()
         {
             Name = "Test",
-            SortOptions = new SortOptions() {
+            SortOptions = new SeriesSortOptionDto() {
                 IsAscending = false,
-                SortField = SortField.CreatedDate
+                SeriesSortField = SeriesSortField.CreatedDate
                 },
             LimitTo = 10,
             Combination = FilterCombination.And,
@@ -56,7 +58,7 @@ public class SmartFilterHelperTests
                 new FilterStatementDto()
                 {
                     Comparison = FilterComparison.Equal,
-                    Field = FilterField.AgeRating,
+                    Field = SeriesFilterField.AgeRating,
                     Value = (int) AgeRating.Unknown + string.Empty
                 }
             }
@@ -69,7 +71,7 @@ public class SmartFilterHelperTests
         AssertStatementSame(decoded.Statements.First(), filter.Statements.First());
         Assert.Equal("Test", decoded.Name);
         Assert.Equal(10, decoded.LimitTo);
-        Assert.Equal(SortField.CreatedDate, decoded.SortOptions.SortField);
+        Assert.Equal(SeriesSortField.CreatedDate, decoded.SortOptions.SeriesSortField);
         Assert.False(decoded.SortOptions.IsAscending);
     }
 
@@ -79,9 +81,9 @@ public class SmartFilterHelperTests
         var filter = new FilterV2Dto()
         {
             Name = "Test",
-            SortOptions = new SortOptions() {
+            SortOptions = new SeriesSortOptionDto() {
                 IsAscending = false,
-                SortField = SortField.CreatedDate
+                SeriesSortField = SeriesSortField.CreatedDate
             },
             LimitTo = 10,
             Combination = FilterCombination.And,
@@ -90,7 +92,7 @@ public class SmartFilterHelperTests
                 new FilterStatementDto()
                 {
                     Comparison = FilterComparison.Equal,
-                    Field = FilterField.AgeRating,
+                    Field = SeriesFilterField.AgeRating,
                     Value = $"{(int) AgeRating.Unknown + string.Empty},{(int) AgeRating.G + string.Empty}"
                 }
             }
@@ -106,7 +108,7 @@ public class SmartFilterHelperTests
 
         Assert.Equal("Test", decoded.Name);
         Assert.Equal(10, decoded.LimitTo);
-        Assert.Equal(SortField.CreatedDate, decoded.SortOptions.SortField);
+        Assert.Equal(SeriesSortField.CreatedDate, decoded.SortOptions.SeriesSortField);
         Assert.False(decoded.SortOptions.IsAscending);
     }
 
@@ -117,7 +119,7 @@ public class SmartFilterHelperTests
         Assert.Equal(statement.Value, statement2.Value);
     }
 
-    private static void AssertStatementSame(FilterStatementDto statement, FilterField field, FilterComparison combination, string value)
+    private static void AssertStatementSame(FilterStatementDto statement, SeriesFilterField field, FilterComparison combination, string value)
     {
         Assert.Equal(statement.Field, field);
         Assert.Equal(statement.Comparison, combination);

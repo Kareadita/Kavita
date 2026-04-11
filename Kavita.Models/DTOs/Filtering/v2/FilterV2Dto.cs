@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using Kavita.Models.DTOs.Filtering.v2.SortOptions;
 
 namespace Kavita.Models.DTOs.Filtering.v2;
 #nullable enable
@@ -18,7 +19,7 @@ public sealed record FilterV2Dto : IFilterDto<FilterStatementDto>
     public string? Name { get; set; }
     public ICollection<FilterStatementDto> Statements { get; set; } = [];
     public FilterCombination Combination { get; set; } = FilterCombination.And;
-    public SortOptions? SortOptions { get; set; }
+    public SeriesSortOptionDto? SortOptions { get; set; }
 
     /// <summary>
     /// Limit the number of rows returned. Defaults to not applying a limit (aka 0)

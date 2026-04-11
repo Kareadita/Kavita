@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Kavita.Models.DTOs.Filtering.v2;
+using Kavita.Models.DTOs.Filtering.v2.FilterFields;
 using Kavita.Models.Entities.Enums;
 
 namespace Kavita.Database.Converters;

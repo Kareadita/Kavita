@@ -1,4 +1,4 @@
-﻿namespace Kavita.Models.DTOs.Filtering;
+﻿namespace Kavita.Models.DTOs.Filtering.v2.SortFields;
 
 public enum PersonSortField
 {

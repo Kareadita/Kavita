@@ -97,7 +97,7 @@ public static class MigrateSmartFilterEncoding
             filterDto.Statements.Add(new FilterStatementDto()
             {
                 Value = Regex.Match(part, ValueRegex).Groups["value"].Value,
-                Field = Enum.Parse<FilterField>(Regex.Match(part, FieldRegex).Groups["value"].Value),
+                Field = Enum.Parse<SeriesFilterField>(Regex.Match(part, FieldRegex).Groups["value"].Value),
                 Comparison = Enum.Parse<FilterComparison>(Regex.Match(part, ComparisonRegex).Groups["value"].Value),
             });
         }

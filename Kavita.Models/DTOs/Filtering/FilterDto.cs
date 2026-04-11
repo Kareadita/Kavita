@@ -1,10 +1,14 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using Kavita.Models.DTOs.Filtering.v2.SortOptions;
 using Kavita.Models.Entities;
 using Kavita.Models.Entities.Enums;
 using Kavita.Models.Entities.User;
 
 namespace Kavita.Models.DTOs.Filtering;
+#nullable enable
 
+[Obsolete("Use FilterV2Dto")]
 public sealed record FilterDto
 {
     /// <summary>
@@ -81,7 +85,7 @@ public sealed record FilterDto
     /// <summary>
     /// Sorting Options for a query. Defaults to null, which uses the queries natural sorting order
     /// </summary>
-    public SortOptions? SortOptions { get; set; } = null;
+    public SeriesSortOptionDto? SortOptions { get; set; } = null;
     /// <summary>
     /// Age Ratings. Empty list will return everything back
     /// </summary>

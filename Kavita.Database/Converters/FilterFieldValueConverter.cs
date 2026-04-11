@@ -9,103 +9,103 @@ namespace Kavita.Database.Converters;
 
 public static class SeriesFilterFieldValueConverter
 {
-    public static object ConvertValue(FilterField field, string value)
+    public static object ConvertValue(SeriesFilterField field, string value)
     {
         return field switch
         {
-            FilterField.SeriesName => value,
-            FilterField.Path => value,
-            FilterField.FilePath => value,
-            FilterField.ReleaseYear => string.IsNullOrEmpty(value) ? 0 : int.Parse(value),
-            FilterField.Languages => value.Split(',').ToList(),
-            FilterField.PublicationStatus => value.Split(',')
+            SeriesFilterField.SeriesName => value,
+            SeriesFilterField.Path => value,
+            SeriesFilterField.FilePath => value,
+            SeriesFilterField.ReleaseYear => string.IsNullOrEmpty(value) ? 0 : int.Parse(value),
+            SeriesFilterField.Languages => value.Split(',').ToList(),
+            SeriesFilterField.PublicationStatus => value.Split(',')
                 .Where(s => !string.IsNullOrEmpty(s))
                 .Select(x => (PublicationStatus) Enum.Parse(typeof(PublicationStatus), x))
                 .ToList(),
-            FilterField.Summary => value,
-            FilterField.AgeRating => value.Split(',')
+            SeriesFilterField.Summary => value,
+            SeriesFilterField.AgeRating => value.Split(',')
                 .Where(s => !string.IsNullOrEmpty(s))
                 .Select(x => (AgeRating) Enum.Parse(typeof(AgeRating), x))
                 .ToList(),
-            FilterField.UserRating => string.IsNullOrEmpty(value) ? 0 : float.Parse(value),
-            FilterField.Tags => value.Split(',')
+            SeriesFilterField.UserRating => string.IsNullOrEmpty(value) ? 0 : float.Parse(value),
+            SeriesFilterField.Tags => value.Split(',')
                 .Where(s => !string.IsNullOrEmpty(s))
                 .Select(int.Parse)
                 .ToList(),
-            FilterField.CollectionTags => value.Split(',')
+            SeriesFilterField.CollectionTags => value.Split(',')
                 .Where(s => !string.IsNullOrEmpty(s))
                 .Select(int.Parse)
                 .ToList(),
-            FilterField.Translators => value.Split(',')
+            SeriesFilterField.Translators => value.Split(',')
                 .Where(s => !string.IsNullOrEmpty(s))
                 .Select(int.Parse)
                 .ToList(),
-            FilterField.Characters => value.Split(',')
+            SeriesFilterField.Characters => value.Split(',')
                 .Where(s => !string.IsNullOrEmpty(s))
                 .Select(int.Parse)
                 .ToList(),
-            FilterField.Publisher => value.Split(',')
+            SeriesFilterField.Publisher => value.Split(',')
                 .Where(s => !string.IsNullOrEmpty(s))
                 .Select(int.Parse)
                 .ToList(),
-            FilterField.Editor => value.Split(',')
+            SeriesFilterField.Editor => value.Split(',')
                 .Where(s => !string.IsNullOrEmpty(s))
                 .Select(int.Parse)
                 .ToList(),
-            FilterField.CoverArtist => value.Split(',')
+            SeriesFilterField.CoverArtist => value.Split(',')
                 .Where(s => !string.IsNullOrEmpty(s))
                 .Select(int.Parse)
                 .ToList(),
-            FilterField.Letterer => value.Split(',')
+            SeriesFilterField.Letterer => value.Split(',')
                 .Where(s => !string.IsNullOrEmpty(s))
                 .Select(int.Parse)
                 .ToList(),
-            FilterField.Colorist => value.Split(',')
+            SeriesFilterField.Colorist => value.Split(',')
                 .Where(s => !string.IsNullOrEmpty(s))
                 .Select(int.Parse)
                 .ToList(),
-            FilterField.Inker => value.Split(',')
+            SeriesFilterField.Inker => value.Split(',')
                 .Where(s => !string.IsNullOrEmpty(s))
                 .Select(int.Parse)
                 .ToList(),
-            FilterField.Imprint => value.Split(',')
+            SeriesFilterField.Imprint => value.Split(',')
                 .Where(s => !string.IsNullOrEmpty(s))
                 .Select(int.Parse)
                 .ToList(),
-            FilterField.Team => value.Split(',')
+            SeriesFilterField.Team => value.Split(',')
                 .Where(s => !string.IsNullOrEmpty(s))
                 .Select(int.Parse)
                 .ToList(),
-            FilterField.Location => value.Split(',')
+            SeriesFilterField.Location => value.Split(',')
                 .Where(s => !string.IsNullOrEmpty(s))
                 .Select(int.Parse)
                 .ToList(),
-            FilterField.Penciller => value.Split(',')
+            SeriesFilterField.Penciller => value.Split(',')
                 .Where(s => !string.IsNullOrEmpty(s))
                 .Select(int.Parse)
                 .ToList(),
-            FilterField.Writers => value.Split(',')
+            SeriesFilterField.Writers => value.Split(',')
                 .Where(s => !string.IsNullOrEmpty(s))
                 .Select(int.Parse)
                 .ToList(),
-            FilterField.Genres => value.Split(',')
+            SeriesFilterField.Genres => value.Split(',')
                 .Where(s => !string.IsNullOrEmpty(s))
                 .Select(int.Parse)
                 .ToList(),
-            FilterField.Libraries => value.Split(',')
+            SeriesFilterField.Libraries => value.Split(',')
                 .Where(s => !string.IsNullOrEmpty(s))
                 .Select(int.Parse)
                 .ToList(),
-            FilterField.WantToRead => bool.Parse(value),
-            FilterField.ReadProgress => string.IsNullOrEmpty(value) ? 0f : value.AsFloat(),
-            FilterField.ReadingDate => DateTime.Parse(value, CultureInfo.InvariantCulture),
-            FilterField.ReadLast => int.Parse(value),
-            FilterField.Formats => value.Split(',')
+            SeriesFilterField.WantToRead => bool.Parse(value),
+            SeriesFilterField.ReadProgress => string.IsNullOrEmpty(value) ? 0f : value.AsFloat(),
+            SeriesFilterField.ReadingDate => DateTime.Parse(value, CultureInfo.InvariantCulture),
+            SeriesFilterField.ReadLast => int.Parse(value),
+            SeriesFilterField.Formats => value.Split(',')
                 .Select(x => (MangaFormat) Enum.Parse(typeof(MangaFormat), x))
                 .ToList(),
-            FilterField.ReadTime => string.IsNullOrEmpty(value) ? 0 : int.Parse(value),
-            FilterField.AverageRating => string.IsNullOrEmpty(value) ? 0f : value.AsFloat(),
-            FilterField.FileSize => value.ParseHumanReadableBytes(),
+            SeriesFilterField.ReadTime => string.IsNullOrEmpty(value) ? 0 : int.Parse(value),
+            SeriesFilterField.AverageRating => string.IsNullOrEmpty(value) ? 0f : value.AsFloat(),
+            SeriesFilterField.FileSize => value.ParseHumanReadableBytes(),
             _ => throw new ArgumentException("Invalid field type")
         };
     }

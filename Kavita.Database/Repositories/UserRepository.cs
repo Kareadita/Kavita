@@ -825,7 +825,7 @@ public class UserRepository(DataContext context, UserManager<AppUser> userManage
                 Series = series
             });
 
-        var filterStatement = filter.Statements.FirstOrDefault(f => f.Field == FilterField.SeriesName);
+        var filterStatement = filter.Statements.FirstOrDefault(f => f.Field == SeriesFilterField.SeriesName);
         if (filterStatement == null || string.IsNullOrWhiteSpace(filterStatement.Value))
         {
             return await ApplyLimit(filterSeriesQuery

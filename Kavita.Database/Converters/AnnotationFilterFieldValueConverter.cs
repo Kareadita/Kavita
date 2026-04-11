@@ -1,6 +1,7 @@
 using System;
 using Kavita.Common.Extensions;
 using Kavita.Models.DTOs.Filtering.v2;
+using Kavita.Models.DTOs.Filtering.v2.FilterFields;
 
 namespace Kavita.Database.Converters;
 

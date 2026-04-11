@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using Kavita.Models.DTOs.Filtering;
 using Kavita.Models.DTOs.Filtering.v2;
+using Kavita.Models.DTOs.Filtering.v2.SortOptions;
 
 namespace Kavita.Models.DTOs.Metadata.Browse.Requests;
 #nullable enable
@@ -17,7 +18,7 @@ public sealed record BrowsePersonFilterDto : IFilterDto<PersonFilterStatementDto
     public string? Name { get; set; }
     public ICollection<PersonFilterStatementDto> Statements { get; set; } = [];
     public FilterCombination Combination { get; set; } = FilterCombination.And;
-    public PersonSortOptions? SortOptions { get; set; }
+    public PersonSortOptionDto? SortOptions { get; set; }
 
     /// <summary>
     /// Limit the number of rows returned. Defaults to not applying a limit (aka 0)

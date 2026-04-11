@@ -3,7 +3,7 @@
 /// <summary>
 /// Represents the field which will dictate the value type and the Extension used for filtering
 /// </summary>
-public enum FilterField
+public enum SeriesFilterField
 {
     Summary = 0,
     SeriesName = 1,
@@ -62,42 +62,8 @@ public enum FilterField
     FileSize = 33,
 }
 
-public enum PersonFilterField
-{
-    Role = 1,
-    Name = 2,
-    SeriesCount = 3,
-    ChapterCount = 4,
-}
 
-public enum AnnotationFilterField
-{
-    Owner = 1,
-    Library = 2,
-    Spoiler = 3,
-    /// <summary>
-    /// When used, only returns your own annotations
-    /// </summary>
-    HighlightSlot = 4,
-    /// <summary>
-    /// This is the text selected in the book
-    /// </summary>
-    Selection = 5,
-    /// <summary>
-    /// This is the text the user wrote
-    /// </summary>
-    Comment = 6,
-    Series = 7,
-    Likes = 8,
-    LikedBy = 9,
-}
 
-public enum ReadingListFilterField
-{
-    Title = 1,
-    ReleaseYear = 2,
-    ItemCount = 3,
-    Tags = 4,
-    Writer = 5,
-    Artist = 6,
-}
+
+
+

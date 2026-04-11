@@ -4,6 +4,8 @@ using System.Linq;
 using System.Web;
 using Kavita.Models.DTOs.Filtering;
 using Kavita.Models.DTOs.Filtering.v2;
+using Kavita.Models.DTOs.Filtering.v2.SortFields;
+using Kavita.Models.DTOs.Filtering.v2.SortOptions;
 
 namespace Kavita.Services.Helpers;
 
@@ -78,9 +80,9 @@ public static class SmartFilterHelper
         return string.IsNullOrWhiteSpace(name) ? string.Empty : $"{NameKey}{Uri.EscapeDataString(name)}&";
     }
 
-    private static string EncodeSortOptions(SortOptions sortOptions)
+    private static string EncodeSortOptions(SeriesSortOptionDto sortOptionDto)
     {
-        return Uri.EscapeDataString($"{SortFieldKey}{(int) sortOptions.SortField}{InnerStatementSeparator}{IsAscendingKey}{sortOptions.IsAscending}");
+        return Uri.EscapeDataString($"{SortFieldKey}{(int) sortOptionDto.SeriesSortField}{InnerStatementSeparator}{IsAscendingKey}{sortOptionDto.IsAscending}");
     }
 
     private static string EncodeFilterStatementDtos(ICollection<FilterStatementDto>? statements)
@@ -117,7 +119,7 @@ public static class SmartFilterHelper
             statements.Add(new FilterStatementDto
             {
                 Comparison = Enum.Parse<FilterComparison>(parts[0].Split("=")[1]),
-                Field = Enum.Parse<FilterField>(parts[1].Split("=")[1]),
+                Field = Enum.Parse<SeriesFilterField>(parts[1].Split("=")[1]),
                 Value = Uri.UnescapeDataString(parts[2].Split("=")[1])
             });
         }
@@ -125,7 +127,7 @@ public static class SmartFilterHelper
         return statements;
     }
 
-    private static SortOptions DecodeSortOptions(string encodedSortOptions)
+    private static SeriesSortOptionDto DecodeSortOptions(string encodedSortOptions)
     {
         var parts = Uri.UnescapeDataString(encodedSortOptions).Split(InnerStatementSeparator);
 
@@ -135,14 +137,14 @@ public static class SmartFilterHelper
         var isAscending = isAscendingPart?.Trim().Replace(IsAscendingKey, string.Empty).Equals("true", StringComparison.OrdinalIgnoreCase) ?? false;
         if (sortFieldPart == null)
         {
-            return new SortOptions();
+            return new SeriesSortOptionDto();
         }
 
-        var sortField = Enum.Parse<SortField>(sortFieldPart.Split("=")[1]);
+        var sortField = Enum.Parse<SeriesSortField>(sortFieldPart.Split("=")[1]);
 
-        return new SortOptions
+        return new SeriesSortOptionDto
         {
-            SortField = sortField,
+            SeriesSortField = sortField,
             IsAscending = isAscending
         };
     }

@@ -1,10 +1,12 @@
 ﻿
+using Kavita.Models.DTOs.Filtering.v2.FilterFields;
+
 namespace Kavita.Models.DTOs.Filtering.v2;
 
-public sealed record FilterStatementDto : IFilterStatement<FilterField>
+public sealed record FilterStatementDto : IFilterStatement<SeriesFilterField>
 {
     public FilterComparison Comparison { get; set; }
-    public FilterField Field { get; set; }
+    public SeriesFilterField Field { get; set; }
     public string Value { get; set; }
 }
 

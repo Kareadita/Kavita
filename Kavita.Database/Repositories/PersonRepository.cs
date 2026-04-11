@@ -13,6 +13,7 @@ using Kavita.Database.Extensions;
 using Kavita.Database.Extensions.Filters;
 using Kavita.Models.DTOs;
 using Kavita.Models.DTOs.Filtering.v2;
+using Kavita.Models.DTOs.Filtering.v2.FilterFields;
 using Kavita.Models.DTOs.Metadata.Browse;
 using Kavita.Models.DTOs.Metadata.Browse.Requests;
 using Kavita.Models.DTOs.Person;

@@ -522,7 +522,7 @@ public class OpdsService(
                 new FilterStatementDto
                 {
                     Comparison = FilterComparison.Equal,
-                    Field = FilterField.Libraries,
+                    Field = SeriesFilterField.Libraries,
                     Value = libraryId + string.Empty
                 }
             ]

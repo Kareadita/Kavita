@@ -1,5 +1,7 @@
 using System.Linq;
 using Kavita.Models.DTOs.Filtering;
+using Kavita.Models.DTOs.Filtering.v2.SortFields;
+using Kavita.Models.DTOs.Filtering.v2.SortOptions;
 using Kavita.Models.Entities;
 using Kavita.Models.Entities.User;
 using Microsoft.EntityFrameworkCore;
@@ -9,32 +11,32 @@ namespace Kavita.Database.Extensions;
 public static class BookmarkSortExtensions
 {
     /// <summary>
-    /// Applies the correct sort based on <see cref="SortOptions"/>
+    /// Applies the correct sort based on <see cref="SeriesSortOptionDto"/>
     /// </summary>
     /// <param name="query"></param>
     /// <param name="sortOptions"></param>
     /// <returns></returns>
-    public static IQueryable<BookmarkSeriesPair> Sort(this IQueryable<BookmarkSeriesPair> query, SortOptions? sortOptions)
+    public static IQueryable<BookmarkSeriesPair> Sort(this IQueryable<BookmarkSeriesPair> query, SeriesSortOptionDto? sortOptions)
     {
         // If no sort options, default to using SortName
-        sortOptions ??= new SortOptions()
+        sortOptions ??= new SeriesSortOptionDto()
         {
             IsAscending = true,
-            SortField = SortField.SortName
+            SeriesSortField = SeriesSortField.SortName
         };
 
-        query = sortOptions.SortField switch
+        query = sortOptions.SeriesSortField switch
         {
-            SortField.SortName => query.DoOrderBy(s => s.Series.SortName.ToLower(), sortOptions),
-            SortField.CreatedDate => query.DoOrderBy(s => s.Series.Created, sortOptions),
-            SortField.LastModifiedDate => query.DoOrderBy(s => s.Series.LastModified, sortOptions),
-            SortField.LastChapterAdded => query.DoOrderBy(s => s.Series.LastChapterAdded, sortOptions),
-            SortField.TimeToRead => query.DoOrderBy(s => s.Series.AvgHoursToRead, sortOptions),
-            SortField.ReleaseYear => query.DoOrderBy(s => s.Series.Metadata.ReleaseYear, sortOptions),
-            SortField.ReadProgress => query.DoOrderBy(s => s.Series.Progress.Where(p => p.SeriesId == s.Series.Id).Select(p => p.LastModified).Max(), sortOptions),
-            SortField.AverageRating => query.DoOrderBy(s => s.Series.ExternalSeriesMetadata.ExternalRatings
+            SeriesSortField.SortName => query.DoOrderBy(s => s.Series.SortName.ToLower(), sortOptions),
+            SeriesSortField.CreatedDate => query.DoOrderBy(s => s.Series.Created, sortOptions),
+            SeriesSortField.LastModifiedDate => query.DoOrderBy(s => s.Series.LastModified, sortOptions),
+            SeriesSortField.LastChapterAdded => query.DoOrderBy(s => s.Series.LastChapterAdded, sortOptions),
+            SeriesSortField.TimeToRead => query.DoOrderBy(s => s.Series.AvgHoursToRead, sortOptions),
+            SeriesSortField.ReleaseYear => query.DoOrderBy(s => s.Series.Metadata.ReleaseYear, sortOptions),
+            SeriesSortField.ReadProgress => query.DoOrderBy(s => s.Series.Progress.Where(p => p.SeriesId == s.Series.Id).Select(p => p.LastModified).Max(), sortOptions),
+            SeriesSortField.AverageRating => query.DoOrderBy(s => s.Series.ExternalSeriesMetadata.ExternalRatings
                 .Where(p => p.SeriesId == s.Series.Id).Average(p => p.AverageScore), sortOptions),
-            SortField.Random => query.DoOrderBy(s => EF.Functions.Random(), sortOptions),
+            SeriesSortField.Random => query.DoOrderBy(s => EF.Functions.Random(), sortOptions),
             _ => query
         };
 
