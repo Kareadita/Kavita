@@ -476,7 +476,7 @@ public class CblImportService(IUnitOfWork unitOfWork, ICblGithubService cblGithu
         // Collect external IDs
         var kavitaIds = cbl.Items
             .SelectMany(i => i.ExternalIds)
-            .Where(e => e.Provider == CblExternalDbProvider.Kavita && !string.IsNullOrEmpty(e.IssueId))
+            .Where(e => e.Provider == CblExternalDbProvider.Kavita && int.TryParse(e.IssueId, out _))
             .Select(e => int.Parse(e.IssueId))
             .Distinct()
             .ToList();
