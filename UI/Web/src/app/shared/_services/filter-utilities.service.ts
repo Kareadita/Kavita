@@ -303,7 +303,7 @@ export class FilterUtilitiesService {
         return [] as unknown as T[];
       case 'readinglist':
         return [
-          ReadingListFilterField.ItemCount
+          ReadingListFilterField.ReleaseYear
         ] as unknown as T[];
     }
   }

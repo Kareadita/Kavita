@@ -107,15 +107,11 @@ export class ReadingListsComponent implements OnInit {
       const d = this.filterSettings();
       this.filterSettings.set({...d, presetsV2: this.filter});
 
-      console.log('filter settings: ', this.filterSettings());
-
       this.loadPage();
     });
   }
 
   ngOnInit(): void {
-    //this.loadPage();
-
     this.bulkSelectionService.registerDataSource('readingList', () => this.lists());
     this.bulkSelectionService.registerPostAction((res: ActionResult<ReadingList>) => {
       if (res.effect === 'none') return;

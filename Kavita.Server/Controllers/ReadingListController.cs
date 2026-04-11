@@ -78,7 +78,7 @@ public class ReadingListController(
     /// <param name="userParams"></param>
     /// <returns></returns>
     [HttpPost("all")]
-    public async Task<ActionResult<PagedList<ReadingListDto>>> GetPeopleForBrowse(BrowseReadingListFilterDto filter, [FromQuery] UserParams? userParams)
+    public async Task<ActionResult<PagedList<ReadingListDto>>> GetAllReadingList(BrowseReadingListFilterDto filter, [FromQuery] UserParams? userParams)
     {
         userParams ??= UserParams.Default;
 

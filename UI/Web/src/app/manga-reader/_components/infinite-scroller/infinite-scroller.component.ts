@@ -330,7 +330,7 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy {
       this.goToPage.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(page => {
         const isSamePage = this.pageNum === page;
         if (isSamePage) { return; }
-        this.debugLog('[GoToPage] jump has occured from ' + this.pageNum + ' to ' + page);
+        this.debugLog('[GoToPage] jump has occurred from ' + this.pageNum + ' to ' + page);
 
         if (this.pageNum < page) {
           this.scrollingDirection = PAGING_DIRECTION.FORWARD;

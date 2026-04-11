@@ -1642,7 +1642,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
   setPageNum(pageNum: number) {
     const clampedPageNum = Math.max(Math.min(pageNum, this.maxPages - 1), 0);
-    const isSamePage = clampedPageNum === pageNum;
+    const isSamePage = clampedPageNum === this.pageNum;
 
     this.pageNum = clampedPageNum;
     this.pageNumSubject.next({pageNum: this.pageNum, maxPages: this.maxPages});
@@ -1662,7 +1662,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
         this.readerService.getChapterInfo(this.prevChapterId).subscribe(res => {
           this.continuousChapterInfos[ChapterInfoPosition.Previous] = res;
           this.prevChapterPrefetched = true;
-          this.prefetchStartOfChapter(this.nextChapterId, PAGING_DIRECTION.BACKWARDS);
+          this.prefetchStartOfChapter(this.prevChapterId, PAGING_DIRECTION.BACKWARDS);
         });
       }
     }
