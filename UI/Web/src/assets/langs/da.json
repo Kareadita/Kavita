@@ -143,8 +143,6 @@
         "download": "{{changelog.download}}",
         "apply": "{{common.apply}}",
         "delete": "{{common.delete}}",
-        "drag-n-drop": "{{cover-image-chooser.drag-n-drop}}",
-        "upload": "{{cover-image-chooser.upload}}",
         "add": "{{common.add}}",
         "description": "Kavita findes i mange farver. Find et farveskema, der passer til dine behov, eller lav dit eget og del det. Temaer kan anvendes på din konto eller på alle konti.",
         "set-default": "Indstil standard",
@@ -530,8 +528,7 @@
     "manage-tasks-settings": {
         "reset-to-default": "{{common.reset-to-default}}",
         "reset": "{{common.reset}}",
-        "save": "{{common.save}}",
-        "required": "{{validation.required-field}}"
+        "save": "{{common.save}}"
     },
     "edit-collection-tags": {
         "required-field": "{{validation.required-field}}",
@@ -931,17 +928,12 @@
     },
     "font-manager": {
         "description": "Kavitas epub-læser leveres med et par indbyggede skrifttyper. Tilføj dine egne skrifttyper her. Upload en fil, eller brug en Google Fonts-URL. Se <a href='{{wikiLink}}' target='_blank' rel='noreferrer noopener'> wiki</a>for mere information.",
-        "enter-an-url-pre-title": "Indtast en {{url}}",
-        "url": "url",
         "add": "{{common.add}}",
         "drag-n-drop": "{{cover-image-chooser.drag-n-drop}}",
         "upload": "{{cover-image-chooser.upload}}",
         "upload-continued": "en fontfil",
         "preview-default": "Upload din egen skrifttype via fil eller Google Font-url",
         "delete": "{{common.delete}}",
-        "url-label": "Url",
-        "back": "Tilbage",
-        "load": "Belastning",
         "no-preview": "IndlæsDenne skrifttype kan ikke forhåndsvises. Den vil bruge standardstilen fra bogen.",
         "brown-fox": "Den hurtige brune ræv springer over den dovne hund",
         "filter-system-fonts-label": "Filtersystemskrifttyper"

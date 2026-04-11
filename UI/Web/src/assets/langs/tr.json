@@ -141,8 +141,6 @@
         "applied": "Uygulanmış",
         "updated-toastr": "Site varsayılanı {{name}} olarak güncellendi",
         "delete": "{{common.delete}}",
-        "drag-n-drop": "{{cover-image-chooser.drag-n-drop}}",
-        "upload": "{{cover-image-chooser.upload}}",
         "add": "{{common.add}}",
         "downloadable": "İndirilebilir",
         "downloaded": "İndirildi",
@@ -692,13 +690,10 @@
         "reset-to-default": "{{common.reset-to-default}}",
         "reset": "{{common.reset}}",
         "save": "{{common.save}}",
-        "required": "{{validation.required-field}}",
         "backup-database-task": "Veritabanını Yedekle",
         "check-for-updates-task": "Güncellemeleri Kontrol Et",
-        "custom": "Kişiselleştir",
         "description-header": "Açıklama",
-        "recurring-tasks-title": "{{title}}",
-        "daily": "Günlük"
+        "recurring-tasks-title": "{{title}}"
     },
     "manage-users": {
         "edit-user-tooltip": "Düzenle",
@@ -767,7 +762,6 @@
     "collection-detail": {
         "item-count": "{{common.item-count}}",
         "last-sync": "Son Senkron: {{date}}",
-        "title-alt": "Kavita - {{collectionName}} Koleksiyonu",
         "sync-progress": "Derlenen Seriler: {{title}}"
     },
     "all-collections": {
@@ -881,13 +875,7 @@
         "series-count": "{{common.series-count}}"
     },
     "import-cbl-modal": {
-        "close": "{{common.close}}",
-        "import": "İçe Aktar",
-        "final-import-step": "Son Adım",
-        "help-label": "{{common.help}}",
-        "next": "Sonraki",
-        "prev": "Önce",
-        "restart": "Yeniden başlat"
+        "close": "{{common.close}}"
     },
     "manga-reader": {
         "auto-close-menu-label": "{{manage-reading-profiles.auto-close-menu-label}}",
@@ -1418,11 +1406,6 @@
         "multiple": "Varsayılan"
     },
     "font-manager": {
-        "back": "Geri",
-        "load": "Yükle",
-        "enter-an-url-pre-title": "Bir {{url}} girin",
-        "url": "url",
-        "url-label": "Url",
         "add": "{{common.add}}",
         "delete": "{{common.delete}}",
         "upload": "{{cover-image-chooser.upload}}",

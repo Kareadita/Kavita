@@ -13,8 +13,8 @@
         "server-settings-link": "Serverinstellingen",
         "not-granted": "U heeft geen toegang gekregen tot bibliotheken.",
         "on-deck-title": "Aan het lezen",
-        "recently-updated-title": "Onlangs bijgewerkte series",
-        "recently-added-title": "Nieuw toegevoegde series",
+        "recently-updated-title": "Onlangs bijgewerkte reeksen",
+        "recently-added-title": "Nieuw toegevoegde reeksen",
         "more-in-genre-title": "Meer in {{genre}}"
     },
     "edit-user": {
@@ -27,7 +27,8 @@
         "saving": "Opslaan…",
         "update": "Update",
         "invalid-email-warning": "Een ongeldig e-mailadres blokkeert bepaalde functionaliteiten van Kavita",
-        "account-detail-title": "Accountgegevens"
+        "account-detail-title": "Accountgegevens",
+        "oidc-managed": "Deze gebruiker wordt beheerd via OIDC. Neem contact op met uw OIDC-beheerder om eventuele wijzigingen aan te vragen."
     },
     "user-scrobble-history": {
         "title": "Scrobble geschiedenis",
@@ -36,7 +37,7 @@
         "created-header": "Gemaakt",
         "last-modified-header": "Laatst gewijzigd",
         "type-header": "Type",
-        "series-header": "Series",
+        "series-header": "Reeks",
         "data-header": "Data",
         "is-processed-header": "Is verwerkt",
         "no-data": "{{common.no-data}}",
@@ -51,7 +52,7 @@
         "chapter-num": "Hoofdstuk {{num}}",
         "not-read-warning": "Upstream-providers behouden altijd het hoogste aantal",
         "generate-scrobble-events": "Genereer evenementen",
-        "token-expired": "Je AniList-token is verlopen! Scrobbling-evenementen zullen niet verwerkt worden totdat je deze verlengt op de Accounts-pagina.",
+        "token-expired": "Uw AniList-token is verlopen! Scrobbling-evenementen zullen niet verwerkt worden totdat u deze verlengt op de Accounts-pagina.",
         "select-all-label": "Alles selecteren",
         "delete-selected-label": "Geselecteerde verwijderen"
     },
@@ -72,7 +73,7 @@
         "go-to-review": "Ga naar recensie"
     },
     "review-card": {
-        "your-review": "Dit is jouw recensie",
+        "your-review": "Dit is uw recensie",
         "external-review": "Externe recensie",
         "local-review": "Lokale recensie",
         "rating-percentage": "Beoordeling {{r}}%",
@@ -81,12 +82,12 @@
     "want-to-read": {
         "title": "Willen lezen",
         "series-count": "{{common.series-count}}",
-        "no-items": "Er zijn geen items. Probeer een serie toe te voegen.",
+        "no-items": "Er zijn geen items. Probeer een reeks toe te voegen.",
         "no-items-filtered": "Er komen geen items overeen met uw huidige filter."
     },
     "user-preferences": {
         "title": "Gebruikersdashboard",
-        "pref-description": "Dit zijn algemene instellingen die aan je account gekoppeld zijn. Lezersinstellingen bevinden zich in Lezersprofielen.",
+        "pref-description": "Dit zijn algemene instellingen die aan uw account gekoppeld zijn. Lezersinstellingen bevinden zich in Lezersprofielen.",
         "account-tab": "{{tabs.account-tab}}",
         "preferences-tab": "{{tabs.preferences-tab}}",
         "theme-tab": "{{tabs.theme-tab}}",
@@ -97,7 +98,7 @@
         "success-toast": "Gebruikersvoorkeuren bijgewerkt",
         "global-settings-title": "Algemene instellingen",
         "page-layout-mode-label": "Pagina-indelingsmodus",
-        "page-layout-mode-tooltip": "Toon items als kaarten of lijstweergave op de seriedetailpagina.",
+        "page-layout-mode-tooltip": "Toon items als kaarten of lijstweergave op de pagina Reeksdetails.",
         "locale-label": "Landinstellingen",
         "locale-tooltip": "De taal die Kavita zou moeten gebruiken",
         "blur-unread-summaries-label": "Vervaag ongelezen samenvattingen",
@@ -106,10 +107,10 @@
         "prompt-on-download-tooltip": "Vragen wanneer een download groter is dan {{size}} MB",
         "disable-animations-label": "Animaties uitschakelen",
         "disable-animations-tooltip": "Schakelt animaties op de site uit. Handig voor e-ink-lezers.",
-        "collapse-series-relationships-label": "Serierelaties samenvouwen",
-        "collapse-series-relationships-tooltip": "Moet Kavita series laten zien die geen relaties hebben of die geen ouder / prequel is",
-        "share-series-reviews-label": "Deel serierecensies",
-        "share-series-reviews-tooltip": "Moet Kavita jouw beoordelingen van Series voor andere gebruikers gebruiken",
+        "collapse-series-relationships-label": "Reeksrelaties samenvouwen",
+        "collapse-series-relationships-tooltip": "Moet Kavita reeksen laten zien die geen relaties hebben of die geen ouder / prequel is",
+        "share-series-reviews-label": "Recensies van reeksen delen",
+        "share-series-reviews-tooltip": "Toestaan dat uw recensies zichtbaar zijn voor andere gebruikers op deze server",
         "clients-opds-alert": "OPDS is niet ingeschakeld op deze server. Dit heeft geen invloed op Tachiyomi-gebruikers.",
         "clients-opds-description": "Alle externe clients gebruiken de API-sleutel of de onderstaande verbindings-URL. Dit zijn net wachtwoorden, houd het privé.",
         "clients-opds-url-tooltip": "Bekijk een lijst met ondersteunde OPDS-clients: ",
@@ -119,11 +120,17 @@
         "kavitaplus-settings-title": "Kavita+",
         "anilist-scrobbling-label": "AniList scrobbelen",
         "want-to-read-sync-label": "Willen Lezen Sync",
-        "clients-opds-url-label": "OPDS URL"
+        "clients-opds-url-label": "OPDS URL",
+        "want-to-read-sync-tooltip": "Sta Kavita toe om items toe te voegen aan uw lijst 'Wil ik lezen' op basis van AniList- en MAL-reeksen in de lijst 'Te lezen'",
+        "share-annotations-tooltip": "Toestaan dat uw aantekeningen zichtbaar zijn voor andere gebruikers op deze server",
+        "social-libraries-tooltip": "Bibliotheken waarop sociale functies moeten worden ingeschakeld. Geen selectie schakelt sociale functies overal in. Schakel specifieke functies uit als u ze nergens wilt gebruiken.",
+        "social-share-profile-tooltip": "Het delen van informatie over uw leesactiviteit met andere serverleden toestaan",
+        "include-continue-from-tooltip": "Voeg een 'Doorgaan vanaf X'-vermelding toe in OPDS-velden om het zoeken naar uw laatste leespunt te vermijden (simuleert Kavita's knop Doorgaan)",
+        "social-include-unknowns-tooltip": "Sociale functies inschakelen voor reeksen en hoofdstukken met een onbekende leeftijdsclassificatie"
     },
     "user-holds": {
         "title": "Scrobble Holds",
-        "description": "Dit is een door de gebruiker beheerde lijst van series die niet worden gescrobbled naar externe providers. Je kunt op elk moment een serie verwijderen, en de eerstvolgende scrobble-bare gebeurtenis (leesvoortgang, beoordeling, wil lezen status) zal het scrobblen activeren.",
+        "description": "Dit is een door de gebruiker beheerde lijst van reeksen die niet worden gescrobbled naar externe providers. Je kunt op elk moment een reeks verwijderen, en de eerstvolgende scrobble-bare gebeurtenis (leesvoortgang, beoordeling, wil lezen status) zal het scrobblen activeren.",
         "no-data": "{{typeahead.no-data}}",
         "series-name-header": "{{manage-matched-metadata.series-name-header}}",
         "created-header": "{{manage-media-issues.created-header}}",
@@ -136,8 +143,6 @@
         "applied": "Toegepast",
         "updated-toastr": "Sitestandaard is bijgewerkt naar {{name}}",
         "delete": "{{common.delete}}",
-        "drag-n-drop": "{{cover-image-chooser.drag-n-drop}}",
-        "upload": "{{cover-image-chooser.upload}}",
         "add": "{{common.add}}",
         "default-theme": "Standaard",
         "downloaded": "Gedownload",
@@ -156,7 +161,7 @@
     },
     "restriction-selector": {
         "title": "Beperking leeftijdsclassificatie",
-        "description": "Indien geselecteerd, worden alle series en leeslijsten met ten minste één item dat groter is dan de geselecteerde beperking, uit de resultaten verwijderd.",
+        "description": "Indien geselecteerd, worden alle reeksen en leeslijsten met ten minste één item dat groter is dan de geselecteerde beperking, uit de resultaten verwijderd.",
         "not-applicable-for-admins": "Dit is niet van toepassing op beheerders.",
         "age-rating-label": "{{metadata-fields.age-rating-title}}",
         "no-restriction": "Geen beperkingen",
@@ -243,7 +248,9 @@
         "anilist-first-later": "Later",
         "anilist-first-now": "Nu",
         "token-valid": "Token geldig",
-        "mal-username-input-label": "MAL Gebruikersnaam"
+        "mal-username-input-label": "MAL Gebruikersnaam",
+        "mal-used-for": "MyAnimeList wordt gebruikt voor Smart Collections en synchronisatie van Wil ik lezen.",
+        "anilist-first-description": "Uw AniList-token is nu ingesteld. Dit token is een jaar geldig en Kavita zal u informeren voordat het verloopt om het hier te vernieuwen. Hiermee zal Kavita scrobble (synchronisatie) gebeurtenissen genereren van uw leesgeschiedenis, 'wil lezen-lijst' en beoordelingen. U kunt hiermee nu beginnen of later. Als u een serie heeft die u niet wilt laten scrobblen, kies dan 'Later' en plaats een Scrobble-hold op die serie. U hoeft deze taak slechts één keer uit te voeren. Daarna zal Kavita de synchronisatie voor u afhandelen.<br/> Als u 'Later' selecteert, kunt u de knop vinden op de Scrobbling-pagina."
     },
     "typeahead": {
         "locked-field": "Veld is vergrendeld",
@@ -312,12 +319,12 @@
         "failure": "Mislukt"
     },
     "cbl-conflict-reason-pipe": {
-        "all-series-missing": "Uw account heeft geen toegang tot alle series in de lijst of Kavita heeft niets in de lijst.",
+        "all-series-missing": "Uw account heeft geen toegang tot alle reeksen in de lijst of Kavita heeft niets in de lijst.",
         "chapter-missing": "{{series}}: Hoofdstuk {{chapter}} ontbreekt in Kavita. Dit item wordt overgeslagen.",
         "empty-file": "Het cbl-bestand is leeg, niets om te doen.",
         "name-conflict": "Er bestaat al een leeslijst ({{readingListName}}) in uw account die overeenkomt met het cbl-bestand.",
-        "series-collision": "De serie, {{seriesLink}}, botst met een andere serie met dezelfde naam in een andere bibliotheek.",
-        "series-missing": "De serie, {{series}}, ontbreekt in Kavita of uw account heeft geen toestemming. Alle items met deze serie worden overgeslagen bij het importeren.",
+        "series-collision": "De reeks {{seriesLink}} conflicteert met een andere reeks met dezelfde naam in een andere bibliotheek.",
+        "series-missing": "De reeks {{series}} ontbreekt in Kavita of uw account heeft geen toestemming. Alle items met deze reeks worden overgeslagen bij het importeren.",
         "volume-missing": "{{series}}: Volume {{volume}} ontbreekt in Kavita of uw account heeft geen toestemming. Alle items met dit volumenummer worden overgeslagen.",
         "all-chapter-missing": "Alle hoofdstukken kunnen niet worden gekoppeld aan hoofdstukken in Kavita.",
         "invalid-file": "Het bestand is beschadigd of komt niet overeen met de verwachte tags/specificaties.",
@@ -433,7 +440,7 @@
         "save": "{{common.save}}"
     },
     "all-series": {
-        "title": "Alle series",
+        "title": "Alle reeksen",
         "series-count": "{{common.series-count}}"
     },
     "all-filters": {
@@ -503,14 +510,15 @@
         "license-active-label": "Licentie actief",
         "expiration-label": "Vervaldatum",
         "reset-label": "Resetten",
-        "delete-label": "Licentie verwijderen"
+        "delete-label": "Licentie verwijderen",
+        "k+-unlocked-description": "Welkom bij Kavita+! Kavita zal scrobble-evenementen genereren op basis van uw voortgang, beoordelingen en 'Wil ik lezen'-lijst zodra u uw Scrobbling-providers onder uw account registreert. Neem de tijd om ervoor te zorgen dat u scrobbling-houders instelt voor alle reeksen die u niet wilt scrobblen."
     },
     "book-line-overlay": {
         "copy": "Kopiëren",
         "bookmark": "Bladwijzer",
         "close": "{{common.close}}",
         "required-field": "{{common.required-field}}",
-        "bookmark-label": "Naam bladwijzer",
+        "bookmark-label": "Bladwijzernaam",
         "save": "{{common.save}}"
     },
     "book-reader": {
@@ -526,8 +534,9 @@
         "go-to-page-prompt": "Er zijn {{totalPages}} pagina's. Naar welke pagina wil je gaan?"
     },
     "personal-table-of-contents": {
-        "no-data": "Nog niets gebookmarked",
-        "delete": "Verwijder {{bookmarkName}}"
+        "no-data": "Nog geen bladwijzers",
+        "delete": "Verwijderen {{bookmarkName}}",
+        "no-match": "Geen overeenkomstige bladwijzers"
     },
     "confirm-email": {
         "title": "Registreren",
@@ -728,7 +737,7 @@
     "bookmarks": {
         "title": "{{side-nav.bookmarks}}",
         "series-count": "{{common.series-count}}",
-        "no-data": "Er zijn geen bladwijzers. Probeer te creëren",
+        "no-data": "Er zijn geen bladwijzers. Probeer er een aan te maken",
         "no-data-2": "een.",
         "confirm-delete": "Weet je zeker dat je alle bladwijzers voor meerdere series wilt wissen? Dit kan niet ongedaan gemaakt worden.",
         "confirm-single-delete": "Weet u zeker dat u alle bladwijzers voor {{seriesName}} wilt wissen? Dit kan niet ongedaan gemaakt worden.",
@@ -922,7 +931,7 @@
         "on-deck-last-progress-tooltip": "Het aantal dagen sinds de laatste voortgang voordat iets van Aan Het Lezen aftrad.",
         "on-deck-last-chapter-add-label": "Aan Het Lezen Laatste hoofdstuk toevoegen (dagen)",
         "on-deck-last-chapter-add-tooltip": "Het aantal dagen sinds het laatste hoofdstuk is toegevoegd om iets Aan Het Lezen op te nemen.",
-        "allow-stats-label": "Anonieme gebruiksverzameling toestaan",
+        "allow-stats-label": "Verzameling van anonieme gebruiksgegevens toestaan",
         "allow-stats-tooltip-part-1": "Stuur anonieme gebruiksgegevens naar de servers van Kavita. Dit omvat informatie over bepaalde gebruikte functies, aantal bestanden, OS-versie, Kavita-installatieversie, CPU en geheugen. We zullen deze informatie gebruiken om prioriteit te geven aan functies, bugfixes en prestatieafstemming. Vereist opnieuw opstarten om van kracht te worden. Zie de ",
         "allow-stats-tooltip-part-2": "voor wat er wordt verzameld.",
         "send-data": "Verstuur data",
@@ -974,7 +983,6 @@
         "reset-to-default": "{{common.reset-to-default}}",
         "reset": "{{common.reset}}",
         "save": "{{common.save}}",
-        "required": "{{validation.required-field}}",
         "recurring-tasks-title": "{{title}}",
         "last-executed-header": "Laatst uitgevoerd",
         "cron-header": "Cron",
@@ -995,7 +1003,8 @@
         "download-logs-task": "Logboeken downloaden",
         "download-logs-task-desc": "Compileert alle logbestanden in een zip en downloadt deze.",
         "check-for-updates-task": "Controleer op updates",
-        "check-for-updates-task-desc": "Kijk of er stabiele releases zijn vóór uw versie."
+        "check-for-updates-task-desc": "Kijk of er stabiele releases zijn vóór uw versie.",
+        "cleanup-label": "Opruimen"
     },
     "manage-users": {
         "invite": "Uitnodigen",
@@ -1012,22 +1021,28 @@
         "change-password-alt": "Verander wachtwoord {{user}}",
         "online-now-tooltip": "Nu online",
         "no-data": "Er zijn geen andere gebruikers.",
-        "all-libraries": "Alle bibliotheken"
+        "all-libraries": "Alle bibliotheken",
+        "name-header": "Naam"
     },
     "edit-collection-tags": {
-        "title": "{{collectionName}} collectie bewerken",
+        "title": "Collectie {{collectionName}} bewerken",
         "required-field": "{{validation.required-field}}",
         "save": "{{common.save}}",
         "close": "{{common.close}}",
         "cancel": "{{common.cancel}}",
         "name-label": "Naam",
         "name-validation": "Naam moet uniek zijn",
-        "promote-label": "Promoot",
-        "promote-tooltip": "Promotie betekent dat de tag serverbreed zichtbaar is, niet alleen voor beheerders. Alle series die deze tag hebben, hebben nog steeds beperkingen voor gebruikerstoegang.",
+        "promote-label": "Aanprijzen",
+        "promote-tooltip": "Aanbevelen betekent dat het label serverbreed zichtbaar is, niet alleen voor beheerders. Alle reeksen die dit label hebben, hebben nog steeds beperkingen voor gebruikerstoegang.",
         "summary-label": "Samenvatting",
         "deselect-all": "{{common.deselect-all}}",
         "select-all": "{{common.select-all}}",
-        "filter-label": "{{common.filter}}"
+        "filter-label": "{{common.filter}}",
+        "last-sync-title": "Laatste sync:",
+        "last-sync-tooltip": "Kavita synchroniseert dagelijks met de upstream-collectieleverancier.",
+        "source-url-title": "Bron-URL:",
+        "total-series-title": "Aantal reeksen:",
+        "missing-series-title": "Ontbrekende reeksen:"
     },
     "library-recommended": {
         "no-data": "Hier is niets te zien. Voeg wat metadata toe aan je bibliotheek, lees iets of beoordeel iets. Voor deze bibliotheek zijn aanbevelingen mogelijk ook uitgeschakeld.",
@@ -1042,17 +1057,18 @@
         "kavitaplus-section-title": "Kavita+"
     },
     "collection-detail": {
-        "no-data": "Hier is nog niks. Probeer nieuwe series toe te voegen.",
-        "no-data-filtered": "Geen resultaten met huidige filter.",
-        "title-alt": "Kavita - {{collectionName}} Collectie",
-        "item-count": "{{common.item-count}}"
+        "no-data": "Hier is nog niks. Probeer een reeks toe te voegen.",
+        "no-data-filtered": "Geen resultaten met het huidige filter.",
+        "item-count": "{{common.item-count}}",
+        "sync-progress": "Verzamelde reeksen: {{title}}",
+        "last-sync": "Laatste sync: {{date}}"
     },
     "all-collections": {
         "title": "Collecties",
         "item-count": "{{common.item-count}}",
         "no-data": "Er zijn geen collecties.",
-        "create-one-part-1": "Probeer te creëren",
-        "create-one-part-2": "één"
+        "create-one-part-1": "Probeer aan te maken",
+        "create-one-part-2": "een"
     },
     "carousel-reel": {
         "prev-items": "Vorige items",
@@ -1140,7 +1156,8 @@
         "help": "{{common.help}}",
         "announcements": "Aankondigingen",
         "logout": "Uitloggen",
-        "close": "{{common.close}}"
+        "close": "{{common.close}}",
+        "all-filters": "Slimme filters"
     },
     "promoted-icon": {
         "promoted": "{{common.promoted}}"
@@ -1169,28 +1186,19 @@
         "ending-title": "Eindigt",
         "starting-title": "Beginnend",
         "promote-label": "Promoot",
-        "promote-tooltip": "Promotie betekent dat de tag serverbreed zichtbaar is, en niet alleen voor beheerders. Voor alle series met deze tag gelden nog steeds gebruikerstoegangsbeperkingen."
+        "promote-tooltip": "Aanbevelen betekent dat het label serverbreed zichtbaar is, en niet alleen voor beheerders. Voor alle reeksen met dit label gelden nog steeds gebruikerstoegangsbeperkingen."
     },
     "import-mal-collection-modal": {
         "close": "{{common.close}}",
-        "series-count": "{{common.series-count}}"
+        "series-count": "{{common.series-count}}",
+        "title": "MAL Interest Stack importeren",
+        "description": "Importeer uw MAL Interest Stacks en maak Collecties aan binnen Kavita",
+        "restack-count": "{{num}} Restacks",
+        "nothing-found": "Niets gevonden"
     },
     "import-cbl-modal": {
         "close": "{{common.close}}",
-        "title": "CBL-import",
-        "import-description": "Importeer een .cbl-bestand om aan de slag te gaan. Kavita voert meerdere controles uit voordat het importeert. Sommige stappen blokkeren de voortgang vanwege problemen met het bestand.",
-        "validate-description": "Alle bestanden zijn gevalideerd om te zien of er bewerkingen in de lijst moeten worden uitgevoerd. Lijsten die zijn mislukt, gaan niet naar de volgende stap. Herstel de CBL-bestanden en probeer het opnieuw.",
-        "validate-warning": "Er zijn problemen met het CBL die een import verhinderen. Corrigeer deze problemen en probeer het opnieuw.",
-        "validate-no-issue-description": "Geen problemen gevonden met CBL, druk op Volgende.",
-        "dry-run-description": "Dit is een testrun en laat zien wat er gebeurt als u op Volgende drukt en de import uitvoert. Niet alle fouten worden geïmporteerd.",
-        "prev": "Vorige",
-        "import": "importeer",
-        "restart": "Herstart",
-        "next": "Volgende",
-        "import-step": "Importeer CBL's",
-        "validate-cbl-step": "Valideer CBL",
-        "dry-run-step": "Test Run",
-        "final-import-step": "Laatste stap"
+        "title": "CBL-import"
     },
     "pdf-reader": {
         "loading-message": "Laden...",
@@ -1290,7 +1298,8 @@
         "last-chapter-added": "Artikel toegevoegd",
         "time-to-read": "Tijd om te lezen",
         "release-year": "Jaar van uitgave",
-        "read-progress": "Laatst gelezen"
+        "read-progress": "Laatst gelezen",
+        "person-name": "Naam"
     },
     "edit-series-modal": {
         "title": "{{seriesName}} Details",
@@ -1428,7 +1437,7 @@
     },
     "errors": {
         "series-doesnt-exist": "Deze serie bestaat niet meer",
-        "collection-invalid-access": "U heeft geen toegang tot de bibliotheken waartoe deze label behoort, of deze verzameling is ongeldig",
+        "collection-invalid-access": "U heeft geen toegang tot bibliotheken onder dit label, of deze collectie is ongeldig",
         "unknown-crit": "Er is een onbekende kritieke fout opgetreden",
         "user-not-auth": "De gebruiker is niet geauthenticeerd",
         "error-code": "{{num}} Fout",
@@ -1447,7 +1456,8 @@
         "remove-rule": "Rij verwijderen"
     },
     "customize-dashboard-modal": {
-        "title-smart-filters": "Slimme filters"
+        "title-smart-filters": "Slimme filters",
+        "description": "U kunt verschillende aspecten van Kavita aanpassen door de volgorde te wijzigen, de zichtbaarheid in of uit te schakelen en slimme filters/externe bronnen aan uw startpagina of zijnavigatie te koppelen."
     },
     "customize-dashboard-streams": {
         "no-data": "Alle slimme filters toegevoegd aan Dashboard of nog geen gemaakt.",
@@ -1463,7 +1473,8 @@
         "clear": "{{common.clear}}",
         "external-sources-title": "{{customize-dashboard-modal.external-sources}}",
         "reorder-when-filter-present": "Je kunt items niet opnieuw rangschikken via slepen en neerzetten terwijl er een filter actief is. Gebruik {{customize-sidenav-streams.order-numbers-label}}",
-        "order-numbers-label": "{{reading-list-detail.order-numbers-label}}"
+        "order-numbers-label": "{{reading-list-detail.order-numbers-label}}",
+        "smart-filters-title": "{{tabs.smart-filters-tab}}"
     },
     "manage-external-sources": {
         "clear": "{{common.clear}}",
@@ -1472,14 +1483,16 @@
     "manage-smart-filters": {
         "delete": "{{common.delete}}",
         "filter": "{{common.filter}}",
-        "clear": "{{common.clear}}"
+        "clear": "{{common.clear}}",
+        "name-label": "Naam"
     },
     "edit-external-source-item": {
         "save": "{{common.save}}",
         "edit": "{{common.edit}}",
         "cancel": "{{common.cancel}}",
         "delete": "{{common.delete}}",
-        "required": "{{validation.required-field}}"
+        "required": "{{validation.required-field}}",
+        "name-label": "Naam"
     },
     "stream-pipe": {
         "on-deck": "{{dashboard.on-deck-title}}",
@@ -1512,10 +1525,16 @@
         "user-rating": "Gebruikersbeoordeling",
         "writers": "{{metadata-fields.writers-title}}",
         "path": "Pad",
-        "file-path": "Bestandspad"
+        "file-path": "Bestandspad",
+        "collection-tags": "Collectie-labels",
+        "want-to-read": "Wil ik lezen"
     },
     "actionable": {
-        "clear": "{{common.clear}}"
+        "clear": "{{common.clear}}",
+        "add-to-collection": "Aan collectie toevoegen",
+        "add-to-collection-tooltip": "Reeks aan collectie toevoegen",
+        "import-mal-stack-tooltip": "Maakt een Slimme Collectie van uw MAL Interesse Stacks",
+        "new-collection": "Nieuwe collectie"
     },
     "reviews": {
         "user-reviews-local": "Lokale recensies",
@@ -1562,7 +1581,9 @@
         "stats-tab": "Statistieken",
         "devices-tab": "Apparaten",
         "theme-tab": "Thema",
-        "preferences-tab": "Voorkeuren"
+        "preferences-tab": "Voorkeuren",
+        "smart-filters-tab": "Slimme filters",
+        "external-sources-tab": "Externe bronnen"
     },
     "changelog-update-item": {
         "download": "Download",
@@ -1592,13 +1613,15 @@
         "scaling-option-label": "Schaalopties"
     },
     "manage-matched-metadata": {
-        "series-name-header": "Series",
+        "series-name-header": "Reeksen",
         "library-name-header": "Bibliotheek",
         "actions-header": "Acties",
         "library-type": "Bibliotheek type",
         "dont-match-status-label": "{{dont-match-label}}",
         "all-status-label": "Alle",
-        "no-data": "{{common.no-data}}"
+        "no-data": "{{common.no-data}}",
+        "description": "Alle toepasselijke reeksen die kunnen worden gekoppeld aan externe metadata bevinden zich hier. Kavita zal de metadata van reeksen vooraf ophalen of vernieuwen, 50 reeksen per 24 uur dagelijks.",
+        "match-alt": "Overeenkomst {{seriesName}}"
     },
     "manage-user-tokens": {
         "username-header": "Gebruikersnaam",
@@ -1619,7 +1642,8 @@
         "enable-chapter-publisher-label": "Uitgever",
         "enable-genres-label": "Genres",
         "genre": "Genre",
-        "person-roles-label": "Rollen"
+        "person-roles-label": "Rollen",
+        "localized-name-label": "Gelokaliseerde reeksnaam"
     },
     "match-series-result-item": {
         "volume-count": "{{server-stats.volume-count}}",
@@ -1667,7 +1691,8 @@
         "close": "{{common.close}}",
         "filter-label": "{{common.filter}}",
         "clear": "{{common.clear}}",
-        "loading": "{{common.loading}}"
+        "loading": "{{common.loading}}",
+        "no-data": "Nog geen collecties aangemaakt"
     },
     "email-history": {
         "no-data": "{{common.no-data}}"
@@ -1679,17 +1704,26 @@
     },
     "oidc": {
         "login": "Terug naar loginscherm",
-        "error-loading-info": "Er is een fout opgetreden bij het laden van de OIDC info, contacteer uw beheerder",
+        "error-loading-info": "Er is een fout opgetreden bij het laden van de OIDC info, neem contract op met uw beheerder",
         "timeout": "OIDC resolutie heeft een time-out of er trad een fout op"
     },
     "manage-oidc-connect": {
-        "save-success": "Uw OIDC instellingen werden succesvol geüpdatet",
+        "save-success": "Uw OIDC-instellingen zijn meet success bijgewerkt",
         "restart-required": "Het veranderen van Authority of Client ID vereist een handmatige herstart van Kavita om actief te worden.",
         "behavior-title": "Gedrag",
         "manual-save-label": "Het veranderen van provider instellingen vereist manueel bewaren",
         "client-id-label": "Client ID",
         "require-verified-email-label": "Vereist geverifieerde emails",
-        "advanced-title": "Geavanceerde instellingen"
+        "advanced-title": "Geavanceerde instellingen",
+        "reset-tooltip": "Externe ID's van alle gebruikers resetten, gebruik dit om de koppelingen tussen gebruikers in Kavita en uw identiteitsprovider te resetten",
+        "reset-confirm": "Weet u zeker dat u de externe ID's van alle gebruikers wilt resetten?",
+        "auto-save-required": "U heeft kritieke instellingen gewijzigd, gebruik autom. opslaan om deze te behouden",
+        "provider-tooltip": "De instellingen van de provider vereisen dat u handmatig op Opslaan klikt. Kavita moet worden geconfigureerd als een vertrouwde cliënt en heeft een omleidings-URL nodig. Zie de <a href='https://wiki.kavitareader.com/guides/admin-settings/open-id-connect/' target='_blank' rel='noreferrer noopener'>wiki</a> voor meer details.",
+        "authority-tooltip": "De URL van uw OIDC-provider, exclusief het pad .well-known/openid-configuration",
+        "client-id-tooltip": "De Client-ID die in uw OIDC-provider is ingesteld, kan van alles zijn",
+        "secret-tooltip": "Het geheim zoals gegenereerd door uw OIDC-provider, wordt niet weergegeven nadat het is ingesteld",
+        "advanced-tooltip": "Wijzig deze opties alleen als u hun impact begrijpt.",
+        "custom-scopes-tooltip": "Aanvullende scopes om aan te vragen bij uw OIDC-provider tijdens het inloggen. Scheid meerdere scopes met komma's. Onjuiste waarden kunnen het inloggen verhinderen."
     },
     "version-update-modal": {
         "close": "{{common.close}}",
@@ -1708,5 +1742,59 @@
             "help": "Hoe te updaten",
             "download": "Download"
         }
+    },
+    "title": {
+        "reading-list": "Leeslijst",
+        "home": "Start",
+        "bookmarks": "Bladwijzers",
+        "collections": "Collecties",
+        "all-series": "Alle reeksen",
+        "reading-lists": "Leeslijsten"
+    },
+    "view-bookmark-drawer": {
+        "title": "Bladwijzers",
+        "close": "{{common.close}}",
+        "no-data": "{{common.no-data}}",
+        "page-num-label": "{{book-reader.page-num-label}}",
+        "load-bookmark": "Laden"
+    },
+    "collection-owner": {
+        "collection-created-label": "Aangemaakt door: {{owner}}",
+        "collection-via-label": "via {{source}}"
+    },
+    "toasts": {
+        "series-added-to-collection": "Reeksen toegevoegd aan collectie {{collectionName}}",
+        "no-series-collection-warning": "Waarschuwing! Er zijn geen reeksen geselecteerd, het opslaan zal de collectie verwijderen. Weet u zeker dat u wilt doorgaan?",
+        "collection-updated": "Collectie bijgewerkt",
+        "collection-tag-deleted": "Collectie-label verwijderd",
+        "collection-not-owned": "U bent niet de eigenaar van deze collectie",
+        "collections-promoted": "Aanbevolen collecties",
+        "collections-unpromoted": "Niet meer aanbevolen collecties",
+        "confirm-delete-collection": "Weet u zeker dat u de collectie wilt verwijderen? Dit kan niet ongedaan worden gemaakt.",
+        "confirm-delete-collections": "Weet u zeker dat u meerdere collecties wilt verwijderen?",
+        "collections-deleted": "Verwijderde collecties"
+    },
+    "cbl-match-tier-pipe": {
+        "alternate-series": "Alternatieve reeks"
+    },
+    "cbl-import-reason-pipe": {
+        "series-missing": "Reeks niet gevonden",
+        "all-series-missing": "Alle ontbrekende reeksen",
+        "series-collision": "Meerdere reeksen komen overeen"
+    },
+    "library-type-subtitle-pipe": {
+        "comic": "Stripboekenbibliotheek met ondersteuning voor het groeperen van volumes en paperbacks binnen een enkele reeks. Ondersteunt geen meerdere reeksen binnen dezelfde serie."
+    },
+    "manage-auth-keys": {
+        "name-label": "Naam"
+    },
+    "create-auth-key": {
+        "name-label": "Naam"
+    },
+    "browse-cbl-repo-modal": {
+        "name-header": "Naam"
+    },
+    "generic-filter-field-pipe": {
+        "person-name": "Naam"
     }
 }

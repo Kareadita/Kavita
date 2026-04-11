@@ -177,8 +177,6 @@
         "active-theme": "Aktiv",
         "updated-toastr": "Der Standardwert der Seite wurde auf {{name}} aktualisiert",
         "delete": "{{common.delete}}",
-        "drag-n-drop": "{{cover-image-chooser.drag-n-drop}}",
-        "upload": "{{cover-image-chooser.upload}}",
         "upload-continued": "eine CSS Datei",
         "preview-default": "Wähle zunächst ein Theme aus",
         "preview-default-admin": "Wähle ein Thema aus oder lade eines hoch",
@@ -858,7 +856,9 @@
         "reading-profile-promoted": "Leseprofil beworben",
         "line-spacing-min-label": "1x",
         "font-family-label": "{{manage-reading-profiles.font-family-label}}",
-        "font-size-label": "{{manage-reading-profiles.font-size-book-label}}"
+        "font-size-label": "{{manage-reading-profiles.font-size-book-label}}",
+        "disable-bookmark-icon-label": "{{manage-reading-profiles.disable-bookmark-icon-label}}",
+        "disable-bookmark-icon-tooltip": "{{manage-reading-profiles.disable-bookmark-icon-tooltip}}"
     },
     "table-of-contents": {
         "no-data": "Dieses Buch hat kein Inhaltsverzeichnis in den Metadaten oder eine toc-Datei"
@@ -878,7 +878,8 @@
         "items-selected": "{{num}} ausgewählte Artikel",
         "mark-as-unread": "Als ungelesen markieren",
         "mark-as-read": "Als gelesen markieren",
-        "deselect-all": "{{common.deselect-all}}"
+        "deselect-all": "{{common.deselect-all}}",
+        "mark-as-read-with-session": "Als gelesen markieren (Session)"
     },
     "card-detail-layout": {
         "total-items": "{{count}} Artikel insgesamt",
@@ -927,7 +928,7 @@
         "url": "Url",
         "drag-n-drop": "Ziehen und Ablegen",
         "upload": "Hochladen",
-        "upload-continued": "ein Bild",
+        "upload-continued": "Bild",
         "url-label": "Url",
         "load": "laden",
         "back": "Zurück",
@@ -1169,7 +1170,7 @@
         "library-database-backup-label": "Kavita-Sicherung",
         "library-database-backup-tooltip": "Wie oft Kavita die Datenbank und andere zugehörige Dateien sichern soll.",
         "cleanup-label": "Bereinigung",
-        "cleanup-tooltip": "Wie oft Kavita Bereinigungen durchführen soll. Dies kann sehr umfangreich sein und sollte in den meisten Fällen um Mitternacht durchgeführt werden",
+        "cleanup-tooltip": "Wie oft Kavita Bereinigungen durchführen soll. Dies kann sehr umfangreich sein und sollte in den meisten Fällen um Mitternacht durchgeführt werden.",
         "adhoc-tasks-title": "Ad-hoc-Aufgaben",
         "job-title-header": "Job Titel",
         "description-header": "Beschreibung",
@@ -1177,16 +1178,9 @@
         "reset-to-default": "{{common.reset-to-default}}",
         "reset": "{{common.reset}}",
         "save": "{{common.save}}",
-        "required": "{{validation.required-field}}",
-        "custom-label": "Benutzerdefinierter Zeitplan (Cron-Notation)",
-        "cron-notation": "Dies ist nicht gültig Cron Notation",
         "recurring-tasks-title": "{{title}}",
         "last-executed-header": "Zuletzt Ausgeführt",
         "cron-header": "Cron",
-        "disabled": "Deaktiviert",
-        "daily": "Täglich",
-        "weekly": "Wöchentlich",
-        "custom": "Benutzerdefiniert",
         "convert-media-task": "Medien in Zielkodierung konvertieren",
         "convert-media-task-desc": "Führt eine langwierige Aufgabe aus, die alle von Kavita verwalteten Medien in die Zielkodierung konvertiert. Dies ist langsam (besonders auf ARM-Geräten).",
         "convert-media-task-success": "Die Konvertierung von Medien in die Zielkodierung wurde in die Warteschlange gestellt",
@@ -1214,7 +1208,9 @@
         "check-for-updates-task-desc": "Schauen Sie nach, ob es vor Ihrer Version bereits Stable Releases gibt.",
         "clean-up-task": "Allgemeine Bereinigung",
         "clean-up-task-desc": "Führt nächtliche Bereinigungsaktivitäten auf dem Server durch. Kann sehr zeitaufwendig sein, sollte nicht bei aktiven Benutzern oder Scans ausgeführt werden. Läuft alle 24 Stunden.",
-        "clean-up-task-success": "Aufräumarbeiten abgeschlossen"
+        "clean-up-task-success": "Aufräumarbeiten abgeschlossen",
+        "cbl-sync-label": "Synchronisierung der Leseliste",
+        "cbl-sync-tooltip": "Wie oft Kavita nach neuen Aktualisierungen der CBL-Leselisten sucht. Standardmäßig erfolgt dies täglich um 4 Uhr morgens."
     },
     "manage-users": {
         "invite": "Einladen",
@@ -1296,7 +1292,7 @@
         "scrobbling": "Scrobbling",
         "theme": "Schema",
         "customize": "Anpassen",
-        "cbl-import": "CBL-Leseliste",
+        "cbl-import": "Leseliste-Manager",
         "mal-stack-import": "MAL Stack",
         "admin-email-history": "E-Mail-Verlauf",
         "admin-matched-metadata": "Passende Metadaten",
@@ -1311,12 +1307,12 @@
         "custom-key-binds": "Tastaturbelegung",
         "insights-section-title": "Einblicke",
         "admin-activity": "Aktivität",
-        "admin-device": "Geräte"
+        "admin-device": "Geräte",
+        "remap-rules": "Regeln neu zuordnen"
     },
     "collection-detail": {
         "no-data": "Es sind keine Artikel vorhanden. Versuchen Sie, eine Serie hinzuzufügen.",
         "no-data-filtered": "Keine Artikel entsprechen Ihrem aktuellen Filter.",
-        "title-alt": "Kavita - {{collectionName}} Kollektion",
         "sync-progress": "Gesammelte Serien: {{title}}",
         "last-sync": "Letzte Synchronisierung: {{date}}",
         "item-count": "{{common.item-count}}"
@@ -1348,7 +1344,8 @@
     "reading-list-item": {
         "remove": "{{common.remove}}",
         "read": "{{common.read}}",
-        "released-label": "Veröffentlicht: {{date}}"
+        "released-label": "Veröffentlicht: {{date}}",
+        "pages-count": "{{series-detail.pages-count}}"
     },
     "stream-list-item": {
         "remove": "{{common.remove}}",
@@ -1364,7 +1361,7 @@
         "page-settings-title": "Seiten Einstellungen",
         "remove-read": "Entfernen Lesen",
         "order-numbers-label": "Bestellnummern",
-        "continue": "Weiter",
+        "continue": "Fortsetzen",
         "read": "{{common.read}}",
         "read-options-alt": "Lese Optionen",
         "incognito-alt": "(Inkognito)",
@@ -1372,7 +1369,6 @@
         "characters-title": "{{metadata-fields.characters-title}}",
         "edit-label": "Editiermodus",
         "reorder-alt": "Einträge anordnen",
-        "dnd-warning": "Drag & Drop ist auf Mobilgeräten oder bei einer Leseliste mit mehr als 100 Einträgen nicht verfügbar.",
         "writers-title": "{{metadata-fields.writers-title}}",
         "publishers-title": "{{metadata-fields.publishers-title}}",
         "items-title": "Artikel",
@@ -1474,7 +1470,7 @@
         "month-label": "Monat",
         "ending-title": "Ende",
         "starting-title": "Anfang",
-        "promote-label": "Werben Sie für",
+        "promote-label": "{{actionable.promote}}",
         "promote-tooltip": "Promotion bedeutet, dass die Sammlung serverweit zu sehen ist, nicht nur für Sie. Für alle Serien innerhalb dieser Sammlung gelten nach wie vor Benutzerzugriffsbeschränkungen."
     },
     "import-mal-collection-modal": {
@@ -1484,27 +1480,51 @@
         "series-count": "{{common.series-count}}",
         "restack-count": "{{num}} Restacks",
         "nothing-found": "Nichts gefunden",
-        "track": "Spur"
+        "track": "Spur",
+        "by-author": "von {{author}}"
     },
     "import-cbl-modal": {
         "close": "{{common.close}}",
-        "title": "CBL-Import",
-        "import-description": "Um zu beginnen, importieren Sie eine .cbl-Datei. Kavita führt vor dem Import mehrere Prüfungen durch. Einige Schritte werden aufgrund von Problemen mit der Datei blockiert.",
-        "validate-description": "Alle Dateien wurden überprüft, um festzustellen, ob es auf der Liste noch Vorgänge zu erledigen gibt. Alle Listen, die fehlgeschlagen sind, werden nicht zum nächsten Schritt weitergeleitet. Korrigieren Sie die CBL-Dateien und versuchen Sie es erneut.",
-        "validate-warning": "Es gibt Probleme mit dem CBL, die einen Import verhindern. Beheben Sie diese Probleme und versuchen Sie es erneut.",
-        "validate-no-issue-description": "Keine Probleme mit CBL gefunden, drücken Sie weiter.",
-        "dry-run-description": "Dies ist ein Probelauf und zeigt, was passiert, wenn Sie auf Weiter drücken und den Import durchführen. Alle Fehlschläge werden nicht importiert.",
-        "prev": "Prev",
-        "import": "Importieren",
-        "restart": "Restart",
-        "next": "Nächstes",
-        "import-step": "CBLs importieren",
-        "validate-cbl-step": "CBL validieren",
-        "dry-run-step": "Leerlauf",
-        "final-import-step": "Letzter Schritt",
-        "comicvine-parsing-label": "Comic Vine Series passend verwenden",
-        "cbl-repo": "In der Community finden Sie viele Leselisten <a href='https://github.com/DieselTech/CBL-ReadingLists' target='_blank' rel='noopener noreferrer'>repository</a>.",
-        "help-label": "{{common.help}}"
+        "title": "CBL-Importer",
+        "matched-count": "{{count}} Treffer",
+        "issues-count": "{{count}} Ausgabe",
+        "matched-items-header": "Passende Artikel",
+        "issues-header": "Zu beachtende Punkte",
+        "remap-rules-header": "Regeln für die Neuzuordnung",
+        "tier-label": "Gefunden über",
+        "skip-item": "Überspringen",
+        "select-series": "Nach Serien suchen",
+        "pick-candidate": "Wählen Sie die richtige Serie aus",
+        "finalize": "Alle importieren",
+        "finalize-single": "Importieren",
+        "previous-file": "Vorherige",
+        "next-file": "Nächste",
+        "file-counter": "Datei {{current}} von {{total}}",
+        "no-remap-rules": "Keine Regeln für die Neuzuordnung",
+        "delete-rule": "{{common.delete}}",
+        "manage-rules": "Regeln zur Neuzuordnung verwalten",
+        "col-series": "Gewünschte Serie",
+        "col-vol-issue": "Gewünschter Band / Ausgabe",
+        "col-status": "Status",
+        "col-matched-series": "Passende Serie",
+        "col-matched-issue": "Passende Ausgabe",
+        "col-action": "Aktion",
+        "resolve": "Beheben",
+        "select-chapter": "Wählen Sie das passende Kapitel aus",
+        "edit-match": "Übereinstimmung bearbeiten",
+        "cancel": "{{common.cancel}}",
+        "undo": "Rückgängig",
+        "remap-rule-used": "Übereinstimmung gemäß Remap-Regel",
+        "import-success": "{{count}} Leseliste(n) wurden erfolgreich importiert",
+        "processing": "Wird verarbeitet",
+        "new-list": "Neu",
+        "update-list": "Aktualisierung",
+        "volume-num": "{{common.volume-num-shorthand}}",
+        "issue-num": "{{common.issue-num-shorthand}}",
+        "description": "Auf diesem Bildschirm können Sie Neuzuordnungsregeln erstellen, um Serien oder Ausgaben automatisch Kavita-Entitäten zuzuordnen. Die Neuzuordnungsregeln gelten für diese und zukünftige Listen.",
+        "unmatched-count": "{{count}} fehlen",
+        "refresh": "Aktualisieren",
+        "wiki": "Wiki"
     },
     "pdf-reader": {
         "loading-message": "Laden...",
@@ -1987,7 +2007,8 @@
         "cancel": "{{common.cancel}}",
         "delete": "{{common.delete}}",
         "pattern": "Host muss eine gültige http(s):// Url sein",
-        "required": "{{validation.required-field}}"
+        "required": "{{validation.required-field}}",
+        "api-key-tooltip": "Keine automatische Anmeldung erforderlich, wenn der Host OIDC verwendet"
     },
     "stream-pipe": {
         "on-deck": "{{dashboard.on-deck-title}}",
@@ -2179,7 +2200,20 @@
         "redownload-confirm": "Sie haben {{title}} bereits am {{date}} heruntergeladen. Möchten Sie es erneut herunterladen?",
         "confirm-delete-collection": "Möchten Sie die Sammlung wirklich löschen? Dieser Vorgang kann nicht rückgängig gemacht werden.",
         "confirm-delete-annotations": "Möchten Sie die Anmerkungen wirklich löschen? Dieser Vorgang kann nicht rückgängig gemacht werden.",
-        "annotations-deleted": "Anmerkung gelöscht"
+        "annotations-deleted": "Anmerkung gelöscht",
+        "save-remap-rule": "„{{from}} → {{to}}“ als Umbenennungsregel für zukünftige Importe speichern?",
+        "import-complete": "Import abgeschlossen",
+        "failed-to-validate": "Die Datei konnte nicht überprüft werden",
+        "failed-to-import": "Der Import von {{name}} ist fehlgeschlagen",
+        "redownload-confirm-bulk": "Sie haben bereits (Teile von) {{title}} heruntergeladen. Möchten Sie diese Elemente erneut herunterladen?",
+        "confirm-delete-client-device": "Möchten Sie dieses Gerät wirklich löschen?",
+        "confirm-delete-cbl-remap-rule": "Möchten Sie diese Umleitungsregel wirklich löschen?",
+        "cbl-remap-rule-created": "Regel für die Neuzuordnung erstellt",
+        "cbl-remap-rule-deleted": "Regel für die Neuzuordnung gelöscht",
+        "cbl-remap-rule-promoted": "Regel auf globaler Ebene eingeführt",
+        "cbl-remap-rule-demoted": "Regel auf Benutzerebene herabgestuft",
+        "confirm-delete-read-from-readinglist": "Möchten Sie wirklich alle gelesenen Titel aus dieser Leseliste entfernen? Dieser Vorgang kann nicht rückgängig gemacht werden.",
+        "reading-list-sync-enqueued": "Die Leseliste wurde zur Synchronisierung in die Warteschlange gestellt."
     },
     "read-time-pipe": {
         "less-than-hour": "<1 Stunde",
@@ -2271,7 +2305,9 @@
         "export-v1": "CBL v1",
         "export-v1-tooltip": "CBL v1 (XML) verwenden",
         "export-v2": "CBL v2",
-        "export-v2-tooltip": "CBL v2 (JSON) verwenden"
+        "export-v2-tooltip": "CBL v2 (JSON) verwenden",
+        "mark-as-read-with-session": "Als gelesen markieren (sessionsbezogen)",
+        "mark-as-read-with-session-tooltip": "Den Fortschritt als vollständig gelesen markieren und eine Sitzung dafür erstellen"
     },
     "preferences": {
         "left-to-right": "Links nach rechts",
@@ -2708,7 +2744,9 @@
         "page-calc-method-tooltip": "{{reader-settings.page-calc-method-tooltip}}",
         "set-devices": "Geräte einrichten",
         "select-devices-for": "Geräte für {{name}} einrichten",
-        "breakpoint-pipe-never": "{{breakpoint-pipe.never}}"
+        "breakpoint-pipe-never": "{{breakpoint-pipe.never}}",
+        "disable-bookmark-icon-label": "Lesezeichen-Symbol deaktivieren",
+        "disable-bookmark-icon-tooltip": "Entfernt Lesezeichen-Symbole aus Bildern im Reader"
     },
     "bulk-set-reading-profile-modal": {
         "no-data": "Es wurden noch keine Sammlungen erstellt",
@@ -2856,8 +2894,9 @@
         "reset-tooltip": "Setzen Sie die externen IDs aller Benutzer zurück. Verwenden Sie diese Funktion, um die Verknüpfungen zwischen Benutzern in Kavita und Ihrem Identitätsanbieter zurückzusetzen",
         "reset-confirm": "Sind Sie sicher, dass Sie die externen IDs aller Benutzer zurücksetzen möchten?",
         "reset-success": "Externe IDs für alle Benutzer zurückgesetzt, bitte erneut authentifizieren, um die Verknüpfung herzustellen",
-        "auto-save-required": "Sie haben wichtige Einstellungen geändert. Bitte speichern Sie diese automatisch, um sie beizubehalten",
-        "other-field-invalid": "{{validation.other-field-invalid}}"
+        "auto-save-required": "Sie haben wichtige Einstellungen geändert; speichern Sie diese manuell, um sie beizubehalten",
+        "other-field-invalid": "{{validation.other-field-invalid}}",
+        "checking-authority": "Die Berechtigung wird überprüft, bitte haben Sie etwas Geduld..."
     },
     "identity-provider-pipe": {
         "kavita": "Kavita",
@@ -2888,9 +2927,9 @@
         "keep": "Behalten",
         "to-pick": "Auflösung auswählen",
         "finalize-title": "Vorschau Ihrer Einstellungen, drücken Sie „Speichern“, um den Import abzuschließen",
-        "prev": "{{import-cbl-modal.prev}}",
-        "import": "{{import-cbl-modal.import}}",
-        "next": "{{import-cbl-modal.next}}",
+        "prev": "{{import-cbl.prev}}",
+        "import": "{{import-cbl.import}}",
+        "next": "{{import-cbl.next}}",
         "save": "{{common.save}}",
         "import-description": "Laden Sie eine Datei hoch, die Sie oder jemand anderes exportiert hat, um sie durch Ihre aktuellen Einstellungen zu ersetzen oder mit diesen zusammenzuführen.",
         "age-ratings-conflicts-tooltip": "Entscheiden Sie, welche Altersfreigabe verwendet werden soll"
@@ -2916,7 +2955,9 @@
         "create": "Erstellen",
         "edit": "Bearbeiten",
         "delete": "Löschen",
-        "contains-spoilers-label": "{{annotation-card.contains-spoilers-label}}"
+        "contains-spoilers-label": "{{annotation-card.contains-spoilers-label}}",
+        "read-more": "{{read-more.read-more}}",
+        "read-less": "{{read-more.read-less}}"
     },
     "view-bookmark-drawer": {
         "title": "Lesezeichen",
@@ -2947,16 +2988,11 @@
     },
     "font-manager": {
         "description": "Der E-Book-Reader von Kavita verfügt über einige integrierte Schriftarten. Hier können Sie Ihre eigenen Schriftarten hinzufügen. Laden Sie eine Datei hoch oder verwenden Sie eine Google-Fonts-URL. Weitere Informationen finden Sie im <a href='{{wikiLink}}' target='_blank' rel='noreferrer noopener'>wiki</a>.",
-        "enter-an-url-pre-title": "Gib eine {{url}} ein",
-        "url": "URL",
         "upload-continued": "eine Schriftartdatei",
         "preview-default": "Lade deine eigene Schriftart über eine Datei oder die Google Font-URL hoch",
-        "back": "Zurück",
-        "load": "Laden",
         "no-preview": "Diese Schriftart kann nicht in der Vorschau angezeigt werden. Es wird der Standardstil aus dem Buch verwendet.",
         "brown-fox": "Der schnelle braune Fuchs springt über den faulen Hund",
         "filter-system-fonts-label": "Systemschriften filtern",
-        "url-label": "URL",
         "add": "{{common.add}}",
         "drag-n-drop": "{{cover-image-chooser.drag-n-drop}}",
         "upload": "{{cover-image-chooser.upload}}",
@@ -3045,7 +3081,8 @@
         "clients-opds-alert": "{{user-preferences.clients-opds-alert}}",
         "clients-opds-description": "{{user-preferences.clients-opds-description}}",
         "clients-opds-url-tooltip": "{{user-preferences.clients-opds-url-tooltip}}",
-        "copy-key": "{{common.copy}}"
+        "copy-key": "{{common.copy}}",
+        "clients-opds-error": "Das Laden der OPDS-URL für den Schlüssel: {{key}} ist fehlgeschlagen"
     },
     "create-auth-key": {
         "create-title": "Authentifizierungsschlüssel erstellen",
@@ -3109,10 +3146,10 @@
     "reading-progress-status-pipe": {
         "no-progress": "Lesen",
         "no-progress-incognito": "Iminkognito lesen",
-        "progress": "Weiter",
+        "progress": "Fortsetzen",
         "progress-incognito": "Inkognito fortsetzen",
         "full-read": "Erneut lesen",
-        "full-read-incognito": "Incognito erneut lesen"
+        "full-read-incognito": "Incognito lesen"
     },
     "client-device-auth-type-pipe": {
         "unknown": "Unbekannt",
@@ -3308,7 +3345,8 @@
         "yesterday": "Gestern",
         "pagination-label": "Aktivitäten-Paginierung",
         "page-info": "Seite {{current}} von {{total}} ({{items}} Ergebnisse insgesamt)",
-        "num-more": "{{num}} weitere"
+        "num-more": "{{num}} weitere",
+        "generated-session-tooltip": "Diese Lesung wurde automatisch auf der Grundlage einer Schätzung erstellt"
     },
     "client-device-type-pipe": {
         "mobile": "Mobile",
@@ -3456,5 +3494,176 @@
         "hardcoverId-label": "Hardcover-ID",
         "comicVineId-label": "Comic Vine-ID",
         "metronId-label": "Metron-ID"
+    },
+    "cbl-match-tier-pipe": {
+        "remap-rule": "Regel neu zuordnen",
+        "external-id": "Externe ID",
+        "exact-name": "Genauer Name",
+        "comicvine-naming": "ComicVine-Namensgebung",
+        "article-stripped": "Artikel (ohne Formatierung)",
+        "reprint-stripped": "Nachdruck (ohne Formatierung)",
+        "alternate-series": "Alternative Serie",
+        "user-decision": "Entscheidung des Benutzers",
+        "unmatched": "Unmatched"
+    },
+    "cbl-import-reason-pipe": {
+        "chapter-missing": "Kapitel fehlt",
+        "volume-missing": "Band fehlt",
+        "series-missing": "Serie nicht gefunden",
+        "name-conflict": "Namenskonflikt",
+        "all-series-missing": "Alle Serien fehlen",
+        "empty-file": "Leere Datei",
+        "series-collision": "Multi-Series Match",
+        "all-chapter-missing": "Alle Kapitel fehlen",
+        "success": "Erfolg",
+        "invalid-file": "Ungültige Datei"
+    },
+    "cbl-manager": {
+        "browse-repo": "CBLs durchsuchen",
+        "description": "Sie können Leselisten aus einer Datei oder einer URL importieren oder das CBL-Repo durchsuchen. Listen, die aus einer Online-Quelle erstellt wurden, werden automatisch im Hintergrund oder auf Wunsch aktualisiert.",
+        "url": "URL zu CBL",
+        "preview-default": "Laden Sie Ihre eigene CBL-Datei (Version 1 oder 2) zum Importieren hoch",
+        "enter-an-url-pre-title": "{{font-manager.enter-an-url-pre-title}}",
+        "drag-n-drop": "{{cover-image-chooser.drag-n-drop}}",
+        "upload": "{{cover-image-chooser.upload}}",
+        "upload-continued": "eine CBL-Datei",
+        "downloaded": "Heruntergeladen",
+        "url-label": "Url",
+        "load": "Laden",
+        "back": "Zurück",
+        "provider-url": "URL",
+        "provider-file": "Datei",
+        "update-available": "Update verfügbar",
+        "search-placeholder": "Leselisten durchsuchen...",
+        "filter-has-update": "Es gibt ein Update",
+        "filter-all": "Alle",
+        "filter-local": "Lokal",
+        "no-results": "Es wurden keine passenden Leselisten gefunden",
+        "add": "{{common.add}}",
+        "sync": "Synchronisieren",
+        "delete": "{{common.delete}}",
+        "view-list": "Leseliste anzeigen",
+        "last-synced": "Zuletzt synchronisiert am {{date}}",
+        "source": "Quelle",
+        "not-authorized": "Sie haben keine Berechtigung, auf diesen Inhalt zuzugreifen"
+    },
+    "manage-remap-rules-modal": {
+        "title": "Regeln für die Neuzuordnung verwalten",
+        "close": "{{common.close}}",
+        "no-rules": "Es wurden keine Remap-Regeln gespeichert",
+        "delete-rule": "{{common.delete}}",
+        "volume-num": "{{common.volume-num-shorthand}}",
+        "issue-num": "{{common.issue-num-shorthand}}",
+        "global": "Weltweit",
+        "series-level": "Serienebene",
+        "volume-target": "{{common.volume-num-shorthand}}"
+    },
+    "manage-remap-rules": {
+        "new-rule-title": "Neue Neukonfigurationsregel",
+        "cbl-series-name-label": "Bezeichnung der CBL-Serie",
+        "cbl-series-name-placeholder": "Geben Sie den Namen der CBL-Serie ein...",
+        "kavita-series-label": "Kavita-Serie",
+        "save": "{{common.save}}",
+        "cancel": "{{common.cancel}}",
+        "my-rules-header": "Meine Regeln",
+        "global-rules-header": "Allgemeine Regeln",
+        "other-users-rules-header": "Regeln anderer Nutzer",
+        "cbl-name-col": "CBL Name",
+        "created-col": "Erstellt",
+        "created-by-col": "Erstellt von",
+        "user-col": "Benutzer",
+        "delete": "{{common.delete}}",
+        "promote": "{{actionable.promote}}",
+        "promote-tooltip": "Als globale Regel festlegen",
+        "demote": "Herabstufen",
+        "demote-tooltip": "In Benutzerregel herabstufen",
+        "by": "von",
+        "volume-num": "{{common.volume-num-shorthand}}",
+        "issue-num": "{{common.issue-num-shorthand}}",
+        "cbl-volume-label": "CBL-Band",
+        "cbl-volume-placeholder": "z. B. 2016",
+        "series-level": "Serienebene",
+        "create-rule-title": "Regel erstellen",
+        "edit-rule-title": "Regel bearbeiten",
+        "cbl-volume-col": "CBL-Band",
+        "cbl-issue-col": "CBL-Ausgabe",
+        "mapped-vol-issue-col": "Zugeordnet Band / Ausgabe",
+        "cbl-number-label": "CBL-Ausgabe #",
+        "cbl-number-placeholder": "z. B. 1",
+        "kavita-chapter-label": "Kapitel „Kavita“ (optional)",
+        "edit": "{{common.edit}}",
+        "mapped-series-col": "Abgebildete Serie"
+    },
+    "browse-cbl-repo-modal": {
+        "title": "CBL-Repo-Browser",
+        "rate-limit-warning": "Kavita nähert sich dem Ratenlimit für GitHub! Sie haben noch {{remaining}} Aufrufe übrig.",
+        "rate-limit-resets": "Rate Limit wird in {{time}} zurückgesetzt",
+        "breadcrumb-alt-label": "Navigationspfad",
+        "root-alt-label": "Stammverzeichnis",
+        "instructions": "Suchen Sie nach Leselisten zum Herunterladen. Die heruntergeladenen Dateien werden mit Ihrer Bibliothek synchronisiert.",
+        "file-browser-label": "CBL-Repo-Browser",
+        "type-header": "Dateityp",
+        "name-header": "Name",
+        "select-all-files": "Alles auswählen",
+        "loading": "{{common.loading}}",
+        "select-file-alt-label": "Datei auswählen: {{name}}",
+        "empty-directory": "Leeres Verzeichnis",
+        "cancel": "{{common.cancel}}",
+        "served-from-cache": "Aus dem Cache bereitgestellt",
+        "download": "Herunterladen",
+        "owned-label": "Im Besitz",
+        "close": "{{common.close}}"
+    },
+    "reading-list-provider-pipe": {
+        "none": "System",
+        "file": "Datei",
+        "url": "URL"
+    },
+    "import-cbl": {
+        "close": "{{common.close}}",
+        "title": "CBL-Import",
+        "help-label": "{{common.help}}",
+        "import-description": "Importieren Sie zunächst eine .cbl-Datei. Kavita führt vor dem Import mehrere Prüfungen durch. Bei Problemen mit der Datei werden einige Schritte blockiert, sodass der Vorgang nicht fortgesetzt werden kann.",
+        "validate-description": "Alle Dateien wurden überprüft, um festzustellen, ob in der Liste noch Vorgänge zu erledigen sind. Listen, bei denen der Überprüfung ein Fehler aufgetreten ist, werden nicht zum nächsten Schritt weitergeleitet. Korrigieren Sie die CBL-Dateien und versuchen Sie es erneut.",
+        "validate-warning": "Es liegen Probleme mit der CBL vor, die einen Import verhindern. Beheben Sie diese Probleme und versuchen Sie es erneut.",
+        "validate-no-issue-description": "Es wurden keine Probleme mit CBL festgestellt. Klicken Sie auf „Weiter“.",
+        "dry-run-description": "Dies ist ein Testlauf, der zeigt, was geschieht, wenn Sie auf „Weiter“ klicken und den Import durchführen. Alle fehlgeschlagenen Einträge werden nicht importiert.",
+        "prev": "zurück",
+        "import": "Importieren",
+        "restart": "Neustart",
+        "next": "Weiter",
+        "import-step": "CBLs importieren",
+        "validate-cbl-step": "CBL validieren",
+        "dry-run-step": "Probelauf",
+        "final-import-step": "Letzter Schritt",
+        "comicvine-parsing-label": "Verwenden Sie die Comic-Vine-Serienabgleichfunktion",
+        "cbl-repo": "Im <a href='https://github.com/DieselTech/CBL-ReadingLists' target='_blank' rel='noopener noreferrer'>repository</a> der Community finden Sie zahlreiche Leselisten."
+    },
+    "authority-validation-result-pipe": {
+        "success": "Die Berechtigung ist gültig",
+        "invalid-authority": "Kavita kann die OIDC-Konfiguration laden, aber der Aussteller stimmt nicht überein",
+        "failure": "Kavita kann die OIDC-Konfiguration nicht laden",
+        "not-applicable": "Kavita kann die Berechtigung nicht überprüfen, da sie nicht konfiguriert ist",
+        "missing-https": "{{manage-oidc-connect.tls-required}}"
+    },
+    "file-drag-and-drop-upload": {
+        "drag-n-drop": "{{cover-image-chooser.drag-n-drop}}",
+        "upload": "{{cover-image-chooser.upload}}",
+        "enter-an-url-pre-title": "Geben Sie eine {{url}} ein",
+        "url": "URL",
+        "url-label": "Url",
+        "back": "Zurück",
+        "load": "Laden"
+    },
+    "cron-frequency-pipe": {
+        "disabled": "Deaktiviert",
+        "daily": "Täglich",
+        "weekly": "Wöchentlich",
+        "custom": "Benutzerdefiniert"
+    },
+    "setting-cron-item": {
+        "custom-label": "Benutzerdefinierter Zeitplan (Kron-Notation)",
+        "required-field": "{{validation.required-field}}",
+        "cron-notation": "Dies ist keine gültige Kron-Notation"
     }
 }

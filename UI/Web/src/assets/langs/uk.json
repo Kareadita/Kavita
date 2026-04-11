@@ -152,8 +152,6 @@
         "download": "{{changelog.download}}",
         "apply": "{{common.apply}}",
         "delete": "{{common.delete}}",
-        "drag-n-drop": "{{cover-image-chooser.drag-n-drop}}",
-        "upload": "{{cover-image-chooser.upload}}",
         "add": "{{common.add}}",
         "description": "Kavita доступна в багатьох кольорах, знайдіть кольорову схему, яка відповідає вашим потребам, або створіть свою самостійно та поділіться нею. Теми можна застосовувати для вашого облікового запису або до всіх облікових записів.",
         "set-default": "Зробити за замовчуванням",
@@ -937,7 +935,6 @@
         "reset-to-default": "{{common.reset-to-default}}",
         "reset": "{{common.reset}}",
         "save": "{{common.save}}",
-        "required": "{{validation.required-field}}",
         "title": "Повторювані завдання",
         "library-scan-label": "Сканування бібліотеки",
         "library-scan-tooltip": "Як часто Kavita скануватиме та оновлюватиме метадані навколо файлів бібліотек.",
@@ -949,15 +946,9 @@
         "job-title-header": "Посада",
         "description-header": "Опис",
         "action-header": "Дія",
-        "custom-label": "Налаштований розклад (нотація Cron)",
-        "cron-notation": "Це недійсна нотація Cron",
         "recurring-tasks-title": "{{title}}",
         "last-executed-header": "Останнє виконання",
         "cron-header": "Крон",
-        "disabled": "Вимкнено",
-        "daily": "Щоденно",
-        "weekly": "Щотижнево",
-        "custom": "Користувацька",
         "convert-media-task": "Конвертувати медіафайли в цільове кодування",
         "convert-media-task-desc": "Запускає тривале завдання, яке конвертуватиме всі медіафайли, керовані kavita, у цільове кодування. Це повільно (особливо на пристроях ARM).",
         "convert-media-task-success": "Конвертація медіафайлів у цільове кодування поставлена в чергу",
@@ -1088,7 +1079,6 @@
         "item-count": "{{common.item-count}}",
         "no-data": "Немає елементів. Спробуйте додати серію.",
         "no-data-filtered": "Немає елементів, що відповідають вашому поточному фільтру.",
-        "title-alt": "Кавіта - колекція {{collectionName}}",
         "sync-progress": "Зібрані серії: {{title}}",
         "last-sync": "Остання синхронізація: {{date}}"
     },
@@ -1140,7 +1130,6 @@
         "date-range-title": "Діапазон дат",
         "more-alt": "{{series-detail.more-alt}}",
         "reorder-alt": "Змінити порядок товарів",
-        "dnd-warning": "Перетягування недоступне на мобільних пристроях або якщо список для читання містить понад 100 елементів.",
         "loading-alt": "{{pdf-reader.loading-message}}"
     },
     "events-widget": {
@@ -1244,23 +1233,7 @@
     },
     "import-cbl-modal": {
         "close": "{{common.close}}",
-        "title": "'Імпорт CBL",
-        "help-label": "{{common.help}}",
-        "import-description": "Щоб розпочати, імпортуйте файл .cbl. Kavita виконає кілька перевірок перед імпортом. Деякі кроки блокуватимуть подальше виконання через проблеми з файлом.",
-        "validate-description": "Усі файли перевірено на наявність операцій у списку. Будь-які списки, які не вдалося виконати, не перейдуть до наступного кроку. Виправте файли CBL та повторіть спробу.",
-        "validate-warning": "Виникли проблеми з CBL, які перешкоджають імпорту. Виправте ці проблеми та повторіть спробу.",
-        "validate-no-issue-description": "З CBL проблем не виявлено, натисніть «Далі».",
-        "dry-run-description": "Це пробний запуск, який показує, що станеться, якщо натиснути кнопку «Далі» та виконати імпорт. Усі збої не будуть імпортовані.",
-        "prev": "Попередня",
-        "import": "Імпорт",
-        "restart": "Перезавантажити",
-        "next": "Далі",
-        "import-step": "Імпорт CBL'",
-        "validate-cbl-step": "Перевірити CBL",
-        "dry-run-step": "Пробний запуск",
-        "final-import-step": "Заключний крок",
-        "comicvine-parsing-label": "Використовуйте зіставлення серій Comic Vine",
-        "cbl-repo": "Ви можете знайти багато списків для читання у спільноті <a href='https://github.com/DieselTech/CBL-ReadingLists' target='_blank' rel='noopener noreferrer'>репозиторії</a>."
+        "title": "'Імпорт CBL"
     },
     "manga-reader": {
         "auto-close-menu-label": "{{manage-reading-profiles.auto-close-menu-label}}",
@@ -2919,17 +2892,12 @@
     },
     "font-manager": {
         "description": "EPUB-рідер Kavita має кілька вбудованих шрифтів, додайте свої власні шрифти тут. Завантажте файл або скористайтеся URL-адресою шрифтів Google. Дивіться <a href='{{wikiLink}}' target='_blank' rel='noreferrer noopener'>вікі</a> для отримання додаткової інформації.",
-        "enter-an-url-pre-title": "Введіть {{url}}",
-        "url": "url",
         "add": "{{common.add}}",
         "drag-n-drop": "{{cover-image-chooser.drag-n-drop}}",
         "upload": "{{cover-image-chooser.upload}}",
         "upload-continued": "файл шрифту",
         "preview-default": "Завантажте власний шрифт через файл або URL-адресу шрифту Google",
         "delete": "{{common.delete}}",
-        "url-label": "Url",
-        "back": "Назад",
-        "load": "Навантаження",
         "no-preview": "Цей шрифт неможливо переглянути. Буде використано стиль за замовчуванням з книги.",
         "brown-fox": "Швидка бура лисиця перестрибує через лінивого собаку",
         "filter-system-fonts-label": "Шрифти системи фільтрів"
@@ -3346,5 +3314,17 @@
             "help": "Як оновити",
             "download": "Завантажити"
         }
+    },
+    "title": {
+        "bookmarks": "Закладки",
+        "collections": "Колекції",
+        "home": "Додому",
+        "reading-list": "Список читання",
+        "browse-genres": "Переглянути жанри",
+        "browse-tags": "Переглянути теги",
+        "want-to-read": "Хочу прочитати",
+        "reading-lists": "Списки читання",
+        "settings": "Налаштування",
+        "all-series": "Всі серії"
     }
 }

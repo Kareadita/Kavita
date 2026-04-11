@@ -177,8 +177,6 @@
         "active-theme": "Actif",
         "updated-toastr": "Le thème par défaut du site a été mis à jour vers {{name}}",
         "delete": "{{common.delete}}",
-        "drag-n-drop": "{{cover-image-chooser.drag-n-drop}}",
-        "upload": "{{cover-image-chooser.upload}}",
         "upload-continued": "un fichier CSS",
         "preview-default": "Sélectionnez d'abord un thème",
         "preview-default-admin": "Sélectionnez d'abord un thème ou téléversez-en un manuellement",
@@ -1165,16 +1163,9 @@
         "reset-to-default": "{{common.reset-to-default}}",
         "reset": "{{common.reset}}",
         "save": "{{common.save}}",
-        "required": "{{validation.required-field}}",
-        "custom-label": "Programme personnalisé (notation Cron)",
-        "cron-notation": "Ceci n'est pas une notation Cron valide",
         "recurring-tasks-title": "{{title}}",
         "last-executed-header": "Dernière exécution",
         "cron-header": "Cron",
-        "disabled": "Désactivé",
-        "daily": "Quotidien",
-        "weekly": "Hebdomadaire",
-        "custom": "Personallisé",
         "convert-media-task": "Convertir le média vers l'encodage cible",
         "convert-media-task-desc": "Exécute une tâche de longue durée qui convertira tous les médias gérés par Kavita vers l'encodage cible. C'est lent (surtout sur les appareils ARM).",
         "convert-media-task-success": "La conversion du média vers l'encodage cible a été mise dans la file d'attente",
@@ -1304,7 +1295,6 @@
     "collection-detail": {
         "no-data": "Il n'y a pas d'éléments. Essayez d'ajouter une série.",
         "no-data-filtered": "Aucun élément ne correspond à votre filtre actuel.",
-        "title-alt": "Kavita - Collection {{collectionName}}",
         "sync-progress": "Séries collectées : {{title}}",
         "last-sync": "Dernière synchro : {{date}}",
         "item-count": "{{common.item-count}}"
@@ -1367,7 +1357,6 @@
         "publishers-title": "{{metadata-fields.publishers-title}}",
         "reorder-alt": "Réorganiser les éléments",
         "more-alt": "{{series-detail.more-alt}}",
-        "dnd-warning": "Le glisser-déposer n'est pas disponible sur les appareils mobiles ou lorsque la liste de lecture comporte plus de 100 éléments.",
         "loading-alt": "{{pdf-reader.loading-message}}"
     },
     "events-widget": {
@@ -1475,23 +1464,7 @@
     },
     "import-cbl-modal": {
         "close": "{{common.close}}",
-        "title": "Import CBL",
-        "import-description": "Pour commencer, importez un fichier .cbl. Kavita effectuera plusieurs contrôles avant l'importation. Certaines étapes seront bloquées en raison de problèmes liés au fichier.",
-        "validate-description": "Tous les fichiers ont été validés pour voir s'il y a des opérations à effectuer sur la liste. Les listes qui ont échoué ne passeront pas à l'étape suivante. Corrigez les fichiers CBL et réessayez.",
-        "validate-warning": "Le CBL présente des problèmes qui empêchent l'importation. Corrigez ces problèmes et réessayez.",
-        "validate-no-issue-description": "Aucun problème n'a été trouvé avec le CBL, appuyez sur suivant.",
-        "dry-run-description": "Il s'agit d'une simulation qui montre ce qui se passera si vous cliquez sur Suivant et effectuez l'importation. Tous les échecs ne seront pas importés.",
-        "prev": "Précédent",
-        "import": "Importer",
-        "restart": "Redémarrer",
-        "next": "Suivant",
-        "import-step": "Importer des CBLs",
-        "validate-cbl-step": "Valider le CBL",
-        "dry-run-step": "Simuler",
-        "final-import-step": "Dernière étape",
-        "comicvine-parsing-label": "Utiliser la correspondance des séries de Comic Vine",
-        "cbl-repo": "Vous pouvez trouver de nombreuses listes de lecture dans la communauté <a href='https://github.com/DieselTech/CBL-ReadingLists' target='_blank' rel='noopener noreferrer'>dépôt</a>.",
-        "help-label": "{{common.help}}"
+        "title": "Import CBL"
     },
     "pdf-reader": {
         "loading-message": "Chargement...",
@@ -2913,15 +2886,10 @@
         "upload-continued": "un fichier de police",
         "preview-default": "Envoyez votre propre police par fichier ou url Google Font",
         "delete": "{{common.delete}}",
-        "url-label": "Url",
-        "back": "Retour",
-        "load": "Charger",
         "no-preview": "Cette police ne peut pas être prévisualisée. Le style par défaut du livre sera appliqué.",
         "brown-fox": "Portez ce vieux whisky au juge blond qui fume",
         "filter-system-fonts-label": "Filtrer les Polices Systèmes",
-        "description": "Le lecteur Epub de Kavita est livré avec quelques polices par défaut, ajoutez vos propres polices ici. Téléversez un fichier ou indiquez l'url d'une police Google Fonts. Voir le <a href='{{wikiLink}}' target='_blank' rel='noreferrer noopener'>wiki</a> pour plus d'informations.",
-        "enter-an-url-pre-title": "Entrez une {{url}}",
-        "url": "url"
+        "description": "Le lecteur Epub de Kavita est livré avec quelques polices par défaut, ajoutez vos propres polices ici. Téléversez un fichier ou indiquez l'url d'une police Google Fonts. Voir le <a href='{{wikiLink}}' target='_blank' rel='noreferrer noopener'>wiki</a> pour plus d'informations."
     },
     "library-type-subtitle-pipe": {
         "book": "Bibliothèque générique de livres.",

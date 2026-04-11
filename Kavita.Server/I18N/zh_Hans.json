@@ -116,7 +116,7 @@
     "collection-tag-title-required": "收藏标题不能为空",
     "reading-list-title-required": "阅读清单标题不能为空",
     "collection-tag-duplicate": "收藏的名称已存在",
-    "chapter-num": "{0}话",
+    "chapter-num": "{0} 话",
     "not-accessible-password": "您的服务器无法访问，重置密码的链接位于日志中",
     "invalid-payload": "无效的数据",
     "nothing-to-do": "没有需要处理的任务",
@@ -142,9 +142,9 @@
     "device-not-created": "设备不存在，请先创建",
     "send-to-permission": "无法向设备发送Kindel不支持的非EPUB格式或者PDF格式文件",
     "reading-list-name-exists": "此名称的阅读清单已存在",
-    "volume-num": "{0}卷",
-    "issue-num": "{0}{1}期号",
-    "book-num": "{0}本",
+    "volume-num": "{0} 卷",
+    "issue-num": "{0}{1} 期号",
+    "book-num": "{0} 本",
     "user-migration-needed": "该用户需要进行迁移。通知他们注销并重新登录，以触发迁移流程",
     "generic-relationship": "更新关系时发生了问题",
     "encode-as-warning": "无法转换为PNG格式。对于封面，请使用刷新封面功能。书签和网站图标无法再进行编码。",
@@ -223,5 +223,6 @@
     "download-not-allowed": "用户没有下载权限",
     "client-device-doesnt-exist": "客户端设备不存在",
     "auth-key-unique": "授权密钥名称在您的帐户中必须是唯一的",
-    "role-restricted": "访问受限：您的角色不允许执行此操作"
+    "role-restricted": "访问受限：您的角色不允许执行此操作",
+    "cbl-export-failed": "无法导出 CBL 文件，请检查日志"
 }

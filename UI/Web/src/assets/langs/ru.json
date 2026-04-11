@@ -172,8 +172,6 @@
         "applied": "Применено",
         "updated-toastr": "Сайт по умолчанию был обновлен до {{name}}",
         "delete": "{{common.delete}}",
-        "drag-n-drop": "{{cover-image-chooser.drag-n-drop}}",
-        "upload": "{{cover-image-chooser.upload}}",
         "add": "{{common.add}}",
         "description": "Kavita предлагает цветовые схемы на любой вкус: выберите готовую или создайте свою и поделитесь ею. Темы могут примениться для вашего аккаунта или для всех глобально.",
         "default-theme": "По умолчанию",
@@ -988,7 +986,6 @@
         "reset-to-default": "{{common.reset-to-default}}",
         "reset": "{{common.reset}}",
         "save": "{{common.save}}",
-        "required": "{{validation.required-field}}",
         "cleanup-label": "Очистка",
         "library-scan-label": "Сканирование библиотеки",
         "library-scan-tooltip": "Насколько часто Kavita будет сканировать и обновлять метаданные в библиотечных файлах.",
@@ -998,13 +995,7 @@
         "action-header": "Действие",
         "recurring-tasks-title": "{{title}}",
         "last-executed-header": "В последний раз выполнено",
-        "custom-label": "Пользовательское расписание (Нотация Cron)",
-        "cron-notation": "Недействительная нотация Cron",
         "cron-header": "Cron",
-        "disabled": "Отключено",
-        "daily": "Ежедневно",
-        "weekly": "Еженедельно",
-        "custom": "Пользовательский",
         "convert-media-task": "Преобразовать медиафайлы в целевую кодировку",
         "clear-reading-cache-task": "Очистить читательский кэш",
         "clear-reading-cache-task-success": "Кэш был очищен",
@@ -1140,7 +1131,6 @@
         "no-data-filtered": "Нет элементов, соответствующих текущему фильтру.",
         "last-sync": "Последняя синхронизация: {{date}}",
         "no-data": "Нет элементов. Попробуйте добавить произведение.",
-        "title-alt": "Kavita — коллекция {{collectionName}}",
         "sync-progress": "Собрано произведение: {{title}}"
     },
     "all-collections": {
@@ -1191,7 +1181,6 @@
         "date-range-title": "Диапазон дат",
         "more-alt": "{{series-detail.more-alt}}",
         "reorder-alt": "Изменить порядок произведений",
-        "dnd-warning": "Перетаскивание недоступно на мобильных устройствах или когда список чтения содержит более 100 произведений.",
         "loading-alt": "{{pdf-reader.loading-message}}"
     },
     "events-widget": {
@@ -1292,22 +1281,7 @@
     },
     "import-cbl-modal": {
         "close": "{{common.close}}",
-        "title": "CBL Импорт",
-        "help-label": "{{common.help}}",
-        "import-description": "Чтобы начать, импортируйте файл .cbl . Kavita выполнит несколько проверок перед импортом. Некоторые шаги блокируют движение вперед из-за проблем с файлом.",
-        "import": "Импорт",
-        "restart": "Перезапуск",
-        "cbl-repo": "Вы можете найти множество списков для чтения в <a href='https://github.com/DieselTech/CBL-ReadingLists' target='_blank' rel='noopener noreferrer'>репозитории</a> сообщества.",
-        "validate-warning": "Возникли проблемы с CBL которые предотвращают импорт. Исправьте эти проблемы и попробуйте снова.",
-        "validate-no-issue-description": "Проблем с CBL не найдено, нажмите далее.",
-        "dry-run-description": "Это проверочный запуск и он покажет что случится если вы нажмете Далее и произведете импорт. Все провалы не будут импортированы.",
-        "prev": "Пред",
-        "next": "Далее",
-        "import-step": "Импорт CBL",
-        "validate-cbl-step": "Проверить CBL",
-        "dry-run-step": "Проверочный запуск",
-        "final-import-step": "Последний шаг",
-        "comicvine-parsing-label": "Используйте Comic Vine совпадение произведений"
+        "title": "CBL Импорт"
     },
     "manga-reader": {
         "auto-close-menu-label": "{{manage-reading-profiles.auto-close-menu-label}}",
@@ -2285,17 +2259,12 @@
     },
     "font-manager": {
         "description": "Программа для чтения epub-файлов имеет несколько шрифтов по умолчанию, добавьте свои шрифты здесь. Вы можете загрузить файл или использовать ссылку на шрифты Google. Дополнительную информацию можно посмотреть на <a href='{{wikiLink}}' target='_blank' rel='noreferrer noopener'>wiki</a>.",
-        "enter-an-url-pre-title": "Введите {{url}}",
-        "url": "Ссылка",
         "add": "{{common.add}}",
         "drag-n-drop": "{{cover-image-chooser.drag-n-drop}}",
         "upload": "{{cover-image-chooser.upload}}",
         "upload-continued": "файл шрифта",
         "preview-default": "Загрузите свой файл шрифта или ссылку на Google шрифт",
         "delete": "{{common.delete}}",
-        "url-label": "Ссылка",
-        "back": "Вернуться",
-        "load": "Загрузить",
         "no-preview": "Этот шрифт недоступен для просмотра. Будет взят шрифт по умолчанию из книги.",
         "brown-fox": "Быстрая рыжая лисица перепрыгивает через ленивую собаку",
         "filter-system-fonts-label": "Фильтр Системных Шрифтов"

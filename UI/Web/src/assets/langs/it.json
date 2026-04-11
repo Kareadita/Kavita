@@ -134,8 +134,6 @@
         "applied": "Applicato",
         "updated-toastr": "L'impostazione predefinita del sito è stata aggiornata a {{name}}",
         "delete": "{{common.delete}}",
-        "drag-n-drop": "{{cover-image-chooser.drag-n-drop}}",
-        "upload": "{{cover-image-chooser.upload}}",
         "add": "{{common.add}}",
         "description": "Kavita è disponibile nei miei colori, trova uno schema di colori che soddisfi le tue esigenze o creane uno tu stesso e condividilo. I temi possono essere applicati al tuo account o a tutti gli account.",
         "active-theme": "Attivo",
@@ -1071,16 +1069,9 @@
         "reset-to-default": "{{common.reset-to-default}}",
         "reset": "{{common.reset}}",
         "save": "{{common.save}}",
-        "required": "{{validation.required-field}}",
-        "custom-label": "Pianificazione personalizzata (notazione Cron)",
-        "cron-notation": "Questa non è una notazione Cron valida",
         "recurring-tasks-title": "{{title}}",
         "last-executed-header": "Ultimo eseguito",
         "cron-header": "Cron",
-        "disabled": "Disabilitato",
-        "daily": "Giornaliero",
-        "weekly": "Settimanale",
-        "custom": "Personalizzato",
         "convert-media-task": "Converti i media nella codifica di destinazione",
         "convert-media-task-desc": "Esegue un'attività a lunga esecuzione che convertirà tutti i media gestiti da Kavita nella codifica di destinazione. Questo è lento (specialmente sui dispositivi ARM).",
         "bust-cache-task": "Cache Danneggiata",
@@ -1197,7 +1188,6 @@
     "collection-detail": {
         "no-data": "Non ci sono articoli. Prova ad aggiungere una serie.",
         "no-data-filtered": "Nessun articolo corrisponde al filtro attuale.",
-        "title-alt": "Kavita - Collezione {{collectionName}}",
         "item-count": "{{common.item-count}}",
         "last-sync": "Ultima Sincronizzazione: {{date}}",
         "sync-progress": "Serie Raccolte: {{title}}"
@@ -1348,23 +1338,7 @@
     },
     "import-cbl-modal": {
         "close": "{{common.close}}",
-        "title": "Importa CBL",
-        "import-description": "Per iniziare, importa un file .cbl. Kavita eseguirà più controlli prima dell'importazione. Alcuni passaggi bloccheranno l'avanzamento a causa di problemi con il file.",
-        "validate-description": "Tutti i file sono stati convalidati per vedere se ci sono operazioni da fare sulla lista. Tutte le liste che hanno fallito non passeranno alla fase successiva. Correggi i file CBL e riprova.",
-        "validate-warning": "Ci sono problemi con il CBL che impediscono l'importazione. Correggi questi problemi e riprova.",
-        "validate-no-issue-description": "Nessun problema riscontrato con CBL, premi Avanti.",
-        "dry-run-description": "Questa è una prova e mostra cosa accadrà se premi Avanti ed esegui l'importazione. Tutti gli errori non verranno importati.",
-        "prev": "Prec",
-        "import": "Importa",
-        "restart": "Riavvia",
-        "next": "Prossimo",
-        "import-step": "Importa CBL",
-        "validate-cbl-step": "Convalidare CBL",
-        "dry-run-step": "Fai una prova",
-        "final-import-step": "Passaggio Finale",
-        "comicvine-parsing-label": "Trova serie con ComicVine",
-        "help-label": "{{common.help}}",
-        "cbl-repo": "Puoi trovare molti elenchi di lettura nella community <a href='https://github.com/DieselTech/CBL-ReadingLists' target='_blank' rel='noopener noreferrer'>repo</a>."
+        "title": "Importa CBL"
     },
     "pdf-reader": {
         "loading-message": "Caricamento...",
@@ -2339,5 +2313,9 @@
             "help": "Come aggiornare",
             "download": "Scaricamento"
         }
+    },
+    "title": {
+        "bookmarks": "Segnalibri",
+        "browse-genres": "Sfoglia Generi"
     }
 }

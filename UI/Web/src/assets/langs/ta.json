@@ -23,7 +23,7 @@
         "save": "{{common.save}}"
     },
     "api-key": {
-        "copy": "நகலெடு"
+        "copy": "{{book-line-overlay.copy}}"
     },
     "login": {
         "title": "உங்கள் கணக்கில் உள்நுழைக",
@@ -31,7 +31,8 @@
         "forgot-password": "கடவுச்சொல்லை மறந்துவிட்டீர்களா?",
         "submit": "விடுபதிகை",
         "password": "{{common.password}}}",
-        "password-validation": "{{சரிபார்ப்பு.போச்வேர்ட்-சரிபார்ப்பு}}"
+        "password-validation": "{{சரிபார்ப்பு.போச்வேர்ட்-சரிபார்ப்பு}}",
+        "oidc": "OpenID இணைப்பு"
     },
     "user-scrobble-history": {
         "not-applicable": "பொருந்தாது",
@@ -48,11 +49,16 @@
         "type-header": "வகை",
         "series-header": "தொடர்",
         "is-processed-header": "செயலாக்கப்படுகிறது",
-        "no-data": "தரவு இல்லை",
+        "no-data": "{{common.no-data}}",
         "volume-and-chapter-num": "தொகுதி {{v}} அத்தியாயம் {{n}}",
-        "volume-num": "தொகுதி {{}}",
-        "chapter-num": "அத்தியாயம் {{num}}",
-        "rating": "மதிப்பீடு {{r}}}"
+        "volume-num": "{{entity-title.volume-num}}",
+        "chapter-num": "{{entity-title.chapter-number}}",
+        "rating": "மதிப்பீடு {{r}}}",
+        "select-all-label": "அனைத்தையும் தெரிவுசெய்",
+        "delete-selected-label": "தேர்ந்தெடுக்கப்பட்டதை நீக்கு",
+        "generate-scrobble-events": "பின்நிரப்பு நிகழ்வுகள்",
+        "token-expired": "உங்கள் அனிலிச்ட் கிள்ளாக்கு காலாவதியானது! நீங்கள் கணக்குகள் பக்கத்தில் புதுப்பிக்கும் வரை ச்க்ராப்ளிங் நிகழ்வுகள் செயலாக்கப்படாது.",
+        "scrobbling-disabled": "உங்கள் கணக்கு அமைப்புகளில் ச்க்ரோபிளிங் முடக்கப்பட்டுள்ளது."
     },
     "scrobble-event-type-pipe": {
         "score-updated": "மதிப்பீட்டு புதுப்பிப்பு",
@@ -73,11 +79,9 @@
         "apply": "{{common.apply}}}",
         "applied": "பயன்படுத்தப்பட்டது",
         "active-theme": "செயலில்",
-        "description": "கவிதா எனது வண்ணங்களில் வருகிறார், உங்கள் தேவைகளைப் நிறைவு செய்யும் வண்ணத் திட்டத்தைக் கண்டுபிடி அல்லது ஒன்றை நீங்களே உருவாக்கி பகிர்ந்து கொள்ளுங்கள். உங்கள் கணக்கிற்கு கருப்பொருள்கள் பயன்படுத்தப்படலாம் அல்லது எல்லா கணக்குகளுக்கும் பயன்படுத்தப்படலாம்.",
+        "description": "கவிதா பல வண்ணங்களில் வருகிறது, உங்கள் தேவைகளைப் நிறைவு செய்யும் வண்ணத் திட்டத்தைக் கண்டறியவும் அல்லது அதை நீங்களே உருவாக்கி பகிர்ந்து கொள்ளவும். உங்கள் கணக்கிற்கு தீம்கள் பயன்படுத்தப்படலாம் அல்லது எல்லா கணக்குகளுக்கும் பயன்படுத்தப்படலாம்.",
         "updated-toastr": "தள இயல்புநிலை {{name}} க்கு புதுப்பிக்கப்பட்டுள்ளது",
         "delete": "{{common.delete}}",
-        "drag-n-drop": "{{கவர்-இமேச்-சாய்சர்.ராக்-அண்ட்-டிராப்}}",
-        "upload": "{{கவர்-இமேச்-சாய்சர்.ப்லோட்}}}",
         "upload-continued": "ஒரு சிஎச்எச் கோப்பு",
         "preview-default": "முதலில் ஒரு கருப்பொருளைத் தேர்ந்தெடுக்கவும்",
         "preview-default-admin": "முதலில் ஒரு கருப்பொருளைத் தேர்ந்தெடுக்கவும் அல்லது கைமுறையாக பதிவேற்றவும்",
@@ -85,7 +89,7 @@
         "add": "{{common.add}}}"
     },
     "role-selector": {
-        "title": "பாத்திரங்கள்",
+        "title": "{{common.roles}}",
         "deselect-all": "{{common.deselect-all}}",
         "select-all": "{{common.select-all}}"
     },
@@ -133,9 +137,9 @@
     },
     "library-type-pipe": {
         "book": "நூல்",
-        "comic": "காமிக்",
+        "comic": "நகைச்சுவை (நெகிழ்வானது)",
         "manga": "மங்கா",
-        "comicVine": "காமிக் கொடியின்",
+        "comicVine": "நகைச்சுவை",
         "image": "படம்",
         "lightNovel": "ஒளி நாவல்"
     },
@@ -188,12 +192,39 @@
         "activate-discordId-tooltip": "உங்கள் முரண்பாட்டுக் கணக்கை கவிதா+உடன் இணைக்கவும். கவிதாவை வடிவமைக்க உதவும் மறைக்கப்பட்ட சேனல்களை அணுக இது வழங்குகிறது.",
         "discord-validation": "இது செல்லுபடியாகும் முரண்பாடு பயனர் ஐடி அல்ல. உங்கள் பயனர் ஐடி உங்கள் முரண்பாடான பயனர்பெயர் அல்ல.",
         "activate-delete": "{{common.delete}}",
-        "activate-reset": "{{common.reset}}}",
+        "activate-reset": "உரிமத்தை மீட்டமைக்கவும்",
         "activate-reset-tooltip": "உங்கள் உரிமத்தைப் பயன்படுத்தி முந்தைய பதிவை செல்லாது. உரிமம் மற்றும் மின்னஞ்சல் இரண்டுமே தேவை",
         "kavita+-desc-part-1": "கவிதா+ என்பது காப்பீடு சந்தா சேவையாகும், இது இந்த கவிதா நிகழ்வில் உள்ள அனைத்து பயனர்களுக்கும் அம்சங்களைத் திறக்கும். திறக்க சந்தா வாங்கவும் ",
         "kavita+-desc-part-2": "காப்பீடு நன்மைகள்",
         "kavita+-desc-part-3": "இன்று!",
-        "kavita+-requirement": "கவிதா+ அண்மைக் கால வெளியீடு - 2 பதிப்புகளுடன் மட்டுமே வேலை செய்ய வடிவமைக்கப்பட்டுள்ளது. அதற்கு வெளியே எதுவும் வேலை செய்யாததற்கு உட்பட்டது."
+        "kavita+-requirement": "கவிதா+ அண்மைக் கால 3 வெளியீடுகளுடன் மட்டுமே வேலை செய்யும் வகையில் வடிவமைக்கப்பட்டுள்ளது. அதற்கு வெளியே உள்ள எதுவும் செயல்படாமல் இருக்கும்.",
+        "kavita+-warning": "கவிதா+ கவிதாவிலிருந்து தனி. முதலில் உங்கள் சந்தாவை ரத்து செய்யாமல் நிறுவல் நீக்குவது பட்டியலிடல் சுழற்சியைத் தொடரும்.",
+        "info-title": "உரிமத் செய்தி",
+        "actions-title": "செயல்கள்",
+        "license-active-label": "உரிமம் செயலில் உள்ளது",
+        "supported-version-label": "ஆதரிக்கப்படும் கவிதா பதிப்பில்",
+        "expiration-label": "காலாவதியாகும்",
+        "valid-tooltip": "செல்லுபடியாகும்",
+        "invalid-tooltip": "செல்லுபடியாகாத",
+        "reset-label": "மீட்டமை",
+        "reset-tooltip": "இது கவிதா+ உரிமத்துடன் இணைக்கப்பட்டுள்ள சர்வர் நிகழ்வை மீட்டமைக்கும். மின்னஞ்சல் மற்றும் உரிம விசை தேவை",
+        "delete-label": "உரிமத்தை அகற்று",
+        "delete-tooltip": "இது கவிதாவிடம் கவிதா+ பேசுவதை நிறுத்துவதற்கான உரிமத்தை கவிதாவிடம் இருந்து நீக்கிவிடும். உங்களை குழுவிலகவில்லை. சந்தாவை ரத்து செய்ய முதலில் 'நிர்வகி' என்பதைப் பயன்படுத்தவும்.",
+        "manage-tooltip": "கட்டணத் தகவலைப் புதுப்பிக்கவும், சந்தாவை ரத்துசெய்/இடைநிறுத்துதல் போன்றவை",
+        "cancel-label": "சந்தாவை நீக்கறல்",
+        "cancel-tooltip": "உங்கள் சந்தாவை ரத்துசெய்து, கவிதாவில் உள்ள உரிமத்தை நீக்கவும்.",
+        "resend-license-email": "மின்னஞ்சலுக்கு உரிமம் அனுப்பவும்",
+        "resend-license-email-tooltip": "மின்னஞ்சலுக்கு கவிதா+ உரிமத்தை மீண்டும் அனுப்பவும். இந்த சர்வரில் வேலை செய்ய உரிமம் கண்டிப்பாக இணைக்கப்பட வேண்டும்.",
+        "faq-title": "அடிக்கடி கேட்கப்படும் கேள்விகள்",
+        "total-subbed-months-label": "சந்தா செலுத்திய மொத்த மாதங்கள்",
+        "email-label": "பதிவு செய்யப்பட்ட மின்னஞ்சல்",
+        "supportId-label": "உதவி அடையாளம்",
+        "license-mismatch": "மற்றொரு கவிதா நிகழ்வில் உரிமம் பதிவு செய்யப்படலாம். சரிசெய்ய மீண்டும் பதிவு செய்யவும்.",
+        "k+-license-overwrite": "மற்றொரு கவிதா நிகழ்வில் உரிமம் பதிவு செய்யப்பட்டுள்ளது. இது மீண்டும் நிறுவலின் போது நிகழலாம் மற்றும் கணினி புதுப்பித்தல்கள் காரணமாக அரிதாகவே நடக்கும். கவிதா+ உடன் பதிவு செய்ய இந்த நிகழ்வை கட்டாயப்படுத்த மேலெழுத தேர்ந்தெடுக்கவும்.",
+        "k+-already-registered-header": "உரிமம் ஏற்கனவே பதிவு செய்யப்பட்டுள்ளது",
+        "overwrite": "மேலெழுதவும்",
+        "k+-unlocked": "கவிதா+ திறக்கப்பட்டது!",
+        "k+-unlocked-description": "கவிதா+க்கு வரவேற்கிறோம்! கவிதா உங்கள் முன்னேற்றம், மதிப்பீடுகள் ஆகியவற்றிலிருந்து ச்க்ரோபிள் நிகழ்வுகளை உருவாக்கும் மற்றும் உங்கள் ச்க்ரோபிளிங் வழங்குநர்களை கணக்கில் பதிவு செய்தவுடன் படிக்க விரும்புவார். நீங்கள் ச்க்ராப்பிள் செய்ய விரும்பாத தொடர்களுக்கு ச்க்ராப்பிளிங் ஓல்டுகளை வைத்திருப்பதை உறுதிசெய்ய சிறிது நேரம் ஒதுக்குங்கள்."
     },
     "series-detail": {
         "writers-title": "{{metadata-fields.writers-title}}}",
@@ -222,15 +253,20 @@
         "more-alt": "மேலும்",
         "time-left-alt": "நேரம் மீதமுள்ளது",
         "time-to-read-alt": "{{sort-field-pipe.time-to-read}}",
-        "scrobbling-tooltip": "{{settings.scrobbling}}}",
+        "scrobbling-tooltip": "{{settings.scrobbling}}: {{value}}",
         "publication-status-title": "வெளியீடு",
-        "publication-status-tooltip": "வெளியீட்டு நிலை"
+        "publication-status-tooltip": "வெளியீட்டு நிலை",
+        "on": "{{reader-settings.on}}",
+        "off": "{{reader-settings.off}}",
+        "loading": "{{common.loading}}",
+        "read-count-tooltip": "மொத்த வாசிப்புகள்"
     },
     "external-rating": {
         "close": "{{common.close}}",
         "entry-label": "விவரங்களைக் காண்க",
         "kavita-tooltip": "உங்கள் மதிப்பீடு + ஒட்டுமொத்தமாக",
-        "kavita-rating-title": "உங்கள் மதிப்பீடு"
+        "kavita-rating-title": "உங்கள் மதிப்பீடு",
+        "critic": "{{review-card.critic}}"
     },
     "badge-expander": {
         "more-items": "மேலும் {{count}} மேலும்"
@@ -247,41 +283,57 @@
         "theme-white": "வெள்ளை",
         "theme-paper": "காகிதம்",
         "general-settings-title": "பொது அமைப்புகள்",
-        "font-family-label": "{{பயனர்-முன்னுரிமைகள்.பொன்ட்-குடும்ப-லேபிள்}}",
-        "font-size-label": "{{பயனர்-முன்னுரிமைகள்.பொன்ட்-அளவு-புத்தக-லேபிள்}}",
-        "line-spacing-label": "{{பயனர்-முன்னுரிமை. லைன்-உயரம்-புத்தக-லேபிள்}}",
-        "margin-label": "{{பயனர்-முன்னுரிமைகள்.மார்சின்-புத்தக-லேபிள்}}",
+        "font-family-label": "{{manage-reading-profiles.font-family-label}}",
+        "font-size-label": "{{manage-reading-profiles.font-size-book-label}}",
+        "line-spacing-label": "{{manage-reading-profiles.line-height-book-label}}",
+        "margin-label": "{{manage-reading-profiles.margin-book-label}}",
         "reset-to-defaults": "இயல்புநிலைகளுக்கு மீட்டமைக்கவும்",
         "reader-settings-title": "வாசகர் அமைப்புகள்",
-        "reading-direction-label": "{{பயனர்-முன்னுரிமைகள். வாசிப்பு-திசை-புத்தக-லேபிள்}}",
+        "reading-direction-label": "{{manage-reading-profiles.reading-direction-book-label}}",
         "right-to-left": "வலமிருந்து இடமாக",
         "left-to-right": "இடமிருந்து வலமாக",
         "horizontal": "கிடைமட்டமாக",
         "vertical": "செங்குத்து",
-        "writing-style-label": "{{பயனர்-முன்னுரிமைகள்.ரிட்டிங்-ச்டைல்-லேபிள்}}",
+        "writing-style-label": "{{manage-reading-profiles.writing-style-label}}",
         "writing-style-tooltip": "உரையின் திசையை மாற்றுகிறது. கிடைமட்டமானது இடமிருந்து வலமாக உள்ளது, செங்குத்து மேலிருந்து கீழாக உள்ளது.",
         "tap-to-paginate-label": "மண்பாண்டத்தைத் தட்டவும்",
         "tap-to-paginate-tooltip": "பாகினேட் செய்ய திரையின் விளிம்புகளைக் சொடுக்கு செய்க",
         "on": "ஆன்",
         "off": "அணை",
-        "immersive-mode-label": "{{பயனர்-முன்னுரிமைகள்.இமர்சைவ்-மோட்-லேபிள்}}}",
+        "immersive-mode-label": "{{manage-reading-profiles.immersive-mode-label}}",
         "immersive-mode-tooltip": "இது ரீடர் ஆவணத்தில் ஒரு கிளிக்கின் பின்னால் உள்ள மெனுவை மறைத்து, தட்டுதல்",
         "fullscreen-label": "முழு திரை",
         "fullscreen-tooltip": "முழுத்திரை பயன்முறையில் வாசகரை வைக்கவும்",
         "exit": "வெளியேறு",
         "enter": "உள்ளிடவும்",
-        "layout-mode-label": "{{பயனர்-முன்னுரிமைகள்.லேவுட்-மோட்-புக்-லேபிள்}}}",
+        "layout-mode-label": "{{manage-reading-profiles.layout-mode-book-label}}",
         "layout-mode-tooltip": "சுருள்: எபப் கோப்பு (பொதுவாக ஒரு அத்தியாயத்திற்கு ஒரு நீண்ட ச்க்ரோலிங் பக்கம்). <br/> 1 நெடுவரிசை: ஒரு நேரத்தில் ஒற்றை மெய்நிகர் பக்கத்தை உருவாக்குகிறது. -SIDE.",
         "layout-mode-option-scroll": "சுருள்",
         "layout-mode-option-1col": "1 நெடுவரிசை",
         "layout-mode-option-2col": "2 நெடுவரிசை",
-        "color-theme-title": "வண்ண கருப்பொருள்"
+        "color-theme-title": "வண்ண கருப்பொருள்",
+        "update-parent": "{{name}} இல் சேமி",
+        "loading": "ஏற்றுகிறது",
+        "create-new": "மறைமுகமாக இருந்து புதிய சுயவிவரம்",
+        "create-new-tooltip": "உங்கள் தற்போதைய மறைமுகமான சுயவிவரத்திலிருந்து நிர்வகிக்கக்கூடிய புதிய சுயவிவரத்தை உருவாக்கவும்",
+        "reading-profile-updated": "படிக்கும் சுயவிவரம் புதுப்பிக்கப்பட்டது",
+        "reading-profile-promoted": "படிக்கும் சுயவிவரம் ஊக்குவிக்கப்பட்டது",
+        "line-spacing-min-label": "1x",
+        "line-spacing-max-label": "2.5x"
     },
     "entity-title": {
-        "book-num": "{{common.book-num-sorthand}}}",
+        "book-num": "நூல் {{num}}",
         "single-volume": "ஒற்றை தொகுதி",
-        "issue-num": "{{comman.issue-hash-num}}",
-        "special": "சிறப்பு"
+        "issue-num": "வெளியீடு #{{num}}",
+        "special": "சிறப்பு",
+        "chapter-num": "அத்தியாயம் {{num}}",
+        "volume-num": "தொகுதி {{num}}",
+        "book-title": "நூல்",
+        "book-title-plural": "புத்தகங்கள்",
+        "issue-title": "சிக்கல்",
+        "issue-title-plural": "சிக்கல்கள்",
+        "chapter-title": "பாடங்கள்",
+        "chapter-title-plural": "பாடங்கள்"
     },
     "external-series-card": {
         "open-external": "வெளிப்புற திறந்த"
@@ -322,16 +374,9 @@
         "reset-to-default": "{{பொதுவான.",
         "reset": "{{common.reset}}}",
         "save": "{{common.save}}",
-        "required": "{{சரிபார்ப்பு.",
-        "custom-label": "தனிப்பயன் அட்டவணை (CRON குறியீடு)",
-        "cron-notation": "இது செல்லுபடியாகும் கிரான் குறியீடு அல்ல",
         "recurring-tasks-title": "{{title}}",
         "last-executed-header": "கடைசியாக செயல்படுத்தப்பட்டது",
         "cron-header": "க்ரோன்",
-        "disabled": "முடக்கப்பட்டது",
-        "daily": "நாள்தோறும்",
-        "weekly": "வாராந்திர",
-        "custom": "தனிப்பயன்",
         "convert-media-task": "குறியாக்கத்தை குறிவைக்க ஊடகத்தை மாற்றவும்",
         "convert-media-task-desc": "கவிதா நிர்வகிக்கப்பட்ட அனைத்து ஊடகங்களையும் இலக்கு குறியாக்கத்திற்கு மாற்றும் நீண்டகால பணியை இயக்குகிறது. இது மெதுவாக உள்ளது (குறிப்பாக கை சாதனங்களில்).",
         "convert-media-task-success": "மீடியாவை இலக்கு குறியாக்கத்திற்கு மாற்றுவது வரிசையில் உள்ளது",
@@ -377,7 +422,7 @@
         "save": "{{common.save}}",
         "limit-label": "வரம்பு",
         "format-label": "வடிவம்",
-        "libraries-label": "நூலகங்கள்",
+        "libraries-label": "{{common.libraries}}",
         "collections-label": "சேகரிப்புகள்",
         "genres-label": "{{metadata-fields.genres-title}}",
         "tags-label": "{{metadata-fields.tags-title}}}",
@@ -463,7 +508,10 @@
         "max-issue-tooltip": "தொடரின் அனைத்து காமிசின்ஃபோவிலிருந்தும் அதிகபட்ச வெளியீடு அல்லது தொகுதி புலம்",
         "loose-leaf-volume": "தளர்வான இலை அத்தியாயங்கள்",
         "specials-volume": "சிறப்பு",
-        "release-year-validation": "{{சரிபார்ப்பு.இயர்-சரிபார்ப்பு}}"
+        "release-year-validation": "{{சரிபார்ப்பு.இயர்-சரிபார்ப்பு}}",
+        "weblinks-tab": "{{tabs.weblink-tab}}",
+        "external-ids-tab": "{{tabs.external-ids-tab}}",
+        "no-data": "{{common.no-data}}"
     },
     "manage-users": {
         "pending-tooltip": "இந்த பயனர் தங்கள் மின்னஞ்சலை சரிபார்க்கவில்லை",
@@ -479,14 +527,18 @@
         "change-password-tooltip": "கடவுச்சொல்லை மாற்றவும்",
         "change-password-alt": "கடவுச்சொல்லை மாற்றவும் {{user}}",
         "last-active-header": "கடைசியாக செயலில்",
-        "roles-header": "பாத்திரங்கள்",
+        "roles-header": "{{common.roles}}",
         "name-header": "பெயர்",
         "online-now-tooltip": "இப்போது ஆன்லைனில்",
         "too-many-libraries": "நிறைய",
         "sharing-header": "பகிர்வு",
         "no-data": "வேறு பயனர்கள் இல்லை.",
         "actions-header": "செயல்கள்",
-        "invite": "அழைக்கவும்"
+        "invite": "அழைக்கவும்",
+        "all-libraries": "அனைத்து நூலகங்கள்",
+        "identity-provider-oidc-tooltip": "ஓ.ஐ.டி.சி",
+        "identity-provider-native-tooltip": "பழமை",
+        "profile-link-alt": "சுயவிவரம்"
     },
     "edit-collection-tags": {
         "title": "திருத்து {{collectionName}} சேகரிப்பு",
@@ -516,7 +568,8 @@
         "vols-and-chapters": "{{volCount}} தொகுதிகள் / {{chpCount}} அத்தியாயங்கள்",
         "remove-from-want-to-read": "{{actionable.remove-from-want-to-read}}",
         "add-to-want-to-read": "{{actionable.add-to-want-to-read}}",
-        "provided-by-label": "வழங்கியவர்"
+        "provided-by-label": "வழங்கியவர்",
+        "story-and-art-label": "கதை & கலை"
     },
     "edit-chapter-modal": {
         "summary-label": "{{edit-series-modal.summary-label}}",
@@ -546,8 +599,8 @@
         "cover-image-description": "{{edit-series-modal.cover-image-description}}",
         "pages-label": "பக்கங்கள்",
         "words-label": "நீளம்",
-        "pages-count": "{{num}} பக்கங்கள்",
-        "words-count": "{{num}} சொற்கள்",
+        "pages-count": "{{series-detail.pages-count}}",
+        "words-count": "{{series-detail.words-count}}",
         "reading-time-label": "நேரம் படிக்கவும்",
         "date-added-label": "தேதி சேர்க்கப்பட்டது",
         "size-label": "{{edit-series-modal.size-title}}",
@@ -560,31 +613,33 @@
         "range-hours": "{{value}} {{hourWord}}}",
         "read-time-label": "நேரம் படிக்கவும்",
         "files-label": "கோப்புகள்",
-        "title": "தொகு"
+        "title": "தொகு",
+        "external-ids-tab": "{{tabs.external-ids-tab}}"
     },
     "edit-volume-modal": {
         "save": "{{common.save}}",
         "cover-image-tab": "{{tabs.cover-tab}}}",
         "tasks-tab": "{{tabs.tasks-tab}}",
-        "words-label": "{{திருத்து-அத்தியாயம்-மோடல். நீட்சி-தலைப்பு}}",
+        "words-label": "{{edit-chapter-modal.words-label}}",
         "pages-count": "{{திருத்து-அத்தியாயம்-மோடல்.பேச்கள்-கவுண்ட்}}",
         "words-count": "{{திருத்து-அத்தியாயம்-modal.words-count}}",
         "date-added-label": "{{திருத்து-அத்தியாயம்-மோடல்.டேட்-சேர்க்கப்பட்ட-லேபிள்}}",
         "info-tab": "{{tabs.info தாவல்}}}",
-        "pages-label": "{{திருத்து-அத்தியாயம்-மாடல்.பேச்-கவுண்ட்}}",
+        "pages-label": "{{edit-chapter-modal.pages-label}}",
         "size-label": "{{திருத்து-அத்தியாயம்-மோடல்.சைச்-லேபிள்}}",
         "id-label": "{{திருத்து-அத்தியாயம்-modal.id-label}}",
         "title": "தொகு",
         "close": "{{common.close}}",
         "files-label": "{{திருத்து-அத்தியாயம்-மோடல்.ஃபைல்கள்-லேபல்}}",
-        "cover-image-description": "{{edit-series-modal.cover-image-description}}"
+        "cover-image-description": "{{edit-series-modal.cover-image-description}}",
+        "external-ids-tab": "{{tabs.external-ids-tab}}",
+        "read-time-label": "{{edit-chapter-modal.read-time-label}}"
     },
     "collection-detail": {
         "last-sync": "கடைசி ஒத்திசைவு: {{date}}",
         "item-count": "{{common.item-count}}}",
         "no-data": "உருப்படிகள் இல்லை. ஒரு தொடரைச் சேர்க்க முயற்சிக்கவும்.",
         "no-data-filtered": "எந்த உருப்படிகளும் உங்கள் தற்போதைய வடிப்பானுடன் பொருந்தவில்லை.",
-        "title-alt": "கவிதா - {{collectionName}} சேகரிப்பு",
         "sync-progress": "சேகரிக்கப்பட்ட தொடர்: {{title}}"
     },
     "all-collections": {
@@ -613,7 +668,8 @@
     },
     "reading-list-item": {
         "remove": "{{common.remove}}",
-        "read": "{{common.read}}}"
+        "read": "{{common.read}}}",
+        "released-label": "வெளியிடப்பட்டது: {{date}}"
     },
     "stream-list-item": {
         "remove": "{{common.remove}}",
@@ -621,7 +677,8 @@
         "provided": "வழங்கப்பட்டது",
         "smart-filter": "அறிவுள்ள வடிகட்டி",
         "library": "நூலகம்",
-        "external-source": "வெளிப்புற மூல"
+        "external-source": "வெளிப்புற மூல",
+        "delete": "{{common.delete}}"
     },
     "reading-list-detail": {
         "item-count": "{{common.item-count}}}",
@@ -633,7 +690,17 @@
         "read-options-alt": "விருப்பங்களைப் படியுங்கள்",
         "incognito-alt": "(மறைநிலை)",
         "no-data": "எதுவும் சேர்க்கப்படவில்லை",
-        "characters-title": "{{metadata-fields.Characters-title}}}"
+        "characters-title": "{{metadata-fields.Characters-title}}}",
+        "writers-title": "{{metadata-fields.writers-title}}",
+        "cover-artists-title": "{{metadata-fields.cover-artists-title}}",
+        "publishers-title": "{{metadata-fields.publishers-title}}",
+        "items-title": "பொருட்கள்",
+        "edit-alt": "{{common.edit}}",
+        "edit-label": "திருத்த பயன்முறை",
+        "date-range-title": "தேதி வரம்பு",
+        "more-alt": "{{series-detail.more-alt}}",
+        "reorder-alt": "பொருட்களை மறுவரிசைப்படுத்தவும்",
+        "loading-alt": "{{pdf-reader.loading-message}}"
     },
     "events-widget": {
         "title-alt": "செய்கைப்பாடு",
@@ -645,8 +712,10 @@
         "users-online-count": "{{num}} பயனர்கள் ஆன்லைனில்",
         "active-events-title": "செயலில் நிகழ்வுகள்:",
         "no-data": "இங்கே அதிகம் நடக்கவில்லை",
-        "left-to-process": "செயலாக்க இடது: {{leftToProcess}}}",
-        "download-in-queue": "{{num}} வரிசையில் பதிவிறக்குகிறது"
+        "left-to-process": "இடமிருந்து செயல்முறை: {{leftToProcess}} / {{totalToProcess}}",
+        "download-in-queue": "{{num}} வரிசையில் பதிவிறக்குகிறது",
+        "reading-now": "{{num}} இப்போது படிக்கிறேன்",
+        "downloads-active": "{{count}} பதிவிறக்கம்(கள்) நடந்து கொண்டிருக்கிறது"
     },
     "shortcuts-modal": {
         "title": "விசைப்பலகை குறுக்குவழிகள்",
@@ -657,7 +726,8 @@
         "bookmark": "தற்போதைய பக்கம் புக்மார்க்கு",
         "double-click": "இரட்டை சொடுக்கு",
         "close-reader": "மூடு வாசகர்",
-        "toggle-menu": "மெனுவை மாற்றவும்"
+        "toggle-menu": "மெனுவை மாற்றவும்",
+        "offset-double-page": "{{keybind-setting-description-pipe.key-bind-title-offset-double-page}}"
     },
     "grouped-typeahead": {
         "files": "கோப்புகள்",
@@ -667,11 +737,12 @@
         "genres": "{{metadata-fields.genres-title}}",
         "bookmarks": "{{side-nav.bookmarks}}",
         "reading-lists": "பட்டியல்களைப் படித்தல்",
-        "libraries": "நூலகங்கள்",
+        "libraries": "{{common.libraries}}",
         "collections": "சேகரிப்புகள்",
         "close": "{{common.close}}",
         "loading": "{{common.loading}}}",
-        "include-extras": "அத்தியாயங்கள் மற்றும் கோப்புகளைச் சேர்க்கவும்"
+        "include-extras": "அத்தியாயங்கள் மற்றும் கோப்புகளைச் சேர்க்கவும்",
+        "annotations": "{{tabs.annotations-tab}}"
     },
     "edit-reading-list-modal": {
         "starting-title": "தொடங்குகிறது",
@@ -709,9 +780,9 @@
         "height": "உயரம்",
         "width": "அகலம்",
         "width-override-label": "அகலம் மேலெழுதல்",
-        "off": "அணை",
+        "off": "{{reader-settings.off}}",
         "original": "அசல்",
-        "auto-close-menu-label": "{{பயனர்-முன்னுரிமைகள்.ஆட்டோ-க்ளோச்-மெனு-லேபல்}}",
+        "auto-close-menu-label": "{{manage-reading-profiles.auto-close-menu-label}}",
         "swipe-enabled-label": "ச்வைப் இயக்கப்பட்டது",
         "brightness-label": "ஒளி",
         "bookmark-page-tooltip": "புக்மார்க்கு பக்கம்",
@@ -724,15 +795,26 @@
         "layout-mode-switched": "இரட்டை தளவமைப்பை வழங்க போதுமான இடம் இல்லாததால் தளவமைப்பு பயன்முறை ஒற்றைக்கு மாறியது",
         "no-next-chapter": "அடுத்த அத்தியாயம் இல்லை",
         "no-prev-chapter": "முந்தைய அத்தியாயம் இல்லை",
-        "emulate-comic-book-label": "{{பயனர்-முன்னுரிமைகள்.இமுலேட்-காமிக்-புத்தக-லேபிள்}}",
-        "series-progress": "தொடர் முன்னேற்றம்: {{percentage}}}"
+        "emulate-comic-book-label": "{{manage-reading-profiles.emulate-comic-book-label}}",
+        "series-progress": "தொடர் முன்னேற்றம்: {{percentage}}}",
+        "update-parent": "{{reader-settings.update-parent}}",
+        "loading": "{{reader-settings.loading}}",
+        "create-new": "{{reader-settings.create-new}}",
+        "create-new-tooltip": "{{reader-settings.create-new-tooltip}}",
+        "reading-profile-updated": "படிக்கும் சுயவிவரம் புதுப்பிக்கப்பட்டது",
+        "reading-profile-promoted": "படிக்கும் சுயவிவரம் ஊக்குவிக்கப்பட்டது",
+        "page-offset-label": "பக்கம் ஆஃப்செட்",
+        "offset-only-double": "பக்க ஆஃப்செட்டை இரட்டை தளவமைப்புடன் மட்டுமே பயன்படுத்த முடியும்"
     },
     "metadata-filter-row": {
         "unit-reading-date": "திகதி",
         "unit-average-rating": "கவிதா+ வெளிப்புற மதிப்பீடு, விழுக்காடு",
         "unit-reading-progress": "விழுக்காடு",
         "unit-user-rating": "0.0 - 5.0 நட்சத்திரங்கள்",
-        "unit-read-last": "இன்று முதல் நாட்கள்"
+        "unit-read-last": "இன்று முதல் நாட்கள்",
+        "disclaimer-highlight-slots": "இந்தப் புலத்தைப் பயன்படுத்தும் போது, உங்கள் சொந்த சிறுகுறிப்புகள் மட்டுமே காண்பிக்கப்படும்",
+        "unit-file-size": "சிபி, எம்பி, கேபி, பி",
+        "disclaimer-file-size": "கோப்பு அளவு அலகு சேர்க்க வேண்டும்"
     },
     "sort-field-pipe": {
         "sort-name": "பெயரை வரிசைப்படுத்துங்கள்",
@@ -743,7 +825,14 @@
         "release-year": "வெளியீட்டு ஆண்டு",
         "read-progress": "கடைசியாக படியுங்கள்",
         "average-rating": "சராசரி மதிப்பீடு",
-        "random": "சீரற்ற"
+        "random": "சீரற்ற",
+        "user-rating": "எனது மதிப்பீடு",
+        "person-name": "பெயர்",
+        "person-series-count": "தொடர் எண்ணிக்கை",
+        "person-chapter-count": "அத்தியாய எண்ணிக்கை",
+        "annotation-owner": "உரிமையாளர்",
+        "annotation-series": "தொடர் பெயர்",
+        "annotation-color": "நிறம்"
     },
     "file-breakdown-stats": {
         "format-title": "வடிவம்",
@@ -757,7 +846,8 @@
         "not-classified": "வகைப்படுத்தப்படவில்லை",
         "total-file-size-title": "மொத்த கோப்பு அளவு:",
         "download-file-for-extension-header": "அறிக்கையைப் பதிவிறக்கவும்",
-        "download-file-for-extension-alt": "{{extension} க்கு க்கான கோப்புகளைப் பதிவிறக்கவும்"
+        "download-file-for-extension-alt": "{{extension} க்கு க்கான கோப்புகளைப் பதிவிறக்கவும்",
+        "no-data": "{{common.no-data}}"
     },
     "filter-comparison-pipe": {
         "equal": "சமமான",
@@ -780,7 +870,11 @@
     },
     "confirm": {
         "alert": "எச்சரிக்கை",
-        "confirm": "உறுதிப்படுத்தவும்"
+        "confirm": "உறுதிப்படுத்தவும்",
+        "info": "தகவல்",
+        "cancel": "{{common.cancel}}",
+        "ok": "சரி",
+        "prompt": "கேள்வி"
     },
     "toasts": {
         "reading-list-imported": "படித்தல் பட்டியல் இறக்குமதி செய்யப்பட்டது",
@@ -828,7 +922,7 @@
         "k+-error": "உங்கள் உரிமத்தை செயல்படுத்தும்போது பிழை ஏற்பட்டது. மீண்டும் முயற்சிக்கவும்.",
         "device-created": "சாதனம் உருவாக்கப்பட்டது",
         "delete-device": "இந்த சாதனத்தை நீக்க விரும்புகிறீர்களா?",
-        "k+-delete-key": "இது கவிதாவின் உரிம விசையை நீக்கி, காண்பிக்க வாங்க இணைப்பை அனுமதிக்கும். இது உங்கள் சந்தாவை ரத்து செய்யாது! ஆதரவால் இயக்கப்பட்டால் மட்டுமே இதைப் பயன்படுத்தவும்!",
+        "k+-delete-key": "இது கவிதாவின் உரிமச் சாவியை மட்டும் நீக்கி வாங்கும் இணைப்பைக் காட்ட அனுமதிக்கும். <b>இது உங்கள் சந்தாவை ரத்து செய்யாது!</b> முதலில் உங்கள் சந்தாவை ரத்து செய்ய நிர்வகி என்பதைப் பயன்படுத்தவும்.",
         "k+-reset-key": "இது உங்கள் உரிமத்தைப் பயன்படுத்தி முந்தைய பதிவை செல்லாது மற்றும் கவிதா நிகழ்வை மீண்டும் பதிவு செய்ய உங்களை அனுமதிக்கும்.",
         "k+-reset-key-success": "உங்கள் உரிமம் பதிவு செய்யப்படவில்லை. உங்கள் நிகழ்வை மீண்டும் பதிவு செய்ய திருத்து பொத்தானைப் பயன்படுத்தவும் மற்றும் கவிதாவை மீண்டும் செயல்படுத்தவும்+",
         "library-deleted": "நூலகம் {{name}} அகற்றப்பட்டது",
@@ -878,14 +972,34 @@
         "chapter-deleted": "அத்தியாயம் நீக்கப்பட்டது",
         "pdf-book-mode-screen-size": "புத்தக பயன்முறையில் திரை மிகச் சிறியது",
         "stack-imported": "இறக்குமதி செய்யப்பட்டது",
-        "confirm-delete-theme": "இந்த கருப்பொருளை அகற்றுவது வட்டில் இருந்து நீக்கப்படும். அகற்றுவதற்கு முன் அதை தற்காலிக கோப்பகத்திலிருந்து பிடிக்கலாம்",
+        "confirm-delete-theme": "இந்த கருப்பொருள் அகற்றுவது வட்டில் இருந்து நீக்கப்படும். அகற்றுவதற்கு முன், தற்காலிக கோப்பகத்திலிருந்து அதைப் பிடிக்கலாம்.",
         "mal-token-required": "மால் கிள்ளாக்கு தேவை, பயனர் அமைப்புகளில் அமைக்கப்பட்டது",
         "confirm-reset-server-settings": "முதலில் மதிப்புகளை நிறுவ இது உங்கள் அமைப்புகளை மீட்டமைக்கும். நீங்கள் தொடர விரும்புகிறீர்களா?",
         "must-select-library": "குறைந்தது ஒரு நூலகம் தேர்ந்தெடுக்கப்பட வேண்டும்",
         "bulk-scan": "பல நூலகங்களை ச்கேன் செய்வது நேர்கோட்டுடன் செய்யப்படும். இது நீண்ட நேரம் ஆகலாம், நூலக அளவைப் பொறுத்து முழுமையடையாது.",
         "bulk-covers": "பல நூலகங்களில் புத்துணர்ச்சியூட்டும் கவர்கள் தீவிரமானவை மற்றும் நீண்ட நேரம் ஆகலாம். நீங்கள் தொடர விரும்புகிறீர்களா?",
         "person-image-downloaded": "நபர் கவர் பதிவிறக்கம் செய்யப்பட்டு பயன்படுத்தப்பட்டது.",
-        "bulk-delete-libraries": "நீங்கள் நிச்சயமாக {{count} நூலகங்களை நீக்க விரும்புகிறீர்களா?"
+        "bulk-delete-libraries": "நீங்கள் நிச்சயமாக {{count} நூலகங்களை நீக்க விரும்புகிறீர்களா?",
+        "series-added-want-to-read": "படிக்க விரும்பும் பட்டியலில் இருந்து தொடர் சேர்க்கப்பட்டது",
+        "confirm-delete-multiple-volumes": "{{count}} தொகுதிகளை நிச்சயமாக நீக்க விரும்புகிறீர்களா? இது வட்டில் உள்ள கோப்புகளை மாற்றாது.",
+        "confirm-delete-auth-key": "இந்த அங்கீகார விசையை நிச்சயமாக நீக்க விரும்புகிறீர்களா?",
+        "redownload-confirm": "நீங்கள் ஏற்கனவே {{date}} அன்று {{title}} ஐ பதிவிறக்கம் செய்துள்ளீர்கள். மீண்டும் பதிவிறக்க விரும்புகிறீர்களா?",
+        "confirm-delete-collection": "சேகரிப்பை நிச்சயமாக நீக்க விரும்புகிறீர்களா? இதை செயல்தவிர்க்க முடியாது.",
+        "confirm-delete-annotations": "சிறுகுறிப்புகளை நிச்சயமாக நீக்க விரும்புகிறீர்களா? இதை செயல்தவிர்க்க முடியாது.",
+        "annotations-deleted": "சிறுகுறிப்பு நீக்கப்பட்டது",
+        "match-success": "தொடர் சரியாகப் பொருந்தியது",
+        "webtoon-override": "வெப்டூனைக் குறிக்கும் படங்கள் காரணமாக வெப்டூன் பயன்முறைக்கு மாறுகிறது.",
+        "scrobble-gen-init": "கடந்தகால வாசிப்பு வரலாறு மற்றும் மதிப்பீடுகளிலிருந்து ச்க்ரோபிள் நிகழ்வுகளை உருவாக்க, இணைக்கப்பட்ட சேவைகளுடன் அவற்றை ஒத்திசைக்க ஒரு வேலையை வரிசைப்படுத்தியது.",
+        "series-bound-to-reading-profile": "தொடர் {{amount}} படிக்கும் சுயவிவரங்களுக்குக் கட்டுப்பட்டது",
+        "library-bound-to-reading-profile": "{{amount}} படிக்கும் சுயவிவரங்களுக்கு நூலகம் பிணைக்கப்பட்டுள்ளது",
+        "external-match-rate-error": "கவிதா {{seriesName}}ஐப் பார்க்கும்போது கட்டணம் இல்லை. 5 நிமிடங்களில் மீண்டும் முயற்சிக்கவும்.",
+        "confirm-delete-bookmark": "இந்த புத்தகக்குறியை நிச்சயமாக நீக்க வேண்டுமா?",
+        "confirm-delete-annotation": "இந்த சிறுகுறிப்பை நிச்சயமாக நீக்க விரும்புகிறீர்களா?",
+        "confirm-delete-font": "இந்த எழுத்துருவை அகற்றுவது வட்டில் இருந்து நீக்கப்படும். அகற்றுவதற்கு முன், தற்காலிக கோப்பகத்திலிருந்து அதைப் பிடிக்கலாம்.",
+        "confirm-force-delete-font": "இந்த எழுத்துரு தற்போது பயன்பாட்டில் உள்ளது. அதை வலுக்கட்டாயமாக நீக்க வேண்டுமா? இது பயனர்களை இயல்பு எழுத்துருவுக்குத் திரும்பச் செய்யும்.",
+        "font-in-use": "எழுத்துரு ஒன்று அல்லது அதற்கு மேற்பட்ட பயனர்களால் பயன்படுத்தப்படுவதால் நீக்க முடியாது.",
+        "k+-resend-welcome-email-success": "உங்கள் கவிதா+ மின்னஞ்சலுக்கு மின்னஞ்சல் அனுப்பப்பட்டது",
+        "profile-unauthorized": "இந்தப் பயனர் தனது சுயவிவரத்தைப் பகிரவில்லை"
     },
     "actionable": {
         "download-tooltip": "சாதனத்திற்கு பதிவிறக்கவும்",
@@ -950,7 +1064,29 @@
         "multiple-selections": "பல தேர்வுகள்",
         "back-to": "மீண்டும் {{action}}",
         "title": "செயல்கள்",
-        "copy-settings": "அமைப்புகளை நகலெடுக்கவும்"
+        "copy-settings": "அமைப்புகளை நகலெடுக்கவும்",
+        "mark-as-read-with-session": "அமர்வுடன் படித்ததாகக் குறிக்கவும்",
+        "mark-as-read-with-session-tooltip": "முன்னேற்றத்தை முழுமையாகப் படித்ததாகக் குறிக்கவும், அதற்கான அமர்வை உருவாக்கவும்",
+        "reading-profiles": "சுயவிவரங்களைப் படித்தல்",
+        "set-reading-profile": "வாசிப்பு சுயவிவரத்தை அமைக்கவும்",
+        "set-reading-profile-tooltip": "இந்த நூலகத்தில் ஒரு வாசிப்பு சுயவிவரத்தை இணைக்கவும்",
+        "clear-reading-profile": "படிக்கும் சுயவிவரத்தை அழிக்கவும்",
+        "clear-reading-profile-tooltip": "இந்த நூலகத்திற்கான வாசிப்பு சுயவிவரத்தை அழிக்கவும்",
+        "cleared-profile": "படிக்கும் சுயவிவரம் அழிக்கப்பட்டது",
+        "match": "போட்டி",
+        "match-tooltip": "கவிதா+ உடன் தொடரை கைமுறையாக பொருத்தவும்",
+        "reorder": "மறுவரிசைப்படுத்து",
+        "rename": "மறுபெயரிடவும்",
+        "rename-tooltip": "அறிவுள்ள ஃபில்டருக்கு மறுபெயரிடவும்",
+        "merge": "ஒன்றிணைக்கவும்",
+        "export": "ஏற்றுமதி",
+        "like": "பிடிக்கும்",
+        "unlike": "விருப்பங்களை அகற்று",
+        "edit-device-name": "பெயரைத் திருத்தவும்",
+        "export-v1": "CBL v1",
+        "export-v1-tooltip": "CBL v1 (XML) ஐப் பயன்படுத்தவும்",
+        "export-v2": "CBL v2",
+        "export-v2-tooltip": "CBL v2 (JSON) ஐப் பயன்படுத்தவும்"
     },
     "preferences": {
         "double-manga": "இரட்டை (மங்கா)",
@@ -990,7 +1126,10 @@
         "required-field": "இந்த புலம் தேவை",
         "valid-email": "இது சரியான மின்னஞ்சலாக இருக்க வேண்டும்",
         "password-validation": "கடவுச்சொல் 6 முதல் 256 எழுத்துக்கள் வரை இருக்க வேண்டும்",
-        "year-validation": "இது 1000 மற்றும் 4 எழுத்துக்களை விட அதிகமான செல்லுபடியாகும் ஆண்டாக இருக்க வேண்டும்"
+        "year-validation": "இது 1000 மற்றும் 4 எழுத்துக்களை விட அதிகமான செல்லுபடியாகும் ஆண்டாக இருக்க வேண்டும்",
+        "other-field-required": "{{other}} அமைக்கப்படும் போது {{name}} தேவை",
+        "other-field-invalid": "செல்லுபடியை சரிபார்க்க முடியவில்லை, {{other}} தவறானது",
+        "invalid-uri": "வழங்கப்பட்ட யூரி தவறானது"
     },
     "entity-type": {
         "volume": "தொகுதி",
@@ -1025,7 +1164,22 @@
         "devices-tab": "சாதனங்கள்",
         "stats-tab": "புள்ளிவிவரங்கள்",
         "scrobbling-tab": "ச்க்ராப்லிங்",
-        "smart-filters-tab": "அறிவுள்ள வடிப்பான்கள்"
+        "smart-filters-tab": "அறிவுள்ள வடிப்பான்கள்",
+        "annotations-tab": "சிறுகுறிப்புகள்",
+        "overview-tab": "கண்ணோட்டம்",
+        "management-tab": "மேலாண்மை",
+        "activity-tab": "செய்கைப்பாடு",
+        "external-ids-tab": "வெளிப்புற ஐடிகள்",
+        "aliases-tab": "மாற்றுப்பெயர்கள்",
+        "chapters-tab": "பாடங்கள்",
+        "dashboard-tab": "முகப்புப்பெட்டி",
+        "sidenav-tab": "பக்கம் நவ்",
+        "external-sources-tab": "வெளிப்புற ஆதாரங்கள்",
+        "image-reader-tab": "பட ரீடர்",
+        "book-reader-tab": "புத்தக வாசிப்பாளர்",
+        "pdf-reader-tab": "PDF ரீடர்",
+        "bookmark-image-tab": "படம்",
+        "bookmark-text-tab": "உரை"
     },
     "common": {
         "reset-to-default": "இயல்புநிலைக்கு மீட்டமைக்கவும்",
@@ -1061,7 +1215,14 @@
         "chapter-num-shorthand": "Ch {{num}}",
         "book-num-shorthand": "நூல் {{num}}",
         "issue-num-shorthand": "#{{num}}",
-        "volume-num-shorthand": "Vol {{num}}"
+        "volume-num-shorthand": "Vol {{num}}",
+        "unknown": "தெரியவில்லை",
+        "chapter-count": "{{num}} அத்தியாயங்கள்",
+        "issue-count": "{{num}} சிக்கல்கள்",
+        "no-data": "தரவு இல்லை",
+        "confirm": "உறுதிப்படுத்தவும்",
+        "selected": "தேர்ந்தெடுக்கப்பட்டது",
+        "libraries": "நூலகங்கள்"
     },
     "relationship-pipe": {
         "doujinshi": "டசின்சி",
@@ -1080,13 +1241,13 @@
         "character": "எழுத்து"
     },
     "all-filters": {
-        "count": "{{count}} {{customize-dashboard-modal.title-smart-filters}}",
+        "count": "{{count}} {{tabs.smart-filters-tab}}",
         "title": "அனைத்து அறிவுள்ள வடிப்பான்களும்",
         "create": "{{common.create}}"
     },
     "user-preferences": {
         "title": "பயனர் டாச்போர்டு",
-        "pref-description": "இவை உங்கள் கணக்கிற்கு கட்டுப்பட்ட உலகளாவிய அமைப்புகள்.",
+        "pref-description": "இவை உங்கள் கணக்கிற்குக் கட்டுப்பட்ட உலகளாவிய அமைப்புகள். ரீடர் அமைப்புகள் வாசிப்பு சுயவிவரங்களில் அமைந்துள்ளன.",
         "account-tab": "{{tabs.account-tab}}}",
         "preferences-tab": "{{tabs.preferences-tab}}}",
         "theme-tab": "{{tabs.theme-tab}}",
@@ -1109,13 +1270,45 @@
         "collapse-series-relationships-label": "தொடர் உறவுகளை சரிவு",
         "collapse-series-relationships-tooltip": "உறவுகள் இல்லாத அல்லது பெற்றோர்/முன்னுரை இல்லாத கவிதா நிகழ்ச்சிகளைக் காட்ட வேண்டுமா",
         "share-series-reviews-label": "பங்கு தொடர் மதிப்புரைகளைப் பகிரவும்",
-        "share-series-reviews-tooltip": "கவிதா மற்ற பயனர்களுக்கான தொடரின் உங்கள் மதிப்புரைகளை சேர்க்க வேண்டுமா",
-        "clients-opds-alert": "இந்த சேவையகத்தில் OPDS இயக்கப்படவில்லை. இது டச்சியோமி பயனர்களை பாதிக்காது.",
-        "clients-opds-description": "அனைத்து 3 வது தரப்பு வாடிக்கையாளர்களும் பநிஇ விசை அல்லது கீழே உள்ள இணைப்பு முகவரி ஐப் பயன்படுத்துவார்கள். இவை கடவுச்சொற்கள் போன்றவை, அதை தனிப்பட்டதாக வைத்திருங்கள்.",
+        "share-series-reviews-tooltip": "இந்த சர்வரில் உள்ள பிற பயனர்களுக்கு உங்கள் மதிப்புரைகள் தெரியும்படி அனுமதிக்கவும்",
+        "clients-opds-alert": "இந்த சர்வரில் OPDS இயக்கப்படவில்லை. இது Mihon பயனர்களை பாதிக்காது.",
+        "clients-opds-description": "அனைத்து மூன்றாம் தரப்பு வாடிக்கையாளர்களும் OPDS அங்கீகார விசையை அல்லது கீழே உள்ள இணைப்பு முகவரி ஐப் பயன்படுத்துவார்கள். இவை கடவுச்சொற்கள் போன்றவை, அதை தனிப்பட்டதாக வைத்திருங்கள்.",
         "clients-opds-url-label": "OPDS முகவரி",
         "clients-opds-url-tooltip": "ஆதரிக்கப்பட்ட OPDS வாடிக்கையாளர்களின் பட்டியலைக் காண்க: ",
         "reset": "{{common.reset}}}",
-        "save": "{{common.save}}"
+        "save": "{{common.save}}",
+        "font-tab": "எழுத்துரு",
+        "social-settings-title": "சமூக அமைப்புகள்",
+        "opds-settings-title": "OPDS அமைப்புகள்",
+        "highlight-bar-label": "சிறுகுறிப்புகள் நிறங்களை முன்னிலைப்படுத்துகின்றன",
+        "highlight-bar-tooltip": "இந்த வண்ணங்கள் எல்லா புத்தகங்களுக்கும் இடையில் பகிரப்படுகின்றன",
+        "colorscape-label": "ColorScape ஐப் பயன்படுத்தவும்",
+        "colorscape-tooltip": "மாறும் கிரேடியண்ட் அம்சத்தை இயக்க/முடக்க உலகளாவிய நிலைமாற்றம். கருப்பொருள் அமைப்புகளை மீறும்",
+        "data-saver-label": "தரவு சேமிப்பான்",
+        "data-saver-tooltip": "தானியங்கு முன்னறிவிப்பைத் தடுப்பதன் மூலம் தரவுப் பயன்பாட்டைக் குறைக்கிறது (எ.கா., PDF ரீடர்)",
+        "prompt-for-rereads-after-label": "மறுவாசிப்புக்கு விரைவு",
+        "prompt-for-rereads-after-tooltip": "ஃச் நாட்களுக்கு முன்பு எந்த முன்னேற்றமும் இல்லை என்றால், மீண்டும் படிக்கவும். 0 ப்ராம்ட்டை முழுவதுமாக முடக்குகிறது.",
+        "kavitaplus-settings-title": "கவிதா+",
+        "anilist-scrobbling-label": "அனிலிச்ட் ச்க்ரோபிளிங்",
+        "anilist-scrobbling-tooltip": "அனிலிச்ட்டிற்கான வாசிப்பு முன்னேற்றம் மற்றும் மதிப்பீடுகளை ச்க்ரோபிள் செய்ய (ஒரு வழி ஒத்திசைவு) கவிதாவை இசைவு",
+        "want-to-read-sync-label": "ஒத்திசைவைப் படிக்க வேண்டும்",
+        "want-to-read-sync-tooltip": "நிலுவையில் உள்ள வாசிப்பு பட்டியலில் உள்ள AniList மற்றும் மால் தொடர்களின் அடிப்படையில் நீங்கள் படிக்க விரும்பும் பட்டியலில் உருப்படிகளைச் சேர்க்க கவிதாவை அனுமதிக்கவும்",
+        "share-annotations-label": "சிறுகுறிப்புகளைப் பகிரவும்",
+        "share-annotations-tooltip": "இந்த சர்வரில் உள்ள பிற பயனர்களுக்கு உங்கள் சிறுகுறிப்புகள் தெரியும்படி அனுமதிக்கவும்",
+        "view-other-annotations-label": "பகிரப்பட்ட சிறுகுறிப்புகளைக் காண்க",
+        "view-other-annotations-tooltip": "படிக்கும் போது பிற பயனர்களின் குறிப்புகளைப் பார்க்கவும்",
+        "social-libraries-label": "சமூக நூலகங்கள்",
+        "social-libraries-tooltip": "சமூக நற்பொருத்தங்கள் இயக்கப்பட வேண்டிய நூலகங்கள். எந்தத் தேர்வும் எல்லா இடங்களிலும் சமூக அம்சங்களை செயல்படுத்துவதில்லை. குறிப்பிட்ட அம்சங்களை எங்கும் பயன்படுத்த விரும்பவில்லை என்றால் அவற்றை முடக்கவும்.",
+        "social-max-age-rating-label": "அதிகபட்ச அகவை மதிப்பீடு",
+        "social-max-age-rating-tooltip": "சமூக நற்பொருத்தங்கள் செயல்படும் அதிகபட்ச அகவை மதிப்பீடு",
+        "social-include-unknowns-label": "தெரியாதவற்றைச் சேர்க்கவும்",
+        "social-include-unknowns-tooltip": "அறியப்படாத அகவை மதிப்பீட்டைக் கொண்ட தொடர் மற்றும் அத்தியாயங்களுக்கான சமூக அம்சங்களை இயக்கவும்",
+        "social-share-profile-label": "சுயவிவரத்தைப் பகிரவும்",
+        "social-share-profile-tooltip": "மற்ற சர்வர் உறுப்பினர்களுடன் உங்கள் வாசிப்புச் செயல்பாடு பற்றிய தகவலைப் பகிர்வதை இயக்கவும்",
+        "embed-progress-indicator-label": "முன்னேற்றம் காட்டி உட்பொதிக்கவும்",
+        "embed-progress-indicator-tooltip": "தலைப்பில் முன்னேற்றக் குறிகாட்டியை உட்பொதிக்கவும்",
+        "include-continue-from-label": "நுழைவிலிருந்து தொடரவும்",
+        "include-continue-from-tooltip": "உங்கள் கடைசி வாசிப்புப் புள்ளியைக் கண்டறிவதைத் தவிர்க்க OPDS புலங்களில் \"X இலிருந்து தொடரவும்\" உள்ளீட்டைச் செருகவும் (கவிதாவின் தொடரும் பொத்தானைப் பின்பற்றுகிறது)"
     },
     "manage-email-settings": {
         "size-limit-tooltip": "இணைப்புகளுக்கு மின்னஞ்சல் சேவையகம் எத்தனை பைட்டுகள் கையாள முடியும்",
@@ -1129,7 +1322,7 @@
         "email-settings-title": "மின்னஞ்சல் அமைப்புகள்",
         "test": "தேர்வு",
         "host-name-label": "புரவலன் பெயர்",
-        "host-name-tooltip": "டொமைன் பெயர் (தலைகீழ் ப்ராக்சி). மின்னஞ்சல் செயல்பாட்டிற்கு தேவை. தலைகீழ் பதிலாள் இல்லை என்றால், எந்த முகவரி ஐப் பயன்படுத்தவும்.",
+        "host-name-tooltip": "உங்கள் ரிவர்ச் ப்ராக்சியின் டொமைன் பெயர், மின்னஞ்சல் செயல்பாட்டிற்குத் தேவை. நீங்கள் ரிவர்ச் ப்ராக்சியைப் பயன்படுத்தவில்லை எனில், http://externalip:port/ உட்பட எந்த URLஐயும் பயன்படுத்தலாம்.",
         "host-name-validation": "புரவலன் பெயர் HTTP (கள்) உடன் தொடங்க வேண்டும் மற்றும் / இல் முடிவடையக்கூடாது",
         "sender-address-label": "அனுப்புநர் முகவரி",
         "sender-address-tooltip": "மின்னஞ்சலைப் பெறும்போது பெறுநர் பார்க்கும் மின்னஞ்சல் முகவரி இது. பொதுவாக கணக்குடன் தொடர்புடைய மின்னஞ்சல் முகவரி.",
@@ -1160,7 +1353,12 @@
         "incognito-mode-label": "மறைநிலை பயன்முறை",
         "next": "அடுத்தது",
         "previous": "முந்தைய",
-        "go-to-page-prompt": "{{totalPages}} பக்கங்கள் உள்ளன. நீங்கள் எந்த பக்கத்திற்கு செல்ல விரும்புகிறீர்கள்?"
+        "go-to-page-prompt": "{{totalPages}} பக்கங்கள் உள்ளன. எந்தப் பக்கத்திற்குச் செல்ல விரும்புகிறீர்கள்? பக்கம் 1 இல் தொடங்குகிறது.",
+        "close-reader-alt": "மூடு ரீடர்",
+        "page-num-label": "பக்கம் {{page}}",
+        "completion-label": "{{percent}} முடிந்தது",
+        "force-selected-one-column": "இரண்டு நெடுவரிசைகளை வழங்குவதற்கு போதுமான இடம் இல்லாததால், லேஅவுட் பயன்முறை ஒரு நெடுவரிசைக்கு மாறியது",
+        "forced-vertical-switch": "இரண்டு நெடுவரிசை தளவமைப்பு செங்குத்து எழுதும் பாணியுடன் வேலை செய்யாததால் லேஅவுட் பயன்முறை மாறியது"
     },
     "metadata-fields": {
         "characters-title": "எழுத்துக்கள்",
@@ -1209,7 +1407,11 @@
         "language-title": "{{திருத்து-அத்தியாயம்-மோடல்.லாங்காச்-லேபிள்}}",
         "release-title": "{{sort-field-pipe.release- ஆண்டு}}",
         "format-title": "{{metadata.filter.format-label}}",
-        "length-title": "{{திருத்து-அத்தியாயம்-மோடல்.வேர்ட்ச்-லேபல்}}"
+        "length-title": "{{திருத்து-அத்தியாயம்-மோடல்.வேர்ட்ச்-லேபல்}}",
+        "age-rating-title": "{{metadata-fields.age-rating-title}}",
+        "folder-path-title": "கோப்புறை பாதை",
+        "file-path-title": "கோப்புகள்",
+        "external-metadata-title": "வெளிப்புற மேனிலை தரவு"
     },
     "manage-media-issues": {
         "filter-label": "{{common.filter}}}",
@@ -1219,7 +1421,7 @@
         "file-header": "கோப்பு",
         "comment-header": "கருத்து",
         "created-header": "உருவாக்கப்பட்டது",
-        "no-data": "தரவு இல்லை"
+        "no-data": "{{common.no-data}}"
     },
     "manage-library": {
         "select-all": "{{common.select-all}}",
@@ -1227,7 +1429,7 @@
         "bulk-copy-to": "{{libraryName}} க்கு இலிருந்து அமைப்புகளை நகலெடுக்க எந்த நூலகங்களைத் தேர்ந்தெடுக்கவும்",
         "include-type-label": "நூலக வகையை நகலெடுப்பது",
         "bulk-action-label": "மொத்த நடவடிக்கை",
-        "title": "நூலகங்கள்",
+        "title": "{{common.libraries}}",
         "add-library": "நூலகத்தைச் சேர்க்கவும்",
         "no-data": "நூலகங்கள் எதுவும் இல்லை. ஒன்றை உருவாக்க முயற்சிக்கவும்.",
         "loading": "{{common.loading}}}",
@@ -1270,7 +1472,9 @@
         "media-issue-title": "ஊடக சிக்கல்கள்",
         "scrobble-issue-title": "துருவல் சிக்கல்கள்",
         "cover-image-size-label": "பட அளவை கவர்",
-        "cover-image-size-tooltip": "படங்களை உருவாக்க எவ்வளவு பெரியது. குறிப்பு: இயல்புநிலையை விட பெரிய எதுவும் நீண்ட பக்க சுமை நேரங்களை ஏற்படுத்தும்."
+        "cover-image-size-tooltip": "படங்களை உருவாக்க எவ்வளவு பெரியது. குறிப்பு: இயல்புநிலையை விட பெரிய எதுவும் நீண்ட பக்க சுமை நேரங்களை ஏற்படுத்தும்.",
+        "pdf-render-resolution-label": "PDF வழங்குதல் தீர்மானம்",
+        "pdf-render-resolution-tooltip": "PDF வழங்குதல் செய்யப்படும் தீர்மானம். அதிக தெளிவுத்திறனை வழங்குவதற்கும் அதிக நினைவகத்தை பயன்படுத்துவதற்கும் அதிக நேரம் எடுக்கும். PDF வழங்குதல் செய்வதில் சிக்கல் ஏற்பட்டால், இதைக் குறைக்க முயற்சிக்கவும்."
     },
     "reading-activity": {
         "no-data": "வாசிப்பு முன்னேற்றம் இல்லை",
@@ -1285,13 +1489,16 @@
         "last-30-days": "{{நேர-காலங்கள். லாச்ட் -30 நாட்கள்}}",
         "last-90-days": "{{நேர-காலங்கள். லாச்ட் -90 நாட்கள்}}",
         "last-year": "{{நேர-காலங்கள். லாச்ட் ஆண்டு}}",
-        "all-time": "{{time-phetiods.all-time}}"
+        "all-time": "{{time-phetiods.all-time}}",
+        "select-user-alt": "வடிகட்ட பயனரைத் தேர்ந்தெடுக்கவும்"
     },
     "publication-status-stats": {
         "count-header": "எண்ணுங்கள்",
         "title": "வெளியீட்டு நிலை",
         "visualisation-label": "காட்சிப்படுத்தல்",
-        "data-table-label": "தரவு அட்டவணை"
+        "data-table-label": "தரவு அட்டவணை",
+        "status-header": "{{manage-matched-metadata.status-header}}",
+        "no-data": "{{common.no-data}}"
     },
     "settings": {
         "admin-users": "பயனர்கள்",
@@ -1299,9 +1506,9 @@
         "server-section-title": "சேவையகம்",
         "info-section-title": "தகவல்",
         "import-section-title": "இறக்குமதி",
-        "kavitaplus-section-title": "{{sentings.admin-kavitaplus}}",
+        "kavitaplus-section-title": "கவிதா+",
         "admin-general": "பொது",
-        "admin-libraries": "நூலகங்கள்",
+        "admin-libraries": "{{common.libraries}}",
         "admin-media": "ஊடகம்",
         "admin-media-issues": "ஊடக சிக்கல்கள்",
         "admin-logs": "பதிவுகள்",
@@ -1309,16 +1516,30 @@
         "admin-tasks": "பணிகள்",
         "admin-statistics": "புள்ளிவிவரங்கள்",
         "admin-system": "மண்டலம்",
-        "admin-kavitaplus": "கவிதா+",
+        "admin-kavitaplus": "உரிமம்",
         "account": "கணக்கு",
         "preferences": "விருப்பத்தேர்வுகள்",
-        "clients": "பநிஇ விசை / OPDS",
+        "clients": "அங்கீகார விசைகள் / OPDS",
         "devices": "சாதனங்கள்",
         "scrobbling": "ச்க்ராப்லிங்",
         "theme": "கருப்பொருள்",
         "customize": "தனிப்பயனாக்கு",
         "cbl-import": "சிபிஎல் வாசிப்பு பட்டியல்",
-        "mal-stack-import": "மால் அடுக்கு"
+        "mal-stack-import": "மால் அடுக்கு",
+        "insights-section-title": "நுண்ணறிவு",
+        "admin-activity": "செய்கைப்பாடு",
+        "admin-device": "சாதனங்கள்",
+        "admin-oidc": "OpenID இணைப்பு",
+        "admin-email-history": "மின்னஞ்சல் வரலாறு",
+        "admin-matched-metadata": "பொருந்திய மேனிலை தரவு",
+        "admin-manage-tokens": "பயனர் டோக்கன்களை நிர்வகிக்கவும்",
+        "admin-metadata": "மெட்டாடேட்டாவை நிர்வகி",
+        "admin-mappings-import": "மேனிலை தரவு அமைப்புகள்",
+        "scrobble-holds": "ச்க்ரோபிள் ஓல்ட்ச்",
+        "custom-key-binds": "முக்கிய பிணைப்புகள்",
+        "reading-profiles": "சுயவிவரங்களைப் படித்தல்",
+        "font": "எபப் எழுத்துருக்கள்",
+        "admin-public-metadata": "மெட்டாடேட்டாவை நிர்வகி"
     },
     "stream-pipe": {
         "want-to-read": "{{side-nav.want-to-read}}",
@@ -1330,12 +1551,12 @@
         "reading-lists": "{{side-nav.reading-lists}}",
         "bookmarks": "{{side-nav.bookmarks}}",
         "all-series": "{{side-nav.all-series}}",
-        "browse-authors": "{{side-nav.browse- ஆசிரியர்கள்}}"
+        "browse-authors": "{{side-nav.browse-people}}"
     },
     "filter-field-pipe": {
         "location": "இடம்",
         "languages": "மொழிகள்",
-        "libraries": "நூலகங்கள்",
+        "libraries": "{{common.libraries}}",
         "letterer": "லெட்டர்",
         "publication-status": "வெளியீட்டு நிலை",
         "penciller": "பென்சில்லர்",
@@ -1365,20 +1586,24 @@
         "want-to-read": "படிக்க விரும்புகிறேன்",
         "read-date": "வாசிப்பு தேதி",
         "read-last": "கடைசியாக படியுங்கள்",
-        "average-rating": "சராசரி மதிப்பீடு"
+        "average-rating": "சராசரி மதிப்பீடு",
+        "file-size": "கோப்பு அளவு"
     },
     "manage-devices": {
         "email-label": "மின்னஞ்சல்",
         "name-label": "பெயர்",
         "title": "சாதன மேலாளர்",
-        "description": "இந்த பிரிவு நீங்கள் ஒரு வலை உலாவி வழியாக கவிதாவுடன் இணைக்க முடியாத சாதனங்களை அமைப்பதற்கும் அதற்கு பதிலாக கோப்புகளை ஏற்றுக்கொள்ளும் மின்னஞ்சல் முகவரியைக் கொண்டிருப்பதற்கும் ஆகும்.",
+        "description": "கவிதாவுடன் இணைக்க முடியாத மின்னஞ்சல் சாதனங்களை அமைப்பதற்கும் அதற்குப் பதிலாக கோப்புகளை ஏற்கும் மின்னஞ்சல் முகவரியைக் கொண்டிருப்பதற்கும் இந்தப் பகுதி.",
         "platform-label": "இயங்குதளம்",
-        "email-setup-alert": "உங்கள் சாதனங்களுக்கு கோப்புகளை அனுப்ப விரும்புகிறீர்களா? உங்கள் நிர்வாக அமைவு மின்னஞ்சல் அமைப்புகளை முதலில் வைத்திருங்கள்!",
+        "email-setup-alert": "உங்கள் மின்னஞ்சலுக்கு கோப்புகளை அனுப்ப வேண்டுமா? முதலில் உங்கள் நிர்வாகி அமைப்பை மின்னஞ்சல் அமைப்புகளை அமைக்கவும்!",
         "add": "{{common.add}}}",
         "delete": "{{common.delete}}",
         "edit": "{{common.edit}}}",
         "no-data": "{{typeahead.no-data}}}",
-        "actions-header": "{{நிர்வகி-பயனர்கள்.அக்சன்ச்-ஈடர்}}"
+        "actions-header": "{{நிர்வகி-பயனர்கள்.அக்சன்ச்-ஈடர்}}",
+        "warning": "எச்சரிக்கை",
+        "client-devices-header": "கிளையன்ட் சாதனங்கள்",
+        "sendto-device-header": "மின்னஞ்சல் அடிப்படையிலான சாதனங்கள்"
     },
     "dashboard": {
         "no-libraries": "இதுவரை நூலகங்கள் அமைக்கப்படவில்லை. சிலவற்றை உருவாக்கவும்",
@@ -1398,7 +1623,16 @@
         "cancel": "{{common.cancel}}",
         "saving": "சேமிப்பு…",
         "update": "புதுப்பிப்பு",
-        "account-detail-title": "கணக்கு விவரங்கள்"
+        "account-detail-title": "கணக்கு விவரங்கள்",
+        "invalid-email-warning": "தவறான மின்னஞ்சல் கவிதாவின் சில செயல்பாடுகளைத் தடுக்கும்",
+        "warning-read-only": "படிக்க மட்டும் கணக்குகளுக்கு வரையறுக்கப்பட்ட அனுமதிகள் உள்ளன",
+        "notice": "எச்சரிக்கை!",
+        "out-of-sync": "இந்த பயனர் OIDC மூலம் உருவாக்கப்பட்டது. SyncUsers அமைப்பு இயக்கப்பட்டிருந்தால், இந்தக் கணக்கில் செய்யப்படும் மாற்றங்கள் மேலெழுதப்படலாம்.",
+        "oidc-managed": "இந்த பயனர் OIDC மூலம் நிர்வகிக்கப்படுகிறார். ஏதேனும் மாற்றங்களைக் கோர உங்கள் OIDC நிர்வாகியைத் தொடர்பு கொள்ளவும்.",
+        "identity-provider": "அடையாள வழங்குபவர்",
+        "identity-provider-tooltip": "கவிதா பயனர்கள் OIDC கணக்குகளுடன் ஒருபோதும் ஒத்திசைக்கப்படுவதில்லை.",
+        "libraries-label": "{{common.libraries}}",
+        "roles-label": "{{common.roles}}"
     },
     "review-card-modal": {
         "close": "{{common.close}}",
@@ -1410,7 +1644,8 @@
         "your-review": "இது உங்கள் மதிப்பாய்வு",
         "external-review": "வெளிப்புற ஆய்வு",
         "local-review": "உள்ளக ஆய்வு",
-        "rating-percentage": "மதிப்பீடு {{r}}%"
+        "rating-percentage": "மதிப்பீடு {{r}}%",
+        "critic": "விமர்சகர்"
     },
     "want-to-read": {
         "title": "படிக்க விரும்புகிறேன்",
@@ -1420,8 +1655,11 @@
     },
     "user-holds": {
         "title": "ச்க்ரோபில் வைத்திருக்கிறது",
-        "description": "இது மேலோடை வழங்குநர்களுக்கு அழிக்கப்படாத தொடர்களின் பயனர் நிர்வகிக்கப்பட்ட பட்டியல். நீங்கள் எந்த நேரத்திலும் ஒரு தொடரை அகற்றலாம் மற்றும் அடுத்த ச்க்ரோபல்-திறன் கொண்ட நிகழ்வு (படித்தல் முன்னேற்றம், மதிப்பீடு, நிலையைப் படிக்க விரும்புகிறது) நிகழ்வுகளைத் தூண்டும்.",
-        "no-data": "{{typeahead.no-data}}}"
+        "description": "இது பயனர்களால் நிர்வகிக்கப்படும் தொடர்களின் பட்டியல் ஆகும், இது மேலோடை வழங்குநர்களுக்கு ச்க்ரோபிள் செய்யப்படாது. நீங்கள் எந்த நேரத்திலும் ஒரு தொடரை அகற்றலாம் மற்றும் அடுத்த ச்க்ரோபிள் செய்யக்கூடிய நிகழ்வு (படிக்கும் முன்னேற்றம், மதிப்பீடு, நிலையைப் படிக்க விரும்புதல்) ச்க்ரோப்பிங்கைத் தூண்டும்.",
+        "no-data": "{{typeahead.no-data}}}",
+        "series-name-header": "{{manage-matched-metadata.series-name-header}}",
+        "created-header": "{{manage-media-issues.created-header}}",
+        "delete-label": "{{common.remove}}"
     },
     "theme": {
         "theme-dark": "இருண்ட",
@@ -1443,11 +1681,11 @@
         "custom": "{{சாதனம்-பிளாட்ஃபார்ம்-பைப்.கச்டம்}}"
     },
     "edit-device-modal": {
-        "title": "சாதனத்தைத் திருத்து",
+        "title": "மின்னஞ்சல் சாதனத்தைத் திருத்தவும்",
         "device-name-label": "{{நிர்வகி-DEVICES.NAME-LABEL}}",
         "email-label": "{{common.email}}}",
         "email-tooltip": "இந்த மின்னஞ்சல் அனுப்புதல் வழியாக கோப்பை ஏற்க பயன்படுத்தப்படும்",
-        "device-platform-label": "சாதன தளம்",
+        "device-platform-label": "{{manage-devices.platform-label}}",
         "save": "{{common.save}}",
         "close": "{{common.close}}",
         "cancel": "{{common.cancel}}",
@@ -1466,7 +1704,7 @@
         "permission-error": "உங்கள் கடவுச்சொல்லை மாற்ற உங்களுக்கு இசைவு இல்லை. சேவையகத்தின் நிர்வாகியை அணுகவும்."
     },
     "typeahead": {
-        "no-data": "தரவு இல்லை",
+        "no-data": "{{common.no-data}}",
         "add-custom-item": ", தனிப்பயன் உருப்படியைச் சேர்க்க தட்டச்சு செய்க",
         "locked-field": "புலம் பூட்டப்பட்டுள்ளது",
         "close": "{{common.close}}",
@@ -1497,7 +1735,13 @@
         "edit": "{{common.edit}}}",
         "cancel": "{{common.cancel}}",
         "save": "{{common.save}}",
-        "loading": "{{common.loading}}}"
+        "loading": "{{common.loading}}}",
+        "anilist-used-for": "AniList is used க்கு scrobbling (syncing data) and want பெறுநர் read syncing.",
+        "mal-used-for": "MyAnimeList அறிவுள்ள சேகரிப்புகளுக்குப் பயன்படுத்தப்படுகிறது மற்றும் ஒத்திசைவைப் படிக்க விரும்புகிறது.",
+        "anilist-first-header": "அனிலிச்ட் கிள்ளாக்கு சேமிக்கப்பட்டது",
+        "anilist-first-description": "உங்கள் அனிலிச்ட் கிள்ளாக்கு இப்போது அமைக்கப்பட்டுள்ளது. இந்த கிள்ளாக்கு ஒரு வருடம் நீடிக்கும், அதை இங்கே புதுப்பிக்க கவிதா காலாவதியாகும் முன் உங்களுக்குத் தெரிவிக்கும். இதன் மூலம், கவிதா உங்கள் வாசிப்பு வரலாறு, படிக்க விரும்பும் மற்றும் மதிப்பீடுகளிலிருந்து ச்க்ரோபிள் (ஒத்திசைவு) நிகழ்வுகளை உருவாக்கும். நீங்கள் இதை இப்போது அல்லது பின்னர் தொடங்கலாம். நீங்கள் ச்க்ரோபிள் செய்ய விரும்பாத தொடர்கள் ஏதேனும் இருந்தால், பின்னர் தேர்ந்தெடுத்து அவற்றை ஒரு ச்க்ரோபிள் பிடியை வைக்கவும். இந்த பணியை நீங்கள் ஒரு முறை மட்டுமே இயக்க வேண்டும். பிறகு, கவிதா உங்களுக்காக ஒத்திசைவைக் கையாளுவார்.<br/> 'பின்னர்' என்பதைத் தேர்ந்தெடுத்தால், ச்க்ரோபிளிங் பக்கத்தில் உள்ள பொத்தானைக் காணலாம்.",
+        "anilist-first-later": "பின்னர்",
+        "anilist-first-now": "இப்போது"
     },
     "library-access-modal": {
         "select-all": "{{common.select-all}}",
@@ -1603,10 +1847,12 @@
         "inviting": "அழைக்கும்…",
         "cancel": "{{common.cancel}}",
         "email-not-sent": "{{doast.email-not-sent}}",
-        "notice": "{{நிர்வகி-SETTINGS.NOTICE}}"
+        "notice": "{{நிர்வகி-SETTINGS.NOTICE}}",
+        "libraries-label": "{{common.libraries}}",
+        "roles-label": "{{common.roles}}"
     },
     "library-selector": {
-        "title": "நூலகங்கள்",
+        "title": "{{common.libraries}}",
         "select-all": "{{common.select-all}}",
         "deselect-all": "{{common.deselect-all}}",
         "no-data": "இதுவரை நூலகங்கள் அமைக்கப்படவில்லை."
@@ -1617,11 +1863,16 @@
         "close": "{{common.close}}",
         "required-field": "{{common.required-field}}",
         "bookmark-label": "புக்மார்க்கு பெயர்",
-        "save": "{{common.save}}"
+        "save": "{{common.save}}",
+        "annotate": "சிறுகுறிப்பு"
     },
     "personal-table-of-contents": {
         "no-data": "இதுவரை எதுவும் புக்மார்க்கு செய்யப்படவில்லை",
-        "delete": "{{bookmarkName}}} ஐ நீக்கு"
+        "delete": "{{bookmarkName}}} ஐ நீக்கு",
+        "page-title": "பக்கம் {{page}}",
+        "chapter-and-page-title": "அத்தியாயம் {{chapterTitle}}, பக்கம் {{page}}",
+        "no-match": "புக்மார்க்ச் பொருத்த வடிப்பான் இல்லை",
+        "filter-label": "{{common.filter}}"
     },
     "confirm-email": {
         "title": "பதிவு செய்யுங்கள்",
@@ -1678,14 +1929,19 @@
         "donate-tooltip": "கவிதா+ க்கு சந்தா செலுத்துவதன் மூலம் இதை அகற்றலாம்",
         "back": "பின்",
         "more": "மேலும்",
-        "customize": "{{settings.customize}}"
+        "customize": "{{settings.customize}}",
+        "browse-people": "நபர்களை உலாவவும்",
+        "cancel-edit": "மறுவரிசையை மூடு",
+        "edit": "{{common.edit}}"
     },
     "person-detail": {
         "known-for-title": "அறியப்படுகிறது",
         "individual-role-title": "ஒரு {{role}}",
         "browse-person-title": "{{name} of இன் அனைத்து படைப்புகளும்",
         "browse-person-by-role-title": "{{role} of இன் அனைத்து படைப்புகளும் {{name}}",
-        "all-roles": "பாத்திரங்கள்"
+        "all-roles": "{{common.roles}}",
+        "aka-title": "என்றும் அழைக்கப்படுகிறது ",
+        "no-info": "இந்த நபரைப் பற்றிய செய்தி இல்லை"
     },
     "library-settings-modal": {
         "close": "{{common.close}}",
@@ -1697,7 +1953,7 @@
         "type-label": "வகை",
         "type-tooltip": "கோப்பு பெயர்கள் எவ்வாறு பாகுபடுத்தப்படுகின்றன என்பதை நூலக வகை தீர்மானிக்கிறது மற்றும் இடைமுகம் அத்தியாயங்கள் (மங்கா) Vs சிக்கல்கள் (காமிக்ச்) காட்டினால். நூலக வகைகளுக்கு இடையிலான வேறுபாடுகள் குறித்த கூடுதல் விவரங்களுக்கு விக்கியைச் சரிபார்க்கவும்.",
         "kavitaplus-eligible-label": "கவிதா+ தகுதியானவர்",
-        "kavitaplus-eligible-tooltip": "கவிதா+ தகவல்களை இழுப்பார் அல்லது ஆதரவளிக்கும்",
+        "kavitaplus-eligible-tooltip": "கவிதா+ மேனிலை தரவு நற்பொருத்தங்கள் மற்றும்/அல்லது ச்க்ரோபிளிங்கை ஆதரிக்கிறது",
         "folder-description": "உங்கள் நூலகத்தில் கோப்புறைகளைச் சேர்க்கவும்",
         "browse": "ஊடக கோப்புறைகளுக்கு உலாவுக",
         "help-us-part-1": "பின்பற்றுவதன் மூலம் எங்களுக்கு உதவுங்கள் ",
@@ -1705,7 +1961,7 @@
         "help-us-part-3": "உங்கள் ஊடகத்திற்கு பெயரிடுவதற்கும் ஒழுங்கமைப்பதற்கும்.",
         "naming-conventions-part-1": "கவிதா உள்ளது ",
         "naming-conventions-part-2": "கோப்புறை தேவைகள்.",
-        "naming-conventions-part-3": "நீங்கள் பின்தொடர்கிறீர்கள் என்பதை உறுதிப்படுத்த இந்த இணைப்பைச் சரிபார்க்கவும், இல்லையெனில் ச்கேன் இல் நான் காண்பிக்கப்படவில்லை.",
+        "naming-conventions-part-3": "நீங்கள் பின்தொடர்கிறீர்கள் என்பதை உறுதிப்படுத்த இந்த இணைப்பைச் சரிபார்க்கவும், இல்லையெனில் வருடு செய்வதில் கோப்புகள் காட்டப்படாமல் போகலாம்.",
         "cover-description": "தனிப்பயன் நூலக பட சின்னங்கள் விருப்பமானவை",
         "cover-description-extra": "நூலக படம் பெரியதாக இருக்கக்கூடாது. ஒரு சிறிய கோப்பை நோக்கமாகக் கொள்ளுங்கள், 32x32 படப்புள்ளிகள் அளவு. கவிதா அளவு மீது சரிபார்ப்பு செய்யாது.",
         "manage-collection-label": "சேகரிப்புகளை நிர்வகிக்கவும்",
@@ -1731,7 +1987,18 @@
         "file-type-group-tooltip": "கவிதா ச்கேன் எந்த வகையான கோப்புகளை ச்கேன் செய்ய வேண்டும். எடுத்துக்காட்டாக, காப்பகத்தில் அனைத்து சிபி*, சிப், ரார் போன்ற கோப்புகள் இருக்கும்.",
         "exclude-patterns-label": "வடிவங்களை விலக்கு",
         "exclude-patterns-tooltip": "கோப்பகங்களை ச்கேன் செய்யும் போது கவிதா பொருந்தும் மற்றும் ச்கேனர் முடிவுகளிலிருந்து விலக்கும் போது கவிதா பொருந்தக்கூடிய வடிவங்களின் தொகுப்பை (குளோப் தொடரியல்) உள்ளமைக்கவும்.",
-        "help": "{{common.help}}}"
+        "help": "{{common.help}}}",
+        "allow-metadata-matching-label": "மேனிலை தரவு பொருத்தத்தை அனுமதிக்கவும்",
+        "allow-metadata-matching-tooltip": "இந்த நூலகத்தில் உள்ள தொடருக்கான மெட்டாடேட்டாவை கவிதா பதிவிறக்கம் செய்ய வேண்டும். சேவையகத்தில் கவிதா+ சந்தா இருந்தால் மட்டுமே இது நிகழும்.",
+        "enable-metadata-label": "மெட்டாடேட்டாவை இயக்கு (ComicInfo/Epub/PDF)",
+        "enable-metadata-tooltip": "கோப்புப் பெயர் பாகுபடுத்தலை மீறும் மேனிலை தரவு கோப்புகளைப் படிக்க கவிதாவை அனுமதிக்கவும்.",
+        "remove-prefix-for-sortname-label": "வரிசைப் பெயருக்கான பொதுவான முன்னொட்டுகளை அகற்றவும்",
+        "remove-prefix-for-sortname-tooltip": "வரிசைப் பெயருக்கான தலைப்புகளில் இருந்து 'The', 'A', 'An' போன்ற பொதுவான முன்னொட்டுகளை கவிதா நீக்குவார். செட் மெட்டாடேட்டாவை மீறாது.",
+        "inherit-web-links-label": "முதல் அத்தியாயத்திலிருந்து இணைய இணைப்புகளைப் பெறவும்",
+        "inherit-web-links-tooltip": "தொடர்கள் அவற்றின் முதல் அத்தியாயத்திலிருந்து இணைய இணைப்புகளைப் பெற வேண்டும்",
+        "default-language-label": "இயல்பு மொழி",
+        "default-language-tooltip": "எந்தவொரு அத்தியாயத்திலும் அவற்றின் மெட்டாடேட்டாவில் எந்த மொழியும் அமைக்கப்படவில்லை எனில், தொடருக்கு ஒதுக்க வேண்டிய மொழி",
+        "files-at-root-warning": "ஒன்று அல்லது அதற்கு மேற்பட்ட கோப்புறைகளில் ரூட்டில் கோப்புகள் உள்ளன. இதை கவிதா ஆதரிக்கவில்லை."
     },
     "file-type-group-pipe": {
         "archive": "காப்பகம்",
@@ -1757,18 +2024,23 @@
         "items-selected": "{{num}} தேர்ந்தெடுக்கப்பட்ட உருப்படிகள்",
         "mark-as-unread": "படிக்காத எனக் குறிக்கவும்",
         "mark-as-read": "படித்தபடி குறி",
-        "deselect-all": "{{பொதுவான."
+        "deselect-all": "{{பொதுவான.",
+        "mark-as-read-with-session": "அமர்வுடன் படித்ததாகக் குறிக்கவும்"
     },
     "card-detail-layout": {
-        "total-items": "{{count}} மொத்த உருப்படிகள்"
+        "total-items": "{{count}} மொத்த உருப்படிகள்",
+        "no-data": "{{common.no-data}}"
     },
     "card-item": {
-        "cannot-read": "படிக்க முடியாது"
+        "cannot-read": "படிக்க முடியாது",
+        "select": "தேர்ந்தெடு",
+        "read": "படித்தேன்"
     },
     "related-tab": {
         "reading-lists-title": "{{reading-lists.title}}}",
         "collections-title": "{{side-nav.collections}}",
-        "relations-title": "{{tabs.-related-tab}}}"
+        "relations-title": "{{tabs.-related-tab}}}",
+        "bookmarks-title": "{{side-nav.bookmarks}}"
     },
     "cover-image-chooser": {
         "enter-an-url-pre-title": "ஒரு {{url}}} ஐ உள்ளிடவும்",
@@ -1786,7 +2058,8 @@
         "applied": "{{தீம்-மேனேசர்."
     },
     "download-indicator": {
-        "progress": "{{percentage}}% பதிவிறக்கம் செய்யப்பட்டது"
+        "progress": "{{percentage}}% பதிவிறக்கம் செய்யப்பட்டது",
+        "completed": "பதிவிறக்கம் முடிந்தது"
     },
     "edit-series-relation": {
         "description-part-1": "என்ன உறவு சேர்க்க வேண்டும் என்று உறுதியாக தெரியவில்லையா? எங்கள் பார்க்கவும்",
@@ -1902,7 +2175,12 @@
         "logout": "வெளியேற்றம்",
         "all-filters": "அறிவுள்ள வடிப்பான்கள்",
         "nav-link-header": "வழிசெலுத்தல் விருப்பங்கள்",
-        "close": "{{common.close}}"
+        "close": "{{common.close}}",
+        "person-aka-status": "மாற்றுப்பெயருடன் பொருந்துகிறது",
+        "browse-genres": "வகைகளை உலாவுக",
+        "browse-tags": "குறிச்சொற்களை உலாவுக",
+        "all-annotations": "சிறுகுறிப்புகளை உலாவுக",
+        "my-profile": "எனது சுயவிவரம்"
     },
     "promoted-icon": {
         "promoted": "{{common.promoted}}}"
@@ -1932,23 +2210,7 @@
     },
     "import-cbl-modal": {
         "close": "{{common.close}}",
-        "title": "சிபிஎல் இறக்குமதி",
-        "help-label": "{{common.help}}}",
-        "import-description": "தொடங்க, .cbl கோப்பை இறக்குமதி செய்யுங்கள். இறக்குமதி செய்வதற்கு முன் கவிதா பல காசோலைகளைச் செய்வார். கோப்பில் உள்ள சிக்கல்கள் காரணமாக சில படிகள் முன்னோக்கி செல்வதைத் தடுக்கும்.",
-        "validate-description": "பட்டியலில் செய்ய ஏதேனும் செயல்பாடுகள் உள்ளதா என்பதைப் பார்க்க எல்லா கோப்புகளும் சரிபார்க்கப்பட்டுள்ளன. தோல்வியுற்ற எந்த பட்டியலும் அடுத்த கட்டத்திற்கு செல்லாது. சிபிஎல் கோப்புகளை சரிசெய்து மீண்டும் முயற்சிக்கவும்.",
-        "validate-warning": "சிபிஎல் உடன் சிக்கல்கள் உள்ளன, அவை இறக்குமதியைத் தடுக்கும். இந்த சிக்கல்களை சரிசெய்யவும், பின்னர் மீண்டும் முயற்சிக்கவும்.",
-        "validate-no-issue-description": "சிபிஎல், அடுத்து அழுத்தவும் இல்லை.",
-        "dry-run-description": "இது உலர்ந்த ரன் மற்றும் நீங்கள் அடுத்ததாக அழுத்தி இறக்குமதியைச் செய்தால் என்ன நடக்கும் என்பதைக் காட்டுகிறது. அனைத்து தோல்விகளும் இறக்குமதி செய்யப்படாது.",
-        "prev": "முந்தைய",
-        "import": "இறக்குமதி",
-        "restart": "மறுதொடக்கம்",
-        "next": "அடுத்தது",
-        "import-step": "CBL களை இறக்குமதி செய்யுங்கள்",
-        "validate-cbl-step": "சிபிஎல் சரிபார்க்கவும்",
-        "dry-run-step": "உலர் ரன்",
-        "final-import-step": "இறுதி படி",
-        "comicvine-parsing-label": "காமிக் வைன் சீரிச் பொருத்தத்தைப் பயன்படுத்தவும்",
-        "cbl-repo": "சமூகத்தில் பல வாசிப்பு பட்டியல்களை நீங்கள் காணலாம் <a href = 'https: //github.com/dieseltech/cbl-readinglists' target = '_ வெற்று' rel = 'noopener norferrer'> களஞ்சி </a>."
+        "title": "சிபிஎல் இறக்குமதி"
     },
     "pdf-reader": {
         "loading-message": "ஏற்றுதல்...",
@@ -1994,11 +2256,17 @@
         "asin-label": "அசின்",
         "asin-tooltip": "https://www.amazon.com/stores/J.K.-Rowling/author/{ASIN}",
         "description-label": "விவரம்",
-        "required-field": "{{சரிபார்ப்புகள்.",
+        "required-field": "{{validation.required-field}}",
         "cover-image-description": "{{edit-series-modal.cover-image-description}}",
         "cover-image-description-extra": "மாற்றாக நீங்கள் கிடைத்தால் கவர்ச்டிபியிலிருந்து ஒரு அட்டையை பதிவிறக்கம் செய்யலாம்.",
         "save": "{{common.save}}",
-        "download-coversdb": "CoverSDB இலிருந்து பதிவிறக்கவும்"
+        "download-coversdb": "CoverSDB இலிருந்து பதிவிறக்கவும்",
+        "mal-tooltip-character": "https://myanimelist.net/character/{MalId}/",
+        "anilist-tooltip-character": "https://anilist.co/character/{AniListId}/",
+        "invalid-amazon-code": "ASIN B0 அல்லது BT உடன் தொடங்க வேண்டும்",
+        "aliases-label": "மாற்றுப்பெயர்களைத் திருத்து",
+        "alias-overlap": "இந்த மாற்றுப்பெயர் ஏற்கனவே மற்றொரு நபரை சுட்டிக்காட்டுகிறது அல்லது இந்த நபரின் பெயர், அவர்களை ஒன்றிணைப்பதைக் கவனியுங்கள்.",
+        "aliases-tooltip": "ஒரு நபரின் மாற்றுப்பெயருடன் ஒரு தொடர் குறியிடப்பட்டால், புதிய நபரை உருவாக்குவதற்குப் பதிலாக அந்த நபர் நியமிக்கப்படுவார். மாற்றுப்பெயரை நீக்கும் போது, மாற்றத்தை எடுக்க தொடரை மீண்டும் வருடு செய்ய வேண்டும்."
     },
     "day-breakdown": {
         "title": "நாள் முறிவு",
@@ -2037,7 +2305,15 @@
         "people-count": "{{num}} மக்கள்",
         "tags": "{{metadata-fields.tags-title}}}",
         "people": "மக்கள்",
-        "genres": "{{metadata-fields.genres-title}}"
+        "genres": "{{metadata-fields.genres-title}}",
+        "stats-title": "ஆராயுங்கள்",
+        "users": "பயனர்கள்",
+        "readers": "வாசகர்கள்",
+        "popular-decades-title": "பிரபலமான பத்தாண்டுகள்",
+        "popular-reading-lists-title": "அதிகம் படித்த வாசிப்பு பட்டியல்கள்",
+        "popular-genres-title": "பிரபலமான வகைகள்",
+        "popular-tags-title": "பிரபலமான குறிச்சொற்கள்",
+        "popular-person-title": "பிரபலமான {{role}}"
     },
     "errors": {
         "series-doesnt-exist": "இந்த தொடர் இனி இல்லை",
@@ -2054,7 +2330,29 @@
         "invalid-password-reset-url": "கடவுச்சொல் முகவரி ஐ மீட்டமை",
         "delete-theme-in-use": "கருப்பொருள் தற்போது குறைந்தது ஒரு பயனரால் பயன்பாட்டில் உள்ளது, நீக்க முடியாது",
         "theme-manual-upload": "கையேடு பதிவேற்றத்திலிருந்து கருப்பொருள் உருவாக்கும் சிக்கல் இருந்தது",
-        "theme-already-in-use": "கருப்பொருள் ஏற்கனவே அந்த பெயரால் உள்ளது"
+        "theme-already-in-use": "கருப்பொருள் ஏற்கனவே அந்த பெயரால் உள்ளது",
+        "delete-font-in-use": "எழுத்துரு தற்போது குறைந்தபட்சம் ஒரு பயனரால் பயன்பாட்டில் உள்ளது, நீக்க முடியாது",
+        "font-manual-upload": "கைமுறைப் பதிவேற்றத்திலிருந்து எழுத்துருவை உருவாக்குவதில் சிக்கல்",
+        "font-already-in-use": "அந்த பெயரில் எழுத்துரு ஏற்கனவே உள்ளது",
+        "upload-too-large": "கோப்பு பதிவேற்ற முடியாத அளவுக்கு பெரிதாக உள்ளது, சிறிய படத்தைத் தேர்ந்தெடுத்து மீண்டும் முயற்சிக்கவும்.",
+        "invalid-form": "நீங்கள் சமர்ப்பிக்க முயற்சிக்கும் படிவத்தில் பிழைகள் உள்ளன",
+        "import-fields": {
+            "non-unique-age-ratings": "அகவை மதிப்பீடு மேப்பிங் விசைகள் தனிப்பட்டவை அல்ல, உங்கள் இறக்குமதி கோப்பை சரிசெய்யவும்",
+            "non-unique-fields": "புல மேப்பிங்கில் தனிப்பட்ட அடையாளம் இல்லை, உங்கள் இறக்குமதி கோப்பை சரிசெய்யவும்"
+        },
+        "oidc": {
+            "missing-external-id": "OIDC சரியான அடையாளங்காட்டியை வழங்கவில்லை",
+            "missing-email": "OIDC சரியான மின்னஞ்சலை அனுப்பவில்லை",
+            "email-not-verified": "OIDC வழியாக உள்நுழைய அனுமதிக்க உங்கள் மின்னஞ்சல் சரிபார்க்கப்பட வேண்டும்",
+            "no-account": "பொருந்தும் கணக்கு எதுவும் இல்லை",
+            "disabled-account": "இந்தக் கணக்கு முடக்கப்பட்டுள்ளது, நிர்வாகியைத் தொடர்பு கொள்ளவும்",
+            "creating-user": "புதிய பயனரை உருவாக்க முடியவில்லை, நிர்வாகியைத் தொடர்பு கொள்ளவும்",
+            "role-not-assigned": "இந்தப் பயன்பாட்டை அணுகுவதற்குத் தேவையான பாத்திரங்கள் உங்களிடம் இல்லை",
+            "failed-to-update-email": "மின்னஞ்சலைப் புதுப்பிக்க முடியவில்லை",
+            "failed-to-update-username": "பயனர்பெயரை புதுப்பிக்க முடியவில்லை",
+            "email-in-use": "மின்னஞ்சல் ஏற்கனவே மற்றொரு கணக்கின் மூலம் பயன்பாட்டில் உள்ளது",
+            "syncing-user": "OIDC இலிருந்து உங்கள் கணக்கை ஒத்திசைக்க முடியவில்லை, நிர்வாகியைத் தொடர்பு கொள்ளவும்"
+        }
     },
     "metadata-builder": {
         "or": "பின்வருவனவற்றில் ஏதேனும் பொருந்தவும்",
@@ -2063,13 +2361,15 @@
         "remove-rule": "வரிசையை அகற்று"
     },
     "customize-dashboard-modal": {
-        "title-smart-filters": "அறிவுள்ள வடிப்பான்கள்"
+        "title-smart-filters": "{{tabs.smart-filters-tab}}",
+        "description": "மறுவரிசைப்படுத்துதல், தெரிவுநிலையை மாற்றுதல் மற்றும் அறிவுள்ள ஃபில்டர்கள்/வெளிப்புற ஆதாரங்களை உங்கள் முகப்புப் பக்கம் அல்லது பக்கவாட்டில் பிணைப்பதன் மூலம் கவிதாவின் பல்வேறு அம்சங்களைத் தனிப்பயனாக்கலாம்."
     },
     "customize-dashboard-streams": {
         "no-data": "அனைத்து அறிவுள்ள வடிப்பான்களும் டாச்போர்டில் சேர்க்கப்பட்டுள்ளன அல்லது எதுவும் இதுவரை உருவாக்கப்படவில்லை.",
         "add": "{{common.add}}}",
         "filter": "{{common.filter}}}",
-        "clear": "{{common.clear}}}"
+        "clear": "{{common.clear}}}",
+        "smart-filter-title": "{{tabs.smart-filters-tab}}"
     },
     "customize-sidenav-streams": {
         "no-data": "அனைத்து அறிவுள்ள வடிப்பான்களும் பக்க NAV இல் சேர்க்கப்பட்டுள்ளன அல்லது இதுவரை உருவாக்கப்படவில்லை.",
@@ -2077,8 +2377,8 @@
         "add": "{{common.add}}}",
         "filter": "{{common.filter}}}",
         "clear": "{{common.clear}}}",
-        "smart-filters-title": "அறிவுள்ள வடிப்பான்கள்",
-        "external-sources-title": "{{தனிப்பயனாக்கு-டாச்போர்டு-மோடல். எக்ச்டெர்னல்-மூலங்கள்}}}",
+        "smart-filters-title": "{{tabs.smart-filters-tab}}",
+        "external-sources-title": "{{tabs.external-sources-tab}}",
         "reorder-when-filter-present": "வடிகட்டி இருக்கும்போது இழுவை மற்றும் துளி வழியாக உருப்படிகளை மறுவடிவமைக்க முடியாது. {{தனிப்பயனாக்கு-SIDENAV-TREAMS.ORDER-NUMBERS-LABEL} bed ஐப் பயன்படுத்தவும்",
         "order-numbers-label": "{{வாசிப்பு-பட்டியல்-டி-ஆர்டர்-எண்கள்-லேபல்}}",
         "bulk-mode-label": "மொத்த பயன்முறை"
@@ -2096,7 +2396,16 @@
         "no-data": "அறிவுள்ள வடிப்பான்கள் எதுவும் உருவாக்கப்படவில்லை",
         "filter": "{{common.filter}}}",
         "clear": "{{common.clear}}}",
-        "errored": "வடிகட்டியில் ஒரு குறியாக்க பிழை உள்ளது. நீங்கள் அதை மீண்டும் உருவாக்க வேண்டும்."
+        "errored": "வடிகட்டியில் ஒரு குறியாக்க பிழை உள்ளது. நீங்கள் அதை மீண்டும் உருவாக்க வேண்டும்.",
+        "cancel": "{{common.cancel}}",
+        "close": "{{common.close}}",
+        "edit": "{{common.edit}}",
+        "save": "{{common.save}}",
+        "edit-smart-filter": "திருத்து {{name}}",
+        "name-label": "பெயர்",
+        "required-field": "அறிவுள்ள வடிப்பான்களுக்கு ஒரு பெயர் தேவை",
+        "filter-name-unique": "அறிவுள்ள ஃபில்டர் பெயர்கள் தனிப்பட்டதாக இருக்க வேண்டும்",
+        "no-content": "இந்த அறிவுள்ள ஃபில்டருக்கு டாச்போர்டில் முடிவுகள் இல்லை"
     },
     "edit-external-source-item": {
         "not-unique": "இந்த ஓச்டுடன் வெளிப்புற மூலங்கள் உள்ளன. உங்களிடம் நகல்கள் இல்லை என்பதை உறுதிப்படுத்தவும்",
@@ -2114,7 +2423,9 @@
     "read-time-pipe": {
         "less-than-hour": "<1 மணி நேரம்",
         "hour": "மணி",
-        "hours": "மணி"
+        "hours": "மணி",
+        "hour-left": "Hour இடது",
+        "hours-left": "இன்னும் மணிநேரம் உள்ளது"
     },
     "version-update-modal": {
         "close": "{{common.close}}",
@@ -2129,6 +2440,995 @@
             "title": "புதிய புதுப்பிப்பு கிடைக்கிறது!",
             "help": "புதுப்பிப்பது எப்படி",
             "download": "பதிவிறக்கம்"
+        },
+        "new-version": {
+            "title": "கவிதா புதுப்பிக்கப்பட்டாள்!",
+            "description": "கவிதாவின் புதிய பதிப்பு கிடைக்கிறது. புதுப்பிப்பு பெறுநர் update.",
+            "refresh": "புதுப்பிப்பு"
         }
+    },
+    "title": {
+        "reading-list": "படித்தல் Lists",
+        "home": "வீடு",
+        "bookmarks": "புக்மார்க்குகள்",
+        "collections": "தொகுப்புகள்",
+        "browse-genres": "வகைகளை உலாவுக",
+        "browse-tags": "குறிச்சொற்களை உலாவுக",
+        "want-to-read": "படிக்க வேண்டும்",
+        "reading-lists": "வாசிப்பு பட்டியல்கள்",
+        "settings": "அமைப்புகள்",
+        "all-series": "அனைத்து தொடர்",
+        "profile": "{{username}} இன் சுயவிவரம்"
+    },
+    "oidc": {
+        "title": "OIDC திரும்ப அழைக்கவும்",
+        "login": "உள்நுழைவுத் திரைக்குத் திரும்பு",
+        "error-loading-info": "OIDC தகவலை ஏற்றுவதில் பிழை ஏற்பட்டது, உங்கள் நிர்வாகியைத் தொடர்புகொள்ளவும்",
+        "timeout": "OIDC தீர்மானம் காலாவதியானது அல்லது பிழை ஏற்பட்டது"
+    },
+    "manage-oidc-connect": {
+        "save": "{{common.save}}",
+        "reset-label": "ஐடிகளை மீட்டமைக்கவும்",
+        "reset-tooltip": "எல்லா பயனர்களிடமிருந்தும் வெளிப்புற ஐடிகளை மீட்டமைக்கவும், கவிதாவில் உள்ள பயனர்களுக்கும் உங்கள் அடையாள வழங்குநருக்கும் இடையிலான இணைப்புகளை மீட்டமைக்க இதைப் பயன்படுத்தவும்",
+        "reset-confirm": "எல்லா பயனர்களிடமிருந்தும் வெளிப்புற ஐடிகளை மீட்டமைக்க விரும்புகிறீர்களா?",
+        "reset-success": "அனைத்து பயனர்களுக்கும் வெளிப்புற ஐடிகள் மீட்டமைக்கப்பட்டு, இணைப்பிற்கு மீண்டும் அங்கீகரிக்கவும்",
+        "save-success": "உங்கள் OIDC அமைப்புகள் வெற்றிகரமாக புதுப்பிக்கப்பட்டன",
+        "notice": "கவனிக்கவும்",
+        "restart-required": "வழங்குநர் அல்லது மேம்பட்ட அமைப்புகளை மாற்றுவதற்கு கவிதாவை கைமுறையாக மறுதொடக்கம் செய்ய வேண்டும்.",
+        "auto-save-required": "முக்கியமான அமைப்புகளை மாற்றியுள்ளீர்கள், அவற்றைத் தொடர தானாகச் சேமிக்கவும்",
+        "provider-title": "வழங்குநர்",
+        "provider-tooltip": "வழங்குநர் அமைப்புகளுக்கு நீங்கள் சேமி என்பதைக் சொடுக்கு செய்ய வேண்டும். கவிதா ஒரு ரகசிய கிளையண்டாக உள்ளமைக்கப்பட வேண்டும் மேலும் ஒரு வழிமாற்று முகவரி தேவை. மேலும் விவரங்களுக்கு <a href='https://wiki.kavitareader.com/guides/admin-settings/open-id-connect/' target='_blank' rel='noreferrer noopener'>விக்கியைப்</a> பார்க்கவும்.",
+        "behavior-title": "நடத்தை",
+        "other-field-required": "{{validation.other-field-required}}",
+        "other-field-invalid": "{{validation.other-field-invalid}}",
+        "invalid-uri": "{{validation.invalid-uri}}",
+        "tls-required": "OIDC வழங்குநர் tls (https) பயன்படுத்த வேண்டும்",
+        "manual-save-label": "வழங்குநரின் அமைப்புகளை மாற்ற, கைமுறையாகச் சேமிக்க வேண்டும்",
+        "authority-label": "அதிகாரம்",
+        "authority-tooltip": "உங்கள் OIDC வழங்குநருக்கான URL, .well-known/openid-configuration பாதையை சேர்க்க வேண்டாம்",
+        "client-id-label": "வாடிக்கையாளர் அடையாளம்",
+        "client-id-tooltip": "உங்கள் OIDC வழங்குநரில் ClientID அமைக்கப்பட்டுள்ளது, எதுவாகவும் இருக்கலாம்",
+        "secret-label": "வாடிக்கையாளர் மறைபொருள்",
+        "secret-tooltip": "உங்கள் OIDC வழங்குநரால் உருவாக்கப்பட்ட மறைபொருள், அமைக்கப்பட்ட பிறகு காட்டப்படாது",
+        "provision-accounts-label": "ஒதுக்கீடு கணக்குகள்",
+        "provision-accounts-tooltip": "OIDC மூலம் உள்நுழையும்போது, ஏற்கனவே உள்ள கணக்குடன் பொருத்த முடியாவிட்டால், புதிய கணக்கைத் தானாக உருவாக்கவும்",
+        "require-verified-email-label": "சரிபார்க்கப்பட்ட மின்னஞ்சல்கள் தேவை",
+        "require-verified-email-tooltip": "புதிய கணக்கை உருவாக்கும் போது அல்லது ஏற்கனவே உள்ள கணக்குடன் பொருந்தும்போது மின்னஞ்சல் சரிபார்ப்பு தேவைப்படுகிறது. புதிதாக உருவாக்கப்பட்ட கணக்கில் சரிபார்க்கப்பட்ட மின்னஞ்சல் இருந்தால், அது கவிதாவின் பக்கத்தில் தானாகவே சரிபார்க்கப்படும்.",
+        "sync-user-settings-label": "OIDC பாத்திரங்களுடன் பயனர் அமைப்புகளை ஒத்திசைக்கவும்",
+        "sync-user-settings-tooltip": "OIDC மூலம் உருவாக்கப்பட்ட பயனர்கள், பாத்திரங்கள், நூலக அணுகல் மற்றும் அகவை மதிப்பீடு உள்ளிட்ட அடையாள வழங்குநரால் முழுமையாக நிர்வகிக்கப்படுவார்கள். இந்த விருப்பம் முடக்கப்பட்டால், கணக்கை உருவாக்கிய பிறகு பயனர்கள் எந்த உள்ளடக்கத்தையும் அணுக முடியாது. மேலும் விவரங்களுக்கு ஆவணங்களைப் பார்க்கவும்.",
+        "auto-login-label": "தானியங்கு உள்நுழைவு",
+        "auto-login-tooltip": "உள்நுழைவுத் திரையைத் திறக்கும்போது OIDC வழங்குநருக்குத் தானாகத் திருப்பிவிடப்படும்",
+        "disable-password-authentication-label": "கடவுச்சொல் அங்கீகாரத்தை முடக்கு",
+        "disable-password-authentication-tooltip": "நிர்வாகப் பொறுப்பைக் கொண்ட பயனர்கள் இந்தக் கட்டுப்பாட்டைத் தவிர்க்கலாம்",
+        "provider-name-label": "வழங்குநர் பெயர்",
+        "provider-name-tooltip": "உள்நுழைவுத் திரையில் பெயர் காட்டப்பட்டுள்ளது",
+        "defaults-title": "இயல்புநிலைகள்",
+        "defaults-requirement": "பயனர் OIDC வழியாகப் பதிவு செய்யும் போது, ஒத்திசைவு பயனர் அமைப்புகள் முடக்கப்பட்டிருக்கும் போது பின்வரும் அமைப்புகள் பயன்படுத்தப்படும்",
+        "default-include-unknowns-label": "தெரியாதவற்றைச் சேர்க்கவும்",
+        "default-include-unknowns-tooltip": "அறியப்படாத அகவை மதிப்பீடுகளைச் சேர்க்கவும்",
+        "default-age-restriction-label": "அகவை மதிப்பீடு",
+        "default-age-restriction-tooltip": "புதிய பயனர்களுக்குக் காட்டப்படும் அதிகபட்ச அகவை மதிப்பீடு",
+        "no-restriction": "{{restriction-selector.no-restriction}}",
+        "default-roles-label": "{{common.roles}}",
+        "default-libraries-label": "{{common.libraries}}",
+        "advanced-title": "மேம்பட்ட அமைப்புகள்",
+        "advanced-tooltip": "இந்த விருப்பங்களின் தாக்கத்தை நீங்கள் புரிந்து கொண்டால் மட்டுமே மாற்றவும்.",
+        "roles-prefix-label": "பாத்திரங்களின் முன்னொட்டு",
+        "roles-prefix-tooltip": "இந்த முன்னொட்டுடன் தொடங்கும் பாத்திரங்களை மட்டுமே கவிதா கருத்தில் கொள்வார்.",
+        "roles-claim-label": "பாத்திரங்கள் கோருகின்றன",
+        "roles-claim-tooltip": "பாத்திரங்களைப் பிரித்தெடுக்க கவிதா பயன்படுத்தும் உரிமைகோரல். இயல்புநிலையைப் பயன்படுத்த, காலியாக விடவும்.",
+        "custom-scopes-label": "தனிப்பயன் நோக்கங்கள்",
+        "custom-scopes-tooltip": "உள்நுழைவின் போது உங்கள் OIDC வழங்குநரிடமிருந்து கோருவதற்கான கூடுதல் நோக்கங்கள். பல நோக்கங்களை காற்புள்ளிகளால் பிரிக்கவும். தவறான மதிப்புகள் உள்நுழைவைத் தடுக்கலாம்."
+    },
+    "manage-auth-keys": {
+        "auth-keys-title": "அங்கீகார விசைகளை நிர்வகிக்கவும்",
+        "name-label": "பெயர்",
+        "key-label": "முக்கிய",
+        "expires-label": "காலாவதியாகும்",
+        "last-accessed-label": "கடைசியாக அணுகப்பட்டது",
+        "actions-label": "செயல்கள்",
+        "rotate": "சுழற்று",
+        "delete": "{{common.delete}}",
+        "clients-opds-url-label": "{{user-preferences.clients-opds-url-label}}",
+        "clients-opds-alert": "{{user-preferences.clients-opds-alert}}",
+        "clients-opds-description": "{{user-preferences.clients-opds-description}}",
+        "clients-opds-url-tooltip": "{{user-preferences.clients-opds-url-tooltip}}",
+        "opds": "OPDS",
+        "image-only": "படங்கள்",
+        "add-auth-key": "புதிய",
+        "description": "அங்கீகார விசை என்பது கடவுச்சொல் போன்றது. அதைச் சுழற்றுவது, ஏற்கனவே உள்ள எந்த வாடிக்கையாளர்களையும் செல்லாததாக்கும்.",
+        "copy-key": "{{common.copy}}"
+    },
+    "create-auth-key": {
+        "create-title": "அங்கீகார விசையை உருவாக்கவும்",
+        "rotate-title": "அங்கீகார விசையை சுழற்று",
+        "name-label": "பெயர்",
+        "key-length-label": "முக்கிய நீளம்",
+        "expiration-label": "காலாவதியாகும்",
+        "required-field": "{{validations.required-field}}",
+        "total-key-length": "மொத்த விசை நீளம்: {{length}}",
+        "cancel": "{{common.cancel}}",
+        "close": "{{common.close}}",
+        "save": "{{common.save}}",
+        "never": "ஒருபோதும்"
+    },
+    "identity-provider-pipe": {
+        "kavita": "கவிதா",
+        "oidc": "OpenID இணைப்பு"
+    },
+    "reviews": {
+        "user-reviews-local": "உள்ளக மதிப்புரைகள்",
+        "user-reviews-plus": "வெளிப்புற விமர்சனங்கள்"
+    },
+    "review-modal": {
+        "title": "மதிப்பாய்வைத் திருத்து",
+        "review-label": "சீராய்வு",
+        "close": "{{common.close}}",
+        "save": "{{common.save}}",
+        "delete": "{{common.delete}}",
+        "min-length": "மதிப்பாய்வில் குறைந்தது {{count}} எழுத்துகள் இருக்க வேண்டும்",
+        "required": "{{validation.required-field}}"
+    },
+    "review-list-item": {
+        "by-label": "மூலம்",
+        "created-alt": "உருவாக்கப்பட்டது"
+    },
+    "reread-modal": {
+        "title": "மீண்டும் படிக்கவும்",
+        "description-full-read": "நீங்கள் ஏற்கனவே {{name}} முடித்துவிட்டீர்கள்! நீங்கள் மீண்டும் தொடங்க விரும்புகிறீர்களா?",
+        "description-time-passed": "நீங்கள் கடைசியாக {{days}} ஐப் படித்து {{name}} நாட்கள் ஆகின்றன, புதுப்பித்தல் வேண்டுமா?",
+        "continue": "நீங்கள் விட்ட இடத்திலிருந்து எடுங்கள்",
+        "reread": "மீண்டும் தொடங்குங்கள்",
+        "cancel": "{{common.cancel}}",
+        "read-incognito": "மறைநிலையில் படிக்கவும்"
+    },
+    "multi-check-box-form": {
+        "select-all": "அனைத்தையும் தெரிவுசெய்",
+        "deselect-all": "அனைத்தையும் தேர்வுநீக்கவும்",
+        "no-data": "{{typeahead.no-data}}"
+    },
+    "font-manager": {
+        "description": "கவிதாவின் எபப் ரீடர் சில பில்ட்-இன் எழுத்துருக்களுடன் வருகிறது, உங்கள் சொந்த எழுத்துருக்களை இங்கே சேர்க்கவும். கோப்பைப் பதிவேற்றவும் அல்லது Google எழுத்துருக்கள் முகவரி ஐப் பயன்படுத்தவும். மேலும் தகவலுக்கு <a href='{{wikiLink}}' target='_blank' rel='noreferrer noopener'>விக்கியைப்</a> பார்க்கவும்.",
+        "add": "{{common.add}}",
+        "drag-n-drop": "{{cover-image-chooser.drag-n-drop}}",
+        "upload": "{{cover-image-chooser.upload}}",
+        "upload-continued": "ஒரு எழுத்துரு கோப்பு",
+        "preview-default": "கோப்பு அல்லது Google எழுத்துரு முகவரி வழியாக உங்கள் சொந்த எழுத்துருவைப் பதிவேற்றவும்",
+        "delete": "{{common.delete}}",
+        "no-preview": "இந்த எழுத்துருவை முன்னோட்டமிட முடியாது. இது புத்தகத்திலிருந்து இயல்புநிலை பாணியை எடுக்கும்.",
+        "brown-fox": "விரைவான பழுப்பு நரி சோம்பேறி நாய் மீது குதிக்கிறது",
+        "filter-system-fonts-label": "கணினி எழுத்துருக்களை வடிகட்டவும்"
+    },
+    "server-devices": {
+        "client-devices-header": "{{manage-devices.client-devices-header}}",
+        "client-devices-this-month-header": "இந்த மாதம் வாங்கி சாதனங்கள்",
+        "client-devices-mobile-vs-pc-header": "இந்த மாதம் மொபைல் vs PC",
+        "no-data": "{{common.no-data}}"
+    },
+    "client-device-card": {
+        "auth-type-label": "அங்கீகார வகை",
+        "browser-label": "உலாவி",
+        "platform-label": "{{manage-devices.platform-label}}",
+        "screen-label": "திரை",
+        "version-label": "ஆப் பதிப்பு",
+        "first-seen-label": "முதலில் பார்த்தது",
+        "last-seen-label": "கடைசியாக பார்த்தது",
+        "active": "செயலில்",
+        "save": "{{common.save}}",
+        "local": "உள்ளக"
+    },
+    "most-active-users": {
+        "title": "மிகவும் சுறுசுறுப்பான வாசகர்கள்",
+        "no-data": "குறிப்பிட்ட காலத்திற்கு வாசிப்பு செயல்பாடு இல்லை"
+    },
+    "active-user-card": {
+        "total-hours": "மொத்தம் {{duration}}",
+        "comics-count": "{{count}} காமிக்ச்",
+        "books-count": "{{count}} புத்தகங்கள்"
+    },
+    "time-frame-label": {
+        "overall": "ஒட்டுமொத்த",
+        "week": "இந்த வாரம்",
+        "month": "இந்த மாதம்",
+        "year": "இந்த ஆண்டு"
+    },
+    "duration-pipe": {
+        "seconds": "{{num}} வினாடிகள்",
+        "minutes": "{{num}} நிமிடங்கள்",
+        "hours": "{{num}} மணிநேரம்",
+        "combo": "{{hour}}ம {{min}}நி"
+    },
+    "library-type-subtitle-pipe": {
+        "book": "பொது நோக்க புத்தக நூலகம்.",
+        "comic": "காமிக் லைப்ரரி, வால்யூம் க்ரூப்பிங் மற்றும் டிரேட் பேப்பர்பேக்குகளை ஒரே தொடரில் ஆதரிக்கிறது. ஒரே தொடரில் பல ரன்களை ஆதரிக்காது.",
+        "manga": "வால்யூம் க்ரூப்பிங் ஆதரவுடன் சப்பானிய காமிக்ச். சில தளர்வான பட கட்டமைப்புகளையும் கையாளுகிறது.",
+        "comicVine": "சிறப்புக் கருவிக்கான ஒருங்கிணைப்புடன் காமிக் வைன் மெட்டாடேட்டாவை அடிப்படையாகக் கொண்ட கடுமையான காமிக் செயலாக்கம்.",
+        "image": "வரையறுக்கப்பட்ட ஆதரவுடன் தளர்வான படக் கோப்புகள். பெரும்பாலும் விக்கி ஆவணங்களைப் பின்பற்ற வேண்டும்.",
+        "lightNovel": "ஒளி நாவல்களுக்கு உகந்ததாக சிறப்பான கையாளுதலுடன் புத்தக நூலகம்"
+    },
+    "changelog-update-item": {
+        "download": "பதிவிறக்கம்",
+        "added": "சேர்க்கப்பட்டது",
+        "changed": "மாற்றப்பட்டது",
+        "fixed": "சரி செய்யப்பட்டது",
+        "developer": "உருவாக்குநர்",
+        "theme": "கருப்பொருள்",
+        "removed": "அகற்றப்பட்டது",
+        "api": "பநிஇ",
+        "published-label": "வெளியிடப்பட்டது: ",
+        "installed": "{{changelog.installed}}",
+        "feature-requests": "அம்ச கோரிக்கைகள்",
+        "known-issues": "Known Issues"
+    },
+    "manage-matched-metadata": {
+        "title": "பொருந்திய மேனிலை தரவு",
+        "description": "வெளிப்புற மெட்டாடேட்டாவுடன் பொருந்தக்கூடிய பொருந்தக்கூடிய அனைத்து தொடர்களும் இங்கே உள்ளன. தினமும் 24 மணிநேரத்திற்கு 50 தொடர்கள், தொடர் மெட்டாடேட்டாவை கவிதா முன்கூட்டியே பெறுவார் அல்லது புதுப்பிப்பார்.",
+        "status-header": "நிலை",
+        "series-name-header": "தொடர்",
+        "library-name-header": "நூலகம்",
+        "valid-until-header": "அடுத்த புதுப்பிப்பு",
+        "actions-header": "செயல்கள்",
+        "library-type": "நூலக வகை",
+        "matched-state-label": "போட்டி நிலை",
+        "matched-status-label": "பொருந்தியது",
+        "unmatched-status-label": "பொருந்தவில்லை",
+        "blacklist-status-label": "கைமுறை பொருத்தம் தேவை",
+        "dont-match-status-label": "{{டோன்ட்-மேட்ச்-லேபிள்}}",
+        "all-status-label": "அனைத்தும்",
+        "dont-match-label": "பொருந்தாதே",
+        "no-data": "{{common.no-data}}",
+        "match-alt": "பொருத்தம் {{seriesName}}"
+    },
+    "manage-user-tokens": {
+        "description": "ச்க்ரோபிளிங் டோக்கன்களை வைத்திருக்கும் பயனர்கள் அவ்வப்போது புதுப்பிக்க வேண்டியிருக்கும். மின்னஞ்சல் அமைக்கப்பட்டு, சரியான மின்னஞ்சலை வைத்திருந்தால் கவிதா தானாகவே அவர்களுக்கு மின்னஞ்சல் அனுப்புவார்.",
+        "username-header": "பயனர் பெயர்",
+        "anilist-header": "அனிலிச்ட்",
+        "mal-header": "மால்",
+        "token-set-label": "கிள்ளாக்கு செட்",
+        "no-data": "{{common.no-data}}",
+        "expires-label": "காலாவதியாகும்: {{date}}"
+    },
+    "manage-metadata-settings": {
+        "k+-warning": "கீழே உள்ள அமைப்புகள் K+ பக்கத்தில் காணப்படும் அமைப்புகளுடன் பகிரப்படுகின்றன. நீங்கள் எந்த இடத்திலும் அவற்றை மாற்றலாம்",
+        "export-settings": "ஏற்றுமதி",
+        "export-tooltip": "உங்கள் தடுப்புப்பட்டியல் மற்றும் அனுமதிப்பட்டியல், அகவை மதிப்பீடு மற்றும் புல வரைபடங்களை ஏற்றுமதி செய்யவும்",
+        "export-file-name": "கவிதா மேனிலை தரவு அமைப்புகள் Export.json",
+        "import-settings": "இறக்குமதி",
+        "import-tooltip": "உங்கள் அல்லது வேறொருவரின் அமைப்புகளை இறக்குமதி செய்யவும்",
+        "description": "Kavita+ ஆனது தரவுத்தளத்தில் சில வரையறுக்கப்பட்ட மெட்டாடேட்டாவைப் பதிவிறக்கி எழுதும் திறனைக் கொண்டுள்ளது. இந்த பக்கம் நீங்கள் நோக்கத்தில் உள்ளதை மாற்ற அனுமதிக்கிறது.",
+        "enabled-label": "மேனிலை தரவு பதிவிறக்கத்தை இயக்கு",
+        "enabled-tooltip": "மெட்டாடேட்டாவைப் பதிவிறக்கி அதன் தரவுத்தளத்தில் எழுத கவிதாவை அனுமதிக்கவும்.",
+        "summary-label": "சுருக்கம்",
+        "summary-tooltip": "புலம் திறக்கப்படும் போது சுருக்கத்தை எழுத அனுமதிக்கவும்.",
+        "localized-name-label": "உள்ளூர்மயமாக்கப்பட்ட தொடர் பெயர்",
+        "localized-name-tooltip": "புலம் திறக்கப்படும் போது உள்ளூர்மயமாக்கப்பட்ட பெயரை எழுத அனுமதிக்கவும். கவிதா சிறந்த யூகத்தைச் செய்ய முயற்சிப்பாள்.",
+        "derive-publication-status-label": "வெளியீட்டு நிலை",
+        "derive-publication-status-tooltip": "மொத்த அத்தியாயம்/தொகுதி எண்ணிக்கையிலிருந்து வெளியீட்டு நிலையைப் பெற அனுமதிக்கவும்.",
+        "enable-relations-label": "உறவுகள்",
+        "enable-relations-tooltip": "தொடர் உறவுகளை <b>சேர்க்க</b> அனுமதிக்கவும்.",
+        "enable-people-label": "மக்கள்",
+        "enable-people-tooltip": "நபர்களை (பாத்திரங்கள், எழுத்தாளர்கள் போன்றவை) <b>சேர்க்க</b> அனுமதிக்கவும். அனைத்து நபர்களும் படங்கள் அடங்கும்.",
+        "enable-cover-image-label": "அட்டைப் படம்",
+        "enable-cover-image-tooltip": "தொடருக்கான அட்டைப் படத்தை எழுத கவிதாவை அனுமதிக்கவும்",
+        "enable-start-date-label": "தொடக்க தேதி",
+        "enable-start-date-tooltip": "Allow தொடங்கு திகதி of Series பெறுநர் be written பெறுநர் the Series",
+        "enable-chapter-title-label": "தலைப்பு",
+        "enable-chapter-title-tooltip": "அத்தியாயம்/வெளியீட்டின் தலைப்பை எழுத அனுமதிக்கவும்",
+        "enable-chapter-summary-label": "{{manage-metadata-settings.summary-label}}",
+        "enable-chapter-summary-tooltip": "{{manage-metadata-settings.summary-tooltip}}",
+        "enable-chapter-release-date-label": "வெளியீட்டு தேதி",
+        "enable-chapter-release-date-tooltip": "அத்தியாயம்/வெளியீட்டின் வெளியீட்டு தேதியை எழுத அனுமதிக்கவும்",
+        "enable-chapter-publisher-label": "பதிப்பாளர்",
+        "enable-chapter-publisher-tooltip": "அத்தியாயம்/வெளியீட்டை எழுதுவதற்கு வெளியீட்டாளரை அனுமதிக்கவும்",
+        "enable-chapter-cover-label": "அத்தியாயம் கவர்",
+        "enable-chapter-cover-tooltip": "அத்தியாயம்/வெளியீட்டின் அட்டையை அமைக்க அனுமதிக்கவும்",
+        "enable-genres-label": "வகைகள்",
+        "enable-genres-tooltip": "தொடர் வகைகளை எழுத அனுமதிக்கவும்.",
+        "enable-tags-label": "குறிச்சொற்கள்",
+        "enable-tags-tooltip": "தொடர் குறிச்சொற்களை எழுத அனுமதிக்கவும்.",
+        "enable-extended-metadata-processing-label": "விரிவாக்கப்பட்ட மேனிலை தரவு செயலாக்கம்",
+        "enable-extended-metadata-processing-tooltip": "காமிக்இன்ஃபோவில் இருந்து பெறப்பட்ட வகைகள் மற்றும் குறிச்சொற்கள் அல்லது இடைமுகம் மூலம் சேர்க்கப்பட்டிருந்தால், தடுப்புப்பட்டியல், அனுமதிப்பட்டியல், அகவை மதிப்பீடு மேப்பிங் மற்றும் புல மேப்பிங்களைப் பயன்படுத்தி செயலாக்கப்பட வேண்டும்.",
+        "blacklist-label": "தடுப்புப்பட்டியல் வகைகள்/குறிச்சொற்கள்",
+        "blacklist-tooltip": "இந்த பட்டியலில் உள்ள அனைத்தும் வகை மற்றும் குறிச்சொல் செயலாக்கம் இரண்டிலிருந்தும் அகற்றப்படும். நீங்கள் எழுத விரும்பாத</b> வகைகள்/குறிச்சொற்களைச் சேர்க்க இது ஒரு இடம். அவை காற்புள்ளியால் பிரிக்கப்பட்டவை என்பதை உறுதிப்படுத்தவும்.",
+        "whitelist-label": "அனுமதிப்பட்டியல் குறிச்சொற்கள்",
+        "whitelist-tooltip": "இந்தப் பட்டியலில் உள்ள ஒரு சரத்தை மட்டும் <b>குறிச்சொற்களுக்கு</b> எழுத அனுமதிக்கவும். அவை காற்புள்ளியால் பிரிக்கப்பட்டவை என்பதை உறுதிப்படுத்தவும்.",
+        "age-rating-mapping-title": "அகவை மதிப்பீடு மேப்பிங்",
+        "age-rating-mapping-description": "இடதுபுறத்தில் உள்ள எந்த சரங்களும், வகை அல்லது குறிச்சொற்களில் காணப்பட்டால், தொடரில் அகவை மதிப்பீட்டை அமைக்கும். பொருத்தம் இயல்பாக்கப்பட்டது மற்றும் கேச்-சென்சிட்டிவ், அதிக அகவை மதிப்பீடு பயன்படுத்தப்படுகிறது.",
+        "genre": "வகை",
+        "tag": "குறியிடவும்",
+        "remove-source-tag-label": "மூல குறிச்சொல்லை அகற்று",
+        "add-field-mapping-label": "புல வரைபடத்தைச் சேர்க்கவும்",
+        "add-age-rating-mapping-label": "அகவை மதிப்பீடு மேப்பிங்கைச் சேர்க்கவும்",
+        "remove-age-rating-mapping-label": "அகவை மதிப்பீடு மேப்பிங்கை அகற்று",
+        "remove-field-mapping-label": "புல மேப்பிங்கை அகற்று",
+        "field-mapping-title": "புல வரைபடம்",
+        "field-mapping-description": "Genre/Tag புலத்தில் காணப்படும் சில சரங்களுக்கான அமைவு விதிகள் மற்றும் அதை Genre/Tag இல் உள்ள புதிய சரத்திற்கு வரைபடமாக்கி, விருப்பப்படி மூலப் பட்டியலிலிருந்து அகற்றவும். பொருத்தம் இயல்பாக்கப்பட்டது மற்றும் கேச்-சென்சிட்டிவ், முதல் பொருத்த மதிப்பு பயன்படுத்தப்படுகிறது. வகை/குறிச்சொல் எழுதுவதற்கு இயக்கப்பட்டால் மட்டுமே பொருந்தும்.",
+        "first-last-name-label": "முதல் கடைசி பெயரிடுதல்",
+        "first-last-name-tooltip": "மக்களின் பெயர்கள் முதலில் எழுதப்பட்டிருப்பதை உறுதிசெய்து கொள்ளுங்கள்",
+        "person-roles-label": "{{common.roles}}",
+        "overrides-label": "மீறுகிறது",
+        "overrides-description": "பூட்டிய புலங்களில் கவிதாவை எழுத அனுமதிக்கவும்.",
+        "chapter-header": "அத்தியாயம் புலங்கள்",
+        "series-header": "தொடர் புலங்கள்",
+        "people-header": "மக்கள்",
+        "tags-header": "குறிச்சொற்கள்",
+        "source-genre-tags-placeholder": "மூல வகை/குறிச்சொல்",
+        "dest-genre-tags-placeholder": "இலக்கு வகை/குறிச்சொல்"
+    },
+    "annotation-card": {
+        "page-num": "{{book-reader.page-num-label}}",
+        "contains-spoilers-label": "ச்பாய்லர்கள்",
+        "view-in-reader-label": "ரீடரில் பார்க்கவும்",
+        "location-tooltip": "{{library}} - {{series}}",
+        "liked": "நீங்கள் உட்பட {{amount}} நபர்களால் விரும்பப்பட்டது",
+        "not-liked": "{{amount}} நபர்களால் விரும்பப்பட்டது, நீங்கள் அதை விரும்பவில்லை"
+    },
+    "view-annotations-drawer": {
+        "title": "{{tabs.annotations-tab}}",
+        "close": "{{common.close}}",
+        "filter-label": "வடிப்பான் குறிப்புகள்",
+        "no-data": "{{common.no-data}}"
+    },
+    "view-edit-annotation-drawer": {
+        "view-title": "சிறுகுறிப்பைக் காண்க",
+        "edit-title": "சிறுகுறிப்பைத் திருத்தவும்",
+        "create-title": "சிறுகுறிப்பை உருவாக்கவும்",
+        "create": "உருவாக்கு",
+        "contains-spoilers-label": "{{annotation-card.contains-spoilers-label}}",
+        "edit": "தொகு",
+        "delete": "நீக்கு",
+        "read-more": "{{read-more.read-more}}",
+        "read-less": "{{read-more.read-less}}"
+    },
+    "quill-wrapper": {
+        "clean-tooltip": "அனைத்து பாணிகளையும் அகற்று"
+    },
+    "view-bookmark-drawer": {
+        "title": "புக்மார்க்குகள்",
+        "close": "{{common.close}}",
+        "no-data": "{{common.no-data}}",
+        "page-num-label": "{{book-reader.page-num-label}}",
+        "load-bookmark": "ஏற்றவும்"
+    },
+    "page-chapter-label-pipe": {
+        "page-only": "— பக்கம் {{pageNumber}}",
+        "full": "— பக்கம் {{pageNumber}}, அத்தியாயம் \"{{chapterTitle}}\""
+    },
+    "view-toc-drawer": {
+        "title": "உள்ளடக்க அட்டவணை",
+        "close": "{{common.close}}",
+        "toc-header": "நூல்",
+        "personal-header": "தனிப்பட்ட"
+    },
+    "epub-setting-drawer": {
+        "title": "புத்தக அமைப்புகள்",
+        "close": "{{common.close}}"
+    },
+    "highlight-bar": {
+        "add-new-color-alt": "தனிப்பயன் வண்ணத்தைச் சேர்க்கவும்",
+        "slot-label": "ஐலைட் ச்லாட் {{slot}}",
+        "edit": "{{common.edit}}",
+        "close": "{{common.close}}"
+    },
+    "reading-progress-status-pipe": {
+        "no-progress": "படிக்கவும்",
+        "no-progress-incognito": "மறைநிலையில் படிக்கவும்",
+        "progress": "தொடரவும்",
+        "progress-incognito": "மறைநிலையில் தொடரவும்",
+        "full-read": "மீண்டும் படிக்கவும்",
+        "full-read-incognito": "மறைநிலையை மீண்டும் படிக்கவும்"
+    },
+    "match-series-modal": {
+        "title": "பொருத்தம் {{seriesName}}",
+        "description": "கவிதா+ மெட்டாடேட்டாவை மாற்றியமைக்கவும், ச்க்ராபிள் நிகழ்வுகளை மீண்டும் உருவாக்கவும் பொருத்தத்தைத் தேர்ந்தெடுக்கவும். பொருந்தாத மேனிலை தரவு மற்றும் ச்க்ரோபிளிங்கிலிருந்து கவிதாவைக் கட்டுப்படுத்த வேண்டாம்.",
+        "close": "{{common.close}}",
+        "save": "{{common.save}}",
+        "no-results": "பொருத்தத்தைக் கண்டுபிடிக்க முடியவில்லை. ஆதரிக்கப்படும் வழங்குநரிடமிருந்து முகவரி ஐச் சேர்த்து மீண்டும் முயற்சிக்கவும்.",
+        "query-label": "வினவு",
+        "query-tooltip": "தொடர் பெயரை உள்ளிடவும், அனிலிச்ட்/மைஅனிம்லிச்ட்/காமிக்புக் ரவுண்டப் url. Urlகள் நேரடித் தேடலைப் பயன்படுத்தும்.",
+        "dont-match-label": "பொருந்த வேண்டாம்",
+        "dont-match-tooltip": "பொருத்தம் மற்றும் ச்க்ரோபிளிங்கிலிருந்து இந்தத் தொடரைத் தேர்ந்தெடுக்கவும்",
+        "search": "தேடல்"
+    },
+    "match-series-result-item": {
+        "volume-count": "{{server-stats.volume-count}}",
+        "chapter-count": "{{common.chapter-count}}",
+        "issue-count": "{{common.issue-count}}",
+        "releasing": "வெளியிடுகிறது",
+        "details": "பக்கத்தைப் பார்க்கவும்",
+        "updating-metadata-status": "மெட்டாடேட்டாவைப் புதுப்பிக்கிறது"
+    },
+    "browse-people": {
+        "title": "நபர்களை உலாவவும்",
+        "author-count": "{{num}} மக்கள்",
+        "cover-image-description": "{{edit-series-modal.cover-image-description}}",
+        "issue-count": "{{common.issue-count}}",
+        "series-count": "{{common.series-count}}",
+        "roles-label": "{{common.roles}}",
+        "sort-label": "வரிசைப்படுத்து",
+        "name-label": "பெயர்",
+        "issue-count-label": "வெளியீடு எண்ணிக்கை",
+        "series-count-label": "தொடர் எண்ணிக்கை"
+    },
+    "browse-genres": {
+        "title": "வகைகளை உலாவுக",
+        "genre-count": "{{num}} வகைகள்",
+        "issue-count": "{{common.issue-count}}",
+        "series-count": "{{common.series-count}}"
+    },
+    "browse-tags": {
+        "title": "குறிச்சொற்களை உலாவுக",
+        "genre-count": "{{num}} குறிச்சொற்கள்",
+        "issue-count": "{{common.issue-count}}",
+        "series-count": "{{common.series-count}}"
+    },
+    "all-annotations": {
+        "title": "அனைத்து சிறுகுறிப்புகள்",
+        "annotations-count": "{{num}} சிறுகுறிப்புகள்",
+        "export": "ஏற்றுமதி"
+    },
+    "bulk-set-reading-profile-modal": {
+        "title": "வாசிப்பு சுயவிவரத்தை அமைக்கவும்",
+        "close": "{{common.close}}",
+        "filter-label": "{{common.filter}}",
+        "clear": "{{common.clear}}",
+        "no-data": "இதுவரை தொகுப்புகள் எதுவும் உருவாக்கப்படவில்லை",
+        "loading": "{{common.loading}}",
+        "bound": "கட்டுப்பட்டது",
+        "warning-duplicate": "உங்கள் தேர்வில் ஒன்றுடன் ஒன்று சாதனங்கள் உள்ளன, இது அனுமதிக்கப்படாது",
+        "hidden": "தவறான நிலை காரணமாக {{amount}} சுயவிவரம்(கள்) மறைக்கப்பட்டுள்ளது"
+    },
+    "email-history": {
+        "description": "கவிதாவிடமிருந்து மற்றும் எந்தப் பயனருக்கு அனுப்பப்பட்ட அனைத்து மின்னஞ்சல்களையும் இங்கே காணலாம்.",
+        "template-header": "டெம்ப்ளேட்",
+        "date-header": "அனுப்பும் தேதி",
+        "user-header": "க்கு அனுப்பப்பட்டது",
+        "sent-header": "வெற்றியடைந்தது",
+        "no-data": "{{common.no-data}}",
+        "sent-tooltip": "அனுப்பப்பட்டது",
+        "not-sent-tooltip": "அனுப்பப்படவில்லை"
+    },
+    "pdf-render-resolution": {
+        "default": "இயல்புநிலை (1080x1920)",
+        "high": "உயர் (1920x2560)",
+        "ultra": "அல்ட்ரா (2160x3840)"
+    },
+    "role-localized-pipe": {
+        "admin": "நிர்வாகி",
+        "download": "பதிவிறக்கம்",
+        "change-password": "கடவுச்சொல்லை மாற்றவும்",
+        "bookmark": "புத்தககுறி",
+        "change-restriction": "தடையை மாற்றவும்",
+        "login": "புகுபதிவு",
+        "read-only": "படிக்க மட்டும்",
+        "promote": "ஊக்குவிக்கவும்"
+    },
+    "manage-custom-key-binds": {
+        "description": "சில நேரங்களில் உங்கள் சுட்டியைக் சொடுக்கு செய்து இழுப்பது மிகவும் மெதுவாக இருக்கும். விசயங்களை விரைவுபடுத்த உங்களுக்கு விருப்பமான விசைப் பிணைப்புகளைப் பயன்படுத்தவும். ஒவ்வொரு விருப்பமும் {{max}} வெவ்வேறு விசைப் பிணைப்புகளை அனுமதிக்கிறது. <b> விசைப் பிணைப்பை அகற்ற நீண்ட நேரம் அழுத்தவும். </b>",
+        "key-bind-error-reserved-key-bind": "இந்த விசைப் பிணைப்பு ஒதுக்கப்பட்டுள்ளது மற்றும் பயன்படுத்த முடியாது",
+        "key-bind-error-need-at-least-one-key": "உங்கள் விசைப் பிணைப்பில் குறைந்தது ஒரு விசையாவது இருக்க வேண்டும்",
+        "key-bind-error-overlap-in-target": "ஒன்று அல்லது அதற்கு மேற்பட்ட விசைப் பிணைப்புகள் ஒரே மாதிரியானவை",
+        "add": "மாற்று விசையைச் சேர்க்கவும்",
+        "reset": "மீட்டமை {{target}}",
+        "errors-array": "{{target}}க்கான விசைப் பிணைப்புகள் பிழைகளைக் கொண்டிருக்கின்றன",
+        "errors-control": "{{target}}க்கான விசைப்பலகை {{index}} பிழைகளைக் கொண்டுள்ளது",
+        "warning-duplicated-control": "{{target}}க்கான விசைப்பலகை {{index}} மற்ற இலக்கிற்கும் பயன்படுத்தப்பட்டது",
+        "warning-duplicate-key-bind": "இந்த விசைப் பிணைப்பு மற்ற இடங்களிலும் பயன்படுத்தப்பட்டுள்ளது",
+        "key-bind-tooltip": "அதை அகற்ற, விசைப் பிணைப்பை நீண்ட நேரம் அழுத்தவும்.",
+        "global-header": "உலகளாவிய",
+        "readers-header": "வாசகர்கள்"
+    },
+    "keybind-setting-description-pipe": {
+        "key-bind-title-navigate-to-settings": "அமைப்புகளைத் திறக்கவும்",
+        "key-bind-tooltip-navigate-to-settings": "ரீடரில் இல்லாதபோது அமைப்புகளைத் திறக்கவும்",
+        "key-bind-title-open-search": "தேடலைத் திறக்கவும்",
+        "key-bind-tooltip-open-search": "மேல் தேடல் பட்டியைத் திறக்கவும்",
+        "key-bind-title-navigate-to-scrobbling": "ச்க்ரோபிளிங்கைத் திறக்கவும்",
+        "key-bind-tooltip-navigate-to-scrobbling": "Scrobbling தாவலில் அமைப்புகள் பக்கத்தைத் திறக்கவும்",
+        "key-bind-title-escape": "எச்கேப்",
+        "key-bind-tooltip-escape": "தற்போது திறந்திருக்கும் சூழலை மூடு",
+        "key-bind-title-toggle-fullscreen": "முழுத் திரையை நிலைமாற்று",
+        "key-bind-tooltip-toggle-fullscreen": "F11 க்கு மாற்று",
+        "key-bind-title-bookmark-page": "தற்போதைய பக்கத்தை புத்தகக்குறி செய்யவும்",
+        "key-bind-tooltip-bookmark-page": "தற்போதைய படத்தை புக்மார்க்காக சேமிக்கிறது",
+        "key-bind-title-open-help": "உதவி மெனுவைத் திறக்கவும்",
+        "key-bind-tooltip-open-help": "தொடர்புடைய அனைத்து விசைப்பலகைகளுடன் ஒரு உதவி மாதிரியைத் திறக்கும்",
+        "key-bind-title-go-to": "பக்கத்திற்கு செல்",
+        "key-bind-tooltip-go-to": "பக்கங்களை மாற்றுவதற்கான வரியைத் திறக்கவும்",
+        "key-bind-title-toggle-menu": "மெனுவை மாற்று",
+        "key-bind-tooltip-toggle-menu": "வாசகர் பட்டியலில் மாறுகிறது",
+        "key-bind-title-page-left": "பக்கம் இடது",
+        "key-bind-tooltip-page-left": "ஒரு பக்கத்தை இடது பக்கம் நகர்த்தவும்",
+        "key-bind-title-page-right": "பக்கம் வலது",
+        "key-bind-tooltip-page-right": "ஒரு பக்கத்தை வலது பக்கம் நகர்த்தவும்",
+        "key-bind-title-page-up": "பக்கம் மேலே",
+        "key-bind-tooltip-page-up": "ஒரு பக்கத்தை மேலே நகர்த்தவும்",
+        "key-bind-title-page-down": "பக்கம் கீழே",
+        "key-bind-tooltip-page-down": "ஒரு பக்கத்தை கீழ்நோக்கி நகர்த்தவும்",
+        "key-bind-title-offset-double-page": "இரட்டைப் பக்கத்தை ஈடுசெய்",
+        "key-bind-tooltip-offset-double-page": "இரட்டை பக்க பரவல் சீரமைப்புக்கான ஆஃப்செட் பக்கங்கள்"
+    },
+    "download-queue-drawer": {
+        "title": "பதிவிறக்கங்கள்",
+        "cancel": "{{common.cancel}}",
+        "cancel-all": "அனைத்தையும் நீக்கறல்",
+        "retry": "மீண்டும் முயற்சிக்கவும்",
+        "retry-all": "அனைத்தையும் மீண்டும் முயற்சிக்கவும்",
+        "clear": "தெளிவு",
+        "empty": "பதிவிறக்கங்கள் இல்லை",
+        "close": "{{common.close}}",
+        "paused-after-refresh": "{{ count }} உருப்படி(கள்) இடைநிறுத்தப்பட்டது — மீண்டும் தொடங்கத் தயாராக உள்ளது",
+        "resume": "ரெச்யூம்",
+        "pause": "இடைநிறுத்தம்",
+        "paused": "இடைநிறுத்தப்பட்டது",
+        "clear-all": "அனைத்தையும் அழி",
+        "failed-from-auth": "அங்கீகரிக்கப்படவில்லை, உலாவியைப் புதுப்பிக்கவும்",
+        "failed-interrupted": "பக்கத்தைப் புதுப்பிப்பதால் குறுக்கிடப்பட்டது",
+        "tab-downloading": "பதிவிறக்குகிறது",
+        "tab-completed": "முடிந்தது",
+        "today": "இன்று",
+        "older": "பழையது",
+        "queued": "{{download-queue-status-pipe.queued}}",
+        "preparing": "{{download-queue-status-pipe.preparing}}",
+        "downloading": "{{download-queue-status-pipe.downloading}}",
+        "completed": "{{download-queue-status-pipe.completed}}",
+        "failed": "{{download-queue-status-pipe.failed}}",
+        "cancelled": "{{download-queue-status-pipe.cancelled}}"
+    },
+    "download-queue-item": {
+        "retry": "{{download-queue-drawer.retry}}",
+        "cancel": "{{common.cancel}}",
+        "remove": "அகற்று"
+    },
+    "download-queue-status-pipe": {
+        "queued": "வரிசையில் நிற்கிறது",
+        "preparing": "தயாராகிறது",
+        "downloading": "பதிவிறக்குகிறது",
+        "completed": "முடிந்தது",
+        "failed": "தோல்வியடைந்தது",
+        "cancelled": "ரத்து செய்யப்பட்டது"
+    },
+    "download-queue-widget": {
+        "title": "{{download-queue-drawer.title}}"
+    },
+    "client-device-auth-type-pipe": {
+        "unknown": "தெரியவில்லை",
+        "oidc": "ஓ.ஐ.டி.சி",
+        "jwt": "JWT",
+        "auth-key": "அங்கீகார விசை"
+    },
+    "client-device-platform-pipe": {
+        "unknown": "{{client-device-auth-type-pipe.unknown}}"
+    },
+    "client-device-client-type-pipe": {
+        "unknown": "{{client-device-auth-type-pipe.unknown}}",
+        "web-browser": "இணைய உலாவி",
+        "web-app": "வலை பயன்பாடு",
+        "koreader": "KOR வாசகர்",
+        "panels": "பேனல்கள்",
+        "librera": "இலவசம்",
+        "opds-client": "OPDS வாங்கி"
+    },
+    "import-mappings": {
+        "import-step": "இறக்குமதி",
+        "configure-step": "கட்டமைக்கவும்",
+        "conflicts-step": "மோதல்களைத் தீர்க்கவும்",
+        "finalize-step": "இறுதி வெற்றி",
+        "prev": "{{import-cbl-modal.prev}}",
+        "import": "{{import-cbl-modal.import}}",
+        "next": "{{import-cbl-modal.next}}",
+        "save": "{{common.save}}",
+        "import-description": "உங்கள் தற்போதைய அமைப்புகளை மாற்ற அல்லது ஒன்றிணைக்க நீங்கள் அல்லது வேறொருவர் ஏற்றுமதி செய்த கோப்பை பதிவேற்றவும்.",
+        "select-files-warning": "தொடர சாதொபொகு கோப்பைப் பதிவேற்ற வேண்டும்",
+        "invalid-file": "உங்கள் கோப்பை அலசுவதில் தோல்வி, உங்கள் உள்ளீட்டைச் சரிபார்க்கவும்",
+        "file-no-valid-content": "உங்கள் இறக்குமதியில் தொடர்வதற்கு அர்த்தமுள்ள தரவு எதுவும் இல்லை",
+        "fields-to-import": "அமைப்புகள்",
+        "fields-to-import-tooltip": "ஒரு அமைப்பை முழுமையாக தவிர்க்க முடக்கவும்",
+        "whitelist-label": "குறிச்சொற்கள் அனுமதிப்பட்டியல்",
+        "blacklist-label": "குறிச்சொற்கள் தடுப்புப்பட்டியல்",
+        "age-ratings-label": "அகவை மதிப்பீடு மேப்பிங்",
+        "field-mappings-label": "கள மேப்பிங்",
+        "age-ratings-conflicts-tooltip": "எந்த அகவை மதிப்பீட்டைப் பயன்படுத்த வேண்டும் என்பதைத் தீர்மானிக்கவும்",
+        "field-mappings-conflicts-tooltip": "எந்த இலக்கு முடிவைப் பயன்படுத்த வேண்டும் என்பதைத் தீர்மானிக்கவும்",
+        "import-mode-label": "இறக்குமதி முறை",
+        "import-mode-tooltip": "உங்கள் தற்போதைய அமைப்புகளைப் புறக்கணிப்பதை மாற்றியமைத்தல், ஒன்றிணைத்தல் முயற்சி செய்து நீங்கள் உள்ளமைத்த விதத்தில் முரண்பாடுகளைத் தீர்க்கும்",
+        "merge": "ஒன்றிணைக்கவும்",
+        "replace": "மாற்றவும்",
+        "resolution-label": "மோதல் தீர்வு",
+        "resolution-tooltip": "மோதல்களை கவிதா எவ்வாறு கையாள வேண்டும் என்பதை முடிவு செய்யுங்கள்",
+        "manual": "கையேடு",
+        "keep": "வைத்துக்கொள்",
+        "to-pick": "தீர்மானத்தைத் தேர்ந்தெடுக்கவும்",
+        "finalize-title": "உங்கள் அமைப்புகளின் மாதிரிக்காட்சி, உங்கள் இறக்குமதியை முடிக்க சேமி என்பதை அழுத்தவும்"
+    },
+    "merge-person-modal": {
+        "title": "{{personName}}",
+        "close": "{{common.close}}",
+        "save": "{{common.save}}",
+        "src": "நபரை ஒன்றிணைக்கவும்",
+        "merge-warning": "நீங்கள் தொடர்ந்தால், தேர்ந்தெடுக்கப்பட்ட நபர் அகற்றப்படுவார். தேர்ந்தெடுக்கப்பட்ட நபரின் பெயர் மாற்றுப்பெயராக சேர்க்கப்படும், மேலும் அவர்களின் அனைத்துப் பணிகளும் மாற்றப்படும்.",
+        "alias-title": "புதிய மாற்றுப்பெயர்கள்",
+        "known-for-title": "அறியப்பட்டவை"
+    },
+    "files-over-time": {
+        "title": "காலப்போக்கில் கோப்புகள் சேர்க்கப்பட்டன",
+        "no-data": "{{common.no-data}}",
+        "most-files": "{{date}} அன்று, {{count}} கோப்புகள் சேர்க்கப்பட்டன"
+    },
+    "server-activity": {
+        "no-data": "இங்கே பார்க்க எதுவும் இல்லை"
+    },
+    "activity-card": {
+        "total-pages-label": "மொத்த பக்கங்கள்",
+        "total-words-label": "மொத்த வார்த்தைகள்",
+        "total-chapters-label": "பாடங்கள்",
+        "started-label": "தொடங்கப்பட்டது",
+        "view-label": "பார்வை"
+    },
+    "profile": {
+        "title": "{{username}} இன் சுயவிவரம்",
+        "joined-label": "சேர்ந்தது:",
+        "last-read-label": "கடைசியாக படித்தது:",
+        "time-reading-label": "மொத்த வாசிப்பு நேரம்:",
+        "avg-reading-per-week-label": "வாரத்திற்கு சராசரி:",
+        "stats-title": "{{libraryName}} வழியாக {{username}} இன் பயணத்தைப் பாருங்கள்",
+        "no-reviews": "இதுவரை விமர்சனங்கள் இல்லை",
+        "total-reads-badge": "{{reads}} படிக்கிறது",
+        "k+-badge": "K+ சந்தாதாரர்"
+    },
+    "profile-review-list": {
+        "no-data": "மதிப்புரைகள் அல்லது மதிப்புரைகள் எதுவும் பகிரப்படவில்லை",
+        "filter-label": "தொடரின்படி வடிகட்டவும்",
+        "clear-rating-alt": "மதிப்பீட்டு வடிகட்டியை அழிக்கவும்"
+    },
+    "profile-stat-bar": {
+        "books-read-label": "படித்த புத்தகங்கள்",
+        "books-read-tooltip": "படித்த புத்தகங்கள்: {{count}}",
+        "comics-read-label": "காமிக்ச் படித்தது",
+        "comics-read-tooltip": "காமிக்ச் படித்தது: {{count}}",
+        "pages-read-label": "படித்த பக்கங்கள்",
+        "pages-read-tooltip": "படித்த பக்கங்கள்: {{count}}",
+        "words-read-label": "படித்த வார்த்தைகள்",
+        "words-read-tooltip": "படித்த வார்த்தைகள்: {{count}}",
+        "authors-read-label": "ஆசிரியர்கள் படித்தனர்",
+        "authors-read-tooltip": "ஆசிரியர்கள் படித்தது: {{count}}",
+        "reviews-label": "விமர்சனங்கள்",
+        "reviews-tooltip": "மதிப்புரைகள்: {{count}}",
+        "ratings-label": "மதிப்பீடுகள்",
+        "ratings-tooltip": "மதிப்பீடுகள்: {{count}}"
+    },
+    "profile-image": {
+        "edit-image-alt": "படத்தை திருத்து",
+        "reset-image-alt": "படத்தை மீட்டமைக்கவும்"
+    },
+    "profile-activity": {
+        "time-filter-title": "{{username}}'s செய்கைப்பாடு through",
+        "pages-count": "{{series-detail.pages-count}}",
+        "words-count": "{{series-detail.words-count}}",
+        "no-data": "{{common.no-data}}",
+        "duration": "கால அளவு",
+        "pages-read": "{{reading-pace.pages-read}}",
+        "words-read": "{{reading-pace.words-read}}",
+        "time": "நேரம்",
+        "info-alt": "மேலும் செய்தி",
+        "today": "இன்று",
+        "yesterday": "நேற்று",
+        "pagination-label": "செயல்பாடு pagination",
+        "page-info": "{{current}} இல் {{total}} பக்கம் ({{items}} மொத்த பதிவுகள்)",
+        "num-more": "மேலும் {{num}}",
+        "generated-session-tooltip": "மதிப்பீட்டின் அடிப்படையில் இந்த வாசிப்பு அமர்வு தானாகவே உருவாக்கப்பட்டுள்ளது"
+    },
+    "user-stats-info-cards": {
+        "pages-read-by-year-title": "வருடந்தோறும் படிக்கும் பக்கங்கள்",
+        "pages-count": "{{num}} பக்கங்கள்",
+        "words-read-by-year-title": "வருடந்தோறும் வாசிக்கப்படும் வார்த்தைகள்",
+        "words-count": "{{num}} வார்த்தைகள்"
+    },
+    "preferred-format": {
+        "title": "விருப்பமான வடிவம்",
+        "sub-title": "{{name}} படிக்க விரும்புகிறது {{format}}",
+        "no-data": "{{common.no-data}}"
+    },
+    "favorite-authors": {
+        "title": "அதிகம் படித்த ஆசிரியர்கள்",
+        "sub-title": "{{name}} இன் அதிகம் படிக்கப்பட்ட ஆசிரியர் {{author}}, மொத்த வாசிப்புகள் {{count}}",
+        "no-data": "{{common.no-data}}"
+    },
+    "page-spread": {
+        "title": "பக்க எண்ணிக்கையின்படி அத்தியாயங்கள்",
+        "sub-title": "{{username}} இன் {{highestBucket}} பக்கங்களுக்கு இடையே அத்தியாயங்களைப் படிக்கிறார்",
+        "data-type": "{{data}} அத்தியாயங்கள்",
+        "data-of": "உங்கள் அத்தியாயங்களில் {{percentage}}%",
+        "range": "பக்க வரம்பு: {{range}}",
+        "no-data": "{{common.no-data}}"
+    },
+    "word-spread": {
+        "title": "சொல் எண்ணிக்கை மூலம் அத்தியாயங்கள்",
+        "sub-title": "{{username}} இன் {{highestBucket}} சொற்களுக்கு இடையே அத்தியாயங்களைப் படிக்கிறார்",
+        "data-type": "{{data}} அத்தியாயங்கள்",
+        "data-of": "உங்கள் அத்தியாயங்களில் {{percentage}}%",
+        "range": "சொல் வரம்பு: {{range}}",
+        "no-data": "{{common.no-data}}"
+    },
+    "tag-breakdown": {
+        "title": "அதிகம் படித்த குறிச்சொற்கள்",
+        "sub-title": "{{name}} இன் அதிகம் வாசிக்கப்பட்ட குறிச்சொல் {{mostUsed}}",
+        "missing": "{{amount}} தொடருக்கான குறிச்சொற்கள் இல்லை",
+        "no-data": "{{common.no-data}}"
+    },
+    "genre-breakdown": {
+        "title": "அதிகம் வாசிக்கப்பட்ட வகைகள்",
+        "sub-title": "{{name}} இன் அதிகம் படிக்கப்பட்ட வகை {{mostUsed}}",
+        "missing": "{{amount}} தொடருக்கான வகைகள் இல்லை",
+        "no-data": "{{common.no-data}}"
+    },
+    "reads-by-month": {
+        "title": "மொத்த வாசிப்பு மாதம்",
+        "sub-title": "{{username}} {{month}} {{year}} இல் {{reads}} அத்தியாயங்களைப் படித்துள்ளார்",
+        "no-data": "{{common.no-data}}"
+    },
+    "avg-time-reading-by-hour": {
+        "title": "சராசரியாக மணிநேரம் வாசிப்பு நேரம்",
+        "most-time-spend-reading": "{{name}} அவர்கள் {{startHour}} மற்றும் {{endHour}} இடையே சராசரியாக {{amount}} நிமிடங்களில் படிக்கும் நேரத்தை செலவிடுகிறார்கள்",
+        "data-since": "{{date}} முதல் படித்தவை மட்டுமே அடங்கும்",
+        "no-data": "{{common.no-data}}"
+    },
+    "profile-overview": {
+        "currently-reading": "தற்போது படிக்கிறேன்",
+        "want-to-read": "{{side-nav.want-to-read}}",
+        "just-finished-reading": "படித்து முடித்தேன்"
+    },
+    "activity-graph": {
+        "title": "வாசிப்பு செயல்பாடு",
+        "day-of-week-alt": "வாரத்தின் நாள்",
+        "less": "குறைவாக",
+        "more": "மேலும்",
+        "reading-time": "படிக்கும் நேரம்",
+        "pages": "பக்கங்கள்",
+        "words": "சொற்கள்",
+        "chapters": "முடிக்கப்பட்ட அத்தியாயங்கள்",
+        "no-activity-alt": "செயல்பாடு இல்லை",
+        "no-activity-tooltip": "{{date}} அன்று வாசிப்பு நடவடிக்கை இல்லை.",
+        "all-time": "{{time-periods.all-time}}",
+        "low-activity-alt": "குறைந்த செயல்பாடு",
+        "moderate-activity-alt": "மிதமான செயல்பாடு",
+        "good-activity-alt": "நல்ல செயல்பாடு",
+        "high-activity-alt": "உயர் செயல்பாடு",
+        "aggregated-count": "நீங்கள் {{totalPages}} பக்கங்களையும் {{totalWords}} சொற்களையும் {{year}} படித்தீர்கள்"
+    },
+    "reading-pace": {
+        "title-books": "படிக்கும் வேகம்: புத்தகங்கள்",
+        "title-comics": "வாசிப்பு வேகம்: காமிக்ச்",
+        "sub-title-books": "{{username}} ஒவ்வொரு {{count}} நாட்களுக்கு ஒரு புத்தகத்தைப் படிக்கிறார்",
+        "sub-title-comics": "{{username}} ஒவ்வொரு {{count}} நாட்களுக்கு ஒரு காமிக் படிக்கிறார்",
+        "hours-read": "மணி நேரம் படித்தது",
+        "pages-read": "படித்த பக்கங்கள்",
+        "words-read": "படித்த வார்த்தைகள்",
+        "comics-read": "காமிக்ச் படித்தது",
+        "books-read": "படித்த புத்தகங்கள்",
+        "per-year": "வருடத்திற்கு",
+        "per-month": "ஒரு மாதத்திற்கு",
+        "per-day": "ஒரு நாளைக்கு",
+        "no-data": "{{common.no-data}}",
+        "disclaimer-books": "Epub/Pdfsக்கு பொருந்தும்",
+        "disclaimer-comics": "படம்/காப்பகங்களுக்குப் பொருந்தும்"
+    },
+    "smart-time-picker": {
+        "forever": "எப்போதும்",
+        "select-year": "ஆண்டைத் தேர்ந்தெடுக்கவும்",
+        "custom-range": "தனிப்பயன் வரம்பு",
+        "during-entire-life-profile": "அவர்களின் வாழ்நாள் முழுவதும்",
+        "during-entire-life-server": "ஆரம்பத்தில் இருந்து",
+        "during-year": "{{year}} காலத்தில்",
+        "during-from-to": "{{startYear}} முதல் {{endYear}} வரை",
+        "during-select": "நேர வரம்பைத் தேர்ந்தெடுக்கவும்",
+        "close": "{{common.close}}"
+    },
+    "client-device-type-pipe": {
+        "mobile": "மொபைல்",
+        "tablet": "டேப்லெட்",
+        "desktop": "டெச்க்டாப்",
+        "Unknown": "{{common.unknown}}"
+    },
+    "month-label-pipe": {
+        "january": "மா-தை",
+        "january-short": "சன",
+        "february": "தை-மாசி",
+        "february-short": "பிப்",
+        "march": "மா-பங்குனி",
+        "march-short": "மார்",
+        "april": "ப-சித்திரை",
+        "april-short": "ஏப்",
+        "may": "சி-வைகாசி",
+        "may-short": "சி-வைகாசி",
+        "june": "வை-ஆனி",
+        "june-short": "சூன்",
+        "july": "ஆ-ஆடி",
+        "july-short": "சூலை",
+        "august": "ஆ-ஆவணி",
+        "august-short": "ஆக",
+        "september": "ஆ-புரட்டாசி",
+        "september-short": "செப்",
+        "october": "பு-ஐப்பசி",
+        "october-short": "அக்",
+        "november": "ஐ-கார்த்திகை",
+        "november-short": "ஒன்பது",
+        "december": "கா-மார்கழி",
+        "december-short": "டிச"
+    },
+    "day-label-pipe": {
+        "sunday": "ஞாயிறு",
+        "sunday-short": "சூரியன்",
+        "monday": "திங்கட்கிழமை",
+        "monday-short": "தி",
+        "tuesday": "செவ்வாய்",
+        "tuesday-short": "செவ்வாய்",
+        "wednesday": "அறிவன்",
+        "wednesday-short": "அறிவன்",
+        "thursday": "வியாழன்",
+        "thursday-short": "வியாழன்",
+        "friday": "வெள்ளிக்கிழமை",
+        "friday-short": "வெள்ளி",
+        "saturday": "காரிக்கிழமை",
+        "saturday-short": "காரி"
+    },
+    "log-level-pipe": {
+        "debug": "பிழைத்திருத்தம்",
+        "information": "தகவல்",
+        "trace": "சுவடு",
+        "warning": "எச்சரிக்கை",
+        "critical": "விமர்சனம்"
+    },
+    "browse-title-pipe": {
+        "publication-status": "{{value}} வேலை",
+        "age-rating": "மதிப்பிடப்பட்டது {{value}}",
+        "user-rating": "{{value}} நட்சத்திர மதிப்பீடு",
+        "tag": "ஏச்டேக் {{value}}",
+        "translator": "{{value}} ஆல் மொழிபெயர்க்கப்பட்டது",
+        "character": "{{value}} எழுத்து உள்ளது",
+        "publisher": "{{value}} ஆல் வெளியிடப்பட்டது",
+        "editor": "திருத்தியது {{value}}",
+        "artist": "வரைந்தது {{value}}",
+        "letterer": "{{value}} எழுதிய கடிதம்",
+        "colorist": "வண்ணம் {{value}}",
+        "inker": "{{value}} மூலம் மை இடப்பட்டது",
+        "penciller": "{{value}} மூலம் எழுதப்பட்டது",
+        "writer": "எழுதியவர் {{value}}",
+        "genre": "வகை உள்ளது {{value}}",
+        "library": "{{value}} நூலகத்திற்குள்",
+        "format": "{{value}} இன் வடிவம்",
+        "release-year": "{{value}} இல் வெளியிடப்பட்டது",
+        "imprint": "{{value}} இன் முத்திரை",
+        "team": "குழு {{value}}",
+        "location": "{{value}} இடத்தில்"
+    },
+    "generic-filter-field-pipe": {
+        "person-role": "பங்கு",
+        "person-name": "பெயர்",
+        "person-series-count": "தொடர் எண்ணிக்கை",
+        "person-chapter-count": "அத்தியாய எண்ணிக்கை",
+        "average-rating": "சராசரி மதிப்பீடு",
+        "annotation-owner": "உரிமையாளர்",
+        "annotation-series": "தொடர் பெயர்",
+        "annotation-spoiler": "இறக்கைத்தடை",
+        "annotation-highlights": "நிறத்தை முன்னிலைப்படுத்தவும்",
+        "annotation-comment": "சிறுகுறிப்பு உரை",
+        "annotation-selection": "உரையை முன்னிலைப்படுத்தவும்",
+        "annotation-likes": "விரும்புகிறது",
+        "annotation-liked-by": "விரும்பினார்",
+        "series": "{{tabs.series-tab}}"
+    },
+    "metadata-setting-field-pipe": {
+        "covers": "மறையம்",
+        "age-rating": "{{metadata-fields.age-rating-title}}",
+        "people": "{{tabs.people-tab}}",
+        "summary": "{{filter-field-pipe.summary}}",
+        "publication-status": "{{edit-series-modal.publication-status-title}}",
+        "start-date": "{{manage-metadata-settings.enable-start-date-label}}",
+        "genres": "{{metadata-fields.genres-title}}",
+        "tags": "{{metadata-fields.tags-title}}",
+        "localized-name": "{{edit-series-modal.localized-name-label}}",
+        "chapter-release-date": "வெளியீட்டு தேதி (அத்தியாயம்)",
+        "chapter-summary": "சுருக்கம் (அத்தியாயம்)",
+        "chapter-covers": "அட்டைகள் (அத்தியாயம்)",
+        "chapter-publisher": "{{person-role-pipe.publisher}} (அத்தியாயம்)",
+        "chapter-title": "தலைப்பு (அத்தியாயம்)"
+    },
+    "breakpoint-pipe": {
+        "never": "ஒருபோதும்",
+        "mobile": "மொபைல்",
+        "tablet": "டேப்லெட்",
+        "desktop": "டெச்க்டாப்"
+    },
+    "account-settings": {
+        "oidc": "{{login.oidc}}",
+        "unlink-oidc": "OIDC இணைப்பை அகற்று",
+        "confirm-unlink": "உங்கள் OIDC இணைப்பை நிச்சயமாக அகற்ற விரும்புகிறீர்களா?",
+        "confirm-unlink-extra": "நீங்கள் தற்போது OIDC கணக்குடன் அங்கீகரிக்கப்பட்டிருந்தால், நீங்கள் வெளியேற்றப்படுவீர்கள். எந்த நேரத்திலும் மின்னஞ்சல் மூலம் மீண்டும் இணைக்கலாம்."
+    },
+    "manage-reading-profiles": {
+        "description": "உங்கள் தொடர்கள் அனைத்தும் ஒரே மாதிரியாகப் படிக்கப்படாமல் இருக்கலாம், உங்கள் தொடரை முடிந்தவரை தடையின்றி திரும்பப் பெற ஒரு நூலகம்/தொடர்/சாதனம் ஆகியவற்றில் தனித்தனியான வாசிப்பு சுயவிவரங்களை அமைக்கவும்.",
+        "extra-tip": "தொடர் மற்றும் நூலகங்களில் செயல் பட்டியல் வழியாக அல்லது மொத்தமாகப் படிக்கும் சுயவிவரங்களை ஒதுக்கவும். ரீடரில் அமைப்புகளை மாற்றும்போது, அந்தத் தொடருக்கான உங்கள் தேர்வுகளை நினைவில் வைத்திருக்கும் (pdfsக்கு அல்ல) மறைக்கப்பட்ட சுயவிவரம் உருவாக்கப்படும். உங்கள் சொந்த வாசிப்பு சுயவிவரங்களில் ஒன்றை தொடருக்கு ஒதுக்கும்போது இந்த சுயவிவரம் அகற்றப்படும். மேலும் தகவல்களைக் காணலாம்",
+        "wiki-title": "விக்கி",
+        "profiles-title": "உங்கள் வாசிப்பு சுயவிவரங்கள்",
+        "default-profile": "இயல்புநிலை",
+        "add": "{{common.add}}",
+        "add-tooltip": "உங்கள் புதிய சுயவிவரத்தில் மாற்றம் செய்த பிறகு சேமிக்கப்படும்",
+        "make-default": "இயல்புநிலையாக அமைக்கவும்",
+        "no-selected": "சுயவிவரம் எதுவும் தேர்ந்தெடுக்கப்படவில்லை",
+        "confirm": "படிக்கும் சுயவிவரத்தை {{name}} நிச்சயமாக நீக்க விரும்புகிறீர்களா?",
+        "selection-tip": "பட்டியலிலிருந்து சுயவிவரத்தைத் தேர்ந்தெடுக்கவும் அல்லது மேல் வலதுபுறத்தில் புதிய ஒன்றை உருவாக்கவும்",
+        "set-devices": "சாதனங்களை அமைக்கவும்",
+        "select-devices-for": "{{name}} க்கான சாதனங்களை அமைக்கவும்",
+        "reading-direction-label": "படிக்கும் திசை",
+        "reading-direction-tooltip": "அடுத்த பக்கத்திற்குச் செல்ல சொடுக்கு செய்வதற்கான திசை. வலமிருந்து இடமாக அடுத்த பக்கத்திற்கு செல்ல திரையின் இடது பக்கத்தில் சொடுக்கு செய்க.",
+        "scaling-option-label": "அளவிடுதல் விருப்பங்கள்",
+        "scaling-option-tooltip": "உங்கள் திரையில் படத்தை அளவிடுவது எப்படி.",
+        "page-splitting-label": "பக்கம் பிரித்தல்",
+        "page-splitting-tooltip": "முழு அகலப் படத்தைப் பிரிப்பது எப்படி (அதாவது இடது மற்றும் வலது படங்கள் இரண்டும் இணைந்திருக்கும்)",
+        "reading-mode-label": "வாசிப்பு முறை",
+        "reading-mode-tooltip": "ரீடரை செங்குத்தாக, கிடைமட்டமாக அல்லது எல்லையற்ற ச்க்ரோல் இருக்கும்படி மாற்றவும்",
+        "layout-mode-label": "தளவமைப்பு முறை",
+        "layout-mode-tooltip": "ஒரு படத்தை திரையில் அல்லது இரண்டு பக்கவாட்டு படங்களை வழங்குதல் செய்யவும்",
+        "background-color-label": "பின்னணி நிறம்",
+        "background-color-tooltip": "பட ரீடரின் பின்னணி நிறம்",
+        "auto-close-menu-label": "தானாக மூடு பட்டியல்",
+        "auto-close-menu-tooltip": "பட்டியல் தானாக மூடப்பட வேண்டும்",
+        "show-screen-hints-label": "திரை குறிப்புகளைக் காட்டு",
+        "show-screen-hints-tooltip": "பேசினேசன் பகுதி மற்றும் திசையைப் புரிந்துகொள்ள உதவும் மேலடுக்கைக் காட்டு",
+        "emulate-comic-book-label": "Emulate comic book",
+        "emulate-comic-book-tooltip": "புத்தகத்திலிருந்து வாசிப்பதைப் பின்பற்றுவதற்கு நிழல் விளைவைப் பயன்படுத்துகிறது",
+        "swipe-to-paginate-label": "பக்கமாக்க ச்வைப் செய்யவும்",
+        "swipe-to-paginate-tooltip": "திரையில் ச்வைப் செய்தால் அடுத்த அல்லது முந்தைய பக்கம் தூண்டப்படும்",
+        "allow-auto-webtoon-reader-label": "தானியங்கி வெப்டூன் ரீடர் பயன்முறை",
+        "allow-auto-webtoon-reader-tooltip": "பக்கங்கள் வெப்டூன் போல் இருந்தால் வெப்டூன் ரீடர் பயன்முறைக்கு மாறவும். சில தவறான நேர்மறைகள் ஏற்படலாம்.",
+        "width-override-label": "{{manga-reader.width-override-label}}",
+        "width-override-tooltip": "ரீடரில் உள்ள படங்களின் அகலத்தை மேலெழுதவும்",
+        "disable-width-override-label": "அகலத்தை மீறுவதை முடக்கு",
+        "disable-width-override-tooltip": "உங்கள் திரை குறைந்தபட்சம் உள்ளமைக்கப்பட்ட பிரேக்பாயிண்ட் அல்லது சிறியதாக இருக்கும் போது, அகலம் மேலெழுதப்படுவதைத் தடுக்கவும்",
+        "reset": "{{common.reset}}",
+        "tap-to-paginate-label": "பக்கத்தை உருவாக்க தட்டவும்",
+        "tap-to-paginate-tooltip": "முன்/அடுத்த பக்கத்திற்குச் செல்ல புத்தக வாசகர் திரையின் பக்கங்கள் அதைத் தட்டுவதை அனுமதிக்க வேண்டும்",
+        "immersive-mode-label": "Immersive பயன்முறை",
+        "immersive-mode-tooltip": "இது ரீடர் ஆவணத்தில் சொடுக்கு செய்த பின் மெனுவை மறைத்து, பக்கத்தை இயக்க தட்டவும்",
+        "reading-direction-book-label": "படிக்கும் திசை",
+        "reading-direction-book-tooltip": "அடுத்த பக்கத்திற்குச் செல்ல சொடுக்கு செய்வதற்கான திசை. வலமிருந்து இடமாக அடுத்த பக்கத்திற்கு செல்ல திரையின் இடது பக்கத்தில் சொடுக்கு செய்க.",
+        "font-family-label": "எழுத்துரு குடும்பம்",
+        "font-family-tooltip": "ஏற்றுவதற்கு எழுத்துரு குடும்பம். இயல்புநிலையானது புத்தகத்தின் இயல்புநிலை எழுத்துருவை ஏற்றும்",
+        "writing-style-label": "எழுதும் நடை",
+        "writing-style-tooltip": "உரையின் திசையை மாற்றுகிறது. கிடைமட்டமானது இடமிருந்து வலமாக, செங்குத்தாக மேலிருந்து கீழாக உள்ளது.",
+        "layout-mode-book-label": "தளவமைப்பு முறை",
+        "layout-mode-book-tooltip": "உள்ளடக்கம் எவ்வாறு அமைக்கப்பட வேண்டும். நூல் பேக் செய்வது போல் ச்க்ரோல் உள்ளது. 1 அல்லது 2 நெடுவரிசையானது சாதனத்தின் உயரத்திற்குப் பொருந்துகிறது மற்றும் ஒரு பக்கத்திற்கு 1 அல்லது 2 நெடுவரிசைகளின் உரையைப் பொருத்துகிறது",
+        "color-theme-book-label": "வண்ண கருப்பொருள்",
+        "color-theme-book-tooltip": "புத்தக வாசகர் உள்ளடக்கம் மற்றும் பட்டியலில் என்ன வண்ண கருப்பொருள் பயன்படுத்த வேண்டும்",
+        "font-size-book-label": "எழுத்துரு அளவு",
+        "font-size-book-tooltip": "புத்தகத்தில் உள்ள எழுத்துருவைப் பயன்படுத்துவதற்கான அளவுகோலின் விழுக்காடு",
+        "line-height-book-label": "வரி இடைவெளி",
+        "line-height-book-tooltip": "புத்தகத்தின் வரிகளுக்கு இடையே எவ்வளவு இடைவெளி",
+        "margin-book-label": "விளிம்பு",
+        "margin-book-tooltip": "திரையின் ஒவ்வொரு பக்கத்திலும் எவ்வளவு இடைவெளி. இந்த அமைப்பைப் பொருட்படுத்தாமல் மொபைல் சாதனங்களில் இது 0க்கு மேலெழுதப்படும்.",
+        "pdf-scroll-mode-label": "ச்க்ரோல் பயன்முறை",
+        "pdf-scroll-mode-tooltip": "பக்கங்களை எப்படி உருட்டுகிறீர்கள். செங்குத்து/கிடைமட்டமாக மற்றும் பக்கமாக்க தட்டவும் (சுருள் இல்லை)",
+        "pdf-spread-mode-label": "பரவல் முறை",
+        "pdf-spread-mode-tooltip": "பக்கங்கள் எவ்வாறு அமைக்கப்பட வேண்டும். ஒற்றை அல்லது இரட்டை (ஒற்றை/இரட்டை)",
+        "pdf-theme-label": "கருப்பொருள்",
+        "pdf-theme-tooltip": "வாசகரின் வண்ண கருப்பொருள்",
+        "page-calc-method-label": "{{reader-settings.page-calc-method-label}}",
+        "page-calc-method-tooltip": "{{reader-settings.page-calc-method-tooltip}}",
+        "reading-profile-series-settings-title": "தொடர்",
+        "reading-profile-library-settings-title": "நூலகம்",
+        "delete": "{{common.delete}}",
+        "breakpoint-pipe-never": "{{breakpoint-pipe.never}}"
+    },
+    "list-select-modal": {
+        "hidden": "செல்லாத நிலை காரணமாக {{amount}} உருப்படிகள் மறைக்கப்பட்டுள்ளன"
+    },
+    "edit-external-metadata-form": {
+        "aniListId-label": "அனிலிச்ட் அடையாளம்",
+        "malId-label": "ஐடியுடன்",
+        "mangaBakaId-label": "மங்காபாகா அடையாளம்",
+        "hardcoverId-label": "ஆர்ட்கவர் அடையாளம்",
+        "comicVineId-label": "காமிக் வைன் அடையாளம்",
+        "metronId-label": "மெட்ரான் அடையாளம்"
     }
 }

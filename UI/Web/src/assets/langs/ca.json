@@ -404,10 +404,6 @@
     "customize-dashboard-modal": {
         "title-smart-filters": "Filtres intel·ligents"
     },
-    "import-cbl-modal": {
-        "restart": "Reinicia",
-        "next": "Següent"
-    },
     "all-filters": {
         "title": "Tots els filtres intel·ligents"
     },

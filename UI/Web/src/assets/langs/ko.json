@@ -177,8 +177,6 @@
         "active-theme": "활성",
         "updated-toastr": "사이트 기본값이 {{name}}(으)로 업데이트되었습니다",
         "delete": "{{common.delete}}",
-        "drag-n-drop": "{{cover-image-chooser.drag-n-drop}}",
-        "upload": "{{cover-image-chooser.upload}}",
         "upload-continued": "CSS 파일",
         "preview-default": "먼저 테마를 선택하세요",
         "preview-default-admin": "먼저 테마를 선택하거나 수동으로 업로드하세요",
@@ -858,7 +856,9 @@
         "create-new": "현재 설정값으로 새 프로필 생성",
         "create-new-tooltip": "현재 설정된 프로필 설정값을 토대로 관리 가능한 프로필을 생성합니다",
         "reading-profile-updated": "읽기 프로필 업데이트 완료",
-        "reading-profile-promoted": "읽기 프로필 생성 완료"
+        "reading-profile-promoted": "읽기 프로필 생성 완료",
+        "disable-bookmark-icon-label": "{{manage-reading-profiles.disable-bookmark-icon-label}}",
+        "disable-bookmark-icon-tooltip": "{{manage-reading-profiles.disable-bookmark-icon-tooltip}}"
     },
     "table-of-contents": {
         "no-data": "이 책에는 메타데이터 또는 toc 파일에 설정된 목차가 없습니다"
@@ -878,7 +878,8 @@
         "items-selected": "{{num}}개 항목 선택됨",
         "mark-as-unread": "읽지 않은 상태로 표시",
         "mark-as-read": "읽은 상태로 표시",
-        "deselect-all": "{{common.deselect-all}}"
+        "deselect-all": "{{common.deselect-all}}",
+        "mark-as-read-with-session": "세션에서 읽은 상태로 표시"
     },
     "card-detail-layout": {
         "total-items": "{{count}} 총 항목",
@@ -926,8 +927,8 @@
         "enter-an-url-pre-title": "{{url}} 링크",
         "url": "입력",
         "drag-n-drop": "드래그 앤 드롭",
-        "upload": "이미지",
-        "upload-continued": "업로드",
+        "upload": "업로드",
+        "upload-continued": "이미지",
         "url-label": "Url",
         "load": "불러오기",
         "back": "뒤로가기",
@@ -969,7 +970,7 @@
         "chapter-num": "{{num}} 화",
         "volume-num": "{{num}} 권",
         "book-title": "책",
-        "book-title-plural": "책",
+        "book-title-plural": "권",
         "issue-title": "호",
         "issue-title-plural": "호",
         "chapter-title": "화",
@@ -1169,7 +1170,7 @@
         "library-database-backup-label": "Kavita 백업",
         "library-database-backup-tooltip": "Kavita가 데이터베이스 및 기타 관련 파일을 백업하는 빈도입니다.",
         "cleanup-label": "파일 정리",
-        "cleanup-tooltip": "Kavita가 파일 정리 작업을 실행하는 주기입니다. 이 작업은 부하가 클 수 있으므로 대부분의 경우 자정에 실행하는 것이 좋습니다",
+        "cleanup-tooltip": "Kavita가 파일 정리 작업을 실행하는 주기입니다. 이 작업은 부하가 클 수 있으므로 대부분의 경우 자정에 실행하는 것이 좋습니다.",
         "adhoc-tasks-title": "임시 작업",
         "job-title-header": "작업 이름",
         "description-header": "설명",
@@ -1177,16 +1178,9 @@
         "reset-to-default": "{{common.reset-to-default}}",
         "reset": "{{common.reset}}",
         "save": "{{common.save}}",
-        "required": "{{validation.required-field}}",
-        "custom-label": "사용자 정의 일정(Cron 표기법)",
-        "cron-notation": "유효한 크론 표기법이 아닙니다",
         "recurring-tasks-title": "{{title}}",
         "last-executed-header": "마지막 실행",
         "cron-header": "크론",
-        "disabled": "비활성",
-        "daily": "매일",
-        "weekly": "매주",
-        "custom": "커스텀",
         "convert-media-task": "미디어를 대상 인코딩으로 변환",
         "convert-media-task-desc": "모든 kavita 관리 미디어를 대상 인코딩으로 변환하는 장기 실행 작업을 실행합니다. 이것은 느립니다(특히 ARM 장치에서).",
         "convert-media-task-success": "대상 인코딩으로의 미디어 변환이 대기열에 추가되었습니다",
@@ -1214,7 +1208,9 @@
         "check-for-updates-task-desc": "버전보다 앞서 안정적인 릴리스가 있는지 확인하십시오.",
         "clean-up-task-desc": "서버에서 24시간마다 파일 정리 작업을 수행합니다. 부하가 발생할 수 있으므로 Kavita를 사용 중이거나 스캔 중일 때는 실행하지 않는 것을 권장합니다.",
         "clean-up-task": "파일 정리",
-        "clean-up-task-success": "파일 정리 완료"
+        "clean-up-task-success": "파일 정리 완료",
+        "cbl-sync-label": "읽기 리스트 동기화",
+        "cbl-sync-tooltip": "Kavita가 CBL 읽기 리스트의 새 업데이트를 확인하는 빈도입니다. 기본값은 매일 오전 4시입니다."
     },
     "manage-users": {
         "invite": "초대",
@@ -1296,7 +1292,7 @@
         "scrobbling": "읽기 동기화",
         "theme": "테마",
         "customize": "커스터마이즈",
-        "cbl-import": "CBL 읽기 목록",
+        "cbl-import": "읽기 목록 관리자",
         "mal-stack-import": "MAL 스택",
         "admin-manage-tokens": "사용자 토큰 관리",
         "admin-metadata": "메타데이터 관리",
@@ -1311,12 +1307,12 @@
         "custom-key-binds": "단축키",
         "insights-section-title": "인사이트",
         "admin-activity": "활동",
-        "admin-device": "디바이스"
+        "admin-device": "디바이스",
+        "remap-rules": "규칙 재배치"
     },
     "collection-detail": {
         "no-data": "항목이 없습니다. 시리즈를 추가해 보세요.",
         "no-data-filtered": "현재 필터와 일치하는 항목이 없습니다.",
-        "title-alt": "Kavita - {{collectionName}} 컬렉션",
         "sync-progress": "수집된 시리즈: {{title}}",
         "last-sync": "마지막 동기화: {{date}}",
         "item-count": "{{common.item-count}}"
@@ -1348,7 +1344,8 @@
     "reading-list-item": {
         "remove": "{{common.remove}}",
         "read": "{{common.read}}",
-        "released-label": "출시: {{date}}"
+        "released-label": "출시: {{date}}",
+        "pages-count": "{{series-detail.pages-count}}"
     },
     "stream-list-item": {
         "remove": "{{common.remove}}",
@@ -1379,7 +1376,6 @@
         "date-range-title": "날짜 범위",
         "more-alt": "{{series-detail.more-alt}}",
         "reorder-alt": "항목 재정렬",
-        "dnd-warning": "드래그 앤 드롭은 모바일 기기나 읽기 목록에 100개 이상의 항목이 있을 경우 사용할 수 없습니다.",
         "loading-alt": "{{pdf-reader.loading-message}}"
     },
     "events-widget": {
@@ -1474,7 +1470,7 @@
         "month-label": "월",
         "ending-title": "종료",
         "starting-title": "시작",
-        "promote-label": "공개",
+        "promote-label": "{{actionable.promote}}",
         "promote-tooltip": "공개 기능은 해당 태그를 관리자만이 아니라 서버 전체 사용자에게 표시합니다. 단, 이 태그가 달린 시리즈는 여전히 기존의 접근 제한(예: 연령 제한, 라이브러리 접근 제한 등)이 적용됩니다."
     },
     "import-mal-collection-modal": {
@@ -1489,22 +1485,45 @@
     "import-cbl-modal": {
         "close": "{{common.close}}",
         "title": "CBL 가져오기",
-        "import-description": "시작하려면 .cbl 파일을 가져옵니다. Kavita는 가져오기 전에 여러 검사를 수행합니다. 일부 단계는 파일 문제로 인해 진행이 차단됩니다.",
-        "validate-description": "목록에서 수행할 작업이 있는지 확인하기 위해 모든 파일의 유효성이 검사되었습니다. 실패한 목록은 다음 단계로 이동되지 않습니다. CBL 파일을 수정하고 다시 시도하세요.",
-        "validate-warning": "가져오기를 방해하는 CBL 문제가 있습니다. 이 문제를 수정한 후 다시 시도하십시오.",
-        "validate-no-issue-description": "CBL에 문제가 없습니다. 다음을 누르세요.",
-        "dry-run-description": "이것은 모의 실행이며 다음을 누르고 가져오기를 수행하면 어떤 일이 발생하는지 보여줍니다. 모든 실패를 가져오지 않습니다.",
-        "prev": "이전",
-        "import": "가져오기",
-        "restart": "재시작",
-        "next": "다음",
-        "import-step": "CBL 가져오기",
-        "validate-cbl-step": "CBL 검증",
-        "dry-run-step": "모의 실행",
-        "final-import-step": "마지막 단계",
-        "comicvine-parsing-label": "Comic Vine 시리즈 매칭 사용",
-        "cbl-repo": "커뮤니티에서 많은 독서 목록을 찾을 수 있습니다. <a href='https://github.com/DieselTech/CBL-ReadingLists' target='_blank' rel='noopener noreferrer'>리포지토리</a>.",
-        "help-label": "{{common.help}}"
+        "matched-count": "{{count}}개 일치",
+        "matched-items-header": "일치한 항목",
+        "issues-count": "{{count}}개 문제",
+        "issues-header": "주의 필요 항목",
+        "remap-rules-header": "규칙 재배치",
+        "skip-item": "생략",
+        "select-series": "시리즈 검색",
+        "finalize": "모두 가져오기",
+        "finalize-single": "가져오기",
+        "previous-file": "이전",
+        "next-file": "다음",
+        "file-counter": "파일 {{total}}개 중 {{current}}개",
+        "no-remap-rules": "재배치 규칙 없음",
+        "delete-rule": "{{common.delete}}",
+        "manage-rules": "재배치 규칙 관리",
+        "col-series": "요청받은 시리즈",
+        "col-vol-issue": "요청받은 권/호",
+        "col-status": "상태",
+        "col-matched-series": "일치하는 시리즈",
+        "col-matched-issue": "일치하는 호",
+        "col-action": "액션",
+        "select-chapter": "일치하는 화 선택",
+        "edit-match": "매칭 편집",
+        "cancel": "{{common.cancel}}",
+        "undo": "되돌리기",
+        "remap-rule-used": "재배치 규칙으로 매칭됨",
+        "import-success": "{{count}}개 읽기 리스트 가져옴",
+        "processing": "처리 중",
+        "new-list": "신규",
+        "update-list": "업데이트",
+        "volume-num": "{{common.volume-num-shorthand}}",
+        "issue-num": "{{common.issue-num-shorthand}}",
+        "tier-label": "매칭 기준:",
+        "pick-candidate": "올바른 시리즈를 선택하십시오",
+        "resolve": "해결",
+        "description": "이 화면에서 화 또는 권을 Kavita 엔티티에 자동으로 매핑하는 재배치 규칙을 만들 수 있습니다. 재배치 규칙은 이 목록과 향후 목록에 적용됩니다.",
+        "unmatched-count": "{{count}}개 없음",
+        "refresh": "새로고침",
+        "wiki": "위키"
     },
     "pdf-reader": {
         "loading-message": "로딩 중...",
@@ -1987,7 +2006,8 @@
         "cancel": "{{common.cancel}}",
         "delete": "{{common.delete}}",
         "pattern": "호스트는 유효한 http(s):// URL이어야 합니다",
-        "required": "{{validation.required-field}}"
+        "required": "{{validation.required-field}}",
+        "api-key-tooltip": "호스트가 OIDC를 사용할 때 자동 로그인이 필요하지 않습니다"
     },
     "stream-pipe": {
         "on-deck": "{{dashboard.on-deck-title}}",
@@ -2179,7 +2199,20 @@
         "confirm-delete-collection": "이 컬렉션을 삭제하시겠습니까? 이 작업은 되돌릴 수 없습니다.",
         "confirm-delete-annotations": "주석을 삭제하시겠습니까? 이 작업은 되돌릴 수 없습니다.",
         "annotations-deleted": "주석 삭제됨",
-        "redownload-confirm": "{{title}} 항목을 {{date}}에 다운로드했습니다. 다시 다운로드하시겠습니까?"
+        "redownload-confirm": "{{title}} 항목을 {{date}}에 다운로드했습니다. 다시 다운로드하시겠습니까?",
+        "save-remap-rule": "\"{{from}} → {{to}}\"를 향후 가져오기를 위한 재배치 규칙으로 저장하시겠습니까?",
+        "import-complete": "가져오기 완료",
+        "failed-to-validate": "파일 유효성 검사 실패",
+        "failed-to-import": "{{name}} 가져오기 실패",
+        "redownload-confirm-bulk": "이전에 {{title}}을(를) 다운로드한 적이 있습니다. 다시 다운로드하시겠습니까?",
+        "confirm-delete-client-device": "정말 이 기기를 삭제하시겠습니까?",
+        "confirm-delete-cbl-remap-rule": "이 재배치 규칙을 삭제하시겠습니까?",
+        "cbl-remap-rule-created": "재배치 규칙 생성됨",
+        "cbl-remap-rule-deleted": "재배치 규칙 삭제됨",
+        "cbl-remap-rule-promoted": "규칙이 전역으로 승격됨",
+        "cbl-remap-rule-demoted": "규칙이 사용자 범위로 강등됨",
+        "confirm-delete-read-from-readinglist": "이 읽기 리스트에서 읽은 항목을 모두 제거하시겠습니까? 이 작업은 되돌릴 수 없습니다.",
+        "reading-list-sync-enqueued": "읽기 리스트가 동기화 대기열에 포함되었습니다."
     },
     "read-time-pipe": {
         "less-than-hour": "<1시간",
@@ -2269,7 +2302,11 @@
         "like": "좋아요",
         "edit-device-name": "이름 수정",
         "export-v1-tooltip": "CBL v1 (XML) 사용",
-        "export-v2-tooltip": "CBL v2 (JSON) 사용"
+        "export-v2-tooltip": "CBL v2 (JSON) 사용",
+        "export-v1": "CBL v1",
+        "export-v2": "CBL v2",
+        "mark-as-read-with-session": "세션에서 읽은 상태로 표시",
+        "mark-as-read-with-session-tooltip": "진행 상황을 완전히 읽은 상태로 표시하고 세션을 생성합니다"
     },
     "preferences": {
         "left-to-right": "왼쪽에서 오른쪽",
@@ -2359,7 +2396,10 @@
         "book-reader-tab": "책 리더",
         "pdf-reader-tab": "PDF 리더",
         "bookmark-image-tab": "이미지",
-        "bookmark-text-tab": "텍스트"
+        "bookmark-text-tab": "텍스트",
+        "aliases-tab": "별칭",
+        "chapters-tab": "챕터",
+        "sidenav-tab": "사이드 네비"
     },
     "common": {
         "reset-to-default": "기본값으로 재설정",
@@ -2735,7 +2775,9 @@
         "page-calc-method-tooltip": "{{reader-settings.page-calc-method-tooltip}}",
         "set-devices": "기기 설정",
         "select-devices-for": "{{name}} 기기 설정",
-        "breakpoint-pipe-never": "{{breakpoint-pipe.never}}"
+        "breakpoint-pipe-never": "{{breakpoint-pipe.never}}",
+        "disable-bookmark-icon-label": "북마크 아이콘 비활성화",
+        "disable-bookmark-icon-tooltip": "리더 이미지에서 북마크 아이콘을 제거합니다"
     },
     "browse-genres": {
         "series-count": "{{common.series-count}}",
@@ -2799,9 +2841,9 @@
         "configure-step": "구성",
         "conflicts-step": "충돌 해결",
         "finalize-step": "확정",
-        "prev": "{{import-cbl-modal.prev}}",
-        "import": "{{import-cbl-modal.import}}",
-        "next": "{{import-cbl-modal.next}}",
+        "prev": "{{import-cbl.prev}}",
+        "import": "{{import-cbl.import}}",
+        "next": "{{import-cbl.next}}",
         "save": "{{common.save}}",
         "import-description": "현재 설정을 대체하거나 병합하기 위해 내보낸 파일을 업로드하세요.",
         "select-files-warning": "계속하려면 json 파일을 업로드해야 합니다",
@@ -2884,7 +2926,8 @@
         "reset-tooltip": "모든 사용자의 외부 ID를 재설정합니다. Kavita와 귀사의 ID 공급자 간 사용자 연결을 재설정하는 데 사용하세요",
         "reset-confirm": "모든 사용자의 외부 ID를 재설정하시겠습니까?",
         "reset-success": "모든 사용자의 외부 ID가 재설정되었습니다. 연결을 위해 재인증하세요",
-        "auto-save-required": "중요한 설정을 변경하셨습니다. 변경 사항을 유지하려면 자동 저장하세요"
+        "auto-save-required": "중요한 설정을 변경하셨습니다. 변경 사항을 유지하려면 수동으로 저장하십시오",
+        "checking-authority": "인증 유효성 확인 중, 기다려 주십시오..."
     },
     "identity-provider-pipe": {
         "kavita": "Kavita",
@@ -2911,7 +2954,9 @@
         "create": "생성",
         "contains-spoilers-label": "{{annotation-card.contains-spoilers-label}}",
         "edit": "편집",
-        "delete": "삭제"
+        "delete": "삭제",
+        "read-more": "{{read-more.read-more}}",
+        "read-less": "{{read-more.read-less}}"
     },
     "view-bookmark-drawer": {
         "title": "북마크",
@@ -2942,17 +2987,12 @@
     },
     "font-manager": {
         "description": "Kavita의 EPUB 리더에는 몇 가지 기본 글꼴이 포함되어 있습니다. 글꼴 파일을 업로드하거나 Google 글꼴 URL을 사용하십시오. 자세한 내용은 <a href='{{wikiLink}}' target='_blank' rel='noreferrer noopener'>위키</a>를 참고하십시오.",
-        "enter-an-url-pre-title": "{{url}}을(를) 입력하십시오",
-        "url": "URL",
         "add": "{{common.add}}",
         "drag-n-drop": "{{cover-image-chooser.drag-n-drop}}",
         "upload": "{{cover-image-chooser.upload}}",
         "upload-continued": "폰트 파일",
         "preview-default": "당신의 글꼴 파일 또는 Google 글꼴 URL로 업로드하십시오",
         "delete": "{{common.delete}}",
-        "url-label": "URL",
-        "back": "뒤로",
-        "load": "불러오기",
         "no-preview": "이 폰트은 미리보기할 수 없습니다. 책의 기본 스타일로 적용됩니다.",
         "brown-fox": "다람쥐 헌 쳇바퀴에 타고파",
         "filter-system-fonts-label": "시스템 폰트 필터"
@@ -3040,7 +3080,8 @@
         "image-only": "이미지전용",
         "add-auth-key": "신규",
         "description": "인증 키는 비밀번호와 유사합니다. 새로고침을 할 경우 기존 클라이언트에 적용된 키는 모두 작동되지 않습니다.",
-        "copy-key": "{{common.copy}}"
+        "copy-key": "{{common.copy}}",
+        "clients-opds-error": "키에 대한 OPDS url 불러오기 실패: {{key}}"
     },
     "create-auth-key": {
         "create-title": "인증 키 만들기",
@@ -3353,7 +3394,9 @@
         "today": "오늘",
         "yesterday": "어제",
         "pagination-label": "활동 표시 설정",
-        "page-info": "{{current}} / {{total}} 페이지 (총 {{items}}건)"
+        "page-info": "{{current}} / {{total}} 페이지 (총 {{items}}건)",
+        "num-more": "{{num}} 이상",
+        "generated-session-tooltip": "이 읽기 세션은 추정치를 기반으로 자동 생성되었습니다"
     },
     "user-stats-info-cards": {
         "pages-read-by-year-title": "연간 읽은 페이지 수",
@@ -3442,5 +3485,182 @@
         "unlink-oidc": "OIDC link 제거",
         "confirm-unlink": "OIDC 연결을 정말로 삭제하시겠습니까?",
         "confirm-unlink-extra": "현재 OIDC 계정으로 로그인되어 있는 경우, 로그아웃됩니다. 언제든지 이메일을 통해 다시 연동할 수 있습니다."
+    },
+    "edit-external-metadata-form": {
+        "aniListId-label": "AniList Id",
+        "malId-label": "MAL Id",
+        "mangaBakaId-label": "MangaBaka Id",
+        "hardcoverId-label": "Hardcover Id",
+        "comicVineId-label": "Comic Vine Id",
+        "metronId-label": "Metron Id"
+    },
+    "cbl-match-tier-pipe": {
+        "remap-rule": "재배치 규칙",
+        "external-id": "외부 ID",
+        "exact-name": "정확한 명칭",
+        "comicvine-naming": "ComicVine 네이밍",
+        "alternate-series": "대체 시리즈",
+        "user-decision": "사용자 결정",
+        "unmatched": "매칭 안됨",
+        "article-stripped": "관사 제거됨",
+        "reprint-stripped": "재판 정보 제거"
+    },
+    "cbl-import-reason-pipe": {
+        "chapter-missing": "화 없음",
+        "volume-missing": "권 없음",
+        "series-missing": "시리즈 없음",
+        "name-conflict": "이름 충돌",
+        "all-series-missing": "모든 시리즈 없음",
+        "empty-file": "빈 파일",
+        "series-collision": "다수 시리즈 일치",
+        "all-chapter-missing": "모든 권 없음",
+        "success": "성공",
+        "invalid-file": "유효하지 않은 파일"
+    },
+    "cbl-manager": {
+        "browse-repo": "CBLs 탐색",
+        "description": "파일, URL 또는 CBL 레포를 탐색하여 읽기 목록을 가져올 수 있습니다. 온라인 소스에서 생성된 목록은 백그라운드 또는 필요에 따라 자동 업데이트됩니다.",
+        "url": "CBL 접속 URL",
+        "preview-default": "가져올 CBL v1/v2 파일을 업로드",
+        "enter-an-url-pre-title": "{{font-manager.enter-an-url-pre-title}}",
+        "drag-n-drop": "{{cover-image-chooser.drag-n-drop}}",
+        "upload": "{{cover-image-chooser.upload}}",
+        "upload-continued": "CBL 파일",
+        "downloaded": "다운로드됨",
+        "url-label": "Url",
+        "load": "불러오기",
+        "back": "뒤로",
+        "provider-url": "URL",
+        "provider-file": "파일",
+        "update-available": "업데이트 가능",
+        "search-placeholder": "읽기 리스트 검색...",
+        "filter-has-update": "업데이트 있음",
+        "filter-all": "모두",
+        "filter-local": "로컬",
+        "no-results": "일치하는 읽기 리스트 없음",
+        "add": "{{common.add}}",
+        "sync": "동기화",
+        "delete": "{{common.delete}}",
+        "view-list": "읽기 리스트 보기",
+        "last-synced": "{{date}}에 동기화됨",
+        "source": "소스",
+        "not-authorized": "이 컨텐츠와 상호작용할 권한이 없습니다"
+    },
+    "manage-remap-rules-modal": {
+        "title": "재배치 규칙 관리",
+        "close": "{{common.close}}",
+        "no-rules": "저장된 재배치 규칙 없음",
+        "delete-rule": "{{common.delete}}",
+        "volume-num": "{{common.volume-num-shorthand}}",
+        "issue-num": "{{common.issue-num-shorthand}}",
+        "global": "전역",
+        "series-level": "시리즈 레벨",
+        "volume-target": "{{common.volume-num-shorthand}}"
+    },
+    "manage-remap-rules": {
+        "new-rule-title": "신규 재배치 규칙",
+        "cbl-series-name-label": "CBL 시리즈 이름",
+        "cbl-series-name-placeholder": "CBL 시리즈 이름을 입력하십시오...",
+        "kavita-series-label": "Kavita 시리즈",
+        "save": "{{common.save}}",
+        "cancel": "{{common.cancel}}",
+        "my-rules-header": "내 규칙",
+        "global-rules-header": "전역 규칙",
+        "other-users-rules-header": "다른 사용자의 규칙",
+        "cbl-name-col": "CBL 이름",
+        "user-col": "사용자",
+        "delete": "{{common.delete}}",
+        "promote": "{{actionable.promote}}",
+        "promote-tooltip": "전역 규칙으로 승격",
+        "demote": "강등",
+        "demote-tooltip": "사용자 규칙으로 강등",
+        "volume-num": "{{common.volume-num-shorthand}}",
+        "issue-num": "{{common.issue-num-shorthand}}",
+        "created-col": "생성됨",
+        "created-by-col": "생성자:",
+        "cbl-volume-label": "CBL 권",
+        "cbl-volume-placeholder": "e.g. 2016",
+        "series-level": "시리즈 레벨",
+        "create-rule-title": "규칙 생성",
+        "edit-rule-title": "재배치 규칙 편집",
+        "cbl-volume-col": "CBL 권",
+        "cbl-issue-col": "CBL 호",
+        "mapped-series-col": "배치된 시리즈",
+        "mapped-vol-issue-col": "배치된 권/호",
+        "cbl-number-label": "CBL 호 #",
+        "kavita-chapter-label": "Kavita 화 (선택)",
+        "edit": "{{common.edit}}"
+    },
+    "browse-cbl-repo-modal": {
+        "title": "CBL 레포 탐색",
+        "rate-limit-warning": "Kavita가 GitHub 요청 제한에 근접했습니다! 남은 호출 횟수는 {{remaining}}입니다.",
+        "rate-limit-resets": "요청 한도 {{time}}에 초기화",
+        "root-alt-label": "루트 폴더",
+        "instructions": "다운로드할 읽기 목록을 탐색합니다. 다운로드한 파일은 라이브러리와 동기화됩니다.",
+        "file-browser-label": "CBL 레포 탐색",
+        "type-header": "파일 유형",
+        "name-header": "이름",
+        "select-all-files": "모두 선택",
+        "loading": "{{common.loading}}",
+        "select-file-alt-label": "파일 선택: {{name}}",
+        "empty-directory": "빈 경로",
+        "cancel": "{{common.cancel}}",
+        "served-from-cache": "캐시에서 제공됨",
+        "download": "다운로드",
+        "owned-label": "소유",
+        "breadcrumb-alt-label": "탐색 경로",
+        "close": "{{common.close}}"
+    },
+    "reading-list-provider-pipe": {
+        "none": "시스템",
+        "file": "파일",
+        "url": "Url"
+    },
+    "import-cbl": {
+        "close": "{{common.close}}",
+        "title": "CBL 가져오기",
+        "help-label": "{{common.help}}",
+        "import-description": "시작하려면 .cbl 파일을 가져오십시오. Kavita에서 가져오기 전에 여러 번 확인 절차를 수행합니다. 일부 단계에서는 파일 관련 문제로 인해 진행이 차단될 수 있습니다.",
+        "validate-warning": "CBL 가져오기 과정에서 문제가 발생할 수 있습니다. 해당 문제를 수정한 후 다시 시도하십시오.",
+        "validate-no-issue-description": "CBL 파일에 문제 없음, 다음을 누르십시오.",
+        "dry-run-description": "이것은 다음을 눌러 가져오기를 진행할 경우의 결과를 보여주는 예비 실행입니다. 실패한 항목은 가져오지 않습니다.",
+        "prev": "이전",
+        "import": "가져오기",
+        "restart": "재시작",
+        "next": "다음",
+        "import-step": "CBLs 가져오기",
+        "validate-cbl-step": "CBL 검증",
+        "dry-run-step": "예비 실행",
+        "final-import-step": "마지막 단계",
+        "comicvine-parsing-label": "Comic Vine 시리즈 매칭 사용",
+        "cbl-repo": "커뮤니티 <a href='https://github.com/DieselTech/CBL-ReadingLists' target='_blank' rel='noopener noreferrer'>레포지토리</a>에서 많은 읽기 리스트를 찾을 수 있습니다.",
+        "validate-description": "모든 파일의 유효성 검사가 완료되었습니다. 실패한 파일이 있는 목록은 다음 단계로 진행되지 않습니다. CBL 파일을 수정한 후 다시 시도하십시오."
+    },
+    "authority-validation-result-pipe": {
+        "success": "인증이 유효합니다",
+        "invalid-authority": "Kavita에서 OIDC 설정을 불러왔지만 발행자가 일치하지 않습니다",
+        "failure": "Kavita에서 OIDC 설정을 불러올 수 없습니다",
+        "not-applicable": "Kavita에서 설정되어 있지 않아 인증을 검증할 수 없습니다",
+        "missing-https": "{{manage-oidc-connect.tls-required}}"
+    },
+    "file-drag-and-drop-upload": {
+        "drag-n-drop": "{{cover-image-chooser.drag-n-drop}}",
+        "upload": "{{cover-image-chooser.upload}}",
+        "enter-an-url-pre-title": "{{url}}을(를) 입력",
+        "url": "url",
+        "url-label": "Url",
+        "back": "뒤로",
+        "load": "불러오기"
+    },
+    "cron-frequency-pipe": {
+        "disabled": "비활성화됨",
+        "daily": "매일",
+        "weekly": "매 주",
+        "custom": "사용자 지정"
+    },
+    "setting-cron-item": {
+        "custom-label": "사용자 지정 스케줄 (Cron 형식)",
+        "required-field": "{{validation.required-field}}",
+        "cron-notation": "올바른 Cron 형식이 아닙니다"
     }
 }

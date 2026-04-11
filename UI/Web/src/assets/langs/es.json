@@ -177,8 +177,6 @@
         "active-theme": "Activo",
         "updated-toastr": "El tema por defecto del sitio ha sido actualizado a {{name}}",
         "delete": "{{common.delete}}",
-        "drag-n-drop": "{{cover-image-chooser.drag-n-drop}}",
-        "upload": "{{cover-image-chooser.upload}}",
         "upload-continued": "un archivo css",
         "preview-default": "Selecciona un tema",
         "preview-default-admin": "Selecciona primero un tema o cargue uno manualmente",
@@ -684,7 +682,10 @@
         "scrobbling-tooltip": "{{settings.scrobbling}}",
         "publication-status-title": "Publicación",
         "publication-status-tooltip": "Estado de publicación",
-        "loading": "{{common.loading}}"
+        "loading": "{{common.loading}}",
+        "on": "{{reader-settings.on}}",
+        "off": "{{reader-settings.off}}",
+        "read-count-tooltip": "Total de Lecturas"
     },
     "metadata-fields": {
         "collections-title": "{{side-nav.collections}}",
@@ -716,7 +717,8 @@
         "entry-label": "Ver detalles",
         "kavita-tooltip": "Su clasificación + Total",
         "kavita-rating-title": "Su valoración",
-        "close": "{{common.close}}"
+        "close": "{{common.close}}",
+        "critic": "{{review-card.critic}}"
     },
     "badge-expander": {
         "more-items": "y {{count}} más"
@@ -793,7 +795,18 @@
         "file-type-group-tooltip": "¿Qué tipos de archivos debe buscar Kavita? Por ejemplo, Archivo incluirá todos los archivos cb*, zip, rar, etc.",
         "exclude-patterns-label": "Excluir los patrones",
         "exclude-patterns-tooltip": "Configure un conjunto de patrones (sintaxis Glob) que Kavita comparará al escanear directorios y excluirá de los resultados del Scanner.",
-        "help": "{{common.help}}"
+        "help": "{{common.help}}",
+        "allow-metadata-matching-label": "Permitir Emparejamiento de Metadatos",
+        "allow-metadata-matching-tooltip": "Debería Kavita descargar metadatos para Series en esta Biblioteca. Esto solo ocurrirá si el servidor tiene una suscripción de Kavita+ activa.",
+        "enable-metadata-label": "Habilitar Metadatos (ComicInfo/Epub/PDF)",
+        "enable-metadata-tooltip": "Permitir que Kavita lea archivos de metadatos que sustituyen el procesamiento de nombres de archivos.",
+        "remove-prefix-for-sortname-label": "Remover prefijos comunes para el Ordenamiento por Nombre",
+        "remove-prefix-for-sortname-tooltip": "Kavita va a remover prefijos comunes como 'The', 'A', 'An' de los títulos para ordenar por nombre. No sustituye los metadatos definidos.",
+        "inherit-web-links-label": "Heredar links web del primer capítulo",
+        "inherit-web-links-tooltip": "Deberían las series heredar links web del primer capítulo?",
+        "default-language-label": "Idioma por defecto",
+        "default-language-tooltip": "Idioma para asignar a las series, en caso de que ninguno de los capítulos tenga algún idioma definido en sus metadatos",
+        "files-at-root-warning": "Una o más carpetas contienen archivos en la raíz. Kavita no soporta esto."
     },
     "file-type-group-pipe": {
         "archive": "Archivo",
@@ -835,7 +848,10 @@
         "theme-dark": "Oscuro",
         "theme-black": "Negro",
         "theme-white": "Blanco",
-        "theme-paper": "Papel"
+        "theme-paper": "Papel",
+        "update-parent": "Guardar en {{name}}",
+        "loading": "cargando",
+        "reading-profile-updated": "Perfil de lectura actualizado"
     },
     "table-of-contents": {
         "no-data": "Este libro no tiene Tabla de Contenidos definida en los metadatos o archivo toc"
@@ -1137,16 +1153,9 @@
         "reset-to-default": "{{common.reset-to-default}}",
         "reset": "{{common.reset}}",
         "save": "{{common.save}}",
-        "required": "{{validation.required-field}}",
-        "custom-label": "Programación personalizada (Notación Cron)",
-        "cron-notation": "Esta no es una notación cron válida",
         "recurring-tasks-title": "{{title}}",
         "last-executed-header": "Última ejecución",
         "cron-header": "Cron",
-        "disabled": "Desactivado",
-        "daily": "A diario",
-        "weekly": "Semanalmente",
-        "custom": "Personalizado",
         "convert-media-task": "Convertir multimedia al codificado objetivo",
         "convert-media-task-desc": "Inicia una tarea de ejecución lenta que convertirá todos los archivos gestionados por Kavita a la codificación objetivo. Esto es lento (especialmente en dispositivos ARM).",
         "convert-media-task-success": "La conversión del archivo a la codificación elegida se ha añadido a la cola",
@@ -1263,7 +1272,6 @@
     "collection-detail": {
         "no-data": "No hay elementos. Prueba a añadir una serie.",
         "no-data-filtered": "No hay elementos coincidentes con tu filtro actual.",
-        "title-alt": "Kavita - Colección {{collectionName}}",
         "sync-progress": "Series recopiladas: {{title}}",
         "last-sync": "Última sincronización: {{date}}",
         "item-count": "{{common.item-count}}"
@@ -1415,23 +1423,7 @@
     },
     "import-cbl-modal": {
         "close": "{{common.close}}",
-        "title": "Importación CBL",
-        "import-description": "Para comenzar, importa un archivo .cbl. Kavita debe realizar varias comprobaciones antes de importar. Algunos pasos se bloquearán debido a fallos en el archivo.",
-        "validate-description": "Todos los archivos se han validado para comprobar si hay operaciones pendientes en la lista. Cualquier lista que den errores no se moverán al siguiente paso. Repara los archivos CBL y vuelve a intentarlo.",
-        "validate-warning": "Hay problemas con el CBL que impiden la importación. Corrige estos fallos y prueba de nuevo.",
-        "validate-no-issue-description": "No hay fallos en el CBL, pulsa siguiente.",
-        "dry-run-description": "Esto es una prueba y muestra que sucederá si presionas Siguiente y realizas la importación. Los fallos no se importarán.",
-        "prev": "Anterior",
-        "import": "Importar",
-        "restart": "Reiniciar",
-        "next": "Siguiente",
-        "import-step": "Importar CBL",
-        "validate-cbl-step": "Validar CBL",
-        "dry-run-step": "Prueba",
-        "final-import-step": "Último paso",
-        "comicvine-parsing-label": "Utilice la combinación de la serie Comic Vine",
-        "cbl-repo": "Encontrará muchas listas de lectura en el <a href='https://github.com/DieselTech/CBL-ReadingLists' target='_blank' rel='noopener noreferrer'>repositorio</a> comunitario.",
-        "help-label": "{{common.help}}"
+        "title": "Importación CBL"
     },
     "pdf-reader": {
         "loading-message": "Cargando...",
@@ -2196,7 +2188,8 @@
         "activity-tab": "Actividad",
         "annotations-tab": "Anotaciones",
         "overview-tab": "Resumen",
-        "management-tab": "Administración"
+        "management-tab": "Administración",
+        "bookmark-text-tab": "Texto"
     },
     "common": {
         "reset-to-default": "Restablecer valores predeterminados",
@@ -2330,13 +2323,20 @@
         "chapter-count": "{{common.chapter-count}}",
         "details": "Ver página",
         "volume-count": "{{server-stats.volume-count}}",
-        "issue-count": "{{common.issue-count}}"
+        "issue-count": "{{common.issue-count}}",
+        "releasing": "Lanzando",
+        "updating-metadata-status": "Actualizando Metadatos"
     },
     "match-series-modal": {
         "search": "Buscar",
         "close": "{{common.close}}",
         "save": "{{common.save}}",
-        "query-label": "Consulta"
+        "query-label": "Consulta",
+        "title": "Emparejar {{seriesName}}",
+        "description": "Seleccionar un emparejamiento para renovar los metadatos de Kavita+ y regenerar los eventos de scrobble. No Emparejar puede ser usado para restringir a Kavita de emparejar metadatos y scrobbling.",
+        "no-results": "No fue posible encontrar un emparejamiento. Intenta añadir la url de un proveedor soportado e inténtalo nuevamente.",
+        "query-tooltip": "Ingrese el nombre de la serie, urls de AniList/MyAnimeList/ComicBookRoundup. Las urls serán usadas como búsqueda directa.",
+        "dont-match-label": "No Emparejar"
     },
     "manage-metadata-settings": {
         "derive-publication-status-label": "Estado de publicación",
@@ -2595,7 +2595,12 @@
         "read-incognito": "Leer en modo incógnito"
     },
     "reading-progress-status-pipe": {
-        "no-progress-incognito": "Leer en modo incógnito"
+        "no-progress-incognito": "Leer en modo incógnito",
+        "progress": "Continuar",
+        "progress-incognito": "Continuar en modo incógnito",
+        "full-read": "Releer",
+        "full-read-incognito": "Releer en modo incógnito",
+        "no-progress": "Leer"
     },
     "multi-check-box-form": {
         "select-all": "Seleccionar todo",
@@ -2604,17 +2609,12 @@
     },
     "font-manager": {
         "description": "El lector de epub de Kavita incluye algunas fuentes incorporadas. Agrega tus propias fuentes aquí. Sube un archivo o utiliza una URL de Google Fonts. Consulta la <a href='{{wikiLink}}' target='_blank' rel='noreferrer noopener'>wiki</a> para más información.",
-        "enter-an-url-pre-title": "Introduzca un {{url}}",
-        "url": "url",
         "add": "{{common.add}}",
         "drag-n-drop": "{{cover-image-chooser.drag-n-drop}}",
         "upload": "{{cover-image-chooser.upload}}",
         "upload-continued": "Un archivo de fuente",
         "preview-default": "Carga tu propia fuente a través de un archivo o de una url de Google Fonts",
         "delete": "{{common.delete}}",
-        "url-label": "Url",
-        "back": "Atrás",
-        "load": "Cargar",
         "no-preview": "Esta fuente no puede ser previsualizada, Esto tomará el estilo por defecto del libro.",
         "brown-fox": "El veloz murciélago hindú comía feliz cardillo y kiwi. La cigüeña tocaba el saxofón detrás del palenque de paja",
         "filter-system-fonts-label": "Filtrar Fuentes del Sistema"
@@ -2675,7 +2675,8 @@
         "name-label": "Nombre",
         "series-count-label": "Número de Series",
         "sort-label": "Ordenar",
-        "title": "Explorar Personas"
+        "title": "Explorar Personas",
+        "issue-count-label": "Número de Ediciones"
     },
     "bulk-set-reading-profile-modal": {
         "filter-label": "{{common.filter}}",
@@ -2724,7 +2725,9 @@
     },
     "browse-tags": {
         "issue-count": "{{common.issue-count}}",
-        "series-count": "{{common.series-count}}"
+        "series-count": "{{common.series-count}}",
+        "title": "Explorar Etiquetas",
+        "genre-count": "{num}} Etiquetas"
     },
     "download-queue-drawer": {
         "cancel": "{{common.cancel}}",
@@ -2826,5 +2829,10 @@
         "unlink-oidc": "Remover Link OIDC",
         "confirm-unlink": "¿Seguro que quieres eliminar tu link OIDC?",
         "confirm-unlink-extra": "Si estás autenticado con la cuenta OIDC, se cerrará la sesión. Podrás vincularla nuevamente por correo electrónico cuando quieras"
+    },
+    "all-annotations": {
+        "title": "Todas las Anotaciones",
+        "annotations-count": "{{num}} Anotaciones",
+        "export": "Exportar"
     }
 }

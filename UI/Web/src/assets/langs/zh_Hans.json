@@ -177,8 +177,6 @@
         "active-theme": "已激活",
         "updated-toastr": "网站默认值已更新为{{name}}",
         "delete": "{{common.delete}}",
-        "drag-n-drop": "{{cover-image-chooser.drag-n-drop}}",
-        "upload": "{{cover-image-chooser.upload}}",
         "upload-continued": "一个 CSS 文件",
         "preview-default": "首先选择一个主题",
         "preview-default-admin": "首先选择主题或手动上传主题",
@@ -428,7 +426,7 @@
         "publisher": "出版社",
         "writer": "作者",
         "other": "其他",
-        "imprint": "压印",
+        "imprint": "刊物 / 杂志",
         "translator": "翻译",
         "team": "{{filter-field-pipe.team}}",
         "location": "{{filter-field-pipe.location}}"
@@ -695,16 +693,16 @@
         "genres-title": "类型",
         "tags-title": "标签",
         "writers-title": "作家",
-        "cover-artists-title": "艺术家",
-        "characters-title": "人物",
+        "cover-artists-title": "封面作者",
+        "characters-title": "角色群",
         "colorists-title": "上色师",
         "editors-title": "编辑",
         "inkers-title": "上墨师",
         "letterers-title": "嵌字师",
         "translators-title": "翻译",
-        "pencillers-title": "铅稿",
+        "pencillers-title": "作画",
         "publishers-title": "出版社",
-        "imprints-title": "压印",
+        "imprints-title": "刊物 / 杂志",
         "teams-title": "团队",
         "locations-title": "地点",
         "language-title": "语言",
@@ -1176,16 +1174,9 @@
         "reset-to-default": "{{common.reset-to-default}}",
         "reset": "{{common.reset}}",
         "save": "{{common.save}}",
-        "required": "{{validation.required-field}}",
-        "custom-label": "自定义计划（Cron 表示法）",
-        "cron-notation": "这不是有效的 Cron 表示法",
         "recurring-tasks-title": "{{title}}",
         "last-executed-header": "上次执行",
         "cron-header": "计划任务",
-        "disabled": "禁用",
-        "daily": "每日",
-        "weekly": "每周",
-        "custom": "自定义",
         "convert-media-task": "将媒体转换为目标编码格式",
         "convert-media-task-desc": "运行一个长时间运行的任务，将所有由Kavita管理的媒体转换为目标编码格式。这个过程较慢（特别是在ARM设备上）。",
         "convert-media-task-success": "媒体到目标编码的转换已排队",
@@ -1315,7 +1306,6 @@
     "collection-detail": {
         "no-data": "暂无项目。请尝试添加一个系列。",
         "no-data-filtered": "没有项目与当前筛选器匹配。",
-        "title-alt": "Kavita - {{collectionName}} 收藏",
         "sync-progress": "系列收藏：{{title}}",
         "last-sync": "上次同步：{{date}}",
         "item-count": "{{common.item-count}}"
@@ -1378,7 +1368,6 @@
         "more-alt": "{{series-detail.more-alt}}",
         "cover-artists-title": "{{metadata-fields.cover-artists-title}}",
         "writers-title": "{{metadata-fields.writers-title}}",
-        "dnd-warning": "在移动设备上或阅读列表超过 100 个项目时，无法进行拖放操作。",
         "loading-alt": "{{pdf-reader.loading-message}}"
     },
     "events-widget": {
@@ -1487,23 +1476,7 @@
     },
     "import-cbl-modal": {
         "close": "{{common.close}}",
-        "title": "CBL导入",
-        "import-description": "要开始，请导入一个.cbl文件。Kavita 将在导入之前执行多个检查。某些步骤可能会因文件问题而阻止继续进行。",
-        "validate-description": "所有文件都已验证，以确定是否有任何操作需要对列表执行。任何失败的列表都不会进入下一步。修复 CBL 文件并重试。",
-        "validate-warning": "CBL存在问题，这会阻止导入。请纠正这些问题，然后重试。",
-        "validate-no-issue-description": "未发现与CBL相关的问题，请点击“下一步”。",
-        "dry-run-description": "这是一次模拟运行，显示了如果您点击“下一步”并执行导入操作将会发生什么。所有失败的操作将不会被导入。",
-        "prev": "上一页",
-        "import": "导入",
-        "restart": "重新开始",
-        "next": "下一项",
-        "import-step": "导入CBL文件",
-        "validate-cbl-step": "验证CBL文件",
-        "dry-run-step": "模拟运行",
-        "final-import-step": "最后一步",
-        "comicvine-parsing-label": "使用 Comic Vine 系列搭配",
-        "cbl-repo": "您可以在社区 <a href='https://github.com/DieselTech/CBL-ReadingLists' target='_blank' rel='noopener noreferrer'>存储库</a>.中找到更多阅读列表。",
-        "help-label": "{{common.help}}"
+        "title": "CBL导入"
     },
     "pdf-reader": {
         "loading-message": "加载中...",
@@ -2013,7 +1986,7 @@
         "letterer": "嵌字师",
         "publication-status": "出版状态",
         "penciller": "铅稿",
-        "imprint": "压印",
+        "imprint": "刊物 / 杂志",
         "publisher": "出版社",
         "read-progress": "阅读进度",
         "read-time": "阅读时长",
@@ -2735,7 +2708,7 @@
         "genre": "类型为 {{value}}",
         "editor": "由 {{value}} 编辑",
         "format": "{{value}} 的格式",
-        "imprint": "{{value}} 的压印",
+        "imprint": "刊于 {{value}}",
         "character": "有字符 {{value}}",
         "artist": "由 {{value}} 绘制",
         "letterer": "由 {{value}} 书写",
@@ -2938,17 +2911,12 @@
     },
     "font-manager": {
         "description": "Kavita 的 epub 阅读器自带一些字体，您可以在此处添加自己的字体。上传文件或使用 Google 字体网址。更多信息，请参阅 <a href='{{wikiLink}}' target='_blank' rel='noreferrer noopener'>wiki</a>。",
-        "enter-an-url-pre-title": "输入 {{url}}",
-        "url": "网址",
         "add": "{{common.add}}",
         "drag-n-drop": "{{cover-image-chooser.drag-n-drop}}",
         "upload": "{{cover-image-chooser.upload}}",
         "upload-continued": "字体文件",
         "preview-default": "通过文件或 Google 字体网址上传您自己的字体",
         "delete": "{{common.delete}}",
-        "url-label": "网址",
-        "back": "返回",
-        "load": "加载",
         "no-preview": "无法预览此字体。这将采用书中的默认样式。",
         "brown-fox": "The quick brown fox jumps over the lazy dog",
         "filter-system-fonts-label": "筛选系统字体"
@@ -3025,7 +2993,8 @@
         "image-only": "图片",
         "add-auth-key": "新的",
         "description": "授权密钥就像密码一样。轮换密钥会使所有现有客户端失效。",
-        "copy-key": "{{common.copy}}"
+        "copy-key": "{{common.copy}}",
+        "clients-opds-error": "无法加载密钥的 OPDS URL: {{key}}"
     },
     "create-auth-key": {
         "rotate-title": "轮换授权密钥",
@@ -3428,5 +3397,12 @@
         "unlink-oidc": "移除 OIDC 链接",
         "confirm-unlink": "您确定要移除 OIDC 连接吗？",
         "confirm-unlink-extra": "如果您当前已通过 OIDC 帐户进行身份验证，您将被强制登出。您可以随时通过电子邮件重新登录。"
+    },
+    "cbl-match-tier-pipe": {
+        "remap-rule": "重映射规则",
+        "external-id": "外部标识",
+        "exact-name": "完整名称",
+        "comicvine-naming": "ComicVine 命名",
+        "article-stripped": "文章已删除"
     }
 }

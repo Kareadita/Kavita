@@ -172,8 +172,6 @@
         "applied": "Aplikovaný",
         "updated-toastr": "Výchozí nastavení webu bylo aktualizováno na {{name}}",
         "delete": "{{common.delete}}",
-        "drag-n-drop": "{{cover-image-chooser.drag-n-drop}}",
-        "upload": "{{cover-image-chooser.upload}}",
         "add": "{{common.add}}",
         "upload-continued": "soubor css",
         "active-theme": "Aktivní",
@@ -488,7 +486,7 @@
     },
     "all-filters": {
         "title": "Všechny chytré filtry",
-        "count": "{{count}} {{customize-dashboard-modal.title-smart-filters}}",
+        "count": "{{count}} {{tabs.smart-filters-tab}}",
         "create": "{{common.create}}"
     },
     "announcements": {
@@ -848,7 +846,9 @@
         "reading-profile-updated": "Profil čtení aktualizován",
         "reading-profile-promoted": "Profil čtení propagován",
         "line-spacing-min-label": "1x",
-        "line-spacing-max-label": "2.5x"
+        "line-spacing-max-label": "2.5x",
+        "disable-bookmark-icon-label": "{{manage-reading-profiles.disable-bookmark-icon-label}}",
+        "disable-bookmark-icon-tooltip": "{{manage-reading-profiles.disable-bookmark-icon-tooltip}}"
     },
     "bookmarks": {
         "title": "{{side-nav.bookmarks}}",
@@ -865,7 +865,8 @@
         "items-selected": "{{num}} vybraných položek",
         "mark-as-unread": "Označit jako nepřečtené",
         "mark-as-read": "Označit jako přečtené",
-        "title": "Hromadné akce"
+        "title": "Hromadné akce",
+        "mark-as-read-with-session": "Označit jako přečtené s relací"
     },
     "details-tab": {
         "writers-title": "{{metadata-fields.writers-title}}",
@@ -891,7 +892,8 @@
         "release-title": "{{sort-field-pipe.release-year}}",
         "age-rating-title": "{{metadata-fields.age-rating-title}}",
         "file-path-title": "Soubory",
-        "folder-path-title": "Cesta ke složce"
+        "folder-path-title": "Cesta ke složce",
+        "external-metadata-title": "Externí metadata"
     },
     "related-tab": {
         "reading-lists-title": "{{reading-lists.title}}",
@@ -1111,7 +1113,6 @@
         "reset-to-default": "{{common.reset-to-default}}",
         "reset": "{{common.reset}}",
         "save": "{{common.save}}",
-        "required": "{{validation.required-field}}",
         "action-header": "Akce",
         "sync-themes-success": "Synchronizace motivů byla zařazena do fronty",
         "last-executed-header": "Naposledy provedeno",
@@ -1119,7 +1120,7 @@
         "check-for-updates-task": "Zkontrolovat aktualizace",
         "clean-up-want-to-read-task-desc": "Odebere všechny série, které uživatelé plně přečetli a které se nacházejí v seznamu Chci číst a mají stav publikace Dokončeno. Probíhá každých 24 hodin.",
         "sync-themes-task-desc": "Synchronizovat stažené motivy se změnami v upstreamu, pokud se verze shodují.",
-        "cleanup-tooltip": "Jak často bude Kavita spouštět úlohy čištění. To může být náročné a ve většině případů by se mělo provádět o půlnoci",
+        "cleanup-tooltip": "Jak často bude Kavita spouštět úlohy čištění. To může být náročné a ve většině případů by se mělo provádět o půlnoci.",
         "convert-media-task-success": "Převod médií do cílového kódování byl zařazen do fronty",
         "bust-cache-task": "Rozbít mezipaměť",
         "check-for-updates-task-desc": "Podívejte se, zda před vaší verzí nejsou nějaké stabilní verze.",
@@ -1129,11 +1130,6 @@
         "library-database-backup-label": "Zálohování Kavity",
         "library-database-backup-tooltip": "Jak často bude Kavita zálohovat databázi a další související soubory.",
         "cleanup-label": "Čištění",
-        "weekly": "Týdně",
-        "custom-label": "Vlastní plán (zápis Cron)",
-        "cron-notation": "Toto není platný zápis Cron",
-        "disabled": "Vypnuto",
-        "custom": "Vlastní",
         "download-logs-task": "Stáhnout záznamy",
         "job-title-header": "Název práce",
         "clean-up-task-success": "Čištění dokončeno",
@@ -1147,7 +1143,6 @@
         "library-scan-label": "Skenování knihovny",
         "description-header": "Popis",
         "recurring-tasks-title": "{{title}}",
-        "daily": "Denně",
         "convert-media-task": "Převod médií na cílové kódování",
         "convert-media-task-desc": "Spustí dlouhodobou úlohu, která převede všechna média spravovaná systémem Kavita do cílového kódování. Toto je pomalé (zejména na zařízeních ARM).",
         "bust-cache-task-desc": "Rozbije vyrovnávací paměť Kavita+ - mělo by se používat pouze při ladění špatných shod.",
@@ -1159,7 +1154,9 @@
         "clean-up-task": "Obecné čištění",
         "clean-up-task-desc": "Provede noční čištění serveru. Může to být náročný proces, nedoporučuje se spouštět při aktivních uživatelích nebo skenování. Spouští se každých 24 hodin.",
         "backup-database-task-desc": "Vytvoří zálohu databáze, záložek, témat, ručně nahraných obálek a konfiguračních souborů.",
-        "sync-themes-task": "Synchronizovat motivy"
+        "sync-themes-task": "Synchronizovat motivy",
+        "cbl-sync-label": "Synchronizace seznamu četby",
+        "cbl-sync-tooltip": "Jak často bude Kavita kontrolovat, zda jsou k dispozici nové aktualizace seznamů doporučené četby CBL. Výchozí nastavení je denně v 4:00 ráno."
     },
     "manage-users": {
         "change-password-alt": "Změna hesla {{user}}",
@@ -1234,7 +1231,7 @@
         "admin-statistics": "Statistiky",
         "scrobbling": "Scrobblování",
         "customize": "Přizpůsobení",
-        "cbl-import": "Seznam četby CBL",
+        "cbl-import": "Správce seznamu četby",
         "server-section-title": "Server",
         "account-section-title": "Účet",
         "import-section-title": "Import",
@@ -1256,15 +1253,15 @@
         "custom-key-binds": "Klávesové zkratky",
         "insights-section-title": "Postřehy",
         "admin-activity": "Aktivita",
-        "admin-device": "Zařízení"
+        "admin-device": "Zařízení",
+        "remap-rules": "Pravidla pro přemapování"
     },
     "collection-detail": {
         "item-count": "{{common.item-count}}",
         "no-data": "Nejsou zde žádné položky. Zkuste přidat sérii.",
         "sync-progress": "Sbírané série: {{title}}",
         "last-sync": "Poslední synchronizace: {{date}}",
-        "no-data-filtered": "Žádné položky neodpovídají vašemu aktuálnímu filtru.",
-        "title-alt": "Kavita - {{collectionName}} Kolekce"
+        "no-data-filtered": "Žádné položky neodpovídají vašemu aktuálnímu filtru."
     },
     "all-collections": {
         "item-count": "{{common.item-count}}",
@@ -1283,7 +1280,8 @@
     "reading-list-item": {
         "remove": "{{common.remove}}",
         "read": "{{common.read}}",
-        "released-label": "Vydáno: {{date}}"
+        "released-label": "Vydáno: {{date}}",
+        "pages-count": "{{series-detail.pages-count}}"
     },
     "stream-list-item": {
         "remove": "{{common.remove}}",
@@ -1306,7 +1304,6 @@
         "incognito-alt": "(Inkognito)",
         "no-data": "Nic nebylo přidáno",
         "publishers-title": "{{metadata-fields.publishers-title}}",
-        "dnd-warning": "Funkce chyť a upusť není dostupná na mobilních zařízeních nebo v případě, že seznam čtení obsahuje více než 100 položek.",
         "reorder-alt": "Přeuspořádat položky",
         "edit-label": "Režim úprav",
         "edit-alt": "{{common.edit}}",
@@ -1406,7 +1403,7 @@
         "starting-title": "Začátek",
         "title": "Upravit seznam četby: {{name}}",
         "month-label": "Měsíc",
-        "promote-label": "Propagovat"
+        "promote-label": "{{actionable.promote}}"
     },
     "import-mal-collection-modal": {
         "close": "{{common.close}}",
@@ -1415,27 +1412,51 @@
         "title": "Import zásobníku zájmů MAL",
         "description": "Importovat své zásobníky zájmů MAL a vytvářet sbírky v systému Kavita",
         "restack-count": "{{num}} zásobníků",
-        "nothing-found": "Nic nebylo nalezeno"
+        "nothing-found": "Nic nebylo nalezeno",
+        "by-author": "autor: {{author}}"
     },
     "import-cbl-modal": {
         "close": "{{common.close}}",
-        "prev": "Předchozí",
-        "restart": "Restartovat",
-        "import-step": "Importovat CBL",
-        "validate-cbl-step": "Ověření CBL",
-        "import-description": "Chcete-li začít, importujte soubor .cbl. Kavita před importem provede několik kontrol. Některé kroky zablokují postup vpřed kvůli problémům se souborem.",
-        "dry-run-step": "Suchý běh",
-        "comicvine-parsing-label": "Použít Comic Vine Series shody",
-        "validate-no-issue-description": "S CBL nebyly nalezeny žádné problémy, stiskněte tlačítko Další.",
-        "import": "Import",
-        "next": "Další",
-        "title": "CBL Import",
-        "help-label": "{{common.help}}",
-        "validate-description": "Všechny soubory byly ověřeny, aby se zjistilo, zda jsou na seznamu nějaké operace, které je třeba provést. Seznamy, které selhaly, nepřejdou do dalšího kroku. Opravte soubory CBL a zkuste to znovu.",
-        "validate-warning": "V CBL jsou problémy, které brání importu. Opravte je a zkuste to znovu.",
-        "cbl-repo": "V komunitě najdete mnoho seznamů četby<a href='https://github.com/DieselTech/CBL-ReadingLists' target='_blank' rel='noopener noreferrer'>repozitář</a>.",
-        "final-import-step": "Poslední krok",
-        "dry-run-description": "Toto je zkušební verze, která ukazuje, co se stane, pokud stisknete tlačítko Další a provedete import. Všechny chyby nebudou importovány."
+        "title": "Importér CBL",
+        "matched-count": "{{count}} shod",
+        "issues-count": "{{count}} vydání",
+        "matched-items-header": "Související položky",
+        "issues-header": "Položky vyžadující pozornost",
+        "remap-rules-header": "Pravidla pro přemapování",
+        "tier-label": "Nalezeno přes",
+        "skip-item": "Přeskočit",
+        "select-series": "Vyhledat série",
+        "pick-candidate": "Vyberte správnou sérii",
+        "finalize": "Importovat vše",
+        "finalize-single": "Importovat",
+        "previous-file": "Předchozí",
+        "next-file": "Další",
+        "file-counter": "Soubor {{current}} z {{total}}",
+        "no-remap-rules": "Žádná pravidla pro přemapování",
+        "delete-rule": "{{common.delete}}",
+        "manage-rules": "Správa pravidel přemapování",
+        "col-series": "Požadované série",
+        "col-vol-issue": "Požadovaný svazek / vydání",
+        "col-status": "Stav",
+        "col-matched-series": "Spárované série",
+        "col-matched-issue": "Spárované vydání",
+        "col-action": "Akce",
+        "resolve": "Vyřešit",
+        "select-chapter": "Vyberte vhodnou kapitolu",
+        "edit-match": "Upravit párovaní",
+        "cancel": "{{common.cancel}}",
+        "undo": "Vrátit",
+        "remap-rule-used": "Přiřazeno podle pravidla přemapování",
+        "import-success": "Úspěšně importováno {{count}} seznamů četby",
+        "processing": "Zpracovává se",
+        "new-list": "Nový",
+        "update-list": "Aktualizovat",
+        "volume-num": "{{common.volume-num-shorthand}}",
+        "issue-num": "{{common.issue-num-shorthand}}",
+        "description": "Na této obrazovce můžete vytvářet pravidla pro automatické přiřazování sérií nebo čísel k entitám Kavita. Tato pravidla se budou vztahovat na tento i budoucí seznamy.",
+        "unmatched-count": "Chybí {{count}}",
+        "refresh": "Obnovit",
+        "wiki": "Wiki"
     },
     "manga-reader": {
         "auto-close-menu-label": "{{manage-reading-profiles.auto-close-menu-label}}",
@@ -1601,7 +1622,9 @@
         "chapter-title": "Kapitola",
         "field-locked-alt": "Pole je uzamčeno",
         "max-issue-tooltip": "Maximální vydání nebo pole svazku ze všech ComicInfo v sérii",
-        "no-data": "{{common.no-data}}"
+        "no-data": "{{common.no-data}}",
+        "weblinks-tab": "{{tabs.weblink-tab}}",
+        "external-ids-tab": "{{tabs.external-ids-tab}}"
     },
     "edit-chapter-modal": {
         "close": "{{common.close}}",
@@ -1645,7 +1668,8 @@
         "id-label": "ID",
         "release-date-label": "Vydání",
         "date-added-label": "Datum přidání",
-        "files-label": "Soubory"
+        "files-label": "Soubory",
+        "external-ids-tab": "{{tabs.external-ids-tab}}"
     },
     "edit-volume-modal": {
         "close": "{{common.close}}",
@@ -1663,7 +1687,8 @@
         "files-label": "{{edit-chapter-modal.files-label}}",
         "cover-image-description": "{{edit-series-modal.cover-image-description}}",
         "title": "Upravit",
-        "read-time-label": "{{edit-chapter-modal.read-time-label}}"
+        "read-time-label": "{{edit-chapter-modal.read-time-label}}",
+        "external-ids-tab": "{{tabs.external-ids-tab}}"
     },
     "reading-activity": {
         "this-week": "{{time-periods.this-week}}",
@@ -1732,7 +1757,7 @@
         "popular-person-title": "Populární {{role}}"
     },
     "customize-dashboard-modal": {
-        "title-smart-filters": "Chytré filtry",
+        "title-smart-filters": "{{tabs.smart-filters-tab}}",
         "description": "Různé aspekty Kavity můžete přizpůsobit změnou pořadí, přepínáním viditelnosti a přiřazením inteligentních filtrů/externích zdrojů k domovské stránce nebo postranní navigaci."
     },
     "customize-dashboard-streams": {
@@ -1740,18 +1765,18 @@
         "filter": "{{common.filter}}",
         "clear": "{{common.clear}}",
         "no-data": "Všechny inteligentní filtry jsou přidané na ovládací panel nebo žádné dosud nebyly vytvořené.",
-        "smart-filter-title": "{{customize-dashboard-modal.title-smart-filters}}"
+        "smart-filter-title": "{{tabs.smart-filters-tab}}"
     },
     "customize-sidenav-streams": {
         "add": "{{common.add}}",
         "filter": "{{common.filter}}",
         "clear": "{{common.clear}}",
-        "external-sources-title": "{{customize-dashboard-modal.external-sources}}",
+        "external-sources-title": "{{tabs.external-sources-tab}}",
         "reorder-when-filter-present": "Při přítomnosti filtru nelze měnit pořadí položek pomocí přetahování. Použijte {{customize-sidenav-streams.order-numbers-label}}",
         "order-numbers-label": "{{reading-list-detail.order-numbers-label}}",
         "bulk-mode-label": "Hromadný režim",
         "no-data": "Všechny inteligentní filtry jsou přidané na postranní navigaci nebo nejsou žádné vytvořené.",
-        "smart-filters-title": "Chytré filtry",
+        "smart-filters-title": "{{tabs.smart-filters-tab}}",
         "no-data-external-source": "Všechny externí zdroje jsou přidané na postranní navigaci nebo nejsou žádné vytvořené."
     },
     "manage-external-sources": {
@@ -1789,7 +1814,8 @@
         "host-label": "Hostitel",
         "name-label": "Název",
         "api-key-label": "Klíč API",
-        "pattern": "Hostitel musí být platná http(s):// url"
+        "pattern": "Hostitel musí být platná http(s):// url",
+        "api-key-tooltip": "Pokud hostitel používá OIDC, není nutné automatické přihlášení"
     },
     "stream-pipe": {
         "on-deck": "{{dashboard.on-deck-title}}",
@@ -1918,7 +1944,13 @@
         "export": "Exportovat",
         "like": "To se mi líbí",
         "unlike": "Už se mi nelíbí",
-        "edit-device-name": "Upravit jméno"
+        "edit-device-name": "Upravit jméno",
+        "export-v1": "CBL v1",
+        "export-v1-tooltip": "Použijte CBL v1 (XML)",
+        "export-v2": "CBL v2",
+        "export-v2-tooltip": "Použijte CBL v2 (JSON)",
+        "mark-as-read-with-session": "Označit jako přečtené s relací",
+        "mark-as-read-with-session-tooltip": "Označit položku jako přečtenou a vytvořit pro ni relaci"
     },
     "changelog-update-item": {
         "changed": "Změněno",
@@ -2220,7 +2252,18 @@
         "annotations-tab": "Anotace",
         "overview-tab": "Přehled",
         "management-tab": "Správa",
-        "activity-tab": "Aktivita"
+        "activity-tab": "Aktivita",
+        "external-ids-tab": "Externí ID",
+        "aliases-tab": "Aliasy",
+        "chapters-tab": "Kapitoly",
+        "dashboard-tab": "Nástěnka",
+        "sidenav-tab": "Boční panel",
+        "external-sources-tab": "Externí zdroje",
+        "image-reader-tab": "Čtečka obrázků",
+        "book-reader-tab": "Čtečka knih",
+        "pdf-reader-tab": "Čtečka PDF",
+        "bookmark-image-tab": "Obrázek",
+        "bookmark-text-tab": "Text"
     },
     "card-item": {
         "cannot-read": "Nelze přečíst",
@@ -2260,7 +2303,7 @@
         "forced-scan-queued": "Bylo zahájeno nucené skenování pro {{name}}",
         "series-added-to-reading-list": "Série přidána do seznamu četby",
         "pdf-book-mode-screen-size": "Příliš malá obrazovka pro režim Kniha",
-        "k+-delete-key": "Tím se pouze odstraní licenční klíč Kavity a zobrazí se odkaz na nákup.<b>Tím se vaše předplatné nezruší!</b>Ke zrušení předplatného nejprve použijte nástroj Spravovat.",
+        "k+-delete-key": "Tím se pouze odstraní licenční klíč Kavity a zobrazí se odkaz na zakoupení.<b> Tím se vaše předplatné nezruší!</b> Chcete-li předplatné zrušit, použijte nejprve možnost Spravovat.",
         "device-created": "Zařízení vytvořeno",
         "bulk-covers": "Obnovování obálek ve více knihovnách je náročné a může trvat dlouho. Jste si jisti, že chcete pokračovat?",
         "k+-reset-key-success": "Vaše licence byla odhlášena. Pomocí tlačítka Upravit znovu zaregistrujte svou instanci a znovu aktivujte Kavita+",
@@ -2374,7 +2417,20 @@
         "confirm-delete-collection": "Opravdu chcete sbírku smazat? Tento úkon nelze vrátit zpět.",
         "confirm-delete-annotations": "Opravdu chcete odstranit poznámky? Tento úkon nelze vrátit zpět.",
         "annotations-deleted": "Anotace smazána",
-        "redownload-confirm": "Dříve jste si stáhli {{title}} dne {{date}}. Chcete jej stáhnout znovu?"
+        "redownload-confirm": "Dříve jste si stáhli {{title}} dne {{date}}. Chcete jej stáhnout znovu?",
+        "save-remap-rule": "Uložit „{{from}} → {{to}}“ jako pravidlo pro přepsání pro budoucí importy?",
+        "import-complete": "Import dokončen",
+        "failed-to-validate": "Ověření souboru se nezdařilo",
+        "failed-to-import": "Nepodařilo se naimportovat {{name}}",
+        "redownload-confirm-bulk": "Již jste si dříve stáhli (část) {{title}}. Chcete tyto položky stáhnout znovu?",
+        "confirm-delete-client-device": "Opravdu chcete toto zařízení odstranit?",
+        "confirm-delete-cbl-remap-rule": "Opravdu chcete toto pravidlo přemapování odstranit?",
+        "cbl-remap-rule-created": "Bylo vytvořeno pravidlo pro přemapování",
+        "cbl-remap-rule-deleted": "Pravidlo přemapování bylo odstraněno",
+        "cbl-remap-rule-promoted": "Pravidlo bylo povýšeno na globální",
+        "cbl-remap-rule-demoted": "Pravidlo bylo sníženo na uživatelskou úroveň",
+        "confirm-delete-read-from-readinglist": "Opravdu chcete odstranit všechny přečtené položky z tohoto seznamu? Tento úkon nelze vrátit zpět.",
+        "reading-list-sync-enqueued": "Seznam četby byl zařazen do fronty pro synchronizaci."
     },
     "preferences": {
         "split-right-to-left": "Rozdělit zprava doleva",
@@ -2697,7 +2753,9 @@
         "page-calc-method-tooltip": "{{reader-settings.page-calc-method-tooltip}}",
         "set-devices": "Nastavit zařízení",
         "select-devices-for": "Nastavit zařízení pro {{name}}",
-        "breakpoint-pipe-never": "{{breakpoint-pipe.never}}"
+        "breakpoint-pipe-never": "{{breakpoint-pipe.never}}",
+        "disable-bookmark-icon-label": "Vypnout ikonu záložky",
+        "disable-bookmark-icon-tooltip": "Odstraní ikony záložek z obrázků v čtečce"
     },
     "bulk-set-reading-profile-modal": {
         "title": "Nastavit profil čtení",
@@ -2837,7 +2895,8 @@
         "reset-tooltip": "Obnovte externí identifikátory všech uživatelů. Tuto funkci použijte k obnovení propojení mezi uživateli v Kavita a vaším poskytovatelem identit",
         "reset-confirm": "Opravdu chcete resetovat externí ID všech uživatelů?",
         "reset-success": "Externí ID všech uživatelů byla resetována, proveďte opětovné ověření pro propojení",
-        "auto-save-required": "Změnili jste důležité nastavení, automaticky uložte, aby se zachovalo"
+        "auto-save-required": "Změnili jste důležité nastavení; uložte je ručně, aby se změny zachovaly",
+        "checking-authority": "Ověřuji platnost této autority, prosím o chvíli trpělivosti..."
     },
     "identity-provider-pipe": {
         "kavita": "Kavita",
@@ -2848,9 +2907,9 @@
         "configure-step": "Konfigurovat",
         "conflicts-step": "Vyřešit kolize",
         "finalize-step": "Dokončit",
-        "prev": "{{import-cbl-modal.prev}}",
-        "import": "{{import-cbl-modal.import}}",
-        "next": "{{import-cbl-modal.next}}",
+        "prev": "{{import-cbl.prev}}",
+        "import": "{{import-cbl.import}}",
+        "next": "{{import-cbl.next}}",
         "save": "{{common.save}}",
         "import-description": "Nahrajte soubor, který jste vy nebo někdo jiný exportoval, abyste nahradili nebo sloučili vaše aktuální nastavení.",
         "select-files-warning": "Abyste mohli pokračovat, musíte nahrát soubor json",
@@ -2896,7 +2955,9 @@
         "create": "Vytvořit",
         "contains-spoilers-label": "{{annotation-card.contains-spoilers-label}}",
         "edit": "Upravit",
-        "delete": "Odstranit"
+        "delete": "Odstranit",
+        "read-more": "{{read-more.read-more}}",
+        "read-less": "{{read-more.read-less}}"
     },
     "view-bookmark-drawer": {
         "title": "Záložky",
@@ -2938,17 +2999,12 @@
     },
     "font-manager": {
         "description": "Čtečka epub Kavita obsahuje několik vestavěných fontů, zde můžete přidat své vlastní fonty. Nahrajte soubor nebo použijte adresu URL fontů Google. Další informace najdete na <a href='{{wikiLink}}' target='_blank' rel='noreferrer noopener'>wiki</a>.",
-        "enter-an-url-pre-title": "Zadejte {{url}}",
-        "url": "url",
         "add": "{{common.add}}",
         "drag-n-drop": "{{cover-image-chooser.drag-n-drop}}",
         "upload": "{{cover-image-chooser.upload}}",
         "upload-continued": "soubor písma",
         "preview-default": "Nahrajte vlastní písmo prostřednictvím souboru nebo adresy URL Google Font",
         "delete": "{{common.delete}}",
-        "url-label": "Url",
-        "back": "Zpět",
-        "load": "Načíst",
         "no-preview": "Toto písmo nelze zobrazit v náhledu. Bude převzat výchozí styl z knihy.",
         "brown-fox": "Rychlá hnědá liška přeskočí líného psa",
         "filter-system-fonts-label": "Filtrování systémových písem"
@@ -3025,7 +3081,8 @@
         "image-only": "Obrázky",
         "add-auth-key": "Nový",
         "description": "Nový autentizační klíč je jako heslo. Jeho změna zneplatní všechny stávající klienty.",
-        "copy-key": "{{common.copy}}"
+        "copy-key": "{{common.copy}}",
+        "clients-opds-error": "Nepodařilo se načíst adresu URL OPDS pro klíč: {{key}}"
     },
     "create-auth-key": {
         "create-title": "Vytvořit autentizační klíč",
@@ -3083,7 +3140,7 @@
         "progress": "Pokračovat",
         "progress-incognito": "Pokračovat v anonymním režimu",
         "full-read": "Přečíst znovu",
-        "full-read-incognito": "Přečíst znovu v anonymním režimu"
+        "full-read-incognito": "Číst v anonymním režimu"
     },
     "client-device-auth-type-pipe": {
         "unknown": "Neznámé",
@@ -3339,7 +3396,8 @@
         "yesterday": "Včera",
         "pagination-label": "Stránkování aktivit",
         "page-info": "Strana {{current}} z {{total}} (celkem {{items}} záznamů)",
-        "num-more": "{{num}} dalších"
+        "num-more": "{{num}} dalších",
+        "generated-session-tooltip": "Toto čtení bylo automaticky vygenerováno na základě odhadu"
     },
     "user-stats-info-cards": {
         "pages-read-by-year-title": "Počet přečtených stránek za rok",
@@ -3428,5 +3486,184 @@
         "unlink-oidc": "Odebrat odkaz OIDC",
         "confirm-unlink": "Opravdu chcete odstranit odkaz OIDC?",
         "confirm-unlink-extra": "Pokud jste aktuálně přihlášeni pomocí účtu OIDC, budete odhlášeni. Kdykoli se můžete znovu propojit prostřednictvím e-mailu."
+    },
+    "edit-external-metadata-form": {
+        "aniListId-label": "AniList ID",
+        "malId-label": "MAL ID",
+        "mangaBakaId-label": "MangaBaka ID",
+        "hardcoverId-label": "Hardcover ID",
+        "comicVineId-label": "Comic Vine ID",
+        "metronId-label": "Metron ID"
+    },
+    "cbl-match-tier-pipe": {
+        "remap-rule": "Pravidlo přemapování",
+        "external-id": "Externí ID",
+        "exact-name": "Přesný název",
+        "comicvine-naming": "Názvy na ComicVine",
+        "article-stripped": "Článek bez obálky",
+        "reprint-stripped": "Reprint bez obálky",
+        "alternate-series": "Alternativní série",
+        "user-decision": "Rozhodnutí uživatele",
+        "unmatched": "Neshodné"
+    },
+    "cbl-import-reason-pipe": {
+        "chapter-missing": "Chybějící kapitola",
+        "volume-missing": "Chybějící svazek",
+        "series-missing": "Série nenalezena",
+        "name-conflict": "Konflikt v názvech",
+        "all-series-missing": "Chybí všechny série",
+        "empty-file": "Prázdný soubor",
+        "series-collision": "Více shodných sérií",
+        "all-chapter-missing": "Chybí všechny kapitoly",
+        "success": "Úspěch",
+        "invalid-file": "Neplatný soubor"
+    },
+    "cbl-manager": {
+        "browse-repo": "Procházet CBL",
+        "description": "Seznamy četby můžete importovat ze souboru, z URL adresy nebo procházet repozitář CBL. Seznamy vytvořené z online zdroje se budou automaticky aktualizovat na pozadí nebo na požádání.",
+        "url": "Odkaz na CBL",
+        "preview-default": "Nahrajte svůj vlastní soubor CBL v1/v2 k importu",
+        "enter-an-url-pre-title": "{{font-manager.enter-an-url-pre-title}}",
+        "drag-n-drop": "{{cover-image-chooser.drag-n-drop}}",
+        "upload": "{{cover-image-chooser.upload}}",
+        "upload-continued": "soubor CBL",
+        "downloaded": "Staženo",
+        "url-label": "URL",
+        "load": "Načíst",
+        "back": "Zpět",
+        "provider-url": "URL",
+        "provider-file": "Soubor",
+        "update-available": "K dispozici je aktualizace",
+        "search-placeholder": "Prohledat seznamy četby...",
+        "filter-has-update": "Má aktualizaci",
+        "filter-all": "Vše",
+        "filter-local": "Místní",
+        "no-results": "Žádné odpovídající seznamy četby",
+        "add": "{{common.add}}",
+        "sync": "Synchronizovat",
+        "delete": "{{common.delete}}",
+        "view-list": "Zobrazit seznam četby",
+        "last-synced": "Naposledy synchronizováno {{date}}",
+        "source": "Zdroj",
+        "not-authorized": "Nemáte oprávnění k prohlížení tohoto obsahu"
+    },
+    "manage-remap-rules-modal": {
+        "title": "Správa pravidel přemapování",
+        "close": "{{common.close}}",
+        "no-rules": "Nebyly uloženy žádné pravidla pro přemapování",
+        "delete-rule": "{{common.delete}}",
+        "volume-num": "{{common.volume-num-shorthand}}",
+        "issue-num": "{{common.issue-num-shorthand}}",
+        "global": "Globální",
+        "series-level": "Na úrovni série",
+        "volume-target": "{{common.volume-num-shorthand}}"
+    },
+    "manage-remap-rules": {
+        "new-rule-title": "Nové pravidlo pro přemapování",
+        "cbl-series-name-label": "Název série CBL",
+        "cbl-series-name-placeholder": "Zadejte název série CBL...",
+        "kavita-series-label": "Série Kavita",
+        "save": "{{common.save}}",
+        "cancel": "{{common.cancel}}",
+        "my-rules-header": "Moje pravidla",
+        "global-rules-header": "Globální pravidla",
+        "other-users-rules-header": "Pravidla ostatních uživatelů",
+        "cbl-name-col": "Název CBL",
+        "created-col": "Vytvořeno",
+        "created-by-col": "Vytvořil",
+        "user-col": "Uživatel",
+        "delete": "{{common.delete}}",
+        "promote": "{{actionable.promote}}",
+        "promote-tooltip": "Povýšit na globální pravidlo",
+        "demote": "Ponižit",
+        "demote-tooltip": "Ponížit na uživatelské pravidlo",
+        "by": "od",
+        "volume-num": "{{common.volume-num-shorthand}}",
+        "issue-num": "{{common.issue-num-shorthand}}",
+        "cbl-volume-label": "Svazek CBL",
+        "cbl-volume-placeholder": "např. 2016",
+        "series-level": "Na úrovni série",
+        "create-rule-title": "Vytvořit pravidlo",
+        "edit-rule-title": "Upravit pravidlo přemapování",
+        "cbl-volume-col": "Svazek CBL",
+        "cbl-issue-col": "Vydání CBL",
+        "mapped-series-col": "Namapovaná série",
+        "mapped-vol-issue-col": "Namapovaný svazek / vydání",
+        "cbl-number-label": "Číslo vydání CBL #",
+        "cbl-number-placeholder": "např. 1",
+        "kavita-chapter-label": "Kavita Kapitola (volitelné)",
+        "edit": "{{common.edit}}"
+    },
+    "browse-cbl-repo-modal": {
+        "title": "Prohlížeč repo CBL",
+        "rate-limit-warning": "Kavita se blíží k dosažení limitu volání na GitHubu! Zbývá ti {{remaining}} volání.",
+        "rate-limit-resets": "Limit počtu požadavků se resetuje za {{time}}",
+        "breadcrumb-alt-label": "Navigační lišta",
+        "root-alt-label": "Kořenová složka",
+        "instructions": "Projděte si seznamy knih ke stažení. Stažené soubory budou synchronizovány s vaší knihovnou.",
+        "file-browser-label": "Prohlížeč repo CBL",
+        "type-header": "Typ souboru",
+        "name-header": "Název",
+        "select-all-files": "Vybrat vše",
+        "loading": "{{common.loading}}",
+        "select-file-alt-label": "Vybrat soubor: {{name}}",
+        "empty-directory": "Prázdný adresář",
+        "cancel": "{{common.cancel}}",
+        "served-from-cache": "Načteno z mezipaměti",
+        "download": "Stáhnout",
+        "owned-label": "Vlastněné",
+        "close": "{{common.close}}"
+    },
+    "reading-list-provider-pipe": {
+        "none": "Systém",
+        "file": "Soubor",
+        "url": "Url"
+    },
+    "import-cbl": {
+        "close": "{{common.close}}",
+        "title": "Import z CBL",
+        "help-label": "{{common.help}}",
+        "import-description": "Nejprve importujte soubor .cbl. Kavita před importem provede několik kontrol. Některé kroky nebudou možné provést kvůli problémům se souborem.",
+        "validate-description": "Všechny soubory byly zkontrolovány, zda se v seznamu nacházejí nějaké operace k provedení. Seznamy, u nichž kontrola selhala, nepostoupí do dalšího kroku. Opravte soubory CBL a zkuste to znovu.",
+        "validate-warning": "V souboru CBL se vyskytují chyby, které brání importu. Opravte tyto chyby a zkuste to znovu.",
+        "validate-no-issue-description": "Nebyly zjištěny žádné problémy s CBL, klikněte na „Další“.",
+        "dry-run-description": "Toto je zkušební simulace, která ukazuje, co se stane, když kliknete na tlačítko „Další“ a provedete import. Žádné položky s chybou nebudou importovány.",
+        "prev": "Předchozí",
+        "import": "Importovat",
+        "restart": "Restartovat",
+        "next": "Další",
+        "import-step": "Importovat CBL",
+        "validate-cbl-step": "Ověřit CBL",
+        "dry-run-step": "Zkušební provoz",
+        "final-import-step": "Poslední krok",
+        "comicvine-parsing-label": "Využij funkci „Shoda sérií“ na Comic Vine",
+        "cbl-repo": "V komunitním <a href='https://github.com/DieselTech/CBL-ReadingLists' target='_blank' rel='noopener noreferrer'>repozitáři</a> najdete mnoho seznamů četby."
+    },
+    "authority-validation-result-pipe": {
+        "success": "Autorita je platná",
+        "invalid-authority": "Kavita dokáže načíst konfiguraci OIDC, ale vydavatel se neshoduje",
+        "failure": "Kavita nemůže načíst konfiguraci OIDC",
+        "not-applicable": "Kavita nemůže ověřit autoritu, protože není nakonfigurována",
+        "missing-https": "{{manage-oidc-connect.tls-required}}"
+    },
+    "file-drag-and-drop-upload": {
+        "drag-n-drop": "{{cover-image-chooser.drag-n-drop}}",
+        "upload": "{{cover-image-chooser.upload}}",
+        "enter-an-url-pre-title": "Zadejte {{url}}",
+        "url": "url",
+        "url-label": "Url",
+        "back": "Zpět",
+        "load": "Načíst"
+    },
+    "cron-frequency-pipe": {
+        "disabled": "Zakázáno",
+        "daily": "Denně",
+        "weekly": "Týdně",
+        "custom": "Vlastní"
+    },
+    "setting-cron-item": {
+        "custom-label": "Vlastní plán (zápis Cron)",
+        "required-field": "{{validation.required-field}}",
+        "cron-notation": "Toto není platný zápis pro cron"
     }
 }

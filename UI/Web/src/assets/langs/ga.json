@@ -106,7 +106,7 @@
         "global-settings-title": "Socruithe Domhanda",
         "page-layout-mode-label": "Mód Leagan Amach an Leathanaigh",
         "page-layout-mode-tooltip": "Taispeáin míreanna mar chártaí nó amharc liosta ar an leathanach Sonraí Sraithe.",
-        "locale-label": "Áitiúil",
+        "locale-label": "Suíomh",
         "locale-tooltip": "Ba chóir go n-úsáidfeadh an teanga Kavita",
         "blur-unread-summaries-label": "Blur Achoimrí Gan Léamh",
         "blur-unread-summaries-tooltip": "Blurs téacs achomair ar imleabhair nó caibidlí nach bhfuil aon dul chun cinn a léamh (spoilers a sheachaint)",
@@ -177,8 +177,6 @@
         "active-theme": "Gníomhach",
         "updated-toastr": "Nuashonraíodh réamhshocrú an tsuímh go {{name}}",
         "delete": "{{common.delete}}",
-        "drag-n-drop": "{{cover-image-chooser.drag-n-drop}}",
-        "upload": "{{cover-image-chooser.upload}}",
         "upload-continued": "comhad css",
         "preview-default": "Roghnaigh téama ar dtús",
         "preview-default-admin": "Roghnaigh téama ar dtús nó uaslódáil ceann de láimh",
@@ -488,7 +486,7 @@
     },
     "all-filters": {
         "title": "Gach Scagaire Cliste",
-        "count": "{{count}} {{customize-dashboard-modal.title-smart-filters}}",
+        "count": "{{count}} {{tabs.smart-filters-tab}}",
         "create": "{{common.create}}"
     },
     "announcements": {
@@ -858,7 +856,9 @@
         "create-new": "Próifíl nua ó intuigthe",
         "reading-profile-updated": "Próifíl léitheoireachta nuashonraithe",
         "reading-profile-promoted": "Próifíl léitheoireachta curtha chun cinn",
-        "create-new-tooltip": "Cruthaigh próifíl nua inbhainistithe ón gceann intuigthe atá agat faoi láthair"
+        "create-new-tooltip": "Cruthaigh próifíl nua inbhainistithe ón gceann intuigthe atá agat faoi láthair",
+        "disable-bookmark-icon-label": "{{manage-reading-profiles.disable-bookmark-icon-label}}",
+        "disable-bookmark-icon-tooltip": "{{manage-reading-profiles.disable-bookmark-icon-tooltip}}"
     },
     "table-of-contents": {
         "no-data": "Níl Clár ábhair sa leabhar seo atá leagtha síos sna meiteashonraí nó i gcomhad clár"
@@ -878,7 +878,8 @@
         "items-selected": "{{num}} míreanna roghnaithe",
         "mark-as-unread": "Marcáil mar Gan Léamh",
         "mark-as-read": "Marcáil mar Léite",
-        "deselect-all": "{{common.deselect-all}}"
+        "deselect-all": "{{common.deselect-all}}",
+        "mark-as-read-with-session": "Marcáil mar Léite le Seisiún"
     },
     "card-detail-layout": {
         "total-items": "{{count}} míreanna iomlána",
@@ -913,7 +914,8 @@
         "length-title": "{{edit-chapter-modal.words-label}}",
         "age-rating-title": "{{metadata-fields.age-rating-title}}",
         "file-path-title": "Comhaid",
-        "folder-path-title": "Cosán fillteáin"
+        "folder-path-title": "Cosán fillteáin",
+        "external-metadata-title": "Meiteashonraí Seachtracha"
     },
     "related-tab": {
         "reading-lists-title": "{{reading-lists.title}}",
@@ -1168,7 +1170,7 @@
         "library-database-backup-label": "Cúltaca fileata",
         "library-database-backup-tooltip": "Cé chomh minic a dhéanfaidh Kavita cúltaca ar an mbunachar sonraí agus ar chomhaid ghaolmhara eile.",
         "cleanup-label": "Glan suas",
-        "cleanup-tooltip": "Cé chomh minic a rithfidh Kavita tascanna glantacháin. D'fhéadfadh sé seo a bheith trom agus ba chóir é a dhéanamh ag meán oíche i bhformhór na gcásanna",
+        "cleanup-tooltip": "Cé chomh minic a rithfidh Kavita tascanna glantacháin. Is féidir leis seo a bheith trom agus ba chóir é a dhéanamh ag meán oíche i bhformhór na gcásanna.",
         "adhoc-tasks-title": "Tascanna Ad-hoc",
         "job-title-header": "Teideal an Phoist",
         "description-header": "Cur síos",
@@ -1176,16 +1178,9 @@
         "reset-to-default": "{{common.reset-to-default}}",
         "reset": "{{common.reset}}",
         "save": "{{common.save}}",
-        "required": "{{validation.required-field}}",
-        "custom-label": "Sceideal an Chustaim (Nodaireacht Cron)",
-        "cron-notation": "Níl sé seo bailí Nodaireacht Cron",
         "recurring-tasks-title": "{{title}}",
         "last-executed-header": "Curtha chun báis go deireanach",
         "cron-header": "Cron",
-        "disabled": "Díchumasaithe",
-        "daily": "Gach lá",
-        "weekly": "Seachtainiúil",
-        "custom": "Saincheaptha",
         "convert-media-task": "Tiontaigh Meáin go Ionchódú Sprioc",
         "convert-media-task-desc": "Ritheann tasc fadtréimhseach a thiontú go léir meáin kavita-bhainistithe go dtí an ionchódú sprioc. Tá sé seo mall (go háirithe ar ghléasanna ARM).",
         "convert-media-task-success": "Tá Tiontú Meáin go Sprioc-Ionchódú curtha i scuaine",
@@ -1213,7 +1208,9 @@
         "check-for-updates-task-desc": "Féach an bhfuil aon eisiúintí Cobhsaí roimh do leagan.",
         "clean-up-task-success": "Glanta críochnaithe",
         "clean-up-task": "Glanta Ginearálta",
-        "clean-up-task-desc": "Déanann sé gníomhaíochtaí glanta oíche ar an bhfreastalaí. Is féidir leis a bheith trom, moltar gan rith le húsáideoirí gníomhacha nó le scananna. Ritheann sé gach 24 uair an chloig."
+        "clean-up-task-desc": "Déanann sé gníomhaíochtaí glanta oíche ar an bhfreastalaí. Is féidir leis a bheith trom, moltar gan rith le húsáideoirí gníomhacha nó le scananna. Ritheann sé gach 24 uair an chloig.",
+        "cbl-sync-label": "Sioncrónú Liosta Léitheoireachta",
+        "cbl-sync-tooltip": "Cé chomh minic a dhéanfaidh Kavita seiceáil le haghaidh nuashonruithe nua ar Liostaí Léitheoireachta CBL. Réamhshocrú go laethúil ag 4am."
     },
     "manage-users": {
         "invite": "Tabhair cuireadh",
@@ -1295,7 +1292,7 @@
         "scrobbling": "Ag scrobadh",
         "theme": "Téama",
         "customize": "Saincheap",
-        "cbl-import": "Liosta Léitheoireachta CBL",
+        "cbl-import": "Bainisteoir Liosta Léitheoireachta",
         "mal-stack-import": "Cruach MAL",
         "admin-email-history": "Stair Ríomhphoist",
         "admin-matched-metadata": "Meiteashonraí Meaitseála",
@@ -1310,12 +1307,12 @@
         "custom-key-binds": "Ceangail Eochracha",
         "insights-section-title": "Léargais",
         "admin-activity": "Gníomhaíocht",
-        "admin-device": "Gléasanna"
+        "admin-device": "Gléasanna",
+        "remap-rules": "Rialacha Athmhapála"
     },
     "collection-detail": {
         "no-data": "Níl aon mhír ann. Bain triail as sraith a chur leis.",
         "no-data-filtered": "Níl aon mhíreanna comhoiriúnach leis an scagaire reatha.",
-        "title-alt": "Kavita - {{collectionName}} Bailiúchán",
         "sync-progress": "Sraith Bailithe: {{title}}",
         "last-sync": "Sioncronú Deireanach: {{date}}",
         "item-count": "{{common.item-count}}"
@@ -1347,7 +1344,8 @@
     "reading-list-item": {
         "remove": "{{common.remove}}",
         "read": "{{common.read}}",
-        "released-label": "Eisithe: {{date}}"
+        "released-label": "Eisithe: {{date}}",
+        "pages-count": "{{series-detail.pages-count}}"
     },
     "stream-list-item": {
         "remove": "{{common.remove}}",
@@ -1369,7 +1367,6 @@
         "incognito-alt": "(Go hanaithnid)",
         "no-data": "Ní chuirfear aon ní leis",
         "characters-title": "{{metadata-fields.characters-title}}",
-        "dnd-warning": "Níl tarraing agus scaoil ar fáil ar ghléasanna soghluaiste nó nuair a bhíonn níos mó ná 100 mír ar an liosta léitheoireachta.",
         "writers-title": "{{metadata-fields.writers-title}}",
         "cover-artists-title": "{{metadata-fields.cover-artists-title}}",
         "more-alt": "{{series-detail.more-alt}}",
@@ -1473,7 +1470,7 @@
         "month-label": "Mí",
         "ending-title": "Deireadh",
         "starting-title": "Ag tosú",
-        "promote-label": "Cur chun cinn",
+        "promote-label": "{{actionable.promote}}",
         "promote-tooltip": "Ciallaíonn cur chun cinn gur féidir an bailiúchán a fheiceáil ar fud an fhreastalaí, ní hamháin duitse. Beidh srianta rochtana úsáideoirí fós ar gach sraith laistigh den bhailiúchán seo."
     },
     "import-mal-collection-modal": {
@@ -1483,27 +1480,51 @@
         "series-count": "{{common.series-count}}",
         "restack-count": "{{num}} Athshocraigh",
         "nothing-found": "Níor aimsíodh aon rud",
-        "track": "Amhrán"
+        "track": "Amhrán",
+        "by-author": "le {{author}}"
     },
     "import-cbl-modal": {
         "close": "{{common.close}}",
-        "title": "Iompórtáil CBL",
-        "import-description": "Chun tús a chur leis, iompórtáil comhad .cbl. Beidh Kavita dhéanamh seiceálacha il roimh allmhairiú. Cuirfidh roinnt céimeanna bac ar bhogadh ar aghaidh mar gheall ar shaincheisteanna leis an gcomhad.",
-        "validate-description": "Tá gach comhad bailíochtaithe féachaint an bhfuil aon oibríochtaí le déanamh ar an liosta. Aon liostaí ar theip orthu, ní bhogfar go dtí an chéad chéim eile. Deisigh na comhaid CBL agus bain triail eile as.",
-        "validate-warning": "Tá saincheisteanna leis an CBL a chuirfidh cosc ar allmhairiú. Ceartaigh na ceisteanna seo ansin bain triail eile as.",
-        "validate-no-issue-description": "Níor aimsíodh aon saincheisteanna le CBL, brúigh an chéad cheann eile.",
-        "dry-run-description": "Is rith tirim é seo agus taispeánann sé cad a tharlóidh má bhrúnn tú Ar Aghaidh agus an t-allmhairiú a dhéanamh. Ní dhéanfar gach Teip a iompórtáil.",
-        "prev": "Roimhe seo",
-        "import": "Iompórtáil",
-        "restart": "Atosaigh",
-        "next": "Ar Aghaidh",
-        "import-step": "Iompórtáil CBLanna",
-        "validate-cbl-step": "Bailíochtaigh CBL",
-        "dry-run-step": "Rith Tirim",
-        "final-import-step": "An Chéim Dheiridh",
-        "comicvine-parsing-label": "Bain úsáid as meaitseáil Sraith Vine Comic",
-        "cbl-repo": "Is féidir leat teacht ar go leor liostaí léitheoireachta sa phobal <a href='https://github.com/DieselTech/CBL-ReadingLists' target='_blank' rel='noopener noreferrer'>stóras</a>.",
-        "help-label": "{{common.help}}"
+        "title": "Allmhaireoir CBL",
+        "matched-count": "{{count}} comhoiriúnach",
+        "issues-count": "{{count}} saincheisteanna",
+        "matched-items-header": "Míreanna Meaitseála",
+        "issues-header": "Míreanna a bhfuil gá le haird orthu",
+        "remap-rules-header": "Rialacha Athmhapála",
+        "tier-label": "Meaitseáilte trí",
+        "skip-item": "Scipeáil",
+        "select-series": "Cuardaigh sraith",
+        "pick-candidate": "Roghnaigh an tsraith cheart",
+        "finalize": "Iompórtáil Gach Rud",
+        "finalize-single": "Iompórtáil",
+        "previous-file": "Roimhe",
+        "next-file": "Ar Aghaidh",
+        "file-counter": "Comhad {{current}} de {{total}}",
+        "no-remap-rules": "Gan aon rialacha athmhapála",
+        "delete-rule": "{{common.delete}}",
+        "manage-rules": "Bainistigh Rialacha Athmhapála",
+        "col-series": "Sraith Iarrtha",
+        "col-vol-issue": "Imleabhar / Eisiúint Iarrtha",
+        "col-status": "Stádas",
+        "col-matched-series": "Sraith Mheaitseáilte",
+        "col-matched-issue": "Saincheist Mheaitseáilte",
+        "col-action": "Gníomh",
+        "resolve": "Réitigh",
+        "select-chapter": "Roghnaigh an chaibidil chomhoiriúnach",
+        "edit-match": "Meaitseáil eagarthóireachta",
+        "cancel": "{{common.cancel}}",
+        "undo": "Cuir ar ceal",
+        "remap-rule-used": "Meaitseáilte trí riail athmhapála",
+        "import-success": "Iompórtáladh {{count}} liosta(í) léitheoireachta go rathúil",
+        "processing": "Próiseáil",
+        "new-list": "Nua",
+        "update-list": "Nuashonrú",
+        "volume-num": "{{common.volume-num-shorthand}}",
+        "issue-num": "{{common.issue-num-shorthand}}",
+        "description": "Ar an scáileán seo is féidir leat rialacha athmhapála a thógáil chun sraitheanna nó saincheisteanna a mhapáil go huathoibríoch chuig eintitis Kavita. Beidh feidhm ag rialacha athmhapála maidir leis an liosta seo agus le liostaí amach anseo.",
+        "unmatched-count": "{{count}} ar iarraidh",
+        "refresh": "Athnuaigh",
+        "wiki": "Vicí"
     },
     "pdf-reader": {
         "loading-message": "Á Luchtú...",
@@ -1718,7 +1739,9 @@
         "specials-volume": "Speisialta",
         "release-year-validation": "{{validation.year-validation}}",
         "volumes-title": "{{tab.volumes-tab}}",
-        "no-data": "{{common.no-data}}"
+        "no-data": "{{common.no-data}}",
+        "weblinks-tab": "{{tabs.weblink-tab}}",
+        "external-ids-tab": "{{tabs.external-ids-tab}}"
     },
     "edit-chapter-modal": {
         "title": "Cuir in eagar",
@@ -1762,7 +1785,8 @@
         "last-read-label": "{{sort-field-pipe.read-progress}}",
         "range-hours": "{{value}} {{hourWord}}",
         "read-time-label": "Am Léigh",
-        "files-label": "Comhaid"
+        "files-label": "Comhaid",
+        "external-ids-tab": "{{tabs.external-ids-tab}}"
     },
     "edit-volume-modal": {
         "title": "Cuir in eagar",
@@ -1780,7 +1804,8 @@
         "id-label": "{{edit-chapter-modal.id-label}}",
         "files-label": "{{edit-chapter-modal.files-label}}",
         "cover-image-description": "{{edit-series-modal.cover-image-description}}",
-        "read-time-label": "{{edit-chapter-modal.read-time-label}}"
+        "read-time-label": "{{edit-chapter-modal.read-time-label}}",
+        "external-ids-tab": "{{tabs.external-ids-tab}}"
     },
     "day-breakdown": {
         "title": "Miondealú Lae",
@@ -1925,7 +1950,7 @@
         "remove-rule": "Bain Ró"
     },
     "customize-dashboard-modal": {
-        "title-smart-filters": "Scagairí Cliste",
+        "title-smart-filters": "{{tabs.smart-filters-tab}}",
         "description": "Is féidir leat gnéithe éagsúla de Kavita a shaincheapadh trí athordú a dhéanamh, trí infheictheacht a scoránú, agus trí scagairí cliste/foinsí seachtracha a cheangal le do leathanach baile nó le do thaobh nav."
     },
     "customize-dashboard-streams": {
@@ -1933,7 +1958,7 @@
         "add": "{{common.add}}",
         "filter": "{{common.filter}}",
         "clear": "{{common.clear}}",
-        "smart-filter-title": "{{customize-dashboard-modal.title-smart-filters}}"
+        "smart-filter-title": "{{tabs.smart-filters-tab}}"
     },
     "customize-sidenav-streams": {
         "no-data": "Gach scagairí Cliste a chuirtear le Side Nav nó aon cheann a cruthaíodh go fóill.",
@@ -1941,8 +1966,8 @@
         "add": "{{common.add}}",
         "filter": "{{common.filter}}",
         "clear": "{{common.clear}}",
-        "smart-filters-title": "Scagairí Cliste",
-        "external-sources-title": "{{customize-dashboard-modal.external-sources}}",
+        "smart-filters-title": "{{tabs.smart-filters-tab}}",
+        "external-sources-title": "{{tabs.external-sources-tab}}",
         "reorder-when-filter-present": "Ní féidir leat míreanna a athordú trí tharraingt & scaoil agus scagaire i láthair. Úsáid {{customize-sidenav-streams.order-numbers-label}}",
         "order-numbers-label": "{{reading-list-detail.order-numbers-label}}",
         "bulk-mode-label": "Mód Bulc"
@@ -1982,7 +2007,8 @@
         "cancel": "{{common.cancel}}",
         "delete": "{{common.delete}}",
         "pattern": "Ní mór don Óstríomhaire a bheith ina http(s):// url bailí",
-        "required": "{{validation.required-field}}"
+        "required": "{{validation.required-field}}",
+        "api-key-tooltip": "Ní gá logáil isteach go huathoibríoch nuair a úsáideann an t-óstach OIDC"
     },
     "stream-pipe": {
         "on-deck": "{{dashboard.on-deck-title}}",
@@ -2174,7 +2200,20 @@
         "confirm-delete-collection": "An bhfuil tú cinnte gur mian leat an bailiúchán a scriosadh? Ní féidir é seo a chealú.",
         "confirm-delete-annotations": "An bhfuil tú cinnte gur mian leat na nótaí a scriosadh? Ní féidir é seo a chealú.",
         "annotations-deleted": "Scriosadh an nóta",
-        "redownload-confirm": "D’íoslódáil tú {{title}} roimhe seo ar {{date}}. Ar mhaith leat é a athíoslódáil?"
+        "redownload-confirm": "D’íoslódáil tú {{title}} roimhe seo ar {{date}}. Ar mhaith leat é a athíoslódáil?",
+        "save-remap-rule": "Sábháil \"{{from}} → {{to}}\" mar riail athmhapála le haghaidh allmhairí amach anseo?",
+        "import-complete": "Iompórtáil críochnaithe",
+        "failed-to-validate": "Theip ar bhailíochtú an chomhaid",
+        "failed-to-import": "Theip ar {{name}} a iompórtáil",
+        "redownload-confirm-bulk": "D’íoslódáil tú (cuid de) {{title}} roimhe seo. Ar mhaith leat na míreanna seo a athíoslódáil?",
+        "confirm-delete-client-device": "An bhfuil tú cinnte gur mian leat an gléas seo a scriosadh?",
+        "confirm-delete-cbl-remap-rule": "An bhfuil tú cinnte gur mian leat an riail athmhapála seo a scriosadh?",
+        "cbl-remap-rule-created": "Riail athmhapála cruthaithe",
+        "cbl-remap-rule-deleted": "Scriosadh riail athmhapála",
+        "cbl-remap-rule-promoted": "Riail curtha chun cinn go domhanda",
+        "cbl-remap-rule-demoted": "Riail íslithe go raon feidhme úsáideora",
+        "confirm-delete-read-from-readinglist": "An bhfuil tú cinnte gur mian leat gach eagrán léite a bhaint den liosta léitheoireachta seo? Ní féidir é seo a chealú.",
+        "reading-list-sync-enqueued": "Tá an Liosta Léitheoireachta curtha sa scuaine le haghaidh sioncrónaithe."
     },
     "read-time-pipe": {
         "less-than-hour": "<1 Uair",
@@ -2262,7 +2301,13 @@
         "export": "Easpórtáil",
         "like": "Is maith liom",
         "unlike": "Bain na maith liom",
-        "edit-device-name": "Cuir Ainm in Eagar"
+        "edit-device-name": "Cuir Ainm in Eagar",
+        "export-v1": "CBL v1",
+        "export-v1-tooltip": "Úsáid CBL v1 (XML)",
+        "export-v2": "CBL v2",
+        "export-v2-tooltip": "Úsáid CBL v2 (JSON)",
+        "mark-as-read-with-session": "Marcáil mar Léite le Seisiún",
+        "mark-as-read-with-session-tooltip": "Marcáil an dul chun cinn mar léite go hiomlán agus gin seisiún dó"
     },
     "preferences": {
         "left-to-right": "Clé go Deas",
@@ -2344,14 +2389,25 @@
         "annotations-tab": "Anótálacha",
         "overview-tab": "Forbhreathnú",
         "management-tab": "Bainistíocht",
-        "activity-tab": "Gníomhaíocht"
+        "activity-tab": "Gníomhaíocht",
+        "external-ids-tab": "Aitheantóirí Seachtracha",
+        "aliases-tab": "Leasainmneacha",
+        "chapters-tab": "Caibidlí",
+        "dashboard-tab": "Painéal Rialaithe",
+        "sidenav-tab": "Nascleanúint Taobh",
+        "external-sources-tab": "Foinsí Seachtracha",
+        "image-reader-tab": "Léitheoir Íomhánna",
+        "book-reader-tab": "Léitheoir Leabhar",
+        "pdf-reader-tab": "Léitheoir PDF",
+        "bookmark-image-tab": "Íomhá",
+        "bookmark-text-tab": "Téacs"
     },
     "common": {
         "reset-to-default": "Athshocraigh go Réamhshocrú",
         "close": "Dún",
         "clear": "Glan",
         "filter": "Scagaire",
-        "cancel": "Cuir ar ceal",
+        "cancel": "Cealaigh",
         "create": "Cruthaigh",
         "save": "Sábháil",
         "reset": "Athshocraigh",
@@ -2697,7 +2753,9 @@
         "page-calc-method-tooltip": "{{reader-settings.page-calc-method-tooltip}}",
         "set-devices": "Socraigh Gléasanna",
         "select-devices-for": "Socraigh gléasanna do {{name}}",
-        "breakpoint-pipe-never": "{{breakpoint-pipe.never}}"
+        "breakpoint-pipe-never": "{{breakpoint-pipe.never}}",
+        "disable-bookmark-icon-label": "Díchumasaigh Deilbhín Leabharmharcanna",
+        "disable-bookmark-icon-tooltip": "Baintear deilbhíní leabharmharcanna as íomhánna sa léitheoir"
     },
     "bulk-set-reading-profile-modal": {
         "filter-label": "{{common.filter}}",
@@ -2837,7 +2895,8 @@
         "reset-tooltip": "Athshocraigh aitheantais sheachtracha ó gach úsáideoir, bain úsáid as seo chun naisc idir úsáideoirí i Kavita agus do sholáthraí aitheantais a athshocrú",
         "reset-confirm": "An bhfuil tú cinnte gur mian leat aitheantóirí seachtracha a athshocrú ó gach úsáideoir?",
         "reset-success": "Athshocraíodh aitheantóirí seachtracha do gach úsáideoir, ath-fhíordheimhniú chun nasc a dhéanamh",
-        "auto-save-required": "D'athraigh tú socruithe ríthábhachtacha, sábháil go huathoibríoch iad le go gcoimeádfar iad"
+        "auto-save-required": "D'athraigh tú socruithe ríthábhachtacha, sábháil de láimh iad le go mairfidh siad",
+        "checking-authority": "Ag seiceáil an bhfuil an t-údarás bailí, bí foighneach le do thoil..."
     },
     "identity-provider-pipe": {
         "kavita": "Kavita",
@@ -2848,9 +2907,9 @@
         "configure-step": "Cumraigh",
         "conflicts-step": "Réiteach imbhuailtí",
         "finalize-step": "Críochnaigh",
-        "prev": "{{import-cbl-modal.prev}}",
-        "import": "{{import-cbl-modal.import}}",
-        "next": "{{import-cbl-modal.next}}",
+        "prev": "{{import-cbl.prev}}",
+        "import": "{{import-cbl.import}}",
+        "next": "{{import-cbl.next}}",
         "save": "{{common.save}}",
         "import-description": "Uaslódáil comhad atá easpórtáilte agat féin, nó ag duine eile, chun do shocruithe reatha a athsholáthar nó a chumasc le do shocruithe reatha.",
         "select-files-warning": "Ní mór duit comhad json a uaslódáil le leanúint ar aghaidh",
@@ -2896,7 +2955,9 @@
         "create": "Cruthaigh",
         "contains-spoilers-label": "{{annotation-card.contains-spoilers-label}}",
         "edit": "Cuir in Eagar",
-        "delete": "Scrios"
+        "delete": "Scrios",
+        "read-more": "{{read-more.read-more}}",
+        "read-less": "{{read-more.read-less}}"
     },
     "view-bookmark-drawer": {
         "title": "Leabharmharcanna",
@@ -2938,17 +2999,12 @@
     },
     "font-manager": {
         "description": "Tagann roinnt clónna ionsuite le léitheoir epub Kavita, cuir do chlónna féin leis anseo. Uaslódáil comhad, nó bain úsáid as url clónna google. Féach ar an <a href='{{wikiLink}}' target='_blank' rel='noreferrer noopener'>vicí</a> le haghaidh tuilleadh eolais.",
-        "enter-an-url-pre-title": "Cuir isteach {{url}}",
-        "url": "url",
         "add": "{{common.add}}",
         "drag-n-drop": "{{cover-image-chooser.drag-n-drop}}",
         "upload": "{{cover-image-chooser.upload}}",
         "upload-continued": "comhad cló",
         "preview-default": "Uaslódáil do chló féin trí chomhad nó url Google Font",
         "delete": "{{common.delete}}",
-        "url-label": "Url",
-        "back": "Ar ais",
-        "load": "Luchtaigh",
         "no-preview": "Ní féidir réamhamharc a dhéanamh ar an gcló seo. Glacfaidh sé seo an stíl réamhshocraithe ón leabhar.",
         "brown-fox": "Léimeann an sionnach donn tapaidh thar an madra leisciúil",
         "filter-system-fonts-label": "Clónna Córas Scagaire"
@@ -3025,7 +3081,8 @@
         "image-only": "Íomhánna",
         "add-auth-key": "Nua",
         "description": "Is cosúil le pasfhocal Eochair Údaraithe. Má rothlaítear í, cuirfear aon chliaint atá ann cheana ar neamhní.",
-        "copy-key": "{{common.copy}}"
+        "copy-key": "{{common.copy}}",
+        "clients-opds-error": "Theip ar lódáil url OPDS don eochair: {{key}}"
     },
     "create-auth-key": {
         "create-title": "Cruthaigh Eochair Údaraithe",
@@ -3083,7 +3140,7 @@
         "progress": "Lean ar aghaidh",
         "progress-incognito": "Lean ar aghaidh i bhfocail neamhaithnidithe",
         "full-read": "Athléigh",
-        "full-read-incognito": "Athléigh incognito"
+        "full-read-incognito": "Léigh gan aithne"
     },
     "client-device-auth-type-pipe": {
         "unknown": "Anaithnid",
@@ -3339,7 +3396,8 @@
         "yesterday": "Inné",
         "pagination-label": "Leathanachú gníomhaíochta",
         "page-info": "Leathanach {{current}} de {{total}} ({{items}} taifead san iomlán)",
-        "num-more": "{{num}} eile"
+        "num-more": "{{num}} eile",
+        "generated-session-tooltip": "Gineadh an seisiún léitheoireachta seo go huathoibríoch bunaithe ar mheastachán"
     },
     "user-stats-info-cards": {
         "pages-read-by-year-title": "Leathanaigh léite de réir bliana",
@@ -3428,5 +3486,184 @@
         "unlink-oidc": "Bain nasc OIDC",
         "confirm-unlink": "An bhfuil tú cinnte gur mian leat do nasc OIDC a bhaint?",
         "confirm-unlink-extra": "Má tá tú fíordheimhnithe faoi láthair leis an gcuntas OIDC, déanfar tú a logáil amach. Is féidir leat nascadh arís trí ríomhphost ag am ar bith."
+    },
+    "edit-external-metadata-form": {
+        "aniListId-label": "Aitheantas AniList",
+        "malId-label": "Aitheantas MAL",
+        "mangaBakaId-label": "Aitheantas MangaBaka",
+        "hardcoverId-label": "Aitheantas Clúdaigh Chrua",
+        "comicVineId-label": "Aitheantas Fíniúna Greannáin",
+        "metronId-label": "Aitheantas Metron"
+    },
+    "cbl-match-tier-pipe": {
+        "remap-rule": "Riail Athmhapála",
+        "external-id": "Aitheantas Seachtrach",
+        "exact-name": "Ainm Beacht",
+        "comicvine-naming": "Ainmniú Fíniúna Comic",
+        "article-stripped": "Airteagal Bainte",
+        "reprint-stripped": "Athchló Striopáilte",
+        "alternate-series": "Sraith Mhalartach",
+        "user-decision": "Cinneadh Úsáideora",
+        "unmatched": "Gan Mheaitseáil"
+    },
+    "cbl-import-reason-pipe": {
+        "chapter-missing": "Caibidil ar Iarraidh",
+        "volume-missing": "Imleabhar ar Iarraidh",
+        "series-missing": "Sraith Gan Aimsiú",
+        "name-conflict": "Coimhlint Ainm",
+        "all-series-missing": "Gach Sraith ar Iarraidh",
+        "empty-file": "Comhad Folamh",
+        "series-collision": "Cluiche Il-Shraith",
+        "all-chapter-missing": "Gach Caibidil ar Iarraidh",
+        "success": "Rath",
+        "invalid-file": "Comhad Neamhbhailí"
+    },
+    "cbl-manager": {
+        "browse-repo": "Brabhsáil CBLanna",
+        "description": "Is féidir leat Liostaí Léitheoireachta a allmhairiú ó chomhad, ó url, nó brabhsáil tríd an CBL Repo. Déanfar liostaí a chruthaítear ó fhoinse ar líne a nuashonrú go huathoibríoch sa chúlra nó ar éileamh.",
+        "url": "URL chuig CBL",
+        "preview-default": "Uaslódáil do chomhad CBL v1/v2 féin le haghaidh allmhairithe",
+        "enter-an-url-pre-title": "{{font-manager.enter-an-url-pre-title}}",
+        "drag-n-drop": "{{cover-image-chooser.drag-n-drop}}",
+        "upload": "{{cover-image-chooser.upload}}",
+        "upload-continued": "comhad cbl",
+        "downloaded": "Íoslódáilte",
+        "url-label": "URL",
+        "load": "Luchtaigh",
+        "back": "Ar ais",
+        "provider-url": "URL",
+        "provider-file": "Comhad",
+        "update-available": "Nuashonrú ar fáil",
+        "search-placeholder": "Cuardaigh liostaí léitheoireachta...",
+        "filter-has-update": "Tá nuashonrú ann",
+        "filter-all": "Gach",
+        "filter-local": "Áitiúil",
+        "no-results": "Gan aon liostaí léitheoireachta comhoiriúnacha",
+        "add": "{{common.add}}",
+        "sync": "Sioncrónaigh",
+        "delete": "{{common.delete}}",
+        "view-list": "Féach ar an Liosta Léitheoireachta",
+        "last-synced": "Sioncronaithe go deireanach {{date}}",
+        "source": "Foinse",
+        "not-authorized": "Níl an cumas agat idirghníomhú leis an ábhar seo"
+    },
+    "manage-remap-rules-modal": {
+        "title": "Bainistigh Rialacha Athmhapála",
+        "close": "{{common.close}}",
+        "no-rules": "Níl aon rialacha athmhapála sábháilte",
+        "delete-rule": "{{common.delete}}",
+        "volume-num": "{{common.volume-num-shorthand}}",
+        "issue-num": "{{common.issue-num-shorthand}}",
+        "global": "Domhanda",
+        "series-level": "Leibhéal sraithe",
+        "volume-target": "{{common.volume-num-shorthand}}"
+    },
+    "manage-remap-rules": {
+        "new-rule-title": "Riail Athmhapála Nua",
+        "cbl-series-name-label": "Ainm Sraith CBL",
+        "cbl-series-name-placeholder": "Cuir isteach ainm sraithe CBL...",
+        "kavita-series-label": "Sraith Kavita",
+        "save": "{{common.save}}",
+        "cancel": "{{common.cancel}}",
+        "my-rules-header": "Mo Rialacha",
+        "global-rules-header": "Rialacha Domhanda",
+        "other-users-rules-header": "Rialacha Úsáideoirí Eile",
+        "cbl-name-col": "Ainm CBL",
+        "created-col": "Cruthaithe",
+        "created-by-col": "Cruthaithe ag",
+        "user-col": "Úsáideoir",
+        "delete": "{{common.delete}}",
+        "promote": "{{actionable.promote}}",
+        "promote-tooltip": "Ardú céime chuig riail dhomhanda",
+        "demote": "Ísligh céim",
+        "demote-tooltip": "Ísligh síos go riail úsáideora",
+        "by": "ag",
+        "volume-num": "{{common.volume-num-shorthand}}",
+        "issue-num": "{{common.issue-num-shorthand}}",
+        "cbl-volume-label": "Imleabhar CBL",
+        "cbl-volume-placeholder": "m.sh. 2016",
+        "series-level": "Leibhéal sraithe",
+        "create-rule-title": "Cruthaigh Riail",
+        "edit-rule-title": "Cuir Riail Athmhapála in Eagar",
+        "cbl-volume-col": "Imleabhar CBL",
+        "cbl-issue-col": "Ceist CBL",
+        "mapped-series-col": "Sraith Mapáilte",
+        "mapped-vol-issue-col": "Imleabhar / Eisiúint Mapáilte",
+        "cbl-number-label": "Uimhir Fadhbanna CBL",
+        "cbl-number-placeholder": "m.sh. 1",
+        "kavita-chapter-label": "Caibidil Kavita (roghnach)",
+        "edit": "{{common.edit}}"
+    },
+    "browse-cbl-repo-modal": {
+        "title": "Brabhsálaí Stórais CBL",
+        "rate-limit-warning": "Tá Kavita ag druidim le Teorainn Ráta GitHub a bhaint amach! Tá {{remaining}} glao fágtha agat.",
+        "rate-limit-resets": "Athshocraítear an Teorainn Ráta {{time}}",
+        "breadcrumb-alt-label": "Blúiríní aráin",
+        "root-alt-label": "Fillteán fréimhe",
+        "instructions": "Brabhsáil le haghaidh Liostaí Léitheoireachta le híoslódáil. Coinneofar comhaid íoslódáilte sioncrónaithe le do leabharlann.",
+        "file-browser-label": "Brabhsálaí Stórais CBL",
+        "type-header": "Cineál Comhaid",
+        "name-header": "Ainm",
+        "select-all-files": "Roghnaigh Uile",
+        "loading": "{{common.loading}}",
+        "select-file-alt-label": "Roghnaigh Comhad: {{name}}",
+        "empty-directory": "Eolaire Folamh",
+        "cancel": "{{common.cancel}}",
+        "served-from-cache": "Freastalaíodh ón Taisce",
+        "download": "Íoslódáil",
+        "owned-label": "Faoi úinéireacht",
+        "close": "{{common.close}}"
+    },
+    "reading-list-provider-pipe": {
+        "none": "Córas",
+        "file": "Comhad",
+        "url": "URL"
+    },
+    "import-cbl": {
+        "close": "{{common.close}}",
+        "title": "Iompórtáil CBL",
+        "help-label": "{{common.help}}",
+        "import-description": "Chun tús a chur leis, allmhairigh comhad .cbl. Déanfaidh Kavita roinnt seiceálacha roimh an allmhairiú. Cuirfidh roinnt céimeanna bac ar bhogadh ar aghaidh mar gheall ar fhadhbanna leis an gcomhad.",
+        "validate-description": "Tá na comhaid uile bailíochtú chun a fháil amach an bhfuil aon oibríochtaí le déanamh ar an liosta. Ní bhogfaidh aon liostaí nár éirigh leo go dtí an chéad chéim eile. Deisigh na comhaid CBL agus déan iarracht eile.",
+        "validate-warning": "Tá fadhbanna leis an CBL a chuirfidh cosc ar allmhairiú. Ceartaigh na fadhbanna seo agus déan iarracht arís.",
+        "validate-no-issue-description": "Níor aimsíodh aon fhadhbanna le CBL, brúigh ar aghaidh.",
+        "dry-run-description": "Is tástáil thrialach í seo agus taispeánann sí cad a tharlóidh má bhrúnn tú Ar Aghaidh agus má dhéanann tú an t-allmhairiú. Ní allmhaireofar aon Teipeanna.",
+        "prev": "Roimhe Seo",
+        "import": "Iompórtáil",
+        "restart": "Atosaigh",
+        "next": "Ar Aghaidh",
+        "import-step": "Iompórtáil CBLanna",
+        "validate-cbl-step": "Bailíochtú CBL",
+        "dry-run-step": "Rith Tirim",
+        "final-import-step": "Céim Deiridh",
+        "comicvine-parsing-label": "Úsáid meaitseáil Sraith Comic Vine",
+        "cbl-repo": "Is féidir leat go leor liostaí léitheoireachta a fháil i <a href='https://github.com/DieselTech/CBL-ReadingLists' target='_blank' rel='noopener noreferrer'>stór pobail</a>."
+    },
+    "authority-validation-result-pipe": {
+        "success": "Tá an t-údarás bailí",
+        "invalid-authority": "Is féidir le Kavita an chumraíocht OIDC a luchtú, ach ní hionann an t-eisitheoir",
+        "failure": "Ní féidir le Kavita an chumraíocht OIDC a luchtú",
+        "not-applicable": "Ní féidir le Kavita an t-údarás a bhailíochtú mar níl sé cumraithe",
+        "missing-https": "{{manage-oidc-connect.tls-required}}"
+    },
+    "file-drag-and-drop-upload": {
+        "drag-n-drop": "{{cover-image-chooser.drag-n-drop}}",
+        "upload": "{{cover-image-chooser.upload}}",
+        "enter-an-url-pre-title": "Cuir isteach {{url}}",
+        "url": "url",
+        "url-label": "Url",
+        "back": "Ar ais",
+        "load": "Luchtaigh"
+    },
+    "cron-frequency-pipe": {
+        "disabled": "Míchumasaithe",
+        "daily": "Laethúil",
+        "weekly": "Seachtainiúil",
+        "custom": "Saincheaptha"
+    },
+    "setting-cron-item": {
+        "custom-label": "Sceideal Saincheaptha (Nótaíocht Cron)",
+        "required-field": "{{validation.required-field}}",
+        "cron-notation": "Ní nóta Cron bailí é seo"
     }
 }

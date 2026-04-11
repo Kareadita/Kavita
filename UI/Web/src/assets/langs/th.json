@@ -122,8 +122,6 @@
         "applied": "บันทึกแล้ว",
         "updated-toastr": "ค่าเริ่มต้นของไซต์ได้รับการอัปเดตเป็น {{name}}",
         "delete": "{{common.delete}}",
-        "drag-n-drop": "{{cover-image-chooser.drag-n-drop}}",
-        "upload": "{{cover-image-chooser.upload}}",
         "add": "{{common.add}}"
     },
     "theme": {
@@ -578,8 +576,7 @@
     "manage-tasks-settings": {
         "reset-to-default": "{{common.reset-to-default}}",
         "reset": "{{common.reset}}",
-        "save": "{{common.save}}",
-        "required": "{{validation.required-field}}"
+        "save": "{{common.save}}"
     },
     "edit-collection-tags": {
         "required-field": "{{validation.required-field}}",

@@ -169,8 +169,6 @@
         "apply": "{{common.apply}}",
         "applied": "Aplikované",
         "delete": "{{common.delete}}",
-        "drag-n-drop": "{{cover-image-chooser.drag-n-drop}}",
-        "upload": "{{cover-image-chooser.upload}}",
         "add": "{{common.add}}",
         "default-theme": "Predvolené",
         "active-theme": "Aktívne",
@@ -1141,13 +1139,7 @@
         "reset-to-default": "{{common.reset-to-default}}",
         "reset": "{{common.reset}}",
         "save": "{{common.save}}",
-        "required": "{{validation.required-field}}",
-        "cron-notation": "Toto nie je platný zápis Cron",
         "last-executed-header": "Posledne vykonané",
-        "disabled": "Zakázané",
-        "daily": "Denne",
-        "weekly": "Týždenne",
-        "custom": "Vlastné",
         "convert-media-task": "Previesť médiá na cieľové kódovanie",
         "convert-media-task-desc": "Spustí dlhotrvajúcu úlohu, ktorá skonvertuje všetky médiá spravované kavitou na cieľové kódovanie. Je to pomalé (najmä na zariadeniach ARM).",
         "bust-cache-task-desc": "Preruší medzipamäť Kavity+, - malo by sa používať iba pri ladení zlých zápasov.",
@@ -1169,7 +1161,6 @@
         "check-for-updates-task": "Skontroluj aktualizácie",
         "check-for-updates-task-desc": "Zistite, či sú pred vašou verziou nejaké stabilné vydania.",
         "clean-up-task": "Všeobecné čistenie",
-        "custom-label": "Vlastný rozvrh (Cron notácia)",
         "recurring-tasks-title": "{{title}}",
         "cron-header": "Cron",
         "convert-media-task-success": "Konverzia médií na cieľové kódovanie bola zaradená do poradia",
@@ -1275,7 +1266,6 @@
     "collection-detail": {
         "no-data": "Neexistujú žiadne položky. Skúste pridať sériu.",
         "no-data-filtered": "Vášmu aktuálnemu filtru nezodpovedajú žiadne položky.",
-        "title-alt": "Kavita – zbierka {{collectionName}}",
         "item-count": "{{common.item-count}}",
         "sync-progress": "Zhromaždené série: {{title}}",
         "last-sync": "Posledná synchronizácia: {{date}}"
@@ -1337,8 +1327,7 @@
         "items-title": "Položky",
         "edit-label": "Režim úprav",
         "reorder-alt": "Preusporiadať položky",
-        "date-range-title": "Rozsah dátumov",
-        "dnd-warning": "Funkcia „drag and drop“ nie je k dispozícii na mobilných zariadeniach alebo ak zoznam na čítanie obsahuje viac ako 100 položiek."
+        "date-range-title": "Rozsah dátumov"
     },
     "events-widget": {
         "title-alt": "Aktivita",
@@ -1438,23 +1427,7 @@
     },
     "import-cbl-modal": {
         "close": "{{common.close}}",
-        "import-description": "Ak chcete začať, importujte súbor \".cbl\". Kavita pred importovaním vykoná viacero kontrol. Niektoré kroky budú blokované kvôli problémom so súborom.",
-        "validate-description": "Všetky súbory boli overené, aby sa zistilo, či je v zozname potrebné vykonať nejaké operácie. Všetky zoznamy, ktoré zlyhali, sa neposunú do ďalšieho kroku. Opravte súbory CBL a skúste to znova.",
-        "validate-warning": "Existujú problémy s CBL, ktoré bránia importu. Opravte tieto problémy a skúste to znova.",
-        "validate-no-issue-description": "Nenašli sa žiadne problémy s CBL, stlačte Ďalej.",
-        "dry-run-description": "Toto je suchý chod a ukazuje, čo sa stane, ak stlačíte Ďalej a vykonáte import. Všetky zlyhania nebudú importované.",
-        "prev": "Predchádzajúce",
-        "import": "Import",
-        "restart": "Reštart",
-        "next": "Ďalej",
-        "import-step": "Importovať CBL",
-        "validate-cbl-step": "Overiť CBL",
-        "dry-run-step": "Suchý beh",
-        "final-import-step": "Záverečný krok",
-        "title": "CBL Importovanie",
-        "help-label": "{{common.help}}",
-        "cbl-repo": "Mnoho zoznamov na čítanie nájdete v komunitnom <a href='https://github.com/DieselTech/CBL-ReadingLists' target='_blank' rel='noopener noreferrer'>repozitári</a>.",
-        "comicvine-parsing-label": "Použite zhodu Comic Vine Serií"
+        "title": "CBL Importovanie"
     },
     "pdf-reader": {
         "loading-message": "Načítavanie...",
@@ -2775,17 +2748,12 @@
     },
     "font-manager": {
         "description": "Čítačka epub súborov Kavita obsahuje niekoľko vstavaných fontov, pridajte si tu svoje vlastné fonty. Nahrajte súbor alebo použite URL adresu fontov Google. Viac informácií nájdete na <a href='{{wikiLink}}' target='_blank' rel='noreferrer noopener'>wiki</a>.",
-        "enter-an-url-pre-title": "Zadajte {{url}}",
-        "url": "URL",
         "add": "{{common.add}}",
         "drag-n-drop": "{{cover-image-chooser.drag-n-drop}}",
         "upload": "{{cover-image-chooser.upload}}",
         "upload-continued": "súbor s písmom",
         "preview-default": "Nahrajte si vlastné písmo cez súbor alebo URL adresu písma Google",
         "delete": "{{common.delete}}",
-        "url-label": "URL",
-        "back": "Späť",
-        "load": "Načítať",
         "no-preview": "Toto písmo nie je možné zobraziť v ukážke. Predvolený štýl sa použije z knihy.",
         "brown-fox": "Rýchla hnedá líška preskakuje lenivého psa",
         "filter-system-fonts-label": "Filtrovať systémové písma"
