@@ -61,4 +61,17 @@ public class ReadingListBuilder : IEntityBuilder<ReadingList>
         _readingList.AppUserId = userId;
         return this;
     }
+
+    public ReadingListBuilder WithStartingYear(int year)
+    {
+        _readingList.StartingYear = year;
+        return this;
+    }
+
+    public ReadingListBuilder WithTag(ReadingListTag tag)
+    {
+        _readingList.Tags ??= new List<ReadingListTag>();
+        _readingList.Tags.Add(tag);
+        return this;
+    }
 }
