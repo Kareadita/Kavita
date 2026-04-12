@@ -34,6 +34,9 @@ import {FilterV2} from "../../_models/metadata/v2/filter-v2";
 import {FilterSettingsBase, ValidFilterEntity} from "../../metadata-filter/filter-settings";
 import {ActionItem} from "../../_models/actionables/action-item";
 import {ActionResult} from "../../_models/actionables/action-result";
+import {PersonSortField} from "../../_models/metadata/v2/person-sort-field";
+import {MetadataService} from "../../_services/metadata.service";
+import {ReadingListSortField} from "../../_models/metadata/v2/reading-list-sort-field";
 
 
 const ANIMATION_TIME_MS = 0;
@@ -63,6 +66,7 @@ export class CardDetailLayoutComponent<TFilter extends number, TSort extends num
   private readonly jumpbarService = inject(JumpbarService);
   private readonly router = inject(Router);
   private readonly destroyRef = inject(DestroyRef);
+  private readonly metadataService = inject(MetadataService);
 
 
   header = input('');
@@ -143,7 +147,11 @@ export class CardDetailLayoutComponent<TFilter extends number, TSort extends num
     if (this.filteringDisabled()) return false;
 
     const filter = this.filterSignal();
-    return filter?.sortOptions?.sortField != SeriesSortField.SortName || !filter?.sortOptions.isAscending;
+    const seriesDefault = filter?.sortOptions?.sortField != SeriesSortField.SortName;
+    const readingListDefault = filter?.sortOptions?.sortField !== ReadingListSortField.Title;
+    const personDefault = filter?.sortOptions?.sortField !== PersonSortField.Name;
+
+    return (seriesDefault || readingListDefault || personDefault) || !filter?.sortOptions?.isAscending;
   });
 
   trackItem = (index: number, item: any) => this.trackByIdentity()(index, item);
