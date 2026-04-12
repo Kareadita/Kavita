@@ -23,8 +23,8 @@ export class CollectionTagService {
     return this.httpClient.get<UserCollection>(this.baseUrl + 'collection/single?collectionId=' + collectionId);
   }
 
-  allCollections(ownedOnly = false) {
-    return this.httpClient.get<UserCollection[]>(this.baseUrl + 'collection?ownedOnly=' + ownedOnly);
+  allCollections(ownedOnly = false, sortByLastModified = false) {
+    return this.httpClient.get<UserCollection[]>(this.baseUrl + `collection?ownedOnly=${ownedOnly}&sortByLastModified=${sortByLastModified}`);
   }
 
   allCollectionsForSeries(seriesId: number, ownedOnly = false) {

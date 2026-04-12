@@ -296,7 +296,7 @@ export class ActionService {
         colRef.setInput('inputItems', []);
         colRef.setInput('loading', true);
 
-        this.collectionService.allCollections(true).pipe(
+        this.collectionService.allCollections(true, true).pipe(
           take(1),
           catchError(() => EMPTY),
           finalize(() => colRef.setInput('loading', false))
@@ -984,7 +984,7 @@ export class ActionService {
         colRef.setInput('inputItems', []);
         colRef.setInput('loading', true);
 
-        this.collectionService.allCollections(true).pipe(
+        this.collectionService.allCollections(true, true).pipe(
           take(1),
           catchError(() => EMPTY),
           finalize(() => colRef.setInput('loading', false))

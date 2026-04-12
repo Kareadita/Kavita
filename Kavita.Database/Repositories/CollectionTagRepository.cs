@@ -59,15 +59,20 @@ public class CollectionTagRepository(DataContext context, IMapper mapper) : ICol
     }
 
     public async Task<IEnumerable<AppUserCollectionDto>> GetCollectionDtosAsync(int userId,
-        bool includePromoted = false, CancellationToken ct = default)
+        bool includePromoted = false, bool sortByLastModified = false, CancellationToken ct = default)
     {
         var ageRating = await context.AppUser.GetUserAgeRestriction(userId, ct: ct);
-        return await context.AppUserCollection
+        var query = context.AppUserCollection
             .Where(uc => uc.AppUserId == userId || (includePromoted && uc.Promoted))
-            .RestrictAgainstAgeRestriction(ageRating)
-            .OrderBy(uc => uc.Title)
+            .RestrictAgainstAgeRestriction(ageRating);
+
+        query = sortByLastModified ? query.OrderByDescending(l => l.LastModified) : query.OrderBy(l => l.Title.ToUpper());
+
+        var finalQuery = query
             .ProjectTo<AppUserCollectionDto>(mapper.ConfigurationProvider)
             .ToListAsync(ct);
+
+        return await finalQuery;
     }
 
     public async Task<AppUserCollectionDto?> GetCollectionDtoAsync(int collectionId, int userId, CancellationToken ct = default)

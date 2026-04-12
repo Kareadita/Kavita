@@ -348,7 +348,7 @@ export class MetadataService {
           return {value: status.id, label: status.title}
         })));
       case SeriesFilterField.CollectionTags:
-        return this.collectionTagService.allCollections().pipe(map(statuses => statuses.map(status => {
+        return this.collectionTagService.allCollections(false, false).pipe(map(statuses => statuses.map(status => {
           return {value: status.id, label: status.title}
         })));
       case SeriesFilterField.Characters: return this.getPersonOptions(PersonRole.Character);

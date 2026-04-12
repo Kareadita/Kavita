@@ -35,12 +35,14 @@ public class CollectionController(IUnitOfWork unitOfWork, ICollectionTagService 
     /// <summary>
     /// Returns all Collection tags for a given User
     /// </summary>
+    /// <param name="ownedOnly">Exclude Promoted</param>
+    /// <param name="sortByLastModified">Order by Last Modified rather than on Title</param>
     /// <returns></returns>
     [HttpGet]
-    public async Task<ActionResult<IEnumerable<AppUserCollectionDto>>> GetAllTags(bool ownedOnly = false)
+    public async Task<ActionResult<IEnumerable<AppUserCollectionDto>>> GetAllTags(bool ownedOnly = false, bool sortByLastModified = false)
     {
         var ct = HttpContext.RequestAborted;
-        return Ok(await unitOfWork.CollectionTagRepository.GetCollectionDtosAsync(UserId, !ownedOnly, ct));
+        return Ok(await unitOfWork.CollectionTagRepository.GetCollectionDtosAsync(UserId, !ownedOnly, sortByLastModified, ct));
     }
 
     /// <summary>

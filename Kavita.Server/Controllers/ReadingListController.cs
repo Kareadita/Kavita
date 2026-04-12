@@ -21,7 +21,6 @@ using Kavita.Models.Entities.Enums;
 using Kavita.Server.Attributes;
 using Kavita.Server.Extensions;
 using Kavita.Services.Reading;
-using Kavita.Services.ReadingLists;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 

@@ -42,7 +42,7 @@ public interface ICollectionTagRepository
     /// <param name="includePromoted"></param>
     /// <param name="ct"></param>
     /// <returns></returns>
-    Task<IEnumerable<AppUserCollectionDto>> GetCollectionDtosAsync(int userId, bool includePromoted = false, CancellationToken ct = default);
+    Task<IEnumerable<AppUserCollectionDto>> GetCollectionDtosAsync(int userId, bool includePromoted = false, bool sortByLastModified = false, CancellationToken ct = default);
     Task<PagedList<AppUserCollectionDto>> GetCollectionDtosPagedAsync(int userId, UserParams userParams, bool includePromoted = false, CancellationToken ct = default);
     Task<IEnumerable<AppUserCollectionDto>> GetCollectionDtosBySeriesAsync(int userId, int seriesId, bool includePromoted = false, CancellationToken ct = default);
 
