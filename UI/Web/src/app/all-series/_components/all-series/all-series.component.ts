@@ -33,7 +33,7 @@ import {FilterComparison} from "../../../_models/metadata/v2/filter-comparison";
 import {BrowseTitlePipe} from "../../../_pipes/browse-title.pipe";
 import {MetadataService} from "../../../_services/metadata.service";
 import {Observable} from "rxjs";
-import {FilterField} from "../../../_models/metadata/v2/filter-field";
+import {SeriesFilterField} from "../../../_models/metadata/v2/series-filter-field";
 import {SeriesFilterSettings} from "../../../metadata-filter/filter-settings";
 import {FilterStatement} from "../../../_models/metadata/v2/filter-statement";
 import {Select2Option} from "ng-select2-component";
@@ -67,10 +67,10 @@ export class AllSeriesComponent implements OnInit {
   series: Series[] = [];
   loadingSeries = false;
   pagination: Pagination = new Pagination();
-  filter: FilterV2<FilterField, SeriesSortField> | undefined = undefined;
+  filter: FilterV2<SeriesFilterField, SeriesSortField> | undefined = undefined;
   filterSettings: SeriesFilterSettings = new SeriesFilterSettings();
   filterOpen: EventEmitter<boolean> = new EventEmitter();
-  filterActiveCheck!: FilterV2<FilterField>;
+  filterActiveCheck!: FilterV2<SeriesFilterField>;
   filterActive: boolean = false;
   jumpbarKeys: Array<JumpKey> = [];
   browseTitlePipe = new BrowseTitlePipe();
@@ -87,11 +87,11 @@ export class AllSeriesComponent implements OnInit {
     })
 
     this.route.data.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(data => {
-      this.filter = data['filter'] as FilterV2<FilterField, SeriesSortField>;
+      this.filter = data['filter'] as FilterV2<SeriesFilterField, SeriesSortField>;
 
       if (this.filter == null) {
         this.filter = this.metadataService.createDefaultFilterDto('series');
-        this.filter.statements.push(this.metadataService.createDefaultFilterStatement('series') as FilterStatement<FilterField>);
+        this.filter.statements.push(this.metadataService.createDefaultFilterStatement('series') as FilterStatement<SeriesFilterField>);
       }
 
       this.title = this.route.snapshot.queryParamMap.get('title') || this.filter!.name || this.title;
@@ -102,7 +102,7 @@ export class AllSeriesComponent implements OnInit {
         const field = this.filter!.statements[0].field;
 
         // This api returns value as string and number, it will complain without the casting
-        (this.metadataService.getOptionsForFilterField<FilterField>(field, 'series') as Observable<Select2Option[]>).subscribe((opts: Select2Option[]) => {
+        (this.metadataService.getOptionsForFilterField<SeriesFilterField>(field, 'series') as Observable<Select2Option[]>).subscribe((opts: Select2Option[]) => {
 
           const matchingOpts = opts.filter(m => `${m.value}` === `${this.filter!.statements[0].value}`);
           if (matchingOpts.length === 0) return;
@@ -119,7 +119,7 @@ export class AllSeriesComponent implements OnInit {
       }
 
       this.filterActiveCheck = this.metadataService.createDefaultFilterDto('series');
-      this.filterActiveCheck.statements.push(this.metadataService.createDefaultFilterStatement('series') as FilterStatement<FilterField>);
+      this.filterActiveCheck.statements.push(this.metadataService.createDefaultFilterStatement('series') as FilterStatement<SeriesFilterField>);
       this.filterSettings.presetsV2 = this.filter;
 
       this.cdRef.markForCheck();
@@ -137,7 +137,7 @@ export class AllSeriesComponent implements OnInit {
     return this.title === translate('side-nav.all-series') && this.filter && this.filter.statements.length === 1 && this.filter.statements[0].comparison === FilterComparison.Equal
   }
 
-  updateFilter(data: FilterEvent<FilterField, SeriesSortField>) {
+  updateFilter(data: FilterEvent<SeriesFilterField, SeriesSortField>) {
     if (data.filterV2 === undefined) return;
     this.filter = data.filterV2;
 

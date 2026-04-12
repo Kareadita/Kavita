@@ -11,7 +11,7 @@ import {Pagination} from "../../_models/pagination";
 import {JumpKey} from "../../_models/jumpbar/jump-key";
 import {MetadataService} from "../../_services/metadata.service";
 import {BrowseGenre} from "../../_models/metadata/browse/browse-genre";
-import {FilterField} from "../../_models/metadata/v2/filter-field";
+import {SeriesFilterField} from "../../_models/metadata/v2/series-filter-field";
 import {FilterComparison} from "../../_models/metadata/v2/filter-comparison";
 import {FilterUtilitiesService} from "../../shared/_services/filter-utilities.service";
 import {CompactNumberPipe} from "../../_pipes/compact-number.pipe";
@@ -32,7 +32,7 @@ import {CompactNumberPipe} from "../../_pipes/compact-number.pipe";
 })
 export class BrowseGenresComponent implements OnInit {
 
-  protected readonly FilterField = FilterField;
+  protected readonly FilterField = SeriesFilterField;
 
   private readonly cdRef = inject(ChangeDetectorRef);
   private readonly metadataService = inject(MetadataService);
@@ -59,7 +59,7 @@ export class BrowseGenresComponent implements OnInit {
     });
   }
 
-  openFilter(field: FilterField, genre: BrowseGenre) {
+  openFilter(field: SeriesFilterField, genre: BrowseGenre) {
     if (genre.seriesCount === 0) return; // We don't yet have an issue page
     this.filterUtilityService.applyFilter(['all-series'], field, FilterComparison.Equal, `${genre.id}`).subscribe();
   }

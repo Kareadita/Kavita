@@ -40,7 +40,7 @@ import {filter, tap} from "rxjs";
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import {translate, TranslocoDirective} from "@jsverse/transloco";
 import {FilterComparison} from "../_models/metadata/v2/filter-comparison";
-import {FilterField} from '../_models/metadata/v2/filter-field';
+import {SeriesFilterField} from '../_models/metadata/v2/series-filter-field';
 import {AgeRating} from '../_models/metadata/age-rating';
 import {Volume} from "../_models/volume";
 import {VolumeService} from "../_services/volume.service";
@@ -480,7 +480,7 @@ export class VolumeDetailComponent implements OnInit {
     }
   }
 
-  openFilter(field: FilterField, value: string | number) {
+  openFilter(field: SeriesFilterField, value: string | number) {
     this.filterUtilityService.applyFilter(['all-series'], field, FilterComparison.Equal, `${value}`).subscribe();
   }
 
@@ -515,6 +515,6 @@ export class VolumeDetailComponent implements OnInit {
   protected readonly Breakpoint = Breakpoint;
   protected readonly AgeRating = AgeRating;
   protected readonly Tabs = Tabs;
-  protected readonly FilterField = FilterField;
+  protected readonly FilterField = SeriesFilterField;
   protected readonly encodeURIComponent = encodeURIComponent;
 }

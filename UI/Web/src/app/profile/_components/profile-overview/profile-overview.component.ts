@@ -12,7 +12,7 @@ import {FilterV2} from "src/app/_models/metadata/v2/filter-v2";
 import {FilterCombination} from "src/app/_models/metadata/v2/filter-combination";
 import {FilterStatement} from "src/app/_models/metadata/v2/filter-statement";
 import {FilterComparison} from "src/app/_models/metadata/v2/filter-comparison";
-import {FilterField} from "src/app/_models/metadata/v2/filter-field";
+import {SeriesFilterField} from "src/app/_models/metadata/v2/series-filter-field";
 import {SeriesSortField} from "src/app/_models/metadata/series-filter";
 import {QueryContext} from "src/app/_models/metadata/v2/query-context";
 import {EntityCardComponent} from "src/app/cards/entity-card/entity-card.component";
@@ -32,7 +32,7 @@ const JustFinishedReadingFilter = {
   combination: FilterCombination.And,
   statements: [
     {
-      field: FilterField.ReadProgress,
+      field: SeriesFilterField.ReadProgress,
       comparison: FilterComparison.GreaterThanEqual,
       value: '100'
     } as FilterStatement

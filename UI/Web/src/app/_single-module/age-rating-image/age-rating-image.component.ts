@@ -1,11 +1,11 @@
-import {ChangeDetectionStrategy, Component, computed, effect, inject, input, model} from '@angular/core';
+import {ChangeDetectionStrategy, Component, computed, inject, input} from '@angular/core';
 import {AgeRating} from "../../_models/metadata/age-rating";
 import {ImageComponent} from "../../shared/image/image.component";
 import {NgbTooltip} from "@ng-bootstrap/ng-bootstrap";
 import {AgeRatingPipe} from "../../_pipes/age-rating.pipe";
 import {FilterUtilitiesService} from "../../shared/_services/filter-utilities.service";
 import {FilterComparison} from "../../_models/metadata/v2/filter-comparison";
-import {FilterField} from "../../_models/metadata/v2/filter-field";
+import {SeriesFilterField} from "../../_models/metadata/v2/series-filter-field";
 
 const basePath = './assets/images/ratings/';
 
@@ -65,7 +65,7 @@ export class AgeRatingImageComponent {
   }
 
   openRating() {
-    this.filterUtilityService.applyFilter(['all-series'], FilterField.AgeRating, FilterComparison.Equal, `${this.rating()}`).subscribe();
+    this.filterUtilityService.applyFilter(['all-series'], SeriesFilterField.AgeRating, FilterComparison.Equal, `${this.rating()}`).subscribe();
   }
 
 

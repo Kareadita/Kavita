@@ -1,6 +1,6 @@
 import {ChangeDetectionStrategy, Component, computed, DestroyRef, effect, inject, input, signal} from '@angular/core';
 import {ImageComponent} from "../../shared/image/image.component";
-import {FilterField} from "../../_models/metadata/v2/filter-field";
+import {SeriesFilterField} from "../../_models/metadata/v2/series-filter-field";
 import {Person} from "../../_models/metadata/person";
 import {ImageService} from "../../_services/image.service";
 import {FilterComparison} from "../../_models/metadata/v2/filter-comparison";
@@ -63,6 +63,6 @@ export class PublisherFlipperComponent {
 
   openPublisher(filter: string | number) {
     // TODO: once we build out publisher person-detail page, we can redirect there
-    this.filterUtilityService.applyFilter(['all-series'], FilterField.Publisher, FilterComparison.Equal, `${filter}`).subscribe();
+    this.filterUtilityService.applyFilter(['all-series'], SeriesFilterField.Publisher, FilterComparison.Equal, `${filter}`).subscribe();
   }
 }

@@ -13,7 +13,7 @@ import {SeriesMetadata} from "../../_models/metadata/series-metadata";
 import {ReadMoreComponent} from "../../shared/read-more/read-more.component";
 import {ActionService} from "../../_services/action.service";
 import {ProviderImagePipe} from "../../_pipes/provider-image.pipe";
-import {FilterField} from "../../_models/metadata/v2/filter-field";
+import {SeriesFilterField} from "../../_models/metadata/v2/series-filter-field";
 
 @Component({
     selector: 'app-series-preview-drawer',
@@ -30,7 +30,7 @@ export class SeriesPreviewDrawerComponent implements OnInit {
   private readonly imageService = inject(ImageService);
   private readonly actionService = inject(ActionService);
 
-  protected readonly FilterField = FilterField;
+  protected readonly FilterField = SeriesFilterField;
 
   name = input.required<string>();
   /** Required for non-external series */

@@ -45,7 +45,7 @@ import {ReadMoreComponent} from "../shared/read-more/read-more.component";
 import {DetailsTabComponent} from "../_single-module/details-tab/details-tab.component";
 import {EntityTitleComponent} from "../cards/entity-title/entity-title.component";
 import {EditChapterModalComponent} from "../_single-module/edit-chapter-modal/edit-chapter-modal.component";
-import {FilterField} from "../_models/metadata/v2/filter-field";
+import {SeriesFilterField} from "../_models/metadata/v2/series-filter-field";
 import {FilterComparison} from "../_models/metadata/v2/filter-comparison";
 import {FilterUtilitiesService} from "../shared/_services/filter-utilities.service";
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
@@ -316,7 +316,7 @@ export class ChapterDetailComponent implements OnInit {
     this.location.replaceState(newUrl)
   }
 
-  openFilter(field: FilterField, value: string | number) {
+  openFilter(field: SeriesFilterField, value: string | number) {
     this.filterUtilityService.applyFilter(['all-series'], field, FilterComparison.Equal, `${value}`).subscribe();
   }
 
@@ -333,7 +333,7 @@ export class ChapterDetailComponent implements OnInit {
 
   protected readonly AgeRating = AgeRating;
   protected readonly Tabs = Tabs;
-  protected readonly FilterField = FilterField;
+  protected readonly FilterField = SeriesFilterField;
   protected readonly LibraryType = LibraryType;
   protected readonly encodeURIComponent = encodeURIComponent;
   protected readonly NULL_DATE = NULL_DATE;

@@ -15,7 +15,7 @@ import {CarouselReelComponent} from "../carousel/_components/carousel-reel/carou
 import {FilterComparison} from "../_models/metadata/v2/filter-comparison";
 import {FilterUtilitiesService} from "../shared/_services/filter-utilities.service";
 import {FilterV2} from "../_models/metadata/v2/filter-v2";
-import {FilterField, personRoleForFilterField} from "../_models/metadata/v2/filter-field";
+import {personRoleForFilterField, SeriesFilterField} from "../_models/metadata/v2/series-filter-field";
 import {Series} from "../_models/series";
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import {FilterCombination} from "../_models/metadata/v2/filter-combination";
@@ -79,7 +79,7 @@ export class PersonDetailComponent {
   person = getWritableResolvedData(this.route, 'person');
   personName = computed(() => this.person().name);
   works = signal<Series[]>([]);
-  filter = signal<FilterV2<FilterField> | null>(null);
+  filter = signal<FilterV2<SeriesFilterField> | null>(null);
   hasCoverImage = computed(() => this.person().coverImage);
   personActions = this.actionService.getPersonActions();
 
@@ -191,5 +191,5 @@ export class PersonDetailComponent {
     }
   }
 
-  protected readonly FilterField = FilterField;
+  protected readonly FilterField = SeriesFilterField;
 }

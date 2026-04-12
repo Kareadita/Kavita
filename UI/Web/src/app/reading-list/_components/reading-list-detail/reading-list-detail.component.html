@@ -146,7 +146,7 @@
                                         [allowToggle]="false"
                                         (toggled)="switchTabsToDetail()">
                       <ng-template #badgeExpanderItem let-item let-position="idx" let-last="last">
-                        <a href="javascript:void(0)" class="dark-exempt btn-icon" (click)="openFilter(FilterField.Tags, item.id)">{{item.title}}</a>
+                        <a href="javascript:void(0)" class="dark-exempt btn-icon" (click)="openFilter(ReadingListFilterField.Tags, item.id)">{{item.title}}</a>
                       </ng-template>
                     </app-badge-expander>
                   </div>

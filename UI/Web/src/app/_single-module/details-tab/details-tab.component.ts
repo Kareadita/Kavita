@@ -4,7 +4,7 @@ import {PersonBadgeComponent} from "../../shared/person-badge/person-badge.compo
 import {TranslocoDirective} from "@jsverse/transloco";
 import {IHasCast} from "../../_models/common/i-has-cast";
 import {PersonRole} from "../../_models/metadata/person";
-import {FilterField} from "../../_models/metadata/v2/filter-field";
+import {SeriesFilterField} from "../../_models/metadata/v2/series-filter-field";
 import {FilterComparison} from "../../_models/metadata/v2/filter-comparison";
 import {FilterUtilitiesService} from "../../shared/_services/filter-utilities.service";
 import {Genre} from "../../_models/metadata/genre";
@@ -46,7 +46,7 @@ export class DetailsTabComponent {
   protected readonly accountService = inject(AccountService);
 
   protected readonly PersonRole = PersonRole;
-  protected readonly FilterField = FilterField;
+  protected readonly FilterField = SeriesFilterField;
   protected readonly MangaFormat = MangaFormat;
 
   metadata = input.required<IHasCast>();
@@ -66,8 +66,8 @@ export class DetailsTabComponent {
   showTags = computed(() => !this.suppressEmptyTags() || this.tags().length > 0);
   showGenres = computed(() => !this.suppressEmptyGenres() || this.genres().length > 0);
 
-  openGeneric(queryParamName: FilterField, filter: string | number) {
-    if (queryParamName === FilterField.None) return;
+  openGeneric(queryParamName: SeriesFilterField, filter: string | number) {
+    if (queryParamName === SeriesFilterField.None) return;
     this.filterUtilityService.applyFilter(['all-series'], queryParamName, FilterComparison.Equal, `${filter}`).subscribe();
   }
 }

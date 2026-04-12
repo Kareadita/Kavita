@@ -37,7 +37,7 @@ import {
 import {TranslocoDirective} from "@jsverse/transloco";
 import {FilterV2} from "../_models/metadata/v2/filter-v2";
 import {FilterComparison} from "../_models/metadata/v2/filter-comparison";
-import {FilterField} from "../_models/metadata/v2/filter-field";
+import {SeriesFilterField} from "../_models/metadata/v2/series-filter-field";
 import {CardActionablesComponent} from "../_single-module/card-actionables/card-actionables.component";
 import {LoadingComponent} from "../shared/loading/loading.component";
 import {debounceTime, ReplaySubject, tap} from "rxjs";
@@ -84,11 +84,11 @@ export class LibraryDetailComponent implements OnInit {
   loadingSeries = false;
   pagination: Pagination = {currentPage: 0, totalPages: 0, totalItems: 0, itemsPerPage: 0};
   actions = computed(() => this.actionFactoryService.getLibraryActions());
-  filter: FilterV2<FilterField> | undefined = undefined;
+  filter: FilterV2<SeriesFilterField> | undefined = undefined;
   filterSettings: SeriesFilterSettings = new SeriesFilterSettings();
   filterOpen: EventEmitter<boolean> = new EventEmitter();
   filterActive: boolean = false;
-  filterActiveCheck!: FilterV2<FilterField>;
+  filterActiveCheck!: FilterV2<SeriesFilterField>;
   refresh: EventEmitter<void> = new EventEmitter();
   jumpKeys = signal<JumpKey[]>([]);
   bulkLoader: boolean = false;
@@ -114,9 +114,9 @@ export class LibraryDetailComponent implements OnInit {
     });
 
     this.route.data.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(data => {
-      this.filter = data['filter'] as FilterV2<FilterField, SeriesSortField>;
+      this.filter = data['filter'] as FilterV2<SeriesFilterField, SeriesSortField>;
 
-      const defaultStmt = {field: FilterField.Libraries, value: this.libraryId() + '', comparison: FilterComparison.Equal};
+      const defaultStmt = {field: SeriesFilterField.Libraries, value: this.libraryId() + '', comparison: FilterComparison.Equal};
 
       if (this.filter == null) {
         this.filter = this.metadataService.createDefaultFilterDto('series');
@@ -176,7 +176,7 @@ export class LibraryDetailComponent implements OnInit {
     });
   }
 
-  updateFilter(data: FilterEvent<FilterField, SeriesSortField>) {
+  updateFilter(data: FilterEvent<SeriesFilterField, SeriesSortField>) {
     if (data.filterV2 === undefined) return;
     this.filter = data.filterV2;
 

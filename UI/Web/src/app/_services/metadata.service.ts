@@ -10,7 +10,7 @@ import {PublicationStatusDto} from '../_models/metadata/publication-status-dto';
 import {allPeopleRoles, Person, PersonRole} from '../_models/metadata/person';
 import {Tag} from '../_models/tag';
 import {FilterComparison} from '../_models/metadata/v2/filter-comparison';
-import {FilterField} from '../_models/metadata/v2/filter-field';
+import {SeriesFilterField} from '../_models/metadata/v2/series-filter-field';
 import {mangaFormatFilters, SeriesSortField} from "../_models/metadata/series-filter";
 import {FilterCombination} from "../_models/metadata/v2/filter-combination";
 import {FilterV2} from "../_models/metadata/v2/filter-v2";
@@ -201,7 +201,7 @@ export class MetadataService {
         }
         return this.createFilterStatement(AnnotationsFilterField.Owner);
       case 'series':
-        return this.createFilterStatement(FilterField.SeriesName);
+        return this.createFilterStatement(SeriesFilterField.SeriesName);
       case 'person':
         return this.createFilterStatement(PersonFilterField.Role, FilterComparison.Contains, `${PersonRole.CoverArtist},${PersonRole.Writer}`);
       case 'readinglist':
@@ -279,7 +279,7 @@ export class MetadataService {
       case "annotation":
         return this.getAnnotationOptionsForFilterField(filterField as AnnotationsFilterField);
       case 'series':
-        return this.getSeriesOptionsForFilterField(filterField as FilterField);
+        return this.getSeriesOptionsForFilterField(filterField as SeriesFilterField);
       case 'person':
         return this.getPersonOptionsForFilterField(filterField as PersonFilterField);
       case 'readinglist':
@@ -319,53 +319,53 @@ export class MetadataService {
     return of([])
   }
 
-  private getSeriesOptionsForFilterField(field: FilterField) {
+  private getSeriesOptionsForFilterField(field: SeriesFilterField) {
     switch (field) {
-      case FilterField.PublicationStatus:
+      case SeriesFilterField.PublicationStatus:
         return this.getAllPublicationStatus().pipe(map(pubs => pubs.map(pub => {
           return {value: pub.value, label: pub.title}
         })));
-      case FilterField.AgeRating:
+      case SeriesFilterField.AgeRating:
         return this.getAllAgeRatings().pipe(map(ratings => ratings.map(rating => {
           return {value: rating.value, label: this.ageRatingPipe.transform(rating.value)}
         })));
-      case FilterField.Genres:
+      case SeriesFilterField.Genres:
         return this.getAllGenres().pipe(map(genres => genres.map(genre => {
           return {value: genre.id, label: genre.title}
         })));
-      case FilterField.Languages:
+      case SeriesFilterField.Languages:
         return this.getAllLanguages().pipe(map(statuses => statuses.map(status => {
           return {value: status.isoCode, label: status.title + ` (${status.isoCode})`}
         })));
-      case FilterField.Formats:
+      case SeriesFilterField.Formats:
         return of(mangaFormatFilters).pipe(map(statuses => statuses.map(status => {
           return {value: status.value, label: this.mangaFormatPipe.transform(status.value)}
         })));
-      case FilterField.Libraries:
+      case SeriesFilterField.Libraries:
         return this.libraryService.getLibraries().pipe(map(libs => libs.map(lib => {
           return {value: lib.id, label: lib.name}
         })));
-      case FilterField.Tags:
+      case SeriesFilterField.Tags:
         return this.getAllTags().pipe(map(statuses => statuses.map(status => {
           return {value: status.id, label: status.title}
         })));
-      case FilterField.CollectionTags:
+      case SeriesFilterField.CollectionTags:
         return this.collectionTagService.allCollections().pipe(map(statuses => statuses.map(status => {
           return {value: status.id, label: status.title}
         })));
-      case FilterField.Characters: return this.getPersonOptions(PersonRole.Character);
-      case FilterField.Colorist: return this.getPersonOptions(PersonRole.Colorist);
-      case FilterField.CoverArtist: return this.getPersonOptions(PersonRole.CoverArtist);
-      case FilterField.Editor: return this.getPersonOptions(PersonRole.Editor);
-      case FilterField.Inker: return this.getPersonOptions(PersonRole.Inker);
-      case FilterField.Letterer: return this.getPersonOptions(PersonRole.Letterer);
-      case FilterField.Penciller: return this.getPersonOptions(PersonRole.Penciller);
-      case FilterField.Publisher: return this.getPersonOptions(PersonRole.Publisher);
-      case FilterField.Imprint: return this.getPersonOptions(PersonRole.Imprint);
-      case FilterField.Team: return this.getPersonOptions(PersonRole.Team);
-      case FilterField.Location: return this.getPersonOptions(PersonRole.Location);
-      case FilterField.Translators: return this.getPersonOptions(PersonRole.Translator);
-      case FilterField.Writers: return this.getPersonOptions(PersonRole.Writer);
+      case SeriesFilterField.Characters: return this.getPersonOptions(PersonRole.Character);
+      case SeriesFilterField.Colorist: return this.getPersonOptions(PersonRole.Colorist);
+      case SeriesFilterField.CoverArtist: return this.getPersonOptions(PersonRole.CoverArtist);
+      case SeriesFilterField.Editor: return this.getPersonOptions(PersonRole.Editor);
+      case SeriesFilterField.Inker: return this.getPersonOptions(PersonRole.Inker);
+      case SeriesFilterField.Letterer: return this.getPersonOptions(PersonRole.Letterer);
+      case SeriesFilterField.Penciller: return this.getPersonOptions(PersonRole.Penciller);
+      case SeriesFilterField.Publisher: return this.getPersonOptions(PersonRole.Publisher);
+      case SeriesFilterField.Imprint: return this.getPersonOptions(PersonRole.Imprint);
+      case SeriesFilterField.Team: return this.getPersonOptions(PersonRole.Team);
+      case SeriesFilterField.Location: return this.getPersonOptions(PersonRole.Location);
+      case SeriesFilterField.Translators: return this.getPersonOptions(PersonRole.Translator);
+      case SeriesFilterField.Writers: return this.getPersonOptions(PersonRole.Writer);
     }
 
     return of([]);

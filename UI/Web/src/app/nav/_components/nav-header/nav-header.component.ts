@@ -33,7 +33,7 @@ import {GroupedTypeaheadComponent, SearchEvent} from '../grouped-typeahead/group
 import {TranslocoDirective} from "@jsverse/transloco";
 import {FilterUtilitiesService} from "../../../shared/_services/filter-utilities.service";
 import {FilterStatement} from "../../../_models/metadata/v2/filter-statement";
-import {FilterField} from "../../../_models/metadata/v2/filter-field";
+import {SeriesFilterField} from "../../../_models/metadata/v2/series-filter-field";
 import {FilterComparison} from "../../../_models/metadata/v2/filter-comparison";
 import {BookmarkSearchResult} from "../../../_models/search/bookmark-search-result";
 import {ScrobbleProvider} from "../../../_services/scrobbling.service";
@@ -122,7 +122,7 @@ export class NavHeaderComponent {
     this.filterUtilityService.applyFilterWithParams(['all-series'], filter, params).subscribe();
   }
 
-  goToOther(field: FilterField, value: string) {
+  goToOther(field: SeriesFilterField, value: string) {
     this.goTo({field, comparison: FilterComparison.Equal, value: value + ''});
   }
 
@@ -202,7 +202,7 @@ export class NavHeaderComponent {
     this.modalService.open(NavLinkModalComponent, {fullscreen: 'sm'});
   }
 
-  protected readonly FilterField = FilterField;
+  protected readonly FilterField = SeriesFilterField;
   protected readonly WikiLink = WikiLink;
   protected readonly ScrobbleProvider = ScrobbleProvider;
   protected readonly SettingsTabId = SettingsTabId;

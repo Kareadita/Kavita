@@ -27,7 +27,7 @@ import {
 import {TranslocoDirective} from "@jsverse/transloco";
 import {FilterV2} from "../../../_models/metadata/v2/filter-v2";
 import {WikiLink} from "../../../_models/wiki";
-import {FilterField} from "../../../_models/metadata/v2/filter-field";
+import {SeriesFilterField} from "../../../_models/metadata/v2/series-filter-field";
 import {SeriesFilterSettings} from "../../../metadata-filter/filter-settings";
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import {FilterStatement} from "../../../_models/metadata/v2/filter-statement";
@@ -89,11 +89,11 @@ export class BookmarksComponent {
   });
 
   pagination: Pagination = new Pagination();
-  filter: FilterV2<FilterField> | undefined = undefined;
+  filter: FilterV2<SeriesFilterField> | undefined = undefined;
   filterSettings: SeriesFilterSettings = new SeriesFilterSettings();
   filterOpen: EventEmitter<boolean> = new EventEmitter();
   filterActive: boolean = false;
-  filterActiveCheck!: FilterV2<FilterField>;
+  filterActiveCheck!: FilterV2<SeriesFilterField>;
 
   trackByIdentity = (index: number, item: BookmarkCardEntity) => `${item.data.series!.name}_${item.data.seriesId}_${item.data.series!.pagesRead}`;
   refresh: EventEmitter<void> = new EventEmitter();
@@ -102,15 +102,15 @@ export class BookmarksComponent {
 
   constructor() {
     this.route.data.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(data => {
-      this.filter = data['filter'] as FilterV2<FilterField, SeriesSortField>;
+      this.filter = data['filter'] as FilterV2<SeriesFilterField, SeriesSortField>;
 
       if (this.filter == null) {
         this.filter = this.metadataService.createDefaultFilterDto('series');
-        this.filter.statements.push(this.metadataService.createDefaultFilterStatement('series') as FilterStatement<FilterField>);
+        this.filter.statements.push(this.metadataService.createDefaultFilterStatement('series') as FilterStatement<SeriesFilterField>);
       }
 
       this.filterActiveCheck = this.metadataService.createDefaultFilterDto('series');
-      this.filterActiveCheck.statements.push(this.metadataService.createDefaultFilterStatement('series') as FilterStatement<FilterField>);
+      this.filterActiveCheck.statements.push(this.metadataService.createDefaultFilterStatement('series') as FilterStatement<SeriesFilterField>);
       this.filterSettings.presetsV2 =  this.filter;
       this.filterSettings.statementLimit = 1;
 
@@ -155,7 +155,7 @@ export class BookmarksComponent {
     this.refresh.emit();
   }
 
-  updateFilter(data: FilterEvent<FilterField, SeriesSortField>) {
+  updateFilter(data: FilterEvent<SeriesFilterField, SeriesSortField>) {
     if (data.filterV2 === undefined) return;
     this.filter = data.filterV2;
 

@@ -69,9 +69,9 @@ import {TabTitlePipe} from "../../../_pipes/tab-title.pipe";
 import {ConfirmService} from "../../../shared/confirm.service";
 import {ColorscapeService} from "../../../_services/colorscape.service";
 import {DateYearRangePipe} from "../../../_pipes/date-year-range.pipe";
-import {FilterField} from "../../../_models/metadata/v2/filter-field";
 import {FilterComparison} from "../../../_models/metadata/v2/filter-comparison";
 import {FilterUtilitiesService} from "../../../shared/_services/filter-utilities.service";
+import {ReadingListFilterField} from "../../../_models/metadata/v2/reading-list-filter-field";
 
 
 @Component({
@@ -421,10 +421,10 @@ export class ReadingListDetailComponent implements OnInit {
     }, 10);
   }
 
-  openFilter(field: FilterField, value: string | number) {
-    this.filterUtilityService.applyFilter(['lists', this.readingList().id], field, FilterComparison.Equal, `${value}`).subscribe();
+  openFilter(field: ReadingListFilterField, value: string | number) {
+    this.filterUtilityService.applyFilter(['lists'], field, FilterComparison.Equal, `${value}`).subscribe();
   }
 
   protected readonly Breakpoint = Breakpoint;
-  protected readonly FilterField = FilterField;
+  protected readonly ReadingListFilterField = ReadingListFilterField;
 }

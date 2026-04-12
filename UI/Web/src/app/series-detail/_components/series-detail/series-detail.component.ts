@@ -72,7 +72,7 @@ import {ThemeService} from "../../../_services/theme.service";
 import {DetailsTabComponent} from "../../../_single-module/details-tab/details-tab.component";
 import {ChapterRemovedEvent} from "../../../_models/events/chapter-removed-event";
 import {SettingsTabId} from "../../../sidenav/preference-nav/preference-nav.component";
-import {FilterField} from "../../../_models/metadata/v2/filter-field";
+import {SeriesFilterField} from "../../../_models/metadata/v2/series-filter-field";
 import {AgeRating} from "../../../_models/metadata/age-rating";
 import {DefaultValuePipe} from "../../../_pipes/default-value.pipe";
 import {ExternalRatingComponent} from "../external-rating/external-rating.component";
@@ -882,7 +882,7 @@ class SeriesDetailComponent implements OnInit, AfterViewInit {
     this.isWantToRead.update(x => !x);
   }
 
-  openFilter(field: FilterField, value: string | number) {
+  openFilter(field: SeriesFilterField, value: string | number) {
     this.filterUtilityService.applyFilter(['all-series'], field, FilterComparison.Equal, `${value}`).subscribe();
   }
 
@@ -926,7 +926,7 @@ class SeriesDetailComponent implements OnInit, AfterViewInit {
   protected readonly LooseLeafOrSpecialNumber = LooseLeafOrDefaultNumber;
   protected readonly SpecialVolumeNumber = SpecialVolumeNumber;
   protected readonly SettingsTabId = SettingsTabId;
-  protected readonly FilterField = FilterField;
+  protected readonly FilterField = SeriesFilterField;
   protected readonly AgeRating = AgeRating;
   protected readonly encodeURIComponent = encodeURIComponent;
   protected readonly Breakpoint = Breakpoint;

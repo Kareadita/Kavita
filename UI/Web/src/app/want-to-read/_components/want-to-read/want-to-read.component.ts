@@ -35,7 +35,7 @@ import {
 } from '../../../sidenav/_components/side-nav-companion-bar/side-nav-companion-bar.component';
 import {TranslocoDirective} from "@jsverse/transloco";
 import {FilterV2} from "../../../_models/metadata/v2/filter-v2";
-import {FilterField} from "../../../_models/metadata/v2/filter-field";
+import {SeriesFilterField} from "../../../_models/metadata/v2/series-filter-field";
 import {SeriesFilterSettings} from "../../../metadata-filter/filter-settings";
 import {MetadataService} from "../../../_services/metadata.service";
 import {FilterStatement} from "../../../_models/metadata/v2/filter-statement";
@@ -74,11 +74,11 @@ export class WantToReadComponent implements OnInit, AfterContentChecked {
   isLoading: boolean = true;
   series: Array<Series> = [];
   pagination: Pagination = new Pagination();
-  filter: FilterV2<FilterField, SeriesSortField> | undefined = undefined;
+  filter: FilterV2<SeriesFilterField, SeriesSortField> | undefined = undefined;
   filterSettings: SeriesFilterSettings = new SeriesFilterSettings();
   refresh: EventEmitter<void> = new EventEmitter();
 
-  filterActiveCheck!: FilterV2<FilterField>;
+  filterActiveCheck!: FilterV2<SeriesFilterField>;
   filterActive: boolean = false;
 
   jumpbarKeys: Array<JumpKey> = [];
@@ -109,9 +109,9 @@ export class WantToReadComponent implements OnInit, AfterContentChecked {
 
 
       this.route.data.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(data => {
-        this.filter = data['filter'] as FilterV2<FilterField, SeriesSortField>;
+        this.filter = data['filter'] as FilterV2<SeriesFilterField, SeriesSortField>;
 
-        const defaultStmt = {field: FilterField.WantToRead, value: 'true', comparison: FilterComparison.Equal} as FilterStatement<FilterField>;
+        const defaultStmt = {field: SeriesFilterField.WantToRead, value: 'true', comparison: FilterComparison.Equal} as FilterStatement<SeriesFilterField>;
 
         if (this.filter == null) {
           this.filter = this.metadataService.createDefaultFilterDto('series');
@@ -177,7 +177,7 @@ export class WantToReadComponent implements OnInit, AfterContentChecked {
     });
   }
 
-  updateFilter(data: FilterEvent<FilterField, SeriesSortField>) {
+  updateFilter(data: FilterEvent<SeriesFilterField, SeriesSortField>) {
     if (data.filterV2 === undefined) return;
     this.filter = data.filterV2;
 

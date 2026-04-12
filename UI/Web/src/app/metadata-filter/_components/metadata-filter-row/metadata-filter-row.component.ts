@@ -9,15 +9,15 @@ import {
   input,
   Input,
   OnInit,
-  Signal,
-  output
+  output,
+  Signal
 } from '@angular/core';
 import {FormControl, FormGroup, ReactiveFormsModule} from '@angular/forms';
 import {FilterStatement} from '../../../_models/metadata/v2/filter-statement';
 import {BehaviorSubject, distinctUntilChanged, filter, map, Observable, of, startWith, switchMap, tap} from 'rxjs';
 import {MetadataService} from 'src/app/_services/metadata.service';
 import {FilterComparison} from 'src/app/_models/metadata/v2/filter-comparison';
-import {FilterField} from 'src/app/_models/metadata/v2/filter-field';
+import {SeriesFilterField} from 'src/app/_models/metadata/v2/series-filter-field';
 import {AsyncPipe, NgStyle} from "@angular/common";
 import {FilterComparisonPipe} from "../../../_pipes/filter-comparison.pipe";
 import {takeUntilDestroyed, toSignal} from "@angular/core/rxjs-interop";
@@ -58,12 +58,12 @@ class FilterRowUi {
 
 const unitLabels: Map<ValidFilterEntity, Map<number, FilterRowUi>> = new Map([
   ['series', new Map([
-    [FilterField.ReadingDate as number, new FilterRowUi('unit-reading-date')],
-    [FilterField.AverageRating as number, new FilterRowUi('unit-average-rating')],
-    [FilterField.ReadProgress as number, new FilterRowUi('unit-reading-progress')],
-    [FilterField.UserRating as number, new FilterRowUi('unit-user-rating')],
-    [FilterField.ReadLast as number, new FilterRowUi('unit-read-last')],
-    [FilterField.FileSize as number, new FilterRowUi('unit-file-size', 'disclaimer-file-size')]
+    [SeriesFilterField.ReadingDate as number, new FilterRowUi('unit-reading-date')],
+    [SeriesFilterField.AverageRating as number, new FilterRowUi('unit-average-rating')],
+    [SeriesFilterField.ReadProgress as number, new FilterRowUi('unit-reading-progress')],
+    [SeriesFilterField.UserRating as number, new FilterRowUi('unit-user-rating')],
+    [SeriesFilterField.ReadLast as number, new FilterRowUi('unit-read-last')],
+    [SeriesFilterField.FileSize as number, new FilterRowUi('unit-file-size', 'disclaimer-file-size')]
   ])],
   ['annotation', new Map([
     [AnnotationsFilterField.HighlightSlots as number, new FilterRowUi('', 'disclaimer-highlight-slots')],
@@ -235,7 +235,7 @@ export class MetadataFilterRowComponent<TFilter extends number = number, TSort e
     }
 
     if (stmt.comparison !== FilterComparison.IsEmpty) {
-      if (!stmt.value && (![FilterField.SeriesName, FilterField.Summary].includes(stmt.field) && !booleanFields.includes(stmt.field))) return;
+      if (!stmt.value && (![SeriesFilterField.SeriesName, SeriesFilterField.Summary].includes(stmt.field) && !booleanFields.includes(stmt.field))) return;
     }
 
     this.filterStatement.emit(stmt);
@@ -262,7 +262,7 @@ export class MetadataFilterRowComponent<TFilter extends number = number, TSort e
       if (this.isMultiSelectDropdownAllowed() || val.includes(',')) {
         this.formGroup.get('filterValue')?.patchValue(val.split(',').map(d => parseInt(d, 10)));
       } else {
-        if (this.preset.field === FilterField.Languages) {
+        if (this.preset.field === SeriesFilterField.Languages) {
           this.formGroup.get('filterValue')?.patchValue(val);
         } else {
           this.formGroup.get('filterValue')?.patchValue(parseInt(val, 10));

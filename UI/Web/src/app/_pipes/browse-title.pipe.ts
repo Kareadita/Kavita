@@ -1,5 +1,5 @@
 import {Pipe, PipeTransform} from '@angular/core';
-import {FilterField} from "../_models/metadata/v2/filter-field";
+import {SeriesFilterField} from "../_models/metadata/v2/series-filter-field";
 import {translate} from "@jsverse/transloco";
 
 /**
@@ -12,65 +12,65 @@ import {translate} from "@jsverse/transloco";
 })
 export class BrowseTitlePipe implements PipeTransform {
 
-  transform(field: FilterField, value: string): string {
+  transform(field: SeriesFilterField, value: string): string {
     switch (field) {
-      case FilterField.PublicationStatus:
+      case SeriesFilterField.PublicationStatus:
         return translate('browse-title-pipe.publication-status', {value});
-      case FilterField.AgeRating:
+      case SeriesFilterField.AgeRating:
         return translate('browse-title-pipe.age-rating', {value});
-      case FilterField.UserRating:
+      case SeriesFilterField.UserRating:
         return translate('browse-title-pipe.user-rating', {value});
-      case FilterField.Tags:
+      case SeriesFilterField.Tags:
         return translate('browse-title-pipe.tag', {value});
-      case FilterField.Translators:
+      case SeriesFilterField.Translators:
         return translate('browse-title-pipe.translator', {value});
-      case FilterField.Characters:
+      case SeriesFilterField.Characters:
         return translate('browse-title-pipe.character', {value});
-      case FilterField.Publisher:
+      case SeriesFilterField.Publisher:
         return translate('browse-title-pipe.publisher', {value});
-      case FilterField.Editor:
+      case SeriesFilterField.Editor:
         return translate('browse-title-pipe.editor', {value});
-      case FilterField.CoverArtist:
+      case SeriesFilterField.CoverArtist:
         return translate('browse-title-pipe.artist', {value});
-      case FilterField.Letterer:
+      case SeriesFilterField.Letterer:
         return translate('browse-title-pipe.letterer', {value});
-      case FilterField.Colorist:
+      case SeriesFilterField.Colorist:
         return translate('browse-title-pipe.colorist', {value});
-      case FilterField.Inker:
+      case SeriesFilterField.Inker:
         return translate('browse-title-pipe.inker', {value});
-      case FilterField.Penciller:
+      case SeriesFilterField.Penciller:
         return translate('browse-title-pipe.penciller', {value});
-      case FilterField.Writers:
+      case SeriesFilterField.Writers:
         return translate('browse-title-pipe.writer', {value});
-      case FilterField.Genres:
+      case SeriesFilterField.Genres:
         return translate('browse-title-pipe.genre', {value});
-      case FilterField.Libraries:
+      case SeriesFilterField.Libraries:
         return translate('browse-title-pipe.library', {value});
-      case FilterField.Formats:
+      case SeriesFilterField.Formats:
         return translate('browse-title-pipe.format', {value});
-      case FilterField.ReleaseYear:
+      case SeriesFilterField.ReleaseYear:
         return translate('browse-title-pipe.release-year', {value});
-      case FilterField.Imprint:
+      case SeriesFilterField.Imprint:
         return translate('browse-title-pipe.imprint', {value});
-      case FilterField.Team:
+      case SeriesFilterField.Team:
         return translate('browse-title-pipe.team', {value});
-      case FilterField.Location:
+      case SeriesFilterField.Location:
         return translate('browse-title-pipe.location', {value});
 
       // These have no natural links in the app to demand a richer title experience
-      case FilterField.Languages:
-      case FilterField.CollectionTags:
-      case FilterField.ReadProgress:
-      case FilterField.ReadTime:
-      case FilterField.Path:
-      case FilterField.FilePath:
-      case FilterField.WantToRead:
-      case FilterField.ReadingDate:
-      case FilterField.AverageRating:
-      case FilterField.ReadLast:
-      case FilterField.Summary:
-      case FilterField.SeriesName:
-      case FilterField.FileSize:
+      case SeriesFilterField.Languages:
+      case SeriesFilterField.CollectionTags:
+      case SeriesFilterField.ReadProgress:
+      case SeriesFilterField.ReadTime:
+      case SeriesFilterField.Path:
+      case SeriesFilterField.FilePath:
+      case SeriesFilterField.WantToRead:
+      case SeriesFilterField.ReadingDate:
+      case SeriesFilterField.AverageRating:
+      case SeriesFilterField.ReadLast:
+      case SeriesFilterField.Summary:
+      case SeriesFilterField.SeriesName:
+      case SeriesFilterField.FileSize:
       default:
         return '';
     }

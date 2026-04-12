@@ -31,7 +31,7 @@ import {normalizeTimestamp} from "../../../libs/download-timestamp";
 import {ReadingList, ReadingListItem} from "../../_models/reading-list/reading-list";
 import {ReadingListService} from "../../_services/reading-list.service";
 import {UserCollection} from "../../_models/collection-tag";
-import {FilterField} from "../../_models/metadata/v2/filter-field";
+import {SeriesFilterField} from "../../_models/metadata/v2/series-filter-field";
 import {FilterComparison} from "../../_models/metadata/v2/filter-comparison";
 import {FilterCombination} from "../../_models/metadata/v2/filter-combination";
 import {EntityTitleService} from "../../_services/entity-title.service";
@@ -627,7 +627,7 @@ export class DownloadService {
 
     // A collection is just a set of series, so we can just call down
     this.seriesService.getAllSeriesV2(0, 0, {
-      statements: [{field: FilterField.CollectionTags, value: collection.id + '', comparison: FilterComparison.Equal}],
+      statements: [{field: SeriesFilterField.CollectionTags, value: collection.id + '', comparison: FilterComparison.Equal}],
       combination: FilterCombination.And,
       limitTo: 0
     }).subscribe(collectionSeries => {

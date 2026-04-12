@@ -20,7 +20,7 @@ import NoSleep from 'nosleep.js';
 import {Volume} from "../_models/volume";
 import {translate} from "@jsverse/transloco";
 import {ToastrService} from "ngx-toastr";
-import {FilterField} from "../_models/metadata/v2/filter-field";
+import {SeriesFilterField} from "../_models/metadata/v2/series-filter-field";
 import {ModalService} from "./modal.service";
 import {catchError, map, Observable, of, switchMap, tap} from "rxjs";
 import {ListSelectModalComponent} from "../shared/_components/list-select-modal/list-select-modal.component";
@@ -124,7 +124,7 @@ export class ReaderService {
     return this.httpClient.post(this.baseUrl + 'reader/unbookmark', {seriesId, volumeId, chapterId, page, imageNumber});
   }
 
-  getAllBookmarks(filter: FilterV2<FilterField> | undefined) {
+  getAllBookmarks(filter: FilterV2<SeriesFilterField> | undefined) {
     return this.httpClient.post<PageBookmark[]>(this.baseUrl + 'reader/all-bookmarks', filter);
   }
 

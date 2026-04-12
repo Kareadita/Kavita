@@ -1,5 +1,5 @@
 import {Pipe, PipeTransform} from '@angular/core';
-import {FilterField} from "../_models/metadata/v2/filter-field";
+import {SeriesFilterField} from "../_models/metadata/v2/series-filter-field";
 import {translate} from "@jsverse/transloco";
 import {ValidFilterEntity} from "../metadata-filter/filter-settings";
 import {PersonFilterField} from "../_models/metadata/v2/person-filter-field";
@@ -17,7 +17,7 @@ export class GenericFilterFieldPipe implements PipeTransform {
       case 'annotation':
         return this.annotationsFilterField(value as AnnotationsFilterField);
       case 'series':
-        return this.translateFilterField(value as FilterField);
+        return this.translateFilterField(value as SeriesFilterField);
       case 'person':
         return this.translatePersonFilterField(value as PersonFilterField);
       case 'readinglist':
@@ -79,75 +79,75 @@ export class GenericFilterFieldPipe implements PipeTransform {
     }
   }
 
-  private translateFilterField(value: FilterField) {
+  private translateFilterField(value: SeriesFilterField) {
     switch (value) {
-      case FilterField.AgeRating:
+      case SeriesFilterField.AgeRating:
         return translate('filter-field-pipe.age-rating');
-      case FilterField.Characters:
+      case SeriesFilterField.Characters:
         return translate('filter-field-pipe.characters');
-      case FilterField.CollectionTags:
+      case SeriesFilterField.CollectionTags:
         return translate('filter-field-pipe.collection-tags');
-      case FilterField.Colorist:
+      case SeriesFilterField.Colorist:
         return translate('filter-field-pipe.colorist');
-      case FilterField.CoverArtist:
+      case SeriesFilterField.CoverArtist:
         return translate('filter-field-pipe.cover-artist');
-      case FilterField.Editor:
+      case SeriesFilterField.Editor:
         return translate('filter-field-pipe.editor');
-      case FilterField.Formats:
+      case SeriesFilterField.Formats:
         return translate('filter-field-pipe.formats');
-      case FilterField.Genres:
+      case SeriesFilterField.Genres:
         return translate('filter-field-pipe.genres');
-      case FilterField.Inker:
+      case SeriesFilterField.Inker:
         return translate('filter-field-pipe.inker');
-      case FilterField.Imprint:
+      case SeriesFilterField.Imprint:
         return translate('filter-field-pipe.imprint');
-      case FilterField.Team:
+      case SeriesFilterField.Team:
         return translate('filter-field-pipe.team');
-      case FilterField.Location:
+      case SeriesFilterField.Location:
         return translate('filter-field-pipe.location');
-      case FilterField.Languages:
+      case SeriesFilterField.Languages:
         return translate('filter-field-pipe.languages');
-      case FilterField.Libraries:
+      case SeriesFilterField.Libraries:
         return translate('filter-field-pipe.libraries');
-      case FilterField.Letterer:
+      case SeriesFilterField.Letterer:
         return translate('filter-field-pipe.letterer');
-      case FilterField.PublicationStatus:
+      case SeriesFilterField.PublicationStatus:
         return translate('filter-field-pipe.publication-status');
-      case FilterField.Penciller:
+      case SeriesFilterField.Penciller:
         return translate('filter-field-pipe.penciller');
-      case FilterField.Publisher:
+      case SeriesFilterField.Publisher:
         return translate('filter-field-pipe.publisher');
-      case FilterField.ReadProgress:
+      case SeriesFilterField.ReadProgress:
         return translate('filter-field-pipe.read-progress');
-      case FilterField.ReadTime:
+      case SeriesFilterField.ReadTime:
         return translate('filter-field-pipe.read-time');
-      case FilterField.ReleaseYear:
+      case SeriesFilterField.ReleaseYear:
         return translate('filter-field-pipe.release-year');
-      case FilterField.SeriesName:
+      case SeriesFilterField.SeriesName:
         return translate('filter-field-pipe.series-name');
-      case FilterField.Summary:
+      case SeriesFilterField.Summary:
         return translate('filter-field-pipe.summary');
-      case FilterField.Tags:
+      case SeriesFilterField.Tags:
         return translate('filter-field-pipe.tags');
-      case FilterField.Translators:
+      case SeriesFilterField.Translators:
         return translate('filter-field-pipe.translators');
-      case FilterField.UserRating:
+      case SeriesFilterField.UserRating:
         return translate('filter-field-pipe.user-rating');
-      case FilterField.Writers:
+      case SeriesFilterField.Writers:
         return translate('filter-field-pipe.writers');
-      case FilterField.Path:
+      case SeriesFilterField.Path:
         return translate('filter-field-pipe.path');
-      case FilterField.FilePath:
+      case SeriesFilterField.FilePath:
         return translate('filter-field-pipe.file-path');
-      case FilterField.WantToRead:
+      case SeriesFilterField.WantToRead:
         return translate('filter-field-pipe.want-to-read');
-      case FilterField.ReadingDate:
+      case SeriesFilterField.ReadingDate:
         return translate('filter-field-pipe.read-date');
-      case FilterField.ReadLast:
+      case SeriesFilterField.ReadLast:
         return translate('filter-field-pipe.read-last');
-      case FilterField.AverageRating:
+      case SeriesFilterField.AverageRating:
         return translate('filter-field-pipe.average-rating');
-      case FilterField.FileSize:
+      case SeriesFilterField.FileSize:
         return translate('filter-field-pipe.file-size');
       default:
         throw new Error(`Invalid FilterField value: ${value}`);

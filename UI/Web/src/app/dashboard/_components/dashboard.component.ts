@@ -26,7 +26,7 @@ import {
   SideNavCompanionBarComponent
 } from '../../sidenav/_components/side-nav-companion-bar/side-nav-companion-bar.component';
 import {translate, TranslocoDirective} from "@jsverse/transloco";
-import {FilterField} from "../../_models/metadata/v2/filter-field";
+import {SeriesFilterField} from "../../_models/metadata/v2/series-filter-field";
 import {FilterComparison} from "../../_models/metadata/v2/filter-comparison";
 import {DashboardService} from "../../_services/dashboard.service";
 import {MetadataService} from "../../_services/metadata.service";
@@ -299,8 +299,8 @@ export class DashboardComponent {
       params['title'] = translate('dashboard.on-deck-title');
 
       const filter = this.metadataService.createDefaultFilterDto('series');
-      filter.statements.push({field: FilterField.ReadProgress, comparison: FilterComparison.GreaterThan, value: '0'});
-      filter.statements.push({field: FilterField.ReadProgress, comparison: FilterComparison.NotEqual, value: '100'});
+      filter.statements.push({field: SeriesFilterField.ReadProgress, comparison: FilterComparison.GreaterThan, value: '0'});
+      filter.statements.push({field: SeriesFilterField.ReadProgress, comparison: FilterComparison.NotEqual, value: '100'});
       if (filter.sortOptions) {
         filter.sortOptions.sortField = SeriesSortField.ReadProgress;
         filter.sortOptions.isAscending = false;
@@ -321,7 +321,7 @@ export class DashboardComponent {
       params['page'] = 1;
       params['title'] = translate('dashboard.more-in-genre-title', {genre: this.genre?.title});
       const filter = this.metadataService.createDefaultFilterDto('series');
-      filter.statements.push({field: FilterField.Genres, value: this.genre?.id + '', comparison: FilterComparison.MustContains});
+      filter.statements.push({field: SeriesFilterField.Genres, value: this.genre?.id + '', comparison: FilterComparison.MustContains});
       this.filterUtilityService.applyFilterWithParams(['all-series'], filter, params).subscribe();
     }
   }

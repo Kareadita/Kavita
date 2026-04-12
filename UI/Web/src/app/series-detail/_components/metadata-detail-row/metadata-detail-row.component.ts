@@ -14,7 +14,7 @@ import {ImageComponent} from "../../../shared/image/image.component";
 import {ImageService} from "../../../_services/image.service";
 import {FilterUtilitiesService} from "../../../shared/_services/filter-utilities.service";
 import {FilterComparison} from "../../../_models/metadata/v2/filter-comparison";
-import {FilterField} from "../../../_models/metadata/v2/filter-field";
+import {SeriesFilterField} from "../../../_models/metadata/v2/series-filter-field";
 import {MangaFormat} from "../../../_models/manga-format";
 import {SeriesFormatComponent} from "../../../shared/series-format/series-format.component";
 import {BytesPipe} from "../../../_pipes/bytes.pipe";
@@ -56,12 +56,12 @@ export class MetadataDetailRowComponent {
 
   hasDownloadRole = this.accountService.hasDownloadRole;
 
-  openGeneric(queryParamName: FilterField, filter: string | number) {
-    if (queryParamName === FilterField.None) return;
+  openGeneric(queryParamName: SeriesFilterField, filter: string | number) {
+    if (queryParamName === SeriesFilterField.None) return;
     this.filterUtilityService.applyFilter(['all-series'], queryParamName, FilterComparison.Equal, `${filter}`).subscribe();
   }
 
   protected readonly LibraryType = LibraryType;
-  protected readonly FilterField = FilterField;
+  protected readonly FilterField = SeriesFilterField;
   protected readonly MangaFormat = MangaFormat;
 }

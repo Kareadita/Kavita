@@ -4,7 +4,7 @@ import {allSeriesSortFields, SeriesSortField} from 'src/app/_models/metadata/ser
 import {MetadataService} from "../../_services/metadata.service";
 import {FilterV2} from "../../_models/metadata/v2/filter-v2";
 import {FilterCombination} from "../../_models/metadata/v2/filter-combination";
-import {allSeriesFilterFields, FilterField} from "../../_models/metadata/v2/filter-field";
+import {allSeriesFilterFields, SeriesFilterField} from "../../_models/metadata/v2/series-filter-field";
 import {FilterComparison} from "../../_models/metadata/v2/filter-comparison";
 import {HttpClient} from "@angular/common/http";
 import {TextResonse} from "../../_types/text-response";
@@ -77,11 +77,11 @@ export class FilterUtilitiesService {
   /**
    * Applies and redirects to the passed page with the filter encoded (Series only)
    * @param page
-   * @param filter
+   * @param filter - One of the filter fieldsFix
    * @param comparison
    * @param value
    */
-  applyFilter(page: Array<any>, filter: FilterField, comparison: FilterComparison, value: string) {
+  applyFilter(page: Array<any>, filter: SeriesFilterField | ReadingListFilterField | PersonFilterField | AnnotationsFilterField, comparison: FilterComparison, value: string) {
     const dto = this.metadataService.createDefaultFilterDto('series');
     dto.statements.push(this.metadataService.createFilterStatement(filter, comparison, value + ''));
 
@@ -183,7 +183,7 @@ export class FilterUtilitiesService {
       case 'annotation':
         return AnnotationsFilterField.Owner as unknown as T;
       case 'series':
-        return FilterField.SeriesName as unknown as T;
+        return SeriesFilterField.SeriesName as unknown as T;
       case 'person':
         return PersonFilterField.Role as unknown as T;
       case 'readinglist':
@@ -205,13 +205,13 @@ export class FilterUtilitiesService {
         ] as T[];
       case 'series':
         return [
-          FilterField.PublicationStatus, FilterField.Languages, FilterField.AgeRating,
-          FilterField.Translators, FilterField.Characters, FilterField.Publisher,
-          FilterField.Editor, FilterField.CoverArtist, FilterField.Letterer,
-          FilterField.Colorist, FilterField.Inker, FilterField.Penciller,
-          FilterField.Writers, FilterField.Genres, FilterField.Libraries,
-          FilterField.Formats, FilterField.CollectionTags, FilterField.Tags,
-          FilterField.Imprint, FilterField.Team, FilterField.Location
+          SeriesFilterField.PublicationStatus, SeriesFilterField.Languages, SeriesFilterField.AgeRating,
+          SeriesFilterField.Translators, SeriesFilterField.Characters, SeriesFilterField.Publisher,
+          SeriesFilterField.Editor, SeriesFilterField.CoverArtist, SeriesFilterField.Letterer,
+          SeriesFilterField.Colorist, SeriesFilterField.Inker, SeriesFilterField.Penciller,
+          SeriesFilterField.Writers, SeriesFilterField.Genres, SeriesFilterField.Libraries,
+          SeriesFilterField.Formats, SeriesFilterField.CollectionTags, SeriesFilterField.Tags,
+          SeriesFilterField.Imprint, SeriesFilterField.Team, SeriesFilterField.Location
         ] as unknown as T[];
       case 'person':
         return [
@@ -236,7 +236,7 @@ export class FilterUtilitiesService {
         ] as T[];
       case 'series':
         return [
-          FilterField.SeriesName, FilterField.Summary, FilterField.Path, FilterField.FilePath, FilterField.FileSize,
+          SeriesFilterField.SeriesName, SeriesFilterField.Summary, SeriesFilterField.Path, SeriesFilterField.FilePath, SeriesFilterField.FileSize,
         ] as unknown as T[];
       case 'person':
         return [
@@ -257,8 +257,8 @@ export class FilterUtilitiesService {
         ] as T[];
       case 'series':
         return [
-          FilterField.ReadTime, FilterField.ReleaseYear, FilterField.ReadProgress,
-          FilterField.UserRating, FilterField.AverageRating, FilterField.ReadLast
+          SeriesFilterField.ReadTime, SeriesFilterField.ReleaseYear, SeriesFilterField.ReadProgress,
+          SeriesFilterField.UserRating, SeriesFilterField.AverageRating, SeriesFilterField.ReadLast
         ] as unknown as T[];
       case 'person':
         return [
@@ -279,7 +279,7 @@ export class FilterUtilitiesService {
         ] as T[];
       case 'series':
         return [
-          FilterField.WantToRead
+          SeriesFilterField.WantToRead
         ] as unknown as T[];
       case 'person':
         return [] as unknown as T[];
@@ -294,7 +294,7 @@ export class FilterUtilitiesService {
         return [] as T[];
       case 'series':
         return [
-          FilterField.ReadingDate
+          SeriesFilterField.ReadingDate
         ] as unknown as T[];
       case 'person':
         return [] as unknown as T[];
@@ -309,7 +309,7 @@ export class FilterUtilitiesService {
         return [] as T[];
       case 'series':
         return [
-          FilterField.ReleaseYear
+          SeriesFilterField.ReleaseYear
         ] as unknown as T[];
       case 'person':
         return [] as unknown as T[];
@@ -326,7 +326,7 @@ export class FilterUtilitiesService {
         return [] as T[];
       case 'series':
         return [
-          FilterField.AgeRating
+          SeriesFilterField.AgeRating
         ] as unknown as T[];
       case 'person':
         return [] as unknown as T[];
@@ -341,7 +341,7 @@ export class FilterUtilitiesService {
         return [] as T[];
       case 'series':
         return [
-          FilterField.Libraries, FilterField.Formats, FilterField.AgeRating, FilterField.PublicationStatus
+          SeriesFilterField.Libraries, SeriesFilterField.Formats, SeriesFilterField.AgeRating, SeriesFilterField.PublicationStatus
         ] as unknown as T[];
       case 'person':
         return [] as unknown as T[];
@@ -356,7 +356,7 @@ export class FilterUtilitiesService {
         return [] as T[];
       case 'series':
         return [
-          FilterField.AgeRating
+          SeriesFilterField.AgeRating
         ] as unknown as T[];
       case 'person':
         return [] as unknown as T[];
@@ -371,13 +371,13 @@ export class FilterUtilitiesService {
         return [] as T[];
       case 'series':
         return [
-          FilterField.Summary, FilterField.UserRating, FilterField.Genres,
-          FilterField.CollectionTags, FilterField.Tags, FilterField.ReleaseYear,
-          FilterField.Translators, FilterField.Characters, FilterField.Publisher,
-          FilterField.Editor, FilterField.CoverArtist, FilterField.Letterer,
-          FilterField.Colorist, FilterField.Inker, FilterField.Penciller,
-          FilterField.Writers, FilterField.Imprint, FilterField.Team,
-          FilterField.Location
+          SeriesFilterField.Summary, SeriesFilterField.UserRating, SeriesFilterField.Genres,
+          SeriesFilterField.CollectionTags, SeriesFilterField.Tags, SeriesFilterField.ReleaseYear,
+          SeriesFilterField.Translators, SeriesFilterField.Characters, SeriesFilterField.Publisher,
+          SeriesFilterField.Editor, SeriesFilterField.CoverArtist, SeriesFilterField.Letterer,
+          SeriesFilterField.Colorist, SeriesFilterField.Inker, SeriesFilterField.Penciller,
+          SeriesFilterField.Writers, SeriesFilterField.Imprint, SeriesFilterField.Team,
+          SeriesFilterField.Location
         ] as unknown as T[];
       case 'person':
         return [] as unknown as T[];
@@ -406,7 +406,7 @@ export class FilterUtilitiesService {
     switch (entityType) {
       case 'series':
         switch (field) {
-          case FilterField.FileSize:
+          case SeriesFilterField.FileSize:
             return [
               FilterComparison.Equal, FilterComparison.GreaterThan, FilterComparison.GreaterThanEqual,
               FilterComparison.LessThan, FilterComparison.LessThanEqual

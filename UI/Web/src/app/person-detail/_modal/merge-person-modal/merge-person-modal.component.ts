@@ -10,7 +10,7 @@ import {map} from "rxjs/operators";
 import {UtilityService} from "../../../shared/_services/utility.service";
 import {SettingItemComponent} from "../../../settings/_components/setting-item/setting-item.component";
 import {BadgeExpanderComponent} from "../../../shared/badge-expander/badge-expander.component";
-import {FilterField} from "../../../_models/metadata/v2/filter-field";
+import {SeriesFilterField} from "../../../_models/metadata/v2/series-filter-field";
 import {Observable, of} from "rxjs";
 import {Series} from "../../../_models/series";
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
@@ -92,7 +92,7 @@ export class MergePersonModalComponent implements OnInit {
         .pipe(takeUntilDestroyed(this.destroyRef));
   }
 
-  protected readonly FilterField = FilterField;
+  protected readonly FilterField = SeriesFilterField;
 
   allNewAliases() {
     if (!this.mergee) return [];

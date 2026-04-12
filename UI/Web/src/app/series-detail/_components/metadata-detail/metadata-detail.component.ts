@@ -1,11 +1,11 @@
-import {ChangeDetectionStrategy, Component, inject, Input, TemplateRef, contentChild} from '@angular/core';
+import {ChangeDetectionStrategy, Component, contentChild, inject, Input, TemplateRef} from '@angular/core';
 import {NgTemplateOutlet} from '@angular/common';
 import {A11yClickDirective} from "../../../shared/a11y-click.directive";
 import {BadgeExpanderComponent} from "../../../shared/badge-expander/badge-expander.component";
 import {TagBadgeComponent, TagBadgeCursor} from "../../../shared/tag-badge/tag-badge.component";
 import {FilterUtilitiesService} from "../../../shared/_services/filter-utilities.service";
 import {FilterComparison} from "../../../_models/metadata/v2/filter-comparison";
-import {FilterField} from "../../../_models/metadata/v2/filter-field";
+import {SeriesFilterField} from "../../../_models/metadata/v2/series-filter-field";
 import {UtilityService} from "../../../shared/_services/utility.service";
 import {BreakpointService} from "../../../_services/breakpoint.service";
 
@@ -27,14 +27,14 @@ export class MetadataDetailComponent {
   @Input({required: true}) tags: Array<any> = [];
   @Input({required: true}) libraryId!: number;
   @Input({required: true}) heading!: string;
-  @Input() queryParam: FilterField = FilterField.None;
+  @Input() queryParam: SeriesFilterField = SeriesFilterField.None;
   @Input() includeComma: boolean = true;
   readonly titleTemplate = contentChild.required<TemplateRef<any>>('titleTemplate');
   readonly itemTemplate = contentChild<TemplateRef<any>>('itemTemplate');
 
 
-  goTo(queryParamName: FilterField, filter: any) {
-    if (queryParamName === FilterField.None) return;
+  goTo(queryParamName: SeriesFilterField, filter: any) {
+    if (queryParamName === SeriesFilterField.None) return;
     this.filterUtilityService.applyFilter(['library', this.libraryId], queryParamName, FilterComparison.Equal, filter).subscribe();
   }
 
