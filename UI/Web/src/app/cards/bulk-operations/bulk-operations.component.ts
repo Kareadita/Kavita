@@ -66,7 +66,7 @@ export class BulkOperationsComponent<T> {
   }
 
   executeAction(action: Action) {
-    const foundActions = this.actions().filter(act => act.action === action);
+    const foundActions = this.actionFactoryService.flattenActions(this.actions()).filter(act => act.action === action);
     if (foundActions.length > 0) {
       this.performAction(foundActions[0]);
     }
