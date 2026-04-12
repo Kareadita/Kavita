@@ -64,7 +64,7 @@ public class CollectionTagRepository(DataContext context, IMapper mapper) : ICol
         var ageRating = await context.AppUser.GetUserAgeRestriction(userId, ct: ct);
         return await context.AppUserCollection
             .Where(uc => uc.AppUserId == userId || (includePromoted && uc.Promoted))
-            .WhereIf(ageRating.AgeRating != AgeRating.NotApplicable, uc => uc.AgeRating <= ageRating.AgeRating)
+            .RestrictAgainstAgeRestriction(ageRating)
             .OrderBy(uc => uc.Title)
             .ProjectTo<AppUserCollectionDto>(mapper.ConfigurationProvider)
             .ToListAsync(ct);
@@ -75,7 +75,7 @@ public class CollectionTagRepository(DataContext context, IMapper mapper) : ICol
         var ageRating = await context.AppUser.GetUserAgeRestriction(userId, ct: ct);
         return await context.AppUserCollection
             .Where(uc => (uc.AppUserId == userId || uc.Promoted) && uc.Id == collectionId)
-            .WhereIf(ageRating.AgeRating != AgeRating.NotApplicable, uc => uc.AgeRating <= ageRating.AgeRating)
+            .RestrictAgainstAgeRestriction(ageRating)
             .OrderBy(uc => uc.Title)
             .ProjectTo<AppUserCollectionDto>(mapper.ConfigurationProvider)
             .FirstOrDefaultAsync(ct);
@@ -87,7 +87,7 @@ public class CollectionTagRepository(DataContext context, IMapper mapper) : ICol
         var ageRating = await context.AppUser.GetUserAgeRestriction(userId, ct: ct);
         var collections = context.AppUserCollection
             .Where(uc => uc.AppUserId == userId || (includePromoted && uc.Promoted))
-            .WhereIf(ageRating.AgeRating != AgeRating.NotApplicable, uc => uc.AgeRating <= ageRating.AgeRating)
+            .RestrictAgainstAgeRestriction(ageRating)
             .OrderBy(uc => uc.Title)
             .ProjectTo<AppUserCollectionDto>(mapper.ConfigurationProvider);
 
@@ -101,7 +101,7 @@ public class CollectionTagRepository(DataContext context, IMapper mapper) : ICol
         return await context.AppUserCollection
             .Where(uc => uc.AppUserId == userId || (includePromoted && uc.Promoted))
             .Where(uc => uc.Items.Any(s => s.Id == seriesId))
-            .WhereIf(ageRating.AgeRating != AgeRating.NotApplicable, uc => uc.AgeRating <= ageRating.AgeRating)
+            .RestrictAgainstAgeRestriction(ageRating)
             .OrderBy(uc => uc.Title)
             .ProjectTo<AppUserCollectionDto>(mapper.ConfigurationProvider)
             .ToListAsync(ct);
