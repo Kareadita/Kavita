@@ -100,6 +100,11 @@
                 </button>
               }
 
+              <button class="btn btn-icon me-1" [ngbTooltip]="t('shortcuts-menu-alt')" (click)="openShortcutModal()">
+                <i class="fa-solid fa-clipboard-question" aria-hidden="true"></i>
+                <span class="visually-hidden">{{t('shortcuts-menu-alt')}}</span>
+              </button>
+
               <button class="btn btn-secondary btn-icon me-1" (click)="viewBookmarkImages()">
                 <i class="fa-solid fa-book-bookmark" aria-hidden="true"></i>
               </button>

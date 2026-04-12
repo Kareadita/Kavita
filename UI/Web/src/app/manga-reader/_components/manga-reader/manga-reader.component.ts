@@ -509,7 +509,6 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
               this.toggleMenu();
               return;
             }
-            this.readerService.closeShortCutModal();
             this.closeReader();
             break;
           case KeyBindTarget.PageLeft:
@@ -1173,6 +1172,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   closeReader() {
+    this.readerService.closeShortCutModal();
     this.readerService.closeReader(this.libraryId, this.seriesId, this.chapterId, this.readingListMode, this.readingListId);
   }
 
