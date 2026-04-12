@@ -168,8 +168,6 @@ public class ReadingListRepository(DataContext context, IMapper mapper) : IReadi
                 case PersonRole.Location:
                     cast.Locations = people;
                     break;
-                case PersonRole.Other:
-                    break;
             }
         }
 

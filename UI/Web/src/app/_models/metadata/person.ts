@@ -1,7 +1,6 @@
 import {IHasCover} from "../common/i-has-cover";
 
 export enum PersonRole {
-  Other = 1,
   Writer = 3,
   Penciller = 4,
   Inker = 5,

@@ -52,7 +52,7 @@ enumArray.sort((a, b) => a.value.localeCompare(b.value));
 export const allSeriesFilterFields = enumArray
     .map(key => parseInt(key.key, 10))as SeriesFilterField[];
 
-export const allPeople = [
+export const allSeriesPeopleFields = [
   SeriesFilterField.Characters,
   SeriesFilterField.Colorist,
   SeriesFilterField.CoverArtist,
@@ -65,7 +65,7 @@ export const allPeople = [
   SeriesFilterField.Writers,
 ];
 
-export const personRoleForFilterField = (role: PersonRole) => {
+export const personRoleForSeriesFilterField = (role: PersonRole) => {
   switch (role) {
     case PersonRole.Character: return SeriesFilterField.Characters;
     case PersonRole.Colorist: return SeriesFilterField.Colorist;
@@ -80,6 +80,5 @@ export const personRoleForFilterField = (role: PersonRole) => {
     case PersonRole.Imprint: return SeriesFilterField.Imprint;
     case PersonRole.Location: return SeriesFilterField.Location;
     case PersonRole.Team: return SeriesFilterField.Team;
-    case PersonRole.Other: return SeriesFilterField.None;
   }
 };

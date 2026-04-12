@@ -15,7 +15,7 @@ import {CarouselReelComponent} from "../carousel/_components/carousel-reel/carou
 import {FilterComparison} from "../_models/metadata/v2/filter-comparison";
 import {FilterUtilitiesService} from "../shared/_services/filter-utilities.service";
 import {FilterV2} from "../_models/metadata/v2/filter-v2";
-import {personRoleForFilterField, SeriesFilterField} from "../_models/metadata/v2/series-filter-field";
+import {personRoleForSeriesFilterField, SeriesFilterField} from "../_models/metadata/v2/series-filter-field";
 import {Series} from "../_models/series";
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import {FilterCombination} from "../_models/metadata/v2/filter-combination";
@@ -127,7 +127,7 @@ export class PersonDetailComponent {
     filter.limitTo = 20;
 
     roles.forEach(pr => {
-      filter.statements.push({comparison: FilterComparison.Contains, value: this.person().id + '', field: personRoleForFilterField(pr)});
+      filter.statements.push({comparison: FilterComparison.Contains, value: this.person().id + '', field: personRoleForSeriesFilterField(pr)});
     });
 
     return filter;
@@ -161,7 +161,7 @@ export class PersonDetailComponent {
     searchFilter.limitTo = 0;
     searchFilter.combination = FilterCombination.Or;
 
-    searchFilter.statements.push({comparison: FilterComparison.Contains, value: this.person().id + '', field: personRoleForFilterField(role)});
+    searchFilter.statements.push({comparison: FilterComparison.Contains, value: this.person().id + '', field: personRoleForSeriesFilterField(role)});
 
     this.filterUtilityService.applyFilterWithParams(['all-series'], searchFilter, params).subscribe();
   }

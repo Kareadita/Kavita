@@ -3,10 +3,6 @@
 public enum PersonRole
 {
     /// <summary>
-    /// Another role, not covered by other types
-    /// </summary>
-    Other = 1,
-    /// <summary>
     /// Author or Writer
     /// </summary>
     Writer = 3,

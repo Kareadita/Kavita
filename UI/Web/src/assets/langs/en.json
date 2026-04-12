@@ -733,7 +733,6 @@
         "penciller": "Penciller",
         "publisher": "Publisher",
         "writer": "Writer",
-        "other": "Other",
         "imprint": "Imprint",
         "translator": "Translator",
         "team": "{{filter-field-pipe.team}}",

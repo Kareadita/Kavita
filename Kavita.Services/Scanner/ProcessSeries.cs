@@ -369,7 +369,7 @@ public class ProcessSeries(
 
         #region PeopleAndTagsAndGenres
 
-        foreach (var personRole in Enum.GetValues<PersonRole>().Where(r => r != PersonRole.Other))
+        foreach (var personRole in Enum.GetValues<PersonRole>())
         {
             if (series.Metadata.IsPersonRoleLocked(personRole)) continue;
 
@@ -916,7 +916,7 @@ public class ProcessSeries(
             chapter.ReleaseDate = new DateTime(comicInfo.Year, month, day);
         }
 
-        foreach (var personRole in Enum.GetValues<PersonRole>().Where(r => r != PersonRole.Other))
+        foreach (var personRole in Enum.GetValues<PersonRole>())
         {
             if (chapter.IsPersonRoleLocked(personRole)) continue;
 

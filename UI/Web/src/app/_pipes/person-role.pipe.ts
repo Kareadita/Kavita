@@ -36,8 +36,6 @@ export class PersonRolePipe implements PipeTransform {
         return translate('person-role-pipe.location');
       case PersonRole.Translator:
         return translate('person-role-pipe.translator');
-      case PersonRole.Other:
-        return translate('person-role-pipe.other');
       default:
         return '';
     }

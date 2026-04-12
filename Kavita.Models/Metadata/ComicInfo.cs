@@ -145,7 +145,6 @@ public class ComicInfo
         PersonRole.Character => SplitNames(Characters),
         PersonRole.Team => SplitNames(Teams),
         PersonRole.Location => SplitNames(Locations),
-        PersonRole.Other => [],
         _ => throw new ArgumentOutOfRangeException(nameof(role), role, null)
     };
 

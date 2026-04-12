@@ -225,8 +225,6 @@ export class MetadataService {
 
   updatePerson(entity: IHasCast, persons: Person[], role: PersonRole) {
     switch (role) {
-      case PersonRole.Other:
-        break;
       case PersonRole.CoverArtist:
         entity.coverArtists = persons;
         break;
