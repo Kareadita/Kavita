@@ -1,9 +1,10 @@
-import { Pipe, PipeTransform } from '@angular/core';
+import {Pipe, PipeTransform} from '@angular/core';
 import {KeyBind} from "../_models/preferences/preferences";
 import {KeyCode} from "../_services/key-bind.service";
 
 @Pipe({
-  name: 'keyBind'
+  name: 'keyBind',
+  pure: true
 })
 export class KeyBindPipe implements PipeTransform {
 
@@ -15,7 +16,7 @@ export class KeyBindPipe implements PipeTransform {
     [KeyCode.Space]: 'space',
   } as const;
 
-  transform(keyBind: KeyBind | undefined): string {
+  transform(keyBind: KeyBind | undefined, withSpacing: boolean = true): string {
     if (!keyBind) return '';
 
     if (keyBind.controllerSequence) {
@@ -33,8 +34,8 @@ export class KeyBindPipe implements PipeTransform {
     if (keyBind.meta) keys.push(isMac ? '⌘' : 'Win');
 
     keys.push(this.customMappings[keyBind.key] ?? keyBind.key.toUpperCase())
-
-    return keys.join('+')
+    const joinKey = withSpacing ? ' + ' : '+';
+    return keys.join(joinKey);
   }
 
 }

@@ -532,12 +532,25 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
           case KeyBindTarget.OpenHelp:
             this.openShortcutModal();
             break;
+          case KeyBindTarget.NextChapter:
+            this.loadNextChapter();
+            break;
+          case KeyBindTarget.PreviousChapter:
+            this.loadPrevChapter();
+            break;
+          case KeyBindTarget.FirstPage:
+            this.goToPage(0);
+            break;
+          case KeyBindTarget.LastPage:
+            this.goToPage(this.maxPages);
+            break;
         }
       },
       [
         KeyBindTarget.ToggleFullScreen, KeyBindTarget.BookmarkPage, KeyBindTarget.OpenHelp, KeyBindTarget.GoTo,
         KeyBindTarget.ToggleMenu, KeyBindTarget.PageRight, KeyBindTarget.PageLeft, KeyBindTarget.Escape,
         KeyBindTarget.PageUp, KeyBindTarget.PageDown, KeyBindTarget.OffsetDoublePage,
+        KeyBindTarget.PreviousChapter, KeyBindTarget.NextChapter, KeyBindTarget.FirstPage, KeyBindTarget.LastPage
       ],
     );
 
@@ -1927,6 +1940,10 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       {keyBindTarget: KeyBindTarget.OpenHelp},
       {keyBindTarget: KeyBindTarget.BookmarkPage, description: 'bookmark'},
       {keyBindTarget: KeyBindTarget.OffsetDoublePage, description: 'offset-double-page'},
+      {keyBindTarget: KeyBindTarget.PreviousChapter, description: 'previous-chapter'},
+      {keyBindTarget: KeyBindTarget.NextChapter, description: 'next-chapter'},
+      {keyBindTarget: KeyBindTarget.FirstPage, description: 'first-page'},
+      {keyBindTarget: KeyBindTarget.LastPage, description: 'last-page'},
       {key: translate('shortcuts-modal.double-click'), description: 'bookmark'},
     ]);
 

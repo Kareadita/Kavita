@@ -38,12 +38,18 @@ export class KeybindSettingDescriptionPipe implements PipeTransform {
         return this.create('key-bind-title-page-down', 'key-bind-tooltip-page-down');
       case KeyBindTarget.OffsetDoublePage:
         return this.create('key-bind-title-offset-double-page', 'key-bind-tooltip-offset-double-page');
+      case KeyBindTarget.NextChapter:
+        return this.create('key-bind-title-next-chapter', 'key-bind-tooltip-next-chapter');
+      case KeyBindTarget.PreviousChapter:
+        return this.create('key-bind-title-previous-chapter', 'key-bind-tooltip-previous-chapter');
+      case KeyBindTarget.FirstPage:
+        return this.create('key-bind-title-first-page', 'key-bind-tooltip-first-page');
+      case KeyBindTarget.LastPage:
+        return this.create('key-bind-title-last-page', 'key-bind-tooltip-last-page');
     }
   }
 
   private create(titleKey: string, tooltipKey: string) {
-
     return {title: translate(`${this.prefix}.${titleKey}`), tooltip: translate(`${this.prefix}.${tooltipKey}`)}
-}
-
+  }
 }

@@ -45,4 +45,16 @@ public enum KeyBindTarget
 
     [Description(nameof(OffsetDoublePage))]
     OffsetDoublePage = 13,
+
+    [Description(nameof(NextChapter))]
+    NextChapter = 14,
+
+    [Description(nameof(PreviousChapter))]
+    PreviousChapter = 15,
+
+    [Description(nameof(FirstPage))]
+    FirstPage = 16,
+
+    [Description(nameof(LastPage))]
+    LastPage = 17,
 }

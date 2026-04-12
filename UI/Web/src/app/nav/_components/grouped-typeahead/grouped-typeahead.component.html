@@ -17,7 +17,7 @@
           }
         } @else {
           <div class="input-hint d-none d-lg-block">
-            {{keyBindService.allKeyBinds().OpenSearch.at(0) | keyBind}}
+            {{keyBindService.allKeyBinds().OpenSearch.at(0) | keyBind:false}}
           </div>
         }
       </div>

@@ -150,7 +150,7 @@ public class UsersController(
             .Select(l => l.Id).ToList();
 
         preferencesDto.SocialPreferences.SocialLibraries = preferencesDto.SocialPreferences.SocialLibraries
-            .Where(l => allLibs.Contains(l)).ToList();
+            .Where(allLibs.Contains).ToList();
         existingPreferences.SocialPreferences = preferencesDto.SocialPreferences;
 
         existingPreferences.OpdsPreferences = preferencesDto.OpdsPreferences;

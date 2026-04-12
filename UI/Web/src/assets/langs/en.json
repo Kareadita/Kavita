@@ -2079,7 +2079,15 @@
         "key-bind-title-page-down": "Page down",
         "key-bind-tooltip-page-down": "Move one page downwards",
         "key-bind-title-offset-double-page": "Offset double page",
-        "key-bind-tooltip-offset-double-page": "Offset pages for double page spread alignment"
+        "key-bind-tooltip-offset-double-page": "Offset pages for double page spread alignment",
+        "key-bind-title-next-chapter": "Next Chapter",
+        "key-bind-tooltip-next-chapter": "Load the next chapter",
+        "key-bind-title-previous-chapter": "Previous Chapter",
+        "key-bind-tooltip-previous-chapter": "Load the previous chapter",
+        "key-bind-title-first-page": "First Page",
+        "key-bind-tooltip-first-page": "Move to the first page",
+        "key-bind-title-last-page": "Last Page",
+        "key-bind-tooltip-last-page": "Move to the last page"
     },
 
     "cbl-manager": {

@@ -690,10 +690,23 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
           case KeyBindTarget.ToggleMenu:
             this.actionBarVisible.update(x => !x);
             break;
+          case KeyBindTarget.FirstPage:
+            await this.goToPage(0);
+            break;
+          case KeyBindTarget.LastPage:
+            await this.goToPage(this.maxPages());
+            break;
+          case KeyBindTarget.PreviousChapter:
+            this.loadPrevChapter();
+            break;
+          case KeyBindTarget.NextChapter:
+            this.loadNextChapter();
+            break;
         }
       },
       [KeyBindTarget.PageLeft, KeyBindTarget.PageRight, KeyBindTarget.Escape, KeyBindTarget.GoTo,
-        KeyBindTarget.ToggleFullScreen, KeyBindTarget.ToggleMenu],
+        KeyBindTarget.ToggleFullScreen, KeyBindTarget.ToggleMenu, KeyBindTarget.FirstPage, KeyBindTarget.LastPage,
+        KeyBindTarget.PreviousChapter, KeyBindTarget.NextChapter],
     );
 
     this.keyBindService.registerListener(

@@ -32,7 +32,7 @@ import {CHAPTER_ID_DOESNT_EXIST, ReaderService} from 'src/app/_services/reader.s
 import {SeriesService} from 'src/app/_services/series.service';
 import {ThemeService} from 'src/app/_services/theme.service';
 import {NgbTooltip} from '@ng-bootstrap/ng-bootstrap';
-import {AsyncPipe, DOCUMENT, NgStyle} from '@angular/common';
+import {DOCUMENT, NgStyle} from '@angular/common';
 import {translate, TranslocoDirective} from "@jsverse/transloco";
 import {PdfLayoutMode} from "../../../_models/preferences/pdf-layout-mode";
 import {PdfScrollMode} from "../../../_models/preferences/pdf-scroll-mode";
@@ -52,7 +52,7 @@ import {Breakpoint, BreakpointService} from "../../../_services/breakpoint.servi
   templateUrl: './pdf-reader.component.html',
   styleUrls: ['./pdf-reader.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [NgStyle, NgxExtendedPdfViewerModule, NgbTooltip, AsyncPipe, TranslocoDirective,
+  imports: [NgStyle, NgxExtendedPdfViewerModule, NgbTooltip, TranslocoDirective,
     PdfScrollModeTypePipe, PdfSpreadTypePipe]
 })
 export class PdfReaderComponent implements OnInit, OnDestroy {
@@ -147,8 +147,23 @@ export class PdfReaderComponent implements OnInit, OnDestroy {
 
       this.keyBindService.registerListener(
         this.destroyRef,
-        () => this.closeReader(),
-        [KeyBindTarget.Escape],
+        (e) => {
+          switch (e.target) {
+            case KeyBindTarget.Escape:
+              this.closeReader();
+              break;
+            case KeyBindTarget.FirstPage:
+              this.currentPage = 0;
+              this.cdRef.markForCheck();
+              break;
+            case KeyBindTarget.LastPage:
+              this.currentPage = this.maxPages;
+              this.cdRef.markForCheck();
+              break;
+          }
+
+        },
+        [KeyBindTarget.Escape, KeyBindTarget.FirstPage, KeyBindTarget.LastPage],
       );
 
       effect(() => {

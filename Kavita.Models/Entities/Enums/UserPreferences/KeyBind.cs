@@ -5,7 +5,7 @@ namespace Kavita.Models.Entities.Enums.UserPreferences;
 
 public sealed record KeyBind
 {
-    public string Key { get; set; }
+    public required string Key { get; set; }
     public bool Control { get; set; }
     public bool Shift { get; set; }
     public bool Meta { get; set; }
