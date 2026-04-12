@@ -118,6 +118,11 @@
               <span class="visually-hidden">{{scrollMode | pdfScrollModeType}}</span>
             </button>
 
+            <button class="btn btn-icon" [ngbTooltip]="t('shortcuts-menu-alt')" (click)="openShortcutModal()">
+              <i class="fa-regular fa-rectangle-list" aria-hidden="true"></i>
+              <span class="visually-hidden">{{t('shortcuts-menu-alt')}}</span>
+            </button>
+
             <button (click)="toggleSpreadMode()" class="btn-icon toolbarButton" [ngbTooltip]="spreadMode | pdfSpreadType" [disabled]="this.pageLayoutMode === 'book'">
 
               @switch (spreadMode) {

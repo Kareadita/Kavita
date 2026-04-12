@@ -47,6 +47,13 @@ import {KeyBindService} from "../../../_services/key-bind.service";
 import {KeyBindTarget} from "../../../_models/preferences/preferences";
 import {Breakpoint, BreakpointService} from "../../../_services/breakpoint.service";
 
+const KEYBIND_TARGETS = [
+  {keyBindTarget: KeyBindTarget.OpenHelp},
+  {keyBindTarget: KeyBindTarget.Escape},
+  {keyBindTarget: KeyBindTarget.FirstPage, description: 'first-page'},
+  {keyBindTarget: KeyBindTarget.LastPage, description: 'last-page'},
+];
+
 @Component({
   selector: 'app-pdf-reader',
   templateUrl: './pdf-reader.component.html',
@@ -160,10 +167,12 @@ export class PdfReaderComponent implements OnInit, OnDestroy {
               this.currentPage = this.maxPages;
               this.cdRef.markForCheck();
               break;
+            case KeyBindTarget.OpenHelp:
+              this.openShortcutModal();
           }
 
         },
-        [KeyBindTarget.Escape, KeyBindTarget.FirstPage, KeyBindTarget.LastPage],
+        KEYBIND_TARGETS.map(k => k.keyBindTarget as KeyBindTarget),
       );
 
       effect(() => {
@@ -402,7 +411,12 @@ export class PdfReaderComponent implements OnInit, OnDestroy {
   }
 
   closeReader() {
-    this.readerService.closeReader(this.libraryId, this.seriesId, this.chapterId, this.readingListMode, this.readingListId);
+     this.readerService.closeShortCutModal();
+     this.readerService.closeReader(this.libraryId, this.seriesId, this.chapterId, this.readingListMode, this.readingListId);
+  }
+
+  openShortcutModal() {
+     this.readerService.openShortcutModal(KEYBIND_TARGETS);
   }
 
   updateLoading(state: boolean) {

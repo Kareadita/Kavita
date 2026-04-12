@@ -1150,7 +1150,8 @@
         "completion-label": "{{percent}} complete",
 
         "force-selected-one-column": "Layout mode switched to One Column due to insufficient space to render Two Columns",
-        "forced-vertical-switch": "Layout mode switched as Two Column layout doesn't work with Vertical Writing Style"
+        "forced-vertical-switch": "Layout mode switched as Two Column layout doesn't work with Vertical Writing Style",
+        "shortcuts-menu-alt": "{{manga-reader.shortcuts-menu-alt}}"
     },
 
     "personal-table-of-contents": {
@@ -2588,7 +2589,8 @@
         "light-theme-alt": "Light Theme",
         "dark-theme-alt": "Dark Theme",
         "close-reader-alt": "Close Reader",
-        "toggle-incognito": "Turn off Incognito Mode"
+        "toggle-incognito": "Turn off Incognito Mode",
+        "shortcuts-menu-alt": "{{manga-reader.shortcuts-menu-alt}}"
     },
 
     "pdf-layout-mode-pipe": {
