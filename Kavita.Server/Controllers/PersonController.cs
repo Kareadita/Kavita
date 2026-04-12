@@ -130,7 +130,7 @@ public class PersonController(
     {
         // This needs to get all people and update them equally
         var person = await unitOfWork.PersonRepository.GetPersonById(dto.Id, PersonIncludes.Aliases);
-        if (person == null) return BadRequest(localizationService.TranslateAsync(UserId, "person-doesnt-exist"));
+        if (person == null) return BadRequest(await localizationService.TranslateAsync(UserId, "person-doesnt-exist"));
 
         if (string.IsNullOrEmpty(dto.Name)) return BadRequest(await localizationService.TranslateAsync(UserId, "person-name-required"));
 
@@ -189,7 +189,7 @@ public class PersonController(
     {
         var settings = await unitOfWork.SettingsRepository.GetSettingsDtoAsync();
         var person = await unitOfWork.PersonRepository.GetPersonById(personId);
-        if (person == null) return BadRequest(localizationService.TranslateAsync(UserId, "person-doesnt-exist"));
+        if (person == null) return BadRequest(await localizationService.TranslateAsync(UserId, "person-doesnt-exist"));
 
         var personImage = await coverDbService.DownloadPersonImageAsync(person, settings.EncodeMediaAs);
 

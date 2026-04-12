@@ -120,7 +120,7 @@ public class FontController(
         }
         catch (KavitaException ex)
         {
-            return BadRequest(localizationService.TranslateAsync(UserId, ex.Message));
+            return BadRequest(await localizationService.TranslateAsync(UserId, ex.Message));
         }
     }
 

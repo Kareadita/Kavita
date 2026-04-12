@@ -675,7 +675,7 @@ public class ReadingListController(
     public async Task<ActionResult> ExportAsCbl([FromQuery] int readingListId, [FromQuery] bool asV2 = false)
     {
         var filepath = await cblExportService.ExportReadingList(readingListId, UserId,  asV2);
-        if (string.IsNullOrEmpty(filepath)) return BadRequest(localizationService.TranslateAsync(UserId, "cbl-export-failed"));
+        if (string.IsNullOrEmpty(filepath)) return BadRequest(await localizationService.TranslateAsync(UserId, "cbl-export-failed"));
 
         var contentType = asV2 ? "application/json" : "application/xml";
         return PhysicalFile(filepath, contentType, Path.GetFileName(filepath));

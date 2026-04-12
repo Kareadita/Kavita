@@ -58,8 +58,6 @@ export class MetadataService {
     return this.accountService.currentUser()?.preferences?.bookReaderHighlightSlots ?? [];
   });
 
-  public readonly defaultSortFields = [SeriesSortField.SortName, PersonSortField.Name, AnnotationsSortField.Owner, ReadingListSortField.Title] as number[];
-
   baseUrl = environment.apiUrl;
   private validLanguages: Array<Language> = [];
   private ageRatingPipe = new AgeRatingPipe();
@@ -180,7 +178,7 @@ export class MetadataService {
     };
   }
 
-  private getDefaultSortField(entityType: ValidFilterEntity) {
+  getDefaultSortField(entityType: ValidFilterEntity) {
     switch (entityType) {
       case 'series':
         return SeriesSortField.SortName;

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using Hangfire;
 using Kavita.API.Database;
@@ -199,7 +200,7 @@ public class CollectionController(IUnitOfWork unitOfWork, ICollectionTagService 
 
         if (tag == null)
         {
-            return BadRequest(localizationService.TranslateAsync(UserId, "collection-doesnt-exists"));
+            return BadRequest(await localizationService.TranslateAsync(UserId, "collection-doesnt-exists"));
         }
 
         var series = await unitOfWork.SeriesRepository.GetSeriesByIdsAsync(dto.SeriesIds.ToList(), false);
@@ -301,7 +302,7 @@ public class CollectionController(IUnitOfWork unitOfWork, ICollectionTagService 
         // Validation check to ensure stack doesn't exist already
         if (await unitOfWork.CollectionTagRepository.CollectionExists(dto.Title, user.Id, ct))
         {
-            return BadRequest(localizationService.TranslateAsync(user.Id, "collection-already-exists"));
+            return BadRequest(await localizationService.TranslateAsync(user.Id, "collection-already-exists"));
         }
 
         try
@@ -317,7 +318,7 @@ public class CollectionController(IUnitOfWork unitOfWork, ICollectionTagService 
             await unitOfWork.CommitAsync(ct);
 
             // Trigger Stack Refresh for just one stack (not all)
-            BackgroundJob.Enqueue(() => collectionSyncService.Sync(newCollection.Id, ct));
+            BackgroundJob.Enqueue(() => collectionSyncService.Sync(newCollection.Id, CancellationToken.None));
             return Ok();
         }
         catch (Exception ex)
@@ -325,6 +326,6 @@ public class CollectionController(IUnitOfWork unitOfWork, ICollectionTagService 
             logger.LogError(ex, "There was an issue importing MAL Stack");
         }
 
-        return BadRequest(localizationService.TranslateAsync(user.Id, "error-import-stack"));
+        return BadRequest(await localizationService.TranslateAsync(user.Id, "error-import-stack"));
     }
 }

@@ -562,7 +562,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
             break;
         }
       },
-      KEYBIND_TARGETS.map(k => k.keyBindTarget as KeyBindTarget),
+      KEYBIND_TARGETS.filter(k => !!k.keyBindTarget).map(k => k.keyBindTarget as KeyBindTarget),
     );
   }
 

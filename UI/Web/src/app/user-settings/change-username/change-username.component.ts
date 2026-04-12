@@ -24,32 +24,23 @@ export class ChangeUsernameComponent {
   username = this.accountService.username;
 
   usernameChangeForm: FormGroup = new FormGroup({});
-  observableHandles: Array<any> = [];
-  errors = signal<string[]>([]);
   isEditMode = signal<boolean>(false);
 
   ngOnInit(): void {
     this.usernameChangeForm.addControl('username', new FormControl(this.accountService.username(), [Validators.required]));
   }
 
-  ngOnDestroy() {
-    this.observableHandles.forEach(o => o.unsubscribe());
-  }
 
   resetPasswordForm() {
     this.usernameChangeForm.get('username')?.setValue(this.accountService.username());
-    this.errors.set([]);
   }
 
   saveForm() {
     const model = this.usernameChangeForm.value;
-    this.errors.set([]);
     this.accountService.changeUsername(model.username).subscribe(() => {
       this.toastr.success(translate('toasts.username-updated'));
       this.resetPasswordForm();
       this.isEditMode.set(false);
-    }, err => {
-      this.errors.set(err);
     });
   }
 

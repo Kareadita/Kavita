@@ -26,7 +26,7 @@ public class KPlusAttribute : Attribute, IAsyncAuthorizationFilter
         if (!await licenseService.HasActiveLicense(ct: context.HttpContext.RequestAborted))
         {
             var localizationService = context.HttpContext.RequestServices.GetRequiredService<ILocalizationService>();
-            var message = localizationService.TranslateAsync(userContext.GetUserIdOrThrow(), "kavitaplus-restricted");
+            var message = await localizationService.TranslateAsync(userContext.GetUserIdOrThrow(), "kavitaplus-restricted");
 
             context.Result = new BadRequestObjectResult(new {Message = message});
         }

@@ -6,6 +6,6 @@ public sealed record UsernameChangeEmailDto
     /// User Id to resolve the locale against
     /// </summary>
     public required int LocaleUserId { get; init; }
-    public string EmailAddress { get; init; }
-    public string InvitingUser { get; init; }
+    public required string EmailAddress { get; init; }
+    public required string InvitingUser { get; init; }
 }

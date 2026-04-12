@@ -266,8 +266,8 @@ public class TaskScheduler : ITaskScheduler
         BackgroundJob.Enqueue(() => _scrobblingService.CheckExternalAccessTokens(CancellationToken.None));
 
         // Get the License Info (and cache it) on first load. This will internally cache the Github releases for the Version Service
-        BackgroundJob.Enqueue(() => _licenseService.GetLicenseInfo(true, cancellationToken));  // Kick this off first to cache it then let it refresh every 9 hours (8 hour cache)
-        RecurringJob.AddOrUpdate(LicenseCheckId, () => _licenseService.GetLicenseInfo(false, cancellationToken),
+        BackgroundJob.Enqueue(() => _licenseService.GetLicenseInfo(true, CancellationToken.None));  // Kick this off first to cache it then let it refresh every 9 hours (8 hour cache)
+        RecurringJob.AddOrUpdate(LicenseCheckId, () => _licenseService.GetLicenseInfo(false, CancellationToken.None),
             LicenseService.Cron, RecurringJobOptions);
 
         // KavitaPlus Scrobbling (every hour) - randomise minutes to spread requests out for K+

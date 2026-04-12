@@ -398,7 +398,7 @@ public class AccountController(UserManager<AppUser> userManager,
 
         // If Valid, we will make the change then email the user to inform them (no confirmation needed)
         var oldUsername = user.UserName;
-        user.UserName = dto.Username;
+        user.UserName = dto.Username.Sanitize();
         await unitOfWork.CommitAsync(ct);
 
         await eventHub.SendMessageToAsync(MessageFactory.UserUpdate, MessageFactory.UserUpdateEvent(user.Id, oldUsername),
