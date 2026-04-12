@@ -89,7 +89,7 @@ public class AnnotationController(
         }
         catch (KavitaException ex)
         {
-            return BadRequest(await localizationService.Translate(UserId, ex.Message));
+            return BadRequest(await localizationService.TranslateAsync(UserId, ex.Message));
         }
     }
 
@@ -108,7 +108,7 @@ public class AnnotationController(
         }
         catch (KavitaException ex)
         {
-            return BadRequest(await localizationService.Translate(UserId, ex.Message));
+            return BadRequest(await localizationService.TranslateAsync(UserId, ex.Message));
         }
     }
 
@@ -186,7 +186,7 @@ public class AnnotationController(
     public async Task<ActionResult> DeleteAnnotation(int annotationId)
     {
         var annotation = await unitOfWork.AnnotationRepository.GetAnnotation(annotationId);
-        if (annotation == null || annotation.AppUserId != UserId) return BadRequest(await localizationService.Translate(UserId, "annotation-delete"));
+        if (annotation == null || annotation.AppUserId != UserId) return BadRequest(await localizationService.TranslateAsync(UserId, "annotation-delete"));
 
         unitOfWork.AnnotationRepository.Remove(annotation);
         await unitOfWork.CommitAsync();

@@ -210,7 +210,7 @@ public class ScrobblingController(
         var user = await unitOfWork.UserRepository.GetUserByIdAsync(UserId, AppUserIncludes.ScrobbleHolds);
         if (user == null) return Unauthorized();
         if (user.ScrobbleHolds.Any(s => s.SeriesId == seriesId))
-            return Ok(await localizationService.Translate(user.Id, "nothing-to-do"));
+            return Ok(await localizationService.TranslateAsync(user.Id, "nothing-to-do"));
 
         var seriesHold = new ScrobbleHoldBuilder()
             .WithSeriesId(seriesId)
@@ -244,7 +244,7 @@ public class ScrobblingController(
             // Handle other exceptions or log the error
             logger.LogError(ex, "An error occurred while adding the hold");
             return StatusCode(StatusCodes.Status500InternalServerError,
-                await localizationService.Translate(UserId, "nothing-to-do"));
+                await localizationService.TranslateAsync(UserId, "nothing-to-do"));
         }
     }
 

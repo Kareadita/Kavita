@@ -496,7 +496,7 @@ public class SeriesService(
     public async Task<SeriesDetailDto> GetSeriesDetail(int seriesId, int userId, CancellationToken ct = default)
     {
         var series = await unitOfWork.SeriesRepository.GetSeriesDtoByIdAsync(seriesId, userId, ct);
-        if (series == null) throw new KavitaException(await localizationService.Translate(userId, "series-doesnt-exist"));
+        if (series == null) throw new KavitaException(await localizationService.TranslateAsync(userId, "series-doesnt-exist"));
 
         var libraryIds = await unitOfWork.LibraryRepository.GetLibraryIdsForUserIdAsync(userId, ct: ct);
         if (!libraryIds.Contains(series.LibraryId))
@@ -749,7 +749,7 @@ public class SeriesService(
         CancellationToken ct = default)
     {
         var series = await unitOfWork.SeriesRepository.GetSeriesByIdAsync(seriesId, SeriesIncludes.Metadata | SeriesIncludes.Library, ct);
-        if (series == null) throw new KavitaException(await localizationService.Translate(userId, "series-doesnt-exist"));
+        if (series == null) throw new KavitaException(await localizationService.TranslateAsync(userId, "series-doesnt-exist"));
         if (!(await unitOfWork.UserRepository.HasAccessToSeries(userId, seriesId, ct)))
         {
             throw new UnauthorizedAccessException("user-no-access-library-from-series");
@@ -890,19 +890,19 @@ public class SeriesService(
             // Manga uses "Chapter X", Comics use "Issue #X", Books use "Book X"
             result.Title = series.Library.Type switch
             {
-                LibraryType.Manga => await localizationService.Translate(userId, "chapter-num", result.ChapterNumber),
-                LibraryType.Comic => await localizationService.Translate(userId, "issue-num", "#", result.ChapterNumber),
-                LibraryType.ComicVine => await localizationService.Translate(userId, "issue-num", "#", result.ChapterNumber),
-                LibraryType.Book => await localizationService.Translate(userId, "book-num", result.ChapterNumber),
-                LibraryType.LightNovel => await localizationService.Translate(userId, "book-num", result.ChapterNumber),
-                _ => await localizationService.Translate(userId, "chapter-num", result.ChapterNumber)
+                LibraryType.Manga => await localizationService.TranslateAsync(userId, "chapter-num", result.ChapterNumber),
+                LibraryType.Comic => await localizationService.TranslateAsync(userId, "issue-num", "#", result.ChapterNumber),
+                LibraryType.ComicVine => await localizationService.TranslateAsync(userId, "issue-num", "#", result.ChapterNumber),
+                LibraryType.Book => await localizationService.TranslateAsync(userId, "book-num", result.ChapterNumber),
+                LibraryType.LightNovel => await localizationService.TranslateAsync(userId, "book-num", result.ChapterNumber),
+                _ => await localizationService.TranslateAsync(userId, "chapter-num", result.ChapterNumber)
             };
         }
         else
         {
             // Volume-only numbering - common for omnibus editions or series without chapter breaks
             result.VolumeNumber = (int)highestVolumeNumber + 1;
-            result.Title = await localizationService.Translate(userId, "volume-num", result.VolumeNumber);
+            result.Title = await localizationService.TranslateAsync(userId, "volume-num", result.VolumeNumber);
         }
 
         return result;

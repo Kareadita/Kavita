@@ -286,7 +286,7 @@ public class CblController(IReadingListService readingListService, IDirectorySer
     {
         var ct = HttpContext.RequestAborted;
         var series = await unitOfWork.SeriesRepository.GetSeriesByIdAsync(dto.SeriesId, ct: ct);
-        if (series == null) return BadRequest(await localizationService.Translate(UserId, "series-doesnt-exist"));
+        if (series == null) return BadRequest(await localizationService.TranslateAsync(UserId, "series-doesnt-exist"));
 
         var normalizedName = dto.CblSeriesName.ToNormalized();
 
@@ -391,7 +391,7 @@ public class CblController(IReadingListService readingListService, IDirectorySer
         if (dto.SeriesId.HasValue && dto.SeriesId.Value != rule.SeriesId)
         {
             var series = await unitOfWork.SeriesRepository.GetSeriesByIdAsync(dto.SeriesId.Value, ct: ct);
-            if (series == null) return BadRequest(await localizationService.Translate(UserId, "series-doesnt-exist"));
+            if (series == null) return BadRequest(await localizationService.TranslateAsync(UserId, "series-doesnt-exist"));
 
             rule.SeriesId = dto.SeriesId.Value;
             rule.SeriesNameAtMapping = series.Name;

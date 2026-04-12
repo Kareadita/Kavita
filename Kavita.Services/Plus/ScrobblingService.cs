@@ -269,7 +269,7 @@ public class ScrobblingService : IScrobblingService
         if (!await _licenseService.HasActiveLicense(ct: ct)) return;
 
         var series = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(seriesId, SeriesIncludes.Metadata | SeriesIncludes.Library | SeriesIncludes.ExternalMetadata, ct);
-        if (series == null) throw new KavitaException(await _localizationService.Translate(userId, "series-doesnt-exist"));
+        if (series == null) throw new KavitaException(await _localizationService.TranslateAsync(userId, "series-doesnt-exist"));
 
         var user = await _unitOfWork.UserRepository.GetUserByIdAsync(userId, AppUserIncludes.UserPreferences, ct);
         if (user == null || !user.UserPreferences.AniListScrobblingEnabled) return;
@@ -311,7 +311,7 @@ public class ScrobblingService : IScrobblingService
         if (!await _licenseService.HasActiveLicense(ct: ct)) return;
 
         var series = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(seriesId, SeriesIncludes.Metadata | SeriesIncludes.Library | SeriesIncludes.ExternalMetadata, ct);
-        if (series == null) throw new KavitaException(await _localizationService.Translate(userId, "series-doesnt-exist"));
+        if (series == null) throw new KavitaException(await _localizationService.TranslateAsync(userId, "series-doesnt-exist"));
 
         var user = await _unitOfWork.UserRepository.GetUserByIdAsync(userId, AppUserIncludes.UserPreferences, ct);
         if (user == null || !user.UserPreferences.AniListScrobblingEnabled) return;
@@ -395,7 +395,7 @@ public class ScrobblingService : IScrobblingService
         if (!await _licenseService.HasActiveLicense(ct: ct)) return;
 
         var series = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(seriesId, SeriesIncludes.Metadata | SeriesIncludes.Library | SeriesIncludes.ExternalMetadata, ct);
-        if (series == null) throw new KavitaException(await _localizationService.Translate(userId, "series-doesnt-exist"));
+        if (series == null) throw new KavitaException(await _localizationService.TranslateAsync(userId, "series-doesnt-exist"));
 
         if (!series.Library.AllowScrobbling) return;
 

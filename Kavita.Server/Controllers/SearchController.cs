@@ -62,7 +62,7 @@ public class SearchController(IUnitOfWork unitOfWork, ILocalizationService local
         queryString = Parser.CleanQuery(queryString);
 
         var libraries = await unitOfWork.LibraryRepository.GetLibraryIdsForUserIdAsync(UserId, QueryContext.Search);
-        if (libraries.Count == 0) return BadRequest(await localizationService.Translate(UserId, "libraries-restricted"));
+        if (libraries.Count == 0) return BadRequest(await localizationService.TranslateAsync(UserId, "libraries-restricted"));
 
         var isAdmin = UserContext.HasRole(PolicyConstants.AdminRole);
 

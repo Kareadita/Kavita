@@ -47,13 +47,13 @@ public class StreamService(
         CancellationToken ct = default)
     {
         var user = await unitOfWork.UserRepository.GetUserByIdAsync(userId, AppUserIncludes.DashboardStreams, ct);
-        if (user == null) throw new KavitaException(await localizationService.Translate(userId, "no-user"));
+        if (user == null) throw new KavitaException(await localizationService.TranslateAsync(userId, "no-user"));
 
         var smartFilter = await unitOfWork.AppUserSmartFilterRepository.GetById(smartFilterId, ct);
-        if (smartFilter == null) throw new KavitaException(await localizationService.Translate(userId, "smart-filter-doesnt-exist"));
+        if (smartFilter == null) throw new KavitaException(await localizationService.TranslateAsync(userId, "smart-filter-doesnt-exist"));
 
         var stream = user.DashboardStreams.FirstOrDefault(d => d.SmartFilter?.Id == smartFilterId);
-        if (stream != null) throw new KavitaException(await localizationService.Translate(userId, "smart-filter-already-in-use"));
+        if (stream != null) throw new KavitaException(await localizationService.TranslateAsync(userId, "smart-filter-already-in-use"));
 
         var maxOrder = user!.DashboardStreams.Max(d => d.Order);
         var createdStream = new AppUserDashboardStream()
@@ -90,7 +90,7 @@ public class StreamService(
     public async Task UpdateDashboardStream(int userId, DashboardStreamDto dto, CancellationToken ct = default)
     {
         var stream = await unitOfWork.UserRepository.GetDashboardStream(dto.Id, ct);
-        if (stream == null) throw new KavitaException(await localizationService.Translate(userId, "dashboard-stream-doesnt-exist"));
+        if (stream == null) throw new KavitaException(await localizationService.TranslateAsync(userId, "dashboard-stream-doesnt-exist"));
         stream.Visible = dto.Visible;
 
         unitOfWork.UserRepository.Update(stream);
@@ -107,7 +107,7 @@ public class StreamService(
         var stream = user?.DashboardStreams.FirstOrDefault(d => d.Id == dto.Id);
         if (stream == null)
         {
-            throw new KavitaException(await localizationService.Translate(userId, "dashboard-stream-doesnt-exist"));
+            throw new KavitaException(await localizationService.TranslateAsync(userId, "dashboard-stream-doesnt-exist"));
         }
 
         if (stream.Order == dto.ToPosition) return;
@@ -142,13 +142,13 @@ public class StreamService(
         CancellationToken ct = default)
     {
         var user = await unitOfWork.UserRepository.GetUserByIdAsync(userId, AppUserIncludes.SideNavStreams, ct);
-        if (user == null) throw new KavitaException(await localizationService.Translate(userId, "no-user"));
+        if (user == null) throw new KavitaException(await localizationService.TranslateAsync(userId, "no-user"));
 
         var smartFilter = await unitOfWork.AppUserSmartFilterRepository.GetById(smartFilterId, ct);
-        if (smartFilter == null) throw new KavitaException(await localizationService.Translate(userId, "smart-filter-doesnt-exist"));
+        if (smartFilter == null) throw new KavitaException(await localizationService.TranslateAsync(userId, "smart-filter-doesnt-exist"));
 
         var stream = user.SideNavStreams.FirstOrDefault(d => d.SmartFilter?.Id == smartFilterId);
-        if (stream != null) throw new KavitaException(await localizationService.Translate(userId, "smart-filter-already-in-use"));
+        if (stream != null) throw new KavitaException(await localizationService.TranslateAsync(userId, "smart-filter-already-in-use"));
 
         var maxOrder = user!.SideNavStreams.Max(d => d.Order);
         var createdStream = new AppUserSideNavStream()
@@ -186,13 +186,13 @@ public class StreamService(
         CancellationToken ct = default)
     {
         var user = await unitOfWork.UserRepository.GetUserByIdAsync(userId, AppUserIncludes.SideNavStreams, ct);
-        if (user == null) throw new KavitaException(await localizationService.Translate(userId, "no-user"));
+        if (user == null) throw new KavitaException(await localizationService.TranslateAsync(userId, "no-user"));
 
         var externalSource = await unitOfWork.AppUserExternalSourceRepository.GetById(externalSourceId, ct);
-        if (externalSource == null) throw new KavitaException(await localizationService.Translate(userId, "external-source-doesnt-exist"));
+        if (externalSource == null) throw new KavitaException(await localizationService.TranslateAsync(userId, "external-source-doesnt-exist"));
 
         var stream = user?.SideNavStreams.FirstOrDefault(d => d.ExternalSourceId == externalSourceId);
-        if (stream != null) throw new KavitaException(await localizationService.Translate(userId, "external-source-already-in-use"));
+        if (stream != null) throw new KavitaException(await localizationService.TranslateAsync(userId, "external-source-already-in-use"));
 
         var maxOrder = user!.SideNavStreams.Max(d => d.Order);
         var createdStream = new AppUserSideNavStream()
@@ -235,7 +235,7 @@ public class StreamService(
     {
         var stream = await unitOfWork.UserRepository.GetSideNavStream(dto.Id, ct);
         if (stream == null)
-            throw new KavitaException(await localizationService.Translate(userId, "sidenav-stream-doesnt-exist"));
+            throw new KavitaException(await localizationService.TranslateAsync(userId, "sidenav-stream-doesnt-exist"));
 
         stream.Visible = dto.Visible;
 
@@ -250,7 +250,7 @@ public class StreamService(
         var user = await unitOfWork.UserRepository.GetUserByIdAsync(userId,
             AppUserIncludes.SideNavStreams, ct);
         var stream = user?.SideNavStreams.FirstOrDefault(d => d.Id == dto.Id);
-        if (stream == null) throw new KavitaException(await localizationService.Translate(userId, "sidenav-stream-doesnt-exist"));
+        if (stream == null) throw new KavitaException(await localizationService.TranslateAsync(userId, "sidenav-stream-doesnt-exist"));
 
         if (stream.Order == dto.ToPosition) return;
 

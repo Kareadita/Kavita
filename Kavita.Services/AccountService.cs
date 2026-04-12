@@ -70,7 +70,7 @@ public partial class AccountService(
     {
         if (string.IsNullOrWhiteSpace(username) || !AllowedUsernameRegex.IsMatch(username))
         {
-            return [new ApiException(400, "Invalid username")];
+            return [new ApiException(400, "invalid-username")];
         }
 
         // Reverted because of https://go.microsoft.com/fwlink/?linkid=2129535
@@ -79,7 +79,7 @@ public partial class AccountService(
         {
             return
             [
-                new(400, "Username is already taken")
+                new(400, "username-taken")
             ];
         }
 
@@ -121,7 +121,7 @@ public partial class AccountService(
         {
             if (identityProvider == IdentityProvider.OpenIdConnect)
             {
-                throw new KavitaException(await localizationService.Translate(actingUserId, "cannot-change-identity-provider-original-user"));
+                throw new KavitaException(await localizationService.TranslateAsync(actingUserId, "cannot-change-identity-provider-original-user"));
             }
 
             return false;
@@ -139,7 +139,7 @@ public partial class AccountService(
         // Don't allow changes to the user if they're managed by oidc, and their identity provider isn't being changed to something else
         if (user.IdentityProvider == IdentityProvider.OpenIdConnect && identityProvider == IdentityProvider.OpenIdConnect)
         {
-            throw new KavitaException(await localizationService.Translate(actingUserId, "oidc-managed"));
+            throw new KavitaException(await localizationService.TranslateAsync(actingUserId, "oidc-managed"));
         }
 
         user.IdentityProvider = identityProvider;

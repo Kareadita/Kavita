@@ -108,7 +108,7 @@ public class SeriesController(
 
         if (await seriesService.DeleteMultipleSeries(dto.SeriesIds)) return Ok(true);
 
-        return BadRequest(await localizationService.Translate(UserId, "generic-series-delete"));
+        return BadRequest(await localizationService.TranslateAsync(UserId, "generic-series-delete"));
     }
 
     /// <summary>
@@ -163,7 +163,7 @@ public class SeriesController(
     {
         var series = await unitOfWork.SeriesRepository.GetSeriesByIdAsync(updateSeries.Id);
         if (series == null)
-            return BadRequest(await localizationService.Translate(UserId, "series-doesnt-exist"));
+            return BadRequest(await localizationService.TranslateAsync(UserId, "series-doesnt-exist"));
 
         series.NormalizedName = series.Name.ToNormalized();
         if (!string.IsNullOrEmpty(updateSeries.SortName?.Trim()))
@@ -198,7 +198,7 @@ public class SeriesController(
 
         if (!await unitOfWork.CommitAsync())
         {
-            return BadRequest(await localizationService.Translate(UserId, "generic-series-update"));
+            return BadRequest(await localizationService.TranslateAsync(UserId, "generic-series-update"));
         }
 
         if (needsRefreshMetadata)
@@ -376,9 +376,9 @@ public class SeriesController(
     public async Task<ActionResult> UpdateSeriesMetadata(UpdateSeriesMetadataDto updateSeriesMetadataDto)
     {
         if (!await seriesService.UpdateSeriesMetadata(updateSeriesMetadataDto))
-            return BadRequest(await localizationService.Translate(UserId, "update-metadata-fail"));
+            return BadRequest(await localizationService.TranslateAsync(UserId, "update-metadata-fail"));
 
-        return Ok(await localizationService.Translate(UserId, "series-updated"));
+        return Ok(await localizationService.TranslateAsync(UserId, "series-updated"));
 
     }
 
@@ -408,7 +408,7 @@ public class SeriesController(
     [HttpPost("series-by-ids")]
     public async Task<ActionResult<IEnumerable<SeriesDto>>> GetAllSeriesById(SeriesByIdsDto dto)
     {
-        if (dto.SeriesIds == null) return BadRequest(await localizationService.Translate(UserId, "invalid-payload"));
+        if (dto.SeriesIds == null) return BadRequest(await localizationService.TranslateAsync(UserId, "invalid-payload"));
         return Ok(await unitOfWork.SeriesRepository.GetSeriesDtoForIdsAsync(dto.SeriesIds, UserId));
     }
 
@@ -423,7 +423,7 @@ public class SeriesController(
     {
         var val = (AgeRating) ageRating;
         if (val == AgeRating.NotApplicable)
-            return await localizationService.Translate(UserId, "age-restriction-not-applicable");
+            return await localizationService.TranslateAsync(UserId, "age-restriction-not-applicable");
 
         return Ok(val.ToDescription());
     }
@@ -444,7 +444,7 @@ public class SeriesController(
         }
         catch (KavitaException ex)
         {
-            return BadRequest(await localizationService.Translate(UserId, ex.Message));
+            return BadRequest(await localizationService.TranslateAsync(UserId, ex.Message));
         }
     }
 
@@ -490,7 +490,7 @@ public class SeriesController(
             return Ok();
         }
 
-        return BadRequest(await localizationService.Translate(UserId, "generic-relationship"));
+        return BadRequest(await localizationService.TranslateAsync(UserId, "generic-relationship"));
     }
 
     [KPlus]

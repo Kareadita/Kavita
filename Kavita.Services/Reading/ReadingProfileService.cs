@@ -110,7 +110,7 @@ public class ReadingProfileService(IUnitOfWork unitOfWork, ILocalizationService 
         if (series == null) throw new KavitaException("series-doesnt-exist"); // Shouldn't happen
 
         profileToPromote.Kind = ReadingProfileKind.User;
-        profileToPromote.Name = await localizationService.Translate(userId, "generated-reading-profile-name", series.Name);
+        profileToPromote.Name = await localizationService.TranslateAsync(userId, "generated-reading-profile-name", series.Name);
         profileToPromote.Name = EnsureUniqueProfileName(allUserProfiles, profileToPromote.Name);
         profileToPromote.NormalizedName = profileToPromote.Name.ToNormalized();
         unitOfWork.AppUserReadingProfileRepository.Update(profileToPromote);

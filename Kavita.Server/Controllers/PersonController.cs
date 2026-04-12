@@ -130,15 +130,15 @@ public class PersonController(
     {
         // This needs to get all people and update them equally
         var person = await unitOfWork.PersonRepository.GetPersonById(dto.Id, PersonIncludes.Aliases);
-        if (person == null) return BadRequest(localizationService.Translate(UserId, "person-doesnt-exist"));
+        if (person == null) return BadRequest(localizationService.TranslateAsync(UserId, "person-doesnt-exist"));
 
-        if (string.IsNullOrEmpty(dto.Name)) return BadRequest(await localizationService.Translate(UserId, "person-name-required"));
+        if (string.IsNullOrEmpty(dto.Name)) return BadRequest(await localizationService.TranslateAsync(UserId, "person-name-required"));
 
 
         // Validate the name is unique
         if (dto.Name != person.Name && !(await unitOfWork.PersonRepository.IsNameUnique(dto.Name)))
         {
-            return BadRequest(await localizationService.Translate(UserId, "person-name-unique"));
+            return BadRequest(await localizationService.TranslateAsync(UserId, "person-name-unique"));
         }
 
         // Update name first, in case it got moved to aliases
@@ -146,7 +146,7 @@ public class PersonController(
         person.NormalizedName = person.Name.ToNormalized();
 
         var success = await personService.UpdatePersonAliasesAsync(person, dto.Aliases);
-        if (!success) return BadRequest(await localizationService.Translate(UserId, "aliases-have-overlap"));
+        if (!success) return BadRequest(await localizationService.TranslateAsync(UserId, "aliases-have-overlap"));
 
 
         person.Description = dto.Description ?? string.Empty;
@@ -189,14 +189,14 @@ public class PersonController(
     {
         var settings = await unitOfWork.SettingsRepository.GetSettingsDtoAsync();
         var person = await unitOfWork.PersonRepository.GetPersonById(personId);
-        if (person == null) return BadRequest(localizationService.Translate(UserId, "person-doesnt-exist"));
+        if (person == null) return BadRequest(localizationService.TranslateAsync(UserId, "person-doesnt-exist"));
 
         var personImage = await coverDbService.DownloadPersonImageAsync(person, settings.EncodeMediaAs);
 
         if (string.IsNullOrEmpty(personImage))
         {
 
-            return BadRequest(await localizationService.Translate(UserId, "person-image-doesnt-exist"));
+            return BadRequest(await localizationService.TranslateAsync(UserId, "person-image-doesnt-exist"));
         }
 
         person.CoverImage = personImage;

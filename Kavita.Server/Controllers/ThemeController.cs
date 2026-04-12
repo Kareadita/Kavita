@@ -41,7 +41,7 @@ public class ThemeController(
         }
         catch (KavitaException)
         {
-            return BadRequest(await localizationService.Translate(UserId, "theme-doesnt-exist"));
+            return BadRequest(await localizationService.TranslateAsync(UserId, "theme-doesnt-exist"));
         }
 
         return Ok();
@@ -61,7 +61,7 @@ public class ThemeController(
         }
         catch (KavitaException ex)
         {
-            return BadRequest(await localizationService.Get("en", ex.Message));
+            return BadRequest(await localizationService.GetAsync("en", ex.Message));
         }
     }
 

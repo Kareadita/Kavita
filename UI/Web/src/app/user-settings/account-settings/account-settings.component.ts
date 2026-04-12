@@ -1,17 +1,18 @@
 import {ChangeDetectionStrategy, Component, inject} from '@angular/core';
 import {
-    ChangeAgeRestrictionComponent
+  ChangeAgeRestrictionComponent
 } from "src/app/user-settings/change-age-restriction/change-age-restriction.component";
 import {ChangeEmailComponent} from "src/app/user-settings/change-email/change-email.component";
 import {ChangePasswordComponent} from "src/app/user-settings/change-password/change-password.component";
 import {
-    ManageScrobblingProvidersComponent
+  ManageScrobblingProvidersComponent
 } from "src/app/user-settings/manage-scrobbling-providers/manage-scrobbling-providers.component";
 import {AccountService} from "src/app/_services/account.service";
 import {ConfirmService} from "src/app/shared/confirm.service";
-import {EMPTY, filter, switchMap, from} from "rxjs";
+import {EMPTY, filter, from, switchMap} from "rxjs";
 import {ImageComponent} from "src/app/shared/image/image.component";
 import {translate, TranslocoDirective} from "@jsverse/transloco";
+import {ChangeUsernameComponent} from "../change-username/change-username.component";
 
 @Component({
   selector: 'app-account-settings',
@@ -21,7 +22,8 @@ import {translate, TranslocoDirective} from "@jsverse/transloco";
     ChangePasswordComponent,
     ManageScrobblingProvidersComponent,
     ImageComponent,
-    TranslocoDirective
+    TranslocoDirective,
+    ChangeUsernameComponent
   ],
   templateUrl: './account-settings.component.html',
   styleUrl: './account-settings.component.scss',

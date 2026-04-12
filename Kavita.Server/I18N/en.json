@@ -286,5 +286,9 @@
     "email.send-to-device.subject": "Kavita - Send file from Kavita",
     "email.send-to-device.preheader": "File(s) sent from Kavita",
     "email.send-to-device.header": "You sent file(s) from Kavita",
-    "email.send-to-device.description": "Please find attached the file(s) you've sent."
+    "email.send-to-device.description": "Please find attached the file(s) you've sent.",
+
+    "email.username-change.subject": "Your username has been changed on {{InvitingUser}}'s Server",
+    "email.username-change.title": "Username Change Update",
+    "email.username-change.description": "Your account's username has been updated on {{InvitingUser}}'s Kavita instance. There is no action required from you."
 }

@@ -14,7 +14,8 @@ public interface IEmailService
     Task<bool> SendFilesToEmail(SendToDto data);
     Task<EmailTestResultDto> SendTestEmail(string adminEmail);
     Task SendEmailChangeEmail(ConfirmationEmailDto data);
-    bool IsValidEmail(string email);
+    Task SendUsernameChangeEmail(UsernameChangeEmailDto data);
+    bool IsValidEmail(string? email);
 
     Task<string> GenerateEmailLink(HttpRequest request, string token, string routePart, string email,
         bool withHost = true);

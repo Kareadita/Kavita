@@ -143,7 +143,7 @@ public class DownloadController(
     public async Task<ActionResult> DownloadVolume(int volumeId, [FromQuery] string? correlationId = null)
     {
         var volume = await unitOfWork.VolumeRepository.GetVolumeByIdAsync(volumeId);
-        if (volume == null) return BadRequest(await localizationService.Translate(UserId, "volume-doesnt-exist"));
+        if (volume == null) return BadRequest(await localizationService.TranslateAsync(UserId, "volume-doesnt-exist"));
 
         var files = await unitOfWork.VolumeRepository.GetFilesForVolume(volumeId);
         var series = await unitOfWork.SeriesRepository.GetSeriesByIdAsync(volume.SeriesId);
@@ -175,7 +175,7 @@ public class DownloadController(
     {
         var files = await unitOfWork.ChapterRepository.GetFilesForChapterAsync(chapterId);
         var chapter = await unitOfWork.ChapterRepository.GetChapterAsync(chapterId);
-        if (chapter == null) return BadRequest(await localizationService.Translate(UserId, "chapter-doesnt-exist"));
+        if (chapter == null) return BadRequest(await localizationService.TranslateAsync(UserId, "chapter-doesnt-exist"));
 
         var volume = await unitOfWork.VolumeRepository.GetVolumeByIdAsync(chapter.VolumeId);
         var series = await unitOfWork.SeriesRepository.GetSeriesByIdAsync(volume!.SeriesId);
@@ -276,7 +276,7 @@ public class DownloadController(
         if (!await unitOfWork.UserRepository.HasAccessToSeries(UserId, seriesId, HttpContext.RequestAborted))
             return NotFound();
 
-        if (!downloadBookmarkDto.Bookmarks.Any()) return BadRequest(await localizationService.Translate(UserId, "bookmarks-empty"));
+        if (!downloadBookmarkDto.Bookmarks.Any()) return BadRequest(await localizationService.TranslateAsync(UserId, "bookmarks-empty"));
 
         var userId = UserId;
         var username = Username!;

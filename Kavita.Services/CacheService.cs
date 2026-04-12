@@ -230,7 +230,7 @@ public class CacheService(
             if (!directoryService.FileSystem.Path.Exists(file.FilePath))
             {
                 logger.LogError("{File} does not exist on disk", file.FilePath);
-                throw new KavitaException(await localizationService.Translate("file-doesnt-exist"));
+                throw new KavitaException(await localizationService.TranslateAsync("file-doesnt-exist"));
             }
 
             switch (file.Format)

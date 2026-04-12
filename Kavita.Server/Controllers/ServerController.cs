@@ -103,7 +103,7 @@ public class ServerController(
         logger.LogInformation("{UserName} is performing file analysis from admin dashboard", Username!);
         if (TaskScheduler.HasAlreadyEnqueuedTask(ScannerService.Name, "AnalyzeFiles",
                 [], TaskScheduler.DefaultQueue, true))
-            return Ok(await localizationService.Translate(UserId, "job-already-running"));
+            return Ok(await localizationService.TranslateAsync(UserId, "job-already-running"));
 
         BackgroundJob.Enqueue(() => scannerService.AnalyzeFiles());
         return Ok();
@@ -132,7 +132,7 @@ public class ServerController(
         var encoding = (await unitOfWork.SettingsRepository.GetSettingsDtoAsync()).EncodeMediaAs;
         if (encoding == EncodeFormat.PNG)
         {
-            return BadRequest(await localizationService.Translate(UserId, "encode-as-warning"));
+            return BadRequest(await localizationService.TranslateAsync(UserId, "encode-as-warning"));
         }
 
         taskScheduler.ConvertAllCoversToEncoding();
@@ -156,7 +156,7 @@ public class ServerController(
         }
         catch (KavitaException ex)
         {
-            return BadRequest(await localizationService.Translate(UserId, ex.Message));
+            return BadRequest(await localizationService.TranslateAsync(UserId, ex.Message));
         }
     }
 
@@ -213,7 +213,7 @@ public class ServerController(
             new JobDto()
             {
                 Id = dto.Id,
-                Title = await localizationService.Translate(UserId, dto.Id),
+                Title = await localizationService.TranslateAsync(UserId, dto.Id),
                 Cron = dto.Cron,
                 LastExecutionUtc = dto.LastExecution.HasValue ? new DateTime(dto.LastExecution.Value.Ticks, DateTimeKind.Utc) : null
             });

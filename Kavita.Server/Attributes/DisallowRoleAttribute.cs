@@ -30,7 +30,7 @@ public class DisallowRoleAttribute(params string[] roles) : Attribute, IAsyncAut
             var localizationService = context.HttpContext.RequestServices.GetRequiredService<ILocalizationService>();
             var userId = user.GetUserId();
 
-            var message = await localizationService.Translate(userId, "permission-denied");
+            var message = await localizationService.TranslateAsync(userId, "permission-denied");
 
             // Pipeline is stopped in IAsyncAuthorizationFilter if result is non nil
             context.Result = new ContentResult

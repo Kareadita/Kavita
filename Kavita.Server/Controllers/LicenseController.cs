@@ -111,7 +111,7 @@ public class LicenseController(
             return Ok();
         }
 
-        return BadRequest(localizationService.Translate(UserId, "unable-to-reset-k+"));
+        return BadRequest(localizationService.TranslateAsync(UserId, "unable-to-reset-k+"));
     }
 
     /// <summary>
@@ -140,7 +140,7 @@ public class LicenseController(
         }
         catch (Exception ex)
         {
-            return BadRequest(await localizationService.Translate(UserId, ex.Message));
+            return BadRequest(await localizationService.TranslateAsync(UserId, ex.Message));
         }
         return Ok();
     }

@@ -88,10 +88,10 @@ public sealed class LocalizedNamingContext
         int userId,
         LibraryType libraryType)
     {
-        var volumeTask = localizationService.Translate(userId, "volume-num");
-        var chapterTask = localizationService.Translate(userId, "chapter-num");
-        var issueTask = localizationService.Translate(userId, "issue-num");
-        var bookTask = localizationService.Translate(userId, "book-num");
+        var volumeTask = localizationService.TranslateAsync(userId, "volume-num");
+        var chapterTask = localizationService.TranslateAsync(userId, "chapter-num");
+        var issueTask = localizationService.TranslateAsync(userId, "issue-num");
+        var bookTask = localizationService.TranslateAsync(userId, "book-num");
 
 
         await Task.WhenAll(volumeTask, chapterTask, issueTask, bookTask);

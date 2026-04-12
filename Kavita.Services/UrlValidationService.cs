@@ -14,12 +14,12 @@ public class UrlValidationService(ILocalizationService localizationService) : IU
     {
         if (!Uri.TryCreate(url, UriKind.Absolute, out var uri))
         {
-            throw new KavitaException(await localizationService.Translate("url-malformed"));
+            throw new KavitaException(await localizationService.TranslateAsync("url-malformed"));
         }
 
         if (!string.Equals(uri.Scheme, "https", StringComparison.OrdinalIgnoreCase))
         {
-            throw new KavitaException(await localizationService.Translate("url-https-only"));
+            throw new KavitaException(await localizationService.TranslateAsync("url-https-only"));
         }
 
         IPAddress[] addresses;
@@ -29,19 +29,19 @@ public class UrlValidationService(ILocalizationService localizationService) : IU
         }
         catch (SocketException)
         {
-            throw new KavitaException(await localizationService.Translate("url-unable-to-resolve"));
+            throw new KavitaException(await localizationService.TranslateAsync("url-unable-to-resolve"));
         }
 
         if (addresses.Length == 0)
         {
-            throw new KavitaException(await localizationService.Translate("url-unable-to-resolve"));
+            throw new KavitaException(await localizationService.TranslateAsync("url-unable-to-resolve"));
         }
 
         foreach (var address in addresses)
         {
             if (IpBlocklist.IsBlockedAddress(address))
             {
-                throw new KavitaException(await localizationService.Translate("url-blocked-address"));
+                throw new KavitaException(await localizationService.TranslateAsync("url-blocked-address"));
             }
         }
     }

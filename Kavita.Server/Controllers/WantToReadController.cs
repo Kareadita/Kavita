@@ -93,7 +93,7 @@ public class WantToReadController(
             return Ok();
         }
 
-        return BadRequest(await localizationService.Translate(UserId, "generic-reading-list-update"));
+        return BadRequest(await localizationService.TranslateAsync(UserId, "generic-reading-list-update"));
     }
 
     /// <summary>
@@ -123,6 +123,6 @@ public class WantToReadController(
             return Ok();
         }
 
-        return BadRequest(await localizationService.Translate(UserId, "generic-reading-list-update"));
+        return BadRequest(await localizationService.TranslateAsync(UserId, "generic-reading-list-update"));
     }
 }

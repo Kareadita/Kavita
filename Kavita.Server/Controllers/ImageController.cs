@@ -142,7 +142,7 @@ public class ImageController(IUnitOfWork unitOfWork, IDirectoryService directory
     public async Task<ActionResult> GetBookmarkImage(int chapterId, int pageNum, string apiKey, int imageOffset = 0)
     {
         var bookmark = await unitOfWork.UserRepository.GetBookmarkForPage(pageNum, chapterId, imageOffset, UserId);
-        if (bookmark == null) return BadRequest(await localizationService.Translate(UserId, "bookmark-doesnt-exist"));
+        if (bookmark == null) return BadRequest(await localizationService.TranslateAsync(UserId, "bookmark-doesnt-exist"));
 
         var bookmarkDirectory =
             (await unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.BookmarkDirectory)).Value;
@@ -160,7 +160,7 @@ public class ImageController(IUnitOfWork unitOfWork, IDirectoryService directory
     [HttpGet("web-link")]
     public async Task<ActionResult> GetWebLinkImage(string url, string apiKey)
     {
-        if (string.IsNullOrEmpty(url)) return BadRequest(await localizationService.Translate(UserId, "must-be-defined", "Url"));
+        if (string.IsNullOrEmpty(url)) return BadRequest(await localizationService.TranslateAsync(UserId, "must-be-defined", "Url"));
 
         var encodeFormat = (await unitOfWork.SettingsRepository.GetSettingsDtoAsync()).EncodeMediaAs;
 
@@ -176,7 +176,7 @@ public class ImageController(IUnitOfWork unitOfWork, IDirectoryService directory
             }
             catch (Exception)
             {
-                return BadRequest(await localizationService.Translate(UserId, "generic-favicon"));
+                return BadRequest(await localizationService.TranslateAsync(UserId, "generic-favicon"));
             }
         }
 
@@ -193,7 +193,7 @@ public class ImageController(IUnitOfWork unitOfWork, IDirectoryService directory
     [HttpGet("publisher")]
     public async Task<ActionResult> GetPublisherImage(string publisherName, string apiKey)
     {
-        if (string.IsNullOrEmpty(publisherName)) return BadRequest(await localizationService.Translate(UserId, "must-be-defined", "publisherName"));
+        if (string.IsNullOrEmpty(publisherName)) return BadRequest(await localizationService.TranslateAsync(UserId, "must-be-defined", "publisherName"));
         if (publisherName.Contains("..")) return BadRequest();
 
         var encodeFormat = (await unitOfWork.SettingsRepository.GetSettingsDtoAsync()).EncodeMediaAs;
@@ -210,7 +210,7 @@ public class ImageController(IUnitOfWork unitOfWork, IDirectoryService directory
             }
             catch (Exception)
             {
-                return BadRequest(await localizationService.Translate(UserId, "generic-favicon"));
+                return BadRequest(await localizationService.TranslateAsync(UserId, "generic-favicon"));
             }
         }
 
@@ -258,7 +258,7 @@ public class ImageController(IUnitOfWork unitOfWork, IDirectoryService directory
     [Authorize(PolicyConstants.AdminRole)]
     public async Task<ActionResult> GetCoverUploadImage(string filename, string apiKey)
     {
-        if (filename.Contains("..")) return BadRequest(await localizationService.Translate(UserId, "invalid-filename"));
+        if (filename.Contains("..")) return BadRequest(await localizationService.TranslateAsync(UserId, "invalid-filename"));
 
         var path = Path.Join(directoryService.TempDirectory, filename);
         return PhysicalFile(path);

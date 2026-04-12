@@ -102,10 +102,10 @@ public class CollectionController(IUnitOfWork unitOfWork, ICollectionTagService 
         }
         catch (KavitaException ex)
         {
-            return BadRequest(await localizationService.Translate(UserId, ex.Message));
+            return BadRequest(await localizationService.TranslateAsync(UserId, ex.Message));
         }
 
-        return BadRequest(await localizationService.Translate(UserId, "generic-error"));
+        return BadRequest(await localizationService.TranslateAsync(UserId, "generic-error"));
     }
 
     /// <summary>
@@ -123,7 +123,7 @@ public class CollectionController(IUnitOfWork unitOfWork, ICollectionTagService 
 
         if (!User.IsInRole(PolicyConstants.PromoteRole) && !User.IsInRole(PolicyConstants.AdminRole))
         {
-            return BadRequest(await localizationService.Translate(userId, "permission-denied"));
+            return BadRequest(await localizationService.TranslateAsync(userId, "permission-denied"));
         }
 
         foreach (var collection in collections)
@@ -190,7 +190,7 @@ public class CollectionController(IUnitOfWork unitOfWork, ICollectionTagService 
 
         if (tag == null)
         {
-            return BadRequest(localizationService.Translate(UserId, "collection-doesnt-exists"));
+            return BadRequest(localizationService.TranslateAsync(UserId, "collection-doesnt-exists"));
         }
 
         var series = await unitOfWork.SeriesRepository.GetSeriesByIdsAsync(dto.SeriesIds.ToList(), false);
@@ -202,7 +202,7 @@ public class CollectionController(IUnitOfWork unitOfWork, ICollectionTagService 
         unitOfWork.UserRepository.Update(user);
         if (await unitOfWork.CommitAsync()) return Ok();
 
-        return BadRequest(await localizationService.Translate(UserId, "generic-error"));
+        return BadRequest(await localizationService.TranslateAsync(UserId, "generic-error"));
     }
 
     /// <summary>
@@ -217,17 +217,17 @@ public class CollectionController(IUnitOfWork unitOfWork, ICollectionTagService 
         try
         {
             var tag = await unitOfWork.CollectionTagRepository.GetCollectionAsync(updateSeriesForTagDto.Tag.Id, CollectionIncludes.Series);
-            if (tag == null) return BadRequest(await localizationService.Translate(UserId, "collection-doesnt-exist"));
+            if (tag == null) return BadRequest(await localizationService.TranslateAsync(UserId, "collection-doesnt-exist"));
 
             if (await collectionService.RemoveTagFromSeries(tag, updateSeriesForTagDto.SeriesIdsToRemove))
-                return Ok(await localizationService.Translate(UserId, "collection-updated"));
+                return Ok(await localizationService.TranslateAsync(UserId, "collection-updated"));
         }
         catch (Exception)
         {
             await unitOfWork.RollbackAsync();
         }
 
-        return BadRequest(await localizationService.Translate(UserId, "generic-error"));
+        return BadRequest(await localizationService.TranslateAsync(UserId, "generic-error"));
     }
 
     /// <summary>
@@ -245,11 +245,11 @@ public class CollectionController(IUnitOfWork unitOfWork, ICollectionTagService 
             if (user == null) return Unauthorized();
 
             if (user.Collections.All(c => c.Id != tagId))
-                return BadRequest(await localizationService.Translate(user.Id, "access-denied"));
+                return BadRequest(await localizationService.TranslateAsync(user.Id, "access-denied"));
 
             if (await collectionService.DeleteTag(tagId, user))
             {
-                return Ok(await localizationService.Translate(UserId, "collection-deleted"));
+                return Ok(await localizationService.TranslateAsync(UserId, "collection-deleted"));
             }
         }
         catch (Exception ex)
@@ -258,7 +258,7 @@ public class CollectionController(IUnitOfWork unitOfWork, ICollectionTagService 
             await unitOfWork.RollbackAsync();
         }
 
-        return BadRequest(await localizationService.Translate(UserId, "generic-error"));
+        return BadRequest(await localizationService.TranslateAsync(UserId, "generic-error"));
     }
 
     /// <summary>
@@ -288,7 +288,7 @@ public class CollectionController(IUnitOfWork unitOfWork, ICollectionTagService 
         // Validation check to ensure stack doesn't exist already
         if (await unitOfWork.CollectionTagRepository.CollectionExists(dto.Title, user.Id))
         {
-            return BadRequest(localizationService.Translate(user.Id, "collection-already-exists"));
+            return BadRequest(localizationService.TranslateAsync(user.Id, "collection-already-exists"));
         }
 
         try
@@ -312,6 +312,6 @@ public class CollectionController(IUnitOfWork unitOfWork, ICollectionTagService 
             logger.LogError(ex, "There was an issue importing MAL Stack");
         }
 
-        return BadRequest(localizationService.Translate(user.Id, "error-import-stack"));
+        return BadRequest(localizationService.TranslateAsync(user.Id, "error-import-stack"));
     }
 }

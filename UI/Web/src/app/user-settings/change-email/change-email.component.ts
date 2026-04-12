@@ -28,6 +28,19 @@ export class ChangeEmailComponent {
   emailConfirmed: boolean = true;
   hasValidEmail: boolean = true;
   canEdit = computed(() => !this.accountService.hasReadOnlyRole());
+  censoredEmail = computed(() => {
+    const email = this.accountService.currentUser()?.email;
+    if (!email) return null;
+
+    const atIndex = email.indexOf('@');
+    const local = atIndex >= 0 ? email.substring(0, atIndex) : email;
+    const domain = atIndex >= 0 ? email.substring(atIndex) : '';
+
+    if (local.length <= 2) return local + domain;
+
+    const visible = Math.max(1, Math.ceil(local.length * 0.3));
+    return local.substring(0, visible) + '•'.repeat(local.length - visible) + domain;
+  })
 
 
   protected get email() { return this.form.get('email'); }

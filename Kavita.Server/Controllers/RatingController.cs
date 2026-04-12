@@ -39,7 +39,7 @@ public class RatingController(
             return Ok();
         }
 
-        return BadRequest(await localizationService.Translate(UserId, "generic-error"));
+        return BadRequest(await localizationService.TranslateAsync(UserId, "generic-error"));
     }
 
     /// <summary>
@@ -62,7 +62,7 @@ public class RatingController(
             return Ok();
         }
 
-        return BadRequest(await localizationService.Translate(UserId, "generic-error"));
+        return BadRequest(await localizationService.TranslateAsync(UserId, "generic-error"));
     }
 
     /// <summary>

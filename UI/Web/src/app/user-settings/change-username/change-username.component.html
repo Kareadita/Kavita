@@ -1,0 +1,41 @@
+<ng-container *transloco="let t; prefix:'change-username'">
+  <app-setting-item [title]="t('username-label')"
+                    [canEdit]="!isReadOnly()"
+                    [isEditMode]="isEditMode()" (isEditModeChange)="updateEditMode($event)"
+  >
+    <ng-template #view>
+      <span class="col-12">{{username()}}</span>
+    </ng-template>
+    <ng-template #edit>
+      @if (errors().length > 0) {
+        <div class="alert alert-danger" role="alert">
+          @for(error of errors(); track error) {
+            <div>{{error}}</div>
+          }
+        </div>
+      }
+
+      <form [formGroup]="usernameChangeForm">
+        @if (usernameChangeForm.get('username'); as formControl) {
+          <div class="mb-3">
+            <label for="username" class="form-label">{{t('new-username-label')}}</label>
+            <input class="form-control custom-input" type="text" id="username" formControlName="username" autocomplete="current-password"
+                   [class.is-invalid]="formControl.invalid && formControl.touched" aria-describedby="username-validations">
+            @if (usernameChangeForm.dirty || usernameChangeForm.touched) {
+              <div id="username-validations" class="invalid-feedback">
+                @if (formControl.errors?.required) {
+                  <div>{{t('required-field')}}</div>
+                }
+              </div>
+            }
+          </div>
+        }
+        <div class="col-auto d-flex d-md-block justify-content-sm-center text-md-end mb-3">
+          <button type="button" class="flex-fill btn btn-secondary me-2" aria-describedby="username-panel" (click)="resetPasswordForm()">{{t('reset')}}</button>
+          <button type="submit" class="flex-fill btn btn-primary" aria-describedby="username-panel" (click)="saveForm()" [disabled]="!usernameChangeForm.valid || !(usernameChangeForm.dirty || usernameChangeForm.touched)">{{t('save')}}</button>
+        </div>
+      </form>
+
+    </ng-template>
+  </app-setting-item>
+</ng-container>

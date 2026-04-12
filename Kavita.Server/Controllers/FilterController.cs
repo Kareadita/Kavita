@@ -145,18 +145,18 @@ public class FilterController(
 
             if (string.IsNullOrWhiteSpace(name))
             {
-                return BadRequest(await localizationService.Translate(user.Id, "smart-filter-name-required"));
+                return BadRequest(await localizationService.TranslateAsync(user.Id, "smart-filter-name-required"));
             }
 
             if (Defaults.DefaultStreams.Any(s => s.Name.Equals(name, StringComparison.InvariantCultureIgnoreCase)))
             {
-                return BadRequest(await localizationService.Translate(user.Id, "smart-filter-system-name"));
+                return BadRequest(await localizationService.TranslateAsync(user.Id, "smart-filter-system-name"));
             }
 
             var filter = user.SmartFilters.FirstOrDefault(f => f.Id == filterId);
             if (filter == null)
             {
-                return BadRequest(await localizationService.Translate(user.Id, "filter-not-found"));
+                return BadRequest(await localizationService.TranslateAsync(user.Id, "filter-not-found"));
             }
 
             filter.Name = name;
@@ -169,7 +169,7 @@ public class FilterController(
         catch (Exception ex)
         {
             logger.LogError(ex, "There was an exception when renaming smart filter: {FilterId}", filterId);
-            return BadRequest(await localizationService.Translate(UserId, "generic-error"));
+            return BadRequest(await localizationService.TranslateAsync(UserId, "generic-error"));
         }
 
     }

@@ -476,6 +476,14 @@
         "permission-error": "You do not have permission to change your password. Reach out to the admin of the server."
     },
 
+    "change-username": {
+        "username-label": "{{common.username}}",
+        "new-username-label": "New Username",
+        "reset": "{{common.reset}}",
+        "save": "{{common.save}}",
+        "required-field": "{{validation.required-field}}"
+    },
+
     "change-email": {
         "email-title": "Email",
         "email-label": "New Email",

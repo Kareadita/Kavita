@@ -4,7 +4,7 @@
 
   <app-setting-item [title]="t('email-title')" [canEdit]="canEdit()" [isEditMode]="isEditMode" (isEditModeChange)="updateEditMode($event)">
     <ng-template #view>
-      <span>{{user?.email | defaultValue}}</span>
+      <span>{{censoredEmail() | defaultValue}}</span>
       @if(emailConfirmed) {
         <i class="fa-solid fa-circle-check ms-1 confirm-icon" aria-hidden="true" [ngbTooltip]="t('email-confirmed')"></i>
         <span class="visually-hidden">{{t('email-confirmed')}}</span>

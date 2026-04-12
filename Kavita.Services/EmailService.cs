@@ -56,6 +56,7 @@ public class EmailService(
     public const string SendToDeviceTemplate = "SendToDevice";
     public const string EmailTestTemplate = "EmailTest";
     public const string EmailChangeTemplate = "EmailChange";
+    public const string UsernameChangeTemplate = "UsernameChange";
     public const string TokenExpirationTemplate = "TokenExpiration";
     public const string TokenExpiringSoonTemplate = "TokenExpiringSoon";
     public const string AuthKeyExpiredTemplate = "AuthKeyExpired";
@@ -83,14 +84,14 @@ public class EmailService(
         if (!IsValidEmail(adminEmail))
         {
 
-            result.ErrorMessage = await localizationService.Translate(defaultAdmin.Id, "account-email-invalid");
+            result.ErrorMessage = await localizationService.TranslateAsync(defaultAdmin.Id, "account-email-invalid");
             result.Successful = false;
             return result;
         }
 
         if (!settings.IsEmailSetup())
         {
-            result.ErrorMessage = await localizationService.Translate(defaultAdmin.Id, "email-settings-invalid");
+            result.ErrorMessage = await localizationService.TranslateAsync(defaultAdmin.Id, "email-settings-invalid");
             result.Successful = false;
             return result;
         }
@@ -127,6 +128,18 @@ public class EmailService(
             .WithLocalization(data.LocaleUserId, "email-change")
             .WithPlaceholder("{{InvitingUser}}", data.InvitingUser)
             .WithPlaceholder("{{Link}}", data.ServerConfirmationLink)
+            .To(data.EmailAddress)
+            .Build();
+
+        await SendEmail(emailOptions);
+    }
+
+    public async Task SendUsernameChangeEmail(UsernameChangeEmailDto data)
+    {
+        var emailOptions = await CreateEmail()
+            .ForTemplate(UsernameChangeTemplate)
+            .WithLocalization(data.LocaleUserId, "username-change")
+            .WithPlaceholder("{{InvitingUser}}", data.InvitingUser)
             .To(data.EmailAddress)
             .Build();
 
@@ -511,14 +524,14 @@ public class EmailService(
         foreach (Match match in matches)
         {
             var key = match.Groups[1].Value;
-            var translated = await localizationService.Translate(userId, key);
+            var translated = await localizationService.TranslateAsync(userId, key);
             body = body.Replace(match.Value, translated);
         }
 
         return UpdatePlaceHolders(body, placeholders);
     }
 
-    private Task<string> TranslateKey(int userId, string key) => localizationService.Translate(userId, key);
+    private Task<string> TranslateKey(int userId, string key) => localizationService.TranslateAsync(userId, key);
 
     private EmailBuilder CreateEmail() => new EmailBuilder(this);
 

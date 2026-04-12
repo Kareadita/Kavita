@@ -81,7 +81,7 @@ public class LocalizationService : ILocalizationService
         return JsonSerializer.Deserialize<Dictionary<string, string>>(json);
     }
 
-    public async Task<string> Get(string locale, string key, params object[] args)
+    public async Task<string> GetAsync(string locale, string key, params object[] args)
     {
 
         // Check if the translation for the given locale is cached
@@ -106,7 +106,7 @@ public class LocalizationService : ILocalizationService
         {
             if (!locale.Equals("en"))
             {
-                return await Get("en", key, args);
+                return await GetAsync("en", key, args);
             }
             return key;
         }
@@ -120,21 +120,21 @@ public class LocalizationService : ILocalizationService
         return translatedString;
     }
 
-    public Task<string> Translate(string key, params object[] args)
+    public Task<string> TranslateAsync(string key, params object[] args)
     {
         var userId = _userContext.GetUserId();
         if (userId.HasValue)
         {
-            return Translate(userId.Value, key, args);
+            return TranslateAsync(userId.Value, key, args);
         }
 
-        return Get("en", key, args);
+        return GetAsync("en", key, args);
     }
 
-    public async Task<string> Translate(int userId, string key, params object[] args)
+    public async Task<string> TranslateAsync(int userId, string key, params object[] args)
     {
         var userLocale = await _unitOfWork.UserRepository.GetLocale(userId);
-        return await Get(userLocale, key, args);
+        return await GetAsync(userLocale, key, args);
     }
 
 

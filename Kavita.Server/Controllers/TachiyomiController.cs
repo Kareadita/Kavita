@@ -25,7 +25,7 @@ public class TachiyomiController(
     [HttpGet("latest-chapter")]
     public async Task<ActionResult<ChapterDto>> GetLatestChapter(int seriesId)
     {
-        if (seriesId < 1) return BadRequest(await localizationService.Translate(UserId, "greater-0", "SeriesId"));
+        if (seriesId < 1) return BadRequest(await localizationService.TranslateAsync(UserId, "greater-0", "SeriesId"));
         return Ok(await tachiyomiService.GetLatestChapter(seriesId, UserId));
     }
 

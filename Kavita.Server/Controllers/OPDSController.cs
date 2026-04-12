@@ -528,8 +528,8 @@ public class OpdsController(
 
         var feed = new OpenSearchDescription()
         {
-            ShortName = await localizationService.Translate(userId, "search"),
-            Description = await localizationService.Translate(userId, "search-description"),
+            ShortName = await localizationService.TranslateAsync(userId, "search"),
+            Description = await localizationService.TranslateAsync(userId, "search-description"),
             Url = new SearchLink()
             {
                 Type = FeedLinkType.AtomAcquisition,
@@ -695,15 +695,15 @@ public class OpdsController(
         [FromQuery] int volumeId,[FromQuery] int chapterId, [FromQuery] int pageNumber, [FromQuery] bool saveProgress = true)
     {
         var userId = UserId;
-        if (pageNumber < 0) return BadRequest(await localizationService.Translate(userId, "greater-0", "Page"));
+        if (pageNumber < 0) return BadRequest(await localizationService.TranslateAsync(userId, "greater-0", "Page"));
         var chapter = await cacheService.Ensure(chapterId, true);
-        if (chapter == null) return BadRequest(await localizationService.Translate(userId, "cache-file-find"));
+        if (chapter == null) return BadRequest(await localizationService.TranslateAsync(userId, "cache-file-find"));
 
         try
         {
             var path = cacheService.GetCachedPagePath(chapter.Id, pageNumber);
             if (string.IsNullOrEmpty(path) || !System.IO.File.Exists(path))
-                return BadRequest(await localizationService.Translate(userId, "no-image-for-page", pageNumber));
+                return BadRequest(await localizationService.TranslateAsync(userId, "no-image-for-page", pageNumber));
 
             var content = await directoryService.ReadFileAsync(path);
             var format = Path.GetExtension(path);
@@ -749,7 +749,7 @@ public class OpdsController(
     public async Task<ActionResult> GetFavicon(string apiKey)
     {
         var files = directoryService.GetFilesWithExtension(Path.Join(Directory.GetCurrentDirectory(), ".."), @"\.ico");
-        if (files.Length == 0) return BadRequest(await localizationService.Translate(UserId, "favicon-doesnt-exist"));
+        if (files.Length == 0) return BadRequest(await localizationService.TranslateAsync(UserId, "favicon-doesnt-exist"));
 
         var path = files[0];
         var content = await directoryService.ReadFileAsync(path);

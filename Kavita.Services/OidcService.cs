@@ -479,7 +479,6 @@ public class OidcService(ILogger<OidcService> logger, UserManager<AppUser> userM
             {
                 LocaleUserId = user.Id,
                 EmailAddress = string.IsNullOrEmpty(user.Email) ? email : user.Email,
-                InstallId = BuildInfo.Version.ToString(),
                 InvitingUser = invitingUser.UserName,
                 ServerConfirmationLink = emailLink,
             }));

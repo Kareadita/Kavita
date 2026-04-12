@@ -50,7 +50,7 @@ public class UsersController(
 
         if (await unitOfWork.CommitAsync()) return Ok();
 
-        return BadRequest(await localizationService.Translate(UserId, "generic-user-delete"));
+        return BadRequest(await localizationService.TranslateAsync(UserId, "generic-user-delete"));
     }
 
     /// <summary>
@@ -103,7 +103,7 @@ public class UsersController(
     public async Task<ActionResult<bool>> HasReadingProgress(int libraryId)
     {
         var library = await unitOfWork.LibraryRepository.GetLibraryForIdAsync(libraryId);
-        if (library == null) return BadRequest(await localizationService.Translate(UserId, "library-doesnt-exist"));
+        if (library == null) return BadRequest(await localizationService.TranslateAsync(UserId, "library-doesnt-exist"));
         return Ok(await unitOfWork.AppUserProgressRepository.UserHasProgress(library.Type, UserId));
     }
 
@@ -178,7 +178,7 @@ public class UsersController(
 
         unitOfWork.UserRepository.Update(existingPreferences);
 
-        if (!await unitOfWork.CommitAsync()) return BadRequest(await localizationService.Translate(UserId, "generic-user-pref"));
+        if (!await unitOfWork.CommitAsync()) return BadRequest(await localizationService.TranslateAsync(UserId, "generic-user-pref"));
 
         await eventHub.SendMessageToAsync(MessageFactory.UserUpdate, MessageFactory.UserUpdateEvent(user.Id, user.UserName!), user.Id);
         return Ok(preferencesDto);

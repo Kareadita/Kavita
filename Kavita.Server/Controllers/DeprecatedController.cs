@@ -139,7 +139,7 @@ public class DeprecatedController(
         try
         {
             var chapter = await unitOfWork.ChapterRepository.GetChapterAsync(uploadCoverFileDto.Id);
-            if (chapter == null) return BadRequest(await localizationService.Translate(UserId, "chapter-doesnt-exist"));
+            if (chapter == null) return BadRequest(await localizationService.TranslateAsync(UserId, "chapter-doesnt-exist"));
             var originalFile = chapter.CoverImage;
 
             chapter.CoverImage = string.Empty;
@@ -167,7 +167,7 @@ public class DeprecatedController(
             await unitOfWork.RollbackAsync();
         }
 
-        return BadRequest(await localizationService.Translate(UserId, "reset-chapter-lock"));
+        return BadRequest(await localizationService.TranslateAsync(UserId, "reset-chapter-lock"));
     }
 
 

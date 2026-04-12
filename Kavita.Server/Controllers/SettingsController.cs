@@ -143,12 +143,12 @@ public class SettingsController(
         }
         catch (KavitaException ex)
         {
-            return BadRequest(await localizationService.Translate(UserId, ex.Message));
+            return BadRequest(await localizationService.TranslateAsync(UserId, ex.Message));
         }
         catch (Exception ex)
         {
             logger.LogError(ex, "There was an exception when updating server settings");
-            return BadRequest(await localizationService.Translate(UserId, "generic-error"));
+            return BadRequest(await localizationService.TranslateAsync(UserId, "generic-error"));
         }
     }
 

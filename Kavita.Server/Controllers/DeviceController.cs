@@ -45,13 +45,13 @@ public class DeviceController(
         {
             var device = await deviceService.Create(dto, user);
             if (device == null)
-                return BadRequest(await localizationService.Translate(UserId, "generic-device-create"));
+                return BadRequest(await localizationService.TranslateAsync(UserId, "generic-device-create"));
 
             return Ok(mapper.Map<EmailDeviceDto>(device));
         }
         catch (KavitaException ex)
         {
-            return BadRequest(await localizationService.Translate(UserId, ex.Message));
+            return BadRequest(await localizationService.TranslateAsync(UserId, ex.Message));
         }
     }
 
@@ -68,7 +68,7 @@ public class DeviceController(
         if (user == null) return Unauthorized();
 
         var device = await deviceService.Update(dto, user);
-        if (device == null) return BadRequest(await localizationService.Translate(UserId, "generic-device-update"));
+        if (device == null) return BadRequest(await localizationService.TranslateAsync(UserId, "generic-device-update"));
 
         return Ok(mapper.Map<EmailDeviceDto>(device));
     }
@@ -82,14 +82,14 @@ public class DeviceController(
     [DisallowRole(PolicyConstants.ReadOnlyRole)]
     public async Task<ActionResult> DeleteDevice(int deviceId)
     {
-        if (deviceId <= 0) return BadRequest(await localizationService.Translate(UserId, "device-doesnt-exist"));
+        if (deviceId <= 0) return BadRequest(await localizationService.TranslateAsync(UserId, "device-doesnt-exist"));
 
         var user = await unitOfWork.UserRepository.GetUserByUsernameAsync(Username!, AppUserIncludes.Devices);
         if (user == null) return Unauthorized();
 
         if (await deviceService.Delete(user, deviceId)) return Ok();
 
-        return BadRequest(await localizationService.Translate(UserId, "generic-device-delete"));
+        return BadRequest(await localizationService.TranslateAsync(UserId, "generic-device-delete"));
     }
 
     [HttpGet]
@@ -108,19 +108,19 @@ public class DeviceController(
     public async Task<ActionResult> SendToDevice(SendToEmailDeviceDto dto)
     {
         var userId = UserId;
-        if (dto.ChapterIds.Any(i => i < 0)) return BadRequest(await localizationService.Translate(userId, "greater-0", "ChapterIds"));
-        if (dto.DeviceId < 0) return BadRequest(await localizationService.Translate(userId, "greater-0", "DeviceId"));
+        if (dto.ChapterIds.Any(i => i < 0)) return BadRequest(await localizationService.TranslateAsync(userId, "greater-0", "ChapterIds"));
+        if (dto.DeviceId < 0) return BadRequest(await localizationService.TranslateAsync(userId, "greater-0", "DeviceId"));
 
         var isEmailSetup = (await unitOfWork.SettingsRepository.GetSettingsDtoAsync()).IsEmailSetupForSendToDevice();
         if (!isEmailSetup)
-            return BadRequest(await localizationService.Translate(userId, "send-to-kavita-email"));
+            return BadRequest(await localizationService.TranslateAsync(userId, "send-to-kavita-email"));
 
         // // Validate that the device belongs to the user
         var user = await unitOfWork.UserRepository.GetUserByIdAsync(userId, AppUserIncludes.Devices);
-        if (user == null || user.Devices.All(d => d.Id != dto.DeviceId)) return BadRequest(await localizationService.Translate(userId, "send-to-unallowed"));
+        if (user == null || user.Devices.All(d => d.Id != dto.DeviceId)) return BadRequest(await localizationService.TranslateAsync(userId, "send-to-unallowed"));
 
         await eventHub.SendMessageToAsync(MessageFactory.NotificationProgress,
-            MessageFactory.SendingToDeviceEvent(await localizationService.Translate(userId, "send-to-device-status"),
+            MessageFactory.SendingToDeviceEvent(await localizationService.TranslateAsync(userId, "send-to-device-status"),
                 "started"), userId);
         try
         {
@@ -129,16 +129,16 @@ public class DeviceController(
         }
         catch (KavitaException ex)
         {
-            return BadRequest(await localizationService.Translate(userId, ex.Message));
+            return BadRequest(await localizationService.TranslateAsync(userId, ex.Message));
         }
         finally
         {
             await eventHub.SendMessageToAsync(MessageFactory.NotificationProgress,
-                MessageFactory.SendingToDeviceEvent(await localizationService.Translate(userId, "send-to-device-status"),
+                MessageFactory.SendingToDeviceEvent(await localizationService.TranslateAsync(userId, "send-to-device-status"),
                     "ended"), userId);
         }
 
-        return BadRequest(await localizationService.Translate(userId, "generic-send-to"));
+        return BadRequest(await localizationService.TranslateAsync(userId, "generic-send-to"));
     }
 
 
@@ -152,21 +152,21 @@ public class DeviceController(
     public async Task<ActionResult> SendSeriesToDevice(SendSeriesToEmailDeviceDto dto)
     {
         var userId = UserId;
-        if (dto.SeriesId <= 0) return BadRequest(await localizationService.Translate(userId, "greater-0", "SeriesId"));
-        if (dto.DeviceId < 0) return BadRequest(await localizationService.Translate(userId, "greater-0", "DeviceId"));
+        if (dto.SeriesId <= 0) return BadRequest(await localizationService.TranslateAsync(userId, "greater-0", "SeriesId"));
+        if (dto.DeviceId < 0) return BadRequest(await localizationService.TranslateAsync(userId, "greater-0", "DeviceId"));
 
         var isEmailSetup = (await unitOfWork.SettingsRepository.GetSettingsDtoAsync()).IsEmailSetupForSendToDevice();
         if (!isEmailSetup)
-            return BadRequest(await localizationService.Translate(userId, "send-to-kavita-email"));
+            return BadRequest(await localizationService.TranslateAsync(userId, "send-to-kavita-email"));
 
         await eventHub.SendMessageToAsync(MessageFactory.NotificationProgress,
-            MessageFactory.SendingToDeviceEvent(await localizationService.Translate(userId, "send-to-device-status"),
+            MessageFactory.SendingToDeviceEvent(await localizationService.TranslateAsync(userId, "send-to-device-status"),
                 "started"), userId);
 
         var series =
             await unitOfWork.SeriesRepository.GetSeriesByIdAsync(dto.SeriesId,
                 SeriesIncludes.Volumes | SeriesIncludes.Chapters);
-        if (series == null) return BadRequest(await localizationService.Translate(userId, "series-doesnt-exist"));
+        if (series == null) return BadRequest(await localizationService.TranslateAsync(userId, "series-doesnt-exist"));
         var chapterIds = series.Volumes.SelectMany(v => v.Chapters.Select(c => c.Id)).ToList();
         try
         {
@@ -175,16 +175,16 @@ public class DeviceController(
         }
         catch (KavitaException ex)
         {
-            return BadRequest(await localizationService.Translate(userId, ex.Message));
+            return BadRequest(await localizationService.TranslateAsync(userId, ex.Message));
         }
         finally
         {
             await eventHub.SendMessageToAsync(MessageFactory.NotificationProgress,
-                MessageFactory.SendingToDeviceEvent(await localizationService.Translate(userId, "send-to-device-status"),
+                MessageFactory.SendingToDeviceEvent(await localizationService.TranslateAsync(userId, "send-to-device-status"),
                     "ended"), userId);
         }
 
-        return BadRequest(await localizationService.Translate(userId, "generic-send-to"));
+        return BadRequest(await localizationService.TranslateAsync(userId, "generic-send-to"));
     }
 
     #region Client Devices

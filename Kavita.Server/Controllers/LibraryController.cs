@@ -63,7 +63,7 @@ public class LibraryController(
     {
         if (await unitOfWork.LibraryRepository.LibraryExists(dto.Name))
         {
-            return BadRequest(await localizationService.Translate(UserId, "library-name-exists"));
+            return BadRequest(await localizationService.TranslateAsync(UserId, "library-name-exists"));
         }
 
         var library = new LibraryBuilder(dto.Name, dto.Type)
@@ -105,7 +105,7 @@ public class LibraryController(
             admin.Libraries.Add(library);
         }
 
-        if (!await unitOfWork.CommitAsync()) return BadRequest(await localizationService.Translate(UserId, "generic-library"));
+        if (!await unitOfWork.CommitAsync()) return BadRequest(await localizationService.TranslateAsync(UserId, "generic-library"));
 
         logger.LogInformation("Created a new library: {LibraryName}", library.Name.Sanitize());
 
@@ -128,7 +128,7 @@ public class LibraryController(
             unitOfWork.UserRepository.Update(user);
         }
 
-        if (!await unitOfWork.CommitAsync()) return BadRequest(await localizationService.Translate(UserId, "generic-library"));
+        if (!await unitOfWork.CommitAsync()) return BadRequest(await localizationService.TranslateAsync(UserId, "generic-library"));
 
         // I added this twice as some users were having issues where their new library wasn't added to the side nav.
         // I wasn't able to reproduce but could validate it didn't happen with this extra commit. (https://github.com/Kareadita/Kavita/issues/4248)
@@ -278,7 +278,7 @@ public class LibraryController(
     public async Task<ActionResult<MemberDto>> UpdateUserLibraries(UpdateLibraryForUserDto updateLibraryForUserDto)
     {
         var user = await unitOfWork.UserRepository.GetUserByUsernameAsync(updateLibraryForUserDto.Username, AppUserIncludes.SideNavStreams);
-        if (user == null) return BadRequest(await localizationService.Translate(UserId, "user-doesnt-exist"));
+        if (user == null) return BadRequest(await localizationService.TranslateAsync(UserId, "user-doesnt-exist"));
 
         var libraryString = string.Join(',', updateLibraryForUserDto.SelectedLibraries.Select(x => x.Name));
         logger.LogInformation("Granting user {UserId} access to: {Libraries}", user.Id, libraryString.Sanitize());
@@ -321,7 +321,7 @@ public class LibraryController(
         }
 
 
-        return BadRequest(await localizationService.Translate(UserId, "generic-library"));
+        return BadRequest(await localizationService.TranslateAsync(UserId, "generic-library"));
     }
 
     /// <summary>
@@ -334,7 +334,7 @@ public class LibraryController(
     [Authorize(Policy = PolicyGroups.AdminPolicy)]
     public async Task<ActionResult> Scan(int libraryId, bool force = false)
     {
-        if (libraryId <= 0) return BadRequest(await localizationService.Translate(UserId, "greater-0", "libraryId"));
+        if (libraryId <= 0) return BadRequest(await localizationService.TranslateAsync(UserId, "greater-0", "libraryId"));
         await taskScheduler.ScanLibrary(libraryId, force);
         return Ok();
     }
@@ -448,7 +448,7 @@ public class LibraryController(
 
         if (dto.FolderPath.Contains(".."))
         {
-            return BadRequest(await localizationService.Translate(UserId, "invalid-path"));
+            return BadRequest(await localizationService.TranslateAsync(UserId, "invalid-path"));
         }
 
         dto.FolderPath = Parser.NormalizePath(dto.FolderPath);
@@ -538,13 +538,13 @@ public class LibraryController(
             if (TaskScheduler.HasScanTaskRunningForLibrary(libraryId))
             {
                 logger.LogInformation("User is attempting to delete a library while a scan is in progress");
-                throw new KavitaException(await localizationService.Translate(userId, "delete-library-while-scan"));
+                throw new KavitaException(await localizationService.TranslateAsync(userId, "delete-library-while-scan"));
             }
 
             var library = await unitOfWork.LibraryRepository.GetLibraryForIdAsync(libraryId);
             if (library == null)
             {
-                throw new KavitaException(await localizationService.Translate(userId, "library-doesnt-exist"));
+                throw new KavitaException(await localizationService.TranslateAsync(userId, "library-doesnt-exist"));
             }
 
 
@@ -630,11 +630,11 @@ public class LibraryController(
     {
         var userId = UserId;
         var library = await unitOfWork.LibraryRepository.GetLibraryForIdAsync(dto.Id, LibraryIncludes.Folders | LibraryIncludes.FileTypes | LibraryIncludes.ExcludePatterns);
-        if (library == null) return BadRequest(await localizationService.Translate(userId, "library-doesnt-exist"));
+        if (library == null) return BadRequest(await localizationService.TranslateAsync(userId, "library-doesnt-exist"));
 
         var newName = dto.Name.Trim();
         if (await unitOfWork.LibraryRepository.LibraryExists(newName) && !library.Name.Equals(newName))
-            return BadRequest(await localizationService.Translate(userId, "library-name-exists"));
+            return BadRequest(await localizationService.TranslateAsync(userId, "library-name-exists"));
 
         var originalFoldersCount = library.Folders.Count;
 
@@ -645,7 +645,7 @@ public class LibraryController(
         var folderWatchingUpdate = library.FolderWatching != dto.FolderWatching;
         UpdateLibrarySettings(dto, library);
 
-        if (!await unitOfWork.CommitAsync()) return BadRequest(await localizationService.Translate(userId, "generic-library-update"));
+        if (!await unitOfWork.CommitAsync()) return BadRequest(await localizationService.TranslateAsync(userId, "generic-library-update"));
 
         if (folderWatchingUpdate || originalFoldersCount != dto.Folders.Count() || typeUpdate)
         {

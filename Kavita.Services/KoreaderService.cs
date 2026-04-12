@@ -35,20 +35,20 @@ public class KoreaderService(
         if (file == null)
         {
             logger.LogWarning("KOReader progress for unknown book: {BookHash}. Run a force scan on the series to generate KOReader hashes", koreaderBookDto.document.Sanitize());
-            throw new KavitaException(await localizationService.Translate(userId, "file-missing"));
+            throw new KavitaException(await localizationService.TranslateAsync(userId, "file-missing"));
         }
 
         var userProgressDto = await unitOfWork.AppUserProgressRepository.GetUserProgressDtoAsync(file.ChapterId, userId, ct);
         if (userProgressDto == null)
         {
             var chapterDto = await unitOfWork.ChapterRepository.GetChapterDtoAsync(file.ChapterId, userId, ct);
-            if (chapterDto == null) throw new KavitaException(await localizationService.Translate(userId, "chapter-doesnt-exist"));
+            if (chapterDto == null) throw new KavitaException(await localizationService.TranslateAsync(userId, "chapter-doesnt-exist"));
 
             var volumeDto = await unitOfWork.VolumeRepository.GetVolumeByIdAsync(chapterDto.VolumeId, ct: ct);
-            if (volumeDto == null) throw new KavitaException(await localizationService.Translate(userId, "volume-doesnt-exist"));
+            if (volumeDto == null) throw new KavitaException(await localizationService.TranslateAsync(userId, "volume-doesnt-exist"));
 
             var seriesDto = await unitOfWork.SeriesRepository.GetSeriesDtoByIdAsync(volumeDto.SeriesId, userId, ct);
-            if (seriesDto == null) throw new KavitaException(await localizationService.Translate(userId, "series-doesnt-exist"));
+            if (seriesDto == null) throw new KavitaException(await localizationService.TranslateAsync(userId, "series-doesnt-exist"));
 
             userProgressDto = new ProgressDto()
             {
@@ -87,7 +87,7 @@ public class KoreaderService(
         if (file == null)
         {
             logger.LogWarning("KOReader progress for unknown book: {BookHash}. Run a force scan on the series to generate KOReader hashes", bookHash.Sanitize());
-            throw new KavitaException(await localizationService.Translate(userId, "file-missing"));
+            throw new KavitaException(await localizationService.TranslateAsync(userId, "file-missing"));
         }
 
         var progressDto = await unitOfWork.AppUserProgressRepository.GetUserProgressDtoAsync(file.ChapterId, userId, ct);

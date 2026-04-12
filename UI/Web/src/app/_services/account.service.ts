@@ -385,6 +385,10 @@ export class AccountService {
     return this.httpClient.post<InviteUserResponse>(this.baseUrl + 'account/update/email', {email, password});
   }
 
+  changeUsername(username: string) {
+    return this.httpClient.post<InviteUserResponse>(this.baseUrl + 'account/update/username', {username});
+  }
+
   updateAgeRestriction(ageRating: AgeRating, includeUnknowns: boolean) {
     return this.httpClient.post(this.baseUrl + 'account/update/age-restriction', {ageRating, includeUnknowns});
   }

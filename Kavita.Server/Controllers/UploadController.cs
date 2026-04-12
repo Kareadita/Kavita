@@ -71,7 +71,7 @@ public class UploadController : BaseApiController
         }
         catch (Exception)
         {
-            return BadRequest(await _localizationService.Translate(UserId, "url-not-valid"));
+            return BadRequest(await _localizationService.TranslateAsync(UserId, "url-not-valid"));
         }
 
         var dateString = $"{DateTime.UtcNow.ToShortDateString()}_{DateTime.UtcNow.ToLongTimeString()}".Replace('/', '_').Replace(':', '_');
@@ -88,9 +88,9 @@ public class UploadController : BaseApiController
                 .DownloadFileAsync(_directoryService.TempDirectory, $"coverupload_{dateString}.{format}");
 
             if (string.IsNullOrEmpty(path) || !_directoryService.FileSystem.File.Exists(path))
-                return BadRequest(await _localizationService.Translate(UserId, "url-not-valid"));
+                return BadRequest(await _localizationService.TranslateAsync(UserId, "url-not-valid"));
 
-            if (!await _imageService.IsImage(path)) return BadRequest(await _localizationService.Translate(UserId, "url-not-valid"));
+            if (!await _imageService.IsImage(path)) return BadRequest(await _localizationService.TranslateAsync(UserId, "url-not-valid"));
 
             return $"coverupload_{dateString}.{format}";
         }
@@ -98,10 +98,10 @@ public class UploadController : BaseApiController
         {
             // Unauthorized
             if (ex.StatusCode == 401)
-                return BadRequest(await _localizationService.Translate(UserId, "url-not-valid"));
+                return BadRequest(await _localizationService.TranslateAsync(UserId, "url-not-valid"));
         }
 
-        return BadRequest(await _localizationService.Translate(UserId, "url-not-valid"));
+        return BadRequest(await _localizationService.TranslateAsync(UserId, "url-not-valid"));
     }
 
     /// <summary>
@@ -120,7 +120,7 @@ public class UploadController : BaseApiController
         {
             var series = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(uploadCoverFileDto.Id);
 
-            if (series == null) return BadRequest(await _localizationService.Translate(UserId, "series-doesnt-exist"));
+            if (series == null) return BadRequest(await _localizationService.TranslateAsync(UserId, "series-doesnt-exist"));
 
             var filePath = string.Empty;
             var lockState = false;
@@ -162,7 +162,7 @@ public class UploadController : BaseApiController
             await _unitOfWork.RollbackAsync();
         }
 
-        return BadRequest(await _localizationService.Translate(UserId, "generic-cover-series-save"));
+        return BadRequest(await _localizationService.TranslateAsync(UserId, "generic-cover-series-save"));
     }
 
     /// <summary>
@@ -179,7 +179,7 @@ public class UploadController : BaseApiController
         try
         {
             var tag = await _unitOfWork.CollectionTagRepository.GetCollectionAsync(uploadCoverFileDto.Id);
-            if (tag == null) return BadRequest(await _localizationService.Translate(UserId, "collection-doesnt-exist"));
+            if (tag == null) return BadRequest(await _localizationService.TranslateAsync(UserId, "collection-doesnt-exist"));
 
             if (!User.IsInRole(PolicyConstants.AdminRole) && tag.AppUserId != UserId)
                 return Unauthorized();
@@ -212,7 +212,7 @@ public class UploadController : BaseApiController
             await _unitOfWork.RollbackAsync();
         }
 
-        return BadRequest(await _localizationService.Translate(UserId, "generic-cover-collection-save"));
+        return BadRequest(await _localizationService.TranslateAsync(UserId, "generic-cover-collection-save"));
     }
 
     /// <summary>
@@ -228,12 +228,12 @@ public class UploadController : BaseApiController
         // Check if Url is non-empty, request the image and place in temp, then ask image service to handle it.
         // See if we can do this all in memory without touching underlying system
         if (await _readingListService.UserHasReadingListAccess(uploadCoverFileDto.Id, Username!) == null)
-            return Unauthorized(await _localizationService.Translate(UserId, "access-denied"));
+            return Unauthorized(await _localizationService.TranslateAsync(UserId, "access-denied"));
 
         try
         {
             var readingList = await _unitOfWork.ReadingListRepository.GetReadingListByIdAsync(uploadCoverFileDto.Id);
-            if (readingList == null) return BadRequest(await _localizationService.Translate(UserId, "reading-list-doesnt-exist"));
+            if (readingList == null) return BadRequest(await _localizationService.TranslateAsync(UserId, "reading-list-doesnt-exist"));
 
 
             var filePath = string.Empty;
@@ -265,7 +265,7 @@ public class UploadController : BaseApiController
             await _unitOfWork.RollbackAsync();
         }
 
-        return BadRequest(await _localizationService.Translate(UserId, "generic-cover-reading-list-save"));
+        return BadRequest(await _localizationService.TranslateAsync(UserId, "generic-cover-reading-list-save"));
     }
 
     private async Task<string> CreateThumbnail(UploadCoverFileDto uploadCoverFileDto, string filename)
@@ -293,7 +293,7 @@ public class UploadController : BaseApiController
         try
         {
             var chapter = await _unitOfWork.ChapterRepository.GetChapterAsync(uploadCoverFileDto.Id);
-            if (chapter == null) return BadRequest(await _localizationService.Translate(UserId, "chapter-doesnt-exist"));
+            if (chapter == null) return BadRequest(await _localizationService.TranslateAsync(UserId, "chapter-doesnt-exist"));
 
             var filePath = string.Empty;
             var lockState = false;
@@ -341,7 +341,7 @@ public class UploadController : BaseApiController
             await _unitOfWork.RollbackAsync();
         }
 
-        return BadRequest(await _localizationService.Translate(UserId, "generic-cover-chapter-save"));
+        return BadRequest(await _localizationService.TranslateAsync(UserId, "generic-cover-chapter-save"));
     }
 
     /// <summary>
@@ -360,7 +360,7 @@ public class UploadController : BaseApiController
         try
         {
             var volume = await _unitOfWork.VolumeRepository.GetVolumeByIdAsync(uploadCoverFileDto.Id, VolumeIncludes.Chapters);
-            if (volume == null) return BadRequest(await _localizationService.Translate(UserId, "volume-doesnt-exist"));
+            if (volume == null) return BadRequest(await _localizationService.TranslateAsync(UserId, "volume-doesnt-exist"));
 
             var filePath = string.Empty;
             var lockState = false;
@@ -401,7 +401,7 @@ public class UploadController : BaseApiController
             await _unitOfWork.RollbackAsync();
         }
 
-        return BadRequest(await _localizationService.Translate(UserId, "generic-cover-volume-save"));
+        return BadRequest(await _localizationService.TranslateAsync(UserId, "generic-cover-volume-save"));
     }
 
 
@@ -462,7 +462,7 @@ public class UploadController : BaseApiController
             await _unitOfWork.RollbackAsync();
         }
 
-        return BadRequest(await _localizationService.Translate(UserId, "generic-cover-library-save"));
+        return BadRequest(await _localizationService.TranslateAsync(UserId, "generic-cover-library-save"));
     }
 
 
@@ -479,7 +479,7 @@ public class UploadController : BaseApiController
         try
         {
             var person = await _unitOfWork.PersonRepository.GetPersonById(uploadCoverFileDto.Id);
-            if (person == null) return BadRequest(await _localizationService.Translate(UserId, "person-doesnt-exist"));
+            if (person == null) return BadRequest(await _localizationService.TranslateAsync(UserId, "person-doesnt-exist"));
 
             await _coverDbService.SetPersonCoverByUrl(person, uploadCoverFileDto.Url, chooseBetterImage: false);
             return Ok();
@@ -490,7 +490,7 @@ public class UploadController : BaseApiController
             await _unitOfWork.RollbackAsync();
         }
 
-        return BadRequest(await _localizationService.Translate(UserId, "generic-cover-person-save"));
+        return BadRequest(await _localizationService.TranslateAsync(UserId, "generic-cover-person-save"));
     }
 
 
@@ -510,7 +510,7 @@ public class UploadController : BaseApiController
             if (uploadCoverFileDto.Id != UserId) return NotFound();
 
             var user = await _unitOfWork.UserRepository.GetUserByIdAsync(uploadCoverFileDto.Id);
-            if (user == null) return BadRequest(await _localizationService.Translate(UserId, "user-doesnt-exist"));
+            if (user == null) return BadRequest(await _localizationService.TranslateAsync(UserId, "user-doesnt-exist"));
 
             await _coverDbService.SetUserCoverByUrl(user, uploadCoverFileDto.Url, chooseBetterImage: false);
             return Ok();
@@ -521,7 +521,7 @@ public class UploadController : BaseApiController
             await _unitOfWork.RollbackAsync();
         }
 
-        return BadRequest(await _localizationService.Translate(UserId, "generic-cover-person-save"));
+        return BadRequest(await _localizationService.TranslateAsync(UserId, "generic-cover-person-save"));
     }
 
 }

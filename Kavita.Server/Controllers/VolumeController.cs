@@ -38,14 +38,14 @@ public class VolumeController(IUnitOfWork unitOfWork, ILocalizationService local
     public async Task<ActionResult<VolumeDto>> UpdateVolume(UpdateVolumeDto dto)
     {
         var volume = await unitOfWork.VolumeRepository.GetVolumeByIdAsync(dto.Id);
-        if (volume == null) return BadRequest(localizationService.Translate(UserId, "volume-doesnt-exist"));
+        if (volume == null) return BadRequest(localizationService.TranslateAsync(UserId, "volume-doesnt-exist"));
 
         ExternalMetadataIdHelper.SetExternalMetadataIds(volume, dto);
 
         unitOfWork.VolumeRepository.Update(volume);
 
         if (unitOfWork.HasChanges() && !await unitOfWork.CommitAsync())
-            return BadRequest(localizationService.Translate(UserId, "generic-error"));
+            return BadRequest(localizationService.TranslateAsync(UserId, "generic-error"));
 
         return Ok(await unitOfWork.VolumeRepository.GetVolumeDtoAsync(volume.Id, UserId));
     }
@@ -62,7 +62,7 @@ public class VolumeController(IUnitOfWork unitOfWork, ILocalizationService local
         var volume = await unitOfWork.VolumeRepository.GetVolumeByIdAsync(volumeId,
             VolumeIncludes.Chapters | VolumeIncludes.People | VolumeIncludes.Tags);
         if (volume == null)
-            return BadRequest(localizationService.Translate(UserId, "volume-doesnt-exist"));
+            return BadRequest(localizationService.TranslateAsync(UserId, "volume-doesnt-exist"));
 
         unitOfWork.VolumeRepository.Remove(volume);
 
@@ -87,7 +87,7 @@ public class VolumeController(IUnitOfWork unitOfWork, ILocalizationService local
         var volumes = await unitOfWork.VolumeRepository.GetVolumesById(volumesIds);
         if (volumes.Count != volumesIds.Length)
         {
-            return BadRequest(localizationService.Translate(UserId, "volume-doesnt-exist"));
+            return BadRequest(localizationService.TranslateAsync(UserId, "volume-doesnt-exist"));
         }
 
         unitOfWork.VolumeRepository.Remove(volumes);
