@@ -230,7 +230,7 @@ public class ReaderService(IUnitOfWork unitOfWork, ILogger<ReaderService> logger
             if (userProgress == null && progressDto.PageNum == 0) return true;
 
 
-            if (userProgress?.PagesRead == progressDto.PageNum) return true;
+            if (userProgress?.PagesRead == progressDto.PageNum && userProgress?.BookScrollId == progressDto.BookScrollId) return true;
 
             if (userProgress == null)
             {
