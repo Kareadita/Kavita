@@ -24,7 +24,7 @@ export class KavitaTitleStrategy extends TitleStrategy {
       const titleSuffix = route.data['titleSuffix'] || '';
       const entity = this.findInRouteTree(route, titleField);
       if (entity?.[titleProp]) {
-        this.title.setTitle(`Kavita: ${entity[titleProp]}${titleSuffix}`);
+        this.title.setTitle(`${entity[titleProp]}${titleSuffix} (Kavita)`);
         return;
       }
     }
@@ -37,11 +37,11 @@ export class KavitaTitleStrategy extends TitleStrategy {
     if (pageTitle.startsWith('title.')) {
       pageTitle = this.translocoService.translate(pageTitle);
     }
-    this.title.setTitle(`Kavita: ${pageTitle}`);
+    this.title.setTitle(`${pageTitle} (Kavita)`);
   }
 
   setTranslatedTitle(key: string, params: Record<string, unknown>): void {
-    this.title.setTitle(`Kavita: ${this.translocoService.translate(key, params)}`);
+    this.title.setTitle(`${this.translocoService.translate(key, params)} (Kavita)`);
   }
 
   private getDeepestRoute(route: RouterStateSnapshot['root']): RouterStateSnapshot['root'] {
