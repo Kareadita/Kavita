@@ -33,6 +33,7 @@ using Kavita.Server.ManualMigrations.v0._8._6;
 using Kavita.Server.ManualMigrations.v0._8._7;
 using Kavita.Server.ManualMigrations.v0._8._8;
 using Kavita.Server.ManualMigrations.v0._8._9;
+using Kavita.Server.ManualMigrations.v0._9._0;
 using Kavita.Server.Middleware;
 using Kavita.Services.SignalR;
 using Microsoft.AspNetCore.Builder;
@@ -490,6 +491,10 @@ public class Startup
                     await new MigrateMissingAppUserRatingDateColumns().RunAsync(dataContext, logger);
                     await new MigrateFormatToActivityDataV2().RunAsync(dataContext, logger);
                     await new MigrateIncorrectUtcTimes().RunAsync(dataContext, logger);
+                    #endregion
+
+                    #region v0.9.0
+                    await new ManualMigrateEnsureNoReadOnlyAdmins().RunAsync(dataContext, logger);
                     #endregion
 
                     #endregion
