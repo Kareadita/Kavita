@@ -546,3 +546,6 @@ Kavita.Services.Tests/Test Data/ScannerService/ScanTests/**/*
 
 
 Kavita.Server/config/appsettings.*.json
+
+# Old installs might have this as a default location
+API/config/bookmarks/

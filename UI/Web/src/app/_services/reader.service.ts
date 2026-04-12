@@ -1,5 +1,5 @@
 import {HttpClient} from '@angular/common/http';
-import {effect, inject, Injectable} from '@angular/core';
+import {effect, inject, Injectable, signal} from '@angular/core';
 import {DOCUMENT, Location} from '@angular/common';
 import {Router} from '@angular/router';
 import {environment} from 'src/environments/environment';
@@ -21,14 +21,18 @@ import {Volume} from "../_models/volume";
 import {translate} from "@jsverse/transloco";
 import {ToastrService} from "ngx-toastr";
 import {SeriesFilterField} from "../_models/metadata/v2/series-filter-field";
-import {ModalService} from "./modal.service";
-import {catchError, map, Observable, of, switchMap, tap} from "rxjs";
+import {ModalService, TypedModalRef} from "./modal.service";
+import {catchError, map, merge, Observable, of, switchMap, tap} from "rxjs";
 import {ListSelectModalComponent} from "../shared/_components/list-select-modal/list-select-modal.component";
 import {take, takeUntil} from "rxjs/operators";
 import {SeriesService} from "./series.service";
 import {Series} from "../_models/series";
 import {RereadPrompt} from "../_models/readers/reread-prompt";
 import {mediumModal} from "../_models/modal/modal-options";
+import {
+  KeyboardShortcut,
+  ShortcutsModalComponent
+} from "../reader-shared/_modals/shortcuts-modal/shortcuts-modal.component";
 
 enum RereadPromptResult {
   Cancel = 0,
@@ -64,6 +68,10 @@ export class ReaderService {
 
 
   private noSleep: NoSleep = new NoSleep();
+  shortCutModalOpen = signal(false);
+  shortCutModalRef: TypedModalRef<ShortcutsModalComponent> | undefined;
+
+
 
   constructor() {
     effect(() => {
@@ -72,6 +80,24 @@ export class ReaderService {
         this.encodedKey = encodeURIComponent(apiKey);
       }
     })
+  }
+
+  openShortcutModal(shortcuts: KeyboardShortcut[]) {
+    if (this.shortCutModalOpen()) return;
+
+    this.shortCutModalOpen.set(true);
+    this.shortCutModalRef = this.modalService.open(ShortcutsModalComponent, mediumModal());
+    this.shortCutModalRef.setInput('shortcuts', shortcuts);
+
+    merge(this.shortCutModalRef.closed, this.shortCutModalRef.dismissed).subscribe(() => this.shortCutModalOpen.set(false));
+  }
+
+  closeShortCutModal() {
+    if (this.shortCutModalRef) {
+      this.shortCutModalRef.dismiss();
+      this.shortCutModalRef = undefined;
+    }
+    this.shortCutModalOpen.set(false);
   }
 
 

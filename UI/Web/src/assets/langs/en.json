@@ -2408,7 +2408,8 @@
         "double-click": "double click",
         "close-reader": "Close reader",
         "toggle-menu": "Toggle Menu",
-        "offset-double-page": "{{keybind-setting-description-pipe.key-bind-title-offset-double-page}}"
+        "offset-double-page": "{{keybind-setting-description-pipe.key-bind-title-offset-double-page}}",
+        "navigate-to-settings": "{{keybind-setting-description-pipe.key-bind-title-navigate-to-settings}}"
     },
 
     "grouped-typeahead": {
