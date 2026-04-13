@@ -440,7 +440,7 @@ public static partial class Parser
             MatchOptions, RegexTimeout),
         // Nagasarete Airantou - Vol. 30 Ch. 187.5 - Vol.31 Omake
         new Regex(
-            @"^(?<Series>.+?)(\s*Chapter\s*\d+)?(\s|_|\-\s)+((Vol(ume)?|tome)\.?(\s|_)?)(?<Volume>\d+(\.\d+)?)(.+?|$)",
+            @"^(?<Series>.+?)(\s*Chapter\s*\d+)?(\s|_|\-\s)+((Vol(ume)?|tome)\.?(\s|_)?)(?<Volume>\d+(\.\d+)?\-\d+(\.\d+)?)(.+?|$)",
             MatchOptions, RegexTimeout),
         // Historys Strongest Disciple Kenichi_v11_c90-98.zip or Dance in the Vampire Bund v16-17
         new Regex(

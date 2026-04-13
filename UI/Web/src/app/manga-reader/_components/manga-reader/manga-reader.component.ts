@@ -79,7 +79,6 @@ import {ConfirmService} from "../../../shared/confirm.service";
 import {PageBookmark} from "../../../_models/readers/page-bookmark";
 import {KeyBindEvent, KeyBindService} from "../../../_services/key-bind.service";
 import {KeyBindTarget} from "../../../_models/preferences/preferences";
-import {ModalService} from "../../../_services/modal.service";
 import {EntityTitleService} from "../../../_services/entity-title.service";
 
 
@@ -152,7 +151,6 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   private readonly formBuilder = inject(FormBuilder);
   private readonly navService = inject(NavService);
   private readonly memberService = inject(MemberService);
-  private readonly modalService = inject(ModalService);
   private readonly cdRef = inject(ChangeDetectorRef);
   private readonly toastr = inject(ToastrService);
   private readonly readingProfileService = inject(ReadingProfileService);

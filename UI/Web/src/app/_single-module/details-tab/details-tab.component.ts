@@ -66,6 +66,7 @@ export class DetailsTabComponent {
   showTags = computed(() => !this.suppressEmptyTags() || this.tags().length > 0);
   showGenres = computed(() => !this.suppressEmptyGenres() || this.genres().length > 0);
 
+
   openGeneric(queryParamName: SeriesFilterField, filter: string | number) {
     if (queryParamName === SeriesFilterField.None) return;
     this.filterUtilityService.applyFilter(['all-series'], queryParamName, FilterComparison.Equal, `${filter}`).subscribe();
