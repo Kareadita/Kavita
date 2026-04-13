@@ -35,6 +35,7 @@ using Kavita.Server.ManualMigrations.v0._8._8;
 using Kavita.Server.ManualMigrations.v0._8._9;
 using Kavita.Server.ManualMigrations.v0._9._0;
 using Kavita.Server.Middleware;
+using Kavita.Server.Swagger;
 using Kavita.Services.SignalR;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.DataProtection;
@@ -139,11 +140,13 @@ public class Startup
 
         services.AddSwaggerGen(c =>
         {
+            c.SchemaFilter<EnumSchemaFilter>();
+
             c.SwaggerDoc("v1", new OpenApiInfo
             {
                 Version = BuildInfo.Version.ToString(),
                 Title = $"Kavita",
-                Description = $"Kavita provides a set of APIs that are authenticated by JWT. JWT token can be copied from local storage. Assume all fields of a payload are required. Built against v{BuildInfo.Version}",
+                Description = $"Kavita provides a set of APIs authenticated via an Auth Key passed in the `x-api-key` header. Generate an Auth Key under User Settings → Manage Auth Keys, paste it into the Authorize panel, and all Try It requests will include it. Assume all fields of a payload are required unless marked optional. Built against v{BuildInfo.Version}",
                 License = new OpenApiLicense
                 {
                     Name = "GPL-3.0",
@@ -167,7 +170,7 @@ public class Startup
 
             c.AddSecurityRequirement((document) => new OpenApiSecurityRequirement()
             {
-                [new OpenApiSecuritySchemeReference("apiKey", document)] = []
+                [new OpenApiSecuritySchemeReference("AuthKey", document)] = []
             });
 
 

@@ -53,10 +53,5 @@ public static class ApplicationServiceExtensions
 
         services.AddSingleton<TicketSerializer>();
         services.AddSingleton<ITicketStore, CustomTicketStore>();
-
-        services.AddSwaggerGen(g =>
-        {
-            g.UseInlineDefinitionsForEnums();
-        });
     }
 }
