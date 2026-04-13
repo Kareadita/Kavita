@@ -901,7 +901,15 @@ public class ProcessSeries(
 
         if (!string.IsNullOrEmpty(comicInfo.Web))
         {
-            chapter.WebLinks = string.Join(",", comicInfo.Web.SplitBy(','));
+            if (comicInfo.Web.Contains(','))
+            {
+                chapter.WebLinks = string.Join(",", comicInfo.Web.SplitBy(','));
+            }
+            else
+            {
+                chapter.WebLinks = string.Join(",", comicInfo.Web.SplitBy(' '));
+            }
+
         }
 
         if (!chapter.ISBNLocked && !string.IsNullOrEmpty(comicInfo.Isbn))
