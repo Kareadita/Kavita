@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using System.Threading;
 using System.Threading.Tasks;
 using AutoMapper;
 using Hangfire;
@@ -200,16 +201,7 @@ public class AccountController(UserManager<AppUser> userManager,
             if (!roleResult.Succeeded) return BadRequest(result.Errors);
             await userManager.AddToRoleAsync(user, PolicyConstants.LoginRole);
 
-            return new UserDto
-            {
-                Username = user.UserName,
-                Email = user.Email,
-                Token = await tokenService.CreateToken(user),
-                RefreshToken = await tokenService.CreateRefreshToken(user),
-                ApiKey = user.GetOpdsAuthKey(),
-                Preferences = mapper.Map<UserPreferencesDto>(user.UserPreferences),
-                KavitaVersion = (await unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.InstallVersion)).Value,
-            };
+            return Ok(await ConstructUserDto(user!, await userManager.GetRolesAsync(user!), ct: HttpContext.RequestAborted));
         }
         catch (Exception ex)
         {
@@ -291,24 +283,24 @@ public class AccountController(UserManager<AppUser> userManager,
 
         logger.LogInformation("{UserName} logged in at {Time}", user.UserName, user.LastActive);
 
-        return Ok(await ConstructUserDto(user, roles));
+        return Ok(await ConstructUserDto(user, roles, ct: HttpContext.RequestAborted));
     }
 
-    private async Task<UserDto> ConstructUserDto(AppUser user, IList<string> roles, bool includeTokens = true)
+    private async Task<UserDto> ConstructUserDto(AppUser user, IList<string> roles, bool includeTokens = true, CancellationToken ct = default)
     {
         // TODO: Clean this up to be streamlined
         var dto = mapper.Map<UserDto>(user);
 
         if (includeTokens)
         {
-            dto.Token = await tokenService.CreateToken(user);
-            dto.RefreshToken = await tokenService.CreateRefreshToken(user);
+            dto.Token = await tokenService.CreateToken(user, ct);
+            dto.RefreshToken = await tokenService.CreateRefreshToken(user, ct);
         }
 
         dto.Roles = roles;
         dto.KavitaVersion = BuildInfo.Version.ToString();
 
-        var pref = await unitOfWork.UserRepository.GetPreferencesAsync(user.UserName!);
+        var pref = await unitOfWork.UserRepository.GetPreferencesAsync(user.UserName!, ct);
         if (pref == null) return dto;
 
         pref.Theme ??= await unitOfWork.SiteThemeRepository.GetDefaultTheme();
@@ -330,7 +322,7 @@ public class AccountController(UserManager<AppUser> userManager,
 
         var roles = await userManager.GetRolesAsync(user);
 
-        return Ok(await ConstructUserDto(user, roles, !HttpContext.Request.Cookies.ContainsKey(OidcService.CookieName)));
+        return Ok(await ConstructUserDto(user, roles, !HttpContext.Request.Cookies.ContainsKey(OidcService.CookieName), HttpContext.RequestAborted));
     }
 
     /// <summary>
@@ -935,17 +927,7 @@ public class AccountController(UserManager<AppUser> userManager,
         user = (await unitOfWork.UserRepository.GetUserByUsernameAsync(user.UserName,
             AppUserIncludes.UserPreferences | AppUserIncludes.AuthKeys, ct))!;
 
-        // Perform Login code
-        return new UserDto
-        {
-            Username = user.UserName!,
-            Email = user.Email!,
-            Token = await tokenService.CreateToken(user, ct),
-            RefreshToken = await tokenService.CreateRefreshToken(user, ct),
-            ApiKey = user.GetOpdsAuthKey(),
-            Preferences = mapper.Map<UserPreferencesDto>(user.UserPreferences),
-            KavitaVersion = (await unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.InstallVersion)).Value,
-        };
+        return Ok(await ConstructUserDto(user, await userManager.GetRolesAsync(user), ct: HttpContext.RequestAborted));
     }
 
     /// <summary>
@@ -1112,18 +1094,7 @@ public class AccountController(UserManager<AppUser> userManager,
         user = await unitOfWork.UserRepository.GetUserByUsernameAsync(user.UserName!,
             AppUserIncludes.UserPreferences | AppUserIncludes.AuthKeys, ct);
 
-        // Perform Login code
-        return new UserDto
-        {
-            Username = user!.UserName!,
-            Email = user.Email!,
-            Token = await tokenService.CreateToken(user, ct),
-            RefreshToken = await tokenService.CreateRefreshToken(user, ct),
-            ApiKey = user.GetOpdsAuthKey(),
-            AuthKeys = mapper.Map<IList<AuthKeyDto>>(user.AuthKeys),
-            Preferences = mapper.Map<UserPreferencesDto>(user.UserPreferences),
-            KavitaVersion = (await unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.InstallVersion, ct)).Value,
-        };
+        return Ok(await ConstructUserDto(user!, await userManager.GetRolesAsync(user!), ct: HttpContext.RequestAborted));
     }
 
     /// <summary>
