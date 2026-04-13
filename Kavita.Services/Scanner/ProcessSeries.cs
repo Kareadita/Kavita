@@ -854,50 +854,28 @@ public class ProcessSeries(
             chapter.AgeRating = ComicInfo.ConvertAgeRatingToEnum(comicInfo.AgeRating);
         }
 
-        if (!chapter.TitleNameLocked && !string.IsNullOrEmpty(comicInfo.Title))
+        if (!chapter.TitleNameLocked)
         {
             chapter.TitleName = comicInfo.Title.Trim();
         }
 
-        if (!chapter.SummaryLocked && !string.IsNullOrEmpty(comicInfo.Summary))
+        if (!chapter.SummaryLocked)
         {
             chapter.Summary = comicInfo.Summary;
         }
 
-        if (!chapter.LanguageLocked && !string.IsNullOrEmpty(comicInfo.LanguageISO))
+        if (!chapter.LanguageLocked)
         {
             chapter.Language = comicInfo.LanguageISO;
         }
 
-        if (!string.IsNullOrEmpty(comicInfo.SeriesGroup))
-        {
-            chapter.SeriesGroup = comicInfo.SeriesGroup;
-        }
+        chapter.SeriesGroup = comicInfo.SeriesGroup;
+        chapter.StoryArc = comicInfo.StoryArc;
+        chapter.AlternateSeries = comicInfo.AlternateSeries;
+        chapter.AlternateNumber = comicInfo.AlternateNumber;
+        chapter.StoryArcNumber = comicInfo.StoryArcNumber;
+        chapter.AlternateCount = comicInfo.AlternateCount;
 
-        if (!string.IsNullOrEmpty(comicInfo.StoryArc))
-        {
-            chapter.StoryArc = comicInfo.StoryArc;
-        }
-
-        if (!string.IsNullOrEmpty(comicInfo.AlternateSeries))
-        {
-            chapter.AlternateSeries = comicInfo.AlternateSeries;
-        }
-
-        if (!string.IsNullOrEmpty(comicInfo.AlternateNumber))
-        {
-            chapter.AlternateNumber = comicInfo.AlternateNumber;
-        }
-
-        if (!string.IsNullOrEmpty(comicInfo.StoryArcNumber))
-        {
-            chapter.StoryArcNumber = comicInfo.StoryArcNumber;
-        }
-
-        if (comicInfo.AlternateCount > 0)
-        {
-            chapter.AlternateCount = comicInfo.AlternateCount;
-        }
 
         if (!string.IsNullOrEmpty(comicInfo.Web))
         {
@@ -909,10 +887,13 @@ public class ProcessSeries(
             {
                 chapter.WebLinks = string.Join(",", comicInfo.Web.SplitBy(' '));
             }
-
+        }
+        else
+        {
+            chapter.WebLinks = string.Empty;
         }
 
-        if (!chapter.ISBNLocked && !string.IsNullOrEmpty(comicInfo.Isbn))
+        if (!chapter.ISBNLocked)
         {
             chapter.ISBN = comicInfo.Isbn;
         }
