@@ -147,7 +147,7 @@ public class ProcessSeries(
 
             // parsedInfos[0] is not the first volume or chapter. We need to find it
             var localizedSeries = parsedInfos.Select(p => p.LocalizedSeries).FirstOrDefault(p => !string.IsNullOrEmpty(p));
-            if (!series.LocalizedNameLocked && !string.IsNullOrEmpty(localizedSeries))
+            if (!series.LocalizedNameLocked)
             {
                 series.LocalizedName = localizedSeries;
                 series.NormalizedLocalizedName = series.LocalizedName.ToNormalized();
@@ -337,9 +337,9 @@ public class ProcessSeries(
 
         DeterminePublicationStatus(series, chapters);
 
-        if (!string.IsNullOrEmpty(firstChapter?.Summary) && !series.Metadata.SummaryLocked)
+        if (!series.Metadata.SummaryLocked)
         {
-            series.Metadata.Summary = firstChapter.Summary;
+            series.Metadata.Summary = firstChapter?.Summary ?? string.Empty;
         }
 
         if (!series.Metadata.LanguageLocked)
