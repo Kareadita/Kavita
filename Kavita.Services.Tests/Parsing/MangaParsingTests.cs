@@ -67,7 +67,6 @@ public class MangaParsingTests
     [InlineData("Манга Глава 2", Parser.LooseLeafVolume)]
     [InlineData("Манга Тома 1-4", "1-4")]
     [InlineData("Манга Том 1-4", "1-4")]
-    [InlineData("조선왕조실톡 106화", "106")]
     [InlineData("동의보감 13장", "13")]
     [InlineData("몰?루 아카이브 7.5권", "7.5")]
     [InlineData("63권#200", "63")]
@@ -91,6 +90,7 @@ public class MangaParsingTests
     [InlineData("Alter Ego (2020) (Digital) (t3dio)", Parser.LooseLeafVolume)]
     [InlineData("The Space Pirate COBRA v11 - Magic Doll Vol.1 [MDKM] (Creek & River)", "11")]
     [InlineData("Pokémon Adventures v04 - Yellow v01 (AnHeroGold-Empire)", "4")]
+    [InlineData("조선왕조실톡 106권", "106")]
     public void ParseVolumeTest(string filename, string expected)
     {
         Assert.Equal(expected, Parser.ParseVolume(filename, LibraryType.Manga));
@@ -119,7 +119,8 @@ public class MangaParsingTests
 
     // Korean Volume tests
     [InlineData("제5권 Test", "5")]
-    [InlineData("10화 Test", "10")]
+    [InlineData("10화 Test", Parser.LooseLeafVolume)]
+    [InlineData("10장 Test", "10")]
     [InlineData("시즌3 Test", "3")]
     [InlineData("5시즌 Test", Parser.LooseLeafVolume)]
 
@@ -361,6 +362,7 @@ public class MangaParsingTests
     [InlineData("Monster #8 Ch. 001", "1")]
     [InlineData("Monster Ch. 001 [MangaPlus] [Digital] [amit34521]", "1")]
     [InlineData("Naruto v2.5", Parser.DefaultChapter)]
+    [InlineData("조선왕조실톡 106화", "106")]
     public void ParseChaptersTest(string filename, string expected)
     {
         Assert.Equal(expected, Parser.ParseChapter(filename, LibraryType.Manga));
