@@ -425,7 +425,6 @@
         "penciller": "Zeichner",
         "publisher": "Verlag",
         "writer": "Autor",
-        "other": "Andere",
         "imprint": "Impressum",
         "translator": "Übersetzer",
         "team": "{{filter-field-pipe.team}}",

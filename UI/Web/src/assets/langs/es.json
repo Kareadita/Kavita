@@ -425,7 +425,6 @@
         "penciller": "Dibujante",
         "publisher": "Editorial",
         "writer": "Escritor",
-        "other": "Otro",
         "imprint": "Sello",
         "translator": "Traductor",
         "team": "{{filter-field-pipe.team}}",

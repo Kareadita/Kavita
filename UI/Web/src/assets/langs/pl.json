@@ -413,7 +413,6 @@
         "penciller": "Rysownik",
         "publisher": "Wydawca",
         "writer": "Pisarz",
-        "other": "Inne",
         "imprint": "Imprint",
         "translator": "Tłumacz",
         "team": "{{filter-field-pipe.team}}",

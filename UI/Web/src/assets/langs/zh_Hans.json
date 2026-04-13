@@ -425,7 +425,6 @@
         "penciller": "铅稿",
         "publisher": "出版社",
         "writer": "作者",
-        "other": "其他",
         "imprint": "刊物 / 杂志",
         "translator": "翻译",
         "team": "{{filter-field-pipe.team}}",

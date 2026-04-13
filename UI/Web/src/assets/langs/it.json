@@ -384,7 +384,6 @@
         "penciller": "Disegnatore",
         "publisher": "Casa Editrice",
         "writer": "Scrittore",
-        "other": "Altro",
         "imprint": "Impronta",
         "translator": "Traduttore",
         "team": "{{filter-field-pipe.team}}",

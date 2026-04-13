@@ -425,7 +425,6 @@
         "penciller": "草稿師",
         "publisher": "出版社",
         "writer": "作者",
-        "other": "其他",
         "team": "{{filter-field-pipe.team}}",
         "location": "{{filter-field-pipe.location}}",
         "translator": "翻譯",

@@ -417,7 +417,6 @@
         "editor": "Editor",
         "publisher": "Vydavateľ",
         "writer": "Spisovateľ",
-        "other": "Iné",
         "team": "{{filter-field-pipe.team}}",
         "location": "{{filter-field-pipe.location}}",
         "colorist": "Kolorista",

@@ -425,7 +425,6 @@
         "penciller": "Desenhista",
         "publisher": "Editora",
         "writer": "Escritor",
-        "other": "Outro",
         "imprint": "Selo",
         "translator": "Tradutor",
         "team": "{{filter-field-pipe.team}}",
@@ -1376,7 +1375,10 @@
         "edit-alt": "{{common.edit}}",
         "writers-title": "{{metadata-fields.writers-title}}",
         "cover-artists-title": "{{metadata-fields.cover-artists-title}}",
-        "loading-alt": "{{pdf-reader.loading-message}}"
+        "loading-alt": "{{pdf-reader.loading-message}}",
+        "missing-count": "{{num}} ausente",
+        "tags-title": "{{metadata-fields.tags-title}}",
+        "filter-label": "{{common.filter}}"
     },
     "events-widget": {
         "title-alt": "Atividade",
@@ -1471,7 +1473,9 @@
         "ending-title": "Terminando",
         "starting-title": "Começando",
         "promote-label": "{{actionable.promote}}",
-        "promote-tooltip": "Divulgação significa que a coleção pode ser vista em todo o servidor, não apenas para você. Todas as séries desta coleção ainda terão restrições de acesso do usuário."
+        "promote-tooltip": "Divulgação significa que a coleção pode ser vista em todo o servidor, não apenas para você. Todas as séries desta coleção ainda terão restrições de acesso do usuário.",
+        "name-label": "{{edit-series-modal.name-label}}",
+        "tags-label": "{{metadata-fields.tags-title}}"
     },
     "import-mal-collection-modal": {
         "close": "{{common.close}}",
@@ -1504,7 +1508,7 @@
         "delete-rule": "{{common.delete}}",
         "manage-rules": "Gerenciar Regras de Remapeamento",
         "col-series": "Séries Solicitadas",
-        "col-vol-issue": "Volume / Número Solicitado",
+        "col-vol-issue": "Vol. / Número Solicitado",
         "col-status": "Estado",
         "col-matched-series": "Séries Correspondidas",
         "col-matched-issue": "Número Correspondido",
@@ -1668,7 +1672,11 @@
         "annotation-owner": "Proprietário",
         "annotation-series": "Nome da série",
         "annotation-color": "Cor",
-        "user-rating": "Minha avaliação"
+        "user-rating": "Minha avaliação",
+        "readinglist-title": "Título",
+        "readinglist-releaseyear-start": "Ano de Lançamento (Início)",
+        "readinglist-releaseyear-end": "Ano de Lançamento (Fim)",
+        "readinglist-item-count": "Número de Itens"
     },
     "edit-series-modal": {
         "title": "{{seriesName}} Detalhes",
@@ -2835,7 +2843,13 @@
         "annotation-selection": "Texto de destaque",
         "series": "{{tabs.series-tab}}",
         "annotation-likes": "Curtidas",
-        "annotation-liked-by": "Curtido por"
+        "annotation-liked-by": "Curtido por",
+        "readinglist-title": "Título",
+        "readinglist-release-year": "{{sort-field-pipe.release-year}}",
+        "readinglist-item-count": "{{sort-field-pipe.readinglist-item-count}}",
+        "readinglist-tags": "{{metadata-fields.tags-title}}",
+        "readinglist-writer": "{{person-role-pipe.writer}}",
+        "readinglist-artist": "{{person-role-pipe.artist}}"
     },
     "import-mappings": {
         "import-step": "Importar",
@@ -3543,9 +3557,12 @@
         "sync": "Sincronizar",
         "delete": "{{common.delete}}",
         "view-list": "Exibir Lista de Leitura",
-        "last-synced": "Última sincronização {{date}}",
+        "last-synced": "Última Sincronização {{date}}",
         "source": "Origem",
-        "not-authorized": "Você não tem a capacidade de interagir com este conteúdo"
+        "not-authorized": "Você não tem a capacidade de interagir com este conteúdo",
+        "item-count": "{{common.item-count}}",
+        "missing-count": "{{reading-list-detail.missing-count}}",
+        "last-checked": "Última Verificação: {{date}}"
     },
     "manage-remap-rules-modal": {
         "title": "Gerenciar Regras de Remapeamento",

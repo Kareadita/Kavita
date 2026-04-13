@@ -425,7 +425,6 @@
         "penciller": "Peannaire",
         "publisher": "Foilsitheoir",
         "writer": "Scríbhneoir",
-        "other": "Eile",
         "imprint": "Imphriontáil",
         "translator": "Aistritheoir",
         "team": "{{filter-field-pipe.team}}",
@@ -1376,7 +1375,10 @@
         "reorder-alt": "Míreanna a Athordú",
         "publishers-title": "{{metadata-fields.publishers-title}}",
         "edit-alt": "{{common.edit}}",
-        "loading-alt": "{{pdf-reader.loading-message}}"
+        "loading-alt": "{{pdf-reader.loading-message}}",
+        "missing-count": "{{num}} ar iarraidh",
+        "tags-title": "{{metadata-fields.tags-title}}",
+        "filter-label": "{{common.filter}}"
     },
     "events-widget": {
         "title-alt": "Gníomhaíocht",
@@ -1471,7 +1473,9 @@
         "ending-title": "Deireadh",
         "starting-title": "Ag tosú",
         "promote-label": "{{actionable.promote}}",
-        "promote-tooltip": "Ciallaíonn cur chun cinn gur féidir an bailiúchán a fheiceáil ar fud an fhreastalaí, ní hamháin duitse. Beidh srianta rochtana úsáideoirí fós ar gach sraith laistigh den bhailiúchán seo."
+        "promote-tooltip": "Ciallaíonn cur chun cinn gur féidir an bailiúchán a fheiceáil ar fud an fhreastalaí, ní hamháin duitse. Beidh srianta rochtana úsáideoirí fós ar gach sraith laistigh den bhailiúchán seo.",
+        "name-label": "{{edit-series-modal.name-label}}",
+        "tags-label": "{{metadata-fields.tags-title}}"
     },
     "import-mal-collection-modal": {
         "close": "{{common.close}}",
@@ -1504,7 +1508,7 @@
         "delete-rule": "{{common.delete}}",
         "manage-rules": "Bainistigh Rialacha Athmhapála",
         "col-series": "Sraith Iarrtha",
-        "col-vol-issue": "Imleabhar / Eisiúint Iarrtha",
+        "col-vol-issue": "Iarratas Imleabhar / Eisiúint",
         "col-status": "Stádas",
         "col-matched-series": "Sraith Mheaitseáilte",
         "col-matched-issue": "Saincheist Mheaitseáilte",
@@ -1668,7 +1672,11 @@
         "annotation-owner": "Úinéir",
         "annotation-series": "Ainm na sraithe",
         "annotation-color": "Dath",
-        "user-rating": "Mo rátáil"
+        "user-rating": "Mo rátáil",
+        "readinglist-title": "Teideal",
+        "readinglist-releaseyear-start": "Bliain Eisiúna (Tosaigh)",
+        "readinglist-releaseyear-end": "Bliain Eisiúna (Deireadh)",
+        "readinglist-item-count": "Líon na Míreanna"
     },
     "edit-series-modal": {
         "title": "{{seriesName}} Sonraí",
@@ -2829,7 +2837,13 @@
         "annotation-selection": "Aibhsigh Téacs",
         "series": "{{tabs.series-tab}}",
         "annotation-likes": "Is maith liom",
-        "annotation-liked-by": "Is maith le"
+        "annotation-liked-by": "Is maith le",
+        "readinglist-title": "Teideal",
+        "readinglist-release-year": "{{sort-field-pipe.release-year}}",
+        "readinglist-item-count": "{{sort-field-pipe.readinglist-item-count}}",
+        "readinglist-tags": "{{metadata-fields.tags-title}}",
+        "readinglist-writer": "{{person-role-pipe.writer}}",
+        "readinglist-artist": "{{person-role-pipe.artist}}"
     },
     "breakpoint-pipe": {
         "never": "Choíche",
@@ -3543,9 +3557,12 @@
         "sync": "Sioncrónaigh",
         "delete": "{{common.delete}}",
         "view-list": "Féach ar an Liosta Léitheoireachta",
-        "last-synced": "Sioncronaithe go deireanach {{date}}",
+        "last-synced": "Sioncrónaithe Deiridh: {{date}}",
         "source": "Foinse",
-        "not-authorized": "Níl an cumas agat idirghníomhú leis an ábhar seo"
+        "not-authorized": "Níl an cumas agat idirghníomhú leis an ábhar seo",
+        "item-count": "{{common.item-count}}",
+        "missing-count": "{{reading-list-detail.missing-count}}",
+        "last-checked": "Seiceáilte Deiridh: {{date}}"
     },
     "manage-remap-rules-modal": {
         "title": "Bainistigh Rialacha Athmhapála",

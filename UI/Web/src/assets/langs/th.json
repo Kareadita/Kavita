@@ -342,7 +342,6 @@
         "penciller": "เพนซิลเลอ",
         "publisher": "สำนักพิมพ์",
         "writer": "ผู้แต่ง",
-        "other": "อื่นๆ",
         "team": "{{filter-field-pipe.team}}",
         "location": "{{filter-field-pipe.location}}"
     },

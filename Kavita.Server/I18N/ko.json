@@ -275,5 +275,8 @@
     "url-malformed": "잘못된 URL 형식",
     "url-https-only": "HTTPS URL만 허용됩니다",
     "url-unable-to-resolve": "호스트네임을 해석할 수 없습니다",
-    "url-blocked-address": "URL이 차단된 주소로 연결됩니다"
+    "url-blocked-address": "URL이 차단된 주소로 연결됩니다",
+    "email.username-change.subject": "귀하의 사용자 이름이 {{InvitingUser}}님의 서버에서 변경되었습니다",
+    "email.username-change.title": "사용자 이름 변경 업데이트",
+    "email.username-change.description": "계정의 사용자 이름이 {{InvitingUser}}님의 Kavita 인스턴스에서 업데이트되었습니다. 사용자 측에서 필요한 조치는 없습니다."
 }

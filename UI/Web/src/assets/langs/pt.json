@@ -425,7 +425,6 @@
         "penciller": "Desenhista",
         "publisher": "Editora",
         "writer": "Escritor",
-        "other": "Outro",
         "imprint": "Selo",
         "translator": "Tradutor",
         "team": "{{filter-field-pipe.team}}",

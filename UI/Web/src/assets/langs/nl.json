@@ -384,7 +384,6 @@
         "penciller": "Tekenaar",
         "publisher": "Uitgever",
         "writer": "Auteur",
-        "other": "Ander",
         "team": "{{filter-field-pipe.team}}",
         "location": "{{filter-field-pipe.location}}",
         "imprint": "Afdruk",

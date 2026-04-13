@@ -425,7 +425,6 @@
         "penciller": "Tužka",
         "publisher": "Vydavatel",
         "writer": "Spisovatel",
-        "other": "Ostatní",
         "team": "{{filter-field-pipe.team}}",
         "location": "{{filter-field-pipe.location}}",
         "imprint": "Otisk",
@@ -1312,7 +1311,10 @@
         "writers-title": "{{metadata-fields.writers-title}}",
         "cover-artists-title": "{{metadata-fields.cover-artists-title}}",
         "items-title": "Položky",
-        "loading-alt": "{{pdf-reader.loading-message}}"
+        "loading-alt": "{{pdf-reader.loading-message}}",
+        "missing-count": "Chybí {{num}}",
+        "tags-title": "{{metadata-fields.tags-title}}",
+        "filter-label": "{{common.filter}}"
     },
     "events-widget": {
         "close": "{{common.close}}",
@@ -1403,7 +1405,9 @@
         "starting-title": "Začátek",
         "title": "Upravit seznam četby: {{name}}",
         "month-label": "Měsíc",
-        "promote-label": "{{actionable.promote}}"
+        "promote-label": "{{actionable.promote}}",
+        "name-label": "{{edit-series-modal.name-label}}",
+        "tags-label": "{{metadata-fields.tags-title}}"
     },
     "import-mal-collection-modal": {
         "close": "{{common.close}}",
@@ -1436,7 +1440,7 @@
         "delete-rule": "{{common.delete}}",
         "manage-rules": "Správa pravidel přemapování",
         "col-series": "Požadované série",
-        "col-vol-issue": "Požadovaný svazek / vydání",
+        "col-vol-issue": "Požad. svaz. / vydání",
         "col-status": "Stav",
         "col-matched-series": "Spárované série",
         "col-matched-issue": "Spárované vydání",
@@ -2089,7 +2093,11 @@
         "annotation-owner": "Vlastník",
         "annotation-series": "Název série",
         "annotation-color": "Barva",
-        "user-rating": "Moje hodnocení"
+        "user-rating": "Moje hodnocení",
+        "readinglist-title": "Název",
+        "readinglist-releaseyear-start": "Rok vydání (začátek)",
+        "readinglist-releaseyear-end": "Rok vydání (konec)",
+        "readinglist-item-count": "Počet položek"
     },
     "edit-person-modal": {
         "name-label": "{{edit-series-modal.name-label}}",
@@ -2829,7 +2837,13 @@
         "annotation-selection": "Zvýraznit text",
         "series": "{{tabs.series-tab}}",
         "annotation-likes": "Lajky",
-        "annotation-liked-by": "Líbí se"
+        "annotation-liked-by": "Líbí se",
+        "readinglist-title": "Název",
+        "readinglist-release-year": "{{sort-field-pipe.release-year}}",
+        "readinglist-item-count": "{{sort-field-pipe.readinglist-item-count}}",
+        "readinglist-tags": "{{metadata-fields.tags-title}}",
+        "readinglist-writer": "{{person-role-pipe.writer}}",
+        "readinglist-artist": "{{person-role-pipe.artist}}"
     },
     "breakpoint-pipe": {
         "never": "Nikdy",
@@ -3545,7 +3559,10 @@
         "view-list": "Zobrazit seznam četby",
         "last-synced": "Naposledy synchronizováno {{date}}",
         "source": "Zdroj",
-        "not-authorized": "Nemáte oprávnění k prohlížení tohoto obsahu"
+        "not-authorized": "Nemáte oprávnění k prohlížení tohoto obsahu",
+        "item-count": "{{common.item-count}}",
+        "missing-count": "{{reading-list-detail.missing-count}}",
+        "last-checked": "Naposledy zkontrolováno: {{date}}"
     },
     "manage-remap-rules-modal": {
         "title": "Správa pravidel přemapování",

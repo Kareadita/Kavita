@@ -425,7 +425,6 @@
         "penciller": "Crayonneur",
         "publisher": "Éditeur",
         "writer": "Scénariste",
-        "other": "Autre",
         "imprint": "Marque",
         "translator": "Traducteur",
         "team": "{{filter-field-pipe.team}}",

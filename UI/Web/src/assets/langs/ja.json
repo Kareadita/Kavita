@@ -425,7 +425,6 @@
         "penciller": "下書き (線画)",
         "publisher": "出版社",
         "writer": "原作 / 脚本 (ストーリー)",
-        "other": "その他",
         "imprint": "レーベル (インプリント)",
         "translator": "翻訳",
         "team": "{{filter-field-pipe.team}}",

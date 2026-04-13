@@ -425,7 +425,6 @@
         "penciller": "펜슬러 / 원화 담당",
         "publisher": "출판사",
         "writer": "작가 / 글 담당",
-        "other": "그 외",
         "imprint": "출판사 브랜드",
         "translator": "번역가 / 역자",
         "team": "{{filter-field-pipe.team}}",
@@ -604,7 +603,8 @@
         "completion-label": "{{percent}} 완료",
         "force-selected-one-column": "2개 열을 표기할 공간이 충분하지 않아 레이아웃 모드가 1개 열로 전환되었습니다",
         "forced-vertical-switch": "2열 레이아웃이 세로쓰기 스타일과 호환되지 않아 레이아웃 모드가 전환되었습니다",
-        "close-reader-alt": "도서 닫기"
+        "close-reader-alt": "도서 닫기",
+        "shortcuts-menu-alt": "{{manga-reader.shortcuts-menu-alt}}"
     },
     "personal-table-of-contents": {
         "no-data": "아직 북마크된 항목 없음",
@@ -1376,7 +1376,10 @@
         "date-range-title": "날짜 범위",
         "more-alt": "{{series-detail.more-alt}}",
         "reorder-alt": "항목 재정렬",
-        "loading-alt": "{{pdf-reader.loading-message}}"
+        "loading-alt": "{{pdf-reader.loading-message}}",
+        "missing-count": "{{num}}개 항목 없음",
+        "tags-title": "{{metadata-fields.tags-title}}",
+        "filter-label": "{{common.filter}}"
     },
     "events-widget": {
         "title-alt": "활동",
@@ -1403,7 +1406,8 @@
         "double-click": "더블 클릭",
         "close-reader": "리더 닫기",
         "toggle-menu": "메뉴 전환",
-        "offset-double-page": "{{keybind-setting-description-pipe.key-bind-title-offset-double-page}}"
+        "offset-double-page": "{{keybind-setting-description-pipe.key-bind-title-offset-double-page}}",
+        "navigate-to-settings": "{{keybind-setting-description-pipe.key-bind-title-navigate-to-settings}}"
     },
     "grouped-typeahead": {
         "files": "파일",
@@ -1471,7 +1475,9 @@
         "ending-title": "종료",
         "starting-title": "시작",
         "promote-label": "{{actionable.promote}}",
-        "promote-tooltip": "공개 기능은 해당 태그를 관리자만이 아니라 서버 전체 사용자에게 표시합니다. 단, 이 태그가 달린 시리즈는 여전히 기존의 접근 제한(예: 연령 제한, 라이브러리 접근 제한 등)이 적용됩니다."
+        "promote-tooltip": "공개 기능은 해당 태그를 관리자만이 아니라 서버 전체 사용자에게 표시합니다. 단, 이 태그가 달린 시리즈는 여전히 기존의 접근 제한(예: 연령 제한, 라이브러리 접근 제한 등)이 적용됩니다.",
+        "name-label": "{{edit-series-modal.name-label}}",
+        "tags-label": "{{metadata-fields.tags-title}}"
     },
     "import-mal-collection-modal": {
         "close": "{{common.close}}",
@@ -1501,7 +1507,7 @@
         "delete-rule": "{{common.delete}}",
         "manage-rules": "재배치 규칙 관리",
         "col-series": "요청받은 시리즈",
-        "col-vol-issue": "요청받은 권/호",
+        "col-vol-issue": "요청 권/호",
         "col-status": "상태",
         "col-matched-series": "일치하는 시리즈",
         "col-matched-issue": "일치하는 호",
@@ -1531,7 +1537,8 @@
         "light-theme-alt": "밝은 테마",
         "dark-theme-alt": "어두운 테마",
         "close-reader-alt": "리더 닫기",
-        "toggle-incognito": "시크릿 모드 끄기"
+        "toggle-incognito": "시크릿 모드 끄기",
+        "shortcuts-menu-alt": "{{manga-reader.shortcuts-menu-alt}}"
     },
     "pdf-layout-mode-pipe": {
         "single": "단일 페이지",
@@ -1667,7 +1674,11 @@
         "annotation-owner": "소유자",
         "annotation-series": "시리즈 이름",
         "annotation-color": "색상",
-        "user-rating": "내 평점"
+        "user-rating": "내 평점",
+        "readinglist-title": "제목",
+        "readinglist-releaseyear-start": "발매연도 (시작)",
+        "readinglist-releaseyear-end": "발매연도 (끝)",
+        "readinglist-item-count": "항목 개수"
     },
     "edit-series-modal": {
         "title": "{{seriesName}} 세부정보",
@@ -2828,7 +2839,13 @@
         "annotation-selection": "강조 텍스트",
         "series": "{{tabs.series-tab}}",
         "annotation-likes": "좋아요",
-        "annotation-liked-by": "좋아요"
+        "annotation-liked-by": "좋아요",
+        "readinglist-title": "제목",
+        "readinglist-release-year": "{{sort-field-pipe.release-year}}",
+        "readinglist-item-count": "{{sort-field-pipe.readinglist-item-count}}",
+        "readinglist-tags": "{{metadata-fields.tags-title}}",
+        "readinglist-writer": "{{person-role-pipe.writer}}",
+        "readinglist-artist": "{{person-role-pipe.artist}}"
     },
     "breakpoint-pipe": {
         "never": "없음",
@@ -3061,7 +3078,15 @@
         "key-bind-title-page-down": "아래로 이동",
         "key-bind-tooltip-page-down": "한 페이지 아래로 이동",
         "key-bind-title-offset-double-page": "양면 페이지 설정",
-        "key-bind-tooltip-offset-double-page": "양면 페이지 정렬을 위한 오프셋 페이지"
+        "key-bind-tooltip-offset-double-page": "양면 페이지 정렬을 위한 오프셋 페이지",
+        "key-bind-title-next-chapter": "다음 화",
+        "key-bind-tooltip-next-chapter": "다음 화 불러오기",
+        "key-bind-title-previous-chapter": "이전 화",
+        "key-bind-tooltip-previous-chapter": "이전 화 불러오기",
+        "key-bind-title-first-page": "첫 페이지",
+        "key-bind-tooltip-first-page": "첫 페이지로 이동",
+        "key-bind-title-last-page": "마지막 페이지",
+        "key-bind-tooltip-last-page": "마지막 페이지로 이동"
     },
     "manage-auth-keys": {
         "auth-keys-title": "인증키 관리",
@@ -3544,7 +3569,10 @@
         "view-list": "읽기 리스트 보기",
         "last-synced": "{{date}}에 동기화됨",
         "source": "소스",
-        "not-authorized": "이 컨텐츠와 상호작용할 권한이 없습니다"
+        "not-authorized": "이 컨텐츠와 상호작용할 권한이 없습니다",
+        "item-count": "{{common.item-count}}",
+        "missing-count": "{{reading-list-detail.missing-count}}",
+        "last-checked": "{{date}}에 확인됨"
     },
     "manage-remap-rules-modal": {
         "title": "재배치 규칙 관리",
@@ -3589,7 +3617,8 @@
         "mapped-vol-issue-col": "배치된 권/호",
         "cbl-number-label": "CBL 호 #",
         "kavita-chapter-label": "Kavita 화 (선택)",
-        "edit": "{{common.edit}}"
+        "edit": "{{common.edit}}",
+        "cbl-number-placeholder": "e.g. 1"
     },
     "browse-cbl-repo-modal": {
         "title": "CBL 레포 탐색",
@@ -3662,5 +3691,12 @@
         "custom-label": "사용자 지정 스케줄 (Cron 형식)",
         "required-field": "{{validation.required-field}}",
         "cron-notation": "올바른 Cron 형식이 아닙니다"
+    },
+    "change-username": {
+        "username-label": "{{common.username}}",
+        "new-username-label": "새 사용자 이름",
+        "reset": "{{common.reset}}",
+        "save": "{{common.save}}",
+        "required-field": "{{validation.required-field}}"
     }
 }
