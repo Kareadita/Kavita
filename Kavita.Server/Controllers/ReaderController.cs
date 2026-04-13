@@ -429,7 +429,7 @@ public class ReaderController(ICacheService cacheService,
         if (!await unitOfWork.CommitAsync()) return BadRequest(await localizationService.TranslateAsync(UserId, "generic-read-progress"));
 
         await eventHub.SendMessageAsync(MessageFactory.UserProgressUpdate,
-            MessageFactory.UserProgressUpdateEvent(user.Id, user.UserName!, markVolumeReadDto.SeriesId,
+            MessageFactory.UserProgressUpdateEvent(user.Id, markVolumeReadDto.SeriesId,
                 markVolumeReadDto.VolumeId, 0, chapters.Sum(c => c.Pages)));
 
         BackgroundJob.Enqueue(() => scrobblingService.ScrobbleReadingUpdate(user.Id, markVolumeReadDto.SeriesId));

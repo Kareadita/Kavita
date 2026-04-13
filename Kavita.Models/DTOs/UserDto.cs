@@ -21,7 +21,7 @@ public sealed record UserDto : IHasCoverImage
     public IList<string> Roles { get; set; } = [];
     public string Token { get; set; } = null!;
     public string? RefreshToken { get; set; }
-    public string? ApiKey { get; init; }
+    public string? ApiKey { get; set; }
     public UserPreferencesDto? Preferences { get; set; }
     public AgeRestrictionDto? AgeRestriction { get; init; }
     public string KavitaVersion { get; set; }

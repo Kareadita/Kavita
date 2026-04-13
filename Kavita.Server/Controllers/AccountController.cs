@@ -299,13 +299,15 @@ public class AccountController(UserManager<AppUser> userManager,
 
         dto.Roles = roles;
         dto.KavitaVersion = BuildInfo.Version.ToString();
+        dto.ApiKey = user.GetOpdsAuthKey();
+        dto.AuthKeys = mapper.Map<List<AuthKeyDto>>(user.AuthKeys);
 
         var pref = await unitOfWork.UserRepository.GetPreferencesAsync(user.UserName!, ct);
-        if (pref == null) return dto;
-
-        pref.Theme ??= await unitOfWork.SiteThemeRepository.GetDefaultTheme();
-        dto.Preferences = mapper.Map<UserPreferencesDto>(pref);
-        dto.AuthKeys = mapper.Map<List<AuthKeyDto>>(user.AuthKeys);
+        if (pref != null)
+        {
+            pref.Theme ??= await unitOfWork.SiteThemeRepository.GetDefaultTheme();
+            dto.Preferences = mapper.Map<UserPreferencesDto>(pref);
+        }
 
         return dto;
     }

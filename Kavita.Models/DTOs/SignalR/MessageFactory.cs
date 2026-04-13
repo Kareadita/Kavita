@@ -593,7 +593,7 @@ public static class MessageFactory
         };
     }
 
-    public static SignalRMessage UserProgressUpdateEvent(int userId, string username, int seriesId, int volumeId, int chapterId, int pagesRead)
+    public static SignalRMessage UserProgressUpdateEvent(int userId, int seriesId, int volumeId, int chapterId, int pagesRead)
     {
         return new SignalRMessage()
         {
@@ -603,7 +603,6 @@ public static class MessageFactory
             Body = new
             {
                 UserId = userId,
-                Username = username,
                 SeriesId = seriesId,
                 VolumeId = volumeId,
                 ChapterId = chapterId,

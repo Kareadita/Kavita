@@ -149,7 +149,7 @@ public class ProcessSeries(
             var localizedSeries = parsedInfos.Select(p => p.LocalizedSeries).FirstOrDefault(p => !string.IsNullOrEmpty(p));
             if (!series.LocalizedNameLocked)
             {
-                series.LocalizedName = localizedSeries;
+                series.LocalizedName = localizedSeries ?? string.Empty;
                 series.NormalizedLocalizedName = series.LocalizedName.ToNormalized();
             }
 
