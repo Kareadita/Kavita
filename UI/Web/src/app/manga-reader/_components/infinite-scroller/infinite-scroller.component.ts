@@ -19,7 +19,7 @@ import {
   SimpleChanges
 } from '@angular/core';
 import {BehaviorSubject, fromEvent, map, Observable, of, ReplaySubject, Subject, tap} from 'rxjs';
-import {debounceTime} from 'rxjs/operators';
+import {debounceTime, distinctUntilChanged} from 'rxjs/operators';
 import {ReaderService} from '../../../_services/reader.service';
 import {PAGING_DIRECTION} from '../../_models/reader-enums';
 import {WebtoonImage} from '../../_models/webtoon-image';
@@ -230,7 +230,7 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy {
     }
 
     this.pageChangeSubject.pipe(
-      debounceTime(PROGRESS_SAVE_TIMEOUT_MS),
+      distinctUntilChanged(),
       takeUntilDestroyed(this.destroyRef),
       tap(page => this.pageNumberChange.emit(page)),
     ).subscribe();
