@@ -437,6 +437,24 @@ public class ArchiveService : IArchiveService
         {
             if (!File.Exists(archivePath)) return null;
 
+            /// replace extension with .xml and check if that exists first before trying to 
+            /// find within the archive. This is because some scanners will extract the 
+            /// ComicInfo.xml to the same directory as the archive for easier access and 
+            /// we want to take advantage of that if possible
+            /// This also allows users to manually add a ComicInfo.xml if they want to 
+            /// edit metadata without needing to rearchive
+
+            var comicInfoPath = Path.ChangeExtension(archivePath, ".xml");
+            if (File.Exists(comicInfoPath))
+            {
+                using var stream = File.OpenRead(comicInfoPath);
+                var info = Deserialize(stream);
+                if (info != null)
+                {
+                    return info;
+                }
+            }
+
             var libraryHandler = CanOpen(archivePath);
             switch (libraryHandler)
             {
