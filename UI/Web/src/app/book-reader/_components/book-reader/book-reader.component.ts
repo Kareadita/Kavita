@@ -707,7 +707,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
             await this.goToPage(0);
             break;
           case KeyBindTarget.LastPage:
-            await this.goToPage(this.maxPages());
+            await this.goToPage(this.maxPages() - 1);
             break;
           case KeyBindTarget.PreviousChapter:
             this.loadPrevChapter();
