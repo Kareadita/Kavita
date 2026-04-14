@@ -120,6 +120,7 @@ const KEYBIND_TARGETS = [
   {keyBindTarget: KeyBindTarget.ToggleFullScreen},
   {keyBindTarget: KeyBindTarget.ToggleMenu},
   {keyBindTarget: KeyBindTarget.OpenHelp},
+  {keyBindTarget: KeyBindTarget.Escape},
   {keyBindTarget: KeyBindTarget.PreviousChapter, description: 'previous-chapter'},
   {keyBindTarget: KeyBindTarget.NextChapter, description: 'next-chapter'},
   {keyBindTarget: KeyBindTarget.FirstPage, description: 'first-page'},

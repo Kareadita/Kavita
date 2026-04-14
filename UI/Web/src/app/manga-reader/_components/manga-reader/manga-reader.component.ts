@@ -110,6 +110,7 @@ const KEYBIND_TARGETS = [
   {keyBindTarget: KeyBindTarget.ToggleFullScreen},
   {keyBindTarget: KeyBindTarget.ToggleMenu},
   {keyBindTarget: KeyBindTarget.OpenHelp},
+  {keyBindTarget: KeyBindTarget.Escape},
   {keyBindTarget: KeyBindTarget.BookmarkPage, description: 'bookmark'},
   {keyBindTarget: KeyBindTarget.OffsetDoublePage, description: 'offset-double-page'},
   {keyBindTarget: KeyBindTarget.PreviousChapter, description: 'previous-chapter'},
