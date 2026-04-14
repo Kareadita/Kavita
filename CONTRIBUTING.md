@@ -19,6 +19,7 @@ The docs are maintained in the [Wiki-Nextra](https://github.com/Kareadita/Wiki-N
 - [NodeJS](https://nodejs.org/en/download/) (Node 18.13.X or higher)
 - .NET 9.0+
 - dotnet tool install -g Swashbuckle.AspNetCore.Cli
+- dotnet cli tools [link](https://learn.microsoft.com/en-us/ef/core/cli/dotnet) 
 
 ### Fork and Clone Kavita
 
@@ -50,6 +51,10 @@ You can re-enable the setting later, and it will bind to a different port. You m
 
 ### Deployment
 Run build.sh and pass the Runtime Identifier for your OS or just build.sh for all supported RIDs.
+
+### Database Changes
+- When you need to make changes to the Db, update the Entities then run:
+`dotnet ef migrations add --project Kavita.Database\Kavita.Database.csproj --startup-project Kavita.Server\Kavita.Server.csproj --context Kavita.Database.DataContext --configuration Debug --output-dir Migrations MeaningfulName`
 
 ## Contributing Code
 
