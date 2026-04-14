@@ -561,7 +561,7 @@ public class CoverDbService : ICoverDbService
 
         if (_unitOfWork.HasChanges())
         {
-            await _unitOfWork.CommitAsync(ct);
+            await _unitOfWork.CommitAsync(ct: ct);
             await _eventHub.SendMessageAsync(MessageFactory.CoverUpdate,
                 MessageFactory.CoverUpdateEvent(person.Id, MessageFactoryEntityTypes.Person), false, ct);
         }
@@ -646,7 +646,7 @@ public class CoverDbService : ICoverDbService
 
         if (_unitOfWork.HasChanges())
         {
-            await _unitOfWork.CommitAsync(ct);
+            await _unitOfWork.CommitAsync(ct: ct);
             await _eventHub.SendMessageAsync(MessageFactory.CoverUpdate,
                 MessageFactory.CoverUpdateEvent(series.Id, MessageFactoryEntityTypes.Series), false, ct);
         }
@@ -720,7 +720,7 @@ public class CoverDbService : ICoverDbService
 
         if (_unitOfWork.HasChanges())
         {
-            await _unitOfWork.CommitAsync(ct);
+            await _unitOfWork.CommitAsync(ct: ct);
             await _eventHub.SendMessageAsync(
                 MessageFactory.CoverUpdate,
                 MessageFactory.CoverUpdateEvent(chapter.Id, MessageFactoryEntityTypes.Chapter),
@@ -773,7 +773,7 @@ public class CoverDbService : ICoverDbService
 
         if (_unitOfWork.HasChanges())
         {
-            await _unitOfWork.CommitAsync(ct);
+            await _unitOfWork.CommitAsync(ct: ct);
             await _eventHub.SendMessageAsync(MessageFactory.CoverUpdate,
                 MessageFactory.CoverUpdateEvent(user.Id, MessageFactoryEntityTypes.User), false, ct);
         }

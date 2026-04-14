@@ -43,7 +43,7 @@ public class DeviceService(
             unitOfWork.UserRepository.Update(userWithDevices);
 
             if (!unitOfWork.HasChanges()) return existingDevice;
-            if (await unitOfWork.CommitAsync(ct)) return existingDevice;
+            if (await unitOfWork.CommitAsync(ct: ct)) return existingDevice;
         }
         catch (Exception ex)
         {
@@ -66,7 +66,7 @@ public class DeviceService(
             existingDevice.EmailAddress = dto.EmailAddress;
 
             if (!unitOfWork.HasChanges()) return existingDevice;
-            if (await unitOfWork.CommitAsync(ct)) return existingDevice;
+            if (await unitOfWork.CommitAsync(ct: ct)) return existingDevice;
         }
         catch (Exception ex)
         {
@@ -87,7 +87,7 @@ public class DeviceService(
             await readingProfileService.RemoveDeviceLinks(userWithDevices.Id, deviceId);
 
             if (!unitOfWork.HasChanges()) return true;
-            if (await unitOfWork.CommitAsync(ct)) return true;
+            if (await unitOfWork.CommitAsync(ct: ct)) return true;
         }
         catch (Exception ex)
         {
@@ -119,7 +119,7 @@ public class DeviceService(
         {
             device.UpdateLastUsed();
             unitOfWork.DeviceRepository.Update(device);
-            await unitOfWork.CommitAsync(ct);
+            await unitOfWork.CommitAsync(ct: ct);
         }
         catch (Exception ex)
         {

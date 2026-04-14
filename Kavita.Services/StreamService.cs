@@ -68,7 +68,7 @@ public class StreamService(
 
         user.DashboardStreams.Add(createdStream);
         unitOfWork.UserRepository.Update(user);
-        await unitOfWork.CommitAsync(ct);
+        await unitOfWork.CommitAsync(ct: ct);
 
         var ret = new DashboardStreamDto()
         {
@@ -94,7 +94,7 @@ public class StreamService(
         stream.Visible = dto.Visible;
 
         unitOfWork.UserRepository.Update(stream);
-        await unitOfWork.CommitAsync(ct);
+        await unitOfWork.CommitAsync(ct: ct);
         await eventHub.SendMessageToAsync(MessageFactory.DashboardUpdate, MessageFactory.DashboardUpdateEvent(userId),
             userId, ct);
     }
@@ -117,7 +117,7 @@ public class StreamService(
         user.DashboardStreams = list;
 
         unitOfWork.UserRepository.Update(user);
-        await unitOfWork.CommitAsync(ct);
+        await unitOfWork.CommitAsync(ct: ct);
         if (!stream.Visible) return;
         await eventHub.SendMessageToAsync(MessageFactory.DashboardUpdate, MessageFactory.DashboardUpdateEvent(user.Id),
             user.Id, ct);
@@ -133,7 +133,7 @@ public class StreamService(
             unitOfWork.UserRepository.Update(stream);
         }
 
-        await unitOfWork.CommitAsync(ct);
+        await unitOfWork.CommitAsync(ct: ct);
         await eventHub.SendMessageToAsync(MessageFactory.SideNavUpdate, MessageFactory.SideNavUpdateEvent(userId),
             userId, ct);
     }
@@ -163,7 +163,7 @@ public class StreamService(
 
         user.SideNavStreams.Add(createdStream);
         unitOfWork.UserRepository.Update(user);
-        await unitOfWork.CommitAsync(ct);
+        await unitOfWork.CommitAsync(ct: ct);
 
         var ret = new SideNavStreamDto()
         {
@@ -207,7 +207,7 @@ public class StreamService(
 
         user.SideNavStreams.Add(createdStream);
         unitOfWork.UserRepository.Update(user);
-        await unitOfWork.CommitAsync(ct);
+        await unitOfWork.CommitAsync(ct: ct);
 
         var ret = new SideNavStreamDto()
         {
@@ -240,7 +240,7 @@ public class StreamService(
         stream.Visible = dto.Visible;
 
         unitOfWork.UserRepository.Update(stream);
-        await unitOfWork.CommitAsync(ct);
+        await unitOfWork.CommitAsync(ct: ct);
         await eventHub.SendMessageToAsync(MessageFactory.SideNavUpdate, MessageFactory.SideNavUpdateEvent(userId),
             userId, ct);
     }
@@ -270,7 +270,7 @@ public class StreamService(
         user.SideNavStreams = list;
 
         unitOfWork.UserRepository.Update(user);
-        await unitOfWork.CommitAsync(ct);
+        await unitOfWork.CommitAsync(ct: ct);
         if (!stream.Visible) return;
         await eventHub.SendMessageToAsync(MessageFactory.SideNavUpdate, MessageFactory.SideNavUpdateEvent(userId),
             userId, ct);
@@ -301,7 +301,7 @@ public class StreamService(
         user.ExternalSources.Add(newSource);
 
         unitOfWork.UserRepository.Update(user);
-        await unitOfWork.CommitAsync(ct);
+        await unitOfWork.CommitAsync(ct: ct);
 
         dto.Id = newSource.Id;
 
@@ -323,7 +323,7 @@ public class StreamService(
         source.Name = dto.Name;
 
         unitOfWork.AppUserExternalSourceRepository.Update(source);
-        await unitOfWork.CommitAsync(ct);
+        await unitOfWork.CommitAsync(ct: ct);
 
         dto.Host = source.Host;
         return dto;
@@ -341,7 +341,7 @@ public class StreamService(
         var streams2 = await unitOfWork.UserRepository.GetSideNavStreamWithExternalSource(externalSourceId, ct);
         unitOfWork.UserRepository.Delete(streams2);
 
-        await unitOfWork.CommitAsync(ct);
+        await unitOfWork.CommitAsync(ct: ct);
     }
 
     public async Task DeleteSideNavSmartFilterStream(int userId, int sideNavStreamId, CancellationToken ct = default)
@@ -361,7 +361,7 @@ public class StreamService(
 
             unitOfWork.UserRepository.Delete(stream);
 
-            await unitOfWork.CommitAsync(ct);
+            await unitOfWork.CommitAsync(ct: ct);
         }
         catch (Exception ex)
         {
@@ -386,7 +386,7 @@ public class StreamService(
 
             unitOfWork.UserRepository.Delete(stream);
 
-            await unitOfWork.CommitAsync(ct);
+            await unitOfWork.CommitAsync(ct: ct);
         } catch (Exception ex)
         {
             logger.LogError(ex, "There was an exception deleting Dashboard Smart Filter Stream: {FilterId}", dashboardStreamId);
@@ -409,6 +409,6 @@ public class StreamService(
             dashboardStream.Name = smartFilter.Name;
         }
 
-        await unitOfWork.CommitAsync(ct);
+        await unitOfWork.CommitAsync(ct: ct);
     }
 }

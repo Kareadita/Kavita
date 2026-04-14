@@ -141,7 +141,7 @@ public class BookmarkService(
             directoryService.CopyFileToDirectory(imageToBookmark, targetFilepath);
 
             unitOfWork.UserRepository.Add(bookmark);
-            await unitOfWork.CommitAsync(ct);
+            await unitOfWork.CommitAsync(ct: ct);
 
             if (settings.EncodeMediaAs != EncodeFormat.PNG)
             {
@@ -178,7 +178,7 @@ public class BookmarkService(
                 unitOfWork.UserRepository.Delete(bookmarkToDelete);
             }
 
-            await unitOfWork.CommitAsync(ct);
+            await unitOfWork.CommitAsync(ct: ct);
         }
         catch (Exception)
         {

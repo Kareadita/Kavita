@@ -105,7 +105,7 @@ public class OidcService(ILogger<OidcService> logger, UserManager<AppUser> userM
 
             logger.LogDebug("User {UserName} has matched on email to {OidcId}", user.Id, oidcId);
             user.OidcId = oidcId;
-            await unitOfWork.CommitAsync(ct);
+            await unitOfWork.CommitAsync(ct: ct);
 
             await SyncUserSettings(request, settings, principal, user);
 
@@ -181,7 +181,7 @@ public class OidcService(ILogger<OidcService> logger, UserManager<AppUser> userM
             user.OidcId = null;
         }
 
-        await unitOfWork.CommitAsync(ct);
+        await unitOfWork.CommitAsync(ct: ct);
     }
 
     public async Task ClearOidcIdForUser(int userId, CancellationToken ct = default)
@@ -190,7 +190,7 @@ public class OidcService(ILogger<OidcService> logger, UserManager<AppUser> userM
         if (user == null) return;
 
         user.OidcId = null;
-        await unitOfWork.CommitAsync(ct);
+        await unitOfWork.CommitAsync(ct: ct);
     }
 
     /// <summary>

@@ -91,7 +91,7 @@ public class AnnotationService(
             };
 
             unitOfWork.AnnotationRepository.Attach(annotation);
-            await unitOfWork.CommitAsync(ct);
+            await unitOfWork.CommitAsync(ct: ct);
 
             return (await unitOfWork.AnnotationRepository.GetAnnotationDto(annotation.Id, ct))!;
         }
@@ -125,12 +125,12 @@ public class AnnotationService(
 
             unitOfWork.AnnotationRepository.Update(annotation);
 
-            if (!unitOfWork.HasChanges() || await unitOfWork.CommitAsync(ct))
+            if (!unitOfWork.HasChanges() || await unitOfWork.CommitAsync(ct: ct))
             {
                 dto = (await unitOfWork.AnnotationRepository.GetAnnotationDto(annotation.Id, ct))!;
 
                 await eventHub.SendMessageToAsync(MessageFactory.AnnotationUpdate,
-                    MessageFactory.AnnotationUpdateEvent(dto), userId);
+                    MessageFactory.AnnotationUpdateEvent(dto), userId, ct);
 
                 return dto;
             }

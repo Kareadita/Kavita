@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Data;
 using System.Threading;
 using System.Threading.Tasks;
 using AutoMapper;
@@ -7,6 +8,9 @@ using Kavita.API.Repositories;
 using Kavita.Database.Repositories;
 using Kavita.Models.Entities.User;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.Data.Sqlite;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 
 namespace Kavita.Database;
 
@@ -16,12 +20,14 @@ public class UnitOfWork : IUnitOfWork
     private readonly DataContext _context;
     private readonly IMapper _mapper;
     private readonly UserManager<AppUser> _userManager;
+    private readonly ILogger<UnitOfWork> _logger;
 
-    public UnitOfWork(DataContext context, IMapper mapper, UserManager<AppUser> userManager)
+    public UnitOfWork(DataContext context, IMapper mapper, UserManager<AppUser> userManager, ILogger<UnitOfWork> logger)
     {
         _context = context;
         _mapper = mapper;
         _userManager = userManager;
+        _logger = logger;
 
         SeriesRepository = new SeriesRepository(_context, _mapper);
         UserRepository = new UserRepository(_context, _userManager, _mapper);
@@ -89,22 +95,62 @@ public class UnitOfWork : IUnitOfWork
     public IReadingListRemapRuleRepository RemapRuleRepository { get; }
 
     /// <summary>
-    /// Commits changes to the DB. Completes the open transaction.
+    /// Commits pending changes inside an IMMEDIATE SQLite transaction so writer contention
+    /// waits on the writer lock (via busy_timeout) instead of failing with SQLITE_BUSY_SNAPSHOT.
+    /// Optionally retries transient BUSY/LOCKED errors with jittered backoff.
     /// </summary>
-    /// <returns></returns>
-    public bool Commit()
+    /// <remarks>
+    /// Microsoft.Data.Sqlite maps <see cref="IsolationLevel.Serializable"/> to BEGIN IMMEDIATE,
+    /// which acquires the writer (RESERVED) lock up front. Because nothing has been read inside
+    /// the transaction yet, <c>busy_timeout</c> can legally wait for the peer to finish — whereas
+    /// the default DEFERRED transaction would return the non-retriable SQLITE_BUSY_SNAPSHOT once
+    /// a read snapshot was established.
+    ///
+    /// Concurrency tokens (<c>IHasConcurrencyToken</c>) compose correctly with retries: on a
+    /// retried SaveChanges, EF Core still emits the WHERE RowVersion check, so lost-update
+    /// detection is preserved. <see cref="DbUpdateConcurrencyException"/> is deliberately NOT
+    /// caught here — it means the caller's in-memory state is stale and needs a business decision.
+    /// </remarks>
+    public async Task<bool> CommitAsync(int maxRetries = 0, CancellationToken ct = default)
     {
-        return _context.SaveChanges() > 0;
+        var attempt = 0;
+        while (true)
+        {
+            try
+            {
+                await using var tx = await _context.Database.BeginTransactionAsync(IsolationLevel.Serializable, ct);
+                var result = await _context.SaveChangesAsync(ct) > 0;
+                await tx.CommitAsync(ct);
+                return result;
+            }
+            catch (Exception ex) when (IsSqliteBusyError(ex))
+            {
+                if (attempt >= maxRetries)
+                {
+                    _logger.LogError(ex, "SQLite busy on CommitAsync after {Attempts} attempt(s)", attempt + 1);
+                    throw;
+                }
+
+                attempt++;
+                _logger.LogWarning(ex, "SQLite busy on CommitAsync, retrying ({Attempt}/{MaxRetries})", attempt, maxRetries);
+                await Task.Delay(50 * attempt + Random.Shared.Next(0, 50), ct);
+            }
+        }
     }
 
-    /// <summary>
-    /// Commits changes to the DB. Completes the open transaction.
-    /// </summary>
-    /// <param name="ct"></param>
-    /// <returns></returns>
-    public async Task<bool> CommitAsync(CancellationToken ct = default)
+    private static bool IsSqliteBusyError(Exception? ex)
     {
-        return await _context.SaveChangesAsync(ct) > 0;
+        while (ex != null)
+        {
+            if (ex is SqliteException sqliteEx && sqliteEx.SqliteErrorCode is 5 /* SQLITE_BUSY */ or 6 /* SQLITE_LOCKED */)
+            {
+                return true;
+            }
+
+            ex = ex.InnerException;
+        }
+
+        return false;
     }
 
     /// <summary>
@@ -114,16 +160,6 @@ public class UnitOfWork : IUnitOfWork
     public bool HasChanges()
     {
         return _context.ChangeTracker.HasChanges();
-    }
-
-    public async Task BeginTransactionAsync()
-    {
-        await _context.Database.BeginTransactionAsync();
-    }
-
-    public async Task CommitTransactionAsync()
-    {
-        await _context.Database.CommitTransactionAsync();
     }
 
     /// <summary>

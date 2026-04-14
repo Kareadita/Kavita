@@ -132,7 +132,7 @@ public partial class AccountService(
         if (!oidcSettings.SyncUserSettings)
         {
             user.IdentityProvider = identityProvider;
-            await unitOfWork.CommitAsync(ct);
+            await unitOfWork.CommitAsync(ct: ct);
             return false;
         }
 
@@ -143,7 +143,7 @@ public partial class AccountService(
         }
 
         user.IdentityProvider = identityProvider;
-        await unitOfWork.CommitAsync(ct);
+        await unitOfWork.CommitAsync(ct: ct);
 
         return user.IdentityProvider == IdentityProvider.OpenIdConnect;
     }
@@ -260,7 +260,7 @@ public partial class AccountService(
 
         unitOfWork.AppUserReadingProfileRepository.Add(profile);
 
-        await unitOfWork.CommitAsync(ct);
+        await unitOfWork.CommitAsync(ct: ct);
     }
 
     [GeneratedRegex(@"^[a-zA-Z0-9\-._@+/]*$")]

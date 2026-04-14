@@ -274,7 +274,7 @@ public class CleanupService(
         }
 
         // Save changes
-        await unitOfWork.CommitAsync(ct);
+        await unitOfWork.CommitAsync(ct: ct);
     }
 
     /// <summary>
@@ -312,7 +312,7 @@ public class CleanupService(
                 removalCount++;
             }
 
-            await unitOfWork.CommitAsync(ct);
+            await unitOfWork.CommitAsync(ct: ct);
 
             logger.LogInformation("Finished consolidation of {Count} Media Errors, Removed: {RemovalCount}",
                 mediaErrors.Count, removalCount);
@@ -410,7 +410,7 @@ public class CleanupService(
 
         if (unitOfWork.HasChanges())
         {
-            await unitOfWork.CommitAsync(ct);
+            await unitOfWork.CommitAsync(ct: ct);
         }
 
         logger.LogInformation("Performing cleanup of Series that are Completed and have been fully read that are in Want To Read list, completed");

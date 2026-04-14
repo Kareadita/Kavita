@@ -300,7 +300,7 @@ public class MetadataService(
                 seriesIndex++;
             }
 
-            await unitOfWork.CommitAsync(ct);
+            await unitOfWork.CommitAsync(ct: ct);
 
             await FlushEvents();
 
@@ -372,7 +372,7 @@ public class MetadataService(
 
         if (unitOfWork.HasChanges())
         {
-            await unitOfWork.CommitAsync(ct);
+            await unitOfWork.CommitAsync(ct: ct);
             logger.LogInformation("[MetadataService] Updated covers for {SeriesName} in {ElapsedMilliseconds} milliseconds", series.Name, sw.ElapsedMilliseconds);
         }
 

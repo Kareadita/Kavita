@@ -338,7 +338,7 @@ public class CblController(IReadingListService readingListService, IDirectorySer
             unitOfWork.RemapRuleRepository.Add(existing);
         }
 
-        await unitOfWork.CommitAsync(ct);
+        await unitOfWork.CommitAsync(ct: ct);
 
         var resultDto = await unitOfWork.RemapRuleRepository.GetDtoByIdAsync(existing.Id, ct);
         return Ok(resultDto);
@@ -428,7 +428,7 @@ public class CblController(IReadingListService readingListService, IDirectorySer
             rule.CblSeriesName = dto.CblSeriesName;
         }
 
-        await unitOfWork.CommitAsync(ct);
+        await unitOfWork.CommitAsync(ct: ct);
 
         return Ok(await unitOfWork.RemapRuleRepository.GetDtoByIdAsync(id, ct));
     }

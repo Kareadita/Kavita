@@ -393,7 +393,7 @@ public class AccountController(UserManager<AppUser> userManager,
         // If Valid, we will make the change then email the user to inform them (no confirmation needed)
         var oldUsername = user.UserName;
         user.UserName = dto.Username.Sanitize();
-        await unitOfWork.CommitAsync(ct);
+        await unitOfWork.CommitAsync(ct: ct);
 
         await eventHub.SendMessageToAsync(MessageFactory.UserUpdate, MessageFactory.UserUpdateEvent(user.Id, oldUsername),
             user.Id, HttpContext.RequestAborted);
@@ -577,7 +577,7 @@ public class AccountController(UserManager<AppUser> userManager,
         if (!unitOfWork.HasChanges()) return Ok();
         try
         {
-            await unitOfWork.CommitAsync(ct);
+            await unitOfWork.CommitAsync(ct: ct);
         }
         catch (Exception ex)
         {
@@ -699,7 +699,7 @@ public class AccountController(UserManager<AppUser> userManager,
 
         unitOfWork.UserRepository.Update(user);
 
-        if (!unitOfWork.HasChanges() || await unitOfWork.CommitAsync(ct))
+        if (!unitOfWork.HasChanges() || await unitOfWork.CommitAsync(ct: ct))
         {
             await eventHub.SendMessageToAsync(MessageFactory.UserUpdate, MessageFactory.UserUpdateEvent(user.Id, user.UserName), user.Id, ct);
             await eventHub.SendMessageToAsync(MessageFactory.SideNavUpdate, MessageFactory.SideNavUpdateEvent(user.Id), user.Id, ct);
@@ -827,13 +827,13 @@ public class AccountController(UserManager<AppUser> userManager,
 
             user.ConfirmationToken = token;
             unitOfWork.UserRepository.Update(user);
-            await unitOfWork.CommitAsync(ct);
+            await unitOfWork.CommitAsync(ct: ct);
         }
         catch (Exception ex)
         {
             logger.LogError(ex, "There was an error during invite user flow, unable to create user. Deleting user for retry");
             unitOfWork.UserRepository.Delete(user);
-            await unitOfWork.CommitAsync(ct);
+            await unitOfWork.CommitAsync(ct: ct);
             return BadRequest(await localizationService.TranslateAsync(UserId, "generic-invite-user"));
         }
 
@@ -923,7 +923,7 @@ public class AccountController(UserManager<AppUser> userManager,
         {
             return BadRequest(errors);
         }
-        await unitOfWork.CommitAsync(ct);
+        await unitOfWork.CommitAsync(ct: ct);
 
 
         user = (await unitOfWork.UserRepository.GetUserByUsernameAsync(user.UserName,
@@ -965,7 +965,7 @@ public class AccountController(UserManager<AppUser> userManager,
         }
         user.ConfirmationToken = null;
         user.EmailConfirmed = true;
-        await unitOfWork.CommitAsync(ct);
+        await unitOfWork.CommitAsync(ct: ct);
 
 
         // For the user's connected devices to pull the new information in
@@ -1046,7 +1046,7 @@ public class AccountController(UserManager<AppUser> userManager,
 
         user.ConfirmationToken = token;
         unitOfWork.UserRepository.Update(user);
-        await unitOfWork.CommitAsync(ct);
+        await unitOfWork.CommitAsync(ct: ct);
 
         logger.LogCritical("[Forgot Password]: Email Link for {UserName}: {Link}", user.UserName, emailLink);
 
@@ -1091,7 +1091,7 @@ public class AccountController(UserManager<AppUser> userManager,
             return BadRequest(BadCredentialsMessage);
         }
 
-        await unitOfWork.CommitAsync(ct);
+        await unitOfWork.CommitAsync(ct: ct);
 
         user = await unitOfWork.UserRepository.GetUserByUsernameAsync(user.UserName!,
             AppUserIncludes.UserPreferences | AppUserIncludes.AuthKeys, ct);
@@ -1123,7 +1123,7 @@ public class AccountController(UserManager<AppUser> userManager,
 
         user.ConfirmationToken = token;
         unitOfWork.UserRepository.Update(user);
-        await unitOfWork.CommitAsync(ct);
+        await unitOfWork.CommitAsync(ct: ct);
 
         var emailLink = await emailService.GenerateEmailLink(Request, token, "confirm-email-update", user.Email);
         logger.LogCritical("[Email Migration]: Email Link for {UserName}: {Link}", user.UserName, emailLink);
@@ -1272,7 +1272,7 @@ public class AccountController(UserManager<AppUser> userManager,
 
         authKey.Key = AuthKeyHelper.GenerateKey(dto.KeyLength);
 
-        await unitOfWork.CommitAsync(ct);
+        await unitOfWork.CommitAsync(ct: ct);
 
         await authKeyService.InvalidateAsync(oldKeyValue, ct);
 
@@ -1310,7 +1310,7 @@ public class AccountController(UserManager<AppUser> userManager,
             Provider = AuthKeyProvider.User,
         };
         unitOfWork.UserRepository.Add(newKey);
-        await unitOfWork.CommitAsync(ct);
+        await unitOfWork.CommitAsync(ct: ct);
 
         var newDto = mapper.Map<AuthKeyDto>(newKey);
 
@@ -1334,7 +1334,7 @@ public class AccountController(UserManager<AppUser> userManager,
         if (authKey.Provider != AuthKeyProvider.User) return BadRequest();
 
         unitOfWork.UserRepository.Delete(authKey);
-        await unitOfWork.CommitAsync(ct);
+        await unitOfWork.CommitAsync(ct: ct);
 
         await eventHub.SendMessageToAsync(MessageFactory.AuthKeyDeleted, MessageFactory.AuthKeyDeletedEvent(authKeyId), UserId, ct);
 

@@ -11,6 +11,7 @@ using Kavita.Models.Entities.Enums;
 using Kavita.Models.Entities.User;
 using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging.Abstractions;
 using NSubstitute;
 using Xunit.Abstractions;
 
@@ -53,7 +54,7 @@ public abstract class AbstractDbTest(ITestOutputHelper testOutputHelper): Abstra
         });
         var mapper = config.CreateMapper();
 
-        var unitOfWork = new UnitOfWork(_context, mapper, null!);
+        var unitOfWork = new UnitOfWork(_context, mapper, null!, NullLogger<UnitOfWork>.Instance);
 
         _context.ChangeTracker.Clear();
 

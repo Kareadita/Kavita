@@ -622,7 +622,7 @@ public class TaskScheduler : ITaskScheduler
 
         if (hasChanges)
         {
-            await _unitOfWork.CommitAsync(ct);
+            await _unitOfWork.CommitAsync(ct: ct);
         }
     }
 

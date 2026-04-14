@@ -302,7 +302,7 @@ public class ThemeService(
         };
         unitOfWork.SiteThemeRepository.Add(theme);
 
-        await unitOfWork.CommitAsync(ct);
+        await unitOfWork.CommitAsync(ct: ct);
 
         // Inform about the new theme
         await eventHub.SendMessageAsync(MessageFactory.NotificationProgress,
@@ -453,7 +453,7 @@ public class ThemeService(
         };
         unitOfWork.SiteThemeRepository.Add(theme);
 
-        await unitOfWork.CommitAsync(ct);
+        await unitOfWork.CommitAsync(ct: ct);
 
         // Inform about the new theme
         await eventHub.SendMessageAsync(MessageFactory.NotificationProgress,
@@ -524,7 +524,7 @@ public class ThemeService(
             }
 
             if (!unitOfWork.HasChanges()) return;
-            await unitOfWork.CommitAsync(ct);
+            await unitOfWork.CommitAsync(ct: ct);
         }
         catch (Exception)
         {

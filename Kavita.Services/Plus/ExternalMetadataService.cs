@@ -315,10 +315,10 @@ public class ExternalMetadataService : IExternalMetadataService
             var errors = await _unitOfWork.ScrobbleRepository.GetAllScrobbleErrorsForSeries(seriesId, ct);
             _unitOfWork.ScrobbleRepository.Remove(errors);
 
-            await _unitOfWork.CommitAsync(ct);
+            await _unitOfWork.CommitAsync(ct: ct);
 
             // Regenerate all events for the series for all users
-            BackgroundJob.Enqueue(() => _scrobblingService.CreateEventsFromExistingHistoryForSeries(seriesId));
+            BackgroundJob.Enqueue(() => _scrobblingService.CreateEventsFromExistingHistoryForSeries(seriesId, CancellationToken.None));
 
             // Name can be null on Series even with a direct match
             _logger.LogInformation("Matched {SeriesName} with Kavita+ Series {MatchSeriesName}", series.Name,
@@ -354,7 +354,7 @@ public class ExternalMetadataService : IExternalMetadataService
 
         _unitOfWork.SeriesRepository.Update(series);
 
-        await _unitOfWork.CommitAsync(ct);
+        await _unitOfWork.CommitAsync(ct: ct);
     }
 
     /// <summary>
@@ -402,7 +402,7 @@ public class ExternalMetadataService : IExternalMetadataService
                     else if (errorMessage.Contains("Unknown Series"))
                     {
                         series.IsBlacklisted = true;
-                        await _unitOfWork.CommitAsync(ct);
+                        await _unitOfWork.CommitAsync(ct: ct);
                     }
                 }
             }
@@ -477,7 +477,7 @@ public class ExternalMetadataService : IExternalMetadataService
             // WriteExternalMetadataToSeries will commit but not always
             if (_unitOfWork.HasChanges())
             {
-                await _unitOfWork.CommitAsync(ct);
+                await _unitOfWork.CommitAsync(ct: ct);
             }
 
             if (madeMetadataModification)
@@ -522,7 +522,7 @@ public class ExternalMetadataService : IExternalMetadataService
 
         // Blacklist the series as it wasn't found in Kavita+
         series.IsBlacklisted = true;
-        await _unitOfWork.CommitAsync(ct);
+        await _unitOfWork.CommitAsync(ct: ct);
 
         return _defaultReturn;
     }

@@ -128,7 +128,7 @@ public class TachiyomiService(
             unitOfWork.UserRepository.Update(userWithProgress);
 
             if (!unitOfWork.HasChanges()) return true;
-            if (await unitOfWork.CommitAsync(ct)) return true;
+            if (await unitOfWork.CommitAsync(ct: ct)) return true;
         } catch (Exception ex) {
             logger.LogError(ex, "There was an error saving progress from tachiyomi");
             await unitOfWork.RollbackAsync(ct);

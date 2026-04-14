@@ -107,7 +107,7 @@ public class LibraryController(
             admin.Libraries.Add(library);
         }
 
-        if (!await unitOfWork.CommitAsync(ct)) return BadRequest(await localizationService.TranslateAsync(UserId, "generic-library"));
+        if (!await unitOfWork.CommitAsync(ct: ct)) return BadRequest(await localizationService.TranslateAsync(UserId, "generic-library"));
 
         logger.LogInformation("Created a new library: {LibraryName}", library.Name.Sanitize());
 
@@ -130,13 +130,13 @@ public class LibraryController(
             unitOfWork.UserRepository.Update(user);
         }
 
-        if (!await unitOfWork.CommitAsync(ct)) return BadRequest(await localizationService.TranslateAsync(UserId, "generic-library"));
+        if (!await unitOfWork.CommitAsync(ct: ct)) return BadRequest(await localizationService.TranslateAsync(UserId, "generic-library"));
 
         // I added this twice as some users were having issues where their new library wasn't added to the side nav.
         // I wasn't able to reproduce but could validate it didn't happen with this extra commit. (https://github.com/Kareadita/Kavita/issues/4248)
         if (unitOfWork.HasChanges())
         {
-            await unitOfWork.CommitAsync(ct);
+            await unitOfWork.CommitAsync(ct: ct);
         }
 
         await _libraryCacheProvider.RemoveByPrefixAsync(CacheKey, ct);
@@ -318,7 +318,7 @@ public class LibraryController(
             return Ok(mapper.Map<MemberDto>(user));
         }
 
-        if (await unitOfWork.CommitAsync(ct))
+        if (await unitOfWork.CommitAsync(ct: ct))
         {
             logger.LogInformation("Added: {SelectedLibraries} to {UserId}", libraryString.Sanitize(), user.Id);
             // Bust cache
@@ -430,7 +430,7 @@ public class LibraryController(
             }, targetLibrary, dto.IncludeType);
         }
 
-        await unitOfWork.CommitAsync(ct);
+        await unitOfWork.CommitAsync(ct: ct);
 
         if (sourceLibrary.FolderWatching)
         {
@@ -568,7 +568,7 @@ public class LibraryController(
                 s.Relations = new List<SeriesRelation>();
                 unitOfWork.SeriesRepository.Update(s);
             }
-            await unitOfWork.CommitAsync(ct);
+            await unitOfWork.CommitAsync(ct: ct);
 
             unitOfWork.LibraryRepository.Delete(library);
 
@@ -576,7 +576,7 @@ public class LibraryController(
             unitOfWork.UserRepository.Delete(streams);
 
 
-            await unitOfWork.CommitAsync(ct);
+            await unitOfWork.CommitAsync(ct: ct);
 
             await _libraryCacheProvider.RemoveByPrefixAsync(CacheKey, ct);
             await eventHub.SendMessageAsync(MessageFactory.SideNavUpdate,
@@ -585,7 +585,7 @@ public class LibraryController(
             if (chapterIds.Any())
             {
                 await unitOfWork.AppUserProgressRepository.CleanupAbandonedChapters(ct);
-                await unitOfWork.CommitAsync(ct);
+                await unitOfWork.CommitAsync(ct: ct);
                 taskScheduler.CleanupChapters(chapterIds);
             }
 
@@ -607,7 +607,7 @@ public class LibraryController(
                     .Where(l => l != libraryId).ToList();
             }
 
-            await unitOfWork.CommitAsync(ct);
+            await unitOfWork.CommitAsync(ct: ct);
             return true;
         }
         catch (Exception ex)
@@ -660,7 +660,7 @@ public class LibraryController(
         var folderWatchingUpdate = library.FolderWatching != dto.FolderWatching;
         UpdateLibrarySettings(dto, library);
 
-        if (!await unitOfWork.CommitAsync(ct)) return BadRequest(await localizationService.TranslateAsync(userId, "generic-library-update"));
+        if (!await unitOfWork.CommitAsync(ct: ct)) return BadRequest(await localizationService.TranslateAsync(userId, "generic-library-update"));
 
         if (folderWatchingUpdate || originalFoldersCount != dto.Folders.Count() || typeUpdate)
         {
