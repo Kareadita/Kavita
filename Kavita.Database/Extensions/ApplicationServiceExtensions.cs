@@ -32,6 +32,7 @@ public static class ApplicationServiceExtensions
             options.UseSqlite("Data source=config/kavita.db", builder =>
             {
                 builder.UseQuerySplittingBehavior(QuerySplittingBehavior.SplitQuery);
+                builder.CommandTimeout(5);
             });
             options.EnableDetailedErrors();
             options.EnableSensitiveDataLogging();
