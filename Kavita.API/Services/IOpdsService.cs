@@ -17,7 +17,6 @@ public interface IOpdsService
     Task<Feed> GetRecentlyUpdated(OpdsPaginatedCatalogueRequest request, CancellationToken ct = default);
     Task<Feed> GetOnDeck(OpdsPaginatedCatalogueRequest request, CancellationToken ct = default);
 
-    Task<Feed> GetMoreInGenre(OpdsItemsFromEntityIdRequest request, CancellationToken ct = default);
     Task<Feed> GetSeriesFromSmartFilter(OpdsItemsFromEntityIdRequest request, CancellationToken ct = default);
     Task<Feed> GetSeriesFromCollection(OpdsItemsFromEntityIdRequest request, CancellationToken ct = default);
     Task<Feed> GetSeriesFromLibrary(OpdsItemsFromEntityIdRequest request, CancellationToken ct = default);

@@ -35,24 +35,6 @@ public class DeprecatedController(
     : BaseApiController
 {
     /// <summary>
-    /// Return all Series that are in the current logged-in user's Want to Read list, filtered (deprecated, use v2)
-    /// </summary>
-    /// <remarks>This will be removed in v0.9.0</remarks>
-    /// <param name="userParams"></param>
-    /// <param name="filterDto"></param>
-    /// <returns></returns>
-    [HttpPost("want-to-read")]
-    [Obsolete("use v2 instead. This will be removed in v0.9.0")]
-    public async Task<ActionResult<PagedList<SeriesDto>>> GetWantToRead([FromQuery] UserParams? userParams, FilterDto filterDto)
-    {
-        userParams ??= new UserParams();
-        var pagedList = await unitOfWork.SeriesRepository.GetWantToReadForUserAsync(UserId, userParams, filterDto);
-        Response.AddPaginationHeader(pagedList.CurrentPage, pagedList.PageSize, pagedList.TotalCount, pagedList.TotalPages);
-
-        return Ok(pagedList);
-    }
-
-    /// <summary>
     /// All chapter entities will load this data by default. Will not be maintained as of v0.8.1
     /// </summary>
     /// <param name="chapterId"></param>
@@ -79,27 +61,6 @@ public class DeprecatedController(
         var userId = UserId;
         var series =
             await unitOfWork.SeriesRepository.GetSeriesDtoForLibraryIdAsync(libraryId, userId, userParams, filterDto);
-
-        Response.AddPaginationHeader(series.CurrentPage, series.PageSize, series.TotalCount, series.TotalPages);
-
-        return Ok(series);
-    }
-
-    /// <summary>
-    /// Gets all recently added series. Obsolete, use recently-added-v2
-    /// </summary>
-    /// <param name="filterDto"></param>
-    /// <param name="userParams"></param>
-    /// <param name="libraryId"></param>
-    /// <returns></returns>
-    [ResponseCache(CacheProfileName = ResponseCacheProfiles.Minute)]
-    [HttpPost("series/recently-added")]
-    [Obsolete("use recently-added-v2. Will be removed in v0.9.0")]
-    public async Task<ActionResult<IEnumerable<SeriesDto>>> GetRecentlyAdded(FilterDto filterDto, [FromQuery] UserParams userParams, [FromQuery] int libraryId = 0)
-    {
-        var userId = UserId;
-        var series =
-            await unitOfWork.SeriesRepository.GetRecentlyAdded(libraryId, userId, userParams, filterDto);
 
         Response.AddPaginationHeader(series.CurrentPage, series.PageSize, series.TotalCount, series.TotalPages);
 
@@ -246,96 +207,6 @@ public class DeprecatedController(
         return Ok(await unitOfWork.AppUserProgressRepository.GetUserProgressForChapter(chapterId, userId));
     }
 
-    /// <summary>
-    /// Quick Reads are series that should be readable in less than 10 in total and are not Ongoing in release.
-    /// </summary>
-    /// <param name="libraryId">Library to restrict series to</param>
-    /// <param name="userParams">Pagination</param>
-    /// <returns></returns>
-    [HttpGet("recommended/quick-reads")]
-    [Obsolete("Will be removed in v0.9.0")]
-    public async Task<ActionResult<PagedList<SeriesDto>>> GetQuickReads(int libraryId, [FromQuery] UserParams? userParams)
-    {
-        userParams ??= UserParams.Default;
-        var series = await unitOfWork.SeriesRepository.GetQuickReads(UserId, libraryId, userParams);
-
-        Response.AddPaginationHeader(series.CurrentPage, series.PageSize, series.TotalCount, series.TotalPages);
-        return Ok(series);
-    }
-
-    /// <summary>
-    /// Quick Catchup Reads are series that should be readable in less than 10 in total and are Ongoing in release.
-    /// </summary>
-    /// <param name="libraryId">Library to restrict series to</param>
-    /// <param name="userParams"></param>
-    /// <returns></returns>
-    [HttpGet("recommended/quick-catchup-reads")]
-    [Obsolete("Will be removed in v0.9.0")]
-    public async Task<ActionResult<PagedList<SeriesDto>>> GetQuickCatchupReads(int libraryId, [FromQuery] UserParams? userParams)
-    {
-        userParams ??= UserParams.Default;
-        var series = await unitOfWork.SeriesRepository.GetQuickCatchupReads(UserId, libraryId, userParams);
-
-        Response.AddPaginationHeader(series.CurrentPage, series.PageSize, series.TotalCount, series.TotalPages);
-        return Ok(series);
-    }
-
-    /// <summary>
-    /// Highly Rated based on other users ratings. Will pull series with ratings > 4.0, weighted by count of other users.
-    /// </summary>
-    /// <param name="libraryId">Library to restrict series to</param>
-    /// <param name="userParams">Pagination</param>
-    /// <returns></returns>
-    [HttpGet("recommended/highly-rated")]
-    [Obsolete("Will be removed in v0.9.0")]
-    public async Task<ActionResult<PagedList<SeriesDto>>> GetHighlyRated(int libraryId, [FromQuery] UserParams? userParams)
-    {
-        var userId = UserId;
-        userParams ??= UserParams.Default;
-
-        var series = await unitOfWork.SeriesRepository.GetHighlyRated(userId, libraryId, userParams);
-
-        Response.AddPaginationHeader(series.CurrentPage, series.PageSize, series.TotalCount, series.TotalPages);
-
-        return Ok(series);
-    }
-
-    /// <summary>
-    /// Chooses a random genre and shows series that are in that without reading progress
-    /// </summary>
-    /// <param name="libraryId">Library to restrict series to</param>
-    /// <param name="genreId">Genre Id</param>
-    /// <param name="userParams">Pagination</param>
-    /// <returns></returns>
-    [HttpGet("recommended/more-in")]
-    [Obsolete("Will be removed in v0.9.0")]
-    public async Task<ActionResult<PagedList<SeriesDto>>> GetMoreIn(int libraryId, int genreId, [FromQuery] UserParams? userParams)
-    {
-        var userId = UserId;
-
-        userParams ??= UserParams.Default;
-        var series = await unitOfWork.SeriesRepository.GetMoreIn(userId, libraryId, genreId, userParams);
-
-        Response.AddPaginationHeader(series.CurrentPage, series.PageSize, series.TotalCount, series.TotalPages);
-        return Ok(series);
-    }
-
-    /// <summary>
-    /// Series that are fully read by the user in no particular order
-    /// </summary>
-    /// <param name="libraryId">Library to restrict series to</param>
-    /// <param name="userParams">Pagination</param>
-    /// <returns></returns>
-    [HttpGet("recommended/rediscover")]
-    [Obsolete("Will be removed in v0.9.0")]
-    public async Task<ActionResult<PagedList<SeriesDto>>> GetRediscover(int libraryId, [FromQuery] UserParams? userParams)
-    {
-        userParams ??= UserParams.Default;
-        var series = await unitOfWork.SeriesRepository.GetRediscover(UserId, libraryId, userParams);
-
-        Response.AddPaginationHeader(series.CurrentPage, series.PageSize, series.TotalCount, series.TotalPages);
-        return Ok(series);
-    }
 
     [Obsolete("Will be removed in v0.9.0")]
     [HttpGet("users/myself")]

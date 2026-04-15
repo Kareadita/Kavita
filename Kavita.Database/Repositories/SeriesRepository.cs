@@ -659,30 +659,6 @@ public class SeriesRepository(DataContext context, IMapper mapper) : ISeriesRepo
     }
 
 
-    /// <summary>
-    /// Returns a list of Series that were added, ordered by Created desc
-    /// </summary>
-    /// <param name="libraryId">Library to restrict to, if 0, will apply to all libraries</param>
-    /// <param name="userId"></param>
-    /// <param name="userParams">Contains pagination information</param>
-    /// <param name="filter">Optional filter on query</param>
-    /// <param name="ct"></param>
-    /// <returns></returns>
-    [Obsolete("Use GetRecentlyAddedV2")]
-    public async Task<PagedList<SeriesDto>> GetRecentlyAdded(int libraryId, int userId, UserParams userParams,
-        FilterDto filter, CancellationToken ct = default)
-    {
-        var query = await CreateFilteredSearchQueryable(userId, libraryId, filter, QueryContext.Dashboard, ct);
-
-        var retSeries = query
-            .OrderByDescending(s => s.Created)
-            .ProjectToWithProgress<Series, SeriesDto>(mapper, userId)
-            .AsSplitQuery()
-            .AsNoTracking();
-
-        return await PagedList<SeriesDto>.CreateAsync(retSeries, userParams.PageNumber, userParams.PageSize, ct);
-    }
-
     public async Task<PagedList<SeriesDto>> GetRecentlyAddedV2(int userId, UserParams userParams, FilterV2Dto filter,
         CancellationToken ct = default)
     {
@@ -1395,57 +1371,6 @@ public class SeriesRepository(DataContext context, IMapper mapper) : ISeriesRepo
             .ToListAsync(ct);
     }
 
-    public async Task<PagedList<SeriesDto>> GetMoreIn(int userId, int libraryId, int genreId, UserParams userParams,
-        CancellationToken ct = default)
-    {
-        var libraryIds = context.AppUser.GetLibraryIdsForUser(userId, libraryId, QueryContext.Dashboard)
-            .Where(id => libraryId == 0 || id == libraryId);
-        var usersSeriesIds = GetSeriesIdsForLibraryIds(libraryIds);
-
-        var userRating = await context.AppUser.GetUserAgeRestriction(userId, ct: ct);
-        // Because this can be called from an API, we need to provide an additional check if the genre has anything the
-        // user with age restrictions can access
-
-        var query = context.Series
-            .Where(s => s.Metadata.Genres.Select(g => g.Id).Contains(genreId))
-            .Where(s => usersSeriesIds.Contains(s.Id))
-            .RestrictAgainstAgeRestriction(userRating)
-            .AsSplitQuery()
-            .ProjectToWithProgress<Series, SeriesDto>(mapper, userId);
-
-
-        return await PagedList<SeriesDto>.CreateAsync(query, userParams.PageNumber, userParams.PageSize, ct);
-    }
-
-    /// <summary>
-    /// Returns a list of Series that the user Has fully read
-    /// </summary>
-    /// <param name="userId"></param>
-    /// <param name="libraryId"></param>
-    /// <param name="userParams"></param>
-    /// <param name="ct"></param>
-    /// <returns></returns>
-    public async Task<PagedList<SeriesDto>> GetRediscover(int userId, int libraryId, UserParams userParams,
-        CancellationToken ct = default)
-    {
-        var libraryIds = context.AppUser.GetLibraryIdsForUser(userId, libraryId, QueryContext.Recommended)
-            .Where(id => libraryId == 0 || id == libraryId);
-        var usersSeriesIds = GetSeriesIdsForLibraryIds(libraryIds);
-        var distinctSeriesIdsWithProgress = context.AppUserProgresses
-            .Where(s => usersSeriesIds.Contains(s.SeriesId))
-            .Select(p => p.SeriesId)
-            .Distinct();
-
-        var query = context.Series
-            .Where(s => distinctSeriesIdsWithProgress.Contains(s.Id) &&
-                        context.AppUserProgresses.Where(s1 => s1.SeriesId == s.Id && s1.AppUserId == userId)
-                            .Sum(s1 => s1.PagesRead) >= s.Pages)
-            .AsSplitQuery()
-            .ProjectTo<SeriesDto>(mapper.ConfigurationProvider);
-
-        return await PagedList<SeriesDto>.CreateAsync(query, userParams.PageNumber, userParams.PageSize, ct);
-    }
-
     public async Task<SeriesDto?> GetSeriesForMangaFile(int mangaFileId, int userId, CancellationToken ct = default)
     {
         var libraryIds = context.AppUser.GetLibraryIdsForUser(userId, 0, QueryContext.Search);
@@ -1746,86 +1671,6 @@ public class SeriesRepository(DataContext context, IMapper mapper) : ISeriesRepo
         return seriesToRemove;
     }
 
-    public async Task<PagedList<SeriesDto>> GetHighlyRated(int userId, int libraryId, UserParams userParams,
-        CancellationToken ct = default)
-    {
-        var libraryIds = context.AppUser.GetLibraryIdsForUser(userId, libraryId, QueryContext.Recommended)
-            .Where(id => libraryId == 0 || id == libraryId);
-        var usersSeriesIds = GetSeriesIdsForLibraryIds(libraryIds);
-        var distinctSeriesIdsWithHighRating = context.AppUserRating
-            .Where(s => usersSeriesIds.Contains(s.SeriesId) && s.Rating > 4)
-            .Select(p => p.SeriesId)
-            .Distinct();
-        var userRating = await context.AppUser.GetUserAgeRestriction(userId, ct: ct);
-
-        var query = context.Series
-            .Where(s => distinctSeriesIdsWithHighRating.Contains(s.Id))
-            .RestrictAgainstAgeRestriction(userRating)
-            .AsSplitQuery()
-            .OrderByDescending(s => context.AppUserRating.Where(r => r.SeriesId == s.Id).Select(r => r.Rating).Average())
-            .ProjectToWithProgress<Series, SeriesDto>(mapper, userId);
-
-        return await PagedList<SeriesDto>.CreateAsync(query, userParams.PageNumber, userParams.PageSize, ct);
-    }
-
-
-    public async Task<PagedList<SeriesDto>> GetQuickReads(int userId, int libraryId, UserParams userParams,
-        CancellationToken ct = default)
-    {
-        var libraryIds = context.AppUser.GetLibraryIdsForUser(userId, libraryId, QueryContext.Recommended)
-            .Where(id => libraryId == 0 || id == libraryId);
-        var usersSeriesIds = GetSeriesIdsForLibraryIds(libraryIds);
-        var distinctSeriesIdsWithProgress = context.AppUserProgresses
-            .Where(s => usersSeriesIds.Contains(s.SeriesId))
-            .Select(p => p.SeriesId)
-            .Distinct();
-        var userRating = await context.AppUser.GetUserAgeRestriction(userId, ct: ct);
-
-
-        var query = context.Series
-            .Where(s => (
-                            (s.Pages / IReaderService.AvgPagesPerMinute / 60 < 10 && s.Format != MangaFormat.Epub)
-                            || (s.WordCount * IReaderService.AvgWordsPerHour < 10 && s.Format == MangaFormat.Epub))
-                        && !distinctSeriesIdsWithProgress.Contains(s.Id) &&
-                        usersSeriesIds.Contains(s.Id))
-            .Where(s => s.Metadata.PublicationStatus != PublicationStatus.OnGoing)
-            .RestrictAgainstAgeRestriction(userRating)
-            .AsSplitQuery()
-            .ProjectTo<SeriesDto>(mapper.ConfigurationProvider);
-
-
-        return await PagedList<SeriesDto>.CreateAsync(query, userParams.PageNumber, userParams.PageSize, ct);
-    }
-
-    public async Task<PagedList<SeriesDto>> GetQuickCatchupReads(int userId, int libraryId, UserParams userParams,
-        CancellationToken ct = default)
-    {
-        var libraryIds = context.AppUser.GetLibraryIdsForUser(userId, libraryId, QueryContext.Dashboard)
-            .Where(id => libraryId == 0 || id == libraryId);
-        var usersSeriesIds = GetSeriesIdsForLibraryIds(libraryIds);
-        var distinctSeriesIdsWithProgress = context.AppUserProgresses
-            .Where(s => usersSeriesIds.Contains(s.SeriesId))
-            .Select(p => p.SeriesId)
-            .Distinct();
-
-        var userRating = await context.AppUser.GetUserAgeRestriction(userId, ct: ct);
-
-
-        var query = context.Series
-            .Where(s => (
-                            (s.Pages / IReaderService.AvgPagesPerMinute / 60 < 10 && s.Format != MangaFormat.Epub)
-                            || (s.WordCount * IReaderService.AvgWordsPerHour < 10 && s.Format == MangaFormat.Epub))
-                        && !distinctSeriesIdsWithProgress.Contains(s.Id) &&
-                        usersSeriesIds.Contains(s.Id))
-            .Where(s => s.Metadata.PublicationStatus == PublicationStatus.OnGoing)
-            .RestrictAgainstAgeRestriction(userRating)
-            .AsSplitQuery()
-            .ProjectTo<SeriesDto>(mapper.ConfigurationProvider);
-
-
-        return await PagedList<SeriesDto>.CreateAsync(query, userParams.PageNumber, userParams.PageSize, ct);
-    }
-
     public async Task<RelatedSeriesDto> GetRelatedSeries(int userId, int seriesId, CancellationToken ct = default)
     {
         var libraryIds = context.Library.GetUserLibraries(userId);
@@ -1919,24 +1764,6 @@ public class SeriesRepository(DataContext context, IMapper mapper) : ISeriesRepo
             .AsSplitQuery()
             .Where(c => c.Created >= withinLastWeek && libraryIds.Contains(c.LibraryId))
             .AsEnumerable();
-    }
-
-    [Obsolete("Use GetWantToReadForUserV2Async")]
-    public async Task<PagedList<SeriesDto>> GetWantToReadForUserAsync(int userId, UserParams userParams,
-        FilterDto filter, CancellationToken ct = default)
-    {
-        var libraryIds = await context.Library.GetUserLibraries(userId).ToListAsync(ct);
-        var query = context.AppUser
-            .Where(user => user.Id == userId)
-            .SelectMany(u => u.WantToRead)
-            .Where(s => libraryIds.Contains(s.Series.LibraryId))
-            .Select(w => w.Series)
-            .AsSplitQuery()
-            .AsNoTracking();
-
-        var filteredQuery = await CreateFilteredSearchQueryable(userId, 0, filter, query);
-
-        return await PagedList<SeriesDto>.CreateAsync(filteredQuery.ProjectToWithProgress<Series, SeriesDto>(mapper, userId), userParams.PageNumber, userParams.PageSize, ct);
     }
 
     public async Task<PagedList<SeriesDto>> GetWantToReadForUserV2Async(int userId, UserParams userParams,

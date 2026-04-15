@@ -418,31 +418,6 @@ public class OpdsService(
         return feed;
     }
 
-    public async Task<Feed> GetMoreInGenre(OpdsItemsFromEntityIdRequest request, CancellationToken ct = default)
-    {
-        var userId = UnpackRequest(request, out var apiKey, out var prefix, out var baseUrl);
-        var genreId = request.EntityId;
-
-        var genre = await unitOfWork.GenreRepository.GetGenreById(genreId, ct);
-        if (genre == null)
-        {
-            throw new OpdsException(await localizationService.TranslateAsync(userId, "genre-doesnt-exist"));
-        }
-        var seriesDtos = await unitOfWork.SeriesRepository.GetMoreIn(userId, 0, genreId, GetUserParams(request.PageNumber), ct);
-        var seriesMetadatas = await unitOfWork.SeriesRepository.GetSeriesMetadataForIds(seriesDtos.Select(s => s.Id), ct);
-
-        var feed = CreateFeed(await localizationService.TranslateAsync(userId, "more-in-genre", genre.Title), $"{apiKey}/more-in-genre", apiKey, prefix);
-        SetFeedId(feed, "more-in-genre");
-        AddPagination(feed, seriesDtos, $"{prefix}{apiKey}/more-in-genre");
-
-        foreach (var seriesDto in seriesDtos)
-        {
-            feed.Entries.Add(CreateSeries(seriesDto, seriesMetadatas.First(s => s.SeriesId == seriesDto.Id), apiKey, prefix, baseUrl));
-        }
-
-        return feed;
-    }
-
     /// <summary>
     /// Returns the Series matching this smart filter.
     /// </summary>

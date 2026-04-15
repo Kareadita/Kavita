@@ -12,6 +12,7 @@ using Kavita.Database;
 using Kavita.Database.Tests;
 using Kavita.Models.Builders;
 using Kavita.Models.DTOs.Filtering;
+using Kavita.Models.DTOs.Filtering.v2;
 using Kavita.Models.Entities;
 using Kavita.Models.Entities.Enums;
 using Kavita.Models.Entities.Progress;
@@ -533,7 +534,7 @@ public class CleanupServiceTests(ITestOutputHelper outputHelper): AbstractDbTest
         await cleanupService.CleanupWantToRead();
 
         var wantToRead =
-            await unitOfWork.SeriesRepository.GetWantToReadForUserAsync(user.Id, new UserParams(), new FilterDto());
+            await unitOfWork.SeriesRepository.GetWantToReadForUserV2Async(user.Id, new UserParams(), new FilterV2Dto());
 
         Assert.Equal(0, wantToRead.TotalCount);
     }

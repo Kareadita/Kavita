@@ -48,8 +48,6 @@ public enum QueryContext
 {
     None = 1,
     Search = 2,
-    [Obsolete("Use Dashboard")]
-    Recommended = 3,
     Dashboard = 4,
 }
 
@@ -96,7 +94,6 @@ public interface ISeriesRepository
     Task<Dictionary<int, long>> GetFilesizesAsync(IList<int> seriesIds, CancellationToken ct = default);
     Task<string?> GetSeriesCoverImageAsync(int seriesId, CancellationToken ct = default);
     Task<PagedList<SeriesDto>> GetOnDeck(int userId, int libraryId, UserParams userParams, FilterDto? filter, CancellationToken ct = default);
-    Task<PagedList<SeriesDto>> GetRecentlyAdded(int libraryId, int userId, UserParams userParams, FilterDto filter, CancellationToken ct = default);
     Task<PagedList<SeriesDto>> GetRecentlyAddedV2(int userId, UserParams userParams, FilterV2Dto filter, CancellationToken ct = default);
     Task<SeriesMetadataDto?> GetSeriesMetadata(int seriesId, CancellationToken ct = default);
     Task<PagedList<SeriesDto>> GetSeriesDtoForCollectionAsync(int collectionId, int userId, UserParams userParams, CancellationToken ct = default);
@@ -110,14 +107,8 @@ public interface ISeriesRepository
     Task<IList<GroupedSeriesDto>> GetRecentlyUpdatedSeries(int userId, UserParams? userParams, CancellationToken ct = default);
     Task<RelatedSeriesDto> GetRelatedSeries(int userId, int seriesId, CancellationToken ct = default);
     Task<IEnumerable<SeriesDto>> GetSeriesForRelationKind(int userId, int seriesId, RelationKind kind, CancellationToken ct = default);
-    Task<PagedList<SeriesDto>> GetQuickReads(int userId, int libraryId, UserParams userParams, CancellationToken ct = default);
-    Task<PagedList<SeriesDto>> GetQuickCatchupReads(int userId, int libraryId, UserParams userParams, CancellationToken ct = default);
-    Task<PagedList<SeriesDto>> GetHighlyRated(int userId, int libraryId, UserParams userParams, CancellationToken ct = default);
-    Task<PagedList<SeriesDto>> GetMoreIn(int userId, int libraryId, int genreId, UserParams userParams, CancellationToken ct = default);
-    Task<PagedList<SeriesDto>> GetRediscover(int userId, int libraryId, UserParams userParams, CancellationToken ct = default);
     Task<SeriesDto?> GetSeriesForMangaFile(int mangaFileId, int userId, CancellationToken ct = default);
     Task<SeriesDto?> GetSeriesForChapter(int chapterId, int userId, CancellationToken ct = default);
-    Task<PagedList<SeriesDto>> GetWantToReadForUserAsync(int userId, UserParams userParams, FilterDto filter, CancellationToken ct = default);
     Task<PagedList<SeriesDto>> GetWantToReadForUserV2Async(int userId, UserParams userParams, FilterV2Dto filter, CancellationToken ct = default);
     Task<IList<Series>> GetWantToReadForUserAsync(int userId, CancellationToken ct = default);
     Task<bool> IsSeriesInWantToRead(int userId, int seriesId, CancellationToken ct = default);
