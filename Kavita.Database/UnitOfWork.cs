@@ -116,14 +116,20 @@ public class UnitOfWork : IUnitOfWork
         var attempt = 0;
         while (true)
         {
+            // Track whether SaveChangesAsync has run so we never retry after EF Core
+            // has already cleared its change tracker. Once SaveChanges succeeds, the
+            // tracked entity states are reset to Unchanged; a retry at that point would
+            // silently save 0 rows and return false, silently discarding the changes.
+            var savedChanges = false;
             try
             {
                 await using var tx = await _context.Database.BeginTransactionAsync(IsolationLevel.Serializable, ct);
                 var result = await _context.SaveChangesAsync(ct) > 0;
+                savedChanges = true;
                 await tx.CommitAsync(ct);
                 return result;
             }
-            catch (Exception ex) when (IsSqliteBusyError(ex))
+            catch (Exception ex) when (IsSqliteBusyError(ex) && !savedChanges)
             {
                 if (attempt >= maxRetries)
                 {

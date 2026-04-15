@@ -448,9 +448,7 @@ public class ScrobblingService : IScrobblingService
             return true;
         }
 
-        // TODO: Double check if this is needed. ScrobbleEventUpdate already has Library on it
-        var library = await _unitOfWork.LibraryRepository.GetLibraryForIdAsync(series.LibraryId);
-        if (library is not {AllowScrobbling: true} || !ExternalMetadataService.IsPlusEligible(library.Type)) return true;
+        if (series.Library is not {AllowScrobbling: true} || !ExternalMetadataService.IsPlusEligible(series.Library.Type)) return true;
 
         return false;
     }
