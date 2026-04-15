@@ -18,6 +18,7 @@ using Kavita.API.Services.SignalR;
 using Kavita.Common;
 using Kavita.Common.Helpers;
 using Kavita.Models.DTOs.Filtering;
+using Kavita.Models.DTOs.Filtering.v2;
 using Kavita.Models.DTOs.Scrobbling;
 using Kavita.Models.DTOs.SignalR;
 using Kavita.Models.Entities;
@@ -1084,16 +1085,31 @@ public class ScrobblingService : IScrobblingService
             await ScrobbleReviewUpdate(userId, review.SeriesId, string.Empty, review.Review!);
         }
 
-        var seriesWithProgress = await _unitOfWork.SeriesRepository.GetSeriesDtoForLibraryIdAsync(0, userId,
-            new UserParams(), new FilterDto
+        // TODO: We can refactor this to remove some extra guards
+        var seriesWithProgress =
+            await _unitOfWork.SeriesRepository.GetSeriesDtoForLibraryIdV2Async(userId, new UserParams(), new FilterV2Dto()
             {
-                ReadStatus = new ReadStatus
-                {
-                    Read = true,
-                    InProgress = true,
-                    NotRead = false
-                },
-                Libraries = libAllowsScrobbling.Keys.Where(k => libAllowsScrobbling[k]).ToList()
+                Combination = FilterCombination.And,
+                Statements = [
+                    new FilterStatementDto()
+                    {
+                        Comparison = FilterComparison.Contains,
+                        Field = SeriesFilterField.Libraries,
+                        Value = string.Join(',', libAllowsScrobbling.Keys.Where(k => libAllowsScrobbling[k]))
+                    },
+                    new FilterStatementDto()
+                    {
+                        Comparison = FilterComparison.LessThan,
+                        Field = SeriesFilterField.ReadProgress,
+                        Value = "100"
+                    },
+                    new FilterStatementDto()
+                    {
+                        Comparison = FilterComparison.GreaterThan,
+                        Field = SeriesFilterField.ReadProgress,
+                        Value = "0"
+                    }
+                ]
             });
 
         foreach (var series in seriesWithProgress.Where(series => series.PagesRead > 0))

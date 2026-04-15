@@ -10,6 +10,7 @@ using Kavita.API.Services;
 using Kavita.API.Services.SignalR;
 using Kavita.Common.Helpers;
 using Kavita.Models.DTOs.Filtering;
+using Kavita.Models.DTOs.Filtering.v2;
 using Kavita.Models.DTOs.SignalR;
 using Kavita.Models.Entities.Enums;
 using Kavita.Models.Entities.User;
@@ -397,6 +398,25 @@ public class CleanupService(
                 NotRead = false
             }
         };
+
+        var filterV2 = new FilterV2Dto()
+        {
+            Combination = FilterCombination.And,
+            Statements =
+            [
+                new FilterStatementDto()
+                {
+                    Comparison = FilterComparison.MustContains,
+                    Field = SeriesFilterField.PublicationStatus,
+                    Value = $"{PublicationStatus.Completed},{PublicationStatus.Cancelled}"
+                },
+                new FilterStatementDto()
+                {
+
+                }
+            ]
+        };
+
         foreach (var user in await unitOfWork.UserRepository.GetAllUsersAsync(AppUserIncludes.WantToRead, ct: ct))
         {
             var series = await unitOfWork.SeriesRepository.GetSeriesDtoForLibraryIdAsync(0, user.Id, new UserParams(), filter);
