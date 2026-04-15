@@ -109,21 +109,28 @@ public class UnitOfWork : IUnitOfWork
     /// Concurrency tokens (<c>IHasConcurrencyToken</c>) compose correctly with retries: on a
     /// retried SaveChanges, EF Core still emits the WHERE RowVersion check, so lost-update
     /// detection is preserved. <see cref="DbUpdateConcurrencyException"/> is deliberately NOT
-    /// caught here — it means the caller's in-memory state is stale and needs a business decision.
+    /// caught here, it means the caller's in-memory state is stale and needs a business decision.
     /// </remarks>
     public async Task<bool> CommitAsync(int maxRetries = 0, CancellationToken ct = default)
     {
         var attempt = 0;
+        var savedChanges = false;
+
         while (true)
         {
             try
             {
                 await using var tx = await _context.Database.BeginTransactionAsync(IsolationLevel.Serializable, ct);
                 var result = await _context.SaveChangesAsync(ct) > 0;
+
+                // If we reach here, EF Core has called AcceptAllChanges().
+                // We can no longer retry the loop if CommitAsync fails.
+                savedChanges = true;
+
                 await tx.CommitAsync(ct);
                 return result;
             }
-            catch (Exception ex) when (IsSqliteBusyError(ex))
+            catch (Exception ex) when (IsSqliteBusyError(ex) && !savedChanges)
             {
                 if (attempt >= maxRetries)
                 {
@@ -142,7 +149,7 @@ public class UnitOfWork : IUnitOfWork
     {
         while (ex != null)
         {
-            if (ex is SqliteException sqliteEx && sqliteEx.SqliteErrorCode is 5 /* SQLITE_BUSY */ or 6 /* SQLITE_LOCKED */)
+            if (ex is SqliteException { SqliteErrorCode: 5 /* SQLITE_BUSY */ or 6 /* SQLITE_LOCKED */ })
             {
                 return true;
             }
