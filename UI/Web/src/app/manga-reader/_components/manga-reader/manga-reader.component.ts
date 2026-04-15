@@ -729,6 +729,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       emulateBook: new FormControl(this.readingProfile.emulateBook),
       swipeToPaginate: new FormControl(this.readingProfile.swipeToPaginate),
       pageOffset: new FormControl(false),
+      readingDirection: this.readingDirection,
     });
 
     this.readerModeSubject.next(this.readerMode);
@@ -1608,6 +1609,9 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     } else {
       this.readingDirection = ReadingDirection.LeftToRight;
     }
+
+    // Manually update the form to keep the reading profiel in sync
+    this.generalSettingsForm.get('readingDirection')?.setValue(this.readingDirection);
 
     if (this.menuOpen && this.readingProfile!.showScreenHints) {
       this.showClickOverlay = true;
