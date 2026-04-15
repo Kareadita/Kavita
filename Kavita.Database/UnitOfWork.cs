@@ -105,32 +105,24 @@ public class UnitOfWork : IUnitOfWork
     /// the transaction yet, <c>busy_timeout</c> can legally wait for the peer to finish — whereas
     /// the default DEFERRED transaction would return the non-retriable SQLITE_BUSY_SNAPSHOT once
     /// a read snapshot was established.
-    ///
-    /// Concurrency tokens (<c>IHasConcurrencyToken</c>) compose correctly with retries: on a
-    /// retried SaveChanges, EF Core still emits the WHERE RowVersion check, so lost-update
-    /// detection is preserved. <see cref="DbUpdateConcurrencyException"/> is deliberately NOT
-    /// caught here, it means the caller's in-memory state is stale and needs a business decision.
     /// </remarks>
     public async Task<bool> CommitAsync(int maxRetries = 0, CancellationToken ct = default)
     {
         var attempt = 0;
-        var savedChanges = false;
 
         while (true)
         {
             try
             {
                 await using var tx = await _context.Database.BeginTransactionAsync(IsolationLevel.Serializable, ct);
-                var result = await _context.SaveChangesAsync(ct) > 0;
 
-                // If we reach here, EF Core has called AcceptAllChanges().
-                // We can no longer retry the loop if CommitAsync fails.
-                savedChanges = true;
+                // Push changes to the DB, but do not reset the tracker yet so that we can retry with state
+                var result = await _context.SaveChangesAsync(acceptAllChangesOnSuccess: false, ct) > 0;
 
                 await tx.CommitAsync(ct);
                 return result;
             }
-            catch (Exception ex) when (IsSqliteBusyError(ex) && !savedChanges)
+            catch (Exception ex) when (IsSqliteBusyError(ex))
             {
                 if (attempt >= maxRetries)
                 {
