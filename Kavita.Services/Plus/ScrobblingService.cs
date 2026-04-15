@@ -436,7 +436,7 @@ public class ScrobblingService : IScrobblingService
     /// </summary>
     /// <param name="userId"></param>
     /// <param name="seriesId"></param>
-    /// <param name="series"></param>
+    /// <param name="series">Should have Library resolved</param>
     /// <returns></returns>
     private async Task<bool> CheckIfCannotScrobble(int userId, int seriesId, Series series)
     {
@@ -448,8 +448,8 @@ public class ScrobblingService : IScrobblingService
             return true;
         }
 
-        // TODO: Double check if this is needed. ScrobbleEventUpdate already has Library on it
-        var library = await _unitOfWork.LibraryRepository.GetLibraryForIdAsync(series.LibraryId);
+        // TODO: Double check if all callers pass with Library or not
+        var library = series.Library ?? await _unitOfWork.LibraryRepository.GetLibraryForIdAsync(series.LibraryId);
         if (library is not {AllowScrobbling: true} || !ExternalMetadataService.IsPlusEligible(library.Type)) return true;
 
         return false;
