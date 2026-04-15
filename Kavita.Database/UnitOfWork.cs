@@ -117,11 +117,9 @@ public class UnitOfWork : IUnitOfWork
         while (true)
         {
             // Track whether SaveChangesAsync has run so we never retry after EF Core
-            // has already cleared its change tracker. Once SaveChanges succeeds, tracked
-            // entity states are reset to Unchanged; a subsequent BUSY on tx.CommitAsync
-            // means the DB transaction was rolled back, but EF Core no longer tracks the
-            // pending changes — a retry would commit an empty transaction and silently
-            // discard the original changes.
+            // has already cleared its change tracker. Once SaveChanges succeeds, the
+            // tracked entity states are reset to Unchanged; a retry at that point would
+            // silently save 0 rows and return false, silently discarding the changes.
             var savedChanges = false;
             try
             {
