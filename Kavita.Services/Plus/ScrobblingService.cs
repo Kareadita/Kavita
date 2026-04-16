@@ -1,9 +1,6 @@
-﻿
-
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
-using System.Globalization;
 using System.Linq;
 using System.Net.Http;
 using System.Threading;
@@ -17,7 +14,6 @@ using Kavita.API.Services.Plus;
 using Kavita.API.Services.SignalR;
 using Kavita.Common;
 using Kavita.Common.Helpers;
-using Kavita.Models.DTOs.Filtering;
 using Kavita.Models.DTOs.Filtering.v2;
 using Kavita.Models.DTOs.Scrobbling;
 using Kavita.Models.DTOs.SignalR;
@@ -1085,16 +1081,21 @@ public class ScrobblingService : IScrobblingService
             await ScrobbleReviewUpdate(userId, review.SeriesId, string.Empty, review.Review!);
         }
 
-        var seriesWithProgress =
-            await _unitOfWork.SeriesRepository.GetSeriesDtoForLibraryIdV2Async(userId, new UserParams(), new FilterV2Dto()
+
+
+        var scrobbleLibraries = libAllowsScrobbling.Keys.Where(k => libAllowsScrobbling[k]).ToList();
+        if (scrobbleLibraries.Count > 0)
+        {
+            var filter = new FilterV2Dto()
             {
                 Combination = FilterCombination.And,
-                Statements = [
+                Statements =
+                [
                     new FilterStatementDto()
                     {
                         Comparison = FilterComparison.Contains,
                         Field = SeriesFilterField.Libraries,
-                        Value = string.Join(',', libAllowsScrobbling.Keys.Where(k => libAllowsScrobbling[k]))
+                        Value = string.Join(',', scrobbleLibraries)
                     },
                     new FilterStatementDto()
                     {
@@ -1109,13 +1110,20 @@ public class ScrobblingService : IScrobblingService
                         Value = "0"
                     }
                 ]
-            });
+            };
 
-        foreach (var series in seriesWithProgress.Where(series => series.PagesRead > 0))
-        {
-            if (!libAllowsScrobbling[series.LibraryId]) continue;
-            await ScrobbleReadingUpdate(userId, series.Id);
+            var seriesWithProgress =
+                await _unitOfWork.SeriesRepository.GetSeriesDtoForLibraryIdV2Async(userId, new UserParams(), filter);
+
+            foreach (var series in seriesWithProgress.Where(series => series.PagesRead > 0))
+            {
+                if (!libAllowsScrobbling[series.LibraryId]) continue;
+                await ScrobbleReadingUpdate(userId, series.Id);
+            }
         }
+
+
+
 
         var user = await _unitOfWork.UserRepository.GetUserByIdAsync(userId);
         if (user != null)
