@@ -6,5 +6,4 @@ public enum DashboardStreamType
     RecentlyUpdated = 2,
     NewlyAdded = 3,
     SmartFilter = 4,
-
 }
