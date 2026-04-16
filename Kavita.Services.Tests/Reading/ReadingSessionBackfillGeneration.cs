@@ -179,10 +179,17 @@ public class ReadingSessionServiceBackfillTests(ITestOutputHelper helper): Abstr
         var ch1 = series.Volumes[0].Chapters.First(c => c.SortOrder == 1);
         var ch2 = series.Volumes[0].Chapters.First(c => c.SortOrder == 2);
 
+        // Each chapter gets 1/3 of the elapsed minutes since midnight, so that
+        // both chapters (2 slots) fit comfortably within today regardless of when
+        // the test runs.
+        var minutesSinceMidnight = (int)DateTime.Now.TimeOfDay.TotalMinutes;
+        var chapterMinutes = Math.Max(minutesSinceMidnight / 2, 1);
+        var chapterHours = chapterMinutes / 60f;
+
         readerService.GetEstimateFromPageForChapter(1, series.Id, ch1.Id, 0)
-            .Returns(AvgEstimate(1f, 10)); // 1 hour
+            .Returns(AvgEstimate(chapterHours, chapterMinutes));
         readerService.GetEstimateFromPageForChapter(1, series.Id, ch2.Id, 0)
-            .Returns(AvgEstimate(1f, 10)); // 1 hour
+            .Returns(AvgEstimate(chapterHours, chapterMinutes));
 
         var user = await context.AppUser.FirstAsync();
         await readingSessionService.GenerateReadingSessionForChapters(user.Id, series.Id, new Dictionary<int, int>
