@@ -348,7 +348,7 @@ public class ReaderController(ICacheService cacheService,
         if (!await unitOfWork.CommitAsync()) return BadRequest(await localizationService.TranslateAsync(UserId, "generic-read-progress"));
 
         BackgroundJob.Enqueue(() => scrobblingService.ScrobbleReadingUpdate(user.Id, markReadDto.SeriesId));
-        BackgroundJob.Enqueue(() => unitOfWork.SeriesRepository.ClearOnDeckRemoval(markReadDto.SeriesId, user.Id));
+        BackgroundJob.Enqueue(() => unitOfWork.SeriesRepository.ClearOnDeckRemovalAsync(markReadDto.SeriesId, user.Id));
 
         if (markReadDto.GenerateReadingSession)
         {
@@ -433,7 +433,7 @@ public class ReaderController(ICacheService cacheService,
                 markVolumeReadDto.VolumeId, 0, chapters.Sum(c => c.Pages)));
 
         BackgroundJob.Enqueue(() => scrobblingService.ScrobbleReadingUpdate(user.Id, markVolumeReadDto.SeriesId));
-        BackgroundJob.Enqueue(() => unitOfWork.SeriesRepository.ClearOnDeckRemoval(markVolumeReadDto.SeriesId, user.Id));
+        BackgroundJob.Enqueue(() => unitOfWork.SeriesRepository.ClearOnDeckRemovalAsync(markVolumeReadDto.SeriesId, user.Id));
 
         if (markVolumeReadDto.GenerateReadingSession)
         {
@@ -474,7 +474,7 @@ public class ReaderController(ICacheService cacheService,
         if (!await unitOfWork.CommitAsync()) return BadRequest(await localizationService.TranslateAsync(UserId, "generic-read-progress"));
 
         BackgroundJob.Enqueue(() => scrobblingService.ScrobbleReadingUpdate(user.Id, dto.SeriesId));
-        BackgroundJob.Enqueue(() => unitOfWork.SeriesRepository.ClearOnDeckRemoval(dto.SeriesId, user.Id));
+        BackgroundJob.Enqueue(() => unitOfWork.SeriesRepository.ClearOnDeckRemovalAsync(dto.SeriesId, user.Id));
 
         if (dto.GenerateReadingSession)
         {
@@ -537,7 +537,7 @@ public class ReaderController(ICacheService cacheService,
         foreach (var sId in dto.SeriesIds)
         {
             BackgroundJob.Enqueue(() => scrobblingService.ScrobbleReadingUpdate(user.Id, sId));
-            BackgroundJob.Enqueue(() => unitOfWork.SeriesRepository.ClearOnDeckRemoval(sId, user.Id));
+            BackgroundJob.Enqueue(() => unitOfWork.SeriesRepository.ClearOnDeckRemovalAsync(sId, user.Id));
 
             var progressDictionary = await unitOfWork.AppUserProgressRepository
                 .GetUserProgressForChaptersBySeries(UserId, sId, HttpContext.RequestAborted);

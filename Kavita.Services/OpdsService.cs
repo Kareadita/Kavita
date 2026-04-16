@@ -50,30 +50,6 @@ public class OpdsService(
     public const string FullReadingProgressIcon = "⬤";
 
     private readonly FilterV2Dto _filterV2Dto = new();
-    private readonly FilterDto _filterDto = new()
-    {
-        Formats = [],
-        Character = [],
-        Colorist = [],
-        Editor = [],
-        Genres = [],
-        Inker = [],
-        Languages = [],
-        Letterer = [],
-        Penciller = [],
-        Libraries = [],
-        Publisher = [],
-        Rating = 0,
-        Tags = [],
-        Translators = [],
-        Writers = [],
-        AgeRating = [],
-        CollectionTags = [],
-        CoverArtist = [],
-        ReadStatus = new ReadStatus(),
-        SortOptions = null,
-        PublicationStatus = []
-    };
 
     public async Task<Feed> GetCatalogue(OpdsCatalogueRequest request, CancellationToken ct = default)
     {
@@ -128,24 +104,6 @@ public class OpdsService(
                         Links =
                         [
                             CreateLink(FeedLinkRelation.SubSection, FeedLinkType.AtomNavigation, $"{request.Prefix}{request.ApiKey}/recently-updated"),
-                        ]
-                    });
-                    break;
-                case DashboardStreamType.MoreInGenre:
-                    var randomGenre = await unitOfWork.GenreRepository.GetRandomGenre(ct);
-                    if (randomGenre == null) break;
-
-                    feed.Entries.Add(new FeedEntry()
-                    {
-                        Id = "moreInGenre",
-                        Title = await localizationService.TranslateAsync(request.UserId, "more-in-genre", randomGenre.Title),
-                        Content = new FeedEntryContent()
-                        {
-                            Text = await localizationService.TranslateAsync(request.UserId, "browse-more-in-genre", randomGenre.Title)
-                        },
-                        Links =
-                        [
-                            CreateLink(FeedLinkRelation.SubSection, FeedLinkType.AtomNavigation, $"{request.Prefix}{request.ApiKey}/more-in-genre?genreId={randomGenre.Id}"),
                         ]
                     });
                     break;
@@ -309,8 +267,8 @@ public class OpdsService(
     {
         var userId = UnpackRequest(request, out var apiKey, out var prefix, out var baseUrl);
 
-        var wantToReadSeries = await unitOfWork.SeriesRepository.GetWantToReadForUserV2Async(userId, GetUserParams(request.PageNumber), _filterV2Dto, ct);
-        var seriesMetadatas = await unitOfWork.SeriesRepository.GetSeriesMetadataForIds(wantToReadSeries.Select(s => s.Id), ct);
+        var wantToReadSeries = await unitOfWork.SeriesRepository.GetWantToReadDtosForUserAsync(userId, GetUserParams(request.PageNumber), _filterV2Dto, ct);
+        var seriesMetadatas = await unitOfWork.SeriesRepository.GetSeriesMetadataForIdsAsync(wantToReadSeries.Select(s => s.Id), ct);
 
         var feed = CreateFeed(await localizationService.TranslateAsync(userId, "want-to-read"), $"{apiKey}/want-to-read", apiKey, prefix);
         SetFeedId(feed, "want-to-read");
@@ -356,8 +314,8 @@ public class OpdsService(
     {
         var userId = UnpackRequest(request, out var apiKey, out var prefix, out var baseUrl);
 
-        var recentlyAdded = await unitOfWork.SeriesRepository.GetRecentlyAddedV2(userId, GetUserParams(request.PageNumber), _filterV2Dto, ct);
-        var seriesMetadatas = await unitOfWork.SeriesRepository.GetSeriesMetadataForIds(recentlyAdded.Select(s => s.Id), ct);
+        var recentlyAdded = await unitOfWork.SeriesRepository.GetRecentlyAddedAsync(userId, GetUserParams(request.PageNumber), _filterV2Dto, ct);
+        var seriesMetadatas = await unitOfWork.SeriesRepository.GetSeriesMetadataForIdsAsync(recentlyAdded.Select(s => s.Id), ct);
 
         var feed = CreateFeed(await localizationService.TranslateAsync(userId, "recently-added"), $"{apiKey}/recently-added", apiKey, prefix);
         SetFeedId(feed, "recently-added");
@@ -375,8 +333,8 @@ public class OpdsService(
     {
         var userId = UnpackRequest(request, out var apiKey, out var prefix, out var baseUrl);
 
-        var seriesDtos = (await unitOfWork.SeriesRepository.GetRecentlyUpdatedSeries(userId, GetUserParams(request.PageNumber), ct)).ToList();
-        var seriesMetadatas = await unitOfWork.SeriesRepository.GetSeriesMetadataForIds(seriesDtos.Select(s => s.SeriesId), ct);
+        var seriesDtos = (await unitOfWork.SeriesRepository.GetRecentlyUpdatedSeriesAsync(userId, GetUserParams(request.PageNumber), ct)).ToList();
+        var seriesMetadatas = await unitOfWork.SeriesRepository.GetSeriesMetadataForIdsAsync(seriesDtos.Select(s => s.SeriesId), ct);
 
         var feed = CreateFeed(await localizationService.TranslateAsync(userId, "recently-updated"), $"{apiKey}/recently-updated", apiKey, prefix);
         SetFeedId(feed, "recently-updated");
@@ -403,39 +361,14 @@ public class OpdsService(
     {
         var userId = UnpackRequest(request, out var apiKey, out var prefix, out var baseUrl);
 
-        var pagedList = await unitOfWork.SeriesRepository.GetOnDeck(userId, 0, GetUserParams(request.PageNumber), _filterDto, ct);
-        var seriesMetadatas = await unitOfWork.SeriesRepository.GetSeriesMetadataForIds(pagedList.Select(s => s.Id), ct);
+        var pagedList = await unitOfWork.SeriesRepository.GetOnDeckAsync(userId, 0, GetUserParams(request.PageNumber), ct);
+        var seriesMetadatas = await unitOfWork.SeriesRepository.GetSeriesMetadataForIdsAsync(pagedList.Select(s => s.Id), ct);
 
         var feed = CreateFeed(await localizationService.TranslateAsync(userId, "on-deck"), $"{apiKey}/on-deck", apiKey, prefix);
         SetFeedId(feed, "on-deck");
         AddPagination(feed, pagedList, $"{prefix}{apiKey}/on-deck");
 
         foreach (var seriesDto in pagedList)
-        {
-            feed.Entries.Add(CreateSeries(seriesDto, seriesMetadatas.First(s => s.SeriesId == seriesDto.Id), apiKey, prefix, baseUrl));
-        }
-
-        return feed;
-    }
-
-    public async Task<Feed> GetMoreInGenre(OpdsItemsFromEntityIdRequest request, CancellationToken ct = default)
-    {
-        var userId = UnpackRequest(request, out var apiKey, out var prefix, out var baseUrl);
-        var genreId = request.EntityId;
-
-        var genre = await unitOfWork.GenreRepository.GetGenreById(genreId, ct);
-        if (genre == null)
-        {
-            throw new OpdsException(await localizationService.TranslateAsync(userId, "genre-doesnt-exist"));
-        }
-        var seriesDtos = await unitOfWork.SeriesRepository.GetMoreIn(userId, 0, genreId, GetUserParams(request.PageNumber), ct);
-        var seriesMetadatas = await unitOfWork.SeriesRepository.GetSeriesMetadataForIds(seriesDtos.Select(s => s.Id), ct);
-
-        var feed = CreateFeed(await localizationService.TranslateAsync(userId, "more-in-genre", genre.Title), $"{apiKey}/more-in-genre", apiKey, prefix);
-        SetFeedId(feed, "more-in-genre");
-        AddPagination(feed, seriesDtos, $"{prefix}{apiKey}/more-in-genre");
-
-        foreach (var seriesDto in seriesDtos)
         {
             feed.Entries.Add(CreateSeries(seriesDto, seriesMetadatas.First(s => s.SeriesId == seriesDto.Id), apiKey, prefix, baseUrl));
         }
@@ -463,9 +396,9 @@ public class OpdsService(
         SetFeedId(feed, "smartFilters-" + filter.Id);
 
         var decodedFilter = SmartFilterHelper.Decode(filter.Filter);
-        var series = await unitOfWork.SeriesRepository.GetSeriesDtoForLibraryIdV2Async(userId, GetUserParams(request.PageNumber),
+        var series = await unitOfWork.SeriesRepository.GetSeriesDtoForLibraryIdAsync(userId, GetUserParams(request.PageNumber),
             decodedFilter, ct: ct);
-        var seriesMetadatas = await unitOfWork.SeriesRepository.GetSeriesMetadataForIds(series.Select(s => s.Id), ct);
+        var seriesMetadatas = await unitOfWork.SeriesRepository.GetSeriesMetadataForIdsAsync(series.Select(s => s.Id), ct);
 
         foreach (var seriesDto in series)
         {
@@ -489,7 +422,7 @@ public class OpdsService(
         }
 
         var series = await unitOfWork.SeriesRepository.GetSeriesDtoForCollectionAsync(collectionId, userId, GetUserParams(request.PageNumber), ct);
-        var seriesMetadatas = await unitOfWork.SeriesRepository.GetSeriesMetadataForIds(series.Select(s => s.Id), ct);
+        var seriesMetadatas = await unitOfWork.SeriesRepository.GetSeriesMetadataForIdsAsync(series.Select(s => s.Id), ct);
 
         var feed = CreateFeed(tag.Title + " Collection", $"{apiKey}/collections/{collectionId}", apiKey, prefix);
         SetFeedId(feed, $"collections-{collectionId}");
@@ -528,8 +461,8 @@ public class OpdsService(
             ]
         };
 
-        var series = await unitOfWork.SeriesRepository.GetSeriesDtoForLibraryIdV2Async(userId, GetUserParams(request.PageNumber), filter, ct: ct);
-        var seriesMetadatas = await unitOfWork.SeriesRepository.GetSeriesMetadataForIds(series.Select(s => s.Id), ct);
+        var series = await unitOfWork.SeriesRepository.GetSeriesDtoForLibraryIdAsync(userId, GetUserParams(request.PageNumber), filter, ct: ct);
+        var seriesMetadatas = await unitOfWork.SeriesRepository.GetSeriesMetadataForIdsAsync(series.Select(s => s.Id), ct);
 
         var feed = CreateFeed(library.Name, $"{apiKey}/libraries/{libraryId}", apiKey, prefix);
         SetFeedId(feed, $"library-{library.Name}");
@@ -843,7 +776,7 @@ public class OpdsService(
 
         var isAdmin = await unitOfWork.UserRepository.IsUserAdminAsync(user, ct);
 
-        var searchResults = await unitOfWork.SeriesRepository.SearchSeries(userId, isAdmin,
+        var searchResults = await unitOfWork.SeriesRepository.SearchSeriesAsync(userId, isAdmin,
             libraries.Select(l => l.Id).ToArray(), query, includeChapterAndFiles: false, ct: ct);
 
         var feed = CreateFeed(query, $"{apiKey}/series?query=" + query, apiKey, prefix);

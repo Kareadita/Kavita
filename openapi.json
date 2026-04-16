@@ -2,12 +2,12 @@
   "openapi": "3.0.4",
   "info": {
     "title": "Kavita",
-    "description": "Kavita provides a set of APIs authenticated via an Auth Key passed in the `x-api-key` header. Generate an Auth Key under User Settings → Manage Auth Keys, paste it into the Authorize panel, and all Try It requests will include it. Assume all fields of a payload are required unless marked optional. Built against v0.8.9.41",
+    "description": "Kavita provides a set of APIs authenticated via an Auth Key passed in the `x-api-key` header. Generate an Auth Key under User Settings → Manage Auth Keys, paste it into the Authorize panel, and all Try It requests will include it. Assume all fields of a payload are required unless marked optional. Built against v0.8.9.42",
     "license": {
       "name": "GPL-3.0",
       "url": "https://github.com/Kareadita/Kavita/blob/develop/LICENSE"
     },
-    "version": "0.8.9.41"
+    "version": "0.8.9.42"
   },
   "servers": [
     {
@@ -3355,1137 +3355,6 @@
             }
           }
         }
-      }
-    },
-    "/api/want-to-read": {
-      "post": {
-        "tags": [
-          "Deprecated"
-        ],
-        "summary": "Return all Series that are in the current logged-in user's Want to Read list, filtered (deprecated, use v2)",
-        "description": "This will be removed in v0.9.0",
-        "parameters": [
-          {
-            "name": "PageNumber",
-            "in": "query",
-            "schema": {
-              "type": "integer",
-              "format": "int32"
-            }
-          },
-          {
-            "name": "PageSize",
-            "in": "query",
-            "schema": {
-              "type": "integer",
-              "format": "int32"
-            }
-          }
-        ],
-        "requestBody": {
-          "description": "",
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/FilterDto"
-              }
-            },
-            "text/json": {
-              "schema": {
-                "$ref": "#/components/schemas/FilterDto"
-              }
-            },
-            "application/*+json": {
-              "schema": {
-                "$ref": "#/components/schemas/FilterDto"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "text/plain": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/SeriesDto"
-                  }
-                }
-              },
-              "application/json": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/SeriesDto"
-                  }
-                }
-              },
-              "text/json": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/SeriesDto"
-                  }
-                }
-              }
-            }
-          }
-        },
-        "deprecated": true
-      },
-      "get": {
-        "tags": [
-          "WantToRead"
-        ],
-        "parameters": [
-          {
-            "name": "seriesId",
-            "in": "query",
-            "schema": {
-              "type": "integer",
-              "format": "int32"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "text/plain": {
-                "schema": {
-                  "type": "boolean"
-                }
-              },
-              "application/json": {
-                "schema": {
-                  "type": "boolean"
-                }
-              },
-              "text/json": {
-                "schema": {
-                  "type": "boolean"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/series/chapter-metadata": {
-      "get": {
-        "tags": [
-          "Deprecated"
-        ],
-        "summary": "All chapter entities will load this data by default. Will not be maintained as of v0.8.1",
-        "parameters": [
-          {
-            "name": "chapterId",
-            "in": "query",
-            "description": "",
-            "schema": {
-              "type": "integer",
-              "format": "int32"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "text/plain": {
-                "schema": {
-                  "$ref": "#/components/schemas/ChapterMetadataDto"
-                }
-              },
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ChapterMetadataDto"
-                }
-              },
-              "text/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ChapterMetadataDto"
-                }
-              }
-            }
-          }
-        },
-        "deprecated": true
-      }
-    },
-    "/api/series": {
-      "post": {
-        "tags": [
-          "Deprecated"
-        ],
-        "summary": "Gets series with the applied Filter",
-        "description": "This is considered v1 and no longer used by Kavita, but will be supported for sometime. See series/v2",
-        "parameters": [
-          {
-            "name": "libraryId",
-            "in": "query",
-            "description": "",
-            "schema": {
-              "type": "integer",
-              "format": "int32"
-            }
-          },
-          {
-            "name": "PageNumber",
-            "in": "query",
-            "schema": {
-              "type": "integer",
-              "format": "int32"
-            }
-          },
-          {
-            "name": "PageSize",
-            "in": "query",
-            "schema": {
-              "type": "integer",
-              "format": "int32"
-            }
-          }
-        ],
-        "requestBody": {
-          "description": "",
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/FilterDto"
-              }
-            },
-            "text/json": {
-              "schema": {
-                "$ref": "#/components/schemas/FilterDto"
-              }
-            },
-            "application/*+json": {
-              "schema": {
-                "$ref": "#/components/schemas/FilterDto"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "text/plain": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/SeriesDto"
-                  }
-                }
-              },
-              "application/json": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/SeriesDto"
-                  }
-                }
-              },
-              "text/json": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/SeriesDto"
-                  }
-                }
-              }
-            }
-          }
-        },
-        "deprecated": true
-      }
-    },
-    "/api/series/recently-added": {
-      "post": {
-        "tags": [
-          "Deprecated"
-        ],
-        "summary": "Gets all recently added series. Obsolete, use recently-added-v2",
-        "parameters": [
-          {
-            "name": "PageNumber",
-            "in": "query",
-            "schema": {
-              "type": "integer",
-              "format": "int32"
-            }
-          },
-          {
-            "name": "PageSize",
-            "in": "query",
-            "schema": {
-              "type": "integer",
-              "format": "int32"
-            }
-          },
-          {
-            "name": "libraryId",
-            "in": "query",
-            "description": "",
-            "schema": {
-              "type": "integer",
-              "format": "int32",
-              "default": 0
-            }
-          }
-        ],
-        "requestBody": {
-          "description": "",
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/FilterDto"
-              }
-            },
-            "text/json": {
-              "schema": {
-                "$ref": "#/components/schemas/FilterDto"
-              }
-            },
-            "application/*+json": {
-              "schema": {
-                "$ref": "#/components/schemas/FilterDto"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "text/plain": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/SeriesDto"
-                  }
-                }
-              },
-              "application/json": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/SeriesDto"
-                  }
-                }
-              },
-              "text/json": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/SeriesDto"
-                  }
-                }
-              }
-            }
-          }
-        },
-        "deprecated": true
-      }
-    },
-    "/api/series/all": {
-      "post": {
-        "tags": [
-          "Deprecated"
-        ],
-        "summary": "Returns all series for the library. Obsolete, use all-v2",
-        "parameters": [
-          {
-            "name": "PageNumber",
-            "in": "query",
-            "schema": {
-              "type": "integer",
-              "format": "int32"
-            }
-          },
-          {
-            "name": "PageSize",
-            "in": "query",
-            "schema": {
-              "type": "integer",
-              "format": "int32"
-            }
-          },
-          {
-            "name": "libraryId",
-            "in": "query",
-            "description": "",
-            "schema": {
-              "type": "integer",
-              "format": "int32",
-              "default": 0
-            }
-          }
-        ],
-        "requestBody": {
-          "description": "",
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/FilterDto"
-              }
-            },
-            "text/json": {
-              "schema": {
-                "$ref": "#/components/schemas/FilterDto"
-              }
-            },
-            "application/*+json": {
-              "schema": {
-                "$ref": "#/components/schemas/FilterDto"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "text/plain": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/SeriesDto"
-                  }
-                }
-              },
-              "application/json": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/SeriesDto"
-                  }
-                }
-              },
-              "text/json": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/SeriesDto"
-                  }
-                }
-              }
-            }
-          }
-        },
-        "deprecated": true
-      }
-    },
-    "/api/upload/reset-chapter-lock": {
-      "post": {
-        "tags": [
-          "Deprecated"
-        ],
-        "summary": "Replaces chapter cover image and locks it with a base64 encoded image. This will update the parent volume's cover image.",
-        "requestBody": {
-          "description": "Does not use Url property",
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/UploadCoverFileDto"
-              }
-            },
-            "text/json": {
-              "schema": {
-                "$ref": "#/components/schemas/UploadCoverFileDto"
-              }
-            },
-            "application/*+json": {
-              "schema": {
-                "$ref": "#/components/schemas/UploadCoverFileDto"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "OK"
-          }
-        },
-        "deprecated": true
-      }
-    },
-    "/api/stats/user/reading-history": {
-      "get": {
-        "tags": [
-          "Deprecated"
-        ],
-        "parameters": [
-          {
-            "name": "userId",
-            "in": "query",
-            "schema": {
-              "type": "integer",
-              "format": "int32"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "text/plain": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/ReadHistoryEvent"
-                  }
-                }
-              },
-              "application/json": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/ReadHistoryEvent"
-                  }
-                }
-              },
-              "text/json": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/ReadHistoryEvent"
-                  }
-                }
-              }
-            }
-          }
-        },
-        "deprecated": true
-      }
-    },
-    "/api/stats/server/top/years": {
-      "get": {
-        "tags": [
-          "Deprecated"
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "text/plain": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/Int32StatCount"
-                  }
-                }
-              },
-              "application/json": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/Int32StatCount"
-                  }
-                }
-              },
-              "text/json": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/Int32StatCount"
-                  }
-                }
-              }
-            }
-          }
-        },
-        "deprecated": true
-      }
-    },
-    "/api/stats/reading-count-by-day": {
-      "get": {
-        "tags": [
-          "Deprecated"
-        ],
-        "summary": "Returns reading history events for a give or all users, broken up by day, and format",
-        "parameters": [
-          {
-            "name": "userId",
-            "in": "query",
-            "description": "If 0, defaults to all users, else just userId",
-            "schema": {
-              "type": "integer",
-              "format": "int32",
-              "default": 0
-            }
-          },
-          {
-            "name": "days",
-            "in": "query",
-            "description": "If 0, defaults to all time, else just those days asked for",
-            "schema": {
-              "type": "integer",
-              "format": "int32",
-              "default": 0
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "text/plain": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/DateTimeStatCountWithFormat"
-                  }
-                }
-              },
-              "application/json": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/DateTimeStatCountWithFormat"
-                  }
-                }
-              },
-              "text/json": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/DateTimeStatCountWithFormat"
-                  }
-                }
-              }
-            }
-          }
-        },
-        "deprecated": true
-      }
-    },
-    "/api/server/count/year": {
-      "get": {
-        "tags": [
-          "Deprecated"
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "text/plain": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/Int32StatCount"
-                  }
-                }
-              },
-              "application/json": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/Int32StatCount"
-                  }
-                }
-              },
-              "text/json": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/Int32StatCount"
-                  }
-                }
-              }
-            }
-          }
-        },
-        "deprecated": true
-      }
-    },
-    "/api/stats/server/top/users": {
-      "get": {
-        "tags": [
-          "Deprecated"
-        ],
-        "summary": "Returns users with the top reads in the server",
-        "parameters": [
-          {
-            "name": "days",
-            "in": "query",
-            "description": "",
-            "schema": {
-              "type": "integer",
-              "format": "int32",
-              "default": 0
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "text/plain": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/TopReadDto"
-                  }
-                }
-              },
-              "application/json": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/TopReadDto"
-                  }
-                }
-              },
-              "text/json": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/TopReadDto"
-                  }
-                }
-              }
-            }
-          }
-        },
-        "deprecated": true
-      }
-    },
-    "/api/reader/all-chapter-progress": {
-      "get": {
-        "tags": [
-          "Deprecated"
-        ],
-        "summary": "Get all progress events for a given chapter",
-        "parameters": [
-          {
-            "name": "chapterId",
-            "in": "query",
-            "description": "",
-            "schema": {
-              "type": "integer",
-              "format": "int32"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "text/plain": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/FullProgressDto"
-                  }
-                }
-              },
-              "application/json": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/FullProgressDto"
-                  }
-                }
-              },
-              "text/json": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/FullProgressDto"
-                  }
-                }
-              }
-            }
-          }
-        },
-        "deprecated": true
-      }
-    },
-    "/api/recommended/quick-reads": {
-      "get": {
-        "tags": [
-          "Deprecated"
-        ],
-        "summary": "Quick Reads are series that should be readable in less than 10 in total and are not Ongoing in release.",
-        "parameters": [
-          {
-            "name": "libraryId",
-            "in": "query",
-            "description": "Library to restrict series to",
-            "schema": {
-              "type": "integer",
-              "format": "int32"
-            }
-          },
-          {
-            "name": "PageNumber",
-            "in": "query",
-            "schema": {
-              "type": "integer",
-              "format": "int32"
-            }
-          },
-          {
-            "name": "PageSize",
-            "in": "query",
-            "schema": {
-              "type": "integer",
-              "format": "int32"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "text/plain": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/SeriesDto"
-                  }
-                }
-              },
-              "application/json": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/SeriesDto"
-                  }
-                }
-              },
-              "text/json": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/SeriesDto"
-                  }
-                }
-              }
-            }
-          }
-        },
-        "deprecated": true
-      }
-    },
-    "/api/recommended/quick-catchup-reads": {
-      "get": {
-        "tags": [
-          "Deprecated"
-        ],
-        "summary": "Quick Catchup Reads are series that should be readable in less than 10 in total and are Ongoing in release.",
-        "parameters": [
-          {
-            "name": "libraryId",
-            "in": "query",
-            "description": "Library to restrict series to",
-            "schema": {
-              "type": "integer",
-              "format": "int32"
-            }
-          },
-          {
-            "name": "PageNumber",
-            "in": "query",
-            "schema": {
-              "type": "integer",
-              "format": "int32"
-            }
-          },
-          {
-            "name": "PageSize",
-            "in": "query",
-            "schema": {
-              "type": "integer",
-              "format": "int32"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "text/plain": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/SeriesDto"
-                  }
-                }
-              },
-              "application/json": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/SeriesDto"
-                  }
-                }
-              },
-              "text/json": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/SeriesDto"
-                  }
-                }
-              }
-            }
-          }
-        },
-        "deprecated": true
-      }
-    },
-    "/api/recommended/highly-rated": {
-      "get": {
-        "tags": [
-          "Deprecated"
-        ],
-        "summary": "Highly Rated based on other users ratings. Will pull series with ratings > 4.0, weighted by count of other users.",
-        "parameters": [
-          {
-            "name": "libraryId",
-            "in": "query",
-            "description": "Library to restrict series to",
-            "schema": {
-              "type": "integer",
-              "format": "int32"
-            }
-          },
-          {
-            "name": "PageNumber",
-            "in": "query",
-            "schema": {
-              "type": "integer",
-              "format": "int32"
-            }
-          },
-          {
-            "name": "PageSize",
-            "in": "query",
-            "schema": {
-              "type": "integer",
-              "format": "int32"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "text/plain": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/SeriesDto"
-                  }
-                }
-              },
-              "application/json": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/SeriesDto"
-                  }
-                }
-              },
-              "text/json": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/SeriesDto"
-                  }
-                }
-              }
-            }
-          }
-        },
-        "deprecated": true
-      }
-    },
-    "/api/recommended/more-in": {
-      "get": {
-        "tags": [
-          "Deprecated"
-        ],
-        "summary": "Chooses a random genre and shows series that are in that without reading progress",
-        "parameters": [
-          {
-            "name": "libraryId",
-            "in": "query",
-            "description": "Library to restrict series to",
-            "schema": {
-              "type": "integer",
-              "format": "int32"
-            }
-          },
-          {
-            "name": "genreId",
-            "in": "query",
-            "description": "Genre Id",
-            "schema": {
-              "type": "integer",
-              "format": "int32"
-            }
-          },
-          {
-            "name": "PageNumber",
-            "in": "query",
-            "schema": {
-              "type": "integer",
-              "format": "int32"
-            }
-          },
-          {
-            "name": "PageSize",
-            "in": "query",
-            "schema": {
-              "type": "integer",
-              "format": "int32"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "text/plain": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/SeriesDto"
-                  }
-                }
-              },
-              "application/json": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/SeriesDto"
-                  }
-                }
-              },
-              "text/json": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/SeriesDto"
-                  }
-                }
-              }
-            }
-          }
-        },
-        "deprecated": true
-      }
-    },
-    "/api/recommended/rediscover": {
-      "get": {
-        "tags": [
-          "Deprecated"
-        ],
-        "summary": "Series that are fully read by the user in no particular order",
-        "parameters": [
-          {
-            "name": "libraryId",
-            "in": "query",
-            "description": "Library to restrict series to",
-            "schema": {
-              "type": "integer",
-              "format": "int32"
-            }
-          },
-          {
-            "name": "PageNumber",
-            "in": "query",
-            "schema": {
-              "type": "integer",
-              "format": "int32"
-            }
-          },
-          {
-            "name": "PageSize",
-            "in": "query",
-            "schema": {
-              "type": "integer",
-              "format": "int32"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "text/plain": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/SeriesDto"
-                  }
-                }
-              },
-              "application/json": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/SeriesDto"
-                  }
-                }
-              },
-              "text/json": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/SeriesDto"
-                  }
-                }
-              }
-            }
-          }
-        },
-        "deprecated": true
-      }
-    },
-    "/api/users/myself": {
-      "get": {
-        "tags": [
-          "Deprecated"
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "text/plain": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/MemberDto"
-                  }
-                }
-              },
-              "application/json": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/MemberDto"
-                  }
-                }
-              },
-              "text/json": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/MemberDto"
-                  }
-                }
-              }
-            }
-          }
-        },
-        "deprecated": true
       }
     },
     "/api/Device/create": {
@@ -8707,49 +7576,6 @@
             "required": true,
             "schema": {
               "type": "string"
-            }
-          },
-          {
-            "name": "pageNumber",
-            "in": "query",
-            "description": "",
-            "schema": {
-              "type": "integer",
-              "format": "int32",
-              "default": 1
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK"
-          }
-        }
-      }
-    },
-    "/api/Opds/{apiKey}/more-in-genre": {
-      "get": {
-        "tags": [
-          "Opds"
-        ],
-        "summary": "Returns More In a Genre (Dashboard Feed) - Supports Pagination",
-        "parameters": [
-          {
-            "name": "apiKey",
-            "in": "path",
-            "description": "",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "genreId",
-            "in": "query",
-            "description": "",
-            "schema": {
-              "type": "integer",
-              "format": "int32"
             }
           },
           {
@@ -15266,16 +14092,6 @@
             }
           },
           {
-            "name": "libraryId",
-            "in": "query",
-            "description": "This is not in use",
-            "schema": {
-              "type": "integer",
-              "format": "int32",
-              "default": 0
-            }
-          },
-          {
             "name": "context",
             "in": "query",
             "description": "",
@@ -21219,6 +20035,45 @@
         }
       }
     },
+    "/api/want-to-read": {
+      "get": {
+        "tags": [
+          "WantToRead"
+        ],
+        "parameters": [
+          {
+            "name": "seriesId",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "boolean"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "boolean"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "boolean"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/want-to-read/add-series": {
       "post": {
         "tags": [
@@ -23337,159 +22192,6 @@
         },
         "additionalProperties": false
       },
-      "ChapterMetadataDto": {
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "chapterId": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "title": {
-            "type": "string",
-            "nullable": true
-          },
-          "writers": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/PersonDto"
-            },
-            "nullable": true
-          },
-          "coverArtists": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/PersonDto"
-            },
-            "nullable": true
-          },
-          "publishers": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/PersonDto"
-            },
-            "nullable": true
-          },
-          "characters": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/PersonDto"
-            },
-            "nullable": true
-          },
-          "pencillers": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/PersonDto"
-            },
-            "nullable": true
-          },
-          "inkers": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/PersonDto"
-            },
-            "nullable": true
-          },
-          "imprints": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/PersonDto"
-            },
-            "nullable": true
-          },
-          "colorists": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/PersonDto"
-            },
-            "nullable": true
-          },
-          "letterers": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/PersonDto"
-            },
-            "nullable": true
-          },
-          "editors": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/PersonDto"
-            },
-            "nullable": true
-          },
-          "translators": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/PersonDto"
-            },
-            "nullable": true
-          },
-          "teams": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/PersonDto"
-            },
-            "nullable": true
-          },
-          "locations": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/PersonDto"
-            },
-            "nullable": true
-          },
-          "genres": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/GenreTagDto"
-            },
-            "nullable": true
-          },
-          "tags": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/TagDto"
-            },
-            "nullable": true
-          },
-          "ageRating": {
-            "$ref": "#/components/schemas/AgeRating"
-          },
-          "releaseDate": {
-            "type": "string",
-            "nullable": true
-          },
-          "publicationStatus": {
-            "$ref": "#/components/schemas/PublicationStatus"
-          },
-          "summary": {
-            "type": "string",
-            "nullable": true
-          },
-          "language": {
-            "type": "string",
-            "nullable": true
-          },
-          "count": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "totalCount": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "wordCount": {
-            "type": "integer",
-            "format": "int64"
-          }
-        },
-        "additionalProperties": false
-      },
       "CharacterRole": {
         "enum": [
           0,
@@ -24026,25 +22728,22 @@
           1,
           2,
           3,
-          4,
-          5
+          4
         ],
         "type": "integer",
-        "description": "Members:\n- `1` — OnDeck\n- `2` — RecentlyUpdated\n- `3` — NewlyAdded\n- `4` — SmartFilter\n- `5` — MoreInGenre",
+        "description": "Members:\n- `1` — OnDeck\n- `2` — RecentlyUpdated\n- `3` — NewlyAdded\n- `4` — SmartFilter",
         "format": "int32",
         "x-enum-varnames": [
           "OnDeck",
           "RecentlyUpdated",
           "NewlyAdded",
-          "SmartFilter",
-          "MoreInGenre"
+          "SmartFilter"
         ],
         "x-enum-descriptions": [
           "OnDeck",
           "RecentlyUpdated",
           "NewlyAdded",
-          "SmartFilter",
-          "MoreInGenre"
+          "SmartFilter"
         ]
       },
       "DateTimeStatCountWithFormat": {
@@ -24897,169 +23596,6 @@
           "IsEmpty"
         ]
       },
-      "FilterDto": {
-        "type": "object",
-        "properties": {
-          "formats": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/MangaFormat"
-            },
-            "nullable": true
-          },
-          "readStatus": {
-            "$ref": "#/components/schemas/ReadStatus"
-          },
-          "libraries": {
-            "type": "array",
-            "items": {
-              "type": "integer",
-              "format": "int32"
-            },
-            "nullable": true
-          },
-          "genres": {
-            "type": "array",
-            "items": {
-              "type": "integer",
-              "format": "int32"
-            },
-            "nullable": true
-          },
-          "writers": {
-            "type": "array",
-            "items": {
-              "type": "integer",
-              "format": "int32"
-            },
-            "nullable": true
-          },
-          "penciller": {
-            "type": "array",
-            "items": {
-              "type": "integer",
-              "format": "int32"
-            },
-            "nullable": true
-          },
-          "inker": {
-            "type": "array",
-            "items": {
-              "type": "integer",
-              "format": "int32"
-            },
-            "nullable": true
-          },
-          "colorist": {
-            "type": "array",
-            "items": {
-              "type": "integer",
-              "format": "int32"
-            },
-            "nullable": true
-          },
-          "letterer": {
-            "type": "array",
-            "items": {
-              "type": "integer",
-              "format": "int32"
-            },
-            "nullable": true
-          },
-          "coverArtist": {
-            "type": "array",
-            "items": {
-              "type": "integer",
-              "format": "int32"
-            },
-            "nullable": true
-          },
-          "editor": {
-            "type": "array",
-            "items": {
-              "type": "integer",
-              "format": "int32"
-            },
-            "nullable": true
-          },
-          "publisher": {
-            "type": "array",
-            "items": {
-              "type": "integer",
-              "format": "int32"
-            },
-            "nullable": true
-          },
-          "character": {
-            "type": "array",
-            "items": {
-              "type": "integer",
-              "format": "int32"
-            },
-            "nullable": true
-          },
-          "translators": {
-            "type": "array",
-            "items": {
-              "type": "integer",
-              "format": "int32"
-            },
-            "nullable": true
-          },
-          "collectionTags": {
-            "type": "array",
-            "items": {
-              "type": "integer",
-              "format": "int32"
-            },
-            "nullable": true
-          },
-          "tags": {
-            "type": "array",
-            "items": {
-              "type": "integer",
-              "format": "int32"
-            },
-            "nullable": true
-          },
-          "rating": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "sortOptions": {
-            "$ref": "#/components/schemas/SeriesSortOptionDto"
-          },
-          "ageRating": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/AgeRating"
-            },
-            "nullable": true
-          },
-          "languages": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            },
-            "nullable": true
-          },
-          "publicationStatus": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/PublicationStatus"
-            },
-            "nullable": true
-          },
-          "seriesNameQuery": {
-            "type": "string",
-            "nullable": true
-          },
-          "releaseYearRange": {
-            "$ref": "#/components/schemas/Int32Range"
-          }
-        },
-        "additionalProperties": false
-      },
       "FilterStatementDto": {
         "type": "object",
         "properties": {
@@ -25123,48 +23659,6 @@
           "System",
           "User"
         ]
-      },
-      "FullProgressDto": {
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "chapterId": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "pagesRead": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "lastModified": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "lastModifiedUtc": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "created": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "createdUtc": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "appUserId": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "userName": {
-            "type": "string",
-            "nullable": true
-          }
-        },
-        "additionalProperties": false
       },
       "GenreTagDto": {
         "required": [
@@ -25385,20 +23879,6 @@
               "$ref": "#/components/schemas/ConflictResolution"
             },
             "nullable": true
-          }
-        },
-        "additionalProperties": false
-      },
-      "Int32Range": {
-        "type": "object",
-        "properties": {
-          "min": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "max": {
-            "type": "integer",
-            "format": "int32"
           }
         },
         "additionalProperties": false
@@ -27275,22 +25755,19 @@
         "enum": [
           1,
           2,
-          3,
           4
         ],
         "type": "integer",
-        "description": "Members:\n- `1` — None\n- `2` — Search\n- `3` — Recommended\n- `4` — Dashboard",
+        "description": "Members:\n- `1` — None\n- `2` — Search\n- `4` — Dashboard",
         "format": "int32",
         "x-enum-varnames": [
           "None",
           "Search",
-          "Recommended",
           "Dashboard"
         ],
         "x-enum-descriptions": [
           "None",
           "Search",
-          "Recommended",
           "Dashboard"
         ]
       },
@@ -27331,68 +25808,6 @@
           "providerUrl": {
             "type": "string",
             "nullable": true
-          }
-        },
-        "additionalProperties": false
-      },
-      "ReadHistoryEvent": {
-        "required": [
-          "chapterNumber",
-          "seriesName",
-          "userName"
-        ],
-        "type": "object",
-        "properties": {
-          "userId": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "userName": {
-            "type": "string",
-            "nullable": true
-          },
-          "libraryId": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "seriesId": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "seriesName": {
-            "type": "string",
-            "nullable": true
-          },
-          "readDate": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "readDateUtc": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "chapterId": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "chapterNumber": {
-            "type": "number",
-            "format": "float"
-          }
-        },
-        "additionalProperties": false
-      },
-      "ReadStatus": {
-        "type": "object",
-        "properties": {
-          "notRead": {
-            "type": "boolean"
-          },
-          "inProgress": {
-            "type": "boolean"
-          },
-          "read": {
-            "type": "boolean"
           }
         },
         "additionalProperties": false
@@ -28886,18 +27301,16 @@
           0,
           1,
           2,
-          3,
           4,
           5
         ],
         "type": "integer",
-        "description": "Members:\n- `0` — Kavita\n- `1` — AniList\n- `2` — Mal\n- `3` — GoogleBooks\n- `4` — Cbr\n- `5` — Hardcover",
+        "description": "Members:\n- `0` — Kavita\n- `1` — AniList\n- `2` — Mal\n- `4` — Cbr\n- `5` — Hardcover",
         "format": "int32",
         "x-enum-varnames": [
           "Kavita",
           "AniList",
           "Mal",
-          "GoogleBooks",
           "Cbr",
           "Hardcover"
         ],
@@ -28905,7 +27318,6 @@
           "Kavita",
           "AniList",
           "Mal",
-          "GoogleBooks",
           "Cbr",
           "Hardcover"
         ]
@@ -32770,14 +31182,6 @@
       "name": "ColorScape"
     },
     {
-      "name": "Deprecated",
-      "description": "All APIs here are subject to be removed and are no longer maintained. Will be removed v0.9.0"
-    },
-    {
-      "name": "WantToRead",
-      "description": "Responsible for all things Want To Read"
-    },
-    {
       "name": "Device",
       "description": "Responsible for interacting and creating Devices"
     },
@@ -32892,6 +31296,10 @@
     },
     {
       "name": "Volume"
+    },
+    {
+      "name": "WantToRead",
+      "description": "Responsible for all things Want To Read"
     }
   ]
 }

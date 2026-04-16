@@ -154,7 +154,7 @@ public class AccountController(UserManager<AppUser> userManager,
             return BadRequest(errors);
         }
 
-        logger.LogInformation("{User}'s Password has been reset", user.UserName);
+        logger.LogInformation("{User}'s Password has been reset", user.UserName!.Sanitize());
         return Ok();
     }
 
@@ -263,7 +263,7 @@ public class AccountController(UserManager<AppUser> userManager,
             {
                 await userManager.UpdateSecurityStampAsync(user);
                 var errorStr = await localizationService.TranslateAsync(user.Id, "locked-out");
-                logger.LogWarning("{UserName} failed to log in at {Time}: {Issue}", user.UserName, user.LastActive,
+                logger.LogWarning("{UserName} failed to log in at {Time}: {Issue}", user.UserName!.Sanitize(), user.LastActive,
                     errorStr);
                 return Unauthorized(errorStr);
             }
@@ -273,7 +273,7 @@ public class AccountController(UserManager<AppUser> userManager,
                 var errorStr = result.IsNotAllowed
                                 ? await localizationService.TranslateAsync(user.Id, "confirm-email")
                                 : BadCredentialsMessage;
-                logger.LogWarning("{UserName} failed to log in at {Time}: {Issue}", user.UserName, user.LastActive, errorStr);
+                logger.LogWarning("{UserName} failed to log in at {Time}: {Issue}", user.UserName!.Sanitize(), user.LastActive, errorStr);
                 return Unauthorized(errorStr);
             }
         }
@@ -281,7 +281,7 @@ public class AccountController(UserManager<AppUser> userManager,
         unitOfWork.UserRepository.Update(user);
         await unitOfWork.CommitAsync();
 
-        logger.LogInformation("{UserName} logged in at {Time}", user.UserName, user.LastActive);
+        logger.LogInformation("{UserName} logged in at {Time}", user.UserName!.Sanitize(), user.LastActive);
 
         return Ok(await ConstructUserDto(user, roles, ct: HttpContext.RequestAborted));
     }
@@ -451,7 +451,7 @@ public class AccountController(UserManager<AppUser> userManager,
         // Validate this user's password
         if (!await userManager.CheckPasswordAsync(user, dto.Password))
         {
-            logger.LogWarning("A user tried to change {UserName}'s email, but password didn't validate", user.UserName);
+            logger.LogWarning("A user tried to change {UserName}'s email, but password didn't validate", user.UserName!.Sanitize());
             return BadRequest(await localizationService.TranslateAsync(UserId, "permission-denied"));
         }
 
@@ -483,7 +483,7 @@ public class AccountController(UserManager<AppUser> userManager,
         await userManager.UpdateAsync(user);
 
         var emailLink = await emailService.GenerateEmailLink(Request, user.ConfirmationToken, "confirm-email-update", dto.Email);
-        logger.LogCritical("[Update Email]: Email Link for {UserName}: {Link}", user.UserName, emailLink);
+        logger.LogCritical("[Update Email]: Email Link for {UserName}: {Link}", user.UserName!.Sanitize(), emailLink.Sanitize());
 
         if (!shouldEmailUser)
         {
@@ -840,7 +840,7 @@ public class AccountController(UserManager<AppUser> userManager,
         try
         {
             var emailLink = await emailService.GenerateEmailLink(Request, user.ConfirmationToken, "confirm-email", dto.Email);
-            logger.LogCritical("[Invite User]: Email Link for {UserName}: {Link}", user.UserName?.Sanitize(), emailLink);
+            logger.LogCritical("[Invite User]: Email Link for {UserName}: {Link}", user.UserName?.Sanitize(), emailLink.Sanitize());
 
             var settings = await unitOfWork.SettingsRepository.GetSettingsDtoAsync(ct);
             if (!emailService.IsValidEmail(dto.Email) || !settings.IsEmailSetup())
@@ -1048,7 +1048,7 @@ public class AccountController(UserManager<AppUser> userManager,
         unitOfWork.UserRepository.Update(user);
         await unitOfWork.CommitAsync(ct);
 
-        logger.LogCritical("[Forgot Password]: Email Link for {UserName}: {Link}", user.UserName, emailLink);
+        logger.LogCritical("[Forgot Password]: Email Link for {UserName}: {Link}", user.UserName!.Sanitize(), emailLink.Sanitize());
 
         if (!settings.IsEmailSetup()) return Ok(await localizationService.GetAsync("en", "email-not-enabled"));
         if (!emailService.IsValidEmail(user.Email))
@@ -1126,11 +1126,11 @@ public class AccountController(UserManager<AppUser> userManager,
         await unitOfWork.CommitAsync(ct);
 
         var emailLink = await emailService.GenerateEmailLink(Request, token, "confirm-email-update", user.Email);
-        logger.LogCritical("[Email Migration]: Email Link for {UserName}: {Link}", user.UserName, emailLink);
+        logger.LogCritical("[Email Migration]: Email Link for {UserName}: {Link}", user.UserName!.Sanitize(), emailLink.Sanitize());
 
         if (!emailService.IsValidEmail(user.Email))
         {
-            logger.LogCritical("[Email Migration]: User {UserName} is trying to resend an invite flow, but their email ({Email}) isn't valid. No email will be send", user.UserName, user.Email);
+            logger.LogCritical("[Email Migration]: User {UserName} is trying to resend an invite flow, but their email ({Email}) isn't valid. No email will be send", user.UserName!.Sanitize(), user.Email);
         }
 
 

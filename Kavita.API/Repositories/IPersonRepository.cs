@@ -29,7 +29,6 @@ public interface IPersonRepository
     void Attach(IEnumerable<Person> person);
     void Remove(Person person);
     void Remove(ChapterPeople person);
-    void Remove(SeriesMetadataPeople person);
     void Update(Person person);
 
     Task<IList<Person>> GetAllPeople(PersonIncludes includes = PersonIncludes.Aliases, CancellationToken ct = default);
@@ -38,9 +37,7 @@ public interface IPersonRepository
     Task RemoveAllPeopleNoLongerAssociated(CancellationToken ct = default);
     Task<IList<PersonDto>> GetAllPeopleDtosForLibrariesAsync(int userId, List<int>? libraryIds = null, PersonIncludes includes = PersonIncludes.None, CancellationToken ct = default);
 
-    Task<string?> GetCoverImageAsync(int personId, CancellationToken ct = default);
     Task<IList<string?>> GetAllCoverImagesAsync(CancellationToken ct = default);
-    Task<string?> GetCoverImageByNameAsync(string name, CancellationToken ct = default);
     Task<IEnumerable<PersonRole>> GetRolesForPersonByName(int personId, int userId, CancellationToken ct = default);
     Task<PagedList<BrowsePersonDto>> GetBrowsePersonDtos(int userId, BrowsePersonFilterDto filter, UserParams userParams, CancellationToken ct = default);
     Task<Person?> GetPersonById(int personId, PersonIncludes includes = PersonIncludes.None, CancellationToken ct = default);

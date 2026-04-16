@@ -61,11 +61,6 @@ public static class QueryableExtensions
             query = query.Where(l => l.IncludeInDashboard);
         }
 
-        if (context.HasFlag(QueryContext.Recommended))
-        {
-            query = query.Where(l => l.IncludeInRecommended);
-        }
-
         if (context.HasFlag(QueryContext.Search))
         {
             query = query.Where(l => l.IncludeInSearch);

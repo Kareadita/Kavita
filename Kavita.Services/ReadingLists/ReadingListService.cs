@@ -257,7 +257,7 @@ public class ReadingListService(
     /// <param name="seriesIds">The series ids of all the reading list items</param>
     private async Task CalculateReadingListAgeRating(ReadingList readingList, IEnumerable<int> seriesIds)
     {
-        var ageRating = await unitOfWork.SeriesRepository.GetMaxAgeRatingFromSeriesAsync(seriesIds);
+        var ageRating = await unitOfWork.SeriesRepository.GetMaxAgeRatingFromSeriesAsyncAsync(seriesIds);
         readingList.AgeRating = ageRating;
     }
 
@@ -505,7 +505,7 @@ public class ReadingListService(
             var seriesIds = readingList.Items.Select(item => item.SeriesId).ToList();
             seriesIds.Remove(seriesId); // Don't get AgeRating from database
 
-            var maxAgeRating = await unitOfWork.SeriesRepository.GetMaxAgeRatingFromSeriesAsync(seriesIds);
+            var maxAgeRating = await unitOfWork.SeriesRepository.GetMaxAgeRatingFromSeriesAsyncAsync(seriesIds);
             if (ageRating > maxAgeRating)
             {
                 maxAgeRating = ageRating;

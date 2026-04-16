@@ -36,7 +36,7 @@ public interface ICollectionTagRepository
     Task<IEnumerable<AppUserCollection>> GetAllCollectionsAsync(CollectionIncludes includes = CollectionIncludes.None, CancellationToken ct = default);
 
     /// <summary>
-    /// Returns all of the user's collections with the option of other user's promoted
+    /// Returns all the user's collections with the option of other user's promoted
     /// </summary>
     /// <param name="userId"></param>
     /// <param name="includePromoted"></param>

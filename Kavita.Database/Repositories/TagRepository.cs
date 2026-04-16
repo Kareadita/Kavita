@@ -122,26 +122,11 @@ public class TagRepository(DataContext context, IMapper mapper) : ITagRepository
         return await PagedList<BrowseTagDto>.CreateAsync(query, userParams.PageNumber, userParams.PageSize, ct);
     }
 
-    public async Task<IList<Tag>> GetAllTagsAsync(CancellationToken ct = default)
-    {
-        return await context.Tag.ToListAsync(ct);
-    }
 
     public async Task<IList<Tag>> GetAllTagsByNameAsync(IEnumerable<string> normalizedNames, CancellationToken ct = default)
     {
         return await context.Tag
             .Where(t => normalizedNames.Contains(t.NormalizedTitle))
-            .ToListAsync(ct);
-    }
-
-    public async Task<IList<TagDto>> GetAllTagDtosAsync(int userId, CancellationToken ct = default)
-    {
-        var userRating = await context.AppUser.GetUserAgeRestriction(userId, ct: ct);
-        return await context.Tag
-            .AsNoTracking()
-            .RestrictAgainstAgeRestriction(userRating)
-            .OrderBy(t => t.NormalizedTitle)
-            .ProjectTo<TagDto>(mapper.ConfigurationProvider)
             .ToListAsync(ct);
     }
 }

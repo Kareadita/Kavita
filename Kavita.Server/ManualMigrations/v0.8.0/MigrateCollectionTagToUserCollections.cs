@@ -57,7 +57,7 @@ public static class MigrateCollectionTagToUserCollections
                 Items = existingCollectionTag.SeriesMetadatas.Select(s => s.Series).ToList()
             };
 
-            collection.AgeRating = await unitOfWork.SeriesRepository.GetMaxAgeRatingFromSeriesAsync(collection.Items.Select(s => s.Id));
+            collection.AgeRating = await unitOfWork.SeriesRepository.GetMaxAgeRatingFromSeriesAsyncAsync(collection.Items.Select(s => s.Id));
             defaultAdmin.Collections.Add(collection);
         }
         unitOfWork.UserRepository.Update(defaultAdmin);

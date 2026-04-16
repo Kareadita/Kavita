@@ -142,10 +142,6 @@ public class ServerSettingConverter : ITypeConverter<IEnumerable<ServerSetting>,
                     destination.OidcConfig = JsonSerializer.Deserialize<OidcConfigDto>(row.Value)!;
                     break;
                 case ServerSettingKey.LicenseKey:
-                case ServerSettingKey.EnableAuthentication:
-                case ServerSettingKey.EmailServiceUrl:
-                case ServerSettingKey.ConvertBookmarkToWebP:
-                case ServerSettingKey.ConvertCoverToWebP:
                 default:
                     break;
             }

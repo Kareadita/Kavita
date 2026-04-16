@@ -107,10 +107,10 @@ public class ScannerService(
         Series? series = null;
         try
         {
-            series = await unitOfWork.SeriesRepository.GetSeriesThatContainsLowestFolderPath(originalPath,
+            series = await unitOfWork.SeriesRepository.GetSeriesThatContainsLowestFolderPathAsync(originalPath,
                          SeriesIncludes.Library) ??
-                     await unitOfWork.SeriesRepository.GetSeriesByFolderPath(originalPath, SeriesIncludes.Library) ??
-                     await unitOfWork.SeriesRepository.GetSeriesByFolderPath(folder, SeriesIncludes.Library);
+                     await unitOfWork.SeriesRepository.GetSeriesByFolderPathAsync(originalPath, SeriesIncludes.Library) ??
+                     await unitOfWork.SeriesRepository.GetSeriesByFolderPathAsync(folder, SeriesIncludes.Library);
         }
         catch (InvalidOperationException ex)
         {
@@ -212,7 +212,7 @@ public class ScannerService(
         if (string.IsNullOrEmpty(folderPath) || !directoryService.Exists(folderPath))
         {
             // We don't care if it's multiple due to new scan loop enforcing all in one root directory
-            var files = await unitOfWork.SeriesRepository.GetFilesForSeries(seriesId);
+            var files = await unitOfWork.SeriesRepository.GetFilesForSeriesAsync(seriesId);
             var seriesDirs = directoryService.FindHighestDirectoriesFromFiles(libraryPaths,
                 files.Select(f => f.FilePath).ToList());
             if (seriesDirs.Keys.Count == 0)
@@ -255,7 +255,7 @@ public class ScannerService(
         // If nothing was found, first validate any of the files still exist. If they don't then we have a deletion and can skip the rest of the logic flow
         if (parsedSeries.Count == 0)
         {
-             var seriesFiles = (await unitOfWork.SeriesRepository.GetFilesForSeries(series.Id));
+             var seriesFiles = (await unitOfWork.SeriesRepository.GetFilesForSeriesAsync(series.Id));
              if (!string.IsNullOrEmpty(series.FolderPath) &&
                  !seriesFiles.Where(f => f.FilePath.Contains(series.FolderPath)).Any(m => File.Exists(m.FilePath)))
              {
@@ -357,7 +357,7 @@ public class ScannerService(
 
     private async Task<ScanCancelReason> ShouldScanSeries(int seriesId, Library library, IList<string> libraryPaths, Series series, bool bypassFolderChecks = false)
     {
-        var seriesFolderPaths = (await unitOfWork.SeriesRepository.GetFilesForSeries(seriesId))
+        var seriesFolderPaths = (await unitOfWork.SeriesRepository.GetFilesForSeriesAsync(seriesId))
             .Select(f => directoryService.FileSystem.FileInfo.New(f.FilePath).Directory?.FullName ?? string.Empty)
             .Where(f => !string.IsNullOrEmpty(f))
             .Distinct()
@@ -583,7 +583,7 @@ public class ScannerService(
         {
             logger.LogDebug("[ScannerService] Removing series that were not found during the scan");
 
-            var removedSeries = await unitOfWork.SeriesRepository.RemoveSeriesNotInList(parsedSeries.Keys.ToList(), library.Id);
+            var removedSeries = await unitOfWork.SeriesRepository.RemoveSeriesNotInListAsync(parsedSeries.Keys.ToList(), library.Id);
             logger.LogDebug("[ScannerService] Found {Count} series to remove: {SeriesList}",
                 removedSeries.Count, string.Join(", ", removedSeries.Select(s => s.Name)));
 
@@ -812,7 +812,7 @@ public class ScannerService(
         var scanWatch = Stopwatch.StartNew();
 
         var processedSeries = await scanner.ScanLibrariesForSeries(library, dirs,
-            isLibraryScan, await unitOfWork.SeriesRepository.GetFolderPathMap(library.Id), forceChecks);
+            isLibraryScan, await unitOfWork.SeriesRepository.GetFolderPathMapAsync(library.Id), forceChecks);
 
         var scanElapsedTime = scanWatch.ElapsedMilliseconds;
 

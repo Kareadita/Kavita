@@ -393,38 +393,6 @@ public class OpdsController(
         }
     }
 
-    /// <summary>
-    /// Returns More In a Genre (Dashboard Feed) - Supports Pagination
-    /// </summary>
-    /// <param name="apiKey"></param>
-    /// <param name="genreId"></param>
-    /// <param name="pageNumber"></param>
-    /// <returns></returns>
-    [Produces("application/xml")]
-    [HttpGet("{apiKey}/more-in-genre")]
-    public async Task<IActionResult> GetMoreInGenre(string apiKey, [FromQuery] int genreId, [FromQuery] int pageNumber = OpdsService.FirstPageNumber)
-    {
-        try
-        {
-            var (baseUrl, prefix) = await GetPrefix();
-            var feed = await opdsService.GetMoreInGenre(new OpdsItemsFromEntityIdRequest()
-            {
-                BaseUrl = baseUrl,
-                Prefix = prefix,
-                UserId = UserId,
-                Preferences = await unitOfWork.UserRepository.GetOpdsPreferences(UserId),
-                ApiKey = apiKey,
-                PageNumber = pageNumber,
-                EntityId = genreId
-            });
-
-            return CreateXmlResult(opdsService.SerializeXml(feed));
-        }
-        catch (OpdsException ex)
-        {
-            return BadRequest(ex.Message);
-        }
-    }
 
     /// <summary>
     /// Get the Recently Updated Series (Dashboard) - Pagination available, total pages will not be filled due to underlying implementation

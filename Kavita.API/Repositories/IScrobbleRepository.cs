@@ -17,7 +17,6 @@ public interface IScrobbleRepository
     void Update(ScrobbleEvent evt);
     Task<IList<ScrobbleEvent>> GetByEvent(ScrobbleEventType type, bool isProcessed = false, CancellationToken ct = default);
     Task<IList<ScrobbleEvent>> GetProcessedEvents(int daysAgo, CancellationToken ct = default);
-    Task<bool> Exists(int userId, int seriesId, ScrobbleEventType eventType, CancellationToken ct = default);
     Task<IEnumerable<ScrobbleErrorDto>> GetScrobbleErrors(CancellationToken ct = default);
     Task<IList<ScrobbleError>> GetAllScrobbleErrorsForSeries(int seriesId, CancellationToken ct = default);
     Task ClearScrobbleErrors(CancellationToken ct = default);
@@ -45,6 +44,5 @@ public interface IScrobbleRepository
     Task<IList<ScrobbleEvent>> GetUserEvents(int userId, IList<long> scrobbleEventIds, CancellationToken ct = default);
     Task<PagedList<ScrobbleEventDto>> GetUserEvents(int userId, ScrobbleEventFilter filter, UserParams pagination, CancellationToken ct = default);
     Task<IList<ScrobbleEvent>> GetAllEventsForSeries(int seriesId, CancellationToken ct = default);
-    Task<IList<ScrobbleEvent>> GetAllEventsWithSeriesIds(IEnumerable<int> seriesIds, CancellationToken ct = default);
     Task<IList<ScrobbleEvent>> GetEvents(CancellationToken ct = default);
 }

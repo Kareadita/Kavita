@@ -159,7 +159,7 @@ public class SmartCollectionSyncService(
                 }
 
                 // Series not found in the collection, try to find it in the server
-                var newSeries = await unitOfWork.SeriesRepository.GetSeriesByAnyName(seriesInfo.SeriesName,
+                var newSeries = await unitOfWork.SeriesRepository.GetSeriesByAnyNameAsync(seriesInfo.SeriesName,
                     seriesInfo.LocalizedSeriesName,
                     formats, collection.AppUserId, ct: ct);
 

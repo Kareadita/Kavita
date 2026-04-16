@@ -18,8 +18,6 @@ public interface IStatisticService
 {
     Task<ServerStatisticsDto> GetServerStatistics(CancellationToken ct = default);
     Task<UserReadStatistics> GetUserReadStatistics(int userId, IList<int> libraryIds, CancellationToken ct = default);
-    Task<IEnumerable<StatCount<int>>> GetYearCount(CancellationToken ct = default);
-    Task<IEnumerable<StatCount<int>>> GetTopYears(CancellationToken ct = default);
     Task<IList<StatBucketDto>> GetPopularDecades(CancellationToken ct = default);
     Task<IList<StatCount<LibraryDto>>> GetPopularLibraries(CancellationToken ct = default);
     Task<IList<StatCount<SeriesDto>>> GetPopularSeries(CancellationToken ct = default);
@@ -30,9 +28,6 @@ public interface IStatisticService
     Task<IEnumerable<StatCount<PublicationStatus>>> GetPublicationCount(CancellationToken ct = default);
     Task<IEnumerable<StatCount<MangaFormat>>> GetMangaFormatCount(CancellationToken ct = default);
     Task<FileExtensionBreakdownDto> GetFileBreakdown(CancellationToken ct = default);
-    Task<IEnumerable<TopReadDto>> GetTopUsers(int days, CancellationToken ct = default);
-    Task<IEnumerable<ReadHistoryEvent>> GetReadingHistory(int userId, CancellationToken ct = default);
-    Task<IEnumerable<StatCountWithFormat<DateTime>>> ReadCountByDay(int userId = 0, int days = 0, CancellationToken ct = default);
     Task<IEnumerable<StatCountWithFormat<DateTime>>> ReadCounts(StatsFilterDto filter, int userId = 0, CancellationToken ct = default);
     Task<IList<StatCount<DayOfWeek>>> GetDayBreakdown(int userId = 0, CancellationToken ct = default);
     Task<IList<StatCount<int>>> GetPagesReadCountByYear(int userId = 0, CancellationToken ct = default);

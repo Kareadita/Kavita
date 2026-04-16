@@ -84,12 +84,6 @@ public class ScrobbleRepository(DataContext context, IMapper mapper) : IScrobble
             .ToListAsync(ct);
     }
 
-    public async Task<bool> Exists(int userId, int seriesId, ScrobbleEventType eventType, CancellationToken ct = default)
-    {
-        return await context.ScrobbleEvent.AnyAsync(e =>
-            e.AppUserId == userId && e.SeriesId == seriesId && e.ScrobbleEventType == eventType, ct);
-    }
-
     public async Task<IEnumerable<ScrobbleErrorDto>> GetScrobbleErrors(CancellationToken ct = default)
     {
         return await context.ScrobbleError
@@ -166,14 +160,6 @@ public class ScrobbleRepository(DataContext context, IMapper mapper) : IScrobble
     {
         return await context.ScrobbleEvent
             .Where(e => e.SeriesId == seriesId)
-            .ToListAsync(ct);
-    }
-
-    public async Task<IList<ScrobbleEvent>> GetAllEventsWithSeriesIds(IEnumerable<int> seriesIds,
-        CancellationToken ct = default)
-    {
-        return await context.ScrobbleEvent
-            .Where(e => seriesIds.Contains(e.SeriesId))
             .ToListAsync(ct);
     }
 

@@ -505,7 +505,7 @@ public class SeriesService(
         var user = await unitOfWork.UserRepository.GetUserByIdAsync(userId, ct: ct);
         if (user!.AgeRestriction != AgeRating.NotApplicable)
         {
-            var seriesMetadata = await unitOfWork.SeriesRepository.GetSeriesMetadata(seriesId, ct);
+            var seriesMetadata = await unitOfWork.SeriesRepository.GetSeriesMetadataAsync(seriesId, ct);
             if (seriesMetadata!.AgeRating > user.AgeRestriction)
                 throw new UnauthorizedAccessException("series-restricted-age-restriction");
         }
@@ -603,7 +603,7 @@ public class SeriesService(
     /// <returns></returns>
     public async Task<RelatedSeriesDto> GetRelatedSeries(int userId, int seriesId, CancellationToken ct = default)
     {
-        return await unitOfWork.SeriesRepository.GetRelatedSeries(userId, seriesId, ct);
+        return await unitOfWork.SeriesRepository.GetRelatedSeriesAsync(userId, seriesId, ct);
     }
 
     /// <summary>
@@ -948,7 +948,7 @@ public class SeriesService(
             filter.Statements.Add(stmt);
         }
 
-        return await unitOfWork.SeriesRepository.GetSeriesDtoForLibraryIdV2Async(userId, userParams, filter, ct: ct);
+        return await unitOfWork.SeriesRepository.GetSeriesDtoForLibraryIdAsync(userId, userParams, filter, ct: ct);
     }
 
     public async Task<List<FilterStatementDto>> GetProfilePrivacyStatements(int userId, int requestingUserId,

@@ -38,12 +38,9 @@ public interface IReadingListRepository
         bool includePromoted, CancellationToken ct = default);
     Task<IEnumerable<ReadingListDto>> GetReadingListDtosForChapterAndUserAsync(int userId, int chapterId,
         bool includePromoted, CancellationToken ct = default);
-    Task<int> Count(CancellationToken ct = default);
-    Task<string?> GetCoverImageAsync(int readingListId, CancellationToken ct = default);
     Task<IList<string>> GetRandomCoverImagesAsync(int readingListId, CancellationToken ct = default);
     Task<IList<string>> GetAllCoverImagesAsync(CancellationToken ct = default);
     Task<bool> ReadingListExists(string name, int? readingListId = null, CancellationToken ct = default);
-    Task<bool> ReadingListExistsForUser(string name, int userId, CancellationToken ct = default);
     IEnumerable<PersonDto> GetReadingListPeopleAsync(int readingListId, PersonRole role, CancellationToken ct = default);
     Task<ReadingListCast> GetReadingListAllPeopleAsync(int readingListId, CancellationToken ct = default);
     Task<IList<ReadingList>> GetAllWithCoversInDifferentEncoding(EncodeFormat encodeFormat, CancellationToken ct = default);

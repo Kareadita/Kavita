@@ -788,44 +788,6 @@ public class OpdsServiceTests(ITestOutputHelper testOutputHelper) : AbstractDbTe
         ValidatePaginationLinks(feed2, OpdsService.FirstPageNumber + 1, expectNext: false, expectPrev: true);
     }
 
-    [Fact]
-    public async Task GetMoreInGenre_WithPagination()
-    {
-        var (unitOfWork, context, mapper) = await CreateDatabase();
-        var (opdsService, _) = SetupService(unitOfWork, mapper);
-        var user = await SetupSeriesAndUser(context, unitOfWork, OpdsService.PageSize + 5);
-
-        // Add genre to all series
-        var genre = new GenreBuilder("Action").Build();
-        context.Genre.Add(genre);
-        await context.SaveChangesAsync();
-
-        for (var i = 1; i <= OpdsService.PageSize + 5; i++)
-        {
-            var series = await unitOfWork.SeriesRepository.GetSeriesByIdAsync(i);
-            if (series?.Metadata != null)
-            {
-                series.Metadata.Genres.Add(genre);
-            }
-        }
-        await unitOfWork.CommitAsync();
-
-        // Test page 1
-        var feed = await opdsService.GetMoreInGenre(new OpdsItemsFromEntityIdRequest
-        {
-            ApiKey = user.GetOpdsAuthKey(),
-            Prefix = OpdsService.DefaultApiPrefix,
-            BaseUrl = string.Empty,
-            UserId = user.Id,
-            Preferences = await unitOfWork.UserRepository.GetOpdsPreferences(user.Id),
-            EntityId = genre.Id,
-            PageNumber = OpdsService.FirstPageNumber
-        });
-
-        Assert.Equal(OpdsService.PageSize, feed.Entries.Count);
-        ValidatePaginationLinks(feed, OpdsService.FirstPageNumber, expectNext: true, expectPrev: false);
-    }
-
     #endregion
 
     #region Detail Feeds

@@ -175,15 +175,6 @@ public class ExternalSeriesMetadataRepository(DataContext context, IMapper mappe
         await context.SaveChangesAsync(ct);
     }
 
-    public Task<bool> IsBlacklistedSeries(int seriesId, CancellationToken ct = default)
-    {
-        return context.Series
-            .Where(s => s.Id == seriesId)
-            .Select(s => s.IsBlacklisted)
-            .FirstOrDefaultAsync(ct);
-    }
-
-
     public async Task<IList<int>> GetSeriesThatNeedExternalMetadata(int limit, bool includeStaleData = false,
         CancellationToken ct = default)
     {

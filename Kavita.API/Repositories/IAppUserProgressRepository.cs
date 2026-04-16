@@ -29,7 +29,6 @@ public interface IAppUserProgressRepository
     Task<DateTime?> GetFirstProgressForSeries(int seriesId, int userId, CancellationToken ct = default);
     Task<DateTime?> GetFirstProgressForUser(int userId, CancellationToken ct = default);
     Task UpdateAllProgressThatAreMoreThanChapterPages(CancellationToken ct = default);
-    Task<IList<FullProgressDto>> GetUserProgressForChapter(int chapterId, int userId = 0, CancellationToken ct = default);
 
     Task<Dictionary<int, int>> GetUserProgressForChaptersBySeries(int userId, int seriesId, CancellationToken ct = default);
     Task<Dictionary<int, int>> GetUserProgressForChaptersByVolumes(int userId, int seriesId, List<int> volumeIds, CancellationToken ct = default);

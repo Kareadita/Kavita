@@ -168,15 +168,7 @@ public static class Defaults
                 Order = 2,
                 IsProvided = true,
                 Visible = true
-            },
-            new()
-            {
-                Name = "more-in-genre",
-                StreamType = DashboardStreamType.MoreInGenre,
-                Order = 3,
-                IsProvided = true,
-                Visible = false
-            },
+            }
         }.ToArray()
     ];
 

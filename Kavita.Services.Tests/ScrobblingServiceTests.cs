@@ -13,9 +13,11 @@ using Kavita.Models.DTOs.Scrobbling;
 using Kavita.Models.Entities;
 using Kavita.Models.Entities.Enums;
 using Kavita.Models.Entities.Scrobble;
+using Kavita.Models.Entities.User;
 using Kavita.Services.Builders;
 using Kavita.Services.Plus;
 using Kavita.Services.Reading;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using NSubstitute;
 using Xunit.Abstractions;
@@ -625,4 +627,347 @@ public class ScrobblingServiceTests(ITestOutputHelper outputHelper): AbstractDbT
 
     #endregion
 
+    #region CreateEventsFromExistingHistory Tests
+
+    private static async Task<int> GetTestLibraryIdAsync(DataContext context)
+    {
+        return await context.Library
+            .Where(l => l.Name == "Test Library")
+            .Select(l => l.Id)
+            .FirstAsync();
+    }
+
+    private static async Task LinkUserToTestLibraryAsync(IUnitOfWork unitOfWork, DataContext context, int userId)
+    {
+        var libraryId = await GetTestLibraryIdAsync(context);
+        var library = await unitOfWork.LibraryRepository.GetLibraryForIdAsync(libraryId, LibraryIncludes.AppUser);
+        var user = await unitOfWork.UserRepository.GetUserByIdAsync(userId);
+        Assert.NotNull(library);
+        Assert.NotNull(user);
+        if (library.AppUsers.Any(u => u.Id == userId)) return;
+        library.AppUsers.Add(user);
+        await unitOfWork.CommitAsync();
+    }
+
+    [Fact]
+    public async Task CreateEventsFromExistingHistory_NoLicense_DoesNothing()
+    {
+        var (unitOfWork, context, _) = await CreateDatabase();
+        var (service, licenseService, _, readerService, _) = await Setup(unitOfWork, context);
+
+        licenseService.HasActiveLicense().Returns(false);
+
+        // Seed something that would produce an event if the method ran
+        var user = await unitOfWork.UserRepository.GetUserByIdAsync(1);
+        Assert.NotNull(user);
+        var chapter1 = await unitOfWork.ChapterRepository.GetChapterAsync(1);
+        Assert.NotNull(chapter1);
+        await readerService.MarkChaptersAsRead(user, 1, [chapter1]);
+        await unitOfWork.CommitAsync();
+
+        await service.CreateEventsFromExistingHistory();
+
+        var events = await unitOfWork.ScrobbleRepository.GetAllEventsForSeries(1);
+        Assert.Empty(events);
+
+        var reloaded = await unitOfWork.UserRepository.GetUserByIdAsync(1);
+        Assert.NotNull(reloaded);
+        Assert.False(reloaded.HasRunScrobbleEventGeneration);
+    }
+
+    [Fact]
+    public async Task CreateEventsFromExistingHistory_SpecificUser_NoAniListToken_DoesNothing()
+    {
+        var (unitOfWork, context, _) = await CreateDatabase();
+        var (service, licenseService, _, _, _) = await Setup(unitOfWork, context);
+
+        licenseService.HasActiveLicense().Returns(true);
+
+        // Seed a rating that would otherwise create an event
+        context.AppUserRating.Add(new AppUserRating
+        {
+            AppUserId = 1,
+            SeriesId = 1,
+            Rating = 4f,
+            HasBeenRated = true,
+        });
+        await unitOfWork.CommitAsync();
+
+        // User has no AniListAccessToken, guard at line 1038 should short-circuit
+        await service.CreateEventsFromExistingHistory(userId: 1);
+
+        var events = await unitOfWork.ScrobbleRepository.GetAllEventsForSeries(1);
+        Assert.Empty(events);
+
+        var reloaded = await unitOfWork.UserRepository.GetUserByIdAsync(1);
+        Assert.NotNull(reloaded);
+        Assert.False(reloaded.HasRunScrobbleEventGeneration);
+    }
+
+    [Fact]
+    public async Task CreateEventsFromExistingHistory_SpecificUser_AlreadyRan_DoesNothing()
+    {
+        var (unitOfWork, context, _) = await CreateDatabase();
+        var (service, licenseService, _, _, _) = await Setup(unitOfWork, context);
+
+        licenseService.HasActiveLicense().Returns(true);
+
+        var user = await unitOfWork.UserRepository.GetUserByIdAsync(1);
+        Assert.NotNull(user);
+        user.AniListAccessToken = ValidJwtToken;
+        user.HasRunScrobbleEventGeneration = true;
+        await unitOfWork.CommitAsync();
+
+        // Seed a rating that would otherwise create an event
+        context.AppUserRating.Add(new AppUserRating
+        {
+            AppUserId = 1,
+            SeriesId = 1,
+            Rating = 3f,
+            HasBeenRated = true,
+        });
+        await unitOfWork.CommitAsync();
+
+        await service.CreateEventsFromExistingHistory(userId: 1);
+
+        var events = await unitOfWork.ScrobbleRepository.GetAllEventsForSeries(1);
+        Assert.Empty(events);
+    }
+
+    [Fact]
+    public async Task CreateEventsFromExistingHistory_AllUsers_SkipsUsersAlreadyProcessed()
+    {
+        var (unitOfWork, context, _) = await CreateDatabase();
+        var (service, licenseService, _, _, _) = await Setup(unitOfWork, context);
+
+        licenseService.HasActiveLicense().Returns(true);
+
+        var secondUser = new AppUserBuilder("testuser2", "testuser2").Build();
+        secondUser.UserPreferences.AniListScrobblingEnabled = true;
+        secondUser.HasRunScrobbleEventGeneration = true;
+        unitOfWork.UserRepository.Add(secondUser);
+        await unitOfWork.CommitAsync();
+
+        // Seed a rating for the already-ran second user, should be ignored
+        context.AppUserRating.Add(new AppUserRating
+        {
+            AppUserId = secondUser.Id,
+            SeriesId = 1,
+            Rating = 5f,
+            HasBeenRated = true,
+        });
+        await unitOfWork.CommitAsync();
+
+        await service.CreateEventsFromExistingHistory();
+
+        var events = await unitOfWork.ScrobbleRepository.GetAllEventsForSeries(1);
+        Assert.Empty(events);
+
+        // First user had no data but is still marked as processed by the loop
+        var first = await unitOfWork.UserRepository.GetUserByIdAsync(1);
+        Assert.NotNull(first);
+        Assert.True(first.HasRunScrobbleEventGeneration);
+
+        // Second user was skipped by the HasRunScrobbleEventGeneration filter, flag stays true
+        var second = await unitOfWork.UserRepository.GetUserByIdAsync(secondUser.Id);
+        Assert.NotNull(second);
+        Assert.True(second.HasRunScrobbleEventGeneration);
+    }
+
+    [Fact]
+    public async Task CreateEventsFromExistingHistory_WantToRead_CreatesAddWantToReadEvent()
+    {
+        var (unitOfWork, context, _) = await CreateDatabase();
+        var (service, licenseService, _, _, _) = await Setup(unitOfWork, context);
+
+        licenseService.HasActiveLicense().Returns(true);
+
+        await LinkUserToTestLibraryAsync(unitOfWork, context, 1);
+
+        var user = await unitOfWork.UserRepository.GetUserByIdAsync(1, AppUserIncludes.WantToRead);
+        Assert.NotNull(user);
+        user.AniListAccessToken = ValidJwtToken;
+        user.WantToRead.Add(new AppUserWantToRead { SeriesId = 1 });
+        await unitOfWork.CommitAsync();
+
+        var before = DateTime.UtcNow.AddSeconds(-1);
+
+        await service.CreateEventsFromExistingHistory(userId: 1);
+
+        var events = await unitOfWork.ScrobbleRepository.GetAllEventsForSeries(1);
+        Assert.Single(events);
+        Assert.Equal(ScrobbleEventType.AddWantToRead, events[0].ScrobbleEventType);
+        Assert.Equal(1, events[0].AppUserId);
+
+        var reloaded = await unitOfWork.UserRepository.GetUserByIdAsync(1);
+        Assert.NotNull(reloaded);
+        Assert.True(reloaded.HasRunScrobbleEventGeneration);
+        Assert.True(reloaded.ScrobbleEventGenerationRan >= before);
+    }
+
+    [Fact]
+    public async Task CreateEventsFromExistingHistory_Rating_CreatesScoreUpdatedEvent()
+    {
+        var (unitOfWork, context, _) = await CreateDatabase();
+        var (service, licenseService, _, _, _) = await Setup(unitOfWork, context);
+
+        licenseService.HasActiveLicense().Returns(true);
+
+        var user = await unitOfWork.UserRepository.GetUserByIdAsync(1);
+        Assert.NotNull(user);
+        user.AniListAccessToken = ValidJwtToken;
+        await unitOfWork.CommitAsync();
+
+        context.AppUserRating.Add(new AppUserRating
+        {
+            AppUserId = 1,
+            SeriesId = 1,
+            Rating = 4.5f,
+            HasBeenRated = true,
+        });
+        await unitOfWork.CommitAsync();
+
+        await service.CreateEventsFromExistingHistory(userId: 1);
+
+        var events = await unitOfWork.ScrobbleRepository.GetAllEventsForSeries(1);
+        Assert.Single(events);
+        Assert.Equal(ScrobbleEventType.ScoreUpdated, events[0].ScrobbleEventType);
+        Assert.Equal(4.5f, events[0].Rating);
+        Assert.Equal(1, events[0].AppUserId);
+    }
+
+    [Fact]
+    public async Task CreateEventsFromExistingHistory_Review_DoesNotCreateReviewEvent()
+    {
+        var (unitOfWork, context, _) = await CreateDatabase();
+        var (service, licenseService, _, _, _) = await Setup(unitOfWork, context);
+
+        licenseService.HasActiveLicense().Returns(true);
+
+        var user = await unitOfWork.UserRepository.GetUserByIdAsync(1);
+        Assert.NotNull(user);
+        user.AniListAccessToken = ValidJwtToken;
+        await unitOfWork.CommitAsync();
+
+        // A review without a rating should still not generate a Review event, because
+        // ScrobbleReviewUpdate is currently disabled.
+        context.AppUserRating.Add(new AppUserRating
+        {
+            AppUserId = 1,
+            SeriesId = 1,
+            Rating = 0f,
+            HasBeenRated = false,
+            Review = "A great read",
+        });
+        await unitOfWork.CommitAsync();
+
+        await service.CreateEventsFromExistingHistory(userId: 1);
+
+        var events = await unitOfWork.ScrobbleRepository.GetAllEventsForSeries(1);
+        Assert.DoesNotContain(events, e => e.ScrobbleEventType == ScrobbleEventType.Review);
+    }
+
+    [Fact]
+    public async Task CreateEventsFromExistingHistory_Reading_CreatesChapterReadEvents()
+    {
+        var (unitOfWork, context, _) = await CreateDatabase();
+        var (service, licenseService, _, readerService, _) = await Setup(unitOfWork, context);
+
+        licenseService.HasActiveLicense().Returns(true);
+
+        await LinkUserToTestLibraryAsync(unitOfWork, context, 1);
+
+        var user = await unitOfWork.UserRepository.GetUserByIdAsync(1);
+        Assert.NotNull(user);
+        user.AniListAccessToken = ValidJwtToken;
+        await unitOfWork.CommitAsync();
+
+        var chapter1 = await unitOfWork.ChapterRepository.GetChapterAsync(1);
+        Assert.NotNull(chapter1);
+        await readerService.MarkChaptersAsRead(user, 1, [chapter1]);
+        await unitOfWork.CommitAsync();
+
+
+        var progressPagesRead = await context.AppUserProgresses
+            .Where(p => p.AppUserId == 1 && p.SeriesId == 1)
+            .SumAsync(p => p.PagesRead);
+        Assert.Equal(ChapterPages, progressPagesRead);
+
+        await service.CreateEventsFromExistingHistory(userId: 1);
+
+        var events = await unitOfWork.ScrobbleRepository.GetAllEventsForSeries(1);
+        Assert.NotEmpty(events);
+    }
+
+    [Fact]
+    public async Task CreateEventsFromExistingHistory_LibraryScrobblingDisabled_SkipsAllWorkButSetsFlag()
+    {
+        var (unitOfWork, context, _) = await CreateDatabase();
+        var (service, licenseService, _, readerService, _) = await Setup(unitOfWork, context);
+
+        licenseService.HasActiveLicense().Returns(true);
+
+        await LinkUserToTestLibraryAsync(unitOfWork, context, 1);
+
+        var user = await unitOfWork.UserRepository.GetUserByIdAsync(1, AppUserIncludes.WantToRead);
+        Assert.NotNull(user);
+        user.AniListAccessToken = ValidJwtToken;
+        user.WantToRead.Add(new AppUserWantToRead { SeriesId = 1 });
+        await unitOfWork.CommitAsync();
+
+        context.AppUserRating.Add(new AppUserRating
+        {
+            AppUserId = 1,
+            SeriesId = 1,
+            Rating = 4f,
+            HasBeenRated = true,
+        });
+        await unitOfWork.CommitAsync();
+
+        var chapter1 = await unitOfWork.ChapterRepository.GetChapterAsync(1);
+        Assert.NotNull(chapter1);
+        await readerService.MarkChaptersAsRead(user, 1, [chapter1]);
+        await unitOfWork.CommitAsync();
+
+        // Flip the test library to disallow scrobbling AFTER seeding the data
+        var testLibraryId = await GetTestLibraryIdAsync(context);
+        var library = await unitOfWork.LibraryRepository.GetLibraryForIdAsync(testLibraryId);
+        Assert.NotNull(library);
+        library.AllowScrobbling = false;
+        await unitOfWork.CommitAsync();
+
+        await service.CreateEventsFromExistingHistory(userId: 1);
+
+        var events = await unitOfWork.ScrobbleRepository.GetAllEventsForSeries(1);
+        Assert.Empty(events);
+
+        var reloaded = await unitOfWork.UserRepository.GetUserByIdAsync(1);
+        Assert.NotNull(reloaded);
+        Assert.True(reloaded.HasRunScrobbleEventGeneration);
+    }
+
+    [Fact]
+    public async Task CreateEventsFromExistingHistory_SetsHasRunFlagAndTimestamp()
+    {
+        var (unitOfWork, context, _) = await CreateDatabase();
+        var (service, licenseService, _, _, _) = await Setup(unitOfWork, context);
+
+        licenseService.HasActiveLicense().Returns(true);
+
+        var user = await unitOfWork.UserRepository.GetUserByIdAsync(1);
+        Assert.NotNull(user);
+        user.AniListAccessToken = ValidJwtToken;
+        await unitOfWork.CommitAsync();
+
+        var before = DateTime.UtcNow.AddSeconds(-1);
+
+        await service.CreateEventsFromExistingHistory(userId: 1);
+
+        var reloaded = await unitOfWork.UserRepository.GetUserByIdAsync(1);
+        Assert.NotNull(reloaded);
+        Assert.True(reloaded.HasRunScrobbleEventGeneration);
+        Assert.True(reloaded.ScrobbleEventGenerationRan >= before);
+    }
+
+    #endregion
 }

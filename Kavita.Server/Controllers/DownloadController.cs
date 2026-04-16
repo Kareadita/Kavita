@@ -249,7 +249,7 @@ public class DownloadController(
         var series = await unitOfWork.SeriesRepository.GetSeriesByIdAsync(seriesId);
         if (series == null) return BadRequest("Invalid Series");
 
-        var files = await unitOfWork.SeriesRepository.GetFilesForSeries(seriesId);
+        var files = await unitOfWork.SeriesRepository.GetFilesForSeriesAsync(seriesId);
         try
         {
             return await DownloadFiles(files, $"download_{Username!}_s{seriesId}", $"{series.Name}.zip", correlationId);

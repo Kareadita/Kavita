@@ -12,6 +12,7 @@ using Kavita.Database;
 using Kavita.Database.Tests;
 using Kavita.Models.Builders;
 using Kavita.Models.DTOs.Filtering;
+using Kavita.Models.DTOs.Filtering.v2;
 using Kavita.Models.Entities;
 using Kavita.Models.Entities.Enums;
 using Kavita.Models.Entities.Progress;
@@ -164,55 +165,6 @@ public class CleanupServiceTests(ITestOutputHelper outputHelper): AbstractDbTest
         Assert.Equal(2, ds.GetFiles(CoverImageDirectory).Count());
     }
     #endregion
-
-    // #region DeleteTagCoverImages
-    //
-    // [Fact]
-    // public async Task DeleteTagCoverImages_ShouldNotDeleteLinkedFiles()
-    // {
-    //     var filesystem = CreateFileSystem();
-    //     filesystem.AddFile($"{CoverImageDirectory}{ImageService.GetCollectionTagFormat(1)}.jpg", new MockFileData(""));
-    //     filesystem.AddFile($"{CoverImageDirectory}{ImageService.GetCollectionTagFormat(2)}.jpg", new MockFileData(""));
-    //     filesystem.AddFile($"{CoverImageDirectory}{ImageService.GetCollectionTagFormat(1000)}.jpg", new MockFileData(""));
-    //
-    //     // Delete all Series to reset state
-    //     var (unitOfWork, context, _) = await CreateDatabase();
-    //     var (logger, messageHub, readerService) = await Setup(unitOfWork, context);
-    //
-    //     // Add 2 series with cover images
-    //
-    //     _context.Series.Add(new SeriesBuilder("Test 1")
-    //         .WithMetadata(new SeriesMetadataBuilder()
-    //             .WithCollectionTag(new AppUserCollectionBuilder("Something")
-    //                 .WithCoverImage($"{ImageService.GetCollectionTagFormat(1)}.jpg")
-    //                 .Build())
-    //             .Build())
-    //         .WithCoverImage($"{ImageService.GetSeriesFormat(1)}.jpg")
-    //         .WithLibraryId(1)
-    //         .Build());
-    //
-    //     _context.Series.Add(new SeriesBuilder("Test 2")
-    //         .WithMetadata(new SeriesMetadataBuilder()
-    //             .WithCollectionTag(new AppUserCollectionBuilder("Something")
-    //                 .WithCoverImage($"{ImageService.GetCollectionTagFormat(2)}.jpg")
-    //                 .Build())
-    //             .Build())
-    //         .WithCoverImage($"{ImageService.GetSeriesFormat(3)}.jpg")
-    //         .WithLibraryId(1)
-    //         .Build());
-    //
-    //
-    //     await _context.SaveChangesAsync();
-    //     var ds = new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), filesystem);
-    //     var cleanupService = new CleanupService(logger, _unitOfWork, messageHub,
-    //         ds);
-    //
-    //     await cleanupService.DeleteTagCoverImages();
-    //
-    //     Assert.Equal(2, ds.GetFiles(CoverImageDirectory).Count());
-    // }
-    //
-    // #endregion
 
     #region DeleteReadingListCoverImages
     [Fact]
@@ -533,9 +485,63 @@ public class CleanupServiceTests(ITestOutputHelper outputHelper): AbstractDbTest
         await cleanupService.CleanupWantToRead();
 
         var wantToRead =
-            await unitOfWork.SeriesRepository.GetWantToReadForUserAsync(user.Id, new UserParams(), new FilterDto());
+            await unitOfWork.SeriesRepository.GetWantToReadDtosForUserAsync(user.Id, new UserParams(), new FilterV2Dto());
 
         Assert.Equal(0, wantToRead.TotalCount);
+    }
+
+    [Fact]
+    public async Task CleanupWantToRead_ShouldNotRemoveUnreadSeries()
+    {
+        var (unitOfWork, context, _) = await CreateDatabase();
+        var (logger, messageHub, readerService) = await Setup(unitOfWork, context);
+
+        var s = new SeriesBuilder("Test CleanupWantToRead_ShouldNotRemoveUnreadSeries")
+            .WithMetadata(new SeriesMetadataBuilder().WithPublicationStatus(PublicationStatus.Completed).Build())
+            .WithVolume(new VolumeBuilder("1")
+                .WithChapter(new ChapterBuilder("1")
+                    .WithPages(10)
+                    .Build())
+                .Build())
+            .Build();
+
+        var lib = new LibraryBuilder("Test LIb").Build();
+        s.Library = lib;
+        context.Series.Add(s);
+
+        var user = new AppUser()
+        {
+            UserName = "CleanupWantToRead_ShouldNotRemoveUnreadSeries",
+        };
+        context.AppUser.Add(user);
+
+        await unitOfWork.CommitAsync();
+
+        lib.AppUsers ??= new List<AppUser>();
+        lib.AppUsers.Add(user);
+        await unitOfWork.CommitAsync();
+
+        user.WantToRead = new List<AppUserWantToRead>()
+        {
+            new AppUserWantToRead()
+            {
+                SeriesId = s.Id
+            }
+        };
+        await unitOfWork.CommitAsync();
+
+        // Do NOT mark as read — series is unread
+
+        var cleanupService = new CleanupService(Substitute.For<ILogger<CleanupService>>(), unitOfWork,
+            Substitute.For<IEventHub>(),
+            new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), new MockFileSystem()));
+
+        await cleanupService.CleanupWantToRead();
+
+        var wantToRead =
+            await unitOfWork.SeriesRepository.GetWantToReadDtosForUserAsync(user.Id, new UserParams(), new FilterV2Dto());
+
+        Assert.Equal(1, wantToRead.TotalCount);
     }
     #endregion
 

@@ -39,7 +39,6 @@ public interface ILibraryRepository
     Task<LibraryType> GetLibraryTypeAsync(int libraryId, CancellationToken ct = default);
     Task<LibraryType> GetLibraryTypeBySeriesIdAsync(int seriesId, CancellationToken ct = default);
     Task<IEnumerable<Library>> GetLibraryForIdsAsync(IEnumerable<int> libraryIds, LibraryIncludes includes = LibraryIncludes.None, CancellationToken ct = default);
-    Task<int> GetTotalFiles(CancellationToken ct = default);
     IEnumerable<JumpKeyDto> GetJumpBarAsync(int libraryId, CancellationToken ct = default);
     Task<IList<AgeRatingDto>> GetAllAgeRatingsDtosForLibrariesAsync(List<int> libraryIds, CancellationToken ct = default);
     Task<IList<LanguageDto>> GetAllLanguagesForLibrariesAsync(List<int>? libraryIds, CancellationToken ct = default);

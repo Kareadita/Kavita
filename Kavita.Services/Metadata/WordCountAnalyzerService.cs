@@ -45,7 +45,7 @@ public class WordCountAnalyzerService(
         await eventHub.SendMessageAsync(MessageFactory.NotificationProgress,
             MessageFactory.WordCountAnalyzerProgressEvent(libraryId, 0F, ProgressEventType.Started, string.Empty), ct: ct);
 
-        var chunkInfo = await unitOfWork.SeriesRepository.GetChunkInfo(library.Id, ct);
+        var chunkInfo = await unitOfWork.SeriesRepository.GetChunkInfoAsync(library.Id, ct);
         var stopwatch = Stopwatch.StartNew();
         logger.LogInformation("[MetadataService] Refreshing Library {LibraryName}. Total Items: {TotalSize}. Total Chunks: {TotalChunks} with {ChunkSize} size", library.Name, chunkInfo.TotalSize, chunkInfo.TotalChunks, chunkInfo.ChunkSize);
 

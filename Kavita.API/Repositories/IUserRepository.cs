@@ -63,14 +63,11 @@ public interface IUserRepository
     Task<IEnumerable<AppUser>> GetAdminUsersAsync(CancellationToken ct = default);
     Task<bool> IsUserAdminAsync(AppUser? user, CancellationToken ct = default);
     Task<IList<string>> GetRoles(int userId, CancellationToken ct = default);
-    Task<IList<string>> GetRolesByAuthKey(string? apiKey, CancellationToken ct = default);
     Task<UserDto?> GetUserDtoByAuthKeyAsync(string authKey, CancellationToken ct = default);
     Task<int> GetUserIdByAuthKeyAsync(string authKey, CancellationToken ct = default);
-    Task<UserDto?> GetUserDtoById(int userId, CancellationToken ct = default);
     Task<AppUser?> GetUserByUsernameAsync(string username, AppUserIncludes includeFlags = AppUserIncludes.None, CancellationToken ct = default);
     Task<AppUser?> GetUserByIdAsync(int userId, AppUserIncludes includeFlags = AppUserIncludes.None, CancellationToken ct = default);
     Task<AppUser?> GetUserByAuthKey(string authKey, AppUserIncludes includeFlags = AppUserIncludes.None, CancellationToken ct = default);
-    Task<int> GetUserIdByUsernameAsync(string username, CancellationToken ct = default);
     Task<AppUser?> GetUserByEmailAsync(string email, AppUserIncludes includes = AppUserIncludes.None, CancellationToken ct = default);
     Task<IEnumerable<AppUser>> GetAllUsersAsync(AppUserIncludes includeFlags = AppUserIncludes.None, bool track = true, CancellationToken ct = default);
     Task<AppUser?> GetUserByConfirmationToken(string token, CancellationToken ct = default);
@@ -127,12 +124,10 @@ public interface IUserRepository
 
     #region Streams (Dashboard & SideNav)
     Task<IList<DashboardStreamDto>> GetDashboardStreams(int userId, bool visibleOnly = false, CancellationToken ct = default);
-    Task<IList<AppUserDashboardStream>> GetAllDashboardStreams(CancellationToken ct = default);
     Task<AppUserDashboardStream?> GetDashboardStream(int streamId, CancellationToken ct = default);
     Task<IList<AppUserDashboardStream>> GetDashboardStreamWithFilter(int filterId, CancellationToken ct = default);
     Task<IList<SideNavStreamDto>> GetSideNavStreams(int userId, bool visibleOnly = false, CancellationToken ct = default);
     Task<AppUserSideNavStream?> GetSideNavStream(int streamId, CancellationToken ct = default);
-    Task<AppUserSideNavStream?> GetSideNavStreamWithUser(int streamId, CancellationToken ct = default);
     Task<IList<AppUserSideNavStream>> GetSideNavStreamWithFilter(int filterId, CancellationToken ct = default);
     Task<IList<AppUserSideNavStream>> GetSideNavStreamsByLibraryId(int libraryId, CancellationToken ct = default);
     Task<IList<AppUserSideNavStream>> GetSideNavStreamWithExternalSource(int externalSourceId, CancellationToken ct = default);
@@ -153,7 +148,6 @@ public interface IUserRepository
 
     #region Auth Keys
     Task<IList<AuthKeyDto>> GetAuthKeysForUserId(int userId, CancellationToken ct = default);
-    Task<IList<AuthKeyDto>> GetAllAuthKeysDtosWithExpiration(CancellationToken ct = default);
     Task<AppUserAuthKey?> GetAuthKeyById(int authKeyId, CancellationToken ct = default);
     Task<DateTime?> GetAuthKeyExpiration(string authKey, int userId, CancellationToken ct = default);
     #endregion

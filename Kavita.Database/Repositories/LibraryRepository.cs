@@ -124,10 +124,6 @@ public class LibraryRepository(DataContext context, IMapper mapper) : ILibraryRe
             .ToListAsync(ct);
     }
 
-    public async Task<int> GetTotalFiles(CancellationToken ct = default)
-    {
-        return await context.MangaFile.CountAsync(ct);
-    }
 
     public IEnumerable<JumpKeyDto> GetJumpBarAsync(int libraryId, CancellationToken ct = default)
     {

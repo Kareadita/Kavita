@@ -75,10 +75,6 @@ export class UploadService {
     }));
   }
 
-  resetChapterCoverLock(chapterId: number, ) {
-    return this.httpClient.post<number>(this.baseUrl + 'upload/reset-chapter-lock', {id: chapterId, url: ''});
-  }
-
   _cleanBase64Url(url: string) {
     if (url.startsWith('data')) {
       url = url.split(',')[1];
