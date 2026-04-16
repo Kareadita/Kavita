@@ -187,7 +187,7 @@ export class FontManagerComponent implements OnInit {
   private addFont(font: EpubFont) {
     this.fonts.update(x => [...x, font]);
     this.loadedFonts.update(x => [...x, font]);
-    setTimeout(() => this.selectedFont.set(font), 100);
+    setTimeout(() => this.selectFont(font), 100);
   }
 
 
