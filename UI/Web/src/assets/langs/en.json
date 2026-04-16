@@ -3520,7 +3520,7 @@
         "person-name": "Name",
         "person-series-count": "Series Count",
         "person-chapter-count": "Chapter Count",
-        "person-library": "Library",
+        "person-library": "{{stream-list-item.library}}",
         "average-rating": "Average Rating",
         "annotation-owner": "Owner",
         "annotation-series": "Series name",

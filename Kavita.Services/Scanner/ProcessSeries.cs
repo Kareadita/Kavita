@@ -53,6 +53,8 @@ internal sealed record UpdateChapterComicInfoArgs
     public bool ForceUpdate { get; init; } = false;
 }
 
+internal sealed record TemporaryPerson(string Name, string NormalizedName);
+
 /// <summary>
 /// All code needed to Update a Series from a Scan action
 /// </summary>
@@ -962,8 +964,6 @@ public class ProcessSeries(
             logger.LogError(ex, "There was an error updating the chapter tags");
         }
     }
-
-    private sealed record TemporaryPerson(string Name, string NormalizedName);
 
     private async Task<Dictionary<string, Person>> LoadAndCreateMissingChapterPeople(Series series, IList<ParserInfo> parserInfos)
     {
