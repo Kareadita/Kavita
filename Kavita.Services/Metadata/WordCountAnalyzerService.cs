@@ -90,7 +90,7 @@ public class WordCountAnalyzerService(
 
             if (unitOfWork.HasChanges())
             {
-                await unitOfWork.CommitAsync(ct: ct);
+                await unitOfWork.CommitAsync(ct);
             }
 
             logger.LogInformation(
@@ -123,7 +123,7 @@ public class WordCountAnalyzerService(
 
         if (unitOfWork.HasChanges())
         {
-            await unitOfWork.CommitAsync(ct: ct);
+            await unitOfWork.CommitAsync(ct);
         }
 
         await eventHub.SendMessageAsync(MessageFactory.NotificationProgress,

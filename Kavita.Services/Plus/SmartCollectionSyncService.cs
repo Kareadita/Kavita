@@ -202,7 +202,7 @@ public class SmartCollectionSyncService(
 
         try
         {
-            await unitOfWork.CommitAsync(ct: ct);
+            await unitOfWork.CommitAsync(ct);
 
             await unitOfWork.CollectionTagRepository.UpdateCollectionAgeRating(collection, ct);
 

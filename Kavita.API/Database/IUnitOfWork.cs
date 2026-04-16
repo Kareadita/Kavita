@@ -40,11 +40,9 @@ public interface IUnitOfWork
     /// <summary>
     /// Commits pending changes to the database inside an IMMEDIATE transaction so writer
     /// contention waits on the SQLite writer lock (via busy_timeout) instead of failing with
-    /// SQLITE_BUSY_SNAPSHOT. Optionally retries transient BUSY/LOCKED errors.
+    /// SQLITE_BUSY_SNAPSHOT.
     /// </summary>
-    /// <param name="maxRetries">How many extra attempts to make if a retryable SQLite busy/locked error occurs. 0 matches pre-existing behavior.</param>
-    /// <param name="ct"></param>
-    Task<bool> CommitAsync(int maxRetries = 0, CancellationToken ct = default);
+    Task<bool> CommitAsync(CancellationToken ct = default);
     bool HasChanges();
     Task<bool> RollbackAsync(CancellationToken ct = default);
 }

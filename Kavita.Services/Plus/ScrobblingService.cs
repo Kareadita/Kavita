@@ -286,7 +286,7 @@ public class ScrobblingService : IScrobblingService
                 existingEvt.Series.Name, existingEvt.Rating, rating);
             existingEvt.Rating = rating;
             _unitOfWork.ScrobbleRepository.Update(existingEvt);
-            await _unitOfWork.CommitAsync(ct: ct);
+            await _unitOfWork.CommitAsync(ct);
             return;
         }
 
@@ -302,7 +302,7 @@ public class ScrobblingService : IScrobblingService
             Rating = rating
         };
         _unitOfWork.ScrobbleRepository.Attach(evt);
-        await _unitOfWork.CommitAsync(ct: ct);
+        await _unitOfWork.CommitAsync(ct);
         _logger.LogDebug("Added Scrobbling Rating update on {SeriesName} with Userid {AppUserId}", series.Name, userId);
     }
 
@@ -333,7 +333,7 @@ public class ScrobblingService : IScrobblingService
             if (!isAnyProgressOnSeries)
             {
                 _unitOfWork.ScrobbleRepository.Remove(existingEvt);
-                await _unitOfWork.CommitAsync(ct: ct);
+                await _unitOfWork.CommitAsync(ct);
                 _logger.LogDebug("Removed scrobble event for {Series} as there is no reading progress", series.Name);
                 return;
             }
@@ -346,7 +346,7 @@ public class ScrobblingService : IScrobblingService
             existingEvt.ChapterNumber = chapterNumber;
 
             _unitOfWork.ScrobbleRepository.Update(existingEvt);
-            await _unitOfWork.CommitAsync(ct: ct);
+            await _unitOfWork.CommitAsync(ct);
 
             _logger.LogDebug("Overriding scrobble event for {Series} from vol {PrevVol} ch {PrevChap} -> vol {UpdatedVol} ch {UpdatedChap}",
                 existingEvt.Series.Name, prevVol, prevChapter, existingEvt.VolumeNumber, existingEvt.ChapterNumber);
@@ -381,7 +381,7 @@ public class ScrobblingService : IScrobblingService
             }
 
             _unitOfWork.ScrobbleRepository.Attach(evt);
-            await _unitOfWork.CommitAsync(ct: ct);
+            await _unitOfWork.CommitAsync(ct);
             _logger.LogDebug("Added Scrobbling Read update on {SeriesName} - Volume: {VolumeNumber} Chapter: {ChapterNumber} for User: {AppUserId}", series.Name, evt.VolumeNumber, evt.ChapterNumber, userId);
         }
         catch (Exception ex)
@@ -425,7 +425,7 @@ public class ScrobblingService : IScrobblingService
         };
 
         _unitOfWork.ScrobbleRepository.Attach(evt);
-        await _unitOfWork.CommitAsync(ct: ct);
+        await _unitOfWork.CommitAsync(ct);
         _logger.LogDebug("Added Scrobbling WantToRead update on {SeriesName} with Userid {AppUserId} ", series.Name, userId);
     }
 
@@ -1165,7 +1165,7 @@ public class ScrobblingService : IScrobblingService
 
         var events = await _unitOfWork.ScrobbleRepository.GetUserEventsForSeries(userId, seriesId, ct);
         _unitOfWork.ScrobbleRepository.Remove(events);
-        await _unitOfWork.CommitAsync(ct: ct);
+        await _unitOfWork.CommitAsync(ct);
     }
 
     /// <summary>
@@ -1180,7 +1180,7 @@ public class ScrobblingService : IScrobblingService
         var events = await _unitOfWork.ScrobbleRepository.GetProcessedEvents(daysAgo, ct);
         _unitOfWork.ScrobbleRepository.Remove(events);
         _logger.LogInformation("Removing {Count} scrobble events that have been processed {DaysAgo}+ days ago", events.Count, daysAgo);
-        await _unitOfWork.CommitAsync(ct: ct);
+        await _unitOfWork.CommitAsync(ct);
     }
 
     private static bool CanProcessScrobbleEvent(ScrobbleEvent readEvent)

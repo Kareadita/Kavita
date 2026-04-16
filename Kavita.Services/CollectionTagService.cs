@@ -27,7 +27,7 @@ public class CollectionTagService(IUnitOfWork unitOfWork, IEventHub eventHub, ID
 
         if (!unitOfWork.HasChanges()) return true;
 
-        return await unitOfWork.CommitAsync(ct: ct);
+        return await unitOfWork.CommitAsync(ct);
     }
 
 
@@ -78,7 +78,7 @@ public class CollectionTagService(IUnitOfWork unitOfWork, IEventHub eventHub, ID
         }
 
         if (!unitOfWork.HasChanges()) return true;
-        return await unitOfWork.CommitAsync(ct: ct);
+        return await unitOfWork.CommitAsync(ct);
     }
 
     public async Task<bool> RemoveTagFromSeries(AppUserCollection? tag, IEnumerable<int> seriesIds, CancellationToken ct = default)
@@ -95,7 +95,7 @@ public class CollectionTagService(IUnitOfWork unitOfWork, IEventHub eventHub, ID
 
         if (!unitOfWork.HasChanges()) return true;
 
-        var result  = await unitOfWork.CommitAsync(ct: ct);
+        var result  = await unitOfWork.CommitAsync(ct);
         if (tag.Items.Count > 0)
         {
             await unitOfWork.CollectionTagRepository.UpdateCollectionAgeRating(tag, ct);

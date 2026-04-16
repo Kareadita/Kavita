@@ -91,7 +91,7 @@ public class AnnotationService(
             };
 
             unitOfWork.AnnotationRepository.Attach(annotation);
-            await unitOfWork.CommitAsync(ct: ct);
+            await unitOfWork.CommitAsync(ct);
 
             return (await unitOfWork.AnnotationRepository.GetAnnotationDto(annotation.Id, ct))!;
         }
@@ -125,7 +125,7 @@ public class AnnotationService(
 
             unitOfWork.AnnotationRepository.Update(annotation);
 
-            if (!unitOfWork.HasChanges() || await unitOfWork.CommitAsync(ct: ct))
+            if (!unitOfWork.HasChanges() || await unitOfWork.CommitAsync(ct))
             {
                 dto = (await unitOfWork.AnnotationRepository.GetAnnotationDto(annotation.Id, ct))!;
 

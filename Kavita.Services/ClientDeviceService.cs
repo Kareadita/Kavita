@@ -96,7 +96,7 @@ public class ClientDeviceService(IDataContext context, IUnitOfWork unitOfWork ,I
         }
 
         device.FriendlyName = newName;
-        await unitOfWork.CommitAsync(ct: ct);
+        await unitOfWork.CommitAsync(ct);
 
         logger.LogInformation("User {UserId} renamed device {DeviceId} to '{Name}'",
             userId, deviceId, newName);
@@ -114,7 +114,7 @@ public class ClientDeviceService(IDataContext context, IUnitOfWork unitOfWork ,I
         }
 
         device.IsActive = false;
-        await unitOfWork.CommitAsync(ct: ct);
+        await unitOfWork.CommitAsync(ct);
 
         logger.LogInformation("User {UserId} removed device {DeviceId}", userId, deviceId);
 
@@ -130,7 +130,7 @@ public class ClientDeviceService(IDataContext context, IUnitOfWork unitOfWork ,I
         if (!string.IsNullOrWhiteSpace(dto.Name))
         {
             device.FriendlyName = dto.Name;
-            await unitOfWork.CommitAsync(ct: ct);
+            await unitOfWork.CommitAsync(ct);
         }
     }
 

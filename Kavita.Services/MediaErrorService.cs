@@ -46,7 +46,7 @@ public class MediaErrorService(IUnitOfWork unitOfWork) : IMediaErrorService
 
 
         unitOfWork.MediaErrorRepository.Attach(error);
-        await unitOfWork.CommitAsync(ct: ct);
+        await unitOfWork.CommitAsync(ct);
     }
 
 }

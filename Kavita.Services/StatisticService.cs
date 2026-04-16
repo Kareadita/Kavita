@@ -772,7 +772,7 @@ public class StatisticService(ILogger<StatisticService> logger, IDataContext con
         {
             context.Entry(existingRecord).State = EntityState.Modified;
         }
-        await unitOfWork.CommitAsync(ct: ct);
+        await unitOfWork.CommitAsync(ct);
     }
 
     public async Task<long> TimeSpentReadingForUsersAsync(IList<int> userIds, IList<int> libraryIds)

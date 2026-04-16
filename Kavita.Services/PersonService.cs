@@ -59,7 +59,7 @@ public class PersonService(IUnitOfWork unitOfWork): IPersonService
 
         unitOfWork.PersonRepository.Remove(src);
         unitOfWork.PersonRepository.Update(dst);
-        await unitOfWork.CommitAsync(ct: ct);
+        await unitOfWork.CommitAsync(ct);
     }
 
     private static void MergeChapterPeople(Person dst, Person src)

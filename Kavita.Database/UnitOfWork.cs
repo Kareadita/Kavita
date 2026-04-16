@@ -8,9 +8,7 @@ using Kavita.API.Repositories;
 using Kavita.Database.Repositories;
 using Kavita.Models.Entities.User;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Logging;
 
 namespace Kavita.Database;
 
@@ -20,14 +18,12 @@ public class UnitOfWork : IUnitOfWork
     private readonly DataContext _context;
     private readonly IMapper _mapper;
     private readonly UserManager<AppUser> _userManager;
-    private readonly ILogger<UnitOfWork> _logger;
 
-    public UnitOfWork(DataContext context, IMapper mapper, UserManager<AppUser> userManager, ILogger<UnitOfWork> logger)
+    public UnitOfWork(DataContext context, IMapper mapper, UserManager<AppUser> userManager)
     {
         _context = context;
         _mapper = mapper;
         _userManager = userManager;
-        _logger = logger;
 
         SeriesRepository = new SeriesRepository(_context, _mapper);
         UserRepository = new UserRepository(_context, _userManager, _mapper);
@@ -97,52 +93,13 @@ public class UnitOfWork : IUnitOfWork
     /// <summary>
     /// Commits pending changes inside an IMMEDIATE SQLite transaction so writer contention
     /// waits on the writer lock (via busy_timeout) instead of failing with SQLITE_BUSY_SNAPSHOT.
-    /// Optionally retries transient BUSY/LOCKED errors with jittered backoff.
     /// </summary>
-    public async Task<bool> CommitAsync(int maxRetries = 0, CancellationToken ct = default)
+    public async Task<bool> CommitAsync(CancellationToken ct = default)
     {
-        var attempt = 0;
-
-        while (true)
-        {
-            try
-            {
-                await using var tx = await _context.Database.BeginTransactionAsync(IsolationLevel.Serializable, ct);
-
-                // Push changes to the DB, but do not reset the tracker yet so that we can retry with state
-                var result = await _context.SaveChangesAsync(acceptAllChangesOnSuccess: false, ct) > 0;
-
-                await tx.CommitAsync(ct);
-                return result;
-            }
-            catch (Exception ex) when (IsSqliteBusyError(ex))
-            {
-                if (attempt >= maxRetries)
-                {
-                    _logger.LogError(ex, "SQLite busy on CommitAsync after {Attempts} attempt(s)", attempt + 1);
-                    throw;
-                }
-
-                attempt++;
-                _logger.LogWarning(ex, "SQLite busy on CommitAsync, retrying ({Attempt}/{MaxRetries})", attempt, maxRetries);
-                await Task.Delay(50 * attempt + Random.Shared.Next(0, 50), ct);
-            }
-        }
-    }
-
-    private static bool IsSqliteBusyError(Exception? ex)
-    {
-        while (ex != null)
-        {
-            if (ex is SqliteException { SqliteErrorCode: 5 /* SQLITE_BUSY */ or 6 /* SQLITE_LOCKED */ })
-            {
-                return true;
-            }
-
-            ex = ex.InnerException;
-        }
-
-        return false;
+        await using var tx = await _context.Database.BeginTransactionAsync(IsolationLevel.Serializable, ct);
+        var result = await _context.SaveChangesAsync(ct) > 0;
+        await tx.CommitAsync(ct);
+        return result;
     }
 
     /// <summary>

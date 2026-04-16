@@ -179,7 +179,7 @@ public class LicenseService(
         var serverSetting = await unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.LicenseKey, ct);
         serverSetting.Value = string.Empty;
         unitOfWork.SettingsRepository.Update(serverSetting);
-        await unitOfWork.CommitAsync(ct: ct);
+        await unitOfWork.CommitAsync(ct);
 
         var provider = cachingProviderFactory.GetCachingProvider(EasyCacheProfiles.License);
         await provider.RemoveAsync(CacheKey, ct);
@@ -195,7 +195,7 @@ public class LicenseService(
             throw new KavitaException("unable-to-register-k+");
         serverSetting.Value = lic;
         unitOfWork.SettingsRepository.Update(serverSetting);
-        await unitOfWork.CommitAsync(ct: ct);
+        await unitOfWork.CommitAsync(ct);
     }
 
 

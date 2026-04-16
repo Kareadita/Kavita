@@ -54,7 +54,7 @@ public abstract class AbstractDbTest(ITestOutputHelper testOutputHelper): Abstra
         });
         var mapper = config.CreateMapper();
 
-        var unitOfWork = new UnitOfWork(_context, mapper, null!, NullLogger<UnitOfWork>.Instance);
+        var unitOfWork = new UnitOfWork(_context, mapper, null!);
 
         _context.ChangeTracker.Clear();
 

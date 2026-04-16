@@ -75,7 +75,7 @@ public class MediaConversionService(
 
             unitOfWork.UserRepository.Update(bookmark);
 
-            await unitOfWork.CommitAsync(ct: ct);
+            await unitOfWork.CommitAsync(ct);
             await eventHub.SendMessageAsync(MessageFactory.NotificationProgress,
                 MessageFactory.ConvertBookmarksProgressEvent(count / bookmarks.Count, ProgressEventType.Updated), ct: ct);
 
@@ -135,7 +135,7 @@ public class MediaConversionService(
 
             unitOfWork.LibraryRepository.Update(library);
 
-            await unitOfWork.CommitAsync(ct: ct);
+            await unitOfWork.CommitAsync(ct);
             await eventHub.SendMessageAsync(MessageFactory.NotificationProgress,
                 MessageFactory.ConvertCoverProgressEvent(count / totalCount, ProgressEventType.Updated), ct: ct);
 
@@ -152,7 +152,7 @@ public class MediaConversionService(
 
             unitOfWork.ReadingListRepository.Update(readingList);
 
-            await unitOfWork.CommitAsync(ct: ct);
+            await unitOfWork.CommitAsync(ct);
             await eventHub.SendMessageAsync(MessageFactory.NotificationProgress,
                 MessageFactory.ConvertCoverProgressEvent(count / totalCount, ProgressEventType.Updated), ct: ct);
 
@@ -169,7 +169,7 @@ public class MediaConversionService(
 
             unitOfWork.CollectionTagRepository.Update(collection);
 
-            await unitOfWork.CommitAsync(ct: ct);
+            await unitOfWork.CommitAsync(ct);
             await eventHub.SendMessageAsync(MessageFactory.NotificationProgress,
                 MessageFactory.ConvertCoverProgressEvent(count / totalCount, ProgressEventType.Updated), ct: ct);
 
@@ -186,7 +186,7 @@ public class MediaConversionService(
 
             unitOfWork.ChapterRepository.Update(chapter);
 
-            await unitOfWork.CommitAsync(ct: ct);
+            await unitOfWork.CommitAsync(ct);
             await eventHub.SendMessageAsync(MessageFactory.NotificationProgress,
                 MessageFactory.ConvertCoverProgressEvent(count / totalCount, ProgressEventType.Updated), ct: ct);
 
@@ -200,7 +200,7 @@ public class MediaConversionService(
             if (string.IsNullOrEmpty(volume.CoverImage)) continue;
             volume.CoverImage = volume.Chapters.MinBy(x => x.MinNumber, ChapterSortComparerDefaultFirst.Default)?.CoverImage;
             unitOfWork.VolumeRepository.Update(volume);
-            await unitOfWork.CommitAsync(ct: ct);
+            await unitOfWork.CommitAsync(ct);
         }
 
         logger.LogInformation("[MediaConversionService] Starting conversion of series");
@@ -213,7 +213,7 @@ public class MediaConversionService(
                 series.CoverImage.Replace(Path.GetExtension(series.CoverImage), encodeFormat.GetExtension()) : Path.GetFileName(newFile);
 
             unitOfWork.SeriesRepository.Update(series);
-            await unitOfWork.CommitAsync(ct: ct);
+            await unitOfWork.CommitAsync(ct);
             await eventHub.SendMessageAsync(MessageFactory.NotificationProgress,
                 MessageFactory.ConvertCoverProgressEvent(count / totalCount, ProgressEventType.Updated), ct: ct);
             count++;
@@ -228,7 +228,7 @@ public class MediaConversionService(
                 logger.LogDebug("[SeriesCoverImageBug] Setting Series Cover Image to null: {SeriesId}", series.Id);
             }
             unitOfWork.SeriesRepository.Update(series);
-            await unitOfWork.CommitAsync(ct: ct);
+            await unitOfWork.CommitAsync(ct);
         }
 
         // Get all volumes and remap their covers

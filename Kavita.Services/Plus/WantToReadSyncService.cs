@@ -73,7 +73,7 @@ public class WantToReadSyncService(
 
                 // Save the left over entities
                 unitOfWork.UserRepository.Update(user);
-                await unitOfWork.CommitAsync(ct: ct);
+                await unitOfWork.CommitAsync(ct);
 
                 // Trigger CleanupService to cleanup any series in WantToRead that don't belong
                 RecurringJob.TriggerJob(TaskScheduler.RemoveFromWantToReadTaskId);

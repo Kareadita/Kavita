@@ -88,7 +88,7 @@ public class BackupServiceTests(ITestOutputHelper outputHelper): AbstractDbTest(
             var mapper = config.CreateMapper();
 
             GlobalConfiguration.Configuration.UseInMemoryStorage();
-            var unitOfWork = new UnitOfWork(context, mapper, null, NullLogger<UnitOfWork>.Instance);
+            var unitOfWork = new UnitOfWork(context, mapper, null!);
 
             var backupService = new BackupService(_logger, unitOfWork, ds, _messageHub);
 

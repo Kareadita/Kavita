@@ -314,7 +314,7 @@ public class SeriesService(
             }
 
             unitOfWork.SeriesRepository.Update(series.Metadata);
-            await unitOfWork.CommitAsync(ct: ct);
+            await unitOfWork.CommitAsync(ct);
 
             // Trigger code to clean up tags, collections, people, etc
             try
@@ -464,7 +464,7 @@ public class SeriesService(
                 library.UpdateLastModified();
                 unitOfWork.LibraryRepository.Update(library);
             }
-            await unitOfWork.CommitAsync(ct: ct);
+            await unitOfWork.CommitAsync(ct);
 
 
             foreach (var s in series)
@@ -633,7 +633,7 @@ public class SeriesService(
         await UpdatePrequelSequelRelations(dto.Sequels, series, RelationKind.Sequel);
 
         if (!unitOfWork.HasChanges()) return true;
-        return await unitOfWork.CommitAsync(ct: ct);
+        return await unitOfWork.CommitAsync(ct);
     }
 
     /// <summary>

@@ -142,7 +142,7 @@ public class CollectionController(IUnitOfWork unitOfWork, ICollectionTagService 
         }
 
         if (!unitOfWork.HasChanges()) return Ok();
-        await unitOfWork.CommitAsync(ct: ct);
+        await unitOfWork.CommitAsync(ct);
 
         return Ok();
     }
@@ -167,7 +167,7 @@ public class CollectionController(IUnitOfWork unitOfWork, ICollectionTagService 
 
 
         if (!unitOfWork.HasChanges()) return Ok();
-        await unitOfWork.CommitAsync(ct: ct);
+        await unitOfWork.CommitAsync(ct);
 
         return Ok();
     }
@@ -210,7 +210,7 @@ public class CollectionController(IUnitOfWork unitOfWork, ICollectionTagService 
             tag.Items.Add(s);
         }
         unitOfWork.UserRepository.Update(user);
-        if (await unitOfWork.CommitAsync(ct: ct)) return Ok();
+        if (await unitOfWork.CommitAsync(ct)) return Ok();
 
         return BadRequest(await localizationService.TranslateAsync(UserId, "generic-error"));
     }
@@ -315,7 +315,7 @@ public class CollectionController(IUnitOfWork unitOfWork, ICollectionTagService 
             user.Collections.Add(newCollection);
 
             unitOfWork.UserRepository.Update(user);
-            await unitOfWork.CommitAsync(ct: ct);
+            await unitOfWork.CommitAsync(ct);
 
             // Trigger Stack Refresh for just one stack (not all)
             BackgroundJob.Enqueue(() => collectionSyncService.Sync(newCollection.Id, CancellationToken.None));

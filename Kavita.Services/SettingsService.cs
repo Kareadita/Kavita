@@ -98,7 +98,7 @@ public class SettingsService(
         }
 
         // Save changes
-        await unitOfWork.CommitAsync(ct: ct);
+        await unitOfWork.CommitAsync(ct);
 
         // Return updated settings
         return await unitOfWork.SettingsRepository.GetMetadataSettingDto(ct);
@@ -453,7 +453,7 @@ public class SettingsService(
 
         try
         {
-            await unitOfWork.CommitAsync(ct: ct);
+            await unitOfWork.CommitAsync(ct);
 
             if (!updateSettingsDto.AllowStatCollection)
             {

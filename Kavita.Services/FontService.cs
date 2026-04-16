@@ -119,7 +119,7 @@ public class FontService(IDirectoryService directoryService, IUnitOfWork unitOfW
             Provider = FontProvider.User
         };
         unitOfWork.EpubFontRepository.Add(font);
-        await unitOfWork.CommitAsync(ct: ct);
+        await unitOfWork.CommitAsync(ct);
 
         // default: Send update to UI
         return font;
