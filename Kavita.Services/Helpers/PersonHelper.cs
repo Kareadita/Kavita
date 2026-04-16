@@ -66,7 +66,8 @@ public static class PersonHelper
 
         var newPeople = normalizedPeople
             .Where(p => !existingPeopleNames.Contains(p))
-            .Select(p => databasePeople[p])
+            .Select(p => databasePeople.TryGetValue(p, out var person) ? person : null)
+            .WhereNotNull()
             .ToList();
 
         foreach (var person in newPeople)
@@ -114,7 +115,8 @@ public static class PersonHelper
 
         var newPeople = normalizedPeople
             .Where(p => !existingPeopleNames.Contains(p))
-            .Select(p => databasePeople[p])
+            .Select(p => databasePeople.TryGetValue(p, out var person) ? person : null)
+            .WhereNotNull()
             .ToList();
 
         foreach (var person in newPeople)
