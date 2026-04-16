@@ -538,6 +538,60 @@ public class CleanupServiceTests(ITestOutputHelper outputHelper): AbstractDbTest
 
         Assert.Equal(0, wantToRead.TotalCount);
     }
+
+    [Fact]
+    public async Task CleanupWantToRead_ShouldNotRemoveUnreadSeries()
+    {
+        var (unitOfWork, context, _) = await CreateDatabase();
+        var (logger, messageHub, readerService) = await Setup(unitOfWork, context);
+
+        var s = new SeriesBuilder("Test CleanupWantToRead_ShouldNotRemoveUnreadSeries")
+            .WithMetadata(new SeriesMetadataBuilder().WithPublicationStatus(PublicationStatus.Completed).Build())
+            .WithVolume(new VolumeBuilder("1")
+                .WithChapter(new ChapterBuilder("1")
+                    .WithPages(10)
+                    .Build())
+                .Build())
+            .Build();
+
+        var lib = new LibraryBuilder("Test LIb").Build();
+        s.Library = lib;
+        context.Series.Add(s);
+
+        var user = new AppUser()
+        {
+            UserName = "CleanupWantToRead_ShouldNotRemoveUnreadSeries",
+        };
+        context.AppUser.Add(user);
+
+        await unitOfWork.CommitAsync();
+
+        lib.AppUsers ??= new List<AppUser>();
+        lib.AppUsers.Add(user);
+        await unitOfWork.CommitAsync();
+
+        user.WantToRead = new List<AppUserWantToRead>()
+        {
+            new AppUserWantToRead()
+            {
+                SeriesId = s.Id
+            }
+        };
+        await unitOfWork.CommitAsync();
+
+        // Do NOT mark as read — series is unread
+
+        var cleanupService = new CleanupService(Substitute.For<ILogger<CleanupService>>(), unitOfWork,
+            Substitute.For<IEventHub>(),
+            new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), new MockFileSystem()));
+
+        await cleanupService.CleanupWantToRead();
+
+        var wantToRead =
+            await unitOfWork.SeriesRepository.GetWantToReadForUserV2Async(user.Id, new UserParams(), new FilterV2Dto());
+
+        Assert.Equal(1, wantToRead.TotalCount);
+    }
     #endregion
 
     #region ConsolidateProgress

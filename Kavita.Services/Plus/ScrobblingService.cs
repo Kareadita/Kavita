@@ -1085,7 +1085,6 @@ public class ScrobblingService : IScrobblingService
             await ScrobbleReviewUpdate(userId, review.SeriesId, string.Empty, review.Review!);
         }
 
-        // TODO: We can refactor this to remove some extra guards
         var seriesWithProgress =
             await _unitOfWork.SeriesRepository.GetSeriesDtoForLibraryIdV2Async(userId, new UserParams(), new FilterV2Dto()
             {

@@ -9,7 +9,6 @@ using Kavita.API.Repositories;
 using Kavita.API.Services;
 using Kavita.API.Services.SignalR;
 using Kavita.Common.Helpers;
-using Kavita.Models.DTOs.Filtering;
 using Kavita.Models.DTOs.Filtering.v2;
 using Kavita.Models.DTOs.SignalR;
 using Kavita.Models.Entities.Enums;
@@ -382,44 +381,30 @@ public class CleanupService(
     {
         logger.LogInformation("Performing cleanup of Series that are Completed and have been fully read that are in Want To Read list");
 
-        var libraryIds = (await unitOfWork.LibraryRepository.GetLibrariesAsync(ct: ct)).Select(l => l.Id).ToList();
-        var filter = new FilterDto()
-        {
-            PublicationStatus = new List<PublicationStatus>()
-            {
-                PublicationStatus.Completed,
-                PublicationStatus.Cancelled
-            },
-            Libraries = libraryIds,
-            ReadStatus = new ReadStatus()
-            {
-                Read = true,
-                InProgress = false,
-                NotRead = false
-            }
-        };
-
-        var filterV2 = new FilterV2Dto()
+        var filter = new FilterV2Dto()
         {
             Combination = FilterCombination.And,
             Statements =
             [
                 new FilterStatementDto()
                 {
-                    Comparison = FilterComparison.MustContains,
+                    Comparison = FilterComparison.Contains,
                     Field = SeriesFilterField.PublicationStatus,
-                    Value = $"{PublicationStatus.Completed},{PublicationStatus.Cancelled}"
+                    Value = $"{(int) PublicationStatus.Completed},{(int) PublicationStatus.Cancelled}"
                 },
                 new FilterStatementDto()
                 {
-
+                    Comparison = FilterComparison.Equal,
+                    Field = SeriesFilterField.ReadProgress,
+                    Value = "100"
                 }
             ]
         };
 
         foreach (var user in await unitOfWork.UserRepository.GetAllUsersAsync(AppUserIncludes.WantToRead, ct: ct))
         {
-            var series = await unitOfWork.SeriesRepository.GetSeriesDtoForLibraryIdAsync(0, user.Id, new UserParams(), filter);
+            var series = await unitOfWork.SeriesRepository.GetSeriesDtoForLibraryIdV2Async(user.Id,
+                new UserParams() { PageSize = int.MaxValue }, filter, ct: ct);
             var seriesIds = series.Select(s => s.Id).ToList();
             if (seriesIds.Count == 0) continue;
 
