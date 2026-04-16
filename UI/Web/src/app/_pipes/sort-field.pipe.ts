@@ -89,7 +89,9 @@ export class SortFieldPipe implements PipeTransform {
         return this.translocoService.translate('sort-field-pipe.random');
       case SeriesSortField.UserRating:
           return this.translocoService.translate('sort-field-pipe.user-rating');
-      }
+      case SeriesSortField.UnreadChapterCount:
+        return this.translocoService.translate('sort-field-pipe.unread-chapter-count');
+    }
   }
 
 }

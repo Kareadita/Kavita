@@ -41,6 +41,11 @@ public static class SeriesSortExtensions
             SeriesSortField.UserRating => query.DoOrderBy(s => s.Ratings.Where(r => r.SeriesId == s.Id && r.AppUserId == userId).Max(r => r.Rating), sortOptions)
                 .ThenBy(s => s.SortName.ToLower()),
             SeriesSortField.Random => query.DoOrderBy(s => EF.Functions.Random(), sortOptions),
+            SeriesSortField.UnreadChapterCount => query.DoOrderBy(s => s.Volumes.Sum(
+                v => v.Chapters.Count(
+                    c => c.UserProgress.Where(p => p.AppUserId == userId)
+                        .Select(p => p.PagesRead).FirstOrDefault() == 0
+                )), sortOptions),
             _ => query
         };
 
