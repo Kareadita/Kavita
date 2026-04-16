@@ -867,17 +867,8 @@ public class ScrobblingServiceTests(ITestOutputHelper outputHelper): AbstractDbT
         Assert.DoesNotContain(events, e => e.ScrobbleEventType == ScrobbleEventType.Review);
     }
 
-    // BUG (regression guard): CreateEventsFromExistingHistoryForUser builds its progress filter with
-    // FilterComparison.MustContains on SeriesFilterField.Libraries, but ApplyLibraryFilter only
-    // treats Equal / Contains as INCLUDE comparisons and routes every other comparison — including
-    // MustContains — into the EXCLUDE list. The effect is that the scrobbling-enabled libraries get
-    // excluded instead of included, and GetSeriesDtoForLibraryIdV2Async returns nothing. No
-    // ChapterRead scrobble events are ever produced by the backfill today. This test pins that
-    // broken behavior so that when the Libraries filter is switched to Equal / Contains (or
-    // ApplyLibraryFilter is taught to understand MustContains), this test fails and forces the
-    // assertion to flip to "creates a ChapterRead event".
     [Fact]
-    public async Task CreateEventsFromExistingHistory_Reading_CurrentlyDoesNotCreateChapterReadEvent_BugPin()
+    public async Task CreateEventsFromExistingHistory_Reading_CreatesChapterReadEvents()
     {
         var (unitOfWork, context, _) = await CreateDatabase();
         var (service, licenseService, _, readerService, _) = await Setup(unitOfWork, context);
@@ -896,7 +887,7 @@ public class ScrobblingServiceTests(ITestOutputHelper outputHelper): AbstractDbT
         await readerService.MarkChaptersAsRead(user, 1, [chapter1]);
         await unitOfWork.CommitAsync();
 
-        // Sanity checks — progress exists and the series has measurable partial progress.
+
         var progressPagesRead = await context.AppUserProgresses
             .Where(p => p.AppUserId == 1 && p.SeriesId == 1)
             .SumAsync(p => p.PagesRead);
@@ -905,7 +896,7 @@ public class ScrobblingServiceTests(ITestOutputHelper outputHelper): AbstractDbT
         await service.CreateEventsFromExistingHistory(userId: 1);
 
         var events = await unitOfWork.ScrobbleRepository.GetAllEventsForSeries(1);
-        Assert.Empty(events);
+        Assert.NotEmpty(events);
     }
 
     [Fact]
