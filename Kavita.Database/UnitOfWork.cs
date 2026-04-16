@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Data;
 using System.Threading;
 using System.Threading.Tasks;
 using AutoMapper;
@@ -7,6 +8,7 @@ using Kavita.API.Repositories;
 using Kavita.Database.Repositories;
 using Kavita.Models.Entities.User;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 
 namespace Kavita.Database;
 
@@ -89,22 +91,15 @@ public class UnitOfWork : IUnitOfWork
     public IReadingListRemapRuleRepository RemapRuleRepository { get; }
 
     /// <summary>
-    /// Commits changes to the DB. Completes the open transaction.
+    /// Commits pending changes inside an IMMEDIATE SQLite transaction so writer contention
+    /// waits on the writer lock (via busy_timeout) instead of failing with SQLITE_BUSY_SNAPSHOT.
     /// </summary>
-    /// <returns></returns>
-    public bool Commit()
-    {
-        return _context.SaveChanges() > 0;
-    }
-
-    /// <summary>
-    /// Commits changes to the DB. Completes the open transaction.
-    /// </summary>
-    /// <param name="ct"></param>
-    /// <returns></returns>
     public async Task<bool> CommitAsync(CancellationToken ct = default)
     {
-        return await _context.SaveChangesAsync(ct) > 0;
+        await using var tx = await _context.Database.BeginTransactionAsync(IsolationLevel.Serializable, ct);
+        var result = await _context.SaveChangesAsync(ct) > 0;
+        await tx.CommitAsync(ct);
+        return result;
     }
 
     /// <summary>
@@ -114,16 +109,6 @@ public class UnitOfWork : IUnitOfWork
     public bool HasChanges()
     {
         return _context.ChangeTracker.HasChanges();
-    }
-
-    public async Task BeginTransactionAsync()
-    {
-        await _context.Database.BeginTransactionAsync();
-    }
-
-    public async Task CommitTransactionAsync()
-    {
-        await _context.Database.CommitTransactionAsync();
     }
 
     /// <summary>

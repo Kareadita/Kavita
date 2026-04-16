@@ -196,7 +196,8 @@ public class Startup
         services.AddHangfire(configuration => configuration
             .UseSimpleAssemblyNameTypeSerializer()
             .UseRecommendedSerializerSettings()
-            .UseInMemoryStorage());
+            .UseInMemoryStorage()
+            .UseSerilogLogProvider());
             //.UseSQLiteStorage("config/Hangfire.db"));
             //// UseSQLiteStorage - SQLite has some issues around resuming jobs when aborted (and locking can cause high utilization)
             /// (NOTE: There is code to clear jobs on startup a redditor gave me)

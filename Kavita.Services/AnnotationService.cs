@@ -130,7 +130,7 @@ public class AnnotationService(
                 dto = (await unitOfWork.AnnotationRepository.GetAnnotationDto(annotation.Id, ct))!;
 
                 await eventHub.SendMessageToAsync(MessageFactory.AnnotationUpdate,
-                    MessageFactory.AnnotationUpdateEvent(dto), userId);
+                    MessageFactory.AnnotationUpdateEvent(dto), userId, ct);
 
                 return dto;
             }

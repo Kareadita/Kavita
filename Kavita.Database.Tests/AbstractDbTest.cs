@@ -11,6 +11,7 @@ using Kavita.Models.Entities.Enums;
 using Kavita.Models.Entities.User;
 using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging.Abstractions;
 using NSubstitute;
 using Xunit.Abstractions;
 

@@ -95,7 +95,7 @@ public class CollectionTagService(IUnitOfWork unitOfWork, IEventHub eventHub, ID
 
         if (!unitOfWork.HasChanges()) return true;
 
-        var result  =  await unitOfWork.CommitAsync(ct);
+        var result  = await unitOfWork.CommitAsync(ct);
         if (tag.Items.Count > 0)
         {
             await unitOfWork.CollectionTagRepository.UpdateCollectionAgeRating(tag, ct);

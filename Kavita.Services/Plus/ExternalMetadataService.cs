@@ -318,7 +318,7 @@ public class ExternalMetadataService : IExternalMetadataService
             await _unitOfWork.CommitAsync(ct);
 
             // Regenerate all events for the series for all users
-            BackgroundJob.Enqueue(() => _scrobblingService.CreateEventsFromExistingHistoryForSeries(seriesId));
+            BackgroundJob.Enqueue(() => _scrobblingService.CreateEventsFromExistingHistoryForSeries(seriesId, CancellationToken.None));
 
             // Name can be null on Series even with a direct match
             _logger.LogInformation("Matched {SeriesName} with Kavita+ Series {MatchSeriesName}", series.Name,

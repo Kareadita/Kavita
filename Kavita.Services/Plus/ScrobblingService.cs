@@ -268,7 +268,7 @@ public class ScrobblingService : IScrobblingService
     {
         if (!await _licenseService.HasActiveLicense(ct: ct)) return;
 
-        var series = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(seriesId, SeriesIncludes.Metadata | SeriesIncludes.Library | SeriesIncludes.ExternalMetadata, ct);
+        var series = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(seriesId, SeriesIncludes.Library, ct);
         if (series == null) throw new KavitaException(await _localizationService.TranslateAsync(userId, "series-doesnt-exist"));
 
         var user = await _unitOfWork.UserRepository.GetUserByIdAsync(userId, AppUserIncludes.UserPreferences, ct);
@@ -310,7 +310,7 @@ public class ScrobblingService : IScrobblingService
     {
         if (!await _licenseService.HasActiveLicense(ct: ct)) return;
 
-        var series = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(seriesId, SeriesIncludes.Metadata | SeriesIncludes.Library | SeriesIncludes.ExternalMetadata, ct);
+        var series = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(seriesId, SeriesIncludes.Library, ct);
         if (series == null) throw new KavitaException(await _localizationService.TranslateAsync(userId, "series-doesnt-exist"));
 
         var user = await _unitOfWork.UserRepository.GetUserByIdAsync(userId, AppUserIncludes.UserPreferences, ct);
@@ -394,7 +394,7 @@ public class ScrobblingService : IScrobblingService
     {
         if (!await _licenseService.HasActiveLicense(ct: ct)) return;
 
-        var series = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(seriesId, SeriesIncludes.Metadata | SeriesIncludes.Library | SeriesIncludes.ExternalMetadata, ct);
+        var series = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(seriesId, SeriesIncludes.Library, ct);
         if (series == null) throw new KavitaException(await _localizationService.TranslateAsync(userId, "series-doesnt-exist"));
 
         if (!series.Library.AllowScrobbling) return;
@@ -436,7 +436,7 @@ public class ScrobblingService : IScrobblingService
     /// </summary>
     /// <param name="userId"></param>
     /// <param name="seriesId"></param>
-    /// <param name="series"></param>
+    /// <param name="series">Should have Library resolved</param>
     /// <returns></returns>
     private async Task<bool> CheckIfCannotScrobble(int userId, int seriesId, Series series)
     {
@@ -448,7 +448,8 @@ public class ScrobblingService : IScrobblingService
             return true;
         }
 
-        var library = await _unitOfWork.LibraryRepository.GetLibraryForIdAsync(series.LibraryId);
+        // TODO: Double check if all callers pass with Library or not
+        var library = series.Library ?? await _unitOfWork.LibraryRepository.GetLibraryForIdAsync(series.LibraryId);
         if (library is not {AllowScrobbling: true} || !ExternalMetadataService.IsPlusEligible(library.Type)) return true;
 
         return false;

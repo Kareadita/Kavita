@@ -10,6 +10,7 @@ using Kavita.Models.AutoMapper;
 using Kavita.Services.Scanner;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Abstractions;
 using NSubstitute;
 using Xunit.Abstractions;
 
@@ -87,7 +88,7 @@ public class BackupServiceTests(ITestOutputHelper outputHelper): AbstractDbTest(
             var mapper = config.CreateMapper();
 
             GlobalConfiguration.Configuration.UseInMemoryStorage();
-            var unitOfWork = new UnitOfWork(context, mapper, null);
+            var unitOfWork = new UnitOfWork(context, mapper, null!);
 
             var backupService = new BackupService(_logger, unitOfWork, ds, _messageHub);
 
