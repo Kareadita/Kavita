@@ -483,7 +483,7 @@ public class AccountController(UserManager<AppUser> userManager,
         await userManager.UpdateAsync(user);
 
         var emailLink = await emailService.GenerateEmailLink(Request, user.ConfirmationToken, "confirm-email-update", dto.Email);
-        logger.LogCritical("[Update Email]: Email Link for {UserName}: {Link}", user.UserName!.Sanitize(), emailLink);
+        logger.LogCritical("[Update Email]: Email Link for {UserName}: {Link}", user.UserName!.Sanitize(), emailLink.Sanitize());
 
         if (!shouldEmailUser)
         {
@@ -840,7 +840,7 @@ public class AccountController(UserManager<AppUser> userManager,
         try
         {
             var emailLink = await emailService.GenerateEmailLink(Request, user.ConfirmationToken, "confirm-email", dto.Email);
-            logger.LogCritical("[Invite User]: Email Link for {UserName}: {Link}", user.UserName?.Sanitize(), emailLink);
+            logger.LogCritical("[Invite User]: Email Link for {UserName}: {Link}", user.UserName?.Sanitize(), emailLink.Sanitize());
 
             var settings = await unitOfWork.SettingsRepository.GetSettingsDtoAsync(ct);
             if (!emailService.IsValidEmail(dto.Email) || !settings.IsEmailSetup())
@@ -1048,7 +1048,7 @@ public class AccountController(UserManager<AppUser> userManager,
         unitOfWork.UserRepository.Update(user);
         await unitOfWork.CommitAsync(ct);
 
-        logger.LogCritical("[Forgot Password]: Email Link for {UserName}: {Link}", user.UserName!.Sanitize(), emailLink);
+        logger.LogCritical("[Forgot Password]: Email Link for {UserName}: {Link}", user.UserName!.Sanitize(), emailLink.Sanitize());
 
         if (!settings.IsEmailSetup()) return Ok(await localizationService.GetAsync("en", "email-not-enabled"));
         if (!emailService.IsValidEmail(user.Email))
@@ -1126,7 +1126,7 @@ public class AccountController(UserManager<AppUser> userManager,
         await unitOfWork.CommitAsync(ct);
 
         var emailLink = await emailService.GenerateEmailLink(Request, token, "confirm-email-update", user.Email);
-        logger.LogCritical("[Email Migration]: Email Link for {UserName}: {Link}", user.UserName!.Sanitize(), emailLink);
+        logger.LogCritical("[Email Migration]: Email Link for {UserName}: {Link}", user.UserName!.Sanitize(), emailLink.Sanitize());
 
         if (!emailService.IsValidEmail(user.Email))
         {
