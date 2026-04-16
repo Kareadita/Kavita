@@ -81,7 +81,7 @@ public interface ISeriesRepository
     Task<long> GetFilesizeAsync(int seriesId, CancellationToken ct = default);
     Task<Dictionary<int, long>> GetFilesizesAsync(IList<int> seriesIds, CancellationToken ct = default);
     Task<string?> GetSeriesCoverImageAsync(int seriesId, CancellationToken ct = default);
-    Task<PagedList<SeriesDto>> GetOnDeck(int userId, int libraryId, UserParams userParams, FilterDto? filter, CancellationToken ct = default);
+    Task<PagedList<SeriesDto>> GetOnDeck(int userId, int libraryId, UserParams userParams, CancellationToken ct = default);
     Task<PagedList<SeriesDto>> GetRecentlyAddedV2(int userId, UserParams userParams, FilterV2Dto filter, CancellationToken ct = default);
     Task<SeriesMetadataDto?> GetSeriesMetadata(int seriesId, CancellationToken ct = default);
     Task<PagedList<SeriesDto>> GetSeriesDtoForCollectionAsync(int collectionId, int userId, UserParams userParams, CancellationToken ct = default);

@@ -245,13 +245,12 @@ public class SeriesController(
     /// <param name="filterDto"></param>
     /// <param name="userParams"></param>
     /// <param name="userId">Optional user id to request the OnDeck for someone else. They must have profile sharing enabled when doing so</param>
-    /// <param name="libraryId">This is not in use</param>
     /// <param name="context"></param>
     /// <returns></returns>
     [HttpPost("all-v2")]
     [ProfilePrivacy(allowMissingUserId: true)]
     public async Task<ActionResult<PagedList<SeriesDto>>> GetAllSeriesV2(FilterV2Dto filterDto, [FromQuery] UserParams userParams,
-        [FromQuery] int? userId = null, [FromQuery] int libraryId = 0, [FromQuery] QueryContext context = QueryContext.None)
+        [FromQuery] int? userId = null, [FromQuery] QueryContext context = QueryContext.None)
     {
         var seriesForUser = userId ?? UserId;
 
@@ -277,7 +276,7 @@ public class SeriesController(
     [HttpPost("on-deck")]
     public async Task<ActionResult<PagedList<SeriesDto>>> GetOnDeck([FromQuery] UserParams userParams, [FromQuery] int libraryId = 0)
     {
-        var pagedList = await unitOfWork.SeriesRepository.GetOnDeck(UserId, libraryId, userParams, null);
+        var pagedList = await unitOfWork.SeriesRepository.GetOnDeck(UserId, libraryId, userParams, HttpContext.RequestAborted);
 
         Response.AddPaginationHeader(pagedList.CurrentPage, pagedList.PageSize, pagedList.TotalCount, pagedList.TotalPages);
 

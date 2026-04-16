@@ -50,30 +50,6 @@ public class OpdsService(
     public const string FullReadingProgressIcon = "⬤";
 
     private readonly FilterV2Dto _filterV2Dto = new();
-    private readonly FilterDto _filterDto = new()
-    {
-        Formats = [],
-        Character = [],
-        Colorist = [],
-        Editor = [],
-        Genres = [],
-        Inker = [],
-        Languages = [],
-        Letterer = [],
-        Penciller = [],
-        Libraries = [],
-        Publisher = [],
-        Rating = 0,
-        Tags = [],
-        Translators = [],
-        Writers = [],
-        AgeRating = [],
-        CollectionTags = [],
-        CoverArtist = [],
-        ReadStatus = new ReadStatus(),
-        SortOptions = null,
-        PublicationStatus = []
-    };
 
     public async Task<Feed> GetCatalogue(OpdsCatalogueRequest request, CancellationToken ct = default)
     {
@@ -385,7 +361,7 @@ public class OpdsService(
     {
         var userId = UnpackRequest(request, out var apiKey, out var prefix, out var baseUrl);
 
-        var pagedList = await unitOfWork.SeriesRepository.GetOnDeck(userId, 0, GetUserParams(request.PageNumber), _filterDto, ct);
+        var pagedList = await unitOfWork.SeriesRepository.GetOnDeck(userId, 0, GetUserParams(request.PageNumber), ct);
         var seriesMetadatas = await unitOfWork.SeriesRepository.GetSeriesMetadataForIds(pagedList.Select(s => s.Id), ct);
 
         var feed = CreateFeed(await localizationService.TranslateAsync(userId, "on-deck"), $"{apiKey}/on-deck", apiKey, prefix);
