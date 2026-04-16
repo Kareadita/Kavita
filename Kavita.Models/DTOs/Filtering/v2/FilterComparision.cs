@@ -56,5 +56,9 @@ public enum FilterComparison
     /// <summary>
     /// There are no records
     /// </summary>
-    IsEmpty = 16
+    IsEmpty = 16,
+    /// <summary>
+    /// There is at least one record
+    /// </summary>
+    IsNotEmpty = 17,
 }

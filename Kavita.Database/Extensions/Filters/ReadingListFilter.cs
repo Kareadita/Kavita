@@ -48,6 +48,7 @@ public static class ReadingListFilter
                 FilterComparison.IsNotInLast => queryable.Where(s =>
                     s.StartingYear < DateTime.Now.Year - (int) releaseYear),
                 FilterComparison.IsEmpty => queryable.Where(s => s.StartingYear == 0),
+                FilterComparison.IsNotEmpty => queryable.Where(s => s.StartingYear != 0),
                 _ => throw new ArgumentOutOfRangeException(nameof(comparison), comparison, null)
             };
         }
@@ -72,7 +73,7 @@ public static class ReadingListFilter
 
         public IQueryable<ReadingList> HasTags(bool condition, FilterComparison comparison, IList<int> tags)
         {
-            if (!condition || (comparison != FilterComparison.IsEmpty && tags.Count == 0)) return queryable;
+            if (!condition || (comparison != FilterComparison.IsEmpty && comparison != FilterComparison.IsNotEmpty && tags.Count == 0)) return queryable;
             ComparisonProfile.Validate(comparison, ComparisonProfile.ListWithEmpty, "ReadingList.Tags");
 
             switch (comparison)
@@ -94,6 +95,8 @@ public static class ReadingListFilter
                     return queries.Aggregate((q1, q2) => q1.Intersect(q2));
                 case FilterComparison.IsEmpty:
                     return queryable.Where(s => s.Tags.Count == 0);
+                case FilterComparison.IsNotEmpty:
+                    return queryable.Where(s => s.Tags.Count > 0);
                 default:
                     throw new ArgumentOutOfRangeException(nameof(comparison), comparison, null);
             }
@@ -101,7 +104,7 @@ public static class ReadingListFilter
 
         public IQueryable<ReadingList> HasPeople(bool condition, FilterComparison comparison, IList<int> people, PersonRole role)
         {
-            if (!condition || (comparison != FilterComparison.IsEmpty && people.Count == 0)) return queryable;
+            if (!condition || (comparison != FilterComparison.IsEmpty && comparison != FilterComparison.IsNotEmpty && people.Count == 0)) return queryable;
             ComparisonProfile.Validate(comparison, ComparisonProfile.ListWithEmpty, "ReadingList.People");
 
             switch (comparison)
@@ -124,6 +127,8 @@ public static class ReadingListFilter
                 case FilterComparison.IsEmpty:
                     // Ensure no person with the given role exists across all items
                     return queryable.Where(s => s.Items.All(i => i.Chapter.People.All(p => p.Role != role)));
+                case FilterComparison.IsNotEmpty:
+                    return queryable.Where(s => s.Items.Any(i => i.Chapter.People.Any(p => p.Role == role)));
                 default:
                     throw new ArgumentOutOfRangeException(nameof(comparison), comparison, null);
             }

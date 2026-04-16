@@ -3458,7 +3458,8 @@
         "is-in-last": "Is in last",
         "is-not-in-last": "Is not in last",
         "must-contains": "Must Contains",
-        "is-empty": "Is Empty"
+        "is-empty": "Is Empty",
+        "is-not-empty": "Is Not Empty"
     },
 
     "log-level-pipe": {

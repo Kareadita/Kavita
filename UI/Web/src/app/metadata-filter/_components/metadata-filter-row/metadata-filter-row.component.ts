@@ -169,7 +169,7 @@ export class MetadataFilterRowComponent<TFilter extends number = number, TSort e
       )
       , {requireSync: true, injector: this.injector});
 
-    this.isEmptySelected = computed(() => this.comparisonSignal() !== FilterComparison.IsEmpty);
+    this.isEmptySelected = computed(() => this.comparisonSignal() === FilterComparison.IsEmpty || this.comparisonSignal() === FilterComparison.IsNotEmpty);
     this.uiLabel = computed(() => unitLabels.get(this.entityType())?.get(this.inputSignal()) ?? null);
 
     this.isMultiSelectDropdownAllowed = computed(() => {
@@ -290,128 +290,66 @@ export class MetadataFilterRowComponent<TFilter extends number = number, TSort e
     const booleanFields = this.filterUtilitiesService.getBooleanFields<TFilter>(this.entityType());
     const dateFields = this.filterUtilitiesService.getDateFields<TFilter>(this.entityType());
     const fieldsThatShouldIncludeIsEmpty = this.filterUtilitiesService.getFieldsThatShouldIncludeIsEmpty<TFilter>(this.entityType());
+    const fieldsThatShouldIncludeIsNotEmpty = this.filterUtilitiesService.getFieldsThatShouldIncludeIsNotEmpty<TFilter>(this.entityType());
     const numberFieldsThatIncludeDateComparisons = this.filterUtilitiesService.getNumberFieldsThatIncludeDateComparisons<TFilter>(this.entityType());
-    const dropdownFieldsThatIncludeDateComparisons = this.filterUtilitiesService.getDropdownFieldsThatIncludeDateComparisons<TFilter>(this.entityType());
-    const dropdownFieldsWithoutMustContains = this.filterUtilitiesService.getDropdownFieldsWithoutMustContains<TFilter>(this.entityType());
     const dropdownFieldsThatIncludeNumberComparisons = this.filterUtilitiesService.getDropdownFieldsThatIncludeNumberComparisons<TFilter>(this.entityType());
+    const dropdownFieldsWithoutMustContains = this.filterUtilitiesService.getDropdownFieldsWithoutMustContains<TFilter>(this.entityType());
     const customComparisons = this.filterUtilitiesService.getCustomComparisons(this.entityType(), inputVal);
 
+    let baseComparisons: FilterComparison[];
+    let predicateType: PredicateType;
+    let defaultValue: string | number | boolean;
+
     if (stringFields.includes(inputVal)) {
-      let comps = [...StringComparisons];
-
-      if (fieldsThatShouldIncludeIsEmpty.includes(inputVal)) {
-        comps.push(FilterComparison.IsEmpty);
-      }
-
-      if (customComparisons && customComparisons.length > 0) {
-        comps = customComparisons;
-      }
-
-      this.validComparisons$.next([...new Set(comps)]);
-      this.predicateType$.next(PredicateType.Text);
-
-      if (this.loaded) {
-        this.formGroup.get('filterValue')?.patchValue('');
-        this.formGroup.get('comparison')?.patchValue(comps[0]);
-      }
-      this.cdRef.markForCheck();
-      return;
-    }
-
-    if (numberFields.includes(inputVal)) {
-      let comps = [...NumberComparisons];
-
+      baseComparisons = [...StringComparisons];
+      predicateType = PredicateType.Text;
+      defaultValue = '';
+    } else if (numberFields.includes(inputVal)) {
+      baseComparisons = [...NumberComparisons];
       if (numberFieldsThatIncludeDateComparisons.includes(inputVal)) {
-        comps.push(...DateComparisons);
+        baseComparisons.push(...DateComparisons);
       }
-      if (fieldsThatShouldIncludeIsEmpty.includes(inputVal)) {
-        comps.push(FilterComparison.IsEmpty);
-      }
-
-      if (customComparisons && customComparisons.length > 0) {
-        comps = customComparisons;
-      }
-
-      this.validComparisons$.next([...new Set(comps)]);
-      this.predicateType$.next(PredicateType.Number);
-
-      if (this.loaded) {
-        this.formGroup.get('filterValue')?.patchValue(0);
-        this.formGroup.get('comparison')?.patchValue(comps[0]);
-      }
-
-      this.cdRef.markForCheck();
-      return;
-    }
-
-    if (dateFields.includes(inputVal)) {
-      let comps = [...DateComparisons];
-      if (fieldsThatShouldIncludeIsEmpty.includes(inputVal)) {
-        comps.push(FilterComparison.IsEmpty);
-      }
-
-      if (customComparisons && customComparisons.length > 0) {
-        comps = customComparisons;
-      }
-
-      this.validComparisons$.next([...new Set(comps)]);
-      this.predicateType$.next(PredicateType.Date);
-
-      if (this.loaded) {
-        this.formGroup.get('filterValue')?.patchValue(false);
-        this.formGroup.get('comparison')?.patchValue(comps[0]);
-      }
-      this.cdRef.markForCheck();
-      return;
-    }
-
-    if (booleanFields.includes(inputVal)) {
-      let comps = [...BooleanComparisons];
-      if (fieldsThatShouldIncludeIsEmpty.includes(inputVal)) {
-        comps.push(FilterComparison.IsEmpty);
-      }
-
-      if (customComparisons && customComparisons.length > 0) {
-        comps = customComparisons;
-      }
-
-
-      this.validComparisons$.next([...new Set(comps)]);
-      this.predicateType$.next(PredicateType.Boolean);
-
-      if (this.loaded) {
-        this.formGroup.get('filterValue')?.patchValue(false);
-        this.formGroup.get('comparison')?.patchValue(comps[0]);
-      }
-      this.cdRef.markForCheck();
-      return;
-    }
-
-    if (dropdownFields.includes(inputVal)) {
-      let comps = [...DropdownComparisons];
+      predicateType = PredicateType.Number;
+      defaultValue = 0;
+    } else if (dateFields.includes(inputVal)) {
+      baseComparisons = [...DateComparisons];
+      predicateType = PredicateType.Date;
+      defaultValue = false;
+    } else if (booleanFields.includes(inputVal)) {
+      baseComparisons = [...BooleanComparisons];
+      predicateType = PredicateType.Boolean;
+      defaultValue = false;
+    } else if (dropdownFields.includes(inputVal)) {
+      baseComparisons = [...DropdownComparisons];
       if (dropdownFieldsThatIncludeNumberComparisons.includes(inputVal)) {
-        comps.push(...NumberComparisons);
+        baseComparisons.push(...NumberComparisons);
       }
       if (dropdownFieldsWithoutMustContains.includes(inputVal)) {
-        comps = comps.filter(c => c !== FilterComparison.MustContains);
+        baseComparisons = baseComparisons.filter(c => c !== FilterComparison.MustContains);
       }
-      if (fieldsThatShouldIncludeIsEmpty.includes(inputVal)) {
-        comps.push(FilterComparison.IsEmpty);
-      }
-
-      if (customComparisons && customComparisons.length > 0) {
-        comps = customComparisons;
-      }
-
-      this.validComparisons$.next([...new Set(comps)]);
-      this.predicateType$.next(PredicateType.Dropdown);
-      if (this.loaded) {
-        this.formGroup.get('filterValue')?.patchValue(0);
-        this.formGroup.get('comparison')?.patchValue(comps[0]);
-      }
-      this.cdRef.markForCheck();
+      predicateType = PredicateType.Dropdown;
+      defaultValue = 0;
+    } else {
       return;
     }
+
+    if (fieldsThatShouldIncludeIsEmpty.includes(inputVal)) baseComparisons.push(FilterComparison.IsEmpty);
+    if (fieldsThatShouldIncludeIsNotEmpty.includes(inputVal)) baseComparisons.push(FilterComparison.IsNotEmpty);
+
+    const comps = (customComparisons?.length ?? 0) > 0 ? customComparisons : baseComparisons;
+
+    this.validComparisons$.next([...new Set(comps)]);
+    this.predicateType$.next(predicateType);
+
+    if (this.loaded) {
+      this.formGroup.get('filterValue')?.patchValue(defaultValue);
+
+      if (comps) {
+        this.formGroup.get('comparison')?.patchValue(comps[0]);
+      }
+    }
+
+    this.cdRef.markForCheck();
   }
 
   onDateSelect(_: NgbDate) {

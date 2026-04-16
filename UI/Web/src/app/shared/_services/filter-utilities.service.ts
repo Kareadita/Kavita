@@ -386,6 +386,11 @@ export class FilterUtilitiesService {
     }
   }
 
+  getFieldsThatShouldIncludeIsNotEmpty<T extends number>(type: ValidFilterEntity) {
+    // For now, we just delegate as they overlap, but we create a new method so it's easier to update in the future
+    return this.getFieldsThatShouldIncludeIsEmpty<T>(type);
+  }
+
   getDefaultSettings(entityType: ValidFilterEntity | 'other' | undefined): FilterSettingsBase<any, any> {
     if (entityType === 'other' || entityType === undefined) {
       // It doesn't matter, return series type

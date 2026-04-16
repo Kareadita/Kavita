@@ -43,5 +43,6 @@ export enum FilterComparison {
     /// Is Date not between now and X seconds ago
     /// </summary>
     IsNotInLast = 15,
-    IsEmpty = 16
+    IsEmpty = 16,
+    IsNotEmpty = 17,
 }

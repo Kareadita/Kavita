@@ -26,7 +26,7 @@ public static class SeriesFilter
         FilterComparison.Equal, FilterComparison.NotEqual,
         FilterComparison.GreaterThan, FilterComparison.GreaterThanEqual,
         FilterComparison.LessThan, FilterComparison.LessThanEqual,
-        FilterComparison.IsEmpty
+        FilterComparison.IsEmpty, FilterComparison.IsNotEmpty
     ];
 
     private static readonly HashSet<FilterComparison> NumericWithList =
@@ -55,7 +55,8 @@ public static class SeriesFilter
     [
         FilterComparison.Equal, FilterComparison.NotEqual,
         FilterComparison.BeginsWith, FilterComparison.EndsWith,
-        FilterComparison.Matches, FilterComparison.IsEmpty
+        FilterComparison.Matches, FilterComparison.IsEmpty,
+        FilterComparison.IsNotEmpty
     ];
 
     private static readonly HashSet<FilterComparison> NumericNoNotEqual =
@@ -106,6 +107,7 @@ public static class SeriesFilter
                 FilterComparison.IsNotInLast => queryable.Where(s =>
                     s.Metadata.ReleaseYear < DateTime.Now.Year - (int) releaseYear),
                 FilterComparison.IsEmpty => queryable.Where(s => s.Metadata.ReleaseYear == 0),
+                FilterComparison.IsNotEmpty => queryable.Where(s => s.Metadata.ReleaseYear != 0),
                 _ => throw new ArgumentOutOfRangeException(nameof(comparison), comparison, null)
             };
         }
@@ -133,6 +135,7 @@ public static class SeriesFilter
                 FilterComparison.NotEqual => queryable.Where(s =>
                     s.Ratings.Any(r => Math.Abs(r.Rating - rating) >= FloatingPointTolerance && r.AppUserId == userId)),
                 FilterComparison.IsEmpty => queryable.Where(s => s.Ratings.All(r => r.AppUserId != userId)),
+                FilterComparison.IsNotEmpty => queryable.Where(s => s.Ratings.Any(r => r.AppUserId == userId)),
                 _ => throw new ArgumentOutOfRangeException(nameof(comparison), comparison, null)
             };
         }
@@ -399,7 +402,7 @@ public static class SeriesFilter
 
         public IQueryable<Series> HasTags(bool condition, FilterComparison comparison, IList<int> tags)
         {
-            if (!condition || (comparison != FilterComparison.IsEmpty && tags.Count == 0)) return queryable;
+            if (!condition || (comparison != FilterComparison.IsEmpty && comparison != FilterComparison.IsNotEmpty && tags.Count == 0)) return queryable;
             ComparisonProfile.Validate(comparison, ComparisonProfile.ListWithEmpty, "Series.Tags");
 
             switch (comparison)
@@ -421,6 +424,8 @@ public static class SeriesFilter
                     return queries.Aggregate((q1, q2) => q1.Intersect(q2));
                 case FilterComparison.IsEmpty:
                     return queryable.Where(s => s.Metadata.Tags.Count == 0);
+                case FilterComparison.IsNotEmpty:
+                    return queryable.Where(s => s.Metadata.Tags.Count > 0);
                 default:
                     throw new ArgumentOutOfRangeException(nameof(comparison), comparison, null);
             }
@@ -428,7 +433,7 @@ public static class SeriesFilter
 
         public IQueryable<Series> HasPeople(bool condition, FilterComparison comparison, IList<int> people, PersonRole role)
         {
-            if (!condition || (comparison != FilterComparison.IsEmpty && people.Count == 0)) return queryable;
+            if (!condition || (comparison != FilterComparison.IsEmpty && comparison != FilterComparison.IsNotEmpty && people.Count == 0)) return queryable;
             ComparisonProfile.Validate(comparison, ComparisonProfile.ListWithEmpty, "Series.People");
 
             switch (comparison)
@@ -451,6 +456,8 @@ public static class SeriesFilter
                 case FilterComparison.IsEmpty:
                     // Ensure no person with the given role exists
                     return queryable.Where(s => s.Metadata.People.All(p => p.Role != role));
+                case FilterComparison.IsNotEmpty:
+                    return queryable.Where(s => s.Metadata.People.Any(p => p.Role == role));
                 default:
                     throw new ArgumentOutOfRangeException(nameof(comparison), comparison, null);
             }
@@ -485,7 +492,7 @@ public static class SeriesFilter
 
         public IQueryable<Series> HasGenre(bool condition, FilterComparison comparison, IList<int> genres)
         {
-            if (!condition || (comparison != FilterComparison.IsEmpty && genres.Count == 0)) return queryable;
+            if (!condition || (comparison != FilterComparison.IsEmpty && comparison != FilterComparison.IsNotEmpty && genres.Count == 0)) return queryable;
             ComparisonProfile.Validate(comparison, ComparisonProfile.ListWithEmpty, "Series.Genres");
 
             switch (comparison)
@@ -507,6 +514,8 @@ public static class SeriesFilter
                     return queries.Aggregate((q1, q2) => q1.Intersect(q2));
                 case FilterComparison.IsEmpty:
                     return queryable.Where(s => s.Metadata.Genres.Count == 0);
+                case FilterComparison.IsNotEmpty:
+                    return queryable.Where(s => s.Metadata.Genres.Count > 0);
                 default:
                     throw new ArgumentOutOfRangeException(nameof(comparison), comparison, null);
             }
@@ -532,7 +541,7 @@ public static class SeriesFilter
 
         public IQueryable<Series> HasCollectionTags(bool condition, FilterComparison comparison, IList<int> collectionTags, IList<int> collectionSeries)
         {
-            if (!condition || (comparison != FilterComparison.IsEmpty && collectionTags.Count == 0)) return queryable;
+            if (!condition || (comparison != FilterComparison.IsEmpty && comparison != FilterComparison.IsNotEmpty && collectionTags.Count == 0)) return queryable;
             ComparisonProfile.Validate(comparison, ComparisonProfile.ListWithEmpty, "Series.CollectionTags");
 
             switch (comparison)
@@ -554,6 +563,8 @@ public static class SeriesFilter
                     return queries.Aggregate((q1, q2) => q1.Intersect(q2));
                 case FilterComparison.IsEmpty:
                     return queryable.Where(s => s.Collections.Count == 0);
+                case FilterComparison.IsNotEmpty:
+                    return queryable.Where(s => s.Collections.Count > 0);
                 default:
                     throw new ArgumentOutOfRangeException(nameof(comparison), comparison, null);
             }
@@ -608,6 +619,7 @@ public static class SeriesFilter
                     EF.Functions.Like(s.Metadata.Summary, $"%{queryString}%")),
                 FilterComparison.NotEqual => queryable.Where(s => s.Metadata.Summary != queryString),
                 FilterComparison.IsEmpty => queryable.Where(s => string.IsNullOrEmpty(s.Metadata.Summary)),
+                FilterComparison.IsNotEmpty => queryable.Where(s => !string.IsNullOrEmpty(s.Metadata.Summary)),
                 _ => throw new ArgumentOutOfRangeException(nameof(comparison), comparison,
                     "Filter Comparison is not supported")
             };
