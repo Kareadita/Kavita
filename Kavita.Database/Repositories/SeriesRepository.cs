@@ -40,7 +40,6 @@ using Kavita.Models.Extensions;
 using Kavita.Models.Misc;
 using Kavita.Models.Parser;
 using Microsoft.EntityFrameworkCore;
-using YamlDotNet.Core;
 
 
 namespace Kavita.Database.Repositories;

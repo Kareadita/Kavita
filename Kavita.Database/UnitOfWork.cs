@@ -101,8 +101,6 @@ public class UnitOfWork : IUnitOfWork
     /// </summary>
     public async Task<bool> CommitAsync(int maxRetries = 0, CancellationToken ct = default)
     {
-        if (!_context.ChangeTracker.HasChanges()) return false;
-
         var attempt = 0;
 
         while (true)
