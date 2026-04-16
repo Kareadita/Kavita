@@ -99,15 +99,10 @@ public class UnitOfWork : IUnitOfWork
     /// waits on the writer lock (via busy_timeout) instead of failing with SQLITE_BUSY_SNAPSHOT.
     /// Optionally retries transient BUSY/LOCKED errors with jittered backoff.
     /// </summary>
-    /// <remarks>
-    /// Microsoft.Data.Sqlite maps <see cref="IsolationLevel.Serializable"/> to BEGIN IMMEDIATE,
-    /// which acquires the writer (RESERVED) lock up front. Because nothing has been read inside
-    /// the transaction yet, <c>busy_timeout</c> can legally wait for the peer to finish — whereas
-    /// the default DEFERRED transaction would return the non-retriable SQLITE_BUSY_SNAPSHOT once
-    /// a read snapshot was established.
-    /// </remarks>
     public async Task<bool> CommitAsync(int maxRetries = 0, CancellationToken ct = default)
     {
+        if (!_context.ChangeTracker.HasChanges()) return false;
+
         var attempt = 0;
 
         while (true)
