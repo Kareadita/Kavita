@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using Kavita.Models.DTOs.Filtering.v2;
+using Kavita.Common.Extensions;
 using Kavita.Models.DTOs.Filtering.v2.FilterFields;
 using Kavita.Models.Entities.Enums;
 
@@ -17,6 +17,7 @@ public static class PersonFilterFieldValueConverter
             PersonFilterField.Role => ParsePersonRoles(value),
             PersonFilterField.SeriesCount => int.Parse(value),
             PersonFilterField.ChapterCount => int.Parse(value),
+            PersonFilterField.Library => value.ParseIntArray(),
             _ => throw new ArgumentOutOfRangeException(nameof(field), field, "Field is not supported")
         };
     }

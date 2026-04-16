@@ -215,7 +215,7 @@ export class FilterUtilitiesService {
         ] as unknown as T[];
       case 'person':
         return [
-          PersonFilterField.Role
+          PersonFilterField.Role, PersonFilterField.Library,
         ] as unknown as T[];
       case 'readinglist':
         return [

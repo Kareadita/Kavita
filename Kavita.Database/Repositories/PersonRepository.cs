@@ -216,6 +216,7 @@ public class PersonRepository(DataContext context, IMapper mapper) : IPersonRepo
             PersonFilterField.Role => query.HasPersonRole(true, statement.Comparison, (IList<PersonRole>)value),
             PersonFilterField.SeriesCount => query.HasPersonSeriesCount(true, statement.Comparison, (int)value),
             PersonFilterField.ChapterCount => query.HasPersonChapterCount(true, statement.Comparison, (int)value),
+            PersonFilterField.Library => query.HasChaptersInLibrary(true, statement.Comparison, (IList<int>)value),
             _ => throw new ArgumentOutOfRangeException(nameof(statement.Field), $"Unexpected value for field: {statement.Field}")
         };
     }

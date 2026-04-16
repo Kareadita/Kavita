@@ -6,4 +6,5 @@ public enum PersonFilterField
     Name = 2,
     SeriesCount = 3,
     ChapterCount = 4,
+    Library = 5,
 }

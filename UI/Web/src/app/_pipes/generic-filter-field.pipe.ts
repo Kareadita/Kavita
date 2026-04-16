@@ -59,6 +59,8 @@ export class GenericFilterFieldPipe implements PipeTransform {
         return translate('generic-filter-field-pipe.person-series-count');
       case PersonFilterField.ChapterCount:
         return translate('generic-filter-field-pipe.person-chapter-count');
+      case PersonFilterField.Library:
+        return translate('generic-filter-field-pipe.person-library');
     }
   }
 

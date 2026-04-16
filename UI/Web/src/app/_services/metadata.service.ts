@@ -313,6 +313,8 @@ export class MetadataService {
     switch (field) {
       case PersonFilterField.Role:
         return of(allPeopleRoles.map(r => {return {value: r, label: this.personRolePipe.transform(r)}}));
+      case PersonFilterField.Library:
+        return this.libraryService.getLibraries().pipe(map(libs => libs.map(lib => ({value: lib.id, label: lib.name}))));
     }
     return of([])
   }

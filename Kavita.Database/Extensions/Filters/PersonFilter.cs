@@ -115,6 +115,22 @@ public static class PersonFilter
                 _ => throw new ArgumentOutOfRangeException(nameof(comparison), comparison, "Filter Comparison is not supported")
             };
         }
+
+        public IQueryable<Person> HasChaptersInLibrary(bool condition, FilterComparison comparison, IList<int> libraryIds)
+        {
+            if (libraryIds.Count == 0 || !condition) return queryable;
+            ComparisonProfile.Validate(comparison, ComparisonProfile.List, "Person.Library");
+
+            return comparison switch
+            {
+                FilterComparison.Equal => queryable.Where(a => a.ChapterPeople.Any(cp => cp.Chapter.Volume.Series.LibraryId == libraryIds[0])),
+                FilterComparison.Contains => queryable.Where(a => a.ChapterPeople.Any(cp => libraryIds.Contains(cp.Chapter.Volume.Series.LibraryId))),
+                FilterComparison.MustContains => queryable.Where(a => a.ChapterPeople.All(cp => libraryIds.Contains(cp.Chapter.Volume.Series.LibraryId))),
+                FilterComparison.NotContains => queryable.Where(a => a.ChapterPeople.All(cp => !libraryIds.Contains(cp.Chapter.Volume.Series.LibraryId))),
+                FilterComparison.NotEqual => queryable.Where(a => a.ChapterPeople.All(cp => cp.Chapter.Volume.Series.LibraryId != libraryIds[0])),
+                _ => throw new ArgumentOutOfRangeException(nameof(comparison), comparison, "Filter Comparison is not supported")
+            };
+        }
     }
 
     private static IQueryable<Person> MustContainAllRoles(IQueryable<Person> queryable, IList<PersonRole> roles)
