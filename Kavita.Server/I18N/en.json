@@ -141,7 +141,6 @@
     "generic-cover-person-save": "Unable to save cover image to Person",
     "generic-cover-volume-save": "Unable to save cover image to Volume",
     "access-denied": "You do not have access",
-    "reset-chapter-lock": "Unable to resetting cover lock for Chapter",
     "generic-user-delete": "Could not delete the user",
     "generic-user-pref": "There was an issue saving preferences",
     "opds-disabled": "OPDS is not enabled on this server",

@@ -201,29 +201,6 @@ public class SeriesRepository(DataContext context, IMapper mapper) : ISeriesRepo
 #nullable  enable
     }
 
-    /// <summary>
-    /// Gets all series
-    /// </summary>
-    /// <param name="libraryId">Restricts to just one library</param>
-    /// <param name="userId"></param>
-    /// <param name="userParams"></param>
-    /// <param name="filter"></param>
-    /// <param name="ct"></param>
-    /// <returns></returns>
-    [Obsolete("Use GetSeriesDtoForLibraryIdAsync")]
-    public async Task<PagedList<SeriesDto>> GetSeriesDtoForLibraryIdAsync(int libraryId, int userId,
-        UserParams userParams, FilterDto filter, CancellationToken ct = default)
-    {
-        var query = await CreateFilteredSearchQueryable(userId, libraryId, filter, QueryContext.None, ct);
-
-        var retSeries = query
-            .ProjectToWithProgress<Series, SeriesDto>(mapper, userId)
-            .AsSplitQuery()
-            .AsNoTracking();
-
-        return await PagedList<SeriesDto>.CreateAsync(retSeries, userParams.PageNumber, userParams.PageSize, ct);
-    }
-
     private async Task<List<int>> GetUserLibrariesForFilteredQuery(int libraryId, int userId, QueryContext queryContext, CancellationToken ct = default)
     {
         if (libraryId == 0)

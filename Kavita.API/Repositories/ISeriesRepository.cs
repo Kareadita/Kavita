@@ -60,18 +60,6 @@ public interface ISeriesRepository
     void Remove(Series series);
     void Remove(IEnumerable<Series> series);
     Task<bool> DoesSeriesNameExistInLibrary(string name, int libraryId, MangaFormat format, CancellationToken ct = default);
-
-    /// <summary>
-    /// Adds user information like progress, ratings, etc
-    /// </summary>
-    /// <param name="libraryId"></param>
-    /// <param name="userId"></param>
-    /// <param name="userParams">Pagination info</param>
-    /// <param name="filter">Filtering/Sorting to apply</param>
-    /// <param name="ct"></param>
-    /// <returns></returns>
-    Task<PagedList<SeriesDto>> GetSeriesDtoForLibraryIdAsync(int libraryId, int userId, UserParams userParams, FilterDto filter, CancellationToken ct = default);
-
     /// <summary>
     /// Does not add user information like progress, ratings, etc.
     /// </summary>
