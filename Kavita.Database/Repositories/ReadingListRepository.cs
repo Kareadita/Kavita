@@ -38,19 +38,6 @@ public class ReadingListRepository(DataContext context, IMapper mapper) : IReadi
         context.Add(list);
     }
 
-    public async Task<int> Count(CancellationToken ct = default)
-    {
-        return await context.ReadingList.CountAsync(ct);
-    }
-
-    public async Task<string?> GetCoverImageAsync(int readingListId, CancellationToken ct = default)
-    {
-        return await context.ReadingList
-            .Where(c => c.Id == readingListId)
-            .Select(c => c.CoverImage)
-            .FirstOrDefaultAsync(ct);
-    }
-
     public async Task<IList<string>> GetAllCoverImagesAsync(CancellationToken ct = default)
     {
         return (await context.ReadingList
@@ -82,13 +69,6 @@ public class ReadingListRepository(DataContext context, IMapper mapper) : IReadi
         return await context.ReadingList
             .WhereIf(readingListId != null, x => x.Id != readingListId)
             .AnyAsync(x => normalized.Equals(x.NormalizedTitle), ct);
-    }
-
-    public async Task<bool> ReadingListExistsForUser(string name, int userId, CancellationToken ct = default)
-    {
-        var normalized = name.ToNormalized();
-        return await context.ReadingList
-            .AnyAsync(x => normalized.Equals(x.NormalizedTitle) && x.AppUserId == userId, ct);
     }
 
     public IEnumerable<PersonDto> GetReadingListPeopleAsync(int readingListId, PersonRole role,

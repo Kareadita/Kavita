@@ -47,10 +47,6 @@ public class PersonRepository(DataContext context, IMapper mapper) : IPersonRepo
         context.ChapterPeople.Remove(person);
     }
 
-    public void Remove(SeriesMetadataPeople person)
-    {
-        context.SeriesMetadataPeople.Remove(person);
-    }
 
     public void Update(Person person)
     {
@@ -97,28 +93,11 @@ public class PersonRepository(DataContext context, IMapper mapper) : IPersonRepo
     }
 
 
-    public async Task<string?> GetCoverImageAsync(int personId, CancellationToken ct = default)
-    {
-        return await context.Person
-            .Where(c => c.Id == personId)
-            .Select(c => c.CoverImage)
-            .SingleOrDefaultAsync(ct);
-    }
-
     public async Task<IList<string?>> GetAllCoverImagesAsync(CancellationToken ct = default)
     {
         return await context.Person
             .Select(p => p.CoverImage)
             .ToListAsync(ct);
-    }
-
-    public async Task<string?> GetCoverImageByNameAsync(string name, CancellationToken ct = default)
-    {
-        var normalized = name.ToNormalized();
-        return await context.Person
-            .Where(c => c.NormalizedName == normalized)
-            .Select(c => c.CoverImage)
-            .SingleOrDefaultAsync(ct);
     }
 
     public async Task<IEnumerable<PersonRole>> GetRolesForPersonByName(int personId, int userId,

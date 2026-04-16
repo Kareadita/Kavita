@@ -9,9 +9,7 @@ namespace Kavita.API.Repositories;
 public interface IMediaErrorRepository
 {
     void Attach(MediaError error);
-    void Remove(MediaError error);
     void Remove(IList<MediaError> errors);
-    Task<MediaError?> Find(string filename, CancellationToken ct = default);
     Task<IEnumerable<MediaErrorDto>> GetAllErrorDtosAsync(CancellationToken ct = default);
     Task<bool> ExistsAsync(MediaError error, CancellationToken ct = default);
     Task DeleteAll(CancellationToken ct = default);

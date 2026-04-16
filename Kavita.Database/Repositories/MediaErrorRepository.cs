@@ -19,22 +19,9 @@ public class MediaErrorRepository(DataContext context, IMapper mapper) : IMediaE
         context.MediaError.Attach(error);
     }
 
-    public void Remove(MediaError? error)
-    {
-        if (error == null) return;
-        context.MediaError.Remove(error);
-    }
-
     public void Remove(IList<MediaError> errors)
     {
         context.MediaError.RemoveRange(errors);
-    }
-
-    public Task<MediaError?> Find(string filename, CancellationToken ct = default)
-    {
-        return context.MediaError
-            .Where(e => e.FilePath == filename)
-            .FirstOrDefaultAsync(ct);
     }
 
     public async Task<IEnumerable<MediaErrorDto>> GetAllErrorDtosAsync(CancellationToken ct = default)

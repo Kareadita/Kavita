@@ -8,9 +8,7 @@ using System.Threading.Tasks;
 using AutoMapper;
 using AutoMapper.QueryableExtensions;
 using Kavita.API.Repositories;
-using Kavita.API.Services.Helpers;
 using Kavita.API.Services.Plus;
-using Kavita.API.Services.Reading;
 using Kavita.Common.Extensions;
 using Kavita.Common.Helpers;
 using Kavita.Database.Converters;
@@ -125,9 +123,6 @@ public class SeriesRepository(DataContext context, IMapper mapper) : ISeriesRepo
 #nullable  disable
         var query = context.Series
             .Where(s => s.LibraryId == libraryId)
-
-            .Include(s => s.Metadata)
-            .ThenInclude(m => m.CollectionTags)
 
             .Include(s => s.Metadata)
             .ThenInclude(m => m.People)
