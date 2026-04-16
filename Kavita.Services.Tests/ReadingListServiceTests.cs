@@ -1284,7 +1284,7 @@ public class ReadingListServiceTests(ITestOutputHelper outputHelper): AbstractDb
     {
 
         // Setup 2 series, only do this once tho
-        if (await unitOfWork.SeriesRepository.DoesSeriesNameExistInLibrary("Series 1", 1, MangaFormat.Archive))
+        if (await unitOfWork.SeriesRepository.DoesSeriesNameExistInLibraryAsync("Series 1", 1, MangaFormat.Archive))
         {
             return new Tuple<Series, Series>(await unitOfWork.SeriesRepository.GetFullSeriesForSeriesIdAsync(1),
                 await unitOfWork.SeriesRepository.GetFullSeriesForSeriesIdAsync(2));

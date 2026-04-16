@@ -261,7 +261,7 @@ public class ExternalMetadataService : IExternalMetadataService
             return await _unitOfWork.ExternalSeriesMetadataRepository.GetSeriesDetailPlusDto(seriesId, ct);
         }
 
-        var data = await _unitOfWork.SeriesRepository.GetPlusSeriesDto(seriesId, ct);
+        var data = await _unitOfWork.SeriesRepository.GetPlusSeriesDtoAsync(seriesId, ct);
         if (data == null) return _defaultReturn;
 
         // Get from Kavita+ API the Full Series metadata with rec/rev and cache to ExternalMetadata tables
@@ -702,7 +702,7 @@ public class ExternalMetadataService : IExternalMetadataService
         foreach (var relation in externalMetadataRelations.Where(r => r.Relation != RelationKind.Parent))
         {
             List<string> names = new [] {relation.SeriesName.PreferredTitle, relation.SeriesName.RomajiTitle, relation.SeriesName.EnglishTitle, relation.SeriesName.NativeTitle}.Where(s => !string.IsNullOrEmpty(s)).ToList()!;
-            var relatedSeries = await _unitOfWork.SeriesRepository.GetSeriesByAnyName(
+            var relatedSeries = await _unitOfWork.SeriesRepository.GetSeriesByAnyNameAsync(
                 names,
                 relation.PlusMediaFormat.GetMangaFormats(),
                 defaultAdmin.Id,
@@ -1806,7 +1806,7 @@ public class ExternalMetadataService : IExternalMetadataService
         foreach (var rec in recs)
         {
             // Find the series based on name and type and that the user has access too
-            var seriesForRec = await _unitOfWork.SeriesRepository.GetSeriesDtoByNamesAndMetadataIds(rec.RecommendationNames,
+            var seriesForRec = await _unitOfWork.SeriesRepository.GetSeriesDtoByNamesAndMetadataIdsAsync(rec.RecommendationNames,
                 libraryType, ScrobblingHelper.CreateUrl(ScrobblingService.AniListWeblinkWebsite, rec.AniListId),
                 ScrobblingHelper.CreateUrl(ScrobblingService.MalWeblinkWebsite, rec.MalId));
 

@@ -110,8 +110,8 @@ public class MediaConversionService(
             MessageFactory.ConvertCoverProgressEvent(0F, ProgressEventType.Started), ct: ct);
 
         var chapterCovers = await unitOfWork.ChapterRepository.GetAllChaptersWithCoversInDifferentEncoding(encodeFormat, ct);
-        var customSeriesCovers = await unitOfWork.SeriesRepository.GetAllWithCoversInDifferentEncoding(encodeFormat);
-        var seriesCovers = await unitOfWork.SeriesRepository.GetAllWithCoversInDifferentEncoding(encodeFormat, false);
+        var customSeriesCovers = await unitOfWork.SeriesRepository.GetAllWithCoversInDifferentEncodingAsync(encodeFormat);
+        var seriesCovers = await unitOfWork.SeriesRepository.GetAllWithCoversInDifferentEncodingAsync(encodeFormat, false);
         var nonCustomOrConvertedVolumeCovers = await unitOfWork.VolumeRepository.GetAllWithCoversInDifferentEncoding(encodeFormat, ct);
 
         var readingListCovers = await unitOfWork.ReadingListRepository.GetAllWithCoversInDifferentEncoding(encodeFormat, ct);

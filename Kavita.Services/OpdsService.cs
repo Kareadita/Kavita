@@ -267,8 +267,8 @@ public class OpdsService(
     {
         var userId = UnpackRequest(request, out var apiKey, out var prefix, out var baseUrl);
 
-        var wantToReadSeries = await unitOfWork.SeriesRepository.GetWantToReadForUserV2Async(userId, GetUserParams(request.PageNumber), _filterV2Dto, ct);
-        var seriesMetadatas = await unitOfWork.SeriesRepository.GetSeriesMetadataForIds(wantToReadSeries.Select(s => s.Id), ct);
+        var wantToReadSeries = await unitOfWork.SeriesRepository.GetWantToReadDtosForUserAsync(userId, GetUserParams(request.PageNumber), _filterV2Dto, ct);
+        var seriesMetadatas = await unitOfWork.SeriesRepository.GetSeriesMetadataForIdsAsync(wantToReadSeries.Select(s => s.Id), ct);
 
         var feed = CreateFeed(await localizationService.TranslateAsync(userId, "want-to-read"), $"{apiKey}/want-to-read", apiKey, prefix);
         SetFeedId(feed, "want-to-read");
@@ -314,8 +314,8 @@ public class OpdsService(
     {
         var userId = UnpackRequest(request, out var apiKey, out var prefix, out var baseUrl);
 
-        var recentlyAdded = await unitOfWork.SeriesRepository.GetRecentlyAddedV2(userId, GetUserParams(request.PageNumber), _filterV2Dto, ct);
-        var seriesMetadatas = await unitOfWork.SeriesRepository.GetSeriesMetadataForIds(recentlyAdded.Select(s => s.Id), ct);
+        var recentlyAdded = await unitOfWork.SeriesRepository.GetRecentlyAddedAsync(userId, GetUserParams(request.PageNumber), _filterV2Dto, ct);
+        var seriesMetadatas = await unitOfWork.SeriesRepository.GetSeriesMetadataForIdsAsync(recentlyAdded.Select(s => s.Id), ct);
 
         var feed = CreateFeed(await localizationService.TranslateAsync(userId, "recently-added"), $"{apiKey}/recently-added", apiKey, prefix);
         SetFeedId(feed, "recently-added");
@@ -333,8 +333,8 @@ public class OpdsService(
     {
         var userId = UnpackRequest(request, out var apiKey, out var prefix, out var baseUrl);
 
-        var seriesDtos = (await unitOfWork.SeriesRepository.GetRecentlyUpdatedSeries(userId, GetUserParams(request.PageNumber), ct)).ToList();
-        var seriesMetadatas = await unitOfWork.SeriesRepository.GetSeriesMetadataForIds(seriesDtos.Select(s => s.SeriesId), ct);
+        var seriesDtos = (await unitOfWork.SeriesRepository.GetRecentlyUpdatedSeriesAsync(userId, GetUserParams(request.PageNumber), ct)).ToList();
+        var seriesMetadatas = await unitOfWork.SeriesRepository.GetSeriesMetadataForIdsAsync(seriesDtos.Select(s => s.SeriesId), ct);
 
         var feed = CreateFeed(await localizationService.TranslateAsync(userId, "recently-updated"), $"{apiKey}/recently-updated", apiKey, prefix);
         SetFeedId(feed, "recently-updated");
@@ -361,8 +361,8 @@ public class OpdsService(
     {
         var userId = UnpackRequest(request, out var apiKey, out var prefix, out var baseUrl);
 
-        var pagedList = await unitOfWork.SeriesRepository.GetOnDeck(userId, 0, GetUserParams(request.PageNumber), ct);
-        var seriesMetadatas = await unitOfWork.SeriesRepository.GetSeriesMetadataForIds(pagedList.Select(s => s.Id), ct);
+        var pagedList = await unitOfWork.SeriesRepository.GetOnDeckAsync(userId, 0, GetUserParams(request.PageNumber), ct);
+        var seriesMetadatas = await unitOfWork.SeriesRepository.GetSeriesMetadataForIdsAsync(pagedList.Select(s => s.Id), ct);
 
         var feed = CreateFeed(await localizationService.TranslateAsync(userId, "on-deck"), $"{apiKey}/on-deck", apiKey, prefix);
         SetFeedId(feed, "on-deck");
@@ -396,9 +396,9 @@ public class OpdsService(
         SetFeedId(feed, "smartFilters-" + filter.Id);
 
         var decodedFilter = SmartFilterHelper.Decode(filter.Filter);
-        var series = await unitOfWork.SeriesRepository.GetSeriesDtoForLibraryIdV2Async(userId, GetUserParams(request.PageNumber),
+        var series = await unitOfWork.SeriesRepository.GetSeriesDtoForLibraryIdAsync(userId, GetUserParams(request.PageNumber),
             decodedFilter, ct: ct);
-        var seriesMetadatas = await unitOfWork.SeriesRepository.GetSeriesMetadataForIds(series.Select(s => s.Id), ct);
+        var seriesMetadatas = await unitOfWork.SeriesRepository.GetSeriesMetadataForIdsAsync(series.Select(s => s.Id), ct);
 
         foreach (var seriesDto in series)
         {
@@ -422,7 +422,7 @@ public class OpdsService(
         }
 
         var series = await unitOfWork.SeriesRepository.GetSeriesDtoForCollectionAsync(collectionId, userId, GetUserParams(request.PageNumber), ct);
-        var seriesMetadatas = await unitOfWork.SeriesRepository.GetSeriesMetadataForIds(series.Select(s => s.Id), ct);
+        var seriesMetadatas = await unitOfWork.SeriesRepository.GetSeriesMetadataForIdsAsync(series.Select(s => s.Id), ct);
 
         var feed = CreateFeed(tag.Title + " Collection", $"{apiKey}/collections/{collectionId}", apiKey, prefix);
         SetFeedId(feed, $"collections-{collectionId}");
@@ -461,8 +461,8 @@ public class OpdsService(
             ]
         };
 
-        var series = await unitOfWork.SeriesRepository.GetSeriesDtoForLibraryIdV2Async(userId, GetUserParams(request.PageNumber), filter, ct: ct);
-        var seriesMetadatas = await unitOfWork.SeriesRepository.GetSeriesMetadataForIds(series.Select(s => s.Id), ct);
+        var series = await unitOfWork.SeriesRepository.GetSeriesDtoForLibraryIdAsync(userId, GetUserParams(request.PageNumber), filter, ct: ct);
+        var seriesMetadatas = await unitOfWork.SeriesRepository.GetSeriesMetadataForIdsAsync(series.Select(s => s.Id), ct);
 
         var feed = CreateFeed(library.Name, $"{apiKey}/libraries/{libraryId}", apiKey, prefix);
         SetFeedId(feed, $"library-{library.Name}");
@@ -776,7 +776,7 @@ public class OpdsService(
 
         var isAdmin = await unitOfWork.UserRepository.IsUserAdminAsync(user, ct);
 
-        var searchResults = await unitOfWork.SeriesRepository.SearchSeries(userId, isAdmin,
+        var searchResults = await unitOfWork.SeriesRepository.SearchSeriesAsync(userId, isAdmin,
             libraries.Select(l => l.Id).ToArray(), query, includeChapterAndFiles: false, ct: ct);
 
         var feed = CreateFeed(query, $"{apiKey}/series?query=" + query, apiKey, prefix);

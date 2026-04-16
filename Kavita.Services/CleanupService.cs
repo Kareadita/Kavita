@@ -409,7 +409,7 @@ public class CleanupService(
 
         foreach (var user in await unitOfWork.UserRepository.GetAllUsersAsync(AppUserIncludes.WantToRead, ct: ct))
         {
-            var series = await unitOfWork.SeriesRepository.GetSeriesDtoForLibraryIdV2Async(user.Id,
+            var series = await unitOfWork.SeriesRepository.GetSeriesDtoForLibraryIdAsync(user.Id,
                 new UserParams() { PageSize = int.MaxValue }, filter, ct: ct);
             var seriesIds = series.Select(s => s.Id).ToList();
             if (seriesIds.Count == 0) continue;

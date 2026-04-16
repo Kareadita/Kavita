@@ -47,7 +47,7 @@ public class WantToReadController(
             filterDto.Statements.Add(stmt);
         }
 
-        var pagedList = await unitOfWork.SeriesRepository.GetWantToReadForUserV2Async(wantToReadForUser, userParams, filterDto);
+        var pagedList = await unitOfWork.SeriesRepository.GetWantToReadDtosForUserAsync(wantToReadForUser, userParams, filterDto);
         Response.AddPaginationHeader(pagedList.CurrentPage, pagedList.PageSize, pagedList.TotalCount, pagedList.TotalPages);
 
         return Ok(pagedList);

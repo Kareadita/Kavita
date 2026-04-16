@@ -1113,7 +1113,7 @@ public class ScrobblingService : IScrobblingService
             };
 
             var seriesWithProgress =
-                await _unitOfWork.SeriesRepository.GetSeriesDtoForLibraryIdV2Async(userId, new UserParams(), filter);
+                await _unitOfWork.SeriesRepository.GetSeriesDtoForLibraryIdAsync(userId, new UserParams(), filter);
 
             foreach (var series in seriesWithProgress.Where(series => series.PagesRead > 0))
             {

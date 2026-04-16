@@ -251,7 +251,7 @@ public class MetadataService(
 
         _updateEvents.Clear();
 
-        var chunkInfo = await unitOfWork.SeriesRepository.GetChunkInfo(library.Id, ct);
+        var chunkInfo = await unitOfWork.SeriesRepository.GetChunkInfoAsync(library.Id, ct);
         var stopwatch = Stopwatch.StartNew();
         var totalTime = 0L;
         logger.LogInformation("[MetadataService] Refreshing Library {LibraryName} for cover generation. Total Items: {TotalSize}. Total Chunks: {TotalChunks} with {ChunkSize} size", library.Name, chunkInfo.TotalSize, chunkInfo.TotalChunks, chunkInfo.ChunkSize);

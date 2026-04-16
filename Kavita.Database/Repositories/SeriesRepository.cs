@@ -90,7 +90,7 @@ public class SeriesRepository(DataContext context, IMapper mapper) : ISeriesRepo
     /// <param name="format">Format of series</param>
     /// <param name="ct"></param>
     /// <returns></returns>
-    public async Task<bool> DoesSeriesNameExistInLibrary(string name, int libraryId, MangaFormat format,
+    public async Task<bool> DoesSeriesNameExistInLibraryAsync(string name, int libraryId, MangaFormat format,
         CancellationToken ct = default)
     {
         return await context.Series
@@ -206,7 +206,7 @@ public class SeriesRepository(DataContext context, IMapper mapper) : ISeriesRepo
         return [libraryId];
     }
 
-    public async Task<SearchResultGroupDto> SearchSeries(int userId, bool isAdmin, IList<int> libraryIds,
+    public async Task<SearchResultGroupDto> SearchSeriesAsync(int userId, bool isAdmin, IList<int> libraryIds,
         string searchQuery, bool includeChapterAndFiles = true, CancellationToken ct = default)
     {
         const int maxRecords = 15;
@@ -539,7 +539,7 @@ public class SeriesRepository(DataContext context, IMapper mapper) : ISeriesRepo
                 .ToDictionaryAsync(x => x.SeriesId, x => x.TotalBytes, cancellationToken: ct));
     }
 
-    public async Task<IList<SeriesMetadataDto>> GetSeriesMetadataForIds(IEnumerable<int> seriesIds,
+    public async Task<IList<SeriesMetadataDto>> GetSeriesMetadataForIdsAsync(IEnumerable<int> seriesIds,
         CancellationToken ct = default)
     {
         return await context.SeriesMetadata
@@ -559,7 +559,7 @@ public class SeriesRepository(DataContext context, IMapper mapper) : ISeriesRepo
     /// </summary>
     /// <remarks>If customOnly, this will not include any volumes/chapters</remarks>
     /// <returns></returns>
-    public async Task<IList<Series>> GetAllWithCoversInDifferentEncoding(EncodeFormat encodeFormat,
+    public async Task<IList<Series>> GetAllWithCoversInDifferentEncodingAsync(EncodeFormat encodeFormat,
         bool customOnly = true, CancellationToken ct = default)
     {
         var extension = encodeFormat.GetExtension();
@@ -579,7 +579,7 @@ public class SeriesRepository(DataContext context, IMapper mapper) : ISeriesRepo
         return await query.ToListAsync(ct);
     }
 
-    public async Task<PagedList<SeriesDto>> GetSeriesDtoForLibraryIdV2Async(int userId, UserParams userParams,
+    public async Task<PagedList<SeriesDto>> GetSeriesDtoForLibraryIdAsync(int userId, UserParams userParams,
         FilterV2Dto filterDto, QueryContext queryContext = QueryContext.None, CancellationToken ct = default)
     {
         var query = await CreateFilteredSearchQueryableV2(userId, filterDto, queryContext, ct: ct);
@@ -589,7 +589,7 @@ public class SeriesRepository(DataContext context, IMapper mapper) : ISeriesRepo
         return await PagedList<SeriesDto>.CreateAsync(retSeries, userParams.PageNumber, userParams.PageSize, ct);
     }
 
-    public async Task<PlusSeriesRequestDto?> GetPlusSeriesDto(int seriesId, CancellationToken ct = default)
+    public async Task<PlusSeriesRequestDto?> GetPlusSeriesDtoAsync(int seriesId, CancellationToken ct = default)
     {
 
         // I need to check Weblinks when AniListId/MalId is already set in ExternalSeries
@@ -631,7 +631,7 @@ public class SeriesRepository(DataContext context, IMapper mapper) : ISeriesRepo
     }
 
 
-    public async Task<PagedList<SeriesDto>> GetRecentlyAddedV2(int userId, UserParams userParams, FilterV2Dto filter,
+    public async Task<PagedList<SeriesDto>> GetRecentlyAddedAsync(int userId, UserParams userParams, FilterV2Dto filter,
         CancellationToken ct = default)
     {
         var query = await CreateFilteredSearchQueryableV2(userId, filter, QueryContext.Dashboard, ct: ct);
@@ -644,7 +644,7 @@ public class SeriesRepository(DataContext context, IMapper mapper) : ISeriesRepo
 
         return await PagedList<SeriesDto>.CreateAsync(retSeries, userParams.PageNumber, userParams.PageSize, ct);
     }
-    
+
     /// <summary>
     /// Returns Series that the user has some partial progress on. Sorts based on activity. Sort first by User progress, then
     /// by when chapters have been added to series. Restricts progress in the past 30 days and chapters being added to last 7.
@@ -654,7 +654,7 @@ public class SeriesRepository(DataContext context, IMapper mapper) : ISeriesRepo
     /// <param name="userParams">Pagination information</param>
     /// <param name="ct"></param>
     /// <returns></returns>
-    public async Task<PagedList<SeriesDto>> GetOnDeck(int userId, int libraryId, UserParams userParams, CancellationToken ct = default)
+    public async Task<PagedList<SeriesDto>> GetOnDeckAsync(int userId, int libraryId, UserParams userParams, CancellationToken ct = default)
     {
         var settings = await context.ServerSetting
             .Select(x => x)
@@ -906,7 +906,7 @@ public class SeriesRepository(DataContext context, IMapper mapper) : ISeriesRepo
         };
     }
 
-    public async Task<SeriesMetadataDto?> GetSeriesMetadata(int seriesId, CancellationToken ct = default)
+    public async Task<SeriesMetadataDto?> GetSeriesMetadataAsync(int seriesId, CancellationToken ct = default)
     {
         return await context.SeriesMetadata
             .Where(metadata => metadata.SeriesId == seriesId)
@@ -937,7 +937,7 @@ public class SeriesRepository(DataContext context, IMapper mapper) : ISeriesRepo
         return await PagedList<SeriesDto>.CreateAsync(query, userParams.PageNumber, userParams.PageSize, ct);
     }
 
-    public async Task<IList<MangaFile>> GetFilesForSeries(int seriesId, CancellationToken ct = default)
+    public async Task<IList<MangaFile>> GetFilesForSeriesAsync(int seriesId, CancellationToken ct = default)
     {
         return await context.Volume
             .Where(v => v.SeriesId == seriesId)
@@ -1012,7 +1012,7 @@ public class SeriesRepository(DataContext context, IMapper mapper) : ISeriesRepo
         return new Tuple<int, int>(totalSeries, 50);
     }
 
-    public async Task<Chunk> GetChunkInfo(int libraryId = 0, CancellationToken ct = default)
+    public async Task<Chunk> GetChunkInfoAsync(int libraryId = 0, CancellationToken ct = default)
     {
         var (totalSeries, chunkSize) = await GetChunkSize(libraryId, ct);
 
@@ -1042,7 +1042,7 @@ public class SeriesRepository(DataContext context, IMapper mapper) : ISeriesRepo
     /// <param name="userParams">Page size and offset</param>
     /// <param name="ct"></param>
     /// <returns></returns>
-    public async Task<IList<GroupedSeriesDto>> GetRecentlyUpdatedSeries(int userId, UserParams? userParams,
+    public async Task<IList<GroupedSeriesDto>> GetRecentlyUpdatedSeriesAsync(int userId, UserParams? userParams,
         CancellationToken ct = default)
     {
         userParams ??= UserParams.Default;
@@ -1096,7 +1096,7 @@ public class SeriesRepository(DataContext context, IMapper mapper) : ISeriesRepo
         return seriesMap.Values.ToList();
     }
 
-    public async Task<IEnumerable<SeriesDto>> GetSeriesForRelationKind(int userId, int seriesId, RelationKind kind,
+    public async Task<IEnumerable<SeriesDto>> GetSeriesForRelationKindAsync(int userId, int seriesId, RelationKind kind,
         CancellationToken ct = default)
     {
         var libraryIds = context.AppUser.GetLibraryIdsForUser(userId);
@@ -1124,7 +1124,7 @@ public class SeriesRepository(DataContext context, IMapper mapper) : ISeriesRepo
             .ToListAsync(ct);
     }
 
-    public async Task<SeriesDto?> GetSeriesForMangaFile(int mangaFileId, int userId, CancellationToken ct = default)
+    public async Task<SeriesDto?> GetSeriesForMangaFileAsync(int mangaFileId, int userId, CancellationToken ct = default)
     {
         var libraryIds = context.AppUser.GetLibraryIdsForUser(userId, 0, QueryContext.Search);
         var userRating = await context.AppUser.GetUserAgeRestriction(userId, ct: ct);
@@ -1141,7 +1141,7 @@ public class SeriesRepository(DataContext context, IMapper mapper) : ISeriesRepo
             .SingleOrDefaultAsync(ct);
     }
 
-    public async Task<SeriesDto?> GetSeriesForChapter(int chapterId, int userId, CancellationToken ct = default)
+    public async Task<SeriesDto?> GetSeriesForChapterAsync(int chapterId, int userId, CancellationToken ct = default)
     {
         var libraryIds = context.AppUser.GetLibraryIdsForUser(userId);
         var userRating = await context.AppUser.GetUserAgeRestriction(userId, ct: ct);
@@ -1163,7 +1163,7 @@ public class SeriesRepository(DataContext context, IMapper mapper) : ISeriesRepo
     /// <param name="includes">Additional relationships to include with the base query</param>
     /// <param name="ct"></param>
     /// <returns></returns>
-    public async Task<Series?> GetSeriesByFolderPath(string folder, SeriesIncludes includes = SeriesIncludes.None,
+    public async Task<Series?> GetSeriesByFolderPathAsync(string folder, SeriesIncludes includes = SeriesIncludes.None,
         CancellationToken ct = default)
     {
         var normalized = folder.NormalizePath();
@@ -1175,7 +1175,7 @@ public class SeriesRepository(DataContext context, IMapper mapper) : ISeriesRepo
             .SingleOrDefaultAsync(ct);
     }
 
-    public async Task<Series?> GetSeriesThatContainsLowestFolderPath(string path,
+    public async Task<Series?> GetSeriesThatContainsLowestFolderPathAsync(string path,
         SeriesIncludes includes = SeriesIncludes.None, CancellationToken ct = default)
     {
         // Check if the path ends with a file (has a file extension)
@@ -1290,7 +1290,7 @@ public class SeriesRepository(DataContext context, IMapper mapper) : ISeriesRepo
 #nullable enable
     }
 
-    public async Task<Series?> GetSeriesByAnyName(string seriesName, string localizedName, IList<MangaFormat> formats,
+    public async Task<Series?> GetSeriesByAnyNameAsync(string seriesName, string localizedName, IList<MangaFormat> formats,
         int userId, int? aniListId = null, SeriesIncludes includes = SeriesIncludes.None, CancellationToken ct = default)
     {
         var libraryIds = context.AppUser.GetLibraryIdsForUser(userId);
@@ -1324,7 +1324,7 @@ public class SeriesRepository(DataContext context, IMapper mapper) : ISeriesRepo
     }
 
 
-    public async Task<Series?> GetSeriesByAnyName(IList<string> names, IList<MangaFormat> formats,
+    public async Task<Series?> GetSeriesByAnyNameAsync(IList<string> names, IList<MangaFormat> formats,
         int userId, int? aniListId = null, SeriesIncludes includes = SeriesIncludes.None, CancellationToken ct = default)
     {
         var libraryIds = context.AppUser.GetLibraryIdsForUser(userId);
@@ -1358,7 +1358,7 @@ public class SeriesRepository(DataContext context, IMapper mapper) : ISeriesRepo
             .FirstOrDefaultAsync(ct);
     }
 
-    public async Task<IList<Series>> GetAllSeriesByAnyName(string seriesName, string localizedName, int libraryId,
+    public async Task<IList<Series>> GetAllSeriesByAnyNameAsync(string seriesName, string localizedName, int libraryId,
         MangaFormat format, CancellationToken ct = default)
     {
         var normalizedSeries = seriesName.ToNormalized();
@@ -1386,7 +1386,7 @@ public class SeriesRepository(DataContext context, IMapper mapper) : ISeriesRepo
     /// <param name="seenSeries"></param>
     /// <param name="libraryId"></param>
     /// <param name="ct"></param>
-    public async Task<IList<Series>> RemoveSeriesNotInList(IList<ParsedSeries> seenSeries, int libraryId,
+    public async Task<IList<Series>> RemoveSeriesNotInListAsync(IList<ParsedSeries> seenSeries, int libraryId,
         CancellationToken ct = default)
     {
         if (!seenSeries.Any()) return Array.Empty<Series>();
@@ -1424,7 +1424,7 @@ public class SeriesRepository(DataContext context, IMapper mapper) : ISeriesRepo
         return seriesToRemove;
     }
 
-    public async Task<RelatedSeriesDto> GetRelatedSeries(int userId, int seriesId, CancellationToken ct = default)
+    public async Task<RelatedSeriesDto> GetRelatedSeriesAsync(int userId, int seriesId, CancellationToken ct = default)
     {
         var libraryIds = context.Library.GetUserLibraries(userId);
         var usersSeriesIds = GetSeriesIdsForLibraryIds(libraryIds);
@@ -1519,7 +1519,7 @@ public class SeriesRepository(DataContext context, IMapper mapper) : ISeriesRepo
             .AsEnumerable();
     }
 
-    public async Task<PagedList<SeriesDto>> GetWantToReadForUserV2Async(int userId, UserParams userParams,
+    public async Task<PagedList<SeriesDto>> GetWantToReadDtosForUserAsync(int userId, UserParams userParams,
         FilterV2Dto filter, CancellationToken ct = default)
     {
         var libraryIds = await context.Library.GetUserLibraries(userId).ToListAsync(ct);
@@ -1561,7 +1561,7 @@ public class SeriesRepository(DataContext context, IMapper mapper) : ISeriesRepo
     /// Uses multiple names to find a match against a series. If not, returns null.
     /// </summary>
     /// <remarks>This does not restrict to the user at all. That is handled at the API level.</remarks>
-    public async Task<SeriesDto?> GetSeriesDtoByNamesAndMetadataIds(IEnumerable<string> names, LibraryType libraryType,
+    public async Task<SeriesDto?> GetSeriesDtoByNamesAndMetadataIdsAsync(IEnumerable<string> names, LibraryType libraryType,
         string aniListUrl, string malUrl, CancellationToken ct = default)
     {
         var libraryIds = await context.Library
@@ -1595,7 +1595,7 @@ public class SeriesRepository(DataContext context, IMapper mapper) : ISeriesRepo
             .FirstOrDefaultAsync(ct); // Some users may have improperly configured libraries
     }
 
-    public async Task<Series?> MatchSeries(ExternalSeriesDetailDto externalSeries, CancellationToken ct = default)
+    public async Task<Series?> MatchSeriesAsync(ExternalSeriesDetailDto externalSeries, CancellationToken ct = default)
     {
         var libraryIds = await context.Library
             .Where(lib => externalSeries.PlusMediaFormat.ConvertToLibraryTypes().Contains(lib.Type))
@@ -1640,7 +1640,7 @@ public class SeriesRepository(DataContext context, IMapper mapper) : ISeriesRepo
     /// <param name="seriesId"></param>
     /// <param name="userId"></param>
     /// <param name="ct"></param>
-    public async Task<int> GetAverageUserRating(int seriesId, int userId, CancellationToken ct = default)
+    public async Task<int> GetAverageUserRatingAsync(int seriesId, int userId, CancellationToken ct = default)
     {
         // If there is 0 or 1 rating and that rating is you, return 0 back
         var countOfRatingsThatAreUser = await context.AppUserRating
@@ -1656,7 +1656,7 @@ public class SeriesRepository(DataContext context, IMapper mapper) : ISeriesRepo
         return avg.HasValue ? (int) (avg.Value * 20) : 0;
     }
 
-    public async Task RemoveFromOnDeck(int seriesId, int userId, CancellationToken ct = default)
+    public async Task RemoveFromOnDeckAsync(int seriesId, int userId, CancellationToken ct = default)
     {
         var existingEntry = await context.AppUserOnDeckRemoval
             .Where(u => u.Id == userId && u.SeriesId == seriesId)
@@ -1670,7 +1670,7 @@ public class SeriesRepository(DataContext context, IMapper mapper) : ISeriesRepo
         await context.SaveChangesAsync(ct);
     }
 
-    public async Task ClearOnDeckRemoval(int seriesId, int userId, CancellationToken ct = default)
+    public async Task ClearOnDeckRemovalAsync(int seriesId, int userId, CancellationToken ct = default)
     {
         var existingEntry = await context.AppUserOnDeckRemoval
             .Where(u => u.AppUserId == userId && u.SeriesId == seriesId)
@@ -1691,7 +1691,7 @@ public class SeriesRepository(DataContext context, IMapper mapper) : ISeriesRepo
             .AnyAsync(ct);
     }
 
-    public async Task<IDictionary<string, IList<SeriesModified>>> GetFolderPathMap(int libraryId,
+    public async Task<IDictionary<string, IList<SeriesModified>>> GetFolderPathMapAsync(int libraryId,
         CancellationToken ct = default)
     {
         var info = await context.Series
@@ -1749,7 +1749,7 @@ public class SeriesRepository(DataContext context, IMapper mapper) : ISeriesRepo
     /// <param name="seriesIds"></param>
     /// <param name="ct"></param>
     /// <returns></returns>
-    public async Task<AgeRating> GetMaxAgeRatingFromSeriesAsync(IEnumerable<int> seriesIds, CancellationToken ct = default)
+    public async Task<AgeRating> GetMaxAgeRatingFromSeriesAsyncAsync(IEnumerable<int> seriesIds, CancellationToken ct = default)
     {
         var ret = await context.Series
             .Where(s => seriesIds.Contains(s.Id))

@@ -614,7 +614,7 @@ public class ImageService(ILogger<ImageService> logger, IDirectoryService direct
     /// <returns></returns>
     public static string GetSeriesFormat(int seriesId)
     {
-        return $"series{seriesId}"; // If this ever changes, also needs to update in SeriesRepository#GetAllWithCoversInDifferentEncoding
+        return $"series{seriesId}"; // If this ever changes, also needs to update in SeriesRepository#GetAllWithCoversInDifferentEncodingAsync
     }
 
     /// <summary>

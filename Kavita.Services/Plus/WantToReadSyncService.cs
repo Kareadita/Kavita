@@ -52,7 +52,7 @@ public class WantToReadSyncService(
                 // Match the series (note: There may be duplicates in the final result)
                 foreach (var unmatchedSeries in wantToReadSeries)
                 {
-                    var match = await unitOfWork.SeriesRepository.MatchSeries(unmatchedSeries, ct);
+                    var match = await unitOfWork.SeriesRepository.MatchSeriesAsync(unmatchedSeries, ct);
                     if (match == null)
                     {
                         continue;

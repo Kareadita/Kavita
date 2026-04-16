@@ -140,7 +140,7 @@ public class ParseScannedFilesTests: AbstractDbTest
     //     }
     //
     //     await psf.ScanLibrariesForSeries(LibraryType.Manga, new List<string>() {"C:/Data/"}, "libraryName",
-    //         false, await _unitOfWork.SeriesRepository.GetFolderPathMap(1), TrackFiles);
+    //         false, await _unitOfWork.SeriesRepository.GetFolderPathMapAsync(1), TrackFiles);
     //
     //     Assert.Equal("Accel World",
     //         psf.MergeName(parsedFiles, ParserInfoFactory.CreateParsedInfo("Accel World", "1", "0", "Accel World v1.cbz", false)));
@@ -211,7 +211,7 @@ public class ParseScannedFilesTests: AbstractDbTest
 
         library.Type = LibraryType.Manga;
         var parsedSeries = await psf.ScanLibrariesForSeries(library, new List<string>() {Root + "Data/"}, false,
-            await unitOfWork.SeriesRepository.GetFolderPathMap(1));
+            await unitOfWork.SeriesRepository.GetFolderPathMapAsync(1));
 
 
         // Assert.Equal(3, parsedSeries.Values.Count);
@@ -256,7 +256,7 @@ public class ParseScannedFilesTests: AbstractDbTest
         var directoriesSeen = new HashSet<string>();
         var library = await unitOfWork.LibraryRepository.GetLibraryForIdAsync(1,
                 LibraryIncludes.Folders | LibraryIncludes.FileTypes);
-        var scanResults = await psf.ScanFiles("C:/Data/", true, await unitOfWork.SeriesRepository.GetFolderPathMap(1), library);
+        var scanResults = await psf.ScanFiles("C:/Data/", true, await unitOfWork.SeriesRepository.GetFolderPathMapAsync(1), library);
         foreach (var scanResult in scanResults)
         {
             directoriesSeen.Add(scanResult.Folder);
@@ -283,7 +283,7 @@ public class ParseScannedFilesTests: AbstractDbTest
 
         var directoriesSeen = new HashSet<string>();
         var scanResults = await psf.ScanFiles("C:/Data/", false,
-            await unitOfWork.SeriesRepository.GetFolderPathMap(1), library);
+            await unitOfWork.SeriesRepository.GetFolderPathMapAsync(1), library);
 
         foreach (var scanResult in scanResults)
         {
@@ -319,7 +319,7 @@ public class ParseScannedFilesTests: AbstractDbTest
         var library = await unitOfWork.LibraryRepository.GetLibraryForIdAsync(1,
             LibraryIncludes.Folders | LibraryIncludes.FileTypes);
         Assert.NotNull(library);
-        var scanResults = await psf.ScanFiles("C:/Data", true, await unitOfWork.SeriesRepository.GetFolderPathMap(1), library);
+        var scanResults = await psf.ScanFiles("C:/Data", true, await unitOfWork.SeriesRepository.GetFolderPathMapAsync(1), library);
 
         Assert.Equal(2, scanResults.Count);
     }
@@ -353,7 +353,7 @@ public class ParseScannedFilesTests: AbstractDbTest
             LibraryIncludes.Folders | LibraryIncludes.FileTypes);
         Assert.NotNull(library);
         var scanResults = await psf.ScanFiles("C:/Data", false,
-            await unitOfWork.SeriesRepository.GetFolderPathMap(1), library);
+            await unitOfWork.SeriesRepository.GetFolderPathMapAsync(1), library);
 
         Assert.Single(scanResults);
     }
@@ -410,7 +410,7 @@ public class ParseScannedFilesTests: AbstractDbTest
             Path.Join(executionerCopyDir, "The Executioner and Her Way of Life Vol. 1 Ch. 0002.cbz"));
 
         // 4 series, of which 2 have volumes as directories
-        var folderMap = await unitOfWork.SeriesRepository.GetFolderPathMap(postLib.Id);
+        var folderMap = await unitOfWork.SeriesRepository.GetFolderPathMapAsync(postLib.Id);
         Assert.Equal(6, folderMap.Count);
 
         var res = await psf.ScanFiles(testDirectoryPath, true, folderMap, postLib);
@@ -461,7 +461,7 @@ public class ParseScannedFilesTests: AbstractDbTest
             Path.Join(executionerCopyDir, "The Executioner and Her Way of Life Vol. 2.cbz"));
 
         var res = await psf.ScanFiles(testDirectoryPath, true,
-            await unitOfWork.SeriesRepository.GetFolderPathMap(postLib.Id), postLib);
+            await unitOfWork.SeriesRepository.GetFolderPathMapAsync(postLib.Id), postLib);
         var changes = res.Count(sc => sc.HasChanged);
         Assert.Equal(1, changes);
     }
@@ -503,7 +503,7 @@ public class ParseScannedFilesTests: AbstractDbTest
         await Task.Delay(1100); // Ensure at least one second has passed since library scan
 
         var res = await psf.ScanFiles(testDirectoryPath, true,
-            await unitOfWork.SeriesRepository.GetFolderPathMap(postLib.Id), postLib);
+            await unitOfWork.SeriesRepository.GetFolderPathMapAsync(postLib.Id), postLib);
         Assert.DoesNotContain(res, sc => sc.HasChanged);
     }
 
@@ -548,7 +548,7 @@ public class ParseScannedFilesTests: AbstractDbTest
             Path.Join(spiceAndWolfDir, "Spice and Wolf Vol. 4.cbz"));
 
         var res = await psf.ScanFiles(testDirectoryPath, true,
-            await unitOfWork.SeriesRepository.GetFolderPathMap(postLib.Id), postLib);
+            await unitOfWork.SeriesRepository.GetFolderPathMapAsync(postLib.Id), postLib);
         var changes = res.Count(sc => sc.HasChanged);
         Assert.Equal(2, changes);
     }
@@ -594,7 +594,7 @@ public class ParseScannedFilesTests: AbstractDbTest
             Path.Join(spiceAndWolfDir, "Spice and Wolf Vol. 3 Ch. 0013.cbz"));
 
         var res = await psf.ScanFiles(testDirectoryPath, true,
-            await unitOfWork.SeriesRepository.GetFolderPathMap(postLib.Id), postLib);
+            await unitOfWork.SeriesRepository.GetFolderPathMapAsync(postLib.Id), postLib);
         var changes = res.Count(sc => sc.HasChanged);
         Assert.Equal(2, changes);
     }
