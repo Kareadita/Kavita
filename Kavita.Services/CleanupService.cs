@@ -375,7 +375,7 @@ public class CleanupService(
     }
 
     /// <summary>
-    /// This does not cleanup any Series that are not Completed or Cancelled
+    /// This does not clean up any Series that are not Completed or Cancelled
     /// </summary>
     public async Task CleanupWantToRead(CancellationToken ct = default)
     {
@@ -397,6 +397,12 @@ public class CleanupService(
                     Comparison = FilterComparison.Equal,
                     Field = SeriesFilterField.ReadProgress,
                     Value = "100"
+                },
+                new FilterStatementDto()
+                {
+                    Comparison = FilterComparison.Equal,
+                    Field = SeriesFilterField.WantToRead,
+                    Value = "true"
                 }
             ]
         };
@@ -408,7 +414,7 @@ public class CleanupService(
             var seriesIds = series.Select(s => s.Id).ToList();
             if (seriesIds.Count == 0) continue;
 
-            user.WantToRead ??= new List<AppUserWantToRead>();
+            user.WantToRead ??= [];
             user.WantToRead = user.WantToRead.Where(s => !seriesIds.Contains(s.SeriesId)).ToList();
             unitOfWork.UserRepository.Update(user);
         }
