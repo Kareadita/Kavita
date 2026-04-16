@@ -1,5 +1,5 @@
 import {HttpClient, HttpParams} from '@angular/common/http';
-import { Injectable, inject } from '@angular/core';
+import {inject, Injectable} from '@angular/core';
 import {map} from 'rxjs/operators';
 import {environment} from 'src/environments/environment';
 import {TextResonse} from '../_types/text-response';
@@ -14,7 +14,6 @@ export enum ScrobbleProvider {
   Kavita = 0,
   AniList = 1,
   Mal = 2,
-  GoogleBooks = 3,
   Cbr = 4
 }
 

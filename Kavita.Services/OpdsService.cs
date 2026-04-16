@@ -131,24 +131,6 @@ public class OpdsService(
                         ]
                     });
                     break;
-                case DashboardStreamType.MoreInGenre:
-                    var randomGenre = await unitOfWork.GenreRepository.GetRandomGenre(ct);
-                    if (randomGenre == null) break;
-
-                    feed.Entries.Add(new FeedEntry()
-                    {
-                        Id = "moreInGenre",
-                        Title = await localizationService.TranslateAsync(request.UserId, "more-in-genre", randomGenre.Title),
-                        Content = new FeedEntryContent()
-                        {
-                            Text = await localizationService.TranslateAsync(request.UserId, "browse-more-in-genre", randomGenre.Title)
-                        },
-                        Links =
-                        [
-                            CreateLink(FeedLinkRelation.SubSection, FeedLinkType.AtomNavigation, $"{request.Prefix}{request.ApiKey}/more-in-genre?genreId={randomGenre.Id}"),
-                        ]
-                    });
-                    break;
                 case DashboardStreamType.SmartFilter:
 
                     feed.Entries.Add(new FeedEntry()
