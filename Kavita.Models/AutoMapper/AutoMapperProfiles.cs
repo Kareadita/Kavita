@@ -415,7 +415,6 @@ public class AutoMapperProfiles : Profile
 
         #region Deprecated Code
 
-        CreateMap<Chapter, ChapterMetadataDto>();
 
         #endregion
 

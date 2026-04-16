@@ -37,7 +37,6 @@ public interface IChapterRepository
     Task<Chapter?> GetChapterAsync(int chapterId, ChapterIncludes includes = ChapterIncludes.Files, CancellationToken ct = default);
     Task<ChapterDto?> GetChapterDtoAsync(int chapterId, int userId, CancellationToken ct = default);
     Task<IList<ChapterDto>> GetChapterDtoByIdsAsync(IEnumerable<int> chapterIds, int userId, CancellationToken ct = default);
-    Task<ChapterMetadataDto?> GetChapterMetadataDtoAsync(int chapterId, ChapterIncludes includes = ChapterIncludes.Files, CancellationToken ct = default);
     Task<IList<MangaFile>> GetFilesForChapterAsync(int chapterId, CancellationToken ct = default);
     Task<IList<Chapter>> GetChaptersAsync(int volumeId, ChapterIncludes includes = ChapterIncludes.None, CancellationToken ct = default);
     Task<IList<ChapterDto>> GetChapterDtosAsync(int volumeId, int userId, CancellationToken ct = default);

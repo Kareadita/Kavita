@@ -48,13 +48,7 @@ public enum ServerSettingKey
     /// </summary>
     [Description("EnableOpds")]
     EnableOpds = 7,
-    /// <summary>
-    /// Is Authentication needed for non-admin accounts
-    /// </summary>
-    /// <remarks>Deprecated. This is no longer used v0.5.1+. Assume Authentication is always in effect</remarks>
-    [Obsolete("Not supported as of v0.5.1")]
-    [Description("EnableAuthentication")]
-    EnableAuthentication = 8,
+    // Removed option on 8 in v0.9.0
     /// <summary>
     /// Base Url for the server. Not Implemented.
     /// </summary>
@@ -76,18 +70,8 @@ public enum ServerSettingKey
     /// </summary>
     [Description("BookmarkDirectory")]
     BookmarkDirectory = 12,
-    /// <summary>
-    /// If SMTP is enabled on the server
-    /// </summary>
-    [Description("CustomEmailService")]
-    [Obsolete("Use Email settings instead")]
-    EmailServiceUrl = 13,
-    /// <summary>
-    /// If Kavita should save bookmarks as WebP images
-    /// </summary>
-    [Obsolete("Use EncodeMediaAs instead")]
-    [Description("ConvertBookmarkToWebP")]
-    ConvertBookmarkToWebP = 14,
+    // Removed option on 13 in v0.9.0
+    // Removed option on 14 in v0.9.0
     /// <summary>
     /// Total Number of Backups to maintain before cleaning. Default 30, min 1.
     /// </summary>
@@ -103,12 +87,7 @@ public enum ServerSettingKey
     /// </summary>
     [Description("TotalLogs")]
     TotalLogs = 18,
-    /// <summary>
-    /// If Kavita should save covers as WebP images
-    /// </summary>
-    [Obsolete("Use EncodeMediaAs instead")]
-    [Description("ConvertCoverToWebP")]
-    ConvertCoverToWebP = 19,
+    // Removed option on 19 in v0.9.0
     /// <summary>
     /// The Host name (ie Reverse proxy domain name) for the server. Used for email link generation
     /// </summary>

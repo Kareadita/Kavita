@@ -1253,15 +1253,15 @@ public class SeriesRepository(DataContext context, IMapper mapper) : ISeriesRepo
     /// </summary>
     /// <param name="libraryId">Defaults to 0 meaning no library</param>
     /// <returns></returns>
-    private async Task<Tuple<int, int>> GetChunkSize(int libraryId = 0)
+    private async Task<Tuple<int, int>> GetChunkSize(int libraryId = 0, CancellationToken ct = default)
     {
-        var totalSeries = await GetSeriesCount(libraryId);
+        var totalSeries = await GetSeriesCount(libraryId, ct);
         return new Tuple<int, int>(totalSeries, 50);
     }
 
     public async Task<Chunk> GetChunkInfo(int libraryId = 0, CancellationToken ct = default)
     {
-        var (totalSeries, chunkSize) = await GetChunkSize(libraryId);
+        var (totalSeries, chunkSize) = await GetChunkSize(libraryId, ct);
 
         if (totalSeries == 0) return new Chunk
         {

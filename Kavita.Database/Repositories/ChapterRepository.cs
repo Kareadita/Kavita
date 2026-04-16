@@ -132,19 +132,6 @@ public class ChapterRepository(DataContext context, IMapper mapper) : IChapterRe
         return chapters;
     }
 
-    public async Task<ChapterMetadataDto?> GetChapterMetadataDtoAsync(int chapterId,
-        ChapterIncludes includes = ChapterIncludes.Files, CancellationToken ct = default)
-    {
-        var chapter = await context.Chapter
-            .Includes(includes)
-            .ProjectTo<ChapterMetadataDto>(mapper.ConfigurationProvider)
-            .AsNoTracking()
-            .AsSplitQuery()
-            .SingleOrDefaultAsync(c => c.Id == chapterId, ct);
-
-        return chapter;
-    }
-
     /// <summary>
     /// Returns non-tracked files for a given chapterId
     /// </summary>
