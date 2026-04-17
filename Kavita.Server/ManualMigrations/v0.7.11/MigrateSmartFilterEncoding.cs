@@ -88,7 +88,7 @@ public static class MigrateSmartFilterEncoding
         });
 
         //name=Zero&sortOptions=sortField=2&isAscending=False&limitTo=0&combination=1
-        var filterDto = SmartFilterHelper.Decode(noStmt);
+        var filterDto = SmartFilterHelper.DecodeLegacy(noStmt);
 
         // Now we just parse each individual stmt into the core components and add to statements
 

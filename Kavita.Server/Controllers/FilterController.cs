@@ -119,10 +119,14 @@ public class FilterController(
     /// <summary>
     /// Decodes the Filter
     /// </summary>
+    /// <remarks>Decoded filter will always have the same shape of <see cref="IFilterDto{TStatement,TSortOption}"/>.
+    /// The concrete class is driven by <c>EntityType</c>.
+    /// Classes: <see cref="SeriesFilterV2Dto"/>, <see cref="PersonFilterDto"/>, <see cref="AnnotationFilterDto"/>, <see cref="ReadingListFilterDto"/>
+    /// </remarks>
     /// <param name="dto"></param>
     /// <returns></returns>
     [HttpPost("decode")]
-    public ActionResult<SeriesFilterV2Dto> DecodeFilter(DecodeFilterDto dto)
+    public ActionResult<IFilterDto<T>> DecodeFilter<T>(DecodeFilterDto dto)
     {
         return Ok(SmartFilterHelper.Decode(dto.EncodedFilter));
     }

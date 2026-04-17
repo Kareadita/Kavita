@@ -4,7 +4,7 @@ using Kavita.Models.DTOs.Filtering.v2.SortOptions;
 
 namespace Kavita.Models.DTOs.Filtering.v2.Requests;
 
-public class AnnotationFilterDto : IFilterDto<AnnotationFilterStatementDto>
+public class AnnotationFilterDto : IFilterDto<AnnotationFilterStatementDto, AnnotationSortOptionDto>
 {
     /// <summary>
     /// Not used - For parity with Series Filter

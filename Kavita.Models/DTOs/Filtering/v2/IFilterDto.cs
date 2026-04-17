@@ -1,29 +1,34 @@
-using System;
 using System.Collections.Generic;
 
 namespace Kavita.Models.DTOs.Filtering.v2;
+#nullable enable
+
 
 /// <summary>
-/// Represents a single filter statement with a field enum, comparison operator, and raw string value.
+/// Base filter interface for statement processing. Used by <c>FilterQueryBuilder</c>
 /// </summary>
-/// <typeparam name="TField">The field enum type (FilterField, PersonFilterField, etc.)</typeparam>
-public interface IFilterStatement<out TField> where TField : Enum
+public interface IFilterDto<TStatement>
 {
-    FilterComparison Comparison { get; }
-    TField Field { get; }
-    string Value { get; }
+    ICollection<TStatement> Statements { get; set; }
+    FilterCombination Combination { get; set; }
+    int LimitTo { get; set; }
+    FilterEntityType EntityType { get; }
 }
 
 /// <summary>
 /// Represents a filter DTO containing statements, a combination mode, and a limit.
-/// Sorting is intentionally excluded — sort field enums differ per entity and sorting
+/// Sorting is intentionally excluded, sort field enums differ per entity and sorting
 /// is always applied separately in the caller.
 /// </summary>
 /// <typeparam name="TStatement">The statement type</typeparam>
-public interface IFilterDto<TStatement>
+/// <typeparam name="TSortOption">The sort option type</typeparam>
+public interface IFilterDto<TStatement, TSortOption> : IFilterDto<TStatement>
 {
-    ICollection<TStatement> Statements { get; }
-    FilterCombination Combination { get; }
-    int LimitTo { get; }
+    int Id { get; set; }
+    string? Name { get; set; }
+    ICollection<TStatement> Statements { get; set;  }
+    FilterCombination Combination { get; set;  }
     FilterEntityType EntityType { get; }
+    TSortOption? SortOptions { get; set; }
+    int LimitTo { get; set;  }
 }

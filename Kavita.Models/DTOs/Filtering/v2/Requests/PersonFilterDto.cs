@@ -4,7 +4,7 @@ using Kavita.Models.DTOs.Filtering.v2.SortOptions;
 namespace Kavita.Models.DTOs.Filtering.v2.Requests;
 #nullable enable
 
-public sealed record PersonFilterDto : IFilterDto<PersonFilterStatementDto>
+public sealed record PersonFilterDto : IFilterDto<PersonFilterStatementDto, PersonSortOptionDto>
 {
     /// <summary>
     /// Not used - For parity with Series Filter

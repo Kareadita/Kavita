@@ -32,7 +32,7 @@ public static class FilterQueryBuilder
         Func<TStatement, IQueryable<TEntity>, IQueryable<TEntity>> buildGroup,
         Action<IFilterDto<TStatement>>? preProcess = null)
     {
-        if (filter.Statements == null || filter.Statements.Count == 0) return query;
+        if (filter.Statements.Count == 0) return query;
 
         preProcess?.Invoke(filter);
 
