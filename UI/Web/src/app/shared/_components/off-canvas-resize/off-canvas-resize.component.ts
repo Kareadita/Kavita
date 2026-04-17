@@ -151,7 +151,7 @@ export class OffCanvasResizeComponent implements OnInit {
     ).subscribe();
 
     const mouseDown$ = fromEvent<MouseEvent>(this.el.nativeElement, 'mousedown');
-    const touchStart$ = fromEvent<TouchEvent>(this.document, 'touchstart');
+    const touchStart$ = fromEvent<TouchEvent>(this.el.nativeElement, 'touchstart');
 
     merge(mouseDown$, touchStart$).pipe(
       takeUntilDestroyed(this.destroyRef),
