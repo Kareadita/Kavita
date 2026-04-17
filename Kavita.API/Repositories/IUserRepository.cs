@@ -91,7 +91,7 @@ public interface IUserRepository
     Task<IEnumerable<BookmarkDto>> GetBookmarkDtosForSeries(int userId, int seriesId, CancellationToken ct = default);
     Task<IEnumerable<BookmarkDto>> GetBookmarkDtosForVolume(int userId, int volumeId, CancellationToken ct = default);
     Task<IEnumerable<BookmarkDto>> GetBookmarkDtosForChapter(int userId, int chapterId, CancellationToken ct = default);
-    Task<IEnumerable<BookmarkDto>> GetAllBookmarkDtos(int userId, FilterV2Dto filter, CancellationToken ct = default);
+    Task<IEnumerable<BookmarkDto>> GetAllBookmarkDtos(int userId, SeriesFilterV2Dto seriesFilter, CancellationToken ct = default);
     Task<IEnumerable<AppUserBookmark>> GetAllBookmarksAsync(CancellationToken ct = default);
     Task<AppUserBookmark?> GetBookmarkForPage(int page, int chapterId, int imageOffset, int userId, CancellationToken ct = default);
     Task<AppUserBookmark?> GetBookmarkAsync(int bookmarkId, CancellationToken ct = default);

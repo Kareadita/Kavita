@@ -579,9 +579,9 @@ public class SeriesRepository(DataContext context, IMapper mapper) : ISeriesRepo
     }
 
     public async Task<PagedList<SeriesDto>> GetSeriesDtoForLibraryIdAsync(int userId, UserParams userParams,
-        FilterV2Dto filterDto, QueryContext queryContext = QueryContext.None, CancellationToken ct = default)
+        SeriesFilterV2Dto seriesFilterDto, QueryContext queryContext = QueryContext.None, CancellationToken ct = default)
     {
-        var query = await CreateFilteredSearchQueryableV2(userId, filterDto, queryContext, ct: ct);
+        var query = await CreateFilteredSearchQueryableV2(userId, seriesFilterDto, queryContext, ct: ct);
 
         var retSeries = query.ProjectToWithProgress<Series, SeriesDto>(mapper, userId);
 
@@ -630,10 +630,10 @@ public class SeriesRepository(DataContext context, IMapper mapper) : ISeriesRepo
     }
 
 
-    public async Task<PagedList<SeriesDto>> GetRecentlyAddedAsync(int userId, UserParams userParams, FilterV2Dto filter,
+    public async Task<PagedList<SeriesDto>> GetRecentlyAddedAsync(int userId, UserParams userParams, SeriesFilterV2Dto seriesFilter,
         CancellationToken ct = default)
     {
-        var query = await CreateFilteredSearchQueryableV2(userId, filter, QueryContext.Dashboard, ct: ct);
+        var query = await CreateFilteredSearchQueryableV2(userId, seriesFilter, QueryContext.Dashboard, ct: ct);
 
         var retSeries = query
             .OrderByDescending(s => s.Created)
@@ -700,7 +700,7 @@ public class SeriesRepository(DataContext context, IMapper mapper) : ISeriesRepo
         return await PagedList<SeriesDto>.CreateAsync(query, userParams.PageNumber, userParams.PageSize, ct);
     }
 
-    private async Task<IQueryable<Series>> CreateFilteredSearchQueryableV2(int userId, FilterV2Dto filter,
+    private async Task<IQueryable<Series>> CreateFilteredSearchQueryableV2(int userId, SeriesFilterV2Dto seriesFilter,
         QueryContext queryContext, IQueryable<Series>? query = null, CancellationToken ct = default)
     {
         var userLibraries = await GetUserLibrariesForFilteredQuery(0, userId, queryContext, ct);
@@ -720,14 +720,14 @@ public class SeriesRepository(DataContext context, IMapper mapper) : ISeriesRepo
         }
 
         // First setup any FilterField.Libraries in the statements, as these don't have any traditional query statements applied here
-        query = ApplyLibraryFilter(filter, query);
+        query = ApplyLibraryFilter(seriesFilter, query);
 
-        query = ApplyWantToReadFilter(filter, query, userId);
+        query = ApplyWantToReadFilter(seriesFilter, query, userId);
 
-        query = await ApplyCollectionFilter(filter, query, userId, userRating, ct);
+        query = await ApplyCollectionFilter(seriesFilter, query, userId, userRating, ct);
 
 
-        query = FilterQueryBuilder.Apply(filter, query,
+        query = FilterQueryBuilder.Apply(seriesFilter, query,
             (stmt, q) => BuildFilterGroup(userId, stmt, q));
 
         query = query
@@ -739,15 +739,15 @@ public class SeriesRepository(DataContext context, IMapper mapper) : ISeriesRepo
 
 
         return query
-                .Sort(userId, filter.SortOptions)
+                .Sort(userId, seriesFilter.SortOptions)
                 .AsSplitQuery()
-                .ApplyLimit(filter.LimitTo);
+                .ApplyLimit(seriesFilter.LimitTo);
     }
 
-    private async Task<IQueryable<Series>> ApplyCollectionFilter(FilterV2Dto filter, IQueryable<Series> query,
+    private async Task<IQueryable<Series>> ApplyCollectionFilter(SeriesFilterV2Dto seriesFilter, IQueryable<Series> query,
         int userId, AgeRestriction userRating, CancellationToken ct = default)
     {
-        var collectionStmt = filter.Statements.FirstOrDefault(stmt => stmt.Field == SeriesFilterField.CollectionTags);
+        var collectionStmt = seriesFilter.Statements.FirstOrDefault(stmt => stmt.Field == SeriesFilterField.CollectionTags);
         if (collectionStmt == null) return query;
 
         var value = (IList<int>) SeriesFilterFieldValueConverter.ConvertValue(collectionStmt.Field, collectionStmt.Value);
@@ -789,9 +789,9 @@ public class SeriesRepository(DataContext context, IMapper mapper) : ISeriesRepo
         return query.Where(s => commonSeries.Contains(s.Id));
     }
 
-    private IQueryable<Series> ApplyWantToReadFilter(FilterV2Dto filter, IQueryable<Series> query, int userId)
+    private IQueryable<Series> ApplyWantToReadFilter(SeriesFilterV2Dto seriesFilter, IQueryable<Series> query, int userId)
     {
-        var wantToReadStmt = filter.Statements.FirstOrDefault(stmt => stmt.Field == SeriesFilterField.WantToRead);
+        var wantToReadStmt = seriesFilter.Statements.FirstOrDefault(stmt => stmt.Field == SeriesFilterField.WantToRead);
         if (wantToReadStmt == null) return query;
 
         var seriesIds = context.AppUser.Where(u => u.Id == userId)
@@ -810,14 +810,14 @@ public class SeriesRepository(DataContext context, IMapper mapper) : ISeriesRepo
         return query;
     }
 
-    private static IQueryable<Series> ApplyLibraryFilter(FilterV2Dto filter, IQueryable<Series> query)
+    private static IQueryable<Series> ApplyLibraryFilter(SeriesFilterV2Dto seriesFilter, IQueryable<Series> query)
     {
         var filterIncludeLibs = new List<int>();
         var filterExcludeLibs = new List<int>();
 
-        if (filter.Statements != null)
+        if (seriesFilter.Statements != null)
         {
-            foreach (var stmt in filter.Statements.Where(stmt => stmt.Field == SeriesFilterField.Libraries))
+            foreach (var stmt in seriesFilter.Statements.Where(stmt => stmt.Field == SeriesFilterField.Libraries))
             {
                 var libIds = stmt.Value.Split(',').Select(int.Parse);
                 if (stmt.Comparison is FilterComparison.Equal or FilterComparison.Contains)
@@ -832,13 +832,13 @@ public class SeriesRepository(DataContext context, IMapper mapper) : ISeriesRepo
             }
 
             // Remove as filterLibs now has everything
-            filter.Statements = filter.Statements.Where(stmt => stmt.Field != SeriesFilterField.Libraries).ToList();
+            seriesFilter.Statements = seriesFilter.Statements.Where(stmt => stmt.Field != SeriesFilterField.Libraries).ToList();
         }
 
         // We now have a list of libraries the user wants it restricted to and libraries the user doesn't want in the list
         // We need to check what the filer combo is to see how to next approach
 
-        if (filter.Combination == FilterCombination.And)
+        if (seriesFilter.Combination == FilterCombination.And)
         {
             // If the filter combo is AND, then we need 2 different queries
             query = query
@@ -1519,7 +1519,7 @@ public class SeriesRepository(DataContext context, IMapper mapper) : ISeriesRepo
     }
 
     public async Task<PagedList<SeriesDto>> GetWantToReadDtosForUserAsync(int userId, UserParams userParams,
-        FilterV2Dto filter, CancellationToken ct = default)
+        SeriesFilterV2Dto seriesFilter, CancellationToken ct = default)
     {
         var libraryIds = await context.Library.GetUserLibraries(userId).ToListAsync(ct);
         var seriesIds = await context.AppUser
@@ -1530,7 +1530,7 @@ public class SeriesRepository(DataContext context, IMapper mapper) : ISeriesRepo
             .Distinct()
             .ToListAsync(ct);
 
-        var query = await CreateFilteredSearchQueryableV2(userId, filter, QueryContext.None, ct: ct);
+        var query = await CreateFilteredSearchQueryableV2(userId, seriesFilter, QueryContext.None, ct: ct);
 
         // Apply the Want to Read filtering
         query = query.Where(s => seriesIds.Contains(s.Id));

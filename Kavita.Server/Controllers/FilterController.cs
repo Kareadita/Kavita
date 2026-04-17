@@ -33,7 +33,7 @@ public class FilterController(
     /// <returns></returns>
     [HttpPost("update")]
     [DisallowRole(PolicyConstants.ReadOnlyRole)]
-    public async Task<ActionResult> CreateOrUpdateSmartFilter(FilterV2Dto dto)
+    public async Task<ActionResult> CreateOrUpdateSmartFilter(SeriesFilterV2Dto dto)
     {
         var user = await unitOfWork.UserRepository.GetUserByIdAsync(UserId, AppUserIncludes.SmartFilters);
         if (user == null) return Unauthorized();
@@ -109,7 +109,7 @@ public class FilterController(
     /// <param name="dto"></param>
     /// <returns></returns>
     [HttpPost("encode")]
-    public ActionResult<string> EncodeFilter(FilterV2Dto dto)
+    public ActionResult<string> EncodeFilter(SeriesFilterV2Dto dto)
     {
         return Ok(SmartFilterHelper.Encode(dto));
     }
@@ -120,7 +120,7 @@ public class FilterController(
     /// <param name="dto"></param>
     /// <returns></returns>
     [HttpPost("decode")]
-    public ActionResult<FilterV2Dto> DecodeFilter(DecodeFilterDto dto)
+    public ActionResult<SeriesFilterV2Dto> DecodeFilter(DecodeFilterDto dto)
     {
         return Ok(SmartFilterHelper.Decode(dto.EncodedFilter));
     }

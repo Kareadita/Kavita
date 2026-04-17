@@ -50,14 +50,14 @@ public class SeriesController(
     /// Gets series with the applied Filter
     /// </summary>
     /// <param name="userParams"></param>
-    /// <param name="filterDto"></param>
+    /// <param name="seriesFilterDto"></param>
     /// <returns></returns>
     [HttpPost("v2")]
-    public async Task<ActionResult<PagedList<SeriesDto>>> GetSeriesForLibraryV2([FromQuery] UserParams userParams, [FromBody] FilterV2Dto filterDto)
+    public async Task<ActionResult<PagedList<SeriesDto>>> GetSeriesForLibraryV2([FromQuery] UserParams userParams, [FromBody] SeriesFilterV2Dto seriesFilterDto)
     {
         var userId = UserId;
         var ct = HttpContext.RequestAborted;
-        var series = await unitOfWork.SeriesRepository.GetSeriesDtoForLibraryIdAsync(userId, userParams, filterDto, ct: ct);
+        var series = await unitOfWork.SeriesRepository.GetSeriesDtoForLibraryIdAsync(userId, userParams, seriesFilterDto, ct: ct);
 
         Response.AddPaginationHeader(series.CurrentPage, series.PageSize, series.TotalCount, series.TotalPages);
 
@@ -219,16 +219,16 @@ public class SeriesController(
     /// <summary>
     /// Gets all recently added series
     /// </summary>
-    /// <param name="filterDto"></param>
+    /// <param name="seriesFilterDto"></param>
     /// <param name="userParams"></param>
     /// <returns></returns>
     [HttpPost("recently-added-v2")]
-    public async Task<ActionResult<IEnumerable<SeriesDto>>> GetRecentlyAddedV2(FilterV2Dto filterDto, [FromQuery] UserParams userParams)
+    public async Task<ActionResult<IEnumerable<SeriesDto>>> GetRecentlyAddedV2(SeriesFilterV2Dto seriesFilterDto, [FromQuery] UserParams userParams)
     {
         var userId = UserId;
         var ct = HttpContext.RequestAborted;
         var series =
-            await unitOfWork.SeriesRepository.GetRecentlyAddedAsync(userId, userParams, filterDto, ct);
+            await unitOfWork.SeriesRepository.GetRecentlyAddedAsync(userId, userParams, seriesFilterDto, ct);
 
         Response.AddPaginationHeader(series.CurrentPage, series.PageSize, series.TotalCount, series.TotalPages);
 
@@ -251,14 +251,14 @@ public class SeriesController(
     /// <summary>
     /// Returns all series for the library
     /// </summary>
-    /// <param name="filterDto"></param>
+    /// <param name="seriesFilterDto"></param>
     /// <param name="userParams"></param>
     /// <param name="userId">Optional user id to request the OnDeck for someone else. They must have profile sharing enabled when doing so</param>
     /// <param name="context"></param>
     /// <returns></returns>
     [HttpPost("all-v2")]
     [ProfilePrivacy(allowMissingUserId: true)]
-    public async Task<ActionResult<PagedList<SeriesDto>>> GetAllSeriesV2(FilterV2Dto filterDto, [FromQuery] UserParams userParams,
+    public async Task<ActionResult<PagedList<SeriesDto>>> GetAllSeriesV2(SeriesFilterV2Dto seriesFilterDto, [FromQuery] UserParams userParams,
         [FromQuery] int? userId = null, [FromQuery] QueryContext context = QueryContext.None)
     {
         var ct = HttpContext.RequestAborted;
@@ -266,10 +266,10 @@ public class SeriesController(
 
         foreach (var stmt in await seriesService.GetProfilePrivacyStatements(seriesForUser, UserId, ct))
         {
-            filterDto.Statements.Add(stmt);
+            seriesFilterDto.Statements.Add(stmt);
         }
 
-        var series = await unitOfWork.SeriesRepository.GetSeriesDtoForLibraryIdAsync(seriesForUser, userParams, filterDto, context, ct);
+        var series = await unitOfWork.SeriesRepository.GetSeriesDtoForLibraryIdAsync(seriesForUser, userParams, seriesFilterDto, context, ct);
 
         Response.AddPaginationHeader(series.CurrentPage, series.PageSize, series.TotalCount, series.TotalPages);
 

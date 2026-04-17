@@ -7,7 +7,7 @@ namespace Kavita.Models.DTOs.Filtering.v2;
 /// <summary>
 /// Metadata filtering for v2 API only
 /// </summary>
-public sealed record FilterV2Dto : IFilterDto<FilterStatementDto>
+public sealed record SeriesFilterV2Dto : IFilterDto<FilterStatementDto>
 {
     /// <summary>
     /// Not used in the UI.

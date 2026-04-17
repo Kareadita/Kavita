@@ -82,7 +82,7 @@ public interface ISeriesRepository
     Task<Dictionary<int, long>> GetFilesizesAsync(IList<int> seriesIds, CancellationToken ct = default);
     Task<string?> GetSeriesCoverImageAsync(int seriesId, CancellationToken ct = default);
     Task<PagedList<SeriesDto>> GetOnDeckAsync(int userId, int libraryId, UserParams userParams, CancellationToken ct = default);
-    Task<PagedList<SeriesDto>> GetRecentlyAddedAsync(int userId, UserParams userParams, FilterV2Dto filter, CancellationToken ct = default);
+    Task<PagedList<SeriesDto>> GetRecentlyAddedAsync(int userId, UserParams userParams, SeriesFilterV2Dto seriesFilter, CancellationToken ct = default);
     Task<SeriesMetadataDto?> GetSeriesMetadataAsync(int seriesId, CancellationToken ct = default);
     Task<PagedList<SeriesDto>> GetSeriesDtoForCollectionAsync(int collectionId, int userId, UserParams userParams, CancellationToken ct = default);
     Task<IList<MangaFile>> GetFilesForSeriesAsync(int seriesId, CancellationToken ct = default);
@@ -97,7 +97,7 @@ public interface ISeriesRepository
     Task<IEnumerable<SeriesDto>> GetSeriesForRelationKindAsync(int userId, int seriesId, RelationKind kind, CancellationToken ct = default);
     Task<SeriesDto?> GetSeriesForMangaFileAsync(int mangaFileId, int userId, CancellationToken ct = default);
     Task<SeriesDto?> GetSeriesForChapterAsync(int chapterId, int userId, CancellationToken ct = default);
-    Task<PagedList<SeriesDto>> GetWantToReadDtosForUserAsync(int userId, UserParams userParams, FilterV2Dto filter, CancellationToken ct = default);
+    Task<PagedList<SeriesDto>> GetWantToReadDtosForUserAsync(int userId, UserParams userParams, SeriesFilterV2Dto seriesFilter, CancellationToken ct = default);
     Task<IList<Series>> GetWantToReadForUserAsync(int userId, CancellationToken ct = default);
     Task<bool> IsSeriesInWantToRead(int userId, int seriesId, CancellationToken ct = default);
     Task<Series?> GetSeriesByFolderPathAsync(string folder, SeriesIncludes includes = SeriesIncludes.None, CancellationToken ct = default);
@@ -119,7 +119,7 @@ public interface ISeriesRepository
     Task<int> GetAverageUserRatingAsync(int seriesId, int userId, CancellationToken ct = default);
     Task RemoveFromOnDeckAsync(int seriesId, int userId, CancellationToken ct = default);
     Task ClearOnDeckRemovalAsync(int seriesId, int userId, CancellationToken ct = default);
-    Task<PagedList<SeriesDto>> GetSeriesDtoForLibraryIdAsync(int userId, UserParams userParams, FilterV2Dto filterDto, QueryContext queryContext = QueryContext.None, CancellationToken ct = default);
+    Task<PagedList<SeriesDto>> GetSeriesDtoForLibraryIdAsync(int userId, UserParams userParams, SeriesFilterV2Dto seriesFilterDto, QueryContext queryContext = QueryContext.None, CancellationToken ct = default);
     Task<PlusSeriesRequestDto?> GetPlusSeriesDtoAsync(int seriesId, CancellationToken ct = default);
     Task<Series?> MatchSeriesAsync(ExternalSeriesDetailDto externalSeries, CancellationToken ct = default);
 }

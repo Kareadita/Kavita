@@ -381,7 +381,7 @@ public class CleanupService(
     {
         logger.LogInformation("Performing cleanup of Series that are Completed and have been fully read that are in Want To Read list");
 
-        var filter = new FilterV2Dto()
+        var filter = new SeriesFilterV2Dto()
         {
             Combination = FilterCombination.And,
             Statements =

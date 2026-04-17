@@ -20,6 +20,7 @@ public class SmartFilterHelperTests
         var filter = SmartFilterHelper.Decode(encoded);
 
         Assert.Equal(10, filter.LimitTo);
+        Assert.NotNull(filter.SortOptions);
         Assert.Equal(SeriesSortField.CreatedDate, filter.SortOptions.SortField);
         Assert.False(filter.SortOptions.IsAscending);
         Assert.Equal("Test" , filter.Name);
@@ -38,13 +39,14 @@ public class SmartFilterHelperTests
                                """;
 
         var filter = SmartFilterHelper.Decode(encoded);
+        Assert.NotNull(filter.SortOptions);
         Assert.True(filter.SortOptions.IsAscending);
     }
 
     [Fact]
     public void Test_EncodeDecode()
     {
-        var filter = new FilterV2Dto()
+        var filter = new SeriesFilterV2Dto()
         {
             Name = "Test",
             SortOptions = new SeriesSortOptionDto() {
@@ -71,6 +73,7 @@ public class SmartFilterHelperTests
         AssertStatementSame(decoded.Statements.First(), filter.Statements.First());
         Assert.Equal("Test", decoded.Name);
         Assert.Equal(10, decoded.LimitTo);
+        Assert.NotNull(decoded.SortOptions);
         Assert.Equal(SeriesSortField.CreatedDate, decoded.SortOptions.SortField);
         Assert.False(decoded.SortOptions.IsAscending);
     }
@@ -78,7 +81,7 @@ public class SmartFilterHelperTests
     [Fact]
     public void Test_EncodeDecode_MultipleValues_Contains()
     {
-        var filter = new FilterV2Dto()
+        var filter = new SeriesFilterV2Dto()
         {
             Name = "Test",
             SortOptions = new SeriesSortOptionDto() {
@@ -108,6 +111,7 @@ public class SmartFilterHelperTests
 
         Assert.Equal("Test", decoded.Name);
         Assert.Equal(10, decoded.LimitTo);
+        Assert.NotNull(decoded.SortOptions);
         Assert.Equal(SeriesSortField.CreatedDate, decoded.SortOptions.SortField);
         Assert.False(decoded.SortOptions.IsAscending);
     }

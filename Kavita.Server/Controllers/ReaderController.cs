@@ -661,12 +661,12 @@ public class ReaderController(ICacheService cacheService,
     /// <summary>
     /// Returns a list of all bookmarked pages for a User
     /// </summary>
-    /// <param name="filterDto">Only supports SeriesNameQuery</param>
+    /// <param name="seriesFilterDto">Only supports SeriesNameQuery</param>
     /// <returns></returns>
     [HttpPost("all-bookmarks")]
-    public async Task<ActionResult<IEnumerable<BookmarkDto>>> GetAllBookmarks(FilterV2Dto filterDto)
+    public async Task<ActionResult<IEnumerable<BookmarkDto>>> GetAllBookmarks(SeriesFilterV2Dto seriesFilterDto)
     {
-        return Ok(await unitOfWork.UserRepository.GetAllBookmarkDtos(UserId, filterDto));
+        return Ok(await unitOfWork.UserRepository.GetAllBookmarkDtos(UserId, seriesFilterDto));
     }
 
     /// <summary>

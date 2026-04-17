@@ -49,7 +49,7 @@ public class OpdsService(
     public const string AboveHalfReadingProgressIcon = "◕";
     public const string FullReadingProgressIcon = "⬤";
 
-    private readonly FilterV2Dto _filterV2Dto = new();
+    private readonly SeriesFilterV2Dto _seriesFilterV2Dto = new();
 
     public async Task<Feed> GetCatalogue(OpdsCatalogueRequest request, CancellationToken ct = default)
     {
@@ -267,7 +267,7 @@ public class OpdsService(
     {
         var userId = UnpackRequest(request, out var apiKey, out var prefix, out var baseUrl);
 
-        var wantToReadSeries = await unitOfWork.SeriesRepository.GetWantToReadDtosForUserAsync(userId, GetUserParams(request.PageNumber), _filterV2Dto, ct);
+        var wantToReadSeries = await unitOfWork.SeriesRepository.GetWantToReadDtosForUserAsync(userId, GetUserParams(request.PageNumber), _seriesFilterV2Dto, ct);
         var seriesMetadatas = await unitOfWork.SeriesRepository.GetSeriesMetadataForIdsAsync(wantToReadSeries.Select(s => s.Id), ct);
 
         var feed = CreateFeed(await localizationService.TranslateAsync(userId, "want-to-read"), $"{apiKey}/want-to-read", apiKey, prefix);
@@ -314,7 +314,7 @@ public class OpdsService(
     {
         var userId = UnpackRequest(request, out var apiKey, out var prefix, out var baseUrl);
 
-        var recentlyAdded = await unitOfWork.SeriesRepository.GetRecentlyAddedAsync(userId, GetUserParams(request.PageNumber), _filterV2Dto, ct);
+        var recentlyAdded = await unitOfWork.SeriesRepository.GetRecentlyAddedAsync(userId, GetUserParams(request.PageNumber), _seriesFilterV2Dto, ct);
         var seriesMetadatas = await unitOfWork.SeriesRepository.GetSeriesMetadataForIdsAsync(recentlyAdded.Select(s => s.Id), ct);
 
         var feed = CreateFeed(await localizationService.TranslateAsync(userId, "recently-added"), $"{apiKey}/recently-added", apiKey, prefix);
@@ -449,7 +449,7 @@ public class OpdsService(
             throw new OpdsException(await localizationService.TranslateAsync(userId, "no-library-access"));
         }
 
-        var filter = new FilterV2Dto
+        var filter = new SeriesFilterV2Dto
         {
             Statements = [
                 new FilterStatementDto

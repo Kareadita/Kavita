@@ -913,7 +913,7 @@ public class SeriesService(
     {
         var serverSettings = await unitOfWork.SettingsRepository.GetSettingsDtoAsync(ct);
 
-        var filter = new FilterV2Dto
+        var filter = new SeriesFilterV2Dto
         {
             Combination = FilterCombination.And,
             SortOptions = new SeriesSortOptionDto

@@ -1087,7 +1087,7 @@ public class ScrobblingService : IScrobblingService
         var scrobbleLibraries = libAllowsScrobbling.Keys.Where(k => libAllowsScrobbling[k]).ToList();
         if (scrobbleLibraries.Count > 0)
         {
-            var filter = new FilterV2Dto()
+            var filter = new SeriesFilterV2Dto()
             {
                 Combination = FilterCombination.And,
                 Statements =

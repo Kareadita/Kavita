@@ -24,15 +24,15 @@ public static class SmartFilterHelper
     public const string StatementSeparator = "\ufffd";
     public const string InnerStatementSeparator = "¦";
 
-    public static FilterV2Dto Decode(string? encodedFilter)
+    public static SeriesFilterV2Dto Decode(string? encodedFilter)
     {
         if (string.IsNullOrWhiteSpace(encodedFilter))
         {
-            return new FilterV2Dto(); // Create a default filter if the input is empty
+            return new SeriesFilterV2Dto(); // Create a default filter if the input is empty
         }
 
         var parts = encodedFilter.Split('&');
-        var filter = new FilterV2Dto();
+        var filter = new SeriesFilterV2Dto();
 
         foreach (var part in parts)
         {
@@ -61,7 +61,7 @@ public static class SmartFilterHelper
         return filter;
     }
 
-    public static string Encode(FilterV2Dto? filter)
+    public static string Encode(SeriesFilterV2Dto? filter)
     {
         if (filter == null)
             return string.Empty;

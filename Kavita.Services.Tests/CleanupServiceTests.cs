@@ -485,7 +485,7 @@ public class CleanupServiceTests(ITestOutputHelper outputHelper): AbstractDbTest
         await cleanupService.CleanupWantToRead();
 
         var wantToRead =
-            await unitOfWork.SeriesRepository.GetWantToReadDtosForUserAsync(user.Id, new UserParams(), new FilterV2Dto());
+            await unitOfWork.SeriesRepository.GetWantToReadDtosForUserAsync(user.Id, new UserParams(), new SeriesFilterV2Dto());
 
         Assert.Equal(0, wantToRead.TotalCount);
     }
@@ -539,7 +539,7 @@ public class CleanupServiceTests(ITestOutputHelper outputHelper): AbstractDbTest
         await cleanupService.CleanupWantToRead();
 
         var wantToRead =
-            await unitOfWork.SeriesRepository.GetWantToReadDtosForUserAsync(user.Id, new UserParams(), new FilterV2Dto());
+            await unitOfWork.SeriesRepository.GetWantToReadDtosForUserAsync(user.Id, new UserParams(), new SeriesFilterV2Dto());
 
         Assert.Equal(1, wantToRead.TotalCount);
     }
