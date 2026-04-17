@@ -397,7 +397,7 @@ public class OpdsService(
         var feed = CreateFeed(await localizationService.TranslateAsync(userId, "smartFilters-" + filter.Id), $"{apiKey}/smart-filters/{filter.Id}/", apiKey, prefix);
         SetFeedId(feed, "smartFilters-" + filter.Id);
 
-        var decodedFilter = SmartFilterHelper.Decode(filter.Filter);
+        var decodedFilter = (SeriesFilterV2Dto) SmartFilterHelper.Decode(filter.Filter);
         var series = await unitOfWork.SeriesRepository.GetSeriesDtoForLibraryIdAsync(userId, GetUserParams(request.PageNumber),
             decodedFilter, ct: ct);
         var seriesMetadatas = await unitOfWork.SeriesRepository.GetSeriesMetadataForIdsAsync(series.Select(s => s.Id), ct);

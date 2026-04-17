@@ -179,7 +179,7 @@ public static class SmartFilterHelper
             return FilterEntityType.Series; // Assume this is a Series filter by default
         }
 
-        return Enum.TryParse<FilterEntityType>(parts[1].Split(StatementSeparator)[0], out var enumType) ? enumType : FilterEntityType.Series;
+        return Enum.TryParse<FilterEntityType>(parts[1].Split('&')[0], out var enumType) ? enumType : FilterEntityType.Series;
     }
 
     private static string EncodeName(string? name)
