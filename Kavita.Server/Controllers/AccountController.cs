@@ -228,7 +228,7 @@ public class AccountController(UserManager<AppUser> userManager,
         AppUser? user;
         if (!string.IsNullOrEmpty(loginDto.ApiKey))
         {
-            user = await unitOfWork.UserRepository.GetUserByAuthKey(loginDto.ApiKey);
+            user = await unitOfWork.UserRepository.GetUserByAuthKey(loginDto.ApiKey, HttpContext.RequestAborted);
         }
         else
         {
@@ -286,6 +286,14 @@ public class AccountController(UserManager<AppUser> userManager,
         return Ok(await ConstructUserDto(user, roles, ct: HttpContext.RequestAborted));
     }
 
+    /// <summary>
+    ///
+    /// </summary>
+    /// <param name="user">Must include <see cref="AppUser.AuthKeys"/></param>
+    /// <param name="roles"></param>
+    /// <param name="includeTokens"></param>
+    /// <param name="ct"></param>
+    /// <returns></returns>
     private async Task<UserDto> ConstructUserDto(AppUser user, IList<string> roles, bool includeTokens = true, CancellationToken ct = default)
     {
         // TODO: Clean this up to be streamlined

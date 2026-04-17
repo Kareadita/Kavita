@@ -138,15 +138,16 @@ public class UserRepository(DataContext context, UserManager<AppUser> userManage
             .FirstOrDefaultAsync(ct);
     }
 
-    public async Task<AppUser?> GetUserByAuthKey(string authKey, AppUserIncludes includeFlags = AppUserIncludes.None, CancellationToken ct = default)
+    public async Task<AppUser?> GetUserByAuthKey(string authKey, CancellationToken ct = default)
     {
         if (string.IsNullOrEmpty(authKey)) return null;
 
         return await context.AppUserAuthKey
             .Where(ak => ak.Key == authKey)
             .HasNotExpired()
+            .Include(ak => ak.AppUser)
+            .ThenInclude(u => u.AuthKeys)
             .Select(ak => ak.AppUser)
-            .Includes(includeFlags)
             .FirstOrDefaultAsync(ct);
     }
 

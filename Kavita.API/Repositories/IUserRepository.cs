@@ -67,7 +67,7 @@ public interface IUserRepository
     Task<int> GetUserIdByAuthKeyAsync(string authKey, CancellationToken ct = default);
     Task<AppUser?> GetUserByUsernameAsync(string username, AppUserIncludes includeFlags = AppUserIncludes.None, CancellationToken ct = default);
     Task<AppUser?> GetUserByIdAsync(int userId, AppUserIncludes includeFlags = AppUserIncludes.None, CancellationToken ct = default);
-    Task<AppUser?> GetUserByAuthKey(string authKey, AppUserIncludes includeFlags = AppUserIncludes.None, CancellationToken ct = default);
+    Task<AppUser?> GetUserByAuthKey(string authKey, CancellationToken ct = default);
     Task<AppUser?> GetUserByEmailAsync(string email, AppUserIncludes includes = AppUserIncludes.None, CancellationToken ct = default);
     Task<IEnumerable<AppUser>> GetAllUsersAsync(AppUserIncludes includeFlags = AppUserIncludes.None, bool track = true, CancellationToken ct = default);
     Task<AppUser?> GetUserByConfirmationToken(string token, CancellationToken ct = default);
