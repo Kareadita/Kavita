@@ -31,7 +31,7 @@ public class AnnotationController(
     /// <param name="userParams"></param>
     /// <returns></returns>
     [HttpPost("all-filtered")]
-    public async Task<ActionResult<PagedList<AnnotationDto>>> GetAnnotationsForBrowse(BrowseAnnotationFilterDto filter, [FromQuery] UserParams? userParams)
+    public async Task<ActionResult<PagedList<AnnotationDto>>> GetAnnotationsForBrowse(AnnotationFilterDto filter, [FromQuery] UserParams? userParams)
     {
         userParams ??= UserParams.Default;
 
@@ -223,7 +223,7 @@ public class AnnotationController(
     /// <returns></returns>
     [HttpPost("export-filter")]
     [DisallowRole(PolicyConstants.ReadOnlyRole)]
-    public async Task<IActionResult> ExportAnnotationsFilter(BrowseAnnotationFilterDto filter, [FromQuery] UserParams? userParams)
+    public async Task<IActionResult> ExportAnnotationsFilter(AnnotationFilterDto filter, [FromQuery] UserParams? userParams)
     {
         userParams ??= UserParams.Default;
 

@@ -1,12 +1,11 @@
-﻿using System.Collections.Generic;
-using Kavita.Models.DTOs.Filtering;
+#nullable enable
+using System.Collections.Generic;
 using Kavita.Models.DTOs.Filtering.v2;
 using Kavita.Models.DTOs.Filtering.v2.SortOptions;
 
 namespace Kavita.Models.DTOs.Metadata.Browse.Requests;
-#nullable enable
 
-public record BrowseReadingListFilterDto : IFilterDto<ReadingListFilterStatementDto>
+public class AnnotationFilterDto : IFilterDto<AnnotationFilterStatementDto>
 {
     /// <summary>
     /// Not used - For parity with Series Filter
@@ -16,9 +15,9 @@ public record BrowseReadingListFilterDto : IFilterDto<ReadingListFilterStatement
     /// Not used - For parity with Series Filter
     /// </summary>
     public string? Name { get; set; }
-    public ICollection<ReadingListFilterStatementDto> Statements { get; set; } = [];
+    public ICollection<AnnotationFilterStatementDto> Statements { get; set; } = [];
     public FilterCombination Combination { get; set; } = FilterCombination.And;
-    public ReadingListSortOptionDto? SortOptions { get; set; }
+    public AnnotationSortOptionDto? SortOptions { get; set; }
 
     /// <summary>
     /// Limit the number of rows returned. Defaults to not applying a limit (aka 0)

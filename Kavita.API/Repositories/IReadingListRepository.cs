@@ -60,5 +60,5 @@ public interface IReadingListRepository
     Task<Dictionary<int, List<int>>> GetSyncableReadingListsAsync(DateTime lastCheckThreshold, CancellationToken ct = default);
 
     Task<List<ReadingListTagDto>> GetAllReadingListTagDtosAsync(int userId, CancellationToken ct = default);
-    Task<PagedList<ReadingListDto>> GetBrowseReadingListDtos(int userId, BrowseReadingListFilterDto filter, UserParams userParams, CancellationToken ct = default);
+    Task<PagedList<ReadingListDto>> GetBrowseReadingListDtos(int userId, ReadingListFilterDto filter, UserParams userParams, CancellationToken ct = default);
 }

@@ -109,7 +109,7 @@ public class PersonController(
     /// <param name="userParams"></param>
     /// <returns></returns>
     [HttpPost("all")]
-    public async Task<ActionResult<PagedList<BrowsePersonDto>>> GetPeopleForBrowse(BrowsePersonFilterDto filter, [FromQuery] UserParams? userParams)
+    public async Task<ActionResult<PagedList<BrowsePersonDto>>> GetPeopleForBrowse(PersonFilterDto filter, [FromQuery] UserParams? userParams)
     {
         userParams ??= UserParams.Default;
 

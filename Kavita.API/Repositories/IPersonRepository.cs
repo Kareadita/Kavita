@@ -39,7 +39,7 @@ public interface IPersonRepository
 
     Task<IList<string?>> GetAllCoverImagesAsync(CancellationToken ct = default);
     Task<IEnumerable<PersonRole>> GetRolesForPersonByName(int personId, int userId, CancellationToken ct = default);
-    Task<PagedList<BrowsePersonDto>> GetBrowsePersonDtos(int userId, BrowsePersonFilterDto filter, UserParams userParams, CancellationToken ct = default);
+    Task<PagedList<BrowsePersonDto>> GetBrowsePersonDtos(int userId, PersonFilterDto filter, UserParams userParams, CancellationToken ct = default);
     Task<Person?> GetPersonById(int personId, PersonIncludes includes = PersonIncludes.None, CancellationToken ct = default);
     Task<PersonDto?> GetPersonDtoByName(string name, int userId, PersonIncludes includes = PersonIncludes.Aliases, CancellationToken ct = default);
 

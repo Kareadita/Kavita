@@ -22,6 +22,6 @@ public interface IAnnotationRepository
     Task<IList<AppUserAnnotation>> GetAnnotations(int userId, IList<int> ids, CancellationToken ct = default);
     Task<IList<FullAnnotationDto>> GetFullAnnotationsByUserIdAsync(int userId, CancellationToken ct = default);
     Task<IList<FullAnnotationDto>> GetFullAnnotations(int userId, IList<int> annotationIds, CancellationToken ct = default);
-    Task<PagedList<AnnotationDto>> GetAnnotationDtos(int userId, BrowseAnnotationFilterDto filter, UserParams userParams, CancellationToken ct = default);
+    Task<PagedList<AnnotationDto>> GetAnnotationDtos(int userId, AnnotationFilterDto filter, UserParams userParams, CancellationToken ct = default);
     Task<List<SeriesDto>> GetSeriesWithAnnotations(int userId, CancellationToken ct = default);
 }

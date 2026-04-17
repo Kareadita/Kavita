@@ -77,7 +77,7 @@ public class ReadingListController(
     /// <param name="userParams"></param>
     /// <returns></returns>
     [HttpPost("all")]
-    public async Task<ActionResult<PagedList<ReadingListDto>>> GetAllReadingList(BrowseReadingListFilterDto filter, [FromQuery] UserParams userParams)
+    public async Task<ActionResult<PagedList<ReadingListDto>>> GetAllReadingList(ReadingListFilterDto filter, [FromQuery] UserParams userParams)
     {
         var list = await unitOfWork.ReadingListRepository.GetBrowseReadingListDtos(UserId, filter, userParams, HttpContext.RequestAborted);
         Response.AddPaginationHeader(list.CurrentPage, list.PageSize, list.TotalCount, list.TotalPages);

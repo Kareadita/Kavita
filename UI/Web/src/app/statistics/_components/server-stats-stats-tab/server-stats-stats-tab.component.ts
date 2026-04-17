@@ -24,6 +24,7 @@ import {map} from "rxjs/operators";
 import {forkJoin, tap} from "rxjs";
 import {ReadingList} from "../../../_models/reading-list/reading-list";
 import {PersonRolePipe} from "../../../_pipes/person-role.pipe";
+import {FilterEntityType} from "../../../_models/metadata/v2/filter-entity-type";
 
 @Component({
   selector: 'app-server-stats-stats-tab',
@@ -208,6 +209,7 @@ export class ServerStatsStatsTabComponent {
       // Fetch only uncached decades
       const encodeRequests = toFetch.map(([key, decade]) =>
         this.filterUtilities.encodeFilter({
+          entityType: FilterEntityType.Series,
           statements: [
             { comparison: FilterComparison.GreaterThanEqual, field: SeriesFilterField.ReleaseYear, value: decade.rangeStart + '' },
             { comparison: FilterComparison.LessThanEqual, field: SeriesFilterField.ReleaseYear, value: decade.rangeEnd + '' },

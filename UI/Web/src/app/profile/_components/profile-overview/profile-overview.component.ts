@@ -19,6 +19,7 @@ import {EntityCardComponent} from "src/app/cards/entity-card/entity-card.compone
 import {CardConfigFactory} from "src/app/_services/card-config-factory.service";
 import {CardEntityFactory, SeriesCardEntity} from "src/app/_models/card/card-entity";
 import {Series} from "src/app/_models/series";
+import {FilterEntityType} from "../../../_models/metadata/v2/filter-entity-type";
 
 type OverviewStream = {
   title: string;
@@ -27,6 +28,7 @@ type OverviewStream = {
 }
 
 const JustFinishedReadingFilter = {
+  entityType: FilterEntityType.Series,
   limitTo: 20,
   offset: 0,
   combination: FilterCombination.And,

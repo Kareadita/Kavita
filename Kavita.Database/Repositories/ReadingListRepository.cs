@@ -538,7 +538,7 @@ public class ReadingListRepository(DataContext context, IMapper mapper) : IReadi
             .ToListAsync(ct);
     }
 
-    public async Task<PagedList<ReadingListDto>> GetBrowseReadingListDtos(int userId, BrowseReadingListFilterDto filter,
+    public async Task<PagedList<ReadingListDto>> GetBrowseReadingListDtos(int userId, ReadingListFilterDto filter,
         UserParams userParams, CancellationToken ct = default)
     {
         var ageRating = await context.AppUser.GetUserAgeRestriction(userId, ct: ct);
@@ -547,7 +547,7 @@ public class ReadingListRepository(DataContext context, IMapper mapper) : IReadi
         return await PagedList<ReadingListDto>.CreateAsync(query, userParams.PageNumber, userParams.PageSize, ct);
     }
 
-    private IQueryable<ReadingListDto> CreateFilteredReadingListQueryable(int userId, BrowseReadingListFilterDto filter,
+    private IQueryable<ReadingListDto> CreateFilteredReadingListQueryable(int userId, ReadingListFilterDto filter,
         AgeRestriction ageRating, CancellationToken ct = default)
     {
         var query = context.ReadingList

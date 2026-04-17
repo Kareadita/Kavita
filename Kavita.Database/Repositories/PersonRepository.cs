@@ -130,7 +130,7 @@ public class PersonRepository(DataContext context, IMapper mapper) : IPersonRepo
         return chapterRoles.Union(seriesRoles).Distinct();
     }
 
-    public async Task<PagedList<BrowsePersonDto>> GetBrowsePersonDtos(int userId, BrowsePersonFilterDto filter,
+    public async Task<PagedList<BrowsePersonDto>> GetBrowsePersonDtos(int userId, PersonFilterDto filter,
         UserParams userParams, CancellationToken ct = default)
     {
         var ageRating = await context.AppUser.GetUserAgeRestriction(userId, ct: ct);
@@ -140,7 +140,7 @@ public class PersonRepository(DataContext context, IMapper mapper) : IPersonRepo
         return await PagedList<BrowsePersonDto>.CreateAsync(query, userParams.PageNumber, userParams.PageSize, ct);
     }
 
-    private async Task<IQueryable<BrowsePersonDto>> CreateFilteredPersonQueryable(int userId, BrowsePersonFilterDto filter, AgeRestriction ageRating, CancellationToken ct = default)
+    private async Task<IQueryable<BrowsePersonDto>> CreateFilteredPersonQueryable(int userId, PersonFilterDto filter, AgeRestriction ageRating, CancellationToken ct = default)
     {
         var allLibrariesCount = await context.Library.CountAsync(ct);
         var userLibs = await context.Library.GetUserLibraries(userId).ToListAsync(ct);

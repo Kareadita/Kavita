@@ -37,6 +37,7 @@ import {FilterCombination} from "../../_models/metadata/v2/filter-combination";
 import {EntityTitleService} from "../../_services/entity-title.service";
 import {LibraryService} from "../../_services/library.service";
 import NoSleep from "nosleep.js";
+import {FilterEntityType} from "../../_models/metadata/v2/filter-entity-type";
 
 export const DEBOUNCE_TIME = 100;
 
@@ -629,7 +630,8 @@ export class DownloadService {
     this.seriesService.getAllSeriesV2(0, 0, {
       statements: [{field: SeriesFilterField.CollectionTags, value: collection.id + '', comparison: FilterComparison.Equal}],
       combination: FilterCombination.And,
-      limitTo: 0
+      limitTo: 0,
+      entityType: FilterEntityType.Series
     }).subscribe(collectionSeries => {
 
 

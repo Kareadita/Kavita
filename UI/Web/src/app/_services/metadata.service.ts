@@ -41,6 +41,7 @@ import {SeriesService} from "./series.service";
 import {ReadingListTag} from "../_models/reading-list/reading-list-tag";
 import {ReadingListSortField} from "../_models/metadata/v2/reading-list-sort-field";
 import {ReadingListFilterField} from "../_models/metadata/v2/reading-list-filter-field";
+import {FilterEntityType} from "../_models/metadata/v2/filter-entity-type";
 
 @Injectable({
   providedIn: 'root'
@@ -168,6 +169,7 @@ export class MetadataService {
 
   createDefaultFilterDto<TFilter extends number, TSort extends number>(entityType: ValidFilterEntity): FilterV2<TFilter, TSort> {
     return {
+      entityType: this.getEntityType(entityType),
       statements: [] as FilterStatement<TFilter>[],
       combination: FilterCombination.And,
       limitTo: 0,
@@ -176,6 +178,19 @@ export class MetadataService {
         sortField: this.getDefaultSortField(entityType) as TSort
       }
     };
+  }
+
+  getEntityType(entityType: ValidFilterEntity) {
+    switch (entityType) {
+      case 'series':
+        return FilterEntityType.Series;
+      case 'person':
+        return FilterEntityType.Person;
+      case 'annotation':
+        return FilterEntityType.Annotation;
+      case 'readinglist':
+        return FilterEntityType.ReadingList;
+    }
   }
 
   getDefaultSortField(entityType: ValidFilterEntity) {

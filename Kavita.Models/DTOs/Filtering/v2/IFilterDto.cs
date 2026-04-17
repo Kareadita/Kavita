@@ -12,6 +12,7 @@ public interface IFilterStatement<out TField> where TField : Enum
     FilterComparison Comparison { get; }
     TField Field { get; }
     string Value { get; }
+    FilterEntityType EntityType { get; }
 }
 
 /// <summary>

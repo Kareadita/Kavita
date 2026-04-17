@@ -29,6 +29,7 @@ import {
 } from "../../_models/metadata/v2/annotations-filter";
 import {allReadingListFilterFields, ReadingListFilterField} from "../../_models/metadata/v2/reading-list-filter-field";
 import {allReadingListSortFields, ReadingListSortField} from "../../_models/metadata/v2/reading-list-sort-field";
+import {FilterEntityType} from "../../_models/metadata/v2/filter-entity-type";
 
 export interface FieldOption<T extends number> {
   title: string,
@@ -108,6 +109,7 @@ export class FilterUtilitiesService {
 
   createPersonV2Filter(): FilterV2<PersonFilterField> {
     return {
+      entityType: FilterEntityType.Person,
       combination: FilterCombination.And,
       statements: [],
       limitTo: 0,
@@ -120,6 +122,7 @@ export class FilterUtilitiesService {
 
   createReadingListV2Filter(): FilterV2<ReadingListFilterField> {
     return {
+      entityType: FilterEntityType.ReadingList,
       combination: FilterCombination.And,
       statements: [],
       limitTo: 0,
