@@ -89,6 +89,7 @@ public class ScrobblingService : IScrobblingService
     public const string HardcoverStaffWebsite = ScrobblingHelper.HardcoverStaffWebsite;
 
     private const int ScrobbleSleepTime = 1000; // We can likely tie this to AniList's 90 rate / min ((60 * 1000) / 90)
+    private const SeriesIncludes ScrobbleSeriesIncludes = SeriesIncludes.Library | SeriesIncludes.ExternalMetadata | SeriesIncludes.Metadata;
 
     private static readonly IList<ScrobbleProvider> BookProviders = [];
     private static readonly IList<ScrobbleProvider> LightNovelProviders =
@@ -265,7 +266,7 @@ public class ScrobblingService : IScrobblingService
     {
         if (!await _licenseService.HasActiveLicense(ct: ct)) return;
 
-        var series = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(seriesId, SeriesIncludes.Library, ct);
+        var series = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(seriesId, ScrobbleSeriesIncludes, ct);
         if (series == null) throw new KavitaException(await _localizationService.TranslateAsync(userId, "series-doesnt-exist"));
 
         var user = await _unitOfWork.UserRepository.GetUserByIdAsync(userId, AppUserIncludes.UserPreferences, ct);
@@ -307,7 +308,7 @@ public class ScrobblingService : IScrobblingService
     {
         if (!await _licenseService.HasActiveLicense(ct: ct)) return;
 
-        var series = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(seriesId, SeriesIncludes.Library, ct);
+        var series = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(seriesId, ScrobbleSeriesIncludes, ct);
         if (series == null) throw new KavitaException(await _localizationService.TranslateAsync(userId, "series-doesnt-exist"));
 
         var user = await _unitOfWork.UserRepository.GetUserByIdAsync(userId, AppUserIncludes.UserPreferences, ct);
@@ -391,7 +392,7 @@ public class ScrobblingService : IScrobblingService
     {
         if (!await _licenseService.HasActiveLicense(ct: ct)) return;
 
-        var series = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(seriesId, SeriesIncludes.Library, ct);
+        var series = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(seriesId, ScrobbleSeriesIncludes, ct);
         if (series == null) throw new KavitaException(await _localizationService.TranslateAsync(userId, "series-doesnt-exist"));
 
         if (!series.Library.AllowScrobbling) return;

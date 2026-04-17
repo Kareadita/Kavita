@@ -129,12 +129,16 @@ public static class ScrobblingHelper
 
     public static long? GetMalId(Series series)
     {
+        if (series.MalId != 0) return series.MalId;
+
         return WeblinkParser.GetMalId(series.Metadata.WebLinks) ?? series.ExternalSeriesMetadata?.MalId;
     }
 
 
     public static int? GetAniListId(Series seriesWithExternalMetadata)
     {
+        if (seriesWithExternalMetadata.AniListId != 0) return seriesWithExternalMetadata.AniListId;
+
         var aniListId = WeblinkParser.GetAniListId(seriesWithExternalMetadata.Metadata.WebLinks);
         return aniListId ?? seriesWithExternalMetadata.ExternalSeriesMetadata?.AniListId;
     }
