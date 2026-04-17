@@ -205,39 +205,30 @@ public class ThemeService(
         var htmlDoc = new HtmlDocument();
         htmlDoc.LoadHtml(htmlContent);
 
-        // Find the table of Native Themes
-        var tableContent = htmlDoc.DocumentNode
-            .SelectSingleNode("//h2[contains(text(),'Native Themes')]/following-sibling::p").InnerText;
-
-        // Initialize dictionary to store theme metadata
         var themes = new Dictionary<string, ThemeMetadata>();
 
+        var table = htmlDoc.DocumentNode.SelectSingleNode("//h2[text()='Native Themes']/following-sibling::table[1]");
 
-        // Split the table content by rows
-        var rows = tableContent.Split("\r\n").Select(row => row.Trim()).Where(row => !string.IsNullOrWhiteSpace(row)).ToList();
+        if (table == null) return themes;
 
-        // Parse each row in the Native Themes table
-        foreach (var row in rows.Skip(2))
+        var rows = table.SelectNodes(".//tbody/tr");
+
+        foreach (var row in rows)
         {
+            var cells = row.SelectNodes("td");
 
-            var cells = row.Split('|').Skip(1).Select(cell => cell.Trim()).ToList();
+            if (cells is not { Count: >= 4 } || string.IsNullOrWhiteSpace(cells[0].InnerText)) continue;
 
-            // Extract information from each cell
-            var themeName = cells[0];
-            var authorName = cells[1];
-            var description = cells[2];
-            var compatibility = Version.Parse(cells[3]);
+            var themeName = cells[0].InnerText.Trim();
 
-            // Create ThemeMetadata object
             var themeMetadata = new ThemeMetadata
             {
-                Author = authorName,
-                Description = description,
-                LastCompatible = compatibility
+                Author = System.Net.WebUtility.HtmlDecode(cells[1].InnerText.Trim()),
+                Description = System.Net.WebUtility.HtmlDecode(cells[2].InnerText.Trim()),
+                LastCompatible = Version.TryParse(cells[3].InnerText.Trim(), out var v) ? v : new Version(0, 0)
             };
 
-            // Add theme metadata to dictionary
-            themes.Add(themeName, themeMetadata);
+            themes.TryAdd(themeName, themeMetadata);
         }
 
         return themes;
