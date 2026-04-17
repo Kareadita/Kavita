@@ -14,6 +14,7 @@ public static class SmartFilterHelper
 {
     private const string SortOptionsKey = "sortOptions=";
     private const string NameKey = "name=";
+    private const string EntityTypeKey = "entityType=";
     private const string SortFieldKey = "sortField=";
     private const string IsAscendingKey = "isAscending=";
     private const string StatementsKey = "stmts=";
@@ -127,19 +128,41 @@ public static class SmartFilterHelper
     }
 
 
-    public static string Encode(SeriesFilterV2Dto? filter)
+    private static string EncodeFilter<TStatement, TField, TSortOption, TSortField>(
+        IFilterDto<TStatement, TSortOption>? filter)
+        where TStatement : IFilterStatement<TField>
+        where TField : struct, Enum
+        where TSortOption : class, ISortOptionDto<TSortField>, new()
+        where TSortField : struct, Enum
     {
-        if (filter == null)
-            return string.Empty;
+        if (filter == null) return string.Empty;
 
-        var encodedStatements = EncodeFilterStatementDtos(filter.Statements);
+        var encodedStatements = EncodeFilterStatementDtos<TField, TStatement>(filter.Statements);
         var encodedSortOptions = filter.SortOptions != null
             ? $"{SortOptionsKey}{EncodeSortOptions(filter.SortOptions)}"
             : string.Empty;
         var encodedLimitTo = $"{LimitToKey}{filter.LimitTo}";
 
-        return $"{EncodeName(filter.Name)}{encodedStatements}&{encodedSortOptions}&{encodedLimitTo}&{CombinationKey}{(int) filter.Combination}";
+        return $"{EncodeName(filter.Name)}{EncodeEntityType(filter.EntityType)}{encodedStatements}&{encodedSortOptions}&{encodedLimitTo}&{CombinationKey}{(int) filter.Combination}";
     }
+
+    public static string Encode(SeriesFilterV2Dto? filter)
+    {
+        return EncodeFilter<SeriesFilterStatementDto, SeriesFilterField, SeriesSortOptionDto, SeriesSortField>(filter);
+    }
+    public static string Encode(ReadingListFilterDto? filter)
+    {
+        return EncodeFilter<ReadingListFilterStatementDto, ReadingListFilterField, ReadingListSortOptionDto, ReadingListSortField>(filter);
+    }
+    public static string Encode(PersonFilterDto? filter)
+    {
+        return EncodeFilter<PersonFilterStatementDto, PersonFilterField, PersonSortOptionDto, PersonSortField>(filter);
+    }
+    public static string Encode(AnnotationFilterDto? filter)
+    {
+        return EncodeFilter<AnnotationFilterStatementDto, AnnotationFilterField, AnnotationSortOptionDto, AnnotationSortField>(filter);
+    }
+
 
     /// <summary>
     /// Checks the entity type from the encoded string. If not valid or missing, defaults to Series
@@ -164,25 +187,35 @@ public static class SmartFilterHelper
         return string.IsNullOrWhiteSpace(name) ? string.Empty : $"{NameKey}{Uri.EscapeDataString(name)}&";
     }
 
-    private static string EncodeSortOptions(SeriesSortOptionDto sortOptionDto)
+    private static string EncodeEntityType(FilterEntityType entityType)
     {
-        return Uri.EscapeDataString($"{SortFieldKey}{(int) sortOptionDto.SortField}{InnerStatementSeparator}{IsAscendingKey}{sortOptionDto.IsAscending}");
+        return $"{EntityTypeKey}{entityType.ToString()}&";
     }
 
-    private static string EncodeFilterStatementDtos(ICollection<SeriesFilterStatementDto>? statements)
+    private static string EncodeSortOptions<TField>(ISortOptionDto<TField> sortOptionDto)
+    where TField : struct, Enum
+    {
+        return Uri.EscapeDataString($"{SortFieldKey}{Convert.ToInt32(sortOptionDto.SortField)}{InnerStatementSeparator}{IsAscendingKey}{sortOptionDto.IsAscending}");
+    }
+
+    private static string EncodeFilterStatementDtos<TField, TStatement>(ICollection<TStatement>? statements)
+    where TField : struct, Enum
+    where TStatement : IFilterStatement<TField>
     {
         if (statements == null || statements.Count == 0)
             return string.Empty;
 
-        var encodedStatements = StatementsKey + Uri.EscapeDataString(string.Join(StatementSeparator, statements.Select(EncodeFilterStatementDto)));
+        var encodedStatements = StatementsKey + Uri.EscapeDataString(string.Join(StatementSeparator, statements.Select(EncodeFilterStatementDto<TField, TStatement>)));
         return encodedStatements;
     }
 
-    private static string EncodeFilterStatementDto(SeriesFilterStatementDto statement)
+    private static string EncodeFilterStatementDto<TField, TStatement>(TStatement statement)
+        where TField : struct, Enum
+        where TStatement : IFilterStatement<TField>
     {
 
         var encodedComparison = $"{StatementComparisonKey}{(int) statement.Comparison}";
-        var encodedField = $"{StatementFieldKey}{(int) statement.Field}";
+        var encodedField = $"{StatementFieldKey}{Convert.ToInt32(statement.Field)}";
         var encodedValue = $"{StatementValueKey}{Uri.EscapeDataString(statement.Value)}";
 
         return Uri.EscapeDataString($"{encodedComparison}{InnerStatementSeparator}{encodedField}{InnerStatementSeparator}{encodedValue}");
