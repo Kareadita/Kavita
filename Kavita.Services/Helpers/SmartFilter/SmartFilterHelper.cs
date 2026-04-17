@@ -2,13 +2,12 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Web;
-using Kavita.Models.DTOs.Filtering;
 using Kavita.Models.DTOs.Filtering.v2;
 using Kavita.Models.DTOs.Filtering.v2.Requests;
 using Kavita.Models.DTOs.Filtering.v2.SortFields;
 using Kavita.Models.DTOs.Filtering.v2.SortOptions;
 
-namespace Kavita.Services.Helpers;
+namespace Kavita.Services.Helpers.SmartFilter;
 
 public static class SmartFilterHelper
 {
@@ -24,6 +23,8 @@ public static class SmartFilterHelper
     private const string StatementValueKey = "value=";
     public const string StatementSeparator = "\ufffd";
     public const string InnerStatementSeparator = "¦";
+
+
 
     public static SeriesFilterV2Dto Decode(string? encodedFilter)
     {
@@ -61,6 +62,13 @@ public static class SmartFilterHelper
 
         return filter;
     }
+
+    // public static string Encode<T>(IFilterDto<T>? filter)
+    // {
+    //     if (filter == null) return string.Empty;
+    //     if (filter.)
+    // }
+
 
     public static string Encode(SeriesFilterV2Dto? filter)
     {

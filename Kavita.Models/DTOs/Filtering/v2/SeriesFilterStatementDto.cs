@@ -8,7 +8,6 @@ public sealed record SeriesFilterStatementDto : IFilterStatement<SeriesFilterFie
     public FilterComparison Comparison { get; set; }
     public SeriesFilterField Field { get; set; }
     public string Value { get; set; }
-    public FilterEntityType EntityType => FilterEntityType.Series;
 }
 
 public sealed record PersonFilterStatementDto : IFilterStatement<PersonFilterField>
@@ -16,7 +15,6 @@ public sealed record PersonFilterStatementDto : IFilterStatement<PersonFilterFie
     public FilterComparison Comparison { get; set; }
     public PersonFilterField Field { get; set; }
     public string Value { get; set; }
-    public FilterEntityType EntityType => FilterEntityType.Person;
 }
 
 public sealed record AnnotationFilterStatementDto : IFilterStatement<AnnotationFilterField>
@@ -24,7 +22,6 @@ public sealed record AnnotationFilterStatementDto : IFilterStatement<AnnotationF
     public FilterComparison Comparison { get; set; }
     public AnnotationFilterField Field { get; set; }
     public string Value { get; set; }
-    public FilterEntityType EntityType => FilterEntityType.Annotation;
 }
 
 public sealed record ReadingListFilterStatementDto : IFilterStatement<ReadingListFilterField>
@@ -32,5 +29,4 @@ public sealed record ReadingListFilterStatementDto : IFilterStatement<ReadingLis
     public FilterComparison Comparison { get; set; }
     public ReadingListFilterField Field { get; set; }
     public string Value { get; set; }
-    public FilterEntityType EntityType => FilterEntityType.ReadingList;
 }

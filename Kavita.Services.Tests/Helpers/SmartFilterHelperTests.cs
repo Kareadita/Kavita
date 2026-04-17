@@ -5,6 +5,7 @@ using Kavita.Models.DTOs.Filtering.v2.SortFields;
 using Kavita.Models.DTOs.Filtering.v2.SortOptions;
 using Kavita.Models.Entities.Enums;
 using Kavita.Services.Helpers;
+using Kavita.Services.Helpers.SmartFilter;
 
 namespace Kavita.Services.Tests.Helpers;
 

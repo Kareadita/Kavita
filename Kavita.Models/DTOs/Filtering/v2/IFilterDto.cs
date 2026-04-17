@@ -12,7 +12,6 @@ public interface IFilterStatement<out TField> where TField : Enum
     FilterComparison Comparison { get; }
     TField Field { get; }
     string Value { get; }
-    FilterEntityType EntityType { get; }
 }
 
 /// <summary>
@@ -26,4 +25,5 @@ public interface IFilterDto<TStatement>
     ICollection<TStatement> Statements { get; }
     FilterCombination Combination { get; }
     int LimitTo { get; }
+    FilterEntityType EntityType { get; }
 }

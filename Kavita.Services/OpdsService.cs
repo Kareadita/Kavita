@@ -24,6 +24,7 @@ using Kavita.Models.DTOs.Search;
 using Kavita.Models.Entities;
 using Kavita.Models.Entities.Enums;
 using Kavita.Services.Helpers;
+using Kavita.Services.Helpers.SmartFilter;
 
 namespace Kavita.Services;
 

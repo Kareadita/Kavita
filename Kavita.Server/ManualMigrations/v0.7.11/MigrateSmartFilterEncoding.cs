@@ -7,6 +7,7 @@ using Kavita.Database;
 using Kavita.Models.DTOs.Filtering.v2;
 using Kavita.Models.Entities.History;
 using Kavita.Services.Helpers;
+using Kavita.Services.Helpers.SmartFilter;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 

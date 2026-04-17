@@ -20,6 +20,7 @@ public sealed record SeriesFilterV2Dto : IFilterDto<SeriesFilterStatementDto>
     public ICollection<SeriesFilterStatementDto> Statements { get; set; } = [];
     public FilterCombination Combination { get; set; } = FilterCombination.And;
     public SeriesSortOptionDto? SortOptions { get; set; }
+    public FilterEntityType EntityType => FilterEntityType.Series;
 
     /// <summary>
     /// Limit the number of rows returned. Defaults to not applying a limit (aka 0)

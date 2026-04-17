@@ -15,6 +15,7 @@ using Kavita.Models.Entities.User;
 using Kavita.Server.Attributes;
 using Kavita.Services;
 using Kavita.Services.Helpers;
+using Kavita.Services.Helpers.SmartFilter;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 
