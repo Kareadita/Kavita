@@ -33,8 +33,6 @@ import {CardConfigFactory} from "../../../_services/card-config-factory.service"
 import {ActionItem} from "../../../_models/actionables/action-item";
 import {Action} from "../../../_models/actionables/action";
 import {ActionResult} from "../../../_models/actionables/action-result";
-import {EntityCardComponent} from "../../../cards/entity-card/entity-card.component";
-import {PromotedIconComponent} from "../../../shared/_components/promoted-icon/promoted-icon.component";
 import {FilterEvent} from "../../../_models/metadata/series-filter";
 import {ReadingListSortField} from "../../../_models/metadata/v2/reading-list-sort-field";
 import {ReadingListFilterField} from "../../../_models/metadata/v2/reading-list-filter-field";
@@ -46,6 +44,7 @@ import {FilterStatement} from "../../../_models/metadata/v2/filter-statement";
 import {ActivatedRoute} from "@angular/router";
 import {MetadataService} from "../../../_services/metadata.service";
 import {UtilityService} from "../../../shared/_services/utility.service";
+import {ReadingListComponent} from "../reading-list/reading-list.component";
 
 @Component({
   selector: 'app-reading-lists',
@@ -53,7 +52,7 @@ import {UtilityService} from "../../../shared/_services/utility.service";
   styleUrls: ['./reading-lists.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [SideNavCompanionBarComponent, CardActionablesComponent, CardDetailLayoutComponent, DecimalPipe,
-    TranslocoDirective, BulkOperationsComponent, EntityCardComponent, PromotedIconComponent]
+    TranslocoDirective, BulkOperationsComponent, ReadingListComponent]
 })
 export class ReadingListsComponent implements OnInit {
   private readonly readingListService = inject(ReadingListService);

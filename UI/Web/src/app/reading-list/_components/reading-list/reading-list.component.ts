@@ -88,8 +88,7 @@ export class ReadingListComponent {
   });
 
   protected readonly tags = computed(() => {
-    // return ['Action', 'Superhero', 'Marvel', 'Crossover', 'Limited Series'] // DEBUG CODE
-    return [];
+    return this.data().tags.map(t => t.title);
   });
 
   protected readonly visibleTags = computed(() => {
