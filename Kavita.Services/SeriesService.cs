@@ -15,6 +15,7 @@ using Kavita.Models.Builders;
 using Kavita.Models.DTOs;
 using Kavita.Models.DTOs.Filtering;
 using Kavita.Models.DTOs.Filtering.v2;
+using Kavita.Models.DTOs.Filtering.v2.Requests;
 using Kavita.Models.DTOs.Filtering.v2.SortFields;
 using Kavita.Models.DTOs.Filtering.v2.SortOptions;
 using Kavita.Models.DTOs.Person;
@@ -922,19 +923,19 @@ public class SeriesService(
                 IsAscending = false,
             },
             Statements = [
-                new FilterStatementDto
+                new SeriesFilterStatementDto
                 {
                   Comparison = FilterComparison.GreaterThan,
                   Field = SeriesFilterField.ReadLast,
                   Value = serverSettings.OnDeckProgressDays.ToString(),
                 },
-                new FilterStatementDto
+                new SeriesFilterStatementDto
                 {
                     Comparison = FilterComparison.LessThan,
                     Field = SeriesFilterField.ReadProgress,
                     Value = "100",
                 },
-                new FilterStatementDto
+                new SeriesFilterStatementDto
                 {
                     Comparison = FilterComparison.GreaterThan,
                     Field = SeriesFilterField.ReadProgress,
@@ -951,7 +952,7 @@ public class SeriesService(
         return await unitOfWork.SeriesRepository.GetSeriesDtoForLibraryIdAsync(userId, userParams, filter, ct: ct);
     }
 
-    public async Task<List<FilterStatementDto>> GetProfilePrivacyStatements(int userId, int requestingUserId,
+    public async Task<List<SeriesFilterStatementDto>> GetProfilePrivacyStatements(int userId, int requestingUserId,
         CancellationToken ct = default)
     {
         if (userId == requestingUserId) return [];
@@ -973,7 +974,7 @@ public class SeriesService(
         var ageRating = socialPreferences.SocialMaxAgeRating < requestingUser.AgeRestriction ? socialPreferences.SocialMaxAgeRating : requestingUser.AgeRestriction;
         var includeUnknowns = socialPreferences.SocialIncludeUnknowns && requestingUser.AgeRestrictionIncludeUnknowns;
 
-        List<FilterStatementDto> filters =
+        List<SeriesFilterStatementDto> filters =
         [
             new()
             {
@@ -986,7 +987,7 @@ public class SeriesService(
 
         if (!includeUnknowns)
         {
-            filters.Add(new FilterStatementDto
+            filters.Add(new SeriesFilterStatementDto
             {
                 Comparison = FilterComparison.NotEqual,
                 Field = SeriesFilterField.AgeRating,
@@ -996,7 +997,7 @@ public class SeriesService(
 
         if (ageRating != AgeRating.NotApplicable)
         {
-            filters.Add(new FilterStatementDto
+            filters.Add(new SeriesFilterStatementDto
             {
                 Comparison = FilterComparison.LessThanEqual,
                 Field = SeriesFilterField.AgeRating,

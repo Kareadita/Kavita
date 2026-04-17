@@ -14,6 +14,7 @@ using Kavita.Models.DTOs;
 using Kavita.Models.DTOs.Account;
 using Kavita.Models.DTOs.Dashboard;
 using Kavita.Models.DTOs.Filtering.v2;
+using Kavita.Models.DTOs.Filtering.v2.Requests;
 using Kavita.Models.DTOs.KavitaPlus.Account;
 using Kavita.Models.DTOs.Reader;
 using Kavita.Models.DTOs.Scrobbling;

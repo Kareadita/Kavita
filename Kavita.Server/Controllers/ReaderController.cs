@@ -16,6 +16,7 @@ using Kavita.Common;
 using Kavita.Models.Constants;
 using Kavita.Models.DTOs;
 using Kavita.Models.DTOs.Filtering.v2;
+using Kavita.Models.DTOs.Filtering.v2.Requests;
 using Kavita.Models.DTOs.Progress;
 using Kavita.Models.DTOs.Reader;
 using Kavita.Models.DTOs.SignalR;

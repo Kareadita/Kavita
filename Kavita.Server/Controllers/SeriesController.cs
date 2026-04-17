@@ -14,6 +14,7 @@ using Kavita.Models.Constants;
 using Kavita.Models.DTOs;
 using Kavita.Models.DTOs.Dashboard;
 using Kavita.Models.DTOs.Filtering.v2;
+using Kavita.Models.DTOs.Filtering.v2.Requests;
 using Kavita.Models.DTOs.Metadata.Matching;
 using Kavita.Models.DTOs.Recommendation;
 using Kavita.Models.DTOs.SeriesDetail;

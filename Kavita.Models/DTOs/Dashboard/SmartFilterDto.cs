@@ -1,4 +1,5 @@
 ﻿using Kavita.Models.DTOs.Filtering.v2;
+using Kavita.Models.DTOs.Filtering.v2.Requests;
 
 namespace Kavita.Models.DTOs.Dashboard;
 

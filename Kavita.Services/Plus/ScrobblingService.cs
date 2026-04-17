@@ -15,6 +15,7 @@ using Kavita.API.Services.SignalR;
 using Kavita.Common;
 using Kavita.Common.Helpers;
 using Kavita.Models.DTOs.Filtering.v2;
+using Kavita.Models.DTOs.Filtering.v2.Requests;
 using Kavita.Models.DTOs.Scrobbling;
 using Kavita.Models.DTOs.SignalR;
 using Kavita.Models.Entities;
@@ -1092,19 +1093,19 @@ public class ScrobblingService : IScrobblingService
                 Combination = FilterCombination.And,
                 Statements =
                 [
-                    new FilterStatementDto()
+                    new SeriesFilterStatementDto()
                     {
                         Comparison = FilterComparison.Contains,
                         Field = SeriesFilterField.Libraries,
                         Value = string.Join(',', scrobbleLibraries)
                     },
-                    new FilterStatementDto()
+                    new SeriesFilterStatementDto()
                     {
                         Comparison = FilterComparison.LessThan,
                         Field = SeriesFilterField.ReadProgress,
                         Value = "100"
                     },
-                    new FilterStatementDto()
+                    new SeriesFilterStatementDto()
                     {
                         Comparison = FilterComparison.GreaterThan,
                         Field = SeriesFilterField.ReadProgress,

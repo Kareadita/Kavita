@@ -13,6 +13,7 @@ using Kavita.Database.Tests;
 using Kavita.Models.Builders;
 using Kavita.Models.DTOs.Filtering;
 using Kavita.Models.DTOs.Filtering.v2;
+using Kavita.Models.DTOs.Filtering.v2.Requests;
 using Kavita.Models.Entities;
 using Kavita.Models.Entities.Enums;
 using Kavita.Models.Entities.Progress;

@@ -9,6 +9,7 @@ using Kavita.API.Services.Plus;
 using Kavita.Common.Helpers;
 using Kavita.Models.DTOs;
 using Kavita.Models.DTOs.Filtering.v2;
+using Kavita.Models.DTOs.Filtering.v2.Requests;
 using Kavita.Models.DTOs.WantToRead;
 using Kavita.Models.Entities.User;
 using Kavita.Server.Attributes;

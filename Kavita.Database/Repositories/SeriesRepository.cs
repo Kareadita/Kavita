@@ -19,6 +19,7 @@ using Kavita.Models.DTOs.Collection;
 using Kavita.Models.DTOs.Dashboard;
 using Kavita.Models.DTOs.Filtering;
 using Kavita.Models.DTOs.Filtering.v2;
+using Kavita.Models.DTOs.Filtering.v2.Requests;
 using Kavita.Models.DTOs.Filtering.v2.SortFields;
 using Kavita.Models.DTOs.Filtering.v2.SortOptions;
 using Kavita.Models.DTOs.KavitaPlus.Metadata;
@@ -854,7 +855,7 @@ public class SeriesRepository(DataContext context, IMapper mapper) : ISeriesRepo
         return query;
     }
 
-    private static IQueryable<Series> BuildFilterGroup(int userId, FilterStatementDto statement, IQueryable<Series> query)
+    private static IQueryable<Series> BuildFilterGroup(int userId, SeriesFilterStatementDto statement, IQueryable<Series> query)
     {
 
         var value = SeriesFilterFieldValueConverter.ConvertValue(statement.Field, statement.Value);

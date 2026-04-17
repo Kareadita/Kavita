@@ -12,7 +12,7 @@ using Kavita.API.Services.SignalR;
 using Kavita.Common;
 using Kavita.Common.Helpers;
 using Kavita.Models.Constants;
-using Kavita.Models.DTOs.Metadata.Browse.Requests;
+using Kavita.Models.DTOs.Filtering.v2.Requests;
 using Kavita.Models.DTOs.Person;
 using Kavita.Models.DTOs.ReadingLists;
 using Kavita.Models.DTOs.ReadingLists.Request;

@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using Kavita.Common.Helpers;
-using Kavita.Models.DTOs.Metadata.Browse.Requests;
+using Kavita.Models.DTOs.Filtering.v2.Requests;
 using Kavita.Models.DTOs.Person;
 using Kavita.Models.DTOs.ReadingLists;
 using Kavita.Models.Entities;

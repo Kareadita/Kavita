@@ -15,6 +15,7 @@ using Kavita.Common.Helpers;
 using Kavita.Models.DTOs;
 using Kavita.Models.DTOs.Filtering;
 using Kavita.Models.DTOs.Filtering.v2;
+using Kavita.Models.DTOs.Filtering.v2.Requests;
 using Kavita.Models.DTOs.OPDS;
 using Kavita.Models.DTOs.OPDS.Requests;
 using Kavita.Models.DTOs.Person;
@@ -452,7 +453,7 @@ public class OpdsService(
         var filter = new SeriesFilterV2Dto
         {
             Statements = [
-                new FilterStatementDto
+                new SeriesFilterStatementDto
                 {
                     Comparison = FilterComparison.Equal,
                     Field = SeriesFilterField.Libraries,

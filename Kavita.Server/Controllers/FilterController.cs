@@ -10,6 +10,7 @@ using Kavita.Models;
 using Kavita.Models.Constants;
 using Kavita.Models.DTOs.Dashboard;
 using Kavita.Models.DTOs.Filtering.v2;
+using Kavita.Models.DTOs.Filtering.v2.Requests;
 using Kavita.Models.Entities.User;
 using Kavita.Server.Attributes;
 using Kavita.Services;

@@ -10,6 +10,7 @@ using Kavita.API.Services;
 using Kavita.API.Services.SignalR;
 using Kavita.Common.Helpers;
 using Kavita.Models.DTOs.Filtering.v2;
+using Kavita.Models.DTOs.Filtering.v2.Requests;
 using Kavita.Models.DTOs.SignalR;
 using Kavita.Models.Entities.Enums;
 using Kavita.Models.Entities.User;
@@ -386,19 +387,19 @@ public class CleanupService(
             Combination = FilterCombination.And,
             Statements =
             [
-                new FilterStatementDto()
+                new SeriesFilterStatementDto()
                 {
                     Comparison = FilterComparison.Contains,
                     Field = SeriesFilterField.PublicationStatus,
                     Value = $"{(int) PublicationStatus.Completed},{(int) PublicationStatus.Cancelled}"
                 },
-                new FilterStatementDto()
+                new SeriesFilterStatementDto()
                 {
                     Comparison = FilterComparison.Equal,
                     Field = SeriesFilterField.ReadProgress,
                     Value = "100"
                 },
-                new FilterStatementDto()
+                new SeriesFilterStatementDto()
                 {
                     Comparison = FilterComparison.Equal,
                     Field = SeriesFilterField.WantToRead,

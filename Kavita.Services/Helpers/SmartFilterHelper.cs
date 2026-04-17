@@ -4,6 +4,7 @@ using System.Linq;
 using System.Web;
 using Kavita.Models.DTOs.Filtering;
 using Kavita.Models.DTOs.Filtering.v2;
+using Kavita.Models.DTOs.Filtering.v2.Requests;
 using Kavita.Models.DTOs.Filtering.v2.SortFields;
 using Kavita.Models.DTOs.Filtering.v2.SortOptions;
 
@@ -85,7 +86,7 @@ public static class SmartFilterHelper
         return Uri.EscapeDataString($"{SortFieldKey}{(int) sortOptionDto.SortField}{InnerStatementSeparator}{IsAscendingKey}{sortOptionDto.IsAscending}");
     }
 
-    private static string EncodeFilterStatementDtos(ICollection<FilterStatementDto>? statements)
+    private static string EncodeFilterStatementDtos(ICollection<SeriesFilterStatementDto>? statements)
     {
         if (statements == null || statements.Count == 0)
             return string.Empty;
@@ -94,7 +95,7 @@ public static class SmartFilterHelper
         return encodedStatements;
     }
 
-    private static string EncodeFilterStatementDto(FilterStatementDto statement)
+    private static string EncodeFilterStatementDto(SeriesFilterStatementDto statement)
     {
 
         var encodedComparison = $"{StatementComparisonKey}{(int) statement.Comparison}";
@@ -104,11 +105,11 @@ public static class SmartFilterHelper
         return Uri.EscapeDataString($"{encodedComparison}{InnerStatementSeparator}{encodedField}{InnerStatementSeparator}{encodedValue}");
     }
 
-    private static List<FilterStatementDto> DecodeFilterStatementDtos(string encodedStatements)
+    private static List<SeriesFilterStatementDto> DecodeFilterStatementDtos(string encodedStatements)
     {
         var statementStrings = Uri.UnescapeDataString(encodedStatements).Split(StatementSeparator);
 
-        var statements = new List<FilterStatementDto>();
+        var statements = new List<SeriesFilterStatementDto>();
 
         foreach (var statementString in statementStrings)
         {
@@ -116,7 +117,7 @@ public static class SmartFilterHelper
             if (parts.Length < 3)
                 continue;
 
-            statements.Add(new FilterStatementDto
+            statements.Add(new SeriesFilterStatementDto
             {
                 Comparison = Enum.Parse<FilterComparison>(parts[0].Split("=")[1]),
                 Field = Enum.Parse<SeriesFilterField>(parts[1].Split("=")[1]),

@@ -1,5 +1,6 @@
 ﻿using Kavita.Models.DTOs.Filtering;
 using Kavita.Models.DTOs.Filtering.v2;
+using Kavita.Models.DTOs.Filtering.v2.Requests;
 using Kavita.Models.DTOs.Filtering.v2.SortFields;
 using Kavita.Models.DTOs.Filtering.v2.SortOptions;
 using Kavita.Models.Entities.Enums;
@@ -55,9 +56,9 @@ public class SmartFilterHelperTests
                 },
             LimitTo = 10,
             Combination = FilterCombination.And,
-            Statements = new List<FilterStatementDto>()
+            Statements = new List<SeriesFilterStatementDto>()
             {
-                new FilterStatementDto()
+                new SeriesFilterStatementDto()
                 {
                     Comparison = FilterComparison.Equal,
                     Field = SeriesFilterField.AgeRating,
@@ -90,9 +91,9 @@ public class SmartFilterHelperTests
             },
             LimitTo = 10,
             Combination = FilterCombination.And,
-            Statements = new List<FilterStatementDto>()
+            Statements = new List<SeriesFilterStatementDto>()
             {
-                new FilterStatementDto()
+                new SeriesFilterStatementDto()
                 {
                     Comparison = FilterComparison.Equal,
                     Field = SeriesFilterField.AgeRating,
@@ -116,14 +117,14 @@ public class SmartFilterHelperTests
         Assert.False(decoded.SortOptions.IsAscending);
     }
 
-    private static void AssertStatementSame(FilterStatementDto statement, FilterStatementDto statement2)
+    private static void AssertStatementSame(SeriesFilterStatementDto statement, SeriesFilterStatementDto statement2)
     {
         Assert.Equal(statement.Field, statement2.Field);
         Assert.Equal(statement.Comparison, statement2.Comparison);
         Assert.Equal(statement.Value, statement2.Value);
     }
 
-    private static void AssertStatementSame(FilterStatementDto statement, SeriesFilterField field, FilterComparison combination, string value)
+    private static void AssertStatementSame(SeriesFilterStatementDto statement, SeriesFilterField field, FilterComparison combination, string value)
     {
         Assert.Equal(statement.Field, field);
         Assert.Equal(statement.Comparison, combination);

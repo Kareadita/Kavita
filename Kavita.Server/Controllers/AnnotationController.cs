@@ -9,7 +9,7 @@ using Kavita.API.Services;
 using Kavita.Common;
 using Kavita.Common.Helpers;
 using Kavita.Models.Constants;
-using Kavita.Models.DTOs.Metadata.Browse.Requests;
+using Kavita.Models.DTOs.Filtering.v2.Requests;
 using Kavita.Models.DTOs.Reader;
 using Kavita.Server.Attributes;
 using Kavita.Server.Extensions;

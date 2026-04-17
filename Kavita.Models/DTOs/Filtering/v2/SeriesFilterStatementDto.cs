@@ -3,7 +3,7 @@ using Kavita.Models.DTOs.Filtering.v2.FilterFields;
 
 namespace Kavita.Models.DTOs.Filtering.v2;
 
-public sealed record FilterStatementDto : IFilterStatement<SeriesFilterField>
+public sealed record SeriesFilterStatementDto : IFilterStatement<SeriesFilterField>
 {
     public FilterComparison Comparison { get; set; }
     public SeriesFilterField Field { get; set; }

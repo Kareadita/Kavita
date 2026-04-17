@@ -94,7 +94,7 @@ public static class MigrateSmartFilterEncoding
         var individualParts = Uri.UnescapeDataString(statements).Split(',').Select(Uri.UnescapeDataString);
         foreach (var part in individualParts)
         {
-            filterDto.Statements.Add(new FilterStatementDto()
+            filterDto.Statements.Add(new SeriesFilterStatementDto()
             {
                 Value = Regex.Match(part, ValueRegex).Groups["value"].Value,
                 Field = Enum.Parse<SeriesFilterField>(Regex.Match(part, FieldRegex).Groups["value"].Value),

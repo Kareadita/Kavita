@@ -17,5 +17,5 @@ public interface ISeriesService
     Task<RelatedSeriesDto> GetRelatedSeries(int userId, int seriesId, CancellationToken ct = default);
     Task<NextExpectedChapterDto> GetEstimatedChapterCreationDate(int seriesId, int userId, CancellationToken ct = default);
     Task<PagedList<SeriesDto>> GetCurrentlyReading(int userId, int requestingUserId, UserParams userParams, CancellationToken ct = default);
-    Task<List<FilterStatementDto>> GetProfilePrivacyStatements(int userId, int requestingUserId, CancellationToken ct = default);
+    Task<List<SeriesFilterStatementDto>> GetProfilePrivacyStatements(int userId, int requestingUserId, CancellationToken ct = default);
 }

@@ -7,6 +7,7 @@ using Kavita.Models.DTOs;
 using Kavita.Models.DTOs.Dashboard;
 using Kavita.Models.DTOs.Filtering;
 using Kavita.Models.DTOs.Filtering.v2;
+using Kavita.Models.DTOs.Filtering.v2.Requests;
 using Kavita.Models.DTOs.KavitaPlus.Metadata;
 using Kavita.Models.DTOs.Scrobbling;
 using Kavita.Models.DTOs.Search;
