@@ -86,7 +86,7 @@
 
               @case (SideNavStreamType.SmartFilter) {
                 <app-side-nav-item cdkDrag cdkDragBoundary=".side-nav-container" cdkDragPreviewContainer="parent"
-                                   [cdkDragDisabled]="!editMode" [cdkDragData]="navStream" [editMode]="editMode" icon="fa-bars-staggered" [title]="navStream.name" link="/all-series" [queryParams]="navStream.smartFilterEncoded" />
+                                   [cdkDragDisabled]="!editMode" [cdkDragData]="navStream" [editMode]="editMode" icon="fa-bars-staggered" [title]="navStream.name" [link]="getSmartFilterBaseLink(navStream)" [queryParams]="navStream.smartFilterEncoded" />
               }
 
               @case (SideNavStreamType.ExternalSource) {

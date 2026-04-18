@@ -101,16 +101,7 @@ export class ManageSmartFiltersComponent {
   }
 
   getFilterLink(filter: SmartFilter) {
-    switch (filter.entityType) {
-      case FilterEntityType.Series:
-        return this.baseUrl + 'all-series?' + filter.filter;
-      case FilterEntityType.ReadingList:
-        return this.baseUrl + 'lists?' + filter.filter;
-      case FilterEntityType.Person:
-        return this.baseUrl + 'browse/people?' + filter.filter;
-      case FilterEntityType.Annotation:
-        return this.baseUrl + 'browse/annotations?' + filter.filter;
-    }
+    return this.baseUrl + FilterUtilitiesService.getFilterLink(filter.entityType, filter.filter);
   }
 
 

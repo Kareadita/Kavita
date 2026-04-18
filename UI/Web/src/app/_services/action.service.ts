@@ -827,7 +827,7 @@ export class ActionService {
         ref.componentInstance.allFilters = allFilters;
         return this.handleEditModal(ref, action, smartFilter);
       case Action.Delete:
-        return from(this.confirmService.confirm(translate('toasts.confirm-delete-smart-filter'))).pipe(
+      return from(this.confirmService.confirm(translate('toasts.confirm-delete-smart-filter'))).pipe(
           filter(confirmed => confirmed),
           switchMap(() => this.filterService.deleteFilter(smartFilter.id)),
           tap(() => this.toastr.success(translate('toasts.smart-filter-deleted'))),

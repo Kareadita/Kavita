@@ -364,7 +364,8 @@ public class UserRepository(DataContext context, UserManager<AppUser> userManage
                 SmartFilterEncoded = d.SmartFilter == null ? null : d.SmartFilter.Filter,
                 StreamType = d.StreamType,
                 Order = d.Order,
-                Visible = d.Visible
+                Visible = d.Visible,
+                EntityType = d.SmartFilter == null ? FilterEntityType.Series : d.SmartFilter.EntityType,
             })
             .ToListAsync(ct);
     }
@@ -400,6 +401,7 @@ public class UserRepository(DataContext context, UserManager<AppUser> userManage
                 IsProvided = d.IsProvided,
                 SmartFilterId = d.SmartFilter == null ? 0 : d.SmartFilter.Id,
                 SmartFilterEncoded = d.SmartFilter == null ? null : d.SmartFilter.Filter,
+                EntityType = d.SmartFilter == null ? FilterEntityType.Series : d.SmartFilter.EntityType,
                 LibraryId = d.LibraryId ?? 0,
                 ExternalSourceId = d.ExternalSourceId ?? 0,
                 StreamType = d.StreamType,

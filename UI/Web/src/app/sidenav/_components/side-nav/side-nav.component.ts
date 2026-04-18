@@ -30,6 +30,7 @@ import {BreakpointService} from "../../../_services/breakpoint.service";
 import {ActionItem} from "../../../_models/actionables/action-item";
 import {Action} from "../../../_models/actionables/action";
 import {ActionResult} from "../../../_models/actionables/action-result";
+import {FilterUtilitiesService} from "../../../shared/_services/filter-utilities.service";
 
 @Component({
   selector: 'app-side-nav',
@@ -205,6 +206,10 @@ export class SideNavComponent {
     this.showAllSubject.next(false);
     this.editMode = false;
     this.cdRef.markForCheck();
+  }
+
+  getSmartFilterBaseLink(item: SideNavStream) {
+    return '/' + FilterUtilitiesService.getFilterLink(item.entityType, '');
   }
 
   async reorderDrop($event: CdkDragDrop<any, any, SideNavStream>) {

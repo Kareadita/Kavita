@@ -29,7 +29,7 @@
         </div>
         @if (!item().isProvided) {
           <div class="ps-1">
-            <a [href]="baseUrl + 'all-series?' + this.item().smartFilterEncoded" target="_blank">{{t('load-filter')}}</a>
+            <a [href]="loadFilterUrl()" target="_blank">{{t('load-filter')}}</a>
           </div>
         }
       </div>

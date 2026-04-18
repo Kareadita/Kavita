@@ -15,7 +15,7 @@ export class FilterService {
   baseUrl = environment.apiUrl;
 
   saveFilter(filter: FilterV2<number>) {
-    const apiRoute = FilterUtilitiesService.getRoutePrefixForEntityType('filter/update/', filter.entityType) ;
+    const apiRoute = FilterUtilitiesService.getApiRoutePrefixForEntityType('filter/update/', filter.entityType) ;
     return this.httpClient.post(this.baseUrl + apiRoute, filter);
   }
   getAllFilters() {

@@ -46,7 +46,7 @@
                 <a [href]="baseUrl + 'library/' + this.item().libraryId" target="_blank">{{item().library?.name}}</a>
               }
               @case (SideNavStreamType.SmartFilter) {
-                <a [href]="baseUrl + 'all-series?' + this.item().smartFilterEncoded">{{t('load-filter')}}</a>
+                <a [href]="loadFilterUrl()">{{t('load-filter')}}</a>
               }
               @case (SideNavStreamType.ExternalSource) {
                 <a [href]="externalUrl()" target="_blank" rel="noopener noreferrer">{{item().externalSource!.host!}}</a>

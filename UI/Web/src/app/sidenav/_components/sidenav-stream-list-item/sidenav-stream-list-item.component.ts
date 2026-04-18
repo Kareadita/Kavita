@@ -4,6 +4,7 @@ import {SideNavStream} from "../../../_models/sidenav/sidenav-stream";
 import {StreamNamePipe} from "../../../_pipes/stream-name.pipe";
 import {TranslocoDirective} from "@jsverse/transloco";
 import {SideNavStreamType} from "../../../_models/sidenav/sidenav-stream-type.enum";
+import {FilterUtilitiesService} from "../../../shared/_services/filter-utilities.service";
 
 @Component({
   selector: 'app-sidenav-stream-list-item',
@@ -15,6 +16,7 @@ import {SideNavStreamType} from "../../../_models/sidenav/sidenav-stream-type.en
 export class SidenavStreamListItemComponent {
   item = input.required<SideNavStream>();
   position = input.required<number>();
+
   hide = output<SideNavStream>();
   delete = output<SideNavStream>();
 
@@ -26,7 +28,10 @@ export class SidenavStreamListItemComponent {
       return '';
 
     return host + 'login' + (!!apiKey ? 'apiKey=' + apiKey : '');
-  })
+  });
+  loadFilterUrl = computed(() => {
+    return this.baseUrl + FilterUtilitiesService.getFilterLink(this.item().entityType, this.item().smartFilterEncoded ?? '');
+  });
 
   protected readonly SideNavStreamType = SideNavStreamType;
   protected readonly baseUrl = inject(APP_BASE_HREF);

@@ -1,4 +1,5 @@
-﻿using Kavita.Models.Entities;
+﻿using Kavita.Models.DTOs.Filtering.v2;
+using Kavita.Models.Entities;
 
 namespace Kavita.Models.DTOs.SideNav;
 #nullable enable
@@ -36,4 +37,8 @@ public sealed record SideNavStreamDto
     /// Only available for SideNavStreamType.Library
     /// </summary>
     public LibraryDto? Library { get; set; }
+    /// <summary>
+    /// For Smart Filters, this is the underlying FilterEntityType
+    /// </summary>
+    public FilterEntityType EntityType { get; set; }
 }

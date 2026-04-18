@@ -52,7 +52,7 @@ export class FilterUtilitiesService {
 
   encodeFilter(filter: FilterV2 | undefined) {
     if (filter === undefined) { return of(''); }
-    const apiRoute = FilterUtilitiesService.getRoutePrefixForEntityType('filter/encode/', filter.entityType) ;
+    const apiRoute = FilterUtilitiesService.getApiRoutePrefixForEntityType('filter/encode/', filter.entityType);
 
     return this.http.post<string>(this.apiUrl + apiRoute, filter, TextResonse);
   }
@@ -109,7 +109,7 @@ export class FilterUtilitiesService {
     }));
   }
 
-  public static getRoutePrefixForEntityType(apiRoute: string, entityType: FilterEntityType) {
+  public static getApiRoutePrefixForEntityType(apiRoute: string, entityType: FilterEntityType) {
     switch (entityType) {
       case FilterEntityType.Series:
         apiRoute += 'series';
@@ -125,6 +125,23 @@ export class FilterUtilitiesService {
         break;
     }
     return apiRoute;
+  }
+
+  /** Returns the url route of a filter **/
+  public static getFilterLink(entityType: FilterEntityType, encodedFilter: string) {
+    if (encodedFilter) {
+      encodedFilter = '?' + encodedFilter;
+    }
+    switch (entityType) {
+      case FilterEntityType.Series:
+        return 'all-series' + encodedFilter;
+      case FilterEntityType.ReadingList:
+        return 'lists' + encodedFilter;
+      case FilterEntityType.Person:
+        return 'browse/people' + encodedFilter;
+      case FilterEntityType.Annotation:
+        return 'browse/annotations' + encodedFilter;
+    }
   }
 
 
