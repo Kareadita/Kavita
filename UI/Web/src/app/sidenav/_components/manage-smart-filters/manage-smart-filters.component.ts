@@ -25,6 +25,10 @@ import {FilterUtilitiesService} from "../../../shared/_services/filter-utilities
 import {ActionFactoryService} from "../../../_services/action-factory.service";
 import {ActionResult} from "../../../_models/actionables/action-result";
 import {CardActionablesComponent} from "src/app/_single-module/card-actionables/card-actionables.component";
+import {FilterEntityType} from "../../../_models/metadata/v2/filter-entity-type";
+import {ReadingListService} from "../../../_services/reading-list.service";
+import {PersonService} from "../../../_services/person.service";
+import {AnnotationService} from "../../../_services/annotation.service";
 
 @Component({
   selector: 'app-manage-smart-filters',
@@ -38,6 +42,9 @@ export class ManageSmartFiltersComponent {
   private readonly filterService = inject(FilterService);
   private readonly filterUtilityService = inject(FilterUtilitiesService);
   private readonly seriesService = inject(SeriesService);
+  private readonly readingListService = inject(ReadingListService);
+  private readonly personService = inject(PersonService);
+  private readonly annotationService = inject(AnnotationService);
   private readonly cdRef = inject(ChangeDetectorRef);
   private readonly actionFactoryService = inject(ActionFactoryService);
   private readonly destroyRef = inject(DestroyRef);
@@ -51,7 +58,7 @@ export class ManageSmartFiltersComponent {
   listForm: FormGroup = new FormGroup({
     'filterQuery': new FormControl('', [])
   });
-  filterApiMap: { [key: string]: Observable<any> } = {};
+  filterApiMap: { [key: number]: Observable<any> } = {};
   actions = computed(() => this.actionFactoryService.getSmartFilterActions(this.filters()));
 
   filterList = (listItem: SmartFilter) => {
@@ -63,15 +70,37 @@ export class ManageSmartFiltersComponent {
     this.loadData();
   }
 
+  getFilterLink(filter: SmartFilter) {
+    switch (filter.entityType) {
+      case FilterEntityType.Series:
+        return this.baseUrl + 'all-series?' + filter.filter;
+      case FilterEntityType.ReadingList:
+        return this.baseUrl + 'lists?' + filter.filter;
+      case FilterEntityType.Person:
+        return this.baseUrl + 'browse/people?' + filter.filter;
+      case FilterEntityType.Annotation:
+        return this.baseUrl + 'browse/annotations?' + filter.filter;
+    }
+  }
+
   loadData() {
     this.filterService.getAllFilters().subscribe(filters => {
       this.filters.set([...filters]);
 
       this.filterApiMap = {};
       for(let filter of filters) {
-        this.filterApiMap[filter.name] = this.filterUtilityService.decodeFilter(filter.filter).pipe(
+        this.filterApiMap[filter.id] = this.filterUtilityService.decodeFilter(filter.filter).pipe(
           switchMap(filter => {
-            return this.seriesService.getAllSeriesV2(0, 20, filter, QueryContext.Dashboard);
+            switch (filter.entityType) {
+              case FilterEntityType.Series:
+                return this.seriesService.getAllSeriesV2(0, 20, filter, QueryContext.Dashboard);
+              case FilterEntityType.ReadingList:
+                return this.readingListService.getAllReadingLists(filter, 0, 20);
+              case FilterEntityType.Person:
+                return this.personService.getAuthorsToBrowse(filter, 0, 20);
+              case FilterEntityType.Annotation:
+                return this.annotationService.getAllAnnotationsFiltered(filter, 0, 20);
+            }
           }))
           .pipe(map(d => d.result), takeUntilDestroyed(this.destroyRef), shareReplay({bufferSize: 1, refCount: true}));
       }

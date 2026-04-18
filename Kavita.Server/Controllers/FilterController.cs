@@ -124,7 +124,7 @@ public class FilterController(
     /// <param name="dto"></param>
     /// <returns></returns>
     [HttpPost("decode")]
-    public ActionResult<IFilterDto<T>> DecodeFilter<T>(DecodeFilterDto dto)
+    public ActionResult<IFilterDto> DecodeFilter(DecodeFilterDto dto)
     {
         return Ok(SmartFilterHelper.Decode(dto.EncodedFilter));
     }

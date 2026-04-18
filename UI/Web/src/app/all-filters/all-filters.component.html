@@ -6,7 +6,7 @@
       </h4>
       <div subtitle>
         <h6>
-          <span>{{t('count', {count: filters.length | number})}}</span>
+          <span>{{t('count', {count: filters().length | number})}}</span>
           <a class="ms-2" href="{{baseUrl}}all-series?name=New%20Filter">{{t('create')}}</a>
         </h6>
       </div>

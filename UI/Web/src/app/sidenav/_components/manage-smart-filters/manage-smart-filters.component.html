@@ -27,8 +27,8 @@
           {{stream.name}} - {{t('errored')}}
         </li>
       } @else {
-        @if(filterApiMap[stream.name] | async; as data) {
-          <app-carousel-reel [items]="data" [title]="stream.name" [titleLink]="baseUrl + 'all-series?' + stream.filter"
+        @if(filterApiMap[stream.id] | async; as data) {
+          <app-carousel-reel [items]="data" [title]="stream.name" [titleLink]="getFilterLink(stream)"
                              [actionables]="actions()" [actionableEntity]="stream" (actionHandler)="handleActionCallback($event)"
                              [alwaysShow]="true"
           >
