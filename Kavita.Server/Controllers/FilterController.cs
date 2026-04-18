@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Threading.Tasks;
 using Kavita.API.Database;
@@ -117,6 +118,7 @@ public class FilterController(
         if (string.IsNullOrWhiteSpace(filterName)) throw new KavitaException("Name must be set");
         if (Defaults.DefaultStreams.Any(s => s.Name.Equals(filterName, StringComparison.InvariantCultureIgnoreCase)))
         {
+            // NOTE: This checks against localization keys (on-deck), so this case will almost never happen
             throw new KavitaException("You cannot use the name of a system provided stream");
         }
 
@@ -166,6 +168,7 @@ public class FilterController(
     {
         var filter = await unitOfWork.AppUserSmartFilterRepository.GetById(filterId);
         if (filter == null) return Ok();
+
         // This needs to delete any dashboard filters that have it too
         var streams = await unitOfWork.UserRepository.GetDashboardStreamWithFilter(filter.Id);
         unitOfWork.UserRepository.Delete(streams);
@@ -245,12 +248,11 @@ public class FilterController(
     /// <returns></returns>
     [HttpPost("rename")]
     [DisallowRole(PolicyConstants.ReadOnlyRole)]
-    public async Task<ActionResult> RenameFilter([FromQuery] int filterId, [FromQuery] string name)
+    public async Task<ActionResult> RenameFilter([FromQuery] int filterId, [FromQuery] [Required] string name)
     {
         try
         {
-            var user = await unitOfWork.UserRepository.GetUserByIdAsync(UserId,
-                AppUserIncludes.SmartFilters);
+            var user = await unitOfWork.UserRepository.GetUserByIdAsync(UserId, AppUserIncludes.SmartFilters);
             if (user == null) return Unauthorized();
 
             name = name.Trim();

@@ -817,8 +817,8 @@
 
     "all-filters": {
         "title": "All Smart Filters",
-        "count": "{{count}} {{tabs.smart-filters-tab}}",
-        "create": "{{common.create}}"
+        "description": "Smart filters are saved filters that can be bound against the side nav and dashboard. You can create them for Series and Reading Lists by giving a name and using Save button.",
+        "count": "{{count}} Total Smart Filters"
     },
 
     "announcements": {
