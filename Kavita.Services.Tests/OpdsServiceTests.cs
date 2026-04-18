@@ -16,6 +16,7 @@ using Kavita.Database;
 using Kavita.Database.Tests;
 using Kavita.Models.Builders;
 using Kavita.Models.Constants;
+using Kavita.Models.DTOs.Filtering.v2;
 using Kavita.Models.DTOs.OPDS;
 using Kavita.Models.DTOs.OPDS.Requests;
 using Kavita.Models.DTOs.Progress;
@@ -194,6 +195,7 @@ public class OpdsServiceTests(ITestOutputHelper testOutputHelper) : AbstractDbTe
         {
             Name = name,
             Filter = filter,
+            EntityType = FilterEntityType.Series,
             AppUserId = userId
         };
 

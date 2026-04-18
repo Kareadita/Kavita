@@ -11,4 +11,8 @@ public sealed record SmartFilterDto
     /// This is the Filter url encoded. It is decoded and reconstructed into a <see cref="SeriesFilterV2Dto"/>
     /// </summary>
     public required string Filter { get; set; }
+    /// <summary>
+    /// The underlying type which drives which API and entity to expect
+    /// </summary>
+    public required FilterEntityType EntityType { get; set; }
 }

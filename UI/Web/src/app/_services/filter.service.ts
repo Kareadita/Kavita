@@ -1,4 +1,4 @@
-import { Injectable, inject } from '@angular/core';
+import {inject, Injectable} from '@angular/core';
 import {FilterV2} from "../_models/metadata/v2/filter-v2";
 import {environment} from "../../environments/environment";
 import {HttpClient} from "@angular/common/http";
@@ -22,7 +22,6 @@ export class FilterService {
   deleteFilter(filterId: number) {
     return this.httpClient.delete(this.baseUrl + 'filter?filterId=' + filterId);
   }
-
   renameSmartFilter(filter: SmartFilter) {
     return this.httpClient.post(this.baseUrl + `filter/rename?filterId=${filter.id}&name=${filter.name.trim()}`, {});
   }

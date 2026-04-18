@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Kavita.API.Attributes;
 using Kavita.API.Database;
 using Kavita.API.Repositories;
 using Kavita.API.Services;
@@ -13,8 +12,6 @@ using Kavita.Models.DTOs.Filtering.v2;
 using Kavita.Models.DTOs.Filtering.v2.Requests;
 using Kavita.Models.Entities.User;
 using Kavita.Server.Attributes;
-using Kavita.Services;
-using Kavita.Services.Helpers;
 using Kavita.Services.Helpers.SmartFilter;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
@@ -59,7 +56,8 @@ public class FilterController(
             existingFilter = new AppUserSmartFilter()
             {
                 Name = dto.Name,
-                Filter = SmartFilterHelper.Encode(dto)
+                Filter = SmartFilterHelper.Encode(dto),
+                EntityType = FilterEntityType.Series
             };
             user.SmartFilters.Add(existingFilter);
             unitOfWork.UserRepository.Update(user);

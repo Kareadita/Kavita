@@ -500,6 +500,7 @@ public class Startup
                     #region v0.9.0
                     await new ManualMigrateEnsureNoReadOnlyAdmins().RunAsync(dataContext, logger);
                     await new ManualMigrationRemoveMoreInGenreStream().RunAsync(dataContext, logger);
+                    await new ManualMigrateSmartFilterEntityTypeBackfill().RunAsync(dataContext, logger);
                     #endregion
 
                     #endregion
