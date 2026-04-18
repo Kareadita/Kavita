@@ -106,10 +106,10 @@ public class FilterController(
     /// <summary>
     /// Encode the Filter
     /// </summary>
-    /// <param name="dto"></param>
+    /// <param name="dto">You can pass any Shape, uses entityType to drive the encoding</param>
     /// <returns></returns>
     [HttpPost("encode")]
-    public ActionResult<string> EncodeFilter(SeriesFilterV2Dto dto)
+    public ActionResult<string> EncodeFilter(BaseFilterDto dto)
     {
         return Ok(SmartFilterHelper.Encode(dto));
     }

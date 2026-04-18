@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using Kavita.Models.DTOs.Filtering.v2.SortOptions;
+using NotImplementedException = System.NotImplementedException;
 
 namespace Kavita.Models.DTOs.Filtering.v2.Requests;
 #nullable enable
@@ -20,7 +21,11 @@ public sealed record SeriesFilterV2Dto : IFilterDto<SeriesFilterStatementDto, Se
     public ICollection<SeriesFilterStatementDto> Statements { get; set; } = [];
     public FilterCombination Combination { get; set; } = FilterCombination.And;
     public SeriesSortOptionDto? SortOptions { get; set; }
-    public FilterEntityType EntityType => FilterEntityType.Series;
+    public FilterEntityType EntityType
+    {
+        get => FilterEntityType.Series;
+        init => throw new NotImplementedException();
+    }
 
     /// <summary>
     /// Limit the number of rows returned. Defaults to not applying a limit (aka 0)

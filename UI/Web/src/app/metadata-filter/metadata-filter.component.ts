@@ -92,6 +92,7 @@ export class MetadataFilterComponent<TFilter extends number = number, TSort exte
       const settings = this.filterSettings();
       if (settings?.presetsV2) {
         this.filterV2 = this.deepClone(settings.presetsV2);
+        console.log('filterV2', this.filterV2);
         this.cdRef.markForCheck();
       }
     })

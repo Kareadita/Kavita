@@ -45,6 +45,7 @@ export class AnnotationsFilterSettings extends FilterSettingsBase<AnnotationsFil
 
 export class ReadingListFilterSettings extends FilterSettingsBase<ReadingListFilterField, ReadingListSortField> {
   type : ValidFilterEntity = 'readinglist';
+  supportsSmartFilter = true;
 }
 
 

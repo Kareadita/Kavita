@@ -146,6 +146,18 @@ public static class SmartFilterHelper
         return $"{EncodeName(filter.Name)}{EncodeEntityType(filter.EntityType)}{encodedStatements}&{encodedSortOptions}&{encodedLimitTo}&{CombinationKey}{(int) filter.Combination}";
     }
 
+    public static string Encode(IFilterDto? filter)
+    {
+        if (filter == null) return string.Empty;
+        return filter.EntityType switch
+        {
+            FilterEntityType.Series => Encode((SeriesFilterV2Dto?) filter),
+            FilterEntityType.ReadingList => Encode((ReadingListFilterDto?) filter),
+            FilterEntityType.Person => Encode((PersonFilterDto?) filter),
+            FilterEntityType.Annotation => Encode((AnnotationFilterDto?) filter),
+            _ => string.Empty
+        };
+    }
     public static string Encode(SeriesFilterV2Dto? filter)
     {
         return EncodeFilter<SeriesFilterStatementDto, SeriesFilterField, SeriesSortOptionDto, SeriesSortField>(filter);
