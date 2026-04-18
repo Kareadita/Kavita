@@ -38,13 +38,29 @@
           {{stream.name}} - {{t('errored')}}
         </li>
       } @else {
-        @if(filterApiMap[stream.id] | async; as data) {
+        @if(filterApiMap()[stream.id] | async; as data) {
+
           <app-carousel-reel [items]="data" [title]="stream.name" [titleLink]="getFilterLink(stream)"
                              [actionables]="actions()" [actionableEntity]="stream" (actionHandler)="handleActionCallback($event)"
                              [alwaysShow]="true"
           >
-            <ng-template #carouselItem let-item>
-              <app-series-card [series]="item" />
+            <ng-template #carouselItem let-item let-idx>
+              @switch (stream.entityType) {
+                @case (FilterEntityType.Series) {
+                  <app-series-card [series]="item" />
+                }
+                @case (FilterEntityType.ReadingList) {
+                  <app-entity-card [entity]="item" [index]="idx" [maxIndex]="data.length" [config]="readingListConfig()">
+                    <ng-template #title let-entity>
+                      <app-promoted-icon [promoted]="entity.data.promoted" /> {{entity.data.title}}
+                    </ng-template>
+                  </app-entity-card>
+                }
+                @default {
+                  Not Implemented!
+                }
+              }
+
             </ng-template>
             <ng-template #noData>
               {{t('no-content')}}

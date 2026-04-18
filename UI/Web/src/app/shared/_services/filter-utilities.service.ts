@@ -10,7 +10,7 @@ import {HttpClient} from "@angular/common/http";
 import {TextResonse} from "../../_types/text-response";
 import {environment} from "../../../environments/environment";
 import {map, tap} from "rxjs/operators";
-import {switchMap} from "rxjs";
+import {of, switchMap} from "rxjs";
 import {allPersonFilterFields, PersonFilterField} from "../../_models/metadata/v2/person-filter-field";
 import {allPersonSortFields} from "../../_models/metadata/v2/person-sort-field";
 import {
@@ -51,7 +51,10 @@ export class FilterUtilitiesService {
   private readonly apiUrl = environment.apiUrl;
 
   encodeFilter(filter: FilterV2 | undefined) {
-    return this.http.post<string>(this.apiUrl + 'filter/encode', filter, TextResonse);
+    if (filter === undefined) { return of(''); }
+    const apiRoute = FilterUtilitiesService.getRoutePrefixForEntityType('filter/encode/', filter.entityType) ;
+
+    return this.http.post<string>(this.apiUrl + apiRoute, filter, TextResonse);
   }
 
   decodeFilter(encodedFilter: string) {
@@ -104,6 +107,24 @@ export class FilterUtilitiesService {
 
       return this.router.navigateByUrl(url, extraParams);
     }));
+  }
+
+  public static getRoutePrefixForEntityType(apiRoute: string, entityType: FilterEntityType) {
+    switch (entityType) {
+      case FilterEntityType.Series:
+        apiRoute += 'series';
+        break;
+      case FilterEntityType.ReadingList:
+        apiRoute += 'reading-list';
+        break;
+      case FilterEntityType.Person:
+        apiRoute += 'person';
+        break;
+      case FilterEntityType.Annotation:
+        apiRoute += 'annotation';
+        break;
+    }
+    return apiRoute;
   }
 
 

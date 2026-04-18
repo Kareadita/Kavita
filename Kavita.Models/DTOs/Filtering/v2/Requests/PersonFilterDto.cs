@@ -18,11 +18,7 @@ public sealed record PersonFilterDto : IFilterDto<PersonFilterStatementDto, Pers
     public ICollection<PersonFilterStatementDto> Statements { get; set; } = [];
     public FilterCombination Combination { get; set; } = FilterCombination.And;
     public PersonSortOptionDto? SortOptions { get; set; }
-    public FilterEntityType EntityType
-    {
-        get => FilterEntityType.Person;
-        init => throw new NotImplementedException();
-    }
+    public FilterEntityType EntityType => FilterEntityType.Person;
 
     /// <summary>
     /// Limit the number of rows returned. Defaults to not applying a limit (aka 0)

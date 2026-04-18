@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using Kavita.API.Database;
 using Kavita.API.Repositories;
 using Kavita.API.Services;
+using Kavita.Common;
 using Kavita.Models;
 using Kavita.Models.Constants;
 using Kavita.Models.DTOs.Dashboard;
@@ -26,48 +27,122 @@ public class FilterController(
     : BaseApiController
 {
     /// <summary>
-    /// Creates or Updates the filter
+    /// Creates or Updates the Series filter
     /// </summary>
     /// <param name="dto"></param>
     /// <returns></returns>
-    [HttpPost("update")]
+    [HttpPost("update/series")]
     [DisallowRole(PolicyConstants.ReadOnlyRole)]
-    public async Task<ActionResult> CreateOrUpdateSmartFilter(SeriesFilterV2Dto dto)
+    public async Task<ActionResult> CreateOrUpdateSeriesSmartFilter(SeriesFilterV2Dto dto)
     {
-        var user = await unitOfWork.UserRepository.GetUserByIdAsync(UserId, AppUserIncludes.SmartFilters);
-        if (user == null) return Unauthorized();
-
-        if (string.IsNullOrWhiteSpace(dto.Name)) return BadRequest("Name must be set");
-        if (Defaults.DefaultStreams.Any(s => s.Name.Equals(dto.Name, StringComparison.InvariantCultureIgnoreCase)))
+        try
         {
-            return BadRequest("You cannot use the name of a system provided stream");
+            var encodedString = SmartFilterHelper.Encode(dto);
+            await ValidateAndSaveFilterUpsert(dto.Id, dto.Name, encodedString, dto.EntityType);
+            return Ok();
+        }
+        catch (KavitaException ex)
+        {
+            return BadRequest(ex.Message);
+        }
+    }
+
+    /// <summary>
+    /// Creates or Updates the Reading List filter
+    /// </summary>
+    /// <param name="dto"></param>
+    /// <returns></returns>
+    [HttpPost("update/reading-list")]
+    [DisallowRole(PolicyConstants.ReadOnlyRole)]
+    public async Task<ActionResult> CreateOrUpdateReadingListSmartFilter(ReadingListFilterDto dto)
+    {
+        try
+        {
+            var encodedString = SmartFilterHelper.Encode(dto);
+            await ValidateAndSaveFilterUpsert(dto.Id, dto.Name, encodedString, dto.EntityType);
+            return Ok();
+        }
+        catch (KavitaException ex)
+        {
+            return BadRequest(ex.Message);
+        }
+    }
+
+    /// <summary>
+    /// Creates or Updates the Person filter
+    /// </summary>
+    /// <param name="dto"></param>
+    /// <returns></returns>
+    [HttpPost("update/person")]
+    [DisallowRole(PolicyConstants.ReadOnlyRole)]
+    public async Task<ActionResult> CreateOrUpdatePersonSmartFilter(PersonFilterDto dto)
+    {
+        try
+        {
+            var encodedString = SmartFilterHelper.Encode(dto);
+            await ValidateAndSaveFilterUpsert(dto.Id, dto.Name, encodedString, dto.EntityType);
+            return Ok();
+        }
+        catch (KavitaException ex)
+        {
+            return BadRequest(ex.Message);
+        }
+    }
+
+    /// <summary>
+    /// Creates or Updates the Reading List filter
+    /// </summary>
+    /// <param name="dto"></param>
+    /// <returns></returns>
+    [HttpPost("update/annotation")]
+    [DisallowRole(PolicyConstants.ReadOnlyRole)]
+    public async Task<ActionResult> CreateOrUpdateAnnotationSmartFilter(AnnotationFilterDto dto)
+    {
+        try
+        {
+            var encodedString = SmartFilterHelper.Encode(dto);
+            await ValidateAndSaveFilterUpsert(dto.Id, dto.Name, encodedString, dto.EntityType);
+            return Ok();
+        }
+        catch (KavitaException ex)
+        {
+            return BadRequest(ex.Message);
+        }
+    }
+
+    private async Task ValidateAndSaveFilterUpsert(int filterId, string? filterName, string encodedFilter,  FilterEntityType entityType)
+    {
+        var user = (await unitOfWork.UserRepository.GetUserByIdAsync(UserId, AppUserIncludes.SmartFilters))!;
+
+        if (string.IsNullOrWhiteSpace(filterName)) throw new KavitaException("Name must be set");
+        if (Defaults.DefaultStreams.Any(s => s.Name.Equals(filterName, StringComparison.InvariantCultureIgnoreCase)))
+        {
+            throw new KavitaException("You cannot use the name of a system provided stream");
         }
 
-        var existingFilter =
-            user.SmartFilters.FirstOrDefault(f => f.Name.Equals(dto.Name, StringComparison.InvariantCultureIgnoreCase));
+        var existingFilter = user.SmartFilters.FirstOrDefault(f => f.Id == filterId);
         if (existingFilter != null)
         {
             // Update the filter
-            existingFilter.Filter = SmartFilterHelper.Encode(dto);
+            existingFilter.Filter = encodedFilter;
             unitOfWork.AppUserSmartFilterRepository.Update(existingFilter);
         }
         else
         {
             existingFilter = new AppUserSmartFilter()
             {
-                Name = dto.Name,
-                Filter = SmartFilterHelper.Encode(dto),
-                EntityType = FilterEntityType.Series
+                Name = filterName,
+                Filter = encodedFilter,
+                EntityType = entityType
             };
             user.SmartFilters.Add(existingFilter);
             unitOfWork.UserRepository.Update(user);
         }
 
-        if (!unitOfWork.HasChanges()) return Ok();
+        if (!unitOfWork.HasChanges()) return;
         await unitOfWork.CommitAsync();
-
-        return Ok();
     }
+
 
     /// <summary>
     /// All Smart Filters for the authenticated user
@@ -104,12 +179,45 @@ public class FilterController(
     }
 
     /// <summary>
-    /// Encode the Filter
+    /// Encode a Series filter
     /// </summary>
-    /// <param name="dto">You can pass any Shape, uses entityType to drive the encoding</param>
+    /// <param name="dto">This must be entityType Series</param>
     /// <returns></returns>
-    [HttpPost("encode")]
-    public ActionResult<string> EncodeFilter(BaseFilterDto dto)
+    [HttpPost("encode/series")]
+    public ActionResult<string> EncodeSeriesFilter(SeriesFilterV2Dto dto)
+    {
+        return Ok(SmartFilterHelper.Encode(dto));
+    }
+
+    /// <summary>
+    /// Encode a Reading List filter
+    /// </summary>
+    /// <param name="dto">This must be entityType ReadingList</param>
+    /// <returns></returns>
+    [HttpPost("encode/reading-list")]
+    public ActionResult<string> EncodeRlFilter(ReadingListFilterDto dto)
+    {
+        return Ok(SmartFilterHelper.Encode(dto));
+    }
+
+    /// <summary>
+    /// Encode a Person Filter
+    /// </summary>
+    /// <param name="dto">This must be entityType Person</param>
+    /// <returns></returns>
+    [HttpPost("encode/person")]
+    public ActionResult<string> EncodePersonFilter(PersonFilterDto dto)
+    {
+        return Ok(SmartFilterHelper.Encode(dto));
+    }
+
+    /// <summary>
+    /// Encode an Annotation Filter
+    /// </summary>
+    /// <param name="dto">This must be entityType Annotation</param>
+    /// <returns></returns>
+    [HttpPost("encode/annotation")]
+    public ActionResult<string> EncodeAnnotationFilter(AnnotationFilterDto dto)
     {
         return Ok(SmartFilterHelper.Encode(dto));
     }

@@ -9,7 +9,7 @@ public interface IFilterDto
     string? Name { get; set; }
     FilterCombination Combination { get; set; }
     int LimitTo { get; set; }
-    FilterEntityType EntityType { get; init; }
+    FilterEntityType EntityType { get; }
 }
 
 /// <summary>
