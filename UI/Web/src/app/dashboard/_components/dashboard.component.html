@@ -48,9 +48,24 @@
             [nextPageLoader]="smartFilterNextPage(stream)"
             (sectionClick)="handleFilterSectionClick(stream)"
           >
-            <ng-template #carouselItem let-item>
-              <app-entity-card [entity]="item" [config]="seriesConfig()" (reload)="reloadStream(stream.id, true)"
-                               (dataChanged)="reloadStream(stream.id)" />
+            <ng-template #carouselItem let-item let-idx>
+              @switch (stream.entityType) {
+                @case (FilterEntityType.Series) {
+                  <app-entity-card [entity]="item" [config]="seriesConfig()" (reload)="reloadStream(stream.id, true)"
+                                   (dataChanged)="reloadStream(stream.id)" />
+                }
+                @case (FilterEntityType.ReadingList) {
+                  <app-entity-card [entity]="item" [index]="idx" [maxIndex]="data.length" [config]="readingListConfig()">
+                    <ng-template #title let-entity>
+                      <app-promoted-icon [promoted]="entity.data.promoted" /> {{entity.data.title}}
+                    </ng-template>
+                  </app-entity-card>
+                }
+                @default {
+                  Not Implemented!
+                }
+              }
+
             </ng-template>
           </app-carousel-reel>
         }

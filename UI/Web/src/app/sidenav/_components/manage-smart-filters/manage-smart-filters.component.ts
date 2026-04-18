@@ -1,6 +1,5 @@
 import {
   ChangeDetectionStrategy,
-  ChangeDetectorRef,
   Component,
   computed,
   DestroyRef,
@@ -51,7 +50,6 @@ export class ManageSmartFiltersComponent {
   private readonly readingListService = inject(ReadingListService);
   private readonly personService = inject(PersonService);
   private readonly annotationService = inject(AnnotationService);
-  private readonly cdRef = inject(ChangeDetectorRef);
   private readonly actionFactoryService = inject(ActionFactoryService);
   private readonly destroyRef = inject(DestroyRef);
   private readonly cardConfigFactory = inject(CardConfigFactory);
