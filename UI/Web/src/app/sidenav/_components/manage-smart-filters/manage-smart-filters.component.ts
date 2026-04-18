@@ -124,9 +124,9 @@ export class ManageSmartFiltersComponent {
             }
           }))
           .pipe(takeUntilDestroyed(this.destroyRef), shareReplay({bufferSize: 1, refCount: true}));
-
-        this.filterApiMap.set(newApiMap);
       }
+
+      this.filterApiMap.set(newApiMap);
     });
   }
 

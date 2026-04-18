@@ -5,7 +5,6 @@ import {DashboardStream} from "../../../_models/dashboard/dashboard-stream";
 import {StreamNamePipe} from "../../../_pipes/stream-name.pipe";
 import {StreamType} from "../../../_models/dashboard/stream-type.enum";
 import {FilterUtilitiesService} from "../../../shared/_services/filter-utilities.service";
-import {SafeUrlPipe} from "../../../_pipes/safe-url.pipe";
 
 @Component({
   selector: 'app-dashboard-stream-list-item',
@@ -15,8 +14,6 @@ import {SafeUrlPipe} from "../../../_pipes/safe-url.pipe";
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class DashboardStreamListItemComponent {
-  private readonly safeUrlPipe = new SafeUrlPipe();
-
   // TODO: Investigate one component for DashboardStream and SideNavStreamListItem
   item = input.required<DashboardStream>();
   position = input.required<number>();

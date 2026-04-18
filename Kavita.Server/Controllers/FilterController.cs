@@ -38,8 +38,9 @@ public class FilterController(
     {
         try
         {
+            if (string.IsNullOrEmpty(dto.Name)) BadRequest("Name is required");
             var encodedString = SmartFilterHelper.Encode(dto);
-            await ValidateAndSaveFilterUpsert(dto.Id, dto.Name, encodedString, dto.EntityType);
+            await ValidateAndSaveFilterUpsert(dto.Name!, encodedString, dto.EntityType);
             return Ok();
         }
         catch (KavitaException ex)
@@ -59,8 +60,9 @@ public class FilterController(
     {
         try
         {
+            if (string.IsNullOrEmpty(dto.Name)) BadRequest("Name is required");
             var encodedString = SmartFilterHelper.Encode(dto);
-            await ValidateAndSaveFilterUpsert(dto.Id, dto.Name, encodedString, dto.EntityType);
+            await ValidateAndSaveFilterUpsert(dto.Name!, encodedString, dto.EntityType);
             return Ok();
         }
         catch (KavitaException ex)
@@ -80,8 +82,9 @@ public class FilterController(
     {
         try
         {
+            if (string.IsNullOrEmpty(dto.Name)) BadRequest("Name is required");
             var encodedString = SmartFilterHelper.Encode(dto);
-            await ValidateAndSaveFilterUpsert(dto.Id, dto.Name, encodedString, dto.EntityType);
+            await ValidateAndSaveFilterUpsert(dto.Name!, encodedString, dto.EntityType);
             return Ok();
         }
         catch (KavitaException ex)
@@ -101,8 +104,9 @@ public class FilterController(
     {
         try
         {
+            if (string.IsNullOrEmpty(dto.Name)) BadRequest("Name is required");
             var encodedString = SmartFilterHelper.Encode(dto);
-            await ValidateAndSaveFilterUpsert(dto.Id, dto.Name, encodedString, dto.EntityType);
+            await ValidateAndSaveFilterUpsert(dto.Name!, encodedString, dto.EntityType);
             return Ok();
         }
         catch (KavitaException ex)
@@ -111,7 +115,7 @@ public class FilterController(
         }
     }
 
-    private async Task ValidateAndSaveFilterUpsert(int filterId, string? filterName, string encodedFilter,  FilterEntityType entityType)
+    private async Task ValidateAndSaveFilterUpsert(string filterName, string encodedFilter,  FilterEntityType entityType)
     {
         var user = (await unitOfWork.UserRepository.GetUserByIdAsync(UserId, AppUserIncludes.SmartFilters))!;
 
@@ -122,7 +126,7 @@ public class FilterController(
             throw new KavitaException("You cannot use the name of a system provided stream");
         }
 
-        var existingFilter = user.SmartFilters.FirstOrDefault(f => f.Id == filterId);
+        var existingFilter = user.SmartFilters.FirstOrDefault(s => s.Name.Equals(filterName, StringComparison.InvariantCultureIgnoreCase));
         if (existingFilter != null)
         {
             // Update the filter

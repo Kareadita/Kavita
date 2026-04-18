@@ -98,7 +98,6 @@ export class ReadingListsComponent implements OnInit {
       if (this.filter == null) {
         this.filter = this.metadataService.createDefaultFilterDto('readinglist');
         this.filter.statements.push(this.metadataService.createDefaultFilterStatement('readinglist') as FilterStatement<ReadingListFilterField>);
-        console.log('default filter: ', this.filter)
       }
 
       this.filterActiveCheck = this.filterUtilityService.createReadingListV2Filter();
