@@ -4,3 +4,5 @@ export enum FilterEntityType {
   Person = 2,
   Annotation = 3
 }
+
+export const allFilterEntityTypes = [FilterEntityType.Series, FilterEntityType.ReadingList];

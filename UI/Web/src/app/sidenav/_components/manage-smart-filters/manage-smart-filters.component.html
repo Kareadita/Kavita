@@ -1,18 +1,29 @@
 <ng-container *transloco="let t; prefix:'manage-smart-filters'">
   <form [formGroup]="listForm">
     @if (hasFilterControl()) {
-      <div class="mb-3">
-        <label for="filter" class="form-label">{{t('filter')}}</label>
-        <div class="input-group">
-          <input id="filter" autocomplete="off" class="form-control" formControlName="filterQuery" type="text" aria-describedby="reset-input">
-          <button class="btn btn-outline-secondary" type="button" id="reset-input" (click)="resetFilter()">{{t('clear')}}</button>
+      <div class="row g-1 mb-3">
+        <div class="col-md-3">
+          <label for="entity-type" class="form-label">{{t('entity-type-label')}}</label>
+          <select class="col-auto form-select" id="entity-type" formControlName="entityType">
+            @for(entityType of allFilterEntityTypes; track entityType) {
+              <option [value]="entityType">{{entityType | filterEntityType}}</option>
+            }
+          </select>
+        </div>
+
+        <div class="col-md-9">
+          <label for="filter" class="form-label">{{t('filter')}}</label>
+          <div class="input-group">
+            <input id="filter" autocomplete="off" class="form-control" formControlName="filterQuery" type="text" aria-describedby="reset-input">
+            <button class="btn btn-outline-secondary" type="button" id="reset-input" (click)="resetFilter()">{{t('clear')}}</button>
+          </div>
         </div>
       </div>
     }
   </form>
 
   <ul>
-    @for(stream of filters() | filter: filterList; track stream.name) {
+    @for(stream of filteredItems(); track stream.id) {
 
       @if (isErrored(stream)) {
         <li class="list-group-item d-block mb-3">
