@@ -38,7 +38,7 @@ public class FilterController(
     {
         try
         {
-            if (string.IsNullOrEmpty(dto.Name)) BadRequest("Name is required");
+            if (string.IsNullOrEmpty(dto.Name)) return BadRequest("Name is required");
             var encodedString = SmartFilterHelper.Encode(dto);
             await ValidateAndSaveFilterUpsert(dto.Name!, encodedString, dto.EntityType);
             return Ok();
@@ -60,7 +60,7 @@ public class FilterController(
     {
         try
         {
-            if (string.IsNullOrEmpty(dto.Name)) BadRequest("Name is required");
+            if (string.IsNullOrEmpty(dto.Name)) return BadRequest("Name is required");
             var encodedString = SmartFilterHelper.Encode(dto);
             await ValidateAndSaveFilterUpsert(dto.Name!, encodedString, dto.EntityType);
             return Ok();
@@ -82,7 +82,7 @@ public class FilterController(
     {
         try
         {
-            if (string.IsNullOrEmpty(dto.Name)) BadRequest("Name is required");
+            if (string.IsNullOrEmpty(dto.Name)) return BadRequest("Name is required");
             var encodedString = SmartFilterHelper.Encode(dto);
             await ValidateAndSaveFilterUpsert(dto.Name!, encodedString, dto.EntityType);
             return Ok();
@@ -104,7 +104,7 @@ public class FilterController(
     {
         try
         {
-            if (string.IsNullOrEmpty(dto.Name)) BadRequest("Name is required");
+            if (string.IsNullOrEmpty(dto.Name)) return BadRequest("Name is required");
             var encodedString = SmartFilterHelper.Encode(dto);
             await ValidateAndSaveFilterUpsert(dto.Name!, encodedString, dto.EntityType);
             return Ok();
