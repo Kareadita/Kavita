@@ -27,7 +27,7 @@ public static class SmartFilterHelper
     public const string InnerStatementSeparator = "¦";
 
 
-    public static object Decode(string? encodedFilter)
+    public static IFilterDto Decode(string? encodedFilter)
     {
         var entityType = PeekEntityType(encodedFilter);
 
