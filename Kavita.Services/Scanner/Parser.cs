@@ -640,10 +640,29 @@ public static partial class Parser
         new Regex(
             @"(Глава|глава|Главы|Глава)(\.?)(\s|_)?(?<Chapter>\d+(?:.\d+|-\d+)?)",
             MatchOptions, RegexTimeout),
-
+        // Chinese Chapter: 第n话 -> Chapter n, 【TFO汉化&Petit汉化】迷你偶像漫画第25话
+        new Regex(
+            @"第(?<Chapter>\d+)话",
+            MatchOptions, RegexTimeout),
+        // Korean Chapter: 제n화 -> Chapter n, 가디언즈 오브 갤럭시 죽음의 보석.E0008.7화#44
+        new Regex(
+            @"제?(?<Chapter>\d+\.?\d+)(회|화|장)",
+            MatchOptions, RegexTimeout),
+        // Korean Chapter: 第10話 -> Chapter n, [ハレム]ナナとカオル ～高校生のSMごっこ～　第1話
+        new Regex(
+            @"第?(?<Chapter>\d+(?:\.\d+|-\d+)?)話",
+            MatchOptions, RegexTimeout),
+        // Russian Chapter: n Главa -> Chapter n
+        new Regex(
+            @"(?!Том)(?<!Том\.)\s\d+(\s|_)?(?<Chapter>\d+(?:\.\d+|-\d+)?)(\s|_)(Глава|глава|Главы|Глава)",
+            MatchOptions, RegexTimeout),
+        // Fullmetal Alchemist chapters 101-108
+        new Regex(
+            @"^(?<Series>.+?)\schapter(?:s)?\s(?<Chapter>\d+-\d+)",
+            MatchOptions, RegexTimeout),
         // Hinowa ga CRUSH! 018 (2019) (Digital) (LuCaZ).cbz, Hinowa ga CRUSH! 018.5 (2019) (Digital) (LuCaZ).cbz
         new Regex(
-            @"^(?<Series>.+?)(?<!Vol)(?<!Vol.)(?<!Volume)\s(\d\s)?(?<Chapter>\d+(?:\.\d+|-\d+)?)(?:\s\(\d{4}\))?(\b|_|-)",
+            @"^(?<Series>.+?)(?<!Vol)(?<!Vol.)(?<!Volume)\s(\d\s)?(?<Chapter>\d+(?:\.\d+|-\d+)?)(?![\d.권])(?:\s\(\d{4}\))?(\b|_|-)",
             MatchOptions, RegexTimeout),
         // Tower Of God S01 014 (CBT) (digital).cbz
         new Regex(
@@ -665,22 +684,6 @@ public static partial class Parser
         new Regex(
             @"(?<Volume>((vol|volume|v))?(\s|_)?\.?\d+)(\s|_)(Chp|Chapter)\.?(\s|_)?(?<Chapter>\d+)",
             MatchOptions, RegexTimeout),
-        // Chinese Chapter: 第n话 -> Chapter n, 【TFO汉化&Petit汉化】迷你偶像漫画第25话
-        new Regex(
-            @"第(?<Chapter>\d+)话",
-            MatchOptions, RegexTimeout),
-        // Korean Chapter: 제n화 -> Chapter n, 가디언즈 오브 갤럭시 죽음의 보석.E0008.7화#44
-        new Regex(
-            @"제?(?<Chapter>\d+\.?\d+)(회|화|장)",
-            MatchOptions, RegexTimeout),
-        // Korean Chapter: 第10話 -> Chapter n, [ハレム]ナナとカオル ～高校生のSMごっこ～　第1話
-        new Regex(
-            @"第?(?<Chapter>\d+(?:\.\d+|-\d+)?)話",
-            MatchOptions, RegexTimeout),
-        // Russian Chapter: n Главa -> Chapter n
-        new Regex(
-            @"(?!Том)(?<!Том\.)\s\d+(\s|_)?(?<Chapter>\d+(?:\.\d+|-\d+)?)(\s|_)(Глава|глава|Главы|Глава)",
-            MatchOptions, RegexTimeout)
     ];
 
     private static readonly Regex MangaEditionRegex = new Regex(
