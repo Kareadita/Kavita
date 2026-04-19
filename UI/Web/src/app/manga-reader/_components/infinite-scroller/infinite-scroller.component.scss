@@ -12,7 +12,7 @@
 
 img, .full-width {
     max-width: 100% !important;
-    height: auto;
+    //height: auto; // This can cause (rarely) a small line between panels
 }
 
 // This is to force hardware acceleration to help address https://github.com/Kareadita/Kavita/issues/1848
