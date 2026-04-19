@@ -129,8 +129,8 @@ export class FontManagerComponent implements OnInit {
 
   uploadFromUrl(url: string) {
     this.isUploadingFont.set(true);
-    this.fontService.uploadFromUrl(url).subscribe((f) => {
-      this.addFont(f);
+    this.fontService.uploadFromUrl(url).subscribe((fonts) => {
+      fonts.forEach(font => this.addFont(font));
       this.isUploadingFont.set(false);
     });
   }

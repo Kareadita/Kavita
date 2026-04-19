@@ -100,6 +100,8 @@ public class FontController(
     {
         if (!_fontFileExtensionRegex.IsMatch(Path.GetExtension(formFile.FileName))) return BadRequest("Invalid file");
 
+        if (string.IsNullOrWhiteSpace(Path.GetFileNameWithoutExtension(formFile.FileName))) return BadRequest("Invalid file");
+
         if (formFile.FileName.Contains("..")) return BadRequest("Invalid file");
 
 
@@ -115,8 +117,8 @@ public class FontController(
         // Validate url
         try
         {
-            var font = await fontService.CreateFontFromUrl(url);
-            return Ok(mapper.Map<EpubFontDto>(font));
+            var fonts = await fontService.CreateFontsFromUrl(url);
+            return Ok(mapper.Map<EpubFontDto[]>(fonts));
         }
         catch (KavitaException ex)
         {

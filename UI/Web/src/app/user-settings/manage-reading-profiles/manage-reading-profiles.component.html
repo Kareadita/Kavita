@@ -337,7 +337,7 @@
                                   <select class="form-select" aria-describedby="book-reader-heading"
                                           formControlName="bookReaderFontFamily">
                                     @for (opt of fonts(); track opt.id) {
-                                      <option [ngValue]="opt.name">{{opt.name | titlecase}}</option>
+                                      <option [ngValue]="opt.family">{{opt.family | titlecase}}</option>
                                     }
                                   </select>
                                 </ng-template>

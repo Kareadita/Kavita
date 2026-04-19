@@ -11,7 +11,10 @@ export enum FontProvider {
  */
 export interface EpubFont {
   id: number;
+  family: string;
   name: string;
   provider: FontProvider;
   fileName: string;
+  style: string;
+  weight: string;
 }

@@ -158,7 +158,7 @@ export class ManageReadingProfilesComponent implements OnInit {
       this.readingProfileService.getAllProfiles(),
       this.deviceService.getMyClientDevices(),
     ]).subscribe(([fonts, profiles, devices]) => {
-      this.fonts.set(fonts);
+      this.fonts.set([...new Map(fonts.map(font => [font.family, font])).values()]);
       this.devices = devices;
 
       this.readingProfiles = profiles;
@@ -203,7 +203,7 @@ export class ManageReadingProfilesComponent implements OnInit {
 
     this.readingProfileForm = new FormGroup({})
 
-    if (this.fonts().find(font => font.name === this.selectedProfile?.bookReaderFontFamily) === undefined) {
+    if (this.fonts().find(font => font.family === this.selectedProfile?.bookReaderFontFamily) === undefined) {
       this.selectedProfile.bookReaderFontFamily = FontService.DefaultEpubFont;
     }
 

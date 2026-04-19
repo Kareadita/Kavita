@@ -104,7 +104,7 @@
       </div>
 
       @if (item.name !== FontService.DefaultEpubFont) {
-        <div class="p-1 me-1 preview mt-2 flex-grow-1 text-center w-100 fs-4 fs-lg-3 mt-2" [ngStyle]="{'font-family': item.name, 'word-break': 'keep-all'}">
+        <div class="p-1 me-1 preview mt-2 flex-grow-1 text-center w-100 fs-4 fs-lg-3 mt-2" [ngStyle]="{'font-family': item.family, 'font-style': item.style, 'font-weight': item.weight, 'word-break': 'keep-all'}">
           {{t('brown-fox')}}
         </div>
       }

@@ -73,7 +73,7 @@ public class EpubFontRepository(DataContext context, IMapper mapper) : IEpubFont
         return await context.AppUserReadingProfiles
             .Join(context.EpubFont,
                 preference => preference.BookReaderFontFamily,
-                font => font.Name,
+                font => font.Family,
                 (preference, font) => new { preference, font })
             .AnyAsync(joined => joined.font.Id == fontId, ct);
     }
