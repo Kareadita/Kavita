@@ -254,7 +254,7 @@ public class ReadingListRepository(DataContext context, IMapper mapper) : IReadi
             .Where(l => l.AppUserId == userId || (includePromoted &&  l.Promoted ))
             .RestrictAgainstAgeRestriction(user.GetAgeRestriction());
 
-        query = sortByLastModified ? query.OrderByDescending(l => l.LastModified) : query.OrderBy(l => l.Title.ToUpper());
+        query = sortByLastModified ? query.OrderByDescending(l => l.LastModified) : query.OrderBy(l => l.Title.ToLower());
 
        var finalQuery = query.ProjectTo<ReadingListDto>(mapper.ConfigurationProvider)
             .AsNoTracking();

@@ -237,7 +237,6 @@ public class LibraryRepository(DataContext context, IMapper mapper) : ILibraryRe
             .Where(s => !string.IsNullOrEmpty(s))
             .DistinctBy(l => l.ToNormalized())
             .Select(GetCulture)
-            .Where(s => s != null)
             .OrderBy(s => s.Title)
             .ToList();
     }
