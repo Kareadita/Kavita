@@ -123,13 +123,8 @@ public class BaseApiController : ControllerBase
             return false;
         }
 
-        if (fileName.Contains("..", StringComparison.Ordinal))
-        {
-            return false;
-        }
-
-        if (fileName.IndexOf(Path.DirectorySeparatorChar) >= 0 ||
-            fileName.IndexOf(Path.AltDirectorySeparatorChar) >= 0)
+        if (fileName.Contains(Path.DirectorySeparatorChar) ||
+            fileName.Contains(Path.AltDirectorySeparatorChar))
         {
             return false;
         }
