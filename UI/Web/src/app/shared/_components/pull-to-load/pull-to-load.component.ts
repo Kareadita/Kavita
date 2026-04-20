@@ -78,6 +78,14 @@ export class PullToLoadComponent {
   readonly containerHeight = computed(() =>
     this.isArmed() || this.isTriggered() ? `${this.armedHeightRem()}rem` : `${RESTING_HEIGHT_REM}rem`
   );
+
+  private readonly isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+  readonly containerMarginTop = computed(() =>
+    this.isArmed() && this.direction() === 'down' && this.isIOS
+      ? `-${this.armedHeightRem() - RESTING_HEIGHT_REM}rem`
+      : '0px'
+  );
+
   readonly directionArrow = computed(() => {
     switch (this.direction()) {
       case 'down': return 'up';
@@ -261,6 +269,12 @@ export class PullToLoadComponent {
    * The guard lasts two animation frames to cover the scroll event dispatch.
    */
   private adjustScrollTop(deltaPx: number) {
+    // We do not need to adjust scroll top on iOS & iPadOS. It's handled by negative margins
+    // It doesn't work anyway. Thanks, Tim Apple
+    if (this.direction() === 'down' && this.isIOS) {
+      return;
+    }
+
     this.isCompensatingScroll = true;
 
     const scrollEl = this.resolveScrollElement();
