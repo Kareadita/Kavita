@@ -13,6 +13,7 @@ public static class ReadingListFilterFieldValueConverter
             ReadingListFilterField.Title => value,
             ReadingListFilterField.ReleaseYear => string.IsNullOrEmpty(value) ? 0 : int.Parse(value),
             ReadingListFilterField.ItemCount => string.IsNullOrEmpty(value) ? 0 : int.Parse(value),
+            ReadingListFilterField.MissingItemCount => string.IsNullOrEmpty(value) ? 0 : int.Parse(value),
             ReadingListFilterField.Tags => value.Split(',')
                 .Where(s => !string.IsNullOrEmpty(s))
                 .Select(int.Parse)

@@ -3546,7 +3546,8 @@
         "readinglist-tags": "{{metadata-fields.tags-title}}",
         "readinglist-writer": "{{person-role-pipe.writer}}",
         "readinglist-artist": "{{person-role-pipe.artist}}",
-        "readinglist-provider": "Provider"
+        "readinglist-provider": "Provider",
+        "readinglist-missing-item-count": "Missing Item Count"
     },
 
 

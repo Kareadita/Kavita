@@ -11,5 +11,6 @@ public enum ReadingListFilterField
     /// <summary>
     /// Source is either Kavita/Url/File
     /// </summary>
-    Provider = 7
+    Provider = 7,
+    MissingItemCount = 8
 }

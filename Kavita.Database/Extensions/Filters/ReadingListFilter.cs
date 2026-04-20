@@ -88,6 +88,29 @@ public static class ReadingListFilter
             }
         }
 
+        public IQueryable<ReadingList> HasMissingCount(bool condition, FilterComparison comparison, int itemCount)
+        {
+            if (!condition) return queryable;
+            ComparisonProfile.Validate(comparison, ComparisonProfile.Numeric, "ReadingList.MissingCount");
+
+            return comparison switch
+            {
+                FilterComparison.NotEqual => queryable.WhereNotEqual(s => s.TotalItemsAtImport - s.Items.Count,
+                    itemCount),
+                FilterComparison.Equal => queryable.WhereEqual(s => s.TotalItemsAtImport - s.Items.Count, itemCount),
+                FilterComparison.GreaterThan => queryable.WhereGreaterThan(s => s.TotalItemsAtImport - s.Items.Count,
+                    itemCount),
+                FilterComparison.GreaterThanEqual => queryable.WhereGreaterThanOrEqual(
+                    s => s.TotalItemsAtImport - s.Items.Count,
+                    itemCount),
+                FilterComparison.LessThan => queryable.WhereLessThan(s => s.TotalItemsAtImport - s.Items.Count,
+                    itemCount),
+                FilterComparison.LessThanEqual => queryable.WhereLessThanOrEqual(
+                    s => s.TotalItemsAtImport - s.Items.Count, itemCount),
+                _ => throw new ArgumentOutOfRangeException(nameof(comparison), comparison, null)
+            };
+        }
+
         public IQueryable<ReadingList> HasTags(bool condition, FilterComparison comparison, IList<int> tags)
         {
             if (!condition || (comparison != FilterComparison.IsEmpty && comparison != FilterComparison.IsNotEmpty && tags.Count == 0)) return queryable;

@@ -308,7 +308,7 @@ export class FilterUtilitiesService {
         ] as unknown as T[];
       case 'readinglist':
         return [
-          ReadingListFilterField.ItemCount
+          ReadingListFilterField.ItemCount, ReadingListFilterField.MissingItemCount
         ] as unknown as T[];
     }
   }
