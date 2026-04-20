@@ -11,12 +11,12 @@ public enum FilterComparison
     LessThan = 3,
     LessThanEqual = 4,
     /// <summary>
-    /// value is within any of the series. This is inheritently an OR, even if combinator is an AND
+    /// value is within any of the entities. This is inherently an OR, even if combinator is an AND
     /// </summary>
     /// <remarks>Only works with IList</remarks>
     Contains = 5,
     /// <summary>
-    /// value is within All of the series. This is an AND, even if combinator ORs the different statements
+    /// value is within all the entities. This is an AND, even if combinator ORs the different statements
     /// </summary>
     /// <remarks>Only works with IList</remarks>
     MustContains = 6,

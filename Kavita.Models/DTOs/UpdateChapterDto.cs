@@ -44,7 +44,7 @@ public sealed record UpdateChapterDto : IUpdateExternalMetadataIds
     /// <summary>
     /// Language of the content (BCP-47 code)
     /// </summary>
-    public string Language { get; set; } = string.Empty;
+    public string? Language { get; set; } = string.Empty;
 
 
     /// <summary>

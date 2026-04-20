@@ -252,6 +252,7 @@ export class EditChapterModalComponent implements OnInit {
     this.chapter.malId = model.malId;
     this.chapter.hardcoverId = model.hardcoverId;
     this.chapter.metronId = model.metronId;
+    this.chapter.language = model.language;
 
 
     const apis = [

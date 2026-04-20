@@ -11,6 +11,7 @@ import {BlurToggleDirective} from "../../../_directives/blur-toggle.directive";
 import {LooseLeafOrDefaultNumber} from "../../../_models/chapter";
 import {DateYearRangePipe, NULL_DATE} from "../../../_pipes/date-year-range.pipe";
 import {DefaultValuePipe} from "../../../_pipes/default-value.pipe";
+import {SafeHtmlPipe} from "../../../_pipes/safe-html.pipe";
 
 @Component({
   selector: 'app-reading-list-item',
@@ -23,6 +24,7 @@ export class ReadingListItemComponent {
 
   protected readonly imageService = inject(ImageService);
   private readonly accountService = inject(AccountService);
+  private readonly safeHtmlPipe = new SafeHtmlPipe();
 
   item = input.required<ReadingListItem>();
   position = input(0);
@@ -43,18 +45,13 @@ export class ReadingListItemComponent {
     return translate('common.issue-num-shorthand', {num: chNum})
   });
   releaseDate = computed(() => this.item().chapter?.releaseDate || this.item().releaseDate);
-  summary = computed(() => this.item().chapter?.summary || this.item().summary);
+  summary = computed(() => this.safeHtmlPipe.transform(this.item().chapter?.summary ?? this.item().summary ?? ''));
   pages = computed(() => this.item().chapter?.pages ?? this.item().pagesTotal);
   writerName = computed(() => this.item().chapter?.writerName);
   pencillerName = computed(() => this.item().chapter?.pencillerName);
 
   isUnread = computed(() => this.item().pagesRead === 0 && this.pages() > 0);
   isInProgress = computed(() => this.item().pagesRead > 0 && this.item().pagesRead < this.pages());
-  progressPercent = computed(() => {
-    const total = this.pages();
-    if (total === 0) return 0;
-    return Math.round((this.item().pagesRead / total) * 100);
-  });
 
   blurEnabled = computed(() => !!this.accountService.userPreferences()?.blurUnreadSummaries);
   shouldBlur = computed(() => this.blurEnabled() && this.isUnread());
