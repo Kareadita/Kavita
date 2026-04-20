@@ -14,6 +14,7 @@ import {
 } from '@angular/core';
 import {DOCUMENT} from '@angular/common';
 import {BreakpointService} from '../../../_services/breakpoint.service';
+import {isSafari} from "../../../_helpers/browser";
 
 /** How long (ms) the user must be idle at the scroll boundary before scroll-driven progress arms. */
 const SCROLL_ARM_DELAY_MS = 100;
@@ -79,9 +80,8 @@ export class PullToLoadComponent {
     this.isArmed() || this.isTriggered() ? `${this.armedHeightRem()}rem` : `${RESTING_HEIGHT_REM}rem`
   );
 
-  private readonly isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
   readonly containerMarginTop = computed(() =>
-    this.isArmed() && this.direction() === 'down' && this.isIOS
+    this.isArmed() && this.direction() === 'down' && isSafari
       ? `-${this.armedHeightRem() - RESTING_HEIGHT_REM}rem`
       : '0px'
   );
@@ -271,7 +271,7 @@ export class PullToLoadComponent {
   private adjustScrollTop(deltaPx: number) {
     // We do not need to adjust scroll top on iOS & iPadOS. It's handled by negative margins
     // It doesn't work anyway. Thanks, Tim Apple
-    if (this.direction() === 'down' && this.isIOS) {
+    if (this.direction() === 'down' && isSafari) {
       return;
     }
 
