@@ -66,6 +66,11 @@ public class CblImportService(IUnitOfWork unitOfWork, ICblGithubService cblGithu
 
         var existingList = await unitOfWork.ReadingListRepository
             .GetReadingListByTitleAsync(cbl.Name, userId);
+
+        // Users may rename the underlying list causing a title lookup to fail, we fall back to lookup with the filename
+        var sourcePathStem = new FileInfo(filePath).Name;
+        existingList ??= await unitOfWork.ReadingListRepository.GetReadingListBySourcePathStemAsync(sourcePathStem, userId);
+
         summary.IsUpdate = existingList != null;
 
         return summary;

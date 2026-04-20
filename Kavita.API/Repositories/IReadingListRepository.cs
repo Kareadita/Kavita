@@ -61,4 +61,5 @@ public interface IReadingListRepository
 
     Task<List<ReadingListTagDto>> GetAllReadingListTagDtosAsync(int userId, CancellationToken ct = default);
     Task<PagedList<ReadingListDto>> GetBrowseReadingListDtos(int userId, ReadingListFilterDto filter, UserParams userParams, CancellationToken ct = default);
+    Task<ReadingList?> GetReadingListBySourcePathStemAsync(string sourcePathStem, int userId, ReadingListIncludes includes = ReadingListIncludes.Items, CancellationToken ct = default);
 }

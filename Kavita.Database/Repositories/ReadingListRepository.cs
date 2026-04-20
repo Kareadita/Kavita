@@ -14,7 +14,6 @@ using Kavita.Database.Extensions.Filters;
 using Kavita.Models.DTOs.Filtering.v2;
 using Kavita.Models.DTOs.Filtering.v2.FilterFields;
 using Kavita.Models.DTOs.Filtering.v2.Requests;
-using Kavita.Models.DTOs.Metadata.Browse;
 using Kavita.Models.DTOs.Person;
 using Kavita.Models.DTOs.ReadingLists;
 using Kavita.Models.Entities;
@@ -545,6 +544,24 @@ public class ReadingListRepository(DataContext context, IMapper mapper) : IReadi
         var query = CreateFilteredReadingListQueryable(userId, filter, ageRating, ct);
 
         return await PagedList<ReadingListDto>.CreateAsync(query, userParams.PageNumber, userParams.PageSize, ct);
+    }
+
+    /// <summary>
+    /// Attempts to match the SourcePath.EndsWith(sourcePathStem) to do the matching
+    /// </summary>
+    /// <param name="sourcePathStem"></param>
+    /// <param name="userId"></param>
+    /// <returns></returns>
+    public async Task<ReadingList?> GetReadingListBySourcePathStemAsync(string sourcePathStem, int userId,
+        ReadingListIncludes includes = ReadingListIncludes.Items, CancellationToken ct = default)
+    {
+        if (string.IsNullOrEmpty(sourcePathStem)) return null;
+
+        return await context.ReadingList
+            .Includes(includes)
+            .FirstOrDefaultAsync(x => x.SourcePath != null &&
+                                      x.SourcePath.EndsWith(sourcePathStem) &&
+                                      x.AppUserId == userId, ct);
     }
 
     private IQueryable<ReadingListDto> CreateFilteredReadingListQueryable(int userId, ReadingListFilterDto filter,
