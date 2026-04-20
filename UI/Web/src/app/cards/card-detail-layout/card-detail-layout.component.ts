@@ -213,7 +213,6 @@ export class CardDetailLayoutComponent<TFilter extends number, TSort extends num
     if (this.hasCustomSort()) return;
 
     const keys = this.jumpBarKeys();
-    console.log('keys: ', keys);
     let targetIndex = 0;
     for(let i = 0; i < keys.length; i++) {
       if (keys[i].key === jumpKey.key) break;
