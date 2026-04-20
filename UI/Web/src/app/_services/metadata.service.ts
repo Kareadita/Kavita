@@ -42,6 +42,8 @@ import {ReadingListTag} from "../_models/reading-list/reading-list-tag";
 import {ReadingListSortField} from "../_models/metadata/v2/reading-list-sort-field";
 import {ReadingListFilterField} from "../_models/metadata/v2/reading-list-filter-field";
 import {FilterEntityType} from "../_models/metadata/v2/filter-entity-type";
+import {allReadingListProviders} from "../_models/reading-list/reading-list";
+import {ReadingListProviderPipe} from "../_pipes/reading-list-provider.pipe";
 
 @Injectable({
   providedIn: 'root'
@@ -64,6 +66,7 @@ export class MetadataService {
   private ageRatingPipe = new AgeRatingPipe();
   private mangaFormatPipe = new MangaFormatPipe();
   private personRolePipe = new PersonRolePipe();
+  private readingListProviderPipe = new ReadingListProviderPipe();
 
   getSeriesMetadataFromPlus(seriesId: number, libraryType: LibraryType) {
     return this.httpClient.get<SeriesDetailPlus | null>(this.baseUrl + 'metadata/series-detail-plus?seriesId=' + seriesId + '&libraryType=' + libraryType);
@@ -393,9 +396,11 @@ export class MetadataService {
           return {value: tag.id, label: tag.title}
         })));
       case ReadingListFilterField.Writer:
-        return this.getPersonOptions(PersonRole.Writer)
+        return this.getPersonOptions(PersonRole.Writer);
       case ReadingListFilterField.Artist:
-        return this.getPersonOptions(PersonRole.CoverArtist)
+        return this.getPersonOptions(PersonRole.CoverArtist);
+      case ReadingListFilterField.Provider:
+        return of(allReadingListProviders.map(p => { return {value: p, label: this.readingListProviderPipe.transform(p)} }));
     }
 
     return of([]);

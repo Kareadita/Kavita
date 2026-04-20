@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Kavita.Models.DTOs.Filtering.v2;
 using Kavita.Models.Entities.Enums;
+using Kavita.Models.Entities.Enums.ReadingList;
 using Kavita.Models.Entities.ReadingLists;
 using Microsoft.EntityFrameworkCore;
 
@@ -69,6 +70,22 @@ public static class ReadingListFilter
                 FilterComparison.LessThanEqual => queryable.WhereLessThanOrEqual(s => s.Items.Count, itemCount),
                 _ => throw new ArgumentOutOfRangeException(nameof(comparison), comparison, null)
             };
+        }
+
+        public IQueryable<ReadingList> HasProvider(bool condition, FilterComparison comparison, ReadingListProvider provider)
+        {
+            if (!condition) return queryable;
+            ComparisonProfile.Validate(comparison, [FilterComparison.Equal, FilterComparison.NotEqual], "ReadingList.Provider");
+
+            switch (comparison)
+            {
+                case FilterComparison.Equal:
+                    return queryable.Where(s => s.Provider == provider);
+                case FilterComparison.NotEqual:
+                    return queryable.Where(s => s.Provider != provider);
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(comparison), comparison, null);
+            }
         }
 
         public IQueryable<ReadingList> HasTags(bool condition, FilterComparison comparison, IList<int> tags)

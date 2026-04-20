@@ -296,7 +296,7 @@ export class MetadataFilterRowComponent<TFilter extends number = number, TSort e
     const dropdownFieldsWithoutMustContains = this.filterUtilitiesService.getDropdownFieldsWithoutMustContains<TFilter>(this.entityType());
     const customComparisons = this.filterUtilitiesService.getCustomComparisons(this.entityType(), inputVal);
 
-    let baseComparisons: FilterComparison[];
+    let baseComparisons: FilterComparison[] = [];
     let predicateType: PredicateType;
     let defaultValue: string | number | boolean;
 
@@ -329,13 +329,14 @@ export class MetadataFilterRowComponent<TFilter extends number = number, TSort e
       }
       predicateType = PredicateType.Dropdown;
       defaultValue = 0;
-    } else {
+    } else{
       return;
     }
 
     if (fieldsThatShouldIncludeIsEmpty.includes(inputVal)) baseComparisons.push(FilterComparison.IsEmpty);
     if (fieldsThatShouldIncludeIsNotEmpty.includes(inputVal)) baseComparisons.push(FilterComparison.IsNotEmpty);
 
+    // Custom comparisons need to also be included in some base type to drive the fields
     const comps = (customComparisons?.length ?? 0) > 0 ? customComparisons : baseComparisons;
 
     this.validComparisons$.next([...new Set(comps)]);

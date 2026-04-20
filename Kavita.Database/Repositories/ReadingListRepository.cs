@@ -600,6 +600,7 @@ public class ReadingListRepository(DataContext context, IMapper mapper) : IReadi
             ReadingListFilterField.Tags => query.HasTags(true, statement.Comparison, (IList<int>) value),
             ReadingListFilterField.Writer => query.HasPeople(true, statement.Comparison, (IList<int>) value, PersonRole.Writer),
             ReadingListFilterField.Artist => query.HasPeople(true, statement.Comparison, (IList<int>) value, PersonRole.CoverArtist),
+            ReadingListFilterField.Provider => query.HasProvider(true, statement.Comparison, (ReadingListProvider) value),
             _ => throw new ArgumentOutOfRangeException(nameof(statement.Field), $"Unexpected value for field: {statement.Field}")
         };
     }

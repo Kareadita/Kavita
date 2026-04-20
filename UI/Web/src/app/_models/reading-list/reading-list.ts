@@ -62,6 +62,10 @@ export enum ReadingListProvider {
   Url = 2
 }
 
+export const allReadingListProviders =  Object.keys(ReadingListProvider)
+  .filter(key => !isNaN(Number(key)) && parseInt(key, 10) >= 0)
+  .map(key => parseInt(key, 10)) as ReadingListProvider[];
+
 export interface ReadingList extends IHasCover {
   id: number;
   title: string;

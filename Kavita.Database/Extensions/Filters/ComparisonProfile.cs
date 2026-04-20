@@ -41,6 +41,15 @@ public static class ComparisonProfile
     ];
 
     /// <summary>
+    /// List/set membership fields: Equal, NotEqual, Contains, NotContains
+    /// </summary>
+    public static readonly HashSet<FilterComparison> ListWithoutMustContains =
+    [
+        FilterComparison.Equal, FilterComparison.NotEqual,
+        FilterComparison.Contains, FilterComparison.NotContains
+    ];
+
+    /// <summary>
     /// List/set membership fields with IsEmpty: Equal, NotEqual, Contains, NotContains, MustContains, IsEmpty, IsNotEmpty
     /// </summary>
     public static readonly HashSet<FilterComparison> ListWithEmpty =
