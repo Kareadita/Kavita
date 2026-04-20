@@ -257,8 +257,10 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy {
 
     // Reset any modal-induced overflow lock (this can happen when Starting Over and ngBootstrap modal hasn't completed teardown)
     if (element === this.document.body) {
-      this.document.body.style.overflow = 'auto';
-      this.document.body.classList.remove('modal-open'); // ngBootstrap adds this
+      setTimeout(() => {
+        this.document.body.style.overflow = 'auto';
+        this.document.body.classList.remove('modal-open'); // ngBootstrap adds this
+      }, 100);
     }
 
     fromEvent(element, 'scroll')
