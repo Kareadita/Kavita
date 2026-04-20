@@ -298,8 +298,6 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy {
       takeUntilDestroyed(this.destroyRef)
     );
 
-    // We need the injector as toSignal is only allowed in injection context
-    // https://angular.dev/guide/signals#injection-context
     this.readerSettings = toSignal(this.readerSettings$, {injector: this.injector, requireSync: true});
 
     // Automatically updates when the breakpoint changes, or when reader settings changes
@@ -313,9 +311,9 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy {
       return (parseInt(value) <= 0) ? '' : value + '%';
     });
 
-    //perform jump so the page stays in view
+    // perform jump so the page stays in view
     effect(() => {
-      const width = this.widthOverride(); // needs to be at the top for effect to work
+      const width = this.widthOverride();
       this.currentPageElem = this.document.querySelector('img#page-' + this.pageNum);
       if(!this.currentPageElem)
         return;
