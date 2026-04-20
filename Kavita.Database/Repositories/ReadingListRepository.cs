@@ -579,7 +579,6 @@ public class ReadingListRepository(DataContext context, IMapper mapper) : IReadi
         query = query.RestrictAgainstAgeRestriction(ageRating);
 
 
-
         // Apply sorting and limiting
         var sortedQuery = query.SortBy(filter.SortOptions);
 

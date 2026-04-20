@@ -12,6 +12,7 @@
     </app-side-nav-companion-bar>
 
     <app-card-detail-layout
+      [gridColumnsTemplate]="'repeat(auto-fill, minmax(30rem, 1fr))'"
       [isLoading]="isLoadingLists()"
       [items]="listEntities()"
       [pagination]="pagination()!"
@@ -33,13 +34,6 @@
           <app-reading-list [entity]="item" [index]="position" [maxIndex]="listEntities().length" [config]="readingListConfig()"
                             (reload)="loadPage()" (dataChanged)="updateReadingList($event)" />
         </div>
-
-<!--                <app-entity-card [entity]="item" [index]="position" [maxIndex]="listEntities().length" [config]="readingListConfig()"-->
-<!--                         (reload)="loadPage()" (dataChanged)="updateReadingList($event)">-->
-<!--          <ng-template #title let-entity>-->
-<!--            <app-promoted-icon [promoted]="entity.data.promoted" /> {{entity.data.title}}-->
-<!--          </ng-template>-->
-<!--        </app-entity-card>-->
       </ng-template>
 
       <ng-template #noData>
