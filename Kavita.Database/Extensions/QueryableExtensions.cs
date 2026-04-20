@@ -306,7 +306,7 @@ public static class QueryableExtensions
     {
         if (sort == null)
         {
-            return query.OrderBy(p => p.Title);
+            return query.OrderBy(p => p.Title.ToLower());
         }
 
         return sort.SortField switch
@@ -319,7 +319,7 @@ public static class QueryableExtensions
             ReadingListSortField.ReleaseYearEnd => query.OrderByDescending(r => r.EndingYear),
             ReadingListSortField.ItemCount when sort.IsAscending => query.OrderBy(r => r.Items.Count),
             ReadingListSortField.ItemCount =>  query.OrderByDescending(r => r.Items.Count),
-            _ => query.OrderBy(p => p.Title),
+            _ => query.OrderBy(p => p.Title.ToLower()),
         };
     }
 
