@@ -32,7 +32,7 @@ import {TimeAgoPipe} from "../../_pipes/time-ago.pipe";
 import {AgeRatingImageComponent} from "../../_single-module/age-rating-image/age-rating-image.component";
 import {DateYearRangePipe} from "../../_pipes/date-year-range.pipe";
 import {SafeUrlPipe} from "../../_pipes/safe-url.pipe";
-import {NgbTooltip} from "@ng-bootstrap/ng-bootstrap";
+import {NgbDropdown, NgbDropdownItem, NgbDropdownMenu, NgbDropdownToggle, NgbTooltip} from "@ng-bootstrap/ng-bootstrap";
 
 @Component({
   selector: 'app-cbl-manager',
@@ -52,7 +52,11 @@ import {NgbTooltip} from "@ng-bootstrap/ng-bootstrap";
     TimeAgoPipe,
     AgeRatingImageComponent,
     SafeUrlPipe,
-    NgbTooltip
+    NgbTooltip,
+    NgbDropdown,
+    NgbDropdownItem,
+    NgbDropdownMenu,
+    NgbDropdownToggle
   ],
   templateUrl: './cbl-manager.component.html',
   styleUrl: './cbl-manager.component.scss',
@@ -182,6 +186,12 @@ export class CblManagerComponent implements OnInit {
   syncReadingList(list: ReadingList) {
     this.cblService.syncList(list.id, true).subscribe(() => {
       this.toastr.success(translate('toasts.reading-list-sync-enqueued'));
+    });
+  }
+
+  manualSyncReadingList(list: ReadingList) {
+    this.cblService.importFromUrl(list.downloadUrl!).subscribe((savedFile) => {
+      this.openImportModal([savedFile]);
     });
   }
 

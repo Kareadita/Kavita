@@ -102,7 +102,21 @@
                     </button>
                   }
                   @if (selectedItem.canSync) {
-                    <button class="btn btn-primary btn-sm" (click)="syncReadingList(selectedItem)">{{t('sync')}}</button>
+
+                    <div class="btn-group">
+                      <button type="button" class="btn btn-primary" (click)="syncReadingList(selectedItem)">
+                        <span class="read-btn--text">{{t('sync')}}</span>
+                      </button>
+
+                      <div class="btn-group" ngbDropdown role="group" [attr.aria-label]="t('sync-options-alt')">
+                        <button type="button" class="btn btn-primary dropdown-toggle-split" ngbDropdownToggle></button>
+                        <div class="dropdown-menu" ngbDropdownMenu>
+                          <button ngbDropdownItem (click)="manualSyncReadingList(selectedItem)">
+                            <span class="read-btn--text">{{t('sync-manual')}}</span>
+                          </button>
+                        </div>
+                      </div>
+                    </div>
                   }
                 </div>
               </div>

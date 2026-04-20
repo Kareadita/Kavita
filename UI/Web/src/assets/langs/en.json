@@ -2124,6 +2124,7 @@
         "no-results": "No matching reading lists",
         "add": "{{common.add}}",
         "sync": "Sync",
+        "sync-manual": "Sync (Manual)",
         "delete": "{{common.delete}}",
         "view-list": "View Reading List",
         "last-synced": "Last Synced: {{date}}",
