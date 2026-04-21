@@ -4,9 +4,16 @@
   }
   <span class="label-card-label">{{label()}}</span>
   @if (value() != null) {
-    <span class="label-card-value"
-      [class.green]="valueColor() === 'green'"
-      [class.muted]="valueColor() === 'muted'">{{value()}}</span>
+    @if (linkUrl()) {
+      <a class="label-card-value" [href]="linkUrl() | safeUrl" target="_blank" rel="noopener noreferrer">
+        {{value()}}<i class="fa-solid fa-external-link ms-1" aria-hidden="true"></i>
+      </a>
+
+    } @else {
+      <span class="label-card-value"
+        [class.green]="valueColor() === 'green'"
+        [class.muted]="valueColor() === 'muted'">{{value()}}</span>
+    }
   } @else {
     <ng-content />
   }

@@ -25,9 +25,12 @@
 
 .label-card-value {
   font-size: 0.82rem;
-  color: var(--label-card-value-color);
   font-weight: 500;
   line-height: 1.3;
+
+  &:not(a) {
+    color: var(--label-card-value-color);
+  }
 
   &.green {
     color: var(--primary-color);
