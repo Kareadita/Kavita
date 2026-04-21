@@ -1579,7 +1579,8 @@
         "file-info-title": "File info",
         "not-set-label": "Not set",
         "pages-count": "{{series-detail.pages-count}}",
-        "words-count": "{{series-detail.words-count}}"
+        "words-count": "{{series-detail.words-count}}",
+        "bytes-count": "{{num}} bytes"
     },
 
     "related-tab": {

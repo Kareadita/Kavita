@@ -32,6 +32,7 @@ import {PublicationStatusPipe} from '../../_pipes/publication-status.pipe';
 import {ReadTimePipe} from '../../_pipes/read-time.pipe';
 import {IHasReadingTime} from '../../_models/common/i-has-reading-time';
 import {CompactNumberPipe} from "../../_pipes/compact-number.pipe";
+import {NgbTooltip} from "@ng-bootstrap/ng-bootstrap";
 
 export interface BasicMetadataInfo {
   readingTime?: IHasReadingTime | null;
@@ -66,6 +67,7 @@ export interface BasicMetadataInfo {
     PublicationStatusPipe,
     ReadTimePipe,
     CompactNumberPipe,
+    NgbTooltip,
   ],
   templateUrl: './details-tab.component.html',
   styleUrl: './details-tab.component.scss',

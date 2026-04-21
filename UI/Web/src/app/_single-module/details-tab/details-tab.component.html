@@ -6,11 +6,15 @@
     @let bm = basicMetadata();
 
     @if (accountService.hasAdminRole() && (filePathsValue.length > 0 || filesValue.length > 0)) {
-      <hr class="section-sep mb-3" aria-hidden="true" />
-      <section class="mb-3 ms-1">
+      <section class="mb-3 mt-3 ms-1">
         <h4 class="section-label">{{t(filesValue.length > 0 ? 'file-path-title' : 'folder-path-title')}}</h4>
         <div class="d-flex flex-column gap-2">
-          @if (filesValue.length > 0) {
+
+          @for (fp of filePathsValue; track $index) {
+            <div class="file-card">
+              <span class="file-path">{{fp}}</span>
+            </div>
+          } @empty {
             @for (fp of filesValue; track fp.id) {
               <div class="file-card">
                 <div class="d-flex align-items-start gap-2">
@@ -18,18 +22,12 @@
                   <span class="file-path">{{fp.filePath}}</span>
                 </div>
                 <div class="file-meta-row mt-2">
-                  <span class="file-meta-item">{{fp.pages | defaultValue}} pages</span>
-                  <span class="file-meta-item">{{fp.bytes | bytes | defaultValue}}</span>
+                  <span class="file-meta-item">{{t('pages-count', {num: fp.pages | compactNumber})}}</span>
+                  <span class="file-meta-item">{{t('bytes-count', {num: fp.bytes | bytes})}}</span>
                   @if (fp.koreaderHash) {
-                    <span class="file-meta-item file-meta-hash" [title]="fp.koreaderHash">KOReader ✓</span>
+                    <span class="file-meta-item file-meta-hash" [ngbTooltip]="fp.koreaderHash">KOReader ✓</span>
                   }
                 </div>
-              </div>
-            }
-          } @else {
-            @for (fp of filePathsValue; track $index) {
-              <div class="file-card">
-                <span class="file-path">{{fp}}</span>
               </div>
             }
           }
