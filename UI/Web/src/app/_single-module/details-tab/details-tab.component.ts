@@ -1,4 +1,4 @@
-import {ChangeDetectionStrategy, Component, computed, inject, input} from '@angular/core';
+import {ChangeDetectionStrategy, Component, computed, effect, inject, input, signal} from '@angular/core';
 import {CarouselReelComponent} from '../../carousel/_components/carousel-reel/carousel-reel.component';
 import {PersonBadgeComponent} from '../../shared/person-badge/person-badge.component';
 import {TranslocoDirective} from '@jsverse/transloco';
@@ -33,6 +33,7 @@ import {ReadTimePipe} from '../../_pipes/read-time.pipe';
 import {IHasReadingTime} from '../../_models/common/i-has-reading-time';
 import {CompactNumberPipe} from "../../_pipes/compact-number.pipe";
 import {NgbTooltip} from "@ng-bootstrap/ng-bootstrap";
+import {MetadataService} from "../../_services/metadata.service";
 
 export interface BasicMetadataInfo {
   readingTime?: IHasReadingTime | null;
@@ -77,6 +78,7 @@ export class DetailsTabComponent {
 
   protected readonly imageService = inject(ImageService);
   private readonly filterUtilityService = inject(FilterUtilitiesService);
+  private readonly metadataService = inject(MetadataService);
   protected readonly accountService = inject(AccountService);
 
   protected readonly PersonRole = PersonRole;
@@ -105,7 +107,24 @@ export class DetailsTabComponent {
     if (!entity?.hasOwnProperty('isbn')) return null;
 
     return (this.entity() as Chapter).isbn;
-  })
+  });
+  languageName = signal<string | null>(null);
+  languageDisplay = computed(() => {
+    return this.languageName() ?? this.basicMetadata()?.language;
+  });
+
+  constructor() {
+    effect(() => {
+      const lang = this.basicMetadata()?.language;
+      const langName = this.languageName();
+      if (lang && !langName) {
+        this.metadataService.getLanguageNameForCode(lang).subscribe(fullCode => {
+          this.languageName.set(fullCode);
+        });
+      }
+    });
+
+  }
 
   openGeneric(queryParamName: SeriesFilterField, filter: string | number) {
     if (queryParamName === SeriesFilterField.None) return;

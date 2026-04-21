@@ -1,3 +1,4 @@
+/** Needed for Details page to scope into carousel */
 .kv-section-header {
   font-size: 0.68rem;
   font-weight: 600;
@@ -6,45 +7,4 @@
   color: var(--text-muted-color);
   margin-bottom: 0.625rem;
   margin-top: 0.625rem;
-}
-
-.kv-modal-title {
-  font-family: var(--font-body), sans-serif;
-  font-size:   1rem;
-  font-weight: 700;
-  color:       var(--color-text);
-  letter-spacing: -0.1px;
-}
-
-.kv-section-heading {
-  font-family: var(--font-body), sans-serif;
-  font-size:   0.95rem;
-  font-weight: 700;
-  color:       var(--color-text-heading);
-}
-
-.kv-series-title {
-  font-family: var(--font-body), sans-serif;
-  font-size:   1.3rem;
-  font-weight: 700;
-  color:       var(--white-text-color);
-  line-height: 1.2;
-  letter-spacing: -0.2px;
-}
-
-.kv-page-title {
-  font-family: var(--font-body), sans-serif;
-  font-size:   1.5rem;
-  font-weight: 700;
-  color:       var(--color-text);
-  line-height: var(--line-height-tight);
-  letter-spacing: -0.2px;
-}
-
-.kv-page-subtitle {
-  font-size:   var(--font-size-sm);
-  color:       var(--color-text-muted);
-  margin-top:  6px;
-  max-width:   520px;
-  line-height: 1.55;
 }

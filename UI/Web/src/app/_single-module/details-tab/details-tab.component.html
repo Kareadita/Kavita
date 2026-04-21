@@ -53,7 +53,7 @@
           @if (bm.isSpecial != null) {
             <app-label-card [label]="t('is-special-label')" [value]="bm.isSpecial ? t('yes-label') : t('no-label')"/>
           }
-          <app-label-card    [label]="t('language-label')"   [value]="bm.language | defaultValue" />
+          <app-label-card    [label]="t('language-label')"   [value]="languageDisplay() | defaultValue" />
           @if (bm.publicationStatus != null) {
             <app-label-card [label]="t('pub-status-label')" [value]="bm.publicationStatus | publicationStatus" />
           }
