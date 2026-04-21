@@ -8,5 +8,10 @@
           [linkUrl]="item.linkUrl ?? undefined" />
       </div>
     }
+    <div class="col-auto mb-3">
+      <app-label-card
+        [label]="t('isbn-label')"
+        [value]="isbn() | defaultValue:t('not-set-label')" />
+    </div>
   </div>
 </ng-container>

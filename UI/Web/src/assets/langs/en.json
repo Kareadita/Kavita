@@ -3965,7 +3965,8 @@
         "hardcoverId-label": "Hardcover Id",
         "comicVineId-label": "Comic Vine Id",
         "metronId-label": "Metron Id",
-        "not-set-label": "Not set"
+        "not-set-label": "Not set",
+        "isbn-label": "{{edit-chapter-modal.isbn-label}}"
     },
 
 

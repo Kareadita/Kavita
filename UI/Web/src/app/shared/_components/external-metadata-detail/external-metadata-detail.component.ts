@@ -28,6 +28,8 @@ const URLS = {
 export class ExternalMetadataDetailComponent {
 
   entity = input.required<IHasMetadataIds>();
+  /** Extra id to show in this section for details-tab */
+  isbn = input<string | null>(null);
 
   metadata = computed(() => {
     const e = this.entity();

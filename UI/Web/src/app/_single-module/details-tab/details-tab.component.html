@@ -68,7 +68,7 @@
     @if (metadataEntity) {
       <section class="mb-3 ms-1">
         <h4 class="section-label">{{t('external-metadata-title')}}</h4>
-        <app-external-metadata-detail [entity]="metadataEntity" />
+        <app-external-metadata-detail [entity]="metadataEntity" [isbn]="isbn()" />
       </section>
     }
 

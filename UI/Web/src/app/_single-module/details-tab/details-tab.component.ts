@@ -93,10 +93,17 @@ export class DetailsTabComponent {
   files = input<MangaFile[]>([]);
   basicMetadata = input<BasicMetadataInfo>();
 
+
   showBasicMetadata = computed(() => !!this.basicMetadata());
   hasUpperMetadata = computed(() => this.genres().length > 0 || this.tags().length > 0 || this.webLinks().length > 0);
   showTags = computed(() => !this.suppressEmptyTags() || this.tags().length > 0);
   showGenres = computed(() => !this.suppressEmptyGenres() || this.genres().length > 0);
+  isbn = computed(() => {
+    const entity = this.entity();
+    if (!entity?.hasOwnProperty('isbn')) return null;
+
+    return (this.entity() as Chapter).isbn;
+  })
 
   openGeneric(queryParamName: SeriesFilterField, filter: string | number) {
     if (queryParamName === SeriesFilterField.None) return;
