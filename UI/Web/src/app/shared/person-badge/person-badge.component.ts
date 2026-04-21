@@ -11,7 +11,8 @@ import {RouterLink} from "@angular/router";
     imports: [ImageComponent, RouterLink],
     templateUrl: './person-badge.component.html',
     styleUrls: ['./person-badge.component.scss'],
-    changeDetection: ChangeDetectionStrategy.OnPush
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    host: { '[style.--person-badge-size]': 'badgeSize()' }
 })
 export class PersonBadgeComponent {
 
@@ -19,8 +20,14 @@ export class PersonBadgeComponent {
 
   person = input.required<Person | SeriesStaff>();
   isStaff = input(false);
+  size = input<'normal' | 'medium' | 'small'>('normal');
 
   staff = computed(() => this.person() as SeriesStaff);
+
+  badgeSize = computed(() => {
+    const map = { normal: '6rem', medium: '4rem', small: '3rem' };
+    return map[this.size()];
+  });
 
   hasCoverImage = computed(() => {
     return this.isStaff() || !!(this.person() as Person).coverImage;
