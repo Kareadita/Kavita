@@ -13,10 +13,8 @@ export type LabelCardValueColor = 'default' | 'green' | 'muted';
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class LabelCardComponent {
-  icon = input<string>();
   label = input.required<string>();
   value = input<string | number | null | undefined>();
-  valueColor = input<LabelCardValueColor>('default');
   /** When link provided, the value will render as a link **/
   linkUrl = input<string | undefined>(undefined);
 }

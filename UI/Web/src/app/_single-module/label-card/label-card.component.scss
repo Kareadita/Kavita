@@ -31,13 +31,4 @@
   &:not(a) {
     color: var(--label-card-value-color);
   }
-
-  &.green {
-    color: var(--primary-color);
-  }
-
-  &.muted {
-    color: var(--label-card-value-muted-color);
-    font-weight: 400;
-  }
 }

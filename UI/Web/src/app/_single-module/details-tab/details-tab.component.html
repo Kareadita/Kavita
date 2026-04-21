@@ -10,23 +10,22 @@
       <p class="section-label">{{t('basic-metadata-title')}}</p>
       <div class="label-card-grid">
         @if (bm.readingTime) {
-          <app-label-card icon="clock" [label]="t('read-time-label')" [value]="bm.readingTime | readTime" />
+          <app-label-card [label]="t('read-time-label')" [value]="bm.readingTime | readTime" />
         }
-        <app-label-card icon="file-lines" [label]="t('pages-label')" [value]="bm.pages != null ? t('pages-count', {num: bm.pages | compactNumber}) : (null | defaultValue)" />
-        <app-label-card icon="font" [label]="t('words-label')" [value]="bm.words != null ? t('words-count', {num: bm.words | compactNumber}) : (null | defaultValue)" />
-        <app-label-card icon="calendar-plus" [label]="t('added-label')" [value]="bm.addedAt | date:'shortDate' | defaultValue" />
-        <app-label-card icon="rotate" [label]="t('updated-label')" [value]="(bm.updatedAt ?? null) | timeAgo | defaultValue" />
-        <app-label-card icon="hashtag" [label]="t('kavita-id-label')" [value]="bm.kavitaId | defaultValue" />
+        <app-label-card [label]="t('pages-label')" [value]="bm.pages != null ? t('pages-count', {num: bm.pages | compactNumber}) : (null | defaultValue)" />
+        <app-label-card [label]="t('words-label')" [value]="bm.words != null ? t('words-count', {num: bm.words | compactNumber}) : (null | defaultValue)" />
+        <app-label-card [label]="t('added-label')" [value]="bm.addedAt | date:'shortDate' | defaultValue" />
+        <app-label-card [label]="t('updated-label')" [value]="(bm.updatedAt ?? null) | timeAgo | defaultValue" />
+        <app-label-card [label]="t('kavita-id-label')" [value]="bm.kavitaId | defaultValue" />
         @if (bm.sortOrder != null) {
-          <app-label-card icon="list-ol" [label]="t('sort-order-label')" [value]="bm.sortOrder | defaultValue" />
+          <app-label-card [label]="t('sort-order-label')" [value]="bm.sortOrder | defaultValue" />
         }
         @if (bm.isSpecial != null) {
-          <app-label-card icon="star"        [label]="t('is-special-label')" [value]="bm.isSpecial ? t('yes-label') : t('no-label')"
-                          [valueColor]="bm.isSpecial ? 'green' : 'default'" />
+          <app-label-card [label]="t('is-special-label')" [value]="bm.isSpecial ? t('yes-label') : t('no-label')"/>
         }
-        <app-label-card icon="language"      [label]="t('language-label')"   [value]="bm.language | defaultValue" />
+        <app-label-card    [label]="t('language-label')"   [value]="bm.language | defaultValue" />
         @if (bm.publicationStatus != null) {
-          <app-label-card icon="signal" [label]="t('pub-status-label')" [value]="bm.publicationStatus | publicationStatus" />
+          <app-label-card [label]="t('pub-status-label')" [value]="bm.publicationStatus | publicationStatus" />
         }
       </div>
     </section>
