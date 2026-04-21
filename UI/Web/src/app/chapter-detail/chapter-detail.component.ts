@@ -42,7 +42,7 @@ import {BulkSelectionService} from "../cards/bulk-selection.service";
 import {ReaderService} from "../_services/reader.service";
 import {AccountService} from "../_services/account.service";
 import {ReadMoreComponent} from "../shared/read-more/read-more.component";
-import {DetailsTabComponent} from "../_single-module/details-tab/details-tab.component";
+import {BasicMetadataInfo, DetailsTabComponent} from "../_single-module/details-tab/details-tab.component";
 import {EntityTitleComponent} from "../cards/entity-title/entity-title.component";
 import {EditChapterModalComponent} from "../_single-module/edit-chapter-modal/edit-chapter-modal.component";
 import {SeriesFilterField} from "../_models/metadata/v2/series-filter-field";
@@ -194,7 +194,22 @@ export class ChapterDetailComponent implements OnInit {
     return hasAnyCast(chp) || (chp?.genres || []).length > 0 ||
       (chp?.tags || []).length > 0 || (chp?.webLinks || []).length > 0 || this.accountService.hasAdminRole();
   })
-  mobileSeriesImgBackground = this.themeService.getCssVariable('--mobile-series-img-background');
+  chapterBasicMetadata = computed<BasicMetadataInfo>(() => {
+    const c = this.chapter();
+    return {
+      readingTime: c,
+      pages: c.pages,
+      words: c.wordCount,
+      addedAt: c.createdUtc,
+      updatedAt: c.createdUtc,
+      kavitaId: c.id,
+      sortOrder: c.sortOrder,
+      isSpecial: c.isSpecial,
+      language: c.language || null,
+      publicationStatus: c.publicationStatus ?? null,
+    };
+  });
+  mobileSeriesImgBackground = this.themeService.getCssVariable('--mobile-series-img-background')
 
   activeTabId = Tabs.Details;
 

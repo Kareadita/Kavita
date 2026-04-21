@@ -69,7 +69,7 @@ import {NextExpectedCardComponent} from "../../../cards/next-expected-card/next-
 import {MetadataService} from "../../../_services/metadata.service";
 import {Rating} from "../../../_models/rating";
 import {ThemeService} from "../../../_services/theme.service";
-import {DetailsTabComponent} from "../../../_single-module/details-tab/details-tab.component";
+import {BasicMetadataInfo, DetailsTabComponent} from "../../../_single-module/details-tab/details-tab.component";
 import {ChapterRemovedEvent} from "../../../_models/events/chapter-removed-event";
 import {SettingsTabId} from "../../../sidenav/preference-nav/preference-nav.component";
 import {SeriesFilterField} from "../../../_models/metadata/v2/series-filter-field";
@@ -410,6 +410,21 @@ class SeriesDetailComponent implements OnInit, AfterViewInit {
     if (!webLinks) return [];
 
     return webLinks.split(',');
+  });
+
+  seriesBasicMetadata = computed<BasicMetadataInfo>(() => {
+    const s = this.series();
+    const meta = this.seriesMetadata();
+    return {
+      readingTime: s,
+      pages: s.pages,
+      words: s.wordCount,
+      addedAt: s.created,
+      updatedAt: s.lastChapterAdded,
+      kavitaId: s.id,
+      language: meta?.language || null,
+      publicationStatus: meta?.publicationStatus ?? null,
+    };
   });
 
   trackStoryLineIdentity = (index: number, item: StoryLineItem) => item.isChapter ? `${item.chapter!.data.id}_ch_storyline` : `${item.volume!.data.id}_vol_storyline`;

@@ -1,1 +1,107 @@
+.label-card-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+  gap: 8px;
+}
 
+.section-label {
+  font-size: 0.68rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-muted-color);
+  margin-bottom: 0.625rem;
+  margin-top: 0.625rem;
+}
+
+.section-sep {
+  border: none;
+  border-top: 1px solid var(--setting-break-color);
+  margin: 0;
+}
+
+.pill-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+
+  a {
+    text-decoration: none;
+  }
+}
+
+.pub-status-bar {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.pub-status-fraction {
+  font-size: 0.8rem;
+  color: var(--label-card-value-color);
+  font-weight: 500;
+}
+
+.pub-bar-track {
+  flex: 1;
+  height: 3px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 2px;
+  min-width: 40px;
+  max-width: 60px;
+}
+
+.pub-bar-fill {
+  height: 100%;
+  border-radius: 2px;
+  background: var(--primary-color);
+}
+
+.pub-status-text {
+  font-size: 0.75rem;
+  color: var(--text-muted-color);
+}
+
+.file-card {
+  background: var(--label-card-bg);
+  border: 1px solid var(--label-card-border);
+  border-radius: 5px;
+  padding: 10px 12px;
+}
+
+.file-card-icon {
+  font-size: 0.75rem;
+  color: var(--label-card-icon-color);
+  opacity: 0.6;
+  margin-top: 2px;
+  flex-shrink: 0;
+}
+
+.file-path {
+  font-family: 'Courier New', monospace;
+  font-size: 0.72rem;
+  color: var(--file-path-color);
+  word-break: break-all;
+  line-height: 1.4;
+}
+
+.file-meta-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.file-meta-item {
+  font-size: 0.72rem;
+  color: var(--text-muted-color);
+}
+
+.empty-value {
+  font-size: 0.82rem;
+  color: var(--label-card-value-muted-color);
+}
+
+.file-meta-hash {
+  color: var(--primary-color);
+  opacity: 0.8;
+}

@@ -1,0 +1,13 @@
+<div class="label-card">
+  @if (icon()) {
+    <span class="label-card-icon" aria-hidden="true"><i class="fas fa-{{icon()}}"></i></span>
+  }
+  <span class="label-card-label">{{label()}}</span>
+  @if (value() != null) {
+    <span class="label-card-value"
+      [class.green]="valueColor() === 'green'"
+      [class.muted]="valueColor() === 'muted'">{{value()}}</span>
+  } @else {
+    <ng-content />
+  }
+</div>

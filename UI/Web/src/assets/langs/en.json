@@ -1560,9 +1560,26 @@
         "format-title": "{{metadata-filter.format-label}}",
         "length-title": "{{edit-chapter-modal.words-label}}",
         "age-rating-title": "{{metadata-fields.age-rating-title}}",
-        "folder-path-title": "Folder path",
+        "folder-path-title": "{{edit-series-modal.folder-path-title}}",
         "file-path-title": "Files",
-        "external-metadata-title": "External Metadata"
+        "external-metadata-title": "External Metadata",
+        "basic-metadata-title": "Basic Metadata",
+        "read-time-label": "Read time",
+        "pages-label": "{{edit-chapter-modal.pages-label}}",
+        "words-label": "{{edit-chapter-modal.words-label}}",
+        "added-label": "Added",
+        "updated-label": "Updated",
+        "kavita-id-label": "Kavita ID",
+        "sort-order-label": "{{edit-chapter-modal.sort-order-label}}",
+        "language-label": "Language",
+        "is-special-label": "Special",
+        "pub-status-label": "{{metadata-filter.publication-status-label}}",
+        "yes-label": "Yes",
+        "no-label": "No",
+        "file-info-title": "File info",
+        "not-set-label": "Not set",
+        "pages-count": "{{series-detail.pages-count}}",
+        "words-count": "{{series-detail.words-count}}"
     },
 
     "related-tab": {
@@ -3947,7 +3964,8 @@
         "mangaBakaId-label": "MangaBaka Id",
         "hardcoverId-label": "Hardcover Id",
         "comicVineId-label": "Comic Vine Id",
-        "metronId-label": "Metron Id"
+        "metronId-label": "Metron Id",
+        "not-set-label": "Not set"
     },
 
 

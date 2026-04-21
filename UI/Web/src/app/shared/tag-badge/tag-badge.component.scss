@@ -68,6 +68,15 @@
     }
 }
 
+.shape-pill {
+    border-radius: 999px;
+    padding: 0.1875rem 0.5625rem;
+
+    &:hover {
+        background: var(--tagbadge-pill-hover-bg-color);
+    }
+}
+
 .outline {
     border: 1px solid var(--tagbadge-border-color);
     color: var(--tagbadge-text-color);

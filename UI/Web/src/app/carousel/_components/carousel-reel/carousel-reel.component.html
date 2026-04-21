@@ -8,9 +8,9 @@
         }
         <h4 class="header" (click)="sectionClicked($event)" [ngClass]="{'non-selectable': !clickableTitle}">
           @if (titleLink !== '') {
-            <a [href]="titleLink | safeUrl" class="section-title">{{title}}</a>
+            <a [href]="titleLink | safeUrl" [class]="headerClass()">{{title}}</a>
           } @else {
-            <a href="javascript:void(0)" class="section-title">{{title}}</a>
+            <a href="javascript:void(0)" [class]="headerClass()">{{title}}</a>
           }
 
           @if (iconClasses !== '') {

@@ -67,6 +67,7 @@ export class CarouselReelComponent {
    * If using actionables, this is the entity to allow Action.Service to handle logic
    */
   @Input() actionableEntity: ActionableEntity = null;
+  headerClass = input<string>('section-title');
   readonly sectionClick = output<string>();
   readonly handleAction = output<ActionItem<any>>();
 

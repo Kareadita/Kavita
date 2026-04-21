@@ -3,12 +3,14 @@ import {TranslocoDirective} from "@jsverse/transloco";
 import {IHasMetadataIds} from "../../../_models/common/i-has-metadata-ids";
 import {HAS_METADATA_DEFAULTS} from "../edit-external-metadata-form/edit-external-metadata-form.component";
 import {DefaultValuePipe} from "../../../_pipes/default-value.pipe";
+import {LabelCardComponent} from "../../../_single-module/label-card/label-card.component";
 
 @Component({
   selector: 'app-external-metadata-detail',
   imports: [
     TranslocoDirective,
-    DefaultValuePipe
+    DefaultValuePipe,
+    LabelCardComponent
   ],
   templateUrl: './external-metadata-detail.component.html',
   styleUrl: './external-metadata-detail.component.scss',

@@ -236,6 +236,18 @@
   --tagbadge-filled-border-color: rgba(239, 239, 239, 0.125);
   --tagbadge-filled-text-color: var(--body-text-color);
   --tagbadge-filled-bg-color: var(--primary-color);
+  --tagbadge-pill-hover-bg-color: rgba(74, 198, 148, 0.15);
+
+  /* Label Card */
+  --label-card-bg: rgba(255, 255, 255, 0.04);
+  --label-card-border: rgba(239, 239, 239, 0.07);
+  --label-card-icon-color: var(--primary-color);
+  --label-card-label-color: rgba(255, 255, 255, 0.4);
+  --label-card-value-color: #efefef;
+  --label-card-value-muted-color: rgba(255, 255, 255, 0.25);
+
+  /* File path */
+  --file-path-color: rgba(255, 255, 255, 0.55);
 
   /* Side Nav */
   --side-nav-width: 14.375rem;
