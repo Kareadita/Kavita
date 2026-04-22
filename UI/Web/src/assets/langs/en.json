@@ -3822,7 +3822,9 @@
         "export-v1": "CBL v1",
         "export-v1-tooltip": "Use CBL v1 (XML)",
         "export-v2": "CBL v2",
-        "export-v2-tooltip": "Use CBL v2 (JSON)"
+        "export-v2-tooltip": "Use CBL v2 (JSON)",
+        "cbl-manager": "CBL Manager",
+        "cbl-manager-tooltip": "Manage/Sync CBLs"
     },
 
     "preferences": {

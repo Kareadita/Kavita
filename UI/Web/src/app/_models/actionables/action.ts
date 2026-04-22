@@ -120,4 +120,8 @@ export enum Action {
    * Marks the entity as read while creating a fake reading session
    */
   MarkAsReadWithSession = 37,
+  /**
+   * A special action to just navigate somewhere
+   */
+  Navigate = 38,
 }

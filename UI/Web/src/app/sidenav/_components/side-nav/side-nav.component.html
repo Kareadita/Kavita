@@ -66,7 +66,11 @@
               @case (SideNavStreamType.ReadingLists) {
                 <app-side-nav-item cdkDrag cdkDragBoundary=".side-nav-container" cdkDragPreviewContainer="parent"
                                    [cdkDragDisabled]="!editMode" [cdkDragData]="navStream" [editMode]="editMode"
-                                   icon="fa-list-ol" [title]="t('reading-lists')" link="/lists/" />
+                                   icon="fa-list-ol" [title]="t('reading-lists')" link="/lists/">
+                  <ng-container actions>
+                    <app-card-actionables [actions]="readingListActions" labelBy="reading-lists" iconClass="fa-ellipsis-v" (actionHandler)="performReadingListAction($event)" />
+                  </ng-container>
+                </app-side-nav-item>
               }
 
               @case (SideNavStreamType.Collections) {

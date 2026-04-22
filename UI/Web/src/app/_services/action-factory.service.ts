@@ -49,6 +49,7 @@ export class ActionFactoryService {
   private sideNavStreamActions: Array<ActionItem<SideNavStream>> = [];
   private smartFilterActions: Array<ActionItem<SmartFilter>> = [];
   private sideNavHomeActions: Array<ActionItem<{}>> = [];
+  private sideNavReadingListActions: Array<ActionItem<{}>> = [];
   private annotationActions: Array<ActionItem<Annotation>> = [];
   private clientDeviceActions: Array<ActionItem<ClientDevice>> = [];
 
@@ -170,6 +171,19 @@ export class ActionFactoryService {
     return this.applyCallbackToList(
       this.sideNavHomeActions,
       (action, entity) => this.actionService.handleSideNavHomeStream(action, entity),
+      renderFunc
+    );
+  }
+
+  getSideNavReadingListActions(shouldRenderFunc: ActionShouldRenderFunc<{}> = this.basicReadRender) {
+    // If the caller doesn't pass a render function, assume that readonly users cannot perform actions
+    const renderFunc = shouldRenderFunc === this.basicReadRender
+      ? (action: ActionItem<any>, entity: any, user: User) => !this.accountService.hasReadOnlyRole()
+      : shouldRenderFunc;
+
+    return this.applyCallbackToList(
+      this.sideNavReadingListActions,
+      (action, entity) => this.actionService.handleSideNavReadingListStream(action, entity),
       renderFunc
     );
   }
@@ -1225,6 +1239,19 @@ export class ActionFactoryService {
       {
         action: Action.Edit,
         title: 'reorder',
+        description: '',
+
+        callback: this.dummyCallback,
+        shouldRender: this.dummyShouldRender,
+        requiredRoles: [],
+        children: [],
+      }
+    ];
+
+    this.sideNavReadingListActions = [
+      {
+        action: Action.Navigate,
+        title: 'cbl-manager',
         description: '',
 
         callback: this.dummyCallback,

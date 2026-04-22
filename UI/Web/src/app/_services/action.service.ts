@@ -873,6 +873,16 @@ export class ActionService {
     }
   }
 
+  handleSideNavReadingListStream(action: ActionItem<{}>, entity: {}) {
+    switch (action.action) {
+      case Action.Navigate:
+        return of(this.fromAction(action, entity, 'none'));
+
+      default:
+        return of(this.fromAction(action, entity, 'none'));
+    }
+  }
+
   /**
    * Centralized handler for all bulk library actions.
    * Returns Observable<ActionResult<Library>> so the caller can react to effects.
