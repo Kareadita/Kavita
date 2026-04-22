@@ -45,13 +45,14 @@ export class CblService {
     return this.httpClient.post<CblImportSummary>(this.baseUrl + 'cbl/re-validate', {fileName});
   }
 
-  finalizeImport(fileName: string, decisions: CblImportDecisions, provider: ReadingListProvider,
+  finalizeImport(fileName: string, decisions: CblImportDecisions, provider: ReadingListProvider, promote: boolean = false,
     repoMeta?: { repoPath: string; downloadUrl: string; sha: string }) {
     return this.httpClient.post<CblImportSummary>(this.baseUrl + 'cbl/finalize-import', {
       fileName,
       decisions,
       provider,
-      ...repoMeta
+      ...repoMeta,
+      promote
     });
   }
 

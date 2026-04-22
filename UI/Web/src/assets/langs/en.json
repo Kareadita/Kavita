@@ -2192,7 +2192,9 @@
         "volume-num": "{{common.volume-num-shorthand}}",
         "issue-num": "{{common.issue-num-shorthand}}",
         "refresh": "Refresh",
-        "wiki": "Wiki"
+        "wiki": "Wiki",
+        "promote": "{{actionable.promote}}",
+        "promote-tooltip": "{{actionable.promote-tooltip}}"
     },
 
     "manage-remap-rules-modal": {

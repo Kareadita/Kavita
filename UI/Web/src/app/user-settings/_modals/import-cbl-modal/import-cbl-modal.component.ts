@@ -82,6 +82,7 @@ export class ImportCblModalComponent implements OnInit {
   currentSummary = signal<CblImportSummary | null>(null);
   isProcessing = signal(false);
   remapRules = signal<RemapRule[]>([]);
+  promoteMap = signal<Record<string, boolean>>({});
 
   /** All rows (matched + issues) for the unified table */
   allRows = signal<CblIssueRow[]>([]);
@@ -111,6 +112,7 @@ export class ImportCblModalComponent implements OnInit {
   matchedCount = computed(() => this.classifiedRows().filter(r => r.category === 'matched').length);
   issueCount = computed(() => this.classifiedRows().filter(r => r.category === 'issue').length);
   unmatchedCount = computed(() => this.classifiedRows().filter(r => r.category === 'unmatched').length);
+  isCurrentFileUpdate = computed(() => this.currentSummary()?.isUpdate ?? false);
 
   /** Lazy typeahead state, only one row can be resolving at a time */
   activeRow = signal<CblIssueRow | null>(null);
@@ -335,6 +337,15 @@ export class ImportCblModalComponent implements OnInit {
     this.allRows.set([...this.allRows()]);
   }
 
+  getPromoteForFile(fileName: string): boolean {
+    return this.promoteMap()[fileName] ?? false;
+  }
+
+  togglePromote(fileName: string) {
+    const current = this.promoteMap()[fileName] ?? false;
+    this.promoteMap.update(m => ({ ...m, [fileName]: !current }));
+  }
+
   toggleRowFilter(category: 'matched' | 'issues' | 'unmatched') {
     switch (category) {
       case 'matched': this.showMatched.update(v => !v); break;
@@ -382,8 +393,9 @@ export class ImportCblModalComponent implements OnInit {
         sha: ''
       } : undefined;
 
+      // Need: hashmap of filename -> promotion
       try {
-        await this.cblService.finalizeImport(file.fileName, decisions, file.provider, repoMeta).toPromise();
+        await this.cblService.finalizeImport(file.fileName, decisions, file.provider, this.getPromoteForFile(file.fileName), repoMeta).toPromise();
       } catch {
         this.toastr.error(translate('toasts.failed-to-import', {name: file.name}));
       }
@@ -407,6 +419,11 @@ export class ImportCblModalComponent implements OnInit {
     }));
 
     this.allRows.set(rows);
+
+    const fileName = this.currentFile().fileName;
+    if (this.promoteMap()[fileName] === undefined) {
+      this.promoteMap.update(m => ({ ...m, [fileName]: false }));
+    }
   }
 
   private async handleSeriesSelection(row: CblIssueRow, seriesId: number) {

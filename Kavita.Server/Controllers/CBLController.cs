@@ -211,7 +211,7 @@ public class CblController(IReadingListService readingListService, IDirectorySer
         try
         {
             var summary = await cblImporterService.UpsertReadingList(
-                userId, fullPath, dto.Decisions);
+                userId, fullPath, dto.Decisions, dto.Promote);
             summary.FileName = dto.FileName;
 
 

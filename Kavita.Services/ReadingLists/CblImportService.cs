@@ -77,7 +77,7 @@ public class CblImportService(IUnitOfWork unitOfWork, ICblGithubService cblGithu
         return summary;
     }
 
-    public async Task<CblImportSummaryDto> UpsertReadingList(int userId, string filePath, CblImportDecisions decisions)
+    public async Task<CblImportSummaryDto> UpsertReadingList(int userId, string filePath, CblImportDecisions decisions, bool promote = false)
     {
         ParsedCblReadingList cbl;
         try
@@ -142,6 +142,7 @@ public class CblImportService(IUnitOfWork unitOfWork, ICblGithubService cblGithu
             readingList = new ReadingListBuilder(cbl.Name)
                 .WithSummary(cbl.Summary ?? string.Empty)
                 .WithAppUserId(userId)
+                .WithPromoted(promote)
                 .Build();
 
             unitOfWork.ReadingListRepository.Add(readingList);

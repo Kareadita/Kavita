@@ -278,8 +278,21 @@
         </button>
       }
     </div>
-    <div>
-      <button class="btn btn-secondary me-2" (click)="dismiss()">{{t('close')}}</button>
+    <div class="d-flex align-items-center gap-2">
+      @if (currentSummary()) {
+        <span class="d-inline-flex align-items-center gap-1"
+              [ngbTooltip]="t('promote-tooltip')" container="body">
+          <input class="form-check-input mt-0" type="checkbox"
+                 id="promote-checkbox"
+                 [checked]="getPromoteForFile(currentFile().fileName)"
+                 [disabled]="isCurrentFileUpdate()"
+                 (change)="togglePromote(currentFile().fileName)">
+          <label class="form-check-label" for="promote-checkbox">
+            {{t('promote')}}
+          </label>
+        </span>
+      }
+      <button class="btn btn-secondary" (click)="dismiss()">{{t('close')}}</button>
       <button class="btn btn-primary" [disabled]="isProcessing()" (click)="finalizeAll()">
         @if (savedFiles().length > 1) {
           {{t('finalize')}}
