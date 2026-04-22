@@ -349,7 +349,10 @@ export class TypeaheadComponent implements OnInit {
       this.typeaheadControl.setValue(this.typeaheadControl.value);
       this.hasFocus = true;
       if (this.useOverlay) {
-        this.triggerWidth = this.triggerEl().nativeElement.getBoundingClientRect().width;
+        this.triggerWidth = Math.max(
+          this.triggerEl().nativeElement.getBoundingClientRect().width,
+          this.settings.overlayMinWidth ?? 0
+        );
       }
     });
   }
@@ -373,7 +376,10 @@ export class TypeaheadComponent implements OnInit {
       inputElem.nativeElement.focus();
       this.hasFocus = true;
       if (this.useOverlay) {
-        this.triggerWidth = this.triggerEl().nativeElement.getBoundingClientRect().width;
+        this.triggerWidth = Math.max(
+          this.triggerEl().nativeElement.getBoundingClientRect().width,
+          this.settings.overlayMinWidth ?? 0
+        );
       }
     }
 

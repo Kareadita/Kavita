@@ -77,6 +77,12 @@ export class TypeaheadSettings<T> {
      * 'body' renders via CDK overlay attached to the document body, avoiding overflow: hidden clipping.
      */
     dropdownPosition: 'relative' | 'body' = 'relative';
+    /**
+     * Minimum width (px) for the CDK overlay dropdown when dropdownPosition is 'body'.
+     * The overlay will be at least this wide, even if the trigger element is narrower.
+     * Defaults to 0 (overlay matches trigger width exactly).
+     */
+    overlayMinWidth: number = 0;
 }
 
 /**

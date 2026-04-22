@@ -465,6 +465,7 @@ export class ImportCblModalComponent implements OnInit {
       return a.seriesId === b.seriesId;
     };
     settings.dropdownPosition = 'body';
+    settings.overlayMinWidth = 400;
 
     return settings;
   }
@@ -501,6 +502,7 @@ export class ImportCblModalComponent implements OnInit {
       return a.id === b.id;
     };
     settings.dropdownPosition = 'body';
+    settings.overlayMinWidth = 280;
 
     return settings;
   }
