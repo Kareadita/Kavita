@@ -59,9 +59,7 @@ ngx-file-drop ::ng-deep > div {
   color: var(--primary-color);
 }
 
-.btn-group .btn {
-  font-size: 0.8rem;
-}
+
 
 .detail-cover {
   width: 80px;
@@ -74,4 +72,14 @@ ngx-file-drop ::ng-deep > div {
     object-fit: cover;
     border-radius: 0.25rem;
   }
+}
+
+.btn-group .btn {
+  font-size: 0.8rem;
+}
+
+.btn-group > .btn.dropdown-toggle-split:not(first-child){
+  border-top-right-radius: var(--bs-border-radius) !important;
+  border-bottom-right-radius: var(--bs-border-radius) !important;
+  border-width: 1px 1px 1px 0 !important;
 }

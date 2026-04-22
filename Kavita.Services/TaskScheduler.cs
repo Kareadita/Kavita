@@ -11,6 +11,7 @@ using Kavita.API.Services;
 using Kavita.API.Services.Metadata;
 using Kavita.API.Services.Plus;
 using Kavita.API.Services.Reading;
+using Kavita.API.Services.ReadingLists;
 using Kavita.API.Services.Scanner;
 using Kavita.API.Services.SignalR;
 using Kavita.Common.Constants;
@@ -171,7 +172,7 @@ public class TaskScheduler : ITaskScheduler
         if (IsInvalidCronSetting(setting))
         {
             _logger.LogError("Backup Task has invalid cron, defaulting to Weekly");
-            RecurringJob.AddOrUpdate(BackupTaskId, () => _backupService.BackupDatabase(CancellationToken.None),
+            RecurringJob.AddOrUpdate<IBackupService>(BackupTaskId, (service) => service.BackupDatabase(CancellationToken.None),
                 Cron.Weekly, RecurringJobOptions);
         }
         else
@@ -183,7 +184,7 @@ public class TaskScheduler : ITaskScheduler
                 // Override daily and make 2am so that everything on system has cleaned up and no blocking
                 schedule = Cron.Daily(2);
             }
-            RecurringJob.AddOrUpdate(BackupTaskId, () => _backupService.BackupDatabase(CancellationToken.None),
+            RecurringJob.AddOrUpdate<IBackupService>(BackupTaskId, (service) => service.BackupDatabase(CancellationToken.None),
                 () => schedule, RecurringJobOptions);
         }
 
@@ -191,13 +192,13 @@ public class TaskScheduler : ITaskScheduler
         if (IsInvalidCronSetting(setting))
         {
             _logger.LogError("Cleanup Task has invalid cron, defaulting to Daily");
-            RecurringJob.AddOrUpdate(CleanupTaskId, () => _cleanupService.Cleanup(CancellationToken.None),
+            RecurringJob.AddOrUpdate<ICleanupService>(CleanupTaskId, (service) => service.Cleanup(CancellationToken.None),
                 Cron.Daily, RecurringJobOptions);
         }
         else
         {
             _logger.LogDebug("Scheduling Cleanup Task for {Setting}", setting);
-            RecurringJob.AddOrUpdate(CleanupTaskId, () => _cleanupService.Cleanup(CancellationToken.None),
+            RecurringJob.AddOrUpdate<ICleanupService>(CleanupTaskId, (service) => service.Cleanup(CancellationToken.None),
                 CronConverter.ConvertToCronNotation(setting), RecurringJobOptions);
         }
 
@@ -205,22 +206,22 @@ public class TaskScheduler : ITaskScheduler
         if (IsInvalidCronSetting(setting))
         {
             _logger.LogError("CBL Sync Task has invalid cron, defaulting to Daily");
-            RecurringJob.AddOrUpdate<CblImportService>(TaskCblSyncId, service => service.SyncAllReadingLists(CancellationToken.None),
+            RecurringJob.AddOrUpdate<ICblImportService>(TaskCblSyncId, service => service.SyncAllReadingLists(CancellationToken.None),
                 "0 4 * * *", RecurringJobOptions);
         }
         else
         {
             _logger.LogDebug("Scheduling CBL Sync Task for {Setting}", setting);
-            RecurringJob.AddOrUpdate<CblImportService>(TaskCblSyncId, service => service.SyncAllReadingLists(CancellationToken.None),
+            RecurringJob.AddOrUpdate<ICblImportService>(TaskCblSyncId, service => service.SyncAllReadingLists(CancellationToken.None),
                 CronConverter.ConvertToCronNotation(setting), RecurringJobOptions);
         }
 
 
-        RecurringJob.AddOrUpdate(RemoveFromWantToReadTaskId,
-            () => _cleanupService.CleanupWantToRead(CancellationToken.None),
+        RecurringJob.AddOrUpdate<ICleanupService>(RemoveFromWantToReadTaskId,
+            (service) => service.CleanupWantToRead(CancellationToken.None),
             Cron.Daily, RecurringJobOptions);
-        RecurringJob.AddOrUpdate(UpdateYearlyStatsTaskId,
-            () => _statisticService.UpdateServerStatistics(CancellationToken.None),
+        RecurringJob.AddOrUpdate<IStatisticService>(UpdateYearlyStatsTaskId,
+            (service) => service.UpdateServerStatistics(CancellationToken.None),
             Cron.Monthly, RecurringJobOptions);
 
         RecurringJob.AddOrUpdate<IThemeService>(SyncThemesTaskId,

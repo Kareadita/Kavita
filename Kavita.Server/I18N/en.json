@@ -227,6 +227,9 @@
     "auth-key-unique": "The Auth Key name must be unique to your account",
     "role-restricted": "Access forbidden: Your role does not permit this action",
 
+    "cbl-import-download-from-url": "Unable to download file from URL",
+    "cbl-import-validation-types": "Only .cbl and .json files are allowed",
+
 
 
     "email.auth-key-expired.subject": "Kavita - One or more Auth Keys have expired!",
