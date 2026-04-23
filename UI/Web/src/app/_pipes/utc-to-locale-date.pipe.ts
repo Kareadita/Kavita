@@ -16,8 +16,7 @@ export class UtcToLocalDatePipe implements PipeTransform {
       return null;
     }
 
-    const browserLanguage = navigator.language;
-    const dateTime = DateTime.fromISO(utcDate, { zone: 'utc' }).toLocal().setLocale(browserLanguage);
+    const dateTime = DateTime.fromISO(utcDate, { zone: 'utc' }).toLocal();
     return dateTime.toJSDate()
   }
 
