@@ -145,6 +145,13 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   readonly doubleReverseRenderer = viewChild(DoubleReverseRendererComponent);
   readonly doubleNoCoverRenderer = viewChild(DoubleNoCoverRendererComponent);
 
+  readonly imageElement = computed(() =>
+    this.singleRenderer()?.imageElement()
+  ?? this.doubleRenderer()?.imageElement()
+  ?? this.doubleReverseRenderer()?.imageElement()
+  ?? this.doubleNoCoverRenderer()?.imageElement()
+  ?? this.canvasRenderer()?.canvas());
+
   private readonly destroyRef = inject(DestroyRef);
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
@@ -628,6 +635,14 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
           }
         })
       })
+    ).subscribe();
+
+    this.currentImage$.pipe(
+      filter(() => this.readerMode !== ReaderMode.Webtoon),
+      filter(img => !!img),
+      tap(() => {
+        this.imageElement()?.nativeElement?.focus();
+      }),
     ).subscribe();
   }
 
