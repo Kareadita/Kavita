@@ -1,5 +1,6 @@
 import {AsyncPipe, DOCUMENT} from '@angular/common';
 import {
+  AfterViewInit,
   ChangeDetectionStrategy,
   ChangeDetectorRef,
   Component,
@@ -16,7 +17,7 @@ import {
   output,
   Renderer2,
   Signal,
-  SimpleChanges
+  SimpleChanges, viewChild
 } from '@angular/core';
 import {BehaviorSubject, fromEvent, map, Observable, of, ReplaySubject, Subject, tap} from 'rxjs';
 import {debounceTime, distinctUntilChanged} from 'rxjs/operators';
@@ -86,7 +87,7 @@ const enum DEBUG_MODES {
     changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [AsyncPipe, TranslocoDirective, InfiniteScrollDirective, SafeStylePipe, PullToLoadComponent]
 })
-export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy {
+export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy, AfterViewInit {
   private readonly document = inject<Document>(DOCUMENT);
   private readonly mangaReaderService = inject(MangaReaderService);
   private readonly readerService = inject(ReaderService);
@@ -95,6 +96,8 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy {
   private readonly cdRef = inject(ChangeDetectorRef);
   private readonly destroyRef = inject(DestroyRef);
   protected readonly breakpointService = inject(BreakpointService);
+
+  scrollContainer = viewChild.required<ElementRef<HTMLDivElement>>('scroller');
 
   get scrollElement(): HTMLElement {
     return this.isFullscreenMode ? this.readerElemRef.nativeElement : this.document.body;
@@ -246,6 +249,10 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy {
 
   ngOnDestroy(): void {
     this.intersectionObserver.disconnect();
+  }
+
+  ngAfterViewInit() {
+    this.scrollContainer().nativeElement.focus();
   }
 
   /**

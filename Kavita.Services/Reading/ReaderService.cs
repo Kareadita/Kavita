@@ -540,11 +540,13 @@ public class ReaderService(IUnitOfWork unitOfWork, ILogger<ReaderService> logger
 
     private static ChapterDto FindNextReadingChapter(IList<ChapterDto> volumeChapters)
     {
-        var chaptersWithProgress = volumeChapters.Where(c => c.PagesRead > 0).ToList();
-        if (chaptersWithProgress.Count <= 0)
+        if (volumeChapters.Count <= 0)
         {
             throw new KavitaNotFoundException();
         }
+
+        var chaptersWithProgress = volumeChapters.Where(c => c.PagesRead > 0).ToList();
+        if (chaptersWithProgress.Count <= 0) return volumeChapters[0];
 
 
         var last = chaptersWithProgress.FindLastIndex(c => c.PagesRead > 0);

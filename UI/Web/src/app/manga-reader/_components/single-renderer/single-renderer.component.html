@@ -3,6 +3,7 @@
        [style.filter]="(darkness$ | async)  ?? '' | safeStyle" [style.height]="(imageContainerHeight$ | async)  ?? '' | safeStyle">
     @if(currentImage) {
       <img alt=" "
+           tabindex="0" [style.outline]="'none'"
            [style.width]="widthOverride()"
            #image
            [src]="currentImage.src"
