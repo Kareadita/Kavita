@@ -22,9 +22,9 @@ public interface ITachiyomiService
     /// Marks every chapter and volume that is sorted below the passed number as Read. This will not mark any specials as read.
     /// Passed number will also be marked as read
     /// </summary>
-    /// <param name="userWithProgress"></param>
+    /// <param name="user"></param>
     /// <param name="seriesId"></param>
     /// <param name="chapterNumber">Can also be a Tachiyomi encoded volume number</param>
     /// <param name="ct"></param>
-    Task<bool> MarkChaptersUntilAsRead(AppUser userWithProgress, int seriesId, float chapterNumber, CancellationToken ct = default);
+    Task<bool> MarkChaptersUntilAsRead(AppUser user, int seriesId, float chapterNumber, CancellationToken ct = default);
 }
