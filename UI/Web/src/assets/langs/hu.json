@@ -357,7 +357,6 @@
     },
     "all-filters": {
         "count": "{{count}} {{customize-dashboard-modal.title-smart-filters}}",
-        "create": "{{common.create}}",
         "title": "Minden intelligens szűrő"
     },
     "invite-user": {

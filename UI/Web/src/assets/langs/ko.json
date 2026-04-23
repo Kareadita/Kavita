@@ -485,8 +485,8 @@
     },
     "all-filters": {
         "title": "모든 스마트 필터",
-        "count": "{{count}} {{tabs.smart-filters-tab}}",
-        "create": "{{common.create}}"
+        "count": "스마트 필터 총 {{count}}개",
+        "description": "스마트 필터는 사이드 네비게이션 및 대시보드에 바인딩할 수 있는 저장된 필터입니다. 이름을 지정하고 저장 버튼을 사용하여 시리즈 및 읽기 리스트용 필터를 생성할 수 있습니다."
     },
     "announcements": {
         "title": "공지 사항"
@@ -1486,7 +1486,8 @@
         "series-count": "{{common.series-count}}",
         "restack-count": "{{num}} 재정렬",
         "nothing-found": "아무것도 찾을 수 없음",
-        "track": "트랙"
+        "track": "트랙",
+        "by-author": "{{author}}별로"
     },
     "import-cbl-modal": {
         "close": "{{common.close}}",
@@ -1678,7 +1679,8 @@
         "readinglist-title": "제목",
         "readinglist-releaseyear-start": "발매연도 (시작)",
         "readinglist-releaseyear-end": "발매연도 (끝)",
-        "readinglist-item-count": "항목 개수"
+        "readinglist-item-count": "항목 개수",
+        "unread-chapter-count": "읽지 않은 챕터 수"
     },
     "edit-series-modal": {
         "title": "{{seriesName}} 세부정보",
@@ -2004,7 +2006,8 @@
         "required-field": "스마트 필터에 이름 필요",
         "filter-name-unique": "스마트 필터 이름은 고유해야 합니다",
         "edit": "{{common.edit}}",
-        "no-content": "이 스마트 필터는 대시보드에 결과를 표시하지 않습니다"
+        "no-content": "이 스마트 필터는 대시보드에 결과를 표시하지 않습니다",
+        "entity-type-label": "엔티티 유형"
     },
     "edit-external-source-item": {
         "not-unique": "이 호스트에 외부 소스가 존재합니다. 중복이 없는지 확인하세요",
@@ -2085,7 +2088,8 @@
         "is-in-last": "마지막에 있음",
         "is-not-in-last": "마지막에 없음",
         "must-contains": "모두 포함함",
-        "is-empty": "빈 값"
+        "is-empty": "빈 값",
+        "is-not-empty": "빈 값 아님"
     },
     "toasts": {
         "no-pages": "페이지가 없습니다. Kavita는 이 아카이브를 읽을 수 없습니다.",
@@ -2845,7 +2849,8 @@
         "readinglist-item-count": "{{sort-field-pipe.readinglist-item-count}}",
         "readinglist-tags": "{{metadata-fields.tags-title}}",
         "readinglist-writer": "{{person-role-pipe.writer}}",
-        "readinglist-artist": "{{person-role-pipe.artist}}"
+        "readinglist-artist": "{{person-role-pipe.artist}}",
+        "person-library": "{{stream-list-item.library}}"
     },
     "breakpoint-pipe": {
         "never": "없음",
@@ -3618,7 +3623,8 @@
         "cbl-number-label": "CBL 호 #",
         "kavita-chapter-label": "Kavita 화 (선택)",
         "edit": "{{common.edit}}",
-        "cbl-number-placeholder": "e.g. 1"
+        "cbl-number-placeholder": "e.g. 1",
+        "by": "에 따라"
     },
     "browse-cbl-repo-modal": {
         "title": "CBL 레포 탐색",
@@ -3698,5 +3704,11 @@
         "reset": "{{common.reset}}",
         "save": "{{common.save}}",
         "required-field": "{{validation.required-field}}"
+    },
+    "filter-entity-type-pipe": {
+        "series": "{{tabs.series-tab}}",
+        "reading-list": "{{add-to-list-modal.reading-list-label}}",
+        "person": "인물",
+        "annotation": "주석"
     }
 }

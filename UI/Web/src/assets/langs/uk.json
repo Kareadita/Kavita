@@ -345,7 +345,6 @@
     },
     "all-filters": {
         "count": "{{count}} {{customize-dashboard-modal.title-smart-filters}}",
-        "create": "{{common.create}}",
         "title": "Усі розумні фільтри"
     },
     "invite-user": {

@@ -444,8 +444,7 @@
     },
     "all-filters": {
         "title": "Tutti i Filtri Intelligenti",
-        "count": "{{count}} {{customize-dashboard-modal.title-smart-filters}}",
-        "create": "{{common.create}}"
+        "count": "{{count}} {{customize-dashboard-modal.title-smart-filters}}"
     },
     "announcements": {
         "title": "Annunci"

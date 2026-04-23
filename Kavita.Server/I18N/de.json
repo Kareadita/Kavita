@@ -132,7 +132,6 @@
     "generic-cover-reading-list-save": "Das Coverbild konnte nicht für die Leseliste gespeichert werden",
     "generic-cover-chapter-save": "Das Coverbild konnte nicht für das Kapitel gespeichert werden",
     "access-denied": "Sie haben keinen Zugriff",
-    "reset-chapter-lock": "Die Cover Sperre konnte für das Kapitel nicht zurückgesetzt werden",
     "generic-user-delete": "Der Benutzer konnte nicht gelöscht werden",
     "opds-disabled": "OPDS ist auf diesem Server nicht aktiviert",
     "recently-added": "Zuletzt hinzugefügt",
@@ -171,8 +170,6 @@
     "external-sources": "Externe Quellen",
     "external-source-required": "Ein Host ist erforderlich",
     "smart-filter-already-in-use": "Es gibt einen bestehenden Stream mit diesem intelligenten Filter",
-    "more-in-genre": "Mehr in Genre {0}",
-    "browse-more-in-genre": "Mehr in {0} stöbern",
     "recently-updated": "Zuletzt aktualisiert",
     "browse-recently-updated": "Zuletzt aktualisiert durchsuchen",
     "unable-to-reset-k+": "Aufgrund eines Fehlers konnte die Kavita+ Lizenz nicht zurückgesetzt werden. Kontaktieren Sie den Kavita+ Support",
@@ -275,5 +272,8 @@
     "url-malformed": "Die URL ist fehlerhaft",
     "url-https-only": "Es sind ausschließlich HTTPS-URLs zulässig",
     "url-unable-to-resolve": "Der Hostname kann nicht aufgelöst werden",
-    "url-blocked-address": "Die URL führt zu einer gesperrten Adresse"
+    "url-blocked-address": "Die URL führt zu einer gesperrten Adresse",
+    "email.username-change.subject": "Ihr Benutzername wurde auf dem Server von {{InvitingUser}} geändert",
+    "email.username-change.title": "Aktuelles zum Ändern des Benutzernamens",
+    "email.username-change.description": "Der Benutzername Ihres Kontos wurde auf der Kavita-Instanz von {{InvitingUser}} aktualisiert. Ihrerseits sind keine weiteren Maßnahmen erforderlich."
 }

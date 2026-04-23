@@ -485,8 +485,8 @@
     },
     "all-filters": {
         "title": "Gach Scagaire Cliste",
-        "count": "{{count}} {{tabs.smart-filters-tab}}",
-        "create": "{{common.create}}"
+        "count": "{{count}} Scagairí Cliste san Iomlán",
+        "description": "Is scagairí sábháilte iad scagairí cliste ar féidir iad a cheangal leis an nascleanúint taobh agus leis an deais. Is féidir leat iad a chruthú do Shraitheanna agus do Liostaí Léitheoireachta trí ainm a thabhairt dóibh agus an cnaipe Sábháil a úsáid."
     },
     "announcements": {
         "title": "Fógraí"
@@ -603,7 +603,8 @@
         "completion-label": "{{percent}} críochnaithe",
         "force-selected-one-column": "Athraíodh an modh leagan amach go Colún Amháin mar gheall ar easpa spáis chun Dhá Cholún a rindreáil",
         "forced-vertical-switch": "Ní oibríonn an modh leagan amach mar leagan amach dhá cholún le Stíl Scríbhneoireachta Ingearach",
-        "close-reader-alt": "Dún an Léitheoir"
+        "close-reader-alt": "Dún an Léitheoir",
+        "shortcuts-menu-alt": "{{manga-reader.shortcuts-menu-alt}}"
     },
     "personal-table-of-contents": {
         "no-data": "Níl aon rud Leabharmharcáilte fós",
@@ -1405,7 +1406,8 @@
         "double-click": "cliceáil faoi dhó",
         "close-reader": "Dún an léitheoir",
         "toggle-menu": "Scoránaigh an Roghchlár",
-        "offset-double-page": "{{keybind-setting-description-pipe.key-bind-title-offset-double-page}}"
+        "offset-double-page": "{{keybind-setting-description-pipe.key-bind-title-offset-double-page}}",
+        "navigate-to-settings": "{{keybind-setting-description-pipe.key-bind-title-navigate-to-settings}}"
     },
     "grouped-typeahead": {
         "files": "Comhaid",
@@ -1536,7 +1538,8 @@
         "light-theme-alt": "Téama Solais",
         "dark-theme-alt": "Téama Dorcha",
         "close-reader-alt": "Dún an Léitheoir",
-        "toggle-incognito": "Cas as Mód Incognito"
+        "toggle-incognito": "Cas as Mód Incognito",
+        "shortcuts-menu-alt": "{{manga-reader.shortcuts-menu-alt}}"
     },
     "pdf-layout-mode-pipe": {
         "single": "Leathanach Aonair",
@@ -1676,7 +1679,8 @@
         "readinglist-title": "Teideal",
         "readinglist-releaseyear-start": "Bliain Eisiúna (Tosaigh)",
         "readinglist-releaseyear-end": "Bliain Eisiúna (Deireadh)",
-        "readinglist-item-count": "Líon na Míreanna"
+        "readinglist-item-count": "Líon na Míreanna",
+        "unread-chapter-count": "Líon na gCaibidlí Gan Léamh"
     },
     "edit-series-modal": {
         "title": "{{seriesName}} Sonraí",
@@ -2002,7 +2006,8 @@
         "cancel": "{{common.cancel}}",
         "edit-smart-filter": "Cuir {{name}} in eagar",
         "close": "{{common.close}}",
-        "no-content": "Níl aon torthaí ag an scagaire cliste seo ar an deais"
+        "no-content": "Níl aon torthaí ag an scagaire cliste seo ar an deais",
+        "entity-type-label": "Cineál Eintitis"
     },
     "edit-external-source-item": {
         "not-unique": "Tá foinse sheachtrach ann leis an óstach seo. Cinntigh nach bhfuil dúbailtí agat",
@@ -2083,7 +2088,8 @@
         "is-in-last": "An bhfuil sa deireadh",
         "is-not-in-last": "Nach bhfuil sa deireadh",
         "must-contains": "Ní mór go mbeadh",
-        "is-empty": "An bhfuil Folamh"
+        "is-empty": "An bhfuil Folamh",
+        "is-not-empty": "Níl sé Folamh"
     },
     "toasts": {
         "no-pages": "Níl aon leathanaigh ann. Ní raibh Kavita in ann an chartlann seo a léamh.",
@@ -2843,7 +2849,8 @@
         "readinglist-item-count": "{{sort-field-pipe.readinglist-item-count}}",
         "readinglist-tags": "{{metadata-fields.tags-title}}",
         "readinglist-writer": "{{person-role-pipe.writer}}",
-        "readinglist-artist": "{{person-role-pipe.artist}}"
+        "readinglist-artist": "{{person-role-pipe.artist}}",
+        "person-library": "{{stream-list-item.library}}"
     },
     "breakpoint-pipe": {
         "never": "Choíche",
@@ -3076,7 +3083,15 @@
         "key-bind-title-page-down": "Leathanach síos",
         "key-bind-tooltip-page-down": "Bog leathanach amháin síos",
         "key-bind-title-offset-double-page": "Leathanach dúbailte fritháireamh",
-        "key-bind-tooltip-offset-double-page": "Leathanaigh fhritháireamh le haghaidh ailíniú leathanaigh dhúbailte"
+        "key-bind-tooltip-offset-double-page": "Leathanaigh fhritháireamh le haghaidh ailíniú leathanaigh dhúbailte",
+        "key-bind-title-next-chapter": "An chéad chaibidil eile",
+        "key-bind-tooltip-next-chapter": "Luchtaigh an chéad chaibidil eile",
+        "key-bind-title-previous-chapter": "Caibidil Roimhe Seo",
+        "key-bind-tooltip-previous-chapter": "Luchtaigh an chaibidil roimhe seo",
+        "key-bind-title-first-page": "An Chéad Leathanach",
+        "key-bind-tooltip-first-page": "Bog go dtí an chéad leathanach",
+        "key-bind-title-last-page": "Leathanach Deireanach",
+        "key-bind-tooltip-last-page": "Bog go dtí an leathanach deireanach"
     },
     "manage-auth-keys": {
         "auth-keys-title": "Bainistigh Eochracha Údaraithe",
@@ -3682,5 +3697,18 @@
         "custom-label": "Sceideal Saincheaptha (Nótaíocht Cron)",
         "required-field": "{{validation.required-field}}",
         "cron-notation": "Ní nóta Cron bailí é seo"
+    },
+    "change-username": {
+        "username-label": "{{common.username}}",
+        "new-username-label": "Ainm úsáideora nua",
+        "reset": "{{common.reset}}",
+        "save": "{{common.save}}",
+        "required-field": "{{validation.required-field}}"
+    },
+    "filter-entity-type-pipe": {
+        "series": "{{tabs.series-tab}}",
+        "reading-list": "{{add-to-list-modal.reading-list-label}}",
+        "person": "Duine",
+        "annotation": "Anótáil"
     }
 }

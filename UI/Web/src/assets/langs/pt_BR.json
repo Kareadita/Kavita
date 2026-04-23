@@ -485,8 +485,8 @@
     },
     "all-filters": {
         "title": "Todos os Filtros Inteligentes",
-        "count": "{{count}} {{tabs.smart-filters-tab}}",
-        "create": "{{common.create}}"
+        "count": "{{count}} Filtros Inteligentes no Total",
+        "description": "Filtros inteligentes são filtros salvos que podem ser atribuídos à navegação lateral e ao painel. Você pode criá-los para Séries e Listas de Leitura dando um nome e usando o botão Salvar."
     },
     "announcements": {
         "title": "Anúncios"
@@ -603,7 +603,8 @@
         "completion-label": "{{percent}} completo",
         "force-selected-one-column": "O modo de layout mudou para Uma Coluna devido ao espaço insuficiente para renderizar Duas Colunas",
         "forced-vertical-switch": "O modo de layout foi alterado, pois o layout de Duas Colunas não funciona com o Estilo de Escrita Vertical",
-        "close-reader-alt": "Fechar Leitor"
+        "close-reader-alt": "Fechar Leitor",
+        "shortcuts-menu-alt": "{{manga-reader.shortcuts-menu-alt}}"
     },
     "personal-table-of-contents": {
         "no-data": "Nada Marcado ainda",
@@ -1405,7 +1406,8 @@
         "double-click": "clique-duplo",
         "close-reader": "Fechar leitor",
         "toggle-menu": "Alternar Menu",
-        "offset-double-page": "{{keybind-setting-description-pipe.key-bind-title-offset-double-page}}"
+        "offset-double-page": "{{keybind-setting-description-pipe.key-bind-title-offset-double-page}}",
+        "navigate-to-settings": "{{keybind-setting-description-pipe.key-bind-title-navigate-to-settings}}"
     },
     "grouped-typeahead": {
         "files": "Arquivos",
@@ -1536,7 +1538,8 @@
         "light-theme-alt": "Tema Claro",
         "dark-theme-alt": "Tema Escuro",
         "close-reader-alt": "Fechar Leitor",
-        "toggle-incognito": "Desative o modo de navegação anônima"
+        "toggle-incognito": "Desative o modo de navegação anônima",
+        "shortcuts-menu-alt": "{{manga-reader.shortcuts-menu-alt}}"
     },
     "pdf-layout-mode-pipe": {
         "single": "Página Única",
@@ -1676,7 +1679,8 @@
         "readinglist-title": "Título",
         "readinglist-releaseyear-start": "Ano de Lançamento (Início)",
         "readinglist-releaseyear-end": "Ano de Lançamento (Fim)",
-        "readinglist-item-count": "Número de Itens"
+        "readinglist-item-count": "Número de Itens",
+        "unread-chapter-count": "Número de Capítulos Não Lidos"
     },
     "edit-series-modal": {
         "title": "{{seriesName}} Detalhes",
@@ -2002,7 +2006,8 @@
         "name-label": "Nome",
         "required-field": "Filtros inteligentes precisam de um nome",
         "filter-name-unique": "Os nomes dos Filtros Inteligentes devem ser exclusivos",
-        "no-content": "Esse filtro inteligente não tem resultados no painel"
+        "no-content": "Esse filtro inteligente não tem resultados no painel",
+        "entity-type-label": "Tipo de Entidade"
     },
     "edit-external-source-item": {
         "not-unique": "Existe uma fonte externa com este host. Certifique-se de não ter duplicatas",
@@ -2083,7 +2088,8 @@
         "is-in-last": "É no final de",
         "is-not-in-last": "Não é no final de",
         "must-contains": "Deve Conter",
-        "is-empty": "Está Vazio"
+        "is-empty": "Está Vazio",
+        "is-not-empty": "Não Está Vazio"
     },
     "toasts": {
         "no-pages": "Não há páginas. Kavita não conseguiu ler este arquivo.",
@@ -2849,7 +2855,8 @@
         "readinglist-item-count": "{{sort-field-pipe.readinglist-item-count}}",
         "readinglist-tags": "{{metadata-fields.tags-title}}",
         "readinglist-writer": "{{person-role-pipe.writer}}",
-        "readinglist-artist": "{{person-role-pipe.artist}}"
+        "readinglist-artist": "{{person-role-pipe.artist}}",
+        "person-library": "{{stream-list-item.library}}"
     },
     "import-mappings": {
         "import-step": "Importar",
@@ -3076,7 +3083,15 @@
         "key-bind-title-page-down": "Página para baixo",
         "key-bind-tooltip-page-down": "Mover uma página para baixo",
         "key-bind-title-offset-double-page": "Deslocar página dupla",
-        "key-bind-tooltip-offset-double-page": "Deslocamento de páginas para alinhamento de páginas duplas"
+        "key-bind-tooltip-offset-double-page": "Deslocamento de páginas para alinhamento de páginas duplas",
+        "key-bind-title-next-chapter": "Capítulo Seguinte",
+        "key-bind-tooltip-next-chapter": "Carrega o capítulo seguinte",
+        "key-bind-title-previous-chapter": "Capítulo Anterior",
+        "key-bind-tooltip-previous-chapter": "Carregar o capítulo anterior",
+        "key-bind-title-first-page": "Primeira Página",
+        "key-bind-tooltip-first-page": "Mover para a primeira página",
+        "key-bind-title-last-page": "Última Página",
+        "key-bind-tooltip-last-page": "Mover para a última página"
     },
     "manage-auth-keys": {
         "auth-keys-title": "Gerenciar Chaves de Autorização",
@@ -3682,5 +3697,18 @@
         "custom-label": "Programação Personalizada (Notação de Tempo)",
         "required-field": "{{validation.required-field}}",
         "cron-notation": "Isso não é uma notação de Tempo válida"
+    },
+    "change-username": {
+        "username-label": "{{common.username}}",
+        "new-username-label": "Novo Nome de Usuário",
+        "reset": "{{common.reset}}",
+        "save": "{{common.save}}",
+        "required-field": "{{validation.required-field}}"
+    },
+    "filter-entity-type-pipe": {
+        "series": "{{tabs.series-tab}}",
+        "reading-list": "{{add-to-list-modal.reading-list-label}}",
+        "person": "Pessoa",
+        "annotation": "Anotação"
     }
 }

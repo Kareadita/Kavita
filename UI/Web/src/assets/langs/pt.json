@@ -485,8 +485,7 @@
     },
     "all-filters": {
         "title": "Todos os Filtros Inteligentes",
-        "count": "{{count}} {{customize-dashboard-modal.title-smart-filters}}",
-        "create": "{{common.create}}"
+        "count": "{{count}} {{customize-dashboard-modal.title-smart-filters}}"
     },
     "announcements": {
         "title": "Anúncios"
@@ -3312,5 +3311,21 @@
             "help": "Como Atualizar",
             "download": "Descarregar"
         }
+    },
+    "title": {
+        "reading-list": "Listas de Leitura",
+        "home": "Página Inicial",
+        "bookmarks": "Marcadores",
+        "collections": "Coleções",
+        "browse-genres": "Explorar Géneros",
+        "browse-tags": "Explorar Etiquetas",
+        "want-to-read": "Leituras Futuras",
+        "reading-lists": "Listas de Leitura",
+        "settings": "Definições",
+        "all-series": "Todas as Séries",
+        "profile": "Perfil de {{username}}"
+    },
+    "authority-validation-result-pipe": {
+        "success": "Autoridade é válida"
     }
 }

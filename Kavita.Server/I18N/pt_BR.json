@@ -85,7 +85,6 @@
     "generic-cover-reading-list-save": "Não é possível salvar a imagem da capa na lista de leitura",
     "generic-cover-chapter-save": "Não foi possível salvar a imagem da capa no Capítulo",
     "access-denied": "Você não tem acesso",
-    "reset-chapter-lock": "Não é possível redefinir o bloqueio da tampa para o Capítulo",
     "generic-user-delete": "Não foi possível excluir o usuário",
     "on-deck": "Na Estante",
     "browse-on-deck": "Navegar Na Estante",
@@ -172,8 +171,6 @@
     "browse-external-sources": "Navegar em Fontes Externas",
     "external-sources": "Fontes Externas",
     "invalid-email": "O e-mail registrado para o usuário não é um e-mail válido. Veja os registros para quaisquer links.",
-    "browse-more-in-genre": "Navegue por mais em {0}",
-    "more-in-genre": "Mais em Gênero {0}",
     "recently-updated": "Atualizado Recentemente",
     "browse-recently-updated": "Navegar Atualizado Recentemente",
     "unable-to-reset-k+": "Não foi possível redefinir a licença Kavita+ devido a um erro. Entre em contato com o suporte Kavita +",
@@ -275,5 +272,8 @@
     "url-malformed": "URL está malformada",
     "url-https-only": "Apenas URLs HTTPS são permitidas",
     "url-unable-to-resolve": "Impossível resolver o nome do host",
-    "url-blocked-address": "URL resolve para um endereço bloqueado"
+    "url-blocked-address": "URL resolve para um endereço bloqueado",
+    "email.username-change.subject": "Seu nome de usuário foi alterado no servidor de {{InvitingUser}}",
+    "email.username-change.title": "Atualização de Mudança de Nome de Usuário",
+    "email.username-change.description": "O nome de usuário da sua conta foi atualizado na instância Kavita de {{InvitingUser}}. Não é necessária nenhuma ação de você."
 }

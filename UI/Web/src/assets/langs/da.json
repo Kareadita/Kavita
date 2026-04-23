@@ -336,7 +336,6 @@
     },
     "all-filters": {
         "count": "{{count}} {{customize-dashboard-modal.title-smart-filters}}",
-        "create": "{{common.create}}",
         "title": "Alle smarte filtre"
     },
     "invite-user": {

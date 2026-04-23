@@ -485,8 +485,7 @@
     },
     "all-filters": {
         "title": "全てのスマートフィルター",
-        "count": "{{count}} {{tabs.smart-filters-tab}}",
-        "create": "{{common.create}}"
+        "count": "{{count}} {{tabs.smart-filters-tab}}"
     },
     "announcements": {
         "title": "お知らせ"

@@ -94,7 +94,6 @@
     "generic-cover-reading-list-save": "Ní féidir íomhá an chlúdaigh a shábháil ar an Liosta Léitheoireachta",
     "generic-cover-volume-save": "Ní féidir íomhá an chlúdaigh a shábháil in Volume",
     "access-denied": "Níl rochtain agat",
-    "reset-chapter-lock": "Ní féidir glas clúdaigh a athshocrú do Chapter",
     "generic-user-delete": "Níorbh fhéidir an t-úsáideoir a scriosadh",
     "opds-disabled": "Níl OPDS cumasaithe ar an bhfreastalaí seo",
     "on-deck": "Ar Deic",
@@ -187,13 +186,11 @@
     "generic-user-pref": "Bhí fadhb ann maidir le roghanna a shábháil",
     "reading-lists": "Liostaí Léitheoireachta",
     "browse-collections": "Brabhsáil de réir Bailiúcháin",
-    "browse-more-in-genre": "Brabhsáil tuilleadh in {0}",
     "recently-updated": "Nuashonraithe Le Déanaí",
     "reading-list-title-required": "Ní féidir le Teideal an Liosta Léitheoireachta a bheith folamh",
     "device-not-created": "Níl an gléas seo ann fós. Cruthaigh ar dtús le do thoil",
     "browse-recently-added": "Brabhsáil Curtha Leis Le Déanaí",
     "browse-want-to-read": "Brabhsáil Ba Mhaith Liom a Léamh",
-    "more-in-genre": "Tuilleadh sa Seánra {0}",
     "unable-to-reset-k+": "Ní féidir ceadúnas Kavita+ a athshocrú de bharr earráide. Déan teagmháil le Tacaíocht Kavita+",
     "series-restricted-age-restriction": "Níl cead ag an úsáideoir an tsraith seo a fheiceáil mar gheall ar shrianta aoise",
     "bad-copy-files-for-download": "Ní féidir na comhaid a chóipeáil go dtí an chartlann eolaire sealadach íoslódáil.",
@@ -275,5 +272,8 @@
     "url-malformed": "Tá an URL mífhoirmithe",
     "url-https-only": "Ní cheadaítear ach URLanna HTTPS",
     "url-unable-to-resolve": "Ní féidir ainm an óstaigh a réiteach",
-    "url-blocked-address": "Réitíonn URL chuig seoladh blocáilte"
+    "url-blocked-address": "Réitíonn URL chuig seoladh blocáilte",
+    "email.username-change.subject": "Tá d'ainm úsáideora athraithe ar fhreastalaí {{InvitingUser}}",
+    "email.username-change.title": "Nuashonrú ar Athrú Ainm Úsáideora",
+    "email.username-change.description": "Tá ainm úsáideora do chuntais nuashonraithe ar chás Kavita {{InvitingUser}}. Níl aon ghníomh ag teastáil uait."
 }

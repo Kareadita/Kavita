@@ -313,7 +313,6 @@
     },
     "all-filters": {
         "count": "{{count}} {{customize-dashboard-modal.title-smart-filters}}",
-        "create": "{{common.create}}",
         "title": "Tüm Akıllı Filtreler"
     },
     "invite-user": {

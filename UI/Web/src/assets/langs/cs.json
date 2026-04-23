@@ -485,8 +485,8 @@
     },
     "all-filters": {
         "title": "Všechny chytré filtry",
-        "count": "{{count}} {{tabs.smart-filters-tab}}",
-        "create": "{{common.create}}"
+        "count": "{{count}} Celkem chytrých filtrů",
+        "description": "Chytré filtry jsou uložené filtry, které lze přiřadit k postranní navigační liště a ovládacímu panelu. Můžete je vytvořit pro série a seznamy ke čtení tak, že jim zadáte název a kliknete na tlačítko Uložit."
     },
     "announcements": {
         "title": "Oznámení"
@@ -603,7 +603,8 @@
         "completion-label": "{{percent}} dokončeno",
         "force-selected-one-column": "Režim rozvržení přepnut na jeden sloupec z důvodu nedostatečného prostoru pro vykreslení dvou sloupců",
         "forced-vertical-switch": "Režim rozvržení přepnutý, protože rozvržení do dvou sloupců nefunguje s vertikálním stylem psaní",
-        "close-reader-alt": "Zavřít čtečku"
+        "close-reader-alt": "Zavřít čtečku",
+        "shortcuts-menu-alt": "{{manga-reader.shortcuts-menu-alt}}"
     },
     "personal-table-of-contents": {
         "no-data": "V záložkách zatím nic není",
@@ -1341,7 +1342,8 @@
         "double-click": "dvojklik",
         "title": "Klávesové zkratky",
         "toggle-menu": "Přepnout nabídku",
-        "offset-double-page": "{{keybind-setting-description-pipe.key-bind-title-offset-double-page}}"
+        "offset-double-page": "{{keybind-setting-description-pipe.key-bind-title-offset-double-page}}",
+        "navigate-to-settings": "{{keybind-setting-description-pipe.key-bind-title-navigate-to-settings}}"
     },
     "grouped-typeahead": {
         "genres": "{{metadata-fields.genres-title}}",
@@ -1805,7 +1807,8 @@
         "edit": "{{common.edit}}",
         "close": "{{common.close}}",
         "cancel": "{{common.cancel}}",
-        "no-content": "Tento inteligentní filtr nemá žádné výsledky na ovládacím panelu"
+        "no-content": "Tento inteligentní filtr nemá žádné výsledky na ovládacím panelu",
+        "entity-type-label": "Typ entity"
     },
     "edit-external-source-item": {
         "save": "{{common.save}}",
@@ -2069,7 +2072,8 @@
         "light-theme-alt": "Světlý motiv",
         "dark-theme-alt": "Tmavý motiv",
         "close-reader-alt": "Zavřít čtečku",
-        "toggle-incognito": "Vypnout anonymní režim"
+        "toggle-incognito": "Vypnout anonymní režim",
+        "shortcuts-menu-alt": "{{manga-reader.shortcuts-menu-alt}}"
     },
     "infinite-scroller": {
         "continuous-reading-prev-chapter": "Předchozí kapitola",
@@ -2097,7 +2101,8 @@
         "readinglist-title": "Název",
         "readinglist-releaseyear-start": "Rok vydání (začátek)",
         "readinglist-releaseyear-end": "Rok vydání (konec)",
-        "readinglist-item-count": "Počet položek"
+        "readinglist-item-count": "Počet položek",
+        "unread-chapter-count": "Počet nepřečtených kapitol"
     },
     "edit-person-modal": {
         "name-label": "{{edit-series-modal.name-label}}",
@@ -2548,7 +2553,8 @@
         "less-than": "Menší než",
         "does-not-contain": "Neobsahuje",
         "is-before": "Je před",
-        "is-in-last": "Je v posledním"
+        "is-in-last": "Je v posledním",
+        "is-not-empty": "Není prázdný"
     },
     "validation": {
         "valid-email": "Musí se jednat o platný e-mail",
@@ -2843,7 +2849,8 @@
         "readinglist-item-count": "{{sort-field-pipe.readinglist-item-count}}",
         "readinglist-tags": "{{metadata-fields.tags-title}}",
         "readinglist-writer": "{{person-role-pipe.writer}}",
-        "readinglist-artist": "{{person-role-pipe.artist}}"
+        "readinglist-artist": "{{person-role-pipe.artist}}",
+        "person-library": "{{stream-list-item.library}}"
     },
     "breakpoint-pipe": {
         "never": "Nikdy",
@@ -3076,7 +3083,15 @@
         "key-bind-title-page-down": "Stránka dolů",
         "key-bind-tooltip-page-down": "Přesunout o jednu stránku dolů",
         "key-bind-title-offset-double-page": "Dvojstránka s odsazením",
-        "key-bind-tooltip-offset-double-page": "Odsazení stránek pro zarovnání dvojstránky"
+        "key-bind-tooltip-offset-double-page": "Odsazení stránek pro zarovnání dvojstránky",
+        "key-bind-title-next-chapter": "Další kapitola",
+        "key-bind-tooltip-next-chapter": "Načíst další kapitolu",
+        "key-bind-title-previous-chapter": "Předchozí kapitola",
+        "key-bind-tooltip-previous-chapter": "Načíst předchozí kapitolu",
+        "key-bind-title-first-page": "Úvodní stránka",
+        "key-bind-tooltip-first-page": "Přejít na první stránku",
+        "key-bind-title-last-page": "Poslední stránka",
+        "key-bind-tooltip-last-page": "Přejít na poslední stránku"
     },
     "manage-auth-keys": {
         "auth-keys-title": "Správa autorizačních klíčů",
@@ -3682,5 +3697,18 @@
         "custom-label": "Vlastní plán (zápis Cron)",
         "required-field": "{{validation.required-field}}",
         "cron-notation": "Toto není platný zápis pro cron"
+    },
+    "change-username": {
+        "username-label": "{{common.username}}",
+        "new-username-label": "Nové uživatelské jméno",
+        "reset": "{{common.reset}}",
+        "save": "{{common.save}}",
+        "required-field": "{{validation.required-field}}"
+    },
+    "filter-entity-type-pipe": {
+        "series": "{{tabs.series-tab}}",
+        "reading-list": "{{add-to-list-modal.reading-list-label}}",
+        "person": "Osoba",
+        "annotation": "Anotace"
     }
 }

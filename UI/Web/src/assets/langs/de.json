@@ -486,7 +486,7 @@
     "all-filters": {
         "title": "Alle Smart-Filter",
         "count": "{{count}} {{tabs.smart-filters-tab}}",
-        "create": "{{common.create}}"
+        "description": "Intelligente Filter sind gespeicherte Filter, die an die Seitenleiste und das Dashboard angeheftet werden können. Sie können sie für Serien und Leselisten erstellen, indem Sie einen Namen eingeben und auf die Schaltfläche „Speichern“ klicken."
     },
     "announcements": {
         "title": "Mitteilungen"
@@ -603,7 +603,8 @@
         "completion-label": "{{percent}} abgeschlossen",
         "force-selected-one-column": "Der Layoutmodus wurde aufgrund unzureichenden Platzes für die Darstellung von zwei Spalten auf eine Spalte umgestellt",
         "forced-vertical-switch": "Der Layoutmodus wurde geändert, weil das zweispaltige Layout mit dem vertikalen Schreibstil nicht klappt",
-        "close-reader-alt": "Reader schließen"
+        "close-reader-alt": "Reader schließen",
+        "shortcuts-menu-alt": "{{manga-reader.shortcuts-menu-alt}}"
     },
     "personal-table-of-contents": {
         "no-data": "Noch nichts mit Lesezeichen versehen",
@@ -1375,7 +1376,10 @@
         "more-alt": "{{series-detail.more-alt}}",
         "date-range-title": "Datumsbereich",
         "edit-alt": "{{common.edit}}",
-        "loading-alt": "{{pdf-reader.loading-message}}"
+        "loading-alt": "{{pdf-reader.loading-message}}",
+        "missing-count": "{{num}} fehlt",
+        "tags-title": "{{metadata-fields.tags-title}}",
+        "filter-label": "{{common.filter}}"
     },
     "events-widget": {
         "title-alt": "Aktivität",
@@ -1402,7 +1406,8 @@
         "double-click": "Doppelklick",
         "close-reader": "Reader schließen",
         "toggle-menu": "Menü umschalten",
-        "offset-double-page": "{{keybind-setting-description-pipe.key-bind-title-offset-double-page}}"
+        "offset-double-page": "{{keybind-setting-description-pipe.key-bind-title-offset-double-page}}",
+        "navigate-to-settings": "{{keybind-setting-description-pipe.key-bind-title-navigate-to-settings}}"
     },
     "grouped-typeahead": {
         "files": "Dateien",
@@ -1470,7 +1475,9 @@
         "ending-title": "Ende",
         "starting-title": "Anfang",
         "promote-label": "{{actionable.promote}}",
-        "promote-tooltip": "Promotion bedeutet, dass die Sammlung serverweit zu sehen ist, nicht nur für Sie. Für alle Serien innerhalb dieser Sammlung gelten nach wie vor Benutzerzugriffsbeschränkungen."
+        "promote-tooltip": "Promotion bedeutet, dass die Sammlung serverweit zu sehen ist, nicht nur für Sie. Für alle Serien innerhalb dieser Sammlung gelten nach wie vor Benutzerzugriffsbeschränkungen.",
+        "name-label": "{{edit-series-modal.name-label}}",
+        "tags-label": "{{metadata-fields.tags-title}}"
     },
     "import-mal-collection-modal": {
         "close": "{{common.close}}",
@@ -1503,7 +1510,7 @@
         "delete-rule": "{{common.delete}}",
         "manage-rules": "Regeln zur Neuzuordnung verwalten",
         "col-series": "Gewünschte Serie",
-        "col-vol-issue": "Gewünschter Band / Ausgabe",
+        "col-vol-issue": "Gew. Band / Ausgabe",
         "col-status": "Status",
         "col-matched-series": "Passende Serie",
         "col-matched-issue": "Passende Ausgabe",
@@ -1531,7 +1538,8 @@
         "light-theme-alt": "Light Schema",
         "dark-theme-alt": "Dunkles Schema",
         "close-reader-alt": "Reader schließen",
-        "toggle-incognito": "Inkognito-Modus deaktivieren"
+        "toggle-incognito": "Inkognito-Modus deaktivieren",
+        "shortcuts-menu-alt": "{{manga-reader.shortcuts-menu-alt}}"
     },
     "pdf-layout-mode-pipe": {
         "single": "Einzelne Seite",
@@ -1667,7 +1675,12 @@
         "annotation-owner": "Eigentümer",
         "annotation-series": "Serienname",
         "annotation-color": "Farbe",
-        "user-rating": "Meine Bewertung"
+        "user-rating": "Meine Bewertung",
+        "unread-chapter-count": "Anzahl ungelesener Kapitel",
+        "readinglist-title": "Titel",
+        "readinglist-releaseyear-start": "Erscheinungsjahr (Start)",
+        "readinglist-releaseyear-end": "Erscheinungsjahr (Ende)",
+        "readinglist-item-count": "Stückzahl"
     },
     "edit-series-modal": {
         "title": "{{seriesName}} Einzelheiten",
@@ -1993,7 +2006,8 @@
         "save": "{{common.save}}",
         "edit-smart-filter": "Bearbeite {{name}}",
         "filter-name-unique": "Die Namen der intelligenten Filter müssen eindeutig sein",
-        "no-content": "Dieser intelligente Filter hat keine Ergebnisse auf dem Dashboard"
+        "no-content": "Dieser intelligente Filter hat keine Ergebnisse auf dem Dashboard",
+        "entity-type-label": "Entitätstyp"
     },
     "edit-external-source-item": {
         "not-unique": "Für diesen Host existiert eine externe Quelle. Stellen Sie sicher, dass Sie keine Duplikate haben",
@@ -2074,7 +2088,8 @@
         "is-in-last": "Ist in letzter",
         "is-not-in-last": "Ist nicht in letzter",
         "must-contains": "Muss Enthält",
-        "is-empty": "Ist Leer"
+        "is-empty": "Ist Leer",
+        "is-not-empty": "Ist nicht leer"
     },
     "toasts": {
         "no-pages": "Es sind keine Seiten vorhanden. Kavita war nicht in der Lage, dieses Archiv zu lesen.",
@@ -2834,7 +2849,14 @@
         "annotation-selection": "Text markieren",
         "series": "{{tabs.series-tab}}",
         "annotation-likes": "Likes",
-        "annotation-liked-by": "Likes von"
+        "annotation-liked-by": "Likes von",
+        "person-library": "{{stream-list-item.library}}",
+        "readinglist-title": "Titel",
+        "readinglist-release-year": "{{sort-field-pipe.release-year}}",
+        "readinglist-item-count": "{{sort-field-pipe.readinglist-item-count}}",
+        "readinglist-tags": "{{metadata-fields.tags-title}}",
+        "readinglist-writer": "{{person-role-pipe.writer}}",
+        "readinglist-artist": "{{person-role-pipe.artist}}"
     },
     "oidc": {
         "title": "OIDC-Callback",
@@ -3061,7 +3083,15 @@
         "key-bind-title-page-down": "Seite nach unten",
         "key-bind-tooltip-page-down": "Eine Seite nach unten verschieben",
         "key-bind-title-offset-double-page": "Offset-Doppelseite",
-        "key-bind-tooltip-offset-double-page": "Versatzseiten für die Ausrichtung von Doppelseiten"
+        "key-bind-tooltip-offset-double-page": "Versatzseiten für die Ausrichtung von Doppelseiten",
+        "key-bind-title-next-chapter": "Nächstes Kapitel",
+        "key-bind-tooltip-next-chapter": "Nächstes Kapitel laden",
+        "key-bind-title-previous-chapter": "Vorheriges Kapitel",
+        "key-bind-tooltip-previous-chapter": "Voriges Kapitel laden",
+        "key-bind-title-first-page": "Erste Seite",
+        "key-bind-tooltip-first-page": "Zur ersten Seite wechseln",
+        "key-bind-title-last-page": "Letzte Seite",
+        "key-bind-tooltip-last-page": "Zur letzten Seite wechseln"
     },
     "manage-auth-keys": {
         "auth-keys-title": "Autorisierungsschlüssel verwalten",
@@ -3503,7 +3533,7 @@
         "reprint-stripped": "Nachdruck (ohne Formatierung)",
         "alternate-series": "Alternative Serie",
         "user-decision": "Entscheidung des Benutzers",
-        "unmatched": "Unmatched"
+        "unmatched": "unpassend"
     },
     "cbl-import-reason-pipe": {
         "chapter-missing": "Kapitel fehlt",
@@ -3542,9 +3572,12 @@
         "sync": "Synchronisieren",
         "delete": "{{common.delete}}",
         "view-list": "Leseliste anzeigen",
-        "last-synced": "Zuletzt synchronisiert am {{date}}",
+        "last-synced": "Zuletzt synchronisiert: {{date}}",
         "source": "Quelle",
-        "not-authorized": "Sie haben keine Berechtigung, auf diesen Inhalt zuzugreifen"
+        "not-authorized": "Sie haben keine Berechtigung, auf diesen Inhalt zuzugreifen",
+        "item-count": "{{common.item-count}}",
+        "missing-count": "{{reading-list-detail.missing-count}}",
+        "last-checked": "Zuletzt überprüft: {{date}}"
     },
     "manage-remap-rules-modal": {
         "title": "Regeln für die Neuzuordnung verwalten",
@@ -3664,5 +3697,18 @@
         "custom-label": "Benutzerdefinierter Zeitplan (Kron-Notation)",
         "required-field": "{{validation.required-field}}",
         "cron-notation": "Dies ist keine gültige Kron-Notation"
+    },
+    "change-username": {
+        "username-label": "{{common.username}}",
+        "new-username-label": "Neuer Benutzername",
+        "reset": "{{common.reset}}",
+        "save": "{{common.save}}",
+        "required-field": "{{validation.required-field}}"
+    },
+    "filter-entity-type-pipe": {
+        "series": "{{tabs.series-tab}}",
+        "reading-list": "{{add-to-list-modal.reading-list-label}}",
+        "person": "Person",
+        "annotation": "Anmerkung"
     }
 }

@@ -485,7 +485,6 @@
     },
     "all-filters": {
         "count": "{{count}} {{customize-dashboard-modal.title-smart-filters}}",
-        "create": "{{common.create}}",
         "title": "所有的智慧篩選器"
     },
     "invite-user": {

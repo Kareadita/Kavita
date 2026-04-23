@@ -485,8 +485,7 @@
     },
     "all-filters": {
         "title": "所有智能筛选器",
-        "count": "{{count}} {{customize-dashboard-modal.title-smart-filters}}",
-        "create": "{{common.create}}"
+        "count": "{{count}} {{customize-dashboard-modal.title-smart-filters}}"
     },
     "announcements": {
         "title": "公告"
