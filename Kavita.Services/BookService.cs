@@ -636,9 +636,13 @@ public partial class BookService(
             }
 
             // Include regular Writer as well, for cases where there is no special tag
-            info.Writer = string.Join(",",
-                epubBook?.Schema.Package.Metadata.Creators.Select(c => Parser.CleanAuthor(c.Creator)) ?? []);
+            var hasAnyRoleRefinement = epubBook?.Schema.Package.Metadata.MetaItems
+                .Any(m => m is { Property: "role", Scheme: null or "marc:relators" }) ?? false;
 
+            if (!hasAnyRoleRefinement)
+            {
+                info.Writer = string.Join(",", epubBook?.Schema.Package.Metadata.Creators.Select(c => Parser.CleanAuthor(c.Creator)) ?? []);
+            }
             var hasVolumeInSeries = !Parser.IsLooseLeafVolume(Parser.ParseVolume(info.Title, LibraryType.Manga));
 
             if (string.IsNullOrEmpty(info.Volume) && hasVolumeInSeries &&
