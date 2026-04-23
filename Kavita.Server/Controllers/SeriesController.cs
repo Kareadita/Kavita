@@ -77,7 +77,7 @@ public class SeriesController(
     {
         var ct = HttpContext.RequestAborted;
         var series = await unitOfWork.SeriesRepository.GetSeriesDtoByIdAsync(seriesId, UserId, ct);
-        if (series == null) return NoContent();
+        if (series == null) return NotFound();
         return Ok(series);
     }
 
@@ -139,7 +139,7 @@ public class SeriesController(
     {
         var ct = HttpContext.RequestAborted;
         var vol = await unitOfWork.VolumeRepository.GetVolumeDtoAsync(volumeId, UserId, ct);
-        if (vol == null) return NoContent();
+        if (vol == null) return NotFound();
         return Ok(vol);
     }
 
@@ -154,7 +154,7 @@ public class SeriesController(
     {
         var ct = HttpContext.RequestAborted;
         var chapter = await unitOfWork.ChapterRepository.GetChapterDtoAsync(chapterId, UserId, ct);
-        if (chapter == null) return NoContent();
+        if (chapter == null) return NotFound();
 
         return Ok(chapter);
     }

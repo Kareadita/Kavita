@@ -61,7 +61,7 @@ public class ReaderController(ICacheService cacheService,
     {
         if (!UserContext.IsAuthenticated) return Unauthorized();
         var chapter = await cacheService.Ensure(chapterId, extractPdf);
-        if (chapter == null) return NoContent();
+        if (chapter == null) return NotFound();
 
         try
         {
@@ -95,7 +95,7 @@ public class ReaderController(ICacheService cacheService,
         try
         {
             var chapter = await cacheService.Ensure(chapterId, extractPdf);
-            if (chapter == null) return NoContent();
+            if (chapter == null) return NotFound();
 
             var path = cacheService.GetCachedPagePath(chapter.Id, page);
             return CachedFile(path, maxAge: TimeSpan.FromHours(1).Seconds);
@@ -120,7 +120,7 @@ public class ReaderController(ICacheService cacheService,
     public async Task<ActionResult> GetThumbnail(int chapterId, int pageNum, string apiKey)
     {
         var chapter = await cacheService.Ensure(chapterId, true);
-        if (chapter == null) return NoContent();
+        if (chapter == null) return NotFound();
 
         var images = cacheService.GetCachedPages(chapterId);
 
@@ -176,7 +176,7 @@ public class ReaderController(ICacheService cacheService,
     {
         if (chapterId <= 0) return ArraySegment<FileDimensionDto>.Empty;
         var chapter = await cacheService.Ensure(chapterId, extractPdf);
-        if (chapter == null) return NoContent();
+        if (chapter == null) return NotFound();
 
         return Ok(cacheService.GetCachedFileDimensions(cacheService.GetCachePath(chapterId)));
     }
@@ -196,7 +196,7 @@ public class ReaderController(ICacheService cacheService,
     {
         if (chapterId <= 0) return Ok(null); // This can happen occasionally from UI, we should just ignore
         var chapter = await cacheService.Ensure(chapterId, extractPdf);
-        if (chapter == null) return NoContent();
+        if (chapter == null) return NotFound();
 
         var dto = await unitOfWork.ChapterRepository.GetChapterInfoDtoAsync(chapterId);
         if (dto == null) return BadRequest(await localizationService.TranslateAsync(UserId, "perform-scan"));
