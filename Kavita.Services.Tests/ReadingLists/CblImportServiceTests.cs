@@ -1716,8 +1716,7 @@ public class CblImportServiceTests : AbstractDbTest
 
         // Verify side effect methods were invoked
         await readingListService.Received(1).CalculateReadingListAgeRating(Arg.Any<ReadingList>());
-        // NOTE: This is gated for v2 lists only
-        await readingListService.Received(0).CalculateStartAndEndDates(Arg.Any<ReadingList>());
+        await readingListService.Received(1).CalculateStartAndEndDates(Arg.Any<ReadingList>());
     }
 
     #endregion
