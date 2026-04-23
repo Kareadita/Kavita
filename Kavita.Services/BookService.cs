@@ -494,164 +494,15 @@ public partial class BookService(
         try
         {
             epubBook = OpenEpubWithFallback(filePath, epubBook);
+            if (epubBook == null) return null;
 
-            var publicationDate = epubBook?.Schema.Package.Metadata.Dates.Find(pDate => pDate.Event == "publication")?.Date;
-
-            if (string.IsNullOrEmpty(publicationDate))
-            {
-                publicationDate = epubBook?.Schema.Package.Metadata.Dates.FirstOrDefault()?.Date;
-            }
-
-            var (year, month, day) = GetPublicationDate(publicationDate);
-
-            var summary = epubBook?.Schema.Package.Metadata.Descriptions.FirstOrDefault();
-            var info = new ComicInfo
-            {
-                Summary = string.IsNullOrEmpty(summary?.Description) ? string.Empty : summary.Description,
-                Publisher = string.Join(",", epubBook?.Schema.Package.Metadata.Publishers.Select(p => p.Publisher) ?? []),
-                Month = month,
-                Day = day,
-                Year = year,
-                Title = epubBook?.Title ?? string.Empty,
-                Genre = string.Join(",",
-                    epubBook?.Schema.Package.Metadata.Subjects.Select(s => s.Subject.ToLower().Trim()) ?? []),
-                LanguageISO = ValidateLanguage(epubBook?.Schema.Package.Metadata.Languages
-                    .Select(l => l.Language)
-                    .FirstOrDefault())
-            };
-
+            var info = BuildBaseComicInfo(epubBook);
             info.CleanComicInfo();
 
-            var weblinks = new List<string>();
-            if (epubBook?.Schema.Package.Metadata.Identifiers != null)
-            {
-                foreach (var identifier in epubBook.Schema.Package.Metadata.Identifiers)
-                {
-                    if (string.IsNullOrEmpty(identifier.Identifier)) continue;
-                    if (!string.IsNullOrEmpty(identifier.Scheme) &&
-                        identifier.Scheme.Equals("ISBN", StringComparison.InvariantCultureIgnoreCase))
-                    {
-                        var isbn = identifier.Identifier.Replace("urn:isbn:", string.Empty).Replace("isbn:", string.Empty);
-                        if (!ArticleNumberHelper.IsValidIsbn10(isbn) && !ArticleNumberHelper.IsValidIsbn13(isbn))
-                        {
-                            logger.LogDebug("[BookService] {File} has invalid ISBN number", filePath);
-                            continue;
-                        }
-
-                        info.Isbn = isbn;
-                    }
-
-                    if ((!string.IsNullOrEmpty(identifier.Scheme) &&
-                         identifier.Scheme.Equals("URL", StringComparison.InvariantCultureIgnoreCase)) ||
-                        identifier.Identifier.StartsWith("url:"))
-                    {
-                        var url = identifier.Identifier.Replace("url:", string.Empty);
-                        weblinks.Add(url.Trim());
-                    }
-                }
-            }
-
-            if (weblinks.Count > 0)
-            {
-                info.Web = string.Join(',', weblinks.Distinct());
-            }
-
-            // Parse tags not exposed via Library
-            if (epubBook?.Schema.Package.Metadata.MetaItems != null)
-            {
-                foreach (var metadataItem in epubBook.Schema.Package.Metadata.MetaItems)
-                {
-                    // EPUB 2 and 3
-                    switch (metadataItem.Name)
-                    {
-                        case "calibre:rating":
-                            info.UserRating = metadataItem.Content.AsFloat();
-                            break;
-                        case "calibre:title_sort":
-                            info.TitleSort = metadataItem.Content;
-                            break;
-                        case "calibre:series":
-                            info.Series = metadataItem.Content;
-                            if (string.IsNullOrEmpty(info.SeriesSort))
-                            {
-                                info.SeriesSort = metadataItem.Content;
-                            }
-
-                            break;
-                        case "calibre:series_index":
-                            info.Volume = metadataItem.Content;
-                            break;
-                    }
-
-
-                    // EPUB 3.2+ only
-                    switch (metadataItem.Property)
-                    {
-                        case "group-position":
-                            info.Volume = metadataItem.Content;
-                            break;
-                        case "belongs-to-collection":
-                            info.Series = metadataItem.Content;
-                            if (string.IsNullOrEmpty(info.SeriesSort))
-                            {
-                                info.SeriesSort = metadataItem.Content;
-                            }
-
-                            break;
-                        case "collection-type":
-                            // These look to be genres from https://manual.calibre-ebook.com/sub_groups.html or can be "series"
-                            break;
-                        case "role":
-                            if (metadataItem.Scheme != null && !metadataItem.Scheme.Equals("marc:relators")) break;
-
-                            var creatorId = metadataItem.Refines?.Replace("#", string.Empty);
-                            var person = epubBook.Schema.Package.Metadata.Creators
-                                .SingleOrDefault(c => c.Id == creatorId);
-                            if (person == null) break;
-
-                            PopulatePerson(metadataItem, info, person);
-                            break;
-                        case "title-type":
-                            if (metadataItem.Content.Equals("collection"))
-                            {
-                                ExtractCollectionOrReadingList(metadataItem, epubBook, info);
-                            }
-
-                            if (metadataItem.Content.Equals("main"))
-                            {
-                                ExtractSortTitle(metadataItem, epubBook, info);
-                            }
-
-                            break;
-                    }
-                }
-            }
-
-
-            // If this is a single book and not a collection, set publication status to Completed
-            if (string.IsNullOrEmpty(info.Volume) &&
-                Parser.IsLooseLeafVolume(Parser.ParseVolume(filePath, LibraryType.Manga)))
-            {
-                info.Count = 1;
-            }
-
-            // Include regular Writer as well, for cases where there is no special tag
-            var hasAnyRoleRefinement = epubBook?.Schema.Package.Metadata.MetaItems
-                .Any(m => m is { Property: "role", Scheme: null or "marc:relators" }) ?? false;
-
-            if (!hasAnyRoleRefinement)
-            {
-                info.Writer = string.Join(",", epubBook?.Schema.Package.Metadata.Creators.Select(c => Parser.CleanAuthor(c.Creator)) ?? []);
-            }
-            var hasVolumeInSeries = !Parser.IsLooseLeafVolume(Parser.ParseVolume(info.Title, LibraryType.Manga));
-
-            if (string.IsNullOrEmpty(info.Volume) && hasVolumeInSeries &&
-                (!info.Series.Equals(info.Title) || string.IsNullOrEmpty(info.Series)))
-            {
-                // This is likely a light novel for which we can set series from parsed title
-                info.Series = Parser.ParseSeries(info.Title, LibraryType.Manga);
-                info.Volume = Parser.ParseVolume(info.Title, LibraryType.Manga);
-            }
+            ApplyIdentifiers(epubBook, info, filePath);
+            ApplyMetadataItems(epubBook, info, out var refinedCreatorIds);
+            ApplyCreators(epubBook, info, refinedCreatorIds);
+            ApplySeriesFallbacks(info, filePath);
 
             return info;
         }
@@ -667,6 +518,200 @@ public partial class BookService(
         }
 
         return null;
+    }
+
+    private void ApplyIdentifiers(EpubBookRef epubBook, ComicInfo info, string filePath)
+    {
+        var identifiers = epubBook.Schema.Package.Metadata.Identifiers;
+        if (identifiers == null) return;
+
+        var weblinks = new List<string>();
+        foreach (var identifier in identifiers)
+        {
+            if (string.IsNullOrEmpty(identifier.Identifier)) continue;
+
+            if (IsIsbnScheme(identifier))
+            {
+                TryApplyIsbn(identifier, info, filePath);
+            }
+
+            if (IsUrlScheme(identifier))
+            {
+                weblinks.Add(identifier.Identifier.Replace("url:", string.Empty).Trim());
+            }
+        }
+
+        if (weblinks.Count > 0)
+        {
+            info.Web = string.Join(',', weblinks.Distinct());
+        }
+    }
+
+    private static bool IsIsbnScheme(EpubMetadataIdentifier identifier) =>
+        !string.IsNullOrEmpty(identifier.Scheme) &&
+        identifier.Scheme.Equals("ISBN", StringComparison.InvariantCultureIgnoreCase);
+
+    private static bool IsUrlScheme(EpubMetadataIdentifier identifier) =>
+        (!string.IsNullOrEmpty(identifier.Scheme) &&
+         identifier.Scheme.Equals("URL", StringComparison.InvariantCultureIgnoreCase)) ||
+        identifier.Identifier.StartsWith("url:");
+
+    private void TryApplyIsbn(EpubMetadataIdentifier identifier, ComicInfo info, string filePath)
+    {
+        var isbn = identifier.Identifier
+            .Replace("urn:isbn:", string.Empty)
+            .Replace("isbn:", string.Empty);
+
+        if (!ArticleNumberHelper.IsValidIsbn10(isbn) && !ArticleNumberHelper.IsValidIsbn13(isbn))
+        {
+            logger.LogDebug("[BookService] {File} has invalid ISBN number", filePath);
+            return;
+        }
+
+        info.Isbn = isbn;
+    }
+
+    private static ComicInfo BuildBaseComicInfo(EpubBookRef epubBook)
+    {
+        var publicationDate = epubBook?.Schema.Package.Metadata.Dates.Find(pDate => pDate.Event == "publication")?.Date;
+
+        if (string.IsNullOrEmpty(publicationDate))
+        {
+            publicationDate = epubBook?.Schema.Package.Metadata.Dates.FirstOrDefault()?.Date;
+        }
+
+        var (year, month, day) = GetPublicationDate(publicationDate);
+
+        var summary = epubBook?.Schema.Package.Metadata.Descriptions.FirstOrDefault();
+        var info = new ComicInfo
+        {
+            Summary = string.IsNullOrEmpty(summary?.Description) ? string.Empty : summary.Description,
+            Publisher = string.Join(",", epubBook?.Schema.Package.Metadata.Publishers.Select(p => p.Publisher) ?? []),
+            Month = month,
+            Day = day,
+            Year = year,
+            Title = epubBook?.Title ?? string.Empty,
+            Genre = string.Join(",",
+                epubBook?.Schema.Package.Metadata.Subjects.Select(s => s.Subject.ToLower().Trim()) ?? []),
+            LanguageISO = ValidateLanguage(epubBook?.Schema.Package.Metadata.Languages
+                .Select(l => l.Language)
+                .FirstOrDefault())
+        };
+        return info;
+    }
+
+    private static void ApplyMetadataItems(EpubBookRef epubBook, ComicInfo info, out HashSet<string> refinedCreatorIds)
+    {
+        refinedCreatorIds = [];
+        var metaItems = epubBook.Schema.Package.Metadata.MetaItems;
+        if (metaItems == null) return;
+
+        foreach (var item in metaItems)
+        {
+            ApplyEpub2Metadata(item, info);
+            ApplyEpub3Metadata(item, info, epubBook, refinedCreatorIds);
+        }
+    }
+
+    private static void ApplyEpub2Metadata(EpubMetadataMeta item, ComicInfo info)
+    {
+        switch (item.Name)
+        {
+            case "calibre:rating":
+                info.UserRating = item.Content.AsFloat();
+                break;
+            case "calibre:title_sort":
+                info.TitleSort = item.Content;
+                break;
+            case "calibre:series":
+                info.Series = item.Content;
+                if (string.IsNullOrEmpty(info.SeriesSort))
+                {
+                    info.SeriesSort = item.Content;
+                }
+                break;
+            case "calibre:series_index":
+                info.Volume = item.Content;
+                break;
+        }
+    }
+
+    private static void ApplyEpub3Metadata(EpubMetadataMeta item, ComicInfo info, EpubBookRef epubBook, HashSet<string> refinedCreatorIds)
+    {
+        switch (item.Property)
+        {
+            case "group-position":
+                info.Volume = item.Content;
+                break;
+            case "belongs-to-collection":
+                info.Series = item.Content;
+                if (string.IsNullOrEmpty(info.SeriesSort)) info.SeriesSort = item.Content;
+                break;
+            case "role":
+                ApplyRoleRefinement(item, info, epubBook, refinedCreatorIds);
+                break;
+            case "title-type":
+                if (item.Content.Equals("collection")) ExtractCollectionOrReadingList(item, epubBook, info);
+                if (item.Content.Equals("main")) ExtractSortTitle(item, epubBook, info);
+                break;
+        }
+    }
+
+    private static void ApplyRoleRefinement(EpubMetadataMeta item, ComicInfo info, EpubBookRef epubBook, HashSet<string> refinedCreatorIds)
+    {
+        if (item.Scheme != null && !item.Scheme.Equals("marc:relators")) return;
+
+        var creatorId = item.Refines?.Replace("#", string.Empty);
+        if (string.IsNullOrEmpty(creatorId)) return;
+
+        var person = epubBook.Schema.Package.Metadata.Creators.SingleOrDefault(c => c.Id == creatorId);
+        if (person == null) return;
+
+        PopulatePerson(item, info, person);
+        refinedCreatorIds.Add(creatorId);
+    }
+
+    private static void ApplyCreators(EpubBookRef epubBook, ComicInfo info, HashSet<string> refinedCreatorIds)
+    {
+        // Creators without a role refinement are assumed to be writers.
+        // This handles both: EPUBs with no refinements at all, and EPUBs
+        // where only some creators have refinements (mixed case).
+        var unrefinedCreators = epubBook.Schema.Package.Metadata.Creators
+            .Where(c => string.IsNullOrEmpty(c.Id) || !refinedCreatorIds.Contains(c.Id))
+            .Select(c => Parser.CleanAuthor(c.Creator))
+            .Where(name => !string.IsNullOrEmpty(name))
+            .ToList();
+
+        var trimmedExisting = info.Writer.TrimEnd(',');
+
+        if (unrefinedCreators.Count == 0)
+        {
+            info.Writer = trimmedExisting;
+            return;
+        }
+
+        var joined = string.Join(",", unrefinedCreators);
+        info.Writer = string.IsNullOrEmpty(trimmedExisting) ? joined.TrimEnd(',') : $"{joined},{trimmedExisting}";
+    }
+
+    private static void ApplySeriesFallbacks(ComicInfo info, string filePath)
+    {
+        // If this is a single book and not a collection, set publication status to Completed
+        if (string.IsNullOrEmpty(info.Volume) &&
+            Parser.IsLooseLeafVolume(Parser.ParseVolume(filePath, LibraryType.Manga)))
+        {
+            info.Count = 1;
+        }
+
+        var hasVolumeInSeries = !Parser.IsLooseLeafVolume(Parser.ParseVolume(info.Title, LibraryType.Manga));
+
+        if (string.IsNullOrEmpty(info.Volume) && hasVolumeInSeries &&
+            (!info.Series.Equals(info.Title) || string.IsNullOrEmpty(info.Series)))
+        {
+            // This is likely a light novel for which we can set series from parsed title
+            info.Series = Parser.ParseSeries(info.Title, LibraryType.Manga);
+            info.Volume = Parser.ParseVolume(info.Title, LibraryType.Manga);
+        }
     }
 
     private EpubBookRef? OpenEpubWithFallback(string filePath, EpubBookRef? epubBook)
