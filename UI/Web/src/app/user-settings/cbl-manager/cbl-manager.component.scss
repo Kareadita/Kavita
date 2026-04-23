@@ -81,7 +81,7 @@
   font-size: 0.8rem;
 }
 
-.btn-group > .btn.dropdown-toggle-split:not(first-child){
+.btn-group > .btn.dropdown-toggle-split {
   border-top-right-radius: var(--bs-border-radius) !important;
   border-bottom-right-radius: var(--bs-border-radius) !important;
   border-width: 1px 1px 1px 0 !important;

@@ -296,7 +296,7 @@ export class VolumeDetailComponent implements OnInit {
       pages: v.pages,
       words: v.wordCount,
       addedAt: v.createdUtc,
-      updatedAt: v.createdUtc,
+      updatedAt: v.lastModifiedUtc,
       kavitaId: v.id,
     };
   });

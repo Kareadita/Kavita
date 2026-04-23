@@ -424,6 +424,8 @@ public class CblImportService(IUnitOfWork unitOfWork, ICblGithubService cblGithu
         var url = readingList.SourcePath ??  readingList.DownloadUrl;
         var isV2 = readingList.Provider == ReadingListProvider.Url && !string.IsNullOrEmpty(url) && url.EndsWith(".json");
 
+        if (!isV2) return true;
+
         // v2 lists don't have Months for some reason
         var hasStartDate = readingList is { StartingYear: > 0 };
         var hasEndDate = readingList is { EndingYear: > 0 };

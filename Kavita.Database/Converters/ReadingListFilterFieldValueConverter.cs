@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Linq;
 using Kavita.Models.DTOs.Filtering.v2.FilterFields;
+using Kavita.Models.Entities.Enums.ReadingList;
 
 namespace Kavita.Database.Converters;
 
@@ -26,7 +27,7 @@ public static class ReadingListFilterFieldValueConverter
                 .Where(s => !string.IsNullOrEmpty(s))
                 .Select(int.Parse)
                 .ToList(),
-            ReadingListFilterField.Provider => Enum.Parse<ReadingListFilterField>(value),
+            ReadingListFilterField.Provider => Enum.Parse<ReadingListProvider>(value),
             _ => throw new ArgumentOutOfRangeException(nameof(field), field, "Field is not supported")
         };
     }
