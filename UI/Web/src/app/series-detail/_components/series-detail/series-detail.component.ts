@@ -239,9 +239,7 @@ class SeriesDetailComponent implements OnInit, AfterViewInit {
   protected readonly isLoadingReadingHistory = signal(false);
   protected readonly readingHistoryCurrentPage = signal(1);
 
-  isAdmin = computed(() => {
-    return this.accountService.hasAdminRole();
-  });
+  readonly isAdmin = this.accountService.hasAdminRole;
 
   activeTabId = Tabs.Storyline;
   mobileSeriesImgBackground = this.themeService.getCssVariable('--mobile-series-img-background');
