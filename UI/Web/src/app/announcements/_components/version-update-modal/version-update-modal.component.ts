@@ -48,6 +48,9 @@ export class VersionUpdateModalComponent {
     this.bustLocaleCache();
     // Refresh manually
     location.reload();
+
+    // Dismiss anyway in case reload doesn't work
+    this.modal.dismiss();
   }
 
 
