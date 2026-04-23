@@ -36,6 +36,7 @@ import {RouterLink} from '@angular/router';
 import {EntityTitleComponent} from '../../../cards/entity-title/entity-title.component';
 import {modalSaved} from "../../../_models/modal/modal-result";
 import {WikiLink} from "../../../_models/wiki";
+import {AccountService} from "../../../_services/account.service";
 
 export interface CblIssueRow {
   result: CblBookResult;
@@ -73,6 +74,7 @@ export class ImportCblModalComponent implements OnInit {
   private readonly toastr = inject(ToastrService);
   private readonly utilityService = inject(UtilityService);
   private readonly libraryService = inject(LibraryService);
+  private readonly accountService = inject(AccountService);
   protected readonly imageService = inject(ImageService);
 
   savedFiles = input.required<CblSavedFile[]>();
@@ -118,6 +120,8 @@ export class ImportCblModalComponent implements OnInit {
   activeRow = signal<CblIssueRow | null>(null);
   activeSeriesTypeahead = signal<TypeaheadSettings<SearchResult> | null>(null);
   activeChapterTypeahead = signal<TypeaheadSettings<Chapter> | null>(null);
+
+  defaultPromotionState = this.accountService.hasAdminRole;
 
   /** Track the CBL series name of the row being resolved, so we can auto-continue after re-validation */
   private pendingAutoEditSeries: string | null = null;
@@ -338,11 +342,11 @@ export class ImportCblModalComponent implements OnInit {
   }
 
   getPromoteForFile(fileName: string): boolean {
-    return this.promoteMap()[fileName] ?? false;
+    return this.promoteMap()[fileName] ?? this.defaultPromotionState();
   }
 
   togglePromote(fileName: string) {
-    const current = this.promoteMap()[fileName] ?? false;
+    const current = this.promoteMap()[fileName] ?? this.defaultPromotionState();
     this.promoteMap.update(m => ({ ...m, [fileName]: !current }));
   }
 
@@ -422,7 +426,7 @@ export class ImportCblModalComponent implements OnInit {
 
     const fileName = this.currentFile().fileName;
     if (this.promoteMap()[fileName] === undefined) {
-      this.promoteMap.update(m => ({ ...m, [fileName]: false }));
+      this.promoteMap.update(m => ({ ...m, [fileName]: this.defaultPromotionState() }));
     }
   }
 
