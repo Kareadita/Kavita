@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Threading.Tasks;
 using System.Collections.Immutable;
 using System.Collections.Generic;
@@ -96,7 +96,8 @@ public class TachiyomiService(
         {
             // Use R to ensure that localization of underlying system doesn't affect the stringification
             // https://docs.microsoft.com/en-us/globalization/locale/number-formatting-in-dotnet-framework
-            Number = (number / 10_000f).ToString("R", EnglishCulture)
+            Number = (number / 10_000f).ToString("R", EnglishCulture),
+            Files = new List<MangaFileDto>()
         };
     }
 
