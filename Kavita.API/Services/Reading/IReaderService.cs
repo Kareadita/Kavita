@@ -26,8 +26,6 @@ public interface IReaderService
     Task<int> GetNextChapterIdAsync(int seriesId, int volumeId, int currentChapterId, int userId);
     Task<int> GetPrevChapterIdAsync(int seriesId, int volumeId, int currentChapterId, int userId);
     Task<ChapterDto> GetContinuePoint(int seriesId, int userId);
-    Task MarkChaptersUntilAsRead(AppUser user, int seriesId, float chapterNumber);
-    Task MarkVolumesUntilAsRead(AppUser user, int seriesId, int volumeNumber);
     IDictionary<int, int> GetPairs(IEnumerable<FileDimensionDto> dimensions);
     Task<string> GetThumbnail(Chapter chapter, int pageNum, IEnumerable<string> cachedImages);
     Task<RereadDto> CheckSeriesForReRead(int userId, int seriesId, int libraryId);
