@@ -241,11 +241,12 @@ public class SeriesRepository(DataContext context, IMapper mapper) : ISeriesRepo
         #endregion
 
         var seriesTask = baseSeriesQuery
-            .Where(s => EF.Functions.Like(s.Name, $"%{searchQuery}%")
-                        || (s.OriginalName != null && EF.Functions.Like(s.OriginalName, $"%{searchQuery}%"))
-                        || (s.LocalizedName != null && EF.Functions.Like(s.LocalizedName, $"%{searchQuery}%"))
-                        || EF.Functions.Like(s.NormalizedName, $"%{searchQueryNormalized}%")
-                        || (hasYearInQuery && s.Metadata.ReleaseYear == yearComparison))
+            .Where(s =>
+                (EF.Functions.Like(s.Name, $"%{searchQuery}%")
+                 || (s.OriginalName != null && EF.Functions.Like(s.OriginalName, $"%{searchQuery}%"))
+                 || (s.LocalizedName != null && EF.Functions.Like(s.LocalizedName, $"%{searchQuery}%"))
+                 || EF.Functions.Like(s.NormalizedName, $"%{searchQueryNormalized}%"))
+                && (!hasYearInQuery || s.Metadata.ReleaseYear == yearComparison))
             .OrderBy(s => s.SortName!.Length)
             .ThenBy(s => s.SortName!.ToLower())
             .Take(maxRecords)
