@@ -106,6 +106,10 @@ public class TachiyomiService(
     public async Task<bool> MarkChaptersUntilAsRead(AppUser user, int seriesId, float chapterNumber, bool generateReadingSessions,
         CancellationToken ct = default)
     {
+
+        logger.LogDebug("[Tachiyomi] Marking chapters until {ChapterNumber} for series {SeriesId} for user {UserId}",
+            chapterNumber, seriesId, user.Id);
+
         user.Progresses ??= [];
 
         var chapters = chapterNumber switch
