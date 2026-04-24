@@ -180,7 +180,7 @@ public class TachiyomiServiceTests(ITestOutputHelper outputHelper): AbstractDbTe
 
 
         var user = await unitOfWork.UserRepository.GetUserByUsernameAsync("majora2007", AppUserIncludes.Progress);
-        await tachiyomiService.MarkChaptersUntilAsRead(user,1,21);
+        await tachiyomiService.MarkChaptersUntilAsRead(user,1,21, false);
 
         await context.SaveChangesAsync();
 
@@ -233,7 +233,7 @@ public class TachiyomiServiceTests(ITestOutputHelper outputHelper): AbstractDbTe
 
         var user = await unitOfWork.UserRepository.GetUserByUsernameAsync("majora2007", AppUserIncludes.Progress);
 
-        await tachiyomiService.MarkChaptersUntilAsRead(user,1,1/10_000F);
+        await tachiyomiService.MarkChaptersUntilAsRead(user,1,1/10_000F, false);
 
         await context.SaveChangesAsync();
 
@@ -332,7 +332,7 @@ public class TachiyomiServiceTests(ITestOutputHelper outputHelper): AbstractDbTe
 
         var user = await unitOfWork.UserRepository.GetUserByUsernameAsync("majora2007", AppUserIncludes.Progress);
 
-        await tachiyomiService.MarkChaptersUntilAsRead(user,1,2002/10_000F);
+        await tachiyomiService.MarkChaptersUntilAsRead(user,1,2002/10_000F, false);
 
         await context.SaveChangesAsync();
 
@@ -482,7 +482,7 @@ public class TachiyomiServiceTests(ITestOutputHelper outputHelper): AbstractDbTe
         await context.SaveChangesAsync();
 
         var user = await unitOfWork.UserRepository.GetUserByUsernameAsync("majora2007", AppUserIncludes.Progress);
-        await tachiyomiService.MarkChaptersUntilAsRead(user,1,21);
+        await tachiyomiService.MarkChaptersUntilAsRead(user,1,21, false);
 
         await context.SaveChangesAsync();
 
@@ -532,7 +532,7 @@ public class TachiyomiServiceTests(ITestOutputHelper outputHelper): AbstractDbTe
 
         var user = await unitOfWork.UserRepository.GetUserByUsernameAsync("majora2007", AppUserIncludes.Progress);
 
-        await tachiyomiService.MarkChaptersUntilAsRead(user,1,1/10_000F);
+        await tachiyomiService.MarkChaptersUntilAsRead(user,1,1/10_000F, false);
 
         await context.SaveChangesAsync();
 
