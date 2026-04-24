@@ -29,6 +29,10 @@ export function fullscreenModal(): Partial<NgbModalOptions> {
   return {...DefaultModalOptions, size: 'xl', fullscreen: true};
 }
 
+export function xxlModal(): Partial<NgbModalOptions> {
+  return {...DefaultModalOptions, size: 'xxl', fullscreen: 'xxl'};
+}
+
 /** Non-dismissible - for refresh-required modals only */
 export function versionRefreshModal(): Partial<NgbModalOptions> {
   return {
