@@ -5,6 +5,7 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using AutoMapper;
+using Hangfire;
 using Kavita.API.Database;
 using Kavita.API.Services;
 using Kavita.API.Services.Reading;
@@ -96,6 +97,7 @@ public sealed class ReadingSessionService : IReadingSessionService, IDisposable,
         }
     }
 
+    [AutomaticRetry(Attempts = 0)]
     public async Task GenerateReadingSessionForChapters(int userId, int seriesId, Dictionary<int, int> chaptersMap, CancellationToken ct = default)
     {
         using var scope = _serviceScopeFactory.CreateScope();
