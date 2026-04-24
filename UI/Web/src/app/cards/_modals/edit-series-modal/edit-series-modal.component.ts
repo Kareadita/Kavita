@@ -100,8 +100,7 @@ import {MangaFormat} from "../../../_models/manga-format";
     DecimalPipe,
     TitleCasePipe,
     TabTitlePipe,
-    EditExternalMetadataFormComponent,
-    MangaFormatPipe
+    EditExternalMetadataFormComponent
   ],
   templateUrl: './edit-series-modal.component.html',
   styleUrls: ['./edit-series-modal.component.scss'],

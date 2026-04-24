@@ -384,6 +384,7 @@ public class OpdsService(
     /// <param name="request"></param>
     /// <param name="ct"></param>
     /// <returns></returns>
+    /// <exception cref="ArgumentOutOfRangeException"></exception>
     public async Task<Feed> ResolveSmartFilter(OpdsItemsFromEntityIdRequest request, CancellationToken ct = default)
     {
         var userId = UnpackRequest(request, out var apiKey, out var prefix, out var baseUrl);
@@ -423,11 +424,9 @@ public class OpdsService(
                 AddPagination(feed, readingLists, $"{prefix}{apiKey}/smart-filters/{request.EntityId}/");
                 break;
             case FilterEntityType.Person:
-                //var list = await unitOfWork.PersonRepository.GetBrowsePersonDtos(userId, (PersonFilterDto) decodedFilter, userParams, ct);
-
-                break;
+                throw new OpdsException("OPDS feed generation is not implemented for Person smart filters");
             case FilterEntityType.Annotation:
-                break;
+                throw new OpdsException("OPDS feed generation is not implemented for Annotation smart filters");
         }
 
         return feed;
