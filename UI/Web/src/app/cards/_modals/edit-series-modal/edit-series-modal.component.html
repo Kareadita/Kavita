@@ -741,7 +741,7 @@
                                         {{t('pages-title')}} {{file.pages}}
                                       </div>
                                       <div class="col">
-                                        {{t('format-title')}} <span class="badge badge-secondary">{{utilityService.mangaFormatToText(file.format)}}</span>
+                                        {{t('format-title')}} <span class="badge badge-secondary">{{file.format | mangaFormat}}</span>
                                       </div>
                                     </div>
                                   </li>

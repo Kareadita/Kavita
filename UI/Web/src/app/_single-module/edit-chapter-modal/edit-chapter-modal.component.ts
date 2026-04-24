@@ -157,7 +157,7 @@ export class EditChapterModalComponent implements OnInit {
     this.initChapter = Object.assign({}, this.chapter);
     this.imageUrls.push(this.imageService.getChapterCoverImage(this.chapter.id));
 
-    this.size = this.utilityService.asChapter(this.chapter).files.reduce((sum, v) => sum + v.bytes, 0);
+    this.size = (<Chapter>this.chapter).files.reduce((sum, v) => sum + v.bytes, 0);
 
     this.editForm.addControl('titleName', new FormControl(this.chapter.titleName, []));
     this.editForm.addControl('sortOrder', new FormControl(Math.max(0, this.chapter.sortOrder), [Validators.required, Validators.min(0)]));
