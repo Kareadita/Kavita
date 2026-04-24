@@ -73,8 +73,9 @@ public class OpdsController(
     }
 
     /// <summary>
-    /// Get the User's Smart Filter series - Supports Pagination
+    /// Get the User's Smart Filter - Supports Pagination
     /// </summary>
+    /// <remarks>Smart filters have different entity types, this will resolve to the underlying entity</remarks>
     /// <returns></returns>
     [Produces("application/xml")]
     [HttpGet("{apiKey}/smart-filters/{filterId}")]
@@ -83,7 +84,7 @@ public class OpdsController(
         var userId = UserId;
         var (baseUrl, prefix) = await GetPrefix();
 
-        var feed = await opdsService.GetSeriesFromSmartFilter(new OpdsItemsFromEntityIdRequest()
+        var feed = await opdsService.ResolveSmartFilter(new OpdsItemsFromEntityIdRequest()
         {
             ApiKey = apiKey,
             Prefix =  prefix,
