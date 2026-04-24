@@ -1,4 +1,5 @@
 ﻿using System.Text.RegularExpressions;
+using Microsoft.Extensions.Hosting;
 using Serilog;
 using Serilog.Core;
 using Serilog.Events;
@@ -36,11 +37,11 @@ public static class LogLevelOptions
     /// </summary>
     private static readonly LoggingLevelSwitch AspNetCoreLogLevelSwitch = new (LogEventLevel.Error);
 
-    public static LoggerConfiguration CreateConfig(LoggerConfiguration configuration)
+    public static LoggerConfiguration CreateConfig(HostBuilderContext context, LoggerConfiguration configuration)
     {
         return configuration
-            .MinimumLevel
-            .ControlledBy(LogLevelSwitch)
+            .MinimumLevel.ControlledBy(LogLevelSwitch)
+            .ReadFrom.Configuration(context.Configuration)
             .MinimumLevel.Override("Microsoft", MicrosoftLogLevelSwitch)
             .MinimumLevel.Override("Microsoft.Hosting.Lifetime", MicrosoftHostingLifetimeLogLevelSwitch)
             .MinimumLevel.Override("Hangfire", HangfireLogLevelSwitch)
