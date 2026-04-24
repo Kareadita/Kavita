@@ -107,7 +107,7 @@ public class TachiyomiService(
         CancellationToken ct = default)
     {
 
-        logger.LogDebug("[Tachiyomi] Marking chapters until {ChapterNumber} for series {SeriesId} for user {UserId}",
+        logger.LogDebug("Marking chapters until {ChapterNumber} for series {SeriesId} for user {UserId}",
             chapterNumber, seriesId, user.Id);
 
         user.Progresses ??= [];
