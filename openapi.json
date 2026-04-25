@@ -23287,10 +23287,6 @@
             "type": "integer",
             "format": "int32"
           },
-          "family": {
-            "type": "string",
-            "format": true
-          },
           "name": {
             "type": "string",
             "nullable": true
@@ -23301,14 +23297,6 @@
           "fileName": {
             "type": "string",
             "nullable": true
-          },
-          "style": {
-            "type": "string",
-            "format": true
-          },
-          "weight": {
-            "type": "string",
-            "format": true
           }
         },
         "additionalProperties": false

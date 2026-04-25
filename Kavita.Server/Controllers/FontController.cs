@@ -112,7 +112,7 @@ public class FontController(
 
     [HttpPost("upload-by-url")]
     [DisallowRole(PolicyConstants.ReadOnlyRole)]
-    public async Task<ActionResult> UploadFontByUrl([FromQuery]string url)
+    public async Task<ActionResult<EpubFontDto[]>> UploadFontByUrl([FromQuery] string url)
     {
         // Validate url
         try

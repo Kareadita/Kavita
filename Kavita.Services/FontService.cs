@@ -1,9 +1,7 @@
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using System.Text.Json;
-using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 using Flurl.Http;
@@ -17,7 +15,6 @@ using Kavita.Models.Entities.Enums.Font;
 using Kavita.Services.Scanner;
 using Microsoft.Extensions.Logging;
 using Microsoft.Net.Http.Headers;
-using Microsoft.OpenApi.Reader;
 
 namespace Kavita.Services;
 
@@ -84,83 +81,30 @@ public class FontService(IDirectoryService directoryService, IUnitOfWork unitOfW
     private const string DownloadFontUrlPrefix = "https://fonts.google.com/download/list?family=";
     private const string GoogleFontsInvalidJsonPrefix = ")]}'";
 
-    private static readonly Dictionary<string, string> FontWeightLookup = new()
-    {
-        { "variable",    "1 1000" }, //Special entry for variable fonts, sets weight to full range
-        { "hairline",    "100" },
-        { "thin",        "100" },
-        { "ultralight",  "200" },
-        { "ultra light", "200" },
-        { "extralight",  "200" },
-        { "extra light", "200" },
-        { "light",       "300" },
-        { "normal",      "400" },
-        { "regular",     "400" },
-        { "medium",      "500" },
-        { "semibold",    "600" },
-        { "semi bold",   "600" },
-        { "demibold",    "600" },
-        { "demi bold",   "600" },
-        { "bold",        "700" },
-        { "extrabold",   "800" },
-        { "extra bold",  "800" },
-        { "ultrabold",   "800" },
-        { "ultra bold",  "800" },
-        { "black",       "900" },
-        { "heavy",       "900" },
-        { "extrablack",  "950" },
-        { "extraheavy",  "950" },
-        { "extra black", "950" },
-        { "extra heavy", "950" }
-    };
 
     public async Task<EpubFont> CreateFontFromFileAsync(string path, CancellationToken ct = default)
     {
+        // Validate that font was uploaded
         if (!directoryService.FileSystem.File.Exists(path))
         {
             logger.LogInformation("Unable to create font from manual upload as font not in temp");
             throw new KavitaException("errors.font-manual-upload");
         }
 
+        // Extract filename and then parse font object from the filename
         var fileName = directoryService.FileSystem.FileInfo.New(path).Name;
-        var nakedFileName = directoryService.FileSystem.Path.GetFileNameWithoutExtension(fileName);
+        var font = Parser.ParseEpubFontFromFilename(fileName);
 
-        var fontStyle = nakedFileName.Contains("italic", StringComparison.OrdinalIgnoreCase) ? "italic" : "normal";
-        var fontWeight = FontWeightLookup.FirstOrDefault(entry => nakedFileName.Contains(entry.Key, StringComparison.OrdinalIgnoreCase), new KeyValuePair<string, string>("normal", "400")).Value;
-        
-        var fontFamily = nakedFileName;
-        var descriptorControlCharIndex = fontFamily.IndexOf('-');
-        if (descriptorControlCharIndex >= 1)
-        {
-            fontFamily = fontFamily[..descriptorControlCharIndex];
-        }
-
-        var fontName = nakedFileName;
-        var axesControlCharIndex = fontName.IndexOf('_');
-        if (axesControlCharIndex >= 1)
-        {
-            fontName = fontName[..axesControlCharIndex];
-        }
-        fontName = Parser.PrettifyFileName(fontName).Trim();
-
-        if (await unitOfWork.EpubFontRepository.GetFontDtoByNameAsync(fontName, ct) != null)
+        // Check if font name is already present in database
+        if (await unitOfWork.EpubFontRepository.GetFontDtoByNameAsync(font.Name, ct) != null)
         {
             throw new KavitaException("errors.font-already-in-use");
         }
 
+        // Copy file from temp directory to EpubFontDirectory
         directoryService.CopyFileToDirectory(path, directoryService.EpubFontDirectory);
-        var finalLocation = directoryService.FileSystem.Path.Join(directoryService.EpubFontDirectory, fileName);
 
-        var font = new EpubFont()
-        {
-            Family = fontFamily,
-            Name = fontName,
-            NormalizedName = Parser.Normalize(nakedFileName),
-            FileName = Path.GetFileName(finalLocation),
-            Style = fontStyle,
-            Weight = fontWeight,
-            Provider = FontProvider.User
-        };
+        // Commit font to database
         unitOfWork.EpubFontRepository.Add(font);
         await unitOfWork.CommitAsync(ct);
 

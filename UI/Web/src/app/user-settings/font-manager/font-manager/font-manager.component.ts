@@ -15,6 +15,15 @@ import {ToastrService} from "ngx-toastr";
 import {
   FileDragAndDropUploadComponent
 } from "src/app/shared/file-drag-and-drop-upload/file-drag-and-drop-upload.component";
+import {
+  NgbAccordionBody,
+  NgbAccordionButton,
+  NgbAccordionCollapse,
+  NgbAccordionDirective,
+  NgbAccordionHeader,
+  NgbAccordionItem,
+  NgbTooltip
+} from '@ng-bootstrap/ng-bootstrap';
 
 @Component({
   selector: 'app-font-manager',
@@ -29,6 +38,13 @@ import {
     TranslocoDirective,
     NgStyle,
     FileDragAndDropUploadComponent,
+    NgbAccordionDirective,
+    NgbAccordionItem,
+    NgbAccordionHeader,
+    NgbAccordionButton,
+    NgbAccordionCollapse,
+    NgbAccordionBody,
+    NgbTooltip
   ],
   templateUrl: './font-manager.component.html',
   styleUrl: './font-manager.component.scss',
@@ -48,11 +64,15 @@ export class FontManagerComponent implements OnInit {
 
   fonts = signal<EpubFont[]>([]);
   visibleFonts = computed(() => {
-    const fonts = this.fonts();
+    // Sort fonts in provider order (System then Custom)
+    const fonts = this.fonts().sort((a,b) => a.provider - b.provider );
     const hide = this.hideSystemFonts();
     if (!hide) return fonts;
 
     return fonts.filter(f => f.provider === FontProvider.User);
+  });
+  visibleFontFamilies = computed(() => {
+    return [...new Map(this.visibleFonts().map(font => [font.family, font])).values()]
   });
 
   hideSystemFonts = signal(false);

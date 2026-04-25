@@ -37,7 +37,7 @@ export class FontService {
 
   getFontFace(font: EpubFont): FontFace {
     if (font.provider === FontProvider.System) {
-      return new FontFace(font.family, `url('assets/fonts/${font.name}/${font.fileName}')`, { style: font.style, weight: font.weight });
+      return new FontFace(font.family, `url('assets/fonts/${font.family}/${font.fileName}')`, { style: font.style, weight: font.weight });
     }
 
     return new FontFace(font.family, `url(${this.baseUrl}font?fontId=${font.id}&apiKey=${this.encodedKey})`, { style: font.style, weight: font.weight });

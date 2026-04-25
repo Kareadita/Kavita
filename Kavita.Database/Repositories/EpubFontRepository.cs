@@ -5,7 +5,6 @@ using System.Threading.Tasks;
 using AutoMapper;
 using AutoMapper.QueryableExtensions;
 using Kavita.API.Repositories;
-using Kavita.API.Services;
 using Kavita.Common.Extensions;
 using Kavita.Models;
 using Kavita.Models.DTOs.Font;
