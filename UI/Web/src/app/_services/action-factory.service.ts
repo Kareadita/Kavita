@@ -1212,6 +1212,40 @@ export class ActionFactoryService {
 
     this.smartFilterActions = [
       {
+        action: Action.Submenu,
+        title: 'add-to',
+        description: '',
+
+        callback: this.dummyCallback,
+        shouldRender: this.dummyShouldRender,
+
+        requiredRoles: [],
+        children: [
+          {
+            action: Action.AddToDashboard,
+            title: 'add-to-dashboard',
+            description: 'add-to-dashboard-tooltip',
+
+            callback: this.dummyCallback,
+            shouldRender: this.dummyShouldRender,
+
+            requiredRoles: [],
+            children: [],
+          },
+          {
+            action: Action.AddToSideNav,
+            title: 'add-to-side-nav',
+            description: 'add-to-side-nav-tooltip',
+
+            callback: this.dummyCallback,
+            shouldRender: this.dummyShouldRender,
+
+            requiredRoles: [],
+            children: [],
+          },
+        ],
+      },
+      {
         action: Action.Edit,
         title: 'rename',
         description: 'rename-tooltip',

@@ -63,6 +63,7 @@ import {ModalResult} from "../_models/modal/modal-result";
 import {addToModal, editModal} from "../_models/modal/modal-options";
 import {ModalService, TypedModalRef} from "./modal.service";
 import {FilterService} from "src/app/_services/filter.service";
+import {DashboardService} from "./dashboard.service";
 
 
 export type LibraryActionCallback = (library: Partial<Library>) => void;
@@ -101,6 +102,7 @@ export class ActionService {
   private readonly annotationsService = inject(AnnotationService);
   private readonly sideNavService = inject(NavService);
   private readonly filterService = inject(FilterService);
+  private readonly dashboardService = inject(DashboardService);
 
   private readingListModalRef: TypedModalRef<BulkSetReadingProfileModalComponent> |  TypedModalRef<ListSelectModalComponent<ReadingList>> | null = null;
   private collectionModalRef: TypedModalRef<ListSelectModalComponent<UserCollection>> | null = null;
@@ -821,6 +823,14 @@ export class ActionService {
    */
   handleSmartFilterAction(action: ActionItem<SmartFilter>, smartFilter: SmartFilter, allFilters: SmartFilter[]) {
     switch (action.action) {
+      case Action.AddToDashboard:
+        return this.dashboardService.createDashboardStream(smartFilter.id).pipe(
+          map(() => this.fromAction(action, smartFilter, 'none'))
+        );
+      case Action.AddToSideNav:
+        return this.sideNavService.createSideNavStream(smartFilter.id).pipe(
+          map(() => this.fromAction(action, smartFilter, 'none'))
+        );
       case Action.Edit:
         const ref = this.modalService.open(EditSmartFilterModalComponent, editModal());
         ref.componentInstance.smartFilter = smartFilter;

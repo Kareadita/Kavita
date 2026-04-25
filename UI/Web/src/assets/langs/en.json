@@ -3826,7 +3826,11 @@
         "export-v2": "CBL v2",
         "export-v2-tooltip": "Use CBL v2 (JSON)",
         "cbl-manager": "CBL Manager",
-        "cbl-manager-tooltip": "Manage/Sync CBLs"
+        "cbl-manager-tooltip": "Manage/Sync CBLs",
+        "add-to-dashboard": "Add to Dashboard",
+        "add-to-dashboard-tooltip": "Adds the smart filter to the bottom of your Dashboard",
+        "add-to-side-nav": "Add to Side Nav",
+        "add-to-side-nav-tooltip": "Adds the smart filter to the bottom of your Side Nav"
     },
 
     "preferences": {
