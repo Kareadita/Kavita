@@ -302,7 +302,20 @@ export class DashboardComponent {
   }
 
   async handleFilterSectionClick(stream: DashboardStream) {
-    await this.router.navigateByUrl('all-series?' + stream.smartFilterEncoded);
+    switch (stream.entityType) {
+      case FilterEntityType.Series:
+        await this.router.navigateByUrl('all-series?' + stream.smartFilterEncoded);
+        break;
+      case FilterEntityType.ReadingList:
+        await this.router.navigateByUrl('lists?' + stream.smartFilterEncoded);
+        break;
+      case FilterEntityType.Annotation:
+        await this.router.navigateByUrl('browse/annotations?' + stream.smartFilterEncoded);
+        break;
+      case FilterEntityType.Person:
+        await this.router.navigateByUrl('browse/people?' + stream.smartFilterEncoded);
+        break;
+    }
   }
 
   // TODO: See if we can put this into the carousel and have a custom tokens (not in the original list) to forward to a callback handler
