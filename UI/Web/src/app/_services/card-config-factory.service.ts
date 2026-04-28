@@ -26,6 +26,8 @@ import {PageBookmark} from "../_models/readers/page-bookmark";
 import {RelatedSeriesPair} from "../_single-module/related-tab/related-tab.component";
 import {ActionItem} from "../_models/actionables/action-item";
 import {SeriesGroup} from "../_models/series-group";
+import {AccountService} from "./account.service";
+import {Action} from "../_models/actionables/action";
 
 export interface ConfigCardFactoryBaseParameters<T> {
   shouldRenderAction?: (action: ActionItem<T>, entity: T, user: User) => boolean,
@@ -70,6 +72,7 @@ export class CardConfigFactory {
   private readonly router = inject(Router);
   private readonly relationshipPipe = new RelationshipPipe();
   private readonly entityTitleService = inject(EntityTitleService);
+  private readonly accountService = inject(AccountService);
 
   /**
    * Creates configuration for Series cards
@@ -354,6 +357,15 @@ export class CardConfigFactory {
    * Creates configuration for ReadingList cards
    */
   forReadingList(params?: ConfigCardFactoryActionableParameters<ReadingList>): ActionableCardConfiguration<ReadingList> {
+    const defaultShouldRenderAction = (action: ActionItem<ReadingList>, entity: ReadingList, user: User) => {
+      switch (action.action) {
+        case Action.RefreshMetadata:
+          return entity.ownedUserName === this.accountService.currentUser()?.username;
+      }
+
+      return true;
+    }
+
     const defaults: ActionableCardConfiguration<ReadingList> = {
       allowSelection: true,
       selectionType: 'readingList',
@@ -374,7 +386,8 @@ export class CardConfigFactory {
       showErrorFunc: () => false,
       ariaLabelFunc: (r) => r.title,
 
-      actionableFunc: (r) => this.actionFactory.getReadingListActions(params?.shouldRenderAction),
+      actionableFunc: (r) => this.actionFactory
+        .getReadingListActions(params?.shouldRenderAction ?? defaultShouldRenderAction),
       readFunc: null,
       clickFunc: (r) => this.router.navigate(['lists', r.id]),
       downloadItemFunc: (r) => this.downloadService.getItemForEntity(r, true),

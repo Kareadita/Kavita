@@ -5,6 +5,7 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using AutoMapper;
+using Hangfire;
 using Kavita.API.Database;
 using Kavita.API.Services;
 using Kavita.API.Services.Reading;
@@ -96,6 +97,7 @@ public sealed class ReadingSessionService : IReadingSessionService, IDisposable,
         }
     }
 
+    [AutomaticRetry(Attempts = 0)]
     public async Task GenerateReadingSessionForChapters(int userId, int seriesId, Dictionary<int, int> chaptersMap, CancellationToken ct = default)
     {
         using var scope = _serviceScopeFactory.CreateScope();
@@ -108,6 +110,9 @@ public sealed class ReadingSessionService : IReadingSessionService, IDisposable,
         if (series == null) throw new KavitaNotFoundException();
 
         var chapterIds = chaptersMap.Keys.ToList();
+
+        _logger.LogDebug("Generating Reading Session for {UserId} on {SeriesId} for {ChapterCount} chapters",
+            userId, seriesId, chapterIds.Count);
 
         var chapters = await context.Chapter
             .Where(cp => chapterIds.Contains(cp.Id) && cp.Volume.SeriesId == seriesId)
@@ -135,10 +140,17 @@ public sealed class ReadingSessionService : IReadingSessionService, IDisposable,
         foreach (var chapter in chapters)
         {
             var estimate = estimatedHoursByChapter[chapter.Id];
-            if (estimate is { PageCount: 0, WordCount: 0 }) continue;
+            if (estimate is { PageCount: 0, WordCount: 0 })
+            {
+                _logger.LogTrace("Not generating reading session for chapter {ChapterId} as nothing would be read", chapter.Id);
+                continue;
+            }
 
             var schedule = chapterSchedule[chapter.Id];
             var chapterDate = schedule.Start.Date;
+
+            _logger.LogTrace("Chapter {ChapterId} will be read from {Start} to {End} [{Minutes}m]",
+                chapter.Id, schedule.Start, schedule.End, schedule.End.Subtract(schedule.Start).TotalMinutes);
 
             if (currentSession == null || chapterDate != currentSessionDate)
             {
@@ -183,6 +195,9 @@ public sealed class ReadingSessionService : IReadingSessionService, IDisposable,
             s.EndTime = s.ActivityData.Max(ad => ad.EndTime);
             s.EndTimeUtc = s.ActivityData.Max(ad => ad.EndTimeUtc);
         }
+
+        _logger.LogTrace("Generated {Count} reading sessions for {UserId} on {SeriesId} for {ChapterCount} chapters",
+            addedSessions.Count, userId, seriesId, chapterIds.Count);
 
         await context.SaveChangesAsync(ct);
     }

@@ -68,6 +68,7 @@ export const allReadingListProviders =  Object.keys(ReadingListProvider)
 
 export interface ReadingList extends IHasCover {
   id: number;
+  ownedUserName: string;
   title: string;
   summary: string;
   promoted: boolean;

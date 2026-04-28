@@ -209,9 +209,9 @@ public class Program
 
     private static IHostBuilder CreateHostBuilder(string[] args) =>
         Host.CreateDefaultBuilder(args)
-            .UseSerilog((_, services, configuration) =>
+            .UseSerilog((ctx, services, configuration) =>
             {
-                LogLevelOptions.CreateConfig(configuration)
+                LogLevelOptions.CreateConfig(ctx, configuration)
                     .WriteTo.SignalRSink<LogHub, ILogHub>(
                         LogEventLevel.Information,
                         services);

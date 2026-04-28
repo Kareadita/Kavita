@@ -17,12 +17,12 @@ namespace Kavita.Server.Attributes;
 /// </summary>
 /// <param name="failOnMissing"></param>
 /// <param name="readingListIdKey"></param>
-public class ReadingListAccessAttribute(bool failOnMissing = true, string readingListIdKey = "readingListId")
+public class ReadingListAccessAttribute(bool failOnMissing = true, string readingListIdKey = "readingListId", bool allowPromoted = true)
     : AccessAttribute(readingListIdKey, failOnMissing, false)
 {
     protected override Task<bool> CheckAccess(IUnitOfWork unitOfWork, int userId, int entityId, CancellationToken ct)
     {
-        return unitOfWork.UserRepository.HasAccessToReadingList(userId, entityId, ct);
+        return unitOfWork.UserRepository.HasAccessToReadingList(userId, entityId, allowPromoted, ct);
     }
 }
 

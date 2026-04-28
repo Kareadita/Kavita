@@ -28,7 +28,7 @@ const ARMED_HEIGHT_DESKTOP_REM = 18.75;
 /** Expanded height when armed on mobile — shorter drag distance for touch. */
 const ARMED_HEIGHT_MOBILE_REM = 9.375;
 
-const enum PullState {
+export const enum PullState {
   Idle,
   Armed,
   Triggered,
@@ -63,7 +63,7 @@ export class PullToLoadComponent {
   private readonly container = viewChild.required<ElementRef<HTMLElement>>('container');
   private readonly triggerSentinel = viewChild.required<ElementRef<HTMLElement>>('triggerSentinel');
 
-  private readonly state = signal(PullState.Idle);
+  readonly state = signal(PullState.Idle);
   readonly progress = signal(0);
 
   readonly isArmed = computed(() => this.state() === PullState.Armed);

@@ -2,12 +2,12 @@
   "openapi": "3.0.4",
   "info": {
     "title": "Kavita",
-    "description": "Kavita provides a set of APIs authenticated via an Auth Key passed in the `x-api-key` header. Generate an Auth Key under User Settings → Manage Auth Keys, paste it into the Authorize panel, and all Try It requests will include it. Assume all fields of a payload are required unless marked optional. Built against v0.8.9.46",
+    "description": "Kavita provides a set of APIs authenticated via an Auth Key passed in the `x-api-key` header. Generate an Auth Key under User Settings → Manage Auth Keys, paste it into the Authorize panel, and all Try It requests will include it. Assume all fields of a payload are required unless marked optional. Built against v0.8.9.49",
     "license": {
       "name": "GPL-3.0",
       "url": "https://github.com/Kareadita/Kavita/blob/develop/LICENSE"
     },
-    "version": "0.8.9.46"
+    "version": "0.8.9.49"
   },
   "servers": [
     {
@@ -7475,7 +7475,8 @@
         "tags": [
           "Opds"
         ],
-        "summary": "Get the User's Smart Filter series - Supports Pagination",
+        "summary": "Get the User's Smart Filter - Supports Pagination",
+        "description": "Smart filters have different entity types, this will resolve to the underlying entity",
         "parameters": [
           {
             "name": "apiKey",
@@ -12029,6 +12030,30 @@
             "schema": {
               "type": "boolean",
               "default": false
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/ReadingList/regenerate-cover": {
+      "post": {
+        "tags": [
+          "ReadingList"
+        ],
+        "summary": "Regenerates the cover image for a reading list, you must own the given reading list to do this",
+        "parameters": [
+          {
+            "name": "readingListId",
+            "in": "query",
+            "description": "",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
             }
           }
         ],
@@ -18933,17 +18958,17 @@
             "content": {
               "text/plain": {
                 "schema": {
-                  "$ref": "#/components/schemas/ChapterDto"
+                  "$ref": "#/components/schemas/TachiyomiChapterDto"
                 }
               },
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ChapterDto"
+                  "$ref": "#/components/schemas/TachiyomiChapterDto"
                 }
               },
               "text/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ChapterDto"
+                  "$ref": "#/components/schemas/TachiyomiChapterDto"
                 }
               }
             }
@@ -18973,6 +18998,14 @@
             "schema": {
               "type": "number",
               "format": "float"
+            }
+          },
+          {
+            "name": "generateReadingSessions",
+            "in": "query",
+            "schema": {
+              "type": "boolean",
+              "default": true
             }
           }
         ],
@@ -29384,6 +29417,357 @@
           "count": {
             "type": "integer",
             "format": "int64"
+          }
+        },
+        "additionalProperties": false
+      },
+      "TachiyomiChapterDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "range": {
+            "type": "string",
+            "nullable": true
+          },
+          "minNumber": {
+            "type": "number",
+            "format": "float"
+          },
+          "maxNumber": {
+            "type": "number",
+            "format": "float"
+          },
+          "sortOrder": {
+            "type": "number",
+            "format": "float"
+          },
+          "pages": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "isSpecial": {
+            "type": "boolean"
+          },
+          "title": {
+            "type": "string",
+            "nullable": true
+          },
+          "files": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/MangaFileDto"
+            },
+            "nullable": true
+          },
+          "pagesRead": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "totalReads": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "lastReadingProgressUtc": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "lastReadingProgress": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "coverImageLocked": {
+            "type": "boolean"
+          },
+          "volumeId": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "createdUtc": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "lastModifiedUtc": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "created": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "releaseDate": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "titleName": {
+            "type": "string",
+            "nullable": true
+          },
+          "summary": {
+            "type": "string",
+            "nullable": true
+          },
+          "ageRating": {
+            "$ref": "#/components/schemas/AgeRating"
+          },
+          "wordCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "volumeTitle": {
+            "type": "string",
+            "nullable": true
+          },
+          "minHoursToRead": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "maxHoursToRead": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "avgHoursToRead": {
+            "type": "number",
+            "format": "float"
+          },
+          "webLinks": {
+            "type": "string",
+            "nullable": true
+          },
+          "isbn": {
+            "type": "string",
+            "nullable": true
+          },
+          "writers": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PersonDto"
+            },
+            "nullable": true
+          },
+          "coverArtists": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PersonDto"
+            },
+            "nullable": true
+          },
+          "publishers": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PersonDto"
+            },
+            "nullable": true
+          },
+          "characters": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PersonDto"
+            },
+            "nullable": true
+          },
+          "pencillers": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PersonDto"
+            },
+            "nullable": true
+          },
+          "inkers": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PersonDto"
+            },
+            "nullable": true
+          },
+          "imprints": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PersonDto"
+            },
+            "nullable": true
+          },
+          "colorists": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PersonDto"
+            },
+            "nullable": true
+          },
+          "letterers": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PersonDto"
+            },
+            "nullable": true
+          },
+          "editors": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PersonDto"
+            },
+            "nullable": true
+          },
+          "translators": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PersonDto"
+            },
+            "nullable": true
+          },
+          "teams": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PersonDto"
+            },
+            "nullable": true
+          },
+          "locations": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PersonDto"
+            },
+            "nullable": true
+          },
+          "genres": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/GenreTagDto"
+            },
+            "nullable": true
+          },
+          "tags": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/TagDto"
+            },
+            "nullable": true
+          },
+          "publicationStatus": {
+            "$ref": "#/components/schemas/PublicationStatus"
+          },
+          "language": {
+            "type": "string",
+            "nullable": true
+          },
+          "count": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "totalCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "languageLocked": {
+            "type": "boolean"
+          },
+          "summaryLocked": {
+            "type": "boolean"
+          },
+          "ageRatingLocked": {
+            "type": "boolean"
+          },
+          "publicationStatusLocked": {
+            "type": "boolean"
+          },
+          "genresLocked": {
+            "type": "boolean"
+          },
+          "tagsLocked": {
+            "type": "boolean"
+          },
+          "writerLocked": {
+            "type": "boolean"
+          },
+          "characterLocked": {
+            "type": "boolean"
+          },
+          "coloristLocked": {
+            "type": "boolean"
+          },
+          "editorLocked": {
+            "type": "boolean"
+          },
+          "inkerLocked": {
+            "type": "boolean"
+          },
+          "imprintLocked": {
+            "type": "boolean"
+          },
+          "lettererLocked": {
+            "type": "boolean"
+          },
+          "pencillerLocked": {
+            "type": "boolean"
+          },
+          "publisherLocked": {
+            "type": "boolean"
+          },
+          "translatorLocked": {
+            "type": "boolean"
+          },
+          "teamLocked": {
+            "type": "boolean"
+          },
+          "locationLocked": {
+            "type": "boolean"
+          },
+          "coverArtistLocked": {
+            "type": "boolean"
+          },
+          "releaseDateLocked": {
+            "type": "boolean"
+          },
+          "titleNameLocked": {
+            "type": "boolean"
+          },
+          "sortOrderLocked": {
+            "type": "boolean"
+          },
+          "coverImage": {
+            "type": "string",
+            "nullable": true
+          },
+          "primaryColor": {
+            "type": "string",
+            "nullable": true
+          },
+          "secondaryColor": {
+            "type": "string",
+            "nullable": true
+          },
+          "format": {
+            "$ref": "#/components/schemas/MangaFormat"
+          },
+          "aniListId": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "malId": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "hardcoverId": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "metronId": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "comicVineId": {
+            "type": "string",
+            "nullable": true
+          },
+          "mangaBakaId": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "number": {
+            "type": "string",
+            "nullable": true
           }
         },
         "additionalProperties": false

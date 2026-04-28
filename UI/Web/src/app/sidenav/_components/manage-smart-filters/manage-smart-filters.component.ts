@@ -4,7 +4,7 @@ import {
   computed,
   DestroyRef,
   inject,
-  input,
+  input, OnInit,
   signal,
   TemplateRef,
   viewChild
@@ -17,7 +17,7 @@ import {APP_BASE_HREF, AsyncPipe} from "@angular/common";
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import {CarouselReelComponent} from "../../../carousel/_components/carousel-reel/carousel-reel.component";
 import {SeriesCardComponent} from "../../../cards/series-card/series-card.component";
-import {Observable, switchMap, tap} from "rxjs";
+import {filter, Observable, switchMap, tap} from "rxjs";
 import {SeriesService} from "../../../_services/series.service";
 import {QueryContext} from "../../../_models/metadata/v2/query-context";
 import {map, shareReplay} from "rxjs/operators";
@@ -34,6 +34,12 @@ import {CardConfigFactory} from "../../../_services/card-config-factory.service"
 import {EntityCardComponent} from "../../../cards/entity-card/entity-card.component";
 import {PromotedIconComponent} from "../../../shared/_components/promoted-icon/promoted-icon.component";
 import {CardEntity, CardEntityFactory} from "../../../_models/card/card-entity";
+import {Action} from "../../../_models/actionables/action";
+import {User} from "../../../_models/user/user";
+import {ActionItem} from "../../../_models/actionables/action-item";
+import {EVENTS, MessageHubService} from "../../../_services/message-hub.service";
+import {DashboardService} from "../../../_services/dashboard.service";
+import {NavService} from "../../../_services/nav.service";
 
 @Component({
   selector: 'app-manage-smart-filters',
@@ -42,7 +48,7 @@ import {CardEntity, CardEntityFactory} from "../../../_models/card/card-entity";
   styleUrls: ['./manage-smart-filters.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class ManageSmartFiltersComponent {
+export class ManageSmartFiltersComponent implements OnInit {
 
   private readonly filterService = inject(FilterService);
   private readonly filterUtilityService = inject(FilterUtilitiesService);
@@ -53,6 +59,9 @@ export class ManageSmartFiltersComponent {
   private readonly actionFactoryService = inject(ActionFactoryService);
   private readonly destroyRef = inject(DestroyRef);
   private readonly cardConfigFactory = inject(CardConfigFactory);
+  private readonly messageHub = inject(MessageHubService);
+  private readonly dashboardService = inject(DashboardService);
+  private readonly sideNavService = inject(NavService);
   protected readonly baseUrl = inject(APP_BASE_HREF);
 
   target = input<'_self' | '_blank'>('_blank');
@@ -77,9 +86,11 @@ export class ManageSmartFiltersComponent {
     'entityType': new FormControl<FilterEntityType>(FilterEntityType.Series, []),
   });
   protected readonly filterApiMap = signal<{ [key: number]: Observable<any> }>({});
-  protected readonly actions = computed(() => this.actionFactoryService.getSmartFilterActions(this.filters()));
+  protected readonly actions = computed(() => this.actionFactoryService.getSmartFilterActions(this.filters(), this.shouldRenderFunc.bind(this)));
   protected readonly filterQuery = signal<string>('');
   protected readonly filterEntityType = signal<FilterEntityType>(FilterEntityType.Series);
+  private readonly dashboardFilters = signal<Set<number>>(new Set<number>());
+  private readonly sideNavFilters = signal<Set<number>>(new Set<number>());
 
   protected titleTemplateRef = viewChild<TemplateRef<{ $implicit: CardEntity }>>('title');
   protected readonly readingListConfig = computed(() => this.cardConfigFactory.forReadingList({titleRef: this.titleTemplateRef(), overrides: {allowSelection: false, actionableFunc: () => []}}));
@@ -96,12 +107,44 @@ export class ManageSmartFiltersComponent {
       tap(val => this.filterEntityType.set(parseInt(val + '', 10)))
     ).subscribe();
 
+    this.messageHub.messages$.pipe(
+      tap(msg => {
+        if (msg.event === EVENTS.SideNavUpdate) {
+          this.sideNavService.getSideNavStreams(true).subscribe(streams => {
+            this.sideNavFilters.set(new Set(streams.map(stream => stream.id)));
+          });
+        } else if (msg.event === EVENTS.DashboardUpdate) {
+          this.dashboardService.getDashboardStreams(true).subscribe(streams => {
+            this.dashboardFilters.set(new Set(streams.map(stream => stream.id)));
+          });
+        }
+      }),
+    ).subscribe();
+  }
+
+  ngOnInit() {
+    this.sideNavService.getSideNavStreams(true).subscribe(streams => {
+      this.sideNavFilters.set(new Set(streams.map(stream => stream.smartFilterId)));
+    });
+    this.dashboardService.getDashboardStreams(true).subscribe(streams => {
+      this.dashboardFilters.set(new Set(streams.map(stream => stream.smartFilterId)));
+    });
   }
 
   getFilterLink(filter: SmartFilter) {
     return this.baseUrl + FilterUtilitiesService.getFilterLink(filter.entityType, filter.filter);
   }
 
+  shouldRenderFunc(action: ActionItem<SmartFilter>, item: SmartFilter, user: User) {
+    switch (action.action) {
+      case Action.AddToDashboard:
+        return !this.dashboardFilters().has(item.id);
+      case Action.AddToSideNav:
+        return !this.sideNavFilters().has(item.id);
+    }
+
+    return true;
+  }
 
   loadData() {
     this.filterService.getAllFilters().subscribe(filters => {

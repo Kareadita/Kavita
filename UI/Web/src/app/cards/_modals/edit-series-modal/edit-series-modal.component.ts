@@ -67,6 +67,7 @@ import {TabTitlePipe} from "../../../_pipes/tab-title.pipe";
 import {
   EditExternalMetadataFormComponent
 } from "../../../shared/_components/edit-external-metadata-form/edit-external-metadata-form.component";
+import {MangaFormat} from "../../../_models/manga-format";
 
 
 @Component({
@@ -99,7 +100,7 @@ import {
     DecimalPipe,
     TitleCasePipe,
     TabTitlePipe,
-    EditExternalMetadataFormComponent,
+    EditExternalMetadataFormComponent
   ],
   templateUrl: './edit-series-modal.component.html',
   styleUrls: ['./edit-series-modal.component.scss'],
@@ -592,4 +593,5 @@ export class EditSeriesModalComponent implements OnInit {
   }
 
   protected readonly LooseLeafOrDefaultNumber = LooseLeafOrDefaultNumber;
+  protected readonly MangaFormat = MangaFormat;
 }

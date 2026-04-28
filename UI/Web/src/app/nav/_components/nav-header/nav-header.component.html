@@ -51,10 +51,10 @@
                         @let normalizedSearchTerm = searchTerm.toLowerCase().trim();
 
                         <span class="ms-1">
-                        @if (item.name.toLowerCase().trim().indexOf(normalizedSearchTerm) >= 0) {
-                          {{item.name}}
+                        @if (item.localizedName.toLowerCase().trim().indexOf(normalizedSearchTerm) >= 0) {
+                          {{item.localizedName}}
                         } @else {
-                          <span [innerHTML]="item.localizedName"></span>
+                          {{item.name}}
                         }
                         </span>
                         <div class="text-light fst-italic" style="font-size: 0.8rem;">in {{item.libraryName}}</div>

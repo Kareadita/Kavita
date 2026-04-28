@@ -22,7 +22,7 @@ import {ImageService} from '../../_services/image.service';
 import {ReadMoreComponent} from '../../shared/read-more/read-more.component';
 import {ImageComponent} from '../../shared/image/image.component';
 import {RouterLink} from '@angular/router';
-import {editModal} from "../../_models/modal/modal-options";
+import {fullscreenModal} from "../../_models/modal/modal-options";
 import {ModalResult} from "../../_models/modal/modal-result";
 import {
   FileDragAndDropUploadComponent
@@ -226,7 +226,7 @@ export class CblManagerComponent implements OnInit {
   }
 
   private openImportModal(savedFiles: CblSavedFile[]) {
-    const ref = this.modalService.open(ImportCblModalComponent, editModal());
+    const ref = this.modalService.open(ImportCblModalComponent, fullscreenModal());
     ref.setInput('savedFiles', savedFiles);
     ref.closed.subscribe((res: ModalResult) => {
       this.refreshLists();

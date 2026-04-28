@@ -103,9 +103,13 @@ public class TachiyomiService(
         };
     }
 
-    public async Task<bool> MarkChaptersUntilAsRead(AppUser user, int seriesId, float chapterNumber,
+    public async Task<bool> MarkChaptersUntilAsRead(AppUser user, int seriesId, float chapterNumber, bool generateReadingSessions,
         CancellationToken ct = default)
     {
+
+        logger.LogDebug("Marking chapters until {ChapterNumber} for series {SeriesId} for user {UserId}",
+            chapterNumber, seriesId, user.Id);
+
         user.Progresses ??= [];
 
         var chapters = chapterNumber switch
@@ -128,9 +132,11 @@ public class TachiyomiService(
 
         await readerService.MarkChaptersAsRead(user, seriesId, chapters);
 
-        // Generate reading sessions
-        BackgroundJob.Enqueue<IReadingSessionService>(s
-            => s.GenerateReadingSessionForChapters(user.Id, seriesId, progressDictionary, CancellationToken.None));
+        if (generateReadingSessions)
+        {
+            BackgroundJob.Enqueue<IReadingSessionService>(s
+                => s.GenerateReadingSessionForChapters(user.Id, seriesId, progressDictionary, CancellationToken.None));
+        }
 
         try {
             if (!unitOfWork.HasChanges()) return true;

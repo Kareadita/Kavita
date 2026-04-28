@@ -1,12 +1,8 @@
 import {HttpParams} from '@angular/common/http';
-import {inject, Injectable} from '@angular/core';
-import {Chapter} from 'src/app/_models/chapter';
-import {MangaFormat} from 'src/app/_models/manga-format';
+import {Injectable} from '@angular/core';
 import {PaginatedResult} from 'src/app/_models/pagination';
-import {Series} from 'src/app/_models/series';
-import {Volume} from 'src/app/_models/volume';
-import {DOCUMENT} from "@angular/common";
 import {ActionItem} from "../../_models/actionables/action-item";
+import {AbstractControl, FormArray, FormGroup, ValidationErrors} from "@angular/forms";
 
 export enum KEY_CODES {
   RIGHT_ARROW = 'ArrowRight',
@@ -29,23 +25,75 @@ export enum KEY_CODES {
   ALT = 'Alt',
 }
 
+export interface FormErrorEntry {
+  path: string;
+  level: 'group' | 'array' | 'control';
+  errors: ValidationErrors;
+}
+
+/**
+ * Recursively walks an AbstractControl tree and collects all errors.
+ * Captures errors at group/array level (cross-field validators) AND control level.
+ */
+export function collectFormErrors(
+  control: AbstractControl,
+  path: string = ''
+): FormErrorEntry[] {
+  const results: FormErrorEntry[] = [];
+
+  // Capture errors at the current node (works for groups, arrays, and controls)
+  if (control.errors) {
+    const level: FormErrorEntry['level'] =
+      control instanceof FormGroup ? 'group'
+        : control instanceof FormArray ? 'array'
+          : 'control';
+
+    results.push({
+      path: path || '(root)',
+      level,
+      errors: control.errors,
+    });
+  }
+
+  // Recurse into children
+  if (control instanceof FormGroup) {
+    for (const key of Object.keys(control.controls)) {
+      const childPath = path ? `${path}.${key}` : key;
+      results.push(...collectFormErrors(control.controls[key], childPath));
+    }
+  } else if (control instanceof FormArray) {
+    control.controls.forEach((child, i) => {
+      const childPath = `${path}[${i}]`;
+      results.push(...collectFormErrors(child, childPath));
+    });
+  }
+
+  return results;
+}
+
+/**
+ * Prints all errors to the console in a readable format.
+ */
+export function printFormErrors(control: AbstractControl, label = 'Form'): void {
+  const entries = collectFormErrors(control);
+
+  if (entries.length === 0) {
+    console.log(`[${label}] No errors`);
+    return;
+  }
+
+  console.group(`[${label}] ${entries.length} error entr${entries.length === 1 ? 'y' : 'ies'}`);
+  for (const { path, level, errors } of entries) {
+    console.log(`(${level}) ${path}:`, errors);
+  }
+  console.groupEnd();
+}
+
 
 @Injectable({
   providedIn: 'root'
 })
 export class UtilityService {
-  private document = inject<Document>(DOCUMENT);
-
-  mangaFormatKeys: string[] = [];
-
-
-  mangaFormatToText(format: MangaFormat): string {
-    if (this.mangaFormatKeys === undefined || this.mangaFormatKeys.length === 0) {
-      this.mangaFormatKeys = Object.keys(MangaFormat);
-    }
-
-    return this.mangaFormatKeys.filter(item => MangaFormat[format] === item)[0];
-  }
 
   filter(input: string, filter: string): boolean {
     if (input === null || filter === null || input === undefined || filter === undefined) return false;
@@ -77,18 +125,6 @@ export class UtilityService {
 
   isUserCollection(d: unknown) {
     return d != null && d.hasOwnProperty('title') && d.hasOwnProperty('itemCount') && !d.hasOwnProperty('startingYear');
-  }
-
-  asVolume(d: any) {
-    return <Volume>d;
-  }
-
-  asChapter(d: any) {
-    return <Chapter>d;
-  }
-
-  asSeries(d: any) {
-    return <Series>d;
   }
 
   isInViewport(element: Element, additionalTopOffset: number = 0) {
@@ -155,16 +191,6 @@ export class UtilityService {
     }
 
     return paginatedVariable;
-  }
-
-  getWindowDimensions() {
-    const windowWidth = window.innerWidth
-                  || document.documentElement.clientWidth
-                  || document.body.clientWidth;
-    const windowHeight = window.innerHeight
-                  || document.documentElement.clientHeight
-                  || document.body.clientHeight;
-    return [windowWidth, windowHeight];
   }
 
   copyActionItem(item: ActionItem<any>): ActionItem<any> {

@@ -1,13 +1,14 @@
-import { Pipe, PipeTransform, inject } from '@angular/core';
-import { MangaFormat } from '../_models/manga-format';
-import {translate, TranslocoService} from "@jsverse/transloco";
+import {Pipe, PipeTransform} from '@angular/core';
+import {MangaFormat} from '../_models/manga-format';
+import {translate} from "@jsverse/transloco";
 
 /**
  * Returns the string name for the format
  */
 @Pipe({
   name: 'mangaFormat',
-  standalone: true
+  standalone: true,
+  pure: true
 })
 export class MangaFormatPipe implements PipeTransform {
 

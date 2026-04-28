@@ -124,4 +124,6 @@ export enum Action {
    * A special action to just navigate somewhere
    */
   Navigate = 38,
+  AddToDashboard = 39,
+  AddToSideNav = 40,
 }

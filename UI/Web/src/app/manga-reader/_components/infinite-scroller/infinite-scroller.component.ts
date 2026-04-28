@@ -16,8 +16,10 @@ import {
   OnInit,
   output,
   Renderer2,
+  signal,
   Signal,
-  SimpleChanges, viewChild
+  SimpleChanges,
+  viewChild
 } from '@angular/core';
 import {BehaviorSubject, fromEvent, map, Observable, of, ReplaySubject, Subject, tap} from 'rxjs';
 import {debounceTime, distinctUntilChanged} from 'rxjs/operators';
@@ -33,7 +35,7 @@ import {SafeStylePipe} from "../../../_pipes/safe-style.pipe";
 import {ReadingProfile} from "../../../_models/preferences/reading-profiles";
 import {BreakpointService} from "../../../_services/breakpoint.service";
 import {Queue} from "../../../shared/data-structures/queue";
-import {PullToLoadComponent} from "../../../shared/_components/pull-to-load/pull-to-load.component";
+import {PullState, PullToLoadComponent} from "../../../shared/_components/pull-to-load/pull-to-load.component";
 
 /**
  * Default debounce time from scroll and scrollend event listeners
@@ -98,6 +100,8 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy, 
   protected readonly breakpointService = inject(BreakpointService);
 
   scrollContainer = viewChild.required<ElementRef<HTMLDivElement>>('scroller');
+  pullToLoadNext = viewChild<PullToLoadComponent>('pullToLoadNext');
+  ignoreNextScrollEvent = signal(false);
 
   get scrollElement(): HTMLElement {
     return this.isFullscreenMode ? this.readerElemRef.nativeElement : this.document.body;
@@ -237,6 +241,24 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy, 
       takeUntilDestroyed(this.destroyRef),
       tap(page => this.pageNumberChange.emit(page)),
     ).subscribe();
+
+    let previousState: PullState = PullState.Idle;
+    effect(() => {
+      const pullToLoad = this.pullToLoadNext();
+      if (!pullToLoad) return;
+
+      const currentState = pullToLoad.state();
+
+      // On mobile devices with a sufficiently small last image, the debounce from moving into idle
+      // causes the scroll event to fire with a wrong page number. We ignore one scroll event to prevent this from
+      // happening.
+      if (previousState === PullState.Triggered && currentState === PullState.Idle) {
+        this.debugLog('Ignoring next scroll event to compensate for PullToLoad debounce')
+        this.ignoreNextScrollEvent.set(true);
+      }
+
+      previousState = currentState;
+    });
   }
 
   ngOnChanges(changes: SimpleChanges): void {
@@ -423,6 +445,11 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy, 
   }
 
   handleScrollEndEvent(event?: any) {
+    if (this.ignoreNextScrollEvent()) {
+      this.ignoreNextScrollEvent.set(false);
+      return;
+    }
+
     if (!this.isScrolling) {
 
       const closestImages = Array.from(document.querySelectorAll('img[id^="page-"]')) as HTMLImageElement[];
