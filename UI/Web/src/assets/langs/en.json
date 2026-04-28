@@ -2549,9 +2549,9 @@
         "configure-step": "Configure",
         "conflicts-step": "Resolve collisions",
         "finalize-step": "Finalize",
-        "prev": "{{common.prev}}",
-        "import": "{{import-step}}",
-        "next": "{{common.next}}",
+        "prev": "{{import-cbl.prev}}",
+        "import": "{{import-cbl.import}}",
+        "next": "{{import-cbl.next}}",
         "save": "{{common.save}}",
 
         "import-description": "Upload a file you, or someone else, has exported to replace or merge with your current settings.",
@@ -2581,6 +2581,27 @@
         "to-pick": "Choose resolution",
 
         "finalize-title": "Preview of your settings, press save to finish your import"
+    },
+
+    "import-cbl": {
+        "close": "{{common.close}}",
+        "title": "CBL Import",
+        "help-label": "{{common.help}}",
+        "import-description": "To get started, import a .cbl file. Kavita will perform multiple checks before importing. Some steps will block moving forward due to issues with the file.",
+        "validate-description": "All files have been validated to see if there are any operations to do on the list. Any lists that have failed will not move to the next step. Fix the CBL files and retry.",
+        "validate-warning": "There are issues with the CBL that will prevent an import. Correct these issues then try again.",
+        "validate-no-issue-description": "No issues found with CBL, press next.",
+        "dry-run-description": "This is a dry run and shows what will happen if you press Next and perform the import. All Failures will not be imported.",
+        "prev": "Prev",
+        "import": "Import",
+        "restart": "Restart",
+        "next": "Next",
+        "import-step": "Import CBLs",
+        "validate-cbl-step": "Validate CBL",
+        "dry-run-step": "Dry Run",
+        "final-import-step": "Final Step",
+        "comicvine-parsing-label": "Use Comic Vine Series matching",
+        "cbl-repo": "You can find many reading lists in the community <a href='https://github.com/DieselTech/CBL-ReadingLists' target='_blank' rel='noopener noreferrer'>repository</a>."
     },
 
     "pdf-reader": {
@@ -4052,8 +4073,6 @@
         "no-data": "No Data",
         "confirm": "Confirm",
         "selected": "Selected",
-        "prev": "Prev",
-        "next": "Next",
 
         "book-num": "Book",
         "issue-hash-num": "Issue #",
