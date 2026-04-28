@@ -697,7 +697,7 @@ public class ReadingListController(
         return Ok();
     }
 
-    private async Task GenerateReadingListCoverImage(int readingListId)
+    public async Task GenerateReadingListCoverImage(int readingListId)
     {
         await readingListService.GenerateReadingListCoverImage(readingListId);
 
