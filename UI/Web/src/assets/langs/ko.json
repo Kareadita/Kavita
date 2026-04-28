@@ -914,8 +914,26 @@
         "release-title": "{{sort-field-pipe.release-year}}",
         "age-rating-title": "{{metadata-fields.age-rating-title}}",
         "file-path-title": "파일",
-        "folder-path-title": "폴더 경로",
-        "external-metadata-title": "외부 메타데이터"
+        "folder-path-title": "{{edit-series-modal.folder-path-title}}",
+        "external-metadata-title": "외부 메타데이터",
+        "updated-label": "업데이트됨",
+        "basic-metadata-title": "기초 메타데이터",
+        "read-time-label": "독서 시간",
+        "pages-label": "{{edit-chapter-modal.pages-label}}",
+        "words-label": "{{edit-chapter-modal.words-label}}",
+        "added-label": "추가됨",
+        "kavita-id-label": "Kavita ID",
+        "sort-order-label": "{{edit-chapter-modal.sort-order-label}}",
+        "language-label": "언어",
+        "is-special-label": "특별",
+        "pub-status-label": "{{metadata-filter.publication-status-label}}",
+        "yes-label": "예",
+        "no-label": "아니오",
+        "file-info-title": "파일 정보",
+        "not-set-label": "설정 없음",
+        "pages-count": "{{series-detail.pages-count}}",
+        "words-count": "{{series-detail.words-count}}",
+        "bytes-count": "{{num}} bytes"
     },
     "related-tab": {
         "reading-lists-title": "{{reading-lists.title}}",
@@ -1530,7 +1548,9 @@
         "description": "이 화면에서 화 또는 권을 Kavita 엔티티에 자동으로 매핑하는 재배치 규칙을 만들 수 있습니다. 재배치 규칙은 이 목록과 향후 목록에 적용됩니다.",
         "unmatched-count": "{{count}}개 없음",
         "refresh": "새로고침",
-        "wiki": "위키"
+        "wiki": "위키",
+        "promote": "{{actionable.promote}}",
+        "promote-tooltip": "{{actionable.promote-tooltip}}"
     },
     "pdf-reader": {
         "loading-message": "로딩 중...",
@@ -2321,7 +2341,9 @@
         "export-v1": "CBL v1",
         "export-v2": "CBL v2",
         "mark-as-read-with-session": "세션에서 읽은 상태로 표시",
-        "mark-as-read-with-session-tooltip": "진행 상황을 완전히 읽은 상태로 표시하고 세션을 생성합니다"
+        "mark-as-read-with-session-tooltip": "진행 상황을 완전히 읽은 상태로 표시하고 세션을 생성합니다",
+        "cbl-manager": "CBL 관리자",
+        "cbl-manager-tooltip": "CBLs 관리/동기화"
     },
     "preferences": {
         "left-to-right": "왼쪽에서 오른쪽",
@@ -2850,7 +2872,9 @@
         "readinglist-tags": "{{metadata-fields.tags-title}}",
         "readinglist-writer": "{{person-role-pipe.writer}}",
         "readinglist-artist": "{{person-role-pipe.artist}}",
-        "person-library": "{{stream-list-item.library}}"
+        "person-library": "{{stream-list-item.library}}",
+        "readinglist-provider": "제공자",
+        "readinglist-missing-item-count": "없는 항목 수"
     },
     "breakpoint-pipe": {
         "never": "없음",
@@ -3522,7 +3546,9 @@
         "mangaBakaId-label": "MangaBaka Id",
         "hardcoverId-label": "Hardcover Id",
         "comicVineId-label": "Comic Vine Id",
-        "metronId-label": "Metron Id"
+        "metronId-label": "Metron Id",
+        "not-set-label": "설정 없음",
+        "isbn-label": "{{edit-chapter-modal.isbn-label}}"
     },
     "cbl-match-tier-pipe": {
         "remap-rule": "재배치 규칙",
@@ -3577,7 +3603,8 @@
         "not-authorized": "이 컨텐츠와 상호작용할 권한이 없습니다",
         "item-count": "{{common.item-count}}",
         "missing-count": "{{reading-list-detail.missing-count}}",
-        "last-checked": "{{date}}에 확인됨"
+        "last-checked": "{{date}}에 확인됨",
+        "sync-manual": "동기화(수동)"
     },
     "manage-remap-rules-modal": {
         "title": "재배치 규칙 관리",

@@ -934,8 +934,6 @@
         "pages-count": "{{series-detail.pages-count}}",
         "words-count": "{{series-detail.words-count}}",
         "bytes-count": "{{num}} octets"
-        "folder-path-title": "Chemin du dossier",
-        "external-metadata-title": "Métadonnées externes"
     },
     "related-tab": {
         "reading-lists-title": "{{reading-lists.title}}",

@@ -50,8 +50,8 @@
         "is-processed-header": "Processado",
         "no-data": "{{common.no-data}}",
         "volume-and-chapter-num": "Volume {{v}} Capítulo {{n}}",
-        "volume-num": "Volume {{num}}",
-        "chapter-num": "Capítulo {{num}}",
+        "volume-num": "{{entity-title.volume-num}}",
+        "chapter-num": "{{entity-title.chapter-num}}",
         "rating": "Classificação {{r}}",
         "not-applicable": "Não Aplicável",
         "processed": "Processado",
@@ -2787,8 +2787,9 @@
         "reset-tooltip": "Redefinir ids externos de todos os utilizadores, utilize esta funcionalidade para redefinir as ligações entre os utilizadores do Kavita e o seu provedor de identificação",
         "reset-confirm": "Tem a certeza que quer redefinir os ids externos de todos os utilizadores?",
         "reset-success": "Os ids externos foram redefinidos para todos os utilizadores, volte a autenticar para fazer a ligação",
-        "auto-save-required": "Alterou definições críticas, grave para as persistir",
-        "other-field-invalid": "{{validation.other-field-invalid}}"
+        "auto-save-required": "Alterou definições críticas manualmente, grave para as persistir",
+        "other-field-invalid": "{{validation.other-field-invalid}}",
+        "checking-authority": "A verificar se a autoridade é válida, aguarde por favor..."
     },
     "identity-provider-pipe": {
         "kavita": "Kavita",
@@ -2926,7 +2927,8 @@
         "image-only": "Imagens",
         "add-auth-key": "Nova",
         "description": "Uma chave de autenticação é como uma palavra passe. Ao alterna-la irá invalidar clientes existentes.",
-        "copy-key": "{{common.copy}}"
+        "copy-key": "{{common.copy}}",
+        "clients-opds-error": "Houve uma falha a carregar o url OPDS con a chave: {{key}}"
     },
     "create-auth-key": {
         "create-title": "Criar Chave de Autenticação",
@@ -3326,6 +3328,31 @@
         "profile": "Perfil de {{username}}"
     },
     "authority-validation-result-pipe": {
-        "success": "Autoridade é válida"
+        "success": "Autoridade é válida",
+        "invalid-authority": "O Kavita pode carregar a configuração OIDC, mas o emissor não corresponde",
+        "failure": "O Kavita não consegue carregar a configuração OIDC",
+        "not-applicable": "O Kavita não pode avaliar a autoridade porque não está configurada",
+        "missing-https": "{{manage-oidc-connect.tls-required}}"
+    },
+    "file-drag-and-drop-upload": {
+        "drag-n-drop": "{{cover-image-chooser.drag-n-drop}}",
+        "upload": "{{cover-image-chooser.upload}}",
+        "enter-an-url-pre-title": "Introduza um {{url}}",
+        "url": "url",
+        "url-label": "Url",
+        "back": "Voltar",
+        "load": "Carregar"
+    },
+    "change-username": {
+        "username-label": "{{common.username}}",
+        "new-username-label": "Novo Nome de Utilizador",
+        "reset": "{{common.reset}}",
+        "save": "{{common.save}}",
+        "required-field": "{{validation.required-field}}"
+    },
+    "cbl-match-tier-pipe": {
+        "remap-rule": "Regra de Remapeamento",
+        "external-id": "ID Externo",
+        "exact-name": "Nome Exato"
     }
 }

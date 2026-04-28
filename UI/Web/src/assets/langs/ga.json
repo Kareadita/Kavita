@@ -914,8 +914,26 @@
         "length-title": "{{edit-chapter-modal.words-label}}",
         "age-rating-title": "{{metadata-fields.age-rating-title}}",
         "file-path-title": "Comhaid",
-        "folder-path-title": "Cosán fillteáin",
-        "external-metadata-title": "Meiteashonraí Seachtracha"
+        "folder-path-title": "{{edit-series-modal.folder-path-title}}",
+        "external-metadata-title": "Meiteashonraí Seachtracha",
+        "basic-metadata-title": "Meiteashonraí Bunúsacha",
+        "read-time-label": "Am léite",
+        "pages-label": "{{edit-chapter-modal.pages-label}}",
+        "words-label": "{{edit-chapter-modal.words-label}}",
+        "added-label": "Cuireadh leis",
+        "updated-label": "Nuashonraithe",
+        "kavita-id-label": "Aitheantas Kavita",
+        "sort-order-label": "{{edit-chapter-modal.sort-order-label}}",
+        "language-label": "Teanga",
+        "is-special-label": "Special",
+        "pub-status-label": "{{metadata-filter.publication-status-label}}",
+        "yes-label": "Tá",
+        "no-label": "Níl",
+        "file-info-title": "Eolas comhaid",
+        "not-set-label": "Gan socrú",
+        "pages-count": "{{series-detail.pages-count}}",
+        "words-count": "{{series-detail.words-count}}",
+        "bytes-count": "{{num}} beart"
     },
     "related-tab": {
         "reading-lists-title": "{{reading-lists.title}}",
@@ -1530,7 +1548,9 @@
         "description": "Ar an scáileán seo is féidir leat rialacha athmhapála a thógáil chun sraitheanna nó saincheisteanna a mhapáil go huathoibríoch chuig eintitis Kavita. Beidh feidhm ag rialacha athmhapála maidir leis an liosta seo agus le liostaí amach anseo.",
         "unmatched-count": "{{count}} ar iarraidh",
         "refresh": "Athnuaigh",
-        "wiki": "Vicí"
+        "wiki": "Vicí",
+        "promote": "{{actionable.promote}}",
+        "promote-tooltip": "{{actionable.promote-tooltip}}"
     },
     "pdf-reader": {
         "loading-message": "Á Luchtú...",
@@ -2080,7 +2100,7 @@
         "less-than": "Níos lú ná",
         "less-than-or-equal": "Níos lú nó cothrom le",
         "matches": "Lasáin",
-        "does-not-contain": "Níl",
+        "does-not-contain": "Níl ann",
         "not-equal": "Níl sé cothrom",
         "ends-with": "Críochnaigh le",
         "is-before": "An bhfuil roimh",
@@ -2321,7 +2341,9 @@
         "export-v2": "CBL v2",
         "export-v2-tooltip": "Úsáid CBL v2 (JSON)",
         "mark-as-read-with-session": "Marcáil mar Léite le Seisiún",
-        "mark-as-read-with-session-tooltip": "Marcáil an dul chun cinn mar léite go hiomlán agus gin seisiún dó"
+        "mark-as-read-with-session-tooltip": "Marcáil an dul chun cinn mar léite go hiomlán agus gin seisiún dó",
+        "cbl-manager": "Bainisteoir CBL",
+        "cbl-manager-tooltip": "Bainistigh/Sioncrónaigh CBLanna"
     },
     "preferences": {
         "left-to-right": "Clé go Deas",
@@ -2850,7 +2872,9 @@
         "readinglist-tags": "{{metadata-fields.tags-title}}",
         "readinglist-writer": "{{person-role-pipe.writer}}",
         "readinglist-artist": "{{person-role-pipe.artist}}",
-        "person-library": "{{stream-list-item.library}}"
+        "person-library": "{{stream-list-item.library}}",
+        "readinglist-provider": "Soláthraí",
+        "readinglist-missing-item-count": "Líon Míreanna atá ar Iarraidh"
     },
     "breakpoint-pipe": {
         "never": "Choíche",
@@ -3522,7 +3546,9 @@
         "mangaBakaId-label": "Aitheantas MangaBaka",
         "hardcoverId-label": "Aitheantas Clúdaigh Chrua",
         "comicVineId-label": "Aitheantas Fíniúna Greannáin",
-        "metronId-label": "Aitheantas Metron"
+        "metronId-label": "Aitheantas Metron",
+        "not-set-label": "Gan socrú",
+        "isbn-label": "{{edit-chapter-modal.isbn-label}}"
     },
     "cbl-match-tier-pipe": {
         "remap-rule": "Riail Athmhapála",
@@ -3577,7 +3603,8 @@
         "not-authorized": "Níl an cumas agat idirghníomhú leis an ábhar seo",
         "item-count": "{{common.item-count}}",
         "missing-count": "{{reading-list-detail.missing-count}}",
-        "last-checked": "Seiceáilte Deiridh: {{date}}"
+        "last-checked": "Seiceáilte Deiridh: {{date}}",
+        "sync-manual": "Sioncrónú (Lámhleabhar)"
     },
     "manage-remap-rules-modal": {
         "title": "Bainistigh Rialacha Athmhapála",

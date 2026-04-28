@@ -892,8 +892,26 @@
         "release-title": "{{sort-field-pipe.release-year}}",
         "age-rating-title": "{{metadata-fields.age-rating-title}}",
         "file-path-title": "Soubory",
-        "folder-path-title": "Cesta ke složce",
-        "external-metadata-title": "Externí metadata"
+        "folder-path-title": "{{edit-series-modal.folder-path-title}}",
+        "external-metadata-title": "Externí metadata",
+        "basic-metadata-title": "Základní metadata",
+        "read-time-label": "Doba čtení",
+        "pages-label": "{{edit-chapter-modal.pages-label}}",
+        "words-label": "{{edit-chapter-modal.words-label}}",
+        "added-label": "Přidáno",
+        "updated-label": "Aktualizováno",
+        "kavita-id-label": "Kavita ID",
+        "sort-order-label": "{{edit-chapter-modal.sort-order-label}}",
+        "language-label": "Jazyk",
+        "is-special-label": "Speciální",
+        "pub-status-label": "{{metadata-filter.publication-status-label}}",
+        "yes-label": "Ano",
+        "no-label": "Ne",
+        "file-info-title": "Informace o souboru",
+        "not-set-label": "Nenastaveno",
+        "pages-count": "{{series-detail.pages-count}}",
+        "words-count": "{{series-detail.words-count}}",
+        "bytes-count": "{{num}} bajtů"
     },
     "related-tab": {
         "reading-lists-title": "{{reading-lists.title}}",
@@ -1462,7 +1480,9 @@
         "description": "Na této obrazovce můžete vytvářet pravidla pro automatické přiřazování sérií nebo čísel k entitám Kavita. Tato pravidla se budou vztahovat na tento i budoucí seznamy.",
         "unmatched-count": "Chybí {{count}}",
         "refresh": "Obnovit",
-        "wiki": "Wiki"
+        "wiki": "Wiki",
+        "promote": "{{actionable.promote}}",
+        "promote-tooltip": "{{actionable.promote-tooltip}}"
     },
     "manga-reader": {
         "auto-close-menu-label": "{{manage-reading-profiles.auto-close-menu-label}}",
@@ -1957,7 +1977,9 @@
         "export-v2": "CBL v2",
         "export-v2-tooltip": "Použijte CBL v2 (JSON)",
         "mark-as-read-with-session": "Označit jako přečtené s relací",
-        "mark-as-read-with-session-tooltip": "Označit položku jako přečtenou a vytvořit pro ni relaci"
+        "mark-as-read-with-session-tooltip": "Označit položku jako přečtenou a vytvořit pro ni relaci",
+        "cbl-manager": "Správce CBL",
+        "cbl-manager-tooltip": "Správa/synchronizace CBL"
     },
     "changelog-update-item": {
         "changed": "Změněno",
@@ -2850,7 +2872,9 @@
         "readinglist-tags": "{{metadata-fields.tags-title}}",
         "readinglist-writer": "{{person-role-pipe.writer}}",
         "readinglist-artist": "{{person-role-pipe.artist}}",
-        "person-library": "{{stream-list-item.library}}"
+        "person-library": "{{stream-list-item.library}}",
+        "readinglist-provider": "Poskytovatel",
+        "readinglist-missing-item-count": "Počet chybějících položek"
     },
     "breakpoint-pipe": {
         "never": "Nikdy",
@@ -3522,7 +3546,9 @@
         "mangaBakaId-label": "MangaBaka ID",
         "hardcoverId-label": "Hardcover ID",
         "comicVineId-label": "Comic Vine ID",
-        "metronId-label": "Metron ID"
+        "metronId-label": "Metron ID",
+        "not-set-label": "Nenastaveno",
+        "isbn-label": "{{edit-chapter-modal.isbn-label}}"
     },
     "cbl-match-tier-pipe": {
         "remap-rule": "Pravidlo přemapování",
@@ -3577,7 +3603,8 @@
         "not-authorized": "Nemáte oprávnění k prohlížení tohoto obsahu",
         "item-count": "{{common.item-count}}",
         "missing-count": "{{reading-list-detail.missing-count}}",
-        "last-checked": "Naposledy zkontrolováno: {{date}}"
+        "last-checked": "Naposledy zkontrolováno: {{date}}",
+        "sync-manual": "Synchronizovat (ručně)"
     },
     "manage-remap-rules-modal": {
         "title": "Správa pravidel přemapování",

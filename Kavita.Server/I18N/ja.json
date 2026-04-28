@@ -237,5 +237,11 @@
     "email.token-expiring-soon.fallback-link-label": "上記のボタンが機能しない場合は、こちらのリンクをご利用ください:",
     "email.token-expired.fallback-link-label": "上記のボタンが機能しない場合は、こちらのリンクをご利用ください:",
     "email.email-confirm.fallback-link-label": "上記のボタンが機能しない場合は、こちらのリンクをご利用ください:",
-    "email.password-reset.fallback-link-label": "上記のボタンが機能しない場合は、こちらのリンクをご利用ください:"
+    "email.password-reset.fallback-link-label": "上記のボタンが機能しない場合は、こちらのリンクをご利用ください:",
+    "url-malformed": "URL の形式が正しくありません",
+    "url-https-only": "HTTPS URL のみが許可されます",
+    "url-unable-to-resolve": "ホスト名を解決できません",
+    "url-blocked-address": "URL がブロックされたアドレスに解決されます",
+    "cbl-import-download-from-url": "URL からファイルをダウンロードできません",
+    "cbl-import-validation-types": ".cbl と .json 形式のファイルのみが許可されます"
 }

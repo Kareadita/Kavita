@@ -673,7 +673,7 @@
         "volume-num": "{{common.volume-num}}",
         "reading-lists-title": "{{side-nav.reading-lists}}",
         "pages-count": "{{num}} Stron",
-        "words-count": "{{num}} Słów",
+        "words-count": "{{num}} Wyrazów",
         "weblinks-title": "Linki",
         "more-alt": "Więcej",
         "time-left-alt": "Pozostały czas",
@@ -912,7 +912,10 @@
         "age-rating-title": "{{metadata-fields.age-rating-title}}",
         "file-path-title": "Pliki",
         "folder-path-title": "Ścieżka do foleru",
-        "external-metadata-title": "Zewnętrzne metadane"
+        "external-metadata-title": "Zewnętrzne metadane",
+        "pages-count": "{{series-detail.pages-count}}",
+        "words-count": "{{series-detail.words-count}}",
+        "bytes-count": "{{num}} bajtów"
     },
     "related-tab": {
         "reading-lists-title": "{{reading-lists.title}}",
@@ -1289,7 +1292,7 @@
         "scrobbling": "Scrobblowanie",
         "theme": "Motyw",
         "customize": "Dostosuj",
-        "cbl-import": "Lista czytelnicza CBL",
+        "cbl-import": "Menedżer list czytelniczych",
         "mal-stack-import": "MAL Stack",
         "admin-matched-metadata": "Pasujące metadane",
         "admin-manage-tokens": "Zarządzanie tokenami użytkownika",
@@ -1300,7 +1303,11 @@
         "admin-oidc": "OpenID Connect",
         "admin-mappings-import": "Ustawienia metadanych",
         "font": "Czcionki EPUB",
-        "admin-public-metadata": "Zarządzaj metadanymi"
+        "admin-public-metadata": "Zarządzaj metadanymi",
+        "insights-section-title": "Wgląd",
+        "admin-activity": "Aktywność",
+        "admin-device": "Urządzenia",
+        "custom-key-binds": "Skróty klawiszowe"
     },
     "collection-detail": {
         "no-data": "Brak elementów. Spróbuj dodać serię.",
@@ -1430,7 +1437,8 @@
         "person-aka-status": "Pasuje do aliasu",
         "browse-genres": "Przeglądaj gatunki",
         "browse-tags": "Przeglądaj tagi",
-        "all-annotations": "Przeglądaj adnotacje"
+        "all-annotations": "Przeglądaj adnotacje",
+        "my-profile": "Mój profil"
     },
     "promoted-icon": {
         "promoted": "{{common.promoted}}"
@@ -1482,7 +1490,10 @@
         "delete-rule": "{{common.delete}}",
         "cancel": "{{common.cancel}}",
         "volume-num": "{{common.volume-num-shorthand}}",
-        "issue-num": "{{common.issue-num-shorthand}}"
+        "issue-num": "{{common.issue-num-shorthand}}",
+        "col-status": "Status",
+        "promote": "{{actionable.promote}}",
+        "promote-tooltip": "{{actionable.promote-tooltip}}"
     },
     "pdf-reader": {
         "loading-message": "Ładowanie...",
@@ -1624,7 +1635,8 @@
         "person-chapter-count": "Liczba rozdziałów",
         "annotation-owner": "Właściciel",
         "annotation-series": "Nazwa serii",
-        "annotation-color": "Kolor"
+        "annotation-color": "Kolor",
+        "user-rating": "Moja ocena"
     },
     "edit-series-modal": {
         "title": "{{seriesName}} szczegóły",
@@ -1813,7 +1825,8 @@
         "vols-and-chapters": "{{volCount}} Tomów / {{chpCount}} Rozdziałów",
         "remove-from-want-to-read": "{{actionable.remove-from-want-to-read}}",
         "add-to-want-to-read": "{{actionable.add-to-want-to-read}}",
-        "provided-by-label": "Dostarczone przez"
+        "provided-by-label": "Dostarczone przez",
+        "story-and-art-label": "Fabuła & Grafika"
     },
     "next-expected-card": {
         "title": "~{{date}}",
@@ -1848,7 +1861,11 @@
         "people-count": "{{num}} Osób",
         "tags": "{{metadata-fields.tags-title}}",
         "people": "Osoby",
-        "genres": "{{metadata-fields.genres-title}}"
+        "genres": "{{metadata-fields.genres-title}}",
+        "stats-title": "Przeglądaj",
+        "popular-genres-title": "Popularne gatunki",
+        "popular-tags-title": "Popularne tagi",
+        "popular-person-title": "Popularne {{role}}"
     },
     "errors": {
         "series-doesnt-exist": "Ta seria już nie istnieje",
@@ -2600,7 +2617,8 @@
         "clear": "{{common.clear}}",
         "no-data": "Nie utworzono jeszcze żadnych kolekcji",
         "loading": "{{common.loading}}",
-        "bound": "Powiązany"
+        "bound": "Powiązany",
+        "hidden": "{{amount}} profil(i) ukryto z powodu nieprawidłowego stanu"
     },
     "merge-person-modal": {
         "title": "{{personName}}",
@@ -2652,7 +2670,9 @@
         "readinglist-item-count": "{{sort-field-pipe.readinglist-item-count}}",
         "readinglist-tags": "{{metadata-fields.tags-title}}",
         "readinglist-writer": "{{person-role-pipe.writer}}",
-        "readinglist-artist": "{{person-role-pipe.artist}}"
+        "readinglist-artist": "{{person-role-pipe.artist}}",
+        "readinglist-title": "Tytuł",
+        "readinglist-provider": "Dostawca"
     },
     "breakpoint-pipe": {
         "never": "Nigdy",
@@ -2979,13 +2999,24 @@
         "combo": "{{hour}}h {{min}}m"
     },
     "manage-custom-key-binds": {
-        "reset": "Resetuj {{target}}"
+        "reset": "Resetuj {{target}}",
+        "description": "Czasami klikanie i przeciąganie myszą jest po prostu zbyt powolne. Skorzystaj z ulubionych skrótów klawiszowych, aby przyspieszyć obsługę. Każda opcja pozwala na skonfigurowanie maksymalnie {{max}} różnych skrótów klawiszowych. <b> Naciśnij i przytrzymaj skrót klawiszowy, aby go usunąć. </b>",
+        "key-bind-error-reserved-key-bind": "To skrót klawiszowy jest zarezerwowany i nie można go używać",
+        "key-bind-error-need-at-least-one-key": "Twój skrót klawiszowy musi zawierać co najmniej jeden klawisz",
+        "key-bind-error-overlap-in-target": "Jeden lub więcej skrótów klawiszowych jest identycznych",
+        "add": "Dodaj inny kalwisz",
+        "errors-array": "Skrót klawiszowy dla {{target}} zawiera błędy",
+        "errors-control": "Skrót klawiszowy {{index}} dla {{target}} zawiera błedy"
     },
     "client-device-platform-pipe": {
         "unknown": "{{client-device-auth-type-pipe.unknown}}"
     },
     "client-device-client-type-pipe": {
-        "unknown": "{{client-device-auth-type-pipe.unknown}}"
+        "unknown": "{{client-device-auth-type-pipe.unknown}}",
+        "web-browser": "Przeglądarka internetowa",
+        "koreader": "KOReader",
+        "librera": "Librera",
+        "opds-client": "Klient OPDS"
     },
     "profile": {
         "title": "Profil użytkownika {{username}}",
@@ -2994,7 +3025,8 @@
         "time-reading-label": "Całkowity czas czytania:",
         "avg-reading-per-week-label": "Średnio tygodniowo:",
         "stats-title": "Rzut oka na podróż {{username}} przez {{libraryName}}",
-        "total-reads-badge": "{{reads}} Czyta"
+        "total-reads-badge": "{{reads}} Czyta",
+        "k+-badge": "Subskrybent K+"
     },
     "profile-stat-bar": {
         "books-read-tooltip": "Przeczytane książki: {{count}}",
@@ -3003,7 +3035,14 @@
         "words-read-tooltip": "Przeczytane słowa: {{count}}",
         "authors-read-tooltip": "Przeczytani autorzy: {{count}}",
         "reviews-tooltip": "Recenzje: {{count}}",
-        "ratings-tooltip": "Oceny: {{count}}"
+        "ratings-tooltip": "Oceny: {{count}}",
+        "books-read-label": "Książek przeczytanych",
+        "comics-read-label": "Komiksów przeczytanych",
+        "pages-read-label": "Stron przeczytanych",
+        "words-read-label": "Wyrazów przeczytanych",
+        "authors-read-label": "Autorów przeczytanych",
+        "reviews-label": "Recenzje",
+        "ratings-label": "Oceny"
     },
     "preferred-format": {
         "sub-title": "{{name}} najbardziej lubi czytać {{format}}",
@@ -3011,7 +3050,8 @@
     },
     "favorite-authors": {
         "sub-title": "Najczęściej czytanym autorem przez {{name}} jest {{author}}, z łączną liczbą {{count}} przeczytanych dzieł",
-        "no-data": "{{common.no-data}}"
+        "no-data": "{{common.no-data}}",
+        "title": "Najczęściej czytani autorzy"
     },
     "page-spread": {
         "sub-title": "Większość rozdziałów czytanych przez {{username}} ma między {{highestBucket}} stron",
@@ -3030,29 +3070,47 @@
     "tag-breakdown": {
         "sub-title": "Najczęściej czytanym tagiem {{name}} jest {{mostUsed}}",
         "missing": "Brakujące tagi dla {{amount}} serii",
-        "no-data": "{{common.no-data}}"
+        "no-data": "{{common.no-data}}",
+        "title": "Najczęściej czytane tagi"
     },
     "genre-breakdown": {
-        "no-data": "{{common.no-data}}"
+        "no-data": "{{common.no-data}}",
+        "title": "Najczęściej czytane gatunki",
+        "sub-title": "{{name}} najczęściej czytanym gatunkiem jest {{mostUsed}}",
+        "missing": "Brak gatunku dla {{amount}} serii"
     },
     "reads-by-month": {
-        "no-data": "{{common.no-data}}"
+        "no-data": "{{common.no-data}}",
+        "sub-title": "{{username}} przeczytał najwięcej w {{month}} {{year}} z {{reads}} przeczytanymi rozdziałami"
     },
     "avg-time-reading-by-hour": {
-        "no-data": "{{common.no-data}}"
+        "no-data": "{{common.no-data}}",
+        "title": "Šredni spedzonyspędzony czas na czytaniu w godzinach",
+        "most-time-spend-reading": "{{name}} spędza najwięcej czasu na czytanie pomiędzy {{startHour}} i {{endHour}} ze średnim czasem {{amount}} minut"
     },
     "profile-overview": {
-        "want-to-read": "{{side-nav.want-to-read}}"
+        "want-to-read": "{{side-nav.want-to-read}}",
+        "currently-reading": "Obecnie czytane"
     },
     "reading-pace": {
-        "no-data": "{{common.no-data}}"
+        "no-data": "{{common.no-data}}",
+        "hours-read": "Godziny czytania",
+        "pages-read": "Stron przeczytanych",
+        "words-read": "Wyrazów przeczytanych",
+        "comics-read": "Komiksów przeczytanych",
+        "books-read": "Książek przeczytanych"
     },
     "smart-time-picker": {
         "during-from-to": "od {{startYear}} do {{endYear}}",
-        "close": "{{common.close}}"
+        "close": "{{common.close}}",
+        "select-year": "Wybierz rok",
+        "custom-range": "Własny zakres",
+        "during-select": "Wybierz zakres czasu"
     },
     "client-device-type-pipe": {
-        "Unknown": "{{common.unknown}}"
+        "Unknown": "{{common.unknown}}",
+        "tablet": "Tablet",
+        "desktop": "Komputer stacjonarny"
     },
     "active-user-card": {
         "books-count": "{{count}} książek",
@@ -3067,10 +3125,20 @@
         "words-count": "{{series-detail.words-count}}",
         "no-data": "{{common.no-data}}",
         "pages-read": "{{reading-pace.pages-read}}",
-        "words-read": "{{reading-pace.words-read}}"
+        "words-read": "{{reading-pace.words-read}}",
+        "info-alt": "Więcej informacji",
+        "today": "Dzisiaj",
+        "yesterday": "Wczoraj",
+        "num-more": "{{num}} więcej"
     },
     "activity-graph": {
-        "all-time": "{{time-periods.all-time}}"
+        "all-time": "{{time-periods.all-time}}",
+        "title": "Aktywność czytelnicza",
+        "day-of-week-alt": "Dzień tygodnia",
+        "reading-time": "Czas czytania",
+        "pages": "Stron",
+        "words": "Wyrazów",
+        "aggregated-count": "Przeczytałeś {{totalPages}} stron i {{totalWords}} wyrazów w {{year}}"
     },
     "version-update-modal": {
         "close": "{{common.close}}",
@@ -3119,7 +3187,22 @@
         "item-count": "{{common.item-count}}",
         "missing-count": "{{reading-list-detail.missing-count}}",
         "add": "{{common.add}}",
-        "delete": "{{common.delete}}"
+        "delete": "{{common.delete}}",
+        "browse-repo": "Przeglądaj CBL",
+        "description": "Możesz zaimportować listy czytelnicze z pliku, adresu URL lub przeglądać repozytorium CBL. Listy utworzone na podstawie źródeł internetowych będą automatycznie aktualizowane w tle lub na żądanie.",
+        "url": "URL do CBL",
+        "preview-default": "Prześlij swój plik CBL w wersji 1 lub 2 w celu zaimportowania",
+        "upload-continued": "plik cbl",
+        "back": "Wstecz",
+        "provider-url": "URL",
+        "provider-file": "Plik",
+        "update-available": "Aktualizacja dostępna",
+        "filter-has-update": "Ma aktualizację",
+        "sync": "Synchronizuj",
+        "sync-manual": "Synchronizuj (Ręcznie)",
+        "last-synced": "Ostatnia synchronizacja: {{date}}",
+        "last-checked": "Ostatnio sprawdzano: {{date}}",
+        "source": "Źródło"
     },
     "manage-remap-rules-modal": {
         "close": "{{common.close}}",
@@ -3135,12 +3218,28 @@
         "promote": "{{actionable.promote}}",
         "volume-num": "{{common.volume-num-shorthand}}",
         "issue-num": "{{common.issue-num-shorthand}}",
-        "edit": "{{common.edit}}"
+        "edit": "{{common.edit}}",
+        "my-rules-header": "Moje reguły",
+        "global-rules-header": "Reguły globalne",
+        "other-users-rules-header": "Reguły innych urzytkowników",
+        "created-col": "Utworzono",
+        "created-by-col": "Utworzono przez",
+        "user-col": "Urzytkownik",
+        "cbl-volume-placeholder": "np. 2016",
+        "cbl-number-placeholder": "np. 1"
     },
     "browse-cbl-repo-modal": {
         "loading": "{{common.loading}}",
         "cancel": "{{common.cancel}}",
-        "close": "{{common.close}}"
+        "close": "{{common.close}}",
+        "rate-limit-warning": "Kavita zbliża się do osiągnięcia limitu żądań dla GitHub! Zostało Ci jeszcze {{remaining}} żądań.",
+        "rate-limit-resets": "Reset limitu żądań {{time}}",
+        "root-alt-label": "Katalog główny",
+        "file-browser-label": "Przeglądarka repozytorium CBL",
+        "type-header": "Typ pliku",
+        "select-all-files": "Zaznacz wszystko",
+        "select-file-alt-label": "Zaznacz plik: {{name}}",
+        "empty-directory": "Pusty katalog"
     },
     "download-queue-drawer": {
         "cancel": "{{common.cancel}}",
@@ -3150,7 +3249,8 @@
         "downloading": "{{download-queue-status-pipe.downloading}}",
         "completed": "{{download-queue-status-pipe.completed}}",
         "failed": "{{download-queue-status-pipe.failed}}",
-        "cancelled": "{{download-queue-status-pipe.cancelled}}"
+        "cancelled": "{{download-queue-status-pipe.cancelled}}",
+        "today": "Dzisiaj"
     },
     "download-queue-item": {
         "retry": "{{download-queue-drawer.retry}}",
@@ -3161,7 +3261,11 @@
     },
     "import-cbl": {
         "close": "{{common.close}}",
-        "help-label": "{{common.help}}"
+        "help-label": "{{common.help}}",
+        "title": "Importuj CBL",
+        "validate-no-issue-description": "Nie wykryto żadnych problemów z CBL, naciśnij „Dalej”.",
+        "import": "Importuj",
+        "next": "Dalej"
     },
     "filter-entity-type-pipe": {
         "series": "{{tabs.series-tab}}",
@@ -3226,5 +3330,85 @@
         "default": "Domyślne (1080x1920))",
         "high": "Duże (1920x2560)",
         "ultra": "Ultra (2160x3840)"
+    },
+    "keybind-setting-description-pipe": {
+        "key-bind-title-navigate-to-settings": "Otwórz ustawienia",
+        "key-bind-title-toggle-fullscreen": "Przełącz pełny ekran",
+        "key-bind-title-open-help": "Otwórz menu pomocy",
+        "key-bind-title-go-to": "Idż do strony",
+        "key-bind-tooltip-go-to": "Otwórz okno zmiany strony",
+        "key-bind-title-toggle-menu": "Przełącz menu",
+        "key-bind-title-next-chapter": "Następny rozdział",
+        "key-bind-tooltip-next-chapter": "Wczytaj następny rozdział",
+        "key-bind-title-previous-chapter": "Poprzedni rozdział",
+        "key-bind-tooltip-previous-chapter": "Wczytaj poprzedni rozdział",
+        "key-bind-title-first-page": "Pierwsza strona",
+        "key-bind-tooltip-first-page": "Przejdź do pierwszej strony",
+        "key-bind-title-last-page": "Ostatnia strona",
+        "key-bind-tooltip-last-page": "Przejdź do ostatniej strony"
+    },
+    "reading-list-provider-pipe": {
+        "file": "Plik",
+        "url": "Url"
+    },
+    "client-device-auth-type-pipe": {
+        "oidc": "OIDC",
+        "jwt": "JWT",
+        "auth-key": "klucz uwierzytelniający"
+    },
+    "profile-image": {
+        "edit-image-alt": "Edytuj obraz",
+        "reset-image-alt": "Resetuj obraz"
+    },
+    "user-stats-info-cards": {
+        "pages-count": "{{num}} stron",
+        "words-count": "{{num}} wyrazów"
+    },
+    "month-label-pipe": {
+        "january": "Styczeń",
+        "january-short": "Sty",
+        "february": "Luty",
+        "february-short": "Lut",
+        "march": "Marzec",
+        "march-short": "Mar",
+        "april": "Kwiecień",
+        "april-short": "Kwi",
+        "may": "Maj",
+        "may-short": "Maj",
+        "june": "Czerwiec",
+        "june-short": "Cze",
+        "july": "Lipiec",
+        "july-short": "Lip",
+        "august": "Sierpień",
+        "august-short": "Sie",
+        "september": "Wrzesień",
+        "september-short": "Wrz",
+        "october": "Październik",
+        "october-short": "Paź",
+        "november": "Listopad",
+        "november-short": "Lis",
+        "december": "Grudzień",
+        "december-short": "Gru"
+    },
+    "day-label-pipe": {
+        "sunday": "Niedziela",
+        "sunday-short": "Niedz.",
+        "monday": "Poniedziałek",
+        "monday-short": "Pon.",
+        "tuesday": "Wtorek",
+        "tuesday-short": "Wt.",
+        "wednesday": "Środa",
+        "wednesday-short": "Śr.",
+        "thursday": "Czwartek",
+        "thursday-short": "Czw.",
+        "friday": "Piątek",
+        "friday-short": "Pt.",
+        "saturday": "Sobota",
+        "saturday-short": "Sob."
+    },
+    "cron-frequency-pipe": {
+        "daily": "Codziennie",
+        "weekly": "Tygodniowo",
+        "custom": "Niestandardowo"
     }
 }

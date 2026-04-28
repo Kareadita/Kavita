@@ -221,6 +221,8 @@
     "client-device-doesnt-exist": "Klientské zařízení neexistuje",
     "auth-key-unique": "Název autentizačního klíče musí být pro váš účet jedinečný",
     "role-restricted": "Přístup zakázán: Vaše role tuto akci neumožňuje",
+    "cbl-import-download-from-url": "Nelze stáhnout soubor z URL adresy",
+    "cbl-import-validation-types": "Povoleny jsou pouze soubory s příponami .cbl a .json",
     "cbl-export-failed": "Nelze exportovat soubor CBL, zkontrolujte protokoly",
     "email.auth-key-expired.subject": "Kavita – Platnost jednoho nebo více autentizačních klíčů vypršela!",
     "email.auth-key-expired.header": "Platnost jednoho nebo více autentizačních klíčů vypršela!",
