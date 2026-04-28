@@ -269,10 +269,10 @@ public class UserRepository(DataContext context, UserManager<AppUser> userManage
             .AnyAsync(p => p.Id == personId, ct);
     }
 
-    public Task<bool> HasAccessToReadingList(int userId, int readingListId, CancellationToken ct = default)
+    public Task<bool> HasAccessToReadingList(int userId, int readingListId, bool allowPromoted = true, CancellationToken ct = default)
     {
         return context.ReadingList
-            .Where(rl => rl.AppUserId == userId || rl.Promoted)
+            .Where(rl => rl.AppUserId == userId || (rl.Promoted && allowPromoted))
             .AnyAsync(rl => rl.Id == readingListId, ct);
     }
 

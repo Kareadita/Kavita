@@ -141,4 +141,8 @@ export class ReadingListService {
     return this.httpClient.post(this.baseUrl + 'readinglist/delete-multiple', {readingListIds: listIds}, TextResonse);
   }
 
+  refreshCover(readingListId: number) {
+    return this.httpClient.post(this.baseUrl + 'readinglist/regenerate-cover?readingListId=' + readingListId, {});
+  }
+
 }

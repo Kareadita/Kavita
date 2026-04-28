@@ -1045,6 +1045,16 @@ export class ActionFactoryService {
         children: [],
       },
       {
+        action: Action.RefreshMetadata,
+        title: 'refresh-covers',
+        description: 'refresh-covers-tooltip',
+        callback: this.dummyCallback,
+        shouldRender: this.dummyShouldRender,
+
+        requiredRoles: [],
+        children: [],
+      },
+      {
         action: Action.Download,
         title: 'download',
         description: 'download-tooltip',

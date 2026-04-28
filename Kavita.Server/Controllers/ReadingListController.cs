@@ -680,4 +680,19 @@ public class ReadingListController(
         var contentType = asV2 ? "application/json" : "application/xml";
         return PhysicalFile(filepath, contentType, Path.GetFileName(filepath));
     }
+
+    [HttpPost("regenerate-cover")]
+    [ReadingListAccess(allowPromoted: false)]
+    [DisallowRole(PolicyConstants.ReadOnlyRole)]
+    public async Task<IActionResult> RegenerateCover([FromQuery] int readingListId)
+    {
+        await readingListService.GenerateReadingListCoverImage(readingListId);
+
+        await unitOfWork.CommitAsync();
+
+        await eventHub.SendMessageAsync(MessageFactory.CoverUpdate,
+            MessageFactory.CoverUpdateEvent(readingListId, MessageFactoryEntityTypes.ReadingList), false);
+
+        return Ok();
+    }
 }

@@ -669,6 +669,10 @@ export class ActionService {
         const ref = this.modalService.open(EditReadingListModalComponent, editModal());
         ref.componentInstance.readingList = readingList;
         return this.handleEditModal(ref, action, readingList);
+      case Action.RefreshMetadata:
+        return this.readingListService.refreshCover(readingList.id).pipe(
+          map(() => this.fromAction(action, {...readingList}, 'none'))
+        );
       case Action.Promote:
         return this.readingListService.promoteMultipleReadingLists([readingList.id], true).pipe(
           tap(() => this.toastr.success(translate('toasts.reading-list-promoted'))),
