@@ -1,0 +1,18 @@
+.tier-badge {
+  font-size: 0.75rem;
+  font-weight: normal;
+  cursor: default;
+}
+
+:host ::ng-deep .skipped-row {
+  color: var(--bs-secondary-color) !important;
+}
+
+:host ::ng-deep .matched-row {
+  background-color: rgba(var(--bs-success-rgb), 0.05);
+}
+
+.table-wrapper {
+  max-height: 60vh;
+  overflow-y: auto;
+}
