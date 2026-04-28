@@ -26,4 +26,11 @@ public class WeblinkParserTests
     {
         Assert.Equal(WeblinkParser.GetComicVineId(link).Item1, expectedId);
     }
+
+    [Theory]
+    [InlineData("https://mangabaka.org/3391", 3391)]
+    public void CanParseWeblink_MangaBaka(string link, long expectedId)
+    {
+        Assert.Equal(WeblinkParser.GetMangaBakaId(link), expectedId);
+    }
 }

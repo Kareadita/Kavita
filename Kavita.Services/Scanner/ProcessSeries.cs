@@ -358,10 +358,12 @@ public class ProcessSeries(
 
         if (!string.IsNullOrEmpty(firstChapter?.WebLinks) && library.InheritWebLinksFromFirstChapter)
         {
+            // TODO: Come back and clean this up, we call this code in DefaultParser AND ProcessSeries
             series.Metadata.WebLinks = firstChapter.WebLinks;
             series.AniListId = WeblinkParser.GetAniListId(series.Metadata.WebLinks) ?? 0;
             series.MalId = WeblinkParser.GetMalId(series.Metadata.WebLinks) ?? 0;
             series.ComicVineId = WeblinkParser.GetComicVineId(series.Metadata.WebLinks).Item1;
+            series.MangaBakaId = WeblinkParser.GetMangaBakaId(series.Metadata.WebLinks);
         }
 
         if (!string.IsNullOrEmpty(firstChapter?.SeriesGroup) && library.ManageCollections)

@@ -17,6 +17,7 @@ public static class WeblinkParser
     private const string AniListStaffWebsite = "https://anilist.co/staff/";
     private const string AniListCharacterWebsite = "https://anilist.co/character/";
     private const string HardcoverStaffWebsite = "https://hardcover.app/authors/";
+    private const string MangaBakaWebsite = "https://mangabaka.org/";
 
 
     /// <summary>
@@ -38,6 +39,7 @@ public static class WeblinkParser
         {AniListStaffWebsite, 0},
         {AniListCharacterWebsite, 0},
         {ComicVineWeblinkWebsite, 1},
+        {MangaBakaWebsite, 0},
     };
 
     public static long? GetMalId(string? weblinks)
@@ -81,6 +83,11 @@ public static class WeblinkParser
     public static string? GetMangaDexId(string? weblinks)
     {
         return ExtractId<string?>(weblinks, MangaDexWeblinkWebsite);
+    }
+
+    public static long GetMangaBakaId(string? weblinks)
+    {
+        return ExtractId<long?>(weblinks, MangaBakaWebsite) ?? 0;
     }
 
 
