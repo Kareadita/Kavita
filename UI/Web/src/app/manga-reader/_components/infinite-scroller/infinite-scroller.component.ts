@@ -249,6 +249,9 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy, 
 
       const currentState = pullToLoad.state();
 
+      // On mobile devices with a sufficiently small last image, the debounce from moving into idle
+      // causes the scroll event to fire with a wrong page number. We ignore one scroll event to prevent this from
+      // happening.
       if (previousState === PullState.Triggered && currentState === PullState.Idle) {
         this.debugLog('Ignoring next scroll event to compensate for PullToLoad debounce')
         this.ignoreNextScrollEvent.set(true);

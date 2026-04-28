@@ -2,6 +2,7 @@
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using Hangfire;
 using Kavita.API.Attributes;
 using Kavita.API.Database;
 using Kavita.API.Repositories;
@@ -681,10 +682,22 @@ public class ReadingListController(
         return PhysicalFile(filepath, contentType, Path.GetFileName(filepath));
     }
 
+    /// <summary>
+    /// Regenerates the cover image for a reading list, you must own the given reading list to do this
+    /// </summary>
+    /// <param name="readingListId"></param>
+    /// <returns></returns>
     [HttpPost("regenerate-cover")]
     [ReadingListAccess(allowPromoted: false)]
     [DisallowRole(PolicyConstants.ReadOnlyRole)]
-    public async Task<IActionResult> RegenerateCover([FromQuery] int readingListId)
+    public IActionResult RegenerateCover([FromQuery] int readingListId)
+    {
+        BackgroundJob.Enqueue(() => GenerateReadingListCoverImage(readingListId));
+
+        return Ok();
+    }
+
+    private async Task GenerateReadingListCoverImage(int readingListId)
     {
         await readingListService.GenerateReadingListCoverImage(readingListId);
 
@@ -692,7 +705,5 @@ public class ReadingListController(
 
         await eventHub.SendMessageAsync(MessageFactory.CoverUpdate,
             MessageFactory.CoverUpdateEvent(readingListId, MessageFactoryEntityTypes.ReadingList), false);
-
-        return Ok();
     }
 }
