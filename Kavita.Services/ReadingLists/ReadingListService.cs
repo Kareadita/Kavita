@@ -450,12 +450,21 @@ public class ReadingListService(
     }
 
 
-    public async Task<string> GenerateReadingListCoverImage(int readingListId)
+    public async Task<string> GenerateReadingListCoverImage(int readingListId, bool commit = false)
     {
         var readingList = await unitOfWork.ReadingListRepository.GetReadingListByIdAsync(readingListId);
         if (readingList == null) return string.Empty;
 
-        return await GenerateReadingListCoverImage(readingList);
+        var path =  await GenerateReadingListCoverImage(readingList);
+
+        if (!commit) return path;
+
+        await unitOfWork.CommitAsync();
+
+        await eventHub.SendMessageAsync(MessageFactory.CoverUpdate,
+            MessageFactory.CoverUpdateEvent(readingListId, MessageFactoryEntityTypes.ReadingList), false);
+
+        return path;
     }
 
     public async Task<string> GenerateReadingListCoverImage(ReadingList readingList)

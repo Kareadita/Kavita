@@ -32,7 +32,7 @@ public interface IReadingListService
     Task CreateReadingListsFromSeries(Series series, Library library);
     /// <inheritdoc cref="GenerateReadingListCoverImage(ReadingList)"/>
     /// <returns></returns>
-    Task<string> GenerateReadingListCoverImage(int readingListId);
+    Task<string> GenerateReadingListCoverImage(int readingListId, bool commit = false);
     /// <summary>
     /// Generates a merged cover image for the reading list, saves it to the covers directory,
     /// and updates the entity's CoverImage and ColorScape.
