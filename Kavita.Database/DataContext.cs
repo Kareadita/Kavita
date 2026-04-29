@@ -377,6 +377,13 @@ public sealed class DataContext : IdentityDbContext<AppUser, AppRole, int,
             entity.HasIndex(s => new { s.IsActive, s.LastModifiedUtc })
                 .HasDatabaseName("IX_AppUserReadingSession_IsActive_LastModifiedUtc");
         });
+
+        builder.Entity<AppUserReadingHistory>(entity =>
+        {
+            entity.HasIndex(s => new { s.AppUserId, s.DateUtc})
+                .HasDatabaseName("IX_AppUserReadingHistory_AppUserId_DateUtc");
+        });
+
         #endregion
 
         #region Client Device

@@ -9,7 +9,6 @@ namespace Kavita.Models.Entities.Progress;
 /// <summary>
 /// Represents a single day's worth of Reading Sessions
 /// </summary>
-[Index(nameof(DateUtc), IsUnique = true)]
 public class AppUserReadingHistory
 {
     public int Id { get; set; }
