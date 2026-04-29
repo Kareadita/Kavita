@@ -690,13 +690,14 @@ public class ReadingListController(
     [HttpPost("regenerate-cover")]
     [ReadingListAccess(allowPromoted: false)]
     [DisallowRole(PolicyConstants.ReadOnlyRole)]
-    public IActionResult RegenerateCover([FromQuery] int readingListId)
+    public ActionResult RegenerateCover([FromQuery] int readingListId)
     {
         BackgroundJob.Enqueue(() => GenerateReadingListCoverImage(readingListId));
 
         return Ok();
     }
 
+    [NonAction]
     public async Task GenerateReadingListCoverImage(int readingListId)
     {
         await readingListService.GenerateReadingListCoverImage(readingListId);
