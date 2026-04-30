@@ -3051,5 +3051,14 @@
     "pdf-spread-mode-pipe": {
         "odd": "Нечетный разброс",
         "even": "Четный разброс"
+    },
+    "title": {
+        "reading-list": "Списки Литературы",
+        "home": "Главная",
+        "bookmarks": "Закладки",
+        "collections": "Коллекции",
+        "browse-genres": "Просмотреть Жанры",
+        "browse-tags": "Просмотреть Теги",
+        "want-to-read": "Хочу Прочитать"
     }
 }

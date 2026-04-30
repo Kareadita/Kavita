@@ -80,7 +80,7 @@
     "ip-address-invalid": "O endereço IP '{0}' é inválido",
     "total-logs": "O total de registros deve estar entre 1 e 30",
     "stats-permission-denied": "Você não está autorizado a visualizar as estatísticas de outro usuário",
-    "url-not-valid": "URL não retorna uma imagem válida ou requer autorização",
+    "url-not-valid": "A URL não retorna uma imagem válida ou requer autorização",
     "generic-cover-collection-save": "Não foi possível salvar a imagem da capa na Coleção",
     "generic-cover-reading-list-save": "Não é possível salvar a imagem da capa na lista de leitura",
     "generic-cover-chapter-save": "Não foi possível salvar a imagem da capa no Capítulo",

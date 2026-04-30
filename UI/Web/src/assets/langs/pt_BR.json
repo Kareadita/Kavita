@@ -250,7 +250,7 @@
         "email-updated-title": "E-mail atualizado",
         "email-updated-description": "Você pode usar o link a seguir para confirmar o e-mail da sua conta. Se as configurações de e-mail tiverem sido configuradas, um e-mail será enviado e o link poderá ser usado para confirmar o e-mail.",
         "setup-user-account": "Configurar conta de usuário",
-        "invite-url-label": "URL do convite",
+        "invite-url-label": "URL de convite",
         "invite-url-tooltip": "Copie isso e cole em uma nova aba",
         "has-invalid-email": "Parece que você não tem um conjunto de e-mail válido. A alteração do e-mail exigirá que o administrador lhe envie um link para concluir esta ação.",
         "required-field": "{{validation.required-field}}",
@@ -539,7 +539,7 @@
         "activate-description": "Insira a chave de licença e o e-mail usados para se registrar no Stripe",
         "activate-license-label": "Chave de licença",
         "activate-email-label": "{{common.email}}",
-        "activate-discordId-label": "ID de Usuário do Discord",
+        "activate-discordId-label": "ID do Usuário do Discord",
         "activate-discordId-tooltip": "Vincule sua conta Discord ao Kavita+. Isso concede acesso a canais ocultos para moldar Kavita.",
         "discord-validation": "Este não é um ID de usuário válido do Discord. Seu ID de usuário não é seu nome de usuário discord.",
         "activate-delete": "{{common.delete}}",
@@ -2343,7 +2343,11 @@
         "mark-as-read-with-session": "Marcar como Lido com a Sessão",
         "mark-as-read-with-session-tooltip": "Marque o progresso como totalmente lido e gere uma sessão para isso",
         "cbl-manager": "Gerenciador CBL",
-        "cbl-manager-tooltip": "Gerenciar/Sincronizar CBLs"
+        "cbl-manager-tooltip": "Gerenciar/Sincronizar CBLs",
+        "add-to-dashboard": "Adicionar ao Painel",
+        "add-to-dashboard-tooltip": "Adiciona o filtro inteligente à parte inferior do seu Painel",
+        "add-to-side-nav": "Adicionar à Barra Lateral de Navegação",
+        "add-to-side-nav-tooltip": "Adiciona o filtro inteligente à parte inferior da sua Barra Lateral de Navegação"
     },
     "preferences": {
         "left-to-right": "Esquerda para Direita",
@@ -2969,9 +2973,9 @@
         "tls-required": "O provedor OIDC deve usar tls (https)",
         "other-field-invalid": "{{validation.other-field-invalid}}",
         "reset-label": "Redefinir ids",
-        "reset-tooltip": "Redefina os IDs externos de todos os usuários, use isto para redefinir os links entre os usuários no Kavita e seu provedor de identidade",
+        "reset-tooltip": "Redefinir os IDs externos de todos os usuários; use esta opção para redefinir os vínculos entre os usuários no Kavita e o seu provedor de identidade",
         "reset-confirm": "Tem certeza de que deseja redefinir os IDs externos de todos os usuários?",
-        "reset-success": "IDs externos redefinidos para todos os usuários, autenticar novamente para vincular",
+        "reset-success": "IDs externos redefinidos para todos os usuários; reautentique-se para vincular novamente",
         "auto-save-required": "Você mudou as configurações críticas, salve manualmente para mantê-las",
         "checking-authority": "Verificando se a autoridade é válida, por favor, tenha paciência..."
     },
@@ -3043,12 +3047,12 @@
         "clean-tooltip": "Remover todos os estilos"
     },
     "font-manager": {
-        "description": "O leitor epub do Kavita vem com algumas fontes integradas, adicione suas próprias fontes aqui. Faça upload de um arquivo ou use um URL de fontes do Google. Veja o 1<a href='{{wikiLink}}' target='_blank' rel='noreferrer noopener'>wiki2</a> para obter mais informações.",
+        "description": "O leitor EPUB do Kavita inclui algumas fontes integradas; adicione suas próprias fontes aqui. Envie um arquivo ou utilize uma URL do Google Fonts. Consulte a <a href='{{wikiLink}}' target='_blank' rel='noreferrer noopener'>wiki</a> para mais informações.",
         "add": "{{common.add}}",
         "drag-n-drop": "{{cover-image-chooser.drag-n-drop}}",
         "upload": "{{cover-image-chooser.upload}}",
         "upload-continued": "um arquivo de fonte",
-        "preview-default": "Faça upload de sua própria fonte por meio de arquivo ou URL da fonte do Google",
+        "preview-default": "Envie sua própria fonte por arquivo ou por URL do Google Fonts",
         "delete": "{{common.delete}}",
         "no-preview": "Essa fonte não pode ser visualizada. Isso pegará o estilo padrão do livro.",
         "brown-fox": "A rápida raposa marrom pula sobre o cachorro preguiçoso",

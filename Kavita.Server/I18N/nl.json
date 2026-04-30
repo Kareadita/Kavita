@@ -204,7 +204,7 @@
     "smart-filter-already-in-use": "Er is een bestaande stream met dit Slimme Filter",
     "dashboard-stream-doesnt-exist": "Dashboard Stream bestaat niet",
     "sidenav-stream-doesnt-exist": "SideNav Stream bestaat niet",
-    "external-source-required": "API-Key en Host vereist",
+    "external-source-required": "Host is vereist",
     "external-source-already-in-use": "Er bestaat al een stream met deze externe bron",
     "sidenav-stream-only-delete-smart-filter": "Alleen slimme filterstreams kunnen uit de zijbalk worden verwijderd",
     "dashboard-stream-only-delete-smart-filter": "Alleen slimme filterstreams kunnen van het dashboard worden verwijderd",
@@ -268,5 +268,14 @@
     "email.send-to-device.subject": "Kavita - Bestand verzenden vanuit Kavita",
     "email.send-to-device.preheader": "Bestand(en) verzonden vanuit Kavita",
     "email.send-to-device.header": "U hebt bestand(en) verzonden vanuit Kavita",
-    "email.send-to-device.description": "In bijlage vindt u de bestand(en) die u heeft verzonden."
+    "email.send-to-device.description": "In bijlage vindt u de bestand(en) die u heeft verzonden.",
+    "url-malformed": "URL is misvormd",
+    "url-https-only": "Alleen HTPS uren mogen",
+    "url-unable-to-resolve": "Falende hostnaamresolutie",
+    "url-blocked-address": "Vertaling:",
+    "cbl-import-download-from-url": "Niet in staat om dossier te downloaden van URL",
+    "cbl-import-validation-types": "Alleen .cbl en .json dossiers mogen",
+    "email.username-change.subject": "Je gebruikersnaam is veranderd op \"Invitatie\" Wij zijn Server",
+    "email.username-change.title": "Gebruikernaam Change Update",
+    "email.username-change.description": "De gebruikersnaam van je account is bijgewerkt op de Kavita-instantie van {{InvitingUser}}. Er is geen actie van jouw kant vereist."
 }

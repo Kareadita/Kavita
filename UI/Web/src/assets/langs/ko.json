@@ -2343,7 +2343,11 @@
         "mark-as-read-with-session": "세션에서 읽은 상태로 표시",
         "mark-as-read-with-session-tooltip": "진행 상황을 완전히 읽은 상태로 표시하고 세션을 생성합니다",
         "cbl-manager": "CBL 관리자",
-        "cbl-manager-tooltip": "CBLs 관리/동기화"
+        "cbl-manager-tooltip": "CBLs 관리/동기화",
+        "add-to-dashboard": "Dashboard에 추가",
+        "add-to-dashboard-tooltip": "Dashboard의 하단에 스마트 필터 추가",
+        "add-to-side-nav": "옆 Nav에 추가",
+        "add-to-side-nav-tooltip": "사이드 Nav의 바닥에 스마트 필터를 추가"
     },
     "preferences": {
         "left-to-right": "왼쪽에서 오른쪽",

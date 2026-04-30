@@ -2343,7 +2343,11 @@
         "export-v2": "CBL v2",
         "export-v2-tooltip": "Utiliser CBL v2 (JSON)",
         "cbl-manager": "CBL Responsable",
-        "cbl-manager-tooltip": "Gérer/Synchroniser les fichiers CBL"
+        "cbl-manager-tooltip": "Gérer/Synchroniser les fichiers CBL",
+        "add-to-dashboard": "Ajouter au tableau de bord",
+        "add-to-dashboard-tooltip": "Ajoute le filtre intelligent au bas de votre tableau de bord",
+        "add-to-side-nav": "Ajouter à côté de la Nave",
+        "add-to-side-nav-tooltip": "Ajouter le filtre intelligent au bas de votre côté Nav"
     },
     "preferences": {
         "left-to-right": "De gauche à droite",

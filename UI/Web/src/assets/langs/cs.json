@@ -1979,7 +1979,11 @@
         "mark-as-read-with-session": "Označit jako přečtené s relací",
         "mark-as-read-with-session-tooltip": "Označit položku jako přečtenou a vytvořit pro ni relaci",
         "cbl-manager": "Správce CBL",
-        "cbl-manager-tooltip": "Správa/synchronizace CBL"
+        "cbl-manager-tooltip": "Správa/synchronizace CBL",
+        "add-to-dashboard": "Přidat na hlavní panel",
+        "add-to-dashboard-tooltip": "Přidá inteligentní filtr do dolní části vašeho ovládacího panelu",
+        "add-to-side-nav": "Přidat do post. panelu",
+        "add-to-side-nav-tooltip": "Přidá chytrý filtr do spodní části postranního panelu"
     },
     "changelog-update-item": {
         "changed": "Změněno",

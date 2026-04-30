@@ -2343,7 +2343,11 @@
         "mark-as-read-with-session": "Marcáil mar Léite le Seisiún",
         "mark-as-read-with-session-tooltip": "Marcáil an dul chun cinn mar léite go hiomlán agus gin seisiún dó",
         "cbl-manager": "Bainisteoir CBL",
-        "cbl-manager-tooltip": "Bainistigh/Sioncrónaigh CBLanna"
+        "cbl-manager-tooltip": "Bainistigh/Sioncrónaigh CBLanna",
+        "add-to-dashboard": "Cuir le Dashboard",
+        "add-to-dashboard-tooltip": "Cuireann an scagaire cliste go bun do Dashboard",
+        "add-to-side-nav": "Cuir le Taobh Nav",
+        "add-to-side-nav-tooltip": "Cuireann an scagaire cliste go bun do Taobh Nav"
     },
     "preferences": {
         "left-to-right": "Clé go Deas",

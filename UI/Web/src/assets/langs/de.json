@@ -485,7 +485,7 @@
     },
     "all-filters": {
         "title": "Alle Smart-Filter",
-        "count": "{{count}} {{tabs.smart-filters-tab}}",
+        "count": "{{count}} Smart-Filter insgesamt",
         "description": "Intelligente Filter sind gespeicherte Filter, die an die Seitenleiste und das Dashboard angeheftet werden können. Sie können sie für Serien und Leselisten erstellen, indem Sie einen Namen eingeben und auf die Schaltfläche „Speichern“ klicken."
     },
     "announcements": {
@@ -914,8 +914,26 @@
         "length-title": "{{edit-chapter-modal.words-label}}",
         "age-rating-title": "{{metadata-fields.age-rating-title}}",
         "file-path-title": "Dateien",
-        "folder-path-title": "Ordnerpfad",
-        "external-metadata-title": "Externe Metadaten"
+        "folder-path-title": "{{edit-series-modal.folder-path-title}}",
+        "external-metadata-title": "Externe Metadaten",
+        "basic-metadata-title": "Grundlegende Metadaten",
+        "read-time-label": "Lesezeit",
+        "pages-label": "{{edit-chapter-modal.pages-label}}",
+        "words-label": "{{edit-chapter-modal.words-label}}",
+        "added-label": "Angelegt",
+        "updated-label": "Aktualisiert",
+        "kavita-id-label": "Kavita ID",
+        "sort-order-label": "{{edit-chapter-modal.sort-order-label}}",
+        "language-label": "Sprache",
+        "is-special-label": "Special",
+        "pub-status-label": "{{metadata-filter.publication-status-label}}",
+        "yes-label": "Ja",
+        "no-label": "Nein",
+        "file-info-title": "Dateiinformationen",
+        "not-set-label": "Nicht festgelegt",
+        "pages-count": "{{series-detail.pages-count}}",
+        "words-count": "{{series-detail.words-count}}",
+        "bytes-count": "{{num}} Bytes"
     },
     "related-tab": {
         "reading-lists-title": "{{reading-lists.title}}",
@@ -1530,7 +1548,9 @@
         "description": "Auf diesem Bildschirm können Sie Neuzuordnungsregeln erstellen, um Serien oder Ausgaben automatisch Kavita-Entitäten zuzuordnen. Die Neuzuordnungsregeln gelten für diese und zukünftige Listen.",
         "unmatched-count": "{{count}} fehlen",
         "refresh": "Aktualisieren",
-        "wiki": "Wiki"
+        "wiki": "Wiki",
+        "promote": "{{actionable.promote}}",
+        "promote-tooltip": "{{actionable.promote-tooltip}}"
     },
     "pdf-reader": {
         "loading-message": "Laden...",
@@ -2321,7 +2341,13 @@
         "export-v2": "CBL v2",
         "export-v2-tooltip": "CBL v2 (JSON) verwenden",
         "mark-as-read-with-session": "Als gelesen markieren (sessionsbezogen)",
-        "mark-as-read-with-session-tooltip": "Den Fortschritt als vollständig gelesen markieren und eine Sitzung dafür erstellen"
+        "mark-as-read-with-session-tooltip": "Den Fortschritt als vollständig gelesen markieren und eine Sitzung dafür erstellen",
+        "cbl-manager": "CBL-Manager",
+        "cbl-manager-tooltip": "CBLs verwalten/synchronisieren",
+        "add-to-dashboard": "Zu Dashboard hinzufügen",
+        "add-to-dashboard-tooltip": "Fügt den Smart-Filter auf den Boden Ihres Dashboards hinzu",
+        "add-to-side-nav": "Zur Seite hinzufügen Nav",
+        "add-to-side-nav-tooltip": "Fügt den Smart-Filter auf den Boden Ihrer Seite Nav hinzu"
     },
     "preferences": {
         "left-to-right": "Links nach rechts",
@@ -2856,7 +2882,9 @@
         "readinglist-item-count": "{{sort-field-pipe.readinglist-item-count}}",
         "readinglist-tags": "{{metadata-fields.tags-title}}",
         "readinglist-writer": "{{person-role-pipe.writer}}",
-        "readinglist-artist": "{{person-role-pipe.artist}}"
+        "readinglist-artist": "{{person-role-pipe.artist}}",
+        "readinglist-provider": "Anbieter",
+        "readinglist-missing-item-count": "Anzahl fehlender Artikel"
     },
     "oidc": {
         "title": "OIDC-Callback",
@@ -3522,7 +3550,9 @@
         "mangaBakaId-label": "MangaBaka-ID",
         "hardcoverId-label": "Hardcover-ID",
         "comicVineId-label": "Comic Vine-ID",
-        "metronId-label": "Metron-ID"
+        "metronId-label": "Metron-ID",
+        "not-set-label": "Nicht festgelegt",
+        "isbn-label": "{{edit-chapter-modal.isbn-label}}"
     },
     "cbl-match-tier-pipe": {
         "remap-rule": "Regel neu zuordnen",
@@ -3577,7 +3607,8 @@
         "not-authorized": "Sie haben keine Berechtigung, auf diesen Inhalt zuzugreifen",
         "item-count": "{{common.item-count}}",
         "missing-count": "{{reading-list-detail.missing-count}}",
-        "last-checked": "Zuletzt überprüft: {{date}}"
+        "last-checked": "Zuletzt überprüft: {{date}}",
+        "sync-manual": "Synchronisieren (manuell)"
     },
     "manage-remap-rules-modal": {
         "title": "Regeln für die Neuzuordnung verwalten",
