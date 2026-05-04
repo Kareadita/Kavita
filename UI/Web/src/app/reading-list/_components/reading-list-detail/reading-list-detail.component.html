@@ -248,6 +248,7 @@
                 <ng-template ngbNavContent>
                   @defer (when activeTabId === Tabs.Details; prefetch on idle) {
                     <app-details-tab [metadata]="castInfo()"
+                                     [tags]="readingList().tags"
                                      [suppressEmptyGenres]="true"
                                      [suppressEmptyTags]="true"
                     />

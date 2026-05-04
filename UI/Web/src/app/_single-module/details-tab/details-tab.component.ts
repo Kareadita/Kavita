@@ -8,7 +8,7 @@ import {SeriesFilterField} from '../../_models/metadata/v2/series-filter-field';
 import {FilterComparison} from '../../_models/metadata/v2/filter-comparison';
 import {FilterUtilitiesService} from '../../shared/_services/filter-utilities.service';
 import {Genre} from '../../_models/metadata/genre';
-import {Tag} from '../../_models/tag';
+import {BaseTag} from '../../_models/tag';
 import {ImageComponent} from '../../shared/image/image.component';
 import {ImageService} from '../../_services/image.service';
 import {MangaFormat} from '../../_models/manga-format';
@@ -89,7 +89,7 @@ export class DetailsTabComponent {
   metadata = input.required<IHasCast>();
   entity = input<Series | Volume | Chapter>();
   genres = input<Genre[]>([]);
-  tags = input<Tag[]>([]);
+  tags = input<BaseTag[]>([]);
   webLinks = input<string[]>([]);
   suppressEmptyGenres = input<boolean>(false);
   suppressEmptyTags = input<boolean>(false);
