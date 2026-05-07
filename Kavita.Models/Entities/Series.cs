@@ -162,10 +162,8 @@ public class Series : IEntityDate, IHasReadTimeEstimate, IHasCoverImage, IHasMet
 
     public bool MatchesSeriesByName(string nameNormalized, string localizedNameNormalized)
     {
-        return NormalizedName == nameNormalized ||
-               NormalizedLocalizedName == nameNormalized ||
-               NormalizedName == localizedNameNormalized ||
-               NormalizedLocalizedName == localizedNameNormalized;
+        return (!string.IsNullOrEmpty(NormalizedName) && (NormalizedName == nameNormalized || NormalizedName == localizedNameNormalized)) ||
+               (!string.IsNullOrEmpty(NormalizedLocalizedName) && (NormalizedLocalizedName == nameNormalized || NormalizedLocalizedName == localizedNameNormalized));
     }
 
     public void ResetColorScape()
