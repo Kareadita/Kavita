@@ -97,6 +97,7 @@
   @let entry = item.value.entry;
 
   <div class="d-flex flex-grow-1 justify-content-between align-items-center"
+       style="min-width: 0;"
        [routerLink]="['/library', entry.libraryId, 'series', entry.seriesId, 'chapter', chapter.chapterId]">
     <div class="col-auto d-none d-sm-block chapter-cover me-2">
       <app-image [imageUrl]="imageService.getChapterCoverImage(chapter.chapterId)" class="d-block"
@@ -110,40 +111,41 @@
 </ng-template>
 
 <ng-template #readStats let-entry let-label="label" let-showInfo="showInfo">
-  <div class="d-flex flex-wrap gap-3 small text-muted me-2 flex-grow-1" *transloco="let t; prefix: 'profile-activity'">
+  <div class="d-flex align-items-center gap-3 small text-muted me-2 flex-grow-1 overflow-hidden" *transloco="let t; prefix: 'profile-activity'">
 
     @if (label) {
-      <span class="d-flex align-items-center flex-grow-1 ms-5" id="label-{{entry.id}}">
+      <span class="text-truncate flex-shrink-1 ms-5"
+            id="label-{{entry.id}}"
+            [title]="label">
         {{label}}
       </span>
     }
 
-    <span [attr.aria-label]="t('duration')" class="d-flex align-items-center gap-1">
+    <span [attr.aria-label]="t('duration')" class="d-flex align-items-center gap-1 text-nowrap flex-shrink-0">
       <i aria-hidden="true" class="fa-regular fa-clock"></i>
       {{ entry.durationSeconds | duration }}
     </span>
 
     @if (entry.pagesRead > 0) {
-      <span [attr.aria-label]="t('pages-read')" class="d-flex align-items-center gap-1">
+      <span [attr.aria-label]="t('pages-read')" class="d-flex align-items-center gap-1 text-nowrap flex-shrink-0">
         <i aria-hidden="true" class="fa-regular fa-file"></i>
         {{t('pages-count', {num: entry.pagesRead | compactNumber})}}
       </span>
     }
 
     @if (entry.wordsRead > 0) {
-      <span [attr.aria-label]="t('words-read')" class="d-flex align-items-center gap-1">
-         <i aria-hidden="true" class="fa fa-book"></i>
+      <span [attr.aria-label]="t('words-read')" class="d-flex align-items-center gap-1 text-nowrap flex-shrink-0">
+        <i aria-hidden="true" class="fa fa-book"></i>
         {{t('words-count', {num: entry.wordsRead | compactNumber})}}
       </span>
     }
 
-
-    <span [attr.aria-label]="t('time')" class="d-flex align-items-center gap-1">
+    <span [attr.aria-label]="t('time')" class="d-flex align-items-center gap-1 text-nowrap flex-shrink-0">
       {{ entry.startTimeUtc | utcToLocalTime:'shortTime' }} - {{ entry.endTimeUtc | utcToLocalTime:'shortTime' }}
     </span>
 
     @if (showInfo) {
-      <button class="btn btn-icon" (click)="displayInfo(entry)" aria-labelledby="label-{{entry.id}}">
+      <button class="btn btn-icon flex-shrink-0" (click)="displayInfo(entry)" aria-labelledby="label-{{entry.id}}">
         <i class="fa fa-info" aria-hidden="true"></i>
         <span class="visually-hidden">{{t('info-alt')}}</span>
       </button>
