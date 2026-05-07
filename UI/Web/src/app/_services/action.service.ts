@@ -233,7 +233,7 @@ export class ActionService {
         ref.setInput('series', series);
         return from(ref.closed).pipe(
           filter((saved: boolean) => saved),
-          map(() => this.fromAction(action, series, 'reload'))
+          map(() => this.fromAction(action, series, 'none'))
         );
       }
 

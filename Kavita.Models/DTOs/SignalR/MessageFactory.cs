@@ -187,7 +187,10 @@ public static class MessageFactory
     /// A reading list was updated via a Sync Operation
     /// </summary>
     public const string ReadingListUpdated = nameof(ReadingListUpdated);
-
+    /// <summary>
+    /// A series was updated (E.x. K+ match)
+    /// </summary>
+    public const string SeriesUpdated = nameof(SeriesUpdated);
 
 
     public static SignalRMessage DashboardUpdateEvent(int userId)
@@ -816,6 +819,18 @@ public static class MessageFactory
         return new SignalRMessage
         {
             Name = ReadingListUpdated,
+            Body = new
+            {
+                Id = id
+            }
+        };
+    }
+
+    public static SignalRMessage SeriesUpdatedEvent(int id)
+    {
+        return new SignalRMessage
+        {
+            Name = SeriesUpdated,
             Body = new
             {
                 Id = id

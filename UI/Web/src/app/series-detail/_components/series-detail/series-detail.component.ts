@@ -530,6 +530,10 @@ class SeriesDetailComponent implements OnInit, AfterViewInit {
         if (volumeRemoveEvent.seriesId === this.seriesId()) {
           this.loadPageSource.next(false);
         }
+      } else if (event.event === EVENTS.SeriesUpdated) {
+        if (event.payload.id === this.seriesId()) {
+          this.loadPageSource.next(false);
+        }
       }
     });
 

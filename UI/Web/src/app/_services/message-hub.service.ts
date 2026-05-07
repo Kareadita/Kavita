@@ -146,7 +146,11 @@ export enum EVENTS {
   /**
    * A Reading List was updated (like via Sync operation)
    */
-  ReadingListUpdated = 'ReadingListUpdated'
+  ReadingListUpdated = 'ReadingListUpdated',
+  /**
+   * A series was updated (E.x. K+ match)
+   */
+  SeriesUpdated = 'SeriesUpdated'
 }
 
 export interface Message<T> {
@@ -435,6 +439,13 @@ export class MessageHubService {
     this.hubConnection.on(EVENTS.AuthKeyDeleted, resp => {
       this.messagesSource.next({
         event: EVENTS.AuthKeyDeleted,
+        payload: resp.body
+      });
+    });
+
+    this.hubConnection.on(EVENTS.SeriesUpdated, resp => {
+      this.messagesSource.next({
+        event: EVENTS.SeriesUpdated,
         payload: resp.body
       });
     });
