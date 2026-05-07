@@ -268,20 +268,16 @@ public class ChapterRepository(DataContext context, IMapper mapper) : IChapterRe
 
     public async Task<int> GetAverageUserRating(int chapterId, int userId, CancellationToken ct = default)
     {
-        // If there is a 0 or 1 rating and that rating is you, return 0 back
-        var countOfRatingsThatAreUser = await context.AppUserChapterRating
+        var ratings = await context.AppUserChapterRating
             .Where(r => r.ChapterId == chapterId && r.HasBeenRated)
-            .CountAsync(u => u.AppUserId == userId, ct);
+            .ToListAsync(ct);
 
-        if (countOfRatingsThatAreUser == 1)
+        if (ratings.Count == 0 || (ratings.Count == 1 && ratings[0].AppUserId == userId))
         {
             return 0;
         }
 
-        var avg = await context.AppUserChapterRating
-            .Where(r => r.ChapterId == chapterId && r.HasBeenRated)
-            .AverageAsync(r => (int?) r.Rating, ct);
-
+        var avg = ratings.Average(r => (int?) r.Rating);
         return avg.HasValue ? (int) (avg.Value * 20) : 0;
     }
 
