@@ -963,9 +963,9 @@ public class ReaderController(ICacheService cacheService,
     /// <returns></returns>
     [ChapterAccess]
     [HttpGet("ptoc")]
-    public ActionResult<IEnumerable<PersonalToCDto>> GetPersonalToC(int chapterId)
+    public async Task<ActionResult<IEnumerable<PersonalToCDto>>> GetPersonalToC(int chapterId)
     {
-        return Ok(unitOfWork.UserTableOfContentRepository.GetPersonalToC(UserId, chapterId));
+        return Ok(await unitOfWork.UserTableOfContentRepository.GetPersonalToC(UserId, chapterId));
     }
 
     /// <summary>

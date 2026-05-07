@@ -1,6 +1,6 @@
 import {
   ChangeDetectionStrategy,
-  Component,
+  Component, computed,
   DestroyRef,
   EventEmitter,
   inject,
@@ -45,6 +45,8 @@ export class PersonalTableOfContentsComponent implements OnInit {
 
 
   ptocBookmarks = signal<PersonalToC[]>([]);
+  visibleBookmarks = computed(() => this.ptocBookmarks()
+    .filter(bookmark => this.filterList(bookmark)));
   formGroup = new FormGroup({
     filter: new FormControl('', [])
   });
