@@ -410,7 +410,7 @@ public class ProcessSeries(
     /// <returns></returns>
     private static bool ShouldUpdatePeopleForRole(Series series, List<ChapterPeople> chapterPeople, PersonRole role)
     {
-        if (chapterPeople.Count == 0) return false;
+        if (chapterPeople.Count == 0) return true;
 
         // If metadata already has this role, but all entries are from KavitaPlus, we should retain them
         if (series.Metadata.AnyOfRole(role))

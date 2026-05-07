@@ -39,9 +39,19 @@ public static class PersonHelper
     public static void UpdateSeriesMetadataPeople(
         Dictionary<string, Person> databasePeople,
         SeriesMetadata metadata,
-        IEnumerable<ChapterPeople> chapterPeople,
+        List<ChapterPeople> chapterPeople,
         PersonRole role)
     {
+        if (chapterPeople.Count == 0)
+        {
+            var allPeopleInRole = metadata.People.Where(mp => mp.Role == role).ToList();
+            foreach (var person in allPeopleInRole)
+            {
+                metadata.People.Remove(person);
+            }
+            return;
+        }
+
         var normalizedPeople = chapterPeople
             .Where(cp => cp.Role == role)
             .Select(cp => cp.Person.NormalizedName)
