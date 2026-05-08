@@ -240,7 +240,10 @@ public static partial class AnnotationHelper
         }
 
         if (current == endElement)
+        {
             elements.Add(endElement);
+        }
+
 
         return elements;
     }
