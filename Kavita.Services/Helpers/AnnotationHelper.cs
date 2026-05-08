@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text.RegularExpressions;
 using HtmlAgilityPack;
 using Kavita.Models.DTOs.Reader;
+using Serilog;
 
 namespace Kavita.Services.Helpers;
 
@@ -59,10 +60,12 @@ public static partial class AnnotationHelper
 
                 foreach (var item in sortedAnnotations)
                 {
+                    var realStartPos = MapNormalizedPositionToOriginal(originalText, item.StartPos);
+
                     // Add text before highlight
-                    if (item.StartPos > currentPos)
+                    if (realStartPos > currentPos)
                     {
-                        var beforeText = originalText.Substring(currentPos, item.StartPos - currentPos);
+                        var beforeText = originalText.Substring(currentPos, realStartPos - currentPos);
                         elem.AppendChild(HtmlNode.CreateNode(beforeText));
                     }
 
@@ -71,17 +74,18 @@ public static partial class AnnotationHelper
                         $"<app-epub-highlight id=\"epub-highlight-{item.Annotation.Id}\">{item.Annotation.SelectedText}</app-epub-highlight>");
                     elem.AppendChild(highlightNode);
 
-                    currentPos = item.StartPos + item.Annotation.SelectedText.Length;
+                    currentPos = realStartPos + item.Annotation.SelectedText.Length;
                 }
 
                 // Add remaining text
                 if (currentPos < originalText.Length)
                 {
-                    elem.AppendChild(HtmlNode.CreateNode(originalText.Substring(currentPos + 1)));
+                    elem.AppendChild(HtmlNode.CreateNode(originalText[currentPos..]));
                 }
             }
             catch (Exception ex)
             {
+                Log.Logger.Debug(ex, "Failed to inject annotation into element");
                 /* Swallow */
                 return;
             }
@@ -115,7 +119,11 @@ public static partial class AnnotationHelper
 
                 var selectionStartPos = normalizedFullText.IndexOf(normalizedSelectedText, StringComparison.Ordinal);
 
-                if (selectionStartPos == -1) continue;
+                if (selectionStartPos == -1)
+                {
+                    Log.Logger.Debug("Failed to inject annotation {AnnotationId}, selected text not found", annotation.Id);
+                    continue;
+                }
 
                 var selectionEndPos = selectionStartPos + normalizedSelectedText.Length;
 
@@ -144,8 +152,9 @@ public static partial class AnnotationHelper
                     InjectHighlightInElement(element, highlightStart, highlightEnd, annotation.Id);
                 }
             }
-            catch (Exception)
+            catch (Exception ex)
             {
+                Log.Logger.Debug(ex, "Failed to inject annotation {AnnotationId} into elements", annotation.Id);
                 /* Swallow */
             }
         }
@@ -244,7 +253,7 @@ public static partial class AnnotationHelper
         // Add text before highlight
         if (startPos > 0)
         {
-            element.AppendChild(HtmlNode.CreateNode(originalText.Substring(0, startPos)));
+            element.AppendChild(HtmlNode.CreateNode(originalText[..startPos]));
         }
 
         // Add highlight
@@ -256,7 +265,7 @@ public static partial class AnnotationHelper
         // Add text after highlight
         if (endPos < originalText.Length)
         {
-            element.AppendChild(HtmlNode.CreateNode(originalText.Substring(endPos + 1)));
+            element.AppendChild(HtmlNode.CreateNode(originalText[endPos..]));
         }
     }
 
