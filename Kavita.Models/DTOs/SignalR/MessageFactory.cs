@@ -826,14 +826,14 @@ public static class MessageFactory
         };
     }
 
-    public static SignalRMessage SeriesUpdatedEvent(int id)
+    public static SignalRMessage SeriesUpdatedEvent(int seriesId)
     {
         return new SignalRMessage
         {
             Name = SeriesUpdated,
             Body = new
             {
-                Id = id
+                Id = seriesId
             }
         };
     }

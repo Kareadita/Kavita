@@ -169,7 +169,10 @@ public static partial class AnnotationHelper
     private static HtmlNode? NormalizeToBlockElement(HtmlNode? node)
     {
         while (node != null && InlineTags.Contains(node.Name.ToLower()))
+        {
             node = node.ParentNode;
+        }
+
         return node;
     }
 

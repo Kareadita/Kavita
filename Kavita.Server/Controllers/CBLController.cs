@@ -124,16 +124,10 @@ public class CblController(IReadingListService readingListService, IDirectorySer
     private async Task<(bool IsInvalid, ActionResult<CblSavedFileDto>? ActionResult)> HasInvalidExtensionAsync(string filename, string fullPath)
     {
         var ext = Path.GetExtension(filename);
-        if (!ext.Equals(".cbl", StringComparison.OrdinalIgnoreCase)
-            && !ext.Equals(".json", StringComparison.OrdinalIgnoreCase))
+        if (!ext.Equals(".cbl", StringComparison.OrdinalIgnoreCase) && !ext.Equals(".json", StringComparison.OrdinalIgnoreCase))
         {
             if (System.IO.File.Exists(fullPath) && filename != fullPath) System.IO.File.Delete(fullPath);
             return (true, BadRequest(await localizationService.TranslateAsync("cbl-import-validation-types")));
-        }
-
-        if (filename.Contains(".exe", StringComparison.OrdinalIgnoreCase))
-        {
-            return (true, BadRequest(await localizationService.TranslateAsync("invalid-filename")));
         }
 
         return (false, null);
