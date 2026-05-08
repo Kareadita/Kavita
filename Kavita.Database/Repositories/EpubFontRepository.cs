@@ -67,6 +67,13 @@ public class EpubFontRepository(DataContext context, IMapper mapper) : IEpubFont
             .FirstOrDefaultAsync(ct);
     }
 
+    public async Task<EpubFont?> GetFontByNameAsync(string name, CancellationToken ct = default)
+    {
+        return await context.EpubFont
+            .Where(f => f.NormalizedName.Equals(name.ToNormalized()))
+            .FirstOrDefaultAsync(ct);
+    }
+
     public async Task<bool> IsFontInUseAsync(int fontId, CancellationToken ct = default)
     {
         return await context.AppUserReadingProfiles

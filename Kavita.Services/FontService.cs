@@ -95,10 +95,13 @@ public class FontService(IDirectoryService directoryService, IUnitOfWork unitOfW
         var fileName = directoryService.FileSystem.FileInfo.New(path).Name;
         var font = Parser.ParseEpubFontFromFilename(fileName);
 
+        var dbFont = await unitOfWork.EpubFontRepository.GetFontByNameAsync(font.Name, ct);
+
         // Check if font name is already present in database
-        if (await unitOfWork.EpubFontRepository.GetFontDtoByNameAsync(font.Name, ct) != null)
+        // If it is, return the one that is already in the database.
+        if (dbFont != null)
         {
-            throw new KavitaException("errors.font-already-in-use");
+            return dbFont;
         }
 
         // Copy file from temp directory to EpubFontDirectory
@@ -143,11 +146,18 @@ public class FontService(IDirectoryService directoryService, IUnitOfWork unitOfW
             throw new KavitaException("errors.font-not-found");
         }
 
+        // Choose the variable font if available
+        // Otherwise take the full list.
+        // This should be fine since Google Fonts seems to
+        // only prepend filenames with 'static/' for font
+        // families that have variable fonts since the
+        // static/ path contains non-variable variants of
+        // the font for applications that don't support
+        // variable fonts.
         var googleFontRefs = metaData.VariableFont();
         if (googleFontRefs.Length == 0)
         {
-            logger.LogError("Unable to find variable font for {FontName} with metadata {MetaData}", fontFamily.Sanitize(), metaData);
-            throw new KavitaException("errors.font-not-found");
+            googleFontRefs = metaData.manifest.fileRefs;
         }
 
         var finalRef = new List<EpubFont>();

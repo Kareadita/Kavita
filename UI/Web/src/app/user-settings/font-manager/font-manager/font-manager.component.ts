@@ -205,6 +205,11 @@ export class FontManagerComponent implements OnInit {
   }
 
   private addFont(font: EpubFont) {
+    // Check if the font is already in our list.
+    // Bail out if is.
+    if (this.fonts().some(f => f.id === font.id)) {
+      return;
+    }
     this.fonts.update(x => [...x, font]);
     this.loadedFonts.update(x => [...x, font]);
     setTimeout(() => this.selectFont(font), 100);

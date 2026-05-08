@@ -92,11 +92,9 @@
                         [class.active]="currentFont && currentFont?.name === font.name"
                         (click)="selectFont(font)"
                       >
-                        <div class="ms-2 me-auto">
-                          <div class="fw-bold">{{font.name | sentenceCase}}</div>
-                        </div>
+                        <div style="word-break: keep-all" class="ms-2 me-auto">{{font.name | sentenceCase}}</div>
                         <div>
-                          <span class="pill p-1 mx-1 provider">{{+font.provider | siteThemeProvider}}</span>
+                          <span style="word-break: keep-all" class="pill p-1 mx-1 provider">{{+font.provider | siteThemeProvider}}</span>
                         </div>
                       </li>
                     }
