@@ -107,7 +107,9 @@ public partial class BookService(
                || anchor.GetAttributeValue("href", string.Empty).Contains(".xhtml")
                || anchor.GetAttributeValue("href", string.Empty).Contains(".html")
                && anchor.GetAttributeValue("tabindex", string.Empty) != "-1"
-               && anchor.GetAttributeValue("role", string.Empty) != "presentation";
+               && anchor.GetAttributeValue("role", string.Empty) != "presentation"
+               // External links should not be caught (may contain the above in their url)
+               && !anchor.GetAttributeValue("href", string.Empty).StartsWith("http");
     }
 
     public static string GetContentType(EpubContentType type)
