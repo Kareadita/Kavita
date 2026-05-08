@@ -11,6 +11,11 @@ namespace Kavita.Services.Helpers;
 public static partial class AnnotationHelper
 {
     private const string UiXPathScope = "//BODY/DIV[1]"; // Div[1] is the div we inject reader contents into
+    /// <summary>
+    /// Used to break out of inline elements when selecting start- and end-elements.
+    /// If we don't do this; <p><em>foo</em></p> will have em selected as start and <see cref="GetElementsInRange"/>
+    /// fails to select the correct elements
+    /// </summary>
     private static readonly HashSet<string> InlineTags = ["em", "strong", "i", "b", "span", "a", "cite"];
 
     [GeneratedRegex("""^id\("([^"]+)"\)$""")]

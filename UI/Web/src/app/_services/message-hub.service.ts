@@ -15,6 +15,7 @@ import {AnnotationUpdateEvent} from "../_models/events/annotation-update-event";
 import {toSignal} from "@angular/core/rxjs-interop";
 import {ReadingSessionCloseEvent, ReadingSessionUpdateEvent} from "../_models/events/reading-session-close-event";
 import {ReadingListUpdatedEvent} from "../_models/events/reading-list-updated-event";
+import {SeriesUpdateEvent} from "../_models/events/series-update-event";
 
 export enum EVENTS {
   UpdateAvailable = 'UpdateAvailable',
@@ -446,7 +447,7 @@ export class MessageHubService {
     this.hubConnection.on(EVENTS.SeriesUpdated, resp => {
       this.messagesSource.next({
         event: EVENTS.SeriesUpdated,
-        payload: resp.body
+        payload: resp.body as SeriesUpdateEvent
       });
     });
   }

@@ -3,6 +3,4 @@ export interface BaseTag {
   title: string;
 }
 export interface Tag extends BaseTag {
-    id: number,
-    title: string;
 }

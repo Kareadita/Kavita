@@ -103,9 +103,9 @@ public partial class BookService(
 
     private static bool HasClickableHrefPart(HtmlNode anchor)
     {
-        return anchor.GetAttributeValue("href", string.Empty).Contains('#')
-               || anchor.GetAttributeValue("href", string.Empty).Contains(".xhtml")
-               || anchor.GetAttributeValue("href", string.Empty).Contains(".html")
+        return (anchor.GetAttributeValue("href", string.Empty).Contains('#')
+                || anchor.GetAttributeValue("href", string.Empty).Contains(".xhtml")
+                || anchor.GetAttributeValue("href", string.Empty).Contains(".html"))
                && anchor.GetAttributeValue("tabindex", string.Empty) != "-1"
                && anchor.GetAttributeValue("role", string.Empty) != "presentation"
                // External links should not be caught (may contain the above in their url)
