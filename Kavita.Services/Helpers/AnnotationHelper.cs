@@ -11,6 +11,7 @@ namespace Kavita.Services.Helpers;
 public static partial class AnnotationHelper
 {
     private const string UiXPathScope = "//BODY/DIV[1]"; // Div[1] is the div we inject reader contents into
+    private static readonly HashSet<string> InlineTags = ["em", "strong", "i", "b", "span", "a", "cite"];
 
     [GeneratedRegex("""^id\("([^"]+)"\)$""")]
     private static partial Regex IdXPathRegex();
@@ -101,8 +102,8 @@ public static partial class AnnotationHelper
                 var startXPath = DescopeXpath(annotation.XPath);
                 var endXPath = DescopeXpath(annotation.EndingXPath);
 
-                var startElement = FindElementByXPath(doc, startXPath);
-                var endElement = FindElementByXPath(doc, endXPath);
+                var startElement = NormalizeToBlockElement(FindElementByXPath(doc, startXPath));
+                var endElement = NormalizeToBlockElement(FindElementByXPath(doc, endXPath));
 
                 if (startElement == null || endElement == null) continue;
 
@@ -165,6 +166,13 @@ public static partial class AnnotationHelper
         return WhitespaceRegex().Replace(text.Trim(), " ");
     }
 
+    private static HtmlNode? NormalizeToBlockElement(HtmlNode? node)
+    {
+        while (node != null && InlineTags.Contains(node.Name.ToLower()))
+            node = node.ParentNode;
+        return node;
+    }
+
     private static int MapNormalizedPositionToOriginal(string originalText, int normalizedPosition)
     {
         var normalizedText = NormalizeWhitespace(originalText);
@@ -212,20 +220,24 @@ public static partial class AnnotationHelper
         var elements = new List<HtmlNode>();
         var current = startElement;
 
-        elements.Add(current);
-
         // If start and end are the same, return just that element
-        if (startElement == endElement) return elements;
+        if (startElement == endElement)
+        {
+            elements.Add(current);
+            return elements;
+        }
 
         // Traverse siblings until we reach the end element
         while (current != null && current != endElement)
         {
-            current = current.NextSibling;
-            if (current is {NodeType: HtmlNodeType.Element}) // Only include element nodes (skip text nodes, comments, etc.)
-            {
+            if (current.NodeType == HtmlNodeType.Element)
                 elements.Add(current);
-            }
+
+            current = current.NextSibling;
         }
+
+        if (current == endElement)
+            elements.Add(endElement);
 
         return elements;
     }
