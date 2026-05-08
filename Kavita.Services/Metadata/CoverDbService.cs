@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -797,8 +797,8 @@ public class CoverDbService : ICoverDbService
 
         if (fromBase64)
         {
-            return _imageService.CreateThumbnailFromBase64(url,
-                filenameWithoutExtension, encodeFormat, coverImageSize.GetDimensions().Width, targetDirectory);
+            var (width, height) = coverImageSize.GetDimensions();
+            return _imageService.CreateThumbnailFromBase64(url, filenameWithoutExtension, encodeFormat, width, height, targetDirectory);
         }
 
         return await DownloadImageFromUrl(filenameWithoutExtension, encodeFormat, url, targetDirectory);

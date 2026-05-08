@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Threading.Tasks;
 using Flurl.Http;
 using Kavita.API.Attributes;
@@ -272,10 +272,9 @@ public class UploadController : BaseApiController
     {
         var settings = await _unitOfWork.SettingsRepository.GetSettingsDtoAsync();
         var encodeFormat = settings.EncodeMediaAs;
-        var coverImageSize = settings.CoverImageSize;
+        var (width, height) = settings.CoverImageSize.GetDimensions();
 
-        return _imageService.CreateThumbnailFromBase64(uploadCoverFileDto.Url,
-            filename, encodeFormat, coverImageSize.GetDimensions().Width);
+        return _imageService.CreateThumbnailFromBase64(uploadCoverFileDto.Url, filename, encodeFormat, width, height);
     }
 
     /// <summary>

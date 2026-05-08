@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -526,13 +526,13 @@ public class ImageService(ILogger<ImageService> logger, IDirectoryService direct
 
 
     /// <inheritdoc />
-    public string CreateThumbnailFromBase64(string encodedImage, string fileName, EncodeFormat encodeFormat, int thumbnailWidth = ThumbnailWidth, string? targetDirectory = null)
+    public string CreateThumbnailFromBase64(string encodedImage, string fileName, EncodeFormat encodeFormat, int thumbnailWidth = ThumbnailWidth, int thumbnailHeight = ThumbnailHeight, string? targetDirectory = null)
     {
         // TODO: This code has no concept of cropping nor Thumbnail Size
         try
         {
             targetDirectory ??= directoryService.CoverImageDirectory;
-            using var thumbnail = Image.ThumbnailBuffer(Convert.FromBase64String(encodedImage), thumbnailWidth);
+            using var thumbnail = Image.ThumbnailBuffer(Convert.FromBase64String(encodedImage), thumbnailWidth, height: thumbnailHeight);
 
             fileName += encodeFormat.GetExtension();
             thumbnail.WriteToFile(directoryService.FileSystem.Path.Join(targetDirectory, fileName));
@@ -552,7 +552,7 @@ public class ImageService(ILogger<ImageService> logger, IDirectoryService direct
     }
 
     /// <inheritdoc />
-    public async Task<string> CreateThumbnailFromUrl(string url, string fileName, EncodeFormat encodeFormat, int thumbnailWidth = ThumbnailWidth)
+    public async Task<string> CreateThumbnailFromUrl(string url, string fileName, EncodeFormat encodeFormat, int thumbnailWidth = ThumbnailWidth, int thumbnailHeight = ThumbnailHeight)
     {
         try
         {
@@ -560,7 +560,7 @@ public class ImageService(ILogger<ImageService> logger, IDirectoryService direct
                 .AllowHttpStatus("2xx,304")
                 .GetStreamAsync();
 
-            using var thumbnail = Image.ThumbnailStream(imageStream, thumbnailWidth);
+            using var thumbnail = Image.ThumbnailStream(imageStream, thumbnailWidth, height: thumbnailHeight);
 
             fileName += encodeFormat.GetExtension();
             thumbnail.WriteToFile(directoryService.FileSystem.Path.Join(directoryService.CoverImageDirectory, fileName));
