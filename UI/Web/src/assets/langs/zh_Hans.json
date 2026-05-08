@@ -485,7 +485,8 @@
     },
     "all-filters": {
         "title": "所有智能筛选器",
-        "count": "{{count}} {{customize-dashboard-modal.title-smart-filters}}"
+        "count": "{{count}} {{customize-dashboard-modal.title-smart-filters}}",
+        "description": "智能过滤器是已保存的过滤规则，可以固定在侧边导航栏或仪表盘中。您可以通过输入名称并点击“保存”按钮，为“系列”或“阅读清单”创建智能过滤器。"
     },
     "announcements": {
         "title": "公告"
@@ -602,7 +603,8 @@
         "completion-label": "{{percent}} 完成",
         "force-selected-one-column": "由于空间不足以呈现两列，布局模式切换为单列",
         "forced-vertical-switch": "布局模式切换为双列布局，不支持垂直书写样式",
-        "close-reader-alt": "关闭阅读器"
+        "close-reader-alt": "关闭阅读器",
+        "shortcuts-menu-alt": "{{manga-reader.shortcuts-menu-alt}}"
     },
     "personal-table-of-contents": {
         "no-data": "尚未添加书签",
@@ -854,7 +856,9 @@
         "reading-profile-updated": "阅读配置文件已更新",
         "reading-profile-promoted": "推广阅读配置文件",
         "line-spacing-max-label": "2.5x",
-        "update-parent": "保存到 {{name}}"
+        "update-parent": "保存到 {{name}}",
+        "disable-bookmark-icon-label": "{{manage-reading-profiles.disable-bookmark-icon-label}}",
+        "disable-bookmark-icon-tooltip": "{{manage-reading-profiles.disable-bookmark-icon-tooltip}}"
     },
     "table-of-contents": {
         "no-data": "这本书没有在元数据或toc文件中设置目录"
@@ -874,7 +878,8 @@
         "items-selected": "{{num}}项已选中",
         "mark-as-unread": "标记为未读",
         "mark-as-read": "标记为已读",
-        "deselect-all": "{{common.deselect-all}}"
+        "deselect-all": "{{common.deselect-all}}",
+        "mark-as-read-with-session": "标记为已读并计入会话"
     },
     "card-detail-layout": {
         "total-items": "总共{{count}}个条目",
@@ -909,7 +914,26 @@
         "format-title": "{{metadata-filter.format-label}}",
         "age-rating-title": "{{metadata-fields.age-rating-title}}",
         "file-path-title": "文件",
-        "folder-path-title": "文件夹路径"
+        "folder-path-title": "文件夹路径",
+        "external-metadata-title": "外部元数据",
+        "basic-metadata-title": "基础元数据",
+        "read-time-label": "阅读时间",
+        "pages-label": "{{edit-chapter-modal.pages-label}}",
+        "words-label": "{{edit-chapter-modal.words-label}}",
+        "added-label": "添加时间",
+        "updated-label": "更新于",
+        "kavita-id-label": "Kavita ID",
+        "sort-order-label": "{{edit-chapter-modal.sort-order-label}}",
+        "language-label": "语言",
+        "is-special-label": "特别篇",
+        "pub-status-label": "{{metadata-filter.publication-status-label}}",
+        "file-info-title": "文件信息",
+        "not-set-label": "未设置",
+        "pages-count": "{{series-detail.pages-count}}",
+        "words-count": "{{series-detail.words-count}}",
+        "bytes-count": "{{num}} bytes",
+        "yes-label": "是",
+        "no-label": "否"
     },
     "related-tab": {
         "reading-lists-title": "{{reading-lists.title}}",
@@ -957,7 +981,7 @@
         "create": "{{common.create}}"
     },
     "entity-title": {
-        "special": "特刊",
+        "special": "特别篇",
         "issue-num": "期 #{{num}}",
         "book-num": "书籍 {{num}}",
         "single-volume": "单卷",
@@ -1202,7 +1226,9 @@
         "check-for-updates-task-desc": "查看您的版本之前是否有任何稳定版本发布。",
         "clean-up-task": "常规清理",
         "clean-up-task-desc": "在服务器上执行夜间清理活动。可能很繁重，建议不要在有活动用户或扫描时运行。每 24 小时运行一次。",
-        "clean-up-task-success": "清理完成"
+        "clean-up-task-success": "清理完成",
+        "cbl-sync-label": "阅读清单同步",
+        "cbl-sync-tooltip": "Kavita 检查 CBL 阅读清单更新的频率。默认为每天凌晨 4 点。"
     },
     "manage-users": {
         "invite": "邀请",
@@ -1299,7 +1325,8 @@
         "custom-key-binds": "按键绑定",
         "insights-section-title": "洞察",
         "admin-activity": "活动",
-        "admin-device": "设备"
+        "admin-device": "设备",
+        "remap-rules": "重映射规则"
     },
     "collection-detail": {
         "no-data": "暂无项目。请尝试添加一个系列。",
@@ -1474,7 +1501,47 @@
     },
     "import-cbl-modal": {
         "close": "{{common.close}}",
-        "title": "CBL导入"
+        "title": "CBL导入",
+        "description": "在此页面上，您可以创建重映射规则，将系列或单话自动映射到 Kavita 实体。重映射规则将应用于当前及未来的清单。",
+        "matched-count": "{{count}} 匹配",
+        "issues-count": "{{count}} 期",
+        "unmatched-count": "{{count}} 项缺失",
+        "matched-items-header": "匹配项",
+        "issues-header": "需要注意的项目",
+        "remap-rules-header": "重映射规则",
+        "tier-label": "匹配来源",
+        "skip-item": "跳过",
+        "select-series": "搜索系列",
+        "pick-candidate": "选择正确的系列",
+        "finalize": "全部导入",
+        "finalize-single": "导入",
+        "previous-file": "上一步",
+        "next-file": "下一步",
+        "file-counter": "文件 {{current}}/ {{total}}",
+        "no-remap-rules": "无重新映射规则",
+        "delete-rule": "{{common.delete}}",
+        "manage-rules": "管理重映射规则",
+        "col-series": "待匹配系列",
+        "col-vol-issue": "待匹配 卷/话",
+        "col-status": "状态",
+        "col-matched-series": "匹配系列",
+        "col-action": "执行",
+        "resolve": "解决",
+        "select-chapter": "选择匹配的章节",
+        "edit-match": "编辑匹配",
+        "cancel": "{{common.cancel}}",
+        "undo": "撤销",
+        "remap-rule-used": "通过重映射规则匹配",
+        "import-success": "成功导入 {{count}} 个阅读清单",
+        "processing": "处理",
+        "new-list": "新",
+        "update-list": "更新",
+        "volume-num": "{{common.volume-num-shorthand}}",
+        "issue-num": "{{common.issue-num-shorthand}}",
+        "refresh": "刷新",
+        "wiki": "Wiki",
+        "promote": "{{actionable.promote}}",
+        "promote-tooltip": "{{actionable.promote-tooltip}}"
     },
     "pdf-reader": {
         "loading-message": "加载中...",
@@ -1987,7 +2054,7 @@
         "imprint": "刊物 / 杂志",
         "publisher": "出版社",
         "read-progress": "阅读进度",
-        "read-time": "阅读时长",
+        "read-time": "阅读时间",
         "release-year": "{{sort-field-pipe.release-year}}",
         "series-name": "系列名称",
         "summary": "内容简介",
@@ -2840,7 +2907,8 @@
         "reset-tooltip": "重置所有用户的外部 ID,用于重置 Kavita 用户与身份提供商之间的关联链接",
         "reset-confirm": "确定要重置所有用户的外部 ID 吗？",
         "reset-success": "已重置所有用户的外部 ID，请重新认证以进行关联",
-        "auto-save-required": "关键设置已更改，系统将通过自动保存进行持久化"
+        "auto-save-required": "关键设置已更改，系统将通过自动保存进行持久化",
+        "checking-authority": "正在检查授权服务器是否有效，请稍候..."
     },
     "identity-provider-pipe": {
         "kavita": "Kavita",
@@ -2867,7 +2935,9 @@
         "create": "创建",
         "contains-spoilers-label": "{{annotation-card.contains-spoilers-label}}",
         "edit": "编辑",
-        "delete": "删除"
+        "delete": "删除",
+        "read-more": "{{read-more.read-more}}",
+        "read-less": "{{read-more.read-less}}"
     },
     "view-bookmark-drawer": {
         "title": "书签",
@@ -2972,7 +3042,15 @@
         "key-bind-title-page-down": "下一页",
         "key-bind-tooltip-page-down": "向下移一页",
         "key-bind-title-offset-double-page": "双页偏移",
-        "key-bind-tooltip-offset-double-page": "偏移页面以对齐双页跨页"
+        "key-bind-tooltip-offset-double-page": "偏移页面以对齐双页跨页",
+        "key-bind-title-next-chapter": "下一章",
+        "key-bind-tooltip-next-chapter": "加载下一章",
+        "key-bind-title-previous-chapter": "上一章",
+        "key-bind-tooltip-previous-chapter": "加载上一章",
+        "key-bind-title-first-page": "第一页",
+        "key-bind-tooltip-first-page": "跳转至第一页",
+        "key-bind-title-last-page": "最后一页",
+        "key-bind-tooltip-last-page": "跳转至最后一页"
     },
     "manage-auth-keys": {
         "auth-keys-title": "管理授权密钥",
@@ -3401,6 +3479,105 @@
         "external-id": "外部标识",
         "exact-name": "完整名称",
         "comicvine-naming": "ComicVine 命名",
-        "article-stripped": "文章已删除"
+        "article-stripped": "文章已删除",
+        "reprint-stripped": "翻印版",
+        "alternate-series": "关联系列",
+        "user-decision": "用户决策",
+        "unmatched": "未匹配"
+    },
+    "authority-validation-result-pipe": {
+        "success": "授权有效",
+        "invalid-authority": "OIDC 配置加载成功，但发行者验证失败",
+        "failure": "Kavita 无法加载 OIDC 配置",
+        "not-applicable": "Kavita未配置授权服务器，验证失败",
+        "missing-https": "{{manage-oidc-connect.tls-required}}"
+    },
+    "file-drag-and-drop-upload": {
+        "drag-n-drop": "{{cover-image-chooser.drag-n-drop}}",
+        "upload": "{{cover-image-chooser.upload}}",
+        "enter-an-url-pre-title": "请输入 {{url}}",
+        "url": "url",
+        "url-label": "Url",
+        "back": "返回",
+        "load": "加载"
+    },
+    "change-username": {
+        "username-label": "{{common.username}}",
+        "new-username-label": "新用户名",
+        "reset": "{{common.reset}}",
+        "save": "{{common.save}}",
+        "required-field": "{{validation.required-field}}"
+    },
+    "cbl-import-reason-pipe": {
+        "chapter-missing": "章节缺失",
+        "volume-missing": "卷数缺失",
+        "series-missing": "无匹配系列",
+        "name-conflict": "命名冲突",
+        "all-series-missing": "所有系列缺失",
+        "empty-file": "空文件",
+        "series-collision": "发现多个匹配系列",
+        "all-chapter-missing": "所有章节均缺失",
+        "success": "成功",
+        "invalid-file": "无效文件"
+    },
+    "cbl-manager": {
+        "browse-repo": "浏览 CBL 清单",
+        "description": "您可以从文件、URL 导入阅读清单，或者浏览 CBL 仓库。从在线来源创建的清单将在后台自动更新，也可根据需要手动更新。",
+        "url": "CBL 链接",
+        "preview-default": "上传您自己的 CBL v1/v2 文件进行导入",
+        "enter-an-url-pre-title": "{{font-manager.enter-an-url-pre-title}}",
+        "drag-n-drop": "{{cover-image-chooser.drag-n-drop}}",
+        "upload": "{{cover-image-chooser.upload}}",
+        "upload-continued": "一个 CBL 文件",
+        "downloaded": "已下载",
+        "url-label": "Url",
+        "load": "加载",
+        "back": "返回",
+        "item-count": "{{common.item-count}}",
+        "missing-count": "{{reading-list-detail.missing-count}}",
+        "provider-url": "URL",
+        "provider-file": "文件",
+        "update-available": "有可用更新",
+        "search-placeholder": "搜索阅读清单...",
+        "filter-has-update": "仅显示有更新",
+        "filter-all": "所有",
+        "filter-local": "本地",
+        "no-results": "没有匹配的阅读列表",
+        "add": "{{common.add}}",
+        "sync": "同步",
+        "sync-manual": "同步（手动）",
+        "delete": "{{common.delete}}",
+        "view-list": "查看阅读列表",
+        "last-synced": "上次同步: {{date}}",
+        "last-checked": "上次检查时间: {{date}}",
+        "not-authorized": "您没有操作此内容的权限",
+        "source": "来源"
+    },
+    "manage-remap-rules-modal": {
+        "title": "管理重映射规则",
+        "close": "{{common.close}}",
+        "no-rules": "未保存任何重映射规则",
+        "delete-rule": "{{common.delete}}",
+        "volume-num": "{{common.volume-num-shorthand}}",
+        "issue-num": "{{common.issue-num-shorthand}}",
+        "global": "全局",
+        "series-level": "系列层级",
+        "volume-target": "{{common.volume-num-shorthand}}"
+    },
+    "manage-remap-rules": {
+        "create-rule-title": "创建规则",
+        "edit-rule-title": "编辑重映射规则",
+        "new-rule-title": "新重映射规则",
+        "cbl-series-name-label": "CBL系列名称",
+        "cbl-series-name-placeholder": "输入CBL系列名称...",
+        "kavita-series-label": "Kavita 系列",
+        "save": "{{common.save}}",
+        "cancel": "{{common.cancel}}",
+        "my-rules-header": "我的规则",
+        "global-rules-header": "全剧规则",
+        "other-users-rules-header": "其他用户规则",
+        "cbl-name-col": "CBL名称",
+        "cbl-volume-col": "CBL卷数",
+        "mapped-series-col": "映射系列"
     }
 }
