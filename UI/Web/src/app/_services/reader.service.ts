@@ -341,19 +341,16 @@ export class ReaderService {
     return params;
   }
 
-  toggleFullscreen(el: Element, callback?: VoidFunction) {
-
+  toggleFullscreen() {
     if (screenfull.isEnabled) {
       screenfull.toggle();
     }
   }
 
-  /**
-   *
-   * @returns If document is in fullscreen mode
-   */
-  checkFullscreenMode() {
-    return document.fullscreenElement != null;
+  exitFullscreen() {
+    if (screenfull.isEnabled) {
+      screenfull.exit();
+    }
   }
 
   /**
