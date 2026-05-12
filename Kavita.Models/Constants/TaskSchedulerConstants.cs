@@ -25,4 +25,5 @@ public static class TaskSchedulerConstants
     public const string AuthKeyExpirationId = "auth-key-expiration";
     public const string EnsureSideNavId = "ensure-sidenav";
     public const string FlushUserActiveTaskId = "flush-user-active";
+    public const string PurgeKavitaPlusAuditLogsId = "purge-kavita-plus-audit-logs";
 }

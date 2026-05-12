@@ -12,6 +12,7 @@ using Kavita.API.Repositories;
 using Kavita.API.Services;
 using Kavita.API.Services.Plus;
 using Kavita.API.Services.SignalR;
+using Kavita.Models.Entities.Enums;
 using Kavita.Common;
 using Kavita.Common.Helpers;
 using Kavita.Models.DTOs.Filtering.v2;
@@ -78,6 +79,7 @@ public class ScrobblingService : IScrobblingService
     private readonly ILocalizationService _localizationService;
     private readonly IEmailService _emailService;
     private readonly IKavitaPlusApiService _kavitaPlusApiService;
+    private readonly IKavitaPlusAuditService _auditService;
 
     public const string AniListWeblinkWebsite = ScrobblingHelper.AniListWeblinkWebsite;
     public const string MalWeblinkWebsite = ScrobblingHelper.MalWeblinkWebsite;
@@ -111,7 +113,7 @@ public class ScrobblingService : IScrobblingService
 
     public ScrobblingService(IUnitOfWork unitOfWork, IEventHub eventHub, ILogger<ScrobblingService> logger,
         ILicenseService licenseService, ILocalizationService localizationService, IEmailService emailService,
-        IKavitaPlusApiService kavitaPlusApiService)
+        IKavitaPlusApiService kavitaPlusApiService, IKavitaPlusAuditService auditService)
     {
         _unitOfWork = unitOfWork;
         _eventHub = eventHub;
@@ -120,6 +122,7 @@ public class ScrobblingService : IScrobblingService
         _localizationService = localizationService;
         _emailService = emailService;
         _kavitaPlusApiService = kavitaPlusApiService;
+        _auditService = auditService;
 
         FlurlConfiguration.ConfigureClientForUrl(Configuration.KavitaPlusApiUrl);
     }
@@ -280,12 +283,15 @@ public class ScrobblingService : IScrobblingService
             ScrobbleEventType.ScoreUpdated, true, ct);
         if (existingEvt is {IsProcessed: false})
         {
-            // We need to just update Volume/Chapter number
             _logger.LogDebug("Overriding scrobble event for {Series} from Rating {Rating} -> {UpdatedRating}",
                 existingEvt.Series.Name, existingEvt.Rating, rating);
+            var prevRating = existingEvt.Rating;
             existingEvt.Rating = rating;
             _unitOfWork.ScrobbleRepository.Update(existingEvt);
             await _unitOfWork.CommitAsync(ct);
+            await _auditService.LogScrobbleAsync(KavitaPlusEventType.ScrobbleEventUpdated, seriesId,
+                new { seriesName = series.Name, from = new { rating = prevRating }, to = new { rating }, userId },
+                AuditStatus.Info, ct: ct);
             return;
         }
 
@@ -303,6 +309,9 @@ public class ScrobblingService : IScrobblingService
         _unitOfWork.ScrobbleRepository.Attach(evt);
         await _unitOfWork.CommitAsync(ct);
         _logger.LogDebug("Added Scrobbling Rating update on {SeriesName} with Userid {AppUserId}", series.Name, userId);
+        await _auditService.LogScrobbleAsync(KavitaPlusEventType.ScrobbleEventCreated, seriesId,
+            new { seriesName = series.Name, eventType = "ScoreUpdated", rating, userId },
+            AuditStatus.Info, ct: ct);
     }
 
     public async Task ScrobbleReadingUpdate(int userId, int seriesId, CancellationToken ct = default)
@@ -349,6 +358,9 @@ public class ScrobblingService : IScrobblingService
 
             _logger.LogDebug("Overriding scrobble event for {Series} from vol {PrevVol} ch {PrevChap} -> vol {UpdatedVol} ch {UpdatedChap}",
                 existingEvt.Series.Name, prevVol, prevChapter, existingEvt.VolumeNumber, existingEvt.ChapterNumber);
+            await _auditService.LogScrobbleAsync(KavitaPlusEventType.ScrobbleEventUpdated, seriesId,
+                new { seriesName = series.Name, from = new { chapter = prevChapter, vol = prevVol }, to = new { chapter = existingEvt.ChapterNumber, vol = existingEvt.VolumeNumber }, userId },
+                AuditStatus.Info, ct: ct);
             return;
         }
 
@@ -382,6 +394,9 @@ public class ScrobblingService : IScrobblingService
             _unitOfWork.ScrobbleRepository.Attach(evt);
             await _unitOfWork.CommitAsync(ct);
             _logger.LogDebug("Added Scrobbling Read update on {SeriesName} - Volume: {VolumeNumber} Chapter: {ChapterNumber} for User: {AppUserId}", series.Name, evt.VolumeNumber, evt.ChapterNumber, userId);
+            await _auditService.LogScrobbleAsync(KavitaPlusEventType.ScrobbleEventCreated, seriesId,
+                new { seriesName = series.Name, eventType = "ChapterRead", chapter = evt.ChapterNumber, volume = evt.VolumeNumber, userId },
+                AuditStatus.Info, ct: ct);
         }
         catch (Exception ex)
         {
@@ -814,7 +829,15 @@ public class ScrobblingService : IScrobblingService
     /// <param name="createEvent"></param>
     private async Task ProcessEvents(IEnumerable<ScrobbleEvent> events, ScrobbleSyncContext ctx, Func<ScrobbleEvent, Task<ScrobbleDto>> createEvent)
     {
-        foreach (var evt in events.Where(CanProcessScrobbleEvent))
+        var eventList = events.ToList();
+        foreach (var evt in eventList.Where(e => !CanProcessScrobbleEvent(e)))
+        {
+            await _auditService.LogScrobbleAsync(KavitaPlusEventType.ScrobbleEventSkipped, evt.SeriesId,
+                new { seriesName = evt.Series.Name, reason = "NoProviderConfigured" },
+                AuditStatus.Info);
+        }
+
+        foreach (var evt in eventList.Where(CanProcessScrobbleEvent))
         {
             _logger.LogDebug("Processing Scrobble Events: {Count} / {Total}", ctx.ProgressCounter, ctx.TotalCount);
             ctx.ProgressCounter++;
@@ -936,12 +959,20 @@ public class ScrobblingService : IScrobblingService
             _logger.LogDebug("K+ API Scrobble response for series {SeriesName}: Successful {Successful}, ErrorMessage {ErrorMessage}, ExtraInformation: {ExtraInformation}, RateLeft: {RateLeft}",
                 data.SeriesName, response.Successful, response.ErrorMessage, response.ExtraInformation, response.RateLeft);
 
-            if (response.Successful || response.ErrorMessage == null) return response.RateLeft;
+            if (response.Successful || response.ErrorMessage == null)
+            {
+                await _auditService.LogScrobbleAsync(KavitaPlusEventType.ScrobbleEventSent, evt.SeriesId,
+                    new { seriesName = evt.Series.Name, eventType = data.ScrobbleEventType, chapter = data.ChapterNumber, rateLeft = response.RateLeft },
+                    AuditStatus.Success);
+                return response.RateLeft;
+            }
 
             // Might want to log this under ScrobbleError
             if (response.ErrorMessage.Contains("Too Many Requests"))
             {
                 _logger.LogInformation("Hit Too many requests while posting scrobble updates, sleeping to regain requests and retrying");
+                await _auditService.LogAsync(KavitaPlusAuditCategory.Scrobble, KavitaPlusEventType.ScrobbleRateLimitHit,
+                    AuditStatus.Failure, AuditSubjectType.Global, error: "Too many requests");
                 await Task.Delay(TimeSpan.FromMinutes(10));
                 return await PostScrobbleUpdate(data, license, evt);
             }
@@ -957,6 +988,9 @@ public class ScrobblingService : IScrobblingService
             if (response.ErrorMessage.Contains("Access token is invalid"))
             {
                 evt.SetErrorMessage(AccessTokenErrorMessage);
+                await _auditService.LogScrobbleAsync(KavitaPlusEventType.ScrobbleEventFailed, evt.SeriesId,
+                    new { seriesName = evt.Series.Name, reason = "InvalidToken" },
+                    AuditStatus.Failure, "InvalidToken");
                 throw new KavitaException("Access token is invalid");
             }
 
@@ -966,6 +1000,9 @@ public class ScrobblingService : IScrobblingService
                 _logger.LogInformation("Kavita+ was unable to match the series: {SeriesName}", evt.Series.Name);
                 await MarkSeriesAsUnknown(data, evt);
                 evt.SetErrorMessage(UnknownSeriesErrorMessage);
+                await _auditService.LogScrobbleAsync(KavitaPlusEventType.ScrobbleEventFailed, evt.SeriesId,
+                    new { seriesName = evt.Series.Name, reason = "Unknown Series" },
+                    AuditStatus.Failure, "Unknown Series");
             } else if (response.ErrorMessage.StartsWith("Review"))
             {
                 // Log the Series name and Id in ScrobbleErrors

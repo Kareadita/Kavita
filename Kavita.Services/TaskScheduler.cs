@@ -79,6 +79,7 @@ public class TaskScheduler : ITaskScheduler
     public const string AuthKeyExpirationId = TaskSchedulerConstants.AuthKeyExpirationId;
     public const string EnsureSideNavId = TaskSchedulerConstants.EnsureSideNavId;
     public const string FlushUserActiveTaskId = TaskSchedulerConstants.FlushUserActiveTaskId;
+    public const string PurgeKavitaPlusAuditLogsId = TaskSchedulerConstants.PurgeKavitaPlusAuditLogsId;
 
     private const int BaseRetryDelay = 60; // 1-minute
 
@@ -293,6 +294,10 @@ public class TaskScheduler : ITaskScheduler
         RecurringJob.AddOrUpdate(KavitaPlusWantToReadSyncId,
             () => _wantToReadSyncService.Sync(CancellationToken.None),
             Cron.Weekly(DayOfWeekHelper.Random()), RecurringJobOptions);
+
+        RecurringJob.AddOrUpdate<IKavitaPlusAuditService>(PurgeKavitaPlusAuditLogsId,
+            service => service.PurgeOldLogsAsync(CancellationToken.None),
+            Cron.Daily, RecurringJobOptions);
     }
 
 
@@ -308,6 +313,7 @@ public class TaskScheduler : ITaskScheduler
         RecurringJob.RemoveIfExists(KavitaPlusDataRefreshId);
         RecurringJob.RemoveIfExists(KavitaPlusStackSyncId);
         RecurringJob.RemoveIfExists(KavitaPlusWantToReadSyncId);
+        RecurringJob.RemoveIfExists(PurgeKavitaPlusAuditLogsId);
     }
 
     #region StatsTasks

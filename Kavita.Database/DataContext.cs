@@ -104,6 +104,8 @@ public sealed class DataContext : IdentityDbContext<AppUser, AppRole, int,
 
     public DbSet<DataProtectionKey> DataProtectionKeys { get; set; } = null!;
 
+    public DbSet<KavitaPlusAuditLog> KavitaPlusAuditLogs { get; set; } = null!;
+
 
     protected override void OnModelCreating(ModelBuilder builder)
     {
@@ -548,6 +550,18 @@ public sealed class DataContext : IdentityDbContext<AppUser, AppRole, int,
         builder.Entity<AppUserReadingSessionActivityData>()
             .HasIndex(a => new { a.StartTimeUtc, a.LibraryId })
             .HasDatabaseName("IX_ActivityData_StartTimeUtc_LibraryId");
+
+        builder.Entity<KavitaPlusAuditLog>(entity =>
+        {
+            entity.HasIndex(e => new { e.Category, e.CreatedUtc })
+                .HasDatabaseName("IX_KavitaPlusAuditLog_Category_CreatedUtc");
+            entity.HasIndex(e => new { e.SeriesId, e.CreatedUtc })
+                .HasDatabaseName("IX_KavitaPlusAuditLog_SeriesId_CreatedUtc");
+            entity.HasIndex(e => new { e.SubjectType, e.SubjectId })
+                .HasDatabaseName("IX_KavitaPlusAuditLog_SubjectType_SubjectId");
+            entity.HasIndex(e => e.CreatedUtc)
+                .HasDatabaseName("IX_KavitaPlusAuditLog_CreatedUtc");
+        });
 
         #endregion
     }

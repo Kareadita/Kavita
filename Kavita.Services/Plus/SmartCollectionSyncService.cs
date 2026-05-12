@@ -38,7 +38,8 @@ public class SmartCollectionSyncService(
     IUnitOfWork unitOfWork,
     ILogger<SmartCollectionSyncService> logger,
     IEventHub eventHub,
-    ILicenseService licenseService)
+    ILicenseService licenseService,
+    IKavitaPlusAuditService auditService)
     : ISmartCollectionSyncService
 {
     private const int SyncDelta = -2;
@@ -168,7 +169,8 @@ public class SmartCollectionSyncService(
                 {
                     // Add the new series to the collection
                     collection.Items.Add(newSeries);
-
+                    await auditService.LogCollectionAsync(KavitaPlusEventType.CollectionItemAdded, collection.Id,
+                        new { collectionName = collection.Title, seriesName = newSeries.Name, seriesId = newSeries.Id }, ct: ct);
                 }
                 else
                 {
@@ -214,6 +216,8 @@ public class SmartCollectionSyncService(
 
             logger.LogInformation("Finished Syncing Collection {CollectionName} - Missing {MissingCount} series",
                 collection.Title, missingCount);
+            await auditService.LogCollectionAsync(KavitaPlusEventType.CollectionSynced, collection.Id,
+                new { collectionName = collection.Title, stackId = collection.SourceUrl, itemCount = collection.TotalSourceCount, missingCount }, ct: ct);
         }
         catch (Exception ex)
         {
