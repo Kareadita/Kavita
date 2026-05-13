@@ -12,7 +12,6 @@ using Kavita.API.Repositories;
 using Kavita.API.Services;
 using Kavita.API.Services.Plus;
 using Kavita.API.Services.SignalR;
-using Kavita.Models.Entities.Enums;
 using Kavita.Common;
 using Kavita.Common.Helpers;
 using Kavita.Models.DTOs.Filtering.v2;
