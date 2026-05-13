@@ -99,7 +99,8 @@ public class ExternalMetadataServiceTests: AbstractDbTest
            Substitute.For<ILogger<ExternalMetadataService>>(),
            mapper, Substitute.For<ILicenseService>(), Substitute.For<IScrobblingService>(),
            Substitute.For<IEventHub>(), Substitute.For<ICoverDbService>(),
-           Substitute.For<IKavitaPlusApiService>(), Substitute.For<IFileCacheService>());
+           Substitute.For<IKavitaPlusApiService>(), Substitute.For<IFileCacheService>(),
+           Substitute.For<IKavitaPlusAuditService>());
 
        // Clear tracker so test body starts with a clean slate
        context.ChangeTracker.Clear();

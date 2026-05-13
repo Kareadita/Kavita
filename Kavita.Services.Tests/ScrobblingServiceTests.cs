@@ -55,7 +55,7 @@ public class ScrobblingServiceTests(ITestOutputHelper outputHelper): AbstractDbT
         var kavitaPlusApiService = Substitute.For<IKavitaPlusApiService>();
 
         var service = new ScrobblingService(unitOfWork, Substitute.For<IEventHub>(), logger,  licenseService,
-            localizationService, emailService, kavitaPlusApiService);
+            localizationService, emailService, kavitaPlusApiService, Substitute.For<IKavitaPlusAuditService>());
 
         var readerService = new ReaderService(unitOfWork,
             Substitute.For<ILogger<ReaderService>>(),
