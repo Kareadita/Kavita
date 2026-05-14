@@ -561,6 +561,12 @@ public sealed class DataContext : IdentityDbContext<AppUser, AppRole, int,
                 .HasDatabaseName("IX_KavitaPlusAuditLog_SubjectType_SubjectId");
             entity.HasIndex(e => e.CreatedUtc)
                 .HasDatabaseName("IX_KavitaPlusAuditLog_CreatedUtc");
+            entity.HasIndex(e => e.UserId)
+                .HasDatabaseName("IX_KavitaPlusAuditLog_UserId");
+            entity.HasOne(e => e.User)
+                .WithMany()
+                .HasForeignKey(e => e.UserId)
+                .OnDelete(DeleteBehavior.SetNull);
         });
 
         #endregion

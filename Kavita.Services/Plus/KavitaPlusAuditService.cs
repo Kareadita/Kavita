@@ -27,6 +27,7 @@ public class KavitaPlusAuditService(IUnitOfWork unitOfWork, ILogger<KavitaPlusAu
         int? subjectId = null,
         object? payload = null,
         string? error = null,
+        int? userId = null,
         CancellationToken ct = default)
     {
         try
@@ -42,6 +43,7 @@ public class KavitaPlusAuditService(IUnitOfWork unitOfWork, ILogger<KavitaPlusAu
                 SubjectId = subjectId,
                 Payload = payload != null ? JsonSerializer.Serialize(payload, JsonOptions) : null,
                 ErrorMessage = error,
+                UserId = userId,
             };
             unitOfWork.KavitaPlusAuditRepository.Add(entry);
             await unitOfWork.CommitAsync(ct);
@@ -73,14 +75,14 @@ public class KavitaPlusAuditService(IUnitOfWork unitOfWork, ILogger<KavitaPlusAu
             AuditSubjectType.Person, subjectId: personId, payload: payload, ct: ct);
 
     public Task LogCollectionAsync(KavitaPlusEventType type, int collectionId, object payload,
-        AuditStatus status = AuditStatus.Success, CancellationToken ct = default) =>
-        LogAsync(KavitaPlusAuditCategory.Metadata, type, status,
-            AuditSubjectType.Collection, subjectId: collectionId, payload: payload, ct: ct);
+        AuditStatus status = AuditStatus.Success, int? userId = null, CancellationToken ct = default) =>
+        LogAsync(KavitaPlusAuditCategory.Sync, type, status,
+            AuditSubjectType.Collection, subjectId: collectionId, payload: payload, userId: userId, ct: ct);
 
     public Task LogScrobbleAsync(KavitaPlusEventType type, int seriesId, object payload,
-        AuditStatus status, string? error = null, CancellationToken ct = default) =>
+        AuditStatus status, string? error = null, int? userId = null, CancellationToken ct = default) =>
         LogAsync(KavitaPlusAuditCategory.Scrobble, type, status,
-            AuditSubjectType.Series, seriesId: seriesId, payload: payload, error: error, ct: ct);
+            AuditSubjectType.Series, seriesId: seriesId, payload: payload, error: error, userId: userId, ct: ct);
 
     public async Task PurgeOldLogsAsync(CancellationToken ct = default)
     {

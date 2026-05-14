@@ -1,5 +1,6 @@
 using System;
 using Kavita.Models.Entities.Enums;
+using Kavita.Models.Entities.User;
 
 namespace Kavita.Models.Entities.History;
 #nullable enable
@@ -36,4 +37,11 @@ public class KavitaPlusAuditLog
     public string? Payload { get; set; }
 
     public string? ErrorMessage { get; set; }
+
+    /// <summary>
+    /// The user who triggered this event. Null for system-initiated events.
+    /// No cascade delete: logs outlive users.
+    /// </summary>
+    public int? UserId { get; set; }
+    public AppUser? User { get; set; }
 }

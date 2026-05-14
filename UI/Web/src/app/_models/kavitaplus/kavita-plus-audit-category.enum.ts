@@ -1,0 +1,6 @@
+export enum KavitaPlusAuditCategory {
+  Match = 0,
+  Metadata = 1,
+  Scrobble = 2,
+  Sync = 3,
+}

@@ -17,6 +17,7 @@ public interface IKavitaPlusAuditService
         int? subjectId = null,
         object? payload = null,
         string? error = null,
+        int? userId = null,
         CancellationToken ct = default);
 
     Task LogMatchAsync(KavitaPlusEventType type, int seriesId, object payload,
@@ -31,10 +32,10 @@ public interface IKavitaPlusAuditService
         AuditStatus status = AuditStatus.Success, CancellationToken ct = default);
 
     Task LogCollectionAsync(KavitaPlusEventType type, int collectionId, object payload,
-        AuditStatus status = AuditStatus.Success, CancellationToken ct = default);
+        AuditStatus status = AuditStatus.Success, int? userId = null, CancellationToken ct = default);
 
     Task LogScrobbleAsync(KavitaPlusEventType type, int seriesId, object payload,
-        AuditStatus status, string? error = null, CancellationToken ct = default);
+        AuditStatus status, string? error = null, int? userId = null, CancellationToken ct = default);
 
     Task PurgeOldLogsAsync(CancellationToken ct = default);
 }

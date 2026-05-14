@@ -605,6 +605,9 @@ namespace Kavita.Database.Migrations
                     b.Property<int>("SubjectType")
                         .HasColumnType("INTEGER");
 
+                    b.Property<int?>("UserId")
+                        .HasColumnType("INTEGER");
+
                     b.HasKey("Id");
 
                     b.HasIndex("CreatedUtc")
@@ -618,6 +621,9 @@ namespace Kavita.Database.Migrations
 
                     b.HasIndex("SubjectType", "SubjectId")
                         .HasDatabaseName("IX_KavitaPlusAuditLog_SubjectType_SubjectId");
+
+                    b.HasIndex("UserId")
+                        .HasDatabaseName("IX_KavitaPlusAuditLog_UserId");
 
                     b.ToTable("KavitaPlusAuditLogs");
                 });
@@ -4012,6 +4018,16 @@ namespace Kavita.Database.Migrations
                         .IsRequired();
 
                     b.Navigation("AppUser");
+                });
+
+            modelBuilder.Entity("Kavita.Models.Entities.History.KavitaPlusAuditLog", b =>
+                {
+                    b.HasOne("Kavita.Models.Entities.User.AppUser", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.SetNull);
+
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("Kavita.Models.Entities.Progress.AppUserReadingHistory", b =>

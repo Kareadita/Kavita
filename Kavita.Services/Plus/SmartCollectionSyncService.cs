@@ -170,7 +170,7 @@ public class SmartCollectionSyncService(
                     // Add the new series to the collection
                     collection.Items.Add(newSeries);
                     await auditService.LogCollectionAsync(KavitaPlusEventType.CollectionItemAdded, collection.Id,
-                        new { collectionName = collection.Title, seriesName = newSeries.Name, seriesId = newSeries.Id }, ct: ct);
+                        new { collectionName = collection.Title, seriesName = newSeries.Name, seriesId = newSeries.Id }, userId: collection.AppUserId, ct: ct);
                 }
                 else
                 {
@@ -217,7 +217,7 @@ public class SmartCollectionSyncService(
             logger.LogInformation("Finished Syncing Collection {CollectionName} - Missing {MissingCount} series",
                 collection.Title, missingCount);
             await auditService.LogCollectionAsync(KavitaPlusEventType.CollectionSynced, collection.Id,
-                new { collectionName = collection.Title, stackId = collection.SourceUrl, itemCount = collection.TotalSourceCount, missingCount }, ct: ct);
+                new { collectionName = collection.Title, stackId = collection.SourceUrl, itemCount = collection.TotalSourceCount, missingCount }, userId: collection.AppUserId, ct: ct);
         }
         catch (Exception ex)
         {
