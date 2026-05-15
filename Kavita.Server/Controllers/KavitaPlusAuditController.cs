@@ -11,6 +11,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace Kavita.Server.Controllers;
 
 [KPlus]
+[Route("api/kavita-plus-audit")]
 public class KavitaPlusAuditController(IUnitOfWork unitOfWork) : BaseApiController
 {
     /// <summary>
@@ -22,8 +23,10 @@ public class KavitaPlusAuditController(IUnitOfWork unitOfWork) : BaseApiControll
         KavitaPlusAuditFilterDto filter, [FromQuery] UserParams? userParams)
     {
         userParams ??= UserParams.Default;
+
         var res = await unitOfWork.KavitaPlusAuditRepository.GetPagedAsync(filter, userParams);
         Response.AddPaginationHeader(res);
+
         return Ok(res);
     }
 
@@ -38,8 +41,6 @@ public class KavitaPlusAuditController(IUnitOfWork unitOfWork) : BaseApiControll
         var isAdmin = User.IsInRole(PolicyConstants.AdminRole);
         var result = await unitOfWork.KavitaPlusAuditRepository
             .GetSeriesInfoAsync(seriesId, UserId, isAdmin);
-
-        if (result == null) return NotFound();
         return Ok(result);
     }
 
@@ -61,9 +62,11 @@ public class KavitaPlusAuditController(IUnitOfWork unitOfWork) : BaseApiControll
         KavitaPlusAuditFilterDto filter, [FromQuery] UserParams? userParams)
     {
         userParams ??= UserParams.Default;
+
         var res = await unitOfWork.KavitaPlusAuditRepository
             .GetMyActivityAsync(UserId, filter, userParams);
         Response.AddPaginationHeader(res);
+
         return Ok(res);
     }
 }

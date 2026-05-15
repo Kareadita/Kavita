@@ -156,3 +156,8 @@ body {
   animation-iteration-count: 1 !important;
   transition-duration: 0.01ms !important;
 }
+
+// Kavita+ audit side-drawer width
+.kplus-offcanvas {
+  --bs-offcanvas-width: 28rem;
+}

@@ -2,11 +2,19 @@ import {KavitaPlusAuditCategory} from './kavita-plus-audit-category.enum';
 import {KavitaPlusEventType} from './kavita-plus-event-type.enum';
 import {AuditStatus} from './audit-status.enum';
 import {AuditSubjectType} from './audit-subject-type.enum';
+import {ScrobbleEventType} from '../scrobbling/scrobble-event';
 
 export interface MetadataFieldChange {
   field: string;
   from: unknown;
   to: unknown;
+}
+
+export interface KavitaPlusScrobbleDetails {
+  scrobbleEventType: ScrobbleEventType | null;
+  chapterNumber: number | null;
+  volumeNumber: number | null;
+  rating: number | null;
 }
 
 export interface KavitaPlusAuditEntry {
@@ -24,4 +32,5 @@ export interface KavitaPlusAuditEntry {
   username: string | null;
   diff: MetadataFieldChange[] | null;
   errorMessage: string | null;
+  scrobbleDetails: KavitaPlusScrobbleDetails | null;
 }

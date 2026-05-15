@@ -34,7 +34,7 @@ public interface IKavitaPlusAuditService
     Task LogCollectionAsync(KavitaPlusEventType type, int collectionId, object payload,
         AuditStatus status = AuditStatus.Success, int? userId = null, CancellationToken ct = default);
 
-    Task LogScrobbleAsync(KavitaPlusEventType type, int seriesId, object payload,
+    Task LogScrobbleAsync(KavitaPlusEventType type, int seriesId, AuditLogScrobbleParamsDto details,
         AuditStatus status, string? error = null, int? userId = null, CancellationToken ct = default);
 
     Task PurgeOldLogsAsync(CancellationToken ct = default);

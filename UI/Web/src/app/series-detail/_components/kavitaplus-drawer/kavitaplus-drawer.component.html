@@ -1,0 +1,21 @@
+<ng-container *transloco="let t; prefix: 'kavitaplus-audit'">
+
+  <app-off-canvas-resize
+    [resizeMode]="ResizeMode.Width"
+    canvasPosition="end"
+    [minWidth]="breakpointService.isTabletOrBelow() ? 200 : 300"
+    [maxWidth]="breakpointService.isTabletOrBelow() ? window.innerWidth : window.innerWidth * 0.5"
+  />
+
+  <div class="offcanvas-header">
+    <h5 class="offcanvas-title">{{t('panel-title')}}</h5>
+    <button type="button" class="btn-unstyled ms-auto" [attr.aria-label]="t('close')" (click)="close()">
+      <i class="fa fa-times" aria-hidden="true"></i>
+    </button>
+  </div>
+
+  <div class="offcanvas-body p-0">
+    <app-kavitaplus-tooltip [seriesId]="seriesId()" />
+  </div>
+
+</ng-container>

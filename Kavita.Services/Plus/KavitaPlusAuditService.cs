@@ -79,10 +79,10 @@ public class KavitaPlusAuditService(IUnitOfWork unitOfWork, ILogger<KavitaPlusAu
         LogAsync(KavitaPlusAuditCategory.Sync, type, status,
             AuditSubjectType.Collection, subjectId: collectionId, payload: payload, userId: userId, ct: ct);
 
-    public Task LogScrobbleAsync(KavitaPlusEventType type, int seriesId, object payload,
+    public Task LogScrobbleAsync(KavitaPlusEventType type, int seriesId, AuditLogScrobbleParamsDto details,
         AuditStatus status, string? error = null, int? userId = null, CancellationToken ct = default) =>
         LogAsync(KavitaPlusAuditCategory.Scrobble, type, status,
-            AuditSubjectType.Series, seriesId: seriesId, payload: payload, error: error, userId: userId, ct: ct);
+            AuditSubjectType.Series, seriesId: seriesId, payload: details, error: error, userId: userId, ct: ct);
 
     public async Task PurgeOldLogsAsync(CancellationToken ct = default)
     {

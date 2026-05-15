@@ -66,17 +66,18 @@ public class KavitaPlusAuditRepository(DataContext context) : IKavitaPlusAuditRe
         var scrobbleQueueCount = await context.ScrobbleEvent
             .CountAsync(e => !e.IsProcessed, ct);
 
-        return new KavitaPlusAuditStatsDto(
-            events24h,
-            failures24h,
-            unresolvedMatchFailures,
-            matchedSeriesCount,
-            totalEligibleSeriesCount,
-            scrobbleQueueCount
-        );
+        return new KavitaPlusAuditStatsDto
+        {
+            Events24h = events24h,
+            Failures24h = failures24h,
+            UnresolvedMatchFailures = unresolvedMatchFailures,
+            MatchedSeriesCount = matchedSeriesCount,
+            TotalEligibleSeriesCount = totalEligibleSeriesCount,
+            ScrobbleQueueCount = scrobbleQueueCount,
+        };
     }
 
-    public async Task<KavitaPlusAuditSeriesInfoDto?> GetSeriesInfoAsync(
+    public async Task<KavitaPlusAuditSeriesInfoDto> GetSeriesInfoAsync(
         int seriesId, int callingUserId, bool isAdmin, CancellationToken ct = default)
     {
         var series = await context.Series
@@ -84,7 +85,10 @@ public class KavitaPlusAuditRepository(DataContext context) : IKavitaPlusAuditRe
             .AsNoTracking()
             .FirstOrDefaultAsync(s => s.Id == seriesId, ct);
 
-        if (series == null) return null;
+        if (series == null)
+        {
+            return new KavitaPlusAuditSeriesInfoDto { SeriesId = seriesId };
+        }
 
         var recentQuery = context.KavitaPlusAuditLogs
             .AsNoTracking()
@@ -106,14 +110,15 @@ public class KavitaPlusAuditRepository(DataContext context) : IKavitaPlusAuditRe
 
         var recentEvents = recentRaw.Select(MapToDto).ToList();
 
-        return new KavitaPlusAuditSeriesInfoDto(
-            series.Id,
-            series.Name,
-            series.MangaBakaId != 0,
-            series.MangaBakaId != 0 ? series.MangaBakaId : null,
-            series.ExternalSeriesMetadata?.ValidUntilUtc,
-            recentEvents
-        );
+        return new KavitaPlusAuditSeriesInfoDto
+        {
+            SeriesId = series.Id,
+            SeriesName = series.Name,
+            IsMatched = series.MangaBakaId != 0,
+            MangaBakaId = series.MangaBakaId != 0 ? series.MangaBakaId : null,
+            LastRefreshedUtc = series.ExternalSeriesMetadata?.ValidUntilUtc,
+            RecentEvents = recentEvents,
+        };
     }
 
     private IQueryable<KavitaPlusAuditLog> BuildBaseQuery(KavitaPlusAuditFilterDto filter)
@@ -170,13 +175,46 @@ public class KavitaPlusAuditRepository(DataContext context) : IKavitaPlusAuditRe
             }
         }
 
-        return new KavitaPlusAuditEntryDto(
-            e.Id, e.CreatedUtc, e.Category, e.EventType, e.Status,
-            e.SeriesId, e.SeriesName,
-            e.SubjectType, e.SubjectId, null,
-            e.UserId, e.Username,
-            diff, e.ErrorMessage
-        );
+        KavitaPlusScrobbleDetailsDto? scrobbleDetails = null;
+        if (e.Category == KavitaPlusAuditCategory.Scrobble && e.Payload != null)
+        {
+            try
+            {
+                var p = JsonSerializer.Deserialize<AuditLogScrobbleParamsDto>(e.Payload, JsonOptions);
+                if (p != null)
+                {
+                    scrobbleDetails = new KavitaPlusScrobbleDetailsDto
+                    {
+                        ScrobbleEventType = p.ScrobbleEventType,
+                        ChapterNumber = p.ChapterNumber,
+                        VolumeNumber = p.VolumeNumber,
+                        Rating = p.Rating,
+                    };
+                }
+            }
+            catch
+            {
+                // malformed payload — leave scrobbleDetails null
+            }
+        }
+
+        return new KavitaPlusAuditEntryDto
+        {
+            Id = e.Id,
+            CreatedUtc = e.CreatedUtc,
+            Category = e.Category,
+            EventType = e.EventType,
+            Status = e.Status,
+            SeriesId = e.SeriesId,
+            SeriesName = e.SeriesName,
+            SubjectType = e.SubjectType,
+            SubjectId = e.SubjectId,
+            UserId = e.UserId,
+            Username = e.Username,
+            Diff = diff,
+            ErrorMessage = e.ErrorMessage,
+            ScrobbleDetails = scrobbleDetails,
+        };
     }
 
     private sealed record RawEntry(

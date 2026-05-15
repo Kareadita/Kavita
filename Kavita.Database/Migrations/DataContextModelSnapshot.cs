@@ -613,6 +613,9 @@ namespace Kavita.Database.Migrations
                     b.HasIndex("CreatedUtc")
                         .HasDatabaseName("IX_KavitaPlusAuditLog_CreatedUtc");
 
+                    b.HasIndex("UserId")
+                        .HasDatabaseName("IX_KavitaPlusAuditLog_UserId");
+
                     b.HasIndex("Category", "CreatedUtc")
                         .HasDatabaseName("IX_KavitaPlusAuditLog_Category_CreatedUtc");
 
@@ -621,9 +624,6 @@ namespace Kavita.Database.Migrations
 
                     b.HasIndex("SubjectType", "SubjectId")
                         .HasDatabaseName("IX_KavitaPlusAuditLog_SubjectType_SubjectId");
-
-                    b.HasIndex("UserId")
-                        .HasDatabaseName("IX_KavitaPlusAuditLog_UserId");
 
                     b.ToTable("KavitaPlusAuditLogs");
                 });
@@ -3808,6 +3808,16 @@ namespace Kavita.Database.Migrations
                     b.Navigation("Library");
                 });
 
+            modelBuilder.Entity("Kavita.Models.Entities.History.KavitaPlusAuditLog", b =>
+                {
+                    b.HasOne("Kavita.Models.Entities.User.AppUser", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.SetNull);
+
+                    b.Navigation("User");
+                });
+
             modelBuilder.Entity("Kavita.Models.Entities.LibraryExcludePattern", b =>
                 {
                     b.HasOne("Kavita.Models.Entities.Library", "Library")
@@ -4018,16 +4028,6 @@ namespace Kavita.Database.Migrations
                         .IsRequired();
 
                     b.Navigation("AppUser");
-                });
-
-            modelBuilder.Entity("Kavita.Models.Entities.History.KavitaPlusAuditLog", b =>
-                {
-                    b.HasOne("Kavita.Models.Entities.User.AppUser", "User")
-                        .WithMany()
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.SetNull);
-
-                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("Kavita.Models.Entities.Progress.AppUserReadingHistory", b =>

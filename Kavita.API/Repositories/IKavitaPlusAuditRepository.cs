@@ -20,6 +20,6 @@ public interface IKavitaPlusAuditRepository
 
     Task<KavitaPlusAuditStatsDto> GetStatsAsync(CancellationToken ct = default);
 
-    Task<KavitaPlusAuditSeriesInfoDto?> GetSeriesInfoAsync(
+    Task<KavitaPlusAuditSeriesInfoDto> GetSeriesInfoAsync(
         int seriesId, int callingUserId, bool isAdmin, CancellationToken ct = default);
 }

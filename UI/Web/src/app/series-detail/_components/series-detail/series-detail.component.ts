@@ -28,8 +28,12 @@ import {
   NgbNavItem,
   NgbNavLink,
   NgbNavOutlet,
+  NgbPopover,
   NgbTooltip
 } from '@ng-bootstrap/ng-bootstrap';
+import {DrawerService} from '../../../_services/drawer.service';
+import {KavitaplusDrawerComponent} from '../kavitaplus-drawer/kavitaplus-drawer.component';
+import {KavitaplusTooltipComponent} from '../kavitaplus-tooltip/kavitaplus-tooltip.component';
 import {ToastrService} from 'ngx-toastr';
 import {catchError, debounceTime, EMPTY, of, ReplaySubject, tap} from 'rxjs';
 import {BulkSelectionService} from 'src/app/cards/bulk-selection.service';
@@ -141,7 +145,7 @@ const READING_HISTORY_PAGE_SIZE = 10;
   imports: [CardActionablesComponent, ReactiveFormsModule, NgStyle,
     NgbTooltip, NgbDropdown, NgbDropdownToggle, NgbDropdownMenu,
     NgbDropdownItem, BulkOperationsComponent,
-    NgbNav, NgbNavItem, NgbNavLink, NgbNavContent, VirtualScrollerModule, SeriesCardComponent, ExternalSeriesCardComponent, NgbNavOutlet,
+    NgbNav, NgbNavItem, NgbNavLink, NgbNavContent, VirtualScrollerModule, SeriesCardComponent, ExternalSeriesCardComponent, NgbNavOutlet, NgbPopover, KavitaplusTooltipComponent,
     TranslocoDirective, NgTemplateOutlet, NextExpectedCardComponent,
     NgClass, DetailsTabComponent, DefaultValuePipe, ExternalRatingComponent, ReadMoreComponent, RouterLink, BadgeExpanderComponent,
     PublicationStatusPipe, MetadataDetailRowComponent, DownloadButtonComponent, RelatedTabComponent, CoverImageComponent, ReviewsComponent,
@@ -181,6 +185,7 @@ class SeriesDetailComponent implements OnInit, AfterViewInit {
   protected readonly breakpointService = inject(BreakpointService);
   private readonly entityTitleService = inject(EntityTitleService);
   private readonly statisticsService = inject(StatisticsService);
+  private readonly drawerService = inject(DrawerService);
 
   readonly scrollingBlock = viewChild<ElementRef<HTMLDivElement>>('scrollingBlock');
 
@@ -913,6 +918,11 @@ class SeriesDetailComponent implements OnInit, AfterViewInit {
       this.scrobbleService.removeHold(this.seriesId()).subscribe();
     }
     this.isScrobbling.update(x => !x);
+  }
+
+  openKavitaPlusDrawer() {
+    const ref = this.drawerService.open(KavitaplusDrawerComponent, { position: 'end', panelClass: 'kplus-offcanvas' });
+    ref.setInput('seriesId', this.seriesId());
   }
 
   switchTabsToDetail() {

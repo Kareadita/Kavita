@@ -25,11 +25,18 @@ namespace Kavita.Database.Migrations
                     SubjectType = table.Column<int>(type: "INTEGER", nullable: false),
                     SubjectId = table.Column<int>(type: "INTEGER", nullable: true),
                     Payload = table.Column<string>(type: "TEXT", nullable: true),
-                    ErrorMessage = table.Column<string>(type: "TEXT", nullable: true)
+                    ErrorMessage = table.Column<string>(type: "TEXT", nullable: true),
+                    UserId = table.Column<int>(type: "INTEGER", nullable: true)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_KavitaPlusAuditLogs", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_KavitaPlusAuditLogs_AspNetUsers_UserId",
+                        column: x => x.UserId,
+                        principalTable: "AspNetUsers",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.SetNull);
                 });
 
             migrationBuilder.CreateIndex(
@@ -51,6 +58,11 @@ namespace Kavita.Database.Migrations
                 name: "IX_KavitaPlusAuditLog_SubjectType_SubjectId",
                 table: "KavitaPlusAuditLogs",
                 columns: new[] { "SubjectType", "SubjectId" });
+
+            migrationBuilder.CreateIndex(
+                name: "IX_KavitaPlusAuditLog_UserId",
+                table: "KavitaPlusAuditLogs",
+                column: "UserId");
         }
 
         /// <inheritdoc />
