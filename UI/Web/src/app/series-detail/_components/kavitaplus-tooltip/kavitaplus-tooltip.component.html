@@ -1,14 +1,14 @@
 <ng-container *transloco="let t; prefix: 'kavitaplus-audit'">
-  <div class="kplus-panel">
+  <div class="kplus-panel d-flex flex-column p-3">
 
     <!-- Header -->
-    <div class="kplus-header">
-      <div class="kplus-kbadge">K+</div>
-      <span class="kplus-title">{{t('panel-title')}}</span>
+    <div class="d-flex align-items-center gap-2">
+      <div class="kplus-kbadge d-inline-flex align-items-center justify-content-center flex-shrink-0">K+</div>
+      <span class="kplus-title fw-semibold">{{t('panel-title')}}</span>
     </div>
 
     @if (isLoading()) {
-      <div class="kplus-loading">
+      <div class="d-flex align-items-center justify-content-center kplus-loading-area">
         <div class="spinner-border spinner-border-sm" role="status">
           <span class="visually-hidden">{{t('loading')}}</span>
         </div>
@@ -18,10 +18,10 @@
       <div class="kplus-divider"></div>
 
       <!-- Match sub-row -->
-      <div class="kplus-match-row">
+      <div class="d-flex align-items-center gap-2 small text-muted">
         @if (info.isMatched && info.mangaBakaId) {
-          <a class="kplus-provider-badge" href="https://mangabaka.org/{{info.mangaBakaId}}" target="_blank" rel="noopener noreferrer">MangaBaka</a>
-          <span class="kplus-match-meta">{{t('refreshed')}} {{info.lastRefreshedUtc | timeAgo}}</span>
+          <a class="kplus-provider-badge d-inline-flex align-items-center" href="https://mangabaka.org/{{info.mangaBakaId}}" target="_blank" rel="noopener noreferrer">MangaBaka</a>
+          <span>{{t('refreshed')}} {{info.lastRefreshedUtc | utcToLocalTime | timeAgo}}</span>
         } @else {
           <span class="badge bg-secondary">{{t('unmatched')}}</span>
         }
@@ -30,7 +30,7 @@
       <div class="kplus-divider"></div>
 
       <!-- Filter chips -->
-      <div class="kplus-chips">
+      <div class="d-flex flex-wrap gap-1">
         <button class="kplus-chip" [class.active]="categoryFilter() === null" (click)="setFilter(null)">
           {{t('filter-all')}} <span class="kplus-chip-count">{{totalCount()}}</span>
         </button>
@@ -48,10 +48,10 @@
       <div class="kplus-divider"></div>
 
       <!-- Event list -->
-      <div class="kplus-events">
+      <div class="d-flex flex-column">
         @for (event of displayedEvents(); track event.id) {
-          <div class="kplus-event">
-            <div class="kplus-event-icon kplus-event-icon--{{categoryColorClass(event.category)}}">
+          <div class="kplus-event d-flex align-items-start gap-3">
+            <div class="kplus-event-icon d-flex align-items-center justify-content-center kplus-event-icon--{{categoryColorClass(event.category)}}">
               <i class="fa-solid {{categoryIcon(event.category, event.eventType)}}" aria-hidden="true"></i>
             </div>
             <div class="kplus-event-body">
@@ -62,56 +62,56 @@
                   @case (ScrobbleEventType.ChapterRead) {
                     @let label = chapterLabel(sd.chapterNumber, sd.volumeNumber);
                     @if (label) {
-                      <div class="kplus-event-desc">{{t('read-progress-sent-label', {chapter: label})}}</div>
+                      <div class="kplus-event-desc text-muted">{{t('read-progress-sent-label', {chapter: label})}}</div>
                     }
                   }
                   @case (ScrobbleEventType.ScoreUpdated) {
-                    <div class="kplus-event-desc">{{t('rating-updated')}}</div>
+                    <div class="kplus-event-desc text-muted">{{t('rating-updated')}}</div>
                   }
                   @case (ScrobbleEventType.AddWantToRead) {
-                    <div class="kplus-event-desc">{{t('add-want-to-read')}}</div>
+                    <div class="kplus-event-desc text-muted">{{t('add-want-to-read')}}</div>
                   }
                   @case (ScrobbleEventType.RemoveWantToRead) {
-                    <div class="kplus-event-desc">{{t('remove-want-to-read')}}</div>
+                    <div class="kplus-event-desc text-muted">{{t('remove-want-to-read')}}</div>
                   }
                   @case (ScrobbleEventType.Review) {
-                    <div class="kplus-event-desc">{{t('review-submitted')}}</div>
+                    <div class="kplus-event-desc text-muted">{{t('review-submitted')}}</div>
                   }
                 }
               } @else if ((event.eventType === EventType.MetadataUpdated || event.eventType === EventType.ChapterMetadataUpdated) && event.diff?.length) {
-                <div class="kplus-event-desc">{{t('fields-updated', {count: event.diff!.length})}}</div>
+                <div class="kplus-event-desc text-muted">{{t('fields-updated', {count: event.diff!.length})}}</div>
               } @else if (event.errorMessage) {
                 <div class="kplus-event-desc text-danger">{{event.errorMessage}}</div>
               }
 
             </div>
-            <span class="kplus-event-time">{{event.createdUtc | timeAgo}}</span>
+            <span class="kplus-event-time flex-shrink-0 text-muted text-nowrap">{{event.createdUtc | utcToLocalTime | timeAgo}}</span>
           </div>
         } @empty {
-          <div class="kplus-empty">{{t('no-events')}}</div>
+          <div class="text-center text-muted py-3 small">{{t('no-events')}}</div>
         }
       </div>
 
       <div class="kplus-divider"></div>
 
       <!-- Footer -->
-      <div class="kplus-footer">
-        <span class="kplus-showing">{{t('showing-latest', {count: displayedEvents().length})}}</span>
-        <div class="kplus-footer-actions">
-          <button class="btn btn-outline-primary btn-sm kplus-footer-btn" (click)="navigateAndClose(['/user-settings/kavitaplus-activity'])">
+      <div class="d-flex align-items-center justify-content-between gap-2">
+        <span class="kplus-showing text-muted">{{t('showing-latest', {count: displayedEvents().length})}}</span>
+        <div class="d-flex gap-2">
+          <button class="btn btn-outline-primary btn-sm d-inline-flex align-items-center gap-1" (click)="navigateAndClose(['/user-settings/kavitaplus-activity'])">
             <i class="fa-solid fa-user" aria-hidden="true"></i> {{t('my-activity')}}
           </button>
           @if (isAdmin()) {
-            <button class="btn btn-success btn-sm kplus-footer-btn" (click)="navigateAndClose(['/admin/kavitaplus-audit'])">
+            <button class="btn btn-success btn-sm d-inline-flex align-items-center gap-1" (click)="navigateAndClose(['/admin/kavitaplus-audit'])">
               <i class="fa-solid fa-list" aria-hidden="true"></i>
-              {{t('admin-feed')}} <span class="kplus-this-series">{{t('this-series')}}</span>
+              {{t('admin-feed')}}
             </button>
           }
         </div>
       </div>
 
     } @else {
-      <div class="kplus-empty py-3">{{t('no-data')}}</div>
+      <div class="text-center text-muted py-3 small">{{t('no-data')}}</div>
     }
 
   </div>

@@ -10,13 +10,14 @@ import {KavitaPlusEventType} from '../../../_models/kavitaplus/kavita-plus-event
 import {ScrobbleEventType} from '../../../_models/scrobbling/scrobble-event';
 import {TimeAgoPipe} from '../../../_pipes/time-ago.pipe';
 import {KavitaPlusEventTypePipe} from '../../../_pipes/kavita-plus-event-type.pipe';
+import {UtcToLocalTimePipe} from "../../../_pipes/utc-to-local-time.pipe";
 
 @Component({
   selector: 'app-kavitaplus-tooltip',
   templateUrl: './kavitaplus-tooltip.component.html',
   styleUrls: ['./kavitaplus-tooltip.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [TranslocoDirective, TimeAgoPipe, KavitaPlusEventTypePipe],
+  imports: [TranslocoDirective, TimeAgoPipe, KavitaPlusEventTypePipe, UtcToLocalTimePipe],
 })
 export class KavitaplusTooltipComponent implements OnInit {
   private readonly auditService = inject(KavitaPlusAuditService);
@@ -26,10 +27,6 @@ export class KavitaplusTooltipComponent implements OnInit {
   protected readonly isAdmin = inject(AccountService).hasAdminRole;
 
   seriesId = input.required<number>();
-
-  protected readonly AuditCategory = KavitaPlusAuditCategory;
-  protected readonly EventType = KavitaPlusEventType;
-  protected readonly ScrobbleEventType = ScrobbleEventType;
 
   seriesInfo = signal<KavitaPlusAuditSeriesInfo | null>(null);
   categoryFilter = signal<KavitaPlusAuditCategory | null>(null);
@@ -99,4 +96,8 @@ export class KavitaplusTooltipComponent implements OnInit {
       default:                               return 'metadata';
     }
   }
+
+  protected readonly AuditCategory = KavitaPlusAuditCategory;
+  protected readonly EventType = KavitaPlusEventType;
+  protected readonly ScrobbleEventType = ScrobbleEventType;
 }

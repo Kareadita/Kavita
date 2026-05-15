@@ -1259,7 +1259,6 @@
         "close": "{{common.close}}",
         "refreshed": "refreshed",
         "showing-latest": "Showing latest {{count}} events",
-        "this-series": "this series",
         "my-activity": "My Activity",
         "admin-feed": "Admin feed",
         "read-progress-sent-label": "Read progress - {{chapter}}",

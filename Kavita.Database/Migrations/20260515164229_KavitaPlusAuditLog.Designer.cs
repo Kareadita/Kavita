@@ -14,7 +14,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Kavita.Database.Migrations
 {
     [DbContext(typeof(DataContext))]
-    [Migration("20260514192253_KavitaPlusAuditLog")]
+    [Migration("20260515164229_KavitaPlusAuditLog")]
     partial class KavitaPlusAuditLog
     {
         /// <inheritdoc />
