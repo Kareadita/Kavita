@@ -37,6 +37,7 @@ import {tap} from "rxjs";
 import {
   CopySettingsFromLibraryModalComponent
 } from "../_modals/copy-settings-from-library-modal/copy-settings-from-library-modal.component";
+import {BookUploadModalComponent} from "../_modals/book-upload-modal/book-upload-modal.component";
 import {FormControl, FormGroup, FormsModule, ReactiveFormsModule} from "@angular/forms";
 import {SelectionModel} from "../../typeahead/_models/selection-model";
 import {ResponsiveTableComponent} from "../../shared/_components/responsive-table/responsive-table.component";
@@ -178,6 +179,12 @@ export class ManageLibraryComponent implements OnInit {
     modalRef.closed.subscribe((result: ModalResult<Library>) => {
       this.getLibraries();
     });
+  }
+
+  uploadBooks(library?: Library) {
+    const modalRef = this.modalService.open(BookUploadModalComponent, editModal());
+    modalRef.componentInstance.libraries = this.libraries;
+    modalRef.componentInstance.library = library;
   }
 
   async deleteLibrary(library: Library) {

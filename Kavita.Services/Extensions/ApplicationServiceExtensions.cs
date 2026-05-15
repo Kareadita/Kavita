@@ -15,6 +15,7 @@ using Kavita.Services.Reading;
 using Kavita.Services.ReadingLists;
 using Kavita.Services.Scanner;
 using Kavita.Services.SignalR;
+using Kavita.Services.Uploads;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Kavita.Services.Extensions;
@@ -57,6 +58,7 @@ public static class ApplicationServiceExtensions
         services.AddScoped<IFontService, FontService>();
         services.AddScoped<IAnnotationService, AnnotationService>();
         services.AddScoped<IOpdsService, OpdsService>();
+        services.AddScoped<IBookUploadService, BookUploadService>();
 
         services.AddScoped<IUrlValidationService, UrlValidationService>();
 

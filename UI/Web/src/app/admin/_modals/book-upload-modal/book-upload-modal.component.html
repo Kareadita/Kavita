@@ -1,0 +1,138 @@
+<ng-container *transloco="let t; prefix:'book-upload-modal'">
+  <div class="modal-header">
+    <h4 class="modal-title">{{t('title')}}</h4>
+    <button type="button" class="btn-close" [attr.aria-label]="t('close')" (click)="dismiss()"></button>
+  </div>
+
+  <div class="modal-body">
+    <form [formGroup]="form">
+      <div class="row g-3">
+        <div class="col-md-6">
+          <label for="book-upload-library" class="form-label">{{t('library')}}</label>
+          <select id="book-upload-library" class="form-select" formControlName="libraryId" (change)="onLibraryChange()">
+            <option [ngValue]="null">{{t('select-library')}}</option>
+            @for (item of libraries; track item.id) {
+              <option [ngValue]="item.id">{{item.name}}</option>
+            }
+          </select>
+        </div>
+
+        <div class="col-md-6">
+          <label for="book-upload-folder" class="form-label">{{t('library-folder')}}</label>
+          <select id="book-upload-folder" class="form-select" formControlName="libraryFolder">
+            @for (folder of options()?.libraryFolders ?? []; track folder) {
+              <option [ngValue]="folder">{{folder}}</option>
+            }
+          </select>
+        </div>
+
+        <div class="col-md-8">
+          <label for="book-upload-target-folder" class="form-label">{{t('target-folder')}}</label>
+          <input id="book-upload-target-folder" class="form-control" type="text" formControlName="targetFolderName">
+          <div class="form-text">{{t('target-folder-help')}}</div>
+        </div>
+
+        <div class="col-md-4">
+          <label for="book-upload-conflict-mode" class="form-label">{{t('conflict-mode')}}</label>
+          <select id="book-upload-conflict-mode" class="form-select" formControlName="conflictMode">
+            <option [ngValue]="BookUploadConflictMode.Reject">{{t('conflict-reject')}}</option>
+            <option [ngValue]="BookUploadConflictMode.Rename">{{t('conflict-rename')}}</option>
+          </select>
+        </div>
+      </div>
+    </form>
+
+    <div class="mt-3">
+      <label class="form-label">{{t('local-source')}}</label>
+      <div class="book-upload-picker d-flex flex-wrap align-items-center gap-2">
+        <button type="button" class="btn btn-outline-primary" (click)="fileInput.click()">
+          <i class="fa fa-file-upload me-1" aria-hidden="true"></i>
+          {{t('choose-files')}}
+        </button>
+        <button type="button" class="btn btn-outline-secondary" (click)="folderInput.click()">
+          <i class="fa fa-folder-open me-1" aria-hidden="true"></i>
+          {{t('choose-folder')}}
+        </button>
+        <span class="text-muted">{{t('source-help')}}</span>
+      </div>
+      <input #fileInput class="visually-hidden" type="file" multiple [accept]="acceptableExtensions()"
+             (change)="filesSelected($event)">
+      <input #folderInput class="visually-hidden" type="file" multiple webkitdirectory directory
+             (change)="filesSelected($event)">
+    </div>
+
+    @if (loadingOptions()) {
+      <app-loading [loading]="true" />
+    } @else if (options()?.libraryFolders?.length === 0) {
+      <div class="alert alert-warning mt-3 mb-0">
+        {{t('no-library-folders')}}
+      </div>
+    } @else if (options()) {
+      <div class="mt-3">
+        <app-file-drag-and-drop-upload
+          [acceptableExtensions]="acceptableExtensions()"
+          [directory]="true"
+          [uploadText]="t('upload-text')"
+          (dropped)="dropped($event)"
+        />
+      </div>
+    }
+
+    @if (selectedFiles().length > 0) {
+      <div class="mt-3">
+        <h5>{{t('selected-files')}}</h5>
+        <ul class="list-group">
+          @for (file of selectedFiles(); track $index; let i = $index) {
+            <li class="list-group-item d-flex align-items-center justify-content-between">
+              <span>{{displayFileName(file)}}</span>
+              <button type="button" class="btn btn-sm btn-outline-secondary" (click)="removeFile(i)"
+                      [attr.aria-label]="t('remove-file')">
+                <i class="fa fa-times" aria-hidden="true"></i>
+              </button>
+            </li>
+          }
+        </ul>
+      </div>
+    }
+
+    @if (uploading()) {
+      <div class="mt-3">
+        <app-loading [loading]="true" />
+      </div>
+    }
+
+    @if (uploadResult(); as result) {
+      <div class="mt-3">
+        <h5>{{t('result')}}</h5>
+        <ul class="list-group">
+          @for (file of result.files; track $index) {
+            <li class="list-group-item d-flex align-items-start gap-2">
+              @if (file.success) {
+                <i class="fa fa-check-circle text-success mt-1" aria-hidden="true"></i>
+              } @else {
+                <i class="fa fa-exclamation-circle text-danger mt-1" aria-hidden="true"></i>
+              }
+              <div>
+                <div>{{file.fileName}}</div>
+                @if (file.error) {
+                  <small class="text-danger">{{file.error}}</small>
+                } @else if (file.scanQueued) {
+                  <small class="text-muted">{{t('scan-queued')}}</small>
+                }
+              </div>
+            </li>
+          }
+        </ul>
+      </div>
+    }
+  </div>
+
+  <div class="modal-footer">
+    <button class="btn btn-secondary" type="button" (click)="dismiss()">{{t('close')}}</button>
+    <button class="btn btn-primary" type="button" (click)="upload()"
+            [disabled]="form.invalid || selectedFiles().length === 0 || uploading()">
+      <i class="fa fa-file-upload me-1" aria-hidden="true"></i>
+      {{t('upload')}}
+    </button>
+  </div>
+</ng-container>

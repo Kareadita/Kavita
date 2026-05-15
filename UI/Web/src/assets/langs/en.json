@@ -1747,7 +1747,38 @@
         "bulk-copy-to": "Select which libraries to copy the settings from {{libraryName}} to",
         "include-type-label": "Include copying Library type",
         "include-type-tooltip": "This will not scan automatically. On the next scan, you may have series shift due to parsing differences",
-        "bulk-action-label": "Bulk Action"
+        "bulk-action-label": "Bulk Action",
+        "upload-books": "Upload Books",
+        "upload-books-by-name": "Upload books to {{name}}"
+    },
+
+    "book-upload-modal": {
+        "title": "Upload Books",
+        "close": "{{common.close}}",
+        "library": "Library",
+        "select-library": "Select a library",
+        "library-folder": "Library folder",
+        "target-folder": "Target folder",
+        "target-folder-help": "Destination folder inside the selected library folder. Leave blank to upload to the library folder root.",
+        "conflict-mode": "If a file exists",
+        "conflict-reject": "Reject",
+        "conflict-rename": "Rename",
+        "local-source": "Local source",
+        "choose-files": "Choose files",
+        "choose-folder": "Choose folder",
+        "source-help": "You can also drag files or folders into the area below.",
+        "no-library-folders": "This library does not have a writable folder configured.",
+        "load-options-failed": "Could not load upload options for this library.",
+        "upload-text": "book files or folders",
+        "selected-files": "Selected files",
+        "remove-file": "Remove file",
+        "result": "Result",
+        "scan-queued": "Scan queued",
+        "upload": "Upload",
+        "select-files": "Select a library folder and at least one local file or folder",
+        "upload-complete": "Books uploaded. Scan queued.",
+        "upload-partial": "Some books uploaded. Review the failed files.",
+        "upload-failed": "No books were uploaded."
     },
 
 
