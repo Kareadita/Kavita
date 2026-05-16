@@ -1,0 +1,80 @@
+<ng-container *transloco="let t; prefix:'kavitaplus-timeline'">
+  @if (isLoading()) {
+    <div class="d-flex align-items-center justify-content-center py-5">
+      <div class="spinner-border spinner-border-sm" role="status">
+        <span class="visually-hidden">Loading...</span>
+      </div>
+    </div>
+  } @else if (entries().length === 0) {
+    <div class="text-center text-muted py-5 small">{{t('no-events')}}</div>
+  } @else {
+    @for (group of groupedEntries(); track group.key) {
+      <div class="kplus-tl-day-header d-flex align-items-center gap-2 my-2">
+        <span class="small fw-semibold text-muted text-nowrap">
+          @if (group.label === 'today') { {{t('today')}} }
+          @else if (group.label === 'yesterday') { {{t('yesterday')}} }
+          @else { {{group.dateStr | date:'mediumDate'}} }
+        </span>
+        <hr class="flex-grow-1 my-0">
+        <span class="small text-muted text-nowrap">{{t('events-count', {count: group.count})}}</span>
+      </div>
+
+      @for (entry of group.events; track entry.id) {
+        <div class="kplus-tl-row d-flex align-items-start gap-3 py-2">
+          @if (entry.seriesId) {
+            <img class="kplus-tl-cover flex-shrink-0 rounded-1 object-fit-cover"
+                 [src]="imageService.getSeriesCoverImage(entry.seriesId)"
+                 [alt]="entry.seriesName ?? ''"
+                 width="40" height="56">
+          } @else {
+            <div class="kplus-tl-cover-placeholder flex-shrink-0 rounded-1 d-flex align-items-center justify-content-center">
+              <i class="fa-solid fa-book text-muted small" aria-hidden="true"></i>
+            </div>
+          }
+
+          <div class="flex-grow-1 min-w-0">
+            @if (entry.seriesName) {
+              <div class="kplus-tl-series fw-semibold text-truncate small mb-1">{{entry.seriesName}}</div>
+            }
+            <div class="d-flex align-items-center gap-2">
+              <div class="kplus-event-icon d-inline-flex align-items-center justify-content-center kplus-event-icon--{{categoryColorClass(entry.category)}}">
+                <i class="fa-solid {{categoryIcon(entry.category, entry.eventType)}}" aria-hidden="true"></i>
+              </div>
+              <span class="small">{{entry.eventType | kavitaPlusEventType}}</span>
+            </div>
+
+            @if (entry.scrobbleDetails; as sd) {
+              @switch (sd.scrobbleEventType) {
+                @case (ScrobbleEventType.ChapterRead) {
+                  @if (sd.chapterNumber !== null || sd.volumeNumber !== null) {
+                    <div class="small text-muted mt-1">
+                      @if (sd.volumeNumber !== null) { Vol.{{sd.volumeNumber}} }
+                      @if (sd.chapterNumber !== null) { Ch.{{sd.chapterNumber}} }
+                    </div>
+                  }
+                }
+                @case (ScrobbleEventType.ScoreUpdated) {
+                  @if (sd.rating !== null) {
+                    <div class="small text-muted mt-1">{{sd.rating}}/5</div>
+                  }
+                }
+              }
+            }
+
+            @if (entry.status === AuditStatus.Failure && entry.errorMessage) {
+              <div class="small text-danger text-truncate mt-1">{{entry.errorMessage}}</div>
+            }
+
+            @if (showRetry() && isRetryable(entry)) {
+              <button class="btn btn-outline-danger btn-sm mt-2">{{t('retry')}}</button>
+            }
+          </div>
+
+          <span class="kplus-tl-time text-muted text-nowrap small flex-shrink-0 pt-1">
+            {{entry.createdUtc | utcToLocalTime | timeAgo}}
+          </span>
+        </div>
+      }
+    }
+  }
+</ng-container>

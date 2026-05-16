@@ -67,6 +67,7 @@ export enum SettingsTabId {
   Devices = 'devices',
   Scrobbling = 'scrobbling',
   ScrobblingHolds = 'scrobble-holds',
+  MyActivity = 'my-activity',
   Customize = 'customize',
   CBLImport = 'cbl-import',
   RemapRules = 'remap-rules',
@@ -289,6 +290,7 @@ export class PreferenceNavComponent implements AfterViewInit {
           SideNavItem.kPlusOnly(SettingsTabId.Metadata, [Role.Admin]),
           SideNavItem.kPlusOnly(SettingsTabId.MatchedMetadata, [Role.Admin], this.matchedMetadataBadgeCount),
           SideNavItem.kPlusOnly(SettingsTabId.ScrobblingHolds),
+          SideNavItem.kPlusOnly(SettingsTabId.MyActivity),
           SideNavItem.kPlusOnly(SettingsTabId.Scrobbling, [], this.scrobblingErrorBadgeCount),
         ]
       }

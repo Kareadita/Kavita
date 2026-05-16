@@ -9,6 +9,7 @@ import {ScrobbleHold} from "../_models/scrobbling/scrobble-hold";
 import {PaginatedResult} from "../_models/pagination";
 import {ScrobbleEventFilter} from "../_models/scrobbling/scrobble-event-filter";
 import {UtilityService} from "../shared/_services/utility.service";
+import {forkJoin} from "rxjs";
 
 export enum ScrobbleProvider {
   Kavita = 0,
@@ -17,6 +18,17 @@ export enum ScrobbleProvider {
   Cbr = 4,
   Hardcover = 5,
   Mangabaka = 6,
+}
+
+/**
+ * TODO: This is a temp wrapper until I merge Amelia's Scrobble Provider Rework branch
+ */
+export interface UserScrobbleProvider {
+  userName: string | null;
+  authenticationToken: string | null;
+  validUntilUtc: string;
+  lastSyncedUtc: string;
+  provider: ScrobbleProvider;
 }
 
 @Injectable({
@@ -56,6 +68,35 @@ export class ScrobblingService {
 
   getMalToken() {
     return this.httpClient.get<{username: string, accessToken: string}>(this.baseUrl + 'scrobbling/mal-token');
+  }
+
+  /**
+   * Returns all providers with user's information filled out
+   */
+  getScrobbleProviders() {
+    // TODO: Port this to the backend
+
+    const defaultProviders = [
+      {provider: ScrobbleProvider.AniList},
+      {provider: ScrobbleProvider.Mal},
+      {provider: ScrobbleProvider.Mangabaka},
+      {provider: ScrobbleProvider.Hardcover},
+    ] as UserScrobbleProvider[];
+
+    return forkJoin({
+      aniList: this.getAniListToken(),
+      mal: this.getMalToken(),
+    }).pipe(map(res => {
+
+      const data = [...defaultProviders];
+      data[0].authenticationToken = res.aniList;
+
+      data[1].authenticationToken = res.mal.accessToken;
+      data[1].userName = res.mal.username;
+
+
+      return data;
+    }));
   }
 
 

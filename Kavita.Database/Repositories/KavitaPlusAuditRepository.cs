@@ -39,6 +39,7 @@ public class KavitaPlusAuditRepository(DataContext context) : IKavitaPlusAuditRe
     {
         var query = BuildBaseQuery(filter)
             .Where(e => e.UserId == userId);
+
         return await ProjectAndPage(query, userParams, ct);
     }
 

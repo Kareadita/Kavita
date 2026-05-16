@@ -209,11 +209,13 @@ public class ScrobblingService : IScrobblingService
     {
         var token = await GetTokenForProvider(userId, provider);
 
+        if (string.IsNullOrEmpty(token)) return true;
+
         if (await HasTokenExpired(token, provider))
         {
             // NOTE: Should this side effect be here?
             await _eventHub.SendMessageToAsync(MessageFactory.ScrobblingKeyExpired,
-                MessageFactory.ScrobblingKeyExpiredEvent(ScrobbleProvider.AniList), userId, ct);
+                MessageFactory.ScrobblingKeyExpiredEvent(provider), userId, ct);
             return true;
         }
 
@@ -975,7 +977,7 @@ public class ScrobblingService : IScrobblingService
             {
                 _logger.LogInformation("Hit Too many requests while posting scrobble updates, sleeping to regain requests and retrying");
                 await _auditService.LogAsync(KavitaPlusAuditCategory.Scrobble, KavitaPlusEventType.ScrobbleRateLimitHit,
-                    AuditStatus.Failure, AuditSubjectType.Global, error: "Too many requests");
+                    AuditStatus.Failure, AuditSubjectType.Global, error: "rate-limit-hit");
                 await Task.Delay(TimeSpan.FromMinutes(10));
                 return await PostScrobbleUpdate(data, license, evt);
             }

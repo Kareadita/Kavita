@@ -56,6 +56,7 @@ import {ManageCustomKeyBindsComponent} from "../../../user-settings/custom-key-b
 import {AccountSettingsComponent} from "src/app/user-settings/account-settings/account-settings.component";
 import {CblManagerComponent} from "../../../user-settings/cbl-manager/cbl-manager.component";
 import {ManageRemapRulesComponent} from "../../../user-settings/manage-remap-rules/manage-remap-rules.component";
+import {KavitaplusActivityComponent} from "../../../user-settings/kavitaplus-activity/kavitaplus-activity.component";
 
 @Component({
   selector: 'app-settings',
@@ -95,7 +96,8 @@ import {ManageRemapRulesComponent} from "../../../user-settings/manage-remap-rul
     ManageAuthKeysComponent,
     AccountSettingsComponent,
     CblManagerComponent,
-    ManageRemapRulesComponent
+    ManageRemapRulesComponent,
+    KavitaplusActivityComponent,
   ],
   templateUrl: './settings.component.html',
   styleUrl: './settings.component.scss',

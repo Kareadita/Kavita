@@ -1,0 +1,29 @@
+<ng-container *transloco="let t; prefix:'kavitaplus-activity'">
+  <div class="container-fluid px-0">
+    <p class="text-muted mb-4">{{t('description')}}</p>
+
+    <div class="d-flex flex-wrap gap-3 mb-4">
+      @for(provider of scrobblingProviders(); track provider.provider) {
+        <app-scrobble-account-card [provider]="provider"  />
+      }
+    </div>
+
+    <ul ngbNav [activeId]="activeTab()" (activeIdChange)="activeTab.set($event)" class="nav-tabs mb-3">
+      <li [ngbNavItem]="ActivityTabId.All">
+        <a ngbNavLink>{{t('tab-all')}} <span class="badge text-bg-secondary ms-1">{{allCount()}}</span></a>
+      </li>
+      <li [ngbNavItem]="ActivityTabId.Scrobbles">
+        <a ngbNavLink>{{t('tab-scrobbles')}} <span class="badge text-bg-secondary ms-1">{{scrobbleCount()}}</span></a>
+      </li>
+      <li [ngbNavItem]="ActivityTabId.Failed">
+        <a ngbNavLink>{{t('tab-failed')}} <span class="badge text-bg-secondary ms-1">{{failedCount()}}</span></a>
+      </li>
+      <li [ngbNavItem]="ActivityTabId.MyChanges">
+        <a ngbNavLink>{{t('tab-my-changes')}} <span class="badge text-bg-secondary ms-1">{{myChangesCount()}}</span></a>
+      </li>
+    </ul>
+
+    <app-kavitaplus-timeline [entries]="filteredEntries()" [isLoading]="isLoading()" />
+
+  </div>
+</ng-container>

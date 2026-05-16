@@ -1,5 +1,5 @@
 import {ChangeDetectionStrategy, Component, computed, inject, input, OnInit, signal} from '@angular/core';
-import {Router} from '@angular/router';
+import {NavigationExtras, Router} from '@angular/router';
 import {NgbActiveOffcanvas} from '@ng-bootstrap/ng-bootstrap';
 import {TranslocoDirective, TranslocoService} from '@jsverse/transloco';
 import {AccountService} from '../../../_services/account.service';
@@ -62,9 +62,9 @@ export class KavitaplusTooltipComponent implements OnInit {
     this.activeOffcanvas?.close();
   }
 
-  navigateAndClose(commands: unknown[]) {
+  navigateAndClose(commands: unknown[], extras?: NavigationExtras) {
     this.activeOffcanvas?.close();
-    this.router.navigate(commands);
+    this.router.navigate(commands, extras);
   }
 
   chapterLabel(chapterNumber: number | null, volumeNumber: number | null): string {

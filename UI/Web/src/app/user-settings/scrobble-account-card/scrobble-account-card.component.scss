@@ -1,0 +1,24 @@
+.kplus-provider-card {
+  flex: 1;
+  width: 400px;
+  height: 65px;
+  background: var(--bs-body-bg);
+  border-left-width: 3px !important;
+  border-color: #353635 !important;
+}
+
+.kplus-provider-logo {
+  width: 44px;
+  height: 44px;
+}
+
+.kplus-status-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+
+  &--connected    { background: var(--success-color); }
+  &--expired      { background: var(--error-color); }
+  &--disconnected { background: var(--text-muted-color); }
+}

@@ -1270,6 +1270,32 @@
         "review-submitted": "Review submitted"
     },
 
+    "kavitaplus-activity": {
+        "title": "My Activity",
+        "description": "Reading activity Kavita has synced to external services on your behalf - progress, ratings, and reading status.",
+        "tab-all": "All",
+        "tab-scrobbles": "Scrobbles",
+        "tab-failed": "Failed",
+        "tab-my-changes": "My Changes"
+    },
+
+    "scrobble-account-card": {
+        "provider-connected": "Connected",
+        "provider-not-connected": "Not connected",
+        "provider-expired": "Token expired",
+        "provider-connect": "Connect",
+        "provider-settings": "Settings",
+        "provider-description": "Link to send progress"
+    },
+
+    "kavitaplus-timeline": {
+        "today": "Today",
+        "yesterday": "Yesterday",
+        "events-count": "{{count}} events",
+        "no-events": "No events to display",
+        "retry": "Retry"
+    },
+
     "kavita-plus-event-type-pipe": {
         "series-matched": "Series Matched",
         "series-match-failed": "Match Failed",
@@ -2104,6 +2130,7 @@
         "admin-metadata": "Manage Metadata",
         "admin-mappings-import": "Metadata Settings",
         "scrobble-holds": "Scrobble Holds",
+        "my-activity": "My Activity",
         "account": "Account",
         "preferences": "Preferences",
         "custom-key-binds": "Key Binds",

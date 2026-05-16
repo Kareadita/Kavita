@@ -231,6 +231,16 @@
             }
           }
 
+          @case (SettingsTabId.MyActivity) {
+            @if (hasActiveLicense()) {
+              @defer (prefetch on idle) {
+                <div class="scale col-md-12">
+                  <app-kavitaplus-activity />
+                </div>
+              }
+            }
+          }
+
           @case (SettingsTabId.MALStackImport) {
             @if (hasActiveLicense()) {
               @defer (prefetch on idle) {
