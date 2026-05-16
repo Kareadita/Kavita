@@ -4,6 +4,8 @@ import {UtilityService} from '../shared/_services/utility.service';
 import {Chapter, LooseLeafOrDefaultNumber} from '../_models/chapter';
 import {LibraryType} from '../_models/library/library';
 import {Volume} from '../_models/volume';
+import {KavitaPlusScrobbleDetails} from '../_models/kavitaplus/kavita-plus-audit-entry';
+import {ScrobbleEventType} from '../_models/scrobbling/scrobble-event';
 
 const LooseLeafOrSpecial = LooseLeafOrDefaultNumber + '';
 
@@ -19,6 +21,40 @@ export class EntityTitleService {
    * @param plural Pluralize word
    * @returns
    */
+  /**
+   * Returns the formatted label for scrobble details — no leading separator. Callers append " - " themselves.
+   * Returns an empty string when there is nothing to display.
+   */
+  scrobbleDetailLabel(details: KavitaPlusScrobbleDetails): string {
+    if (details.scrobbleEventType === ScrobbleEventType.ChapterRead) {
+      const parts: string[] = [];
+      if (details.volumeNumber != null) {
+        parts.push(this.translocoService.translate('common.volume-num-shorthand', {num: details.volumeNumber}));
+      }
+      if (details.chapterNumber != null) {
+        parts.push(this.translocoService.translate(this.chapterKey(details.libraryType), {num: details.chapterNumber}));
+      }
+      return parts.join(' ');
+    }
+    if (details.scrobbleEventType === ScrobbleEventType.ScoreUpdated && details.rating != null) {
+      return `${details.rating}/5`;
+    }
+    return '';
+  }
+
+  private chapterKey(libraryType: LibraryType): string {
+    switch (libraryType) {
+      case LibraryType.Comic:
+      case LibraryType.ComicVine:
+        return 'common.issue-num-shorthand';
+      case LibraryType.Book:
+      case LibraryType.LightNovel:
+        return 'common.book-num-shorthand';
+      default:
+        return 'common.chapter-num-shorthand';
+    }
+  }
+
   formatChapterName(libraryType: LibraryType, plural: boolean = false) {
     const pluralKeyPart = plural ? '-plural' : '';
 

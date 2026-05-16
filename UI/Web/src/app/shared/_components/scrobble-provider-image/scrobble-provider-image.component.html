@@ -1,7 +1,8 @@
 @let providerName = provider() | scrobbleProviderName;
 @let providerImageUrl = provider() | providerImage;
 
-<img class="flex-shrink-0"
+<img [class]="'flex-shrink-0 ' + classes()"
      [ngSrc]="providerImageUrl"
      [alt]="providerName"
-     width="32" height="32" />
+     [width]="size()"
+     [height]="size()" />

@@ -3,6 +3,8 @@ import {KavitaPlusEventType} from './kavita-plus-event-type.enum';
 import {AuditStatus} from './audit-status.enum';
 import {AuditSubjectType} from './audit-subject-type.enum';
 import {ScrobbleEventType} from '../scrobbling/scrobble-event';
+import {ScrobbleProvider} from "../../_services/scrobbling.service";
+import {LibraryType} from '../library/library';
 
 export interface MetadataFieldChange {
   field: string;
@@ -15,6 +17,8 @@ export interface KavitaPlusScrobbleDetails {
   chapterNumber: number | null;
   volumeNumber: number | null;
   rating: number | null;
+  scrobbleProvider: ScrobbleProvider;
+  libraryType: LibraryType;
 }
 
 export interface KavitaPlusAuditEntry {

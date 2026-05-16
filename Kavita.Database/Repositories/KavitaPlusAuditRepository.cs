@@ -182,7 +182,7 @@ public class KavitaPlusAuditRepository(DataContext context) : IKavitaPlusAuditRe
         }
 
         KavitaPlusScrobbleDetailsDto? scrobbleDetails = null;
-        if (e.Category == KavitaPlusAuditCategory.Scrobble && e.Payload != null)
+        if (e is {Category: KavitaPlusAuditCategory.Scrobble, Payload: not null})
         {
             try
             {
@@ -195,6 +195,8 @@ public class KavitaPlusAuditRepository(DataContext context) : IKavitaPlusAuditRe
                         ChapterNumber = p.ChapterNumber,
                         VolumeNumber = p.VolumeNumber,
                         Rating = p.Rating,
+                        Provider = ScrobbleProvider.AniList, // TODO: This needs to allow provider to be passed from ScrobbleService (Amelia)
+                        LibraryType = p.LibraryType,
                     };
                 }
             }

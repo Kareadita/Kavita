@@ -18,4 +18,5 @@ import {NgOptimizedImage} from "@angular/common";
 export class ScrobbleProviderImageComponent {
   provider = input.required<ScrobbleProvider>();
   classes = input<string>('');
+  size = input<number>(32);
 }

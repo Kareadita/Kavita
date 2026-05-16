@@ -292,7 +292,7 @@ public class ScrobblingService : IScrobblingService
             _unitOfWork.ScrobbleRepository.Update(existingEvt);
             await _unitOfWork.CommitAsync(ct);
             await _auditService.LogScrobbleAsync(KavitaPlusEventType.ScrobbleEventUpdated, seriesId,
-                new AuditLogScrobbleParamsDto { ScrobbleEventType = ScrobbleEventType.ScoreUpdated, Rating = rating },
+                new AuditLogScrobbleParamsDto { ScrobbleEventType = ScrobbleEventType.ScoreUpdated, Rating = rating, LibraryType = series.Library.Type },
                 AuditStatus.Info, userId: userId, ct: ct);
             return;
         }
@@ -312,7 +312,7 @@ public class ScrobblingService : IScrobblingService
         await _unitOfWork.CommitAsync(ct);
         _logger.LogDebug("Added Scrobbling Rating update on {SeriesName} with Userid {AppUserId}", series.Name, userId);
         await _auditService.LogScrobbleAsync(KavitaPlusEventType.ScrobbleEventCreated, seriesId,
-            new AuditLogScrobbleParamsDto { ScrobbleEventType = ScrobbleEventType.ScoreUpdated, Rating = rating },
+            new AuditLogScrobbleParamsDto { ScrobbleEventType = ScrobbleEventType.ScoreUpdated, Rating = rating, LibraryType = series.Library.Type },
             AuditStatus.Info, userId: userId, ct: ct);
     }
 
@@ -361,7 +361,7 @@ public class ScrobblingService : IScrobblingService
             _logger.LogDebug("Overriding scrobble event for {Series} from vol {PrevVol} ch {PrevChap} -> vol {UpdatedVol} ch {UpdatedChap}",
                 existingEvt.Series.Name, prevVol, prevChapter, existingEvt.VolumeNumber, existingEvt.ChapterNumber);
             await _auditService.LogScrobbleAsync(KavitaPlusEventType.ScrobbleEventUpdated, seriesId,
-                new AuditLogScrobbleParamsDto { ScrobbleEventType = ScrobbleEventType.ChapterRead, ChapterNumber = existingEvt.ChapterNumber, VolumeNumber = existingEvt.VolumeNumber },
+                new AuditLogScrobbleParamsDto { ScrobbleEventType = ScrobbleEventType.ChapterRead, ChapterNumber = existingEvt.ChapterNumber, VolumeNumber = existingEvt.VolumeNumber, LibraryType = series.Library.Type },
                 AuditStatus.Info, userId: userId, ct: ct);
             return;
         }
@@ -397,7 +397,7 @@ public class ScrobblingService : IScrobblingService
             await _unitOfWork.CommitAsync(ct);
             _logger.LogDebug("Added Scrobbling Read update on {SeriesName} - Volume: {VolumeNumber} Chapter: {ChapterNumber} for User: {AppUserId}", series.Name, evt.VolumeNumber, evt.ChapterNumber, userId);
             await _auditService.LogScrobbleAsync(KavitaPlusEventType.ScrobbleEventCreated, seriesId,
-                new AuditLogScrobbleParamsDto { ScrobbleEventType = ScrobbleEventType.ChapterRead, ChapterNumber = evt.ChapterNumber, VolumeNumber = evt.VolumeNumber },
+                new AuditLogScrobbleParamsDto { ScrobbleEventType = ScrobbleEventType.ChapterRead, ChapterNumber = evt.ChapterNumber, VolumeNumber = evt.VolumeNumber, LibraryType = series.Library.Type },
                 AuditStatus.Info, userId: userId, ct: ct);
         }
         catch (Exception ex)
@@ -444,7 +444,7 @@ public class ScrobblingService : IScrobblingService
         await _unitOfWork.CommitAsync(ct);
         _logger.LogDebug("Added Scrobbling WantToRead update on {SeriesName} with Userid {AppUserId} ", series.Name, userId);
         await _auditService.LogScrobbleAsync(KavitaPlusEventType.ScrobbleEventCreated, seriesId,
-            new AuditLogScrobbleParamsDto { ScrobbleEventType = evt.ScrobbleEventType },
+            new AuditLogScrobbleParamsDto { ScrobbleEventType = evt.ScrobbleEventType, LibraryType = series.Library.Type },
             AuditStatus.Info, userId: userId, ct: ct);
     }
 
@@ -967,7 +967,7 @@ public class ScrobblingService : IScrobblingService
             if (response.Successful || response.ErrorMessage == null)
             {
                 await _auditService.LogScrobbleAsync(KavitaPlusEventType.ScrobbleEventSent, evt.SeriesId,
-                    new AuditLogScrobbleParamsDto { ScrobbleEventType = data.ScrobbleEventType, ChapterNumber = data.ChapterNumber, VolumeNumber = data.VolumeNumber, Rating = data.Rating },
+                    new AuditLogScrobbleParamsDto { ScrobbleEventType = data.ScrobbleEventType, ChapterNumber = data.ChapterNumber, VolumeNumber = data.VolumeNumber, Rating = data.Rating, LibraryType = evt.Series?.Library?.Type ?? LibraryType.Manga },
                     AuditStatus.Success, userId: evt.AppUserId);
                 return response.RateLeft;
             }
@@ -994,7 +994,7 @@ public class ScrobblingService : IScrobblingService
             {
                 evt.SetErrorMessage(AccessTokenErrorMessage);
                 await _auditService.LogScrobbleAsync(KavitaPlusEventType.ScrobbleEventFailed, evt.SeriesId,
-                    new AuditLogScrobbleParamsDto { ScrobbleEventType = evt.ScrobbleEventType },
+                    new AuditLogScrobbleParamsDto { ScrobbleEventType = evt.ScrobbleEventType, LibraryType = evt.Series?.Library?.Type ?? LibraryType.Manga },
                     AuditStatus.Failure, "InvalidToken", userId: evt.AppUserId);
                 throw new KavitaException("Access token is invalid");
             }
@@ -1006,7 +1006,7 @@ public class ScrobblingService : IScrobblingService
                 await MarkSeriesAsUnknown(data, evt);
                 evt.SetErrorMessage(UnknownSeriesErrorMessage);
                 await _auditService.LogScrobbleAsync(KavitaPlusEventType.ScrobbleEventFailed, evt.SeriesId,
-                    new AuditLogScrobbleParamsDto { ScrobbleEventType = evt.ScrobbleEventType },
+                    new AuditLogScrobbleParamsDto { ScrobbleEventType = evt.ScrobbleEventType, LibraryType = evt.Series?.Library?.Type ?? LibraryType.Manga },
                     AuditStatus.Failure, "Unknown Series", userId: evt.AppUserId);
             } else if (response.ErrorMessage.StartsWith("Review"))
             {

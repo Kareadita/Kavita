@@ -1,9 +1,10 @@
 import {ChangeDetectionStrategy, Component, computed, inject, input, OnInit, signal} from '@angular/core';
 import {NavigationExtras, Router} from '@angular/router';
 import {NgbActiveOffcanvas} from '@ng-bootstrap/ng-bootstrap';
-import {TranslocoDirective, TranslocoService} from '@jsverse/transloco';
+import {TranslocoDirective} from '@jsverse/transloco';
 import {AccountService} from '../../../_services/account.service';
 import {KavitaPlusAuditService} from '../../../_services/kavitaplus-audit.service';
+import {EntityTitleService} from '../../../_services/entity-title.service';
 import {KavitaPlusAuditSeriesInfo} from '../../../_models/kavitaplus/kavita-plus-audit-series-info';
 import {KavitaPlusAuditCategory} from '../../../_models/kavitaplus/kavita-plus-audit-category.enum';
 import {KavitaPlusEventType} from '../../../_models/kavitaplus/kavita-plus-event-type.enum';
@@ -22,8 +23,8 @@ import {NULL_DATE} from "../../../_pipes/date-year-range.pipe";
 })
 export class KavitaplusTooltipComponent implements OnInit {
   private readonly auditService = inject(KavitaPlusAuditService);
-  private readonly translocoService = inject(TranslocoService);
   private readonly router = inject(Router);
+  protected readonly entityTitleService = inject(EntityTitleService);
   protected readonly activeOffcanvas = inject(NgbActiveOffcanvas, { optional: true });
   protected readonly isAdmin = inject(AccountService).hasAdminRole;
 
@@ -65,18 +66,6 @@ export class KavitaplusTooltipComponent implements OnInit {
   navigateAndClose(commands: unknown[], extras?: NavigationExtras) {
     this.activeOffcanvas?.close();
     this.router.navigate(commands, extras);
-  }
-
-  chapterLabel(chapterNumber: number | null, volumeNumber: number | null): string {
-    if (chapterNumber === null && volumeNumber === null) return '';
-    const chStr = chapterNumber !== null
-      ? this.translocoService.translate('common.chapter-num-shorthand', { num: chapterNumber })
-      : null;
-    const volStr = volumeNumber !== null
-      ? this.translocoService.translate('common.volume-num-shorthand', { num: volumeNumber })
-      : null;
-    if (volStr && chStr) return `${volStr} ${chStr}`;
-    return chStr ?? volStr ?? '';
   }
 
   categoryIcon(category: KavitaPlusAuditCategory, eventType: KavitaPlusEventType): string {

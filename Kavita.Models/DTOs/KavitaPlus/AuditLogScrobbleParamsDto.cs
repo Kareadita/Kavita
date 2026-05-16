@@ -1,4 +1,5 @@
 using Kavita.Models.DTOs.Scrobbling;
+using Kavita.Models.Entities.Enums;
 
 namespace Kavita.Models.DTOs.KavitaPlus;
 #nullable enable
@@ -13,4 +14,5 @@ public sealed record AuditLogScrobbleParamsDto
     public int? ChapterNumber { get; init; }
     public float? VolumeNumber { get; init; }
     public float? Rating { get; init; }
+    public LibraryType LibraryType { get; init; } = LibraryType.Manga;
 }

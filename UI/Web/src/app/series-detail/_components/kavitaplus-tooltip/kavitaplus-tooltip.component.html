@@ -67,7 +67,7 @@
               @if (event.scrobbleDetails; as sd) {
                 @switch (sd.scrobbleEventType) {
                   @case (ScrobbleEventType.ChapterRead) {
-                    @let label = chapterLabel(sd.chapterNumber, sd.volumeNumber);
+                    @let label = entityTitleService.scrobbleDetailLabel(sd);
                     @if (label) {
                       <div class="kplus-event-desc text-muted">{{t('read-progress-sent-label', {chapter: label})}}</div>
                     }

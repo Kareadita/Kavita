@@ -5,11 +5,16 @@ import {KavitaPlusAuditEntry} from '../../_models/kavitaplus/kavita-plus-audit-e
 import {KavitaPlusAuditCategory} from '../../_models/kavitaplus/kavita-plus-audit-category.enum';
 import {KavitaPlusEventType} from '../../_models/kavitaplus/kavita-plus-event-type.enum';
 import {AuditStatus} from '../../_models/kavitaplus/audit-status.enum';
-import {ScrobbleEventType} from '../../_models/scrobbling/scrobble-event';
 import {KavitaPlusEventTypePipe} from '../../_pipes/kavita-plus-event-type.pipe';
+import {ScrobbleProviderNamePipe} from '../../_pipes/scrobble-provider-name.pipe';
 import {TimeAgoPipe} from '../../_pipes/time-ago.pipe';
 import {UtcToLocalTimePipe} from '../../_pipes/utc-to-local-time.pipe';
 import {ImageService} from '../../_services/image.service';
+import {EntityTitleService} from '../../_services/entity-title.service';
+import {ImageComponent} from '../../shared/image/image.component';
+import {
+  ScrobbleProviderImageComponent
+} from '../../shared/_components/scrobble-provider-image/scrobble-provider-image.component';
 
 interface DayGroup {
   key: string;
@@ -47,14 +52,24 @@ function groupByDay(entries: KavitaPlusAuditEntry[]): DayGroup[] {
   templateUrl: './kavitaplus-timeline.component.html',
   styleUrls: ['./kavitaplus-timeline.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [TranslocoDirective, KavitaPlusEventTypePipe, TimeAgoPipe, UtcToLocalTimePipe, DatePipe],
+  imports: [
+    TranslocoDirective,
+    KavitaPlusEventTypePipe,
+    ScrobbleProviderNamePipe,
+    TimeAgoPipe,
+    UtcToLocalTimePipe,
+    DatePipe,
+    ImageComponent,
+    ScrobbleProviderImageComponent,
+  ],
 })
 export class KavitaplusTimelineComponent {
   protected readonly imageService = inject(ImageService);
+  private readonly entityTitleService = inject(EntityTitleService);
 
   entries = input.required<KavitaPlusAuditEntry[]>();
   isLoading = input<boolean>(false);
-  showRetry = input<boolean>(false);
+  showRetry = input<boolean>(true);
 
   groupedEntries = computed(() => groupByDay(this.entries()));
 
@@ -67,14 +82,26 @@ export class KavitaplusTimelineComponent {
     }
   }
 
-  categoryIcon(category: KavitaPlusAuditCategory, eventType: KavitaPlusEventType): string {
-    if (category === KavitaPlusAuditCategory.Scrobble) return 'fa-bookmark';
-    if (category === KavitaPlusAuditCategory.Match)    return 'fa-link';
-    if (category === KavitaPlusAuditCategory.Sync)     return 'fa-arrows-rotate';
-    if (eventType === KavitaPlusEventType.CoverUpdated ||
-        eventType === KavitaPlusEventType.ChapterCoverUpdated ||
-        eventType === KavitaPlusEventType.PersonCoverUpdated) return 'fa-image';
+  descriptionColorClass(entry: KavitaPlusAuditEntry): string {
+    if (entry.status === AuditStatus.Failure) return 'failure';
+    return this.categoryColorClass(entry.category);
+  }
+
+  descriptionIcon(entry: KavitaPlusAuditEntry): string {
+    if (entry.status === AuditStatus.Failure) return 'fa-triangle-exclamation';
+    if (entry.category === KavitaPlusAuditCategory.Scrobble) return 'fa-paper-plane';
+    if (entry.category === KavitaPlusAuditCategory.Match)    return 'fa-link';
+    if (entry.category === KavitaPlusAuditCategory.Sync)     return 'fa-arrows-rotate';
+    if (entry.eventType === KavitaPlusEventType.CoverUpdated ||
+        entry.eventType === KavitaPlusEventType.ChapterCoverUpdated ||
+        entry.eventType === KavitaPlusEventType.PersonCoverUpdated) return 'fa-image';
     return 'fa-pen-to-square';
+  }
+
+  descriptionDetail(entry: KavitaPlusAuditEntry): string {
+    if (!entry.scrobbleDetails) return '';
+    const label = this.entityTitleService.scrobbleDetailLabel(entry.scrobbleDetails);
+    return label ? ` - ${label}` : '';
   }
 
   isRetryable(entry: KavitaPlusAuditEntry): boolean {
@@ -82,6 +109,5 @@ export class KavitaplusTimelineComponent {
   }
 
   protected readonly AuditStatus = AuditStatus;
-  protected readonly ScrobbleEventType = ScrobbleEventType;
   protected readonly KavitaPlusEventType = KavitaPlusEventType;
 }
