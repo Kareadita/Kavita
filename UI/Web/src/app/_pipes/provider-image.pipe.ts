@@ -9,6 +9,10 @@ export class ProviderImagePipe implements PipeTransform {
 
   transform(value: ScrobbleProvider, large: boolean = false): string {
     switch (value) {
+      case ScrobbleProvider.Hardcover:
+        return `assets/images/ExternalServices/hardcover${large ? '-lg' : ''}.png`;
+      case ScrobbleProvider.Mangabaka:
+        return `assets/images/ExternalServices/mangabaka${large ? '-lg' : ''}.png`;
       case ScrobbleProvider.AniList:
         return `assets/images/ExternalServices/AniList${large ? '-lg' : ''}.png`;
       case ScrobbleProvider.Mal:

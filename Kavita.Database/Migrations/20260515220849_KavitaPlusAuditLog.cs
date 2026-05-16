@@ -11,6 +11,34 @@ namespace Kavita.Database.Migrations
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
+            migrationBuilder.AddColumn<DateTime>(
+                name: "Created",
+                table: "ExternalSeriesMetadata",
+                type: "TEXT",
+                nullable: false,
+                defaultValue: new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified));
+
+            migrationBuilder.AddColumn<DateTime>(
+                name: "CreatedUtc",
+                table: "ExternalSeriesMetadata",
+                type: "TEXT",
+                nullable: false,
+                defaultValue: new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified));
+
+            migrationBuilder.AddColumn<DateTime>(
+                name: "LastModified",
+                table: "ExternalSeriesMetadata",
+                type: "TEXT",
+                nullable: false,
+                defaultValue: new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified));
+
+            migrationBuilder.AddColumn<DateTime>(
+                name: "LastModifiedUtc",
+                table: "ExternalSeriesMetadata",
+                type: "TEXT",
+                nullable: false,
+                defaultValue: new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified));
+
             migrationBuilder.CreateTable(
                 name: "KavitaPlusAuditLogs",
                 columns: table => new
@@ -70,6 +98,22 @@ namespace Kavita.Database.Migrations
         {
             migrationBuilder.DropTable(
                 name: "KavitaPlusAuditLogs");
+
+            migrationBuilder.DropColumn(
+                name: "Created",
+                table: "ExternalSeriesMetadata");
+
+            migrationBuilder.DropColumn(
+                name: "CreatedUtc",
+                table: "ExternalSeriesMetadata");
+
+            migrationBuilder.DropColumn(
+                name: "LastModified",
+                table: "ExternalSeriesMetadata");
+
+            migrationBuilder.DropColumn(
+                name: "LastModifiedUtc",
+                table: "ExternalSeriesMetadata");
         }
     }
 }

@@ -116,7 +116,12 @@ public class KavitaPlusAuditRepository(DataContext context) : IKavitaPlusAuditRe
             SeriesName = series.Name,
             IsMatched = series.MangaBakaId != 0,
             MangaBakaId = series.MangaBakaId != 0 ? series.MangaBakaId : null,
-            LastRefreshedUtc = series.ExternalSeriesMetadata?.ValidUntilUtc,
+            AniListId = series.AniListId != 0 ? series.AniListId : null,
+            HardcoverId = series.HardcoverId != 0 ? series.HardcoverId : null,
+            CbrId = series.CbrId != 0 ? series.CbrId : null,
+            ComicVineId = series.ComicVineId != string.Empty ? series.ComicVineId : null,
+            NextRefreshUtc = series.ExternalSeriesMetadata?.ValidUntilUtc,
+            LastRefreshedUtc = series.ExternalSeriesMetadata?.LastModifiedUtc,
             RecentEvents = recentEvents,
         };
     }

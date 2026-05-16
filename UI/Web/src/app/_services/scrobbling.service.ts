@@ -14,7 +14,9 @@ export enum ScrobbleProvider {
   Kavita = 0,
   AniList = 1,
   Mal = 2,
-  Cbr = 4
+  Cbr = 4,
+  Hardcover = 5,
+  Mangabaka = 6,
 }
 
 @Injectable({

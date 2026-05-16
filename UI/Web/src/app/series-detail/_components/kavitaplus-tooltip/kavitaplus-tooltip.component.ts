@@ -11,6 +11,7 @@ import {ScrobbleEventType} from '../../../_models/scrobbling/scrobble-event';
 import {TimeAgoPipe} from '../../../_pipes/time-ago.pipe';
 import {KavitaPlusEventTypePipe} from '../../../_pipes/kavita-plus-event-type.pipe';
 import {UtcToLocalTimePipe} from "../../../_pipes/utc-to-local-time.pipe";
+import {NULL_DATE} from "../../../_pipes/date-year-range.pipe";
 
 @Component({
   selector: 'app-kavitaplus-tooltip',
@@ -100,4 +101,5 @@ export class KavitaplusTooltipComponent implements OnInit {
   protected readonly AuditCategory = KavitaPlusAuditCategory;
   protected readonly EventType = KavitaPlusEventType;
   protected readonly ScrobbleEventType = ScrobbleEventType;
+  protected readonly NULL_DATE = NULL_DATE;
 }

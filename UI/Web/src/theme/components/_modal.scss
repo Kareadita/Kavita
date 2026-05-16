@@ -5,6 +5,20 @@
     font-size: .9rem;
 }
 
+.modal-header {
+  border-bottom: 1px solid var(--modal-footer-border-top-color);
+  //background-color: var(--modal-footer-bg-color);
+}
+
+.modal-body {
+  background-color: var(--modal-body-bg-color);
+}
+
+.modal-footer {
+  border-top: 1px solid var(--modal-footer-border-top-color);
+  background-color: var(--modal-footer-bg-color);
+}
+
 .modal-title {
     word-break: break-all;
 }

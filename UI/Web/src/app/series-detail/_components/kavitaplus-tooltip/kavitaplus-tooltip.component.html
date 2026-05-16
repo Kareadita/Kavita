@@ -19,9 +19,16 @@
 
       <!-- Match sub-row -->
       <div class="d-flex align-items-center gap-2 small text-muted">
-        @if (info.isMatched && info.mangaBakaId) {
+        @if (info.isMatched) {
+
+          <!--We have multiple primary metadata ids driven by library type. We should render either Mangabaka/CBR/Hardcover ?-->
+
           <a class="kplus-provider-badge d-inline-flex align-items-center" href="https://mangabaka.org/{{info.mangaBakaId}}" target="_blank" rel="noopener noreferrer">MangaBaka</a>
-          <span>{{t('refreshed')}} {{info.lastRefreshedUtc | utcToLocalTime | timeAgo}}</span>
+
+          @if (info.lastRefreshedUtc != NULL_DATE) {
+            <span>{{t('refreshed')}} {{info.lastRefreshedUtc | utcToLocalTime | timeAgo}}</span>
+            <span class="dot-separator mx-1">{{t('next-refresh')}} {{info.nextRefreshUtc | utcToLocalTime | timeAgo}}</span>
+          }
         } @else {
           <span class="badge bg-secondary">{{t('unmatched')}}</span>
         }

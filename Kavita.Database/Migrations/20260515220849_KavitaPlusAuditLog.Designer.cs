@@ -14,7 +14,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Kavita.Database.Migrations
 {
     [DbContext(typeof(DataContext))]
-    [Migration("20260515164229_KavitaPlusAuditLog")]
+    [Migration("20260515220849_KavitaPlusAuditLog")]
     partial class KavitaPlusAuditLog
     {
         /// <inheritdoc />
@@ -1005,7 +1005,19 @@ namespace Kavita.Database.Migrations
                     b.Property<int>("CbrId")
                         .HasColumnType("INTEGER");
 
+                    b.Property<DateTime>("Created")
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime>("CreatedUtc")
+                        .HasColumnType("TEXT");
+
                     b.Property<string>("GoogleBooksId")
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime>("LastModified")
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime>("LastModifiedUtc")
                         .HasColumnType("TEXT");
 
                     b.Property<long>("MalId")

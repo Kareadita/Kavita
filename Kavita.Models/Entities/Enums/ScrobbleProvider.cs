@@ -15,4 +15,5 @@ public enum ScrobbleProvider
     Mal = 2,
     Cbr = 4,
     Hardcover = 5,
+    MangaBaka = 6
 }

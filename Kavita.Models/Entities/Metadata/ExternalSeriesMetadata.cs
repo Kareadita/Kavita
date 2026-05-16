@@ -1,12 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
+using Kavita.Models.Entities.Interfaces;
 
 namespace Kavita.Models.Entities.Metadata;
 
 /// <summary>
 /// External Metadata from Kavita+ for a Series
 /// </summary>
-public class ExternalSeriesMetadata
+public class ExternalSeriesMetadata : IEntityDate
 {
     public int Id { get; set; }
     /// <summary>
@@ -37,4 +38,8 @@ public class ExternalSeriesMetadata
 
     public Series Series { get; set; } = null!;
     public int SeriesId { get; set; }
+    public DateTime Created { get; set; }
+    public DateTime CreatedUtc { get; set; }
+    public DateTime LastModified { get; set; }
+    public DateTime LastModifiedUtc { get; set; }
 }

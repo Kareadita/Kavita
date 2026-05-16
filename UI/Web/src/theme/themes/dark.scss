@@ -207,7 +207,10 @@
   --nav-link-text-color: var(--elevation-layer10);
 
   /* Modal */
-  --modal-bg-color: #202122; // var(--bs-body-bg)
+  --modal-bg-color: #202122;
+  --modal-footer-bg-color: #292929;
+  --modal-footer-border-top-color: rgba(255, 255, 255, 0.05);
+  --modal-body-bg-color: var(--elevation-solid-1);
 
   /* Header */
   --nav-header-text-color: white;
