@@ -318,6 +318,8 @@ public class ReaderController(ICacheService cacheService,
                 => s.GenerateReadingSessionForChapters(UserId, dto.SeriesId, progressDictionary, CancellationToken.None));
         }
 
+        BackgroundJob.Enqueue(() => scrobblingService.ScrobbleReadingUpdate(user.Id, dto.SeriesId));
+
         return Ok();
     }
 
