@@ -55,11 +55,7 @@
               <i class="fa-solid {{descriptionIcon(entry)}} kplus-icon--{{descriptionColorClass(entry)}} flex-shrink-0 kplus-desc-icon"
                  aria-hidden="true"></i>
               <span class="small kplus-desc--{{descriptionColorClass(entry)}}">
-                @if (entry.status === AuditStatus.Failure && entry.errorMessage) {
-                  {{entry.errorMessage}}
-                } @else {
-                  {{entry.eventType | kavitaPlusEventType}}{{descriptionDetail(entry)}}
-                }
+                {{entry.eventType | kavitaPlusEventType}}{{descriptionDetail(entry)}}@if (entry.errorMessage) { — {{translateAuditError(entry.errorMessage)}}}
               </span>
             </div>
           </div>

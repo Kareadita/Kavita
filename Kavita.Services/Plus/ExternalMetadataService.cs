@@ -424,7 +424,7 @@ public class ExternalMetadataService : IExternalMetadataService
                         series.IsBlacklisted = true;
                         await _unitOfWork.CommitAsync(ct);
                         await _auditService.LogMatchAsync(KavitaPlusEventType.SeriesBlacklisted, seriesId,
-                            new { seriesName = series.Name, reason = "Unknown Series" }, AuditStatus.Failure, ct: ct);
+                            new { seriesName = series.Name, reason = "unknown-series" }, AuditStatus.Failure, ct: ct);
                     }
                 }
             }

@@ -1,7 +1,7 @@
 import {ChangeDetectionStrategy, Component, computed, inject, input} from '@angular/core';
 import {DatePipe} from '@angular/common';
 import {Router} from '@angular/router';
-import {TranslocoDirective} from '@jsverse/transloco';
+import {TranslocoDirective, TranslocoService} from '@jsverse/transloco';
 import {KavitaPlusAuditEntry} from '../../_models/kavitaplus/kavita-plus-audit-entry';
 import {KavitaPlusAuditCategory} from '../../_models/kavitaplus/kavita-plus-audit-category.enum';
 import {KavitaPlusEventType} from '../../_models/kavitaplus/kavita-plus-event-type.enum';
@@ -68,6 +68,7 @@ export class KavitaplusTimelineComponent {
   protected readonly imageService = inject(ImageService);
   private readonly entityTitleService = inject(EntityTitleService);
   private readonly router = inject(Router);
+  private readonly translocoService = inject(TranslocoService);
 
   entries = input.required<KavitaPlusAuditEntry[]>();
   isLoading = input<boolean>(false);
@@ -115,6 +116,12 @@ export class KavitaplusTimelineComponent {
 
   isRetryable(entry: KavitaPlusAuditEntry): boolean {
     return entry.status === AuditStatus.Failure && entry.category === KavitaPlusAuditCategory.Scrobble;
+  }
+
+  translateAuditError(key: string): string {
+    const fullKey = 'audit-log-messages.' + key;
+    const translated = this.translocoService.translate(fullKey);
+    return translated !== fullKey ? translated : key;
   }
 
   protected readonly AuditStatus = AuditStatus;

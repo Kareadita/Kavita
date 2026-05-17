@@ -1324,6 +1324,16 @@
         "sync-failed": "Sync Failed"
     },
 
+    "audit-log-messages": {
+        "rate-limit-hit": "Rate Limit Hit",
+        "invalid-token": "Invalid AniList Token",
+        "unknown-series": "Unknown Series",
+        "series-dont-match": "Series Marked as Do Not Match",
+        "scrobble-hold-active": "Series Is on Hold",
+        "library-scrobbling-disabled": "Library Scrobbling Disabled",
+        "token-expired": "AniList Token Has Expired"
+    },
+
     "reading-progress-status-pipe": {
         "no-progress": "Read",
         "no-progress-incognito": "Read incognito",
