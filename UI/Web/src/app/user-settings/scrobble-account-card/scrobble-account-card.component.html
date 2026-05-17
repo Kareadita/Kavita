@@ -32,7 +32,13 @@
       </div>
 
       @if (isConnected()) {
-        <div class="small text-muted text-truncate">{{username() ? '&#64;' + username() : ''}}</div>
+        <div class="small text-muted text-truncate">{{username() ? username() : ''}}</div>
+        @if (isScrobbleDisabled()) {
+          <div class="small warning">
+            <i class="fa-solid fa-exclamation-circle" aria-hidden="true"></i>
+            {{t('disabled')}}
+          </div>
+        }
       } @else {
         <div class="small text-muted">{{t('provider-description')}}</div>
       }

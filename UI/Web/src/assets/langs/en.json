@@ -1285,7 +1285,8 @@
         "provider-expired": "Token expired",
         "provider-connect": "Connect",
         "provider-settings": "Settings",
-        "provider-description": "Link to send progress"
+        "provider-description": "Link to send progress",
+        "disabled": "{{cron-frequency-pipe.disabled}}"
     },
 
     "kavitaplus-timeline": {

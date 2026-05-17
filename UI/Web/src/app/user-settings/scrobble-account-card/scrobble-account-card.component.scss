@@ -26,3 +26,7 @@
   &--expired      { background: var(--error-color); }
   &--disconnected { background: var(--text-muted-color); }
 }
+
+.warning {
+  color: var(--warning-color);
+}

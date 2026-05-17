@@ -8,6 +8,7 @@ import {SettingsTabId} from '../../sidenav/preference-nav/preference-nav.compone
 import {
   ScrobbleProviderImageComponent
 } from '../../shared/_components/scrobble-provider-image/scrobble-provider-image.component';
+import {AccountService} from "../../_services/account.service";
 
 @Component({
   selector: 'app-scrobble-account-card',
@@ -18,6 +19,7 @@ import {
 })
 export class ScrobbleAccountCardComponent {
   private readonly router = inject(Router);
+  private readonly accountService = inject(AccountService);
 
   provider = input.required<UserScrobbleProvider>();
 
@@ -33,6 +35,10 @@ export class ScrobbleAccountCardComponent {
   });
 
   username = computed(() => this.provider().userName ?? '');
+
+  isScrobbleDisabled = computed(() => {
+    return !this.accountService.currentUser()?.preferences.aniListScrobblingEnabled;
+  })
 
 
   goToScrobbling() {
