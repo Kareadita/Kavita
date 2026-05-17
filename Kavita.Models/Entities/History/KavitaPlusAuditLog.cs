@@ -1,5 +1,6 @@
 using System;
 using Kavita.Models.Entities.Enums;
+using Kavita.Models.Entities.Enums.Audit;
 using Kavita.Models.Entities.User;
 
 namespace Kavita.Models.Entities.History;

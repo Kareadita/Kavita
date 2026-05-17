@@ -1,4 +1,4 @@
-namespace Kavita.Models.Entities.Enums;
+namespace Kavita.Models.Entities.Enums.Audit;
 
 public enum KavitaPlusEventType
 {
@@ -9,20 +9,20 @@ public enum KavitaPlusEventType
     SeriesMatchCleared = 3,
     SeriesDontMatchSet = 4,
 
-    // Metadata — Series
+    // Metadata - Series
     MetadataFetched = 10,
     MetadataUpdated = 11,
     CoverUpdated = 13,
 
-    // Metadata — Chapter/Issue
+    // Metadata - Chapter/Issue
     ChapterMetadataUpdated = 20,
     ChapterCoverUpdated = 21,
 
-    // Metadata — People
+    // Metadata - People
     PersonCoverUpdated = 30,
     PersonAliasAdded = 31,
 
-    // Metadata — Collections
+    // Metadata - Collections
     CollectionSynced = 40,
     CollectionItemAdded = 41,
 

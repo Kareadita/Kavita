@@ -1,4 +1,4 @@
-namespace Kavita.Models.Entities.Enums;
+namespace Kavita.Models.Entities.Enums.Audit;
 
 public enum AuditStatus
 {

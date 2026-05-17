@@ -1,7 +1,7 @@
 import {ChangeDetectionStrategy, Component, computed, inject, input} from '@angular/core';
 import {DatePipe} from '@angular/common';
 import {Router} from '@angular/router';
-import {TranslocoDirective, TranslocoService} from '@jsverse/transloco';
+import {TranslocoDirective} from '@jsverse/transloco';
 import {KavitaPlusAuditEntry} from '../../_models/kavitaplus/kavita-plus-audit-entry';
 import {KavitaPlusAuditCategory} from '../../_models/kavitaplus/kavita-plus-audit-category.enum';
 import {KavitaPlusEventType} from '../../_models/kavitaplus/kavita-plus-event-type.enum';
@@ -16,6 +16,7 @@ import {ImageComponent} from '../../shared/image/image.component';
 import {
   ScrobbleProviderImageComponent
 } from '../../shared/_components/scrobble-provider-image/scrobble-provider-image.component';
+import {AuditLogErrorPipe} from "../../_pipes/audit-log-error.pipe";
 
 interface DayGroup {
   key: string;
@@ -62,13 +63,13 @@ function groupByDay(entries: KavitaPlusAuditEntry[]): DayGroup[] {
     DatePipe,
     ImageComponent,
     ScrobbleProviderImageComponent,
+    AuditLogErrorPipe,
   ],
 })
 export class KavitaplusTimelineComponent {
   protected readonly imageService = inject(ImageService);
   private readonly entityTitleService = inject(EntityTitleService);
   private readonly router = inject(Router);
-  private readonly translocoService = inject(TranslocoService);
 
   entries = input.required<KavitaPlusAuditEntry[]>();
   isLoading = input<boolean>(false);
@@ -118,11 +119,6 @@ export class KavitaplusTimelineComponent {
     return entry.status === AuditStatus.Failure && entry.category === KavitaPlusAuditCategory.Scrobble;
   }
 
-  translateAuditError(key: string): string {
-    const fullKey = 'audit-log-messages.' + key;
-    const translated = this.translocoService.translate(fullKey);
-    return translated !== fullKey ? translated : key;
-  }
 
   protected readonly AuditStatus = AuditStatus;
   protected readonly KavitaPlusEventType = KavitaPlusEventType;

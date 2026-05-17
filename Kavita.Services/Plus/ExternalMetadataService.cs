@@ -32,6 +32,7 @@ using Kavita.Models.DTOs.SeriesDetail;
 using Kavita.Models.DTOs.SignalR;
 using Kavita.Models.Entities;
 using Kavita.Models.Entities.Enums;
+using Kavita.Models.Entities.Enums.Audit;
 using Kavita.Models.Entities.Interfaces;
 using Kavita.Models.Entities.Metadata;
 using Kavita.Models.Entities.MetadataMatching;
@@ -399,10 +400,29 @@ public class ExternalMetadataService : IExternalMetadataService
             _logger.LogDebug("Fetching Kavita+ Series Detail data for {SeriesName}", string.IsNullOrEmpty(data.SeriesName) ? data.AniListId : data.SeriesName);
             SeriesDetailPlusApiDto? result = null;
 
+            await _auditService.LogAsync(
+                KavitaPlusAuditCategory.Metadata,
+                KavitaPlusEventType.MetadataFetched,
+                AuditStatus.Info,
+                AuditSubjectType.Series,
+                seriesId: seriesId,
+                payload: new
+                {
+                    seriesId,
+                    libraryId = series.Library?.Id,
+                    format = series.Format,
+                    mangaBakaId = series.MangaBakaId,
+                    cbrId = series.CbrId,
+                    aniListId = series.AniListId,
+                    hardcoverId = series.HardcoverId,
+                },
+                ct: ct);
+
             try
             {
                 // This returns an AniListSeries and Match returns ExternalSeriesDto
                 result = await _kavitaPlusApiService.GetSeriesDetailAsync(data, ct);
+
             }
             catch (FlurlHttpException ex)
             {
@@ -432,6 +452,8 @@ public class ExternalMetadataService : IExternalMetadataService
             if (result == null)
             {
                 _logger.LogInformation("Hit rate limit twice, try again later");
+                await _auditService.LogMatchAsync(KavitaPlusEventType.SeriesMatchFailed, seriesId,
+                    new { seriesName = series.Name, reason = "rate-limit-hit" }, AuditStatus.Failure, ct: ct);
                 return _defaultReturn;
             }
 

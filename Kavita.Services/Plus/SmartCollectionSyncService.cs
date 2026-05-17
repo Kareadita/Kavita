@@ -17,6 +17,7 @@ using Kavita.Models.DTOs.KavitaPlus.ExternalMetadata;
 using Kavita.Models.DTOs.SignalR;
 using Kavita.Models.Entities;
 using Kavita.Models.Entities.Enums;
+using Kavita.Models.Entities.Enums.Audit;
 using Kavita.Models.Entities.User;
 using Kavita.Models.Extensions;
 using Microsoft.Extensions.Logging;

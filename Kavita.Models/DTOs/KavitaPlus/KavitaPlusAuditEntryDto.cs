@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using Kavita.Models.Entities.Enums;
+using Kavita.Models.Entities.Enums.Audit;
 
 namespace Kavita.Models.DTOs.KavitaPlus;
 #nullable enable
