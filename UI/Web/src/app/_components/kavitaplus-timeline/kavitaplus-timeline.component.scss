@@ -1,8 +1,13 @@
-.kplus-tl-muted {
-  color: var(--text-muted-color);
+:host {
+  --color-metadata: #20b2aa;
+  --color-scrobble: #e69500;
+  --color-match:    #6366f1;
+  --color-sync:     #3b82f6;
 }
 
-.kplus-tl-day-label {
+.tl-muted { color: var(--text-muted-color); }
+
+.tl-day-label {
   font-size: 0.7rem;
   font-weight: 600;
   letter-spacing: 0.06em;
@@ -10,42 +15,40 @@
   color: var(--body-text-color);
 }
 
-.kplus-tl-count {
-  font-size: 0.7rem;
-}
+.tl-count { font-size: 0.7rem; }
 
-.kplus-tl-divider {
+.tl-divider {
   flex: 1 1 0%;
-  height: 1px;
+  height: 0.0625rem;
   background: var(--hr-color);
 }
 
-.kplus-tl-row {
-  border-bottom: 1px solid var(--hr-color);
+.tl-row {
+  border-bottom: 0.0625rem solid var(--hr-color);
   background-color: var(--elevation-layer1-dark-solid);
-  border-radius: 6px;
+  border-radius: 0.375rem;
 
   &:last-child {
     border-bottom: none;
   }
 }
 
-.kplus-tl-cover {
-  width: 48px;
-  height: 64px;
+.tl-cover {
+  width: 3rem;
+  height: 4rem;
 }
 
-.kplus-tl-cover-placeholder {
+.tl-cover-placeholder {
   font-size: 1rem;
   background: var(--label-card-bg);
 }
 
-.kplus-tl-series {
+.tl-series {
   font-size: 0.875rem;
   color: var(--body-text-color);
 }
 
-.kplus-tl-series-link {
+.tl-series-link {
   background: none;
   border: none;
   padding: 0;
@@ -56,47 +59,21 @@
   }
 }
 
-.kplus-tl-time {
-  font-size: 0.75rem;
+.tl-time { font-size: 0.75rem; }
+
+.desc-icon { font-size: 0.7rem; }
+
+@each $name in metadata, scrobble, match, sync {
+  .icon--#{$name}     { color: var(--color-#{$name}); }
+  .cover-bg--#{$name} { background: color-mix(in srgb, var(--color-#{$name}) 12%, transparent); }
+  .desc--#{$name}     { color: var(--body-text-color); }
 }
 
-.kplus-desc-icon {
-  font-size: 0.7rem;
-}
+.icon--failure { color: var(--toast-warning-bg-color); }
+.desc--failure { color: var(--toast-warning-bg-color); }
 
-// Category color tokens - these are K+ design tokens, not theme variables
-$kplus-colors: (
-  'metadata': #20b2aa,
-  'scrobble': #e69500,
-  'match': #6366f1,
-  'sync': #3b82f6,
-);
-
-@each $name, $color in $kplus-colors {
-  .kplus-icon--#{$name} {
-    color: $color;
-  }
-
-  .kplus-cover-bg--#{$name} {
-    background: rgba($color, 0.12);
-  }
-
-  .kplus-desc--#{$name} {
-    color: var(--body-text-color);
-  }
-}
-
-// Failure uses the toast warning amber, not the light --warning-color alert tint
-.kplus-icon--failure {
-  color: var(--toast-warning-bg-color);
-}
-
-.kplus-desc--failure {
-  color: var(--toast-warning-bg-color);
-}
-
-.kplus-provider-badge {
-  border: 1px solid var(--tagbadge-border-color);
+.provider-badge {
+  border: 0.0625rem solid var(--tagbadge-border-color);
   border-radius: 999px;
   padding: 0.1rem 0.5rem 0.1rem 0.2rem;
   font-size: 0.7rem;

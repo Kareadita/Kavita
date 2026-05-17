@@ -6,55 +6,55 @@
       </div>
     </div>
   } @else if (entries().length === 0) {
-    <div class="text-center py-5 small kplus-tl-muted">{{t('no-events')}}</div>
+    <div class="text-center py-5 small tl-muted">{{t('no-events')}}</div>
   } @else {
     @for (group of groupedEntries(); track group.key; let isFirst = $first) {
-      <div class="kplus-tl-day-header d-flex align-items-center gap-3 mb-1" [class.mt-4]="!isFirst">
-        <h5 class="kplus-tl-day-label mb-0">
+      <div class="tl-day-header d-flex align-items-center gap-3 mb-1" [class.mt-4]="!isFirst">
+        <h5 class="tl-day-label mb-0">
           @if (group.label === 'today') { {{t('today')}} }
           @else if (group.label === 'yesterday') { {{t('yesterday')}} }
           @else { {{group.dateStr | date:'mediumDate'}} }
         </h5>
-        <div class="kplus-tl-divider"></div>
-        <span class="kplus-tl-count kplus-tl-muted text-nowrap">{{t('events-count', {count: group.count})}}</span>
+        <div class="tl-divider"></div>
+        <span class="tl-count tl-muted text-nowrap">{{t('events-count', {count: group.count})}}</span>
       </div>
 
       @for (entry of group.events; track entry.id) {
-        <div class="kplus-tl-row d-flex align-items-start gap-3 p-3 my-2">
+        <div class="tl-row d-flex align-items-start gap-3 p-3 my-2">
 
           @if (entry.seriesId) {
-            <div class="kplus-tl-cover flex-shrink-0">
+            <div class="tl-cover flex-shrink-0">
               <app-image [imageUrl]="imageService.getSeriesCoverImage(entry.seriesId)"
                          width="48px" height="64px"
                          classes="rounded-1 w-100 h-100"
                          objectFit="cover" />
             </div>
           } @else {
-            <div class="kplus-tl-cover kplus-tl-cover-placeholder flex-shrink-0 rounded-1 d-flex align-items-center justify-content-center kplus-cover-bg--{{categoryColorClass(entry.category)}}">
-              <i class="fa-solid fa-circle-nodes kplus-icon--{{categoryColorClass(entry.category)}}" aria-hidden="true"></i>
+            <div class="tl-cover tl-cover-placeholder flex-shrink-0 rounded-1 d-flex align-items-center justify-content-center cover-bg--{{categoryColorClass(entry.category)}}">
+              <i class="fa-solid fa-circle-nodes icon--{{categoryColorClass(entry.category)}}" aria-hidden="true"></i>
             </div>
           }
 
           <div class="flex-grow-1 min-w-0">
             <div class="d-flex align-items-center gap-2 mb-1 flex-wrap">
               @if (entry.seriesId != null && entry.libraryId != null) {
-                <button class="kplus-tl-series kplus-tl-series-link fw-semibold text-truncate" (click)="navigateToSeries(entry)">
+                <button class="tl-series tl-series-link fw-semibold text-truncate" (click)="navigateToSeries(entry)">
                   {{entry.seriesName}}
                 </button>
               } @else {
-                <span class="kplus-tl-series fw-semibold text-truncate">{{entry.seriesName ?? t('system')}}</span>
+                <span class="tl-series fw-semibold text-truncate">{{entry.seriesName ?? t('system')}}</span>
               }
               @if (entry.scrobbleDetails?.scrobbleProvider != null) {
-                <span class="kplus-provider-badge d-inline-flex align-items-center gap-1">
+                <span class="provider-badge d-inline-flex align-items-center gap-1">
                   <app-scrobble-provider-image [provider]="entry.scrobbleDetails!.scrobbleProvider" [size]="16" />
                   <span>{{entry.scrobbleDetails!.scrobbleProvider | scrobbleProviderName}}</span>
                 </span>
               }
             </div>
             <div class="d-flex align-items-center gap-2">
-              <i class="fa-solid {{descriptionIcon(entry)}} kplus-icon--{{descriptionColorClass(entry)}} flex-shrink-0 kplus-desc-icon"
+              <i class="fa-solid {{descriptionIcon(entry)}} icon--{{descriptionColorClass(entry)}} flex-shrink-0 desc-icon"
                  aria-hidden="true"></i>
-              <span class="small kplus-desc--{{descriptionColorClass(entry)}}">
+              <span class="small desc--{{descriptionColorClass(entry)}}">
                 {{entry.eventType | kavitaPlusEventType}}{{descriptionDetail(entry)}}@if (entry.errorMessage) { - {{entry.errorMessage | auditLogError }}}
               </span>
             </div>
@@ -66,7 +66,7 @@
                 <i class="fa-solid fa-rotate-left"></i> {{t('retry')}}
               </button>
             }
-            <span class="kplus-tl-time kplus-tl-muted text-nowrap">
+            <span class="tl-time tl-muted text-nowrap">
               {{entry.createdUtc | utcToLocalTime | timeAgo}}
             </span>
           </div>

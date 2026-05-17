@@ -1,9 +1,9 @@
 <ng-container *transloco="let t; prefix:'scrobble-account-card'">
   @let providerName = provider().provider | scrobbleProviderName;
 
-  <div class="kplus-provider-card d-flex align-items-center gap-3 p-3 rounded-2 border">
+  <div class="provider-card d-flex align-items-center gap-3 p-3 rounded-2 border">
 
-    <div class="kplus-provider-logo flex-shrink-0 rounded-2 d-flex align-items-center justify-content-center">
+    <div class="provider-logo flex-shrink-0 rounded-2 d-flex align-items-center justify-content-center">
       <app-scrobble-provider-image [provider]="provider().provider" />
     </div>
 
@@ -11,10 +11,10 @@
       <div class="d-flex align-items-center gap-2 flex-wrap">
         <span class="fw-semibold small text-truncate">{{providerName}}</span>
         <div class="d-flex align-items-center gap-1 flex-shrink-0">
-          <span class="kplus-status-dot"
-                [class.kplus-status-dot--connected]="isConnected() && !hasExpired()"
-                [class.kplus-status-dot--expired]="hasExpired()"
-                [class.kplus-status-dot--disconnected]="!isConnected()">
+          <span class="status-dot"
+                [class.status-dot--connected]="isConnected() && !hasExpired()"
+                [class.status-dot--expired]="hasExpired()"
+                [class.status-dot--disconnected]="!isConnected()">
           </span>
           <span class="small"
                 [class.text-success]="isConnected() && !hasExpired()"

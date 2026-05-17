@@ -1,20 +1,24 @@
-.kplus-provider-card {
+:host {
+  --provider-card-border-color: #353635;
+}
+
+.provider-card {
   flex: 1;
-  width: 400px;
-  height: 65px;
+  width: 25rem;
+  height: 4.0625rem;
   background: var(--bs-body-bg);
-  border-left-width: 3px !important;
-  border-color: #353635 !important;
+  border-left-width: 0.1875rem !important;
+  border-color: var(--provider-card-border-color) !important;
 }
 
-.kplus-provider-logo {
-  width: 44px;
-  height: 44px;
+.provider-logo {
+  width: 2.75rem;
+  height: 2.75rem;
 }
 
-.kplus-status-dot {
-  width: 8px;
-  height: 8px;
+.status-dot {
+  width: 0.5rem;
+  height: 0.5rem;
   border-radius: 50%;
   flex-shrink: 0;
 
