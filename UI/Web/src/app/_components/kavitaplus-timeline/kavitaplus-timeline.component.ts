@@ -1,5 +1,6 @@
 import {ChangeDetectionStrategy, Component, computed, inject, input} from '@angular/core';
 import {DatePipe} from '@angular/common';
+import {Router} from '@angular/router';
 import {TranslocoDirective} from '@jsverse/transloco';
 import {KavitaPlusAuditEntry} from '../../_models/kavitaplus/kavita-plus-audit-entry';
 import {KavitaPlusAuditCategory} from '../../_models/kavitaplus/kavita-plus-audit-category.enum';
@@ -66,6 +67,7 @@ function groupByDay(entries: KavitaPlusAuditEntry[]): DayGroup[] {
 export class KavitaplusTimelineComponent {
   protected readonly imageService = inject(ImageService);
   private readonly entityTitleService = inject(EntityTitleService);
+  private readonly router = inject(Router);
 
   entries = input.required<KavitaPlusAuditEntry[]>();
   isLoading = input<boolean>(false);
@@ -89,6 +91,8 @@ export class KavitaplusTimelineComponent {
 
   descriptionIcon(entry: KavitaPlusAuditEntry): string {
     if (entry.status === AuditStatus.Failure) return 'fa-triangle-exclamation';
+    if (entry.eventType === KavitaPlusEventType.ScrobbleHoldAdded ||
+        entry.eventType === KavitaPlusEventType.ScrobbleHoldRemoved) return 'fa-circle-pause';
     if (entry.category === KavitaPlusAuditCategory.Scrobble) return 'fa-paper-plane';
     if (entry.category === KavitaPlusAuditCategory.Match)    return 'fa-link';
     if (entry.category === KavitaPlusAuditCategory.Sync)     return 'fa-arrows-rotate';
@@ -102,6 +106,11 @@ export class KavitaplusTimelineComponent {
     if (!entry.scrobbleDetails) return '';
     const label = this.entityTitleService.scrobbleDetailLabel(entry.scrobbleDetails);
     return label ? ` - ${label}` : '';
+  }
+
+  navigateToSeries(entry: KavitaPlusAuditEntry): void {
+    if (entry.seriesId == null || entry.libraryId == null) return;
+    this.router.navigate(['library', entry.libraryId, 'series', entry.seriesId]);
   }
 
   isRetryable(entry: KavitaPlusAuditEntry): boolean {

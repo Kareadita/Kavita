@@ -2,6 +2,7 @@ import {KavitaPlusAuditEntry} from './kavita-plus-audit-entry';
 
 export interface KavitaPlusAuditSeriesInfo {
   seriesId: number;
+  libraryId: number;
   seriesName: string;
   isMatched: boolean;
   mangaBakaId?: number;

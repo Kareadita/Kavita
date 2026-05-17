@@ -13,6 +13,7 @@ public sealed record KavitaPlusAuditEntryDto
     public KavitaPlusEventType EventType { get; init; }
     public AuditStatus Status { get; init; }
     public int? SeriesId { get; init; }
+    public int? LibraryId { get; init; }
     public string? SeriesName { get; init; }
     public AuditSubjectType SubjectType { get; init; }
     public int? SubjectId { get; init; }

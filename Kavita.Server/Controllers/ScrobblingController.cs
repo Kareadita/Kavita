@@ -10,6 +10,7 @@ using Kavita.API.Services.Plus;
 using Kavita.Common.Helpers;
 using Kavita.Models.Builders;
 using Kavita.Models.Constants;
+using Kavita.Models.DTOs.KavitaPlus;
 using Kavita.Models.DTOs.KavitaPlus.Account;
 using Kavita.Models.DTOs.Scrobbling;
 using Kavita.Models.Entities.Enums;
@@ -28,7 +29,8 @@ public class ScrobblingController(
     IUnitOfWork unitOfWork,
     IScrobblingService scrobblingService,
     ILogger<ScrobblingController> logger,
-    ILocalizationService localizationService)
+    ILocalizationService localizationService,
+    IKavitaPlusAuditService kavitaPlusAuditService)
     : BaseApiController
 {
     /// <summary>
@@ -224,6 +226,8 @@ public class ScrobblingController(
 
             // When a hold is placed on a series, clear any pre-existing Scrobble Events
             await scrobblingService.ClearEventsForSeries(user.Id, seriesId);
+            await kavitaPlusAuditService.LogScrobbleAsync(KavitaPlusEventType.ScrobbleHoldAdded, seriesId,
+                new AuditLogScrobbleParamsDto(), AuditStatus.Success, null, UserId, HttpContext.RequestAborted);
             return Ok();
         }
         catch (DbUpdateConcurrencyException ex)
@@ -237,6 +241,8 @@ public class ScrobblingController(
             // Retry the update
             unitOfWork.UserRepository.Update(user);
             await unitOfWork.CommitAsync();
+            await kavitaPlusAuditService.LogScrobbleAsync(KavitaPlusEventType.ScrobbleHoldAdded, seriesId,
+                new AuditLogScrobbleParamsDto(), AuditStatus.Success, null, UserId, HttpContext.RequestAborted);
             return Ok();
         }
         catch (Exception ex)
@@ -257,13 +263,17 @@ public class ScrobblingController(
     [DisallowRole(PolicyConstants.ReadOnlyRole)]
     public async Task<ActionResult> RemoveHold(int seriesId)
     {
-        var user = await unitOfWork.UserRepository.GetUserByIdAsync(UserId, AppUserIncludes.ScrobbleHolds);
+        var user = await unitOfWork.UserRepository.GetUserByIdAsync(UserId, AppUserIncludes.ScrobbleHolds, HttpContext.RequestAborted);
         if (user == null) return Unauthorized();
 
         user.ScrobbleHolds = user.ScrobbleHolds.Where(h => h.SeriesId != seriesId).ToList();
 
         unitOfWork.UserRepository.Update(user);
-        await unitOfWork.CommitAsync();
+        await unitOfWork.CommitAsync(HttpContext.RequestAborted);
+
+        await kavitaPlusAuditService.LogScrobbleAsync(KavitaPlusEventType.ScrobbleHoldRemoved, seriesId,
+            new AuditLogScrobbleParamsDto(), AuditStatus.Success, null, UserId, HttpContext.RequestAborted);
+
         return Ok();
     }
 

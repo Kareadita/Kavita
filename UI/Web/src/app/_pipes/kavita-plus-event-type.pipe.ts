@@ -51,6 +51,10 @@ export class KavitaPlusEventTypePipe implements PipeTransform {
         return this.translocoService.translate('kavita-plus-event-type-pipe.scrobble-rate-limit');
       case KavitaPlusEventType.ScrobbleEventSkipped:
         return this.translocoService.translate('kavita-plus-event-type-pipe.scrobble-skipped');
+      case KavitaPlusEventType.ScrobbleHoldAdded:
+        return this.translocoService.translate('kavita-plus-event-type-pipe.scrobble-hold-added');
+      case KavitaPlusEventType.ScrobbleHoldRemoved:
+        return this.translocoService.translate('kavita-plus-event-type-pipe.scrobble-hold-removed');
       case KavitaPlusEventType.SyncStarted:
         return this.translocoService.translate('kavita-plus-event-type-pipe.sync-started');
       case KavitaPlusEventType.SyncCompleted:

@@ -1317,6 +1317,8 @@
         "scrobble-failed": "Scrobble Failed",
         "scrobble-rate-limit": "Rate Limit Hit",
         "scrobble-skipped": "Scrobble Skipped",
+        "scrobble-hold-added": "Scrobble Hold Added",
+        "scrobble-hold-removed": "Scrobble Hold Removed",
         "sync-started": "Sync Started",
         "sync-completed": "Sync Completed",
         "sync-failed": "Sync Failed"

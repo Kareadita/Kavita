@@ -8,6 +8,7 @@ namespace Kavita.Models.DTOs.KavitaPlus;
 public sealed record KavitaPlusAuditSeriesInfoDto : IUpdateExternalMetadataIds
 {
     public int SeriesId { get; init; }
+    public int LibraryId { get; init; }
     public string SeriesName { get; init; } = string.Empty;
     public bool IsMatched { get; init; }
     public int? AniListId { get; set; }

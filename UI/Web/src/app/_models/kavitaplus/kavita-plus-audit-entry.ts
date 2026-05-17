@@ -28,6 +28,7 @@ export interface KavitaPlusAuditEntry {
   eventType: KavitaPlusEventType;
   status: AuditStatus;
   seriesId: number | null;
+  libraryId: number | null;
   seriesName: string | null;
   subjectType: AuditSubjectType;
   subjectId: number | null;

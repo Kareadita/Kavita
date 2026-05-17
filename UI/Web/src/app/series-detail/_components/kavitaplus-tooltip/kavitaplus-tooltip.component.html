@@ -22,12 +22,17 @@
         @if (info.isMatched) {
 
           <!--We have multiple primary metadata ids driven by library type. We should render either Mangabaka/CBR/Hardcover ?-->
+          @if (info.mangaBakaId) {
+            <a class="kplus-provider-badge d-inline-flex align-items-center" href="https://mangabaka.org/{{info.mangaBakaId}}" target="_blank" rel="noopener noreferrer">MangaBaka</a>
+          } @else if (info.hardcoverId) {
+            <a class="kplus-provider-badge d-inline-flex align-items-center" href="https://hardcover.app/id/series/{{info.hardcoverId}}" target="_blank" rel="noopener noreferrer">Hardcover</a>
+          }
 
-          <a class="kplus-provider-badge d-inline-flex align-items-center" href="https://mangabaka.org/{{info.mangaBakaId}}" target="_blank" rel="noopener noreferrer">MangaBaka</a>
 
           @if (info.lastRefreshedUtc != NULL_DATE) {
             <span>{{t('refreshed')}} {{info.lastRefreshedUtc | utcToLocalTime | timeAgo}}</span>
-            <span class="dot-separator mx-1">{{t('next-refresh')}} {{info.nextRefreshUtc | utcToLocalTime | timeAgo}}</span>
+            <span class="dot-separator mx-1"></span>
+            <span>{{t('next-refresh')}} {{info.nextRefreshUtc | utcToLocalTime | timeAgo}}</span>
           }
         } @else {
           <span class="badge bg-secondary">{{t('unmatched')}}</span>

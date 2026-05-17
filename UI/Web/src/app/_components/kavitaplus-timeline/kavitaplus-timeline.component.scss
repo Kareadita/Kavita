@@ -22,6 +22,8 @@
 
 .kplus-tl-row {
   border-bottom: 1px solid var(--hr-color);
+  background-color: var(--elevation-layer1-dark-solid);
+  border-radius: 6px;
 
   &:last-child {
     border-bottom: none;
@@ -41,6 +43,17 @@
 .kplus-tl-series {
   font-size: 0.875rem;
   color: var(--body-text-color);
+}
+
+.kplus-tl-series-link {
+  background: none;
+  border: none;
+  padding: 0;
+  text-align: left;
+
+  &:hover {
+    text-decoration: underline;
+  }
 }
 
 .kplus-tl-time {

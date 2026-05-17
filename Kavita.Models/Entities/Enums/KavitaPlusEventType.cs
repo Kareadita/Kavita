@@ -33,6 +33,9 @@ public enum KavitaPlusEventType
     ScrobbleEventFailed = 53,
     ScrobbleRateLimitHit = 54,
     ScrobbleEventSkipped = 55,
+    ScrobbleHoldRemoved = 56,
+    ScrobbleHoldAdded = 57,
+
 
     // Sync (global background jobs)
     SyncStarted = 60,

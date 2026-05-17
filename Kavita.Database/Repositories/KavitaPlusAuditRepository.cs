@@ -45,13 +45,13 @@ public class KavitaPlusAuditRepository(DataContext context) : IKavitaPlusAuditRe
 
     public async Task<KavitaPlusAuditStatsDto> GetStatsAsync(CancellationToken ct = default)
     {
-        var cutoff24h = DateTime.UtcNow.AddHours(-24);
+        var cutoff24H = DateTime.UtcNow.AddHours(-24);
 
-        var events24h = await context.KavitaPlusAuditLogs
-            .CountAsync(e => e.CreatedUtc >= cutoff24h, ct);
+        var events24H = await context.KavitaPlusAuditLogs
+            .CountAsync(e => e.CreatedUtc >= cutoff24H, ct);
 
-        var failures24h = await context.KavitaPlusAuditLogs
-            .CountAsync(e => e.CreatedUtc >= cutoff24h && e.Status == AuditStatus.Failure, ct);
+        var failures24H = await context.KavitaPlusAuditLogs
+            .CountAsync(e => e.CreatedUtc >= cutoff24H && e.Status == AuditStatus.Failure, ct);
 
         var unresolvedMatchFailures = await context.KavitaPlusAuditLogs
             .CountAsync(e => e.EventType == KavitaPlusEventType.SeriesMatchFailed
@@ -69,8 +69,8 @@ public class KavitaPlusAuditRepository(DataContext context) : IKavitaPlusAuditRe
 
         return new KavitaPlusAuditStatsDto
         {
-            Events24h = events24h,
-            Failures24h = failures24h,
+            Events24h = events24H,
+            Failures24h = failures24H,
             UnresolvedMatchFailures = unresolvedMatchFailures,
             MatchedSeriesCount = matchedSeriesCount,
             TotalEligibleSeriesCount = totalEligibleSeriesCount,
@@ -103,7 +103,7 @@ public class KavitaPlusAuditRepository(DataContext context) : IKavitaPlusAuditRe
         var recentRaw = await recentQuery
             .Select(e => new RawEntry(
                 e.Id, e.CreatedUtc, e.Category, e.EventType, e.Status,
-                e.SeriesId, series.Name,
+                e.SeriesId, series.LibraryId, series.Name,
                 e.SubjectType, e.SubjectId,
                 e.UserId, e.User != null ? e.User.UserName : null,
                 e.Payload, e.ErrorMessage))
@@ -114,6 +114,7 @@ public class KavitaPlusAuditRepository(DataContext context) : IKavitaPlusAuditRe
         return new KavitaPlusAuditSeriesInfoDto
         {
             SeriesId = series.Id,
+            LibraryId = series.LibraryId,
             SeriesName = series.Name,
             IsMatched = series.MangaBakaId != 0,
             MangaBakaId = series.MangaBakaId != 0 ? series.MangaBakaId : null,
@@ -155,6 +156,7 @@ public class KavitaPlusAuditRepository(DataContext context) : IKavitaPlusAuditRe
             .Select(e => new RawEntry(
                 e.Id, e.CreatedUtc, e.Category, e.EventType, e.Status,
                 e.SeriesId,
+                context.Series.Where(s => s.Id == e.SeriesId).Select(s => (int?)s.LibraryId).FirstOrDefault(),
                 context.Series.Where(s => s.Id == e.SeriesId).Select(s => s.Name).FirstOrDefault(),
                 e.SubjectType, e.SubjectId,
                 e.UserId, e.User != null ? e.User.UserName : null,
@@ -165,10 +167,10 @@ public class KavitaPlusAuditRepository(DataContext context) : IKavitaPlusAuditRe
         return PagedList<KavitaPlusAuditEntryDto>.Create(items, count, userParams);
     }
 
-    private KavitaPlusAuditEntryDto MapToDto(RawEntry e)
+    private static KavitaPlusAuditEntryDto MapToDto(RawEntry e)
     {
         IList<MetadataFieldChange>? diff = null;
-        if (e.Category == KavitaPlusAuditCategory.Metadata && e.Payload != null)
+        if (e is {Category: KavitaPlusAuditCategory.Metadata, Payload: not null})
         {
             try
             {
@@ -177,7 +179,7 @@ public class KavitaPlusAuditRepository(DataContext context) : IKavitaPlusAuditRe
             }
             catch
             {
-                // malformed payload — leave diff null
+                // malformed payload
             }
         }
 
@@ -202,7 +204,7 @@ public class KavitaPlusAuditRepository(DataContext context) : IKavitaPlusAuditRe
             }
             catch
             {
-                // malformed payload — leave scrobbleDetails null
+                // malformed payload
             }
         }
 
@@ -214,6 +216,7 @@ public class KavitaPlusAuditRepository(DataContext context) : IKavitaPlusAuditRe
             EventType = e.EventType,
             Status = e.Status,
             SeriesId = e.SeriesId,
+            LibraryId = e.LibraryId,
             SeriesName = e.SeriesName,
             SubjectType = e.SubjectType,
             SubjectId = e.SubjectId,
@@ -228,7 +231,7 @@ public class KavitaPlusAuditRepository(DataContext context) : IKavitaPlusAuditRe
     private sealed record RawEntry(
         long Id, DateTime CreatedUtc, KavitaPlusAuditCategory Category,
         KavitaPlusEventType EventType, AuditStatus Status,
-        int? SeriesId, string? SeriesName,
+        int? SeriesId, int? LibraryId, string? SeriesName,
         AuditSubjectType SubjectType, int? SubjectId,
         int? UserId, string? Username,
         string? Payload, string? ErrorMessage);

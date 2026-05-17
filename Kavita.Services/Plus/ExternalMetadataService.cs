@@ -372,7 +372,6 @@ public class ExternalMetadataService : IExternalMetadataService
 
         await _unitOfWork.CommitAsync(ct);
 
-        // TODO: This needs userId for better tracking
         await _auditService.LogMatchAsync(KavitaPlusEventType.SeriesDontMatchSet, seriesId,
             new { seriesName = series.Name, dontMatch }, ct: ct);
     }
