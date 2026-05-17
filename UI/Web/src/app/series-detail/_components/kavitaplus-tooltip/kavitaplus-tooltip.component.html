@@ -1,11 +1,13 @@
 <ng-container *transloco="let t; prefix: 'kavitaplus-audit'">
-  <div class="kplus-panel d-flex flex-column p-3">
+  <div class="kplus-panel d-flex flex-column p-3" [class.pt-1]="!activeOffcanvas">
 
-    <!-- Header -->
-    <div class="d-flex align-items-center gap-2">
-      <div class="kplus-kbadge d-inline-flex align-items-center justify-content-center flex-shrink-0">K+</div>
-      <span class="kplus-title fw-semibold">{{t('panel-title')}}</span>
-    </div>
+    <!-- Header (tooltip mode only) -->
+    @if (!activeOffcanvas) {
+      <div class="d-flex align-items-center gap-2">
+        <div class="kplus-kbadge d-inline-flex align-items-center justify-content-center flex-shrink-0">K+</div>
+        <span class="kplus-title fw-semibold">{{t('panel-title')}}</span>
+      </div>
+    }
 
     @if (isLoading()) {
       <div class="d-flex align-items-center justify-content-center kplus-loading-area">

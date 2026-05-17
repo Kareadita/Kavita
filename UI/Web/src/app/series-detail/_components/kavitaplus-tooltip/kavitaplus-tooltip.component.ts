@@ -71,16 +71,6 @@ export class KavitaplusTooltipComponent implements OnInit {
     this.router.navigate(commands, extras);
   }
 
-  categoryIcon(category: KavitaPlusAuditCategory, eventType: KavitaPlusEventType): string {
-    if (category === KavitaPlusAuditCategory.Scrobble) return 'fa-bookmark';
-    if (category === KavitaPlusAuditCategory.Match)    return 'fa-link';
-    if (category === KavitaPlusAuditCategory.Sync)     return 'fa-arrows-rotate';
-    if (eventType === KavitaPlusEventType.CoverUpdated ||
-        eventType === KavitaPlusEventType.ChapterCoverUpdated ||
-        eventType === KavitaPlusEventType.PersonCoverUpdated) return 'fa-image';
-    return 'fa-pen-to-square';
-  }
-
   categoryColorClass(category: KavitaPlusAuditCategory): string {
     switch (category) {
       case KavitaPlusAuditCategory.Match:    return 'match';
