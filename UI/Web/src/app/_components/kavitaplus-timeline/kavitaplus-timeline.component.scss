@@ -1,13 +1,5 @@
-:host {
-  --color-metadata: #20b2aa;
-  --color-scrobble: #e69500;
-  --color-match:    #6366f1;
-  --color-sync:     #3b82f6;
-}
 
-.tl-muted { color: var(--text-muted-color); }
-
-.tl-day-label {
+.day-label {
   font-size: 0.7rem;
   font-weight: 600;
   letter-spacing: 0.06em;
@@ -15,15 +7,15 @@
   color: var(--body-text-color);
 }
 
-.tl-count { font-size: 0.7rem; }
+.count { font-size: 0.7rem; }
 
-.tl-divider {
+.divider {
   flex: 1 1 0%;
   height: 0.0625rem;
   background: var(--hr-color);
 }
 
-.tl-row {
+.entry {
   border-bottom: 0.0625rem solid var(--hr-color);
   background-color: var(--elevation-layer1-dark-solid);
   border-radius: 0.375rem;
@@ -33,22 +25,21 @@
   }
 }
 
-.tl-cover {
+.cover {
   width: 3rem;
   height: 4rem;
 }
 
-.tl-cover-placeholder {
+.cover-placeholder {
   font-size: 1rem;
-  background: var(--label-card-bg);
 }
 
-.tl-series {
+.series {
   font-size: 0.875rem;
   color: var(--body-text-color);
 }
 
-.tl-series-link {
+.series-link {
   background: none;
   border: none;
   padding: 0;
@@ -59,18 +50,8 @@
   }
 }
 
-.tl-time { font-size: 0.75rem; }
+.time { font-size: 0.75rem; }
 
-.desc-icon { font-size: 0.7rem; }
-
-@each $name in metadata, scrobble, match, sync {
-  .icon--#{$name}     { color: var(--color-#{$name}); }
-  .cover-bg--#{$name} { background: color-mix(in srgb, var(--color-#{$name}) 12%, transparent); }
-  .desc--#{$name}     { color: var(--body-text-color); }
-}
-
-.icon--failure { color: var(--toast-warning-bg-color); }
-.desc--failure { color: var(--toast-warning-bg-color); }
 
 .provider-badge {
   border: 0.0625rem solid var(--tagbadge-border-color);

@@ -4,7 +4,6 @@ import {Router} from '@angular/router';
 import {TranslocoDirective} from '@jsverse/transloco';
 import {KavitaPlusAuditEntry} from '../../_models/kavitaplus/kavita-plus-audit-entry';
 import {KavitaPlusAuditCategory} from '../../_models/kavitaplus/kavita-plus-audit-category.enum';
-import {KavitaPlusEventType} from '../../_models/kavitaplus/kavita-plus-event-type.enum';
 import {AuditStatus} from '../../_models/kavitaplus/audit-status.enum';
 import {KavitaPlusEventTypePipe} from '../../_pipes/kavita-plus-event-type.pipe';
 import {ScrobbleProviderNamePipe} from '../../_pipes/scrobble-provider-name.pipe';
@@ -17,6 +16,9 @@ import {
   ScrobbleProviderImageComponent
 } from '../../shared/_components/scrobble-provider-image/scrobble-provider-image.component';
 import {AuditLogErrorPipe} from "../../_pipes/audit-log-error.pipe";
+import {
+  KavitaPlusAuditEventTypeIconComponent
+} from "../../shared/_components/kavitaplus-event-type-icon/kavita-plus-audit-event-type-icon.component";
 
 interface DayGroup {
   key: string;
@@ -64,6 +66,7 @@ function groupByDay(entries: KavitaPlusAuditEntry[]): DayGroup[] {
     ImageComponent,
     ScrobbleProviderImageComponent,
     AuditLogErrorPipe,
+    KavitaPlusAuditEventTypeIconComponent,
   ],
 })
 export class KavitaplusTimelineComponent {
@@ -77,31 +80,23 @@ export class KavitaplusTimelineComponent {
 
   groupedEntries = computed(() => groupByDay(this.entries()));
 
-  categoryColorClass(category: KavitaPlusAuditCategory): string {
+  categoryColor(category: KavitaPlusAuditCategory): string {
     switch (category) {
-      case KavitaPlusAuditCategory.Match:    return 'match';
-      case KavitaPlusAuditCategory.Scrobble: return 'scrobble';
-      case KavitaPlusAuditCategory.Sync:     return 'sync';
-      default:                               return 'metadata';
+      case KavitaPlusAuditCategory.Match:    return 'var(--audit-log-match-color)';
+      case KavitaPlusAuditCategory.Scrobble: return 'var(--audit-log-scrobble-color)';
+      case KavitaPlusAuditCategory.Sync:     return 'var(--audit-log-sync-color)';
+      default:                               return 'var(--audit-log-metadata-color)';
     }
   }
 
-  descriptionColorClass(entry: KavitaPlusAuditEntry): string {
-    if (entry.status === AuditStatus.Failure) return 'failure';
-    return this.categoryColorClass(entry.category);
+  categoryBg(category: KavitaPlusAuditCategory): string {
+    return `color-mix(in srgb, ${this.categoryColor(category)} 12%, transparent)`;
   }
 
-  descriptionIcon(entry: KavitaPlusAuditEntry): string {
-    if (entry.status === AuditStatus.Failure) return 'fa-triangle-exclamation';
-    if (entry.eventType === KavitaPlusEventType.ScrobbleHoldAdded ||
-        entry.eventType === KavitaPlusEventType.ScrobbleHoldRemoved) return 'fa-circle-pause';
-    if (entry.category === KavitaPlusAuditCategory.Scrobble) return 'fa-paper-plane';
-    if (entry.category === KavitaPlusAuditCategory.Match)    return 'fa-link';
-    if (entry.category === KavitaPlusAuditCategory.Sync)     return 'fa-arrows-rotate';
-    if (entry.eventType === KavitaPlusEventType.CoverUpdated ||
-        entry.eventType === KavitaPlusEventType.ChapterCoverUpdated ||
-        entry.eventType === KavitaPlusEventType.PersonCoverUpdated) return 'fa-image';
-    return 'fa-pen-to-square';
+  descriptionColor(entry: KavitaPlusAuditEntry): string {
+    return entry.status === AuditStatus.Failure
+      ? 'var(--toast-warning-bg-color)'
+      : 'var(--body-text-color)';
   }
 
   descriptionDetail(entry: KavitaPlusAuditEntry): string {
@@ -119,7 +114,4 @@ export class KavitaplusTimelineComponent {
     return entry.status === AuditStatus.Failure && entry.category === KavitaPlusAuditCategory.Scrobble;
   }
 
-
-  protected readonly AuditStatus = AuditStatus;
-  protected readonly KavitaPlusEventType = KavitaPlusEventType;
 }

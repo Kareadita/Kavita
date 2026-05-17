@@ -6,43 +6,44 @@
       </div>
     </div>
   } @else if (entries().length === 0) {
-    <div class="text-center py-5 small tl-muted">{{t('no-events')}}</div>
+    <div class="text-center py-5 small text-muted">{{t('no-events')}}</div>
   } @else {
     @for (group of groupedEntries(); track group.key; let isFirst = $first) {
-      <div class="tl-day-header d-flex align-items-center gap-3 mb-1" [class.mt-4]="!isFirst">
-        <h5 class="tl-day-label mb-0">
+      <div class="day-header d-flex align-items-center gap-3 mb-1" [class.mt-4]="!isFirst">
+        <h5 class="day-label mb-0">
           @if (group.label === 'today') { {{t('today')}} }
           @else if (group.label === 'yesterday') { {{t('yesterday')}} }
           @else { {{group.dateStr | date:'mediumDate'}} }
         </h5>
-        <div class="tl-divider"></div>
-        <span class="tl-count tl-muted text-nowrap">{{t('events-count', {count: group.count})}}</span>
+        <div class="divider"></div>
+        <span class="count text-muted text-nowrap">{{t('events-count', {count: group.count})}}</span>
       </div>
 
       @for (entry of group.events; track entry.id) {
-        <div class="tl-row d-flex align-items-start gap-3 p-3 my-2">
+        <div class="entry d-flex align-items-start gap-3 p-3 my-2">
 
           @if (entry.seriesId) {
-            <div class="tl-cover flex-shrink-0">
+            <div class="cover flex-shrink-0">
               <app-image [imageUrl]="imageService.getSeriesCoverImage(entry.seriesId)"
                          width="48px" height="64px"
                          classes="rounded-1 w-100 h-100"
                          objectFit="cover" />
             </div>
           } @else {
-            <div class="tl-cover tl-cover-placeholder flex-shrink-0 rounded-1 d-flex align-items-center justify-content-center cover-bg--{{categoryColorClass(entry.category)}}">
-              <i class="fa-solid fa-circle-nodes icon--{{categoryColorClass(entry.category)}}" aria-hidden="true"></i>
+            <div class="cover cover-placeholder flex-shrink-0 rounded-1 d-flex align-items-center justify-content-center"
+                 [style.background]="categoryBg(entry.category)">
+              <i class="fa-solid fa-circle-nodes" [style.color]="categoryColor(entry.category)" aria-hidden="true"></i>
             </div>
           }
 
           <div class="flex-grow-1 min-w-0">
             <div class="d-flex align-items-center gap-2 mb-1 flex-wrap">
               @if (entry.seriesId != null && entry.libraryId != null) {
-                <button class="tl-series tl-series-link fw-semibold text-truncate" (click)="navigateToSeries(entry)">
+                <button class="series series-link fw-semibold text-truncate" (click)="navigateToSeries(entry)">
                   {{entry.seriesName}}
                 </button>
               } @else {
-                <span class="tl-series fw-semibold text-truncate">{{entry.seriesName ?? t('system')}}</span>
+                <span class="series fw-semibold text-truncate">{{entry.seriesName ?? t('system')}}</span>
               }
               @if (entry.scrobbleDetails?.scrobbleProvider != null) {
                 <span class="provider-badge d-inline-flex align-items-center gap-1">
@@ -52,10 +53,14 @@
               }
             </div>
             <div class="d-flex align-items-center gap-2">
-              <i class="fa-solid {{descriptionIcon(entry)}} icon--{{descriptionColorClass(entry)}} flex-shrink-0 desc-icon"
-                 aria-hidden="true"></i>
-              <span class="small desc--{{descriptionColorClass(entry)}}">
-                {{entry.eventType | kavitaPlusEventType}}{{descriptionDetail(entry)}}@if (entry.errorMessage) { - {{entry.errorMessage | auditLogError }}}
+              <app-kavitaplus-audit-event-type-icon [type]="entry.eventType" [category]="entry.category" />
+
+              <span class="small" [style.color]="descriptionColor(entry)">
+                {{entry.eventType | kavitaPlusEventType}}{{descriptionDetail(entry)}}
+
+                @if (entry.errorMessage) {
+                  - {{entry.errorMessage | auditLogError }}
+                }
               </span>
             </div>
           </div>
@@ -66,7 +71,7 @@
                 <i class="fa-solid fa-rotate-left"></i> {{t('retry')}}
               </button>
             }
-            <span class="tl-time tl-muted text-nowrap">
+            <span class="time text-muted text-nowrap">
               {{entry.createdUtc | utcToLocalTime | timeAgo}}
             </span>
           </div>

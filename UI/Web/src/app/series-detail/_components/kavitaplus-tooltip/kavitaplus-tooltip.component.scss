@@ -1,3 +1,11 @@
+:host {
+  --color-metadata:       #4AC694;
+  --color-scrobble:       #FAC858;
+  --color-match:          #5470C6;
+  --color-sync:           #73C0DE;
+  --provider-badge-bg:    #6f42c1;
+}
+
 ::ng-deep .kplus-popover {
   .popover-body {
     min-width: 28rem;
@@ -34,7 +42,7 @@
 .kplus-provider-badge {
   padding: 0.1rem 0.5rem;
   border-radius: 999px;
-  background: #6f42c1;
+  background: var(--provider-badge-bg);
   color: #fff;
   font-size: 0.7rem;
   font-weight: 600;
@@ -43,7 +51,7 @@
   cursor: pointer;
 
   &:hover {
-    background: darken(#6f42c1, 8%);
+    background: color-mix(in srgb, var(--provider-badge-bg) 85%, black);
     color: #fff;
   }
 }
@@ -110,23 +118,19 @@
   font-size: 0.8rem;
 
   &--metadata {
-    background: rgba(32, 178, 170, 0.15);
-    color: #20b2aa;
+    background: color-mix(in srgb, var(--audit-log-metadata-color) 15%, transparent);
   }
 
   &--scrobble {
-    background: rgba(255, 165, 0, 0.15);
-    color: #e69500;
+    background: color-mix(in srgb, var(--audit-log-scrobble-color) 15%, transparent);
   }
 
   &--match {
-    background: rgba(99, 102, 241, 0.15);
-    color: #6366f1;
+    background: color-mix(in srgb, var(--audit-log-match-color) 15%, transparent);
   }
 
   &--sync {
-    background: rgba(59, 130, 246, 0.15);
-    color: #3b82f6;
+    background: color-mix(in srgb, var(--audit-log-sync-color) 15%, transparent);
   }
 }
 
