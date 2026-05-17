@@ -10,6 +10,7 @@ using Kavita.API.Repositories;
 using Kavita.API.Services.Plus;
 using Kavita.Common;
 using Kavita.Common.Extensions;
+using Kavita.Models.Entities.Enums.Audit;
 using Kavita.Models.DTOs.KavitaPlus.Metadata;
 using Kavita.Models.Entities.Enums;
 using Kavita.Models.Entities.User;
@@ -24,7 +25,8 @@ namespace Kavita.Services.Plus;
 public class WantToReadSyncService(
     IUnitOfWork unitOfWork,
     ILogger<WantToReadSyncService> logger,
-    ILicenseService licenseService)
+    ILicenseService licenseService,
+    IKavitaPlusAuditService auditService)
     : IWantToReadSyncService
 {
     public async Task Sync(CancellationToken ct = default)
@@ -41,6 +43,14 @@ public class WantToReadSyncService(
             try
             {
                 logger.LogInformation("Syncing want to read for user: {UserName}", user.UserName);
+                await auditService.LogAsync(
+                    KavitaPlusAuditCategory.Sync,
+                    KavitaPlusEventType.SyncStarted,
+                    AuditStatus.Info,
+                    AuditSubjectType.Global,
+                    userId: user.Id,
+                    payload: new { userName = user.UserName, hasMal = !string.IsNullOrEmpty(user.MalUserName), hasAniList = !string.IsNullOrEmpty(user.AniListAccessToken) },
+                    ct: ct);
                 var wantToReadSeries =
                     await (
                             $"{Configuration.KavitaPlusApiUrl}/api/metadata/v2/want-to-read?malUsername={user.MalUserName}&aniListToken={user.AniListAccessToken}")
@@ -69,17 +79,33 @@ public class WantToReadSyncService(
                 // Remove existing Want to Read that are duplicates
                 user.WantToRead = user.WantToRead.DistinctBy(d => d.SeriesId).ToList();
 
-                // TODO: Need to write in the history table the last sync time
-
-                // Save the left over entities
+                // Save the leftover entities
                 unitOfWork.UserRepository.Update(user);
                 await unitOfWork.CommitAsync(ct);
+
+                await auditService.LogAsync(
+                    KavitaPlusAuditCategory.Sync,
+                    KavitaPlusEventType.SyncCompleted,
+                    AuditStatus.Success,
+                    AuditSubjectType.Global,
+                    userId: user.Id,
+                    payload: new { userName = user.UserName, seriesMatched = user.WantToRead.Count, hasMal = !string.IsNullOrEmpty(user.MalUserName), hasAniList = !string.IsNullOrEmpty(user.AniListAccessToken) },
+                    ct: ct);
 
                 // Trigger CleanupService to cleanup any series in WantToRead that don't belong
                 RecurringJob.TriggerJob(TaskScheduler.RemoveFromWantToReadTaskId);
             }
             catch (Exception ex)
             {
+                await auditService.LogAsync(
+                    KavitaPlusAuditCategory.Sync,
+                    KavitaPlusEventType.SyncFailed,
+                    AuditStatus.Failure,
+                    AuditSubjectType.Global,
+                    userId: user.Id,
+                    payload: new { userName = user.UserName },
+                    error: ex.Message,
+                    ct: ct);
                 logger.LogError(ex, "There was an exception when processing want to read series sync for {User}", user.UserName);
             }
         }

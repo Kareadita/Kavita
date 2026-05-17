@@ -26,7 +26,10 @@ function resolveIcon(type: KavitaPlusEventType): string {
     case KavitaPlusEventType.ScrobbleEventSkipped:   return 'fas fa-circle-xmark';
     case KavitaPlusEventType.ScrobbleHoldRemoved:    return 'fas fa-eraser';
     case KavitaPlusEventType.ScrobbleHoldAdded:      return 'fas fa-table-cells-row-lock';
-    default:                                         return 'fas fa-circle-info';
+    case KavitaPlusEventType.SyncStarted:            return 'fas fa-cloud-arrow-up';
+    case KavitaPlusEventType.SyncCompleted:          return 'fas fa-cloud-arrow-down';
+    case KavitaPlusEventType.SyncFailed:             return 'fas fa-cloud-arrow-down';
+    default:                                         return 'fas fa-circle-exclamation';
   }
 }
 
@@ -34,6 +37,7 @@ function resolveColor(type: KavitaPlusEventType): string {
   switch (type) {
     case KavitaPlusEventType.SeriesMatchFailed:
     case KavitaPlusEventType.ScrobbleEventFailed:
+    case KavitaPlusEventType.SyncFailed:
       return 'var(--error-color)';
     case KavitaPlusEventType.SeriesBlacklisted:
     case KavitaPlusEventType.ScrobbleRateLimitHit:

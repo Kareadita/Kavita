@@ -4,9 +4,9 @@
 
 .provider-card {
   flex: 1;
-  width: 25rem;
+  max-width: 25rem;
   height: 4.0625rem;
-  background: var(--bs-body-bg);
+  background: var(--elevation-layer2);
   border-left-width: 0.1875rem !important;
   border-color: var(--provider-card-border-color) !important;
 }
