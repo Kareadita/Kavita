@@ -1271,9 +1271,13 @@
     },
 
     "kavitaplus-activity": {
-        "title": "My Activity",
         "description": "Reading activity Kavita has synced to external services on your behalf - progress, ratings, and reading status."
     },
+
+    "manage-kavitaplus-activity": {
+        "description": "90 days of metadata, match, scrobble and sync events. Triage failures and trigger a manual match from here."
+    },
+
 
     "scrobble-account-card": {
         "provider-connected": "Connected",
