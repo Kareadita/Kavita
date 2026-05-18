@@ -1293,9 +1293,6 @@
         "yesterday": "Yesterday",
         "events-count": "{{count}} events",
         "subject-label": "Subject: {{subject}}",
-        "diff-field": "Field",
-        "diff-before": "Before",
-        "diff-after": "After",
         "search-alt": "Search events",
         "filter-subject-label": "Subject",
         "filter-user-label": "User",
@@ -1306,6 +1303,13 @@
         "system": "System"
     },
 
+    "kavitaplus-diff": {
+        "field-label": "Field",
+        "before-label": "Before",
+        "after-label": "After",
+        "null-value": "—",
+        "object-expanded": "expanded below"
+    },
 
     "scrobble-account-card": {
         "provider-connected": "Connected",

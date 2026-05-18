@@ -1,0 +1,48 @@
+:host {
+  display: block;
+}
+
+.diff-table {
+  border-collapse: collapse;
+
+  th {
+    text-align: left;
+    padding: 0.25rem 0.5rem;
+    color: var(--text-muted-color);
+    font-weight: 600;
+    border-bottom: 0.0625rem solid var(--hr-color);
+  }
+
+  td {
+    padding: 0.25rem 0.5rem;
+    vertical-align: top;
+    word-break: break-word;
+  }
+}
+
+.top-row td {
+  border-top: 0.0625rem solid var(--hr-color);
+}
+
+.sub-row td {
+  background: var(--elevation-layer3);
+  font-size: 0.8rem;
+}
+
+.diff-from {
+  color: var(--diff-from-color, var(--text-muted-color));
+  text-decoration: line-through;
+}
+
+.diff-to {
+  background: var(--diff-to-bg, rgba(74, 198, 148, 0.12));
+}
+
+.array-items .badge {
+  font-size: 0.7rem;
+  font-weight: 400;
+}
+
+.null-value {
+  font-size: 0.85em;
+}

@@ -68,24 +68,7 @@
       <div [ngbCollapse]="collapsed()">
         <div class="diff-body mt-2">
           @if (entry().diff?.length) {
-            <table class="diff-table w-100 small">
-              <thead>
-                <tr>
-                  <th>{{t('diff-field')}}</th>
-                  <th>{{t('diff-before')}}</th>
-                  <th>{{t('diff-after')}}</th>
-                </tr>
-              </thead>
-              <tbody>
-                @for (change of entry().diff!; track change.field) {
-                  <tr>
-                    <td>{{change.field}}</td>
-                    <td class="diff-from">{{change.from}}</td>
-                    <td class="diff-to">{{change.to}}</td>
-                  </tr>
-                }
-              </tbody>
-            </table>
+            <app-kavitaplus-diff [diff]="entry().diff!" />
           }
         </div>
       </div>
