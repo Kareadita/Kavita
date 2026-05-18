@@ -1272,11 +1272,7 @@
 
     "kavitaplus-activity": {
         "title": "My Activity",
-        "description": "Reading activity Kavita has synced to external services on your behalf - progress, ratings, and reading status.",
-        "tab-all": "All",
-        "tab-scrobbles": "Scrobbles",
-        "tab-failed": "Failed",
-        "tab-my-changes": "My Changes"
+        "description": "Reading activity Kavita has synced to external services on your behalf - progress, ratings, and reading status."
     },
 
     "scrobble-account-card": {
@@ -4152,7 +4148,12 @@
         "uploaded-tab": "Uploaded",
         "current-tab": "Current",
         "kavita-plus-tab": "Kavita+",
-        "other-tab": "Other"
+        "other-tab": "Other",
+        "all-tab": "All",
+        "scrobbles-tab": "Scrobbles",
+        "failed-tab": "Failed",
+        "my-changes-tab": "My Changes",
+        "scrobble-holds-tab": "Scrobble Holds"
     },
 
     "common": {
