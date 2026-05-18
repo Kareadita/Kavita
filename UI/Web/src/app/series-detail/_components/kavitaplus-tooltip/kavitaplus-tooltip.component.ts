@@ -14,13 +14,14 @@ import {NULL_DATE} from "../../../_pipes/date-year-range.pipe";
 import {
   KavitaPlusAuditEventTypeIconComponent
 } from "../../../shared/_components/kavitaplus-event-type-icon/kavita-plus-audit-event-type-icon.component";
+import {AuditLogErrorPipe} from "../../../_pipes/audit-log-error.pipe";
 
 @Component({
   selector: 'app-kavitaplus-tooltip',
   templateUrl: './kavitaplus-tooltip.component.html',
   styleUrls: ['./kavitaplus-tooltip.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [TranslocoDirective, TimeAgoPipe, KavitaPlusEventTypePipe, KavitaPlusEventDescriptionPipe, UtcToLocalTimePipe, KavitaPlusAuditEventTypeIconComponent],
+  imports: [TranslocoDirective, TimeAgoPipe, KavitaPlusEventTypePipe, KavitaPlusEventDescriptionPipe, UtcToLocalTimePipe, KavitaPlusAuditEventTypeIconComponent, AuditLogErrorPipe],
 })
 export class KavitaplusTooltipComponent implements OnInit {
   private readonly auditService = inject(KavitaPlusAuditService);

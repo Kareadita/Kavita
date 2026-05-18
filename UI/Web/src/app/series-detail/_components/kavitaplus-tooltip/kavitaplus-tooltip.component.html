@@ -77,7 +77,7 @@
                 <div class="kplus-event-desc text-muted">{{desc}}</div>
               }
               @if (event.errorMessage) {
-                <div class="kplus-event-desc text-danger">{{event.errorMessage}}</div>
+                <div class="kplus-event-desc text-danger">{{event.errorMessage | auditLogError}}</div>
               }
 
             </div>
