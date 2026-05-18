@@ -2162,7 +2162,8 @@
         "cbl-import": "Reading List Manager",
         "remap-rules": "Remap Rules",
         "mal-stack-import": "MAL Stack",
-        "admin-public-metadata": "Manage Metadata"
+        "admin-public-metadata": "Manage Metadata",
+        "admin-manage-kavitaplus-activity": "Manage Kavita+ Activity"
     },
 
     "manage-custom-key-binds": {

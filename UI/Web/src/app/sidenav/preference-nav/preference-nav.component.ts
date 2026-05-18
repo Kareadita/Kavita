@@ -29,6 +29,9 @@ import {MatchStateOption} from "../../_models/kavitaplus/match-state-option";
 import {KeyBindService} from "../../_services/key-bind.service";
 import {KeyBindTarget} from "../../_models/preferences/preferences";
 import {BreakpointService} from "../../_services/breakpoint.service";
+import {KavitaPlusAuditService} from "../../_services/kavitaplus-audit.service";
+import {KavitaPlusAuditCategory} from "../../_models/kavitaplus/kavita-plus-audit-category.enum";
+import {AuditStatus} from "../../_models/kavitaplus/audit-status.enum";
 
 export enum SettingsTabId {
 
@@ -54,6 +57,7 @@ export enum SettingsTabId {
   MappingsImport = 'admin-mappings-import',
   MatchedMetadata = 'admin-matched-metadata',
   ManageUserTokens = 'admin-manage-tokens',
+  ManageKavitaPlusActivity = 'admin-manage-kavitaplus-activity',
   Metadata = 'admin-metadata',
 
   // Non-Admin
@@ -146,6 +150,7 @@ export class PreferenceNavComponent implements AfterViewInit {
   private readonly document = inject(DOCUMENT);
   private readonly keyBindService = inject(KeyBindService);
   protected readonly breakpointService = inject(BreakpointService);
+  protected readonly kavitaplusAuditService = inject(KavitaPlusAuditService);
 
   readonly hasValidLicense$ = toObservable(this.licenseService.hasValidLicense);
 
@@ -177,6 +182,15 @@ export class PreferenceNavComponent implements AfterViewInit {
           shareReplay({bufferSize: 1, refCount: true})
         );
       })
+    ),
+    { initialValue: -1 }
+  );
+
+  private readonly scrobblingFailuresBadgeCount = toSignal(
+    this.kavitaplusAuditService.getMyActivity({category: KavitaPlusAuditCategory.Scrobble, userId: this.accountService.currentUser()!.id, status: AuditStatus.Failure}).pipe(
+      takeUntilDestroyed(this.destroyRef),
+      map(d => d.pagination.totalItems),
+      shareReplay({bufferSize: 1, refCount: true})
     ),
     { initialValue: -1 }
   );
@@ -290,7 +304,8 @@ export class PreferenceNavComponent implements AfterViewInit {
           SideNavItem.kPlusOnly(SettingsTabId.Metadata, [Role.Admin]),
           SideNavItem.kPlusOnly(SettingsTabId.MatchedMetadata, [Role.Admin], this.matchedMetadataBadgeCount),
           SideNavItem.kPlusOnly(SettingsTabId.ScrobblingHolds),
-          SideNavItem.kPlusOnly(SettingsTabId.MyActivity),
+          SideNavItem.kPlusOnly(SettingsTabId.ManageKavitaPlusActivity),
+          SideNavItem.kPlusOnly(SettingsTabId.MyActivity, [], this.scrobblingFailuresBadgeCount),
           SideNavItem.kPlusOnly(SettingsTabId.Scrobbling, [], this.scrobblingErrorBadgeCount),
         ]
       }
