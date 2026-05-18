@@ -16,6 +16,7 @@ import {NULL_DATE} from "../../../_pipes/date-year-range.pipe";
 import {
   KavitaPlusAuditEventTypeIconComponent
 } from "../../../shared/_components/kavitaplus-event-type-icon/kavita-plus-audit-event-type-icon.component";
+import {KavitaPlusAuditEntry} from "../../../_models/kavitaplus/kavita-plus-audit-entry";
 
 @Component({
   selector: 'app-kavitaplus-tooltip',
@@ -62,9 +63,12 @@ export class KavitaplusTooltipComponent implements OnInit {
     this.categoryFilter.set(cat);
   }
 
-  close() {
-    this.activeOffcanvas?.close();
+  descriptionDetail(entry: KavitaPlusAuditEntry): string {
+    if (!entry.scrobbleDetails) return '';
+    const label = this.entityTitleService.scrobbleDetailLabel(entry.scrobbleDetails);
+    return label ? `${label}` : '';
   }
+
 
   navigateAndClose(commands: unknown[], extras?: NavigationExtras) {
     this.activeOffcanvas?.close();
