@@ -19,7 +19,7 @@
       <div class="stat-value text-danger">{{stats()?.failures24h | defaultValue}}</div>
       @let unresolved = stats()?.unresolvedMatchFailures ?? 0;
       @if (unresolved > 0) {
-        <div class="stat-subtitle text-danger">{{t('stats-unresolved', {count: unresolved})}}</div>
+        <div class="stat-subtitle text-danger phone-hidden">{{t('stats-unresolved', {count: unresolved})}}</div>
       }
     </div>
 
@@ -32,7 +32,7 @@
         <div class="stat-value">{{null | defaultValue}}</div>
       } @else {
         <div class="stat-value text-success">{{stats()!.matchedSeriesCount}} / {{stats()!.totalEligibleSeriesCount}}</div>
-        <div class="stat-subtitle">{{t('stats-coverage-subtitle', {percent: matchedPercent()})}}</div>
+        <div class="stat-subtitle phone-hidden">{{t('stats-coverage-subtitle', {percent: matchedPercent()})}}</div>
       }
     </div>
 
@@ -80,13 +80,21 @@
     </select>
 
     <label class="visually-hidden" for="auditUserFilter">{{t('filter-user-label')}}</label>
-    <select id="auditUserFilter" class="form-select form-select-sm" style="width: auto">
-      <option value="">{{t('filter-user-label')}}</option>
+    <select id="auditUserFilter" class="form-select form-select-sm" style="width: auto"
+            (change)="onUserFilterChange($any($event.target).value)">
+      <option [value]="null">{{t('filter-user-label')}}</option>
+      @for(member of members(); track member.id) {
+        <option [value]="member.id">{{member.username}}</option>
+      }
     </select>
 
     <label class="visually-hidden" for="auditTimeFilter">{{t('filter-timeframe-label')}}</label>
-    <select id="auditTimeFilter" class="form-select form-select-sm" style="width: auto">
-      <option value="">{{t('filter-timeframe-label')}}</option>
+    <select id="auditTimeFilter" class="form-select form-select-sm" style="width: auto"
+            (change)="onTimeFilterChange($any($event.target).value)">
+      <option value="all" [selected]="timeFrameFilter() === 'all'">{{t('filter-timeframe-label')}}</option>
+      <option value="24h" [selected]="timeFrameFilter() === '24h'">{{t('filter-timeframe-24h')}}</option>
+      <option value="7d" [selected]="timeFrameFilter() === '7d'">{{t('filter-timeframe-7d')}}</option>
+      <option value="30d" [selected]="timeFrameFilter() === '30d'">{{t('filter-timeframe-30d')}}</option>
     </select>
 
     <label class="visually-hidden" for="auditSearch">{{t('search-alt')}}</label>

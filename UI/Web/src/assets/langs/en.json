@@ -1300,6 +1300,9 @@
         "filter-subject-label": "Subject",
         "filter-user-label": "User",
         "filter-timeframe-label": "Time Frame",
+        "filter-timeframe-24h": "Last 24 Hours",
+        "filter-timeframe-7d": "Last 7 Days",
+        "filter-timeframe-30d": "Last 30 Days",
         "system": "System"
     },
 

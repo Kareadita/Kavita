@@ -15,6 +15,8 @@ import {
 import {DefaultValuePipe} from "../../_pipes/default-value.pipe";
 import {AuditStatusTitlePipe} from "../../_pipes/audit-status-title.pipe";
 import {AuditSubjectTitlePipe} from "../../_pipes/audit-subject-title.pipe";
+import {MemberService} from "../../_services/member.service";
+import {Member} from "../../_models/auth/member";
 
 @Component({
   selector: 'app-manage-kavitaplus-activity',
@@ -33,6 +35,7 @@ import {AuditSubjectTitlePipe} from "../../_pipes/audit-subject-title.pipe";
 export class ManageKavitaplusActivityComponent implements OnInit {
   private readonly auditService = inject(KavitaPlusAuditService);
   private readonly destroyRef = inject(DestroyRef);
+  private readonly memberService = inject(MemberService);
 
   stats = signal<KavitaPlusAuditStats | null>(null);
   entries = signal<KavitaPlusAuditEntry[]>([]);
@@ -43,7 +46,9 @@ export class ManageKavitaplusActivityComponent implements OnInit {
 
   subjectFilter = signal<AuditSubjectType | null>(null);
   userFilter = signal<number | null>(null);
-  timeFrameFilter = signal<'all' | '24h' | '7d' | '30d'>('all');
+  timeFrameFilter = signal<'all' | '24h' | '7d' | '30d'>('7d');
+
+  members = signal<Member[]>([]);
 
   matchedPercent = computed(() => {
     const s = this.stats();
@@ -54,12 +59,23 @@ export class ManageKavitaplusActivityComponent implements OnInit {
   ngOnInit() {
     this.loadStats();
     this.loadEntries();
+
+    this.memberService.getMembers(false).subscribe(members => {
+      this.members.set(members);
+    })
   }
 
   private loadStats() {
     this.auditService.getStats().pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: s => this.stats.set(s),
     });
+  }
+
+  private timeFrameToFromUtc(): string | null {
+    const tf = this.timeFrameFilter();
+    if (tf === 'all') return null;
+    const msMap = { '24h': 86_400_000, '7d': 604_800_000, '30d': 2_592_000_000 };
+    return new Date(Date.now() - msMap[tf]).toISOString();
   }
 
   private loadEntries() {
@@ -69,6 +85,8 @@ export class ManageKavitaplusActivityComponent implements OnInit {
       status: this.statusFilter(),
       search: this.searchQuery() || null,
       subjectType: this.subjectFilter() || null,
+      fromUtc: this.timeFrameToFromUtc(),
+      userId: this.userFilter() || null,
     };
     this.auditService.getEntries(filter, 0, 50).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: result => {
@@ -91,6 +109,16 @@ export class ManageKavitaplusActivityComponent implements OnInit {
 
   onSubjectFilterChange(value: AuditSubjectType | null) {
     this.subjectFilter.set(value === null ? null : Number(value) as AuditSubjectType);
+    this.loadEntries();
+  }
+
+  onTimeFilterChange(value: string) {
+    this.timeFrameFilter.set(value as 'all' | '24h' | '7d' | '30d');
+    this.loadEntries();
+  }
+
+  onUserFilterChange(value: null | number) {
+    this.userFilter.set(value);
     this.loadEntries();
   }
 
