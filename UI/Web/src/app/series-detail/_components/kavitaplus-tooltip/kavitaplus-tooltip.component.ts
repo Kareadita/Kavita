@@ -66,10 +66,14 @@ export class KavitaplusTooltipComponent implements OnInit {
 
   categoryColorClass(category: KavitaPlusAuditCategory): string {
     switch (category) {
-      case KavitaPlusAuditCategory.Match:    return 'match';
-      case KavitaPlusAuditCategory.Scrobble: return 'scrobble';
-      case KavitaPlusAuditCategory.Sync:     return 'sync';
-      default:                               return 'metadata';
+      case KavitaPlusAuditCategory.Match:
+        return 'match';
+      case KavitaPlusAuditCategory.Scrobble:
+        return 'scrobble';
+      case KavitaPlusAuditCategory.Sync:
+        return 'sync';
+      default:
+        return 'metadata';
     }
   }
 

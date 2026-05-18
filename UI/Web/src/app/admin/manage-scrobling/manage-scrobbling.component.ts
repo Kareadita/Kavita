@@ -1,19 +1,16 @@
-import {ChangeDetectionStrategy, ChangeDetectorRef, Component, DestroyRef, inject} from '@angular/core';
+import {ChangeDetectionStrategy, ChangeDetectorRef, Component, inject} from '@angular/core';
 import {ManageScrobbleErrorsComponent} from "../manage-scrobble-errors/manage-scrobble-errors.component";
-import {AsyncPipe} from "@angular/common";
 import {AccountService} from "../../_services/account.service";
-import {ScrobblingHoldsComponent} from "../../user-settings/user-holds/scrobbling-holds.component";
-import {
-  UserScrobbleHistoryComponent
-} from "../../_single-module/user-scrobble-history/user-scrobble-history.component";
+import {UserScrobbleHistoryComponent} from "../../_single-module/user-scrobble-history/user-scrobble-history.component";
+import {RouterLink} from "@angular/router";
 
 @Component({
     selector: 'app-manage-scrobling',
-    imports: [
-        ManageScrobbleErrorsComponent,
-        AsyncPipe,
-        UserScrobbleHistoryComponent
-    ],
+  imports: [
+    ManageScrobbleErrorsComponent,
+    UserScrobbleHistoryComponent,
+    RouterLink
+  ],
     templateUrl: './manage-scrobbling.component.html',
     styleUrl: './manage-scrobbling.component.scss',
     changeDetection: ChangeDetectionStrategy.OnPush
