@@ -2,9 +2,11 @@
   <div class="container-fluid px-0">
     <p class="text-muted mb-4">{{t('description')}}</p>
 
-    <div class="d-flex flex-wrap gap-3 mb-4">
+    <div class="row g-3 mb-4">
       @for(provider of scrobblingProviders(); track provider.provider) {
-        <app-scrobble-account-card [provider]="provider"  />
+        <div class="col-12 col-md-auto">
+          <app-scrobble-account-card [provider]="provider" class="d-block" />
+        </div>
       }
     </div>
 

@@ -98,7 +98,7 @@ export class KavitaplusTimelineComponent {
   descriptionColor(entry: KavitaPlusAuditEntry): string {
     return entry.status === AuditStatus.Failure
       ? 'var(--toast-warning-bg-color)'
-      : 'var(--body-text-color)';
+      : '';
   }
 
   navigateToSeries(entry: KavitaPlusAuditEntry): void {

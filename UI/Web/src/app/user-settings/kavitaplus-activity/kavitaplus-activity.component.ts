@@ -7,7 +7,7 @@ import {ScrobbleProvider, ScrobblingService, UserScrobbleProvider} from '../../_
 import {KavitaPlusAuditEntry} from '../../_models/kavitaplus/kavita-plus-audit-entry';
 import {KavitaPlusAuditCategory} from '../../_models/kavitaplus/kavita-plus-audit-category.enum';
 import {AuditStatus} from '../../_models/kavitaplus/audit-status.enum';
-import {KavitaplusTimelineComponent} from '../../_components/kavitaplus-timeline/kavitaplus-timeline.component';
+import {KavitaplusTimelineComponent} from '../../_single-module/kavitaplus-timeline/kavitaplus-timeline.component';
 import {ScrobbleAccountCardComponent} from '../scrobble-account-card/scrobble-account-card.component';
 import {KavitaPlusEventType} from "../../_models/kavitaplus/kavita-plus-event-type.enum";
 import {Tabs} from "../../_models/tabs";
