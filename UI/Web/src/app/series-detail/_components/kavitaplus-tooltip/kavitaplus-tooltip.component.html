@@ -72,33 +72,11 @@
             <div class="kplus-event-body">
               <div class="kplus-event-title">{{event.eventType | kavitaPlusEventType}}</div>
 
-              <!--Between the 2 screens there is a slight difference, this is focused on Read progress/Rating Updated. The other uses a - details
-                I probably want to consolidate into one component that can drive both functionalities. 
-              -->
-              @if (event.scrobbleDetails; as sd) {
-                @switch (sd.scrobbleEventType) {
-                  @case (ScrobbleEventType.ChapterRead) {
-                    @let label = entityTitleService.scrobbleDetailLabel(sd);
-                    @if (label) {
-                      <div class="kplus-event-desc text-muted">{{t('read-progress-sent-label', {chapter: descriptionDetail(event)})}}</div>
-                    }
-                  }
-                  @case (ScrobbleEventType.ScoreUpdated) {
-                    <div class="kplus-event-desc text-muted">{{t('rating-updated')}}</div>
-                  }
-                  @case (ScrobbleEventType.AddWantToRead) {
-                    <div class="kplus-event-desc text-muted">{{t('add-want-to-read')}}</div>
-                  }
-                  @case (ScrobbleEventType.RemoveWantToRead) {
-                    <div class="kplus-event-desc text-muted">{{t('remove-want-to-read')}}</div>
-                  }
-                  @case (ScrobbleEventType.Review) {
-                    <div class="kplus-event-desc text-muted">{{t('review-submitted')}}</div>
-                  }
-                }
-              } @else if ((event.eventType === EventType.MetadataUpdated || event.eventType === EventType.ChapterMetadataUpdated) && event.diff?.length) {
-                <div class="kplus-event-desc text-muted">{{t('fields-updated', {count: event.diff!.length})}}</div>
-              } @else if (event.errorMessage) {
+              @let desc = event | kavitaPlusEventDescription;
+              @if (desc) {
+                <div class="kplus-event-desc text-muted">{{desc}}</div>
+              }
+              @if (event.errorMessage) {
                 <div class="kplus-event-desc text-danger">{{event.errorMessage}}</div>
               }
 

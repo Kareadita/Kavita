@@ -1,16 +1,16 @@
-import {ChangeDetectionStrategy, Component, computed, inject, input} from '@angular/core';
-import {DatePipe} from '@angular/common';
+import {ChangeDetectionStrategy, Component, computed, inject, input, TemplateRef} from '@angular/core';
+import {DatePipe, NgTemplateOutlet} from '@angular/common';
 import {Router} from '@angular/router';
 import {TranslocoDirective} from '@jsverse/transloco';
 import {KavitaPlusAuditEntry} from '../../_models/kavitaplus/kavita-plus-audit-entry';
 import {KavitaPlusAuditCategory} from '../../_models/kavitaplus/kavita-plus-audit-category.enum';
 import {AuditStatus} from '../../_models/kavitaplus/audit-status.enum';
 import {KavitaPlusEventTypePipe} from '../../_pipes/kavita-plus-event-type.pipe';
+import {KavitaPlusEventDescriptionPipe} from '../../_pipes/kavita-plus-event-description.pipe';
 import {ScrobbleProviderNamePipe} from '../../_pipes/scrobble-provider-name.pipe';
 import {TimeAgoPipe} from '../../_pipes/time-ago.pipe';
 import {UtcToLocalTimePipe} from '../../_pipes/utc-to-local-time.pipe';
 import {ImageService} from '../../_services/image.service';
-import {EntityTitleService} from '../../_services/entity-title.service';
 import {ImageComponent} from '../../shared/image/image.component';
 import {
   ScrobbleProviderImageComponent
@@ -59,6 +59,7 @@ function groupByDay(entries: KavitaPlusAuditEntry[]): DayGroup[] {
   imports: [
     TranslocoDirective,
     KavitaPlusEventTypePipe,
+    KavitaPlusEventDescriptionPipe,
     ScrobbleProviderNamePipe,
     TimeAgoPipe,
     UtcToLocalTimePipe,
@@ -67,16 +68,17 @@ function groupByDay(entries: KavitaPlusAuditEntry[]): DayGroup[] {
     ScrobbleProviderImageComponent,
     AuditLogErrorPipe,
     KavitaPlusAuditEventTypeIconComponent,
+    NgTemplateOutlet,
   ],
 })
 export class KavitaplusTimelineComponent {
   protected readonly imageService = inject(ImageService);
-  private readonly entityTitleService = inject(EntityTitleService);
   private readonly router = inject(Router);
 
   entries = input.required<KavitaPlusAuditEntry[]>();
   isLoading = input<boolean>(false);
   showRetry = input<boolean>(true);
+  entryTemplate = input<TemplateRef<{$implicit: KavitaPlusAuditEntry}>>();
 
   groupedEntries = computed(() => groupByDay(this.entries()));
 
@@ -97,12 +99,6 @@ export class KavitaplusTimelineComponent {
     return entry.status === AuditStatus.Failure
       ? 'var(--toast-warning-bg-color)'
       : 'var(--body-text-color)';
-  }
-
-  descriptionDetail(entry: KavitaPlusAuditEntry): string {
-    if (!entry.scrobbleDetails) return '';
-    const label = this.entityTitleService.scrobbleDetailLabel(entry.scrobbleDetails);
-    return label ? ` - ${label}` : '';
   }
 
   navigateToSeries(entry: KavitaPlusAuditEntry): void {

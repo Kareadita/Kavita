@@ -4,31 +4,27 @@ import {NgbActiveOffcanvas} from '@ng-bootstrap/ng-bootstrap';
 import {TranslocoDirective} from '@jsverse/transloco';
 import {AccountService} from '../../../_services/account.service';
 import {KavitaPlusAuditService} from '../../../_services/kavitaplus-audit.service';
-import {EntityTitleService} from '../../../_services/entity-title.service';
 import {KavitaPlusAuditSeriesInfo} from '../../../_models/kavitaplus/kavita-plus-audit-series-info';
 import {KavitaPlusAuditCategory} from '../../../_models/kavitaplus/kavita-plus-audit-category.enum';
-import {KavitaPlusEventType} from '../../../_models/kavitaplus/kavita-plus-event-type.enum';
-import {ScrobbleEventType} from '../../../_models/scrobbling/scrobble-event';
 import {TimeAgoPipe} from '../../../_pipes/time-ago.pipe';
 import {KavitaPlusEventTypePipe} from '../../../_pipes/kavita-plus-event-type.pipe';
+import {KavitaPlusEventDescriptionPipe} from '../../../_pipes/kavita-plus-event-description.pipe';
 import {UtcToLocalTimePipe} from "../../../_pipes/utc-to-local-time.pipe";
 import {NULL_DATE} from "../../../_pipes/date-year-range.pipe";
 import {
   KavitaPlusAuditEventTypeIconComponent
 } from "../../../shared/_components/kavitaplus-event-type-icon/kavita-plus-audit-event-type-icon.component";
-import {KavitaPlusAuditEntry} from "../../../_models/kavitaplus/kavita-plus-audit-entry";
 
 @Component({
   selector: 'app-kavitaplus-tooltip',
   templateUrl: './kavitaplus-tooltip.component.html',
   styleUrls: ['./kavitaplus-tooltip.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [TranslocoDirective, TimeAgoPipe, KavitaPlusEventTypePipe, UtcToLocalTimePipe, KavitaPlusAuditEventTypeIconComponent],
+  imports: [TranslocoDirective, TimeAgoPipe, KavitaPlusEventTypePipe, KavitaPlusEventDescriptionPipe, UtcToLocalTimePipe, KavitaPlusAuditEventTypeIconComponent],
 })
 export class KavitaplusTooltipComponent implements OnInit {
   private readonly auditService = inject(KavitaPlusAuditService);
   private readonly router = inject(Router);
-  protected readonly entityTitleService = inject(EntityTitleService);
   protected readonly activeOffcanvas = inject(NgbActiveOffcanvas, { optional: true });
   protected readonly isAdmin = inject(AccountService).hasAdminRole;
 
@@ -63,13 +59,6 @@ export class KavitaplusTooltipComponent implements OnInit {
     this.categoryFilter.set(cat);
   }
 
-  descriptionDetail(entry: KavitaPlusAuditEntry): string {
-    if (!entry.scrobbleDetails) return '';
-    const label = this.entityTitleService.scrobbleDetailLabel(entry.scrobbleDetails);
-    return label ? `${label}` : '';
-  }
-
-
   navigateAndClose(commands: unknown[], extras?: NavigationExtras) {
     this.activeOffcanvas?.close();
     this.router.navigate(commands, extras);
@@ -85,7 +74,5 @@ export class KavitaplusTooltipComponent implements OnInit {
   }
 
   protected readonly AuditCategory = KavitaPlusAuditCategory;
-  protected readonly EventType = KavitaPlusEventType;
-  protected readonly ScrobbleEventType = ScrobbleEventType;
   protected readonly NULL_DATE = NULL_DATE;
 }

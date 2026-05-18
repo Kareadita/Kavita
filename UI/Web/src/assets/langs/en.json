@@ -1297,6 +1297,15 @@
         "retry": "Retry"
     },
 
+    "kavita-plus-event-description-pipe": {
+        "read-progress-sent": "Read progress sent · {{chapter}}",
+        "rating-updated": "Rating updated",
+        "add-want-to-read": "Added to want to read",
+        "remove-want-to-read": "Removed from want to read",
+        "review-submitted": "Review submitted",
+        "fields-updated": "{{count}} fields updated"
+    },
+
     "kavita-plus-event-type-pipe": {
         "series-matched": "Series Matched",
         "series-match-failed": "Match Failed",
