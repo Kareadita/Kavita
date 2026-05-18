@@ -1328,6 +1328,14 @@
         "info": "Info"
     },
 
+    "audit-subject-title-pipe": {
+        "series": "Series",
+        "person": "Person",
+        "collection": "Collection",
+        "chapter": "Chapter",
+        "global": "Global"
+    },
+
     "kavita-plus-event-description-pipe": {
         "read-progress-sent": "{{chapter}}",
         "rating-updated": "Rating updated",

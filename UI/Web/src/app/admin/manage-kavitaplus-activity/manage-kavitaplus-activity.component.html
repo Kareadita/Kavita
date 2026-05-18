@@ -71,8 +71,12 @@
     </select>
 
     <label class="visually-hidden" for="auditSubjectFilter">{{t('filter-subject-label')}}</label>
-    <select id="auditSubjectFilter" class="form-select form-select-sm" style="width: auto">
-      <option value="">{{t('filter-subject-label')}}</option>
+    <select id="auditSubjectFilter" class="form-select form-select-sm" style="width: auto"
+            (change)="onSubjectFilterChange($any($event.target).value)">
+      <option [value]="null">{{t('filter-subject-label')}}</option>
+      @for(subject of allAuditSubjectTypes; track subject) {
+        <option [value]="subject">{{subject | auditSubjectTitle}}</option>
+      }
     </select>
 
     <label class="visually-hidden" for="auditUserFilter">{{t('filter-user-label')}}</label>

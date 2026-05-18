@@ -5,3 +5,8 @@ export enum AuditSubjectType {
   Chapter = 3,
   Global = 4,
 }
+
+export const allAuditSubjectTypes = [
+  AuditSubjectType.Series, AuditSubjectType.Person, AuditSubjectType.Collection,
+  AuditSubjectType.Chapter, AuditSubjectType.Global,
+]

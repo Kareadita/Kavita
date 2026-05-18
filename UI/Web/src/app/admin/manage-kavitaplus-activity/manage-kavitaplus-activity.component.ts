@@ -7,13 +7,14 @@ import {KavitaPlusAuditStats} from '../../_models/kavitaplus/kavita-plus-audit-s
 import {KavitaPlusAuditFilter} from '../../_models/kavitaplus/kavita-plus-audit-filter';
 import {KavitaPlusAuditCategory} from '../../_models/kavitaplus/kavita-plus-audit-category.enum';
 import {allAuditStatuses, AuditStatus} from '../../_models/kavitaplus/audit-status.enum';
-import {AuditSubjectType} from '../../_models/kavitaplus/audit-subject-type.enum';
+import {allAuditSubjectTypes, AuditSubjectType} from '../../_models/kavitaplus/audit-subject-type.enum';
 import {KavitaplusTimelineComponent} from '../../_single-module/kavitaplus-timeline/kavitaplus-timeline.component';
 import {
   KavitaplusAuditAccordionItemComponent
 } from './kavitaplus-audit-accordion-item/kavitaplus-audit-accordion-item.component';
 import {DefaultValuePipe} from "../../_pipes/default-value.pipe";
 import {AuditStatusTitlePipe} from "../../_pipes/audit-status-title.pipe";
+import {AuditSubjectTitlePipe} from "../../_pipes/audit-subject-title.pipe";
 
 @Component({
   selector: 'app-manage-kavitaplus-activity',
@@ -23,6 +24,7 @@ import {AuditStatusTitlePipe} from "../../_pipes/audit-status-title.pipe";
     KavitaplusAuditAccordionItemComponent,
     DefaultValuePipe,
     AuditStatusTitlePipe,
+    AuditSubjectTitlePipe,
   ],
   templateUrl: './manage-kavitaplus-activity.component.html',
   styleUrl: './manage-kavitaplus-activity.component.scss',
@@ -66,6 +68,7 @@ export class ManageKavitaplusActivityComponent implements OnInit {
       category: this.categoryFilter(),
       status: this.statusFilter(),
       search: this.searchQuery() || null,
+      subjectType: this.subjectFilter() || null,
     };
     this.auditService.getEntries(filter, 0, 50).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: result => {
@@ -86,12 +89,17 @@ export class ManageKavitaplusActivityComponent implements OnInit {
     this.loadEntries();
   }
 
+  onSubjectFilterChange(value: AuditSubjectType | null) {
+    this.subjectFilter.set(value === null ? null : Number(value) as AuditSubjectType);
+    this.loadEntries();
+  }
+
   onSearchChange(value: string) {
     this.searchQuery.set(value);
     this.loadEntries();
   }
 
   protected readonly KavitaPlusAuditCategory = KavitaPlusAuditCategory;
-  protected readonly AuditStatus = AuditStatus;
   protected readonly allAuditStatuses = allAuditStatuses;
+  protected readonly allAuditSubjectTypes = allAuditSubjectTypes;
 }
