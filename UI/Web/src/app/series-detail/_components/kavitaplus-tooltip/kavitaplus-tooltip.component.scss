@@ -13,6 +13,11 @@
   }
 }
 
+::ng-deep .popover {
+  background-color: transparent;
+  border-color: transparent;
+}
+
 .kplus-panel {
   gap: 0.75rem;
   overflow-y: auto;

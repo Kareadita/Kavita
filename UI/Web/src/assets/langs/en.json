@@ -1245,7 +1245,7 @@
     },
 
     "kavitaplus-audit": {
-        "panel-title": "Kavita+",
+        "panel-title": "Kavita+: Audit Log",
         "matched": "Matched",
         "unmatched": "Unmatched",
         "filter-all": "All",
