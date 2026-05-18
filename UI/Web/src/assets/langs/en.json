@@ -1275,7 +1275,32 @@
     },
 
     "manage-kavitaplus-activity": {
-        "description": "90 days of metadata, match, scrobble and sync events. Triage failures and trigger a manual match from here."
+        "description": "90 days of metadata, match, scrobble and sync events. Triage failures and trigger a manual match from here.",
+        "stats-events-label": "Events (24h)",
+        "stats-failures-label": "Failures",
+        "stats-match-label": "Matched",
+        "stats-matched-label": "Matched {{percent}}%",
+        "stats-coverage-subtitle": "{{percent}}% coverage",
+        "stats-queue-label": "Queue",
+        "stats-unresolved": "{{count}} unresolved",
+        "filter-all": "All",
+        "filter-match": "Match",
+        "filter-metadata": "Metadata",
+        "filter-scrobble": "Scrobble",
+        "filter-sync": "Sync",
+        "filter-status-label": "Status filter",
+        "today": "Today",
+        "yesterday": "Yesterday",
+        "events-count": "{{count}} events",
+        "subject-label": "Subject: {{subject}}",
+        "diff-field": "Field",
+        "diff-before": "Before",
+        "diff-after": "After",
+        "search-alt": "Search events",
+        "filter-subject-label": "Subject",
+        "filter-user-label": "User",
+        "filter-timeframe-label": "Time Frame",
+        "system": "System"
     },
 
 
@@ -1295,6 +1320,12 @@
         "events-count": "{{count}} events",
         "no-events": "No events to display",
         "retry": "Retry"
+    },
+
+    "audit-status-title-pipe": {
+        "success": "Success",
+        "failure": "Failure",
+        "info": "Info"
     },
 
     "kavita-plus-event-description-pipe": {

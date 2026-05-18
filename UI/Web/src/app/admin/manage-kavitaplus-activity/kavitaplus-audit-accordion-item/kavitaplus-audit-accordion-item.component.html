@@ -1,0 +1,95 @@
+<ng-container *transloco="let t; prefix: 'manage-kavitaplus-activity'">
+  <div class="entry flex-grow-1 d-flex flex-column p-3">
+
+    <div class="d-flex align-items-start gap-3">
+
+      @if (entry().seriesId) {
+        <div class="cover flex-shrink-0">
+          <app-image [imageUrl]="imageService.getSeriesCoverImage(entry().seriesId!)"
+                     width="3rem" height="4rem"
+                     classes="rounded-1 w-100 h-100"
+                     objectFit="cover" />
+        </div>
+      }
+
+      <div class="flex-grow-1 min-w-0">
+        <div class="d-flex align-items-center gap-2 mb-1 flex-wrap">
+          @if (entry().seriesId != null && entry().libraryId != null) {
+            <button class="series-link fw-semibold text-truncate btn-unstyled" (click)="navigateToSeries()">
+              {{entry().seriesName}}
+            </button>
+          } @else {
+            <span class="fw-semibold text-truncate">{{entry().seriesName ?? t('system')}}</span>
+          }
+
+          <span class="badge" [ngClass]="statusBadgeClass()">{{entry().status | auditStatusTitle}}</span>
+
+          @if (entry().scrobbleDetails?.scrobbleProvider != null) {
+            <span class="provider-badge d-inline-flex align-items-center gap-1">
+              <app-scrobble-provider-image [provider]="entry().scrobbleDetails!.scrobbleProvider" [size]="16" />
+              <span>{{entry().scrobbleDetails!.scrobbleProvider | scrobbleProviderName}}</span>
+            </span>
+          }
+        </div>
+
+        <div class="small text-muted mb-1">
+          {{entry().eventType | kavitaPlusEventType}}
+          @let desc = entry() | kavitaPlusEventDescription;
+          @if (desc) {
+            <span class="mx-1 dot-separator"></span>{{desc}}
+          }
+          @if (entry().errorMessage) {
+            - {{entry().errorMessage! | auditLogError}}
+          }
+        </div>
+      </div>
+
+      <div class="d-flex flex-column align-items-end gap-1 flex-shrink-0">
+        <span class="time text-muted text-nowrap">
+          {{entry().createdUtc | utcToLocalTime | timeAgo}}
+        </span>
+        @if (entry().userId) {
+          <div class="d-flex align-items-center gap-1">
+            <app-profile-icon [userId]="entry().userId!" [size]="14" />
+            <span class="small text-muted">{{entry().username}}</span>
+          </div>
+        }
+        @if (entry().eventType === KavitaPlusEventType.MetadataUpdated) {
+          <button class="btn-unstyled" (click)="collapsed.set(!collapsed())"
+                  [attr.aria-expanded]="!collapsed()">
+            <i class="fa fa-chevron-down" [class.fa-rotate-180]="!collapsed()" aria-hidden="true"></i>
+          </button>
+        }
+      </div>
+
+    </div>
+
+    @if (entry().eventType === KavitaPlusEventType.MetadataUpdated) {
+      <div [ngbCollapse]="collapsed()">
+        <div class="diff-body mt-2">
+          @if (entry().diff?.length) {
+            <table class="diff-table w-100 small">
+              <thead>
+                <tr>
+                  <th>{{t('diff-field')}}</th>
+                  <th>{{t('diff-before')}}</th>
+                  <th>{{t('diff-after')}}</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (change of entry().diff!; track change.field) {
+                  <tr>
+                    <td>{{change.field}}</td>
+                    <td class="diff-from">{{change.from}}</td>
+                    <td class="diff-to">{{change.to}}</td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          }
+        </div>
+      </div>
+    }
+
+  </div>
+</ng-container>
