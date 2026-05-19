@@ -54,6 +54,7 @@ export class KavitaplusActivityComponent implements OnInit {
 
   loadData() {
     this.isLoading.set(true);
+    // TODO: This may need proper pagination support
     this.auditService.getMyActivity({}, undefined, 200)
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({

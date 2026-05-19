@@ -54,11 +54,18 @@ export class KavitaplusAuditAccordionItemComponent {
 
   statusBadgeClass = computed(() => {
     switch (this.entry().status) {
-      case AuditStatus.Success: return 'bg-success';
-      case AuditStatus.Failure: return 'bg-danger';
-      default:                  return 'bg-secondary';
+      case AuditStatus.Success:
+        return 'bg-success';
+      case AuditStatus.Failure:
+        return 'bg-danger';
+      default:
+        return 'bg-secondary';
     }
   });
+
+  supportsDiff(entry: KavitaPlusAuditEntry) {
+    return [KavitaPlusEventType.MetadataUpdated, KavitaPlusEventType.ChapterMetadataUpdated].includes(entry.eventType);
+  }
 
   navigateToSeries() {
     const e = this.entry();
@@ -67,5 +74,4 @@ export class KavitaplusAuditAccordionItemComponent {
   }
 
   protected readonly KavitaPlusAuditCategory = KavitaPlusAuditCategory;
-  protected readonly KavitaPlusEventType = KavitaPlusEventType;
 }

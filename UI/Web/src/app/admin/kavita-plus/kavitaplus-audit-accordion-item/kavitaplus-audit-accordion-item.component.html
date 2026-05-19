@@ -54,7 +54,7 @@
             <span class="small text-muted">{{entry().username}}</span>
           </div>
         }
-        @if (entry().eventType === KavitaPlusEventType.MetadataUpdated) {
+        @if (supportsDiff(entry())) {
           <button class="btn-unstyled" (click)="collapsed.set(!collapsed())"
                   [attr.aria-expanded]="!collapsed()">
             <i class="fa fa-chevron-down" [class.fa-rotate-180]="!collapsed()" aria-hidden="true"></i>
@@ -64,7 +64,7 @@
 
     </div>
 
-    @if (entry().eventType === KavitaPlusEventType.MetadataUpdated) {
+    @if (supportsDiff(entry())) {
       <div [ngbCollapse]="collapsed()">
         <div class="diff-body mt-2">
           @if (entry().diff?.length) {
