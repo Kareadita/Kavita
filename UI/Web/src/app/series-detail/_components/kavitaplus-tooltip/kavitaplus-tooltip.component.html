@@ -34,7 +34,7 @@
           } @else if (info.cbrId) {
             <app-scrobble-provider-image [provider]="ScrobbleProvider.Cbr" [size]="32" /> {{ScrobbleProvider.Cbr | scrobbleProviderName}}
           } @else if (info.aniListId) {
-            <a class="d-inline-flex align-items-center" href="hhttps://anilist.co/manga/{{info.aniListId}}" target="_blank" rel="noopener noreferrer">
+            <a class="d-inline-flex align-items-center" href="https://anilist.co/manga/{{info.aniListId}}" target="_blank" rel="noopener noreferrer">
               <app-scrobble-provider-image [provider]="ScrobbleProvider.AniList" [size]="32" /> {{ScrobbleProvider.AniList | scrobbleProviderName}}
             </a>
           }
