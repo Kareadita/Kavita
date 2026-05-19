@@ -23,11 +23,20 @@
       <div class="d-flex align-items-center gap-2 small text-muted">
         @if (info.isMatched) {
 
-          <!--We have multiple primary metadata ids driven by library type. We should render either Mangabaka/CBR/Hardcover ?-->
           @if (info.mangaBakaId) {
-            <a class="kplus-provider-badge d-inline-flex align-items-center" href="https://mangabaka.org/{{info.mangaBakaId}}" target="_blank" rel="noopener noreferrer">MangaBaka</a>
+            <a class="d-inline-flex align-items-center" href="https://mangabaka.org/{{info.mangaBakaId}}" target="_blank" rel="noopener noreferrer">
+              <app-scrobble-provider-image [provider]="ScrobbleProvider.MangaBaka" [size]="32" /> {{ScrobbleProvider.MangaBaka | scrobbleProviderName}}
+            </a>
           } @else if (info.hardcoverId) {
-            <a class="kplus-provider-badge d-inline-flex align-items-center" href="https://hardcover.app/id/series/{{info.hardcoverId}}" target="_blank" rel="noopener noreferrer">Hardcover</a>
+            <a class="d-inline-flex align-items-center" href="https://hardcover.app/id/series/{{info.hardcoverId}}" target="_blank" rel="noopener noreferrer">
+              <app-scrobble-provider-image [provider]="ScrobbleProvider.Hardcover" [size]="32" /> {{ScrobbleProvider.Hardcover | scrobbleProviderName}}
+            </a>
+          } @else if (info.cbrId) {
+            <app-scrobble-provider-image [provider]="ScrobbleProvider.Cbr" [size]="32" /> {{ScrobbleProvider.Cbr | scrobbleProviderName}}
+          } @else if (info.aniListId) {
+            <a class="d-inline-flex align-items-center" href="hhttps://anilist.co/manga/{{info.aniListId}}" target="_blank" rel="noopener noreferrer">
+              <app-scrobble-provider-image [provider]="ScrobbleProvider.AniList" [size]="32" /> {{ScrobbleProvider.AniList | scrobbleProviderName}}
+            </a>
           }
 
 

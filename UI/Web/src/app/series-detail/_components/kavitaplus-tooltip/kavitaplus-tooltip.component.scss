@@ -1,11 +1,3 @@
-:host {
-  --color-metadata:       #4AC694;
-  --color-scrobble:       #FAC858;
-  --color-match:          #5470C6;
-  --color-sync:           #73C0DE;
-  --provider-badge-bg:    #6f42c1;
-}
-
 ::ng-deep .kplus-popover {
   .popover-body {
     min-width: 28rem;
@@ -47,18 +39,12 @@
 .kplus-provider-badge {
   padding: 0.1rem 0.5rem;
   border-radius: 999px;
-  background: var(--provider-badge-bg);
   color: #fff;
   font-size: 0.7rem;
   font-weight: 600;
   white-space: nowrap;
   text-decoration: none;
   cursor: pointer;
-
-  &:hover {
-    background: color-mix(in srgb, var(--provider-badge-bg) 85%, black);
-    color: #fff;
-  }
 }
 
 // Filter chips

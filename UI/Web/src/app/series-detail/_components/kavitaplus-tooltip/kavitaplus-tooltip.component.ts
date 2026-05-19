@@ -16,13 +16,18 @@ import {
 } from "../../../shared/_components/kavitaplus-event-type-icon/kavita-plus-audit-event-type-icon.component";
 import {AuditLogErrorPipe} from "../../../_pipes/audit-log-error.pipe";
 import {SettingsTabId} from "../../../sidenav/preference-nav/preference-nav.component";
+import {
+  ScrobbleProviderImageComponent
+} from "../../../shared/_components/scrobble-provider-image/scrobble-provider-image.component";
+import {ScrobbleProvider} from "../../../_services/scrobbling.service";
+import {ScrobbleProviderNamePipe} from "../../../_pipes/scrobble-provider-name.pipe";
 
 @Component({
   selector: 'app-kavitaplus-tooltip',
   templateUrl: './kavitaplus-tooltip.component.html',
   styleUrls: ['./kavitaplus-tooltip.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [TranslocoDirective, TimeAgoPipe, KavitaPlusEventTypePipe, KavitaPlusEventDescriptionPipe, UtcToLocalTimePipe, KavitaPlusAuditEventTypeIconComponent, AuditLogErrorPipe],
+  imports: [TranslocoDirective, TimeAgoPipe, KavitaPlusEventTypePipe, KavitaPlusEventDescriptionPipe, UtcToLocalTimePipe, KavitaPlusAuditEventTypeIconComponent, AuditLogErrorPipe, ScrobbleProviderImageComponent, ScrobbleProviderNamePipe],
 })
 export class KavitaplusTooltipComponent implements OnInit {
   private readonly auditService = inject(KavitaPlusAuditService);
@@ -82,4 +87,5 @@ export class KavitaplusTooltipComponent implements OnInit {
   protected readonly AuditCategory = KavitaPlusAuditCategory;
   protected readonly NULL_DATE = NULL_DATE;
   protected readonly SettingsTabId = SettingsTabId;
+  protected readonly ScrobbleProvider = ScrobbleProvider;
 }
