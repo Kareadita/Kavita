@@ -8,7 +8,7 @@
         <i class="fa-solid fa-bolt" aria-hidden="true"></i>
         <span>{{t('stats-events-label')}}</span>
       </div>
-      <div class="stat-value">{{stats()?.events24h | defaultValue}}</div>
+      <div class="stat-value">{{stats()?.events24H | defaultValue}}</div>
     </div>
 
     <div class="stats-card card p-3 flex-fill">
@@ -16,7 +16,7 @@
         <i class="fa-solid fa-triangle-exclamation" aria-hidden="true"></i>
         <span>{{t('stats-failures-label')}}</span>
       </div>
-      <div class="stat-value text-danger">{{stats()?.failures24h | defaultValue}}</div>
+      <div class="stat-value text-danger">{{stats()?.failures24H | defaultValue}}</div>
       @let unresolved = stats()?.unresolvedMatchFailures ?? 0;
       @if (unresolved > 0) {
         <div class="stat-subtitle text-danger phone-hidden">{{t('stats-unresolved', {count: unresolved})}}</div>
@@ -32,7 +32,20 @@
         <div class="stat-value">{{null | defaultValue}}</div>
       } @else {
         <div class="stat-value text-success">{{stats()!.matchedSeriesCount}} / {{stats()!.totalEligibleSeriesCount}}</div>
-        <div class="stat-subtitle phone-hidden">{{t('stats-coverage-subtitle', {percent: matchedPercent()})}}</div>
+        <div class="stat-subtitle phone-hidden">
+          <span>{{t('stats-coverage-subtitle', {percent: matchedPercent()})}}</span>
+        </div>
+
+        <div class="stat-subtitle phone-hidden">
+        @if (stats()!.staleMatchesCount > 0) {
+          {{t('stats-stale-subtitle', {count: stats()!.staleMatchesCount})}}
+        }
+        @if (stats()!.blacklistedSeriesCount > 0) {
+          <span class="dot-separator mx-1" aria-hidden="true"></span>
+          {{t('stats-blacklisted-subtitle', {count: stats()!.blacklistedSeriesCount})}}
+        }
+        </div>
+
       }
     </div>
 
@@ -83,7 +96,7 @@
       <label class="visually-hidden" for="auditUserFilter">{{t('filter-user-label')}}</label>
       <select id="auditUserFilter" class="form-select form-select-sm" style="width: auto"
               (change)="onUserFilterChange($any($event.target).value)">
-        <option [value]="null">{{t('filter-user-label')}}</option>
+        <option [value]="-1">{{t('filter-user-label')}}</option>
         @for(member of members(); track member.id) {
           <option [value]="member.id">{{member.username}}</option>
         }

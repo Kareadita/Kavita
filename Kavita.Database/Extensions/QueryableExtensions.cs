@@ -363,7 +363,7 @@ public static class QueryableExtensions
             MatchStateOption.All => query,
             MatchStateOption.Matched => query
                 .Include(s => s.ExternalSeriesMetadata)
-                .Where(s => s.ExternalSeriesMetadata != null && s.ExternalSeriesMetadata.ValidUntilUtc > DateTime.MinValue && !s.IsBlacklisted),
+                .WhereMatchedExternalMetadata(),
             MatchStateOption.NotMatched => query.
                 Include(s => s.ExternalSeriesMetadata)
                 .Where(s => (s.ExternalSeriesMetadata == null || s.ExternalSeriesMetadata.ValidUntilUtc == DateTime.MinValue) && !s.IsBlacklisted && !s.DontMatch),
@@ -371,6 +371,28 @@ public static class QueryableExtensions
             MatchStateOption.DontMatch => query.Where(s => s.DontMatch),
             _ => query
         };
+    }
+
+    /// <summary>
+    /// Filters to series that have been successfully matched in Kavita+:
+    /// has ExternalSeriesMetadata with a populated ValidUntilUtc and is not blacklisted.
+    /// </summary>
+    public static IQueryable<Series> WhereMatchedExternalMetadata(this IQueryable<Series> query)
+    {
+        return query
+            .Where(s => !s.IsBlacklisted)
+            .Where(s => s.ExternalSeriesMetadata != null && s.ExternalSeriesMetadata.ValidUntilUtc > DateTime.MinValue);
+    }
+
+    /// <summary>
+    /// Filters to series that are matched but whose cached metadata has expired and needs a refresh.
+    /// A stale series is still considered matched — the data is just out of date.
+    /// </summary>
+    public static IQueryable<Series> WhereStaleExternalMetadata(this IQueryable<Series> query)
+    {
+        return query
+            .WhereMatchedExternalMetadata()
+            .Where(s => s.ExternalSeriesMetadata!.ValidUntilUtc < DateTime.UtcNow);
     }
 
     /// <summary>

@@ -5,6 +5,7 @@ using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 using Kavita.API.Repositories;
+using Kavita.API.Services.Plus;
 using Kavita.Common.Helpers;
 using Kavita.Database.Extensions;
 using Kavita.Models.DTOs.KavitaPlus;
@@ -58,23 +59,33 @@ public class KavitaPlusAuditRepository(DataContext context) : IKavitaPlusAuditRe
             .CountAsync(e => e.EventType == KavitaPlusEventType.SeriesMatchFailed
                              && e.Status == AuditStatus.Failure, ct);
 
-        var matchedSeriesCount = await context.Series
-            .CountAsync(s => s.MangaBakaId != 0, ct);
+        var baseEligible = context.Series
+            .Where(s => !IExternalMetadataService.NonEligibleLibraryTypes.Contains(s.Library.Type))
+            .Where(s => s.Library.AllowMetadataMatching)
+            .Where(s => !s.DontMatch);
 
-        var totalEligibleSeriesCount = await context.Series
-            .Include(s => s.Library)
-            .CountAsync(s => s.Library.AllowMetadataMatching, ct);
+        var matchedSeriesCount = await baseEligible.WhereMatchedExternalMetadata().CountAsync(ct);
+
+        var totalEligibleSeriesCount = await baseEligible.CountAsync(ct);
+
+        var staleMatchesCount = await baseEligible.WhereStaleExternalMetadata().CountAsync(ct);
+
+        var blacklistedSeriesCount = await baseEligible
+            .Where(s => s.IsBlacklisted)
+            .CountAsync(ct);
 
         var scrobbleQueueCount = await context.ScrobbleEvent
             .CountAsync(e => !e.IsProcessed, ct);
 
         return new KavitaPlusAuditStatsDto
         {
-            Events24h = events24H,
-            Failures24h = failures24H,
+            Events24H = events24H,
+            Failures24H = failures24H,
             UnresolvedMatchFailures = unresolvedMatchFailures,
             MatchedSeriesCount = matchedSeriesCount,
             TotalEligibleSeriesCount = totalEligibleSeriesCount,
+            StaleMatchesCount = staleMatchesCount,
+            BlacklistedSeriesCount = blacklistedSeriesCount,
             ScrobbleQueueCount = scrobbleQueueCount,
         };
     }
@@ -117,7 +128,9 @@ public class KavitaPlusAuditRepository(DataContext context) : IKavitaPlusAuditRe
             SeriesId = series.Id,
             LibraryId = series.LibraryId,
             SeriesName = series.Name,
-            IsMatched = series.MangaBakaId != 0,
+            IsMatched = !series.IsBlacklisted
+                && series.ExternalSeriesMetadata != null
+                && series.ExternalSeriesMetadata.ValidUntilUtc > DateTime.MinValue,
             MangaBakaId = series.MangaBakaId != 0 ? series.MangaBakaId : null,
             AniListId = series.AniListId != 0 ? series.AniListId : null,
             HardcoverId = series.HardcoverId != 0 ? series.HardcoverId : null,

@@ -1283,6 +1283,8 @@
         "stats-coverage-subtitle": "{{percent}}% coverage",
         "stats-queue-label": "Queue",
         "stats-unresolved": "{{count}} unresolved",
+        "stats-stale-subtitle": "{{count}} stale",
+        "stats-blacklisted-subtitle": "{{count}} failed to match",
         "filter-all": "All",
         "filter-match": "Match",
         "filter-metadata": "Metadata",

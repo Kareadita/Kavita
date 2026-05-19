@@ -147,8 +147,8 @@ export class ManageKavitaplusActivityComponent implements OnInit {
     this.loadEntries();
   }
 
-  onUserFilterChange(value: null | number) {
-    this.userFilter.set(value);
+  onUserFilterChange(value: number) {
+    this.userFilter.set(value < 0 ? null : Number(value));
     this.loadEntries();
   }
 

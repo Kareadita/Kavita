@@ -17,8 +17,8 @@ public class KavitaPlusAuditController(IUnitOfWork unitOfWork) : BaseApiControll
     /// <summary>
     /// Returns a paged, filtered list of all Kavita+ audit events. Admin only.
     /// </summary>
-    [Authorize(Policy = PolicyGroups.AdminPolicy)]
     [HttpPost("entries")]
+    [Authorize(Policy = PolicyGroups.AdminPolicy)]
     public async Task<ActionResult<PagedList<KavitaPlusAuditEntryDto>>> GetEntries(
         KavitaPlusAuditFilterDto filter, [FromQuery] UserParams? userParams)
     {
@@ -47,8 +47,8 @@ public class KavitaPlusAuditController(IUnitOfWork unitOfWork) : BaseApiControll
     /// <summary>
     /// Returns aggregate stats for the admin audit feed header strip.
     /// </summary>
-    [Authorize(Policy = PolicyGroups.AdminPolicy)]
     [HttpGet("stats")]
+    [Authorize(Policy = PolicyGroups.AdminPolicy)]
     public async Task<ActionResult<KavitaPlusAuditStatsDto>> GetStats()
     {
         return Ok(await unitOfWork.KavitaPlusAuditRepository.GetStatsAsync());
