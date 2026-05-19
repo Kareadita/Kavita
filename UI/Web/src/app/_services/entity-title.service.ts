@@ -4,8 +4,8 @@ import {UtilityService} from '../shared/_services/utility.service';
 import {Chapter, LooseLeafOrDefaultNumber} from '../_models/chapter';
 import {LibraryType} from '../_models/library/library';
 import {Volume} from '../_models/volume';
-import {KavitaPlusScrobbleDetails} from '../_models/kavitaplus/kavita-plus-audit-entry';
 import {ScrobbleEventType} from '../_models/scrobbling/scrobble-event';
+import {KavitaPlusScrobbleDetails} from "../_models/kavitaplus/kavita-plus-scrobble-details";
 
 const LooseLeafOrSpecial = LooseLeafOrDefaultNumber + '';
 

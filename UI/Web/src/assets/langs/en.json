@@ -1346,6 +1346,24 @@
         "global": "Global"
     },
 
+    "metadata-field-change-kind-title-pipe": {
+        "relationships": "Relationships",
+        "characters": "Characters",
+        "artists": "Artists",
+        "writers": "Writers",
+        "tags": "Tags",
+        "genres": "Genres",
+        "publication-status": "Publication Status",
+        "age-rating": "Age Rating",
+        "external-ids": "External IDs",
+        "summary": "Summary",
+        "title": "Title",
+        "release-date": "Release Date",
+        "release-year": "Release Year",
+        "localized-name": "Localized Name"
+    },
+
+
     "kavita-plus-event-description-pipe": {
         "read-progress-sent": "{{chapter}}",
         "rating-updated": "Rating updated",

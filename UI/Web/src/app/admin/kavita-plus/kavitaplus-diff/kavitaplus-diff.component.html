@@ -11,7 +11,7 @@
       <tbody>
         @for (row of rows(); track row.field) {
           <tr class="top-row">
-            <td class="field-name fw-semibold">{{row.field}}</td>
+            <td class="field-name fw-semibold">{{row.field | metadataFieldChangeKindTitle}}</td>
             @if (row.subRows.length === 0) {
               <td class="diff-from">
                 <ng-container *ngTemplateOutlet="cell; context: { $implicit: row.from }" />

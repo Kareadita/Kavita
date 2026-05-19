@@ -2,7 +2,9 @@ import {ChangeDetectionStrategy, Component, computed, input} from '@angular/core
 import {NgTemplateOutlet} from '@angular/common';
 import {TranslocoDirective} from '@jsverse/transloco';
 import {DefaultValuePipe} from "../../../_pipes/default-value.pipe";
-import {MetadataFieldChange} from "../../../_models/kavitaplus/kavita-plus-audit-entry";
+import {MetadataFieldChange} from "../../../_models/kavitaplus/metadata-field-change";
+import {MetadataFieldChangeKindTitlePipe} from "../../../_pipes/metadata-field-change-kind-title.pipe";
+import {MetadataFieldChangeKind} from "../../../_models/kavitaplus/metadata-field-change-kind.enum";
 
 type ValueKind = 'null' | 'primitive' | 'array' | 'object';
 
@@ -19,7 +21,7 @@ interface SubRow {
 }
 
 interface ProcessedRow {
-  field: string;
+  field: MetadataFieldChangeKind;
   from: DiffCell;
   to: DiffCell;
   subRows: SubRow[];
@@ -64,7 +66,7 @@ function expandSubRows(from: unknown, to: unknown): SubRow[] {
 
 @Component({
   selector: 'app-kavitaplus-diff',
-  imports: [TranslocoDirective, NgTemplateOutlet, DefaultValuePipe],
+  imports: [TranslocoDirective, NgTemplateOutlet, DefaultValuePipe, MetadataFieldChangeKindTitlePipe],
   templateUrl: './kavitaplus-diff.component.html',
   styleUrl: './kavitaplus-diff.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -77,6 +79,7 @@ export class KavitaplusDiffComponent {
       const from = processCell(change.from, 1);
       const to = processCell(change.to, 1);
       const isObjectExpansion = from.kind === 'object' || to.kind === 'object';
+
       return {
         field: change.field,
         from,

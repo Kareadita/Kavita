@@ -591,7 +591,7 @@ public class ExternalMetadataService : IExternalMetadataService
         _logger.LogInformation("Writing External metadata to Series {SeriesName}", series.Name);
 
         var madeModification = false;
-        var fieldChanges = new List<MetadataFieldChange>();
+        var fieldChanges = new List<MetadataFieldChangeDto>();
         var processedGenres = new List<string>();
         var processedTags = new List<string>();
 
@@ -815,7 +815,7 @@ public class ExternalMetadataService : IExternalMetadataService
         GenerateGenreAndTagLists(genres, tags, settings, ref processedTags, ref processedGenres);
     }
 
-    private async Task<(bool, MetadataFieldChange?)> UpdateRelationships(Series series, MetadataSettingsDto settings, IList<SeriesRelationship>? externalMetadataRelations, AppUser defaultAdmin)
+    private async Task<(bool, MetadataFieldChangeDto?)> UpdateRelationships(Series series, MetadataSettingsDto settings, IList<SeriesRelationship>? externalMetadataRelations, AppUser defaultAdmin)
     {
         if (!settings.EnableRelationships) return (false, null);
 
@@ -878,10 +878,11 @@ public class ExternalMetadataService : IExternalMetadataService
 
         if (!_unitOfWork.HasChanges()) return (false, null);
         await _unitOfWork.CommitAsync();
-        return (true, new MetadataFieldChange("Relationships", null, addedRelations));
+
+        return (true, new MetadataFieldChangeDto(MetadataFieldChangeKind.Relationships, null, addedRelations));
     }
 
-    private async Task<(bool, MetadataFieldChange?)> UpdateCharacters(Series series, MetadataSettingsDto settings, IList<SeriesCharacter>? externalCharacters)
+    private async Task<(bool, MetadataFieldChangeDto?)> UpdateCharacters(Series series, MetadataSettingsDto settings, IList<SeriesCharacter>? externalCharacters)
     {
         if (!settings.EnablePeople) return (false, null);
 
@@ -955,10 +956,11 @@ public class ExternalMetadataService : IExternalMetadataService
         }
 
         series.Metadata.AddKPlusOverride(MetadataSettingField.People);
-        return (true, new MetadataFieldChange("Characters", null, externalCharacters.Select(c => c.Name).ToList()));
+
+        return (true, new MetadataFieldChangeDto(MetadataFieldChangeKind.Characters, null, externalCharacters.Select(c => c.Name).ToList()));
     }
 
-    private async Task<(bool, MetadataFieldChange?)> UpdateArtists(Series series, MetadataSettingsDto settings, List<SeriesStaffDto> staff)
+    private async Task<(bool, MetadataFieldChangeDto?)> UpdateArtists(Series series, MetadataSettingsDto settings, List<SeriesStaffDto> staff)
     {
         if (!settings.EnablePeople) return (false, null);
 
@@ -1011,10 +1013,11 @@ public class ExternalMetadataService : IExternalMetadataService
 
         await DownloadAndSetPersonCovers(upstreamArtists);
         series.Metadata.AddKPlusOverride(MetadataSettingField.People);
-        return (true, new MetadataFieldChange("Artists", null, upstreamArtists.Select(a => a.Name).ToList()));
+
+        return (true, new MetadataFieldChangeDto(MetadataFieldChangeKind.Artists, null, upstreamArtists.Select(a => a.Name).ToList()));
     }
 
-    private async Task<(bool, MetadataFieldChange?)> UpdateWriters(Series series, MetadataSettingsDto settings, List<SeriesStaffDto> staff)
+    private async Task<(bool, MetadataFieldChangeDto?)> UpdateWriters(Series series, MetadataSettingsDto settings, List<SeriesStaffDto> staff)
     {
         if (!settings.EnablePeople) return (false, null);
 
@@ -1067,10 +1070,11 @@ public class ExternalMetadataService : IExternalMetadataService
 
         await DownloadAndSetPersonCovers(upstreamWriters);
         series.Metadata.AddKPlusOverride(MetadataSettingField.People);
-        return (true, new MetadataFieldChange("Writers", null, upstreamWriters.Select(w => w.Name).ToList()));
+
+        return (true, new MetadataFieldChangeDto(MetadataFieldChangeKind.Writers, null, upstreamWriters.Select(w => w.Name).ToList()));
     }
 
-    private async Task<(bool, MetadataFieldChange?)> UpdateTags(Series series, MetadataSettingsDto settings, ExternalSeriesDetailDto externalMetadata, List<string> processedTags)
+    private async Task<(bool, MetadataFieldChangeDto?)> UpdateTags(Series series, MetadataSettingsDto settings, ExternalSeriesDetailDto externalMetadata, List<string> processedTags)
     {
         externalMetadata.Tags ??= [];
 
@@ -1097,7 +1101,8 @@ public class ExternalMetadataService : IExternalMetadataService
         if (!madeModification) return (false, null);
         series.Metadata.AddKPlusOverride(MetadataSettingField.Tags);
         var after = series.Metadata.Tags.Select(t => t.Title).ToList();
-        return (true, new MetadataFieldChange("Tags", before, after));
+
+        return (true, new MetadataFieldChangeDto(MetadataFieldChangeKind.Tags, before, after));
     }
 
     private static List<string> ApplyBlackWhiteList(MetadataSettingsDto settings, MetadataFieldType fieldType, List<string> processedStrings)
@@ -1118,7 +1123,7 @@ public class ExternalMetadataService : IExternalMetadataService
         };
     }
 
-    private async Task<(bool, MetadataFieldChange?)> UpdateGenres(Series series, MetadataSettingsDto settings, ExternalSeriesDetailDto externalMetadata, List<string> processedGenres)
+    private async Task<(bool, MetadataFieldChangeDto?)> UpdateGenres(Series series, MetadataSettingsDto settings, ExternalSeriesDetailDto externalMetadata, List<string> processedGenres)
     {
         externalMetadata.Genres ??= [];
 
@@ -1152,10 +1157,11 @@ public class ExternalMetadataService : IExternalMetadataService
         if (!madeModification) return (false, null);
         series.Metadata.AddKPlusOverride(MetadataSettingField.Genres);
         var after = series.Metadata.Genres.Select(g => g.Title).ToList();
-        return (true, new MetadataFieldChange("Genres", before, after));
+
+        return (true, new MetadataFieldChangeDto(MetadataFieldChangeKind.Genres, before, after));
     }
 
-    private async Task<(bool, MetadataFieldChange?)> UpdatePublicationStatus(Series series, MetadataSettingsDto settings, ExternalSeriesDetailDto externalMetadata)
+    private async Task<(bool, MetadataFieldChangeDto?)> UpdatePublicationStatus(Series series, MetadataSettingsDto settings, ExternalSeriesDetailDto externalMetadata)
     {
         if (!settings.EnablePublicationStatus) return (false, null);
 
@@ -1175,7 +1181,8 @@ public class ExternalMetadataService : IExternalMetadataService
             series.Metadata.PublicationStatus = status;
             series.Metadata.PublicationStatusLocked = true;
             series.Metadata.AddKPlusOverride(MetadataSettingField.PublicationStatus);
-            return (true, new MetadataFieldChange("PublicationStatus", from.ToString(), status.ToString()));
+
+            return (true, new MetadataFieldChangeDto(MetadataFieldChangeKind.PublicationStatus, from.ToString(), status.ToString()));
         }
         catch (Exception ex)
         {
@@ -1185,7 +1192,7 @@ public class ExternalMetadataService : IExternalMetadataService
         return (false, null);
     }
 
-    private (bool, MetadataFieldChange?) UpdateAgeRating(Series series, MetadataSettingsDto settings, IEnumerable<string> allExternalTags)
+    private (bool, MetadataFieldChangeDto?) UpdateAgeRating(Series series, MetadataSettingsDto settings, IEnumerable<string> allExternalTags)
     {
         if (series.Metadata.AgeRatingLocked && !HasForceOverride(settings, series.Metadata, MetadataSettingField.AgeRating))
         {
@@ -1204,7 +1211,8 @@ public class ExternalMetadataService : IExternalMetadataService
             {
                 series.Metadata.AgeRating = ageRating;
                 series.Metadata.AddKPlusOverride(MetadataSettingField.AgeRating);
-                return (true, new MetadataFieldChange("AgeRating", from.ToString(), ageRating.ToString()));
+
+                return (true, new MetadataFieldChangeDto(MetadataFieldChangeKind.AgeRating, from.ToString(), ageRating.ToString()));
             }
         }
         catch (Exception ex)
@@ -1215,7 +1223,7 @@ public class ExternalMetadataService : IExternalMetadataService
         return (false, null);
     }
 
-    private static (bool, MetadataFieldChange?) UpdateExternalIds(Series series, MetadataSettingsDto _, ExternalSeriesDetailDto externalMetadata)
+    private static (bool, MetadataFieldChangeDto?) UpdateExternalIds(Series series, MetadataSettingsDto _, ExternalSeriesDetailDto externalMetadata)
     {
         var madeModification = false;
         var from = new { aniListId = series.AniListId, malId = series.MalId, cbrId = series.CbrId, mangaBakaId = series.MangaBakaId };
@@ -1248,7 +1256,7 @@ public class ExternalMetadataService : IExternalMetadataService
         if (!madeModification) return (false, null);
         var to = new { aniListId = series.AniListId, malId = series.MalId, cbrId = series.CbrId, mangaBakaId = series.MangaBakaId };
 
-        return (true, new MetadataFieldChange("ExternalIds", from, to));
+        return (true, new MetadataFieldChangeDto(MetadataFieldChangeKind.ExternalIds, from, to));
     }
 
 
@@ -1275,7 +1283,7 @@ public class ExternalMetadataService : IExternalMetadataService
         foreach (var (chapter, potentialMatch) in matchedChapters)
         {
             _logger.LogDebug("Updating {ChapterNumber} with metadata", chapter.Range);
-            var chapterFieldChanges = new List<MetadataFieldChange>();
+            var chapterFieldChanges = new List<MetadataFieldChangeDto>();
 
             Accumulate(ref madeModification, chapterFieldChanges, UpdateChapterTitle(chapter, settings, potentialMatch.Title, series.Name));
             Accumulate(ref madeModification, chapterFieldChanges, UpdateChapterSummary(chapter, settings, potentialMatch.Summary));
@@ -1400,7 +1408,7 @@ public class ExternalMetadataService : IExternalMetadataService
     }
 
 
-    private static (bool, MetadataFieldChange?) UpdateChapterSummary(Chapter chapter, MetadataSettingsDto settings, string? summary)
+    private static (bool, MetadataFieldChangeDto?) UpdateChapterSummary(Chapter chapter, MetadataSettingsDto settings, string? summary)
     {
         if (!settings.EnableChapterSummary) return (false, null);
 
@@ -1419,10 +1427,11 @@ public class ExternalMetadataService : IExternalMetadataService
         var from = chapter.Summary;
         chapter.Summary = StringHelper.RemoveSourceInDescription(StringHelper.SquashBreaklines(summary));
         chapter.AddKPlusOverride(MetadataSettingField.ChapterSummary);
-        return (true, new MetadataFieldChange("Summary", from, chapter.Summary));
+
+        return (true, new MetadataFieldChangeDto(MetadataFieldChangeKind.Summary, from, chapter.Summary));
     }
 
-    private static (bool, MetadataFieldChange?) UpdateChapterTitle(Chapter chapter, MetadataSettingsDto settings, string? title, string seriesName)
+    private static (bool, MetadataFieldChangeDto?) UpdateChapterTitle(Chapter chapter, MetadataSettingsDto settings, string? title, string seriesName)
     {
         if (!settings.EnableChapterTitle) return (false, null);
 
@@ -1441,10 +1450,11 @@ public class ExternalMetadataService : IExternalMetadataService
         var from = chapter.TitleName;
         chapter.TitleName = title;
         chapter.AddKPlusOverride(MetadataSettingField.ChapterTitle);
-        return (true, new MetadataFieldChange("Title", from, title));
+
+        return (true, new MetadataFieldChangeDto(MetadataFieldChangeKind.Title, from, title));
     }
 
-    private static (bool, MetadataFieldChange?) UpdateChapterReleaseDate(Chapter chapter, MetadataSettingsDto settings, DateTime? releaseDate)
+    private static (bool, MetadataFieldChangeDto?) UpdateChapterReleaseDate(Chapter chapter, MetadataSettingsDto settings, DateTime? releaseDate)
     {
         if (!settings.EnableChapterReleaseDate) return (false, null);
 
@@ -1463,7 +1473,8 @@ public class ExternalMetadataService : IExternalMetadataService
         var from = chapter.ReleaseDate;
         chapter.ReleaseDate = releaseDate.Value;
         chapter.AddKPlusOverride(MetadataSettingField.ChapterReleaseDate);
-        return (true, new MetadataFieldChange("ReleaseDate", from, releaseDate.Value));
+
+        return (true, new MetadataFieldChangeDto(MetadataFieldChangeKind.ReleaseDate, from, releaseDate.Value));
     }
 
     private async Task<bool> UpdateChapterPublisher(Chapter chapter, MetadataSettingsDto settings, string? publisher)
@@ -1587,7 +1598,7 @@ public class ExternalMetadataService : IExternalMetadataService
     }
 
 
-    private static (bool, MetadataFieldChange?) UpdateReleaseYear(Series series, MetadataSettingsDto settings, ExternalSeriesDetailDto externalMetadata)
+    private static (bool, MetadataFieldChangeDto?) UpdateReleaseYear(Series series, MetadataSettingsDto settings, ExternalSeriesDetailDto externalMetadata)
     {
         if (!settings.EnableStartDate) return (false, null);
 
@@ -1606,10 +1617,11 @@ public class ExternalMetadataService : IExternalMetadataService
         var from = series.Metadata.ReleaseYear;
         series.Metadata.ReleaseYear = externalMetadata.StartDate.Value.Year;
         series.Metadata.AddKPlusOverride(MetadataSettingField.StartDate);
-        return (true, new MetadataFieldChange("ReleaseYear", from, series.Metadata.ReleaseYear));
+
+        return (true, new MetadataFieldChangeDto(MetadataFieldChangeKind.ReleaseYear, from, series.Metadata.ReleaseYear));
     }
 
-    private static (bool, MetadataFieldChange?) UpdateLocalizedName(Series series, MetadataSettingsDto settings, ExternalSeriesDetailDto externalMetadata)
+    private static (bool, MetadataFieldChangeDto?) UpdateLocalizedName(Series series, MetadataSettingsDto settings, ExternalSeriesDetailDto externalMetadata)
     {
         if (!settings.EnableLocalizedName) return (false, null);
 
@@ -1647,10 +1659,11 @@ public class ExternalMetadataService : IExternalMetadataService
 
 
         series.Metadata.AddKPlusOverride(MetadataSettingField.LocalizedName);
-        return (true, new MetadataFieldChange("LocalizedName", from, series.LocalizedName));
+
+        return (true, new MetadataFieldChangeDto(MetadataFieldChangeKind.LocalizedName, from, series.LocalizedName));
     }
 
-    private static (bool, MetadataFieldChange?) UpdateSummary(Series series, MetadataSettingsDto settings, ExternalSeriesDetailDto externalMetadata)
+    private static (bool, MetadataFieldChangeDto?) UpdateSummary(Series series, MetadataSettingsDto settings, ExternalSeriesDetailDto externalMetadata)
     {
         if (!settings.EnableSummary) return (false, null);
 
@@ -1669,11 +1682,12 @@ public class ExternalMetadataService : IExternalMetadataService
         var from = series.Metadata.Summary;
         series.Metadata.Summary = StringHelper.RemoveSourceInDescription(StringHelper.SquashBreaklines(externalMetadata.Summary));
         series.Metadata.AddKPlusOverride(MetadataSettingField.Summary);
-        return (true, new MetadataFieldChange("Summary", from, series.Metadata.Summary));
+
+        return (true, new MetadataFieldChangeDto(MetadataFieldChangeKind.Summary, from, series.Metadata.Summary));
     }
 
 
-    private static void Accumulate(ref bool madeModification, List<MetadataFieldChange> changes, (bool Modified, MetadataFieldChange? Change) result)
+    private static void Accumulate(ref bool madeModification, List<MetadataFieldChangeDto> changes, (bool Modified, MetadataFieldChangeDto? Change) result)
     {
         madeModification = result.Modified || madeModification;
         if (result.Change != null) changes.Add(result.Change);

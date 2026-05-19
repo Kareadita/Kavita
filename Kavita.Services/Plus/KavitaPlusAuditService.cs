@@ -61,11 +61,11 @@ public class KavitaPlusAuditService(IUnitOfWork unitOfWork, ILogger<KavitaPlusAu
         LogAsync(KavitaPlusAuditCategory.Match, type, status,
             AuditSubjectType.Series, seriesId: seriesId, payload: payload, error: error, ct: ct);
 
-    public Task LogMetadataAsync(int seriesId, IList<MetadataFieldChange> changes, CancellationToken ct = default) =>
+    public Task LogMetadataAsync(int seriesId, IList<MetadataFieldChangeDto> changes, CancellationToken ct = default) =>
         LogAsync(KavitaPlusAuditCategory.Metadata, KavitaPlusEventType.MetadataUpdated, AuditStatus.Success,
             AuditSubjectType.Series, seriesId: seriesId, payload: new { changes }, ct: ct);
 
-    public Task LogChapterMetadataAsync(int chapterId, int seriesId, IList<MetadataFieldChange> changes,
+    public Task LogChapterMetadataAsync(int chapterId, int seriesId, IList<MetadataFieldChangeDto> changes,
         CancellationToken ct = default) =>
         LogAsync(KavitaPlusAuditCategory.Metadata, KavitaPlusEventType.ChapterMetadataUpdated, AuditStatus.Success,
             AuditSubjectType.Chapter, seriesId: seriesId, subjectId: chapterId, payload: new { changes }, ct: ct);

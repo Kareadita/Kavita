@@ -184,7 +184,7 @@ public class KavitaPlusAuditRepository(DataContext context) : IKavitaPlusAuditRe
 
     private static KavitaPlusAuditEntryDto MapToDto(RawEntry e)
     {
-        IList<MetadataFieldChange>? diff = null;
+        IList<MetadataFieldChangeDto>? diff = null;
         if (e is {Category: KavitaPlusAuditCategory.Metadata, Payload: not null})
         {
             try
@@ -263,6 +263,6 @@ public class KavitaPlusAuditRepository(DataContext context) : IKavitaPlusAuditRe
 
     private sealed class ChangesWrapper
     {
-        public List<MetadataFieldChange>? Changes { get; set; }
+        public List<MetadataFieldChangeDto>? Changes { get; set; }
     }
 }

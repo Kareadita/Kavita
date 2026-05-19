@@ -24,9 +24,9 @@ public interface IKavitaPlusAuditService
     Task LogMatchAsync(KavitaPlusEventType type, int seriesId, object payload,
         AuditStatus status = AuditStatus.Success, string? error = null, CancellationToken ct = default);
 
-    Task LogMetadataAsync(int seriesId, IList<MetadataFieldChange> changes, CancellationToken ct = default);
+    Task LogMetadataAsync(int seriesId, IList<MetadataFieldChangeDto> changes, CancellationToken ct = default);
 
-    Task LogChapterMetadataAsync(int chapterId, int seriesId, IList<MetadataFieldChange> changes,
+    Task LogChapterMetadataAsync(int chapterId, int seriesId, IList<MetadataFieldChangeDto> changes,
         CancellationToken ct = default);
 
     Task LogPersonAsync(KavitaPlusEventType type, int personId, object payload,

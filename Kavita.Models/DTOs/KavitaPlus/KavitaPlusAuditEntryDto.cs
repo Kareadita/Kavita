@@ -19,7 +19,7 @@ public sealed record KavitaPlusAuditEntryDto
     public int? SubjectId { get; init; }
     public int? UserId { get; init; }
     public string? Username { get; init; }
-    public IList<MetadataFieldChange>? Diff { get; init; }
+    public IList<MetadataFieldChangeDto>? Diff { get; init; }
     public string? ErrorMessage { get; init; }
     public KavitaPlusScrobbleDetailsDto? ScrobbleDetails { get; init; }
     public bool CanRetry { get; init; }
