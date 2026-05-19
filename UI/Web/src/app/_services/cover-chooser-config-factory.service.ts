@@ -1,5 +1,5 @@
 import {inject, Injectable} from '@angular/core';
-import {Observable, of} from "rxjs";
+import {map, Observable, of} from "rxjs";
 import {UploadService} from "./upload.service";
 import {ImageService} from "./image.service";
 import {Series} from "../_models/series";
@@ -11,6 +11,7 @@ import {UserCollection} from "../_models/collection-tag";
 import {ReadingList} from "../_models/reading-list/reading-list";
 import {Person} from "../_models/metadata/person";
 import {LicenseService} from "./license.service";
+import {ReadingListService} from "./reading-list.service";
 
 export interface CoverImageOption {
   url: string;
@@ -37,6 +38,7 @@ export class CoverChooserConfigFactoryService {
   private readonly imageService = inject(ImageService);
   private readonly entityTitleService = inject(EntityTitleService);
   private readonly licenseService = inject(LicenseService);
+  private readonly readinglistService = inject(ReadingListService);
 
 
   public forSeries(series: Series, volumes: Volume[], libraryType: LibraryType) {
@@ -109,6 +111,14 @@ export class CoverChooserConfigFactoryService {
       isLocked: list.coverImageLocked,
       resetFunc: () => this.uploadService.updateReadingListCoverImage(list.id, '', false),
       selected: { url: this.imageService.getReadingListCoverImage(list.id), title: list.title },
+      chapterFunc: this.readinglistService.getListItems(list.id).pipe(map(items => {
+        return items.map(i => {
+          return {
+            url: this.imageService.getChapterCoverImage(i.chapterId),
+            title: i.title
+          }
+        })
+      }))
     };
   }
 
