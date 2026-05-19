@@ -26,6 +26,7 @@ using Kavita.Models.Entities.Metadata;
 using Kavita.Models.Entities.Scrobble;
 using Kavita.Models.Entities.User;
 using Kavita.Models.Extensions;
+using Kavita.Services.Helpers;
 using Kavita.Services.Scanner;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
@@ -1252,6 +1253,51 @@ public class ScrobblingService : IScrobblingService
         var events = await _unitOfWork.ScrobbleRepository.GetUserEventsForSeries(userId, seriesId, ct);
         _unitOfWork.ScrobbleRepository.Remove(events);
         await _unitOfWork.CommitAsync(ct);
+    }
+
+    public async Task<bool> RetryScrobbleAsync(int authUserId, KavitaPlusAuditEntryDto auditEntry, CancellationToken ct = default)
+    {
+        if (auditEntry.ScrobbleDetails == null) return false;
+        if (auditEntry.Status != AuditStatus.Failure) return false;
+        if (auditEntry.SubjectType != AuditSubjectType.Series && auditEntry.SubjectType != AuditSubjectType.Chapter) return false;
+
+        switch (auditEntry.ScrobbleDetails!.ScrobbleEventType)
+        {
+            case ScrobbleEventType.ChapterRead:
+                if (auditEntry.SeriesId == null || auditEntry.UserId == null) return false;
+                await ScrobbleReadingUpdate(auditEntry.UserId.Value, auditEntry.SeriesId.Value, ct);
+                return true;
+            case ScrobbleEventType.AddWantToRead:
+                if (auditEntry.SeriesId == null || auditEntry.UserId == null) return false;
+                await ScrobbleWantToReadUpdate(auditEntry.UserId.Value, auditEntry.SeriesId.Value, true, ct);
+                return true;
+            case ScrobbleEventType.RemoveWantToRead:
+                if (auditEntry.SeriesId == null || auditEntry.UserId == null) return false;
+                await ScrobbleWantToReadUpdate(auditEntry.UserId.Value, auditEntry.SeriesId.Value, false, ct);
+                return true;
+            case ScrobbleEventType.ScoreUpdated:
+                if (auditEntry.SeriesId == null || auditEntry.UserId == null) return false;
+                await ScrobbleRatingUpdate(auditEntry.UserId.Value, auditEntry.SeriesId.Value, auditEntry.ScrobbleDetails.Rating ?? 0f, ct);
+                return true;
+            case ScrobbleEventType.Review:
+                if (auditEntry.SeriesId == null || auditEntry.UserId == null) return false;
+                string? reviewBody;
+                if (auditEntry is {SubjectType: AuditSubjectType.Chapter, SubjectId: not null})
+                {
+                    var chapterRating = await _unitOfWork.UserRepository.GetUserChapterRatingAsync(auditEntry.UserId.Value, auditEntry.SubjectId.Value, ct);
+                    reviewBody = chapterRating?.Review;
+                }
+                else
+                {
+                    var seriesRating = await _unitOfWork.UserRepository.GetUserRatingAsync(auditEntry.SeriesId.Value, auditEntry.UserId.Value, ct);
+                    reviewBody = seriesRating?.Review;
+                }
+                if (string.IsNullOrEmpty(reviewBody)) return false;
+                await ScrobbleReviewUpdate(auditEntry.UserId.Value, auditEntry.SeriesId.Value, string.Empty, reviewBody, ct);
+                return true;
+            default:
+                return false;
+        }
     }
 
     /// <summary>

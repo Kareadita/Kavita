@@ -14,7 +14,7 @@ export class ScrobbleProviderNamePipe implements PipeTransform {
       case ScrobbleProvider.Kavita: return 'Kavita';
       case ScrobbleProvider.Cbr: return 'Comicbook Roundup';
       case ScrobbleProvider.Hardcover: return 'Hardcover';
-      case ScrobbleProvider.Mangabaka: return 'Mangabaka';
+      case ScrobbleProvider.MangaBaka: return 'MangaBaka';
     }
   }
 

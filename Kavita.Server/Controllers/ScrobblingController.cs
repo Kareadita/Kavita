@@ -279,7 +279,7 @@ public class ScrobblingController(
     }
 
     /// <summary>
-    /// Has the logged in user ran scrobble generation
+    /// Has the logged-in user ran scrobble generation
     /// </summary>
     /// <returns></returns>
     [HttpGet("has-ran-scrobble-gen")]
@@ -302,5 +302,21 @@ public class ScrobblingController(
         unitOfWork.ScrobbleRepository.Remove(events);
         await unitOfWork.CommitAsync();
         return Ok();
+    }
+
+
+    /// <summary>
+    /// Attempts to retry Scrobble Events for the current authenticated user (or admin-allowed).
+    /// </summary>
+    /// <param name="dto"></param>
+    /// <returns>true if successful, false in all other cases (validation)</returns>
+    [HttpPost("retry-scrobble")]
+    [DisallowRole(PolicyConstants.ReadOnlyRole)]
+    public async Task<ActionResult<bool>> RetryScrobble(KavitaPlusAuditEntryDto dto)
+    {
+        if (dto.UserId.HasValue && (dto.UserId != UserId || User.IsInRole(PolicyConstants.AdminRole))) return Ok(false);
+
+        // Locate the Scrobble event or replay the event
+        return Ok(await scrobblingService.RetryScrobbleAsync(UserId, dto, HttpContext.RequestAborted));
     }
 }

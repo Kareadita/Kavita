@@ -17,7 +17,7 @@ export interface KavitaPlusScrobbleDetails {
   chapterNumber: number | null;
   volumeNumber: number | null;
   rating: number | null;
-  scrobbleProvider: ScrobbleProvider;
+  provider: ScrobbleProvider;
   libraryType: LibraryType;
 }
 

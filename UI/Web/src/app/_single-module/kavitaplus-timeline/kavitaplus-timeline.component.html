@@ -57,10 +57,10 @@
                     } @else {
                       <span class="series fw-semibold text-truncate">{{entry.seriesName ?? t('system')}}</span>
                     }
-                    @if (entry.scrobbleDetails?.scrobbleProvider != null) {
+                    @if (entry.scrobbleDetails?.provider != null) {
                       <span class="provider-badge d-inline-flex align-items-center gap-1">
-                        <app-scrobble-provider-image [provider]="entry.scrobbleDetails!.scrobbleProvider" [size]="16" />
-                        <span>{{entry.scrobbleDetails!.scrobbleProvider | scrobbleProviderName}}</span>
+                        <app-scrobble-provider-image [provider]="entry.scrobbleDetails!.provider" [size]="16" />
+                        <span>{{entry.scrobbleDetails!.provider | scrobbleProviderName}}</span>
                       </span>
                     }
                   </div>
@@ -80,7 +80,7 @@
 
                 <div class="d-flex flex-column align-items-end gap-2 flex-shrink-0">
                   @if (showRetry() && isRetryable(entry)) {
-                    <button class="btn btn-outline-success btn-sm">
+                    <button class="btn btn-outline-success btn-sm" (click)="retryScrobbleEvent(entry)">
                       <i class="fa-solid fa-rotate-left"></i> {{t('retry')}}
                     </button>
                   }

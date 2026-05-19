@@ -11,7 +11,7 @@ export class ProviderImagePipe implements PipeTransform {
     switch (value) {
       case ScrobbleProvider.Hardcover:
         return `assets/images/ExternalServices/hardcover${large ? '-lg' : ''}.png`;
-      case ScrobbleProvider.Mangabaka:
+      case ScrobbleProvider.MangaBaka:
         return `assets/images/ExternalServices/mangabaka${large ? '-lg' : ''}.png`;
       case ScrobbleProvider.AniList:
         return `assets/images/ExternalServices/AniList${large ? '-lg' : ''}.png`;

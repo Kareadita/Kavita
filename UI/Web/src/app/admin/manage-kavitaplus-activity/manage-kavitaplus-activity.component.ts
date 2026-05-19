@@ -17,6 +17,7 @@ import {AuditStatusTitlePipe} from "../../_pipes/audit-status-title.pipe";
 import {AuditSubjectTitlePipe} from "../../_pipes/audit-subject-title.pipe";
 import {MemberService} from "../../_services/member.service";
 import {Member} from "../../_models/auth/member";
+import {Pagination} from '../../_models/pagination';
 
 @Component({
   selector: 'app-manage-kavitaplus-activity',
@@ -36,10 +37,12 @@ export class ManageKavitaplusActivityComponent implements OnInit {
   private readonly auditService = inject(KavitaPlusAuditService);
   private readonly destroyRef = inject(DestroyRef);
   private readonly memberService = inject(MemberService);
+  private readonly PAGE_SIZE = 50;
 
   stats = signal<KavitaPlusAuditStats | null>(null);
   entries = signal<KavitaPlusAuditEntry[]>([]);
   isLoading = signal(false);
+  isLoadingMore = signal(false);
   categoryFilter = signal<KavitaPlusAuditCategory | null>(null);
   statusFilter = signal<AuditStatus | null>(null);
   searchQuery = signal('');
@@ -49,11 +52,18 @@ export class ManageKavitaplusActivityComponent implements OnInit {
   timeFrameFilter = signal<'all' | '24h' | '7d' | '30d'>('7d');
 
   members = signal<Member[]>([]);
+  currentPage = signal(0);
+  pagination = signal<Pagination | null>(null);
 
   matchedPercent = computed(() => {
     const s = this.stats();
     if (!s || s.totalEligibleSeriesCount === 0) return 0;
     return Math.round(s.matchedSeriesCount / s.totalEligibleSeriesCount * 100);
+  });
+
+  hasMore = computed(() => {
+    const p = this.pagination();
+    return p != null && p.currentPage < p.totalPages - 1;
   });
 
   ngOnInit() {
@@ -78,8 +88,14 @@ export class ManageKavitaplusActivityComponent implements OnInit {
     return new Date(Date.now() - msMap[tf]).toISOString();
   }
 
-  private loadEntries() {
-    this.isLoading.set(true);
+  private loadEntries(reset = true) {
+    if (reset) {
+      this.currentPage.set(0);
+      this.entries.set([]);
+      this.isLoading.set(true);
+    } else {
+      this.isLoadingMore.set(true);
+    }
     const filter: KavitaPlusAuditFilter = {
       category: this.categoryFilter(),
       status: this.statusFilter(),
@@ -88,13 +104,27 @@ export class ManageKavitaplusActivityComponent implements OnInit {
       fromUtc: this.timeFrameToFromUtc(),
       userId: this.userFilter() || null,
     };
-    this.auditService.getEntries(filter, 0, 50).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
+    this.auditService.getEntries(filter, this.currentPage(), this.PAGE_SIZE).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: result => {
-        this.entries.set(result.result ?? []);
-        this.isLoading.set(false);
+        this.pagination.set(result.pagination);
+        if (reset) {
+          this.entries.set(result.result ?? []);
+          this.isLoading.set(false);
+        } else {
+          this.entries.update(prev => [...prev, ...(result.result ?? [])]);
+          this.isLoadingMore.set(false);
+        }
       },
-      error: () => this.isLoading.set(false),
+      error: () => {
+        this.isLoading.set(false);
+        this.isLoadingMore.set(false);
+      },
     });
+  }
+
+  loadMore() {
+    this.currentPage.update(p => p + 1);
+    this.loadEntries(false);
   }
 
   setCategoryFilter(cat: KavitaPlusAuditCategory | null) {

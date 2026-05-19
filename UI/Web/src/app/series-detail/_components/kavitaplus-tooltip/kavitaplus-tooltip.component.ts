@@ -15,6 +15,7 @@ import {
   KavitaPlusAuditEventTypeIconComponent
 } from "../../../shared/_components/kavitaplus-event-type-icon/kavita-plus-audit-event-type-icon.component";
 import {AuditLogErrorPipe} from "../../../_pipes/audit-log-error.pipe";
+import {SettingsTabId} from "../../../sidenav/preference-nav/preference-nav.component";
 
 @Component({
   selector: 'app-kavitaplus-tooltip',
@@ -80,4 +81,5 @@ export class KavitaplusTooltipComponent implements OnInit {
 
   protected readonly AuditCategory = KavitaPlusAuditCategory;
   protected readonly NULL_DATE = NULL_DATE;
+  protected readonly SettingsTabId = SettingsTabId;
 }

@@ -24,10 +24,10 @@
 
           <span class="badge" [ngClass]="statusBadgeClass()">{{entry().status | auditStatusTitle}}</span>
 
-          @if (entry().scrobbleDetails?.scrobbleProvider != null) {
+          @if (entry().scrobbleDetails?.provider != null) {
             <span class="provider-badge d-inline-flex align-items-center gap-1">
-              <app-scrobble-provider-image [provider]="entry().scrobbleDetails!.scrobbleProvider" [size]="16" />
-              <span>{{entry().scrobbleDetails!.scrobbleProvider | scrobbleProviderName}}</span>
+              <app-scrobble-provider-image [provider]="entry().scrobbleDetails!.provider" [size]="16" />
+              <span>{{entry().scrobbleDetails!.provider | scrobbleProviderName}}</span>
             </span>
           }
         </div>

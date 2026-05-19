@@ -47,14 +47,25 @@ export class KavitaplusActivityComponent implements OnInit {
   });
 
   ngOnInit() {
+    this.loadData();
+
+    this.scrobblingService.getScrobbleProviders().subscribe(tokens => this.scrobblingProviders.set(tokens));
+  }
+
+  loadData() {
+    this.isLoading.set(true);
     this.auditService.getMyActivity({}, undefined, 200)
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: result => { this.entries.set(result.result ?? []); this.isLoading.set(false); },
         error: ()     => this.isLoading.set(false),
       });
+  }
 
-    this.scrobblingService.getScrobbleProviders().subscribe(tokens => this.scrobblingProviders.set(tokens));
+  retryScrobbleEvent(event: KavitaPlusAuditEntry) {
+    this.scrobblingService.retryScrobbleEvent(event).subscribe(() => {
+      this.loadData();
+    });
   }
 
   protected readonly ScrobbleProvider = ScrobbleProvider;

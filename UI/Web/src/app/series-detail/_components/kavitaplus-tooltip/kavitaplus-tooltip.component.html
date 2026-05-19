@@ -94,11 +94,11 @@
       <div class="d-flex align-items-center justify-content-between gap-2">
         <span class="kplus-showing text-muted">{{t('showing-latest', {count: displayedEvents().length})}}</span>
         <div class="d-flex gap-2">
-          <button class="btn btn-outline-primary btn-sm d-inline-flex align-items-center gap-1" (click)="navigateAndClose(['/settings'], {fragment: 'my-activity'})">
+          <button class="btn btn-outline-primary btn-sm d-inline-flex align-items-center gap-1" (click)="navigateAndClose(['/settings'], {fragment: SettingsTabId.MyActivity})">
             <i class="fa-solid fa-user" aria-hidden="true"></i> {{t('my-activity')}}
           </button>
           @if (isAdmin()) {
-            <button class="btn btn-success btn-sm d-inline-flex align-items-center gap-1" (click)="navigateAndClose(['/admin/kavitaplus-audit'])">
+            <button class="btn btn-success btn-sm d-inline-flex align-items-center gap-1" (click)="navigateAndClose(['/settings'], {fragment: SettingsTabId.ManageKavitaPlusActivity})">
               <i class="fa-solid fa-list" aria-hidden="true"></i>
               {{t('admin-feed')}}
             </button>

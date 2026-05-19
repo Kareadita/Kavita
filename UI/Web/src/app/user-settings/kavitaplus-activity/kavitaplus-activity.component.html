@@ -29,7 +29,7 @@
       </li>
     </ul>
 
-    <app-kavitaplus-timeline [entries]="filteredEntries()" [isLoading]="isLoading()" />
+    <app-kavitaplus-timeline [entries]="filteredEntries()" [isLoading]="isLoading()" (retry)="retryScrobbleEvent($event)" />
 
   </div>
 </ng-container>

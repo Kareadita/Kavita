@@ -1,4 +1,4 @@
-import {ChangeDetectionStrategy, Component, computed, inject, input, TemplateRef} from '@angular/core';
+import {ChangeDetectionStrategy, Component, computed, inject, input, output, TemplateRef} from '@angular/core';
 import {DatePipe, NgTemplateOutlet} from '@angular/common';
 import {Router} from '@angular/router';
 import {TranslocoDirective} from '@jsverse/transloco';
@@ -80,6 +80,8 @@ export class KavitaplusTimelineComponent {
   showRetry = input<boolean>(true);
   entryTemplate = input<TemplateRef<{$implicit: KavitaPlusAuditEntry}>>();
 
+  retry = output<KavitaPlusAuditEntry>();
+
   groupedEntries = computed(() => groupByDay(this.entries()));
 
   categoryColor(category: KavitaPlusAuditCategory): string {
@@ -109,5 +111,10 @@ export class KavitaplusTimelineComponent {
   isRetryable(entry: KavitaPlusAuditEntry): boolean {
     return entry.status === AuditStatus.Failure && entry.category === KavitaPlusAuditCategory.Scrobble;
   }
+
+  retryScrobbleEvent(entry: KavitaPlusAuditEntry) {
+    this.retry.emit(entry);
+  }
+
 
 }

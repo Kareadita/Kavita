@@ -10,6 +10,7 @@ import {PaginatedResult} from "../_models/pagination";
 import {ScrobbleEventFilter} from "../_models/scrobbling/scrobble-event-filter";
 import {UtilityService} from "../shared/_services/utility.service";
 import {forkJoin} from "rxjs";
+import {KavitaPlusAuditEntry} from "../_models/kavitaplus/kavita-plus-audit-entry";
 
 export enum ScrobbleProvider {
   Kavita = 0,
@@ -17,7 +18,7 @@ export enum ScrobbleProvider {
   Mal = 2,
   Cbr = 4,
   Hardcover = 5,
-  Mangabaka = 6,
+  MangaBaka = 6,
 }
 
 /**
@@ -79,7 +80,7 @@ export class ScrobblingService {
     const defaultProviders = [
       {provider: ScrobbleProvider.AniList},
       {provider: ScrobbleProvider.Mal},
-      {provider: ScrobbleProvider.Mangabaka},
+      {provider: ScrobbleProvider.MangaBaka},
       {provider: ScrobbleProvider.Hardcover},
     ] as UserScrobbleProvider[];
 
@@ -99,6 +100,13 @@ export class ScrobblingService {
     }));
   }
 
+  /**
+   * Re-queues the underlying event to process. Only applicable if the event is in failed/rate limit state
+   * @param event
+   */
+  retryScrobbleEvent(event: KavitaPlusAuditEntry) {
+    return this.httpClient.post(this.baseUrl + 'scrobbling/retry-scrobble', event, TextResonse);
+  }
 
   hasRunScrobbleGen() {
     return this.httpClient.get(this.baseUrl + 'scrobbling/has-ran-scrobble-gen ', TextResonse).pipe(map(r => r === 'true'));
