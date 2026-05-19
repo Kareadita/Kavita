@@ -2,6 +2,7 @@ import {
   ChangeDetectionStrategy,
   Component,
   contentChild,
+  DestroyRef,
   effect,
   inject,
   input,
@@ -16,6 +17,7 @@ import {ScrobbleProviderNamePipe} from "../../_pipes/scrobble-provider-name.pipe
 import {
   ScrobbleProviderImageComponent
 } from "../../shared/_components/scrobble-provider-image/scrobble-provider-image.component";
+import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 
 @Component({
   selector: 'app-scrobble-provider-item',
@@ -33,6 +35,7 @@ import {
 export class ScrobbleProviderItemComponent {
 
   private readonly scrobblingService = inject(ScrobblingService);
+  private readonly destroyRef = inject(DestroyRef);
 
   provider = input.required<ScrobbleProvider>();
   token = input.required<string>();
@@ -44,7 +47,9 @@ export class ScrobbleProviderItemComponent {
   constructor() {
 
     effect(() => {
-      this.scrobblingService.hasTokenExpired(this.provider()).subscribe(hasExpired => {
+      this.scrobblingService.hasTokenExpired(this.provider())
+        .pipe(takeUntilDestroyed(this.destroyRef))
+        .subscribe(hasExpired => {
         this.hasExpired.set(hasExpired);
       });
     });

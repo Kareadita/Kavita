@@ -2,8 +2,7 @@ import {inject, Pipe, PipeTransform} from '@angular/core';
 import {TranslocoService} from "@jsverse/transloco";
 
 @Pipe({
-  name: 'auditLogError',
-  pure: true
+  name: 'auditLogError'
 })
 export class AuditLogErrorPipe implements PipeTransform {
   private readonly translocoService = inject(TranslocoService);

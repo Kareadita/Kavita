@@ -315,7 +315,7 @@ public class ScrobblingController(
     public async Task<ActionResult<bool>> RetryScrobble(KavitaPlusAuditEntryDto dto)
     {
         if (!dto.UserId.HasValue) return Ok(false);
-        if (dto.UserId != UserId && User.IsInRole(PolicyConstants.AdminRole)) return Ok(false);
+        if (dto.UserId != UserId && !User.IsInRole(PolicyConstants.AdminRole)) return Ok(false);
 
         // Locate the Scrobble event or replay the event
         return Ok(await scrobblingService.RetryScrobbleAsync(UserId, dto, HttpContext.RequestAborted));
