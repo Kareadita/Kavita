@@ -107,8 +107,8 @@
                [attr.aria-label]="opt.title || t('select-image-alt')"
                [attr.aria-pressed]="selectedOptionKey() === opt.url"
                (click)="selectOption(opt, tabId)"
-               (keydown.enter)="selectOption(opt, tabId)"
-               (keydown.space)="selectOption(opt, tabId)"
+               (keydown.enter)="selectOption(opt, tabId); $event.stopPropagation();"
+               (keydown.space)="selectOption(opt, tabId); $event.stopPropagation();"
                [class.selected]="selectedOptionKey() === opt.url">
             <app-image height="232.91px" width="160px" [imageUrl]="opt.url" />
             @if (opt.title) {

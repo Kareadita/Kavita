@@ -9,4 +9,8 @@ public sealed record UploadUrlDto
     /// </summary>
     [Required]
     public required string Url { get; set; }
+    /// <summary>
+    /// Does this url resolve to Kavita - This will bypass security checks
+    /// </summary>
+    public bool IsInternalUrl { get; set; }
 }

@@ -113,7 +113,7 @@ export class CoverImageChooserComponent  {
       return;
     }
 
-    this.uploadService.uploadByUrl(option.url).subscribe(filename => {
+    this.uploadService.uploadByUrl(option.url, true).subscribe(filename => {
       const img = new Image();
       img.crossOrigin = 'Anonymous';
       img.src = this.imageService.getCoverUploadImage(filename);
