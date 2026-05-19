@@ -67,14 +67,19 @@ public class UploadController : BaseApiController
     {
         try
         {
-            await _urlValidationService.ValidateUrlAsync(dto.Url);
+            // We need to allow any images that are coming from within Kavita to bypass Validation
+            if (!dto.IsInternalUrl)
+            {
+                await _urlValidationService.ValidateUrlAsync(dto.Url);
+            }
         }
         catch (Exception)
         {
             return BadRequest(await _localizationService.TranslateAsync(UserId, "url-not-valid"));
         }
 
-        var dateString = $"{DateTime.UtcNow.ToShortDateString()}_{DateTime.UtcNow.ToLongTimeString()}".Replace('/', '_').Replace(':', '_');
+        var now = DateTime.UtcNow;
+        var dateString = $"{now:d}_{now:T}".Replace('/', '_').Replace(':', '_');
         try
         {
             var format = await dto.Url.GetFileFormatAsync();

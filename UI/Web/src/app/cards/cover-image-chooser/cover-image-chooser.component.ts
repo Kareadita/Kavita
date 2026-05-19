@@ -1,13 +1,4 @@
-import {
-  ChangeDetectionStrategy,
-  ChangeDetectorRef,
-  Component,
-  effect,
-  inject,
-  input,
-  output,
-  signal
-} from '@angular/core';
+import {ChangeDetectionStrategy, Component, effect, inject, input, output, signal} from '@angular/core';
 import {FileSystemFileEntry, NgxFileDropEntry} from 'ngx-file-drop';
 import {ToastrService} from 'ngx-toastr';
 import {ImageService} from 'src/app/_services/image.service';
@@ -49,7 +40,6 @@ export class CoverImageChooserComponent  {
   private readonly toastr = inject(ToastrService);
   private readonly uploadService = inject(UploadService);
   private readonly colorscapeService = inject(ColorscapeService);
-  private readonly cdRef = inject(ChangeDetectorRef);
 
   config = input<CoverImageChooserConfig>({});
 
@@ -113,7 +103,7 @@ export class CoverImageChooserComponent  {
       return;
     }
 
-    this.uploadService.uploadByUrl(option.url).subscribe(filename => {
+    this.uploadService.uploadByUrl(option.url, true).subscribe(filename => {
       const img = new Image();
       img.crossOrigin = 'Anonymous';
       img.src = this.imageService.getCoverUploadImage(filename);

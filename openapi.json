@@ -2,12 +2,12 @@
   "openapi": "3.0.4",
   "info": {
     "title": "Kavita",
-    "description": "Kavita provides a set of APIs authenticated via an Auth Key passed in the `x-api-key` header. Generate an Auth Key under User Settings → Manage Auth Keys, paste it into the Authorize panel, and all Try It requests will include it. Assume all fields of a payload are required unless marked optional. Built against v0.9.0.0",
+    "description": "Kavita provides a set of APIs authenticated via an Auth Key passed in the `x-api-key` header. Generate an Auth Key under User Settings → Manage Auth Keys, paste it into the Authorize panel, and all Try It requests will include it. Assume all fields of a payload are required unless marked optional. Built against v0.9.0.2",
     "license": {
       "name": "GPL-3.0",
       "url": "https://github.com/Kareadita/Kavita/blob/develop/LICENSE"
     },
-    "version": "0.9.0.0"
+    "version": "0.9.0.2"
   },
   "servers": [
     {
@@ -5457,6 +5457,166 @@
         "responses": {
           "200": {
             "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/Image/external/series": {
+      "get": {
+        "tags": [
+          "Image"
+        ],
+        "parameters": [
+          {
+            "name": "seriesId",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ExternalCoverResponseDto"
+                  }
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ExternalCoverResponseDto"
+                  }
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ExternalCoverResponseDto"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/Image/external/volume": {
+      "get": {
+        "tags": [
+          "Image"
+        ],
+        "parameters": [
+          {
+            "name": "seriesId",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "volumeId",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ExternalCoverResponseDto"
+                  }
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ExternalCoverResponseDto"
+                  }
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ExternalCoverResponseDto"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/Image/external/chapter": {
+      "get": {
+        "tags": [
+          "Image"
+        ],
+        "parameters": [
+          {
+            "name": "seriesId",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "chapterId",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ExternalCoverResponseDto"
+                  }
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ExternalCoverResponseDto"
+                  }
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ExternalCoverResponseDto"
+                  }
+                }
+              }
+            }
           }
         }
       }
@@ -22340,6 +22500,10 @@
           "mangaBakaId": {
             "type": "integer",
             "format": "int64"
+          },
+          "cbrId": {
+            "type": "integer",
+            "format": "int32"
           }
         },
         "additionalProperties": false
@@ -23416,6 +23580,69 @@
         },
         "additionalProperties": false
       },
+      "ExternalCoverImageType": {
+        "enum": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8
+        ],
+        "type": "integer",
+        "description": "Members:\n- `0` — Series\n- `1` — Volume\n- `2` — VolumeBack\n- `3` — Chapter\n- `4` — Issue\n- `5` — Banner\n- `6` — Season\n- `7` — Audiobook\n- `8` — Other",
+        "format": "int32",
+        "x-enum-varnames": [
+          "Series",
+          "Volume",
+          "VolumeBack",
+          "Chapter",
+          "Issue",
+          "Banner",
+          "Season",
+          "Audiobook",
+          "Other"
+        ],
+        "x-enum-descriptions": [
+          "Series",
+          "Volume",
+          "VolumeBack",
+          "Chapter",
+          "Issue",
+          "Banner",
+          "Season",
+          "Audiobook",
+          "Other"
+        ]
+      },
+      "ExternalCoverResponseDto": {
+        "required": [
+          "url"
+        ],
+        "type": "object",
+        "properties": {
+          "url": {
+            "type": "string",
+            "nullable": true
+          },
+          "type": {
+            "$ref": "#/components/schemas/ExternalCoverImageType"
+          },
+          "number": {
+            "type": "number",
+            "format": "float",
+            "nullable": true
+          },
+          "language": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
       "ExternalSeriesDetailDto": {
         "type": "object",
         "properties": {
@@ -23434,6 +23661,11 @@
             "nullable": true
           },
           "cbrId": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "mangabakaId": {
             "type": "integer",
             "format": "int32",
             "nullable": true
@@ -28061,6 +28293,10 @@
           "mangaBakaId": {
             "type": "integer",
             "format": "int64"
+          },
+          "cbrId": {
+            "type": "integer",
+            "format": "int32"
           }
         },
         "additionalProperties": false
@@ -29343,6 +29579,10 @@
             "type": "integer",
             "format": "int64"
           },
+          "cbrId": {
+            "type": "integer",
+            "format": "int32"
+          },
           "seriesId": {
             "type": "integer",
             "format": "int32"
@@ -29767,6 +30007,10 @@
             "type": "integer",
             "format": "int64"
           },
+          "cbrId": {
+            "type": "integer",
+            "format": "int32"
+          },
           "number": {
             "type": "string",
             "nullable": true
@@ -30113,6 +30357,11 @@
           "mangaBakaId": {
             "type": "integer",
             "format": "int64",
+            "nullable": true
+          },
+          "cbrId": {
+            "type": "integer",
+            "format": "int32",
             "nullable": true
           }
         },
@@ -30877,6 +31126,11 @@
             "type": "integer",
             "format": "int64",
             "nullable": true
+          },
+          "cbrId": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
           }
         },
         "additionalProperties": false
@@ -31038,6 +31292,11 @@
             "type": "integer",
             "format": "int64",
             "nullable": true
+          },
+          "cbrId": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
           }
         },
         "additionalProperties": false
@@ -31086,6 +31345,9 @@
           "url": {
             "minLength": 1,
             "type": "string"
+          },
+          "isInternalUrl": {
+            "type": "boolean"
           }
         },
         "additionalProperties": false
@@ -31815,6 +32077,10 @@
           "mangaBakaId": {
             "type": "integer",
             "format": "int64"
+          },
+          "cbrId": {
+            "type": "integer",
+            "format": "int32"
           }
         },
         "additionalProperties": false

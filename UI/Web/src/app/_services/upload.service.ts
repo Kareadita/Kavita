@@ -16,8 +16,8 @@ export class UploadService {
   private baseUrl = environment.apiUrl;
 
 
-  uploadByUrl(url: string) {
-    return this.httpClient.post<string>(this.baseUrl + 'upload/upload-by-url', {url}, TextResonse);
+  uploadByUrl(url: string,  isInternalUrl = false) {
+    return this.httpClient.post<string>(this.baseUrl + 'upload/upload-by-url', {url, isInternalUrl}, TextResonse);
   }
 
   /**

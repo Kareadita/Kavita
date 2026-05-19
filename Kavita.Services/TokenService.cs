@@ -73,8 +73,20 @@ public class TokenService(
         try
         {
             var tokenHandler = new JwtSecurityTokenHandler();
-            var tokenContent = tokenHandler.ReadJwtToken(request.Token);
-            var username = tokenContent.Claims.FirstOrDefault(q => q.Type == JwtRegisteredClaimNames.Name)?.Value;
+            var tokenValidationParams = new TokenValidationParameters()
+            {
+                ValidateIssuerSigningKey = true,
+                IssuerSigningKey = _key,
+                ValidateIssuer = false,
+                ValidateAudience = false,
+                ValidIssuer = "Kavita",
+                NameClaimType = JwtRegisteredClaimNames.Name,
+                RoleClaimType = "role",
+            };
+
+            var principal = tokenHandler.ValidateToken(request.Token, tokenValidationParams, out var tokenContent);
+            var username = principal.Claims.FirstOrDefault(q => q.Type == JwtRegisteredClaimNames.Name)?.Value;
+
             if (string.IsNullOrEmpty(username))
             {
                 logger.LogDebug("[RefreshToken] failed to validate due to not finding user in RefreshToken");
@@ -90,9 +102,14 @@ public class TokenService(
 
             var validated = await userManager.VerifyUserTokenAsync(user, TokenOptions.DefaultProvider,
                 RefreshTokenName, request.RefreshToken);
-            if (!validated && tokenContent.ValidTo <= DateTime.UtcNow.Add(TimeSpan.FromHours(1)))
+            if (!validated)
             {
                 logger.LogDebug("[RefreshToken] failed to validate due to invalid refresh token");
+                return null;
+            }
+
+            if (tokenContent.ValidTo <= DateTime.UtcNow.Add(TimeSpan.FromHours(1)))
+            {
                 return null;
             }
 
