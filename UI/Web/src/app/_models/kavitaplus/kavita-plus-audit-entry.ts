@@ -32,7 +32,6 @@ export interface KavitaPlusAuditEntry {
   seriesName: string | null;
   subjectType: AuditSubjectType;
   subjectId: number | null;
-  subjectName: string | null;
   userId: number | null;
   username: string | null;
   diff: MetadataFieldChange[] | null;

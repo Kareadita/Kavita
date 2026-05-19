@@ -121,6 +121,7 @@ public class KavitaPlusAuditRepository(DataContext context) : IKavitaPlusAuditRe
                 e.Payload, e.ErrorMessage, e.HasRetried))
             .ToListAsync(ct);
 
+        // Due to Json deserialization, I can't use automapper here and need to do in-mem
         var recentEvents = recentRaw.Select(MapToDto).ToList();
 
         return new KavitaPlusAuditSeriesInfoDto

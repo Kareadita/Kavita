@@ -17,7 +17,6 @@ public sealed record KavitaPlusAuditEntryDto
     public string? SeriesName { get; init; }
     public AuditSubjectType SubjectType { get; init; }
     public int? SubjectId { get; init; }
-    public string? SubjectName { get; init; }
     public int? UserId { get; init; }
     public string? Username { get; init; }
     public IList<MetadataFieldChange>? Diff { get; init; }
