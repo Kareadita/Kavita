@@ -1302,8 +1302,7 @@
         "filter-timeframe-24h": "Last 24 Hours",
         "filter-timeframe-7d": "Last 7 Days",
         "filter-timeframe-30d": "Last 30 Days",
-        "system": "System",
-        "load-more-label": "Load more"
+        "system": "System"
     },
 
     "kavitaplus-diff": {
@@ -1329,7 +1328,8 @@
         "yesterday": "Yesterday",
         "events-count": "{{count}} events",
         "no-events": "No events to display",
-        "retry": "Retry"
+        "retry": "Retry",
+        "load-more-label": "Load more"
     },
 
     "audit-status-title-pipe": {

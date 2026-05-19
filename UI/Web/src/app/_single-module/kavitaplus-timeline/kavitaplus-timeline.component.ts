@@ -78,9 +78,12 @@ export class KavitaplusTimelineComponent {
   entries = input.required<KavitaPlusAuditEntry[]>();
   isLoading = input<boolean>(false);
   showRetry = input<boolean>(true);
+  hasMore = input<boolean>(false);
+  isLoadingMore = input<boolean>(false);
   entryTemplate = input<TemplateRef<{$implicit: KavitaPlusAuditEntry}>>();
 
   retry = output<KavitaPlusAuditEntry>();
+  loadMore = output<void>();
 
   groupedEntries = computed(() => groupByDay(this.entries()));
 

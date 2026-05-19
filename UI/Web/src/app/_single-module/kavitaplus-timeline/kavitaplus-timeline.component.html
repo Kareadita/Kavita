@@ -96,5 +96,16 @@
 
       </div>
     }
+
+    @if (hasMore() || isLoadingMore()) {
+      <div class="d-flex justify-content-center mt-3">
+        <button class="btn btn-outline-secondary btn-sm" [disabled]="isLoadingMore()" (click)="loadMore.emit()">
+          @if (isLoadingMore()) {
+            <span class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span>
+          }
+          {{t('load-more-label')}}
+        </button>
+      </div>
+    }
   }
 </ng-container>

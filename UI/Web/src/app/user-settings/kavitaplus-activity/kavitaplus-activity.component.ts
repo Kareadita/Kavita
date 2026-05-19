@@ -12,6 +12,7 @@ import {ScrobbleAccountCardComponent} from '../scrobble-account-card/scrobble-ac
 import {KavitaPlusEventType} from "../../_models/kavitaplus/kavita-plus-event-type.enum";
 import {Tabs} from "../../_models/tabs";
 import {TabTitlePipe} from "../../_pipes/tab-title.pipe";
+import {Pagination} from '../../_models/pagination';
 
 @Component({
   selector: 'app-kavitaplus-activity',
@@ -24,11 +25,20 @@ export class KavitaplusActivityComponent implements OnInit {
   private readonly auditService = inject(KavitaPlusAuditService);
   private readonly scrobblingService = inject(ScrobblingService);
   private readonly destroyRef = inject(DestroyRef);
+  private readonly PAGE_SIZE = 50;
 
   entries = signal<KavitaPlusAuditEntry[]>([]);
   isLoading = signal(true);
+  isLoadingMore = signal(false);
   activeTab = signal<Tabs>(Tabs.All);
   scrobblingProviders = signal<UserScrobbleProvider[]>([]);
+  currentPage = signal(0);
+  pagination = signal<Pagination | null>(null);
+
+  hasMore = computed(() => {
+    const p = this.pagination();
+    return p != null && p.currentPage < p.totalPages - 1;
+  });
 
   allCount      = computed(() => this.entries().length);
   scrobbleCount = computed(() => this.entries().filter(e => e.category === KavitaPlusAuditCategory.Scrobble && ![KavitaPlusEventType.ScrobbleHoldAdded, KavitaPlusEventType.ScrobbleHoldRemoved].includes(e.eventType)).length);
@@ -52,15 +62,37 @@ export class KavitaplusActivityComponent implements OnInit {
     this.scrobblingService.getScrobbleProviders().subscribe(tokens => this.scrobblingProviders.set(tokens));
   }
 
-  loadData() {
-    this.isLoading.set(true);
-    // TODO: This may need proper pagination support
-    this.auditService.getMyActivity({}, undefined, 200)
+  loadData(reset = true) {
+    if (reset) {
+      this.currentPage.set(0);
+      this.entries.set([]);
+      this.isLoading.set(true);
+    } else {
+      this.isLoadingMore.set(true);
+    }
+    this.auditService.getMyActivity({}, this.currentPage(), this.PAGE_SIZE)
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
-        next: result => { this.entries.set(result.result ?? []); this.isLoading.set(false); },
-        error: ()     => this.isLoading.set(false),
+        next: result => {
+          this.pagination.set(result.pagination);
+          if (reset) {
+            this.entries.set(result.result ?? []);
+            this.isLoading.set(false);
+          } else {
+            this.entries.update(prev => [...prev, ...(result.result ?? [])]);
+            this.isLoadingMore.set(false);
+          }
+        },
+        error: () => {
+          this.isLoading.set(false);
+          this.isLoadingMore.set(false);
+        },
       });
+  }
+
+  loadMore() {
+    this.currentPage.update(p => p + 1);
+    this.loadData(false);
   }
 
   retryScrobbleEvent(event: KavitaPlusAuditEntry) {
