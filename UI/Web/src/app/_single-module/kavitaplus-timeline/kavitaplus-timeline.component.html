@@ -79,8 +79,8 @@
                 </div>
 
                 <div class="d-flex flex-column align-items-end gap-2 flex-shrink-0">
-                  @if (showRetry() && isRetryable(entry)) {
-                    <button class="btn btn-outline-success btn-sm" (click)="retryScrobbleEvent(entry)">
+                  @if (showRetry() && entry.canRetry) {
+                    <button class="btn btn-outline-primary btn-sm" (click)="retryScrobbleEvent(entry)">
                       <i class="fa-solid fa-rotate-left"></i> {{t('retry')}}
                     </button>
                   }

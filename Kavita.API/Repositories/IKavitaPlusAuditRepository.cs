@@ -22,4 +22,6 @@ public interface IKavitaPlusAuditRepository
 
     Task<KavitaPlusAuditSeriesInfoDto> GetSeriesInfoAsync(
         int seriesId, int callingUserId, bool isAdmin, CancellationToken ct = default);
+
+    Task MarkAsRetriedAsync(long id, CancellationToken ct = default);
 }

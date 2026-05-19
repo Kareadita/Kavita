@@ -108,10 +108,6 @@ export class KavitaplusTimelineComponent {
     this.router.navigate(['library', entry.libraryId, 'series', entry.seriesId]);
   }
 
-  isRetryable(entry: KavitaPlusAuditEntry): boolean {
-    return entry.status === AuditStatus.Failure && entry.category === KavitaPlusAuditCategory.Scrobble;
-  }
-
   retryScrobbleEvent(entry: KavitaPlusAuditEntry) {
     this.retry.emit(entry);
   }

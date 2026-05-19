@@ -1,22 +1,22 @@
 import {ChangeDetectionStrategy, ChangeDetectorRef, Component, computed, inject, OnInit, signal} from '@angular/core';
 import {FormControl, FormGroup, ReactiveFormsModule, Validators} from "@angular/forms";
-import {AccountService} from "../../_services/account.service";
-import {ToastrService} from "ngx-toastr";
-import {ConfirmService} from "../../shared/confirm.service";
-import {LoadingComponent} from '../../shared/loading/loading.component';
-import {NgbTooltip} from '@ng-bootstrap/ng-bootstrap';
-import {environment} from "../../../environments/environment";
+import {LicenseInfo} from "../../../_models/kavitaplus/license-info";
+import {NgbTooltip} from "@ng-bootstrap/ng-bootstrap";
+import {LoadingComponent} from "../../../shared/loading/loading.component";
 import {translate, TranslocoDirective} from "@jsverse/transloco";
-import {WikiLink} from "../../_models/wiki";
-import {SettingItemComponent} from "../../settings/_components/setting-item/setting-item.component";
+import {SettingItemComponent} from "../../../settings/_components/setting-item/setting-item.component";
+import {DefaultValuePipe} from "../../../_pipes/default-value.pipe";
+import {UtcToLocalTimePipe} from "../../../_pipes/utc-to-local-time.pipe";
+import {SettingButtonComponent} from "../../../settings/_components/setting-button/setting-button.component";
 import {DecimalPipe} from "@angular/common";
-import {DefaultValuePipe} from "../../_pipes/default-value.pipe";
-import {switchMap} from "rxjs";
-import {LicenseInfo} from "../../_models/kavitaplus/license-info";
-import {UtcToLocalTimePipe} from "../../_pipes/utc-to-local-time.pipe";
-import {filter, tap} from "rxjs/operators";
-import {SettingButtonComponent} from "../../settings/_components/setting-button/setting-button.component";
-import {LicenseService} from "../../_services/license.service";
+import {ToastrService} from "ngx-toastr";
+import {ConfirmService} from "../../../shared/confirm.service";
+import {AccountService} from "../../../_services/account.service";
+import {LicenseService} from "../../../_services/license.service";
+import {environment} from "../../../../environments/environment";
+import {WikiLink} from "../../../_models/wiki";
+import {switchMap} from "rxjs/operators";
+import {filter, tap} from "rxjs";
 
 @Component({
     selector: 'app-license',

@@ -1,23 +1,23 @@
 import {ChangeDetectionStrategy, Component, computed, DestroyRef, inject, OnInit, signal} from '@angular/core';
 import {takeUntilDestroyed} from '@angular/core/rxjs-interop';
 import {TranslocoDirective} from '@jsverse/transloco';
-import {KavitaPlusAuditService} from '../../_services/kavitaplus-audit.service';
-import {KavitaPlusAuditEntry} from '../../_models/kavitaplus/kavita-plus-audit-entry';
-import {KavitaPlusAuditStats} from '../../_models/kavitaplus/kavita-plus-audit-stats';
-import {KavitaPlusAuditFilter} from '../../_models/kavitaplus/kavita-plus-audit-filter';
-import {KavitaPlusAuditCategory} from '../../_models/kavitaplus/kavita-plus-audit-category.enum';
-import {allAuditStatuses, AuditStatus} from '../../_models/kavitaplus/audit-status.enum';
-import {allAuditSubjectTypes, AuditSubjectType} from '../../_models/kavitaplus/audit-subject-type.enum';
-import {KavitaplusTimelineComponent} from '../../_single-module/kavitaplus-timeline/kavitaplus-timeline.component';
+import {KavitaplusTimelineComponent} from "../../../_single-module/kavitaplus-timeline/kavitaplus-timeline.component";
 import {
   KavitaplusAuditAccordionItemComponent
-} from './kavitaplus-audit-accordion-item/kavitaplus-audit-accordion-item.component';
-import {DefaultValuePipe} from "../../_pipes/default-value.pipe";
-import {AuditStatusTitlePipe} from "../../_pipes/audit-status-title.pipe";
-import {AuditSubjectTitlePipe} from "../../_pipes/audit-subject-title.pipe";
-import {MemberService} from "../../_services/member.service";
-import {Member} from "../../_models/auth/member";
-import {Pagination} from '../../_models/pagination';
+} from "../kavitaplus-audit-accordion-item/kavitaplus-audit-accordion-item.component";
+import {DefaultValuePipe} from "../../../_pipes/default-value.pipe";
+import {AuditStatusTitlePipe} from "../../../_pipes/audit-status-title.pipe";
+import {AuditSubjectTitlePipe} from "../../../_pipes/audit-subject-title.pipe";
+import {KavitaPlusAuditService} from "../../../_services/kavitaplus-audit.service";
+import {MemberService} from "../../../_services/member.service";
+import {KavitaPlusAuditStats} from "../../../_models/kavitaplus/kavita-plus-audit-stats";
+import {KavitaPlusAuditEntry} from "../../../_models/kavitaplus/kavita-plus-audit-entry";
+import {allAuditStatuses, AuditStatus} from "../../../_models/kavitaplus/audit-status.enum";
+import {allAuditSubjectTypes, AuditSubjectType} from "../../../_models/kavitaplus/audit-subject-type.enum";
+import {Member} from "../../../_models/auth/member";
+import {Pagination} from "../../../_models/pagination";
+import {KavitaPlusAuditCategory} from "../../../_models/kavitaplus/kavita-plus-audit-category.enum";
+import {KavitaPlusAuditFilter} from "../../../_models/kavitaplus/kavita-plus-audit-filter";
 
 @Component({
   selector: 'app-manage-kavitaplus-activity',
@@ -157,7 +157,9 @@ export class ManageKavitaplusActivityComponent implements OnInit {
     this.loadEntries();
   }
 
+
   protected readonly KavitaPlusAuditCategory = KavitaPlusAuditCategory;
   protected readonly allAuditStatuses = allAuditStatuses;
   protected readonly allAuditSubjectTypes = allAuditSubjectTypes;
 }
+

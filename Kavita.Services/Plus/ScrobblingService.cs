@@ -1264,24 +1264,26 @@ public class ScrobblingService : IScrobblingService
         if (auditEntry.Status != AuditStatus.Failure) return false;
         if (auditEntry.SubjectType != AuditSubjectType.Series && auditEntry.SubjectType != AuditSubjectType.Chapter) return false;
 
+        if (!auditEntry.CanRetry) return false;
+
         switch (auditEntry.ScrobbleDetails!.ScrobbleEventType)
         {
             case ScrobbleEventType.ChapterRead:
                 if (auditEntry.SeriesId == null || auditEntry.UserId == null) return false;
                 await ScrobbleReadingUpdate(auditEntry.UserId.Value, auditEntry.SeriesId.Value, ct);
-                return true;
+                break;
             case ScrobbleEventType.AddWantToRead:
                 if (auditEntry.SeriesId == null || auditEntry.UserId == null) return false;
                 await ScrobbleWantToReadUpdate(auditEntry.UserId.Value, auditEntry.SeriesId.Value, true, ct);
-                return true;
+                break;
             case ScrobbleEventType.RemoveWantToRead:
                 if (auditEntry.SeriesId == null || auditEntry.UserId == null) return false;
                 await ScrobbleWantToReadUpdate(auditEntry.UserId.Value, auditEntry.SeriesId.Value, false, ct);
-                return true;
+                break;
             case ScrobbleEventType.ScoreUpdated:
                 if (auditEntry.SeriesId == null || auditEntry.UserId == null) return false;
                 await ScrobbleRatingUpdate(auditEntry.UserId.Value, auditEntry.SeriesId.Value, auditEntry.ScrobbleDetails.Rating ?? 0f, ct);
-                return true;
+                break;
             case ScrobbleEventType.Review:
                 if (auditEntry.SeriesId == null || auditEntry.UserId == null) return false;
                 string? reviewBody;
@@ -1297,10 +1299,13 @@ public class ScrobblingService : IScrobblingService
                 }
                 if (string.IsNullOrEmpty(reviewBody)) return false;
                 await ScrobbleReviewUpdate(auditEntry.UserId.Value, auditEntry.SeriesId.Value, string.Empty, reviewBody, ct);
-                return true;
+                break;
             default:
                 return false;
         }
+
+        await _unitOfWork.KavitaPlusAuditRepository.MarkAsRetriedAsync(auditEntry.Id, ct);
+        return true;
     }
 
     /// <summary>

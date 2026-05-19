@@ -34,7 +34,7 @@
       <div class="d-flex gap-3 mb-3 align-items-center">
         <div class="btn-group" role="group">
           <input type="checkbox" class="btn-check" id="matched-btn" autocomplete="off" [checked]="showMatched()" (change)="toggleRowFilter('matched')">
-          <label class="btn btn-outline-success" for="matched-btn">{{t('matched-count', {count: matchedCount()})}}</label>
+          <label class="btn btn-outline-primary" for="matched-btn">{{t('matched-count', {count: matchedCount()})}}</label>
 
           <input type="checkbox" class="btn-check" id="warnings-btn" autocomplete="off" [checked]="showIssues()" (change)="toggleRowFilter('issues')">
           <label class="btn btn-outline-warning" for="warnings-btn">{{t('issues-count', {count: issueCount()})}}</label>

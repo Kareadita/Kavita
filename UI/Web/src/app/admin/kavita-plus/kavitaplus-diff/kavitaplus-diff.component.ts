@@ -1,8 +1,8 @@
 import {ChangeDetectionStrategy, Component, computed, input} from '@angular/core';
 import {NgTemplateOutlet} from '@angular/common';
 import {TranslocoDirective} from '@jsverse/transloco';
-import {MetadataFieldChange} from '../../../../_models/kavitaplus/kavita-plus-audit-entry';
-import {DefaultValuePipe} from "../../../../_pipes/default-value.pipe";
+import {DefaultValuePipe} from "../../../_pipes/default-value.pipe";
+import {MetadataFieldChange} from "../../../_models/kavitaplus/kavita-plus-audit-entry";
 
 type ValueKind = 'null' | 'primitive' | 'array' | 'object';
 

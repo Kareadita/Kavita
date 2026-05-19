@@ -1,8 +1,10 @@
 import {ChangeDetectionStrategy, ChangeDetectorRef, Component, inject} from '@angular/core';
 import {ManageScrobbleErrorsComponent} from "../manage-scrobble-errors/manage-scrobble-errors.component";
-import {AccountService} from "../../_services/account.service";
-import {UserScrobbleHistoryComponent} from "../../_single-module/user-scrobble-history/user-scrobble-history.component";
 import {RouterLink} from "@angular/router";
+import {AccountService} from "../../../_services/account.service";
+import {
+  UserScrobbleHistoryComponent
+} from "../../../_single-module/user-scrobble-history/user-scrobble-history.component";
 
 @Component({
     selector: 'app-manage-scrobling',

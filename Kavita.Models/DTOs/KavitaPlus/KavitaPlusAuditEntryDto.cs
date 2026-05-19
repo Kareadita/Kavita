@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using Kavita.Models.Entities.Enums;
 using Kavita.Models.Entities.Enums.Audit;
 
 namespace Kavita.Models.DTOs.KavitaPlus;
@@ -24,4 +23,5 @@ public sealed record KavitaPlusAuditEntryDto
     public IList<MetadataFieldChange>? Diff { get; init; }
     public string? ErrorMessage { get; init; }
     public KavitaPlusScrobbleDetailsDto? ScrobbleDetails { get; init; }
+    public bool CanRetry { get; init; }
 }

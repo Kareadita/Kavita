@@ -5,25 +5,24 @@ import {
   DestroyRef,
   inject,
   OnInit,
-  signal,
-  output
+  output,
+  signal
 } from '@angular/core';
 import {FormControl, FormGroup, ReactiveFormsModule} from "@angular/forms";
-import {EVENTS, MessageHubService} from "../../_services/message-hub.service";
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import {filter, shareReplay} from "rxjs";
-import {ScrobblingService} from "../../_services/scrobbling.service";
-import {ScrobbleError} from "../../_models/scrobbling/scrobble-error";
-
-import {SeriesService} from "../../_services/series.service";
-import {FilterPipe} from "../../_pipes/filter.pipe";
 import {TranslocoModule} from "@jsverse/transloco";
-import {DefaultValuePipe} from "../../_pipes/default-value.pipe";
 import {TranslocoLocaleModule} from "@jsverse/transloco-locale";
-import {UtcToLocalTimePipe} from "../../_pipes/utc-to-local-time.pipe";
 import {ColumnMode, NgxDatatableModule} from "@siemens/ngx-datatable";
-import {ActionService} from "../../_services/action.service";
-import {ResponsiveTableComponent} from "../../shared/_components/responsive-table/responsive-table.component";
+import {ScrobblingService} from "../../../_services/scrobbling.service";
+import {FilterPipe} from "../../../_pipes/filter.pipe";
+import {DefaultValuePipe} from "../../../_pipes/default-value.pipe";
+import {UtcToLocalTimePipe} from "../../../_pipes/utc-to-local-time.pipe";
+import {ResponsiveTableComponent} from "../../../shared/_components/responsive-table/responsive-table.component";
+import {EVENTS, MessageHubService} from "../../../_services/message-hub.service";
+import {SeriesService} from "../../../_services/series.service";
+import {ActionService} from "../../../_services/action.service";
+import {ScrobbleError} from "../../../_models/scrobbling/scrobble-error";
 
 @Component({
     selector: 'app-manage-scrobble-errors',

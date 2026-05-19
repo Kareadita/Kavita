@@ -107,7 +107,7 @@ public class KavitaPlusAuditRepository(DataContext context) : IKavitaPlusAuditRe
                 e.SeriesId, series.LibraryId, series.Name,
                 e.SubjectType, e.SubjectId,
                 e.UserId, e.User != null ? e.User.UserName : null,
-                e.Payload, e.ErrorMessage))
+                e.Payload, e.ErrorMessage, e.HasRetried))
             .ToListAsync(ct);
 
         var recentEvents = recentRaw.Select(MapToDto).ToList();
@@ -161,7 +161,7 @@ public class KavitaPlusAuditRepository(DataContext context) : IKavitaPlusAuditRe
                 context.Series.Where(s => s.Id == e.SeriesId).Select(s => s.Name).FirstOrDefault(),
                 e.SubjectType, e.SubjectId,
                 e.UserId, e.User != null ? e.User.UserName : null,
-                e.Payload, e.ErrorMessage))
+                e.Payload, e.ErrorMessage, e.HasRetried))
             .ToListAsync(ct);
 
         var items = raw.Select(MapToDto).ToList();
@@ -226,7 +226,17 @@ public class KavitaPlusAuditRepository(DataContext context) : IKavitaPlusAuditRe
             Diff = diff,
             ErrorMessage = e.ErrorMessage,
             ScrobbleDetails = scrobbleDetails,
+            CanRetry = e.Status == AuditStatus.Failure
+                       && e.Category == KavitaPlusAuditCategory.Scrobble
+                       && !e.HasRetried,
         };
+    }
+
+    public async Task MarkAsRetriedAsync(long id, CancellationToken ct = default)
+    {
+        await context.KavitaPlusAuditLogs
+            .Where(e => e.Id == id)
+            .ExecuteUpdateAsync(s => s.SetProperty(e => e.HasRetried, true), ct);
     }
 
     private sealed record RawEntry(
@@ -235,7 +245,7 @@ public class KavitaPlusAuditRepository(DataContext context) : IKavitaPlusAuditRe
         int? SeriesId, int? LibraryId, string? SeriesName,
         AuditSubjectType SubjectType, int? SubjectId,
         int? UserId, string? Username,
-        string? Payload, string? ErrorMessage);
+        string? Payload, string? ErrorMessage, bool HasRetried);
 
     private sealed class ChangesWrapper
     {

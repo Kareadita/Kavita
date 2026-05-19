@@ -105,7 +105,7 @@ export class ScrobblingService {
    * @param event
    */
   retryScrobbleEvent(event: KavitaPlusAuditEntry) {
-    return this.httpClient.post(this.baseUrl + 'scrobbling/retry-scrobble', event, TextResonse);
+    return this.httpClient.post(this.baseUrl + 'scrobbling/retry-scrobble', event, TextResonse).pipe(map(r => r === 'true'));
   }
 
   hasRunScrobbleGen() {

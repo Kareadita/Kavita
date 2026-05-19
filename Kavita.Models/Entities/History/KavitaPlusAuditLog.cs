@@ -40,6 +40,11 @@ public class KavitaPlusAuditLog
     public string? ErrorMessage { get; set; }
 
     /// <summary>
+    /// Scrobble events that failed allow retrying
+    /// </summary>
+    public bool HasRetried { get; set; }
+
+    /// <summary>
     /// The user who triggered this event. Null for system-initiated events.
     /// No cascade delete: logs outlive users.
     /// </summary>

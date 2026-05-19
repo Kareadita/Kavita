@@ -1,31 +1,32 @@
 import {ChangeDetectionStrategy, Component, DestroyRef, inject, OnInit, signal} from '@angular/core';
 import {translate, TranslocoDirective} from "@jsverse/transloco";
-import {ImageComponent} from "../../shared/image/image.component";
-import {ImageService} from "../../_services/image.service";
-import {Series} from "../../_models/series";
-import {ActionService} from "../../_services/action.service";
-import {ManageService} from "../../_services/manage.service";
-import {ManageMatchSeries} from "../../_models/kavitaplus/manage-match-series";
+import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
+import {LibraryTypePipe} from "../../../_pipes/library-type.pipe";
+import {ImageComponent} from "../../../shared/image/image.component";
 import {VirtualScrollerModule} from "@iharbeck/ngx-virtual-scroller";
 import {FormControl, FormGroup, ReactiveFormsModule} from "@angular/forms";
-import {ManageMatchFilter} from "../../_models/kavitaplus/manage-match-filter";
-import {allMatchStates, MatchStateOption} from "../../_models/kavitaplus/match-state-option";
-import {MatchStateOptionPipe} from "../../_pipes/match-state.pipe";
-import {UtcToLocalTimePipe} from "../../_pipes/utc-to-local-time.pipe";
-import {debounceTime, distinctUntilChanged, switchMap, tap} from "rxjs";
-import {DefaultValuePipe} from "../../_pipes/default-value.pipe";
+import {MatchStateOptionPipe} from "../../../_pipes/match-state.pipe";
+import {UtcToLocalTimePipe} from "../../../_pipes/utc-to-local-time.pipe";
+import {DefaultValuePipe} from "../../../_pipes/default-value.pipe";
 import {NgxDatatableModule} from "@siemens/ngx-datatable";
-import {LibraryNamePipe} from "../../_pipes/library-name.pipe";
+import {LibraryNamePipe} from "../../../_pipes/library-name.pipe";
 import {APP_BASE_HREF, AsyncPipe} from "@angular/common";
-import {EVENTS, MessageHubService} from "../../_services/message-hub.service";
-import {ScanSeriesEvent} from "../../_models/events/scan-series-event";
-import {LibraryTypePipe} from "../../_pipes/library-type.pipe";
-import {allKavitaPlusMetadataApplicableTypes} from "../../_models/library/library";
-import {ExternalMatchRateLimitErrorEvent} from "../../_models/events/external-match-rate-limit-error-event";
+import {ResponsiveTableComponent} from "../../../shared/_components/responsive-table/responsive-table.component";
+import {allKavitaPlusMetadataApplicableTypes} from "../../../_models/library/library";
+import {ActionService} from "../../../_services/action.service";
+import {ManageService} from "../../../_services/manage.service";
+import {EVENTS, MessageHubService} from "../../../_services/message-hub.service";
+import {ManageMatchSeries} from "../../../_models/kavitaplus/manage-match-series";
+import {Series} from "../../../_models/series";
+import {ManageMatchFilter} from "../../../_models/kavitaplus/manage-match-filter";
+import {debounceTime, distinctUntilChanged, tap} from "rxjs";
+import {switchMap} from "rxjs/operators";
+import {ExternalMatchRateLimitErrorEvent} from "../../../_models/events/external-match-rate-limit-error-event";
 import {ToastrService} from "ngx-toastr";
-import {ResponsiveTableComponent} from "../../shared/_components/responsive-table/responsive-table.component";
-import {Pagination} from "../../_models/pagination";
-import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
+import {ImageService} from "../../../_services/image.service";
+import {Pagination} from "../../../_models/pagination";
+import {ScanSeriesEvent} from "../../../_models/events/scan-series-event";
+import {allMatchStates, MatchStateOption} from "../../../_models/kavitaplus/match-state-option";
 
 @Component({
   selector: 'app-manage-matched-metadata',
@@ -48,7 +49,7 @@ import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class ManageMatchedMetadataComponent implements OnInit {
-  protected readonly MatchStateOption = MatchStateOption;
+
   protected readonly allMatchStates = allMatchStates.filter(m => m !== MatchStateOption.Matched); // Matched will have too many
   protected readonly allLibraryTypes = allKavitaPlusMetadataApplicableTypes;
 
@@ -138,4 +139,6 @@ export class ManageMatchedMetadataComponent implements OnInit {
       this.data.update(x => x.filter(s => s.series.id !== series.id));
     });
   }
+
+  protected readonly MatchStateOption = MatchStateOption;
 }

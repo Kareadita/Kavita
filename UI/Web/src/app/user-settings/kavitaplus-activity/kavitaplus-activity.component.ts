@@ -63,7 +63,8 @@ export class KavitaplusActivityComponent implements OnInit {
   }
 
   retryScrobbleEvent(event: KavitaPlusAuditEntry) {
-    this.scrobblingService.retryScrobbleEvent(event).subscribe(() => {
+    this.scrobblingService.retryScrobbleEvent(event).subscribe((success) => {
+      if (!success) return;
       this.loadData();
     });
   }

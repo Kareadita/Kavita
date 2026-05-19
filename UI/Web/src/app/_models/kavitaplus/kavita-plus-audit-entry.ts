@@ -38,4 +38,5 @@ export interface KavitaPlusAuditEntry {
   diff: MetadataFieldChange[] | null;
   errorMessage: string | null;
   scrobbleDetails: KavitaPlusScrobbleDetails | null;
+  canRetry: boolean;
 }

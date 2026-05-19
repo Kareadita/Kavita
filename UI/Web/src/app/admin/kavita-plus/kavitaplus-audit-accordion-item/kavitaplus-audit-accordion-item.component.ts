@@ -20,7 +20,7 @@ import {AuditLogErrorPipe} from '../../../_pipes/audit-log-error.pipe';
 import {TimeAgoPipe} from '../../../_pipes/time-ago.pipe';
 import {UtcToLocalTimePipe} from '../../../_pipes/utc-to-local-time.pipe';
 import {AuditStatusTitlePipe} from "../../../_pipes/audit-status-title.pipe";
-import {KavitaplusDiffComponent} from './kavitaplus-diff/kavitaplus-diff.component';
+import {KavitaplusDiffComponent} from "../kavitaplus-diff/kavitaplus-diff.component";
 
 @Component({
   selector: 'app-kavitaplus-audit-accordion-item',
