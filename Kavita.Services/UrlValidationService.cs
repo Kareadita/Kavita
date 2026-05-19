@@ -10,14 +10,14 @@ namespace Kavita.Services;
 
 public class UrlValidationService(ILocalizationService localizationService) : IUrlValidationService
 {
-    public async Task ValidateUrlAsync(string url, bool allowHttp = false)
+    public async Task ValidateUrlAsync(string url)
     {
         if (!Uri.TryCreate(url, UriKind.Absolute, out var uri))
         {
             throw new KavitaException(await localizationService.TranslateAsync("url-malformed"));
         }
 
-        if (!allowHttp && !string.Equals(uri.Scheme, "https", StringComparison.OrdinalIgnoreCase))
+        if (!string.Equals(uri.Scheme, "https", StringComparison.OrdinalIgnoreCase))
         {
             throw new KavitaException(await localizationService.TranslateAsync("url-https-only"));
         }

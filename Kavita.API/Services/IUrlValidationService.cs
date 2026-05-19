@@ -9,7 +9,6 @@ public interface IUrlValidationService
     /// Rejects non-HTTPS schemes, private/loopback IPs, and link-local addresses.
     /// </summary>
     /// <param name="url">The URL to validate</param>
-    /// <param name="allowHttp">Allow http</param>
     /// <exception cref="Kavita.Common.KavitaException">Thrown when the URL fails validation</exception>
-    Task ValidateUrlAsync(string url, bool allowHttp = false);
+    Task ValidateUrlAsync(string url);
 }

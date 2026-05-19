@@ -70,7 +70,7 @@ public class UploadController : BaseApiController
             // We need to allow any images that are coming from within Kavita to bypass Validation
             if (!dto.IsInternalUrl)
             {
-                await _urlValidationService.ValidateUrlAsync(dto.Url, true);
+                await _urlValidationService.ValidateUrlAsync(dto.Url);
             }
         }
         catch (Exception)
