@@ -1878,7 +1878,7 @@
         "title": "État de la publication",
         "visualisation-label": "Visualisation",
         "data-table-label": "Table de données",
-        "count-header": "Compter",
+        "count-header": "Nombre",
         "status-header": "{{manage-matched-metadata.status-header}}",
         "no-data": "{{common.no-data}}"
     },
@@ -1918,7 +1918,7 @@
         "most-active-users-title": "Utilisateurs les plus actifs",
         "popular-libraries-title": "Bibliothèques populaires",
         "popular-series-title": "Séries populaires",
-        "series-count": "{{num}} Série(s)",
+        "series-count": "{{num}} Séries",
         "volume-count": "{{num}} Volumes",
         "file-count": "{{num}} Fichiers",
         "genre-count": "{{num}} Genres",
@@ -3049,9 +3049,9 @@
     },
     "library-type-subtitle-pipe": {
         "book": "Bibliothèque générique de livres.",
-        "comic": "Bibliothèque de Comics avec regroupement de volumes et recueils au sein d'une seule Série. Ne supporte pas plusieurs versions dans une même Série.",
+        "comic": "Bibliothèque de bandes dessinées avec regroupement de volumes et recueils au sein d'une seule Série. Ne supporte pas plusieurs versions dans une même Série.",
         "manga": "Manga Japonais avec support de regoupement de volumes. Supporte aussi les images éparpillées.",
-        "comicVine": "Implémentation stricte des Comics basée sur les metadonnées Comic Vine avec intégration des outils spécialisés.",
+        "comicVine": "Implémentation stricte des bandes dessinées basée sur les metadonnées Comic Vine avec intégration des outils spécialisés.",
         "image": "Fichiers image éparpillés avec support limité. Doit globalement suivre la documentation wiki.",
         "lightNovel": "Bibliothèque de livres avec fonctionnement particulier optimisé pour les romans légers"
     },
@@ -3149,8 +3149,8 @@
     "profile-stat-bar": {
         "books-read-label": "Livres lus",
         "books-read-tooltip": "Livres Lus : {{count}}",
-        "comics-read-label": "Comics lus",
-        "comics-read-tooltip": "Comics Lus : {{count}}",
+        "comics-read-label": "Bandes dessinées lues",
+        "comics-read-tooltip": "Bandes dessinées lues : {{count}}",
         "pages-read-label": "Pages lues",
         "pages-read-tooltip": "Pages Lues : {{count}}",
         "words-read-label": "Mots lus",
@@ -3180,7 +3180,7 @@
     },
     "active-user-card": {
         "total-hours": "{{duration}} au total",
-        "comics-count": "{{count}} comics",
+        "comics-count": "{{count}} bandes dessinées",
         "books-count": "{{count}} livres"
     },
     "duration-pipe": {
@@ -3208,7 +3208,7 @@
     },
     "favorite-authors": {
         "title": "Auteurs les plus lus",
-        "sub-title": "{{name}} a pour auteur le plus lu {{author}}, avec un total de {{count}} lectures",
+        "sub-title": "{{name}} est l'auteur le plus lu par {{author}}, avec un total de {{count}} lectures",
         "no-data": "{{common.no-data}}"
     },
     "manage-custom-key-binds": {
@@ -3228,7 +3228,7 @@
     },
     "page-spread": {
         "title": "Chapitres par nombre de pages",
-        "sub-title": "{{username}} a lu des chapitres entre {{highestBucket}} pages",
+        "sub-title": "{{username}} lit des chapitres d'une longueur comprise entre {{highestBucket}} pages",
         "data-type": "{{data}} chapitres",
         "data-of": "{{percentage}}% de vos chapitres",
         "range": "Pages : {{range}}",
@@ -3236,7 +3236,7 @@
     },
     "word-spread": {
         "title": "Chapitres par nombre de mots",
-        "sub-title": "{{username}} lit des chapitres entre {{highestBucket}} mots",
+        "sub-title": "{{username}} lit des chapitres d'une longueur comprise entre {{highestBucket}} mots",
         "data-type": "{{data}} chapitres",
         "data-of": "{{percentage}}% de vos chapitres",
         "range": "Plage de mots : {{range}}",
@@ -3305,12 +3305,12 @@
     },
     "reads-by-month": {
         "title": "Total de lectures par mois",
-        "sub-title": "{{username}} a lu le plus en {{month}} {{year}} avec {{reads}} chapitres lus",
+        "sub-title": "{{username}} a réalisé son meilleur mois de lecture en {{month}} {{year}}, avec {{reads}} chapitres",
         "no-data": "{{common.no-data}}"
     },
     "avg-time-reading-by-hour": {
         "title": "Moyenne de temps passé à lire par heure",
-        "most-time-spend-reading": "{{name}} passe la plupart de son temps à lire entre {{startHour}} et {{endHour}} avec une moyenne de {{amount}} minutes",
+        "most-time-spend-reading": "{{name}} consacre la majorité de son temps de lecture au créneau {{startHour}}-{{endHour}}, avec une moyenne de {{amount}} minutes par session",
         "data-since": "Inclut uniquement les lectures depuis {{date}}",
         "no-data": "{{common.no-data}}"
     },
@@ -3339,13 +3339,13 @@
     },
     "reading-pace": {
         "title-books": "Rythme de lecture : Livres",
-        "title-comics": "Rythme de lecture : Comics",
-        "sub-title-books": "{{username}} a lu un livre tous les {{count}} jours",
-        "sub-title-comics": "{{username}} a lu un comic tous les {{count}} jours",
+        "title-comics": "Rythme de lecture : Bandes dessinées",
+        "sub-title-books": "{{username}} lit un livre tous les {{count}} jours",
+        "sub-title-comics": "{{username}} lit une bande dessinée tous les {{count}} jours",
         "hours-read": "Heures de lecture",
         "pages-read": "Pages lues",
         "words-read": "Mots lus",
-        "comics-read": "Comics lus",
+        "comics-read": "Bandes dessinées lues",
         "books-read": "Livres lus",
         "per-year": "Par Année",
         "per-month": "Par Mois",
@@ -3355,10 +3355,10 @@
         "disclaimer-comics": "S'applique à Image/Archives"
     },
     "smart-time-picker": {
-        "forever": "Pour toujours",
-        "select-year": "Sélectionner l'Année",
-        "custom-range": "Gamme personnalisée",
-        "during-entire-life-profile": "tout au long de leur vie",
+        "forever": "Depuis le début",
+        "select-year": "Pour l'année",
+        "custom-range": "Pour la période",
+        "during-entire-life-profile": "Depuis le début",
         "during-entire-life-server": "depuis le début",
         "during-year": "durant {{year}}",
         "during-from-to": "de {{startYear}} à {{endYear}}",

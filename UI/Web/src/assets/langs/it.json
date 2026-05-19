@@ -2281,7 +2281,7 @@
         "save": "{{common.save}}",
         "reset-label": "Reset ids",
         "auto-save-required": "Hai cambiato impostazioni critiche, salva per mentenerle",
-        "provider-title": "Provider",
+        "provider-title": "Fornitore",
         "provider-tooltip": "Modifiche al Provider richiedono il salvattaggio manuale. Kavita deve essere configurato come client confidenziale e necessita di un URL di reindirizzamento. Maggiori informazione nella <a href='https://wiki.kavitareader.com/guides/admin-settings/open-id-connect/' target='_blank' rel='noreferrer noopener'>guida</a>.",
         "behavior-title": "Comportamento",
         "other-field-required": "{{validation.other-field-required}}",
@@ -2290,7 +2290,15 @@
         "tls-required": "Il provider OIDC richiede tls (https)",
         "manual-save-label": "Modifiche al provider richiedono un salvataggio manuale",
         "authority-tooltip": "L'URL del provider OIDC, non include il percorso .well-known/openid-configuration",
-        "client-id-label": "Client ID"
+        "client-id-label": "Client ID",
+        "reset-tooltip": "Reimposta gli id esterni di tutti gli utenti; usa questa funzione per reimpostare i collegamenti tra gli utenti in Kavita e il tuo provider di identità",
+        "reset-confirm": "Vuoi davvero resettare gli id esterni per tutti gli utenti?",
+        "reset-success": "Id esterni resettati per tutti gli utenti, ri-autenticarsi per collegarsi",
+        "checking-authority": "Controllo validità dell'autorità, attendere...",
+        "authority-label": "Autorità",
+        "client-id-tooltip": "Il ClientID impostato nel tuo OIDC provider, non può essere vuoto",
+        "secret-label": "Client secret",
+        "secret-tooltip": "La chiave segreta generata dal tuo OIDC provider, non sarà mostrata dopo l'impostazione"
     },
     "version-update-modal": {
         "close": "{{common.close}}",
@@ -2314,6 +2322,22 @@
     },
     "title": {
         "bookmarks": "Segnalibri",
-        "browse-genres": "Sfoglia Generi"
+        "browse-genres": "Sfoglia Generi",
+        "reading-list": "Liste di lettura",
+        "home": "Home",
+        "collections": "Collezioni",
+        "browse-tags": "Sfoglia tags",
+        "want-to-read": "Da leggere",
+        "reading-lists": "Liste di lettura",
+        "settings": "Impostazioni",
+        "all-series": "Tutte le serie",
+        "profile": "Profilo di {{username}}"
+    },
+    "authority-validation-result-pipe": {
+        "success": "Autorità valida",
+        "invalid-authority": "Kavita non riesce a caricare la configurazione OIDC, ma l'emittente non corrisponde",
+        "failure": "Kavita non riesce a caricare la configurazione OIDC",
+        "not-applicable": "Kavita non riesce a validare l'autorità perché non è configurata",
+        "missing-https": "{{manage-oidc-connect.tls-required}}"
     }
 }
