@@ -873,6 +873,9 @@ public class ScrobblingService : IScrobblingService
             var count = await SetAndCheckRateLimit(ctx.RateLimits, evt.AppUser, ctx.License);
             if (count == 0)
             {
+                await _auditService.LogScrobbleAsync(KavitaPlusEventType.ScrobbleEventSkipped, evt.SeriesId,
+                    new AuditLogScrobbleParamsDto { ScrobbleEventType = evt.ScrobbleEventType },
+                    AuditStatus.Failure, "rate-limit-hit", userId: evt.AppUserId);
                 if (ctx.Users.Count == 1) break;
                 continue;
             }
