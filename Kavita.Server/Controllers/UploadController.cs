@@ -78,7 +78,8 @@ public class UploadController : BaseApiController
             return BadRequest(await _localizationService.TranslateAsync(UserId, "url-not-valid"));
         }
 
-        var dateString = $"{DateTime.UtcNow.ToShortDateString()}_{DateTime.UtcNow.ToLongTimeString()}".Replace('/', '_').Replace(':', '_');
+        var now = DateTime.UtcNow;
+        var dateString = $"{now:d}_{now:T}".Replace('/', '_').Replace(':', '_');
         try
         {
             var format = await dto.Url.GetFileFormatAsync();
