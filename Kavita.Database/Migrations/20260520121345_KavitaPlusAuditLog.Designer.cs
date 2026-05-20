@@ -14,7 +14,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Kavita.Database.Migrations
 {
     [DbContext(typeof(DataContext))]
-    [Migration("20260515220849_KavitaPlusAuditLog")]
+    [Migration("20260520121345_KavitaPlusAuditLog")]
     partial class KavitaPlusAuditLog
     {
         /// <inheritdoc />
@@ -591,6 +591,9 @@ namespace Kavita.Database.Migrations
                         .HasColumnType("TEXT");
 
                     b.Property<int>("EventType")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<bool>("HasRetried")
                         .HasColumnType("INTEGER");
 
                     b.Property<string>("Payload")

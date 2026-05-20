@@ -54,6 +54,7 @@ namespace Kavita.Database.Migrations
                     SubjectId = table.Column<int>(type: "INTEGER", nullable: true),
                     Payload = table.Column<string>(type: "TEXT", nullable: true),
                     ErrorMessage = table.Column<string>(type: "TEXT", nullable: true),
+                    HasRetried = table.Column<bool>(type: "INTEGER", nullable: false),
                     UserId = table.Column<int>(type: "INTEGER", nullable: true)
                 },
                 constraints: table =>
