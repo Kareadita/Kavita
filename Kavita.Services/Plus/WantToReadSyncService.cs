@@ -11,6 +11,7 @@ using Kavita.API.Services.Plus;
 using Kavita.Common;
 using Kavita.Common.Extensions;
 using Kavita.Models.Entities.Enums.Audit;
+using Kavita.Models.DTOs.KavitaPlus.Audit;
 using Kavita.Models.DTOs.KavitaPlus.Metadata;
 using Kavita.Models.Entities.Enums;
 using Kavita.Models.Entities.User;
@@ -49,7 +50,7 @@ public class WantToReadSyncService(
                     AuditStatus.Info,
                     AuditSubjectType.Global,
                     userId: user.Id,
-                    payload: new { userName = user.UserName, hasMal = !string.IsNullOrEmpty(user.MalUserName), hasAniList = !string.IsNullOrEmpty(user.AniListAccessToken) },
+                    payload: new AuditLogWantToReadSyncParamsDto { UserName = user.UserName, HasMal = !string.IsNullOrEmpty(user.MalUserName), HasAniList = !string.IsNullOrEmpty(user.AniListAccessToken) },
                     ct: ct);
                 var wantToReadSeries =
                     await (
@@ -89,7 +90,7 @@ public class WantToReadSyncService(
                     AuditStatus.Success,
                     AuditSubjectType.Global,
                     userId: user.Id,
-                    payload: new { userName = user.UserName, seriesMatched = user.WantToRead.Count, hasMal = !string.IsNullOrEmpty(user.MalUserName), hasAniList = !string.IsNullOrEmpty(user.AniListAccessToken) },
+                    payload: new AuditLogWantToReadSyncCompletedParamsDto { UserName = user.UserName, SeriesMatched = user.WantToRead.Count, HasMal = !string.IsNullOrEmpty(user.MalUserName), HasAniList = !string.IsNullOrEmpty(user.AniListAccessToken) },
                     ct: ct);
 
                 // Trigger CleanupService to cleanup any series in WantToRead that don't belong
@@ -103,7 +104,7 @@ public class WantToReadSyncService(
                     AuditStatus.Failure,
                     AuditSubjectType.Global,
                     userId: user.Id,
-                    payload: new { userName = user.UserName },
+                    payload: new AuditLogWantToReadSyncParamsDto { UserName = user.UserName },
                     error: ex.Message,
                     ct: ct);
                 logger.LogError(ex, "There was an exception when processing want to read series sync for {User}", user.UserName);

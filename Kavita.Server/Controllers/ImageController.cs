@@ -267,6 +267,7 @@ public class ImageController(IUnitOfWork unitOfWork, IDirectoryService directory
         return PhysicalFile(path);
     }
 
+
     [HttpGet("external/series")]
     [Authorize(PolicyGroups.AdminPolicy)]
     [SeriesAccess]

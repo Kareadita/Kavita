@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using Kavita.API.Database;
 using Kavita.API.Services.Plus;
 using Kavita.Models.DTOs.KavitaPlus;
+using Kavita.Models.DTOs.KavitaPlus.Audit;
 using Kavita.Models.Entities.Enums;
 using Kavita.Models.Entities.Enums.Audit;
 using Kavita.Models.Entities.History;
@@ -63,12 +64,12 @@ public class KavitaPlusAuditService(IUnitOfWork unitOfWork, ILogger<KavitaPlusAu
 
     public Task LogMetadataAsync(int seriesId, IList<MetadataFieldChangeDto> changes, CancellationToken ct = default) =>
         LogAsync(KavitaPlusAuditCategory.Metadata, KavitaPlusEventType.MetadataUpdated, AuditStatus.Success,
-            AuditSubjectType.Series, seriesId: seriesId, payload: new { changes }, ct: ct);
+            AuditSubjectType.Series, seriesId: seriesId, payload: new AuditLogMetadataChangesParamsDto { Changes = changes }, ct: ct);
 
     public Task LogChapterMetadataAsync(int chapterId, int seriesId, IList<MetadataFieldChangeDto> changes,
         CancellationToken ct = default) =>
         LogAsync(KavitaPlusAuditCategory.Metadata, KavitaPlusEventType.ChapterMetadataUpdated, AuditStatus.Success,
-            AuditSubjectType.Chapter, seriesId: seriesId, subjectId: chapterId, payload: new { changes }, ct: ct);
+            AuditSubjectType.Chapter, seriesId: seriesId, subjectId: chapterId, payload: new AuditLogMetadataChangesParamsDto { Changes = changes }, ct: ct);
 
     public Task LogPersonAsync(KavitaPlusEventType type, int personId, object payload,
         AuditStatus status = AuditStatus.Success, CancellationToken ct = default) =>

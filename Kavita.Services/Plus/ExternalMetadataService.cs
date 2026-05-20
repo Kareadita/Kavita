@@ -21,6 +21,7 @@ using Kavita.Models.Builders;
 using Kavita.Models.DTOs;
 using Kavita.Models.DTOs.Collection;
 using Kavita.Models.DTOs.KavitaPlus;
+using Kavita.Models.DTOs.KavitaPlus.Audit;
 using Kavita.Models.DTOs.KavitaPlus.ExternalMetadata;
 using Kavita.Models.DTOs.KavitaPlus.ExternalMetadata.Covers;
 using Kavita.Models.DTOs.KavitaPlus.Metadata;
@@ -338,7 +339,7 @@ public class ExternalMetadataService : IExternalMetadataService
             _logger.LogInformation("Matched {SeriesName} with Kavita+ Series {MatchSeriesName}", series.Name,
                 metadata.Series.Name);
             await _auditService.LogMatchAsync(KavitaPlusEventType.SeriesMatchCleared, seriesId,
-                new { seriesName = series.Name, matchedName = metadata.Series.Name }, ct: ct);
+                new AuditLogMatchClearedParamsDto { SeriesName = series.Name, MatchedName = metadata.Series.Name }, ct: ct);
         }
         catch (KavitaException ex)
         {
@@ -374,7 +375,7 @@ public class ExternalMetadataService : IExternalMetadataService
         await _unitOfWork.CommitAsync(ct);
 
         await _auditService.LogMatchAsync(KavitaPlusEventType.SeriesDontMatchSet, seriesId,
-            new { seriesName = series.Name, dontMatch }, ct: ct);
+            new AuditLogMatchDontMatchParamsDto { SeriesName = series.Name, DontMatch = dontMatch }, ct: ct);
     }
 
     /// <summary>
@@ -406,15 +407,15 @@ public class ExternalMetadataService : IExternalMetadataService
                 AuditStatus.Info,
                 AuditSubjectType.Series,
                 seriesId: seriesId,
-                payload: new
+                payload: new AuditLogMetadataFetchParamsDto
                 {
-                    seriesId,
-                    libraryId = series.Library?.Id,
-                    format = series.Format,
-                    mangaBakaId = series.MangaBakaId,
-                    cbrId = series.CbrId,
-                    aniListId = series.AniListId,
-                    hardcoverId = series.HardcoverId,
+                    SeriesId = seriesId,
+                    LibraryId = series.Library?.Id,
+                    Format = series.Format,
+                    MangaBakaId = series.MangaBakaId,
+                    CbrId = series.CbrId,
+                    AniListId = series.AniListId,
+                    HardcoverId = series.HardcoverId,
                 },
                 ct: ct);
 
@@ -444,7 +445,7 @@ public class ExternalMetadataService : IExternalMetadataService
                         series.IsBlacklisted = true;
                         await _unitOfWork.CommitAsync(ct);
                         await _auditService.LogMatchAsync(KavitaPlusEventType.SeriesBlacklisted, seriesId,
-                            new { seriesName = series.Name, reason = "unknown-series" }, AuditStatus.Failure, ct: ct);
+                            new AuditLogMatchFailureParamsDto { SeriesName = series.Name, Reason = "unknown-series" }, AuditStatus.Failure, ct: ct);
                     }
                 }
             }
@@ -453,7 +454,7 @@ public class ExternalMetadataService : IExternalMetadataService
             {
                 _logger.LogInformation("Hit rate limit twice, try again later");
                 await _auditService.LogMatchAsync(KavitaPlusEventType.SeriesMatchFailed, seriesId,
-                    new { seriesName = series.Name, reason = "rate-limit-hit" }, AuditStatus.Failure, ct: ct);
+                    new AuditLogMatchFailureParamsDto { SeriesName = series.Name, Reason = "rate-limit-hit" }, AuditStatus.Failure, ct: ct);
                 return _defaultReturn;
             }
 
@@ -492,16 +493,16 @@ public class ExternalMetadataService : IExternalMetadataService
                 .Average(r => r.AverageScore) : 0;
 
             // prefer what was passed in (manual match), fall back to what K+ returned
-            var beforeIds = new { aniListId = series.AniListId, malId = series.MalId, mangaBakaId = series.MangaBakaId, cbrId = series.CbrId };
+            var beforeIds = new AuditLogMatchExternalIdsParamsDto { AniListId = series.AniListId, MalId = series.MalId, MangaBakaId = series.MangaBakaId, CbrId = series.CbrId };
 
             externalSeriesMetadata.MalId = data.MalId ?? result.MalId ?? 0;
             externalSeriesMetadata.AniListId = data.AniListId ?? result.AniListId ?? 0;
             externalSeriesMetadata.CbrId = data.CbrId ?? result.CbrId ?? 0;
             series.MangaBakaId = data.MangabakaId ?? result.MangabakaId ?? 0;
-            var afterIds = new { aniListId = externalSeriesMetadata.AniListId, malId = externalSeriesMetadata.MalId, mangaBakaId = series.MangaBakaId, cbrId = externalSeriesMetadata.CbrId };
+            var afterIds = new AuditLogMatchExternalIdsParamsDto { AniListId = externalSeriesMetadata.AniListId, MalId = externalSeriesMetadata.MalId, MangaBakaId = series.MangaBakaId, CbrId = externalSeriesMetadata.CbrId };
 
             await _auditService.LogMatchAsync(KavitaPlusEventType.SeriesMatched, seriesId,
-                new { seriesName = series.Name, before = beforeIds, after = afterIds, matchedName = result.Series?.Name }, ct: ct);
+                new AuditLogMatchedParamsDto { SeriesName = series.Name, Before = beforeIds, After = afterIds, MatchedName = result.Series?.Name }, ct: ct);
 
             // If there is metadata and the user has metadata download turned on
             var madeMetadataModification = false;
@@ -728,7 +729,7 @@ public class ExternalMetadataService : IExternalMetadataService
                 modified = true;
                 person.Aliases.Add(new PersonAliasBuilder(mapping.PreferredName).Build());
                 await _auditService.LogPersonAsync(KavitaPlusEventType.PersonAliasAdded, person.Id,
-                    new { personName = person.Name, aliasAdded = mapping.PreferredName });
+                    new AuditLogPersonAliasParamsDto { PersonName = person.Name, AliasAdded = mapping.PreferredName });
             }
         }
 
@@ -1520,7 +1521,7 @@ public class ExternalMetadataService : IExternalMetadataService
         chapter.AddKPlusOverride(MetadataSettingField.ChapterCovers);
         await _auditService.LogAsync(KavitaPlusAuditCategory.Metadata, KavitaPlusEventType.ChapterCoverUpdated, AuditStatus.Success,
             AuditSubjectType.Chapter, seriesId: seriesId, subjectId: chapter.Id,
-            payload: new { issueNumber = chapter.Range, coverUrl });
+            payload: new AuditLogChapterCoverParamsDto { IssueNumber = chapter.Range, CoverUrl = coverUrl });
         return true;
     }
 
@@ -1593,7 +1594,7 @@ public class ExternalMetadataService : IExternalMetadataService
         series.Metadata.AddKPlusOverride(MetadataSettingField.Covers);
         await _auditService.LogAsync(KavitaPlusAuditCategory.Metadata, KavitaPlusEventType.CoverUpdated, AuditStatus.Success,
             AuditSubjectType.Series, seriesId: series.Id,
-            payload: new { seriesName = series.Name, coverUrl = externalMetadata.CoverUrl });
+            payload: new AuditLogSeriesCoverParamsDto { SeriesName = series.Name, CoverUrl = externalMetadata.CoverUrl });
         return true;
     }
 
@@ -1742,7 +1743,7 @@ public class ExternalMetadataService : IExternalMetadataService
             {
                 await _coverDbService.SetPersonCoverByUrl(person, staff.ImageUrl, false, true);
                 await _auditService.LogPersonAsync(KavitaPlusEventType.PersonCoverUpdated, person.Id,
-                    new { personName = person.Name, aniListId, imageUrl = staff.ImageUrl });
+                    new AuditLogPersonCoverParamsDto { PersonName = person.Name, AniListId = aniListId, ImageUrl = staff.ImageUrl });
             }
             catch (Exception ex)
             {
