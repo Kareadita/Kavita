@@ -90,6 +90,7 @@ export class KavitaplusActivityComponent implements OnInit {
       });
   }
 
+
   loadMore() {
     this.currentPage.update(p => p + 1);
     this.loadData(false);

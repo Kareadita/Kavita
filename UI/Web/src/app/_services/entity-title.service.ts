@@ -16,13 +16,7 @@ export class EntityTitleService {
 
 
   /**
-   * Formats a Chapter name based on the library it's in
-   * @param libraryType
-   * @param plural Pluralize word
-   * @returns
-   */
-  /**
-   * Returns the formatted label for scrobble details — no leading separator. Callers append " - " themselves.
+   * Returns the formatted label for scrobble details with no leading separator. Callers append " - " themselves.
    * Returns an empty string when there is nothing to display.
    */
   scrobbleDetailLabel(details: KavitaPlusScrobbleDetails): string {

@@ -12,7 +12,7 @@ const PREFIX = 'kavita-plus-event-description-pipe';
   standalone: true,
 })
 export class KavitaPlusEventDescriptionPipe implements PipeTransform {
-  private readonly t = inject(TranslocoService);
+  private readonly translocoService = inject(TranslocoService);
   private readonly entityTitleService = inject(EntityTitleService);
 
   transform(entry: KavitaPlusAuditEntry): string {
@@ -21,16 +21,16 @@ export class KavitaPlusEventDescriptionPipe implements PipeTransform {
       switch (sd.scrobbleEventType) {
         case ScrobbleEventType.ChapterRead: {
           const chapter = this.entityTitleService.scrobbleDetailLabel(sd);
-          return chapter ? this.t.translate(`${PREFIX}.read-progress-sent`, {chapter}) : '';
+          return chapter ? this.translocoService.translate(`${PREFIX}.read-progress-sent`, {chapter}) : '';
         }
         case ScrobbleEventType.ScoreUpdated:
-          return this.t.translate(`${PREFIX}.rating-updated`);
+          return this.translocoService.translate(`${PREFIX}.rating-updated`);
         case ScrobbleEventType.AddWantToRead:
-          return this.t.translate(`${PREFIX}.add-want-to-read`);
+          return this.translocoService.translate(`${PREFIX}.add-want-to-read`);
         case ScrobbleEventType.RemoveWantToRead:
-          return this.t.translate(`${PREFIX}.remove-want-to-read`);
+          return this.translocoService.translate(`${PREFIX}.remove-want-to-read`);
         case ScrobbleEventType.Review:
-          return this.t.translate(`${PREFIX}.review-submitted`);
+          return this.translocoService.translate(`${PREFIX}.review-submitted`);
         default:
           return '';
       }
@@ -41,7 +41,7 @@ export class KavitaPlusEventDescriptionPipe implements PipeTransform {
         entry.eventType === KavitaPlusEventType.ChapterMetadataUpdated) &&
       entry.diff?.length
     ) {
-      return this.t.translate(`${PREFIX}.fields-updated`, {count: entry.diff.length});
+      return this.translocoService.translate(`${PREFIX}.fields-updated`, {count: entry.diff.length});
     }
 
     return '';

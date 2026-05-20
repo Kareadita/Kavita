@@ -16,8 +16,6 @@ export class AuditStatusTitlePipe implements PipeTransform {
         return this.translocoService.translate('audit-status-title-pipe.failure');
       case AuditStatus.Info:
         return this.translocoService.translate('audit-status-title-pipe.info');
-
     }
   }
-
 }

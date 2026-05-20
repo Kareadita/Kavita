@@ -96,6 +96,7 @@ export class ManageKavitaplusActivityComponent implements OnInit {
     } else {
       this.isLoadingMore.set(true);
     }
+
     const filter: KavitaPlusAuditFilter = {
       category: this.categoryFilter(),
       status: this.statusFilter(),
@@ -104,6 +105,7 @@ export class ManageKavitaplusActivityComponent implements OnInit {
       fromUtc: this.timeFrameToFromUtc(),
       userId: this.userFilter() || null,
     };
+
     this.auditService.getEntries(filter, this.currentPage(), this.PAGE_SIZE).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: result => {
         this.pagination.set(result.pagination);
