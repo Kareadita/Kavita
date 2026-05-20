@@ -1286,11 +1286,10 @@ public class OpdsService(
 
     private static FeedLink CreatePageStreamLink(int libraryId, int seriesId, ChapterDto chapter, IOpdsRequest request)
     {
-        var mangaFile = chapter.Files.First();
         // NOTE: Type could be wrong, there is nothing I can do in the spec
         var link = CreateLink(FeedLinkRelation.Stream, "image/jpeg",
             $"{request.Prefix}{request.ApiKey}/image?libraryId={libraryId}&seriesId={seriesId}&volumeId={chapter.VolumeId}&chapterId={chapter.Id}&pageNumber=" + "{pageNumber}");
-        link.TotalPages = mangaFile.Pages;
+        link.TotalPages = chapter.Pages;
         link.IsPageStream = true;
 
         if (chapter.LastReadingProgressUtc > DateTime.MinValue)

@@ -1050,6 +1050,81 @@ public class OpdsServiceTests(ITestOutputHelper testOutputHelper) : AbstractDbTe
         Assert.Single(feed.Entries); // Each chapter has 1 file
     }
 
+    [Fact]
+    public async Task PageStreamLink_p5count_ReflectsChapterTotalPagesForMultiFileChapter()
+    {
+        // Issue #4382: for a chapter composed of multiple MangaFiles, the OPDS-PSE
+        // stream link's p5:count must equal chapter.Pages (the total across all files),
+        // not Files.First().Pages — otherwise spec-compliant clients (Panels) stop
+        // streaming halfway through the chapter.
+        var (unitOfWork, context, mapper) = await CreateDatabase();
+        var (opdsService, _) = SetupService(unitOfWork, mapper);
+
+        var library = new LibraryBuilder("Test Lib").Build();
+        unitOfWork.LibraryRepository.Add(library);
+        await unitOfWork.CommitAsync();
+
+        context.AppUser.Add(new AppUserBuilder("majora2007", "majora2007")
+            .WithLibrary(library)
+            .WithLocale("en")
+            .WithRole(PolicyConstants.AdminRole)
+            .Build());
+        await context.SaveChangesAsync();
+
+        // chapter total = 45, but the first file is only 10 pages.
+        var series = new SeriesBuilder("MultiFile Test")
+            .WithVolume(new VolumeBuilder(Parser.LooseLeafVolume)
+                .WithChapter(new ChapterBuilder("1")
+                    .WithSortOrder(0)
+                    .WithPages(45)
+                    .WithFile(new MangaFileBuilder(_testFilePath, MangaFormat.Archive, 10).Build())
+                    .WithFile(new MangaFileBuilder(_testFilePath, MangaFormat.Archive, 15).Build())
+                    .WithFile(new MangaFileBuilder(_testFilePath, MangaFormat.Archive, 20).Build())
+                    .Build())
+                .Build())
+            .Build();
+        series.Library = library;
+        context.Series.Add(series);
+        await unitOfWork.CommitAsync();
+
+        var user = await unitOfWork.UserRepository.GetUserByIdAsync(1,
+            AppUserIncludes.Progress | AppUserIncludes.WantToRead | AppUserIncludes.Collections);
+        Assert.NotNull(user);
+        user.SideNavStreams = new List<AppUserSideNavStream>
+        {
+            new AppUserSideNavStream
+            {
+                Name = library.Name,
+                IsProvided = true,
+                Order = 0,
+                StreamType = SideNavStreamType.Library,
+                Visible = true,
+                LibraryId = library.Id,
+                AppUserId = user.Id
+            }
+        };
+        await unitOfWork.CommitAsync();
+
+        var feed = await opdsService.GetSeriesDetail(new OpdsItemsFromEntityIdRequest
+        {
+            ApiKey = user.GetOpdsAuthKey(),
+            Prefix = OpdsService.DefaultApiPrefix,
+            BaseUrl = string.Empty,
+            UserId = user.Id,
+            Preferences = await unitOfWork.UserRepository.GetOpdsPreferences(user.Id),
+            EntityId = 1,
+            PageNumber = OpdsService.FirstPageNumber
+        });
+
+        Assert.NotEmpty(feed.Entries);
+        var streamLink = feed.Entries
+            .First()
+            .Links
+            .SingleOrDefault(l => l.Rel == FeedLinkRelation.Stream);
+        Assert.NotNull(streamLink);
+        Assert.Equal(45, streamLink.TotalPages); // pre-fix this would be 10 (Files.First().Pages)
+    }
+
     #endregion
 
     #region XML Serialization
