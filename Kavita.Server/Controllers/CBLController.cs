@@ -125,7 +125,7 @@ public class CblController(IReadingListService readingListService, IDirectorySer
     {
         if (!ValidateFilename(Path.Join(fullPath, filename)))
         {
-            return (false, null);
+            return (true, BadRequest(await localizationService.TranslateAsync("cbl-import-validation-types")));
         }
 
         var ext = Path.GetExtension(filename);

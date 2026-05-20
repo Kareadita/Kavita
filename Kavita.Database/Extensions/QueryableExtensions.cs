@@ -386,13 +386,13 @@ public static class QueryableExtensions
 
     /// <summary>
     /// Filters to series that are matched but whose cached metadata has expired and needs a refresh.
-    /// A stale series is still considered matched — the data is just out of date.
+    /// A stale series is still considered matched, the data is just out of date.
     /// </summary>
     public static IQueryable<Series> WhereStaleExternalMetadata(this IQueryable<Series> query)
     {
         return query
-            .WhereMatchedExternalMetadata()
-            .Where(s => s.ExternalSeriesMetadata!.ValidUntilUtc < DateTime.UtcNow);
+            .Where(s => !s.IsBlacklisted)
+            .Where(s => s.ExternalSeriesMetadata != null && s.ExternalSeriesMetadata!.ValidUntilUtc < DateTime.UtcNow);
     }
 
     /// <summary>
