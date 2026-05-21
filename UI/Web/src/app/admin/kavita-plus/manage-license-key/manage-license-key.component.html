@@ -1,0 +1,15 @@
+<ng-container *transloco="let t; prefix:'manage-license-key'">
+
+  <div>
+    <h6>{{t('register-title')}}</h6>
+    <p>{{t('register-description')}}</p>
+
+    <app-edit-license-key [hasLicense]="licenseService.hasValidLicense()" (updated)="updateFormData($event)" />
+
+    <button class="btn btn-primary float-end mt-3" [disabled]="!formIsValid()">
+      {{t('activate-license')}}
+    </button>
+
+  </div>
+
+</ng-container>

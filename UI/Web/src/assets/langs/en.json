@@ -124,7 +124,7 @@
         "name-label": "Name",
         "key-length-label": "Key Length",
         "expiration-label": "Expiration",
-        "required-field": "{{validations.required-field}}",
+        "required-field": "{{validation.required-field}}",
         "total-key-length": "Total Key Length: {{length}}",
         "cancel": "{{common.cancel}}",
         "close": "{{common.close}}",
@@ -896,6 +896,31 @@
         "deselect-all": "{{common.deselect-all}}",
         "no-data": "There are no libraries setup yet."
     },
+
+
+    "edit-license-key": {
+        "activate-license-label": "License Key",
+        "activate-email-label": "{{common.email}}",
+        "activate-discordId-label": "Discord User ID",
+        "activate-discordId-tooltip": "Link your Discord Account with Kavita+. This grants you access to hidden channels to help shape Kavita.",
+        "discord-validation": "This is not a valid Discord User Id. Your user id is not your discord username.",
+        "email-help": "This is the email registered with Stripe",
+        "license-help": "For your security, the stored key is encrypted on disk, re-enter it to update.",
+        "help-label": "{{common.help}}",
+        "required-field-validation": "{{validation.required-field}}",
+        "license-length-validation": "License key is expected to be 19 characters long",
+        "license-format-validation": "License is expected to be formatted as: XXXX-XXXX-XXXX-XXXX",
+        "discord-format-validation": "Discord ID expected to be 19 number user id",
+        "email-format-validation": "Must be a valid email address"
+    },
+
+    "manage-license-key": {
+        "register-title": "Already have a license?",
+        "register-description": "Enter the key from your purchase email to activate Kavita+ on this server.",
+        "activate-license": "Activate License"
+
+    },
+
 
     "license": {
         "title": "Kavita+ License",

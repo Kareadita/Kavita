@@ -17,14 +17,15 @@ import {environment} from "../../../../environments/environment";
 import {WikiLink} from "../../../_models/wiki";
 import {switchMap} from "rxjs/operators";
 import {filter, tap} from "rxjs";
+import {ManageLicenseKeyComponent} from "../manage-license-key/manage-license-key.component";
 
 @Component({
     selector: 'app-license',
     templateUrl: './license.component.html',
     styleUrls: ['./license.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush,
-    imports: [NgbTooltip, LoadingComponent, ReactiveFormsModule, TranslocoDirective, SettingItemComponent,
-        DefaultValuePipe, UtcToLocalTimePipe, SettingButtonComponent, DecimalPipe]
+  imports: [NgbTooltip, LoadingComponent, ReactiveFormsModule, TranslocoDirective, SettingItemComponent,
+    DefaultValuePipe, UtcToLocalTimePipe, SettingButtonComponent, DecimalPipe, ManageLicenseKeyComponent]
 })
 export class LicenseComponent implements OnInit {
 
@@ -33,6 +34,7 @@ export class LicenseComponent implements OnInit {
   private readonly confirmService = inject(ConfirmService);
   protected readonly accountService = inject(AccountService);
   protected readonly licenseService = inject(LicenseService);
+
   protected readonly WikiLink = WikiLink;
   protected readonly buyLink = environment.buyLink;
 
