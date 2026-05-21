@@ -1,14 +1,38 @@
 <ng-container *transloco="let t; prefix:'manage-license-key'">
 
+  <!--TODO: Design has this in a modal, need to refactor this -->
+  @let hasLicenseOnFile = licenseService.hasValidLicense();
+
   <div>
-    <h6>{{t('register-title')}}</h6>
-    <p>{{t('register-description')}}</p>
+    <h5>{{t('title')}}</h5>
+    <p>
+      <!--Status-->
+      <!--Last validated: {{timeAgo}}-->
+    </p>
 
-    <app-edit-license-key [hasLicense]="licenseService.hasValidLicense()" (updated)="updateFormData($event)" />
+    <app-edit-license-key [hasLicense]="hasLicenseOnFile" (updated)="updateFormData($event)" />
 
-    <button class="btn btn-primary float-end mt-3" [disabled]="!formIsValid()">
-      {{t('activate-license')}}
-    </button>
+    @if (hasLicenseOnFile) {
+      <hr class="setting-section-break" />
+      <div class="row g-0">
+        <button class="btn btn-danger-text" (click)="deleteLicense()">
+          <i class="fas fa-cancel" aria-hidden="true"></i>
+          {{t('delete-license')}}
+        </button>
+
+        <div class="mx-auto"></div>
+        <div class="float-end">
+          <button class="btn btn-outline-secondary" (click)="resetLicense()">{{t('reset-license')}}</button>
+          <button class="btn btn-outline-primary" [disabled]="!formIsValid()">{{t('save')}}</button>
+        </div>
+
+      </div>
+    } @else {
+      <button class="btn btn-primary float-end mt-3" [disabled]="!formIsValid()">
+        {{t('activate-license')}}
+      </button>
+    }
+
 
   </div>
 

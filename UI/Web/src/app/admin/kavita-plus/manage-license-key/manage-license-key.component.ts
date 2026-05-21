@@ -1,11 +1,10 @@
 import {ChangeDetectionStrategy, Component, inject, signal} from '@angular/core';
-import {TranslocoDirective} from "@jsverse/transloco";
+import {translate, TranslocoDirective} from "@jsverse/transloco";
 import {EditLicenseKeyComponent, LicenseFormEvent} from "../edit-license-key/edit-license-key.component";
 import {LicenseService} from "../../../_services/license.service";
+import {ConfirmService} from "../../../shared/confirm.service";
+import {ToastrService} from "ngx-toastr";
 
-/**
- * This is the extra buttons (delete, reset)
- */
 @Component({
   selector: 'app-manage-license-key',
   imports: [
@@ -19,12 +18,39 @@ import {LicenseService} from "../../../_services/license.service";
 export class ManageLicenseKeyComponent {
 
   protected readonly licenseService = inject(LicenseService);
+  protected readonly confirmService = inject(ConfirmService);
+  protected readonly toastr = inject(ToastrService);
 
   protected readonly formIsValid = signal<boolean>(false);
 
+  private formData: LicenseFormEvent | null = null;
+
   updateFormData(data: LicenseFormEvent) {
-    console.log(data)
+    this.formData = data;
     this.formIsValid.set(data.isValid);
+  }
+
+
+  async deleteLicense() {
+    if (!await this.confirmService.confirm(translate('toasts.k+-delete-key'))) {
+      return;
+    }
+
+    this.licenseService.deleteLicense().subscribe(() => {
+      // TODO: (the parent component should update due to the license logic changing)
+    });
+  }
+
+  async resetLicense() {
+    if (!await this.confirmService.confirm(translate('toasts.k+-reset-key'))) {
+      return;
+    }
+
+    if (!this.formData) return;
+
+    this.licenseService.resetLicense(this.formData.licenseKey.trim(), this.formData.email.trim()).subscribe(() => {
+      this.toastr.success(translate('toasts.k+-reset-key-success'));
+    });
   }
 
 }

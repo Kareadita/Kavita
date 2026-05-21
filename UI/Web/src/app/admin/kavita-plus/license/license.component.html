@@ -120,7 +120,11 @@
 
 
     <!--Temp playground-->
-    <app-manage-license-key />
+    @if (licenseService.hasLicenseOnFile()) {
+      <app-manage-license-key />
+    } @else {
+      <app-register-license-key />
+    }
 
 
     @let licInfo = licenseInfo();

@@ -1,0 +1,26 @@
+<ng-container *transloco="let t; prefix:'register-license-key'">
+
+  @let hasLicenseOnFile = licenseService.hasValidLicense();
+
+  <div>
+    <h5>{{t('title')}}</h5>
+    <p>{{t('description')}}</p>
+
+    @if (errorCode() !== null) {
+      <div class="alert alert-warning mt-2" role="alert">
+        {{errorCode() | kavitaPlusRegistrationErrorCode}}
+      </div>
+    }
+
+    <app-edit-license-key [hasLicense]="hasLicenseOnFile" (updated)="updateFormData($event)" />
+
+    <button class="btn btn-primary float-end mt-3" [disabled]="!formIsValid() || isLoading()" (click)="save()">
+      @if (isLoading()) {
+        <span class="spinner-border spinner-border-sm me-1" aria-hidden="true"></span>
+      }
+      {{t('activate-license')}}
+    </button>
+
+  </div>
+
+</ng-container>

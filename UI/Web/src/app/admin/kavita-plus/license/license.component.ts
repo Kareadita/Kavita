@@ -18,6 +18,10 @@ import {WikiLink} from "../../../_models/wiki";
 import {switchMap} from "rxjs/operators";
 import {filter, tap} from "rxjs";
 import {ManageLicenseKeyComponent} from "../manage-license-key/manage-license-key.component";
+import {
+  KavitaPlusRegistrationErrorCode
+} from '../../../_models/kavitaplus/registration/kavita-plus-registration-error-code';
+import {RegisterLicenseKeyComponent} from "../register-license-key/register-license-key.component";
 
 @Component({
     selector: 'app-license',
@@ -25,7 +29,7 @@ import {ManageLicenseKeyComponent} from "../manage-license-key/manage-license-ke
     styleUrls: ['./license.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [NgbTooltip, LoadingComponent, ReactiveFormsModule, TranslocoDirective, SettingItemComponent,
-    DefaultValuePipe, UtcToLocalTimePipe, SettingButtonComponent, DecimalPipe, ManageLicenseKeyComponent]
+    DefaultValuePipe, UtcToLocalTimePipe, SettingButtonComponent, DecimalPipe, ManageLicenseKeyComponent, RegisterLicenseKeyComponent]
 })
 export class LicenseComponent implements OnInit {
 
@@ -111,7 +115,30 @@ export class LicenseComponent implements OnInit {
 
     this.licenseService.updateUserLicense(license, email, discordId)
       .subscribe({
-        next: () => {
+        next: async (result) => {
+          if (!result.success) {
+            this.isSaving.set(false);
+            this.cdRef.markForCheck();
+            if (result.errorCode === KavitaPlusRegistrationErrorCode.AlreadyRegistered) {
+              const answer = await this.confirmService.confirm(translate('license.k+-license-overwrite'), {
+                _type: 'confirm',
+                content: translate('license.k+-license-overwrite'),
+                disableEscape: false,
+                header: translate('license.k+-already-registered-header'),
+                buttons: [
+                  {text: translate('license.overwrite'), type: 'primary'},
+                  {text: translate('license.cancel'), type: 'secondary'},
+                ]
+              });
+              if (answer) {
+                this.forceSave();
+              }
+            } else {
+              const key = this.errorCodeI18nKey(result.errorCode);
+              this.toastr.error(translate(key));
+            }
+            return;
+          }
           this.resetForm();
           this.isViewMode.set(true);
           this.isSaving.set(false);
@@ -124,50 +151,17 @@ export class LicenseComponent implements OnInit {
             }
           });
         },
-        error: async err => {
-          await this.handleError(err);
-        }
       });
   }
 
-  private async handleError(err: any) {
-    this.isSaving.set(false);
-    this.cdRef.markForCheck();
-
-    if (err.hasOwnProperty('error')) {
-      if (err['error'][0] === '{') {
-        this.toastr.error(JSON.parse(err['error']));
-      } else {
-        // Prompt user if they want to override their instance. This will call the rest flow then the register flow
-        if (err['error'] === 'Kavita instance already registered with another license') {
-          const answer = await this.confirmService.confirm(translate('license.k+-license-overwrite'), {
-            _type: 'confirm',
-            content: translate('license.k+-license-overwrite'),
-            disableEscape: false,
-            header: translate('license.k+-already-registered-header'),
-            buttons: [
-              {
-                text: translate('license.overwrite'),
-                type: 'primary'
-              },
-              {
-                text: translate('license.cancel'),
-                type: 'secondary'
-              },
-            ]
-          });
-          if (answer) {
-            this.forceSave();
-            return;
-          }
-          return;
-        } else {
-
-        }
-        this.toastr.error(err['error']);
-      }
-    } else {
-      this.toastr.error(translate('toasts.k+-error'));
+  private errorCodeI18nKey(code: KavitaPlusRegistrationErrorCode | undefined): string {
+    switch (code) {
+      case KavitaPlusRegistrationErrorCode.SubscriptionInactive:
+        return 'registration-error-code-pipe.subscription-inactive';
+      case KavitaPlusRegistrationErrorCode.InternalError:
+        return 'registration-error-code-pipe.internal-error';
+      default:
+        return 'registration-error-code-pipe.registration-failed';
     }
   }
 

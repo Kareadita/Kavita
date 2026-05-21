@@ -4,6 +4,7 @@ import {catchError, map, tap, throwError} from "rxjs";
 import {environment} from "../../environments/environment";
 import {TextResonse} from '../_types/text-response';
 import {LicenseInfo} from "../_models/kavitaplus/license-info";
+import {KavitaPlusRegisterResult} from "../_models/kavitaplus/registration/kavita-plus-register-result";
 
 @Injectable({
   providedIn: 'root'
@@ -14,8 +15,12 @@ export class LicenseService {
   private readonly baseUrl = environment.apiUrl;
 
   private readonly _hasValidLicense = signal<boolean>(false);
-  /** Does the user have an active license */
+  /** Does the server have an active license */
   public readonly hasValidLicense = this._hasValidLicense.asReadonly();
+
+  private readonly _hasLicenseOnFile = signal<boolean>(false);
+  /** Does the server have a license stored - doesn't indicate being active */
+  public readonly hasLicenseOnFile = this._hasLicenseOnFile.asReadonly();
 
 
   /**
@@ -79,11 +84,21 @@ export class LicenseService {
     return this.httpClient.get<string>(this.baseUrl + 'license/has-license', TextResonse)
       .pipe(
         map(res => res === "true"),
+        tap(value => {
+          this._hasLicenseOnFile.set(value);
+        }),
+        catchError(error => {
+          this._hasLicenseOnFile.set(false);
+          return throwError(error); // Rethrow the error to propagate it further
+        })
       );
   }
 
+  registerLicense(license: string, email: string, discordId?: string) {
+    return this.updateUserLicense(license, email, discordId);
+  }
+
   updateUserLicense(license: string, email: string, discordId?: string) {
-    return this.httpClient.post<string>(this.baseUrl + 'license', {license, email, discordId}, TextResonse)
-      .pipe(map(res => res === "true"));
+    return this.httpClient.post<KavitaPlusRegisterResult>(this.baseUrl + 'license', {license, email, discordId});
   }
 }

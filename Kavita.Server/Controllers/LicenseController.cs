@@ -131,17 +131,13 @@ public class LicenseController(
     /// <returns></returns>
     [HttpPost]
     [Authorize(PolicyGroups.AdminPolicy)]
-    public async Task<ActionResult> UpdateLicense(UpdateLicenseDto dto)
+    public async Task<ActionResult<KavitaPlusRegisterResultDto>> UpdateLicense(UpdateLicenseDto dto)
     {
-        try
+        var result = await licenseService.AddLicense(dto.License.Trim(), dto.Email.Trim(), dto.DiscordId);
+        if (result.Success)
         {
-            await licenseService.AddLicense(dto.License.Trim(), dto.Email.Trim(), dto.DiscordId);
             await taskScheduler.ScheduleKavitaPlusTasks();
         }
-        catch (Exception ex)
-        {
-            return BadRequest(await localizationService.TranslateAsync(UserId, ex.Message));
-        }
-        return Ok();
+        return Ok(result);
     }
 }

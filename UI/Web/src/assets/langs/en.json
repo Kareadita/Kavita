@@ -915,12 +915,27 @@
     },
 
     "manage-license-key": {
-        "register-title": "Already have a license?",
-        "register-description": "Enter the key from your purchase email to activate Kavita+ on this server.",
-        "activate-license": "Activate License"
-
+        "title": "Kavita+ License",
+        "last-validated": "last validated {{timeAgo}}",
+        "activate-license": "Activate License",
+        "close": "{{common.close}}",
+        "delete-license": "Delete license",
+        "reset-license": "Reset license",
+        "save": "{{common.save}}"
     },
 
+    "register-license-key": {
+        "title": "Already have a license?",
+        "description": "Enter the key from your purchase email to activate Kavita+ on this server.",
+        "activate-license": "Activate License"
+    },
+
+    "kavita-plus-registration-error-code-pipe": {
+        "registration-failed": "License activation failed. Verify your license key and email are correct.",
+        "already-registered": "This license is registered to another server. Use 'Reset license' first.",
+        "subscription-inactive": "Your subscription is not active. Renew at kavitareader.com.",
+        "internal-error": "An internal error occurred. Please contact Kavita+ support."
+    },
 
     "license": {
         "title": "Kavita+ License",

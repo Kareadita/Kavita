@@ -41,9 +41,11 @@ export class EditLicenseKeyComponent {
   protected readonly destroyRef = inject(DestroyRef);
 
   formGroup: FormGroup = new FormGroup({
-    'licenseKey': new FormControl('', [Validators.required, Validators.maxLength(19), Validators.minLength(19), Validators.pattern(/[A-Z]{4}-[A-Z]{4}[A-Z]{4}[A-Z]{4}/)]),
+    'licenseKey': new FormControl('', [Validators.required, Validators.maxLength(19),
+      Validators.minLength(19), Validators.pattern(/^[A-Z0-9]{4}-[A-Z0-9]{4}-[A-Z0-9]{4}-[A-Z0-9]{4}$/)]),
     'email': new FormControl('', [Validators.required, Validators.email]),
-    'discordId': new FormControl('', [Validators.pattern(/\d{19}/), Validators.maxLength(19), Validators.minLength(19)])
+    'discordId': new FormControl('', [Validators.pattern(/\d{19}/), Validators.maxLength(19),
+      Validators.minLength(19)])
   });
 
   constructor() {
