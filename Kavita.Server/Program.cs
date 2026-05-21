@@ -147,6 +147,7 @@ public class Program
                 catch (Exception ex)
                 {
                     logger.LogCritical(ex, "Failed to run critical Migrations, restore from a backup");
+                    Environment.Exit(1);
                 }
 
 
