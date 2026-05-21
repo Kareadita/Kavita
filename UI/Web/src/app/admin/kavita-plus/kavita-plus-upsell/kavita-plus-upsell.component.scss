@@ -1,0 +1,41 @@
+:host {
+  --upsell-hero-bg: radial-gradient(circle at 100% 0%, rgba(74,198,148,0.28), transparent 50%),
+                    radial-gradient(circle at 0% 100%, rgba(74,198,148,0.10), transparent 40%),
+                    linear-gradient(135deg, #102018 0%, #0A1310 100%);
+  --upsell-hero-border: rgba(74,198,148,0.25);
+  --upsell-price-card-bg: rgba(0,0,0,0.45);
+  --upsell-price-card-border: rgba(255,255,255,0.10);
+  --upsell-benefit-icon-bg: rgba(74,198,148,0.12);
+  --upsell-faq-separator: rgba(255,255,255,0.05);
+}
+
+.upsell-hero {
+  background: var(--upsell-hero-bg);
+  border: 1px solid var(--upsell-hero-border);
+  border-radius: 0.75rem;
+  overflow: hidden;
+}
+
+.upsell-price-card {
+  background: var(--upsell-price-card-bg);
+  border: 1px solid var(--upsell-price-card-border);
+  backdrop-filter: blur(0.5rem);
+  border-radius: 0.75rem;
+}
+
+.upsell-benefit-icon {
+  background: var(--upsell-benefit-icon-bg);
+  border-radius: 0.5rem;
+  width: 2.25rem;
+  height: 2.25rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.upsell-faq-item + .upsell-faq-item {
+  border-top: 1px solid var(--upsell-faq-separator);
+  padding-top: 0.875rem;
+  margin-top: 0.875rem;
+}

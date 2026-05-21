@@ -1,0 +1,237 @@
+<ng-container *transloco="let t; prefix: 'kavita-plus-upsell'">
+
+  <!-- Page header -->
+  <div class="d-flex align-items-start justify-content-between gap-3 mb-4">
+    <div class="flex-fill">
+      <h1 class="fw-bold mb-2">{{t('title-label')}}</h1>
+      <p class="text-muted mb-0" style="font-size: 0.92rem;">
+        {{t('subtitle-label')}}
+        <a [href]="WikiLink.KavitaPlus" target="_blank" rel="noreferrer nofollow" class="text-primary ms-1">
+          {{t('wiki-link-label')}} <i class="fa-solid fa-arrow-up-right-from-square" style="font-size: 0.65rem;"></i>
+        </a>
+      </p>
+    </div>
+    <a [href]="WikiLink.KavitaPlusFAQ" target="_blank" rel="noreferrer nofollow" class="btn btn-outline-primary btn-sm flex-shrink-0">
+      <i class="fa-regular fa-circle-question me-1"></i>{{t('faq-btn-label')}}
+    </a>
+  </div>
+
+  <!-- Hero strip -->
+  <div class="upsell-hero p-4 p-lg-5 mb-4">
+    <div class="d-flex flex-column flex-lg-row gap-4 align-items-center">
+
+      <!-- Left: brand + copy + CTAs -->
+      <div class="flex-fill">
+        <div class="d-flex align-items-center gap-3 mb-3">
+          <div class="rounded-2 d-inline-flex align-items-center justify-content-center bg-primary flex-shrink-0"
+               style="width: 2.75rem; height: 2.75rem;">
+            <i class="fa-solid fa-book-open" style="color: #0d2d20; font-size: 1.125rem;"></i>
+          </div>
+          <div class="fw-bold" style="font-size: 2.2rem; letter-spacing: -0.01em; line-height: 1;">
+            Kavita<span class="text-primary">+</span>
+          </div>
+        </div>
+
+        <h2 class="fw-bold mb-3" style="font-size: 2.2rem; line-height: 1.15; letter-spacing: -0.02em;">
+          {{t('hero-headline-label')}}
+        </h2>
+        <p class="text-muted mb-4" style="font-size: 0.96rem; line-height: 1.6; max-width: 32rem;">
+          {{t('hero-subtitle-label')}}
+        </p>
+
+        <div class="d-flex align-items-center gap-3 flex-wrap">
+          <a [href]="WikiLink.KavitaPlus" target="_blank" rel="noreferrer nofollow" class="btn btn-link btn-primary">
+            <i class="fa-solid fa-bolt me-1"></i>{{t('start-cta-label')}}
+          </a>
+          <a [href]="WikiLink.KavitaPlus" target="_blank" rel="noreferrer nofollow"
+             class="text-primary" style="font-size: 0.88rem;">
+            {{t('feature-list-link-label')}}
+            <i class="fa-solid fa-arrow-up-right-from-square ms-1" style="font-size: 0.65rem;"></i>
+          </a>
+        </div>
+      </div>
+
+      <!-- Right: pricing card -->
+      <div class="upsell-price-card p-4 flex-shrink-0" style="min-width: 16rem; max-width: 20rem; width: 100%;">
+        <div class="d-flex align-items-baseline gap-2 mb-1">
+          <span class="fw-bold" style="font-size: 3rem; line-height: 1; letter-spacing: -0.02em;">{{t('price-label')}}</span>
+          <span class="text-muted" style="font-size: 0.92rem;">{{t('price-per-month-label')}}</span>
+        </div>
+        <p class="mb-3" style="font-size: 0.84rem;">
+          <s class="text-muted">{{t('price-label')}}</s>
+          <span class="text-primary ms-2 fw-medium">{{t('price-promo-label')}}</span>
+        </p>
+
+        <div class="d-flex flex-column gap-2">
+          <div class="d-flex align-items-center gap-2 text-muted" style="font-size: 0.8rem;">
+            <i class="fa-solid fa-check text-primary" style="font-size: 0.68rem; width: 0.875rem;"></i>
+            <span>{{t('pricing-feature-1-label')}}</span>
+          </div>
+          <div class="d-flex align-items-center gap-2 text-muted" style="font-size: 0.8rem;">
+            <i class="fa-solid fa-check text-primary" style="font-size: 0.68rem; width: 0.875rem;"></i>
+            <span>{{t('pricing-feature-2-label')}}</span>
+          </div>
+          <div class="d-flex align-items-center gap-2 text-muted" style="font-size: 0.8rem;">
+            <i class="fa-solid fa-check text-primary" style="font-size: 0.68rem; width: 0.875rem;"></i>
+            <span>{{t('pricing-feature-3-label')}}</span>
+          </div>
+          <div class="d-flex align-items-center gap-2 text-muted" style="font-size: 0.8rem;">
+            <i class="fa-solid fa-check text-primary" style="font-size: 0.68rem; width: 0.875rem;"></i>
+            <span>{{t('pricing-feature-4-label')}}</span>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Provider strip -->
+  <div class="d-flex align-items-center gap-3 flex-wrap rounded mb-4 px-4 py-3"
+       style="background: var(--elevation-layer1-dark-solid); border: 1px solid var(--hr-color); font-size: 0.82rem;">
+    <span class="text-muted text-uppercase fw-semibold" style="font-size: 0.74rem; letter-spacing: 0.08em;">
+      {{t('providers-label')}}
+    </span>
+    @for (p of providers; track p) {
+      <span class="d-inline-flex align-items-center gap-2">
+        <app-scrobble-provider-image [provider]="p" [size]="22" />
+        <span>{{p | scrobbleProviderName}}</span>
+      </span>
+    }
+    <span class="ms-auto text-muted" style="font-size: 0.74rem;">{{t('providers-more-label')}}</span>
+  </div>
+
+  <!-- Benefits grid -->
+  <p class="text-uppercase fw-semibold text-muted mb-3" style="font-size: 0.78rem; letter-spacing: 0.06em;">
+    {{t('benefits-section-label')}}
+  </p>
+  <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-3 mb-5">
+
+    <div class="col">
+      <div class="h-100 rounded p-3 d-flex flex-column gap-3"
+           style="background: var(--elevation-layer1-dark-solid); border: 1px solid var(--hr-color);">
+        <div class="upsell-benefit-icon">
+          <i class="fa-solid fa-arrows-rotate text-primary" style="font-size: 0.875rem;"></i>
+        </div>
+        <div>
+          <div class="fw-semibold mb-1" style="font-size: 0.94rem;">{{t('benefit-1-title-label')}}</div>
+          <div class="text-muted" style="font-size: 0.8rem; line-height: 1.55;">{{t('benefit-1-body-label')}}</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col">
+      <div class="h-100 rounded p-3 d-flex flex-column gap-3"
+           style="background: var(--elevation-layer1-dark-solid); border: 1px solid var(--hr-color);">
+        <div class="upsell-benefit-icon">
+          <i class="fa-solid fa-star text-primary" style="font-size: 0.875rem;"></i>
+        </div>
+        <div>
+          <div class="fw-semibold mb-1" style="font-size: 0.94rem;">{{t('benefit-2-title-label')}}</div>
+          <div class="text-muted" style="font-size: 0.8rem; line-height: 1.55;">{{t('benefit-2-body-label')}}</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col">
+      <div class="h-100 rounded p-3 d-flex flex-column gap-3"
+           style="background: var(--elevation-layer1-dark-solid); border: 1px solid var(--hr-color);">
+        <div class="upsell-benefit-icon">
+          <i class="fa-solid fa-tags text-primary" style="font-size: 0.875rem;"></i>
+        </div>
+        <div>
+          <div class="fw-semibold mb-1" style="font-size: 0.94rem;">{{t('benefit-3-title-label')}}</div>
+          <div class="text-muted" style="font-size: 0.8rem; line-height: 1.55;">{{t('benefit-3-body-label')}}</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col">
+      <div class="h-100 rounded p-3 d-flex flex-column gap-3"
+           style="background: var(--elevation-layer1-dark-solid); border: 1px solid var(--hr-color);">
+        <div class="upsell-benefit-icon">
+          <i class="fa-solid fa-layer-group text-primary" style="font-size: 0.875rem;"></i>
+        </div>
+        <div>
+          <div class="fw-semibold mb-1" style="font-size: 0.94rem;">{{t('benefit-4-title-label')}}</div>
+          <div class="text-muted" style="font-size: 0.8rem; line-height: 1.55;">{{t('benefit-4-body-label')}}</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col">
+      <div class="h-100 rounded p-3 d-flex flex-column gap-3"
+           style="background: var(--elevation-layer1-dark-solid); border: 1px solid var(--hr-color);">
+        <div class="upsell-benefit-icon">
+          <i class="fa-solid fa-list-check text-primary" style="font-size: 0.875rem;"></i>
+        </div>
+        <div>
+          <div class="fw-semibold mb-1" style="font-size: 0.94rem;">{{t('benefit-5-title-label')}}</div>
+          <div class="text-muted" style="font-size: 0.8rem; line-height: 1.55;">{{t('benefit-5-body-label')}}</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col">
+      <div class="h-100 rounded p-3 d-flex flex-column gap-3"
+           style="background: var(--elevation-layer1-dark-solid); border: 1px solid var(--hr-color);">
+        <div class="upsell-benefit-icon">
+          <i class="fa-solid fa-server text-primary" style="font-size: 0.875rem;"></i>
+        </div>
+        <div>
+          <div class="fw-semibold mb-1" style="font-size: 0.94rem;">{{t('benefit-6-title-label')}}</div>
+          <div class="text-muted" style="font-size: 0.8rem; line-height: 1.55;">{{t('benefit-6-body-label')}}</div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- License form + FAQ -->
+  <div class="row g-4">
+
+    <!-- License form -->
+    <div class="col-12 col-lg-6">
+      <h3 class="mb-2" style="font-size: 1.15rem;">{{t('license-section-title-label')}}</h3>
+      <p class="text-muted mb-4" style="font-size: 0.84rem; line-height: 1.6;">
+        {{t('license-section-desc-label')}}
+      </p>
+
+      <app-edit-license-key [hasLicense]="false" />
+
+      <div class="mt-3">
+        <button class="btn btn-primary float-end" disabled>{{t('activate-label')}}</button>
+      </div>
+    </div>
+
+    <!-- FAQ -->
+    <div class="col-12 col-lg-6">
+      <div class="rounded p-4 h-100"
+           style="background: var(--elevation-layer1-dark-solid); border: 1px solid var(--hr-color);">
+        <h3 class="mb-4" style="font-size: 1.15rem;">{{t('faq-section-title-label')}}</h3>
+
+        <div class="upsell-faq-item">
+          <div class="fw-semibold mb-1" style="font-size: 0.84rem;">{{t('faq-1-question-label')}}</div>
+          <div class="text-muted" style="font-size: 0.78rem; line-height: 1.55;">{{t('faq-1-answer-label')}}</div>
+        </div>
+        <div class="upsell-faq-item">
+          <div class="fw-semibold mb-1" style="font-size: 0.84rem;">{{t('faq-2-question-label')}}</div>
+          <div class="text-muted" style="font-size: 0.78rem; line-height: 1.55;">{{t('faq-2-answer-label')}}</div>
+        </div>
+        <div class="upsell-faq-item">
+          <div class="fw-semibold mb-1" style="font-size: 0.84rem;">{{t('faq-3-question-label')}}</div>
+          <div class="text-muted" style="font-size: 0.78rem; line-height: 1.55;">{{t('faq-3-answer-label')}}</div>
+        </div>
+
+        <div class="mt-3">
+          <a [href]="WikiLink.KavitaPlusFAQ" target="_blank" rel="noreferrer nofollow"
+             class="text-primary" style="font-size: 0.82rem;">
+            {{t('faq-wiki-link-label')}}
+            <i class="fa-solid fa-arrow-up-right-from-square ms-1" style="font-size: 0.65rem;"></i>
+          </a>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+</ng-container>

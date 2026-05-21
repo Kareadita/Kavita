@@ -17,11 +17,11 @@ import {environment} from "../../../../environments/environment";
 import {WikiLink} from "../../../_models/wiki";
 import {switchMap} from "rxjs/operators";
 import {filter, tap} from "rxjs";
-import {ManageLicenseKeyComponent} from "../manage-license-key/manage-license-key.component";
 import {
   KavitaPlusRegistrationErrorCode
 } from '../../../_models/kavitaplus/registration/kavita-plus-registration-error-code';
 import {RegisterLicenseKeyComponent} from "../register-license-key/register-license-key.component";
+import {KavitaPlusUpsellComponent} from "../kavita-plus-upsell/kavita-plus-upsell.component";
 
 @Component({
     selector: 'app-license',
@@ -29,7 +29,7 @@ import {RegisterLicenseKeyComponent} from "../register-license-key/register-lice
     styleUrls: ['./license.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [NgbTooltip, LoadingComponent, ReactiveFormsModule, TranslocoDirective, SettingItemComponent,
-    DefaultValuePipe, UtcToLocalTimePipe, SettingButtonComponent, DecimalPipe, ManageLicenseKeyComponent, RegisterLicenseKeyComponent]
+    DefaultValuePipe, UtcToLocalTimePipe, SettingButtonComponent, DecimalPipe, RegisterLicenseKeyComponent, KavitaPlusUpsellComponent]
 })
 export class LicenseComponent implements OnInit {
 
