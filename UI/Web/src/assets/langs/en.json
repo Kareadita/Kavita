@@ -938,8 +938,8 @@
     },
 
     "kavita-plus-upsell": {
-        "title-label": "Unlock Kavita+",
-        "subtitle-label": "A premium subscription that unlocks metadata, scrobbling, and recommendations for every user on this Kavita instance.",
+        "title": "Unlock Kavita+",
+        "subtitle": "A premium subscription that unlocks metadata, scrobbling, and recommendations for every user on this Kavita instance.",
         "wiki-link-label": "Read the wiki",
         "faq-btn-label": "FAQ",
         "hero-headline-label": "Metadata, scrobbling, and recommendations.",
@@ -979,6 +979,12 @@
         "faq-3-question-label": "How do I cancel?",
         "faq-3-answer-label": "Use the Manage button to open the Stripe portal - cancel or pause any time.",
         "faq-wiki-link-label": "Full FAQ on the wiki"
+    },
+
+    "kavita-plus-connect-providers": {
+        "title": "You're all set - One last step",
+        "description": "Connect the providers you scrobble to. Kavita+ will backfill your existing reading history and keep progress in sync (one way) going forward.",
+        "faq-btn-label": "FAQ"
     },
 
     "license": {

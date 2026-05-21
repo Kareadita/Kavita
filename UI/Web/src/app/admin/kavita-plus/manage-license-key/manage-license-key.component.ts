@@ -30,7 +30,7 @@ export class ManageLicenseKeyComponent {
     this.formIsValid.set(data.isValid);
   }
 
-
+// TODO: This needs to be ported still
   async deleteLicense() {
     if (!await this.confirmService.confirm(translate('toasts.k+-delete-key'))) {
       return;

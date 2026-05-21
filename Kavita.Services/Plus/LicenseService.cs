@@ -22,6 +22,7 @@ internal class RegisterLicenseResponseDto
     public string EncryptedLicense { get; set; }
     public bool Successful { get; set; }
     public string ErrorMessage { get; set; }
+    public bool IsSubscriptionActive { get; set; }
     public KavitaPlusRegistrationErrorCode ErrorCode { get; set; }
 }
 
@@ -68,10 +69,18 @@ public class LicenseService(
         }
     }
 
-    private async Task<(string EncryptedLicense, KavitaPlusRegistrationErrorCode ErrorCode)> RegisterLicense(string license, string email, string? discordId)
+    private async Task<RegisterLicenseResponseDto> RegisterLicense(string license, string email, string? discordId)
     {
         if (string.IsNullOrWhiteSpace(license) || string.IsNullOrWhiteSpace(email))
-            return (string.Empty, KavitaPlusRegistrationErrorCode.RegistrationFailed);
+        {
+            return new RegisterLicenseResponseDto()
+            {
+                EncryptedLicense = string.Empty,
+                ErrorCode = KavitaPlusRegistrationErrorCode.RegistrationFailed,
+                Successful = false
+            };
+        }
+
         try
         {
             var response = await (Configuration.KavitaPlusApiUrl + "/api/license/register")
@@ -87,16 +96,21 @@ public class LicenseService(
 
             if (response.Successful)
             {
-                return (response.EncryptedLicense, KavitaPlusRegistrationErrorCode.None);
+                return response;
             }
 
             logger.LogError("Kavita+ registration failed. Code: {Code}, Message: {Message}", response.ErrorCode, response.ErrorMessage);
-            return (string.Empty, response.ErrorCode);
+            return response;
         }
         catch (FlurlHttpException e)
         {
             logger.LogError(e, "Network error reaching Kavita+ API");
-            return (string.Empty, KavitaPlusRegistrationErrorCode.InternalError);
+            return new RegisterLicenseResponseDto()
+            {
+                EncryptedLicense = string.Empty,
+                ErrorCode = KavitaPlusRegistrationErrorCode.InternalError,
+                Successful = false
+            };
         }
     }
 
@@ -185,21 +199,23 @@ public class LicenseService(
 
     public async Task<KavitaPlusRegisterResultDto> AddLicense(string license, string email, string? discordId, CancellationToken ct = default)
     {
-        var (lic, errorCode) = await RegisterLicense(license, email, discordId);
-        if (string.IsNullOrWhiteSpace(lic))
-            return new KavitaPlusRegisterResultDto { Success = false, ErrorCode = errorCode };
+        var response = await RegisterLicense(license, email, discordId);
+        if (string.IsNullOrWhiteSpace(response.EncryptedLicense) || !response.Successful)
+            return new KavitaPlusRegisterResultDto { Success = false, ErrorCode = response.ErrorCode };
 
         var serverSetting = await unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.LicenseKey, ct);
-        serverSetting.Value = lic;
+        serverSetting.Value = response.EncryptedLicense;
         unitOfWork.SettingsRepository.Update(serverSetting);
         await unitOfWork.CommitAsync(ct);
 
-        // Can we cache here? Should we add a validation to only allow registering an active sub?
-        // var provider = cachingProviderFactory.GetCachingProvider(EasyCacheProfiles.License);
-        // await provider.FlushAsync(ct);
-        // await provider.SetAsync(CacheKey, true, _licenseCacheTimeout, ct);
+        if (response is {Successful: true})
+        {
+            var provider = cachingProviderFactory.GetCachingProvider(EasyCacheProfiles.License);
+            await provider.FlushAsync(ct);
+            await provider.SetAsync(CacheKey, response.IsSubscriptionActive, _licenseCacheTimeout, ct);
+        }
 
-        return new KavitaPlusRegisterResultDto { Success = true };
+        return new KavitaPlusRegisterResultDto { Success = true, IsSubscriptionActive = response.IsSubscriptionActive};
     }
 
 

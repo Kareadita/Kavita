@@ -1,0 +1,8 @@
+@switch (activeStep()) {
+  @case (KavitaPlusRegistrationStep.Upsell) {
+    <app-kavita-plus-upsell (stepChanged)="activeStep.set($event)" />
+  }
+  @case (KavitaPlusRegistrationStep.ConnectProviders) {
+    <app-kavita-plus-connect-providers />
+  }
+}

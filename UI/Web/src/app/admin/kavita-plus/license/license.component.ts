@@ -21,7 +21,7 @@ import {
   KavitaPlusRegistrationErrorCode
 } from '../../../_models/kavitaplus/registration/kavita-plus-registration-error-code';
 import {RegisterLicenseKeyComponent} from "../register-license-key/register-license-key.component";
-import {KavitaPlusUpsellComponent} from "../kavita-plus-upsell/kavita-plus-upsell.component";
+import {RegistrationWizardComponent} from "../registration-wizard/registration-wizard.component";
 
 @Component({
     selector: 'app-license',
@@ -29,7 +29,7 @@ import {KavitaPlusUpsellComponent} from "../kavita-plus-upsell/kavita-plus-upsel
     styleUrls: ['./license.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [NgbTooltip, LoadingComponent, ReactiveFormsModule, TranslocoDirective, SettingItemComponent,
-    DefaultValuePipe, UtcToLocalTimePipe, SettingButtonComponent, DecimalPipe, RegisterLicenseKeyComponent, KavitaPlusUpsellComponent]
+    DefaultValuePipe, UtcToLocalTimePipe, SettingButtonComponent, DecimalPipe, RegisterLicenseKeyComponent, RegistrationWizardComponent]
 })
 export class LicenseComponent implements OnInit {
 

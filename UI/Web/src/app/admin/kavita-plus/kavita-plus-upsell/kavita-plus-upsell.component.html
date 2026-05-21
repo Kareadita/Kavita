@@ -3,16 +3,16 @@
   <!-- Page header -->
   <div class="d-flex align-items-start justify-content-between gap-3 mb-4">
     <div class="flex-fill">
-      <h1 class="fw-bold mb-2">{{t('title-label')}}</h1>
+      <h1 class="fw-bold mb-2">{{t('title')}}</h1>
       <p class="text-muted mb-0" style="font-size: 0.92rem;">
-        {{t('subtitle-label')}}
-        <a [href]="WikiLink.KavitaPlus" target="_blank" rel="noreferrer nofollow" class="text-primary ms-1">
-          {{t('wiki-link-label')}} <i class="fa-solid fa-arrow-up-right-from-square" style="font-size: 0.65rem;"></i>
+        {{t('description')}}
+        <a [href]="WikiLink.KavitaPlusFAQ" target="_blank" rel="noreferrer nofollow" class="text-primary ms-1">
+          {{t('wiki-link-label')}} <i class="fa-solid fa-arrow-up-right-from-square" aria-hidden="true" style="font-size: 0.65rem;"></i>
         </a>
       </p>
     </div>
     <a [href]="WikiLink.KavitaPlusFAQ" target="_blank" rel="noreferrer nofollow" class="btn btn-outline-primary btn-sm flex-shrink-0">
-      <i class="fa-regular fa-circle-question me-1"></i>{{t('faq-btn-label')}}
+      <i class="fa-regular fa-circle-question me-1" aria-hidden="true"></i>{{t('faq-btn-label')}}
     </a>
   </div>
 
@@ -25,7 +25,7 @@
         <div class="d-flex align-items-center gap-3 mb-3">
           <div class="rounded-2 d-inline-flex align-items-center justify-content-center bg-primary flex-shrink-0"
                style="width: 2.75rem; height: 2.75rem;">
-            <i class="fa-solid fa-book-open" style="color: #0d2d20; font-size: 1.125rem;"></i>
+            <i class="fa-solid fa-book-open" aria-hidden="true" style="color: #0d2d20; font-size: 1.125rem;"></i>
           </div>
           <div class="fw-bold" style="font-size: 2.2rem; letter-spacing: -0.01em; line-height: 1;">
             Kavita<span class="text-primary">+</span>
@@ -40,8 +40,8 @@
         </p>
 
         <div class="d-flex align-items-center gap-3 flex-wrap">
-          <a [href]="WikiLink.KavitaPlus" target="_blank" rel="noreferrer nofollow" class="btn btn-link btn-primary">
-            <i class="fa-solid fa-bolt me-1"></i>{{t('start-cta-label')}}
+          <a [href]="environment.buyLink" target="_blank" rel="noreferrer nofollow" class="btn btn-primary dark-exempt">
+            <i class="fa-solid fa-bolt me-1" aria-hidden="true"></i>{{t('start-cta-label')}}
           </a>
           <a [href]="WikiLink.KavitaPlus" target="_blank" rel="noreferrer nofollow"
              class="text-primary" style="font-size: 0.88rem;">
@@ -64,19 +64,19 @@
 
         <div class="d-flex flex-column gap-2">
           <div class="d-flex align-items-center gap-2 text-muted" style="font-size: 0.8rem;">
-            <i class="fa-solid fa-check text-primary" style="font-size: 0.68rem; width: 0.875rem;"></i>
+            <i class="fa-solid fa-check text-primary" aria-hidden="true" style="font-size: 0.68rem; width: 0.875rem;"></i>
             <span>{{t('pricing-feature-1-label')}}</span>
           </div>
           <div class="d-flex align-items-center gap-2 text-muted" style="font-size: 0.8rem;">
-            <i class="fa-solid fa-check text-primary" style="font-size: 0.68rem; width: 0.875rem;"></i>
+            <i class="fa-solid fa-check text-primary" aria-hidden="true" style="font-size: 0.68rem; width: 0.875rem;"></i>
             <span>{{t('pricing-feature-2-label')}}</span>
           </div>
           <div class="d-flex align-items-center gap-2 text-muted" style="font-size: 0.8rem;">
-            <i class="fa-solid fa-check text-primary" style="font-size: 0.68rem; width: 0.875rem;"></i>
+            <i class="fa-solid fa-check text-primary" aria-hidden="true" style="font-size: 0.68rem; width: 0.875rem;"></i>
             <span>{{t('pricing-feature-3-label')}}</span>
           </div>
           <div class="d-flex align-items-center gap-2 text-muted" style="font-size: 0.8rem;">
-            <i class="fa-solid fa-check text-primary" style="font-size: 0.68rem; width: 0.875rem;"></i>
+            <i class="fa-solid fa-check text-primary" aria-hidden="true" style="font-size: 0.68rem; width: 0.875rem;"></i>
             <span>{{t('pricing-feature-4-label')}}</span>
           </div>
         </div>
@@ -110,7 +110,7 @@
       <div class="h-100 rounded p-3 d-flex flex-column gap-3"
            style="background: var(--elevation-layer1-dark-solid); border: 1px solid var(--hr-color);">
         <div class="upsell-benefit-icon">
-          <i class="fa-solid fa-arrows-rotate text-primary" style="font-size: 0.875rem;"></i>
+          <i class="fa-solid fa-arrows-rotate text-primary" aria-hidden="true" style="font-size: 0.875rem;"></i>
         </div>
         <div>
           <div class="fw-semibold mb-1" style="font-size: 0.94rem;">{{t('benefit-1-title-label')}}</div>
@@ -123,7 +123,7 @@
       <div class="h-100 rounded p-3 d-flex flex-column gap-3"
            style="background: var(--elevation-layer1-dark-solid); border: 1px solid var(--hr-color);">
         <div class="upsell-benefit-icon">
-          <i class="fa-solid fa-star text-primary" style="font-size: 0.875rem;"></i>
+          <i class="fa-solid fa-star text-primary" aria-hidden="true" style="font-size: 0.875rem;"></i>
         </div>
         <div>
           <div class="fw-semibold mb-1" style="font-size: 0.94rem;">{{t('benefit-2-title-label')}}</div>
@@ -136,7 +136,7 @@
       <div class="h-100 rounded p-3 d-flex flex-column gap-3"
            style="background: var(--elevation-layer1-dark-solid); border: 1px solid var(--hr-color);">
         <div class="upsell-benefit-icon">
-          <i class="fa-solid fa-tags text-primary" style="font-size: 0.875rem;"></i>
+          <i class="fa-solid fa-tags text-primary" aria-hidden="true" style="font-size: 0.875rem;"></i>
         </div>
         <div>
           <div class="fw-semibold mb-1" style="font-size: 0.94rem;">{{t('benefit-3-title-label')}}</div>
@@ -149,7 +149,7 @@
       <div class="h-100 rounded p-3 d-flex flex-column gap-3"
            style="background: var(--elevation-layer1-dark-solid); border: 1px solid var(--hr-color);">
         <div class="upsell-benefit-icon">
-          <i class="fa-solid fa-layer-group text-primary" style="font-size: 0.875rem;"></i>
+          <i class="fa-solid fa-layer-group text-primary" aria-hidden="true" style="font-size: 0.875rem;"></i>
         </div>
         <div>
           <div class="fw-semibold mb-1" style="font-size: 0.94rem;">{{t('benefit-4-title-label')}}</div>
@@ -162,7 +162,7 @@
       <div class="h-100 rounded p-3 d-flex flex-column gap-3"
            style="background: var(--elevation-layer1-dark-solid); border: 1px solid var(--hr-color);">
         <div class="upsell-benefit-icon">
-          <i class="fa-solid fa-list-check text-primary" style="font-size: 0.875rem;"></i>
+          <i class="fa-solid fa-list-check text-primary" aria-hidden="true" style="font-size: 0.875rem;"></i>
         </div>
         <div>
           <div class="fw-semibold mb-1" style="font-size: 0.94rem;">{{t('benefit-5-title-label')}}</div>
@@ -175,7 +175,7 @@
       <div class="h-100 rounded p-3 d-flex flex-column gap-3"
            style="background: var(--elevation-layer1-dark-solid); border: 1px solid var(--hr-color);">
         <div class="upsell-benefit-icon">
-          <i class="fa-solid fa-server text-primary" style="font-size: 0.875rem;"></i>
+          <i class="fa-solid fa-server text-primary" aria-hidden="true" style="font-size: 0.875rem;"></i>
         </div>
         <div>
           <div class="fw-semibold mb-1" style="font-size: 0.94rem;">{{t('benefit-6-title-label')}}</div>
@@ -196,11 +196,7 @@
         {{t('license-section-desc-label')}}
       </p>
 
-      <app-edit-license-key [hasLicense]="false" />
-
-      <div class="mt-3">
-        <button class="btn btn-primary float-end" disabled>{{t('activate-label')}}</button>
-      </div>
+      <app-register-license-key (saved)="handleSaved($event)" />
     </div>
 
     <!-- FAQ -->

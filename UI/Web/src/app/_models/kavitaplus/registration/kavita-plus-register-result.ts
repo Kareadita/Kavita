@@ -3,4 +3,5 @@ import {KavitaPlusRegistrationErrorCode} from "./kavita-plus-registration-error-
 export interface KavitaPlusRegisterResult {
   success: boolean;
   errorCode?: KavitaPlusRegistrationErrorCode;
+  isSubscriptionActive: boolean;
 }

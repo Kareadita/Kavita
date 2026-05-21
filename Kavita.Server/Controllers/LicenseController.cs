@@ -127,13 +127,13 @@ public class LicenseController(
     /// <summary>
     /// Updates server license
     /// </summary>
-    /// <remarks>Caches the result</remarks>
+    /// <remarks>Caches the result when successful</remarks>
     /// <returns></returns>
     [HttpPost]
     [Authorize(PolicyGroups.AdminPolicy)]
     public async Task<ActionResult<KavitaPlusRegisterResultDto>> UpdateLicense(UpdateLicenseDto dto)
     {
-        var result = await licenseService.AddLicense(dto.License.Trim(), dto.Email.Trim(), dto.DiscordId);
+        var result = await licenseService.AddLicense(dto.License.Trim(), dto.Email.Trim(), dto.DiscordId?.Trim());
         if (result.Success)
         {
             await taskScheduler.ScheduleKavitaPlusTasks();
