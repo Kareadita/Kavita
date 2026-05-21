@@ -3,7 +3,14 @@
 
     <div class="d-flex align-items-start gap-3">
 
-      @if (entry().seriesId) {
+      @if (entry().subjectId !== null && entry().subjectType === AuditSubjectType.Chapter) {
+        <div class="cover flex-shrink-0">
+          <app-image [imageUrl]="imageService.getChapterCoverImage(entry().subjectId!)"
+                     width="3rem" height="4rem"
+                     classes="rounded-1 w-100 h-100"
+                     objectFit="cover" />
+        </div>
+      } @else if (entry().seriesId) {
         <div class="cover flex-shrink-0">
           <app-image [imageUrl]="imageService.getSeriesCoverImage(entry().seriesId!)"
                      width="3rem" height="4rem"

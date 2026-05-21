@@ -21,6 +21,7 @@ import {TimeAgoPipe} from '../../../_pipes/time-ago.pipe';
 import {UtcToLocalTimePipe} from '../../../_pipes/utc-to-local-time.pipe';
 import {AuditStatusTitlePipe} from "../../../_pipes/audit-status-title.pipe";
 import {KavitaplusDiffComponent} from "../kavitaplus-diff/kavitaplus-diff.component";
+import {AuditSubjectType} from "../../../_models/kavitaplus/audit-subject-type.enum";
 
 @Component({
   selector: 'app-kavitaplus-audit-accordion-item',
@@ -74,4 +75,5 @@ export class KavitaplusAuditAccordionItemComponent {
   }
 
   protected readonly KavitaPlusAuditCategory = KavitaPlusAuditCategory;
+  protected readonly AuditSubjectType = AuditSubjectType;
 }

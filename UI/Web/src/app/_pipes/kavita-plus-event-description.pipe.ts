@@ -44,6 +44,12 @@ export class KavitaPlusEventDescriptionPipe implements PipeTransform {
       return this.translocoService.translate(`${PREFIX}.fields-updated`, {count: entry.diff.length});
     }
 
+    if (entry.eventType === KavitaPlusEventType.ChapterCoverUpdated) {
+      return this.translocoService.translate(`${PREFIX}.chapter-cover-updated`);
+    } else if (entry.eventType === KavitaPlusEventType.CoverUpdated) {
+      return this.translocoService.translate(`${PREFIX}.series-cover-updated`);
+    }
+
     return '';
   }
 }

@@ -524,7 +524,7 @@ class SeriesDetailComponent implements OnInit, AfterViewInit {
         }
       } else if (event.event === EVENTS.CoverUpdate) {
         const coverUpdateEvent = event.payload as CoverUpdateEvent;
-        if (coverUpdateEvent.id === this.seriesId()) {
+        if (coverUpdateEvent.id === this.seriesId() && coverUpdateEvent.entityType === 'series') {
           this.themeService.refreshColorScape('series', this.seriesId()).subscribe();
         }
       } else if (event.event === EVENTS.ChapterRemoved) {

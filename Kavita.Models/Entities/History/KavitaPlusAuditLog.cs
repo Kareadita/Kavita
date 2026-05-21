@@ -1,5 +1,4 @@
 using System;
-using Kavita.Models.Entities.Enums;
 using Kavita.Models.Entities.Enums.Audit;
 using Kavita.Models.Entities.User;
 
@@ -20,7 +19,7 @@ public class KavitaPlusAuditLog
     public AuditStatus Status { get; set; }
 
     /// <summary>
-    /// Series FK — set for Series, Chapter, and series-contextual events. No cascade delete: logs outlive entities
+    /// Series FK - set for Series, Chapter, and series-contextual events. No cascade delete: logs outlive entities
     /// </summary>
     public int? SeriesId { get; set; }
 
@@ -33,7 +32,7 @@ public class KavitaPlusAuditLog
     public int? SubjectId { get; set; }
 
     /// <summary>
-    /// JSON-serialized event-specific payload. Not filtered in SQL — for display only
+    /// JSON-serialized event-specific payload.
     /// </summary>
     public string? Payload { get; set; }
 

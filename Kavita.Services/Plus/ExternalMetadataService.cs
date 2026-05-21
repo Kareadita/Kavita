@@ -1513,7 +1513,7 @@ public class ExternalMetadataService : IExternalMetadataService
 
         if (chapter.CoverImageLocked && !HasForceOverride(settings, chapter, MetadataSettingField.ChapterCovers))
         {
-            // TODO: LogTrace/Debug here to indicate why we rejected updating image for debugging?
+            _logger.LogDebug("Kavita+ Update Chapter was skipped as cover was locked, Chapter: {ChapterId}", chapter.Id);
             return false;
         }
 
@@ -1522,6 +1522,7 @@ public class ExternalMetadataService : IExternalMetadataService
         await _auditService.LogAsync(KavitaPlusAuditCategory.Metadata, KavitaPlusEventType.ChapterCoverUpdated, AuditStatus.Success,
             AuditSubjectType.Chapter, seriesId: seriesId, subjectId: chapter.Id,
             payload: new AuditLogChapterCoverParamsDto { IssueNumber = chapter.Range, CoverUrl = coverUrl });
+
         return true;
     }
 
