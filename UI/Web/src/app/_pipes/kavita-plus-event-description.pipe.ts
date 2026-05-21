@@ -24,7 +24,7 @@ export class KavitaPlusEventDescriptionPipe implements PipeTransform {
           return chapter ? this.translocoService.translate(`${PREFIX}.read-progress-sent`, {chapter}) : '';
         }
         case ScrobbleEventType.ScoreUpdated:
-          return this.translocoService.translate(`${PREFIX}.rating-updated`);
+          return this.translocoService.translate(`${PREFIX}.rating-updated`, {rating: sd.rating});
         case ScrobbleEventType.AddWantToRead:
           return this.translocoService.translate(`${PREFIX}.add-want-to-read`);
         case ScrobbleEventType.RemoveWantToRead:
@@ -45,9 +45,11 @@ export class KavitaPlusEventDescriptionPipe implements PipeTransform {
     }
 
     if (entry.eventType === KavitaPlusEventType.ChapterCoverUpdated) {
-      return this.translocoService.translate(`${PREFIX}.chapter-cover-updated`);
+      return this.translocoService.translate(`${PREFIX}.chapter-cover-updated`, {chapter: entry.metadataExtras!.issueNumber});
     } else if (entry.eventType === KavitaPlusEventType.CoverUpdated) {
       return this.translocoService.translate(`${PREFIX}.series-cover-updated`);
+    } else if (entry.eventType === KavitaPlusEventType.SeriesMatchFixed) {
+      return this.translocoService.translate(`${PREFIX}.series-match-fixed`, {matchName: entry.matchDetails?.matchedName});
     }
 
     return '';

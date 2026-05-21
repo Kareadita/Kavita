@@ -1366,20 +1366,21 @@
 
     "kavita-plus-event-description-pipe": {
         "read-progress-sent": "{{chapter}}",
-        "rating-updated": "Rating updated",
+        "rating-updated": "Rating updated: {{rating}}/5",
         "add-want-to-read": "Added to want to read",
         "remove-want-to-read": "Removed from want to read",
         "review-submitted": "Review submitted",
         "fields-updated": "{{count}} fields updated",
-        "chapter-cover-updated": "Cover updated",
-        "series-cover-updated": "Series cover updated"
+        "chapter-cover-updated": "Cover updated: {{chapter}}",
+        "series-cover-updated": "Series cover updated",
+        "series-match-fixed": "Series matched with {{matchName}}"
     },
 
     "kavita-plus-event-type-pipe": {
         "series-matched": "Series Matched",
         "series-match-failed": "Match Failed",
         "series-blacklisted": "Blacklisted",
-        "series-match-cleared": "Match Cleared",
+        "series-match-fixed": "Match Fixed",
         "series-dont-match-set": "Don't Match Set",
         "metadata-fetched": "Metadata Fetched",
         "metadata-updated": "Metadata Updated",

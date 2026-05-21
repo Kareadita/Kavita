@@ -338,7 +338,7 @@ public class ExternalMetadataService : IExternalMetadataService
             // Name can be null on Series even with a direct match
             _logger.LogInformation("Matched {SeriesName} with Kavita+ Series {MatchSeriesName}", series.Name,
                 metadata.Series.Name);
-            await _auditService.LogMatchAsync(KavitaPlusEventType.SeriesMatchCleared, seriesId,
+            await _auditService.LogMatchAsync(KavitaPlusEventType.SeriesMatchFixed, seriesId,
                 new AuditLogMatchClearedParamsDto { SeriesName = series.Name, MatchedName = metadata.Series.Name }, ct: ct);
         }
         catch (KavitaException ex)

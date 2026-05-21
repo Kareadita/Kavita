@@ -7,7 +7,7 @@ function resolveIcon(type: KavitaPlusEventType): string {
     case KavitaPlusEventType.SeriesMatched:          return 'fas fa-table-list';
     case KavitaPlusEventType.SeriesMatchFailed:      return 'fas fa-circle-exclamation';
     case KavitaPlusEventType.SeriesBlacklisted:      return 'fas fa-circle-xmark';
-    case KavitaPlusEventType.SeriesMatchCleared:     return 'fas fa-eraser';
+    case KavitaPlusEventType.SeriesMatchFixed:     return 'fas fa-eraser';
     case KavitaPlusEventType.SeriesDontMatchSet:     return 'fas fa-table-cells-row-lock';
     case KavitaPlusEventType.MetadataFetched:        return 'fas fa-magnifying-glass';
     case KavitaPlusEventType.MetadataUpdated:        return 'fas fa-database';

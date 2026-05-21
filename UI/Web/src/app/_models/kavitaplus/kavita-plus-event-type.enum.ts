@@ -3,7 +3,7 @@ export enum KavitaPlusEventType {
   SeriesMatched = 0,
   SeriesMatchFailed = 1,
   SeriesBlacklisted = 2,
-  SeriesMatchCleared = 3,
+  SeriesMatchFixed = 3,
   SeriesDontMatchSet = 4,
 
   // Metadata - Series

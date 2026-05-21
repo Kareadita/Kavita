@@ -17,8 +17,8 @@ export class KavitaPlusEventTypePipe implements PipeTransform {
         return this.translocoService.translate('kavita-plus-event-type-pipe.series-match-failed');
       case KavitaPlusEventType.SeriesBlacklisted:
         return this.translocoService.translate('kavita-plus-event-type-pipe.series-blacklisted');
-      case KavitaPlusEventType.SeriesMatchCleared:
-        return this.translocoService.translate('kavita-plus-event-type-pipe.series-match-cleared');
+      case KavitaPlusEventType.SeriesMatchFixed:
+        return this.translocoService.translate('kavita-plus-event-type-pipe.series-match-fixed');
       case KavitaPlusEventType.SeriesDontMatchSet:
         return this.translocoService.translate('kavita-plus-event-type-pipe.series-dont-match-set');
       case KavitaPlusEventType.MetadataFetched:

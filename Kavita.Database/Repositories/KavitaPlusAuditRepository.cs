@@ -9,6 +9,7 @@ using Kavita.API.Services.Plus;
 using Kavita.Common.Helpers;
 using Kavita.Database.Extensions;
 using Kavita.Models.DTOs.KavitaPlus;
+using Kavita.Models.DTOs.KavitaPlus.Audit;
 using Kavita.Models.Entities.Enums;
 using Kavita.Models.Entities.Enums.Audit;
 using Kavita.Models.Entities.History;
@@ -223,6 +224,76 @@ public class KavitaPlusAuditRepository(DataContext context) : IKavitaPlusAuditRe
             }
         }
 
+        KavitaPlusAuditMatchDetailsDto? matchDetails = null;
+        if (e is { Category: KavitaPlusAuditCategory.Match, Payload: not null })
+        {
+            try
+            {
+                matchDetails = e.EventType switch
+                {
+                    KavitaPlusEventType.SeriesMatched =>
+                        KavitaPlusAuditMatchDetailsDto.From(JsonSerializer.Deserialize<AuditLogMatchedParamsDto>(e.Payload, JsonOptions)),
+                    KavitaPlusEventType.SeriesMatchFixed =>
+                        KavitaPlusAuditMatchDetailsDto.From(JsonSerializer.Deserialize<AuditLogMatchClearedParamsDto>(e.Payload, JsonOptions)),
+                    KavitaPlusEventType.SeriesMatchFailed or KavitaPlusEventType.SeriesBlacklisted =>
+                        KavitaPlusAuditMatchDetailsDto.From(JsonSerializer.Deserialize<AuditLogMatchFailureParamsDto>(e.Payload, JsonOptions)),
+                    KavitaPlusEventType.SeriesDontMatchSet =>
+                        KavitaPlusAuditMatchDetailsDto.From(JsonSerializer.Deserialize<AuditLogMatchDontMatchParamsDto>(e.Payload, JsonOptions)),
+                    _ => null
+                };
+            }
+            catch
+            {
+                // malformed payload
+            }
+        }
+
+        KavitaPlusAuditSyncDetailsDto? syncDetails = null;
+        if (e is { Category: KavitaPlusAuditCategory.Sync, Payload: not null })
+        {
+            try
+            {
+                syncDetails = e.EventType switch
+                {
+                    KavitaPlusEventType.CollectionSynced =>
+                        KavitaPlusAuditSyncDetailsDto.From(JsonSerializer.Deserialize<AuditLogCollectionSyncedParamsDto>(e.Payload, JsonOptions)),
+                    KavitaPlusEventType.CollectionItemAdded =>
+                        KavitaPlusAuditSyncDetailsDto.From(JsonSerializer.Deserialize<AuditLogCollectionItemParamsDto>(e.Payload, JsonOptions)),
+                    KavitaPlusEventType.SyncCompleted =>
+                        KavitaPlusAuditSyncDetailsDto.From(JsonSerializer.Deserialize<AuditLogWantToReadSyncCompletedParamsDto>(e.Payload, JsonOptions)),
+                    _ => null
+                };
+            }
+            catch
+            {
+                // malformed payload
+            }
+        }
+
+        KavitaPlusAuditMetadataExtrasDto? metadataExtras = null;
+        if (e is { Category: KavitaPlusAuditCategory.Metadata, Payload: not null })
+        {
+            try
+            {
+                metadataExtras = e.EventType switch
+                {
+                    KavitaPlusEventType.CoverUpdated =>
+                        KavitaPlusAuditMetadataExtrasDto.From(JsonSerializer.Deserialize<AuditLogSeriesCoverParamsDto>(e.Payload, JsonOptions)),
+                    KavitaPlusEventType.ChapterCoverUpdated =>
+                        KavitaPlusAuditMetadataExtrasDto.From(JsonSerializer.Deserialize<AuditLogChapterCoverParamsDto>(e.Payload, JsonOptions)),
+                    KavitaPlusEventType.PersonAliasAdded =>
+                        KavitaPlusAuditMetadataExtrasDto.From(JsonSerializer.Deserialize<AuditLogPersonAliasParamsDto>(e.Payload, JsonOptions)),
+                    KavitaPlusEventType.PersonCoverUpdated =>
+                        KavitaPlusAuditMetadataExtrasDto.From(JsonSerializer.Deserialize<AuditLogPersonCoverParamsDto>(e.Payload, JsonOptions)),
+                    _ => null
+                };
+            }
+            catch
+            {
+                // malformed payload
+            }
+        }
+
         return new KavitaPlusAuditEntryDto
         {
             Id = e.Id,
@@ -240,6 +311,9 @@ public class KavitaPlusAuditRepository(DataContext context) : IKavitaPlusAuditRe
             Diff = diff,
             ErrorMessage = e.ErrorMessage,
             ScrobbleDetails = scrobbleDetails,
+            MatchDetails = matchDetails,
+            SyncDetails = syncDetails,
+            MetadataExtras = metadataExtras,
             CanRetry = e.Status == AuditStatus.Failure
                        && e.Category == KavitaPlusAuditCategory.Scrobble
                        && !e.HasRetried,
