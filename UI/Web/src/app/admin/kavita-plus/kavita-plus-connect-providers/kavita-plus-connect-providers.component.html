@@ -15,11 +15,22 @@
 
 
   <!--License activated Banner + CTA-->
-  <div class="" role="banner">
+  <app-banner [isCta]="true" [title]="t('activated-title-label')" [body]="t('activated-body-label')" class="mb-3">
+    <i bannerIcon class="fa-solid fa-check" aria-hidden="true"></i>
+    <a bannerAction class="text-primary" style="font-size:0.82rem;white-space:nowrap" [routerLink]="'/settings'" [fragment]="SettingsTabId.KavitaPlusLicense" [skipLocationChange]="false">
+      {{t('skip-to-dashboard-label')}}
+      <i class="fa-solid fa-arrow-right ms-1" aria-hidden="true" style="font-size:0.7rem"></i>
+    </a>
+  </app-banner>
 
-  </div>
-
-  <!--Backfill reading history modified step tracker banner -->
+  <!--Backfill reading history step tracker banner -->
+  <app-banner [title]="t('backfill-title-label')" [body]="t('backfill-body-label')"
+              iconClass="fa-solid fa-clock-rotate-left" class="mb-4">
+    <span bannerAction class="text-uppercase fw-semibold"
+          style="font-size:0.74rem;letter-spacing:0.08em;white-space:nowrap;color:var(--banner-subtle-color)">
+      {{t('step-2-of-2-label')}}
+    </span>
+  </app-banner>
 
   <!--Provider cards-->
   <div class="row g-3 mb-4">
@@ -31,4 +42,12 @@
   </div>
 
   <!--CTAs-->
+  <div class="d-flex align-items-center gap-3 pt-4 mt-2" style="border-top:1px solid var(--hr-color)">
+    <p class="flex-fill text-muted mb-0" style="font-size:0.78rem">{{t('footer-hint-label')}}</p>
+    <a class="btn btn-link text-muted p-0" [routerLink]="'/settings'" [fragment]="SettingsTabId.KavitaPlusLicense" [skipLocationChange]="false">{{t('skip-for-now-label')}}</a>
+    <a class="btn btn-link btn-primary" [routerLink]="'/settings'" [fragment]="SettingsTabId.KavitaPlusLicense" [skipLocationChange]="false">
+      {{t('go-to-dashboard-label')}}
+      <i class="fa-solid fa-arrow-right ms-1" aria-hidden="true" style="font-size:0.7rem"></i>
+    </a>
+  </div>
 </ng-container>

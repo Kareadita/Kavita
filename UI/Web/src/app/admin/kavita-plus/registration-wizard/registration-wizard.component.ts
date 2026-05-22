@@ -21,7 +21,7 @@ export enum KavitaPlusRegistrationStep {
 })
 export class RegistrationWizardComponent {
 
-  activeStep = signal<KavitaPlusRegistrationStep>(KavitaPlusRegistrationStep.Upsell);
+  activeStep = signal<KavitaPlusRegistrationStep>(KavitaPlusRegistrationStep.ConnectProviders);
 
   protected readonly KavitaPlusRegistrationStep = KavitaPlusRegistrationStep;
 }

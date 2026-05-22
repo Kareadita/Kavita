@@ -5,14 +5,17 @@ import {
   ScrobbleAccountCardComponent
 } from "../../../user-settings/scrobble-account-card/scrobble-account-card.component";
 import {ScrobblingService, UserScrobbleProvider} from "../../../_services/scrobbling.service";
-import {DiscordButtonComponent} from "../discord-button/discord-button.component";
+import {BannerComponent} from "../../../shared/_components/banner/banner.component";
+import {RouterLink} from "@angular/router";
+import {SettingsTabId} from "../../../sidenav/preference-nav/preference-nav.component";
 
 @Component({
   selector: 'app-kavita-plus-connect-providers',
   imports: [
     TranslocoDirective,
     ScrobbleAccountCardComponent,
-    DiscordButtonComponent
+    BannerComponent,
+    RouterLink
   ],
   templateUrl: './kavita-plus-connect-providers.component.html',
   styleUrl: './kavita-plus-connect-providers.component.scss',
@@ -28,4 +31,5 @@ export class KavitaPlusConnectProvidersComponent {
     this.scrobblingService.getScrobbleProviders().subscribe(tokens => this.scrobblingProviders.set(tokens));
   }
   protected readonly WikiLink = WikiLink;
+  protected readonly SettingsTabId = SettingsTabId;
 }

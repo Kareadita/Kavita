@@ -913,7 +913,7 @@
         "discord-format-validation": "Discord ID expected to be 19 number user id",
         "email-format-validation": "Must be a valid email address",
         "connect-with-discord": "Connect with Discord",
-        "connect-with-discord-help": "Or, {{connectWithDiscordBtn}} to fill this out automatically"
+        "connect-with-discord-help": "Or {{connectWithDiscordBtn}} to fill this out automatically"
     },
 
     "manage-license-key": {
@@ -983,7 +983,16 @@
     "kavita-plus-connect-providers": {
         "title": "You're all set - One last step",
         "description": "Connect the providers you scrobble to. Kavita+ will backfill your existing reading history and keep progress in sync (one way) going forward.",
-        "faq-btn-label": "FAQ"
+        "faq-btn-label": "FAQ",
+        "activated-title-label": "License activated",
+        "activated-body-label": "Premium features are unlocked for every user on this server.",
+        "skip-to-dashboard-label": "Skip to dashboard",
+        "backfill-title-label": "Backfill your reading history",
+        "backfill-body-label": "Connecting now lets Kavita+ pull your existing progress from these services so series in your library show as already-read. You can connect more later, but backfill is easiest right after activation.",
+        "step-2-of-2-label": "Step 2 of 2",
+        "skip-for-now-label": "Skip for now",
+        "go-to-dashboard-label": "Go to dashboard",
+        "footer-hint-label": "You can connect more providers later under Settings → Kavita+ → Linked accounts."
     },
 
     "license": {
