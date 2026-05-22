@@ -11,4 +11,24 @@
       <i class="fa-regular fa-circle-question me-1" aria-hidden="true"></i>{{t('faq-btn-label')}}
     </a>
   </div>
+
+
+
+  <!--License activated Banner + CTA-->
+  <div class="" role="banner">
+
+  </div>
+
+  <!--Backfill reading history modified step tracker banner -->
+
+  <!--Provider cards-->
+  <div class="row g-3 mb-4">
+    @for(provider of scrobblingProviders(); track provider.provider) {
+      <div class="col-12 col-md-auto">
+        <app-scrobble-account-card [provider]="provider" class="d-block" />
+      </div>
+    }
+  </div>
+
+  <!--CTAs-->
 </ng-container>

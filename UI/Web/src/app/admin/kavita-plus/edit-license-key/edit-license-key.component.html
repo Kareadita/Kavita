@@ -1,7 +1,7 @@
 <ng-container *transloco="let t; prefix:'edit-license-key'">
   <form [formGroup]="formGroup">
     <div class="mt-2">
-      <div class="form-group">
+      <div class="form-group mb-1">
         @if (formGroup.get('licenseKey'); as formControl) {
           <label for="license-key">{{t('activate-license-label')}}</label>
           <input id="license-key" type="text" class="form-control" formControlName="licenseKey" autocomplete="off"
@@ -31,7 +31,7 @@
           }
         }
       </div>
-      <div class="form-group">
+      <div class="form-group mb-1">
         @if (formGroup.get('email'); as formControl) {
           <label for="email">{{t('activate-email-label')}}</label>
           <input id="email" type="email" class="form-control" formControlName="email" autocomplete="off"
@@ -54,7 +54,7 @@
           }
         }
       </div>
-      <div class="form-group">
+      <div class="form-group mb-1">
         @if (formGroup.get('discordId'); as formControl) {
           <label for="discordId">{{t('activate-discordId-label')}}</label>
 
