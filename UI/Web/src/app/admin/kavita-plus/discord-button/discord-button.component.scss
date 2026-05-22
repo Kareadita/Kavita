@@ -1,0 +1,33 @@
+.btn-discord {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  background-color: #5865F2;
+  color: #fff;
+  font-size: 0.875rem;
+  font-weight: 500;
+  line-height: 1;
+  border: none;
+  border-radius: 0.25rem;
+  text-decoration: none;
+  cursor: pointer;
+  transition: background-color 0.15s ease;
+
+  &:hover,
+  &:focus-visible {
+    background-color: #4752C4;
+    color: #fff;
+  }
+
+  &:active {
+    background-color: #3C45A5;
+    color: #fff;
+  }
+}
+
+.discord-logo {
+  width: 1.25rem;
+  height: 1.25rem;
+  object-fit: contain;
+}
