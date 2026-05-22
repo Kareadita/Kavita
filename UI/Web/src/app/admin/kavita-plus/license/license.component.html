@@ -2,7 +2,7 @@
 
   @let hasLicenseOnFile = licenseService.hasLicenseOnFile();
 
-  @if(hasLicenseOnFile) {
+  @if(!hasLicenseOnFile) {
     <app-registration-wizard />
   }
   @else {
@@ -237,9 +237,5 @@
       }
     </div>
   }
-
-
-
-
 
 </ng-container>

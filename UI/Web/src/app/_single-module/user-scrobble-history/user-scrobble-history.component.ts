@@ -163,7 +163,7 @@ export class UserScrobbleHistoryComponent implements OnInit {
 
   generateScrobbleEvents() {
     this.scrobblingService.triggerScrobbleEventGeneration().subscribe(_ => {
-      this.toastr.info(translate('toasts.scrobble-gen-init'))
+      this.toastr.info(translate('toasts.scrobble-gen-init'));
     });
   }
 
