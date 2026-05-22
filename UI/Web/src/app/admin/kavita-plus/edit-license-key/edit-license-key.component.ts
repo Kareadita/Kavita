@@ -6,6 +6,9 @@ import {AccountService} from "../../../_services/account.service";
 import {LicenseService} from "../../../_services/license.service";
 import {NgbTooltip} from "@ng-bootstrap/ng-bootstrap";
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
+import {DiscordButtonComponent} from "../discord-button/discord-button.component";
+import {TranslocoInjectComponent} from "../../../shared/_components/transloco-inject/transloco-inject.component";
+import {TranslocoSlotDirective} from "../../../_directives/transloco-slot.directive";
 
 
 export interface LicenseFormEvent {
@@ -24,7 +27,10 @@ export interface LicenseFormEvent {
     TranslocoDirective,
     FormsModule,
     ReactiveFormsModule,
-    NgbTooltip
+    NgbTooltip,
+    DiscordButtonComponent,
+    TranslocoInjectComponent,
+    TranslocoSlotDirective
   ],
   templateUrl: './edit-license-key.component.html',
   styleUrl: './edit-license-key.component.scss',
@@ -34,6 +40,8 @@ export class EditLicenseKeyComponent {
 
   /** This will trigger showing an additional helper to explain why the key is needed again */
   hasLicense = input<boolean>();
+  /** This will show the additional connect with discord OAuth flow */
+  showConnectWithDiscord = input<boolean>(true);
   updated = output<LicenseFormEvent>();
 
   protected readonly accountService = inject(AccountService);

@@ -64,6 +64,16 @@
           <input id="discordId" type="text" class="form-control" formControlName="discordId" autocomplete="off"
                  placeholder="0000000000000000000" [class.is-invalid]="formControl.invalid && !formControl.untouched" />
 
+          @if (showConnectWithDiscord()) {
+            <div class="form-text text-muted">
+              <app-transloco-inject key="edit-license-key.connect-with-discord-help">
+                <ng-template translocoSlot="connectWithDiscordBtn">
+                  <app-discord-button [label]="t('connect-with-discord')" />
+                </ng-template>
+              </app-transloco-inject>
+            </div>
+          }
+
           @if (formControl.dirty || !formControl.untouched) {
             <div class="invalid-feedback">
               @if (formControl.errors) {

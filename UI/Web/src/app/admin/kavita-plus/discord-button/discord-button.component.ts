@@ -12,5 +12,5 @@ import {NgOptimizedImage} from "@angular/common";
 })
 export class DiscordButtonComponent {
   href = input<string>('');
-  label = input<string>('Connect');
+  label = input<string>('');
 }
