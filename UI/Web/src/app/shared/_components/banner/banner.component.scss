@@ -43,7 +43,7 @@
   border-left: 3px solid var(--banner-color);
 }
 
-.banner__icon {
+.banner-icon {
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -56,19 +56,33 @@
   font-size: 0.875rem;
 }
 
-.banner__icon--circle {
+.banner-icon--circle {
   border-radius: 50%;
   background: var(--banner-color);
   color: var(--banner-subtext-color);
 }
 
-.banner__title {
+.banner-title {
   font-size: 0.92rem;
   font-weight: 600;
 }
 
-.banner__body {
+.banner-body {
   font-size: 0.78rem;
   line-height: 1.55;
   margin-top: 0.125rem;
+}
+
+.banner-action {
+  flex-shrink: 0;
+  font-size: 0.82rem;
+  white-space: nowrap;
+}
+
+.banner:not(.banner--cta) .banner-action {
+  font-size: 0.74rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--banner-subtle-color);
 }
