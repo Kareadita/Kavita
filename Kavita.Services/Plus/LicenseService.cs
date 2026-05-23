@@ -286,6 +286,7 @@ public class LicenseService(
         try
         {
             var encryptedLicense = await unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.LicenseKey, ct);
+            // TODO: Move this to the KavitaPlusApiService/Helper
             var response = await (Configuration.KavitaPlusApiUrl + "/api/license/info")
                 .WithKavitaPlusHeaders(encryptedLicense.Value)
                 .GetJsonAsync<LicenseInfoDto>(cancellationToken: ct);
@@ -311,6 +312,7 @@ public class LicenseService(
             // default: If info.IsCancelled && notActive, let's remove the license so we aren't constantly checking
             if (response is {IsCancelled: true, IsActive: false})
             {
+                // TODO: Update the settings with a cached state that this is inactive
                 //logger.LogWarning("Kavita+ License is no longer active, removing Server registration");
             }
 

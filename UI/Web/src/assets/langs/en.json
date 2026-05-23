@@ -939,6 +939,23 @@
         "internal-error": "An internal error occurred. Please contact Kavita+ support."
     },
 
+    "kavita-plus-subscription-status-pipe": {
+        "active-label": "Active",
+        "paused-label": "Paused",
+        "cancelled-label": "Cancelled"
+    },
+
+    "kavita-plus-billing-interval-pipe": {
+        "day-label": "daily",
+        "week-label": "weekly",
+        "month-label": "monthly",
+        "year-label": "yearly",
+        "day-unit-label": "day",
+        "week-unit-label": "week",
+        "month-unit-label": "month",
+        "year-unit-label": "year"
+    },
+
     "kavita-plus-upsell": {
         "title": "Unlock Kavita+",
         "description": "A premium subscription that unlocks metadata, scrobbling, and recommendations for every user on this Kavita instance.",
@@ -1055,6 +1072,35 @@
         "kavita+-desc-part-2": "premium benefits",
         "kavita+-desc-part-3": "today!",
         "kavita+-requirement": "Kavita+ is designed to work only with the latest 3 releases. Anything outside of that is subject to not functioning."
+    },
+
+    "license-dashboard-inactive": {
+        "title": "License & Kavita+",
+        "description": "Your Kavita+ subscription has lapsed. Renew to restore metadata sync, scrobbling, recommendations, and more.",
+        "faq-btn-label": "FAQ"
+    },
+
+    "license-info-panel": {
+        "desc-active-label": "Premium subscription · server-wide",
+        "desc-inactive-label": "Premium features paused for all users",
+        "next-charge-label": "Next Charge",
+        "member-since-label": "Member Since",
+        "months-subscribed-label": "{{count}} months subscribed",
+        "version-label": "Kavita Version",
+        "supported-label": "Supported",
+        "unsupported-label": "Unsupported",
+        "version-sub-label": "on v{{version}}",
+        "expired-label": "Expired",
+        "days-ago-label": "{{count}} days ago",
+        "last-plan-label": "Last Plan",
+        "impacted-label": "Active Users Impacted",
+        "impacted-value-label": "All users",
+        "impacted-sub-label": "premium features paused",
+        "days-left-label": "Days Left",
+        "manage-label": "Manage",
+        "renew-label": "Renew",
+        "edit-license-label": "Edit license",
+        "edit-key-label": "Edit key"
     },
 
     "manage-matched-metadata": {

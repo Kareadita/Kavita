@@ -20,8 +20,8 @@ import {filter, tap} from "rxjs";
 import {
   KavitaPlusRegistrationErrorCode
 } from '../../../_models/kavitaplus/registration/kavita-plus-registration-error-code';
-import {RegisterLicenseKeyComponent} from "../register-license-key/register-license-key.component";
 import {RegistrationWizardComponent} from "../registration-wizard/registration-wizard.component";
+import {LicenseDashboardInactiveComponent} from "../license-dashboard-inactive/license-dashboard-inactive.component";
 
 @Component({
     selector: 'app-license',
@@ -29,7 +29,7 @@ import {RegistrationWizardComponent} from "../registration-wizard/registration-w
     styleUrls: ['./license.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [NgbTooltip, LoadingComponent, ReactiveFormsModule, TranslocoDirective, SettingItemComponent,
-    DefaultValuePipe, UtcToLocalTimePipe, SettingButtonComponent, DecimalPipe, RegisterLicenseKeyComponent, RegistrationWizardComponent]
+    DefaultValuePipe, UtcToLocalTimePipe, SettingButtonComponent, DecimalPipe, RegistrationWizardComponent, LicenseDashboardInactiveComponent]
 })
 export class LicenseComponent implements OnInit {
 

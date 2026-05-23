@@ -1,0 +1,131 @@
+<ng-container *transloco="let t; prefix:'license-info-panel'">
+  <div class="info-card">
+
+    <!-- Brand row -->
+    <div class="d-flex align-items-center gap-3 mb-3">
+      <div class="brand-icon flex-shrink-0">
+        <i class="fa-solid fa-book-open" aria-hidden="true"></i>
+      </div>
+      <div class="flex-fill min-w-0">
+        <div class="d-flex align-items-center flex-wrap gap-2">
+          <span class="brand-name">Kavita<span class="brand-plus">+</span></span>
+          <span class="status-pill ms-1" [ngClass]="{
+            'status-pill--active':    status() === 'active',
+            'status-pill--paused':    status() === 'paused',
+            'status-pill--cancelled': status() === 'cancelled'
+          }">
+            @if (status() === 'active') {
+              <i class="fa-solid fa-circle fa-2xs me-1" aria-hidden="true"></i>
+            } @else {
+              <i class="fa-solid fa-triangle-exclamation fa-2xs me-1" aria-hidden="true"></i>
+            }
+            {{ licenseInfo()?.state | kavitaPlusSubscriptionStatus }}
+          </span>
+        </div>
+        <div>
+          <span class="brand-desc">
+            @if (status() === 'active') { {{ t('desc-active-label') }} }
+            @else { {{ t('desc-inactive-label') }} }
+          </span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Main row: data cols + right panel -->
+    <div class="d-flex align-items-center gap-4">
+
+      <!-- Data columns (3-up) -->
+      <div class="data-cols flex-fill">
+        @if (status() === 'active') {
+          <div class="data-col">
+            <span class="data-label">{{ t('next-charge-label') }}</span>
+            <span class="data-value">{{ licenseInfo()?.nextChargeDate | utcToLocalTime }}</span>
+            <span class="data-sub">{{ formattedPrice() }}<span class="mx-1 dot-separator"></span>{{ licenseInfo()?.billingInterval | kavitaPlusBillingInterval }}</span>
+          </div>
+          <div class="data-col">
+            <span class="data-label">{{ t('member-since-label') }}</span>
+            <span class="data-value">{{licenseInfo()?.subscribedSince | date:'short'}}</span>
+            <span class="data-sub">{{ t('months-subscribed-label', { count: licenseInfo()?.totalMonthsSubbed ?? 0 }) }}</span>
+          </div>
+          <div class="data-col">
+            <span class="data-label">{{ t('version-label') }}</span>
+            <span class="data-value">
+              @if (licenseInfo()?.isValidVersion) {
+                <i class="fa-solid fa-check me-1 text-success" aria-hidden="true"></i>{{ t('supported-label') }}
+              } @else {
+                <i class="fa-solid fa-xmark me-1 text-danger" aria-hidden="true"></i>{{ t('unsupported-label') }}
+              }
+            </span>
+            <span class="data-sub">{{ t('version-sub-label', { version: activeVersion() }) }}</span>
+          </div>
+        } @else {
+          <div class="data-col">
+            <span class="data-label">{{ t('expired-label') }}</span>
+            <span class="data-value">{{ licenseInfo()?.expirationDate | utcToLocalTime }}</span>
+            <span class="data-sub">{{ t('days-ago-label', { count: daysAgo() }) }}</span>
+          </div>
+          <div class="data-col">
+            <span class="data-label">{{ t('last-plan-label') }}</span>
+            <span class="data-value">{{ formattedPrice() }} / {{ licenseInfo()?.billingInterval | kavitaPlusBillingInterval:'unit' }}</span>
+            <span class="data-sub">{{ t('months-subscribed-label', { count: licenseInfo()?.totalMonthsSubbed ?? 0 }) }}</span>
+          </div>
+          <div class="data-col">
+            <span class="data-label">{{ t('impacted-label') }}</span>
+            <span class="data-value">{{ t('impacted-value-label') }}</span>
+            <span class="data-sub">{{ t('impacted-sub-label') }}</span>
+          </div>
+        }
+      </div>
+
+      <!-- Right panel: ring + buttons -->
+      <div class="right-panel flex-shrink-0 d-flex align-items-center gap-3">
+
+        @if (this.licenseInfo()?.state === KavitaPlusSubscriptionState.Active) {
+          <circle-progress
+            [percent]="daysRemainingPercent()"
+            [title]="daysRemaining().toString()"
+            [subtitle]="t('days-left-label') | uppercase"
+            [titleColor]="'#A9A9A9'"
+            [showSubtitle]="true"
+            [radius]="42"
+            [outerStrokeWidth]="8"
+            [innerStrokeWidth]="0"
+            [space]="0"
+            [backgroundPadding]="0"
+            outerStrokeLinecap="butt"
+            [outerStrokeColor]="ringColor()"
+            innerStrokeColor="transparent"
+            titleFontSize="22"
+            subtitleFontSize="9"
+            [showUnits]="false"
+            [animation]="true"
+            [animationDuration]="600"
+            [startFromZero]="false"
+            [responsive]="false"
+            [backgroundOpacity]="0.08"
+            [backgroundColor]="ringColor()"
+          />
+        } @else {
+          <div class="ring-inactive">
+            <i class="fa-solid fa-triangle-exclamation ring-inactive-icon" aria-hidden="true"></i>
+            <span class="ring-inactive-label">{{ licenseInfo()?.state | kavitaPlusSubscriptionStatus | uppercase }}</span>
+          </div>
+        }
+
+        <div class="d-flex flex-column gap-2">
+          <a [href]="manageLink()" target="_blank" rel="noreferrer nofollow" class="btn btn-primary btn-sm dark-exempt">
+            <i class="fa-brands fa-stripe-s me-1" aria-hidden="true"></i>
+            {{ status() === 'active' ? t('manage-label') : t('renew-label') }}
+          </a>
+          <button type="button" class="btn btn-outline-secondary btn-sm dark-exempt" (click)="editKey.emit()">
+            <i class="fa-regular fa-pen-to-square me-1" aria-hidden="true"></i>
+            {{ status() === 'active' ? t('edit-license-label') : t('edit-key-label') }}
+          </button>
+        </div>
+
+      </div>
+
+    </div>
+
+  </div>
+</ng-container>

@@ -1,0 +1,17 @@
+<ng-container *transloco="let t; prefix:'license-dashboard-inactive'">
+  <div class="d-flex align-items-start justify-content-between gap-3 mb-4">
+    <div class="flex-fill">
+      <h1 class="fw-bold mb-2">{{t('title')}}</h1>
+      <p class="text-muted page-desc mb-0">{{t('description')}}</p>
+    </div>
+    <a [href]="WikiLink.KavitaPlusFAQ" target="_blank" rel="noreferrer nofollow" class="btn btn-outline-primary btn-sm flex-shrink-0">
+      <i class="fa-regular fa-circle-question me-1" aria-hidden="true"></i>{{t('faq-btn-label')}}
+    </a>
+  </div>
+
+  <app-license-info-panel [licenseInfo]="licenseInfo()" class="mb-3" />
+
+  <!-- app-license-sub-card -->
+
+  <!--app-usage-snapshot-->
+</ng-container>

@@ -1,31 +1,93 @@
 ﻿using System;
 
 namespace Kavita.Models.DTOs.KavitaPlus.License;
+#nullable enable
+
+public enum KavitaPlusSubscriptionState
+{
+    Active = 0,
+    Cancelled = 1,
+    Paused = 2
+}
+
+public enum KavitaPlusBillingInterval
+{
+    Day = 0,
+    Week = 1,
+    Month = 2,
+    Year = 3
+}
 
 public sealed record LicenseInfoDto
 {
     /// <summary>
-    /// If cancelled, will represent cancellation date. If not, will represent repayment date
+    /// Overall subscription state
+    /// </summary>
+    public KavitaPlusSubscriptionState State { get; set; }
+
+    /// <summary>
+    /// Backward-compat shim - true when State is Active
+    /// </summary>
+    public bool IsActive => State == KavitaPlusSubscriptionState.Active;
+
+    /// <summary>
+    /// Backward-compat shim - true when State is Cancelled
+    /// </summary>
+    public bool IsCancelled => State == KavitaPlusSubscriptionState.Cancelled;
+
+    /// <summary>
+    /// If cancelled, represents the cancellation/expiry date; if active, the next renewal date
     /// </summary>
     public DateTime ExpirationDate { get; set; }
+
     /// <summary>
-    /// If cancelled or not
+    /// When the subscription will next renew; null if Cancelled or Paused
     /// </summary>
-    public bool IsActive { get; set; }
+    public DateTime? NextChargeDate { get; set; }
+
     /// <summary>
-    /// If will be or is cancelled
+    /// The earliest date this user ever subscribed, across all Stripe customer records with the same email
     /// </summary>
-    public bool IsCancelled { get; set; }
+    public DateTime? SubscribedSince { get; set; }
+
+    /// <summary>
+    /// Stripe product name (e.g. "Kavita+")
+    /// </summary>
+    public string? ProductName { get; set; }
+
+    /// <summary>
+    /// Effective price in cents after any active coupon (0 = free)
+    /// </summary>
+    public long? PriceAmount { get; set; }
+
+    /// <summary>
+    /// ISO currency code (e.g. "usd")
+    /// </summary>
+    public string? PriceCurrency { get; set; }
+
+    /// <summary>
+    /// Billing cycle interval
+    /// </summary>
+    public KavitaPlusBillingInterval? BillingInterval { get; set; }
+
+    /// <summary>
+    /// True if an active coupon or discount is applied to the subscription or customer
+    /// </summary>
+    public bool HasActiveDiscount { get; set; }
+
     /// <summary>
     /// Is the installed version valid for Kavita+ (aka within 3 releases)
     /// </summary>
+    /// <remarks>This is used only on Kavita</remarks>
     public bool IsValidVersion { get; set; }
+
     /// <summary>
     /// The email on file
     /// </summary>
     public string RegisteredEmail { get; set; }
+
     /// <summary>
-    /// Number of months user has been subscribed
+    /// Total months subscribed across all historical subscriptions
     /// </summary>
     public int TotalMonthsSubbed { get; set; }
     /// <summary>
