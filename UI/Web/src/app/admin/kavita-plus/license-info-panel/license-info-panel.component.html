@@ -41,9 +41,7 @@
             <span class="data-label">{{ t('next-charge-label') }}</span>
             <span class="data-value">{{ licenseInfo()?.nextChargeDate | utcToLocalTime }}</span>
             <span class="data-sub">{{ formattedPrice() }}
-              @if (licenseInfo()?.priceAmount != 0) {
-                <span class="mx-1 dot-separator"></span>{{ licenseInfo()?.billingInterval | kavitaPlusBillingInterval }}
-              }
+            <span class="mx-1 dot-separator"></span>{{ licenseInfo()?.billingInterval | kavitaPlusBillingInterval }}
             </span>
           </div>
           <div class="data-col">

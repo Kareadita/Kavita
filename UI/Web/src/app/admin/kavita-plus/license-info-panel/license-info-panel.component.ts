@@ -4,7 +4,7 @@ import {KavitaPlusBillingInterval, LicenseInfo} from '../../../_models/kavitaplu
 import {environment} from '../../../../environments/environment';
 import {UtcToLocalTimePipe} from '../../../_pipes/utc-to-local-time.pipe';
 import {VersionService} from '../../../_services/version.service';
-import {translate, TranslocoDirective} from '@jsverse/transloco';
+import {TranslocoDirective} from '@jsverse/transloco';
 import {KavitaPlusSubscriptionStatusPipe} from '../../../_pipes/kavita-plus-subscription-status.pipe';
 import {KavitaPlusBillingIntervalPipe} from '../../../_pipes/kavita-plus-billing-interval.pipe';
 import {MemberService} from "../../../_services/member.service";
@@ -90,8 +90,6 @@ export class LicenseInfoPanelComponent {
     const amount = this.licenseInfo()?.priceAmount;
     const currency = this.licenseInfo()?.priceCurrency;
     if (amount == null || !currency) return null;
-
-    if (amount === 0) return translate('license-info-panel.free-price-label');
 
     return new Intl.NumberFormat(undefined, {
       style: 'currency',
