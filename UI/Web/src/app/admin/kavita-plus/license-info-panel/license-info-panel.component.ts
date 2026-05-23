@@ -23,7 +23,9 @@ export class LicenseInfoPanelComponent {
   private readonly userService = inject(MemberService);
 
   licenseInfo = input.required<LicenseInfo | null>();
-  editKey = output<void>();
+  editLicense = output<void>();
+  /** Triggers a license validation and forced reload of license info */
+  check = output<void>();
 
   usersCount = signal<number>(0);
 

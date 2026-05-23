@@ -122,11 +122,11 @@
             <i class="fa-brands fa-stripe-s me-1" aria-hidden="true"></i>
             {{ status() === 'active' ? t('manage-label') : t('renew-label') }}
           </a>
-          <button type="button" class="btn btn-outline-secondary btn-sm dark-exempt" (click)="editKey.emit()">
+          <button type="button" class="btn btn-outline-secondary btn-sm dark-exempt" (click)="editLicense.emit()">
             <i class="fa-regular fa-pen-to-square me-1" aria-hidden="true"></i>
             {{ t('edit-license-label') }}
           </button>
-          <button type="button" class="btn btn-outline-secondary btn-sm dark-exempt" (click)="editKey.emit()">
+          <button type="button" class="btn btn-outline-secondary btn-sm dark-exempt" (click)="check.emit()">
             <i class="fa-solid fa-rotate me-1" aria-hidden="true"></i>
             {{ t('check-license-label') }}
           </button>
