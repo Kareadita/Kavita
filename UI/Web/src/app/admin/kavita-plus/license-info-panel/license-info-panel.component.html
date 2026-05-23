@@ -44,7 +44,7 @@
           </div>
           <div class="data-col">
             <span class="data-label">{{ t('member-since-label') }}</span>
-            <span class="data-value">{{licenseInfo()?.subscribedSince | date:'short'}}</span>
+            <span class="data-value">{{licenseInfo()?.subscribedSince | date:'shortDate'}}</span>
             <span class="data-sub">{{ t('months-subscribed-label', { count: licenseInfo()?.totalMonthsSubbed ?? 0 }) }}</span>
           </div>
           <div class="data-col">
@@ -57,6 +57,22 @@
               }
             </span>
             <span class="data-sub">{{ t('version-sub-label', { version: activeVersion() }) }}</span>
+          </div>
+        } @else if (status() === 'cancelled' && !isExpired()) {
+          <div class="data-col">
+            <span class="data-label">{{ t('expires-label') }}</span>
+            <span class="data-value">{{ licenseInfo()?.expirationDate | utcToLocalTime }}</span>
+            <span class="data-sub">{{ t('days-remaining-label', { count: daysUntilExpiry() }) }}</span>
+          </div>
+          <div class="data-col">
+            <span class="data-label">{{ t('last-plan-label') }}</span>
+            <span class="data-value">{{ formattedPrice() }} / {{ licenseInfo()?.billingInterval | kavitaPlusBillingInterval:'unit' }}</span>
+            <span class="data-sub">{{ t('months-subscribed-label', { count: licenseInfo()?.totalMonthsSubbed ?? 0 }) }}</span>
+          </div>
+          <div class="data-col">
+            <span class="data-label">{{ t('impacted-label') }}</span>
+            <span class="data-value">{{ t('impacted-value-label') }}</span>
+            <span class="data-sub">{{ t('impacted-sub-label') }}</span>
           </div>
         } @else {
           <div class="data-col">
@@ -71,7 +87,7 @@
           </div>
           <div class="data-col">
             <span class="data-label">{{ t('impacted-label') }}</span>
-            <span class="data-value">{{ t('impacted-value-label') }}</span>
+            <span class="data-value">{{ t('impacted-value-label', {count: usersCount()}) }}</span>
             <span class="data-sub">{{ t('impacted-sub-label') }}</span>
           </div>
         }
@@ -80,31 +96,20 @@
       <!-- Right panel: ring + buttons -->
       <div class="right-panel flex-shrink-0 d-flex align-items-center gap-3">
 
-        @if (this.licenseInfo()?.state === KavitaPlusSubscriptionState.Active) {
-          <circle-progress
-            [percent]="daysRemainingPercent()"
-            [title]="daysRemaining().toString()"
-            [subtitle]="t('days-left-label') | uppercase"
-            [titleColor]="'#A9A9A9'"
-            [showSubtitle]="true"
-            [radius]="42"
-            [outerStrokeWidth]="8"
-            [innerStrokeWidth]="0"
-            [space]="0"
-            [backgroundPadding]="0"
-            outerStrokeLinecap="butt"
-            [outerStrokeColor]="ringColor()"
-            innerStrokeColor="transparent"
-            titleFontSize="22"
-            subtitleFontSize="9"
-            [showUnits]="false"
-            [animation]="true"
-            [animationDuration]="600"
-            [startFromZero]="false"
-            [responsive]="false"
-            [backgroundOpacity]="0.08"
-            [backgroundColor]="ringColor()"
-          />
+        @if (status() === 'active') {
+          <div class="ring-active" [style.--ring-pct]="daysRemainingPercent() + '%'">
+            <div class="ring-active-face">
+              <span class="ring-active-title">{{ daysRemaining() }}</span>
+              <span class="ring-active-sub">{{ t('days-left-label') | uppercase }}</span>
+            </div>
+          </div>
+        } @else if (status() === 'cancelled' && !isExpired()) {
+          <div class="ring-active" [style.--ring-pct]="daysUntilExpiryPercent() + '%'">
+            <div class="ring-active-face">
+              <span class="ring-active-title">{{ daysUntilExpiry() }}</span>
+              <span class="ring-active-sub">{{ t('days-left-label') | uppercase }}</span>
+            </div>
+          </div>
         } @else {
           <div class="ring-inactive">
             <i class="fa-solid fa-triangle-exclamation ring-inactive-icon" aria-hidden="true"></i>
@@ -119,7 +124,11 @@
           </a>
           <button type="button" class="btn btn-outline-secondary btn-sm dark-exempt" (click)="editKey.emit()">
             <i class="fa-regular fa-pen-to-square me-1" aria-hidden="true"></i>
-            {{ status() === 'active' ? t('edit-license-label') : t('edit-key-label') }}
+            {{ t('edit-license-label') }}
+          </button>
+          <button type="button" class="btn btn-outline-secondary btn-sm dark-exempt" (click)="editKey.emit()">
+            <i class="fa-solid fa-rotate me-1" aria-hidden="true"></i>
+            {{ t('check-license-label') }}
           </button>
         </div>
 

@@ -5,16 +5,16 @@ import {LicenseInfo} from '../../../_models/kavitaplus/license-info';
 import {LicenseInfoPanelComponent} from '../license-info-panel/license-info-panel.component';
 
 @Component({
-  selector: 'app-license-dashboard-inactive',
+  selector: 'app-license-dashboard',
   imports: [
     TranslocoDirective,
     LicenseInfoPanelComponent,
   ],
-  templateUrl: './license-dashboard-inactive.component.html',
-  styleUrl: './license-dashboard-inactive.component.scss',
+  templateUrl: './license-dashboard.component.html',
+  styleUrl: './license-dashboard.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class LicenseDashboardInactiveComponent {
+export class LicenseDashboardComponent {
 
   licenseInfo = input.required<LicenseInfo | null>();
 

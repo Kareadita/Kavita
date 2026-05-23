@@ -1,28 +1,31 @@
-import {ChangeDetectionStrategy, Component, computed, inject, input, output} from '@angular/core';
+import {ChangeDetectionStrategy, Component, computed, inject, input, output, signal} from '@angular/core';
 import {DatePipe, NgClass, UpperCasePipe} from '@angular/common';
-import {NgCircleProgressModule} from 'ng-circle-progress';
-import {KavitaPlusSubscriptionState, LicenseInfo} from '../../../_models/kavitaplus/license-info';
+import {KavitaPlusBillingInterval, LicenseInfo} from '../../../_models/kavitaplus/license-info';
 import {environment} from '../../../../environments/environment';
 import {UtcToLocalTimePipe} from '../../../_pipes/utc-to-local-time.pipe';
 import {VersionService} from '../../../_services/version.service';
 import {TranslocoDirective} from '@jsverse/transloco';
 import {KavitaPlusSubscriptionStatusPipe} from '../../../_pipes/kavita-plus-subscription-status.pipe';
 import {KavitaPlusBillingIntervalPipe} from '../../../_pipes/kavita-plus-billing-interval.pipe';
+import {MemberService} from "../../../_services/member.service";
 
 @Component({
   selector: 'app-license-info-panel',
   templateUrl: './license-info-panel.component.html',
   styleUrl: './license-info-panel.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [NgClass, NgCircleProgressModule, UtcToLocalTimePipe, UpperCasePipe, DatePipe, TranslocoDirective, KavitaPlusSubscriptionStatusPipe, KavitaPlusBillingIntervalPipe],
+  imports: [NgClass, UtcToLocalTimePipe, UpperCasePipe, DatePipe, TranslocoDirective, KavitaPlusSubscriptionStatusPipe, KavitaPlusBillingIntervalPipe],
   host: {'[attr.color]': 'status()'},
 })
 export class LicenseInfoPanelComponent {
 
   private readonly versionService = inject(VersionService);
+  private readonly userService = inject(MemberService);
 
   licenseInfo = input.required<LicenseInfo | null>();
   editKey = output<void>();
+
+  usersCount = signal<number>(0);
 
   readonly status = computed((): 'active' | 'paused' | 'cancelled' => {
     const info = this.licenseInfo();
@@ -33,13 +36,13 @@ export class LicenseInfoPanelComponent {
     return 'paused';
   });
 
-
   readonly activeVersion = this.versionService.currentVersion;
 
   readonly daysRemaining = computed((): number => {
-    const expDate = this.licenseInfo()?.expirationDate;
-    if (!expDate) return 0;
-    const diff = Math.ceil((new Date(expDate).getTime() - Date.now()) / 86_400_000);
+    const nextChargeDate = this.licenseInfo()?.nextChargeDate;
+    if (!nextChargeDate) return 0;
+    const diff = Math.ceil((new Date(nextChargeDate).getTime() - Date.now()) / 86_400_000);
+
     return Math.max(0, diff);
   });
 
@@ -51,6 +54,28 @@ export class LicenseInfoPanelComponent {
     const email = this.licenseInfo()?.registeredEmail;
     if (!email) return environment.manageLink;
     return environment.manageLink + '?prefilled_email=' + encodeURIComponent(email);
+  });
+
+  readonly isExpired = computed((): boolean => {
+    const exp = this.licenseInfo()?.expirationDate;
+    if (!exp) return true;
+    return new Date(exp).getTime() < Date.now();
+  });
+
+  readonly daysUntilExpiry = computed((): number => {
+    const exp = this.licenseInfo()?.expirationDate;
+    if (!exp) return 0;
+    return Math.max(0, Math.ceil((new Date(exp).getTime() - Date.now()) / 86_400_000));
+  });
+
+  readonly daysUntilExpiryPercent = computed((): number => {
+    const days = this.daysUntilExpiry();
+    const interval = this.licenseInfo()?.billingInterval;
+    const totalDays = interval === KavitaPlusBillingInterval.Year ? 365
+      : interval === KavitaPlusBillingInterval.Week ? 7
+      : interval === KavitaPlusBillingInterval.Day  ? 1
+      : 30;
+    return Math.min(100, Math.round((days / totalDays) * 100));
   });
 
   readonly daysAgo = computed((): number => {
@@ -69,14 +94,10 @@ export class LicenseInfoPanelComponent {
     }).format(amount / 100);
   });
 
-  // SVG attributes cannot resolve CSS custom properties - map status to literal color values.
-  readonly ringColor = computed((): string => {
-    switch (this.status()) {
-      case 'active':    return '#4ac694';
-      case 'cancelled': return '#dc3545';
-      case 'paused':    return '#ffc107';
-    }
-  });
-  protected readonly KavitaPlusSubscriptionStatusPipe = KavitaPlusSubscriptionStatusPipe;
-  protected readonly KavitaPlusSubscriptionState = KavitaPlusSubscriptionState;
+  constructor() {
+    this.userService.getMembers(false).subscribe(members => {
+      this.usersCount.set(members.length);
+    });
+  }
+
 }

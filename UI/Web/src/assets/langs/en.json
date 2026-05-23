@@ -1074,9 +1074,10 @@
         "kavita+-requirement": "Kavita+ is designed to work only with the latest 3 releases. Anything outside of that is subject to not functioning."
     },
 
-    "license-dashboard-inactive": {
+    "license-dashboard": {
         "title": "License & Kavita+",
-        "description": "Your Kavita+ subscription has lapsed. Renew to restore metadata sync, scrobbling, recommendations, and more.",
+        "description-inactive": "Your Kavita+ subscription has lapsed. Renew to restore metadata sync, scrobbling, recommendations, and more.",
+        "description-active": "Subscription, integrations, and usage for this server.",
         "faq-btn-label": "FAQ"
     },
 
@@ -1091,16 +1092,19 @@
         "unsupported-label": "Unsupported",
         "version-sub-label": "on v{{version}}",
         "expired-label": "Expired",
+        "expires-label": "Expires",
         "days-ago-label": "{{count}} days ago",
+        "days-remaining-label": "{{count}} days left",
         "last-plan-label": "Last Plan",
         "impacted-label": "Active Users Impacted",
-        "impacted-value-label": "All users",
+        "impacted-value-label": "{{count}} users",
         "impacted-sub-label": "premium features paused",
         "days-left-label": "Days Left",
         "manage-label": "Manage",
         "renew-label": "Renew",
         "edit-license-label": "Edit license",
-        "edit-key-label": "Edit key"
+        "edit-key-label": "Edit key",
+        "check-license-label": "Check"
     },
 
     "manage-matched-metadata": {

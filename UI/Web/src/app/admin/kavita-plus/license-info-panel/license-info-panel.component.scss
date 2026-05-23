@@ -89,6 +89,47 @@
   color: var(--text-muted-color);
 }
 
+.ring-active {
+  --ring-pct: 100%;
+  width: 6.75rem;
+  height: 6.75rem;
+  border-radius: 50%;
+  background: conic-gradient(
+    var(--panel-color) var(--ring-pct),
+    color-mix(in srgb, var(--panel-color) 20%, transparent) var(--ring-pct)
+  );
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.ring-active-face {
+  width: 5.75rem;
+  height: 5.75rem;
+  border-radius: 50%;
+  background: color-mix(in srgb, var(--panel-color) 8%, var(--elevation-layer1-dark-solid));
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.15rem;
+}
+
+.ring-active-title {
+  font-size: 1.375rem;
+  font-weight: 700;
+  line-height: 1;
+  color: var(--text-muted-color);
+}
+
+.ring-active-sub {
+  font-size: 0.6rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--text-muted-color);
+}
+
 .ring-inactive {
   width: 6.75rem;
   height: 6.75rem;

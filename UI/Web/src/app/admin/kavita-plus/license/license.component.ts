@@ -1,14 +1,7 @@
 import {ChangeDetectionStrategy, ChangeDetectorRef, Component, computed, inject, OnInit, signal} from '@angular/core';
 import {FormControl, FormGroup, ReactiveFormsModule, Validators} from "@angular/forms";
 import {LicenseInfo} from "../../../_models/kavitaplus/license-info";
-import {NgbTooltip} from "@ng-bootstrap/ng-bootstrap";
-import {LoadingComponent} from "../../../shared/loading/loading.component";
 import {translate, TranslocoDirective} from "@jsverse/transloco";
-import {SettingItemComponent} from "../../../settings/_components/setting-item/setting-item.component";
-import {DefaultValuePipe} from "../../../_pipes/default-value.pipe";
-import {UtcToLocalTimePipe} from "../../../_pipes/utc-to-local-time.pipe";
-import {SettingButtonComponent} from "../../../settings/_components/setting-button/setting-button.component";
-import {DecimalPipe} from "@angular/common";
 import {ToastrService} from "ngx-toastr";
 import {ConfirmService} from "../../../shared/confirm.service";
 import {AccountService} from "../../../_services/account.service";
@@ -21,15 +14,14 @@ import {
   KavitaPlusRegistrationErrorCode
 } from '../../../_models/kavitaplus/registration/kavita-plus-registration-error-code';
 import {RegistrationWizardComponent} from "../registration-wizard/registration-wizard.component";
-import {LicenseDashboardInactiveComponent} from "../license-dashboard-inactive/license-dashboard-inactive.component";
+import {LicenseDashboardComponent} from "../license-dashboard-inactive/license-dashboard.component";
 
 @Component({
     selector: 'app-license',
     templateUrl: './license.component.html',
     styleUrls: ['./license.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [NgbTooltip, LoadingComponent, ReactiveFormsModule, TranslocoDirective, SettingItemComponent,
-    DefaultValuePipe, UtcToLocalTimePipe, SettingButtonComponent, DecimalPipe, RegistrationWizardComponent, LicenseDashboardInactiveComponent]
+  imports: [ReactiveFormsModule, TranslocoDirective, RegistrationWizardComponent, LicenseDashboardComponent]
 })
 export class LicenseComponent implements OnInit {
 
