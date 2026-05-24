@@ -98,4 +98,14 @@ public sealed record LicenseInfoDto
     /// InstallId which can be given to support
     /// </summary>
     public string InstallId { get; set; }
+
+    /// <summary>
+    /// Discord UserId if set
+    /// </summary>
+    public string? DiscordId { get; set; }
+
+    /// <summary>
+    /// Has Discord Set
+    /// </summary>
+    public bool HasDiscordSet => DiscordId is not null;
 }

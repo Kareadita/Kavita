@@ -14,7 +14,7 @@ import {
   KavitaPlusRegistrationErrorCode
 } from '../../../_models/kavitaplus/registration/kavita-plus-registration-error-code';
 import {RegistrationWizardComponent} from "../registration-wizard/registration-wizard.component";
-import {LicenseDashboardComponent} from "../license-dashboard-inactive/license-dashboard.component";
+import {LicenseDashboardComponent} from "../license-dashboard/license-dashboard.component";
 
 @Component({
     selector: 'app-license',

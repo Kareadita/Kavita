@@ -1,25 +1,30 @@
-import {ChangeDetectionStrategy, Component, inject, signal} from '@angular/core';
-import {translate, TranslocoDirective} from "@jsverse/transloco";
-import {EditLicenseKeyComponent, LicenseFormEvent} from "../edit-license-key/edit-license-key.component";
+import {ChangeDetectionStrategy, Component, inject, input, signal} from '@angular/core';
+import {EditLicenseKeyComponent, LicenseFormEvent} from "../../kavita-plus/edit-license-key/edit-license-key.component";
 import {LicenseService} from "../../../_services/license.service";
 import {ConfirmService} from "../../../shared/confirm.service";
 import {ToastrService} from "ngx-toastr";
+import {translate, TranslocoDirective} from "@jsverse/transloco";
+import {NgbActiveModal} from "@ng-bootstrap/ng-bootstrap";
+import {LicenseInfo} from "../../../_models/kavitaplus/license-info";
 
 @Component({
-  selector: 'app-manage-license-key',
+  selector: 'app-manage-license-key-modal',
   imports: [
-    TranslocoDirective,
-    EditLicenseKeyComponent
+    EditLicenseKeyComponent,
+    TranslocoDirective
   ],
-  templateUrl: './manage-license-key.component.html',
-  styleUrl: './manage-license-key.component.scss',
+  templateUrl: './manage-license-key-modal.component.html',
+  styleUrl: './manage-license-key-modal.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class ManageLicenseKeyComponent {
+export class ManageLicenseKeyModalComponent {
 
+  protected readonly modal = inject(NgbActiveModal);
   protected readonly licenseService = inject(LicenseService);
   protected readonly confirmService = inject(ConfirmService);
   protected readonly toastr = inject(ToastrService);
+
+  licenseInfo = input.required<LicenseInfo>();
 
   protected readonly formIsValid = signal<boolean>(false);
 
@@ -52,5 +57,10 @@ export class ManageLicenseKeyComponent {
       this.toastr.success(translate('toasts.k+-reset-key-success'));
     });
   }
+
+  save() {
+    // TODO
+  }
+
 
 }

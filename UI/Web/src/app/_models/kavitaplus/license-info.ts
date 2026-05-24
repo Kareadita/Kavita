@@ -31,4 +31,6 @@ export interface LicenseInfo {
   totalMonthsSubbed: number;
   hasLicense: boolean;
   installId: string;
+  discordId: string | null;
+  hasDiscordSet: boolean;
 }

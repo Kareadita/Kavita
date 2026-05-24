@@ -12,7 +12,7 @@
       </a>
     </div>
 
-    <app-license-info-panel [licenseInfo]="licenseInfo()" class="mb-3" />
+    <app-license-info-panel [licenseInfo]="licenseInfo()" class="mb-3" (check)="forceCheckLicense()" (editLicense)="openEditLicenseModal()" />
 
     <!-- app-license-sub-card -->
 

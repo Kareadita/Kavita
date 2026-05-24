@@ -916,7 +916,7 @@
         "connect-with-discord-help": "Or {{connectWithDiscordBtn}} to fill this out automatically"
     },
 
-    "manage-license-key": {
+    "manage-license-key-modal": {
         "title": "Kavita+ License",
         "last-validated": "last validated {{timeAgo}}",
         "activate-license": "Activate License",
