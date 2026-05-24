@@ -1,7 +1,12 @@
 <ng-container *transloco="let t; prefix:'license-dashboard'">
   @let info = licenseService.licenseInfo();
 
+
   @if (info) {
+    @let isActive = info.isActive;
+    @let isCancelled = info.isCancelled;
+    @let isExpired = info.isExpired;
+
     <div class="d-flex align-items-start justify-content-between gap-3 mb-4">
       <div class="flex-fill">
         <h1 class="fw-bold mb-2">{{t('title')}}</h1>
@@ -27,6 +32,8 @@
     <!-- app-license-sub-card -->
 
       <!--app-usage-snapshot-->
+
+
   }
 
 </ng-container>

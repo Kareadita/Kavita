@@ -40,11 +40,7 @@ export class LicenseInfoPanelComponent {
   readonly activeVersion = this.versionService.currentVersion;
 
   readonly daysRemaining = computed((): number => {
-    const nextChargeDate = this.licenseInfo()?.nextChargeDate;
-    if (!nextChargeDate) return 0;
-    const diff = Math.ceil((new Date(nextChargeDate).getTime() - Date.now()) / 86_400_000);
-
-    return Math.max(0, diff);
+    return this.licenseInfo()?.daysRemaining ?? 0;
   });
 
   readonly daysRemainingPercent = computed((): number =>
@@ -58,15 +54,12 @@ export class LicenseInfoPanelComponent {
   });
 
   readonly isExpired = computed((): boolean => {
-    const exp = this.licenseInfo()?.expirationDate;
-    if (!exp) return true;
-    return new Date(exp).getTime() < Date.now();
+    return this.licenseInfo()?.isExpired ?? true;
+
   });
 
   readonly daysUntilExpiry = computed((): number => {
-    const exp = this.licenseInfo()?.expirationDate;
-    if (!exp) return 0;
-    return Math.max(0, Math.ceil((new Date(exp).getTime() - Date.now()) / 86_400_000));
+    return this.licenseInfo()?.daysUntilExpiry ?? 0;
   });
 
   readonly daysUntilExpiryPercent = computed((): number => {
