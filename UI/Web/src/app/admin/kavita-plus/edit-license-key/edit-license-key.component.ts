@@ -42,11 +42,12 @@ export class EditLicenseKeyComponent {
   protected readonly licenseService = inject(LicenseService);
   protected readonly destroyRef = inject(DestroyRef);
 
-  /** This will trigger showing an additional helper to explain why the key is needed again */
-  hasLicense = computed(() => this.licenseService.hasActiveLicense());
   /** This will show the additional connect with discord OAuth flow */
   updated = output<LicenseFormEvent>();
 
+
+  /** This will trigger showing an additional helper to explain why the key is needed again */
+  hasLicense = computed(() => this.licenseService.hasActiveLicense());
   showConnectWithDiscord = computed(() => {
     return !this.licenseService.licenseInfo()?.hasDiscordSet;
   });
@@ -60,6 +61,13 @@ export class EditLicenseKeyComponent {
   });
 
   constructor() {
+
+    const licenseInfo = this.licenseService.licenseInfo();
+    if (licenseInfo) {
+      this.formGroup.get('email')?.setValue(licenseInfo.registeredEmail);
+      this.formGroup.get('discordId')?.setValue(licenseInfo.discordId);
+    }
+
     this.formGroup.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(change => {
       this.updated.emit({...this.formGroup.value, isValid: this.formGroup.valid});
     });
