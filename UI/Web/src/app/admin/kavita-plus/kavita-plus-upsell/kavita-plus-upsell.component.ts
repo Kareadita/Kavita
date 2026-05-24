@@ -8,7 +8,7 @@ import {
 import {ScrobbleProviderNamePipe} from '../../../_pipes/scrobble-provider-name.pipe';
 import {environment} from "../../../../environments/environment";
 import {RegisterLicenseKeyComponent} from "../register-license-key/register-license-key.component";
-import {KavitaPlusRegistrationStep} from "../registration-wizard/registration-wizard.component";
+import {KavitaPlusRegistrationStep} from "../license/license.component";
 
 @Component({
   selector: 'app-kavita-plus-upsell',

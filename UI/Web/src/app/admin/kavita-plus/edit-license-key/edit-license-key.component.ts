@@ -1,4 +1,4 @@
-import {ChangeDetectionStrategy, Component, DestroyRef, inject, input, output} from '@angular/core';
+import {ChangeDetectionStrategy, Component, computed, DestroyRef, inject, output} from '@angular/core';
 import {TranslocoDirective} from "@jsverse/transloco";
 import {FormControl, FormGroup, FormsModule, ReactiveFormsModule, Validators} from "@angular/forms";
 import {WikiLink} from "../../../_models/wiki";
@@ -38,15 +38,18 @@ export interface LicenseFormEvent {
 })
 export class EditLicenseKeyComponent {
 
-  /** This will trigger showing an additional helper to explain why the key is needed again */
-  hasLicense = input<boolean>();
-  /** This will show the additional connect with discord OAuth flow */
-  showConnectWithDiscord = input<boolean>(true);
-  updated = output<LicenseFormEvent>();
-
   protected readonly accountService = inject(AccountService);
   protected readonly licenseService = inject(LicenseService);
   protected readonly destroyRef = inject(DestroyRef);
+
+  /** This will trigger showing an additional helper to explain why the key is needed again */
+  hasLicense = computed(() => this.licenseService.hasActiveLicense());
+  /** This will show the additional connect with discord OAuth flow */
+  updated = output<LicenseFormEvent>();
+
+  showConnectWithDiscord = computed(() => {
+    return !this.licenseService.licenseInfo()?.hasDiscordSet;
+  });
 
   formGroup: FormGroup = new FormGroup({
     'licenseKey': new FormControl('', [Validators.required, Validators.maxLength(19),

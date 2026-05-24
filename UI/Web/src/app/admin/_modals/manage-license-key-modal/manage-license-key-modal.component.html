@@ -7,7 +7,7 @@
     <button type="button" class="btn-close" [attr.aria-label]="t('close')" (click)="modal.dismiss()"></button>
   </div>
   <div class="modal-body">
-    <app-edit-license-key [hasLicense]="hasLicenseOnFile" (updated)="updateFormData($event)" [showConnectWithDiscord]="!licenseService.licenseInfo()?.hasDiscordSet" />
+    <app-edit-license-key (updated)="updateFormData($event)" />
 
   </div>
   <div class="modal-footer">

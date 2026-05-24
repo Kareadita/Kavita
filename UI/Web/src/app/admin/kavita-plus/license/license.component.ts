@@ -10,15 +10,23 @@ import {WikiLink} from "../../../_models/wiki";
 import {
   KavitaPlusRegistrationErrorCode
 } from '../../../_models/kavitaplus/registration/kavita-plus-registration-error-code';
-import {RegistrationWizardComponent} from "../registration-wizard/registration-wizard.component";
 import {LicenseDashboardComponent} from "../license-dashboard/license-dashboard.component";
+import {KavitaPlusUpsellComponent} from "../kavita-plus-upsell/kavita-plus-upsell.component";
+import {
+  KavitaPlusConnectProvidersComponent
+} from "../kavita-plus-connect-providers/kavita-plus-connect-providers.component";
+
+export enum KavitaPlusRegistrationStep {
+  Upsell = 0,
+  ConnectProviders = 1
+}
 
 @Component({
     selector: 'app-license',
     templateUrl: './license.component.html',
     styleUrls: ['./license.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [ReactiveFormsModule, TranslocoDirective, RegistrationWizardComponent, LicenseDashboardComponent]
+  imports: [ReactiveFormsModule, TranslocoDirective, LicenseDashboardComponent, KavitaPlusUpsellComponent, KavitaPlusConnectProvidersComponent]
 })
 export class LicenseComponent implements OnInit {
 
@@ -36,10 +44,14 @@ export class LicenseComponent implements OnInit {
     'email': new FormControl('', [Validators.required]),
     'discordId': new FormControl('', [Validators.pattern(/\d+/)])
   });
+  activeStep = signal<KavitaPlusRegistrationStep>(KavitaPlusRegistrationStep.Upsell);
+
   isViewMode = signal<boolean>(true);
   isChecking = signal<boolean>(true);
   isSaving = signal<boolean>(false);
   showEmail = signal<boolean>(false);
+
+  protected readonly KavitaPlusRegistrationStep = KavitaPlusRegistrationStep;
 
   readonly manageLink = computed(() => {
     const email = this.licenseService.licenseInfo()?.registeredEmail;

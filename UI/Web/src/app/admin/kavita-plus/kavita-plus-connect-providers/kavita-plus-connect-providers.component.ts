@@ -1,4 +1,4 @@
-import {ChangeDetectionStrategy, Component, inject, signal} from '@angular/core';
+import {ChangeDetectionStrategy, Component, inject, output, signal} from '@angular/core';
 import {translate, TranslocoDirective} from "@jsverse/transloco";
 import {WikiLink} from "../../../_models/wiki";
 import {
@@ -6,10 +6,7 @@ import {
 } from "../../../user-settings/scrobble-account-card/scrobble-account-card.component";
 import {ScrobblingService, UserScrobbleProvider} from "../../../_services/scrobbling.service";
 import {BannerComponent} from "../../../shared/_components/banner/banner.component";
-import {Router} from "@angular/router";
-import {SettingsTabId} from "../../../sidenav/preference-nav/preference-nav.component";
 import {ToastrService} from "ngx-toastr";
-import {LicenseService} from "../../../_services/license.service";
 
 @Component({
   selector: 'app-kavita-plus-connect-providers',
@@ -25,9 +22,9 @@ import {LicenseService} from "../../../_services/license.service";
 export class KavitaPlusConnectProvidersComponent {
 
   private readonly scrobblingService = inject(ScrobblingService);
-  private readonly router = inject(Router);
   private readonly toastr = inject(ToastrService);
-  private readonly licenseService = inject(LicenseService);
+
+  done = output();
 
   scrobblingProviders = signal<UserScrobbleProvider[]>([]);
 
@@ -36,7 +33,6 @@ export class KavitaPlusConnectProvidersComponent {
   }
 
   backfillAndRedirect() {
-    // Validate there are scrobble providers hooked up, if not, just redirect
     this.scrobblingService.getScrobbleProviders().subscribe(providers => {
       const enabledProviders = providers.filter(p => p.authenticationToken);
       if (enabledProviders.length > 0) {
@@ -44,25 +40,17 @@ export class KavitaPlusConnectProvidersComponent {
           if (res) {
             this.toastr.info(translate('toasts.scrobble-gen-init'));
           }
-          this.refresh();
+          this.done.emit();
         });
       } else {
-        this.refresh();
+        this.done.emit();
       }
-    })
-  }
-
-  skip() {
-    // Call hasAnyLicense to ensure we don't show the wizard
-    this.refresh();
-  }
-
-  private refresh() {
-    this.licenseService.hasAnyLicense().subscribe(hasLicense => {
-      this.router.navigate(['/settings'], {fragment: SettingsTabId.KavitaPlusLicense});
     });
   }
 
+  skip() {
+    this.done.emit();
+  }
+
   protected readonly WikiLink = WikiLink;
-  protected readonly SettingsTabId = SettingsTabId;
 }
