@@ -35,6 +35,8 @@ export class LicenseService {
       map(res => res === "true"),
       tap(_ => {
         this._hasActiveLicense.set(false);
+        this._licenseInfo.set(null);
+        this._hasLicenseOnFile.set(false);
       }),
       catchError(error => {
         this._hasActiveLicense.set(false);
@@ -59,6 +61,8 @@ export class LicenseService {
     return this.httpClient.get<LicenseInfo | null>(this.baseUrl + `license/info?forceCheck=${forceCheck}`).pipe(
       tap(res => {
         this._hasActiveLicense.set(res?.isActive || false);
+        this._licenseInfo.set(res);
+        this._hasLicenseOnFile.set(res?.hasLicense ?? false);
       }),
       catchError(error => {
         console.error(error);
@@ -75,6 +79,7 @@ export class LicenseService {
         map(res => res === "true"),
         tap(value => {
           this._hasActiveLicense.set(value);
+          if (forceCheck) this.getLicenseInfo(true).subscribe();
         }),
         catchError(error => {
           this._hasActiveLicense.set(false);
@@ -103,6 +108,10 @@ export class LicenseService {
   }
 
   updateUserLicense(license: string, email: string, discordId?: string) {
-    return this.httpClient.post<KavitaPlusRegisterResult>(this.baseUrl + 'license', {license, email, discordId});
+    return this.httpClient.post<KavitaPlusRegisterResult>(this.baseUrl + 'license', {license, email, discordId}).pipe(
+      tap(result => {
+        if (result.success) this.getLicenseInfo(true).subscribe();
+      })
+    );
   }
 }

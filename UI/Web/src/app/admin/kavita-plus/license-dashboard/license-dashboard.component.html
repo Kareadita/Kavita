@@ -1,5 +1,5 @@
 <ng-container *transloco="let t; prefix:'license-dashboard'">
-  @let info = licenseInfo();
+  @let info = licenseService.licenseInfo();
 
   @if (info) {
     <div class="d-flex align-items-start justify-content-between gap-3 mb-4">
@@ -12,7 +12,7 @@
       </a>
     </div>
 
-    <app-license-info-panel [licenseInfo]="licenseInfo()" class="mb-3" (check)="forceCheckLicense()" (editLicense)="openEditLicenseModal()" />
+    <app-license-info-panel [licenseInfo]="licenseService.licenseInfo()" class="mb-3" (check)="forceCheckLicense()" (editLicense)="openEditLicenseModal()" />
 
     <!-- app-license-sub-card -->
 

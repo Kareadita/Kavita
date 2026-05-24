@@ -1,13 +1,13 @@
-import {ChangeDetectionStrategy, Component, inject, input} from '@angular/core';
+import {ChangeDetectionStrategy, Component, inject} from '@angular/core';
 import {TranslocoDirective} from '@jsverse/transloco';
 import {WikiLink} from '../../../_models/wiki';
-import {LicenseInfo} from '../../../_models/kavitaplus/license-info';
 import {LicenseInfoPanelComponent} from '../license-info-panel/license-info-panel.component';
 import {editModal} from "../../../_models/modal/modal-options";
 import {ModalService} from "../../../_services/modal.service";
 import {
   ManageLicenseKeyModalComponent
 } from "../../_modals/manage-license-key-modal/manage-license-key-modal.component";
+import {LicenseService} from "../../../_services/license.service";
 
 @Component({
   selector: 'app-license-dashboard',
@@ -22,24 +22,16 @@ import {
 export class LicenseDashboardComponent {
 
   private readonly modalService = inject(ModalService);
+  protected readonly licenseService = inject(LicenseService);
 
-  licenseInfo = input.required<LicenseInfo | null>();
-
-  forceCheckLicense() {}
+  forceCheckLicense() {
+    this.licenseService.getLicenseInfo(true).subscribe();
+  }
 
   openEditLicenseModal() {
     const ref = this.modalService.open(ManageLicenseKeyModalComponent, editModal());
-    ref.setInput('licenseInfo', this.licenseInfo()!);
-    ref.closed.subscribe(res => {
-      // After editings, there are a few different results:
-      // 1 - License deleted
-      // 2 - Install Id cleared (usually they will re-save afterwards tho)
-      // 3 - License change/Discord Id set
-      // We need to populate and refresh licenseInfo
-    });
+    ref.closed.subscribe();
   }
-
-
 
   protected readonly WikiLink = WikiLink;
 }

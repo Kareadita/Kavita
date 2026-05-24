@@ -1,6 +1,5 @@
 import {ChangeDetectionStrategy, ChangeDetectorRef, Component, computed, inject, OnInit, signal} from '@angular/core';
 import {FormControl, FormGroup, ReactiveFormsModule, Validators} from "@angular/forms";
-import {LicenseInfo} from "../../../_models/kavitaplus/license-info";
 import {translate, TranslocoDirective} from "@jsverse/transloco";
 import {ToastrService} from "ngx-toastr";
 import {ConfirmService} from "../../../shared/confirm.service";
@@ -8,8 +7,6 @@ import {AccountService} from "../../../_services/account.service";
 import {LicenseService} from "../../../_services/license.service";
 import {environment} from "../../../../environments/environment";
 import {WikiLink} from "../../../_models/wiki";
-import {switchMap} from "rxjs/operators";
-import {filter, tap} from "rxjs";
 import {
   KavitaPlusRegistrationErrorCode
 } from '../../../_models/kavitaplus/registration/kavita-plus-registration-error-code';
@@ -42,21 +39,14 @@ export class LicenseComponent implements OnInit {
   isViewMode = signal<boolean>(true);
   isChecking = signal<boolean>(true);
   isSaving = signal<boolean>(false);
-  hasLicense = signal<boolean>(false);
-  licenseInfo = signal<LicenseInfo | null>(null);
   showEmail = signal<boolean>(false);
 
-  /**
-   * Either the normal manageLink or with a prefilled email to ease the user
-   */
   readonly manageLink = computed(() => {
-    const email = this.licenseInfo()?.registeredEmail;
+    const email = this.licenseService.licenseInfo()?.registeredEmail;
     if (!email) return environment.manageLink;
 
     return environment.manageLink + '?prefilled_email=' + encodeURIComponent(email);
   });
-
-
 
 
   ngOnInit(): void {
@@ -64,28 +54,11 @@ export class LicenseComponent implements OnInit {
   }
 
   loadLicenseInfo(forceCheck = false) {
-    this.getLicenseInfoObservable(forceCheck).subscribe();
-  }
-
-  getLicenseInfoObservable(forceCheck = false) {
     this.isChecking.set(true);
-
-    return this.licenseService.hasAnyLicense()
-      .pipe(
-        tap(res => {
-          this.hasLicense.set(res);
-          this.isChecking.set(false);
-        }),
-        filter(hasLicense => hasLicense),
-        tap(_ => {
-          this.isChecking.set(true);
-        }),
-        switchMap(_ => this.licenseService.getLicenseInfo(forceCheck)),
-        tap(licenseInfo => {
-          this.licenseInfo.set(licenseInfo);
-          this.isChecking.set(false);
-        })
-      );
+    this.licenseService.getLicenseInfo(forceCheck).subscribe({
+      next: () => this.isChecking.set(false),
+      error: () => this.isChecking.set(false),
+    });
   }
 
 
@@ -99,7 +72,7 @@ export class LicenseComponent implements OnInit {
   saveForm() {
     this.isSaving.set(true);
 
-    const hadActiveLicenseBefore = this.licenseInfo()?.isActive;
+    const hadActiveLicenseBefore = this.licenseService.licenseInfo()?.isActive;
 
     const license = this.formGroup.get('licenseKey')!.value.trim();
     const email = this.formGroup.get('email')!.value.trim();
@@ -135,7 +108,8 @@ export class LicenseComponent implements OnInit {
           this.isViewMode.set(true);
           this.isSaving.set(false);
           this.cdRef.markForCheck();
-          this.getLicenseInfoObservable().subscribe(async (info) => {
+          // updateUserLicense already triggers getLicenseInfo(true); subscribe here to read the refreshed result for the notification
+          this.licenseService.getLicenseInfo().subscribe(async (info) => {
             if (info?.isActive && !hadActiveLicenseBefore) {
               await this.confirmService.info(translate('license.k+-unlocked-description'), translate('license.k+-unlocked'));
             } else {
@@ -174,8 +148,6 @@ export class LicenseComponent implements OnInit {
     this.licenseService.deleteLicense().subscribe(() => {
       this.resetForm();
       this.isViewMode.set(true);
-      this.licenseInfo.set(null);
-      this.hasLicense.set(false);
       this.cdRef.markForCheck();
     });
   }
