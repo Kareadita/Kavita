@@ -1078,7 +1078,8 @@
         "title": "License & Kavita+",
         "description-inactive": "Your Kavita+ subscription has lapsed. Renew to restore metadata sync, scrobbling, recommendations, and more.",
         "description-active": "Subscription, integrations, and usage for this server.",
-        "faq-btn-label": "FAQ"
+        "faq-label": "FAQ",
+        "support-label": "Help"
     },
 
     "license-info-panel": {

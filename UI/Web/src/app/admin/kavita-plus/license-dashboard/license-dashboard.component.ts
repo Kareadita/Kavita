@@ -8,12 +8,14 @@ import {
   ManageLicenseKeyModalComponent
 } from "../../_modals/manage-license-key-modal/manage-license-key-modal.component";
 import {LicenseService} from "../../../_services/license.service";
+import {DiscordButtonComponent} from "../discord-button/discord-button.component";
 
 @Component({
   selector: 'app-license-dashboard',
   imports: [
     TranslocoDirective,
     LicenseInfoPanelComponent,
+    DiscordButtonComponent,
   ],
   templateUrl: './license-dashboard.component.html',
   styleUrl: './license-dashboard.component.scss',

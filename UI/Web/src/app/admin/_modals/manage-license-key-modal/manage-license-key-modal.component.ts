@@ -55,8 +55,10 @@ export class ManageLicenseKeyModalComponent {
   }
 
   save() {
-    // TODO
+    if (!this.formData?.isValid) return;
+
+    this.licenseService.updateUserLicense(this.formData.licenseKey, this.formData.email, this.formData.discordId ?? undefined).subscribe(() => {
+      this.modal.close();
+    })
   }
-
-
 }

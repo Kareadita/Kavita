@@ -103,6 +103,7 @@ export class LicenseService {
       );
   }
 
+  
   registerLicense(license: string, email: string, discordId?: string) {
     return this.updateUserLicense(license, email, discordId);
   }

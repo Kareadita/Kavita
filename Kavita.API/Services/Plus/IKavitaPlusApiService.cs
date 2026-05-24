@@ -5,6 +5,7 @@ using Kavita.Models.DTOs.Collection;
 using Kavita.Models.DTOs.KavitaPlus;
 using Kavita.Models.DTOs.KavitaPlus.ExternalMetadata;
 using Kavita.Models.DTOs.KavitaPlus.ExternalMetadata.Covers;
+using Kavita.Models.DTOs.KavitaPlus.License;
 using Kavita.Models.DTOs.KavitaPlus.Metadata;
 using Kavita.Models.DTOs.Metadata.Matching;
 using Kavita.Models.DTOs.Scrobbling;
@@ -26,4 +27,5 @@ public interface IKavitaPlusApiService
     Task<SeriesDetailPlusApiDto> GetSeriesDetailAsync(PlusSeriesRequestDto request, CancellationToken ct = default);
     Task<ExternalSeriesDetailDto> GetSeriesDetailByIdAsync(ExternalMetadataIdsDto request, CancellationToken ct = default);
     Task<KPlusResult<IList<ExternalCoverResponseDto>>> GetCoverImagesAsync(ExternalCoverRequestDto request, CancellationToken ct = default);
+    Task<LicenseInfoDto?> GetLicenseInfo(CancellationToken ct = default);
 }

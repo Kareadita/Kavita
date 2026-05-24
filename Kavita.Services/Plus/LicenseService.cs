@@ -30,7 +30,7 @@ public class LicenseService(
     IEasyCachingProviderFactory cachingProviderFactory,
     IUnitOfWork unitOfWork,
     ILogger<LicenseService> logger,
-    IVersionUpdaterService versionUpdaterService)
+    IVersionUpdaterService versionUpdaterService, IKavitaPlusApiService kavitaPlusApiService)
     : ILicenseService
 {
     private readonly TimeSpan _licenseCacheTimeout = TimeSpan.FromHours(8);
@@ -283,13 +283,11 @@ public class LicenseService(
             if (cacheValue.HasValue) return cacheValue.Value;
         }
 
+
+
         try
         {
-            var encryptedLicense = await unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.LicenseKey, ct);
-            // TODO: Move this to the KavitaPlusApiService/Helper
-            var response = await (Configuration.KavitaPlusApiUrl + "/api/license/info")
-                .WithKavitaPlusHeaders(encryptedLicense.Value)
-                .GetJsonAsync<LicenseInfoDto>(cancellationToken: ct);
+            var response = await kavitaPlusApiService.GetLicenseInfo(ct);
 
             // This indicates a mismatch on installId or no active subscription
             if (response == null) return null;
@@ -309,19 +307,8 @@ public class LicenseService(
             var licenseProvider = cachingProviderFactory.GetCachingProvider(EasyCacheProfiles.License);
             await licenseProvider.SetAsync(CacheKey, response.IsActive, _licenseCacheTimeout, ct);
 
-            // default: If info.IsCancelled && notActive, let's remove the license so we aren't constantly checking
-            if (response is {IsCancelled: true, IsActive: false})
-            {
-                // TODO: Update the settings with a cached state that this is inactive
-                //logger.LogWarning("Kavita+ License is no longer active, removing Server registration");
-            }
-
-            // Cache the license info if IsActive and ExpirationDate > DateTime.UtcNow + 2
-            if (response.IsActive && response.ExpirationDate > DateTime.UtcNow.AddDays(2))
-            {
-                await licenseInfoProvider.SetAsync(LicenseInfoCacheKey, response, _licenseCacheTimeout, ct);
-            }
-
+            // Always cache the response as we provide this on expired licenses
+            await licenseInfoProvider.SetAsync(LicenseInfoCacheKey, response, _licenseCacheTimeout, ct);
 
             return response;
         }

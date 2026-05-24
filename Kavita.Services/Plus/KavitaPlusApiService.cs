@@ -12,6 +12,7 @@ using Kavita.Models.DTOs.Collection;
 using Kavita.Models.DTOs.KavitaPlus;
 using Kavita.Models.DTOs.KavitaPlus.ExternalMetadata;
 using Kavita.Models.DTOs.KavitaPlus.ExternalMetadata.Covers;
+using Kavita.Models.DTOs.KavitaPlus.License;
 using Kavita.Models.DTOs.KavitaPlus.Metadata;
 using Kavita.Models.DTOs.Metadata.Matching;
 using Kavita.Models.DTOs.Scrobbling;
@@ -106,6 +107,24 @@ public class KavitaPlusApiService(ILogger<KavitaPlusApiService> logger, IUnitOfW
             logger.LogError(ex, "There was an issue getting cover images from Kavita+ for Series ({SeriesName})", request.SeriesName);
             return KPlusResult<IList<ExternalCoverResponseDto>>.Failure(ex.Message);
         }
+    }
+
+    public async Task<LicenseInfoDto?> GetLicenseInfo(CancellationToken ct = default)
+    {
+        try
+        {
+            var license = (await unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.LicenseKey, ct)).Value;
+            var response = await (Configuration.KavitaPlusApiUrl + "/api/license/info")
+                .WithKavitaPlusHeaders(license)
+                .GetJsonAsync<LicenseInfoDto>(cancellationToken: ct);
+
+            return response;
+        } catch (FlurlHttpException e)
+        {
+            logger.LogError(e, "An error happened during the request to Kavita+ API");
+        }
+
+        return null;
     }
 
     /// <summary>

@@ -7,13 +7,23 @@
         <h1 class="fw-bold mb-2">{{t('title')}}</h1>
         <p class="text-muted page-desc mb-0">{{t('description-' + (info.isActive ? 'active' : 'inactive'))}}</p>
       </div>
+      <a href="mailto:kavitareader@gmail.com?subject=Kavita%20Subscription%20Help" target="_blank" rel="noreferrer nofollow" class="btn btn-outline-primary btn-sm flex-shrink-0">
+        <i class="fa-regular fa-circle-question me-1" aria-hidden="true"></i>{{t('support-label')}}
+      </a>
       <a [href]="WikiLink.KavitaPlusFAQ" target="_blank" rel="noreferrer nofollow" class="btn btn-outline-primary btn-sm flex-shrink-0">
-        <i class="fa-regular fa-circle-question me-1" aria-hidden="true"></i>{{t('faq-btn-label')}}
+        <i class="fa-regular fa-circle-question me-1" aria-hidden="true"></i>{{t('faq-label')}}
       </a>
     </div>
 
     <app-license-info-panel [licenseInfo]="licenseService.licenseInfo()" class="mb-3" (check)="forceCheckLicense()" (editLicense)="openEditLicenseModal()" />
 
+    @if (licenseService.licenseInfo()?.isActive) {
+      @if (!licenseService.licenseInfo()?.hasDiscordSet) {
+        <app-discord-button />
+      } @else {
+        Discord: {{licenseService.licenseInfo()?.discordId}}
+      }
+    }
     <!-- app-license-sub-card -->
 
       <!--app-usage-snapshot-->
