@@ -9,11 +9,7 @@
       <div class="flex-fill min-w-0">
         <div class="d-flex align-items-center flex-wrap gap-2">
           <span class="brand-name">Kavita<span class="brand-plus">+</span></span>
-          <span class="status-pill ms-1" [ngClass]="{
-            'status-pill--active':    status() === 'active',
-            'status-pill--paused':    status() === 'paused',
-            'status-pill--cancelled': status() === 'cancelled'
-          }">
+          <span class="status-pill ms-1 status-pill--{{status()}}">
             @if (status() === 'active') {
               <i class="fa-solid fa-circle fa-2xs me-1" aria-hidden="true"></i>
             } @else {

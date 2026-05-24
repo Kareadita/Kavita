@@ -181,7 +181,7 @@
           }
 
           @case (SettingsTabId.MatchedMetadata) {
-            @if (accountService.hasAdminRole() && licenseService.hasValidLicense()) {
+            @if (accountService.hasAdminRole() && licenseService.hasActiveLicense()) {
               @defer (prefetch on idle) {
                 <div class="scale col-md-12">
                   <app-manage-matched-metadata />

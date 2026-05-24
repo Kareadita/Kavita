@@ -14,9 +14,9 @@ export class LicenseService {
 
   private readonly baseUrl = environment.apiUrl;
 
-  private readonly _hasValidLicense = signal<boolean>(false);
+  private readonly _hasActiveLicense = signal<boolean>(false);
   /** Does the server have an active license */
-  public readonly hasValidLicense = this._hasValidLicense.asReadonly();
+  public readonly hasActiveLicense = this._hasActiveLicense.asReadonly();
 
   private readonly _hasLicenseOnFile = signal<boolean>(false);
   /** Does the server have a license stored - doesn't indicate being active */
@@ -30,10 +30,10 @@ export class LicenseService {
     return this.httpClient.delete<string>(this.baseUrl + 'license', TextResonse).pipe(
       map(res => res === "true"),
       tap(_ => {
-        this._hasValidLicense.set(false);
+        this._hasActiveLicense.set(false);
       }),
       catchError(error => {
-        this._hasValidLicense.set(false);
+        this._hasActiveLicense.set(false);
         return throwError(error); // Rethrow the error to propagate it further
       })
     );
@@ -54,11 +54,11 @@ export class LicenseService {
   licenseInfo(forceCheck: boolean = false) {
     return this.httpClient.get<LicenseInfo | null>(this.baseUrl + `license/info?forceCheck=${forceCheck}`).pipe(
       tap(res => {
-        this._hasValidLicense.set(res?.isActive || false);
+        this._hasActiveLicense.set(res?.isActive || false);
       }),
       catchError(error => {
         console.error(error);
-        this._hasValidLicense.set(false);
+        this._hasActiveLicense.set(false);
         return throwError(error); // Rethrow the error to propagate it further
       })
     );
@@ -70,10 +70,10 @@ export class LicenseService {
       .pipe(
         map(res => res === "true"),
         tap(value => {
-          this._hasValidLicense.set(value);
+          this._hasActiveLicense.set(value);
         }),
         catchError(error => {
-          this._hasValidLicense.set(false);
+          this._hasActiveLicense.set(false);
           return throwError(error); // Rethrow the error to propagate it further
         })
       );

@@ -5,7 +5,7 @@
 
   @if (accountService.currentUser()) {
     <div class="side-nav-container"
-         [class.no-donate]="licenseService.hasValidLicense()"
+         [class.no-donate]="licenseService.hasActiveLicense()"
          [class.closed]="sideNavCollapsed"
          [class.hidden]="!sideNavVisible">
       <div class="side-nav" cdkDropList (cdkDropListDropped)="reorderDrop($event)" [cdkDropListDisabled]="accountService.hasReadOnlyRole()">
@@ -115,8 +115,8 @@
     <div class="side-nav-overlay" (click)="toggleNavBar()" [class.closed]="sideNavCollapsed"></div>
   }
 
-  <div class="sidenav-bottom" [class.closed]="sideNavCollapsed" [class.hidden]="!sideNavVisible || licenseService.hasValidLicense()">
-    @if (!licenseService.hasValidLicense()) {
+  <div class="sidenav-bottom" [class.closed]="sideNavCollapsed" [class.hidden]="!sideNavVisible || licenseService.hasActiveLicense()">
+    @if (!licenseService.hasActiveLicense()) {
       <app-side-nav-item class="donate" icon="fa-heart"
                         [ngbTooltip]="t('donate-tooltip')"
                         [link]="WikiLink.Donation"

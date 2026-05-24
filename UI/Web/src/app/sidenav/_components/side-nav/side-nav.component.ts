@@ -70,7 +70,7 @@ export class SideNavComponent {
   totalSize = 0;
   isReadOnly = this.accountService.hasReadOnlyRole;
 
-  readonly hasValidLicense$ = toObservable(this.licenseService.hasValidLicense);
+  readonly hasValidLicense$ = toObservable(this.licenseService.hasActiveLicense);
 
   private showAllSubject = new BehaviorSubject<boolean>(false);
   showAll$ = this.showAllSubject.asObservable();

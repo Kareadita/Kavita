@@ -66,7 +66,7 @@ export class CoverChooserConfigFactoryService {
           title: this.entityTitleService.computeTitle(v, libraryType, { prioritizeTitleName: false, includeVolume: true }) } as CoverImageOption)))
         : undefined,
       chapterFunc: looseLeafChapters,
-      kavitaplusFunc: this.licenseService.hasValidLicense() ?
+      kavitaplusFunc: this.licenseService.hasActiveLicense() ?
         this.imageService.getKavitaPlusSeriesCoverImages(series.id) : undefined
       ,
     };
@@ -80,7 +80,7 @@ export class CoverChooserConfigFactoryService {
         url: this.imageService.getVolumeCoverImage(volume.id),
         title: this.entityTitleService.computeTitle(volume, libraryType, { prioritizeTitleName: false, includeVolume: true, fallbackToVolume: true })
       },
-      kavitaplusFunc: this.licenseService.hasValidLicense() ?
+      kavitaplusFunc: this.licenseService.hasActiveLicense() ?
         this.imageService.getKavitaPlusSeriesCoverImages(volume.seriesId, volume.id) : undefined
     };
   }
@@ -90,7 +90,7 @@ export class CoverChooserConfigFactoryService {
       isLocked: chapter.coverImageLocked,
       resetFunc: () => this.uploadService.updateChapterCoverImage(chapter.id, '', false),
       selected: { url: this.imageService.getChapterCoverImage(chapter.id), title: this.entityTitleService.computeTitle(chapter, libraryType) },
-      kavitaplusFunc: this.licenseService.hasValidLicense() ?
+      kavitaplusFunc: this.licenseService.hasActiveLicense() ?
         this.imageService.getKavitaPlusSeriesCoverImages(seriesId, null, chapter.id) : undefined
     };
   }

@@ -34,7 +34,7 @@ export class ManageScrobblingProvidersComponent implements OnInit {
 
   protected readonly ScrobbleProvider = ScrobbleProvider;
 
-  hasValidLicense = this.licenseService.hasValidLicense;
+  hasValidLicense = this.licenseService.hasActiveLicense;
 
   formGroup: FormGroup = new FormGroup({});
   aniListToken: string = '';

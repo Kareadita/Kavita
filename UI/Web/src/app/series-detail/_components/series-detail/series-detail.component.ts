@@ -256,7 +256,7 @@ class SeriesDetailComponent implements OnInit, AfterViewInit {
 
   libraryAllowsScrobbling  = signal<boolean>(false);
   isScrobbling = signal<boolean>(true);
-  showScrobbleControls = computed(() => this.licenseService.hasValidLicense() && this.libraryAllowsScrobbling());
+  showScrobbleControls = computed(() => this.licenseService.hasActiveLicense() && this.libraryAllowsScrobbling());
 
   currentlyReadingChapter = signal<Chapter | null>(null);
   continueReadingTitle = computed(() => {
@@ -332,7 +332,7 @@ class SeriesDetailComponent implements OnInit, AfterViewInit {
   unreadCount = signal(0);
   totalCount = signal(0);
   seriesActions = computed(() => {
-    const hasLicense = this.licenseService.hasValidLicense();
+    const hasLicense = this.licenseService.hasActiveLicense();
     let actions = this.actionFactoryService.getSeriesActions()
       .filter(action => action.action !== Action.Edit);
     if (!hasLicense) {

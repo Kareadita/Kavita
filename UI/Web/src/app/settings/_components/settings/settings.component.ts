@@ -119,7 +119,7 @@ export class SettingsComponent {
   protected readonly accountService = inject(AccountService);
 
   fragment: SettingsTabId = SettingsTabId.Account;
-  hasActiveLicense = computed(() => this.licenseService.hasValidLicense());
+  hasActiveLicense = computed(() => this.licenseService.hasActiveLicense());
 
   constructor() {
     this.route.fragment.pipe(tap(frag => {

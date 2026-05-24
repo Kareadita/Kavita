@@ -1,7 +1,7 @@
 <ng-container *transloco="let t; prefix:'manage-license-key'">
 
   <!--TODO: Design has this in a modal, need to refactor this -->
-  @let hasLicenseOnFile = licenseService.hasValidLicense();
+  @let hasLicenseOnFile = licenseService.hasActiveLicense();
 
   <div>
     <h5>{{t('title')}}</h5>

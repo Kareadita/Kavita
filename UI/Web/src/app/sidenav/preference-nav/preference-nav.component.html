@@ -5,7 +5,7 @@
       <div class="preference side-nav-container"  [ngClass]="{
       'closed' : navService.sideNavCollapsedSignal(),
       'hidden': !navService.sideNavVisibilitySignal(),
-      'no-donate': licenseService.hasValidLicense()
+      'no-donate': licenseService.hasActiveLicense()
       }">
         <div class="side-nav">
 

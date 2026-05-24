@@ -110,7 +110,7 @@
                 </div>
               }
 
-              @if (licenseService.hasValidLicense()) {
+              @if (licenseService.hasActiveLicense()) {
                 <div class="col-auto ms-2 d-none d-md-block">
                   <button class="btn btn-actions"
                           [ngbPopover]="kplusPopContent"

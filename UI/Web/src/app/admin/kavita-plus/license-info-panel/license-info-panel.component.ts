@@ -1,5 +1,5 @@
 import {ChangeDetectionStrategy, Component, computed, inject, input, output, signal} from '@angular/core';
-import {DatePipe, NgClass, UpperCasePipe} from '@angular/common';
+import {DatePipe, UpperCasePipe} from '@angular/common';
 import {KavitaPlusBillingInterval, LicenseInfo} from '../../../_models/kavitaplus/license-info';
 import {environment} from '../../../../environments/environment';
 import {UtcToLocalTimePipe} from '../../../_pipes/utc-to-local-time.pipe';
@@ -14,8 +14,7 @@ import {MemberService} from "../../../_services/member.service";
   templateUrl: './license-info-panel.component.html',
   styleUrl: './license-info-panel.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [NgClass, UtcToLocalTimePipe, UpperCasePipe, DatePipe, TranslocoDirective, KavitaPlusSubscriptionStatusPipe, KavitaPlusBillingIntervalPipe],
-  host: {'[attr.color]': 'status()'},
+  imports: [UtcToLocalTimePipe, UpperCasePipe, DatePipe, TranslocoDirective, KavitaPlusSubscriptionStatusPipe, KavitaPlusBillingIntervalPipe]
 })
 export class LicenseInfoPanelComponent {
 

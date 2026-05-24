@@ -1,6 +1,6 @@
 <ng-container *transloco="let t; prefix:'register-license-key'">
 
-  @let hasLicenseOnFile = licenseService.hasValidLicense();
+  @let hasLicenseOnFile = licenseService.hasActiveLicense();
 
   <div>
     <h3 class="sub-header mb-2">{{t('title')}}</h3>

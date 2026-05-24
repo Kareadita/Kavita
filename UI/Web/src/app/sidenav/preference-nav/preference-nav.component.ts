@@ -152,7 +152,7 @@ export class PreferenceNavComponent implements AfterViewInit {
   protected readonly breakpointService = inject(BreakpointService);
   protected readonly kavitaplusAuditService = inject(KavitaPlusAuditService);
 
-  readonly hasValidLicense$ = toObservable(this.licenseService.hasValidLicense);
+  readonly hasValidLicense$ = toObservable(this.licenseService.hasActiveLicense);
 
   private readonly navEnd = toSignal(
     this.router.events.pipe(
@@ -169,7 +169,7 @@ export class PreferenceNavComponent implements AfterViewInit {
   private readonly matchedMetadataBadgeCount = toSignal(
     toObservable(this.accountService.hasAdminRole).pipe(
       take(1),
-      filter(_ => this.licenseService.hasValidLicense()),
+      filter(_ => this.licenseService.hasActiveLicense()),
       switchMap(isAdmin => {
         if (!isAdmin) return of(-1);
         return this.manageService.getAllKavitaPlusSeries({
@@ -187,10 +187,18 @@ export class PreferenceNavComponent implements AfterViewInit {
   );
 
   private readonly scrobblingFailuresBadgeCount = toSignal(
-    this.kavitaplusAuditService.getMyActivity({category: KavitaPlusAuditCategory.Scrobble, userId: this.accountService.currentUser()!.id, status: AuditStatus.Failure}).pipe(
+    of(this.licenseService.hasActiveLicense()).pipe(
+      switchMap(hasLicense =>
+        hasLicense
+          ? this.kavitaplusAuditService.getMyActivity({
+            category: KavitaPlusAuditCategory.Scrobble,
+            userId: this.accountService.currentUser()!.id,
+            status: AuditStatus.Failure
+          }).pipe(map(d => d.pagination.totalItems))
+          : of(-1)
+      ),
       takeUntilDestroyed(this.destroyRef),
-      map(d => d.pagination.totalItems),
-      shareReplay({bufferSize: 1, refCount: true})
+      shareReplay({ bufferSize: 1, refCount: true })
     ),
     { initialValue: -1 }
   );
@@ -316,7 +324,7 @@ export class PreferenceNavComponent implements AfterViewInit {
 
     // Refresh visibility if license changes
     effect(() => {
-      this.licenseService.hasValidLicense();
+      this.licenseService.hasActiveLicense();
       this.cdRef.markForCheck();
     });
 
@@ -348,7 +356,7 @@ export class PreferenceNavComponent implements AfterViewInit {
   }
 
   isItemVisible(user: User, item: SideNavItem) {
-    return this.accountService.hasAnyRole(user, item.roles, item.restrictRoles) && (!item.kPlusOnly || this.licenseService.hasValidLicense())
+    return this.accountService.hasAnyRole(user, item.roles, item.restrictRoles) && (!item.kPlusOnly || this.licenseService.hasActiveLicense())
   }
 
   collapse() {
