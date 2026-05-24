@@ -126,7 +126,7 @@ export class AppComponent implements OnInit {
     if (!user) return;
 
     if (this.accountService.hasAdminRole()) {
-      this.licenseService.licenseInfo().subscribe();
+      this.licenseService.getLicenseInfo().subscribe();
     }
 
     // Bootstrap anything that's needed

@@ -31,7 +31,11 @@ export class LicenseDashboardComponent {
     const ref = this.modalService.open(ManageLicenseKeyModalComponent, editModal());
     ref.setInput('licenseInfo', this.licenseInfo()!);
     ref.closed.subscribe(res => {
-
+      // After editings, there are a few different results:
+      // 1 - License deleted
+      // 2 - Install Id cleared (usually they will re-save afterwards tho)
+      // 3 - License change/Discord Id set
+      // We need to populate and refresh licenseInfo
     });
   }
 

@@ -80,7 +80,7 @@ export class LicenseComponent implements OnInit {
         tap(_ => {
           this.isChecking.set(true);
         }),
-        switchMap(_ => this.licenseService.licenseInfo(forceCheck)),
+        switchMap(_ => this.licenseService.getLicenseInfo(forceCheck)),
         tap(licenseInfo => {
           this.licenseInfo.set(licenseInfo);
           this.isChecking.set(false);

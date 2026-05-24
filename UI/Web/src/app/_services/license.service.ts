@@ -22,6 +22,10 @@ export class LicenseService {
   /** Does the server have a license stored - doesn't indicate being active */
   public readonly hasLicenseOnFile = this._hasLicenseOnFile.asReadonly();
 
+  private readonly _licenseInfo = signal<LicenseInfo | null>(null);
+  /** Cached license info - Should always be accessed this way */
+  public readonly licenseInfo = this._licenseInfo.asReadonly();
+
 
   /**
    * Delete the license from the server and update hasValidLicenseSource to false
@@ -51,7 +55,7 @@ export class LicenseService {
   /**
    * Returns information about License and will internally cache if license is valid or not
    */
-  licenseInfo(forceCheck: boolean = false) {
+  getLicenseInfo(forceCheck: boolean = false) {
     return this.httpClient.get<LicenseInfo | null>(this.baseUrl + `license/info?forceCheck=${forceCheck}`).pipe(
       tap(res => {
         this._hasActiveLicense.set(res?.isActive || false);
