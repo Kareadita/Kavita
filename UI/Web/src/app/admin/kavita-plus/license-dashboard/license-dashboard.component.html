@@ -22,18 +22,22 @@
 
     <app-license-info-panel [licenseInfo]="licenseService.licenseInfo()" class="mb-3" (check)="forceCheckLicense()" (editLicense)="openEditLicenseModal()" />
 
-    @if (licenseService.licenseInfo()?.isActive) {
-      @if (!licenseService.licenseInfo()?.hasDiscordSet) {
-        <app-discord-button />
-      } @else {
-        Discord: {{licenseService.licenseInfo()?.discordId}}
+    @if (info.isExpired) {
+      <app-expired-license-info-card class="mt-3 d-block" />
+    } @else {
+      <!--TODO: Discord Panel -->
+      @if (isActive) {
+        @if (!licenseService.licenseInfo()?.hasDiscordSet) {
+          <app-discord-button />
+        } @else {
+          Discord: {{licenseService.licenseInfo()?.discordId}}
+        }
       }
+
+      <app-scrobble-health class="mt-3 d-block" />
     }
-    <!-- app-license-sub-card -->
 
-      <!--app-usage-snapshot-->
 
-    <app-scrobble-health class="mt-3 d-block" />
 
   }
 

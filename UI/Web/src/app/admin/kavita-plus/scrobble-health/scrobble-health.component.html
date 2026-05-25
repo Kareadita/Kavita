@@ -1,7 +1,7 @@
 <ng-container *transloco="let t; prefix:'scrobble-health'">
   <div class="provider-health-card">
     <div class="d-flex align-items-center justify-content-between mb-3">
-      <span class="section-label text-uppercase fw-semibold">{{t('title-label')}}</span>
+      <h3 class="kv-section-header">{{t('title-label')}}</h3>
       <div class="d-flex align-items-center gap-2">
         @if (lastChecked()) {
           <span class="live-indicator">

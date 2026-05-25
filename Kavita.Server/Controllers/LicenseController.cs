@@ -150,9 +150,10 @@ public class LicenseController(
     }
 
     /// <summary>
-    /// Provides a 15 min snapshot of Kavita+ Providers (Hardcover, AniList, MangaBaka, etc) API health.
-    /// Kavita caches every 15 mins.
+    /// Provides a 15 min snapshot of Kavita+ Providers (Hardcover, AniList, MangaBaka, etc.) API health.
+    /// Kavita caches every 45 mins.
     /// </summary>
+    /// <param name="forceCheck">Bypass cache and force a reload from Kavita+ server</param>
     /// <returns></returns>
     [HttpGet("provider-health")]
     public async Task<ActionResult<IList<KavitaPlusProviderHealthSnapshotDto>>> GetProviderHealthSnapshot(bool forceCheck = false)

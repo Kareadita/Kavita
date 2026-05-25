@@ -63,7 +63,7 @@ export class LicenseService {
     return this.httpClient.get<LicenseInfo | null>(this.baseUrl + `license/info?forceCheck=${forceCheck}`).pipe(
       tap(res => {
         this._hasActiveLicense.set(res?.isActive || false);
-        this._licenseInfo.set(res);
+        this._licenseInfo.set(res ? LicenseInfo.from(res) : null);
         this._hasLicenseOnFile.set(res?.hasLicense ?? false);
       }),
       catchError(error => {

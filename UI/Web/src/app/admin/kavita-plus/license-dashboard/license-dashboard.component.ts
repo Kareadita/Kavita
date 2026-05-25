@@ -10,6 +10,7 @@ import {
 import {LicenseService} from "../../../_services/license.service";
 import {DiscordButtonComponent} from "../discord-button/discord-button.component";
 import {ScrobbleHealthComponent} from '../scrobble-health/scrobble-health.component';
+import {ExpiredLicenseInfoCardComponent} from '../expired-license-info-card/expired-license-info-card.component';
 
 @Component({
   selector: 'app-license-dashboard',
@@ -18,6 +19,7 @@ import {ScrobbleHealthComponent} from '../scrobble-health/scrobble-health.compon
     LicenseInfoPanelComponent,
     DiscordButtonComponent,
     ScrobbleHealthComponent,
+    ExpiredLicenseInfoCardComponent,
   ],
   templateUrl: './license-dashboard.component.html',
   styleUrl: './license-dashboard.component.scss',

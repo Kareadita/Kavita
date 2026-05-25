@@ -1105,6 +1105,14 @@
         "support-label": "Help"
     },
 
+    "expired-license-info-card": {
+        "title-label": "Last Subscription",
+        "status-label": "Status",
+        "expired-on-label": "Expired on",
+        "member-since-label": "Member since",
+        "total-months-label": "Total months"
+    },
+
     "license-info-panel": {
         "desc-active-label": "Premium subscription · server-wide",
         "desc-inactive-label": "Premium features paused for all users",
