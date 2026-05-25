@@ -5,6 +5,8 @@ import {environment} from "../../environments/environment";
 import {TextResonse} from '../_types/text-response';
 import {LicenseInfo} from "../_models/kavitaplus/license-info";
 import {KavitaPlusRegisterResult} from "../_models/kavitaplus/registration/kavita-plus-register-result";
+import {KavitaPlusProviderHealthSnapshotDto} from '../_models/kavitaplus/provider-health';
+import {ScrobbleProvider} from "./scrobbling.service";
 
 @Injectable({
   providedIn: 'root'
@@ -114,5 +116,10 @@ export class LicenseService {
         if (result.success) this.getLicenseInfo(true).subscribe();
       })
     );
+  }
+
+  getProviderHealthSnapshot(forceCheck = false) {
+    return this.httpClient.get<KavitaPlusProviderHealthSnapshotDto[]>(this.baseUrl + `license/provider-health?forceCheck=${forceCheck}`).pipe(
+      map(res => res.filter(s => s.provider !== (3 as ScrobbleProvider)))); // Take out GoogleBooks, it's being repaced by Hardcover
   }
 }

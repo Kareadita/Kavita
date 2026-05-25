@@ -945,6 +945,21 @@
         "cancelled-label": "Cancelled"
     },
 
+    "kavita-plus-provider-health-status-pipe": {
+        "unknown-label": "Unknown",
+        "operational-label": "Operational",
+        "degraded-label": "Degraded",
+        "down-label": "Down"
+    },
+
+    "scrobble-health": {
+        "title-label": "Upstream Providers",
+        "checked-ago-label": "checked {{time}} ago",
+        "live-label": "live",
+        "refresh-alt": "Refresh provider health",
+        "no-data-label": "No provider health data available"
+    },
+
     "kavita-plus-billing-interval-pipe": {
         "day-label": "daily",
         "week-label": "weekly",

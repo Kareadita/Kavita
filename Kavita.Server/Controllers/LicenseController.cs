@@ -1,10 +1,12 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using EasyCaching.Core;
 using Kavita.API.Database;
 using Kavita.API.Services;
 using Kavita.API.Services.Plus;
 using Kavita.Models.Constants;
+using Kavita.Models.DTOs.KavitaPlus;
 using Kavita.Models.DTOs.KavitaPlus.License;
 using Kavita.Models.Entities.Enums;
 using Kavita.Services.Plus;
@@ -21,7 +23,8 @@ public class LicenseController(
     ILicenseService licenseService,
     ILocalizationService localizationService,
     ITaskScheduler taskScheduler,
-    IEasyCachingProviderFactory cachingProviderFactory)
+    IEasyCachingProviderFactory cachingProviderFactory,
+    IKavitaPlusProviderHealthService providerHealthService)
     : BaseApiController
 {
     /// <summary>
@@ -31,15 +34,15 @@ public class LicenseController(
     [HttpGet("valid-license")]
     public async Task<ActionResult<bool>> HasValidLicense(bool forceCheck = false)
     {
-
-        var result = await licenseService.HasActiveLicense(forceCheck);
+        var ct = HttpContext.RequestAborted;
+        var result = await licenseService.HasActiveLicense(forceCheck, ct);
 
         var licenseInfoProvider = cachingProviderFactory.GetCachingProvider(EasyCacheProfiles.License);
-        var cacheValue = await licenseInfoProvider.GetAsync<bool>(LicenseService.CacheKey);
+        var cacheValue = await licenseInfoProvider.GetAsync<bool>(LicenseService.CacheKey, ct);
 
         if (result && !cacheValue.IsNull && !cacheValue.Value)
         {
-            await taskScheduler.ScheduleKavitaPlusTasks();
+            await taskScheduler.ScheduleKavitaPlusTasks(ct);
         }
 
         return Ok(result);
@@ -52,8 +55,9 @@ public class LicenseController(
     [HttpGet("has-license")]
     public async Task<ActionResult<bool>> HasLicense()
     {
+        var ct = HttpContext.RequestAborted;
         return Ok(!string.IsNullOrEmpty(
-            (await unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.LicenseKey)).Value));
+            (await unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.LicenseKey, ct)).Value));
     }
 
     /// <summary>
@@ -65,9 +69,10 @@ public class LicenseController(
     [Authorize(PolicyGroups.AdminPolicy)]
     public async Task<ActionResult<LicenseInfoDto?>> GetLicenseInfo(bool forceCheck = false)
     {
+        var ct = HttpContext.RequestAborted;
         try
         {
-            return Ok(await licenseService.GetLicenseInfo(forceCheck));
+            return Ok(await licenseService.GetLicenseInfo(forceCheck, ct));
         }
         catch (Exception)
         {
@@ -83,11 +88,12 @@ public class LicenseController(
     [Authorize(PolicyGroups.AdminPolicy)]
     public async Task<ActionResult> RemoveLicense()
     {
+        var ct = HttpContext.RequestAborted;
         logger.LogInformation("Removing license on file for Server");
-        var setting = await unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.LicenseKey);
+        var setting = await unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.LicenseKey, ct);
         setting.Value = null;
         unitOfWork.SettingsRepository.Update(setting);
-        await unitOfWork.CommitAsync();
+        await unitOfWork.CommitAsync(ct);
 
         TaskScheduler.RemoveKavitaPlusTasks();
 
@@ -104,10 +110,11 @@ public class LicenseController(
     [Authorize(PolicyGroups.AdminPolicy)]
     public async Task<ActionResult> ResetLicense(UpdateLicenseDto dto)
     {
+        var ct = HttpContext.RequestAborted;
         logger.LogInformation("Resetting license on file for Server");
-        if (await licenseService.ResetLicense(dto.License, dto.Email))
+        if (await licenseService.ResetLicense(dto.License, dto.Email, ct))
         {
-            await taskScheduler.ScheduleKavitaPlusTasks();
+            await taskScheduler.ScheduleKavitaPlusTasks(ct);
             return Ok();
         }
 
@@ -121,6 +128,7 @@ public class LicenseController(
     [HttpPost("resend-license")]
     public async Task<ActionResult<bool>> ResendWelcomeEmail()
     {
+
        return Ok(await licenseService.ResendWelcomeEmail());
     }
 
@@ -133,11 +141,24 @@ public class LicenseController(
     [Authorize(PolicyGroups.AdminPolicy)]
     public async Task<ActionResult<KavitaPlusRegisterResultDto>> UpdateLicense(UpdateLicenseDto dto)
     {
-        var result = await licenseService.AddLicense(dto.License.Trim(), dto.Email.Trim(), dto.DiscordId?.Trim());
+        var result = await licenseService.AddLicense(dto.License.Trim(), dto.Email.Trim(), dto.DiscordId?.Trim(), HttpContext.RequestAborted);
         if (result.Success)
         {
             await taskScheduler.ScheduleKavitaPlusTasks();
         }
         return Ok(result);
     }
+
+    /// <summary>
+    /// Provides a 15 min snapshot of Kavita+ Providers (Hardcover, AniList, MangaBaka, etc) API health.
+    /// Kavita caches every 15 mins.
+    /// </summary>
+    /// <returns></returns>
+    [HttpGet("provider-health")]
+    public async Task<ActionResult<IList<KavitaPlusProviderHealthSnapshotDto>>> GetProviderHealthSnapshot(bool forceCheck = false)
+    {
+        var ct = HttpContext.RequestAborted;
+        return Ok(await providerHealthService.GetProviderHealthSnapshot(forceCheck, ct));
+    }
+
 }

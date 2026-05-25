@@ -213,15 +213,7 @@ public class ScrobblingService : IScrobblingService
 
         if (string.IsNullOrEmpty(token)) return true;
 
-        if (await HasTokenExpired(token, provider))
-        {
-            // NOTE: Should this side effect be here?
-            await _eventHub.SendMessageToAsync(MessageFactory.ScrobblingKeyExpired,
-                MessageFactory.ScrobblingKeyExpiredEvent(provider), userId, ct);
-            return true;
-        }
-
-        return false;
+        return await HasTokenExpired(token, provider);
     }
 
     private async Task<bool> HasTokenExpired(string token, ScrobbleProvider provider)
@@ -873,6 +865,7 @@ public class ScrobblingService : IScrobblingService
             var count = await SetAndCheckRateLimit(ctx.RateLimits, evt.AppUser, ctx.License);
             if (count == 0)
             {
+                _logger.LogDebug("Skipped processing Scrobble event due to premature rate exceeded");
                 await _auditService.LogScrobbleAsync(KavitaPlusEventType.ScrobbleEventSkipped, evt.SeriesId,
                     new AuditLogScrobbleParamsDto { ScrobbleEventType = evt.ScrobbleEventType },
                     AuditStatus.Failure, "rate-limit-hit", userId: evt.AppUserId);

@@ -91,6 +91,7 @@ public static class ApplicationServiceExtensions
         services.AddScoped<ISmartCollectionSyncService, SmartCollectionSyncService>();
         services.AddScoped<IWantToReadSyncService, WantToReadSyncService>();
         services.AddScoped<IKavitaPlusAuditService, KavitaPlusAuditService>();
+        services.AddScoped<IKavitaPlusProviderHealthService, KavitaPlusProviderHealthService>();
 
         services.AddScoped<IOidcService, OidcService>();
 

@@ -9,6 +9,7 @@ import {
 } from "../../_modals/manage-license-key-modal/manage-license-key-modal.component";
 import {LicenseService} from "../../../_services/license.service";
 import {DiscordButtonComponent} from "../discord-button/discord-button.component";
+import {ScrobbleHealthComponent} from '../scrobble-health/scrobble-health.component';
 
 @Component({
   selector: 'app-license-dashboard',
@@ -16,6 +17,7 @@ import {DiscordButtonComponent} from "../discord-button/discord-button.component
     TranslocoDirective,
     LicenseInfoPanelComponent,
     DiscordButtonComponent,
+    ScrobbleHealthComponent,
   ],
   templateUrl: './license-dashboard.component.html',
   styleUrl: './license-dashboard.component.scss',

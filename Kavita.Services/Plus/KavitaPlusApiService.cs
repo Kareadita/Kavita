@@ -128,6 +128,29 @@ public class KavitaPlusApiService(ILogger<KavitaPlusApiService> logger, IUnitOfW
     }
 
     /// <summary>
+    /// Gets a snapshot of the Metadata providers operational health (average response time, last incident, overall status)
+    /// </summary>
+    /// <param name="ct"></param>
+    /// <returns></returns>
+    public async Task<IList<KavitaPlusProviderHealthSnapshotDto>> GetProviderHealthSnapshot(CancellationToken ct = default)
+    {
+        try
+        {
+            var license = (await unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.LicenseKey, ct)).Value;
+            var response = await (Configuration.KavitaPlusApiUrl + "/api/providerhealth/snapshot")
+                .WithKavitaPlusHeaders(license)
+                .GetJsonAsync<IList<KavitaPlusProviderHealthSnapshotDto>>(cancellationToken: ct);
+
+            return response;
+        } catch (FlurlHttpException e)
+        {
+            logger.LogError(e, "An error happened during the request to Kavita+ API");
+        }
+
+        return [];
+    }
+
+    /// <summary>
     /// Send a GET request to K+
     /// </summary>
     /// <param name="url">only path of the uri, the host is added</param>
