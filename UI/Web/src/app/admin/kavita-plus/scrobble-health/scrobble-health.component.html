@@ -27,8 +27,9 @@
           <app-scrobble-provider-image [provider]="snap.provider" [size]="40" />
           <div>
             <div class="provider-name fw-semibold">{{snap.provider | scrobbleProviderName}}</div>
-            @if (providerSubtitles[snap.provider]) {
-              <div class="provider-subtitle text-muted small">{{providerSubtitles[snap.provider]}}</div>
+            @let subtitle = snap.provider | scrobbleProviderMediaTitle;
+            @if (subtitle) {
+              <div class="provider-subtitle text-muted small">{{subtitle}}</div>
             }
           </div>
         </div>

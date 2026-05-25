@@ -952,6 +952,14 @@
         "down-label": "Down"
     },
 
+    "scrobble-provider-media-title-pipe": {
+        "anilist-label": "Manga + Light Novels",
+        "mal-label": "{{scrobble-provider-media-title-pipe.anilist-label}}",
+        "mangabaka-label": "{{scrobble-provider-media-title-pipe.anilist-label}}",
+        "hardcover-label": "Books",
+        "cbr-label": "Comics"
+    },
+
     "scrobble-health": {
         "title-label": "Upstream Providers",
         "checked-ago-label": "checked {{time}} ago",

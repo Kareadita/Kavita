@@ -1,24 +1,13 @@
 import {ChangeDetectionStrategy, Component, computed, inject, signal} from '@angular/core';
 import {TranslocoDirective} from '@jsverse/transloco';
 import {LicenseService} from '../../../_services/license.service';
-import {
-  KavitaPlusProviderHealthSnapshotDto,
-  KavitaPlusProviderHealthStatus
-} from '../../../_models/kavitaplus/provider-health';
-import {ScrobbleProvider} from '../../../_services/scrobbling.service';
+import {KavitaPlusProviderHealthSnapshotDto} from '../../../_models/kavitaplus/provider-health';
 import {
   ScrobbleProviderImageComponent
 } from '../../../shared/_components/scrobble-provider-image/scrobble-provider-image.component';
 import {ScrobbleProviderNamePipe} from '../../../_pipes/scrobble-provider-name.pipe';
 import {KavitaPlusProviderHealthStatusPipe} from '../../../_pipes/kavita-plus-provider-health-status.pipe';
-
-const PROVIDER_SUBTITLES: Partial<Record<ScrobbleProvider, string>> = {
-  [ScrobbleProvider.AniList]:   'Manga + Light Novels',
-  [ScrobbleProvider.Mal]:       'Manga + Light Novels',
-  [ScrobbleProvider.MangaBaka]: 'Manga + Light Novels',
-  [ScrobbleProvider.Hardcover]: 'Books',
-  [ScrobbleProvider.Cbr]:       'Comics',
-};
+import {ScrobbleProviderMediaTitlePipe} from '../../../_pipes/scrobble-provider-media-title.pipe';
 
 @Component({
   selector: 'app-scrobble-health',
@@ -30,13 +19,11 @@ const PROVIDER_SUBTITLES: Partial<Record<ScrobbleProvider, string>> = {
     ScrobbleProviderImageComponent,
     ScrobbleProviderNamePipe,
     KavitaPlusProviderHealthStatusPipe,
+    ScrobbleProviderMediaTitlePipe,
   ],
 })
 export class ScrobbleHealthComponent {
   private readonly licenseService = inject(LicenseService);
-
-  protected readonly KavitaPlusProviderHealthStatus = KavitaPlusProviderHealthStatus;
-  protected readonly providerSubtitles = PROVIDER_SUBTITLES;
 
   private readonly _snapshots = signal<KavitaPlusProviderHealthSnapshotDto[]>([]);
   protected readonly snapshots = this._snapshots.asReadonly();
