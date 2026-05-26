@@ -9,24 +9,24 @@
   <div class="modal-body scrollable-modal d-flex flex-column gap-0">
 
     <!-- Sub-header: explainer left + In Kavita chip right -->
-    <div class="match-subheader">
-      <div class="match-description">
+    <div class="match-subheader d-flex align-items-center gap-3">
+      <div class="match-description flex-fill">
         <p class="mb-1">{{ t('description') }}</p>
         <p class="mb-0 text-muted small">{{ t('dont-match-hint') }}</p>
       </div>
-      <div class="in-kavita-chip">
+      <div class="in-kavita-chip d-flex align-items-center flex-shrink-0 gap-2">
         <app-image [imageUrl]="coverImageUrl()" width="32px" height="46px" />
-        <div class="in-kavita-info">
-          <div class="in-kavita-label">{{ t('in-kavita') }}</div>
-          <div class="in-kavita-name">{{ series().name }}</div>
+        <div class="d-flex flex-column gap-0">
+          <div class="in-kavita-label text-uppercase">{{ t('in-kavita') }}</div>
+          <div class="in-kavita-name fw-bold">{{ series().name }}</div>
         </div>
       </div>
     </div>
 
     <!-- Query bar -->
-    <div class="match-query-bar" [formGroup]="formGroup">
-      <div class="query-input-row">
-        <div class="query-input-wrapper">
+    <div class="py-3" [formGroup]="formGroup">
+      <div class="d-flex align-items-stretch gap-2">
+        <div class="d-flex align-items-center position-relative flex-fill">
           <i class="fa-solid fa-magnifying-glass query-icon" aria-hidden="true"></i>
           <label for="search-query" class="visually-hidden">{{t('search')}}</label>
           <input class="form-control query-input"
@@ -39,7 +39,7 @@
                     (click)="clearQuery()"></button>
           }
         </div>
-        <button type="button" class="btn btn-primary query-search-btn"
+        <button type="button" class="btn btn-primary"
                 (click)="search()"
                 [disabled]="isLoading() || formGroup.get('dontMatch')?.value">
           @if (isLoading()) {
@@ -53,13 +53,13 @@
         </button>
       </div>
 
-      <div class="query-hints-row">
-        <div class="provider-hints">
+      <div class="d-flex align-items-center justify-content-between flex-wrap gap-2 mt-2">
+        <div class="provider-hints d-flex align-items-center flex-wrap gap-1">
           <span class="text-muted">{{ t('try') }}</span>
           <code class="provider-hint">anilist:30074</code>
           <code class="provider-hint">mal:74</code>
           <code class="provider-hint">mangabaka:10003</code>
-          <code class="provider-hint">hardcover:4451</code>
+          <code class="provider-hint">hardcover:flatland</code>
         </div>
         <div class="form-check form-switch mb-0">
           <input type="checkbox" class="form-check-input" formControlName="dontMatch"

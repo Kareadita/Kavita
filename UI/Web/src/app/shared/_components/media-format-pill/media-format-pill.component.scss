@@ -1,9 +1,5 @@
 .format-pill {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.3125rem;
   padding: 0.125rem 0.5rem;
-  border-radius: 999px;
   background: color-mix(in srgb, var(--pill-color) 12%, transparent);
   color: var(--pill-color);
   border: 1px solid color-mix(in srgb, var(--pill-color) 27%, transparent);
