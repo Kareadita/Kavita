@@ -1,0 +1,19 @@
+<ng-container *transloco="let t; prefix: 'scrobble-provider-tag-badge'">
+  @if (showId()) {
+    <a class="id-pill"
+       [href]="url()"
+       target="_blank"
+       rel="noopener noreferrer"
+       (click)="$event.stopPropagation()"
+       [style.--badge-color]="brandColor()"
+       [attr.aria-label]="t('view-on', { provider: provider() | scrobbleProviderName })">
+      <app-scrobble-provider-image [provider]="provider()" [size]="12" aria-hidden="true" />
+      <span>{{ id() }}</span>
+    </a>
+  } @else {
+    <span class="source-badge" [style.--badge-color]="brandColor()">
+      <app-scrobble-provider-image [provider]="provider()" [size]="14" aria-hidden="true" />
+      <span>{{ provider() | scrobbleProviderName }}</span>
+    </span>
+  }
+</ng-container>

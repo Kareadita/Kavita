@@ -1,0 +1,35 @@
+.confidence-chip {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  padding: 6px 10px;
+  min-width: 64px;
+  border-radius: 6px;
+  background: color-mix(in srgb, var(--chip-color) 8%, transparent);
+  border: 1px solid color-mix(in srgb, var(--chip-color) 20%, transparent);
+}
+
+.chip-pct {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--chip-color);
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+}
+
+.chip-unit {
+  font-size: 11px;
+  opacity: 0.6;
+  font-weight: 500;
+}
+
+.chip-label {
+  font-size: 9.5px;
+  color: var(--chip-color);
+  opacity: 0.85;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  font-weight: 600;
+}

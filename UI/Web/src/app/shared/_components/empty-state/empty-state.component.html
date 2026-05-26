@@ -1,0 +1,9 @@
+<div class="empty-state-container" *transloco="let t; prefix: i18nPrefix()">
+  <div class="empty-state-icon" [class.is-error]="isError()">
+    <ng-content select="[icon]" />
+  </div>
+  <div class="empty-state-title">{{ t(titleKey()) }}</div>
+  @if (descriptionKey()) {
+    <div class="empty-state-desc">{{ t(descriptionKey(), descriptionParams()) }}</div>
+  }
+</div>

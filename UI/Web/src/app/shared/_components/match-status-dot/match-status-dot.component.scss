@@ -1,0 +1,20 @@
+.status-dot-wrapper {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 11.5px;
+  color: var(--text-muted-color);
+}
+
+.status-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  background: var(--primary-color);
+
+  &.ongoing {
+    background: #73c0de;
+    box-shadow: 0 0 6px rgba(115, 192, 222, 0.5);
+  }
+}

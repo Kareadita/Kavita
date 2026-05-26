@@ -158,12 +158,12 @@ public abstract class DefaultParser(IDirectoryService directoryService) : IDefau
         var notes = info.ComicInfo?.Notes;
         var weblinks = info.ComicInfo?.Web;
 
-        info.AniListId = WeblinkParser.GetAniListId(weblinks);
-        info.MalId = WeblinkParser.GetMalId(weblinks);
-        info.MangaBakaId = WeblinkParser.GetMangaBakaId(weblinks);
+        info.AniListId = ExternalIdParser.GetAniListId(weblinks);
+        info.MalId = ExternalIdParser.GetMalId(weblinks);
+        info.MangaBakaId = ExternalIdParser.GetMangaBakaId(weblinks);
 
         var comicvineId = Parser.ParseComicVineIdFromComicInfoNote(notes);
-        var parsedCvWeblink = WeblinkParser.GetComicVineId(weblinks);
+        var parsedCvWeblink = ExternalIdParser.GetComicVineId(weblinks);
         info.ComicVineId = comicvineId;
 
         // If we have a seriesId, set it. Otherwise, we set the issue id

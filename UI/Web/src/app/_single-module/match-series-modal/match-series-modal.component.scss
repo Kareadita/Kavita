@@ -1,3 +1,139 @@
-.setting-section-break {
-    margin: 0 !important;
+.match-title-prefix {
+  opacity: 0.55;
+  font-weight: 500;
+}
+
+.match-subheader {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 14px 0 12px;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.match-description {
+  flex: 1;
+  color: var(--color-text-muted);
+  line-height: 1.5;
+}
+
+.in-kavita-chip {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 6px 10px 6px 6px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid var(--color-border);
+  border-radius: 6px;
+  flex-shrink: 0;
+}
+
+.in-kavita-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.in-kavita-label {
+  font-size: 10.5px;
+  color: var(--color-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  line-height: 1.2;
+}
+
+.in-kavita-name {
+  font-weight: 700;
+  font-size: 14px;
+  color: var(--color-text-heading);
+  line-height: 1.2;
+}
+
+.match-query-bar {
+  padding: 14px 0 12px;
+}
+
+.query-input-row {
+  display: flex;
+  align-items: stretch;
+  gap: 8px;
+}
+
+.query-input-wrapper {
+  flex: 1;
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.query-icon {
+  position: absolute;
+  left: 12px;
+  color: var(--color-text-muted);
+  font-size: 13px;
+  pointer-events: none;
+}
+
+.query-input {
+  padding-left: 36px;
+  padding-right: 36px;
+}
+
+.query-clear {
+  position: absolute;
+  right: 8px;
+  opacity: 0.5;
+
+  &:hover {
+    opacity: 1;
+  }
+}
+
+.query-search-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  white-space: nowrap;
+}
+
+.query-hints-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 10px;
+  flex-wrap: wrap;
+}
+
+.provider-hints {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  color: var(--color-text-muted);
+  flex-wrap: wrap;
+}
+
+.provider-hint {
+  padding: 2px 7px;
+  border-radius: 4px;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  color: var(--color-text-muted);
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 11px;
+}
+
+.match-count-bar {
+  font-size: 11.5px;
+  color: var(--color-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  font-weight: 600;
+  padding: 8px 0 4px;
+}
+
+.match-body {
+  flex: 1;
+  padding-bottom: 8px;
 }

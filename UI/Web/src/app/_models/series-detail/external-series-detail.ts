@@ -29,6 +29,8 @@ export interface ExternalSeriesDetail {
   name: string;
   aniListId?: number | null;
   malId?: number | null;
+  mangaBakaId?: number | null;
+  hardcoverId?: number | null;
   cbrId?: number | null;
   synonyms: Array<string>;
   plusMediaFormat: PlusMediaFormat;
@@ -43,6 +45,9 @@ export interface ExternalSeriesDetail {
    */
   volumes?: number;
   chapters?: number;
+  startDate?: string | null;
+  endDate?: string | null;
+  averageScore?: number | null;
   staff: Array<SeriesStaff>;
   tags: Array<MetadataTagDto>;
   provider: ScrobbleProvider;

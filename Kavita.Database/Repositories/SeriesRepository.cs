@@ -614,16 +614,16 @@ public class SeriesRepository(DataContext context, IMapper mapper) : ISeriesRepo
                 // TODO: Refactor this to check from ExternalMetadataIds first then ExternalSeriesMetadata. Weblink parsing is pointless as it updates in externalMetadata
                 AniListId = series.ExternalSeriesMetadata.AniListId != 0
                     ? series.ExternalSeriesMetadata.AniListId
-                    : WeblinkParser.GetAniListId(series.Metadata.WebLinks),
+                    : ExternalIdParser.GetAniListId(series.Metadata.WebLinks),
                 MalId = series.ExternalSeriesMetadata.MalId != 0
                     ? series.ExternalSeriesMetadata.MalId
-                    : WeblinkParser.GetMalId(series.Metadata.WebLinks),
+                    : ExternalIdParser.GetMalId(series.Metadata.WebLinks),
                 CbrId = series.ExternalSeriesMetadata.CbrId,
                 GoogleBooksId = !string.IsNullOrEmpty(series.ExternalSeriesMetadata.GoogleBooksId)
                     ? series.ExternalSeriesMetadata.GoogleBooksId
-                    : WeblinkParser.GetGoogleBooksId(series.Metadata.WebLinks),
+                    : ExternalIdParser.GetGoogleBooksId(series.Metadata.WebLinks),
                 MangabakaId = (int?) series.MangaBakaId,
-                MangaDexId = WeblinkParser.GetMangaDexId(series.Metadata.WebLinks),
+                MangaDexId = ExternalIdParser.GetMangaDexId(series.Metadata.WebLinks),
                 VolumeCount = series.Volumes.Count,
                 ChapterCount = series.Volumes.SelectMany(v => v.Chapters).Count(c => !c.IsSpecial),
                 Year = series.Metadata.ReleaseYear
