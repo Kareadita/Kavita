@@ -3,30 +3,29 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 2px;
-  padding: 6px 10px;
-  min-width: 64px;
-  border-radius: 6px;
+  gap: 0.125rem;
+  padding: 0.375rem 0.625rem;
+  min-width: 4rem;
+  border-radius: 0.375rem;
   background: color-mix(in srgb, var(--chip-color) 8%, transparent);
   border: 1px solid color-mix(in srgb, var(--chip-color) 20%, transparent);
 }
 
 .chip-pct {
-  font-size: 18px;
+  font-size: 1.125rem;
   font-weight: 700;
   color: var(--chip-color);
   line-height: 1;
-  font-variant-numeric: tabular-nums;
 }
 
 .chip-unit {
-  font-size: 11px;
+  font-size: 0.6875rem;
   opacity: 0.6;
   font-weight: 500;
 }
 
 .chip-label {
-  font-size: 9.5px;
+  font-size: 0.59375rem;
   color: var(--chip-color);
   opacity: 0.85;
   text-transform: uppercase;

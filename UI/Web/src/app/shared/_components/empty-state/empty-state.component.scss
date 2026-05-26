@@ -1,26 +1,26 @@
 .empty-state-container {
-  padding: 40px 24px;
+  padding: 2.5rem 1.5rem;
   text-align: center;
-  color: var(--color-text-muted);
-  font-size: 13px;
+  color: var(--text-muted-color);
+  font-size: 0.8125rem;
   line-height: 1.6;
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 6px;
+  gap: 0.375rem;
 }
 
 .empty-state-icon {
-  width: 56px;
-  height: 56px;
-  margin-bottom: 8px;
+  width: 3.5rem;
+  height: 3.5rem;
+  margin-bottom: 0.5rem;
   border-radius: 50%;
   background: rgba(255, 255, 255, 0.04);
-  border: 1px solid var(--color-border);
+  border: 1px solid var(--hr-color);
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 18px;
+  font-size: 1.125rem;
   opacity: 0.6;
 
   &.is-error {
@@ -32,11 +32,11 @@
 }
 
 .empty-state-title {
-  font-size: 14px;
-  color: var(--color-text);
+  font-size: 0.875rem;
+  color: var(--body-text-color);
   font-weight: 500;
 }
 
 .empty-state-desc {
-  color: var(--color-text-muted);
+  color: var(--text-muted-color);
 }
