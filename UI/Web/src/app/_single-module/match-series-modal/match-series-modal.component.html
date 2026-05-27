@@ -113,10 +113,10 @@
           </app-empty-state>
         }
         @case ('results') {
-          @for (item of matches(); track item.series.name) {
+          @for (item of matches(); track item.series.name + '_' + item.series.provider) {
             <app-match-series-result-item
               [item]="item"
-              [isSelected]="selectedItem()?.series?.name === item.series.name"
+              [isSelected]="selectedItem()?.series?.name === item.series.name && selectedItem()?.series?.provider === item.series.provider"
               [showSynonyms]="true"
               [query]="lastQuery()"
               (selected)="selectItem($event)" />

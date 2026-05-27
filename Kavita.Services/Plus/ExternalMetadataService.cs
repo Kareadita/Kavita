@@ -186,11 +186,6 @@ public class ExternalMetadataService : IExternalMetadataService
             SeriesIncludes.Metadata | SeriesIncludes.ExternalMetadata | SeriesIncludes.Library, ct);
         if (series == null) return [];
 
-        // var potentialAnilistId = ExternalIdParser.ParseAniListHeader(dto.Query) ?? ExternalIdParser.GetAniListId(dto.Query);
-        // var potentialMalId = ExternalIdParser.ParseMalHeader(dto.Query) ?? ExternalIdParser.GetMalId(dto.Query);
-        // var potentialMangabakaId = ExternalIdParser.ParseMangaBakaHeader(dto.Query) ?? ExternalIdParser.GetMangaBakaId(dto.Query);
-        // var potentialHardcoverSlug = ExternalIdParser.ParseHardcoverHeader(dto.Query);
-
         var query = dto.Query;
 
         var potentialAnilistId = ExternalIdParser.TryParseAniListHeader(query, out var aniListId)

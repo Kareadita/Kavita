@@ -9,7 +9,9 @@ import {ToastrService} from "ngx-toastr";
 import {catchError, filter, of, startWith, tap} from "rxjs";
 import {takeUntilDestroyed, toSignal} from "@angular/core/rxjs-interop";
 import {EmptyStateComponent} from "../../shared/_components/empty-state/empty-state.component";
-import {MatchSeriesResultItemComponent} from "../../shared/_components/match-series-result-item/match-series-result-item.component";
+import {
+  MatchSeriesResultItemComponent
+} from "../../shared/_components/match-series-result-item/match-series-result-item.component";
 import {ImageComponent} from "../../shared/image/image.component";
 import {ImageService} from "../../_services/image.service";
 
@@ -53,7 +55,7 @@ export class MatchSeriesModalComponent implements OnInit {
   ).subscribe(() => this.search());
 
   protected readonly canSaveDontMatch = computed(() =>
-    this.isDontMatch() === true && this.series().dontMatch === false
+    this.isDontMatch() === true && !this.series().dontMatch
   );
 
   matches = signal<ExternalSeriesMatch[]>([]);
