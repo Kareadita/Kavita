@@ -392,6 +392,9 @@ public class ExternalMetadataService : IExternalMetadataService
 
         await _unitOfWork.CommitAsync(ct);
 
+        // Send a series Update to ensure pages get the new information
+        await _eventHub.SendMessageAsync(MessageFactory.SeriesUpdated, MessageFactory.SeriesUpdatedEvent(series.Id), ct: ct);
+
         await _auditService.LogMatchAsync(KavitaPlusEventType.SeriesDontMatchSet, seriesId,
             new AuditLogMatchDontMatchParamsDto { SeriesName = series.Name, DontMatch = dontMatch }, ct: ct);
     }

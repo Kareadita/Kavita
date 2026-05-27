@@ -32,7 +32,6 @@
           <input class="form-control query-input"
                  id="search-query"
                  formControlName="query"
-                 [attr.disabled]="isDontMatch() ? true : null"
                  (keydown.enter)="search()" />
           @if (formGroup.get('query')?.value) {
             <button type="button" class="query-clear btn-close btn-close-white btn-sm"

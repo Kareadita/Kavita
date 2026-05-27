@@ -1,4 +1,4 @@
-import {ChangeDetectionStrategy, Component, computed, inject, input, OnInit, signal} from '@angular/core';
+import {ChangeDetectionStrategy, Component, computed, effect, inject, input, OnInit, signal} from '@angular/core';
 import {Series} from "../../_models/series";
 import {SeriesService} from "../../_services/series.service";
 import {FormControl, FormGroup, ReactiveFormsModule} from "@angular/forms";
@@ -48,6 +48,14 @@ export class MatchSeriesModalComponent implements OnInit {
     ),
     { initialValue: false }
   );
+
+  private readonly _queryDisableEffect = effect(() => {
+    if (this.isDontMatch()) {
+      this.formGroup.controls.query.disable();
+    } else {
+      this.formGroup.controls.query.enable();
+    }
+  });
 
   private readonly _autoSearchOnEnable = this.formGroup.controls.dontMatch.valueChanges.pipe(
     filter(v => v === false),
