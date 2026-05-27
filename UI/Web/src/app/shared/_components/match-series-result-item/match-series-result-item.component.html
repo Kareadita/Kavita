@@ -1,0 +1,91 @@
+<div class="match-result-row position-relative d-flex align-items-start gap-3" [class.selected]="isSelected()"
+     *transloco="let t; prefix: 'match-series-result-item'"
+     (click)="selectItem()">
+
+  @if (isSelected()) {
+    <div class="selected-check position-absolute d-flex align-items-center justify-content-center rounded-circle" aria-hidden="true">
+      <i class="fa-solid fa-check"></i>
+    </div>
+    <span class="visually-hidden">{{ t('selected-alt') }}</span>
+  }
+
+  <app-image [imageUrl]="item().series.coverUrl ?? ''" width="72px" height="102px" />
+
+  <div class="match-result-content d-flex flex-column flex-fill gap-1">
+
+    <div class="match-result-title-row d-flex align-items-center flex-wrap gap-2">
+      <h3 class="match-result-name fw-bold">{{ item().series.name }}</h3>
+      <app-media-format-pill [format]="item().series.plusMediaFormat" />
+      <app-scrobble-provider-tag-badge [provider]="item().series.provider" />
+    </div>
+
+    <div class="match-result-meta d-flex align-items-center flex-wrap">
+      <app-match-status-dot [endDate]="item().series.endDate" />
+      @if (startYear()) {
+        <span class="dot-separator mx-1" aria-hidden="true"></span>
+        <span>{{ startYear() }}{{ endYear() && endYear() !== startYear() ? '–' + endYear() : '' }}</span>
+      }
+      @if (firstAuthor()) {
+        <span class="dot-separator mx-1" aria-hidden="true"></span>
+        <span>{{ firstAuthor() }}</span>
+      }
+      @if ((item().series.volumes ?? 0) > 0 || (item().series.chapters ?? 0) > 0) {
+        <span class="dot-separator mx-1" aria-hidden="true"></span>
+        <span>
+          @if ((item().series.volumes ?? 0) > 0) {
+            {{ t('volume-count', {num: item().series.volumes}) }}
+          }
+          @if ((item().series.chapters ?? 0) > 0) {
+            {{ t('chapter-count', {num: item().series.chapters}) }}
+          }
+        </span>
+      }
+    </div>
+
+    <div class="match-result-providers d-flex align-items-center flex-wrap gap-1">
+      @if (item().series.mangaBakaId) {
+        <app-scrobble-provider-tag-badge [provider]="ScrobbleProvider.MangaBaka" [id]="item().series.mangaBakaId" />
+      }
+      @if (item().series.aniListId) {
+        <app-scrobble-provider-tag-badge [provider]="ScrobbleProvider.AniList" [id]="item().series.aniListId" />
+      }
+      @if (item().series.malId) {
+        <app-scrobble-provider-tag-badge [provider]="ScrobbleProvider.Mal" [id]="item().series.malId" />
+      }
+      @if (item().series.hardcoverId) {
+        <app-scrobble-provider-tag-badge [provider]="ScrobbleProvider.Hardcover" [id]="item().series.hardcoverId" />
+      }
+    </div>
+
+    @if (showSynonyms() && matchedSynonyms().length > 0) {
+      <div class="match-result-synonyms d-flex align-items-center flex-wrap gap-1">
+        <i class="fa-solid fa-language" aria-hidden="true"></i>
+        <span>{{ t('matched-alt') }}</span>
+        <span class="synonym-first">"{{ matchedSynonyms()[0] }}"</span>
+        @if (matchedSynonyms().length > 1) {
+          <span class="synonym-more d-inline-flex align-items-center rounded-pill fw-semibold"
+                [ngbTooltip]="synonymTooltip"
+                (click)="$event.stopPropagation()">
+            +{{ matchedSynonyms().length - 1 }} {{ t('more') }}
+          </span>
+          <ng-template #synonymTooltip>
+            <div>{{ matchedSynonyms().length }} {{ t('matched-alt-count') }}</div>
+            <ul class="list-unstyled mb-0 mt-1">
+              @for (s of matchedSynonyms(); track s) {
+                <li>"{{ s }}"</li>
+              }
+            </ul>
+          </ng-template>
+        }
+      </div>
+    }
+
+    <div class="match-result-synopsis">{{ item().series.summary }}</div>
+
+  </div>
+
+  <div class="match-result-rail d-flex flex-column flex-shrink-0 align-items-end">
+    <app-confidence-chip [pct]="pct()" />
+  </div>
+
+</div>

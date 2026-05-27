@@ -517,9 +517,21 @@
   --activity-card-client-device-badge-bg-color: #3b82f6;
 
   /** KavitaPlus Audit Log **/
-  --audit-log-metadata-color:       #4AC694;
-  --audit-log-scrobble-color:       #FAC858;
-  --audit-log-match-color:          #5470C6;
-  --audit-log-sync-color:           #73C0DE;
+  --audit-log-metadata-color: #4AC694;
+  --audit-log-scrobble-color: #FAC858;
+  --audit-log-match-color: #5470C6; // Maybe #a5bbff is a better color (color contrast)
+  --audit-log-sync-color: #73C0DE;
+
+  /** Match confidence chip */
+  --match-confidence-chip-strong-color: var(--primary-color);
+  --match-confidence-chip-likely-color: #7ec99e;
+  --match-confidence-chip-weak-color: var(--warning-color);
+  --match-confidence-chip-doubt-color: var(--error-color);
+
+  /** Media format pill */
+  --media-format-pill-manga-color: var(--primary-color);
+  --media-format-pill-light-novel-color: #a5bbff;
+  --media-format-pill-comic-color: #fc8452;
+  --media-format-pill-book-color: #fac858;
 
 }

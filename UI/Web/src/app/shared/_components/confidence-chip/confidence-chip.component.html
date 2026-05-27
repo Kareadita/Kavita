@@ -1,0 +1,5 @@
+<div class="confidence-chip d-flex flex-column align-items-center justify-content-center gap-0" [style.--chip-color]="colorVar()"
+     *transloco="let t; prefix: 'confidence-chip'">
+  <span class="chip-pct fw-bold lh-1">{{ pct() }}<span class="chip-unit">%</span></span>
+  <span class="chip-label text-uppercase fw-semibold">{{ t(labelKey()) }}</span>
+</div>

@@ -1,12 +1,16 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Globalization;
 using System.Linq;
 
 namespace Kavita.Common.Helpers;
 #nullable enable
 
-public static class WeblinkParser
+/// <summary>
+/// Handles all things parsing of External Ids (weblinks, not set checks, anilist:X)
+/// </summary>
+public static class ExternalIdParser
 {
     private const string AniListWeblinkWebsite = "https://anilist.co/manga/";
     private const string MalWeblinkWebsite = "https://myanimelist.net/manga/";
@@ -90,6 +94,51 @@ public static class WeblinkParser
         return ExtractId<long?>(weblinks, MangaBakaWebsite) ?? 0;
     }
 
+    #region Header-based Parsing
+    public static bool TryParseAniListHeader(string? text, out int id) =>
+        TryParseHeader(text, "ANILIST", out id);
+
+    public static bool TryParseHardcoverHeader(string? text, out string id) =>
+        TryParseHeader(text, "HARDCOVER", out id);
+
+    public static bool TryParseMangaBakaHeader(string? text, out long id) =>
+        TryParseHeader(text, "MANGABAKA", out id);
+
+    public static bool TryParseMalHeader(string? text, out int id) =>
+        TryParseHeader(text, "MAL", out id);
+
+    public static int? ParseAniListHeader(string? text) => ParseHeader<int>(text, "ANILIST");
+
+    public static string? ParseHardcoverHeader(string? text) => ParseHeader<string>(text, "HARDCOVER");
+
+    public static long? ParseMangaBakaHeader(string? text) => ParseHeader<long>(text, "MANGABAKA");
+
+    public static int? ParseMalHeader(string? text) => ParseHeader<int>(text, "MAL");
+
+    private static T? ParseHeader<T>(string? text, string header)
+        where T : IParsable<T>
+    {
+        if (string.IsNullOrWhiteSpace(text)) return default;
+        if (!text.StartsWith(header + ":", StringComparison.InvariantCultureIgnoreCase)) return default;
+        var valuePart = text.Split(':', 2)[1];
+
+        return T.TryParse(valuePart, CultureInfo.InvariantCulture, out var result) ? result : default;
+    }
+
+    private static bool TryParseHeader<T>(string? text, string header, out T id)
+        where T : IParsable<T>
+    {
+        var result = ParseHeader<T>(text, header);
+        if (result is not null)
+        {
+            id = result;
+            return true;
+        }
+        id = default!;
+        return false;
+    }
+
+    #endregion
 
 
     /// <summary>

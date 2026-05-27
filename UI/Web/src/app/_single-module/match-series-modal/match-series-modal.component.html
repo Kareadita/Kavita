@@ -1,68 +1,141 @@
-<ng-container *transloco="let t; prefix:'match-series-modal'">
-  <div>
-    <div class="modal-header">
-      <h4 class="modal-title" id="modal-basic-title">
-        {{t('title', {seriesName: series().name})}}
-      </h4>
-      <button type="button" class="btn-close" [attr.aria-label]="t('close')" (click)="close()"></button>
-    </div>
-    <div class="modal-body scrollable-modal">
+<ng-container *transloco="let t; prefix: 'match-series-modal'">
+  <div class="modal-header">
+    <h4 class="modal-title" id="modal-basic-title">
+      <span class="match-title-prefix">{{ t('title-prefix') }}</span> {{ series().name }}
+    </h4>
+    <button type="button" class="btn-close" [attr.aria-label]="t('close')" (click)="close()"></button>
+  </div>
 
-      <form [formGroup]="formGroup">
-        <p>{{t('description')}}</p>
-        <div class="row g-0">
-          <div class="mb-3" style="width: 100%">
-            <app-setting-item [title]="t('query-label')" [subtitle]="t('query-tooltip')" [toggleOnViewClick]="false" [showEdit]="false">
-              <ng-template #view>
-                <div class="input-group">
-                  @if (formGroup.get('query'); as formControl) {
-                    <input id="query" class="form-control" formControlName="query" type="text"
-                           [class.is-invalid]="formControl.invalid && !formControl.untouched">
-                    @if (formControl.errors) {
-                      @if (formControl.errors.required) {
-                        <div class="invalid-feedback">{{t('required-field')}}</div>
-                      }
-                    }
-                  }
-                </div>
-              </ng-template>
-            </app-setting-item>
-          </div>
-          <div class="row g-0">
-            <div class="mb-3" style="width: 100%">
-              <app-setting-switch [title]="t('dont-match-label')" [subtitle]="t('dont-match-tooltip')">
-                <ng-template #switch>
-                  <div class="form-check form-switch">
-                    <input id="dont-match" type="checkbox" class="form-check-input" formControlName="dontMatch" role="switch" switch>
-                  </div>
-                </ng-template>
-              </app-setting-switch>
+  <div class="modal-body scrollable-modal d-flex flex-column gap-0">
+
+    <!-- Sub-header: explainer left + In Kavita chip right -->
+    <div class="match-subheader d-flex align-items-center gap-3 pt-1">
+      <div class="match-description flex-fill">
+        <p class="mb-1">{{ t('description') }}</p>
+        <p class="mb-0 text-muted small">{{ t('dont-match-hint') }}</p>
+      </div>
+      <div class="in-kavita-chip d-flex align-items-center flex-shrink-0 gap-2">
+        <app-image [imageUrl]="coverImageUrl()" width="32px" height="46px" />
+        <div class="d-flex flex-column gap-0">
+          <div class="in-kavita-label text-uppercase">{{ t('in-kavita') }}</div>
+          <div class="in-kavita-name fw-bold">{{ series().name }}</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Query bar -->
+    <div class="py-3" [formGroup]="formGroup">
+      <div class="d-flex align-items-stretch gap-2">
+        <div class="d-flex align-items-center position-relative flex-fill">
+          <i class="fa-solid fa-magnifying-glass query-icon" aria-hidden="true"></i>
+          <label for="search-query" class="visually-hidden">{{t('search')}}</label>
+          <input class="form-control query-input"
+                 id="search-query"
+                 formControlName="query"
+                 (keydown.enter)="search()" />
+          @if (formGroup.get('query')?.value) {
+            <button type="button" class="query-clear btn-close btn-close-white btn-sm"
+                    [attr.aria-label]="t('clear')"
+                    (click)="clearQuery()"></button>
+          }
+        </div>
+        <button type="button" class="btn btn-primary"
+                (click)="search()"
+                [disabled]="isLoading() || formGroup.get('dontMatch')?.value">
+          @if (isLoading()) {
+            <span class="spinner-border spinner-border-sm" role="status">
+              <span class="visually-hidden">{{ t('searching-alt') }}</span>
+            </span>
+          } @else {
+            <i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i>
+            {{ t('search') }}
+          }
+        </button>
+      </div>
+
+      <div class="d-flex align-items-center justify-content-between flex-wrap gap-2 mt-2">
+        <div class="provider-hints d-flex align-items-center flex-wrap gap-1">
+          <span class="text-muted">{{ t('try') }}</span>
+          <code class="provider-hint">anilist:159441</code>
+          <code class="provider-hint">mal:20593</code>
+          <code class="provider-hint">mangabaka:1331</code>
+          <code class="provider-hint">hardcover:flatland</code>
+        </div>
+        <div class="form-check form-switch mb-0">
+          <input type="checkbox" class="form-check-input" formControlName="dontMatch"
+                 id="dont-match" role="switch" />
+          <label class="form-check-label" for="dont-match"
+                 [ngbTooltip]="t('dont-match-tooltip')">
+            {{ t('dont-match-label') }}
+          </label>
+        </div>
+      </div>
+    </div>
+
+    <!-- Results count bar -->
+    @if (bodyState() === 'results') {
+      <div class="match-count-bar">
+        {{ t('match-count', { count: matches().length }) }}
+      </div>
+    }
+
+    <!-- Body -->
+    <div class="match-body">
+      @switch (bodyState()) {
+        @case ('loading') {
+          <div class="d-flex justify-content-center align-items-center py-5">
+            <div class="spinner-border text-primary" role="status">
+              <span class="visually-hidden">{{ t('loading-alt') }}</span>
             </div>
           </div>
-        </div>
-        <div class="row g-0">
-          <button class="btn btn-primary" [disabled]="formGroup.get('dontMatch')?.value" (click)="search()">{{t('search')}}</button>
-        </div>
-      </form>
-
-      <div class="setting-section-break"></div>
-
-      @if (!formGroup.get('dontMatch')?.value) {
-        <app-loading [loading]="isLoading()" />
-        @for(item of matches(); track item.series.name) {
-          <app-match-series-result-item [item]="item" [isDarkMode]="(themeService.isDarkMode$ | async)!" (selected)="selectMatch($event)" />
-        } @empty {
-          @if (!isLoading()) {
-            <p>{{t('no-results')}}</p>
+        }
+        @case ('empty') {
+          <app-empty-state [titleKey]="'empty-title'" [descriptionKey]="'empty-description'"
+                           [i18nPrefix]="'match-series-modal'">
+            <i icon class="fa-solid fa-magnifying-glass" aria-hidden="true"></i>
+          </app-empty-state>
+        }
+        @case ('dont-match') {
+          <app-empty-state [titleKey]="'dont-match-active-title'"
+                           [descriptionKey]="'dont-match-active-description'"
+                           [i18nPrefix]="'match-series-modal'">
+            <i icon class="fa-solid fa-ban" aria-hidden="true"></i>
+          </app-empty-state>
+        }
+        @case ('no-results') {
+          <app-empty-state [isError]="true"
+                           [titleKey]="'no-results-title'"
+                           [descriptionKey]="'no-results-description'"
+                           [descriptionParams]="{ query: lastQuery() }"
+                           [i18nPrefix]="'match-series-modal'">
+            <i icon class="fa-solid fa-magnifying-glass-minus" aria-hidden="true"></i>
+          </app-empty-state>
+        }
+        @case ('results') {
+          @for (item of matches(); track item.series.name + '_' + item.series.provider) {
+            <app-match-series-result-item
+              [item]="item"
+              [isSelected]="selectedItem()?.series?.name === item.series.name && selectedItem()?.series?.provider === item.series.provider"
+              [showSynonyms]="true"
+              [query]="lastQuery()"
+              (selected)="selectItem($event)" />
           }
         }
       }
+    </div>
 
-    </div>
-    <div class="modal-footer">
-      <button type="button" class="btn btn-secondary" (click)="close()">{{t('close')}}</button>
-      <button type="button" class="btn btn-primary" (click)="save()">{{t('save')}}</button>
-    </div>
+  </div>
+
+  <div class="modal-footer">
+    <button type="button" class="btn btn-secondary" (click)="close()">{{ t('close') }}</button>
+    @if (isDontMatch()) {
+      <button type="button" class="btn btn-primary" [disabled]="!canSaveDontMatch()" (click)="saveDontMatch()">
+        {{ t('save') }}
+      </button>
+    } @else {
+      <button type="button" class="btn btn-primary" [disabled]="!selectedItem()" (click)="applyMatch()">
+        {{ t('apply-match') }}
+      </button>
+    }
   </div>
 </ng-container>
-

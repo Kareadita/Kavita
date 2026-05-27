@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Threading;
 using System.Threading.Tasks;
 using EasyCaching.Core;
 using Hangfire;
@@ -17,6 +18,7 @@ using Kavita.Models.DTOs.Filtering.v2;
 using Kavita.Models.DTOs.Filtering.v2.Requests;
 using Kavita.Models.DTOs.Metadata.Matching;
 using Kavita.Models.DTOs.Recommendation;
+using Kavita.Models.DTOs.KavitaPlus.ExternalMetadata;
 using Kavita.Models.DTOs.SeriesDetail;
 using Kavita.Models.Entities.Enums;
 using Kavita.Models.Entities.MetadataMatching;
@@ -583,18 +585,15 @@ public class SeriesController(
     /// <summary>
     /// This will perform the fix match
     /// </summary>
-    /// <param name="match"></param>
     /// <param name="seriesId"></param>
-    /// <param name="aniListId"></param>
-    /// <param name="malId"></param>
-    /// <param name="cbrId"></param>
+    /// <param name="ids"></param>
     /// <returns></returns>
     [KPlus]
     [HttpPost("update-match")]
     [Authorize(Policy = PolicyGroups.AdminPolicy)]
-    public ActionResult UpdateSeriesMatch([FromQuery] int seriesId, [FromQuery] int? aniListId, [FromQuery] long? malId, [FromQuery] int? cbrId)
+    public ActionResult UpdateSeriesMatch([FromQuery] int seriesId, [FromBody] ExternalMetadataIdsDto ids)
     {
-        BackgroundJob.Enqueue(() => externalMetadataService.FixSeriesMatch(seriesId, aniListId, malId, cbrId));
+        BackgroundJob.Enqueue(() => externalMetadataService.FixSeriesMatch(seriesId, ids, CancellationToken.None));
 
         return Ok();
     }

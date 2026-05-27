@@ -1,0 +1,20 @@
+.source-badge {
+  height: 1.375rem;
+  padding: 0 0.5625rem 0 0.3125rem;
+  background: color-mix(in srgb, var(--badge-color) 12%, transparent);
+  border: 1px solid color-mix(in srgb, var(--badge-color) 33%, transparent);
+  color: var(--badge-color);
+  font-size: 0.6875rem;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.id-pill {
+  height: 1.25rem;
+  padding: 0 0.4375rem 0 0.25rem;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  color: var(--text-muted-color);
+  font-size: 0.65625rem;
+  white-space: nowrap;
+}

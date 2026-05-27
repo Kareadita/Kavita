@@ -182,14 +182,31 @@ public class ExternalMetadataService : IExternalMetadataService
 
     public async Task<IList<ExternalSeriesMatchDto>> MatchSeries(MatchSeriesDto dto, CancellationToken ct = default)
     {
-
         var series = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(dto.SeriesId,
             SeriesIncludes.Metadata | SeriesIncludes.ExternalMetadata | SeriesIncludes.Library, ct);
         if (series == null) return [];
 
-        var potentialAnilistId = WeblinkParser.GetAniListId(dto.Query);
-        var potentialMalId = WeblinkParser.GetMalId(dto.Query);
-        var potentialMangabakaId = WeblinkParser.GetMangaBakaId(dto.Query);
+        var query = dto.Query;
+
+        var potentialAnilistId = ExternalIdParser.TryParseAniListHeader(query, out var aniListId)
+            ? aniListId : ExternalIdParser.GetAniListId(query);
+
+        var potentialMalId = ExternalIdParser.TryParseMalHeader(query, out var malId)
+            ? malId : ExternalIdParser.GetMalId(query);
+
+        var potentialMangabakaId = ExternalIdParser.TryParseMangaBakaHeader(query, out var mangabakaId)
+            ? mangabakaId : ExternalIdParser.GetMangaBakaId(query);
+
+        var potentialHardcoverSlug = ExternalIdParser.TryParseHardcoverHeader(query, out var hardcoverId)
+            ? hardcoverId : null;
+
+        // If any ID was extracted (header syntax or URL), the raw query string is meaningless to the backend
+        var wasHeaderQuery = potentialAnilistId.HasValue
+                             || potentialMalId.HasValue
+                             || potentialMangabakaId > 0
+                             || !string.IsNullOrEmpty(potentialHardcoverSlug);
+
+        query = wasHeaderQuery ? null : dto.Query;
 
         var format = series.Library.Type.ConvertToPlusMediaFormat(series.Format);
         var otherNames = ExtractAlternativeNames(series);
@@ -208,13 +225,14 @@ public class ExternalMetadataService : IExternalMetadataService
         var matchRequest = new MatchSeriesRequestDto()
         {
             Format = format,
-            Query = dto.Query,
+            Query = query,
             SeriesName = series.Name,
             AlternativeNames = otherNames,
             Year = year,
-            AniListId = potentialAnilistId ?? ScrobblingHelper.GetAniListId(series),
+            AniListId = potentialAnilistId ?? ScrobblingHelper.GetAniListId(series), // TODO: Opportunity to streamline this with ExternalIdParser and the default > 0/empty string checks
             MalId = potentialMalId ?? ScrobblingHelper.GetMalId(series),
-            MangabakaId = potentialMangabakaId > 0 ? (int) potentialMangabakaId : (int?) series.MangaBakaId
+            MangabakaId = potentialMangabakaId > 0 ? (int) potentialMangabakaId : (int?) series.MangaBakaId,
+            HardcoverSlug = potentialHardcoverSlug
         };
 
         try
@@ -289,7 +307,7 @@ public class ExternalMetadataService : IExternalMetadataService
         }
     }
 
-    public async Task FixSeriesMatch(int seriesId, int? aniListId, long? malId, int? cbrId, CancellationToken ct = default)
+    public async Task FixSeriesMatch(int seriesId, ExternalMetadataIdsDto ids, CancellationToken ct = default)
     {
         var series = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(seriesId, SeriesIncludes.Library, ct);
         if (series == null) return;
@@ -306,17 +324,19 @@ public class ExternalMetadataService : IExternalMetadataService
             var metadata = await FetchExternalMetadataForSeries(seriesId, series.Library.Type,
                 new PlusSeriesRequestDto()
                 {
-                    AniListId = aniListId,
-                    MalId = malId,
-                    CbrId = cbrId,
+                    AniListId = ids.AniListId,
+                    MalId = ids.MalId,
+                    CbrId = ids.CbrId,
+                    MangabakaId = ids.MangabakaId,
+                    HardcoverId = ids.HardcoverId,
                     MediaFormat = series.Library.Type.ConvertToPlusMediaFormat(series.Format),
-                    SeriesName = series.Name // Required field, not used since AniList/Mal Id are passed
+                    SeriesName = series.Name // Required field, not used since provider Ids are passed
                 }, true, ct);
 
             if (metadata.Series == null)
             {
-                _logger.LogError("Unable to Match {SeriesName} with Kavita+ Series with Id: {AniListId}/{MalId}/{CbrId}",
-                    series.Name, aniListId, malId, cbrId);
+                _logger.LogError("Unable to Match {SeriesName} with Kavita+ Series with Ids: {AniListId}/{MalId}/{CbrId}/{MangabakaId}/{HardcoverId}",
+                    series.Name, ids.AniListId, ids.MalId, ids.CbrId, ids.MangabakaId, ids.HardcoverId);
                 return;
             }
 
@@ -373,6 +393,9 @@ public class ExternalMetadataService : IExternalMetadataService
         _unitOfWork.SeriesRepository.Update(series);
 
         await _unitOfWork.CommitAsync(ct);
+
+        // Send a series Update to ensure pages get the new information
+        await _eventHub.SendMessageAsync(MessageFactory.SeriesUpdated, MessageFactory.SeriesUpdatedEvent(series.Id), ct: ct);
 
         await _auditService.LogMatchAsync(KavitaPlusEventType.SeriesDontMatchSet, seriesId,
             new AuditLogMatchDontMatchParamsDto { SeriesName = series.Name, DontMatch = dontMatch }, ct: ct);
@@ -905,7 +928,7 @@ public class ExternalMetadataService : IExternalMetadataService
             .Select(w => new PersonDto()
             {
                 Name = w.Name.Trim(),
-                AniListId = WeblinkParser.GetAniListCharacterId(w.Url),
+                AniListId = ExternalIdParser.GetAniListCharacterId(w.Url),
                 Description = StringHelper.CorrectUrls(StringHelper.RemoveSourceInDescription(StringHelper.SquashBreaklines(w.Description))),
             })
             .Concat(series.Metadata.People
@@ -947,7 +970,7 @@ public class ExternalMetadataService : IExternalMetadataService
 
         foreach (var character in externalCharacters)
         {
-            var aniListId = WeblinkParser.GetAniListCharacterId(character.Url);
+            var aniListId = ExternalIdParser.GetAniListCharacterId(character.Url);
             if (aniListId <= 0) continue;
             var person = await _unitOfWork.PersonRepository.GetPersonByAniListId(aniListId);
             if (person != null && !string.IsNullOrEmpty(character.ImageUrl) && string.IsNullOrEmpty(person.CoverImage))
@@ -986,7 +1009,7 @@ public class ExternalMetadataService : IExternalMetadataService
             .Select(w => new PersonDto()
             {
                 Name = w.Name.Trim(),
-                AniListId = WeblinkParser.GetAniListStaffId(w.Url),
+                AniListId = ExternalIdParser.GetAniListStaffId(w.Url),
                 Description = StringHelper.CorrectUrls(StringHelper.RemoveSourceInDescription(StringHelper.SquashBreaklines(w.Description))),
             })
             .Concat(series.Metadata.People
@@ -1043,7 +1066,7 @@ public class ExternalMetadataService : IExternalMetadataService
             .Select(w => new PersonDto()
             {
                 Name = w.Name.Trim(),
-                AniListId = WeblinkParser.GetAniListStaffId(w.Url),
+                AniListId = ExternalIdParser.GetAniListStaffId(w.Url),
                 Description = StringHelper.CorrectUrls(StringHelper.RemoveSourceInDescription(StringHelper.SquashBreaklines(w.Description))),
             })
             .Concat(series.Metadata.People
@@ -1734,7 +1757,7 @@ public class ExternalMetadataService : IExternalMetadataService
     {
         foreach (var staff in people)
         {
-            var aniListId = WeblinkParser.GetAniListStaffId(staff.Url);
+            var aniListId = ExternalIdParser.GetAniListStaffId(staff.Url);
             if (aniListId <= 0) continue;
             var person = await _unitOfWork.PersonRepository.GetPersonByAniListId(aniListId);
             if (person == null || string.IsNullOrEmpty(staff.ImageUrl) ||
@@ -2061,11 +2084,11 @@ public class ExternalMetadataService : IExternalMetadataService
             {
                 if (payload.AniListId <= 0)
                 {
-                    payload.AniListId = WeblinkParser.GetAniListId(series.Metadata.WebLinks);
+                    payload.AniListId = ExternalIdParser.GetAniListId(series.Metadata.WebLinks);
                 }
                 if (payload.MalId <= 0)
                 {
-                    payload.MalId = WeblinkParser.GetMalId(series.Metadata.WebLinks);
+                    payload.MalId = ExternalIdParser.GetMalId(series.Metadata.WebLinks);
                 }
                 payload.SeriesName = series.Name;
                 payload.LocalizedSeriesName = series.LocalizedName;

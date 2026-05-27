@@ -2,12 +2,12 @@
   "openapi": "3.0.4",
   "info": {
     "title": "Kavita",
-    "description": "Kavita provides a set of APIs authenticated via an Auth Key passed in the `x-api-key` header. Generate an Auth Key under User Settings → Manage Auth Keys, paste it into the Authorize panel, and all Try It requests will include it. Assume all fields of a payload are required unless marked optional. Built against v0.9.0.3",
+    "description": "Kavita provides a set of APIs authenticated via an Auth Key passed in the `x-api-key` header. Generate an Auth Key under User Settings → Manage Auth Keys, paste it into the Authorize panel, and all Try It requests will include it. Assume all fields of a payload are required unless marked optional. Built against v0.9.0.4",
     "license": {
       "name": "GPL-3.0",
       "url": "https://github.com/Kareadita/Kavita/blob/develop/LICENSE"
     },
-    "version": "0.9.0.3"
+    "version": "0.9.0.4"
   },
   "servers": [
     {
@@ -15701,35 +15701,28 @@
               "type": "integer",
               "format": "int32"
             }
-          },
-          {
-            "name": "aniListId",
-            "in": "query",
-            "description": "",
-            "schema": {
-              "type": "integer",
-              "format": "int32"
-            }
-          },
-          {
-            "name": "malId",
-            "in": "query",
-            "description": "",
-            "schema": {
-              "type": "integer",
-              "format": "int64"
-            }
-          },
-          {
-            "name": "cbrId",
-            "in": "query",
-            "description": "",
-            "schema": {
-              "type": "integer",
-              "format": "int32"
-            }
           }
         ],
+        "requestBody": {
+          "description": "",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ExternalMetadataIdsDto"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ExternalMetadataIdsDto"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/ExternalMetadataIdsDto"
+              }
+            }
+          }
+        },
         "responses": {
           "200": {
             "description": "OK"
@@ -23984,6 +23977,48 @@
         },
         "additionalProperties": false
       },
+      "ExternalMetadataIdsDto": {
+        "type": "object",
+        "properties": {
+          "malId": {
+            "type": "integer",
+            "format": "int64",
+            "nullable": true
+          },
+          "aniListId": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "mangabakaId": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "hardcoverId": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "cbrId": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "seriesName": {
+            "type": "string",
+            "nullable": true
+          },
+          "localizedSeriesName": {
+            "type": "string",
+            "nullable": true
+          },
+          "plusMediaFormat": {
+            "$ref": "#/components/schemas/PlusMediaFormat"
+          }
+        },
+        "additionalProperties": false
+      },
       "ExternalSeriesDetailDto": {
         "type": "object",
         "properties": {
@@ -24002,6 +24037,11 @@
             "nullable": true
           },
           "cbrId": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "hardcoverId": {
             "type": "integer",
             "format": "int32",
             "nullable": true

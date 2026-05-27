@@ -19,6 +19,7 @@ import {AuditLogErrorPipe} from "../../_pipes/audit-log-error.pipe";
 import {
   KavitaPlusAuditEventTypeIconComponent
 } from "../../shared/_components/kavitaplus-event-type-icon/kavita-plus-audit-event-type-icon.component";
+import {EmptyStateComponent} from "../../shared/_components/empty-state/empty-state.component";
 
 interface DayGroup {
   key: string;
@@ -69,6 +70,7 @@ function groupByDay(entries: KavitaPlusAuditEntry[]): DayGroup[] {
     AuditLogErrorPipe,
     KavitaPlusAuditEventTypeIconComponent,
     NgTemplateOutlet,
+    EmptyStateComponent,
   ],
 })
 export class KavitaplusTimelineComponent {

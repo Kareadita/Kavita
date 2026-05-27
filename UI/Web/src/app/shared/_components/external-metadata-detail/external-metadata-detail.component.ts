@@ -9,7 +9,7 @@ const URLS = {
   aniListId: 'https://anilist.co/manga/{id}/',
   malId: 'https://myanimelist.net/manga/{id}/',
   mangaBakaId: 'https://mangabaka.org/{id}',
-  hardcoverId: null,
+  hardcoverId: 'https://hardcover.app/id/series/{id}',
   comicVineId: null,
   metronId: null,
   cbrId: null,

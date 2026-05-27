@@ -250,7 +250,14 @@ export class SeriesService {
   }
 
   updateMatch(seriesId: number, series: ExternalSeriesDetail) {
-    return this.httpClient.post<string>(this.baseUrl + `series/update-match?seriesId=${seriesId}&aniListId=${series.aniListId || 0}&malId=${series.malId || 0}&cbrId=${series.cbrId || 0}`, {}, TextResonse);
+    const ids = {
+      aniListId: series.aniListId ?? null,
+      malId: series.malId ?? null,
+      cbrId: series.cbrId ?? null,
+      mangabakaId: series.mangaBakaId ?? null,
+      hardcoverId: series.hardcoverId ?? null,
+    };
+    return this.httpClient.post<string>(this.baseUrl + `series/update-match?seriesId=${seriesId}`, ids, TextResonse);
   }
 
   updateDontMatch(seriesId: number, dontMatch: boolean) {
