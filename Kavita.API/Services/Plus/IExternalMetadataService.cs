@@ -3,6 +3,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Kavita.Common;
 using Kavita.Models.DTOs.Collection;
+using Kavita.Models.DTOs.KavitaPlus.ExternalMetadata;
 using Kavita.Models.DTOs.KavitaPlus.ExternalMetadata.Covers;
 using Kavita.Models.DTOs.KavitaPlus.Metadata;
 using Kavita.Models.DTOs.Metadata.Matching;
@@ -69,11 +70,9 @@ public interface IExternalMetadataService
     /// This will override any sort of matching that was done prior and force it to be what the user Selected
     /// </summary>
     /// <param name="seriesId"></param>
-    /// <param name="aniListId"></param>
-    /// <param name="malId"></param>
-    /// <param name="cbrId"></param>
+    /// <param name="ids"></param>
     /// <param name="ct"></param>
-    Task FixSeriesMatch(int seriesId, int? aniListId, long? malId, int? cbrId, CancellationToken ct = default);
+    Task FixSeriesMatch(int seriesId, ExternalMetadataIdsDto ids, CancellationToken ct = default);
 
     /// <summary>
     /// Sets a series to Don't Match and removes all previously cached

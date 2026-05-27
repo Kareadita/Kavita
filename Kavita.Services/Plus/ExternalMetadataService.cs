@@ -200,10 +200,10 @@ public class ExternalMetadataService : IExternalMetadataService
         var potentialHardcoverSlug = ExternalIdParser.TryParseHardcoverHeader(query, out var hardcoverId)
             ? hardcoverId : null;
 
-        // If any header was matched, the raw query string is meaningless to the backend (and will break matching)
-        var wasHeaderQuery = potentialAnilistId.HasValue && dto.Query != null && dto.Query.Contains(':')
-                             || potentialMalId.HasValue && dto.Query != null && dto.Query.Contains(':')
-                             || potentialMangabakaId > 0 && dto.Query != null && dto.Query.Contains(':')
+        // If any ID was extracted (header syntax or URL), the raw query string is meaningless to the backend
+        var wasHeaderQuery = potentialAnilistId.HasValue
+                             || potentialMalId.HasValue
+                             || potentialMangabakaId > 0
                              || !string.IsNullOrEmpty(potentialHardcoverSlug);
 
         query = wasHeaderQuery ? null : dto.Query;
@@ -307,7 +307,7 @@ public class ExternalMetadataService : IExternalMetadataService
         }
     }
 
-    public async Task FixSeriesMatch(int seriesId, int? aniListId, long? malId, int? cbrId, CancellationToken ct = default)
+    public async Task FixSeriesMatch(int seriesId, ExternalMetadataIdsDto ids, CancellationToken ct = default)
     {
         var series = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(seriesId, SeriesIncludes.Library, ct);
         if (series == null) return;
@@ -324,17 +324,19 @@ public class ExternalMetadataService : IExternalMetadataService
             var metadata = await FetchExternalMetadataForSeries(seriesId, series.Library.Type,
                 new PlusSeriesRequestDto()
                 {
-                    AniListId = aniListId,
-                    MalId = malId,
-                    CbrId = cbrId,
+                    AniListId = ids.AniListId,
+                    MalId = ids.MalId,
+                    CbrId = ids.CbrId,
+                    MangabakaId = ids.MangabakaId,
+                    HardcoverId = ids.HardcoverId,
                     MediaFormat = series.Library.Type.ConvertToPlusMediaFormat(series.Format),
-                    SeriesName = series.Name // Required field, not used since AniList/Mal Id are passed
+                    SeriesName = series.Name // Required field, not used since provider Ids are passed
                 }, true, ct);
 
             if (metadata.Series == null)
             {
-                _logger.LogError("Unable to Match {SeriesName} with Kavita+ Series with Id: {AniListId}/{MalId}/{CbrId}",
-                    series.Name, aniListId, malId, cbrId);
+                _logger.LogError("Unable to Match {SeriesName} with Kavita+ Series with Ids: {AniListId}/{MalId}/{CbrId}/{MangabakaId}/{HardcoverId}",
+                    series.Name, ids.AniListId, ids.MalId, ids.CbrId, ids.MangabakaId, ids.HardcoverId);
                 return;
             }
 

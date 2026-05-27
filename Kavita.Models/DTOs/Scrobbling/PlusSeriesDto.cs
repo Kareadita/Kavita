@@ -11,6 +11,7 @@ public class PlusSeriesRequestDto
     public string? GoogleBooksId { get; set; }
     public string? MangaDexId { get; set; }
     public int? MangabakaId { get; set; }
+    public int? HardcoverId { get; set; }
     /// <summary>
     /// ComicBookRoundup Id
     /// </summary>
