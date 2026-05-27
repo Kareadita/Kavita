@@ -6,7 +6,8 @@ import {NgbActiveModal, NgbTooltip} from "@ng-bootstrap/ng-bootstrap";
 import {translate, TranslocoDirective} from "@jsverse/transloco";
 import {ExternalSeriesMatch} from "../../_models/series-detail/external-series-match";
 import {ToastrService} from "ngx-toastr";
-import {catchError, of, tap} from "rxjs";
+import {catchError, filter, of, startWith, tap} from "rxjs";
+import {takeUntilDestroyed, toSignal} from "@angular/core/rxjs-interop";
 import {EmptyStateComponent} from "../../shared/_components/empty-state/empty-state.component";
 import {MatchSeriesResultItemComponent} from "../../shared/_components/match-series-result-item/match-series-result-item.component";
 import {ImageComponent} from "../../shared/image/image.component";
@@ -39,6 +40,22 @@ export class MatchSeriesModalComponent implements OnInit {
     dontMatch: new FormControl(false, []),
   });
 
+  protected readonly isDontMatch = toSignal(
+    this.formGroup.controls.dontMatch.valueChanges.pipe(
+      startWith(this.formGroup.controls.dontMatch.value)
+    ),
+    { initialValue: false }
+  );
+
+  private readonly _autoSearchOnEnable = this.formGroup.controls.dontMatch.valueChanges.pipe(
+    filter(v => v === false),
+    takeUntilDestroyed()
+  ).subscribe(() => this.search());
+
+  protected readonly canSaveDontMatch = computed(() =>
+    this.isDontMatch() === true && this.series().dontMatch === false
+  );
+
   matches = signal<ExternalSeriesMatch[]>([]);
   isLoading = signal<boolean>(false);
   hasSearched = signal<boolean>(false);
@@ -46,7 +63,7 @@ export class MatchSeriesModalComponent implements OnInit {
   lastQuery = signal<string>('');
 
   protected bodyState = computed<'empty' | 'dont-match' | 'loading' | 'results' | 'no-results'>(() => {
-    if (this.formGroup.get('dontMatch')?.value) return 'dont-match';
+    if (this.isDontMatch()) return 'dont-match';
     if (this.isLoading()) return 'loading';
     if (!this.hasSearched()) return 'empty';
     return this.matches().length > 0 ? 'results' : 'no-results';
@@ -60,7 +77,7 @@ export class MatchSeriesModalComponent implements OnInit {
   }
 
   search() {
-    if (this.formGroup.get('dontMatch')?.value) return;
+    if (this.isDontMatch()) return;
 
     this.isLoading.set(true);
     this.lastQuery.set(this.formGroup.value.query ?? '');
@@ -102,21 +119,14 @@ export class MatchSeriesModalComponent implements OnInit {
     data.genres = data.genres || [];
 
     this.seriesService.updateMatch(this.series().id, data).subscribe(() => {
-      this.save();
+      this.toastr.success(translate('toasts.match-success'));
+      this.modalService.close(true);
     });
   }
 
-  save() {
-    const dontMatch = this.formGroup.value.dontMatch ?? false;
-    const dontMatchChanged = this.series().dontMatch !== dontMatch;
-
-    if (dontMatchChanged) {
-      this.seriesService.updateDontMatch(this.series().id, dontMatch).subscribe(() => {
-        this.modalService.close(true);
-      });
-    } else {
-      this.toastr.success(translate('toasts.match-success'));
+  saveDontMatch() {
+    this.seriesService.updateDontMatch(this.series().id, true).subscribe(() => {
       this.modalService.close(true);
-    }
+    });
   }
 }

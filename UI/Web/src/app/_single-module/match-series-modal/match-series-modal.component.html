@@ -9,7 +9,7 @@
   <div class="modal-body scrollable-modal d-flex flex-column gap-0">
 
     <!-- Sub-header: explainer left + In Kavita chip right -->
-    <div class="match-subheader d-flex align-items-center gap-3">
+    <div class="match-subheader d-flex align-items-center gap-3 pt-1">
       <div class="match-description flex-fill">
         <p class="mb-1">{{ t('description') }}</p>
         <p class="mb-0 text-muted small">{{ t('dont-match-hint') }}</p>
@@ -32,6 +32,7 @@
           <input class="form-control query-input"
                  id="search-query"
                  formControlName="query"
+                 [attr.disabled]="isDontMatch() ? true : null"
                  (keydown.enter)="search()" />
           @if (formGroup.get('query')?.value) {
             <button type="button" class="query-clear btn-close btn-close-white btn-sm"
@@ -128,8 +129,14 @@
 
   <div class="modal-footer">
     <button type="button" class="btn btn-secondary" (click)="close()">{{ t('close') }}</button>
-    <button type="button" class="btn btn-primary" [disabled]="!selectedItem()" (click)="applyMatch()">
-      {{ t('apply-match') }}
-    </button>
+    @if (isDontMatch()) {
+      <button type="button" class="btn btn-primary" [disabled]="!canSaveDontMatch()" (click)="saveDontMatch()">
+        {{ t('save') }}
+      </button>
+    } @else {
+      <button type="button" class="btn btn-primary" [disabled]="!selectedItem()" (click)="applyMatch()">
+        {{ t('apply-match') }}
+      </button>
+    }
   </div>
 </ng-container>

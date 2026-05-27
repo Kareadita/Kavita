@@ -1436,14 +1436,15 @@
         "dont-match-tooltip": "Stop Kavita from auto-matching or scrobbling this series",
         "match-count": "{{ count }} matches",
         "apply-match": "Apply match",
-        "close": "Close",
+        "close": "{{common.close}}",
         "loading-alt": "Loading results",
         "empty-title": "Search for a match",
         "empty-description": "Try a series title, or paste a direct AniList, MAL, MangaBaka, CBR or Hardcover URL.",
         "no-results-title": "No matches found",
         "no-results-description": "Nothing came back for \"{{ query }}\". Try a shorter query, romanized title, or a direct ID.",
         "dont-match-active-title": "Do not match enabled",
-        "dont-match-active-description": "This series is opted out of Kavita+ matching and scrobbling."
+        "dont-match-active-description": "This series is opted out of Kavita+ matching and scrobbling.",
+        "save": "{{common.save}}"
     },
 
     "match-series-result-item": {
