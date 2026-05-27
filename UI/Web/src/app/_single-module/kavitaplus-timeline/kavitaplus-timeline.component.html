@@ -6,7 +6,10 @@
       </div>
     </div>
   } @else if (entries().length === 0) {
-    <div class="text-center py-5 small text-muted">{{t('no-events')}}</div>
+    <app-empty-state [titleKey]="'empty-title'" [descriptionKey]="'empty-description'"
+                     [i18nPrefix]="'kavitaplus-timeline'">
+      <i icon class="fa-solid fa-magnifying-glass" aria-hidden="true"></i>
+    </app-empty-state>
   } @else {
     @for (group of groupedEntries(); track group.key; let isFirst = $first) {
       <div class="timeline-group" [class.mt-4]="!isFirst">

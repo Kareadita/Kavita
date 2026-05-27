@@ -1327,9 +1327,10 @@
         "today": "Today",
         "yesterday": "Yesterday",
         "events-count": "{{count}} events",
-        "no-events": "No events to display",
         "retry": "Retry",
-        "load-more-label": "Load more"
+        "load-more-label": "Load more",
+        "empty-title": "Nothing found",
+        "empty-description": "Try a different filter or perform some matches/reading to populate"
     },
 
     "audit-status-title-pipe": {
@@ -1439,7 +1440,7 @@
         "close": "{{common.close}}",
         "loading-alt": "Loading results",
         "empty-title": "Search for a match",
-        "empty-description": "Try a series title, or paste a direct AniList, MAL, MangaBaka, CBR or Hardcover URL.",
+        "empty-description": "Try a series title or paste a direct AniList, MAL, MangaBaka, CBR or Hardcover URL.",
         "no-results-title": "No matches found",
         "no-results-description": "Nothing came back for \"{{ query }}\". Try a shorter query, romanized title, or a direct ID.",
         "dont-match-active-title": "Do not match enabled",
