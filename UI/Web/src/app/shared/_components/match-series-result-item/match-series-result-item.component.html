@@ -65,6 +65,9 @@
         @if (displaySynonyms().length > 1) {
           <span class="synonym-more d-inline-flex align-items-center rounded-pill fw-semibold"
                 [ngbTooltip]="synonymTooltip"
+                tooltipClass="series-synonym-tooltip"
+                placement="top"
+                autoClose="false"
                 (click)="$event.stopPropagation()">
             {{ t('more-titles', {count: displaySynonyms().length - 1}) }}
           </span>
