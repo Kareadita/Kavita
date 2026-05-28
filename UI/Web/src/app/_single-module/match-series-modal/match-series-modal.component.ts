@@ -57,10 +57,7 @@ export class MatchSeriesModalComponent implements OnInit {
     }
   });
 
-  private readonly _autoSearchOnEnable = this.formGroup.controls.dontMatch.valueChanges.pipe(
-    filter(v => v === false),
-    takeUntilDestroyed()
-  ).subscribe(() => this.search());
+
 
   protected readonly canSaveDontMatch = computed(() =>
     this.isDontMatch() === true && !this.series().dontMatch
@@ -84,6 +81,11 @@ export class MatchSeriesModalComponent implements OnInit {
   ngOnInit() {
     this.formGroup.patchValue({ dontMatch: this.series().dontMatch || false });
     this.search();
+
+    this.formGroup.controls.dontMatch.valueChanges.pipe(
+      filter(v => v === false),
+      takeUntilDestroyed()
+    ).subscribe(() => this.search());
   }
 
   search() {
