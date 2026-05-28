@@ -1,7 +1,5 @@
 <ng-container *transloco="let t; prefix:'manage-license-key-modal'">
 
-  @let hasLicenseOnFile = licenseService.hasActiveLicense();
-
   <div class="modal-header">
     <h4 class="modal-title" id="modal-basic-title">{{t('title')}}</h4>
     <button type="button" class="btn-close" [attr.aria-label]="t('close')" (click)="modal.dismiss()"></button>
