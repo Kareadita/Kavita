@@ -167,8 +167,11 @@ public class ImageController(IUnitOfWork unitOfWork, IDirectoryService directory
 
         var encodeFormat = (await unitOfWork.SettingsRepository.GetSettingsDtoAsync()).EncodeMediaAs;
 
+        var webLinkFileName = ImageService.GetWebLinkFormat(url, encodeFormat);
+        if (!IsPathWithinDirectory(directoryService.FaviconDirectory, webLinkFileName)) return BadRequest();
+
         // Check if the domain exists
-        var domainFilePath = directoryService.FileSystem.Path.Join(directoryService.FaviconDirectory, ImageService.GetWebLinkFormat(url, encodeFormat));
+        var domainFilePath = directoryService.FileSystem.Path.Join(directoryService.FaviconDirectory, webLinkFileName);
         if (!directoryService.FileSystem.File.Exists(domainFilePath))
         {
             // We need to request the favicon and save it
@@ -197,12 +200,14 @@ public class ImageController(IUnitOfWork unitOfWork, IDirectoryService directory
     public async Task<ActionResult> GetPublisherImage(string publisherName, string apiKey)
     {
         if (string.IsNullOrEmpty(publisherName)) return BadRequest(await localizationService.TranslateAsync(UserId, "must-be-defined", "publisherName"));
-        if (publisherName.Contains("..")) return BadRequest();
 
         var encodeFormat = (await unitOfWork.SettingsRepository.GetSettingsDtoAsync()).EncodeMediaAs;
 
+        var publisherFileName = ImageService.GetPublisherFormat(publisherName, encodeFormat);
+        if (!IsPathWithinDirectory(directoryService.PublisherDirectory, publisherFileName)) return BadRequest();
+
         // Check if the domain exists
-        var domainFilePath = directoryService.FileSystem.Path.Join(directoryService.PublisherDirectory, ImageService.GetPublisherFormat(publisherName, encodeFormat));
+        var domainFilePath = directoryService.FileSystem.Path.Join(directoryService.PublisherDirectory, publisherFileName);
         if (!directoryService.FileSystem.File.Exists(domainFilePath))
         {
             // We need to request the favicon and save it
@@ -261,7 +266,7 @@ public class ImageController(IUnitOfWork unitOfWork, IDirectoryService directory
     [Authorize(PolicyGroups.AdminPolicy)]
     public async Task<ActionResult> GetCoverUploadImage(string filename, string apiKey)
     {
-        if (filename.Contains("..")) return BadRequest(await localizationService.TranslateAsync(UserId, "invalid-filename"));
+        if (!IsPathWithinDirectory(directoryService.TempDirectory, filename)) return BadRequest(await localizationService.TranslateAsync(UserId, "invalid-filename"));
 
         var path = Path.Join(directoryService.TempDirectory, filename);
         return PhysicalFile(path);

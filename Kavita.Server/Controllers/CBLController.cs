@@ -123,7 +123,7 @@ public class CblController(IReadingListService readingListService, IDirectorySer
 
     private async Task<(bool IsInvalid, ActionResult<CblSavedFileDto>? ActionResult)> HasInvalidExtensionAsync(string filename, string fullPath)
     {
-        if (!ValidateFilename(Path.Join(fullPath, filename)))
+        if (!IsPathWithinDirectory(GetCblManagerFolder(UserId), filename))
         {
             return (true, BadRequest(await localizationService.TranslateAsync("cbl-import-validation-types")));
         }
@@ -175,9 +175,9 @@ public class CblController(IReadingListService readingListService, IDirectorySer
     [DisallowRole(PolicyConstants.ReadOnlyRole)]
     public async Task<ActionResult<CblImportSummaryDto>> ReValidate([FromBody] CblReValidateRequestDto dto)
     {
-        if (!ValidateFilename(dto.FileName)) return BadRequest(await localizationService.TranslateAsync("invalid-filename"));
-
         var userId = UserId;
+        if (!IsPathWithinDirectory(GetCblManagerFolder(userId), dto.FileName)) return BadRequest(await localizationService.TranslateAsync("invalid-filename"));
+
         var fullPath = Path.Join(GetCblManagerFolder(userId), dto.FileName);
 
         if (!System.IO.File.Exists(fullPath))
@@ -197,9 +197,9 @@ public class CblController(IReadingListService readingListService, IDirectorySer
     [DisallowRole(PolicyConstants.ReadOnlyRole)]
     public async Task<ActionResult<CblImportSummaryDto>> FinalizeImport([FromBody] CblFinalizeRequestDto dto)
     {
-        if (!ValidateFilename(dto.FileName)) return BadRequest(await localizationService.TranslateAsync("invalid-filename"));
-
         var userId = UserId;
+        if (!IsPathWithinDirectory(GetCblManagerFolder(userId), dto.FileName)) return BadRequest(await localizationService.TranslateAsync("invalid-filename"));
+
         var fullPath = Path.Join(GetCblManagerFolder(userId), dto.FileName);
 
         if (!System.IO.File.Exists(fullPath))

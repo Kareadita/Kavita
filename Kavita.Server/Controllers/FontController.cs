@@ -53,6 +53,8 @@ public class FontController(
 
         if (font.Provider == FontProvider.System) return BadRequest("System provided fonts are not loaded by API");
 
+        if (!IsPathWithinDirectory(directoryService.EpubFontDirectory, font.FileName)) return NotFound();
+
         var path = Path.Join(directoryService.EpubFontDirectory, font.FileName);
 
         return CachedFile(path);
@@ -100,7 +102,7 @@ public class FontController(
     {
         if (!_fontFileExtensionRegex.IsMatch(Path.GetExtension(formFile.FileName))) return BadRequest("Invalid file");
 
-        if (formFile.FileName.Contains("..")) return BadRequest("Invalid file");
+        if (!IsPathWithinDirectory(directoryService.TempDirectory, formFile.FileName)) return BadRequest("Invalid file");
 
 
         var tempFile = await UploadToTemp(formFile);
