@@ -21,6 +21,7 @@ import {
   KavitaPlusAuditEventTypeIconComponent
 } from "../../shared/_components/kavitaplus-event-type-icon/kavita-plus-audit-event-type-icon.component";
 import {EmptyStateComponent} from "../../shared/_components/empty-state/empty-state.component";
+import {TruncatePipe} from "../../_pipes/truncate.pipe";
 
 interface DayGroup {
   key: string;
@@ -72,6 +73,7 @@ function groupByDay(entries: KavitaPlusAuditEntry[]): DayGroup[] {
     KavitaPlusAuditEventTypeIconComponent,
     NgTemplateOutlet,
     EmptyStateComponent,
+    TruncatePipe,
   ],
 })
 export class KavitaplusTimelineComponent {
@@ -92,10 +94,14 @@ export class KavitaplusTimelineComponent {
 
   categoryColor(category: KavitaPlusAuditCategory): string {
     switch (category) {
-      case KavitaPlusAuditCategory.Match:    return 'var(--audit-log-match-color)';
-      case KavitaPlusAuditCategory.Scrobble: return 'var(--audit-log-scrobble-color)';
-      case KavitaPlusAuditCategory.Sync:     return 'var(--audit-log-sync-color)';
-      default:                               return 'var(--audit-log-metadata-color)';
+      case KavitaPlusAuditCategory.Match:
+        return 'var(--audit-log-match-color)';
+      case KavitaPlusAuditCategory.Scrobble:
+        return 'var(--audit-log-scrobble-color)';
+      case KavitaPlusAuditCategory.Sync:
+        return 'var(--audit-log-sync-color)';
+      default:
+        return 'var(--audit-log-metadata-color)';
     }
   }
 
@@ -136,6 +142,4 @@ export class KavitaplusTimelineComponent {
 
     return null;
   }
-
-  protected readonly AuditSubjectType = AuditSubjectType;
 }

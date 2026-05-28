@@ -2,7 +2,14 @@
   display: block;
 }
 
+.diff-scroll {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
 .diff-table {
+  width: 100%;
+  min-width: 20rem;
   border-collapse: collapse;
 
   th {

@@ -26,6 +26,7 @@ import {UtcToLocalTimePipe} from '../../../_pipes/utc-to-local-time.pipe';
 import {AuditStatusTitlePipe} from "../../../_pipes/audit-status-title.pipe";
 import {KavitaplusDiffComponent} from "../kavitaplus-diff/kavitaplus-diff.component";
 import {AuditSubjectType} from "../../../_models/kavitaplus/audit-subject-type.enum";
+import {TruncatePipe} from "../../../_pipes/truncate.pipe";
 
 @Component({
   selector: 'app-kavitaplus-audit-accordion-item',
@@ -45,6 +46,7 @@ import {AuditSubjectType} from "../../../_models/kavitaplus/audit-subject-type.e
     UtcToLocalTimePipe,
     AuditStatusTitlePipe,
     KavitaplusDiffComponent,
+    TruncatePipe,
   ],
   templateUrl: './kavitaplus-audit-accordion-item.component.html',
   styleUrl: './kavitaplus-audit-accordion-item.component.scss',

@@ -42,3 +42,15 @@
     width: 100%;
   }
 }
+
+@media (max-width: 575.98px) {
+  .stats-strip {
+    flex-wrap: wrap;
+
+    .stats-card { flex-basis: calc(50% - 0.75rem); }
+  }
+}
+
+@media (max-width: 991.98px) {
+  .form-select { width: 100% !important; }
+}

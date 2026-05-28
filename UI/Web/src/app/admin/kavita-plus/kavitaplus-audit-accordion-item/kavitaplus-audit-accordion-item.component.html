@@ -4,28 +4,28 @@
     <div class="d-flex align-items-start gap-3">
 
       @if (entry().subjectId !== null && entry().subjectType === AuditSubjectType.Chapter) {
-        <div class="cover flex-shrink-0">
+        <div class="cover flex-shrink-0 phone-hidden">
           <app-image [imageUrl]="imageService.getChapterCoverImage(entry().subjectId!)"
                      width="3rem" height="4rem"
                      classes="rounded-1 w-100 h-100"
                      objectFit="cover" />
         </div>
       } @else if (entry().subjectId !== null && entry().subjectType === AuditSubjectType.Collection) {
-        <div class="cover flex-shrink-0">
+        <div class="cover flex-shrink-0 phone-hidden">
           <app-image [imageUrl]="imageService.getCollectionCoverImage(entry().subjectId!)"
                      width="3rem" height="4rem"
                      classes="rounded-1 w-100 h-100"
                      objectFit="cover" />
         </div>
       } @else if (entry().subjectId !== null && entry().subjectType === AuditSubjectType.Person) {
-        <div class="cover flex-shrink-0">
+        <div class="cover flex-shrink-0 phone-hidden">
           <app-image [imageUrl]="imageService.getPersonImage(entry().subjectId!)"
                      width="3rem" height="4rem"
                      classes="rounded-1 w-100 h-100"
                      objectFit="cover" />
         </div>
       } @else if (entry().seriesId) {
-        <div class="cover flex-shrink-0">
+        <div class="cover flex-shrink-0 phone-hidden">
           <app-image [imageUrl]="imageService.getSeriesCoverImage(entry().seriesId!)"
                      width="3rem" height="4rem"
                      classes="rounded-1 w-100 h-100"
@@ -37,10 +37,10 @@
         <div class="d-flex align-items-center gap-2 mb-1 flex-wrap">
           @if (entry().seriesId != null && entry().libraryId != null) {
             <button class="series-link fw-semibold text-truncate btn-unstyled" (click)="navigateToSeries()">
-              {{entry().seriesName}}
+              {{entry().seriesName | truncate}}
             </button>
           } @else {
-            <span class="fw-semibold text-truncate">{{entityLabel() ?? t('system')}}</span>
+            <span class="fw-semibold text-truncate">{{(entityLabel() ?? t('system')) | truncate}}</span>
           }
 
           <span class="badge" [ngClass]="statusBadgeClass()">{{entry().status | auditStatusTitle}}</span>
@@ -74,7 +74,7 @@
           {{entry().createdUtc | utcToLocalTime | timeAgo}}
         </span>
         @if (entry().userId) {
-          <div class="d-flex align-items-center gap-1">
+          <div class="d-flex align-items-center gap-1 phone-hidden">
             <app-profile-icon [userId]="entry().userId!" [size]="14" />
             <span class="small text-muted">{{entry().username}}</span>
           </div>

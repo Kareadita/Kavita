@@ -10,24 +10,26 @@
       }
     </div>
 
-    <ul ngbNav [activeId]="activeTab()" (activeIdChange)="activeTab.set($event)" class="nav-tabs mb-3">
-      <li [ngbNavItem]="Tabs.All">
-        <a ngbNavLink>{{Tabs.All | tabTitle}} <span class="badge text-bg-secondary ms-1">{{allCount()}}</span></a>
-      </li>
-      <li [ngbNavItem]="Tabs.Scrobbles">
-        <a ngbNavLink>{{Tabs.Scrobbles | tabTitle}} <span class="badge text-bg-secondary ms-1">{{scrobbleCount()}}</span></a>
-      </li>
-      <li [ngbNavItem]="Tabs.Failed">
-        <a ngbNavLink>{{Tabs.Failed | tabTitle}} <span class="badge text-bg-secondary ms-1">{{failedCount()}}</span></a>
-      </li>
-      <li [ngbNavItem]="Tabs.MyChanges">
-        <a ngbNavLink>{{Tabs.MyChanges | tabTitle}} <span class="badge text-bg-secondary ms-1">{{myChangesCount()}}</span></a>
-      </li>
+    <div class="tabs-scroller">
+      <ul ngbNav [activeId]="activeTab()" (activeIdChange)="activeTab.set($event)" class="nav-tabs mb-3 flex-nowrap">
+        <li [ngbNavItem]="Tabs.All">
+          <a ngbNavLink>{{Tabs.All | tabTitle}} <span class="badge text-bg-secondary ms-1">{{allCount()}}</span></a>
+        </li>
+        <li [ngbNavItem]="Tabs.Scrobbles">
+          <a ngbNavLink>{{Tabs.Scrobbles | tabTitle}} <span class="badge text-bg-secondary ms-1">{{scrobbleCount()}}</span></a>
+        </li>
+        <li [ngbNavItem]="Tabs.Failed">
+          <a ngbNavLink>{{Tabs.Failed | tabTitle}} <span class="badge text-bg-secondary ms-1">{{failedCount()}}</span></a>
+        </li>
+        <li [ngbNavItem]="Tabs.MyChanges">
+          <a ngbNavLink>{{Tabs.MyChanges | tabTitle}} <span class="badge text-bg-secondary ms-1">{{myChangesCount()}}</span></a>
+        </li>
 
-      <li [ngbNavItem]="Tabs.ScrobbleHolds">
-        <a ngbNavLink>{{Tabs.ScrobbleHolds | tabTitle}} <span class="badge text-bg-secondary ms-1">{{scrobbleHoldsCount()}}</span></a>
-      </li>
-    </ul>
+        <li [ngbNavItem]="Tabs.ScrobbleHolds">
+          <a ngbNavLink>{{Tabs.ScrobbleHolds | tabTitle}} <span class="badge text-bg-secondary ms-1">{{scrobbleHoldsCount()}}</span></a>
+        </li>
+      </ul>
+    </div>
 
     <app-kavitaplus-timeline
       [entries]="filteredEntries()"

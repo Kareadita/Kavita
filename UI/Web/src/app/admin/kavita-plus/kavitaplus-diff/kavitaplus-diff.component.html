@@ -1,6 +1,7 @@
 <ng-container *transloco="let t; prefix: 'kavitaplus-diff'">
   @if (rows().length) {
-    <table class="diff-table w-100 small">
+    <div class="diff-scroll">
+    <table class="diff-table small">
       <thead>
         <tr>
           <th>{{t('field-label')}}</th>
@@ -37,6 +38,7 @@
         }
       </tbody>
     </table>
+    </div>
   }
 
   <ng-template #cell let-c>
