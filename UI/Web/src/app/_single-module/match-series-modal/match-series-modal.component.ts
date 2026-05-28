@@ -6,7 +6,7 @@ import {NgbActiveModal, NgbTooltip} from "@ng-bootstrap/ng-bootstrap";
 import {translate, TranslocoDirective} from "@jsverse/transloco";
 import {ExternalSeriesMatch} from "../../_models/series-detail/external-series-match";
 import {ToastrService} from "ngx-toastr";
-import {catchError, filter, of, startWith, tap} from "rxjs";
+import {catchError, filter, of, skip, startWith, tap} from "rxjs";
 import {takeUntilDestroyed, toSignal} from "@angular/core/rxjs-interop";
 import {EmptyStateComponent} from "../../shared/_components/empty-state/empty-state.component";
 import {
@@ -49,16 +49,6 @@ export class MatchSeriesModalComponent implements OnInit {
     { initialValue: false }
   );
 
-  private readonly _queryDisableEffect = effect(() => {
-    if (this.isDontMatch()) {
-      this.formGroup.controls.query.disable();
-    } else {
-      this.formGroup.controls.query.enable();
-    }
-  });
-
-
-
   protected readonly canSaveDontMatch = computed(() =>
     this.isDontMatch() === true && !this.series().dontMatch
   );
@@ -78,14 +68,33 @@ export class MatchSeriesModalComponent implements OnInit {
 
   protected coverImageUrl = computed(() => this.imageService.getSeriesCoverImage(this.series().id));
 
-  ngOnInit() {
-    this.formGroup.patchValue({ dontMatch: this.series().dontMatch || false });
-    this.search();
+  protected readonly kavitaVolumeCount = computed(() =>
+    this.series().volumes.filter(v => v.minNumber > 0).length
+  );
+
+  protected readonly kavitaChapterCount = computed(() =>
+    this.series().volumes.reduce((sum, v) => sum + (v.chapters?.length ?? 0), 0)
+  );
+
+  constructor() {
+    effect(() => {
+      if (this.isDontMatch()) {
+        this.formGroup.controls.query.disable({ emitEvent: false });
+      } else {
+        this.formGroup.controls.query.enable({ emitEvent: false });
+      }
+    });
 
     this.formGroup.controls.dontMatch.valueChanges.pipe(
+      skip(1),
       filter(v => v === false),
       takeUntilDestroyed()
     ).subscribe(() => this.search());
+  }
+
+  ngOnInit() {
+    this.formGroup.patchValue({ dontMatch: this.series().dontMatch || false });
+    this.search();
   }
 
   search() {

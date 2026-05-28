@@ -95,7 +95,9 @@
 
   /* Global Common Colors */
   --success-color: #22c55e; // Success, Online, Connected
-  // --text-muted-color (we can alias this)
+
+  /** Override bs styles **/
+  --bs-success-rgb: 34, 197, 94;
 
 
   /* Should we render the series cover as background on mobile */
@@ -533,5 +535,4 @@
   --media-format-pill-light-novel-color: #a5bbff;
   --media-format-pill-comic-color: #fc8452;
   --media-format-pill-book-color: #fac858;
-
 }

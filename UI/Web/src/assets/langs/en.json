@@ -1632,13 +1632,17 @@
         "no-results-description": "Nothing came back for \"{{ query }}\". Try a shorter query, romanized title, or a direct ID.",
         "dont-match-active-title": "Do not match enabled",
         "dont-match-active-description": "This series is opted out of Kavita+ matching and scrobbling.",
-        "save": "{{common.save}}"
+        "save": "{{common.save}}",
+        "volume-count": "{{match-series-result-item.volume-count}}",
+        "chapter-count": "{{match-series-result-item.chapter-count}}"
     },
 
     "match-series-result-item": {
         "matched-alt": "Matched alt:",
         "more": "more",
         "matched-alt-count": "matched alt titles",
+        "alt-titles": "Alt titles",
+        "more-titles": "+{{count}} more",
         "selected-alt": "Selected",
         "volume-count": "{{ num }} vol",
         "chapter-count": "{{ num }} ch",

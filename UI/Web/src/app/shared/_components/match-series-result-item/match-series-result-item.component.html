@@ -43,8 +43,8 @@
     </div>
 
     <div class="match-result-providers d-flex align-items-center flex-wrap gap-1">
-      @if (item().series.mangaBakaId) {
-        <app-scrobble-provider-tag-badge [provider]="ScrobbleProvider.MangaBaka" [id]="item().series.mangaBakaId" />
+      @if (item().series.mangabakaId) {
+        <app-scrobble-provider-tag-badge [provider]="ScrobbleProvider.MangaBaka" [id]="item().series.mangabakaId" />
       }
       @if (item().series.aniListId) {
         <app-scrobble-provider-tag-badge [provider]="ScrobbleProvider.AniList" [id]="item().series.aniListId" />
@@ -57,21 +57,20 @@
       }
     </div>
 
-    @if (showSynonyms() && matchedSynonyms().length > 0) {
+    @if (showSynonyms() && displaySynonyms().length > 0) {
       <div class="match-result-synonyms d-flex align-items-center flex-wrap gap-1">
         <i class="fa-solid fa-language" aria-hidden="true"></i>
-        <span>{{ t('matched-alt') }}</span>
-        <span class="synonym-first">"{{ matchedSynonyms()[0] }}"</span>
-        @if (matchedSynonyms().length > 1) {
+        <span>{{ t('alt-titles') }}</span>
+        <span class="synonym-first">"{{ displaySynonyms()[0] }}"</span>
+        @if (displaySynonyms().length > 1) {
           <span class="synonym-more d-inline-flex align-items-center rounded-pill fw-semibold"
                 [ngbTooltip]="synonymTooltip"
                 (click)="$event.stopPropagation()">
-            +{{ matchedSynonyms().length - 1 }} {{ t('more') }}
+            {{ t('more-titles', {count: displaySynonyms().length - 1}) }}
           </span>
           <ng-template #synonymTooltip>
-            <div>{{ matchedSynonyms().length }} {{ t('matched-alt-count') }}</div>
-            <ul class="list-unstyled mb-0 mt-1">
-              @for (s of matchedSynonyms(); track s) {
+            <ul class="list-unstyled mb-0">
+              @for (s of displaySynonyms(); track s) {
                 <li>"{{ s }}"</li>
               }
             </ul>

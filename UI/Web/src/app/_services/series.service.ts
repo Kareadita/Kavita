@@ -254,7 +254,7 @@ export class SeriesService {
       aniListId: series.aniListId ?? null,
       malId: series.malId ?? null,
       cbrId: series.cbrId ?? null,
-      mangabakaId: series.mangaBakaId ?? null,
+      mangabakaId: series.mangabakaId ?? null,
       hardcoverId: series.hardcoverId ?? null,
     };
     return this.httpClient.post<string>(this.baseUrl + `series/update-match?seriesId=${seriesId}`, ids, TextResonse);

@@ -29,7 +29,7 @@ export interface ExternalSeriesDetail {
   name: string;
   aniListId?: number | null;
   malId?: number | null;
-  mangaBakaId?: number | null;
+  mangabakaId?: number | null;
   hardcoverId?: number | null;
   cbrId?: number | null;
   synonyms: Array<string>;

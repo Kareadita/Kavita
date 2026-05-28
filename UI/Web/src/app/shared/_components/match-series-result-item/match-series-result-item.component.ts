@@ -39,6 +39,12 @@ export class MatchSeriesResultItemComponent {
     return (this.item().series.synonyms ?? []).filter(s => s.toLowerCase().includes(q));
   });
 
+  protected readonly displaySynonyms = computed(() =>
+    this.matchedSynonyms().length > 0
+      ? this.matchedSynonyms()
+      : (this.item().series.synonyms ?? [])
+  );
+
   protected startYear = computed(() =>
     this.item().series.startDate ? new Date(this.item().series.startDate!).getFullYear() : null
   );
