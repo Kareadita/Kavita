@@ -9,7 +9,7 @@
   <div class="modal-body scrollable-modal d-flex flex-column gap-0">
 
     <!-- Sub-header: explainer left + In Kavita chip right -->
-    <div class="match-subheader d-flex align-items-center gap-3 pt-1">
+    <div class="match-subheader d-flex align-items-center flex-wrap gap-3 pt-1">
       <div class="match-description flex-fill">
         <p class="mb-1">{{ t('description') }}</p>
         <p class="mb-0 text-muted small">{{ t('dont-match-hint') }}</p>
@@ -48,7 +48,7 @@
             </span>
           } @else {
             <i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i>
-            {{ t('search') }}
+            <span class="phone-hidden">{{ t('search') }}</span>
           }
         </button>
       </div>
