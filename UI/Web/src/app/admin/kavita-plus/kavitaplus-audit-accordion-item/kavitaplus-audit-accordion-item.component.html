@@ -10,6 +10,20 @@
                      classes="rounded-1 w-100 h-100"
                      objectFit="cover" />
         </div>
+      } @else if (entry().subjectId !== null && entry().subjectType === AuditSubjectType.Collection) {
+        <div class="cover flex-shrink-0">
+          <app-image [imageUrl]="imageService.getCollectionCoverImage(entry().subjectId!)"
+                     width="3rem" height="4rem"
+                     classes="rounded-1 w-100 h-100"
+                     objectFit="cover" />
+        </div>
+      } @else if (entry().subjectId !== null && entry().subjectType === AuditSubjectType.Person) {
+        <div class="cover flex-shrink-0">
+          <app-image [imageUrl]="imageService.getPersonImage(entry().subjectId!)"
+                     width="3rem" height="4rem"
+                     classes="rounded-1 w-100 h-100"
+                     objectFit="cover" />
+        </div>
       } @else if (entry().seriesId) {
         <div class="cover flex-shrink-0">
           <app-image [imageUrl]="imageService.getSeriesCoverImage(entry().seriesId!)"
@@ -26,7 +40,7 @@
               {{entry().seriesName}}
             </button>
           } @else {
-            <span class="fw-semibold text-truncate">{{entry().seriesName ?? t('system')}}</span>
+            <span class="fw-semibold text-truncate">{{entityLabel() ?? t('system')}}</span>
           }
 
           <span class="badge" [ngClass]="statusBadgeClass()">{{entry().status | auditStatusTitle}}</span>
@@ -36,6 +50,10 @@
               <app-scrobble-provider-image [provider]="entry().scrobbleDetails!.provider" [size]="16" />
               <span>{{entry().scrobbleDetails!.provider | scrobbleProviderName}}</span>
             </span>
+          }
+
+          @for (badge of matchProviderBadges(); track badge.provider) {
+            <app-scrobble-provider-tag-badge [provider]="badge.provider" [id]="badge.id" />
           }
         </div>
 

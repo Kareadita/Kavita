@@ -13,7 +13,11 @@ import {ProfileIconComponent} from '../../../_single-module/profile-icon/profile
 import {
   ScrobbleProviderImageComponent
 } from '../../../shared/_components/scrobble-provider-image/scrobble-provider-image.component';
+import {ScrobbleProvider} from '../../../_services/scrobbling.service';
 import {ScrobbleProviderNamePipe} from '../../../_pipes/scrobble-provider-name.pipe';
+import {
+  ScrobbleProviderTagBadgeComponent
+} from '../../../shared/_components/scrobble-provider-tag-badge/scrobble-provider-tag-badge.component';
 import {KavitaPlusEventTypePipe} from '../../../_pipes/kavita-plus-event-type.pipe';
 import {KavitaPlusEventDescriptionPipe} from '../../../_pipes/kavita-plus-event-description.pipe';
 import {AuditLogErrorPipe} from '../../../_pipes/audit-log-error.pipe';
@@ -33,6 +37,7 @@ import {AuditSubjectType} from "../../../_models/kavitaplus/audit-subject-type.e
     ProfileIconComponent,
     ScrobbleProviderImageComponent,
     ScrobbleProviderNamePipe,
+    ScrobbleProviderTagBadgeComponent,
     KavitaPlusEventTypePipe,
     KavitaPlusEventDescriptionPipe,
     AuditLogErrorPipe,
@@ -52,6 +57,25 @@ export class KavitaplusAuditAccordionItemComponent {
   entry = input.required<KavitaPlusAuditEntry>();
 
   collapsed = signal(true);
+
+  entityLabel = computed(() => {
+    const e = this.entry();
+    if (e.seriesName) return e.seriesName;
+    if (e.metadataExtras?.personName) return e.metadataExtras.personName;
+    if (e.syncDetails?.collectionName) return e.syncDetails.collectionName;
+    return null;
+  });
+
+  matchProviderBadges = computed(() => {
+    const ids = this.entry().matchDetails?.after;
+    if (!ids) return [];
+    const badges: {provider: ScrobbleProvider; id: number}[] = [];
+    if (ids.aniListId) badges.push({provider: ScrobbleProvider.AniList, id: ids.aniListId});
+    if (ids.malId) badges.push({provider: ScrobbleProvider.Mal, id: ids.malId});
+    if (ids.mangaBakaId) badges.push({provider: ScrobbleProvider.MangaBaka, id: ids.mangaBakaId});
+    if (ids.cbrId) badges.push({provider: ScrobbleProvider.Cbr, id: ids.cbrId});
+    return badges;
+  });
 
   statusBadgeClass = computed(() => {
     switch (this.entry().status) {

@@ -134,13 +134,15 @@ export class ManageKavitaplusActivityComponent implements OnInit {
     this.loadEntries();
   }
 
-  onStatusFilterChange(value: AuditStatus | null) {
-    this.statusFilter.set(value === null ? null : Number(value) as AuditStatus);
+  onStatusFilterChange(value: string) {
+    const num = Number(value);
+    this.statusFilter.set(isNaN(num) ? null : num as AuditStatus);
     this.loadEntries();
   }
 
-  onSubjectFilterChange(value: AuditSubjectType | null) {
-    this.subjectFilter.set(value === null ? null : Number(value) as AuditSubjectType);
+  onSubjectFilterChange(value: string) {
+    const num = Number(value);
+    this.subjectFilter.set(isNaN(num) ? null : num as AuditSubjectType);
     this.loadEntries();
   }
 

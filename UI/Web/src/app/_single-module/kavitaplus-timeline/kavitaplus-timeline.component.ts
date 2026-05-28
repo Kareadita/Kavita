@@ -5,6 +5,7 @@ import {TranslocoDirective} from '@jsverse/transloco';
 import {KavitaPlusAuditEntry} from '../../_models/kavitaplus/kavita-plus-audit-entry';
 import {KavitaPlusAuditCategory} from '../../_models/kavitaplus/kavita-plus-audit-category.enum';
 import {AuditStatus} from '../../_models/kavitaplus/audit-status.enum';
+import {AuditSubjectType} from '../../_models/kavitaplus/audit-subject-type.enum';
 import {KavitaPlusEventTypePipe} from '../../_pipes/kavita-plus-event-type.pipe';
 import {KavitaPlusEventDescriptionPipe} from '../../_pipes/kavita-plus-event-description.pipe';
 import {ScrobbleProviderNamePipe} from '../../_pipes/scrobble-provider-name.pipe';
@@ -117,5 +118,24 @@ export class KavitaplusTimelineComponent {
     this.retry.emit(entry);
   }
 
+  entityLabel(entry: KavitaPlusAuditEntry): string | null {
+    if (entry.seriesName) return entry.seriesName;
+    if (entry.metadataExtras?.personName) return entry.metadataExtras.personName;
+    if (entry.syncDetails?.collectionName) return entry.syncDetails.collectionName;
+    return null;
+  }
 
+  imageUrl(entry: KavitaPlusAuditEntry) {
+    if (entry.subjectId !== null && entry.subjectType === AuditSubjectType.Collection) {
+      return this.imageService.getCollectionCoverImage(entry.subjectId);
+    } else if (entry.subjectId !== null && entry.subjectType === AuditSubjectType.Person) {
+      return this.imageService.getPersonImage(entry.subjectId);
+    } else if (entry.seriesId){
+      return this.imageService.getSeriesCoverImage(entry.seriesId);
+    }
+
+    return null;
+  }
+
+  protected readonly AuditSubjectType = AuditSubjectType;
 }

@@ -50,6 +50,33 @@ export class KavitaPlusEventDescriptionPipe implements PipeTransform {
       return this.translocoService.translate(`${PREFIX}.series-cover-updated`);
     } else if (entry.eventType === KavitaPlusEventType.SeriesMatchFixed) {
       return this.translocoService.translate(`${PREFIX}.series-match-fixed`, {matchName: entry.matchDetails?.matchedName});
+    } else if (entry.eventType === KavitaPlusEventType.CollectionSynced && entry.syncDetails) {
+      return this.translocoService.translate(`${PREFIX}.collection-synced`, {
+        collectionName: entry.syncDetails.collectionName,
+        itemCount: entry.syncDetails.itemCount ?? 0,
+        missingCount: entry.syncDetails.missingCount ?? 0,
+      });
+    } else if (entry.eventType === KavitaPlusEventType.CollectionItemAdded && entry.syncDetails?.collectionName) {
+      return this.translocoService.translate(`${PREFIX}.collection-item-added`, {collectionName: entry.syncDetails.collectionName});
+    } else if (entry.eventType === KavitaPlusEventType.PersonCoverUpdated && entry.metadataExtras?.personName) {
+      return this.translocoService.translate(`${PREFIX}.person-cover-updated`, {personName: entry.metadataExtras.personName});
+    } else if (entry.eventType === KavitaPlusEventType.PersonAliasAdded && entry.metadataExtras) {
+      return this.translocoService.translate(`${PREFIX}.person-alias-added`, {
+        aliasAdded: entry.metadataExtras.aliasAdded,
+        personName: entry.metadataExtras.personName,
+      });
+    } else if (entry.eventType === KavitaPlusEventType.SyncStarted && entry.syncDetails?.collectionName) {
+      return this.translocoService.translate(`${PREFIX}.sync-started-collection`, {
+        collectionName: entry.syncDetails.collectionName,
+        itemCount: entry.syncDetails.itemCount ?? 0,
+      });
+    } else if (entry.eventType === KavitaPlusEventType.SyncFailed && entry.syncDetails?.collectionName) {
+      return this.translocoService.translate(`${PREFIX}.sync-failed-collection`, {collectionName: entry.syncDetails.collectionName});
+    } else if (entry.eventType === KavitaPlusEventType.SyncCompleted && entry.syncDetails?.seriesMatched != null) {
+      return this.translocoService.translate(`${PREFIX}.sync-completed-want-to-read`, {
+        seriesMatched: entry.syncDetails.seriesMatched,
+        userName: entry.syncDetails.userName,
+      });
     }
 
     return '';

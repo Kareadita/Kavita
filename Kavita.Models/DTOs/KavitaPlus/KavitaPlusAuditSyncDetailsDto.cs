@@ -33,4 +33,13 @@ public sealed record KavitaPlusAuditSyncDetailsDto
 
     public static KavitaPlusAuditSyncDetailsDto? From(AuditLogWantToReadSyncCompletedParamsDto? p) =>
         p is null ? null : new KavitaPlusAuditSyncDetailsDto { UserName = p.UserName, HasMal = p.HasMal, HasAniList = p.HasAniList, SeriesMatched = p.SeriesMatched };
+
+    public static KavitaPlusAuditSyncDetailsDto? From(AuditLogCollectionStartedParamsDto? p) =>
+        p is null ? null : new KavitaPlusAuditSyncDetailsDto { CollectionName = p.CollectionName, StackId = p.StackId, ItemCount = p.TotalItems };
+
+    public static KavitaPlusAuditSyncDetailsDto? From(AuditLogCollectionFailedParamsDto? p) =>
+        p is null ? null : new KavitaPlusAuditSyncDetailsDto { CollectionName = p.CollectionName };
+
+    public static KavitaPlusAuditSyncDetailsDto? From(AuditLogWantToReadSyncParamsDto? p) =>
+        p is null ? null : new KavitaPlusAuditSyncDetailsDto { UserName = p.UserName, HasMal = p.HasMal, HasAniList = p.HasAniList };
 }

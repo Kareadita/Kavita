@@ -42,9 +42,10 @@
             } @else {
               <div class="entry flex-grow-1 d-flex align-items-start gap-3 p-3">
 
-                @if (entry.seriesId) {
+                @let image = imageUrl(entry);
+                @if (image) {
                   <div class="cover flex-shrink-0">
-                    <app-image [imageUrl]="imageService.getSeriesCoverImage(entry.seriesId)"
+                    <app-image [imageUrl]="image"
                                width="48px" height="64px"
                                classes="rounded-1 w-100 h-100"
                                objectFit="cover" />
@@ -58,7 +59,7 @@
                         {{entry.seriesName}}
                       </button>
                     } @else {
-                      <span class="series fw-semibold text-truncate">{{entry.seriesName ?? t('system')}}</span>
+                      <span class="series fw-semibold text-truncate">{{entityLabel(entry) ?? t('system')}}</span>
                     }
                     @if (entry.scrobbleDetails?.provider != null) {
                       <span class="provider-badge d-inline-flex align-items-center gap-1">

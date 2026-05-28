@@ -442,6 +442,7 @@ public class SeriesController(
     {
         var ct = HttpContext.RequestAborted;
         var val = (AgeRating) ageRating;
+        // NOTE: Why not rename NotApplicable to NoRestriction and avoid this extra if?
         if (val == AgeRating.NotApplicable)
             return await localizationService.TranslateAsync(UserId, "age-restriction-not-applicable");
 

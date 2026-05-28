@@ -1509,7 +1509,8 @@
         "retry": "Retry",
         "load-more-label": "Load more",
         "empty-title": "Nothing found",
-        "empty-description": "Try a different filter or perform some matches/reading to populate"
+        "empty-description": "Try a different filter or perform some matches/reading to populate",
+        "system": "{{manage-kavitaplus-activity.system}}"
     },
 
     "audit-status-title-pipe": {
@@ -1553,7 +1554,14 @@
         "fields-updated": "{{count}} fields updated",
         "chapter-cover-updated": "Cover updated: {{chapter}}",
         "series-cover-updated": "Series cover updated",
-        "series-match-fixed": "Series matched with {{matchName}}"
+        "series-match-fixed": "Series matched with {{matchName}}",
+        "collection-synced": "{{collectionName}}: {{itemCount}} items synced, {{missingCount}} missing",
+        "collection-item-added": "Added to {{collectionName}}",
+        "person-cover-updated": "Cover updated for {{personName}}",
+        "person-alias-added": "Alias '{{aliasAdded}}' added for {{personName}}",
+        "sync-started-collection": "Starting sync of {{collectionName}} ({{itemCount}} items)",
+        "sync-failed-collection": "Sync failed for {{collectionName}}",
+        "sync-completed-want-to-read": "{{seriesMatched}} series matched for {{userName}}"
     },
 
     "kavita-plus-event-type-pipe": {
