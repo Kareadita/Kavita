@@ -83,10 +83,8 @@ export class MatchSeriesModalComponent implements OnInit {
   constructor() {
     this.canSaveDontMatch = computed(() => this.isDontMatch() === true && !this.series().dontMatch);
     this.coverImageUrl = computed(() => this.imageService.getSeriesCoverImage(this.series().id));
-    this.kavitaVolumeCount = computed(() => (this.seriesDetail()?.volumes ?? []).filter(v => v.minNumber > 0).length);
-    this.kavitaChapterCount = computed(() =>
-      (this.seriesDetail()?.volumes ?? []).reduce((sum, v) => sum + (v.chapters?.length ?? 0), 0)
-    );
+    this.kavitaVolumeCount = computed(() => (this.seriesDetail()?.volumes ?? []).length);
+    this.kavitaChapterCount = computed(() => (this.seriesDetail()?.chapters ?? []).length);
 
     effect(() => {
       if (this.isDontMatch()) {
