@@ -1,4 +1,4 @@
-import {ChangeDetectionStrategy, Component, computed, inject, input, signal} from '@angular/core';
+import {ChangeDetectionStrategy, Component, computed, inject, input, output, signal} from '@angular/core';
 import {NgbCollapse} from '@ng-bootstrap/ng-bootstrap';
 import {NgClass} from '@angular/common';
 import {Router} from '@angular/router';
@@ -30,7 +30,7 @@ import {MetadataFetchTriggerTitlePipe} from "../../../_pipes/metadata-fetch-trig
 import {TruncatePipe} from "../../../_pipes/truncate.pipe";
 
 @Component({
-  selector: 'app-kavitaplus-audit-accordion-item',
+  selector: 'app-kavitaplus-audit-entry',
   imports: [
     NgbCollapse,
     NgClass,
@@ -50,15 +50,25 @@ import {TruncatePipe} from "../../../_pipes/truncate.pipe";
     TruncatePipe,
     MetadataFetchTriggerTitlePipe,
   ],
-  templateUrl: './kavitaplus-audit-accordion-item.component.html',
-  styleUrl: './kavitaplus-audit-accordion-item.component.scss',
+  templateUrl: './kavita-plus-audit-entry.component.html',
+  styleUrl: './kavita-plus-audit-entry.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class KavitaplusAuditAccordionItemComponent {
+export class KavitaPlusAuditEntryComponent {
   protected readonly imageService = inject(ImageService);
   private readonly router = inject(Router);
 
   entry = input.required<KavitaPlusAuditEntry>();
+  /** Show the status badge plus the match-provider and fetch-trigger badges (admin "rich" view). */
+  showStatus = input<boolean>(false);
+  /** Show the acting user's avatar and username. */
+  showUser = input<boolean>(false);
+  /** Show the retry button for retryable failures. */
+  showRetry = input<boolean>(false);
+  /** Show the collapsible metadata diff for events that support one. */
+  showDiff = input<boolean>(false);
+
+  retry = output<KavitaPlusAuditEntry>();
 
   collapsed = signal(true);
 
@@ -67,6 +77,23 @@ export class KavitaplusAuditAccordionItemComponent {
     if (e.seriesName) return e.seriesName;
     if (e.metadataExtras?.personName) return e.metadataExtras.personName;
     if (e.syncDetails?.collectionName) return e.syncDetails.collectionName;
+    return null;
+  });
+
+  coverUrl = computed(() => {
+    const e = this.entry();
+    if (e.subjectId !== null && e.subjectType === AuditSubjectType.Chapter) {
+      return this.imageService.getChapterCoverImage(e.subjectId);
+    }
+    if (e.subjectId !== null && e.subjectType === AuditSubjectType.Collection) {
+      return this.imageService.getCollectionCoverImage(e.subjectId);
+    }
+    if (e.subjectId !== null && e.subjectType === AuditSubjectType.Person) {
+      return this.imageService.getPersonImage(e.subjectId);
+    }
+    if (e.seriesId) {
+      return this.imageService.getSeriesCoverImage(e.seriesId);
+    }
     return null;
   });
 
@@ -100,14 +127,24 @@ export class KavitaplusAuditAccordionItemComponent {
     }
   });
 
-  supportsDiff(entry: KavitaPlusAuditEntry) {
-    return [KavitaPlusEventType.MetadataUpdated, KavitaPlusEventType.ChapterMetadataUpdated].includes(entry.eventType);
-  }
+  descriptionColor = computed(() => {
+    return this.entry().status === AuditStatus.Failure
+      ? 'var(--toast-warning-bg-color)'
+      : '';
+  });
+
+  supportsDiff = computed(() => {
+    return [KavitaPlusEventType.MetadataUpdated, KavitaPlusEventType.ChapterMetadataUpdated].includes(this.entry().eventType);
+  });
 
   navigateToSeries() {
     const e = this.entry();
     if (e.seriesId == null || e.libraryId == null) return;
     this.router.navigate(['library', e.libraryId, 'series', e.seriesId]);
+  }
+
+  retryEntry() {
+    this.retry.emit(this.entry());
   }
 
   protected readonly KavitaPlusAuditCategory = KavitaPlusAuditCategory;

@@ -39,61 +39,6 @@
 
             @if (entryTemplate(); as tpl) {
               <ng-container [ngTemplateOutlet]="tpl" [ngTemplateOutletContext]="{$implicit: entry}" />
-            } @else {
-              <div class="entry flex-grow-1 d-flex align-items-start gap-3 p-3">
-
-                @let image = imageUrl(entry);
-                @if (image) {
-                  <div class="cover flex-shrink-0 phone-hidden">
-                    <app-image [imageUrl]="image"
-                               width="48px" height="64px"
-                               classes="rounded-1 w-100 h-100"
-                               objectFit="cover" />
-                  </div>
-                }
-
-                <div class="flex-grow-1 min-w-0">
-                  <div class="d-flex align-items-center gap-2 mb-1 flex-wrap">
-                    @if (entry.seriesId != null && entry.libraryId != null) {
-                      <button class="series series-link fw-semibold text-truncate" (click)="navigateToSeries(entry)">
-                        {{entry.seriesName | truncate}}
-                      </button>
-                    } @else {
-                      <span class="series fw-semibold text-truncate">{{(entityLabel(entry) ?? t('system')) | truncate}}</span>
-                    }
-                    @if (entry.scrobbleDetails?.provider != null) {
-                      <span class="provider-badge d-inline-flex align-items-center gap-1">
-                        <app-scrobble-provider-image [provider]="entry.scrobbleDetails!.provider" [size]="16" />
-                        <span>{{entry.scrobbleDetails!.provider | scrobbleProviderName}}</span>
-                      </span>
-                    }
-                  </div>
-                  <div>
-                    <span class="small text-muted" [style.color]="descriptionColor(entry)">
-                      {{entry.eventType | kavitaPlusEventType}}
-                      @let desc = entry | kavitaPlusEventDescription;
-                      @if (desc) {
-                        <span class="mx-1 dot-separator"></span>{{desc}}
-                      }
-                      @if (entry.errorMessage) {
-                        - {{entry.errorMessage | auditLogError }}
-                      }
-                    </span>
-                  </div>
-                </div>
-
-                <div class="d-flex flex-column align-items-end gap-2 flex-shrink-0">
-                  @if (showRetry() && entry.canRetry) {
-                    <button class="btn btn-outline-primary btn-sm" (click)="retryScrobbleEvent(entry)">
-                      <i class="fa-solid fa-rotate-left"></i> {{t('retry')}}
-                    </button>
-                  }
-                  <span class="time text-muted text-nowrap phone-hidden">
-                    {{entry.createdUtc | utcToLocalTime | timeAgo}}
-                  </span>
-                </div>
-
-              </div>
             }
           </div>
         }

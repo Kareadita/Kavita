@@ -31,12 +31,16 @@
       </ul>
     </div>
 
+    <ng-template #entryTpl let-entry>
+      <app-kavitaplus-audit-entry [entry]="entry" [showRetry]="true" (retry)="retryScrobbleEvent($event)" />
+    </ng-template>
+
     <app-kavitaplus-timeline
       [entries]="filteredEntries()"
       [isLoading]="isLoading()"
       [hasMore]="hasMore()"
       [isLoadingMore]="isLoadingMore()"
-      (retry)="retryScrobbleEvent($event)"
+      [entryTemplate]="entryTpl"
       (loadMore)="loadMore()" />
 
   </div>

@@ -117,7 +117,7 @@
 
   <!-- Timeline with custom entry card -->
   <ng-template #entryTpl let-entry>
-    <app-kavitaplus-audit-accordion-item [entry]="entry" />
+    <app-kavitaplus-audit-entry [entry]="entry" [showStatus]="true" [showUser]="true" [showDiff]="true" />
   </ng-template>
 
   <app-kavitaplus-timeline
@@ -125,7 +125,6 @@
     [isLoading]="isLoading()"
     [hasMore]="hasMore()"
     [isLoadingMore]="isLoadingMore()"
-    [showRetry]="false"
     [entryTemplate]="entryTpl"
     (loadMore)="loadMore()" />
 

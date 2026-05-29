@@ -3,8 +3,8 @@ import {takeUntilDestroyed} from '@angular/core/rxjs-interop';
 import {TranslocoDirective} from '@jsverse/transloco';
 import {KavitaplusTimelineComponent} from "../../../_single-module/kavitaplus-timeline/kavitaplus-timeline.component";
 import {
-  KavitaplusAuditAccordionItemComponent
-} from "../kavitaplus-audit-accordion-item/kavitaplus-audit-accordion-item.component";
+  KavitaPlusAuditEntryComponent
+} from "../kavitaplus-audit-entry/kavita-plus-audit-entry.component";
 import {DefaultValuePipe} from "../../../_pipes/default-value.pipe";
 import {AuditStatusTitlePipe} from "../../../_pipes/audit-status-title.pipe";
 import {AuditSubjectTitlePipe} from "../../../_pipes/audit-subject-title.pipe";
@@ -25,7 +25,7 @@ import {SearchInputComponent} from "../../../shared/_components/search-input/sea
   imports: [
     TranslocoDirective,
     KavitaplusTimelineComponent,
-    KavitaplusAuditAccordionItemComponent,
+    KavitaPlusAuditEntryComponent,
     DefaultValuePipe,
     AuditStatusTitlePipe,
     AuditSubjectTitlePipe,

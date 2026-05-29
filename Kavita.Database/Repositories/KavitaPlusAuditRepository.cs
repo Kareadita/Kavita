@@ -329,9 +329,7 @@ public class KavitaPlusAuditRepository(DataContext context) : IKavitaPlusAuditRe
             MatchDetails = matchDetails,
             SyncDetails = syncDetails,
             MetadataExtras = metadataExtras,
-            CanRetry = e.Status == AuditStatus.Failure
-                       && e.Category == KavitaPlusAuditCategory.Scrobble
-                       && !e.HasRetried,
+            CanRetry = e is { Status: AuditStatus.Failure, Category: KavitaPlusAuditCategory.Scrobble, HasRetried: false },
         };
     }
 

@@ -8,6 +8,9 @@ import {KavitaPlusAuditEntry} from '../../_models/kavitaplus/kavita-plus-audit-e
 import {KavitaPlusAuditCategory} from '../../_models/kavitaplus/kavita-plus-audit-category.enum';
 import {AuditStatus} from '../../_models/kavitaplus/audit-status.enum';
 import {KavitaplusTimelineComponent} from '../../_single-module/kavitaplus-timeline/kavitaplus-timeline.component';
+import {
+  KavitaPlusAuditEntryComponent
+} from '../../admin/kavita-plus/kavitaplus-audit-entry/kavita-plus-audit-entry.component';
 import {ScrobbleAccountCardComponent} from '../scrobble-account-card/scrobble-account-card.component';
 import {KavitaPlusEventType} from "../../_models/kavitaplus/kavita-plus-event-type.enum";
 import {Tabs} from "../../_models/tabs";
@@ -19,7 +22,7 @@ import {Pagination} from '../../_models/pagination';
   templateUrl: './kavitaplus-activity.component.html',
   styleUrls: ['./kavitaplus-activity.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [TranslocoDirective, NgbNav, NgbNavItem, NgbNavLink, KavitaplusTimelineComponent, ScrobbleAccountCardComponent, TabTitlePipe],
+  imports: [TranslocoDirective, NgbNav, NgbNavItem, NgbNavLink, KavitaplusTimelineComponent, KavitaPlusAuditEntryComponent, ScrobbleAccountCardComponent, TabTitlePipe],
 })
 export class KavitaplusActivityComponent implements OnInit {
   private readonly auditService = inject(KavitaPlusAuditService);
