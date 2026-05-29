@@ -1,4 +1,4 @@
-import {ChangeDetectionStrategy, Component, inject} from '@angular/core';
+import {ChangeDetectionStrategy, Component, inject, signal} from '@angular/core';
 import {TranslocoDirective} from '@jsverse/transloco';
 import {WikiLink} from '../../../_models/wiki';
 import {LicenseInfoPanelComponent} from '../license-info-panel/license-info-panel.component';
@@ -11,6 +11,10 @@ import {LicenseService} from "../../../_services/license.service";
 import {DiscordButtonComponent} from "../discord-button/discord-button.component";
 import {ScrobbleHealthComponent} from '../scrobble-health/scrobble-health.component';
 import {ExpiredLicenseInfoCardComponent} from '../expired-license-info-card/expired-license-info-card.component';
+import {
+  ScrobbleAccountCardComponent
+} from "../../../user-settings/scrobble-account-card/scrobble-account-card.component";
+import {ScrobblingService, UserScrobbleProvider} from "../../../_services/scrobbling.service";
 
 @Component({
   selector: 'app-license-dashboard',
@@ -20,6 +24,7 @@ import {ExpiredLicenseInfoCardComponent} from '../expired-license-info-card/expi
     DiscordButtonComponent,
     ScrobbleHealthComponent,
     ExpiredLicenseInfoCardComponent,
+    ScrobbleAccountCardComponent,
   ],
   templateUrl: './license-dashboard.component.html',
   styleUrl: './license-dashboard.component.scss',
@@ -28,7 +33,14 @@ import {ExpiredLicenseInfoCardComponent} from '../expired-license-info-card/expi
 export class LicenseDashboardComponent {
 
   private readonly modalService = inject(ModalService);
+  private readonly scrobblingService = inject(ScrobblingService);
   protected readonly licenseService = inject(LicenseService);
+
+  scrobblingProviders = signal<UserScrobbleProvider[]>([]);
+
+  constructor() {
+    this.scrobblingService.getScrobbleProviders().subscribe(tokens => this.scrobblingProviders.set(tokens));
+  }
 
   forceCheckLicense() {
     this.licenseService.getLicenseInfo(true).subscribe();

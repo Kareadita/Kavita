@@ -22,20 +22,30 @@
 
     @if (info.isExpired) {
       <app-expired-license-info-card class="mt-3 d-block" />
-    } @else {
-      <!--TODO: Discord Panel -->
-      @if (isActive) {
-        @if (!licenseService.licenseInfo()?.hasDiscordSet) {
-          <app-discord-button />
-        } @else {
-          Discord: {{licenseService.licenseInfo()?.discordId}}
-        }
-      }
+    } @else if (isActive) {
+
+      <div class="row g-1">
+        <div class="col-6">
+          <!--TODO: Discord Panel -->
+          @if (!licenseService.licenseInfo()?.hasDiscordSet) {
+            <app-discord-button />
+          } @else {
+            Discord: {{licenseService.licenseInfo()?.discordId}}
+          }
+        </div>
+        <div class="col-6">
+          @for(provider of scrobblingProviders(); track provider.provider) {
+            <div class="col-12 col-md-auto mb-2">
+              <app-scrobble-account-card [provider]="provider" class="d-block" />
+            </div>
+          }
+        </div>
+      </div>
 
       <app-scrobble-health class="mt-3 d-block" />
     }
 
-
+    <!--API Count information-->
 
   }
 
