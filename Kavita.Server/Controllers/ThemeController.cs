@@ -112,7 +112,7 @@ public class ThemeController(
     public async Task<ActionResult<SiteThemeDto>> DownloadTheme(IFormFile formFile)
     {
         if (!formFile.FileName.EndsWith(".css")) return BadRequest("Invalid file");
-        if (formFile.FileName.Contains("..")) return BadRequest("Invalid file");
+        if (!IsPathWithinDirectory(directoryService.TempDirectory, formFile.FileName)) return BadRequest("Invalid file");
         var tempFile = await UploadToTemp(formFile);
 
         // Set summary as "Uploaded by Username! on DATE"

@@ -6,6 +6,7 @@ using Kavita.API.Store;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using MimeTypes;
 
 namespace Kavita.Server.Controllers;
@@ -20,6 +21,12 @@ public class BaseApiController : ControllerBase
     /// </summary>
     protected IUserContext UserContext =>
         field ??= HttpContext.RequestServices.GetRequiredService<IUserContext>();
+
+    /// <summary>
+    /// Logger scoped to <see cref="BaseApiController"/>. Available in all derived controllers.
+    /// </summary>
+    protected ILogger<BaseApiController> Logger =>
+        field ??= HttpContext.RequestServices.GetRequiredService<ILogger<BaseApiController>>();
 
     /// <summary>
     /// Gets the current authenticated user's ID.
@@ -112,20 +119,41 @@ public class BaseApiController : ControllerBase
     }
 
     /// <summary>
-    /// Ensures there is no malicious path in the fileName before use
+    /// Validates that a user-supplied relative path resolves to a location inside the given base directory.
     /// </summary>
-    /// <param name="fileName"></param>
-    /// <returns></returns>
-    protected static bool ValidateFilename(string fileName)
+    /// <remarks>
+    /// This blocks path traversal (e.g. <c>../</c>, absolute/rooted paths) while still permitting nested
+    /// relative paths such as <c>.hack/.hack.json</c>. The combined path is canonicalized with
+    /// <see cref="Path.GetFullPath(string)"/> (which collapses <c>..</c> segments) and then confirmed to remain
+    /// under <paramref name="baseDirectory"/>. Always use the returned/combined path rather than re-joining the
+    /// raw input afterwards.
+    /// </remarks>
+    /// <param name="baseDirectory">The trusted directory the path must stay within.</param>
+    /// <param name="relativePath">The untrusted, caller-supplied relative path or filename.</param>
+    /// <returns><c>true</c> if <paramref name="relativePath"/> stays within <paramref name="baseDirectory"/>.</returns>
+    protected bool IsPathWithinDirectory(string baseDirectory, string relativePath)
     {
-        if (string.IsNullOrWhiteSpace(fileName))
+        if (string.IsNullOrWhiteSpace(relativePath))
         {
             return false;
         }
 
-        if (fileName.Contains(Path.DirectorySeparatorChar) ||
-            fileName.Contains(Path.AltDirectorySeparatorChar))
+        // Reject absolute/rooted paths (e.g. "C:\...", "/etc/...", "\\server\share") - the caller owns the base directory
+        if (Path.IsPathRooted(relativePath))
         {
+            Logger.LogWarning("Rejected rooted path '{RelativePath}' that attempted to escape base directory '{BaseDirectory}'",
+                relativePath, baseDirectory);
+            return false;
+        }
+
+        var fullBase = Path.GetFullPath(baseDirectory);
+        var fullTarget = Path.GetFullPath(Path.Combine(fullBase, relativePath));
+
+        var baseWithSeparator = Path.TrimEndingDirectorySeparator(fullBase) + Path.DirectorySeparatorChar;
+        if (!fullTarget.StartsWith(baseWithSeparator, StringComparison.Ordinal))
+        {
+            Logger.LogWarning("Rejected path traversal attempt: '{RelativePath}' resolved to '{ResolvedPath}' outside base directory '{BaseDirectory}'",
+                relativePath, fullTarget, fullBase);
             return false;
         }
 
