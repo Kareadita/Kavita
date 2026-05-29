@@ -179,9 +179,9 @@ export class EditReadingListModalComponent implements OnInit {
     });
   }
 
-  handleCoverChanged(event: { isDirty: boolean; url: string }) {
+  handleCoverChanged(event: { isDirty: boolean; fileName: string }) {
     this.coverImageDirty = event.isDirty;
-    this.selectedCover = event.url;
+    this.selectedCover = event.fileName;
     this.cdRef.markForCheck();
   }
 

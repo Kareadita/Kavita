@@ -2,8 +2,11 @@
 using System.IO;
 using System.Linq;
 using System.Security.Cryptography;
+using System.Threading.Tasks;
+using Kavita.API.Services;
 using Kavita.API.Store;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -27,6 +30,12 @@ public class BaseApiController : ControllerBase
     /// </summary>
     protected ILogger<BaseApiController> Logger =>
         field ??= HttpContext.RequestServices.GetRequiredService<ILogger<BaseApiController>>();
+
+    /// <summary>
+    /// Directory service used for temp-file staging helpers. Available in all derived controllers.
+    /// </summary>
+    protected IDirectoryService DirectoryService =>
+        field ??= HttpContext.RequestServices.GetRequiredService<IDirectoryService>();
 
     /// <summary>
     /// Gets the current authenticated user's ID.
@@ -158,6 +167,28 @@ public class BaseApiController : ControllerBase
         }
 
         return true;
+    }
+
+    /// <summary>
+    /// Persists an uploaded file into the temp directory and returns the absolute path written.
+    /// </summary>
+    /// <remarks>
+    /// Callers must validate the resulting filename with <see cref="IsPathWithinDirectory"/> before use when the
+    /// name originates from untrusted input (e.g. <see cref="IFormFile.FileName"/>).
+    /// </remarks>
+    /// <param name="file">The uploaded file</param>
+    /// <param name="fileName">Override the on-disk filename. Defaults to the uploaded file's name.</param>
+    /// <returns>The absolute path of the written temp file</returns>
+    protected async Task<string> UploadToTempAsync(IFormFile file, string? fileName = null)
+    {
+        fileName ??= file.FileName;
+        var outputFile = System.IO.Path.Join(DirectoryService.TempDirectory, fileName);
+
+        await using var stream = System.IO.File.Create(outputFile);
+        await file.CopyToAsync(stream);
+        stream.Close();
+
+        return outputFile;
     }
 
 }

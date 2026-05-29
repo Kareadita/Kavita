@@ -14,9 +14,12 @@ import {LicenseService} from "./license.service";
 import {ReadingListService} from "./reading-list.service";
 
 export interface CoverImageOption {
+  /** Image URL used to render the preview (remote URL, cover-upload URL, or data URL). */
   url: string;
   title: string;
   subtitle?: string;
+  /** Filename of the image once staged in the temp directory. Populated lazily on selection. */
+  fileName?: string;
 }
 
 export interface CoverImageChooserConfig {

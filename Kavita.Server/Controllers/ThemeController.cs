@@ -113,20 +113,11 @@ public class ThemeController(
     {
         if (!formFile.FileName.EndsWith(".css")) return BadRequest("Invalid file");
         if (!IsPathWithinDirectory(directoryService.TempDirectory, formFile.FileName)) return BadRequest("Invalid file");
-        var tempFile = await UploadToTemp(formFile);
+        var tempFile = await UploadToTempAsync(formFile);
 
         // Set summary as "Uploaded by Username! on DATE"
         var theme = await themeService.CreateThemeFromFile(tempFile, Username!);
         return Ok(mapper.Map<SiteThemeDto>(theme));
-    }
-
-    private async Task<string> UploadToTemp(IFormFile file)
-    {
-        var outputFile = Path.Join(directoryService.TempDirectory, file.FileName);
-        await using var stream = System.IO.File.Create(outputFile);
-        await file.CopyToAsync(stream);
-        stream.Close();
-        return outputFile;
     }
 
 }

@@ -434,9 +434,9 @@ export class LibrarySettingsModalComponent implements OnInit {
     this.uploadService.updateLibraryCoverImage(this.library!.id, coverUrl).subscribe();
   }
 
-  handleCoverChanged(event: { isDirty: boolean; url: string }) {
+  handleCoverChanged(event: { isDirty: boolean; fileName: string }) {
     if (event.isDirty) {
-      this.applyCoverImage(event.url);
+      this.applyCoverImage(event.fileName);
     }
   }
 

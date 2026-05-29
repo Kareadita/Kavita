@@ -5,7 +5,6 @@ import {ImageService} from 'src/app/_services/image.service';
 import {UploadService} from 'src/app/_services/upload.service';
 import {ImageComponent} from "../../shared/image/image.component";
 import {translate, TranslocoModule} from "@jsverse/transloco";
-import {ColorscapeService} from "../../_services/colorscape.service";
 import {
   FileDragAndDropUploadComponent
 } from "src/app/shared/file-drag-and-drop-upload/file-drag-and-drop-upload.component";
@@ -39,11 +38,10 @@ export class CoverImageChooserComponent  {
   public readonly imageService = inject(ImageService);
   private readonly toastr = inject(ToastrService);
   private readonly uploadService = inject(UploadService);
-  private readonly colorscapeService = inject(ColorscapeService);
 
   config = input<CoverImageChooserConfig>({});
 
-  coverChanged = output<{ isDirty: boolean; url: string }>();
+  coverChanged = output<{ isDirty: boolean; fileName: string }>();
   resetClicked = output();
 
   protected readonly acceptableExtensions = ['.png', '.jpg', '.jpeg', '.gif', '.webp', '.avif'].join(',');
@@ -98,22 +96,25 @@ export class CoverImageChooserComponent  {
     this.selectedOptionKey.set(option.url);
     const isDirty = sourceTab !== Tabs.Current;
 
-    if (option.url.startsWith('data:image/')) {
-      this.coverChanged.emit({ isDirty, url: option.url });
+    if (!isDirty) {
+      // Selecting the existing cover - nothing to stage or upload.
+      this.coverChanged.emit({ isDirty, fileName: '' });
       return;
     }
 
-    this.uploadService.uploadByUrl(option.url, true).subscribe(filename => {
-      const img = new Image();
-      img.crossOrigin = 'Anonymous';
-      img.src = this.imageService.getCoverUploadImage(filename);
-      img.onload = () => {
-        const base64 = this.colorscapeService.getBase64Image(img);
-        this.coverChanged.emit({ isDirty, url: base64 });
-      };
-      img.onerror = () => {
-        this.toastr.error(translate('errors.rejected-cover-upload'));
-      };
+    // Already staged in temp (Uploaded tab) - emit its filename directly.
+    if (option.fileName) {
+      this.coverChanged.emit({ isDirty, fileName: option.fileName });
+      return;
+    }
+
+    // Remote option (Volumes/Chapters/Kavita+/Other): stage it into temp, then emit the resulting filename.
+    this.uploadService.uploadByUrl(option.url, true).subscribe({
+      next: filename => {
+        option.fileName = filename;
+        this.coverChanged.emit({ isDirty, fileName: filename });
+      },
+      error: () => this.toastr.error(translate('errors.rejected-cover-upload'))
     });
   }
 
@@ -154,13 +155,10 @@ export class CoverImageChooserComponent  {
       if (droppedFile.fileEntry.isFile) {
         const fileEntry = droppedFile.fileEntry as FileSystemFileEntry;
         fileEntry.file((file: File) => {
-          const reader = new FileReader();
-          reader.onload = (e) => {
-            if (e.target?.result) {
-              this.addToUploaded(e.target.result as string);
-            }
-          };
-          reader.readAsDataURL(file);
+          this.uploadService.uploadByFile(file).subscribe({
+            next: filename => this.addStagedImage(filename),
+            error: () => this.toastr.error(translate('errors.rejected-cover-upload'))
+          });
         });
       }
     }
@@ -169,22 +167,21 @@ export class CoverImageChooserComponent  {
   loadImage(url: string) {
     if (!url || url === '') return;
 
-    this.uploadService.uploadByUrl(url).subscribe(filename => {
-      const img = new Image();
-      img.crossOrigin = 'Anonymous';
-      img.src = this.imageService.getCoverUploadImage(filename);
-      img.onload = () => {
-        const base64 = this.colorscapeService.getBase64Image(img);
-        this.addToUploaded(base64);
-      };
-      img.onerror = () => {
-        this.toastr.error(translate('errors.rejected-cover-upload'));
-      };
+    this.uploadService.uploadByUrl(url).subscribe({
+      next: filename => this.addStagedImage(filename),
+      error: () => this.toastr.error(translate('errors.rejected-cover-upload'))
     });
   }
 
-  private addToUploaded(base64: string) {
-    const option: CoverImageOption = { url: base64, title: '' };
+  /**
+   * Adds an image that has already been staged in the temp directory to the Uploaded tab and selects it.
+   */
+  private addStagedImage(filename: string) {
+    const option: CoverImageOption = {
+      url: this.imageService.getCoverUploadImage(filename),
+      title: '',
+      fileName: filename
+    };
     this.uploadedImages.update(imgs => [...imgs, option]);
     this.selectOption(option, Tabs.Uploaded);
   }

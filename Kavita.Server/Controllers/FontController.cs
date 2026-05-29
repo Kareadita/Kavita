@@ -105,7 +105,7 @@ public class FontController(
         if (!IsPathWithinDirectory(directoryService.TempDirectory, formFile.FileName)) return BadRequest("Invalid file");
 
 
-        var tempFile = await UploadToTemp(formFile);
+        var tempFile = await UploadToTempAsync(formFile);
         var font = await fontService.CreateFontFromFileAsync(tempFile);
         return Ok(mapper.Map<EpubFontDto>(font));
     }
@@ -126,14 +126,4 @@ public class FontController(
         }
     }
 
-    private async Task<string> UploadToTemp(IFormFile file)
-    {
-        var outputFile = Path.Join(directoryService.TempDirectory, file.FileName);
-
-        await using var stream = System.IO.File.Create(outputFile);
-        await file.CopyToAsync(stream);
-        stream.Close();
-
-        return outputFile;
-    }
 }

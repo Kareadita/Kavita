@@ -21,50 +21,60 @@ export class UploadService {
   }
 
   /**
+   * Stages a local file in the temp directory and returns its filename for use with the cover update endpoints.
+   * @param file The image file to upload
+   */
+  uploadByFile(file: File) {
+    const formData = new FormData();
+    formData.append('file', file, file.name);
+    return this.httpClient.post<string>(this.baseUrl + 'upload/upload-by-file', formData, TextResonse);
+  }
+
+  /**
    *
    * @param seriesId Series to overwrite cover image for
-   * @param url A base64 encoded url
+   * @param fileName A temp filename returned by uploadByUrl/uploadByFile
    * @param lockCover Should the cover be locked or not
    * @returns
    */
-  updateSeriesCoverImage(seriesId: number, url: string, lockCover: boolean = true) {
-    return this.httpClient.post<number>(this.baseUrl + 'upload/series', {id: seriesId, url: this._cleanBase64Url(url), lockCover}).pipe(tap(_ => {
+  updateSeriesCoverImage(seriesId: number, fileName: string, lockCover: boolean = true) {
+    return this.httpClient.post<number>(this.baseUrl + 'upload/series', {id: seriesId, fileName, lockCover}).pipe(tap(_ => {
       this.toastr.info(translate('series-detail.cover-change'));
     }));
   }
 
-  updateCollectionCoverImage(tagId: number, url: string, lockCover: boolean = true) {
-    return this.httpClient.post<number>(this.baseUrl + 'upload/collection', {id: tagId, url: this._cleanBase64Url(url), lockCover}).pipe(tap(_ => {
+  updateCollectionCoverImage(tagId: number, fileName: string, lockCover: boolean = true) {
+    return this.httpClient.post<number>(this.baseUrl + 'upload/collection', {id: tagId, fileName, lockCover}).pipe(tap(_ => {
       this.toastr.info(translate('series-detail.cover-change'));
     }));
   }
 
-  updateReadingListCoverImage(readingListId: number, url: string, lockCover: boolean = true) {
-    return this.httpClient.post<number>(this.baseUrl + 'upload/reading-list', {id: readingListId, url: this._cleanBase64Url(url), lockCover}).pipe(tap(_ => {
+  updateReadingListCoverImage(readingListId: number, fileName: string, lockCover: boolean = true) {
+    return this.httpClient.post<number>(this.baseUrl + 'upload/reading-list', {id: readingListId, fileName, lockCover}).pipe(tap(_ => {
       this.toastr.info(translate('series-detail.cover-change'));
     }));
   }
 
-  updateChapterCoverImage(chapterId: number, url: string, lockCover: boolean = true) {
-    return this.httpClient.post<number>(this.baseUrl + 'upload/chapter', {id: chapterId, url: this._cleanBase64Url(url), lockCover}).pipe(tap(_ => {
+  updateChapterCoverImage(chapterId: number, fileName: string, lockCover: boolean = true) {
+    return this.httpClient.post<number>(this.baseUrl + 'upload/chapter', {id: chapterId, fileName, lockCover}).pipe(tap(_ => {
       this.toastr.info(translate('series-detail.cover-change'));
     }));
   }
 
-  updateVolumeCoverImage(volumeId: number, url: string, lockCover: boolean = true) {
-    return this.httpClient.post<number>(this.baseUrl + 'upload/volume', {id: volumeId, url: this._cleanBase64Url(url), lockCover}).pipe(tap(_ => {
+  updateVolumeCoverImage(volumeId: number, fileName: string, lockCover: boolean = true) {
+    return this.httpClient.post<number>(this.baseUrl + 'upload/volume', {id: volumeId, fileName, lockCover}).pipe(tap(_ => {
       this.toastr.info(translate('series-detail.cover-change'));
     }));
   }
 
-  updateLibraryCoverImage(libraryId: number, url: string, lockCover: boolean = true) {
-    return this.httpClient.post<number>(this.baseUrl + 'upload/library', {id: libraryId, url: this._cleanBase64Url(url), lockCover}).pipe(tap(_ => {
+  updateLibraryCoverImage(libraryId: number, fileName: string, lockCover: boolean = true) {
+    return this.httpClient.post<number>(this.baseUrl + 'upload/library', {id: libraryId, fileName, lockCover}).pipe(tap(_ => {
       this.toastr.info(translate('series-detail.cover-change'));
     }));
   }
 
-  updatePersonCoverImage(personId: number, url: string, lockCover: boolean = true) {
-    return this.httpClient.post<number>(this.baseUrl + 'upload/person', {id: personId, url: this._cleanBase64Url(url), lockCover}).pipe(tap(_ => {
+  updatePersonCoverImage(personId: number, fileName: string, lockCover: boolean = true) {
+    return this.httpClient.post<number>(this.baseUrl + 'upload/person', {id: personId, fileName, lockCover}).pipe(tap(_ => {
       this.toastr.info(translate('series-detail.cover-change'));
     }));
   }
