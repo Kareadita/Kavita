@@ -18,6 +18,7 @@ import {Member} from "../../../_models/auth/member";
 import {Pagination} from "../../../_models/pagination";
 import {KavitaPlusAuditCategory} from "../../../_models/kavitaplus/kavita-plus-audit-category.enum";
 import {KavitaPlusAuditFilter} from "../../../_models/kavitaplus/kavita-plus-audit-filter";
+import {SearchInputComponent} from "../../../shared/_components/search-input/search-input.component";
 
 @Component({
   selector: 'app-manage-kavitaplus-activity',
@@ -28,6 +29,7 @@ import {KavitaPlusAuditFilter} from "../../../_models/kavitaplus/kavita-plus-aud
     DefaultValuePipe,
     AuditStatusTitlePipe,
     AuditSubjectTitlePipe,
+    SearchInputComponent,
   ],
   templateUrl: './manage-kavitaplus-activity.component.html',
   styleUrl: './manage-kavitaplus-activity.component.scss',

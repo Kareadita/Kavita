@@ -26,6 +26,7 @@ import {UtcToLocalTimePipe} from '../../../_pipes/utc-to-local-time.pipe';
 import {AuditStatusTitlePipe} from "../../../_pipes/audit-status-title.pipe";
 import {KavitaplusDiffComponent} from "../kavitaplus-diff/kavitaplus-diff.component";
 import {AuditSubjectType} from "../../../_models/kavitaplus/audit-subject-type.enum";
+import {MetadataFetchTriggerTitlePipe} from "../../../_pipes/metadata-fetch-trigger-title.pipe";
 import {TruncatePipe} from "../../../_pipes/truncate.pipe";
 
 @Component({
@@ -47,6 +48,7 @@ import {TruncatePipe} from "../../../_pipes/truncate.pipe";
     AuditStatusTitlePipe,
     KavitaplusDiffComponent,
     TruncatePipe,
+    MetadataFetchTriggerTitlePipe,
   ],
   templateUrl: './kavitaplus-audit-accordion-item.component.html',
   styleUrl: './kavitaplus-audit-accordion-item.component.scss',
@@ -76,7 +78,15 @@ export class KavitaplusAuditAccordionItemComponent {
     if (ids.malId) badges.push({provider: ScrobbleProvider.Mal, id: ids.malId});
     if (ids.mangaBakaId) badges.push({provider: ScrobbleProvider.MangaBaka, id: ids.mangaBakaId});
     if (ids.cbrId) badges.push({provider: ScrobbleProvider.Cbr, id: ids.cbrId});
+    if (ids.hardcoverId) badges.push({provider: ScrobbleProvider.Hardcover, id: ids.hardcoverId});
     return badges;
+  });
+
+  fetchTrigger = computed(() => {
+    const e = this.entry();
+    if (e.eventType !== KavitaPlusEventType.MetadataFetched) return null;
+    // MetadataFetchTrigger.Unknown (0) is falsy, so this also filters out untracked/legacy entries
+    return e.metadataExtras?.fetchTrigger || null;
   });
 
   statusBadgeClass = computed(() => {

@@ -413,6 +413,10 @@
         "custom": "{{device-platform-pipe.custom}}"
     },
 
+    "search-input": {
+        "clear": "Clear search"
+    },
+
     "manage-devices": {
         "title": "Device Manager",
         "description": "This section is for you to setup email devices that cannot connect to Kavita and instead have an email address that accepts files.",
@@ -1517,6 +1521,13 @@
         "success": "Success",
         "failure": "Failure",
         "info": "Info"
+    },
+
+    "metadata-fetch-trigger-title-pipe": {
+        "series-added": "Auto on add",
+        "on-demand": "On page visit",
+        "manual-match": "Manual",
+        "scheduled-refresh": "Scheduled"
     },
 
     "audit-subject-title-pipe": {

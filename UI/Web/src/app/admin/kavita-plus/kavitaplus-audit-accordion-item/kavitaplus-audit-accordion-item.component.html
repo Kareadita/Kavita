@@ -55,6 +55,10 @@
           @for (badge of matchProviderBadges(); track badge.provider) {
             <app-scrobble-provider-tag-badge [provider]="badge.provider" [id]="badge.id" />
           }
+
+          @if (fetchTrigger(); as trigger) {
+            <span class="badge bg-secondary fetch-trigger-badge">{{trigger | metadataFetchTriggerTitle}}</span>
+          }
         </div>
 
         <div class="small text-muted mb-1">

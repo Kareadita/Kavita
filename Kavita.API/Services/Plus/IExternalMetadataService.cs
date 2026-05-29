@@ -9,6 +9,7 @@ using Kavita.Models.DTOs.KavitaPlus.Metadata;
 using Kavita.Models.DTOs.Metadata.Matching;
 using Kavita.Models.DTOs.SeriesDetail;
 using Kavita.Models.Entities.Enums;
+using Kavita.Models.Entities.Enums.Audit;
 
 namespace Kavita.API.Services.Plus;
 
@@ -32,9 +33,11 @@ public interface IExternalMetadataService
     /// </summary>
     /// <param name="seriesId"></param>
     /// <param name="libraryType"></param>
+    /// <param name="trigger"></param>
     /// <param name="ct"></param>
     /// <returns></returns>
-    Task<SeriesDetailPlusDto?> GetSeriesDetailPlus(int seriesId, LibraryType libraryType, CancellationToken ct = default);
+    Task<SeriesDetailPlusDto?> GetSeriesDetailPlus(int seriesId, LibraryType libraryType,
+        MetadataFetchTrigger trigger = MetadataFetchTrigger.OnDemand, CancellationToken ct = default);
     /// <summary>
     /// This is a task that runs on a schedule and slowly fetches data from Kavita+ to keep
     /// data in the DB non-stale and fetched.
@@ -51,7 +54,8 @@ public interface IExternalMetadataService
     /// <param name="libraryType"></param>
     /// <param name="ct"></param>
     /// <returns>If the fetch was made</returns>
-    Task<bool> FetchSeriesMetadata(int seriesId, LibraryType libraryType, CancellationToken ct = default);
+    Task<bool> FetchSeriesMetadata(int seriesId, LibraryType libraryType,
+        MetadataFetchTrigger trigger = MetadataFetchTrigger.SeriesAdded, CancellationToken ct = default);
 
     Task<IList<MalStackDto>> GetStacksForUser(int userId, CancellationToken ct = default);
 

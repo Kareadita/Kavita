@@ -1,4 +1,5 @@
 using Kavita.Models.Entities.Enums;
+using Kavita.Models.Entities.Enums.Audit;
 
 namespace Kavita.Models.DTOs.KavitaPlus.Audit;
 #nullable enable
@@ -27,6 +28,7 @@ public sealed record AuditLogMatchExternalIdsParamsDto
     public long MalId { get; init; }
     public long MangaBakaId { get; init; }
     public int CbrId { get; init; }
+    public int HardcoverId { get; init; }
 }
 
 public sealed record AuditLogMatchedParamsDto
@@ -46,4 +48,5 @@ public sealed record AuditLogMetadataFetchParamsDto
     public int CbrId { get; init; }
     public int AniListId { get; init; }
     public int HardcoverId { get; init; }
+    public MetadataFetchTrigger Trigger { get; init; }
 }

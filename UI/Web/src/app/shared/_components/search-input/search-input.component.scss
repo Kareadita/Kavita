@@ -1,0 +1,33 @@
+:host {
+  display: block;
+  max-width: 12.5rem;
+
+  @media (max-width: 991.98px) {
+    max-width: none;
+    width: 100%;
+  }
+}
+
+.search-icon {
+  position: absolute;
+  left: 0.75rem;
+  color: var(--text-muted-color);
+  font-size: 0.8125rem;
+  pointer-events: none;
+}
+
+.search-control {
+  padding-left: 2.25rem;
+  padding-right: 2.25rem;
+  width: 100%;
+}
+
+.search-clear {
+  position: absolute;
+  right: 0.5rem;
+  opacity: 0.5;
+
+  &:hover {
+    opacity: 1;
+  }
+}

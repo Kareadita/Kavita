@@ -1,12 +1,13 @@
 using Kavita.Models.DTOs.KavitaPlus.Audit;
+using Kavita.Models.Entities.Enums.Audit;
 
 namespace Kavita.Models.DTOs.KavitaPlus;
 #nullable enable
 
 /// <summary>
-/// Extra context for non-diff Metadata events (cover updates, person operations).
+/// Extra context for non-diff Metadata events (cover updates, person operations, metadata fetches).
 /// Projected from AuditLogSeriesCoverParamsDto, AuditLogChapterCoverParamsDto,
-/// AuditLogPersonAliasParamsDto, AuditLogPersonCoverParamsDto.
+/// AuditLogPersonAliasParamsDto, AuditLogPersonCoverParamsDto, AuditLogMetadataFetchParamsDto.
 /// </summary>
 public sealed record KavitaPlusAuditMetadataExtrasDto
 {
@@ -22,6 +23,9 @@ public sealed record KavitaPlusAuditMetadataExtrasDto
     // PersonAliasAdded
     public string? AliasAdded { get; init; }
 
+    // MetadataFetched - why the fetch fired
+    public MetadataFetchTrigger? FetchTrigger { get; init; }
+
     public static KavitaPlusAuditMetadataExtrasDto? From(AuditLogSeriesCoverParamsDto? p) =>
         p is null ? null : new KavitaPlusAuditMetadataExtrasDto { CoverUrl = p.CoverUrl };
 
@@ -33,4 +37,7 @@ public sealed record KavitaPlusAuditMetadataExtrasDto
 
     public static KavitaPlusAuditMetadataExtrasDto? From(AuditLogPersonCoverParamsDto? p) =>
         p is null ? null : new KavitaPlusAuditMetadataExtrasDto { PersonName = p.PersonName, CoverUrl = p.ImageUrl };
+
+    public static KavitaPlusAuditMetadataExtrasDto? From(AuditLogMetadataFetchParamsDto? p) =>
+        p is null ? null : new KavitaPlusAuditMetadataExtrasDto { FetchTrigger = p.Trigger };
 }

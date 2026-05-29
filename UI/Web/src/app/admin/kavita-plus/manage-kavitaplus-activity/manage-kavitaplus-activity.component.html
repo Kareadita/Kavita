@@ -112,11 +112,7 @@
       </select>
     </div>
 
-    <label class="visually-hidden" for="auditSearch">{{t('search-alt')}}</label>
-    <input id="auditSearch" class="form-control form-control-sm search-input"
-           [placeholder]="t('search-alt')"
-           [value]="searchQuery()"
-           (input)="onSearchChange($any($event.target).value)" />
+    <app-search-input [value]="searchQuery()" (search)="onSearchChange($event)" [label]="t('search-alt')" />
   </div>
 
   <!-- Timeline with custom entry card -->

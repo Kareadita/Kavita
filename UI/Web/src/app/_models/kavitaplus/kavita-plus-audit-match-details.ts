@@ -3,6 +3,7 @@ export interface AuditMatchExternalIds {
   malId: number;
   mangaBakaId: number;
   cbrId: number;
+  hardcoverId: number;
 }
 
 export interface KavitaPlusAuditMatchDetails {

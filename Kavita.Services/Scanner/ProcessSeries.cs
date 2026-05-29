@@ -22,6 +22,7 @@ using Kavita.Models.DTOs.KavitaPlus.Metadata;
 using Kavita.Models.DTOs.SignalR;
 using Kavita.Models.Entities;
 using Kavita.Models.Entities.Enums;
+using Kavita.Models.Entities.Enums.Audit;
 using Kavita.Models.Entities.Person;
 using Kavita.Models.Metadata;
 using Kavita.Models.Parser;
@@ -231,7 +232,7 @@ public class ProcessSeries(
 
         if (seriesAdded)
         {
-            await externalMetadataService.FetchSeriesMetadata(series.Id, series.Library.Type);
+            await externalMetadataService.FetchSeriesMetadata(series.Id, series.Library.Type, MetadataFetchTrigger.SeriesAdded);
         }
 
         await eventHub.SendMessageAsync(MessageFactory.ScanSeries,

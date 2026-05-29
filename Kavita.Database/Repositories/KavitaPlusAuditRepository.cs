@@ -298,6 +298,8 @@ public class KavitaPlusAuditRepository(DataContext context) : IKavitaPlusAuditRe
                         KavitaPlusAuditMetadataExtrasDto.From(JsonSerializer.Deserialize<AuditLogPersonAliasParamsDto>(e.Payload, JsonOptions)),
                     KavitaPlusEventType.PersonCoverUpdated =>
                         KavitaPlusAuditMetadataExtrasDto.From(JsonSerializer.Deserialize<AuditLogPersonCoverParamsDto>(e.Payload, JsonOptions)),
+                    KavitaPlusEventType.MetadataFetched =>
+                        KavitaPlusAuditMetadataExtrasDto.From(JsonSerializer.Deserialize<AuditLogMetadataFetchParamsDto>(e.Payload, JsonOptions)),
                     _ => null
                 };
             }

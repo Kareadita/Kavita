@@ -1,0 +1,15 @@
+<div class="search-input-wrapper position-relative d-flex align-items-center">
+  <i class="fa-solid fa-magnifying-glass search-icon" aria-hidden="true"></i>
+  @if (label()) {
+    <label [for]="inputId()" class="visually-hidden">{{label()}}</label>
+  }
+  <input [id]="inputId()" type="text" class="form-control form-control-sm search-control"
+         [placeholder]="label()"
+         [value]="value()"
+         (input)="onInput($any($event.target).value)" />
+  @if (value()) {
+    <button type="button" class="search-clear btn-close btn-close-white btn-sm"
+            [attr.aria-label]="clearAriaLabel()"
+            (click)="clear()"></button>
+  }
+</div>
