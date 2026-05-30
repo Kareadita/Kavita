@@ -150,6 +150,35 @@ public class KavitaPlusApiService(ILogger<KavitaPlusApiService> logger, IUnitOfW
         return [];
     }
 
+
+    /// <summary>
+    /// Gets a snapshot of the amount of usage this server has with Kavita+
+    /// </summary>
+    /// <param name="ct"></param>
+    /// <returns>Returns an empty object on errors</returns>
+    public async Task<KavitaPlusLicenseUsageDto> GetLicenseUsage(CancellationToken ct = default)
+    {
+        try
+        {
+            var license = (await unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.LicenseKey, ct)).Value;
+            var response = await (Configuration.KavitaPlusApiUrl + "/api/stats/")
+                .WithKavitaPlusHeaders(license)
+                .GetJsonAsync<KPlusResult<KavitaPlusLicenseUsageDto>>(cancellationToken: ct);
+
+            if (response.IsSuccess) return response.Data!;
+            logger.LogError(response.ErrorMessage, "Unable to pull license usage data from Kavita+ API");
+        } catch (FlurlHttpException e)
+        {
+            logger.LogError(e, "An error happened during the request to Kavita+ API");
+        }
+
+        return new KavitaPlusLicenseUsageDto()
+        {
+            GeneratedAtUtc =  DateTime.UtcNow,
+            Stats = []
+        };
+    }
+
     /// <summary>
     /// Send a GET request to K+
     /// </summary>

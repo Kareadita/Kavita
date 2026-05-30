@@ -7,15 +7,15 @@ export enum KavitaPlusProviderHealthStatus {
   Down = 3,
 }
 
-export interface KavitaPlusProviderIncidentDto {
+export interface KavitaPlusProviderIncident {
   startedAtUtc: string;
   endedAtUtc: string | null;
   type: number;
 }
 
-export interface KavitaPlusProviderHealthSnapshotDto {
+export interface KavitaPlusProviderHealthSnapshot {
   provider: ScrobbleProvider;
   avgLatencyMs: number;
   status: KavitaPlusProviderHealthStatus;
-  lastIncident: KavitaPlusProviderIncidentDto | null;
+  lastIncident: KavitaPlusProviderIncident | null;
 }

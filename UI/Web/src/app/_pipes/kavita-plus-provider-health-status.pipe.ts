@@ -1,6 +1,6 @@
 import {inject, Pipe, PipeTransform} from '@angular/core';
 import {TranslocoService} from '@jsverse/transloco';
-import {KavitaPlusProviderHealthStatus} from '../_models/kavitaplus/provider-health';
+import {KavitaPlusProviderHealthStatus} from '../_models/kavitaplus/kavita-plus-provider-health';
 
 @Pipe({
   name: 'kavitaPlusProviderHealthStatus',

@@ -15,6 +15,7 @@ import {
   ScrobbleAccountCardComponent
 } from "../../../user-settings/scrobble-account-card/scrobble-account-card.component";
 import {ScrobblingService, UserScrobbleProvider} from "../../../_services/scrobbling.service";
+import {LicenseApiStatsComponent} from "../license-api-stats/license-api-stats.component";
 
 @Component({
   selector: 'app-license-dashboard',
@@ -25,6 +26,7 @@ import {ScrobblingService, UserScrobbleProvider} from "../../../_services/scrobb
     ScrobbleHealthComponent,
     ExpiredLicenseInfoCardComponent,
     ScrobbleAccountCardComponent,
+    LicenseApiStatsComponent,
   ],
   templateUrl: './license-dashboard.component.html',
   styleUrl: './license-dashboard.component.scss',

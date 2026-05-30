@@ -956,6 +956,25 @@
         "down-label": "Down"
     },
 
+    "kavita-plus-api-name-title-desc-pipe": {
+        "cover-requests-title": "Cover Requests",
+        "cover-requests-description": "Series, chapters, and volume covers",
+        "metadata-sync-title": "Metadata Syncs",
+        "metadata-sync-description": "Series detail refreshes",
+        "series-matched-title": "Series Matched",
+        "series-matched-description": "Matched to upstream providers",
+        "scrobbles-title": "Scrobbles",
+        "scrobbles-description": "Progress pushed to providers",
+        "mal-stack-import-title": "MAL Stacks Imported",
+        "mal-stack-import-description": "Interest stacks ingested",
+        "want-to-read-title": "Want-to-Read Syncs",
+        "want-to-read-description": "Synced from MAL/AniList/Hardcover/MangaBaka",
+        "recommendations-title": "Recommendations",
+        "recommendations-description": "External recs loaded",
+        "reviews-title": "Reviews",
+        "reviews-description": "External reviews loaded"
+    },
+
     "scrobble-provider-media-title-pipe": {
         "anilist-label": "Manga + Light Novels",
         "mal-label": "{{scrobble-provider-media-title-pipe.anilist-label}}",
@@ -1037,6 +1056,11 @@
         "skip-for-now-label": "Skip for now",
         "go-to-dashboard-label": "Go to dashboard",
         "footer-hint-label": "You can connect more providers later under Settings → Kavita+ → Linked accounts."
+    },
+
+    "license-api-stats": {
+        "title": "API Usage",
+        "description": "Calls this server has made to Kavita+. Purely informational, there are no caps."
     },
 
     "license": {

@@ -1,0 +1,32 @@
+<ng-container *transloco="let t;prefix:'license-api-stats'">
+  <div class="api-stats-container p-3">
+    <h3 class="kv-section-header">{{t('title')}}</h3>
+    <p class="text-muted">{{t('description')}}</p>
+    <ul class="list-unstyled m-0">
+      @for(api of filteredUsageInfo(); track api.apiName; let last = $last) {
+        <li class="d-flex align-items-center gap-3 py-3" [class.border-bottom]="!last">
+          @let apiRenderData = api.apiName | kavitaPlusApiNameRenderData;
+          <!-- Icon -->
+          <span class="api-icon d-flex align-items-center justify-content-center flex-shrink-0">
+            <i [class]="apiRenderData.icon" aria-hidden="true"></i>
+          </span>
+
+          <!-- Title + subtitle -->
+          <div class="flex-grow-1 min-width-0">
+            <div class="fw-semibold">{{apiRenderData.title}}</div>
+            <div class="text-muted small">{{apiRenderData.description}}</div>
+          </div>
+
+          <!-- Sparkline chart placeholder (impl later) -->
+          <div class="api-chart phone-hidden flex-shrink-0">
+
+          </div>
+
+          <!-- Count -->
+          <div class="fw-bold fs-5 text-end flex-shrink-0">{{api.lifetimeCount}}</div>
+        </li>
+      }
+    </ul>
+  </div>
+
+</ng-container>

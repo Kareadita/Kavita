@@ -29,4 +29,5 @@ public interface IKavitaPlusApiService
     Task<KPlusResult<IList<ExternalCoverResponseDto>>> GetCoverImagesAsync(ExternalCoverRequestDto request, CancellationToken ct = default);
     Task<LicenseInfoDto?> GetLicenseInfo(CancellationToken ct = default);
     Task<IList<KavitaPlusProviderHealthSnapshotDto>> GetProviderHealthSnapshot(CancellationToken ct = default);
+    Task<KavitaPlusLicenseUsageDto> GetLicenseUsage(CancellationToken ct = default);
 }

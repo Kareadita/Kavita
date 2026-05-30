@@ -162,4 +162,15 @@ public class LicenseController(
         return Ok(await providerHealthService.GetProviderHealthSnapshot(forceCheck, ct));
     }
 
+    /// <summary>
+    /// Providers how many interactions this license has had with Kavita+ over a lifetime
+    /// </summary>
+    /// <returns></returns>
+    [HttpGet("stats")]
+    public async Task<ActionResult<KavitaPlusLicenseUsageDto>> GetLicenseUsage()
+    {
+        var ct = HttpContext.RequestAborted;
+        return Ok(await licenseService.GetLicenseUsage(ct));
+    }
+
 }

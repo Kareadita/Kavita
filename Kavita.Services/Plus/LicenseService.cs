@@ -350,4 +350,9 @@ public class LicenseService(
 
         return false;
     }
+
+    public async Task<KavitaPlusLicenseUsageDto> GetLicenseUsage(CancellationToken ct = default)
+    {
+        return await kavitaPlusApiService.GetLicenseUsage(ct);
+    }
 }

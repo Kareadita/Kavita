@@ -1,7 +1,7 @@
 import {ChangeDetectionStrategy, Component, computed, inject, signal} from '@angular/core';
 import {TranslocoDirective} from '@jsverse/transloco';
 import {LicenseService} from '../../../_services/license.service';
-import {KavitaPlusProviderHealthSnapshotDto} from '../../../_models/kavitaplus/provider-health';
+import {KavitaPlusProviderHealthSnapshot} from '../../../_models/kavitaplus/kavita-plus-provider-health';
 import {
   ScrobbleProviderImageComponent
 } from '../../../shared/_components/scrobble-provider-image/scrobble-provider-image.component';
@@ -25,7 +25,7 @@ import {ScrobbleProviderMediaTitlePipe} from '../../../_pipes/scrobble-provider-
 export class ScrobbleHealthComponent {
   private readonly licenseService = inject(LicenseService);
 
-  private readonly _snapshots = signal<KavitaPlusProviderHealthSnapshotDto[]>([]);
+  private readonly _snapshots = signal<KavitaPlusProviderHealthSnapshot[]>([]);
   protected readonly snapshots = this._snapshots.asReadonly();
   protected readonly lastChecked = signal<Date | null>(null);
   protected readonly loading = signal(false);
