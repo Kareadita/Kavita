@@ -106,6 +106,8 @@ enum KeyDirection {
 const KEYBIND_TARGETS = [
   {keyBindTarget: KeyBindTarget.PageLeft, description: 'prev-page'},
   {keyBindTarget: KeyBindTarget.PageRight, description: 'next-page'},
+  {keyBindTarget: KeyBindTarget.PageUp, description: 'next-page'},
+  {keyBindTarget: KeyBindTarget.PageDown, description: 'prev-page'},
   {keyBindTarget: KeyBindTarget.GoTo, description: 'go-to'},
   {keyBindTarget: KeyBindTarget.ToggleFullScreen},
   {keyBindTarget: KeyBindTarget.ToggleMenu},
@@ -147,10 +149,10 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
   readonly imageElement = computed(() =>
     this.singleRenderer()?.imageElement()
-  ?? this.doubleRenderer()?.imageElement()
-  ?? this.doubleReverseRenderer()?.imageElement()
-  ?? this.doubleNoCoverRenderer()?.imageElement()
-  ?? this.canvasRenderer()?.canvas());
+    ?? this.doubleRenderer()?.imageElement()
+    ?? this.doubleReverseRenderer()?.imageElement()
+    ?? this.doubleNoCoverRenderer()?.imageElement()
+    ?? this.canvasRenderer()?.canvas());
 
   private readonly destroyRef = inject(DestroyRef);
   private readonly route = inject(ActivatedRoute);
