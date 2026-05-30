@@ -23,7 +23,14 @@
     <app-license-info-panel [licenseInfo]="licenseService.licenseInfo()" class="mb-3" (check)="forceCheckLicense()" (editLicense)="openEditLicenseModal()" />
 
     @if (info.isExpired) {
-      <app-expired-license-info-card class="mt-3 d-block" />
+      <div class="row g-3">
+        <div class="col-12 col-lg-6">
+          <app-expired-license-info-card class="mt-3 d-block" />
+        </div>
+        <div class="col-12 col-lg-6">
+          <app-expired-license-api-stats class="mt-3 d-block" />
+        </div>
+      </div>
     } @else if (isActive) {
 
       <div class="row g-3 mt-1">
@@ -45,9 +52,11 @@
     }
 
     <!--API Count information-->
-    <div class="mt-3">
-      <app-license-api-stats />
-    </div>
+    @if (isActive) {
+      <div class="mt-3">
+        <app-license-api-stats />
+      </div>
+    }
 
   }
 

@@ -1,0 +1,20 @@
+<ng-container *transloco="let t; prefix: 'expired-license-api-stats'">
+  <div class="flex-fill min-w-0">
+    <h3 class="kv-section-header">{{t('title')}}</h3>
+    <div class="d-flex align-items-center flex-wrap gap-2">
+      @for(api of usageData()?.stats; track api.apiName) {
+        @let apiRenderData = api.apiName | kavitaPlusApiNameRenderData;
+        <div class="card stats-card col-auto">
+
+          <div class="card-body">
+            <h4 class="stats-title">{{apiRenderData.title}}</h4>
+            <p class="card-text">
+              {{api.lifetimeCount | compactNumber}}
+            </p>
+          </div>
+
+        </div>
+      }
+    </div>
+  </div>
+</ng-container>

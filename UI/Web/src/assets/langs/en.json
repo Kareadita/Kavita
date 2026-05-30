@@ -1066,6 +1066,10 @@
         "range-toggle-alt": "Toggle API usage range"
     },
 
+    "expired-license-api-stats": {
+        "title": "Final Usage Snapshot"
+    },
+
     "license": {
         "title": "Kavita+ License",
         "kavita+-warning": "Kavita+ is separate from Kavita. Uninstalling without first cancelling your subscription will continue the billing cycle.",
