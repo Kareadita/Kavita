@@ -14,7 +14,8 @@ import {MemberService} from "../../../_services/member.service";
   templateUrl: './license-info-panel.component.html',
   styleUrl: './license-info-panel.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [UtcToLocalTimePipe, UpperCasePipe, DatePipe, TranslocoDirective, KavitaPlusSubscriptionStatusPipe, KavitaPlusBillingIntervalPipe]
+  imports: [UtcToLocalTimePipe, UpperCasePipe, DatePipe, TranslocoDirective, KavitaPlusSubscriptionStatusPipe, KavitaPlusBillingIntervalPipe],
+  host: { '[attr.data-status]': 'status()' }
 })
 export class LicenseInfoPanelComponent {
 

@@ -9,8 +9,8 @@
   display: block;
 }
 
-:host([color='cancelled']) { --panel-color: var(--panel-danger-color); }
-:host([color='paused'])    { --panel-color: var(--panel-warning-color); }
+:host([data-status='cancelled']) { --panel-color: var(--panel-danger-color); }
+:host([data-status='paused'])    { --panel-color: var(--panel-warning-color); }
 
 .info-card {
   background:
