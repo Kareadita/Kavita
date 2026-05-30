@@ -1,10 +1,10 @@
 import {ChangeDetectionStrategy, Component, computed, inject, signal} from '@angular/core';
-import {DecimalPipe} from "@angular/common";
 import {TranslocoDirective} from "@jsverse/transloco";
 import {LicenseService} from "../../../_services/license.service";
 import {ApiUsage, KavitaPlusLicenseUsage} from "../../../_models/kavitaplus/kavita-plus-license-usage";
 import {KavitaPlusApiNameRenderDataPipe} from "../../../_pipes/kavita-plus-api-name-render-data.pipe";
 import {SparklineComponent} from "../../../shared/_charts/sparkline/sparkline.component";
+import {CompactNumberPipe} from "../../../_pipes/compact-number.pipe";
 
 type StatRange = 'last30' | 'lifetime';
 
@@ -14,7 +14,7 @@ type StatRange = 'last30' | 'lifetime';
     TranslocoDirective,
     KavitaPlusApiNameRenderDataPipe,
     SparklineComponent,
-    DecimalPipe
+    CompactNumberPipe
   ],
   templateUrl: './license-api-stats.component.html',
   styleUrl: './license-api-stats.component.scss',

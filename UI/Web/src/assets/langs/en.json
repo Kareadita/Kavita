@@ -1136,6 +1136,13 @@
         "support-label": "Help"
     },
 
+    "discord-connect-card": {
+        "connect-title": "Connect Discord",
+        "connect-subtitle": "Beta builds, #kavita-plus role, and direct support",
+        "connect-button": "Connect",
+        "connected-label": "Discord Connected"
+    },
+
     "expired-license-info-card": {
         "title-label": "Last Subscription",
         "status-label": "Status",

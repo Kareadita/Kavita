@@ -8,7 +8,7 @@ import {
   ManageLicenseKeyModalComponent
 } from "../../_modals/manage-license-key-modal/manage-license-key-modal.component";
 import {LicenseService} from "../../../_services/license.service";
-import {DiscordButtonComponent} from "../discord-button/discord-button.component";
+import {DiscordConnectCardComponent} from "../discord-connect-card/discord-connect-card.component";
 import {ScrobbleHealthComponent} from '../scrobble-health/scrobble-health.component';
 import {ExpiredLicenseInfoCardComponent} from '../expired-license-info-card/expired-license-info-card.component';
 import {
@@ -22,7 +22,7 @@ import {LicenseApiStatsComponent} from "../license-api-stats/license-api-stats.c
   imports: [
     TranslocoDirective,
     LicenseInfoPanelComponent,
-    DiscordButtonComponent,
+    DiscordConnectCardComponent,
     ScrobbleHealthComponent,
     ExpiredLicenseInfoCardComponent,
     ScrobbleAccountCardComponent,

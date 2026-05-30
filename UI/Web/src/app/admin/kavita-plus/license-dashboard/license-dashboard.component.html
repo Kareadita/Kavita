@@ -5,17 +5,19 @@
   @if (info) {
     @let isActive = info.isActive;
 
-    <div class="d-flex align-items-start justify-content-between gap-3 mb-4">
-      <div class="flex-fill">
+    <div class="d-flex align-items-start justify-content-between flex-wrap gap-2 mb-4">
+      <div class="flex-fill min-w-0">
         <h1 class="fw-bold mb-2">{{t('title')}}</h1>
         <p class="text-muted page-desc mb-0">{{t('description-' + (info.isActive ? 'active' : 'inactive'))}}</p>
       </div>
-      <a href="mailto:kavitareader@gmail.com?subject=Kavita%20Subscription%20Help" target="_blank" rel="noreferrer nofollow" class="btn btn-outline-primary btn-sm flex-shrink-0">
-        <i class="fa-regular fa-circle-question me-1" aria-hidden="true"></i>{{t('support-label')}}
-      </a>
-      <a [href]="WikiLink.KavitaPlusFAQ" target="_blank" rel="noreferrer nofollow" class="btn btn-outline-primary btn-sm flex-shrink-0">
-        <i class="fa-regular fa-circle-question me-1" aria-hidden="true"></i>{{t('faq-label')}}
-      </a>
+      <div class="d-flex gap-2 flex-shrink-0">
+        <a href="mailto:kavitareader@gmail.com?subject=Kavita%20Subscription%20Help" target="_blank" rel="noreferrer nofollow" class="btn btn-outline-primary btn-sm">
+          <i class="fa-regular fa-circle-question me-1" aria-hidden="true"></i>{{t('support-label')}}
+        </a>
+        <a [href]="WikiLink.KavitaPlusFAQ" target="_blank" rel="noreferrer nofollow" class="btn btn-outline-primary btn-sm">
+          <i class="fa-regular fa-circle-question me-1" aria-hidden="true"></i>{{t('faq-label')}}
+        </a>
+      </div>
     </div>
 
     <app-license-info-panel [licenseInfo]="licenseService.licenseInfo()" class="mb-3" (check)="forceCheckLicense()" (editLicense)="openEditLicenseModal()" />
@@ -24,22 +26,19 @@
       <app-expired-license-info-card class="mt-3 d-block" />
     } @else if (isActive) {
 
-      <div class="row g-1">
-        <div class="col-6">
-          <!--TODO: Discord Panel -->
-          @if (!licenseService.licenseInfo()?.hasDiscordSet) {
-            <app-discord-button />
-          } @else {
-            Discord: {{licenseService.licenseInfo()?.discordId}}
-          }
+      <div class="row g-3 mt-1">
+        <div class="col-12 col-lg-6">
+          <app-discord-connect-card class="d-block" [licenseInfo]="licenseService.licenseInfo()" />
         </div>
-        <div class="col-6">
-          @for(provider of scrobblingProviders(); track provider.provider) {
-            <div class="col-12 col-md-auto mb-2">
-              <app-scrobble-account-card [provider]="provider" class="d-block" />
+        @if (scrobblingProviders().length > 0) {
+          <div class="col-12 col-lg-6">
+            <div class="d-flex flex-column gap-2">
+              @for(provider of scrobblingProviders(); track provider.provider) {
+                <app-scrobble-account-card [provider]="provider" class="d-block" />
+              }
             </div>
-          }
-        </div>
+          </div>
+        }
       </div>
 
       <app-scrobble-health class="my-3 d-block" />

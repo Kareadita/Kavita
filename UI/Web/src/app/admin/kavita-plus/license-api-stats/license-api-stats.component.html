@@ -1,6 +1,6 @@
 <ng-container *transloco="let t;prefix:'license-api-stats'">
   <div class="api-stats-container p-3">
-    <div class="d-flex align-items-start justify-content-between gap-3 mb-2">
+    <div class="d-flex align-items-start justify-content-between flex-wrap gap-2 mb-2">
       <div class="min-width-0">
         <h3 class="kv-section-header mb-1">{{t('title')}}</h3>
         <p class="text-muted m-0">{{t('description')}}</p>
@@ -35,10 +35,12 @@
           </div>
 
           <!-- Sparkline chart -->
-          <app-sparkline class="api-chart phone-hidden flex-shrink-0" [data]="bucketsFor(api)" />
+          <div class="phone-hidden flex-shrink-0">
+            <app-sparkline class="api-chart" [data]="bucketsFor(api)" />
+          </div>
 
           <!-- Count -->
-          <div class="fw-bold fs-5 text-end flex-shrink-0">{{countFor(api) | number}}</div>
+          <div class="fw-bold fs-5 text-end flex-shrink-0">{{countFor(api) | compactNumber}}</div>
         </li>
       }
     </ul>

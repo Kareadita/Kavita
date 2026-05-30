@@ -1,0 +1,25 @@
+<ng-container *transloco="let t; prefix:'discord-connect-card'">
+  <div class="discord-card d-flex flex-column flex-md-row align-items-md-center gap-3">
+
+    <div class="discord-icon flex-shrink-0 d-flex align-items-center justify-content-center">
+      <i class="fa-brands fa-discord" aria-hidden="true"></i>
+    </div>
+
+    <div class="flex-fill min-w-0">
+      @if (isConnected()) {
+        <h3 class="discord-title mb-1">{{ t('connected-label') }}</h3>
+        <p class="discord-subtitle text-muted text-break mb-0">{{ discordId() }}</p>
+      } @else {
+        <h3 class="discord-title mb-1">{{ t('connect-title') }}</h3>
+        <p class="discord-subtitle text-muted mb-0">{{ t('connect-subtitle') }}</p>
+      }
+    </div>
+
+    @if (!isConnected()) {
+      <div class="flex-shrink-0">
+        <app-discord-button [label]="t('connect-button')" [block]="breakpointService.isMobileOrBelow()" />
+      </div>
+    }
+
+  </div>
+</ng-container>

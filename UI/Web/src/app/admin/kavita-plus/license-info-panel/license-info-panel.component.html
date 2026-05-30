@@ -28,7 +28,7 @@
     </div>
 
     <!-- Main row: data cols + right panel -->
-    <div class="d-flex align-items-center gap-4">
+    <div class="panel-body d-flex align-items-center gap-4">
 
       <!-- Data columns (3-up) -->
       <div class="data-cols flex-fill">
@@ -55,6 +55,11 @@
               }
             </span>
             <span class="data-sub">{{ t('version-sub-label', { version: activeVersion() }) }}</span>
+          </div>
+          <!-- Phone-only fallback for the days-left ring (hidden on phone) -->
+          <div class="data-col not-phone-hidden">
+            <span class="data-label">{{ t('days-left-label') }}</span>
+            <span class="data-value">{{ t('days-remaining-label', { count: daysRemaining() }) }}</span>
           </div>
         } @else if (status() === 'cancelled' && !isExpired()) {
           <div class="data-col">
@@ -95,27 +100,27 @@
       <div class="right-panel flex-shrink-0 d-flex align-items-center gap-3">
 
         @if (status() === 'active') {
-          <div class="ring-active" [style.--ring-pct]="daysRemainingPercent() + '%'">
+          <div class="ring-active phone-hidden" [style.--ring-pct]="daysRemainingPercent() + '%'">
             <div class="ring-active-face">
               <span class="ring-active-title">{{ daysRemaining() }}</span>
               <span class="ring-active-sub">{{ t('days-left-label') | uppercase }}</span>
             </div>
           </div>
         } @else if (status() === 'cancelled' && !isExpired()) {
-          <div class="ring-active" [style.--ring-pct]="daysUntilExpiryPercent() + '%'">
+          <div class="ring-active phone-hidden" [style.--ring-pct]="daysUntilExpiryPercent() + '%'">
             <div class="ring-active-face">
               <span class="ring-active-title">{{ daysUntilExpiry() }}</span>
               <span class="ring-active-sub">{{ t('days-left-label') | uppercase }}</span>
             </div>
           </div>
         } @else {
-          <div class="ring-inactive">
+          <div class="ring-inactive phone-hidden">
             <i class="fa-solid fa-triangle-exclamation ring-inactive-icon" aria-hidden="true"></i>
             <span class="ring-inactive-label">{{ licenseInfo()?.state | kavitaPlusSubscriptionStatus | uppercase }}</span>
           </div>
         }
 
-        <div class="d-flex flex-column gap-2">
+        <div class="panel-actions d-flex flex-column gap-2">
           <a [href]="manageLink()" target="_blank" rel="noreferrer nofollow" class="btn btn-primary btn-sm dark-exempt">
             <i class="fa-brands fa-stripe-s me-1" aria-hidden="true"></i>
             {{ status() === 'active' ? t('manage-label') : t('renew-label') }}

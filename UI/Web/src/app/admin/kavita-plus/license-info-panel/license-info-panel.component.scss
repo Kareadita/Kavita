@@ -1,3 +1,5 @@
+@use "../../../../theme/variables" as theme;
+
 :host {
   --panel-primary-color:  var(--primary-color);
   --panel-danger-color:   var(--error-color);
@@ -153,4 +155,35 @@
   font-weight: 700;
   letter-spacing: 0.1em;
   text-transform: uppercase;
+}
+
+@media (max-width: theme.$grid-breakpoints-md) {
+  .info-card {
+    padding: 1.25rem;
+  }
+
+  .panel-body {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 1.5rem;
+  }
+
+  .data-cols {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+
+  .right-panel {
+    width: 100%;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .panel-actions {
+    width: 100%;
+
+    .btn {
+      width: 100%;
+    }
+  }
 }
