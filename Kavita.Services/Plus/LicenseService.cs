@@ -30,7 +30,8 @@ public class LicenseService(
     IEasyCachingProviderFactory cachingProviderFactory,
     IUnitOfWork unitOfWork,
     ILogger<LicenseService> logger,
-    IVersionUpdaterService versionUpdaterService, IKavitaPlusApiService kavitaPlusApiService)
+    IVersionUpdaterService versionUpdaterService, IKavitaPlusApiService kavitaPlusApiService,
+    IFileCacheService fileCacheService)
     : ILicenseService
 {
     private readonly TimeSpan _licenseCacheTimeout = TimeSpan.FromHours(8);
@@ -40,6 +41,7 @@ public class LicenseService(
     /// </summary>
     public const string CacheKey = "license";
     private const string LicenseInfoCacheKey = "license-info";
+    private const string LicenseUsageCacheKey = "license-usage";
 
 
     /// <summary>
@@ -353,6 +355,24 @@ public class LicenseService(
 
     public async Task<KavitaPlusLicenseUsageDto> GetLicenseUsage(CancellationToken ct = default)
     {
-        return await kavitaPlusApiService.GetLicenseUsage(ct);
+        // Expired licenses won't generate new usage, so cache them long term (1 month);
+        // active licenses refresh every 4 hours.
+        var ttl = await HasActiveLicense(ct: ct)
+            ? TimeSpan.FromHours(4)
+            : TimeSpan.FromDays(30);
+
+        var result = await fileCacheService.GetOrFetchAsync<KavitaPlusLicenseUsageDto>(
+            LicenseUsageCacheKey,
+            FileCacheService.KavitaPlusCacheDirectory,
+            ttl,
+            async _ => await kavitaPlusApiService.GetLicenseUsage(ct),
+            shouldCache: r => r?.Stats?.Count > 0,
+            ct: ct);
+
+        return result ?? new KavitaPlusLicenseUsageDto
+        {
+            GeneratedAtUtc = DateTime.UtcNow,
+            Stats = []
+        };
     }
 }
