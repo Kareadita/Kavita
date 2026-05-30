@@ -1060,7 +1060,10 @@
 
     "license-api-stats": {
         "title": "API Usage",
-        "description": "Calls this server has made to Kavita+. Purely informational, there are no caps."
+        "description": "Calls this server has made to Kavita+. Purely informational, there are no caps.",
+        "last-30-days": "Last 30 days",
+        "lifetime": "Lifetime",
+        "range-toggle-alt": "Toggle API usage range"
     },
 
     "license": {

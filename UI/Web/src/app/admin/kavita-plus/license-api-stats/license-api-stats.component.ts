@@ -1,14 +1,20 @@
 import {ChangeDetectionStrategy, Component, computed, inject, signal} from '@angular/core';
+import {DecimalPipe} from "@angular/common";
 import {TranslocoDirective} from "@jsverse/transloco";
 import {LicenseService} from "../../../_services/license.service";
-import {KavitaPlusLicenseUsage} from "../../../_models/kavitaplus/kavita-plus-license-usage";
+import {ApiUsage, KavitaPlusLicenseUsage} from "../../../_models/kavitaplus/kavita-plus-license-usage";
 import {KavitaPlusApiNameRenderDataPipe} from "../../../_pipes/kavita-plus-api-name-render-data.pipe";
+import {SparklineComponent} from "../../../shared/_charts/sparkline/sparkline.component";
+
+type StatRange = 'last30' | 'lifetime';
 
 @Component({
   selector: 'app-license-api-stats',
   imports: [
     TranslocoDirective,
-    KavitaPlusApiNameRenderDataPipe
+    KavitaPlusApiNameRenderDataPipe,
+    SparklineComponent,
+    DecimalPipe
   ],
   templateUrl: './license-api-stats.component.html',
   styleUrl: './license-api-stats.component.scss',
@@ -19,13 +25,9 @@ export class LicenseApiStatsComponent {
   private readonly licenseService = inject(LicenseService);
 
   usageData = signal<KavitaPlusLicenseUsage | null>(null);
-  filteredUsageInfo = computed(() => {
-    const data = this.usageData()?.stats ?? [];
+  selectedRange = signal<StatRange>('lifetime');
 
-    // TODO: Hook in the filter for the stats
-
-    return data;
-  });
+  usageInfo = computed(() => this.usageData()?.stats ?? []);
 
   constructor() {
     this.licenseService.getLicenseUsage().subscribe(res => {
@@ -33,5 +35,13 @@ export class LicenseApiStatsComponent {
     });
   }
 
+  countFor(api: ApiUsage): number {
+    return this.selectedRange() === 'lifetime' ? api.lifetimeCount : api.last30DaysCount;
+  }
+
+  bucketsFor(api: ApiUsage): number[] {
+    const counts = api.dailyBuckets.map(b => b.count);
+    return this.selectedRange() === 'lifetime' ? counts : counts.slice(-30);
+  }
 
 }
