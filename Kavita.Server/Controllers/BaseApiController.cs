@@ -5,6 +5,7 @@ using System.Security.Cryptography;
 using System.Threading.Tasks;
 using Kavita.API.Services;
 using Kavita.API.Store;
+using Kavita.Common.Extensions;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -151,7 +152,7 @@ public class BaseApiController : ControllerBase
         if (Path.IsPathRooted(relativePath))
         {
             Logger.LogWarning("Rejected rooted path '{RelativePath}' that attempted to escape base directory '{BaseDirectory}'",
-                relativePath, baseDirectory);
+                relativePath.Sanitize(), baseDirectory.Sanitize());
             return false;
         }
 
@@ -162,7 +163,7 @@ public class BaseApiController : ControllerBase
         if (!fullTarget.StartsWith(baseWithSeparator, StringComparison.Ordinal))
         {
             Logger.LogWarning("Rejected path traversal attempt: '{RelativePath}' resolved to '{ResolvedPath}' outside base directory '{BaseDirectory}'",
-                relativePath, fullTarget, fullBase);
+                relativePath.Sanitize(), fullTarget.Sanitize(), fullBase.Sanitize());
             return false;
         }
 
