@@ -80,7 +80,7 @@
           </div>
         }
         @if (showDiff() && supportsDiff()) {
-          <button class="btn-unstyled" (click)="collapsed.set(!collapsed())"
+          <button class="btn-unstyled diff-toggle" (click)="collapsed.set(!collapsed())"
                   [attr.aria-expanded]="!collapsed()">
             <i class="fa fa-chevron-down" [class.fa-rotate-180]="!collapsed()" aria-hidden="true"></i>
           </button>
