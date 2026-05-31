@@ -1,4 +1,4 @@
-import {ChangeDetectionStrategy, Component, input, model} from '@angular/core';
+import {ChangeDetectionStrategy, Component, effect, input, model, signal} from '@angular/core';
 
 let nextId = 0;
 
@@ -24,6 +24,7 @@ let nextId = 0;
   changeDetection: ChangeDetectionStrategy.OnPush,
   host: {
     '[class.is-open]': 'open()',
+    '[class.is-fully-open]': 'fullyOpen()',
     '[class.toggle-chevron]': "toggleTrigger() === 'chevron'",
   }
 })
@@ -48,6 +49,23 @@ export class AccordionComponent {
   headingLevel = input<number | null>(null);
 
   protected readonly bodyId = `app-accordion-body-${nextId++}`;
+  /**
+   * True only once the open animation has finished. Used to switch the body/host back to
+   * `overflow: visible` so dropdowns (select2, typeahead) inside the body are not clipped by
+   * the collapse wrapper, while keeping it clipped during the open/close animation.
+   */
+  protected readonly fullyOpen = signal(false);
+
+  constructor() {
+    effect((onCleanup) => {
+      if (this.open()) {
+        const timer = setTimeout(() => this.fullyOpen.set(true), 300);
+        onCleanup(() => clearTimeout(timer));
+      } else {
+        this.fullyOpen.set(false);
+      }
+    });
+  }
 
   toggle() {
     this.open.update(v => !v);

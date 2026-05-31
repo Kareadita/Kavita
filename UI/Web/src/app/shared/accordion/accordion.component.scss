@@ -11,6 +11,15 @@
   border-color: var(--accordion-border-hover-color);
 }
 
+// Once fully open, stop clipping so body dropdowns (select2/typeahead) can overflow the tile
+:host(.is-fully-open) {
+  overflow: visible;
+}
+
+:host(.is-fully-open) .body-inner {
+  overflow: visible;
+}
+
 .header {
   display: flex;
   align-items: center;
