@@ -6,6 +6,12 @@
   --bs-btn-disabled-color: var(--btn-disabled-text-color);
 }
 
+button {
+  i {
+    color: var(--btn-fa-icon-color);
+  }
+}
+
 .btn-primary {
   color: var(--btn-primary-text-color);
   background-color: var(--btn-primary-bg-color);
@@ -121,13 +127,13 @@
   }
 }
 
-
+// TODO: This is dead code
 .btn-danger-outline {
   color: var(--btn-danger-outline-text-color);
   background-color: var(--btn-danger-outline-bg-color);
   border-color: var(--btn-danger-outline-border-color);
 
-  i {
+   i {
     color: var(--btn-danger-outline-text-color);
   }
 
@@ -141,6 +147,11 @@
     }
   }
 }
+
+.btn-outline-danger > i {
+  color: var(--bs-btn-color);
+}
+
 
 .btn-actions {
   color: var(--btn-fa-icon-color);
@@ -268,11 +279,7 @@ button:disabled, .form-control:disabled, .form-control[readonly], .disabled, :di
     }
 }
 
-button {
-  i {
-    color: var(--btn-fa-icon-color);
-  }
-}
+
 
 .btn-check:focus + .btn, .btn:focus {
   box-shadow: 0 0 0 0.05rem var(--btn-focus-boxshadow-color);

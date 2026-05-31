@@ -16,14 +16,7 @@ import {PublicationStatus, PublicationStatuses} from "../../_models/metadata/pub
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import {debounceTime, distinctUntilChanged} from "rxjs/operators";
 import {translate, TranslocoDirective} from "@jsverse/transloco";
-import {
-  NgbAccordionBody,
-  NgbAccordionButton,
-  NgbAccordionCollapse,
-  NgbAccordionDirective,
-  NgbAccordionHeader,
-  NgbAccordionItem
-} from "@ng-bootstrap/ng-bootstrap";
+import {AccordionComponent} from "../../shared/accordion/accordion.component";
 import {ScrobbleProviderNamePipe} from "../../_pipes/scrobble-provider-name.pipe";
 import {ProviderImagePipe} from "../../_pipes/provider-image.pipe";
 import {TagBadgeComponent} from "../../shared/tag-badge/tag-badge.component";
@@ -92,15 +85,10 @@ const ProvidersSupportLibraryTypes: Record<ScrobbleProvider, LibraryType[]> = {
   selector: 'app-manage-scrobble-providers',
   imports: [
     TranslocoDirective,
-    NgbAccordionDirective,
-    NgbAccordionItem,
-    NgbAccordionHeader,
-    NgbAccordionBody,
+    AccordionComponent,
     ScrobbleProviderNamePipe,
     ProviderImagePipe,
     ReactiveFormsModule,
-    NgbAccordionCollapse,
-    NgbAccordionButton,
     TagBadgeComponent,
     ScrobbleProviderDescriptionPipe,
     UtcToLocalTimePipe,

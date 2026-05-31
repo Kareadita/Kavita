@@ -33,6 +33,7 @@ button.chevron:focus-visible {
 
 // Leading icon/logo tile
 .lead {
+  position: relative; // supports NgOptimizedImage fill-mode logos projected into this slot
   flex-shrink: 0;
   width: 2.625rem;
   height: 2.625rem;
