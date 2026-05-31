@@ -5,22 +5,14 @@ import {LoadingComponent} from '../../../shared/loading/loading.component';
 import {TranslocoDirective} from "@jsverse/transloco";
 import {AccountService} from "../../../_services/account.service";
 
-import {
-  NgbAccordionBody,
-  NgbAccordionButton,
-  NgbAccordionCollapse,
-  NgbAccordionDirective,
-  NgbAccordionHeader,
-  NgbAccordionItem
-} from "@ng-bootstrap/ng-bootstrap";
 import {ChangelogUpdateItemComponent} from "../changelog-update-item/changelog-update-item.component";
+import {AccordionComponent} from "../../../shared/accordion/accordion.component";
 
 @Component({
     selector: 'app-changelog',
     templateUrl: './changelog.component.html',
     styleUrls: ['./changelog.component.scss'],
-    imports: [LoadingComponent, TranslocoDirective, NgbAccordionDirective,
-        NgbAccordionItem, NgbAccordionButton, NgbAccordionHeader, NgbAccordionCollapse, NgbAccordionBody, ChangelogUpdateItemComponent],
+    imports: [LoadingComponent, TranslocoDirective, ChangelogUpdateItemComponent, AccordionComponent],
     changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class ChangelogComponent implements OnInit {
