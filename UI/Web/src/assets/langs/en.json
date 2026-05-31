@@ -1115,7 +1115,8 @@
         "manage-label": "Manage",
         "renew-label": "Renew",
         "edit-license-label": "Edit license",
-        "check-license-label": "Check"
+        "check-license-label": "Check",
+        "support-id-label": "Support Id"
     },
 
     "manage-matched-metadata": {
