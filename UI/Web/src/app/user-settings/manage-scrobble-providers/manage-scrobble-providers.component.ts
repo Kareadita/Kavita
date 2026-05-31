@@ -48,6 +48,7 @@ import {fromPromise} from "rxjs/internal/observable/innerFrom";
 import {LoadingComponent} from "../../shared/loading/loading.component";
 import {EVENTS, MessageHubService} from "../../_services/message-hub.service";
 import {ScrobbleProviderUpdatedEvent} from "../../_models/events/scrobble-provider-updated-event";
+import {NgOptimizedImage} from "@angular/common";
 
 type ReadStatusTransitionRuleFromGroup = FormGroup<{
   enabled: FormControl<boolean>;
@@ -108,7 +109,8 @@ const ProvidersSupportLibraryTypes: Record<ScrobbleProvider, LibraryType[]> = {
     ScrobbleReadStatusPipe,
     Select2,
     TypeaheadComponent,
-    LoadingComponent
+    LoadingComponent,
+    NgOptimizedImage
   ],
   templateUrl: './manage-scrobble-providers.component.html',
   styleUrl: './manage-scrobble-providers.component.scss',

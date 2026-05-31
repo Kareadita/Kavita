@@ -2453,7 +2453,7 @@
     },
 
     "scrobble-provider-settings-manager": {
-        "description": "Manage what, when, and where things are scrobbled to!",
+        "description": "Manage what, when, and where things are scrobbled to",
         "none-setup": "You do not have any scrobble providers setup yet! Click the add button above to start",
         "select-provider-title": "New Scrobble Provider",
         "authentication": "Authentication",

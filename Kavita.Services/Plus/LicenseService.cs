@@ -355,7 +355,7 @@ public class LicenseService(
 
     public async Task<KavitaPlusLicenseUsageDto> GetLicenseUsage(CancellationToken ct = default)
     {
-        // Expired licenses won't generate new usage, so cache them long term (1 month);
+        // Expired licenses won't generate new usage, so cache them long term (1 month)
         // active licenses refresh every 4 hours.
         var ttl = await HasActiveLicense(ct: ct)
             ? TimeSpan.FromHours(4)

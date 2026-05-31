@@ -223,7 +223,7 @@
   --modal-bg-color: #202122;
   --modal-footer-bg-color: #292929;
   --modal-footer-border-top-color: rgba(255, 255, 255, 0.05);
-  --modal-body-bg-color: var(--elevation-solid-1);
+  --modal-body-bg-color: var(--elevation-layer1-dark-solid);
 
   /* Header */
   --nav-header-text-color: white;
@@ -341,17 +341,26 @@
   --dropdown-overlay-color: var(--elevation-layer1);
 
   /* Accordion */
-  --accordion-header-text-color: rgba(74, 198, 148, 0.9);
-  --accordion-header-bg-color: rgba(52, 60, 70, 0.5);
-  --accordion-body-bg-color: #292929;
+  --accordion-surface-bg-color: var(--elevation-layer1-dark-solid);
+  --accordion-header-text-color: var(--body-text-color);
+  --accordion-header-bg-color: transparent;
+  --accordion-body-bg-color: var(--accordion-surface-bg-color);
   --accordion-body-border-color: rgba(239, 239, 239, 0.125);
   --accordion-body-text-color: var(--body-text-color);
-  --accordion-header-collapsed-text-color: rgba(74, 198, 148, 0.9);
-  --accordion-header-collapsed-bg-color: #292929;
+  --accordion-header-collapsed-text-color: var(--body-text-color);
+  --accordion-header-collapsed-bg-color: transparent;
   --accordion-button-focus-border-color: unset;
   --accordion-button-focus-box-shadow: unset;
-  --accordion-active-body-bg-color: #292929;
+  --accordion-active-body-bg-color: var(--accordion-surface-bg-color);
   --accordion-body-box-shadow: none;
+  --accordion-hairline-color: var(--elevation-layer3);
+  --accordion-subtitle-text-color: var(--offwhite-text-color);
+  --accordion-meta-text-color: var(--text-muted-color);
+  --accordion-chevron-color: var(--offwhite-text-color);
+  --accordion-chevron-hover-color: var(--body-text-color);
+  --accordion-border-hover-color: color-mix(in srgb, #fff 20%, transparent);
+  --accordion-radius: var(--card-border-radius);
+  --accordion-gap: 0.75rem;
 
   /* Breadcrumb */
   --breadcrumb-bg-color: #292d32;

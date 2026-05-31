@@ -3,36 +3,53 @@
     color: var(--accordion-header-text-color);
 }
 
+// Each item is a distinct, elevated tile on the surface color with a hairline border
 .accordion-item {
-    background-color: var(--accordion-body-bg-color);
+    background-color: var(--accordion-surface-bg-color);
     color: var(--accordion-body-text-color);
-    border-color: var(--accordion-body-border-color);
+    border: 1px solid var(--accordion-body-border-color);
+    border-radius: var(--accordion-radius);
+    overflow: hidden;
+    transition: border-color 0.15s ease-in-out;
 
-    div[role="tabpanel"] {
-      background-color: var(--accordion-header-bg-color);
+    &:hover {
+      border-color: var(--accordion-border-hover-color);
+    }
 
-      .accordion-body {
-        background-color: var(--accordion-active-body-bg-color);
-      }
+    // Bootstrap collapses borders/radii between stacked items; separate them into tiles instead
+    & + .accordion-item {
+      margin-top: var(--accordion-gap);
+    }
+
+    .accordion-body {
+      background-color: var(--accordion-active-body-bg-color);
+      // Hairline divider under the header; only visible once the body is revealed
+      border-top: 1px solid var(--accordion-hairline-color);
+      padding: 1.25rem 1.375rem 1.5rem;
     }
 }
 
 .accordion-button {
   display: flex;
   justify-content: space-between;
+  align-items: center;
+  padding: 1rem 1.125rem;
+  background-color: var(--accordion-header-bg-color);
+  color: var(--accordion-header-text-color);
 
   &::after {
     content: none;
   }
 
+  // Flat open-state: only the chevron moves, no surface/color change
   &:not(.collapsed) {
       color: var(--accordion-header-text-color);
-      background-color: var(--accordion-body-bg-color);
+      background-color: var(--accordion-header-bg-color);
       box-shadow: var(--accordion-body-box-shadow);
 
     i {
       transform: rotate(180deg);
-      transition: transform 0.3s ease;
+      transition: transform 0.15s ease-in-out, color 0.15s ease-in-out;
     }
   }
 
@@ -41,13 +58,27 @@
       background-color: var(--accordion-header-collapsed-bg-color);
 
     i {
-      transition: transform 0.3s ease;
+      transition: transform 0.15s ease-in-out, color 0.15s ease-in-out;
     }
+  }
 
+  i {
+    color: var(--accordion-chevron-color);
+  }
+
+  &:hover i {
+    color: var(--accordion-chevron-hover-color);
   }
 
   &:focus {
       border-color: var(--accordion-button-focus-border-color);
       box-shadow: var(--accordion-button-focus-box-shadow);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .accordion-item,
+  .accordion-button i {
+    transition: none;
   }
 }
