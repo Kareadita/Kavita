@@ -1,48 +1,9 @@
-<ng-container *transloco="let t; prefix: 'license'">
+@let hasLicenseOnFile = licenseService.hasLicenseOnFile();
 
-  @let hasLicenseOnFile = licenseService.hasLicenseOnFile();
-
-  @if (!hasLicenseOnFile && activeStep() === KavitaPlusRegistrationStep.Upsell) {
-    <app-kavita-plus-upsell (stepChanged)="activeStep.set($event)" />
-  } @else if (activeStep() === KavitaPlusRegistrationStep.ConnectProviders) {
-    <app-kavita-plus-connect-providers (done)="activeStep.set(KavitaPlusRegistrationStep.Upsell)" />
-  } @else {
-
-    <app-license-dashboard />
-
-<!--          &lt;!&ndash; Actions around license &ndash;&gt;-->
-<!--          <h3>{{t('actions-title')}}</h3>-->
-
-<!--          <div class="mt-2 mb-2">-->
-<!--            <app-setting-button [subtitle]="t('cancel-tooltip')">-->
-<!--              <a class="btn btn-danger btn-sm mt-1" [href]="manageLink()" target="_blank" rel="noreferrer nofollow">{{t('cancel-label')}}</a>-->
-<!--            </app-setting-button>-->
-<!--          </div>-->
-
-<!--          <div class="mt-2 mb-2">-->
-<!--            <app-setting-button [subtitle]="t('delete-tooltip')">-->
-<!--              <button type="button" class="flex-fill btn btn-danger btn-sm mt-1" aria-describedby="license-key-header" (click)="deleteLicense()">-->
-<!--                {{t('activate-delete')}}-->
-<!--              </button>-->
-<!--            </app-setting-button>-->
-<!--          </div>-->
-
-<!--          <div class="mt-2 mb-2">-->
-<!--            <app-setting-button [subtitle]="t('manage-tooltip')">-->
-<!--              <a class="btn btn-primary btn-sm mt-1" [href]="manageLink()" target="_blank" rel="noreferrer nofollow">{{t('manage')}}</a>-->
-<!--            </app-setting-button>-->
-<!--          </div>-->
-
-<!--          <div class="mt-2 mb-2">-->
-<!--            <app-setting-button [subtitle]="t('resend-license-email-tooltip')">-->
-<!--              <button type="button" class="flex-fill btn btn-primary btn-sm mt-1" aria-describedby="license-key-header" (click)="resendWelcomeEmail()">-->
-<!--                {{t('resend-license-email')}}-->
-<!--              </button>-->
-<!--            </app-setting-button>-->
-<!--          </div>-->
-<!--        </div>-->
-<!--      }-->
-<!--    </div>-->
-  }
-
-</ng-container>
+@if (!hasLicenseOnFile && activeStep() === KavitaPlusRegistrationStep.Upsell) {
+  <app-kavita-plus-upsell (stepChanged)="activeStep.set($event)" />
+} @else if (activeStep() === KavitaPlusRegistrationStep.ConnectProviders) {
+  <app-kavita-plus-connect-providers (done)="activeStep.set(KavitaPlusRegistrationStep.Upsell)" />
+} @else {
+  <app-license-dashboard />
+}

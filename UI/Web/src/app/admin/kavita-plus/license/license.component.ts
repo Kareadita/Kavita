@@ -1,6 +1,5 @@
 import {ChangeDetectionStrategy, Component, inject, OnInit, signal} from '@angular/core';
 import {ReactiveFormsModule} from "@angular/forms";
-import {TranslocoDirective} from "@jsverse/transloco";
 import {AccountService} from "../../../_services/account.service";
 import {LicenseService} from "../../../_services/license.service";
 import {WikiLink} from "../../../_models/wiki";
@@ -20,7 +19,7 @@ export enum KavitaPlusRegistrationStep {
     templateUrl: './license.component.html',
     styleUrls: ['./license.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [ReactiveFormsModule, TranslocoDirective, LicenseDashboardComponent, KavitaPlusUpsellComponent, KavitaPlusConnectProvidersComponent]
+  imports: [ReactiveFormsModule, LicenseDashboardComponent, KavitaPlusUpsellComponent, KavitaPlusConnectProvidersComponent]
 })
 export class LicenseComponent implements OnInit {
 
