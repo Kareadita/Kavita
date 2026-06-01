@@ -178,6 +178,52 @@ button.chevron {
   padding: 1.25rem 1.375rem 1.5rem;
 }
 
+// On mobile the header wraps to two rows: row 1 is the lead/title/chevron, row 2 holds the
+// badges and CTA buttons so nothing clips off-screen. The subtitle is suppressed since there
+// isn't room for it in the cramped header.
+@media (max-width: 768px) {
+  .header {
+    flex-wrap: wrap;
+    column-gap: 0.625rem;
+    row-gap: 0.625rem;
+    padding: 0.875rem 1rem;
+  }
+
+  .lead {
+    order: 1;
+  }
+
+  .titles {
+    order: 2;
+    flex: 1 1 auto;
+  }
+
+  .subtitle {
+    display: none;
+  }
+
+  .chevron {
+    order: 3;
+  }
+
+  // Zero-height full-width item forces everything after it onto a second row
+  .spacer {
+    order: 4;
+    flex: 0 0 100%;
+    height: 0;
+  }
+
+  .badges {
+    order: 5;
+  }
+
+  .actions {
+    order: 6;
+    flex: 1 1 auto;
+    justify-content: flex-end;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   :host,
   .body,

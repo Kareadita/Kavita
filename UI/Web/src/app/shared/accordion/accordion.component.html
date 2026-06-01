@@ -25,19 +25,19 @@
   <div class="actions">
     <div class="cta" (click)="$event.stopPropagation()"><ng-content select="[accCta]"/></div>
     <div class="meta"><ng-content select="[accMeta]"/></div>
-
-    @if (headerToggle) {
-      <span class="chevron" aria-hidden="true"><i class="fas fa-chevron-down"></i></span>
-    } @else {
-      <button type="button" class="chevron"
-              [attr.aria-expanded]="open()"
-              [attr.aria-controls]="bodyId"
-              [attr.aria-label]="toggleLabel() || null"
-              (click)="onChevronClick($event)">
-        <i class="fas fa-chevron-down" aria-hidden="true"></i>
-      </button>
-    }
   </div>
+
+  @if (headerToggle) {
+    <span class="chevron" aria-hidden="true"><i class="fas fa-chevron-down"></i></span>
+  } @else {
+    <button type="button" class="chevron"
+            [attr.aria-expanded]="open()"
+            [attr.aria-controls]="bodyId"
+            [attr.aria-label]="toggleLabel() || null"
+            (click)="onChevronClick($event)">
+      <i class="fas fa-chevron-down" aria-hidden="true"></i>
+    </button>
+  }
 </div>
 
 <div class="body" [id]="bodyId">
