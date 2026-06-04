@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
@@ -28,6 +29,15 @@ public class AniListScrobbleProviderService(ILogger<AniListScrobbleProviderServi
     {
         evt.AniListId = series.AniListId;
     }
+
+    // AniList's rate limit is enforced server-wide (~30 requests/min), shared across all users.
+    // 30/min == one request every 2s; the buffer keeps us comfortably under the ceiling.
+    public override RateProfile RateProfile => new(
+        BaseInterval: TimeSpan.FromSeconds(2),
+        Buffer: TimeSpan.FromMilliseconds(300),
+        LowRateThreshold: 10,
+        RebuildWait: TimeSpan.FromSeconds(60),
+        Scope: RateScope.Server);
 
     public override bool IsTokenValid(string token)
     {

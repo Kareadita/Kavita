@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
@@ -158,8 +159,50 @@ public sealed record ScrobbleUpdateContext
 
 }
 
+/// <summary>
+/// Where a provider enforces its rate limit
+/// </summary>
+public enum RateScope
+{
+    /// <summary>
+    /// The limit is shared across the whole server/instance, regardless of user (e.g. AniList)
+    /// </summary>
+    Server = 0,
+    /// <summary>
+    /// The limit is tied to the individual user's token (e.g. Hardcover)
+    /// </summary>
+    User = 1
+}
+
+/// <summary>
+/// Per-provider throttling configuration. Drives how long to wait between requests and when to back off
+/// to let a provider's rate budget rebuild.
+/// </summary>
+/// <param name="BaseInterval">Steady-state gap between successive requests to this provider</param>
+/// <param name="Buffer">Additional safety padding added on top of <paramref name="BaseInterval"/></param>
+/// <param name="LowRateThreshold">When the remaining budget is at or below this, back off by <paramref name="RebuildWait"/> instead of <see cref="BaseRate"/></param>
+/// <param name="RebuildWait">How long to wait before the next request once the budget is low, to let it rebuild</param>
+/// <param name="Scope">Whether the limit is shared server-wide or per-user</param>
+public record RateProfile(
+    TimeSpan BaseInterval,
+    TimeSpan Buffer,
+    int LowRateThreshold,
+    TimeSpan RebuildWait,
+    RateScope Scope)
+{
+    /// <summary>
+    /// Effective steady-state delay between requests (interval plus safety buffer)
+    /// </summary>
+    public TimeSpan BaseRate => BaseInterval + Buffer;
+}
+
 public interface IScrobbleProviderService
 {
+    /// <summary>
+    /// Per-provider rate limiting profile, used to pace and back off requests during a sync
+    /// </summary>
+    RateProfile RateProfile { get; }
+
     /// <summary>
     /// Create, or update a non-processed, <see cref="ScrobbleEventType.ScoreUpdated"/> event, for the given series
     /// </summary>

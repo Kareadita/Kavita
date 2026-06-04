@@ -32,6 +32,8 @@ where T: IScrobbleProviderService
 
     protected abstract void SetScrobbleIds(ScrobbleEvent evt, Series series, Chapter chapter);
 
+    public abstract RateProfile RateProfile { get; }
+
     public abstract bool IsTokenValid(string token);
 
     public async Task ScrobbleReadStatusUpdates(ScrobbleUpdateContext ctx, ScrobbleReadStatus status,

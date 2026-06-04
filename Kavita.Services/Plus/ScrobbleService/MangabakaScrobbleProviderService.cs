@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
@@ -27,6 +28,14 @@ public class MangabakaScrobbleProviderService(ILogger<MangabakaScrobbleProviderS
     {
         evt.MangabakaId = series.MangaBakaId;
     }
+
+    // MangaBaka is technically unlimited and server-wide (API keys), but we still pace it to be polite (~80/min)
+    public override RateProfile RateProfile => new(
+        BaseInterval: TimeSpan.FromMilliseconds(500),
+        Buffer: TimeSpan.FromMilliseconds(250),
+        LowRateThreshold: 5,
+        RebuildWait: TimeSpan.FromSeconds(60),
+        Scope: RateScope.Server);
 
     public override bool IsTokenValid(string token)
     {

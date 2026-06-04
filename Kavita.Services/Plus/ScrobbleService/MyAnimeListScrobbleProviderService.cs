@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using Kavita.API.Database;
 using Kavita.API.Services.Plus;
@@ -22,6 +23,14 @@ public class MyAnimeListScrobbleProviderService(ILogger<MyAnimeListScrobbleProvi
     {
         evt.MalId = series.MalId;
     }
+
+    // This is just a baseline, we don't support MAL yet
+    public override RateProfile RateProfile => new(
+        BaseInterval: TimeSpan.FromSeconds(1),
+        Buffer: TimeSpan.FromMilliseconds(500),
+        LowRateThreshold: 5,
+        RebuildWait: TimeSpan.FromSeconds(60),
+        Scope: RateScope.Server);
 
     public override bool IsTokenValid(string token)
     {

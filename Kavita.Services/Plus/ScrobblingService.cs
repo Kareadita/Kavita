@@ -56,9 +56,58 @@ public class ScrobbleSyncContext
     /// </summary>
     public required string License { get; init; }
     /// <summary>
-    /// Maps userId to left over request amount
+    /// Per-provider throttle profiles, resolved once at the start of the sync
     /// </summary>
-    public required Dictionary<int, Dictionary<ScrobbleProvider, int>> RateLimits { get; init; }
+    public required IReadOnlyDictionary<ScrobbleProvider, RateProfile> RateProfiles { get; init; }
+
+    /// <summary>
+    /// Rate gates keyed by scope. Server-scoped providers share a single gate (UserId is null);
+    /// user-scoped providers get one gate per user.
+    /// </summary>
+    private readonly Dictionary<(int? UserId, ScrobbleProvider Provider), RateGate> _rateGates = [];
+
+    /// <summary>
+    /// Resolves (creating if needed) the rate gate for a user/provider, keyed by the provider's scope
+    /// </summary>
+    public RateGate GetRateGate(int userId, ScrobbleProvider provider)
+    {
+        var profile = RateProfiles[provider];
+        var key = (profile.Scope == RateScope.Server ? (int?) null : userId, provider);
+
+        if (_rateGates.TryGetValue(key, out var gate)) return gate;
+
+        gate = new RateGate(profile);
+        _rateGates[key] = gate;
+
+        return gate;
+    }
+
+    /// <summary>
+    /// Resolves (creating if needed) the rate gate for the scope an event belongs to
+    /// </summary>
+    public RateGate GetRateGate(ScrobbleEvent evt) => GetRateGate(evt.AppUserId, evt.ScrobbleProvider);
+
+    /// <summary>
+    /// Minimum spacing between ANY two K+ requests, regardless of provider/scope. Stops a sync that
+    /// fans out across many providers/users (each with its own ready-to-fire gate) from bursting the K+ proxy.
+    /// </summary>
+    public static readonly TimeSpan GlobalRequestFloor = TimeSpan.FromMilliseconds(250);
+
+    private DateTime _nextGlobalAllowedUtc = DateTime.MinValue;
+
+    /// <summary>
+    /// How long to wait to honor the global request floor (never negative)
+    /// </summary>
+    public TimeSpan GetGlobalFloorWait()
+    {
+        var wait = _nextGlobalAllowedUtc - DateTime.UtcNow;
+        return wait > TimeSpan.Zero ? wait : TimeSpan.Zero;
+    }
+
+    /// <summary>
+    /// Records that a K+ request is firing now, arming the global floor for the next one
+    /// </summary>
+    public void RecordGlobalRequest() => _nextGlobalAllowedUtc = DateTime.UtcNow + GlobalRequestFloor;
 
     /// <summary>
     /// All users being scrobbled for
@@ -91,6 +140,58 @@ public class ScrobbleSyncContext
     /// Sum of all events to process
     /// </summary>
     public int TotalCount => ReadEvents.Count + RatingEvents.Count + ReviewEvents.Count + ReadStatusEvents.Count + Decisions.Count;
+
+    /// <summary>
+    /// Tracks the remaining rate budget and the next-allowed-request time for a single rate scope
+    /// (a server-wide provider, or one user's provider token). Encapsulates all pacing/backoff decisions
+    /// so the processing loop reads as: has budget? wait my turn, post, record the result.
+    /// </summary>
+    public sealed class RateGate(RateProfile profile)
+    {
+        private DateTime _nextAllowedUtc = DateTime.MinValue;
+        private int _rateLeft;
+        private bool _seeded;
+
+        /// <summary>
+        /// True once the initial budget has been fetched from K+. Lets server-scoped gates shared
+        /// between users avoid duplicate lookups.
+        /// </summary>
+        public bool IsSeeded => _seeded;
+
+        /// <summary>
+        /// Whether there is any budget left to attempt a request
+        /// </summary>
+        public bool HasRateLeft() => _rateLeft > 0;
+
+        /// <summary>
+        /// How long to wait before the next request may be sent for this scope (never negative)
+        /// </summary>
+        public TimeSpan GetWaitTime()
+        {
+            var wait = _nextAllowedUtc - DateTime.UtcNow;
+            return wait > TimeSpan.Zero ? wait : TimeSpan.Zero;
+        }
+
+        /// <summary>
+        /// Seeds the initial remaining budget (from K+) without scheduling a wait
+        /// </summary>
+        public void Seed(int rateLeft)
+        {
+            _rateLeft = rateLeft;
+            _seeded = true;
+        }
+
+        /// <summary>
+        /// Records the budget returned by a request and schedules when the next one may fire.
+        /// Backs off for <see cref="RateProfile.RebuildWait"/> when the budget is at or below the threshold.
+        /// </summary>
+        public void RecordResult(int rateLeft)
+        {
+            _rateLeft = rateLeft;
+            var delay = rateLeft <= profile.LowRateThreshold ? profile.RebuildWait : profile.BaseRate;
+            _nextAllowedUtc = DateTime.UtcNow + delay;
+        }
+    }
 }
 
 public class ScrobblingService : IScrobblingService
@@ -116,7 +217,6 @@ public class ScrobblingService : IScrobblingService
     public const string AniListCharacterWebsite = ScrobblingHelper.AniListCharacterWebsite;
     public const string HardcoverStaffWebsite = ScrobblingHelper.HardcoverStaffWebsite;
 
-    private const int ScrobbleSleepTime = 1000; // We can likely tie this to AniList's 90 rate / min ((60 * 1000) / 90)
     private const SeriesIncludes ScrobbleSeriesIncludes = SeriesIncludes.Library | SeriesIncludes.ExternalMetadata | SeriesIncludes.Metadata;
 
     // When adjusting these, also adjust in ManageScrobbleProvidersComponent in the UI
@@ -821,7 +921,9 @@ public class ScrobblingService : IScrobblingService
             ReviewEvents = reviewEvents,
             ReadStatusEvents = readStatusEvents,
             Decisions = CalculateNetWantToReadDecisions(addToWantToRead, removeWantToRead),
-            RateLimits = [],
+            RateProfiles = AllScrobbleProviders.ToDictionary(
+                p => p,
+                p => _serviceProvider.GetRequiredKeyedService<IScrobbleProviderService>(p).RateProfile),
             License = (await _unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.LicenseKey, ct)).Value,
         };
     }
@@ -1299,7 +1401,9 @@ public class ScrobblingService : IScrobblingService
             if (!await ValidateUserToken(user, evt)) continue;
             if (!await ValidateSeriesCanBeScrobbled(evt)) continue;
 
-            if (!ctx.RateLimits[evt.AppUserId].TryGetValue(evt.ScrobbleProvider, out var rateLimit) || rateLimit == 0)
+            var gate = ctx.GetRateGate(evt);
+
+            if (!gate.HasRateLeft())
             {
                 // TODO: This isn't recording the original payload, so we don't know exactly what the rating/etc were
                 _logger.LogDebug("Skipped processing Scrobble event due to premature rate exceeded, provider: {Provider}", evt.ScrobbleProvider);
@@ -1310,14 +1414,21 @@ public class ScrobblingService : IScrobblingService
                 continue;
             }
 
+            // Pace requests for this provider's scope (only the remainder this scope still owes),
+            // then honor the global floor so we don't burst the K+ proxy across all providers/users
+            await Task.Delay(gate.GetWaitTime(), ct);
+            await Task.Delay(ctx.GetGlobalFloorWait(), ct);
+
             try
             {
                 var data = NormalizeScrobbleData(await createEvent(evt));
 
                 data.AuthenticationToken = user.ScrobbleProviders[evt.ScrobbleProvider].AuthenticationToken;
 
+                // Arm the global floor as the request fires, so every send path (success or error) spaces the next one
+                ctx.RecordGlobalRequest();
                 var rateLeft = await PostScrobbleUpdate(data, ctx.License, evt);
-                ctx.RateLimits[evt.AppUserId][evt.ScrobbleProvider] = rateLeft;
+                gate.RecordResult(rateLeft);
 
                 evt.IsProcessed = true;
                 evt.ProcessDateUtc = DateTime.UtcNow;
@@ -1352,8 +1463,8 @@ public class ScrobblingService : IScrobblingService
 
                 if (ex.Message.Contains(RateLimitHitErrorMessage))
                 {
-                    // Ensure we skip all events for this provider this cycle
-                    ctx.RateLimits[evt.AppUserId][evt.ScrobbleProvider] = 0;
+                    // Ensure we skip all remaining events for this scope this cycle
+                    gate.RecordResult(0);
                 }
 
             }
@@ -1364,10 +1475,6 @@ public class ScrobblingService : IScrobblingService
             }
 
             await SaveToDb(ctx.ProgressCounter);
-
-            // We can use count to determine how long to sleep based on rate gain. It might be specific to AniList, but we can model others
-            var delay = rateLimit > 10 ? TimeSpan.FromMilliseconds(ScrobbleSleepTime) : TimeSpan.FromSeconds(60);
-            await Task.Delay(delay, ct);
         }
 
         await SaveToDb(ctx.ProgressCounter, true);
@@ -1916,13 +2023,15 @@ public class ScrobblingService : IScrobblingService
             .Where(kv => allUserProviders.Contains(kv.Key))
             .ToList();
 
-        if (!ctx.RateLimits.ContainsKey(user.Id))
-            ctx.RateLimits[user.Id] = [];
-
-        foreach (var kv in providersToCheck.Where(kv => !ctx.RateLimits[user.Id].ContainsKey(kv.Key)))
+        foreach (var kv in providersToCheck)
         {
+            var gate = ctx.GetRateGate(user.Id, kv.Key);
+
+            // Server-scoped providers share one gate across users; only fetch the budget once
+            if (gate.IsSeeded) continue;
+
             var result = await GetRateLimit(kv.Key, ctx.License, kv.Value.AuthenticationToken, ct);
-            ctx.RateLimits[user.Id][kv.Key] = result;
+            gate.Seed(result);
 
             if (result == 0)
             {

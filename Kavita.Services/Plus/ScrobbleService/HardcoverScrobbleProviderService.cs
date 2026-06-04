@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
@@ -30,6 +31,14 @@ public class HardcoverScrobbleProviderService(ILogger<HardcoverScrobbleProviderS
     {
         evt.HardcoverId = chapter.HardcoverId;
     }
+
+    // Hardcover's rate limit is enforced per-user (~60 requests/min), so each user is tracked independently
+    public override RateProfile RateProfile => new(
+        BaseInterval: TimeSpan.FromSeconds(1),
+        Buffer: TimeSpan.FromMilliseconds(500),
+        LowRateThreshold: 5,
+        RebuildWait: TimeSpan.FromSeconds(60),
+        Scope: RateScope.User);
 
     public override bool IsTokenValid(string token)
     {
