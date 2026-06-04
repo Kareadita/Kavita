@@ -1303,8 +1303,7 @@ public class ScrobblingService : IScrobblingService
         await _unitOfWork.CommitAsync();
 
         await _auditService.LogScrobbleAsync(KavitaPlusEventType.ScrobbleEventFailed, evt.SeriesId,
-            new AuditLogScrobbleParamsDto { ScrobbleEventType = evt.ScrobbleEventType, Provider = evt.ScrobbleProvider },
-            AuditStatus.Failure, "token-expired", evt.AppUserId);
+            ToAuditParams(evt), AuditStatus.Failure, "token-expired", evt.AppUserId);
         return false;
     }
 
@@ -1335,8 +1334,7 @@ public class ScrobblingService : IScrobblingService
         _unitOfWork.ScrobbleRepository.Update(evt);
         await _unitOfWork.CommitAsync();
         await _auditService.LogScrobbleAsync(KavitaPlusEventType.ScrobbleEventFailed, evt.SeriesId,
-            new AuditLogScrobbleParamsDto { ScrobbleEventType = evt.ScrobbleEventType, Provider = evt.ScrobbleProvider },
-            AuditStatus.Failure, "unknown-series", evt.AppUserId);
+            ToAuditParams(evt), AuditStatus.Failure, "unknown-series", evt.AppUserId);
         return false;
     }
 
@@ -1364,6 +1362,24 @@ public class ScrobblingService : IScrobblingService
     }
 
     /// <summary>
+    /// Projects the original payload of a <see cref="ScrobbleEvent"/> into an audit params DTO so skipped/failed
+    /// entries retain the rating, progress, volume/chapter, etc. that the event would have sent.
+    /// </summary>
+    private static AuditLogScrobbleParamsDto ToAuditParams(ScrobbleEvent evt) => new()
+    {
+        Provider = evt.ScrobbleProvider,
+        ScrobbleEventType = evt.ScrobbleEventType,
+        ChapterNumber = evt.ChapterNumber,
+        VolumeNumber = evt.VolumeNumber,
+        PercentRead = evt.Progress,
+        Rating = evt.Rating,
+        ReviewBody = evt.ReviewBody,
+        ReadStatus = evt.ReadStatus ?? default,
+        LibraryType = evt.Series?.Library?.Type ?? LibraryType.Manga,
+        TransitionRuleKind = evt.TransitionRuleKind,
+    };
+
+    /// <summary>
     /// Loops through all events, and post them to K+
     /// </summary>
     /// <param name="events"></param>
@@ -1382,8 +1398,7 @@ public class ScrobblingService : IScrobblingService
         foreach (var evt in eventList.Where(e => !CanProcessScrobbleEvent(e)))
         {
             await _auditService.LogScrobbleAsync(KavitaPlusEventType.ScrobbleEventSkipped, evt.SeriesId,
-                new AuditLogScrobbleParamsDto { ScrobbleEventType = evt.ScrobbleEventType, Provider = evt.ScrobbleProvider },
-                AuditStatus.Info, userId: evt.AppUserId, ct: ct);
+                ToAuditParams(evt), AuditStatus.Info, userId: evt.AppUserId, ct: ct);
         }
 
         foreach (var evt in eventList.Where(CanProcessScrobbleEvent))
@@ -1405,11 +1420,9 @@ public class ScrobblingService : IScrobblingService
 
             if (!gate.HasRateLeft())
             {
-                // TODO: This isn't recording the original payload, so we don't know exactly what the rating/etc were
                 _logger.LogDebug("Skipped processing Scrobble event due to premature rate exceeded, provider: {Provider}", evt.ScrobbleProvider);
                 await _auditService.LogScrobbleAsync(KavitaPlusEventType.ScrobbleEventSkipped, evt.SeriesId,
-                    new AuditLogScrobbleParamsDto { ScrobbleEventType = evt.ScrobbleEventType, Provider = evt.ScrobbleProvider },
-                    AuditStatus.Failure, "rate-limit-hit", userId: evt.AppUserId, ct: ct);
+                    ToAuditParams(evt), AuditStatus.Failure, "rate-limit-hit", userId: evt.AppUserId, ct: ct);
 
                 continue;
             }
@@ -1577,8 +1590,7 @@ public class ScrobblingService : IScrobblingService
                 evt.SetErrorMessage(AccessTokenErrorMessage);
 
                 await _auditService.LogScrobbleAsync(KavitaPlusEventType.ScrobbleEventFailed, evt.SeriesId,
-                    new AuditLogScrobbleParamsDto { Provider = evt.ScrobbleProvider, ScrobbleEventType = evt.ScrobbleEventType, LibraryType = evt.Series?.Library?.Type ?? LibraryType.Manga },
-                    AuditStatus.Failure, "invalid-token", userId: evt.AppUserId);
+                    ToAuditParams(evt), AuditStatus.Failure, "invalid-token", userId: evt.AppUserId);
 
                 throw new KavitaException("Access token is invalid");
             }
@@ -1592,8 +1604,7 @@ public class ScrobblingService : IScrobblingService
                 evt.SetErrorMessage(UnknownSeriesErrorMessage);
 
                 await _auditService.LogScrobbleAsync(KavitaPlusEventType.ScrobbleEventFailed, evt.SeriesId,
-                    new AuditLogScrobbleParamsDto { Provider = evt.ScrobbleProvider, ScrobbleEventType = evt.ScrobbleEventType, LibraryType = evt.Series?.Library?.Type ?? LibraryType.Manga },
-                    AuditStatus.Failure, "unknown-series", userId: evt.AppUserId);
+                    ToAuditParams(evt), AuditStatus.Failure, "unknown-series", userId: evt.AppUserId);
 
             } else if (response.ErrorMessage.StartsWith("Review"))
             {
