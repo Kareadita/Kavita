@@ -90,7 +90,7 @@ public class ScrobbleSyncContext
     /// <summary>
     /// Sum of all events to process
     /// </summary>
-    public int TotalCount => ReadEvents.Count + RatingEvents.Count + ReviewEvents.Count + ReadStatusEvents.Count + AddToWantToRead.Count + RemoveWantToRead.Count;
+    public int TotalCount => ReadEvents.Count + RatingEvents.Count + ReviewEvents.Count + ReadStatusEvents.Count + Decisions.Count;
 }
 
 public class ScrobblingService : IScrobblingService
@@ -131,15 +131,6 @@ public class ScrobblingService : IScrobblingService
     private static readonly IList<ScrobbleProvider> MangaProviders = [
         ScrobbleProvider.AniList, ScrobbleProvider.MangaBaka, ScrobbleProvider.Mal
     ];
-
-    private static readonly IReadOnlyCollection<ScrobbleProvider> AllProviders = BookProviders
-        .Concat(LightNovelProviders)
-        .Concat(ComicProviders)
-        .Concat(MangaProviders)
-        .Concat(BookProviders)
-        .Distinct()
-        .ToList()
-        .AsReadOnly();
 
     private const string RateLimitHitErrorMessage = "Scrobbling rate limit hit";
     private const string UnknownSeriesErrorMessage = "Series cannot be matched for Scrobbling";
@@ -362,16 +353,13 @@ public class ScrobblingService : IScrobblingService
 
             if (string.IsNullOrEmpty(scrobbleProvider.AuthenticationToken))
             {
-                // NOTE: I don't think we need this, it's very noisy and is essentially saying Provider is not setup
-                // _logger.LogTrace("[{Provider}/{UserId}] Skipping {EventType} event on {SeriesId} as no authentication token is set",
-                //     provider, user.Id, eventType, series.Id);
                 continue;
             }
 
             var settings = scrobbleProvider.Settings;
             if (!guard(settings))
             {
-                _logger.LogTrace("[{Provider}/{UserId}] Skipping {EventType} event on {SeriesId} because the event is disabled is disabled",
+                _logger.LogTrace("[{Provider}/{UserId}] Skipping {EventType} event on {SeriesId} because the event type is disabled",
                     provider, user.Id, eventType, series.Id);
                 continue;
             }
@@ -632,7 +620,7 @@ public class ScrobblingService : IScrobblingService
         var providers = GetProvidersForScrobbleEvent(scrobbleProviders, ScrobbleEventType.ChapterRead, ctx);
         if (providers.Count == 0)
         {
-            _logger.LogDebug("Ignoring scrobble reading update on {SeriesId} - {ChapterId}, no providers matched", series.Id, chapters.Select(c => c.Id));
+            _logger.LogDebug("Ignoring scrobble reading update on {SeriesId} - chapters {ChapterIds}, no providers matched", series.Id, string.Join(", ", chapters.Select(c => c.Id)));
             return;
         }
 
@@ -694,11 +682,11 @@ public class ScrobblingService : IScrobblingService
         var providers = GetProvidersForScrobbleEvent(scrobbleProviders, eventType, ctx);
         if (providers.Count == 0)
         {
-            _logger.LogDebug("Ignoring scrobble want to read update on {SeriesId} - {ChapterId}, no providers matched", seriesId, onWantToRead);
+            _logger.LogDebug("Ignoring scrobble want to read update on {SeriesId} (onWantToRead: {OnWantToRead}), no providers matched", seriesId, onWantToRead);
             return;
         }
 
-        _logger.LogInformation("Processing Scrobbling reading event for {AppUserId} on {SeriesName}", userId, series.Name);
+        _logger.LogInformation("Processing Scrobbling want to read event for {AppUserId} on {SeriesName}", userId, series.Name);
 
         var allChapters = series.Volumes.SelectMany(v => v.Chapters).ToList();
         if (allChapters.Count == 0) return;
@@ -1075,19 +1063,6 @@ public class ScrobblingService : IScrobblingService
                 SeriesName = evt.Series.Name,
                 Year = evt.Series.Metadata.ReleaseYear
             }), ct);
-
-        // After decisions, we need to mark all the want to read and remove from want to read as completed
-        var processedDecisions = ctx.Decisions.Where(d => d.IsProcessed).ToList();
-        if (processedDecisions.Count > 0)
-        {
-            foreach (var scrobbleEvent in processedDecisions)
-            {
-                scrobbleEvent.IsProcessed = true;
-                scrobbleEvent.ProcessDateUtc = DateTime.UtcNow;
-                _unitOfWork.ScrobbleRepository.Update(scrobbleEvent);
-            }
-            await _unitOfWork.CommitAsync(ct);
-        }
     }
 
     private async Task ProcessRatingEvents(ScrobbleSyncContext ctx, CancellationToken ct)
@@ -1270,8 +1245,7 @@ public class ScrobblingService : IScrobblingService
     /// <returns></returns>
     private static ScrobbleV3Dto NormalizeScrobbleData(ScrobbleV3Dto data)
     {
-        // We need to handle the encoding and changing it to the old one until we can update the API layer to handle these
-        // which could happen in v0.8.3
+        // We need to handle the encoding and changing it to the old one until the API layer is updated to handle these
         if (data.VolumeNumber is Parser.SpecialVolumeNumber or Parser.DefaultChapterNumber)
         {
             data.VolumeNumber = 0;
@@ -1474,7 +1448,6 @@ public class ScrobblingService : IScrobblingService
                 return response.RateLeft;
             }
 
-            // Might want to log this under ScrobbleError
             if (response.ErrorMessage.Contains("Too Many Requests"))
             {
                 _logger.LogInformation("Hit Too many requests while posting scrobble updates, will be retried in the next cycle");
@@ -1842,13 +1815,9 @@ public class ScrobblingService : IScrobblingService
         switch (auditEntry.ScrobbleDetails!.ScrobbleEventType)
         {
             case ScrobbleEventType.ChapterRead:
-                if (auditEntry.SeriesId == null || auditEntry.UserId == null || auditEntry.SubjectId == null) return false;
-
-                // TODO: COme back to this and rethink
-                //var chapterId = auditEntry.SubjectType == AuditSubjectType.Chapter ? auditEntry.SubjectId : null;
-
-                //await ScrobbleReadingUpdate(auditEntry.UserId.Value, auditEntry.SeriesId.Value, chapterId, ct);
-                break;
+                // TODO: Retrying ChapterRead events is not yet supported. Return false so the entry is not
+                // marked as retried while we send nothing. Revisit and implement the retry path.
+                return false;
             case ScrobbleEventType.AddWantToRead:
                 if (auditEntry.SeriesId == null || auditEntry.UserId == null) return false;
                 await ScrobbleWantToReadUpdate(auditEntry.UserId.Value, auditEntry.SeriesId.Value, true, ct);
