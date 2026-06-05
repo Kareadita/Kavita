@@ -27,6 +27,9 @@ public class RateLimiter(int maxRequests, TimeSpan duration, bool refillBetween 
 
             RefillTokens(key);
 
+            // Re-read the bucket, as RefillTokens may have updated the token count
+            value = _tokenBuckets[key];
+
             if (value.Tokens <= 0) return false;
 
             _tokenBuckets[key] = (Tokens: value.Tokens - 1, LastRefill: value.LastRefill);
