@@ -37,7 +37,7 @@ import {Genre} from "../../_models/metadata/genre";
 import {DashboardStream} from "../../_models/dashboard/dashboard-stream";
 import {StreamType} from "../../_models/dashboard/stream-type.enum";
 import {LoadingComponent} from "../../shared/loading/loading.component";
-import {ScrobbleProvider, ScrobblingService} from "../../_services/scrobbling.service";
+import {ScrobblingService} from "../../_services/scrobbling.service";
 import {ToastrService} from "ngx-toastr";
 import {SettingsTabId} from "../../sidenav/preference-nav/preference-nav.component";
 import {ReaderService} from "../../_services/reader.service";
@@ -152,6 +152,7 @@ export class DashboardComponent {
     if (this.licenseService.hasActiveLicense()) {
       this.scrobblingService.expiredTokens()
         .pipe(
+          takeUntilDestroyed(this.destroyRef),
           filter(providers => providers.length > 0),
           map(providers => providers.map(this.scrobbleProviderNamePipe.transform).join(', ')),
           switchMap(providerNames => this.toastr.error(providerNames, translate('toasts.tokens-expired')).onTap),
