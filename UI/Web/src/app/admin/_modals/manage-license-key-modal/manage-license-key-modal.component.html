@@ -17,6 +17,7 @@
 
       <div class="ms-auto d-flex gap-2">
         <button type="button" class="btn btn-outline-secondary" (click)="resetLicense()">{{t('reset-license')}}</button>
+        <button type="button" class="btn btn-outline-secondary" (click)="modal.dismiss()">{{t('close')}}</button>
         <button type="button" class="btn btn-outline-primary" [disabled]="!formIsValid()" (click)="save()">{{t('save')}}</button>
       </div>
     </div>
