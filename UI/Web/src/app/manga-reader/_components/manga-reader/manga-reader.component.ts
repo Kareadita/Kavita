@@ -1042,7 +1042,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
 
 
-  init(firstLoad: boolean) {
+  init(firstLoad: boolean, direction: 'Next' | 'Prev' | 'None' = 'None') {
     this.nextChapterId = CHAPTER_ID_NOT_FETCHED;
     this.prevChapterId = CHAPTER_ID_NOT_FETCHED;
     this.nextChapterDisabled = false;
@@ -1114,14 +1114,24 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
       let page = results.progress.pageNum;
 
-      // When a chapter is completed, we store the last page (maxPages - 1) as progress maxPages
-      // We need to correct for this when using it pageNum again. See setPageNum method for the correction logic
-      if (page === this.maxPages) {
-        page--;
-      }
+      // Reading forward into an already fully-read next chapter is a re-read: reset to the start so
+      // it re-counts on completion (via reading sessions) instead of resuming at the last page.
+      // Partially-read next chapters still resume where you left off. See readChapter()'s reread flow.
+      if (direction === 'Next' && page >= this.maxPages) {
+        if (!this.incognitoMode) {
+          this.readerService.saveProgress(this.libraryId, this.seriesId, this.volumeId, this.chapterId, 0).subscribe();
+        }
+        page = 0;
+      } else {
+        // When a chapter is completed, we store the last page (maxPages - 1) as progress maxPages
+        // We need to correct for this when using it pageNum again. See setPageNum method for the correction logic
+        if (page === this.maxPages) {
+          page--;
+        }
 
-      if (page > this.maxPages) {
-        page = !firstLoad ? 0 : this.maxPages - 1;
+        if (page > this.maxPages) {
+          page = !firstLoad ? 0 : this.maxPages - 1;
+        }
       }
 
       page = this.adjustPagesForDoubleRenderer(page);
@@ -1520,7 +1530,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     if (prevChapter != this.chapterId) {
       if (prevChapter !== undefined) {
         this.chapterId = prevChapter;
-        this.init(false);
+        this.init(false, 'Prev');
         return;
       }
     }
@@ -1545,7 +1555,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       // Load chapter Id onto route but don't reload
       const newRoute = this.readerService.getNextChapterUrl(this.router.url, this.chapterId, this.incognitoMode, this.readingListMode, this.readingListId);
       window.history.replaceState({}, '', newRoute);
-      this.init(false);
+      this.init(false, direction);
       const msg = translate(direction === 'Next' ? 'toasts.load-next-chapter' : 'toasts.load-prev-chapter', {entity: this.entityTitleService.formatChapterName(this.libraryType).toLowerCase()});
       this.toastr.info(msg, '', {timeOut: 3000});
     } else {
