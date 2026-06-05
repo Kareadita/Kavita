@@ -46,6 +46,12 @@
 
           <form [formGroup]="formGroup" class="d-flex flex-column gap-3">
 
+            @if (provider === ScrobbleProvider.AniList) {
+              <p class="alert alert-warning" role="alert">
+                {{t('anilist-warning')}}
+              </p>
+            }
+
             <div>
               <div class="text-secondary fw-bold text-uppercase small px-1 mb-2" style="font-size: 0.75rem; letter-spacing: 0.5px;">
                 {{ t('info') }}
@@ -66,7 +72,7 @@
                       @if (userScrobbleProvider.lastSyncedUtc) {
                         <span class="text-nowrap">
                           <i class="fa-solid fa-rotate me-1"></i>
-                          <span [ngbTooltip]="userScrobbleProvider.lastSyncedUtc | utcToLocalTime">{{ t('last-synced', { time: userScrobbleProvider.lastSyncedUtc | utcToLocalDate | timeAgo }) }}</span>
+                          <span [ngbTooltip]="userScrobbleProvider.lastSyncedUtc | utcToLocalTime">{{ t('last-synced', { time: userScrobbleProvider.lastSyncedUtc | utcToLocalDate | timeDifference }) }}</span>
                         </span>
                       }
                     </div>

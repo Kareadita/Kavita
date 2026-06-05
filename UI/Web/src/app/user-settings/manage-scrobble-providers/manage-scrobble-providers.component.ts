@@ -18,38 +18,37 @@ import {PublicationStatus, PublicationStatuses} from "../../_models/metadata/pub
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import {catchError, debounceTime, distinctUntilChanged} from "rxjs/operators";
 import {translate, TranslocoDirective} from "@jsverse/transloco";
-import {AccordionComponent} from "../../shared/accordion/accordion.component";
 import {ScrobbleProviderNamePipe} from "../../_pipes/scrobble-provider-name.pipe";
-import {ProviderImagePipe} from "../../_pipes/provider-image.pipe";
-import {TagBadgeComponent} from "../../shared/tag-badge/tag-badge.component";
-import {ScrobbleProviderDescriptionPipe} from "../manga-user-preferences/scrobble-provider-description.pipe";
-import {UtcToLocalTimePipe} from "../../_pipes/utc-to-local-time.pipe";
 import {ScrobbleEventType} from "../../_models/scrobbling/scrobble-event";
 import {ReviewScrobbleTargetNamePipe} from "../../_pipes/review-scrobble-target-name.pipe";
-import {AgeRatingPipe} from "../../_pipes/age-rating.pipe";
 import {Library, LibraryType} from "../../_models/library/library";
 import {LibraryService} from "../../_services/library.service";
 import {PublicationStatusPipe} from "../../_pipes/publication-status.pipe";
 import {ScrobbleReadStatusPipe} from "../../_pipes/scrobble-read-status.pipe";
 import {Select2, Select2Data} from "ng-select2-component";
 import {TypeaheadSettings} from "../../typeahead/_models/typeahead-settings";
-import {TypeaheadComponent} from "../../typeahead/_components/typeahead.component";
 import {ModalService} from "../../_services/modal.service";
 import {
   ManageUserScrobbleProviderModalComponent
 } from "../_modals/manage-user-scrobble-provider-modal/manage-user-scrobble-provider-modal.component";
 import {ConfirmService} from "../../shared/confirm.service";
 import {fromPromise} from "rxjs/internal/observable/innerFrom";
-import {LoadingComponent} from "../../shared/loading/loading.component";
 import {EVENTS, MessageHubService} from "../../_services/message-hub.service";
 import {ScrobbleProviderUpdatedEvent} from "../../_models/events/scrobble-provider-updated-event";
 import {NgOptimizedImage} from "@angular/common";
-import {UtcToLocalDatePipe} from "../../_pipes/utc-to-locale-date.pipe";
-import {TimeAgoPipe} from "../../_pipes/time-ago.pipe";
 import {NgbTooltip} from "@ng-bootstrap/ng-bootstrap";
-import {TimeDifferencePipe} from "../../_pipes/time-difference.pipe";
 import {ToastrService} from "ngx-toastr";
+import {AccordionComponent} from "../../shared/accordion/accordion.component";
+import {LoadingComponent} from "../../shared/loading/loading.component";
+import {ProviderImagePipe} from "../../_pipes/provider-image.pipe";
+import {ScrobbleProviderDescriptionPipe} from "../manga-user-preferences/scrobble-provider-description.pipe";
+import {TagBadgeComponent} from "../../shared/tag-badge/tag-badge.component";
+import {UtcToLocalDatePipe} from "../../_pipes/utc-to-locale-date.pipe";
 import {DefaultValuePipe} from "../../_pipes/default-value.pipe";
+import {UtcToLocalTimePipe} from "../../_pipes/utc-to-local-time.pipe";
+import {TimeDifferencePipe} from "../../_pipes/time-difference.pipe";
+import {TypeaheadComponent} from "../../typeahead/_components/typeahead.component";
+import {AgeRatingPipe} from "../../_pipes/age-rating.pipe";
 
 type ReadStatusTransitionRuleFromGroup = FormGroup<{
   enabled: FormControl<boolean>;
@@ -93,25 +92,24 @@ const ProvidersSupportLibraryTypes: Record<ScrobbleProvider, LibraryType[]> = {
   selector: 'app-manage-scrobble-providers',
   imports: [
     TranslocoDirective,
-    AccordionComponent,
-    ScrobbleProviderNamePipe,
-    ProviderImagePipe,
     ReactiveFormsModule,
-    TagBadgeComponent,
-    ScrobbleProviderDescriptionPipe,
-    UtcToLocalTimePipe,
     ReviewScrobbleTargetNamePipe,
-    AgeRatingPipe,
     ScrobbleReadStatusPipe,
     Select2,
-    TypeaheadComponent,
-    LoadingComponent,
     NgOptimizedImage,
-    UtcToLocalDatePipe,
-    TimeAgoPipe,
     NgbTooltip,
+    AccordionComponent,
+    LoadingComponent,
+    ProviderImagePipe,
+    ScrobbleProviderNamePipe,
+    ScrobbleProviderDescriptionPipe,
+    TagBadgeComponent,
+    UtcToLocalDatePipe,
+    DefaultValuePipe,
+    UtcToLocalTimePipe,
     TimeDifferencePipe,
-    DefaultValuePipe
+    TypeaheadComponent,
+    AgeRatingPipe,
   ],
   templateUrl: './manage-scrobble-providers.component.html',
   styleUrl: './manage-scrobble-providers.component.scss',
@@ -299,4 +297,5 @@ export class ManageScrobbleProvidersComponent implements OnInit {
   protected readonly ReviewScrobbleTargets = ReviewScrobbleTargets;
   protected readonly AgeRatings = AgeRatings;
   protected readonly ScrobbleReadStatuses = ScrobbleReadStatuses;
+  protected readonly ScrobbleProvider = ScrobbleProvider;
 }
