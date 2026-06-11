@@ -8,6 +8,7 @@ import {MediaFormatPillComponent} from "../media-format-pill/media-format-pill.c
 import {ScrobbleProviderTagBadgeComponent} from "../scrobble-provider-tag-badge/scrobble-provider-tag-badge.component";
 import {MatchStatusDotComponent} from "../match-status-dot/match-status-dot.component";
 import {ConfidenceChipComponent} from "../confidence-chip/confidence-chip.component";
+import {SafeUrlPipe} from "../../../_pipes/safe-url.pipe";
 
 @Component({
   selector: 'app-match-series-result-item',
@@ -19,6 +20,7 @@ import {ConfidenceChipComponent} from "../confidence-chip/confidence-chip.compon
     ScrobbleProviderTagBadgeComponent,
     MatchStatusDotComponent,
     ConfidenceChipComponent,
+    SafeUrlPipe,
   ],
   templateUrl: './match-series-result-item.component.html',
   styleUrl: './match-series-result-item.component.scss',

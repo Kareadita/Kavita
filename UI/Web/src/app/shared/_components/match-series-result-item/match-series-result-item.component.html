@@ -14,7 +14,10 @@
   <div class="match-result-content d-flex flex-column flex-fill gap-1">
 
     <div class="match-result-title-row d-flex align-items-center flex-wrap gap-2">
-      <h3 class="match-result-name fw-bold">{{ item().series.name }}</h3>
+      <h3 class="match-result-name fw-bold">
+        <a [href]="item().series.siteUrl | safeUrl" target="_blank" rel="noreferrer noopener">{{ item().series.name }}</a>
+
+      </h3>
       <app-media-format-pill [format]="item().series.plusMediaFormat" />
       <app-scrobble-provider-tag-badge [provider]="item().series.provider" />
     </div>

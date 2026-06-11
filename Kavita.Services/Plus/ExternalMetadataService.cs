@@ -533,7 +533,7 @@ public class ExternalMetadataService : IExternalMetadataService
             // prefer what was passed in (manual match), fall back to what K+ returned
             var beforeIds = new AuditLogMatchExternalIdsParamsDto { AniListId = series.AniListId, MalId = series.MalId, MangaBakaId = series.MangaBakaId, CbrId = series.CbrId, HardcoverId = series.HardcoverId };
 
-            // TODO: Need to rewthink how all these Ids work and only write on MetadataFetchTrigger.OnDemand
+            // TODO: Need to rethink how all these Ids work and only write on MetadataFetchTrigger.OnDemand
             externalSeriesMetadata.MalId = data.MalId ?? result.MalId ?? 0;
             externalSeriesMetadata.AniListId = data.AniListId ?? result.AniListId ?? 0;
             externalSeriesMetadata.CbrId = data.CbrId ?? result.CbrId ?? 0;
