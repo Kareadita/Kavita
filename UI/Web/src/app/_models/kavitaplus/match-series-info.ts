@@ -9,7 +9,8 @@ export interface MatchSeriesInfo {
   isLegacy: boolean;
   plusMediaFormat: PlusMediaFormat;
   libraryType: LibraryType;
-  primaryProvider?: MetadataProvider | null;
+  matchedProvider?: MetadataProvider | null;
+  primaryProvider: MetadataProvider;
   seriesFormat: MangaFormat;
   mangaBakaId?: number;
   hardcoverId?: number;

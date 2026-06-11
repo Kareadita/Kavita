@@ -214,7 +214,7 @@ public class ExternalMetadataService : IExternalMetadataService
                              || potentialMalId.HasValue
                              || potentialMangabakaId > 0
                              || !string.IsNullOrEmpty(potentialHardcoverSlug)
-                             || !string.IsNullOrEmpty(potentialCbrSlug);
+                             ;//|| !string.IsNullOrEmpty(potentialCbrSlug); // For now, we pass slug as query as there is a direct handling on Query currently
 
         query = wasHeaderQuery ? null : dto.Query;
 
@@ -540,10 +540,19 @@ public class ExternalMetadataService : IExternalMetadataService
             externalSeriesMetadata.MangabakaId = data.MangabakaId ?? result.MangabakaId ?? 0;
             series.MangaBakaId = externalSeriesMetadata.MangabakaId;
             var hardcoverId = data.HardcoverId ?? result.Series?.HardcoverId ?? series.HardcoverId;
-            var afterIds = new AuditLogMatchExternalIdsParamsDto { AniListId = externalSeriesMetadata.AniListId, MalId = externalSeriesMetadata.MalId, MangaBakaId = series.MangaBakaId, CbrId = externalSeriesMetadata.CbrId, HardcoverId = hardcoverId };
+            var afterIds = new AuditLogMatchExternalIdsParamsDto {
+                AniListId = externalSeriesMetadata.AniListId,
+                MalId = externalSeriesMetadata.MalId,
+                MangaBakaId = series.MangaBakaId,
+                CbrId = externalSeriesMetadata.CbrId,
+                HardcoverId = hardcoverId };
 
             await _auditService.LogMatchAsync(KavitaPlusEventType.SeriesMatched, seriesId,
-                new AuditLogMatchedParamsDto { SeriesName = series.Name, Before = beforeIds, After = afterIds, MatchedName = result.Series?.Name }, ct: ct);
+                new AuditLogMatchedParamsDto {
+                    SeriesName = series.Name,
+                    Before = beforeIds, After = afterIds,
+                    MatchedName = result.Series?.Name
+                }, ct: ct);
 
             // If there is metadata and the user has metadata download turned on
             var madeMetadataModification = false;

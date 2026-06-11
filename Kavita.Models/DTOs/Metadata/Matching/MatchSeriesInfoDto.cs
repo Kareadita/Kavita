@@ -13,7 +13,14 @@ public sealed record MatchSeriesInfoDto
     public bool IsLegacy { get; set; }
     public PlusMediaFormat PlusMediaFormat { get; set; }
     public LibraryType LibraryType { get; set; }
-    public MetadataProvider? PrimaryProvider { get; set; }
+    /// <summary>
+    /// Where the Match came from
+    /// </summary>
+    public MetadataProvider? MatchedProvider { get; set; }
+    /// <summary>
+    /// Who we would match against
+    /// </summary>
+    public MetadataProvider PrimaryProvider { get; set; }
     public MangaFormat SeriesFormat { get; set; }
     public int? MangaBakaId { get; set; }
     public int? AniListId { get; set; }

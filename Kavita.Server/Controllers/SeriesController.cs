@@ -21,6 +21,7 @@ using Kavita.Models.DTOs.Recommendation;
 using Kavita.Models.DTOs.KavitaPlus.ExternalMetadata;
 using Kavita.Models.DTOs.SeriesDetail;
 using Kavita.Models.Entities.Enums;
+using Kavita.Models.Entities.Enums.KavitaPlus;
 using Kavita.Models.Entities.MetadataMatching;
 using Kavita.Models.Extensions;
 using Kavita.Server.Attributes;
@@ -31,6 +32,7 @@ using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using MetadataProvider = Kavita.Models.Entities.Enums.MetadataProvider;
 
 namespace Kavita.Server.Controllers;
 
@@ -633,6 +635,17 @@ public class SeriesController(
         var libraryType = series.Library.Type;
         var externalMetadata = series.ExternalSeriesMetadata;
 
+        // This is assuming v2 logic. Not sure if we will change how we match on V3 yet
+        var primaryProvider = Models.Entities.Enums.MetadataProvider.Mangabaka;
+        if (plusFormat is PlusMediaFormat.Comic)
+        {
+            primaryProvider = Models.Entities.Enums.MetadataProvider.ComicBookRoundup;
+        }
+        if (plusFormat is PlusMediaFormat.Book or PlusMediaFormat.LightNovel)
+        {
+            primaryProvider = Models.Entities.Enums.MetadataProvider.Hardcover;
+        }
+
         // We need provider derived from the primary id
         MetadataProvider? provider = null;
 
@@ -648,9 +661,9 @@ public class SeriesController(
             provider = Models.Entities.Enums.MetadataProvider.ComicBookRoundup;
         }
 
-        return Ok(new MatchSeriesInfoDto()
+        return Ok(new MatchSeriesInfoDto
         {
-            HasMatch = externalMetadata.Id > 0,
+            HasMatch = externalMetadata.Id > 0 && provider != null,
             // MangaBaka will always set AniList if set
             IsLegacy = series is {AniListId: > 0, MangaBakaId: 0},
             CbrId = series.CbrId,
@@ -659,7 +672,8 @@ public class SeriesController(
             AniListId = series.AniListId,
             LibraryType = libraryType,
             PlusMediaFormat = plusFormat,
-            PrimaryProvider = provider,
+            MatchedProvider = provider,
+            PrimaryProvider = primaryProvider,
             SeriesFormat = series.Format
         });
     }
