@@ -3,10 +3,12 @@ using System.Collections.Generic;
 using Kavita.Models.DTOs.KavitaPlus.ExternalMetadata;
 using Kavita.Models.DTOs.Scrobbling;
 using Kavita.Models.Entities.Enums;
+using Kavita.Models.Entities.Enums.KavitaPlus;
 using Kavita.Models.Entities.Enums.UserPreferences;
 using Kavita.Models.Entities.Scrobble;
 
 namespace Kavita.Models.DTOs.KavitaPlus.Scrobble;
+#nullable enable
 
 public record ScrobbleV3Dto: MetadataRequest
 {

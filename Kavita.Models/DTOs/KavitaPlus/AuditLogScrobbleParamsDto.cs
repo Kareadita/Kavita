@@ -1,5 +1,6 @@
 using Kavita.Models.DTOs.Scrobbling;
 using Kavita.Models.Entities.Enums;
+using Kavita.Models.Entities.Enums.KavitaPlus;
 using Kavita.Models.Entities.Enums.UserPreferences;
 
 namespace Kavita.Models.DTOs.KavitaPlus;

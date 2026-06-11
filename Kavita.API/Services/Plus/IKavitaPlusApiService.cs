@@ -24,11 +24,7 @@ namespace Kavita.API.Services.Plus;
 public interface IKavitaPlusApiService
 {
     [Obsolete]
-    Task<bool> HasTokenExpiredAsync(string license, string token, ScrobbleProvider provider, CancellationToken ct = default);
-    [Obsolete]
     Task<int> GetRateLimitAsync(string license, string token, CancellationToken ct = default);
-    [Obsolete]
-    Task<ScrobbleResponseDto> PostScrobbleUpdateAsync(ScrobbleDto data, string license, CancellationToken ct = default);
     [Obsolete]
     Task<IList<MalStackDto>> GetMalStacksAsync(string malUsername, string license, CancellationToken ct = default);
     [Obsolete]

@@ -1,4 +1,5 @@
 ﻿using Kavita.Models.DTOs.Scrobbling;
+using Kavita.Models.Entities.Enums.KavitaPlus;
 using Kavita.Models.Entities.Interfaces;
 
 namespace Kavita.Models.DTOs.KavitaPlus.ExternalMetadata.Covers;

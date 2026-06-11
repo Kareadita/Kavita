@@ -10,6 +10,7 @@ using Kavita.Models.DTOs.KavitaPlus.ExternalMetadata.Covers;
 using Kavita.Models.DTOs.KavitaPlus.Metadata;
 using Kavita.Models.DTOs.Metadata.Matching;
 using Kavita.Models.DTOs.Scrobbling;
+using Kavita.Models.Entities.Enums.KavitaPlus;
 using Xunit.Abstractions;
 
 namespace Kavita.Integration.Tests.Plus;

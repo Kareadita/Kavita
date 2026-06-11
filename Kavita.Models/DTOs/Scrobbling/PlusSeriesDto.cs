@@ -1,4 +1,6 @@
-﻿namespace Kavita.Models.DTOs.Scrobbling;
+﻿using Kavita.Models.Entities.Enums.KavitaPlus;
+
+namespace Kavita.Models.DTOs.Scrobbling;
 #nullable enable
 
 /// <summary>

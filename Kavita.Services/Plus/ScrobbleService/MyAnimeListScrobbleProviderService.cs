@@ -5,6 +5,7 @@ using Kavita.API.Services.Plus;
 using Kavita.Models.DTOs.Scrobbling;
 using Kavita.Models.Entities;
 using Kavita.Models.Entities.Enums;
+using Kavita.Models.Entities.Enums.KavitaPlus;
 using Kavita.Models.Entities.Scrobble;
 using Microsoft.Extensions.Logging;
 

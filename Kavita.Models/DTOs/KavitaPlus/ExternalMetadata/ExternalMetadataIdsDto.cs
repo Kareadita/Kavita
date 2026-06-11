@@ -1,4 +1,5 @@
 ﻿using Kavita.Models.DTOs.Scrobbling;
+using Kavita.Models.Entities.Enums.KavitaPlus;
 
 namespace Kavita.Models.DTOs.KavitaPlus.ExternalMetadata;
 #nullable enable
@@ -16,5 +17,5 @@ public sealed record ExternalMetadataIdsDto
 
     public string? SeriesName { get; set; }
     public string? LocalizedSeriesName { get; set; }
-    public PlusMediaFormat? PlusMediaFormat { get; set; } = DTOs.Scrobbling.PlusMediaFormat.Unknown;
+    public PlusMediaFormat? PlusMediaFormat { get; set; } = Kavita.Models.Entities.Enums.KavitaPlus.PlusMediaFormat.Unknown;
 }

@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using Kavita.Models.DTOs.Scrobbling;
 using Kavita.Models.Entities.Enums;
+using Kavita.Models.Entities.Enums.KavitaPlus;
 
 namespace Kavita.Models.Extensions;
 

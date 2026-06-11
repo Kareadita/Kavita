@@ -8,6 +8,7 @@ using Kavita.Models.Builders;
 using Kavita.Models.DTOs.KavitaPlus.Scrobble;
 using Kavita.Models.DTOs.Scrobbling;
 using Kavita.Models.Entities.Enums;
+using Kavita.Models.Entities.Enums.KavitaPlus;
 using Kavita.Models.Entities.Enums.UserPreferences;
 using Kavita.Models.Entities.History;
 using Kavita.Models.Entities.Progress;

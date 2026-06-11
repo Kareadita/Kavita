@@ -19,7 +19,6 @@ using Kavita.Models.DTOs.KavitaPlus.Scrobble;
 using Kavita.Models.DTOs.Metadata.Matching;
 using Kavita.Models.DTOs.Scrobbling;
 using Kavita.Models.Entities.Enums;
-using Kavita.Models.Entities.User;
 using Microsoft.Extensions.Logging;
 
 namespace Kavita.Services.Plus;
@@ -28,14 +27,6 @@ public class KavitaPlusApiService(ILogger<KavitaPlusApiService> logger, IUnitOfW
 {
     private const string ScrobblingPath = "/api/scrobbling/";
 
-    public async Task<bool> HasTokenExpiredAsync(string license, string token, ScrobbleProvider provider,
-        CancellationToken ct = default)
-    {
-        var res = await Get(ScrobblingPath + "valid-key?provider=" + provider + "&key=" + token, license, token);
-        var str = await res.GetStringAsync();
-        return bool.Parse(str);
-    }
-
     public async Task<int> GetRateLimitAsync(string license, string token, CancellationToken ct = default)
     {
         var res = await Get(ScrobblingPath + "rate-limit?accessToken=" + token, license, token);
@@ -43,11 +34,6 @@ public class KavitaPlusApiService(ILogger<KavitaPlusApiService> logger, IUnitOfW
         return int.Parse(str);
     }
 
-    public async Task<ScrobbleResponseDto> PostScrobbleUpdateAsync(ScrobbleDto data, string license,
-        CancellationToken ct = default)
-    {
-        return await PostAndReceive<ScrobbleResponseDto>(ScrobblingPath + "update", data, license);
-    }
 
     public async Task<IList<MalStackDto>> GetMalStacksAsync(string malUsername, string license, CancellationToken ct = default)
     {

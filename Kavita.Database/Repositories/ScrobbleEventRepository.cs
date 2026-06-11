@@ -10,6 +10,7 @@ using Kavita.Common.Helpers;
 using Kavita.Database.Extensions;
 using Kavita.Models.DTOs.Scrobbling;
 using Kavita.Models.Entities.Enums;
+using Kavita.Models.Entities.Enums.KavitaPlus;
 using Kavita.Models.Entities.History;
 using Kavita.Models.Entities.Scrobble;
 using Microsoft.EntityFrameworkCore;
