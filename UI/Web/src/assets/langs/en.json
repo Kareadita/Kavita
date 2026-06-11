@@ -1603,7 +1603,8 @@
         "sync-started-collection": "Starting sync of {{collectionName}} ({{itemCount}} items)",
         "sync-failed-collection": "Sync failed for {{collectionName}}",
         "sync-completed-want-to-read": "{{seriesMatched}} series matched for {{userName}}",
-        "read-status-update": "Status {{status}}"
+        "read-status-update": "Status {{status}}",
+        "series-matched-against": "Matched against \"{{matchName}}\""
     },
 
     "kavita-plus-event-type-pipe": {

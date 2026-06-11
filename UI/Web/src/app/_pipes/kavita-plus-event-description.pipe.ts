@@ -23,7 +23,7 @@ export class KavitaPlusEventDescriptionPipe implements PipeTransform {
     if (sd) {
       switch (sd.scrobbleEventType) {
         case ScrobbleEventType.ChapterRead: {
-          // Note: there can be a discrepency where creation event says Ch 2 and Sent event says Vol 0 Ch 2 due to
+          // Note: there can be a discrepancy where creation event says Ch 2 and Sent event says Vol 0 Ch 2 due to
           // -100000 being overridden to 0 on send
           const chapter = this.entityTitleService.scrobbleDetailLabel(sd);
           return chapter ? this.translocoService.translate(`${PREFIX}.read-progress-sent`, {chapter}) : '';
@@ -88,6 +88,10 @@ export class KavitaPlusEventDescriptionPipe implements PipeTransform {
 
     if (entry.eventType === KavitaPlusEventType.PersonAliasAdded) {
       return this.translocoService.translate(`${PREFIX}.person-alias-added`, {personName: entry.metadataExtras?.personName, alias: entry.metadataExtras?.aliasAdded});
+    }
+
+    if (entry.eventType === KavitaPlusEventType.SeriesMatched) {
+      return this.translocoService.translate(`${PREFIX}.series-matched-against`, {matchName: entry.matchDetails?.matchedName});
     }
 
     return '';
