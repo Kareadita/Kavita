@@ -1,4 +1,4 @@
-import {ChangeDetectionStrategy, ChangeDetectorRef, Component, inject} from '@angular/core';
+import {ChangeDetectionStrategy, Component, inject, signal} from '@angular/core';
 import {translate, TranslocoDirective} from "@jsverse/transloco";
 import {CollectionTagService} from "../../../_services/collection-tag.service";
 import {ToastrService} from "ngx-toastr";
@@ -25,25 +25,25 @@ import {EmptyStateComponent} from "../../../shared/_components/empty-state/empty
 })
 export class ImportMalCollectionComponent {
   private readonly collectionService = inject(CollectionTagService);
-  private readonly cdRef = inject(ChangeDetectorRef);
   private readonly toastr = inject(ToastrService);
   private readonly scrobblingService = inject(ScrobblingService);
   private readonly confirmService = inject(ConfirmService);
 
-  stacks: Array<MalStack> = [];
-  isLoading = true;
-  collectionMap: {[key: string]: UserCollection | MalStack} = {};
+  stacks = signal<MalStack[]>([]);
+  isLoading = signal<boolean>(true);
+  collectionMap= signal<{[key: string]: UserCollection | MalStack}>({});
 
   constructor() {
     this.scrobblingService.getScrobbleProviders().subscribe(async res => {
       const potentialMal = res.filter(r => r.provider === ScrobbleProvider.Mal);
       if (potentialMal.length === 0 || potentialMal[0].authenticationToken === '') {
+        this.isLoading.set(false);
         await this.confirmService.alert(translate('toasts.mal-token-required'));
         return;
       }
 
       this.setup();
-    })
+    });
   }
 
   setup() {
@@ -56,20 +56,23 @@ export class ImportMalCollectionComponent {
       const collects = res.allCollections.filter(c => c.source === ScrobbleProvider.Mal && c.sourceUrl);
       for(let col of collects) {
         if (col.sourceUrl === null) continue;
-        this.collectionMap[col.sourceUrl] = col;
+        this.collectionMap.update(m => {
+          m[col.sourceUrl!] = col;
+          return m;
+        });
       }
 
-      this.stacks = res.malStacks;
-      this.isLoading = false;
-
-      this.cdRef.markForCheck();
+      this.stacks.set(res.malStacks);
+      this.isLoading.set(false);
     });
   }
 
   importStack(stack: MalStack) {
     this.collectionService.importStack(stack).subscribe(() => {
-      this.collectionMap[stack.url] = stack;
-      this.cdRef.markForCheck();
+      this.collectionMap.update(m => {
+        m[stack.url] = stack;
+        return m;
+      });
       this.toastr.success(translate('toasts.stack-imported'));
     })
   }

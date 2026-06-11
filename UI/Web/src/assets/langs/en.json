@@ -3072,7 +3072,7 @@
     "import-mal-collection-modal": {
         "close": "{{common.close}}",
         "title": "MAL Interest Stack Import",
-        "description": "Import your MAL Interest Stacks and create Collections within Kavita",
+        "description": "Import your MAL Interest Stacks and create Collections within Kavita that sync",
         "series-count": "{{common.series-count}}",
         "restack-count": "{{num}} Restacks",
         "no-data": "{{common.no-data}}",

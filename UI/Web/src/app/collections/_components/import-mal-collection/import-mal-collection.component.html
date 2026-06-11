@@ -1,34 +1,41 @@
 <ng-container *transloco="let t; prefix: 'import-mal-collection-modal'">
   <p>{{t('description')}}</p>
 
-  <ul>
-    @for(stack of stacks; track stack.url) {
-      <li class="mb-2">
-        <div>
-          <a [href]="stack.url" rel="noreferrer noopener" target="_blank">{{stack.title}}</a>
-          <button class="btn btn-primary float-end" [disabled]="collectionMap && collectionMap.hasOwnProperty(stack.url)" (click)="importStack(stack)">{{t('track')}}</button>
-        </div>
-        <div>
-          @if (stack.author) {
-            {{t('by-author', {author: stack.author})}}
+  @let malStacks = stacks();
+  @let map = collectionMap();
+
+  @if (malStacks.length > 0) {
+    <ul>
+      @for(stack of stacks(); track stack.url) {
+        <li class="mb-2">
+          <div>
+            <a [href]="stack.url" rel="noreferrer noopener" target="_blank">{{stack.title}}</a>
+            <button class="btn btn-primary float-end" [disabled]="map && map.hasOwnProperty(stack.url)" (click)="importStack(stack)">{{t('track')}}</button>
+          </div>
+          <div>
+            @if (stack.author) {
+              {{t('by-author', {author: stack.author})}}
+              <span class="dot-separator mx-1"></span>
+            }
+            {{t('series-count', {num: stack.seriesCount | number})}}
             <span class="dot-separator mx-1"></span>
-          }
-          {{t('series-count', {num: stack.seriesCount | number})}}
-          <span class="dot-separator mx-1"></span>
-          <span>
-            <i class="fa-solid fa-layer-group me-1" aria-hidden="true"></i>
-            {{t('restack-count', {num: stack.restackCount | number})}}
-          </span>
-        </div>
-      </li>
-    } @empty {
-      @if (isLoading) {
-        <app-loading [loading]="isLoading" />
-      } @else {
-        <app-empty-state titleKey="no-data" descriptionKey="no-data-description" i18nPrefix="import-mal-collection-modal">
-          <i icon class="fa-solid fa-magnifying-glass" aria-hidden="true"></i>
-        </app-empty-state>
+            <span>
+              <i class="fa-solid fa-layer-group me-1" aria-hidden="true"></i>
+                {{t('restack-count', {num: stack.restackCount | number})}}
+            </span>
+          </div>
+        </li>
       }
+    </ul>
+  } @else {
+    @if (isLoading()) {
+      <app-loading [loading]="isLoading()" />
+    } @else {
+      <app-empty-state titleKey="no-data" descriptionKey="no-data-description" i18nPrefix="import-mal-collection-modal">
+        <i icon class="fa-solid fa-magnifying-glass" aria-hidden="true"></i>
+      </app-empty-state>
     }
-  </ul>
+  }
+
+
 </ng-container>
