@@ -8,7 +8,7 @@ namespace Kavita.Models.DTOs.KavitaPlus;
 
 /// <summary>
 /// Internal typed payload written into the Payload column for scrobble audit entries.
-/// Not returned directly by the API — projected to <see cref="KavitaPlusScrobbleDetailsDto"/> on read.
+/// Not returned directly by the API, projected to <see cref="KavitaPlusScrobbleDetailsDto"/> on read.
 /// </summary>
 public sealed record AuditLogScrobbleParamsDto
 {
@@ -17,6 +17,7 @@ public sealed record AuditLogScrobbleParamsDto
     public int? ChapterNumber { get; init; }
     public float? VolumeNumber { get; init; }
     public float? PercentRead { get; init; }
+    public int? TotalReadCountForSeries { get; init; }
     public float? Rating { get; init; }
     public string? ReviewBody { get; init; }
     public ScrobbleReadStatus ReadStatus { get; init; }

@@ -48,6 +48,10 @@ public record ScrobbleV3Dto: MetadataRequest
     /// <remarks>This is relevant when scrobbling to Hardcover, this will be converted to pages based on the edition page count</remarks>
     public int? PercentRead { get; set; }
     /// <summary>
+    /// Total number of times the Series has been read
+    /// </summary>
+    public int? TotalReadCountForSeries { get; set; }
+    /// <summary>
     /// Rating for the Series
     /// </summary>
     /// <remarks>This will map based on user's preferences</remarks>
