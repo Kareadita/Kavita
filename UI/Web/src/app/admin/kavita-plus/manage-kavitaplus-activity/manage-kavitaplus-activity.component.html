@@ -119,7 +119,6 @@
     <app-search-input [value]="searchQuery()" (search)="onSearchChange($event)" [label]="t('search-alt')" />
   </div>
 
-  <!-- Timeline with custom entry card -->
   <ng-template #entryTpl let-entry>
     <app-kavitaplus-audit-entry [entry]="entry" [showStatus]="true" [showUser]="true" [showDiff]="true" />
   </ng-template>

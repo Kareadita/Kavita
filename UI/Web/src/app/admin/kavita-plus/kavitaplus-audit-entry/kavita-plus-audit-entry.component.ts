@@ -28,6 +28,7 @@ import {MetadataFetchTriggerTitlePipe} from "../../../_pipes/metadata-fetch-trig
 import {TruncatePipe} from "../../../_pipes/truncate.pipe";
 import {UtcToLocalDatePipe} from "../../../_pipes/utc-to-locale-date.pipe";
 import {TimeDifferencePipe} from "../../../_pipes/time-difference.pipe";
+import {SafeUrlPipe} from "../../../_pipes/safe-url.pipe";
 
 @Component({
   selector: 'app-kavitaplus-audit-entry',
@@ -49,6 +50,7 @@ import {TimeDifferencePipe} from "../../../_pipes/time-difference.pipe";
     MetadataFetchTriggerTitlePipe,
     UtcToLocalDatePipe,
     TimeDifferencePipe,
+    SafeUrlPipe,
   ],
   templateUrl: './kavita-plus-audit-entry.component.html',
   styleUrl: './kavita-plus-audit-entry.component.scss',
@@ -151,4 +153,5 @@ export class KavitaPlusAuditEntryComponent {
 
   protected readonly KavitaPlusAuditCategory = KavitaPlusAuditCategory;
   protected readonly AuditSubjectType = AuditSubjectType;
+  protected readonly ScrobbleProvider = ScrobbleProvider;
 }

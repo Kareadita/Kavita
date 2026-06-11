@@ -14,6 +14,7 @@ public sealed record KavitaPlusAuditSyncDetailsDto
     public string? StackId { get; init; }
     public int? ItemCount { get; init; }
     public int? MissingCount { get; init; }
+    public string? CollectionUrl { get; init; }
 
     // CollectionItemAdded
     public string? SeriesName { get; init; }
@@ -26,20 +27,25 @@ public sealed record KavitaPlusAuditSyncDetailsDto
     public int? SeriesMatched { get; init; }
 
     public static KavitaPlusAuditSyncDetailsDto? From(AuditLogCollectionSyncedParamsDto? p) =>
-        p is null ? null : new KavitaPlusAuditSyncDetailsDto { CollectionName = p.CollectionName, StackId = p.StackId, ItemCount = p.ItemCount, MissingCount = p.MissingCount };
+        p is null ? null : new KavitaPlusAuditSyncDetailsDto { CollectionName = p.CollectionName, StackId = p.StackId,
+            ItemCount = p.ItemCount, MissingCount = p.MissingCount, CollectionUrl = p.Url };
 
     public static KavitaPlusAuditSyncDetailsDto? From(AuditLogCollectionItemParamsDto? p) =>
-        p is null ? null : new KavitaPlusAuditSyncDetailsDto { CollectionName = p.CollectionName, SeriesName = p.SeriesName, SeriesId = p.SeriesId };
+        p is null ? null : new KavitaPlusAuditSyncDetailsDto { CollectionName = p.CollectionName,
+            SeriesName = p.SeriesName, SeriesId = p.SeriesId, CollectionUrl = p.Url };
 
     public static KavitaPlusAuditSyncDetailsDto? From(AuditLogWantToReadSyncCompletedParamsDto? p) =>
-        p is null ? null : new KavitaPlusAuditSyncDetailsDto { UserName = p.UserName, HasMal = p.HasMal, HasAniList = p.HasAniList, SeriesMatched = p.SeriesMatched };
+        p is null ? null : new KavitaPlusAuditSyncDetailsDto { UserName = p.UserName, HasMal = p.HasMal,
+            HasAniList = p.HasAniList, SeriesMatched = p.SeriesMatched };
 
     public static KavitaPlusAuditSyncDetailsDto? From(AuditLogCollectionStartedParamsDto? p) =>
-        p is null ? null : new KavitaPlusAuditSyncDetailsDto { CollectionName = p.CollectionName, StackId = p.StackId, ItemCount = p.TotalItems };
+        p is null ? null : new KavitaPlusAuditSyncDetailsDto { CollectionName = p.CollectionName,
+            StackId = p.StackId, ItemCount = p.TotalItems };
 
     public static KavitaPlusAuditSyncDetailsDto? From(AuditLogCollectionFailedParamsDto? p) =>
         p is null ? null : new KavitaPlusAuditSyncDetailsDto { CollectionName = p.CollectionName };
 
     public static KavitaPlusAuditSyncDetailsDto? From(AuditLogWantToReadSyncParamsDto? p) =>
-        p is null ? null : new KavitaPlusAuditSyncDetailsDto { UserName = p.UserName, HasMal = p.HasMal, HasAniList = p.HasAniList };
+        p is null ? null : new KavitaPlusAuditSyncDetailsDto { UserName = p.UserName, HasMal = p.HasMal,
+            HasAniList = p.HasAniList };
 }

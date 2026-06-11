@@ -6,6 +6,7 @@ export interface KavitaPlusAuditSyncDetails {
   stackId: string | null;
   itemCount: number | null;
   missingCount: number | null;
+  collectionUrl: string | null; // and CollectionItemAdded
 
   // CollectionItemAdded
   seriesName: string | null;

@@ -10,6 +10,7 @@ public sealed record AuditLogCollectionItemParamsDto
     public string CollectionName { get; init; } = string.Empty;
     public string SeriesName { get; init; } = string.Empty;
     public int SeriesId { get; init; }
+    public string Url { get; init; } = string.Empty;
 }
 
 public sealed record AuditLogCollectionSyncedParamsDto
@@ -18,6 +19,7 @@ public sealed record AuditLogCollectionSyncedParamsDto
     public string? StackId { get; init; }
     public int ItemCount { get; init; }
     public int MissingCount { get; init; }
+    public string Url { get; init; } = string.Empty;
 }
 
 public sealed record AuditLogCollectionFailedParamsDto

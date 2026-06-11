@@ -1,4 +1,4 @@
-<ng-container *transloco="let t; prefix: 'kavitaplus-timeline'">
+<ng-container *transloco="let t; prefix: 'kavita-plus-audit-entry'">
   <div class="entry flex-grow-1 d-flex flex-column p-3">
 
     <div class="d-flex flex-column flex-sm-row align-items-sm-start gap-2 gap-sm-3">
@@ -49,6 +49,14 @@
             @if (fetchTrigger(); as trigger) {
               <span class="badge bg-secondary fetch-trigger-badge">{{trigger | metadataFetchTriggerTitle}}</span>
             }
+          }
+
+          <!--Collection Sync only-->
+          @if (entry().syncDetails?.collectionUrl) {
+            <a [href]="entry().syncDetails?.collectionUrl | safeUrl" target="_blank" rel="nofollow noopener">
+              <app-scrobble-provider-image [provider]="ScrobbleProvider.Mal" [size]="24" />
+            </a>
+
           }
         </div>
 

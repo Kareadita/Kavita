@@ -2,7 +2,6 @@ using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using Kavita.Models.DTOs.KavitaPlus;
-using Kavita.Models.Entities.Enums;
 using Kavita.Models.Entities.Enums.Audit;
 
 namespace Kavita.API.Services.Plus;

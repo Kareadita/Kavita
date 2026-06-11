@@ -1536,11 +1536,15 @@
         "today": "Today",
         "yesterday": "Yesterday",
         "events-count": "{{count}} events",
-        "retry": "Retry",
         "load-more-label": "Load more",
         "empty-title": "Nothing found",
         "empty-description": "Try a different filter or perform some matches/reading to populate",
         "system": "{{manage-kavitaplus-activity.system}}"
+    },
+
+    "kavita-plus-audit-entry": {
+        "system": "{{manage-kavitaplus-activity.system}}",
+        "retry": "Retry"
     },
 
     "audit-status-title-pipe": {

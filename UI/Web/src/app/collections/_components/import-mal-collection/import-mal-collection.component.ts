@@ -58,7 +58,7 @@ export class ImportMalCollectionComponent {
         if (col.sourceUrl === null) continue;
         this.collectionMap.update(m => {
           m[col.sourceUrl!] = col;
-          return m;
+          return {...m};
         });
       }
 
@@ -71,7 +71,7 @@ export class ImportMalCollectionComponent {
     this.collectionService.importStack(stack).subscribe(() => {
       this.collectionMap.update(m => {
         m[stack.url] = stack;
-        return m;
+        return {...m};
       });
       this.toastr.success(translate('toasts.stack-imported'));
     })
