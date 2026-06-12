@@ -230,7 +230,7 @@ public class ProcessSeries(
             return null;
         }
 
-        if (seriesAdded)
+        if (seriesAdded && library.AllowMetadataMatching)
         {
             await externalMetadataService.FetchSeriesMetadata(series.Id, series.Library.Type, MetadataFetchTrigger.SeriesAdded);
         }
