@@ -73,20 +73,29 @@
       </div>
 
       <div class="meta d-flex flex-row flex-sm-column align-items-center align-items-sm-end justify-content-start gap-2 gap-sm-1 flex-shrink-0">
+        <span class="time text-muted text-nowrap">
+          {{entry().createdUtc | utcToLocalDate | timeDifference}}
+        </span>
+
         @if (showRetry() && entry().canRetry) {
           <button class="btn btn-outline-primary btn-sm" (click)="retryEntry()">
             <i class="fa-solid fa-rotate-left" aria-hidden="true"></i> {{t('retry')}}
           </button>
         }
-        <span class="time text-muted text-nowrap">
-          {{entry().createdUtc | utcToLocalDate | timeDifference}}
-        </span>
+
+        @if (entry().category === KavitaPlusAuditCategory.Match && !!entry().libraryId) {
+          <button class="btn btn-outline-primary btn-sm" (click)="matchSeries()">
+            <i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i> {{t('match')}}
+          </button>
+        }
+
         @if (showUser() && entry().userId) {
           <div class="d-flex align-items-center gap-1 phone-hidden">
             <app-profile-icon [userId]="entry().userId!" [size]="14" />
             <span class="small text-muted">{{entry().username}}</span>
           </div>
         }
+
         @if (showDiff() && supportsDiff()) {
           <button class="btn-unstyled diff-toggle" (click)="collapsed.set(!collapsed())"
                   [attr.aria-expanded]="!collapsed()">

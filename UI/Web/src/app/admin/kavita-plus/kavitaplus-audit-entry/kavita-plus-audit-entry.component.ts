@@ -29,6 +29,9 @@ import {TruncatePipe} from "../../../_pipes/truncate.pipe";
 import {UtcToLocalDatePipe} from "../../../_pipes/utc-to-locale-date.pipe";
 import {TimeDifferencePipe} from "../../../_pipes/time-difference.pipe";
 import {SafeUrlPipe} from "../../../_pipes/safe-url.pipe";
+import {SeriesService} from "../../../_services/series.service";
+import {ActionService} from "../../../_services/action.service";
+import {map} from "rxjs/operators";
 
 @Component({
   selector: 'app-kavitaplus-audit-entry',
@@ -57,7 +60,10 @@ import {SafeUrlPipe} from "../../../_pipes/safe-url.pipe";
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class KavitaPlusAuditEntryComponent {
+
   protected readonly imageService = inject(ImageService);
+  private readonly seriesService = inject(SeriesService);
+  private readonly actionService = inject(ActionService);
   private readonly router = inject(Router);
 
   entry = input.required<KavitaPlusAuditEntry>();
@@ -149,6 +155,15 @@ export class KavitaPlusAuditEntryComponent {
 
   retryEntry() {
     this.retry.emit(this.entry());
+  }
+
+  matchSeries() {
+    const e = this.entry();
+    if (e.seriesId == null) return;
+
+    this.seriesService.getSeries(e.seriesId).pipe(
+      map(series => this.actionService.matchSeries(series))
+    ).subscribe();
   }
 
   protected readonly KavitaPlusAuditCategory = KavitaPlusAuditCategory;
