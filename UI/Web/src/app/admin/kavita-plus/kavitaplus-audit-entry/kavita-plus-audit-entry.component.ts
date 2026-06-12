@@ -31,7 +31,7 @@ import {TimeDifferencePipe} from "../../../_pipes/time-difference.pipe";
 import {SafeUrlPipe} from "../../../_pipes/safe-url.pipe";
 import {SeriesService} from "../../../_services/series.service";
 import {ActionService} from "../../../_services/action.service";
-import {map} from "rxjs/operators";
+import {tap} from "rxjs";
 
 @Component({
   selector: 'app-kavitaplus-audit-entry',
@@ -162,7 +162,7 @@ export class KavitaPlusAuditEntryComponent {
     if (e.seriesId == null) return;
 
     this.seriesService.getSeries(e.seriesId).pipe(
-      map(series => this.actionService.matchSeries(series))
+      tap(series => this.actionService.matchSeries(series))
     ).subscribe();
   }
 

@@ -22,6 +22,6 @@ public class ManualMigrationMetadataProvider: ManualMigration
         await context.ExternalSeriesMetadata
             .Where(m => m.Series.Library.Type != LibraryType.Comic && m.Series.Library.Type != LibraryType.ComicVine)
             .ExecuteUpdateAsync(setters => setters
-                .SetProperty(e => e.Provider, MetadataProvider.ComicBookRoundup));
+                .SetProperty(e => e.Provider, MetadataProvider.Mangabaka));
     }
 }

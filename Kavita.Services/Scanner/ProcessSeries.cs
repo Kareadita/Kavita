@@ -760,17 +760,29 @@ public class ProcessSeries(
 
             // Try to patch in any External Metadata Ids we've seen during parsing
             if (info.AniListId is > 0)
+            {
                 chapter.AniListId = info.AniListId ?? 0;
+            }
             if (info.MalId is > 0)
+            {
                 chapter.MalId = info.MalId ?? 0;
+            }
             if (info.MangaBakaId is > 0)
+            {
                 chapter.MangaBakaId = info.MangaBakaId ?? 0;
+            }
             if (info.MetronId is > 0)
+            {
                 chapter.MetronId = info.MetronId ?? 0;
-            if (string.IsNullOrEmpty(info.ComicVineId))
+            }
+            if (!string.IsNullOrEmpty(info.ComicVineId))
+            {
                 chapter.ComicVineId = info.ComicVineId;
+            }
             if (info.HardcoverId is > 0)
+            {
                 chapter.HardcoverId = info.HardcoverId ?? 0;
+            }
         }
 
         RemoveChapters(args.Volume, args.ParsedInfos);
