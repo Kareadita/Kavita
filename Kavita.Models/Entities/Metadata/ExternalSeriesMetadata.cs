@@ -15,7 +15,7 @@ public class ExternalSeriesMetadata : IEntityDate
     /// <summary>
     /// Where is this metadata coming from
     /// </summary>
-    public MetadataProvider Provider { get; set; } = MetadataProvider.Mangabaka;
+    public MetadataProvider Provider { get; set; }
     /// <summary>
     /// External Reviews for the Series. Managed by Kavita for Kavita+ users
     /// </summary>

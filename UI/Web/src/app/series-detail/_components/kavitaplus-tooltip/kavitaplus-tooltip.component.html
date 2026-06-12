@@ -30,9 +30,9 @@
                 <app-metadata-provider-tag-badge [metadataProvider]="info.metadataProvider" />
                 @if (info.lastRefreshedUtc != NULL_DATE) {
                   <span class="text-muted" style="font-size: 11px;">
-              <i class="ti ti-refresh"></i> {{info.lastRefreshedUtc | utcToLocalDate | timeDifference}}
-                    &middot;
-              <i class="ti ti-clock"></i> {{t('next-refresh')}} {{info.nextRefreshUtc | utcToLocalTime:'shortDate'}}
+                  <i class="ti ti-refresh" aria-hidden="true"></i> {{info.lastRefreshedUtc | utcToLocalDate | timeDifference}}
+                  <span class="dot-separator" aria-hidden="true"></span>
+                  <i class="ti ti-clock" aria-hidden="true"></i> {{t('next-refresh')}} {{info.nextRefreshUtc | utcToLocalTime:'shortDate'}}
             </span>
                 }
               </div>

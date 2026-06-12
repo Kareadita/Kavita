@@ -503,7 +503,8 @@ public class ExternalMetadataService : IExternalMetadataService
             _unitOfWork.ExternalSeriesMetadataRepository.Remove(externalSeriesMetadata.ExternalRecommendations);
 
             // TODO: Do not hardcode - Metadata Rework
-            externalSeriesMetadata.Provider = MetadataProvider.Mangabaka;
+            externalSeriesMetadata.Provider = result.MangabakaId > 0 ? MetadataProvider.Mangabaka :
+                    (result.CbrId > 0 ? MetadataProvider.ComicBookRoundup : MetadataProvider.Hardcover);
 
             externalSeriesMetadata.ExternalReviews = result.Reviews.Select(r =>
             {
