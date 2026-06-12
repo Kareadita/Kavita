@@ -60,6 +60,12 @@ public static class EnumerableExtensions
         }
     }
 
+    public static IEnumerable<TSource> WhereIf<TSource>(this IEnumerable<TSource> source, bool guard, Func<TSource, bool> predicate)
+        where TSource : class
+    {
+        return guard ? source.Where(predicate) : source;
+    }
+
     public static IEnumerable<TSource> WhereNotNull<TSource>(this IEnumerable<TSource?> source)
         where TSource : class
     {

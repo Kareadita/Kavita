@@ -1511,7 +1511,8 @@
         "filter-timeframe-7d": "Last 7 Days",
         "filter-timeframe-30d": "Last 30 Days",
         "system": "System",
-        "next-scrobble": "Next Scrobble: {{date}}"
+        "next-scrobble": "Next Scrobble: {{date}}",
+        "filter-provider-label": "Scrobble provider"
     },
 
     "kavitaplus-diff": {

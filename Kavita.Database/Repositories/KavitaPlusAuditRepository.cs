@@ -6,6 +6,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Kavita.API.Repositories;
 using Kavita.API.Services.Plus;
+using Kavita.Common.Extensions;
 using Kavita.Common.Helpers;
 using Kavita.Database.Extensions;
 using Kavita.Models.DTOs.KavitaPlus;
@@ -151,6 +152,11 @@ public class KavitaPlusAuditRepository(DataContext context) : IKavitaPlusAuditRe
             .WhereIf(filter.Category.HasValue, e => e.Category == filter.Category!.Value)
             .WhereIf(filter.Status.HasValue, e => e.Status == filter.Status!.Value)
             .WhereIf(filter.SubjectType.HasValue, e => e.SubjectType == filter.SubjectType!.Value)
+            .WhereIf(filter.Provider.HasValue, e =>
+                e.Category == KavitaPlusAuditCategory.Scrobble &&
+                // Best way for us to filter right now. In EF.Core 11 we'll get a EF.Functions.JsonContains but unsure
+                // if this is also for sqlite
+                EF.Functions.Like(e.Payload, $"%\"Provider\":{(int)filter.Provider!.Value}%"))
             .WhereIf(filter.UserId.HasValue, e => e.UserId == filter.UserId!.Value)
             .WhereIf(filter.SeriesId.HasValue, e => e.SeriesId == filter.SeriesId!.Value)
             .WhereIf(filter.FromUtc.HasValue, e => e.CreatedUtc >= filter.FromUtc!.Value)

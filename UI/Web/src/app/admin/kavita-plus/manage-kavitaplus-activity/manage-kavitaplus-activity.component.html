@@ -79,6 +79,18 @@
     </div>
 
     <div class="d-flex align-items-center gap-2 flex-wrap">
+
+      @if (categoryFilter() === KavitaPlusAuditCategory.Scrobble) {
+        <label class="visually-hidden" for="providerFilter">{{t('filter-provider-label')}}</label>
+        <select id="providerFilter" class="form-select form-select-sm" style="width: auto"
+          (change)="onProviderFilterChange($any($event.target).value)">
+          <option [value]="null">{{t('filter-provider-label')}}</option>
+          @for (provider of scrobblingService.validExternalScrobbleProviders(); track provider) {
+            <option [value]="provider">{{provider | scrobbleProviderName}}</option>
+          }
+        </select>
+      }
+
       <label class="visually-hidden" for="auditStatusFilter">{{t('filter-status-label')}}</label>
       <select id="auditStatusFilter" class="form-select form-select-sm" style="width: auto"
               (change)="onStatusFilterChange($any($event.target).value)">
