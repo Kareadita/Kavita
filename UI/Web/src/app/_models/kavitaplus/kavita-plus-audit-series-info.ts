@@ -1,4 +1,5 @@
 import {KavitaPlusAuditEntry} from './kavita-plus-audit-entry';
+import {MetadataProvider} from "./metadata-provider.enum";
 
 export interface KavitaPlusAuditSeriesInfo {
   seriesId: number;
@@ -12,6 +13,7 @@ export interface KavitaPlusAuditSeriesInfo {
   metronId?: number;
   comicVineId?: string;
   cbrId?: number;
+  metadataProvider?: MetadataProvider;
   nextRefreshUtc: string | null;
   lastRefreshedUtc: string | null;
   recentEvents: KavitaPlusAuditEntry[];

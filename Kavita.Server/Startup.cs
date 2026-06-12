@@ -528,6 +528,7 @@ public class Startup
 
                     await new ManualMigrationScrobbleRework().RunAsync(dataContext, logger);
                     await new ManualMigrationKavitaScrobbleProviders().RunAsync(dataContext, logger);
+                    await new ManualMigrationMetadataProvider().RunAsync(dataContext, logger);
 
                     #endregion
 

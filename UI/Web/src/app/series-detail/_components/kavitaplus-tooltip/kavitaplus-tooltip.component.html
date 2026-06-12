@@ -20,25 +20,48 @@
       <div class="kplus-divider"></div>
 
       <!-- Match sub-row -->
-      <div class="d-flex align-items-center gap-2 small text-muted">
+      <div class="d-flex flex-column gap-2 small text-muted">
         @if (info.isMatched) {
 
-          @if (info.mangaBakaId) {
-            <app-scrobble-provider-tag-badge [provider]="ScrobbleProvider.MangaBaka" [id]="info.mangaBakaId" />
-          } @else if (info.hardcoverId) {
-            <app-scrobble-provider-tag-badge [provider]="ScrobbleProvider.Hardcover" [id]="info.hardcoverId" />
-          } @else if (info.cbrId) {
-            <app-scrobble-provider-image [provider]="ScrobbleProvider.Cbr" [size]="32" /> {{ScrobbleProvider.Cbr | scrobbleProviderName}}
-          } @else if (info.aniListId) {
-            <app-scrobble-provider-tag-badge [provider]="ScrobbleProvider.AniList" [id]="info.aniListId" />
+          @if (info.metadataProvider) {
+            <div class="d-flex flex-column gap-1">
+              <span class="text-uppercase fw-semibold" style="font-size: 10px; letter-spacing: 0.06em;">{{t('metadata-source')}}</span>
+              <div class="d-flex align-items-center gap-2">
+                <app-metadata-provider-tag-badge [metadataProvider]="info.metadataProvider" />
+                @if (info.lastRefreshedUtc != NULL_DATE) {
+                  <span class="text-muted" style="font-size: 11px;">
+              <i class="ti ti-refresh"></i> {{info.lastRefreshedUtc | utcToLocalDate | timeDifference}}
+                    &middot;
+              <i class="ti ti-clock"></i> {{t('next-refresh')}} {{info.nextRefreshUtc | utcToLocalTime:'shortDate'}}
+            </span>
+                }
+              </div>
+            </div>
           }
 
-
-          @if (info.lastRefreshedUtc != NULL_DATE) {
-            <span>{{t('refreshed')}} {{info.lastRefreshedUtc | utcToLocalDate | timeDifference}}</span>
-            <span class="dot-separator mx-1"></span>
-            <span>{{t('next-refresh')}} {{info.nextRefreshUtc | utcToLocalTime:'shortDate'}}</span>
+          @if (info.mangaBakaId || info.hardcoverId || info.cbrId || info.aniListId) {
+            <div class="d-flex flex-column gap-1">
+              <span class="text-uppercase fw-semibold" style="font-size: 10px; letter-spacing: 0.06em;">{{t('linked-to')}}</span>
+              <div class="d-flex align-items-center flex-wrap gap-2">
+                @if (info.mangaBakaId) {
+                  <app-scrobble-provider-tag-badge [provider]="ScrobbleProvider.MangaBaka" [id]="info.mangaBakaId" />
+                }
+                @if (info.hardcoverId) {
+                  <app-scrobble-provider-tag-badge [provider]="ScrobbleProvider.Hardcover" [id]="info.hardcoverId" />
+                }
+                @if (info.cbrId) {
+                  <div class="d-flex align-items-center gap-1">
+                    <app-scrobble-provider-image [provider]="ScrobbleProvider.Cbr" [size]="32" />
+                    {{ScrobbleProvider.Cbr | scrobbleProviderName}}
+                  </div>
+                }
+                @if (info.aniListId) {
+                  <app-scrobble-provider-tag-badge [provider]="ScrobbleProvider.AniList" [id]="info.aniListId" />
+                }
+              </div>
+            </div>
           }
+
         } @else {
           <span class="badge bg-secondary">{{t('unmatched')}}</span>
         }

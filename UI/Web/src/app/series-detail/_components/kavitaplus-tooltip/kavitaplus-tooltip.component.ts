@@ -25,6 +25,9 @@ import {TimeDifferencePipe} from "../../../_pipes/time-difference.pipe";
 import {
   ScrobbleProviderTagBadgeComponent
 } from "../../../shared/_components/scrobble-provider-tag-badge/scrobble-provider-tag-badge.component";
+import {
+  MetadataProviderTagBadgeComponent
+} from "../../../shared/_components/metadata-provider-tag-badge/metadata-provider-tag-badge.component";
 
 @Component({
   selector: 'app-kavitaplus-tooltip',
@@ -33,7 +36,7 @@ import {
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [TranslocoDirective, KavitaPlusEventTypePipe, KavitaPlusEventDescriptionPipe, UtcToLocalTimePipe,
     KavitaPlusAuditEventTypeIconComponent, AuditLogErrorPipe, ScrobbleProviderImageComponent, ScrobbleProviderNamePipe,
-    UtcToLocalDatePipe, TimeDifferencePipe, ScrobbleProviderTagBadgeComponent],
+    UtcToLocalDatePipe, TimeDifferencePipe, ScrobbleProviderTagBadgeComponent, MetadataProviderTagBadgeComponent],
 })
 export class KavitaplusTooltipComponent implements OnInit {
   private readonly auditService = inject(KavitaPlusAuditService);

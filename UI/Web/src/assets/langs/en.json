@@ -1475,7 +1475,9 @@
         "rating-updated": "Rating updated",
         "add-want-to-read": "Added to want to read",
         "remove-want-to-read": "Removed from want to read",
-        "review-submitted": "Review submitted"
+        "review-submitted": "Review submitted",
+        "metadata-source": "Metadata source",
+        "linked-to": "Linked to"
     },
 
     "kavitaplus-activity": {

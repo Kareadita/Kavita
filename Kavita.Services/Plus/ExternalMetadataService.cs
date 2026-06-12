@@ -502,6 +502,9 @@ public class ExternalMetadataService : IExternalMetadataService
             _unitOfWork.ExternalSeriesMetadataRepository.Remove(externalSeriesMetadata.ExternalRatings);
             _unitOfWork.ExternalSeriesMetadataRepository.Remove(externalSeriesMetadata.ExternalRecommendations);
 
+            // TODO: Do not hardcode - Metadata Rework
+            externalSeriesMetadata.Provider = MetadataProvider.Mangabaka;
+
             externalSeriesMetadata.ExternalReviews = result.Reviews.Select(r =>
             {
                 var review = _mapper.Map<ExternalReview>(r);
