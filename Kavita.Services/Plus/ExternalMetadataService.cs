@@ -670,7 +670,14 @@ public class ExternalMetadataService : IExternalMetadataService
         Accumulate(ref madeModification, fieldChanges, await UpdateCharacters(series, settings, externalMetadata.Characters));
 
         Accumulate(ref madeModification, fieldChanges, await UpdateRelationships(series, settings, externalMetadata.Relations, defaultAdmin));
-        madeModification = await UpdateCoverImage(series, settings, externalMetadata) || madeModification;
+        try
+        {
+            madeModification = await UpdateCoverImage(series, settings, externalMetadata) || madeModification;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogWarning(ex, "Failed to fetch cover image");
+        }
 
         madeModification = await UpdateChapters(series, settings, externalMetadata) || madeModification;
 
@@ -1342,7 +1349,7 @@ public class ExternalMetadataService : IExternalMetadataService
 
         foreach (var (chapter, potentialMatch) in matchedChapters)
         {
-            _logger.LogDebug("Updating {ChapterNumber} with metadata", chapter.Range);
+            _logger.LogDebug("Updating {SeriesName} ({SeriesId}) - Chapter {ChapterNumber} with metadata", series.Name, series.Id, chapter.Range);
             var chapterFieldChanges = new List<MetadataFieldChangeDto>();
 
             Accumulate(ref madeModification, chapterFieldChanges, UpdateChapterTitle(chapter, settings, potentialMatch.Title, series.Name));

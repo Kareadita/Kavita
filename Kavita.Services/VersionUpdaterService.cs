@@ -437,6 +437,7 @@ public partial class VersionUpdaterService : IVersionUpdaterService
             await File.WriteAllTextAsync(tempPath, json);
 
             // Atomic replace - handles file in use scenarios
+            // TODO: BUG: This can sometimes throw an System.UnauthorizedAccessException: Access to the path is denied.
             File.Move(tempPath, _cacheFilePath, overwrite: true);
         }
         catch (Exception ex)
