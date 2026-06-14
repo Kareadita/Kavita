@@ -6,6 +6,7 @@ import {LicenseService} from '../../../../_services/license.service';
 import {KavitaPlusSubscriptionState} from '../../../../_models/kavitaplus/license-info';
 import {RenewLicenseComponent} from '../../renew-license/renew-license.component';
 import {CancelLicenseComponent} from "../../cancel-license/cancel-license.component";
+import {ChangeLicenseEmailComponent} from "../../change-license-email/change-license-email.component";
 
 export enum ManageLicenseStep {
   Hub = 'hub',
@@ -16,7 +17,7 @@ export enum ManageLicenseStep {
 
 @Component({
   selector: 'app-manage-license-modal',
-  imports: [TranslocoDirective, RenewLicenseComponent, CancelLicenseComponent],
+  imports: [TranslocoDirective, RenewLicenseComponent, CancelLicenseComponent, ChangeLicenseEmailComponent],
   templateUrl: './manage-license-modal.component.html',
   styleUrl: './manage-license-modal.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -37,6 +38,9 @@ export class ManageLicenseModalComponent {
       || state === KavitaPlusSubscriptionState.Paused;
   });
 
+  protected readonly isCancelling = computed((): boolean =>
+    this.licenseInfo()?.state === KavitaPlusSubscriptionState.Cancelling);
+
   protected readonly manageLink = computed((): string => {
     const email = this.licenseInfo()?.registeredEmail;
     if (!email) return environment.manageLink;
@@ -56,4 +60,5 @@ export class ManageLicenseModalComponent {
   }
 
   protected readonly ManageLicenseStep = ManageLicenseStep;
+  protected readonly KavitaPlusSubscriptionState = KavitaPlusSubscriptionState;
 }

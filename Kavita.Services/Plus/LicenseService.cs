@@ -375,4 +375,9 @@ public class LicenseService(
             Stats = []
         };
     }
+
+    public async Task<bool> CancelLicense(CancelKavitaPlusLicenseDto dto, CancellationToken ct)
+    {
+        return await kavitaPlusApiService.CancelLicenseAsync(dto, ct);
+    }
 }

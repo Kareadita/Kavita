@@ -52,14 +52,27 @@
       </li>
     </ul>
 
+    <div class="d-flex flex-column gap-2">
+      <label for="cancel-comment" class="section-label">{{t('comment-label')}}</label>
+      <textarea id="cancel-comment" class="form-control" rows="3"
+                [placeholder]="t('comment-placeholder')"
+                [disabled]="isCancelling()"
+                [ngModel]="comment()" (ngModelChange)="comment.set($event)"></textarea>
+    </div>
+
   </div>
 
   <div class="modal-footer">
-    <button type="button" class="btn btn-outline-secondary me-2" (click)="back.emit()">
+    <button type="button" class="btn btn-outline-secondary me-2" [disabled]="isCancelling()" (click)="back.emit()">
       <i class="fa-solid fa-chevron-left me-1" aria-hidden="true"></i>
       {{t('back-label')}}
     </button>
-    <button type="button" class="btn btn-danger" (click)="cancelLicense()">{{t('confirm-label')}}</button>
+    <button type="button" class="btn btn-danger" [disabled]="!canConfirm() || isCancelling()" (click)="cancelLicense()">
+      @if (isCancelling()) {
+        <span class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span>
+      }
+      {{t('confirm-label')}}
+    </button>
   </div>
 
 </ng-container>

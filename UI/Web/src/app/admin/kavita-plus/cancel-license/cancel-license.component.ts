@@ -1,5 +1,7 @@
 import {ChangeDetectionStrategy, Component, computed, inject, output, signal} from '@angular/core';
-import {TranslocoDirective} from '@jsverse/transloco';
+import {FormsModule} from '@angular/forms';
+import {ToastrService} from 'ngx-toastr';
+import {TranslocoDirective, TranslocoService} from '@jsverse/transloco';
 import {LicenseService} from '../../../_services/license.service';
 import {MemberService} from '../../../_services/member.service';
 import {KavitaPlusSubscriptionState} from '../../../_models/kavitaplus/license-info';
@@ -9,7 +11,7 @@ import {ManageLicenseModalScreen} from '../_modals/manage-license-modal/manage-l
 
 @Component({
   selector: 'app-cancel-license',
-  imports: [TranslocoDirective, KavitaPlusSubscriptionStatusPipe, KavitaPlusBillingIntervalPipe],
+  imports: [TranslocoDirective, FormsModule, KavitaPlusSubscriptionStatusPipe, KavitaPlusBillingIntervalPipe],
   templateUrl: './cancel-license.component.html',
   styleUrl: './cancel-license.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -18,12 +20,18 @@ export class CancelLicenseComponent implements ManageLicenseModalScreen {
 
   private readonly licenseService = inject(LicenseService);
   private readonly memberService = inject(MemberService);
+  private readonly toastr = inject(ToastrService);
+  private readonly translocoService = inject(TranslocoService);
 
   readonly back = output<void>();
   readonly dismiss = output<void>();
 
   protected readonly licenseInfo = this.licenseService.licenseInfo;
   protected readonly usersCount = signal<number>(0);
+  protected readonly comment = signal<string>('');
+  protected readonly isCancelling = signal<boolean>(false);
+
+  protected readonly canConfirm = computed((): boolean => !!this.licenseInfo()?.registeredEmail);
 
   protected readonly statusToken = computed((): 'active' | 'cancelling' | 'paused' | 'expired' => {
     switch (this.licenseInfo()?.state) {
@@ -56,7 +64,21 @@ export class CancelLicenseComponent implements ManageLicenseModalScreen {
   }
 
   cancelLicense() {
-    this.licenseService.cancelLicense().subscribe();
+    const email = this.licenseInfo()?.registeredEmail;
+    if (!email) return;
+
+    this.isCancelling.set(true);
+    this.licenseService.cancelLicense(email, this.comment().trim() || undefined)
+      .subscribe({
+        next: () => {
+          this.toastr.success(this.translocoService.translate('cancel-license.cancelled-success'));
+          this.dismiss.emit();
+        },
+        error: () => {
+          this.toastr.error(this.translocoService.translate('cancel-license.cancelled-error'));
+          this.isCancelling.set(false);
+        }
+      });
   }
 
 }

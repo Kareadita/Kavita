@@ -178,10 +178,12 @@ public class LicenseController(
     /// </summary>
     /// <returns></returns>
     [HttpDelete("cancel")]
-    public ActionResult CancelLicense()
+    [Authorize(PolicyGroups.AdminPolicy)]
+    public async Task<ActionResult> CancelLicense(CancelKavitaPlusLicenseDto dto)
     {
         var ct = HttpContext.RequestAborted;
-        return Ok();
+        if (await licenseService.CancelLicense(dto, ct)) return Ok();
+        return BadRequest(await localizationService.TranslateAsync(UserId, "unable-to-cancel-k+"));
     }
 
 }

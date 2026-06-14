@@ -9,7 +9,7 @@ import {SettingItemComponent} from "../../settings/_components/setting-item/sett
 import {DefaultValuePipe} from "../../_pipes/default-value.pipe";
 
 @Component({
-  selector: 'app-change-license-email',
+  selector: 'app-change-email',
   templateUrl: './change-email.component.html',
   styleUrls: ['./change-email.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,

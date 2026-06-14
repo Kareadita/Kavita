@@ -302,6 +302,26 @@ public class KavitaPlusApiService(ILogger<KavitaPlusApiService> logger, IUnitOfW
         };
     }
 
+    public async Task<bool> CancelLicenseAsync(CancelKavitaPlusLicenseDto dto, CancellationToken ct)
+    {
+        try
+        {
+            var license = (await unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.LicenseKey, ct)).Value;
+            var response = await (Configuration.KavitaPlusApiUrl + "/api/license/cancel")
+                .WithKavitaPlusHeaders(license)
+                .PostJsonAsync(dto, cancellationToken: ct)
+                .ReceiveJson<KPlusResult<object>>();
+
+            if (response.IsSuccess) return true;
+            logger.LogError("Unable to cancel subscription on Kavita+ API: {Error}", response.ErrorMessage);
+        } catch (FlurlHttpException e)
+        {
+            logger.LogError(e, "An error happened during the request to Kavita+ API");
+        }
+
+        return false;
+    }
+
     /// <summary>
     /// Send a GET request to K+
     /// </summary>

@@ -1023,6 +1023,10 @@
         "impact-1": "Kavita+ stays active until your current billing date.",
         "impact-2": "No further charges are made after that date.",
         "impact-3": "You can resubscribe at any time to restore premium features.",
+        "comment-label": "Reason for cancelling (optional)",
+        "comment-placeholder": "Let us know why you're cancelling...",
+        "cancelled-success": "Subscription cancelled. Access continues until your billing date.",
+        "cancelled-error": "We couldn't cancel your subscription. Please try again or contact support.",
         "back-label": "Back",
         "confirm-label": "Cancel subscription"
     },

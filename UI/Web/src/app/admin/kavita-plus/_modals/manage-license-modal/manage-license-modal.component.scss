@@ -45,9 +45,14 @@
   text-decoration: none;
   transition: border-color 0.15s ease-in-out, background 0.15s ease-in-out;
 
-  &:hover, &:focus-visible {
+  &:not(:disabled):hover, &:not(:disabled):focus-visible {
     border-color: color-mix(in srgb, var(--primary-color) 45%, var(--hr-color));
     background: color-mix(in srgb, var(--primary-color) 6%, var(--elevation-layer1-dark-solid));
+  }
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
   }
 }
 

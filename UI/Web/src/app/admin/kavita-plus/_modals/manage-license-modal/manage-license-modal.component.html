@@ -19,7 +19,7 @@
       <div class="modal-body d-flex flex-column gap-3">
 
         @if (isActiveSubscription()) {
-          <button type="button" class="action-card" (click)="goTo(ManageLicenseStep.Cancel)">
+          <button type="button" class="action-card" [disabled]="isCancelling()" (click)="goTo(ManageLicenseStep.Cancel)">
             <div class="action-icon action-icon--danger flex-shrink-0">
               <i class="fa-solid fa-ban" aria-hidden="true"></i>
             </div>
@@ -47,8 +47,8 @@
             <i class="fa-solid fa-at" aria-hidden="true"></i>
           </div>
           <div class="flex-fill text-start">
-            <div class="action-card-title">{{t('change-license-email-title')}}</div>
-            <div class="action-card-desc">{{t('change-license-email-desc')}}</div>
+            <div class="action-card-title">{{t('change-email-title')}}</div>
+            <div class="action-card-desc">{{t('change-email-desc')}}</div>
           </div>
           <i class="fa-solid fa-chevron-right action-card-chevron flex-shrink-0" aria-hidden="true"></i>
         </button>
@@ -76,7 +76,7 @@
     }
 
     @case (ManageLicenseStep.ChangeEmail) {
-      <app-change-email (back)="back()" (dismiss)="close()" />
+      <app-change-license-email (back)="back()" (dismiss)="close()" />
     }
 
   }
