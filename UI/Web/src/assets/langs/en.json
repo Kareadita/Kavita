@@ -977,6 +977,20 @@
         "save": "{{common.save}}"
     },
 
+    "manage-license-modal": {
+        "hub-title": "Manage subscription",
+        "hub-subtitle": "Choose what you'd like to do with this server's Kavita+ plan.",
+        "renew-title": "Renew subscription",
+        "renew-desc": "Reactivate Kavita+ for everyone on this server.",
+        "cancel-title": "Cancel subscription",
+        "cancel-desc": "End your plan. Kavita+ stays active until your billing date - no further charges.",
+        "change-email-title": "Change email",
+        "change-email-desc": "Update the address Stripe uses for receipts and where your license & renewal links are sent.",
+        "billing-title": "Billing & payment details",
+        "billing-desc": "Update your card, view invoices, and download receipts in Stripe's secure portal.",
+        "close": "{{common.close}}"
+    },
+
     "register-license-key": {
         "title": "Already have a license?",
         "description": "Enter the key from your purchase email to activate Kavita+ on this server.",
