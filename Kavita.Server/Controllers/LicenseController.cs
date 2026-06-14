@@ -173,4 +173,15 @@ public class LicenseController(
         return Ok(await licenseService.GetLicenseUsage(ct));
     }
 
+    /// <summary>
+    /// Cancels the active Kavita+ Subscription tied to this server. License will elapse at end of billing period.
+    /// </summary>
+    /// <returns></returns>
+    [HttpDelete("cancel")]
+    public ActionResult CancelLicense()
+    {
+        var ct = HttpContext.RequestAborted;
+        return Ok();
+    }
+
 }

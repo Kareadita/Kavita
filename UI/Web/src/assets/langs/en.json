@@ -991,6 +991,55 @@
         "close": "{{common.close}}"
     },
 
+    "renew-license": {
+        "title": "Renew Kavita+",
+        "subtitle": "Reactivate premium features for everyone on this server.",
+        "close": "{{common.close}}",
+        "billing-period-label": "Billing period",
+        "monthly-label": "Monthly",
+        "monthly-price": "$4.00 / month",
+        "yearly-label": "Yearly",
+        "yearly-price": "$46.00 / year",
+        "yearly-save": "SAVE $2",
+        "billing-email-label": "Billing email",
+        "on-file-label": "on file",
+        "email-help": "Auto-filled from this instance - must match your original purchase.",
+        "change-label": "Change",
+        "how-it-works-label": "How renewing works",
+        "how-step-1": "Stripe emails a secure payment link to {{email}} for the selected plan.",
+        "how-step-2": "Confirm your card there - your details never touch this server.",
+        "how-step-3": "Once payment clears, Kavita+ turns back on for everyone automatically.",
+        "not-now-label": "Not now",
+        "send-link-label": "Send payment link"
+    },
+
+    "cancel-license": {
+        "title": "Cancel subscription",
+        "subtitle": "You'll keep full access until the end of your current billing period.",
+        "close": "{{common.close}}",
+        "server-wide-label": "Server-wide",
+        "users-active-label": "{{count}} users active",
+        "what-happens-label": "What happens",
+        "impact-1": "Kavita+ stays active until your current billing date.",
+        "impact-2": "No further charges are made after that date.",
+        "impact-3": "You can resubscribe at any time to restore premium features.",
+        "back-label": "Back",
+        "confirm-label": "Cancel subscription"
+    },
+
+    "change-license-email": {
+        "title": "Change email",
+        "subtitle": "Update where receipts, license keys, and renewal links are sent.",
+        "close": "{{common.close}}",
+        "current-email-label": "Current email",
+        "on-file-label": "on file",
+        "new-email-label": "New email address",
+        "new-email-placeholder": "you@domain.com",
+        "confirm-help": "We'll send a link to complete the change before anything changes.",
+        "back-label": "Back",
+        "send-code-label": "Send code"
+    },
+
     "register-license-key": {
         "title": "Already have a license?",
         "description": "Enter the key from your purchase email to activate Kavita+ on this server.",

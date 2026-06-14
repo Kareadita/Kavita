@@ -47,8 +47,8 @@
             <i class="fa-solid fa-at" aria-hidden="true"></i>
           </div>
           <div class="flex-fill text-start">
-            <div class="action-card-title">{{t('change-email-title')}}</div>
-            <div class="action-card-desc">{{t('change-email-desc')}}</div>
+            <div class="action-card-title">{{t('change-license-email-title')}}</div>
+            <div class="action-card-desc">{{t('change-license-email-desc')}}</div>
           </div>
           <i class="fa-solid fa-chevron-right action-card-chevron flex-shrink-0" aria-hidden="true"></i>
         </button>
@@ -68,17 +68,15 @@
     }
 
     @case (ManageLicenseStep.Renew) {
-      <app-renew-license />
+      <app-renew-license (back)="back()" (dismiss)="close()" (changeEmail)="goTo(ManageLicenseStep.ChangeEmail)" />
     }
 
     @case (ManageLicenseStep.Cancel) {
-      <div class="modal-body">
-        <p class="text-muted mb-0">{{t('cancel-title')}}</p>
-      </div>
+      <app-cancel-license (back)="back()" (dismiss)="close()" />
     }
 
     @case (ManageLicenseStep.ChangeEmail) {
-      <app-change-email />
+      <app-change-email (back)="back()" (dismiss)="close()" />
     }
 
   }

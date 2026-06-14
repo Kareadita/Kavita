@@ -1,1 +1,89 @@
-<p>renew-license works!</p>
+<ng-container *transloco="let t; prefix:'renew-license'">
+
+  <div class="modal-header align-items-start">
+    <div class="d-flex align-items-start gap-3">
+      <div class="screen-icon screen-icon--primary flex-shrink-0">
+        <i class="fa-solid fa-arrows-rotate" aria-hidden="true"></i>
+      </div>
+      <div>
+        <h4 class="modal-title mb-1">{{t('title')}}</h4>
+        <p class="screen-subtitle mb-0">{{t('subtitle')}}</p>
+      </div>
+    </div>
+    <button type="button" class="btn-close" [attr.aria-label]="t('close')" (click)="dismiss.emit()"></button>
+  </div>
+
+  <div class="modal-body d-flex flex-column gap-3">
+
+    <section>
+      <div class="section-label mb-2">{{t('billing-period-label')}}</div>
+      <div class="d-flex gap-2">
+        <button type="button" class="period-card flex-fill"
+                [class.selected]="billingPeriod() === 'monthly'"
+                (click)="selectPeriod('monthly')">
+          <span class="period-radio" aria-hidden="true"></span>
+          <span class="flex-fill text-start">
+            <span class="period-title">{{t('monthly-label')}}</span>
+            <span class="period-price">{{t('monthly-price')}}</span>
+          </span>
+        </button>
+
+        <button type="button" class="period-card flex-fill"
+                [class.selected]="billingPeriod() === 'yearly'"
+                (click)="selectPeriod('yearly')">
+          <span class="period-radio" aria-hidden="true"></span>
+          <span class="flex-fill text-start">
+            <span class="period-title">
+              {{t('yearly-label')}}
+              <span class="save-pill">{{t('yearly-save')}}</span>
+            </span>
+            <span class="period-price">{{t('yearly-price')}}</span>
+          </span>
+        </button>
+      </div>
+    </section>
+
+    <section>
+      <div class="section-label mb-2">{{t('billing-email-label')}}</div>
+      <div class="email-row d-flex align-items-center gap-3">
+        <i class="fa-solid fa-envelope flex-shrink-0" aria-hidden="true"></i>
+        <div class="flex-fill min-w-0">
+          <div class="d-flex align-items-center gap-2">
+            <span class="email-address text-truncate">{{licenseInfo()?.registeredEmail}}</span>
+            <span class="on-file-pill">{{t('on-file-label')}}</span>
+          </div>
+          <div class="email-help">{{t('email-help')}}</div>
+        </div>
+        <button type="button" class="btn btn-link p-0 change-link flex-shrink-0" (click)="changeEmail.emit()">{{t('change-label')}}</button>
+      </div>
+    </section>
+
+    <section>
+      <div class="section-label mb-2">{{t('how-it-works-label')}}</div>
+      <ul class="how-list list-unstyled m-0 d-flex flex-column">
+        <li class="how-item d-flex align-items-start gap-3">
+          <i class="fa-brands fa-stripe-s how-icon flex-shrink-0" aria-hidden="true"></i>
+          <span>{{t('how-step-1', {email: licenseInfo()?.registeredEmail})}}</span>
+        </li>
+        <li class="how-item d-flex align-items-start gap-3">
+          <i class="fa-solid fa-credit-card how-icon flex-shrink-0" aria-hidden="true"></i>
+          <span>{{t('how-step-2')}}</span>
+        </li>
+        <li class="how-item d-flex align-items-start gap-3">
+          <i class="fa-solid fa-bolt how-icon flex-shrink-0" aria-hidden="true"></i>
+          <span>{{t('how-step-3')}}</span>
+        </li>
+      </ul>
+    </section>
+
+  </div>
+
+  <div class="modal-footer">
+    <button type="button" class="btn btn-link text-muted me-2" (click)="dismiss.emit()">{{t('not-now-label')}}</button>
+    <button type="button" class="btn btn-primary">
+      <i class="fa-solid fa-paper-plane me-1" aria-hidden="true"></i>
+      {{t('send-link-label')}}
+    </button>
+  </div>
+
+</ng-container>

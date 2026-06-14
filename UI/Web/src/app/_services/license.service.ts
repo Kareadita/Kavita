@@ -127,4 +127,8 @@ export class LicenseService {
   getLicenseUsage() {
     return this.httpClient.get<KavitaPlusLicenseUsage>(this.baseUrl + `license/stats`);
   }
+
+  cancelLicense() {
+    return this.httpClient.delete(this.baseUrl + `license/cancel`);
+  }
 }

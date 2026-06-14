@@ -5,7 +5,7 @@ import {environment} from '../../../../../environments/environment';
 import {LicenseService} from '../../../../_services/license.service';
 import {KavitaPlusSubscriptionState} from '../../../../_models/kavitaplus/license-info';
 import {RenewLicenseComponent} from '../../renew-license/renew-license.component';
-import {ChangeEmailComponent} from '../../change-email/change-email.component';
+import {CancelLicenseComponent} from "../../cancel-license/cancel-license.component";
 
 export enum ManageLicenseStep {
   Hub = 'hub',
@@ -16,7 +16,7 @@ export enum ManageLicenseStep {
 
 @Component({
   selector: 'app-manage-license-modal',
-  imports: [TranslocoDirective, RenewLicenseComponent, ChangeEmailComponent],
+  imports: [TranslocoDirective, RenewLicenseComponent, CancelLicenseComponent],
   templateUrl: './manage-license-modal.component.html',
   styleUrl: './manage-license-modal.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

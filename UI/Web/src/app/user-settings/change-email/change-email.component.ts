@@ -9,7 +9,7 @@ import {SettingItemComponent} from "../../settings/_components/setting-item/sett
 import {DefaultValuePipe} from "../../_pipes/default-value.pipe";
 
 @Component({
-  selector: 'app-change-email',
+  selector: 'app-change-license-email',
   templateUrl: './change-email.component.html',
   styleUrls: ['./change-email.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -86,7 +86,7 @@ export class ChangeEmailComponent {
       } else if (updateEmailResponse.emailSent) {
         this.toastr.success(translate('toasts.email-sent-to'));
       } else {
-        this.toastr.success(translate('toasts.change-email-no-email'));
+        this.toastr.success(translate('toasts.change-license-email-no-email'));
       }
 
       this.accountService.refreshAccount().subscribe(user => {
