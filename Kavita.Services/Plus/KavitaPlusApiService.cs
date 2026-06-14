@@ -322,6 +322,42 @@ public class KavitaPlusApiService(ILogger<KavitaPlusApiService> logger, IUnitOfW
         return false;
     }
 
+    public async Task<IList<KavitaPlusProductInfo>> GetProducts(CancellationToken ct = default)
+    {
+        try
+        {
+            var license = (await unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.LicenseKey, ct)).Value;
+            return await (Configuration.KavitaPlusApiUrl + "/api/license/products")
+                .WithKavitaPlusHeaders(license)
+                .GetJsonAsync<IList<KavitaPlusProductInfo>>(cancellationToken: ct);
+        } catch (FlurlHttpException e)
+        {
+            logger.LogError(e, "An error happened during the request to Kavita+ API");
+        }
+
+        return [];
+    }
+
+    public async Task<bool> RenewLicenseAsync(RenewKavitaPlusLicenseDto dto, CancellationToken ct)
+    {
+        try
+        {
+            var license = (await unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.LicenseKey, ct)).Value;
+            var response = await (Configuration.KavitaPlusApiUrl + "/api/license/renew")
+                .WithKavitaPlusHeaders(license)
+                .PostJsonAsync(dto, cancellationToken: ct)
+                .ReceiveJson<KPlusResult<object>>();
+
+            if (response.IsSuccess) return true;
+            logger.LogError("Unable to renew subscription on Kavita+ API: {Error}", response.ErrorMessage);
+        } catch (FlurlHttpException e)
+        {
+            logger.LogError(e, "An error happened during the request to Kavita+ API");
+        }
+
+        return false;
+    }
+
     /// <summary>
     /// Send a GET request to K+
     /// </summary>
@@ -335,22 +371,4 @@ public class KavitaPlusApiService(ILogger<KavitaPlusApiService> logger, IUnitOfW
             .WithKavitaPlusHeaders(license, aniListToken)
             .GetAsync();
     }
-
-    /// <summary>
-    /// Send a POST request to K+
-    /// </summary>
-    /// <param name="url">only path of the uri, the host is added</param>
-    /// <param name="body"></param>
-    /// <param name="license"></param>
-    /// <param name="aniListToken"></param>
-    /// <typeparam name="T">Return type</typeparam>
-    /// <returns></returns>
-    private static async Task<T> PostAndReceive<T>(string url, object body, string license, string? aniListToken = null)
-    {
-        return await (Configuration.KavitaPlusApiUrl + url)
-            .WithKavitaPlusHeaders(license, aniListToken)
-            .PostJsonAsync(body)
-            .ReceiveJson<T>();
-    }
-
 }

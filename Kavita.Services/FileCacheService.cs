@@ -47,7 +47,8 @@ public partial class FileCacheService : IFileCacheService
                 {
                     var json = await File.ReadAllTextAsync(path, ct);
                     var cached = JsonSerializer.Deserialize<T>(json, JsonOptions);
-                    _logger.LogDebug("[FileCache] Hit: {Key}", safeKey);
+                    _logger.LogTrace("[FileCache] Hit: {Key}", safeKey);
+
                     return cached;
                 }
                 catch (Exception ex)
@@ -56,7 +57,7 @@ public partial class FileCacheService : IFileCacheService
                 }
             }
 
-            _logger.LogDebug("[FileCache] Miss: {Key}", safeKey);
+            _logger.LogTrace("[FileCache] Miss: {Key}", safeKey);
             var result = await fetch(ct);
             if (shouldCache != null && !shouldCache(result)) return result;
 
@@ -88,7 +89,7 @@ public partial class FileCacheService : IFileCacheService
         try
         {
             File.Delete(path);
-            _logger.LogDebug("[FileCache] Invalidated: {Key}", SanitizeKey(key));
+            _logger.LogTrace("[FileCache] Invalidated: {Key}", SanitizeKey(key));
         }
         catch (Exception ex)
         {
@@ -107,7 +108,7 @@ public partial class FileCacheService : IFileCacheService
             try
             {
                 File.Delete(file);
-                _logger.LogDebug("[FileCache] Invalidated (prefix): {File}", Path.GetFileNameWithoutExtension(file));
+                _logger.LogTrace("[FileCache] Invalidated (prefix): {File}", Path.GetFileNameWithoutExtension(file));
             }
             catch (Exception ex)
             {

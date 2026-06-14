@@ -186,4 +186,28 @@ public class LicenseController(
         return BadRequest(await localizationService.TranslateAsync(UserId, "unable-to-cancel-k+"));
     }
 
+    /// <summary>
+    /// Returns the available Kavita+ products (billing interval and list price) the renew flow can select.
+    /// </summary>
+    /// <returns></returns>
+    [HttpGet("products")]
+    public async Task<ActionResult<IList<KavitaPlusProductInfo>>> GetProducts()
+    {
+        var ct = HttpContext.RequestAborted;
+        return Ok(await licenseService.GetProducts(ct));
+    }
+
+    /// <summary>
+    /// Requests Kavita+ email a secure payment link to renew the subscription on the given billing interval.
+    /// </summary>
+    /// <returns></returns>
+    [HttpPost("renew")]
+    [Authorize(PolicyGroups.AdminPolicy)]
+    public async Task<ActionResult> RenewLicense(RenewKavitaPlusLicenseDto dto)
+    {
+        var ct = HttpContext.RequestAborted;
+        if (await licenseService.RenewLicense(dto, ct)) return Ok();
+        return BadRequest(await localizationService.TranslateAsync(UserId, "unable-to-renew-k+"));
+    }
+
 }

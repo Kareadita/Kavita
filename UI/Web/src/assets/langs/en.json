@@ -997,10 +997,7 @@
         "close": "{{common.close}}",
         "billing-period-label": "Billing period",
         "monthly-label": "Monthly",
-        "monthly-price": "$4.00 / month",
         "yearly-label": "Yearly",
-        "yearly-price": "$46.00 / year",
-        "yearly-save": "SAVE $2",
         "billing-email-label": "Billing email",
         "on-file-label": "on file",
         "email-help": "Auto-filled from this instance - must match your original purchase.",
@@ -1008,9 +1005,11 @@
         "how-it-works-label": "How renewing works",
         "how-step-1": "Stripe emails a secure payment link to {{email}} for the selected plan.",
         "how-step-2": "Confirm your card there - your details never touch this server.",
-        "how-step-3": "Once payment clears, Kavita+ turns back on for everyone automatically.",
-        "not-now-label": "Not now",
-        "send-link-label": "Send payment link"
+        "how-step-3": "Once payment clears, Kavita+ features will once again become available to everyone on the server.",
+        "back-label": "Back",
+        "send-link-label": "Send payment link",
+        "link-sent-success": "Payment link sent. Check your email to complete renewal.",
+        "link-sent-error": "Unable to send payment link. Please try again."
     },
 
     "cancel-license": {

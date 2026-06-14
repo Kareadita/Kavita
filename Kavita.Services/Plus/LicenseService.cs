@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -379,5 +380,15 @@ public class LicenseService(
     public async Task<bool> CancelLicense(CancelKavitaPlusLicenseDto dto, CancellationToken ct)
     {
         return await kavitaPlusApiService.CancelLicenseAsync(dto, ct);
+    }
+
+    public async Task<IList<KavitaPlusProductInfo>> GetProducts(CancellationToken ct = default)
+    {
+        return await kavitaPlusApiService.GetProducts(ct);
+    }
+
+    public async Task<bool> RenewLicense(RenewKavitaPlusLicenseDto dto, CancellationToken ct)
+    {
+        return await kavitaPlusApiService.RenewLicenseAsync(dto, ct);
     }
 }

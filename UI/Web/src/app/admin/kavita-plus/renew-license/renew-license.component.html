@@ -19,25 +19,26 @@
       <div class="section-label mb-2">{{t('billing-period-label')}}</div>
       <div class="d-flex gap-2">
         <button type="button" class="period-card flex-fill"
-                [class.selected]="billingPeriod() === 'monthly'"
-                (click)="selectPeriod('monthly')">
+                [class.selected]="selectedInterval() === KavitaPlusBillingInterval.Month"
+                (click)="selectPeriod(KavitaPlusBillingInterval.Month)">
           <span class="period-radio" aria-hidden="true"></span>
           <span class="flex-fill text-start">
             <span class="period-title">{{t('monthly-label')}}</span>
-            <span class="period-price">{{t('monthly-price')}}</span>
+            @if (formattedPrice(monthlyProduct()); as price) {
+              <span class="period-price">{{ price }} / {{ KavitaPlusBillingInterval.Month | kavitaPlusBillingInterval:'unit' }}</span>
+            }
           </span>
         </button>
 
         <button type="button" class="period-card flex-fill"
-                [class.selected]="billingPeriod() === 'yearly'"
-                (click)="selectPeriod('yearly')">
+                [class.selected]="selectedInterval() === KavitaPlusBillingInterval.Year"
+                (click)="selectPeriod(KavitaPlusBillingInterval.Year)">
           <span class="period-radio" aria-hidden="true"></span>
           <span class="flex-fill text-start">
-            <span class="period-title">
-              {{t('yearly-label')}}
-              <span class="save-pill">{{t('yearly-save')}}</span>
-            </span>
-            <span class="period-price">{{t('yearly-price')}}</span>
+            <span class="period-title">{{t('yearly-label')}}</span>
+            @if (formattedPrice(yearlyProduct()); as price) {
+              <span class="period-price">{{ price }} / {{ KavitaPlusBillingInterval.Year | kavitaPlusBillingInterval:'unit' }}</span>
+            }
           </span>
         </button>
       </div>
@@ -79,9 +80,16 @@
   </div>
 
   <div class="modal-footer">
-    <button type="button" class="btn btn-link text-muted me-2" (click)="dismiss.emit()">{{t('not-now-label')}}</button>
-    <button type="button" class="btn btn-primary">
-      <i class="fa-solid fa-paper-plane me-1" aria-hidden="true"></i>
+    <button type="button" class="btn btn-outline-secondary me-2" [disabled]="isSending()" (click)="back.emit()">
+      <i class="fa-solid fa-chevron-left me-1" aria-hidden="true"></i>
+      {{t('back-label')}}
+    </button>
+    <button type="button" class="btn btn-primary" [disabled]="!selectedProduct() || isSending()" (click)="sendLink()">
+      @if (isSending()) {
+        <span class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span>
+      } @else {
+        <i class="fa-solid fa-paper-plane me-1" aria-hidden="true"></i>
+      }
       {{t('send-link-label')}}
     </button>
   </div>
