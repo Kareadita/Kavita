@@ -16,44 +16,40 @@ namespace Kavita.Database;
 public class UnitOfWork : IUnitOfWork
 {
     private readonly DataContext _context;
-    private readonly IMapper _mapper;
-    private readonly UserManager<AppUser> _userManager;
 
     public UnitOfWork(DataContext context, IMapper mapper, UserManager<AppUser> userManager)
     {
         _context = context;
-        _mapper = mapper;
-        _userManager = userManager;
 
-        SeriesRepository = new SeriesRepository(_context, _mapper);
-        UserRepository = new UserRepository(_context, _userManager, _mapper);
-        LibraryRepository = new LibraryRepository(_context, _mapper);
-        VolumeRepository = new VolumeRepository(_context, _mapper);
-        SettingsRepository = new SettingsRepository(_context, _mapper);
-        AppUserProgressRepository = new AppUserProgressRepository(_context, _mapper);
-        CollectionTagRepository = new CollectionTagRepository(_context, _mapper);
-        ChapterRepository = new ChapterRepository(_context, _mapper);
-        ReadingListRepository = new ReadingListRepository(_context, _mapper);
+        SeriesRepository = new SeriesRepository(_context, mapper);
+        UserRepository = new UserRepository(_context, userManager, mapper);
+        LibraryRepository = new LibraryRepository(_context, mapper);
+        VolumeRepository = new VolumeRepository(_context, mapper);
+        SettingsRepository = new SettingsRepository(_context, mapper);
+        AppUserProgressRepository = new AppUserProgressRepository(_context, mapper);
+        CollectionTagRepository = new CollectionTagRepository(_context, mapper);
+        ChapterRepository = new ChapterRepository(_context, mapper);
+        ReadingListRepository = new ReadingListRepository(_context, mapper);
         SeriesMetadataRepository = new SeriesMetadataRepository(_context);
-        PersonRepository = new PersonRepository(_context, _mapper);
-        GenreRepository = new GenreRepository(_context, _mapper);
-        TagRepository = new TagRepository(_context, _mapper);
-        SiteThemeRepository = new SiteThemeRepository(_context, _mapper);
+        PersonRepository = new PersonRepository(_context, mapper);
+        GenreRepository = new GenreRepository(_context, mapper);
+        TagRepository = new TagRepository(_context, mapper);
+        SiteThemeRepository = new SiteThemeRepository(_context, mapper);
         MangaFileRepository = new MangaFileRepository(_context);
-        DeviceRepository = new DeviceRepository(_context, _mapper);
-        MediaErrorRepository = new MediaErrorRepository(_context, _mapper);
-        ScrobbleRepository = new ScrobbleRepository(_context, _mapper);
-        UserTableOfContentRepository = new UserTableOfContentRepository(_context, _mapper);
-        AppUserSmartFilterRepository = new AppUserSmartFilterRepository(_context, _mapper);
-        AppUserExternalSourceRepository = new AppUserExternalSourceRepository(_context, _mapper);
-        ExternalSeriesMetadataRepository = new ExternalSeriesMetadataRepository(_context, _mapper);
-        EmailHistoryRepository = new EmailHistoryRepository(_context, _mapper);
-        AppUserReadingProfileRepository = new AppUserReadingProfileRepository(_context, _mapper);
-        AnnotationRepository = new AnnotationRepository(_context, _mapper);
-        EpubFontRepository = new EpubFontRepository(_context, _mapper);
-        ReadingSessionRepository = new ReadingSessionRepository(_context, _mapper);
-        ClientDeviceRepository = new ClientDeviceRepository(_context, _mapper);
-        RemapRuleRepository = new ReadingListRemapRuleRepository(_context, _mapper);
+        DeviceRepository = new DeviceRepository(_context, mapper);
+        MediaErrorRepository = new MediaErrorRepository(_context, mapper);
+        ScrobbleRepository = new ScrobbleRepository(_context, mapper);
+        UserTableOfContentRepository = new UserTableOfContentRepository(_context, mapper);
+        AppUserSmartFilterRepository = new AppUserSmartFilterRepository(_context, mapper);
+        AppUserExternalSourceRepository = new AppUserExternalSourceRepository(_context, mapper);
+        ExternalSeriesMetadataRepository = new ExternalSeriesMetadataRepository(_context, mapper);
+        EmailHistoryRepository = new EmailHistoryRepository(_context, mapper);
+        AppUserReadingProfileRepository = new AppUserReadingProfileRepository(_context, mapper);
+        AnnotationRepository = new AnnotationRepository(_context, mapper);
+        EpubFontRepository = new EpubFontRepository(_context, mapper);
+        ReadingSessionRepository = new ReadingSessionRepository(_context, mapper);
+        ClientDeviceRepository = new ClientDeviceRepository(_context, mapper);
+        RemapRuleRepository = new ReadingListRemapRuleRepository(_context, mapper);
         KavitaPlusAuditRepository = new KavitaPlusAuditRepository(_context);
     }
 
