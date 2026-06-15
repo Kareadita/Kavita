@@ -198,15 +198,16 @@ public class LicenseController(
     }
 
     /// <summary>
-    /// Requests Kavita+ email a secure payment link to renew the subscription on the given billing interval.
+    /// Renews the subscription on the given billing interval and returns the Stripe Checkout (Pay Now) URL the customer visits to pay.
     /// </summary>
-    /// <returns></returns>
+    /// <returns>The Stripe Checkout URL</returns>
     [HttpPost("renew")]
     [Authorize(PolicyGroups.AdminPolicy)]
-    public async Task<ActionResult> RenewLicense(RenewKavitaPlusLicenseDto dto)
+    public async Task<ActionResult<string>> RenewLicense(RenewKavitaPlusLicenseDto dto)
     {
         var ct = HttpContext.RequestAborted;
-        if (await licenseService.RenewLicense(dto, ct)) return Ok();
+        var checkoutUrl = await licenseService.RenewLicense(dto, ct);
+        if (!string.IsNullOrEmpty(checkoutUrl)) return Ok(checkoutUrl);
         return BadRequest(await localizationService.TranslateAsync(UserId, "unable-to-renew-k+"));
     }
 

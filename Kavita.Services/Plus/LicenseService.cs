@@ -387,7 +387,7 @@ public class LicenseService(
         return await kavitaPlusApiService.GetProducts(ct);
     }
 
-    public async Task<bool> RenewLicense(RenewKavitaPlusLicenseDto dto, CancellationToken ct)
+    public async Task<string?> RenewLicense(RenewKavitaPlusLicenseDto dto, CancellationToken ct)
     {
         return await kavitaPlusApiService.RenewLicenseAsync(dto, ct);
     }

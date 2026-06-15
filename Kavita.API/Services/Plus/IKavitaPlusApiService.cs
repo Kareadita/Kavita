@@ -43,5 +43,5 @@ public interface IKavitaPlusApiService
     Task<KavitaPlusLicenseUsageDto> GetLicenseUsage(CancellationToken ct = default);
     Task<bool> CancelLicenseAsync(CancelKavitaPlusLicenseDto dto, CancellationToken ct);
     Task<IList<KavitaPlusProductInfo>> GetProducts(CancellationToken ct = default);
-    Task<bool> RenewLicenseAsync(RenewKavitaPlusLicenseDto dto, CancellationToken ct);
+    Task<string?> RenewLicenseAsync(RenewKavitaPlusLicenseDto dto, CancellationToken ct);
 }

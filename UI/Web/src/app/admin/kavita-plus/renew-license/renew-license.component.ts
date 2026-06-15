@@ -29,6 +29,8 @@ export class RenewLicenseComponent implements ManageLicenseModalScreen {
   protected readonly products = signal<KavitaPlusProductInfo[]>([]);
   protected readonly selectedInterval = signal<KavitaPlusBillingInterval>(KavitaPlusBillingInterval.Month);
   protected readonly isSending = signal<boolean>(false);
+  /** Stripe Checkout (Pay Now) URL returned after a successful renew request. */
+  protected readonly checkoutUrl = signal<string | null>(null);
 
   protected readonly monthlyProduct = computed((): KavitaPlusProductInfo | undefined =>
     this.products().find(p => p.billingInterval === KavitaPlusBillingInterval.Month));
@@ -64,9 +66,9 @@ export class RenewLicenseComponent implements ManageLicenseModalScreen {
     this.isSending.set(true);
     this.licenseService.renewLicense(email, this.selectedInterval())
       .subscribe({
-        next: () => {
-          this.toastr.success(this.translocoService.translate('renew-license.link-sent-success'));
-          this.dismiss.emit();
+        next: (checkoutUrl) => {
+          this.isSending.set(false);
+          this.checkoutUrl.set(checkoutUrl);
         },
         error: () => {
           this.toastr.error(this.translocoService.translate('renew-license.link-sent-error'));

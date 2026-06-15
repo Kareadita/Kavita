@@ -338,7 +338,7 @@ public class KavitaPlusApiService(ILogger<KavitaPlusApiService> logger, IUnitOfW
         return [];
     }
 
-    public async Task<bool> RenewLicenseAsync(RenewKavitaPlusLicenseDto dto, CancellationToken ct)
+    public async Task<string?> RenewLicenseAsync(RenewKavitaPlusLicenseDto dto, CancellationToken ct)
     {
         try
         {
@@ -346,16 +346,16 @@ public class KavitaPlusApiService(ILogger<KavitaPlusApiService> logger, IUnitOfW
             var response = await (Configuration.KavitaPlusApiUrl + "/api/license/renew")
                 .WithKavitaPlusHeaders(license)
                 .PostJsonAsync(dto, cancellationToken: ct)
-                .ReceiveJson<KPlusResult<object>>();
+                .ReceiveJson<KPlusResult<RenewSubscriptionResponseDto>>();
 
-            if (response.IsSuccess) return true;
+            if (response.IsSuccess) return response.Data?.CheckoutUrl;
             logger.LogError("Unable to renew subscription on Kavita+ API: {Error}", response.ErrorMessage);
         } catch (FlurlHttpException e)
         {
             logger.LogError(e, "An error happened during the request to Kavita+ API");
         }
 
-        return false;
+        return null;
     }
 
     /// <summary>

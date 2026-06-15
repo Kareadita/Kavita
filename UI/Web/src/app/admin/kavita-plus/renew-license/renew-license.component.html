@@ -15,6 +15,21 @@
 
   <div class="modal-body d-flex flex-column gap-3">
 
+    @if (checkoutUrl(); as url) {
+
+    <section class="checkout-ready text-center d-flex flex-column align-items-center gap-3">
+      <div class="mt-2">
+        <h5 class="mb-1">{{t('checkout-ready-label')}}</h5>
+        <p class="screen-subtitle mb-0">{{t('checkout-ready-help')}}</p>
+      </div>
+      <a class="btn btn-primary dark-exempt" [href]="url" target="_blank" rel="noopener noreferrer">
+        <i class="fa-solid fa-credit-card me-1" aria-hidden="true"></i>
+        {{t('pay-now-label')}}
+      </a>
+    </section>
+
+    } @else {
+
     <section>
       <div class="section-label mb-2">{{t('billing-period-label')}}</div>
       <div class="d-flex gap-2">
@@ -77,21 +92,27 @@
       </ul>
     </section>
 
+    }
+
   </div>
 
   <div class="modal-footer">
-    <button type="button" class="btn btn-outline-secondary me-2" [disabled]="isSending()" (click)="back.emit()">
-      <i class="fa-solid fa-chevron-left me-1" aria-hidden="true"></i>
-      {{t('back-label')}}
-    </button>
-    <button type="button" class="btn btn-primary" [disabled]="!selectedProduct() || isSending()" (click)="sendLink()">
-      @if (isSending()) {
-        <span class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span>
-      } @else {
-        <i class="fa-solid fa-paper-plane me-1" aria-hidden="true"></i>
-      }
-      {{t('send-link-label')}}
-    </button>
+    @if (checkoutUrl()) {
+      <button type="button" class="btn btn-primary" (click)="dismiss.emit()">{{t('done-label')}}</button>
+    } @else {
+      <button type="button" class="btn btn-outline-secondary me-2" [disabled]="isSending()" (click)="back.emit()">
+        <i class="fa-solid fa-chevron-left me-1" aria-hidden="true"></i>
+        {{t('back-label')}}
+      </button>
+      <button type="button" class="btn btn-primary" [disabled]="!selectedProduct() || isSending()" (click)="sendLink()">
+        @if (isSending()) {
+          <span class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span>
+        } @else {
+          <i class="fa-solid fa-paper-plane me-1" aria-hidden="true"></i>
+        }
+        {{t('send-link-label')}}
+      </button>
+    }
   </div>
 
 </ng-container>

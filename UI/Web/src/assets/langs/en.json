@@ -1003,13 +1003,16 @@
         "email-help": "Auto-filled from this instance - must match your original purchase.",
         "change-label": "Change",
         "how-it-works-label": "How renewing works",
-        "how-step-1": "Stripe emails a secure payment link to {{email}} for the selected plan.",
+        "how-step-1": "We create a secure Stripe checkout for {{email}} on the selected plan.",
         "how-step-2": "Confirm your card there - your details never touch this server.",
         "how-step-3": "Once payment clears, Kavita+ features will once again become available to everyone on the server.",
         "back-label": "Back",
-        "send-link-label": "Send payment link",
-        "link-sent-success": "Payment link sent. Check your email to complete renewal.",
-        "link-sent-error": "Unable to send payment link. Please try again."
+        "send-link-label": "Continue to payment",
+        "checkout-ready-label": "Your checkout is ready",
+        "checkout-ready-help": "Open the secure Stripe checkout to complete your renewal. You can close this once payment is done.",
+        "pay-now-label": "Pay now",
+        "done-label": "{{common.done}}",
+        "link-sent-error": "Unable to start the renewal. Please try again or contact support."
     },
 
     "cancel-license": {
@@ -4680,6 +4683,7 @@
         "edit": "Edit",
         "help": "Help",
         "submit": "Submit",
+        "done": "Done",
         "email": "Email",
         "read": "Read",
         "unknown": "Unknown",
