@@ -1009,7 +1009,7 @@
         "back-label": "Back",
         "send-link-label": "Continue to payment",
         "checkout-ready-label": "Your checkout is ready",
-        "checkout-ready-help": "Open the secure Stripe checkout to complete your renewal. You can close this once payment is done.",
+        "checkout-ready-help": "Open the secure Stripe checkout to complete your renewal. You can close this once payment is done and re-check.",
         "pay-now-label": "Pay now",
         "done-label": "{{common.done}}",
         "link-sent-error": "Unable to start the renewal. Please try again or contact support."
