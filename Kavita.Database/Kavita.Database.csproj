@@ -13,10 +13,10 @@
 
     <ItemGroup>
       <PackageReference Include="AutoMapper.Extensions.Microsoft.DependencyInjection" Version="12.0.1" />
-      <PackageReference Include="Microsoft.AspNetCore.DataProtection.EntityFrameworkCore" Version="10.0.5" />
-      <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="10.0.6" />
-      <PackageReference Include="Microsoft.EntityFrameworkCore" Version="10.0.6" />
-      <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="10.0.6" />
+      <PackageReference Include="Microsoft.AspNetCore.DataProtection.EntityFrameworkCore" Version="10.0.9" />
+      <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="10.0.9" />
+      <PackageReference Include="Microsoft.EntityFrameworkCore" Version="10.0.9" />
+      <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="10.0.9" />
       <PackageReference Include="NeoSmart.Caching.Sqlite" Version="9.0.1" />
       <PackageReference Include="NeoSmart.Caching.Sqlite.AspNetCore" Version="9.0.1" />
     </ItemGroup>
