@@ -18,4 +18,5 @@ public interface ILicenseService
     Task<bool> CancelLicense(CancelKavitaPlusLicenseDto dto, CancellationToken ct);
     Task<IList<KavitaPlusProductInfo>> GetProducts(CancellationToken ct = default);
     Task<string?> RenewLicense(RenewKavitaPlusLicenseDto dto, CancellationToken ct);
+    Task<bool> ChangeEmail(ChangeEmailOnLicenseDto dto, CancellationToken ct);
 }

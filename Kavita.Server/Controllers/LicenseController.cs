@@ -211,4 +211,17 @@ public class LicenseController(
         return BadRequest(await localizationService.TranslateAsync(UserId, "unable-to-renew-k+"));
     }
 
+    /// <summary>
+    /// Change email on Kavita+ License/Stripe - Sends a confirmation email on Kavita+ side. No-op for server.
+    /// </summary>
+    /// <param name="dto"></param>
+    /// <returns></returns>
+    [HttpPost("change-email")]
+    [Authorize(PolicyGroups.AdminPolicy)]
+    public async Task<ActionResult<bool>> ChangeEmail(ChangeEmailOnLicenseDto dto)
+    {
+        var ct = HttpContext.RequestAborted;
+        var success = await licenseService.ChangeEmail(dto, ct);
+    }
+
 }

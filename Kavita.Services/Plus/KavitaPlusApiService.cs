@@ -358,6 +358,26 @@ public class KavitaPlusApiService(ILogger<KavitaPlusApiService> logger, IUnitOfW
         return null;
     }
 
+    public async Task<bool> ChangeEmail(ChangeEmailOnLicenseDto dto, CancellationToken ct)
+    {
+        try
+        {
+            var license = (await unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.LicenseKey, ct)).Value;
+            var response = await (Configuration.KavitaPlusApiUrl + "/api/license/change-email")
+                .WithKavitaPlusHeaders(license)
+                .PostJsonAsync(dto, cancellationToken: ct)
+                .ReceiveJson<KPlusResult<object>>(); // It just returns blank result
+
+            if (response.IsSuccess) return response.IsSuccess;
+            logger.LogError("Unable to change Kavita+ email: {Error}", response.ErrorMessage);
+        } catch (FlurlHttpException e)
+        {
+            logger.LogError(e, "An error happened during the request to Kavita+ API");
+        }
+
+        return false;
+    }
+
     /// <summary>
     /// Send a GET request to K+
     /// </summary>

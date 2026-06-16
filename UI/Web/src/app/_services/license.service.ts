@@ -142,4 +142,8 @@ export class LicenseService {
   renewLicense(email: string, billingInterval: KavitaPlusBillingInterval) {
     return this.httpClient.post<string>(this.baseUrl + 'license/renew', {email, billingInterval}, TextResonse);
   }
+
+  changeEmail(existingEmail: string, newEmail: string) {
+    return this.httpClient.post(this.baseUrl + 'license/change-email', {existingEmail, newEmail}, TextResonse);
+  }
 }

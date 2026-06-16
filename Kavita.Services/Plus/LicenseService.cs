@@ -391,4 +391,9 @@ public class LicenseService(
     {
         return await kavitaPlusApiService.RenewLicenseAsync(dto, ct);
     }
+
+    public async Task<bool> ChangeEmail(ChangeEmailOnLicenseDto dto, CancellationToken ct)
+    {
+        return await kavitaPlusApiService.ChangeEmail(dto, ct);
+    }
 }
