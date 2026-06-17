@@ -294,16 +294,7 @@ public class LicenseService(
             // This indicates a mismatch on installId or no active subscription
             if (response == null) return null;
 
-            // Ensure that current version is within the 3 version limit. Don't count Nightly releases or Hotfixes
-            var releases = await versionUpdaterService.GetAllReleases(ct: ct);
-            response.IsValidVersion = releases
-                .Where(r => !r.UpdateTitle.Contains("Hotfix")) // We don't care about Hotfix releases
-                .Where(r => !r.IsPrerelease) // Ensure we don't take current nightlies within the current/last stable
-                .Take(3)
-                .All(r => new Version(r.UpdateVersion) <= BuildInfo.Version);
-
-            response.HasLicense = hasLicense;
-            response.InstallId = HashUtil.ServerToken();
+            await EnrichLicenseInfo(response, hasLicense, ct);
 
             // Cache if the license is valid here as well
             var licenseProvider = cachingProviderFactory.GetCachingProvider(EasyCacheProfiles.License);
@@ -374,5 +365,55 @@ public class LicenseService(
             GeneratedAtUtc = DateTime.UtcNow,
             Stats = []
         };
+    }
+
+    public async Task LinkDiscord(string discordId, string discordUsername, CancellationToken ct = default)
+    {
+        var hasLicense = !string.IsNullOrEmpty((await unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.LicenseKey, ct))
+                .Value);
+
+        if (!hasLicense) return;
+
+        try
+        {
+            var response = await kavitaPlusApiService.LinkDiscord(new LinkDiscordRequestDto
+            {
+                DiscordId = discordId,
+                DiscordUserName = discordUsername
+            }, ct);
+
+            if (response == null)
+            {
+                logger.LogError("Failed to link discord info");
+                return;
+            }
+
+            await EnrichLicenseInfo(response, hasLicense, ct);
+
+            var licenseInfoProvider = cachingProviderFactory.GetCachingProvider(EasyCacheProfiles.LicenseInfo);
+            var licenseProvider = cachingProviderFactory.GetCachingProvider(EasyCacheProfiles.License);
+
+            await licenseProvider.SetAsync(CacheKey, response.IsActive, _licenseCacheTimeout, ct);
+            await licenseInfoProvider.SetAsync(LicenseInfoCacheKey, response, _licenseCacheTimeout, ct);
+
+        }
+        catch (Exception e)
+        {
+            logger.LogError(e, "Failed to link discord info");
+        }
+    }
+
+    private async Task EnrichLicenseInfo(LicenseInfoDto licenseInfo, bool hasLicense, CancellationToken ct)
+    {
+        // Ensure that current version is within the 3 version limit. Don't count Nightly releases or Hotfixes
+        var releases = await versionUpdaterService.GetAllReleases(ct: ct);
+        licenseInfo.IsValidVersion = releases
+            .Where(r => !r.UpdateTitle.Contains("Hotfix")) // We don't care about Hotfix releases
+            .Where(r => !r.IsPrerelease) // Ensure we don't take current nightlies within the current/last stable
+            .Take(3)
+            .All(r => new Version(r.UpdateVersion) <= BuildInfo.Version);
+
+        licenseInfo.HasLicense = hasLicense;
+        licenseInfo.InstallId = HashUtil.ServerToken();
     }
 }

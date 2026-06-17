@@ -43,38 +43,35 @@
     @if (formGroup) {
       <form [formGroup]="formGroup" class="row">
         <div class="col-12">
-          <app-setting-item [title]="t('username-label')" [canEdit]="userScrobbleProvider().provider === ScrobbleProvider.Mal">
+          <app-setting-item [title]="t('username-label')" [canEdit]="false">
             <ng-template #view>
               {{ formGroup.get('userName')?.value | defaultValue }}
-            </ng-template>
-            <ng-template #edit>
-              <input class="form-control" formControlName="userName" [attr.aria-label]="t('username-label')">
             </ng-template>
           </app-setting-item>
         </div>
 
         <div class="col-12 mt-4">
-          <app-setting-item [title]="t('authentication-token-label')">
+          <app-setting-item [title]="t('authentication-token-label')" labelId="authentication-token">
             <ng-template #view>
               <span class="font-monospace text-muted small">
                 {{ formGroup.get('authenticationToken')?.value | truncate:50:true | defaultValue }}
               </span>
             </ng-template>
             <ng-template #edit>
-              <textarea class="form-control" formControlName="authenticationToken" [attr.aria-label]="t('authentication-token-label')"></textarea>
+              <textarea class="form-control" formControlName="authenticationToken" id="authentication-token"></textarea>
             </ng-template>
           </app-setting-item>
         </div>
 
         <div class="col-12 mt-4">
-          <app-setting-item [title]="t('refresh-token-label')">
+          <app-setting-item [title]="t('refresh-token-label')" labelId="refresh-token">
             <ng-template #view>
               <span class="font-monospace text-muted small">
                 {{ formGroup.get('refreshToken')?.value | truncate:50:true | defaultValue }}
               </span>
             </ng-template>
             <ng-template #edit>
-              <textarea class="form-control" formControlName="refreshToken" [attr.aria-label]="t('refresh-token-label')"></textarea>
+              <textarea class="form-control" formControlName="refreshToken" id="refresh-token"></textarea>
             </ng-template>
           </app-setting-item>
         </div>
@@ -84,8 +81,7 @@
             <div class="col-auto d-flex d-md-block justify-content-sm-center text-md-end mb-3">
               <a class="flex-fill btn btn-secondary me-2"
                  [href]="tokenLink | safeUrl"
-                 target="_blank" rel="noopener noreferrer"
-                 [attr.aria-label]="t('generate')">{{t('generate')}}</a>
+                 target="_blank" rel="noopener noreferrer">{{t('generate')}}</a>
             </div>
           </div>
         }
@@ -96,8 +92,7 @@
               <a class="flex-fill btn btn-primary me-2"
                  [href]="oAuthFlowLink | safeUrl"
                  target="_blank" rel="noopener noreferrer"
-                 [ngbTooltip]="t('connect-tooltip')"
-                 [attr.aria-label]="t('connect-label')">{{t('connect-label')}}</a>
+                 [ngbTooltip]="t('connect-tooltip')">{{t('connect-label')}}</a>
             </div>
           </div>
         }

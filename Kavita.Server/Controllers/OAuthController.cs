@@ -5,6 +5,7 @@ using Kavita.API.Database;
 using Kavita.API.Repositories;
 using Kavita.API.Services.Plus;
 using Kavita.Common;
+using Kavita.Models.Constants;
 using Kavita.Models.DTOs.KavitaPlus.OAuth;
 using Kavita.Models.DTOs.Settings;
 using Kavita.Server.Attributes;
@@ -28,6 +29,11 @@ public class OAuthController(IOAuthService oAuthService, IUnitOfWork unitOfWork,
         var user = await unitOfWork.UserRepository.GetUserByIdAsync(UserId, AppUserIncludes.AuthKeys);
         if (user == null) return Unauthorized();
 
+        if (upstream == OAuthUpstream.Discord && !UserContext.HasRole(PolicyConstants.AdminRole))
+        {
+            return BadRequest();
+        }
+
         var apiKey = user.GetOpdsAuthKey();
 
         var serverSettings = await unitOfWork.SettingsRepository.GetSettingsDtoAsync();
@@ -39,7 +45,7 @@ public class OAuthController(IOAuthService oAuthService, IUnitOfWork unitOfWork,
             return BadRequest(jwt.ErrorMessage);
         }
 
-        var redirectUrl = (Configuration.KavitaPlusApiUrl + "/token-relay/continue-flow")
+        var redirectUrl = (Configuration.KavitaPlusApiUrl + "/TokenRelay/continue-flow")
             .SetQueryParam("token", jwt.Data);
 
         return Redirect(redirectUrl.ToString());

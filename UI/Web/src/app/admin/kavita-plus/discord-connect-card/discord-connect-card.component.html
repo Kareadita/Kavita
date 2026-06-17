@@ -16,9 +16,9 @@
     </div>
 
     @if (!isConnected()) {
-      <div class="flex-shrink-0">
+      <a class="flex-shrink-0" [href]="discordOAuthFlow() | safeUrl" rel="noopener noreferrer">
         <app-discord-button [label]="t('connect-button')" [block]="breakpointService.isMobileOrBelow()" />
-      </div>
+      </a>
     }
 
   </div>

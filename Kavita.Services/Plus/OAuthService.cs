@@ -63,12 +63,19 @@ public class OAuthService(
                 .WithOAuthBearerToken(token)
                 .GetJsonAsync<JsonElement>();
 
-            var snowflake = response.GetProperty("id").GetInt32();
+            var snowflake = response.GetProperty("id").GetString();
+            var username = response.GetProperty("username").GetString();
+
+            if (string.IsNullOrEmpty(snowflake))
+            {
+                logger.LogWarning("Cannot link discord, as no id was found");
+                return;
+            }
 
             logger.LogDebug("Will be linking the discord user {DiscordId} to K+ license on behalf of {UserId}",
                 snowflake, userContext.GetUserIdOrThrow());
 
-            // TODO: Update license with this id, idk how
+            BackgroundJob.Enqueue<ILicenseService>(s => s.LinkDiscord(snowflake, username ?? string.Empty, CancellationToken.None));
         }
         catch (Exception ex)
         {

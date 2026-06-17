@@ -19,6 +19,7 @@ import {ConfirmService} from "../../../shared/confirm.service";
 import {NULL_DATE} from "../../../_pipes/date-year-range.pipe";
 import {AccountService} from "../../../_services/account.service";
 import {SafeUrlPipe} from "../../../_pipes/safe-url.pipe";
+import {APP_BASE_HREF} from "@angular/common";
 
 @Component({
   selector: 'app-manage-user-scrobble-provider-modal-modal',
@@ -48,6 +49,7 @@ export class ManageUserScrobbleProviderModalComponent implements OnInit {
   private readonly toastr = inject(ToastrService);
   private readonly confirmService = inject(ConfirmService);
   private readonly accountService = inject(AccountService);
+  protected readonly baseUrl = inject(APP_BASE_HREF);
 
   userScrobbleProvider = model.required<UserScrobbleProvider>();
 
@@ -64,8 +66,7 @@ export class ManageUserScrobbleProviderModalComponent implements OnInit {
       return null;
     }
 
-    // TODO: Prefix with baseUrl
-    return `/api/oauth/start?upstream=${this.userScrobbleProvider().oAuthUpStream}&apiKey=${apiKey}`;
+    return this.baseUrl + `api/oauth/start?upstream=${this.userScrobbleProvider().oAuthUpStream}&apiKey=${apiKey}`;
   });
 
   formGroup!: FormGroup<{

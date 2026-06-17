@@ -44,6 +44,7 @@ public interface IKavitaPlusApiService
     Task<KPlusResult<List<ExternalSeriesDetailDto>>> GetWantToRead(ScrobbleProvider provider, string token, string license, CancellationToken ct = default);
     Task<KPlusResult<KavitaPlusUserInfo>> GetUserInfo(ScrobbleProvider provider, string token, string license, CancellationToken ct = default);
     Task<LicenseInfoDto?> GetLicenseInfo(CancellationToken ct = default);
+    Task<LicenseInfoDto?> LinkDiscord(LinkDiscordRequestDto request, CancellationToken ct = default);
     Task<IList<KavitaPlusProviderHealthSnapshotDto>> GetProviderHealthSnapshot(CancellationToken ct = default);
     Task<KavitaPlusLicenseUsageDto> GetLicenseUsage(CancellationToken ct = default);
 

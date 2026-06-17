@@ -14,4 +14,5 @@ public interface ILicenseService
     Task<LicenseInfoDto?> GetLicenseInfo(bool forceCheck = false, CancellationToken ct = default);
     Task<bool> ResendWelcomeEmail(CancellationToken ct = default);
     Task<KavitaPlusLicenseUsageDto> GetLicenseUsage(CancellationToken ct = default);
+    Task LinkDiscord(string discordId, string discordUsername, CancellationToken ct = default);
 }
