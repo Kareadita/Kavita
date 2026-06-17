@@ -83,7 +83,7 @@
           <div class="text-end">
             <div class="col-auto d-flex d-md-block justify-content-sm-center text-md-end mb-3">
               <a class="flex-fill btn btn-secondary me-2"
-                 [href]="tokenLink"
+                 [href]="tokenLink | safeUrl"
                  target="_blank" rel="noopener noreferrer"
                  [attr.aria-label]="t('generate')">{{t('generate')}}</a>
             </div>
@@ -94,7 +94,7 @@
           <div class="text-end">
             <div class="col-auto d-flex d-md-block justify-content-sm-center text-md-end mb-3">
               <a class="flex-fill btn btn-primary me-2"
-                 [href]="oAuthFlowLink"
+                 [href]="oAuthFlowLink | safeUrl"
                  target="_blank" rel="noopener noreferrer"
                  [ngbTooltip]="t('connect-tooltip')"
                  [attr.aria-label]="t('connect-label')">{{t('connect-label')}}</a>

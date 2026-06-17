@@ -13,6 +13,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace Kavita.Server.Controllers;
 
+[KPlus]
 public class OAuthController(IOAuthService oAuthService, IUnitOfWork unitOfWork, IKavitaPlusApiService kavitaPlusApiService): BaseApiController
 {
 
@@ -21,7 +22,6 @@ public class OAuthController(IOAuthService oAuthService, IUnitOfWork unitOfWork,
     /// </summary>
     /// <param name="upstream"></param>
     /// <returns></returns>
-    [KPlus]
     [HttpGet("start")]
     public async Task<IActionResult> StartFlow([FromQuery] OAuthUpstream upstream)
     {
@@ -39,7 +39,7 @@ public class OAuthController(IOAuthService oAuthService, IUnitOfWork unitOfWork,
             return BadRequest(jwt.ErrorMessage);
         }
 
-        var redirectUrl = (Configuration.KavitaPlusApiUrl + "/TokenRelay/continue-flow")
+        var redirectUrl = (Configuration.KavitaPlusApiUrl + "/token-relay/continue-flow")
             .SetQueryParam("token", jwt.Data);
 
         return Redirect(redirectUrl.ToString());
@@ -53,7 +53,6 @@ public class OAuthController(IOAuthService oAuthService, IUnitOfWork unitOfWork,
     /// <param name="token"></param>
     /// <param name="refreshToken"></param>
     /// <returns></returns>
-    [KPlus]
     [HttpGet("callback")]
     public async Task<IActionResult> Callback([FromQuery] OAuthUpstream upstream, [FromQuery] string token,
         [FromQuery] string? refreshToken = null)
@@ -70,11 +69,11 @@ public class OAuthController(IOAuthService oAuthService, IUnitOfWork unitOfWork,
 
     private static string GetInstanceUrl(HttpRequest request, ServerSettingDto serverSettings)
     {
-        var origin =string.IsNullOrEmpty(serverSettings.HostName)
+        var origin = string.IsNullOrEmpty(serverSettings.HostName)
             ?  request.Scheme + "://" + request.Host.Value
             : serverSettings.HostName.TrimEnd('/');
 
-        origin += string.IsNullOrEmpty(serverSettings.BaseUrl) ? "" : serverSettings.BaseUrl.TrimEnd('/');
+        origin += string.IsNullOrEmpty(serverSettings.BaseUrl) ? string.Empty : serverSettings.BaseUrl.TrimEnd('/');
 
         return origin + "/";
     }

@@ -2581,7 +2581,7 @@
         "generate": "Generate",
         "generate-scrobble-events": "Backfill Events",
         "connect-label": "Connect Account",
-        "connect-tooltip": "You will be redirected to K+ and the Scrobble provider"
+        "connect-tooltip": "You will be redirected to Kavita+ and the Scrobble provider"
     },
 
     "scrobble-provider-description-pipe": {

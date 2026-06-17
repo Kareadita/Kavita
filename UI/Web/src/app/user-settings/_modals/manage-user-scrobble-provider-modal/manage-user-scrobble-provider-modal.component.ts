@@ -18,6 +18,7 @@ import {TimeDifferencePipe} from "../../../_pipes/time-difference.pipe";
 import {ConfirmService} from "../../../shared/confirm.service";
 import {NULL_DATE} from "../../../_pipes/date-year-range.pipe";
 import {AccountService} from "../../../_services/account.service";
+import {SafeUrlPipe} from "../../../_pipes/safe-url.pipe";
 
 @Component({
   selector: 'app-manage-user-scrobble-provider-modal-modal',
@@ -32,7 +33,8 @@ import {AccountService} from "../../../_services/account.service";
     UtcToLocalDatePipe,
     ScrobbleProviderImageComponent,
     NgbTooltip,
-    TimeDifferencePipe
+    TimeDifferencePipe,
+    SafeUrlPipe
   ],
   templateUrl: './manage-user-scrobble-provider-modal.component.html',
   styleUrl: './manage-user-scrobble-provider-modal.component.scss',

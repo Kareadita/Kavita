@@ -47,7 +47,29 @@ public interface IKavitaPlusApiService
     Task<IList<KavitaPlusProviderHealthSnapshotDto>> GetProviderHealthSnapshot(CancellationToken ct = default);
     Task<KavitaPlusLicenseUsageDto> GetLicenseUsage(CancellationToken ct = default);
 
+    /// <summary>
+    /// Starts the OAuth flow for the given upstream. Returns a JWT token to be use as authentication for the redirect to K+
+    /// Which handles the OAuth flow with the upstream, and redirect back to OAuth/callback
+    /// </summary>
+    /// <param name="upstream"></param>
+    /// <param name="instanceUrl"></param>
+    /// <param name="apiKey"></param>
+    /// <param name="ct"></param>
+    /// <returns></returns>
     Task<KPlusResult<string>> StartOAuthFlow(OAuthUpstream upstream, string instanceUrl, string apiKey, CancellationToken ct = default);
+    /// <summary>
+    /// Returns the expiry date of the given access token. Either by reading from JWT or calling the introspect endpoint (OAuth)
+    /// </summary>
+    /// <param name="upstream"></param>
+    /// <param name="accessToken"></param>
+    /// <param name="ct"></param>
+    /// <returns></returns>
     Task<KPlusResult<DateTime>> GetTokenExpiry(OAuthUpstream upstream, string accessToken, CancellationToken ct = default);
+    /// <summary>
+    /// Runs the OAuth refresh token flow
+    /// </summary>
+    /// <param name="requestDto"></param>
+    /// <param name="ct"></param>
+    /// <returns></returns>
     Task<KPlusResult<TokenResponseDto>> RefreshToken(RefreshTokenRequestDto requestDto, CancellationToken ct = default);
 }

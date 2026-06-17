@@ -57,16 +57,23 @@ public class OAuthService(
             return;
         }
 
-        var response = await DiscordMeApiUrl
-            .WithOAuthBearerToken(token)
-            .GetJsonAsync<JsonElement>();
+        try
+        {
+            var response = await DiscordMeApiUrl
+                .WithOAuthBearerToken(token)
+                .GetJsonAsync<JsonElement>();
 
-        var snowflake = response.GetProperty("id").GetInt32();
+            var snowflake = response.GetProperty("id").GetInt32();
 
-        logger.LogDebug("Will be linking the discord user {DiscordId} to K+ license on behalf of {UserId}",
-            snowflake, userContext.GetUserIdOrThrow());
+            logger.LogDebug("Will be linking the discord user {DiscordId} to K+ license on behalf of {UserId}",
+                snowflake, userContext.GetUserIdOrThrow());
 
-        // TODO: Update license with this id, idk how
+            // TODO: Update license with this id, idk how
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "Failed to get discord user id, cannot update id on K+");
+        }
     }
 
     private async Task SetScrobbleProviderToken(ScrobbleProvider provider, string token, string? refreshToken = null)
@@ -100,7 +107,6 @@ public class OAuthService(
 
     /// <summary>
     /// Wrapper around <see cref="IScrobblingService.SyncProviderInfo"/> to avoid an issue with EF.Core's concurrency handling.
-    /// See https://github.com/dotnet/efcore/issues/24279
     /// </summary>
     /// <param name="userId"></param>
     /// <param name="provider"></param>
@@ -155,7 +161,7 @@ public class OAuthService(
                 {
                     settings.AuthenticationToken = response.Data.AccessToken;
                     settings.RefreshToken = response.Data.RefreshToken;
-                    // Subtrack 30s for latency
+                    // Remove 30s for latency
                     settings.ValidUntilUtc = DateTime.UtcNow
                                              + TimeSpan.FromSeconds(response.Data.ExpiresIn)
                                              - TimeSpan.FromSeconds(30);

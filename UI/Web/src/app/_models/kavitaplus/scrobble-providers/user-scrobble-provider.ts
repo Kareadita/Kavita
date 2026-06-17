@@ -23,7 +23,7 @@ export class UserScrobbleProvider {
   }
 
   get supportsOAuthFlow() {
-    return ![ScrobbleProvider.Hardcover, ScrobbleProvider.Cbr].includes(this.provider);
+    return ![ScrobbleProvider.Hardcover, ScrobbleProvider.Cbr, ScrobbleProvider.Kavita].includes(this.provider);
   }
 
   get oAuthUpStream() {

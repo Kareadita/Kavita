@@ -1,4 +1,3 @@
-
 export enum OAuthUpstream {
   Discord = 0,
   MangaBaka = 1,

@@ -1,6 +1,6 @@
 namespace Kavita.Models.DTOs.KavitaPlus.OAuth;
 
-public class RefreshTokenRequestDto
+public sealed record RefreshTokenRequestDto
 {
     public required OAuthUpstream Upstream { get; set; }
     public required string RefreshToken { get; set; }
