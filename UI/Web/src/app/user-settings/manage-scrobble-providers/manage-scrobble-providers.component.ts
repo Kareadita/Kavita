@@ -73,7 +73,7 @@ type ScrobbleProviderSettingsFormGroup = FormGroup<{
 const ProviderSupportedEvents: Record<ScrobbleProvider, ScrobbleEventType[]> = {
   [ScrobbleProvider.AniList]: [ScrobbleEventType.ScoreUpdated, ScrobbleEventType.Review, ScrobbleEventType.ChapterRead, ScrobbleEventType.AddWantToRead],
   [ScrobbleProvider.Hardcover]: [ScrobbleEventType.ScoreUpdated, ScrobbleEventType.Review, ScrobbleEventType.ChapterRead, ScrobbleEventType.AddWantToRead],
-  [ScrobbleProvider.Mal]: [ScrobbleEventType.AddWantToRead],
+  [ScrobbleProvider.Mal]: [ScrobbleEventType.AddWantToRead, ScrobbleEventType.ScoreUpdated, ScrobbleEventType.ChapterRead],
   [ScrobbleProvider.MangaBaka]: [ScrobbleEventType.ScoreUpdated, ScrobbleEventType.Review, ScrobbleEventType.ChapterRead, ScrobbleEventType.AddWantToRead],
   [ScrobbleProvider.Cbr]: [],
   [ScrobbleProvider.Kavita]: []

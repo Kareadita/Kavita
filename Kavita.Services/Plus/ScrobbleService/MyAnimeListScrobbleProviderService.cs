@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using Kavita.API.Database;
 using Kavita.API.Services.Plus;
-using Kavita.Models.DTOs.Scrobbling;
+using Kavita.Common.Helpers;
 using Kavita.Models.Entities;
 using Kavita.Models.Entities.Enums;
 using Kavita.Models.Entities.Enums.KavitaPlus;
@@ -17,7 +17,8 @@ public class MyAnimeListScrobbleProviderService(ILogger<MyAnimeListScrobbleProvi
     protected override ScrobbleProvider Provider => ScrobbleProvider.Mal;
     protected override IReadOnlyList<ScrobbleEventType> SupportedEvents =>
     [
-        // Not Supported
+        ScrobbleEventType.AddWantToRead, ScrobbleEventType.ChapterRead, ScrobbleEventType.ReadStatusUpdate,
+        ScrobbleEventType.RemoveWantToRead, ScrobbleEventType.ScoreUpdated
     ];
 
     protected override void SetScrobbleIds(ScrobbleEvent evt, Series series)
@@ -25,7 +26,6 @@ public class MyAnimeListScrobbleProviderService(ILogger<MyAnimeListScrobbleProvi
         evt.MalId = series.MalId;
     }
 
-    // This is just a baseline, we don't support MAL yet
     public override RateProfile RateProfile => new(
         BaseInterval: TimeSpan.FromSeconds(1),
         Buffer: TimeSpan.FromMilliseconds(500),
@@ -35,7 +35,6 @@ public class MyAnimeListScrobbleProviderService(ILogger<MyAnimeListScrobbleProvi
 
     public override bool IsTokenValid(string token)
     {
-        // I don't actually know what Mal uses, but it's always valid whatever
-        return true;
+        return JwtHelper.IsTokenValid(token);
     }
 }
