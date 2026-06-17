@@ -29,6 +29,7 @@ using Kavita.Models.Entities.Enums.UserPreferences;
 using Kavita.Models.Entities.Metadata;
 using Kavita.Models.Entities.Scrobble;
 using Kavita.Models.Entities.User;
+using Kavita.Models.Extensions;
 using Kavita.Services.Plus.ScrobbleService;
 using Kavita.Services.Scanner;
 using Microsoft.EntityFrameworkCore;
@@ -1891,20 +1892,15 @@ public class ScrobblingService : IScrobblingService
             scrobbleProviderSettings.UserName = userInfo.Data!.Username;
         }
 
-        if (provider is ScrobbleProvider.AniList or ScrobbleProvider.Hardcover or ScrobbleProvider.Mal)
+        var tokenExpiry = await GetTokenExpiry(provider, userId, scrobbleProviderSettings.AuthenticationToken, ct);
+        if (tokenExpiry.HasValue)
         {
-            try
-            {
-                scrobbleProviderSettings.ValidUntilUtc = TokenService.GetTokenExpiry(scrobbleProviderSettings.AuthenticationToken);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Failed to get token expiry for {UserId} for {Provider}", userId, provider);
-            }
+            scrobbleProviderSettings.ValidUntilUtc = tokenExpiry.Value;
         }
         else
         {
-            scrobbleProviderSettings.ValidUntilUtc = DateTime.MaxValue;
+            _logger.LogWarning("Failed to get token expiry for {UserId} for {Provider} assuming invalid", userId, provider);
+            scrobbleProviderSettings.ValidUntilUtc = DateTime.MinValue;
         }
 
 
@@ -1913,6 +1909,32 @@ public class ScrobblingService : IScrobblingService
 
         await _eventHub.SendMessageToAsync(MessageFactory.ScrobbleProviderUpdated,
             MessageFactory.ScrobbleProviderUpdatedEvent(provider), userId, ct);
+    }
+
+    private async Task<DateTime?> GetTokenExpiry(ScrobbleProvider provider, int userId, string token, CancellationToken ct = default)
+    {
+        var upstream = provider.ToOAuthUpstream();
+        if (upstream == null)
+        {
+            try
+            {
+                return TokenService.GetTokenExpiry(token);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Failed to get token expiry for {UserId} for {Provider}", userId, provider);
+            }
+
+            return null;
+        }
+
+        var tokenExp = await _kavitaPlusApiService.GetTokenExpiry(upstream.Value, token, ct);
+        if (tokenExp.IsSuccess)
+        {
+            return tokenExp.Data;
+        }
+
+        return null;
     }
 
     public async Task<List<int>> FilterLibrariesForProvider(ScrobbleProvider provider, int userId, List<int> libraryIds, CancellationToken ct = default)

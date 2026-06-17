@@ -48,5 +48,6 @@ public interface IKavitaPlusApiService
     Task<KavitaPlusLicenseUsageDto> GetLicenseUsage(CancellationToken ct = default);
 
     Task<KPlusResult<string>> StartOAuthFlow(OAuthUpstream upstream, string instanceUrl, string apiKey, CancellationToken ct = default);
+    Task<KPlusResult<DateTime>> GetTokenExpiry(OAuthUpstream upstream, string accessToken, CancellationToken ct = default);
     Task<KPlusResult<TokenResponseDto>> RefreshToken(RefreshTokenRequestDto requestDto, CancellationToken ct = default);
 }

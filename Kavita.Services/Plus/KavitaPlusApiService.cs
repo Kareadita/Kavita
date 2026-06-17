@@ -331,6 +331,27 @@ public class KavitaPlusApiService(ILogger<KavitaPlusApiService> logger, IUnitOfW
         }
     }
 
+    public async Task<KPlusResult<DateTime>> GetTokenExpiry(OAuthUpstream upstream, string accessToken, CancellationToken ct = default)
+    {
+        var license = (await unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.LicenseKey, ct)).Value;
+
+        try
+        {
+            var response = await (Configuration.KavitaPlusApiUrl + "/api/v3/oauth/token-expiration")
+                .WithKavitaPlusHeaders(license)
+                .SetQueryParam("upstream", upstream)
+                .SetQueryParam("accessToken", accessToken)
+                .GetJsonAsync<KPlusResult<DateTime>>(cancellationToken: ct);
+
+            return response;
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "There was an issue starting refreshing tokens");
+            return KPlusResult<DateTime>.Failure(ex.Message);
+        }
+    }
+
     public async Task<KPlusResult<TokenResponseDto>> RefreshToken(RefreshTokenRequestDto requestDto, CancellationToken ct = default)
     {
         var license = (await unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.LicenseKey, ct)).Value;
