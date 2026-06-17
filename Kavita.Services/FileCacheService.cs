@@ -6,6 +6,7 @@ using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 using Kavita.API.Services;
+using Kavita.Common.Extensions;
 using Microsoft.Extensions.Logging;
 
 namespace Kavita.Services;
@@ -47,7 +48,7 @@ public partial class FileCacheService : IFileCacheService
                 {
                     var json = await File.ReadAllTextAsync(path, ct);
                     var cached = JsonSerializer.Deserialize<T>(json, JsonOptions);
-                    _logger.LogTrace("[FileCache] Hit: {Key}", safeKey);
+                    _logger.LogTrace("[FileCache] Hit: {Key}", safeKey.Sanitize());
 
                     return cached;
                 }
@@ -57,7 +58,7 @@ public partial class FileCacheService : IFileCacheService
                 }
             }
 
-            _logger.LogTrace("[FileCache] Miss: {Key}", safeKey);
+            _logger.LogTrace("[FileCache] Miss: {Key}", safeKey.Sanitize());
             var result = await fetch(ct);
             if (shouldCache != null && !shouldCache(result)) return result;
 
@@ -71,7 +72,7 @@ public partial class FileCacheService : IFileCacheService
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "[FileCache] Failed to write cache for {Key}", safeKey);
+                _logger.LogError(ex, "[FileCache] Failed to write cache for {Key}", safeKey.Sanitize());
             }
 
             return result;
@@ -89,11 +90,11 @@ public partial class FileCacheService : IFileCacheService
         try
         {
             File.Delete(path);
-            _logger.LogTrace("[FileCache] Invalidated: {Key}", SanitizeKey(key));
+            _logger.LogTrace("[FileCache] Invalidated: {Key}", SanitizeKey(key).Sanitize());
         }
         catch (Exception ex)
         {
-            _logger.LogWarning(ex, "[FileCache] Failed to invalidate cache for {Key}", key);
+            _logger.LogWarning(ex, "[FileCache] Failed to invalidate cache for {Key}", key.Sanitize());
         }
     }
 
@@ -108,11 +109,11 @@ public partial class FileCacheService : IFileCacheService
             try
             {
                 File.Delete(file);
-                _logger.LogTrace("[FileCache] Invalidated (prefix): {File}", Path.GetFileNameWithoutExtension(file));
+                _logger.LogTrace("[FileCache] Invalidated (prefix): {File}", Path.GetFileNameWithoutExtension(file).Sanitize());
             }
             catch (Exception ex)
             {
-                _logger.LogWarning(ex, "[FileCache] Failed to invalidate cache file {File}", file);
+                _logger.LogWarning(ex, "[FileCache] Failed to invalidate cache file {File}", file.Sanitize());
             }
         }
     }
