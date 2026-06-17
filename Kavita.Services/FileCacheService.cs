@@ -54,7 +54,7 @@ public partial class FileCacheService : IFileCacheService
                 }
                 catch (Exception ex)
                 {
-                    _logger.LogWarning(ex, "[FileCache] Failed to deserialize cache for {Key}, fetching fresh", safeKey);
+                    _logger.LogWarning(ex, "[FileCache] Failed to deserialize cache for {Key}, fetching fresh", safeKey.Sanitize());
                 }
             }
 
@@ -94,7 +94,7 @@ public partial class FileCacheService : IFileCacheService
         }
         catch (Exception ex)
         {
-            _logger.LogWarning(ex, "[FileCache] Failed to invalidate cache for {Key}", key.Sanitize());
+            _logger.LogWarning(ex, "[FileCache] Failed to invalidate cache for {Key}", SanitizeKey(key).Sanitize());
         }
     }
 
