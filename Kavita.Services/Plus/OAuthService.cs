@@ -6,9 +6,11 @@ using Flurl.Http;
 using Hangfire;
 using Kavita.API.Database;
 using Kavita.API.Services.Plus;
+using Kavita.API.Services.SignalR;
 using Kavita.API.Store;
 using Kavita.Models.Constants;
 using Kavita.Models.DTOs.KavitaPlus.OAuth;
+using Kavita.Models.DTOs.SignalR;
 using Kavita.Models.Entities.Enums;
 using Kavita.Models.Extensions;
 using Microsoft.Extensions.Logging;
@@ -20,7 +22,8 @@ public class OAuthService(
     IUserContext userContext,
     IUnitOfWork unitOfWork,
     IScrobblingService scrobblingService,
-    IKavitaPlusApiService kavitaPlusApiService): IOAuthService
+    IKavitaPlusApiService kavitaPlusApiService,
+    IEventHub eventHub): IOAuthService
 {
     private const string DiscordMeApiUrl = "https://discord.com/api/users/@me";
 
@@ -159,6 +162,11 @@ public class OAuthService(
                     settings.LastSyncedUtc = DateTime.UtcNow;
 
                     unitOfWork.UserRepository.Update(user);
+                    await unitOfWork.CommitAsync(ct);
+
+                    await eventHub.SendMessageToAsync(MessageFactory.ScrobbleProviderUpdated,
+                        MessageFactory.ScrobbleProviderUpdatedEvent(provider), user.Id, ct);
+
                     continue;
                 }
 
@@ -166,7 +174,5 @@ public class OAuthService(
 
             }
         }
-
-        await unitOfWork.CommitAsync(ct);
     }
 }
