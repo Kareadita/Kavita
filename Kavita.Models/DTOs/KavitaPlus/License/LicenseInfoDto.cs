@@ -115,6 +115,11 @@ public sealed record LicenseInfoDto
     public string? DiscordId { get; set; }
 
     /// <summary>
+    /// Discord Username if set
+    /// </summary>
+    public string? DiscordUsername { get; set; }
+
+    /// <summary>
     /// Has Discord Set
     /// </summary>
     public bool HasDiscordSet => DiscordId is not null;

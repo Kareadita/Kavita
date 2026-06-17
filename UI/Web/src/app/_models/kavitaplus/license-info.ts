@@ -33,6 +33,7 @@ export class LicenseInfo {
   hasLicense!: boolean;
   installId!: string;
   discordId!: string | null;
+  discordUsername!: string | null;
   hasDiscordSet!: boolean;
   pastDue!: boolean;
 

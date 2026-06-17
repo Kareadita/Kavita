@@ -7,10 +7,11 @@ import {OAuthUpstream} from "../../../_models/kavitaplus/oauth-upstream";
 import {APP_BASE_HREF} from "@angular/common";
 import {AccountService} from "../../../_services/account.service";
 import {SafeUrlPipe} from "../../../_pipes/safe-url.pipe";
+import {NgbTooltip} from "@ng-bootstrap/ng-bootstrap";
 
 @Component({
   selector: 'app-discord-connect-card',
-  imports: [TranslocoDirective, DiscordButtonComponent, SafeUrlPipe],
+  imports: [TranslocoDirective, DiscordButtonComponent, SafeUrlPipe, NgbTooltip],
   templateUrl: './discord-connect-card.component.html',
   styleUrl: './discord-connect-card.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -25,6 +26,7 @@ export class DiscordConnectCardComponent {
   loadingDiscordInBackground = input<boolean>(false);
 
   readonly isConnected = computed((): boolean => this.licenseInfo()?.hasDiscordSet ?? false);
+  readonly discordUsername = computed((): string | null => this.licenseInfo()?.discordUsername ?? null);
   readonly discordId = computed((): string | null => this.licenseInfo()?.discordId ?? null);
 
   discordOAuthFlow = computed(() => {
