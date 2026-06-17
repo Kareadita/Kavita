@@ -366,7 +366,7 @@ public class KavitaPlusApiService(ILogger<KavitaPlusApiService> logger, IUnitOfW
             var response = await (Configuration.KavitaPlusApiUrl + "/api/license/change-email")
                 .WithKavitaPlusHeaders(license)
                 .PostJsonAsync(dto, cancellationToken: ct)
-                .ReceiveJson<KPlusResult<object>>(); // It just returns blank result
+                .ReceiveJson<KPlusResult<bool>>(); // It just returns blank result
 
             if (response.IsSuccess) return response.IsSuccess;
             logger.LogError("Unable to change Kavita+ email: {Error}", response.ErrorMessage);

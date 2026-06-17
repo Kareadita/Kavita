@@ -222,6 +222,7 @@ public class LicenseController(
     {
         var ct = HttpContext.RequestAborted;
         var success = await licenseService.ChangeEmail(dto, ct);
+        return Ok(success);
     }
 
 }

@@ -143,7 +143,7 @@ export class LicenseService {
     return this.httpClient.post<string>(this.baseUrl + 'license/renew', {email, billingInterval}, TextResonse);
   }
 
-  changeEmail(existingEmail: string, newEmail: string) {
-    return this.httpClient.post(this.baseUrl + 'license/change-email', {existingEmail, newEmail}, TextResonse);
+  changeEmail(oldEmail: string, newEmail: string) {
+    return this.httpClient.post(this.baseUrl + 'license/change-email', {oldEmail, newEmail}, TextResonse);
   }
 }

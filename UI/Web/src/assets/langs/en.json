@@ -4324,7 +4324,9 @@
         "cbl-remap-rule-demoted": "Rule demoted to user scope",
         "confirm-delete-read-from-readinglist": "Are you sure you want to remove all read issues from this reading list? This cannot be undone.",
         "reading-list-sync-enqueued": "The Reading List has been enqueued for sync.",
-        "confirm-rerun-backfill": "You've already generated scrobble events for {{provider}} at least once. Backfilling may delay scrobbling of recent read events. Are you sure you want to continue?"
+        "confirm-rerun-backfill": "You've already generated scrobble events for {{provider}} at least once. Backfilling may delay scrobbling of recent read events. Are you sure you want to continue?",
+        "change-email-success": "An email has been sent to the new email, you must accept to complete this process",
+        "change-email-error": "Unable to change email, please try again or reach out to support"
     },
 
     "read-time-pipe": {

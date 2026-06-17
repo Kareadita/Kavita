@@ -3,6 +3,7 @@ import {FormControl, FormGroup, ReactiveFormsModule, Validators} from '@angular/
 import {TranslocoDirective} from '@jsverse/transloco';
 import {LicenseService} from '../../../_services/license.service';
 import {ManageLicenseModalScreen} from '../_modals/manage-license-modal/manage-license-modal-screen';
+import {ToastrService} from "ngx-toastr";
 
 @Component({
   selector: 'app-change-license-email',
@@ -14,6 +15,7 @@ import {ManageLicenseModalScreen} from '../_modals/manage-license-modal/manage-l
 export class ChangeLicenseEmailComponent implements ManageLicenseModalScreen {
 
   private readonly licenseService = inject(LicenseService);
+  private readonly toastr = inject(ToastrService);
 
   readonly back = output<void>();
   readonly dismiss = output<void>();
@@ -26,5 +28,8 @@ export class ChangeLicenseEmailComponent implements ManageLicenseModalScreen {
 
   sendCode() {
     if (this.form.invalid) return;
+    this.licenseService.changeEmail(this.licenseInfo()!.registeredEmail, this.form.get('newEmail')!.value!).subscribe(res => {
+      this.toastr.info('toasts.change-email-' + (res ? 'success' : 'error'));
+    });
   }
 }
