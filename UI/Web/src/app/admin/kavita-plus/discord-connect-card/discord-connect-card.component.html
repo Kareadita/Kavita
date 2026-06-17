@@ -9,13 +9,16 @@
       @if (isConnected()) {
         <h3 class="discord-title mb-1">{{ t('connected-label') }}</h3>
         <p class="discord-subtitle text-muted text-break mb-0">{{ discordId() }}</p>
+      } @else if (loadingDiscordInBackground()) {
+        <h3 class="discord-title mb-1">{{ t('connecting-title') }}</h3>
+        <p class="discord-subtitle text-muted mb-0">{{ t('connecting-subtitle') }}</p>
       } @else {
         <h3 class="discord-title mb-1">{{ t('connect-title') }}</h3>
         <p class="discord-subtitle text-muted mb-0">{{ t('connect-subtitle') }}</p>
       }
     </div>
 
-    @if (!isConnected()) {
+    @if (!isConnected() && !loadingDiscordInBackground()) {
       <a class="flex-shrink-0" [href]="discordOAuthFlow() | safeUrl" rel="noopener noreferrer">
         <app-discord-button [label]="t('connect-button')" [block]="breakpointService.isMobileOrBelow()" />
       </a>

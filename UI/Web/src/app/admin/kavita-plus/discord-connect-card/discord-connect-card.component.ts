@@ -22,6 +22,7 @@ export class DiscordConnectCardComponent {
   private readonly accountService = inject(AccountService);
 
   licenseInfo = input<LicenseInfo | null>(null);
+  loadingDiscordInBackground = input<boolean>(false);
 
   readonly isConnected = computed((): boolean => this.licenseInfo()?.hasDiscordSet ?? false);
   readonly discordId = computed((): string | null => this.licenseInfo()?.discordId ?? null);

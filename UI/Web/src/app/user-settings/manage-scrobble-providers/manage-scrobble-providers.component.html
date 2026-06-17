@@ -1,6 +1,12 @@
 <ng-container *transloco="let t; prefix: 'scrobble-provider-settings-manager'">
   <p class="ps-2">{{t('description')}}</p>
 
+  @if (isLoadingInBackground()) {
+    <div class="alert alert-warning" role="alert">
+      {{t('loading-background')}}
+    </div>
+  }
+
   <app-loading [loading]="loading()" />
 
   @if (formGroups().size > 0) {

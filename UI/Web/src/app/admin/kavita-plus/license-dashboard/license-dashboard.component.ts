@@ -1,4 +1,4 @@
-import {ChangeDetectionStrategy, Component, inject, signal} from '@angular/core';
+import {ChangeDetectionStrategy, Component, inject, OnInit, signal} from '@angular/core';
 import {TranslocoDirective} from '@jsverse/transloco';
 import {WikiLink} from '../../../_models/wiki';
 import {LicenseInfoPanelComponent} from '../license-info-panel/license-info-panel.component';
@@ -19,6 +19,11 @@ import {LicenseApiStatsComponent} from "../license-api-stats/license-api-stats.c
 import {ExpiredLicenseApiStatsComponent} from "../expired-license-api-stats/expired-license-api-stats.component";
 import {UserScrobbleProvider} from "../../../_models/kavitaplus/scrobble-providers/user-scrobble-provider";
 import {KavitaPlusSubscriptionState} from "../../../_models/kavitaplus/license-info";
+import {filter, map, switchMap, tap} from "rxjs";
+import {EVENTS, MessageHubService} from "../../../_services/message-hub.service";
+import {ScrobbleProviderUpdatedEvent} from "../../../_models/events/scrobble-provider-updated-event";
+import {ActivatedRoute} from "@angular/router";
+import {take} from "rxjs/operators";
 
 @Component({
   selector: 'app-license-dashboard',
@@ -36,16 +41,35 @@ import {KavitaPlusSubscriptionState} from "../../../_models/kavitaplus/license-i
   styleUrl: './license-dashboard.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class LicenseDashboardComponent {
+export class LicenseDashboardComponent implements OnInit {
 
   private readonly modalService = inject(ModalService);
   private readonly scrobblingService = inject(ScrobblingService);
   protected readonly licenseService = inject(LicenseService);
+  private readonly messageHub = inject(MessageHubService);
+  private readonly route = inject(ActivatedRoute);
 
+  isLoadingDiscordInfoInBackground = signal(false);
   scrobblingProviders = signal<UserScrobbleProvider[]>([]);
 
   constructor() {
     this.scrobblingService.getScrobbleProviders().subscribe(tokens => this.scrobblingProviders.set(tokens));
+  }
+
+  ngOnInit() {
+    this.route.queryParamMap.pipe(
+      map(m => m.get('loading')),
+      take(1),
+      filter(loading => loading === 'true'),
+      tap(() => this.isLoadingDiscordInfoInBackground.set(true))
+    ).subscribe();
+
+
+    this.messageHub.messages$.pipe(
+      filter(msg => msg.event === EVENTS.LicenseInfoUpdate),
+      switchMap(() => this.licenseService.getLicenseInfo()),
+      tap(() => this.isLoadingDiscordInfoInBackground.set(false))
+    ).subscribe();
   }
 
   forceCheckLicense() {

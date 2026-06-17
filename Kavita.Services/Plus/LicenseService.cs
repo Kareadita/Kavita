@@ -7,11 +7,13 @@ using Flurl.Http;
 using Kavita.API.Database;
 using Kavita.API.Services;
 using Kavita.API.Services.Plus;
+using Kavita.API.Services.SignalR;
 using Kavita.Common;
 using Kavita.Common.EnvironmentInfo;
 using Kavita.Common.Extensions;
 using Kavita.Models.Constants;
 using Kavita.Models.DTOs.KavitaPlus.License;
+using Kavita.Models.DTOs.SignalR;
 using Kavita.Models.Entities.Enums;
 using Microsoft.Extensions.Logging;
 
@@ -31,7 +33,8 @@ public class LicenseService(
     IUnitOfWork unitOfWork,
     ILogger<LicenseService> logger,
     IVersionUpdaterService versionUpdaterService, IKavitaPlusApiService kavitaPlusApiService,
-    IFileCacheService fileCacheService)
+    IFileCacheService fileCacheService,
+    IEventHub eventHub)
     : ILicenseService
 {
     private readonly TimeSpan _licenseCacheTimeout = TimeSpan.FromHours(8);
@@ -98,6 +101,8 @@ public class LicenseService(
 
             if (response.Successful)
             {
+                await eventHub.SendMessageAsync(MessageFactory.LicenseInfoUpdate, MessageFactory.LicenseInfoUpdateEvent());
+
                 return response;
             }
 
@@ -196,7 +201,7 @@ public class LicenseService(
         var provider = cachingProviderFactory.GetCachingProvider(EasyCacheProfiles.License);
         await provider.RemoveAsync(CacheKey, ct);
 
-
+        await eventHub.SendMessageAsync(MessageFactory.LicenseInfoUpdate, MessageFactory.LicenseInfoUpdateEvent(), ct: ct);
     }
 
     public async Task<KavitaPlusRegisterResultDto> AddLicense(string license, string email, string? discordId, CancellationToken ct = default)
@@ -215,6 +220,8 @@ public class LicenseService(
             var provider = cachingProviderFactory.GetCachingProvider(EasyCacheProfiles.License);
             await provider.FlushAsync(ct);
             await provider.SetAsync(CacheKey, response.IsSubscriptionActive, _licenseCacheTimeout, ct);
+
+            await eventHub.SendMessageAsync(MessageFactory.LicenseInfoUpdate, MessageFactory.LicenseInfoUpdateEvent(), ct: ct);
         }
 
         return new KavitaPlusRegisterResultDto { Success = true, IsSubscriptionActive = response.IsSubscriptionActive};
@@ -248,6 +255,9 @@ public class LicenseService(
             {
                 var provider = cachingProviderFactory.GetCachingProvider(EasyCacheProfiles.License);
                 await provider.RemoveAsync(CacheKey, ct);
+
+                await eventHub.SendMessageAsync(MessageFactory.LicenseInfoUpdate, MessageFactory.LicenseInfoUpdateEvent(), ct: ct);
+
                 return true;
             }
 
@@ -302,6 +312,8 @@ public class LicenseService(
 
             // Always cache the response as we provide this on expired licenses
             await licenseInfoProvider.SetAsync(LicenseInfoCacheKey, response, _licenseCacheTimeout, ct);
+
+            await eventHub.SendMessageAsync(MessageFactory.LicenseInfoUpdate, MessageFactory.LicenseInfoUpdateEvent(), ct: ct);
 
             return response;
         }
@@ -396,6 +408,7 @@ public class LicenseService(
             await licenseProvider.SetAsync(CacheKey, response.IsActive, _licenseCacheTimeout, ct);
             await licenseInfoProvider.SetAsync(LicenseInfoCacheKey, response, _licenseCacheTimeout, ct);
 
+            await eventHub.SendMessageAsync(MessageFactory.LicenseInfoUpdate, MessageFactory.LicenseInfoUpdateEvent(), ct: ct);
         }
         catch (Exception e)
         {

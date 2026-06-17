@@ -196,6 +196,10 @@ public static class MessageFactory
     /// A scrobble provider has had their (authentication) details updated
     /// </summary>
     public const string ScrobbleProviderUpdated = nameof(ScrobbleProviderUpdated);
+    /// <summary>
+    /// The K+ license info has updated
+    /// </summary>
+    public const string LicenseInfoUpdate = nameof(LicenseInfoUpdate);
 
 
     public static SignalRMessage DashboardUpdateEvent(int userId)
@@ -852,6 +856,14 @@ public static class MessageFactory
             {
                 Provider = provider
             }
+        };
+    }
+
+    public static SignalRMessage LicenseInfoUpdateEvent()
+    {
+        return new SignalRMessage
+        {
+            Name = LicenseInfoUpdate
         };
     }
 }

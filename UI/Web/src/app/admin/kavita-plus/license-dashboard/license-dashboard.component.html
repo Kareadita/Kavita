@@ -35,7 +35,7 @@
 
       <div class="row g-3 mt-1">
         <div class="col-12 col-lg-6">
-          <app-discord-connect-card class="d-block" [licenseInfo]="licenseService.licenseInfo()" />
+          <app-discord-connect-card class="d-block" [licenseInfo]="licenseService.licenseInfo()" [loadingDiscordInBackground]="isLoadingDiscordInfoInBackground()" />
         </div>
         @if (scrobblingProviders().length > 0) {
           <div class="col-12 col-lg-6">

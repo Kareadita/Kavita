@@ -16,7 +16,7 @@ import {
 import {UserScrobbleProvider} from "../../_models/kavitaplus/scrobble-providers/user-scrobble-provider";
 import {PublicationStatus, PublicationStatuses} from "../../_models/metadata/publication-status";
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
-import {catchError, debounceTime, distinctUntilChanged} from "rxjs/operators";
+import {catchError, debounceTime, distinctUntilChanged, take} from "rxjs/operators";
 import {translate, TranslocoDirective} from "@jsverse/transloco";
 import {ScrobbleProviderNamePipe} from "../../_pipes/scrobble-provider-name.pipe";
 import {ScrobbleEventType} from "../../_models/scrobbling/scrobble-event";
@@ -49,6 +49,7 @@ import {UtcToLocalTimePipe} from "../../_pipes/utc-to-local-time.pipe";
 import {TimeDifferencePipe} from "../../_pipes/time-difference.pipe";
 import {TypeaheadComponent} from "../../typeahead/_components/typeahead.component";
 import {AgeRatingPipe} from "../../_pipes/age-rating.pipe";
+import {ActivatedRoute} from "@angular/router";
 
 type ReadStatusTransitionRuleFromGroup = FormGroup<{
   enabled: FormControl<boolean>;
@@ -126,11 +127,13 @@ export class ManageScrobbleProvidersComponent implements OnInit {
   private readonly messageHub = inject(MessageHubService);
   private readonly scrobblingService = inject(ScrobblingService);
   private readonly toastr = inject(ToastrService);
+  private readonly route = inject(ActivatedRoute);
 
   formGroups = signal<Map<ScrobbleProvider, ScrobbleProviderSettingsFormGroup>>(new Map());
   userScrobbleProviders = signal<Map<ScrobbleProvider, UserScrobbleProvider>>(new Map());
   loading = computed(() => this.formGroups().size === 0);
 
+  isLoadingInBackground = signal(false);
   libraries = signal<Library[]>([]);
   backfillAttempts: Map<ScrobbleProvider, number> = new Map();
 
@@ -145,12 +148,20 @@ export class ManageScrobbleProvidersComponent implements OnInit {
   ngOnInit() {
     this.libraryService.getLibraries().subscribe(libraries => this.libraries.set(libraries));
 
+    this.route.queryParamMap.pipe(
+      map(m => m.get('loading')),
+      take(1),
+      filter(loading => loading === 'true'),
+      tap(() => this.isLoadingInBackground.set(true))
+    ).subscribe();
+
     this.loadData().subscribe();
 
     this.messageHub.messages$.pipe(
       filter(msg => msg.event === EVENTS.ScrobbleProviderUpdated),
       map(msg => (msg.payload as ScrobbleProviderUpdatedEvent).provider),
-      switchMap(() => this.loadData())
+      switchMap(() => this.loadData()),
+      tap(() => this.isLoadingInBackground.set(false))
     ).subscribe();
   }
 

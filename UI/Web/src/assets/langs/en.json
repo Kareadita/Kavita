@@ -1130,7 +1130,9 @@
         "connect-title": "Connect Discord",
         "connect-subtitle": "Access exclusive channels and show your flair",
         "connect-button": "Connect",
-        "connected-label": "Discord Connected"
+        "connected-label": "Discord Connected",
+        "connecting-title": "Connecting",
+        "connecting-subtitle": "Kavita is linking your discord in the background, stand by..."
     },
 
     "expired-license-info-card": {
@@ -2563,7 +2565,8 @@
         "dropped-series-rule-status-aria": "Dropped series transition status",
         "dropped-series-rule-excluded-publication-aria": "Excluded publication statuses for dropped series rule",
         "backfill-events": "{{manage-user-scrobble-provider-modal.generate-scrobble-events}}",
-        "anilist-warning": "AniList sync may be slower during busy periods. MangaBaka offers a larger library and consistently faster syncing."
+        "anilist-warning": "AniList sync may be slower during busy periods. MangaBaka offers a larger library and consistently faster syncing.",
+        "loading-background": "Kavita is loading your connection in the background, stand by..."
     },
 
     "manage-user-scrobble-provider-modal": {

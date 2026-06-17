@@ -157,6 +157,10 @@ export enum EVENTS {
    * A scrobble provider has had their (authentication) details updated
    */
   ScrobbleProviderUpdated = 'ScrobbleProviderUpdated',
+  /**
+   * The K+ license info has updated
+   */
+  LicenseInfoUpdate = 'LicenseInfoUpdate',
 }
 
 export interface Message<T> {
@@ -460,6 +464,13 @@ export class MessageHubService {
       this.messagesSource.next({
         event: EVENTS.ScrobbleProviderUpdated,
         payload: resp.body as ScrobbleProviderUpdatedEvent
+      });
+    });
+
+    this.hubConnection.on(EVENTS.LicenseInfoUpdate, (resp) => {
+      this.messagesSource.next({
+        event: EVENTS.LicenseInfoUpdate,
+        payload: resp.body,
       });
     });
   }
