@@ -18,6 +18,11 @@ public sealed record ScrobbleProviderDto
     public string AuthenticationToken { get; set; }
 
     /// <summary>
+    /// Refresh Token for the provider. Not all providers support automatic refreshes
+    /// </summary>
+    public string RefreshToken { get; set; }
+
+    /// <summary>
     /// Token valid until
     /// </summary>
     public DateTime ValidUntilUtc { get; set; }

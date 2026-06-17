@@ -1,8 +1,11 @@
+using System.Diagnostics.CodeAnalysis;
+
 namespace Kavita.Models.DTOs.KavitaPlus;
 #nullable enable
 
 public sealed record KPlusResult<T>
 {
+    [MemberNotNullWhen(true, nameof(Data))]
     public bool IsSuccess { get; init; }
     public T? Data { get; init; }
     public string? ErrorMessage { get; init; }

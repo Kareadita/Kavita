@@ -1,10 +1,12 @@
 import {ScrobbleProvider} from "../../../_services/scrobbling.service";
 import {ScrobbleProviderSettings} from "./scrobble-provider-settings";
+import {OAuthUpstream} from "../oauth-upstream";
 
 export class UserScrobbleProvider {
   provider!: ScrobbleProvider;
   userName!: string;
   authenticationToken!: string;
+  refreshToken?: string;
   validUntilUtc!: string;
   lastSyncedUtc!: string;
   hasRunScrobbleEventGeneration!: boolean;
@@ -13,12 +15,25 @@ export class UserScrobbleProvider {
 
   get generateTokenLink(): string | null {
     switch (this.provider) {
-      case ScrobbleProvider.AniList:
-        return "https://anilist.co/api/v2/oauth/authorize?client_id=12809&redirect_url=https://anilist.co/api/v2/oauth/pin&response_type=token";
       case ScrobbleProvider.Hardcover:
         return "https://hardcover.app/account/api";
+    }
+
+    return null;
+  }
+
+  get supportsOAuthFlow() {
+    return ![ScrobbleProvider.Hardcover, ScrobbleProvider.Cbr].includes(this.provider);
+  }
+
+  get oAuthUpStream() {
+    switch (this.provider) {
+      case ScrobbleProvider.AniList:
+        return OAuthUpstream.AniList;
+      case ScrobbleProvider.Mal:
+        return OAuthUpstream.MyAnimeList;
       case ScrobbleProvider.MangaBaka:
-        return "https://mangabaka.org/my/settings/api-and-apps";
+        return OAuthUpstream.MangaBaka;
     }
 
     return null;

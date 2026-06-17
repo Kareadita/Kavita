@@ -20,6 +20,11 @@ public class AppUserScrobbleProvider
     public string AuthenticationToken { get; set; } = string.Empty;
 
     /// <summary>
+    /// Refresh Token for the provider, not used for all providers
+    /// </summary>
+    public string RefreshToken { get; set; } = string.Empty;
+
+    /// <summary>
     /// Token valid until
     /// </summary>
     public DateTime ValidUntilUtc { get; set; }

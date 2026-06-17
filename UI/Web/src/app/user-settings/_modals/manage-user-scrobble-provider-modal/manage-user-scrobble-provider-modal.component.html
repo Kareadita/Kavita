@@ -66,6 +66,19 @@
           </app-setting-item>
         </div>
 
+        <div class="col-12 mt-4">
+          <app-setting-item [title]="t('refresh-token-label')">
+            <ng-template #view>
+              <span class="font-monospace text-muted small">
+                {{ formGroup.get('refreshToken')?.value | truncate:50:true | defaultValue }}
+              </span>
+            </ng-template>
+            <ng-template #edit>
+              <textarea class="form-control" formControlName="refreshToken" [attr.aria-label]="t('refresh-token-label')"></textarea>
+            </ng-template>
+          </app-setting-item>
+        </div>
+
         @if (generateTokenLink(); as tokenLink) {
           <div class="text-end">
             <div class="col-auto d-flex d-md-block justify-content-sm-center text-md-end mb-3">
@@ -73,6 +86,18 @@
                  [href]="tokenLink"
                  target="_blank" rel="noopener noreferrer"
                  [attr.aria-label]="t('generate')">{{t('generate')}}</a>
+            </div>
+          </div>
+        }
+
+        @if (oAuthFlowLink(); as oAuthFlowLink) {
+          <div class="text-end">
+            <div class="col-auto d-flex d-md-block justify-content-sm-center text-md-end mb-3">
+              <a class="flex-fill btn btn-primary me-2"
+                 [href]="oAuthFlowLink"
+                 target="_blank" rel="noopener noreferrer"
+                 [ngbTooltip]="t('connect-tooltip')"
+                 [attr.aria-label]="t('connect-label')">{{t('connect-label')}}</a>
             </div>
           </div>
         }

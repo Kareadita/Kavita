@@ -2572,13 +2572,16 @@
         "title": "Manage your authentication details for {{provider}}",
         "username-label": "Username",
         "authentication-token-label": "Authentication Token",
+        "refresh-token-label": "Refresh token",
         "valid-until-label": "Valid Until",
         "last-synced-label": "Last synced",
         "not-synced": "Not yet synced",
         "event-generation-label": "Last scrobble backfill",
         "event-generation-not-run": "Backfill not yet ran",
         "generate": "Generate",
-        "generate-scrobble-events": "Backfill Events"
+        "generate-scrobble-events": "Backfill Events",
+        "connect-label": "Connect Account",
+        "connect-tooltip": "You will be redirected to K+ and the Scrobble provider"
     },
 
     "scrobble-provider-description-pipe": {

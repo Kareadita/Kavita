@@ -15,6 +15,7 @@ using Kavita.Models.DTOs.KavitaPlus.ExternalMetadata;
 using Kavita.Models.DTOs.KavitaPlus.ExternalMetadata.Covers;
 using Kavita.Models.DTOs.KavitaPlus.License;
 using Kavita.Models.DTOs.KavitaPlus.Metadata;
+using Kavita.Models.DTOs.KavitaPlus.OAuth;
 using Kavita.Models.DTOs.KavitaPlus.Scrobble;
 using Kavita.Models.DTOs.Metadata.Matching;
 using Kavita.Models.DTOs.Scrobbling;
@@ -300,6 +301,54 @@ public class KavitaPlusApiService(ILogger<KavitaPlusApiService> logger, IUnitOfW
             GeneratedAtUtc =  DateTime.UtcNow,
             Stats = []
         };
+    }
+
+    public async Task<KPlusResult<string>> StartOAuthFlow(OAuthUpstream upstream, string instanceUrl, string apiKey,
+        CancellationToken ct = default)
+    {
+        var license = (await unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.LicenseKey, ct)).Value;
+
+        var body = new StartOAuthFlowRequestDto
+        {
+            Upstream = upstream,
+            InstanceUrl = instanceUrl,
+            ApiKey = apiKey
+        };
+
+        try
+        {
+            var response = await (Configuration.KavitaPlusApiUrl + "/api/v3/oauth/start-flow")
+                .WithKavitaPlusHeaders(license)
+                .PostJsonAsync(body, cancellationToken: ct)
+                .ReceiveJson<KPlusResult<string>>();
+
+            return response;
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "There was an issue starting the OAuth flow");
+            return KPlusResult<string>.Failure(ex.Message);
+        }
+    }
+
+    public async Task<KPlusResult<TokenResponseDto>> RefreshToken(RefreshTokenRequestDto requestDto, CancellationToken ct = default)
+    {
+        var license = (await unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.LicenseKey, ct)).Value;
+
+        try
+        {
+            var response = await (Configuration.KavitaPlusApiUrl + "/api/v3/oauth/refresh-tokens")
+                .WithKavitaPlusHeaders(license)
+                .PostJsonAsync(requestDto, cancellationToken: ct)
+                .ReceiveJson<KPlusResult<TokenResponseDto>>();
+
+            return response;
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "There was an issue starting refreshing tokens");
+            return KPlusResult<TokenResponseDto>.Failure(ex.Message);
+        }
     }
 
     /// <summary>

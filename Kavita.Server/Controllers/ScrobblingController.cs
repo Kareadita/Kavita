@@ -108,12 +108,7 @@ public class ScrobblingController(
         var scrobbleProvider = user.ScrobbleProviders[dto.Provider];
 
         scrobbleProvider.AuthenticationToken = dto.AuthenticationToken.TrimPrefix("Bearer").Trim();
-
-        // Mal uses UserName & ClientId or something
-        if (dto.Provider is ScrobbleProvider.Mal)
-        {
-            scrobbleProvider.UserName = dto.UserName;
-        }
+        scrobbleProvider.RefreshToken = dto.RefreshToken.TrimPrefix("Bearer").Trim();
 
         unitOfWork.UserRepository.Update(user);
         await unitOfWork.CommitAsync(HttpContext.RequestAborted);

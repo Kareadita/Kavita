@@ -1852,6 +1852,7 @@ public class ScrobblingService : IScrobblingService
         await _unitOfWork.CommitAsync(ct);
     }
 
+    [DisableConcurrentExecution(60 * 60 * 60)]
     public async Task SyncProviderInfo(int userId, ScrobbleProvider provider, CancellationToken ct = default)
     {
         _logger.LogDebug("Syncing scrobbling info for {UserId} for {Provider}", userId, provider);
@@ -1867,6 +1868,7 @@ public class ScrobblingService : IScrobblingService
         {
             scrobbleProviderSettings.ValidUntilUtc = DateTime.MinValue;
             scrobbleProviderSettings.UserName = string.Empty;
+            scrobbleProviderSettings.RefreshToken = string.Empty;
 
             _unitOfWork.UserRepository.Update(user);
             await _unitOfWork.CommitAsync(ct);
@@ -1879,39 +1881,32 @@ public class ScrobblingService : IScrobblingService
 
         // TODO: Call HasTokenExpiredForProviderAsync() so we can validate the token authentication, rather than just assuming
 
-        // MAL doesn't use JWT tokens
-        if (provider != ScrobbleProvider.Mal)
+        var userInfo = await _kavitaPlusApiService.GetUserInfo(provider, scrobbleProviderSettings.AuthenticationToken, license, ct);
+        if (!userInfo.IsSuccess)
         {
-            var userInfo = await _kavitaPlusApiService.GetUserInfo(provider, scrobbleProviderSettings.AuthenticationToken, license, ct);
-            if (!userInfo.IsSuccess)
-            {
-                _logger.LogWarning("Failed to sync provider info for {UserId} for {Provider} due to error: {ErrorMessage}", userId, provider, userInfo.ErrorMessage);
-            }
-            else
-            {
-                scrobbleProviderSettings.UserName = userInfo.Data!.Username;
-            }
+            _logger.LogWarning("Failed to sync provider info for {UserId} for {Provider} due to error: {ErrorMessage}", userId, provider, userInfo.ErrorMessage);
+        }
+        else
+        {
+            scrobbleProviderSettings.UserName = userInfo.Data!.Username;
+        }
 
-            if (provider is ScrobbleProvider.AniList or ScrobbleProvider.Hardcover)
+        if (provider is ScrobbleProvider.AniList or ScrobbleProvider.Hardcover or ScrobbleProvider.Mal)
+        {
+            try
             {
-                try
-                {
-                    scrobbleProviderSettings.ValidUntilUtc = TokenService.GetTokenExpiry(scrobbleProviderSettings.AuthenticationToken);
-                }
-                catch (Exception ex)
-                {
-                    _logger.LogError(ex, "Failed to get token expiry for {UserId} for {Provider}", userId, provider);
-                }
+                scrobbleProviderSettings.ValidUntilUtc = TokenService.GetTokenExpiry(scrobbleProviderSettings.AuthenticationToken);
             }
-            else
+            catch (Exception ex)
             {
-                scrobbleProviderSettings.ValidUntilUtc = DateTime.MaxValue;
+                _logger.LogError(ex, "Failed to get token expiry for {UserId} for {Provider}", userId, provider);
             }
         }
         else
         {
             scrobbleProviderSettings.ValidUntilUtc = DateTime.MaxValue;
         }
+
 
         _unitOfWork.UserRepository.Update(user);
         await _unitOfWork.CommitAsync(ct);

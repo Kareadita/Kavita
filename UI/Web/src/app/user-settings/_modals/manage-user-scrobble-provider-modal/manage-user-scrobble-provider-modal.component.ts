@@ -17,6 +17,7 @@ import {
 import {TimeDifferencePipe} from "../../../_pipes/time-difference.pipe";
 import {ConfirmService} from "../../../shared/confirm.service";
 import {NULL_DATE} from "../../../_pipes/date-year-range.pipe";
+import {AccountService} from "../../../_services/account.service";
 
 @Component({
   selector: 'app-manage-user-scrobble-provider-modal-modal',
@@ -44,26 +45,42 @@ export class ManageUserScrobbleProviderModalComponent implements OnInit {
   private readonly fb = inject(NonNullableFormBuilder);
   private readonly toastr = inject(ToastrService);
   private readonly confirmService = inject(ConfirmService);
+  private readonly accountService = inject(AccountService);
 
   userScrobbleProvider = model.required<UserScrobbleProvider>();
 
   generateTokenLink = computed<string | null>(() => this.userScrobbleProvider().generateTokenLink);
   canGenerateEvents = computed(() => this.userScrobbleProvider().canGenerateEvents);
 
+  oAuthFlowLink = computed<string | null>(() => {
+    if (!this.userScrobbleProvider().supportsOAuthFlow) {
+      return null;
+    }
+
+    const apiKey = this.accountService.currentUserGenericApiKey();
+    if (!apiKey) {
+      return null;
+    }
+
+    // TODO: Prefix with baseUrl
+    return `/api/oauth/start?upstream=${this.userScrobbleProvider().oAuthUpStream}&apiKey=${apiKey}`;
+  });
+
   formGroup!: FormGroup<{
     userName: FormControl<string>,
     authenticationToken: FormControl<string>,
+    refreshToken: FormControl<string>,
   }>;
 
   ngOnInit() {
     this.formGroup = this.fb.group({
       userName: this.fb.control(this.userScrobbleProvider().userName),
       authenticationToken: this.fb.control(this.userScrobbleProvider().authenticationToken),
+      refreshToken: this.fb.control(this.userScrobbleProvider().refreshToken ?? ''),
     });
   }
 
   async generateEvents() {
-
     if (this.userScrobbleProvider().hasRunScrobbleEventGeneration) {
       // Alert the user they have already run this X times before
       if (!await this.confirmService.confirm(translate('toasts.confirm-rerun-backfill', {provider: this.userScrobbleProvider().provider}))) return;
