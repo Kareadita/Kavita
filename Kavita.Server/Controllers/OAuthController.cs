@@ -45,7 +45,7 @@ public class OAuthController(IOAuthService oAuthService, IUnitOfWork unitOfWork,
             return BadRequest(jwt.ErrorMessage);
         }
 
-        var redirectUrl = (Configuration.KavitaPlusApiUrl + "/TokenRelay/continue-flow")
+        var redirectUrl = (Configuration.KavitaPlusApiUrl + "/token-relay/continue-flow")
             .SetQueryParam("token", jwt.Data);
 
         return Redirect(redirectUrl.ToString());
