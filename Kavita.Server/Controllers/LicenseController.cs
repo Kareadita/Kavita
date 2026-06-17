@@ -179,7 +179,7 @@ public class LicenseController(
     /// <returns></returns>
     [HttpDelete("cancel")]
     [Authorize(PolicyGroups.AdminPolicy)]
-    public async Task<ActionResult> CancelLicense(CancelKavitaPlusLicenseDto dto)
+    public async Task<ActionResult> CancelLicense([FromBody] CancelKavitaPlusLicenseDto dto)
     {
         var ct = HttpContext.RequestAborted;
         if (await licenseService.CancelLicense(dto, ct)) return Ok();
@@ -191,6 +191,7 @@ public class LicenseController(
     /// </summary>
     /// <returns></returns>
     [HttpGet("products")]
+    [Authorize(PolicyGroups.AdminPolicy)]
     public async Task<ActionResult<IList<KavitaPlusProductInfo>>> GetProducts()
     {
         var ct = HttpContext.RequestAborted;

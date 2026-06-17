@@ -144,6 +144,8 @@ export class LicenseService {
   }
 
   changeEmail(oldEmail: string, newEmail: string) {
-    return this.httpClient.post(this.baseUrl + 'license/change-email', {oldEmail, newEmail}, TextResonse);
+    return this.httpClient.post(this.baseUrl + 'license/change-email', {oldEmail, newEmail}, TextResonse).pipe(
+      map(res => res + '' === 'true')
+    );
   }
 }

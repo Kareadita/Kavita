@@ -1,6 +1,6 @@
 import {ChangeDetectionStrategy, Component, inject, output} from '@angular/core';
 import {FormControl, FormGroup, ReactiveFormsModule, Validators} from '@angular/forms';
-import {TranslocoDirective} from '@jsverse/transloco';
+import {translate, TranslocoDirective} from '@jsverse/transloco';
 import {LicenseService} from '../../../_services/license.service';
 import {ManageLicenseModalScreen} from '../_modals/manage-license-modal/manage-license-modal-screen';
 import {ToastrService} from "ngx-toastr";
@@ -27,9 +27,9 @@ export class ChangeLicenseEmailComponent implements ManageLicenseModalScreen {
   });
 
   sendCode() {
-    if (this.form.invalid) return;
+    if (this.form.invalid || !this.licenseInfo()) return;
     this.licenseService.changeEmail(this.licenseInfo()!.registeredEmail, this.form.get('newEmail')!.value!).subscribe(res => {
-      this.toastr.info('toasts.change-email-' + (res ? 'success' : 'error'));
+      this.toastr.info(translate('toasts.change-email-' + (res ? 'success' : 'error')));
     });
   }
 }
