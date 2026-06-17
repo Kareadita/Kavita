@@ -1,3 +1,4 @@
+using System.Threading;
 using System.Threading.Tasks;
 using Kavita.Models.DTOs.KavitaPlus.OAuth;
 
@@ -7,5 +8,5 @@ public interface IOAuthService
 {
     Task HandleCallback(OAuthUpstream upstream, string token, string? refreshToken = null);
 
-    Task RefreshTokens();
+    Task RefreshTokens(CancellationToken ct = default);
 }

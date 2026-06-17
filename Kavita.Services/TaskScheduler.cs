@@ -301,6 +301,10 @@ public class TaskScheduler : ITaskScheduler
         RecurringJob.AddOrUpdate<IScrobblingService>(TaskSchedulerConstants.CreateReadStatusTransitionRuleEventsId,
             service => service.RunReadStatusTransitionRules(CancellationToken.None),
             Cron.Daily, RecurringJobOptions);
+
+        RecurringJob.AddOrUpdate<IOAuthService>(TaskSchedulerConstants.RefreshConnectedTokensId,
+            service => service.RefreshTokens(CancellationToken.None),
+            Cron.Daily, RecurringJobOptions);
     }
 
 

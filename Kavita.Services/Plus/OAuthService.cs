@@ -10,11 +10,17 @@ using Kavita.API.Store;
 using Kavita.Models.Constants;
 using Kavita.Models.DTOs.KavitaPlus.OAuth;
 using Kavita.Models.Entities.Enums;
+using Kavita.Models.Extensions;
 using Microsoft.Extensions.Logging;
 
 namespace Kavita.Services.Plus;
 
-public class OAuthService(ILogger<OAuthService> logger, IUserContext userContext, IUnitOfWork unitOfWork, IScrobblingService scrobblingService): IOAuthService
+public class OAuthService(
+    ILogger<OAuthService> logger,
+    IUserContext userContext,
+    IUnitOfWork unitOfWork,
+    IScrobblingService scrobblingService,
+    IKavitaPlusApiService kavitaPlusApiService): IOAuthService
 {
     private const string DiscordMeApiUrl = "https://discord.com/api/users/@me";
 
@@ -103,8 +109,64 @@ public class OAuthService(ILogger<OAuthService> logger, IUserContext userContext
         await scrobblingService.SyncProviderInfo(userId, provider, ct);
     }
 
-    public Task RefreshTokens()
+    public async Task RefreshTokens(CancellationToken ct = default)
     {
-        throw new System.NotImplementedException();
+        var users = await unitOfWork.UserRepository.GetAllUsersAsync(ct: ct);
+
+        foreach (var user in users)
+        {
+            foreach (var provider in user.ScrobbleProviders.Keys)
+            {
+                var settings = user.ScrobbleProviders[provider];
+
+                var upstream = provider.ToOAuthUpstream();
+                if (upstream == null)
+                {
+                    logger.LogTrace("Skipping {Provider} as they could not be mapped to an OAuth upstream for automatic refresh", provider);
+                    continue;
+                }
+
+                if (string.IsNullOrEmpty(settings.AuthenticationToken) || string.IsNullOrEmpty(settings.RefreshToken))
+                {
+                    logger.LogTrace("Skipping {Provider} for {UserId} as they do not have a valid token for automatic refresh", provider, user.Id);
+                    continue;
+                }
+
+                var timeRemaining = settings.ValidUntilUtc - DateTime.UtcNow;
+
+                if (timeRemaining > TimeSpan.FromDays(1))
+                {
+                    logger.LogTrace("Skipping {Provider} for {UserId} as they have a token that is still valid for {TimeRemaining}", provider, user.Id, timeRemaining);
+                    continue;
+                }
+
+                logger.LogDebug("Token for {Provider} for user {UserId} is about to expire, refreshing", provider, user.Id);
+
+                var response = await kavitaPlusApiService.RefreshToken(new RefreshTokenRequestDto()
+                {
+                    RefreshToken = settings.RefreshToken,
+                    Upstream = upstream.Value,
+                }, ct);
+
+                if (response.IsSuccess)
+                {
+                    settings.AuthenticationToken = response.Data.AccessToken;
+                    settings.RefreshToken = response.Data.RefreshToken;
+                    // Subtrack 30s for latency
+                    settings.ValidUntilUtc = DateTime.UtcNow
+                                             + TimeSpan.FromSeconds(response.Data.ExpiresIn)
+                                             - TimeSpan.FromSeconds(30);
+                    settings.LastSyncedUtc = DateTime.UtcNow;
+
+                    unitOfWork.UserRepository.Update(user);
+                    continue;
+                }
+
+                logger.LogWarning("Failed to refresh token for {Provider} for user {UserId}: {ErrorMessage}", provider, user.Id, response.ErrorMessage);
+
+            }
+        }
+
+        await unitOfWork.CommitAsync(ct);
     }
 }
