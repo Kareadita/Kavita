@@ -57,10 +57,10 @@ public class WantToReadSyncService(
 
             foreach (var kv in userScrobbleProviders)
             {
-                var token = kv.Key == ScrobbleProvider.Mal ? kv.Value.UserName : kv.Value.AuthenticationToken;
+                var token = kv.Value.AuthenticationToken;
                 if (string.IsNullOrEmpty(token))
                 {
-                    logger.LogWarning("Cannot sync Want To Read for user {UserName} as they do not have a valid {Provider} token", user.UserName, kv.Key);
+                    logger.LogDebug("Cannot sync Want To Read for user {UserName} for {Provider} as they do not have a valid token", user.UserName, kv.Key);
                     continue;
                 }
 
