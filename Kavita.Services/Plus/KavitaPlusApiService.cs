@@ -322,14 +322,14 @@ public class KavitaPlusApiService(ILogger<KavitaPlusApiService> logger, IUnitOfW
         return false;
     }
 
-    public async Task<IList<KavitaPlusProductInfo>> GetProducts(CancellationToken ct = default)
+    public async Task<IList<KavitaPlusProductInfoDto>> GetProducts(CancellationToken ct = default)
     {
         try
         {
             var license = (await unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.LicenseKey, ct)).Value;
             return await (Configuration.KavitaPlusApiUrl + "/api/license/products")
                 .WithKavitaPlusHeaders(license)
-                .GetJsonAsync<IList<KavitaPlusProductInfo>>(cancellationToken: ct);
+                .GetJsonAsync<IList<KavitaPlusProductInfoDto>>(cancellationToken: ct);
         } catch (FlurlHttpException e)
         {
             logger.LogError(e, "An error happened during the request to Kavita+ API");

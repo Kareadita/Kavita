@@ -192,7 +192,7 @@ public class LicenseController(
     /// <returns></returns>
     [HttpGet("products")]
     [Authorize(PolicyGroups.AdminPolicy)]
-    public async Task<ActionResult<IList<KavitaPlusProductInfo>>> GetProducts()
+    public async Task<ActionResult<IList<KavitaPlusProductInfoDto>>> GetProducts()
     {
         var ct = HttpContext.RequestAborted;
         return Ok(await licenseService.GetProducts(ct));

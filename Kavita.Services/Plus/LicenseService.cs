@@ -382,7 +382,7 @@ public class LicenseService(
         return await kavitaPlusApiService.CancelLicenseAsync(dto, ct);
     }
 
-    public async Task<IList<KavitaPlusProductInfo>> GetProducts(CancellationToken ct = default)
+    public async Task<IList<KavitaPlusProductInfoDto>> GetProducts(CancellationToken ct = default)
     {
         return await kavitaPlusApiService.GetProducts(ct);
     }
