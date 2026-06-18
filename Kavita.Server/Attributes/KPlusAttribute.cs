@@ -10,12 +10,12 @@ using Microsoft.Extensions.DependencyInjection;
 namespace Kavita.Server.Attributes;
 
 [AttributeUsage(AttributeTargets.Class | AttributeTargets.Method, AllowMultiple = true)]
-public class KPlusAttribute : Attribute, IAsyncAuthorizationFilter
+public class KPlusAttribute(bool allowUnauthenticated = false) : Attribute, IAsyncAuthorizationFilter
 {
     public async Task OnAuthorizationAsync(AuthorizationFilterContext context)
     {
         var userContext = context.HttpContext.RequestServices.GetRequiredService<IUserContext>();
-        if (!userContext.IsAuthenticated)
+        if (!allowUnauthenticated && !userContext.IsAuthenticated)
         {
             context.Result = new UnauthorizedResult();
             return;

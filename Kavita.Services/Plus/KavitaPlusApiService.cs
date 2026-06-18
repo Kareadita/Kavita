@@ -20,13 +20,17 @@ using Kavita.Models.DTOs.KavitaPlus.Scrobble;
 using Kavita.Models.DTOs.Metadata.Matching;
 using Kavita.Models.DTOs.Scrobbling;
 using Kavita.Models.Entities.Enums;
+using Microsoft.AspNetCore.DataProtection;
 using Microsoft.Extensions.Logging;
 
 namespace Kavita.Services.Plus;
 
-public class KavitaPlusApiService(ILogger<KavitaPlusApiService> logger, IUnitOfWork unitOfWork): IKavitaPlusApiService
+public class KavitaPlusApiService(ILogger<KavitaPlusApiService> logger, IUnitOfWork unitOfWork, IDataProtectionProvider dataProtectionProvider): IKavitaPlusApiService
 {
     private const string ScrobblingPath = "/api/scrobbling/";
+    public const string ApiKeyDataProtectorName = "KavitaPlus.ApiKey";
+
+    private readonly IDataProtector _dataProtector = dataProtectionProvider.CreateProtector(ApiKeyDataProtectorName);
 
     public async Task<int> GetRateLimitAsync(string license, string token, CancellationToken ct = default)
     {
@@ -331,7 +335,7 @@ public class KavitaPlusApiService(ILogger<KavitaPlusApiService> logger, IUnitOfW
         {
             Upstream = upstream,
             InstanceUrl = instanceUrl,
-            ApiKey = apiKey
+            ApiKey = _dataProtector.Protect(apiKey)
         };
 
         try
