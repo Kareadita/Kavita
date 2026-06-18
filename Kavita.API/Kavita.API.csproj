@@ -12,8 +12,8 @@
 
     <ItemGroup>
       <PackageReference Include="Hangfire" Version="1.8.23" />
-      <PackageReference Include="Microsoft.EntityFrameworkCore" Version="10.0.6" />
-      <PackageReference Include="Microsoft.EntityFrameworkCore.Abstractions" Version="10.0.6" />
+      <PackageReference Include="Microsoft.EntityFrameworkCore" Version="10.0.9" />
+      <PackageReference Include="Microsoft.EntityFrameworkCore.Abstractions" Version="10.0.9" />
       <PackageReference Include="Newtonsoft.Json" Version="13.0.4" />
       <PackageReference Include="System.IO.Abstractions" Version="22.1.1" />
       <PackageReference Include="VersOne.Epub" Version="3.3.6" />

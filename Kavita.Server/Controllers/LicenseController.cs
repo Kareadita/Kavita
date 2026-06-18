@@ -173,4 +173,57 @@ public class LicenseController(
         return Ok(await licenseService.GetLicenseUsage(ct));
     }
 
+    /// <summary>
+    /// Cancels the active Kavita+ Subscription tied to this server. License will elapse at end of billing period.
+    /// </summary>
+    /// <returns></returns>
+    [HttpDelete("cancel")]
+    [Authorize(PolicyGroups.AdminPolicy)]
+    public async Task<ActionResult> CancelLicense([FromBody] CancelKavitaPlusLicenseDto dto)
+    {
+        var ct = HttpContext.RequestAborted;
+        if (await licenseService.CancelLicense(dto, ct)) return Ok();
+        return BadRequest(await localizationService.TranslateAsync(UserId, "unable-to-cancel-k+"));
+    }
+
+    /// <summary>
+    /// Returns the available Kavita+ products (billing interval and list price) the renew flow can select.
+    /// </summary>
+    /// <returns></returns>
+    [HttpGet("products")]
+    [Authorize(PolicyGroups.AdminPolicy)]
+    public async Task<ActionResult<IList<KavitaPlusProductInfoDto>>> GetProducts()
+    {
+        var ct = HttpContext.RequestAborted;
+        return Ok(await licenseService.GetProducts(ct));
+    }
+
+    /// <summary>
+    /// Renews the subscription on the given billing interval and returns the Stripe Checkout (Pay Now) URL the customer visits to pay.
+    /// </summary>
+    /// <returns>The Stripe Checkout URL</returns>
+    [HttpPost("renew")]
+    [Authorize(PolicyGroups.AdminPolicy)]
+    public async Task<ActionResult<string>> RenewLicense(RenewKavitaPlusLicenseDto dto)
+    {
+        var ct = HttpContext.RequestAborted;
+        var checkoutUrl = await licenseService.RenewLicense(dto, ct);
+        if (!string.IsNullOrEmpty(checkoutUrl)) return Ok(checkoutUrl);
+        return BadRequest(await localizationService.TranslateAsync(UserId, "unable-to-renew-k+"));
+    }
+
+    /// <summary>
+    /// Change email on Kavita+ License/Stripe - Sends a confirmation email on Kavita+ side. No-op for server.
+    /// </summary>
+    /// <param name="dto"></param>
+    /// <returns></returns>
+    [HttpPost("change-email")]
+    [Authorize(PolicyGroups.AdminPolicy)]
+    public async Task<ActionResult<bool>> ChangeEmail(ChangeEmailOnLicenseDto dto)
+    {
+        var ct = HttpContext.RequestAborted;
+        var success = await licenseService.ChangeEmail(dto, ct);
+        return Ok(success);
+    }
+
 }

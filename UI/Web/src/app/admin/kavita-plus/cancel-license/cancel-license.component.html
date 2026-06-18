@@ -1,0 +1,78 @@
+<ng-container *transloco="let t; prefix:'cancel-license'">
+
+  <div class="modal-header align-items-start">
+    <div class="d-flex align-items-start gap-3">
+      <div class="screen-icon screen-icon--danger flex-shrink-0">
+        <i class="fa-solid fa-ban" aria-hidden="true"></i>
+      </div>
+      <div>
+        <h4 class="modal-title mb-1">{{t('title')}}</h4>
+        <p class="screen-subtitle mb-0">{{t('subtitle')}}</p>
+      </div>
+    </div>
+    <button type="button" class="btn-close" [attr.aria-label]="t('close')" (click)="dismiss.emit()"></button>
+  </div>
+
+  <div class="modal-body d-flex flex-column gap-3">
+
+    @if (licenseInfo(); as info) {
+      <div class="product-card d-flex align-items-center gap-3">
+        <div class="product-icon flex-shrink-0">
+          <i class="fa-solid fa-book-open" aria-hidden="true"></i>
+        </div>
+        <div class="flex-fill min-w-0">
+          <div class="product-title text-truncate">
+            Kavita+
+            @if (formattedPrice(); as price) {
+              <span class="mx-1 dot-separator"></span>{{ price }} / {{ info.billingInterval | kavitaPlusBillingInterval:'unit' }}
+            }
+          </div>
+          <div class="product-sub">{{ t('server-wide-label') }}<span class="mx-1 dot-separator"></span>{{ t('users-active-label', {count: usersCount()}) }}</div>
+        </div>
+        <span class="status-pill status-pill--{{statusToken()}} flex-shrink-0">
+          <span class="status-dot" aria-hidden="true"></span>
+          {{ info.state | kavitaPlusSubscriptionStatus }}
+        </span>
+      </div>
+    }
+
+    <div class="section-label">{{t('what-happens-label')}}</div>
+    <ul class="impact-list list-unstyled m-0 d-flex flex-column">
+      <li class="impact-item d-flex align-items-start gap-3">
+        <i class="fa-solid fa-calendar-check impact-icon flex-shrink-0" aria-hidden="true"></i>
+        <span>{{t('impact-1')}}</span>
+      </li>
+      <li class="impact-item d-flex align-items-start gap-3">
+        <i class="fa-solid fa-ban impact-icon flex-shrink-0" aria-hidden="true"></i>
+        <span>{{t('impact-2')}}</span>
+      </li>
+      <li class="impact-item d-flex align-items-start gap-3">
+        <i class="fa-solid fa-rotate-left impact-icon flex-shrink-0" aria-hidden="true"></i>
+        <span>{{t('impact-3')}}</span>
+      </li>
+    </ul>
+
+    <div class="d-flex flex-column gap-2">
+      <label for="cancel-comment" class="section-label">{{t('comment-label')}}</label>
+      <textarea id="cancel-comment" class="form-control" rows="3"
+                [placeholder]="t('comment-placeholder')"
+                [disabled]="isCancelling()"
+                [ngModel]="comment()" (ngModelChange)="comment.set($event)"></textarea>
+    </div>
+
+  </div>
+
+  <div class="modal-footer">
+    <button type="button" class="btn btn-outline-secondary me-2" [disabled]="isCancelling()" (click)="back.emit()">
+      <i class="fa-solid fa-chevron-left me-1" aria-hidden="true"></i>
+      {{t('back-label')}}
+    </button>
+    <button type="button" class="btn btn-danger" [disabled]="!canConfirm() || isCancelling()" (click)="cancelLicense()">
+      @if (isCancelling()) {
+        <span class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span>
+      }
+      {{t('confirm-label')}}
+    </button>
+  </div>
+
+</ng-container>

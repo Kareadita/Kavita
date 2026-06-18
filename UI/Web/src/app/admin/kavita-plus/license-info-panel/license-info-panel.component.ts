@@ -12,6 +12,9 @@ import {TranslocoDirective} from '@jsverse/transloco';
 import {KavitaPlusSubscriptionStatusPipe} from '../../../_pipes/kavita-plus-subscription-status.pipe';
 import {KavitaPlusBillingIntervalPipe} from '../../../_pipes/kavita-plus-billing-interval.pipe';
 import {MemberService} from "../../../_services/member.service";
+import {ModalService} from "../../../_services/modal.service";
+import {ManageLicenseModalComponent} from "../_modals/manage-license-modal/manage-license-modal.component";
+import {mediumModal} from "../../../_models/modal/modal-options";
 
 @Component({
   selector: 'app-license-info-panel',
@@ -25,6 +28,7 @@ export class LicenseInfoPanelComponent {
 
   private readonly versionService = inject(VersionService);
   private readonly userService = inject(MemberService);
+  private readonly modalService = inject(ModalService);
 
   licenseInfo = input.required<LicenseInfo | null>();
   editLicense = output<void>();
@@ -101,6 +105,10 @@ export class LicenseInfoPanelComponent {
     this.userService.getMembers(false).subscribe(members => {
       this.usersCount.set(members.length);
     });
+  }
+
+  openManageModal() {
+    this.modalService.open(ManageLicenseModalComponent, mediumModal());
   }
 
   protected readonly KavitaPlusSubscriptionState = KavitaPlusSubscriptionState;

@@ -975,6 +975,75 @@
         "save": "{{common.save}}"
     },
 
+    "manage-license-modal": {
+        "hub-title": "Manage subscription",
+        "hub-subtitle": "Choose what you'd like to do with this server's Kavita+ plan.",
+        "renew-title": "Renew subscription",
+        "renew-desc": "Reactivate Kavita+ for everyone on this server.",
+        "cancel-title": "Cancel subscription",
+        "cancel-desc": "End your plan. Kavita+ stays active until your billing date - no further charges.",
+        "change-email-title": "Change email",
+        "change-email-desc": "Update the address Stripe uses for receipts and where your license & renewal links are sent.",
+        "billing-title": "Billing & payment details",
+        "billing-desc": "Update your card, view invoices, and download receipts in Stripe's secure portal.",
+        "close": "{{common.close}}"
+    },
+
+    "renew-license": {
+        "title": "Renew Kavita+",
+        "subtitle": "Reactivate premium features for everyone on this server.",
+        "close": "{{common.close}}",
+        "billing-period-label": "Billing period",
+        "monthly-label": "Monthly",
+        "yearly-label": "Yearly",
+        "billing-email-label": "Billing email",
+        "on-file-label": "on file",
+        "email-help": "Auto-filled from this instance - must match your original purchase.",
+        "change-label": "Change",
+        "how-it-works-label": "How renewing works",
+        "how-step-1": "We create a secure Stripe checkout for {{email}} on the selected plan.",
+        "how-step-2": "Confirm your card there - your details never touch this server.",
+        "how-step-3": "Once payment clears, Kavita+ features will once again become available to everyone on the server.",
+        "back-label": "Back",
+        "send-link-label": "Continue to payment",
+        "checkout-ready-label": "Your checkout is ready",
+        "checkout-ready-help": "Open the secure Stripe checkout to complete your renewal. You can close this once payment is done and re-check.",
+        "pay-now-label": "Pay now",
+        "done-label": "{{common.done}}",
+        "link-sent-error": "Unable to start the renewal. Please try again or contact support."
+    },
+
+    "cancel-license": {
+        "title": "Cancel subscription",
+        "subtitle": "You'll keep full access until the end of your current billing period.",
+        "close": "{{common.close}}",
+        "server-wide-label": "Server-wide",
+        "users-active-label": "{{count}} users active",
+        "what-happens-label": "What happens",
+        "impact-1": "Kavita+ stays active until your current billing date.",
+        "impact-2": "No further charges are made after that date.",
+        "impact-3": "You can resubscribe at any time to restore premium features.",
+        "comment-label": "Reason for cancelling (optional)",
+        "comment-placeholder": "Let us know why you're cancelling...",
+        "cancelled-success": "Subscription cancelled. Access continues until your billing date.",
+        "cancelled-error": "We couldn't cancel your subscription. Please try again or contact support.",
+        "back-label": "Back",
+        "confirm-label": "Cancel subscription"
+    },
+
+    "change-license-email": {
+        "title": "Change email",
+        "subtitle": "Update where receipts, license keys, and renewal links are sent.",
+        "close": "{{common.close}}",
+        "current-email-label": "Current email",
+        "on-file-label": "on file",
+        "new-email-label": "New email address",
+        "new-email-placeholder": "you@domain.com",
+        "confirm-help": "We'll send a link to complete the change before anything changes.",
+        "back-label": "Back",
+        "send-code-label": "Send code"
+    },
+
     "register-license-key": {
         "title": "Already have a license?",
         "description": "Enter the key from your purchase email to activate Kavita+ on this server.",
@@ -4259,7 +4328,9 @@
         "cbl-remap-rule-demoted": "Rule demoted to user scope",
         "confirm-delete-read-from-readinglist": "Are you sure you want to remove all read issues from this reading list? This cannot be undone.",
         "reading-list-sync-enqueued": "The Reading List has been enqueued for sync.",
-        "confirm-rerun-backfill": "You've already generated scrobble events for {{provider}} at least once. Backfilling may delay scrobbling of recent read events. Are you sure you want to continue?"
+        "confirm-rerun-backfill": "You've already generated scrobble events for {{provider}} at least once. Backfilling may delay scrobbling of recent read events. Are you sure you want to continue?",
+        "change-email-success": "A confirmation link was sent to your new address. Click it to complete the change.",
+        "change-email-error": "We couldn't change your email. Please try again, or contact support if it keeps happening."
     },
 
     "read-time-pipe": {
@@ -4618,6 +4689,7 @@
         "edit": "Edit",
         "help": "Help",
         "submit": "Submit",
+        "done": "Done",
         "email": "Email",
         "read": "Read",
         "unknown": "Unknown",

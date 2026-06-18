@@ -125,10 +125,11 @@
         }
 
         <div class="panel-actions d-flex flex-column gap-2">
-          <a [href]="manageLink()" target="_blank" rel="noreferrer nofollow" class="btn btn-primary btn-sm dark-exempt">
+          <button type="button" class="btn btn-primary btn-sm dark-exempt" (click)="openManageModal()">
             <i class="fa-brands fa-stripe-s me-1" aria-hidden="true"></i>
             {{ (status() === KavitaPlusSubscriptionState.Active || status() === KavitaPlusSubscriptionState.Cancelling) ? t('manage-label') : t('renew-label') }}
-          </a>
+          </button>
+
           <button type="button" class="btn btn-outline-secondary btn-sm dark-exempt" (click)="editLicense.emit()">
             <i class="fa-regular fa-pen-to-square me-1" aria-hidden="true"></i>
             {{ t('edit-license-label') }}

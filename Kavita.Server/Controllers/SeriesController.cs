@@ -640,8 +640,10 @@ public class SeriesController(
         if (plusFormat is PlusMediaFormat.Comic)
         {
             primaryProvider = Models.Entities.Enums.MetadataProvider.ComicBookRoundup;
-        }
-        if (plusFormat is PlusMediaFormat.Book or PlusMediaFormat.LightNovel)
+        } else if (plusFormat is PlusMediaFormat.LightNovel)
+        {
+            primaryProvider = Models.Entities.Enums.MetadataProvider.Mangabaka;
+        } else if (plusFormat is PlusMediaFormat.Book)
         {
             primaryProvider = Models.Entities.Enums.MetadataProvider.Hardcover;
         }

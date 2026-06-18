@@ -1,0 +1,84 @@
+<ng-container *transloco="let t; prefix:'manage-license-modal'">
+
+  @switch (step()) {
+
+    @case (ManageLicenseStep.Hub) {
+      <div class="modal-header align-items-start">
+        <div class="d-flex align-items-start gap-3">
+          <div class="action-icon action-icon--primary flex-shrink-0">
+            <i class="fa-solid fa-sliders" aria-hidden="true"></i>
+          </div>
+          <div>
+            <h4 class="modal-title mb-1">{{t('hub-title')}}</h4>
+            <p class="hub-subtitle mb-0">{{t('hub-subtitle')}}</p>
+          </div>
+        </div>
+        <button type="button" class="btn-close" [attr.aria-label]="t('close')" (click)="close()"></button>
+      </div>
+
+      <div class="modal-body d-flex flex-column gap-3">
+
+        @if (isActiveSubscription()) {
+          <button type="button" class="action-card" [disabled]="isCancelling()" (click)="goTo(ManageLicenseStep.Cancel)">
+            <div class="action-icon action-icon--danger flex-shrink-0">
+              <i class="fa-solid fa-ban" aria-hidden="true"></i>
+            </div>
+            <div class="flex-fill text-start">
+              <div class="action-card-title">{{t('cancel-title')}}</div>
+              <div class="action-card-desc">{{t('cancel-desc')}}</div>
+            </div>
+            <i class="fa-solid fa-chevron-right action-card-chevron flex-shrink-0" aria-hidden="true"></i>
+          </button>
+        } @else {
+          <button type="button" class="action-card" (click)="goTo(ManageLicenseStep.Renew)">
+            <div class="action-icon action-icon--primary flex-shrink-0">
+              <i class="fa-solid fa-arrows-rotate" aria-hidden="true"></i>
+            </div>
+            <div class="flex-fill text-start">
+              <div class="action-card-title">{{t('renew-title')}}</div>
+              <div class="action-card-desc">{{t('renew-desc')}}</div>
+            </div>
+            <i class="fa-solid fa-chevron-right action-card-chevron flex-shrink-0" aria-hidden="true"></i>
+          </button>
+        }
+
+        <button type="button" class="action-card" (click)="goTo(ManageLicenseStep.ChangeEmail)">
+          <div class="action-icon action-icon--info flex-shrink-0">
+            <i class="fa-solid fa-at" aria-hidden="true"></i>
+          </div>
+          <div class="flex-fill text-start">
+            <div class="action-card-title">{{t('change-email-title')}}</div>
+            <div class="action-card-desc">{{t('change-email-desc')}}</div>
+          </div>
+          <i class="fa-solid fa-chevron-right action-card-chevron flex-shrink-0" aria-hidden="true"></i>
+        </button>
+
+        <a class="action-card" [href]="manageLink()" target="_blank" rel="noreferrer nofollow">
+          <div class="action-icon action-icon--brand flex-shrink-0">
+            <i class="fa-brands fa-stripe-s" aria-hidden="true"></i>
+          </div>
+          <div class="flex-fill text-start">
+            <div class="action-card-title">{{t('billing-title')}}</div>
+            <div class="action-card-desc">{{t('billing-desc')}}</div>
+          </div>
+          <i class="fa-solid fa-arrow-up-right-from-square action-card-chevron flex-shrink-0" aria-hidden="true"></i>
+        </a>
+
+      </div>
+    }
+
+    @case (ManageLicenseStep.Renew) {
+      <app-renew-license (back)="back()" (dismiss)="close()" (changeEmail)="goTo(ManageLicenseStep.ChangeEmail)" />
+    }
+
+    @case (ManageLicenseStep.Cancel) {
+      <app-cancel-license (back)="back()" (dismiss)="close()" />
+    }
+
+    @case (ManageLicenseStep.ChangeEmail) {
+      <app-change-license-email (back)="back()" (dismiss)="close()" />
+    }
+
+  }
+
+</ng-container>

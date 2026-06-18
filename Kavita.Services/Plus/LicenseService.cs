@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -377,6 +378,26 @@ public class LicenseService(
             GeneratedAtUtc = DateTime.UtcNow,
             Stats = []
         };
+    }
+
+    public async Task<bool> CancelLicense(CancelKavitaPlusLicenseDto dto, CancellationToken ct)
+    {
+        return await kavitaPlusApiService.CancelLicenseAsync(dto, ct);
+    }
+
+    public async Task<IList<KavitaPlusProductInfoDto>> GetProducts(CancellationToken ct = default)
+    {
+        return await kavitaPlusApiService.GetProducts(ct);
+    }
+
+    public async Task<string?> RenewLicense(RenewKavitaPlusLicenseDto dto, CancellationToken ct)
+    {
+        return await kavitaPlusApiService.RenewLicenseAsync(dto, ct);
+    }
+
+    public async Task<bool> ChangeEmail(ChangeEmailOnLicenseDto dto, CancellationToken ct)
+    {
+        return await kavitaPlusApiService.ChangeEmail(dto, ct);
     }
 
     public async Task LinkDiscord(string discordId, string discordUsername, CancellationToken ct = default)

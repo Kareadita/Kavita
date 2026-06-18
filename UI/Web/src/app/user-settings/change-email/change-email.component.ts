@@ -86,7 +86,7 @@ export class ChangeEmailComponent {
       } else if (updateEmailResponse.emailSent) {
         this.toastr.success(translate('toasts.email-sent-to'));
       } else {
-        this.toastr.success(translate('toasts.change-email-no-email'));
+        this.toastr.success(translate('toasts.change-license-email-no-email'));
       }
 
       this.accountService.refreshAccount().subscribe(user => {

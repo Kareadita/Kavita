@@ -3,7 +3,8 @@ import {HttpClient} from "@angular/common/http";
 import {catchError, map, tap, throwError} from "rxjs";
 import {environment} from "../../environments/environment";
 import {TextResonse} from '../_types/text-response';
-import {LicenseInfo} from "../_models/kavitaplus/license-info";
+import {KavitaPlusBillingInterval, LicenseInfo} from "../_models/kavitaplus/license-info";
+import {KavitaPlusProductInfo} from "../_models/kavitaplus/kavita-plus-product-info";
 import {KavitaPlusRegisterResult} from "../_models/kavitaplus/registration/kavita-plus-register-result";
 import {KavitaPlusProviderHealthSnapshot} from '../_models/kavitaplus/kavita-plus-provider-health';
 import {ScrobbleProvider} from "./scrobbling.service";
@@ -126,5 +127,25 @@ export class LicenseService {
 
   getLicenseUsage() {
     return this.httpClient.get<KavitaPlusLicenseUsage>(this.baseUrl + `license/stats`);
+  }
+
+  cancelLicense(email: string, comment?: string) {
+    return this.httpClient.delete(this.baseUrl + `license/cancel`, {body: {email, comment}}).pipe(
+      tap(() => this.getLicenseInfo(true).subscribe())
+    );
+  }
+
+  getProducts() {
+    return this.httpClient.get<KavitaPlusProductInfo[]>(this.baseUrl + 'license/products');
+  }
+
+  renewLicense(email: string, billingInterval: KavitaPlusBillingInterval) {
+    return this.httpClient.post<string>(this.baseUrl + 'license/renew', {email, billingInterval}, TextResonse);
+  }
+
+  changeEmail(oldEmail: string, newEmail: string) {
+    return this.httpClient.post(this.baseUrl + 'license/change-email', {oldEmail, newEmail}, TextResonse).pipe(
+      map(res => res + '' === 'true')
+    );
   }
 }
