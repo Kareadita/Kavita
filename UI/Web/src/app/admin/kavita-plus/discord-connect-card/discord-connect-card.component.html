@@ -25,9 +25,7 @@
     </div>
 
     @if (!isConnected() && !loadingDiscordInBackground()) {
-      <a class="flex-shrink-0" [href]="discordOAuthFlow() | safeUrl" rel="noopener noreferrer">
-        <app-discord-button [label]="t('connect-button')" [block]="breakpointService.isMobileOrBelow()" />
-      </a>
+      <app-discord-button [label]="t('connect-button')" [block]="breakpointService.isMobileOrBelow()" />
     }
 
   </div>
