@@ -54,38 +54,6 @@
           }
         }
       </div>
-      <div class="form-group mb-1">
-        @if (formGroup.get('discordId'); as formControl) {
-          <label for="discordId">{{t('activate-discordId-label')}}</label>
-
-          <a class="ms-1" [href]="WikiLink.KavitaPlusDiscordId" [ngbTooltip]="t('activate-discordId-tooltip')" target="_blank" rel="noopener noreferrer">
-            <i class="fa fa-circle-info ms-1" aria-hidden="true"></i> {{t('help-label')}}
-          </a>
-          <input id="discordId" type="text" class="form-control" formControlName="discordId" autocomplete="off"
-                 placeholder="0000000000000000000" [class.is-invalid]="formControl.invalid && !formControl.untouched" />
-
-          @if (showConnectWithDiscord()) {
-            <div class="form-text text-muted mt-2">
-              <app-transloco-inject key="edit-license-key.connect-with-discord-help">
-                <ng-template translocoSlot="connectWithDiscordBtn">
-                  <app-discord-button [label]="t('connect-with-discord')" />
-                </ng-template>
-              </app-transloco-inject>
-            </div>
-          }
-
-          @if (formControl.dirty || !formControl.untouched) {
-            <div class="invalid-feedback">
-              @if (formControl.errors) {
-                @if (formControl.errors.pattern || formControl.errors.minlength || formControl.errors.maxlength) {
-                  <div>{{t('discord-format-validation')}}</div>
-                }
-              }
-            </div>
-          }
-        }
-
-      </div>
     </div>
   </form>
 </ng-container>

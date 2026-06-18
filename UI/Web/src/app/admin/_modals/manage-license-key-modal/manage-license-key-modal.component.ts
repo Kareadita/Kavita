@@ -57,7 +57,8 @@ export class ManageLicenseKeyModalComponent {
   save() {
     if (!this.formData?.isValid) return;
 
-    this.licenseService.updateUserLicense(this.formData.licenseKey, this.formData.email, this.formData.discordId ?? undefined).subscribe(() => {
+    // NOTE: We removed the ability to update discordId in the registration as the OAuth connect is much easier
+    this.licenseService.updateUserLicense(this.formData.licenseKey, this.formData.email, undefined).subscribe(() => {
       this.modal.close();
     })
   }

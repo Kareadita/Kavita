@@ -962,9 +962,7 @@
         "license-length-validation": "License key is expected to be 19 characters long",
         "license-format-validation": "License is expected to be formatted as: XXXX-XXXX-XXXX-XXXX",
         "discord-format-validation": "Discord ID expected to be 19 number user id",
-        "email-format-validation": "Must be a valid email address",
-        "connect-with-discord": "Connect with Discord",
-        "connect-with-discord-help": "Or {{connectWithDiscordBtn}} to fill this out automatically"
+        "email-format-validation": "Must be a valid email address"
     },
 
     "manage-license-key-modal": {
