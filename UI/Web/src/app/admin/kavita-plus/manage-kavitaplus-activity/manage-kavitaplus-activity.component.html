@@ -57,7 +57,7 @@
       <div class="stat-value text-warning">{{stats()?.scrobbleQueueCount | defaultValue}}</div>
       @let nextScrobbleDate = nextScrobble();
       @if (nextScrobbleDate != null) {
-        <div class="stat-subtitle">{{t('next-scrobble', {date: nextScrobbleDate | utcToLocalTime | timeDifference})}}</div>
+        <div class="stat-subtitle">{{t('next-scrobble', {date: nextScrobbleDate | utcToLocalDate | timeDifference})}}</div>
       }
     </div>
   </div>

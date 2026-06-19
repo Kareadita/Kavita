@@ -27,9 +27,9 @@ import {KavitaPlusAuditCategory} from "../../../_models/kavitaplus/kavita-plus-a
 import {KavitaPlusAuditFilter} from "../../../_models/kavitaplus/kavita-plus-audit-filter";
 import {SearchInputComponent} from "../../../shared/_components/search-input/search-input.component";
 import {TimeDifferencePipe} from "../../../_pipes/time-difference.pipe";
-import {UtcToLocalTimePipe} from "../../../_pipes/utc-to-local-time.pipe";
 import {ScrobbleProvider, ScrobblingService} from "../../../_services/scrobbling.service";
 import {ScrobbleProviderNamePipe} from "../../../_pipes/scrobble-provider-name.pipe";
+import {UtcToLocalDatePipe} from "../../../_pipes/utc-to-locale-date.pipe";
 
 @Component({
   selector: 'app-manage-kavitaplus-activity',
@@ -43,7 +43,7 @@ import {ScrobbleProviderNamePipe} from "../../../_pipes/scrobble-provider-name.p
     SearchInputComponent,
     ScrobbleProviderNamePipe,
     TimeDifferencePipe,
-    UtcToLocalTimePipe,
+    UtcToLocalDatePipe,
   ],
   templateUrl: './manage-kavitaplus-activity.component.html',
   styleUrl: './manage-kavitaplus-activity.component.scss',
