@@ -1,19 +1,10 @@
-import {
-  ChangeDetectionStrategy,
-  ChangeDetectorRef,
-  Component,
-  DestroyRef,
-  inject,
-  OnInit,
-  output
-} from '@angular/core';
+import {ChangeDetectionStrategy, Component, computed, DestroyRef, inject, OnInit, output, signal} from '@angular/core';
 import {filter, shareReplay} from 'rxjs';
 import {KavitaMediaError} from '../_models/media-error';
 import {ServerService} from 'src/app/_services/server.service';
 import {EVENTS, MessageHubService} from 'src/app/_services/message-hub.service';
 import {FormControl, FormGroup, ReactiveFormsModule} from '@angular/forms';
-import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
-import {FilterPipe} from '../../_pipes/filter.pipe';
+import {takeUntilDestroyed, toSignal} from "@angular/core/rxjs-interop";
 import {TranslocoDirective} from "@jsverse/transloco";
 import {WikiLink} from "../../_models/wiki";
 import {UtcToLocalTimePipe} from "../../_pipes/utc-to-local-time.pipe";
@@ -25,7 +16,7 @@ import {ResponsiveTableComponent} from "../../shared/_components/responsive-tabl
   selector: 'app-manage-media-issues',
   templateUrl: './manage-media-issues.component.html',
   styleUrls: ['./manage-media-issues.component.scss'],
-  imports: [ReactiveFormsModule, FilterPipe, TranslocoDirective, UtcToLocalTimePipe, DefaultDatePipe, NgxDatatableModule, ResponsiveTableComponent],
+  imports: [ReactiveFormsModule, TranslocoDirective, UtcToLocalTimePipe, DefaultDatePipe, NgxDatatableModule, ResponsiveTableComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ManageMediaIssuesComponent implements OnInit {
@@ -34,18 +25,26 @@ export class ManageMediaIssuesComponent implements OnInit {
 
   private readonly serverService = inject(ServerService);
   private readonly messageHub = inject(MessageHubService);
-  private readonly cdRef = inject(ChangeDetectorRef);
   private readonly destroyRef = inject(DestroyRef);
   protected readonly WikiLink = WikiLink;
 
-  messageHubUpdate$ = this.messageHub.messages$.pipe(takeUntilDestroyed(this.destroyRef), filter(m => m.event === EVENTS.ScanSeries), shareReplay());
+  messageHubUpdate$ = this.messageHub.messages$.pipe(takeUntilDestroyed(this.destroyRef),
+    filter(m => m.event === EVENTS.ScanSeries), shareReplay());
 
-  data: Array<KavitaMediaError> = [];
-  isLoading = true;
+  data = signal<KavitaMediaError[]>([]);
+  isLoading = signal(true);
   formGroup = new FormGroup({
     filter: new FormControl('', [])
   });
-  trackBy = (idx: number, item: KavitaMediaError) => `${item.filePath}`
+  private readonly filterQuery = toSignal(this.formGroup.controls.filter.valueChanges, {initialValue: ''});
+  filteredData = computed(() => {
+    const query = (this.filterQuery() || '').toLowerCase();
+    return this.data().filter(item =>
+      item.comment.toLowerCase().indexOf(query) >= 0 ||
+      item.filePath.toLowerCase().indexOf(query) >= 0 ||
+      item.details.indexOf(query) >= 0);
+  });
+  trackBy = (_: number, item: KavitaMediaError) => `${item.filePath}`
 
   ngOnInit(): void {
     this.loadData();
@@ -54,23 +53,16 @@ export class ManageMediaIssuesComponent implements OnInit {
 
 
   loadData() {
-    this.isLoading = true;
-    this.cdRef.markForCheck();
+    this.isLoading.set(true);
     this.serverService.getMediaErrors().subscribe(d => {
-      this.data = d;
-      this.isLoading = false;
+      this.data.set([...d]);
+      this.isLoading.set(false);
       this.alertCount.emit(d.length);
-      this.cdRef.detectChanges();
     });
   }
 
   clear() {
     this.serverService.clearMediaAlerts().subscribe(_ => this.loadData());
-  }
-
-  filterList = (listItem: KavitaMediaError) => {
-    const query = (this.formGroup.get('filter')?.value || '').toLowerCase();
-    return listItem.comment.toLowerCase().indexOf(query) >= 0 || listItem.filePath.toLowerCase().indexOf(query) >= 0 || listItem.details.indexOf(query) >= 0;
   }
 
 }

@@ -8,7 +8,7 @@ public class MediaErrorBuilder(string filePath): IEntityBuilder<MediaError>
 {
     private readonly MediaError _mediaError = new()
     {
-        FilePath = filePath.ToNormalized(),
+        FilePath = filePath.NormalizePath(),
         Extension = Path.GetExtension(filePath).Replace(".", string.Empty).ToUpperInvariant()
     };
 
