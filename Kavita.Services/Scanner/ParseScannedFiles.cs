@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using Kavita.API.Services;
 using Kavita.API.Services.SignalR;
@@ -779,10 +780,31 @@ public class ParseScannedFiles
         }
         else
         {
-            // Process files in parallel
-            var tasks = files.Select(file => Task.Run(() =>
-                _readingItemService.ParseFile(file, normalizedFolder, result.LibraryRoot, library.Type, library.EnableMetadata)));
+            // Process files in parallel, but bound the concurrency so that a folder with
+            // many files cannot flood the ThreadPool and starve request handling (the web UI
+            // and health checks become unresponsive during scans otherwise).
+            // Matches the scanner's existing parallelism convention (see ScannerService).
+            var maxConcurrency = Math.Max(1, Environment.ProcessorCount / 2);
+            using var throttler = new SemaphoreSlim(maxConcurrency);
 
+            var tasks = files.Select(async file =>
+            {
+                await throttler.WaitAsync();
+
+                try
+                {
+                    // Task.Run keeps the synchronous parser work off the enumerating thread
+                    // while the semaphore bounds how many parses run at once.
+                    return await Task.Run(() =>
+                        _readingItemService.ParseFile(file, normalizedFolder, result.LibraryRoot, library.Type, library.EnableMetadata));
+                }
+                finally
+                {
+                    throttler.Release();
+                }
+            });
+
+            // Task.WhenAll preserves input (file) order, which downstream series mapping relies on
             var infos = await Task.WhenAll(tasks);
             result.ParserInfos = infos.Where(info => info != null).ToList()!;
         }

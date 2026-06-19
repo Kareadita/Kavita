@@ -668,4 +668,103 @@ public class ParseScannedFilesTests: AbstractDbTest
         Assert.Single(scannedSeries);
         Assert.Single(scannedSeries.Values.First().DistinctBy(x => x.Series));
     }
+
+    #region ParseFiles Concurrency
+
+    /// <summary>
+    /// Wraps <see cref="MockReadingItemService"/> and records how many ParseFile calls run
+    /// concurrently, so we can assert the parallel parse path is bounded.
+    /// </summary>
+    private sealed class ConcurrencyTrackingReadingItemService : IReadingItemService
+    {
+        private readonly MockReadingItemService _inner;
+        private int _current;
+        private int _max;
+        private int _totalCalls;
+
+        public int MaxObservedConcurrency => _max;
+        public int TotalCalls => _totalCalls;
+
+        public ConcurrencyTrackingReadingItemService(IDirectoryService directoryService, IBookService bookService)
+        {
+            _inner = new MockReadingItemService(directoryService, bookService);
+        }
+
+        public ParserInfo ParseFile(string path, string rootPath, string libraryRoot, LibraryType type, bool enableMetadata)
+        {
+            Interlocked.Increment(ref _totalCalls);
+            var running = Interlocked.Increment(ref _current);
+            int observedMax;
+            while (running > (observedMax = _max))
+            {
+                Interlocked.CompareExchange(ref _max, running, observedMax);
+            }
+
+            try
+            {
+                // Hold the slot briefly so concurrent parses actually overlap
+                Thread.Sleep(10);
+
+                return _inner.ParseFile(path, rootPath, libraryRoot, type, enableMetadata);
+            }
+            finally
+            {
+                Interlocked.Decrement(ref _current);
+            }
+        }
+
+        public ParserInfo Parse(string path, string rootPath, string libraryRoot, LibraryType type, bool enableMetadata)
+            => _inner.Parse(path, rootPath, libraryRoot, type, enableMetadata);
+
+        public ComicInfo GetComicInfo(string filePath) => _inner.GetComicInfo(filePath);
+
+        public int GetNumberOfPages(string filePath, MangaFormat format) => _inner.GetNumberOfPages(filePath, format);
+
+        public string GetCoverImage(string fileFilePath, string fileName, MangaFormat format, EncodeFormat encodeFormat, CoverImageSize size = CoverImageSize.Default)
+            => _inner.GetCoverImage(fileFilePath, fileName, format, encodeFormat, size);
+
+        public void Extract(string fileFilePath, string targetDirectory, MangaFormat format, int imageCount = 1)
+            => _inner.Extract(fileFilePath, targetDirectory, format, imageCount);
+    }
+
+    [Fact]
+    public async Task ScanLibrariesForSeries_LargeFolder_BoundsParseConcurrencyAndParsesEveryFile()
+    {
+        var (unitOfWork, context, mapper) = await CreateDatabase();
+        _ = await Setup(unitOfWork);
+
+        // A single folder with >= 100 files takes the parallel parse path in ParseFiles
+        const int fileCount = 150;
+        var fileSystem = new MockFileSystem();
+        fileSystem.AddDirectory(Root + "Data/");
+        for (var i = 0; i < fileCount; i++)
+        {
+            fileSystem.AddFile(Root + $"Data/Accel World v{i:D3}.cbz", new MockFileData(string.Empty));
+        }
+
+        var ds = new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), fileSystem);
+        var readingItemService = new ConcurrencyTrackingReadingItemService(ds, Substitute.For<IBookService>());
+        var psf = new ParseScannedFiles(Substitute.For<ILogger<ParseScannedFiles>>(), ds,
+            readingItemService, Substitute.For<IEventHub>(), Substitute.For<IMediaErrorService>());
+
+        var library = await unitOfWork.LibraryRepository.GetLibraryForIdAsync(1,
+            LibraryIncludes.Folders | LibraryIncludes.FileTypes);
+        Assert.NotNull(library);
+        library.Type = LibraryType.Manga;
+
+        await psf.ScanLibrariesForSeries(library, new List<string> { Root + "Data/" }, false,
+            await unitOfWork.SeriesRepository.GetFolderPathMapAsync(1));
+
+        // Every file still goes through the parser
+        Assert.Equal(fileCount, readingItemService.TotalCalls);
+
+        // ...and the parallel parse path never exceeds the scanner's concurrency cap.
+        // Before the fix this branch was an unbounded Task.WhenAll over one Task.Run per file,
+        // which let all 150 parses run at once and exhaust the ThreadPool.
+        var expectedMax = Math.Max(1, Environment.ProcessorCount / 2);
+        Assert.True(readingItemService.MaxObservedConcurrency <= expectedMax,
+            $"Observed parse concurrency {readingItemService.MaxObservedConcurrency} exceeded the cap {expectedMax}");
+    }
+
+    #endregion
 }
