@@ -19,6 +19,7 @@ using Kavita.Models.DTOs.Filtering.v2.Requests;
 using Kavita.Models.DTOs.KavitaPlus;
 using Kavita.Models.DTOs.KavitaPlus.Account;
 using Kavita.Models.DTOs.KavitaPlus.Audit;
+using Kavita.Models.DTOs.KavitaPlus.OAuth;
 using Kavita.Models.DTOs.KavitaPlus.Scrobble;
 using Kavita.Models.DTOs.Scrobbling;
 using Kavita.Models.DTOs.SignalR;
@@ -1937,7 +1938,8 @@ public class ScrobblingService : IScrobblingService
     private async Task<DateTime?> GetTokenExpiry(ScrobbleProvider provider, int userId, string token, CancellationToken ct = default)
     {
         var upstream = provider.ToOAuthUpstream();
-        if (upstream == null)
+        // All upstreams but MangaBaka use JWT tokens
+        if (upstream is not OAuthUpstream.MangaBaka)
         {
             try
             {
