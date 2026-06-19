@@ -7,7 +7,6 @@ using Kavita.API.Database;
 using Kavita.API.Services.Plus;
 using Kavita.Models.DTOs.KavitaPlus;
 using Kavita.Models.DTOs.KavitaPlus.Audit;
-using Kavita.Models.Entities.Enums;
 using Kavita.Models.Entities.Enums.Audit;
 using Kavita.Models.Entities.History;
 using Microsoft.Extensions.Logging;

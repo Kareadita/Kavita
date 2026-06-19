@@ -105,6 +105,18 @@ export class KavitaPlusAuditEntryComponent {
     return null;
   });
 
+  provider = computed(() => {
+    if (!!this.entry().scrobbleDetails?.provider) {
+      return this.entry().scrobbleDetails!.provider;
+    }
+
+    if (!!this.entry().systemDetails?.provider) {
+      return this.entry().systemDetails!.provider;
+    }
+
+    return null;
+  });
+
   matchProviderBadges = computed(() => {
     const ids = this.entry().matchDetails?.after;
     if (!ids) return [];

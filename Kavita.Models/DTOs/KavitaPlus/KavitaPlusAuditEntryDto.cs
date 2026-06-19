@@ -25,5 +25,6 @@ public sealed record KavitaPlusAuditEntryDto
     public KavitaPlusAuditMatchDetailsDto? MatchDetails { get; init; }
     public KavitaPlusAuditSyncDetailsDto? SyncDetails { get; init; }
     public KavitaPlusAuditMetadataExtrasDto? MetadataExtras { get; init; }
+    public KavitaPlusAuditSystemDetailsDto? SystemDetails { get; init; }
     public bool CanRetry { get; init; }
 }

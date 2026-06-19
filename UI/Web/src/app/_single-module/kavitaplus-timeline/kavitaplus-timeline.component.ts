@@ -72,6 +72,8 @@ export class KavitaplusTimelineComponent {
         return 'var(--audit-log-scrobble-color)';
       case KavitaPlusAuditCategory.Sync:
         return 'var(--audit-log-sync-color)';
+      case KavitaPlusAuditCategory.System:
+        return 'var(--audit-log-system-color)';
       default:
         return 'var(--audit-log-metadata-color)';
     }

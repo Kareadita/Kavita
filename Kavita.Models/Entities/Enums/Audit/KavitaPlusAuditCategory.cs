@@ -6,4 +6,5 @@ public enum KavitaPlusAuditCategory
     Metadata = 1,
     Scrobble = 2,
     Sync = 3,
+    System = 4,
 }

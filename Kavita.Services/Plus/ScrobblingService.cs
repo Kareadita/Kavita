@@ -18,6 +18,7 @@ using Kavita.Models.DTOs.Filtering.v2;
 using Kavita.Models.DTOs.Filtering.v2.Requests;
 using Kavita.Models.DTOs.KavitaPlus;
 using Kavita.Models.DTOs.KavitaPlus.Account;
+using Kavita.Models.DTOs.KavitaPlus.Audit;
 using Kavita.Models.DTOs.KavitaPlus.Scrobble;
 using Kavita.Models.DTOs.Scrobbling;
 using Kavita.Models.DTOs.SignalR;
@@ -1886,10 +1887,23 @@ public class ScrobblingService : IScrobblingService
         if (!userInfo.IsSuccess)
         {
             _logger.LogWarning("Failed to sync provider info for {UserId} for {Provider} due to error: {ErrorMessage}", userId, provider, userInfo.ErrorMessage);
+
+            await _auditService.LogAsync(KavitaPlusAuditCategory.System, KavitaPlusEventType.SystemProviderInfoSync,
+                AuditStatus.Failure, payload: new AuditLogSystemProviderInfoSyncParamsDto
+                {
+                    Provider = provider,
+                }, error: userInfo.ErrorMessage, userId: userId, ct: ct);
         }
         else
         {
             scrobbleProviderSettings.UserName = userInfo.Data!.Username;
+
+            await _auditService.LogAsync(KavitaPlusAuditCategory.System, KavitaPlusEventType.SystemProviderInfoSync,
+                AuditStatus.Success, payload: new AuditLogSystemProviderInfoSyncParamsDto
+                {
+                    Provider = provider,
+                    UserInfo = userInfo.Data,
+                }, userId: userId, ct: ct);
         }
 
         var tokenExpiry = await GetTokenExpiry(provider, userId, scrobbleProviderSettings.AuthenticationToken, ct);

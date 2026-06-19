@@ -76,6 +76,8 @@
               (click)="setCategoryFilter(KavitaPlusAuditCategory.Scrobble)">{{t('filter-scrobble')}}</button>
       <button class="btn btn-sm btn-outline-secondary" [class.active-filter]="categoryFilter() === KavitaPlusAuditCategory.Sync"
               (click)="setCategoryFilter(KavitaPlusAuditCategory.Sync)">{{t('filter-sync')}}</button>
+      <button class="btn btn-sm btn-outline-secondary" [class.active-filter]="categoryFilter() === KavitaPlusAuditCategory.System"
+              (click)="setCategoryFilter(KavitaPlusAuditCategory.System)">{{t('filter-system')}}</button>
     </div>
 
     <div class="d-flex align-items-center gap-2 flex-wrap">

@@ -7,7 +7,7 @@ function resolveIcon(type: KavitaPlusEventType): string {
     case KavitaPlusEventType.SeriesMatched:          return 'fas fa-table-list';
     case KavitaPlusEventType.SeriesMatchFailed:      return 'fas fa-circle-exclamation';
     case KavitaPlusEventType.SeriesBlacklisted:      return 'fas fa-circle-xmark';
-    case KavitaPlusEventType.SeriesMatchFixed:     return 'fas fa-eraser';
+    case KavitaPlusEventType.SeriesMatchFixed:       return 'fas fa-eraser';
     case KavitaPlusEventType.SeriesDontMatchSet:     return 'fas fa-table-cells-row-lock';
     case KavitaPlusEventType.MetadataFetched:        return 'fas fa-magnifying-glass';
     case KavitaPlusEventType.MetadataUpdated:        return 'fas fa-database';
@@ -29,6 +29,8 @@ function resolveIcon(type: KavitaPlusEventType): string {
     case KavitaPlusEventType.SyncStarted:            return 'fas fa-cloud-arrow-up';
     case KavitaPlusEventType.SyncCompleted:          return 'fas fa-cloud-arrow-down';
     case KavitaPlusEventType.SyncFailed:             return 'fas fa-cloud-arrow-down';
+    case KavitaPlusEventType.SystemTokenRefresh:     return 'fas fas-recycle'
+    case KavitaPlusEventType.SystemProviderInfoSync: return 'fas fa-sync'
     default:                                         return 'fas fa-circle-exclamation';
   }
 }
@@ -58,6 +60,8 @@ function resolveCategory(type: KavitaPlusAuditCategory): string {
       return 'var(--audit-log-scrobble-color)';
     case KavitaPlusAuditCategory.Sync:
       return 'var(--audit-log-sync-color)';
+    case KavitaPlusAuditCategory.System:
+      return 'var(--audit-log-system-color)';
   }
 }
 

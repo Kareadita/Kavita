@@ -1677,7 +1677,11 @@
         "sync-failed-collection": "Sync failed for {{collectionName}}",
         "sync-completed-want-to-read": "{{seriesMatched}} series matched for {{userName}}",
         "read-status-update": "Status {{status}}",
-        "series-matched-against": "Matched against \"{{matchName}}\""
+        "series-matched-against": "Matched against \"{{matchName}}\"",
+        "system-token-refresh-success": "Refresh authentication tokens for {{provider}}. They are valid until {{validUntil}}",
+        "system-token-refresh-failure": "Failed to refresh authentication tokens for {{provider}}",
+        "system-provider-info-sync-success": "Successfully synced information for {{provider}}. Linked to account {{username}}",
+        "system-provider-info-sync-failure": "Failed to sync account information for {{provider}}"
     },
 
     "kavita-plus-event-type-pipe": {
@@ -1705,7 +1709,9 @@
         "scrobble-hold-removed": "Scrobble Hold Removed",
         "sync-started": "Sync Started",
         "sync-completed": "Sync Completed",
-        "sync-failed": "Sync Failed"
+        "sync-failed": "Sync Failed",
+        "system-provider-info-sync": "Scrobble Provider Info Sync",
+        "system-token-refresh": "Scrobble Provider token refresh"
     },
 
     "audit-log-messages": {

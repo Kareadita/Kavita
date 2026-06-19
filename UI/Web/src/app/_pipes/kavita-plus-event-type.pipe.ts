@@ -61,8 +61,10 @@ export class KavitaPlusEventTypePipe implements PipeTransform {
         return this.translocoService.translate('kavita-plus-event-type-pipe.sync-completed');
       case KavitaPlusEventType.SyncFailed:
         return this.translocoService.translate('kavita-plus-event-type-pipe.sync-failed');
-      default:
-        return String(value);
+      case KavitaPlusEventType.SystemProviderInfoSync:
+        return this.translocoService.translate('kavita-plus-event-type-pipe.system-provider-info-sync');
+      case KavitaPlusEventType.SystemTokenRefresh:
+        return this.translocoService.translate('kavita-plus-event-type-pipe.system-token-refresh');
     }
   }
 }

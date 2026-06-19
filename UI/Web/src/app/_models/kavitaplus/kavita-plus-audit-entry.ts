@@ -7,6 +7,7 @@ import {MetadataFieldChange} from './metadata-field-change';
 import {KavitaPlusAuditMatchDetails} from './kavita-plus-audit-match-details';
 import {KavitaPlusAuditSyncDetails} from './kavita-plus-audit-sync-details';
 import {KavitaPlusAuditMetadataExtras} from './kavita-plus-audit-metadata-extras';
+import {KavitaPlusSystemDetail} from "./kavita-plus-system-detail";
 
 
 export interface KavitaPlusAuditEntry {
@@ -28,5 +29,6 @@ export interface KavitaPlusAuditEntry {
   matchDetails: KavitaPlusAuditMatchDetails | null;
   syncDetails: KavitaPlusAuditSyncDetails | null;
   metadataExtras: KavitaPlusAuditMetadataExtras | null;
+  systemDetails: KavitaPlusSystemDetail | null;
   canRetry: boolean;
 }

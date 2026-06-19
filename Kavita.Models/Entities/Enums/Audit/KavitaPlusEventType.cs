@@ -44,4 +44,9 @@ public enum KavitaPlusEventType
     SyncStarted = 60,
     SyncCompleted = 61,
     SyncFailed = 62,
+
+    // System
+    SystemTokenRefresh = 80,
+    SystemProviderInfoSync = 81
+
 }

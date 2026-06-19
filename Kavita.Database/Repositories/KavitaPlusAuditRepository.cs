@@ -320,6 +320,26 @@ public class KavitaPlusAuditRepository(DataContext context) : IKavitaPlusAuditRe
             }
         }
 
+        KavitaPlusAuditSystemDetailsDto? systemDetails = null;
+        if (e is { Category: KavitaPlusAuditCategory.System, Payload: not null })
+        {
+            try
+            {
+                systemDetails = e.EventType switch
+                {
+                    KavitaPlusEventType.SystemProviderInfoSync => KavitaPlusAuditSystemDetailsDto.From(
+                        JsonSerializer.Deserialize<AuditLogSystemProviderInfoSyncParamsDto>(e.Payload, JsonOptions)),
+                    KavitaPlusEventType.SystemTokenRefresh => KavitaPlusAuditSystemDetailsDto.From(
+                        JsonSerializer.Deserialize<AuditLogSystemTokenRefreshParamsDto>(e.Payload, JsonOptions)),
+                    _ => null,
+                };
+            }
+            catch
+            {
+                // malformed payload
+            }
+        }
+
         return new KavitaPlusAuditEntryDto
         {
             Id = e.Id,
@@ -340,6 +360,7 @@ public class KavitaPlusAuditRepository(DataContext context) : IKavitaPlusAuditRe
             MatchDetails = matchDetails,
             SyncDetails = syncDetails,
             MetadataExtras = metadataExtras,
+            SystemDetails = systemDetails,
             CanRetry = e is { Status: AuditStatus.Failure, Category: KavitaPlusAuditCategory.Scrobble, HasRetried: false },
         };
     }

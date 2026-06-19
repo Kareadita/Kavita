@@ -7,9 +7,11 @@ using Hangfire;
 using Kavita.API.Database;
 using Kavita.API.Services.Plus;
 using Kavita.API.Services.SignalR;
+using Kavita.Models.DTOs.KavitaPlus.Audit;
 using Kavita.Models.DTOs.KavitaPlus.OAuth;
 using Kavita.Models.DTOs.SignalR;
 using Kavita.Models.Entities.Enums;
+using Kavita.Models.Entities.Enums.Audit;
 using Kavita.Models.Entities.User;
 using Kavita.Models.Extensions;
 using Microsoft.Extensions.Logging;
@@ -21,7 +23,8 @@ public class OAuthService(
     IUnitOfWork unitOfWork,
     IScrobblingService scrobblingService,
     IKavitaPlusApiService kavitaPlusApiService,
-    IEventHub eventHub): IOAuthService
+    IEventHub eventHub,
+    IKavitaPlusAuditService kavitaPlusAuditService): IOAuthService
 {
     private const string DiscordMeApiUrl = "https://discord.com/api/users/@me";
 
@@ -156,27 +159,41 @@ public class OAuthService(
                     Upstream = upstream.Value,
                 }, ct);
 
-                if (response.IsSuccess)
+                if (!response.IsSuccess)
                 {
-                    settings.AuthenticationToken = response.Data.AccessToken;
-                    settings.RefreshToken = response.Data.RefreshToken;
-                    // Remove 30s for latency
-                    settings.ValidUntilUtc = DateTime.UtcNow
-                                             + TimeSpan.FromSeconds(response.Data.ExpiresIn)
-                                             - TimeSpan.FromSeconds(30);
-                    settings.LastSyncedUtc = DateTime.UtcNow;
+                    logger.LogWarning("Failed to refresh token for {Provider} for user {UserId}: {ErrorMessage}", provider, user.Id, response.ErrorMessage);
 
-                    unitOfWork.UserRepository.Update(user);
-                    await unitOfWork.CommitAsync(ct);
-
-                    await eventHub.SendMessageToAsync(MessageFactory.ScrobbleProviderUpdated,
-                        MessageFactory.ScrobbleProviderUpdatedEvent(provider), user.Id, ct);
+                    await kavitaPlusAuditService.LogAsync(KavitaPlusAuditCategory.System,
+                        KavitaPlusEventType.SystemTokenRefresh, AuditStatus.Failure,
+                        payload: new AuditLogSystemTokenRefreshParamsDto
+                        {
+                            Provider = provider
+                        }, userId: user.Id, ct: ct);
 
                     continue;
                 }
 
-                logger.LogWarning("Failed to refresh token for {Provider} for user {UserId}: {ErrorMessage}", provider, user.Id, response.ErrorMessage);
+                settings.AuthenticationToken = response.Data.AccessToken;
+                settings.RefreshToken = response.Data.RefreshToken;
+                // Remove 30s for latency
+                settings.ValidUntilUtc = DateTime.UtcNow
+                                         + TimeSpan.FromSeconds(response.Data.ExpiresIn)
+                                         - TimeSpan.FromSeconds(30);
+                settings.LastSyncedUtc = DateTime.UtcNow;
 
+                await kavitaPlusAuditService.LogAsync(KavitaPlusAuditCategory.System,
+                    KavitaPlusEventType.SystemTokenRefresh, AuditStatus.Success,
+                    payload: new AuditLogSystemTokenRefreshParamsDto
+                    {
+                        Provider = provider,
+                        ValidUntilUtc = settings.ValidUntilUtc,
+                    }, error: response.ErrorMessage, userId: user.Id, ct: ct);
+
+                unitOfWork.UserRepository.Update(user);
+                await unitOfWork.CommitAsync(ct);
+
+                await eventHub.SendMessageToAsync(MessageFactory.ScrobbleProviderUpdated,
+                    MessageFactory.ScrobbleProviderUpdatedEvent(provider), user.Id, ct);
             }
         }
     }
