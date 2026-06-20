@@ -2439,7 +2439,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   openShortcutModal() {
-    this.readerService.openShortcutModal(KEYBIND_TARGETS);
+    this.readerService.openShortcutModal(KEYBIND_TARGETS, true);
   }
 
 
