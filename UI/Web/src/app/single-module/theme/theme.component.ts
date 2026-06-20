@@ -1,4 +1,4 @@
-import {ChangeDetectionStrategy, Component} from '@angular/core';
+import {ChangeDetectionStrategy, Component, inject} from '@angular/core';
 import {Select2, Select2Data} from "ng-select2-component";
 import {AccordionComponent} from "../../shared/accordion/accordion.component";
 import {TagBadgeComponent, TagBadgeCursor} from "../../shared/tag-badge/tag-badge.component";
@@ -18,6 +18,8 @@ import {
 } from "../../settings/_components/setting-multi-check-box/setting-multi-check-box.component";
 import {PlusMediaFormat} from "../../_models/series-detail/external-series-detail";
 import {ScrobbleProvider} from "../../_services/scrobbling.service";
+import {ConfirmService} from "../../shared/confirm.service";
+import {ConfirmConfig} from "../../shared/confirm-dialog/_models/confirm-config";
 
 /**
  * Developer-only, unlocalized style guide. Renders the app's common UI primitives and raw theme
@@ -44,6 +46,8 @@ import {ScrobbleProvider} from "../../_services/scrobbling.service";
 })
 export class ThemeComponent {
 
+  protected readonly confirmService = inject(ConfirmService);
+
   protected readonly TagBadgeCursor = TagBadgeCursor;
   protected readonly PlusMediaFormat = PlusMediaFormat;
   protected readonly ScrobbleProvider = ScrobbleProvider;
@@ -59,4 +63,32 @@ export class ThemeComponent {
     {label: 'Option Two', value: 2},
     {label: 'Option Three', value: 3},
   ];
+
+  confirm() {
+    this.confirmService.confirm('Test content');
+  }
+
+  alert() {
+    this.confirmService.alert('Test content');
+  }
+
+  info() {
+    this.confirmService.info('Test content', 'Info');
+  }
+
+  prompt() {
+    this.confirmService.prompt('Enter a value');
+  }
+
+  dangerConfirm() {
+    const config = new ConfirmConfig();
+    config.header = 'Delete series';
+    config.content = 'This action cannot be undone.';
+    config.buttons = [
+      {text: 'Cancel', type: 'secondary'},
+      {text: 'Delete', type: 'danger'},
+    ];
+    this.confirmService.confirm(undefined, config);
+  }
+
 }

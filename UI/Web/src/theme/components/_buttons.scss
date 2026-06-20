@@ -82,6 +82,29 @@ button {
   }
 }
 
+.btn-danger {
+  color: var(--btn-danger-text-color);
+  background-color: var(--btn-danger-bg-color);
+  border-color: var(--btn-danger-border-color);
+
+  --bs-btn-active-bg: var(--btn-danger-hover-bg-color);
+  --bs-btn-active-border-color: var(--btn-danger-hover-border-color);
+
+  i {
+    color: var(--btn-danger-text-color);
+  }
+
+  &:hover, &:focus-visible {
+    color: var(--btn-danger-hover-text-color);
+    background-color: var(--btn-danger-hover-bg-color);
+    border-color: var(--btn-danger-hover-border-color);
+
+    i {
+      color: var(--btn-danger-hover-text-color);
+    }
+  }
+}
+
 /* Outline variants */
 .btn-outline-primary {
   color: var(--btn-outline-primary-text-color);

@@ -587,3 +587,17 @@
   <div class="setting-section-break"></div>
   <hr />
 </app-accordion>
+
+<!--Confirm Popups-->
+<app-accordion>
+  <span accTitle>Confirm Popups</span>
+
+  <p>Each dialog type drives its own accent color and header icon. The danger example shows the destructive button variant.</p>
+  <div class="demo-row">
+    <button class="btn btn-primary" (click)="confirm()">Confirm</button>
+    <button class="btn btn-danger" (click)="alert()">Alert</button>
+    <button class="btn btn-primary" (click)="info()">Info</button>
+    <button class="btn btn-primary" (click)="prompt()">Prompt</button>
+    <button class="btn btn-danger" (click)="dangerConfirm()">Danger Confirm</button>
+  </div>
+</app-accordion>

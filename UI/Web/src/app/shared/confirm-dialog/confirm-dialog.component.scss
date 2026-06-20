@@ -1,4 +1,21 @@
 
+:host {
+  // Accent colour driven by the per-type host class; defaults to the primary (confirm) accent
+  --confirm-accent-color: var(--primary-color);
+}
+
+:host(.confirm-alert) {
+  --confirm-accent-color: var(--error-color);
+}
+
+:host(.confirm-info) {
+  --confirm-accent-color: var(--info-color, #2F96B4);
+}
+
+.confirm-type-icon {
+  color: var(--confirm-accent-color);
+}
+
 .book-reader {
   color: var(--drawer-text-color);
   background-color: var(--drawer-bg-color);

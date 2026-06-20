@@ -47,6 +47,7 @@
   --error-color: #BD362F;
   --error-accent-color: #ea0d02;
   --warning-color: #dd9f50;
+  --info-color: #2F96B4;
   --body-text-color: #efefef;
   --btn-icon-filter: invert(1) grayscale(100%) brightness(200%);
   --primary-color-scrollbar: rgba(255,255,255,0.3);
@@ -184,7 +185,13 @@
   --btn-warning-text-text-color: #ffc107;
   --btn-warning-text-hover-color: var(--warning-color);
 
-  /* Danger (outline + text; solid danger uses Bootstrap's defaults) */
+  /* Danger (solid + outline + text) */
+  --btn-danger-text-color: white;
+  --btn-danger-bg-color: var(--error-color);
+  --btn-danger-border-color: var(--error-color);
+  --btn-danger-hover-text-color: white;
+  --btn-danger-hover-bg-color: #9a2a24;
+  --btn-danger-hover-border-color: #9a2a24;
   --btn-outline-danger-text-color: var(--error-color);
   --btn-outline-danger-hover-text-color: white;
   --btn-danger-text-text-color: var(--error-color);
