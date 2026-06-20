@@ -252,7 +252,7 @@ public class AccountController(UserManager<AppUser> userManager,
         var oidcConfig = (await unitOfWork.SettingsRepository.GetSettingsDtoAsync()).OidcConfig;
         // Setting only takes effect if OIDC is functional, and if we're not logging in via ApiKey
         var disablePasswordAuthentication = oidcConfig is {Enabled: true, DisablePasswordAuthentication: true} && string.IsNullOrEmpty(loginDto.ApiKey);
-        if (disablePasswordAuthentication && !roles.Contains(PolicyConstants.AdminRole)) return Unauthorized(await localizationService.TranslateAsync(user.Id, "password-authentication-disabled"));
+        if (disablePasswordAuthentication) return Unauthorized(await localizationService.TranslateAsync(user.Id, "password-authentication-disabled"));
 
         if (string.IsNullOrEmpty(loginDto.ApiKey))
         {
