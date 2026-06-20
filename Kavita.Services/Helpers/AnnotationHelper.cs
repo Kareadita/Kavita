@@ -185,12 +185,16 @@ public static partial class AnnotationHelper
     {
         var normalizedText = NormalizeWhitespace(originalText);
 
-        if (normalizedPosition == 0) return 0;
         if (normalizedPosition >= normalizedText.Length) return originalText.Length;
 
         // Walk through both strings character by character to find the mapping
         var originalPos = 0;
         var normalizedPos = 0;
+
+        while (originalPos < originalText.Length && char.IsWhiteSpace(originalText[originalPos]))
+        {
+            originalPos++;
+        }
 
         while (originalPos < originalText.Length && normalizedPos < normalizedPosition)
         {
