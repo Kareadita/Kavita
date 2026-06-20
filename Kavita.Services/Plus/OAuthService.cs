@@ -99,7 +99,7 @@ public class OAuthService(
         }
 
         user.ScrobbleProviders[provider].AuthenticationToken = token;
-        user.ScrobbleProviders[provider].RefreshToken = refreshToken;
+        user.ScrobbleProviders[provider].RefreshToken = refreshToken ?? string.Empty;
         unitOfWork.UserRepository.Update(user);
 
         await unitOfWork.CommitAsync();
@@ -129,6 +129,8 @@ public class OAuthService(
             foreach (var provider in user.ScrobbleProviders.Keys)
             {
                 var settings = user.ScrobbleProviders[provider];
+
+                if (!provider.SupportsOAuthTokenRefresh()) continue;
 
                 var upstream = provider.ToOAuthUpstream();
                 if (upstream == null)

@@ -119,7 +119,7 @@ export class KavitaPlusEventDescriptionPipe implements PipeTransform {
         return this.translocoService.translate(`${PREFIX}.system-provider-info-sync-success`,
           {
             provider: this.providerNamePipe.transform(entry.systemDetails!.provider),
-            username: entry.systemDetails!.userInfo.username
+            username: entry.systemDetails!.userInfo!.username
           });
       }
 

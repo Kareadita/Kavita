@@ -158,6 +158,7 @@ export class ManageScrobbleProvidersComponent implements OnInit {
     this.loadData().subscribe();
 
     this.messageHub.messages$.pipe(
+      takeUntilDestroyed(this.destroyRef$),
       filter(msg => msg.event === EVENTS.ScrobbleProviderUpdated),
       map(msg => (msg.payload as ScrobbleProviderUpdatedEvent).provider),
       switchMap(() => this.loadData()),

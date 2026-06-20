@@ -1,3 +1,4 @@
+#nullable enable
 using System;
 using Kavita.Models.Entities.Enums;
 
@@ -12,6 +13,6 @@ public sealed record AuditLogSystemTokenRefreshParamsDto
 public sealed record AuditLogSystemProviderInfoSyncParamsDto
 {
     public ScrobbleProvider Provider { get; init; }
-    public KavitaPlusUserInfo UserInfo { get; init; }
+    public KavitaPlusUserInfo? UserInfo { get; init; }
 }
 
