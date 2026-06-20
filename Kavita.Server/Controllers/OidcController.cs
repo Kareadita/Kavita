@@ -36,10 +36,14 @@ public class OidcController(
     [HttpGet("logout")]
     public async Task<IActionResult> Logout()
     {
+        var baseUrl = Configuration.BaseUrl;
+        // Remove trailing / if the baseUrl isn't the default. As it isn't included in the path by ASP.Core
+        var cookiePath = baseUrl == "/" ? baseUrl : baseUrl.TrimEnd('/');
+
 
         if (!Request.Cookies.ContainsKey(OidcService.CookieName))
         {
-            return Redirect(Configuration.BaseUrl);
+            return Redirect(baseUrl);
         }
 
         var oidcScheme = await authenticationSchemeProvider.GetSchemeAsync(IdentityServiceExtensions.OpenIdConnect);
@@ -47,9 +51,9 @@ public class OidcController(
         {
             HttpContext.Response.Cookies.Delete(OidcService.CookieName, new CookieOptions
             {
-                Path = Configuration.BaseUrl,
+                Path = cookiePath,
             });
-            return Redirect(Configuration.BaseUrl);
+            return Redirect(baseUrl);
         }
 
         var res = await Request.HttpContext.AuthenticateAsync(CookieAuthenticationDefaults.AuthenticationScheme);
@@ -57,9 +61,9 @@ public class OidcController(
         {
             HttpContext.Response.Cookies.Delete(OidcService.CookieName, new CookieOptions
             {
-                Path = Configuration.BaseUrl,
+                Path = cookiePath,
             });
-            return Redirect(Configuration.BaseUrl);
+            return Redirect(baseUrl);
         }
 
         // Authelia is dysfunctional and doesn't support logging out like this
@@ -68,13 +72,13 @@ public class OidcController(
         {
             HttpContext.Response.Cookies.Delete(OidcService.CookieName, new CookieOptions
             {
-                Path = Configuration.BaseUrl,
+                Path = cookiePath,
             });
-            return Redirect(Configuration.BaseUrl);
+            return Redirect(baseUrl);
         }
 
         return SignOut(
-            new AuthenticationProperties { RedirectUri = Configuration.BaseUrl+"login" },
+            new AuthenticationProperties { RedirectUri = baseUrl+"login" },
             CookieAuthenticationDefaults.AuthenticationScheme,
             IdentityServiceExtensions.OpenIdConnect);
     }
