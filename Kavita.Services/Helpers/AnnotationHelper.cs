@@ -42,7 +42,6 @@ public static partial class AnnotationHelper
         {
             try
             {
-                var scopedXPath = DescopeXpath(xpath);
                 var elem = FindElementByXPath(doc, xpath);
                 if (elem == null) continue;
 
@@ -67,6 +66,7 @@ public static partial class AnnotationHelper
                 foreach (var item in sortedAnnotations)
                 {
                     var realStartPos = MapNormalizedPositionToOriginal(originalText, item.StartPos);
+                    var realEndPos = MapNormalizedPositionToOriginal(originalText, item.StartPos + item.Annotation.SelectedText.Length);
 
                     // Add text before highlight
                     if (realStartPos > currentPos)
@@ -75,12 +75,14 @@ public static partial class AnnotationHelper
                         elem.AppendChild(HtmlNode.CreateNode(beforeText));
                     }
 
+                    var selectedText = originalText.Substring(realStartPos, realEndPos - realStartPos);
+
                     // Add highlight
                     var highlightNode = HtmlNode.CreateNode(
-                        $"<app-epub-highlight id=\"epub-highlight-{item.Annotation.Id}\">{item.Annotation.SelectedText}</app-epub-highlight>");
+                        $"<app-epub-highlight id=\"epub-highlight-{item.Annotation.Id}\">{selectedText}</app-epub-highlight>");
                     elem.AppendChild(highlightNode);
 
-                    currentPos = realStartPos + item.Annotation.SelectedText.Length;
+                    currentPos = realEndPos;
                 }
 
                 // Add remaining text
