@@ -97,10 +97,10 @@ public class OAuthController(
 
         if (upstream == OAuthUpstream.Discord)
         {
-            return Redirect("/settings?loading=true#admin-kavitaplus");
+            return Redirect($"{Configuration.BaseUrl}settings?loading=true#admin-kavitaplus");
         }
 
-        return Redirect("/settings?loading=true#scrobble-settings");
+        return Redirect($"{Configuration.BaseUrl}settings?loading=true#scrobble-settings");
     }
 
     private static string GetInstanceUrl(HttpRequest request, ServerSettingDto serverSettings)
