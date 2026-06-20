@@ -760,46 +760,56 @@ public class SeriesRepository(DataContext context, IMapper mapper) : ISeriesRepo
     private async Task<IQueryable<Series>> ApplyCollectionFilter(SeriesFilterV2Dto seriesFilter, IQueryable<Series> query,
         int userId, AgeRestriction userRating, CancellationToken ct = default)
     {
-        var collectionStmt = seriesFilter.Statements.FirstOrDefault(stmt => stmt.Field == SeriesFilterField.CollectionTags);
-        if (collectionStmt == null) return query;
+        var collectionStmts = seriesFilter.Statements
+            .Where(stmt => stmt.Field == SeriesFilterField.CollectionTags)
+            .ToList();
+        if (collectionStmts.Count == 0) return query;
 
-        var value = (IList<int>) SeriesFilterFieldValueConverter.ConvertValue(collectionStmt.Field, collectionStmt.Value);
-
-        if (value.Count == 0)
+        foreach (var collectionStmt in collectionStmts)
         {
-            return query;
+            var value = (IList<int>) SeriesFilterFieldValueConverter.ConvertValue(collectionStmt.Field, collectionStmt.Value);
+
+            if (value.Count == 0)
+            {
+                continue;
+            }
+
+            if (collectionStmt.Comparison != FilterComparison.MustContains)
+            {
+                var collectionSeries = await context.AppUserCollection
+                    .Where(uc => uc.Promoted || uc.AppUserId == userId)
+                    .Where(uc => value.Contains(uc.Id))
+                    .SelectMany(uc => uc.Items)
+                    .RestrictAgainstAgeRestriction(userRating)
+                    .Select(s => s.Id)
+                    .Distinct()
+                    .ToListAsync(ct);
+
+                query = query.HasCollectionTags(true, collectionStmt.Comparison, value, collectionSeries);
+                continue;
+            }
+
+            var collectionSeriesTasks = value.Select(async collectionId =>
+            {
+                return await context.AppUserCollection
+                    .Where(uc => uc.Promoted || uc.AppUserId == userId)
+                    .Where(uc => uc.Id == collectionId)
+                    .SelectMany(uc => uc.Items)
+                    .RestrictAgainstAgeRestriction(userRating)
+                    .Select(s => s.Id)
+                    .ToListAsync(ct);
+            });
+
+            var collectionSeriesLists = await Task.WhenAll(collectionSeriesTasks);
+
+            var commonSeries = collectionSeriesLists
+                .Aggregate((common, next) => common.Intersect(next)
+                    .ToList());
+
+            query = query.Where(s => commonSeries.Contains(s.Id));
         }
 
-        var collectionSeries = await context.AppUserCollection
-            .Where(uc => uc.Promoted || uc.AppUserId == userId)
-            .Where(uc => value.Contains(uc.Id))
-            .SelectMany(uc => uc.Items)
-            .RestrictAgainstAgeRestriction(userRating)
-            .Select(s => s.Id)
-            .Distinct()
-            .ToListAsync(ct);
-
-        if (collectionStmt.Comparison != FilterComparison.MustContains)
-            return query.HasCollectionTags(true, collectionStmt.Comparison, value, collectionSeries);
-
-        var collectionSeriesTasks = value.Select(async collectionId =>
-        {
-            return await context.AppUserCollection
-                .Where(uc => uc.Promoted || uc.AppUserId == userId)
-                .Where(uc => uc.Id == collectionId)
-                .SelectMany(uc => uc.Items)
-                .RestrictAgainstAgeRestriction(userRating)
-                .Select(s => s.Id)
-                .ToListAsync(ct);
-        });
-
-        var collectionSeriesLists = await Task.WhenAll(collectionSeriesTasks);
-
-        // Find the common series among all collections
-        var commonSeries = collectionSeriesLists.Aggregate((common, next) => common.Intersect(next).ToList());
-
-        // Filter the original query based on the common series
-        return query.Where(s => commonSeries.Contains(s.Id));
+        return query;
     }
 
     private IQueryable<Series> ApplyWantToReadFilter(SeriesFilterV2Dto seriesFilter, IQueryable<Series> query, int userId)
