@@ -1569,6 +1569,7 @@
         "filter-metadata": "Metadata",
         "filter-scrobble": "Scrobble",
         "filter-sync": "Sync",
+        "filter-system": "System",
         "filter-status-label": "Status filter",
         "today": "Today",
         "yesterday": "Yesterday",
