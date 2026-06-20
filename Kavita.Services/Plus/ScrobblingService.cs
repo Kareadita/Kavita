@@ -305,8 +305,11 @@ public class ScrobblingService : IScrobblingService
 
                 var tokenExpiry = settings.ValidUntilUtc;
 
-                // Send early reminder 5 days before token expiry
-                if (await ShouldSendEarlyReminder(user.Id, tokenExpiry))
+                var canBeRefreshedByKavita = provider.SupportsOAuthTokenRefresh()
+                    && !string.IsNullOrEmpty(settings.RefreshToken);
+
+                // Send early reminder 5 days before token expiry. Unless Kavita can refresh the token for the user
+                if (!canBeRefreshedByKavita && await ShouldSendEarlyReminder(user.Id, tokenExpiry))
                 {
                     await _emailService.SendTokenExpiringSoonEmail(user.Id, provider);
                 }

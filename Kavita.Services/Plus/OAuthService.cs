@@ -130,6 +130,8 @@ public class OAuthService(
             {
                 var settings = user.ScrobbleProviders[provider];
 
+                if (!provider.SupportsOAuthTokenRefresh()) continue;
+
                 var upstream = provider.ToOAuthUpstream();
                 if (upstream == null)
                 {
