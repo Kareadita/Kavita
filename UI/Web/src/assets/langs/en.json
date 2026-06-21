@@ -1783,6 +1783,11 @@
         "cbr": "Comic Book Roundup"
     },
 
+    "recommendation-source-pipe": {
+        "similar": "Similar",
+        "personalized": "For You"
+    },
+
     "scrobble-provider-tag-badge": {
         "view-on": "View on {{ provider }}"
     },

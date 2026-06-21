@@ -638,20 +638,8 @@ public class SeriesController(
         // This is assuming v2 logic. Not sure if we will change how we match on V3 yet
         var primaryProvider = plusFormat.GetMetadataProvider(series.Library);
 
-        // We need provider derived from the primary id
-        MetadataProvider? provider = null;
-
-        // Set AniList as MangaBaka since the next update will fix this
-        if (series.MangaBakaId > 0 || series.AniListId > 0)
-        {
-            provider = Models.Entities.Enums.MetadataProvider.Mangabaka;
-        } else if (series.HardcoverId > 0)
-        {
-            provider = Models.Entities.Enums.MetadataProvider.Hardcover;
-        } else if (series.CbrId > 0)
-        {
-            provider = Models.Entities.Enums.MetadataProvider.ComicBookRoundup;
-        }
+        // We need provider derived from the primary id (null until the series is matched)
+        var provider = series.ResolveMatchedProvider();
 
         return Ok(new MatchSeriesInfoDto
         {

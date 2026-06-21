@@ -421,14 +421,8 @@ public class ExternalMetadataService : IExternalMetadataService
     /// </summary>
     private static MetadataProvider DeriveProvider(PlusSeriesRequestDto data, Series series)
     {
-        // TODO: Refactor so match-info can use this (IHasMetadataIds might work, needs some tweakage with K+ contract)
-        // AniList ids resolve to MangaBaka going forward
-        if (data.MangabakaId is > 0 || data.AniListId is > 0) return MetadataProvider.Mangabaka;
-        if (data.HardcoverId is > 0) return MetadataProvider.Hardcover;
-        if (data.CbrId is > 0) return MetadataProvider.ComicBookRoundup;
-
-        // No matched id yet; fall back to the provider implied by the media format
-        return data.MediaFormat.GetMetadataProvider(series.Library);
+        // Use the matched id's provider when present, else fall back to the provider implied by the media format
+        return data.ResolveMatchedProvider() ?? data.MediaFormat.GetMetadataProvider(series.Library);
     }
 
     /// <summary>
@@ -449,8 +443,9 @@ public class ExternalMetadataService : IExternalMetadataService
             return _defaultReturn;
         }
 
-        // Convert the v2 request data into the v3 series-detail contract
-        var requestData = SeriesDetailRequestV3Dto.From(data, DeriveProvider(data, series));
+        // The provider we route the request to is also the provider that owns the returned recommendation lists
+        var provider = DeriveProvider(data, series);
+        var requestData = SeriesDetailRequestV3Dto.From(data, provider);
 
         try
         {
@@ -537,9 +532,16 @@ public class ExternalMetadataService : IExternalMetadataService
             }).ToList();
 
 
-            // Recommendations
+            // Recommendations. Personalized runs first so a series surfacing in both lists keeps the Personalized
+            // badge; the shared identity set then skips it when the Similar list is processed.
             externalSeriesMetadata.ExternalRecommendations ??= [];
-            var recs = await ProcessRecommendations(libraryType, result.Recommendations, externalSeriesMetadata);
+            var seenRecommendations = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+            var recs = await ProcessRecommendations(libraryType, result.ReadersAlsoLike, externalSeriesMetadata,
+                RecommendationSource.Personalized, provider, seenRecommendations);
+            var similarRecs = await ProcessRecommendations(libraryType, result.SimilarSeries, externalSeriesMetadata,
+                RecommendationSource.Similar, provider, seenRecommendations);
+            recs.ExternalSeries = recs.ExternalSeries.Concat(similarRecs.ExternalSeries).ToList();
+            recs.OwnedSeries = recs.OwnedSeries.Concat(similarRecs.OwnedSeries).ToList();
 
             var extRatings = externalSeriesMetadata.ExternalRatings
                 .Where(r => r.AverageScore > 0)
@@ -2053,7 +2055,7 @@ public class ExternalMetadataService : IExternalMetadataService
     }
 
     private async Task<RecommendationDto> ProcessRecommendations(LibraryType libraryType, IEnumerable<MediaRecommendationDto> recs,
-        ExternalSeriesMetadata externalSeriesMetadata)
+        ExternalSeriesMetadata externalSeriesMetadata, RecommendationSource source, MetadataProvider provider, ISet<string> seen)
     {
         var recDto = new RecommendationDto()
         {
@@ -2064,6 +2066,9 @@ public class ExternalMetadataService : IExternalMetadataService
         // NOTE: This can result in a series being recommended that shares the same name but different format
         foreach (var rec in recs)
         {
+            // Skip recommendations already added from a higher-priority list (e.g. Personalized before Similar)
+            if (!seen.Add(GetRecommendationIdentity(rec))) continue;
+
             // Find the series based on name and type and that the user has access too
             var seriesForRec = await _unitOfWork.SeriesRepository.GetSeriesDtoByNamesAndMetadataIdsAsync(rec.RecommendationNames,
                 libraryType, ScrobblingHelper.CreateUrl(ScrobblingService.AniListWeblinkWebsite, rec.AniListId),
@@ -2081,7 +2086,9 @@ public class ExternalMetadataService : IExternalMetadataService
                     Url = rec.SiteUrl,
                     CoverUrl = rec.CoverUrl,
                     Summary = rec.Summary,
-                    Provider = rec.Provider
+                    MangaBakaId = rec.MangabakaId,
+                    MetadataProvider = provider,
+                    RecommendationSource = source
                 });
                 continue;
             }
@@ -2095,7 +2102,9 @@ public class ExternalMetadataService : IExternalMetadataService
                 CoverUrl = rec.CoverUrl,
                 Summary = rec.Summary,
                 AniListId = rec.AniListId,
-                MalId = rec.MalId
+                MalId = rec.MalId,
+                MetadataProvider = provider,
+                RecommendationSource = source
             });
             externalSeriesMetadata.ExternalRecommendations.Add(new ExternalRecommendation()
             {
@@ -2106,7 +2115,9 @@ public class ExternalMetadataService : IExternalMetadataService
                 Url = rec.SiteUrl,
                 CoverUrl = rec.CoverUrl,
                 Summary = rec.Summary,
-                Provider = rec.Provider
+                MangaBakaId = rec.MangabakaId,
+                MetadataProvider = provider,
+                RecommendationSource = source
             });
         }
 
@@ -2114,6 +2125,20 @@ public class ExternalMetadataService : IExternalMetadataService
         recDto.ExternalSeries = recDto.ExternalSeries.DistinctBy(s => s.Name.ToNormalized()).OrderBy(r => r.Name).ToList();
 
         return recDto;
+    }
+
+    /// <summary>
+    /// Stable key for a recommendation so the same series is only added once across the Similar/Personalized lists,
+    /// preferring whichever id is most navigable before falling back to the normalized name.
+    /// </summary>
+    private static string GetRecommendationIdentity(MediaRecommendationDto rec)
+    {
+        if (rec.MangabakaId is > 0) return $"mb:{rec.MangabakaId}";
+        if (rec.AniListId is > 0) return $"al:{rec.AniListId}";
+        if (rec.MalId is > 0) return $"mal:{rec.MalId}";
+
+        var name = string.IsNullOrEmpty(rec.Name) ? rec.RecommendationNames.FirstOrDefault() : rec.Name;
+        return $"name:{(name ?? string.Empty).ToNormalized()}";
     }
 
 

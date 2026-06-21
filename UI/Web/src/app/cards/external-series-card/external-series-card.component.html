@@ -14,13 +14,17 @@
           </div>
         </ng-container>
 
+        @if (externalSeries.recommendationSource) {
+          <span class="source-badge badge rounded-pill">{{externalSeries.recommendationSource | recommendationSource}}</span>
+        }
+
         <div class="card-overlay"></div>
 
       </div>
 
       <div class="card-title-container">
         @if (externalSeries.name.length > 0) {
-          <img class="me-1" [ngSrc]="externalSeries.provider | providerImage" width="20" height="20" alt="">
+          <img class="me-1" [ngSrc]="scrobbleProvider() | providerImage" width="20" height="20" alt="">
           <a #link class="card-title" [href]="externalSeries.url" target="_blank" rel="noreferrer nofollow">
             <span class="card-title" placement="top" id="{{externalSeries.name}}" [ngbTooltip]="externalSeries.name" (click)="handleClick()" tabindex="0">
               {{externalSeries.name}}
