@@ -76,6 +76,74 @@ public enum RelationKind
     /// The target series is an annual of the Series
     /// </summary>
     [Description("Annual")]
-    Annual = 14
+    Annual = 14,
+    #region MangaBaka Only
+    /// <summary>
+    /// MangaBaka <c>main</c>: the parent/main story this entry branches from.
+    /// </summary>
+    [Description("Main Story")]
+    Main = 15,
+    /// <summary>
+    /// MangaBaka <c>cameo</c>: a brief appearance of characters from another series.
+    /// </summary>
+    [Description("Cameo")]
+    Cameo = 16,
+    /// <summary>
+    /// MangaBaka <c>character_focus</c>: focuses on characters from the related series.
+    /// </summary>
+    [Description("Character Focus")]
+    CharacterFocus = 17,
+    /// <summary>
+    /// MangaBaka <c>compilation</c>: a compilation/collection of the related series.
+    /// </summary>
+    [Description("Compilation")]
+    Compilation = 18,
+    /// <summary>
+    /// MangaBaka <c>crossover</c>: a crossover between series.
+    /// </summary>
+    [Description("Crossover")]
+    Crossover = 19,
+    /// <summary>
+    /// MangaBaka <c>expansion</c>: an expanded version of the related series.
+    /// </summary>
+    [Description("Expansion")]
+    Expansion = 20,
+    /// <summary>
+    /// MangaBaka <c>parody</c>: a parody of the related series.
+    /// </summary>
+    [Description("Parody")]
+    Parody = 21,
+    /// <summary>
+    /// MangaBaka <c>reboot</c>: a reboot of the related series.
+    /// </summary>
+    [Description("Reboot")]
+    Reboot = 22,
+    /// <summary>
+    /// MangaBaka <c>remake</c>: a remake of the related series.
+    /// </summary>
+    [Description("Remake")]
+    Remake = 23,
+    /// <summary>
+    /// MangaBaka <c>series</c>: belongs to the same overall series.
+    /// </summary>
+    [Description("Series")]
+    Series = 24,
+    /// <summary>
+    /// MangaBaka <c>source</c>: the source work this entry adapts.
+    /// </summary>
+    [Description("Source")]
+    Source = 25,
+    /// <summary>
+    /// MangaBaka <c>summary</c>: a summary/abridged version of the related series.
+    /// </summary>
+    [Description("Summary")]
+    Summary = 26,
+    /// <summary>
+    /// MangaBaka <c>uncollected</c>: uncollected chapters related to the series.
+    /// </summary>
+    [Description("Uncollected")]
+    Uncollected = 27
+
+    #endregion
 
 }

@@ -416,6 +416,22 @@ public class ExternalMetadataService : IExternalMetadataService
     }
 
     /// <summary>
+    /// Derives the v3 <see cref="MetadataProvider"/> to route a series-detail request to, based on whichever
+    /// primary id is already present, falling back to the format default.
+    /// </summary>
+    private static MetadataProvider DeriveProvider(PlusSeriesRequestDto data, Series series)
+    {
+        // TODO: Refactor so match-info can use this (IHasMetadataIds might work, needs some tweakage with K+ contract)
+        // AniList ids resolve to MangaBaka going forward
+        if (data.MangabakaId is > 0 || data.AniListId is > 0) return MetadataProvider.Mangabaka;
+        if (data.HardcoverId is > 0) return MetadataProvider.Hardcover;
+        if (data.CbrId is > 0) return MetadataProvider.ComicBookRoundup;
+
+        // No matched id yet; fall back to the provider implied by the media format
+        return data.MediaFormat.GetMetadataProvider(series.Library);
+    }
+
+    /// <summary>
     /// Requests the full SeriesDetail (rec, review, metadata) data for a Series. Will save to ExternalMetadata tables.
     /// </summary>
     /// <param name="seriesId"></param>
@@ -432,6 +448,9 @@ public class ExternalMetadataService : IExternalMetadataService
         {
             return _defaultReturn;
         }
+
+        // Convert the v2 request data into the v3 series-detail contract
+        var requestData = SeriesDetailRequestV3Dto.From(data, DeriveProvider(data, series));
 
         try
         {
@@ -457,36 +476,32 @@ public class ExternalMetadataService : IExternalMetadataService
                 },
                 ct: ct);
 
-            try
+            // v3 wraps failures in the result envelope (200 body or an extracted error) rather than throwing,
+            // so we inspect the error message to preserve the v2 rate-limit retry and unknown-series blacklist behavior.
+            var apiResult = await _kavitaPlusApiService.GetSeriesDetailV3Async(requestData, ct);
+            if (!apiResult.IsSuccess)
             {
-                // This returns an AniListSeries and Match returns ExternalSeriesDto
-                result = await _kavitaPlusApiService.GetSeriesDetailAsync(data, ct);
+                var errorMessage = apiResult.ErrorMessage ?? string.Empty;
 
-            }
-            catch (FlurlHttpException ex)
-            {
-                var errorMessage = await ex.GetResponseStringAsync() ?? string.Empty;
-                // Trim quotes if the response is a JSON string
-                errorMessage = errorMessage.Trim('"');
-
-                if (ex.StatusCode == 400)
+                // Rate limiting surfaces as a bodyless 429, so the message is Flurl's "... (Too Many Requests) ..."
+                if (errorMessage.Contains("Too Many Requests", StringComparison.OrdinalIgnoreCase))
                 {
-                    if (errorMessage.Contains("Too many Requests"))
-                    {
-                        _logger.LogDebug("Hit rate limit, will retry in 3 seconds");
-                        await Task.Delay(3000, ct);
+                    _logger.LogDebug("Hit rate limit, will retry in 3 seconds");
+                    await Task.Delay(3000, ct);
 
-                        result = await _kavitaPlusApiService.GetSeriesDetailAsync(data, ct);
-                    }
-                    else if (errorMessage.Contains("Unknown Series"))
-                    {
-                        series.IsBlacklisted = true;
-                        await _unitOfWork.CommitAsync(ct);
-                        await _auditService.LogMatchAsync(KavitaPlusEventType.SeriesBlacklisted, seriesId,
-                            new AuditLogMatchFailureParamsDto { SeriesName = series.Name, Reason = "unknown-series" }, AuditStatus.Failure, ct: ct);
-                    }
+                    apiResult = await _kavitaPlusApiService.GetSeriesDetailV3Async(requestData, ct);
+                }
+                else if (errorMessage.Contains("Unknown Series", StringComparison.OrdinalIgnoreCase)
+                         || errorMessage.Contains("Series not found", StringComparison.OrdinalIgnoreCase))
+                {
+                    series.IsBlacklisted = true;
+                    await _unitOfWork.CommitAsync(ct);
+                    await _auditService.LogMatchAsync(KavitaPlusEventType.SeriesBlacklisted, seriesId,
+                        new AuditLogMatchFailureParamsDto { SeriesName = series.Name, Reason = "unknown-series" }, AuditStatus.Failure, ct: ct);
                 }
             }
+
+            result = apiResult.IsSuccess ? apiResult.Data : null;
 
             if (result == null)
             {

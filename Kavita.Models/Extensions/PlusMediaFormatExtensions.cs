@@ -1,10 +1,12 @@
 using System;
 using System.Collections.Generic;
 using Kavita.Models.DTOs.Scrobbling;
+using Kavita.Models.Entities;
 using Kavita.Models.Entities.Enums;
 using Kavita.Models.Entities.Enums.KavitaPlus;
 
 namespace Kavita.Models.Extensions;
+#nullable enable
 
 public static class PlusMediaFormatExtensions
 {
@@ -50,6 +52,25 @@ public static class PlusMediaFormatExtensions
             PlusMediaFormat.Book => [MangaFormat.Epub, MangaFormat.Pdf],
             _ => [MangaFormat.Archive]
         };
+    }
+
+
+    public static MetadataProvider GetMetadataProvider(this PlusMediaFormat plusFormat, Library? library = null)
+    {
+        // TODO: If Library != null then we just take the hardcoded value
+        var primaryProvider = Models.Entities.Enums.MetadataProvider.Mangabaka;
+        if (plusFormat is PlusMediaFormat.Comic)
+        {
+            primaryProvider = Models.Entities.Enums.MetadataProvider.ComicBookRoundup;
+        } else if (plusFormat is PlusMediaFormat.LightNovel)
+        {
+            primaryProvider = Models.Entities.Enums.MetadataProvider.Mangabaka;
+        } else if (plusFormat is PlusMediaFormat.Book)
+        {
+            primaryProvider = Models.Entities.Enums.MetadataProvider.Hardcover;
+        }
+
+        return primaryProvider;
     }
 
 

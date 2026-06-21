@@ -68,7 +68,7 @@ public class KavitaPlusApiService(ILogger<KavitaPlusApiService> logger, IUnitOfW
             .ScrobbleProviders[ScrobbleProvider.AniList]
             .AuthenticationToken;
 
-        return await (Configuration.KavitaPlusApiUrl + "/api/metadata/v2/series-detail")
+        return await (Configuration.KavitaPlusApiUrl + "/api/metadata/v3/series-detail")
             .WithKavitaPlusHeaders(license, token)
             .PostJsonAsync(request, cancellationToken: ct)
             .ReceiveJson<SeriesDetailPlusApiDto>();
@@ -98,6 +98,14 @@ public class KavitaPlusApiService(ILogger<KavitaPlusApiService> logger, IUnitOfW
                 .WithKavitaPlusHeaders(license)
                 .PostJsonAsync(request, cancellationToken: ct)
                 .ReceiveJson<KPlusResult<SeriesDetailPlusApiDto?>>();
+        }
+        catch (FlurlHttpException ex)
+        {
+            // Surface the response body (e.g. "Unknown Series", "Too many Requests") rather than the generic
+            // "Call failed with status code..." so callers can react to specific error markers.
+            var body = (await ex.GetResponseStringAsync() ?? string.Empty).Trim('"');
+            logger.LogError(ex, "There was an issue getting series detail from Kavita+ for Series ({SeriesName})", request.SeriesName);
+            return KPlusResult<SeriesDetailPlusApiDto?>.Failure(string.IsNullOrEmpty(body) ? ex.Message : body);
         }
         catch (Exception ex)
         {

@@ -636,17 +636,7 @@ public class SeriesController(
         var externalMetadata = series.ExternalSeriesMetadata;
 
         // This is assuming v2 logic. Not sure if we will change how we match on V3 yet
-        var primaryProvider = Models.Entities.Enums.MetadataProvider.Mangabaka;
-        if (plusFormat is PlusMediaFormat.Comic)
-        {
-            primaryProvider = Models.Entities.Enums.MetadataProvider.ComicBookRoundup;
-        } else if (plusFormat is PlusMediaFormat.LightNovel)
-        {
-            primaryProvider = Models.Entities.Enums.MetadataProvider.Mangabaka;
-        } else if (plusFormat is PlusMediaFormat.Book)
-        {
-            primaryProvider = Models.Entities.Enums.MetadataProvider.Hardcover;
-        }
+        var primaryProvider = plusFormat.GetMetadataProvider(series.Library);
 
         // We need provider derived from the primary id
         MetadataProvider? provider = null;
