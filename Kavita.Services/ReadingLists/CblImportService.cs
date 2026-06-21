@@ -253,11 +253,13 @@ public class CblImportService(IUnitOfWork unitOfWork, ICblGithubService cblGithu
             try
             {
                 await urlValidationService.ValidateUrlAsync(coverUrl);
+                var (width, height) = settings.CoverImageSize.GetDimensions();
                 var fileName = await imageService.CreateThumbnailFromUrl(
                     coverUrl,
                     ImageService.GetReadingListFormat(readingList.Id),
                     settings.EncodeMediaAs,
-                    settings.CoverImageSize.GetDimensions().Width);
+                    width,
+                    height);
 
                 if (!string.IsNullOrEmpty(fileName))
                 {
