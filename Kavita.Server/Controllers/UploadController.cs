@@ -364,7 +364,7 @@ public class UploadController : BaseApiController
             var tempPath = ResolveTempCoverPath(uploadCoverFileDto.FileName)
                            ?? throw new KavitaException(await _localizationService.TranslateAsync(UserId, "invalid-filename"));
 
-            return _imageService.CreateThumbnailFromFile(tempPath, filename, encodeFormat, width);
+            return _imageService.CreateThumbnailFromFile(tempPath, filename, encodeFormat, width, height);
         }
 
         // Legacy fallback: base64 payload

@@ -552,12 +552,13 @@ public class ImageService(ILogger<ImageService> logger, IDirectoryService direct
     }
 
     /// <inheritdoc />
-    public string CreateThumbnailFromFile(string sourceFile, string fileName, EncodeFormat encodeFormat, int thumbnailWidth = ThumbnailWidth, string? targetDirectory = null)
+    public string CreateThumbnailFromFile(string sourceFile, string fileName, EncodeFormat encodeFormat,
+        int thumbnailWidth = 320, int thumbnailHeight = 455, string? targetDirectory = null)
     {
         try
         {
             targetDirectory ??= directoryService.CoverImageDirectory;
-            using var thumbnail = Image.Thumbnail(sourceFile, thumbnailWidth);
+            using var thumbnail = Image.Thumbnail(sourceFile, thumbnailWidth, thumbnailHeight);
 
             fileName += encodeFormat.GetExtension();
             thumbnail.WriteToFile(directoryService.FileSystem.Path.Join(targetDirectory, fileName));
