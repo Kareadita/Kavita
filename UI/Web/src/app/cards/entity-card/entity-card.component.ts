@@ -4,6 +4,7 @@ import {
   Component,
   computed,
   DestroyRef,
+  ElementRef,
   HostListener,
   inject,
   input,
@@ -66,6 +67,7 @@ import {UserProgressUpdateEvent} from "../../_models/events/user-progress-update
 export class EntityCardComponent<T> implements OnInit {
   private readonly cdRef = inject(ChangeDetectorRef);
   private readonly destroyRef = inject(DestroyRef);
+  private readonly elementRef = inject(ElementRef);
   private readonly scrollService = inject(ScrollService);
   private readonly themeService = inject(ThemeService);
   private readonly messageHub = inject(MessageHubService);
@@ -255,6 +257,18 @@ export class EntityCardComponent<T> implements OnInit {
 
   ngOnInit() {
     this.setupProgressTracking();
+    const el = this.elementRef.nativeElement;
+    const onTouchMove = () => {
+      if (!this.config().allowSelection) return;
+      this.selectionInProgress = false;
+      this.cdRef.markForCheck();
+    };
+    el.addEventListener('touchmove', onTouchMove, { passive: true });
+    this.destroyRef.onDestroy(() => el.removeEventListener('touchmove', onTouchMove));
+
+    const onTouchStart = (event: TouchEvent) => this.onTouchStart(event);
+    el.addEventListener('touchstart', onTouchStart, { passive: true });
+    this.destroyRef.onDestroy(() => el.removeEventListener('touchstart', onTouchStart));
   }
 
   private setupProgressTracking() {
@@ -307,14 +321,6 @@ export class EntityCardComponent<T> implements OnInit {
     this.progressUpdated.emit(result);
   }
 
-  @HostListener('touchmove')
-  onTouchMove() {
-    if (!this.config().allowSelection) return;
-    this.selectionInProgress = false;
-    this.cdRef.markForCheck();
-  }
-
-  @HostListener('touchstart', ['$event'])
   onTouchStart(event: TouchEvent) {
     if (!this.config().allowSelection) return;
     this.prevTouchTime = event.timeStamp;
