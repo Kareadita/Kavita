@@ -187,6 +187,9 @@ public class ExternalMetadataService : IExternalMetadataService
 
         if (validAutomatedMatches.Count == 0)
         {
+            series.IsBlacklisted = true;
+            await _unitOfWork.CommitAsync(ct);
+
             await _auditService.LogAsync(KavitaPlusAuditCategory.Match, KavitaPlusEventType.SeriesMatchFailed,
                 AuditStatus.Failure, seriesId: seriesId, error: "no-matches", ct: ct);
             _logger.LogInformation("No good enough matches found for Series {SeriesId}", seriesId);
@@ -195,6 +198,9 @@ public class ExternalMetadataService : IExternalMetadataService
 
         if (validAutomatedMatches.Count > 1)
         {
+            series.IsBlacklisted = true;
+            await _unitOfWork.CommitAsync(ct);
+
             await _auditService.LogAsync(KavitaPlusAuditCategory.Match, KavitaPlusEventType.SeriesMatchFailed,
                 AuditStatus.Failure, seriesId: seriesId, error: "too-many-matches", ct: ct);
             _logger.LogInformation("Multiple good enough matches found for Series {SeriesId}: {Matches}. Will not automatically choose", seriesId, validAutomatedMatches.Count);
