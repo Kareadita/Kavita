@@ -68,6 +68,8 @@ public class LibraryController(
             return BadRequest(await localizationService.TranslateAsync(UserId, "library-name-exists"));
         }
 
+        ValidateMetadataProvider(dto.Type, dto.MetadataProvider);
+
         var library = new LibraryBuilder(dto.Name, dto.Type)
             .WithFolders(dto.Folders.Select(x => new FolderPath {Path = x}).Distinct().ToList())
             .WithFolderWatching(dto.FolderWatching)
@@ -77,6 +79,7 @@ public class LibraryController(
             .WithAllowScrobbling(dto.AllowScrobbling)
             .WithAllowMetadataMatching(dto.AllowMetadataMatching)
             .WithEnableMetadata(dto.EnableMetadata)
+            .WithMetadataProvider(dto.MetadataProvider)
             .Build();
 
         library.LibraryFileTypes = dto.FileGroupTypes
@@ -413,20 +416,26 @@ public class LibraryController(
         var libraries = await unitOfWork.LibraryRepository.GetLibraryForIdsAsync(dto.TargetLibraryIds, LibraryIncludes.ExcludePatterns | LibraryIncludes.FileTypes | LibraryIncludes.Folders, ct);
         foreach (var targetLibrary in libraries)
         {
-            UpdateLibrarySettings(new UpdateLibraryDto()
+            UpdateLibrarySettings(new UpdateLibraryDto
             {
                 Folders = targetLibrary.Folders.Select(s => s.Path),
                 Name = targetLibrary.Name,
                 Id = targetLibrary.Id,
                 Type = sourceLibrary.Type,
                 AllowScrobbling = sourceLibrary.AllowScrobbling,
+                AllowMetadataMatching = sourceLibrary.AllowMetadataMatching,
+                EnableMetadata = sourceLibrary.EnableMetadata,
+                RemovePrefixForSortName = sourceLibrary.RemovePrefixForSortName,
+                InheritWebLinksFromFirstChapter = sourceLibrary.InheritWebLinksFromFirstChapter,
+                DefaultLanguage = sourceLibrary.DefaultLanguage,
+                MetadataProvider = sourceLibrary.MetadataProvider,
                 ExcludePatterns = sourceLibrary.LibraryExcludePatterns.Select(p => p.Pattern).ToList(),
                 FolderWatching = sourceLibrary.FolderWatching,
                 ManageCollections = sourceLibrary.ManageCollections,
                 FileGroupTypes = sourceLibrary.LibraryFileTypes.Select(t => t.FileTypeGroup).ToList(),
                 IncludeInDashboard = sourceLibrary.IncludeInDashboard,
                 IncludeInSearch = sourceLibrary.IncludeInSearch,
-                ManageReadingLists = sourceLibrary.ManageReadingLists
+                ManageReadingLists = sourceLibrary.ManageReadingLists,
             }, targetLibrary, dto.IncludeType);
         }
 
@@ -693,6 +702,8 @@ public class LibraryController(
             library.Type = dto.Type;
         }
 
+        ValidateMetadataProvider(library.Type, dto.MetadataProvider);
+
         library.FolderWatching = dto.FolderWatching;
         library.IncludeInDashboard = dto.IncludeInDashboard;
         library.IncludeInSearch = dto.IncludeInSearch;
@@ -704,6 +715,7 @@ public class LibraryController(
         library.RemovePrefixForSortName = dto.RemovePrefixForSortName;
         library.InheritWebLinksFromFirstChapter = dto.InheritWebLinksFromFirstChapter;
         library.DefaultLanguage = dto.DefaultLanguage;
+        library.MetadataProvider = dto.MetadataProvider;
 
         library.LibraryFileTypes = dto.FileGroupTypes
             .Select(t => new LibraryFileTypeGroup() {FileTypeGroup = t, LibraryId = library.Id})
@@ -724,6 +736,25 @@ public class LibraryController(
 
 
         unitOfWork.LibraryRepository.Update(library);
+    }
+
+    private static void ValidateMetadataProvider(LibraryType type, MetadataProvider provider)
+    {
+        List<MetadataProvider> validProviders = type switch
+        {
+            LibraryType.Manga => [Models.Entities.Enums.MetadataProvider.Mangabaka],
+            LibraryType.Comic => [Models.Entities.Enums.MetadataProvider.ComicBookRoundup],
+            LibraryType.Book => [Models.Entities.Enums.MetadataProvider.Hardcover],
+            LibraryType.Image => [Models.Entities.Enums.MetadataProvider.Mangabaka, Models.Entities.Enums.MetadataProvider.ComicBookRoundup],
+            LibraryType.LightNovel => [Models.Entities.Enums.MetadataProvider.Mangabaka, Models.Entities.Enums.MetadataProvider.Hardcover],
+            LibraryType.ComicVine => [Models.Entities.Enums.MetadataProvider.ComicBookRoundup],
+            _ => throw new ArgumentOutOfRangeException()
+        };
+
+        if (!validProviders.Contains(provider))
+        {
+            throw new KavitaException("invalid-metadata-provider");
+        }
     }
 
     /// <summary>

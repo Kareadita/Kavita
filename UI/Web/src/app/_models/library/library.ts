@@ -1,4 +1,5 @@
 import {FileTypeGroup} from "./file-type-group.enum";
+import {MetadataProvider} from "../kavitaplus/metadata-provider.enum";
 
 export enum LibraryType {
     Manga = 0,
@@ -42,6 +43,7 @@ export interface Library extends LiteLibrary{
     collapseSeriesRelationships: boolean;
     inheritWebLinksFromFirstChapter: boolean;
     defaultLanguage: string;
+    metadataProvider: MetadataProvider;
     libraryFileTypes: Array<FileTypeGroup>;
     excludePatterns: Array<string>;
 }

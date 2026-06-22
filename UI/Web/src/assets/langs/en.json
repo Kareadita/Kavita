@@ -1950,6 +1950,8 @@
         "include-in-search-tooltip": "Should series and any derived information (genres, people, files) from the library be included in search results.",
         "enable-metadata-label": "Enable Metadata (ComicInfo/Epub/PDF)",
         "enable-metadata-tooltip": "Allow Kavita to read metadata files which override filename parsing.",
+        "metadata-provider-label": "Metadata Provider",
+        "metadata-provider-tooltip": "Select the source Kavita pulls metadata from.",
         "remove-prefix-for-sortname-label": "Remove common prefixes for Sort Name",
         "remove-prefix-for-sortname-tooltip": "Kavita will remove common prefixes like 'The', 'A', 'An' from titles for sort name. Does not override set metadata.",
         "inherit-web-links-label": "Inherit web links from first chapter",
