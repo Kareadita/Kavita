@@ -22,6 +22,7 @@ using Kavita.Models.DTOs.Filtering.v2;
 using Kavita.Models.DTOs.Filtering.v2.Requests;
 using Kavita.Models.DTOs.Filtering.v2.SortFields;
 using Kavita.Models.DTOs.Filtering.v2.SortOptions;
+using Kavita.Models.DTOs.KavitaPlus.ExternalMetadata;
 using Kavita.Models.DTOs.KavitaPlus.Metadata;
 using Kavita.Models.DTOs.KavitaPlus.Scrobble;
 using Kavita.Models.DTOs.Metadata;
@@ -599,7 +600,7 @@ public class SeriesRepository(DataContext context, IMapper mapper) : ISeriesRepo
         return await PagedList<SeriesDto>.CreateAsync(retSeries, userParams.PageNumber, userParams.PageSize, ct);
     }
 
-    public async Task<PlusSeriesRequestDto?> GetPlusSeriesDtoAsync(int seriesId, CancellationToken ct = default)
+    public async Task<SeriesDetailRequestV3Dto?> GetSeriesDetailRequestV3Dto(int seriesId, CancellationToken ct = default)
     {
 
         // I need to check Weblinks when AniListId/MalId is already set in ExternalSeries
@@ -607,11 +608,12 @@ public class SeriesRepository(DataContext context, IMapper mapper) : ISeriesRepo
         var result = await context.Series
             .Where(s => s.Id == seriesId)
             .Include(s => s.ExternalSeriesMetadata)
-            .Select(series => new PlusSeriesRequestDto()
+            .Select(series => new SeriesDetailRequestV3Dto
             {
-                MediaFormat = series.Library.Type.ConvertToPlusMediaFormat(series.Format),
+                Provider = series.Library.MetadataProvider,
+                Format = series.Library.Type.ConvertToPlusMediaFormat(series.Format),
                 SeriesName = series.Name,
-                AltSeriesName = series.LocalizedName,
+                AlternativeNames = new List<string> { series.LocalizedName },
                 // TODO: Refactor this to check from ExternalMetadataIds first then ExternalSeriesMetadata. Weblink parsing is pointless as it updates in externalMetadata
                 AniListId = series.ExternalSeriesMetadata.AniListId != 0
                     ? series.ExternalSeriesMetadata.AniListId

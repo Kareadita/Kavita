@@ -416,7 +416,7 @@ public class ExternalMetadataService : IExternalMetadataService
             return await _unitOfWork.ExternalSeriesMetadataRepository.GetSeriesDetailPlusDto(seriesId, ct);
         }
 
-        var data = await _unitOfWork.SeriesRepository.GetPlusSeriesDtoAsync(seriesId, ct);
+        var data = await _unitOfWork.SeriesRepository.GetSeriesDetailRequestV3Dto(seriesId, ct);
         if (data == null) return _defaultReturn;
 
         // Get from Kavita+ API the Full Series metadata with rec/rev and cache to ExternalMetadata tables
@@ -447,14 +447,15 @@ public class ExternalMetadataService : IExternalMetadataService
         try
         {
             var metadata = await FetchExternalMetadataForSeries(seriesId, series.Library.Type,
-                new PlusSeriesRequestDto()
+                new  SeriesDetailRequestV3Dto()
                 {
+                    Provider = series.Library.MetadataProvider,
                     AniListId = ids.AniListId,
                     MalId = ids.MalId,
                     CbrId = ids.CbrId,
                     MangabakaId = ids.MangabakaId,
                     HardcoverId = ids.HardcoverId,
-                    MediaFormat = series.Library.Type.ConvertToPlusMediaFormat(series.Format),
+                    Format = series.Library.Type.ConvertToPlusMediaFormat(series.Format),
                     SeriesName = series.Name // Required field, not used since provider Ids are passed
                 }, true, MetadataFetchTrigger.ManualMatch, ct);
 
@@ -536,7 +537,7 @@ public class ExternalMetadataService : IExternalMetadataService
     /// <param name="data"></param>
     /// <param name="ct"></param>
     /// <returns></returns>
-    private async Task<SeriesDetailPlusDto> FetchExternalMetadataForSeries(int seriesId, LibraryType libraryType, PlusSeriesRequestDto data,
+    private async Task<SeriesDetailPlusDto> FetchExternalMetadataForSeries(int seriesId, LibraryType libraryType, SeriesDetailRequestV3Dto data,
         bool fromMatchFlow = false, MetadataFetchTrigger trigger = MetadataFetchTrigger.OnDemand, CancellationToken ct = default)
     {
 
@@ -572,9 +573,16 @@ public class ExternalMetadataService : IExternalMetadataService
 
             try
             {
-                // This returns an AniListSeries and Match returns ExternalSeriesDto
-                result = await _kavitaPlusApiService.GetSeriesDetailAsync(data, ct);
+                var kPlusResult = await _kavitaPlusApiService.GetSeriesDetailV3Async(data, ct);
+                if (!kPlusResult.IsSuccess)
+                {
+                    _logger.LogError("Unable to fetch Kavita+ Series Detail data for {SeriesName}", string.IsNullOrEmpty(data.SeriesName) ? data.AniListId : data.SeriesName);
+                    await _auditService.LogMatchAsync(KavitaPlusEventType.SeriesMatchFailed, seriesId,
+                        new AuditLogMatchFailureParamsDto { SeriesName = series.Name, Reason = kPlusResult.ErrorMessage ?? string.Empty }, AuditStatus.Failure, ct: ct);
+                    return _defaultReturn;
+                }
 
+                result = kPlusResult.Data;
             }
             catch (FlurlHttpException ex)
             {
@@ -589,7 +597,16 @@ public class ExternalMetadataService : IExternalMetadataService
                         _logger.LogDebug("Hit rate limit, will retry in 3 seconds");
                         await Task.Delay(3000, ct);
 
-                        result = await _kavitaPlusApiService.GetSeriesDetailAsync(data, ct);
+                        var kPlusResult = await _kavitaPlusApiService.GetSeriesDetailV3Async(data, ct);
+                        if (!kPlusResult.IsSuccess)
+                        {
+                            _logger.LogError("Unable to fetch Kavita+ Series Detail data for {SeriesName}", string.IsNullOrEmpty(data.SeriesName) ? data.AniListId : data.SeriesName);
+                            await _auditService.LogMatchAsync(KavitaPlusEventType.SeriesMatchFailed, seriesId,
+                                new AuditLogMatchFailureParamsDto { SeriesName = series.Name, Reason = kPlusResult.ErrorMessage ?? string.Empty }, AuditStatus.Failure, ct: ct);
+                            return _defaultReturn;
+                        }
+
+                        result = kPlusResult.Data;
                     }
                     else if (errorMessage.Contains("Unknown Series"))
                     {
