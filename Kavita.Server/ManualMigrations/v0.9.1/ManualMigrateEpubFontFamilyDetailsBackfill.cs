@@ -7,10 +7,10 @@ using Kavita.Services.Scanner;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 
-namespace Kavita.Server.ManualMigrations.v0._9._0;
+namespace Kavita.Server.ManualMigrations.v0._9._1;
 
 /// <summary>
-/// v0.9.0 expanded the EpubFont to contain Family, Style and Weight properties
+/// v0.9.1 expanded the EpubFont to contain Family, Style and Weight properties
 /// </summary>
 public class ManualMigrateEpubFontFamilyDetailsBackfill : ManualMigration
 {
@@ -18,7 +18,7 @@ public class ManualMigrateEpubFontFamilyDetailsBackfill : ManualMigration
     /// <summary>
     /// Migrates System fonts by finding the corresponding entry in the DefaultFonts list
     /// and mapping the added properties to the font in the database.
-    /// 
+    ///
     /// For custom user fonts attempt a best effort guess by re-parsing the filename and
     /// applying updated results. If this best guess is incorrect then users will still
     /// need to delete and re-upload fonts while following filename guidelines if uploading
@@ -33,7 +33,7 @@ public class ManualMigrateEpubFontFamilyDetailsBackfill : ManualMigration
     {
         var fonts = await context.EpubFont.ToListAsync();
         if (fonts.Count == 0) return;
-        
+
         var prefs = await context.AppUserReadingProfiles.ToListAsync();
 
         foreach (var font in fonts)
