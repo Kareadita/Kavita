@@ -771,7 +771,20 @@
         "spin-off": "Spin Off",
         "parent": "Parent",
         "edition": "Edition",
-        "annual": "Annual"
+        "annual": "Annual",
+        "main": "Main Story",
+        "cameo": "Cameo",
+        "character-focus": "Character Focus",
+        "compilation": "Compilation",
+        "crossover": "Crossover",
+        "expansion": "Expansion",
+        "parody": "Parody",
+        "reboot": "Reboot",
+        "remake": "Remake",
+        "series": "Series",
+        "source": "Source",
+        "summary": "Summary",
+        "uncollected": "Uncollected"
     },
 
     "publication-status-pipe": {

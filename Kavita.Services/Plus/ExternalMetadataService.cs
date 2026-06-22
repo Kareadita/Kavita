@@ -532,8 +532,7 @@ public class ExternalMetadataService : IExternalMetadataService
             }).ToList();
 
 
-            // Recommendations. Personalized runs first so a series surfacing in both lists keeps the Personalized
-            // badge; the shared identity set then skips it when the Similar list is processed.
+            // Personalized runs first so that a duplicate perfers Personalized
             externalSeriesMetadata.ExternalRecommendations ??= [];
             var seenRecommendations = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
             var recs = await ProcessRecommendations(libraryType, result.ReadersAlsoLike, externalSeriesMetadata,
@@ -606,7 +605,8 @@ public class ExternalMetadataService : IExternalMetadataService
             if (madeMetadataModification)
             {
                 // Inform the UI of the update
-                await _eventHub.SendMessageAsync(MessageFactory.ScanSeries, MessageFactory.ScanSeriesEvent(series.LibraryId, series.Id, series.Name), false, ct);
+                await _eventHub.SendMessageAsync(MessageFactory.ScanSeries,
+                    MessageFactory.ScanSeriesEvent(series.LibraryId, series.Id, series.Name), false, ct);
             }
 
             return new SeriesDetailPlusDto()
@@ -645,6 +645,7 @@ public class ExternalMetadataService : IExternalMetadataService
 
         // Blacklist the series as it wasn't found in Kavita+
         series.IsBlacklisted = true;
+        // TODO: Do we need to update the Audit Log?
         await _unitOfWork.CommitAsync(ct);
 
         return _defaultReturn;

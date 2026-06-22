@@ -41,6 +41,32 @@ export class RelationshipPipe implements PipeTransform {
         return this.translocoService.translate('relationship-pipe.edition');
       case RelationKind.Annual:
         return this.translocoService.translate('relationship-pipe.annual');
+      case RelationKind.Main:
+        return this.translocoService.translate('relationship-pipe.main');
+      case RelationKind.Cameo:
+        return this.translocoService.translate('relationship-pipe.cameo');
+      case RelationKind.CharacterFocus:
+        return this.translocoService.translate('relationship-pipe.character-focus');
+      case RelationKind.Compilation:
+        return this.translocoService.translate('relationship-pipe.compilation');
+      case RelationKind.Crossover:
+        return this.translocoService.translate('relationship-pipe.crossover');
+      case RelationKind.Expansion:
+        return this.translocoService.translate('relationship-pipe.expansion');
+      case RelationKind.Parody:
+        return this.translocoService.translate('relationship-pipe.parody');
+      case RelationKind.Reboot:
+        return this.translocoService.translate('relationship-pipe.reboot');
+      case RelationKind.Remake:
+        return this.translocoService.translate('relationship-pipe.remake');
+      case RelationKind.Series:
+        return this.translocoService.translate('relationship-pipe.series');
+      case RelationKind.Source:
+        return this.translocoService.translate('relationship-pipe.source');
+      case RelationKind.Summary:
+        return this.translocoService.translate('relationship-pipe.summary');
+      case RelationKind.Uncollected:
+        return this.translocoService.translate('relationship-pipe.uncollected');
       default:
         return '';
     }
