@@ -290,11 +290,13 @@ public class ExternalMetadataService : IExternalMetadataService
 
     public async Task<IList<ExternalSeriesMatchDto>> MatchSeries(MatchSeriesDto dto, CancellationToken ct = default)
     {
-        var series = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(dto.SeriesId,
-            SeriesIncludes.Metadata | SeriesIncludes.ExternalMetadata | SeriesIncludes.Library, ct);
+        const SeriesIncludes includes = SeriesIncludes.Metadata | SeriesIncludes.ExternalMetadata
+                                                                | SeriesIncludes.Library | SeriesIncludes.Chapters;
+
+        var series = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(dto.SeriesId, includes, ct);
         if (series == null) return [];
 
-        var query = dto.Query;
+        var query = dto.Query ?? string.Empty;
 
         var potentialAnilistId = ExternalIdParser.TryParseAniListHeader(query, out var aniListId)
             ? aniListId : ExternalIdParser.GetAniListId(query);
@@ -333,39 +335,41 @@ public class ExternalMetadataService : IExternalMetadataService
             }
         }
 
-        // TODO: Match needs to be overhauled
-        var matchRequest = new MatchSeriesRequestDto()
+        var matchV3Request = new MatchRequestV3Dto
         {
-            Format = format,
-            Query = query,
+            AniListId = potentialAnilistId ?? ExternalIdParser.GetAniListId(series.Metadata.WebLinks),
+            MalId = potentialMalId ?? ExternalIdParser.GetMalId(series.Metadata.WebLinks),
+            HardcoverId = null, // This is complex (There's two types of Ids; Series & Books)
+            HardcoverSlug = potentialHardcoverSlug,
+            CbrId = null,
+            MangabakaId = potentialMangabakaId > 0 ? potentialMangabakaId : ExternalIdParser.GetMangaBakaId(series.Metadata.WebLinks),
+            IsStandAlone = series.Volumes.Sum(v => v.Chapters.Count) == 1,
+            Provider = series.Library.MetadataProvider,
             SeriesName = series.Name,
             AlternativeNames = otherNames,
             Year = year,
-            AniListId = potentialAnilistId ?? ScrobblingHelper.GetAniListId(series), // TODO: Opportunity to streamline this with ExternalIdParser and the default > 0/empty string checks
-            MalId = potentialMalId ?? ScrobblingHelper.GetMalId(series),
-            MangabakaId = potentialMangabakaId > 0 ? (int) potentialMangabakaId : (int?) series.MangaBakaId,
-            HardcoverSlug = potentialHardcoverSlug,
-            CbrSlug = potentialCbrSlug
+            Query = query,
+            Format = series.Library.Type.ConvertToPlusMediaFormat(series.Format),
         };
 
-        try
-        {
-            var results = await _kavitaPlusApiService.MatchSeriesAsync(matchRequest, ct);
+        _logger.LogDebug("Match request: {@Request}", matchV3Request);
 
-            // Some summaries can contain multiple <br/>s, we need to ensure it's only 1
-            foreach (var result in results)
-            {
-                result.Series.Summary = StringHelper.RemoveSourceInDescription(StringHelper.SquashBreaklines(result.Series.Summary));
-            }
-
-            return results;
-        }
-        catch (Exception ex)
+        var kPlusResult = await _kavitaPlusApiService.MatchSeriesV3Async(matchV3Request, ct);
+        if (!kPlusResult.IsSuccess)
         {
-            _logger.LogError(ex, "An error happened during the request to Kavita+ API");
+            _logger.LogError("Match request failed for {SeriesName}: {Error}", series.Name, kPlusResult.ErrorMessage);
+            return [];
         }
 
-        return ArraySegment<ExternalSeriesMatchDto>.Empty;
+        var results = kPlusResult.Data;
+
+        // Some summaries can contain multiple <br/>s, we need to ensure it's only 1
+        foreach (var result in results)
+        {
+            result.Series.Summary = StringHelper.RemoveSourceInDescription(StringHelper.SquashBreaklines(result.Series.Summary));
+        }
+
+        return results;
     }
 
     private static List<string> ExtractAlternativeNames(Series series)
