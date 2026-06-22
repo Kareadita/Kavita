@@ -148,7 +148,7 @@ export class LibrarySettingsModalComponent implements OnInit {
       case LibraryType.Comic:
         return [MetadataProvider.ComicBookRoundup];
       case LibraryType.Book:
-        return [MetadataProvider.Hardcover];
+        return [MetadataProvider.Hardcover, MetadataProvider.Mangabaka];
       case LibraryType.Images:
         return [MetadataProvider.Mangabaka, MetadataProvider.ComicBookRoundup];
       case LibraryType.LightNovel:
@@ -330,6 +330,7 @@ export class LibrarySettingsModalComponent implements OnInit {
       this.libraryForm.get('collapseSeriesRelationships')?.setValue(this.library.collapseSeriesRelationships);
       this.libraryForm.get('allowScrobbling')?.setValue(this.IsKavitaPlusEligible ? this.library.allowScrobbling : false);
       this.libraryForm.get('allowMetadataMatching')?.setValue(this.IsMetadataDownloadEligible ? this.library.allowMetadataMatching : false);
+      this.libraryForm.get('metadataProvider')?.setValue(this.library.metadataProvider);
       this.libraryForm.get('excludePatterns')?.setValue(this.excludePatterns ? this.library.excludePatterns : false);
       this.libraryForm.get('enableMetadata')?.setValue(this.library.enableMetadata);
       this.libraryForm.get('removePrefixForSortName')?.setValue(this.library.removePrefixForSortName);
