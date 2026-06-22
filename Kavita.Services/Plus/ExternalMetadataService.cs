@@ -125,7 +125,7 @@ public class ExternalMetadataService : IExternalMetadataService
         foreach (var seriesId in ids)
         {
             var libraryType = libTypes[seriesId];
-            var success = await FetchSeriesMetadata(seriesId, libraryType, MetadataFetchTrigger.ScheduledRefresh, ct);
+            var success = await TryMatchAndLoadMetadataForSeries(seriesId, libraryType, MetadataFetchTrigger.ScheduledRefresh, ct) != null;
             if (success)
             {
                 count++;
@@ -144,6 +144,8 @@ public class ExternalMetadataService : IExternalMetadataService
 
         var series = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(seriesId, SeriesIncludes.Library | SeriesIncludes.Chapters, ct: ct);
         if (series == null) return null;
+
+        if (!series.WillScrobble() || !series.Library.AllowMetadataMatching) return null;
 
         if (!RateLimiter.TryAcquire(string.Empty))
         {
@@ -249,25 +251,6 @@ public class ExternalMetadataService : IExternalMetadataService
         };
     }
 
-
-    private async Task<bool> FetchSeriesMetadata(int seriesId, LibraryType libraryType,
-        MetadataFetchTrigger trigger = MetadataFetchTrigger.SeriesAdded, CancellationToken ct = default)
-    {
-        if (!IsPlusEligible(libraryType)) return false;
-        if (!await _licenseService.HasActiveLicense(ct: ct)) return false;
-
-        // Generate key based on seriesId and libraryType or any unique identifier for the request
-        // Check if the request is allowed based on the rate limit
-        if (!RateLimiter.TryAcquire(string.Empty))
-        {
-            // Request not allowed due to rate limit
-            _logger.LogInformation("Rate Limit hit for Kavita+ prefetch");
-            return false;
-        }
-
-        // Prefetch SeriesDetail data
-        return await GetSeriesDetailPlus(seriesId, libraryType, trigger, ct) != null;
-    }
 
     public async Task<IList<MalStackDto>> GetStacksForUser(int userId, CancellationToken ct = default)
     {
@@ -398,7 +381,7 @@ public class ExternalMetadataService : IExternalMetadataService
 
     }
 
-    public async Task<SeriesDetailPlusDto?> GetSeriesDetailPlus(int seriesId, LibraryType libraryType,
+    private async Task<SeriesDetailPlusDto?> GetSeriesDetailPlus(int seriesId, LibraryType libraryType,
         MetadataFetchTrigger trigger = MetadataFetchTrigger.OnDemand, CancellationToken ct = default)
     {
         if (!IsPlusEligible(libraryType) || !await _licenseService.HasActiveLicense(ct: ct)) return _defaultReturn;
