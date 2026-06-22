@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Threading;
 using System.Threading.Tasks;
 using EasyCaching.Core;
 using Hangfire;
@@ -17,9 +18,12 @@ using Kavita.Models.DTOs.Filtering.v2;
 using Kavita.Models.DTOs.Filtering.v2.Requests;
 using Kavita.Models.DTOs.Metadata.Matching;
 using Kavita.Models.DTOs.Recommendation;
+using Kavita.Models.DTOs.KavitaPlus.ExternalMetadata;
 using Kavita.Models.DTOs.SeriesDetail;
 using Kavita.Models.Entities.Enums;
+using Kavita.Models.Entities.Enums.KavitaPlus;
 using Kavita.Models.Entities.MetadataMatching;
+using Kavita.Models.Extensions;
 using Kavita.Server.Attributes;
 using Kavita.Server.Extensions;
 using Kavita.Server.Helpers;
@@ -28,6 +32,7 @@ using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using MetadataProvider = Kavita.Models.Entities.Enums.MetadataProvider;
 
 namespace Kavita.Server.Controllers;
 
@@ -77,7 +82,7 @@ public class SeriesController(
     {
         var ct = HttpContext.RequestAborted;
         var series = await unitOfWork.SeriesRepository.GetSeriesDtoByIdAsync(seriesId, UserId, ct);
-        if (series == null) return NoContent();
+        if (series == null) return NotFound();
         return Ok(series);
     }
 
@@ -139,7 +144,7 @@ public class SeriesController(
     {
         var ct = HttpContext.RequestAborted;
         var vol = await unitOfWork.VolumeRepository.GetVolumeDtoAsync(volumeId, UserId, ct);
-        if (vol == null) return NoContent();
+        if (vol == null) return NotFound();
         return Ok(vol);
     }
 
@@ -154,7 +159,7 @@ public class SeriesController(
     {
         var ct = HttpContext.RequestAborted;
         var chapter = await unitOfWork.ChapterRepository.GetChapterDtoAsync(chapterId, UserId, ct);
-        if (chapter == null) return NoContent();
+        if (chapter == null) return NotFound();
 
         return Ok(chapter);
     }
@@ -440,6 +445,7 @@ public class SeriesController(
     {
         var ct = HttpContext.RequestAborted;
         var val = (AgeRating) ageRating;
+        // NOTE: Why not rename NotApplicable to NoRestriction and avoid this extra if?
         if (val == AgeRating.NotApplicable)
             return await localizationService.TranslateAsync(UserId, "age-restriction-not-applicable");
 
@@ -583,18 +589,15 @@ public class SeriesController(
     /// <summary>
     /// This will perform the fix match
     /// </summary>
-    /// <param name="match"></param>
     /// <param name="seriesId"></param>
-    /// <param name="aniListId"></param>
-    /// <param name="malId"></param>
-    /// <param name="cbrId"></param>
+    /// <param name="ids"></param>
     /// <returns></returns>
     [KPlus]
     [HttpPost("update-match")]
     [Authorize(Policy = PolicyGroups.AdminPolicy)]
-    public ActionResult UpdateSeriesMatch([FromQuery] int seriesId, [FromQuery] int? aniListId, [FromQuery] long? malId, [FromQuery] int? cbrId)
+    public ActionResult UpdateSeriesMatch([FromQuery] int seriesId, [FromBody] ExternalMetadataIdsDto ids)
     {
-        BackgroundJob.Enqueue(() => externalMetadataService.FixSeriesMatch(seriesId, aniListId, malId, cbrId));
+        BackgroundJob.Enqueue(() => externalMetadataService.FixSeriesMatch(seriesId, ids, CancellationToken.None));
 
         return Ok();
     }
@@ -613,6 +616,68 @@ public class SeriesController(
         var ct = HttpContext.RequestAborted;
         await externalMetadataService.UpdateSeriesDontMatch(seriesId, dontMatch, ct);
         return Ok();
+    }
+
+    /// <summary>
+    /// Returns extra information around an existing match (and series) to display on the Match Screen.
+    /// </summary>
+    /// <param name="seriesId"></param>
+    /// <returns></returns>
+    [HttpGet("match-info")]
+    [KPlus]
+    [Authorize(Policy = PolicyGroups.AdminPolicy)]
+    public async Task<ActionResult<MatchSeriesInfoDto>> GetExistingMatchInfo(int seriesId)
+    {
+        var series = await unitOfWork.SeriesRepository.GetSeriesByIdAsync(seriesId, SeriesIncludes.ExternalMetadata | SeriesIncludes.Library);
+        if (series == null) return NotFound();
+
+        var plusFormat = series.Library.Type.ConvertToPlusMediaFormat(series.Format);
+        var libraryType = series.Library.Type;
+        var externalMetadata = series.ExternalSeriesMetadata;
+
+        // This is assuming v2 logic. Not sure if we will change how we match on V3 yet
+        var primaryProvider = Models.Entities.Enums.MetadataProvider.Mangabaka;
+        if (plusFormat is PlusMediaFormat.Comic)
+        {
+            primaryProvider = Models.Entities.Enums.MetadataProvider.ComicBookRoundup;
+        } else if (plusFormat is PlusMediaFormat.LightNovel)
+        {
+            primaryProvider = Models.Entities.Enums.MetadataProvider.Mangabaka;
+        } else if (plusFormat is PlusMediaFormat.Book)
+        {
+            primaryProvider = Models.Entities.Enums.MetadataProvider.Hardcover;
+        }
+
+        // We need provider derived from the primary id
+        MetadataProvider? provider = null;
+
+        // Set AniList as MangaBaka since the next update will fix this
+        if (series.MangaBakaId > 0 || series.AniListId > 0)
+        {
+            provider = Models.Entities.Enums.MetadataProvider.Mangabaka;
+        } else if (series.HardcoverId > 0)
+        {
+            provider = Models.Entities.Enums.MetadataProvider.Hardcover;
+        } else if (series.CbrId > 0)
+        {
+            provider = Models.Entities.Enums.MetadataProvider.ComicBookRoundup;
+        }
+
+        return Ok(new MatchSeriesInfoDto
+        {
+            HasMatch = externalMetadata is {Id: > 0} && provider != null,
+            // MangaBaka will always set AniList if set
+            IsLegacy = series is {AniListId: > 0, MangaBakaId: 0},
+            CbrId = series.CbrId,
+            HardcoverId = series.HardcoverId,
+            MangaBakaId = (int) series.MangaBakaId,
+            AniListId = series.AniListId,
+            LibraryType = libraryType,
+            PlusMediaFormat = plusFormat,
+            MatchedProvider = provider,
+            PrimaryProvider = primaryProvider,
+            SeriesFormat = series.Format
+        });
     }
 
     /// <summary>

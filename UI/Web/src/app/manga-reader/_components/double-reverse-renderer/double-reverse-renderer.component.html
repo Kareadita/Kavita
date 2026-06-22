@@ -5,6 +5,7 @@
 
     @if(leftImage) {
       <img alt=" "
+           tabindex="0" [style.outline]="'none'"
            #image [src]="leftImage.src"
            id="image-1"
            class="{{imageFitClass$ | async}} {{readerModeClass$ | async}} {{showClickOverlayClass$ | async}}">

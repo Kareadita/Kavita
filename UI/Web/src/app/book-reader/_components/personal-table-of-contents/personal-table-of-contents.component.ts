@@ -1,6 +1,6 @@
 import {
   ChangeDetectionStrategy,
-  Component,
+  Component, computed,
   DestroyRef,
   EventEmitter,
   inject,
@@ -11,11 +11,10 @@ import {
 } from '@angular/core';
 import {ReaderService} from "../../../_services/reader.service";
 import {PersonalToC} from "../../../_models/readers/personal-toc";
-import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
+import {takeUntilDestroyed, toSignal} from "@angular/core/rxjs-interop";
 import {translate, TranslocoDirective} from "@jsverse/transloco";
 import {TextBookmarkItemComponent} from "../text-bookmark-item/text-bookmark-item.component";
 import {ConfirmService} from "../../../shared/confirm.service";
-import {FilterPipe} from "../../../_pipes/filter.pipe";
 import {FormControl, FormGroup, FormsModule, ReactiveFormsModule} from "@angular/forms";
 
 export interface PersonalToCEvent {
@@ -25,7 +24,7 @@ export interface PersonalToCEvent {
 
 @Component({
   selector: 'app-personal-table-of-contents',
-  imports: [TranslocoDirective, TextBookmarkItemComponent, FilterPipe, FormsModule, ReactiveFormsModule],
+  imports: [TranslocoDirective, TextBookmarkItemComponent, FormsModule, ReactiveFormsModule],
   templateUrl: './personal-table-of-contents.component.html',
   styleUrls: ['./personal-table-of-contents.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
@@ -45,9 +44,20 @@ export class PersonalTableOfContentsComponent implements OnInit {
 
 
   ptocBookmarks = signal<PersonalToC[]>([]);
+  visibleBookmarks = computed(() => {
+    const query = this.query()?.toLowerCase() ?? '';
+
+    return this.ptocBookmarks().filter(bookMark => {
+      return bookMark.title.toLowerCase().indexOf(query) >= 0
+        || bookMark.pageNumber.toString().indexOf(query) >= 0
+        || (bookMark.chapterTitle ?? '').toLowerCase().indexOf(query) >= 0;
+    });
+  });
+
   formGroup = new FormGroup({
     filter: new FormControl('', [])
   });
+  query = toSignal(this.formGroup.get('filter')!.valueChanges, {initialValue: ''});
 
   ngOnInit() {
     this.tocRefresh.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(() => {
@@ -74,11 +84,6 @@ export class PersonalTableOfContentsComponent implements OnInit {
     this.readerService.removePersonalToc(bookmark.chapterId, bookmark.pageNumber, bookmark.title).subscribe(() => {
       this.ptocBookmarks.set(this.ptocBookmarks().filter(t => t.title !== bookmark.title));
     });
-  }
-
-  filterList = (listItem: PersonalToC) => {
-    const query = (this.formGroup.get('filter')?.value || '').toLowerCase();
-    return listItem.title.toLowerCase().indexOf(query) >= 0 || listItem.pageNumber.toString().indexOf(query) >= 0 || (listItem.chapterTitle ?? '').toLowerCase().indexOf(query) >= 0;
   }
 
 }

@@ -2,7 +2,7 @@
 
   <div class="position-relative">
     @if (!accountService.hasReadOnlyRole()) {
-      <div class="position-absolute custom-position d-flex gap-2">
+      <div class="position-absolute custom-position d-flex gap-2 align-items-center">
         <button class="btn btn-outline-primary" [disabled]="selectedList() === undefined" (click)="selectedList.set(undefined)" [title]="t('add')">
           <i class="fa fa-plus" aria-hidden="true"></i><span class="phone-hidden ms-1">{{t('add')}}</span>
         </button>
@@ -17,14 +17,14 @@
 
 
   <div class="row g-0 theme-container">
-    <div class="col-lg-5 col-md-6 col-sm-7 col-xs-7 scroller">
+    <div class="col-lg-5 col-md-6 col-sm-12 scroller">
       <div class="pe-2">
         <div class="mb-2">
           <input type="text" class="form-control form-control-sm" [placeholder]="t('search-placeholder')"
                  [value]="searchTerm()" (input)="searchTerm.set($any($event.target).value)" />
         </div>
 
-        <div class="d-flex align-items-center justify-content-between mb-2">
+        <div class="d-flex align-items-center justify-content-between mb-2 filter-row">
           <div class="form-check form-switch mb-0">
             <input class="form-check-input" type="checkbox" id="hasUpdateFilter"
                    [checked]="hasUpdateFilter()" (change)="hasUpdateFilter.set($any($event.target).checked)">
@@ -59,7 +59,8 @@
       </div>
     </div>
 
-    <div class="col-lg-7 col-md-6 col-sm-4 col-xs-4 ps-3">
+    <div class="col-lg-7 col-md-6 col-sm-12 ps-3 ps-sm-3 ps-0 pt-3 pt-md-0 detail-panel"
+         [class.is-hidden-mobile]="!selectedList() && !showUploadFlow()">
       <div class="card p-3">
 
         @let selectedItem = selectedList();
@@ -93,17 +94,37 @@
             <app-image class="detail-cover" [imageUrl]="imageService.getReadingListCoverImage(selectedItem.id)" />
 
             <div class="flex-grow-1">
-              <div class="d-flex justify-content-between align-items-start">
+              <div class="d-flex flex-column flex-sm-row justify-content-between align-items-start gap-2">
+
                 <h4 class="mb-1">{{selectedItem.title}}</h4>
-                <div class="d-flex gap-2">
-                  @if (!accountService.hasReadOnlyRole()) {
-                    <button class="btn btn-outline-danger btn-sm" (click)="deleteList(selectedItem)">
-                      <i class="fa fa-trash-alt" aria-hidden="true"></i><span class="phone-hidden ms-1">{{t('delete')}}</span>
-                    </button>
-                  }
-                  @if (selectedItem.canSync) {
-                    <button class="btn btn-primary btn-sm" (click)="syncReadingList(selectedItem)">{{t('sync')}}</button>
-                  }
+
+                <div class="flex-shrink-0 ms-2">
+
+                  <div class="d-flex flex-row gap-2">
+                    @if (!accountService.hasReadOnlyRole()) {
+                      <button class="btn btn-outline-danger btn-sm" (click)="deleteList(selectedItem)">
+                        <i class="fa fa-trash-alt" aria-hidden="true"></i><span class="phone-hidden ms-1">{{t('delete')}}</span>
+                      </button>
+                    }
+                    @if (selectedItem.canSync) {
+
+                      <div class="btn-group">
+                        <button type="button" class="btn btn-primary" (click)="syncReadingList(selectedItem)">
+                          <span class="read-btn--text">{{t('sync')}}</span>
+                        </button>
+
+                        <div class="btn-group" ngbDropdown role="group">
+                          <button type="button" class="btn btn-primary dropdown-toggle-split" ngbDropdownToggle></button>
+                          <div class="dropdown-menu" ngbDropdownMenu>
+                            <button ngbDropdownItem (click)="manualSyncReadingList(selectedItem)">
+                              <span class="read-btn--text">{{t('sync-manual')}}</span>
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    }
+                  </div>
+
                 </div>
               </div>
 
@@ -141,22 +162,22 @@
                   </div>
                 }
               </div>
+            </div>
+          </div>
 
-              <div class="d-flex">
-                <div class="mt-1">
+          <div class="d-flex">
+            <div class="mt-1">
+              @if (selectedItem.canSync) {
+                <div class="mt-3 text-muted" style="font-size: 0.8rem;">
+                  <div>{{t('last-synced', {date: (selectedItem.lastSyncedUtc | utcToLocalDate | timeAgo)})}}</div>
+                  <div>{{t('last-checked', {date: (selectedItem.lastSyncCheckUtc | utcToLocalDate | timeAgo)})}}</div>
                   @if (selectedItem.canSync) {
-                    <div class="mt-3 text-muted" style="font-size: 0.8rem;">
-                      <div>{{t('last-synced', {date: (selectedItem.lastSyncedUtc | utcToLocalDate | timeAgo)})}}</div>
-                      <div>{{t('last-checked', {date: (selectedItem.lastSyncCheckUtc | utcToLocalDate | timeAgo)})}}</div>
-                      @if (selectedItem.canSync) {
-                        <div>
-                          <a [href]="(selectedItem.downloadUrl ?? selectedItem.sourcePath) | safeUrl" target="_blank" rel="noopener noreferrer">{{t('source')}}</a>
-                        </div>
-                      }
+                    <div>
+                      <a [href]="(selectedItem.downloadUrl ?? selectedItem.sourcePath) | safeUrl" target="_blank" rel="noopener noreferrer">{{t('source')}}</a>
                     </div>
                   }
                 </div>
-              </div>
+              }
             </div>
           </div>
 

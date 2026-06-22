@@ -1,0 +1,60 @@
+<ng-container *transloco="let t; prefix:'kavitaplus-timeline'">
+  @if (isLoading()) {
+    <div class="d-flex align-items-center justify-content-center py-5">
+      <div class="spinner-border spinner-border-sm" role="status">
+        <span class="visually-hidden">Loading...</span>
+      </div>
+    </div>
+  } @else if (entries().length === 0) {
+    <app-empty-state [titleKey]="'empty-title'" [descriptionKey]="'empty-description'"
+                     [i18nPrefix]="'kavitaplus-timeline'">
+      <i icon class="fa-solid fa-magnifying-glass" aria-hidden="true"></i>
+    </app-empty-state>
+  } @else {
+    @for (group of groupedEntries(); track group.key; let isFirst = $first) {
+      <div class="timeline-group" [class.mt-4]="!isFirst">
+
+        <div class="d-flex align-items-center gap-3 mb-2">
+          <div class="spine-node flex-shrink-0 d-flex align-items-center justify-content-center">
+            <span class="day-dot"></span>
+          </div>
+          <h5 class="day-label mb-0">
+            @if (group.label === 'today') { {{t('today')}} }
+            @else if (group.label === 'yesterday') { {{t('yesterday')}} }
+            @else { {{group.dateStr | date:'mediumDate'}} }
+          </h5>
+          <div class="divider"></div>
+          <span class="count text-muted text-nowrap">{{t('events-count', {count: group.count})}}</span>
+        </div>
+
+        @for (entry of group.events; track entry.id) {
+          <div class="timeline-row d-flex align-items-start gap-3 my-2">
+
+            <div class="spine-node flex-shrink-0 d-flex align-items-center justify-content-center pt-2">
+              <div class="spine-icon d-flex align-items-center justify-content-center"
+                   [style.background]="categoryBg(entry.category)">
+                <app-kavitaplus-audit-event-type-icon [type]="entry.eventType" [category]="entry.category" />
+              </div>
+            </div>
+
+            @if (entryTemplate(); as tpl) {
+              <ng-container [ngTemplateOutlet]="tpl" [ngTemplateOutletContext]="{$implicit: entry}" />
+            }
+          </div>
+        }
+
+      </div>
+    }
+
+    @if (hasMore() || isLoadingMore()) {
+      <div class="d-flex justify-content-center mt-3">
+        <button class="btn btn-outline-secondary btn-sm" [disabled]="isLoadingMore()" (click)="loadMore.emit()">
+          @if (isLoadingMore()) {
+            <span class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span>
+          }
+          {{t('load-more-label')}}
+        </button>
+      </div>
+    }
+  }
+</ng-container>

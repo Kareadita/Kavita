@@ -122,7 +122,8 @@ public class Series : IEntityDate, IHasReadTimeEstimate, IHasCoverImage, IHasMet
     public int HardcoverId { get; set; }
     public long MetronId { get; set; }
     public string ComicVineId { get; set; }
-    public long MangaBakaId { get; set; }
+    public long MangaBakaId { get; set; } // TODO: Migrate this back to an int
+    public int CbrId { get; set; }
     #endregion
 
     public SeriesMetadata Metadata { get; set; } = null!;
@@ -162,10 +163,8 @@ public class Series : IEntityDate, IHasReadTimeEstimate, IHasCoverImage, IHasMet
 
     public bool MatchesSeriesByName(string nameNormalized, string localizedNameNormalized)
     {
-        return NormalizedName == nameNormalized ||
-               NormalizedLocalizedName == nameNormalized ||
-               NormalizedName == localizedNameNormalized ||
-               NormalizedLocalizedName == localizedNameNormalized;
+        return (!string.IsNullOrEmpty(NormalizedName) && (NormalizedName == nameNormalized || NormalizedName == localizedNameNormalized)) ||
+               (!string.IsNullOrEmpty(NormalizedLocalizedName) && (NormalizedLocalizedName == nameNormalized || NormalizedLocalizedName == localizedNameNormalized));
     }
 
     public void ResetColorScape()

@@ -35,4 +35,8 @@ public static class EasyCacheProfiles
     /// All Locales on the Server
     /// </summary>
     public const string LocaleOptions = "locales";
+    /// <summary>
+    /// Provider health snapshot from Kavita+
+    /// </summary>
+    public const string ProviderHealth = "kavita+providerHealth";
 }

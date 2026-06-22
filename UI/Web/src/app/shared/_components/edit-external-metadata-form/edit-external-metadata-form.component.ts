@@ -11,6 +11,7 @@ export const HAS_METADATA_DEFAULTS: Required<IHasMetadataIds> = {
   hardcoverId: 0,
   comicVineId: null,
   metronId: 0,
+  cbrId: 0
 };
 
 @Component({
@@ -39,7 +40,11 @@ export class EditExternalMetadataFormComponent implements OnInit {
 
     (Object.keys(HAS_METADATA_DEFAULTS) as (keyof IHasMetadataIds)[]).forEach((key) => {
       if (!form.contains(key)) {
-        form.addControl(key, new FormControl(entity[key] ?? null));
+        const control = new FormControl(entity[key] ?? null);
+        if (this.getIsDisabled(key)) {
+          control.disable();
+        }
+        form.addControl(key, control);
       } else {
         form.get(key)?.setValue(entity[key] ?? null);
       }
@@ -49,5 +54,10 @@ export class EditExternalMetadataFormComponent implements OnInit {
   getKeyInputType(key: string) {
     if (key === 'comicVineId') return 'text';
     return 'number';
+  }
+
+  getIsDisabled(key: string) {
+    if (key === 'cbrId') return true;
+    return false;
   }
 }

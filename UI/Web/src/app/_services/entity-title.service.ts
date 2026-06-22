@@ -1,9 +1,11 @@
 import {inject, Injectable} from '@angular/core';
 import {TranslocoService} from '@jsverse/transloco';
 import {UtilityService} from '../shared/_services/utility.service';
-import {Chapter, LooseLeafOrDefaultNumber} from '../_models/chapter';
+import {Chapter, LooseLeafOrDefaultNumber, SpecialVolumeNumber} from '../_models/chapter';
 import {LibraryType} from '../_models/library/library';
 import {Volume} from '../_models/volume';
+import {ScrobbleEventType} from '../_models/scrobbling/scrobble-event';
+import {KavitaPlusScrobbleDetails} from "../_models/kavitaplus/kavita-plus-scrobble-details";
 
 const LooseLeafOrSpecial = LooseLeafOrDefaultNumber + '';
 
@@ -14,11 +16,43 @@ export class EntityTitleService {
 
 
   /**
-   * Formats a Chapter name based on the library it's in
-   * @param libraryType
-   * @param plural Pluralize word
-   * @returns
+   * Returns the formatted label for scrobble details with no leading separator. Callers append " - " themselves.
+   * Returns an empty string when there is nothing to display.
    */
+  scrobbleDetailLabel(details: KavitaPlusScrobbleDetails): string {
+    if (details.scrobbleEventType === ScrobbleEventType.ChapterRead) {
+      const parts: string[] = [];
+      if (details.volumeNumber != null && details.volumeNumber !== LooseLeafOrDefaultNumber && details.volumeNumber !== SpecialVolumeNumber) {
+        parts.push(this.translocoService.translate('common.volume-num-shorthand', {num: details.volumeNumber}));
+      }
+      if (details.chapterNumber != null && details.chapterNumber !== LooseLeafOrDefaultNumber && details.chapterNumber !== SpecialVolumeNumber) {
+        parts.push(this.translocoService.translate(this.chapterKey(details.libraryType), {num: details.chapterNumber}));
+      }
+      if (details.percentRead != null) {
+        parts.push((parts.length > 0 ? ' - ' : '') + `${details.percentRead}%`);
+      }
+
+      return parts.join(' ');
+    }
+    if (details.scrobbleEventType === ScrobbleEventType.ScoreUpdated && details.rating != null) {
+      return `${details.rating}/5`;
+    }
+    return '';
+  }
+
+  private chapterKey(libraryType: LibraryType): string {
+    switch (libraryType) {
+      case LibraryType.Comic:
+      case LibraryType.ComicVine:
+        return 'common.issue-num-shorthand';
+      case LibraryType.Book:
+      case LibraryType.LightNovel:
+        return 'common.book-num-shorthand';
+      default:
+        return 'common.chapter-num-shorthand';
+    }
+  }
+
   formatChapterName(libraryType: LibraryType, plural: boolean = false) {
     const pluralKeyPart = plural ? '-plural' : '';
 
@@ -147,6 +181,9 @@ export class EntityTitleService {
           renderText = this.translocoService.translate('entity-title.chapter-num', {num: number});
         } else {
           renderText = volumeTitle;
+          if (fallbackToVolume) {
+            renderText = this.translocoService.translate('entity-title.volume-num', {num: volumeTitle});
+          }
         }
       } else if (fallbackToVolume && isChapter && volumeTitle) {
         renderText = this.translocoService.translate('entity-title.volume-num', {num: volumeTitle});

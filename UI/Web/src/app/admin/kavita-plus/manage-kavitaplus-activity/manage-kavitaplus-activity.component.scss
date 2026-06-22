@@ -1,0 +1,47 @@
+:host {
+  --filter-chip-active-bg: var(--btn-primary-bg-color);
+  --filter-chip-active-color: var(--btn-primary-text-color);
+  display: block;
+}
+
+.stat-header {
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text-muted-color);
+  margin-bottom: 0.375rem;
+}
+
+.stat-value {
+  font-size: 1.5rem;
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+.stat-subtitle {
+  font-size: 0.75rem;
+  color: var(--text-muted-color);
+  margin-top: 0.125rem;
+}
+
+.btn.active-filter {
+  background: var(--filter-chip-active-bg);
+  color: var(--filter-chip-active-color);
+  border-color: transparent;
+}
+
+@media (max-width: 575.98px) {
+  .stats-strip {
+    flex-wrap: wrap;
+
+    .stats-card { flex-basis: calc(50% - 0.75rem); }
+  }
+}
+
+@media (max-width: 991.98px) {
+  .form-select { width: 100% !important; }
+}

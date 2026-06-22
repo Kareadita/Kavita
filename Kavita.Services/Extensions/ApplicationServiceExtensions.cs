@@ -7,10 +7,12 @@ using Kavita.API.Services.Reading;
 using Kavita.API.Services.ReadingLists;
 using Kavita.API.Services.Scanner;
 using Kavita.API.Services.SignalR;
+using Kavita.Models.Entities.Enums;
 using Kavita.Services.Helpers;
 using Kavita.Services.HostedServices;
 using Kavita.Services.Metadata;
 using Kavita.Services.Plus;
+using Kavita.Services.Plus.ScrobbleService;
 using Kavita.Services.Reading;
 using Kavita.Services.ReadingLists;
 using Kavita.Services.Scanner;
@@ -57,6 +59,7 @@ public static class ApplicationServiceExtensions
         services.AddScoped<IFontService, FontService>();
         services.AddScoped<IAnnotationService, AnnotationService>();
         services.AddScoped<IOpdsService, OpdsService>();
+        services.AddScoped<IOAuthService, OAuthService>();
 
         services.AddScoped<IUrlValidationService, UrlValidationService>();
 
@@ -83,13 +86,19 @@ public static class ApplicationServiceExtensions
         services.AddScoped<ISettingsService, SettingsService>();
         services.AddScoped<IAuthKeyService, AuthKeyService>();
 
-
         services.AddScoped<IKavitaPlusApiService, KavitaPlusApiService>();
+        services.AddKeyedScoped<IScrobbleProviderService, MangabakaScrobbleProviderService>(ScrobbleProvider.MangaBaka);
+        services.AddKeyedScoped<IScrobbleProviderService, AniListScrobbleProviderService>(ScrobbleProvider.AniList);
+        services.AddKeyedScoped<IScrobbleProviderService, MyAnimeListScrobbleProviderService>(ScrobbleProvider.Mal);
+        services.AddKeyedScoped<IScrobbleProviderService, HardcoverScrobbleProviderService>(ScrobbleProvider.Hardcover);
+        services.AddScoped<IScrobbleRuleService, ScrobbleRuleService>();
         services.AddScoped<IScrobblingService, ScrobblingService>();
         services.AddScoped<ILicenseService, LicenseService>();
         services.AddScoped<IExternalMetadataService, ExternalMetadataService>();
         services.AddScoped<ISmartCollectionSyncService, SmartCollectionSyncService>();
         services.AddScoped<IWantToReadSyncService, WantToReadSyncService>();
+        services.AddScoped<IKavitaPlusAuditService, KavitaPlusAuditService>();
+        services.AddScoped<IKavitaPlusProviderHealthService, KavitaPlusProviderHealthService>();
 
         services.AddScoped<IOidcService, OidcService>();
 
@@ -99,6 +108,7 @@ public static class ApplicationServiceExtensions
         services.AddScoped<IDeviceTrackingService, DeviceTrackingService>();
 
 
+        services.AddScoped<IFileCacheService, FileCacheService>();
         services.AddSingleton<IReadingSessionService, ReadingSessionService>();
         services.AddSingleton<IEntityNamingService, EntityNamingService>();
         services.AddSingleton<ActiveUserTrackerService>(); // This is required for the below lines. It allows IHostedService.StopAsync() to be called on shutdown

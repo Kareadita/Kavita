@@ -21,6 +21,7 @@ import {NextExpectedChapter} from "../_models/series-detail/next-expected-chapte
 import {QueryContext} from "../_models/metadata/v2/query-context";
 import {ExternalSeriesMatch} from "../_models/series-detail/external-series-match";
 import {SeriesFilterField} from "../_models/metadata/v2/series-filter-field";
+import {MatchSeriesInfo} from "../_models/kavitaplus/match-series-info";
 
 @Injectable({
   providedIn: 'root'
@@ -250,7 +251,14 @@ export class SeriesService {
   }
 
   updateMatch(seriesId: number, series: ExternalSeriesDetail) {
-    return this.httpClient.post<string>(this.baseUrl + `series/update-match?seriesId=${seriesId}&aniListId=${series.aniListId || 0}&malId=${series.malId || 0}&cbrId=${series.cbrId || 0}`, {}, TextResonse);
+    const ids = {
+      aniListId: series.aniListId ?? null,
+      malId: series.malId ?? null,
+      cbrId: series.cbrId ?? null,
+      mangabakaId: series.mangabakaId ?? null,
+      hardcoverId: series.hardcoverId ?? null,
+    };
+    return this.httpClient.post<string>(this.baseUrl + `series/update-match?seriesId=${seriesId}`, ids, TextResonse);
   }
 
   updateDontMatch(seriesId: number, dontMatch: boolean) {
@@ -259,5 +267,9 @@ export class SeriesService {
 
   getSeriesWithAnnotations() {
     return this.httpClient.get<Series[]>(this.baseUrl + 'series/series-with-annotations');
+  }
+
+  getMatchInfo(seriesId: number) {
+    return this.httpClient.get<MatchSeriesInfo>(this.baseUrl + 'series/match-info?seriesId=' + seriesId);
   }
 }

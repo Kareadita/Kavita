@@ -12,10 +12,12 @@ using Kavita.Common;
 using Kavita.Models;
 using Kavita.Models.Builders;
 using Kavita.Models.Constants;
+using Kavita.Models.DTOs.KavitaPlus.Scrobble;
 using Kavita.Models.Entities;
 using Kavita.Models.Entities.Enums;
 using Kavita.Models.Entities.User;
 using Kavita.Models.Extensions;
+using Kavita.Services.Plus;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
@@ -209,6 +211,7 @@ public partial class AccountService(
         AddDefaultStreamsToUser(user, ct);
         AddDefaultHighlightSlotsToUser(user);
         AddAuthKeys(user);
+        AddScrobbleProvidersToUser(user);
         await AddDefaultReadingProfileToUser(user, ct); // Commits
     }
 
@@ -261,6 +264,25 @@ public partial class AccountService(
         unitOfWork.AppUserReadingProfileRepository.Add(profile);
 
         await unitOfWork.CommitAsync(ct);
+    }
+
+    public static void AddScrobbleProvidersToUser(AppUser user)
+    {
+        foreach (var provider in ScrobblingService.AllScrobbleProviders)
+        {
+            user.ScrobbleProviders[provider] = new AppUserScrobbleProvider
+            {
+                Provider = provider,
+                Settings = new ScrobbleProviderSettingsDto()
+                {
+
+                    ProgressScrobbling = true,
+                    RatingScrobbling = true,
+                    WantToReadSync = true,
+                    AllLibraries = true
+                }
+            };
+        }
     }
 
     [GeneratedRegex(@"^[a-zA-Z0-9\-._@+/]*$")]

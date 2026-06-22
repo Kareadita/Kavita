@@ -19,7 +19,6 @@ export class ReadingListProviderPipe implements PipeTransform {
         return this.translocoService.translate('reading-list-provider-pipe.file');
       case ReadingListProvider.Url:
         return this.translocoService.translate('reading-list-provider-pipe.url');
-
     }
   }
 

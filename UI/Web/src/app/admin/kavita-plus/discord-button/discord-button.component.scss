@@ -1,0 +1,43 @@
+:host(.block) {
+  display: block;
+
+  .btn-discord {
+    display: flex;
+    width: 100%;
+    justify-content: center;
+  }
+}
+
+.btn-discord {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  background-color: var(--discord-bg-color);
+  color: var(--discord-text-color);
+  font-size: 0.875rem;
+  font-weight: 500;
+  line-height: 1;
+  border: none;
+  border-radius: 0.25rem;
+  text-decoration: none;
+  cursor: pointer;
+  transition: background-color 0.15s ease;
+
+  &:hover,
+  &:focus-visible {
+    background-color: var(--discord-hover-bg-color);
+    color: var(--discord-text-color);
+  }
+
+  &:active {
+    background-color: var(--discord-active-bg-color);
+    color: var(--discord-text-color);
+  }
+}
+
+.discord-logo {
+  width: 1.25rem;
+  height: 1.25rem;
+  object-fit: contain;
+}

@@ -1,6 +1,6 @@
 <ng-container *transloco="let t; prefix: 'manage-metadata-settings'">
 
-  @if (licenseService.hasValidLicense()) {
+  @if (licenseService.hasActiveLicense()) {
     <p class="alert alert-warning" role="alert">{{t('k+-warning')}}</p>
   }
 

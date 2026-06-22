@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Threading.Tasks;
 using System.Collections.Immutable;
 using System.Collections.Generic;
@@ -6,11 +6,13 @@ using System.Globalization;
 using System.Linq;
 using System.Threading;
 using AutoMapper;
+using Hangfire;
 using Kavita.API.Database;
 using Kavita.API.Services;
 using Kavita.API.Services.Reading;
 using Kavita.Common.Extensions;
 using Kavita.Models.DTOs;
+using Kavita.Models.Entities;
 using Kavita.Models.Entities.Progress;
 using Kavita.Models.Entities.User;
 using Kavita.Services.Comparators;
@@ -96,37 +98,47 @@ public class TachiyomiService(
         {
             // Use R to ensure that localization of underlying system doesn't affect the stringification
             // https://docs.microsoft.com/en-us/globalization/locale/number-formatting-in-dotnet-framework
-            Number = (number / 10_000f).ToString("R", EnglishCulture)
+            Number = (number / 10_000f).ToString("R", EnglishCulture),
+            Files = new List<MangaFileDto>()
         };
     }
 
-    public async Task<bool> MarkChaptersUntilAsRead(AppUser userWithProgress, int seriesId, float chapterNumber,
+    public async Task<bool> MarkChaptersUntilAsRead(AppUser user, int seriesId, float chapterNumber, bool generateReadingSessions,
         CancellationToken ct = default)
     {
-        userWithProgress.Progresses ??= [];
 
-        switch (chapterNumber)
+        logger.LogDebug("Marking chapters until {ChapterNumber} for series {SeriesId} for user {UserId}",
+            chapterNumber, seriesId, user.Id);
+
+        user.Progresses ??= [];
+
+        var chapters = chapterNumber switch
         {
             // When Tachiyomi sync's progress, if there is no current progress in Tachiyomi, 0.0f is sent.
             // Due to the encoding for volumes, this marks all chapters in volume 0 (loose chapters) as read.
             // Hence we catch and return early, so we ignore the request.
-            case 0.0f:
-                return true;
-            case < 1.0f:
-            {
-                // This is a hack to track volume number. We need to map it back by x10,000
-                var volumeNumber = int.Parse($"{(int)(chapterNumber * 10_000)}", EnglishCulture);
-                await readerService.MarkVolumesUntilAsRead(userWithProgress, seriesId, volumeNumber);
-                break;
-            }
-            default:
-                await readerService.MarkChaptersUntilAsRead(userWithProgress, seriesId, chapterNumber);
-                break;
+            0.0f => [],
+            // This is a hack to track volume number. We need to map it back by x10,000
+            < 1.0f => await GetChaptersUntilVolume(seriesId, int.Parse($"{(int)(chapterNumber * 10_000)}", EnglishCulture)),
+            _ => await GetChaptersUntilChapter(seriesId, chapterNumber)
+        };
+
+        if (chapters.Count == 0) return true;
+
+        var chapterIds = chapters.Select(c => c.Id).ToList();
+
+        var progressDictionary = await unitOfWork.AppUserProgressRepository
+            .GetUserProgressForChaptersByChapters(user.Id, seriesId, chapterIds, ct);
+
+        await readerService.MarkChaptersAsRead(user, seriesId, chapters);
+
+        if (generateReadingSessions)
+        {
+            BackgroundJob.Enqueue<IReadingSessionService>(s
+                => s.GenerateReadingSessionForChapters(user.Id, seriesId, progressDictionary, CancellationToken.None));
         }
 
         try {
-            unitOfWork.UserRepository.Update(userWithProgress);
-
             if (!unitOfWork.HasChanges()) return true;
             if (await unitOfWork.CommitAsync(ct)) return true;
         } catch (Exception ex) {
@@ -135,4 +147,29 @@ public class TachiyomiService(
         }
         return false;
     }
+
+    private async Task<List<Chapter>> GetChaptersUntilVolume(int seriesId, int volumeNumber)
+    {
+        var volumes = await unitOfWork.VolumeRepository.GetVolumesForSeriesAsync([seriesId], true);
+
+        return volumes
+            .Where(v => v.MinNumber <= volumeNumber && v.MinNumber > 0)
+            .OrderBy(v => v.MinNumber)
+            .SelectMany(v => v.Chapters)
+            .ToList();
+    }
+
+    private async Task<List<Chapter>> GetChaptersUntilChapter(int seriesId, float chapterNumber)
+    {
+        var volumes = await unitOfWork.VolumeRepository.GetVolumesForSeriesAsync([seriesId], true);
+
+        return volumes
+            .OrderBy(v => v.MinNumber)
+            .SelectMany(v => v.Chapters)
+            .Where(c => !c.IsSpecial && c.MaxNumber <= chapterNumber)
+            .OrderBy(c => c.MinNumber)
+            .ToList();
+    }
+
+
 }

@@ -129,12 +129,7 @@
 
                 <button class="btn btn-primary mb-2 w-100" (click)="downloadCover()" [disabled]="fetchDisabled">{{t('download-coversdb')}}</button>
 
-                <app-cover-image-chooser [(imageUrls)]="imageUrls"
-                                         (imageUrlsChange)="handleUploadByUrl($event)"
-                                         (imageSelected)="updateSelectedIndex($event)"
-                                         (selectedBase64Url)="updateSelectedImage($event)"
-                                         [showReset]="person.coverImageLocked"
-                                         (resetClicked)="handleReset()" />
+                <app-cover-image-chooser [config]="chooserConfig" (coverChanged)="handleCoverChanged($event)" (resetClicked)="handleReset()" />
               </ng-template>
             </li>
           </ul>

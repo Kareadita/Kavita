@@ -24,7 +24,7 @@ export class KavitaTitleStrategy extends TitleStrategy {
       const titleSuffix = route.data['titleSuffix'] || '';
       const entity = this.findInRouteTree(route, titleField);
       if (entity?.[titleProp]) {
-        this.title.setTitle(`${entity[titleProp]}${titleSuffix} (Kavita)`);
+        this.title.setTitle(`${entity[titleProp]}${titleSuffix}`);
         return;
       }
     }

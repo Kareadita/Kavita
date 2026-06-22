@@ -1,0 +1,64 @@
+<ng-container *transloco="let t; prefix: 'kavitaplus-diff'">
+  @if (rows().length) {
+    <div class="diff-scroll">
+    <table class="diff-table small">
+      <thead>
+        <tr>
+          <th>{{t('field-label')}}</th>
+          <th>{{t('before-label')}}</th>
+          <th>{{t('after-label')}}</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (row of rows(); track row.field) {
+          <tr class="top-row">
+            <td class="field-name fw-semibold">{{row.field | metadataFieldChangeKindTitle}}</td>
+            @if (row.subRows.length === 0) {
+              <td class="diff-from">
+                <ng-container *ngTemplateOutlet="cell; context: { $implicit: row.from }" />
+              </td>
+              <td class="diff-to">
+                <ng-container *ngTemplateOutlet="cell; context: { $implicit: row.to }" />
+              </td>
+            } @else {
+              <td colspan="2" class="text-muted fst-italic">{{t('object-expanded')}}</td>
+            }
+          </tr>
+          @for (sub of row.subRows; track sub.key) {
+            <tr class="sub-row">
+              <td class="ps-4 text-muted">{{sub.key}}</td>
+              <td class="diff-from">
+                <ng-container *ngTemplateOutlet="cell; context: { $implicit: sub.from }" />
+              </td>
+              <td class="diff-to">
+                <ng-container *ngTemplateOutlet="cell; context: { $implicit: sub.to }" />
+              </td>
+            </tr>
+          }
+        }
+      </tbody>
+    </table>
+    </div>
+  }
+
+  <ng-template #cell let-c>
+    @switch (c.kind) {
+      @case ('null') {
+        <span class="null-value text-muted fst-italic">{{null | defaultValue}}</span>
+      }
+      @case ('primitive') {
+        {{c.text}}
+      }
+      @case ('array') {
+        <div class="array-items d-flex flex-wrap gap-1">
+          @for (item of c.items; track item) {
+            <span class="badge bg-secondary">{{item}}</span>
+          }
+        </div>
+      }
+      @case ('object') {
+        <span class="text-muted fst-italic">{{t('object-expanded')}}</span>
+      }
+    }
+  </ng-template>
+</ng-container>

@@ -31,6 +31,7 @@ public class BookController(
     /// <param name="chapterId"></param>
     /// <returns></returns>
     [HttpGet("{chapterId}/book-info")]
+    [ChapterAccess]
     [ResponseCache(CacheProfileName = ResponseCacheProfiles.Hour, VaryByQueryKeys = ["chapterId"])]
     public async Task<ActionResult<BookInfoDto>> GetBookInfo(int chapterId)
     {
@@ -126,6 +127,7 @@ public class BookController(
     /// <param name="chapterId"></param>
     /// <returns></returns>
     [HttpGet("{chapterId}/chapters")]
+    [ChapterAccess]
     public async Task<ActionResult<ICollection<BookChapterItem>>> GetBookChapters(int chapterId)
     {
         if (chapterId <= 0) return BadRequest(await localizationService.TranslateAsync(UserId, "chapter-doesnt-exist"));
@@ -152,6 +154,7 @@ public class BookController(
     /// <param name="page"></param>
     /// <returns></returns>
     [HttpGet("{chapterId}/book-page")]
+    [ChapterAccess]
     public async Task<ActionResult<string>> GetBookPage(int chapterId, [FromQuery] int page)
     {
         var chapter = await cacheService.Ensure(chapterId);

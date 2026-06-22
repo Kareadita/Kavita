@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using Kavita.Models.DTOs.Scrobbling;
 using Kavita.Models.Entities.Enums;
+using Kavita.Models.Entities.Enums.KavitaPlus;
 
 namespace Kavita.Models.Extensions;
 
@@ -9,13 +10,13 @@ public static class PlusMediaFormatExtensions
 {
     public static PlusMediaFormat ConvertToPlusMediaFormat(this LibraryType libraryType, MangaFormat? seriesFormat = null)
     {
-
+        // TODO: Amelia, let's rework this with v3/scrobbling
         return libraryType switch
         {
             LibraryType.Manga => seriesFormat is MangaFormat.Epub ? PlusMediaFormat.LightNovel : PlusMediaFormat.Manga,
             LibraryType.Comic => PlusMediaFormat.Comic,
             LibraryType.LightNovel => PlusMediaFormat.LightNovel,
-            LibraryType.Book => PlusMediaFormat.LightNovel,
+            LibraryType.Book => PlusMediaFormat.Book,
             LibraryType.Image => PlusMediaFormat.Manga,
             LibraryType.ComicVine => PlusMediaFormat.Comic,
             _ => throw new ArgumentOutOfRangeException(nameof(libraryType), libraryType, null)

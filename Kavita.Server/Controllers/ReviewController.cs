@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using AutoMapper;
 using Hangfire;
@@ -51,8 +52,9 @@ public class ReviewController(
 
         await unitOfWork.CommitAsync();
 
-        BackgroundJob.Enqueue(() =>
-            scrobblingService.ScrobbleReviewUpdate(user.Id, dto.SeriesId, string.Empty, dto.Body));
+        BackgroundJob.Enqueue(() => scrobblingService.ScrobbleSeriesReviewUpdate(user.Id, dto.SeriesId,
+            string.Empty, dto.Body, CancellationToken.None));
+
         return Ok(mapper.Map<UserReviewDto>(rating));
     }
 
@@ -91,6 +93,9 @@ public class ReviewController(
         unitOfWork.UserRepository.Update(user);
 
         await unitOfWork.CommitAsync();
+
+        BackgroundJob.Enqueue(() => scrobblingService.ScrobbleChapterReviewUpdate(user.Id, dto.SeriesId,
+            chapterId, string.Empty, dto.Body, CancellationToken.None));
 
         return Ok(mapper.Map<UserReviewDto>(rating));
     }

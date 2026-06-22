@@ -6,11 +6,13 @@ using System.Linq;
 using System.Net;
 using System.Net.Sockets;
 using System.Reflection;
+using System.Threading;
 using System.Threading.Tasks;
 using Hangfire;
 using HtmlAgilityPack;
 using Kavita.API.Database;
 using Kavita.API.Services;
+using Kavita.API.Services.Plus;
 using Kavita.Common;
 using Kavita.Common.Constants;
 using Kavita.Common.EnvironmentInfo;
@@ -34,6 +36,7 @@ using Kavita.Server.ManualMigrations.v0._8._7;
 using Kavita.Server.ManualMigrations.v0._8._8;
 using Kavita.Server.ManualMigrations.v0._8._9;
 using Kavita.Server.ManualMigrations.v0._9._0;
+using Kavita.Server.ManualMigrations.v0._9._1;
 using Kavita.Server.Middleware;
 using Kavita.Server.Swagger;
 using Kavita.Services.SignalR;
@@ -396,9 +399,27 @@ public class Startup
             }
             catch (Exception)
             {
-                /* Swallow Exception */
                 Console.WriteLine($"Kavita - v{BuildInfo.Version}");
             }
+
+            _ = Task.Run(async () =>
+            {
+                try
+                {
+                    using var scope = app.ApplicationServices.CreateScope();
+                    var licenseService = scope.ServiceProvider.GetRequiredService<ILicenseService>();
+                    await licenseService.HasActiveLicense(true);
+                }
+                catch (Exception ex)
+                {
+                    logger.LogError(ex, "Failed to warm license cache on startup");
+                }
+                finally
+                {
+                    // Always enqueue even if the license check failed (ScheduleKavitaPlusTasks handles invalid/missing license)
+                    BackgroundJob.Enqueue<ITaskScheduler>(s => s.ScheduleKavitaPlusTasks(CancellationToken.None));
+                }
+            });
         });
 
         logger.LogInformation("Starting with base url as {BaseUrl}", basePath);
@@ -502,6 +523,15 @@ public class Startup
                     await new ManualMigrationRemoveMoreInGenreStream().RunAsync(dataContext, logger);
                     await new ManualMigrateSmartFilterEntityTypeBackfill().RunAsync(dataContext, logger);
                     await new ManualMigrateEpubFontFamilyDetailsBackfill().RunAsync(dataContext, logger);
+                    #endregion
+
+                    #region v0.9.1
+
+                    await new ManualMigrationScrobbleRework().RunAsync(dataContext, logger);
+                    await new ManualMigrationKavitaScrobbleProviders().RunAsync(dataContext, logger);
+                    await new ManualMigrationMetadataProvider().RunAsync(dataContext, logger);
+                    await new ManualMigrationOAuthMigration().RunAsync(dataContext, logger);
+
                     #endregion
 
                     #endregion

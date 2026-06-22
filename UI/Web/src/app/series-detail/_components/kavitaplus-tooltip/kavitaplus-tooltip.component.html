@@ -1,0 +1,140 @@
+<ng-container *transloco="let t; prefix: 'kavitaplus-tooltip'">
+  <div class="kplus-panel d-flex flex-column p-3" [class.pt-1]="!activeOffcanvas">
+
+    <!-- Header (tooltip mode only) -->
+    @if (!activeOffcanvas) {
+      <div class="d-flex align-items-center gap-2 pt-2">
+        <div class="kplus-kbadge d-inline-flex align-items-center justify-content-center flex-shrink-0">K+</div>
+        <span class="kplus-title fw-semibold">{{t('panel-title')}}</span>
+      </div>
+    }
+
+    @if (isLoading()) {
+      <div class="d-flex align-items-center justify-content-center kplus-loading-area">
+        <div class="spinner-border spinner-border-sm" role="status">
+          <span class="visually-hidden">{{t('loading')}}</span>
+        </div>
+      </div>
+    } @else if (seriesInfo(); as info) {
+
+      <div class="kplus-divider"></div>
+
+      <!-- Match sub-row -->
+      <div class="d-flex flex-column gap-2 small text-muted">
+        @if (info.isMatched) {
+
+          @if (info.metadataProvider) {
+            <div class="d-flex flex-column gap-1">
+              <span class="text-uppercase fw-semibold" style="font-size: 10px; letter-spacing: 0.06em;">{{t('metadata-source')}}</span>
+              <div class="d-flex align-items-center gap-2">
+                <app-metadata-provider-tag-badge [metadataProvider]="info.metadataProvider" />
+                @if (info.lastRefreshedUtc != NULL_DATE) {
+                  <span class="text-muted" style="font-size: 11px;">
+                  <i class="ti ti-refresh" aria-hidden="true"></i> {{info.lastRefreshedUtc | utcToLocalDate | timeDifference}}
+                  <span class="dot-separator" aria-hidden="true"></span>
+                  <i class="ti ti-clock" aria-hidden="true"></i> {{t('next-refresh')}} {{info.nextRefreshUtc | utcToLocalTime:'shortDate'}}
+            </span>
+                }
+              </div>
+            </div>
+          }
+
+          @if (info.mangaBakaId || info.hardcoverId || info.cbrId || info.aniListId) {
+            <div class="d-flex flex-column gap-1">
+              <span class="text-uppercase fw-semibold" style="font-size: 10px; letter-spacing: 0.06em;">{{t('linked-to')}}</span>
+              <div class="d-flex align-items-center flex-wrap gap-2">
+                @if (info.mangaBakaId) {
+                  <app-scrobble-provider-tag-badge [provider]="ScrobbleProvider.MangaBaka" [id]="info.mangaBakaId" />
+                }
+                @if (info.hardcoverId) {
+                  <app-scrobble-provider-tag-badge [provider]="ScrobbleProvider.Hardcover" [id]="info.hardcoverId" />
+                }
+                @if (info.cbrId) {
+                  <div class="d-flex align-items-center gap-1">
+                    <app-scrobble-provider-image [provider]="ScrobbleProvider.Cbr" [size]="32" />
+                    {{ScrobbleProvider.Cbr | scrobbleProviderName}}
+                  </div>
+                }
+                @if (info.aniListId) {
+                  <app-scrobble-provider-tag-badge [provider]="ScrobbleProvider.AniList" [id]="info.aniListId" />
+                }
+              </div>
+            </div>
+          }
+
+        } @else {
+          <span class="badge bg-secondary">{{t('unmatched')}}</span>
+        }
+      </div>
+
+      <div class="kplus-divider"></div>
+
+      <!-- Filter chips -->
+      <div class="d-flex flex-wrap gap-1">
+        <button class="kplus-chip" [class.active]="categoryFilter() === null" (click)="setFilter(null)">
+          {{t('filter-all')}} <span class="kplus-chip-count">{{totalCount()}}</span>
+        </button>
+        <button class="kplus-chip" [class.active]="categoryFilter() === AuditCategory.Metadata" (click)="setFilter(AuditCategory.Metadata)">
+          {{t('filter-metadata')}} <span class="kplus-chip-count">{{metadataCount()}}</span>
+        </button>
+        <button class="kplus-chip" [class.active]="categoryFilter() === AuditCategory.Scrobble" (click)="setFilter(AuditCategory.Scrobble)">
+          {{t('filter-scrobble')}} <span class="kplus-chip-count">{{scrobbleCount()}}</span>
+        </button>
+        <button class="kplus-chip" [class.active]="categoryFilter() === AuditCategory.Match" (click)="setFilter(AuditCategory.Match)">
+          {{t('filter-match')}} <span class="kplus-chip-count">{{matchCount()}}</span>
+        </button>
+      </div>
+
+      <div class="kplus-divider"></div>
+
+      <!-- Event list -->
+      <div class="d-flex flex-column">
+        @for (event of displayedEvents(); track event.id) {
+          <div class="kplus-event d-flex align-items-start gap-3">
+
+            <div class="kplus-event-icon d-flex align-items-center justify-content-center kplus-event-icon--{{categoryColorClass(event.category)}}">
+              <app-kavitaplus-audit-event-type-icon [type]="event.eventType" [category]="event.category" />
+            </div>
+            <div class="kplus-event-body">
+              <div class="kplus-event-title">{{event.eventType | kavitaPlusEventType}}</div>
+
+              @let desc = event | kavitaPlusEventDescription;
+              @if (desc) {
+                <div class="kplus-event-desc text-muted">{{desc}}</div>
+              }
+              @if (event.errorMessage) {
+                <div class="kplus-event-desc text-danger">{{event.errorMessage | auditLogError}}</div>
+              }
+
+            </div>
+            <span class="kplus-event-time flex-shrink-0 text-muted text-nowrap">{{event.createdUtc | utcToLocalDate | timeDifference}}</span>
+          </div>
+        } @empty {
+          <div class="text-center text-muted py-3 small">{{t('no-events')}}</div>
+        }
+      </div>
+
+      <div class="kplus-divider"></div>
+
+      <!-- Footer -->
+      <div class="d-flex align-items-center justify-content-between gap-2">
+        <span class="kplus-showing text-muted">{{t('showing-latest', {count: displayedEvents().length})}}</span>
+        <div class="d-flex gap-2">
+          <button class="btn btn-outline-primary btn-sm d-inline-flex align-items-center gap-1" (click)="navigateAndClose(['/settings'], {fragment: SettingsTabId.MyActivity})">
+            <i class="fa-solid fa-user" aria-hidden="true"></i> {{t('my-activity')}}
+          </button>
+          @if (isAdmin()) {
+            <button class="btn btn-success btn-sm d-inline-flex align-items-center gap-1" (click)="navigateAndClose(['/settings'], {fragment: SettingsTabId.ManageKavitaPlusActivity})">
+              <i class="fa-solid fa-list" aria-hidden="true"></i>
+              {{t('admin-feed')}}
+            </button>
+          }
+        </div>
+      </div>
+
+    } @else {
+      <div class="text-center text-muted py-3 small">{{t('no-data')}}</div>
+    }
+
+  </div>
+</ng-container>

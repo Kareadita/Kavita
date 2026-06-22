@@ -20,3 +20,7 @@
         color: var(--input-placeholder-color);
     }
 }
+
+.form-select:disabled {
+  --bs-secondary-bg: var(--dropdown-disabled-bg-color);
+}

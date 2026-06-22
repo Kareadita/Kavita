@@ -1,0 +1,118 @@
+<ng-container *transloco="let t; prefix:'renew-license'">
+
+  <div class="modal-header align-items-start">
+    <div class="d-flex align-items-start gap-3">
+      <div class="screen-icon screen-icon--primary flex-shrink-0">
+        <i class="fa-solid fa-arrows-rotate" aria-hidden="true"></i>
+      </div>
+      <div>
+        <h4 class="modal-title mb-1">{{t('title')}}</h4>
+        <p class="screen-subtitle mb-0">{{t('subtitle')}}</p>
+      </div>
+    </div>
+    <button type="button" class="btn-close" [attr.aria-label]="t('close')" (click)="dismiss.emit()"></button>
+  </div>
+
+  <div class="modal-body d-flex flex-column gap-3">
+
+    @if (checkoutUrl(); as url) {
+
+    <section class="checkout-ready text-center d-flex flex-column align-items-center gap-3">
+      <div class="mt-2">
+        <h5 class="mb-1">{{t('checkout-ready-label')}}</h5>
+        <p class="screen-subtitle mb-0">{{t('checkout-ready-help')}}</p>
+      </div>
+      <a class="btn btn-primary dark-exempt" [href]="url" target="_blank" rel="noopener noreferrer">
+        <i class="fa-solid fa-credit-card me-1" aria-hidden="true"></i>
+        {{t('pay-now-label')}}
+      </a>
+    </section>
+
+    } @else {
+
+    <section>
+      <div class="section-label mb-2">{{t('billing-period-label')}}</div>
+      <div class="d-flex gap-2">
+        <button type="button" class="period-card flex-fill"
+                [class.selected]="selectedInterval() === KavitaPlusBillingInterval.Month"
+                (click)="selectPeriod(KavitaPlusBillingInterval.Month)">
+          <span class="period-radio" aria-hidden="true"></span>
+          <span class="flex-fill text-start">
+            <span class="period-title">{{t('monthly-label')}}</span>
+            @if (formattedPrice(monthlyProduct()); as price) {
+              <span class="period-price">{{ price }} / {{ KavitaPlusBillingInterval.Month | kavitaPlusBillingInterval:'unit' }}</span>
+            }
+          </span>
+        </button>
+
+        <button type="button" class="period-card flex-fill"
+                [class.selected]="selectedInterval() === KavitaPlusBillingInterval.Year"
+                (click)="selectPeriod(KavitaPlusBillingInterval.Year)">
+          <span class="period-radio" aria-hidden="true"></span>
+          <span class="flex-fill text-start">
+            <span class="period-title">{{t('yearly-label')}}</span>
+            @if (formattedPrice(yearlyProduct()); as price) {
+              <span class="period-price">{{ price }} / {{ KavitaPlusBillingInterval.Year | kavitaPlusBillingInterval:'unit' }}</span>
+            }
+          </span>
+        </button>
+      </div>
+    </section>
+
+    <section>
+      <div class="section-label mb-2">{{t('billing-email-label')}}</div>
+      <div class="email-row d-flex align-items-center gap-3">
+        <i class="fa-solid fa-envelope flex-shrink-0" aria-hidden="true"></i>
+        <div class="flex-fill min-w-0">
+          <div class="d-flex align-items-center gap-2">
+            <span class="email-address text-truncate">{{licenseInfo()?.registeredEmail}}</span>
+            <span class="on-file-pill">{{t('on-file-label')}}</span>
+          </div>
+          <div class="email-help">{{t('email-help')}}</div>
+        </div>
+        <button type="button" class="btn btn-link p-0 change-link flex-shrink-0" (click)="changeEmail.emit()">{{t('change-label')}}</button>
+      </div>
+    </section>
+
+    <section>
+      <div class="section-label mb-2">{{t('how-it-works-label')}}</div>
+      <ul class="how-list list-unstyled m-0 d-flex flex-column">
+        <li class="how-item d-flex align-items-start gap-3">
+          <i class="fa-brands fa-stripe-s how-icon flex-shrink-0" aria-hidden="true"></i>
+          <span>{{t('how-step-1', {email: licenseInfo()?.registeredEmail})}}</span>
+        </li>
+        <li class="how-item d-flex align-items-start gap-3">
+          <i class="fa-solid fa-credit-card how-icon flex-shrink-0" aria-hidden="true"></i>
+          <span>{{t('how-step-2')}}</span>
+        </li>
+        <li class="how-item d-flex align-items-start gap-3">
+          <i class="fa-solid fa-bolt how-icon flex-shrink-0" aria-hidden="true"></i>
+          <span>{{t('how-step-3')}}</span>
+        </li>
+      </ul>
+    </section>
+
+    }
+
+  </div>
+
+  <div class="modal-footer">
+    @if (checkoutUrl()) {
+      <button type="button" class="btn btn-primary" (click)="dismiss.emit()">{{t('done-label')}}</button>
+    } @else {
+      <button type="button" class="btn btn-outline-secondary me-2" [disabled]="isSending()" (click)="back.emit()">
+        <i class="fa-solid fa-chevron-left me-1" aria-hidden="true"></i>
+        {{t('back-label')}}
+      </button>
+      <button type="button" class="btn btn-primary" [disabled]="!selectedProduct() || isSending()" (click)="sendLink()">
+        @if (isSending()) {
+          <span class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span>
+        } @else {
+          <i class="fa-solid fa-paper-plane me-1" aria-hidden="true"></i>
+        }
+        {{t('send-link-label')}}
+      </button>
+    }
+  </div>
+
+</ng-container>

@@ -1,0 +1,154 @@
+::ng-deep .kplus-popover {
+  .popover-body {
+    min-width: 28rem;
+    padding: 0;
+  }
+}
+
+::ng-deep .popover {
+  background-color: transparent;
+  border-color: transparent;
+}
+
+.kplus-panel {
+  gap: 0.75rem;
+  overflow-y: auto;
+}
+
+.kplus-kbadge {
+  width: 2rem;
+  height: 2rem;
+  border-radius: 0.375rem;
+  background: var(--btn-primary-bg-color);
+  color: var(--btn-primary-text-color);
+  font-weight: 700;
+  font-size: 0.75rem;
+}
+
+.kplus-title {
+  font-size: 0.9375rem;
+  line-height: 1.2;
+}
+
+.kplus-divider {
+  height: 1px;
+  background: var(--bs-border-color-translucent);
+  margin: 0 -1rem;
+}
+
+.kplus-provider-badge {
+  padding: 0.1rem 0.5rem;
+  border-radius: 999px;
+  color: #fff;
+  font-size: 0.7rem;
+  font-weight: 600;
+  white-space: nowrap;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+// Filter chips
+
+.kplus-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  font-size: 0.75rem;
+  font-weight: 500;
+  line-height: 1;
+  padding: 0.3rem 0.65rem;
+  border-radius: 999px;
+  border: 1px solid var(--bs-border-color);
+  background: transparent;
+  color: var(--body-text-color);
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background 0.12s, border-color 0.12s, color 0.12s;
+
+  &:hover:not(.active) {
+    border-color: var(--btn-primary-bg-color);
+  }
+
+  &.active {
+    background: var(--btn-primary-bg-color);
+    color: var(--btn-primary-text-color);
+    border-color: var(--btn-primary-bg-color);
+
+    .kplus-chip-count {
+      color: var(--btn-primary-text-color);
+      opacity: 0.8;
+    }
+  }
+}
+
+.kplus-chip-count {
+  font-size: 0.7rem;
+  color: var(--text-muted-color);
+}
+
+// Event list
+
+.kplus-loading-area {
+  min-height: 5rem;
+}
+
+.kplus-event {
+  padding: 0.375rem 0;
+
+  & + .kplus-event {
+    border-top: 1px solid var(--bs-border-color-translucent);
+    padding-top: 0.375rem;
+  }
+}
+
+.kplus-event-icon {
+  flex-shrink: 0;
+  width: 2rem;
+  height: 2rem;
+  border-radius: 0.375rem;
+  font-size: 0.8rem;
+
+  &--metadata {
+    background: color-mix(in srgb, var(--audit-log-metadata-color) 15%, transparent);
+  }
+
+  &--scrobble {
+    background: color-mix(in srgb, var(--audit-log-scrobble-color) 15%, transparent);
+  }
+
+  &--match {
+    background: color-mix(in srgb, var(--audit-log-match-color) 15%, transparent);
+  }
+
+  &--sync {
+    background: color-mix(in srgb, var(--audit-log-sync-color) 15%, transparent);
+  }
+}
+
+.kplus-event-body {
+  flex: 1;
+  min-width: 0;
+}
+
+.kplus-event-title {
+  font-size: 0.875rem;
+  font-weight: 500;
+  line-height: 1.3;
+}
+
+.kplus-event-desc {
+  font-size: 0.775rem;
+  margin-top: 0.1rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.kplus-event-time {
+  font-size: 0.75rem;
+  padding-top: 0.125rem;
+}
+
+.kplus-showing {
+  font-size: 0.775rem;
+}

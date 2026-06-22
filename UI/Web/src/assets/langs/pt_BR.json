@@ -106,7 +106,7 @@
         "global-settings-title": "Configurações Globais",
         "page-layout-mode-label": "Modo de Layout de Página",
         "page-layout-mode-tooltip": "Mostrar itens como cartões ou exibição de lista na página Detalhes da série.",
-        "locale-label": "Idioma",
+        "locale-label": "Local",
         "locale-tooltip": "A linguagem que Kavita deve usar",
         "blur-unread-summaries-label": "Desfocar Resumos Não Lidos",
         "blur-unread-summaries-tooltip": "Desfoca o texto do resumo em volumes ou capítulos que não têm progresso de leitura (para evitar spoilers)",
@@ -250,7 +250,7 @@
         "email-updated-title": "E-mail atualizado",
         "email-updated-description": "Você pode usar o link a seguir para confirmar o e-mail da sua conta. Se as configurações de e-mail tiverem sido configuradas, um e-mail será enviado e o link poderá ser usado para confirmar o e-mail.",
         "setup-user-account": "Configurar conta de usuário",
-        "invite-url-label": "URL do Convite",
+        "invite-url-label": "URL de convite",
         "invite-url-tooltip": "Copie isso e cole em uma nova aba",
         "has-invalid-email": "Parece que você não tem um conjunto de e-mail válido. A alteração do e-mail exigirá que o administrador lhe envie um link para concluir esta ação.",
         "required-field": "{{validation.required-field}}",
@@ -485,8 +485,8 @@
     },
     "all-filters": {
         "title": "Todos os Filtros Inteligentes",
-        "count": "{{count}} {{tabs.smart-filters-tab}}",
-        "create": "{{common.create}}"
+        "count": "{{count}} Filtros Inteligentes no Total",
+        "description": "Filtros inteligentes são filtros salvos que podem ser atribuídos à navegação lateral e ao painel. Você pode criá-los para Séries e Listas de Leitura dando um nome e usando o botão Salvar."
     },
     "announcements": {
         "title": "Anúncios"
@@ -507,7 +507,7 @@
         "setup-user-description": "Você pode usar o link a seguir para configurar a conta do seu usuário ou usar o botão copiar. Pode ser necessário sair antes de usar o link para registrar um novo usuário.",
         "setup-user-account": "Configurar conta de usuário",
         "setup-user-account-tooltip": "Copie isso e cole em uma nova aba. Você pode precisar fazer logout.",
-        "invite-url-label": "URL do Convite",
+        "invite-url-label": "Url do Convite",
         "invite": "Convite",
         "inviting": "Convidando…",
         "cancel": "{{common.cancel}}",
@@ -539,9 +539,9 @@
         "activate-description": "Insira a chave de licença e o e-mail usados para se registrar no Stripe",
         "activate-license-label": "Chave de licença",
         "activate-email-label": "{{common.email}}",
-        "activate-discordId-label": "ID de Usuário do Discord",
+        "activate-discordId-label": "ID do Usuário do Discord",
         "activate-discordId-tooltip": "Vincule sua conta Discord ao Kavita+. Isso concede acesso a canais ocultos para moldar Kavita.",
-        "discord-validation": "Este não é um ID de usuário válido do Discord. Seu ID de usuário não é seu nome de usuário no Discord.",
+        "discord-validation": "Este não é um ID de usuário válido do Discord. Seu ID de usuário não é seu nome de usuário discord.",
         "activate-delete": "{{common.delete}}",
         "activate-reset": "Redefinir Licença",
         "activate-reset-tooltip": "Invalidar um registro anterior usando sua licença. Requer licença e e-mail",
@@ -603,7 +603,8 @@
         "completion-label": "{{percent}} completo",
         "force-selected-one-column": "O modo de layout mudou para Uma Coluna devido ao espaço insuficiente para renderizar Duas Colunas",
         "forced-vertical-switch": "O modo de layout foi alterado, pois o layout de Duas Colunas não funciona com o Estilo de Escrita Vertical",
-        "close-reader-alt": "Fechar Leitor"
+        "close-reader-alt": "Fechar Leitor",
+        "shortcuts-menu-alt": "{{manga-reader.shortcuts-menu-alt}}"
     },
     "personal-table-of-contents": {
         "no-data": "Nada Marcado ainda",
@@ -913,8 +914,26 @@
         "length-title": "{{edit-chapter-modal.words-label}}",
         "age-rating-title": "{{metadata-fields.age-rating-title}}",
         "file-path-title": "Arquivos",
-        "folder-path-title": "Caminho da pasta",
-        "external-metadata-title": "Metadados Externos"
+        "folder-path-title": "{{edit-series-modal.folder-path-title}}",
+        "external-metadata-title": "Metadados Externos",
+        "basic-metadata-title": "Metadados Básicos",
+        "read-time-label": "Tempo de leitura",
+        "pages-label": "{{edit-chapter-modal.pages-label}}",
+        "words-label": "{{edit-chapter-modal.words-label}}",
+        "added-label": "Adicionado",
+        "updated-label": "Atualizado",
+        "kavita-id-label": "ID Kavita",
+        "sort-order-label": "{{edit-chapter-modal.sort-order-label}}",
+        "language-label": "Idioma",
+        "is-special-label": "Especial",
+        "pub-status-label": "{{metadata-filter.publication-status-label}}",
+        "yes-label": "Sim",
+        "no-label": "Não",
+        "file-info-title": "Informações do arquivo",
+        "not-set-label": "Não definido",
+        "pages-count": "{{series-detail.pages-count}}",
+        "words-count": "{{series-detail.words-count}}",
+        "bytes-count": "{{num}} bytes"
     },
     "related-tab": {
         "reading-lists-title": "{{reading-lists.title}}",
@@ -1102,7 +1121,7 @@
         "notice": "Aviso:",
         "restart-required": "Alterar porta, URL base, tamanho do cache ou IPs requer uma reinicialização manual do Kavita para entrar em vigor.",
         "base-url-label": "Url Base",
-        "base-url-tooltip": "Use isso se quiser hospedar o Kavita em um URL base, ou seja, seudominio.com/kavita. Não suportado no Docker usando usuário não root.",
+        "base-url-tooltip": "Use isto se quiser hospedar o Kavita em um URL base, ou seja, seudominio.com/kavita. Não há suporte no Docker usando usuário não root.",
         "ip-address-label": "Endereço de IP",
         "ip-address-tooltip": "Lista separada por vírgulas de endereços IP que o servidor escuta. Isso é corrigido se você estiver executando no Docker. Requer reinicialização para entrar em vigor.",
         "port-label": "Porta",
@@ -1253,7 +1272,7 @@
         "select-all": "{{common.select-all}}",
         "filter-label": "{{common.filter}}",
         "last-sync-title": "Última Sincronização:",
-        "source-url-title": "URL da Fonte:",
+        "source-url-title": "URL da fonte:",
         "total-series-title": "Total de Séries:",
         "missing-series-title": "Séries Ausentes:",
         "last-sync-tooltip": "Kavita sincroniza diariamente com o provedor de coleta upstream."
@@ -1405,7 +1424,8 @@
         "double-click": "clique-duplo",
         "close-reader": "Fechar leitor",
         "toggle-menu": "Alternar Menu",
-        "offset-double-page": "{{keybind-setting-description-pipe.key-bind-title-offset-double-page}}"
+        "offset-double-page": "{{keybind-setting-description-pipe.key-bind-title-offset-double-page}}",
+        "navigate-to-settings": "{{keybind-setting-description-pipe.key-bind-title-navigate-to-settings}}"
     },
     "grouped-typeahead": {
         "files": "Arquivos",
@@ -1528,7 +1548,9 @@
         "description": "Nesta tela, você pode criar regras de remapeamento para mapear automaticamente séries ou edições para entidades Kavita. Regras de remapeamento se aplicarão a esta e a futuras listas.",
         "unmatched-count": "{{count}} ausente",
         "refresh": "Atualizar",
-        "wiki": "Wiki"
+        "wiki": "Wiki",
+        "promote": "{{actionable.promote}}",
+        "promote-tooltip": "{{actionable.promote-tooltip}}"
     },
     "pdf-reader": {
         "loading-message": "Carregando...",
@@ -1536,7 +1558,8 @@
         "light-theme-alt": "Tema Claro",
         "dark-theme-alt": "Tema Escuro",
         "close-reader-alt": "Fechar Leitor",
-        "toggle-incognito": "Desative o modo de navegação anônima"
+        "toggle-incognito": "Desative o modo de navegação anônima",
+        "shortcuts-menu-alt": "{{manga-reader.shortcuts-menu-alt}}"
     },
     "pdf-layout-mode-pipe": {
         "single": "Página Única",
@@ -1676,7 +1699,8 @@
         "readinglist-title": "Título",
         "readinglist-releaseyear-start": "Ano de Lançamento (Início)",
         "readinglist-releaseyear-end": "Ano de Lançamento (Fim)",
-        "readinglist-item-count": "Número de Itens"
+        "readinglist-item-count": "Número de Itens",
+        "unread-chapter-count": "Número de Capítulos Não Lidos"
     },
     "edit-series-modal": {
         "title": "{{seriesName}} Detalhes",
@@ -1922,9 +1946,9 @@
         "not-found": "Essa url não existe",
         "generic": "Algo inesperado deu errado",
         "rejected-cover-upload": "A imagem não pôde ser obtida através da URL. Faça download e upload do arquivo.",
-        "invalid-confirmation-url": "URL de confirmação inválida",
+        "invalid-confirmation-url": "Url de confirmação inválida",
         "invalid-confirmation-email": "E-mail de confirmação inválido",
-        "invalid-password-reset-url": "URL de redefinição de senha inválida",
+        "invalid-password-reset-url": "Url de redefinição de senha inválida",
         "delete-theme-in-use": "O tema está em uso por pelo menos um usuário, não é possível excluí-lo",
         "theme-manual-upload": "Ocorreu um problema ao criar o tema a partir do upload manual",
         "theme-already-in-use": "O tema já existe com esse nome",
@@ -2002,7 +2026,8 @@
         "name-label": "Nome",
         "required-field": "Filtros inteligentes precisam de um nome",
         "filter-name-unique": "Os nomes dos Filtros Inteligentes devem ser exclusivos",
-        "no-content": "Esse filtro inteligente não tem resultados no painel"
+        "no-content": "Esse filtro inteligente não tem resultados no painel",
+        "entity-type-label": "Tipo de Entidade"
     },
     "edit-external-source-item": {
         "not-unique": "Existe uma fonte externa com este host. Certifique-se de não ter duplicatas",
@@ -2083,7 +2108,8 @@
         "is-in-last": "É no final de",
         "is-not-in-last": "Não é no final de",
         "must-contains": "Deve Conter",
-        "is-empty": "Está Vazio"
+        "is-empty": "Está Vazio",
+        "is-not-empty": "Não Está Vazio"
     },
     "toasts": {
         "no-pages": "Não há páginas. Kavita não conseguiu ler este arquivo.",
@@ -2156,7 +2182,7 @@
         "confirm-delete-series": "Tem certeza de que deseja excluir esta série? Ele não modificará os arquivos no disco.",
         "confirm-delete-chapter": "Tem certeza de que deseja excluir este capítulo? Não modificará arquivos no disco.",
         "confirm-delete-volume": "Tem certeza de que deseja excluir este volume? Não modificará arquivos no disco.",
-        "alert-bad-theme": "Há um CSS inválido ou inseguro no tema. Entre em contato com seu administrador para corrigir isso. Padrão para tema escuro.",
+        "alert-bad-theme": "Há CSS inválido ou inseguro no tema. Entre em contato com seu administrador para corrigir isso. Padrão para tema escuro.",
         "confirm-library-delete": "Tem certeza de que deseja excluir a biblioteca {{name}}? Você não pode desfazer esta ação.",
         "confirm-library-type-change": "Alterar o tipo de biblioteca acionará uma nova verificação com regras de análise diferentes e poderá levar à recriação de séries e, portanto, você poderá perder progresso e marcadores. Você deve fazer backup antes de fazer isso. Tem certeza de que deseja continuar?",
         "confirm-download-size": "O {{entityType}} é {{size}}. Você tem certeza que quer continuar?",
@@ -2315,7 +2341,13 @@
         "export-v2": "CBL v2",
         "export-v2-tooltip": "Usar CBL v2 (JSON)",
         "mark-as-read-with-session": "Marcar como Lido com a Sessão",
-        "mark-as-read-with-session-tooltip": "Marque o progresso como totalmente lido e gere uma sessão para isso"
+        "mark-as-read-with-session-tooltip": "Marque o progresso como totalmente lido e gere uma sessão para isso",
+        "cbl-manager": "Gerenciador CBL",
+        "cbl-manager-tooltip": "Gerenciar/Sincronizar CBLs",
+        "add-to-dashboard": "Adicionar ao Painel",
+        "add-to-dashboard-tooltip": "Adiciona o filtro inteligente à parte inferior do seu Painel",
+        "add-to-side-nav": "Adicionar à Barra Lateral de Navegação",
+        "add-to-side-nav-tooltip": "Adiciona o filtro inteligente à parte inferior da sua Barra Lateral de Navegação"
     },
     "preferences": {
         "left-to-right": "Esquerda para Direita",
@@ -2542,9 +2574,9 @@
         "close": "{{common.close}}",
         "title": "Correspondente {{seriesName}}",
         "save": "{{common.save}}",
-        "no-results": "Incapaz de encontrar uma correspondência. Tente adicionar a URL de um provedor suportado e tente novamente.",
+        "no-results": "Não foi possível encontrar uma correspondência. Tente adicionar o URL de um provedor compatível e tente novamente.",
         "query-label": "Consulta",
-        "query-tooltip": "Insira o nome da série, URL AniList/MyAnimeList/ComicBookRoundup. As URLs usarão uma consulta direta.",
+        "query-tooltip": "Digite o nome da série, URL AniList/MyAnimeList/ComicBookRoundup. Os URLs usarão uma pesquisa direta.",
         "dont-match-label": "Não Fazer Correspondência",
         "dont-match-tooltip": "Opte por esta série de correspondência e scrobbling",
         "search": "Pesquisar"
@@ -2722,7 +2754,7 @@
         "pdf-theme-tooltip": "Cor do tema do leitor",
         "reading-profile-library-settings-title": "Biblioteca",
         "delete": "{{common.delete}}",
-        "extra-tip": "Atribua perfis de leitura por meio do menu de ações em séries e bibliotecas, ou em massa. Ao alterar as configurações em um leitor, um perfil oculto é criado para lembrar suas escolhas para aquela série (exceto para PDFs). Este perfil é removido quando você atribui um dos seus próprios perfis de leitura à série. Mais informações podem ser encontradas em",
+        "extra-tip": "Atribua perfis de leitura através do menu de ação em séries e bibliotecas, ou em massa. Ao alterar as configurações de um leitor, é criado um perfil oculto que lembra suas escolhas para aquela série (não para PDFs). Este perfil é removido quando você atribui um de seus próprios perfis de leitura à série. Mais informações podem ser encontradas no",
         "make-default": "Definir como padrão",
         "layout-mode-label": "Modo de Layout",
         "add": "{{common.add}}",
@@ -2849,7 +2881,10 @@
         "readinglist-item-count": "{{sort-field-pipe.readinglist-item-count}}",
         "readinglist-tags": "{{metadata-fields.tags-title}}",
         "readinglist-writer": "{{person-role-pipe.writer}}",
-        "readinglist-artist": "{{person-role-pipe.artist}}"
+        "readinglist-artist": "{{person-role-pipe.artist}}",
+        "person-library": "{{stream-list-item.library}}",
+        "readinglist-provider": "Provedor",
+        "readinglist-missing-item-count": "Número de Itens Ausentes"
     },
     "import-mappings": {
         "import-step": "Importar",
@@ -2938,9 +2973,9 @@
         "tls-required": "O provedor OIDC deve usar tls (https)",
         "other-field-invalid": "{{validation.other-field-invalid}}",
         "reset-label": "Redefinir ids",
-        "reset-tooltip": "Redefina IDs externos de todos os usuários, use isso para redefinir os links entre usuários no Kavita e seu provedor de identidade",
-        "reset-confirm": "Você tem certeza de que quer redefinir os IDs externos de todos os usuários?",
-        "reset-success": "IDs externos redefinidos para todos os usuários, re-autenticar para o link",
+        "reset-tooltip": "Redefinir os IDs externos de todos os usuários; use esta opção para redefinir os vínculos entre os usuários no Kavita e o seu provedor de identidade",
+        "reset-confirm": "Tem certeza de que deseja redefinir os IDs externos de todos os usuários?",
+        "reset-success": "IDs externos redefinidos para todos os usuários; reautentique-se para vincular novamente",
         "auto-save-required": "Você mudou as configurações críticas, salve manualmente para mantê-las",
         "checking-authority": "Verificando se a autoridade é válida, por favor, tenha paciência..."
     },
@@ -3012,12 +3047,12 @@
         "clean-tooltip": "Remover todos os estilos"
     },
     "font-manager": {
-        "description": "O leitor epub da Kavita vem com algumas fontes integradas, adicione suas próprias fontes aqui. Faça upload de um arquivo ou use uma URL do Google Fonts. Veja o <a _blank href='{{wikiLink}}' rel='noreferrer noopener'>wiki</a> para mais informações.",
+        "description": "O leitor EPUB do Kavita inclui algumas fontes integradas; adicione suas próprias fontes aqui. Envie um arquivo ou utilize uma URL do Google Fonts. Consulte a <a href='{{wikiLink}}' target='_blank' rel='noreferrer noopener'>wiki</a> para mais informações.",
         "add": "{{common.add}}",
         "drag-n-drop": "{{cover-image-chooser.drag-n-drop}}",
         "upload": "{{cover-image-chooser.upload}}",
         "upload-continued": "um arquivo de fonte",
-        "preview-default": "Envie sua própria fonte via arquivo ou URL do Google Font",
+        "preview-default": "Envie sua própria fonte por arquivo ou por URL do Google Fonts",
         "delete": "{{common.delete}}",
         "no-preview": "Essa fonte não pode ser visualizada. Isso pegará o estilo padrão do livro.",
         "brown-fox": "A rápida raposa marrom pula sobre o cachorro preguiçoso",
@@ -3076,7 +3111,15 @@
         "key-bind-title-page-down": "Página para baixo",
         "key-bind-tooltip-page-down": "Mover uma página para baixo",
         "key-bind-title-offset-double-page": "Deslocar página dupla",
-        "key-bind-tooltip-offset-double-page": "Deslocamento de páginas para alinhamento de páginas duplas"
+        "key-bind-tooltip-offset-double-page": "Deslocamento de páginas para alinhamento de páginas duplas",
+        "key-bind-title-next-chapter": "Capítulo Seguinte",
+        "key-bind-tooltip-next-chapter": "Carrega o capítulo seguinte",
+        "key-bind-title-previous-chapter": "Capítulo Anterior",
+        "key-bind-tooltip-previous-chapter": "Carregar o capítulo anterior",
+        "key-bind-title-first-page": "Primeira Página",
+        "key-bind-tooltip-first-page": "Mover para a primeira página",
+        "key-bind-title-last-page": "Última Página",
+        "key-bind-tooltip-last-page": "Mover para a última página"
     },
     "manage-auth-keys": {
         "auth-keys-title": "Gerenciar Chaves de Autorização",
@@ -3502,12 +3545,14 @@
         "confirm-unlink-extra": "Se você estiver atualmente autenticado com a conta OIDC, será deslogado. Você pode linkar novamente por e-mail a qualquer momento."
     },
     "edit-external-metadata-form": {
-        "aniListId-label": "AniList Id",
+        "aniListId-label": "Id AniList",
         "malId-label": "MAL Id",
-        "mangaBakaId-label": "MangaBaka Id",
-        "hardcoverId-label": "Hardcover Id",
-        "comicVineId-label": "Comic Vine Id",
-        "metronId-label": "Metron Id"
+        "mangaBakaId-label": "Id MangaBaka",
+        "hardcoverId-label": "Id Hardcover",
+        "comicVineId-label": "Id Comic Vine",
+        "metronId-label": "Id Metron",
+        "not-set-label": "Não definido",
+        "isbn-label": "{{edit-chapter-modal.isbn-label}}"
     },
     "cbl-match-tier-pipe": {
         "remap-rule": "Regra de Remapeamento",
@@ -3562,7 +3607,8 @@
         "not-authorized": "Você não tem a capacidade de interagir com este conteúdo",
         "item-count": "{{common.item-count}}",
         "missing-count": "{{reading-list-detail.missing-count}}",
-        "last-checked": "Última Verificação: {{date}}"
+        "last-checked": "Última Verificação: {{date}}",
+        "sync-manual": "Sincronizar (Manual)"
     },
     "manage-remap-rules-modal": {
         "title": "Gerenciar Regras de Remapeamento",
@@ -3682,5 +3728,18 @@
         "custom-label": "Programação Personalizada (Notação de Tempo)",
         "required-field": "{{validation.required-field}}",
         "cron-notation": "Isso não é uma notação de Tempo válida"
+    },
+    "change-username": {
+        "username-label": "{{common.username}}",
+        "new-username-label": "Novo Nome de Usuário",
+        "reset": "{{common.reset}}",
+        "save": "{{common.save}}",
+        "required-field": "{{validation.required-field}}"
+    },
+    "filter-entity-type-pipe": {
+        "series": "{{tabs.series-tab}}",
+        "reading-list": "{{add-to-list-modal.reading-list-label}}",
+        "person": "Pessoa",
+        "annotation": "Anotação"
     }
 }

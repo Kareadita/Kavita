@@ -12,8 +12,6 @@ export class JumpbarService {
   // Used for custom filtered urls
   resumeScroll: {[key: string]: number} = {};
 
-  constructor() { }
-
 
   getResumeKey(key: string) {
     const k = key.toUpperCase();

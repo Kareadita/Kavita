@@ -27,4 +27,10 @@ public class UserParams
         PageSize = 20,
         PageNumber = 1,
     };
+
+    public static readonly UserParams Infinite = new()
+    {
+        PageSize = int.MaxValue,
+        PageNumber = 1,
+    };
 }

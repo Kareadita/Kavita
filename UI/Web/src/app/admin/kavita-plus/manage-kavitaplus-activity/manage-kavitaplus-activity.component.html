@@ -1,0 +1,148 @@
+<ng-container *transloco="let t; prefix: 'manage-kavitaplus-activity'">
+
+  <!-- Stats strip -->
+  <div class="stats-strip d-flex justify-content-between mb-4 gap-3">
+
+    <div class="stats-card card p-3 flex-fill">
+      <div class="stat-header">
+        <i class="fa-solid fa-bolt" aria-hidden="true"></i>
+        <span>{{t('stats-events-label')}}</span>
+      </div>
+      <div class="stat-value">{{stats()?.events24H | defaultValue}}</div>
+    </div>
+
+    <div class="stats-card card p-3 flex-fill">
+      <div class="stat-header text-danger">
+        <i class="fa-solid fa-triangle-exclamation" aria-hidden="true"></i>
+        <span>{{t('stats-failures-label')}}</span>
+      </div>
+      <div class="stat-value text-danger">{{stats()?.failures24H | defaultValue}}</div>
+      @let unresolved = stats()?.unresolvedMatchFailures ?? 0;
+      @if (unresolved > 0) {
+        <div class="stat-subtitle text-danger phone-hidden">{{t('stats-unresolved', {count: unresolved})}}</div>
+      }
+    </div>
+
+    <div class="stats-card card p-3 flex-fill">
+      <div class="stat-header text-success">
+        <i class="fa-solid fa-link" aria-hidden="true"></i>
+        <span>{{t('stats-match-label')}}</span>
+      </div>
+      @if (!stats() || stats()!.totalEligibleSeriesCount === 0) {
+        <div class="stat-value">{{null | defaultValue}}</div>
+      } @else {
+        <div class="stat-value text-success">{{stats()!.matchedSeriesCount}} / {{stats()!.totalEligibleSeriesCount}}</div>
+        <div class="stat-subtitle phone-hidden">
+          <span>{{t('stats-coverage-subtitle', {percent: matchedPercent()})}}</span>
+        </div>
+
+        <div class="stat-subtitle phone-hidden">
+        @if (stats()!.staleMatchesCount > 0) {
+          {{t('stats-stale-subtitle', {count: stats()!.staleMatchesCount})}}
+        }
+        @if (stats()!.blacklistedSeriesCount > 0) {
+          <span class="dot-separator mx-1" aria-hidden="true"></span>
+          {{t('stats-blacklisted-subtitle', {count: stats()!.blacklistedSeriesCount})}}
+        }
+        </div>
+
+      }
+    </div>
+
+    <div class="stats-card card p-3 flex-fill">
+      <div class="stat-header text-warning">
+        <i class="fa-solid fa-tower-broadcast" aria-hidden="true"></i>
+        <span>{{t('stats-queue-label')}}</span>
+      </div>
+      <div class="stat-value text-warning">{{stats()?.scrobbleQueueCount | defaultValue}}</div>
+      @let nextScrobbleDate = nextScrobble();
+      @if (nextScrobbleDate != null) {
+        <div class="stat-subtitle">{{t('next-scrobble', {date: nextScrobbleDate | utcToLocalDate | timeDifference})}}</div>
+      }
+    </div>
+  </div>
+
+  <!-- Filter bar -->
+  <div class="d-flex flex-column flex-lg-row align-items-start align-items-lg-center justify-content-lg-between gap-2 mb-3">
+
+    <div class="d-flex gap-1 flex-wrap flex-shrink-0">
+      <button class="btn btn-sm btn-outline-secondary" [class.active-filter]="categoryFilter() === null"
+              (click)="setCategoryFilter(null)">{{t('filter-all')}}</button>
+      <button class="btn btn-sm btn-outline-secondary" [class.active-filter]="categoryFilter() === KavitaPlusAuditCategory.Match"
+              (click)="setCategoryFilter(KavitaPlusAuditCategory.Match)">{{t('filter-match')}}</button>
+      <button class="btn btn-sm btn-outline-secondary" [class.active-filter]="categoryFilter() === KavitaPlusAuditCategory.Metadata"
+              (click)="setCategoryFilter(KavitaPlusAuditCategory.Metadata)">{{t('filter-metadata')}}</button>
+      <button class="btn btn-sm btn-outline-secondary" [class.active-filter]="categoryFilter() === KavitaPlusAuditCategory.Scrobble"
+              (click)="setCategoryFilter(KavitaPlusAuditCategory.Scrobble)">{{t('filter-scrobble')}}</button>
+      <button class="btn btn-sm btn-outline-secondary" [class.active-filter]="categoryFilter() === KavitaPlusAuditCategory.Sync"
+              (click)="setCategoryFilter(KavitaPlusAuditCategory.Sync)">{{t('filter-sync')}}</button>
+      <button class="btn btn-sm btn-outline-secondary" [class.active-filter]="categoryFilter() === KavitaPlusAuditCategory.System"
+              (click)="setCategoryFilter(KavitaPlusAuditCategory.System)">{{t('filter-system')}}</button>
+    </div>
+
+    <div class="d-flex align-items-center gap-2 flex-wrap">
+
+      @if (categoryFilter() === KavitaPlusAuditCategory.Scrobble) {
+        <label class="visually-hidden" for="providerFilter">{{t('filter-provider-label')}}</label>
+        <select id="providerFilter" class="form-select form-select-sm" style="width: auto"
+          (change)="onProviderFilterChange($any($event.target).value)">
+          <option [value]="null">{{t('filter-provider-label')}}</option>
+          @for (provider of scrobblingService.validExternalScrobbleProviders(); track provider) {
+            <option [value]="provider">{{provider | scrobbleProviderName}}</option>
+          }
+        </select>
+      }
+
+      <label class="visually-hidden" for="auditStatusFilter">{{t('filter-status-label')}}</label>
+      <select id="auditStatusFilter" class="form-select form-select-sm" style="width: auto"
+              (change)="onStatusFilterChange($any($event.target).value)">
+        <option [value]="null">{{t('filter-status-label')}}</option>
+        @for(status of allAuditStatuses; track status) {
+          <option [value]="status">{{status | auditStatusTitle}}</option>
+        }
+      </select>
+
+      <label class="visually-hidden" for="auditSubjectFilter">{{t('filter-subject-label')}}</label>
+      <select id="auditSubjectFilter" class="form-select form-select-sm" style="width: auto"
+              (change)="onSubjectFilterChange($any($event.target).value)">
+        <option [value]="null">{{t('filter-subject-label')}}</option>
+        @for(subject of allAuditSubjectTypes; track subject) {
+          <option [value]="subject">{{subject | auditSubjectTitle}}</option>
+        }
+      </select>
+
+      <label class="visually-hidden" for="auditUserFilter">{{t('filter-user-label')}}</label>
+      <select id="auditUserFilter" class="form-select form-select-sm" style="width: auto"
+              (change)="onUserFilterChange($any($event.target).value)">
+        <option [value]="-1">{{t('filter-user-label')}}</option>
+        @for(member of members(); track member.id) {
+          <option [value]="member.id">{{member.username}}</option>
+        }
+      </select>
+
+      <label class="visually-hidden" for="auditTimeFilter">{{t('filter-timeframe-label')}}</label>
+      <select id="auditTimeFilter" class="form-select form-select-sm" style="width: auto"
+              (change)="onTimeFilterChange($any($event.target).value)">
+        <option value="all" [selected]="timeFrameFilter() === 'all'">{{t('filter-timeframe-label')}}</option>
+        <option value="24h" [selected]="timeFrameFilter() === '24h'">{{t('filter-timeframe-24h')}}</option>
+        <option value="7d" [selected]="timeFrameFilter() === '7d'">{{t('filter-timeframe-7d')}}</option>
+        <option value="30d" [selected]="timeFrameFilter() === '30d'">{{t('filter-timeframe-30d')}}</option>
+      </select>
+    </div>
+
+    <app-search-input [value]="searchQuery()" (search)="onSearchChange($event)" [label]="t('search-alt')" />
+  </div>
+
+  <ng-template #entryTpl let-entry>
+    <app-kavitaplus-audit-entry [entry]="entry" [showStatus]="true" [showUser]="true" [showDiff]="true" />
+  </ng-template>
+
+  <app-kavitaplus-timeline
+    [entries]="entries()"
+    [isLoading]="isLoading()"
+    [hasMore]="hasMore()"
+    [isLoadingMore]="isLoadingMore()"
+    [entryTemplate]="entryTpl"
+    (loadMore)="loadMore()" />
+
+</ng-container>

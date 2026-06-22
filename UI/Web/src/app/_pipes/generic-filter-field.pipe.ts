@@ -66,6 +66,8 @@ export class GenericFilterFieldPipe implements PipeTransform {
 
   private translateReadingListFilterField(value: ReadingListFilterField) {
     switch (value) {
+      case ReadingListFilterField.Provider:
+        return translate('generic-filter-field-pipe.readinglist-provider');
       case ReadingListFilterField.Title:
         return translate('generic-filter-field-pipe.readinglist-title');
       case ReadingListFilterField.ReleaseYear:
@@ -78,6 +80,8 @@ export class GenericFilterFieldPipe implements PipeTransform {
         return translate('generic-filter-field-pipe.readinglist-writer');
       case ReadingListFilterField.Artist:
         return translate('generic-filter-field-pipe.readinglist-artist');
+        case ReadingListFilterField.MissingItemCount:
+        return translate('generic-filter-field-pipe.readinglist-missing-item-count');
     }
   }
 

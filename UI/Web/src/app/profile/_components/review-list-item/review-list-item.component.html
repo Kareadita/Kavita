@@ -51,7 +51,7 @@
       <div class="footer d-flex justify-content-end align-items-center mt-2">
         <div class="text-muted small me-3">
           <span class="visually-hidden">{{t('created-alt')}}</span>
-          <time [attr.datetime]="item.createdUtc">{{item.createdUtc | date:'longDate'}}</time>
+          <time [attr.datetime]="item.createdUtc">{{item.createdUtc | utcToLocalDate | date:'longDate'}}</time>
         </div>
 
         <div class="actions">

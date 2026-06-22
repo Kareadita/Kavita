@@ -43,6 +43,7 @@ public static class ApplicationServiceExtensions
             options.UseInMemory(EasyCacheProfiles.License);
             options.UseInMemory(EasyCacheProfiles.LicenseInfo);
             options.UseInMemory(EasyCacheProfiles.KavitaPlusMatchSeries);
+            options.UseInMemory(EasyCacheProfiles.ProviderHealth);
         });
 
         services.AddMemoryCache(options =>

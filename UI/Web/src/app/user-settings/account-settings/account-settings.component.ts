@@ -4,9 +4,6 @@ import {
 } from "src/app/user-settings/change-age-restriction/change-age-restriction.component";
 import {ChangeEmailComponent} from "src/app/user-settings/change-email/change-email.component";
 import {ChangePasswordComponent} from "src/app/user-settings/change-password/change-password.component";
-import {
-  ManageScrobblingProvidersComponent
-} from "src/app/user-settings/manage-scrobbling-providers/manage-scrobbling-providers.component";
 import {AccountService} from "src/app/_services/account.service";
 import {ConfirmService} from "src/app/shared/confirm.service";
 import {EMPTY, filter, from, switchMap} from "rxjs";
@@ -20,7 +17,6 @@ import {ChangeUsernameComponent} from "../change-username/change-username.compon
     ChangeAgeRestrictionComponent,
     ChangeEmailComponent,
     ChangePasswordComponent,
-    ManageScrobblingProvidersComponent,
     ImageComponent,
     TranslocoDirective,
     ChangeUsernameComponent

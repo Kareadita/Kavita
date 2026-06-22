@@ -1,0 +1,110 @@
+<ng-container *transloco="let t; prefix:'manage-user-scrobble-provider-modal'">
+  <div class="modal-header">
+    <div class="d-flex align-items-center gap-2">
+      <app-scrobble-provider-image [provider]="userScrobbleProvider().provider" [size]="40" />
+      <h4 class="modal-title">{{t('title', { provider: userScrobbleProvider().provider | scrobbleProviderName })}}</h4>
+    </div>
+    <button type="button" class="btn-close" [attr.aria-label]="t('close')" (click)="close()"></button>
+  </div>
+
+  <div class="modal-body">
+
+    <div class="row g-2 mb-3">
+      <div class="col-4">
+        <dl>
+          <dt class="text-muted small">{{t('valid-until-label')}}</dt>
+          <dd [ngbTooltip]="userScrobbleProvider().validUntilUtc | utcToLocalTime">{{ userScrobbleProvider().validUntilUtc | utcToLocalDate | timeDifference | defaultValue }}</dd>
+        </dl>
+      </div>
+      <div class="col-4">
+        <dl>
+          <dt class="text-muted small">{{t('last-synced-label')}}</dt>
+          @let lastSyncedUtc = userScrobbleProvider().lastSyncedUtc | utcToLocalTime;
+          @if (lastSyncedUtc) {
+            <dd [ngbTooltip]="lastSyncedUtc">{{ userScrobbleProvider().lastSyncedUtc | utcToLocalDate | timeDifference }}</dd>
+          } @else {
+            <dd>{{t('not-synced')}}</dd>
+          }
+        </dl>
+      </div>
+      <div class="col-4">
+        <dl>
+          <dt class="text-muted small">{{t('event-generation-label')}}</dt>
+          @let scrobbleEventGenerationRan = userScrobbleProvider().scrobbleEventGenerationRan | utcToLocalTime;
+          @if (scrobbleEventGenerationRan && scrobbleEventGenerationRan !== NULL_DATE) {
+            <dd [ngbTooltip]="scrobbleEventGenerationRan">{{ userScrobbleProvider().scrobbleEventGenerationRan | utcToLocalDate | timeDifference }}</dd>
+          } @else {
+            <dd>{{t('event-generation-not-run')}}</dd>
+          }
+        </dl>
+      </div>
+    </div>
+
+    @if (formGroup) {
+      <form [formGroup]="formGroup" class="row">
+        <div class="col-12">
+          <app-setting-item [title]="t('username-label')" [canEdit]="false">
+            <ng-template #view>
+              {{ formGroup.get('userName')?.value | defaultValue }}
+            </ng-template>
+          </app-setting-item>
+        </div>
+
+        <div class="col-12 mt-4">
+          <app-setting-item [title]="t('authentication-token-label')" labelId="authentication-token">
+            <ng-template #view>
+              <span class="font-monospace text-muted small">
+                {{ formGroup.get('authenticationToken')?.value | truncate:50:true | defaultValue }}
+              </span>
+            </ng-template>
+            <ng-template #edit>
+              <textarea class="form-control" formControlName="authenticationToken" id="authentication-token"></textarea>
+            </ng-template>
+          </app-setting-item>
+        </div>
+
+        <div class="col-12 mt-4">
+          <app-setting-item [title]="t('refresh-token-label')" labelId="refresh-token">
+            <ng-template #view>
+              <span class="font-monospace text-muted small">
+                {{ formGroup.get('refreshToken')?.value | truncate:50:true | defaultValue }}
+              </span>
+            </ng-template>
+            <ng-template #edit>
+              <textarea class="form-control" formControlName="refreshToken" id="refresh-token"></textarea>
+            </ng-template>
+          </app-setting-item>
+        </div>
+
+        @if (generateTokenLink(); as tokenLink) {
+          <div class="text-end">
+            <div class="col-auto d-flex d-md-block justify-content-sm-center text-md-end mb-3">
+              <a class="flex-fill btn btn-secondary me-2"
+                 [href]="tokenLink | safeUrl"
+                 target="_blank" rel="noopener noreferrer">{{t('generate')}}</a>
+            </div>
+          </div>
+        }
+
+        @if (oAuthFlowLink(); as oAuthFlowLink) {
+          <div class="text-end">
+            <div class="col-auto d-flex d-md-block justify-content-sm-center text-md-end mb-3">
+              <a class="flex-fill btn btn-primary me-2"
+                 [href]="oAuthFlowLink | safeUrl"
+                 target="_blank" rel="noopener noreferrer"
+                 [ngbTooltip]="t('connect-tooltip')">{{t('connect-label')}}</a>
+            </div>
+          </div>
+        }
+
+      </form>
+    }
+
+  </div>
+
+  <div class="modal-footer">
+    <button class="btn btn-outline-secondary me-auto" [disabled]="!canGenerateEvents()" (click)="generateEvents()" [attr.aria-label]="t('generate-scrobble-events')">{{t('generate-scrobble-events')}}</button>
+    <button class="btn btn-secondary" (click)="close()" [attr.aria-label]="t('close')">{{t('close')}}</button>
+    <button class="btn btn-primary" [disabled]="!formGroup.dirty || formGroup.invalid" (click)="save()" [attr.aria-label]="t('save')">{{t('save')}}</button>
+  </div>
+</ng-container>

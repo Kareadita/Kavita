@@ -68,7 +68,7 @@ export class ManageCustomKeyBindsComponent implements OnInit {
   protected duplicatedKeyBinds = signal<Partial<Record<KeyBindTarget, number[]>>>({});
   protected filteredKeyBindGroups = computed(() => {
     const roles = this.accountService.currentUser()!.roles;
-    const hasKPlus = this.licenseService.hasValidLicense();
+    const hasKPlus = this.licenseService.hasActiveLicense();
 
     return KeyBindGroups.map(g => {
       g.elements = g.elements.filter(e => {

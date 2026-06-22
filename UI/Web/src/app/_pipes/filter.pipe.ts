@@ -5,9 +5,9 @@ import { Pipe, PipeTransform } from '@angular/core';
   pure: false,
   standalone: true
 })
-export class FilterPipe implements PipeTransform {
+export class FilterPipe<T> implements PipeTransform {
 
-  transform(items: any[], callback: (item: any) => boolean): any {
+  transform(items: T[], callback: (item: T) => boolean): T[] {
     if (!items || !callback) {
         return items;
     }

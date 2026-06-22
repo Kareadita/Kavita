@@ -1,4 +1,5 @@
 export interface PersonalToC {
+  id: number;
   chapterId: number;
   pageNumber: number;
   title: string;

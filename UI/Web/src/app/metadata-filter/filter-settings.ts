@@ -39,7 +39,7 @@ export class PersonFilterSettings extends FilterSettingsBase<PersonFilterField, 
   type: ValidFilterEntity = 'person';
 }
 
-export class AnnotationsFilterSettings extends FilterSettingsBase<AnnotationsFilterField, AnnotationsSortField> {
+export class AnnotationFilterSettings extends FilterSettingsBase<AnnotationsFilterField, AnnotationsSortField> {
   type : ValidFilterEntity = 'annotation';
 }
 

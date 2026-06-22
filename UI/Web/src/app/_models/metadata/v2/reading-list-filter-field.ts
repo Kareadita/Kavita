@@ -5,6 +5,8 @@ export enum ReadingListFilterField {
   Tags = 4,
   Writer = 5,
   Artist = 6,
+  Provider = 7,
+  MissingItemCount = 8
 }
 
 export const allReadingListFilterFields = Object.keys(ReadingListFilterField)

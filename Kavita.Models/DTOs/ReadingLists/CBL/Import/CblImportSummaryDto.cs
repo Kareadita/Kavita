@@ -19,5 +19,9 @@ public sealed record CblImportSummaryDto
     /// Are we updating a pre-existing list or not
     /// </summary>
     public bool IsUpdate { get; set; }
+    /// <summary>
+    /// Id of the reading list
+    /// </summary>
+    public int ReadingListId { get; set; }
 
 }

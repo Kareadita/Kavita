@@ -14,6 +14,7 @@ import {of, switchMap} from "rxjs";
 import {allPersonFilterFields, PersonFilterField} from "../../_models/metadata/v2/person-filter-field";
 import {allPersonSortFields} from "../../_models/metadata/v2/person-sort-field";
 import {
+  AnnotationFilterSettings,
   FilterSettingsBase,
   PersonFilterSettings,
   ReadingListFilterSettings,
@@ -260,7 +261,7 @@ export class FilterUtilitiesService {
         ] as unknown as T[];
       case 'readinglist':
         return [
-          ReadingListFilterField.Writer, ReadingListFilterField.Artist, ReadingListFilterField.Tags
+          ReadingListFilterField.Writer, ReadingListFilterField.Artist, ReadingListFilterField.Tags, ReadingListFilterField.Provider
         ] as unknown as T[];
     }
   }
@@ -307,7 +308,7 @@ export class FilterUtilitiesService {
         ] as unknown as T[];
       case 'readinglist':
         return [
-          ReadingListFilterField.ItemCount
+          ReadingListFilterField.ItemCount, ReadingListFilterField.MissingItemCount
         ] as unknown as T[];
     }
   }
@@ -387,7 +388,7 @@ export class FilterUtilitiesService {
       case 'person':
         return [] as unknown as T[];
       case 'readinglist':
-        return [] as unknown as T[];
+        return [ReadingListFilterField.Provider] as unknown as T[];
     }
   }
 
@@ -432,17 +433,17 @@ export class FilterUtilitiesService {
     return this.getFieldsThatShouldIncludeIsEmpty<T>(type);
   }
 
-  getDefaultSettings(entityType: ValidFilterEntity | 'other' | undefined): FilterSettingsBase<any, any> {
-    if (entityType === 'other' || entityType === undefined) {
-      // It doesn't matter, return series type
-      return new SeriesFilterSettings();
+  getDefaultSettings(entityType: ValidFilterEntity): FilterSettingsBase<any, any> {
+    switch (entityType) {
+      case "series":
+        return new SeriesFilterSettings();
+      case "person":
+        return new PersonFilterSettings();
+      case "annotation":
+        return new AnnotationFilterSettings();
+      case "readinglist":
+        return new ReadingListFilterSettings();
     }
-
-    if (entityType == 'series') return new SeriesFilterSettings();
-    if (entityType == 'person') return new PersonFilterSettings();
-    if (entityType == 'readinglist') return new ReadingListFilterSettings();
-
-    return new SeriesFilterSettings();
   }
 
   /**
@@ -458,6 +459,15 @@ export class FilterUtilitiesService {
               FilterComparison.LessThan, FilterComparison.LessThanEqual
             ]
         }
+        break;
+      case 'readinglist':
+        switch (field) {
+          case ReadingListFilterField.Provider:
+            return [
+              FilterComparison.Equal, FilterComparison.NotEqual
+            ]
+        }
+        break;
     }
 
     return null;

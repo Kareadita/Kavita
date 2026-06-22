@@ -28,8 +28,12 @@ import {
   NgbNavItem,
   NgbNavLink,
   NgbNavOutlet,
+  NgbPopover,
   NgbTooltip
 } from '@ng-bootstrap/ng-bootstrap';
+import {DrawerService} from '../../../_services/drawer.service';
+import {KavitaplusDrawerComponent} from '../kavitaplus-drawer/kavitaplus-drawer.component';
+import {KavitaplusTooltipComponent} from '../kavitaplus-tooltip/kavitaplus-tooltip.component';
 import {ToastrService} from 'ngx-toastr';
 import {catchError, debounceTime, EMPTY, of, ReplaySubject, tap} from 'rxjs';
 import {BulkSelectionService} from 'src/app/cards/bulk-selection.service';
@@ -69,7 +73,7 @@ import {NextExpectedCardComponent} from "../../../cards/next-expected-card/next-
 import {MetadataService} from "../../../_services/metadata.service";
 import {Rating} from "../../../_models/rating";
 import {ThemeService} from "../../../_services/theme.service";
-import {DetailsTabComponent} from "../../../_single-module/details-tab/details-tab.component";
+import {BasicMetadataInfo, DetailsTabComponent} from "../../../_single-module/details-tab/details-tab.component";
 import {ChapterRemovedEvent} from "../../../_models/events/chapter-removed-event";
 import {SettingsTabId} from "../../../sidenav/preference-nav/preference-nav.component";
 import {SeriesFilterField} from "../../../_models/metadata/v2/series-filter-field";
@@ -123,6 +127,7 @@ import {ReadingHistoryItem} from "src/app/_models/stats/reading-history-item";
 import {StatisticsService} from "src/app/_services/statistics.service";
 import {Pagination} from "src/app/_models/pagination";
 import {ReadingHistoryViewerComponent} from "src/app/shared/reading-history-viewer/reading-history-viewer.component";
+import {SeriesUpdateEvent} from "../../../_models/events/series-update-event";
 
 interface StoryLineItem {
   chapter?: ChapterCardEntity;
@@ -140,7 +145,7 @@ const READING_HISTORY_PAGE_SIZE = 10;
   imports: [CardActionablesComponent, ReactiveFormsModule, NgStyle,
     NgbTooltip, NgbDropdown, NgbDropdownToggle, NgbDropdownMenu,
     NgbDropdownItem, BulkOperationsComponent,
-    NgbNav, NgbNavItem, NgbNavLink, NgbNavContent, VirtualScrollerModule, SeriesCardComponent, ExternalSeriesCardComponent, NgbNavOutlet,
+    NgbNav, NgbNavItem, NgbNavLink, NgbNavContent, VirtualScrollerModule, SeriesCardComponent, ExternalSeriesCardComponent, NgbNavOutlet, NgbPopover, KavitaplusTooltipComponent,
     TranslocoDirective, NgTemplateOutlet, NextExpectedCardComponent,
     NgClass, DetailsTabComponent, DefaultValuePipe, ExternalRatingComponent, ReadMoreComponent, RouterLink, BadgeExpanderComponent,
     PublicationStatusPipe, MetadataDetailRowComponent, DownloadButtonComponent, RelatedTabComponent, CoverImageComponent, ReviewsComponent,
@@ -180,6 +185,7 @@ class SeriesDetailComponent implements OnInit, AfterViewInit {
   protected readonly breakpointService = inject(BreakpointService);
   private readonly entityTitleService = inject(EntityTitleService);
   private readonly statisticsService = inject(StatisticsService);
+  private readonly drawerService = inject(DrawerService);
 
   readonly scrollingBlock = viewChild<ElementRef<HTMLDivElement>>('scrollingBlock');
 
@@ -239,9 +245,7 @@ class SeriesDetailComponent implements OnInit, AfterViewInit {
   protected readonly isLoadingReadingHistory = signal(false);
   protected readonly readingHistoryCurrentPage = signal(1);
 
-  isAdmin = computed(() => {
-    return this.accountService.hasAdminRole();
-  });
+  readonly isAdmin = this.accountService.hasAdminRole;
 
   activeTabId = Tabs.Storyline;
   mobileSeriesImgBackground = this.themeService.getCssVariable('--mobile-series-img-background');
@@ -252,7 +256,7 @@ class SeriesDetailComponent implements OnInit, AfterViewInit {
 
   libraryAllowsScrobbling  = signal<boolean>(false);
   isScrobbling = signal<boolean>(true);
-  showScrobbleControls = computed(() => this.licenseService.hasValidLicense() && this.libraryAllowsScrobbling());
+  showScrobbleControls = computed(() => this.licenseService.hasActiveLicense() && this.libraryAllowsScrobbling());
 
   currentlyReadingChapter = signal<Chapter | null>(null);
   continueReadingTitle = computed(() => {
@@ -328,7 +332,7 @@ class SeriesDetailComponent implements OnInit, AfterViewInit {
   unreadCount = signal(0);
   totalCount = signal(0);
   seriesActions = computed(() => {
-    const hasLicense = this.licenseService.hasValidLicense();
+    const hasLicense = this.licenseService.hasActiveLicense();
     let actions = this.actionFactoryService.getSeriesActions()
       .filter(action => action.action !== Action.Edit);
     if (!hasLicense) {
@@ -410,6 +414,21 @@ class SeriesDetailComponent implements OnInit, AfterViewInit {
     if (!webLinks) return [];
 
     return webLinks.split(',');
+  });
+
+  seriesBasicMetadata = computed<BasicMetadataInfo>(() => {
+    const s = this.series();
+    const meta = this.seriesMetadata();
+    return {
+      readingTime: s,
+      pages: s.pages,
+      words: s.wordCount,
+      addedAt: s.created,
+      updatedAt: s.lastChapterAdded,
+      kavitaId: s.id,
+      language: meta?.language || null,
+      publicationStatus: meta?.publicationStatus ?? null,
+    };
   });
 
   trackStoryLineIdentity = (index: number, item: StoryLineItem) => item.isChapter ? `${item.chapter!.data.id}_ch_storyline` : `${item.volume!.data.id}_vol_storyline`;
@@ -505,7 +524,7 @@ class SeriesDetailComponent implements OnInit, AfterViewInit {
         }
       } else if (event.event === EVENTS.CoverUpdate) {
         const coverUpdateEvent = event.payload as CoverUpdateEvent;
-        if (coverUpdateEvent.id === this.seriesId()) {
+        if (coverUpdateEvent.id === this.seriesId() && coverUpdateEvent.entityType === 'series') {
           this.themeService.refreshColorScape('series', this.seriesId()).subscribe();
         }
       } else if (event.event === EVENTS.ChapterRemoved) {
@@ -515,6 +534,10 @@ class SeriesDetailComponent implements OnInit, AfterViewInit {
       } else if (event.event === EVENTS.VolumeRemoved) {
         const volumeRemoveEvent = event.payload as VolumeRemovedEvent;
         if (volumeRemoveEvent.seriesId === this.seriesId()) {
+          this.loadPageSource.next(false);
+        }
+      } else if (event.event === EVENTS.SeriesUpdated) {
+        if ((event.payload as SeriesUpdateEvent).id === this.seriesId()) {
           this.loadPageSource.next(false);
         }
       }
@@ -895,6 +918,11 @@ class SeriesDetailComponent implements OnInit, AfterViewInit {
       this.scrobbleService.removeHold(this.seriesId()).subscribe();
     }
     this.isScrobbling.update(x => !x);
+  }
+
+  openKavitaPlusDrawer() {
+    const ref = this.drawerService.open(KavitaplusDrawerComponent, { position: 'end', panelClass: 'kplus-offcanvas' });
+    ref.setInput('seriesId', this.seriesId());
   }
 
   switchTabsToDetail() {

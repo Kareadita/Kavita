@@ -1,0 +1,88 @@
+:host {
+  --banner-primary-color:         var(--primary-color);
+  --banner-primary-subtext-color: var(--bs-body-bg, #0d2d20);
+  --banner-danger-color:          var(--error-color);
+  --banner-danger-subtext-color:  var(--bs-white, #fff);
+  --banner-warning-color:         var(--warning-color);
+  --banner-warning-subtext-color: var(--bs-dark, #1a1000);
+  --banner-subtle-color:          var(--bs-secondary-color, #8b95a5);
+
+  --banner-color:         var(--banner-primary-color);
+  --banner-subtext-color: var(--banner-primary-subtext-color);
+
+  display: block;
+}
+
+:host([color='danger']) {
+  --banner-color:         var(--banner-danger-color);
+  --banner-subtext-color: var(--banner-danger-subtext-color);
+}
+
+:host([color='warning']) {
+  --banner-color:         var(--banner-warning-color);
+  --banner-subtext-color: var(--banner-warning-subtext-color);
+}
+
+.banner {
+  display: flex;
+  align-items: center;
+  gap: 0.875rem;
+  padding: 1rem 1.25rem;
+  background: var(--elevation-layer1-dark-solid);
+  border: 1px solid var(--hr-color);
+  border-radius: 0.5rem;
+}
+
+.banner--cta {
+  background: linear-gradient(
+    90deg,
+    color-mix(in srgb, var(--banner-color) 16%, transparent),
+    color-mix(in srgb, var(--banner-color) 4%, transparent) 60%
+  );
+  border-color: color-mix(in srgb, var(--banner-color) 30%, transparent);
+  border-left: 3px solid var(--banner-color);
+}
+
+.banner-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.125rem;
+  height: 2.125rem;
+  border-radius: 0.5rem;
+  background: color-mix(in srgb, var(--banner-color) 12%, transparent);
+  color: var(--banner-color);
+  flex-shrink: 0;
+  font-size: 0.875rem;
+}
+
+.banner-icon--circle {
+  border-radius: 50%;
+  background: var(--banner-color);
+  color: var(--banner-subtext-color);
+}
+
+.banner-title {
+  font-size: 0.92rem;
+  font-weight: 600;
+}
+
+.banner-body {
+  font-size: 0.78rem;
+  line-height: 1.55;
+  margin-top: 0.125rem;
+}
+
+.banner-action {
+  flex-shrink: 0;
+  font-size: 0.82rem;
+  white-space: nowrap;
+}
+
+.banner:not(.banner--cta) .banner-action {
+  font-size: 0.74rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--banner-subtle-color);
+}

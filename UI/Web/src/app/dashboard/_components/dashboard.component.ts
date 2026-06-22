@@ -37,7 +37,7 @@ import {Genre} from "../../_models/metadata/genre";
 import {DashboardStream} from "../../_models/dashboard/dashboard-stream";
 import {StreamType} from "../../_models/dashboard/stream-type.enum";
 import {LoadingComponent} from "../../shared/loading/loading.component";
-import {ScrobbleProvider, ScrobblingService} from "../../_services/scrobbling.service";
+import {ScrobblingService} from "../../_services/scrobbling.service";
 import {ToastrService} from "ngx-toastr";
 import {SettingsTabId} from "../../sidenav/preference-nav/preference-nav.component";
 import {ReaderService} from "../../_services/reader.service";
@@ -51,6 +51,7 @@ import {FilterEntityType} from "../../_models/metadata/v2/filter-entity-type";
 import {ReadingListService} from "../../_services/reading-list.service";
 import {PersonService} from "../../_services/person.service";
 import {AnnotationService} from "../../_services/annotation.service";
+import {ScrobbleProviderNamePipe} from "../../_pipes/scrobble-provider-name.pipe";
 
 enum StreamId {
   OnDeck,
@@ -89,6 +90,8 @@ export class DashboardComponent {
   private readonly readerService = inject(ReaderService);
   private readonly licenseService = inject(LicenseService);
   private readonly cardConfigFactory = inject(CardConfigFactory);
+
+  private readonly scrobbleProviderNamePipe = new ScrobbleProviderNamePipe();
 
   libraries$: Observable<Library[]> = this.libraryService.getLibraries().pipe(take(1), takeUntilDestroyed(this.destroyRef))
   isLoadingDashboard = signal<boolean>(true);
@@ -146,15 +149,16 @@ export class DashboardComponent {
       }
     });
 
-    this.licenseService.hasAnyLicense()
-      .pipe(
-        filter((hasLic: boolean) => hasLic),
-        switchMap(_ => this.scrobblingService.hasTokenExpired(ScrobbleProvider.AniList)),
-      ).subscribe((hasExpired: boolean) => {
-      if (hasExpired) {
-        this.toastr.error(translate('toasts.anilist-token-expired'));
-      }
-    });
+    if (this.licenseService.hasActiveLicense()) {
+      this.scrobblingService.checkExpiredTokens()
+        .pipe(
+          takeUntilDestroyed(this.destroyRef),
+          filter(providers => providers.length > 0),
+          map(providers => providers.map(this.scrobbleProviderNamePipe.transform).join(', ')),
+          switchMap(providerNames => this.toastr.error(providerNames, translate('toasts.tokens-expired')).onTap),
+          tap(() => this.router.navigateByUrl('/settings#' + SettingsTabId.ScrobbleSettings).catch(console.error))
+        ).subscribe();
+    }
   }
 
   smartFilterNextPage(stream: DashboardStream) {
@@ -302,7 +306,20 @@ export class DashboardComponent {
   }
 
   async handleFilterSectionClick(stream: DashboardStream) {
-    await this.router.navigateByUrl('all-series?' + stream.smartFilterEncoded);
+    switch (stream.entityType) {
+      case FilterEntityType.Series:
+        await this.router.navigateByUrl('all-series?' + stream.smartFilterEncoded);
+        break;
+      case FilterEntityType.ReadingList:
+        await this.router.navigateByUrl('lists?' + stream.smartFilterEncoded);
+        break;
+      case FilterEntityType.Annotation:
+        await this.router.navigateByUrl('browse/annotations?' + stream.smartFilterEncoded);
+        break;
+      case FilterEntityType.Person:
+        await this.router.navigateByUrl('browse/people?' + stream.smartFilterEncoded);
+        break;
+    }
   }
 
   // TODO: See if we can put this into the carousel and have a custom tokens (not in the original list) to forward to a callback handler

@@ -1,0 +1,73 @@
+.hub-subtitle {
+  font-size: 0.8rem;
+  color: var(--text-muted-color);
+}
+
+.action-icon {
+  width: 2.375rem;
+  height: 2.375rem;
+  border-radius: 0.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1rem;
+
+  &--primary {
+    background: color-mix(in srgb, var(--primary-color) 20%, transparent);
+    color: var(--primary-color);
+  }
+
+  &--danger {
+    background: color-mix(in srgb, var(--error-color) 20%, transparent);
+    color: var(--error-color);
+  }
+
+  &--info {
+    background: color-mix(in srgb, var(--primary-color) 14%, transparent);
+    color: color-mix(in srgb, var(--primary-color) 70%, var(--body-text-color));
+  }
+
+  &--brand {
+    background: color-mix(in srgb, var(--primary-color) 16%, transparent);
+    color: var(--primary-color);
+  }
+}
+
+.action-card {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  width: 100%;
+  padding: 1rem 1.25rem;
+  border-radius: 0.75rem;
+  border: 1px solid var(--hr-color);
+  background: var(--elevation-layer1-dark-solid);
+  text-decoration: none;
+  transition: border-color 0.15s ease-in-out, background 0.15s ease-in-out;
+
+  &:not(:disabled):hover, &:not(:disabled):focus-visible {
+    border-color: color-mix(in srgb, var(--primary-color) 45%, var(--hr-color));
+    background: color-mix(in srgb, var(--primary-color) 6%, var(--elevation-layer1-dark-solid));
+  }
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+}
+
+.action-card-title {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--body-text-color);
+}
+
+.action-card-desc {
+  font-size: 0.78rem;
+  color: var(--text-muted-color);
+}
+
+.action-card-chevron {
+  font-size: 0.85rem;
+  color: var(--text-muted-color);
+}

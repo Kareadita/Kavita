@@ -195,7 +195,7 @@ export class ImportMappingsComponent implements OnInit {
 
     this.settingsService.updateMetadataSettings(newSettings).subscribe({
       next: () => {
-        const fragment = this.licenseService.hasValidLicense()
+        const fragment = this.licenseService.hasActiveLicense()
           ? SettingsTabId.Metadata : SettingsTabId.ManageMetadata;
 
         this.router.navigate(['settings'], { fragment: fragment });

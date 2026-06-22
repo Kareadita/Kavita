@@ -1,0 +1,97 @@
+.screen-icon {
+  width: 2.375rem;
+  height: 2.375rem;
+  border-radius: 0.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1rem;
+
+  &--danger {
+    background: color-mix(in srgb, var(--error-color) 20%, transparent);
+    color: var(--error-color);
+  }
+}
+
+.screen-subtitle {
+  font-size: 0.8rem;
+  color: var(--text-muted-color);
+}
+
+.product-card {
+  padding: 0.85rem 1rem;
+  border-radius: 0.6rem;
+  border: 1px solid var(--hr-color);
+  background: var(--elevation-layer1-dark-solid);
+}
+
+.product-icon {
+  width: 2.375rem;
+  height: 2.375rem;
+  border-radius: 0.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1rem;
+  background: color-mix(in srgb, var(--primary-color) 20%, transparent);
+  color: var(--primary-color);
+}
+
+.product-title {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--body-text-color);
+}
+
+.product-sub {
+  font-size: 0.78rem;
+  color: var(--text-muted-color);
+}
+
+.status-pill {
+  --pill-color: var(--primary-color);
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.7rem;
+  font-weight: 600;
+  padding: 0.2rem 0.55rem;
+  border-radius: 9999px;
+  border: 1px solid color-mix(in srgb, var(--pill-color) 40%, transparent);
+  background: color-mix(in srgb, var(--pill-color) 12%, transparent);
+  color: var(--pill-color);
+
+  &--cancelling, &--paused { --pill-color: var(--warning-color); }
+  &--expired { --pill-color: var(--error-color); }
+}
+
+.status-dot {
+  width: 0.4rem;
+  height: 0.4rem;
+  border-radius: 50%;
+  background: var(--pill-color);
+}
+
+.section-label {
+  font-size: 0.65rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--label-card-label-color);
+}
+
+.impact-list {
+  gap: 0.85rem;
+}
+
+.impact-item {
+  font-size: 0.85rem;
+  color: var(--body-text-color);
+}
+
+.impact-icon {
+  width: 1.25rem;
+  text-align: center;
+  margin-top: 0.15rem;
+  color: var(--text-muted-color);
+}

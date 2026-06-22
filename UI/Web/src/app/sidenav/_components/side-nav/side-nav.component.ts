@@ -59,6 +59,7 @@ export class SideNavComponent {
   cachedData: SideNavStream[] | null = null;
   actions: ActionItem<Library>[] = this.actionFactoryService.getLibraryActions();
   homeActions: ActionItem<{}>[] = this.actionFactoryService.getSideNavHomeActions();
+  readingListActions: ActionItem<{}>[] = this.actionFactoryService.getSideNavReadingListActions();
 
   filterQuery: string = '';
   filterLibrary = (stream: SideNavStream) => {
@@ -69,7 +70,7 @@ export class SideNavComponent {
   totalSize = 0;
   isReadOnly = this.accountService.hasReadOnlyRole;
 
-  readonly hasValidLicense$ = toObservable(this.licenseService.hasValidLicense);
+  readonly hasValidLicense$ = toObservable(this.licenseService.hasActiveLicense);
 
   private showAllSubject = new BehaviorSubject<boolean>(false);
   showAll$ = this.showAllSubject.asObservable();
@@ -152,7 +153,7 @@ export class SideNavComponent {
 
     this.keyBindService.registerListener(
       this.destroyRef,
-      (e) => this.router.navigate(['/settings'], { fragment: SettingsTabId.Scrobbling}),
+      (e) => this.router.navigate(['/settings'], { fragment: SettingsTabId.MyActivity}),
       [KeyBindTarget.NavigateToScrobbling],
       {condition$: this.hasValidLicense$},
     );
@@ -168,6 +169,12 @@ export class SideNavComponent {
   performHomeAction(event: ActionItem<{}> | ActionResult<{}>) {
     if (event.action === Action.Edit) {
       this.showMore(true);
+    }
+  }
+  performReadingListAction(event: ActionItem<{}> | ActionResult<{}>) {
+    if (event.action === Action.Navigate) {
+      this.router.navigateByUrl('/settings#cbl-import');
+      return;
     }
   }
 

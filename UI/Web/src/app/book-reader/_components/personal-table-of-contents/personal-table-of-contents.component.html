@@ -1,8 +1,6 @@
 <ng-container *transloco="let t; prefix: 'personal-table-of-contents'">
   <div class="table-of-contents">
-    @let bookmarks = ptocBookmarks();
-
-    @if(bookmarks.length >= ShowFilterAfterItems) {
+    @if(ptocBookmarks().length >= ShowFilterAfterItems) {
       <form [formGroup]="formGroup">
         <div class="row g-0 mb-3">
           <div class="col-md-12">
@@ -15,7 +13,7 @@
       </form>
     }
 
-    @for(bookmark of bookmarks | filter: filterList; track bookmark.id) {
+    @for(bookmark of visibleBookmarks(); track bookmark.id) {
       <div class="mb-2">
         <app-text-bookmark-item [bookmark]="bookmark"
                                 (loadBookmark)="loadChapterPage($event.pageNumber, $event.bookScrollId)"

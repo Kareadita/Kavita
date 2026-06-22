@@ -5,4 +5,5 @@ export interface IHasMetadataIds {
   metronId: number;
   comicVineId: string | null;
   mangaBakaId: number;
+  cbrId: number;
 }

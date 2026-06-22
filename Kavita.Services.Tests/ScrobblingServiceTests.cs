@@ -1,7 +1,7 @@
-﻿using Kavita.API.Database;
+﻿using AutoMapper;
+using Kavita.API.Database;
 using Kavita.API.Repositories;
 using Kavita.API.Services;
-using Kavita.API.Services.Helpers;
 using Kavita.API.Services.Plus;
 using Kavita.API.Services.Reading;
 using Kavita.API.Services.SignalR;
@@ -9,21 +9,35 @@ using Kavita.Common;
 using Kavita.Database;
 using Kavita.Database.Tests;
 using Kavita.Models.Builders;
+using Kavita.Models.DTOs.KavitaPlus;
+using Kavita.Models.DTOs.KavitaPlus.Scrobble;
 using Kavita.Models.DTOs.Scrobbling;
 using Kavita.Models.Entities;
 using Kavita.Models.Entities.Enums;
+using Kavita.Models.Entities.Enums.KavitaPlus;
+using Kavita.Models.Entities.Enums.UserPreferences;
 using Kavita.Models.Entities.Scrobble;
 using Kavita.Models.Entities.User;
 using Kavita.Services.Builders;
 using Kavita.Services.Plus;
+using Kavita.Services.Plus.ScrobbleService;
 using Kavita.Services.Reading;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using NSubstitute;
 using Xunit.Abstractions;
 
 namespace Kavita.Services.Tests;
 #nullable enable
+
+public record ScrobbleProviderServices
+{
+    public required IScrobbleProviderService AniList { get; init; }
+    public required IScrobbleProviderService Mal { get; init; }
+    public required IScrobbleProviderService MangaBaka { get; init; }
+    public required IScrobbleProviderService Hardcover { get; init; }
+}
 
 public class ScrobblingServiceTests(ITestOutputHelper outputHelper): AbstractDbTest(outputHelper)
 {
@@ -46,7 +60,7 @@ public class ScrobblingServiceTests(ITestOutputHelper outputHelper): AbstractDbT
     /// <param name="unitOfWork"></param>
     /// <param name="context"></param>
     /// <returns>First IReaderService is not hooked up to the scrobbleService, second one is</returns>
-    public async Task<(ScrobblingService, ILicenseService, IKavitaPlusApiService, IReaderService, IReaderService)> Setup(IUnitOfWork unitOfWork, DataContext context)
+    public async Task<(ScrobblingService, ILicenseService, IKavitaPlusApiService, IReaderService, IReaderService, ScrobbleProviderServices)> Setup(IUnitOfWork unitOfWork, DataContext context)
     {
         var licenseService = Substitute.For<ILicenseService>();
         var localizationService = Substitute.For<ILocalizationService>();
@@ -54,8 +68,22 @@ public class ScrobblingServiceTests(ITestOutputHelper outputHelper): AbstractDbT
         var emailService = Substitute.For<IEmailService>();
         var kavitaPlusApiService = Substitute.For<IKavitaPlusApiService>();
 
+        var aniList = new AniListScrobbleProviderService(Substitute.For<ILogger<AniListScrobbleProviderService>>(), unitOfWork, Substitute.For<IKavitaPlusAuditService>());
+        var mal = new MyAnimeListScrobbleProviderService(Substitute.For<ILogger<MyAnimeListScrobbleProviderService>>(), unitOfWork, Substitute.For<IKavitaPlusAuditService>());
+        var mangaBaka = new MangabakaScrobbleProviderService(Substitute.For<ILogger<MangabakaScrobbleProviderService>>(), unitOfWork, Substitute.For<IKavitaPlusAuditService>());
+        var hardcover = new HardcoverScrobbleProviderService(Substitute.For<ILogger<HardcoverScrobbleProviderService>>(), unitOfWork, Substitute.For<IKavitaPlusAuditService>());
+
+        var serviceCollection = new ServiceCollection();
+        serviceCollection.AddKeyedScoped<IScrobbleProviderService>(ScrobbleProvider.AniList, (_, _) => aniList);
+        serviceCollection.AddKeyedScoped<IScrobbleProviderService>(ScrobbleProvider.Mal, (_, _) => mal);
+        serviceCollection.AddKeyedScoped<IScrobbleProviderService>(ScrobbleProvider.MangaBaka, (_, _) => mangaBaka);
+        serviceCollection.AddKeyedScoped<IScrobbleProviderService>(ScrobbleProvider.Hardcover, (_, _) => hardcover);
+
+        var ruleService = new ScrobbleRuleService(unitOfWork, Substitute.For<ILogger<ScrobbleRuleService>>());
+
         var service = new ScrobblingService(unitOfWork, Substitute.For<IEventHub>(), logger,  licenseService,
-            localizationService, emailService, kavitaPlusApiService);
+            localizationService, emailService, kavitaPlusApiService, serviceCollection.BuildServiceProvider(),
+            Substitute.For<IKavitaPlusAuditService>(), ruleService);
 
         var readerService = new ReaderService(unitOfWork,
             Substitute.For<ILogger<ReaderService>>(),
@@ -77,7 +105,13 @@ public class ScrobblingServiceTests(ITestOutputHelper outputHelper): AbstractDbT
 
         await SeedData(unitOfWork, context);
 
-        return (service, licenseService, kavitaPlusApiService, readerService, hookedUpReaderService);
+        return (service, licenseService, kavitaPlusApiService, readerService, hookedUpReaderService, new ScrobbleProviderServices
+        {
+            AniList = aniList,
+            Hardcover = hardcover,
+            Mal = mal,
+            MangaBaka = mangaBaka,
+        });
     }
 
     private async Task SeedData(IUnitOfWork unitOfWork, DataContext context)
@@ -120,10 +154,22 @@ public class ScrobblingServiceTests(ITestOutputHelper outputHelper): AbstractDbT
         context.Library.Add(library);
 
         var user = new AppUserBuilder("testuser", "testuser")
-            //.WithPreferences(new UserPreferencesBuilder().WithAniListScrobblingEnabled(true).Build())
             .Build();
 
-        user.UserPreferences.AniListScrobblingEnabled = true;
+        AccountService.AddScrobbleProvidersToUser(user);
+
+        user.ScrobbleProviders[ScrobbleProvider.AniList] = new AppUserScrobbleProvider
+        {
+            AuthenticationToken = ValidJwtToken,
+            Settings = new ScrobbleProviderSettingsDto
+            {
+                ProgressScrobbling = true,
+                RatingScrobbling = true,
+                ReviewsScrobbling = true,
+                AllLibraries = true,
+                WantToReadSync = true,
+            }
+        };
 
         unitOfWork.UserRepository.Add(user);
 
@@ -161,9 +207,9 @@ public class ScrobblingServiceTests(ITestOutputHelper outputHelper): AbstractDbT
     public async Task PostScrobbleUpdate_AuthErrors()
     {
         var (unitOfWork, context, _) = await CreateDatabase();
-        var (service, _, kavitaPlusApiService, _, _) = await Setup(unitOfWork, context);
+        var (service, _, kavitaPlusApiService, _, _, _) = await Setup(unitOfWork, context);
 
-        kavitaPlusApiService.PostScrobbleUpdate(null!, "")
+        kavitaPlusApiService.PostScrobbleV3UpdateAsync(null!, "")
             .ReturnsForAnyArgs(new ScrobbleResponseDto()
             {
                 ErrorMessage = "Unauthorized"
@@ -172,7 +218,13 @@ public class ScrobblingServiceTests(ITestOutputHelper outputHelper): AbstractDbT
         var evt = await CreateScrobbleEvent(unitOfWork);
         await Assert.ThrowsAsync<KavitaException>(async () =>
         {
-            await service.PostScrobbleUpdate(new ScrobbleDto(), "", evt);
+            await service.PostScrobbleUpdate(new ScrobbleV3Dto
+            {
+                AuthenticationToken = null,
+                Provider = ScrobbleProvider.AniList,
+                SeriesName = null,
+                Format = PlusMediaFormat.Manga,
+            }, string.Empty, evt);
         });
         Assert.True(evt.IsErrored);
         Assert.Equal("Kavita+ subscription no longer active", evt.ErrorDetails);
@@ -182,9 +234,9 @@ public class ScrobblingServiceTests(ITestOutputHelper outputHelper): AbstractDbT
     public async Task PostScrobbleUpdate_UnknownSeriesLoggedAsError()
     {
         var (unitOfWork, context, _) = await CreateDatabase();
-        var (service, _, kavitaPlusApiService, _, _) = await Setup(unitOfWork, context);
+        var (service, _, kavitaPlusApiService, _, _, _) = await Setup(unitOfWork, context);
 
-        kavitaPlusApiService.PostScrobbleUpdate(null!, "")
+        kavitaPlusApiService.PostScrobbleV3UpdateAsync(null!, "")
             .ReturnsForAnyArgs(new ScrobbleResponseDto()
             {
                 ErrorMessage = "Unknown Series"
@@ -192,7 +244,13 @@ public class ScrobblingServiceTests(ITestOutputHelper outputHelper): AbstractDbT
 
         var evt = await CreateScrobbleEvent(unitOfWork, 1);
 
-        await service.PostScrobbleUpdate(new ScrobbleDto(), string.Empty, evt);
+        await Assert.ThrowsAsync<KavitaException>(() => service.PostScrobbleUpdate(new ScrobbleV3Dto
+        {
+            AuthenticationToken = null,
+            Provider = ScrobbleProvider.AniList,
+            SeriesName = null,
+            Format = PlusMediaFormat.Manga,
+        }, string.Empty, evt));
         await unitOfWork.CommitAsync();
         Assert.True(evt.IsErrored);
 
@@ -210,9 +268,9 @@ public class ScrobblingServiceTests(ITestOutputHelper outputHelper): AbstractDbT
     public async Task PostScrobbleUpdate_InvalidAccessToken()
     {
         var (unitOfWork, context, _) = await CreateDatabase();
-        var (service, _, kavitaPlusApiService, _, _) = await Setup(unitOfWork, context);
+        var (service, _, kavitaPlusApiService, _, _, _) = await Setup(unitOfWork, context);
 
-        kavitaPlusApiService.PostScrobbleUpdate(null!, "")
+        kavitaPlusApiService.PostScrobbleV3UpdateAsync(null!, "")
             .ReturnsForAnyArgs(new ScrobbleResponseDto()
             {
                 ErrorMessage = "Access token is invalid"
@@ -222,7 +280,13 @@ public class ScrobblingServiceTests(ITestOutputHelper outputHelper): AbstractDbT
 
         await Assert.ThrowsAsync<KavitaException>(async () =>
         {
-            await service.PostScrobbleUpdate(new ScrobbleDto(), "", evt);
+            await service.PostScrobbleUpdate(new ScrobbleV3Dto
+            {
+                AuthenticationToken = null,
+                Provider = ScrobbleProvider.AniList,
+                SeriesName = null,
+                Format = PlusMediaFormat.Manga,
+            }, string.Empty, evt);
         });
 
         Assert.True(evt.IsErrored);
@@ -237,20 +301,15 @@ public class ScrobblingServiceTests(ITestOutputHelper outputHelper): AbstractDbT
     public async Task ProcessReadEvents_CreatesNoEventsWhenNoProgress()
     {
         var (unitOfWork, context, _) = await CreateDatabase();
-        var (service, licenseService, kavitaPlusApiService, _, _) = await Setup(unitOfWork, context);
+        var (service, licenseService, kavitaPlusApiService, _, _, _) = await Setup(unitOfWork, context);
 
         // Set Returns
         licenseService.HasActiveLicense().Returns(Task.FromResult(true));
-        kavitaPlusApiService.GetRateLimit(Arg.Any<string>(), Arg.Any<string>())
+        kavitaPlusApiService.GetRateLimitAsync(Arg.Any<string>(), Arg.Any<string>())
             .Returns(100);
 
         var user = await unitOfWork.UserRepository.GetUserByIdAsync(1);
         Assert.NotNull(user);
-
-        // Ensure CanProcessScrobbleEvent returns true
-        user.AniListAccessToken = ValidJwtToken;
-        unitOfWork.UserRepository.Update(user);
-        await unitOfWork.CommitAsync();
 
         var chapter = await unitOfWork.ChapterRepository.GetChapterAsync(4);
         Assert.NotNull(chapter);
@@ -259,7 +318,7 @@ public class ScrobblingServiceTests(ITestOutputHelper outputHelper): AbstractDbT
         Assert.NotNull(volume);
 
         // Call Scrobble without having any progress
-        await service.ScrobbleReadingUpdate(1, 1);
+        await service.ScrobbleReadingUpdate(1, 1, chapter.Id);
         var events = await unitOfWork.ScrobbleRepository.GetAllEventsForSeries(1);
         Assert.Empty(events);
     }
@@ -268,20 +327,15 @@ public class ScrobblingServiceTests(ITestOutputHelper outputHelper): AbstractDbT
     public async Task ProcessReadEvents_UpdateVolumeAndChapterData()
     {
         var (unitOfWork, context, _) = await CreateDatabase();
-        var (service, licenseService, kavitaPlusApiService, readerService, _) = await Setup(unitOfWork, context);
+        var (service, licenseService, kavitaPlusApiService, readerService, _, _) = await Setup(unitOfWork, context);
 
         // Set Returns
         licenseService.HasActiveLicense().Returns(Task.FromResult(true));
-        kavitaPlusApiService.GetRateLimit(Arg.Any<string>(), Arg.Any<string>())
-            .Returns(100);
+        kavitaPlusApiService.GetRateLimitForProviderAsync(ScrobbleProvider.AniList, Arg.Any<string>(), Arg.Any<string>())
+            .Returns(KPlusResult<int>.Success(100));
 
         var user = await unitOfWork.UserRepository.GetUserByIdAsync(1);
         Assert.NotNull(user);
-
-        // Ensure CanProcessScrobbleEvent returns true
-        user.AniListAccessToken = ValidJwtToken;
-        unitOfWork.UserRepository.Update(user);
-        await unitOfWork.CommitAsync();
 
         var chapter = await unitOfWork.ChapterRepository.GetChapterAsync(4);
         Assert.NotNull(chapter);
@@ -294,7 +348,7 @@ public class ScrobblingServiceTests(ITestOutputHelper outputHelper): AbstractDbT
         await unitOfWork.CommitAsync();
 
         // Call Scrobble while having some progress
-        await service.ScrobbleReadingUpdate(user.Id, 1);
+        await service.ScrobbleReadingUpdate(user.Id, 1, chapter.Id);
         var events = await unitOfWork.ScrobbleRepository.GetAllEventsForSeries(1);
         Assert.Single(events);
 
@@ -305,8 +359,8 @@ public class ScrobblingServiceTests(ITestOutputHelper outputHelper): AbstractDbT
 
         await service.ProcessUpdatesSinceLastSync();
 
-        await kavitaPlusApiService.Received(1).PostScrobbleUpdate(
-            Arg.Is<ScrobbleDto>(data =>
+        await kavitaPlusApiService.Received(1).PostScrobbleV3UpdateAsync(
+            Arg.Is<ScrobbleV3Dto>(data =>
                 data.ChapterNumber == (int)chapter.MaxNumber &&
                 data.VolumeNumber == (int)volume.MaxNumber
             ),
@@ -321,11 +375,11 @@ public class ScrobblingServiceTests(ITestOutputHelper outputHelper): AbstractDbT
     public async Task ScrobbleReadingUpdate_IgnoreNoLicense()
     {
         var (unitOfWork, context, _) = await CreateDatabase();
-        var (service, licenseService, _, _, _) = await Setup(unitOfWork, context);
+        var (service, licenseService, _, _, _, _) = await Setup(unitOfWork, context);
 
         licenseService.HasActiveLicense().Returns(false);
 
-        await service.ScrobbleReadingUpdate(1, 1);
+        await service.ScrobbleReadingUpdate(1, 1, 1);
         var events = await unitOfWork.ScrobbleRepository.GetAllEventsForSeries(1);
         Assert.Empty(events);
     }
@@ -334,7 +388,7 @@ public class ScrobblingServiceTests(ITestOutputHelper outputHelper): AbstractDbT
     public async Task ScrobbleReadingUpdate_RemoveWhenNoProgress()
     {
         var (unitOfWork, context, _) = await CreateDatabase();
-        var (service, licenseService, _, readerService, hookedUpReaderService) = await Setup(unitOfWork, context);
+        var (service, licenseService, _, readerService, hookedUpReaderService, _) = await Setup(unitOfWork, context);
 
         licenseService.HasActiveLicense().Returns(true);
 
@@ -347,7 +401,7 @@ public class ScrobblingServiceTests(ITestOutputHelper outputHelper): AbstractDbT
         await readerService.MarkChaptersAsRead(user, 1, new List<Chapter>() {volume.Chapters[0]});
         await unitOfWork.CommitAsync();
 
-        await service.ScrobbleReadingUpdate(1, 1);
+        await service.ScrobbleReadingUpdate(1, 1, volume.Chapters[0].Id);
         var events = await unitOfWork.ScrobbleRepository.GetAllEventsForSeries(1);
         Assert.Single(events);
 
@@ -358,7 +412,7 @@ public class ScrobblingServiceTests(ITestOutputHelper outputHelper): AbstractDbT
         await unitOfWork.CommitAsync();
 
         // Existing event is deleted
-        await service.ScrobbleReadingUpdate(1, 1);
+        await service.ScrobbleReadingUpdate(1, 1, volume.Chapters[0].Id);
         events = await unitOfWork.ScrobbleRepository.GetAllEventsForSeries(1);
         Assert.Empty(events);
 
@@ -374,7 +428,7 @@ public class ScrobblingServiceTests(ITestOutputHelper outputHelper): AbstractDbT
     public async Task ScrobbleReadingUpdate_UpdateExistingNotIsProcessed()
     {
         var (unitOfWork, context, _) = await CreateDatabase();
-        var (service, licenseService, _, readerService, _) = await Setup(unitOfWork, context);
+        var (service, licenseService, _, readerService, _, _) = await Setup(unitOfWork, context);
 
         var user = await unitOfWork.UserRepository.GetUserByIdAsync(1);
         Assert.NotNull(user);
@@ -396,7 +450,7 @@ public class ScrobblingServiceTests(ITestOutputHelper outputHelper): AbstractDbT
         await unitOfWork.CommitAsync();
 
         // Scrobble update
-        await service.ScrobbleReadingUpdate(1, 1);
+        await service.ScrobbleReadingUpdate(1, 1, chapter1.Id);
         events = await unitOfWork.ScrobbleRepository.GetAllEventsForSeries(1);
         Assert.Single(events);
 
@@ -412,7 +466,7 @@ public class ScrobblingServiceTests(ITestOutputHelper outputHelper): AbstractDbT
         await unitOfWork.CommitAsync();
 
         // Scrobble update
-        await service.ScrobbleReadingUpdate(1, 1);
+        await service.ScrobbleReadingUpdate(1, 1, chapter1.Id);
         events = await unitOfWork.ScrobbleRepository.GetAllEventsForSeries(1);
         Assert.Equal(2, events.Count);
         Assert.Single(events.Where(e => e.IsProcessed).ToList());
@@ -423,7 +477,7 @@ public class ScrobblingServiceTests(ITestOutputHelper outputHelper): AbstractDbT
         await unitOfWork.CommitAsync();
 
         // Scrobble update
-        await service.ScrobbleReadingUpdate(1, 1);
+        await service.ScrobbleReadingUpdate(1, 1, chapter1.Id);
         events = await unitOfWork.ScrobbleRepository.GetAllEventsForSeries(1);
         Assert.Equal(2, events.Count);
         Assert.Single(events.Where(e => e.IsProcessed).ToList());
@@ -438,7 +492,7 @@ public class ScrobblingServiceTests(ITestOutputHelper outputHelper): AbstractDbT
     public async Task ScrobbleWantToReadUpdate_NoExistingEvents_WantToRead_ShouldCreateNewEvent()
     {
         var (unitOfWork, context, _) = await CreateDatabase();
-        var (service, licenseService, _, _, _) = await Setup(unitOfWork, context);
+        var (service, licenseService, _, _, _, _) = await Setup(unitOfWork, context);
 
         licenseService.HasActiveLicense().Returns(Task.FromResult(true));
 
@@ -459,7 +513,7 @@ public class ScrobblingServiceTests(ITestOutputHelper outputHelper): AbstractDbT
     public async Task ScrobbleWantToReadUpdate_NoExistingEvents_RemoveWantToRead_ShouldCreateNewEvent()
     {
         var (unitOfWork, context, _) = await CreateDatabase();
-        var (service, licenseService, _, _, _) = await Setup(unitOfWork, context);
+        var (service, licenseService, _, _, _, _) = await Setup(unitOfWork, context);
 
         licenseService.HasActiveLicense().Returns(Task.FromResult(true));
 
@@ -480,7 +534,7 @@ public class ScrobblingServiceTests(ITestOutputHelper outputHelper): AbstractDbT
     public async Task ScrobbleWantToReadUpdate_ExistingWantToReadEvent_WantToRead_ShouldNotCreateNewEvent()
     {
         var (unitOfWork, context, _) = await CreateDatabase();
-        var (service, licenseService, _, _, _) = await Setup(unitOfWork, context);
+        var (service, licenseService, _, _, _, _) = await Setup(unitOfWork, context);
 
         licenseService.HasActiveLicense().Returns(Task.FromResult(true));
 
@@ -504,7 +558,7 @@ public class ScrobblingServiceTests(ITestOutputHelper outputHelper): AbstractDbT
     public async Task ScrobbleWantToReadUpdate_ExistingWantToReadEvent_RemoveWantToRead_ShouldAddRemoveEvent()
     {
         var (unitOfWork, context, _) = await CreateDatabase();
-        var (service, licenseService, _, _, _) = await Setup(unitOfWork, context);
+        var (service, licenseService, _, _, _, _) = await Setup(unitOfWork, context);
 
         licenseService.HasActiveLicense().Returns(Task.FromResult(true));
 
@@ -528,7 +582,7 @@ public class ScrobblingServiceTests(ITestOutputHelper outputHelper): AbstractDbT
     public async Task ScrobbleWantToReadUpdate_ExistingRemoveWantToReadEvent_RemoveWantToRead_ShouldNotCreateNewEvent()
     {
         var (unitOfWork, context, _) = await CreateDatabase();
-        var (service, licenseService, _, _, _) = await Setup(unitOfWork, context);
+        var (service, licenseService, _, _, _, _) = await Setup(unitOfWork, context);
 
         licenseService.HasActiveLicense().Returns(Task.FromResult(true));
 
@@ -552,7 +606,7 @@ public class ScrobblingServiceTests(ITestOutputHelper outputHelper): AbstractDbT
     public async Task ScrobbleWantToReadUpdate_ExistingRemoveWantToReadEvent_WantToRead_ShouldAddWantToReadEvent()
     {
         var (unitOfWork, context, _) = await CreateDatabase();
-        var (service, licenseService, _, _, _) = await Setup(unitOfWork, context);
+        var (service, licenseService, _, _, _, _) = await Setup(unitOfWork, context);
 
         licenseService.HasActiveLicense().Returns(Task.FromResult(true));
 
@@ -580,11 +634,11 @@ public class ScrobblingServiceTests(ITestOutputHelper outputHelper): AbstractDbT
     public async Task ScrobbleRatingUpdate_IgnoreNoLicense()
     {
         var (unitOfWork, context, _) = await CreateDatabase();
-        var (service, licenseService, _, _, _) = await Setup(unitOfWork, context);
+        var (service, licenseService, _, _, _, _) = await Setup(unitOfWork, context);
 
         licenseService.HasActiveLicense().Returns(false);
 
-        await service.ScrobbleRatingUpdate(1, 1, 1);
+        await service.ScrobbleSeriesRatingUpdate(1, 1, 1);
         var events = await unitOfWork.ScrobbleRepository.GetAllEventsForSeries(1);
         Assert.Empty(events);
     }
@@ -593,7 +647,7 @@ public class ScrobblingServiceTests(ITestOutputHelper outputHelper): AbstractDbT
     public async Task ScrobbleRatingUpdate_UpdateExistingNotIsProcessed()
     {
         var (unitOfWork, context, _) = await CreateDatabase();
-        var (service, licenseService, _, _, _) = await Setup(unitOfWork, context);
+        var (service, licenseService, _, _, _, _) = await Setup(unitOfWork, context);
 
         licenseService.HasActiveLicense().Returns(true);
 
@@ -603,7 +657,7 @@ public class ScrobblingServiceTests(ITestOutputHelper outputHelper): AbstractDbT
         var series = await unitOfWork.SeriesRepository.GetSeriesByIdAsync(1);
         Assert.NotNull(series);
 
-        await service.ScrobbleRatingUpdate(user.Id, series.Id, 1);
+        await service.ScrobbleSeriesRatingUpdate(user.Id, series.Id, 1);
         var events = await unitOfWork.ScrobbleRepository.GetAllEventsForSeries(1);
         Assert.Single(events);
         Assert.Equal(1, events.First().Rating);
@@ -612,13 +666,13 @@ public class ScrobblingServiceTests(ITestOutputHelper outputHelper): AbstractDbT
         events.First().IsProcessed = true;
         await unitOfWork.CommitAsync();
 
-        await service.ScrobbleRatingUpdate(user.Id, series.Id, 5);
+        await service.ScrobbleSeriesRatingUpdate(user.Id, series.Id, 5);
         events = await unitOfWork.ScrobbleRepository.GetAllEventsForSeries(1);
         Assert.Equal(2, events.Count);
         Assert.Single(events, evt => evt.IsProcessed);
         Assert.Single(events, evt => !evt.IsProcessed);
 
-        await service.ScrobbleRatingUpdate(user.Id, series.Id, 5);
+        await service.ScrobbleSeriesRatingUpdate(user.Id, series.Id, 5);
         events = await unitOfWork.ScrobbleRepository.GetAllEventsForSeries(1);
         Assert.Single(events, evt => !evt.IsProcessed);
         Assert.Equal(5, events.First(evt => !evt.IsProcessed).Rating);
@@ -653,7 +707,7 @@ public class ScrobblingServiceTests(ITestOutputHelper outputHelper): AbstractDbT
     public async Task CreateEventsFromExistingHistory_NoLicense_DoesNothing()
     {
         var (unitOfWork, context, _) = await CreateDatabase();
-        var (service, licenseService, _, readerService, _) = await Setup(unitOfWork, context);
+        var (service, licenseService, _, readerService, _, _) = await Setup(unitOfWork, context);
 
         licenseService.HasActiveLicense().Returns(false);
 
@@ -665,21 +719,23 @@ public class ScrobblingServiceTests(ITestOutputHelper outputHelper): AbstractDbT
         await readerService.MarkChaptersAsRead(user, 1, [chapter1]);
         await unitOfWork.CommitAsync();
 
-        await service.CreateEventsFromExistingHistory();
+        await service.CreateEventsFromExistingHistory(ScrobbleProvider.AniList);
 
         var events = await unitOfWork.ScrobbleRepository.GetAllEventsForSeries(1);
         Assert.Empty(events);
 
         var reloaded = await unitOfWork.UserRepository.GetUserByIdAsync(1);
         Assert.NotNull(reloaded);
-        Assert.False(reloaded.HasRunScrobbleEventGeneration);
+        Assert.Empty(reloaded.ScrobbleProviders.Values
+            .Where(p => p.ScrobbleEventGenerationRan >= DateTime.UtcNow.AddDays(-1))
+            .ToList());
     }
 
     [Fact]
     public async Task CreateEventsFromExistingHistory_SpecificUser_NoAniListToken_DoesNothing()
     {
         var (unitOfWork, context, _) = await CreateDatabase();
-        var (service, licenseService, _, _, _) = await Setup(unitOfWork, context);
+        var (service, licenseService, _, _, _, _) = await Setup(unitOfWork, context);
 
         licenseService.HasActiveLicense().Returns(true);
 
@@ -691,94 +747,29 @@ public class ScrobblingServiceTests(ITestOutputHelper outputHelper): AbstractDbT
             Rating = 4f,
             HasBeenRated = true,
         });
+
+        var user = await unitOfWork.UserRepository.GetUserByIdAsync(1);
+        Assert.NotNull(user);
+        user.ScrobbleProviders[ScrobbleProvider.AniList].AuthenticationToken = "";
+
         await unitOfWork.CommitAsync();
 
         // User has no AniListAccessToken, guard at line 1038 should short-circuit
-        await service.CreateEventsFromExistingHistory(userId: 1);
+        await service.CreateEventsFromExistingHistory(ScrobbleProvider.AniList, userId: 1);
 
         var events = await unitOfWork.ScrobbleRepository.GetAllEventsForSeries(1);
         Assert.Empty(events);
 
         var reloaded = await unitOfWork.UserRepository.GetUserByIdAsync(1);
         Assert.NotNull(reloaded);
-        Assert.False(reloaded.HasRunScrobbleEventGeneration);
-    }
-
-    [Fact]
-    public async Task CreateEventsFromExistingHistory_SpecificUser_AlreadyRan_DoesNothing()
-    {
-        var (unitOfWork, context, _) = await CreateDatabase();
-        var (service, licenseService, _, _, _) = await Setup(unitOfWork, context);
-
-        licenseService.HasActiveLicense().Returns(true);
-
-        var user = await unitOfWork.UserRepository.GetUserByIdAsync(1);
-        Assert.NotNull(user);
-        user.AniListAccessToken = ValidJwtToken;
-        user.HasRunScrobbleEventGeneration = true;
-        await unitOfWork.CommitAsync();
-
-        // Seed a rating that would otherwise create an event
-        context.AppUserRating.Add(new AppUserRating
-        {
-            AppUserId = 1,
-            SeriesId = 1,
-            Rating = 3f,
-            HasBeenRated = true,
-        });
-        await unitOfWork.CommitAsync();
-
-        await service.CreateEventsFromExistingHistory(userId: 1);
-
-        var events = await unitOfWork.ScrobbleRepository.GetAllEventsForSeries(1);
-        Assert.Empty(events);
-    }
-
-    [Fact]
-    public async Task CreateEventsFromExistingHistory_AllUsers_SkipsUsersAlreadyProcessed()
-    {
-        var (unitOfWork, context, _) = await CreateDatabase();
-        var (service, licenseService, _, _, _) = await Setup(unitOfWork, context);
-
-        licenseService.HasActiveLicense().Returns(true);
-
-        var secondUser = new AppUserBuilder("testuser2", "testuser2").Build();
-        secondUser.UserPreferences.AniListScrobblingEnabled = true;
-        secondUser.HasRunScrobbleEventGeneration = true;
-        unitOfWork.UserRepository.Add(secondUser);
-        await unitOfWork.CommitAsync();
-
-        // Seed a rating for the already-ran second user, should be ignored
-        context.AppUserRating.Add(new AppUserRating
-        {
-            AppUserId = secondUser.Id,
-            SeriesId = 1,
-            Rating = 5f,
-            HasBeenRated = true,
-        });
-        await unitOfWork.CommitAsync();
-
-        await service.CreateEventsFromExistingHistory();
-
-        var events = await unitOfWork.ScrobbleRepository.GetAllEventsForSeries(1);
-        Assert.Empty(events);
-
-        // First user had no data but is still marked as processed by the loop
-        var first = await unitOfWork.UserRepository.GetUserByIdAsync(1);
-        Assert.NotNull(first);
-        Assert.True(first.HasRunScrobbleEventGeneration);
-
-        // Second user was skipped by the HasRunScrobbleEventGeneration filter, flag stays true
-        var second = await unitOfWork.UserRepository.GetUserByIdAsync(secondUser.Id);
-        Assert.NotNull(second);
-        Assert.True(second.HasRunScrobbleEventGeneration);
+        Assert.False(reloaded.ScrobbleProviders[ScrobbleProvider.AniList].ScrobbleEventGenerationRan > DateTime.UtcNow.AddDays(-1));
     }
 
     [Fact]
     public async Task CreateEventsFromExistingHistory_WantToRead_CreatesAddWantToReadEvent()
     {
         var (unitOfWork, context, _) = await CreateDatabase();
-        var (service, licenseService, _, _, _) = await Setup(unitOfWork, context);
+        var (service, licenseService, _, _, _, _) = await Setup(unitOfWork, context);
 
         licenseService.HasActiveLicense().Returns(true);
 
@@ -786,13 +777,12 @@ public class ScrobblingServiceTests(ITestOutputHelper outputHelper): AbstractDbT
 
         var user = await unitOfWork.UserRepository.GetUserByIdAsync(1, AppUserIncludes.WantToRead);
         Assert.NotNull(user);
-        user.AniListAccessToken = ValidJwtToken;
         user.WantToRead.Add(new AppUserWantToRead { SeriesId = 1 });
         await unitOfWork.CommitAsync();
 
         var before = DateTime.UtcNow.AddSeconds(-1);
 
-        await service.CreateEventsFromExistingHistory(userId: 1);
+        await service.CreateEventsFromExistingHistory(ScrobbleProvider.AniList, userId: 1);
 
         var events = await unitOfWork.ScrobbleRepository.GetAllEventsForSeries(1);
         Assert.Single(events);
@@ -801,22 +791,16 @@ public class ScrobblingServiceTests(ITestOutputHelper outputHelper): AbstractDbT
 
         var reloaded = await unitOfWork.UserRepository.GetUserByIdAsync(1);
         Assert.NotNull(reloaded);
-        Assert.True(reloaded.HasRunScrobbleEventGeneration);
-        Assert.True(reloaded.ScrobbleEventGenerationRan >= before);
+        Assert.True(reloaded.ScrobbleProviders[ScrobbleProvider.AniList].ScrobbleEventGenerationRan >= before);
     }
 
     [Fact]
     public async Task CreateEventsFromExistingHistory_Rating_CreatesScoreUpdatedEvent()
     {
         var (unitOfWork, context, _) = await CreateDatabase();
-        var (service, licenseService, _, _, _) = await Setup(unitOfWork, context);
+        var (service, licenseService, _, _, _, _) = await Setup(unitOfWork, context);
 
         licenseService.HasActiveLicense().Returns(true);
-
-        var user = await unitOfWork.UserRepository.GetUserByIdAsync(1);
-        Assert.NotNull(user);
-        user.AniListAccessToken = ValidJwtToken;
-        await unitOfWork.CommitAsync();
 
         context.AppUserRating.Add(new AppUserRating
         {
@@ -827,7 +811,7 @@ public class ScrobblingServiceTests(ITestOutputHelper outputHelper): AbstractDbT
         });
         await unitOfWork.CommitAsync();
 
-        await service.CreateEventsFromExistingHistory(userId: 1);
+        await service.CreateEventsFromExistingHistory(ScrobbleProvider.AniList, userId: 1);
 
         var events = await unitOfWork.ScrobbleRepository.GetAllEventsForSeries(1);
         Assert.Single(events);
@@ -837,41 +821,10 @@ public class ScrobblingServiceTests(ITestOutputHelper outputHelper): AbstractDbT
     }
 
     [Fact]
-    public async Task CreateEventsFromExistingHistory_Review_DoesNotCreateReviewEvent()
-    {
-        var (unitOfWork, context, _) = await CreateDatabase();
-        var (service, licenseService, _, _, _) = await Setup(unitOfWork, context);
-
-        licenseService.HasActiveLicense().Returns(true);
-
-        var user = await unitOfWork.UserRepository.GetUserByIdAsync(1);
-        Assert.NotNull(user);
-        user.AniListAccessToken = ValidJwtToken;
-        await unitOfWork.CommitAsync();
-
-        // A review without a rating should still not generate a Review event, because
-        // ScrobbleReviewUpdate is currently disabled.
-        context.AppUserRating.Add(new AppUserRating
-        {
-            AppUserId = 1,
-            SeriesId = 1,
-            Rating = 0f,
-            HasBeenRated = false,
-            Review = "A great read",
-        });
-        await unitOfWork.CommitAsync();
-
-        await service.CreateEventsFromExistingHistory(userId: 1);
-
-        var events = await unitOfWork.ScrobbleRepository.GetAllEventsForSeries(1);
-        Assert.DoesNotContain(events, e => e.ScrobbleEventType == ScrobbleEventType.Review);
-    }
-
-    [Fact]
     public async Task CreateEventsFromExistingHistory_Reading_CreatesChapterReadEvents()
     {
         var (unitOfWork, context, _) = await CreateDatabase();
-        var (service, licenseService, _, readerService, _) = await Setup(unitOfWork, context);
+        var (service, licenseService, _, readerService, _, _) = await Setup(unitOfWork, context);
 
         licenseService.HasActiveLicense().Returns(true);
 
@@ -879,8 +832,6 @@ public class ScrobblingServiceTests(ITestOutputHelper outputHelper): AbstractDbT
 
         var user = await unitOfWork.UserRepository.GetUserByIdAsync(1);
         Assert.NotNull(user);
-        user.AniListAccessToken = ValidJwtToken;
-        await unitOfWork.CommitAsync();
 
         var chapter1 = await unitOfWork.ChapterRepository.GetChapterAsync(1);
         Assert.NotNull(chapter1);
@@ -893,7 +844,7 @@ public class ScrobblingServiceTests(ITestOutputHelper outputHelper): AbstractDbT
             .SumAsync(p => p.PagesRead);
         Assert.Equal(ChapterPages, progressPagesRead);
 
-        await service.CreateEventsFromExistingHistory(userId: 1);
+        await service.CreateEventsFromExistingHistory(ScrobbleProvider.AniList, userId: 1);
 
         var events = await unitOfWork.ScrobbleRepository.GetAllEventsForSeries(1);
         Assert.NotEmpty(events);
@@ -903,7 +854,7 @@ public class ScrobblingServiceTests(ITestOutputHelper outputHelper): AbstractDbT
     public async Task CreateEventsFromExistingHistory_LibraryScrobblingDisabled_SkipsAllWorkButSetsFlag()
     {
         var (unitOfWork, context, _) = await CreateDatabase();
-        var (service, licenseService, _, readerService, _) = await Setup(unitOfWork, context);
+        var (service, licenseService, _, readerService, _, _) = await Setup(unitOfWork, context);
 
         licenseService.HasActiveLicense().Returns(true);
 
@@ -911,7 +862,6 @@ public class ScrobblingServiceTests(ITestOutputHelper outputHelper): AbstractDbT
 
         var user = await unitOfWork.UserRepository.GetUserByIdAsync(1, AppUserIncludes.WantToRead);
         Assert.NotNull(user);
-        user.AniListAccessToken = ValidJwtToken;
         user.WantToRead.Add(new AppUserWantToRead { SeriesId = 1 });
         await unitOfWork.CommitAsync();
 
@@ -933,40 +883,308 @@ public class ScrobblingServiceTests(ITestOutputHelper outputHelper): AbstractDbT
         var testLibraryId = await GetTestLibraryIdAsync(context);
         var library = await unitOfWork.LibraryRepository.GetLibraryForIdAsync(testLibraryId);
         Assert.NotNull(library);
-        library.AllowScrobbling = false;
+
+        user.ScrobbleProviders[ScrobbleProvider.AniList].Settings.AllLibraries = false;
+
         await unitOfWork.CommitAsync();
 
-        await service.CreateEventsFromExistingHistory(userId: 1);
+        await service.CreateEventsFromExistingHistory(ScrobbleProvider.AniList, userId: 1);
 
         var events = await unitOfWork.ScrobbleRepository.GetAllEventsForSeries(1);
         Assert.Empty(events);
 
         var reloaded = await unitOfWork.UserRepository.GetUserByIdAsync(1);
         Assert.NotNull(reloaded);
-        Assert.True(reloaded.HasRunScrobbleEventGeneration);
+        Assert.True(reloaded.ScrobbleProviders[ScrobbleProvider.AniList].ScrobbleEventGenerationRan > DateTime.UtcNow.AddDays(-1));
     }
 
     [Fact]
     public async Task CreateEventsFromExistingHistory_SetsHasRunFlagAndTimestamp()
     {
         var (unitOfWork, context, _) = await CreateDatabase();
-        var (service, licenseService, _, _, _) = await Setup(unitOfWork, context);
+        var (service, licenseService, _, _, _, _) = await Setup(unitOfWork, context);
 
         licenseService.HasActiveLicense().Returns(true);
 
         var user = await unitOfWork.UserRepository.GetUserByIdAsync(1);
         Assert.NotNull(user);
-        user.AniListAccessToken = ValidJwtToken;
         await unitOfWork.CommitAsync();
 
         var before = DateTime.UtcNow.AddSeconds(-1);
 
-        await service.CreateEventsFromExistingHistory(userId: 1);
+        await service.CreateEventsFromExistingHistory(ScrobbleProvider.AniList, userId: 1);
 
         var reloaded = await unitOfWork.UserRepository.GetUserByIdAsync(1);
         Assert.NotNull(reloaded);
-        Assert.True(reloaded.HasRunScrobbleEventGeneration);
-        Assert.True(reloaded.ScrobbleEventGenerationRan >= before);
+        Assert.True(reloaded.ScrobbleProviders[ScrobbleProvider.AniList].ScrobbleEventGenerationRan >= before);
+    }
+
+    #endregion
+
+    #region Scrobble settings test
+
+    [Fact]
+    public async Task ScrobbleSettings_ScrobbleEventToggles()
+    {
+        var (unitOfWork, context, _) = await CreateDatabase();
+        var (service, licenseService, _, _, _, _) = await Setup(unitOfWork, context);
+
+        licenseService.HasActiveLicense().Returns(true);
+
+        var user = await unitOfWork.UserRepository.GetUserByIdAsync(1);
+        Assert.NotNull(user);
+
+        user.ScrobbleProviders[ScrobbleProvider.AniList].Settings = new ScrobbleProviderSettingsDto
+        {
+            AllLibraries = true,
+            RatingScrobbling = false,
+            ProgressScrobbling = false,
+            ReviewsScrobbling = false,
+            WantToReadSync = true,
+        };
+
+        unitOfWork.UserRepository.Update(user);
+        await unitOfWork.CommitAsync();
+
+        await service.ScrobbleReadingUpdate(1, 1, 1);
+
+        var events = await unitOfWork.ScrobbleRepository.GetAllEventsForSeries(1);
+        Assert.Empty(events);
+
+        await service.ScrobbleSeriesRatingUpdate(1, 1, 5);
+
+        events = await unitOfWork.ScrobbleRepository.GetAllEventsForSeries(1);
+        Assert.Empty(events);
+
+        await service.ScrobbleChapterRatingUpdate(1, 1, 1, 5);
+
+        events = await unitOfWork.ScrobbleRepository.GetAllEventsForSeries(1);
+        Assert.Empty(events);
+
+        await service.ScrobbleSeriesReviewUpdate(1, 1, string.Empty, "test");
+
+        events = await unitOfWork.ScrobbleRepository.GetAllEventsForSeries(1);
+        Assert.Empty(events);
+
+        await service.ScrobbleChapterReviewUpdate(1, 1, 1, string.Empty, "test");
+
+        events = await unitOfWork.ScrobbleRepository.GetAllEventsForSeries(1);
+        Assert.Empty(events);
+
+        await service.ScrobbleWantToReadUpdate(1, 1, false);
+
+        events = await unitOfWork.ScrobbleRepository.GetAllEventsForSeries(1);
+        Assert.Single(events);
+        Assert.Equal(ScrobbleEventType.RemoveWantToRead, events[0].ScrobbleEventType);
+    }
+
+    [Fact]
+    public async Task ScrobbleSettings_Libraries()
+    {
+        var (unitOfWork, context, _) = await CreateDatabase();
+        var (service, licenseService, _, _, _, _) = await Setup(unitOfWork, context);
+
+        licenseService.HasActiveLicense().Returns(true);
+
+        var user = await unitOfWork.UserRepository.GetUserByIdAsync(1);
+        Assert.NotNull(user);
+
+        user.ScrobbleProviders[ScrobbleProvider.AniList].Settings.AllLibraries = false;
+        user.ScrobbleProviders[ScrobbleProvider.AniList].Settings.Libraries = [1]; // Manga library from base class
+
+        unitOfWork.UserRepository.Update(user);
+        await unitOfWork.CommitAsync();
+
+        var testLib = await unitOfWork.LibraryRepository.GetLibraryForIdAsync(await GetTestLibraryIdAsync(context));
+        Assert.NotNull(testLib);
+
+        var lib = await unitOfWork.LibraryRepository.GetLibraryForIdAsync(1, LibraryIncludes.Series);
+        Assert.NotNull(lib);
+
+        var series = new SeriesBuilder("Spice and Wolf")
+            .WithFormat(MangaFormat.Archive)
+            .WithMetadata(new SeriesMetadataBuilder().Build())
+            .WithVolume(new VolumeBuilder("Volume 1")
+                .WithChapters([
+                    new ChapterBuilder("1")
+                        .WithPages(ChapterPages)
+                        .Build(),
+                    new ChapterBuilder("2")
+                        .WithPages(ChapterPages)
+                        .Build(),
+                    new ChapterBuilder("3")
+                        .WithPages(ChapterPages)
+                        .Build()])
+                .Build())
+            .WithVolume(new VolumeBuilder("Volume 2")
+                .WithChapters([
+                    new ChapterBuilder("4")
+                        .WithPages(ChapterPages)
+                        .Build(),
+                    new ChapterBuilder("5")
+                        .WithPages(ChapterPages)
+                        .Build(),
+                    new ChapterBuilder("6")
+                        .WithPages(ChapterPages)
+                        .Build()])
+                .Build())
+            .Build();
+
+        lib.Series.Add(series);
+
+        await unitOfWork.CommitAsync();
+
+        var testSeries = await unitOfWork.SeriesRepository.GetSeriesByIdAsync(testLib.Series.First().Id, SeriesIncludes.Chapters);
+        Assert.NotNull(testSeries);
+
+        await service.ScrobbleSeriesRatingUpdate(1, testSeries.Id, 5);
+        await service.ScrobbleSeriesRatingUpdate(1, series.Id, 5);
+
+        var events = await unitOfWork.ScrobbleRepository.GetAllEventsForSeries(series.Id);
+        Assert.Single(events);
+        Assert.Equal(ScrobbleEventType.ScoreUpdated, events[0].ScrobbleEventType);
+        Assert.Equal(series.Id, events[0].SeriesId);
+    }
+
+    [Fact]
+    public async Task ScrobbleSettings_HighestAgeRating()
+    {
+        var (unitOfWork, context, _) = await CreateDatabase();
+        var (service, licenseService, _, _, _, _) = await Setup(unitOfWork, context);
+
+        licenseService.HasActiveLicense().Returns(true);
+
+        var user = await unitOfWork.UserRepository.GetUserByIdAsync(1);
+        Assert.NotNull(user);
+
+        user.ScrobbleProviders[ScrobbleProvider.AniList].Settings.HighestAgeRating = AgeRating.Mature;
+
+        unitOfWork.UserRepository.Update(user);
+        await unitOfWork.CommitAsync();
+
+        var lib = await unitOfWork.LibraryRepository.GetLibraryForIdAsync(1, LibraryIncludes.Series);
+        Assert.NotNull(lib);
+
+        var series = new SeriesBuilder("Spice and Wolf")
+            .WithFormat(MangaFormat.Archive)
+            .WithMetadata(new SeriesMetadataBuilder()
+                .WithAgeRating(AgeRating.R18Plus)
+                .Build())
+            .WithVolume(new VolumeBuilder("Volume 1")
+                .WithChapters([
+                    new ChapterBuilder("1")
+                        .WithPages(ChapterPages)
+                        .Build(),
+                    new ChapterBuilder("2")
+                        .WithPages(ChapterPages)
+                        .Build(),
+                    new ChapterBuilder("3")
+                        .WithPages(ChapterPages)
+                        .Build()])
+                .Build())
+            .WithVolume(new VolumeBuilder("Volume 2")
+                .WithChapters([
+                    new ChapterBuilder("4")
+                        .WithPages(ChapterPages)
+                        .Build(),
+                    new ChapterBuilder("5")
+                        .WithPages(ChapterPages)
+                        .Build(),
+                    new ChapterBuilder("6")
+                        .WithPages(ChapterPages)
+                        .Build()])
+                .Build())
+            .Build();
+
+        lib.Series.Add(series);
+
+        await unitOfWork.CommitAsync();
+
+        await service.ScrobbleSeriesRatingUpdate(1, series.Id, 5);
+
+        var events = await unitOfWork.ScrobbleRepository.GetAllEventsForSeries(series.Id);
+        Assert.Empty(events);
+
+        series.Metadata.AgeRating = AgeRating.Everyone;
+
+        await unitOfWork.CommitAsync();
+
+        await service.ScrobbleSeriesRatingUpdate(1, series.Id, 5);
+
+        events = await unitOfWork.ScrobbleRepository.GetAllEventsForSeries(series.Id);
+        Assert.Single(events);
+        Assert.Equal(ScrobbleEventType.ScoreUpdated, events[0].ScrobbleEventType);
+        Assert.Equal(series.Id, events[0].SeriesId);
+    }
+
+    #endregion
+
+    #region Read Status Transition Rule Dedup
+
+    [Fact]
+    public async Task RunReadStatusTransitionRules_DoesNotResendTransition_AfterDelivery()
+    {
+        var (unitOfWork, context, _) = await CreateDatabase();
+        var (service, licenseService, kavitaPlusApiService, readerService, _, _) = await Setup(unitOfWork, context);
+
+        licenseService.HasActiveLicense().Returns(Task.FromResult(true));
+        kavitaPlusApiService.GetRateLimitForProviderAsync(ScrobbleProvider.AniList, Arg.Any<string>(), Arg.Any<string>())
+            .Returns(KPlusResult<int>.Success(100));
+        kavitaPlusApiService.PostScrobbleV3UpdateAsync(Arg.Any<ScrobbleV3Dto>(), Arg.Any<string>())
+            .Returns(new ScrobbleResponseDto { Successful = true, RateLeft = 100 });
+
+        var user = await unitOfWork.UserRepository.GetUserByIdAsync(1);
+        Assert.NotNull(user);
+
+        // Enable the inactive-series rule
+        user.ScrobbleProviders[ScrobbleProvider.AniList].Settings.InactiveSeriesRule = new ReadStatusTransitionRule
+        {
+            Enabled = true,
+            Days = 30,
+            TransitionStatus = ScrobbleReadStatus.OnHold,
+            ExcludedPublicationStatus = [],
+        };
+        unitOfWork.UserRepository.Update(user);
+        await unitOfWork.CommitAsync();
+
+        // Give the series some progress, then age it past the rule window so it qualifies as "inactive"
+        var chapter1 = await unitOfWork.ChapterRepository.GetChapterAsync(1);
+        Assert.NotNull(chapter1);
+        await readerService.MarkChaptersAsRead(user, 1, [chapter1]);
+        await unitOfWork.CommitAsync();
+
+        var aged = await context.AppUserProgresses
+            .Where(p => p.AppUserId == 1 && p.SeriesId == 1)
+            .ExecuteUpdateAsync(s => s.SetProperty(p => p.LastModifiedUtc, DateTime.UtcNow.AddDays(-60)));
+        Assert.Equal(1, aged);
+
+        // First run: the rule fires and creates a single read-status event stamped with the rule kind + hash
+        await service.RunReadStatusTransitionRules();
+
+        // Clearing the tracker forces the assertions below to read the persisted columns, not in-memory copies
+        context.ChangeTracker.Clear();
+        var afterFirstRun = (await unitOfWork.ScrobbleRepository.GetAllEventsForSeries(1))
+            .Where(e => e.ScrobbleEventType == ScrobbleEventType.ReadStatusUpdate)
+            .ToList();
+        Assert.Single(afterFirstRun);
+        Assert.Equal(TransitionRuleKind.Inactive, afterFirstRun[0].TransitionRuleKind);
+        Assert.False(string.IsNullOrEmpty(afterFirstRun[0].RuleHashSnapshot));
+
+        // Deliver it through the real pipeline -> writes the durable ledger row
+        await service.ProcessUpdatesSinceLastSync();
+
+        await kavitaPlusApiService.Received().PostScrobbleV3UpdateAsync(
+            Arg.Is<ScrobbleV3Dto>(d => d.ScrobbleEventType == ScrobbleEventType.ReadStatusUpdate), Arg.Any<string>());
+        Assert.Equal(1, await context.ScrobbleRuleHistory.CountAsync());
+
+        // Second run: the series is still inactive, but the ledger must suppress a re-send
+        await service.RunReadStatusTransitionRules();
+
+        var afterSecondRun = (await unitOfWork.ScrobbleRepository.GetAllEventsForSeries(1))
+            .Where(e => e.ScrobbleEventType == ScrobbleEventType.ReadStatusUpdate)
+            .ToList();
+        Assert.Single(afterSecondRun);
+        Assert.Equal(afterFirstRun[0].Id, afterSecondRun[0].Id);
     }
 
     #endregion

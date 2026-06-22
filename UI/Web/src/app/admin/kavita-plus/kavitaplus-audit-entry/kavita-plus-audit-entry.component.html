@@ -1,0 +1,120 @@
+<ng-container *transloco="let t; prefix: 'kavita-plus-audit-entry'">
+  <div class="entry flex-grow-1 d-flex flex-column p-3">
+
+    <div class="d-flex flex-column flex-sm-row align-items-sm-start gap-2 gap-sm-3">
+
+      @if (coverUrl(); as cover) {
+        <div class="cover flex-shrink-0 phone-hidden">
+          <app-image [imageUrl]="cover"
+                     width="3rem" height="4rem"
+                     classes="rounded-1 w-100 h-100"
+                     objectFit="cover" />
+        </div>
+      } @else if (entry().subjectType === AuditSubjectType.Person && entry().subjectId) {
+        <div class="cover flex-shrink-0">
+          <app-image [imageUrl]="imageService.getPersonImage(entry().subjectId!)"
+                     [errorImage]="imageService.noPersonImage"
+                     width="48px" height="64px"
+                     classes="rounded-1 w-100 h-100"
+                     objectFit="cover" />
+        </div>
+      }
+
+      <div class="flex-grow-1 min-w-0">
+        <div class="d-flex align-items-center gap-2 mb-1 flex-wrap">
+          @if (entry().seriesId != null && entry().libraryId != null) {
+            <button class="series-link fw-semibold text-truncate btn-unstyled" (click)="navigateToSeries()">
+              {{entry().seriesName | truncate}}
+            </button>
+          } @else {
+            <span class="series-link fw-semibold text-truncate">{{(entityLabel() ?? t('system')) | truncate}}</span>
+          }
+
+          @if (showStatus()) {
+            <span class="badge" [ngClass]="statusBadgeClass()">{{entry().status | auditStatusTitle}}</span>
+          }
+
+          @if (provider(); as provider) {
+            <span class="provider-badge d-inline-flex align-items-center gap-1">
+              <app-scrobble-provider-image [provider]="provider" [size]="16" />
+              <span>{{provider | scrobbleProviderName}}</span>
+            </span>
+          }
+
+          @if (showStatus()) {
+            @for (badge of matchProviderBadges(); track badge.provider) {
+              <app-scrobble-provider-tag-badge [provider]="badge.provider" [id]="badge.id" />
+            }
+
+            @if (fetchTrigger(); as trigger) {
+              <span class="badge bg-secondary fetch-trigger-badge">{{trigger | metadataFetchTriggerTitle}}</span>
+            }
+          }
+
+          <!--Collection Sync only-->
+          @if (entry().syncDetails?.collectionUrl) {
+            <a [href]="entry().syncDetails?.collectionUrl | safeUrl" target="_blank" rel="nofollow noopener">
+              <app-scrobble-provider-image [provider]="ScrobbleProvider.Mal" [size]="24" />
+            </a>
+
+          }
+        </div>
+
+        <div class="small text-muted mb-1" [style.color]="showStatus() ? null : descriptionColor()">
+          {{entry().eventType | kavitaPlusEventType}}
+          @let desc = entry() | kavitaPlusEventDescription;
+          @if (desc) {
+            <span class="mx-1 dot-separator"></span>{{desc}}
+          }
+          @if (entry().errorMessage) {
+            <span class="mx-1 dot-separator"></span>{{entry().errorMessage! | auditLogError}}
+          }
+        </div>
+      </div>
+
+      <div class="meta d-flex flex-row flex-sm-column align-items-center align-items-sm-end justify-content-start gap-2 gap-sm-1 flex-shrink-0">
+        <span class="time text-muted text-nowrap">
+          {{entry().createdUtc | utcToLocalDate | timeDifference}}
+        </span>
+
+        @if (showRetry() && entry().canRetry) {
+          <button class="btn btn-outline-primary btn-sm" (click)="retryEntry()">
+            <i class="fa-solid fa-rotate-left" aria-hidden="true"></i> {{t('retry')}}
+          </button>
+        }
+
+        @if (entry().category === KavitaPlusAuditCategory.Match && !!entry().libraryId) {
+          <button class="btn btn-outline-primary btn-sm" (click)="matchSeries()">
+            <i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i> {{t('match')}}
+          </button>
+        }
+
+        @if (showUser() && entry().userId) {
+          <div class="d-flex align-items-center gap-1 phone-hidden">
+            <app-profile-icon [userId]="entry().userId!" [size]="14" />
+            <span class="small text-muted">{{entry().username}}</span>
+          </div>
+        }
+
+        @if (showDiff() && supportsDiff()) {
+          <button class="btn-unstyled diff-toggle" (click)="collapsed.set(!collapsed())"
+                  [attr.aria-expanded]="!collapsed()">
+            <i class="fa fa-chevron-down" [class.fa-rotate-180]="!collapsed()" aria-hidden="true"></i>
+          </button>
+        }
+      </div>
+
+    </div>
+
+    @if (showDiff() && supportsDiff()) {
+      <div [ngbCollapse]="collapsed()">
+        <div class="diff-body mt-2">
+          @if (entry().diff?.length) {
+            <app-kavitaplus-diff [diff]="entry().diff!" />
+          }
+        </div>
+      </div>
+    }
+
+  </div>
+</ng-container>

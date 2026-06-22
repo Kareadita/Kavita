@@ -38,9 +38,8 @@ public class RatingService(IUnitOfWork unitOfWork, IScrobblingService scrobbling
 
             if (!unitOfWork.HasChanges() || await unitOfWork.CommitAsync(ct))
             {
-                BackgroundJob.Enqueue(() =>
-                    scrobblingService.ScrobbleRatingUpdate(user.Id, updateRatingDto.SeriesId,
-                        userRating.Rating));
+                BackgroundJob.Enqueue(() => scrobblingService.ScrobbleSeriesRatingUpdate(user.Id,
+                    updateRatingDto.SeriesId, userRating.Rating, CancellationToken.None));
                 return true;
             }
         }
@@ -83,6 +82,10 @@ public class RatingService(IUnitOfWork unitOfWork, IScrobblingService scrobbling
             unitOfWork.UserRepository.Update(user);
 
             await unitOfWork.CommitAsync(ct);
+
+            BackgroundJob.Enqueue(() => scrobblingService.ScrobbleChapterRatingUpdate(user.Id,
+                updateRatingDto.SeriesId, updateRatingDto.ChapterId.Value, userRating.Rating, CancellationToken.None));
+
             return true;
         }
         catch (Exception ex)

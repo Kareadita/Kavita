@@ -6,7 +6,6 @@ using System.Threading;
 using System.Threading.Tasks;
 using Kavita.API.Repositories;
 using Kavita.Models.DTOs.Annotations;
-using Kavita.Models.DTOs.Filtering;
 using Kavita.Models.DTOs.Filtering.v2.SortFields;
 using Kavita.Models.DTOs.Filtering.v2.SortOptions;
 using Kavita.Models.DTOs.KavitaPlus.Manage;
@@ -114,24 +113,6 @@ public static class QueryableExtensions
             .Select(lib => lib.Id);
     }
 
-    /// <summary>
-    /// Returns all libraries for a given user and library type
-    /// </summary>
-    /// <param name="library"></param>
-    /// <param name="userId"></param>
-    /// <param name="queryContext"></param>
-    /// <returns></returns>
-    public static IQueryable<int> GetUserLibrariesByType(this IQueryable<Library> library, int userId, LibraryType type, QueryContext queryContext = QueryContext.None)
-    {
-        return library
-            .Include(l => l.AppUsers)
-            .Where(lib => lib.AppUsers.Any(user => user.Id == userId))
-            .Where(lib => lib.Type == type)
-            .IsRestricted(queryContext)
-            .AsNoTracking()
-            .AsSplitQuery()
-            .Select(lib => lib.Id);
-    }
 
     public static IEnumerable<DateTime> Range(this DateTime startDate, int numberOfDays) =>
         Enumerable.Range(0, numberOfDays).Select(e => startDate.AddDays(e));
@@ -250,11 +231,12 @@ public static class QueryableExtensions
     {
         if (!condition || string.IsNullOrEmpty(searchQuery)) return queryable;
 
-        var method = typeof(DbFunctionsExtensions).GetMethod(nameof(DbFunctionsExtensions.Like), new[] { typeof(DbFunctions), typeof(string), typeof(string) });
+        var method = typeof(DbFunctionsExtensions).GetMethod(nameof(DbFunctionsExtensions.Like), [typeof(DbFunctions), typeof(string), typeof(string)
+        ]);
         var dbFunctions = typeof(EF).GetMethod(nameof(EF.Functions))?.Invoke(null, null);
         var searchExpression = Expression.Constant($"%{searchQuery}%");
 
-        Expression orExpression = null;
+        Expression? orExpression = null;
         foreach (var propertySelector in propertySelectors)
         {
             var likeExpression = Expression.Call(method, Expression.Constant(dbFunctions), propertySelector.Body, searchExpression);
@@ -310,8 +292,8 @@ public static class QueryableExtensions
 
         return sort.SortField switch
         {
-            PersonSortField.Name when sort.IsAscending => query.OrderBy(p => p.Name),
-            PersonSortField.Name => query.OrderByDescending(p => p.Name),
+            PersonSortField.Name when sort.IsAscending => query.OrderBy(p => p.Name.ToLower()),
+            PersonSortField.Name => query.OrderByDescending(p => p.Name.ToLower()),
             PersonSortField.SeriesCount when sort.IsAscending => query.OrderBy(p => p.SeriesMetadataPeople.Count),
             PersonSortField.SeriesCount => query.OrderByDescending(p => p.SeriesMetadataPeople.Count),
             PersonSortField.ChapterCount when sort.IsAscending => query.OrderBy(p => p.ChapterPeople.Count),
@@ -324,20 +306,20 @@ public static class QueryableExtensions
     {
         if (sort == null)
         {
-            return query.OrderBy(p => p.Title);
+            return query.OrderBy(p => p.Title.ToLower());
         }
 
         return sort.SortField switch
         {
-            ReadingListSortField.Title when sort.IsAscending => query.OrderBy(p => p.Title),
-            ReadingListSortField.Title  => query.OrderByDescending(p => p.Title),
+            ReadingListSortField.Title when sort.IsAscending => query.OrderBy(p => p.Title.ToLower()),
+            ReadingListSortField.Title  => query.OrderByDescending(p => p.Title.ToLower()),
             ReadingListSortField.ReleaseYearStart when sort.IsAscending => query.OrderBy(r => r.StartingYear),
             ReadingListSortField.ReleaseYearStart => query.OrderByDescending(r => r.StartingYear),
             ReadingListSortField.ReleaseYearEnd when sort.IsAscending => query.OrderBy(r => r.EndingYear),
             ReadingListSortField.ReleaseYearEnd => query.OrderByDescending(r => r.EndingYear),
             ReadingListSortField.ItemCount when sort.IsAscending => query.OrderBy(r => r.Items.Count),
             ReadingListSortField.ItemCount =>  query.OrderByDescending(r => r.Items.Count),
-            _ => query.OrderBy(p => p.Title),
+            _ => query.OrderBy(p => p.Title.ToLower()),
         };
     }
 
@@ -381,7 +363,7 @@ public static class QueryableExtensions
             MatchStateOption.All => query,
             MatchStateOption.Matched => query
                 .Include(s => s.ExternalSeriesMetadata)
-                .Where(s => s.ExternalSeriesMetadata != null && s.ExternalSeriesMetadata.ValidUntilUtc > DateTime.MinValue && !s.IsBlacklisted),
+                .WhereMatchedExternalMetadata(),
             MatchStateOption.NotMatched => query.
                 Include(s => s.ExternalSeriesMetadata)
                 .Where(s => (s.ExternalSeriesMetadata == null || s.ExternalSeriesMetadata.ValidUntilUtc == DateTime.MinValue) && !s.IsBlacklisted && !s.DontMatch),
@@ -389,6 +371,28 @@ public static class QueryableExtensions
             MatchStateOption.DontMatch => query.Where(s => s.DontMatch),
             _ => query
         };
+    }
+
+    /// <summary>
+    /// Filters to series that have been successfully matched in Kavita+:
+    /// has ExternalSeriesMetadata with a populated ValidUntilUtc and is not blacklisted.
+    /// </summary>
+    public static IQueryable<Series> WhereMatchedExternalMetadata(this IQueryable<Series> query)
+    {
+        return query
+            .Where(s => !s.IsBlacklisted)
+            .Where(s => s.ExternalSeriesMetadata != null && s.ExternalSeriesMetadata.ValidUntilUtc > DateTime.MinValue);
+    }
+
+    /// <summary>
+    /// Filters to series that are matched but whose cached metadata has expired and needs a refresh.
+    /// A stale series is still considered matched, the data is just out of date.
+    /// </summary>
+    public static IQueryable<Series> WhereStaleExternalMetadata(this IQueryable<Series> query)
+    {
+        return query
+            .Where(s => !s.IsBlacklisted)
+            .Where(s => s.ExternalSeriesMetadata != null && s.ExternalSeriesMetadata!.ValidUntilUtc < DateTime.UtcNow);
     }
 
     /// <summary>

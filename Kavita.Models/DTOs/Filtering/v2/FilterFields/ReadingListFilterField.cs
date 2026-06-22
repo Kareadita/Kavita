@@ -8,4 +8,9 @@ public enum ReadingListFilterField
     Tags = 4,
     Writer = 5,
     Artist = 6,
+    /// <summary>
+    /// Source is either Kavita/Url/File
+    /// </summary>
+    Provider = 7,
+    MissingItemCount = 8
 }

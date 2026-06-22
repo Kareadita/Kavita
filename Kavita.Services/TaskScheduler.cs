@@ -5,12 +5,14 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Hangfire;
+using Hangfire.Storage;
 using Kavita.API.Database;
 using Kavita.API.Repositories;
 using Kavita.API.Services;
 using Kavita.API.Services.Metadata;
 using Kavita.API.Services.Plus;
 using Kavita.API.Services.Reading;
+using Kavita.API.Services.ReadingLists;
 using Kavita.API.Services.Scanner;
 using Kavita.API.Services.SignalR;
 using Kavita.Common.Constants;
@@ -43,7 +45,6 @@ public class TaskScheduler : ITaskScheduler
     private readonly IStatsService _statsService;
     private readonly IVersionUpdaterService _versionUpdaterService;
     private readonly IWordCountAnalyzerService _wordCountAnalyzerService;
-    private readonly IStatisticService _statisticService;
     private readonly IMediaConversionService _mediaConversionService;
     private readonly IScrobblingService _scrobblingService;
     private readonly ILicenseService _licenseService;
@@ -78,6 +79,7 @@ public class TaskScheduler : ITaskScheduler
     public const string AuthKeyExpirationId = TaskSchedulerConstants.AuthKeyExpirationId;
     public const string EnsureSideNavId = TaskSchedulerConstants.EnsureSideNavId;
     public const string FlushUserActiveTaskId = TaskSchedulerConstants.FlushUserActiveTaskId;
+    public const string PurgeKavitaPlusAuditLogsId = TaskSchedulerConstants.PurgeKavitaPlusAuditLogsId;
 
     private const int BaseRetryDelay = 60; // 1-minute
 
@@ -100,7 +102,7 @@ public class TaskScheduler : ITaskScheduler
     public TaskScheduler(ICacheService cacheService, ILogger<TaskScheduler> logger, IScannerService scannerService,
         IUnitOfWork unitOfWork, IMetadataService metadataService, IBackupService backupService,
         ICleanupService cleanupService, IStatsService statsService, IVersionUpdaterService versionUpdaterService,
-        IWordCountAnalyzerService wordCountAnalyzerService, IStatisticService statisticService,
+        IWordCountAnalyzerService wordCountAnalyzerService,
         IMediaConversionService mediaConversionService, IScrobblingService scrobblingService, ILicenseService licenseService,
         IExternalMetadataService externalMetadataService, ISmartCollectionSyncService smartCollectionSyncService,
         IWantToReadSyncService wantToReadSyncService, IEventHub eventHub, IEmailService emailService,
@@ -116,7 +118,6 @@ public class TaskScheduler : ITaskScheduler
         _statsService = statsService;
         _versionUpdaterService = versionUpdaterService;
         _wordCountAnalyzerService = wordCountAnalyzerService;
-        _statisticService = statisticService;
         _mediaConversionService = mediaConversionService;
         _scrobblingService = scrobblingService;
         _licenseService = licenseService;
@@ -171,7 +172,7 @@ public class TaskScheduler : ITaskScheduler
         if (IsInvalidCronSetting(setting))
         {
             _logger.LogError("Backup Task has invalid cron, defaulting to Weekly");
-            RecurringJob.AddOrUpdate(BackupTaskId, () => _backupService.BackupDatabase(CancellationToken.None),
+            RecurringJob.AddOrUpdate<IBackupService>(BackupTaskId, (service) => service.BackupDatabase(CancellationToken.None),
                 Cron.Weekly, RecurringJobOptions);
         }
         else
@@ -183,7 +184,7 @@ public class TaskScheduler : ITaskScheduler
                 // Override daily and make 2am so that everything on system has cleaned up and no blocking
                 schedule = Cron.Daily(2);
             }
-            RecurringJob.AddOrUpdate(BackupTaskId, () => _backupService.BackupDatabase(CancellationToken.None),
+            RecurringJob.AddOrUpdate<IBackupService>(BackupTaskId, (service) => service.BackupDatabase(CancellationToken.None),
                 () => schedule, RecurringJobOptions);
         }
 
@@ -191,13 +192,13 @@ public class TaskScheduler : ITaskScheduler
         if (IsInvalidCronSetting(setting))
         {
             _logger.LogError("Cleanup Task has invalid cron, defaulting to Daily");
-            RecurringJob.AddOrUpdate(CleanupTaskId, () => _cleanupService.Cleanup(CancellationToken.None),
+            RecurringJob.AddOrUpdate<ICleanupService>(CleanupTaskId, (service) => service.Cleanup(CancellationToken.None),
                 Cron.Daily, RecurringJobOptions);
         }
         else
         {
             _logger.LogDebug("Scheduling Cleanup Task for {Setting}", setting);
-            RecurringJob.AddOrUpdate(CleanupTaskId, () => _cleanupService.Cleanup(CancellationToken.None),
+            RecurringJob.AddOrUpdate<ICleanupService>(CleanupTaskId, (service) => service.Cleanup(CancellationToken.None),
                 CronConverter.ConvertToCronNotation(setting), RecurringJobOptions);
         }
 
@@ -205,22 +206,22 @@ public class TaskScheduler : ITaskScheduler
         if (IsInvalidCronSetting(setting))
         {
             _logger.LogError("CBL Sync Task has invalid cron, defaulting to Daily");
-            RecurringJob.AddOrUpdate<CblImportService>(TaskCblSyncId, service => service.SyncAllReadingLists(CancellationToken.None),
+            RecurringJob.AddOrUpdate<ICblImportService>(TaskCblSyncId, service => service.SyncAllReadingLists(CancellationToken.None),
                 "0 4 * * *", RecurringJobOptions);
         }
         else
         {
             _logger.LogDebug("Scheduling CBL Sync Task for {Setting}", setting);
-            RecurringJob.AddOrUpdate<CblImportService>(TaskCblSyncId, service => service.SyncAllReadingLists(CancellationToken.None),
+            RecurringJob.AddOrUpdate<ICblImportService>(TaskCblSyncId, service => service.SyncAllReadingLists(CancellationToken.None),
                 CronConverter.ConvertToCronNotation(setting), RecurringJobOptions);
         }
 
 
-        RecurringJob.AddOrUpdate(RemoveFromWantToReadTaskId,
-            () => _cleanupService.CleanupWantToRead(CancellationToken.None),
+        RecurringJob.AddOrUpdate<ICleanupService>(RemoveFromWantToReadTaskId,
+            (service) => service.CleanupWantToRead(CancellationToken.None),
             Cron.Daily, RecurringJobOptions);
-        RecurringJob.AddOrUpdate(UpdateYearlyStatsTaskId,
-            () => _statisticService.UpdateServerStatistics(CancellationToken.None),
+        RecurringJob.AddOrUpdate<IStatisticService>(UpdateYearlyStatsTaskId,
+            (service) => service.UpdateServerStatistics(CancellationToken.None),
             Cron.Monthly, RecurringJobOptions);
 
         RecurringJob.AddOrUpdate<IThemeService>(SyncThemesTaskId,
@@ -242,19 +243,16 @@ public class TaskScheduler : ITaskScheduler
             service => service.FlushAsync(CancellationToken.None),
             "*/5 * * * *", RecurringJobOptions);
 
-        BackgroundJob.Enqueue(() => ScheduleKavitaPlusTasks(CancellationToken.None));
     }
 
-    private static bool IsInvalidCronSetting(string setting)
+    private static bool IsInvalidCronSetting(string? setting)
     {
         return setting == null || (!NonCronOptions.Contains(setting) && !CronHelper.IsValidCron(setting));
     }
 
     public async Task ScheduleKavitaPlusTasks(CancellationToken cancellationToken = default)
     {
-        // KavitaPlus based (needs license check)
-        var license = (await _unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.LicenseKey, cancellationToken)).Value;
-        if (string.IsNullOrEmpty(license) || !await _licenseService.HasActiveSubscription(license, cancellationToken))
+        if (!await _licenseService.HasActiveLicense(false, cancellationToken))
         {
             return;
         }
@@ -272,6 +270,7 @@ public class TaskScheduler : ITaskScheduler
 
         // KavitaPlus Scrobbling (every hour) - randomise minutes to spread requests out for K+
         var randomMinute = Rnd.Next(0, 60);
+        _logger.LogDebug("Scheduling KavitaPlus Scrobbling Task every hour @ {Minute}m", randomMinute);
         RecurringJob.AddOrUpdate(ProcessScrobblingEventsId,
             () => _scrobblingService.ProcessUpdatesSinceLastSync(CancellationToken.None),
             Cron.Hourly(randomMinute), RecurringJobOptions);
@@ -294,6 +293,18 @@ public class TaskScheduler : ITaskScheduler
         RecurringJob.AddOrUpdate(KavitaPlusWantToReadSyncId,
             () => _wantToReadSyncService.Sync(CancellationToken.None),
             Cron.Weekly(DayOfWeekHelper.Random()), RecurringJobOptions);
+
+        RecurringJob.AddOrUpdate<IKavitaPlusAuditService>(PurgeKavitaPlusAuditLogsId,
+            service => service.PurgeOldLogsAsync(CancellationToken.None),
+            Cron.Daily, RecurringJobOptions);
+
+        RecurringJob.AddOrUpdate<IScrobblingService>(TaskSchedulerConstants.CreateReadStatusTransitionRuleEventsId,
+            service => service.RunReadStatusTransitionRules(CancellationToken.None),
+            Cron.Daily, RecurringJobOptions);
+
+        RecurringJob.AddOrUpdate<IOAuthService>(TaskSchedulerConstants.RefreshConnectedTokensId,
+            service => service.RefreshTokens(CancellationToken.None),
+            Cron.Daily, RecurringJobOptions);
     }
 
 
@@ -309,6 +320,8 @@ public class TaskScheduler : ITaskScheduler
         RecurringJob.RemoveIfExists(KavitaPlusDataRefreshId);
         RecurringJob.RemoveIfExists(KavitaPlusStackSyncId);
         RecurringJob.RemoveIfExists(KavitaPlusWantToReadSyncId);
+        RecurringJob.RemoveIfExists(PurgeKavitaPlusAuditLogsId);
+        RecurringJob.RemoveIfExists(TaskSchedulerConstants.CreateReadStatusTransitionRuleEventsId);
     }
 
     #region StatsTasks
@@ -465,11 +478,6 @@ public class TaskScheduler : ITaskScheduler
         var jobId = BackgroundJob.Enqueue(() => _scannerService.ScanLibrary(libraryId, force, true));
         // When we do a scan, force cache to re-unpack in case page numbers change
         BackgroundJob.ContinueJobWith(jobId, () => _cleanupService.CleanupCacheDirectory());
-    }
-
-    public void TurnOnScrobbling(int userId = 0)
-    {
-        BackgroundJob.Enqueue(() => _scrobblingService.CreateEventsFromExistingHistory(userId));
     }
 
     public void CleanupChapters(int[] chapterIds)
@@ -774,5 +782,19 @@ public class TaskScheduler : ITaskScheduler
 
         var runningJobs = JobStorage.Current.GetMonitoringApi().ProcessingJobs(0, int.MaxValue);
         return runningJobs.Exists(j => classNames.Contains(j.Value.Job.Method.DeclaringType?.Name));
+    }
+
+    /// <summary>
+    /// Returns Utc DateTime of next run of a given Job Id
+    /// </summary>
+    /// <param name="jobId"></param>
+    /// <returns></returns>
+    public static DateTime? GetNextRun(string jobId)
+    {
+        using var connection = JobStorage.Current.GetConnection();
+        var job = connection.GetRecurringJobs()
+            .FirstOrDefault(j => j.Id == jobId);
+
+        return job?.NextExecution;
     }
 }

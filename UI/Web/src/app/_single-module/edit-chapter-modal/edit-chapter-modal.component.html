@@ -540,8 +540,7 @@
                 <p class="alert alert-warning" role="alert">
                   {{t('cover-image-description')}}
                 </p>
-                <app-cover-image-chooser [(imageUrls)]="imageUrls" (imageSelected)="updateSelectedIndex($event)" (selectedBase64Url)="updateSelectedImage($event)"
-                                         [showReset]="chapter.coverImageLocked" (resetClicked)="handleReset()" />
+                <app-cover-image-chooser [config]="chooserConfig" (coverChanged)="handleCoverChanged($event)" (resetClicked)="handleReset()" />
               </ng-template>
             </li>
           }

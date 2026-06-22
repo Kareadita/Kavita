@@ -1,0 +1,9 @@
+<div class="empty-state-container d-flex flex-column align-items-center text-center py-5 px-4 gap-1" *transloco="let t; prefix: i18nPrefix()">
+  <div class="empty-state-icon d-flex align-items-center justify-content-center rounded-circle mb-2" [class.is-error]="isError()">
+    <ng-content select="[icon]" />
+  </div>
+  <div class="empty-state-title fw-medium">{{ t(titleKey()) }}</div>
+  @if (descriptionKey()) {
+    <div class="empty-state-desc">{{ t(descriptionKey(), descriptionParams()) }}</div>
+  }
+</div>

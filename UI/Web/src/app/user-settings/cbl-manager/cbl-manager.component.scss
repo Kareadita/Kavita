@@ -1,23 +1,11 @@
-
-ngx-file-drop ::ng-deep > div {
-  // styling for the outer drop box
-  width: 100%;
-  border: 0.125rem solid var(--primary-color);
-  border-radius: 0.3125rem;
-  height: 6.25rem;
-  margin: auto;
-
-  > div {
-    // styling for the inner box (template)
-    width: 100%;
-    display: inline-block;
-
-  }
-}
-
 .custom-position {
   right: 0.9375rem;
   top: -2.625rem;
+  @media (max-width: 576px) {
+    position: static !important;
+    justify-content: flex-end;
+    padding: 0 0 0.5rem;
+  }
 }
 
 .section-header {
@@ -31,7 +19,8 @@ ngx-file-drop ::ng-deep > div {
   flex-direction: column;
 
   @media (max-width: 576px) {
-    max-height: calc(100dvh - 30rem);
+    max-height: 50dvh;
+    overflow-y: auto;
   }
 
   > div {
@@ -59,8 +48,20 @@ ngx-file-drop ::ng-deep > div {
   color: var(--primary-color);
 }
 
-.btn-group .btn {
-  font-size: 0.8rem;
+.filter-row {
+  @media (max-width: 576px) {
+    flex-direction: column;
+    align-items: flex-start !important;
+    gap: 0.5rem !important;
+  }
+}
+
+.detail-panel {
+  @media (max-width: 767px) {
+    &.is-hidden-mobile {
+      display: none;
+    }
+  }
 }
 
 .detail-cover {
@@ -74,4 +75,14 @@ ngx-file-drop ::ng-deep > div {
     object-fit: cover;
     border-radius: 0.25rem;
   }
+}
+
+.btn-group .btn {
+  font-size: 0.8rem;
+}
+
+.btn-group > .btn.dropdown-toggle-split {
+  border-top-right-radius: var(--bs-border-radius) !important;
+  border-bottom-right-radius: var(--bs-border-radius) !important;
+  border-width: 1px 1px 1px 0 !important;
 }

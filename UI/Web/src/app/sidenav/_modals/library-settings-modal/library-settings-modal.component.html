@@ -118,9 +118,7 @@
             }
 
             <p>{{t('cover-description-extra')}}</p>
-            <app-cover-image-chooser [(imageUrls)]="imageUrls" (imageSelected)="updateCoverImageIndex($event)"
-                                     (selectedBase64Url)="applyCoverImage($event)" [showReset]="library?.coverImage !== null"
-                                     (resetClicked)="resetCoverImage()" />
+            <app-cover-image-chooser [config]="chooserConfig" (coverChanged)="handleCoverChanged($event)" />
           </ng-template>
         </li>
 

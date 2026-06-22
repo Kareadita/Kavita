@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -9,6 +10,7 @@ using Kavita.Common.Extensions;
 using Kavita.Database.Extensions;
 using Kavita.Models.Constants;
 using Kavita.Models.DTOs;
+using Kavita.Models.DTOs.KavitaPlus.Scrobble;
 using Kavita.Models.DTOs.Metadata;
 using Kavita.Models.DTOs.Reader;
 using Kavita.Models.DTOs.SeriesDetail;
@@ -268,20 +270,16 @@ public class ChapterRepository(DataContext context, IMapper mapper) : IChapterRe
 
     public async Task<int> GetAverageUserRating(int chapterId, int userId, CancellationToken ct = default)
     {
-        // If there is a 0 or 1 rating and that rating is you, return 0 back
-        var countOfRatingsThatAreUser = await context.AppUserChapterRating
+        var ratings = await context.AppUserChapterRating
             .Where(r => r.ChapterId == chapterId && r.HasBeenRated)
-            .CountAsync(u => u.AppUserId == userId, ct);
+            .ToListAsync(ct);
 
-        if (countOfRatingsThatAreUser == 1)
+        if (ratings.Count == 0 || (ratings.Count == 1 && ratings[0].AppUserId == userId))
         {
             return 0;
         }
 
-        var avg = await context.AppUserChapterRating
-            .Where(r => r.ChapterId == chapterId && r.HasBeenRated)
-            .AverageAsync(r => (int?) r.Rating, ct);
-
+        var avg = ratings.Average(r => (int?) r.Rating);
         return avg.HasValue ? (int) (avg.Value * 20) : 0;
     }
 
@@ -452,5 +450,40 @@ public class ChapterRepository(DataContext context, IMapper mapper) : IChapterRe
         return chapters
             .Where(c => normalizedSet.Contains(c.AlternateSeries.ToNormalized()))
             .ToList();
+    }
+
+    public Task<List<Chapter>> GetChaptersForReadStatusTransitionRuleAsync(int userId, ReadStatusTransitionRule rule, CancellationToken ct = default)
+    {
+        if (!rule.Enabled || rule.Days <= 0) return Task.FromResult(new List<Chapter>());
+
+        var cutoffDate = DateTime.UtcNow.AddDays(-rule.Days);
+        var excludedStatuses = rule.ExcludedPublicationStatus;
+
+        var chapterProgressStats = context.AppUserProgresses
+            .Where(p => p.AppUserId == userId && p.PagesRead > 0)
+            .GroupBy(p => p.ChapterId)
+            .Select(g => new
+            {
+                ChapterId = g.Key,
+                LastProgressUtc = g.Max(p => p.LastModifiedUtc)
+            });
+
+        return context.Chapter
+            .Join(chapterProgressStats,
+                c => c.Id,
+                cp => cp.ChapterId,
+                (c, cp) => new { Chapter = c, cp.LastProgressUtc })
+            .Where(x => x.LastProgressUtc < cutoffDate)
+            .Select(x => x.Chapter)
+            .Include(c => c.Volume)
+            .ThenInclude(v => v.Series)
+            .ThenInclude(s => s.Library)
+            .Include(c => c.Volume)
+            .ThenInclude(v => v.Series)
+            .ThenInclude(s => s.ExternalSeriesMetadata)
+            .Include(c => c.Volume)
+            .ThenInclude(v => v.Series)
+            .ThenInclude(s => s.Metadata)
+            .ToListAsync(ct);
     }
 }

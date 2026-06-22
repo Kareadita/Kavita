@@ -1,9 +1,15 @@
+using System;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using Kavita.Models.DTOs.Collection;
+using Kavita.Models.DTOs.KavitaPlus;
 using Kavita.Models.DTOs.KavitaPlus.ExternalMetadata;
+using Kavita.Models.DTOs.KavitaPlus.ExternalMetadata.Covers;
+using Kavita.Models.DTOs.KavitaPlus.License;
 using Kavita.Models.DTOs.KavitaPlus.Metadata;
+using Kavita.Models.DTOs.KavitaPlus.OAuth;
+using Kavita.Models.DTOs.KavitaPlus.Scrobble;
 using Kavita.Models.DTOs.Metadata.Matching;
 using Kavita.Models.DTOs.Scrobbling;
 using Kavita.Models.Entities.Enums;
@@ -13,14 +19,58 @@ namespace Kavita.API.Services.Plus;
 /// <summary>
 /// All Http requests to K+ should be contained in this service, the service will not handle any errors.
 /// This is expected from the caller.
+///
+/// Methods returning <see cref="KPlusResult{T}"/> will NOT thrown.
 /// </summary>
 public interface IKavitaPlusApiService
 {
-    Task<bool> HasTokenExpired(string license, string token, ScrobbleProvider provider, CancellationToken ct = default);
-    Task<int> GetRateLimit(string license, string token, CancellationToken ct = default);
-    Task<ScrobbleResponseDto> PostScrobbleUpdate(ScrobbleDto data, string license, CancellationToken ct = default);
-    Task<IList<MalStackDto>> GetMalStacks(string malUsername, string license, CancellationToken ct = default);
-    Task<IList<ExternalSeriesMatchDto>> MatchSeries(MatchSeriesRequestDto request, CancellationToken ct = default);
-    Task<SeriesDetailPlusApiDto> GetSeriesDetail(PlusSeriesRequestDto request, CancellationToken ct = default);
-    Task<ExternalSeriesDetailDto> GetSeriesDetailById(ExternalMetadataIdsDto request, CancellationToken ct = default);
+    [Obsolete]
+    Task<int> GetRateLimitAsync(string license, string token, CancellationToken ct = default);
+    Task<IList<MalStackDto>> GetMalStacksAsync(string malUsername, string license, CancellationToken ct = default);
+    Task<IList<ExternalSeriesMatchDto>> MatchSeriesAsync(MatchSeriesRequestDto request, CancellationToken ct = default);
+    Task<SeriesDetailPlusApiDto> GetSeriesDetailAsync(PlusSeriesRequestDto request, CancellationToken ct = default);
+    Task<ExternalSeriesDetailDto> GetSeriesDetailByIdAsync(ExternalMetadataIdsDto request, CancellationToken ct = default);
+
+    Task<KPlusResult<SeriesDetailPlusApiDto?>> GetSeriesDetailV3Async(SeriesDetailRequestV3Dto request, CancellationToken ct = default);
+    Task<KPlusResult<List<ExternalSeriesMatchDto>>> MatchSeriesV3Async(MatchRequestV3Dto request, CancellationToken ct = default);
+    Task<ScrobbleResponseDto> PostScrobbleV3UpdateAsync(ScrobbleV3Dto data, string license, CancellationToken ct = default);
+    Task<KPlusResult<bool>> HasTokenExpiredForProviderAsync(ScrobbleProvider provider, string token, string license, CancellationToken ct = default);
+    Task<KPlusResult<int>> GetRateLimitForProviderAsync(ScrobbleProvider provider, string token, string license, CancellationToken ct = default);
+    Task<KPlusResult<IList<ExternalCoverResponseDto>>> GetCoverImagesAsync(ExternalCoverRequestDto request, CancellationToken ct = default);
+    Task<KPlusResult<List<ExternalSeriesDetailDto>>> GetWantToRead(ScrobbleProvider provider, string token, string license, CancellationToken ct = default);
+    Task<KPlusResult<KavitaPlusUserInfo>> GetUserInfo(ScrobbleProvider provider, string token, string license, CancellationToken ct = default);
+    Task<LicenseInfoDto?> GetLicenseInfo(CancellationToken ct = default);
+    Task<LicenseInfoDto?> LinkDiscord(LinkDiscordRequestDto request, CancellationToken ct = default);
+    Task<IList<KavitaPlusProviderHealthSnapshotDto>> GetProviderHealthSnapshot(CancellationToken ct = default);
+    Task<KavitaPlusLicenseUsageDto> GetLicenseUsage(CancellationToken ct = default);
+    Task<bool> CancelLicenseAsync(CancelKavitaPlusLicenseDto dto, CancellationToken ct);
+    Task<IList<KavitaPlusProductInfoDto>> GetProducts(CancellationToken ct = default);
+    Task<string?> RenewLicenseAsync(RenewKavitaPlusLicenseDto dto, CancellationToken ct);
+    Task<bool> ChangeEmail(ChangeEmailOnLicenseDto dto, CancellationToken ct);
+
+    /// <summary>
+    /// Starts the OAuth flow for the given upstream. Returns a JWT token to be use as authentication for the redirect to K+
+    /// Which handles the OAuth flow with the upstream, and redirect back to OAuth/callback
+    /// </summary>
+    /// <param name="upstream"></param>
+    /// <param name="instanceUrl"></param>
+    /// <param name="apiKey"></param>
+    /// <param name="ct"></param>
+    /// <returns></returns>
+    Task<KPlusResult<string>> StartOAuthFlow(OAuthUpstream upstream, string instanceUrl, string apiKey, CancellationToken ct = default);
+    /// <summary>
+    /// Returns the expiry date of the given access token. Either by reading from JWT or calling the introspect endpoint (OAuth)
+    /// </summary>
+    /// <param name="upstream"></param>
+    /// <param name="accessToken"></param>
+    /// <param name="ct"></param>
+    /// <returns></returns>
+    Task<KPlusResult<DateTime>> GetTokenExpiry(OAuthUpstream upstream, string accessToken, CancellationToken ct = default);
+    /// <summary>
+    /// Runs the OAuth refresh token flow
+    /// </summary>
+    /// <param name="requestDto"></param>
+    /// <param name="ct"></param>
+    /// <returns></returns>
+    Task<KPlusResult<TokenResponseDto>> RefreshToken(RefreshTokenRequestDto requestDto, CancellationToken ct = default);
 }

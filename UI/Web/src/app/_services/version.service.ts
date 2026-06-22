@@ -1,4 +1,4 @@
-import {DestroyRef, inject, Injectable} from '@angular/core';
+import {DestroyRef, inject, Injectable, signal} from '@angular/core';
 import {interval, Subscription, switchMap} from 'rxjs';
 import {ServerService} from "./server.service";
 import {AccountService} from "./account.service";
@@ -26,6 +26,9 @@ export class VersionService {
   public static readonly SERVER_VERSION_KEY = 'kavita--version';
   public static readonly CLIENT_REFRESH_KEY = 'kavita--client-refresh-last-shown';
   private static readonly DISMISS_KEY_PREFIX = 'kavita--update-dismiss-';
+
+  private readonly _currentVersion = signal<string | undefined>(undefined);
+  public readonly currentVersion = this._currentVersion.asReadonly();
 
   private readonly VERSION_CHECK_INTERVAL = 30 * 60 * 1000; // 30 minutes
   /** Threshold: above this count shows "out of date" instead of "update available" */
@@ -74,6 +77,7 @@ export class VersionService {
     ).subscribe(serverVersion => {
       this.loadedVersion = serverVersion;
       localStorage.setItem(VersionService.SERVER_VERSION_KEY, serverVersion);
+      this._currentVersion.set(serverVersion);
       this.cleanupOldDismissals(serverVersion);
       console.log('Initial version check - Server version:', serverVersion);
     });
@@ -116,6 +120,7 @@ export class VersionService {
       // Server was updated mid-session - don't update loadedVersion so the
       // refresh prompt persists until the user actually refreshes.
       localStorage.setItem(VersionService.SERVER_VERSION_KEY, serverVersion);
+      this._currentVersion.set(serverVersion);
       this.serverService.getChangelog(1).subscribe(changelog => {
         this.showRefreshModal(changelog[0]);
         localStorage.setItem(VersionService.CLIENT_REFRESH_KEY, Date.now().toString());

@@ -69,6 +69,7 @@ public class RatingController(
     /// Overall rating from all Kavita users for a given Series
     /// </summary>
     /// <param name="seriesId"></param>
+    /// <remarks>If the authenticated user is the only user to have rated the series, returns 0</remarks>
     /// <returns></returns>
     [SeriesAccess]
     [HttpGet("overall-series")]
@@ -86,6 +87,7 @@ public class RatingController(
     /// Overall rating from all Kavita users for a given Chapter
     /// </summary>
     /// <param name="chapterId"></param>
+    /// <remarks>If the authenticated user is the only user to have rated the chapter, returns 0</remarks>
     /// <returns></returns>
     [ChapterAccess]
     [HttpGet("overall-chapter")]

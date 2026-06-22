@@ -77,6 +77,7 @@ export interface Chapter extends IHasCast, IHasReadingTime, IHasCover, IHasProgr
   metronId: number;
   comicVineId: string | null;
   mangaBakaId: number;
+  cbrId: number;
 
   genres: Array<Genre>;
   tags: Array<Tag>;

@@ -1,5 +1,6 @@
 <ng-container *transloco="let t">
   <div class="modal-header" [class.book-reader]="config.bookReader">
+    <i class="fa-solid {{typeIcon}} confirm-type-icon me-2" aria-hidden="true"></i>
     <h4 class="modal-title" id="modal-basic-title">{{config.header | confirmTranslate}}</h4>
     @if (!config.disableEscape) {
       <button type="button" class="btn-unstyled ms-auto" [attr.aria-label]="t('common.close')" (click)="close()">

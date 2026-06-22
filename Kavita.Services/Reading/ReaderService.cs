@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using Hangfire;
 using Kavita.API.Database;
@@ -223,9 +224,11 @@ public class ReaderService(IUnitOfWork unitOfWork, ILogger<ReaderService> logger
         try
         {
             var userProgress = await unitOfWork.AppUserProgressRepository.GetUserProgressAsync(progressDto.ChapterId, userId);
+            var oldProgress = userProgress?.PagesRead ?? 0;
+
             // Don't create an empty progress record if there isn't any progress. This prevents Last Read date from being updated when opening a chapter
             if (userProgress == null && progressDto.PageNum == 0) return true;
-            if (userProgress?.PagesRead == progressDto.PageNum && userProgress?.BookScrollId == progressDto.BookScrollId) return true;
+            if (oldProgress == progressDto.PageNum && userProgress?.BookScrollId == progressDto.BookScrollId) return true;
 
             logger.LogDebug("Saving Progress on Series {SeriesId}, Chapter {ChapterId} to Page {PageNum}", progressDto.SeriesId, progressDto.ChapterId, progressDto.PageNum);
             if (userProgress == null)
@@ -269,13 +272,16 @@ public class ReaderService(IUnitOfWork unitOfWork, ILogger<ReaderService> logger
                     MessageFactory.UserProgressUpdateEvent(userId, progressDto.SeriesId,
                         progressDto.VolumeId, progressDto.ChapterId, progressDto.PageNum));
 
-                if (progressDto.PageNum >= totalPages)
+                // Chapter-based tracking want per chapter updates, if the page has changed; Create one
+                if (oldProgress != progressDto.PageNum || progressDto.PageNum >= totalPages)
                 {
                     // Inform Scrobble service that a chapter is read
-                    BackgroundJob.Enqueue(() => scrobblingService.ScrobbleReadingUpdate(userId, progressDto.SeriesId));
+                    BackgroundJob.Enqueue(() => scrobblingService.ScrobbleReadingUpdate(userId,
+                        progressDto.SeriesId, progressDto.ChapterId,  CancellationToken.None));
                 }
 
-                BackgroundJob.Enqueue(() => unitOfWork.SeriesRepository.ClearOnDeckRemovalAsync(progressDto.SeriesId, userId));
+                BackgroundJob.Enqueue(() =>
+                    unitOfWork.SeriesRepository.ClearOnDeckRemovalAsync(progressDto.SeriesId, userId));
 
                 return true;
             }
@@ -540,6 +546,11 @@ public class ReaderService(IUnitOfWork unitOfWork, ILogger<ReaderService> logger
 
     private static ChapterDto FindNextReadingChapter(IList<ChapterDto> volumeChapters)
     {
+        if (volumeChapters.Count <= 0)
+        {
+            throw new KavitaNotFoundException();
+        }
+
         var chaptersWithProgress = volumeChapters.Where(c => c.PagesRead > 0).ToList();
         if (chaptersWithProgress.Count <= 0) return volumeChapters[0];
 
@@ -591,33 +602,6 @@ public class ReaderService(IUnitOfWork unitOfWork, ILogger<ReaderService> logger
         }
 
         return -1;
-    }
-
-    /// <summary>
-    /// Marks every chapter that is sorted below the passed number as Read. This will not mark any specials as read or Volumes with a single 0 chapter.
-    /// </summary>
-    /// <param name="user"></param>
-    /// <param name="seriesId"></param>
-    /// <param name="chapterNumber"></param>
-    public async Task MarkChaptersUntilAsRead(AppUser user, int seriesId, float chapterNumber)
-    {
-        var volumes = await unitOfWork.VolumeRepository.GetVolumesForSeriesAsync(new List<int> { seriesId }, true);
-        foreach (var volume in volumes.OrderBy(v => v.MinNumber))
-        {
-            var chapters = volume.Chapters
-                .Where(c => !c.IsSpecial && c.MaxNumber <= chapterNumber)
-                .OrderBy(c => c.MinNumber);
-            await MarkChaptersAsRead(user, volume.SeriesId, chapters.ToList());
-        }
-    }
-
-    public async Task MarkVolumesUntilAsRead(AppUser user, int seriesId, int volumeNumber)
-    {
-        var volumes = await unitOfWork.VolumeRepository.GetVolumesForSeriesAsync(new List<int> { seriesId }, true);
-        foreach (var volume in volumes.Where(v => v.MinNumber <= volumeNumber && v.MinNumber > 0).OrderBy(v => v.MinNumber))
-        {
-            await MarkChaptersAsRead(user, volume.SeriesId, volume.Chapters);
-        }
     }
 
     public async Task<HourEstimateRangeDto> GetEstimateToCompletionForChapter(int userId, int seriesId, int chapterId)

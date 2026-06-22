@@ -131,7 +131,6 @@
     "epub-html-missing": "そのページに適切な HTML が見つかりませんでした",
     "device-duplicate": "このデバイス名はすでに存在しています",
     "reading-list-name-exists": "この名前の読書リストはすでに存在しています",
-    "browse-more-in-genre": "もっと見る {0}",
     "recently-updated": "最近更新",
     "browse-recently-updated": "最近更新されたものを閲覧",
     "smart-filters": "スマートフィルター",
@@ -147,12 +146,10 @@
     "volume-num": "第 {0} 巻",
     "book-num": "第 {0} 冊",
     "issue-num": "{0}{1} 号",
-    "reset-chapter-lock": "章の表紙ロックをリセットできません",
     "on-deck": "デッキ",
     "browse-on-deck": "デッキを閲覧",
     "reading-lists": "読書リスト",
     "browse-reading-lists": "読書リストで閲覧",
-    "more-in-genre": "さらなるジャンル {0}",
     "external-sources": "外部ソース",
     "smart-filter-doesnt-exist": "スマートフィルターは存在しません",
     "theme-doesnt-exist": "テーマファイルが見つからないか無効です",
@@ -240,5 +237,11 @@
     "email.token-expiring-soon.fallback-link-label": "上記のボタンが機能しない場合は、こちらのリンクをご利用ください:",
     "email.token-expired.fallback-link-label": "上記のボタンが機能しない場合は、こちらのリンクをご利用ください:",
     "email.email-confirm.fallback-link-label": "上記のボタンが機能しない場合は、こちらのリンクをご利用ください:",
-    "email.password-reset.fallback-link-label": "上記のボタンが機能しない場合は、こちらのリンクをご利用ください:"
+    "email.password-reset.fallback-link-label": "上記のボタンが機能しない場合は、こちらのリンクをご利用ください:",
+    "url-malformed": "URL の形式が正しくありません",
+    "url-https-only": "HTTPS URL のみが許可されます",
+    "url-unable-to-resolve": "ホスト名を解決できません",
+    "url-blocked-address": "URL がブロックされたアドレスに解決されます",
+    "cbl-import-download-from-url": "URL からファイルをダウンロードできません",
+    "cbl-import-validation-types": ".cbl と .json 形式のファイルのみが許可されます"
 }

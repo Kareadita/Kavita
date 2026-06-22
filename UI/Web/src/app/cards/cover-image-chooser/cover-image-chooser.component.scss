@@ -21,6 +21,16 @@ $image-width: 10rem;
     justify-content: space-around;
 }
 
+.cover-title {
+  font-size: 0.75rem;
+  text-align: center;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 160px;
+  margin: 0.25rem 0 0;
+}
+
 ngx-file-drop ::ng-deep > div {
     // styling for the outer drop box
     width: 100%;

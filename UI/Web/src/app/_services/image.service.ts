@@ -3,23 +3,28 @@ import {environment} from 'src/environments/environment';
 import {ThemeService} from './theme.service';
 import {AccountService} from './account.service';
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
+import {map} from "rxjs";
+import {HttpClient} from "@angular/common/http";
+import {CoverImageOption} from "./cover-chooser-config-factory.service";
+import {translate} from "@jsverse/transloco";
+import {ExternalCoverImageType, ExternalCoverResponse} from "../_models/kavitaplus/external-cover-response";
 
 @Injectable({
   providedIn: 'root'
 })
 export class ImageService {
-  private accountService = inject(AccountService);
-  private themeService = inject(ThemeService);
-
+  private readonly accountService = inject(AccountService);
+  private readonly themeService = inject(ThemeService);
   private readonly destroyRef = inject(DestroyRef);
-  baseUrl = environment.apiUrl;
+  private readonly httpClient = inject(HttpClient);
+
+  private readonly baseUrl = environment.apiUrl;
   apiKey = this.accountService.currentUserImageAuthKey;
   encodedKey = computed(() => encodeURIComponent(this.apiKey()!));
+
   public placeholderImage = 'assets/images/image-placeholder.dark-min.png';
   public errorImage = 'assets/images/error-placeholder2.dark-min.png';
-  public resetCoverImage = 'assets/images/image-reset-cover-min.png';
   public errorWebLinkImage = 'assets/images/broken-white-32x32.png';
-  public nextChapterImage = 'assets/images/image-placeholder.dark-min.png';
   public noPersonImage = 'assets/images/error-person-missing.dark.min.png';
 
   constructor() {
@@ -98,8 +103,44 @@ export class ImageService {
     return `${this.baseUrl}image/cover-upload?filename=${encodeURIComponent(filename)}&apiKey=${this.encodedKey()}`;
   }
 
-  updateErroredWebLinkImage(event: any) {
-    event.target.src = this.errorWebLinkImage;
+  getKavitaPlusSeriesCoverImages(seriesId: number, volumeId: number | null = null, chapterId: number | null = null) {
+    const base = (chapterId === null) ? volumeId == null ? 'series' : 'volume' : 'chapter';
+    const volStr = volumeId == null ? '' : `&volumeId=${volumeId}`;
+    const chStr = chapterId == null ? '' : `&chapterId=${chapterId}`;
+
+    return this.httpClient.get<ExternalCoverResponse[]>(`${this.baseUrl}image/external/${base}?seriesId=${seriesId}${volStr}${chStr}`).pipe(
+      map(res => res
+        .filter(res => [ExternalCoverImageType.Volume, ExternalCoverImageType.Chapter, ExternalCoverImageType.Series, ExternalCoverImageType.Issue].includes(res.type))
+        .map(d => {
+          const langSuffix = d.language ? ` (${d.language})` : '';
+
+          let label: string;
+          switch (d.type) {
+            case ExternalCoverImageType.Series:
+              label = d.language ?? '';
+              break;
+            case ExternalCoverImageType.Volume:
+              label = translate('common.volume-num-shorthand', { num: d.number });
+              break;
+            case ExternalCoverImageType.Chapter:
+              label = translate('common.chapter-num-shorthand', { num: d.number });
+              break;
+            case ExternalCoverImageType.Issue:
+              label = translate('common.issue-hash-num', { num: d.number });
+              break;
+            default:
+              label = '';
+          }
+
+          // Series uses language as the label itself; others append it as a suffix
+          const title = d.type === ExternalCoverImageType.Series
+            ? label
+            : label + langSuffix;
+
+          return { url: d.url, title } as CoverImageOption;
+      })
+      )
+    );
   }
 
   /**

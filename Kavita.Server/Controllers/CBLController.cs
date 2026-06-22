@@ -21,6 +21,7 @@ using Kavita.Models.DTOs.Uploads;
 using AutoMapper;
 using Hangfire;
 using Kavita.Models.DTOs.SignalR;
+using Kavita.Services.ReadingLists;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -62,17 +63,10 @@ public class CblController(IReadingListService readingListService, IDirectorySer
         var userId = UserId;
         var filename = cblFile.FileName;
 
-        var ext = Path.GetExtension(filename);
-        if (!ext.Equals(".cbl", StringComparison.OrdinalIgnoreCase)
-            && !ext.Equals(".json", StringComparison.OrdinalIgnoreCase))
-        {
-            return BadRequest("Only .cbl and .json files are allowed");
-        }
+        var (isInvalid, actionResult) = await HasInvalidExtensionAsync(filename, filename);
+        if (isInvalid) return actionResult!;
 
-        if (filename.Contains(".exe", StringComparison.OrdinalIgnoreCase))
-        {
-            return BadRequest("Invalid filename");
-        }
+
 
         await SaveCblFile(cblFile, userId, filename);
 
@@ -112,16 +106,11 @@ public class CblController(IReadingListService readingListService, IDirectorySer
         }
         catch (FlurlHttpException)
         {
-            return BadRequest("Unable to download file from URL");
+            return BadRequest(await localizationService.TranslateAsync("cbl-import-download-from-url"));
         }
 
-        var ext = Path.GetExtension(filename);
-        if (!ext.Equals(".cbl", StringComparison.OrdinalIgnoreCase)
-            && !ext.Equals(".json", StringComparison.OrdinalIgnoreCase))
-        {
-            if (System.IO.File.Exists(fullPath)) System.IO.File.Delete(fullPath);
-            return BadRequest("Only .cbl and .json files are allowed");
-        }
+        var (isInvalid, actionResult) = await HasInvalidExtensionAsync(filename, fullPath);
+        if (isInvalid) return actionResult!;
 
         return Ok(new CblSavedFileDto
         {
@@ -130,6 +119,23 @@ public class CblController(IReadingListService readingListService, IDirectorySer
             Provider = ReadingListProvider.Url,
             DownloadUrl = dto.Url
         });
+    }
+
+    private async Task<(bool IsInvalid, ActionResult<CblSavedFileDto>? ActionResult)> HasInvalidExtensionAsync(string filename, string fullPath)
+    {
+        if (!IsPathWithinDirectory(GetCblManagerFolder(UserId), filename))
+        {
+            return (true, BadRequest(await localizationService.TranslateAsync("cbl-import-validation-types")));
+        }
+
+        var ext = Path.GetExtension(filename);
+        if (!ext.Equals(".cbl", StringComparison.OrdinalIgnoreCase) && !ext.Equals(".json", StringComparison.OrdinalIgnoreCase))
+        {
+            if (System.IO.File.Exists(fullPath) && filename != fullPath) System.IO.File.Delete(fullPath);
+            return (true, BadRequest(await localizationService.TranslateAsync("cbl-import-validation-types")));
+        }
+
+        return (false, null);
     }
 
 
@@ -169,14 +175,14 @@ public class CblController(IReadingListService readingListService, IDirectorySer
     [DisallowRole(PolicyConstants.ReadOnlyRole)]
     public async Task<ActionResult<CblImportSummaryDto>> ReValidate([FromBody] CblReValidateRequestDto dto)
     {
-        if (!ValidateFilename(dto.FileName)) return BadRequest("Invalid filename");
-
         var userId = UserId;
+        if (!IsPathWithinDirectory(GetCblManagerFolder(userId), dto.FileName)) return BadRequest(await localizationService.TranslateAsync("invalid-filename"));
+
         var fullPath = Path.Join(GetCblManagerFolder(userId), dto.FileName);
 
         if (!System.IO.File.Exists(fullPath))
         {
-            return BadRequest("File not found on server");
+            return BadRequest(await localizationService.TranslateAsync("file-doesnt-exist"));
         }
 
         var summary = await cblImporterService.ValidateList(userId, fullPath);
@@ -191,27 +197,28 @@ public class CblController(IReadingListService readingListService, IDirectorySer
     [DisallowRole(PolicyConstants.ReadOnlyRole)]
     public async Task<ActionResult<CblImportSummaryDto>> FinalizeImport([FromBody] CblFinalizeRequestDto dto)
     {
-        if (!ValidateFilename(dto.FileName)) return BadRequest("Invalid filename");
-
         var userId = UserId;
+        if (!IsPathWithinDirectory(GetCblManagerFolder(userId), dto.FileName)) return BadRequest(await localizationService.TranslateAsync("invalid-filename"));
+
         var fullPath = Path.Join(GetCblManagerFolder(userId), dto.FileName);
 
         if (!System.IO.File.Exists(fullPath))
         {
-            return BadRequest("File not found on server");
+            return BadRequest(await localizationService.TranslateAsync("file-doesnt-exist"));
         }
 
         try
         {
             var summary = await cblImporterService.UpsertReadingList(
-                userId, fullPath, dto.Decisions);
+                userId, fullPath, dto.Decisions, dto.Promote);
             summary.FileName = dto.FileName;
 
+
             // Set provider and sync tracking fields
-            if (summary.Success != CblImportResult.Fail && dto.Provider != ReadingListProvider.None)
+            if (dto.Provider != ReadingListProvider.None)
             {
                 var readingList = await unitOfWork.ReadingListRepository
-                    .GetReadingListByTitleAsync(summary.CblName, userId);
+                    .GetReadingListByIdAsync(summary.ReadingListId);
 
                 if (readingList != null)
                 {
@@ -237,7 +244,11 @@ public class CblController(IReadingListService readingListService, IDirectorySer
                     }
 
                     await readingListService.CalculateReadingListAgeRating(readingList);
-                    await readingListService.CalculateStartAndEndDates(readingList);
+                    if (CblImportService.ShouldCalcReleaseDatesFromIssues(readingList))
+                    {
+                        await readingListService.CalculateStartAndEndDates(readingList);
+                    }
+
 
                     await unitOfWork.CommitAsync();
                 }
@@ -463,7 +474,6 @@ public class CblController(IReadingListService readingListService, IDirectorySer
 
         var result = await cblGithubService.BrowseRepo(path);
 
-        // TODO: Refactor into CblService - Update Browse Results with sync details from what's on disk
         var syncedPaths = await dataContext.ReadingList
             .Where(rl => rl.AppUserId == UserId
                          && rl.Provider == ReadingListProvider.Url

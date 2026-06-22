@@ -379,12 +379,13 @@ public class OpdsService(
     }
 
     /// <summary>
-    /// Returns the Series matching this smart filter.
+    /// Returns the Entities matching this smart filter.
     /// </summary>
     /// <param name="request"></param>
     /// <param name="ct"></param>
     /// <returns></returns>
-    public async Task<Feed> GetSeriesFromSmartFilter(OpdsItemsFromEntityIdRequest request, CancellationToken ct = default)
+    /// <exception cref="ArgumentOutOfRangeException"></exception>
+    public async Task<Feed> ResolveSmartFilter(OpdsItemsFromEntityIdRequest request, CancellationToken ct = default)
     {
         var userId = UnpackRequest(request, out var apiKey, out var prefix, out var baseUrl);
 
@@ -397,17 +398,36 @@ public class OpdsService(
         var feed = CreateFeed(await localizationService.TranslateAsync(userId, "smartFilters-" + filter.Id), $"{apiKey}/smart-filters/{filter.Id}/", apiKey, prefix);
         SetFeedId(feed, "smartFilters-" + filter.Id);
 
-        var decodedFilter = (SeriesFilterV2Dto) SmartFilterHelper.Decode(filter.Filter);
-        var series = await unitOfWork.SeriesRepository.GetSeriesDtoForLibraryIdAsync(userId, GetUserParams(request.PageNumber),
-            decodedFilter, ct: ct);
-        var seriesMetadatas = await unitOfWork.SeriesRepository.GetSeriesMetadataForIdsAsync(series.Select(s => s.Id), ct);
+        var decodedFilter = SmartFilterHelper.Decode(filter.Filter);
+        var userParams = GetUserParams(request.PageNumber);
 
-        foreach (var seriesDto in series)
+
+        switch (decodedFilter.EntityType)
         {
-            feed.Entries.Add(CreateSeries(seriesDto, seriesMetadatas.First(s => s.SeriesId == seriesDto.Id), apiKey, prefix, baseUrl));
-        }
+            case FilterEntityType.Series:
+                var series = await unitOfWork.SeriesRepository.GetSeriesDtoForLibraryIdAsync(userId, userParams,
+                    (SeriesFilterV2Dto) decodedFilter, ct: ct);
+                var seriesMetadatas = await unitOfWork.SeriesRepository.GetSeriesMetadataForIdsAsync(series.Select(s => s.Id), ct);
 
-        AddPagination(feed, series, $"{prefix}{apiKey}/smart-filters/{request.EntityId}/");
+                foreach (var seriesDto in series)
+                {
+                    feed.Entries.Add(CreateSeries(seriesDto, seriesMetadatas.First(s => s.SeriesId == seriesDto.Id), apiKey, prefix, baseUrl));
+                }
+                AddPagination(feed, series, $"{prefix}{apiKey}/smart-filters/{request.EntityId}/");
+                break;
+            case FilterEntityType.ReadingList:
+                var readingLists = await unitOfWork.ReadingListRepository.GetBrowseReadingListDtos(userId, (ReadingListFilterDto) decodedFilter, userParams, ct);
+                foreach (var readingList in readingLists)
+                {
+                    feed.Entries.Add(CreateReadingListFeedEntry(readingList, prefix, apiKey, baseUrl));
+                }
+                AddPagination(feed, readingLists, $"{prefix}{apiKey}/smart-filters/{request.EntityId}/");
+                break;
+            case FilterEntityType.Person:
+                throw new OpdsException("OPDS feed generation is not implemented for Person smart filters");
+            case FilterEntityType.Annotation:
+                throw new OpdsException("OPDS feed generation is not implemented for Annotation smart filters");
+        }
 
         return feed;
     }
@@ -840,24 +860,29 @@ public class OpdsService(
 
         foreach (var readingListDto in readingLists)
         {
-            feed.Entries.Add(new FeedEntry()
-            {
-                Id = readingListDto.Id.ToString(),
-                Title = readingListDto.Title,
-                Summary = readingListDto.Summary,
-                Links =
-                [
-                    CreateLink(FeedLinkRelation.SubSection, FeedLinkType.AtomNavigation,
-                        $"{prefix}{apiKey}/reading-list/{readingListDto.Id}"),
-                    CreateLink(FeedLinkRelation.Image, FeedLinkType.Image,
-                        $"{baseUrl}api/image/readinglist-cover?readingListId={readingListDto.Id}&apiKey={apiKey}"),
-                    CreateLink(FeedLinkRelation.Thumbnail, FeedLinkType.Image,
-                        $"{baseUrl}api/image/readinglist-cover?readingListId={readingListDto.Id}&apiKey={apiKey}")
-                ]
-            });
+            feed.Entries.Add(CreateReadingListFeedEntry(readingListDto, prefix, apiKey, baseUrl));
         }
 
         return feed;
+    }
+
+    private static FeedEntry CreateReadingListFeedEntry(ReadingListDto readingListDto, string prefix, string apiKey, string baseUrl)
+    {
+        return new FeedEntry()
+        {
+            Id = readingListDto.Id.ToString(),
+            Title = readingListDto.Title,
+            Summary = readingListDto.Summary,
+            Links =
+            [
+                CreateLink(FeedLinkRelation.SubSection, FeedLinkType.AtomNavigation,
+                    $"{prefix}{apiKey}/reading-list/{readingListDto.Id}"),
+                CreateLink(FeedLinkRelation.Image, FeedLinkType.Image,
+                    $"{baseUrl}api/image/readinglist-cover?readingListId={readingListDto.Id}&apiKey={apiKey}"),
+                CreateLink(FeedLinkRelation.Thumbnail, FeedLinkType.Image,
+                    $"{baseUrl}api/image/readinglist-cover?readingListId={readingListDto.Id}&apiKey={apiKey}")
+            ]
+        };
     }
 
     private static int UnpackRequest(IOpdsRequest request, out string apiKey, out string prefix,

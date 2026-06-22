@@ -1,0 +1,19 @@
+<div class="banner" [class.banner--cta]="isCta()">
+  <div class="banner-icon" [class.banner-icon--circle]="isCta()">
+    <ng-content select="[bannerIcon]" />
+    @if (iconClass()) {
+      <i [class]="iconClass()" aria-hidden="true"></i>
+    }
+  </div>
+
+  <div class="flex-fill">
+    <div class="banner-title">{{ title() }}</div>
+    @if (body()) {
+      <div class="banner-body text-muted">{{ body() }}</div>
+    }
+  </div>
+
+  <div class="banner-action">
+    <ng-content select="[bannerAction]" />
+  </div>
+</div>

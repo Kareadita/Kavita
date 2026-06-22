@@ -1,5 +1,15 @@
 import {AsyncPipe, DOCUMENT, NgClass} from '@angular/common';
-import { ChangeDetectionStrategy, ChangeDetectorRef, Component, DestroyRef, inject, Input, OnInit, output } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  ChangeDetectorRef,
+  Component,
+  DestroyRef, ElementRef,
+  inject,
+  Input,
+  OnInit,
+  output,
+  viewChild
+} from '@angular/core';
 import {combineLatest, filter, map, Observable, of, shareReplay, tap} from 'rxjs';
 import {PageSplitOption} from 'src/app/_models/preferences/page-split-option';
 import {ReaderMode} from 'src/app/_models/preferences/reader-mode';
@@ -29,7 +39,7 @@ export class DoubleReverseRendererComponent implements OnInit, ImageRenderer {
   private document = inject<Document>(DOCUMENT);
   readerService = inject(ReaderService);
 
-
+  readonly imageElement = viewChild<ElementRef<HTMLImageElement>>('image');
 
   @Input({required: true}) readerSettings$!: Observable<ReaderSetting>;
   @Input({required: true}) image$!: Observable<HTMLImageElement | null>;

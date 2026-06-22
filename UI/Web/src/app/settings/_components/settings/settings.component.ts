@@ -13,7 +13,6 @@ import {TranslocoDirective} from "@jsverse/transloco";
 import {SettingsTabId} from "../../../sidenav/preference-nav/preference-nav.component";
 import {AccountService} from "../../../_services/account.service";
 import {WikiLink} from "../../../_models/wiki";
-import {LicenseComponent} from "../../../admin/license/license.component";
 import {ManageEmailSettingsComponent} from "../../../admin/manage-email-settings/manage-email-settings.component";
 import {ManageLibraryComponent} from "../../../admin/manage-library/manage-library.component";
 import {ManageMediaSettingsComponent} from "../../../admin/manage-media-settings/manage-media-settings.component";
@@ -25,7 +24,6 @@ import {ServerStatsComponent} from "../../../statistics/_components/server-stats
 import {SettingFragmentPipe} from "../../../_pipes/setting-fragment.pipe";
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import {tap} from "rxjs";
-import {ManageScrobblingComponent} from "../../../admin/manage-scrobling/manage-scrobbling.component";
 import {ManageMediaIssuesComponent} from "../../../admin/manage-media-issues/manage-media-issues.component";
 import {
   ManageCustomizationComponent
@@ -34,7 +32,6 @@ import {
   ImportMalCollectionComponent
 } from "../../../collections/_components/import-mal-collection/import-mal-collection.component";
 import {LicenseService} from "../../../_services/license.service";
-import {ManageMatchedMetadataComponent} from "../../../admin/manage-matched-metadata/manage-matched-metadata.component";
 import {ManageUserTokensComponent} from "../../../admin/manage-user-tokens/manage-user-tokens.component";
 import {EmailHistoryComponent} from "../../../admin/email-history/email-history.component";
 import {ScrobblingHoldsComponent} from "../../../user-settings/user-holds/scrobbling-holds.component";
@@ -56,6 +53,18 @@ import {ManageCustomKeyBindsComponent} from "../../../user-settings/custom-key-b
 import {AccountSettingsComponent} from "src/app/user-settings/account-settings/account-settings.component";
 import {CblManagerComponent} from "../../../user-settings/cbl-manager/cbl-manager.component";
 import {ManageRemapRulesComponent} from "../../../user-settings/manage-remap-rules/manage-remap-rules.component";
+import {KavitaplusActivityComponent} from "../../../user-settings/kavitaplus-activity/kavitaplus-activity.component";
+import {
+  ManageKavitaplusActivityComponent
+} from "../../../admin/kavita-plus/manage-kavitaplus-activity/manage-kavitaplus-activity.component";
+import {ManageScrobblingComponent} from "../../../admin/kavita-plus/manage-scrobling/manage-scrobbling.component";
+import {
+  ManageMatchedMetadataComponent
+} from "../../../admin/kavita-plus/manage-matched-metadata/manage-matched-metadata.component";
+import {LicenseComponent} from "../../../admin/kavita-plus/license/license.component";
+import {
+  ManageScrobbleProvidersComponent
+} from "../../../user-settings/manage-scrobble-providers/manage-scrobble-providers.component";
 
 @Component({
   selector: 'app-settings',
@@ -95,7 +104,10 @@ import {ManageRemapRulesComponent} from "../../../user-settings/manage-remap-rul
     ManageAuthKeysComponent,
     AccountSettingsComponent,
     CblManagerComponent,
-    ManageRemapRulesComponent
+    ManageRemapRulesComponent,
+    KavitaplusActivityComponent,
+    ManageKavitaplusActivityComponent,
+    ManageScrobbleProvidersComponent
   ],
   templateUrl: './settings.component.html',
   styleUrl: './settings.component.scss',
@@ -111,7 +123,7 @@ export class SettingsComponent {
   protected readonly accountService = inject(AccountService);
 
   fragment: SettingsTabId = SettingsTabId.Account;
-  hasActiveLicense = computed(() => this.licenseService.hasValidLicense());
+  hasActiveLicense = computed(() => this.licenseService.hasActiveLicense());
 
   constructor() {
     this.route.fragment.pipe(tap(frag => {

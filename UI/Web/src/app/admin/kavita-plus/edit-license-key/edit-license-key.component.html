@@ -1,0 +1,59 @@
+<ng-container *transloco="let t; prefix:'edit-license-key'">
+  <form [formGroup]="formGroup">
+    <div class="mt-2">
+      <div class="form-group mb-1">
+        @if (formGroup.get('licenseKey'); as formControl) {
+          <label for="license-key">{{t('activate-license-label')}}</label>
+          <input id="license-key" type="text" class="form-control" formControlName="licenseKey" autocomplete="off"
+                 placeholder="XXXX-XXXX-XXXX-XXXX" aria-describedby="license-help-block"
+                 [class.is-invalid]="formControl.invalid && !formControl.untouched" />
+
+          @if (hasLicense()) {
+            <div id="license-help-block" class="form-text">
+              {{t('license-help')}}
+            </div>
+          }
+
+          @if (formControl.dirty || !formControl.untouched) {
+            <div class="invalid-feedback">
+              @if (formControl.errors) {
+                @if (formControl.errors.required) {
+                  <div>{{t('required-field-validation')}}</div>
+                }
+                @if (formControl.errors.minlength || formControl.errors.maxlength) {
+                  <div>{{t('license-length-validation')}}</div>
+                }
+                @if (formControl.errors.pattern) {
+                  <div>{{t('license-format-validation')}}</div>
+                }
+              }
+            </div>
+          }
+        }
+      </div>
+      <div class="form-group mb-1">
+        @if (formGroup.get('email'); as formControl) {
+          <label for="email">{{t('activate-email-label')}}</label>
+          <input id="email" type="email" class="form-control" formControlName="email" autocomplete="off"
+                 placeholder="you@domain.com" aria-describedby="email-help-block"
+                 [class.is-invalid]="formControl.invalid && !formControl.untouched" />
+          <div id="email-help-block" class="form-text">
+            {{t('email-help')}}
+          </div>
+          @if (formControl.dirty || !formControl.untouched) {
+            <div class="invalid-feedback">
+              @if (formControl.errors) {
+                @if (formControl.errors.required) {
+                  <div>{{t('required-field-validation')}}</div>
+                }
+                @if (formControl.errors.email) {
+                  <div>{{t('email-format-validation')}}</div>
+                }
+              }
+            </div>
+          }
+        }
+      </div>
+    </div>
+  </form>
+</ng-container>

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
@@ -6,13 +7,14 @@ using Kavita.API.Attributes;
 using Kavita.API.Database;
 using Kavita.API.Services;
 using Kavita.API.Services.Metadata;
-using Kavita.API.Services.Reading;
+using Kavita.API.Services.Plus;
 using Kavita.API.Services.ReadingLists;
 using Kavita.Models.Constants;
+using Kavita.Models.DTOs.KavitaPlus.ExternalMetadata.Covers;
 using Kavita.Models.Entities.Enums;
-using Kavita.Models.Extensions;
 using Kavita.Server.Attributes;
 using Kavita.Services;
+using Kavita.Services.Plus;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -25,7 +27,8 @@ namespace Kavita.Server.Controllers;
 [SkipDeviceTracking]
 public class ImageController(IUnitOfWork unitOfWork, IDirectoryService directoryService,
     ILocalizationService localizationService, IReadingListService readingListService,
-    ICoverDbService coverDbService, ICollectionTagService collectionTagService) : BaseApiController
+    ICoverDbService coverDbService, ICollectionTagService collectionTagService,
+    IExternalMetadataService externalMetadataService) : BaseApiController
 {
 
     /// <summary>
@@ -164,8 +167,11 @@ public class ImageController(IUnitOfWork unitOfWork, IDirectoryService directory
 
         var encodeFormat = (await unitOfWork.SettingsRepository.GetSettingsDtoAsync()).EncodeMediaAs;
 
+        var webLinkFileName = ImageService.GetWebLinkFormat(url, encodeFormat);
+        if (!IsPathWithinDirectory(directoryService.FaviconDirectory, webLinkFileName)) return BadRequest();
+
         // Check if the domain exists
-        var domainFilePath = directoryService.FileSystem.Path.Join(directoryService.FaviconDirectory, ImageService.GetWebLinkFormat(url, encodeFormat));
+        var domainFilePath = directoryService.FileSystem.Path.Join(directoryService.FaviconDirectory, webLinkFileName);
         if (!directoryService.FileSystem.File.Exists(domainFilePath))
         {
             // We need to request the favicon and save it
@@ -194,12 +200,14 @@ public class ImageController(IUnitOfWork unitOfWork, IDirectoryService directory
     public async Task<ActionResult> GetPublisherImage(string publisherName, string apiKey)
     {
         if (string.IsNullOrEmpty(publisherName)) return BadRequest(await localizationService.TranslateAsync(UserId, "must-be-defined", "publisherName"));
-        if (publisherName.Contains("..")) return BadRequest();
 
         var encodeFormat = (await unitOfWork.SettingsRepository.GetSettingsDtoAsync()).EncodeMediaAs;
 
+        var publisherFileName = ImageService.GetPublisherFormat(publisherName, encodeFormat);
+        if (!IsPathWithinDirectory(directoryService.PublisherDirectory, publisherFileName)) return BadRequest();
+
         // Check if the domain exists
-        var domainFilePath = directoryService.FileSystem.Path.Join(directoryService.PublisherDirectory, ImageService.GetPublisherFormat(publisherName, encodeFormat));
+        var domainFilePath = directoryService.FileSystem.Path.Join(directoryService.PublisherDirectory, publisherFileName);
         if (!directoryService.FileSystem.File.Exists(domainFilePath))
         {
             // We need to request the favicon and save it
@@ -255,12 +263,37 @@ public class ImageController(IUnitOfWork unitOfWork, IDirectoryService directory
     /// <param name="apiKey"></param>
     /// <returns></returns>
     [HttpGet("cover-upload")]
-    [Authorize(PolicyConstants.AdminRole)]
+    [Authorize(PolicyGroups.AdminPolicy)]
     public async Task<ActionResult> GetCoverUploadImage(string filename, string apiKey)
     {
-        if (filename.Contains("..")) return BadRequest(await localizationService.TranslateAsync(UserId, "invalid-filename"));
+        if (!IsPathWithinDirectory(directoryService.TempDirectory, filename)) return BadRequest(await localizationService.TranslateAsync(UserId, "invalid-filename"));
 
         var path = Path.Join(directoryService.TempDirectory, filename);
         return PhysicalFile(path);
+    }
+
+
+    [HttpGet("external/series")]
+    [Authorize(PolicyGroups.AdminPolicy)]
+    [SeriesAccess]
+    public async Task<ActionResult<List<ExternalCoverResponseDto>>> GetExternalCoverImagesForSeries(int seriesId)
+    {
+        return Ok(await externalMetadataService.GetExternalCovers(seriesId, null, null, HttpContext.RequestAborted));
+    }
+
+    [HttpGet("external/volume")]
+    [Authorize(PolicyGroups.AdminPolicy)]
+    [VolumeAccess]
+    public async Task<ActionResult<List<ExternalCoverResponseDto>>> GetExternalCoverImagesForVolume(int seriesId, int volumeId)
+    {
+        return Ok(await externalMetadataService.GetExternalCovers(seriesId, volumeId, null, HttpContext.RequestAborted));
+    }
+
+    [HttpGet("external/chapter")]
+    [Authorize(PolicyGroups.AdminPolicy)]
+    [ChapterAccess]
+    public async Task<ActionResult<List<ExternalCoverResponseDto>>> GetExternalCoverImagesForChapter(int seriesId, int chapterId)
+    {
+        return Ok(await externalMetadataService.GetExternalCovers(seriesId, null, chapterId, HttpContext.RequestAborted));
     }
 }

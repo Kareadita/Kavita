@@ -3,6 +3,7 @@ using System.IO;
 using System.IO.Abstractions;
 using System.Linq;
 using System.Security.Cryptography;
+using System.Threading;
 using System.Threading.Tasks;
 using Kavita.API.Database;
 using Kavita.API.Services;
@@ -122,7 +123,32 @@ public class Program
 
 
 
-                await context.Database.MigrateAsync();
+                var appLifetime = services.GetRequiredService<IHostApplicationLifetime>();
+                using var timeoutCts = new CancellationTokenSource(TimeSpan.FromMinutes(5));
+                using var linkedCts = CancellationTokenSource.CreateLinkedTokenSource(
+                    appLifetime.ApplicationStopping,
+                    timeoutCts.Token
+                );
+
+                try
+                {
+                    await context.Database.MigrateAsync(linkedCts.Token);
+                }
+                catch (OperationCanceledException) when (timeoutCts.IsCancellationRequested)
+                {
+                    logger.LogCritical("Failed to run critical Migrations, restore from a backup");
+                    Environment.Exit(1);
+                }
+                catch (OperationCanceledException)
+                {
+                    logger.LogCritical("Database migration cancelled due to shutdown signal");
+                    throw;
+                }
+                catch (Exception ex)
+                {
+                    logger.LogCritical(ex, "Failed to run critical Migrations, restore from a backup");
+                    Environment.Exit(1);
+                }
 
 
                 await Seed.SeedRoles(services.GetRequiredService<RoleManager<AppRole>>());
@@ -133,6 +159,7 @@ public class Program
                 await Seed.SeedDefaultSideNavStreams(unitOfWork);
                 await Seed.SeedMetadataSettings(context);
                 await Seed.SeedDefaultHighlightSlots(unitOfWork);
+                await Seed.SeedScrobbleProviders(context);
             }
             catch (Exception ex)
             {
@@ -209,9 +236,9 @@ public class Program
 
     private static IHostBuilder CreateHostBuilder(string[] args) =>
         Host.CreateDefaultBuilder(args)
-            .UseSerilog((_, services, configuration) =>
+            .UseSerilog((ctx, services, configuration) =>
             {
-                LogLevelOptions.CreateConfig(configuration)
+                LogLevelOptions.CreateConfig(ctx, configuration)
                     .WriteTo.SignalRSink<LogHub, ILogHub>(
                         LogEventLevel.Information,
                         services);

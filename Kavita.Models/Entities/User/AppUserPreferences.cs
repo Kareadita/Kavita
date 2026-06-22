@@ -192,11 +192,14 @@ public class AppUserPreferences
     /// <summary>
     /// Should this account have Scrobbling enabled for AniList
     /// </summary>
+    [Obsolete("Use AppUser.ScrobbleProviders")]
     public bool AniListScrobblingEnabled { get; set; }
     /// <summary>
     /// Should this account have Want to Read Sync enabled
     /// </summary>
+    [Obsolete("Use AppUser.ScrobbleProviders")]
     public bool WantToReadSync { get; set; }
+
     #endregion
 
     #region Social

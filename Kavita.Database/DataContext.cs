@@ -104,6 +104,10 @@ public sealed class DataContext : IdentityDbContext<AppUser, AppRole, int,
 
     public DbSet<DataProtectionKey> DataProtectionKeys { get; set; } = null!;
 
+    public DbSet<KavitaPlusAuditLog> KavitaPlusAuditLogs { get; set; } = null!;
+
+    public DbSet<ScrobbleRuleHistory> ScrobbleRuleHistory { get; set; } = null!;
+
 
     protected override void OnModelCreating(ModelBuilder builder)
     {
@@ -289,6 +293,13 @@ public sealed class DataContext : IdentityDbContext<AppUser, AppRole, int,
             .HasJsonConversion(new AppUserOpdsPreferences())
             .HasColumnType("TEXT")
             .HasDefaultValue(new AppUserOpdsPreferences());
+
+        builder.Entity<AppUser>()
+            .Property(u => u.ScrobbleProviders)
+            .HasJsonConversion(new Dictionary<ScrobbleProvider, AppUserScrobbleProvider>())
+            .HasColumnType("TEXT")
+            .HasDefaultValue(new Dictionary<ScrobbleProvider, AppUserScrobbleProvider>());
+
         #endregion
 
         #region AppUserReadingProfile
@@ -377,6 +388,13 @@ public sealed class DataContext : IdentityDbContext<AppUser, AppRole, int,
             entity.HasIndex(s => new { s.IsActive, s.LastModifiedUtc })
                 .HasDatabaseName("IX_AppUserReadingSession_IsActive_LastModifiedUtc");
         });
+
+        builder.Entity<AppUserReadingHistory>(entity =>
+        {
+            entity.HasIndex(s => new { s.AppUserId, s.DateUtc})
+                .HasDatabaseName("IX_AppUserReadingHistory_AppUserId_DateUtc");
+        });
+
         #endregion
 
         #region Client Device
@@ -541,6 +559,53 @@ public sealed class DataContext : IdentityDbContext<AppUser, AppRole, int,
         builder.Entity<AppUserReadingSessionActivityData>()
             .HasIndex(a => new { a.StartTimeUtc, a.LibraryId })
             .HasDatabaseName("IX_ActivityData_StartTimeUtc_LibraryId");
+
+        builder.Entity<KavitaPlusAuditLog>(entity =>
+        {
+            entity.HasIndex(e => new { e.Category, e.CreatedUtc })
+                .HasDatabaseName("IX_KavitaPlusAuditLog_Category_CreatedUtc");
+            entity.HasIndex(e => new { e.SeriesId, e.CreatedUtc })
+                .HasDatabaseName("IX_KavitaPlusAuditLog_SeriesId_CreatedUtc");
+            entity.HasIndex(e => new { e.SubjectType, e.SubjectId })
+                .HasDatabaseName("IX_KavitaPlusAuditLog_SubjectType_SubjectId");
+            entity.HasIndex(e => e.CreatedUtc)
+                .HasDatabaseName("IX_KavitaPlusAuditLog_CreatedUtc");
+            entity.HasIndex(e => e.UserId)
+                .HasDatabaseName("IX_KavitaPlusAuditLog_UserId");
+            entity.HasOne(e => e.User)
+                .WithMany()
+                .HasForeignKey(e => e.UserId)
+                .OnDelete(DeleteBehavior.SetNull);
+        });
+
+        builder.Entity<ScrobbleRuleHistory>(entity =>
+        {
+            // One delivered row per (user, provider, rule, series, chapter). ChapterId is null for series-based providers.
+            entity.HasIndex(e => new { e.AppUserId, e.Provider, e.RuleKind, e.SeriesId, e.ChapterId })
+                .IsUnique()
+                .HasDatabaseName("IX_ScrobbleRuleHistory_User_Provider_Rule_Series_Chapter");
+            // Reset/purge lookups by user + series
+            entity.HasIndex(e => new { e.AppUserId, e.SeriesId })
+                .HasDatabaseName("IX_ScrobbleRuleHistory_AppUserId_SeriesId");
+
+            entity.HasOne(e => e.AppUser)
+                .WithMany()
+                .HasForeignKey(e => e.AppUserId)
+                .OnDelete(DeleteBehavior.Cascade);
+            entity.HasOne(e => e.Series)
+                .WithMany()
+                .HasForeignKey(e => e.SeriesId)
+                .OnDelete(DeleteBehavior.Cascade);
+            entity.HasOne(e => e.Chapter)
+                .WithMany()
+                .HasForeignKey(e => e.ChapterId)
+                .OnDelete(DeleteBehavior.Cascade);
+            // The event is reaped ~7 days after processing while this row must outlive it.
+            entity.HasOne(e => e.ScrobbleEvent)
+                .WithMany()
+                .HasForeignKey(e => e.ScrobbleEventId)
+                .OnDelete(DeleteBehavior.SetNull);
+        });
 
         #endregion
     }

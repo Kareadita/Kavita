@@ -1,1 +1,65 @@
+.label-card-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+  gap: 8px;
+}
 
+.section-sep {
+  border: none;
+  border-top: 1px solid var(--setting-break-color);
+  margin: 0;
+}
+
+.pill-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+
+  a {
+    text-decoration: none;
+  }
+}
+
+.file-card {
+  background: var(--label-card-bg);
+  border: 1px solid var(--label-card-border);
+  border-radius: 5px;
+  padding: 10px 12px;
+}
+
+.file-card-icon {
+  font-size: 0.75rem;
+  color: var(--label-card-icon-color);
+  opacity: 0.6;
+  margin-top: 2px;
+  flex-shrink: 0;
+}
+
+.file-path {
+  font-family: 'Courier New', monospace;
+  font-size: 0.72rem;
+  color: var(--file-path-color);
+  word-break: break-all;
+  line-height: 1.4;
+}
+
+.file-meta-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.file-meta-item {
+  font-size: 0.72rem;
+  color: var(--text-muted-color);
+}
+
+.empty-value {
+  font-size: 0.82rem;
+  color: var(--label-card-value-muted-color);
+}
+
+.file-meta-hash {
+  color: var(--primary-color);
+  opacity: 0.8;
+}

@@ -132,9 +132,9 @@ export class ReadingListDetailComponent implements OnInit {
     const startMonth = rl.startingMonth > 0 ? rl.startingMonth - 1 : undefined;
     const endMonth = rl.startingMonth > 0 ? rl.endingMonth - 1 : undefined;
 
-    const startDate = startMonth !== undefined ? new Date(rl.startingYear, startMonth) : new Date(rl.startingYear);
+    const startDate = startMonth !== undefined ? new Date(rl.startingYear, startMonth) : new Date(rl.startingYear, 0);
     const endDate = rl.endingYear <= 0 ? null :
-      (endMonth !== undefined ? new Date(rl.endingYear, endMonth) : new Date(rl.endingYear));
+      (endMonth !== undefined ? new Date(rl.endingYear, endMonth) : new Date(rl.endingYear, 0));
 
     return this.dateYearRangePipe.transform(startDate, endDate, !!endMonth);
   });

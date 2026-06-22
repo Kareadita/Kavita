@@ -52,6 +52,7 @@
 @use './theme/components/typeahead';
 @use './theme/components/tooltip';
 @use './theme/components/stat-card';
+@use './theme/components/headers';
 
 @use './theme/utilities/headings';
 @use './theme/utilities/utilities';
@@ -154,4 +155,9 @@ body {
   animation-duration: 0.01ms !important;
   animation-iteration-count: 1 !important;
   transition-duration: 0.01ms !important;
+}
+
+// Kavita+ audit side-drawer width
+.kplus-offcanvas {
+  --bs-offcanvas-width: 28rem;
 }

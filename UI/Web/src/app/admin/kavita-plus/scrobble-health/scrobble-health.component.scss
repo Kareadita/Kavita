@@ -1,0 +1,79 @@
+.provider-health-card {
+  background-color: var(--elevation-layer1-dark-solid);
+  border-radius: 0.5rem;
+  padding: 1.25rem;
+}
+
+.live-indicator {
+  font-size: 0.8rem;
+  color: var(--text-muted-color);
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.live-dot {
+  display: inline-block;
+  width: 0.5rem;
+  height: 0.5rem;
+  border-radius: 50%;
+  background-color: var(--success-color, #2ecc71);
+}
+
+.provider-row {
+  border-top: 1px solid var(--card-border-color, rgba(255, 255, 255, 0.1));
+
+  &:first-of-type {
+    border-top: none;
+  }
+}
+
+.provider-name {
+  font-size: 0.95rem;
+}
+
+.provider-subtitle {
+  font-size: 0.8rem;
+}
+
+.latency {
+  font-size: 0.85rem;
+  min-width: 3.5rem;
+  text-align: right;
+}
+
+.status-badge {
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+  min-width: 6rem;
+
+  &.status-1 {
+    color: var(--success-color, #2ecc71);
+    .status-dot { background-color: var(--success-color, #2ecc71); }
+  }
+
+  &.status-2 {
+    color: var(--warning-color, #f39c12);
+    .status-dot { background-color: var(--warning-color, #f39c12); }
+  }
+
+  &.status-3 {
+    color: var(--danger-color, #e74c3c);
+    .status-dot { background-color: var(--danger-color, #e74c3c); }
+  }
+
+  &.status-0 {
+    color: var(--text-muted-color);
+    .status-dot { background-color: var(--text-muted-color); }
+  }
+}
+
+.status-dot {
+  display: inline-block;
+  width: 0.5rem;
+  height: 0.5rem;
+  border-radius: 50%;
+}

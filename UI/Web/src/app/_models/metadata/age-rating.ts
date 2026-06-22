@@ -19,3 +19,5 @@ export enum AgeRating {
     AdultsOnly = 13,
     X18Plus = 14
 }
+
+export const AgeRatings = Object.values(AgeRating).filter(a => typeof a === 'number') as AgeRating[];

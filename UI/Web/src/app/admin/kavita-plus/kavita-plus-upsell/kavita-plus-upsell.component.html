@@ -1,0 +1,219 @@
+<ng-container *transloco="let t; prefix: 'kavita-plus-upsell'">
+
+  <!-- Page header -->
+  <div class="d-flex align-items-start justify-content-between gap-3 mb-4">
+    <div class="flex-fill">
+      <h1 class="fw-bold mb-2">{{t('title')}}</h1>
+      <p class="text-muted upsell-page-desc mb-0">
+        {{t('description')}}
+        <a [href]="WikiLink.KavitaPlusFAQ" target="_blank" rel="noreferrer nofollow" class="text-primary ms-1">
+          {{t('wiki-link-label')}} <i class="fa-solid fa-arrow-up-right-from-square upsell-icon-xs" aria-hidden="true"></i>
+        </a>
+      </p>
+    </div>
+    <a [href]="WikiLink.KavitaPlusFAQ" target="_blank" rel="noreferrer nofollow" class="btn btn-outline-primary btn-sm flex-shrink-0">
+      <i class="fa-regular fa-circle-question me-1" aria-hidden="true"></i>{{t('faq-btn-label')}}
+    </a>
+  </div>
+
+  <!-- Hero strip -->
+  <div class="upsell-hero p-4 p-lg-5 mb-4">
+    <div class="d-flex flex-column flex-lg-row gap-4 align-items-center">
+
+      <!-- Left: brand + copy + CTAs -->
+      <div class="flex-fill">
+        <div class="d-flex align-items-center gap-3 mb-3">
+          <div class="rounded-2 d-inline-flex align-items-center justify-content-center bg-primary flex-shrink-0 upsell-brand-icon">
+            <i class="fa-solid fa-book-open upsell-brand-icon-fa" aria-hidden="true"></i>
+          </div>
+          <div class="fw-bold upsell-brand-name">
+            Kavita<span class="text-primary">+</span>
+          </div>
+        </div>
+
+        <h2 class="fw-bold mb-3 upsell-headline">
+          {{t('hero-headline-label')}}
+        </h2>
+        <p class="text-muted mb-4 upsell-subtitle">
+          {{t('hero-subtitle-label')}}
+        </p>
+
+        <div class="d-flex align-items-center gap-3 flex-wrap">
+          <a [href]="environment.buyLink" target="_blank" rel="noreferrer nofollow" class="btn btn-primary dark-exempt">
+            <i class="fa-solid fa-bolt me-1" aria-hidden="true"></i>{{t('start-cta-label')}}
+          </a>
+          <a [href]="WikiLink.KavitaPlus" target="_blank" rel="noreferrer nofollow"
+             class="text-primary upsell-link-sm">
+            {{t('feature-list-link-label')}}
+            <i class="fa-solid fa-arrow-up-right-from-square ms-1 upsell-icon-xs"></i>
+          </a>
+        </div>
+      </div>
+
+      <!-- Right: pricing card -->
+      <div class="upsell-price-card p-4 flex-shrink-0 upsell-price-card-width">
+        <div class="d-flex align-items-baseline gap-2 mb-1">
+          <span class="fw-bold upsell-price-number">{{t('price-label')}}</span>
+          <span class="text-muted upsell-price-period">{{t('price-per-month-label')}}</span>
+        </div>
+        <p class="mb-3 upsell-price-promo">
+          <s class="text-muted">{{t('price-label')}}</s>
+          <span class="text-primary ms-2 fw-medium">{{t('price-promo-label')}}</span>
+        </p>
+
+        <div class="d-flex flex-column gap-2">
+          <div class="d-flex align-items-center gap-2 text-muted upsell-price-feature">
+            <i class="fa-solid fa-check text-primary upsell-check-icon" aria-hidden="true"></i>
+            <span>{{t('pricing-feature-1-label')}}</span>
+          </div>
+          <div class="d-flex align-items-center gap-2 text-muted upsell-price-feature">
+            <i class="fa-solid fa-check text-primary upsell-check-icon" aria-hidden="true"></i>
+            <span>{{t('pricing-feature-2-label')}}</span>
+          </div>
+          <div class="d-flex align-items-center gap-2 text-muted upsell-price-feature">
+            <i class="fa-solid fa-check text-primary upsell-check-icon" aria-hidden="true"></i>
+            <span>{{t('pricing-feature-3-label')}}</span>
+          </div>
+          <div class="d-flex align-items-center gap-2 text-muted upsell-price-feature">
+            <i class="fa-solid fa-check text-primary upsell-check-icon" aria-hidden="true"></i>
+            <span>{{t('pricing-feature-4-label')}}</span>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Provider strip -->
+  <div class="d-flex align-items-center gap-3 flex-wrap rounded mb-4 px-4 py-3 upsell-provider-strip">
+    <span class="text-muted text-uppercase fw-semibold upsell-overline">
+      {{t('providers-label')}}
+    </span>
+    @for (p of providers; track p) {
+      <span class="d-inline-flex align-items-center gap-2">
+        <app-scrobble-provider-image [provider]="p" [size]="22" />
+        <span>{{p | scrobbleProviderName}}</span>
+      </span>
+    }
+    <span class="ms-auto text-muted upsell-overline">{{t('providers-more-label')}}</span>
+  </div>
+
+  <!-- Benefits grid -->
+  <p class="text-uppercase fw-semibold text-muted mb-3 upsell-section-label">
+    {{t('benefits-section-label')}}
+  </p>
+  <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-3 mb-5">
+
+    <div class="col">
+      <div class="h-100 rounded p-3 d-flex flex-column gap-3 upsell-card">
+        <div class="upsell-benefit-icon">
+          <i class="fa-solid fa-arrows-rotate text-primary" aria-hidden="true"></i>
+        </div>
+        <div>
+          <div class="fw-semibold mb-1 upsell-benefit-title">{{t('benefit-1-title-label')}}</div>
+          <div class="text-muted upsell-benefit-body">{{t('benefit-1-body-label')}}</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col">
+      <div class="h-100 rounded p-3 d-flex flex-column gap-3 upsell-card">
+        <div class="upsell-benefit-icon">
+          <i class="fa-solid fa-star text-primary" aria-hidden="true"></i>
+        </div>
+        <div>
+          <div class="fw-semibold mb-1 upsell-benefit-title">{{t('benefit-2-title-label')}}</div>
+          <div class="text-muted upsell-benefit-body">{{t('benefit-2-body-label')}}</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col">
+      <div class="h-100 rounded p-3 d-flex flex-column gap-3 upsell-card">
+        <div class="upsell-benefit-icon">
+          <i class="fa-solid fa-tags text-primary" aria-hidden="true"></i>
+        </div>
+        <div>
+          <div class="fw-semibold mb-1 upsell-benefit-title">{{t('benefit-3-title-label')}}</div>
+          <div class="text-muted upsell-benefit-body">{{t('benefit-3-body-label')}}</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col">
+      <div class="h-100 rounded p-3 d-flex flex-column gap-3 upsell-card">
+        <div class="upsell-benefit-icon">
+          <i class="fa-solid fa-layer-group text-primary" aria-hidden="true"></i>
+        </div>
+        <div>
+          <div class="fw-semibold mb-1 upsell-benefit-title">{{t('benefit-4-title-label')}}</div>
+          <div class="text-muted upsell-benefit-body">{{t('benefit-4-body-label')}}</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col">
+      <div class="h-100 rounded p-3 d-flex flex-column gap-3 upsell-card">
+        <div class="upsell-benefit-icon">
+          <i class="fa-solid fa-list-check text-primary" aria-hidden="true"></i>
+        </div>
+        <div>
+          <div class="fw-semibold mb-1 upsell-benefit-title">{{t('benefit-5-title-label')}}</div>
+          <div class="text-muted upsell-benefit-body">{{t('benefit-5-body-label')}}</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col">
+      <div class="h-100 rounded p-3 d-flex flex-column gap-3 upsell-card">
+        <div class="upsell-benefit-icon">
+          <i class="fa-solid fa-server text-primary" aria-hidden="true"></i>
+        </div>
+        <div>
+          <div class="fw-semibold mb-1 upsell-benefit-title">{{t('benefit-6-title-label')}}</div>
+          <div class="text-muted upsell-benefit-body">{{t('benefit-6-body-label')}}</div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- License form + FAQ -->
+  <div class="row g-4">
+
+    <!-- License form -->
+    <div class="col-12 col-lg-6">
+      <app-register-license-key (saved)="handleSaved($event)" />
+    </div>
+
+    <!-- FAQ -->
+    <div class="col-12 col-lg-6">
+      <div class="rounded p-4 h-100 upsell-card">
+        <h3 class="mb-4 upsell-faq-heading">{{t('faq-section-title-label')}}</h3>
+
+        <div class="upsell-faq-item">
+          <div class="fw-semibold mb-1 upsell-faq-question">{{t('faq-1-question-label')}}</div>
+          <div class="text-muted upsell-faq-answer">{{t('faq-1-answer-label')}}</div>
+        </div>
+        <div class="upsell-faq-item">
+          <div class="fw-semibold mb-1 upsell-faq-question">{{t('faq-2-question-label')}}</div>
+          <div class="text-muted upsell-faq-answer">{{t('faq-2-answer-label')}}</div>
+        </div>
+        <div class="upsell-faq-item">
+          <div class="fw-semibold mb-1 upsell-faq-question">{{t('faq-3-question-label')}}</div>
+          <div class="text-muted upsell-faq-answer">{{t('faq-3-answer-label')}}</div>
+        </div>
+
+        <div class="mt-3">
+          <a [href]="WikiLink.KavitaPlusFAQ" target="_blank" rel="noreferrer nofollow"
+             class="text-primary upsell-link-sm">
+            {{t('faq-wiki-link-label')}}
+            <i class="fa-solid fa-arrow-up-right-from-square ms-1 upsell-icon-xs"></i>
+          </a>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+</ng-container>

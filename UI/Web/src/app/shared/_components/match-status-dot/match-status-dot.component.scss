@@ -1,0 +1,17 @@
+.status-dot-wrapper {
+  font-size: 0.71875rem;
+  color: var(--text-muted-color);
+}
+
+.status-dot {
+  width: 0.4375rem;
+  height: 0.4375rem;
+  border-radius: 50%;
+  flex-shrink: 0;
+  background: var(--primary-color);
+
+  &.ongoing {
+    background: #73c0de;
+    box-shadow: 0 0 0.375rem rgba(115, 192, 222, 0.5);
+  }
+}

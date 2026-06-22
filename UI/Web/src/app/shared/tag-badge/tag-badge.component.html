@@ -7,6 +7,7 @@
   [class.color-error]="color() === 'error'"
   [class.selectable-cursor]="selectionMode() === TagBadgeCursor.Selectable"
   [class.not-allowed-cursor]="selectionMode() === TagBadgeCursor.NotAllowed"
-  [class.clickable-cursor]="selectionMode() === TagBadgeCursor.Clickable">
+  [class.clickable-cursor]="selectionMode() === TagBadgeCursor.Clickable"
+  [class.shape-pill]="shape() === 'pill'">
   <ng-content />
 </div>

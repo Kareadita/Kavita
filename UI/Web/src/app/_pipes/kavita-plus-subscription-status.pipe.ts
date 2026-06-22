@@ -1,0 +1,28 @@
+import {inject, Pipe, PipeTransform} from '@angular/core';
+import {TranslocoService} from '@jsverse/transloco';
+import {KavitaPlusSubscriptionState} from '../_models/kavitaplus/license-info';
+
+@Pipe({
+  name: 'kavitaPlusSubscriptionStatus',
+  standalone: true,
+  pure: true
+})
+export class KavitaPlusSubscriptionStatusPipe implements PipeTransform {
+  private readonly translocoService = inject(TranslocoService);
+
+  transform(state: KavitaPlusSubscriptionState | null | undefined): string {
+    switch (state) {
+      case KavitaPlusSubscriptionState.Active:
+        return this.translocoService.translate('kavita-plus-subscription-status-pipe.active');
+      case KavitaPlusSubscriptionState.Cancelling:
+        return this.translocoService.translate('kavita-plus-subscription-status-pipe.cancelling');
+      case KavitaPlusSubscriptionState.Paused:
+        return this.translocoService.translate('kavita-plus-subscription-status-pipe.paused');
+      case KavitaPlusSubscriptionState.Expired:
+        return this.translocoService.translate('kavita-plus-subscription-status-pipe.expired');
+      default:
+        return '';
+    }
+
+  }
+}

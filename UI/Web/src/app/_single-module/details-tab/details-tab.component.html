@@ -1,176 +1,228 @@
 <ng-container *transloco="let t; prefix: 'details-tab'">
-<div class="details pb-3">
+  <div class="details pb-3">
 
-  @let filePathsValue = filePaths();
-  @let filesValue = files();
+    @let filesValue = files();
+    @let filePathsValue = filePaths();
+    @let bm = basicMetadata();
 
-  @if (accountService.hasAdminRole() && (filePathsValue.length > 0 || filesValue.length > 0)) {
-    <div class="mb-3 ms-1">
-      <h4 class="header">{{t(filesValue.length > 0 ? 'file-path-title' : 'folder-path-title')}}</h4>
-      <div class="ms-3 d-flex flex-column">
-        @if (filesValue.length > 0) {
-          @for (fp of filesValue; track $index) {
-            {{fp.filePath}}
-            @if (fp.koreaderHash) {
-              ({{fp.koreaderHash}})
+    @if (accountService.hasAdminRole() && (filePathsValue.length > 0 || filesValue.length > 0)) {
+      <section class="mb-3 mt-3 ms-1">
+        <h4 class="kv-section-header">{{t(filesValue.length > 0 ? 'file-path-title' : 'folder-path-title')}}</h4>
+        <div class="d-flex flex-column gap-2">
+
+          @for (fp of filePathsValue; track $index) {
+            <div class="file-card">
+              <span class="file-path">{{fp}}</span>
+            </div>
+          } @empty {
+            @for (fp of filesValue; track fp.id) {
+              <div class="file-card">
+                <div class="d-flex align-items-start gap-2">
+                  <i class="fas fa-file-archive file-card-icon" aria-hidden="true"></i>
+                  <span class="file-path">{{fp.filePath}}</span>
+                </div>
+                <div class="file-meta-row mt-2">
+                  <span class="file-meta-item">{{t('pages-count', {num: fp.pages | compactNumber})}}</span>
+                  <span class="file-meta-item">{{t('bytes-count', {num: fp.bytes | bytes})}}</span>
+                  @if (fp.koreaderHash) {
+                    <span class="file-meta-item file-meta-hash" [ngbTooltip]="fp.koreaderHash">KOReader ✓</span>
+                  }
+                </div>
+              </div>
             }
           }
-        } @else {
-          @for (fp of filePathsValue; track $index) {
-            {{fp}}
+        </div>
+      </section>
+    }
+
+    @if (showBasicMetadata() && bm) {
+      <section class="mb-4 ms-1">
+        <p class="kv-section-header">{{t('basic-metadata-title')}}</p>
+        <div class="label-card-grid">
+          @if (bm.readingTime) {
+            <app-label-card [label]="t('read-time-label')" [value]="bm.readingTime | readTime" />
           }
-        }
+          <app-label-card [label]="t('pages-label')" [value]="bm.pages != null ? t('pages-count', {num: bm.pages | compactNumber}) : (null | defaultValue)" />
+          <app-label-card [label]="t('words-label')" [value]="bm.words != null ? t('words-count', {num: bm.words | compactNumber}) : (null | defaultValue)" />
+          <app-label-card [label]="t('added-label')" [value]="bm.addedAt | date:'shortDate' | defaultValue" />
+          <app-label-card [label]="t('updated-label')" [value]="(bm.updatedAt ?? null) | timeAgo | defaultValue" />
+          <app-label-card [label]="t('kavita-id-label')" [value]="bm.kavitaId | defaultValue" />
+          @if (bm.sortOrder != null) {
+            <app-label-card [label]="t('sort-order-label')" [value]="bm.sortOrder | defaultValue" />
+          }
+          @if (bm.isSpecial != null) {
+            <app-label-card [label]="t('is-special-label')" [value]="bm.isSpecial ? t('yes-label') : t('no-label')"/>
+          }
+          <app-label-card    [label]="t('language-label')"   [value]="languageDisplay() | defaultValue" />
+          @if (bm.publicationStatus != null) {
+            <app-label-card [label]="t('pub-status-label')" [value]="bm.publicationStatus | publicationStatus" />
+          }
+        </div>
+      </section>
+      <hr class="setting-section-break" aria-hidden="true" />
+    }
+
+    @let metadataEntity = entity();
+    @if (metadataEntity) {
+      <section class="mb-3 ms-1">
+        <h4 class="kv-section-header">{{t('external-metadata-title')}}</h4>
+        <app-external-metadata-detail [entity]="metadataEntity" [isbn]="isbn()" />
+      </section>
+    }
+
+    @if (webLinks().length > 0) {
+      <div class="mb-3 ms-1">
+        <h4 class="kv-section-header">{{t('weblinks-title')}}</h4>
+        <div class="ms-3 pill-row">
+          @for (link of webLinks(); track $index) {
+            <a [href]="link | safeUrl" target="_blank" rel="noopener noreferrer" [title]="link">
+              <app-tag-badge [selectionMode]="TagBadgeCursor.Clickable" color="primary">
+                <app-image height="16px" width="16px" aria-hidden="true" [imageUrl]="imageService.getWebLinkImage(link)"
+                           [errorImage]="imageService.errorWebLinkImage" />
+              </app-tag-badge>
+            </a>
+          }
+        </div>
       </div>
-    </div>
-  }
+    }
 
-  @let metadataEntity = entity();
-  @if(metadataEntity) {
-    <div class="mb-3 ms-1">
-      <h4 class="header">{{t('external-metadata-title')}}</h4>
-      <div class="ms-3">
-        <app-external-metadata-detail [entity]="metadataEntity" />
+    @if (metadataEntity || webLinks().length > 0) {
+      <hr class="setting-section-break mb-3" aria-hidden="true" />
+    }
+
+    @if (showGenres()) {
+      <div class="mb-3 ms-1">
+        <h4 class="kv-section-header">{{t('genres-title')}}</h4>
+        <div class="pill-row">
+          @if (genres().length > 0) {
+            @for (item of genres(); track item.id) {
+              <a href="javascript:void(0)" (click)="openGeneric(FilterField.Genres, item.id)">
+                <app-tag-badge shape="pill" [selectionMode]="TagBadgeCursor.Clickable">{{item.title}}</app-tag-badge>
+              </a>
+            }
+          } @else {
+            <span class="empty-value">{{null | defaultValue}}</span>
+          }
+        </div>
       </div>
-    </div>
-  }
+    }
 
-  @if (showGenres()) {
-    <div class="mb-3 ms-1">
-      <h4 class="header">{{t('genres-title')}}</h4>
-      <div class="ms-3">
-        <app-badge-expander [includeComma]="true" [items]="genres()" [itemsTillExpander]="3" [defaultExpanded]="true">
-          <ng-template #badgeExpanderItem let-item let-position="idx" let-last="last">
-            <a href="javascript:void(0)" class="dark-exempt btn-icon" (click)="openGeneric(FilterField.Genres, item.id)">{{item.title}}</a>
-          </ng-template>
-        </app-badge-expander>
+    @if (showTags()) {
+      <div class="mb-3 ms-1">
+        <h4 class="kv-section-header">{{t('tags-title')}}</h4>
+        <div class="pill-row">
+          @if (tags().length > 0) {
+            @for (item of tags(); track item.id) {
+              <a href="javascript:void(0)" (click)="openGeneric(FilterField.Tags, item.id)">
+                <app-tag-badge shape="pill" [selectionMode]="TagBadgeCursor.Clickable">{{item.title}}</app-tag-badge>
+              </a>
+            }
+          } @else {
+            <span class="empty-value">{{null | defaultValue}}</span>
+          }
+        </div>
       </div>
+    }
+
+    @if (hasUpperMetadata()) {
+      <div class="setting-section-break" aria-hidden="true"></div>
+    }
+
+    <div class="">
+      <app-carousel-reel [items]="metadata().writers" [title]="t('writers-title')" headerClass="kv-section-header dark-exempt">
+        <ng-template #carouselItem let-item>
+          <app-person-badge [person]="item" />
+        </ng-template>
+      </app-carousel-reel>
     </div>
-  }
 
-  @if (showTags()) {
-    <div class="mb-3 ms-1">
-      <h4 class="header">{{t('tags-title')}}</h4>
-      <div class="ms-3">
-        <app-badge-expander [includeComma]="true" [items]="tags()" [itemsTillExpander]="3" [defaultExpanded]="true">
-          <ng-template #badgeExpanderItem let-item let-position="idx" let-last="last">
-            <a href="javascript:void(0)" class="dark-exempt btn-icon" (click)="openGeneric(FilterField.Tags, item.id)">{{item.title}}</a>
-          </ng-template>
-        </app-badge-expander>
-      </div>
+    <div class="">
+      <app-carousel-reel [items]="metadata().colorists" [title]="t('colorists-title')" headerClass="kv-section-header dark-exempt">
+        <ng-template #carouselItem let-item>
+          <app-person-badge [person]="item" />
+        </ng-template>
+      </app-carousel-reel>
     </div>
-  }
 
-  <div class="mb-3">
-    <app-carousel-reel [items]="webLinks()" [title]="t('weblinks-title')">
-      <ng-template #carouselItem let-item>
-        <a class="me-1" [href]="item | safeUrl"  target="_blank" rel="noopener noreferrer" [title]="item">
-          <app-image height="24px" width="24px" aria-hidden="true" [imageUrl]="imageService.getWebLinkImage(item)"
-                     [errorImage]="imageService.errorWebLinkImage" />
-        </a>
-      </ng-template>
-    </app-carousel-reel>
+    <div class="mb-3">
+      <app-carousel-reel [items]="metadata().editors" [title]="t('editors-title')" headerClass="kv-section-header dark-exempt">
+        <ng-template #carouselItem let-item>
+          <app-person-badge [person]="item" />
+        </ng-template>
+      </app-carousel-reel>
+    </div>
+
+    <div class="mb-3">
+      <app-carousel-reel [items]="metadata().coverArtists" [title]="t('cover-artists-title')" headerClass="kv-section-header dark-exempt">
+        <ng-template #carouselItem let-item>
+          <app-person-badge [person]="item" />
+        </ng-template>
+      </app-carousel-reel>
+    </div>
+
+    <div class="mb-3">
+      <app-carousel-reel [items]="metadata().inkers" [title]="t('inkers-title')" headerClass="kv-section-header dark-exempt">
+        <ng-template #carouselItem let-item>
+          <app-person-badge [person]="item" />
+        </ng-template>
+      </app-carousel-reel>
+    </div>
+
+    <div class="mb-3">
+      <app-carousel-reel [items]="metadata().letterers" [title]="t('letterers-title')" headerClass="kv-section-header dark-exempt">
+        <ng-template #carouselItem let-item>
+          <app-person-badge [person]="item" />
+        </ng-template>
+      </app-carousel-reel>
+    </div>
+
+    <div class="mb-3">
+      <app-carousel-reel [items]="metadata().pencillers" [title]="t('pencillers-title')" headerClass="kv-section-header dark-exempt">
+        <ng-template #carouselItem let-item>
+          <app-person-badge [person]="item" />
+        </ng-template>
+      </app-carousel-reel>
+    </div>
+
+    <div class="mb-3">
+      <app-carousel-reel [items]="metadata().translators" [title]="t('translators-title')" headerClass="kv-section-header dark-exempt">
+        <ng-template #carouselItem let-item>
+          <app-person-badge [person]="item" />
+        </ng-template>
+      </app-carousel-reel>
+    </div>
+
+    <div class="mb-3">
+      <app-carousel-reel [items]="metadata().characters" [title]="t('characters-title')" headerClass="kv-section-header dark-exempt">
+        <ng-template #carouselItem let-item>
+          <app-person-badge [person]="item" />
+        </ng-template>
+      </app-carousel-reel>
+    </div>
+
+    <div class="mb-3">
+      <app-carousel-reel [items]="metadata().locations" [title]="t('locations-title')" headerClass="kv-section-header dark-exempt">
+        <ng-template #carouselItem let-item>
+          <app-person-badge [person]="item" />
+        </ng-template>
+      </app-carousel-reel>
+    </div>
+
+    <div class="mb-3">
+      <app-carousel-reel [items]="metadata().teams" [title]="t('teams-title')" headerClass="kv-section-header dark-exempt">
+        <ng-template #carouselItem let-item>
+          <app-person-badge [person]="item" />
+        </ng-template>
+      </app-carousel-reel>
+    </div>
+
+    <div class="mb-3">
+      <app-carousel-reel [items]="metadata().imprints" [title]="t('imprints-title')" headerClass="kv-section-header dark-exempt">
+        <ng-template #carouselItem let-item>
+          <app-person-badge [person]="item" />
+        </ng-template>
+      </app-carousel-reel>
+    </div>
+
   </div>
-
-  @if (hasUpperMetadata()) {
-    <div class="setting-section-break" aria-hidden="true"></div>
-  }
-
-
-  <div class="mb-3">
-    <app-carousel-reel [items]="metadata().writers" [title]="t('writers-title')">
-      <ng-template #carouselItem let-item>
-        <app-person-badge [person]="item" />
-      </ng-template>
-    </app-carousel-reel>
-  </div>
-
-  <div class="mb-3">
-    <app-carousel-reel [items]="metadata().colorists" [title]="t('colorists-title')">
-      <ng-template #carouselItem let-item>
-        <app-person-badge [person]="item" />
-      </ng-template>
-    </app-carousel-reel>
-  </div>
-
-  <div class="mb-3">
-    <app-carousel-reel [items]="metadata().editors" [title]="t('editors-title')">
-      <ng-template #carouselItem let-item>
-        <app-person-badge [person]="item" />
-      </ng-template>
-    </app-carousel-reel>
-  </div>
-
-
-  <div class="mb-3">
-    <app-carousel-reel [items]="metadata().coverArtists" [title]="t('cover-artists-title')">
-      <ng-template #carouselItem let-item>
-        <app-person-badge [person]="item" />
-      </ng-template>
-    </app-carousel-reel>
-  </div>
-
-  <div class="mb-3">
-    <app-carousel-reel [items]="metadata().inkers" [title]="t('inkers-title')">
-      <ng-template #carouselItem let-item>
-        <app-person-badge [person]="item" />
-      </ng-template>
-    </app-carousel-reel>
-  </div>
-
-  <div class="mb-3">
-    <app-carousel-reel [items]="metadata().letterers" [title]="t('letterers-title')">
-      <ng-template #carouselItem let-item>
-        <app-person-badge [person]="item" />
-      </ng-template>
-    </app-carousel-reel>
-  </div>
-
-  <div class="mb-3">
-    <app-carousel-reel [items]="metadata().pencillers" [title]="t('pencillers-title')">
-      <ng-template #carouselItem let-item>
-        <app-person-badge [person]="item" />
-      </ng-template>
-    </app-carousel-reel>
-  </div>
-
-  <div class="mb-3">
-    <app-carousel-reel [items]="metadata().translators" [title]="t('translators-title')">
-      <ng-template #carouselItem let-item>
-        <app-person-badge [person]="item" />
-      </ng-template>
-    </app-carousel-reel>
-  </div>
-
-  <div class="mb-3">
-    <app-carousel-reel [items]="metadata().characters" [title]="t('characters-title')">
-      <ng-template #carouselItem let-item>
-        <app-person-badge [person]="item" />
-      </ng-template>
-    </app-carousel-reel>
-  </div>
-
-  <div class="mb-3">
-    <app-carousel-reel [items]="metadata().locations" [title]="t('locations-title')">
-      <ng-template #carouselItem let-item>
-        <app-person-badge [person]="item" />
-      </ng-template>
-    </app-carousel-reel>
-  </div>
-
-  <div class="mb-3">
-    <app-carousel-reel [items]="metadata().teams" [title]="t('teams-title')">
-      <ng-template #carouselItem let-item>
-        <app-person-badge [person]="item" />
-      </ng-template>
-    </app-carousel-reel>
-  </div>
-
-  <div class="mb-3">
-    <app-carousel-reel [items]="metadata().imprints" [title]="t('imprints-title')">
-      <ng-template #carouselItem let-item>
-        <app-person-badge [person]="item" />
-      </ng-template>
-    </app-carousel-reel>
-  </div>
-</div>
 </ng-container>

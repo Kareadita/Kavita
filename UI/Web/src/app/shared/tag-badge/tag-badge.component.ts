@@ -35,6 +35,7 @@ export class TagBadgeComponent {
   fillStyle = input<'filled' | 'outline'>('outline');
   color = input<TagBadgeColor>('default');
   size = input<'default' | 'sm'>('default');
+  shape = input<'default' | 'pill'>('default');
 
   protected readonly TagBadgeCursor = TagBadgeCursor;
 }

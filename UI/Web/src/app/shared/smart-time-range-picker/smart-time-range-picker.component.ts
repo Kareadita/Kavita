@@ -64,6 +64,7 @@ export class SmartTimeRangePickerComponent {
 
     return translate('smart-time-picker.during-select');
   });
+
   readonly yearOptions = computed(() => {
     const startYear = this.startYear();
     const amountOfYears = new Date().getFullYear() - startYear + 1;
@@ -71,7 +72,7 @@ export class SmartTimeRangePickerComponent {
     return Array.from(
       {length: amountOfYears},
       (_, i) => startYear + i,
-    );
+    ).sort((a, b) => b - a);
   })
 
   constructor() {

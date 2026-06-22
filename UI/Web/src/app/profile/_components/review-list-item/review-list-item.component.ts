@@ -9,6 +9,7 @@ import {NgbTooltip} from "@ng-bootstrap/ng-bootstrap";
 import {NgxStarsModule} from "ngx-stars";
 import {ThemeService} from "../../../_services/theme.service";
 import {NULL_DATE} from "../../../_pipes/date-year-range.pipe";
+import {UtcToLocalDatePipe} from "../../../_pipes/utc-to-locale-date.pipe";
 
 @Component({
   selector: 'app-review-list-item',
@@ -18,7 +19,8 @@ import {NULL_DATE} from "../../../_pipes/date-year-range.pipe";
     ImageComponent,
     ReadMoreComponent,
     NgbTooltip,
-    NgxStarsModule
+    NgxStarsModule,
+    UtcToLocalDatePipe
   ],
   templateUrl: './review-list-item.component.html',
   styleUrl: './review-list-item.component.scss',

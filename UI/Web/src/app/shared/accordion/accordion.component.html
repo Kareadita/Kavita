@@ -1,0 +1,47 @@
+@let headerToggle = toggleTrigger() === 'header';
+
+<div class="header"
+     [attr.role]="headerToggle ? 'button' : null"
+     [attr.tabindex]="headerToggle ? 0 : null"
+     [attr.aria-expanded]="headerToggle ? open() : null"
+     [attr.aria-controls]="headerToggle ? bodyId : null"
+     (click)="onHeaderClick()"
+     (keydown.enter)="onHeaderKey($event)"
+     (keydown.space)="onHeaderKey($event)">
+
+  <div class="lead"><ng-content select="[accLead]"/></div>
+
+  <div class="titles">
+    <span class="title"
+          [attr.role]="headingLevel() ? 'heading' : null"
+          [attr.aria-level]="headingLevel()"><ng-content select="[accTitle]"/></span>
+    <span class="subtitle"><ng-content select="[accSubtitle]"/></span>
+  </div>
+
+  <div class="badges"><ng-content select="[accBadges]"/></div>
+
+  <div class="spacer"></div>
+
+  <div class="actions">
+    <div class="cta" (click)="$event.stopPropagation()"><ng-content select="[accCta]"/></div>
+    <div class="meta"><ng-content select="[accMeta]"/></div>
+  </div>
+
+  @if (headerToggle) {
+    <span class="chevron" aria-hidden="true"><i class="fas fa-chevron-down"></i></span>
+  } @else {
+    <button type="button" class="chevron"
+            [attr.aria-expanded]="open()"
+            [attr.aria-controls]="bodyId"
+            [attr.aria-label]="toggleLabel() || null"
+            (click)="onChevronClick($event)">
+      <i class="fas fa-chevron-down" aria-hidden="true"></i>
+    </button>
+  }
+</div>
+
+<div class="body" [id]="bodyId">
+  <div class="body-inner" [attr.inert]="open() ? null : ''">
+    <div class="content"><ng-content/></div>
+  </div>
+</div>

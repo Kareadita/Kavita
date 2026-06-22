@@ -1,14 +1,21 @@
 ﻿using System;
 using System.Collections.Generic;
+using Kavita.Models.Entities.Enums;
+using Kavita.Models.Entities.Interfaces;
 
 namespace Kavita.Models.Entities.Metadata;
 
 /// <summary>
 /// External Metadata from Kavita+ for a Series
 /// </summary>
-public class ExternalSeriesMetadata
+public class ExternalSeriesMetadata : IEntityDate
 {
     public int Id { get; set; }
+
+    /// <summary>
+    /// Where is this metadata coming from
+    /// </summary>
+    public MetadataProvider Provider { get; set; }
     /// <summary>
     /// External Reviews for the Series. Managed by Kavita for Kavita+ users
     /// </summary>
@@ -29,6 +36,8 @@ public class ExternalSeriesMetadata
     public int CbrId { get; set; }
     public long MalId { get; set; }
     public string GoogleBooksId { get; set; }
+    public long MangabakaId { get; set; }
+    public int HardcoverId { get; set; }
 
     /// <summary>
     /// Data is valid until this time
@@ -37,4 +46,8 @@ public class ExternalSeriesMetadata
 
     public Series Series { get; set; } = null!;
     public int SeriesId { get; set; }
+    public DateTime Created { get; set; }
+    public DateTime CreatedUtc { get; set; }
+    public DateTime LastModified { get; set; }
+    public DateTime LastModifiedUtc { get; set; }
 }

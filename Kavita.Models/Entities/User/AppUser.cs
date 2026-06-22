@@ -72,31 +72,45 @@ public class AppUser : IdentityUser<int>, IHasConcurrencyToken, IHasCoverImage
     /// </summary>
     public bool AgeRestrictionIncludeUnknowns { get; set; } = false;
 
+    #region KavitaPlus
+
     /// <summary>
     /// The JWT for the user's AniList account. Expires after a year.
     /// </summary>
     /// <remarks>Requires Kavita+ Subscription</remarks>
+    [Obsolete("Tracked in ScrobbleProviders")]
     public string? AniListAccessToken { get; set; }
 
     /// <summary>
     /// The Username of the MAL user
     /// </summary>
+    [Obsolete("Tracked in ScrobbleProviders")]
     public string? MalUserName { get; set; }
     /// <summary>
     /// The Client ID for the user's MAL account. User should create a client on MAL for this.
     /// </summary>
+    [Obsolete("Tracked in ScrobbleProviders")]
     public string? MalAccessToken { get; set; }
 
     /// <summary>
     /// Has the user ran Scrobble Event Generation
     /// </summary>
     /// <remarks>Only applicable for Kavita+ and when a Token is present</remarks>
+    [Obsolete("Tracked in ScrobbleProviders")]
     public bool HasRunScrobbleEventGeneration { get; set; }
     /// <summary>
     /// The timestamp of when Scrobble Event Generation ran (Utc)
     /// </summary>
     /// <remarks>Kavita+ only</remarks>
+    [Obsolete("Tracked in ScrobbleProviders")]
     public DateTime ScrobbleEventGenerationRan { get; set; }
+
+    /// <summary>
+    /// Provider tokens, usernames, etc
+    /// </summary>
+    public Dictionary<ScrobbleProvider, AppUserScrobbleProvider> ScrobbleProviders { get; set; } = new();
+
+    #endregion
 
     /// <summary>
     /// The sub returned the by OIDC provider

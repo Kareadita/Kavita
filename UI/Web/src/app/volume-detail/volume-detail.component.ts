@@ -45,7 +45,7 @@ import {AgeRating} from '../_models/metadata/age-rating';
 import {Volume} from "../_models/volume";
 import {VolumeService} from "../_services/volume.service";
 import {LoadingComponent} from "../shared/loading/loading.component";
-import {DetailsTabComponent} from "../_single-module/details-tab/details-tab.component";
+import {BasicMetadataInfo, DetailsTabComponent} from "../_single-module/details-tab/details-tab.component";
 import {ReadMoreComponent} from "../shared/read-more/read-more.component";
 import {Person} from "../_models/metadata/person";
 import {IHasCast} from "../_models/common/i-has-cast";
@@ -288,6 +288,18 @@ export class VolumeDetailComponent implements OnInit {
 
     return translate(chapterLocaleKey, {num: currentlyReadingChapter.minNumber});
   })
+
+  volumeBasicMetadata = computed<BasicMetadataInfo>(() => {
+    const v = this.volume();
+    return {
+      readingTime: v,
+      pages: v.pages,
+      words: v.wordCount,
+      addedAt: v.createdUtc,
+      updatedAt: v.lastModifiedUtc,
+      kavitaId: v.id,
+    };
+  });
 
   volumeCast = computed<VolumeCast>(() => {
     const chapters = this.volume()?.chapters || [];

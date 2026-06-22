@@ -1,0 +1,190 @@
+@use "../../../../theme/variables" as theme;
+
+:host {
+  --panel-primary-color:  var(--primary-color);
+  --panel-danger-color:   var(--error-color);
+  --panel-warning-color:  var(--warning-color);
+  --panel-color:          var(--panel-primary-color);
+
+  display: block;
+}
+
+:host([data-status='expired'])    { --panel-color: var(--panel-danger-color); }
+:host([data-status='cancelling']) { --panel-color: var(--panel-warning-color); }
+:host([data-status='paused'])     { --panel-color: var(--panel-warning-color); }
+
+.info-card {
+  background:
+    radial-gradient(circle at 85% 50%, color-mix(in srgb, var(--panel-color) 22%, transparent), transparent 55%),
+    linear-gradient(135deg, color-mix(in srgb, var(--panel-color) 12%, var(--elevation-layer1-dark-solid)) 0%, var(--elevation-layer1-dark-solid) 100%);
+  border: 1px solid color-mix(in srgb, var(--panel-color) 25%, var(--hr-color));
+  border-radius: 0.75rem;
+  padding: 1.75rem 2rem;
+}
+
+.brand-icon {
+  width: 2.375rem;
+  height: 2.375rem;
+  border-radius: 0.5rem;
+  background: color-mix(in srgb, var(--panel-color) 20%, transparent);
+  color: var(--panel-color);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1rem;
+}
+
+.brand-name {
+  font-size: 1.1rem;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+}
+
+.brand-plus {
+  color: var(--panel-color);
+}
+
+.brand-desc {
+  font-size: 0.8rem;
+  color: var(--text-muted-color);
+}
+
+.status-pill {
+  display: inline-flex;
+  align-items: center;
+  font-size: 0.7rem;
+  font-weight: 600;
+  padding: 0.2rem 0.55rem;
+  border-radius: 9999px;
+  border: 1px solid color-mix(in srgb, var(--panel-color) 40%, transparent);
+  background: color-mix(in srgb, var(--panel-color) 12%, transparent);
+  color: var(--panel-color);
+}
+
+.data-cols {
+  display: grid;
+  grid-template-columns: repeat(3, auto);
+  gap: 2rem;
+}
+
+.data-col {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+.data-label {
+  font-size: 0.65rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--label-card-label-color);
+}
+
+.data-value {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--label-card-value-color);
+}
+
+.data-sub {
+  font-size: 0.74rem;
+  color: var(--text-muted-color);
+}
+
+.ring-active {
+  --ring-pct: 100%;
+  width: 6.75rem;
+  height: 6.75rem;
+  border-radius: 50%;
+  background: conic-gradient(
+    var(--panel-color) var(--ring-pct),
+    color-mix(in srgb, var(--panel-color) 20%, transparent) var(--ring-pct)
+  );
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.ring-active-face {
+  width: 5.75rem;
+  height: 5.75rem;
+  border-radius: 50%;
+  background: color-mix(in srgb, var(--panel-color) 8%, var(--elevation-layer1-dark-solid));
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.15rem;
+}
+
+.ring-active-title {
+  font-size: 1.375rem;
+  font-weight: 700;
+  line-height: 1;
+  color: var(--text-muted-color);
+}
+
+.ring-active-sub {
+  font-size: 0.6rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--text-muted-color);
+}
+
+.ring-inactive {
+  width: 6.75rem;
+  height: 6.75rem;
+  border-radius: 50%;
+  border: 0.5rem solid color-mix(in srgb, var(--panel-color) 60%, transparent);
+  background: color-mix(in srgb, var(--panel-color) 8%, transparent);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.25rem;
+  color: var(--panel-color);
+}
+
+.ring-inactive-icon {
+  font-size: 1.5rem;
+}
+
+.ring-inactive-label {
+  font-size: 0.6rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+@media (max-width: theme.$grid-breakpoints-md) {
+  .info-card {
+    padding: 1.25rem;
+  }
+
+  .panel-body {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 1.5rem;
+  }
+
+  .data-cols {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+
+  .right-panel {
+    width: 100%;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .panel-actions {
+    width: 100%;
+
+    .btn {
+      width: 100%;
+    }
+  }
+}

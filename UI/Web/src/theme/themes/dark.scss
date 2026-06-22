@@ -29,7 +29,7 @@
   --elevation-layer11-dark: rgba(0, 0, 0, 0.6);
 
   --elevation-layer0-dark-solid: #121212;
-  --elevation-layer1-dark-solid: #1D1D1D;
+  --elevation-layer1-dark-solid: #1D1D1D; // This is a good base for cards
   --elevation-layer2-dark-solid: #212121;
   --elevation-layer3-dark-solid: #242424;
   --elevation-layer4-dark-solid: #272727;
@@ -46,7 +46,8 @@
   --primary-color-darkest-shade: #25624A;
   --error-color: #BD362F;
   --error-accent-color: #ea0d02;
-  --warning-color: #FFECB5;
+  --warning-color: #dd9f50;
+  --info-color: #2F96B4;
   --body-text-color: #efefef;
   --btn-icon-filter: invert(1) grayscale(100%) brightness(200%);
   --primary-color-scrollbar: rgba(255,255,255,0.3);
@@ -93,6 +94,13 @@
   --nav-offset: 3.75rem;
   --nav-mobile-offset: 3.4375rem;
 
+  /* Global Common Colors */
+  --success-color: #22c55e; // Success, Online, Connected
+
+  /** Override bs styles **/
+  --bs-success-rgb: 34, 197, 94;
+
+
   /* Should we render the series cover as background on mobile */
   --mobile-series-img-background: true;
 
@@ -130,48 +138,9 @@
   --input-focus-boxshadow-color: rgb(255 255 255 / 50%);
 
   /* Buttons */
+  /* Core slots shared across every variant */
   --btn-focus-boxshadow-color: rgb(255 255 255 / 50%);
-  --btn-primary-text-color: white;
-  --btn-primary-bg-color: var(--primary-color);
-  --btn-primary-border-color: var(--primary-color);
-  --btn-primary-hover-text-color: white;
-  --btn-primary-hover-bg-color: var(--primary-color-darker-shade);
-  --btn-primary-hover-border-color: var(--primary-color-darker-shade);
-  --btn-outline-primary-text-color: white;
-  --btn-outline-primary-bg-color: transparent;
-  --btn-outline-primary-border-color: var(--primary-color);
-  --btn-outline-primary-hover-text-color: white;
-  --btn-outline-primary-hover-bg-color: var(--primary-color-darker-shade);
-  --btn-outline-primary-hover-border-color: var(--primary-color-darker-shade);
-  --btn-secondary-text-color: white;
-  --btn-secondary-bg-color: #6c757d;
-  --btn-secondary-border-color: #6c757d;
-  --btn-secondary-hover-bg-color: var(--bs-btn-hover-bg);
-  --btn-secondary-hover-border-color: var(--bs-btn-hover-border-color);
-  --btn-secondary-font-weight: bold;
-  --btn-secondary-outline-text-color: white;
-  --btn-secondary-outline-bg-color: transparent;
-  --btn-secondary-outline-border-color: #6c757d;
-  --btn-secondary-outline-hover-text-color: #fff;
-  --btn-secondary-outline-hover-bg-color: var(--btn-secondary-bg-color);
-  --btn-secondary-outline-hover-border-color: var(--btn-secondary-bg-color);
-  --btn-secondary-outline-font-weight: bold;
-  --btn-primary-text-text-color: white;
-  --btn-secondary-text-text-color: lightgrey;
-
-  --btn-danger-text-text-color: var(--error-color);
-  --btn-danger-outline-text-color: white;
-  --btn-danger-outline-bg-color: transparent;
-  --btn-danger-outline-border-color: var(--error-color);
-  --btn-danger-outline-hover-text-color: white;
-  --btn-danger-outline-hover-bg-color: var(--error-color);
-  --btn-danger-outline-hover-border-color: var(--error-color);
-
-  --btn-alt-bg-color: #424c72;
-  --btn-alt-border-color: #444f75;
-  --btn-alt-hover-bg-color: #3b4466;
-  --btn-alt-focus-bg-color: #343c59;
-  --btn-alt-focus-boxshadow-color: rgb(255 255 255 / 50%);
+  --btn-focus-ring-width: 0.15rem;
   --btn-fa-icon-color: white;
   --btn-disabled-bg-color: #343a40;
   --btn-disabled-text-color: white;
@@ -179,6 +148,60 @@
   --bs-btn-disabled-border-color: transparent;
   --btn-actions-border-radius: 0.375rem;
   --btn-actions-hover-bg: rgb(255 255 255 / 18%);
+
+  /* Primary (solid + outline + text) */
+  --btn-primary-text-color: white;
+  --btn-primary-bg-color: var(--primary-color);
+  --btn-primary-border-color: var(--primary-color);
+  --btn-primary-hover-text-color: white;
+  --btn-primary-hover-bg-color: var(--primary-color-darker-shade);
+  --btn-primary-hover-border-color: var(--primary-color-darker-shade);
+  --btn-outline-primary-text-color: white;
+  --btn-primary-text-text-color: var(--primary-color);
+  --btn-primary-text-hover-color: var(--primary-color-darker-shade);
+
+  /* Secondary (solid + outline + text + alt) */
+  --btn-secondary-text-color: white;
+  --btn-secondary-bg-color: #6c757d;
+  --btn-secondary-border-color: #6c757d;
+  --btn-secondary-font-weight: bold;
+  --btn-outline-secondary-text-color: white;
+  --btn-secondary-text-text-color: lightgrey;
+  --btn-secondary-text-hover-color: #9a9a9a;
+  --btn-alt-bg-color: #424c72;
+  --btn-alt-border-color: #444f75;
+  --btn-alt-hover-bg-color: #3b4466;
+  --btn-alt-focus-bg-color: #343c59;
+  --btn-alt-focus-boxshadow-color: rgb(255 255 255 / 50%);
+
+  /* Warning (solid + outline + text). Bright fill at rest, darker --warning-color on hover. */
+  --btn-warning-text-color: #212529;
+  --btn-warning-bg-color: #ffc107;
+  --btn-warning-border-color: #ffc107;
+  --btn-warning-hover-text-color: #212529;
+  --btn-warning-hover-bg-color: var(--warning-color);
+  --btn-warning-hover-border-color: var(--warning-color);
+  --btn-outline-warning-text-color: #ffc107;
+  --btn-warning-text-text-color: #ffc107;
+  --btn-warning-text-hover-color: var(--warning-color);
+
+  /* Danger (solid + outline + text) */
+  --btn-danger-text-color: white;
+  --btn-danger-bg-color: var(--error-color);
+  --btn-danger-border-color: var(--error-color);
+  --btn-danger-hover-text-color: white;
+  --btn-danger-hover-bg-color: #9a2a24;
+  --btn-danger-hover-border-color: #9a2a24;
+  --btn-outline-danger-text-color: var(--error-color);
+  --btn-outline-danger-hover-text-color: white;
+  --btn-danger-text-text-color: var(--error-color);
+  --btn-danger-text-hover-color: #9a2a24;
+
+  /* Discord (brand colors) */
+  --discord-bg-color: #5865F2;
+  --discord-text-color: #fff;
+  --discord-hover-bg-color: #4752C4;
+  --discord-active-bg-color: #3C45A5;
 
 
   /* Nav (Tabs) */
@@ -207,7 +230,10 @@
   --nav-link-text-color: var(--elevation-layer10);
 
   /* Modal */
-  --modal-bg-color: #202122; // var(--bs-body-bg)
+  --modal-bg-color: #202122;
+  --modal-footer-bg-color: #292929;
+  --modal-footer-border-top-color: rgba(255, 255, 255, 0.05);
+  --modal-body-bg-color: var(--elevation-layer1-dark-solid);
 
   /* Header */
   --nav-header-text-color: white;
@@ -236,6 +262,18 @@
   --tagbadge-filled-border-color: rgba(239, 239, 239, 0.125);
   --tagbadge-filled-text-color: var(--body-text-color);
   --tagbadge-filled-bg-color: var(--primary-color);
+  --tagbadge-pill-hover-bg-color: rgba(74, 198, 148, 0.15);
+
+  /* Label Card */
+  --label-card-bg: rgba(255, 255, 255, 0.04);
+  --label-card-border: rgba(239, 239, 239, 0.07);
+  --label-card-icon-color: var(--primary-color);
+  --label-card-label-color: rgba(255, 255, 255, 0.4);
+  --label-card-value-color: #efefef;
+  --label-card-value-muted-color: rgba(255, 255, 255, 0.25);
+
+  /* File path */
+  --file-path-color: rgba(255, 255, 255, 0.55);
 
   /* Side Nav */
   --side-nav-width: 14.375rem;
@@ -313,17 +351,26 @@
   --dropdown-overlay-color: var(--elevation-layer1);
 
   /* Accordion */
-  --accordion-header-text-color: rgba(74, 198, 148, 0.9);
-  --accordion-header-bg-color: rgba(52, 60, 70, 0.5);
-  --accordion-body-bg-color: #292929;
+  --accordion-surface-bg-color: var(--elevation-layer1-dark-solid);
+  --accordion-header-text-color: var(--body-text-color);
+  --accordion-header-bg-color: transparent;
+  --accordion-body-bg-color: var(--accordion-surface-bg-color);
   --accordion-body-border-color: rgba(239, 239, 239, 0.125);
   --accordion-body-text-color: var(--body-text-color);
-  --accordion-header-collapsed-text-color: rgba(74, 198, 148, 0.9);
-  --accordion-header-collapsed-bg-color: #292929;
+  --accordion-header-collapsed-text-color: var(--body-text-color);
+  --accordion-header-collapsed-bg-color: transparent;
   --accordion-button-focus-border-color: unset;
   --accordion-button-focus-box-shadow: unset;
-  --accordion-active-body-bg-color: #292929;
+  --accordion-active-body-bg-color: var(--accordion-surface-bg-color);
   --accordion-body-box-shadow: none;
+  --accordion-hairline-color: var(--elevation-layer3);
+  --accordion-subtitle-text-color: var(--offwhite-text-color);
+  --accordion-meta-text-color: var(--text-muted-color);
+  --accordion-chevron-color: var(--offwhite-text-color);
+  --accordion-chevron-hover-color: var(--body-text-color);
+  --accordion-border-hover-color: color-mix(in srgb, #fff 20%, transparent);
+  --accordion-radius: var(--card-border-radius);
+  --accordion-gap: 0.75rem;
 
   /* Breadcrumb */
   --breadcrumb-bg-color: #292d32;
@@ -490,9 +537,28 @@
 
   /** Misc **/
   --offwhite-text-color: #8b95a5;
+  --white-text-color: white;
 
   /** Activity Card **/
   --activity-card-client-platform-badge-bg-color: #8b5cf6;
   --activity-card-client-device-badge-bg-color: #3b82f6;
 
+  /** KavitaPlus Audit Log **/
+  --audit-log-metadata-color: #4AC694;
+  --audit-log-scrobble-color: #FAC858;
+  --audit-log-match-color: #5470C6; // Maybe #a5bbff is a better color (color contrast)
+  --audit-log-sync-color: #73C0DE;
+  --audit-log-system-color: #9A60B4;
+
+  /** Match confidence chip */
+  --match-confidence-chip-strong-color: var(--primary-color);
+  --match-confidence-chip-likely-color: #7ec99e;
+  --match-confidence-chip-weak-color: var(--warning-color);
+  --match-confidence-chip-doubt-color: var(--error-color);
+
+  /** Media format pill */
+  --media-format-pill-manga-color: var(--primary-color);
+  --media-format-pill-light-novel-color: #a5bbff;
+  --media-format-pill-comic-color: #fc8452;
+  --media-format-pill-book-color: #fac858;
 }

@@ -22,7 +22,7 @@
                 </app-loading>
               </span>
 
-              @if (licenseService.hasValidLicense()) {
+              @if (licenseService.hasActiveLicense()) {
                 <span class="badge kplus-badge">{{t('k+-badge')}}</span>
               }
             </div>

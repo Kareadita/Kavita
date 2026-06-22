@@ -1,0 +1,31 @@
+:host {
+  display: block;
+}
+
+.discord-card {
+  background:
+    radial-gradient(circle at 90% 50%, color-mix(in srgb, var(--discord-bg-color) 22%, transparent), transparent 55%),
+    linear-gradient(135deg, color-mix(in srgb, var(--discord-bg-color) 12%, var(--elevation-layer1-dark-solid)) 0%, var(--elevation-layer1-dark-solid) 100%);
+  border: 1px solid color-mix(in srgb, var(--discord-bg-color) 25%, var(--hr-color));
+  border-radius: 0.75rem;
+  padding: 1.25rem 1.5rem;
+}
+
+.discord-icon {
+  width: 2.75rem;
+  height: 2.75rem;
+  border-radius: 0.625rem;
+  background: var(--discord-bg-color);
+  color: var(--discord-text-color);
+  font-size: 1.25rem;
+}
+
+.discord-title {
+  font-size: 1rem;
+  font-weight: 700;
+  margin: 0;
+}
+
+.discord-subtitle {
+  font-size: 0.8rem;
+}

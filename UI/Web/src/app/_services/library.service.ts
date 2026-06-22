@@ -14,7 +14,7 @@ import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
   providedIn: 'root'
 })
 export class LibraryService {
-  private httpClient = inject(HttpClient);
+  private readonly httpClient = inject(HttpClient);
   private readonly messageHub = inject(MessageHubService);
   private readonly destroyRef = inject(DestroyRef);
 

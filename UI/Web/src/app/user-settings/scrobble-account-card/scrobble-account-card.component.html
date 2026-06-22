@@ -1,0 +1,54 @@
+<ng-container *transloco="let t; prefix:'scrobble-account-card'">
+  @let providerName = provider().provider | scrobbleProviderName;
+
+  <div class="provider-card d-flex align-items-center gap-3 p-3 rounded-2 border">
+
+    <div class="provider-logo flex-shrink-0 rounded-2 d-flex align-items-center justify-content-center">
+      <app-scrobble-provider-image [provider]="provider().provider" />
+    </div>
+
+    <div class="flex-grow-1 min-w-0">
+      <div class="d-flex align-items-center gap-2 flex-wrap">
+        <span class="fw-semibold small text-truncate">{{providerName}}</span>
+        <div class="d-flex align-items-center gap-1 flex-shrink-0">
+          <span class="status-dot"
+                [class.status-dot--connected]="isConnected() && !hasExpired()"
+                [class.status-dot--expired]="hasExpired()"
+                [class.status-dot--disconnected]="!isConnected()">
+          </span>
+          <span class="small"
+                [class.text-success]="isConnected() && !hasExpired()"
+                [class.text-danger]="hasExpired()"
+                [class.text-muted]="!isConnected()">
+            @if (isConnected() && !hasExpired()) {
+              {{t('provider-connected')}}
+            } @else if (hasExpired()) {
+              {{t('provider-expired')}}
+            } @else {
+              {{t('provider-not-connected')}}
+            }
+          </span>
+        </div>
+      </div>
+
+      @if (isConnected()) {
+        <div class="small text-muted text-truncate">{{username() ? username() : ''}}</div>
+      } @else {
+        <div class="small text-muted phone-hidden">{{t('provider-description')}}</div>
+      }
+    </div>
+
+    @if (isConnected()) {
+      <button class="btn btn-sm btn-link flex-shrink-0 p-1 text-muted"
+              [ngbTooltip]="t('provider-settings')"
+              (click)="goToScrobbling()">
+        <i class="fa-solid fa-gear" aria-hidden="true"></i>
+      </button>
+    } @else {
+      <button class="btn btn-sm btn-outline-primary flex-shrink-0 text-nowrap"
+              (click)="goToScrobbling()">
+        {{t('provider-connect')}}
+      </button>
+    }
+  </div>
+</ng-container>

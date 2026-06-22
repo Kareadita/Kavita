@@ -187,7 +187,7 @@ public class AppUserProgressRepository(DataContext context, IMapper mapper) : IA
     public async Task<DateTime?> GetFirstProgressForSeries(int seriesId, int userId, CancellationToken ct = default)
     {
         var list = await context.AppUserProgresses.Where(p => p.AppUserId == userId && p.SeriesId == seriesId)
-            .Select(p => p.LastModifiedUtc)
+            .Select(p => p.CreatedUtc)
             .ToListAsync(ct);
         return list.Count == 0 ? null : list.DefaultIfEmpty().Min();
     }

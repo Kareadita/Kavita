@@ -1,5 +1,15 @@
 import { DOCUMENT, NgClass, AsyncPipe } from '@angular/common';
-import { ChangeDetectionStrategy, ChangeDetectorRef, Component, DestroyRef, inject, Input, OnInit, output } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  ChangeDetectorRef,
+  Component,
+  DestroyRef, ElementRef,
+  inject,
+  Input,
+  OnInit,
+  output,
+  viewChild
+} from '@angular/core';
 import { Observable, of, map, tap, shareReplay, filter, combineLatest } from 'rxjs';
 import { PageSplitOption } from 'src/app/_models/preferences/page-split-option';
 import { ReaderMode } from 'src/app/_models/preferences/reader-mode';
@@ -28,6 +38,7 @@ export class DoubleNoCoverRendererComponent implements OnInit {
   private document = inject<Document>(DOCUMENT);
   readerService = inject(ReaderService);
 
+  readonly imageElement = viewChild<ElementRef<HTMLImageElement>>('image');
 
   @Input({required: true}) readerSettings$!: Observable<ReaderSetting>;
   @Input({required: true}) image$!: Observable<HTMLImageElement | null>;

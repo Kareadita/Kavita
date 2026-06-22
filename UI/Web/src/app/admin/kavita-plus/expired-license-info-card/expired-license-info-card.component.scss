@@ -1,0 +1,37 @@
+:host { display: block; }
+
+.card {
+  background: var(--elevation-layer1-dark-solid);
+  border-radius: 0.5rem;
+  padding: 1.25rem;
+}
+
+.status-pill {
+  display: inline-flex;
+  align-items: center;
+  font-size: 0.7rem;
+  font-weight: 600;
+  padding: 0.2rem 0.55rem;
+  border-radius: 9999px;
+  border: 1px solid color-mix(in srgb, var(--error-color) 40%, transparent);
+  background: color-mix(in srgb, var(--error-color) 12%, transparent);
+  color: var(--error-color);
+}
+
+.row-grid {
+  display: grid;
+  grid-template-columns: 8rem 1fr;
+  row-gap: 0.6rem;
+  align-items: center;
+}
+
+.row-label {
+  font-size: 0.85rem;
+  color: var(--text-muted-color);
+}
+
+.row-value {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--label-card-value-color);
+}

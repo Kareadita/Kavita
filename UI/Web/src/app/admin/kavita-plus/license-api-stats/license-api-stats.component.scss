@@ -1,0 +1,21 @@
+.api-stats-container {
+  background-color: var(--elevation-layer1-dark-solid);
+  border-radius: 0.5rem;
+}
+
+.api-icon {
+  width: 2.25rem;
+  height: 2.25rem;
+  border-radius: 0.375rem;
+  background-color: color-mix(in srgb, var(--primary-color) 15%, transparent);
+  color: var(--primary-color);
+}
+
+.api-chart {
+  width: 8rem;
+  height: 2.5rem;
+}
+
+.min-width-0 {
+  min-width: 0;
+}

@@ -73,7 +73,7 @@
             {{t('created-col')}}
           </ng-template>
           <ng-template let-item="row" ngx-datatable-cell-template>
-            {{item.createdUtc | date:'shortDate'}}
+            {{item.createdUtc | utcToLocalDate | date:'shortDate'}}
           </ng-template>
         </ngx-datatable-column>
 
@@ -224,7 +224,7 @@
             {{t('created-col')}}
           </ng-template>
           <ng-template let-item="row" ngx-datatable-cell-template>
-            {{item.createdUtc | date:'shortDate'}}
+            {{item.createdUtc | utcToLocalDate | date:'shortDate'}}
           </ng-template>
         </ngx-datatable-column>
 
@@ -359,7 +359,7 @@
               {{t('created-col')}}
             </ng-template>
             <ng-template let-item="row" ngx-datatable-cell-template>
-              {{item.createdUtc | date:'shortDate'}}
+              {{item.createdUtc | utcToLocalDate | date:'shortDate'}}
             </ng-template>
           </ngx-datatable-column>
 

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Kavita.Models.DTOs.Filtering.v2;
 using Kavita.Models.Entities.Enums;
+using Kavita.Models.Entities.Enums.ReadingList;
 using Kavita.Models.Entities.ReadingLists;
 using Microsoft.EntityFrameworkCore;
 
@@ -67,6 +68,45 @@ public static class ReadingListFilter
                     itemCount),
                 FilterComparison.LessThan => queryable.WhereLessThan(s => s.Items.Count, itemCount),
                 FilterComparison.LessThanEqual => queryable.WhereLessThanOrEqual(s => s.Items.Count, itemCount),
+                _ => throw new ArgumentOutOfRangeException(nameof(comparison), comparison, null)
+            };
+        }
+
+        public IQueryable<ReadingList> HasProvider(bool condition, FilterComparison comparison, ReadingListProvider provider)
+        {
+            if (!condition) return queryable;
+            ComparisonProfile.Validate(comparison, [FilterComparison.Equal, FilterComparison.NotEqual], "ReadingList.Provider");
+
+            switch (comparison)
+            {
+                case FilterComparison.Equal:
+                    return queryable.Where(s => s.Provider == provider);
+                case FilterComparison.NotEqual:
+                    return queryable.Where(s => s.Provider != provider);
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(comparison), comparison, null);
+            }
+        }
+
+        public IQueryable<ReadingList> HasMissingCount(bool condition, FilterComparison comparison, int itemCount)
+        {
+            if (!condition) return queryable;
+            ComparisonProfile.Validate(comparison, ComparisonProfile.Numeric, "ReadingList.MissingCount");
+
+            return comparison switch
+            {
+                FilterComparison.NotEqual => queryable.WhereNotEqual(s => s.TotalItemsAtImport - s.Items.Count,
+                    itemCount),
+                FilterComparison.Equal => queryable.WhereEqual(s => s.TotalItemsAtImport - s.Items.Count, itemCount),
+                FilterComparison.GreaterThan => queryable.WhereGreaterThan(s => s.TotalItemsAtImport - s.Items.Count,
+                    itemCount),
+                FilterComparison.GreaterThanEqual => queryable.WhereGreaterThanOrEqual(
+                    s => s.TotalItemsAtImport - s.Items.Count,
+                    itemCount),
+                FilterComparison.LessThan => queryable.WhereLessThan(s => s.TotalItemsAtImport - s.Items.Count,
+                    itemCount),
+                FilterComparison.LessThanEqual => queryable.WhereLessThanOrEqual(
+                    s => s.TotalItemsAtImport - s.Items.Count, itemCount),
                 _ => throw new ArgumentOutOfRangeException(nameof(comparison), comparison, null)
             };
         }

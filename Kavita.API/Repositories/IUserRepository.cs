@@ -73,7 +73,6 @@ public interface IUserRepository
     Task<IEnumerable<AppUser>> GetAllUsersAsync(AppUserIncludes includeFlags = AppUserIncludes.None, bool track = true, CancellationToken ct = default);
     Task<AppUser?> GetUserByConfirmationToken(string token, CancellationToken ct = default);
     Task<AppUser> GetDefaultAdminUser(AppUserIncludes includes = AppUserIncludes.None, CancellationToken ct = default);
-    Task<IEnumerable<UserTokenInfo>> GetUserTokenInfo(CancellationToken ct = default);
     Task<AppUser?> GetUserByDeviceEmail(string deviceEmail, CancellationToken ct = default);
     Task<AppUser?> GetByOidcId(string? oidcId, AppUserIncludes includes = AppUserIncludes.None, CancellationToken ct = default);
     #endregion
@@ -84,7 +83,9 @@ public interface IUserRepository
     Task<IList<UserReviewDto>> GetUserRatingDtosForSeriesAsync(int seriesId, int userId, CancellationToken ct = default);
     Task<IList<UserReviewDto>> GetUserRatingDtosForChapterAsync(int chapterId, int userId, CancellationToken ct = default);
     Task<IEnumerable<AppUserRating>> GetSeriesWithRatings(int userId, CancellationToken ct = default);
+    Task<List<AppUserChapterRating>> GetChaptersWithRatings(int userId, CancellationToken ct = default);
     Task<IEnumerable<AppUserRating>> GetSeriesWithReviews(int userId, CancellationToken ct = default);
+    Task<List<AppUserChapterRating>> GetChaptersWithReviews(int userId, CancellationToken ct = default);
     Task<IList<UserReviewExtendedDto>> GetAllReviewsForUser(int userId, int requestingUserId, string? query = null, float? ratingFilter = null, CancellationToken ct = default);
     #endregion
 
@@ -115,7 +116,7 @@ public interface IUserRepository
     Task<bool> HasAccessToVolume(int userId, int volumeId, CancellationToken ct = default);
     Task<bool> HasAccessToChapter(int userId, int chapterId, CancellationToken ct = default);
     Task<bool> HasAccessToPerson(int userId, int personId, CancellationToken ct = default);
-    Task<bool> HasAccessToReadingList(int userId, int readingListId, CancellationToken ct = default);
+    Task<bool> HasAccessToReadingList(int userId, int readingListId, bool allowPromoted = true, CancellationToken ct = default);
     #endregion
 
     #region Scrobbling & Holds

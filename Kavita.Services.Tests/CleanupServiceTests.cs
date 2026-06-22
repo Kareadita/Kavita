@@ -378,7 +378,7 @@ public class CleanupServiceTests(ITestOutputHelper outputHelper): AbstractDbTest
         await context.SaveChangesAsync();
 
         var user = await unitOfWork.UserRepository.GetUserByUsernameAsync("majora2007", AppUserIncludes.Progress);
-        await readerService.MarkChaptersUntilAsRead(user, 1, 5);
+        await readerService.MarkChaptersAsRead(user, series.Id, series.Volumes.First().Chapters);
         await context.SaveChangesAsync();
 
         // Validate correct chapters have read status

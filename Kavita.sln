@@ -27,6 +27,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Kavita.Models.Tests", "Kavi
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Kavita.Benchmark", "Kavita.Benchmark\Kavita.Benchmark.csproj", "{CF765586-FAF5-4701-900D-C2CE8897CCC7}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Kavita.Integration.Tests", "Kavita.Integration.Tests\Kavita.Integration.Tests.csproj", "{15A9CDCD-D4CE-4155-8338-6FB9CB2EDC56}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -35,9 +37,6 @@ Global
 		Release|Any CPU = Release|Any CPU
 		Release|x64 = Release|x64
 		Release|x86 = Release|x86
-	EndGlobalSection
-	GlobalSection(SolutionProperties) = preSolution
-		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
 		{165A86F5-9E74-4C05-9305-A6F0BA32C9EE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
@@ -184,5 +183,20 @@ Global
 		{CF765586-FAF5-4701-900D-C2CE8897CCC7}.Release|x64.Build.0 = Release|Any CPU
 		{CF765586-FAF5-4701-900D-C2CE8897CCC7}.Release|x86.ActiveCfg = Release|Any CPU
 		{CF765586-FAF5-4701-900D-C2CE8897CCC7}.Release|x86.Build.0 = Release|Any CPU
+		{15A9CDCD-D4CE-4155-8338-6FB9CB2EDC56}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{15A9CDCD-D4CE-4155-8338-6FB9CB2EDC56}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{15A9CDCD-D4CE-4155-8338-6FB9CB2EDC56}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{15A9CDCD-D4CE-4155-8338-6FB9CB2EDC56}.Debug|x64.Build.0 = Debug|Any CPU
+		{15A9CDCD-D4CE-4155-8338-6FB9CB2EDC56}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{15A9CDCD-D4CE-4155-8338-6FB9CB2EDC56}.Debug|x86.Build.0 = Debug|Any CPU
+		{15A9CDCD-D4CE-4155-8338-6FB9CB2EDC56}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{15A9CDCD-D4CE-4155-8338-6FB9CB2EDC56}.Release|Any CPU.Build.0 = Release|Any CPU
+		{15A9CDCD-D4CE-4155-8338-6FB9CB2EDC56}.Release|x64.ActiveCfg = Release|Any CPU
+		{15A9CDCD-D4CE-4155-8338-6FB9CB2EDC56}.Release|x64.Build.0 = Release|Any CPU
+		{15A9CDCD-D4CE-4155-8338-6FB9CB2EDC56}.Release|x86.ActiveCfg = Release|Any CPU
+		{15A9CDCD-D4CE-4155-8338-6FB9CB2EDC56}.Release|x86.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
 	EndGlobalSection
 EndGlobal

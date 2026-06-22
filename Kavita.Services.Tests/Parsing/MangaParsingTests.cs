@@ -363,6 +363,7 @@ public class MangaParsingTests
     [InlineData("Monster Ch. 001 [MangaPlus] [Digital] [amit34521]", "1")]
     [InlineData("Naruto v2.5", Parser.DefaultChapter)]
     [InlineData("조선왕조실톡 106화", "106")]
+    [InlineData("나루토 1.5권", Parser.DefaultChapter)]
     public void ParseChaptersTest(string filename, string expected)
     {
         Assert.Equal(expected, Parser.ParseChapter(filename, LibraryType.Manga));

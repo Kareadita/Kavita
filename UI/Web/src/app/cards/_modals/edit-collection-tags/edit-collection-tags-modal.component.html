@@ -98,9 +98,7 @@
       <li [ngbNavItem]="Tabs.CoverImage">
         <a ngbNavLink>{{Tabs.CoverImage | tabTitle}}</a>
         <ng-template ngbNavContent>
-          <app-cover-image-chooser [(imageUrls)]="imageUrls" (imageSelected)="updateSelectedIndex($event)"
-                                   (selectedBase64Url)="updateSelectedImage($event)" [showReset]="tag().coverImageLocked"
-                                   (resetClicked)="handleReset()" />
+          <app-cover-image-chooser [config]="chooserConfig" (coverChanged)="handleCoverChanged($event)" (resetClicked)="handleReset()" />
         </ng-template>
       </li>
 

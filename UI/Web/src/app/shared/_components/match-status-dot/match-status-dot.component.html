@@ -1,0 +1,4 @@
+<span class="status-dot-wrapper d-inline-flex align-items-center gap-1" *transloco="let t; prefix: 'match-status-dot'">
+  <span class="status-dot" [class.ongoing]="isOngoing()" aria-hidden="true"></span>
+  {{ isOngoing() ? t('ongoing') : t('completed') }}
+</span>

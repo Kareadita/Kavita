@@ -33,8 +33,7 @@
         @if (showOidcButton()) {
           <a
             class="btn btn-outline-primary mt-2 d-flex justify-content-center align-items-center gap-2"
-            [href]="baseUrl + 'oidc/login'"
-          >
+            [href]="baseUrl + 'oidc/login'">
             <app-image height="36px" width="36px" [imageUrl]="'assets/icons/open-id-connect-logo.svg'" [styles]="{'object-fit': 'contains'}" />
             {{oidcConfig()?.providerName || t('oidc')}}
           </a>

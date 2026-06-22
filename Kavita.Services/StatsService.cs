@@ -272,8 +272,7 @@ public class StatsService : IStatsService
 
         try
         {
-            var license = (await _unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.LicenseKey)).Value;
-            dto.ActiveKavitaPlusSubscription = await _licenseService.HasActiveSubscription(license);
+            dto.ActiveKavitaPlusSubscription = await _licenseService.HasActiveLicense();
         }
         catch (Exception)
         {
@@ -336,35 +335,36 @@ public class StatsService : IStatsService
                                                                          | AppUserIncludes.SmartFilters | AppUserIncludes.WantToRead, false);
         foreach (var user in allUsers)
         {
-            var userDto = new UserStatV3();
-            userDto.HasMALToken = !string.IsNullOrEmpty(user.MalAccessToken);
-            userDto.HasAniListToken = !string.IsNullOrEmpty(user.AniListAccessToken);
-            userDto.AgeRestriction = new AgeRestriction()
+            var userDto = new UserStatV3
             {
-                AgeRating = user.AgeRestriction,
-                IncludeUnknowns = user.AgeRestrictionIncludeUnknowns
+                HasMALToken = !string.IsNullOrEmpty(user.ScrobbleProviders[ScrobbleProvider.Mal].AuthenticationToken),
+                HasAniListToken = !string.IsNullOrEmpty(user.ScrobbleProviders[ScrobbleProvider.AniList].AuthenticationToken),
+                AgeRestriction = new AgeRestriction()
+                {
+                    AgeRating = user.AgeRestriction,
+                    IncludeUnknowns = user.AgeRestrictionIncludeUnknowns
+                },
+                Locale = user.UserPreferences.Locale,
+                Roles = [.. _userManager.GetRolesAsync(user).Result],
+                LastLogin = user.LastActiveUtc,
+                HasValidEmail = user.Email != null && _emailService.IsValidEmail(user.Email),
+                IsEmailConfirmed = user.EmailConfirmed,
+                ActiveTheme = user.UserPreferences.Theme.Name,
+                CollectionsCreatedCount = user.Collections.Count,
+                ReadingListsCreatedCount = user.ReadingLists.Count,
+                LastReadTime = user.Progresses
+                    .Select(p => p.LastModifiedUtc)
+                    .DefaultIfEmpty()
+                    .Max(),
+                DevicePlatforms = user.Devices.Select(d => d.Platform).ToList(),
+                SeriesBookmarksCreatedCount = user.Bookmarks.Count,
+                SmartFilterCreatedCount = user.SmartFilters.Count,
+                IsSharingReviews = user.UserPreferences.SocialPreferences.ShareReviews,
+                IsSharingProfile = user.UserPreferences.SocialPreferences.ShareProfile,
+                IsSharingAnnotations = user.UserPreferences.SocialPreferences.ShareAnnotations,
+                WantToReadSeriesCount = user.WantToRead.Count,
+                IdentityProvider = user.IdentityProvider
             };
-
-            userDto.Locale = user.UserPreferences.Locale;
-            userDto.Roles = [.. _userManager.GetRolesAsync(user).Result];
-            userDto.LastLogin = user.LastActiveUtc;
-            userDto.HasValidEmail = user.Email != null && _emailService.IsValidEmail(user.Email);
-            userDto.IsEmailConfirmed = user.EmailConfirmed;
-            userDto.ActiveTheme = user.UserPreferences.Theme.Name;
-            userDto.CollectionsCreatedCount = user.Collections.Count;
-            userDto.ReadingListsCreatedCount = user.ReadingLists.Count;
-            userDto.LastReadTime = user.Progresses
-                .Select(p => p.LastModifiedUtc)
-                .DefaultIfEmpty()
-                .Max();
-            userDto.DevicePlatforms = user.Devices.Select(d => d.Platform).ToList();
-            userDto.SeriesBookmarksCreatedCount = user.Bookmarks.Count;
-            userDto.SmartFilterCreatedCount = user.SmartFilters.Count;
-            userDto.IsSharingReviews = user.UserPreferences.SocialPreferences.ShareReviews;
-            userDto.IsSharingProfile = user.UserPreferences.SocialPreferences.ShareProfile;
-            userDto.IsSharingAnnotations = user.UserPreferences.SocialPreferences.ShareAnnotations;
-            userDto.WantToReadSeriesCount = user.WantToRead.Count;
-            userDto.IdentityProvider = user.IdentityProvider;
 
             // Social Profile
             var activityData = await _context.AppUserReadingSession

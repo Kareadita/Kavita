@@ -552,6 +552,27 @@ public class ImageService(ILogger<ImageService> logger, IDirectoryService direct
     }
 
     /// <inheritdoc />
+    public string CreateThumbnailFromFile(string sourceFile, string fileName, EncodeFormat encodeFormat, int thumbnailWidth = ThumbnailWidth, string? targetDirectory = null)
+    {
+        try
+        {
+            targetDirectory ??= directoryService.CoverImageDirectory;
+            using var thumbnail = Image.Thumbnail(sourceFile, thumbnailWidth);
+
+            fileName += encodeFormat.GetExtension();
+            thumbnail.WriteToFile(directoryService.FileSystem.Path.Join(targetDirectory, fileName));
+
+            return fileName;
+        }
+        catch (Exception e)
+        {
+            logger.LogError(e, "Error creating thumbnail from file {SourceFile}", sourceFile);
+        }
+
+        return string.Empty;
+    }
+
+    /// <inheritdoc />
     public async Task<string> CreateThumbnailFromUrl(string url, string fileName, EncodeFormat encodeFormat, int thumbnailWidth = ThumbnailWidth)
     {
         try

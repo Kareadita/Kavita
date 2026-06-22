@@ -28,6 +28,9 @@ This code was taken from https://github.com/AndrewPoyntz/time-ago-pipe/blob/mast
 and modified
  */
 
+/**
+ * @deprecated Use {@link TimeDifferencePipe}
+ */
 @Pipe({
   name: 'timeAgo',
   pure: false,

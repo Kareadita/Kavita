@@ -1,5 +1,6 @@
 import { Pipe, PipeTransform } from '@angular/core';
 import { DateTime } from 'luxon';
+import {translate} from "@jsverse/transloco";
 
 type UtcToLocalTimeFormat = 'full' | 'short' | 'shortDate' | 'shortTime';
 
@@ -18,6 +19,10 @@ export class UtcToLocalTimePipe implements PipeTransform {
   transform(utcDate: string | undefined | null, format: UtcToLocalTimeFormat = 'short'): string {
     if (utcDate === '' || utcDate === null || utcDate === undefined || utcDate.split('T')[0] === '0001-01-01')  {
       return '';
+    }
+
+    if (utcDate.split('T')[0] === '9999-12-31')  {
+      return translate('default-date-pipe.never')
     }
 
     const browserLanguage = navigator.language;

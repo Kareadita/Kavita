@@ -189,13 +189,13 @@ public class OpdsServiceTests(ITestOutputHelper testOutputHelper) : AbstractDbTe
         return readingList;
     }
 
-    private static async Task<AppUserSmartFilter> CreateSmartFilter(DataContext context, int userId, string name, string filter)
+    private static async Task<AppUserSmartFilter> CreateSmartFilter(DataContext context, int userId, string name, string filter, FilterEntityType entityType = FilterEntityType.Series)
     {
         var smartFilter = new AppUserSmartFilter
         {
             Name = name,
             Filter = filter,
-            EntityType = FilterEntityType.Series,
+            EntityType = entityType,
             AppUserId = userId
         };
 
@@ -805,7 +805,7 @@ public class OpdsServiceTests(ITestOutputHelper testOutputHelper) : AbstractDbTe
         var smartFilter = await CreateSmartFilter(context, user.Id, "Test Filter", "combination=0");
 
         // Test page 1
-        var feed = await opdsService.GetSeriesFromSmartFilter(new OpdsItemsFromEntityIdRequest
+        var feed = await opdsService.ResolveSmartFilter(new OpdsItemsFromEntityIdRequest
         {
             ApiKey = user.GetOpdsAuthKey(),
             Prefix = OpdsService.DefaultApiPrefix,

@@ -65,6 +65,7 @@ import {ActionResult} from "../../../_models/actionables/action-result";
 import {getWritableResolvedData} from "../../../../libs/route-util";
 import {User} from "../../../_models/user/user";
 import {DrawerService} from "../../../_services/drawer.service";
+import {UtcToLocalDatePipe} from "../../../_pipes/utc-to-locale-date.pipe";
 
 @Component({
   selector: 'app-collection-detail',
@@ -73,7 +74,7 @@ import {DrawerService} from "../../../_services/drawer.service";
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [SideNavCompanionBarComponent, CardActionablesComponent, ImageComponent, ReadMoreComponent,
     BulkOperationsComponent, CardDetailLayoutComponent, SeriesCardComponent, TranslocoDirective, NgbTooltip,
-    DatePipe, DefaultDatePipe, ProviderImagePipe, ScrobbleProviderNamePipe, PromotedIconComponent]
+    DatePipe, DefaultDatePipe, ProviderImagePipe, ScrobbleProviderNamePipe, PromotedIconComponent, UtcToLocalDatePipe]
 })
 export class CollectionDetailComponent implements AfterContentChecked {
   public readonly imageService = inject(ImageService);

@@ -227,9 +227,9 @@ public class ServerController(
     /// <returns></returns>
     [Authorize(PolicyGroups.AdminPolicy)]
     [HttpGet("media-errors")]
-    public ActionResult<PagedList<MediaErrorDto>> GetMediaErrors()
+    public async Task<ActionResult<IList<MediaErrorDto>>> GetMediaErrors()
     {
-        return Ok(unitOfWork.MediaErrorRepository.GetAllErrorDtosAsync());
+        return Ok(await unitOfWork.MediaErrorRepository.GetAllErrorDtosAsync());
     }
 
     /// <summary>

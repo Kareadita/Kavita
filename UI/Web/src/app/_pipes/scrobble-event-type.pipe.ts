@@ -22,6 +22,8 @@ export class ScrobbleEventTypePipe implements PipeTransform {
         return this.translocoService.translate('scrobble-event-type-pipe.want-to-read-remove');
       case ScrobbleEventType.Review:
         return this.translocoService.translate('scrobble-event-type-pipe.review');
+      case ScrobbleEventType.ReadStatusUpdate:
+        return this.translocoService.translate('scrobble-event-type-pipe.read-status-update');
     }
   }
 

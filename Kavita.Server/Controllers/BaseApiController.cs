@@ -2,10 +2,15 @@
 using System.IO;
 using System.Linq;
 using System.Security.Cryptography;
+using System.Threading.Tasks;
+using Kavita.API.Services;
 using Kavita.API.Store;
+using Kavita.Common.Extensions;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using MimeTypes;
 
 namespace Kavita.Server.Controllers;
@@ -20,6 +25,18 @@ public class BaseApiController : ControllerBase
     /// </summary>
     protected IUserContext UserContext =>
         field ??= HttpContext.RequestServices.GetRequiredService<IUserContext>();
+
+    /// <summary>
+    /// Logger scoped to <see cref="BaseApiController"/>. Available in all derived controllers.
+    /// </summary>
+    protected ILogger<BaseApiController> Logger =>
+        field ??= HttpContext.RequestServices.GetRequiredService<ILogger<BaseApiController>>();
+
+    /// <summary>
+    /// Directory service used for temp-file staging helpers. Available in all derived controllers.
+    /// </summary>
+    protected IDirectoryService DirectoryService =>
+        field ??= HttpContext.RequestServices.GetRequiredService<IDirectoryService>();
 
     /// <summary>
     /// Gets the current authenticated user's ID.
@@ -112,29 +129,67 @@ public class BaseApiController : ControllerBase
     }
 
     /// <summary>
-    /// Ensures there is no malicious path in the fileName before use
+    /// Validates that a user-supplied relative path resolves to a location inside the given base directory.
     /// </summary>
-    /// <param name="fileName"></param>
-    /// <returns></returns>
-    protected static bool ValidateFilename(string fileName)
+    /// <remarks>
+    /// This blocks path traversal (e.g. <c>../</c>, absolute/rooted paths) while still permitting nested
+    /// relative paths such as <c>.hack/.hack.json</c>. The combined path is canonicalized with
+    /// <see cref="Path.GetFullPath(string)"/> (which collapses <c>..</c> segments) and then confirmed to remain
+    /// under <paramref name="baseDirectory"/>. Always use the returned/combined path rather than re-joining the
+    /// raw input afterwards.
+    /// </remarks>
+    /// <param name="baseDirectory">The trusted directory the path must stay within.</param>
+    /// <param name="relativePath">The untrusted, caller-supplied relative path or filename.</param>
+    /// <returns><c>true</c> if <paramref name="relativePath"/> stays within <paramref name="baseDirectory"/>.</returns>
+    protected bool IsPathWithinDirectory(string baseDirectory, string relativePath)
     {
-        if (string.IsNullOrWhiteSpace(fileName))
+        if (string.IsNullOrWhiteSpace(relativePath))
         {
             return false;
         }
 
-        if (fileName.Contains("..", StringComparison.Ordinal))
+        // Reject absolute/rooted paths (e.g. "C:\...", "/etc/...", "\\server\share") - the caller owns the base directory
+        if (Path.IsPathRooted(relativePath))
         {
+            Logger.LogWarning("Rejected rooted path '{RelativePath}' that attempted to escape base directory '{BaseDirectory}'",
+                relativePath.Sanitize(), baseDirectory.Sanitize());
             return false;
         }
 
-        if (fileName.IndexOf(Path.DirectorySeparatorChar) >= 0 ||
-            fileName.IndexOf(Path.AltDirectorySeparatorChar) >= 0)
+        var fullBase = Path.GetFullPath(baseDirectory);
+        var fullTarget = Path.GetFullPath(Path.Combine(fullBase, relativePath));
+
+        var baseWithSeparator = Path.TrimEndingDirectorySeparator(fullBase) + Path.DirectorySeparatorChar;
+        if (!fullTarget.StartsWith(baseWithSeparator, StringComparison.Ordinal))
         {
+            Logger.LogWarning("Rejected path traversal attempt: '{RelativePath}' resolved to '{ResolvedPath}' outside base directory '{BaseDirectory}'",
+                relativePath.Sanitize(), fullTarget.Sanitize(), fullBase.Sanitize());
             return false;
         }
 
         return true;
+    }
+
+    /// <summary>
+    /// Persists an uploaded file into the temp directory and returns the absolute path written.
+    /// </summary>
+    /// <remarks>
+    /// Callers must validate the resulting filename with <see cref="IsPathWithinDirectory"/> before use when the
+    /// name originates from untrusted input (e.g. <see cref="IFormFile.FileName"/>).
+    /// </remarks>
+    /// <param name="file">The uploaded file</param>
+    /// <param name="fileName">Override the on-disk filename. Defaults to the uploaded file's name.</param>
+    /// <returns>The absolute path of the written temp file</returns>
+    protected async Task<string> UploadToTempAsync(IFormFile file, string? fileName = null)
+    {
+        fileName ??= file.FileName;
+        var outputFile = System.IO.Path.Join(DirectoryService.TempDirectory, fileName);
+
+        await using var stream = System.IO.File.Create(outputFile);
+        await file.CopyToAsync(stream);
+        stream.Close();
+
+        return outputFile;
     }
 
 }

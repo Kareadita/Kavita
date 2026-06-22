@@ -1,37 +1,122 @@
 <ng-container *transloco="let t; prefix: 'cover-image-chooser'">
   <div class="container-fluid" style="padding-left: 0; padding-right: 0">
-    <app-file-drag-and-drop-upload
-      (dropped)="dropped($event)"
-      (urlSubmitted)="loadImage($event)"
-      [showUrlUpload]="true"
-      [acceptableExtensions]="acceptableExtensions"
-      [uploadText]="t('upload-continued')"
-    />
 
-    <div class="row g-0 chooser" style="padding-top: 0.625rem">
-      @if (showReset()) {
-        <div class="clickable col-auto" tabindex="0" (click)="reset()"
-             [class.selected]="!showApplyButton() && selectedIndex() === -1">
-          <app-image class="card-img-top" [title]="t('reset-cover-tooltip')" height="232.91px" width="160px" [imageUrl]="imageService.resetCoverImage" />
-          @if (showApplyButton()) {
-            <br>
-            <button style="width: 100%;" class="btn btn-secondary" (click)="resetImage()">{{t('reset')}}</button>
-          }
-        </div>
-      }
 
-      @for (url of imageUrls(); track url; let idx = $index) {
-        <div class="clickable col-auto" tabindex="0" [attr.aria-label]="t('image-num', {num: idx + 1})" (click)="selectImage(idx)"
-             [class.selected]="!showApplyButton() && selectedIndex() === idx">
-          <app-image class="card-img-top" height="232.91px" width="160px" [imageUrl]="url" [processEvents]="idx > 0" />
-          @if (showApplyButton()) {
-            <br>
-            <button class="btn btn-primary w-100" (click)="applyImage(idx)">
-              {{appliedIndex() === idx ? t('applied') : t('apply')}}
-            </button>
-          }
-        </div>
-      }
+    <div class="mt-2">
+      <app-file-drag-and-drop-upload
+        (dropped)="dropped($event)"
+        (urlSubmitted)="loadImage($event)"
+        [showUrlUpload]="true"
+        [acceptableExtensions]="acceptableExtensions"
+        [uploadText]="t('upload-continued')"
+      />
     </div>
+
+    @if (config().isLocked != null) {
+      <div class="d-flex align-items-center gap-2 mt-2 mb-1">
+        @if (config().isLocked) {
+          <span class="text-warning"><i class="fa fa-lock" aria-hidden="true"></i> {{ t('cover-locked') }}</span>
+            <button class="btn btn-sm btn-outline-warning" (click)="reset()">{{ t('reset') }}</button>
+        } @else {
+          <span class="text-muted small"><i class="fa fa-lock-open" aria-hidden="true"></i> {{ t('cover-not-locked') }}</span>
+        }
+      </div>
+    }
+
+    <ul ngbNav #nav="ngbNav" (navChange)="onTabActivate($event.nextId)" [(activeId)]="activeTabId" class="nav-tabs">
+      <li [ngbNavItem]="Tabs.Uploaded">
+        <a ngbNavLink>{{ Tabs.Uploaded | tabTitle }}</a>
+        <ng-template ngbNavContent>
+          <ng-container *ngTemplateOutlet="imageChooserTab; context: { images: uploadedImages(), tabId: Tabs.Uploaded }" />
+        </ng-template>
+      </li>
+
+      @if (config().selected) {
+        <li [ngbNavItem]="Tabs.Current">
+          <a ngbNavLink>{{ Tabs.Current | tabTitle }}</a>
+          <ng-template ngbNavContent>
+            <div class="row g-0 chooser mt-2">
+              <div class="clickable col-auto" tabindex="0"
+                   (click)="selectOption(config().selected!, Tabs.Current)"
+                   [class.selected]="selectedOptionKey() === config().selected!.url">
+                <app-image height="232.91px" width="160px" [imageUrl]="config().selected!.url" />
+                @if (config().selected!.title) {
+                  <p class="cover-title">{{ config().selected!.title }}</p>
+                }
+              </div>
+            </div>
+          </ng-template>
+        </li>
+      }
+
+      @if (config().volumeFunc) {
+        <li [ngbNavItem]="Tabs.Volumes">
+          <a ngbNavLink>{{ Tabs.Volumes | tabTitle }}</a>
+          <ng-template ngbNavContent>
+            <ng-container *ngTemplateOutlet="imageChooserTab; context: { images: volumeImages(), tabId: Tabs.Volumes }" />
+          </ng-template>
+        </li>
+      }
+
+      @if (config().chapterFunc) {
+        <li [ngbNavItem]="Tabs.Chapters">
+          <a ngbNavLink>{{ Tabs.Chapters | tabTitle }}</a>
+          <ng-template ngbNavContent>
+            <ng-container *ngTemplateOutlet="imageChooserTab; context: { images: chapterImages(), tabId: Tabs.Chapters }" />
+          </ng-template>
+        </li>
+      }
+
+      @if (config().otherFunc) {
+        <li [ngbNavItem]="Tabs.Other">
+          <a ngbNavLink>{{ Tabs.Other | tabTitle }}</a>
+          <ng-template ngbNavContent>
+            <ng-container *ngTemplateOutlet="imageChooserTab; context: { images: otherImages(), tabId: Tabs.Other }" />
+          </ng-template>
+        </li>
+      }
+
+      @if (config().kavitaplusFunc) {
+        <li [ngbNavItem]="Tabs.KavitaPlus">
+          <a ngbNavLink>{{ Tabs.KavitaPlus | tabTitle }}</a>
+          <ng-template ngbNavContent>
+            <ng-container *ngTemplateOutlet="imageChooserTab; context: { images: kavitaplusImages(), tabId: Tabs.KavitaPlus, loading: !kavitaplusImagesLoaded() }" />
+          </ng-template>
+        </li>
+      }
+
+    </ul>
+    <div [ngbNavOutlet]="nav"></div>
   </div>
+
+  <ng-template #imageChooserTab let-images="images" let-tabId="tabId" let-loading="loading">
+    @if (images === null || loading) {
+      <div class="d-flex justify-content-center mt-3">
+        <div class="spinner-border" role="status">
+          <span class="visually-hidden">{{ t('loading') }}</span>
+        </div>
+      </div>
+    } @else if (images.length === 0) {
+      <p class="mt-3">{{ t('no-images') }}</p>
+    } @else {
+      <div class="row g-0 chooser mt-2">
+        @for (opt of images; track opt.url) {
+          <div class="clickable col-auto"
+               tabindex="0"
+               role="button"
+               [attr.aria-label]="opt.title || t('select-image-alt')"
+               [attr.aria-pressed]="selectedOptionKey() === opt.url"
+               (click)="selectOption(opt, tabId)"
+               (keydown.enter)="selectOption(opt, tabId); $event.stopPropagation();"
+               (keydown.space)="selectOption(opt, tabId); $event.stopPropagation();"
+               [class.selected]="selectedOptionKey() === opt.url">
+            <app-image height="232.91px" width="160px" [imageUrl]="opt.url" />
+            @if (opt.title) {
+              <p class="cover-title">{{ opt.title }}</p>
+            }
+          </div>
+        }
+      </div>
+    }
+  </ng-template>
 </ng-container>

@@ -28,7 +28,7 @@ public static class Configuration
         var environment = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT");
         var isDevelopment = environment == Environments.Development;
 
-        if (isDevelopment && Environment.UserName.Equals("Joe", StringComparison.OrdinalIgnoreCase))
+        if (isDevelopment ) //&& Environment.UserName.Equals("Joe", StringComparison.OrdinalIgnoreCase))
         {
             return "http://localhost:5020";
         }

@@ -1,0 +1,52 @@
+
+.timeline-group {
+  position: relative;
+
+  &::before {
+    content: '';
+    position: absolute;
+    left: calc(1rem - 1px);
+    top: 0;
+    bottom: 0;
+    width: 2px;
+    background: var(--hr-color);
+    z-index: 0;
+  }
+}
+
+.spine-node {
+  width: 2rem;
+  z-index: 1;
+}
+
+.day-dot {
+  width: 0.5rem;
+  height: 0.5rem;
+  border-radius: 50%;
+  background: var(--hr-color);
+}
+
+.spine-icon {
+  width: 1.75rem;
+  height: 1.75rem;
+  border-radius: 50%;
+  font-size: 0.8rem;
+}
+
+.day-label {
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--body-text-color);
+}
+
+.count {
+  font-size: 0.9rem;
+}
+
+.divider {
+  flex: 1 1 0%;
+  height: 0.0625rem;
+  background: var(--hr-color);
+}

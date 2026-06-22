@@ -28,7 +28,7 @@ public class UsersController(
     IMapper mapper,
     IEventHub eventHub,
     ILocalizationService localizationService,
-    ILicenseService licenseService)
+    IScrobblingService scrobblingService)
     : BaseApiController
 {
     [Authorize(Policy = PolicyGroups.AdminPolicy)]
@@ -155,26 +155,16 @@ public class UsersController(
 
         existingPreferences.OpdsPreferences = preferencesDto.OpdsPreferences;
 
-        if (await licenseService.HasActiveLicense(ct: HttpContext.RequestAborted))
-        {
-            existingPreferences.AniListScrobblingEnabled = preferencesDto.AniListScrobblingEnabled;
-            existingPreferences.WantToReadSync = preferencesDto.WantToReadSync;
-        }
-
-
-
         if (preferencesDto.Theme != null && existingPreferences.Theme.Id != preferencesDto.Theme?.Id)
         {
             var theme = await unitOfWork.SiteThemeRepository.GetTheme(preferencesDto.Theme!.Id);
             existingPreferences.Theme = theme ?? await unitOfWork.SiteThemeRepository.GetDefaultTheme();
         }
 
-
         if (localizationService.GetLocales().Select(l => l.FileName).Contains(preferencesDto.Locale))
         {
             existingPreferences.Locale = preferencesDto.Locale;
         }
-
 
         unitOfWork.UserRepository.Update(existingPreferences);
 
@@ -215,8 +205,8 @@ public class UsersController(
     [KPlus]
     [HttpGet("tokens")]
     [Authorize(Policy = PolicyGroups.AdminPolicy)]
-    public async Task<ActionResult<IEnumerable<UserTokenInfo>>> GetUserTokens()
+    public async Task<ActionResult<IEnumerable<UserTokenInfoDto>>> GetUserTokens()
     {
-        return Ok(await unitOfWork.UserRepository.GetUserTokenInfo());
+        return Ok(await scrobblingService.GetUserTokenInfo());
     }
 }

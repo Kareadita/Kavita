@@ -1,0 +1,20 @@
+<ng-container *transloco="let t; prefix:'expired-license-info-card'">
+  <div class="card">
+    <h3 class="kv-section-header mb-3">{{t('title-label')}}</h3>
+    <div class="row-grid">
+      <span class="row-label">{{t('status-label')}}</span>
+      <span class="row-value">
+        <span class="status-pill">{{licenseService.licenseInfo()?.state | kavitaPlusSubscriptionStatus}}</span>
+      </span>
+
+      <span class="row-label">{{t('expired-on-label')}}</span>
+      <span class="row-value">{{licenseService.licenseInfo()?.expirationDate | date:'mediumDate'}}</span>
+
+      <span class="row-label">{{t('member-since-label')}}</span>
+      <span class="row-value">{{licenseService.licenseInfo()?.subscribedSince | date:'mediumDate'}}</span>
+
+      <span class="row-label">{{t('total-months-label')}}</span>
+      <span class="row-value">{{licenseService.licenseInfo()?.totalMonthsSubbed}}</span>
+    </div>
+  </div>
+</ng-container>

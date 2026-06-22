@@ -1,0 +1,26 @@
+<ng-container *transloco="let t; prefix:'manage-license-key-modal'">
+
+  <div class="modal-header">
+    <h4 class="modal-title" id="modal-basic-title">{{t('title')}}</h4>
+    <button type="button" class="btn-close" [attr.aria-label]="t('close')" (click)="modal.dismiss()"></button>
+  </div>
+  <div class="modal-body">
+    <app-edit-license-key (updated)="updateFormData($event)" />
+
+  </div>
+  <div class="modal-footer">
+    <div class="d-flex w-100 align-items-center gap-2">
+      <button class="btn btn-danger-text" (click)="deleteLicense()">
+        <i class="fas fa-cancel" aria-hidden="true"></i>
+        {{t('delete-license')}}
+      </button>
+
+      <div class="ms-auto d-flex gap-2">
+        <button type="button" class="btn btn-outline-secondary" (click)="resetLicense()">{{t('reset-license')}}</button>
+        <button type="button" class="btn btn-outline-secondary" (click)="modal.dismiss()">{{t('close')}}</button>
+        <button type="button" class="btn btn-outline-primary" [disabled]="!formIsValid()" (click)="save()">{{t('save')}}</button>
+      </div>
+    </div>
+  </div>
+
+</ng-container>

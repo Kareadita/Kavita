@@ -1,0 +1,47 @@
+<ng-container *transloco="let t; prefix:'kavitaplus-activity'">
+  <div class="container-fluid px-0">
+    <p class="text-muted mb-4">{{t('description')}}</p>
+
+    <div class="row g-3 mb-4">
+      @for(provider of scrobblingProviders(); track provider.provider) {
+        <div class="col-12 col-md-auto">
+          <app-scrobble-account-card [provider]="provider" class="d-block" />
+        </div>
+      }
+    </div>
+
+    <div class="tabs-scroller">
+      <ul ngbNav [activeId]="activeTab()" (activeIdChange)="activeTab.set($event)" class="nav-tabs mb-3 flex-nowrap">
+        <li [ngbNavItem]="Tabs.All">
+          <a ngbNavLink>{{Tabs.All | tabTitle}} <span class="badge text-bg-secondary ms-1">{{allCount()}}</span></a>
+        </li>
+        <li [ngbNavItem]="Tabs.Scrobbles">
+          <a ngbNavLink>{{Tabs.Scrobbles | tabTitle}} <span class="badge text-bg-secondary ms-1">{{scrobbleCount()}}</span></a>
+        </li>
+        <li [ngbNavItem]="Tabs.Failed">
+          <a ngbNavLink>{{Tabs.Failed | tabTitle}} <span class="badge text-bg-secondary ms-1">{{failedCount()}}</span></a>
+        </li>
+        <li [ngbNavItem]="Tabs.MyChanges">
+          <a ngbNavLink>{{Tabs.MyChanges | tabTitle}} <span class="badge text-bg-secondary ms-1">{{myChangesCount()}}</span></a>
+        </li>
+
+        <li [ngbNavItem]="Tabs.ScrobbleHolds">
+          <a ngbNavLink>{{Tabs.ScrobbleHolds | tabTitle}} <span class="badge text-bg-secondary ms-1">{{scrobbleHoldsCount()}}</span></a>
+        </li>
+      </ul>
+    </div>
+
+    <ng-template #entryTpl let-entry>
+      <app-kavitaplus-audit-entry [entry]="entry" [showRetry]="true" (retry)="retryScrobbleEvent($event)" />
+    </ng-template>
+
+    <app-kavitaplus-timeline
+      [entries]="filteredEntries()"
+      [isLoading]="isLoading()"
+      [hasMore]="hasMore()"
+      [isLoadingMore]="isLoadingMore()"
+      [entryTemplate]="entryTpl"
+      (loadMore)="loadMore()" />
+
+  </div>
+</ng-container>

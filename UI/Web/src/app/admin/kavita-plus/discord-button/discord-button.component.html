@@ -1,0 +1,13 @@
+@if (href()) {
+  <a [href]="href()" target="_blank" rel="noreferrer nofollow" class="btn-discord">
+    <img ngSrc="/assets/images/ExternalServices/discord-symbol.png" alt="Discord" aria-hidden="true" class="discord-logo"
+         height="400" width="528"/>
+    <span>{{ label() }}</span>
+  </a>
+} @else {
+  <button type="button" class="btn-discord">
+    <img ngSrc="/assets/images/ExternalServices/discord-symbol.png" alt="Discord" aria-hidden="true" class="discord-logo"
+         height="400" width="528"/>
+    <span>{{ label() }}</span>
+  </button>
+}

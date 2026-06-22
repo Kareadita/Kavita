@@ -77,9 +77,7 @@
 
       <!-- Summary with blur and fade -->
       @if (summary()) {
-        <div class="summary-text" [appBlurToggle]="shouldBlur()" [appBlurToggleEnabled]="blurEnabled()">
-          {{summary()}}
-        </div>
+        <div class="summary-text" [appBlurToggle]="shouldBlur()" [appBlurToggleEnabled]="blurEnabled()" [innerHTML]="summary()"></div>
       }
     </div>
 

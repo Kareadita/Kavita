@@ -52,11 +52,11 @@
             </ng-template>
             <ng-template let-item="row" ngx-datatable-cell-template>
               @if (item.sent) {
-                <i class="fa-solid fa-check-circle successful-validation ms-1">
+                <i class="fa-solid fa-check-circle text-primary ms-1">
                   <span class="visually-hidden">{{t('sent-tooltip')}}</span>
                 </i>
               } @else {
-                <i class="error fa-solid fa-exclamation-circle ms-1">
+                <i class="error fa-solid fa-exclamation-circle text-danger ms-1">
                   <span class="visually-hidden">{{t('not-sent-tooltip')}}</span>
                 </i>
               }

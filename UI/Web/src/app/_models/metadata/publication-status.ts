@@ -5,3 +5,6 @@ export enum PublicationStatus {
     Cancelled = 3,
     Ended = 4
 }
+
+export const PublicationStatuses = [PublicationStatus.OnGoing, PublicationStatus.Hiatus,
+PublicationStatus.Completed, PublicationStatus.Cancelled, PublicationStatus.Ended];

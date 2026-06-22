@@ -13,7 +13,7 @@
     </div>
   </form>
 
-  @let filteredRows = data | filter: filterList;
+  @let filteredRows = filteredData();
   <app-responsive-table [rows]="filteredRows" [trackByFn]="trackBy">
     <ng-template #tableTemplate>
       <ngx-datatable

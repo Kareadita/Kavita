@@ -124,8 +124,11 @@ export class ReadingListsComponent implements OnInit {
   updateReadingList(updatedEntity: ReadingList) {
     const originalEntity = this.lists().find(s => s.id == updatedEntity.id);
     if (originalEntity) {
-      Object.assign(originalEntity, updatedEntity);
-      this.lists.set([...this.lists()]);
+      this.lists.update(l => [...l.map(item => {
+        if (item.id == updatedEntity.id) return updatedEntity;
+
+        return item;
+      })]);
     }
   }
 

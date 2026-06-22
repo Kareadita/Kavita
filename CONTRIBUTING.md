@@ -110,3 +110,8 @@ We welcome anyone to build external scripts and applications. Reach out to us ab
 **Please do not use words like "Kavita reader" or "Kavita" as your explicit app name.** Use of "[name]: A Kavita Reader" is preferred. 
 
 If you have any questions about any of this, please let us know.
+
+
+## Misc
+- Localization should use component name for primary grouping, -label for labels, -alt for accessibility text
+- /theme can be used to visualize different components available for building

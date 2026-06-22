@@ -156,11 +156,6 @@
   }
 }
 
-::ng-deep .image-container.mobile-bg app-image img {
-  max-height: 100dvh !important;
-  object-fit: cover !important;
-}
-
 /* col-lg */
 @media (max-width: theme.$grid-breakpoints-lg) {
   .image-container.mobile-bg{

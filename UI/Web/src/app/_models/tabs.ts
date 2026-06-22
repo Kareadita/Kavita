@@ -45,4 +45,15 @@ export enum Tabs {
   BookmarkImageTab = "bookmark-image-tab",
   BookmarkTextTab = "bookmark-text-tab",
 
+  KavitaPlus = 'kavita-plus-tab',
+  Current = 'current-tab',
+  Uploaded = 'uploaded-tab',
+  Other = 'other-tab',
+
+  All = 'all-tab',
+  Scrobbles = 'scrobbles-tab',
+  Failed = 'failed-tab',
+  MyChanges = 'my-changes-tab',
+  ScrobbleHolds = 'scrobble-holds-tab',
+
 }

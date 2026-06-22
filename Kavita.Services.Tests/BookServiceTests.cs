@@ -46,6 +46,9 @@ public class BookServiceTests
         Assert.Equal("genre1, genre2", comicInfo.Genre);
     }
 
+    /// <summary>
+    /// This tests an edge case where there is bad metadata
+    /// </summary>
     [Fact]
     public void ShouldHaveComicInfo_WithAuthors()
     {
@@ -55,6 +58,17 @@ public class BookServiceTests
         var comicInfo = _bookService.GetComicInfo(archive);
         Assert.NotNull(comicInfo);
         Assert.Equal("Roger Starbuck,Junya Inoue", comicInfo.Writer);
+    }
+
+    [Fact]
+    public void ShouldHaveComicInfo_WithAuthors_ForRoleRefinement()
+    {
+        var testDirectory = Path.Join(Directory.GetCurrentDirectory(), "../../../Test Data/BookService");
+        var archive = Path.Join(testDirectory, "Role Refinement.epub");
+
+        var comicInfo = _bookService.GetComicInfo(archive);
+        Assert.NotNull(comicInfo);
+        Assert.Equal("미아키 스가루", comicInfo.Writer); // This should not use the fallback for the test case ShouldHaveComicInfo_WithAuthors
     }
 
     [Fact]

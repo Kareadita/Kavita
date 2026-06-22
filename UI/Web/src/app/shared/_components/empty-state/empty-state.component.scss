@@ -1,0 +1,30 @@
+.empty-state-container {
+  font-size: 0.8125rem;
+  color: var(--text-muted-color);
+  line-height: 1.6;
+}
+
+.empty-state-icon {
+  width: 3.5rem;
+  height: 3.5rem;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid var(--hr-color);
+  font-size: 1.125rem;
+  opacity: 0.6;
+
+  &.is-error {
+    background: rgba(189, 54, 47, 0.10);
+    border-color: rgba(189, 54, 47, 0.35);
+    color: var(--match-confidence-chip-doubt-color);
+    opacity: 1;
+  }
+}
+
+.empty-state-title {
+  font-size: 0.875rem;
+  color: var(--body-text-color);
+}
+
+.empty-state-desc {
+  color: var(--text-muted-color);
+}

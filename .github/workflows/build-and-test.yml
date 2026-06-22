@@ -32,4 +32,4 @@ jobs:
           path: Kavita.Common/Kavita.Common.csproj
 
       - name: Test
-        run: dotnet test --no-restore --verbosity normal
+        run: dotnet test --no-restore --verbosity normal --filter "Category!=Integration"

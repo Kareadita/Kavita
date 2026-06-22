@@ -26,4 +26,9 @@ public sealed record CblFinalizeRequestDto
     /// Optional Git SHA for sync tracking
     /// </summary>
     public string? Sha { get; set; }
+
+    /// <summary>
+    /// Optional flag to promote the RL on creation
+    /// </summary>
+    public bool Promote { get; set; } = false;
 }

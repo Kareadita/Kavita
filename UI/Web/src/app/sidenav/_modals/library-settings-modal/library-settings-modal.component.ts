@@ -40,6 +40,10 @@ import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import {DatePipe, NgTemplateOutlet} from "@angular/common";
 import {SentenceCasePipe} from "../../../_pipes/sentence-case.pipe";
 import {CoverImageChooserComponent} from "../../../cards/cover-image-chooser/cover-image-chooser.component";
+import {
+  CoverChooserConfigFactoryService,
+  CoverImageChooserConfig
+} from "../../../_services/cover-chooser-config-factory.service";
 import {translate, TranslocoModule} from "@jsverse/transloco";
 import {DefaultDatePipe} from "../../../_pipes/default-date.pipe";
 import {allFileTypeGroup, FileTypeGroup} from "../../../_models/library/file-type-group.enum";
@@ -95,6 +99,7 @@ export class LibrarySettingsModalComponent implements OnInit {
   private readonly actionFactoryService = inject(ActionFactoryService);
   private readonly metadataService = inject(MetadataService);
   protected readonly breakpointService = inject(BreakpointService);
+  private readonly coverChooserConfigFactory = inject(CoverChooserConfigFactoryService);
 
   protected readonly LibraryType = LibraryType;
   protected readonly Tabs = Tabs;
@@ -105,7 +110,7 @@ export class LibrarySettingsModalComponent implements OnInit {
   @Input({required: true}) library!: Library | undefined;
 
   active = Tabs.General;
-  imageUrls: Array<string> = [];
+  chooserConfig: CoverImageChooserConfig = {};
   protected readonly excludePatternTooltip = `<span>` + translate('library-settings-modal.exclude-patterns-tooltip') +
   `<a class="ms-1" href="${WikiLink.ScannerExclude}" rel="noopener noreferrer" target="_blank">${translate('library-settings-modal.help')}` +
   `<i class="fa fa-external-link-alt ms-1" aria-hidden="true"></i></a>`;
@@ -165,10 +170,8 @@ export class LibrarySettingsModalComponent implements OnInit {
       this.cdRef.markForCheck();
     }
 
-    if (this.library?.coverImage != null && this.library?.coverImage !== '') {
-      this.imageUrls.push(this.imageService.getLibraryCoverImage(this.library.id));
-      this.cdRef.markForCheck();
-    }
+    this.chooserConfig = this.coverChooserConfigFactory.forLibrary(this.library);
+    this.cdRef.markForCheck();
 
     if (this.library && !(this.library.type === LibraryType.Manga || this.library.type === LibraryType.LightNovel) ) {
       this.libraryForm.get('allowScrobbling')?.setValue(false);
@@ -431,13 +434,10 @@ export class LibrarySettingsModalComponent implements OnInit {
     this.uploadService.updateLibraryCoverImage(this.library!.id, coverUrl).subscribe();
   }
 
-  updateCoverImageIndex(selectedIndex: number) {
-    if (selectedIndex <= 0) return;
-    this.applyCoverImage(this.imageUrls[selectedIndex]);
-  }
-
-  resetCoverImage() {
-    this.uploadService.updateLibraryCoverImage(this.library!.id, '', false).subscribe();
+  handleCoverChanged(event: { isDirty: boolean; fileName: string }) {
+    if (event.isDirty) {
+      this.applyCoverImage(event.fileName);
+    }
   }
 
   openDirectoryPicker() {

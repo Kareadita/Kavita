@@ -36,6 +36,7 @@ import {RouterLink} from '@angular/router';
 import {EntityTitleComponent} from '../../../cards/entity-title/entity-title.component';
 import {modalSaved} from "../../../_models/modal/modal-result";
 import {WikiLink} from "../../../_models/wiki";
+import {AccountService} from "../../../_services/account.service";
 
 export interface CblIssueRow {
   result: CblBookResult;
@@ -73,6 +74,7 @@ export class ImportCblModalComponent implements OnInit {
   private readonly toastr = inject(ToastrService);
   private readonly utilityService = inject(UtilityService);
   private readonly libraryService = inject(LibraryService);
+  private readonly accountService = inject(AccountService);
   protected readonly imageService = inject(ImageService);
 
   savedFiles = input.required<CblSavedFile[]>();
@@ -82,6 +84,7 @@ export class ImportCblModalComponent implements OnInit {
   currentSummary = signal<CblImportSummary | null>(null);
   isProcessing = signal(false);
   remapRules = signal<RemapRule[]>([]);
+  promoteMap = signal<Record<string, boolean>>({});
 
   /** All rows (matched + issues) for the unified table */
   allRows = signal<CblIssueRow[]>([]);
@@ -111,11 +114,14 @@ export class ImportCblModalComponent implements OnInit {
   matchedCount = computed(() => this.classifiedRows().filter(r => r.category === 'matched').length);
   issueCount = computed(() => this.classifiedRows().filter(r => r.category === 'issue').length);
   unmatchedCount = computed(() => this.classifiedRows().filter(r => r.category === 'unmatched').length);
+  isCurrentFileUpdate = computed(() => this.currentSummary()?.isUpdate ?? false);
 
   /** Lazy typeahead state, only one row can be resolving at a time */
   activeRow = signal<CblIssueRow | null>(null);
   activeSeriesTypeahead = signal<TypeaheadSettings<SearchResult> | null>(null);
   activeChapterTypeahead = signal<TypeaheadSettings<Chapter> | null>(null);
+
+  defaultPromotionState = this.accountService.hasAdminRole;
 
   /** Track the CBL series name of the row being resolved, so we can auto-continue after re-validation */
   private pendingAutoEditSeries: string | null = null;
@@ -335,6 +341,15 @@ export class ImportCblModalComponent implements OnInit {
     this.allRows.set([...this.allRows()]);
   }
 
+  getPromoteForFile(fileName: string): boolean {
+    return this.promoteMap()[fileName] ?? this.defaultPromotionState();
+  }
+
+  togglePromote(fileName: string) {
+    const current = this.promoteMap()[fileName] ?? this.defaultPromotionState();
+    this.promoteMap.update(m => ({ ...m, [fileName]: !current }));
+  }
+
   toggleRowFilter(category: 'matched' | 'issues' | 'unmatched') {
     switch (category) {
       case 'matched': this.showMatched.update(v => !v); break;
@@ -382,8 +397,9 @@ export class ImportCblModalComponent implements OnInit {
         sha: ''
       } : undefined;
 
+      // Need: hashmap of filename -> promotion
       try {
-        await this.cblService.finalizeImport(file.fileName, decisions, file.provider, repoMeta).toPromise();
+        await this.cblService.finalizeImport(file.fileName, decisions, file.provider, this.getPromoteForFile(file.fileName), repoMeta).toPromise();
       } catch {
         this.toastr.error(translate('toasts.failed-to-import', {name: file.name}));
       }
@@ -407,6 +423,11 @@ export class ImportCblModalComponent implements OnInit {
     }));
 
     this.allRows.set(rows);
+
+    const fileName = this.currentFile().fileName;
+    if (this.promoteMap()[fileName] === undefined) {
+      this.promoteMap.update(m => ({ ...m, [fileName]: this.defaultPromotionState() }));
+    }
   }
 
   private async handleSeriesSelection(row: CblIssueRow, seriesId: number) {
@@ -465,6 +486,7 @@ export class ImportCblModalComponent implements OnInit {
       return a.seriesId === b.seriesId;
     };
     settings.dropdownPosition = 'body';
+    settings.overlayMinWidth = 400;
 
     return settings;
   }
@@ -501,6 +523,7 @@ export class ImportCblModalComponent implements OnInit {
       return a.id === b.id;
     };
     settings.dropdownPosition = 'body';
+    settings.overlayMinWidth = 280;
 
     return settings;
   }

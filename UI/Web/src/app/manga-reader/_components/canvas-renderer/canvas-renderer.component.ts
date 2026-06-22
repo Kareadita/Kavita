@@ -50,7 +50,7 @@ export class CanvasRendererComponent implements OnInit, AfterViewInit, ImageRend
   readonly imageHeight = output<number>();
 
 
-  readonly canvas = viewChild<ElementRef>('content');
+  readonly canvas = viewChild<ElementRef<HTMLCanvasElement>>('content');
   private ctx!: CanvasRenderingContext2D;
 
   currentImageSplitPart: SPLIT_PAGE_PART = SPLIT_PAGE_PART.NO_SPLIT;
@@ -135,7 +135,7 @@ export class CanvasRendererComponent implements OnInit, AfterViewInit, ImageRend
   ngAfterViewInit() {
     const canvas = this.canvas();
     if (canvas) {
-      this.ctx = canvas.nativeElement.getContext('2d', { alpha: false });
+      this.ctx = canvas.nativeElement.getContext('2d', { alpha: false })!;
     }
   }
 

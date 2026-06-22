@@ -11,13 +11,14 @@ import {DatePipe} from '@angular/common';
 import {DefaultValuePipe} from '../../_pipes/default-value.pipe';
 import {CblRemapRuleChapterTitlePipe} from '../../_pipes/cbl-remap-rule-chapter-title.pipe';
 import {EditRemapRuleComponent} from './edit-remap-rule/edit-remap-rule.component';
+import {UtcToLocalDatePipe} from "../../_pipes/utc-to-locale-date.pipe";
 
 @Component({
   selector: 'app-manage-remap-rules',
   templateUrl: './manage-remap-rules.component.html',
   styleUrls: ['./manage-remap-rules.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [TranslocoDirective, NgxDatatableModule, ResponsiveTableComponent, DatePipe, DefaultValuePipe, CblRemapRuleChapterTitlePipe, EditRemapRuleComponent]
+  imports: [TranslocoDirective, NgxDatatableModule, ResponsiveTableComponent, DatePipe, DefaultValuePipe, CblRemapRuleChapterTitlePipe, EditRemapRuleComponent, UtcToLocalDatePipe]
 })
 export class ManageRemapRulesComponent implements OnInit {
 

@@ -1,0 +1,603 @@
+<!--Color & Token Palette-->
+<app-accordion [open]="true">
+  <span accTitle>Color &amp; Token Palette</span>
+
+  <h4>Base colors</h4>
+  <div class="swatch-grid">
+    @for (token of ['--primary-color', '--primary-color-dark-shade', '--primary-color-darker-shade', '--primary-color-darkest-shade', '--error-color', '--error-accent-color', '--warning-color', '--success-color', '--body-text-color', '--text-muted-color', '--offwhite-text-color', '--white-text-color']; track token) {
+      <div class="swatch">
+        <div class="swatch-chip" [style.background]="'var(' + token + ')'"></div>
+        <code class="swatch-label">{{token}}</code>
+      </div>
+    }
+  </div>
+
+  <div class="setting-section-break"></div>
+
+  <h4>Elevation layers (solid)</h4>
+  <div class="swatch-grid">
+    @for (token of ['--elevation-layer0-dark-solid', '--elevation-layer1-dark-solid', '--elevation-layer2-dark-solid', '--elevation-layer3-dark-solid', '--elevation-layer4-dark-solid', '--elevation-layer5-dark-solid', '--elevation-layer6-dark-solid', '--elevation-layer7-dark-solid', '--elevation-layer8-dark-solid', '--elevation-layer9-dark-solid']; track token) {
+      <div class="swatch">
+        <div class="swatch-chip" [style.background]="'var(' + token + ')'"></div>
+        <code class="swatch-label">{{token}}</code>
+      </div>
+    }
+  </div>
+
+  <div class="setting-section-break"></div>
+
+  <h4>Surfaces</h4>
+  <div class="swatch-grid">
+    @for (token of ['--bs-body-bg', '--card-bg-color', '--modal-bg-color', '--navbar-bg-color', '--side-nav-bg-color', '--drawer-bg-color', '--popover-body-bg-color', '--dropdown-item-bg-color', '--input-bg-color', '--accent-bg-color']; track token) {
+      <div class="swatch">
+        <div class="swatch-chip" [style.background]="'var(' + token + ')'"></div>
+        <code class="swatch-label">{{token}}</code>
+      </div>
+    }
+  </div>
+</app-accordion>
+
+
+<!--Buttons-->
+<app-accordion>
+  <span accTitle>Buttons</span>
+
+  <h4>Primary classes</h4>
+  <div class="demo-row">
+    <button class="btn btn-primary">
+      <i class="fas fa-exclamation"></i>
+      btn-primary
+    </button>
+
+    <button class="btn btn-secondary">
+      <i class="fas fa-exclamation"></i>
+      btn-secondary
+    </button>
+
+    <button class="btn btn-warning">
+      <i class="fas fa-exclamation"></i>
+      btn-warning
+    </button>
+
+    <button class="btn btn-danger">
+      <i class="fas fa-exclamation"></i>
+      btn-danger
+    </button>
+
+    <button class="btn btn-primary" disabled>
+      <i class="fas fa-exclamation"></i>
+      disabled
+    </button>
+  </div>
+
+  <div class="setting-section-break"></div>
+
+  <h4>Outline classes</h4>
+  <div class="demo-row">
+    <button class="btn btn-outline-primary">
+      <i class="fas fa-exclamation"></i>
+      btn-outline-primary
+    </button>
+
+    <button class="btn btn-outline-secondary">
+      <i class="fas fa-exclamation"></i>
+      btn-outline-secondary
+    </button>
+
+    <button class="btn btn-outline-warning">
+      <i class="fas fa-exclamation"></i>
+      btn-outline-warning
+    </button>
+
+    <button class="btn btn-outline-danger">
+      <i class="fas fa-exclamation"></i>
+      btn-outline-danger
+    </button>
+  </div>
+
+  <div class="setting-section-break"></div>
+
+  <h4>Outline Classes (as Anchors)</h4>
+  <div class="demo-row">
+    <a class="btn btn-outline-primary">
+      <i class="fas fa-exclamation"></i>
+      btn-outline-primary
+    </a>
+
+    <a class="btn btn-outline-secondary">
+      <i class="fas fa-exclamation"></i>
+      btn-outline-secondary
+    </a>
+
+    <a class="btn btn-outline-warning">
+      <i class="fas fa-exclamation"></i>
+      btn-outline-warning
+    </a>
+
+    <a class="btn btn-outline-danger">
+      <i class="fas fa-exclamation"></i>
+      btn-outline-danger
+    </a>
+  </div>
+
+  <div class="setting-section-break"></div>
+
+  <h4>Text classes</h4>
+  <div class="demo-row">
+    <button class="btn btn-primary-text">
+      <i class="fas fa-exclamation"></i>
+      btn-primary-text
+    </button>
+
+    <button class="btn btn-secondary-text">
+      <i class="fas fa-exclamation"></i>
+      btn-secondary-text
+    </button>
+
+    <button class="btn btn-warning-text">
+      <i class="fas fa-exclamation"></i>
+      btn-warning-text
+    </button>
+
+    <button class="btn btn-danger-text">
+      <i class="fas fa-exclamation"></i>
+      btn-danger-text
+    </button>
+  </div>
+
+  <div class="setting-section-break"></div>
+
+  <h4>Icon &amp; action classes</h4>
+  <div class="demo-row">
+    <button class="btn btn-icon">
+      <i class="fas fa-ellipsis-v"></i>
+    </button>
+
+    <button class="btn btn-actions">
+      <i class="fas fa-cog"></i>
+    </button>
+
+    <button class="btn btn-link">btn-link</button>
+  </div>
+</app-accordion>
+
+
+<!--Badges-->
+<app-accordion>
+  <span accTitle>Badges</span>
+
+  <h4>Bootstrap badges</h4>
+  <div class="demo-row">
+    <span class="badge bg-primary">primary</span>
+    <span class="badge bg-secondary">secondary</span>
+    <span class="badge bg-success">success</span>
+    <span class="badge bg-danger">danger</span>
+    <span class="badge bg-warning">warning</span>
+    <span class="badge bg-info">info</span>
+    <span class="badge rounded-pill bg-primary">pill</span>
+  </div>
+
+  <div class="setting-section-break"></div>
+
+  <h4>Tag badge (outline)</h4>
+  <div class="demo-row">
+    <app-tag-badge>default</app-tag-badge>
+    <app-tag-badge [color]="'primary'">primary</app-tag-badge>
+    <app-tag-badge [color]="'secondary'">secondary</app-tag-badge>
+    <app-tag-badge [color]="'error'">error</app-tag-badge>
+    <app-tag-badge [size]="'sm'">small</app-tag-badge>
+    <app-tag-badge [shape]="'pill'">pill</app-tag-badge>
+  </div>
+
+  <div class="setting-section-break"></div>
+
+  <h4>Tag badge (filled)</h4>
+  <div class="demo-row">
+    <app-tag-badge [fillStyle]="'filled'">default</app-tag-badge>
+    <app-tag-badge [fillStyle]="'filled'" [color]="'primary'">primary</app-tag-badge>
+    <app-tag-badge [fillStyle]="'filled'" [color]="'secondary'">secondary</app-tag-badge>
+    <app-tag-badge [fillStyle]="'filled'" [color]="'error'">error</app-tag-badge>
+    <app-tag-badge [fillStyle]="'filled'" [shape]="'pill'">pill</app-tag-badge>
+    <app-tag-badge [fillStyle]="'filled'" [selectionMode]="TagBadgeCursor.Clickable" [color]="'primary'">clickable</app-tag-badge>
+  </div>
+
+  <div class="setting-section-break"></div>
+
+  <h4>Confidence chip</h4>
+  <div class="demo-row">
+    <app-confidence-chip [pct]="95"></app-confidence-chip>
+    <app-confidence-chip [pct]="80"></app-confidence-chip>
+    <app-confidence-chip [pct]="60"></app-confidence-chip>
+    <app-confidence-chip [pct]="40"></app-confidence-chip>
+  </div>
+
+  <div class="setting-section-break"></div>
+
+  <h4>Media format pill</h4>
+  <div class="demo-row">
+    <app-media-format-pill [format]="PlusMediaFormat.Manga"></app-media-format-pill>
+    <app-media-format-pill [format]="PlusMediaFormat.LightNovel"></app-media-format-pill>
+    <app-media-format-pill [format]="PlusMediaFormat.Comic"></app-media-format-pill>
+    <app-media-format-pill [format]="PlusMediaFormat.Book"></app-media-format-pill>
+  </div>
+
+  <div class="setting-section-break"></div>
+
+  <h4>Scrobble provider tag badge</h4>
+  <div class="demo-row">
+    <app-scrobble-provider-tag-badge [provider]="ScrobbleProvider.AniList"></app-scrobble-provider-tag-badge>
+    <app-scrobble-provider-tag-badge [provider]="ScrobbleProvider.Mal"></app-scrobble-provider-tag-badge>
+    <app-scrobble-provider-tag-badge [provider]="ScrobbleProvider.Cbr"></app-scrobble-provider-tag-badge>
+    <app-scrobble-provider-tag-badge [provider]="ScrobbleProvider.Hardcover"></app-scrobble-provider-tag-badge>
+    <app-scrobble-provider-tag-badge [provider]="ScrobbleProvider.MangaBaka" [id]="12345"></app-scrobble-provider-tag-badge>
+  </div>
+</app-accordion>
+
+
+<!--Alerts-->
+<app-accordion>
+  <span accTitle>Alerts</span>
+  <div class="alert alert-primary" role="alert">
+    A simple primary alert—check it out!
+  </div>
+  <div class="alert alert-secondary" role="alert">
+    A simple secondary alert—check it out!
+  </div>
+  <div class="alert alert-success" role="alert">
+    A simple success alert—check it out!
+  </div>
+  <div class="alert alert-danger" role="alert">
+    A simple danger alert—check it out!
+  </div>
+  <div class="alert alert-warning" role="alert">
+    A simple warning alert—check it out!
+  </div>
+  <div class="alert alert-info" role="alert">
+    A simple info alert—check it out!
+  </div>
+  <div class="alert alert-light" role="alert">
+    A simple light alert—check it out!
+  </div>
+  <div class="alert alert-dark" role="alert">
+    A simple dark alert—check it out!
+  </div>
+</app-accordion>
+
+
+<!--Toasts-->
+<app-accordion>
+  <span accTitle>Toasts</span>
+
+  <div class="toast show" role="alert" aria-live="assertive" aria-atomic="true">
+    <div class="toast-header">
+      <strong class="me-auto">Kavita</strong>
+      <small>just now</small>
+      <button type="button" class="btn-close" aria-label="Close"></button>
+    </div>
+    <div class="toast-body">
+      A static toast body, shown so toast tokens render without a JS trigger.
+    </div>
+  </div>
+</app-accordion>
+
+
+<!--Tabs-->
+<app-accordion>
+  <span accTitle>Tabs</span>
+
+  <ul class="nav nav-tabs">
+    <li class="nav-item">
+      <a class="nav-link active" href="javascript:void(0);">Active</a>
+    </li>
+    <li class="nav-item">
+      <a class="nav-link" href="javascript:void(0);">Inactive</a>
+    </li>
+    <li class="nav-item">
+      <a class="nav-link" href="javascript:void(0);">Another</a>
+    </li>
+    <li class="nav-item">
+      <a class="nav-link disabled" aria-disabled="true">Disabled</a>
+    </li>
+  </ul>
+</app-accordion>
+
+
+<!--Form Controls-->
+<app-accordion>
+  <span accTitle>Form Controls</span>
+
+  <div class="demo-stack">
+    <div>
+      <label class="form-label" for="demo-text">Text input</label>
+      <input type="text" class="form-control" id="demo-text" placeholder="Placeholder text">
+      <div class="form-text">Helper text below the input.</div>
+    </div>
+
+    <div>
+      <label class="form-label" for="demo-textarea">Textarea</label>
+      <textarea class="form-control" id="demo-textarea" rows="3" placeholder="Multi-line text"></textarea>
+    </div>
+
+    <div>
+      <label class="form-label" for="demo-select">Native select</label>
+      <select class="form-select" id="demo-select">
+        <option>Option 1</option>
+        <option>Option 2</option>
+        <option>Option 3</option>
+      </select>
+    </div>
+
+    <div>
+      <label class="form-label" for="demo-disabled">Disabled</label>
+      <input type="text" class="form-control" id="demo-disabled" value="Disabled value" disabled>
+    </div>
+
+    <div>
+      <label class="form-label" for="demo-readonly">Readonly</label>
+      <input type="text" class="form-control" id="demo-readonly" value="Readonly value" readonly>
+    </div>
+  </div>
+</app-accordion>
+
+
+<!--Setting Input Fields-->
+<app-accordion>
+  <span accTitle>Setting Input Fields</span>
+
+  <h4>app-setting-item</h4>
+  <app-setting-item [title]="'Setting item'" [subtitle]="'Click the row or Edit to toggle into edit mode.'" labelId="demo-setting-item">
+    <ng-template #view>
+      Current value
+    </ng-template>
+    <ng-template #edit>
+      <input type="text" class="form-control" id="demo-setting-item" value="Current value">
+    </ng-template>
+  </app-setting-item>
+
+  <div class="setting-section-break"></div>
+
+  <h4>app-setting-switch</h4>
+  <app-setting-switch [title]="'Setting switch'" [subtitle]="'A labelled toggle row.'">
+    <ng-template #switch>
+      <div class="form-check form-switch">
+        <input type="checkbox" role="switch" id="demo-setting-switch" class="form-check-input" checked>
+      </div>
+    </ng-template>
+  </app-setting-switch>
+
+  <div class="setting-section-break"></div>
+
+  <h4>app-setting-multi-check-box</h4>
+  <app-setting-multi-check-box id="demo-multi-check" [title]="'Setting multi check-box'"
+                               [tooltip]="'Select any number of options.'" [options]="settingCheckboxOptions">
+  </app-setting-multi-check-box>
+
+  <div class="setting-section-break"></div>
+
+  <h4>app-setting-multi-text-field</h4>
+  <app-setting-multi-text-field [title]="'Setting multi text-field'"
+                                [tooltip]="'Comma-separated values become tag badges.'" id="demo-multi-text">
+  </app-setting-multi-text-field>
+</app-accordion>
+
+
+<!--Checkbox / Radio / Switch / Slider-->
+<app-accordion>
+  <span accTitle>Checkbox / Radio / Switch</span>
+
+  <h4>Checkboxes</h4>
+  <div class="form-check">
+    <input class="form-check-input" type="checkbox" id="demo-check-1" checked>
+    <label class="form-check-label" for="demo-check-1">Checked</label>
+  </div>
+  <div class="form-check">
+    <input class="form-check-input" type="checkbox" id="demo-check-2">
+    <label class="form-check-label" for="demo-check-2">Unchecked</label>
+  </div>
+  <div class="form-check">
+    <input class="form-check-input" type="checkbox" id="demo-check-3" disabled>
+    <label class="form-check-label" for="demo-check-3">Disabled</label>
+  </div>
+
+  <div class="setting-section-break"></div>
+
+  <h4>Radios</h4>
+  <div class="form-check">
+    <input class="form-check-input" type="radio" name="demo-radio" id="demo-radio-1" checked>
+    <label class="form-check-label" for="demo-radio-1">Selected</label>
+  </div>
+  <div class="form-check">
+    <input class="form-check-input" type="radio" name="demo-radio" id="demo-radio-2">
+    <label class="form-check-label" for="demo-radio-2">Unselected</label>
+  </div>
+
+  <div class="setting-section-break"></div>
+
+  <h4>Switch</h4>
+  <div class="form-check form-switch">
+    <input class="form-check-input" type="checkbox" role="switch" id="demo-switch-1" checked>
+    <label class="form-check-label" for="demo-switch-1">On</label>
+  </div>
+  <div class="form-check form-switch">
+    <input class="form-check-input" type="checkbox" role="switch" id="demo-switch-2">
+    <label class="form-check-label" for="demo-switch-2">Off</label>
+  </div>
+
+  <div class="setting-section-break"></div>
+
+  <h4>Range slider</h4>
+  <input type="range" class="form-range" min="0" max="100" value="50">
+</app-accordion>
+
+
+<!--Links (Anchors)-->
+<app-accordion>
+  <span accTitle>Links (Anchors)</span>
+
+  <p>
+    An inline <a href="javascript:void(0);">anchor link</a> within a paragraph of body text to
+    show the default link color and hover treatment.
+  </p>
+</app-accordion>
+
+
+<!--Dropdown + Select2-->
+<app-accordion>
+  <span accTitle>Dropdown &amp; Select2</span>
+
+  <h4>Bootstrap dropdown (static)</h4>
+  <div class="dropdown-menu show position-static d-inline-block">
+    <button class="dropdown-item active" type="button">Active item</button>
+    <button class="dropdown-item" type="button">Regular item</button>
+    <button class="dropdown-item" type="button">Another item</button>
+    <div class="dropdown-divider"></div>
+    <button class="dropdown-item" type="button" disabled>Disabled item</button>
+  </div>
+
+  <div class="setting-section-break"></div>
+
+  <h4>Select2 (single)</h4>
+  <select2 [data]="select2Demo" [overlay]="true" aria-label="Demo single select"></select2>
+
+  <div class="setting-section-break"></div>
+
+  <h4>Select2 (multiple)</h4>
+  <select2 [data]="select2Demo" [multiple]="true" [overlay]="true" aria-label="Demo multi select"></select2>
+</app-accordion>
+
+
+<!--Cards-->
+<app-accordion>
+  <span accTitle>Cards</span>
+
+  <div class="card" style="max-width: 22rem;">
+    <div class="card-body">
+      <h5 class="card-title">Card title</h5>
+      <h6 class="card-subtitle mb-2">Card subtitle</h6>
+      <p class="card-text">Some quick example body text to build on the card and fill out its content.</p>
+      <button class="btn btn-primary">Action</button>
+    </div>
+    <div class="card-footer">
+      Card footer
+    </div>
+  </div>
+</app-accordion>
+
+
+<!--Lists-->
+<app-accordion>
+  <span accTitle>Lists</span>
+
+  <ul class="list-group">
+    <li class="list-group-item active">Active item</li>
+    <li class="list-group-item">A second item</li>
+    <li class="list-group-item">A third item</li>
+    <li class="list-group-item disabled">A disabled item</li>
+  </ul>
+</app-accordion>
+
+
+<!--Table-->
+<app-accordion>
+  <span accTitle>Table</span>
+
+  <table class="table table-striped">
+    <thead>
+      <tr>
+        <th scope="col">#</th>
+        <th scope="col">Name</th>
+        <th scope="col">Format</th>
+        <th scope="col">Status</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>1</td>
+        <td>Series One</td>
+        <td>Manga</td>
+        <td>Ongoing</td>
+      </tr>
+      <tr>
+        <td>2</td>
+        <td>Series Two</td>
+        <td>Comic</td>
+        <td>Completed</td>
+      </tr>
+      <tr>
+        <td>3</td>
+        <td>Series Three</td>
+        <td>Light Novel</td>
+        <td>Hiatus</td>
+      </tr>
+    </tbody>
+  </table>
+</app-accordion>
+
+
+<!--Pagination-->
+<app-accordion>
+  <span accTitle>Pagination</span>
+
+  <nav aria-label="Demo pagination">
+    <ul class="pagination">
+      <li class="page-item disabled"><a class="page-link" href="javascript:void(0);">Previous</a></li>
+      <li class="page-item active"><a class="page-link" href="javascript:void(0);">1</a></li>
+      <li class="page-item"><a class="page-link" href="javascript:void(0);">2</a></li>
+      <li class="page-item"><a class="page-link" href="javascript:void(0);">3</a></li>
+      <li class="page-item"><a class="page-link" href="javascript:void(0);">Next</a></li>
+    </ul>
+  </nav>
+</app-accordion>
+
+
+<!--Progress-->
+<app-accordion>
+  <span accTitle>Progress</span>
+
+  <div class="progress" role="progressbar" aria-label="Demo progress" aria-valuenow="35" aria-valuemin="0" aria-valuemax="100">
+    <div class="progress-bar" style="width: 35%">35%</div>
+  </div>
+
+  <div class="setting-section-break"></div>
+
+  <div class="progress" role="progressbar" aria-label="Demo striped progress" aria-valuenow="65" aria-valuemin="0" aria-valuemax="100">
+    <div class="progress-bar progress-bar-striped progress-bar-animated" style="width: 65%"></div>
+  </div>
+</app-accordion>
+
+
+<!--Breadcrumb-->
+<app-accordion>
+  <span accTitle>Breadcrumb</span>
+
+  <nav aria-label="breadcrumb">
+    <ol class="breadcrumb">
+      <li class="breadcrumb-item"><a href="javascript:void(0);">Home</a></li>
+      <li class="breadcrumb-item"><a href="javascript:void(0);">Library</a></li>
+      <li class="breadcrumb-item active" aria-current="page">Series</li>
+    </ol>
+  </nav>
+</app-accordion>
+
+
+<!--Dividers-->
+<app-accordion>
+  <span accTitle>Dividers</span>
+
+  <div class="setting-section-break"></div>
+  <hr />
+</app-accordion>
+
+<!--Confirm Popups-->
+<app-accordion>
+  <span accTitle>Confirm Popups</span>
+
+  <p>Each dialog type drives its own accent color and header icon. The danger example shows the destructive button variant.</p>
+  <div class="demo-row">
+    <button class="btn btn-primary" (click)="confirm()">Confirm</button>
+    <button class="btn btn-danger" (click)="alert()">Alert</button>
+    <button class="btn btn-primary" (click)="info()">Info</button>
+    <button class="btn btn-primary" (click)="prompt()">Prompt</button>
+    <button class="btn btn-danger" (click)="dangerConfirm()">Danger Confirm</button>
+  </div>
+</app-accordion>

@@ -13,10 +13,12 @@ using Kavita.API.Services.SignalR;
 using Kavita.Common;
 using Kavita.Common.Extensions;
 using Kavita.Common.Helpers;
+using Kavita.Models.DTOs.KavitaPlus.Audit;
 using Kavita.Models.DTOs.KavitaPlus.ExternalMetadata;
 using Kavita.Models.DTOs.SignalR;
 using Kavita.Models.Entities;
 using Kavita.Models.Entities.Enums;
+using Kavita.Models.Entities.Enums.Audit;
 using Kavita.Models.Entities.User;
 using Kavita.Models.Extensions;
 using Microsoft.Extensions.Logging;
@@ -38,7 +40,8 @@ public class SmartCollectionSyncService(
     IUnitOfWork unitOfWork,
     ILogger<SmartCollectionSyncService> logger,
     IEventHub eventHub,
-    ILicenseService licenseService)
+    ILicenseService licenseService,
+    IKavitaPlusAuditService auditService)
     : ISmartCollectionSyncService
 {
     private const int SyncDelta = -2;
@@ -105,8 +108,17 @@ public class SmartCollectionSyncService(
     {
         if (!RateLimiter.TryAcquire(string.Empty))
         {
-            // Request not allowed due to rate limit
             logger.LogDebug("Rate Limit hit for Smart Collection Sync");
+            await auditService.LogAsync(
+                KavitaPlusAuditCategory.Sync,
+                KavitaPlusEventType.SyncFailed,
+                AuditStatus.Failure,
+                AuditSubjectType.Collection,
+                subjectId: collection.Id,
+                payload: new AuditLogCollectionFailedParamsDto { CollectionName = collection.Title },
+                error: "rate-limit-hit",
+                userId: collection.AppUserId,
+                ct: ct);
             throw new RateLimitException();
         }
 
@@ -114,8 +126,28 @@ public class SmartCollectionSyncService(
         if (info == null)
         {
             logger.LogInformation("Unable to find collection through Kavita+");
+            await auditService.LogAsync(
+                KavitaPlusAuditCategory.Sync,
+                KavitaPlusEventType.SyncFailed,
+                AuditStatus.Failure,
+                AuditSubjectType.Collection,
+                subjectId: collection.Id,
+                payload: new AuditLogCollectionFailedParamsDto { CollectionName = collection.Title },
+                error: "api-unavailable",
+                userId: collection.AppUserId,
+                ct: ct);
             return;
         }
+
+        await auditService.LogAsync(
+            KavitaPlusAuditCategory.Sync,
+            KavitaPlusEventType.SyncStarted,
+            AuditStatus.Info,
+            AuditSubjectType.Collection,
+            subjectId: collection.Id,
+            payload: new AuditLogCollectionStartedParamsDto { CollectionName = info.Title, StackId = collection.SourceUrl, TotalItems = info.TotalItems },
+            userId: collection.AppUserId,
+            ct: ct);
 
         // Check each series in the collection against what's in the target
         // For everything that's not there, link it up for this user.
@@ -168,7 +200,8 @@ public class SmartCollectionSyncService(
                 {
                     // Add the new series to the collection
                     collection.Items.Add(newSeries);
-
+                    await auditService.LogCollectionAsync(KavitaPlusEventType.CollectionItemAdded, collection.Id,
+                        new AuditLogCollectionItemParamsDto { CollectionName = collection.Title, SeriesName = newSeries.Name, SeriesId = newSeries.Id, Url = collection.SourceUrl }, userId: collection.AppUserId, ct: ct);
                 }
                 else
                 {
@@ -214,10 +247,23 @@ public class SmartCollectionSyncService(
 
             logger.LogInformation("Finished Syncing Collection {CollectionName} - Missing {MissingCount} series",
                 collection.Title, missingCount);
+            await auditService.LogCollectionAsync(KavitaPlusEventType.CollectionSynced, collection.Id,
+                new AuditLogCollectionSyncedParamsDto { CollectionName = collection.Title, StackId = collection.SourceUrl,
+                    ItemCount = collection.TotalSourceCount, MissingCount = missingCount, Url = collection.SourceUrl }, userId: collection.AppUserId, ct: ct);
         }
         catch (Exception ex)
         {
             logger.LogError(ex, "There was an error during saving the collection");
+            await auditService.LogAsync(
+                KavitaPlusAuditCategory.Sync,
+                KavitaPlusEventType.SyncFailed,
+                AuditStatus.Failure,
+                AuditSubjectType.Collection,
+                subjectId: collection.Id,
+                payload: new AuditLogCollectionFailedParamsDto { CollectionName = collection.Title },
+                error: ex.Message,
+                userId: collection.AppUserId,
+                ct: ct);
         }
     }
 

@@ -1,5 +1,4 @@
-// TODO: Figure this out, it causes a lot of style conflicts
-a:not(.dark-exempt) {
+a:not(.dark-exempt):not(.btn) {
     color: var(--primary-color);
     > i {
       color: var(--primary-color);
@@ -7,7 +6,6 @@ a:not(.dark-exempt) {
   }
 
   a.btn {
-    color: inherit;
     text-decoration: none;
 
     &:hover {
@@ -25,10 +23,6 @@ a.read-more-link {
       text-decoration: none;
     }
 }
-
-//td > a:not(.dark-exempt) {
-//  color: var(--primary-color-darker-shade);
-//}
 
 a {
   text-decoration: none;

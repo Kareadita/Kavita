@@ -14,7 +14,6 @@ using Kavita.Database.Extensions.Filters;
 using Kavita.Models.DTOs.Filtering.v2;
 using Kavita.Models.DTOs.Filtering.v2.FilterFields;
 using Kavita.Models.DTOs.Filtering.v2.Requests;
-using Kavita.Models.DTOs.Metadata.Browse;
 using Kavita.Models.DTOs.Person;
 using Kavita.Models.DTOs.ReadingLists;
 using Kavita.Models.Entities;
@@ -255,7 +254,7 @@ public class ReadingListRepository(DataContext context, IMapper mapper) : IReadi
             .Where(l => l.AppUserId == userId || (includePromoted &&  l.Promoted ))
             .RestrictAgainstAgeRestriction(user.GetAgeRestriction());
 
-        query = sortByLastModified ? query.OrderByDescending(l => l.LastModified) : query.OrderBy(l => l.Title.ToUpper());
+        query = sortByLastModified ? query.OrderByDescending(l => l.LastModified) : query.OrderBy(l => l.Title.ToLower());
 
        var finalQuery = query.ProjectTo<ReadingListDto>(mapper.ConfigurationProvider)
             .AsNoTracking();
@@ -547,6 +546,24 @@ public class ReadingListRepository(DataContext context, IMapper mapper) : IReadi
         return await PagedList<ReadingListDto>.CreateAsync(query, userParams.PageNumber, userParams.PageSize, ct);
     }
 
+    /// <summary>
+    /// Attempts to match the SourcePath.EndsWith(sourcePathStem) to do the matching
+    /// </summary>
+    /// <param name="sourcePathStem"></param>
+    /// <param name="userId"></param>
+    /// <returns></returns>
+    public async Task<ReadingList?> GetReadingListBySourcePathStemAsync(string sourcePathStem, int userId,
+        ReadingListIncludes includes = ReadingListIncludes.Items, CancellationToken ct = default)
+    {
+        if (string.IsNullOrEmpty(sourcePathStem)) return null;
+
+        return await context.ReadingList
+            .Includes(includes)
+            .FirstOrDefaultAsync(x => x.SourcePath != null &&
+                                      x.SourcePath.EndsWith(sourcePathStem) &&
+                                      x.AppUserId == userId, ct);
+    }
+
     private IQueryable<ReadingListDto> CreateFilteredReadingListQueryable(int userId, ReadingListFilterDto filter,
         AgeRestriction ageRating, CancellationToken ct = default)
     {
@@ -560,7 +577,6 @@ public class ReadingListRepository(DataContext context, IMapper mapper) : IReadi
 
         // Apply restrictions
         query = query.RestrictAgainstAgeRestriction(ageRating);
-
 
 
         // Apply sorting and limiting
@@ -583,6 +599,8 @@ public class ReadingListRepository(DataContext context, IMapper mapper) : IReadi
             ReadingListFilterField.Tags => query.HasTags(true, statement.Comparison, (IList<int>) value),
             ReadingListFilterField.Writer => query.HasPeople(true, statement.Comparison, (IList<int>) value, PersonRole.Writer),
             ReadingListFilterField.Artist => query.HasPeople(true, statement.Comparison, (IList<int>) value, PersonRole.CoverArtist),
+            ReadingListFilterField.Provider => query.HasProvider(true, statement.Comparison, (ReadingListProvider) value),
+            ReadingListFilterField.MissingItemCount => query.HasMissingCount(true, statement.Comparison, (int) value),
             _ => throw new ArgumentOutOfRangeException(nameof(statement.Field), $"Unexpected value for field: {statement.Field}")
         };
     }

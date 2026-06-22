@@ -3,10 +3,13 @@ using System.Threading;
 using System.Threading.Tasks;
 using Kavita.Common;
 using Kavita.Models.DTOs.Collection;
+using Kavita.Models.DTOs.KavitaPlus.ExternalMetadata;
+using Kavita.Models.DTOs.KavitaPlus.ExternalMetadata.Covers;
 using Kavita.Models.DTOs.KavitaPlus.Metadata;
 using Kavita.Models.DTOs.Metadata.Matching;
 using Kavita.Models.DTOs.SeriesDetail;
 using Kavita.Models.Entities.Enums;
+using Kavita.Models.Entities.Enums.Audit;
 
 namespace Kavita.API.Services.Plus;
 
@@ -30,9 +33,11 @@ public interface IExternalMetadataService
     /// </summary>
     /// <param name="seriesId"></param>
     /// <param name="libraryType"></param>
+    /// <param name="trigger"></param>
     /// <param name="ct"></param>
     /// <returns></returns>
-    Task<SeriesDetailPlusDto?> GetSeriesDetailPlus(int seriesId, LibraryType libraryType, CancellationToken ct = default);
+    Task<SeriesDetailPlusDto?> GetSeriesDetailPlus(int seriesId, LibraryType libraryType,
+        MetadataFetchTrigger trigger = MetadataFetchTrigger.OnDemand, CancellationToken ct = default);
     /// <summary>
     /// This is a task that runs on a schedule and slowly fetches data from Kavita+ to keep
     /// data in the DB non-stale and fetched.
@@ -49,7 +54,8 @@ public interface IExternalMetadataService
     /// <param name="libraryType"></param>
     /// <param name="ct"></param>
     /// <returns>If the fetch was made</returns>
-    Task<bool> FetchSeriesMetadata(int seriesId, LibraryType libraryType, CancellationToken ct = default);
+    Task<bool> FetchSeriesMetadata(int seriesId, LibraryType libraryType,
+        MetadataFetchTrigger trigger = MetadataFetchTrigger.SeriesAdded, CancellationToken ct = default);
 
     Task<IList<MalStackDto>> GetStacksForUser(int userId, CancellationToken ct = default);
 
@@ -68,11 +74,9 @@ public interface IExternalMetadataService
     /// This will override any sort of matching that was done prior and force it to be what the user Selected
     /// </summary>
     /// <param name="seriesId"></param>
-    /// <param name="aniListId"></param>
-    /// <param name="malId"></param>
-    /// <param name="cbrId"></param>
+    /// <param name="ids"></param>
     /// <param name="ct"></param>
-    Task FixSeriesMatch(int seriesId, int? aniListId, long? malId, int? cbrId, CancellationToken ct = default);
+    Task FixSeriesMatch(int seriesId, ExternalMetadataIdsDto ids, CancellationToken ct = default);
 
     /// <summary>
     /// Sets a series to Don't Match and removes all previously cached
@@ -89,5 +93,17 @@ public interface IExternalMetadataService
     /// <param name="seriesId"></param>
     /// <param name="ct"></param>
     /// <returns></returns>
-    Task<bool> WriteExternalMetadataToSeries(ExternalSeriesDetailDto externalMetadata, int seriesId, CancellationToken ct = default);
+    Task<bool> WriteExternalMetadataToSeries(ExternalSeriesDetailDto externalMetadata, int seriesId,
+        MetadataFetchTrigger trigger = MetadataFetchTrigger.OnDemand, CancellationToken ct = default);
+
+    /// <summary>
+    /// Get cover images for a Series/Volume/Chapter
+    /// </summary>
+    /// <param name="seriesId"></param>
+    /// <param name="volumeId">If set, will get a volume</param>
+    /// <param name="chapterId">If set, will filter to chapters (overrides volume)</param>
+    /// <param name="ct"></param>
+    /// <returns></returns>
+    Task<IList<ExternalCoverResponseDto>> GetExternalCovers(int seriesId, int? volumeId = null,
+        int? chapterId = null, CancellationToken ct = default);
 }

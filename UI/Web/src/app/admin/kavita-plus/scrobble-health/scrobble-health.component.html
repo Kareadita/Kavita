@@ -1,0 +1,46 @@
+<ng-container *transloco="let t; prefix:'scrobble-health'">
+  <div class="provider-health-card">
+    <div class="d-flex align-items-center justify-content-between mb-3">
+      <h3 class="kv-section-header">{{t('title-label')}}</h3>
+      <div class="d-flex align-items-center gap-2">
+        @if (lastChecked()) {
+          <span class="live-indicator">
+            <span class="live-dot"></span>
+            {{t('live-label')}}
+            <span class="mx-1 dot-separator"></span>
+            {{t('checked-ago-label', {time: minutesAgo() + 'm'})}}
+          </span>
+        }
+        <button class="btn btn-sm btn-link p-0" (click)="load(true)" [disabled]="loading()" [attr.aria-label]="t('refresh-alt')">
+          <i class="fa-solid fa-rotate-right" [class.fa-spin]="loading()"></i>
+        </button>
+      </div>
+    </div>
+
+    @if (snapshots().length === 0 && !loading()) {
+      <p class="text-muted mb-0">{{t('no-data-label')}}</p>
+    }
+
+    @for (snap of snapshots(); track snap.provider) {
+      <div class="provider-row d-flex align-items-center justify-content-between py-2">
+        <div class="d-flex align-items-center gap-3">
+          <app-scrobble-provider-image [provider]="snap.provider" [size]="40" />
+          <div>
+            <div class="provider-name fw-semibold">{{snap.provider | scrobbleProviderName}}</div>
+            @let subtitle = snap.provider | scrobbleProviderMediaTitle;
+            @if (subtitle) {
+              <div class="provider-subtitle phone-hidden text-muted small">{{subtitle}}</div>
+            }
+          </div>
+        </div>
+        <div class="d-flex align-items-center gap-3">
+          <span class="latency text-muted">{{formatLatency(snap.avgLatencyMs)}}</span>
+          <span class="status-badge" [class]="'status-' + snap.status">
+            <span class="status-dot"></span>
+            {{snap.status | kavitaPlusProviderHealthStatus}}
+          </span>
+        </div>
+      </div>
+    }
+  </div>
+</ng-container>

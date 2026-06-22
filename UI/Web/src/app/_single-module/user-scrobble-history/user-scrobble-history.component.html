@@ -1,17 +1,4 @@
 <ng-container *transloco="let t; prefix:'user-scrobble-history'">
-
-  <div class="position-relative">
-    <button class="btn btn-outline-primary position-absolute custom-position" [disabled]="hasRunScrobbleGen()" (click)="generateScrobbleEvents()" [title]="t('generate-scrobble-events')">
-      <i class="fa fa-plus" aria-hidden="true"></i><span class="phone-hidden ms-1">{{t('generate-scrobble-events')}}</span>
-    </button>
-  </div>
-
-  @if (tokenExpired()) {
-    <p class="alert alert-warning">{{t('token-expired')}}</p>
-  } @else if (!accountService.currentUser()!.preferences.aniListScrobblingEnabled) {
-    <p class="alert alert-warning">{{t('scrobbling-disabled')}}</p>
-  }
-
   <p>{{t('description')}}</p>
   <p class="fw-bold">{{t('not-read-warning')}}</p>
   <div class="row g-0 mb-2">
@@ -59,6 +46,15 @@
           <ng-template let-event="row" let-rowIndex="rowIndex" ngx-datatable-cell-template>
             <input id="select-event-{{rowIndex}}" type="checkbox" class="form-check-input"
                    [checked]="selections().isSelected(event)" (change)="handleSelection(event, rowIndex)">
+          </ng-template>
+        </ngx-datatable-column>
+
+        <ngx-datatable-column prop="scrobbleProvider" [sortable]="true" [draggable]="false" [resizeable]="false">
+          <ng-template let-column="column" ngx-datatable-header-template>
+            {{t('provider-header')}}
+          </ng-template>
+          <ng-template let-value="value" ngx-datatable-cell-template>
+            <app-scrobble-provider-image [provider]="value" [size]="16" [tooltip]="true" />
           </ng-template>
         </ngx-datatable-column>
 
@@ -115,6 +111,9 @@
               }
               @case (ScrobbleEventType.ScoreUpdated) {
                 {{t('rating', {r: item.rating})}}
+              }
+              @case (ScrobbleEventType.ReadStatusUpdate) {
+                {{t('read-status-update', {status: item.readStatus | scrobbleReadStatus})}}
               }
               @default {
                 {{t('not-applicable')}}

@@ -4,6 +4,7 @@ using Kavita.Models.DTOs.Scrobbling;
 using Kavita.Models.DTOs.SeriesDetail;
 
 namespace Kavita.Models.DTOs.KavitaPlus.ExternalMetadata;
+#nullable enable
 
 public sealed record SeriesDetailPlusApiDto
 {
@@ -13,5 +14,7 @@ public sealed record SeriesDetailPlusApiDto
     public ExternalSeriesDetailDto? Series { get; set; }
     public int? AniListId { get; set; }
     public long? MalId { get; set; }
+    public int? MangabakaId { get; set; }
+    public int? HardCoverId { get; set; }
     public int? CbrId { get; set; }
 }

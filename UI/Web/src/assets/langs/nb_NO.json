@@ -132,8 +132,7 @@
         "series-count": "{{common.series-count}}"
     },
     "all-filters": {
-        "count": "{{count}} {{customize-dashboard-modal.title-smart-filters}}",
-        "create": "{{common.create}}"
+        "count": "{{count}} {{customize-dashboard-modal.title-smart-filters}}"
     },
     "invite-user": {
         "close": "{{common.close}}",

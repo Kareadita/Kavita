@@ -29,6 +29,9 @@ import {MatchStateOption} from "../../_models/kavitaplus/match-state-option";
 import {KeyBindService} from "../../_services/key-bind.service";
 import {KeyBindTarget} from "../../_models/preferences/preferences";
 import {BreakpointService} from "../../_services/breakpoint.service";
+import {KavitaPlusAuditService} from "../../_services/kavitaplus-audit.service";
+import {KavitaPlusAuditCategory} from "../../_models/kavitaplus/kavita-plus-audit-category.enum";
+import {AuditStatus} from "../../_models/kavitaplus/audit-status.enum";
 
 export enum SettingsTabId {
 
@@ -54,11 +57,13 @@ export enum SettingsTabId {
   MappingsImport = 'admin-mappings-import',
   MatchedMetadata = 'admin-matched-metadata',
   ManageUserTokens = 'admin-manage-tokens',
+  ManageKavitaPlusActivity = 'admin-manage-kavitaplus-activity',
   Metadata = 'admin-metadata',
 
   // Non-Admin
   Account = 'account',
   Preferences = 'preferences',
+  ScrobbleSettings = 'scrobble-settings',
   CustomKeyBinds = 'custom-key-binds',
   ReadingProfiles = 'reading-profiles',
   Font = 'font',
@@ -67,6 +72,7 @@ export enum SettingsTabId {
   Devices = 'devices',
   Scrobbling = 'scrobbling',
   ScrobblingHolds = 'scrobble-holds',
+  MyActivity = 'my-activity',
   Customize = 'customize',
   CBLImport = 'cbl-import',
   RemapRules = 'remap-rules',
@@ -145,8 +151,9 @@ export class PreferenceNavComponent implements AfterViewInit {
   private readonly document = inject(DOCUMENT);
   private readonly keyBindService = inject(KeyBindService);
   protected readonly breakpointService = inject(BreakpointService);
+  protected readonly kavitaplusAuditService = inject(KavitaPlusAuditService);
 
-  readonly hasValidLicense$ = toObservable(this.licenseService.hasValidLicense);
+  readonly hasValidLicense$ = toObservable(this.licenseService.hasActiveLicense);
 
   private readonly navEnd = toSignal(
     this.router.events.pipe(
@@ -163,7 +170,7 @@ export class PreferenceNavComponent implements AfterViewInit {
   private readonly matchedMetadataBadgeCount = toSignal(
     toObservable(this.accountService.hasAdminRole).pipe(
       take(1),
-      filter(_ => this.licenseService.hasValidLicense()),
+      filter(_ => this.licenseService.hasActiveLicense()),
       switchMap(isAdmin => {
         if (!isAdmin) return of(-1);
         return this.manageService.getAllKavitaPlusSeries({
@@ -176,6 +183,23 @@ export class PreferenceNavComponent implements AfterViewInit {
           shareReplay({bufferSize: 1, refCount: true})
         );
       })
+    ),
+    { initialValue: -1 }
+  );
+
+  private readonly scrobblingFailuresBadgeCount = toSignal(
+    of(this.licenseService.hasActiveLicense()).pipe(
+      switchMap(hasLicense =>
+        hasLicense
+          ? this.kavitaplusAuditService.getMyActivity({
+            category: KavitaPlusAuditCategory.Scrobble,
+            userId: this.accountService.currentUser()!.id,
+            status: AuditStatus.Failure
+          }).pipe(map(d => d.pagination.totalItems))
+          : of(-1)
+      ),
+      takeUntilDestroyed(this.destroyRef),
+      shareReplay({ bufferSize: 1, refCount: true })
     ),
     { initialValue: -1 }
   );
@@ -289,6 +313,9 @@ export class PreferenceNavComponent implements AfterViewInit {
           SideNavItem.kPlusOnly(SettingsTabId.Metadata, [Role.Admin]),
           SideNavItem.kPlusOnly(SettingsTabId.MatchedMetadata, [Role.Admin], this.matchedMetadataBadgeCount),
           SideNavItem.kPlusOnly(SettingsTabId.ScrobblingHolds),
+          SideNavItem.kPlusOnly(SettingsTabId.ManageKavitaPlusActivity),
+          SideNavItem.kPlusOnly(SettingsTabId.MyActivity, [], this.scrobblingFailuresBadgeCount),
+          SideNavItem.kPlusOnly(SettingsTabId.ScrobbleSettings),
           SideNavItem.kPlusOnly(SettingsTabId.Scrobbling, [], this.scrobblingErrorBadgeCount),
         ]
       }
@@ -299,13 +326,13 @@ export class PreferenceNavComponent implements AfterViewInit {
 
     // Refresh visibility if license changes
     effect(() => {
-      this.licenseService.hasValidLicense();
+      this.licenseService.hasActiveLicense();
       this.cdRef.markForCheck();
     });
 
     this.keyBindService.registerListener(
       this.destroyRef,
-      () => this.router.navigate(['/settings'], { fragment: SettingsTabId.Scrobbling})
+      () => this.router.navigate(['/settings'], { fragment: SettingsTabId.MyActivity})
         .then(() => this.scrollToActiveItem()),
       [KeyBindTarget.NavigateToScrobbling],
       {condition$: this.hasValidLicense$},
@@ -331,7 +358,7 @@ export class PreferenceNavComponent implements AfterViewInit {
   }
 
   isItemVisible(user: User, item: SideNavItem) {
-    return this.accountService.hasAnyRole(user, item.roles, item.restrictRoles) && (!item.kPlusOnly || this.licenseService.hasValidLicense())
+    return this.accountService.hasAnyRole(user, item.roles, item.restrictRoles) && (!item.kPlusOnly || this.licenseService.hasActiveLicense())
   }
 
   collapse() {

@@ -1,0 +1,142 @@
+.screen-icon {
+  width: 2.375rem;
+  height: 2.375rem;
+  border-radius: 0.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1rem;
+
+  &--primary {
+    background: color-mix(in srgb, var(--primary-color) 20%, transparent);
+    color: var(--primary-color);
+  }
+}
+
+.screen-subtitle {
+  font-size: 0.8rem;
+  color: var(--text-muted-color);
+}
+
+.section-label {
+  font-size: 0.65rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--label-card-label-color);
+}
+
+.period-card {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.85rem 1rem;
+  border-radius: 0.6rem;
+  border: 1px solid var(--hr-color);
+  background: var(--elevation-layer1-dark-solid);
+  transition: border-color 0.15s ease-in-out, background 0.15s ease-in-out;
+
+  &.selected {
+    border-color: var(--primary-color);
+    background: color-mix(in srgb, var(--primary-color) 8%, var(--elevation-layer1-dark-solid));
+
+    .period-radio {
+      border-color: var(--primary-color);
+
+      &::after {
+        transform: scale(1);
+      }
+    }
+  }
+}
+
+.period-radio {
+  width: 1.1rem;
+  height: 1.1rem;
+  border-radius: 50%;
+  border: 0.125rem solid var(--text-muted-color);
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  &::after {
+    content: '';
+    width: 0.55rem;
+    height: 0.55rem;
+    border-radius: 50%;
+    background: var(--primary-color);
+    transform: scale(0);
+    transition: transform 0.15s ease-in-out;
+  }
+}
+
+.period-title {
+  display: block;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--body-text-color);
+}
+
+.period-price {
+  display: block;
+  font-size: 0.8rem;
+  color: var(--text-muted-color);
+}
+
+.on-file-pill {
+  display: inline-flex;
+  align-items: center;
+  font-size: 0.65rem;
+  font-weight: 600;
+  padding: 0.1rem 0.45rem;
+  border-radius: 9999px;
+  border: 1px solid color-mix(in srgb, var(--primary-color) 40%, transparent);
+  background: color-mix(in srgb, var(--primary-color) 12%, transparent);
+  color: var(--primary-color);
+}
+
+.email-row {
+  padding: 0.85rem 1rem;
+  border-radius: 0.6rem;
+  border: 1px solid var(--hr-color);
+  background: var(--elevation-layer1-dark-solid);
+
+  > i {
+    color: var(--text-muted-color);
+  }
+}
+
+.email-address {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--body-text-color);
+}
+
+.email-help {
+  font-size: 0.74rem;
+  color: var(--text-muted-color);
+}
+
+.change-link {
+  color: var(--primary-color);
+  text-decoration: none;
+  font-weight: 600;
+  font-size: 0.85rem;
+}
+
+.how-list {
+  gap: 0.85rem;
+}
+
+.how-item {
+  font-size: 0.85rem;
+  color: var(--body-text-color);
+}
+
+.how-icon {
+  width: 1.25rem;
+  text-align: center;
+  margin-top: 0.15rem;
+  color: var(--primary-color);
+}

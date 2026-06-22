@@ -1,0 +1,46 @@
+<ng-container *transloco="let t; prefix:'kavita-plus-connect-providers'">
+  <!-- Page header -->
+  <div class="d-flex align-items-start justify-content-between gap-3 mb-4">
+    <div class="flex-fill">
+      <h1 class="fw-bold mb-2">{{t('title')}}</h1>
+      <p class="text-muted page-desc mb-0">{{t('description')}}</p>
+    </div>
+    <a [href]="WikiLink.KavitaPlusFAQ" target="_blank" rel="noreferrer nofollow" class="btn btn-outline-primary btn-sm flex-shrink-0">
+      <i class="fa-regular fa-circle-question me-1" aria-hidden="true"></i>{{t('faq-btn-label')}}
+    </a>
+  </div>
+
+  <!--License activated Banner + CTA-->
+  <app-banner [isCta]="true" [title]="t('activated-title-label')" [body]="t('activated-body-label')" class="mb-3">
+    <i bannerIcon class="fa-solid fa-check" aria-hidden="true"></i>
+    <a bannerAction class="text-primary" (click)="skip()">
+      {{t('skip-to-dashboard-label')}}
+      <i class="fa-solid fa-arrow-right ms-1 icon-xs" aria-hidden="true"></i>
+    </a>
+  </app-banner>
+
+  <!--Backfill reading history step tracker banner -->
+  <app-banner [title]="t('backfill-title-label')" [body]="t('backfill-body-label')"
+              iconClass="fa-solid fa-clock-rotate-left" class="mb-4">
+    <span bannerAction>{{t('step-2-of-2-label')}}</span>
+  </app-banner>
+
+  <!--Provider cards-->
+  <div class="row g-3 mb-4">
+    @for(provider of scrobblingProviders(); track provider.provider) {
+      <div class="col-12 col-md-auto">
+        <app-scrobble-account-card [provider]="provider" class="d-block" />
+      </div>
+    }
+  </div>
+
+  <!--CTAs-->
+  <div class="d-flex align-items-center gap-3 pt-4 mt-2 footer">
+    <p class="flex-fill text-muted mb-0 footer-hint">{{t('footer-hint-label')}}</p>
+    <a class="btn btn-link text-muted p-0" (click)="skip()">{{t('skip-for-now-label')}}</a>
+    <a class="btn btn-link btn-primary" (click)="backfillAndRedirect()">
+      {{t('go-to-dashboard-label')}}
+      <i class="fa-solid fa-arrow-right ms-1 icon-xs" aria-hidden="true"></i>
+    </a>
+  </div>
+</ng-container>

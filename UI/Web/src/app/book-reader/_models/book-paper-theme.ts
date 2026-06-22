@@ -22,14 +22,26 @@ export const BookPaperTheme = `
 
 
     /* Accordion */
-    --accordion-header-bg-color: rgba(52, 60, 70, 0.5);
-    --accordion-body-bg-color: #F1E4D5;
-    --accordion-body-border-color: rgba(239, 239, 239, 0.125);
+    --accordion-surface-bg-color: #F1E4D5;
+    --accordion-header-text-color: var(--body-text-color);
+    --accordion-header-bg-color: transparent;
+    --accordion-body-bg-color: var(--accordion-surface-bg-color);
+    --accordion-body-border-color: rgba(0, 0, 0, 0.125);
     --accordion-body-text-color: var(--body-text-color);
-    --accordion-header-collapsed-bg-color: #F1E4D5;
+    --accordion-header-collapsed-text-color: var(--body-text-color);
+    --accordion-header-collapsed-bg-color: transparent;
     --accordion-button-focus-border-color: unset;
     --accordion-button-focus-box-shadow: unset;
-    --accordion-active-body-bg-color: #F1E4D5;
+    --accordion-active-body-bg-color: var(--accordion-surface-bg-color);
+    --accordion-body-box-shadow: none;
+    --accordion-hairline-color: rgba(0, 0, 0, 0.08);
+    --accordion-subtitle-text-color: rgba(0, 0, 0, 0.55);
+    --accordion-meta-text-color: rgba(0, 0, 0, 0.45);
+    --accordion-chevron-color: rgba(0, 0, 0, 0.5);
+    --accordion-chevron-hover-color: var(--body-text-color);
+    --accordion-border-hover-color: rgba(0, 0, 0, 0.25);
+    --accordion-radius: var(--card-border-radius);
+    --accordion-gap: 0.75rem;
 
     /* Buttons */
     --btn-focus-boxshadow-color: rgb(255 255 255 / 50%);

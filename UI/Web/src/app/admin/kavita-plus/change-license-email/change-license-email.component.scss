@@ -1,0 +1,66 @@
+.screen-icon {
+  width: 2.375rem;
+  height: 2.375rem;
+  border-radius: 0.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1rem;
+
+  &--info {
+    background: color-mix(in srgb, var(--primary-color) 14%, transparent);
+    color: color-mix(in srgb, var(--primary-color) 70%, var(--body-text-color));
+  }
+}
+
+.screen-subtitle {
+  font-size: 0.8rem;
+  color: var(--text-muted-color);
+}
+
+.section-label {
+  font-size: 0.65rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--label-card-label-color);
+}
+
+.email-row {
+  padding: 0.85rem 1rem;
+  border-radius: 0.6rem;
+  border: 1px solid var(--hr-color);
+  background: var(--elevation-layer1-dark-solid);
+
+  > i {
+    color: var(--text-muted-color);
+  }
+}
+
+.email-address {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--body-text-color);
+}
+
+.on-file-pill {
+  display: inline-flex;
+  align-items: center;
+  font-size: 0.65rem;
+  font-weight: 600;
+  padding: 0.1rem 0.45rem;
+  border-radius: 9999px;
+  border: 1px solid color-mix(in srgb, var(--primary-color) 40%, transparent);
+  background: color-mix(in srgb, var(--primary-color) 12%, transparent);
+  color: var(--primary-color);
+}
+
+.confirm-help {
+  font-size: 0.78rem;
+  color: var(--text-muted-color);
+
+  > i {
+    margin-top: 0.15rem;
+    color: var(--primary-color);
+  }
+}

@@ -1,0 +1,10 @@
+@let providerName = provider() | scrobbleProviderName;
+@let providerImageUrl = provider() | providerImage;
+
+<img [class]="'flex-shrink-0 ' + classes()"
+     [ngSrc]="providerImageUrl"
+     [alt]="providerName"
+     [width]="size()"
+     [height]="size()"
+     [ngbTooltip]="tooltip() ? providerName : ''"
+/>

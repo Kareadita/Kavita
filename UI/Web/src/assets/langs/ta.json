@@ -1241,8 +1241,7 @@
     },
     "all-filters": {
         "count": "{{count}} {{tabs.smart-filters-tab}}",
-        "title": "அனைத்து அறிவுள்ள வடிப்பான்களும்",
-        "create": "{{common.create}}"
+        "title": "அனைத்து அறிவுள்ள வடிப்பான்களும்"
     },
     "user-preferences": {
         "title": "பயனர் டாச்போர்டு",

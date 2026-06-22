@@ -22,6 +22,7 @@ using Kavita.Models.DTOs.KavitaPlus.Metadata;
 using Kavita.Models.DTOs.SignalR;
 using Kavita.Models.Entities;
 using Kavita.Models.Entities.Enums;
+using Kavita.Models.Entities.Enums.Audit;
 using Kavita.Models.Entities.Person;
 using Kavita.Models.Metadata;
 using Kavita.Models.Parser;
@@ -229,9 +230,9 @@ public class ProcessSeries(
             return null;
         }
 
-        if (seriesAdded)
+        if (seriesAdded && library.AllowMetadataMatching)
         {
-            await externalMetadataService.FetchSeriesMetadata(series.Id, series.Library.Type);
+            await externalMetadataService.FetchSeriesMetadata(series.Id, series.Library.Type, MetadataFetchTrigger.SeriesAdded);
         }
 
         await eventHub.SendMessageAsync(MessageFactory.ScanSeries,
@@ -358,10 +359,27 @@ public class ProcessSeries(
 
         if (!string.IsNullOrEmpty(firstChapter?.WebLinks) && library.InheritWebLinksFromFirstChapter)
         {
+            // TODO: Come back and clean this up, we call this code in DefaultParser AND ProcessSeries
             series.Metadata.WebLinks = firstChapter.WebLinks;
-            series.AniListId = WeblinkParser.GetAniListId(series.Metadata.WebLinks) ?? 0;
-            series.MalId = WeblinkParser.GetMalId(series.Metadata.WebLinks) ?? 0;
-            series.ComicVineId = WeblinkParser.GetComicVineId(series.Metadata.WebLinks).Item1;
+            var aniListId = ExternalIdParser.GetAniListId(series.Metadata.WebLinks);
+            if (aniListId.HasValue)
+                series.AniListId = aniListId.Value;
+
+            var malId = ExternalIdParser.GetMalId(series.Metadata.WebLinks);
+            if (malId.HasValue)
+                series.MalId = malId.Value;
+
+            var (comicVineId, _) = ExternalIdParser.GetComicVineId(series.Metadata.WebLinks);
+            if (comicVineId != null)
+                series.ComicVineId = comicVineId;
+
+            var mangaBakaId = ExternalIdParser.GetMangaBakaId(series.Metadata.WebLinks);
+            if (mangaBakaId > 0)
+                series.MangaBakaId = mangaBakaId;
+
+            var hardcoverId = ExternalIdParser.GetHardcoverSeriesId(series.Metadata.WebLinks);
+            if (hardcoverId > 0)
+                series.HardcoverId = hardcoverId;
         }
 
         if (!string.IsNullOrEmpty(firstChapter?.SeriesGroup) && library.ManageCollections)
@@ -408,7 +426,7 @@ public class ProcessSeries(
     /// <returns></returns>
     private static bool ShouldUpdatePeopleForRole(Series series, List<ChapterPeople> chapterPeople, PersonRole role)
     {
-        if (chapterPeople.Count == 0) return false;
+        if (chapterPeople.Count == 0) return true;
 
         // If metadata already has this role, but all entries are from KavitaPlus, we should retain them
         if (series.Metadata.AnyOfRole(role))
@@ -741,12 +759,30 @@ public class ProcessSeries(
             }
 
             // Try to patch in any External Metadata Ids we've seen during parsing
-            chapter.AniListId = info.AniListId ?? 0;
-            chapter.MalId = info.MalId ?? 0;
-            chapter.MangaBakaId = info.MangaBakaId ?? 0;
-            chapter.MetronId = info.MetronId ?? 0;
-            chapter.ComicVineId = info.ComicVineId;
-            chapter.HardcoverId = info.HardcoverId ?? 0;
+            if (info.AniListId is > 0)
+            {
+                chapter.AniListId = info.AniListId ?? 0;
+            }
+            if (info.MalId is > 0)
+            {
+                chapter.MalId = info.MalId ?? 0;
+            }
+            if (info.MangaBakaId is > 0)
+            {
+                chapter.MangaBakaId = info.MangaBakaId ?? 0;
+            }
+            if (info.MetronId is > 0)
+            {
+                chapter.MetronId = info.MetronId ?? 0;
+            }
+            if (!string.IsNullOrEmpty(info.ComicVineId))
+            {
+                chapter.ComicVineId = info.ComicVineId;
+            }
+            if (info.HardcoverId is > 0)
+            {
+                chapter.HardcoverId = info.HardcoverId ?? 0;
+            }
         }
 
         RemoveChapters(args.Volume, args.ParsedInfos);

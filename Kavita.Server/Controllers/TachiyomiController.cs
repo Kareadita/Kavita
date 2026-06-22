@@ -21,9 +21,9 @@ public class TachiyomiController(
     /// Given the series Id, this should return the latest chapter that has been fully read.
     /// </summary>
     /// <param name="seriesId"></param>
-    /// <returns>ChapterDTO of latest chapter. Only Chapter number is used by consuming app. All other fields may be missing.</returns>
+    /// <returns>TachiyomiChapterDto of latest chapter. Only Chapter number is used by consuming app. All other fields may be missing.</returns>
     [HttpGet("latest-chapter")]
-    public async Task<ActionResult<ChapterDto>> GetLatestChapter(int seriesId)
+    public async Task<ActionResult<TachiyomiChapterDto>> GetLatestChapter(int seriesId)
     {
         if (seriesId < 1) return BadRequest(await localizationService.TranslateAsync(UserId, "greater-0", "SeriesId"));
         return Ok(await tachiyomiService.GetLatestChapter(seriesId, UserId));
@@ -35,10 +35,13 @@ public class TachiyomiController(
     /// <remarks>This is built for Tachiyomi and is not expected to be called by any other place</remarks>
     /// <returns></returns>
     [HttpPost("mark-chapter-until-as-read")]
-    public async Task<ActionResult<bool>> MarkChaptersUntilAsRead(int seriesId, float chapterNumber)
+    public async Task<ActionResult<bool>> MarkChaptersUntilAsRead(
+        [FromQuery] int seriesId,
+        [FromQuery] float chapterNumber,
+        [FromQuery] bool generateReadingSessions = true)
     {
-        var user = (await unitOfWork.UserRepository.GetUserByUsernameAsync(Username!,
-            AppUserIncludes.Progress))!;
-        return Ok(await tachiyomiService.MarkChaptersUntilAsRead(user, seriesId, chapterNumber));
+        var user = (await unitOfWork.UserRepository.GetUserByUsernameAsync(Username!, AppUserIncludes.Progress))!;
+
+        return Ok(await tachiyomiService.MarkChaptersUntilAsRead(user, seriesId, chapterNumber, generateReadingSessions, HttpContext.RequestAborted));
     }
 }

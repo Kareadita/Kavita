@@ -112,15 +112,18 @@ input {
 }
 
 .results {
-    .list-group-item {
-        cursor: pointer;
-        border-left-color: var(--list-group-hover-text-color);
-        border-right-color: var(--list-group-hover-text-color);
-    }
+  .list-group-item {
+    cursor: pointer;
+    border-left-color: var(--list-group-hover-text-color);
+    border-right-color: var(--list-group-hover-text-color);
+    border-left-width: 1px;
+    border-right-width: 1px;
+  }
 
-    .list-group-item:last-child {
-        border-bottom-color: var(--list-group-hover-text-color);
-    }
+  .list-group-item:last-child {
+    border-bottom-width: 1px;
+    border-bottom-color: var(--list-group-hover-text-color);
+  }
 }
 
 .dropdown {

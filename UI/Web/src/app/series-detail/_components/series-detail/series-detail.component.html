@@ -1,5 +1,3 @@
-
-
 <ng-container *transloco="let t; prefix: 'series-detail'">
   <app-bulk-operations [marginLeft]="12" [marginRight]="0" />
 
@@ -37,7 +35,7 @@
               </span>
 
           </h4>
-          <div class="subtitle mt-2 mb-2">
+          <div class="subtitle  mt-2 mb-2">
             @if (seriesValue.localizedName !== seriesValue.name && seriesValue.localizedName) {
               <span>{{seriesValue.localizedName | defaultValue}}</span>
             }
@@ -112,6 +110,25 @@
                 </div>
               }
 
+              @if (licenseService.hasActiveLicense()) {
+                <div class="col-auto ms-2 d-none d-md-block">
+                  <button class="btn btn-actions"
+                          [ngbPopover]="kplusPopContent"
+                          popoverClass="kplus-popover"
+                          [autoClose]="'outside'"
+                          triggers="click"
+                          placement="bottom-start"
+                          [attr.aria-label]="t('kavitaplus-audit-alt')">
+                    <i class="fa-solid fa-bolt" aria-hidden="true"></i>
+                  </button>
+                </div>
+                <div class="col-auto ms-2 d-md-none">
+                  <button class="btn btn-actions" [ngbTooltip]="t('kavitaplus-audit-alt')" (click)="openKavitaPlusDrawer()">
+                    <i class="fa-solid fa-bolt" aria-hidden="true"></i>
+                  </button>
+                </div>
+              }
+
               <div class="col-auto ms-2">
                 <div class="card-actions btn-actions" [ngbTooltip]="t('more-alt')">
                   <app-card-actionables [entity]="seriesValue" [actions]="seriesActions()" [labelBy]="seriesValue.name"
@@ -125,6 +142,10 @@
 
             </div>
           </div>
+
+          <ng-template #kplusPopContent>
+            <app-kavitaplus-tooltip [seriesId]="seriesValue.id" />
+          </ng-template>
 
           <div class="mt-2 mb-3">
             <app-read-more [text]="seriesMetadataValue.summary || ''" [useResponsiveLength]="true" />
@@ -367,6 +388,7 @@
                                    [tags]="seriesMetadataValue.tags"
                                    [webLinks]="weblinksValue"
                                    [filePaths]="[seriesValue.folderPath]"
+                                   [basicMetadata]="seriesBasicMetadata()"
                   />
                 }
               </ng-template>

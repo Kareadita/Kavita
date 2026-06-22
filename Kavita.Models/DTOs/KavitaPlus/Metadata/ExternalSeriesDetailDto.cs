@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using Kavita.Models.DTOs.Recommendation;
 using Kavita.Models.DTOs.Scrobbling;
 using Kavita.Models.Entities.Enums;
+using Kavita.Models.Entities.Enums.KavitaPlus;
 
 namespace Kavita.Models.DTOs.KavitaPlus.Metadata;
 
@@ -15,7 +16,12 @@ public sealed record ExternalSeriesDetailDto
     public string Name { get; set; }
     public int? AniListId { get; set; }
     public long? MALId { get; set; }
+    /// <summary>
+    /// ComicBookRoundup Id for direct matching
+    /// </summary>
     public int? CbrId { get; set; }
+    public int? HardcoverId { get; set; }
+    public int? MangabakaId { get; set; }
     public IList<string> Synonyms { get; set; } = [];
     public PlusMediaFormat PlusMediaFormat { get; set; }
     public string? SiteUrl { get; set; }

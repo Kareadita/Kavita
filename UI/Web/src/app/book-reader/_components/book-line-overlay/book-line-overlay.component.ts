@@ -211,18 +211,19 @@ export class BookLineOverlayComponent implements OnInit {
   switchMode(mode: BookLineOverlayMode) {
     this.mode.set(mode);
 
-    if (mode === BookLineOverlayMode.Bookmark) {
-      this.bookmarkForm.get('name')?.setValue(this.selectedText());
-      this.focusOnBookmarkInput();
-      return;
-    }
-
     // On mobile, first selection might not match as users can select after the fact. Recalculate
     const windowText = window.getSelection();
     const selectedText = windowText?.toString() === '' ? this.selectedText() : windowText?.toString() ?? this.selectedText();
 
-    if (mode === BookLineOverlayMode.Annotate) {
+    if (mode === BookLineOverlayMode.Bookmark) {
+      this.bookmarkForm.get('name')?.setValue(selectedText);
+      this.focusOnBookmarkInput();
+      return;
+    }
 
+
+
+    if (mode === BookLineOverlayMode.Annotate) {
       const createAnnotation = {
         id: 0,
         xPath: this.startXPath,

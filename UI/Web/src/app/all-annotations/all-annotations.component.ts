@@ -19,7 +19,7 @@ import {Annotation} from "../book-reader/_models/annotations/annotation";
 import {Pagination} from "../_models/pagination";
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import {map, tap} from "rxjs/operators";
-import {AnnotationsFilterSettings} from "../metadata-filter/filter-settings";
+import {AnnotationFilterSettings} from "../metadata-filter/filter-settings";
 import {
   AnnotationsFilter,
   AnnotationsFilterField,
@@ -74,7 +74,7 @@ export class AllAnnotationsComponent implements OnInit {
   filterActive = signal(false);
   filter = signal<AnnotationsFilter | undefined>(undefined);
 
-  filterSettings: AnnotationsFilterSettings = new AnnotationsFilterSettings();
+  filterSettings: AnnotationFilterSettings = new AnnotationFilterSettings();
   trackByIdentity = (idx: number, item: Annotation) => `${item.id}`;
   refresh: EventEmitter<void> = new EventEmitter();
   filterOpen: EventEmitter<boolean> = new EventEmitter();

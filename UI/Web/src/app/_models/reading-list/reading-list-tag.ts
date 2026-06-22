@@ -1,5 +1,5 @@
-export interface ReadingListTag {
-  id: number;
-  title: string;
+import {BaseTag} from "../tag";
+
+export interface ReadingListTag extends BaseTag {
   normalizedTitle: string;
 }

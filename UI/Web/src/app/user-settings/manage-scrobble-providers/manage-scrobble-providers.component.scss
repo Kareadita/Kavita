@@ -1,0 +1,9 @@
+.provider-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--accordion-gap);
+}
+
+::ng-deep .select2-selection__rendered {
+  padding-top: 0.25rem !important;
+}

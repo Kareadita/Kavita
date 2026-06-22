@@ -1,0 +1,19 @@
+.kv-section-header {
+  font-size: 0.78rem;
+  letter-spacing: 0.06em;
+  font-weight: 600;
+  text-transform: uppercase;
+  color: var(--text-muted-color);
+  margin-bottom: 0.625rem;
+  margin-top: 0.625rem;
+}
+
+
+.sub-header {
+  font-size: 1.15rem;
+}
+
+.sub-header > p {
+  font-size: 0.84rem;
+  line-height: 1.6;
+}

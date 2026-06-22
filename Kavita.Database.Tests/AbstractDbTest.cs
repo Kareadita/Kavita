@@ -94,6 +94,7 @@ public abstract class AbstractDbTest(ITestOutputHelper testOutputHelper): Abstra
             await context.SaveChangesAsync();
 
             await Seed.SeedMetadataSettings(context);
+            await Seed.SeedScrobbleProviders(context);
         }
         catch (Exception ex)
         {

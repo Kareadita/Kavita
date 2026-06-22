@@ -481,8 +481,7 @@
     },
     "all-filters": {
         "title": "Všetky smart filtre",
-        "count": "{{count}} {{customize-dashboard-modal.title-smart-filters}}",
-        "create": "{{common.create}}"
+        "count": "{{count}} {{customize-dashboard-modal.title-smart-filters}}"
     },
     "announcements": {
         "title": "Oznámenia"

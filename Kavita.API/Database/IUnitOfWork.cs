@@ -36,6 +36,7 @@ public interface IUnitOfWork
     IReadingSessionRepository ReadingSessionRepository { get; }
     IClientDeviceRepository ClientDeviceRepository { get; }
     IReadingListRemapRuleRepository RemapRuleRepository { get; }
+    IKavitaPlusAuditRepository KavitaPlusAuditRepository { get; }
 
     /// <summary>
     /// Commits pending changes to the database inside an IMMEDIATE transaction so writer

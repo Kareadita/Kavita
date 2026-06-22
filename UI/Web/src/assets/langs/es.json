@@ -485,8 +485,7 @@
     },
     "all-filters": {
         "title": "Todos los filtros inteligentes",
-        "count": "{{count}} {{customize-dashboard-modal.title-smart-filters}}",
-        "create": "{{common.create}}"
+        "count": "{{count}} {{customize-dashboard-modal.title-smart-filters}}"
     },
     "announcements": {
         "title": "Noticias"

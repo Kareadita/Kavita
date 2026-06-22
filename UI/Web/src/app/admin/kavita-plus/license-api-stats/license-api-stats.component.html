@@ -1,0 +1,49 @@
+<ng-container *transloco="let t;prefix:'license-api-stats'">
+  <div class="api-stats-container p-3">
+    <div class="d-flex align-items-start justify-content-between flex-wrap gap-2 mb-2">
+      <div class="min-width-0">
+        <h3 class="kv-section-header mb-1">{{t('title')}}</h3>
+        <p class="text-muted m-0">{{t('description')}}</p>
+      </div>
+
+      <!-- Range toggle -->
+      <div class="btn-group btn-group-sm flex-shrink-0" role="group" [attr.aria-label]="t('range-toggle-alt')">
+        <button type="button" class="btn"
+                [class.btn-primary]="selectedRange() === 'last30'"
+                [class.btn-outline-secondary]="selectedRange() !== 'last30'"
+                (click)="selectedRange.set('last30')">{{t('last-30-days')}}</button>
+        <button type="button" class="btn"
+                [class.btn-primary]="selectedRange() === 'lifetime'"
+                [class.btn-outline-secondary]="selectedRange() !== 'lifetime'"
+                (click)="selectedRange.set('lifetime')">{{t('lifetime')}}</button>
+      </div>
+    </div>
+
+    <ul class="list-unstyled m-0">
+      @for(api of usageInfo(); track api.apiName; let last = $last) {
+        <li class="d-flex align-items-center gap-3 py-3" [class.border-bottom]="!last">
+          @let apiRenderData = api.apiName | kavitaPlusApiNameRenderData;
+          <!-- Icon -->
+          <span class="api-icon d-flex align-items-center justify-content-center flex-shrink-0">
+            <i [class]="apiRenderData.icon" aria-hidden="true"></i>
+          </span>
+
+          <!-- Title + subtitle -->
+          <div class="flex-grow-1 min-width-0">
+            <div class="fw-semibold">{{apiRenderData.title}}</div>
+            <div class="text-muted small">{{apiRenderData.description}}</div>
+          </div>
+
+          <!-- Sparkline chart -->
+          <div class="phone-hidden flex-shrink-0">
+            <app-sparkline class="api-chart" [data]="bucketsFor(api)" />
+          </div>
+
+          <!-- Count -->
+          <div class="fw-bold fs-5 text-end flex-shrink-0">{{countFor(api) | compactNumber}}</div>
+        </li>
+      }
+    </ul>
+  </div>
+
+</ng-container>

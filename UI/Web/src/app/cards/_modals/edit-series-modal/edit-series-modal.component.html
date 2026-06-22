@@ -526,7 +526,7 @@
                 <p class="alert alert-warning" role="alert">
                   {{t('cover-image-description')}}
                 </p>
-                <app-cover-image-chooser [(imageUrls)]="imageUrls" (imageSelected)="updateSelectedIndex($event)" (selectedBase64Url)="updateSelectedImage($event)" [showReset]="series.coverImageLocked" (resetClicked)="handleReset()" />
+                <app-cover-image-chooser [config]="chooserConfig" (coverChanged)="handleCoverChanged($event)" (resetClicked)="handleReset()" />
               </ng-template>
             </li>
 
@@ -696,7 +696,7 @@
                 </div>
 
                 <h4>{{t('volumes-title')}}</h4>
-                @if (isLoadingVolumes) {
+                @if (isLoadingVolumes()) {
                   <div class="spinner-border text-primary" role="status">
                     <span class="visually-hidden">{{t('loading')}}</span>
                   </div>
@@ -741,7 +741,7 @@
                                         {{t('pages-title')}} {{file.pages}}
                                       </div>
                                       <div class="col">
-                                        {{t('format-title')}} <span class="badge badge-secondary">{{utilityService.mangaFormatToText(file.format)}}</span>
+                                        {{t('format-title')}} <span class="badge badge-secondary">{{file.format | mangaFormat}}</span>
                                       </div>
                                     </div>
                                   </li>

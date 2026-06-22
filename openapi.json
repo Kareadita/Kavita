@@ -2,12 +2,12 @@
   "openapi": "3.0.4",
   "info": {
     "title": "Kavita",
-    "description": "Kavita provides a set of APIs authenticated via an Auth Key passed in the `x-api-key` header. Generate an Auth Key under User Settings → Manage Auth Keys, paste it into the Authorize panel, and all Try It requests will include it. Assume all fields of a payload are required unless marked optional. Built against v0.8.9.45",
+    "description": "Kavita provides a set of APIs authenticated via an Auth Key passed in the `x-api-key` header. Generate an Auth Key under User Settings → Manage Auth Keys, paste it into the Authorize panel, and all Try It requests will include it. Assume all fields of a payload are required unless marked optional. Built against v0.9.0.9",
     "license": {
       "name": "GPL-3.0",
       "url": "https://github.com/Kareadita/Kavita/blob/develop/LICENSE"
     },
-    "version": "0.8.9.45"
+    "version": "0.9.0.9"
   },
   "servers": [
     {
@@ -5461,6 +5461,389 @@
         }
       }
     },
+    "/api/Image/external/series": {
+      "get": {
+        "tags": [
+          "Image"
+        ],
+        "parameters": [
+          {
+            "name": "seriesId",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ExternalCoverResponseDto"
+                  }
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ExternalCoverResponseDto"
+                  }
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ExternalCoverResponseDto"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/Image/external/volume": {
+      "get": {
+        "tags": [
+          "Image"
+        ],
+        "parameters": [
+          {
+            "name": "seriesId",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "volumeId",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ExternalCoverResponseDto"
+                  }
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ExternalCoverResponseDto"
+                  }
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ExternalCoverResponseDto"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/Image/external/chapter": {
+      "get": {
+        "tags": [
+          "Image"
+        ],
+        "parameters": [
+          {
+            "name": "seriesId",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "chapterId",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ExternalCoverResponseDto"
+                  }
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ExternalCoverResponseDto"
+                  }
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ExternalCoverResponseDto"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/kavita-plus-audit/entries": {
+      "post": {
+        "tags": [
+          "KavitaPlusAudit"
+        ],
+        "summary": "Returns a paged, filtered list of all Kavita+ audit events. Admin only.",
+        "parameters": [
+          {
+            "name": "PageNumber",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "PageSize",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/KavitaPlusAuditFilterDto"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/KavitaPlusAuditFilterDto"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/KavitaPlusAuditFilterDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/KavitaPlusAuditEntryDto"
+                  }
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/KavitaPlusAuditEntryDto"
+                  }
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/KavitaPlusAuditEntryDto"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/kavita-plus-audit/entries/series/{seriesId}": {
+      "get": {
+        "tags": [
+          "KavitaPlusAudit"
+        ],
+        "summary": "Returns Kavita+ audit info scoped to a single series, for the popover.\nScrobble events are filtered to the calling user unless they are an admin.",
+        "parameters": [
+          {
+            "name": "seriesId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/KavitaPlusAuditSeriesInfoDto"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/KavitaPlusAuditSeriesInfoDto"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/KavitaPlusAuditSeriesInfoDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/kavita-plus-audit/stats": {
+      "get": {
+        "tags": [
+          "KavitaPlusAudit"
+        ],
+        "summary": "Returns aggregate stats for the admin audit feed header strip.",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/KavitaPlusAuditStatsDto"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/KavitaPlusAuditStatsDto"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/KavitaPlusAuditStatsDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/kavita-plus-audit/my-activity": {
+      "post": {
+        "tags": [
+          "KavitaPlusAudit"
+        ],
+        "summary": "Returns the calling user's own Kavita+ activity, paged and filtered.",
+        "parameters": [
+          {
+            "name": "PageNumber",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "PageSize",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/KavitaPlusAuditFilterDto"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/KavitaPlusAuditFilterDto"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/KavitaPlusAuditFilterDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/KavitaPlusAuditEntryDto"
+                  }
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/KavitaPlusAuditEntryDto"
+                  }
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/KavitaPlusAuditEntryDto"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/Koreader/{apiKey}/users/auth": {
       "get": {
         "tags": [
@@ -6546,7 +6929,7 @@
           "License"
         ],
         "summary": "Updates server license",
-        "description": "Caches the result",
+        "description": "Caches the result when successful",
         "requestBody": {
           "content": {
             "application/json": {
@@ -6568,7 +6951,24 @@
         },
         "responses": {
           "200": {
-            "description": "OK"
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/KavitaPlusRegisterResultDto"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/KavitaPlusRegisterResultDto"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/KavitaPlusRegisterResultDto"
+                }
+              }
+            }
           }
         }
       }
@@ -6612,6 +7012,256 @@
           "License"
         ],
         "summary": "Resend the welcome email to the user",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "boolean"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "boolean"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "boolean"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/License/provider-health": {
+      "get": {
+        "tags": [
+          "License"
+        ],
+        "summary": "Provides a 15 min snapshot of Kavita+ Providers (Hardcover, AniList, MangaBaka, etc.) API health.\nKavita caches every 45 mins.",
+        "parameters": [
+          {
+            "name": "forceCheck",
+            "in": "query",
+            "description": "Bypass cache and force a reload from Kavita+ server",
+            "schema": {
+              "type": "boolean",
+              "default": false
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/KavitaPlusProviderHealthSnapshotDto"
+                  }
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/KavitaPlusProviderHealthSnapshotDto"
+                  }
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/KavitaPlusProviderHealthSnapshotDto"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/License/stats": {
+      "get": {
+        "tags": [
+          "License"
+        ],
+        "summary": "Providers how many interactions this license has had with Kavita+ over a lifetime",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/KavitaPlusLicenseUsageDto"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/KavitaPlusLicenseUsageDto"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/KavitaPlusLicenseUsageDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/License/cancel": {
+      "delete": {
+        "tags": [
+          "License"
+        ],
+        "summary": "Cancels the active Kavita+ Subscription tied to this server. License will elapse at end of billing period.",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CancelKavitaPlusLicenseDto"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CancelKavitaPlusLicenseDto"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/CancelKavitaPlusLicenseDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/License/products": {
+      "get": {
+        "tags": [
+          "License"
+        ],
+        "summary": "Returns the available Kavita+ products (billing interval and list price) the renew flow can select.",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/KavitaPlusProductInfoDto"
+                  }
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/KavitaPlusProductInfoDto"
+                  }
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/KavitaPlusProductInfoDto"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/License/renew": {
+      "post": {
+        "tags": [
+          "License"
+        ],
+        "summary": "Renews the subscription on the given billing interval and returns the Stripe Checkout (Pay Now) URL the customer visits to pay.",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RenewKavitaPlusLicenseDto"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RenewKavitaPlusLicenseDto"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/RenewKavitaPlusLicenseDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/License/change-email": {
+      "post": {
+        "tags": [
+          "License"
+        ],
+        "summary": "Change email on Kavita+ License/Stripe - Sends a confirmation email on Kavita+ side. No-op for server.",
+        "requestBody": {
+          "description": "",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ChangeEmailOnLicenseDto"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ChangeEmailOnLicenseDto"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/ChangeEmailOnLicenseDto"
+              }
+            }
+          }
+        },
         "responses": {
           "200": {
             "description": "OK",
@@ -7390,6 +8040,76 @@
         }
       }
     },
+    "/api/OAuth/start": {
+      "get": {
+        "tags": [
+          "OAuth"
+        ],
+        "summary": "Start the OAuth flow for the given upstream, redirect (302!) to KavitaPlus",
+        "parameters": [
+          {
+            "name": "upstream",
+            "in": "query",
+            "description": "",
+            "schema": {
+              "$ref": "#/components/schemas/OAuthUpstream"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/OAuth/callback": {
+      "get": {
+        "tags": [
+          "OAuth"
+        ],
+        "summary": "Callback from KavitaPlus.",
+        "parameters": [
+          {
+            "name": "upstream",
+            "in": "query",
+            "description": "",
+            "schema": {
+              "$ref": "#/components/schemas/OAuthUpstream"
+            }
+          },
+          {
+            "name": "token",
+            "in": "query",
+            "description": "",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "apiKey",
+            "in": "query",
+            "description": "Encrypted ApiKey",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "refreshToken",
+            "in": "query",
+            "description": "",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
     "/Oidc/login": {
       "get": {
         "tags": [
@@ -7475,7 +8195,8 @@
         "tags": [
           "Opds"
         ],
-        "summary": "Get the User's Smart Filter series - Supports Pagination",
+        "summary": "Get the User's Smart Filter - Supports Pagination",
+        "description": "Smart filters have different entity types, this will resolve to the underlying entity",
         "parameters": [
           {
             "name": "apiKey",
@@ -9163,6 +9884,7 @@
           "Rating"
         ],
         "summary": "Overall rating from all Kavita users for a given Series",
+        "description": "If the authenticated user is the only user to have rated the series, returns 0",
         "parameters": [
           {
             "name": "seriesId",
@@ -9204,6 +9926,7 @@
           "Rating"
         ],
         "summary": "Overall rating from all Kavita users for a given Chapter",
+        "description": "If the authenticated user is the only user to have rated the chapter, returns 0",
         "parameters": [
           {
             "name": "chapterId",
@@ -12039,6 +12762,30 @@
         }
       }
     },
+    "/api/ReadingList/regenerate-cover": {
+      "post": {
+        "tags": [
+          "ReadingList"
+        ],
+        "summary": "Regenerates the cover image for a reading list, you must own the given reading list to do this",
+        "parameters": [
+          {
+            "name": "readingListId",
+            "in": "query",
+            "description": "",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
     "/api/reading-profile/all": {
       "get": {
         "tags": [
@@ -13035,29 +13782,38 @@
         }
       }
     },
-    "/api/Scrobbling/anilist-token": {
+    "/api/Scrobbling/scrobble-settings": {
       "get": {
         "tags": [
           "Scrobbling"
         ],
-        "summary": "Get the current user's AniList token",
+        "summary": "Returns all scrobble providers for a user. This list is guaranteed to contain an entry for each currently\nvalid scrobble provider. If the user has none setup, returns the empty default values.",
         "responses": {
           "200": {
             "description": "OK",
             "content": {
               "text/plain": {
                 "schema": {
-                  "type": "string"
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ScrobbleProviderDto"
+                  }
                 }
               },
               "application/json": {
                 "schema": {
-                  "type": "string"
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ScrobbleProviderDto"
+                  }
                 }
               },
               "text/json": {
                 "schema": {
-                  "type": "string"
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ScrobbleProviderDto"
+                  }
                 }
               }
             }
@@ -13065,132 +13821,79 @@
         }
       }
     },
-    "/api/Scrobbling/mal-token": {
-      "get": {
-        "tags": [
-          "Scrobbling"
-        ],
-        "summary": "Get the current user's MAL token and username",
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "text/plain": {
-                "schema": {
-                  "$ref": "#/components/schemas/MalUserInfoDto"
-                }
-              },
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/MalUserInfoDto"
-                }
-              },
-              "text/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/MalUserInfoDto"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/Scrobbling/update-anilist-token": {
+    "/api/Scrobbling/update-scrobble-settings": {
       "post": {
         "tags": [
           "Scrobbling"
         ],
-        "summary": "Update the current user's AniList token",
+        "summary": "Updates the scrobble settings for a given provider. Libraries are filtered on supported types",
+        "parameters": [
+          {
+            "name": "provider",
+            "in": "query",
+            "description": "",
+            "schema": {
+              "$ref": "#/components/schemas/ScrobbleProvider"
+            }
+          }
+        ],
         "requestBody": {
           "description": "",
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/AniListUpdateDto"
+                "$ref": "#/components/schemas/ScrobbleProviderSettingsDto"
               }
             },
             "text/json": {
               "schema": {
-                "$ref": "#/components/schemas/AniListUpdateDto"
+                "$ref": "#/components/schemas/ScrobbleProviderSettingsDto"
               }
             },
             "application/*+json": {
               "schema": {
-                "$ref": "#/components/schemas/AniListUpdateDto"
+                "$ref": "#/components/schemas/ScrobbleProviderSettingsDto"
               }
             }
           }
         },
         "responses": {
           "200": {
-            "description": "OK",
-            "content": {
-              "text/plain": {
-                "schema": {
-                  "type": "boolean"
-                }
-              },
-              "application/json": {
-                "schema": {
-                  "type": "boolean"
-                }
-              },
-              "text/json": {
-                "schema": {
-                  "type": "boolean"
-                }
-              }
-            }
+            "description": "OK"
           }
         }
       }
     },
-    "/api/Scrobbling/update-mal-token": {
+    "/api/Scrobbling/update-user-scrobble-provider": {
       "post": {
         "tags": [
           "Scrobbling"
         ],
-        "summary": "Update the current user's MAL token (Client ID) and Username",
+        "summary": "Update authentication details for the given provider",
+        "description": "Kicks of a sync background job, listen on signalr for when it completes",
         "requestBody": {
           "description": "",
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/MalUserInfoDto"
+                "$ref": "#/components/schemas/UpdateScrobbleProviderDto"
               }
             },
             "text/json": {
               "schema": {
-                "$ref": "#/components/schemas/MalUserInfoDto"
+                "$ref": "#/components/schemas/UpdateScrobbleProviderDto"
               }
             },
             "application/*+json": {
               "schema": {
-                "$ref": "#/components/schemas/MalUserInfoDto"
+                "$ref": "#/components/schemas/UpdateScrobbleProviderDto"
               }
             }
           }
         },
         "responses": {
           "200": {
-            "description": "OK",
-            "content": {
-              "text/plain": {
-                "schema": {
-                  "type": "boolean"
-                }
-              },
-              "application/json": {
-                "schema": {
-                  "type": "boolean"
-                }
-              },
-              "text/json": {
-                "schema": {
-                  "type": "boolean"
-                }
-              }
-            }
+            "description": "OK"
           }
         }
       }
@@ -13200,10 +13903,50 @@
         "tags": [
           "Scrobbling"
         ],
-        "summary": "When a user request to generate scrobble events from history. Should only be ran once per user.",
+        "summary": "Generate scrobble events from history. Should only be ran once per user.",
+        "parameters": [
+          {
+            "name": "scrobbleProvider",
+            "in": "query",
+            "description": "Members:\n- `0` — Kavita\n- `1` — AniList\n- `2` — Mal\n- `4` — Cbr\n- `5` — Hardcover\n- `6` — MangaBaka",
+            "schema": {
+              "$ref": "#/components/schemas/ScrobbleProvider"
+            }
+          }
+        ],
         "responses": {
           "200": {
             "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/Scrobbling/generate-scrobble-events-all": {
+      "post": {
+        "tags": [
+          "Scrobbling"
+        ],
+        "summary": "Generate scrobble events from history for all valid providers.",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "boolean"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "boolean"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "boolean"
+                }
+              }
+            }
           }
         }
       }
@@ -13241,6 +13984,45 @@
               "text/json": {
                 "schema": {
                   "type": "boolean"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/Scrobbling/expired-tokens": {
+      "get": {
+        "tags": [
+          "Scrobbling"
+        ],
+        "summary": "Returns all expired tokens for the current user",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ScrobbleProvider"
+                  }
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ScrobbleProvider"
+                  }
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ScrobbleProvider"
+                  }
                 }
               }
             }
@@ -13547,36 +14329,6 @@
         }
       }
     },
-    "/api/Scrobbling/has-ran-scrobble-gen": {
-      "get": {
-        "tags": [
-          "Scrobbling"
-        ],
-        "summary": "Has the logged in user ran scrobble generation",
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "text/plain": {
-                "schema": {
-                  "type": "boolean"
-                }
-              },
-              "application/json": {
-                "schema": {
-                  "type": "boolean"
-                }
-              },
-              "text/json": {
-                "schema": {
-                  "type": "boolean"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
     "/api/Scrobbling/bulk-remove-events": {
       "post": {
         "tags": [
@@ -13618,6 +14370,92 @@
         "responses": {
           "200": {
             "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/Scrobbling/retry-scrobble": {
+      "post": {
+        "tags": [
+          "Scrobbling"
+        ],
+        "summary": "Attempts to retry Scrobble Events for the current authenticated user (or admin-allowed).",
+        "requestBody": {
+          "description": "",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/KavitaPlusAuditEntryDto"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/KavitaPlusAuditEntryDto"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/KavitaPlusAuditEntryDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "boolean"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "boolean"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "boolean"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/Scrobbling/next-scrobble-time": {
+      "get": {
+        "tags": [
+          "Scrobbling"
+        ],
+        "summary": "Returns when Scrobbling upload will next execute",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "string",
+                  "format": "date-time",
+                  "nullable": true
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "string",
+                  "format": "date-time",
+                  "nullable": true
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "string",
+                  "format": "date-time",
+                  "nullable": true
+                }
+              }
+            }
           }
         }
       }
@@ -15241,35 +16079,28 @@
               "type": "integer",
               "format": "int32"
             }
-          },
-          {
-            "name": "aniListId",
-            "in": "query",
-            "description": "",
-            "schema": {
-              "type": "integer",
-              "format": "int32"
-            }
-          },
-          {
-            "name": "malId",
-            "in": "query",
-            "description": "",
-            "schema": {
-              "type": "integer",
-              "format": "int64"
-            }
-          },
-          {
-            "name": "cbrId",
-            "in": "query",
-            "description": "",
-            "schema": {
-              "type": "integer",
-              "format": "int32"
-            }
           }
         ],
+        "requestBody": {
+          "description": "",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ExternalMetadataIdsDto"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ExternalMetadataIdsDto"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/ExternalMetadataIdsDto"
+              }
+            }
+          }
+        },
         "responses": {
           "200": {
             "description": "OK"
@@ -15305,6 +16136,47 @@
         "responses": {
           "200": {
             "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/Series/match-info": {
+      "get": {
+        "tags": [
+          "Series"
+        ],
+        "summary": "Returns extra information around an existing match (and series) to display on the Match Screen.",
+        "parameters": [
+          {
+            "name": "seriesId",
+            "in": "query",
+            "description": "",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/MatchSeriesInfoDto"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MatchSeriesInfoDto"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MatchSeriesInfoDto"
+                }
+              }
+            }
           }
         }
       }
@@ -18933,17 +19805,17 @@
             "content": {
               "text/plain": {
                 "schema": {
-                  "$ref": "#/components/schemas/ChapterDto"
+                  "$ref": "#/components/schemas/TachiyomiChapterDto"
                 }
               },
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ChapterDto"
+                  "$ref": "#/components/schemas/TachiyomiChapterDto"
                 }
               },
               "text/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ChapterDto"
+                  "$ref": "#/components/schemas/TachiyomiChapterDto"
                 }
               }
             }
@@ -18973,6 +19845,14 @@
             "schema": {
               "type": "number",
               "format": "float"
+            }
+          },
+          {
+            "name": "generateReadingSessions",
+            "in": "query",
+            "schema": {
+              "type": "boolean",
+              "default": true
             }
           }
         ],
@@ -19319,6 +20199,57 @@
             "application/*+json": {
               "schema": {
                 "$ref": "#/components/schemas/UploadUrlDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/Upload/upload-by-file": {
+      "post": {
+        "tags": [
+          "Upload"
+        ],
+        "summary": "Stages an uploaded image file in the temp directory for use in a cover image replacement flow.\nThis is automatically cleaned up.",
+        "requestBody": {
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "file": {
+                    "type": "string",
+                    "description": "The image file to stage",
+                    "format": "binary"
+                  }
+                }
+              },
+              "encoding": {
+                "file": {
+                  "style": "form"
+                }
               }
             }
           }
@@ -19983,7 +20914,7 @@
                 "schema": {
                   "type": "array",
                   "items": {
-                    "$ref": "#/components/schemas/UserTokenInfo"
+                    "$ref": "#/components/schemas/UserTokenInfoDto"
                   }
                 }
               },
@@ -19991,7 +20922,7 @@
                 "schema": {
                   "type": "array",
                   "items": {
-                    "$ref": "#/components/schemas/UserTokenInfo"
+                    "$ref": "#/components/schemas/UserTokenInfoDto"
                   }
                 }
               },
@@ -19999,7 +20930,7 @@
                 "schema": {
                   "type": "array",
                   "items": {
-                    "$ref": "#/components/schemas/UserTokenInfo"
+                    "$ref": "#/components/schemas/UserTokenInfoDto"
                   }
                 }
               }
@@ -20507,16 +21438,6 @@
         },
         "additionalProperties": false
       },
-      "AniListUpdateDto": {
-        "type": "object",
-        "properties": {
-          "token": {
-            "type": "string",
-            "nullable": true
-          }
-        },
-        "additionalProperties": false
-      },
       "AnnotationDto": {
         "required": [
           "chapterId",
@@ -20756,6 +21677,30 @@
         },
         "additionalProperties": false
       },
+      "ApiUsageDto": {
+        "type": "object",
+        "properties": {
+          "apiName": {
+            "$ref": "#/components/schemas/KavitaPlusApiName"
+          },
+          "lifetimeCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "last30DaysCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "dailyBuckets": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DailyBucketDto"
+            },
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
       "AppUserCollectionDto": {
         "type": "object",
         "properties": {
@@ -20865,6 +21810,78 @@
           }
         },
         "additionalProperties": false
+      },
+      "AuditLogMatchExternalIdsParamsDto": {
+        "type": "object",
+        "properties": {
+          "aniListId": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "malId": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "mangaBakaId": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "cbrId": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "hardcoverId": {
+            "type": "integer",
+            "format": "int32"
+          }
+        },
+        "additionalProperties": false
+      },
+      "AuditStatus": {
+        "enum": [
+          0,
+          1,
+          2
+        ],
+        "type": "integer",
+        "description": "Members:\n- `0` — Success\n- `1` — Failure\n- `2` — Info",
+        "format": "int32",
+        "x-enum-varnames": [
+          "Success",
+          "Failure",
+          "Info"
+        ],
+        "x-enum-descriptions": [
+          "Success",
+          "Failure",
+          "Info"
+        ]
+      },
+      "AuditSubjectType": {
+        "enum": [
+          0,
+          1,
+          2,
+          3,
+          4
+        ],
+        "type": "integer",
+        "description": "Members:\n- `0` — Series\n- `1` — Person\n- `2` — Collection\n- `3` — Chapter\n- `4` — Global",
+        "format": "int32",
+        "x-enum-varnames": [
+          "Series",
+          "Person",
+          "Collection",
+          "Chapter",
+          "Global"
+        ],
+        "x-enum-descriptions": [
+          "Series",
+          "Person",
+          "Collection",
+          "Chapter",
+          "Global"
+        ]
       },
       "AuthKeyDto": {
         "required": [
@@ -21515,6 +22532,23 @@
         },
         "additionalProperties": false
       },
+      "CancelKavitaPlusLicenseDto": {
+        "required": [
+          "email"
+        ],
+        "type": "object",
+        "properties": {
+          "email": {
+            "type": "string",
+            "nullable": true
+          },
+          "comment": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
       "CblBookResult": {
         "type": "object",
         "properties": {
@@ -21605,6 +22639,9 @@
           "sha": {
             "type": "string",
             "nullable": true
+          },
+          "promote": {
+            "type": "boolean"
           }
         },
         "additionalProperties": false
@@ -21716,6 +22753,10 @@
           },
           "isUpdate": {
             "type": "boolean"
+          },
+          "readingListId": {
+            "type": "integer",
+            "format": "int32"
           }
         },
         "additionalProperties": false
@@ -21917,6 +22958,24 @@
             "format": "int32"
           },
           "seriesName": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "ChangeEmailOnLicenseDto": {
+        "required": [
+          "newEmail",
+          "oldEmail"
+        ],
+        "type": "object",
+        "properties": {
+          "oldEmail": {
+            "type": "string",
+            "nullable": true
+          },
+          "newEmail": {
             "type": "string",
             "nullable": true
           }
@@ -22298,6 +23357,10 @@
           "mangaBakaId": {
             "type": "integer",
             "format": "int64"
+          },
+          "cbrId": {
+            "type": "integer",
+            "format": "int32"
           }
         },
         "additionalProperties": false
@@ -22876,6 +23939,20 @@
         },
         "additionalProperties": false
       },
+      "DailyBucketDto": {
+        "type": "object",
+        "properties": {
+          "date": {
+            "type": "string",
+            "format": "date"
+          },
+          "count": {
+            "type": "integer",
+            "format": "int64"
+          }
+        },
+        "additionalProperties": false
+      },
       "DashboardStreamDto": {
         "required": [
           "name"
@@ -23374,6 +24451,111 @@
         },
         "additionalProperties": false
       },
+      "ExternalCoverImageType": {
+        "enum": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8
+        ],
+        "type": "integer",
+        "description": "Members:\n- `0` — Series\n- `1` — Volume\n- `2` — VolumeBack\n- `3` — Chapter\n- `4` — Issue\n- `5` — Banner\n- `6` — Season\n- `7` — Audiobook\n- `8` — Other",
+        "format": "int32",
+        "x-enum-varnames": [
+          "Series",
+          "Volume",
+          "VolumeBack",
+          "Chapter",
+          "Issue",
+          "Banner",
+          "Season",
+          "Audiobook",
+          "Other"
+        ],
+        "x-enum-descriptions": [
+          "Series",
+          "Volume",
+          "VolumeBack",
+          "Chapter",
+          "Issue",
+          "Banner",
+          "Season",
+          "Audiobook",
+          "Other"
+        ]
+      },
+      "ExternalCoverResponseDto": {
+        "required": [
+          "url"
+        ],
+        "type": "object",
+        "properties": {
+          "url": {
+            "type": "string",
+            "nullable": true
+          },
+          "type": {
+            "$ref": "#/components/schemas/ExternalCoverImageType"
+          },
+          "number": {
+            "type": "number",
+            "format": "float",
+            "nullable": true
+          },
+          "language": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "ExternalMetadataIdsDto": {
+        "type": "object",
+        "properties": {
+          "malId": {
+            "type": "integer",
+            "format": "int64",
+            "nullable": true
+          },
+          "aniListId": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "mangabakaId": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "hardcoverId": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "cbrId": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "seriesName": {
+            "type": "string",
+            "nullable": true
+          },
+          "localizedSeriesName": {
+            "type": "string",
+            "nullable": true
+          },
+          "plusMediaFormat": {
+            "$ref": "#/components/schemas/PlusMediaFormat"
+          }
+        },
+        "additionalProperties": false
+      },
       "ExternalSeriesDetailDto": {
         "type": "object",
         "properties": {
@@ -23392,6 +24574,16 @@
             "nullable": true
           },
           "cbrId": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "hardcoverId": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "mangabakaId": {
             "type": "integer",
             "format": "int32",
             "nullable": true
@@ -24213,6 +25405,777 @@
         },
         "additionalProperties": false
       },
+      "KavitaPlusApiName": {
+        "enum": [
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8
+        ],
+        "type": "integer",
+        "description": "Members:\n- `1` — CoverRequests\n- `2` — MetadataSync\n- `3` — SeriesMatched\n- `4` — Scrobbles\n- `5` — MalStackImport\n- `6` — WantToRead\n- `7` — Recommendations\n- `8` — Reviews",
+        "format": "int32",
+        "x-enum-varnames": [
+          "CoverRequests",
+          "MetadataSync",
+          "SeriesMatched",
+          "Scrobbles",
+          "MalStackImport",
+          "WantToRead",
+          "Recommendations",
+          "Reviews"
+        ],
+        "x-enum-descriptions": [
+          "CoverRequests",
+          "MetadataSync",
+          "SeriesMatched",
+          "Scrobbles",
+          "MalStackImport",
+          "WantToRead",
+          "Recommendations",
+          "Reviews"
+        ]
+      },
+      "KavitaPlusAuditCategory": {
+        "enum": [
+          0,
+          1,
+          2,
+          3,
+          4
+        ],
+        "type": "integer",
+        "description": "Members:\n- `0` — Match\n- `1` — Metadata\n- `2` — Scrobble\n- `3` — Sync\n- `4` — System",
+        "format": "int32",
+        "x-enum-varnames": [
+          "Match",
+          "Metadata",
+          "Scrobble",
+          "Sync",
+          "System"
+        ],
+        "x-enum-descriptions": [
+          "Match",
+          "Metadata",
+          "Scrobble",
+          "Sync",
+          "System"
+        ]
+      },
+      "KavitaPlusAuditEntryDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "createdUtc": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "category": {
+            "$ref": "#/components/schemas/KavitaPlusAuditCategory"
+          },
+          "eventType": {
+            "$ref": "#/components/schemas/KavitaPlusEventType"
+          },
+          "status": {
+            "$ref": "#/components/schemas/AuditStatus"
+          },
+          "seriesId": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "libraryId": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "seriesName": {
+            "type": "string",
+            "nullable": true
+          },
+          "subjectType": {
+            "$ref": "#/components/schemas/AuditSubjectType"
+          },
+          "subjectId": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "userId": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "username": {
+            "type": "string",
+            "nullable": true
+          },
+          "diff": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/MetadataFieldChangeDto"
+            },
+            "nullable": true
+          },
+          "errorMessage": {
+            "type": "string",
+            "nullable": true
+          },
+          "scrobbleDetails": {
+            "$ref": "#/components/schemas/KavitaPlusScrobbleDetailsDto"
+          },
+          "matchDetails": {
+            "$ref": "#/components/schemas/KavitaPlusAuditMatchDetailsDto"
+          },
+          "syncDetails": {
+            "$ref": "#/components/schemas/KavitaPlusAuditSyncDetailsDto"
+          },
+          "metadataExtras": {
+            "$ref": "#/components/schemas/KavitaPlusAuditMetadataExtrasDto"
+          },
+          "systemDetails": {
+            "$ref": "#/components/schemas/KavitaPlusAuditSystemDetailsDto"
+          },
+          "canRetry": {
+            "type": "boolean"
+          }
+        },
+        "additionalProperties": false
+      },
+      "KavitaPlusAuditFilterDto": {
+        "type": "object",
+        "properties": {
+          "category": {
+            "$ref": "#/components/schemas/KavitaPlusAuditCategory"
+          },
+          "status": {
+            "$ref": "#/components/schemas/AuditStatus"
+          },
+          "subjectType": {
+            "$ref": "#/components/schemas/AuditSubjectType"
+          },
+          "provider": {
+            "$ref": "#/components/schemas/ScrobbleProvider"
+          },
+          "userId": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "seriesId": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "fromUtc": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "toUtc": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "search": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "KavitaPlusAuditMatchDetailsDto": {
+        "type": "object",
+        "properties": {
+          "matchedName": {
+            "type": "string",
+            "nullable": true
+          },
+          "before": {
+            "$ref": "#/components/schemas/AuditLogMatchExternalIdsParamsDto"
+          },
+          "after": {
+            "$ref": "#/components/schemas/AuditLogMatchExternalIdsParamsDto"
+          },
+          "reason": {
+            "type": "string",
+            "nullable": true
+          },
+          "dontMatch": {
+            "type": "boolean",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "KavitaPlusAuditMetadataExtrasDto": {
+        "type": "object",
+        "properties": {
+          "coverUrl": {
+            "type": "string",
+            "nullable": true
+          },
+          "issueNumber": {
+            "type": "string",
+            "nullable": true
+          },
+          "personName": {
+            "type": "string",
+            "nullable": true
+          },
+          "aliasAdded": {
+            "type": "string",
+            "nullable": true
+          },
+          "fetchTrigger": {
+            "$ref": "#/components/schemas/MetadataFetchTrigger"
+          }
+        },
+        "additionalProperties": false
+      },
+      "KavitaPlusAuditSeriesInfoDto": {
+        "type": "object",
+        "properties": {
+          "seriesId": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "libraryId": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "seriesName": {
+            "type": "string",
+            "nullable": true
+          },
+          "isMatched": {
+            "type": "boolean"
+          },
+          "aniListId": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "malId": {
+            "type": "integer",
+            "format": "int64",
+            "nullable": true
+          },
+          "hardcoverId": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "metronId": {
+            "type": "integer",
+            "format": "int64",
+            "nullable": true
+          },
+          "comicVineId": {
+            "type": "string",
+            "nullable": true
+          },
+          "mangaBakaId": {
+            "type": "integer",
+            "format": "int64",
+            "nullable": true
+          },
+          "cbrId": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "metadataProvider": {
+            "$ref": "#/components/schemas/MetadataProvider"
+          },
+          "nextRefreshUtc": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "lastRefreshedUtc": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "recentEvents": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/KavitaPlusAuditEntryDto"
+            },
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "KavitaPlusAuditStatsDto": {
+        "type": "object",
+        "properties": {
+          "events24H": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "failures24H": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "unresolvedMatchFailures": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "matchedSeriesCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "totalEligibleSeriesCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "staleMatchesCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "blacklistedSeriesCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "scrobbleQueueCount": {
+            "type": "integer",
+            "format": "int32"
+          }
+        },
+        "additionalProperties": false
+      },
+      "KavitaPlusAuditSyncDetailsDto": {
+        "type": "object",
+        "properties": {
+          "collectionName": {
+            "type": "string",
+            "nullable": true
+          },
+          "stackId": {
+            "type": "string",
+            "nullable": true
+          },
+          "itemCount": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "missingCount": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "collectionUrl": {
+            "type": "string",
+            "nullable": true
+          },
+          "seriesName": {
+            "type": "string",
+            "nullable": true
+          },
+          "seriesId": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "userName": {
+            "type": "string",
+            "nullable": true
+          },
+          "hasMal": {
+            "type": "boolean",
+            "nullable": true
+          },
+          "hasAniList": {
+            "type": "boolean",
+            "nullable": true
+          },
+          "seriesMatched": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "KavitaPlusAuditSystemDetailsDto": {
+        "type": "object",
+        "properties": {
+          "provider": {
+            "$ref": "#/components/schemas/ScrobbleProvider"
+          },
+          "validUntilUtc": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "userInfo": {
+            "$ref": "#/components/schemas/KavitaPlusUserInfo"
+          }
+        },
+        "additionalProperties": false
+      },
+      "KavitaPlusBillingInterval": {
+        "enum": [
+          0,
+          1,
+          2,
+          3
+        ],
+        "type": "integer",
+        "description": "Members:\n- `0` — Day\n- `1` — Week\n- `2` — Month\n- `3` — Year",
+        "format": "int32",
+        "x-enum-varnames": [
+          "Day",
+          "Week",
+          "Month",
+          "Year"
+        ],
+        "x-enum-descriptions": [
+          "Day",
+          "Week",
+          "Month",
+          "Year"
+        ]
+      },
+      "KavitaPlusEventType": {
+        "enum": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          10,
+          11,
+          13,
+          20,
+          21,
+          30,
+          31,
+          40,
+          41,
+          50,
+          51,
+          52,
+          53,
+          54,
+          55,
+          56,
+          57,
+          60,
+          61,
+          62,
+          80,
+          81
+        ],
+        "type": "integer",
+        "description": "Members:\n- `0` — SeriesMatched\n- `1` — SeriesMatchFailed\n- `2` — SeriesBlacklisted\n- `3` — SeriesMatchFixed\n- `4` — SeriesDontMatchSet\n- `10` — MetadataFetched\n- `11` — MetadataUpdated\n- `13` — CoverUpdated\n- `20` — ChapterMetadataUpdated\n- `21` — ChapterCoverUpdated\n- `30` — PersonCoverUpdated\n- `31` — PersonAliasAdded\n- `40` — CollectionSynced\n- `41` — CollectionItemAdded\n- `50` — ScrobbleEventCreated\n- `51` — ScrobbleEventUpdated\n- `52` — ScrobbleEventSent\n- `53` — ScrobbleEventFailed\n- `54` — ScrobbleRateLimitHit\n- `55` — ScrobbleEventSkipped\n- `56` — ScrobbleHoldRemoved\n- `57` — ScrobbleHoldAdded\n- `60` — SyncStarted\n- `61` — SyncCompleted\n- `62` — SyncFailed\n- `80` — SystemTokenRefresh\n- `81` — SystemProviderInfoSync",
+        "format": "int32",
+        "x-enum-varnames": [
+          "SeriesMatched",
+          "SeriesMatchFailed",
+          "SeriesBlacklisted",
+          "SeriesMatchFixed",
+          "SeriesDontMatchSet",
+          "MetadataFetched",
+          "MetadataUpdated",
+          "CoverUpdated",
+          "ChapterMetadataUpdated",
+          "ChapterCoverUpdated",
+          "PersonCoverUpdated",
+          "PersonAliasAdded",
+          "CollectionSynced",
+          "CollectionItemAdded",
+          "ScrobbleEventCreated",
+          "ScrobbleEventUpdated",
+          "ScrobbleEventSent",
+          "ScrobbleEventFailed",
+          "ScrobbleRateLimitHit",
+          "ScrobbleEventSkipped",
+          "ScrobbleHoldRemoved",
+          "ScrobbleHoldAdded",
+          "SyncStarted",
+          "SyncCompleted",
+          "SyncFailed",
+          "SystemTokenRefresh",
+          "SystemProviderInfoSync"
+        ],
+        "x-enum-descriptions": [
+          "SeriesMatched",
+          "SeriesMatchFailed",
+          "SeriesBlacklisted",
+          "SeriesMatchFixed",
+          "SeriesDontMatchSet",
+          "MetadataFetched",
+          "MetadataUpdated",
+          "CoverUpdated",
+          "ChapterMetadataUpdated",
+          "ChapterCoverUpdated",
+          "PersonCoverUpdated",
+          "PersonAliasAdded",
+          "CollectionSynced",
+          "CollectionItemAdded",
+          "ScrobbleEventCreated",
+          "ScrobbleEventUpdated",
+          "ScrobbleEventSent",
+          "ScrobbleEventFailed",
+          "ScrobbleRateLimitHit",
+          "ScrobbleEventSkipped",
+          "ScrobbleHoldRemoved",
+          "ScrobbleHoldAdded",
+          "SyncStarted",
+          "SyncCompleted",
+          "SyncFailed",
+          "SystemTokenRefresh",
+          "SystemProviderInfoSync"
+        ]
+      },
+      "KavitaPlusLicenseUsageDto": {
+        "type": "object",
+        "properties": {
+          "generatedAtUtc": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "stats": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ApiUsageDto"
+            },
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "KavitaPlusProductInfoDto": {
+        "type": "object",
+        "properties": {
+          "productName": {
+            "type": "string",
+            "nullable": true
+          },
+          "priceAmount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "priceCurrency": {
+            "type": "string",
+            "nullable": true
+          },
+          "billingInterval": {
+            "$ref": "#/components/schemas/KavitaPlusBillingInterval"
+          }
+        },
+        "additionalProperties": false
+      },
+      "KavitaPlusProviderHealthIncidentType": {
+        "enum": [
+          1,
+          2
+        ],
+        "type": "integer",
+        "description": "Members:\n- `1` — Degraded\n- `2` — Down",
+        "format": "int32",
+        "x-enum-varnames": [
+          "Degraded",
+          "Down"
+        ],
+        "x-enum-descriptions": [
+          "Degraded",
+          "Down"
+        ]
+      },
+      "KavitaPlusProviderHealthSnapshotDto": {
+        "type": "object",
+        "properties": {
+          "provider": {
+            "$ref": "#/components/schemas/ScrobbleProvider"
+          },
+          "avgLatencyMs": {
+            "type": "number",
+            "format": "double"
+          },
+          "status": {
+            "$ref": "#/components/schemas/KavitaPlusProviderHealthStatus"
+          },
+          "lastIncident": {
+            "$ref": "#/components/schemas/KavitaPlusProviderIncidentDto"
+          }
+        },
+        "additionalProperties": false
+      },
+      "KavitaPlusProviderHealthStatus": {
+        "enum": [
+          0,
+          1,
+          2,
+          3
+        ],
+        "type": "integer",
+        "description": "Members:\n- `0` — Unknown\n- `1` — Operational\n- `2` — Degraded\n- `3` — Down",
+        "format": "int32",
+        "x-enum-varnames": [
+          "Unknown",
+          "Operational",
+          "Degraded",
+          "Down"
+        ],
+        "x-enum-descriptions": [
+          "Unknown",
+          "Operational",
+          "Degraded",
+          "Down"
+        ]
+      },
+      "KavitaPlusProviderIncidentDto": {
+        "type": "object",
+        "properties": {
+          "startedAtUtc": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "endedAtUtc": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "type": {
+            "$ref": "#/components/schemas/KavitaPlusProviderHealthIncidentType"
+          }
+        },
+        "additionalProperties": false
+      },
+      "KavitaPlusRegisterResultDto": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean"
+          },
+          "isSubscriptionActive": {
+            "type": "boolean"
+          },
+          "errorCode": {
+            "$ref": "#/components/schemas/KavitaPlusRegistrationErrorCode"
+          }
+        },
+        "additionalProperties": false
+      },
+      "KavitaPlusRegistrationErrorCode": {
+        "enum": [
+          0,
+          1,
+          2,
+          3,
+          4
+        ],
+        "type": "integer",
+        "description": "Members:\n- `0` — None\n- `1` — Registration Failed (RegistrationFailed)\n- `2` — Already Registered (AlreadyRegistered)\n- `3` — Subscription Inactive (SubscriptionInactive)\n- `4` — Internal Error (InternalError)",
+        "format": "int32",
+        "x-enum-varnames": [
+          "None",
+          "RegistrationFailed",
+          "AlreadyRegistered",
+          "SubscriptionInactive",
+          "InternalError"
+        ],
+        "x-enum-descriptions": [
+          "None",
+          "Registration Failed",
+          "Already Registered",
+          "Subscription Inactive",
+          "Internal Error"
+        ]
+      },
+      "KavitaPlusScrobbleDetailsDto": {
+        "type": "object",
+        "properties": {
+          "scrobbleEventType": {
+            "$ref": "#/components/schemas/ScrobbleEventType"
+          },
+          "chapterNumber": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "volumeNumber": {
+            "type": "number",
+            "format": "float",
+            "nullable": true
+          },
+          "percentRead": {
+            "type": "number",
+            "format": "float",
+            "nullable": true
+          },
+          "rating": {
+            "type": "number",
+            "format": "float",
+            "nullable": true
+          },
+          "reviewBody": {
+            "type": "string",
+            "nullable": true
+          },
+          "readStatus": {
+            "$ref": "#/components/schemas/ScrobbleReadStatus"
+          },
+          "provider": {
+            "$ref": "#/components/schemas/ScrobbleProvider"
+          },
+          "libraryType": {
+            "$ref": "#/components/schemas/LibraryType"
+          }
+        },
+        "additionalProperties": false
+      },
+      "KavitaPlusSubscriptionState": {
+        "enum": [
+          0,
+          1,
+          2,
+          3,
+          4
+        ],
+        "type": "integer",
+        "description": "Members:\n- `0` — Active\n- `1` — Cancelled\n- `2` — Paused\n- `3` — Cancelling\n- `4` — Expired",
+        "format": "int32",
+        "x-enum-varnames": [
+          "Active",
+          "Cancelled",
+          "Paused",
+          "Cancelling",
+          "Expired"
+        ],
+        "x-enum-descriptions": [
+          "Active",
+          "Cancelled",
+          "Paused",
+          "Cancelling",
+          "Expired"
+        ]
+      },
+      "KavitaPlusUserInfo": {
+        "required": [
+          "username"
+        ],
+        "type": "object",
+        "properties": {
+          "username": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
       "KeyBind": {
         "required": [
           "key"
@@ -24458,14 +26421,46 @@
       "LicenseInfoDto": {
         "type": "object",
         "properties": {
-          "expirationDate": {
-            "type": "string",
-            "format": "date-time"
+          "state": {
+            "$ref": "#/components/schemas/KavitaPlusSubscriptionState"
           },
           "isActive": {
             "type": "boolean"
           },
           "isCancelled": {
+            "type": "boolean"
+          },
+          "expirationDate": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "nextChargeDate": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "subscribedSince": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "productName": {
+            "type": "string",
+            "nullable": true
+          },
+          "priceAmount": {
+            "type": "integer",
+            "format": "int64",
+            "nullable": true
+          },
+          "priceCurrency": {
+            "type": "string",
+            "nullable": true
+          },
+          "billingInterval": {
+            "$ref": "#/components/schemas/KavitaPlusBillingInterval"
+          },
+          "hasActiveDiscount": {
             "type": "boolean"
           },
           "isValidVersion": {
@@ -24485,6 +26480,21 @@
           "installId": {
             "type": "string",
             "nullable": true
+          },
+          "pastDue": {
+            "type": "boolean"
+          },
+          "discordId": {
+            "type": "string",
+            "nullable": true
+          },
+          "discordUsername": {
+            "type": "string",
+            "nullable": true
+          },
+          "hasDiscordSet": {
+            "type": "boolean",
+            "readOnly": true
           }
         },
         "additionalProperties": false
@@ -24545,24 +26555,6 @@
           "existingId": {
             "type": "integer",
             "format": "int32"
-          }
-        },
-        "additionalProperties": false
-      },
-      "MalUserInfoDto": {
-        "required": [
-          "accessToken",
-          "username"
-        ],
-        "type": "object",
-        "properties": {
-          "username": {
-            "type": "string",
-            "nullable": true
-          },
-          "accessToken": {
-            "type": "string",
-            "nullable": true
           }
         },
         "additionalProperties": false
@@ -24772,15 +26764,59 @@
       "MatchSeriesDto": {
         "type": "object",
         "properties": {
-          "dontMatch": {
-            "type": "boolean"
-          },
           "seriesId": {
             "type": "integer",
             "format": "int32"
           },
           "query": {
             "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "MatchSeriesInfoDto": {
+        "type": "object",
+        "properties": {
+          "hasMatch": {
+            "type": "boolean"
+          },
+          "isLegacy": {
+            "type": "boolean"
+          },
+          "plusMediaFormat": {
+            "$ref": "#/components/schemas/PlusMediaFormat"
+          },
+          "libraryType": {
+            "$ref": "#/components/schemas/LibraryType"
+          },
+          "matchedProvider": {
+            "$ref": "#/components/schemas/MetadataProvider"
+          },
+          "primaryProvider": {
+            "$ref": "#/components/schemas/MetadataProvider"
+          },
+          "seriesFormat": {
+            "$ref": "#/components/schemas/MangaFormat"
+          },
+          "mangaBakaId": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "aniListId": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "hardcoverId": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "cbrId": {
+            "type": "integer",
+            "format": "int32",
             "nullable": true
           }
         },
@@ -24925,6 +26961,100 @@
         },
         "additionalProperties": false
       },
+      "MetadataFetchTrigger": {
+        "enum": [
+          0,
+          1,
+          2,
+          3,
+          4
+        ],
+        "type": "integer",
+        "description": "Members:\n- `0` — Unknown\n- `1` — Series Added (SeriesAdded)\n- `2` — On Demand (OnDemand)\n- `3` — Manual Match (ManualMatch)\n- `4` — Scheduled Refresh (ScheduledRefresh)",
+        "format": "int32",
+        "x-enum-varnames": [
+          "Unknown",
+          "SeriesAdded",
+          "OnDemand",
+          "ManualMatch",
+          "ScheduledRefresh"
+        ],
+        "x-enum-descriptions": [
+          "Unknown",
+          "Series Added",
+          "On Demand",
+          "Manual Match",
+          "Scheduled Refresh"
+        ]
+      },
+      "MetadataFieldChangeDto": {
+        "type": "object",
+        "properties": {
+          "field": {
+            "$ref": "#/components/schemas/MetadataFieldChangeKind"
+          },
+          "from": {
+            "nullable": true
+          },
+          "to": {
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "MetadataFieldChangeKind": {
+        "enum": [
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8,
+          9,
+          10,
+          11,
+          12,
+          13,
+          14
+        ],
+        "type": "integer",
+        "description": "Members:\n- `1` — Relationships\n- `2` — Characters\n- `3` — Artists\n- `4` — Writers\n- `5` — Tags\n- `6` — Genres\n- `7` — PublicationStatus\n- `8` — AgeRating\n- `9` — ExternalIds\n- `10` — Summary\n- `11` — Title\n- `12` — ReleaseDate\n- `13` — ReleaseYear\n- `14` — LocalizedName",
+        "format": "int32",
+        "x-enum-varnames": [
+          "Relationships",
+          "Characters",
+          "Artists",
+          "Writers",
+          "Tags",
+          "Genres",
+          "PublicationStatus",
+          "AgeRating",
+          "ExternalIds",
+          "Summary",
+          "Title",
+          "ReleaseDate",
+          "ReleaseYear",
+          "LocalizedName"
+        ],
+        "x-enum-descriptions": [
+          "Relationships",
+          "Characters",
+          "Artists",
+          "Writers",
+          "Tags",
+          "Genres",
+          "PublicationStatus",
+          "AgeRating",
+          "ExternalIds",
+          "Summary",
+          "Title",
+          "ReleaseDate",
+          "ReleaseYear",
+          "LocalizedName"
+        ]
+      },
       "MetadataFieldMappingDto": {
         "type": "object",
         "properties": {
@@ -24967,6 +27097,26 @@
         "x-enum-descriptions": [
           "Genre",
           "Tag"
+        ]
+      },
+      "MetadataProvider": {
+        "enum": [
+          2,
+          3,
+          4
+        ],
+        "type": "integer",
+        "description": "Members:\n- `2` — Hardcover\n- `3` — Mangabaka\n- `4` — ComicBookRoundup",
+        "format": "int32",
+        "x-enum-varnames": [
+          "Hardcover",
+          "Mangabaka",
+          "ComicBookRoundup"
+        ],
+        "x-enum-descriptions": [
+          "Hardcover",
+          "Mangabaka",
+          "ComicBookRoundup"
         ]
       },
       "MetadataSettingField": {
@@ -25201,6 +27351,29 @@
           }
         },
         "additionalProperties": false
+      },
+      "OAuthUpstream": {
+        "enum": [
+          0,
+          1,
+          2,
+          3
+        ],
+        "type": "integer",
+        "description": "Members:\n- `0` — Discord\n- `1` — MangaBaka\n- `2` — AniList\n- `3` — MyAnimeList",
+        "format": "int32",
+        "x-enum-varnames": [
+          "Discord",
+          "MangaBaka",
+          "AniList",
+          "MyAnimeList"
+        ],
+        "x-enum-descriptions": [
+          "Discord",
+          "MangaBaka",
+          "AniList",
+          "MyAnimeList"
+        ]
       },
       "OidcConfigDto": {
         "type": "object",
@@ -26047,6 +28220,29 @@
         },
         "additionalProperties": false
       },
+      "ReadStatusTransitionRule": {
+        "type": "object",
+        "properties": {
+          "enabled": {
+            "type": "boolean"
+          },
+          "days": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "transitionStatus": {
+            "$ref": "#/components/schemas/ScrobbleReadStatus"
+          },
+          "excludedPublicationStatus": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PublicationStatus"
+            },
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
       "ReadTimeByHourDto": {
         "type": "object",
         "properties": {
@@ -26467,10 +28663,12 @@
           3,
           4,
           5,
-          6
+          6,
+          7,
+          8
         ],
         "type": "integer",
-        "description": "Members:\n- `1` — Title\n- `2` — ReleaseYear\n- `3` — ItemCount\n- `4` — Tags\n- `5` — Writer\n- `6` — Artist",
+        "description": "Members:\n- `1` — Title\n- `2` — ReleaseYear\n- `3` — ItemCount\n- `4` — Tags\n- `5` — Writer\n- `6` — Artist\n- `7` — Provider\n- `8` — MissingItemCount",
         "format": "int32",
         "x-enum-varnames": [
           "Title",
@@ -26478,7 +28676,9 @@
           "ItemCount",
           "Tags",
           "Writer",
-          "Artist"
+          "Artist",
+          "Provider",
+          "MissingItemCount"
         ],
         "x-enum-descriptions": [
           "Title",
@@ -26486,7 +28686,9 @@
           "ItemCount",
           "Tags",
           "Writer",
-          "Artist"
+          "Artist",
+          "Provider",
+          "MissingItemCount"
         ]
       },
       "ReadingListFilterStatementDto": {
@@ -27212,6 +29414,24 @@
         },
         "additionalProperties": false
       },
+      "RenewKavitaPlusLicenseDto": {
+        "required": [
+          "billingInterval",
+          "email"
+        ],
+        "type": "object",
+        "properties": {
+          "email": {
+            "minLength": 1,
+            "type": "string",
+            "format": "email"
+          },
+          "billingInterval": {
+            "$ref": "#/components/schemas/KavitaPlusBillingInterval"
+          }
+        },
+        "additionalProperties": false
+      },
       "RereadChapterDto": {
         "type": "object",
         "properties": {
@@ -27291,6 +29511,26 @@
           }
         },
         "additionalProperties": false
+      },
+      "ReviewScrobbleTarget": {
+        "enum": [
+          0,
+          1,
+          2
+        ],
+        "type": "integer",
+        "description": "Members:\n- `0` — Private\n- `1` — Friends\n- `2` — Public",
+        "format": "int32",
+        "x-enum-varnames": [
+          "Private",
+          "Friends",
+          "Public"
+        ],
+        "x-enum-descriptions": [
+          "Private",
+          "Friends",
+          "Public"
+        ]
       },
       "RgbaColor": {
         "type": "object",
@@ -27449,8 +29689,14 @@
             "format": "float",
             "nullable": true
           },
+          "readStatus": {
+            "$ref": "#/components/schemas/ScrobbleReadStatus"
+          },
           "scrobbleEventType": {
             "$ref": "#/components/schemas/ScrobbleEventType"
+          },
+          "scrobbleProvider": {
+            "$ref": "#/components/schemas/ScrobbleProvider"
           },
           "isErrored": {
             "type": "boolean"
@@ -27519,24 +29765,27 @@
           1,
           2,
           3,
-          4
+          4,
+          5
         ],
         "type": "integer",
-        "description": "Members:\n- `0` — Chapter Read (ChapterRead)\n- `1` — Add to Want to Read (AddWantToRead)\n- `2` — Remove from Want to Read (RemoveWantToRead)\n- `3` — Score Updated (ScoreUpdated)\n- `4` — Review Added/Updated (Review)",
+        "description": "Members:\n- `0` — Chapter Read (ChapterRead)\n- `1` — Add to Want to Read (AddWantToRead)\n- `2` — Remove from Want to Read (RemoveWantToRead)\n- `3` — Score Updated (ScoreUpdated)\n- `4` — Review Added/Updated (Review)\n- `5` — Read status Updated (ReadStatusUpdate)",
         "format": "int32",
         "x-enum-varnames": [
           "ChapterRead",
           "AddWantToRead",
           "RemoveWantToRead",
           "ScoreUpdated",
-          "Review"
+          "Review",
+          "ReadStatusUpdate"
         ],
         "x-enum-descriptions": [
           "Chapter Read",
           "Add to Want to Read",
           "Remove from Want to Read",
           "Score Updated",
-          "Review Added/Updated"
+          "Review Added/Updated",
+          "Read status Updated"
         ]
       },
       "ScrobbleHoldDto": {
@@ -27571,24 +29820,136 @@
           1,
           2,
           4,
-          5
+          5,
+          6
         ],
         "type": "integer",
-        "description": "Members:\n- `0` — Kavita\n- `1` — AniList\n- `2` — Mal\n- `4` — Cbr\n- `5` — Hardcover",
+        "description": "Members:\n- `0` — Kavita\n- `1` — AniList\n- `2` — Mal\n- `4` — Cbr\n- `5` — Hardcover\n- `6` — MangaBaka",
         "format": "int32",
         "x-enum-varnames": [
           "Kavita",
           "AniList",
           "Mal",
           "Cbr",
-          "Hardcover"
+          "Hardcover",
+          "MangaBaka"
         ],
         "x-enum-descriptions": [
           "Kavita",
           "AniList",
           "Mal",
           "Cbr",
-          "Hardcover"
+          "Hardcover",
+          "MangaBaka"
+        ]
+      },
+      "ScrobbleProviderDto": {
+        "type": "object",
+        "properties": {
+          "provider": {
+            "$ref": "#/components/schemas/ScrobbleProvider"
+          },
+          "userName": {
+            "type": "string",
+            "nullable": true
+          },
+          "authenticationToken": {
+            "type": "string",
+            "nullable": true
+          },
+          "refreshToken": {
+            "type": "string",
+            "nullable": true
+          },
+          "validUntilUtc": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "lastSyncedUtc": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "hasRunScrobbleEventGeneration": {
+            "type": "boolean"
+          },
+          "scrobbleEventGenerationRan": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "settings": {
+            "$ref": "#/components/schemas/ScrobbleProviderSettingsDto"
+          }
+        },
+        "additionalProperties": false
+      },
+      "ScrobbleProviderSettingsDto": {
+        "type": "object",
+        "properties": {
+          "progressScrobbling": {
+            "type": "boolean"
+          },
+          "wantToReadSync": {
+            "type": "boolean"
+          },
+          "ratingScrobbling": {
+            "type": "boolean"
+          },
+          "reviewsScrobbling": {
+            "type": "boolean"
+          },
+          "reviewScrobbleTarget": {
+            "$ref": "#/components/schemas/ReviewScrobbleTarget"
+          },
+          "allLibraries": {
+            "type": "boolean"
+          },
+          "libraries": {
+            "type": "array",
+            "items": {
+              "type": "integer",
+              "format": "int32"
+            },
+            "nullable": true
+          },
+          "highestAgeRating": {
+            "$ref": "#/components/schemas/AgeRating"
+          },
+          "inactiveSeriesRule": {
+            "$ref": "#/components/schemas/ReadStatusTransitionRule"
+          },
+          "droppedSeriesRule": {
+            "$ref": "#/components/schemas/ReadStatusTransitionRule"
+          }
+        },
+        "additionalProperties": false
+      },
+      "ScrobbleReadStatus": {
+        "enum": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5
+        ],
+        "type": "integer",
+        "description": "Members:\n- `0` — Ignore\n- `1` — Want to Read (WantToRead)\n- `2` — Read\n- `3` — Un read (UnRead)\n- `4` — Dropped\n- `5` — On hold (OnHold)",
+        "format": "int32",
+        "x-enum-varnames": [
+          "Ignore",
+          "WantToRead",
+          "Read",
+          "UnRead",
+          "Dropped",
+          "OnHold"
+        ],
+        "x-enum-descriptions": [
+          "Ignore",
+          "Want to Read",
+          "Read",
+          "Un read",
+          "Dropped",
+          "On hold"
         ]
       },
       "SearchResultDto": {
@@ -28013,6 +30374,10 @@
           "mangaBakaId": {
             "type": "integer",
             "format": "int64"
+          },
+          "cbrId": {
+            "type": "integer",
+            "format": "int32"
           }
         },
         "additionalProperties": false
@@ -29295,6 +31660,10 @@
             "type": "integer",
             "format": "int64"
           },
+          "cbrId": {
+            "type": "integer",
+            "format": "int32"
+          },
           "seriesId": {
             "type": "integer",
             "format": "int32"
@@ -29375,6 +31744,361 @@
         },
         "additionalProperties": false
       },
+      "TachiyomiChapterDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "range": {
+            "type": "string",
+            "nullable": true
+          },
+          "minNumber": {
+            "type": "number",
+            "format": "float"
+          },
+          "maxNumber": {
+            "type": "number",
+            "format": "float"
+          },
+          "sortOrder": {
+            "type": "number",
+            "format": "float"
+          },
+          "pages": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "isSpecial": {
+            "type": "boolean"
+          },
+          "title": {
+            "type": "string",
+            "nullable": true
+          },
+          "files": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/MangaFileDto"
+            },
+            "nullable": true
+          },
+          "pagesRead": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "totalReads": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "lastReadingProgressUtc": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "lastReadingProgress": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "coverImageLocked": {
+            "type": "boolean"
+          },
+          "volumeId": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "createdUtc": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "lastModifiedUtc": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "created": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "releaseDate": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "titleName": {
+            "type": "string",
+            "nullable": true
+          },
+          "summary": {
+            "type": "string",
+            "nullable": true
+          },
+          "ageRating": {
+            "$ref": "#/components/schemas/AgeRating"
+          },
+          "wordCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "volumeTitle": {
+            "type": "string",
+            "nullable": true
+          },
+          "minHoursToRead": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "maxHoursToRead": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "avgHoursToRead": {
+            "type": "number",
+            "format": "float"
+          },
+          "webLinks": {
+            "type": "string",
+            "nullable": true
+          },
+          "isbn": {
+            "type": "string",
+            "nullable": true
+          },
+          "writers": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PersonDto"
+            },
+            "nullable": true
+          },
+          "coverArtists": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PersonDto"
+            },
+            "nullable": true
+          },
+          "publishers": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PersonDto"
+            },
+            "nullable": true
+          },
+          "characters": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PersonDto"
+            },
+            "nullable": true
+          },
+          "pencillers": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PersonDto"
+            },
+            "nullable": true
+          },
+          "inkers": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PersonDto"
+            },
+            "nullable": true
+          },
+          "imprints": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PersonDto"
+            },
+            "nullable": true
+          },
+          "colorists": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PersonDto"
+            },
+            "nullable": true
+          },
+          "letterers": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PersonDto"
+            },
+            "nullable": true
+          },
+          "editors": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PersonDto"
+            },
+            "nullable": true
+          },
+          "translators": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PersonDto"
+            },
+            "nullable": true
+          },
+          "teams": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PersonDto"
+            },
+            "nullable": true
+          },
+          "locations": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PersonDto"
+            },
+            "nullable": true
+          },
+          "genres": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/GenreTagDto"
+            },
+            "nullable": true
+          },
+          "tags": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/TagDto"
+            },
+            "nullable": true
+          },
+          "publicationStatus": {
+            "$ref": "#/components/schemas/PublicationStatus"
+          },
+          "language": {
+            "type": "string",
+            "nullable": true
+          },
+          "count": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "totalCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "languageLocked": {
+            "type": "boolean"
+          },
+          "summaryLocked": {
+            "type": "boolean"
+          },
+          "ageRatingLocked": {
+            "type": "boolean"
+          },
+          "publicationStatusLocked": {
+            "type": "boolean"
+          },
+          "genresLocked": {
+            "type": "boolean"
+          },
+          "tagsLocked": {
+            "type": "boolean"
+          },
+          "writerLocked": {
+            "type": "boolean"
+          },
+          "characterLocked": {
+            "type": "boolean"
+          },
+          "coloristLocked": {
+            "type": "boolean"
+          },
+          "editorLocked": {
+            "type": "boolean"
+          },
+          "inkerLocked": {
+            "type": "boolean"
+          },
+          "imprintLocked": {
+            "type": "boolean"
+          },
+          "lettererLocked": {
+            "type": "boolean"
+          },
+          "pencillerLocked": {
+            "type": "boolean"
+          },
+          "publisherLocked": {
+            "type": "boolean"
+          },
+          "translatorLocked": {
+            "type": "boolean"
+          },
+          "teamLocked": {
+            "type": "boolean"
+          },
+          "locationLocked": {
+            "type": "boolean"
+          },
+          "coverArtistLocked": {
+            "type": "boolean"
+          },
+          "releaseDateLocked": {
+            "type": "boolean"
+          },
+          "titleNameLocked": {
+            "type": "boolean"
+          },
+          "sortOrderLocked": {
+            "type": "boolean"
+          },
+          "coverImage": {
+            "type": "string",
+            "nullable": true
+          },
+          "primaryColor": {
+            "type": "string",
+            "nullable": true
+          },
+          "secondaryColor": {
+            "type": "string",
+            "nullable": true
+          },
+          "format": {
+            "$ref": "#/components/schemas/MangaFormat"
+          },
+          "aniListId": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "malId": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "hardcoverId": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "metronId": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "comicVineId": {
+            "type": "string",
+            "nullable": true
+          },
+          "mangaBakaId": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "cbrId": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "number": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
       "TagDto": {
         "required": [
           "title"
@@ -29432,6 +32156,19 @@
           "refreshToken": {
             "type": "string",
             "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "TokenValidityInfoDto": {
+        "type": "object",
+        "properties": {
+          "provider": {
+            "$ref": "#/components/schemas/ScrobbleProvider"
+          },
+          "validUntilUtc": {
+            "type": "string",
+            "format": "date-time"
           }
         },
         "additionalProperties": false
@@ -29714,6 +32451,11 @@
           "mangaBakaId": {
             "type": "integer",
             "format": "int64",
+            "nullable": true
+          },
+          "cbrId": {
+            "type": "integer",
+            "format": "int32",
             "nullable": true
           }
         },
@@ -30426,6 +33168,30 @@
         },
         "additionalProperties": false
       },
+      "UpdateScrobbleProviderDto": {
+        "required": [
+          "provider"
+        ],
+        "type": "object",
+        "properties": {
+          "provider": {
+            "$ref": "#/components/schemas/ScrobbleProvider"
+          },
+          "userName": {
+            "type": "string",
+            "nullable": true
+          },
+          "authenticationToken": {
+            "type": "string",
+            "nullable": true
+          },
+          "refreshToken": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
       "UpdateSeriesDto": {
         "type": "object",
         "properties": {
@@ -30477,6 +33243,11 @@
           "mangaBakaId": {
             "type": "integer",
             "format": "int64",
+            "nullable": true
+          },
+          "cbrId": {
+            "type": "integer",
+            "format": "int32",
             "nullable": true
           }
         },
@@ -30639,6 +33410,11 @@
             "type": "integer",
             "format": "int64",
             "nullable": true
+          },
+          "cbrId": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
           }
         },
         "additionalProperties": false
@@ -30659,8 +33435,7 @@
       },
       "UploadCoverFileDto": {
         "required": [
-          "id",
-          "url"
+          "id"
         ],
         "type": "object",
         "properties": {
@@ -30669,6 +33444,10 @@
             "format": "int32"
           },
           "url": {
+            "type": "string",
+            "nullable": true
+          },
+          "fileName": {
             "type": "string",
             "nullable": true
           },
@@ -30687,6 +33466,9 @@
           "url": {
             "minLength": 1,
             "type": "string"
+          },
+          "isInternalUrl": {
+            "type": "boolean"
           }
         },
         "additionalProperties": false
@@ -31279,7 +34061,7 @@
         },
         "additionalProperties": false
       },
-      "UserTokenInfo": {
+      "UserTokenInfoDto": {
         "type": "object",
         "properties": {
           "userId": {
@@ -31290,18 +34072,12 @@
             "type": "string",
             "nullable": true
           },
-          "isAniListTokenSet": {
-            "type": "boolean"
-          },
-          "isAniListTokenValid": {
-            "type": "boolean"
-          },
-          "aniListValidUntilUtc": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "isMalTokenSet": {
-            "type": "boolean"
+          "tokens": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/TokenValidityInfoDto"
+            },
+            "nullable": true
           }
         },
         "additionalProperties": false
@@ -31416,6 +34192,10 @@
           "mangaBakaId": {
             "type": "integer",
             "format": "int64"
+          },
+          "cbrId": {
+            "type": "integer",
+            "format": "int32"
           }
         },
         "additionalProperties": false
@@ -31535,6 +34315,9 @@
       "description": "Responsible for servicing up images stored in Kavita for entities"
     },
     {
+      "name": "KavitaPlusAudit"
+    },
+    {
       "name": "Koreader",
       "description": "The endpoint to interface with Koreader's Progress Sync plugin."
     },
@@ -31553,6 +34336,9 @@
     },
     {
       "name": "Metadata"
+    },
+    {
+      "name": "OAuth"
     },
     {
       "name": "Oidc"

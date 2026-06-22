@@ -6,7 +6,8 @@ import {
   EventEmitter,
   inject,
   Input,
-  OnInit
+  OnInit,
+  signal
 } from '@angular/core';
 import {FormBuilder, FormControl, FormGroup, ReactiveFormsModule, Validators} from '@angular/forms';
 import {
@@ -52,7 +53,6 @@ import {translate, TranslocoModule} from "@jsverse/transloco";
 import {UtcToLocalTimePipe} from "../../../_pipes/utc-to-local-time.pipe";
 import {EditListComponent} from "../../../shared/edit-list/edit-list.component";
 import {AccountService} from "../../../_services/account.service";
-import {Volume} from "../../../_models/volume";
 import {SettingButtonComponent} from "../../../settings/_components/setting-button/setting-button.component";
 import {SettingItemComponent} from "../../../settings/_components/setting-item/setting-item.component";
 import {LicenseService} from "../../../_services/license.service";
@@ -67,6 +67,13 @@ import {TabTitlePipe} from "../../../_pipes/tab-title.pipe";
 import {
   EditExternalMetadataFormComponent
 } from "../../../shared/_components/edit-external-metadata-form/edit-external-metadata-form.component";
+import {MangaFormat} from "../../../_models/manga-format";
+import {LibraryType} from "../../../_models/library/library";
+import {
+  CoverChooserConfigFactoryService,
+  CoverImageChooserConfig
+} from "../../../_services/cover-chooser-config-factory.service";
+import {Volume} from "../../../_models/volume";
 
 
 @Component({
@@ -99,7 +106,7 @@ import {
     DecimalPipe,
     TitleCasePipe,
     TabTitlePipe,
-    EditExternalMetadataFormComponent,
+    EditExternalMetadataFormComponent
   ],
   templateUrl: './edit-series-modal.component.html',
   styleUrls: ['./edit-series-modal.component.scss'],
@@ -121,6 +128,7 @@ export class EditSeriesModalComponent implements OnInit {
   private readonly destroyRef = inject(DestroyRef);
   private readonly actionFactoryService = inject(ActionFactoryService);
   protected readonly breakpointService = inject(BreakpointService);
+  private readonly coverChooserConfigFactory = inject(CoverChooserConfigFactoryService);
 
   protected readonly Tabs = Tabs;
   protected readonly PersonRole = PersonRole;
@@ -130,7 +138,7 @@ export class EditSeriesModalComponent implements OnInit {
 
 
   seriesVolumes: any[] = [];
-  isLoadingVolumes = false;
+  isLoadingVolumes = signal<boolean>(false);
   /**
    * A copy of the series from init. This is used to compare values for name fields to see if lock was modified
    */
@@ -142,6 +150,7 @@ export class EditSeriesModalComponent implements OnInit {
   editSeriesForm!: FormGroup;
   libraryName: string | undefined = undefined;
   size: number = 0;
+  libraryType = LibraryType.Manga;
 
 
   // Typeaheads
@@ -156,12 +165,10 @@ export class EditSeriesModalComponent implements OnInit {
   publicationStatuses: Array<PublicationStatusDto> = [];
 
   metadata!: SeriesMetadata;
-  imageUrls: Array<string> = [];
-  /**
-   * Selected Cover for uploading
-   */
   selectedCover: string = '';
   coverImageReset = false;
+  coverImageDirty = false;
+  chooserConfig: CoverImageChooserConfig = {};
 
   saveNestedComponents: EventEmitter<void> = new EventEmitter();
 
@@ -180,11 +187,12 @@ export class EditSeriesModalComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    this.imageUrls.push(this.imageService.getSeriesCoverImage(this.series.id));
 
     this.libraryService.getLibraryNames().pipe(takeUntilDestroyed(this.destroyRef)).subscribe(names => {
       this.libraryName = names[this.series.libraryId];
     });
+
+
 
     this.initSeries = Object.assign({}, this.series);
 
@@ -196,7 +204,6 @@ export class EditSeriesModalComponent implements OnInit {
       sortName: new FormControl(this.series.sortName, [Validators.required]),
       rating: new FormControl(this.series.userRating, []),
 
-      coverImageIndex: new FormControl(0, []),
       coverImageLocked: new FormControl(this.series.coverImageLocked, []),
 
       ageRating: new FormControl('', []),
@@ -274,21 +281,21 @@ export class EditSeriesModalComponent implements OnInit {
       }
     });
 
-    this.isLoadingVolumes = true;
-    this.cdRef.markForCheck();
-    this.seriesService.getVolumes(this.series.id).subscribe(volumes => {
-      this.seriesVolumes = volumes;
-      this.isLoadingVolumes = false;
+    this.isLoadingVolumes.set(true);
 
-      if (this.seriesVolumes.length === 1) {
-        this.imageUrls.push(...this.seriesVolumes[0].chapters.map((c: Chapter) => this.imageService.getChapterCoverImage(c.id)));
-      } else {
-        this.imageUrls.push(...this.seriesVolumes.map(v => this.imageService.getVolumeCoverImage(v.id)));
-      }
+    forkJoin({volumes: this.seriesService.getVolumes(this.series.id), libraryType: this.libraryService.getLibraryType(this.series.libraryId)}).subscribe(res => {
+      const volumes = res.volumes;
+      const libraryType = res.libraryType;
+
+      this.seriesVolumes = volumes;
+      this.libraryType = libraryType;
+      this.isLoadingVolumes.set(false);
+      this.chooserConfig = this.coverChooserConfigFactory.forSeries(this.series, this.seriesVolumes, this.libraryType);
 
       volumes.forEach(v => {
         this.volumeCollapsed[v.name] = true;
       });
+
       this.seriesVolumes.forEach(vol => {
         vol.volumeFiles = vol.chapters?.map((c: Chapter) => c.files.map((f: any) => {
           // TODO: Identify how to fix this hack
@@ -308,16 +315,10 @@ export class EditSeriesModalComponent implements OnInit {
       }
       this.cdRef.markForCheck();
     });
+
   }
 
-  formatVolumeName(volume: Volume) {
-    if (volume.minNumber === LooseLeafOrDefaultNumber) {
-      return translate('edit-series-modal.loose-leaf-volume');
-    } else if (volume.minNumber === SpecialVolumeNumber) {
-      return translate('edit-series-modal.specials-volume');
-    }
-    return translate('edit-series-modal.volume-num') + ' ' + volume.name;
-  }
+
 
 
   setupTypeaheads() {
@@ -485,7 +486,11 @@ export class EditSeriesModalComponent implements OnInit {
   }
 
   close() {
-    this.modal.dismiss();
+    if (this.coverImageReset) {
+      this.modal.close(modalSaved(this.series, true));
+    } else {
+      this.modal.dismiss();
+    }
   }
 
   updateWeblinks(items: Array<string>) {
@@ -495,7 +500,6 @@ export class EditSeriesModalComponent implements OnInit {
 
   save() {
     const model = this.editSeriesForm.getRawValue();
-    const selectedIndex = this.editSeriesForm.get('coverImageIndex')?.value || 0;
 
     const apis = [
       this.seriesService.updateMetadata(this.metadata)
@@ -507,7 +511,7 @@ export class EditSeriesModalComponent implements OnInit {
 
     let updatedSeries: Series | null = null;
 
-    if (nameFieldsDirty || nameFieldLockChanged || this.coverImageReset) {
+    if (nameFieldsDirty || nameFieldLockChanged) {
       model.nameLocked = this.series.nameLocked;
       model.sortNameLocked = this.series.sortNameLocked;
       model.localizedNameLocked = this.series.localizedNameLocked;
@@ -518,8 +522,8 @@ export class EditSeriesModalComponent implements OnInit {
       tap(result => updatedSeries = result)
     ));
 
-    if (selectedIndex > 0 || this.coverImageReset) {
-      apis.push(this.uploadService.updateSeriesCoverImage(model.id, this.selectedCover, !this.coverImageReset));
+    if (this.coverImageDirty) {
+      apis.push(this.uploadService.updateSeriesCoverImage(model.id, this.selectedCover, true));
     }
 
     this.saveNestedComponents.emit();
@@ -529,7 +533,7 @@ export class EditSeriesModalComponent implements OnInit {
       delay(10),
       last()
     ).subscribe(() => {
-      this.modal.close(modalSaved(updatedSeries ?? model, selectedIndex > 0 || this.coverImageReset));
+      this.modal.close(modalSaved(updatedSeries ?? model, this.coverImageDirty || this.coverImageReset));
     });
   }
 
@@ -560,23 +564,15 @@ export class EditSeriesModalComponent implements OnInit {
     this.cdRef.markForCheck();
   }
 
-  updateSelectedIndex(index: number) {
-    this.editSeriesForm.patchValue({
-      coverImageIndex: index
-    });
-    this.cdRef.markForCheck();
-  }
-
-  updateSelectedImage(url: string) {
-    this.selectedCover = url;
-    this.cdRef.markForCheck();
+  handleCoverChanged(event: { isDirty: boolean; fileName: string }) {
+    this.coverImageDirty = event.isDirty;
+    this.selectedCover = event.fileName;
   }
 
   handleReset() {
     this.coverImageReset = true;
-    this.editSeriesForm.patchValue({
-      coverImageLocked: false
-    });
+    this.editSeriesForm.patchValue({ coverImageLocked: false });
+    this.chooserConfig = { ...this.chooserConfig, isLocked: false };
     this.cdRef.markForCheck();
   }
 
@@ -588,8 +584,18 @@ export class EditSeriesModalComponent implements OnInit {
   }
 
   async runTask(action: ActionItem<Series>) {
+    action.callback(action,  this.series);
+  }
 
+  formatVolumeName(volume: Volume) {
+    if (volume.minNumber === LooseLeafOrDefaultNumber) {
+      return translate('edit-series-modal.loose-leaf-volume');
+    } else if (volume.minNumber === SpecialVolumeNumber) {
+      return translate('edit-series-modal.specials-volume');
+    }
+    return translate('edit-series-modal.volume-num', {num: volume.name});
   }
 
   protected readonly LooseLeafOrDefaultNumber = LooseLeafOrDefaultNumber;
+  protected readonly MangaFormat = MangaFormat;
 }

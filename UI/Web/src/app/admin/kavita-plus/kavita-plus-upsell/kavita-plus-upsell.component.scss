@@ -1,0 +1,126 @@
+:host {
+  --upsell-hero-bg: radial-gradient(circle at 100% 0%, rgba(74,198,148,0.28), transparent 50%),
+                    radial-gradient(circle at 0% 100%, rgba(74,198,148,0.10), transparent 40%),
+                    linear-gradient(135deg, #102018 0%, #0A1310 100%);
+  --upsell-hero-border: rgba(74,198,148,0.25);
+  --upsell-price-card-bg: rgba(0,0,0,0.45);
+  --upsell-price-card-border: rgba(255,255,255,0.10);
+  --upsell-benefit-icon-bg: rgba(74,198,148,0.12);
+  --upsell-faq-separator: rgba(255,255,255,0.05);
+  --upsell-brand-icon-color: var(--banner-primary-subtext-color, #0d2d20);
+}
+
+.upsell-hero {
+  background: var(--upsell-hero-bg);
+  border: 1px solid var(--upsell-hero-border);
+  border-radius: 0.75rem;
+  overflow: hidden;
+}
+
+.upsell-price-card {
+  background: var(--upsell-price-card-bg);
+  border: 1px solid var(--upsell-price-card-border);
+  backdrop-filter: blur(0.5rem);
+  border-radius: 0.75rem;
+}
+
+.upsell-benefit-icon {
+  background: var(--upsell-benefit-icon-bg);
+  border-radius: 0.5rem;
+  width: 2.25rem;
+  height: 2.25rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  font-size: 0.875rem;
+}
+
+.upsell-faq-item + .upsell-faq-item {
+  border-top: 1px solid var(--upsell-faq-separator);
+  padding-top: 0.875rem;
+  margin-top: 0.875rem;
+}
+
+// Page header
+.upsell-page-desc { font-size: 0.92rem; }
+.upsell-icon-xs   { font-size: 0.65rem; }
+
+// Hero
+.upsell-brand-icon {
+  width: 2.75rem;
+  height: 2.75rem;
+}
+.upsell-brand-icon-fa {
+  color: var(--upsell-brand-icon-color);
+  font-size: 1.125rem;
+}
+.upsell-brand-name {
+  font-size: 2.2rem;
+  letter-spacing: -0.01em;
+  line-height: 1;
+}
+.upsell-headline {
+  font-size: 2.2rem;
+  line-height: 1.15;
+  letter-spacing: -0.02em;
+}
+.upsell-subtitle {
+  font-size: 0.96rem;
+  line-height: 1.6;
+  max-width: 32rem;
+}
+.upsell-link-sm { font-size: 0.88rem; }
+
+// Pricing card
+.upsell-price-card-width {
+  min-width: 16rem;
+  max-width: 20rem;
+  width: 100%;
+}
+.upsell-price-number {
+  font-size: 3rem;
+  line-height: 1;
+  letter-spacing: -0.02em;
+}
+.upsell-price-period  { font-size: 0.92rem; }
+.upsell-price-promo   { font-size: 0.84rem; }
+.upsell-price-feature { font-size: 0.8rem; }
+.upsell-check-icon {
+  font-size: 0.68rem;
+  width: 0.875rem;
+}
+
+// Provider strip
+.upsell-provider-strip {
+  background: var(--elevation-layer1-dark-solid);
+  border: 1px solid var(--hr-color);
+  font-size: 0.82rem;
+}
+.upsell-overline {
+  font-size: 0.74rem;
+  letter-spacing: 0.08em;
+}
+
+// Benefits
+.upsell-section-label {
+  font-size: 0.78rem;
+  letter-spacing: 0.06em;
+}
+.upsell-card {
+  background: var(--elevation-layer1-dark-solid);
+  border: 1px solid var(--hr-color);
+}
+.upsell-benefit-title { font-size: 0.94rem; }
+.upsell-benefit-body {
+  font-size: 0.8rem;
+  line-height: 1.55;
+}
+
+// FAQ
+.upsell-faq-heading  { font-size: 1.15rem; }
+.upsell-faq-question { font-size: 0.84rem; }
+.upsell-faq-answer {
+  font-size: 0.78rem;
+  line-height: 1.55;
+}

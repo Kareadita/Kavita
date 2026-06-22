@@ -33,7 +33,7 @@
                              width="16px" height="16px"
                              [ngbTooltip]="collectionTag()!.source | scrobbleProviderName" tabindex="0" />
                   <span class="ms-2 me-2">{{t('sync-progress', {title: series().length + ' / ' + collectionTag()!.totalSourceCount})}}</span>
-                  <i class="fa-solid fa-question-circle" aria-hidden="true" [ngbTooltip]="t('last-sync', {date: collectionTag()!.lastSyncUtc | date: 'short' | defaultDate })"></i>
+                  <i class="fa-solid fa-question-circle" aria-hidden="true" [ngbTooltip]="t('last-sync', {date: collectionTag()!.lastSyncUtc | utcToLocalDate | date: 'short' | defaultDate })"></i>
                 </div>
               }
             </div>

@@ -14,6 +14,7 @@ import {
 } from '@angular/core';
 import {DOCUMENT} from '@angular/common';
 import {BreakpointService} from '../../../_services/breakpoint.service';
+import {isSafari} from "../../../_helpers/browser";
 
 /** How long (ms) the user must be idle at the scroll boundary before scroll-driven progress arms. */
 const SCROLL_ARM_DELAY_MS = 100;
@@ -27,7 +28,7 @@ const ARMED_HEIGHT_DESKTOP_REM = 18.75;
 /** Expanded height when armed on mobile — shorter drag distance for touch. */
 const ARMED_HEIGHT_MOBILE_REM = 9.375;
 
-const enum PullState {
+export const enum PullState {
   Idle,
   Armed,
   Triggered,
@@ -62,7 +63,7 @@ export class PullToLoadComponent {
   private readonly container = viewChild.required<ElementRef<HTMLElement>>('container');
   private readonly triggerSentinel = viewChild.required<ElementRef<HTMLElement>>('triggerSentinel');
 
-  private readonly state = signal(PullState.Idle);
+  readonly state = signal(PullState.Idle);
   readonly progress = signal(0);
 
   readonly isArmed = computed(() => this.state() === PullState.Armed);
@@ -78,6 +79,13 @@ export class PullToLoadComponent {
   readonly containerHeight = computed(() =>
     this.isArmed() || this.isTriggered() ? `${this.armedHeightRem()}rem` : `${RESTING_HEIGHT_REM}rem`
   );
+
+  readonly containerMarginTop = computed(() =>
+    this.isArmed() && this.direction() === 'down' && isSafari
+      ? `-${this.armedHeightRem() - RESTING_HEIGHT_REM}rem`
+      : '0px'
+  );
+
   readonly directionArrow = computed(() => {
     switch (this.direction()) {
       case 'down': return 'up';
@@ -261,6 +269,12 @@ export class PullToLoadComponent {
    * The guard lasts two animation frames to cover the scroll event dispatch.
    */
   private adjustScrollTop(deltaPx: number) {
+    // We do not need to adjust scroll top on iOS & iPadOS. It's handled by negative margins
+    // It doesn't work anyway. Thanks, Tim Apple
+    if (this.direction() === 'down' && isSafari) {
+      return;
+    }
+
     this.isCompensatingScroll = true;
 
     const scrollEl = this.resolveScrollElement();

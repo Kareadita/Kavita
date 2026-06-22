@@ -1,7 +1,7 @@
 export interface ConfirmButton {
     text: string;
     /**
-     * Type for css class. ie) primary, secondary
+     * Type for css class. ie) primary, secondary, danger
      */
-    type: 'secondary' | 'primary';
+    type: 'secondary' | 'primary' | 'danger';
 }

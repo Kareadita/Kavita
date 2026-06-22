@@ -65,7 +65,7 @@ public partial class VersionUpdaterService : IVersionUpdaterService
     private const string GithubBranchCommitsUrl = "https://api.github.com/repos/Kareadita/Kavita/commits?sha=develop";
 #pragma warning restore S1075
 
-    [GeneratedRegex(@"^\n*(.*?)\n+#{1,2}\s", RegexOptions.Singleline)]
+    [GeneratedRegex(@"^\n*([\s\S]*?)\n+^#\s(Added|Fixed|Changed|Theme|API|Removed)", RegexOptions.Multiline | RegexOptions.Compiled)]
     private static partial Regex BlogPartRegex();
     private readonly string _cacheFilePath;
     /// <summary>
@@ -341,7 +341,7 @@ public partial class VersionUpdaterService : IVersionUpdaterService
         }
 
         // If we're on a nightly build, enrich the information
-        if (updateDtos.Count != 0) // && BuildInfo.Version > new Version(updateDtos[0].UpdateVersion)
+        if (updateDtos.Count != 0)
         {
             await EnrichWithNightlyInfo(updateDtos);
         }
@@ -437,6 +437,7 @@ public partial class VersionUpdaterService : IVersionUpdaterService
             await File.WriteAllTextAsync(tempPath, json);
 
             // Atomic replace - handles file in use scenarios
+            // TODO: BUG: This can sometimes throw an System.UnauthorizedAccessException: Access to the path is denied.
             File.Move(tempPath, _cacheFilePath, overwrite: true);
         }
         catch (Exception ex)
