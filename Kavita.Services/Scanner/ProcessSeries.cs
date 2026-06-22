@@ -5,6 +5,7 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using Hangfire;
 using Kavita.API.Database;
 using Kavita.API.Repositories;
 using Kavita.API.Services;
@@ -232,7 +233,13 @@ public class ProcessSeries(
 
         if (seriesAdded && library.AllowMetadataMatching)
         {
-            await externalMetadataService.FetchSeriesMetadata(series.Id, series.Library.Type, MetadataFetchTrigger.SeriesAdded);
+            // I think we can spawn this in a background job? Do we need to enqueue on a specific queue?
+            // All changes to series after this should be page count etc
+            /*BackgroundJob.Enqueue<IExternalMetadataService>(s
+                => s.TryMatchAndLoadMetadataForSeries(series.Id, series.Library.Type, MetadataFetchTrigger.SeriesAdded));*/
+
+            await externalMetadataService.TryMatchAndLoadMetadataForSeries(series.Id, series.Library.Type,
+                MetadataFetchTrigger.SeriesAdded);
         }
 
         await eventHub.SendMessageAsync(MessageFactory.ScanSeries,

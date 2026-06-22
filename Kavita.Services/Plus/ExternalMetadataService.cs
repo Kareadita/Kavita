@@ -136,8 +136,121 @@ public class ExternalMetadataService : IExternalMetadataService
         _logger.LogInformation("[Kavita+ Data Refresh] Finished Refreshing {Count} / {Total} series data from Kavita+: {Ids}", count, ids.Count, string.Join(',', successfulMatches));
     }
 
+    public async Task<SeriesDetailPlusDto?> TryMatchAndLoadMetadataForSeries(int seriesId, LibraryType libraryType, MetadataFetchTrigger trigger,
+        CancellationToken ct = default)
+    {
+        if (!IsPlusEligible(libraryType)) return null;
+        if (!await _licenseService.HasActiveLicense(ct: ct)) return null;
 
-    public async Task<bool> FetchSeriesMetadata(int seriesId, LibraryType libraryType,
+        var series = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(seriesId, SeriesIncludes.Library | SeriesIncludes.Chapters, ct: ct);
+        if (series == null) return null;
+
+        if (!RateLimiter.TryAcquire(string.Empty))
+        {
+            _logger.LogDebug("Skipping Matching for Series {SeriesId} due to rate limit", seriesId);
+            return null;
+        }
+
+        if (HasRequiredId(series, series.Library.MetadataProvider))
+        {
+            return await GetSeriesDetailPlus(seriesId, libraryType, trigger, ct);
+        }
+
+        var matchRequest = new MatchRequestV3Dto
+        {
+            AniListId = series.AniListId,
+            MalId = series.MalId,
+            HardcoverId = series.HardcoverId,
+            CbrId = series.CbrId,
+            MangabakaId = series.MangaBakaId,
+            MetronId = series.MetronId,
+            ComicVineId = series.ComicVineId,
+            IsStandAlone = series.Volumes.Sum(v => v.Chapters.Count) == 1,
+            Provider = series.Library.MetadataProvider,
+            SeriesName = series.Name,
+            AlternativeNames = [series.LocalizedName],
+            Format = series.Library.Type.ConvertToPlusMediaFormat(series.Format),
+        };
+
+        var result = await _kavitaPlusApiService.MatchSeriesV3Async(matchRequest, ct);
+        if (!result.IsSuccess)
+        {
+            _logger.LogError("Failed to load matches for series {SeriesId} from Kavita+: {Error}", seriesId, result.ErrorMessage);
+            return null;
+        }
+
+        var validAutomatedMatches = (result.Data ?? [])
+            .Where(m => m.MatchRating > 0.9)
+            .ToList();
+
+        if (validAutomatedMatches.Count == 0)
+        {
+            await _auditService.LogAsync(KavitaPlusAuditCategory.Match, KavitaPlusEventType.SeriesMatchFailed,
+                AuditStatus.Failure, seriesId: seriesId, error: "no-matches", ct: ct);
+            _logger.LogInformation("No good enough matches found for Series {SeriesId}", seriesId);
+            return null;
+        }
+
+        if (validAutomatedMatches.Count > 1)
+        {
+            await _auditService.LogAsync(KavitaPlusAuditCategory.Match, KavitaPlusEventType.SeriesMatchFailed,
+                AuditStatus.Failure, seriesId: seriesId, error: "too-many-matches", ct: ct);
+            _logger.LogInformation("Multiple good enough matches found for Series {SeriesId}: {Matches}. Will not automatically choose", seriesId, validAutomatedMatches.Count);
+            return null;
+        }
+
+        var match = validAutomatedMatches[0];
+
+        _logger.LogInformation("Matches series {SeriesId} to MangaBaka: {MangaBakaId}, HardcoverId: {HardcoverId}, CbrId: {CbrId} with {Certainty}% certainty",
+            seriesId, match.Series.MangabakaId, match.Series.HardcoverId, match.Series.CbrId, match.MatchRating * 100);
+
+        var beforeIds = new AuditLogMatchExternalIdsParamsDto
+        {
+            AniListId = series.AniListId,
+            MalId = series.MalId,
+            MangaBakaId = series.MangaBakaId,
+            CbrId = series.CbrId,
+            HardcoverId = series.HardcoverId
+        };
+
+        series.MangaBakaId = match.Series.MangabakaId ?? 0;
+        series.AniListId = match.Series.AniListId ?? 0;
+        series.MalId = match.Series.MALId ?? 0;
+        series.HardcoverId = match.Series.HardcoverId ?? 0;
+        series.CbrId = match.Series.CbrId ?? 0;
+
+        await _auditService.LogMatchAsync(KavitaPlusEventType.SeriesMatched, seriesId,
+            new AuditLogMatchedParamsDto {
+                SeriesName = series.Name,
+                Before = beforeIds, After = new AuditLogMatchExternalIdsParamsDto
+                {
+                    AniListId = series.AniListId,
+                    MalId = series.MalId,
+                    MangaBakaId = series.MangaBakaId,
+                    CbrId = series.CbrId,
+                    HardcoverId = series.HardcoverId,
+                },
+                MatchedName = series.Name
+            }, ct: ct);
+
+        await _unitOfWork.CommitAsync(ct);
+
+        return await GetSeriesDetailPlus(seriesId, libraryType, trigger, ct);
+    }
+
+    private static bool HasRequiredId(Series series, MetadataProvider metadataProvider)
+    {
+        return metadataProvider switch
+        {
+            MetadataProvider.Hardcover => series.HardcoverId > 0,
+            MetadataProvider.Mangabaka => series.MangaBakaId > 0 || series.AniListId > 0 || series.MalId > 0,
+            MetadataProvider.ComicBookRoundup => series.CbrId > 0,
+            _ => throw new ArgumentOutOfRangeException(nameof(metadataProvider), metadataProvider, null)
+        };
+    }
+
+
+    private async Task<bool> FetchSeriesMetadata(int seriesId, LibraryType libraryType,
         MetadataFetchTrigger trigger = MetadataFetchTrigger.SeriesAdded, CancellationToken ct = default)
     {
         if (!IsPlusEligible(libraryType)) return false;

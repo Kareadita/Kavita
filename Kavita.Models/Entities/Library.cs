@@ -66,6 +66,8 @@ public class Library : IEntityDate, IHasCoverImage
     /// </summary>
     public string DefaultLanguage { get; set; } = "";
 
+    public MetadataProvider MetadataProvider { get; set; }
+
     public DateTime Created { get; set; }
     public DateTime LastModified { get; set; }
     public DateTime CreatedUtc { get; set; }

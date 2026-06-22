@@ -29,33 +29,12 @@ public interface IExternalMetadataService
     Task<ExternalSeriesDetailDto?> GetExternalSeriesDetail(int? aniListId, long? malId, int? seriesId, CancellationToken ct = default);
 
     /// <summary>
-    /// Returns Series Detail data from Kavita+ - Review, Recs, Ratings
-    /// </summary>
-    /// <param name="seriesId"></param>
-    /// <param name="libraryType"></param>
-    /// <param name="trigger"></param>
-    /// <param name="ct"></param>
-    /// <returns></returns>
-    Task<SeriesDetailPlusDto?> GetSeriesDetailPlus(int seriesId, LibraryType libraryType,
-        MetadataFetchTrigger trigger = MetadataFetchTrigger.OnDemand, CancellationToken ct = default);
-    /// <summary>
     /// This is a task that runs on a schedule and slowly fetches data from Kavita+ to keep
     /// data in the DB non-stale and fetched.
     /// </summary>
     /// <remarks>To avoid blasting Kavita+ API, this only processes 25 records. The goal is to slowly build out/refresh the data</remarks>
     /// <returns></returns>
     Task FetchExternalDataTask(CancellationToken ct = default);
-
-    /// <summary>
-    /// This is an entry point and provides a level of protection against calling upstream API. Will only allow 100 new
-    /// series to fetch data within a day and enqueues background jobs at certain times to fetch that data.
-    /// </summary>
-    /// <param name="seriesId"></param>
-    /// <param name="libraryType"></param>
-    /// <param name="ct"></param>
-    /// <returns>If the fetch was made</returns>
-    Task<bool> FetchSeriesMetadata(int seriesId, LibraryType libraryType,
-        MetadataFetchTrigger trigger = MetadataFetchTrigger.SeriesAdded, CancellationToken ct = default);
 
     Task<IList<MalStackDto>> GetStacksForUser(int userId, CancellationToken ct = default);
 
@@ -106,4 +85,16 @@ public interface IExternalMetadataService
     /// <returns></returns>
     Task<IList<ExternalCoverResponseDto>> GetExternalCovers(int seriesId, int? volumeId = null,
         int? chapterId = null, CancellationToken ct = default);
+
+    /// <summary>
+    /// Loads external series metadata. If ids are presents, loads directly otherwise goes through the match flow
+    /// And picks the best match (Requires just one result > 0.9)
+    /// </summary>
+    /// <param name="seriesId"></param>
+    /// <param name="libraryType"></param>
+    /// <param name="trigger"></param>
+    /// <param name="ct"></param>
+    /// <returns></returns>
+    Task<SeriesDetailPlusDto?> TryMatchAndLoadMetadataForSeries(int seriesId, LibraryType libraryType, MetadataFetchTrigger trigger,
+        CancellationToken ct = default);
 }
