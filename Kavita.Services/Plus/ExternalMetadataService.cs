@@ -535,7 +535,9 @@ public class ExternalMetadataService : IExternalMetadataService
     /// <param name="seriesId"></param>
     /// <param name="libraryType"></param>
     /// <param name="data"></param>
+    /// <param name="trigger"></param>
     /// <param name="ct"></param>
+    /// <param name="fromMatchFlow"></param>
     /// <returns></returns>
     private async Task<SeriesDetailPlusDto> FetchExternalMetadataForSeries(int seriesId, LibraryType libraryType, SeriesDetailRequestV3Dto data,
         bool fromMatchFlow = false, MetadataFetchTrigger trigger = MetadataFetchTrigger.OnDemand, CancellationToken ct = default)
@@ -547,220 +549,161 @@ public class ExternalMetadataService : IExternalMetadataService
             return _defaultReturn;
         }
 
-        try
-        {
-            _logger.LogDebug("Fetching Kavita+ Series Detail data for {SeriesName}", string.IsNullOrEmpty(data.SeriesName) ? data.AniListId : data.SeriesName);
-            SeriesDetailPlusApiDto? result = null;
+        _logger.LogDebug("Fetching Kavita+ Series Detail data for {SeriesName}", string.IsNullOrEmpty(data.SeriesName) ? data.AniListId : data.SeriesName);
 
-            await _auditService.LogAsync(
-                KavitaPlusAuditCategory.Metadata,
-                KavitaPlusEventType.MetadataFetched,
-                AuditStatus.Info,
-                AuditSubjectType.Series,
-                seriesId: seriesId,
-                payload: new AuditLogMetadataFetchParamsDto
-                {
-                    SeriesId = seriesId,
-                    LibraryId = series.Library?.Id,
-                    Format = series.Format,
-                    MangaBakaId = series.MangaBakaId,
-                    CbrId = series.CbrId,
-                    AniListId = series.AniListId,
-                    HardcoverId = series.HardcoverId,
-                    Trigger = trigger,
-                },
-                ct: ct);
+        await _auditService.LogAsync(
+            KavitaPlusAuditCategory.Metadata,
+            KavitaPlusEventType.MetadataFetched,
+            AuditStatus.Info,
+            AuditSubjectType.Series,
+            seriesId: seriesId,
+            payload: new AuditLogMetadataFetchParamsDto
+            {
+                SeriesId = seriesId,
+                LibraryId = series.Library?.Id,
+                Format = series.Format,
+                MangaBakaId = series.MangaBakaId,
+                CbrId = series.CbrId,
+                AniListId = series.AniListId,
+                HardcoverId = series.HardcoverId,
+                Trigger = trigger,
+            },
+            ct: ct);
+
+        var kPlusResult = await _kavitaPlusApiService.GetSeriesDetailV3Async(data, ct);
+        if (!kPlusResult.IsSuccess && (kPlusResult.ErrorMessage ?? string.Empty).Contains("Too many Requests"))
+        {
+            _logger.LogDebug("Hit the rate limit while fetching Kavita+ Series Detail data for {SeriesId}. Retrying in 3s", series.Id);
+            await Task.Delay(3000, ct);
+
+            kPlusResult = await _kavitaPlusApiService.GetSeriesDetailV3Async(data, ct);
+        }
+
+        if ((kPlusResult.ErrorMessage ?? string.Empty).Contains("Unknown Series"))
+        {
+            series.IsBlacklisted = true;
+            await _unitOfWork.CommitAsync(ct);
+            await _auditService.LogMatchAsync(KavitaPlusEventType.SeriesBlacklisted, seriesId,
+                new AuditLogMatchFailureParamsDto { SeriesName = series.Name, Reason = "unknown-series" }, AuditStatus.Failure, ct: ct);
+            return _defaultReturn;
+        }
+
+        var result = kPlusResult.Data;
+
+        if (result == null)
+        {
+            _logger.LogError("Unable to fetch Kavita+ Series Detail data for {SeriesId}: {ErrorMessage}",
+                series.Id, kPlusResult.ErrorMessage);
+
+            var reason = (kPlusResult.ErrorMessage ?? string.Empty).Contains("Too Many Requests")
+                ? "rate-limit-hit" : kPlusResult.ErrorMessage ?? string.Empty;
+
+            await _auditService.LogMatchAsync(KavitaPlusEventType.SeriesMatchFailed, seriesId,
+                new AuditLogMatchFailureParamsDto { SeriesName = series.Name, Reason = reason }, AuditStatus.Failure, ct: ct);
+            return _defaultReturn;
+        }
+
+        // Clear out existing results
+        var externalSeriesMetadata = await GetOrCreateExternalSeriesMetadataForSeries(seriesId, series);
+        _unitOfWork.ExternalSeriesMetadataRepository.Remove(externalSeriesMetadata.ExternalReviews);
+        _unitOfWork.ExternalSeriesMetadataRepository.Remove(externalSeriesMetadata.ExternalRatings);
+        _unitOfWork.ExternalSeriesMetadataRepository.Remove(externalSeriesMetadata.ExternalRecommendations);
+
+        externalSeriesMetadata.Provider = data.Provider;
+
+        externalSeriesMetadata.ExternalReviews = result.Reviews.Select(r =>
+        {
+            var review = _mapper.Map<ExternalReview>(r);
+            review.SeriesId = externalSeriesMetadata.SeriesId;
+            return review;
+        }).ToList();
+
+        externalSeriesMetadata.ExternalRatings = result.Ratings.Select(r =>
+        {
+            var rating = _mapper.Map<ExternalRating>(r);
+            rating.SeriesId = externalSeriesMetadata.SeriesId;
+            rating.ProviderUrl = r.ProviderUrl;
+            return rating;
+        }).ToList();
+
+
+        // Recommendations
+        externalSeriesMetadata.ExternalRecommendations ??= [];
+        var recs = await ProcessRecommendations(libraryType, result.Recommendations, externalSeriesMetadata);
+
+        var extRatings = externalSeriesMetadata.ExternalRatings
+            .Where(r => r.AverageScore > 0)
+            .ToList();
+
+        externalSeriesMetadata.ValidUntilUtc = DateTime.UtcNow.Add(_externalSeriesMetadataCache);
+        externalSeriesMetadata.AverageExternalRating = extRatings.Count != 0 ? (int) extRatings
+            .Average(r => r.AverageScore) : 0;
+
+        // prefer what was passed in (manual match), fall back to what K+ returned
+        var beforeIds = new AuditLogMatchExternalIdsParamsDto { AniListId = series.AniListId, MalId = series.MalId, MangaBakaId = series.MangaBakaId, CbrId = series.CbrId, HardcoverId = series.HardcoverId };
+
+        // TODO: Need to rethink how all these Ids work and only write on MetadataFetchTrigger.OnDemand
+        externalSeriesMetadata.MalId = data.MalId ?? result.MalId ?? 0;
+        externalSeriesMetadata.AniListId = data.AniListId ?? result.AniListId ?? 0;
+        externalSeriesMetadata.CbrId = data.CbrId ?? result.CbrId ?? 0;
+        externalSeriesMetadata.MangabakaId = data.MangabakaId ?? result.MangabakaId ?? 0;
+        series.MangaBakaId = externalSeriesMetadata.MangabakaId;
+
+        var hardcoverId = data.HardcoverId ?? result.Series?.HardcoverId ?? series.HardcoverId;
+        var afterIds = new AuditLogMatchExternalIdsParamsDto {
+            AniListId = externalSeriesMetadata.AniListId,
+            MalId = externalSeriesMetadata.MalId,
+            MangaBakaId = series.MangaBakaId,
+            CbrId = externalSeriesMetadata.CbrId,
+            HardcoverId = hardcoverId };
+
+        await _auditService.LogMatchAsync(KavitaPlusEventType.SeriesMatched, seriesId,
+            new AuditLogMatchedParamsDto {
+                SeriesName = series.Name,
+                Before = beforeIds, After = afterIds,
+                MatchedName = result.Series?.Name
+            }, ct: ct);
+
+        // If there is metadata and the user has metadata download turned on
+        var madeMetadataModification = false;
+        if (result.Series != null && (series.Library!.AllowMetadataMatching || fromMatchFlow))
+        {
+            externalSeriesMetadata.Series = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(seriesId, ct: ct);
 
             try
             {
-                var kPlusResult = await _kavitaPlusApiService.GetSeriesDetailV3Async(data, ct);
-                if (!kPlusResult.IsSuccess)
+                madeMetadataModification = await WriteExternalMetadataToSeries(result.Series, seriesId, trigger, ct);
+                if (madeMetadataModification)
                 {
-                    _logger.LogError("Unable to fetch Kavita+ Series Detail data for {SeriesName}", string.IsNullOrEmpty(data.SeriesName) ? data.AniListId : data.SeriesName);
-                    await _auditService.LogMatchAsync(KavitaPlusEventType.SeriesMatchFailed, seriesId,
-                        new AuditLogMatchFailureParamsDto { SeriesName = series.Name, Reason = kPlusResult.ErrorMessage ?? string.Empty }, AuditStatus.Failure, ct: ct);
-                    return _defaultReturn;
-                }
-
-                result = kPlusResult.Data;
-            }
-            catch (FlurlHttpException ex)
-            {
-                var errorMessage = await ex.GetResponseStringAsync() ?? string.Empty;
-                // Trim quotes if the response is a JSON string
-                errorMessage = errorMessage.Trim('"');
-
-                if (ex.StatusCode == 400)
-                {
-                    if (errorMessage.Contains("Too many Requests"))
-                    {
-                        _logger.LogDebug("Hit rate limit, will retry in 3 seconds");
-                        await Task.Delay(3000, ct);
-
-                        var kPlusResult = await _kavitaPlusApiService.GetSeriesDetailV3Async(data, ct);
-                        if (!kPlusResult.IsSuccess)
-                        {
-                            _logger.LogError("Unable to fetch Kavita+ Series Detail data for {SeriesName}", string.IsNullOrEmpty(data.SeriesName) ? data.AniListId : data.SeriesName);
-                            await _auditService.LogMatchAsync(KavitaPlusEventType.SeriesMatchFailed, seriesId,
-                                new AuditLogMatchFailureParamsDto { SeriesName = series.Name, Reason = kPlusResult.ErrorMessage ?? string.Empty }, AuditStatus.Failure, ct: ct);
-                            return _defaultReturn;
-                        }
-
-                        result = kPlusResult.Data;
-                    }
-                    else if (errorMessage.Contains("Unknown Series"))
-                    {
-                        series.IsBlacklisted = true;
-                        await _unitOfWork.CommitAsync(ct);
-                        await _auditService.LogMatchAsync(KavitaPlusEventType.SeriesBlacklisted, seriesId,
-                            new AuditLogMatchFailureParamsDto { SeriesName = series.Name, Reason = "unknown-series" }, AuditStatus.Failure, ct: ct);
-                    }
+                    _unitOfWork.SeriesRepository.Update(series);
+                    _unitOfWork.SeriesRepository.Update(series.Metadata);
                 }
             }
-
-            if (result == null)
+            catch (Exception ex)
             {
-                _logger.LogInformation("Hit rate limit twice, try again later");
-                await _auditService.LogMatchAsync(KavitaPlusEventType.SeriesMatchFailed, seriesId,
-                    new AuditLogMatchFailureParamsDto { SeriesName = series.Name, Reason = "rate-limit-hit" }, AuditStatus.Failure, ct: ct);
-                return _defaultReturn;
+                _logger.LogError(ex, "There was an exception when trying to write Series metadata from Kavita+");
             }
 
-            // Clear out existing results
-            var externalSeriesMetadata = await GetOrCreateExternalSeriesMetadataForSeries(seriesId, series);
-            _unitOfWork.ExternalSeriesMetadataRepository.Remove(externalSeriesMetadata.ExternalReviews);
-            _unitOfWork.ExternalSeriesMetadataRepository.Remove(externalSeriesMetadata.ExternalRatings);
-            _unitOfWork.ExternalSeriesMetadataRepository.Remove(externalSeriesMetadata.ExternalRecommendations);
-
-            // TODO: Do not hardcode - Metadata Rework
-            externalSeriesMetadata.Provider = result.MangabakaId > 0 ? MetadataProvider.Mangabaka :
-                    (result.CbrId > 0 ? MetadataProvider.ComicBookRoundup : MetadataProvider.Hardcover);
-
-            externalSeriesMetadata.ExternalReviews = result.Reviews.Select(r =>
-            {
-                var review = _mapper.Map<ExternalReview>(r);
-                review.SeriesId = externalSeriesMetadata.SeriesId;
-                return review;
-            }).ToList();
-
-            externalSeriesMetadata.ExternalRatings = result.Ratings.Select(r =>
-            {
-                var rating = _mapper.Map<ExternalRating>(r);
-                rating.SeriesId = externalSeriesMetadata.SeriesId;
-                rating.ProviderUrl = r.ProviderUrl;
-                return rating;
-            }).ToList();
-
-
-            // Recommendations
-            externalSeriesMetadata.ExternalRecommendations ??= [];
-            var recs = await ProcessRecommendations(libraryType, result.Recommendations, externalSeriesMetadata);
-
-            var extRatings = externalSeriesMetadata.ExternalRatings
-                .Where(r => r.AverageScore > 0)
-                .ToList();
-
-            externalSeriesMetadata.ValidUntilUtc = DateTime.UtcNow.Add(_externalSeriesMetadataCache);
-            externalSeriesMetadata.AverageExternalRating = extRatings.Count != 0 ? (int) extRatings
-                .Average(r => r.AverageScore) : 0;
-
-            // prefer what was passed in (manual match), fall back to what K+ returned
-            var beforeIds = new AuditLogMatchExternalIdsParamsDto { AniListId = series.AniListId, MalId = series.MalId, MangaBakaId = series.MangaBakaId, CbrId = series.CbrId, HardcoverId = series.HardcoverId };
-
-            // TODO: Need to rethink how all these Ids work and only write on MetadataFetchTrigger.OnDemand
-            externalSeriesMetadata.MalId = data.MalId ?? result.MalId ?? 0;
-            externalSeriesMetadata.AniListId = data.AniListId ?? result.AniListId ?? 0;
-            externalSeriesMetadata.CbrId = data.CbrId ?? result.CbrId ?? 0;
-            externalSeriesMetadata.MangabakaId = data.MangabakaId ?? result.MangabakaId ?? 0;
-            series.MangaBakaId = externalSeriesMetadata.MangabakaId;
-            var hardcoverId = data.HardcoverId ?? result.Series?.HardcoverId ?? series.HardcoverId;
-            var afterIds = new AuditLogMatchExternalIdsParamsDto {
-                AniListId = externalSeriesMetadata.AniListId,
-                MalId = externalSeriesMetadata.MalId,
-                MangaBakaId = series.MangaBakaId,
-                CbrId = externalSeriesMetadata.CbrId,
-                HardcoverId = hardcoverId };
-
-            await _auditService.LogMatchAsync(KavitaPlusEventType.SeriesMatched, seriesId,
-                new AuditLogMatchedParamsDto {
-                    SeriesName = series.Name,
-                    Before = beforeIds, After = afterIds,
-                    MatchedName = result.Series?.Name
-                }, ct: ct);
-
-            // If there is metadata and the user has metadata download turned on
-            var madeMetadataModification = false;
-            if (result.Series != null && (series.Library!.AllowMetadataMatching || fromMatchFlow))
-            {
-                externalSeriesMetadata.Series = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(seriesId, ct: ct);
-
-                try
-                {
-                    madeMetadataModification = await WriteExternalMetadataToSeries(result.Series, seriesId, trigger, ct);
-                    if (madeMetadataModification)
-                    {
-                        _unitOfWork.SeriesRepository.Update(series);
-                        _unitOfWork.SeriesRepository.Update(series.Metadata);
-                    }
-                }
-                catch (Exception ex)
-                {
-                    _logger.LogError(ex, "There was an exception when trying to write Series metadata from Kavita+");
-                }
-
-            }
-
-            // WriteExternalMetadataToSeries will commit but not always
-            if (_unitOfWork.HasChanges())
-            {
-                await _unitOfWork.CommitAsync(ct);
-            }
-
-            if (madeMetadataModification)
-            {
-                // Inform the UI of the update
-                await _eventHub.SendMessageAsync(MessageFactory.ScanSeries, MessageFactory.ScanSeriesEvent(series.LibraryId, series.Id, series.Name), false, ct);
-            }
-
-            return new SeriesDetailPlusDto()
-            {
-                Recommendations = recs,
-                Ratings = result.Ratings,
-                Reviews = externalSeriesMetadata.ExternalReviews.Select(r => _mapper.Map<UserReviewDto>(r)),
-                Series = result.Series
-            };
         }
-        catch (FlurlHttpException ex)
+
+        if (_unitOfWork.HasChanges())
         {
-            var errorMessage = await ex.GetResponseStringAsync();
-            // Trim quotes if the response is a JSON string
-            errorMessage = errorMessage.Trim('"');
-
-            if (ex.StatusCode == 500)
-            {
-                return _defaultReturn;
-            }
-
-            if (ex.StatusCode == 400 && errorMessage.Contains("Too many Requests"))
-            {
-                throw new KavitaException("Too many requests, slow down");
-            }
+            await _unitOfWork.CommitAsync(ct);
         }
-        catch (Exception ex)
+
+        if (madeMetadataModification)
         {
-            if (ex.Message.Contains("Too Many Requests"))
-            {
-                throw new KavitaException("Too many requests, slow down");
-            }
-
-            _logger.LogError(ex, "Unable to fetch external series metadata from Kavita+");
+            // Inform the UI of the update
+            await _eventHub.SendMessageAsync(MessageFactory.ScanSeries, MessageFactory.ScanSeriesEvent(series.LibraryId, series.Id, series.Name), false, ct);
         }
 
-        // Blacklist the series as it wasn't found in Kavita+
-        series.IsBlacklisted = true;
-        await _unitOfWork.CommitAsync(ct);
-
-        return _defaultReturn;
+        return new SeriesDetailPlusDto
+        {
+            Recommendations = recs,
+            Ratings = result.Ratings,
+            Reviews = externalSeriesMetadata.ExternalReviews.Select(r => _mapper.Map<UserReviewDto>(r)),
+            Series = result.Series
+        };
     }
 
     public async Task<bool> WriteExternalMetadataToSeries(ExternalSeriesDetailDto externalMetadata, int seriesId, MetadataFetchTrigger trigger = MetadataFetchTrigger.OnDemand, CancellationToken ct = default)
@@ -1464,8 +1407,6 @@ public class ExternalMetadataService : IExternalMetadataService
     private async Task<bool> UpdateChapters(Series series, MetadataSettingsDto settings,
         ExternalSeriesDetailDto externalMetadata)
     {
-        if (externalMetadata.PlusMediaFormat != PlusMediaFormat.Comic) return false;
-
         if (externalMetadata.ChapterDtos == null || externalMetadata.ChapterDtos.Count == 0) return false;
 
         // Get all volumes and chapters
@@ -1475,15 +1416,18 @@ public class ExternalMetadataService : IExternalMetadataService
         var matchedChapters = allChapters
             .Join(
                 externalMetadata.ChapterDtos,
-                chapter => chapter.Range,
-                dto => dto.IssueNumber,
+                chapter => Parser.IsLooseLeafVolume(chapter.Range) ? chapter.Volume.Name : chapter.Range,
+                dto => dto.IssueNumber.Replace(",", "."), // Ensure comma's are dots
                 (chapter, dto) => (chapter, dto)
             )
             .ToList();
 
         foreach (var (chapter, potentialMatch) in matchedChapters)
         {
-            _logger.LogDebug("Updating {SeriesName} ({SeriesId}) - Chapter {ChapterNumber} with metadata", series.Name, series.Id, chapter.Range);
+            var usedRange = Parser.IsLooseLeafVolume(chapter.Range) ? chapter.Volume.Name : chapter.Range;
+
+            _logger.LogDebug("Updating {SeriesName} ({SeriesId}) - Chapter {ChapterNumber} with metadata. Matched to {IssueNumber} - {HardcoverId}",
+                series.Name, series.Id, usedRange, potentialMatch.IssueNumber, potentialMatch.HardcoverId);
             var chapterFieldChanges = new List<MetadataFieldChangeDto>();
 
             Accumulate(ref madeModification, chapterFieldChanges, UpdateChapterTitle(chapter, settings, potentialMatch.Title, series.Name));
@@ -1499,6 +1443,12 @@ public class ExternalMetadataService : IExternalMetadataService
 
             madeModification = await UpdateChapterCoverImage(chapter, settings, series.Id, potentialMatch.CoverImageUrl) || madeModification;
             madeModification = await UpdateExternalChapterMetadata(chapter, settings, potentialMatch) || madeModification;
+
+            if (potentialMatch.HardcoverId is > 0)
+            {
+                chapterFieldChanges.Add(new MetadataFieldChangeDto(MetadataFieldChangeKind.ExternalIds, new { hardcoverId = chapter.HardcoverId }, new { hardcoverId = potentialMatch.HardcoverId }));
+                chapter.HardcoverId = potentialMatch.HardcoverId.Value;
+            }
 
             if (chapterFieldChanges.Count > 0)
             {
