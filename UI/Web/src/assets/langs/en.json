@@ -72,8 +72,7 @@
         "sync-user-settings-tooltip": "Users created via OIDC will be fully managed by the identity provider, including roles, library access, and age rating. If this option is disabled, users will not have access to any content after account creation. Refer to the documentation for more details.",
         "auto-login-label": "Auto login",
         "auto-login-tooltip": "Auto redirect to OIDC provider when opening the login screen",
-        "disable-password-authentication-label": "Disable password authentication",
-        "disable-password-authentication-tooltip": "Users with the admin role can bypass this restriction",
+        "disable-password-authentication-label": "Disable password authentication"
         "provider-name-label": "Provider name",
         "provider-name-tooltip": "Name shown on the login screen",
 
