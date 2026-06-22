@@ -35,12 +35,16 @@ export class FontService {
     return this.httpClient.get<Array<EpubFont>>(this.baseUrl + 'font/all');
   }
 
-  getFontFace(font: EpubFont): FontFace {
+  /**
+   * Builds a FontFace for the given font. Pass {@link familyName} to register the face under a different
+   * family name than the font's own (e.g. a namespaced preview alias) so it cannot clobber a global family.
+   */
+  getFontFace(font: EpubFont, familyName: string = font.family): FontFace {
     if (font.provider === FontProvider.System) {
-      return new FontFace(font.family, `url('assets/fonts/${font.family}/${font.fileName}')`, { style: font.style, weight: font.weight });
+      return new FontFace(familyName, `url('assets/fonts/${font.family}/${font.fileName}')`, { style: font.style, weight: font.weight });
     }
 
-    return new FontFace(font.family, `url(${this.baseUrl}font?fontId=${font.id}&apiKey=${this.encodedKey})`, { style: font.style, weight: font.weight });
+    return new FontFace(familyName, `url(${this.baseUrl}font?fontId=${font.id}&apiKey=${this.encodedKey})`, { style: font.style, weight: font.weight });
   }
 
   uploadFont(fontFile: File, fileEntry: NgxFileDropEntry) {

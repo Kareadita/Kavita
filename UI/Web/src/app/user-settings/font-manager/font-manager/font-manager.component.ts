@@ -3,47 +3,49 @@ import {FontService} from "src/app/_services/font.service";
 import {AccountService} from "../../../_services/account.service";
 import {ConfirmService} from "../../../shared/confirm.service";
 import {EpubFont, FontProvider} from 'src/app/_models/preferences/epub-font';
-import {NgxFileDropEntry, NgxFileDropModule} from "ngx-file-drop";
-import {DOCUMENT, NgStyle, NgTemplateOutlet} from "@angular/common";
+import {NgxFileDropEntry} from "ngx-file-drop";
+import {DOCUMENT} from "@angular/common";
 import {LoadingComponent} from "../../../shared/loading/loading.component";
-import {FormControl, FormGroup, FormsModule, ReactiveFormsModule} from "@angular/forms";
 import {SentenceCasePipe} from "../../../_pipes/sentence-case.pipe";
 import {SiteThemeProviderPipe} from "../../../_pipes/site-theme-provider.pipe";
 import {translate, TranslocoDirective} from "@jsverse/transloco";
 import {WikiLink} from "../../../_models/wiki";
 import {ToastrService} from "ngx-toastr";
+import {forkJoin} from "rxjs";
 import {
   FileDragAndDropUploadComponent
 } from "src/app/shared/file-drag-and-drop-upload/file-drag-and-drop-upload.component";
-import {
-  NgbAccordionBody,
-  NgbAccordionButton,
-  NgbAccordionCollapse,
-  NgbAccordionDirective,
-  NgbAccordionHeader,
-  NgbAccordionItem,
-  NgbTooltip
-} from '@ng-bootstrap/ng-bootstrap';
+import {NgbCollapse, NgbTooltip} from '@ng-bootstrap/ng-bootstrap';
+
+/**
+ * A family groups every uploaded/system file that shares the same family name (the name the user picks
+ * while reading). Each family may hold multiple files for its weights and styles.
+ */
+export interface FontFamilyGroup {
+  family: string;
+  provider: FontProvider;
+  files: EpubFont[];
+  /** True when any file declares a weight range (variable font), e.g. "400 800". */
+  isVariable: boolean;
+  weightMin: number;
+  weightMax: number;
+  hasItalic: boolean;
+  hasNormal: boolean;
+  /** Whether the family can be visually previewed (the special Default font cannot). */
+  canPreview: boolean;
+  /** Namespaced css family name used only for the preview so it can never clobber a global family. */
+  previewAlias: string;
+}
 
 @Component({
   selector: 'app-font-manager',
   imports: [
     LoadingComponent,
-    NgxFileDropModule,
-    FormsModule,
-    ReactiveFormsModule,
     SentenceCasePipe,
     SiteThemeProviderPipe,
-    NgTemplateOutlet,
     TranslocoDirective,
-    NgStyle,
     FileDragAndDropUploadComponent,
-    NgbAccordionDirective,
-    NgbAccordionItem,
-    NgbAccordionHeader,
-    NgbAccordionButton,
-    NgbAccordionCollapse,
-    NgbAccordionBody,
+    NgbCollapse,
     NgbTooltip
   ],
   templateUrl: './font-manager.component.html',
@@ -58,40 +60,49 @@ export class FontManagerComponent implements OnInit {
   private readonly toastr = inject(ToastrService);
   protected readonly fontService = inject(FontService);
 
-
-  protected readonly user = this.accountService.currentUser;
   protected readonly isReadOnly = this.accountService.hasReadOnlyRole;
 
   fonts = signal<EpubFont[]>([]);
+  hideSystemFonts = signal(false);
+
+  selectedFamilyKey = signal<string | undefined>(undefined);
+  isUploadingFont = signal(false);
+
+  /** Toggles the inline upload zone in the header. */
+  showUpload = signal(false);
+  /** Toggles the "files in this family" disclosure in the specimen panel. */
+  showFiles = signal(false);
+  /** Current weight applied to the preview (drives the variable weight axis slider). */
+  currentWeight = signal(400);
+
   visibleFonts = computed(() => {
     // Sort fonts in provider order (System then Custom)
-    const fonts = this.fonts().sort((a,b) => a.provider - b.provider );
-    const hide = this.hideSystemFonts();
-    if (!hide) return fonts;
+    const fonts = [...this.fonts()].sort((a, b) => a.provider - b.provider);
+    if (!this.hideSystemFonts()) return fonts;
 
     return fonts.filter(f => f.provider === FontProvider.User);
   });
-  visibleFontFamilies = computed(() => {
-    return [...new Map(this.visibleFonts().map(font => [font.family, font])).values()]
+
+  fontFamilies = computed<FontFamilyGroup[]>(() => {
+    const groups = new Map<string, EpubFont[]>();
+    for (const font of this.visibleFonts()) {
+      const existing = groups.get(font.family);
+      if (existing) {
+        existing.push(font);
+      } else {
+        groups.set(font.family, [font]);
+      }
+    }
+
+    return [...groups.entries()].map(([family, files]) => this.buildGroup(family, files));
   });
 
-  hideSystemFonts = signal(false);
-
-
-  /**
-   * Fonts added during the current sessions
-   */
-  loadedFonts = signal<EpubFont[]>([]);
-
-  selectedFont = signal<EpubFont | undefined>(undefined);
-  isUploadingFont = signal(false);
-  initialLoadComplete = signal(false);
-
-  form: FormGroup = new FormGroup({
-    filter: new FormControl(this.hideSystemFonts(), [])
+  selectedGroup = computed<FontFamilyGroup | undefined>(() => {
+    const key = this.selectedFamilyKey();
+    if (key === undefined) return undefined;
+    return this.fontFamilies().find(g => g.family === key);
   });
 
-  files: NgxFileDropEntry[] = [];
   // When accepting more types, also need to update in the Parser
   acceptableExtensions = ['.woff2', '.woff', '.ttf', '.otf'].join(',');
 
@@ -100,33 +111,95 @@ export class FontManagerComponent implements OnInit {
   }
 
   loadFonts() {
-    this.initialLoadComplete.set(false);
     this.fontService.getFonts().subscribe(fonts => {
       this.fonts.set(fonts);
 
       // First load, if there are user provided fonts, switch the filter toggle
-      if (fonts.filter(f => f.provider != FontProvider.System).length > 0 && !this.hideSystemFonts()) {
-        this.setHideSystemFontsFilter(true);
+      if (fonts.some(f => f.provider !== FontProvider.System) && !this.hideSystemFonts()) {
+        this.hideSystemFonts.set(true);
       }
-      setTimeout(() => this.initialLoadComplete.set(true), 100);
+
+      const families = this.fontFamilies();
+      if (families.length > 0) {
+        this.selectFamily(families[0]);
+      }
     });
   }
 
-  selectFont(font: EpubFont | undefined) {
-    if (font === undefined) {
-      this.selectedFont.set(font);
-      return;
-    }
+  private buildGroup(family: string, files: EpubFont[]): FontFamilyGroup {
+    const isVariable = files.some(f => this.isVariableWeight(f.weight));
+    const variableFile = files.find(f => this.isVariableWeight(f.weight));
+    const range = variableFile ? this.parseWeightRange(variableFile.weight) : {min: 400, max: 700};
+    const canPreview = files.some(f => f.name !== FontService.DefaultEpubFont);
 
+    return {
+      family,
+      provider: files[0].provider,
+      files,
+      isVariable,
+      weightMin: range.min,
+      weightMax: range.max,
+      hasItalic: files.some(f => f.style === 'italic'),
+      hasNormal: files.some(f => f.style !== 'italic'),
+      canPreview,
+      previewAlias: `kavita-preview-${files[0].id}`,
+    };
+  }
 
-    if (font.name !== FontService.DefaultEpubFont) {
-      this.fontService.getFontFace(font).load().then(loadedFace => {
-        (this.document as any).fonts.add(loadedFace);
-        this.selectedFont.set(font);
-      });
+  isVariableWeight(weight: string): boolean {
+    return /\s/.test((weight ?? '').trim());
+  }
+
+  parseWeightRange(weight: string): {min: number, max: number} {
+    const parts = weight.trim().split(/\s+/).map(Number);
+    return {min: parts[0] || 100, max: parts[1] || 900};
+  }
+
+  /** Renders a file's weight as a range ("400–800") for variable fonts, or the plain number otherwise. */
+  weightLabel(weight: string): string {
+    if (!this.isVariableWeight(weight)) return weight;
+    const {min, max} = this.parseWeightRange(weight);
+    return `${min}–${max}`;
+  }
+
+  selectFamily(group: FontFamilyGroup) {
+    this.selectedFamilyKey.set(group.family);
+    this.showFiles.set(false);
+
+    // Default the preview weight: variable fonts start at 400 (clamped to range), otherwise the
+    // weight of the family's normal file.
+    if (group.isVariable) {
+      this.currentWeight.set(Math.min(Math.max(400, group.weightMin), group.weightMax));
     } else {
-      this.selectedFont.set(font);
+      const normal = group.files.find(f => f.style !== 'italic') ?? group.files[0];
+      this.currentWeight.set(Number(normal.weight) || 400);
     }
+
+    if (!group.canPreview) return;
+
+    // Register every file in the family under a single namespaced alias so the browser can pick the
+    // correct face by style/weight. The alias never matches a real family, so global styles are untouched.
+    for (const font of group.files) {
+      if (font.name === FontService.DefaultEpubFont) continue;
+      this.fontService.getFontFace(font, group.previewAlias).load()
+        .then(loadedFace => (this.document as any).fonts.add(loadedFace))
+        .catch(() => { /* preview only; ignore load failures */ });
+    }
+  }
+
+  toggleCustomOnly() {
+    this.hideSystemFonts.update(x => !x);
+
+    // Keep the selection valid against the new filter
+    if (!this.selectedGroup()) {
+      const families = this.fontFamilies();
+      if (families.length > 0) this.selectFamily(families[0]);
+      else this.selectedFamilyKey.set(undefined);
+    }
+  }
+
+  toggleUpload() {
+    this.showUpload.update(x => !x);
   }
 
   dropped(files: NgxFileDropEntry[]) {
@@ -155,66 +228,64 @@ export class FontManagerComponent implements OnInit {
     });
   }
 
-  async deleteFont(id: number) {
+  async deleteFamily(group: FontFamilyGroup) {
     if (!await this.confirmService.confirm(translate('toasts.confirm-delete-font'))) {
       return;
     }
 
-    // Check if this font is in use
-    this.fontService.isFontInUse(id).subscribe(async (inUse) => {
-      if (!inUse) {
-        this.performDeleteFont(id);
+    const ids = group.files.map(f => f.id);
+
+    // Check if any file in the family is in use before deleting the whole family
+    forkJoin(ids.map(id => this.fontService.isFontInUse(id))).subscribe(async (results) => {
+      if (!results.some(inUse => inUse)) {
+        this.performDeleteFamily(ids);
         return;
       }
 
       if (!this.accountService.hasAdminRole()) {
-        this.toastr.info(translate('toasts.font-in-use'))
+        this.toastr.info(translate('toasts.font-in-use'));
         return;
       }
 
       if (!await this.confirmService.confirm(translate('toasts.confirm-force-delete-font'))) {
         return;
       }
-      this.performDeleteFont(id, true);
-    })
-
-
+      this.performDeleteFamily(ids, true);
+    });
   }
 
-  private setHideSystemFontsFilter(value: boolean) {
-    this.hideSystemFonts.set(value);
-    this.form.get('filter')?.setValue(value);
-  }
+  private performDeleteFamily(ids: number[], force: boolean = false) {
+    forkJoin(ids.map(id => this.fontService.deleteFont(id, force))).subscribe(() => {
+      this.fonts.update(x => x.filter(f => !ids.includes(f.id)));
 
-  private performDeleteFont(id: number, force: boolean = false) {
-    this.fontService.deleteFont(id, force).subscribe(() => {
-      this.fonts.update(x => x.filter(f => f.id !== id));
-
-      // Select the first font in the list
-      const visibleFonts = this.visibleFonts();
-      if (visibleFonts.length === 0 && this.hideSystemFonts()) {
-        this.setHideSystemFontsFilter(false);
-        this.selectFont(this.fonts()[0]); // Default
+      const families = this.fontFamilies();
+      if (families.length === 0 && this.hideSystemFonts()) {
+        this.hideSystemFonts.set(false);
+        const all = this.fontFamilies();
+        if (all.length > 0) this.selectFamily(all[0]);
         return;
       }
 
-      if (visibleFonts.length > 0) {
-        this.selectFont(visibleFonts[visibleFonts.length - 1]);
+      if (families.length > 0) {
+        this.selectFamily(families[families.length - 1]);
+      } else {
+        this.selectedFamilyKey.set(undefined);
       }
     });
   }
 
   private addFont(font: EpubFont) {
-    // Check if the font is already in our list.
-    // Bail out if is.
+    // Check if the font is already in our list. Bail out if it is.
     if (this.fonts().some(f => f.id === font.id)) {
       return;
     }
     this.fonts.update(x => [...x, font]);
-    this.loadedFonts.update(x => [...x, font]);
-    setTimeout(() => this.selectFont(font), 100);
-  }
 
+    const group = this.fontFamilies().find(g => g.family === font.family);
+    if (group) {
+      setTimeout(() => this.selectFamily(group), 100);
+    }
+  }
 
   protected readonly FontService = FontService;
   protected readonly FontProvider = FontProvider;
