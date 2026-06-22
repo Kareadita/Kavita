@@ -112,13 +112,13 @@ public class FontController(
 
     [HttpPost("upload-by-url")]
     [DisallowRole(PolicyConstants.ReadOnlyRole)]
-    public async Task<ActionResult> UploadFontByUrl([FromQuery]string url)
+    public async Task<ActionResult<EpubFontDto[]>> UploadFontByUrl([FromQuery] string url)
     {
         // Validate url
         try
         {
-            var font = await fontService.CreateFontFromUrl(url);
-            return Ok(mapper.Map<EpubFontDto>(font));
+            var fonts = await fontService.CreateFontsFromUrl(url);
+            return Ok(mapper.Map<EpubFontDto[]>(fonts));
         }
         catch (KavitaException ex)
         {

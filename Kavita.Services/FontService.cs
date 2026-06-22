@@ -1,5 +1,5 @@
 using System;
-using System.IO;
+using System.Collections.Generic;
 using System.Linq;
 using System.Text.Json;
 using System.Threading;
@@ -34,19 +34,10 @@ internal class GoogleFontsMetadata
     /// <summary>
     /// Tries to find the variable font in the manifest
     /// </summary>
-    /// <returns>GoogleFontsFileRef</returns>
-    public GoogleFontsFileRef? VariableFont()
+    /// <returns>GoogleFontsFileRef[]</returns>
+    public GoogleFontsFileRef[] VariableFont()
     {
-        foreach (var fileRef in manifest.fileRefs)
-        {
-            // Filename prefixed with static means it's a Bold/Italic/... font
-            if (!fileRef.filename.StartsWith("static/"))
-            {
-                return fileRef;
-            }
-        }
-
-        return null;
+        return Array.FindAll(manifest.fileRefs, fontRefs => fontRefs.filename.Contains("variable", StringComparison.OrdinalIgnoreCase));
     }
 }
 
@@ -90,34 +81,33 @@ public class FontService(IDirectoryService directoryService, IUnitOfWork unitOfW
     private const string DownloadFontUrlPrefix = "https://fonts.google.com/download/list?family=";
     private const string GoogleFontsInvalidJsonPrefix = ")]}'";
 
+
     public async Task<EpubFont> CreateFontFromFileAsync(string path, CancellationToken ct = default)
     {
+        // Validate that font was uploaded
         if (!directoryService.FileSystem.File.Exists(path))
         {
             logger.LogInformation("Unable to create font from manual upload as font not in temp");
             throw new KavitaException("errors.font-manual-upload");
         }
 
+        // Extract filename and then parse font object from the filename
         var fileName = directoryService.FileSystem.FileInfo.New(path).Name;
-        var nakedFileName = directoryService.FileSystem.Path.GetFileNameWithoutExtension(fileName);
-        var fontName = Parser.PrettifyFileName(nakedFileName);
-        var normalizedName = Parser.Normalize(nakedFileName);
+        var font = Parser.ParseEpubFontFromFilename(fileName);
 
-        if (await unitOfWork.EpubFontRepository.GetFontDtoByNameAsync(fontName, ct) != null)
+        var dbFont = await unitOfWork.EpubFontRepository.GetFontByNameAsync(font.Name, ct);
+
+        // Check if font name is already present in database
+        // If it is, return the one that is already in the database.
+        if (dbFont != null)
         {
-            throw new KavitaException("errors.font-already-in-use");
+            return dbFont;
         }
 
+        // Copy file from temp directory to EpubFontDirectory
         directoryService.CopyFileToDirectory(path, directoryService.EpubFontDirectory);
-        var finalLocation = directoryService.FileSystem.Path.Join(directoryService.EpubFontDirectory, fileName);
 
-        var font = new EpubFont()
-        {
-            Name = fontName,
-            NormalizedName = normalizedName,
-            FileName = Path.GetFileName(finalLocation),
-            Provider = FontProvider.User
-        };
+        // Commit font to database
         unitOfWork.EpubFontRepository.Add(font);
         await unitOfWork.CommitAsync(ct);
 
@@ -138,7 +128,7 @@ public class FontService(IDirectoryService directoryService, IUnitOfWork unitOfW
         await RemoveFont(font);
     }
 
-    public async Task<EpubFont> CreateFontFromUrl(string url, CancellationToken ct = default)
+    public async Task<EpubFont[]> CreateFontsFromUrl(string url, CancellationToken ct = default)
     {
         if (!url.StartsWith(SupportedFontUrlPrefix))
         {
@@ -156,21 +146,32 @@ public class FontService(IDirectoryService directoryService, IUnitOfWork unitOfW
             throw new KavitaException("errors.font-not-found");
         }
 
-        var googleFontRef = metaData.VariableFont();
-        if (googleFontRef == null)
+        // Choose the variable font if available
+        // Otherwise take the full list.
+        // This should be fine since Google Fonts seems to
+        // only prepend filenames with 'static/' for font
+        // families that have variable fonts since the
+        // static/ path contains non-variable variants of
+        // the font for applications that don't support
+        // variable fonts.
+        var googleFontRefs = metaData.VariableFont();
+        if (googleFontRefs.Length == 0)
         {
-            logger.LogError("Unable to find variable font for {FontName} with metadata {MetaData}", fontFamily.Sanitize(), metaData);
-            throw new KavitaException("errors.font-not-found");
+            googleFontRefs = metaData.manifest.fileRefs;
         }
 
-        var fontExt = Path.GetExtension(googleFontRef.filename);
-        var fileName = $"{fontFamily}{fontExt}";
+        var finalRef = new List<EpubFont>();
+        foreach (var fontRef in googleFontRefs)
+        {
+            await urlValidationService.ValidateUrlAsync(fontRef.url);
+            logger.LogDebug("Downloading font {FontFamily} to {FileName} from {Url}", fontFamily.Sanitize(), fontRef.filename.Sanitize(), fontRef.url);
+            var path = await fontRef.url.DownloadFileAsync(directoryService.TempDirectory, fontRef.filename, cancellationToken: ct);
 
-        await urlValidationService.ValidateUrlAsync(googleFontRef.url);
-        logger.LogDebug("Downloading font {FontFamily} to {FileName} from {Url}", fontFamily.Sanitize(), fileName.Sanitize(), googleFontRef.url);
-        var path = await googleFontRef.url.DownloadFileAsync(directoryService.TempDirectory, fileName, cancellationToken: ct);
+            var result = await CreateFontFromFileAsync(path, ct);
+            finalRef.Add(result);
+        }
 
-        return await CreateFontFromFileAsync(path, ct);
+        return [..finalRef];
     }
 
     /// <summary>
@@ -191,7 +192,7 @@ public class FontService(IDirectoryService directoryService, IUnitOfWork unitOfW
     {
         if (font.Provider == FontProvider.System) return;
 
-        var prefs = await unitOfWork.UserRepository.GetAllPreferencesByFontAsync(font.Name);
+        var prefs = await unitOfWork.UserRepository.GetAllPreferencesByFontAsync(font.Family);
         foreach (var pref in prefs)
         {
             pref.BookReaderFontFamily = Defaults.DefaultFont;

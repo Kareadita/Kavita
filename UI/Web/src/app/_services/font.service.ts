@@ -37,10 +37,10 @@ export class FontService {
 
   getFontFace(font: EpubFont): FontFace {
     if (font.provider === FontProvider.System) {
-      return new FontFace(font.name, `url('assets/fonts/${font.name}/${font.fileName}')`);
+      return new FontFace(font.family, `url('assets/fonts/${font.family}/${font.fileName}')`, { style: font.style, weight: font.weight });
     }
 
-    return new FontFace(font.name, `url(${this.baseUrl}font?fontId=${font.id}&apiKey=${this.encodedKey})`);
+    return new FontFace(font.family, `url(${this.baseUrl}font?fontId=${font.id}&apiKey=${this.encodedKey})`, { style: font.style, weight: font.weight });
   }
 
   uploadFont(fontFile: File, fileEntry: NgxFileDropEntry) {
@@ -50,7 +50,7 @@ export class FontService {
   }
 
   uploadFromUrl(url: string) {
-    return this.httpClient.post<EpubFont>(this.baseUrl + "font/upload-by-url?url=" + encodeURIComponent(url), {});
+    return this.httpClient.post<EpubFont[]>(this.baseUrl + "font/upload-by-url?url=" + encodeURIComponent(url), {});
   }
 
   deleteFont(id: number, force: boolean = false) {

@@ -217,7 +217,7 @@ export class EpubReaderSettingsService {
    */
   async initialize(libraryId: number, seriesId: number, readingProfile: ReadingProfile): Promise<void> {
     const fonts = await firstValueFrom(this.fontService.getFonts());
-    this._epubFonts.set(fonts);
+    this._epubFonts.set([...new Map(fonts.map(font => [font.family, font])).values()]);
 
     this._currentSeriesId.set(seriesId);
     this._currentLibraryId.set(libraryId);
@@ -487,10 +487,10 @@ export class EpubReaderSettingsService {
     // Font family changes
     this.settingsForm.get('bookReaderFontFamily')?.valueChanges.pipe(
       takeUntilDestroyed(this.destroyRef)
-    ).subscribe(fontName => {
+    ).subscribe(fontFamily => {
       this.isUpdatingFromForm = true;
 
-      const familyName = this._epubFonts().find(f => f.name === fontName)?.name || FontService.DefaultEpubFont;
+      const familyName = this._epubFonts().find(f => f.family === fontFamily)?.family || FontService.DefaultEpubFont;
       const currentStyles = this._pageStyles();
 
       const newStyles = { ...currentStyles };

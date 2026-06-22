@@ -5,7 +5,6 @@ using System.Threading.Tasks;
 using AutoMapper;
 using AutoMapper.QueryableExtensions;
 using Kavita.API.Repositories;
-using Kavita.API.Services;
 using Kavita.Common.Extensions;
 using Kavita.Models;
 using Kavita.Models.DTOs.Font;
@@ -68,12 +67,19 @@ public class EpubFontRepository(DataContext context, IMapper mapper) : IEpubFont
             .FirstOrDefaultAsync(ct);
     }
 
+    public async Task<EpubFont?> GetFontByNameAsync(string name, CancellationToken ct = default)
+    {
+        return await context.EpubFont
+            .Where(f => f.NormalizedName.Equals(name.ToNormalized()))
+            .FirstOrDefaultAsync(ct);
+    }
+
     public async Task<bool> IsFontInUseAsync(int fontId, CancellationToken ct = default)
     {
         return await context.AppUserReadingProfiles
             .Join(context.EpubFont,
                 preference => preference.BookReaderFontFamily,
-                font => font.Name,
+                font => font.Family,
                 (preference, font) => new { preference, font })
             .AnyAsync(joined => joined.font.Id == fontId, ct);
     }

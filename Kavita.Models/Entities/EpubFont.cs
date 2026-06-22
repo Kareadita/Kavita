@@ -12,6 +12,10 @@ public class EpubFont: IEntityDate
     public int Id { get; set; }
 
     /// <summary>
+    /// Family of the font
+    /// </summary>
+    public required string Family { get; set; }
+    /// <summary>
     /// Name of the font
     /// </summary>
     public required string Name { get; set; }
@@ -28,6 +32,14 @@ public class EpubFont: IEntityDate
     /// Where the font came from
     /// </summary>
     public FontProvider Provider { get; set; }
+    /// <summary>
+    /// Style for the font, i.e. normal or italic (FontFace font-style values)
+    /// </summary>
+    public required string Style { get; set; }
+    /// <summary>
+    /// Supported weight of font, either via a single number for a specific weight or two numbers for a range. e.g. '400' or '100 400'
+    /// </summary>
+    public required string Weight { get; set; }
 
     public DateTime Created { get; set; }
     public DateTime CreatedUtc { get; set; }

@@ -16,15 +16,11 @@
               <label for="filter-out-system-fonts" class="form-check-label">{{t('filter-system-fonts-label')}}</label>
             </div>
           </div>
-
-          <ul style="height: 100%" class="list-group list-group-flush">
-
-            @for (font of visibleFonts(); track font.id) {
-              <ng-container [ngTemplateOutlet]="fontOption" [ngTemplateOutletContext]="{ $implicit: font}"></ng-container>
-            } @empty {
-              <app-loading [loading]="fonts().length === 0"></app-loading>
-            }
-          </ul>
+          @for (font of visibleFontFamilies(); track font.id) {
+            <ng-container [ngTemplateOutlet]="fontOption" [ngTemplateOutletContext]="{ $implicit: font}"></ng-container>
+          } @empty {
+            <app-loading [loading]="fonts().length === 0"></app-loading>
+          }
         </div>
       </div>
 
@@ -77,19 +73,38 @@
   <ng-template #fontOption let-item>
     @if (item !== undefined) {
       @let currentFont = selectedFont();
-      <li
-        [animate.enter]="initialLoadComplete() ? 'highlight-new-font' : ''"
-        class="list-group-item d-flex justify-content-between align-items-start clickable rounded mt-1"
-        [class.active]="currentFont && currentFont?.name === item.name"
-        (click)="selectFont(item)"
-      >
-        <div class="ms-2 me-auto">
-          <div class="fw-bold">{{item.name | sentenceCase}}</div>
+      <div ngbAccordion>
+        <div ngbAccordionItem>
+          <h2 ngbAccordionHeader>
+            <button ngbAccordionButton class="accordion-button">
+              <h4 class="ms-2 me-auto">{{item.family}}</h4>
+              <i class="fas fa-chevron-up" aria-hidden="true"></i>
+            </button>
+          </h2>
+          <div ngbAccordionCollapse>
+            <div ngbAccordionBody>
+              <ng-template>
+                <ul style="height: 100%" class="list-group list-group-flush">
+                  @for (font of visibleFonts(); track font.id) {
+                    @if (font.family === item.family) {
+                      <li
+                        class="list-group-item d-flex justify-content-between align-items-start clickable rounded mt-1"
+                        [class.active]="currentFont && currentFont?.name === font.name"
+                        (click)="selectFont(font)"
+                      >
+                        <div style="word-break: keep-all" class="ms-2 me-auto">{{font.name | sentenceCase}}</div>
+                        <div>
+                          <span style="word-break: keep-all" class="pill p-1 mx-1 provider">{{+font.provider | siteThemeProvider}}</span>
+                        </div>
+                      </li>
+                    }
+                  }
+                </ul>
+              </ng-template>
+            </div>
+          </div>
         </div>
-        <div>
-          <span class="pill p-1 mx-1 provider">{{item.provider | siteThemeProvider}}</span>
-        </div>
-      </li>
+      </div>
     }
   </ng-template>
 
@@ -104,7 +119,9 @@
       </div>
 
       @if (item.name !== FontService.DefaultEpubFont) {
-        <div class="p-1 me-1 preview mt-2 flex-grow-1 text-center w-100 fs-4 fs-lg-3 mt-2" [ngStyle]="{'font-family': item.name, 'word-break': 'keep-all'}">
+        <h6>Style: {{item.style}}</h6>
+        <h6>Weight: {{item.weight}}</h6>
+        <div class="p-1 me-1 preview mt-2 flex-grow-1 text-center w-100 fs-4 fs-lg-3 mt-2" [ngStyle]="{'font-family': item.family, 'font-style': item.style, 'font-weight': item.weight, 'word-break': 'keep-all'}">
           {{t('brown-fox')}}
         </div>
       }
