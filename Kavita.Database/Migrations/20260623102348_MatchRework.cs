@@ -5,11 +5,18 @@
 namespace Kavita.Database.Migrations
 {
     /// <inheritdoc />
-    public partial class AddLibraryMetadataProvider : Migration
+    public partial class MatchRework : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
+            migrationBuilder.AddColumn<bool>(
+                name: "IsStandAlone",
+                table: "Series",
+                type: "INTEGER",
+                nullable: false,
+                defaultValue: false);
+
             migrationBuilder.AddColumn<int>(
                 name: "MetadataProvider",
                 table: "Library",
@@ -21,6 +28,10 @@ namespace Kavita.Database.Migrations
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
+            migrationBuilder.DropColumn(
+                name: "IsStandAlone",
+                table: "Series");
+
             migrationBuilder.DropColumn(
                 name: "MetadataProvider",
                 table: "Library");

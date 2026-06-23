@@ -601,6 +601,7 @@ public class ExternalMetadataService : IExternalMetadataService
         _unitOfWork.ExternalSeriesMetadataRepository.Remove(externalSeriesMetadata.ExternalRatings);
         _unitOfWork.ExternalSeriesMetadataRepository.Remove(externalSeriesMetadata.ExternalRecommendations);
 
+        series.IsStandAlone = result.Series?.IsStandAlone ?? false;
         externalSeriesMetadata.Provider = data.Provider;
 
         externalSeriesMetadata.ExternalReviews = result.Reviews.Select(r =>

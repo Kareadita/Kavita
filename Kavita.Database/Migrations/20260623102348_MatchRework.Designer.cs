@@ -14,8 +14,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Kavita.Database.Migrations
 {
     [DbContext(typeof(DataContext))]
-    [Migration("20260622140655_AddLibraryMetadataProvider")]
-    partial class AddLibraryMetadataProvider
+    [Migration("20260623102348_MatchRework")]
+    partial class MatchRework
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -2208,6 +2208,9 @@ namespace Kavita.Database.Migrations
                         .HasColumnType("INTEGER");
 
                     b.Property<bool>("IsBlacklisted")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<bool>("IsStandAlone")
                         .HasColumnType("INTEGER");
 
                     b.Property<DateTime>("LastChapterAdded")

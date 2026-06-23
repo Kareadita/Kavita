@@ -2207,6 +2207,9 @@ namespace Kavita.Database.Migrations
                     b.Property<bool>("IsBlacklisted")
                         .HasColumnType("INTEGER");
 
+                    b.Property<bool>("IsStandAlone")
+                        .HasColumnType("INTEGER");
+
                     b.Property<DateTime>("LastChapterAdded")
                         .HasColumnType("TEXT");
 

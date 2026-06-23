@@ -628,7 +628,7 @@ public class SeriesRepository(DataContext context, IMapper mapper) : ISeriesRepo
                 MangabakaId = (int?) series.MangaBakaId,
                 MangaDexId = ExternalIdParser.GetMangaDexId(series.Metadata.WebLinks),
                 HardcoverId = series.HardcoverId,
-                IsStandAlone = series.Volumes.Sum(v => v.Chapters.Count) == 1,
+                IsStandAlone = series.IsStandAlone,
                 VolumeCount = series.Volumes.Count,
                 ChapterCount = series.Volumes.SelectMany(v => v.Chapters).Count(c => !c.IsSpecial),
                 Year = series.Metadata.ReleaseYear
