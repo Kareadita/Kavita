@@ -451,7 +451,7 @@ public class ParsingTests
     // Name strips the variable-axes suffix (everything after '_') and prettifies separators
     [InlineData("Family-Regular.ttf", "Family Regular")]
     [InlineData("Family-BoldItalic.ttf", "Family BoldItalic")]
-    [InlineData("Family-VariableFont_wght.ttf", "Family VariableFont")]
+    [InlineData("Family-VariableFont_wght.ttf", "Family Variable Font")]
     [InlineData("OpenSans-Regular.ttf", "OpenSans Regular")]
     [InlineData("Arial.ttf", "Arial")]
     public void ParseEpubFontFromFilename_BuildsName(string fileName, string expectedName)
