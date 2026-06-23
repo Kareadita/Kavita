@@ -15,6 +15,8 @@ import {
   FileDragAndDropUploadComponent
 } from "src/app/shared/file-drag-and-drop-upload/file-drag-and-drop-upload.component";
 import {NgbCollapse, NgbTooltip} from '@ng-bootstrap/ng-bootstrap';
+import {tap} from "rxjs";
+import {finalize} from "rxjs/operators";
 
 /**
  * A family groups every uploaded/system file that shares the same family name (the name the user picks
@@ -221,10 +223,10 @@ export class FontManagerComponent implements OnInit {
 
   uploadFromUrl(url: string) {
     this.isUploadingFont.set(true);
-    this.fontService.uploadFromUrl(url).subscribe((fonts) => {
-      fonts.forEach(font => this.addFont(font));
-      this.isUploadingFont.set(false);
-    });
+    this.fontService.uploadFromUrl(url).pipe(
+      tap(fonts => fonts.forEach(font => this.addFont(font))),
+      finalize(() => this.isUploadingFont.set(false))
+    ).subscribe();
   }
 
   async deleteFamily(group: FontFamilyGroup) {
@@ -295,7 +297,6 @@ export class FontManagerComponent implements OnInit {
     }
   }
 
-  protected readonly FontService = FontService;
   protected readonly FontProvider = FontProvider;
   protected readonly WikiLink = WikiLink.EpubFontManager;
 }

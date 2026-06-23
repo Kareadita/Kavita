@@ -217,8 +217,7 @@ export class EpubReaderSettingsService {
    */
   async initialize(libraryId: number, seriesId: number, readingProfile: ReadingProfile): Promise<void> {
     const fonts = await firstValueFrom(this.fontService.getFonts());
-    // Key by family+provider so a user upload sharing a built-in family name still gets its own entry
-    this._epubFonts.set([...new Map(fonts.map(font => [`${font.family}-${font.provider}`, font])).values()]);
+    this._epubFonts.set([...new Map(fonts.map(font => [`${font.family}`, font])).values()]);
 
     this._currentSeriesId.set(seriesId);
     this._currentLibraryId.set(libraryId);
