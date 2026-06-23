@@ -2005,7 +2005,7 @@
     "reader-settings": {
         "general-settings-title": "General Settings",
         "font-family-label": "{{manage-reading-profiles.font-family-label}}",
-        "user-font-suffix": " (User)",
+        "user-font-suffix": "(User)",
         "font-size-label": "{{manage-reading-profiles.font-size-book-label}}",
         "line-spacing-label": "{{manage-reading-profiles.line-height-book-label}}",
         "margin-label": "{{manage-reading-profiles.margin-book-label}}",

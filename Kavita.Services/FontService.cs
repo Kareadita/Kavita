@@ -195,8 +195,13 @@ public class FontService(IDirectoryService directoryService, IUnitOfWork unitOfW
         foreach (var fontRef in googleFontRefs)
         {
             await urlValidationService.ValidateUrlAsync(fontRef.url);
-            logger.LogDebug("Downloading font {FontFamily} to {FileName} from {Url}", fontFamily.Sanitize(), fontRef.filename.Sanitize(), fontRef.url);
-            var path = await fontRef.url.DownloadFileAsync(directoryService.TempDirectory, fontRef.filename, cancellationToken: ct);
+
+            // filename comes from remote metadata and may contain path separators (e.g. static/...).
+            // Reduce it to a basename so the download can't create unexpected subdirectories or traverse outside temp.
+            var fileName = directoryService.FileSystem.Path.GetFileName(fontRef.filename.Replace('\\', '/'));
+
+            logger.LogDebug("Downloading font {FontFamily} to {FileName} from {Url}", fontFamily.Sanitize(), fileName.Sanitize(), fontRef.url);
+            var path = await fontRef.url.DownloadFileAsync(directoryService.TempDirectory, fileName, cancellationToken: ct);
 
             var result = await CreateFontFromFileAsync(path, ct);
             finalRef.Add(result);

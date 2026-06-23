@@ -1384,7 +1384,7 @@ public static partial class Parser
     {
         { "variable",    "1 1000" }, /* Special entry for variable fonts, sets weight to full range.
                                         Technically incorrect since most variable fonts generally don't
-                                        don't support full 1-1000 range. Usually the lowest is 300
+                                        support full 1-1000 range. Usually the lowest is 300
                                         with some going down to 100. Usually the highest is 800 with
                                         some going to 900 or 950. Setting '1 1000' should be fine since
                                         browsers should clamp to the lowest value the font file supports.
@@ -1415,7 +1415,7 @@ public static partial class Parser
         { "extra black", "950" },
         { "extra heavy", "950" }
     };
-    
+
     /// <summary>
     /// Parses a given filename into an EpubFont object.
     /// Filename will be passed through to the object.
@@ -1433,7 +1433,7 @@ public static partial class Parser
         var fontWeight = FontWeightLookup
             .OrderByDescending(entry => entry.Key.Length)
             .FirstOrDefault(entry => nakedFileName.Contains(entry.Key, StringComparison.OrdinalIgnoreCase), new KeyValuePair<string, string>("normal", "400")).Value;
-        
+
         var fontFamily = nakedFileName;
         var descriptorControlCharIndex = fontFamily.IndexOf('-');
         if (descriptorControlCharIndex >= 1)
