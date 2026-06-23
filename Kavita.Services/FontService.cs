@@ -222,13 +222,6 @@ public class FontService(IDirectoryService directoryService, IUnitOfWork unitOfW
             profile.BookReaderFontFamily = Defaults.DefaultFont;
             unitOfWork.AppUserReadingProfileRepository.Update(profile);
         }
-
-        var prefs = await unitOfWork.UserRepository.GetAllPreferencesByFontAsync(family);
-        foreach (var pref in prefs)
-        {
-            pref.BookReaderFontFamily = Defaults.DefaultFont;
-            unitOfWork.UserRepository.Update(pref);
-        }
     }
 
     private void MoveFontFileToTemp(EpubFont font)

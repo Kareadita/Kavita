@@ -98,7 +98,6 @@ public class FontController(
     [DisallowRole(PolicyConstants.ReadOnlyRole)]
     public async Task<ActionResult<EpubFontDto[]>> UploadFontByUrl([FromQuery] string url)
     {
-        // Validate url
         try
         {
             var fonts = await fontService.CreateFontsFromUrl(url);

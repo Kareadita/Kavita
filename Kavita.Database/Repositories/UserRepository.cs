@@ -203,14 +203,6 @@ public class UserRepository(DataContext context, UserManager<AppUser> userManage
             .ToListAsync(ct);
     }
 
-    public async Task<IEnumerable<AppUserPreferences>> GetAllPreferencesByFontAsync(string fontFamily, CancellationToken ct = default)
-    {
-        return await context.AppUserPreferences
-            .Where(p => p.BookReaderFontFamily == fontFamily)
-            .AsSplitQuery()
-            .ToListAsync(ct);
-    }
-
     public async Task<bool> HasAccessToLibrary(int userId, int libraryId, CancellationToken ct = default)
     {
         return await context.Library
