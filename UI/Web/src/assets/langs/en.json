@@ -4585,6 +4585,7 @@
         "reading-direction-book-tooltip": "Direction to click to move to next page. Right to Left means you click on left side of screen to move to next page.",
         "font-family-label": "Font Family",
         "font-family-tooltip": "Font family to load up. Default will load the book's default font",
+        "user-font-suffix": "{{reader-settings.user-font-suffix}}",
         "writing-style-label": "Writing Style",
         "writing-style-tooltip": "Changes the direction of the text. Horizontal is left to right, vertical is top to bottom.",
         "layout-mode-book-label": "Layout Mode",
