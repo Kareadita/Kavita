@@ -1429,7 +1429,10 @@ public static partial class Parser
         var nakedFileName = Path.GetFileNameWithoutExtension(fileName);
 
         var fontStyle = nakedFileName.Contains("italic", StringComparison.OrdinalIgnoreCase) ? "italic" : "normal";
-        var fontWeight = FontWeightLookup.FirstOrDefault(entry => nakedFileName.Contains(entry.Key, StringComparison.OrdinalIgnoreCase), new KeyValuePair<string, string>("normal", "400")).Value;
+        // Match longest descriptors first so specific weights (e.g. "extrabold") win over substrings (e.g. "bold")
+        var fontWeight = FontWeightLookup
+            .OrderByDescending(entry => entry.Key.Length)
+            .FirstOrDefault(entry => nakedFileName.Contains(entry.Key, StringComparison.OrdinalIgnoreCase), new KeyValuePair<string, string>("normal", "400")).Value;
         
         var fontFamily = nakedFileName;
         var descriptorControlCharIndex = fontFamily.IndexOf('-');
