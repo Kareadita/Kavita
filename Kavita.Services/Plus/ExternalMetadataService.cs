@@ -290,9 +290,7 @@ public class ExternalMetadataService : IExternalMetadataService
 
     public async Task<IList<ExternalSeriesMatchDto>> MatchSeries(MatchSeriesDto dto, CancellationToken ct = default)
     {
-        const SeriesIncludes includes = SeriesIncludes.Metadata | SeriesIncludes.ExternalMetadata
-                                                                | SeriesIncludes.Library | SeriesIncludes.Chapters;
-
+        const SeriesIncludes includes = SeriesIncludes.Metadata | SeriesIncludes.ExternalMetadata | SeriesIncludes.Library;
         var series = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(dto.SeriesId, includes, ct);
         if (series == null) return [];
 
@@ -343,7 +341,7 @@ public class ExternalMetadataService : IExternalMetadataService
             HardcoverSlug = potentialHardcoverSlug,
             CbrId = null,
             MangabakaId = potentialMangabakaId > 0 ? potentialMangabakaId : ExternalIdParser.GetMangaBakaId(series.Metadata.WebLinks),
-            IsStandAlone = series.Volumes.Sum(v => v.Chapters.Count) == 1,
+            IsStandAlone = dto.IsStandAlone,
             Provider = series.Library.MetadataProvider,
             SeriesName = series.Name,
             AlternativeNames = otherNames,
@@ -352,7 +350,7 @@ public class ExternalMetadataService : IExternalMetadataService
             Format = series.Library.Type.ConvertToPlusMediaFormat(series.Format),
         };
 
-        _logger.LogDebug("Match request: {@Request}", matchV3Request);
+        _logger.LogDebug("Making match request for series {SeriesId}: {@Request}", series.Id, matchV3Request);
 
         var kPlusResult = await _kavitaPlusApiService.MatchSeriesV3Async(matchV3Request, ct);
         if (!kPlusResult.IsSuccess)

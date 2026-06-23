@@ -1759,10 +1759,9 @@
         "chapter-count": "{{match-series-result-item.chapter-count}}",
         "matched-to": "Currently matched to",
         "searching-against": "Searching against {{provider}}",
-        "selected-desc": "Selected because: {{libraryType}} {{format}}",
-        "library-type": "Library Type:",
-        "format-type": "Format:",
-        "provider-help": "One provider per library type"
+        "change-provider-help": "You can change which provider to use in Library settings",
+        "is-standalone-label": "Is standalone",
+        "is-standalone-tooltip": "Enable if this series represents a single book, and hardcover doesn't have a series entry for it"
     },
 
     "match-series-result-item": {

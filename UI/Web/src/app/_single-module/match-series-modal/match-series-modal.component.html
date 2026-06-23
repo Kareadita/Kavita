@@ -10,7 +10,6 @@
 
     @let match = matchInfo();
 
-    <!-- Sub-header: explainer left + In Kavita chip right -->
     <div class="match-subheader d-flex align-items-center flex-wrap gap-3 pt-1">
       <div class="match-description flex-fill">
         <p class="mb-1">{{ t('description') }}</p>
@@ -58,7 +57,6 @@
       </div>
     </div>
 
-    <!--Metadata Provider Explainer-->
     @if (match) {
       <div class="provider-card d-flex align-items-center gap-3 p-3 rounded-2 border">
 
@@ -74,28 +72,25 @@
           </div>
 
           <div class="small text-muted">
-            <app-transloco-inject key="match-series-modal.selected-desc">
-              <ng-template translocoSlot="libraryType">
-                {{t('library-type')}} <app-tag-badge size="sm">{{match.libraryType | libraryType}}</app-tag-badge>
-              </ng-template>
-              <ng-template translocoSlot="format">
-                @if (match.plusMediaFormat == PlusMediaFormat.Book || match.plusMediaFormat === PlusMediaFormat.LightNovel) {
-                  <span class="dot-separator mx-1"></span>
-                  {{t('format-type')}} <app-tag-badge size="sm">{{match.seriesFormat | mangaFormat}}</app-tag-badge>
-                }
-              </ng-template>
-            </app-transloco-inject>
-
+            {{t('change-provider-help')}}
           </div>
         </div>
 
-        <div class="flex-shrink-0 p-1 text-muted phone-hidden">
-          {{t('provider-help')}}
-        </div>
+        @if (match.primaryProvider === MetadataProvider.Hardcover) {
+          <form [formGroup]="formGroup">
+            <div class="form-check form-switch mb-0">
+              <input type="checkbox" class="form-check-input" formControlName="isStandAlone"
+                     id="is-standalone" role="switch" />
+              <label class="form-check-label" for="is-standalone">
+                {{ t('is-standalone-label') }}
+                <i class="fa fa-info-circle" [ngbTooltip]="t('is-standalone-tooltip')"></i>
+              </label>
+            </div>
+          </form>
+        }
+
       </div>
     }
-
-
 
     <!-- Query bar -->
     <div class="py-3" [formGroup]="formGroup">

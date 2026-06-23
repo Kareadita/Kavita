@@ -573,7 +573,7 @@ public class SeriesController(
     public async Task<ActionResult<IList<ExternalSeriesMatchDto>>> MatchSeries(MatchSeriesDto dto)
     {
         var ct = HttpContext.RequestAborted;
-        var cacheKey = $"{MatchSeriesCacheKey}-{dto.SeriesId}-{dto.Query}";
+        var cacheKey = $"{MatchSeriesCacheKey}-{dto.SeriesId}-{dto.Query}-{dto.IsStandAlone}";
         var results = await _matchSeriesCacheProvider.GetAsync<IList<ExternalSeriesMatchDto>>(cacheKey, ct);
         if (results.HasValue && !environment.IsDevelopment())
         {
@@ -623,8 +623,8 @@ public class SeriesController(
     /// </summary>
     /// <param name="seriesId"></param>
     /// <returns></returns>
-    [HttpGet("match-info")]
     [KPlus]
+    [HttpGet("match-info")]
     [Authorize(Policy = PolicyGroups.AdminPolicy)]
     public async Task<ActionResult<MatchSeriesInfoDto>> GetExistingMatchInfo(int seriesId)
     {
@@ -635,33 +635,7 @@ public class SeriesController(
         var libraryType = series.Library.Type;
         var externalMetadata = series.ExternalSeriesMetadata;
 
-        // This is assuming v2 logic. Not sure if we will change how we match on V3 yet
-        var primaryProvider = Models.Entities.Enums.MetadataProvider.Mangabaka;
-        if (plusFormat is PlusMediaFormat.Comic)
-        {
-            primaryProvider = Models.Entities.Enums.MetadataProvider.ComicBookRoundup;
-        } else if (plusFormat is PlusMediaFormat.LightNovel)
-        {
-            primaryProvider = Models.Entities.Enums.MetadataProvider.Mangabaka;
-        } else if (plusFormat is PlusMediaFormat.Book)
-        {
-            primaryProvider = Models.Entities.Enums.MetadataProvider.Hardcover;
-        }
-
-        // We need provider derived from the primary id
-        MetadataProvider? provider = null;
-
-        // Set AniList as MangaBaka since the next update will fix this
-        if (series.MangaBakaId > 0 || series.AniListId > 0)
-        {
-            provider = Models.Entities.Enums.MetadataProvider.Mangabaka;
-        } else if (series.HardcoverId > 0)
-        {
-            provider = Models.Entities.Enums.MetadataProvider.Hardcover;
-        } else if (series.CbrId > 0)
-        {
-            provider = Models.Entities.Enums.MetadataProvider.ComicBookRoundup;
-        }
+        var provider = externalMetadata?.Provider;
 
         return Ok(new MatchSeriesInfoDto
         {
@@ -675,7 +649,7 @@ public class SeriesController(
             LibraryType = libraryType,
             PlusMediaFormat = plusFormat,
             MatchedProvider = provider,
-            PrimaryProvider = primaryProvider,
+            PrimaryProvider = series.Library.MetadataProvider,
             SeriesFormat = series.Format
         });
     }
