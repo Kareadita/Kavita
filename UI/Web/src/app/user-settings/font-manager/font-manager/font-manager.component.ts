@@ -229,11 +229,13 @@ export class FontManagerComponent implements OnInit {
   }
 
   async deleteFamily(group: FontFamilyGroup) {
+    if (group.provider === FontProvider.System) return;
+
     if (!await this.confirmService.confirm(translate('toasts.confirm-delete-font'))) {
       return;
     }
 
-    const ids = group.files.map(f => f.id);
+    const ids = group.files.filter(f => f.provider === FontProvider.User).map(f => f.id);
 
     // Check if any file in the family is in use before deleting the whole family
     forkJoin(ids.map(id => this.fontService.isFontInUse(id))).subscribe(async (results) => {

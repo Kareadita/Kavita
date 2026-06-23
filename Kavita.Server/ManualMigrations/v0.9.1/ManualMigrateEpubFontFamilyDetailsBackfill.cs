@@ -53,7 +53,7 @@ public class ManualMigrateEpubFontFamilyDetailsBackfill : ManualMigration
                         // BookReaderFontFamily in Reading Profiles does not need to be updated
                         // here since the old fonts that already existed in DefaultFonts list
                         // were given the same string for Family and Name. This was done so that
-                        // the SeedFonts function wouldn't erronously create duplicate font entries
+                        // the SeedFonts function wouldn't erroneously create duplicate font entries
                         // in the database.
 
                         // Update items that are new based on current state of DefaultFonts list
