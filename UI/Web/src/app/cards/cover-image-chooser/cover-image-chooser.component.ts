@@ -96,6 +96,8 @@ export class CoverImageChooserComponent  {
     this.selectedOptionKey.set(option.url);
     const isDirty = sourceTab !== Tabs.Current;
 
+    this.activeTabId = sourceTab;
+
     if (!isDirty) {
       // Selecting the existing cover - nothing to stage or upload.
       this.coverChanged.emit({ isDirty, fileName: '' });
