@@ -381,7 +381,7 @@
     },
 
     "font-manager": {
-        "description": "Fonts you can choose from in the epub reader. They're grouped by family, the name you pick while reading. Each family holds one or more files for its different weights and styles. See the <a href='{{wikiLink}}' target='_blank' rel='noreferrer noopener'>wiki</a> for more information.",
+        "description": "Fonts you can choose from in the epub reader. They're grouped by family, the name you pick while reading. Each family holds one or more files for its different weights and styles. Get fonts from <a href='https://fonts.google.com' target='_blank' rel='noreferrer noopener'>Google Fonts</a>, or see the <a href='{{wikiLink}}' target='_blank' rel='noreferrer noopener'>wiki</a> for more information. ",
         "add": "{{common.add}}",
         "add-font": "Add font",
         "drag-n-drop": "{{cover-image-chooser.drag-n-drop}}",
