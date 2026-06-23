@@ -1721,7 +1721,9 @@
         "series-dont-match": "Series Marked as Do Not Match",
         "scrobble-hold-active": "Series Is on Hold",
         "library-scrobbling-disabled": "Library Scrobbling Disabled",
-        "token-expired": "AniList Token Has Expired"
+        "token-expired": "AniList Token Has Expired",
+        "no-matches": "No matches with enough certainty found to automatically pick",
+        "too-many-matches": "More than one match with high certainty found, manual intervention required"
     },
 
     "reading-progress-status-pipe": {

@@ -181,7 +181,7 @@ public class ExternalMetadataService : IExternalMetadataService
             return null;
         }
 
-        var validAutomatedMatches = (result.Data ?? [])
+        var validAutomatedMatches = result.Data
             .Where(m => m.MatchRating > 0.9)
             .ToList();
 
@@ -190,9 +190,10 @@ public class ExternalMetadataService : IExternalMetadataService
             series.IsBlacklisted = true;
             await _unitOfWork.CommitAsync(ct);
 
-            await _auditService.LogAsync(KavitaPlusAuditCategory.Match, KavitaPlusEventType.SeriesMatchFailed,
+            await _auditService.LogAsync(KavitaPlusAuditCategory.Match, KavitaPlusEventType.SeriesBlacklisted,
                 AuditStatus.Failure, seriesId: seriesId, error: "no-matches", ct: ct);
-            _logger.LogInformation("No good enough matches found for Series {SeriesId}", seriesId);
+
+            _logger.LogInformation("No good enough matches out of {TotalMatch} found for Series {SeriesId}", result.Data.Count, seriesId);
             return null;
         }
 
@@ -201,9 +202,11 @@ public class ExternalMetadataService : IExternalMetadataService
             series.IsBlacklisted = true;
             await _unitOfWork.CommitAsync(ct);
 
-            await _auditService.LogAsync(KavitaPlusAuditCategory.Match, KavitaPlusEventType.SeriesMatchFailed,
+            await _auditService.LogAsync(KavitaPlusAuditCategory.Match, KavitaPlusEventType.SeriesBlacklisted,
                 AuditStatus.Failure, seriesId: seriesId, error: "too-many-matches", ct: ct);
-            _logger.LogInformation("Multiple good enough matches found for Series {SeriesId}: {Matches}. Will not automatically choose", seriesId, validAutomatedMatches.Count);
+
+            _logger.LogInformation("Found {GoodMatch} good enough matches out of {TotalMatch} found for Series {SeriesId}. Will not automatically choose",
+                validAutomatedMatches.Count, result.Data.Count, seriesId);
             return null;
         }
 
