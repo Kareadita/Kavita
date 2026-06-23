@@ -197,8 +197,9 @@ public class CoverDbService : ICoverDbService
             var res = await provider.GetAsync<string>(publisherName, ct);
             if (res.HasValue)
             {
-                _logger.LogInformation("Kavita has already tried to fetch Publisher: {PublisherName} and failed. Skipping duplicate check", publisherName);
-                throw new KavitaException($"Kavita has already tried to fetch Publisher: {publisherName} and failed. Skipping duplicate check");
+                _logger.LogDebug("Kavita has already tried to fetch Publisher: {PublisherName} and failed. Skipping duplicate check", publisherName);
+                // Do not throw to prevent duplicate log spam when visiting series
+                return string.Empty;
             }
 
             await provider.SetAsync(publisherName, string.Empty, _cacheTime, ct);
