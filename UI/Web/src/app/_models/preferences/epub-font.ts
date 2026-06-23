@@ -18,3 +18,13 @@ export interface EpubFont {
   style: string;
   weight: string;
 }
+
+/**
+ * Result of attempting to delete a font family
+ */
+export interface FontDeleteResult {
+  /** True when the family was removed */
+  deleted: boolean;
+  /** True when the family is currently selected by one or more users */
+  inUse: boolean;
+}

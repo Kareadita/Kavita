@@ -18,7 +18,7 @@
                       <label for="library-type" class="form-label">{{t('font-family-label')}}</label>
                       <select class="form-select" id="library-type" formControlName="bookReaderFontFamily">
                         @for(opt of epubFonts(); track opt.id) {
-                          <option [value]="opt.family">{{opt.family | titlecase}}</option>
+                          <option [value]="opt.family">{{opt.family | titlecase}} {{opt.provider === FontProvider.User ? t('user-font-suffix') : ''}}</option>
                         }
                       </select>
                     </div>

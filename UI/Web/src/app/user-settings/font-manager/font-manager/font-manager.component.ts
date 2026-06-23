@@ -11,7 +11,6 @@ import {SiteThemeProviderPipe} from "../../../_pipes/site-theme-provider.pipe";
 import {translate, TranslocoDirective} from "@jsverse/transloco";
 import {WikiLink} from "../../../_models/wiki";
 import {ToastrService} from "ngx-toastr";
-import {forkJoin} from "rxjs";
 import {
   FileDragAndDropUploadComponent
 } from "src/app/shared/file-drag-and-drop-upload/file-drag-and-drop-upload.component";
@@ -235,14 +234,22 @@ export class FontManagerComponent implements OnInit {
       return;
     }
 
-    const ids = group.files.filter(f => f.provider === FontProvider.User).map(f => f.id);
+    this.requestDeleteFamily(group);
+  }
 
-    // Check if any file in the family is in use before deleting the whole family
-    forkJoin(ids.map(id => this.fontService.isFontInUse(id))).subscribe(async (results) => {
-      if (!results.some(inUse => inUse)) {
-        this.performDeleteFamily(ids);
+  // The reader selects a family as a whole, so the backend deletes (and validates in-use for) the whole family
+  // from any one of its files. A non-forced delete is rejected when in use; admins can then confirm a force delete.
+  private requestDeleteFamily(group: FontFamilyGroup, force: boolean = false) {
+    const userFile = group.files.find(f => f.provider === FontProvider.User);
+    if (!userFile) return;
+
+    this.fontService.deleteFontFamily(userFile.id, force).subscribe(async (result) => {
+      if (result.deleted) {
+        this.onFamilyDeleted(group);
         return;
       }
+
+      if (!result.inUse) return;
 
       if (!this.accountService.hasAdminRole()) {
         this.toastr.info(translate('toasts.font-in-use'));
@@ -252,28 +259,27 @@ export class FontManagerComponent implements OnInit {
       if (!await this.confirmService.confirm(translate('toasts.confirm-force-delete-font'))) {
         return;
       }
-      this.performDeleteFamily(ids, true);
+      this.requestDeleteFamily(group, true);
     });
   }
 
-  private performDeleteFamily(ids: number[], force: boolean = false) {
-    forkJoin(ids.map(id => this.fontService.deleteFont(id, force))).subscribe(() => {
-      this.fonts.update(x => x.filter(f => !ids.includes(f.id)));
+  private onFamilyDeleted(group: FontFamilyGroup) {
+    const ids = group.files.filter(f => f.provider === FontProvider.User).map(f => f.id);
+    this.fonts.update(x => x.filter(f => !ids.includes(f.id)));
 
-      const families = this.fontFamilies();
-      if (families.length === 0 && this.hideSystemFonts()) {
-        this.hideSystemFonts.set(false);
-        const all = this.fontFamilies();
-        if (all.length > 0) this.selectFamily(all[0]);
-        return;
-      }
+    const families = this.fontFamilies();
+    if (families.length === 0 && this.hideSystemFonts()) {
+      this.hideSystemFonts.set(false);
+      const all = this.fontFamilies();
+      if (all.length > 0) this.selectFamily(all[0]);
+      return;
+    }
 
-      if (families.length > 0) {
-        this.selectFamily(families[families.length - 1]);
-      } else {
-        this.selectedFamilyKey.set(undefined);
-      }
-    });
+    if (families.length > 0) {
+      this.selectFamily(families[families.length - 1]);
+    } else {
+      this.selectedFamilyKey.set(undefined);
+    }
   }
 
   private addFont(font: EpubFont) {

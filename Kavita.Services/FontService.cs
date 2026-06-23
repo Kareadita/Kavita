@@ -10,6 +10,7 @@ using Kavita.API.Services;
 using Kavita.Common;
 using Kavita.Common.Extensions;
 using Kavita.Models;
+using Kavita.Models.DTOs.Font;
 using Kavita.Models.Entities;
 using Kavita.Models.Entities.Enums.Font;
 using Kavita.Services.Scanner;
@@ -116,16 +117,46 @@ public class FontService(IDirectoryService directoryService, IUnitOfWork unitOfW
     }
 
     /// <summary>
-    /// This does not check if in use, use <see cref="IsFontInUse"/>
+    /// Deletes the entire font family that the given font belongs to. Rejects when in-use without <c>forceDelete</c>
     /// </summary>
-    /// <param name="fontId"></param>
+    /// <param name="fontId">Any file within the family to delete</param>
+    /// <param name="forceDelete">Delete even when the family is currently in use</param>
     /// <param name="ct"></param>
-    public async Task Delete(int fontId, CancellationToken ct = default)
+    public async Task<FontDeleteResultDto> DeleteFamily(int fontId, bool forceDelete, CancellationToken ct = default)
     {
         var font = await unitOfWork.EpubFontRepository.GetFontAsync(fontId, ct);
-        if (font == null) return;
+        if (font == null || font.Provider == FontProvider.System)
+        {
+            return new FontDeleteResultDto {Deleted = false, InUse = false};
+        }
 
-        await RemoveFont(font);
+        var family = font.Family;
+        var inUse = await unitOfWork.EpubFontRepository.IsFontFamilyInUseAsync(family, ct);
+        if (inUse && !forceDelete)
+        {
+            return new FontDeleteResultDto {Deleted = false, InUse = true};
+        }
+
+        // Only user provided files can be removed; system fonts in the family (if any) are left untouched
+        var files = (await unitOfWork.EpubFontRepository.GetFontsByFamilyAsync(family, ct))
+            .Where(f => f.Provider == FontProvider.User)
+            .ToList();
+        if (files.Count == 0)
+        {
+            return new FontDeleteResultDto {Deleted = false, InUse = inUse};
+        }
+
+        await ResetFamilyReferences(family);
+
+        foreach (var file in files)
+        {
+            MoveFontFileToTemp(file);
+            unitOfWork.EpubFontRepository.Remove(file);
+        }
+
+        await unitOfWork.CommitAsync(ct);
+
+        return new FontDeleteResultDto {Deleted = true, InUse = inUse};
     }
 
     public async Task<EpubFont[]> CreateFontsFromUrl(string url, CancellationToken ct = default)
@@ -175,30 +206,28 @@ public class FontService(IDirectoryService directoryService, IUnitOfWork unitOfW
     }
 
     /// <summary>
-    /// Returns if the given font is in use by any other user. System provided fonts will always return true.
+    /// Points every user selecting this family back at the default font. Reading profiles are the live source the
+    /// reader reads from; the legacy preferences are reset too so no stale references are left behind.
     /// </summary>
-    /// <param name="fontId"></param>
-    /// <param name="ct"></param>
-    /// <returns></returns>
-    public async Task<bool> IsFontInUse(int fontId, CancellationToken ct = default)
+    private async Task ResetFamilyReferences(string family)
     {
-        var font = await unitOfWork.EpubFontRepository.GetFontAsync(fontId, ct);
-        if (font == null || font.Provider == FontProvider.System) return true;
+        var profiles = await unitOfWork.AppUserReadingProfileRepository.GetProfilesByFontFamily(family);
+        foreach (var profile in profiles)
+        {
+            profile.BookReaderFontFamily = Defaults.DefaultFont;
+            unitOfWork.AppUserReadingProfileRepository.Update(profile);
+        }
 
-        return await unitOfWork.EpubFontRepository.IsFontInUseAsync(fontId, ct);
-    }
-
-    private async Task RemoveFont(EpubFont font)
-    {
-        if (font.Provider == FontProvider.System) return;
-
-        var prefs = await unitOfWork.UserRepository.GetAllPreferencesByFontAsync(font.Family);
+        var prefs = await unitOfWork.UserRepository.GetAllPreferencesByFontAsync(family);
         foreach (var pref in prefs)
         {
             pref.BookReaderFontFamily = Defaults.DefaultFont;
             unitOfWork.UserRepository.Update(pref);
         }
+    }
 
+    private void MoveFontFileToTemp(EpubFont font)
+    {
         try
         {
             // Copy the font file to temp for nightly removal (to give user time to reclaim if made a mistake)
@@ -210,9 +239,6 @@ public class FontService(IDirectoryService directoryService, IUnitOfWork unitOfW
             directoryService.DeleteFiles([existingLocation]);
         }
         catch (Exception) { /* Swallow */ }
-
-        unitOfWork.EpubFontRepository.Remove(font);
-        await unitOfWork.CommitAsync();
     }
 
     private async Task<GoogleFontsMetadata?> GetGoogleFontsMetadataAsync(string fontName)

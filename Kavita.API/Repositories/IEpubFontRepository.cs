@@ -17,5 +17,6 @@ public interface IEpubFontRepository
     Task<IList<EpubFont>> GetFontsAsync(CancellationToken ct = default);
     Task<EpubFont?> GetFontAsync(int fontId, CancellationToken ct = default);
     Task<EpubFont?> GetFontByNameAsync(string name, CancellationToken ct = default);
-    Task<bool> IsFontInUseAsync(int fontId, CancellationToken ct = default);
+    Task<bool> IsFontFamilyInUseAsync(string family, CancellationToken ct = default);
+    Task<IList<EpubFont>> GetFontsByFamilyAsync(string family, CancellationToken ct = default);
 }

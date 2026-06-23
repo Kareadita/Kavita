@@ -22,7 +22,7 @@ import {
 import {TranslocoDirective} from "@jsverse/transloco";
 import {ReadingProfile, ReadingProfileKind} from "../../../_models/preferences/reading-profiles";
 import {BookReadingProfileFormGroup, EpubReaderSettingsService} from "../../../_services/epub-reader-settings.service";
-import {EpubFont} from "../../../_models/preferences/epub-font";
+import {EpubFont, FontProvider} from "../../../_models/preferences/epub-font";
 
 /**
  * Used for book reader. Do not use for other components
@@ -178,4 +178,5 @@ export class ReaderSettingsComponent implements OnInit {
   protected readonly WritingStyle = WritingStyle;
   protected readonly ReadingDirection = ReadingDirection;
   protected readonly BookPageLayoutMode = BookPageLayoutMode;
+  protected readonly FontProvider = FontProvider;
 }
