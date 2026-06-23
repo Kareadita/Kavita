@@ -31,6 +31,7 @@ export interface ExternalSeriesDetail {
   malId?: number | null;
   mangabakaId?: number | null;
   hardcoverId?: number | null;
+  isStandAlone: boolean;
   cbrId?: number | null;
   synonyms: Array<string>;
   plusMediaFormat: PlusMediaFormat;

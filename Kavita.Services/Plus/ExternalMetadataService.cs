@@ -446,6 +446,7 @@ public class ExternalMetadataService : IExternalMetadataService
                     CbrId = ids.CbrId,
                     MangabakaId = ids.MangabakaId,
                     HardcoverId = ids.HardcoverId,
+                    IsStandAlone = ids.IsStandAlone,
                     Format = series.Library.Type.ConvertToPlusMediaFormat(series.Format),
                     SeriesName = series.Name // Required field, not used since provider Ids are passed
                 }, true, MetadataFetchTrigger.ManualMatch, ct);
