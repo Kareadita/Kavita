@@ -87,7 +87,7 @@
 
             @if (group.canPreview) {
               <div class="glyph lh-1" [style.font-family]="group.previewAlias" [style.font-weight]="currentWeight()">Ag</div>
-              <div class="alphabet small" [style.font-family]="group.previewAlias" [style.font-weight]="currentWeight()">{{t('alphabet')}}</div>
+              <div class="alphabet small pt-2" [style.font-family]="group.previewAlias" [style.font-weight]="currentWeight()">{{t('alphabet')}}</div>
             } @else {
               <div class="text-muted mt-2">{{t('no-preview')}}</div>
             }

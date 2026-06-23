@@ -1297,7 +1297,7 @@ public static partial class Parser
      */
     public static string PrettifyFileName(string name)
     {
-        return NonAlphanumericRegex().Replace(name, " ");
+        return NonAlphanumericRegex().Replace(name, " ").Replace("VariableFont", "Variable Font");
     }
 
     /// <summary>
