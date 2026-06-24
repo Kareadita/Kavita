@@ -10,39 +10,10 @@ import {Series} from '../_models/series';
   providedIn: 'root'
 })
 export class RecommendationService {
-  private httpClient = inject(HttpClient);
-  private utilityService = inject(UtilityService);
+  private readonly httpClient = inject(HttpClient);
+  private readonly utilityService = inject(UtilityService);
 
-
-  private baseUrl = environment.apiUrl;
-
-  getQuickReads(libraryId: number, pageNum?: number, itemsPerPage?: number) {
-    let params = new HttpParams();
-    params = this.utilityService.addPaginationIfExists(params, pageNum, itemsPerPage);
-    return this.httpClient.get<PaginatedResult<Series[]>>(this.baseUrl + 'recommended/quick-reads?libraryId=' + libraryId, {observe: 'response', params})
-      .pipe(map(response => this.utilityService.createPaginatedResult(response)));
-  }
-
-  getQuickCatchupReads(libraryId: number, pageNum?: number, itemsPerPage?: number) {
-    let params = new HttpParams();
-    params = this.utilityService.addPaginationIfExists(params, pageNum, itemsPerPage);
-    return this.httpClient.get<PaginatedResult<Series[]>>(this.baseUrl + 'recommended/quick-catchup-reads?libraryId=' + libraryId, {observe: 'response', params})
-      .pipe(map(response => this.utilityService.createPaginatedResult(response)));
-  }
-
-  getHighlyRated(libraryId: number, pageNum?: number, itemsPerPage?: number) {
-    let params = new HttpParams();
-    params = this.utilityService.addPaginationIfExists(params, pageNum, itemsPerPage);
-    return this.httpClient.get<PaginatedResult<Series[]>>(this.baseUrl + 'recommended/highly-rated?libraryId=' + libraryId, {observe: 'response', params})
-      .pipe(map(response => this.utilityService.createPaginatedResult(response)));
-  }
-
-  getRediscover(libraryId: number, pageNum?: number, itemsPerPage?: number) {
-    let params = new HttpParams();
-    params = this.utilityService.addPaginationIfExists(params, pageNum, itemsPerPage);
-    return this.httpClient.get<PaginatedResult<Series[]>>(this.baseUrl + 'recommended/rediscover?libraryId=' + libraryId, {observe: 'response', params})
-      .pipe(map(response => this.utilityService.createPaginatedResult(response)));
-  }
+  private readonly baseUrl = environment.apiUrl;
 
   getMoreIn(libraryId: number, genreId: number, pageNum?: number, itemsPerPage?: number) {
     let params = new HttpParams();
