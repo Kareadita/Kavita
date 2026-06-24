@@ -58,80 +58,283 @@ public static class Defaults
     [
         new ()
         {
+            Family = DefaultFont,
             Name = DefaultFont,
             NormalizedName = DefaultFont.ToNormalized(),
             Provider = FontProvider.System,
             FileName = string.Empty,
+            Style = "normal",
+            Weight = "400",
         },
         new ()
         {
+            Family = "Merriweather",
             Name = "Merriweather",
             NormalizedName = "Merriweather".ToNormalized(),
             Provider = FontProvider.System,
             FileName = "Merriweather-Regular.woff2",
+            Style = "normal",
+            Weight = "400",
         },
         new ()
         {
+            Family = "Merriweather",
+            Name = "Merriweather Italic",
+            NormalizedName = "Merriweather-Italic".ToNormalized(),
+            Provider = FontProvider.System,
+            FileName = "Merriweather-Italic.woff2",
+            Style = "italic",
+            Weight = "400",
+        },
+        new ()
+        {
+            Family = "Merriweather",
+            Name = "Merriweather Bold",
+            NormalizedName = "Merriweather-Bold".ToNormalized(),
+            Provider = FontProvider.System,
+            FileName = "Merriweather-Bold.woff2",
+            Style = "normal",
+            Weight = "700",
+        },
+        new ()
+        {
+            Family = "Merriweather",
+            Name = "Merriweather BoldItalic",
+            NormalizedName = "Merriweather-BoldItalic".ToNormalized(),
+            Provider = FontProvider.System,
+            FileName = "Merriweather-BoldItalic.woff2",
+            Style = "italic",
+            Weight = "700",
+        },
+        new ()
+        {
+            Family = "EB Garamond",
             Name = "EB Garamond",
             NormalizedName = "EB Garamond".ToNormalized(),
             Provider = FontProvider.System,
             FileName = "EBGaramond-VariableFont_wght.woff2",
+            Style = "normal",
+            Weight = "400 800",
         },
         new ()
         {
+            Family = "EB Garamond",
+            Name = "EB Garamond Italic VariableFont",
+            NormalizedName = "EBGaramond-Italic-VariableFont".ToNormalized(),
+            Provider = FontProvider.System,
+            FileName = "EBGaramond-Italic-VariableFont_wght.woff2",
+            Style = "italic",
+            Weight = "400 800",
+        },
+        new ()
+        {
+            Family = "Fira Sans",
             Name = "Fira Sans",
             NormalizedName = "Fira Sans".ToNormalized(),
             Provider = FontProvider.System,
             FileName = "FiraSans-Regular.woff2",
+            Style = "normal",
+            Weight = "400",
         },
         new ()
         {
+            Family = "Fira Sans",
+            Name = "Fira Sans Italic",
+            NormalizedName = "FiraSans-Italic".ToNormalized(),
+            Provider = FontProvider.System,
+            FileName = "FiraSans-Italic.woff2",
+            Style = "italic",
+            Weight = "400",
+        },
+        new ()
+        {
+            Family = "Fira Sans",
+            Name = "Fira Sans Bold",
+            NormalizedName = "FiraSans-Bold".ToNormalized(),
+            Provider = FontProvider.System,
+            FileName = "FiraSans-Bold.woff2",
+            Style = "normal",
+            Weight = "700",
+        },
+        new ()
+        {
+            Family = "Fira Sans",
+            Name = "Fira Sans BoldItalic",
+            NormalizedName = "FiraSans-BoldItalic".ToNormalized(),
+            Provider = FontProvider.System,
+            FileName = "FiraSans-BoldItalic.woff2",
+            Style = "italic",
+            Weight = "700",
+        },
+        new ()
+        {
+            Family = "Lato",
             Name = "Lato",
             NormalizedName = "Lato".ToNormalized(),
             Provider = FontProvider.System,
             FileName = "Lato-Regular.woff2",
+            Style = "normal",
+            Weight = "400",
         },
         new ()
         {
+            Family = "Lato",
+            Name = "Lato Italic",
+            NormalizedName = "Lato-Italic".ToNormalized(),
+            Provider = FontProvider.System,
+            FileName = "Lato-Italic.woff2",
+            Style = "italic",
+            Weight = "400",
+        },
+        new ()
+        {
+            Family = "Lato",
+            Name = "Lato Bold",
+            NormalizedName = "Lato-Bold".ToNormalized(),
+            Provider = FontProvider.System,
+            FileName = "Lato-Bold.woff2",
+            Style = "normal",
+            Weight = "700",
+        },
+        new ()
+        {
+            Family = "Lato",
+            Name = "Lato BoldItalic",
+            NormalizedName = "Lato-BoldItalic".ToNormalized(),
+            Provider = FontProvider.System,
+            FileName = "Lato-BoldItalic.woff2",
+            Style = "italic",
+            Weight = "700",
+        },
+        new ()
+        {
+            Family = "Libre Baskerville",
             Name = "Libre Baskerville",
             NormalizedName = "Libre Baskerville".ToNormalized(),
             Provider = FontProvider.System,
             FileName = "LibreBaskerville-Regular.woff2",
+            Style = "normal",
+            Weight = "400",
         },
         new ()
         {
+            Family = "Libre Baskerville",
+            Name = "Libre Baskerville Italic",
+            NormalizedName = "LibreBaskerville-Italic".ToNormalized(),
+            Provider = FontProvider.System,
+            FileName = "LibreBaskerville-Italic.woff2",
+            Style = "italic",
+            Weight = "400",
+        },
+        new ()
+        {
+            Family = "Libre Baskerville",
+            Name = "Libre Baskerville Bold",
+            NormalizedName = "LibreBaskerville-Bold".ToNormalized(),
+            Provider = FontProvider.System,
+            FileName = "LibreBaskerville-Bold.woff2",
+            Style = "normal",
+            Weight = "700",
+        },
+        new ()
+        {
+            Family = "Nanum Gothic",
             Name = "Nanum Gothic",
-            NormalizedName = ("Nanum Gothic").ToNormalized(),
+            NormalizedName = "Nanum Gothic".ToNormalized(),
             Provider = FontProvider.System,
             FileName = "NanumGothic-Regular.woff2",
+            Style = "normal",
+            Weight = "400",
         },
         new ()
         {
+            Family = "Nanum Gothic",
+            Name = "Nanum Gothic Bold",
+            NormalizedName = "NanumGothic-Bold".ToNormalized(),
+            Provider = FontProvider.System,
+            FileName = "NanumGothic-Bold.woff2",
+            Style = "normal",
+            Weight = "700",
+        },
+        new ()
+        {
+            Family = "Nanum Gothic",
+            Name = "Nanum Gothic ExtraBold",
+            NormalizedName = "NanumGothic-ExtraBold".ToNormalized(),
+            Provider = FontProvider.System,
+            FileName = "NanumGothic-ExtraBold.woff2",
+            Style = "normal",
+            Weight = "800",
+        },
+        new ()
+        {
+            Family = "Open Dyslexic",
             Name = "Open Dyslexic",
-            NormalizedName = ("Open Dyslexic").ToNormalized(),
+            NormalizedName = "Open Dyslexic".ToNormalized(),
             Provider = FontProvider.System,
             FileName = "OpenDyslexic-Regular.woff2",
+            Style = "normal",
+            Weight = "400",
         },
         new ()
         {
+            Family = "Open Dyslexic",
+            Name = "Open Dyslexic Italic",
+            NormalizedName = "OpenDyslexic-Italic".ToNormalized(),
+            Provider = FontProvider.System,
+            FileName = "OpenDyslexic-Italic.woff2",
+            Style = "italic",
+            Weight = "400",
+        },
+        new ()
+        {
+            Family = "Open Dyslexic",
+            Name = "Open Dyslexic Bold",
+            NormalizedName = "OpenDyslexic-Bold".ToNormalized(),
+            Provider = FontProvider.System,
+            FileName = "OpenDyslexic-Bold.woff2",
+            Style = "normal",
+            Weight = "700",
+        },
+        new ()
+        {
+            Family = "Open Dyslexic",
+            Name = "Open Dyslexic BoldItalic",
+            NormalizedName = "OpenDyslexic-BoldItalic".ToNormalized(),
+            Provider = FontProvider.System,
+            FileName = "OpenDyslexic-BoldItalic.woff2",
+            Style = "italic",
+            Weight = "700",
+        },
+        new ()
+        {
+            Family = "RocknRoll One",
             Name = "RocknRoll One",
-            NormalizedName = ("RocknRoll One").ToNormalized(),
+            NormalizedName = "RocknRoll One".ToNormalized(),
             Provider = FontProvider.System,
             FileName = "RocknRollOne-Regular.woff2",
+            Style = "normal",
+            Weight = "400",
         },
         new ()
         {
+            Family = "Fast Font Serif",
             Name = "Fast Font Serif",
-            NormalizedName = ("Fast Font Serif").ToNormalized(),
+            NormalizedName = "Fast Font Serif".ToNormalized(),
             Provider = FontProvider.System,
             FileName = "Fast_Serif.woff2",
+            Style = "normal",
+            Weight = "400",
         },
         new ()
         {
+            Family = "Fast Font Sans",
             Name = "Fast Font Sans",
-            NormalizedName = ("Fast Font Sans").ToNormalized(),
+            NormalizedName = "Fast Font Sans".ToNormalized(),
             Provider = FontProvider.System,
             FileName = "Fast_Sans.woff2",
+            Style = "normal",
+            Weight = "400",
         }
     ];
 

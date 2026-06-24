@@ -1,7 +1,7 @@
 <ng-container *transloco="let t; prefix:'manage-remap-rules'">
 
   <div class="position-relative">
-    <button class="btn btn-outline-primary position-absolute custom-position" [disabled]="isReadOnly() || showForm()" (click)="openCreateForm()">
+    <button class="btn btn-primary position-absolute custom-position" [disabled]="isReadOnly() || showForm()" (click)="openCreateForm()">
       <i class="fa fa-plus" aria-hidden="true"></i><span class="phone-hidden ms-1">{{t('create-rule-title')}}</span>
     </button>
   </div>

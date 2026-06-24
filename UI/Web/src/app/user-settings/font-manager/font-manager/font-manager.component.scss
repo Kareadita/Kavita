@@ -1,61 +1,207 @@
-.highlight-new-font {
-  animation: highlight-bg 2s ease-out;
+$primary-soft: color-mix(in srgb, var(--primary-color) 10%, transparent);
+$primary-softer: color-mix(in srgb, var(--primary-color) 14%, transparent);
+$primary-line: color-mix(in srgb, var(--primary-color) 45%, transparent);
+
+.description {
+  color: var(--text-muted-color);
+  line-height: 1.55;
+  max-width: 65rem;
 }
 
-@keyframes highlight-bg {
-  from {
-    background-color: var(--primary-color);
-  }
-  to {
-    background-color: var(--list-group-item-bg-color);
-  }
+.eyebrow {
+  color: var(--text-muted-color);
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
 }
 
-.pill {
-  font-size: .8rem;
-  background-color: var(--card-bg-color);
-  border-radius: 0.375rem;
+.upload {
+  border: 1px dashed $primary-line;
+  border-radius: 0.5rem;
+  padding: 1rem 1.25rem;
+  background: color-mix(in srgb, var(--primary-color) 4%, transparent);
+}
+
+.families {
+  width: 16rem;
+
+  @media (max-width: 768px) {
+    width: 100%;
+  }
 }
 
 .scroller {
-  max-height: calc(100dvh - 11.25rem);
+  max-height: calc(100dvh - 16rem);
   overflow-y: auto;
   scrollbar-gutter: stable;
 
-  @media (max-width: 576px) {
-    max-height: calc(100dvh - 30rem);
+  @media (max-width: 768px) {
+    max-height: 18rem;
   }
 }
 
-.list-group-item {
-  background-color: transparent;
+.family {
+  border: 1px solid var(--hr-color);
+  border-radius: 0.4375rem;
+  background: var(--elevation-layer1);
+  padding: 0.7rem 0.8rem;
+  cursor: pointer;
+  transition: background var(--transition-fast);
 
   &:hover {
-    background-color: var(--card-bg-color);
+    background: var(--elevation-layer3);
   }
 
   &.active {
+    background: $primary-soft;
+    border-color: $primary-line;
+  }
+
+  .name {
+    min-width: 0;
+    color: var(--body-text-color);
+  }
+
+  .styles {
+    color: var(--text-muted-color);
+  }
+}
+
+// Provider/variable/file badges share Bootstrap's .badge shape; only their colours are custom
+.badge {
+  &.provider {
+    color: var(--text-muted-color);
+    background: var(--elevation-layer2);
+
+    &.custom {
+      color: var(--primary-color);
+      background: color-mix(in srgb, var(--primary-color) 12%, transparent);
+    }
+  }
+
+  &.tag {
+    color: var(--primary-color);
+    background: $primary-softer;
+    letter-spacing: 0.04em;
+  }
+
+  &.chip {
+    color: var(--text-muted-color);
+    background: var(--elevation-layer2);
+
+    &.weight {
+      color: var(--primary-color);
+      background: color-mix(in srgb, var(--primary-color) 12%, transparent);
+      font-variant-numeric: tabular-nums;
+    }
+  }
+}
+
+.specimen {
+  min-width: 0;
+  border: 1px solid var(--hr-color);
+  border-radius: 0.625rem;
+  overflow: hidden;
+
+  .empty {
+    padding: 3rem 1.75rem;
+    color: var(--text-muted-color);
+  }
+
+  .head {
+    padding: 1.5rem 1.75rem 1.375rem;
+    border-bottom: 1px solid var(--hr-color);
+  }
+
+  .title {
+    font-size: 1.375rem;
+    font-weight: 700;
+  }
+
+  .glyph {
+    font-size: 5.25rem;
+    color: var(--body-text-color);
+    margin: 0.75rem 0 0.5rem;
+    word-break: keep-all;
+
+    @media (max-width: 576px) {
+      font-size: 3.75rem;
+    }
+  }
+
+  .alphabet {
+    color: var(--text-muted-color);
+    word-break: break-word;
+  }
+}
+
+.axis {
+  padding: 1.125rem 1.75rem;
+  border-bottom: 1px solid var(--hr-color);
+  background: var(--elevation-layer1);
+
+  .value {
+    color: var(--primary-color);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .scale {
+    font-variant-numeric: tabular-nums;
+  }
+}
+
+// Keep Bootstrap's .form-range mechanics; just theme the thumb to the brand colour
+.form-range {
+  &::-webkit-slider-thumb {
+    background-color: var(--primary-color);
+  }
+
+  &::-moz-range-thumb {
     background-color: var(--primary-color);
   }
 }
 
-.list-group-item, .list-group-item.active {
-  border-top-width: 0;
-  border-bottom-width: 0;
+.sample {
+  padding: 1.25rem 1.75rem 1.375rem;
+
+  .text {
+    font-size: 1.0625rem;
+    line-height: 1.6;
+    color: var(--body-text-color);
+  }
 }
 
-ngx-file-drop ::ng-deep > div {
-  // styling for the outer drop box
-  width: 100%;
-  border: 0.125rem solid var(--primary-color);
-  border-radius: 0.3125rem;
-  height: 6.25rem;
-  margin: auto;
+.files {
+  margin: 0 1.75rem 1.375rem;
+  border-top: 1px solid var(--hr-color);
+  padding-top: 0.875rem;
 
-  > div {
-    // styling for the inner box (template)
-    width: 100%;
-    display: inline-block;
+  .toggle {
+    background: none;
+    border: 0;
+    padding: 0;
+    cursor: pointer;
+    user-select: none;
+  }
 
+  .chevron {
+    color: var(--text-muted-color);
+    transition: transform var(--transition-fast);
+
+    &.open {
+      transform: rotate(90deg);
+    }
+  }
+
+  .item {
+    padding: 0.5rem 0.75rem;
+    background: var(--elevation-layer1);
+    border-radius: 0.375rem;
+  }
+
+  .filename {
+    font-family: monospace;
+    word-break: break-all;
   }
 }

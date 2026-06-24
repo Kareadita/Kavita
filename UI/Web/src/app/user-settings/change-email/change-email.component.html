@@ -1,4 +1,4 @@
-<ng-container *transloco="let t; prefix:'change-license-email'">
+<ng-container *transloco="let t; prefix:'change-email'">
   <app-setting-item [title]="t('email-title')" [canEdit]="canEdit()" [isEditMode]="isEditMode" (isEditModeChange)="updateEditMode($event)">
     <ng-template #view>
       <span>{{censoredEmail() | defaultValue}}</span>

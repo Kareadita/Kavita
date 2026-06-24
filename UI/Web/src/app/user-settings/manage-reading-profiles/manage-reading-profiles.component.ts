@@ -63,13 +63,14 @@ import {
 import {ColorscapeService} from "../../_services/colorscape.service";
 import {Color} from "@iplab/ngx-color-picker";
 import {FontService} from "../../_services/font.service";
-import {EpubFont} from "../../_models/preferences/epub-font";
+import {EpubFont, FontProvider} from "../../_models/preferences/epub-font";
 import {DeviceService} from "../../_services/device.service";
 import {ModalService} from "../../_services/modal.service";
 import {ListSelectModalComponent} from "../../shared/_components/list-select-modal/list-select-modal.component";
 import {ClientDevice} from "../../_models/client-device";
 import {TabTitlePipe} from "../../_pipes/tab-title.pipe";
 import {Tabs} from "../../_models/tabs";
+import {EpubFontTitlePipe} from "../../_pipes/epub-font-title.pipe";
 
 
 @Component({
@@ -104,7 +105,8 @@ import {Tabs} from "../../_models/tabs";
     NgbTooltip,
     BreakpointPipe,
     SettingColorPickerComponent,
-    TabTitlePipe
+    TabTitlePipe,
+    EpubFontTitlePipe
   ],
   templateUrl: './manage-reading-profiles.component.html',
   styleUrl: './manage-reading-profiles.component.scss',
@@ -158,7 +160,7 @@ export class ManageReadingProfilesComponent implements OnInit {
       this.readingProfileService.getAllProfiles(),
       this.deviceService.getMyClientDevices(),
     ]).subscribe(([fonts, profiles, devices]) => {
-      this.fonts.set(fonts);
+      this.fonts.set([...new Map(fonts.map(font => [font.family, font])).values()]);
       this.devices = devices;
 
       this.readingProfiles = profiles;
@@ -203,7 +205,7 @@ export class ManageReadingProfilesComponent implements OnInit {
 
     this.readingProfileForm = new FormGroup({})
 
-    if (this.fonts().find(font => font.name === this.selectedProfile?.bookReaderFontFamily) === undefined) {
+    if (this.fonts().find(font => font.family === this.selectedProfile?.bookReaderFontFamily) === undefined) {
       this.selectedProfile.bookReaderFontFamily = FontService.DefaultEpubFont;
     }
 
@@ -386,4 +388,5 @@ export class ManageReadingProfilesComponent implements OnInit {
   protected readonly ReadingProfileKind = ReadingProfileKind;
   protected readonly WikiLink = WikiLink;
   protected readonly breakPoints = breakPoints;
+  protected readonly FontProvider = FontProvider;
 }

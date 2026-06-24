@@ -15,11 +15,12 @@ import {NgClass, NgTemplateOutlet} from "@angular/common";
 import {ImageComponent} from "../../../shared/image/image.component";
 import {UtilityService} from "../../../shared/_services/utility.service";
 import {BreakpointService} from "../../../_services/breakpoint.service";
+import {CompactNumberPipe} from "../../../_pipes/compact-number.pipe";
 
 
 @Component({
   selector: 'app-side-nav-item',
-  imports: [RouterLink, ImageComponent, NgTemplateOutlet, NgClass],
+  imports: [RouterLink, ImageComponent, NgTemplateOutlet, NgClass, CompactNumberPipe],
   templateUrl: './side-nav-item.component.html',
   styleUrls: ['./side-nav-item.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush

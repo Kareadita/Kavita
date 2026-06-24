@@ -1,113 +1,164 @@
 <ng-container *transloco="let t; prefix:'font-manager'">
-  <div class="container-fluid g-0">
+  <div class="font-manager">
 
-    <p [innerHTML]="t('description', {'wikiLink': WikiLink})"></p>
-    <form [formGroup]="form">
-      <div class="row g-0 theme-container">
-      <div class="col-lg-3 col-md-5 col-sm-7 col-xs-7 scroller">
-        <div class="pe-2">
+    <!-- Header -->
+    <div class="d-flex justify-content-between align-items-start gap-3 mb-3">
+      <p class="description mb-0">
+        <app-transloco-inject key="font-manager.description">
+          <ng-template translocoSlot="wikiLink">
+            <a [href]="WikiLink" target='_blank' rel='noreferrer noopener'>{{t('wiki')}}</a>
+          </ng-template>
+          <ng-template translocoSlot="googleFontsLink">
+            <a href='https://fonts.google.com' target='_blank' rel='noreferrer noopener'>{{t('google-fonts')}}</a>
+          </ng-template>
+        </app-transloco-inject>
+      </p>
+      <button class="btn flex-shrink-0" [class.btn-primary]="!showUpload()" [class.btn-outline-primary]="showUpload()"
+              (click)="toggleUpload()" [disabled]="isReadOnly()">
+        <i class="fa fa-plus me-1" aria-hidden="true"></i>{{t('add-font')}}
+      </button>
+    </div>
 
-          <div class="d-flex justify-content-between mb-2 align-items-center {{!selectedFont() ? 'active' : ''}}">
-            <button class="btn btn-outline-primary btn-sm me-1" (click)="selectFont(undefined)" [disabled]="selectedFont() === undefined || isReadOnly()">
-              <i class="fa fa-plus me-1" aria-hidden="true"></i>{{t("add")}}
-            </button>
-            <div class="form-check form-switch">
-              <input type="checkbox" formControlName="filter" class="form-check-input" id="filter-out-system-fonts" (change)="hideSystemFonts.set(!hideSystemFonts())">
-              <label for="filter-out-system-fonts" class="form-check-label">{{t('filter-system-fonts-label')}}</label>
-            </div>
-          </div>
-
-          <ul style="height: 100%" class="list-group list-group-flush">
-
-            @for (font of visibleFonts(); track font.id) {
-              <ng-container [ngTemplateOutlet]="fontOption" [ngTemplateOutletContext]="{ $implicit: font}"></ng-container>
-            } @empty {
-              <app-loading [loading]="fonts().length === 0"></app-loading>
-            }
-          </ul>
-        </div>
+    <!-- Upload zone (toggled by Add font) -->
+    @if (showUpload()) {
+      <div class="upload mb-4">
+        @if (isUploadingFont()) {
+          <app-loading [loading]="isUploadingFont()"></app-loading>
+        } @else {
+          <app-file-drag-and-drop-upload
+            (dropped)="dropped($event)"
+            (urlSubmitted)="uploadFromUrl($event)"
+            [showUrlUpload]="true"
+            [uploadText]="t('upload-continued')"
+            [acceptableExtensions]="acceptableExtensions"
+          />
+        }
       </div>
+    }
 
-      <div class="col-lg-9 col-md-7 col-sm-4 col-xs-4 ps-3">
-        <div class="card p-3">
+    <!-- Two-pane -->
+    <div class="d-flex flex-column flex-md-row gap-4 align-items-start">
 
-          @let currentFont = selectedFont();
-          @if (currentFont === undefined) {
-            <div class="row pb-4">
-              <div class="mx-auto">
-                <div class="d-flex justify-content-center">
-                  <div class="d-flex justify-content-evenly">
-                    {{t('preview-default')}}
-                  </div>
-                </div>
-              </div>
-            </div>
+      <!-- LEFT: family nav -->
+      <div class="families flex-shrink-0">
+        <div class="d-flex justify-content-between align-items-center mb-2">
+          <span class="eyebrow">{{t('families')}}</span>
+          <div class="form-check form-switch m-0">
+            <input class="form-check-input" type="checkbox" role="switch" id="custom-only"
+                   [checked]="hideSystemFonts()" (change)="toggleCustomOnly()">
+            <label class="form-check-label small" for="custom-only">{{t('custom-only')}}</label>
+          </div>
+        </div>
 
-            @if (files && files.length > 0) {
-              <app-loading [loading]="isUploadingFont()"></app-loading>
-            } @else {
-              <app-file-drag-and-drop-upload
-                (dropped)="dropped($event)"
-                (urlSubmitted)="uploadFromUrl($event)"
-                [showUrlUpload]="true"
-                [uploadText]="t('upload-continued')"
-                [acceptableExtensions]="acceptableExtensions"
-              />
-            }
-          } @else {
-            <h4>
-              {{currentFont.name | sentenceCase}}
-              <div class="float-end">
-                @if (currentFont.provider !== FontProvider.System && currentFont.name !== FontService.DefaultEpubFont) {
-                  <button class="btn btn-danger me-1" (click)="deleteFont(currentFont.id)" [disabled]="isReadOnly()">{{t('delete')}}</button>
+        <div class="scroller d-flex flex-column gap-2">
+          @for (group of fontFamilies(); track group.family) {
+            <button type="button" class="family text-start" [class.active]="group.family === selectedFamilyKey()"
+                    (click)="selectFamily(group)">
+              <div class="d-flex align-items-center gap-2">
+                <span class="name flex-fill text-truncate fw-semibold">{{group.family}}</span>
+                @if (group.isVariable) {
+                  <span class="badge tag" [ngbTooltip]="t('variable')">{{t('var')}}</span>
                 }
               </div>
-            </h4>
-
-            <div>
-              <ng-container [ngTemplateOutlet]="availableFont" [ngTemplateOutletContext]="{ $implicit: currentFont}"></ng-container>
-            </div>
+              <div class="d-flex align-items-center gap-2 mt-1">
+                <span class="badge provider" [class.custom]="group.provider === FontProvider.User">{{+group.provider | siteThemeProvider}}</span>
+                <span class="styles small">{{group.files.length}} {{group.files.length === 1 ? t('style') : t('styles')}}</span>
+              </div>
+            </button>
+          } @empty {
+            <app-loading [loading]="fonts().length === 0"></app-loading>
           }
         </div>
       </div>
-    </div>
-    </form>
-  </div>
 
-  <ng-template #fontOption let-item>
-    @if (item !== undefined) {
-      @let currentFont = selectedFont();
-      <li
-        [animate.enter]="initialLoadComplete() ? 'highlight-new-font' : ''"
-        class="list-group-item d-flex justify-content-between align-items-start clickable rounded mt-1"
-        [class.active]="currentFont && currentFont?.name === item.name"
-        (click)="selectFont(item)"
-      >
-        <div class="ms-2 me-auto">
-          <div class="fw-bold">{{item.name | sentenceCase}}</div>
-        </div>
-        <div>
-          <span class="pill p-1 mx-1 provider">{{item.provider | siteThemeProvider}}</span>
-        </div>
-      </li>
-    }
-  </ng-template>
+      <!-- RIGHT: specimen -->
+      @let group = selectedGroup();
+      <div class="specimen flex-fill">
+        @if (group === undefined) {
+          <div class="empty text-center text-muted">{{t('preview-default')}}</div>
+        } @else {
 
-  <ng-template #availableFont let-item>
-    @if (item) {
-      <div class="d-flex justify-content-between w-100">
-        @if (item.name === FontService.DefaultEpubFont) {
-          <div class="ms-2 me-auto fs-6">
-            {{t('no-preview')}}
+          <!-- Glyph header -->
+          <div class="head">
+            <div class="d-flex align-items-center flex-wrap gap-2 mb-2">
+              <h2 class="title mb-0">{{group.family | sentenceCase}}</h2>
+              <span class="badge provider" [class.custom]="group.provider === FontProvider.User">{{+group.provider | siteThemeProvider}}</span>
+              @if (group.isVariable) {
+                <span class="badge tag text-uppercase">{{t('variable')}}</span>
+              }
+              <span class="small text-muted">
+                {{group.provider === FontProvider.User ? t('provider-note-custom') : t('provider-note-system')}}
+              </span>
+              @if (group.provider === FontProvider.User) {
+                <button class="btn btn-danger btn-sm ms-auto" (click)="deleteFamily(group)" [disabled]="isReadOnly()">{{t('delete')}}</button>
+              }
+            </div>
+
+            @if (group.canPreview) {
+              <div class="glyph lh-1" [style.font-family]="group.previewAlias" [style.font-weight]="currentWeight()">Ag</div>
+              <div class="alphabet small pt-2" [style.font-family]="group.previewAlias" [style.font-weight]="currentWeight()">{{t('alphabet')}}</div>
+            } @else {
+              <div class="text-muted mt-2">{{t('no-preview')}}</div>
+            }
+          </div>
+
+          <!-- Variable weight axis -->
+          @if (group.isVariable && group.canPreview) {
+            <div class="axis">
+              <div class="d-flex align-items-center justify-content-between gap-2 mb-2">
+                <div>
+                  <span class="fw-semibold">{{t('weight-axis')}}</span>
+                  <span class="small text-muted ms-2">{{t('weight-axis-hint')}}</span>
+                </div>
+                <span class="value fw-bold">{{currentWeight()}}</span>
+              </div>
+              <input class="form-range" type="range" [min]="group.weightMin" [max]="group.weightMax"
+                     [value]="currentWeight()" (input)="currentWeight.set(+$any($event.target).value)"
+                     [attr.aria-label]="t('weight-axis')">
+              <div class="d-flex justify-content-between mt-1 scale small text-muted">
+                <span>{{group.weightMin}} · {{t('weight-thin')}}</span>
+                <span>{{group.weightMax}} · {{t('weight-black')}}</span>
+              </div>
+            </div>
+          }
+
+          <!-- Reading sample -->
+          @if (group.canPreview) {
+            <div class="sample">
+              <div class="eyebrow mb-2">{{t('reading-sample')}}</div>
+              <p class="text mb-0" [style.font-family]="group.previewAlias" [style.font-weight]="currentWeight()">
+                {{t('reading-sample-text')}}
+              </p>
+            </div>
+          }
+
+          <!-- Files disclosure -->
+          <div class="files">
+            <button type="button" class="toggle d-flex align-items-center gap-2 w-100 text-start"
+                    (click)="showFiles.set(!showFiles())" [attr.aria-expanded]="showFiles()">
+              <i class="fas fa-chevron-right chevron" [class.open]="showFiles()" aria-hidden="true"></i>
+              <span class="small text-muted">
+                {{group.files.length}} {{group.files.length === 1 ? t('file') : t('files')}} {{t('in-this-family')}}
+              </span>
+              <span class="small text-muted opacity-75">{{t('styles-summary', {styles: (group.hasNormal && group.hasItalic) ? (t('roman') + ' + ' + t('italic')) : (group.hasItalic ? t('italic') : t('roman'))})}}</span>
+            </button>
+            <div [ngbCollapse]="!showFiles()">
+              <ul class="list-unstyled d-flex flex-column gap-2 mt-2 mb-0">
+                @for (font of group.files; track font.id) {
+                  <li class="item d-flex align-items-center flex-wrap gap-2">
+                    <span class="small">{{font.name | sentenceCase}}</span>
+                    <span class="badge chip">{{font.style === 'italic' ? t('italic') : t('regular')}}</span>
+                    <span class="badge chip weight">{{t('wght')}} {{weightLabel(font.weight)}}</span>
+                    @if (font.fileName) {
+                      <span class="filename small text-muted ms-auto">{{font.fileName}}</span>
+                    }
+                  </li>
+                }
+              </ul>
+            </div>
           </div>
         }
       </div>
-
-      @if (item.name !== FontService.DefaultEpubFont) {
-        <div class="p-1 me-1 preview mt-2 flex-grow-1 text-center w-100 fs-4 fs-lg-3 mt-2" [ngStyle]="{'font-family': item.name, 'word-break': 'keep-all'}">
-          {{t('brown-fox')}}
-        </div>
-      }
-    }
-  </ng-template>
+    </div>
+  </div>
 </ng-container>

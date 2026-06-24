@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
@@ -6,7 +7,9 @@ using System.Linq;
 using System.Text.RegularExpressions;
 using Kavita.Common.Extensions;
 using Kavita.Models.Constants;
+using Kavita.Models.Entities;
 using Kavita.Models.Entities.Enums;
+using Kavita.Models.Entities.Enums.Font;
 
 namespace Kavita.Services.Scanner;
 
@@ -93,6 +96,10 @@ public static partial class Parser
     public static readonly Regex AsinRegex = new(@"^(B0|BT)[0-9A-Z]{8}$",
         MatchOptions, RegexTimeout);
 
+    [GeneratedRegex(@"(?<=[a-z])(?=[A-Z])")]
+    public static partial Regex CamelCaseRegex();
+    [GeneratedRegex(@"[^a-zA-Z0-9]")]
+    public static partial Regex NonAlphanumericRegex();
 
     private static readonly Regex ImageRegex = new(ImageFileExtensions,
         MatchOptions, RegexTimeout);
@@ -1290,7 +1297,7 @@ public static partial class Parser
      */
     public static string PrettifyFileName(string name)
     {
-        return Regex.Replace(name, "[^a-zA-Z0-9]", " ");
+        return NonAlphanumericRegex().Replace(name, " ").Replace("VariableFont", "Variable Font");
     }
 
     /// <summary>
@@ -1371,5 +1378,90 @@ public static partial class Parser
     public static bool IsLooseLeafVolume(string? volumeNumber)
     {
         return !string.IsNullOrEmpty(volumeNumber) && (volumeNumber.Equals(LooseLeafVolume) || volumeNumber.Equals(LooseLeafVolume + ".0"));
+    }
+
+    private static readonly Dictionary<string, string> FontWeightLookup = new()
+    {
+        { "variable",    "1 1000" }, /* Special entry for variable fonts, sets weight to full range.
+                                        Technically incorrect since most variable fonts generally don't
+                                        support full 1-1000 range. Usually the lowest is 300
+                                        with some going down to 100. Usually the highest is 800 with
+                                        some going to 900 or 950. Setting '1 1000' should be fine since
+                                        browsers should clamp to the lowest value the font file supports.
+                                     */
+        { "hairline",    "100" },
+        { "thin",        "100" },
+        { "ultralight",  "200" },
+        { "ultra light", "200" },
+        { "extralight",  "200" },
+        { "extra light", "200" },
+        { "light",       "300" },
+        { "normal",      "400" },
+        { "regular",     "400" },
+        { "medium",      "500" },
+        { "semibold",    "600" },
+        { "semi bold",   "600" },
+        { "demibold",    "600" },
+        { "demi bold",   "600" },
+        { "bold",        "700" },
+        { "extrabold",   "800" },
+        { "extra bold",  "800" },
+        { "ultrabold",   "800" },
+        { "ultra bold",  "800" },
+        { "black",       "900" },
+        { "heavy",       "900" },
+        { "extrablack",  "950" },
+        { "extraheavy",  "950" },
+        { "extra black", "950" },
+        { "extra heavy", "950" }
+    };
+
+    /// <summary>
+    /// Parses a given filename into an EpubFont object.
+    /// Filename will be passed through to the object.
+    /// Callers are expected to update the filename with
+    /// the full path for general use.
+    /// </summary>
+    /// <param name="fileName"></param>
+    /// <returns></returns>
+    public static EpubFont ParseEpubFontFromFilename(string fileName)
+    {
+        var nakedFileName = Path.GetFileNameWithoutExtension(fileName);
+
+        var fontStyle = nakedFileName.Contains("italic", StringComparison.OrdinalIgnoreCase) ? "italic" : "normal";
+        // Match longest descriptors first so specific weights (e.g. "extrabold") win over substrings (e.g. "bold")
+        var fontWeight = FontWeightLookup
+            .OrderByDescending(entry => entry.Key.Length)
+            .FirstOrDefault(entry => nakedFileName.Contains(entry.Key, StringComparison.OrdinalIgnoreCase), new KeyValuePair<string, string>("normal", "400")).Value;
+
+        var fontFamily = nakedFileName;
+        var descriptorControlCharIndex = fontFamily.IndexOf('-');
+        if (descriptorControlCharIndex >= 1)
+        {
+            fontFamily = fontFamily[..descriptorControlCharIndex];
+        }
+
+        fontFamily = CamelCaseRegex().Replace(fontFamily, " ");
+
+        var fontName = nakedFileName;
+        var axesControlCharIndex = fontName.IndexOf('_');
+        if (axesControlCharIndex >= 1)
+        {
+            fontName = fontName[..axesControlCharIndex];
+        }
+        fontName = PrettifyFileName(fontName).Trim();
+
+        var font = new EpubFont()
+        {
+            Family = fontFamily,
+            Name = fontName,
+            NormalizedName = Normalize(fontName),
+            FileName = fileName,
+            Style = fontStyle,
+            Weight = fontWeight,
+            Provider = FontProvider.User
+        };
+
+        return font;
     }
 }

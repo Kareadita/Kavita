@@ -1,4 +1,13 @@
-import {ChangeDetectionStrategy, Component, effect, inject, input, output, signal} from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  ChangeDetectorRef,
+  Component,
+  effect,
+  inject,
+  input,
+  output,
+  signal
+} from '@angular/core';
 import {FileSystemFileEntry, NgxFileDropEntry} from 'ngx-file-drop';
 import {ToastrService} from 'ngx-toastr';
 import {ImageService} from 'src/app/_services/image.service';
@@ -35,9 +44,10 @@ import {NgTemplateOutlet} from "@angular/common";
 })
 export class CoverImageChooserComponent  {
 
-  public readonly imageService = inject(ImageService);
+  protected readonly imageService = inject(ImageService);
   private readonly toastr = inject(ToastrService);
   private readonly uploadService = inject(UploadService);
+  private readonly cdRef = inject(ChangeDetectorRef);
 
   config = input<CoverImageChooserConfig>({});
 
@@ -95,6 +105,9 @@ export class CoverImageChooserComponent  {
   selectOption(option: CoverImageOption, sourceTab: Tabs) {
     this.selectedOptionKey.set(option.url);
     const isDirty = sourceTab !== Tabs.Current;
+
+    this.activeTabId = sourceTab;
+    this.cdRef.markForCheck();
 
     if (!isDirty) {
       // Selecting the existing cover - nothing to stage or upload.

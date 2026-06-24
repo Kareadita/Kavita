@@ -2,12 +2,12 @@
   "openapi": "3.0.4",
   "info": {
     "title": "Kavita",
-    "description": "Kavita provides a set of APIs authenticated via an Auth Key passed in the `x-api-key` header. Generate an Auth Key under User Settings → Manage Auth Keys, paste it into the Authorize panel, and all Try It requests will include it. Assume all fields of a payload are required unless marked optional. Built against v0.9.0.9",
+    "description": "Kavita provides a set of APIs authenticated via an Auth Key passed in the `x-api-key` header. Generate an Auth Key under User Settings → Manage Auth Keys, paste it into the Authorize panel, and all Try It requests will include it. Assume all fields of a payload are required unless marked optional. Built against v0.9.0.11",
     "license": {
       "name": "GPL-3.0",
       "url": "https://github.com/Kareadita/Kavita/blob/develop/LICENSE"
     },
-    "version": "0.9.0.9"
+    "version": "0.9.0.11"
   },
   "servers": [
     {
@@ -4888,12 +4888,12 @@
         "tags": [
           "Font"
         ],
-        "summary": "Removes a font from the system",
+        "summary": "Removes a font family from the system. The family is validated for in-use server side and only removed when\nit is not selected by a user, or when an admin forces the deletion.",
         "parameters": [
           {
             "name": "fontId",
             "in": "query",
-            "description": "",
+            "description": "Any file within the family to delete",
             "schema": {
               "type": "integer",
               "format": "int32"
@@ -4902,34 +4902,10 @@
           {
             "name": "force",
             "in": "query",
-            "description": "If the font is in use by other users and an admin wants it deleted, they must confirm to force delete it. This is prompted in the UI.",
+            "description": "If the family is in use and an admin wants it deleted, they must confirm to force delete it. This is prompted in the UI.",
             "schema": {
               "type": "boolean",
               "default": false
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK"
-          }
-        }
-      }
-    },
-    "/api/Font/in-use": {
-      "get": {
-        "tags": [
-          "Font"
-        ],
-        "summary": "Returns if the given font is in use by any other user. System provided fonts will always return true.",
-        "parameters": [
-          {
-            "name": "fontId",
-            "in": "query",
-            "description": "",
-            "schema": {
-              "type": "integer",
-              "format": "int32"
             }
           }
         ],
@@ -4939,17 +4915,17 @@
             "content": {
               "text/plain": {
                 "schema": {
-                  "type": "boolean"
+                  "$ref": "#/components/schemas/FontDeleteResultDto"
                 }
               },
               "application/json": {
                 "schema": {
-                  "type": "boolean"
+                  "$ref": "#/components/schemas/FontDeleteResultDto"
                 }
               },
               "text/json": {
                 "schema": {
-                  "type": "boolean"
+                  "$ref": "#/components/schemas/FontDeleteResultDto"
                 }
               }
             }
@@ -5024,7 +5000,33 @@
         ],
         "responses": {
           "200": {
-            "description": "OK"
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/EpubFontDto"
+                  }
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/EpubFontDto"
+                  }
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/EpubFontDto"
+                  }
+                }
+              }
+            }
           }
         }
       }
@@ -24364,6 +24366,10 @@
             "type": "integer",
             "format": "int32"
           },
+          "family": {
+            "type": "string",
+            "nullable": true
+          },
           "name": {
             "type": "string",
             "nullable": true
@@ -24372,6 +24378,14 @@
             "$ref": "#/components/schemas/FontProvider"
           },
           "fileName": {
+            "type": "string",
+            "nullable": true
+          },
+          "style": {
+            "type": "string",
+            "nullable": true
+          },
+          "weight": {
             "type": "string",
             "nullable": true
           }
@@ -25008,6 +25022,18 @@
           "Person",
           "Annotation"
         ]
+      },
+      "FontDeleteResultDto": {
+        "type": "object",
+        "properties": {
+          "deleted": {
+            "type": "boolean"
+          },
+          "inUse": {
+            "type": "boolean"
+          }
+        },
+        "additionalProperties": false
       },
       "FontProvider": {
         "enum": [

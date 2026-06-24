@@ -43,6 +43,13 @@ public class AppUserReadingProfileRepository(DataContext context, IMapper mapper
             .ToListAsync(ct);
     }
 
+    public async Task<IList<AppUserReadingProfile>> GetProfilesByFontFamily(string family, CancellationToken ct = default)
+    {
+        return await context.AppUserReadingProfiles
+            .Where(rp => rp.BookReaderFontFamily == family)
+            .ToListAsync(ct);
+    }
+
     public async Task<AppUserReadingProfile?> GetUserProfile(int userId, int profileId, CancellationToken ct = default)
     {
         return await context.AppUserReadingProfiles

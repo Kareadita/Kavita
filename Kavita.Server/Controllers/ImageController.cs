@@ -222,6 +222,11 @@ public class ImageController(IUnitOfWork unitOfWork, IDirectoryService directory
             }
         }
 
+        if (string.IsNullOrEmpty(domainFilePath))
+        {
+            return BadRequest(await localizationService.TranslateAsync(UserId, "generic-favicon"));
+        }
+
         return CachedFile(domainFilePath);
     }
 

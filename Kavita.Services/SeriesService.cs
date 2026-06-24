@@ -153,10 +153,20 @@ public class SeriesService(
                     series.Metadata.Genres, allGenres, genre =>
                     {
                         series.Metadata.Genres.Add(genre);
-                    }, () => series.Metadata.GenresLocked = true);
+                    }, () =>
+                    {
+                        series.Metadata.GenresLocked = true;
+                        series.Metadata.KPlusOverrides.Remove(MetadataSettingField.Genres);
+                    });
             }
             else
             {
+                if (series.Metadata.Genres.Count > 0)
+                {
+                    series.Metadata.GenresLocked = true;
+                    series.Metadata.KPlusOverrides.Remove(MetadataSettingField.Genres);
+                }
+
                 series.Metadata.Genres = [];
             }
 
@@ -171,10 +181,19 @@ public class SeriesService(
                     series.Metadata.Tags, allTags, tag =>
                     {
                         series.Metadata.Tags.Add(tag);
-                    }, () => series.Metadata.TagsLocked = true);
+                    }, () =>
+                    {
+                        series.Metadata.TagsLocked = true;
+                        series.Metadata.KPlusOverrides.Remove(MetadataSettingField.Tags);
+                    });
             }
             else
             {
+                if (series.Metadata.Tags.Count > 0)
+                {
+                    series.Metadata.TagsLocked = true;
+                    series.Metadata.KPlusOverrides.Remove(MetadataSettingField.Tags);
+                }
                 series.Metadata.Tags = [];
             }
 
@@ -414,6 +433,11 @@ public class SeriesService(
         var peopleToRemove = metadataPeople
             .Where(mp => mp.Role == role && peopleToAdd.TrueForAll(p => p.NormalizedName != mp.Person.NormalizedName))
             .ToList();
+
+        if (peopleToRemove.Count != 0 || peopleToAdd.Count != 0)
+        {
+            metadata.KPlusOverrides.Remove(MetadataSettingField.People);
+        }
 
         foreach (var personToRemove in peopleToRemove)
         {

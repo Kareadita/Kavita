@@ -82,12 +82,13 @@ export class ReaderService {
     })
   }
 
-  openShortcutModal(shortcuts: KeyboardShortcut[]) {
+  openShortcutModal(shortcuts: KeyboardShortcut[], inBookReader: boolean = false) {
     if (this.shortCutModalOpen()) return;
 
     this.shortCutModalOpen.set(true);
     this.shortCutModalRef = this.modalService.open(ShortcutsModalComponent, mediumModal());
     this.shortCutModalRef.setInput('shortcuts', shortcuts);
+    this.shortCutModalRef.setInput('inBookReader', inBookReader);
 
     merge(this.shortCutModalRef.closed, this.shortCutModalRef.dismissed).subscribe(() => this.shortCutModalOpen.set(false));
   }

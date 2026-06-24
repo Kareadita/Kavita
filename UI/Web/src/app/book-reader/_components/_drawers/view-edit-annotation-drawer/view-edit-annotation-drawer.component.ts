@@ -360,7 +360,12 @@ export class ViewEditAnnotationDrawerComponent implements OnInit {
     const annotation = this.annotation();
     if (!annotation) return;
 
-    if (!await this.confirmService.confirm(translate('toasts.confirm-delete-annotation'))) return;
+    const config = {
+      ...this.confirmService.defaultConfirm,
+      bookReader: true,
+    };
+
+    if (!await this.confirmService.confirm(translate('toasts.confirm-delete-annotation'), config)) return;
 
     this.annotationService.deleteAnnotation(annotation).subscribe(_ => {
       this.drawerService.dismiss();

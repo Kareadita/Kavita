@@ -73,7 +73,6 @@
         "auto-login-label": "Auto login",
         "auto-login-tooltip": "Auto redirect to OIDC provider when opening the login screen",
         "disable-password-authentication-label": "Disable password authentication",
-        "disable-password-authentication-tooltip": "Users with the admin role can bypass this restriction",
         "provider-name-label": "Provider name",
         "provider-name-tooltip": "Name shown on the login screen",
 
@@ -381,16 +380,42 @@
     },
 
     "font-manager": {
-        "description": "Kavita's epub reader comes with a few build-in fonts, add your own fonts here. Upload a file, or use a google fonts url. See the <a href='{{wikiLink}}' target='_blank' rel='noreferrer noopener'>wiki</a> for more information.",
+        "description": "Fonts you can choose from in the epub reader. They're grouped by family, the name you pick while reading. Each family holds one or more files for its different weights and styles. Get fonts from {{googleFontsLink}}, or see the {{wikiLink}} for more information. ",
+        "wiki": "Wiki",
+        "google-fonts": "Google Fonts",
         "add": "{{common.add}}",
+        "add-font": "Add font",
         "drag-n-drop": "{{cover-image-chooser.drag-n-drop}}",
         "upload": "{{cover-image-chooser.upload}}",
         "upload-continued": "a font file",
-        "preview-default": "Upload your own font via file or Google Font url",
+        "preview-default": "Select a family to preview it, or add your own font via file or Google Font url",
         "delete": "{{common.delete}}",
         "no-preview": "This font cannot be previewed. This will take the default style from the book.",
         "brown-fox": "The quick brown fox jumps over the lazy dog",
-        "filter-system-fonts-label": "Filter System Fonts"
+        "filter-system-fonts-label": "Filter System Fonts",
+        "families": "Families",
+        "custom-only": "Custom only",
+        "var": "VAR",
+        "variable": "Variable",
+        "style": "style",
+        "styles": "styles",
+        "file": "file",
+        "files": "files",
+        "in-this-family": "in this family",
+        "styles-summary": "· {{styles}}",
+        "roman": "Roman",
+        "italic": "Italic",
+        "regular": "Regular",
+        "wght": "wght",
+        "alphabet": "ABCDEFGHIJKLM abcdefghijklm 0123456789",
+        "weight-axis": "Weight axis",
+        "weight-axis-hint": "drag to preview the full range",
+        "weight-thin": "thin",
+        "weight-black": "black",
+        "reading-sample": "Reading sample",
+        "reading-sample-text": "She turned the page slowly, the lamplight catching each letter. Whispered tales of ink and paper drifted up from the spine, the five boxing wizards jump quickly, and the night read on.",
+        "provider-note-system": "Built-in, always available",
+        "provider-note-custom": "Uploaded by you"
     },
 
     "theme": {
@@ -1582,6 +1607,7 @@
         "filter-metadata": "Metadata",
         "filter-scrobble": "Scrobble",
         "filter-sync": "Sync",
+        "filter-system": "System",
         "filter-status-label": "Status filter",
         "today": "Today",
         "yesterday": "Yesterday",
@@ -1994,6 +2020,10 @@
         "epub": "Epub",
         "pdf": "Pdf",
         "image": "Image"
+    },
+
+    "epub-font-title-pipe": {
+        "user-font-suffix": "(User)"
     },
 
     "reader-settings": {

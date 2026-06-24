@@ -6,12 +6,14 @@ using System.Threading.Tasks;
 using Kavita.API.Database;
 using Kavita.API.Repositories;
 using Kavita.API.Services;
+using Kavita.API.Services.SignalR;
 using Kavita.Common;
 using Kavita.Models;
 using Kavita.Models.Constants;
 using Kavita.Models.DTOs.Dashboard;
 using Kavita.Models.DTOs.Filtering.v2;
 using Kavita.Models.DTOs.Filtering.v2.Requests;
+using Kavita.Models.DTOs.SignalR;
 using Kavita.Models.Entities.User;
 using Kavita.Server.Attributes;
 using Kavita.Services.Helpers.SmartFilter;
@@ -24,7 +26,8 @@ public class FilterController(
     IUnitOfWork unitOfWork,
     ILocalizationService localizationService,
     IStreamService streamService,
-    ILogger<FilterController> logger)
+    ILogger<FilterController> logger,
+    IEventHub eventHub)
     : BaseApiController
 {
     /// <summary>
@@ -182,6 +185,10 @@ public class FilterController(
 
         unitOfWork.AppUserSmartFilterRepository.Delete(filter);
         await unitOfWork.CommitAsync();
+
+        await eventHub.SendMessageToAsync(MessageFactory.SideNavUpdate, MessageFactory.SideNavUpdateEvent(UserId),
+            UserId, HttpContext.RequestAborted);
+
         return Ok();
     }
 

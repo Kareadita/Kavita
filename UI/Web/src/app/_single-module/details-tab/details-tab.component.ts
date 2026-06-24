@@ -93,6 +93,7 @@ export class DetailsTabComponent {
   webLinks = input<string[]>([]);
   suppressEmptyGenres = input<boolean>(false);
   suppressEmptyTags = input<boolean>(false);
+  individualWork = input<boolean>(false);
   filePaths = input<string[]>([]);
   files = input<MangaFile[]>([]);
   basicMetadata = input<BasicMetadataInfo>();

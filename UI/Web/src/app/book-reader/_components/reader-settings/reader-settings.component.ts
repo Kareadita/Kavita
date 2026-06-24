@@ -22,7 +22,8 @@ import {
 import {TranslocoDirective} from "@jsverse/transloco";
 import {ReadingProfile, ReadingProfileKind} from "../../../_models/preferences/reading-profiles";
 import {BookReadingProfileFormGroup, EpubReaderSettingsService} from "../../../_services/epub-reader-settings.service";
-import {EpubFont} from "../../../_models/preferences/epub-font";
+import {EpubFont, FontProvider} from "../../../_models/preferences/epub-font";
+import {EpubFontTitlePipe} from "../../../_pipes/epub-font-title.pipe";
 
 /**
  * Used for book reader. Do not use for other components
@@ -85,7 +86,7 @@ export const bookColorThemes = [
     changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [ReactiveFormsModule, NgbAccordionDirective, NgbAccordionItem, NgbAccordionHeader, NgbAccordionButton,
     NgbAccordionCollapse, NgbAccordionBody, NgbTooltip, NgTemplateOutlet, NgClass, NgStyle,
-    TitleCasePipe, TranslocoDirective]
+    TitleCasePipe, TranslocoDirective, EpubFontTitlePipe]
 })
 export class ReaderSettingsComponent implements OnInit {
 
@@ -178,4 +179,5 @@ export class ReaderSettingsComponent implements OnInit {
   protected readonly WritingStyle = WritingStyle;
   protected readonly ReadingDirection = ReadingDirection;
   protected readonly BookPageLayoutMode = BookPageLayoutMode;
+  protected readonly FontProvider = FontProvider;
 }

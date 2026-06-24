@@ -1,4 +1,4 @@
-a:not(.dark-exempt):not(.btn) {
+a:not(.dark-exempt, .btn) {
     color: var(--primary-color);
     > i {
       color: var(--primary-color);

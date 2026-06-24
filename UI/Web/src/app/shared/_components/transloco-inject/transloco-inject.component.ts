@@ -23,8 +23,8 @@ type Part =
 /**
  * Renders a Transloco string with Angular component slots.
  *
- * Translation string uses `{slotName}` placeholders:
- *   "connect-with-discord-help": "Or {connectToDiscordBtn} to fill this automatically"
+ * Translation string uses `{{slotName}}` placeholders:
+ *   "connect-with-discord-help": "Or {{connectToDiscordBtn}} to fill this automatically"
  *
  * Usage:
  *   <app-transloco-inject key="connect-with-discord-help">

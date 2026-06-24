@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Linq;
 using System.Threading.Tasks;
 using Flurl.Http;
@@ -355,7 +355,7 @@ public class UploadController : BaseApiController
     {
         var settings = await _unitOfWork.SettingsRepository.GetSettingsDtoAsync();
         var encodeFormat = settings.EncodeMediaAs;
-        var coverImageSize = settings.CoverImageSize;
+        var (width, height) = settings.CoverImageSize.GetDimensions();
 
         // Preferred path: the image was already streamed into temp (upload-by-url / upload-by-file) and we only
         // received its filename. This avoids posting a large base64 payload back through the request body.
@@ -364,13 +364,11 @@ public class UploadController : BaseApiController
             var tempPath = ResolveTempCoverPath(uploadCoverFileDto.FileName)
                            ?? throw new KavitaException(await _localizationService.TranslateAsync(UserId, "invalid-filename"));
 
-            return _imageService.CreateThumbnailFromFile(tempPath,
-                filename, encodeFormat, coverImageSize.GetDimensions().Width);
+            return _imageService.CreateThumbnailFromFile(tempPath, filename, encodeFormat, width, height);
         }
 
         // Legacy fallback: base64 payload
-        return _imageService.CreateThumbnailFromBase64(uploadCoverFileDto.Url!,
-            filename, encodeFormat, coverImageSize.GetDimensions().Width);
+        return _imageService.CreateThumbnailFromBase64(uploadCoverFileDto.Url, filename, encodeFormat, width, height);
     }
 
     /// <summary>

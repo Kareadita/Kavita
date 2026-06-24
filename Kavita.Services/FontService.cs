@@ -1,5 +1,5 @@
 using System;
-using System.IO;
+using System.Collections.Generic;
 using System.Linq;
 using System.Text.Json;
 using System.Threading;
@@ -10,6 +10,7 @@ using Kavita.API.Services;
 using Kavita.Common;
 using Kavita.Common.Extensions;
 using Kavita.Models;
+using Kavita.Models.DTOs.Font;
 using Kavita.Models.Entities;
 using Kavita.Models.Entities.Enums.Font;
 using Kavita.Services.Scanner;
@@ -34,19 +35,10 @@ internal class GoogleFontsMetadata
     /// <summary>
     /// Tries to find the variable font in the manifest
     /// </summary>
-    /// <returns>GoogleFontsFileRef</returns>
-    public GoogleFontsFileRef? VariableFont()
+    /// <returns>GoogleFontsFileRef[]</returns>
+    public GoogleFontsFileRef[] VariableFont()
     {
-        foreach (var fileRef in manifest.fileRefs)
-        {
-            // Filename prefixed with static means it's a Bold/Italic/... font
-            if (!fileRef.filename.StartsWith("static/"))
-            {
-                return fileRef;
-            }
-        }
-
-        return null;
+        return Array.FindAll(manifest.fileRefs, fontRefs => fontRefs.filename.Contains("variable", StringComparison.OrdinalIgnoreCase));
     }
 }
 
@@ -90,34 +82,33 @@ public class FontService(IDirectoryService directoryService, IUnitOfWork unitOfW
     private const string DownloadFontUrlPrefix = "https://fonts.google.com/download/list?family=";
     private const string GoogleFontsInvalidJsonPrefix = ")]}'";
 
+
     public async Task<EpubFont> CreateFontFromFileAsync(string path, CancellationToken ct = default)
     {
+        // Validate that font was uploaded
         if (!directoryService.FileSystem.File.Exists(path))
         {
             logger.LogInformation("Unable to create font from manual upload as font not in temp");
             throw new KavitaException("errors.font-manual-upload");
         }
 
+        // Extract filename and then parse font object from the filename
         var fileName = directoryService.FileSystem.FileInfo.New(path).Name;
-        var nakedFileName = directoryService.FileSystem.Path.GetFileNameWithoutExtension(fileName);
-        var fontName = Parser.PrettifyFileName(nakedFileName);
-        var normalizedName = Parser.Normalize(nakedFileName);
+        var font = Parser.ParseEpubFontFromFilename(fileName);
 
-        if (await unitOfWork.EpubFontRepository.GetFontDtoByNameAsync(fontName, ct) != null)
+        var dbFont = await unitOfWork.EpubFontRepository.GetFontByNameAsync(font.Name, ct);
+
+        // Check if font name is already present in database
+        // If it is, return the one that is already in the database.
+        if (dbFont != null)
         {
-            throw new KavitaException("errors.font-already-in-use");
+            return dbFont;
         }
 
+        // Copy file from temp directory to EpubFontDirectory
         directoryService.CopyFileToDirectory(path, directoryService.EpubFontDirectory);
-        var finalLocation = directoryService.FileSystem.Path.Join(directoryService.EpubFontDirectory, fileName);
 
-        var font = new EpubFont()
-        {
-            Name = fontName,
-            NormalizedName = normalizedName,
-            FileName = Path.GetFileName(finalLocation),
-            Provider = FontProvider.User
-        };
+        // Commit font to database
         unitOfWork.EpubFontRepository.Add(font);
         await unitOfWork.CommitAsync(ct);
 
@@ -126,19 +117,49 @@ public class FontService(IDirectoryService directoryService, IUnitOfWork unitOfW
     }
 
     /// <summary>
-    /// This does not check if in use, use <see cref="IsFontInUse"/>
+    /// Deletes the entire font family that the given font belongs to. Rejects when in-use without <c>forceDelete</c>
     /// </summary>
-    /// <param name="fontId"></param>
+    /// <param name="fontId">Any file within the family to delete</param>
+    /// <param name="forceDelete">Delete even when the family is currently in use</param>
     /// <param name="ct"></param>
-    public async Task Delete(int fontId, CancellationToken ct = default)
+    public async Task<FontDeleteResultDto> DeleteFamily(int fontId, bool forceDelete, CancellationToken ct = default)
     {
         var font = await unitOfWork.EpubFontRepository.GetFontAsync(fontId, ct);
-        if (font == null) return;
+        if (font == null || font.Provider == FontProvider.System)
+        {
+            return new FontDeleteResultDto {Deleted = false, InUse = false};
+        }
 
-        await RemoveFont(font);
+        var family = font.Family;
+        var inUse = await unitOfWork.EpubFontRepository.IsFontFamilyInUseAsync(family, ct);
+        if (inUse && !forceDelete)
+        {
+            return new FontDeleteResultDto {Deleted = false, InUse = true};
+        }
+
+        // Only user provided files can be removed; system fonts in the family (if any) are left untouched
+        var files = (await unitOfWork.EpubFontRepository.GetFontsByFamilyAsync(family, ct))
+            .Where(f => f.Provider == FontProvider.User)
+            .ToList();
+        if (files.Count == 0)
+        {
+            return new FontDeleteResultDto {Deleted = false, InUse = inUse};
+        }
+
+        await ResetFamilyReferences(family);
+
+        foreach (var file in files)
+        {
+            MoveFontFileToTemp(file);
+            unitOfWork.EpubFontRepository.Remove(file);
+        }
+
+        await unitOfWork.CommitAsync(ct);
+
+        return new FontDeleteResultDto {Deleted = true, InUse = inUse};
     }
 
-    public async Task<EpubFont> CreateFontFromUrl(string url, CancellationToken ct = default)
+    public async Task<EpubFont[]> CreateFontsFromUrl(string url, CancellationToken ct = default)
     {
         if (!url.StartsWith(SupportedFontUrlPrefix))
         {
@@ -156,48 +177,55 @@ public class FontService(IDirectoryService directoryService, IUnitOfWork unitOfW
             throw new KavitaException("errors.font-not-found");
         }
 
-        var googleFontRef = metaData.VariableFont();
-        if (googleFontRef == null)
+        // Choose the variable font if available
+        // Otherwise take the full list.
+        // This should be fine since Google Fonts seems to
+        // only prepend filenames with 'static/' for font
+        // families that have variable fonts since the
+        // static/ path contains non-variable variants of
+        // the font for applications that don't support
+        // variable fonts.
+        var googleFontRefs = metaData.VariableFont();
+        if (googleFontRefs.Length == 0)
         {
-            logger.LogError("Unable to find variable font for {FontName} with metadata {MetaData}", fontFamily.Sanitize(), metaData);
-            throw new KavitaException("errors.font-not-found");
+            googleFontRefs = metaData.manifest.fileRefs;
         }
 
-        var fontExt = Path.GetExtension(googleFontRef.filename);
-        var fileName = $"{fontFamily}{fontExt}";
+        var finalRef = new List<EpubFont>();
+        foreach (var fontRef in googleFontRefs)
+        {
+            await urlValidationService.ValidateUrlAsync(fontRef.url);
 
-        await urlValidationService.ValidateUrlAsync(googleFontRef.url);
-        logger.LogDebug("Downloading font {FontFamily} to {FileName} from {Url}", fontFamily.Sanitize(), fileName.Sanitize(), googleFontRef.url);
-        var path = await googleFontRef.url.DownloadFileAsync(directoryService.TempDirectory, fileName, cancellationToken: ct);
+            // filename comes from remote metadata and may contain path separators (e.g. static/...).
+            // Reduce it to a basename so the download can't create unexpected subdirectories or traverse outside temp.
+            var fileName = directoryService.FileSystem.Path.GetFileName(fontRef.filename.Replace('\\', '/'));
 
-        return await CreateFontFromFileAsync(path, ct);
+            logger.LogDebug("Downloading font {FontFamily} to {FileName} from {Url}", fontFamily.Sanitize(), fileName.Sanitize(), fontRef.url);
+            var path = await fontRef.url.DownloadFileAsync(directoryService.TempDirectory, fileName, cancellationToken: ct);
+
+            var result = await CreateFontFromFileAsync(path, ct);
+            finalRef.Add(result);
+        }
+
+        return [..finalRef];
     }
 
     /// <summary>
-    /// Returns if the given font is in use by any other user. System provided fonts will always return true.
+    /// Points every user selecting this family back at the default font. Reading profiles are the live source the
+    /// reader reads from; the legacy preferences are reset too so no stale references are left behind.
     /// </summary>
-    /// <param name="fontId"></param>
-    /// <param name="ct"></param>
-    /// <returns></returns>
-    public async Task<bool> IsFontInUse(int fontId, CancellationToken ct = default)
+    private async Task ResetFamilyReferences(string family)
     {
-        var font = await unitOfWork.EpubFontRepository.GetFontAsync(fontId, ct);
-        if (font == null || font.Provider == FontProvider.System) return true;
-
-        return await unitOfWork.EpubFontRepository.IsFontInUseAsync(fontId, ct);
+        var profiles = await unitOfWork.AppUserReadingProfileRepository.GetProfilesByFontFamily(family);
+        foreach (var profile in profiles)
+        {
+            profile.BookReaderFontFamily = Defaults.DefaultFont;
+            unitOfWork.AppUserReadingProfileRepository.Update(profile);
+        }
     }
 
-    private async Task RemoveFont(EpubFont font)
+    private void MoveFontFileToTemp(EpubFont font)
     {
-        if (font.Provider == FontProvider.System) return;
-
-        var prefs = await unitOfWork.UserRepository.GetAllPreferencesByFontAsync(font.Name);
-        foreach (var pref in prefs)
-        {
-            pref.BookReaderFontFamily = Defaults.DefaultFont;
-            unitOfWork.UserRepository.Update(pref);
-        }
-
         try
         {
             // Copy the font file to temp for nightly removal (to give user time to reclaim if made a mistake)
@@ -209,9 +237,6 @@ public class FontService(IDirectoryService directoryService, IUnitOfWork unitOfW
             directoryService.DeleteFiles([existingLocation]);
         }
         catch (Exception) { /* Swallow */ }
-
-        unitOfWork.EpubFontRepository.Remove(font);
-        await unitOfWork.CommitAsync();
     }
 
     private async Task<GoogleFontsMetadata?> GetGoogleFontsMetadataAsync(string fontName)
