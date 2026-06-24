@@ -1,20 +1,23 @@
 name: Validate PR Body
 
 on:
-    pull_request:
-        branches: [ main, develop, canary ]
-        types: [synchronize]
+  pull_request:
+    branches: [ main, develop, canary ]
+    types: [opened, synchronize, edited]
 
 jobs:
-    check_pr:
-        runs-on: ubuntu-24.04
-        steps:
-            - name: Extract branch name
-              shell: bash
-              run: echo "branch=${GITHUB_HEAD_REF:-${GITHUB_REF#refs/heads/}}" >> $GITHUB_OUTPUT
-              id: extract_branch
-            - name: Check PR Body
-              uses: JJ/github-pr-contains-action@releases/v10
-              with:
-                  github-token: ${{ secrets.GITHUB_TOKEN }}
-                  bodyDoesNotContain: "[\"|`]"
+  check_pr:
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Check PR Body
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const checkBody = (bodyText) => {
+              if (/["`]/.test(bodyText)) {
+                core.setFailed('PR body must not contain double-quotes or backticks.');
+              }
+            };
+
+            const body = context.payload.pull_request?.body || '';
+            checkBody(body);

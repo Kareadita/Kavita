@@ -28,7 +28,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           ref: develop
-          fetch-depth: 0
+          fetch-depth: 1
 
       - name: Get csproj Version
         uses: kzrnm/get-net-sdk-project-versions-action@v2

@@ -1,79 +1,109 @@
 name: Stable Workflow
 
 on:
-  push:
-    branches: ['release/**']
   pull_request:
     branches: [ 'develop' ]
     types: [ closed ]
   workflow_dispatch:
+    inputs:
+      pr_number:
+        description: 'PR Number to fetch release notes from (for manual retries)'
+        required: false
+        type: string
 
 jobs:
-  debug:
+  check-release:
+    name: Validate Release & Fetch Notes
     runs-on: ubuntu-24.04
+    permissions:
+      contents: read
+      pull-requests: read
+    if: |
+      (github.event_name == 'pull_request' && github.event.pull_request.merged == true && startsWith(github.head_ref, 'release/')) ||
+      (github.event_name == 'workflow_dispatch' && (github.ref == 'refs/heads/develop' || startsWith(github.ref, 'refs/heads/release/')))
+    outputs:
+      pr_body: ${{ steps.get-notes.outputs.BODY }}
     steps:
-      - name: Debug Info
+      - name: Fetch PR Notes
+        id: get-notes
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PR_NUMBER_INPUT: ${{ inputs.pr_number }}
         run: |
-          echo "Event Name: ${{ github.event_name }}"
-          echo "Ref: ${{ github.ref }}"
-          echo "Not Contains Release: ${{ !contains(github.head_ref, 'release') }}"
-          echo "Matches Develop: ${{ github.ref == 'refs/heads/develop' }}"
-  if_merged:
-    if: github.event.pull_request.merged == true && contains(github.head_ref, 'release')
-    runs-on: ubuntu-24.04
-    steps:
-      - run: |
-          echo The PR was merged
-  build:
-    name: Upload Kavita.Common for Version Bump
-    runs-on: ubuntu-24.04
-    if: github.event.pull_request.merged == true && contains(github.head_ref, 'release')
-    steps:
-      - name: Checkout Repo
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
+          if [[ "${{ github.event_name }}" == "pull_request" ]]; then
+            # Securely extract the PR body without shell interpolation
+            RAW_BODY=$(jq -r '.pull_request.body // empty' "$GITHUB_EVENT_PATH")
+          elif [[ -n "$PR_NUMBER_INPUT" ]]; then
+            # Validate that the input is strictly numeric
+            if ! [[ "$PR_NUMBER_INPUT" =~ ^[0-9]+$ ]]; then
+              echo "Error: pr_number input must be purely numeric."
+              exit 1
+            fi
+            # Fetch via GitHub CLI using the validated and quoted variable
+            RAW_BODY=$(gh pr view "$PR_NUMBER_INPUT" --repo "${{ github.repository }}" --json body --jq '.body')
+          else
+            RAW_BODY="Read full changelog: https://github.com/Kareadita/Kavita/releases/latest"
+          fi
 
-      - uses: actions/upload-artifact@v4
-        with:
-          name: csproj
-          path: Kavita.Common/Kavita.Common.csproj
+          # Generate a random delimiter to prevent multiline EOF injection
+          DELIMITER=$(dd if=/dev/urandom bs=15 count=1 status=none | base64)
+
+          # Safely write the multiline string to GITHUB_OUTPUT
+          echo "BODY<<$DELIMITER" >> "$GITHUB_OUTPUT"
+          echo "$RAW_BODY" >> "$GITHUB_OUTPUT"
+          echo "$DELIMITER" >> "$GITHUB_OUTPUT"
 
   stable:
-    name: Build Stable and Nightly Docker if Release
-    needs: [ build ]
-    if: github.event.pull_request.merged == true && contains(github.head_ref, 'release')
+    name: Build Stable and Nightly Docker
+    needs: [ check-release ]
     runs-on: ubuntu-24.04
     permissions:
       packages: write
       contents: read
     steps:
-      - name: Find Current Pull Request
-        uses: jwalton/gh-find-current-pr@v1
-        id: findPr
-        with:
-          state: all
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-
       - name: Parse PR body
         id: parse-body
+        env:
+          RAW_BODY: ${{ needs.check-release.outputs.pr_body }}
+          PR_NUMBER: ${{ inputs.pr_number || github.event.pull_request.number }}
         run: |
-          body="Read full changelog: https://github.com/Kareadita/Kavita/releases/latest"
+          body="$RAW_BODY"
 
-          echo $body
-          echo "BODY=$body" >> $GITHUB_OUTPUT
+          if [[ -n "$PR_NUMBER" ]]; then
+            LINK="https://github.com/Kareadita/Kavita/pull/$PR_NUMBER"
+          else
+            LINK="https://github.com/Kareadita/Kavita/releases/latest"
+          fi
+
+          if [[ ${#body} -gt 1870 ]] ; then
+            body=${body:0:1870}
+            body="${body}...and much more.
+
+            Read full changelog: $LINK"
+          fi
+
+          body=${body//\'/}
+          body=${body//'%'/'%25'}
+          body=${body//$'\n'/'%0A'}
+          body=${body//$'\r'/'%0D'}
+          body=${body//$'`'/'%60'}
+          body=${body//$'>'/'%3E'}
+
+          echo "BODY=$body" >> "$GITHUB_OUTPUT"
 
       - name: Check Out Repo
         uses: actions/checkout@v4
         with:
-          ref: develop
+          fetch-depth: 1
 
       - name: NodeJS to Compile WebUI
         uses: actions/setup-node@v4
         with:
           node-version: 22
-      - run: |
+          cache: 'npm'
+          cache-dependency-path: UI/Web/package-lock.json
 
+      - run: |
           cd UI/Web || exit
           echo 'Installing web dependencies'
           npm ci
@@ -96,19 +126,30 @@ jobs:
         run: echo "${{steps.get-version.outputs.assembly-version}}"
 
       - name: Parse Version
+        id: parse-version
         run: |
           version='${{steps.get-version.outputs.assembly-version}}'
           newVersion=${version%.*}
           echo $newVersion
-          echo "VERSION=$newVersion" >> $GITHUB_OUTPUT
-        id: parse-version
+          echo "VERSION=$newVersion" >> "$GITHUB_OUTPUT"
 
       - name: Compile dotnet app
         uses: actions/setup-dotnet@v4
         with:
           dotnet-version: 10.0.x
+
+      - name: Cache NuGet packages
+        uses: actions/cache@v4
+        with:
+          path: ~/.nuget/packages
+          key: ${{ runner.os }}-nuget-${{ hashFiles('**/*.csproj') }}
+          restore-keys: |
+            ${{ runner.os }}-nuget-
+
       - name: Install Swashbuckle CLI
-        run: dotnet tool install -g Swashbuckle.AspNetCore.Cli
+        run: |
+          dotnet new tool-manifest --force
+          dotnet tool install Swashbuckle.AspNetCore.Cli
 
       - run: ./monorepo-build.sh
 
@@ -134,49 +175,27 @@ jobs:
         uses: docker/setup-buildx-action@v3
 
       - name: Extract metadata (tags, labels) for Docker
-        id: docker_meta_stable
+        id: docker_meta
         uses: docker/metadata-action@v5
         with:
           tags: |
             type=raw,value=latest
             type=raw,value=${{ steps.parse-version.outputs.VERSION }}
-          images: |
-            name=jvmilazz0/kavita,enable=${{ github.repository_owner == 'Kareadita' }}
-            name=ghcr.io/${{ github.repository }}
-
-      - name: Build and push stable
-        id: docker_build_stable
-        uses: docker/build-push-action@v6
-        with:
-          context: .
-          platforms: linux/amd64,linux/arm/v7,linux/arm64
-          push: true
-          tags: ${{ steps.docker_meta_stable.outputs.tags }}
-          labels: ${{ steps.docker_meta_stable.outputs.labels }}
-
-      - name: Extract metadata (tags, labels) for Docker
-        id: docker_meta_nightly
-        uses: docker/metadata-action@v5
-        with:
-          tags: |
             type=raw,value=nightly
             type=raw,value=nightly-${{ steps.parse-version.outputs.VERSION }}
           images: |
             name=jvmilazz0/kavita,enable=${{ github.repository_owner == 'Kareadita' }}
             name=ghcr.io/${{ github.repository }}
 
-      - name: Build and push nightly
-        id: docker_build_nightly
+      - name: Build and push combined tags
+        id: docker_build
         uses: docker/build-push-action@v6
         with:
           context: .
           platforms: linux/amd64,linux/arm/v7,linux/arm64
           push: true
-          tags: ${{ steps.docker_meta_nightly.outputs.tags }}
-          labels: ${{ steps.docker_meta_nightly.outputs.labels }}
+          tags: ${{ steps.docker_meta.outputs.tags }}
+          labels: ${{ steps.docker_meta.outputs.labels }}
 
       - name: Image digest
-        run: echo ${{ steps.docker_build_stable.outputs.digest }}
-
-      - name: Image digest
-        run: echo ${{ steps.docker_build_nightly.outputs.digest }}
+        run: echo ${{ steps.docker_build.outputs.digest }}

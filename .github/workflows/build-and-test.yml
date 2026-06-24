@@ -7,7 +7,7 @@ on:
 jobs:
   build:
     name: Build and Test PR
-    runs-on: windows-latest
+    runs-on: ubuntu-24.04
     steps:
       - name: Checkout Repo
         uses: actions/checkout@v4
@@ -19,17 +19,21 @@ jobs:
         with:
             dotnet-version: 10.0.x
 
+      - name: Cache NuGet packages
+        uses: actions/cache@v4
+        with:
+          path: ~/.nuget/packages
+          key: ${{ runner.os }}-nuget-${{ hashFiles('**/*.csproj') }}
+          restore-keys: |
+            ${{ runner.os }}-nuget-
+
       - name: Install Swashbuckle CLI
-        shell: powershell
-        run: dotnet tool install -g Swashbuckle.AspNetCore.Cli
+        run: |
+          dotnet new tool-manifest --force
+          dotnet tool install Swashbuckle.AspNetCore.Cli
 
       - name: Install dependencies
         run: dotnet restore
-
-      - uses: actions/upload-artifact@v4
-        with:
-          name: csproj
-          path: Kavita.Common/Kavita.Common.csproj
 
       - name: Test
         run: dotnet test --no-restore --verbosity normal --filter "Category!=Integration"

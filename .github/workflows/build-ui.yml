@@ -7,7 +7,7 @@ on:
 jobs:
   build:
     name: Build UI
-    runs-on: windows-latest
+    runs-on: ubuntu-24.04
     steps:
       - name: Checkout Repo
         uses: actions/checkout@v4
@@ -18,6 +18,8 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 22
+          cache: 'npm'
+          cache-dependency-path: UI/Web/package-lock.json
       - run: |
           cd UI/Web || exit
           echo 'Installing web dependencies'

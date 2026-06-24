@@ -7,36 +7,29 @@ on:
         - '!release/**'
 
 jobs:
-  build:
-    name: Upload Kavita.Common for Version Bump
-    runs-on: ubuntu-24.04
-    steps:
-      - name: Checkout Repo
-        uses: actions/checkout@v4
-        with:
-            fetch-depth: 0
-
-      - uses: actions/upload-artifact@v4
-        with:
-          name: csproj
-          path: Kavita.Common/Kavita.Common.csproj
-
   version:
     name: Bump version
-    needs: [ build ]
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
         with:
-          fetch-depth: 0
+          fetch-depth: 1
 
       - name: Setup .NET Core
         uses: actions/setup-dotnet@v4
         with:
             dotnet-version: 10.0.x
 
+      - name: Cache NuGet packages
+        uses: actions/cache@v4
+        with:
+          path: ~/.nuget/packages
+          key: ${{ runner.os }}-nuget-${{ hashFiles('**/*.csproj') }}
+          restore-keys: |
+            ${{ runner.os }}-nuget-
+
       - name: Bump versions
-        uses: SiqiLu/dotnet-bump-version@2.0.0
+        uses: majora2007/dotnet-bump-version@v0.0.10
         with:
           version_files: Kavita.Common/Kavita.Common.csproj
           github_token: ${{ secrets.REPO_GHA_PAT }}
@@ -44,7 +37,7 @@ jobs:
 
   canary:
       name: Build Canary Docker
-      needs: [ build, version ]
+      needs: [ version ]
       runs-on: ubuntu-24.04
       permissions:
           packages: write
@@ -67,10 +60,12 @@ jobs:
             uses: actions/setup-node@v4
             with:
                 node-version: 22
+                cache: 'npm'
+                cache-dependency-path: UI/Web/package-lock.json
           - run: |
                 cd UI/Web || exit
                 echo 'Installing web dependencies'
-                npm install --legacy-peer-deps
+                npm ci
 
                 echo 'Building UI'
                 npm run prod
@@ -100,8 +95,18 @@ jobs:
             with:
                 dotnet-version: 10.0.x
 
+          - name: Cache NuGet packages
+            uses: actions/cache@v4
+            with:
+              path: ~/.nuget/packages
+              key: ${{ runner.os }}-nuget-${{ hashFiles('**/*.csproj') }}
+              restore-keys: |
+                ${{ runner.os }}-nuget-
+
           - name: Install Swashbuckle CLI
-            run: dotnet tool install -g Swashbuckle.AspNetCore.Cli
+            run: |
+              dotnet new tool-manifest --force
+              dotnet tool install Swashbuckle.AspNetCore.Cli
 
           - run: ./monorepo-build.sh
 

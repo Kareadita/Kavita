@@ -6,14 +6,12 @@ on:
     paths:
       - '**/*.cs'
       - '**/*.csproj'
-  pull_request:
-    branches: [ 'develop', '!release/**' ]
   workflow_dispatch:
 
 
 jobs:
   generate-openapi:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     # Only run on direct pushes to develop, not PRs
     if: (github.event_name == 'push' || github.event_name == 'workflow_dispatch') && github.repository_owner == 'Kareadita'
 
@@ -25,6 +23,14 @@ jobs:
         uses: actions/setup-dotnet@v4
         with:
           dotnet-version: 10.0.x
+
+      - name: Cache NuGet packages
+        uses: actions/cache@v4
+        with:
+          path: ~/.nuget/packages
+          key: ${{ runner.os }}-nuget-${{ hashFiles('**/*.csproj') }}
+          restore-keys: |
+            ${{ runner.os }}-nuget-
 
       - name: Install dependencies
         run: dotnet restore
