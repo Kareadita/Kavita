@@ -3,7 +3,16 @@
 
     <!-- Header -->
     <div class="d-flex justify-content-between align-items-start gap-3 mb-3">
-      <p class="description mb-0" [innerHTML]="t('description', {'wikiLink': WikiLink})"></p>
+      <p class="description mb-0">
+        <app-transloco-inject key="font-manager.description">
+          <ng-template translocoSlot="wikiLink">
+            <a [href]="WikiLink" target='_blank' rel='noreferrer noopener'>{{t('wiki')}}</a>
+          </ng-template>
+          <ng-template translocoSlot="googleFontsLink">
+            <a href='https://fonts.google.com' target='_blank' rel='noreferrer noopener'>{{t('google-fonts')}}</a>
+          </ng-template>
+        </app-transloco-inject>
+      </p>
       <button class="btn flex-shrink-0" [class.btn-primary]="!showUpload()" [class.btn-outline-primary]="showUpload()"
               (click)="toggleUpload()" [disabled]="isReadOnly()">
         <i class="fa fa-plus me-1" aria-hidden="true"></i>{{t('add-font')}}

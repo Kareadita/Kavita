@@ -17,6 +17,8 @@ import {
 import {NgbCollapse, NgbTooltip} from '@ng-bootstrap/ng-bootstrap';
 import {tap} from "rxjs";
 import {finalize} from "rxjs/operators";
+import {TranslocoInjectComponent} from "../../../shared/_components/transloco-inject/transloco-inject.component";
+import {TranslocoSlotDirective} from "../../../_directives/transloco-slot.directive";
 
 /**
  * A family groups every uploaded/system file that shares the same family name (the name the user picks
@@ -47,7 +49,9 @@ export interface FontFamilyGroup {
     TranslocoDirective,
     FileDragAndDropUploadComponent,
     NgbCollapse,
-    NgbTooltip
+    NgbTooltip,
+    TranslocoInjectComponent,
+    TranslocoSlotDirective
   ],
   templateUrl: './font-manager.component.html',
   styleUrl: './font-manager.component.scss',
