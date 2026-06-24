@@ -2,6 +2,23 @@
 // BASE CARD STYLES
 // =============================================================================
 
+:host {
+  --source-badge-bg-color: var(--primary-color);
+  --source-badge-text-color: var(--btn-primary-text-color);
+}
+
+.source-badge {
+  position: absolute;
+  top: 0.3125rem;
+  left: 0.3125rem;
+  z-index: 10;
+  background-color: var(--source-badge-bg-color);
+  color: var(--source-badge-text-color);
+  font-size: 0.7rem;
+  pointer-events: none;
+  border: 0.0625rem solid var(--primary-color-darkest-shade);
+}
+
 .card {
   background-color: var(--card-bg-color);
   color: var(--card-text-color);

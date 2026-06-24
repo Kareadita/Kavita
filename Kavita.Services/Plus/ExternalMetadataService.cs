@@ -2064,7 +2064,7 @@ public class ExternalMetadataService : IExternalMetadataService
         var recDto = new RecommendationDto()
         {
             ExternalSeries = new List<ExternalSeriesDto>(),
-            OwnedSeries = new List<SeriesDto>()
+            OwnedSeries = new List<RecommendedSeriesDto>()
         };
 
         // NOTE: This can result in a series being recommended that shares the same name but different format
@@ -2080,7 +2080,7 @@ public class ExternalMetadataService : IExternalMetadataService
 
             if (seriesForRec != null)
             {
-                recDto.OwnedSeries.Add(seriesForRec);
+                recDto.OwnedSeries.Add(new RecommendedSeriesDto() { Series = seriesForRec, Source = source });
                 externalSeriesMetadata.ExternalRecommendations.Add(new ExternalRecommendation()
                 {
                     SeriesId = seriesForRec.Id,
@@ -2125,7 +2125,7 @@ public class ExternalMetadataService : IExternalMetadataService
             });
         }
 
-        recDto.OwnedSeries = recDto.OwnedSeries.DistinctBy(s => s.Id).OrderBy(r => r.Name).ToList();
+        recDto.OwnedSeries = recDto.OwnedSeries.DistinctBy(s => s.Series.Id).OrderBy(r => r.Series.Name).ToList();
         recDto.ExternalSeries = recDto.ExternalSeries.DistinctBy(s => s.Name.ToNormalized()).OrderBy(r => r.Name).ToList();
 
         return recDto;
