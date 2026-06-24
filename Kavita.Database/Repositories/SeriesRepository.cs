@@ -1479,7 +1479,8 @@ public class SeriesRepository(DataContext context, IMapper mapper) : ISeriesRepo
                 .AsNoTracking()
                 .ProjectToWithProgress<Series, SeriesDto>(mapper.ConfigurationProvider, userId)
                 .ToListAsync(ct),
-            Editions = await GetRelatedSeriesQuery(userId, seriesId, usersSeriesIds, RelationKind.Edition, userRating, ct)
+            Editions = await GetRelatedSeriesQuery(userId, seriesId, usersSeriesIds, RelationKind.Edition, userRating, ct),
+            Cameos = await GetRelatedSeriesQuery(userId, seriesId, usersSeriesIds, RelationKind.Cameo, userRating, ct)
         };
     }
 

@@ -16,20 +16,7 @@ export enum RelationKind {
     Parent = 12,
     Edition = 13,
     Annual = 14,
-
-    Main = 15,
     Cameo = 16,
-    CharacterFocus = 17,
-    Compilation = 18,
-    Crossover = 19,
-    Expansion = 20,
-    Parody = 21,
-    Reboot = 22,
-    Remake = 23,
-    Series = 24,
-    Source = 25,
-    Summary = 26,
-    Uncollected = 27
 
 }
 
@@ -47,19 +34,7 @@ const RelationKindsUnsorted = [
     {text: 'Edition', value: RelationKind.Edition},
     {text: 'Doujinshi', value: RelationKind.Doujinshi},
     {text: 'Other', value: RelationKind.Other},
-    {text: 'Main Story', value: RelationKind.Main},
     {text: 'Cameo', value: RelationKind.Cameo},
-    {text: 'Character Focus', value: RelationKind.CharacterFocus},
-    {text: 'Compilation', value: RelationKind.Compilation},
-    {text: 'Crossover', value: RelationKind.Crossover},
-    {text: 'Expansion', value: RelationKind.Expansion},
-    {text: 'Parody', value: RelationKind.Parody},
-    {text: 'Reboot', value: RelationKind.Reboot},
-    {text: 'Remake', value: RelationKind.Remake},
-    {text: 'Series', value: RelationKind.Series},
-    {text: 'Source', value: RelationKind.Source},
-    {text: 'Summary', value: RelationKind.Summary},
-    {text: 'Uncollected', value: RelationKind.Uncollected},
 ];
 
 export const RelationKinds = RelationKindsUnsorted.slice().sort((a, b) => a.text.localeCompare(b.text));

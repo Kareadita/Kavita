@@ -18,4 +18,5 @@ public sealed record UpdateRelatedSeriesDto
     public IList<int> Doujinshis { get; set; } = default!;
     public IList<int> Editions { get; set; } = default!;
     public IList<int> Annuals { get; set; } = default!;
+    public IList<int> Cameos { get; set; } = default!;
 }

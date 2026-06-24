@@ -82,6 +82,7 @@ export class EditSeriesRelationComponent implements OnInit {
         this.setupRelationRows(relations.parent, RelationKind.Parent);
         this.setupRelationRows(relations.editions, RelationKind.Edition);
         this.setupRelationRows(relations.annuals, RelationKind.Annual);
+        this.setupRelationRows(relations.cameos, RelationKind.Cameo);
     });
 
     this.libraryService.getLibraryNames().subscribe(names => {
@@ -192,7 +193,8 @@ export class EditSeriesRelationComponent implements OnInit {
       g(RelationKind.AlternativeVersion),
       g(RelationKind.Doujinshi),
       g(RelationKind.Edition),
-      g(RelationKind.Annual)
+      g(RelationKind.Annual),
+      g(RelationKind.Cameo)
     ).subscribe(() => {}); // NOTE: We can actually emit this onto an observable and in main parent, use mergeMap into the forkJoin
   }
 

@@ -16,4 +16,5 @@ export interface RelatedSeries {
     parent: Array<Series>;
     editions: Array<Series>;
     annuals: Array<Series>;
+    cameos: Array<Series>;
 }

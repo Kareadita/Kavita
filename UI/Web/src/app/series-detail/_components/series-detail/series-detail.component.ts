@@ -713,6 +713,7 @@ class SeriesDetailComponent implements OnInit, AfterViewInit {
         ...relations.parent.map(item => this.createRelatedSeries(item, RelationKind.Parent)),
         ...relations.editions.map(item => this.createRelatedSeries(item, RelationKind.Edition)),
         ...relations.annuals.map(item => this.createRelatedSeries(item, RelationKind.Annual)),
+        ...relations.cameos.map(item => this.createRelatedSeries(item, RelationKind.Cameo)),
       ]);
     });
   }

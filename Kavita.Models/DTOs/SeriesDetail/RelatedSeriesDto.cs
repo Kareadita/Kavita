@@ -23,4 +23,5 @@ public sealed record RelatedSeriesDto
     public IEnumerable<SeriesDto> Parent { get; set; } = default!;
     public IEnumerable<SeriesDto> Editions { get; set; } = default!;
     public IEnumerable<SeriesDto> Annuals { get; set; } = default!;
+    public IEnumerable<SeriesDto> Cameos { get; set; } = default!;
 }
