@@ -57,18 +57,20 @@
         "processed": "Próiseáilte",
         "not-processed": "Gan Phróiseáil",
         "special": "{{entity-title.special}}",
-        "generate-scrobble-events": "Imeachtaí Aislíonta",
         "token-expired": "Tá do chomhartha AniList imithe in éag! Ní phróiseálfar imeachtaí scrobála go dtí go ndéanfaidh tú athnuachan ar leathanach na gCuntas.",
         "scrobbling-disabled": "Tá scrobbling díchumasaithe ar do Shocruithe Cuntais.",
         "select-all-label": "Roghnaigh gach rud",
-        "delete-selected-label": "Scrios na roghanna"
+        "delete-selected-label": "Scrios na roghanna",
+        "provider-header": "Soláthraí",
+        "read-status-update": "Stádas: {{status}}"
     },
     "scrobble-event-type-pipe": {
         "chapter-read": "Dul Chun Cinn léitheoireachta",
         "score-updated": "Nuashonrú rátála",
         "want-to-read-add": "Ag iarraidh Léamh: Cuir Leis",
         "want-to-read-remove": "Ag iarraidh Léamh: Bain",
-        "review": "Athbhreithnigh nuashonrú"
+        "review": "Athbhreithnigh nuashonrú",
+        "read-status-update": "Léigh an Nuashonrú Stádais"
     },
     "spoiler": {
         "click-to-show": "Spoiler, cliceáil chun a thaispeáint"
@@ -260,7 +262,7 @@
     },
     "change-age-restriction": {
         "age-restriction-label": "Srian Aoise",
-        "unknowns": "Anaithnid",
+        "unknowns": "Anaithnide",
         "reset": "{{common.reset}}",
         "save": "{{common.save}}"
     },
@@ -500,7 +502,7 @@
     "invite-user": {
         "title": "Tabhair cuireadh don úsáideoir",
         "close": "{{common.close}}",
-        "description": "Tabhair cuireadh d'úsáideoir chuig do fhreastalaí tríd a ríomhphost a chur isteach. Gheobhaidh siad ríomhphost chun cuntas a chruthú. Le go n-oibreoidh sé seo ní mór duit na réimsí socruithe Ainm Óstach agus Ríomhphoist a bheith socraithe agat sa chluaisín <a href=\"/settings#email\" rel=\"noopener noreferrer\" target=\"_blank\">Ríomhphost</a>, nó beidh nasc ann a thíolacadh duit le socrú ar son an úsáideora.<br/><br/>Ní gá don ríomhphost a bheith bailí.",
+        "description": "Tabhair cuireadh d'úsáideoir chuig do fhreastalaí trína ríomhphost a iontráil. Gheobhaidh siad ríomhphost chun cuntas a chruthú. Chun go n-oibreoidh sé seo, ní mór duit na réimsí socraithe Ainm Óstach agus Ríomhphost a bheith socraithe sa chluaisín <a href=\"/settings#admin-email\" rel=\"noopener noreferrer\" target=\"_blank\">Ríomhphost</a>, nó cuirfear nasc i láthair duit le socrú thar ceann an úsáideora.<br/><br/>Ní gá go mbeadh an ríomhphost bailí.",
         "email": "{{common.email}}",
         "required-field": "{{common.required-field}}",
         "setup-user-title": "Cuireadh tugtha don úsáideoir",
@@ -521,63 +523,6 @@
         "select-all": "{{common.select-all}}",
         "deselect-all": "{{common.deselect-all}}",
         "no-data": "Níl aon leabharlanna socraithe go fóill."
-    },
-    "license": {
-        "title": "Ceadúnas Kavita+",
-        "manage": "Bainistigh",
-        "invalid-license-tooltip": "Má tá deireadh le do shíntiús, ní mór duit tacaíocht ríomhphoist a sheoladh chun síntiús nua a chruthú",
-        "check": "Seiceáil",
-        "cancel": "{{common.cancel}}",
-        "edit": "{{common.edit}}",
-        "buy": "Ceannaigh",
-        "activate": "Gníomhachtaigh",
-        "renew": "Athnuachan",
-        "no-license-key": "Gan eochair cheadúnais",
-        "license-valid": "Tá an ceadúnas bailí",
-        "license-not-valid": "Níl an ceadúnas bailí",
-        "loading": "{{common.loading}}",
-        "activate-description": "Cuir isteach an Eochair Cheadúnais agus Ríomhphost a úsáidtear chun clárú le Stripe",
-        "activate-license-label": "Eochair Cheadúnais",
-        "activate-email-label": "{{common.email}}",
-        "activate-discordId-label": "Aitheantas Úsáideora Discord",
-        "activate-discordId-tooltip": "Nasc do Chuntas Discord le Kavita +. Tugann sé seo rochtain duit ar chainéil i bhfolach chun cabhrú le Kavita a mhúnlú.",
-        "discord-validation": "Ní Aitheantas Úsáideora Discord bailí é seo. Ní hé d'aitheantas úsáideora d'ainm úsáideora discord.",
-        "activate-delete": "{{common.delete}}",
-        "activate-reset": "Ceadúnas Athshocraigh",
-        "activate-reset-tooltip": "Neamhbhailí clárúchán roimhe seo trí úsáid a bhaint as do cheadúnas. Teastaíonn Ceadúnas agus Ríomhphost araon",
-        "activate-save": "{{common.save}}",
-        "kavita+-desc-part-1": "Is seirbhís síntiús préimhe é Kavita + a dhíghlasálann gnéithe do gach úsáideoir ar an ásc Kavita seo. Ceannaigh síntiús le díghlasáil ",
-        "kavita+-desc-part-2": "sochair phréimhe",
-        "kavita+-desc-part-3": "inniu!",
-        "kavita+-requirement": "Tá Kavita+ deartha chun oibriú leis na 3 eisiúint is déanaí amháin. Tá aon rud taobh amuigh de sin faoi réir neamhfheidhmiú.",
-        "help-label": "{{common.help}}",
-        "k+-already-registered-header": "Ceadúnas cláraithe cheana",
-        "k+-license-overwrite": "Cláraítear ceadúnas chuig ásc Kavita eile. Is féidir leis seo tarlú ar athshuiteáil agus go hannamh mar gheall ar nuashonruithe córais. Roghnaigh forscríobh chun iallach a chur ar an gcás seo clárú le Kavita+.",
-        "overwrite": "Forscríobh",
-        "k+-unlocked-description": "Fáilte go Kavita+! Ginfidh Kavita imeachtaí scrobble ó do dhul chun cinn, rátálacha agus ba mhaith leat léamh nuair a chláraíonn tú do Sholáthraithe Scrobbling faoi chuntas. Tóg roinnt ama lena chinntiú go n-áitíonn tú greimíní scrobble le haghaidh sraith ar bith nach mian leat a scrobble.",
-        "info-title": "Eolas Ceadúnais",
-        "actions-title": "Gníomhartha",
-        "license-active-label": "Ceadúnas Gníomhach",
-        "supported-version-label": "Ar leagan Kavita Tacaithe",
-        "expiration-label": "Dul in éag",
-        "valid-tooltip": "Bailí",
-        "invalid-tooltip": "Neamhbhailí",
-        "reset-label": "Athshocraigh",
-        "reset-tooltip": "Athshocróidh sé seo an cás freastalaí a bhfuil ceadúnas Kavita+ ceangailte leis. Teastaíonn Ríomhphost agus Eochair Cheadúnais",
-        "delete-label": "Bain Ceadúnas",
-        "delete-tooltip": "Bainfidh sé seo an ceadúnas de Kavita chun Kavita a stopadh ó labhairt le Kavita+. Ní dhíliostáil sé thú. Úsáid 'manage' ar dtús chun an síntiús a chealú.",
-        "manage-tooltip": "Nuashonraigh faisnéis íocaíochta, Cealaigh/Cuir síntiús, etc",
-        "faq-title": "CCanna",
-        "total-subbed-months-label": "Míonna Iomlána Suibscríofa",
-        "email-label": "Ríomhphost Cláraithe",
-        "license-mismatch": "Is féidir ceadúnas a chlárú le cás Kavita eile. Athchlárú lena shocrú.",
-        "k+-unlocked": "Kavita+ díghlasáilte!",
-        "kavita+-warning": "Tá Kavita+ ar leithligh ó Kavita. Má dhíshuiteálann tú gan do shíntiús a chealú ar dtús, leanfaidh an timthriall billeála ar aghaidh.",
-        "cancel-label": "Cealaigh an Síntiús",
-        "cancel-tooltip": "Cealaigh do shíntiús agus scrios an ceadúnas laistigh de Kavita.",
-        "resend-license-email": "Seol Ceadúnas chuig ríomhphost",
-        "resend-license-email-tooltip": "Seol ceadúnas Kavita+ arís chuig ríomhphost. Ní mór don cheadúnas a bheith ceangailte leis an bhfreastalaí seo le go n-oibreoidh sé.",
-        "supportId-label": "Aitheantas Tacaíochta"
     },
     "book-line-overlay": {
         "copy": "Cóipeáil",
@@ -685,7 +630,8 @@
         "off": "{{reader-settings.off}}",
         "on": "{{reader-settings.on}}",
         "loading": "{{common.loading}}",
-        "read-count-tooltip": "Líon Iomlán na Léamha"
+        "read-count-tooltip": "Líon Iomlán na Léamha",
+        "kavitaplus-audit-alt": "Gníomhaíocht Kavita+"
     },
     "metadata-fields": {
         "collections-title": "{{side-nav.collections}}",
@@ -954,7 +900,14 @@
         "reset": "{{common.reset}}",
         "image-num": "Íomhá {{num}}",
         "apply": "{{common.apply}}",
-        "applied": "{{theme-manager.applied}}"
+        "applied": "{{theme-manager.applied}}",
+        "cover-locked": "Tá an clúdach faoi ghlas",
+        "cover-not-locked": "Níl an clúdach faoi ghlas",
+        "reset-tab": "Athshocraigh",
+        "no-images": "Níl aon íomhánna ar fáil",
+        "loading": "{{common.loading}}",
+        "select-image-alt": "Roghnaigh íomhá",
+        "download-cover": "Íoslódáil Clúdach"
     },
     "download-indicator": {
         "progress": "{{percentage}}% íoslódáilte",
@@ -1326,7 +1279,10 @@
         "insights-section-title": "Léargais",
         "admin-activity": "Gníomhaíocht",
         "admin-device": "Gléasanna",
-        "remap-rules": "Rialacha Athmhapála"
+        "remap-rules": "Rialacha Athmhapála",
+        "my-activity": "Mo Ghníomhaíocht",
+        "admin-manage-kavitaplus-activity": "Bainistigh Gníomhaíocht Kavita+",
+        "scrobble-settings": "Naisc"
     },
     "collection-detail": {
         "no-data": "Níl aon mhír ann. Bain triail as sraith a chur leis.",
@@ -1500,12 +1456,13 @@
     "import-mal-collection-modal": {
         "close": "{{common.close}}",
         "title": "Mal Ús Stack Iompórtáil",
-        "description": "Iompórtáil do Chruacha Úis MAL agus Bailiúcháin a chruthú laistigh de Kavita",
+        "description": "Iompórtáil do Chruacha Leasa MAL agus cruthaigh Bailiúcháin laistigh de Kavita a shioncrónaíonn",
         "series-count": "{{common.series-count}}",
         "restack-count": "{{num}} Athshocraigh",
-        "nothing-found": "Níor aimsíodh aon rud",
         "track": "Amhrán",
-        "by-author": "le {{author}}"
+        "by-author": "le {{author}}",
+        "no-data": "{{common.no-data}}",
+        "no-data-description": "Cinntigh go bhfuil comhartha MAL bailí agat agus go bhfuil roinnt Cruacha á leanúint agat"
     },
     "import-cbl-modal": {
         "close": "{{common.close}}",
@@ -2192,7 +2149,6 @@
         "smart-filter-deleted": "Scagaire Cliste Scriosta",
         "smart-filter-updated": "Scagaire cliste cruthaithe / nuashonraithe",
         "external-source-already-exists": "Tá Foinse Sheachtrach ann cheana féin leis an Ainm/Óstríomhaire/Eochair API céanna",
-        "anilist-token-expired": "Tá do chomhartha AniList imithe in éag. Ní phróiseálfar scrobbling a thuilleadh go dtí go ndéanfaidh tú é a athghiniúint i Socruithe Úsáideora > Cuntas",
         "collection-tag-deleted": "Scriosadh Clib Bhailiúcháin",
         "force-kavita+-refresh-success": "Tá meiteashonraí seachtracha Kavita+ neamhbhailí",
         "collection-not-owned": "Níl an bailiúchán seo agat",
@@ -2247,7 +2203,11 @@
         "cbl-remap-rule-promoted": "Riail curtha chun cinn go domhanda",
         "cbl-remap-rule-demoted": "Riail íslithe go raon feidhme úsáideora",
         "confirm-delete-read-from-readinglist": "An bhfuil tú cinnte gur mian leat gach eagrán léite a bhaint den liosta léitheoireachta seo? Ní féidir é seo a chealú.",
-        "reading-list-sync-enqueued": "Tá an Liosta Léitheoireachta curtha sa scuaine le haghaidh sioncrónaithe."
+        "reading-list-sync-enqueued": "Tá an Liosta Léitheoireachta curtha sa scuaine le haghaidh sioncrónaithe.",
+        "tokens-expired": "Tá comhartha nasc amháin nó níos mó imithe in éag. Cuirtear sos ar scrobáil/sioncrónú go dtí go nginfidh tú arís é i Kavita+ > Naisc",
+        "confirm-rerun-backfill": "Tá imeachtaí scrobble ginte agat do {{provider}} uair amháin ar a laghad. D’fhéadfadh moill a bheith ar scrobbleáil imeachtaí léite le déanaí mar gheall ar aislíonadh. An bhfuil tú cinnte gur mian leat leanúint ar aghaidh?",
+        "change-email-success": "Seoladh nasc deimhnithe chuig do sheoladh nua. Cliceáil air chun an t-athrú a chríochnú.",
+        "change-email-error": "Ní raibh muid in ann do sheoladh ríomhphoist a athrú. Déan iarracht arís, nó déan teagmháil leis an bhfoireann tacaíochta má leanann sé ar aghaidh."
     },
     "read-time-pipe": {
         "less-than-hour": "<1 Uair",
@@ -2440,7 +2400,16 @@
         "book-reader-tab": "Léitheoir Leabhar",
         "pdf-reader-tab": "Léitheoir PDF",
         "bookmark-image-tab": "Íomhá",
-        "bookmark-text-tab": "Téacs"
+        "bookmark-text-tab": "Téacs",
+        "uploaded-tab": "Uaslódáilte",
+        "current-tab": "Reatha",
+        "kavita-plus-tab": "Kavita+",
+        "other-tab": "Eile",
+        "all-tab": "Gach",
+        "scrobbles-tab": "Scrobbles",
+        "failed-tab": "Theip air",
+        "my-changes-tab": "Mo Athruithe",
+        "scrobble-holds-tab": "Sealbháin Scrobble"
     },
     "common": {
         "reset-to-default": "Athshocraigh go Réamhshocrú",
@@ -2483,7 +2452,8 @@
         "unknown": "Gan aithne",
         "libraries": "Leabharlanna",
         "confirm": "Deimhnigh",
-        "selected": "Roghnaithe"
+        "selected": "Roghnaithe",
+        "done": "Déanta"
     },
     "confirm": {
         "alert": "Airdeall",
@@ -2543,15 +2513,34 @@
     },
     "match-series-modal": {
         "save": "{{common.save}}",
-        "no-results": "Ní féidir meaitseáil a aimsiú. Bain triail as an url ó sholáthraí tacaithe a chur leis agus bain triail eile as.",
-        "query-label": "Fiosrúchán",
-        "title": "Meaitseáil {{ seriesName}}",
-        "description": "Roghnaigh meaitseáil chun meiteashonraí Kavita+ a athshreangú agus imeachtaí scrobble a athghiniúint. Is féidir Don't Match a úsáid chun Kavita a shrianadh ó mheiteashonraí a mheaitseáil agus scrobadh a dhéanamh.",
+        "description": "Roghnaigh meaitseáil chun meiteashonraí Kavita+ a athshreangú agus imeachtaí scrobble a athghiniúint.",
         "close": "{{common.close}}",
-        "query-tooltip": "Cuir isteach ainm na sraithe, url AniList/MyAnimeList/ComicBookRoundup. Úsáidfear cuardach díreach sna URLanna.",
-        "dont-match-label": "Ná Meaitseáil",
-        "dont-match-tooltip": "Rogha an tsraith seo ó mheaitseáil agus scrobbling",
-        "search": "Cuardach"
+        "dont-match-label": "Ná meaitseáil",
+        "dont-match-tooltip": "Stop Kavita ó mheaitseáil nó scrobáil uathoibríoch a dhéanamh ar an tsraith seo",
+        "search": "Cuardach",
+        "title-prefix": "Meaitseáil",
+        "in-kavita": "I Kavita",
+        "dont-match-hint": "Úsáid \"Ní mheaitseálann\" chun an tsraith seo a dhíliostáil go hiomlán.",
+        "try": "Bain triail as",
+        "searching-alt": "Ag cuardach…",
+        "clear": "Glan an cuardach",
+        "match-count": "{{ count }} meaitseáil",
+        "apply-match": "Cuir meaitseáil i bhfeidhm",
+        "loading-alt": "Ag lódáil torthaí",
+        "empty-title": "Cuardaigh meaitseáil",
+        "empty-description": "Bain triail as teideal sraithe nó greamaigh URL díreach AniList, MAL, MangaBaka, CBR nó Hardcover.",
+        "no-results-title": "Níor aimsíodh aon mheaitseálacha",
+        "no-results-description": "Níor tháinig aon rud ar ais le haghaidh \"{{ query }}\". Bain triail as ceist níos giorra, teideal rómhánaithe, nó ID díreach.",
+        "dont-match-active-title": "Ní chumasaítear meaitseáil",
+        "dont-match-active-description": "Tá an tsraith seo roghnaithe amach as meaitseáil agus scrobbling Kavita+.",
+        "volume-count": "{{match-series-result-item.volume-count}}",
+        "chapter-count": "{{match-series-result-item.chapter-count}}",
+        "matched-to": "Meaitseáilte faoi láthair le",
+        "searching-against": "Ag cuardach i gcoinne {{provider}}",
+        "selected-desc": "Roghnaithe mar gheall ar: {{libraryType}} {{format}}",
+        "library-type": "Cineál Leabharlainne:",
+        "format-type": "Formáid:",
+        "provider-help": "Soláthraí amháin in aghaidh an chineáil leabharlainne"
     },
     "email-history": {
         "description": "Anseo gheobhaidh tú gach ríomhphost a sheoltar ó Kavita agus chuig an úsáideoir.",
@@ -2583,12 +2572,15 @@
         "library-type": "Cineál Leabharlainne"
     },
     "match-series-result-item": {
-        "details": "Féach ar an leathanach",
-        "volume-count": "{{server-stats.volume-count}}",
-        "chapter-count": "{{common.chapter-count}}",
-        "releasing": "Ag scaoileadh",
-        "updating-metadata-status": "Meiteashonraí á nuashonrú",
-        "issue-count": "{{common.issue-count}}"
+        "volume-count": "{{ num }} imleabhar",
+        "chapter-count": "{{ num }} caibidil",
+        "issue-count": "{{ num }} saincheisteanna",
+        "matched-alt": "Alt meaitseáilte:",
+        "more": "níos mó",
+        "matched-alt-count": "teidil mhalartacha meaitseáilte",
+        "selected-alt": "Roghnaithe",
+        "alt-titles": "Teidil eile",
+        "more-titles": "+{{count}} eile"
     },
     "manage-user-tokens": {
         "description": "Seans go mbeidh gá le hathnuachan a dhéanamh ó am go chéile ar úsáideoirí a bhfuil comharthaí scrobarnaí acu. Seolfaidh Kavita ríomhphost chucu go huathoibríoch má tá ríomhphost socraithe agus má tá ríomhphost bailí acu.",
@@ -2918,7 +2910,6 @@
         "auto-login-label": "Logáil isteach uathoibríoch",
         "auto-login-tooltip": "Atreorú uathoibríoch chuig soláthraí OIDC nuair a osclaítear an scáileán logála isteach",
         "disable-password-authentication-label": "Díchumasaigh fíordheimhniú pasfhocail",
-        "disable-password-authentication-tooltip": "Is féidir le húsáideoirí a bhfuil ról riarthóra acu an srian seo a sheachaint",
         "provider-name-label": "Ainm an tsoláthraí",
         "provider-name-tooltip": "Ainm a thaispeántar ar an scáileán logála isteach",
         "defaults-title": "Réamhshocruithe",
@@ -3088,8 +3079,8 @@
         "key-bind-tooltip-navigate-to-settings": "Oscail socruithe agus tú gan a bheith i léitheoir",
         "key-bind-title-open-search": "Oscail cuardach",
         "key-bind-tooltip-open-search": "Oscail an barra cuardaigh uachtarach",
-        "key-bind-title-navigate-to-scrobbling": "Oscail Scrobáil",
-        "key-bind-tooltip-navigate-to-scrobbling": "Oscail leathanach na socruithe ar an táb Scrobbling",
+        "key-bind-title-navigate-to-scrobbling": "Oscail Mo Ghníomhaíocht",
+        "key-bind-tooltip-navigate-to-scrobbling": "Oscail leathanach na socruithe ar an táb Mo Ghníomhaíocht",
         "key-bind-title-escape": "Éalú",
         "key-bind-tooltip-escape": "Dún an comhthéacs atá oscailte faoi láthair",
         "key-bind-title-toggle-fullscreen": "Scoraigh an scáileán iomlán",
@@ -3147,7 +3138,7 @@
         "name-label": "Ainm",
         "key-length-label": "Fad Eochrach",
         "expiration-label": "Dáta éaga",
-        "required-field": "{{validations.required-field}}",
+        "required-field": "{{validation.required-field}}",
         "total-key-length": "Fad Iomlán na hEochrach: {{length}}",
         "cancel": "{{common.cancel}}",
         "close": "{{common.close}}",
@@ -3552,7 +3543,8 @@
         "comicVineId-label": "Aitheantas Fíniúna Greannáin",
         "metronId-label": "Aitheantas Metron",
         "not-set-label": "Gan socrú",
-        "isbn-label": "{{edit-chapter-modal.isbn-label}}"
+        "isbn-label": "{{edit-chapter-modal.isbn-label}}",
+        "cbrId-label": "Aitheantas Achoimre Leabhar Greannáin"
     },
     "cbl-match-tier-pipe": {
         "remap-rule": "Riail Athmhapála",
@@ -3741,5 +3733,605 @@
         "reading-list": "{{add-to-list-modal.reading-list-label}}",
         "person": "Duine",
         "annotation": "Anótáil"
+    },
+    "kavitaplus-activity": {
+        "description": "Gníomhaíocht léitheoireachta atá sioncronaithe ag Kavita le seirbhísí seachtracha ar do shon - dul chun cinn, rátálacha, agus stádas léitheoireachta."
+    },
+    "manage-kavitaplus-activity": {
+        "description": "90 lá de mheiteashonraí, meaitseáil, scrobble agus imeachtaí sioncronaithe. Déan teipeanna a thriail agus meaitseáil de láimh a spreagadh as seo.",
+        "stats-events-label": "Imeachtaí (24 uair an chloig)",
+        "stats-failures-label": "Teipeanna",
+        "stats-match-label": "Meaitseáilte",
+        "stats-matched-label": "Comhoiriúnaithe {{percent}}%",
+        "stats-coverage-subtitle": "Clúdach {{percent}}%",
+        "stats-queue-label": "Scuaine",
+        "stats-unresolved": "{{count}} gan réiteach",
+        "stats-stale-subtitle": "{{count}} seanchaite",
+        "stats-blacklisted-subtitle": "Theip ar {{count}} teacht le chéile",
+        "filter-all": "Gach",
+        "filter-match": "Meaitseáil",
+        "filter-metadata": "Meiteashonraí",
+        "filter-scrobble": "Scrobble",
+        "filter-sync": "Sioncrónaigh",
+        "filter-status-label": "Scagaire stádais",
+        "today": "Inniu",
+        "yesterday": "Inné",
+        "events-count": "{{count}} imeachtaí",
+        "subject-label": "Ábhar: {{subject}}",
+        "search-alt": "Cuardaigh imeachtaí",
+        "filter-subject-label": "Ábhar",
+        "filter-user-label": "Úsáideoir",
+        "filter-timeframe-label": "Fráma Ama",
+        "filter-timeframe-24h": "24 Uair an Chloig Deiridh",
+        "filter-timeframe-7d": "7 Lá Deiridh",
+        "filter-timeframe-30d": "30 Lá Deiridh",
+        "system": "Córas",
+        "next-scrobble": "An chéad Scrobble eile: {{date}}",
+        "filter-provider-label": "Soláthraí Scrobble"
+    },
+    "kavitaplus-diff": {
+        "field-label": "Réimse",
+        "before-label": "Roimh",
+        "after-label": "Tar éis",
+        "null-value": "—",
+        "object-expanded": "leathnaithe thíos"
+    },
+    "scrobble-account-card": {
+        "provider-connected": "Ceangailte",
+        "provider-not-connected": "Gan cheangal",
+        "provider-expired": "Tá an comhartha imithe in éag",
+        "provider-connect": "Ceangail",
+        "provider-settings": "Socruithe",
+        "provider-description": "Nasc chun dul chun cinn a sheoladh",
+        "disabled": "{{cron-frequency-pipe.disabled}}"
+    },
+    "kavitaplus-timeline": {
+        "today": "Inniu",
+        "yesterday": "Inné",
+        "events-count": "{{count}} imeachtaí",
+        "load-more-label": "Luchtaigh níos mó",
+        "empty-title": "Ní bhfuarthas aon rud",
+        "empty-description": "Bain triail as scagaire difriúil nó déan roinnt meaitseálacha/léamha chun é a líonadh",
+        "system": "{{manage-kavitaplus-activity.system}}"
+    },
+    "audit-status-title-pipe": {
+        "success": "Rath",
+        "failure": "Teip",
+        "info": "Eolas"
+    },
+    "audit-subject-title-pipe": {
+        "series": "Sraith",
+        "person": "Duine",
+        "collection": "Bailiúchán",
+        "chapter": "Caibidil",
+        "global": "Domhanda"
+    },
+    "metadata-field-change-kind-title-pipe": {
+        "relationships": "Caidrimh",
+        "characters": "Carachtair",
+        "artists": "Ealaíontóirí",
+        "writers": "Scríbhneoirí",
+        "tags": "Clibeanna",
+        "genres": "Seánraí",
+        "publication-status": "Stádas Foilseacháin",
+        "age-rating": "Rátáil Aois",
+        "external-ids": "Aitheantóirí seachtracha",
+        "summary": "Achoimre",
+        "title": "Teideal",
+        "release-date": "Dáta Eisiúna",
+        "release-year": "Bliain Scaoilte",
+        "localized-name": "Ainm Áitiúil"
+    },
+    "kavita-plus-event-description-pipe": {
+        "read-progress-sent": "{{chapter}}",
+        "rating-updated": "Rátáil nuashonraithe: {{rating}}/5",
+        "add-want-to-read": "Cuireadh leis ag iarraidh léamh",
+        "remove-want-to-read": "Bainte as ag iarraidh léamh",
+        "review-submitted": "Athbhreithniú curtha isteach",
+        "fields-updated": "Nuashonraíodh {{count}} réimsí",
+        "chapter-cover-updated": "Clúdach nuashonraithe: {{chapter}}",
+        "series-cover-updated": "Clúdach na sraithe nuashonraithe",
+        "series-match-fixed": "Sraith mheaitseáilte le {{matchName}}",
+        "collection-synced": "{{collectionName}}: {{itemCount}} míreanna sioncronaithe, {{missingCount}} ar iarraidh",
+        "collection-item-added": "Curtha le {{collectionName}}",
+        "person-cover-updated": "Clúdach nuashonraithe do {{personName}}",
+        "person-alias-added": "Ainm cleite '{{aliasAdded}}' curtha leis do {{personName}}",
+        "sync-started-collection": "Ag tosú sioncrónú {{collectionName}} ({{itemCount}} mír)",
+        "sync-failed-collection": "Theip ar shioncrónú le haghaidh {{collectionName}}",
+        "sync-completed-want-to-read": "Sraith {{seriesMatched}} a mheaitseáladh do {{userName}}",
+        "read-status-update": "Stádas {{status}}",
+        "series-matched-against": "Meaitseáilte i gcoinne \"{{matchName}}\"",
+        "system-token-refresh-success": "Athnuaigh comharthaí fíordheimhnithe do {{provider}}. Tá siad bailí go dtí {{validUntil}}",
+        "system-token-refresh-failure": "Theip ar chomharthaí fíordheimhnithe a athnuachan do {{provider}}",
+        "system-provider-info-sync-success": "Faisnéis sioncronaithe go rathúil do {{provider}}. Nasctha le cuntas {{username}}",
+        "system-provider-info-sync-failure": "Theip ar fhaisnéis chuntais a shioncronú do {{provider}}"
+    },
+    "kavita-plus-event-type-pipe": {
+        "series-matched": "Sraith Mheaitseáilte",
+        "series-match-failed": "Theip ar an gcluiche",
+        "series-blacklisted": "Liosta dubh",
+        "series-match-fixed": "Meaitseáil Socraithe",
+        "series-dont-match-set": "Ná Meaitseáil an Tacar",
+        "metadata-fetched": "Meiteashonraí Fuarthas",
+        "metadata-updated": "Meiteashonraí Nuashonraithe",
+        "cover-updated": "Clúdach Nuashonraithe",
+        "chapter-metadata-updated": "Meiteashonraí Caibidle Nuashonraithe",
+        "chapter-cover-updated": "Clúdach Caibidle Nuashonraithe",
+        "person-cover-updated": "Clúdach Duine Nuashonraithe",
+        "person-alias-added": "Ainmfhocail Duine Curtha Leis",
+        "collection-synced": "Bailiúchán Sioncronaithe",
+        "collection-item-added": "Mír Bhailiúcháin Cuireadh Leis",
+        "scrobble-created": "Cruthaíodh Scrobble",
+        "scrobble-updated": "Nuashonraithe Scrobble",
+        "scrobble-sent": "Seolta Scrobble",
+        "scrobble-failed": "Theip ar Scrobble",
+        "scrobble-rate-limit": "Buille Teorainn Ráta",
+        "scrobble-skipped": "Scipeáladh Scrobble",
+        "scrobble-hold-added": "Sealbhú Scrobble curtha leis",
+        "scrobble-hold-removed": "Baineadh Sealbhú Scrobble",
+        "sync-started": "Tosaíodh an sioncrónú",
+        "sync-completed": "Sioncrónú Críochnaithe",
+        "sync-failed": "Theip ar an sioncrónú",
+        "system-provider-info-sync": "Sioncrónú Faisnéise Soláthraí Scrobble",
+        "system-token-refresh": "Athnuachan comhartha Soláthraí Scrobble"
+    },
+    "audit-log-messages": {
+        "rate-limit-hit": "Buille Teorainn Ráta",
+        "invalid-token": "Comhartha AniList Neamhbhailí",
+        "unknown-series": "Sraith Anaithnid",
+        "series-dont-match": "Sraith Marcáilte mar Neamh-Mheaitseála",
+        "scrobble-hold-active": "Tá an tsraith ar fionraí",
+        "library-scrobbling-disabled": "Scrobáil Leabharlainne Díchumasaithe",
+        "token-expired": "Tá Comhartha AniList imithe in éag"
+    },
+    "scrobble-provider-tag-badge": {
+        "view-on": "Féach ar {{ provider }}"
+    },
+    "confidence-chip": {
+        "strong": "Láidir",
+        "likely": "Is dócha",
+        "weak": "Lag",
+        "doubt": "Amhras"
+    },
+    "match-status-dot": {
+        "ongoing": "Ar siúl",
+        "completed": "Críochnaithe"
+    },
+    "search-input": {
+        "clear": "Glan an cuardach"
+    },
+    "edit-license-key": {
+        "activate-license-label": "Eochair Cheadúnais",
+        "activate-email-label": "{{common.email}}",
+        "activate-discordId-label": "Aitheantas Úsáideora Discord",
+        "activate-discordId-tooltip": "Ceangail do Chuntas Discord le Kavita+. Tugann sé seo rochtain duit ar chainéil fholaithe chun cabhrú le Kavita a mhúnlú.",
+        "discord-validation": "Ní Aitheantas Úsáideora Discord bailí é seo. Ní hé d'aitheantas úsáideora d'ainm úsáideora Discord.",
+        "email-help": "Seo é an ríomhphost atá cláraithe le Stripe",
+        "license-help": "Ar mhaithe le do shlándáil, tá an eochair stóráilte criptithe ar dhiosca, cuir isteach arís í le nuashonrú.",
+        "help-label": "{{common.help}}",
+        "required-field-validation": "{{validation.required-field}}",
+        "license-length-validation": "Táthar ag súil go mbeidh 19 carachtar san eochair cheadúnais",
+        "license-format-validation": "Táthar ag súil go mbeidh an ceadúnas formáidithe mar seo a leanas: XXXX-XXXX-XXXX-XXXX",
+        "discord-format-validation": "Meastar go mbeidh aitheantas úsáideora 19 uimhir in aitheantóir Discord",
+        "email-format-validation": "Ní mór seoladh ríomhphoist bailí a bheith ann"
+    },
+    "manage-license-key-modal": {
+        "title": "Ceadúnas Kavita+",
+        "last-validated": "bailíochtú deireanach {{timeAgo}}",
+        "activate-license": "Gníomhachtaigh an Ceadúnas",
+        "close": "{{common.close}}",
+        "delete-license": "Scrios ceadúnas",
+        "reset-license": "Athshocraigh an ceadúnas",
+        "save": "{{common.save}}"
+    },
+    "register-license-key": {
+        "title": "An bhfuil ceadúnas agat cheana féin?",
+        "description": "Cuir isteach an eochair ó do ríomhphost ceannaigh chun Kavita+ a ghníomhachtú ar an bhfreastalaí seo.",
+        "activate-license": "Gníomhachtaigh an Ceadúnas"
+    },
+    "kavita-plus-registration-error-code-pipe": {
+        "registration-failed": "Theip ar ghníomhachtú an cheadúnais. Fíoraigh go bhfuil d’eochair cheadúnais agus do sheoladh ríomhphoist ceart.",
+        "already-registered": "Tá an ceadúnas seo cláraithe le freastalaí eile. Bain úsáid as 'Athshocraigh ceadúnas' ar dtús.",
+        "subscription-inactive": "Níl do shíntiús gníomhach. Athnuaigh ag kavitareader.com.",
+        "internal-error": "Tharla earráid inmheánach. Téigh i dteagmháil le tacaíocht Kavita+ le do thoil."
+    },
+    "kavita-plus-provider-health-status-pipe": {
+        "unknown-label": "Anaithnid",
+        "operational-label": "Oibríochtúil",
+        "degraded-label": "Díghrádaithe",
+        "down-label": "Síos"
+    },
+    "kavita-plus-api-name-title-desc-pipe": {
+        "cover-requests-title": "Iarratais Chlúdaigh",
+        "cover-requests-description": "Clúdaigh sraitheanna, caibidlí agus imleabhar",
+        "metadata-sync-title": "Sioncrónuithe Meiteashonraí",
+        "metadata-sync-description": "Athnuachan sonraí na sraithe",
+        "series-matched-title": "Sraith Mheaitseáilte",
+        "series-matched-description": "Meaitseáilte le soláthraithe suas an sruth",
+        "scrobbles-title": "Scrobbles",
+        "scrobbles-description": "Dul chun cinn curtha ar aghaidh chuig soláthraithe",
+        "mal-stack-import-title": "Cruacha MAL Iompórtáilte",
+        "mal-stack-import-description": "Cruacha spéise ionghabháilte",
+        "want-to-read-title": "Sioncrónuithe Ar Mhaith Le Léamh",
+        "want-to-read-description": "Sioncrónaithe ó MAL/AniList/Clúdach Crua/MangaBaka",
+        "recommendations-title": "Moltaí",
+        "recommendations-description": "Luchtaithe iarratais sheachtracha",
+        "reviews-title": "Léirmheasanna",
+        "reviews-description": "Lódáladh léirmheasanna seachtracha"
+    },
+    "scrobble-provider-media-title-pipe": {
+        "anilist-label": "Manga + Úrscéalta Éadroma",
+        "mal-label": "{{scrobble-provider-media-title-pipe.anilist-label}}",
+        "mangabaka-label": "{{scrobble-provider-media-title-pipe.anilist-label}}",
+        "hardcover-label": "Leabhair",
+        "cbr-label": "Greannáin"
+    },
+    "scrobble-health": {
+        "title-label": "Soláthraithe Suas-srutha",
+        "checked-ago-label": "seiceáilte {{time}} ó shin",
+        "live-label": "beo",
+        "refresh-alt": "Athnuachan sláinte an tsoláthraí",
+        "no-data-label": "Níl aon sonraí sláinte soláthraithe ar fáil"
+    },
+    "kavita-plus-billing-interval-pipe": {
+        "day-label": "laethúil",
+        "week-label": "seachtainiúil",
+        "month-label": "míosúil",
+        "year-label": "bliantúil",
+        "day-unit-label": "lá",
+        "week-unit-label": "seachtain",
+        "month-unit-label": "mí",
+        "year-unit-label": "bliain"
+    },
+    "kavita-plus-upsell": {
+        "title": "Díghlasáil Kavita+",
+        "description": "Síntiús préimhe a dhíghlasálann meiteashonraí, scrobbling, agus moltaí do gach úsáideoir ar an gcás Kavita seo.",
+        "wiki-link-label": "Léigh an vicí",
+        "faq-btn-label": "Ceisteanna Coitianta",
+        "hero-headline-label": "Meiteashonraí, scrobbling, agus moltaí.",
+        "hero-subtitle-label": "Déan dul chun cinn léitheoireachta a shioncrónú go huathoibríoch, tarraing isteach meiteashonraí saibhre, agus ceangail le AniList, MyAnimeList, Hardcover, agus MangaBaka - ar fad ó aon síntiús amháin, ar fud an fhreastalaí.",
+        "start-cta-label": "Tosaigh Kavita+",
+        "feature-list-link-label": "Féach ar an liosta iomlán gnéithe",
+        "price-label": "$4",
+        "price-per-month-label": "/ mí",
+        "price-promo-label": "$2 do chéad mhí",
+        "pricing-feature-1-label": "Síntiús amháin - ar fud an fhreastalaí",
+        "pricing-feature-2-label": "Baineann gach úsáideoir ar an gcás seo leas as",
+        "pricing-feature-3-label": "Cealaigh am ar bith trí Stripe",
+        "pricing-feature-4-label": "Glasáilte le nód - gan aon táille in aghaidh an tsuíocháin",
+        "providers-label": "Ceanglaíonn le",
+        "providers-more-label": "+ níos mó ag teacht",
+        "benefits-section-label": "Cad atá sa bhosca",
+        "benefit-1-title-label": "Dul chun cinn léitheoireachta a shioncrónú go huathoibríoch",
+        "benefit-1-body-label": "Brúigh dul chun cinn chuig AniList, MangaBaka, Hardcover agus níos mó - gan aon rianú láimhe.",
+        "benefit-2-title-label": "Rátálacha & léirmheasanna",
+        "benefit-2-body-label": "Tarraing rátálacha agus léirmheasanna ó AniList, MyAnimeList, agus ComicBookRoundup díreach isteach i Kavita.",
+        "benefit-3-title-label": "Meiteashonraí saibhre, gan clibeáil",
+        "benefit-3-body-label": "Meiteashonraí uathoibríocha do Manga, Leabhair, agus Greannáin. Ealaín chlúdaigh, achoimrí, seánraí, agus daoine.",
+        "benefit-4-title-label": "Iompórtáil & sioncrónaigh Cruacha MAL",
+        "benefit-4-body-label": "Tarraing isteach Cruacha Úis agus coinnigh sioncrónaithe iad. Tuilleadh comhtháthú soláthraithe ag teacht.",
+        "benefit-5-title-label": "Liostaí léitheoireachta, áit ar bith",
+        "benefit-5-body-label": "Sioncrónaigh do liostaí léitheoireachta ar dhá bhealach le soláthraithe réamhtheachtacha ar nós MAL agus AniList.",
+        "benefit-6-title-label": "Díghlasáil ar fud an fhreastalaí",
+        "benefit-6-body-label": "Síntiús amháin, atá ceangailte le nód chun do fhreastalaí. Baineann gach úsáideoir ar an gcás seo leas as.",
+        "faq-section-title-label": "Ceisteanna Coitianta",
+        "faq-1-question-label": "An bhfuil Kavita+ ar leithligh ó Kavita?",
+        "faq-1-answer-label": "Sea. Fanann Kavita saor in aisce agus foinse oscailte. Cuireann Kavita+ seirbhísí préimhe leis - ní chealóidh díshuiteáil Kavita do shíntiús.",
+        "faq-2-question-label": "Cad a tharlaíonn má tá ilfhreastalaithe agam?",
+        "faq-2-answer-label": "Tá gach ceadúnas Kavita+ faoi ghlas de réir nóid le freastalaí aonair. Téigh i dteagmháil leis an bhfoireann tacaíochta chun aistriú.",
+        "faq-3-question-label": "Conas a chealaím?",
+        "faq-3-answer-label": "Bain úsáid as an gcnaipe Bainistigh chun tairseach Stripe a oscailt - cealaigh nó cuir ar sos é am ar bith.",
+        "faq-wiki-link-label": "Ceisteanna Coitianta iomlána ar an vicí"
+    },
+    "kavita-plus-connect-providers": {
+        "title": "Tá tú réidh - Céim amháin eile",
+        "description": "Ceangail na soláthraithe a ndéanann tú scrobble leo. Líonfaidh Kavita+ do stair léitheoireachta atá ann cheana féin ar ais agus coinneoidh sé dul chun cinn sioncrónaithe (aontreo) feasta.",
+        "faq-btn-label": "Ceisteanna Coitianta",
+        "activated-title-label": "Ceadúnas gníomhachtaithe",
+        "activated-body-label": "Tá gnéithe préimhe díghlasáilte do gach úsáideoir ar an bhfreastalaí seo.",
+        "skip-to-dashboard-label": "Léim go dtí an painéal rialaithe",
+        "backfill-title-label": "Líon isteach do stair léitheoireachta",
+        "backfill-body-label": "Trí cheangal anois, ligeann Kavita+ do dhul chun cinn atá ann cheana a tharraingt ó na seirbhísí seo ionas go dtaispeánfar sraitheanna i do leabharlann mar shraitheanna atá léite cheana féin. Is féidir leat níos mó a cheangal níos déanaí, ach is é an bealach is fusa chun aislíonadh a dhéanamh díreach tar éis gníomhachtaithe.",
+        "step-2-of-2-label": "Céim 2 de 2",
+        "skip-for-now-label": "Léim ar feadh tamaill",
+        "go-to-dashboard-label": "Téigh go dtí an painéal rialaithe",
+        "footer-hint-label": "Is féidir leat níos mó soláthraithe a nascadh níos déanaí faoi Socruithe → Kavita+ → Cuntais Nasctha."
+    },
+    "license-api-stats": {
+        "title": "Úsáid API",
+        "description": "Glaonna a rinne an freastalaí seo chuig Kavita+. Chun críocha faisnéise amháin, níl aon uasteorainneacha ann.",
+        "last-30-days": "30 lá anuas",
+        "lifetime": "Saolré",
+        "range-toggle-alt": "Raon úsáide API a scoránaigh"
+    },
+    "expired-license-api-stats": {
+        "title": "Léargas Úsáide Deiridh"
+    },
+    "license-dashboard": {
+        "title": "Ceadúnas & Kavita+",
+        "description-inactive": "Tá do shíntiús Kavita+ imithe in éag. Athnuaigh chun sioncrónú meiteashonraí, scrobbling, moltaí agus tuilleadh a athbhunú.",
+        "description-active": "Síntiús, comhtháthú agus úsáid don fhreastalaí seo.",
+        "faq-label": "Ceisteanna Coitianta",
+        "support-label": "Cabhair"
+    },
+    "discord-connect-card": {
+        "connect-title": "Ceangail Discord",
+        "connect-subtitle": "Rochtain ar chainéil eisiacha agus taispeáin do chumas",
+        "connect-button": "Ceangail",
+        "connected-label": "Discord Ceangailte",
+        "connecting-title": "Ag ceangal",
+        "connecting-subtitle": "Tá Kavita ag nascadh do mhí-chomhoiriúnachta sa chúlra, fan leis..."
+    },
+    "expired-license-info-card": {
+        "title-label": "Síntiús Deireanach",
+        "status-label": "Stádas",
+        "expired-on-label": "Dul in éag ar",
+        "member-since-label": "Ball ó shin",
+        "total-months-label": "Míonna iomlána"
+    },
+    "license-info-panel": {
+        "desc-active-label": "Síntiús préimhe · ar fud an fhreastalaí",
+        "desc-inactive-label": "Gnéithe préimhe curtha ar sos do gach úsáideoir",
+        "next-charge-label": "An Chéad Mhuirear Eile",
+        "member-since-label": "Ball Ó shin",
+        "months-subscribed-label": "{{count}} mí síntiús",
+        "version-label": "Leagan Kavita",
+        "supported-label": "Tacaithe",
+        "unsupported-label": "Gan tacaíocht",
+        "version-sub-label": "ar v{{version}}",
+        "expired-label": "Imithe in éag",
+        "expires-label": "Éagaíonn",
+        "days-ago-label": "{{count}} lá ó shin",
+        "days-remaining-label": "{{count}} lá fágtha",
+        "last-plan-label": "Plean Deireanach",
+        "impacted-label": "Úsáideoirí Gníomhacha a ndearnadh difear dóibh",
+        "impacted-value-label": "{{count}} úsáideoirí",
+        "impacted-sub-label": "gnéithe préimhe curtha ar sos",
+        "days-left-label": "Laethanta Fágtha",
+        "manage-label": "Bainistigh",
+        "renew-label": "Athnuachan",
+        "edit-license-label": "Cuir ceadúnas in eagar",
+        "check-license-label": "Seiceáil",
+        "support-id-label": "Aitheantas Tacaíochta"
+    },
+    "metadata-fetch-trigger-title-pipe": {
+        "series-added": "Uathoibríoch ar chur leis",
+        "on-demand": "Cuairt ar an leathanach",
+        "manual-match": "Lámhleabhar",
+        "scheduled-refresh": "Sceidealaithe"
+    },
+    "time-difference-pipe": {
+        "never": "Choíche",
+        "just-now": "díreach anois",
+        "min": {
+            "ago": "nóiméad ó shin",
+            "in": "i gceann nóiméid"
+        },
+        "mins": {
+            "ago": "{{value}} nóiméad ó shin",
+            "in": "i {{value}} nóiméad"
+        },
+        "hour": {
+            "ago": "uair an chloig ó shin",
+            "in": "i gceann uair an chloig"
+        },
+        "hours": {
+            "ago": "{{value}} uair an chloig ó shin",
+            "in": "i {{value}} uair an chloig"
+        },
+        "day": {
+            "ago": "lá ó shin",
+            "in": "i lá amháin"
+        },
+        "days": {
+            "ago": "{{value}} lá ó shin",
+            "in": "i {{value}} lá"
+        },
+        "month": {
+            "ago": "mí ó shin",
+            "in": "i mí"
+        },
+        "months": {
+            "ago": "{{value}} mí ó shin",
+            "in": "i {{value}} mí"
+        },
+        "year": {
+            "ago": "bliain ó shin",
+            "in": "i mbliain"
+        },
+        "years": {
+            "ago": "{{value}} bliain ó shin",
+            "in": "i {{value}} bliain"
+        }
+    },
+    "kavita-plus-subscription-status-pipe": {
+        "active": "Gníomhach",
+        "paused": "Sosaithe",
+        "cancelling": "Ag cealú",
+        "expired": "Cealaithe"
+    },
+    "scrobble-provider-settings-manager": {
+        "description": "Bainistigh cad, cathain agus cá háit a ndéantar scrobbleáil ar rudaí. Ritheann scrobbleáil gach uair an chloig.",
+        "none-setup": "Níl aon soláthraithe scrobble socraithe agat fós! Cliceáil an cnaipe cuir leis thuas le tosú",
+        "select-provider-title": "Soláthraí Scrobble Nua",
+        "info": "Eolas Úsáideora",
+        "connect": "Ceangail",
+        "connected": "Ceangailte",
+        "regenerate": "Athghiniúint",
+        "disconnect": "Dícheangail",
+        "expires": "Éagaíonn {{time}}",
+        "last-synced": "Sioncronaithe go deireanach {{time}}",
+        "not-setup": "Níl an soláthraí socraithe, ceangail le tosú",
+        "sync-options": "Roghanna sioncrónaithe",
+        "reviews-sync-label": "Léirmheasanna sioncrónaithe",
+        "reviews-sync-tooltip": "Déanfaidh Kavita léirmheasanna scrobble le haghaidh sraitheanna agus caibidlí a mheaitseálann",
+        "progress-sync-label": "Dul Chun Cinn Sioncrónaithe",
+        "progress-sync-tooltip": "Déanann Kavita scrobbles ar dhul chun cinn na sraithe nuair a bhíonn caibidlí críochnaithe, nó ar dhul chun cinn na caibidle ar athruithe leathanaigh",
+        "rating-sync-label": "Rátálacha Sioncrónaithe",
+        "rating-sync-tooltip": "Rátálacha scrobble Kavita do shraitheanna agus caibidlí meaitseáilte",
+        "want-to-read-sync-label": "Sioncrónaigh an liosta Ar Mhaith Leat Léamh",
+        "want-to-read-sync-tooltip": "Coinnigh do liosta \"ar mian leat a léamh\" sioncrónaithe. Ní athraíonn sé stádais na léite",
+        "reviews-target-label": "Sprioc athbhreithnithe",
+        "reviews-target-tooltip": "Cé a fheiceann léirmheasanna sioncrónaithe, braitheann sé ar thacaíocht an tsoláthraí",
+        "filter-rules": "Scagairí",
+        "highest-age-rating-label": "Rátálacha aoise is airde",
+        "highest-age-rating-tooltip": "An rátáil aoise is airde (san áireamh) is féidir a scrobbleáil i sraith",
+        "automations": "Uathoibrithe",
+        "inactive-series-rule-label": "Riail sraithe neamhghníomhach",
+        "inactive-series-rule-condition": "Mura bhfuil sraith/caibidil léite le",
+        "rule-days-mark": "laethanta, marcáil é",
+        "rule-publication-exception": "mura bhfuil stádas foilsitheoireachta",
+        "dropped-series-rule-label": "Riail sraithe a ligeadh ar lár",
+        "dropped-series-rule-condition": "Mura bhfuil sraith/caibidil léite le",
+        "all-libraries-label": "Gach leabharlann",
+        "all-libraries-tooltip": "Nuair a bhíonn sé cumasaithe, ritheann scrobbling ar na leabharlanna uile is infheidhme. Díchumasaigh chun é a shrianadh do leabharlanna sonracha ag baint úsáide as an rogha thíos.",
+        "confirm-delete": "An bhfuil tú cinnte gur mian leat {{provider}} a dhícheangal",
+        "inactive-series-rule-days-aria": "Tairseach sraith neamhghníomhach i laethanta",
+        "inactive-series-rule-status-aria": "Stádas aistrithe sraithe neamhghníomhach",
+        "inactive-series-rule-excluded-publication-aria": "Stádas foilsitheoireachta eisiata don riail sraith neamhghníomhach",
+        "dropped-series-rule-days-aria": "Tairseach sraithe laghdaithe i laethanta",
+        "dropped-series-rule-status-aria": "Stádas aistrithe sraithe a cailleadh",
+        "dropped-series-rule-excluded-publication-aria": "Stádas foilseachán eisiata don riail sraitheanna a baineadh de",
+        "backfill-events": "{{manage-user-scrobble-provider-modal.generate-scrobble-events}}",
+        "anilist-warning": "D’fhéadfadh sioncrónú AniList a bheith níos moille le linn tréimhsí gnóthacha. Cuireann MangaBaka leabharlann níos mó agus sioncrónú níos tapúla ar fáil i gcónaí.",
+        "loading-background": "Tá Kavita ag luchtú do nasc sa chúlra, fan go fóill..."
+    },
+    "manage-user-scrobble-provider-modal": {
+        "close": "{{common.close}}",
+        "save": "{{common.save}}",
+        "title": "Bainistigh do shonraí fíordheimhnithe do {{provider}}",
+        "username-label": "Ainm úsáideora",
+        "authentication-token-label": "Comhartha Fíordheimhnithe",
+        "valid-until-label": "Bailí Go dtí",
+        "last-synced-label": "Sioncronaithe go deireanach",
+        "not-synced": "Níl sioncrónaithe fós",
+        "event-generation-label": "Líonadh siar scrobble deireanach",
+        "event-generation-not-run": "Níor rith an t-aislíonadh go fóill",
+        "generate": "Gin",
+        "generate-scrobble-events": "Imeachtaí Aislíonta",
+        "refresh-token-label": "Athnuachan comhartha",
+        "connect-label": "Ceangail Cuntas",
+        "connect-tooltip": "Déanfar tú a atreorú chuig Kavita+ agus an soláthraí Scrobble"
+    },
+    "scrobble-provider-description-pipe": {
+        "ani-list": "Gach rud Manga & Úrscéalta Éadroma",
+        "my-anime-list": "Sioncrónaíonn \"Want To Read & Stacks\" le haghaidh Manga agus Úrscéalta Éadroma",
+        "hardcover": "Gach rud Leabhair, Manga, agus Úrscéalta Éadroma!",
+        "manga-baka": "Gach rud Manga & Úrscéalta Éadroma"
+    },
+    "review-scrobble-target-name-pipe": {
+        "private": "Tusa amháin",
+        "friends": "Cairde",
+        "public": "Gach duine"
+    },
+    "scrobble-read-status-pipe": {
+        "ignore": "Déan neamhaird de",
+        "want-to-read": "Ar mhaith leat léamh",
+        "read": "Léigh",
+        "unread": "Gan léamh",
+        "dropped": "Tite",
+        "on-hold": "Ar Feitheamh"
+    },
+    "kavitaplus-tooltip": {
+        "panel-title": "Kavita+: Log Iniúchta",
+        "matched": "Meaitseáilte",
+        "unmatched": "Gan Mheaitseáil",
+        "filter-all": "Gach",
+        "filter-match": "Meaitseáil",
+        "filter-metadata": "Meiteashonraí",
+        "filter-scrobble": "Scrobble",
+        "filter-sync": "Sionc",
+        "no-events": "Gan aon imeachtaí le déanaí",
+        "no-data": "Níl aon sonraí ar fáil",
+        "loading": "{{common.loading}}",
+        "close": "{{common.close}}",
+        "refreshed": "Athnuachan",
+        "next-refresh": "Athnuachan Eile",
+        "showing-latest": "Ag taispeáint na n-imeachtaí is déanaí {{count}}",
+        "my-activity": "Mo Ghníomhaíocht",
+        "admin-feed": "Fotha riaracháin",
+        "read-progress-sent-label": "Léigh dul chun cinn - {{chapter}}",
+        "fields-updated": "Nuashonraíodh {{count}} réimsí",
+        "rating-updated": "Rátáil nuashonraithe",
+        "add-want-to-read": "Cuireadh leis an liosta \"mian liom léamh\"",
+        "remove-want-to-read": "Bainte as mian léite",
+        "review-submitted": "Athbhreithniú curtha isteach",
+        "metadata-source": "Foinse meiteashonraí",
+        "linked-to": "Nasctha le"
+    },
+    "kavita-plus-audit-entry": {
+        "system": "{{manage-kavitaplus-activity.system}}",
+        "retry": "Déan iarracht eile",
+        "match": "Meaitseáil"
+    },
+    "metadata-provider-title-pipe": {
+        "hardcover": "Clúdach crua",
+        "mangabaka": "MangaBaka",
+        "cbr": "Achoimre ar Leabhar Greannáin"
+    },
+    "manage-license-modal": {
+        "hub-title": "Bainistigh an síntiús",
+        "hub-subtitle": "Roghnaigh cad ba mhaith leat a dhéanamh le plean Kavita+ an fhreastalaí seo.",
+        "renew-title": "Athnuachan síntiús",
+        "renew-desc": "Athghníomhachtaigh Kavita+ do gach duine ar an bhfreastalaí seo.",
+        "cancel-title": "Cealaigh an síntiús",
+        "cancel-desc": "Cuir deireadh le do phlean. Fanann Kavita+ gníomhach go dtí do dháta billeála - gan aon táillí breise.",
+        "change-email-title": "Athraigh ríomhphost",
+        "change-email-desc": "Nuashonraigh an seoladh a úsáideann Stripe le haghaidh admhálacha agus cá seoltar do naisc cheadúnais agus athnuachana.",
+        "billing-title": "Sonraí billeála agus íocaíochta",
+        "billing-desc": "Nuashonraigh do chárta, féach ar shonraisc, agus íoslódáil admhálacha i dtairseach slán Stripe.",
+        "close": "{{common.close}}"
+    },
+    "renew-license": {
+        "title": "Athnuachan Kavita+",
+        "subtitle": "Athghníomhachtaigh gnéithe préimhe do gach duine ar an bhfreastalaí seo.",
+        "close": "{{common.close}}",
+        "billing-period-label": "Tréimhse billeála",
+        "monthly-label": "Míosúil",
+        "yearly-label": "Bliantúil",
+        "billing-email-label": "Ríomhphost billeála",
+        "on-file-label": "ar chomhad",
+        "email-help": "Líonta go huathoibríoch ón gcás seo - ní mór é a bheith mar an gcéanna le do cheannachán bunaidh.",
+        "change-label": "Athraigh",
+        "how-it-works-label": "Conas a oibríonn athnuachan",
+        "how-step-1": "Cruthaímid seiceáil amach slán Stripe do {{email}} ar an bplean roghnaithe.",
+        "how-step-2": "Deimhnigh do chárta ansin - ní bheidh do shonraí i dteagmháil leis an bhfreastalaí seo choíche.",
+        "how-step-3": "Nuair a bheidh an íocaíocht glanta, beidh gnéithe Kavita+ ar fáil arís do gach duine ar an bhfreastalaí.",
+        "back-label": "Ar ais",
+        "send-link-label": "Lean ar aghaidh leis an íocaíocht",
+        "checkout-ready-label": "Tá do sheiceáil réidh",
+        "checkout-ready-help": "Oscail an tseiceáil slán Stripe chun d’athnuachan a chríochnú. Is féidir leat é seo a dhúnadh nuair a bheidh an íocaíocht déanta agus seiceáil arís.",
+        "pay-now-label": "Íoc anois",
+        "done-label": "{{common.done}}",
+        "link-sent-error": "Ní féidir an t-athnuachan a thosú. Déan iarracht eile nó déan teagmháil leis an bhfoireann tacaíochta."
+    },
+    "cancel-license": {
+        "title": "Cealaigh an síntiús",
+        "subtitle": "Coinneoidh tú rochtain iomlán go dtí deireadh do thréimhse billeála reatha.",
+        "close": "{{common.close}}",
+        "server-wide-label": "Ar fud an fhreastalaí",
+        "users-active-label": "{{count}} úsáideoir gníomhach",
+        "what-happens-label": "Cad a tharlaíonn",
+        "impact-1": "Fanann Kavita+ gníomhach go dtí do dháta billeála reatha.",
+        "impact-2": "Ní ghearrtar aon táillí eile tar éis an dáta sin.",
+        "impact-3": "Is féidir leat athliostáil ag am ar bith chun gnéithe préimhe a athbhunú.",
+        "comment-label": "Cúis leis an gcealú (roghnach)",
+        "comment-placeholder": "Cuir in iúl dúinn cén fáth a bhfuil tú ag cealú...",
+        "cancelled-success": "Síntiús curtha ar ceal. Leanann an rochtain ar aghaidh go dtí do dháta billeála.",
+        "cancelled-error": "Níorbh fhéidir linn do shíntiús a chealú. Déan iarracht arís nó déan teagmháil leis an bhfoireann tacaíochta.",
+        "back-label": "Ar ais",
+        "confirm-label": "Cealaigh an síntiús"
+    },
+    "change-license-email": {
+        "title": "Athraigh ríomhphost",
+        "subtitle": "Nuashonraigh cá seoltar admhálacha, eochracha ceadúnais, agus naisc athnuachana.",
+        "close": "{{common.close}}",
+        "current-email-label": "Ríomhphost reatha",
+        "on-file-label": "ar chomhad",
+        "new-email-label": "Seoladh ríomhphoist nua",
+        "new-email-placeholder": "tusa@domain.com",
+        "confirm-help": "Seolfaimid nasc chugat chun an t-athrú a chríochnú sula n-athraítear aon rud.",
+        "back-label": "Ar ais",
+        "send-code-label": "Seol cód"
     }
 }

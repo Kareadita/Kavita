@@ -50,7 +50,6 @@
         "not-applicable": "Ikke relevant",
         "processed": "Forarbejdet",
         "not-processed": "Ikke behandlet",
-        "generate-scrobble-events": "Backfill-begivenheder",
         "token-expired": "Dit AniList-token er udløbet! Scrobbling-begivenheder vil ikke blive behandlet, før du fornyer det på siden Konti.",
         "scrobbling-disabled": "Scrobbling er deaktiveret i dine kontoindstillinger."
     },
@@ -349,15 +348,6 @@
     "library-selector": {
         "select-all": "{{common.select-all}}",
         "deselect-all": "{{common.deselect-all}}"
-    },
-    "license": {
-        "cancel": "{{common.cancel}}",
-        "edit": "{{common.edit}}",
-        "loading": "{{common.loading}}",
-        "activate-email-label": "{{common.email}}",
-        "activate-delete": "{{common.delete}}",
-        "activate-reset": "{{common.reset}}",
-        "activate-save": "{{common.save}}"
     },
     "book-line-overlay": {
         "close": "{{common.close}}",
@@ -810,7 +800,6 @@
         "auto-login-label": "Automatisk login",
         "auto-login-tooltip": "Automatisk omdirigering til OIDC-udbyder, når login-skærmen åbnes",
         "disable-password-authentication-label": "Deaktiver adgangskodegodkendelse",
-        "disable-password-authentication-tooltip": "Brugere med administratorrolle kan omgå denne begrænsning",
         "provider-name-label": "Udbyderens navn",
         "provider-name-tooltip": "Navn vist på login-skærmen",
         "defaults-title": "Standardindstillinger",
