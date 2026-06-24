@@ -23,7 +23,7 @@ export class ExternalSeriesCardComponent {
   private readonly drawerService = inject(DrawerService);
 
   data = input.required<ExternalSeries>();
-  
+
   protected readonly scrobbleProvider = computed(() => {
     switch (this.data().metadataProvider) {
       case MetadataProvider.Hardcover:
@@ -48,6 +48,7 @@ export class ExternalSeriesCardComponent {
       const ref = this.drawerService.open(SeriesPreviewDrawerComponent, {position: 'end', panelClass: ''});
 
       ref.setInput('isExternalSeries', true);
+      ref.setInput('mangaBakaId', this.data().mangaBakaId)
       ref.setInput('aniListId', this.data().aniListId);
       ref.setInput('malId', this.data().malId);
       ref.setInput('name', this.data().name);

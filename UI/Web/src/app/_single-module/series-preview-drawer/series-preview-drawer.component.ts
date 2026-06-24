@@ -38,6 +38,7 @@ export class SeriesPreviewDrawerComponent implements OnInit {
   /** Required for non-external series */
   libraryId = input<number>(0);
   aniListId = input<number | undefined>(undefined);
+  mangaBakaId = input<number | undefined>(undefined);
   malId = input<number | undefined>(undefined);
   isExternalSeries = model<boolean>(true);
 
@@ -71,7 +72,7 @@ export class SeriesPreviewDrawerComponent implements OnInit {
 
   ngOnInit() {
     if (this.isExternalSeries()) {
-      this.seriesService.getExternalSeriesDetails(this.aniListId(), this.malId()).subscribe(externalSeries => {
+      this.seriesService.getExternalSeriesDetails(this.aniListId(), this.malId(), this.mangaBakaId(), 0).subscribe(externalSeries => {
         this.externalSeries.set(externalSeries);
         this.isLoading.set(false);
       });
@@ -81,7 +82,7 @@ export class SeriesPreviewDrawerComponent implements OnInit {
 
         // Consider the localSeries has no metadata, try to merge the external Series metadata
         if (this.localSeries()!.summary === '' && this.localSeries()!.genres.length === 0) {
-          this.seriesService.getExternalSeriesDetails(0, 0, this.seriesId()).subscribe(externalSeriesData => {
+          this.seriesService.getExternalSeriesDetails(0, 0, 0, this.seriesId()).subscribe(externalSeriesData => {
             this.isExternalSeries.set(true);
             this.externalSeries.set(externalSeriesData);
           })

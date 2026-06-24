@@ -527,13 +527,20 @@ public class SeriesController(
         return BadRequest(await localizationService.TranslateAsync(UserId, "generic-relationship"));
     }
 
+    /// <summary>
+    /// Returns external series metadata around a Given External Series
+    /// </summary>
+    /// <param name="aniListId"></param>
+    /// <param name="malId"></param>
+    /// <param name="seriesId"></param>
+    /// <returns></returns>
     [KPlus]
     [HttpGet("external-series-detail")]
     [Authorize(Policy = PolicyGroups.AdminPolicy)]
-    public async Task<ActionResult<ExternalSeriesDto>> GetExternalSeriesInfo(int? aniListId, long? malId, int? seriesId)
+    public async Task<ActionResult<ExternalSeriesDto>> GetExternalSeriesInfo(int? aniListId, long? malId, int? mangaBakaId, int? seriesId)
     {
         var ct = HttpContext.RequestAborted;
-        var cacheKey = $"{CacheKey}-{aniListId ?? 0}-{malId ?? 0}-{seriesId ?? 0}";
+        var cacheKey = $"{CacheKey}-{aniListId ?? 0}-{malId ?? 0}-{mangaBakaId ?? 0}-{seriesId ?? 0}";
         var results = await _externalSeriesCacheProvider.GetAsync<ExternalSeriesDto>(cacheKey, ct);
         if (results.HasValue)
         {
@@ -542,7 +549,7 @@ public class SeriesController(
 
         try
         {
-            var ret = await externalMetadataService.GetExternalSeriesDetail(aniListId, malId, seriesId, ct);
+            var ret = await externalMetadataService.GetExternalSeriesDetail(aniListId, malId, mangaBakaId, seriesId, ct);
             await _externalSeriesCacheProvider.SetAsync(cacheKey, ret, TimeSpan.FromMinutes(15), ct);
             return Ok(ret);
         }

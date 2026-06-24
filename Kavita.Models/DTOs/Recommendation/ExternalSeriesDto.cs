@@ -13,6 +13,7 @@ public sealed record ExternalSeriesDto
     public required string Url { get; set; }
     public string? Summary { get; set; }
     public int? AniListId { get; set; }
+    public int? MangaBakaId { get; set; }
     public long? MalId { get; set; }
     public ScrobbleProvider Provider { get; set; } = ScrobbleProvider.AniList;
     /// <summary>

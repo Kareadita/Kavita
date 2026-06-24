@@ -276,7 +276,16 @@ public class ExternalMetadataService : IExternalMetadataService
     }
 
 
-    public async Task<ExternalSeriesDetailDto?> GetExternalSeriesDetail(int? aniListId, long? malId, int? seriesId, CancellationToken ct = default)
+    /// <summary>
+    /// Fetches metadata about an external Series
+    /// </summary>
+    /// <param name="aniListId"></param>
+    /// <param name="malId"></param>
+    /// <param name="seriesId"></param>
+    /// <param name="ct"></param>
+    /// <returns></returns>
+    /// <exception cref="KavitaException"></exception>
+    public async Task<ExternalSeriesDetailDto?> GetExternalSeriesDetail(int? aniListId, long? malId, int? mangaBakaId, int? seriesId, CancellationToken ct = default)
     {
         if (!aniListId.HasValue && !malId.HasValue)
         {
@@ -284,7 +293,7 @@ public class ExternalMetadataService : IExternalMetadataService
         }
 
         // This is for the Series drawer. We can get this extra information during the initial SeriesDetail call so it's all coming from the DB
-        return await GetSeriesDetail(aniListId, malId, seriesId, ct);
+        return await GetSeriesDetail(aniListId, malId, mangaBakaId, seriesId, ct);
 
     }
 
@@ -2107,6 +2116,7 @@ public class ExternalMetadataService : IExternalMetadataService
                 Summary = rec.Summary,
                 AniListId = rec.AniListId,
                 MalId = rec.MalId,
+                MangaBakaId = rec.MangabakaId,
                 MetadataProvider = provider,
                 RecommendationSource = source
             });
@@ -2155,7 +2165,7 @@ public class ExternalMetadataService : IExternalMetadataService
     /// <param name="seriesId"></param>
     /// <param name="ct"></param>
     /// <returns></returns>
-    private async Task<ExternalSeriesDetailDto?> GetSeriesDetail(int? aniListId, long? malId, int? seriesId, CancellationToken ct = default)
+    private async Task<ExternalSeriesDetailDto?> GetSeriesDetail(int? aniListId, long? malId, int? mangaBakaId, int? seriesId, CancellationToken ct = default)
     {
         // TODO: This is the primary point where we need to integrate ExternalIds since weblink parsing is already handled
         // TODO: Ensure when we set/update weblinks via API, we reparse and update external ids (if they are empty only)
@@ -2163,6 +2173,7 @@ public class ExternalMetadataService : IExternalMetadataService
         {
             AniListId = aniListId,
             MalId = malId,
+            MangabakaId = mangaBakaId,
             SeriesName = string.Empty,
             LocalizedSeriesName = string.Empty
         };
