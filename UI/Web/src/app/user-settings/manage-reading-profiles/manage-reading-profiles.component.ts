@@ -70,6 +70,7 @@ import {ListSelectModalComponent} from "../../shared/_components/list-select-mod
 import {ClientDevice} from "../../_models/client-device";
 import {TabTitlePipe} from "../../_pipes/tab-title.pipe";
 import {Tabs} from "../../_models/tabs";
+import {EpubFontTitlePipe} from "../../_pipes/epub-font-title.pipe";
 
 
 @Component({
@@ -104,7 +105,8 @@ import {Tabs} from "../../_models/tabs";
     NgbTooltip,
     BreakpointPipe,
     SettingColorPickerComponent,
-    TabTitlePipe
+    TabTitlePipe,
+    EpubFontTitlePipe
   ],
   templateUrl: './manage-reading-profiles.component.html',
   styleUrl: './manage-reading-profiles.component.scss',

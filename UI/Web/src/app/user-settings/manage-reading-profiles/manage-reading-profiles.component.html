@@ -338,10 +338,7 @@
                                           formControlName="bookReaderFontFamily">
                                     @for (opt of fonts(); track opt.id) {
                                       <option [ngValue]="opt.family">
-                                        {{opt.family | titlecase}}
-                                        @if (opt.provider === FontProvider.User) {
-                                          {{t('user-font-suffix')}}
-                                        }
+                                        {{opt | epubFontTitle}}
                                       </option>
                                     }
                                   </select>
