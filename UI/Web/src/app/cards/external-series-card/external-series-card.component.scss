@@ -19,12 +19,13 @@ a {
 }
 
 .source-badge {
-    position: absolute;
-    top: 0.3125rem;
-    left: 0.3125rem;
-    z-index: 10;
-    background-color: var(--source-badge-bg-color);
-    color: var(--source-badge-text-color);
-    font-size: 0.7rem;
-    pointer-events: none;
+  position: absolute;
+  top: 0.3125rem;
+  left: 0.3125rem;
+  z-index: 10;
+  background-color: var(--source-badge-bg-color);
+  color: var(--source-badge-text-color);
+  font-size: 0.7rem;
+  pointer-events: none;
+  border: 0.0625rem solid var(--primary-color-darkest-shade);
 }

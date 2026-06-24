@@ -539,7 +539,7 @@ public class ExternalMetadataService : IExternalMetadataService
             externalSeriesMetadata.ExternalRecommendations ??= [];
             var seenRecommendations = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
             var recs = await ProcessRecommendations(libraryType, result.ReadersAlsoLike, externalSeriesMetadata,
-                RecommendationSource.Personalized, provider, seenRecommendations);
+                RecommendationSource.UserBased, provider, seenRecommendations);
             var similarRecs = await ProcessRecommendations(libraryType, result.SimilarSeries, externalSeriesMetadata,
                 RecommendationSource.Similar, provider, seenRecommendations);
             recs.ExternalSeries = recs.ExternalSeries.Concat(similarRecs.ExternalSeries).ToList();

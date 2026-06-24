@@ -1824,6 +1824,7 @@
 
     "recommendation-source-pipe": {
         "similar": "Similar",
+        "user-based": "Users Liked",
         "personalized": "For You"
     },
 

@@ -1,4 +1,5 @@
 export enum RecommendationSource {
   Similar = 1,
-  Personalized = 2,
+  UserBased = 2,
+  Personalized = 3,
 }

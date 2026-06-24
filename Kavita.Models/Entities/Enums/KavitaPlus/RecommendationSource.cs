@@ -2,7 +2,7 @@
 
 /// <summary>
 /// Recommendation Source from Kavita+. Each recommendation has exactly one source; when the same series surfaces
-/// from both lists, <see cref="Personalized"/> wins.
+/// from both lists, <see cref="UserBased"/> wins.
 /// </summary>
 public enum RecommendationSource
 {
@@ -11,7 +11,12 @@ public enum RecommendationSource
     /// </summary>
     Similar = 1,
     /// <summary>
-    /// Personalized (Readers also Like) based on your reading activity with that provider (only applicable if you scrobble with them)
+    /// Personalized (Readers also Like) based on your reading activity with that provider
     /// </summary>
-    Personalized = 2
+    UserBased = 2,
+    /// <summary>
+    /// Based on your actual reading history and ratings (only applicable if you scrobble with them)
+    /// </summary>
+    Personalized = 3
+
 }

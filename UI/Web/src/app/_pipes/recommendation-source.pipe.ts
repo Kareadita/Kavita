@@ -11,6 +11,8 @@ export class RecommendationSourcePipe implements PipeTransform {
 
   transform(value: RecommendationSource): string {
     switch (value) {
+      case RecommendationSource.UserBased:
+        return this.transloco.translate('recommendation-source-pipe.user-based');
       case RecommendationSource.Similar:
         return this.transloco.translate('recommendation-source-pipe.similar');
       case RecommendationSource.Personalized:
