@@ -59,6 +59,8 @@ public class ExternalMetadataService : IExternalMetadataService
     private readonly IKavitaPlusApiService _kavitaPlusApiService;
     private readonly IFileCacheService _fileCacheService;
     private readonly IKavitaPlusAuditService _auditService;
+
+    private const int SeriesPerRefresh = 25;
     private readonly TimeSpan _externalSeriesMetadataCache = TimeSpan.FromDays(30);
     private static readonly HashSet<LibraryType> NonEligibleLibraryTypes = [LibraryType.Comic, LibraryType.Image];
     private readonly SeriesDetailPlusDto _defaultReturn = new()
@@ -105,10 +107,11 @@ public class ExternalMetadataService : IExternalMetadataService
     public async Task FetchExternalDataTask(CancellationToken ct = default)
     {
         // Find all Series that are eligible and limit
-        var ids = await _unitOfWork.ExternalSeriesMetadataRepository.GetSeriesThatNeedExternalMetadata(25, ct: ct);
-        if (ids.Count == 0)
+        var ids = await _unitOfWork.ExternalSeriesMetadataRepository.GetSeriesThatNeedExternalMetadata(SeriesPerRefresh, ct: ct);
+        if (ids.Count != SeriesPerRefresh)
         {
-            ids = await _unitOfWork.ExternalSeriesMetadataRepository.GetSeriesThatNeedExternalMetadata(25, true, ct);
+            var wanted = SeriesPerRefresh - ids.Count;
+            ids.AddRange(await _unitOfWork.ExternalSeriesMetadataRepository.GetSeriesThatNeedExternalMetadata(wanted, true, ct));
         }
 
         if (ids.Count == 0)

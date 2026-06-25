@@ -1,5 +1,7 @@
 using System;
 using System.IO;
+using System.IO.Compression;
+using System.Linq;
 using System.Threading.Tasks;
 using System.Xml.Serialization;
 using Kavita.API.Database;
@@ -14,6 +16,7 @@ using Kavita.Models.DTOs.Progress;
 using Kavita.Models.Entities.Enums;
 using Kavita.Server.Attributes;
 using Kavita.Services;
+using Kavita.Services.Extensions;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using MimeTypes;
@@ -631,9 +634,36 @@ public class OpdsController(
     [HttpGet("{apiKey}/series/{seriesId}/volume/{volumeId}/chapter/{chapterId}/download/{filename}")]
     public async Task<ActionResult> DownloadFile(string apiKey, int seriesId, int volumeId, int chapterId, string filename)
     {
-        var files = await unitOfWork.ChapterRepository.GetFilesForChapterAsync(chapterId);
-        var (zipFile, contentType, fileDownloadName) = downloadService.GetFirstFileDownload(files);
-        return PhysicalFile(zipFile, contentType, fileDownloadName, true);
+        var files = (await unitOfWork.ChapterRepository.GetFilesForChapterAsync(chapterId)).ToList();
+
+        if (files.Count <= 1)
+        {
+            var (zipFile, contentType, fileDownloadName) = downloadService.GetFirstFileDownload(files);
+            return PhysicalFile(zipFile, contentType, fileDownloadName, true);
+        }
+
+        // Multi-file chapter: produce a single flat .cbz by reusing the
+        // page-streaming cache, which already extracts and orders pages
+        // across all the chapter's files. Otherwise OPDS clients only
+        // receive the first file of the chapter.
+        var chapter = await cacheService.Ensure(chapterId);
+        if (chapter == null)
+        {
+            return BadRequest(await localizationService.TranslateAsync(UserId, "cache-file-find"));
+        }
+
+        var series = await unitOfWork.SeriesRepository.GetSeriesByIdAsync(seriesId);
+        var downloadName = $"{series!.Name} - Chapter {chapter.GetNumberTitle()}.cbz";
+        var dateStr = DateTime.UtcNow.ToShortDateString().Replace("/", "_");
+        var outputPath = Path.Join(directoryService.TempDirectory, $"kavita_opds_merged_c{chapterId}_{dateStr}.cbz");
+
+        if (!System.IO.File.Exists(outputPath))
+        {
+            var cacheDir = cacheService.GetCachePath(chapterId);
+            ZipFile.CreateFromDirectory(cacheDir, outputPath);
+        }
+
+        return PhysicalFile(outputPath, "application/x-cbz", downloadName, true);
     }
 
     private static ContentResult CreateXmlResult(string xml)

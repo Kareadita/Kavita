@@ -283,7 +283,7 @@ export class ManageLibraryComponent implements OnInit {
 
         // Prompt the user for the library, then wait for them to manually trigger applyBulkAction
         const ref = this.modalService.open(CopySettingsFromLibraryModalComponent, {size: 'lg', fullscreen: 'md'});
-        ref.componentInstance.libraries = this.libraries;
+        ref.setInput('libraries', this.libraries);
         ref.closed.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((res: number) => {
           // res will be the library the user chose
           this.bulkMode = true;

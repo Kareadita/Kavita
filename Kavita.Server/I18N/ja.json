@@ -243,5 +243,16 @@
     "url-unable-to-resolve": "ホスト名を解決できません",
     "url-blocked-address": "URL がブロックされたアドレスに解決されます",
     "cbl-import-download-from-url": "URL からファイルをダウンロードできません",
-    "cbl-import-validation-types": ".cbl と .json 形式のファイルのみが許可されます"
+    "cbl-import-validation-types": ".cbl と .json 形式のファイルのみが許可されます",
+    "scrobble-provider-not-setup": "Scrobble プロバイダー {0} が設定されていません",
+    "email.email-change.title": "メールアドレスの更新",
+    "email.email-change.cta": "メールアドレスを確認してください",
+    "email.email-test.subject": "Kavita - メールアドレステスト",
+    "email.email-test.header": "これはテストメールです",
+    "email.email-test.description": "おめでとうございます！ Kavita のインスタンスが正しくメール送信できるように設定されました！",
+    "email.email-test.safe-notice": "この操作を行っていない場合は、このメールを無視してください。お客様のアカウントは安全です。",
+    "email.token-expired.subject": "Kavita - {{Provider}} トークンの有効期限が切れ、Scrobbling イベントが停止しました",
+    "email.token-expired.header": "{{Provider}} トークンの有効期限が切れています！",
+    "email.token-expired.description": "トークンを更新するまで、Kavita は {{Provider}} との同期を停止します。",
+    "email.token-expired.cta": "更新"
 }

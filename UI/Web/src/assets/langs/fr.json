@@ -59,7 +59,6 @@
         "special": "{{entity-title.special}}",
         "token-expired": "Votre jeton AniList a expiré ! Les événements de scrobbling ne seront pas pris en compte tant que vous n'aurez pas renouvelé votre compte sur la page Comptes.",
         "scrobbling-disabled": "Le suivi de lecture est désactivé dans les paramètres de votre compte.",
-        "generate-scrobble-events": "Rattraper les Événements",
         "select-all-label": "Sélectionner tout",
         "delete-selected-label": "Supprimer la sélection"
     },
@@ -522,63 +521,6 @@
         "deselect-all": "{{common.deselect-all}}",
         "no-data": "Aucune bibliothèque configurée."
     },
-    "license": {
-        "title": "Licence Kavita+",
-        "manage": "Gérer",
-        "invalid-license-tooltip": "Si votre souscription est terminée, vous devez envoyer un mail au support pour en obtenir une nouvelle",
-        "check": "Vérifier",
-        "cancel": "{{common.cancel}}",
-        "edit": "{{common.edit}}",
-        "buy": "Acheter",
-        "activate": "Activer",
-        "renew": "Renouveler",
-        "no-license-key": "Aucune clé de licence",
-        "license-valid": "Licence valide",
-        "license-not-valid": "Licence non valide",
-        "loading": "{{common.loading}}",
-        "activate-description": "Entrez la clé de licence et l'email utilisé pour s'inscrire avec Stripe",
-        "activate-license-label": "Clé de licence",
-        "activate-email-label": "{{common.email}}",
-        "activate-discordId-label": "Identifiant Discord",
-        "activate-discordId-tooltip": "Lien vers votre compte Discord avec Kavita+. Cela vous donne accès à des canaux cachés pour aider à façonner Kavita.",
-        "discord-validation": "Ce n'est pas un identifiant Discord valide. Votre identifiant n'est pas votre nom d'utilisateur Discord.",
-        "activate-delete": "{{common.delete}}",
-        "activate-reset": "Réinitialiser la licence",
-        "activate-reset-tooltip": "Invalider un enregistrement précédent en utilisant votre licence. Nécessite une licence et un email",
-        "activate-save": "{{common.save}}",
-        "kavita+-desc-part-1": "Kavita+ est un service d'abonnement premium qui débloque des fonctionnalités pour tous les utilisateurs de l'instance Kavita. Acheter un abonnement pour débloquer ",
-        "kavita+-desc-part-2": "avantages premium",
-        "kavita+-desc-part-3": "aujourd'hui !",
-        "kavita+-requirement": "Kavita+ est conçu pour fonctionner uniquement avec les 3 dernières versions. Toute autre version est susceptible de ne pas fonctionner.",
-        "help-label": "{{common.help}}",
-        "k+-license-overwrite": "La licence est enregistrée dans une autre instance de Kavita. Cela peut se produire lors d'une réinstallation ou, plus rarement, à la suite d'une mise à jour du système. Sélectionnez écraser pour forcer cette instance à s'enregistrer auprès de Kavita+.",
-        "license-active-label": "Validité de la licence",
-        "actions-title": "Actions",
-        "supported-version-label": "Sur la version supportée de Kavita",
-        "expiration-label": "Expiration",
-        "valid-tooltip": "Valide",
-        "invalid-tooltip": "Invalide",
-        "reset-label": "Remise à zéro",
-        "reset-tooltip": "Ceci réinitialisera l'instance du serveur Kavita+ à laquelle la licence est liée. Nécessite l'email et la clé de licence",
-        "delete-label": "Supprimer la licence",
-        "info-title": "Informations sur les licences",
-        "manage-tooltip": "Mise à jour des informations de paiement, annulation/pause de l'abonnement, etc",
-        "faq-title": "FAQ",
-        "total-subbed-months-label": "Nombre total de mois d'abonnement",
-        "email-label": "Adresse électronique enregistrée",
-        "license-mismatch": "La licence peut être enregistrée sur une autre instance de Kavita. Réenregistrer pour corriger.",
-        "k+-already-registered-header": "Licence déjà enregistrée",
-        "overwrite": "Écraser",
-        "k+-unlocked": "Kavita+ débloquée !",
-        "k+-unlocked-description": "Bienvenue sur Kavita+ ! Kavita générera des événements de scrobbling à partir de votre progression, de vos évaluations et de vos envies de lecture une fois que vous aurez enregistré vos fournisseurs de scrobbling sur votre compte. Prenez le temps de vous assurer que vous mettez en attente de scrobbling, toutes les séries que vous ne voulez pas scrobbler.",
-        "delete-tooltip": "Cela supprimera la licence de Kavita pour empêcher Kavita de parler à Kavita+. Cela ne vous désinscrit pas. Utilisez d'abord \"gérer\" pour annuler l'abonnement.",
-        "kavita+-warning": "Kavita+ est distinct de Kavita. Si vous désinstallez Kavita sans vous désabonner avant, vous continuerez à être facturés.",
-        "cancel-label": "Annuler l'abonnement",
-        "cancel-tooltip": "Annulez votre abonnement et supprimez la licence dans Kavita.",
-        "resend-license-email": "Envoyer la licence par courriel",
-        "resend-license-email-tooltip": "Envoyer à nouveau la licence Kavita+ par courriel. La licence doit être liée à ce serveur pour fonctionner.",
-        "supportId-label": "Identifiant de support"
-    },
     "book-line-overlay": {
         "copy": "Copier",
         "bookmark": "Marque-page",
@@ -954,7 +896,12 @@
         "reset": "{{common.reset}}",
         "image-num": "Image {{num}}",
         "apply": "{{common.apply}}",
-        "applied": "{{theme-manager.applied}}"
+        "applied": "{{theme-manager.applied}}",
+        "reset-tab": "Réinitialiser",
+        "no-images": "Aucune image disponible",
+        "select-image-alt": "Sélectionnez une image",
+        "download-cover": "Télécharger la couverture",
+        "loading": "{{common.loading}}"
     },
     "download-indicator": {
         "progress": "{{percentage}}% téléchargés",
@@ -1503,7 +1450,6 @@
         "description": "Importez vos piles d'intérêts MAL et créez des collections dans Kavita",
         "series-count": "{{common.series-count}}",
         "restack-count": "{{num}} Rempilés",
-        "nothing-found": "Aucun résultat",
         "track": "Piste",
         "by-author": "par {{author}}"
     },
@@ -2192,7 +2138,6 @@
         "smart-filter-deleted": "Filtre intelligent supprimé",
         "smart-filter-updated": "Filtre intelligent créé/mis à jour",
         "external-source-already-exists": "Une source externe existe déjà avec le même nom/hôte/clé API",
-        "anilist-token-expired": "Votre jeton AniList a expiré. Le suivi d'activité (Scrobbling) ne sera plus possible tant que vous ne l'aurez pas généré à nouveau dans Paramètres de l'utilisateur > Compte",
         "collection-tag-deleted": "Étiquette de collection supprimé",
         "force-kavita+-refresh-success": "Les métadonnées externes de Kavita+ ont été invalidées",
         "collection-not-owned": "Vous ne possédez pas cette collection",
@@ -2440,7 +2385,9 @@
         "book-reader-tab": "Lecteur de livres",
         "pdf-reader-tab": "Lecteur de PDF",
         "bookmark-image-tab": "Image",
-        "bookmark-text-tab": "Texte"
+        "bookmark-text-tab": "Texte",
+        "kavita-plus-tab": "Kavita+",
+        "other-tab": "Autre"
     },
     "common": {
         "reset-to-default": "Réinitialiser aux valeurs par défaut",
@@ -2542,16 +2489,12 @@
         "feature-requests": "Demandes de fonctionnalités"
     },
     "match-series-modal": {
-        "title": "Les correspondances de {{seriesName}}",
         "description": "Sélectionnez une correspondance pour recâbler les métadonnées de Kavita+ et régénérer les événements de scrobbling. L'option Ne pas faire correspondre peut être utilisée pour empêcher Kavita de faire correspondre les métadonnées et le scrobbler.",
         "close": "{{common.close}}",
         "save": "{{common.save}}",
-        "query-tooltip": "Entrez le nom de la série, l'URL AniList/MyAnimeList/ComicBookRoundup. Les URL utiliseront une recherche directe.",
         "dont-match-tooltip": "Exclure cette série de la correspondance et du scrobbling",
         "dont-match-label": "Ne pas correspondre",
-        "search": "Rechercher",
-        "no-results": "Impossible de trouver une correspondance. Essayez d'ajouter l'URL d'un fournisseur pris en charge et réessayez.",
-        "query-label": "Requête"
+        "search": "Rechercher"
     },
     "manage-user-tokens": {
         "expires-label": "Expiration : {{date}}",
@@ -2650,10 +2593,7 @@
     },
     "match-series-result-item": {
         "chapter-count": "{{common.chapter-count}}",
-        "updating-metadata-status": "Mise à jour des métadonnées",
         "volume-count": "{{server-stats.volume-count}}",
-        "releasing": "Sorties",
-        "details": "Voir la page",
         "issue-count": "{{common.issue-count}}"
     },
     "metadata-setting-field-pipe": {
@@ -2918,7 +2858,6 @@
         "auto-login-label": "Connexion automatique",
         "auto-login-tooltip": "Redirection automatique vers le fournisseur OIDC lors de l'ouverture de l'écran de connexion",
         "disable-password-authentication-label": "Désactiver l'authentification par mot de passe",
-        "disable-password-authentication-tooltip": "Les utilisateurs ayant le rôle d'administrateur peuvent contourner cette restriction",
         "provider-name-label": "Nom du fournisseur",
         "provider-name-tooltip": "Nom affiché sur l'écran de connexion",
         "defaults-title": "Valeurs par défaut",
@@ -3208,7 +3147,7 @@
     },
     "favorite-authors": {
         "title": "Auteurs les plus lus",
-        "sub-title": "{{name}} est l'auteur le plus lu par {{author}}, avec un total de {{count}} lectures",
+        "sub-title": "{{author}} est l'auteur le plus lu par {{name}}, avec un total de {{count}} lectures",
         "no-data": "{{common.no-data}}"
     },
     "manage-custom-key-binds": {
@@ -3740,6 +3679,7 @@
         "comicVineId-label": "Comic Vine Id",
         "metronId-label": "Metron Id",
         "not-set-label": "Non défini",
-        "isbn-label": "{{edit-chapter-modal.isbn-label}}"
+        "isbn-label": "{{edit-chapter-modal.isbn-label}}",
+        "cbrId-label": "Comic Book Roundup Id"
     }
 }

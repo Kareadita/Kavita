@@ -30,6 +30,14 @@ public interface IAppUserReadingProfileRepository
     Task<List<AppUserReadingProfile>> GetProfilesForLibrary(int userId, int libraryId, CancellationToken ct = default);
 
     /// <summary>
+    /// Returns all reading profiles that currently select the given font family
+    /// </summary>
+    /// <param name="family"></param>
+    /// <param name="ct"></param>
+    /// <returns></returns>
+    Task<IList<AppUserReadingProfile>> GetProfilesByFontFamily(string family, CancellationToken ct = default);
+
+    /// <summary>
     /// Return the profile if it belongs to the user
     /// </summary>
     /// <param name="userId"></param>

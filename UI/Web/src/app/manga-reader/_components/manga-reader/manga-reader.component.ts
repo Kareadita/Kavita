@@ -505,7 +505,8 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
         return this.bookmarks[this.pageNum];
       }
 
-      return chapterInfo?.chapterTitle || chapterInfo?.subtitle || '';
+      // chapterInfo.chapterTitle is already contained in title if present
+      return chapterInfo?.subtitle || '';
     });
 
     this.keyBindService.registerListener(

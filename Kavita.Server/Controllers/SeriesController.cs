@@ -184,8 +184,14 @@ public class SeriesController(
             series.SortName = updateSeries.SortName.Trim();
         }
 
-        series.LocalizedName = updateSeries.LocalizedName?.Trim();
-        series.NormalizedLocalizedName = series.LocalizedName?.ToNormalized();
+        var newNormalizedLocalizedName = updateSeries.LocalizedName?.Trim().ToNormalized();
+        if (series.NormalizedLocalizedName != newNormalizedLocalizedName)
+        {
+            series.LocalizedName = updateSeries.LocalizedName?.Trim();
+            series.NormalizedLocalizedName = newNormalizedLocalizedName;
+
+            series.Metadata.KPlusOverrides.Remove(MetadataSettingField.LocalizedName);
+        }
 
         series.SortNameLocked = updateSeries.SortNameLocked;
         series.LocalizedNameLocked = updateSeries.LocalizedNameLocked;

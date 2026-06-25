@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -197,8 +197,9 @@ public class CoverDbService : ICoverDbService
             var res = await provider.GetAsync<string>(publisherName, ct);
             if (res.HasValue)
             {
-                _logger.LogInformation("Kavita has already tried to fetch Publisher: {PublisherName} and failed. Skipping duplicate check", publisherName);
-                throw new KavitaException($"Kavita has already tried to fetch Publisher: {publisherName} and failed. Skipping duplicate check");
+                _logger.LogDebug("Kavita has already tried to fetch Publisher: {PublisherName} and failed. Skipping duplicate check", publisherName);
+                // Do not throw to prevent duplicate log spam when visiting series
+                return string.Empty;
             }
 
             await provider.SetAsync(publisherName, string.Empty, _cacheTime, ct);
@@ -797,8 +798,8 @@ public class CoverDbService : ICoverDbService
 
         if (fromBase64)
         {
-            return _imageService.CreateThumbnailFromBase64(url,
-                filenameWithoutExtension, encodeFormat, coverImageSize.GetDimensions().Width, targetDirectory);
+            var (width, height) = coverImageSize.GetDimensions();
+            return _imageService.CreateThumbnailFromBase64(url, filenameWithoutExtension, encodeFormat, width, height, targetDirectory);
         }
 
         return await DownloadImageFromUrl(filenameWithoutExtension, encodeFormat, url, targetDirectory);

@@ -393,15 +393,6 @@
         "select-all": "{{common.select-all}}",
         "deselect-all": "{{common.deselect-all}}"
     },
-    "license": {
-        "cancel": "{{common.cancel}}",
-        "edit": "{{common.edit}}",
-        "loading": "{{common.loading}}",
-        "activate-email-label": "{{common.email}}",
-        "activate-delete": "{{common.delete}}",
-        "activate-reset": "{{common.reset}}",
-        "activate-save": "{{common.save}}"
-    },
     "book-line-overlay": {
         "close": "{{common.close}}",
         "required-field": "{{common.required-field}}",

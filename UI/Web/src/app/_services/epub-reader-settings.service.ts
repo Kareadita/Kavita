@@ -16,7 +16,7 @@ import {ToastrService} from "ngx-toastr";
 import {takeUntilDestroyed} from '@angular/core/rxjs-interop';
 import {UtilityService} from "../shared/_services/utility.service";
 import {environment} from "../../environments/environment";
-import {EpubFont} from "../_models/preferences/epub-font";
+import {EpubFont, FontProvider} from "../_models/preferences/epub-font";
 import {FontService} from "./font.service";
 import {BreakpointService} from "./breakpoint.service";
 
@@ -217,7 +217,7 @@ export class EpubReaderSettingsService {
    */
   async initialize(libraryId: number, seriesId: number, readingProfile: ReadingProfile): Promise<void> {
     const fonts = await firstValueFrom(this.fontService.getFonts());
-    this._epubFonts.set(fonts);
+    this._epubFonts.set([...new Map(fonts.map(font => [`${font.family}`, font])).values()]);
 
     this._currentSeriesId.set(seriesId);
     this._currentLibraryId.set(libraryId);
@@ -283,7 +283,7 @@ export class EpubReaderSettingsService {
 
     // Set up page styles
     this._pageStyles.set(this.buildPageStyles(
-      profile.bookReaderFontFamily,
+      this.toCssFontFamily(profile.bookReaderFontFamily),
       profile.bookReaderFontSize + '%',
       profile.bookReaderMargin + 'vw',
       profile.bookReaderLineSpacing + '%'
@@ -487,19 +487,11 @@ export class EpubReaderSettingsService {
     // Font family changes
     this.settingsForm.get('bookReaderFontFamily')?.valueChanges.pipe(
       takeUntilDestroyed(this.destroyRef)
-    ).subscribe(fontName => {
+    ).subscribe(fontFamily => {
       this.isUpdatingFromForm = true;
 
-      const familyName = this._epubFonts().find(f => f.name === fontName)?.name || FontService.DefaultEpubFont;
-      const currentStyles = this._pageStyles();
-
-      const newStyles = { ...currentStyles };
-      if (familyName === FontService.DefaultEpubFont) {
-        newStyles['font-family'] = 'inherit';
-      } else {
-        newStyles['font-family'] = `'${familyName}'`;
-      }
-
+      const newStyles = { ...this._pageStyles() };
+      newStyles['font-family'] = this.toCssFontFamily(fontFamily);
       this._pageStyles.set(newStyles);
       this.isUpdatingFromForm = false;
     });
@@ -672,6 +664,15 @@ export class EpubReaderSettingsService {
     }
 
     return data;
+  }
+
+  // Maps a stored font family selection to its css font-family value, resolving user fonts to their namespaced alias
+  // (preferring a user upload when it shares a built-in family name) so the reader uses the right face on load and change.
+  private toCssFontFamily(fontFamily: string | undefined): string {
+    if (!fontFamily || fontFamily === FontService.DefaultEpubFont) return 'inherit';
+    const matches = this._epubFonts().filter(f => f.family === fontFamily);
+    const font = matches.find(f => f.provider === FontProvider.User) ?? matches[0];
+    return font ? `'${this.fontService.resolveCssFamily(font)}'` : 'inherit';
   }
 
   private buildPageStyles(fontFamily?: string, fontSize?: string, margin?: string, lineHeight?: string) {

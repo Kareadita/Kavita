@@ -51,7 +51,6 @@
         "volume-num": "Deel {{num}}",
         "chapter-num": "Hoofdstuk {{num}}",
         "not-read-warning": "Upstream-providers behouden altijd het hoogste aantal",
-        "generate-scrobble-events": "Genereer evenementen",
         "token-expired": "Uw AniList-token is verlopen! Scrobbling-evenementen zullen niet verwerkt worden totdat u deze verlengt op de Accounts-pagina.",
         "select-all-label": "Alles selecteren",
         "delete-selected-label": "Geselecteerde verwijderen"
@@ -476,40 +475,6 @@
         "select-all": "{{common.select-all}}",
         "deselect-all": "{{common.deselect-all}}",
         "no-data": "Er zijn nog geen bibliotheken ingesteld."
-    },
-    "license": {
-        "title": "Kavita+ licentie",
-        "manage": "Beheer",
-        "invalid-license-tooltip": "Als jouw abonnement verlopen is, moet je support mailen om een nieuw abonnement aan te maken",
-        "check": "Controleer",
-        "cancel": "{{common.cancel}}",
-        "edit": "{{common.edit}}",
-        "buy": "Koop",
-        "activate": "Activeer",
-        "renew": "Verlengen",
-        "no-license-key": "Geen licentiesleutel",
-        "license-valid": "Licentie is geldig",
-        "license-not-valid": "Licentie niet geldig",
-        "loading": "{{common.loading}}",
-        "activate-description": "Voer de licentiesleutel en het e-mailadres in die zijn gebruikt om u bij Stripe te registreren",
-        "activate-license-label": "Licentiesleutel",
-        "activate-email-label": "{{common.email}}",
-        "activate-delete": "{{common.delete}}",
-        "activate-reset": "Licentie resetten",
-        "activate-save": "{{common.save}}",
-        "help-label": "{{common.help}}",
-        "info-title": "Licentie informatie",
-        "valid-tooltip": "Geldig",
-        "invalid-tooltip": "Ongeldig",
-        "email-label": "Geregistreerd e-mailadres",
-        "k+-unlocked": "Kavita+ ontgrendeld!",
-        "kavita+-desc-part-3": "vandaag!",
-        "actions-title": "Acties",
-        "license-active-label": "Licentie actief",
-        "expiration-label": "Vervaldatum",
-        "reset-label": "Resetten",
-        "delete-label": "Licentie verwijderen",
-        "k+-unlocked-description": "Welkom bij Kavita+! Kavita zal scrobble-evenementen genereren op basis van uw voortgang, beoordelingen en 'Wil ik lezen'-lijst zodra u uw Scrobbling-providers onder uw account registreert. Neem de tijd om ervoor te zorgen dat u scrobbling-houders instelt voor alle reeksen die u niet wilt scrobblen."
     },
     "book-line-overlay": {
         "copy": "Kopiëren",
@@ -1191,8 +1156,7 @@
         "series-count": "{{common.series-count}}",
         "title": "MAL Interest Stack importeren",
         "description": "Importeer uw MAL Interest Stacks en maak Collecties aan binnen Kavita",
-        "restack-count": "{{num}} Restacks",
-        "nothing-found": "Niets gevonden"
+        "restack-count": "{{num}} Restacks"
     },
     "import-cbl-modal": {
         "close": "{{common.close}}",

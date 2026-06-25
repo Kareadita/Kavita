@@ -1,9 +1,9 @@
 <ng-container *transloco="let t; prefix: 'shortcuts-modal'">
-  <div class="modal-header">
+  <div class="modal-header" [class.book-reader]="inBookReader()">
     <h4 class="modal-title" id="modal-basic-title">{{ t('title') }}</h4>
     <button type="button" class="btn-close" [attr.aria-label]="t('close')" (click)="modal.close()"></button>
   </div>
-  <div class="modal-body">
+  <div class="modal-body" [class.book-reader]="inBookReader()">
     <div class="row g-0">
       @for(shortcut of shortcuts(); track shortcut.keyBindTarget ?? shortcut.key ?? $index) {
         @if (shortcut.keyBindTarget) {
@@ -36,7 +36,7 @@
       }
     </div>
   </div>
-  <div class="modal-footer">
+  <div class="modal-footer" [class.book-reader]="inBookReader()">
     <button type="button" class="btn btn-primary" (click)="modal.close()">{{ t('close') }}</button>
   </div>
 </ng-container>

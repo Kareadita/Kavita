@@ -34,4 +34,6 @@ export class ShortcutsModalComponent {
   protected readonly modal = inject(NgbActiveModal);
 
   shortcuts = input<KeyboardShortcut[]>([]);
+  inBookReader = input<boolean>(false);
+
 }

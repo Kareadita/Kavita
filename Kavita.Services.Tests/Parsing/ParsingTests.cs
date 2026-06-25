@@ -1,4 +1,5 @@
 using System.Globalization;
+using Kavita.Models.Entities.Enums.Font;
 using static Kavita.Services.Scanner.Parser;
 
 namespace Kavita.Services.Tests.Parsing;
@@ -383,4 +384,93 @@ public class ParsingTests
     {
         Assert.Equal(expected, HasEndMarker(input));
     }
+
+    #region ParseEpubFontFromFilename
+
+    [Theory]
+    // Family is everything before the first '-' descriptor separator
+    [InlineData("Family-Regular.ttf", "Family")]
+    [InlineData("Family-BoldItalic.ttf", "Family")]
+    [InlineData("Family-VariableFont_wght.ttf", "Family")]
+    [InlineData("Roboto-Bold.ttf", "Roboto")]
+    // camelCase families get split on the lowercase -> uppercase boundary
+    [InlineData("OpenSans-Regular.ttf", "Open Sans")]
+    [InlineData("PlayfairDisplay-Italic.ttf", "Playfair Display")]
+    // No descriptor separator: the whole (camelCase split) name is the family
+    [InlineData("Arial.ttf", "Arial")]
+    [InlineData("OpenSans.ttf", "Open Sans")]
+    public void ParseEpubFontFromFilename_ExtractsFamily(string fileName, string expectedFamily)
+    {
+        Assert.Equal(expectedFamily, ParseEpubFontFromFilename(fileName).Family);
+    }
+
+    [Theory]
+    // Style is "italic" when the filename contains "italic" (case-insensitive), else "normal"
+    [InlineData("Family-Regular.ttf", "normal")]
+    [InlineData("Family-Bold.ttf", "normal")]
+    [InlineData("Family-Italic.ttf", "italic")]
+    [InlineData("Family-BoldItalic.ttf", "italic")]
+    [InlineData("Roboto-boldITALIC.ttf", "italic")]
+    public void ParseEpubFontFromFilename_DetectsItalic(string fileName, string expectedStyle)
+    {
+        Assert.Equal(expectedStyle, ParseEpubFontFromFilename(fileName).Style);
+    }
+
+    [Theory]
+    // Weights resolve via the longest matching descriptor so specific weights beat substrings
+    [InlineData("Family-Thin.ttf", "100")]
+    [InlineData("Family-Light.ttf", "300")]
+    [InlineData("Family-Regular.ttf", "400")]
+    [InlineData("Family-Medium.ttf", "500")]
+    [InlineData("Family-SemiBold.ttf", "600")]
+    [InlineData("Family-Bold.ttf", "700")]
+    [InlineData("Family-ExtraBold.ttf", "800")]
+    [InlineData("Family-Black.ttf", "900")]
+    // "extrabold" must win over the "bold" substring
+    [InlineData("Roboto-ExtraBold.ttf", "800")]
+    // Italic descriptor does not affect the resolved weight
+    [InlineData("Family-BoldItalic.ttf", "700")]
+    // No recognizable descriptor falls back to normal/400
+    [InlineData("Arial.ttf", "400")]
+    public void ParseEpubFontFromFilename_DetectsWeight(string fileName, string expectedWeight)
+    {
+        Assert.Equal(expectedWeight, ParseEpubFontFromFilename(fileName).Weight);
+    }
+
+    [Theory]
+    // Variable fonts map to the full "1 1000" range regardless of casing
+    [InlineData("Family-VariableFont_wght.ttf")]
+    [InlineData("Inter-VariableFont_slnt,wght.ttf")]
+    [InlineData("roboto-variablefont_wght.ttf")]
+    public void ParseEpubFontFromFilename_DetectsVariableWeight(string fileName)
+    {
+        Assert.Equal("1 1000", ParseEpubFontFromFilename(fileName).Weight);
+    }
+
+    [Theory]
+    // Name strips the variable-axes suffix (everything after '_') and prettifies separators
+    [InlineData("Family-Regular.ttf", "Family Regular")]
+    [InlineData("Family-BoldItalic.ttf", "Family BoldItalic")]
+    [InlineData("Family-VariableFont_wght.ttf", "Family Variable Font")]
+    [InlineData("OpenSans-Regular.ttf", "OpenSans Regular")]
+    [InlineData("Arial.ttf", "Arial")]
+    public void ParseEpubFontFromFilename_BuildsName(string fileName, string expectedName)
+    {
+        Assert.Equal(expectedName, ParseEpubFontFromFilename(fileName).Name);
+    }
+
+    [Fact]
+    public void ParseEpubFontFromFilename_PassesThroughFilenameAndProvider()
+    {
+        var font = ParseEpubFontFromFilename("OpenSans-BoldItalic.ttf");
+
+        Assert.Equal("OpenSans-BoldItalic.ttf", font.FileName);
+        Assert.Equal("Open Sans", font.Family);
+        Assert.Equal("OpenSans BoldItalic", font.Name);
+        Assert.Equal("italic", font.Style);
+        Assert.Equal("700", font.Weight);
+        Assert.Equal(FontProvider.User, font.Provider);
+    }
+
+    #endregion
 }

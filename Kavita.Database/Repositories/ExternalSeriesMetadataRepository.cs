@@ -175,7 +175,7 @@ public class ExternalSeriesMetadataRepository(DataContext context, IMapper mappe
         await context.SaveChangesAsync(ct);
     }
 
-    public async Task<IList<int>> GetSeriesThatNeedExternalMetadata(int limit, bool includeStaleData = false,
+    public async Task<List<int>> GetSeriesThatNeedExternalMetadata(int limit, bool includeStaleData = false,
         CancellationToken ct = default)
     {
         return await context.Series

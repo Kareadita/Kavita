@@ -4,7 +4,7 @@
 
   @if (!loading) {
     <div class="position-relative">
-      <button class="btn btn-outline-primary position-absolute custom-position" [ngbTooltip]="t('add-tooltip')" (click)="addNew()" [title]="t('add')">
+      <button class="btn btn-primary position-absolute custom-position" [ngbTooltip]="t('add-tooltip')" (click)="addNew()" [title]="t('add')">
         <i class="fa fa-plus" aria-hidden="true"></i><span class="phone-hidden ms-1">{{t('add')}}</span>
       </button>
     </div>
@@ -337,7 +337,9 @@
                                   <select class="form-select" aria-describedby="book-reader-heading"
                                           formControlName="bookReaderFontFamily">
                                     @for (opt of fonts(); track opt.id) {
-                                      <option [ngValue]="opt.name">{{opt.name | titlecase}}</option>
+                                      <option [ngValue]="opt.family">
+                                        {{opt | epubFontTitle}}
+                                      </option>
                                     }
                                   </select>
                                 </ng-template>

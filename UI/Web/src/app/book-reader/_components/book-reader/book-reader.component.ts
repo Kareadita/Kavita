@@ -871,7 +871,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   async ngOnInit() {
     this.fontService.getFonts().subscribe(fonts => {
       fonts.filter(f => f.name !== FontService.DefaultEpubFont).forEach(font => {
-        this.fontService.getFontFace(font).load().then(loadedFace => {
+        this.fontService.getFontFace(font, this.fontService.resolveCssFamily(font)).load().then(loadedFace => {
           (this.document as any).fonts.add(loadedFace);
         });
       });
@@ -2439,7 +2439,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   openShortcutModal() {
-    this.readerService.openShortcutModal(KEYBIND_TARGETS);
+    this.readerService.openShortcutModal(KEYBIND_TARGETS, true);
   }
 
 
