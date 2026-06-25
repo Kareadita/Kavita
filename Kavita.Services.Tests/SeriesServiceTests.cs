@@ -78,7 +78,8 @@ public class SeriesServiceTests(ITestOutputHelper outputHelper): AbstractDbTest(
             SideStories = new List<int>(),
             SpinOffs = new List<int>(),
             Editions = new List<int>(),
-            Annuals = new List<int>()
+            Annuals = new List<int>(),
+            Cameos = new List<int>(),
         };
     }
 
