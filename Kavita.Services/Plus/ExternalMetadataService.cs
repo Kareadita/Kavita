@@ -287,7 +287,7 @@ public class ExternalMetadataService : IExternalMetadataService
     /// <exception cref="KavitaException"></exception>
     public async Task<ExternalSeriesDetailDto?> GetExternalSeriesDetail(int? aniListId, long? malId, int? mangaBakaId, int? seriesId, CancellationToken ct = default)
     {
-        if (!aniListId.HasValue && !malId.HasValue)
+        if (!aniListId.HasValue && !malId.HasValue && !mangaBakaId.HasValue && !seriesId.HasValue)
         {
             throw new KavitaException("Unable to find valid information from url for External Load");
         }
@@ -2162,6 +2162,7 @@ public class ExternalMetadataService : IExternalMetadataService
     /// <remarks>This uses a different API that series detail</remarks>
     /// <param name="aniListId"></param>
     /// <param name="malId"></param>
+    /// <param name="mangaBakaId"></param>
     /// <param name="seriesId"></param>
     /// <param name="ct"></param>
     /// <returns></returns>
@@ -2169,13 +2170,16 @@ public class ExternalMetadataService : IExternalMetadataService
     {
         // TODO: This is the primary point where we need to integrate ExternalIds since weblink parsing is already handled
         // TODO: Ensure when we set/update weblinks via API, we reparse and update external ids (if they are empty only)
-        var payload = new ExternalMetadataIdsDto()
+        var payload = new SeriesDetailRequestV3Dto()
         {
+            // We can hardcode this for now. But will need to load from Library setting once Hardcover providers
+            // recommendations too
+            Provider = MetadataProvider.Mangabaka,
             AniListId = aniListId,
             MalId = malId,
             MangabakaId = mangaBakaId,
             SeriesName = string.Empty,
-            LocalizedSeriesName = string.Empty
+            AlternativeNames = [],
         };
 
         if (seriesId is > 0)
@@ -2193,26 +2197,25 @@ public class ExternalMetadataService : IExternalMetadataService
                     payload.MalId = ExternalIdParser.GetMalId(series.Metadata.WebLinks);
                 }
                 payload.SeriesName = series.Name;
-                payload.LocalizedSeriesName = series.LocalizedName;
-                payload.PlusMediaFormat = series.Library.Type.ConvertToPlusMediaFormat(series.Format);
+                payload.AlternativeNames = [series.LocalizedName];
+                payload.Format = series.Library.Type.ConvertToPlusMediaFormat(series.Format);
             }
 
         }
-        try
+
+        var result =  await _kavitaPlusApiService.GetSeriesDetailV3Async(payload, ct);
+        if (!result.IsSuccess)
         {
-            var ret =  await _kavitaPlusApiService.GetSeriesDetailByIdAsync(payload, ct);
-
-            ret.Summary = StringHelper.RemoveSourceInDescription(StringHelper.SquashBreaklines(ret.Summary));
-
-            return ret;
-
-        }
-        catch (Exception e)
-        {
-            _logger.LogError(e, "An error happened during the request to Kavita+ API");
+            _logger.LogError("Failed to retrieve series detail from Kavita Plus API: {ErrorMessage}", result.ErrorMessage);
+            return null;
         }
 
-        return null;
+        var extSeries = result.Data.Series;
+        if (extSeries == null) return null;
+
+        extSeries.Summary = StringHelper.RemoveSourceInDescription(StringHelper.SquashBreaklines(extSeries.Summary));
+
+        return extSeries;
     }
 
     private static bool HasForceOverride(MetadataSettingsDto settings, IHasKPlusMetadata kPlusMetadata,
