@@ -61,33 +61,6 @@ public class KavitaPlusApiService(ILogger<KavitaPlusApiService> logger, IUnitOfW
             .ReceiveJson<IList<ExternalSeriesMatchDto>>();
     }
 
-    public async Task<SeriesDetailPlusApiDto> GetSeriesDetailAsync(PlusSeriesRequestDto request, CancellationToken ct = default)
-    {
-        var license = (await unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.LicenseKey, ct)).Value;
-        var token = (await unitOfWork.UserRepository.GetDefaultAdminUser(ct: ct))
-            .ScrobbleProviders[ScrobbleProvider.AniList]
-            .AuthenticationToken;
-
-        return await (Configuration.KavitaPlusApiUrl + "/api/metadata/v3/series-detail")
-            .WithKavitaPlusHeaders(license, token)
-            .PostJsonAsync(request, cancellationToken: ct)
-            .ReceiveJson<SeriesDetailPlusApiDto>();
-    }
-
-    public async Task<ExternalSeriesDetailDto> GetSeriesDetailByIdAsync(ExternalMetadataIdsDto request,
-        CancellationToken ct = default)
-    {
-        var license = (await unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.LicenseKey, ct)).Value;
-        var token = (await unitOfWork.UserRepository.GetDefaultAdminUser(ct: ct))
-            .ScrobbleProviders[ScrobbleProvider.AniList]
-            .AuthenticationToken;
-
-        return await (Configuration.KavitaPlusApiUrl + "/api/metadata/v2/series-by-ids")
-            .WithKavitaPlusHeaders(license, token)
-            .PostJsonAsync(request, cancellationToken: ct)
-            .ReceiveJson<ExternalSeriesDetailDto>();
-    }
-
     public async Task<KPlusResult<SeriesDetailPlusApiDto?>> GetSeriesDetailV3Async(SeriesDetailRequestV3Dto request, CancellationToken ct = default)
     {
         try
@@ -111,24 +84,6 @@ public class KavitaPlusApiService(ILogger<KavitaPlusApiService> logger, IUnitOfW
         {
             logger.LogError(ex, "There was an issue getting series detail from Kavita+ for Series ({SeriesName})", request.SeriesName);
             return KPlusResult<SeriesDetailPlusApiDto?>.Failure(ex.Message);
-        }
-    }
-
-    public async Task<KPlusResult<List<ExternalSeriesMatchDto>>> MatchSeriesV3Async(MatchRequestV3Dto request, CancellationToken ct = default)
-    {
-        try
-        {
-            var license = (await unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.LicenseKey, ct)).Value;
-
-            return await (Configuration.KavitaPlusApiUrl + "/api/v3/Metadata/match")
-                .WithKavitaPlusHeaders(license)
-                .PostJsonAsync(request, cancellationToken: ct)
-                .ReceiveJson<KPlusResult<List<ExternalSeriesMatchDto>>>();
-        }
-        catch (Exception ex)
-        {
-            logger.LogError(ex, "There was an issue matching series from Kavita+ for Series ({SeriesName})", request.SeriesName);
-            return KPlusResult<List<ExternalSeriesMatchDto>>.Failure(ex.Message);
         }
     }
 
