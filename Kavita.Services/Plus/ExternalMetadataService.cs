@@ -294,7 +294,6 @@ public class ExternalMetadataService : IExternalMetadataService
 
         // This is for the Series drawer. We can get this extra information during the initial SeriesDetail call so it's all coming from the DB
         return await GetSeriesDetail(aniListId, malId, mangaBakaId, seriesId, ct);
-
     }
 
     public async Task<SeriesDetailPlusDto?> GetSeriesDetailPlus(int seriesId, LibraryType libraryType,
@@ -2180,6 +2179,10 @@ public class ExternalMetadataService : IExternalMetadataService
             MangabakaId = mangaBakaId,
             SeriesName = string.Empty,
             AlternativeNames = [],
+            IncludeRecommendations = false,
+            IncludeReviews = false,
+            IncludeRelationships = false,
+            IncludeRatings = false
         };
 
         if (seriesId is > 0)
@@ -2200,8 +2203,8 @@ public class ExternalMetadataService : IExternalMetadataService
                 payload.AlternativeNames = [series.LocalizedName];
                 payload.Format = series.Library.Type.ConvertToPlusMediaFormat(series.Format);
             }
-
         }
+
 
         var result =  await _kavitaPlusApiService.GetSeriesDetailV3Async(payload, ct);
         if (!result.IsSuccess)

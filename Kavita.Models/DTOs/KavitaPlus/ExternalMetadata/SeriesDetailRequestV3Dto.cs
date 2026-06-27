@@ -17,6 +17,27 @@ public sealed record SeriesDetailRequestV3Dto: MetadataRequest
     public int? Year { get; set; }
 
     /// <summary>
+    /// Include Reviews
+    /// </summary>
+    /// <remarks>Make false for Recommendation data retrieval</remarks>
+    public bool IncludeReviews { get; set; } = true;
+    /// <summary>
+    /// Include Recommendations
+    /// </summary>
+    /// <remarks>Make false for Recommendation data retrieval</remarks>
+    public bool IncludeRecommendations { get; set; } = true;
+    /// <summary>
+    /// Include Relationships
+    /// </summary>
+    /// <remarks>Make false for Recommendation data retrieval</remarks>
+    public bool IncludeRelationships { get; set; } = true;
+    /// <summary>
+    /// Include Ratings
+    /// </summary>
+    /// <remarks>Make false for Recommendation data retrieval</remarks>
+    public bool IncludeRatings { get; set; } = true;
+
+    /// <summary>
     /// Projects a v2 <see cref="PlusSeriesRequestDto"/> into the v3 series-detail request contract.
     /// </summary>
     /// <param name="data">The v2 request data</param>
