@@ -123,7 +123,7 @@ where T: IScrobbleProviderService
             await auditService.LogTemperedAsync(al => al.SeriesId == ctx.Series.Id && al.UserId == ctx.User.Id, KavitaPlusAuditCategory.Scrobble,
                 KavitaPlusEventType.ScrobbleEventSkipped, AuditStatus.Info, AuditSubjectType.Series,
                 payload: new AuditLogScrobbleParamsDto { ScrobbleEventType = ScrobbleEventType.ScoreUpdated, Provider = Provider },
-                seriesId: ctx.Series.Id, error: "missing-required-ids", userId: ctx.User.Id, ct: ct);
+                seriesId: ctx.Series.Id, error: "series-missing-required-ids", userId: ctx.User.Id, ct: ct);
             return;
         }
 
@@ -192,7 +192,7 @@ where T: IScrobbleProviderService
             await auditService.LogTemperedAsync(al => al.SeriesId == ctx.Series.Id && al.UserId == ctx.User.Id, KavitaPlusAuditCategory.Scrobble,
                 KavitaPlusEventType.ScrobbleEventSkipped, AuditStatus.Info, AuditSubjectType.Series,
                 payload: new AuditLogScrobbleParamsDto { ScrobbleEventType = ScrobbleEventType.Review, Provider = Provider },
-                seriesId: ctx.Series.Id, error: "missing-required-ids", userId: ctx.User.Id, ct: ct);
+                seriesId: ctx.Series.Id, error: "series-missing-required-ids", userId: ctx.User.Id, ct: ct);
             return;
         }
 
@@ -263,7 +263,7 @@ where T: IScrobbleProviderService
             await auditService.LogTemperedAsync(al => al.SeriesId == ctx.Series.Id && al.UserId == ctx.User.Id, KavitaPlusAuditCategory.Scrobble,
                 KavitaPlusEventType.ScrobbleEventSkipped, AuditStatus.Info, AuditSubjectType.Series,
                 payload: new AuditLogScrobbleParamsDto { ScrobbleEventType = ScrobbleEventType.ChapterRead, Provider = Provider },
-                seriesId: ctx.Series.Id, error: "missing-required-ids", userId: ctx.User.Id, ct: ct);
+                seriesId: ctx.Series.Id, error: "series-missing-required-ids", userId: ctx.User.Id, ct: ct);
             return;
         }
 
@@ -371,7 +371,7 @@ where T: IScrobbleProviderService
             await auditService.LogTemperedAsync(al => al.SeriesId == ctx.Series.Id && al.UserId == ctx.User.Id, KavitaPlusAuditCategory.Scrobble,
                 KavitaPlusEventType.ScrobbleEventSkipped, AuditStatus.Info, AuditSubjectType.Series,
                 payload: new AuditLogScrobbleParamsDto { ScrobbleEventType = eventType, Provider = Provider },
-                seriesId: ctx.Series.Id, error: "missing-required-ids", userId: ctx.User.Id, ct: ct);
+                seriesId: ctx.Series.Id, error: "series-missing-required-ids", userId: ctx.User.Id, ct: ct);
             return;
         }
 

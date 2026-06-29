@@ -747,7 +747,7 @@ public class LibraryController(
             LibraryType.Book => [Models.Entities.Enums.MetadataProvider.Hardcover, Models.Entities.Enums.MetadataProvider.Mangabaka],
             LibraryType.Image => [Models.Entities.Enums.MetadataProvider.Mangabaka, Models.Entities.Enums.MetadataProvider.ComicBookRoundup],
             LibraryType.LightNovel => [Models.Entities.Enums.MetadataProvider.Mangabaka, Models.Entities.Enums.MetadataProvider.Hardcover],
-            LibraryType.ComicVine => [Models.Entities.Enums.MetadataProvider.ComicBookRoundup],
+            LibraryType.ComicVine => [Models.Entities.Enums.MetadataProvider.ComicBookRoundup, Models.Entities.Enums.MetadataProvider.Hardcover],
             _ => throw new ArgumentOutOfRangeException()
         };
 
