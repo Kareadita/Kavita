@@ -26,6 +26,11 @@ public class MyAnimeListScrobbleProviderService(ILogger<MyAnimeListScrobbleProvi
         evt.MalId = series.MalId;
     }
 
+    protected override bool HasRequiredIds(Series series)
+    {
+        return series.MalId > 0;
+    }
+
     public override RateProfile RateProfile => new(
         BaseInterval: TimeSpan.FromSeconds(1),
         Buffer: TimeSpan.FromMilliseconds(500),

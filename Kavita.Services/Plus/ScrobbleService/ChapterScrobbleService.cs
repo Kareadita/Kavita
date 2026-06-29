@@ -37,10 +37,21 @@ where T: IScrobbleProviderService
 
     public abstract bool IsTokenValid(string token);
 
+    protected abstract bool HasRequiredIds(Chapter chapter);
+
     public async Task ScrobbleReadStatusUpdates(ScrobbleUpdateContext ctx, ScrobbleReadStatus status,
         TransitionRuleKind? ruleKind = null, string? ruleHash = null, CancellationToken ct = default)
     {
         if (!SupportedEvents.Contains(ScrobbleEventType.ReadStatusUpdate) || ctx.Chapter == null) return;
+
+        if (!HasRequiredIds(ctx.Chapter))
+        {
+            await auditService.LogTemperedAsync(al => al.SubjectId == ctx.Chapter.Id, KavitaPlusAuditCategory.Scrobble,
+                KavitaPlusEventType.ScrobbleEventSkipped, AuditStatus.Failure, AuditSubjectType.Chapter,
+                seriesId: ctx.Series.Id, payload: new AuditLogScrobbleParamsDto { ScrobbleEventType = ScrobbleEventType.ReadStatusUpdate, Provider = Provider },
+                subjectId: ctx.Chapter.Id, error: "chapter-missing-required-ids", ct: ct);
+            return;
+        }
 
         var existingEvent = await unitOfWork.ScrobbleRepository.GetEvent(
             Provider, ctx.User.Id, ctx.Series.Id, ctx.Chapter.Id, ScrobbleEventType.ReadStatusUpdate, true, ct
@@ -106,6 +117,15 @@ where T: IScrobbleProviderService
     {
         if (!SupportedEvents.Contains(ScrobbleEventType.ScoreUpdated) || ctx.Chapter == null) return;
 
+        if (!HasRequiredIds(ctx.Chapter))
+        {
+            await auditService.LogTemperedAsync(al => al.SubjectId == ctx.Chapter.Id, KavitaPlusAuditCategory.Scrobble,
+                KavitaPlusEventType.ScrobbleEventSkipped, AuditStatus.Failure, AuditSubjectType.Chapter,
+                seriesId: ctx.Series.Id, payload: new AuditLogScrobbleParamsDto { ScrobbleEventType = ScrobbleEventType.ScoreUpdated, Provider = Provider },
+                subjectId: ctx.Chapter.Id, error: "chapter-missing-required-ids", ct: ct);
+            return;
+        }
+
         var existingEvent = await unitOfWork.ScrobbleRepository.GetEvent(
             Provider, ctx.User.Id, ctx.Series.Id, ctx.Chapter.Id, ScrobbleEventType.ScoreUpdated, true, ct
             );
@@ -168,6 +188,15 @@ where T: IScrobbleProviderService
         CancellationToken ct = default)
     {
         if (!SupportedEvents.Contains(ScrobbleEventType.Review) || ctx.Chapter == null) return;
+
+        if (!HasRequiredIds(ctx.Chapter))
+        {
+            await auditService.LogTemperedAsync(al => al.SubjectId == ctx.Chapter.Id, KavitaPlusAuditCategory.Scrobble,
+                KavitaPlusEventType.ScrobbleEventSkipped, AuditStatus.Failure, AuditSubjectType.Chapter,
+                seriesId: ctx.Series.Id, payload: new AuditLogScrobbleParamsDto { ScrobbleEventType = ScrobbleEventType.Review, Provider = Provider },
+                subjectId: ctx.Chapter.Id, error: "chapter-missing-required-ids", ct: ct);
+            return;
+        }
 
         var existingEvent = await unitOfWork.ScrobbleRepository.GetEvent(
             Provider, ctx.User.Id, ctx.Series.Id, ctx.Chapter.Id, ScrobbleEventType.Review, true, ct
@@ -233,6 +262,15 @@ where T: IScrobbleProviderService
     public async Task ScrobbleReadingUpdate(ScrobbleUpdateContext ctx, CancellationToken ct = default)
     {
         if (!SupportedEvents.Contains(ScrobbleEventType.ChapterRead) || ctx.Chapter == null) return;
+
+        if (!HasRequiredIds(ctx.Chapter))
+        {
+            await auditService.LogTemperedAsync(al => al.SubjectId == ctx.Chapter.Id, KavitaPlusAuditCategory.Scrobble,
+                KavitaPlusEventType.ScrobbleEventSkipped, AuditStatus.Failure, AuditSubjectType.Chapter,
+                seriesId: ctx.Series.Id, payload: new AuditLogScrobbleParamsDto { ScrobbleEventType = ScrobbleEventType.ChapterRead, Provider = Provider },
+                subjectId: ctx.Chapter.Id, error: "chapter-missing-required-ids", ct: ct);
+            return;
+        }
 
         var chapterProgress = await unitOfWork.AppUserProgressRepository.GetUserProgressAsync(ctx.Chapter.Id, ctx.User.Id, ct);
         var hasAnyProgress = chapterProgress is { PagesRead: > 0 };
@@ -324,6 +362,15 @@ where T: IScrobbleProviderService
             || ctx.Chapter == null) return;
 
         var eventType = onWantToRead ? ScrobbleEventType.AddWantToRead : ScrobbleEventType.RemoveWantToRead;
+
+        if (!HasRequiredIds(ctx.Chapter))
+        {
+            await auditService.LogTemperedAsync(al => al.SubjectId == ctx.Chapter.Id, KavitaPlusAuditCategory.Scrobble,
+                KavitaPlusEventType.ScrobbleEventSkipped, AuditStatus.Failure, AuditSubjectType.Chapter,
+                seriesId: ctx.Series.Id, payload: new AuditLogScrobbleParamsDto { ScrobbleEventType = eventType, Provider = Provider },
+                subjectId: ctx.Chapter.Id, error: "chapter-missing-required-ids", ct: ct);
+            return;
+        }
 
         var existingEvents = (await unitOfWork.ScrobbleRepository.GetUserEventsForSeries(ctx.User.Id, ctx.Series.Id, ct))
             .Where(e => e.ScrobbleProvider == Provider && e.ChapterId == ctx.Chapter.Id)

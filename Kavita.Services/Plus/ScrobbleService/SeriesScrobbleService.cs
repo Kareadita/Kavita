@@ -38,10 +38,21 @@ where T: IScrobbleProviderService
 
     public abstract bool IsTokenValid(string token);
 
+    protected abstract bool HasRequiredIds(Series series);
+
     public async Task ScrobbleReadStatusUpdates(ScrobbleUpdateContext ctx, ScrobbleReadStatus status,
         TransitionRuleKind? ruleKind = null, string? ruleHash = null, CancellationToken ct = default)
     {
         if (!SupportedEvents.Contains(ScrobbleEventType.ReadStatusUpdate) || ctx.Chapter != null) return;
+
+        if (!HasRequiredIds(ctx.Series))
+        {
+            await auditService.LogTemperedAsync(al => al.SeriesId == ctx.Series.Id, KavitaPlusAuditCategory.Scrobble,
+                KavitaPlusEventType.ScrobbleEventSkipped, AuditStatus.Failure, AuditSubjectType.Series,
+                payload: new AuditLogScrobbleParamsDto { ScrobbleEventType = ScrobbleEventType.ReadStatusUpdate, Provider = Provider },
+                seriesId: ctx.Series.Id, error: "series-missing-required-ids", ct: ct);
+            return;
+        }
 
         var existingEvent = await unitOfWork.ScrobbleRepository.GetEvent(
             Provider, ctx.User.Id, ctx.Series.Id, null, ScrobbleEventType.ReadStatusUpdate, true, ct
@@ -107,6 +118,15 @@ where T: IScrobbleProviderService
     {
         if (!SupportedEvents.Contains(ScrobbleEventType.ScoreUpdated) || ctx.Chapter != null) return;
 
+        if (!HasRequiredIds(ctx.Series))
+        {
+            await auditService.LogTemperedAsync(al => al.SeriesId == ctx.Series.Id, KavitaPlusAuditCategory.Scrobble,
+                KavitaPlusEventType.ScrobbleEventSkipped, AuditStatus.Failure, AuditSubjectType.Series,
+                payload: new AuditLogScrobbleParamsDto { ScrobbleEventType = ScrobbleEventType.ScoreUpdated, Provider = Provider },
+                seriesId: ctx.Series.Id, error: "missing-required-ids", ct: ct);
+            return;
+        }
+
         var existingEvent = await unitOfWork.ScrobbleRepository.GetEvent(
             Provider, ctx.User.Id, ctx.Series.Id, null, ScrobbleEventType.ScoreUpdated, true, ct
         );
@@ -166,6 +186,15 @@ where T: IScrobbleProviderService
         CancellationToken ct = default)
     {
         if (!SupportedEvents.Contains(ScrobbleEventType.Review) || ctx.Chapter != null) return;
+
+        if (!HasRequiredIds(ctx.Series))
+        {
+            await auditService.LogTemperedAsync(al => al.SeriesId == ctx.Series.Id, KavitaPlusAuditCategory.Scrobble,
+                KavitaPlusEventType.ScrobbleEventSkipped, AuditStatus.Failure, AuditSubjectType.Series,
+                payload: new AuditLogScrobbleParamsDto { ScrobbleEventType = ScrobbleEventType.Review, Provider = Provider },
+                seriesId: ctx.Series.Id, error: "missing-required-ids", ct: ct);
+            return;
+        }
 
         var existingEvent = await unitOfWork.ScrobbleRepository.GetEvent(
             Provider, ctx.User.Id, ctx.Series.Id, null, ScrobbleEventType.Review, true, ct
@@ -228,6 +257,15 @@ where T: IScrobbleProviderService
     public async Task ScrobbleReadingUpdate(ScrobbleUpdateContext ctx, CancellationToken ct = default)
     {
         if (!SupportedEvents.Contains(ScrobbleEventType.ChapterRead) || ctx.Chapter == null) return;
+
+        if (!HasRequiredIds(ctx.Series))
+        {
+            await auditService.LogTemperedAsync(al => al.SeriesId == ctx.Series.Id, KavitaPlusAuditCategory.Scrobble,
+                KavitaPlusEventType.ScrobbleEventSkipped, AuditStatus.Failure, AuditSubjectType.Series,
+                payload: new AuditLogScrobbleParamsDto { ScrobbleEventType = ScrobbleEventType.ChapterRead, Provider = Provider },
+                seriesId: ctx.Series.Id, error: "missing-required-ids", ct: ct);
+            return;
+        }
 
         // Series should only create scrobble events for completed chapters
         var chapterProgress = await unitOfWork.AppUserProgressRepository.GetUserProgressAsync(ctx.Chapter.Id, ctx.User.Id, ct);
@@ -327,6 +365,15 @@ where T: IScrobbleProviderService
         if (!SupportedEvents.Contains(ScrobbleEventType.AddWantToRead) || !SupportedEvents.Contains(ScrobbleEventType.RemoveWantToRead)) return;
 
         var eventType = onWantToRead ? ScrobbleEventType.AddWantToRead : ScrobbleEventType.RemoveWantToRead;
+
+        if (!HasRequiredIds(ctx.Series))
+        {
+            await auditService.LogTemperedAsync(al => al.SeriesId == ctx.Series.Id, KavitaPlusAuditCategory.Scrobble,
+                KavitaPlusEventType.ScrobbleEventSkipped, AuditStatus.Failure, AuditSubjectType.Series,
+                payload: new AuditLogScrobbleParamsDto { ScrobbleEventType = eventType, Provider = Provider },
+                seriesId: ctx.Series.Id, error: "missing-required-ids", ct: ct);
+            return;
+        }
 
         var existingEvents = (await unitOfWork.ScrobbleRepository.GetUserEventsForSeries(ctx.User.Id, ctx.Series.Id, ct))
             .Where(e => e.ScrobbleProvider == Provider)
