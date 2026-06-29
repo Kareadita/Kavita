@@ -46,10 +46,12 @@ where T: IScrobbleProviderService
 
         if (!HasRequiredIds(ctx.Chapter))
         {
-            await auditService.LogTemperedAsync(al => al.SubjectId == ctx.Chapter.Id, KavitaPlusAuditCategory.Scrobble,
-                KavitaPlusEventType.ScrobbleEventSkipped, AuditStatus.Failure, AuditSubjectType.Chapter,
-                seriesId: ctx.Series.Id, payload: new AuditLogScrobbleParamsDto { ScrobbleEventType = ScrobbleEventType.ReadStatusUpdate, Provider = Provider },
-                subjectId: ctx.Chapter.Id, error: "chapter-missing-required-ids", ct: ct);
+            await auditService.LogTemperedAsync(al => al.SubjectId == ctx.Chapter.Id && al.UserId == ctx.User.Id, KavitaPlusAuditCategory.Scrobble,
+                KavitaPlusEventType.ScrobbleEventSkipped, AuditStatus.Info, AuditSubjectType.Chapter,
+                seriesId: ctx.Series.Id,
+                payload: new AuditLogScrobbleParamsDto
+                    { ScrobbleEventType = ScrobbleEventType.ReadStatusUpdate, Provider = Provider },
+                subjectId: ctx.Chapter.Id, error: "chapter-missing-required-ids", userId: ctx.User.Id, ct: ct);
             return;
         }
 
@@ -119,10 +121,10 @@ where T: IScrobbleProviderService
 
         if (!HasRequiredIds(ctx.Chapter))
         {
-            await auditService.LogTemperedAsync(al => al.SubjectId == ctx.Chapter.Id, KavitaPlusAuditCategory.Scrobble,
-                KavitaPlusEventType.ScrobbleEventSkipped, AuditStatus.Failure, AuditSubjectType.Chapter,
+            await auditService.LogTemperedAsync(al => al.SubjectId == ctx.Chapter.Id && al.UserId == ctx.User.Id, KavitaPlusAuditCategory.Scrobble,
+                KavitaPlusEventType.ScrobbleEventSkipped, AuditStatus.Info, AuditSubjectType.Chapter,
                 seriesId: ctx.Series.Id, payload: new AuditLogScrobbleParamsDto { ScrobbleEventType = ScrobbleEventType.ScoreUpdated, Provider = Provider },
-                subjectId: ctx.Chapter.Id, error: "chapter-missing-required-ids", ct: ct);
+                subjectId: ctx.Chapter.Id, error: "chapter-missing-required-ids", userId: ctx.User.Id, ct: ct);
             return;
         }
 
@@ -191,10 +193,10 @@ where T: IScrobbleProviderService
 
         if (!HasRequiredIds(ctx.Chapter))
         {
-            await auditService.LogTemperedAsync(al => al.SubjectId == ctx.Chapter.Id, KavitaPlusAuditCategory.Scrobble,
-                KavitaPlusEventType.ScrobbleEventSkipped, AuditStatus.Failure, AuditSubjectType.Chapter,
+            await auditService.LogTemperedAsync(al => al.SubjectId == ctx.Chapter.Id && al.UserId == ctx.User.Id, KavitaPlusAuditCategory.Scrobble,
+                KavitaPlusEventType.ScrobbleEventSkipped, AuditStatus.Info, AuditSubjectType.Chapter,
                 seriesId: ctx.Series.Id, payload: new AuditLogScrobbleParamsDto { ScrobbleEventType = ScrobbleEventType.Review, Provider = Provider },
-                subjectId: ctx.Chapter.Id, error: "chapter-missing-required-ids", ct: ct);
+                subjectId: ctx.Chapter.Id, error: "chapter-missing-required-ids", userId: ctx.User.Id, ct: ct);
             return;
         }
 
@@ -265,10 +267,10 @@ where T: IScrobbleProviderService
 
         if (!HasRequiredIds(ctx.Chapter))
         {
-            await auditService.LogTemperedAsync(al => al.SubjectId == ctx.Chapter.Id, KavitaPlusAuditCategory.Scrobble,
-                KavitaPlusEventType.ScrobbleEventSkipped, AuditStatus.Failure, AuditSubjectType.Chapter,
+            await auditService.LogTemperedAsync(al => al.SubjectId == ctx.Chapter.Id && al.UserId == ctx.User.Id, KavitaPlusAuditCategory.Scrobble,
+                KavitaPlusEventType.ScrobbleEventSkipped, AuditStatus.Info, AuditSubjectType.Chapter,
                 seriesId: ctx.Series.Id, payload: new AuditLogScrobbleParamsDto { ScrobbleEventType = ScrobbleEventType.ChapterRead, Provider = Provider },
-                subjectId: ctx.Chapter.Id, error: "chapter-missing-required-ids", ct: ct);
+                subjectId: ctx.Chapter.Id, error: "chapter-missing-required-ids", userId: ctx.User.Id, ct: ct);
             return;
         }
 
@@ -365,10 +367,10 @@ where T: IScrobbleProviderService
 
         if (!HasRequiredIds(ctx.Chapter))
         {
-            await auditService.LogTemperedAsync(al => al.SubjectId == ctx.Chapter.Id, KavitaPlusAuditCategory.Scrobble,
-                KavitaPlusEventType.ScrobbleEventSkipped, AuditStatus.Failure, AuditSubjectType.Chapter,
+            await auditService.LogTemperedAsync(al => al.SubjectId == ctx.Chapter.Id && al.UserId == ctx.User.Id, KavitaPlusAuditCategory.Scrobble,
+                KavitaPlusEventType.ScrobbleEventSkipped, AuditStatus.Info, AuditSubjectType.Chapter,
                 seriesId: ctx.Series.Id, payload: new AuditLogScrobbleParamsDto { ScrobbleEventType = eventType, Provider = Provider },
-                subjectId: ctx.Chapter.Id, error: "chapter-missing-required-ids", ct: ct);
+                subjectId: ctx.Chapter.Id, error: "chapter-missing-required-ids", userId: ctx.User.Id, ct: ct);
             return;
         }
 
