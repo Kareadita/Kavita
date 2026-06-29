@@ -100,13 +100,13 @@ public static class ExternalIdParser
 
     #region Header-based Parsing
     public static bool TryParseAniListHeader(string? text, out int id) =>
-        TryParseHeader(text, "ANILIST", out id);
+        TryParseHeader(text, "ANILIST", out id) || TryParseHeader(text, "AL", out id);
 
     public static bool TryParseHardcoverHeader(string? text, out string id) =>
         TryParseHeader(text, "HARDCOVER", out id);
 
     public static bool TryParseMangaBakaHeader(string? text, out long id) =>
-        TryParseHeader(text, "MANGABAKA", out id);
+        TryParseHeader(text, "MANGABAKA", out id) || TryParseHeader(text, "MB", out id);
 
     public static bool TryParseMalHeader(string? text, out int id) =>
         TryParseHeader(text, "MAL", out id);
