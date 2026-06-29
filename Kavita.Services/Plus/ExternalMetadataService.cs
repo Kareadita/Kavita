@@ -964,7 +964,13 @@ public class ExternalMetadataService : IExternalMetadataService
                 SeriesId = series.Id,
             };
             series.Relations.Add(newRelation);
-            addedRelations.Add(new { relatedSeriesName = relatedSeries.Name, relatedSeriesId = relatedSeries.Id, kind = relation.Relation.ToString() });
+            addedRelations.Add(new
+            {
+                relatedSeriesName = relatedSeries.Name,
+                relatedSeriesId = relatedSeries.Id,
+                relatedSeriesLibraryId = relatedSeries.LibraryId,
+                kind = (int) relation.Relation
+            });
 
             // Handle sequel/prequel: add reverse relationship
             if (relation.Relation is RelationKind.Prequel or RelationKind.Sequel)

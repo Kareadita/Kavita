@@ -56,6 +56,20 @@
           }
         </div>
       }
+      @case ('relations') {
+        <div class="array-items d-flex flex-wrap gap-1">
+          @for (rel of c.relations; track rel.seriesId + '_' + rel.kind) {
+            <a class="text-decoration-none" [routerLink]="['/library', rel.libraryId, 'series', rel.seriesId]">
+              <app-tag-badge [selectionMode]="TagBadgeCursor.Clickable" color="primary" fillStyle="outline">
+                {{rel.name}}
+                @if (rel.kind !== null) {
+                  ({{rel.kind | relationship}})
+                }
+              </app-tag-badge>
+            </a>
+          }
+        </div>
+      }
       @case ('object') {
         <span class="text-muted fst-italic">{{t('object-expanded')}}</span>
       }

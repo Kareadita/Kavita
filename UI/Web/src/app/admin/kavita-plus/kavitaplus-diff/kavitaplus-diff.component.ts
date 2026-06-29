@@ -1,17 +1,29 @@
 import {ChangeDetectionStrategy, Component, computed, input} from '@angular/core';
 import {NgTemplateOutlet} from '@angular/common';
+import {RouterLink} from '@angular/router';
 import {TranslocoDirective} from '@jsverse/transloco';
 import {DefaultValuePipe} from "../../../_pipes/default-value.pipe";
 import {MetadataFieldChange} from "../../../_models/kavitaplus/metadata-field-change";
 import {MetadataFieldChangeKindTitlePipe} from "../../../_pipes/metadata-field-change-kind-title.pipe";
 import {MetadataFieldChangeKind} from "../../../_models/kavitaplus/metadata-field-change-kind.enum";
+import {RelationshipPipe} from "../../../_pipes/relationship.pipe";
+import {RelationKind} from "../../../_models/series-detail/relation-kind";
+import {TagBadgeComponent, TagBadgeCursor} from "../../../shared/tag-badge/tag-badge.component";
 
-type ValueKind = 'null' | 'primitive' | 'array' | 'object';
+type ValueKind = 'null' | 'primitive' | 'array' | 'object' | 'relations';
+
+interface RelationLink {
+  name: string;
+  kind: RelationKind | null;
+  seriesId: number;
+  libraryId: number;
+}
 
 interface DiffCell {
   kind: ValueKind;
   text: string | null;
   items: string[] | null;
+  relations?: RelationLink[] | null;
 }
 
 interface SubRow {
@@ -32,9 +44,22 @@ function stringify(value: unknown): string {
   return String(value);
 }
 
-function processCell(value: unknown, depth: number): DiffCell {
+function toRelationLink(item: unknown): RelationLink {
+  const obj = (item !== null && typeof item === 'object') ? item as Record<string, unknown> : {};
+  return {
+    name: stringify(obj['relatedSeriesName']),
+    kind: typeof obj['kind'] === 'number' ? obj['kind'] as RelationKind : null,
+    seriesId: Number(obj['relatedSeriesId']),
+    libraryId: Number(obj['relatedSeriesLibraryId']),
+  };
+}
+
+function processCell(value: unknown, depth: number, field?: MetadataFieldChangeKind): DiffCell {
   if (value === null || value === undefined) {
     return {kind: 'null', text: null, items: null};
+  }
+  if (field === MetadataFieldChangeKind.Relationships && Array.isArray(value)) {
+    return {kind: 'relations', text: null, items: null, relations: (value as unknown[]).map(toRelationLink)};
   }
   if (typeof value !== 'object') {
     return {kind: 'primitive', text: String(value), items: null};
@@ -66,18 +91,20 @@ function expandSubRows(from: unknown, to: unknown): SubRow[] {
 
 @Component({
   selector: 'app-kavitaplus-diff',
-  imports: [TranslocoDirective, NgTemplateOutlet, DefaultValuePipe, MetadataFieldChangeKindTitlePipe],
+  imports: [TranslocoDirective, NgTemplateOutlet, RouterLink, DefaultValuePipe, MetadataFieldChangeKindTitlePipe, RelationshipPipe, TagBadgeComponent],
   templateUrl: './kavitaplus-diff.component.html',
   styleUrl: './kavitaplus-diff.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class KavitaplusDiffComponent {
+  protected readonly TagBadgeCursor = TagBadgeCursor;
+
   diff = input.required<MetadataFieldChange[]>();
 
   rows = computed<ProcessedRow[]>(() =>
     this.diff().map(change => {
-      const from = processCell(change.from, 1);
-      const to = processCell(change.to, 1);
+      const from = processCell(change.from, 1, change.field);
+      const to = processCell(change.to, 1, change.field);
       const isObjectExpansion = from.kind === 'object' || to.kind === 'object';
 
       return {
