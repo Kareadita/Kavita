@@ -23,7 +23,7 @@ public sealed record SeriesRelationship
     public ALMediaTitle SeriesName { get; set; }
     public RelationKind Relation { get; set; }
     public ScrobbleProvider Provider { get; set; }
-    public PlusMediaFormat PlusMediaFormat { get; set; } = PlusMediaFormat.Manga;
+    public PlusMediaFormat Format { get; set; } = PlusMediaFormat.Manga;
     public ExternalSeriesDetailDto Series { get; set; }
     public MetadataProvider MetadataProvider { get; set; }
 }

@@ -930,12 +930,21 @@ public class ExternalMetadataService : IExternalMetadataService
                 .Concat(relation.Series.Synonyms)
                 .Where(s => !string.IsNullOrEmpty(s)).ToList()!;
 
+            var externalIds = new ExternalMetadataIdsDto
+            {
+                AniListId = relation.AniListId,
+                MalId = relation.MalId,
+                MangabakaId = relation.MangabakaId,
+                PlusMediaFormat = relation.Format,
+            };
 
-            var relatedSeries = await _unitOfWork.SeriesRepository.GetSeriesByAnyNameAsync(
+            var formatTypes = relation.Format.GetMangaFormats();
+
+            var relatedSeries = await _unitOfWork.SeriesRepository.GetSeriesFromExternalMetadata(
                 names,
-                relation.PlusMediaFormat.GetMangaFormats(),
+                formatTypes,
                 defaultAdmin.Id,
-                relation.AniListId,
+                externalIds,
                 SeriesIncludes.Related);
 
             // Skip if no related series found or series is the parent

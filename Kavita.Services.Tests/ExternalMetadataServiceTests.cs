@@ -2586,7 +2586,7 @@ public class ExternalMetadataServiceTests: AbstractDbTest
                     RomajiTitle = series2.Name,
                 },
                 AniListId = 10,
-                PlusMediaFormat = PlusMediaFormat.Manga
+                Format = PlusMediaFormat.Manga
             }]
         }, 1);
 
@@ -2642,7 +2642,7 @@ public class ExternalMetadataServiceTests: AbstractDbTest
                     RomajiTitle = series2.Name,
                 },
                 AniListId = 10,
-                PlusMediaFormat = PlusMediaFormat.Manga
+                Format = PlusMediaFormat.Manga
             }]
         }, 1);
 
@@ -2699,7 +2699,7 @@ public class ExternalMetadataServiceTests: AbstractDbTest
                     RomajiTitle = series2.Name,
                 },
                 AniListId = 10,
-                PlusMediaFormat = PlusMediaFormat.Book
+                Format = PlusMediaFormat.Book
             }]
         }, 1);
 
@@ -2765,7 +2765,7 @@ public class ExternalMetadataServiceTests: AbstractDbTest
                     NativeTitle = series2.Name,
                     RomajiTitle = series2.Name,
                 },
-                PlusMediaFormat = PlusMediaFormat.Manga
+                Format = PlusMediaFormat.Manga
             }]
         }, 2);
 
@@ -2824,7 +2824,7 @@ public class ExternalMetadataServiceTests: AbstractDbTest
                     NativeTitle = series2.Name,
                     RomajiTitle = series2.Name,
                 },
-                PlusMediaFormat = PlusMediaFormat.Manga
+                Format = PlusMediaFormat.Manga
             }]
         }, 1);
 
@@ -2884,7 +2884,7 @@ public class ExternalMetadataServiceTests: AbstractDbTest
                     NativeTitle = "ブルーロック",
                     RomajiTitle = "Blue Lock",
                 },
-                PlusMediaFormat = PlusMediaFormat.Manga,
+                Format = PlusMediaFormat.Manga,
                 AniListId = 106130,
                 MalId = 114745,
                 Provider = ScrobbleProvider.AniList
