@@ -703,6 +703,7 @@ public class ExternalMetadataService : IExternalMetadataService
         Accumulate(ref madeModification, fieldChanges, await UpdateCharacters(series, settings, externalMetadata.Characters));
 
         Accumulate(ref madeModification, fieldChanges, await UpdateRelationships(series, settings, externalMetadata.Relations, defaultAdmin));
+
         try
         {
             madeModification = await UpdateCoverImage(series, settings, externalMetadata) || madeModification;
@@ -921,7 +922,15 @@ public class ExternalMetadataService : IExternalMetadataService
         var addedRelations = new List<object>();
         foreach (var relation in externalMetadataRelations.Where(r => r.Relation != RelationKind.Parent))
         {
-            List<string> names = new [] {relation.SeriesName.PreferredTitle, relation.SeriesName.RomajiTitle, relation.SeriesName.EnglishTitle, relation.SeriesName.NativeTitle}.Where(s => !string.IsNullOrEmpty(s)).ToList()!;
+            List<string> names = new [] {
+                    relation.SeriesName.PreferredTitle,
+                    relation.SeriesName.RomajiTitle,
+                    relation.SeriesName.EnglishTitle,
+                    relation.SeriesName.NativeTitle}
+                .Concat(relation.Series.Synonyms)
+                .Where(s => !string.IsNullOrEmpty(s)).ToList()!;
+
+
             var relatedSeries = await _unitOfWork.SeriesRepository.GetSeriesByAnyNameAsync(
                 names,
                 relation.PlusMediaFormat.GetMangaFormats(),
