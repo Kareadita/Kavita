@@ -146,7 +146,7 @@ export class LibrarySettingsModalComponent implements OnInit {
       case LibraryType.Manga:
         return [MetadataProvider.Mangabaka];
       case LibraryType.Comic:
-        return [MetadataProvider.ComicBookRoundup];
+        return [MetadataProvider.ComicBookRoundup, MetadataProvider.Hardcover];
       case LibraryType.Book:
         return [MetadataProvider.Hardcover, MetadataProvider.Mangabaka];
       case LibraryType.Images:
@@ -154,7 +154,7 @@ export class LibrarySettingsModalComponent implements OnInit {
       case LibraryType.LightNovel:
         return [MetadataProvider.Mangabaka, MetadataProvider.Hardcover];
       case LibraryType.ComicVine:
-        return [MetadataProvider.ComicBookRoundup];
+        return [MetadataProvider.ComicBookRoundup, MetadataProvider.Hardcover];
     }
   });
 
