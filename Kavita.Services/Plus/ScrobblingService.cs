@@ -848,24 +848,24 @@ public class ScrobblingService : IScrobblingService
         if (series.DontMatch)
         {
             _logger.LogInformation("Series {SeriesName} is marked don't match. Not scrobbling", series.Name);
-            await _auditService.LogScrobbleAsync(KavitaPlusEventType.ScrobbleEventSkipped, seriesId,
-                new AuditLogScrobbleParamsDto() {Provider = provider, ScrobbleEventType = eventType}, AuditStatus.Info, "series-dont-match", userId);
+            await _auditService.LogTemperedAsync(al => al.SeriesId == seriesId && al.UserId == userId, KavitaPlusAuditCategory.Scrobble, KavitaPlusEventType.ScrobbleEventSkipped, AuditStatus.Info,
+                payload: new AuditLogScrobbleParamsDto() {Provider = provider, ScrobbleEventType = eventType}, seriesId: seriesId, error: "series-dont-match", userId: userId);
             return true;
         }
 
         if (await _unitOfWork.UserRepository.HasHoldOnSeries(userId, seriesId))
         {
             _logger.LogInformation("Series {SeriesName} is on AppUserId {AppUserId}'s hold list. Not scrobbling", series.Name, userId);
-            await _auditService.LogScrobbleAsync(KavitaPlusEventType.ScrobbleEventSkipped, seriesId,
-                new AuditLogScrobbleParamsDto() {Provider = provider, ScrobbleEventType = eventType}, AuditStatus.Info, "scrobble-hold-active", userId);
+            await _auditService.LogTemperedAsync(al => al.SeriesId == seriesId && al.UserId == userId, KavitaPlusAuditCategory.Scrobble, KavitaPlusEventType.ScrobbleEventSkipped, AuditStatus.Info,
+                payload: new AuditLogScrobbleParamsDto() {Provider = provider, ScrobbleEventType = eventType}, seriesId: seriesId, error: "scrobble-hold-active", userId: userId);
             return true;
         }
 
         var library = series.Library ?? await _unitOfWork.LibraryRepository.GetLibraryForIdAsync(series.LibraryId);
         if (library is not {AllowScrobbling: true} || !ExternalMetadataService.IsPlusEligible(library.Type))
         {
-            await _auditService.LogScrobbleAsync(KavitaPlusEventType.ScrobbleEventSkipped, seriesId,
-                new AuditLogScrobbleParamsDto() {Provider = provider, ScrobbleEventType = eventType}, AuditStatus.Info, "library-scrobbling-disabled", userId);
+            await _auditService.LogTemperedAsync(al => al.SeriesId == seriesId && al.UserId == userId, KavitaPlusAuditCategory.Scrobble, KavitaPlusEventType.ScrobbleEventSkipped, AuditStatus.Info,
+                payload: new AuditLogScrobbleParamsDto() {Provider = provider, ScrobbleEventType = eventType}, seriesId: seriesId, error: "library-scrobbling-disabled", userId: userId);
             return true;
         }
 
@@ -1407,8 +1407,8 @@ public class ScrobblingService : IScrobblingService
 
         foreach (var evt in eventList.Where(e => !CanProcessScrobbleEvent(e)))
         {
-            await _auditService.LogScrobbleAsync(KavitaPlusEventType.ScrobbleEventSkipped, evt.SeriesId,
-                ToAuditParams(evt), AuditStatus.Info, userId: evt.AppUserId, ct: ct);
+            await _auditService.LogTemperedAsync(al => al.SeriesId == evt.SeriesId, KavitaPlusAuditCategory.Scrobble,
+                KavitaPlusEventType.ScrobbleEventSkipped, AuditStatus.Info, AuditSubjectType.Series, evt.SeriesId, payload: ToAuditParams(evt), userId: evt.AppUserId, ct: ct);
         }
 
         foreach (var evt in eventList.Where(CanProcessScrobbleEvent))
