@@ -1,4 +1,5 @@
-﻿using Kavita.Models.Entities.Enums;
+﻿using System;
+using Kavita.Models.Entities.Enums;
 using Kavita.Models.Entities.Metadata;
 
 namespace Kavita.Models.DTOs;
@@ -7,7 +8,11 @@ namespace Kavita.Models.DTOs;
 public sealed record RatingDto
 {
 
+    /// <summary>
+    /// Normalized score 0-100
+    /// </summary>
     public int AverageScore { get; set; }
+    [Obsolete("Not used as of v0.9.1")]
     public int FavoriteCount { get; set; }
     public ScrobbleProvider Provider { get; set; }
     /// <inheritdoc cref="ExternalRating.Authority"/>

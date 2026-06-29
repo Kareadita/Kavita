@@ -130,7 +130,7 @@ public class ExternalSeriesMetadataRepository(DataContext context, IMapper mappe
             .ToList();
 
         IEnumerable<UserReviewDto> reviews = [];
-        if (seriesDetailDto.ExternalReviews != null && seriesDetailDto.ExternalReviews.Any())
+        if (seriesDetailDto.ExternalReviews != null && seriesDetailDto.ExternalReviews.Count != 0)
         {
             reviews = seriesDetailDto.ExternalReviews
                 .Select(r =>
