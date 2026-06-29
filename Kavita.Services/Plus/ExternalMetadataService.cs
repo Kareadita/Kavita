@@ -342,12 +342,19 @@ public class ExternalMetadataService : IExternalMetadataService
             }
         }
 
+        var slug = series.Library.MetadataProvider switch
+        {
+            MetadataProvider.Hardcover => potentialHardcoverSlug,
+            MetadataProvider.ComicBookRoundup => potentialCbrSlug,
+            _ => string.Empty,
+        };
+
         var matchV3Request = new MatchRequestV3Dto
         {
             AniListId = potentialAnilistId ?? ExternalIdParser.GetAniListId(series.Metadata.WebLinks),
             MalId = potentialMalId ?? ExternalIdParser.GetMalId(series.Metadata.WebLinks),
             HardcoverId = null, // This is complex (There's two types of Ids; Series & Books)
-            HardcoverSlug = potentialHardcoverSlug,
+            Slug = slug,
             CbrId = null,
             MangabakaId = potentialMangabakaId > 0 ? potentialMangabakaId : ExternalIdParser.GetMangaBakaId(series.Metadata.WebLinks),
             IsStandAlone = dto.IsStandAlone,
@@ -356,7 +363,7 @@ public class ExternalMetadataService : IExternalMetadataService
             AlternativeNames = otherNames,
             Year = year,
             Query = query,
-            Format = series.Library.Type.ConvertToPlusMediaFormat(series.Format),
+            Format = format,
         };
 
         _logger.LogDebug("Making match request for series {SeriesId}: {@Request}", series.Id, matchV3Request);
