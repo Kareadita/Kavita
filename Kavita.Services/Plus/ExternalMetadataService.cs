@@ -5,7 +5,6 @@ using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 using AutoMapper;
-using Flurl.Http;
 using Hangfire;
 using Kavita.API.Database;
 using Kavita.API.Repositories;
@@ -158,7 +157,7 @@ public class ExternalMetadataService : IExternalMetadataService
 
         if (HasRequiredId(series, series.Library.MetadataProvider))
         {
-            return await GetSeriesDetailPlus(seriesId, libraryType, trigger, ct);
+            return await GetSeriesDetailPlus(seriesId, libraryType, trigger, ct: ct);
         }
 
         var matchRequest = new MatchRequestV3Dto
@@ -252,7 +251,8 @@ public class ExternalMetadataService : IExternalMetadataService
 
         await _unitOfWork.CommitAsync(ct);
 
-        return await GetSeriesDetailPlus(seriesId, libraryType, trigger, ct);
+        // Force a refresh: the match just set new external Ids, so any previously cached metadata no longer applies.
+        return await GetSeriesDetailPlus(seriesId, libraryType, trigger, forceRefresh: true, ct: ct);
     }
 
     private static bool HasRequiredId(Series series, MetadataProvider metadataProvider)
@@ -399,7 +399,7 @@ public class ExternalMetadataService : IExternalMetadataService
     }
 
     private async Task<SeriesDetailPlusDto?> GetSeriesDetailPlus(int seriesId, LibraryType libraryType,
-        MetadataFetchTrigger trigger = MetadataFetchTrigger.OnDemand, CancellationToken ct = default)
+        MetadataFetchTrigger trigger = MetadataFetchTrigger.OnDemand, bool forceRefresh = false, CancellationToken ct = default)
     {
         if (!IsPlusEligible(libraryType) || !await _licenseService.HasActiveLicense(ct: ct)) return _defaultReturn;
 
@@ -407,7 +407,8 @@ public class ExternalMetadataService : IExternalMetadataService
         var series = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(seriesId, SeriesIncludes.Library,  ct: ct);
         if (series == null || !series.WillScrobble() || !series.Library.AllowMetadataMatching) return _defaultReturn;
 
-        var needsRefresh =
+        // After a fresh match the external Ids just changed, so any cached data is stale by definition and must be refetched
+        var needsRefresh = forceRefresh ||
             await _unitOfWork.ExternalSeriesMetadataRepository.NeedsDataRefresh(seriesId, ct);
 
         if (!needsRefresh)

@@ -81,11 +81,13 @@ public class ExternalSeriesMetadataRepository(DataContext context, IMapper mappe
 
     public async Task<bool> NeedsDataRefresh(int seriesId, CancellationToken ct = default)
     {
-        return await context.ExternalSeriesMetadata
+        // A series with no external metadata row has never been fetched and needs a refresh.
+        // Otherwise, only refresh once the cached data has expired.
+        var hasFreshData = await context.ExternalSeriesMetadata
             .Where(s => s.SeriesId == seriesId)
-            .Select(s => s.ValidUntilUtc)
-            .Where(date => date < DateTime.UtcNow)
-            .AnyAsync(ct);
+            .AnyAsync(s => s.ValidUntilUtc >= DateTime.UtcNow, ct);
+
+        return !hasFreshData;
     }
 
     public async Task<SeriesDetailPlusDto?> GetSeriesDetailPlusDto(int seriesId, CancellationToken ct = default)

@@ -39,6 +39,25 @@ public class ExternalSeriesMetadataRepositoryTests(ITestOutputHelper outputHelpe
     }
 
     [Fact]
+    public async Task NeedsDataRefresh_WhenNoMetadataRowExists_ReturnsTrue()
+    {
+        var (unitOfWork, context, _) = await CreateDatabase();
+
+        var lib = new LibraryBuilder("lib0")
+            .WithSeries(new SeriesBuilder("series0").Build())
+            .Build();
+        context.Library.Add(lib);
+        await context.SaveChangesAsync();
+
+        var series = context.Series.First(s => s.Name == "series0");
+
+        // No ExternalSeriesMetadata row exists for this series (e.g. freshly matched)
+        var result = await unitOfWork.ExternalSeriesMetadataRepository.NeedsDataRefresh(series.Id);
+
+        Assert.True(result);
+    }
+
+    [Fact]
     public async Task NeedsDataRefresh_WhenValidUntilIsInTheFuture_ReturnsFalse()
     {
         var (unitOfWork, context, _) = await CreateDatabase();
