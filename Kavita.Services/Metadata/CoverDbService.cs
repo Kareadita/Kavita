@@ -698,7 +698,7 @@ public class CoverDbService : ICoverDbService
                     if (!File.Exists(existingPath))
                     {
                         // Existing cover reference is stale/missing on disk; accept the new image as it's better than nothing
-                        _logger.LogWarning("Existing cover for Chapter {FileName} ({ChapterId}) is missing on disk ({Path}); accepting new cover from source", chapter.Range, chapter.Id, existingPath);
+                        _logger.LogWarning("Existing cover for Chapter {FileName} ({ChapterId}) is missing on disk ({Path}); accepting new cover from source", chapter.Range, chapter.Id, new FileInfo(existingPath).Name);
                         _directoryService.CopyFile(tempFullPath, finalFullPath);
                         _directoryService.DeleteFiles([tempFullPath]);
                         chapter.CoverImage = finalFileName;
