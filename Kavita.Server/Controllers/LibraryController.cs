@@ -106,7 +106,7 @@ public class LibraryController(
         var admins = (await unitOfWork.UserRepository.GetAdminUsersAsync(ct)).ToList();
         foreach (var admin in admins)
         {
-            admin.Libraries ??= new List<Library>();
+            admin.Libraries ??= [];
             admin.Libraries.Add(library);
         }
 

@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore.Migrations;
+﻿using Kavita.Models.Entities.Enums;
+using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
@@ -22,7 +23,7 @@ namespace Kavita.Database.Migrations
                 table: "Library",
                 type: "INTEGER",
                 nullable: false,
-                defaultValue: 0);
+                defaultValue: MetadataProvider.Mangabaka);
         }
 
         /// <inheritdoc />
