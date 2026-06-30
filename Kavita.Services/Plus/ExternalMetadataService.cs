@@ -581,7 +581,7 @@ public class ExternalMetadataService : IExternalMetadataService
             kPlusResult = await _kavitaPlusApiService.GetSeriesDetailV3Async(data, ct);
         }
 
-        if ((kPlusResult.ErrorMessage ?? string.Empty).Contains("Unknown Series"))
+        if (kPlusResult.ErrorMessage.IsUnknownSeriesError())
         {
             series.IsBlacklisted = true;
             await _unitOfWork.CommitAsync(ct);

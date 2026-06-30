@@ -1609,7 +1609,7 @@ public class ScrobblingService : IScrobblingService
                 throw new KavitaException("Access token is invalid");
             }
 
-            if (response.ErrorMessage.Contains("Unknown Series"))
+            if (response.ErrorMessage.IsUnknownSeriesError())
             {
                 // Log the Series name and Id in ScrobbleErrors
                 _logger.LogInformation("Kavita+ was unable to match the series: {SeriesName}", evt.Series.Name);
