@@ -186,6 +186,7 @@ public class ExternalMetadataService : IExternalMetadataService
 
         var validAutomatedMatches = result.Data
             .Where(m => m.MatchRating > 0.9)
+            .OrderBy(m => m.MatchRating)
             .ToList();
 
         if (validAutomatedMatches.Count == 0)
@@ -199,6 +200,8 @@ public class ExternalMetadataService : IExternalMetadataService
             _logger.LogInformation("No good enough matches out of {TotalMatch} found for Series {SeriesId}", result.Data.Count, seriesId);
             return null;
         }
+
+        // WE can add a new case for validatedAutomatedMatches.Count == 2 && validatedAutomatedMatches[1] < 1f && validatedAutomatedMatches[0] == 1f
 
         if (validAutomatedMatches.Count > 1)
         {
