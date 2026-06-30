@@ -543,7 +543,7 @@ public class ExternalMetadataService : IExternalMetadataService
             }).ToList();
 
 
-            // Personalized runs first so that a duplicate perfers Personalized
+            // User-base runs first so that a duplicate prefers User-base
             externalSeriesMetadata.ExternalRecommendations ??= [];
             var seenRecommendations = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
             var recs = await ProcessRecommendations(libraryType, result.ReadersAlsoLike, externalSeriesMetadata,
@@ -927,7 +927,7 @@ public class ExternalMetadataService : IExternalMetadataService
                     relation.SeriesName.RomajiTitle,
                     relation.SeriesName.EnglishTitle,
                     relation.SeriesName.NativeTitle}
-                .Concat(relation.Series.Synonyms)
+                .Concat(relation.Series?.Synonyms ?? [])
                 .Where(s => !string.IsNullOrEmpty(s)).ToList()!;
 
             var externalIds = new ExternalMetadataIdsDto
