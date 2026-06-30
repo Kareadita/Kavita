@@ -614,19 +614,20 @@ public class SeriesRepository(DataContext context, IMapper mapper) : ISeriesRepo
                 Format = series.Library.Type.ConvertToPlusMediaFormat(series.Format),
                 SeriesName = series.Name,
                 AlternativeNames = new List<string> { series.LocalizedName },
-                // TODO: Refactor this to check from ExternalMetadataIds first then ExternalSeriesMetadata. Weblink parsing is pointless as it updates in externalMetadata
-                AniListId = series.ExternalSeriesMetadata.AniListId != 0
+                AniListId = series.AniListId != 0
                     ? series.ExternalSeriesMetadata.AniListId
                     : ExternalIdParser.GetAniListId(series.Metadata.WebLinks),
-                MalId = series.ExternalSeriesMetadata.MalId != 0
+                MalId = series.MalId != 0
                     ? series.ExternalSeriesMetadata.MalId
                     : ExternalIdParser.GetMalId(series.Metadata.WebLinks),
-                CbrId = series.ExternalSeriesMetadata.CbrId,
+                CbrId = series.CbrId,
+                // TODO: Remove GoogleBooks and MangaDex, we don't use them anymore
                 GoogleBooksId = !string.IsNullOrEmpty(series.ExternalSeriesMetadata.GoogleBooksId)
                     ? series.ExternalSeriesMetadata.GoogleBooksId
                     : ExternalIdParser.GetGoogleBooksId(series.Metadata.WebLinks),
-                MangabakaId = (int?) series.MangaBakaId,
                 MangaDexId = ExternalIdParser.GetMangaDexId(series.Metadata.WebLinks),
+
+                MangabakaId = (int?) series.MangaBakaId,
                 HardcoverId = series.HardcoverId,
                 IsStandAlone = series.IsStandAlone,
                 VolumeCount = series.Volumes.Count,
