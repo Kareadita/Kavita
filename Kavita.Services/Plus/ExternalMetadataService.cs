@@ -573,7 +573,7 @@ public class ExternalMetadataService : IExternalMetadataService
     {
 
         var series = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(seriesId, SeriesIncludes.Library, ct);
-        if (series == null)
+        if (series?.Library == null)
         {
             return _defaultReturn;
         }
@@ -656,16 +656,15 @@ public class ExternalMetadataService : IExternalMetadataService
             return rating;
         }).ToList();
 
-
-            // User-base runs first so that a duplicate prefers User-base
-            externalSeriesMetadata.ExternalRecommendations ??= [];
-            var seenRecommendations = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
-            var recs = await ProcessRecommendations(libraryType, result.ReadersAlsoLike, externalSeriesMetadata,
-                RecommendationSource.UserBased, provider, seenRecommendations);
-            var similarRecs = await ProcessRecommendations(libraryType, result.SimilarSeries, externalSeriesMetadata,
-                RecommendationSource.Similar, provider, seenRecommendations);
-            recs.ExternalSeries = recs.ExternalSeries.Concat(similarRecs.ExternalSeries).ToList();
-            recs.OwnedSeries = recs.OwnedSeries.Concat(similarRecs.OwnedSeries).ToList();
+        // User-base runs first so that a duplicate prefers User-base
+        externalSeriesMetadata.ExternalRecommendations ??= [];
+        var seenRecommendations = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+        var recs = await ProcessRecommendations(libraryType, result.ReadersAlsoLike, externalSeriesMetadata,
+            RecommendationSource.UserBased, series.Library!.MetadataProvider, seenRecommendations);
+        var similarRecs = await ProcessRecommendations(libraryType, result.SimilarSeries, externalSeriesMetadata,
+            RecommendationSource.Similar, series.Library.MetadataProvider, seenRecommendations);
+        recs.ExternalSeries = recs.ExternalSeries.Concat(similarRecs.ExternalSeries).ToList();
+        recs.OwnedSeries = recs.OwnedSeries.Concat(similarRecs.OwnedSeries).ToList();
 
         var extRatings = externalSeriesMetadata.ExternalRatings
             .Where(r => r.AverageScore > 0)

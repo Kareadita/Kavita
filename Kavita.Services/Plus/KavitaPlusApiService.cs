@@ -87,6 +87,24 @@ public class KavitaPlusApiService(ILogger<KavitaPlusApiService> logger, IUnitOfW
         }
     }
 
+    public async Task<KPlusResult<List<ExternalSeriesMatchDto>>> MatchSeriesV3Async(MatchRequestV3Dto request, CancellationToken ct = default)
+    {
+        try
+        {
+            var license = (await unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.LicenseKey, ct)).Value;
+
+            return await (Configuration.KavitaPlusApiUrl + "/api/v3/Metadata/match")
+                .WithKavitaPlusHeaders(license)
+                .PostJsonAsync(request, cancellationToken: ct)
+                .ReceiveJson<KPlusResult<List<ExternalSeriesMatchDto>>>();
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "There was an issue matching series from Kavita+ for Series ({SeriesName})", request.SeriesName);
+            return KPlusResult<List<ExternalSeriesMatchDto>>.Failure(ex.Message);
+        }
+    }
+
     public async Task<ScrobbleResponseDto> PostScrobbleV3UpdateAsync(ScrobbleV3Dto data, string license, CancellationToken ct = default)
     {
         try
