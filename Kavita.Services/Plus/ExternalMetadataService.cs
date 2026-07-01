@@ -63,11 +63,12 @@ public class ExternalMetadataService : IExternalMetadataService
     private readonly TimeSpan _externalSeriesMetadataCache = TimeSpan.FromDays(30);
     private readonly string[] _artistRoleStrings = [
         "Art", "Story & Art",  // AniList
-        "Artist" // MangaBaka
+        "Artist", // MangaBaka, Hardcover
+        "Illustrations", // Hardcover
     ];
     private readonly string[] _writerRoleStrings = [
         "Story", "Story & Art", // AniList
-        "Author" // MangaBaka
+        "Author", // MangaBaka, Hardcover
     ];
     private readonly SeriesDetailPlusDto _defaultReturn = new()
     {
