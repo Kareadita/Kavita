@@ -2292,8 +2292,7 @@ public class ExternalMetadataService : IExternalMetadataService
             AlternativeNames = [],
             IncludeRecommendations = false,
             IncludeReviews = false,
-            IncludeRelationships = false,
-            IncludeRatings = false
+            IncludeRelationships = false
         };
 
         if (seriesId is > 0)
