@@ -64,7 +64,7 @@ public class ExternalMetadataService : IExternalMetadataService
     private readonly string[] _artistRoleStrings = [
         "Art", "Story & Art",  // AniList
         "Artist", // MangaBaka, Hardcover
-        "Illustrations", // Hardcover
+        "Illustrations", "Cover Artist" // Hardcover
     ];
     private readonly string[] _writerRoleStrings = [
         "Story", "Story & Art", // AniList
