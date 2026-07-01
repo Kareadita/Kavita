@@ -98,7 +98,7 @@ public class SeriesRepositoryTests(ITestOutputHelper testOutputHelper) : Abstrac
         await unitOfWork.CommitAsync();
 
         // Act
-        var result = await unitOfWork.SeriesRepository.GetSeriesDetailRequestV3Dto(series.Id);
+        var result = await unitOfWork.SeriesRepository.GetKavitaPlusSeriesDetailRequestV3Dto(series.Id);
 
         // Assert
         Assert.NotNull(result);

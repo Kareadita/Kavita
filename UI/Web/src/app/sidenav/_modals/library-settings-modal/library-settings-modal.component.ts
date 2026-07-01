@@ -141,26 +141,8 @@ export class LibrarySettingsModalComponent implements OnInit {
   selectedLibraryType = toSignal(this.libraryForm.get('type')!.valueChanges.pipe(
     map(() => this.libraryForm.getRawValue().type as LibraryType),
   ), { initialValue: LibraryType.Manga });
-  validMetadataProviders = computed(() => {
-    const libraryType = parseInt(this.selectedLibraryType() + '') as LibraryType;
-    switch (libraryType) {
-      case LibraryType.Manga:
-        return [MetadataProvider.Mangabaka];
-      case LibraryType.Comic:
-        return [MetadataProvider.ComicBookRoundup, MetadataProvider.Hardcover];
-      case LibraryType.Book:
-        return [MetadataProvider.Hardcover, MetadataProvider.Mangabaka];
-      case LibraryType.Images:
-        return [MetadataProvider.Mangabaka, MetadataProvider.ComicBookRoundup];
-      case LibraryType.LightNovel:
-        return [MetadataProvider.Mangabaka, MetadataProvider.Hardcover];
-      case LibraryType.ComicVine:
-        return [MetadataProvider.ComicBookRoundup, MetadataProvider.Hardcover];
-    }
 
-    console.warn("Did not match the selected library type: ", libraryType, libraryType === LibraryType.ComicVine);
-    return [];
-  });
+  validMetadataProviders = this.libraryService.getSupportedMetadataProviders(() => this.selectedLibraryType());
 
   selectedFolders: string[] = [];
   madeChanges = false;
@@ -194,7 +176,8 @@ export class LibrarySettingsModalComponent implements OnInit {
 
   constructor() {
     effect(() => {
-      const validMetadataProviders = this.validMetadataProviders();
+      if (!this.validMetadataProviders.hasValue()) return;
+      const validMetadataProviders = this.validMetadataProviders.value();
       const selectedMetadataProvider = this.libraryForm.get('metadataProvider')!.value as MetadataProvider;
 
       if (!validMetadataProviders.includes(selectedMetadataProvider)) {

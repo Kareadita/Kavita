@@ -600,7 +600,7 @@ public class SeriesRepository(DataContext context, IMapper mapper) : ISeriesRepo
         return await PagedList<SeriesDto>.CreateAsync(retSeries, userParams.PageNumber, userParams.PageSize, ct);
     }
 
-    public async Task<SeriesDetailRequestV3Dto?> GetSeriesDetailRequestV3Dto(int seriesId, CancellationToken ct = default)
+    public async Task<SeriesDetailRequestV3Dto?> GetKavitaPlusSeriesDetailRequestV3Dto(int seriesId, CancellationToken ct = default)
     {
 
         // I need to check Weblinks when AniListId/MalId is already set in ExternalSeries

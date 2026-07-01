@@ -123,7 +123,7 @@ public interface ISeriesRepository
     Task RemoveFromOnDeckAsync(int seriesId, int userId, CancellationToken ct = default);
     Task ClearOnDeckRemovalAsync(int seriesId, int userId, CancellationToken ct = default);
     Task<PagedList<SeriesDto>> GetSeriesDtoForLibraryIdAsync(int userId, UserParams userParams, SeriesFilterV2Dto seriesFilterDto, QueryContext queryContext = QueryContext.None, CancellationToken ct = default);
-    Task<SeriesDetailRequestV3Dto?> GetSeriesDetailRequestV3Dto(int seriesId, CancellationToken ct = default);
+    Task<SeriesDetailRequestV3Dto?> GetKavitaPlusSeriesDetailRequestV3Dto(int seriesId, CancellationToken ct = default);
     Task<Series?> MatchSeriesAsync(ExternalSeriesDetailDto externalSeries, CancellationToken ct = default);
     Task<List<Series>> GetSeriesForReadStatusTransitionRuleAsync(int userId, ReadStatusTransitionRule rule, bool requireUnReadChapters, CancellationToken ct);
 }

@@ -8,6 +8,7 @@ using Kavita.API.Database;
 using Kavita.API.Errors;
 using Kavita.API.Repositories;
 using Kavita.API.Services;
+using Kavita.API.Services.Plus;
 using Kavita.Common;
 using Kavita.Models;
 using Kavita.Models.Builders;
@@ -268,7 +269,7 @@ public partial class AccountService(
 
     public static void AddScrobbleProvidersToUser(AppUser user)
     {
-        foreach (var provider in ScrobblingService.AllScrobbleProviders)
+        foreach (var provider in KavitaPlusConfiguration.AllInUseScrobbleProviders)
         {
             user.ScrobbleProviders[provider] = new AppUserScrobbleProvider
             {

@@ -10,6 +10,7 @@ using Hangfire;
 using Kavita.API.Database;
 using Kavita.API.Repositories;
 using Kavita.API.Services;
+using Kavita.API.Services.Plus;
 using Kavita.API.Services.Scanner;
 using Kavita.API.Services.SignalR;
 using Kavita.Common;
@@ -693,6 +694,17 @@ public class LibraryController(
 
     }
 
+    [HttpGet("metadata-providers")]
+    public ActionResult<List<MetadataProvider>> SupportedMetadataProviders([FromQuery] LibraryType libraryType)
+    {
+        if (KavitaPlusConfiguration.MetadataProvidersForLibraryTypes.TryGetValue(libraryType, out var providers))
+        {
+            return Ok(providers);
+        }
+
+        return Ok(new List<MetadataProvider>());
+    }
+
     private void UpdateLibrarySettings(UpdateLibraryDto dto, Library library, bool updateType = true)
     {
         // Reminder: Add new fields to the Create Library Endpoint!
@@ -727,31 +739,12 @@ public class LibraryController(
             .Select(t => new LibraryExcludePattern() {Pattern = t, LibraryId = library.Id})
             .ToList();
 
-        // Override Scrobbling for Comic libraries since there are no providers to scrobble to
-        if (library.Type is LibraryType.Comic or LibraryType.ComicVine)
-        {
-            logger.LogInformation("Overrode Library {Name} to disable scrobbling since there are no providers for Comics", dto.Name.Replace(Environment.NewLine, string.Empty));
-            library.AllowScrobbling = false;
-        }
-
-
         unitOfWork.LibraryRepository.Update(library);
     }
 
     private static void ValidateMetadataProvider(LibraryType type, MetadataProvider provider)
     {
-        List<MetadataProvider> validProviders = type switch
-        {
-            LibraryType.Manga => [Models.Entities.Enums.MetadataProvider.Mangabaka],
-            LibraryType.Comic => [Models.Entities.Enums.MetadataProvider.ComicBookRoundup, Models.Entities.Enums.MetadataProvider.Hardcover],
-            LibraryType.Book => [Models.Entities.Enums.MetadataProvider.Hardcover, Models.Entities.Enums.MetadataProvider.Mangabaka],
-            LibraryType.Image => [Models.Entities.Enums.MetadataProvider.Mangabaka, Models.Entities.Enums.MetadataProvider.ComicBookRoundup],
-            LibraryType.LightNovel => [Models.Entities.Enums.MetadataProvider.Mangabaka, Models.Entities.Enums.MetadataProvider.Hardcover],
-            LibraryType.ComicVine => [Models.Entities.Enums.MetadataProvider.ComicBookRoundup, Models.Entities.Enums.MetadataProvider.Hardcover],
-            _ => throw new ArgumentOutOfRangeException()
-        };
-
-        if (!validProviders.Contains(provider))
+        if (!KavitaPlusConfiguration.MetadataProvidersForLibraryTypes.TryGetValue(type, out var validProviders) || !validProviders.Contains(provider))
         {
             throw new KavitaException("invalid-metadata-provider");
         }

@@ -61,7 +61,6 @@ public class ExternalMetadataService : IExternalMetadataService
 
     private const int SeriesPerRefresh = 25;
     private readonly TimeSpan _externalSeriesMetadataCache = TimeSpan.FromDays(30);
-    private static readonly HashSet<LibraryType> NonEligibleLibraryTypes = [LibraryType.Comic, LibraryType.Image];
     private readonly SeriesDetailPlusDto _defaultReturn = new()
     {
         Series =  null,
@@ -98,7 +97,7 @@ public class ExternalMetadataService : IExternalMetadataService
     /// <returns></returns>
     public static bool IsPlusEligible(LibraryType type)
     {
-        return !NonEligibleLibraryTypes.Contains(type);
+        return KavitaPlusConfiguration.MetadataProvidersForLibraryTypes.ContainsKey(type);
     }
 
     [DisableConcurrentExecution(60 * 60 * 60)]
@@ -149,7 +148,9 @@ public class ExternalMetadataService : IExternalMetadataService
 
         if (!series.WillScrobble() || !series.Library.AllowMetadataMatching) return null;
 
-        if (!RateLimiter.TryAcquire(string.Empty))
+        // OnDemand (Page visit) is allowed to bypass the rate limit to allow for a nicer user experience
+        // TODO: Check if this is correct. Do we want a stricter RateLimit on it?
+        if (trigger != MetadataFetchTrigger.OnDemand && !RateLimiter.TryAcquire(string.Empty))
         {
             _logger.LogDebug("Skipping Matching for Series {SeriesId} due to rate limit", seriesId);
             return null;
@@ -226,7 +227,7 @@ public class ExternalMetadataService : IExternalMetadataService
             MalId = series.MalId,
             MangaBakaId = series.MangaBakaId,
             CbrId = series.CbrId,
-            HardcoverId = series.HardcoverId
+            HardcoverId = series.HardcoverId,
         };
 
         series.MangaBakaId = match.Series.MangabakaId ?? 0;
@@ -234,6 +235,7 @@ public class ExternalMetadataService : IExternalMetadataService
         series.MalId = match.Series.MALId ?? 0;
         series.HardcoverId = match.Series.HardcoverId ?? 0;
         series.CbrId = match.Series.CbrId ?? 0;
+        series.IsStandAlone = match.Series.IsStandAlone;
 
         await _auditService.LogMatchAsync(KavitaPlusEventType.SeriesMatched, seriesId,
             new AuditLogMatchedParamsDto {
@@ -353,7 +355,7 @@ public class ExternalMetadataService : IExternalMetadataService
         {
             AniListId = potentialAnilistId ?? ExternalIdParser.GetAniListId(series.Metadata.WebLinks),
             MalId = potentialMalId ?? ExternalIdParser.GetMalId(series.Metadata.WebLinks),
-            HardcoverId = null, // This is complex (There's two types of Ids; Series & Books)
+            HardcoverId = dto.IsStandAlone ? ExternalIdParser.GetHardcoverBookId(series.Metadata.WebLinks) : ExternalIdParser.GetHardcoverSeriesId(series.Metadata.WebLinks),
             Slug = slug,
             CbrId = null,
             MangabakaId = potentialMangabakaId > 0 ? potentialMangabakaId : ExternalIdParser.GetMangaBakaId(series.Metadata.WebLinks),
@@ -424,7 +426,7 @@ public class ExternalMetadataService : IExternalMetadataService
             return await _unitOfWork.ExternalSeriesMetadataRepository.GetSeriesDetailPlusDto(seriesId, ct);
         }
 
-        var data = await _unitOfWork.SeriesRepository.GetSeriesDetailRequestV3Dto(seriesId, ct);
+        var data = await _unitOfWork.SeriesRepository.GetKavitaPlusSeriesDetailRequestV3Dto(seriesId, ct);
         if (data == null) return _defaultReturn;
 
         // Get from Kavita+ API the Full Series metadata with rec/rev and cache to ExternalMetadata tables
@@ -652,7 +654,6 @@ public class ExternalMetadataService : IExternalMetadataService
         // prefer what was passed in (manual match), fall back to what K+ returned
         var beforeIds = new AuditLogMatchExternalIdsParamsDto { AniListId = series.AniListId, MalId = series.MalId, MangaBakaId = series.MangaBakaId, CbrId = series.CbrId, HardcoverId = series.HardcoverId };
 
-        // TODO: Need to rethink how all these Ids work and only write on MetadataFetchTrigger.OnDemand
         externalSeriesMetadata.MalId = data.MalId ?? result.MalId ?? 0;
         externalSeriesMetadata.AniListId = data.AniListId ?? result.AniListId ?? 0;
         externalSeriesMetadata.CbrId = data.CbrId ?? result.CbrId ?? 0;
