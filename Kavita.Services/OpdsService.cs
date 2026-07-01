@@ -738,8 +738,14 @@ public class OpdsService(
 
         var isAdmin = await unitOfWork.UserRepository.IsUserAdminAsync(user, ct);
 
-        var searchResults = await unitOfWork.SeriesRepository.SearchSeriesAsync(userId, isAdmin,
-            libraries, query, includeChapterAndFiles: false, ct: ct);
+        // OPDS only strips '%', so ':' survives and shortcodes (anilist:/al:, mangabaka:/mb:, hardcover:) still parse
+        var searchDto = SearchDto.FromQuery(query, includeChapterAndFiles: false);
+        if (!searchDto.HasShortcode)
+        {
+            searchDto.Query = query;
+        }
+
+        var searchResults = await unitOfWork.SeriesRepository.SearchSeriesAsync(userId, isAdmin, libraries, searchDto, ct);
 
         var feed = CreateFeed(query, $"{apiKey}/series?query=" + query, apiKey, prefix);
         SetFeedId(feed, "search-series");

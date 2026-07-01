@@ -73,7 +73,7 @@ public interface ISeriesRepository
     /// <param name="includeChapterAndFiles">Includes Files in the Search</param>
     /// <param name="ct"></param>
     /// <returns></returns>
-    Task<SearchResultGroupDto> SearchSeriesAsync(int userId, bool isAdmin, IList<int> libraryIds, string searchQuery, bool includeChapterAndFiles = true, CancellationToken ct = default);
+    Task<SearchResultGroupDto> SearchSeriesAsync(int userId, bool isAdmin, IList<int> libraryIds, SearchDto dto, CancellationToken ct = default);
     Task<IEnumerable<Series>> GetSeriesForLibraryIdAsync(int libraryId, SeriesIncludes includes = SeriesIncludes.None, CancellationToken ct = default);
     Task<SeriesDto?> GetSeriesDtoByIdAsync(int seriesId, int userId, CancellationToken ct = default);
     Task<Series?> GetSeriesByIdAsync(int seriesId, SeriesIncludes includes = SeriesIncludes.Volumes | SeriesIncludes.Metadata, CancellationToken ct = default);
