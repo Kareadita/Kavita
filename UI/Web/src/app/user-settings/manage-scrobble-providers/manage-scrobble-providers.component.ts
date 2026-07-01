@@ -82,7 +82,7 @@ const ProviderSupportedEvents: Record<ScrobbleProvider, ScrobbleEventType[]> = {
 
 const ProvidersSupportLibraryTypes: Record<ScrobbleProvider, LibraryType[]> = {
   [ScrobbleProvider.AniList]: [LibraryType.Manga, LibraryType.LightNovel],
-  [ScrobbleProvider.Hardcover]: [LibraryType.LightNovel, LibraryType.Book],
+  [ScrobbleProvider.Hardcover]: [LibraryType.LightNovel, LibraryType.Book, LibraryType.Comic, LibraryType.ComicVine],
   [ScrobbleProvider.Mal]: [LibraryType.Manga, LibraryType.LightNovel],
   [ScrobbleProvider.MangaBaka]: [LibraryType.Manga, LibraryType.LightNovel],
   [ScrobbleProvider.Cbr]: [LibraryType.Comic],

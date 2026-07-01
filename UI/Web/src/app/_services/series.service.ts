@@ -258,6 +258,7 @@ export class SeriesService {
       cbrId: series.cbrId ?? null,
       mangabakaId: series.mangabakaId ?? null,
       hardcoverId: series.hardcoverId ?? null,
+      isStandAlone: series.isStandAlone,
     };
     return this.httpClient.post<string>(this.baseUrl + `series/update-match?seriesId=${seriesId}`, ids, TextResonse);
   }

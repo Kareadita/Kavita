@@ -277,5 +277,8 @@
     "url-blocked-address": "URL odkazuje na blokovanou adresu",
     "email.username-change.subject": "Vaše uživatelské jméno bylo změněno na serveru {{InvitingUser}}",
     "email.username-change.title": "Aktualizace týkající se změny uživatelského jména",
-    "email.username-change.description": "Uživatelské jméno vašeho účtu bylo aktualizováno na instanci Kavita uživatele {{InvitingUser}}. Není třeba, abyste cokoli dělali."
+    "email.username-change.description": "Uživatelské jméno vašeho účtu bylo aktualizováno na instanci Kavita uživatele {{InvitingUser}}. Není třeba, abyste cokoli dělali.",
+    "scrobble-provider-not-setup": "Poskytovatel scrobblování {0} není nastaven",
+    "unable-to-cancel-k+": "Předplatné služby Kavita+ nelze z důvodu chyby zrušit. Obraťte se na podporu služby Kavita+",
+    "unable-to-renew-k+": "Z důvodu chyby se nepodařilo obnovit předplatné služby Kavita+. Obraťte se na podporu služby Kavita+"
 }

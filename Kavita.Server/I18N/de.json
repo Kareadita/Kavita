@@ -277,5 +277,6 @@
     "email.username-change.title": "Aktuelles zum Ändern des Benutzernamens",
     "email.username-change.description": "Der Benutzername Ihres Kontos wurde auf der Kavita-Instanz von {{InvitingUser}} aktualisiert. Ihrerseits sind keine weiteren Maßnahmen erforderlich.",
     "cbl-import-download-from-url": "Die Datei kann nicht von der URL heruntergeladen werden",
-    "cbl-import-validation-types": "Es sind nur Dateien mit den Endungen .cbl und .json zulässig"
+    "cbl-import-validation-types": "Es sind nur Dateien mit den Endungen .cbl und .json zulässig",
+    "scrobble-provider-not-setup": "Der Scrobble-Anbieter {0} ist nicht eingerichtet"
 }

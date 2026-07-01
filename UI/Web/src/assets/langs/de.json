@@ -58,17 +58,19 @@
         "not-processed": "Nicht verarbeitet",
         "special": "{{entity-title.special}}",
         "token-expired": "Ihr AniList-Token ist abgelaufen! Scrobbling-Ereignisse werden nicht verarbeitet, bis Sie auf der Seite Konten erneuert haben.",
-        "generate-scrobble-events": "Backfill Ereignisse",
         "scrobbling-disabled": "Scrobbeln ist in deinen Kontoeinstellungen deaktiviert.",
         "select-all-label": "Alles auswählen",
-        "delete-selected-label": "Markiertes löschen"
+        "delete-selected-label": "Markiertes löschen",
+        "provider-header": "Anbieter",
+        "read-status-update": "Status: {{status}}"
     },
     "scrobble-event-type-pipe": {
         "chapter-read": "Lesefortschritt",
         "score-updated": "Bewertung Aktualisierung",
         "want-to-read-add": "Möchte lesen: Hinzufügen",
         "want-to-read-remove": "Möchte lesen: Entfernen",
-        "review": "Aktualisierung überprüfung"
+        "review": "Aktualisierung überprüfung",
+        "read-status-update": "Statusaktualisierung lesen"
     },
     "spoiler": {
         "click-to-show": "Spoiler, klicke zum Anzeigen"
@@ -500,7 +502,7 @@
     "invite-user": {
         "title": "Lade einen Nutzer ein",
         "close": "{{common.close}}",
-        "description": "Laden Sie einen Benutzer zu Ihrem Server ein, indem Sie seine E-Mail-Adresse eingeben. Sie erhalten eine E-Mail, um ein Konto zu erstellen. Damit dies funktioniert, müssen Sie die Felder Hostname und E-Mail-Einstellung in der Registerkarte <a href=\"/settings#email\" rel=\"noopener noreferrer\" target=\"_blank\">E-Mail</a> festgelegt haben, andernfalls wird Ihnen ein Link zur Einrichtung im Namen des Benutzers angezeigt.<br/><br/>Die E-Mail muss nicht gültig sein.",
+        "description": "Laden Sie einen Benutzer auf Ihren Server ein, indem Sie dessen E-Mail-Adresse eingeben. Der Benutzer erhält daraufhin eine E-Mail, um ein Konto zu erstellen. Damit dies funktioniert, müssen die Felder für den Hostnamen und die E-Mail-Einstellungen auf der Registerkarte <a href=\"/settings#admin-email\" rel=\"noopener noreferrer\" target=\"_blank\">E-Mail</a> ausgefüllt sein, andernfalls wird Ihnen ein Link angezeigt, über den Sie die Einrichtung im Namen des Benutzers vornehmen können.<br/><br/>Die E-Mail-Adresse muss nicht gültig sein.",
         "email": "{{common.email}}",
         "required-field": "{{common.required-field}}",
         "setup-user-title": "Nutzer wurde eingeladen",
@@ -521,63 +523,6 @@
         "select-all": "{{common.select-all}}",
         "deselect-all": "{{common.deselect-all}}",
         "no-data": "Bisher wurde noch keine Bibliothek aufgesetzt."
-    },
-    "license": {
-        "title": "Kavita+ Lizenz",
-        "manage": "Verwalten",
-        "invalid-license-tooltip": "Wenn Ihr Abonnement abgelaufen ist, müssen Sie eine E-Mail an den Support senden, um ein neues Abonnement zu erstellen",
-        "check": "Überprüfen",
-        "cancel": "{{common.cancel}}",
-        "edit": "{{common.edit}}",
-        "buy": "Kaufen",
-        "activate": "Aktivieren",
-        "renew": "Erneuern",
-        "no-license-key": "Kein Lizenz-Schlüssel",
-        "license-valid": "Lizenz ist valide",
-        "license-not-valid": "Lizenz ist nicht valide",
-        "loading": "{{common.loading}}",
-        "activate-description": "Geben Sie den Lizenzschlüssel und die E-Mail-Adresse ein, die Sie bei der Registrierung bei Stripe verwendet haben",
-        "activate-license-label": "Lizenzschlüssel",
-        "activate-email-label": "{{common.email}}",
-        "activate-discordId-label": "Discord Nutzer ID",
-        "activate-discordId-tooltip": "Verbinden Sie Ihr Discord-Konto mit Kavita+. Dadurch erhalten Sie Zugriff auf versteckte Kanäle, über die Sie Kavita mitgestalten können.",
-        "discord-validation": "Dies ist keine valide Discord-User-ID. Deine User ID ist nicht dein Discord-Benutzername.",
-        "activate-delete": "{{common.delete}}",
-        "activate-reset": "Lizenz zurücksetzen",
-        "activate-reset-tooltip": "Ungültigmachen einer früheren Registrierung mit Ihrer Lizenz. Erfordert sowohl Lizenz als auch E-Mail",
-        "activate-save": "{{common.save}}",
-        "kavita+-desc-part-1": "Kavita+ ist ein Premium-Abonnementdienst, der Funktionen für alle Benutzer dieser Kavita-Instanz freischaltet. Kaufen Sie ein Abonnement zum Freischalten ",
-        "kavita+-desc-part-2": "Premiumleistungen",
-        "kavita+-desc-part-3": "heute!",
-        "kavita+-requirement": "Kavita+ ist nur für die neuesten 3 Versionen ausgelegt. Alles, was darüber hinausgeht, funktioniert möglicherweise nicht.",
-        "help-label": "{{common.help}}",
-        "k+-license-overwrite": "Die Lizenz ist auf einer anderen Kavita-Instanz registriert. Dies kann bei einer Neuinstallation und selten aufgrund von Systemaktualisierungen passieren. Wählen Sie „Überschreiben“, um diese Instanz zu zwingen, sich bei Kavita+ zu registrieren.",
-        "delete-tooltip": "Dadurch wird Kavita die Lizenz entzogen, um Kavita daran zu hindern, mit Kavita+ zu sprechen. Sie werden dadurch nicht abgemeldet. Verwenden Sie zuerst „Verwalten“, um das Abonnement zu kündigen.",
-        "info-title": "Lizenz-Informationen",
-        "actions-title": "Aktionen",
-        "license-active-label": "Lizenz Aktiv",
-        "supported-version-label": "Auf unterstützte Kavita-Version",
-        "expiration-label": "Gültigkeitsdauer",
-        "valid-tooltip": "Gültig",
-        "invalid-tooltip": "Ungültig",
-        "reset-label": "Zurücksetzen",
-        "reset-tooltip": "Dadurch wird die Serverinstanz zurückgesetzt, an welche die Kavita+-Lizenz gebunden ist. E-Mail-Adresse und Lizenzschlüssel erforderlich",
-        "delete-label": "Lizenz entfernen",
-        "manage-tooltip": "Zahlungsinformationen aktualisieren, Abonnement kündigen/pausieren usw",
-        "faq-title": "FAQ",
-        "total-subbed-months-label": "Gesamtmonate abonniert",
-        "email-label": "Registrierte E-Mail",
-        "license-mismatch": "Die Lizenz kann auf eine andere Kavita-Instanz registriert werden. Zur Behebung erneut registrieren.",
-        "k+-already-registered-header": "Lizenz bereits registriert",
-        "overwrite": "Überschreiben",
-        "k+-unlocked": "Kavita+ freigeschaltet!",
-        "k+-unlocked-description": "Willkommen bei Kavita+! Kavita generiert Scrobbler-Ereignisse aus Ihren Fortschritten, Bewertungen und Lesewünschen, sobald Sie Ihre Scrobbler-Anbieter unter Ihrem Konto registriert haben. Nehmen Sie sich etwas Zeit, um sicherzustellen, dass Sie Scrobbler-Holds für alle Serien setzen, die Sie nicht scrobbeln möchten.",
-        "cancel-tooltip": "Kündigen Sie Ihr Abonnement und löschen Sie die Lizenz innerhalb von Kavita.",
-        "kavita+-warning": "Kavita+ ist unabhängig von Kavita. Wenn Sie Kavita deinstallieren, ohne zuvor Ihr Abonnement zu kündigen, werden Ihnen weiterhin Gebühren berechnet.",
-        "cancel-label": "Abonnement kündigen",
-        "resend-license-email": "Lizenz per E-Mail senden",
-        "resend-license-email-tooltip": "Kavita+ Lizenz erneut an E-Mail senden. Die Lizenz muss an diesen Server gebunden sein, damit sie funktioniert.",
-        "supportId-label": "Support-ID"
     },
     "book-line-overlay": {
         "copy": "Kopieren",
@@ -685,7 +630,8 @@
         "on": "{{reader-settings.on}}",
         "off": "{{reader-settings.off}}",
         "loading": "{{common.loading}}",
-        "read-count-tooltip": "Gelesen insgesamt"
+        "read-count-tooltip": "Gelesen insgesamt",
+        "kavitaplus-audit-alt": "Kavita+ Aktivität"
     },
     "metadata-fields": {
         "collections-title": "{{side-nav.collections}}",
@@ -954,7 +900,14 @@
         "reset": "{{common.reset}}",
         "image-num": "Bild {{num}}",
         "apply": "{{common.apply}}",
-        "applied": "{{theme-manager.applied}}"
+        "applied": "{{theme-manager.applied}}",
+        "cover-locked": "Cover ist geschützt",
+        "cover-not-locked": "Cover ist nicht geschützt",
+        "reset-tab": "Zurücksetzen",
+        "no-images": "Keine Bilder verfügbar",
+        "loading": "{{common.loading}}",
+        "select-image-alt": "Wählen Sie ein Bild aus",
+        "download-cover": "Cover herunterladen"
     },
     "download-indicator": {
         "progress": "{{percentage}}% heruntergeladen",
@@ -1326,7 +1279,10 @@
         "insights-section-title": "Einblicke",
         "admin-activity": "Aktivität",
         "admin-device": "Geräte",
-        "remap-rules": "Regeln neu zuordnen"
+        "remap-rules": "Regeln neu zuordnen",
+        "my-activity": "Meine Aktivitäten",
+        "admin-manage-kavitaplus-activity": "Kavita+ verwalten",
+        "scrobble-settings": "Verbindungen"
     },
     "collection-detail": {
         "no-data": "Es sind keine Artikel vorhanden. Versuchen Sie, eine Serie hinzuzufügen.",
@@ -1500,12 +1456,13 @@
     "import-mal-collection-modal": {
         "close": "{{common.close}}",
         "title": "MAL-Interessenstapel Import",
-        "description": "Importieren Sie Ihre MAL-Interessenstapel und erstellen Sie Sammlungen in Kavita",
+        "description": "Importieren Sie Ihre MAL-Interessenstapel und erstellen Sie Sammlungen in Kavita, die synchronisiert werden",
         "series-count": "{{common.series-count}}",
         "restack-count": "{{num}} Restacks",
-        "nothing-found": "Nichts gefunden",
         "track": "Spur",
-        "by-author": "von {{author}}"
+        "by-author": "von {{author}}",
+        "no-data": "{{common.no-data}}",
+        "no-data-description": "Stellen Sie sicher, dass Sie über ein gültiges MAL-Token verfügen und einige Stacks verfolgt haben"
     },
     "import-cbl-modal": {
         "close": "{{common.close}}",
@@ -2192,7 +2149,6 @@
         "smart-filter-deleted": "Smart-Filter Gelöscht",
         "smart-filter-updated": "Smart-Filter erstellt/aktualisiert",
         "external-source-already-exists": "Es existiert bereits eine externe Quelle mit demselben Namen/Host/API-Schlüssel",
-        "anilist-token-expired": "Ihr AniList-Token ist abgelaufen. Scrobbling wird nicht mehr ausgeführt, bis Sie es unter Benutzereinstellungen > Konto neu generieren",
         "collection-tag-deleted": "Collection Tag gelöscht",
         "force-kavita+-refresh-success": "Die externen Metadaten von Kavita+ wurden für ungültig erklärt",
         "collection-not-owned": "Sie sind nicht Eigentümer dieser Sammlung",
@@ -2247,7 +2203,9 @@
         "cbl-remap-rule-promoted": "Regel auf globaler Ebene eingeführt",
         "cbl-remap-rule-demoted": "Regel auf Benutzerebene herabgestuft",
         "confirm-delete-read-from-readinglist": "Möchten Sie wirklich alle gelesenen Titel aus dieser Leseliste entfernen? Dieser Vorgang kann nicht rückgängig gemacht werden.",
-        "reading-list-sync-enqueued": "Die Leseliste wurde zur Synchronisierung in die Warteschlange gestellt."
+        "reading-list-sync-enqueued": "Die Leseliste wurde zur Synchronisierung in die Warteschlange gestellt.",
+        "confirm-rerun-backfill": "Sie haben bereits mindestens einmal Scrobble-Ereignisse für {{provider}} generiert. Das Nachholen von Daten kann das Scrobbeln der zuletzt gelesenen Ereignisse verzögern. Möchten Sie wirklich fortfahren?",
+        "tokens-expired": "Ein oder mehrere Verbindungstoken sind abgelaufen. Das Scrobbeln und die Synchronisierung werden unterbrochen, bis Sie diese in Kavita+ > Verbindungen neu generieren"
     },
     "read-time-pipe": {
         "less-than-hour": "<1 Stunde",
@@ -2440,7 +2398,16 @@
         "book-reader-tab": "Buchlesegerät",
         "pdf-reader-tab": "PDF-Reader",
         "bookmark-image-tab": "Bild",
-        "bookmark-text-tab": "Text"
+        "bookmark-text-tab": "Text",
+        "uploaded-tab": "Hochgeladen",
+        "current-tab": "Aktuell",
+        "kavita-plus-tab": "Kavita+",
+        "other-tab": "Sonstiges",
+        "all-tab": "Alle",
+        "scrobbles-tab": "Scrobbles",
+        "failed-tab": "Fehlgeschlagen",
+        "my-changes-tab": "Meine Änderungen",
+        "scrobble-holds-tab": "Scrobble-Holds"
     },
     "common": {
         "reset-to-default": "Auf Standard zurücksetzen",
@@ -2542,24 +2509,46 @@
         "known-issues": "Bekannte Probleme"
     },
     "match-series-result-item": {
-        "releasing": "Veröffentlichung",
-        "details": "Seite anzeigen",
-        "updating-metadata-status": "Metadaten aktualisieren",
-        "volume-count": "{{server-stats.volume-count}}",
-        "chapter-count": "{{common.chapter-count}}",
-        "issue-count": "{{common.issue-count}}"
+        "volume-count": "Band {{ num }}",
+        "chapter-count": "{{ num }} Kap",
+        "issue-count": "{{ num }} Ausgaben",
+        "matched-alt": "Passende Alternative:",
+        "more": "mehr",
+        "matched-alt-count": "passende alternative Titel",
+        "alt-titles": "Alternative Titel",
+        "more-titles": "+{{count}} weitere",
+        "selected-alt": "Ausgewählt"
     },
     "match-series-modal": {
-        "description": "Wähle einen Treffer aus, um die Metadaten von Kavita+ neu zu verknüpfen und Scrobble-Ereignisse neu zu generieren. „Nicht übereinstimmend“ kann verwendet werden, um Kavita daran zu hindern, Metadaten abzugleichen und zu scrobbeln.",
-        "query-tooltip": "Geben Sie den Seriennamen und die URL von AniList/MyAnimeList/ComicBookRoundup ein. Die URLs werden direkt nachgeschlagen.",
-        "no-results": "Es wurde keine Übereinstimmung gefunden. Versuche, die URL eines unterstützten Anbieters hinzuzufügen und versuche es erneut.",
-        "query-label": "Abfrage",
-        "dont-match-label": "Keine Übereinstimmung",
-        "dont-match-tooltip": "Diese Serie von Matching und Scrobbeln ausschließen",
+        "description": "Wählen Sie eine Übereinstimmung aus, um die Metadaten von Kavita+ neu zu verknüpfen und die Scrobble-Ereignisse neu zu generieren.",
+        "dont-match-label": "Keine übereinstimmung",
+        "dont-match-tooltip": "Verhindern Sie, dass Kavita diese Serie automatisch zuordnet oder scrobbelt",
         "search": "Suche",
-        "title": "Treffer {{seriesName}}",
         "save": "{{common.save}}",
-        "close": "{{common.close}}"
+        "close": "{{common.close}}",
+        "title-prefix": "Übereinstimmung",
+        "in-kavita": "In Kavita",
+        "dont-match-hint": "Wählen Sie „Nicht für Übereinstimmungen berücksichtigen“, um diese Serie vollständig auszuschließen.",
+        "try": "Versuchen Sie es",
+        "searching-alt": "Suche…",
+        "clear": "Suche löschen",
+        "match-count": "{{ count }} Übereinstimmungen",
+        "apply-match": "Übereinstimmung anwenden",
+        "loading-alt": "Ergebnisse werden geladen",
+        "empty-title": "Nach einer Übereinstimmung suchen",
+        "empty-description": "Geben Sie den Titel einer Serie ein oder fügen Sie eine direkte URL von AniList, MAL, MangaBaka, CBR oder Hardcover ein.",
+        "no-results-title": "Es wurden keine Übereinstimmungen gefunden",
+        "no-results-description": "Für „{{ query }}“ wurden keine Ergebnisse gefunden. Versuchen Sie es mit einer kürzeren Suchanfrage, einem romanisierten Titel oder einer direkten ID.",
+        "dont-match-active-title": "Nicht abgleichen aktiviert",
+        "dont-match-active-description": "Für diese Serie wurde die Teilnahme am Kavita+-Abgleich und am Scrobbling deaktiviert.",
+        "volume-count": "{{match-series-result-item.volume-count}}",
+        "chapter-count": "{{match-series-result-item.chapter-count}}",
+        "matched-to": "Derzeit zugeordnet zu",
+        "searching-against": "Suche bei {{provider}}",
+        "selected-desc": "Ausgewählt, weil: {{libraryType}} {{format}}",
+        "library-type": "Bibliotheksart:",
+        "format-type": "Format:",
+        "provider-help": "Ein Anbieter pro Bibliothekstyp"
     },
     "email-history": {
         "description": "Hier finden Sie alle E-Mails, die von Kavita gesendet wurden und an welchen Benutzer.",
@@ -2926,7 +2915,6 @@
         "auto-login-label": "Automatische Anmeldung",
         "auto-login-tooltip": "Automatische Weiterleitung zum OIDC-Anbieter beim Öffnen des Anmeldebildschirms",
         "disable-password-authentication-label": "Passwortauthentifizierung deaktivieren",
-        "disable-password-authentication-tooltip": "Benutzer mit der Administratorrolle können diese Einschränkung umgehen",
         "provider-name-label": "Name des Anbieters",
         "provider-name-tooltip": "Name, der auf dem Anmeldebildschirm angezeigt wird",
         "defaults-title": "Standardwerte",
@@ -3088,8 +3076,8 @@
         "key-bind-tooltip-navigate-to-settings": "Öffnen Sie die Einstellungen, wenn Sie nicht im Reader sind",
         "key-bind-title-open-search": "Suche öffnen",
         "key-bind-tooltip-open-search": "Öffnen Sie die obere Suchleiste",
-        "key-bind-title-navigate-to-scrobbling": "Scrobbling öffnen",
-        "key-bind-tooltip-navigate-to-scrobbling": "Öffnen Sie die Einstellungsseite auf der Registerkarte „Scrobbling“",
+        "key-bind-title-navigate-to-scrobbling": "Meine Aktivitäten öffnen",
+        "key-bind-tooltip-navigate-to-scrobbling": "Öffnen Sie die Einstellungsseite auf der Registerkarte „Meine Aktivitäten“",
         "key-bind-title-escape": "Escape",
         "key-bind-tooltip-escape": "Den aktuell geöffneten Kontext schließen",
         "key-bind-title-toggle-fullscreen": "Vollbild umschalten",
@@ -3149,7 +3137,7 @@
         "expiration-label": "Ablaufdatum",
         "total-key-length": "Gesamtlänge des Schlüssels: {{length}}",
         "never": "Niemals",
-        "required-field": "{{validations.required-field}}",
+        "required-field": "{{validation.required-field}}",
         "cancel": "{{common.cancel}}",
         "close": "{{common.close}}",
         "save": "{{common.save}}"
@@ -3552,7 +3540,8 @@
         "comicVineId-label": "Comic Vine-ID",
         "metronId-label": "Metron-ID",
         "not-set-label": "Nicht festgelegt",
-        "isbn-label": "{{edit-chapter-modal.isbn-label}}"
+        "isbn-label": "{{edit-chapter-modal.isbn-label}}",
+        "cbrId-label": "Comic Book Roundup ID"
     },
     "cbl-match-tier-pipe": {
         "remap-rule": "Regel neu zuordnen",
@@ -3741,5 +3730,530 @@
         "reading-list": "{{add-to-list-modal.reading-list-label}}",
         "person": "Person",
         "annotation": "Anmerkung"
+    },
+    "search-input": {
+        "clear": "Suche löschen"
+    },
+    "time-difference-pipe": {
+        "never": "Niemals",
+        "just-now": "gerade eben",
+        "min": {
+            "ago": "vor einer Minute",
+            "in": "in einer Minute"
+        },
+        "mins": {
+            "ago": "vor {{value}} Minuten",
+            "in": "in {{value}} Minuten"
+        },
+        "hour": {
+            "ago": "vor einer Stunde",
+            "in": "in einer Stunde"
+        },
+        "hours": {
+            "ago": "vor {{value}} Stunden",
+            "in": "in {{value}} Stunden"
+        },
+        "day": {
+            "ago": "vor einem Tag",
+            "in": "in einem Tag"
+        },
+        "days": {
+            "ago": "vor {{value}} Tagen",
+            "in": "in {{value}} Tagen"
+        },
+        "month": {
+            "ago": "vor einem Monat",
+            "in": "in einem Monat"
+        },
+        "months": {
+            "ago": "vor {{value}} Monaten",
+            "in": "in {{value}} Monaten"
+        },
+        "year": {
+            "ago": "vor einem Jahr",
+            "in": "in einem Jahr"
+        },
+        "years": {
+            "ago": "vor {{value}} Jahren",
+            "in": "in {{value}} Jahren"
+        }
+    },
+    "edit-license-key": {
+        "activate-license-label": "Lizenzschlüssel",
+        "activate-email-label": "{{common.email}}",
+        "activate-discordId-label": "Discord-Benutzer ID",
+        "activate-discordId-tooltip": "Verbinden Sie Ihr Discord-Konto mit Kavita+. Dadurch erhalten Sie Zugang zu versteckten Kanälen, über die Sie Kavita mitgestalten können.",
+        "discord-validation": "Dies ist keine gültige Discord-Benutzer-ID. Ihre Benutzer-ID ist nicht Ihr Discord-Benutzername.",
+        "email-help": "Dies ist die bei Stripe hinterlegte E-Mail-Adresse",
+        "license-help": "Zu Ihrer Sicherheit ist der gespeicherte Schlüssel auf der Festplatte verschlüsselt. Geben Sie ihn erneut ein, um die Daten zu aktualisieren.",
+        "help-label": "{{common.help}}",
+        "required-field-validation": "{{validation.required-field}}",
+        "license-length-validation": "Der Lizenzschlüssel sollte 19 Zeichen lang sein",
+        "license-format-validation": "Die Lizenznummer sollte folgendes Format haben: XXXX-XXXX-XXXX-XXXX",
+        "discord-format-validation": "Die Discord-ID sollte aus 19 Ziffern bestehen",
+        "email-format-validation": "Es muss sich um eine gültige E-Mail-Adresse handeln"
+    },
+    "manage-license-key-modal": {
+        "title": "Kavita+-Lizenz",
+        "last-validated": "zuletzt validiert vor {{timeAgo}}",
+        "activate-license": "Lizenz aktivieren",
+        "close": "{{common.close}}",
+        "delete-license": "Lizenz löschen",
+        "reset-license": "Lizenz zurücksetzen",
+        "save": "{{common.save}}"
+    },
+    "register-license-key": {
+        "title": "Haben Sie bereits eine Lizenz?",
+        "description": "Geben Sie den Schlüssel aus Ihrer Kauf-E-Mail ein, um Kavita+ auf diesem Server zu aktivieren.",
+        "activate-license": "Lizenz aktivieren"
+    },
+    "kavita-plus-registration-error-code-pipe": {
+        "registration-failed": "Die Lizenzaktivierung ist fehlgeschlagen. Bitte überprüfen Sie, ob Ihr Lizenzschlüssel und Ihre E-Mail-Adresse korrekt sind.",
+        "already-registered": "Diese Lizenz ist auf einem anderen Server registriert. Führen Sie zunächst die Option „Lizenz zurücksetzen“ aus.",
+        "subscription-inactive": "Ihr Abonnement ist nicht aktiv. Verlängern Sie es unter kavitareader.com.",
+        "internal-error": "Es ist ein interner Fehler aufgetreten. Bitte wenden Sie sich an den Kavita+ Support."
+    },
+    "kavita-plus-subscription-status-pipe": {
+        "active": "Aktiv",
+        "paused": "Angehalten",
+        "cancelling": "Stornierung",
+        "expired": "Storniert"
+    },
+    "kavita-plus-provider-health-status-pipe": {
+        "unknown-label": "Unbekannt",
+        "operational-label": "Operativ",
+        "degraded-label": "Abgewertet",
+        "down-label": "Nach unten"
+    },
+    "kavita-plus-api-name-title-desc-pipe": {
+        "cover-requests-title": "Cover-Anfragen",
+        "cover-requests-description": "Serien, Kapitel und Bandcover",
+        "metadata-sync-title": "Metadaten-Synchronisierung",
+        "metadata-sync-description": "Aktualisierung der Seriendetails",
+        "series-matched-title": "Serie Abgestimmt",
+        "series-matched-description": "Auf vorgelagerte Anbieter abgestimmt",
+        "scrobbles-title": "Scrobbles",
+        "scrobbles-description": "Fortschritte an die Anbieter weitergeleitet",
+        "mal-stack-import-title": "MAL-Stapel importiert",
+        "mal-stack-import-description": "Interessenstapel aufgenommen",
+        "want-to-read-title": "Leselisten synchronisieren",
+        "want-to-read-description": "Synchronisiert von MAL/AniList/Hardcover/MangaBaka",
+        "recommendations-title": "Empfehlungen",
+        "recommendations-description": "Externe Empfehlungen wurden geladen",
+        "reviews-title": "Bewertungen",
+        "reviews-description": "Externe Bewertungen wurden geladen"
+    },
+    "scrobble-provider-media-title-pipe": {
+        "anilist-label": "Manga + Light Novels",
+        "mal-label": "{{scrobble-provider-media-title-pipe.anilist-label}}",
+        "mangabaka-label": "{{scrobble-provider-media-title-pipe.anilist-label}}",
+        "hardcover-label": "Bücher",
+        "cbr-label": "Comics"
+    },
+    "scrobble-health": {
+        "title-label": "Upstream-Anbieter",
+        "checked-ago-label": "vor {{time}} überprüft",
+        "live-label": "live",
+        "refresh-alt": "Aktualisierung des Anbieterstatus",
+        "no-data-label": "Es liegen keine Verfügbarkeitsdaten vor"
+    },
+    "kavita-plus-billing-interval-pipe": {
+        "day-label": "täglich",
+        "week-label": "wöchentlich",
+        "month-label": "monatlich",
+        "year-label": "jährlich",
+        "day-unit-label": "Tag",
+        "week-unit-label": "Woche",
+        "month-unit-label": "Monat",
+        "year-unit-label": "Jahr"
+    },
+    "kavita-plus-upsell": {
+        "title": "Kavita+ freischalten",
+        "description": "Ein Premium-Abonnement, das Metadaten, Scrobbling und Empfehlungen für alle Nutzer dieser Kavita-Instanz freischaltet.",
+        "wiki-link-label": "Lesen Sie das Wiki",
+        "faq-btn-label": "FAQ",
+        "hero-headline-label": "Metadaten, Scrobbeln und Empfehlungen.",
+        "hero-subtitle-label": "Lesfortschritt automatisch synchronisieren, umfangreiche Metadaten abrufen und eine Verbindung zu AniList, MyAnimeList, Hardcover und MangaBaka herstellen – alles über ein einziges Abonnement, serverweit.",
+        "start-cta-label": "Kavita+ starten",
+        "feature-list-link-label": "Vollständige Liste der Funktionen anzeigen",
+        "price-label": "4 $",
+        "price-per-month-label": "/ Monat",
+        "price-promo-label": "2 $ im ersten Monat",
+        "pricing-feature-1-label": "Ein Abonnement – serverweit",
+        "pricing-feature-2-label": "Jeder Benutzer dieser Instanz profitiert davon",
+        "pricing-feature-3-label": "Sie können jederzeit über Stripe kündigen",
+        "pricing-feature-4-label": "An einen bestimmten Rechner gebunden – keine Lizenzgebühren pro Arbeitsplatz",
+        "providers-label": "Verbindet sich mit",
+        "providers-more-label": "+ weitere folgen",
+        "benefits-section-label": "Lieferumfang",
+        "benefit-1-title-label": "Lesefortschritt automatisch synchronisieren",
+        "benefit-1-body-label": "Übertragen Sie Ihren Fortschritt an AniList, MangaBaka, Hardcover und weitere Dienste – ganz ohne manuelle Nachverfolgung.",
+        "benefit-2-title-label": "Bewertungen & Rezensionen",
+        "benefit-2-body-label": "Importieren Sie Bewertungen und Rezensionen von AniList, MyAnimeList und ComicBookRoundup direkt in Kavita.",
+        "benefit-3-title-label": "Umfangreiche Metadaten, keine Tagging",
+        "benefit-3-body-label": "Automatische Metadaten für Manga, Bücher und Comics. Cover, Zusammenfassungen, Genres und Personen.",
+        "benefit-4-title-label": "MAL-Stacks importieren und synchronisieren",
+        "benefit-4-body-label": "Fügen Sie Interest Stacks hinzu und halten Sie sie synchronisiert. Weitere Anbieterintegrationen folgen in Kürze.",
+        "benefit-5-title-label": "Leselisten, überall",
+        "benefit-5-body-label": "Synchronisieren Sie Ihre Leselisten bidirektional mit Anbietern wie MAL und AniList.",
+        "benefit-6-title-label": "Serverweite Freischaltung",
+        "benefit-6-body-label": "Ein Abonnement, das an Ihren Server gebunden ist. Davon profitiert jeder Benutzer dieser Instanz.",
+        "faq-section-title-label": "FAQ",
+        "faq-1-question-label": "Ist „Kavita+“ etwas anderes als „Kavita“?",
+        "faq-1-answer-label": "Ja. Kavita bleibt kostenlos und als Open-Source-Software verfügbar. Kavita+ bietet zusätzliche Premium-Dienste – die Deinstallation von Kavita führt nicht zur Kündigung Ihres Abonnements.",
+        "faq-2-question-label": "Was ist, wenn ich mehrere Server habe?",
+        "faq-2-answer-label": "Jede Kavita+-Lizenz ist an einen einzelnen Server gebunden. Wenden Sie sich für eine Migration bitte an den Support.",
+        "faq-3-question-label": "Wie kann ich kündigen?",
+        "faq-3-answer-label": "Klicken Sie auf die Schaltfläche „Verwalten“, um das Stripe-Portal zu öffnen – Sie können den Vorgang jederzeit abbrechen oder unterbrechen.",
+        "faq-wiki-link-label": "Ausführliche FAQ im Wiki"
+    },
+    "kavita-plus-connect-providers": {
+        "title": "Sie sind startklar – nur noch ein letzter Schritt",
+        "description": "Verbinden Sie die Dienste, bei denen Sie scrobbeln. Kavita+ füllt Ihren bisherigen Leseverlauf nach und synchronisiert den Fortschritt künftig (in eine Richtung).",
+        "faq-btn-label": "FAQ",
+        "activated-title-label": "Lizenz aktiviert",
+        "activated-body-label": "Die Premium-Funktionen sind für alle Nutzer auf diesem Server freigeschaltet.",
+        "skip-to-dashboard-label": "Zum Dashboard springen",
+        "backfill-title-label": "Ergänzen Sie Ihren Leseverlauf",
+        "backfill-body-label": "Wenn Sie die Verbindung jetzt herstellen, kann Kavita+ Ihren bisherigen Lesefortschritt aus diesen Diensten abrufen, sodass die Serien in Ihrer Bibliothek als bereits gelesen angezeigt werden. Sie können später weitere Dienste hinzufügen, doch die Nachverfolgung funktioniert am einfachsten direkt nach der Aktivierung.",
+        "step-2-of-2-label": "Schritt 2 von 2",
+        "skip-for-now-label": "Vorerst überspringen",
+        "go-to-dashboard-label": "Zum Dashboard",
+        "footer-hint-label": "Sie können später unter „Einstellungen“ → „Kavita+“ → „Verbundene Konten“ weitere Anbieter hinzufügen."
+    },
+    "license-api-stats": {
+        "title": "API-Nutzung",
+        "description": "Anrufe, die dieser Server an Kavita+ getätigt hat. Dies dient lediglich zu Informationszwecken; es gibt keine Obergrenzen.",
+        "last-30-days": "Letzte 30 Tage",
+        "lifetime": "Lebensdauer",
+        "range-toggle-alt": "Anwendungsbereich der API umschalten"
+    },
+    "expired-license-api-stats": {
+        "title": "Zusammenfassung der endgültigen Nutzung"
+    },
+    "license-dashboard": {
+        "title": "Lizenz & Kavita+",
+        "description-inactive": "Ihr Kavita+-Abonnement ist abgelaufen. Verlängern Sie es, um die Synchronisierung von Metadaten, das Scrobbeln, Empfehlungen und weitere Funktionen wieder zu aktivieren.",
+        "description-active": "Abonnement, Integrationen und Nutzung dieses Servers.",
+        "faq-label": "FAQ",
+        "support-label": "Hilfe"
+    },
+    "discord-connect-card": {
+        "connect-title": "Mit Discord verbinden",
+        "connect-subtitle": "Erhalten Sie Zugang zu exklusiven Kanälen und zeigen Sie Ihr Gespür",
+        "connect-button": "Verbinden",
+        "connected-label": "Mit Discord verbunden"
+    },
+    "expired-license-info-card": {
+        "title-label": "Letztes Abonnement",
+        "status-label": "Status",
+        "expired-on-label": "Abgelaufen am",
+        "member-since-label": "Mitglied seit",
+        "total-months-label": "Gesamtmonate"
+    },
+    "license-info-panel": {
+        "desc-active-label": "Premium-Abonnement · serverweit",
+        "desc-inactive-label": "Premium-Funktionen wurden für alle Nutzer vorübergehend deaktiviert",
+        "next-charge-label": "Nächste Zahlung",
+        "member-since-label": "Mitglied seit",
+        "months-subscribed-label": "Seit {{count}} Monaten abonniert",
+        "version-label": "Kavita-Version",
+        "supported-label": "Unterstützt",
+        "unsupported-label": "Nicht unterstützt",
+        "version-sub-label": "in V{{version}}",
+        "expired-label": "Abgelaufen",
+        "expires-label": "Abgelaufen",
+        "days-ago-label": "vor {{count}} Tagen",
+        "days-remaining-label": "Noch {{count}} Tage",
+        "last-plan-label": "Letzter Plan",
+        "impacted-label": "Betroffene aktive Nutzer",
+        "impacted-value-label": "{{count}} Nutzer",
+        "impacted-sub-label": "Premium-Funktionen deaktiviert",
+        "days-left-label": "Noch verbleibende Tage",
+        "manage-label": "Verwalten",
+        "renew-label": "Verlängern",
+        "edit-license-label": "Lizenz bearbeiten",
+        "check-license-label": "Überprüfen",
+        "support-id-label": "Support-ID"
+    },
+    "kavitaplus-tooltip": {
+        "panel-title": "Kavita+: Prüfprotokoll",
+        "matched": "Passend",
+        "unmatched": "nicht passend",
+        "filter-all": "Alle",
+        "filter-match": "Übereinstimmung",
+        "filter-metadata": "Metadaten",
+        "filter-scrobble": "Scrobbeln",
+        "filter-sync": "Synchronisieren",
+        "no-events": "Keine aktuellen Ereignisse",
+        "no-data": "Keine Daten verfügbar",
+        "loading": "{{common.loading}}",
+        "close": "{{common.close}}",
+        "refreshed": "Aktualisiert",
+        "next-refresh": "Weiter Aktualisieren",
+        "showing-latest": "Die letzten {{count}} Ereignisse werden angezeigt",
+        "my-activity": "Meine Aktivitäten",
+        "admin-feed": "Admin-Feed",
+        "read-progress-sent-label": "Lesefortschritt – {{chapter}}",
+        "fields-updated": "{{count}} Felder aktualisiert",
+        "rating-updated": "Bewertung aktualisiert",
+        "add-want-to-read": "Zur Leseliste hinzugefügt",
+        "remove-want-to-read": "Aus der Leseliste entfernt",
+        "review-submitted": "Bewertung eingereicht",
+        "metadata-source": "Metadatenquelle",
+        "linked-to": "Verlinkt zu"
+    },
+    "kavitaplus-activity": {
+        "description": "Leseaktivität: Kavita hat in Ihrem Namen Daten mit externen Diensten synchronisiert – Fortschritt, Bewertungen und Lesestatus."
+    },
+    "manage-kavitaplus-activity": {
+        "description": "90 Tage an Metadaten, Abgleich-, Scrobble- und Synchronisierungsereignissen. Hier können Sie Fehler klassifizieren und einen manuellen Abgleich auslösen.",
+        "stats-events-label": "Ereignisse (24 h)",
+        "stats-failures-label": "Fehlschläge",
+        "stats-match-label": "Passend",
+        "stats-matched-label": "Passend {{prozent}} %",
+        "stats-coverage-subtitle": "{{percent}} % Abdeckung",
+        "stats-queue-label": "Warteschlange",
+        "stats-unresolved": "{{count}} ungelöst",
+        "stats-stale-subtitle": "{{count}} veraltet",
+        "stats-blacklisted-subtitle": "{{count}} konnte nicht zugeordnet werden",
+        "filter-all": "Alle",
+        "filter-match": "Match",
+        "filter-metadata": "Metadaten",
+        "filter-scrobble": "Scrobbeln",
+        "filter-sync": "Synchronisieren",
+        "filter-status-label": "Statusfilter",
+        "today": "Heute",
+        "yesterday": "Gestern",
+        "events-count": "{{count}} Ereignisse",
+        "subject-label": "Betreff: {{subject}}",
+        "search-alt": "Ereignis suchen",
+        "filter-subject-label": "Betreff",
+        "filter-user-label": "Benutzer",
+        "filter-timeframe-label": "Zeitrahmen",
+        "filter-timeframe-24h": "In den letzten 24 Stunden",
+        "filter-timeframe-7d": "Letzte 7 Tage",
+        "filter-timeframe-30d": "Letzte 30 Tage",
+        "system": "System",
+        "next-scrobble": "Nächster Scrobble: {{date}}",
+        "filter-provider-label": "Scrobble-Anbieter"
+    },
+    "kavitaplus-diff": {
+        "field-label": "Feld",
+        "before-label": "Zuvor",
+        "after-label": "Danach",
+        "null-value": "—",
+        "object-expanded": "weiter unten"
+    },
+    "scrobble-account-card": {
+        "provider-connected": "Verbunden",
+        "provider-not-connected": "Nicht verbunden",
+        "provider-expired": "Token ist abgelaufen",
+        "provider-connect": "Verbinden",
+        "provider-settings": "Einstellungen",
+        "provider-description": "Link zum Senden des Fortschritts",
+        "disabled": "{{cron-frequency-pipe.disabled}}"
+    },
+    "kavitaplus-timeline": {
+        "today": "Heute",
+        "yesterday": "Gestern",
+        "events-count": "{{count}} Ereignisse",
+        "load-more-label": "Weitere anzeigen",
+        "empty-title": "Keine Treffer gefunden",
+        "empty-description": "Probieren Sie einen anderen Filter aus oder führen Sie einige Abgleiche bzw. Lesevorgänge durch, um die Daten zu füllen",
+        "system": "{{manage-kavitaplus-activity.system}}"
+    },
+    "kavita-plus-audit-entry": {
+        "system": "{{manage-kavitaplus-activity.system}}",
+        "retry": "Erneut versuchen"
+    },
+    "audit-status-title-pipe": {
+        "success": "Erfolg",
+        "failure": "Misserfolg",
+        "info": "Info"
+    },
+    "metadata-fetch-trigger-title-pipe": {
+        "series-added": "Automatisch beim Hinzufügen",
+        "on-demand": "Seitenaufruf",
+        "manual-match": "Handbuch",
+        "scheduled-refresh": "Geplant"
+    },
+    "audit-subject-title-pipe": {
+        "series": "Serie",
+        "person": "Person",
+        "collection": "Sammlung",
+        "chapter": "Kapitel",
+        "global": "Weltweit"
+    },
+    "metadata-field-change-kind-title-pipe": {
+        "relationships": "Beziehungen",
+        "characters": "Charaktere",
+        "artists": "Künstler",
+        "writers": "Autoren",
+        "genres": "Genres",
+        "publication-status": "Veröffentlichungsstatus",
+        "age-rating": "Altersfreigabe",
+        "external-ids": "Externe IDs",
+        "summary": "Zusammenfassung",
+        "title": "Titel",
+        "release-date": "Erscheinungsdatum",
+        "release-year": "Erscheinungsjahr",
+        "localized-name": "Lokalisierter Name",
+        "tags": "Tags"
+    },
+    "kavita-plus-event-description-pipe": {
+        "read-progress-sent": "{{chapter}}",
+        "rating-updated": "Bewertung aktualisiert: {{rating}}/5",
+        "add-want-to-read": "Zur Leseliste hinzugefügt",
+        "remove-want-to-read": "Aus der Leseliste entfernt",
+        "review-submitted": "Bewertung eingereicht",
+        "fields-updated": "{{count}} Felder wurden aktualisiert",
+        "chapter-cover-updated": "Aktualisiertes Cover: {{Kapitel}}",
+        "series-cover-updated": "Cover der Serie aktualisiert",
+        "series-match-fixed": "Serie, die mit {{matchName}} übereinstimmt",
+        "collection-synced": "{{collectionName}}: {{itemCount}} Elemente synchronisiert, {{missingCount}} fehlen",
+        "collection-item-added": "Zur Sammlung {{collectionName}} hinzugefügt",
+        "person-cover-updated": "Das Cover wurde für {{personName}} aktualisiert",
+        "person-alias-added": "Alias „{{aliasAdded}}“ für {{personName}} hinzugefügt",
+        "sync-started-collection": "Synchronisierung von {{collectionName}} ({{itemCount}} Elemente) wird gestartet",
+        "sync-failed-collection": "DieSynchronisierung für {{collectionName}} ist fehlgeschlagen",
+        "sync-completed-want-to-read": "{{seriesMatched}} Serien, die für {{userName}} gefunden wurden",
+        "read-status-update": "Status {{status}}",
+        "series-matched-against": "Übereinstimmung mit „{{matchName}}“"
+    },
+    "kavita-plus-event-type-pipe": {
+        "series-matched": "Serie Übereinstimmend",
+        "series-match-failed": "Übereinstimmung fehlgeschlagen",
+        "series-blacklisted": "Auf der schwarzen Liste",
+        "series-match-fixed": "Übereinstimmung Behoben",
+        "series-dont-match-set": "Keine Übereinstimmung",
+        "metadata-fetched": "Metadaten abgerufen",
+        "metadata-updated": "Metadaten aktualisiert",
+        "cover-updated": "Cover aktualisiert",
+        "chapter-metadata-updated": "Metadaten des Kapitels aktualisiert",
+        "chapter-cover-updated": "Kapitel-Cover aktualisiert",
+        "person-cover-updated": "Cover für Personen aktualisiert",
+        "person-alias-added": "Alias für Person hinzugefügt",
+        "collection-synced": "Sammlung synchronisiert",
+        "collection-item-added": "Objekt zur Sammlung hinzugefügt",
+        "scrobble-created": "Scrobble erstellt",
+        "scrobble-updated": "Scrobble aktualisiert",
+        "scrobble-sent": "Scrobble gesendet",
+        "scrobble-failed": "Scrobbeln fehlgeschlagen",
+        "scrobble-rate-limit": "Ratenbegrenzung erreicht",
+        "scrobble-skipped": "Scrobble übersprungen",
+        "scrobble-hold-added": "Scrobble-Sperre hinzugefügt",
+        "scrobble-hold-removed": "Scrobble-Sperre aufgehoben",
+        "sync-started": "Synchronisierung gestartet",
+        "sync-completed": "Synchronisierung abgeschlossen",
+        "sync-failed": "Synchronisierung fehlgeschlagen"
+    },
+    "audit-log-messages": {
+        "rate-limit-hit": "Ratenbegrenzung erreicht",
+        "invalid-token": "Ungültiges AniList-Token",
+        "unknown-series": "Unbekannte Serie",
+        "series-dont-match": "Als „Keine Übereinstimmung“ gekennzeichnete Serien",
+        "scrobble-hold-active": "Die Serie wurde vorläufig ausgesetzt",
+        "library-scrobbling-disabled": "Bibliotheks-Scrobbling deaktiviert",
+        "token-expired": "Der AniList-Token ist abgelaufen"
+    },
+    "metadata-provider-title-pipe": {
+        "hardcover": "Hardcover",
+        "mangabaka": "MangaBaka",
+        "cbr": "Comic Book Roundup"
+    },
+    "scrobble-provider-tag-badge": {
+        "view-on": "Auf {{ provider }} anzeigen"
+    },
+    "confidence-chip": {
+        "strong": "Stark",
+        "likely": "Wahrscheinlich",
+        "weak": "Schwach",
+        "doubt": "Zweifel"
+    },
+    "match-status-dot": {
+        "ongoing": "Laufend",
+        "completed": "Abgeschlossen"
+    },
+    "scrobble-provider-settings-manager": {
+        "description": "Legen Sie fest, was, wann und wohin Daten gescrobbelt werden sollen. Das Scrobbeln erfolgt stündlich.",
+        "none-setup": "Sie haben noch keine Scrobble-Anbieter eingerichtet! Klicken Sie oben auf die Schaltfläche „Hinzufügen“, um zu beginnen",
+        "select-provider-title": "Neuer Scrobble-Anbieter",
+        "info": "Benutzerinformationen",
+        "connect": "Verbinden",
+        "connected": "Verbunden",
+        "regenerate": "Erneuern",
+        "disconnect": "Trennen",
+        "expires": "Läuft ab in {{time}}",
+        "last-synced": "Zuletzt synchronisiert vor {{time}}",
+        "not-setup": "Anbieter noch nicht eingerichtet – bitte verbinden, um loszulegen",
+        "sync-options": "Synchronisierungsoptionen",
+        "reviews-sync-label": "Bewertungen synchronisieren",
+        "reviews-sync-tooltip": "Kavita wird Rezensionen für übereinstimmende Serien und Kapitel scrobbeln",
+        "progress-sync-label": "Synchronisierungsfortschritt",
+        "progress-sync-tooltip": "Kavita erfasst den Fortschritt der Serie, wenn Kapitel abgeschlossen werden, oder den Fortschritt innerhalb eines Kapitels bei Seitenwechseln",
+        "rating-sync-label": "Bewertungen synchronisieren",
+        "rating-sync-tooltip": "Kavita erfasst die Bewertungen für zugeordnete Serien und Episoden",
+        "want-to-read-sync-label": "Leseliste synchronisieren",
+        "want-to-read-sync-tooltip": "Halten Sie Ihre Leseliste auf dem neuesten Stand. Der Lesestatus wird dabei nicht geändert",
+        "reviews-target-label": "Ziel der Überprüfung",
+        "reviews-target-tooltip": "Wer synchronisierte Bewertungen sehen kann, hängt von der Unterstützung durch den Anbieter ab",
+        "filter-rules": "Filter",
+        "highest-age-rating-label": "Höchste Altersfreigaben",
+        "highest-age-rating-tooltip": "Die höchste Altersfreigabe (einschließlich), die eine Serie haben darf, muss gescrobbelt werden",
+        "automations": "Automatisierungen",
+        "inactive-series-rule-label": "Regelung für inaktive Serien",
+        "inactive-series-rule-condition": "Wenn eine Serie/ein Kapitel seit",
+        "rule-days-mark": "Tage, merken Sie sich das",
+        "rule-publication-exception": "es sei denn, der Veröffentlichungsstatus ist",
+        "dropped-series-rule-label": "Regel für gestrichene Serien",
+        "dropped-series-rule-condition": "Wenn eine Serie/ein Kapitel seit",
+        "all-libraries-label": "Alle Bibliotheken",
+        "all-libraries-tooltip": "Wenn diese Option aktiviert ist, wird das Scrobbeln für alle entsprechenden Bibliotheken ausgeführt. Deaktivieren Sie diese Option, um es mithilfe der untenstehenden Auswahl auf bestimmte Bibliotheken zu beschränken.",
+        "confirm-delete": "Möchten Sie die Verbindung zu {{provider}} wirklich trennen",
+        "inactive-series-rule-days-aria": "Schwellenwert für inaktive Serien in Tagen",
+        "inactive-series-rule-status-aria": "Status des Übergangs einer inaktiven Serie",
+        "inactive-series-rule-excluded-publication-aria": "Ausgeschlossene Veröffentlichungsstatus für die Regel zu inaktiven Reihen",
+        "dropped-series-rule-days-aria": "Schwellenwert für die Anzahl der Tage, an denen die Serie nicht erreicht wurde",
+        "dropped-series-rule-status-aria": "Status des Übergangs bei eingestellten Serien",
+        "dropped-series-rule-excluded-publication-aria": "Ausgeschlossene Veröffentlichungsstatus für die Regel zu eingestellten Serien",
+        "backfill-events": "{{manage-user-scrobble-provider-modal.generate-scrobble-events}}",
+        "anilist-warning": "Die Synchronisierung von AniList kann zu Stoßzeiten langsamer sein. MangaBaka bietet eine umfangreichere Bibliothek und eine durchweg schnellere Synchronisierung."
+    },
+    "manage-user-scrobble-provider-modal": {
+        "close": "{{common.close}}",
+        "save": "{{common.save}}",
+        "title": "Verwalten Sie Ihre Anmeldedaten für {{provider}}",
+        "username-label": "Benutzername",
+        "authentication-token-label": "Authentifizierungstoken",
+        "valid-until-label": "Gültig bis",
+        "last-synced-label": "Zuletzt synchronisiert",
+        "not-synced": "Noch nicht synchronisiert",
+        "event-generation-label": "Nachträgliche Erfassung des letzten Scrobbles",
+        "event-generation-not-run": "Die Nachberechnung wurde noch nicht durchgeführt",
+        "generate": "Erstellen",
+        "generate-scrobble-events": "Bereinigungsmaßnahmen"
+    },
+    "scrobble-provider-description-pipe": {
+        "ani-list": "Alles rund um Manga und Light Novels",
+        "my-anime-list": "„Want To Read“ und „Stacks“ synchronisieren für Manga und Light Novels",
+        "hardcover": "Alles rund um Bücher, Manga und Light Novels!",
+        "manga-baka": "Alles rund um Manga und Light Novels"
+    },
+    "review-scrobble-target-name-pipe": {
+        "private": "Nur Sie",
+        "friends": "Freunde",
+        "public": "Alle"
+    },
+    "scrobble-read-status-pipe": {
+        "ignore": "Ignorieren",
+        "want-to-read": "Möchten Sie lesen",
+        "read": "Lesen",
+        "unread": "Ungelesen",
+        "dropped": "Ausgelassen",
+        "on-hold": "Angehalten"
+    },
+    "manage-license-modal": {
+        "hub-title": "Abonnement verwalten"
     }
 }

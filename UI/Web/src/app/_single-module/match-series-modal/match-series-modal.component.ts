@@ -32,12 +32,7 @@ import {MatchSeriesInfo} from "../../_models/kavitaplus/match-series-info";
 import {MetadataProvider} from "../../_models/kavitaplus/metadata-provider.enum";
 import {ScrobbleProvider} from "../../_services/scrobbling.service";
 import {MetadataProviderTitlePipe} from "../../_pipes/metadata-provider-title.pipe";
-import {LibraryTypePipe} from "../../_pipes/library-type.pipe";
-import {MangaFormatPipe} from "../../_pipes/manga-format.pipe";
 import {PlusMediaFormat} from "../../_models/series-detail/external-series-detail";
-import {TranslocoInjectComponent} from "../../shared/_components/transloco-inject/transloco-inject.component";
-import {TranslocoSlotDirective} from "../../_directives/transloco-slot.directive";
-import {TagBadgeComponent} from "../../shared/tag-badge/tag-badge.component";
 
 @Component({
   selector: 'app-match-series-modal',
@@ -50,19 +45,13 @@ import {TagBadgeComponent} from "../../shared/tag-badge/tag-badge.component";
     ImageComponent,
     ScrobbleProviderTagBadgeComponent,
     MetadataProviderTitlePipe,
-    LibraryTypePipe,
-    MangaFormatPipe,
-    TranslocoInjectComponent,
-    TranslocoSlotDirective,
-    TagBadgeComponent,
-
-
   ],
   templateUrl: './match-series-modal.component.html',
   styleUrl: './match-series-modal.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class MatchSeriesModalComponent implements OnInit {
+
   private readonly seriesService = inject(SeriesService);
   private readonly modalService = inject(NgbActiveModal);
   private readonly toastr = inject(ToastrService);
@@ -72,6 +61,7 @@ export class MatchSeriesModalComponent implements OnInit {
 
   formGroup = new FormGroup({
     query: new FormControl('', []),
+    isStandAlone: new FormControl(false),
     dontMatch: new FormControl(false, []),
   });
 
@@ -131,8 +121,16 @@ export class MatchSeriesModalComponent implements OnInit {
 
   ngOnInit() {
     this.formGroup.patchValue({ dontMatch: this.series().dontMatch || false });
-    this.seriesService.getSeriesDetail(this.series().id).subscribe(detail => this.seriesDetail.set(detail));
-    this.search();
+    this.seriesService.getSeriesDetail(this.series().id).pipe(
+      tap(detail => {
+        this.seriesDetail.set(detail)
+
+        const isStandAlone = detail.chapters.length + detail.specials.length == 1;
+        this.formGroup.get('isStandAlone')?.setValue(isStandAlone);
+
+        this.search();
+      }),
+    ).subscribe();
   }
 
   search() {

@@ -1,14 +1,18 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
+using System.Linq.Expressions;
 using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 using Kavita.API.Database;
 using Kavita.API.Services.Plus;
+using Kavita.Database.Extensions;
 using Kavita.Models.DTOs.KavitaPlus;
 using Kavita.Models.DTOs.KavitaPlus.Audit;
 using Kavita.Models.Entities.Enums.Audit;
 using Kavita.Models.Entities.History;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 
 namespace Kavita.Services.Plus;
@@ -18,6 +22,8 @@ public class KavitaPlusAuditService(IUnitOfWork unitOfWork, ILogger<KavitaPlusAu
 {
     private static readonly JsonSerializerOptions JsonOptions = new() { WriteIndented = false };
     private const int RetentionDays = 90;
+    // 24h before we log the audit log again
+    private const int TemperedLoggingCoolDownHours = 24;
 
     public async Task LogAsync(
         KavitaPlusAuditCategory category,
@@ -54,6 +60,29 @@ public class KavitaPlusAuditService(IUnitOfWork unitOfWork, ILogger<KavitaPlusAu
             // Audit failures must never surface to callers
             logger.LogWarning(ex, "[Kavita+ Audit] Failed to write audit entry {EventType}", eventType);
         }
+    }
+
+    public async Task LogTemperedAsync(Expression<Func<KavitaPlusAuditLog, bool>> idSelector, KavitaPlusAuditCategory category, KavitaPlusEventType eventType,
+        AuditStatus status, AuditSubjectType subjectType = AuditSubjectType.Global, int? seriesId = null,
+        int? subjectId = null, object? payload = null, string? error = null, int? userId = null,
+        CancellationToken ct = default)
+    {
+        var timeStart = DateTime.UtcNow.AddHours(-1 * TemperedLoggingCoolDownHours);
+
+        var hasAlreadyLogged = await unitOfWork.DataContext.KavitaPlusAuditLogs
+            .Where(al => al.CreatedUtc > timeStart && al.Category == category && al.EventType == eventType && al.Status == status && al.SubjectType == subjectType)
+            .Where(idSelector)
+            .WhereIf(!string.IsNullOrEmpty(error), al => al.ErrorMessage == error)
+            .AnyAsync(ct);
+
+        if (hasAlreadyLogged)
+        {
+            logger.LogTrace("Skipping logging {Category} - {EventType} - {Status} - {SubjectType} for as a matching event was found.",
+                category, eventType, status, subjectType);
+            return;
+        }
+
+        await LogAsync(category, eventType, status, subjectType, seriesId, subjectId, payload, error, userId, ct);
     }
 
     public Task LogMatchAsync(KavitaPlusEventType type, int seriesId, object payload,

@@ -10,6 +10,7 @@ using Hangfire;
 using Kavita.API.Database;
 using Kavita.API.Repositories;
 using Kavita.API.Services;
+using Kavita.API.Services.Plus;
 using Kavita.API.Services.Scanner;
 using Kavita.API.Services.SignalR;
 using Kavita.Common;
@@ -68,6 +69,8 @@ public class LibraryController(
             return BadRequest(await localizationService.TranslateAsync(UserId, "library-name-exists"));
         }
 
+        ValidateMetadataProvider(dto.Type, dto.MetadataProvider);
+
         var library = new LibraryBuilder(dto.Name, dto.Type)
             .WithFolders(dto.Folders.Select(x => new FolderPath {Path = x}).Distinct().ToList())
             .WithFolderWatching(dto.FolderWatching)
@@ -77,6 +80,7 @@ public class LibraryController(
             .WithAllowScrobbling(dto.AllowScrobbling)
             .WithAllowMetadataMatching(dto.AllowMetadataMatching)
             .WithEnableMetadata(dto.EnableMetadata)
+            .WithMetadataProvider(dto.MetadataProvider)
             .Build();
 
         library.LibraryFileTypes = dto.FileGroupTypes
@@ -103,7 +107,7 @@ public class LibraryController(
         var admins = (await unitOfWork.UserRepository.GetAdminUsersAsync(ct)).ToList();
         foreach (var admin in admins)
         {
-            admin.Libraries ??= new List<Library>();
+            admin.Libraries ??= [];
             admin.Libraries.Add(library);
         }
 
@@ -413,20 +417,26 @@ public class LibraryController(
         var libraries = await unitOfWork.LibraryRepository.GetLibraryForIdsAsync(dto.TargetLibraryIds, LibraryIncludes.ExcludePatterns | LibraryIncludes.FileTypes | LibraryIncludes.Folders, ct);
         foreach (var targetLibrary in libraries)
         {
-            UpdateLibrarySettings(new UpdateLibraryDto()
+            UpdateLibrarySettings(new UpdateLibraryDto
             {
                 Folders = targetLibrary.Folders.Select(s => s.Path),
                 Name = targetLibrary.Name,
                 Id = targetLibrary.Id,
                 Type = sourceLibrary.Type,
                 AllowScrobbling = sourceLibrary.AllowScrobbling,
+                AllowMetadataMatching = sourceLibrary.AllowMetadataMatching,
+                EnableMetadata = sourceLibrary.EnableMetadata,
+                RemovePrefixForSortName = sourceLibrary.RemovePrefixForSortName,
+                InheritWebLinksFromFirstChapter = sourceLibrary.InheritWebLinksFromFirstChapter,
+                DefaultLanguage = sourceLibrary.DefaultLanguage,
+                MetadataProvider = sourceLibrary.MetadataProvider,
                 ExcludePatterns = sourceLibrary.LibraryExcludePatterns.Select(p => p.Pattern).ToList(),
                 FolderWatching = sourceLibrary.FolderWatching,
                 ManageCollections = sourceLibrary.ManageCollections,
                 FileGroupTypes = sourceLibrary.LibraryFileTypes.Select(t => t.FileTypeGroup).ToList(),
                 IncludeInDashboard = sourceLibrary.IncludeInDashboard,
                 IncludeInSearch = sourceLibrary.IncludeInSearch,
-                ManageReadingLists = sourceLibrary.ManageReadingLists
+                ManageReadingLists = sourceLibrary.ManageReadingLists,
             }, targetLibrary, dto.IncludeType);
         }
 
@@ -684,6 +694,17 @@ public class LibraryController(
 
     }
 
+    [HttpGet("metadata-providers")]
+    public ActionResult<List<MetadataProvider>> SupportedMetadataProviders([FromQuery] LibraryType libraryType)
+    {
+        if (KavitaPlusConfiguration.MetadataProvidersForLibraryTypes.TryGetValue(libraryType, out var providers))
+        {
+            return Ok(providers);
+        }
+
+        return Ok(new List<MetadataProvider>());
+    }
+
     private void UpdateLibrarySettings(UpdateLibraryDto dto, Library library, bool updateType = true)
     {
         // Reminder: Add new fields to the Create Library Endpoint!
@@ -692,6 +713,8 @@ public class LibraryController(
         {
             library.Type = dto.Type;
         }
+
+        ValidateMetadataProvider(library.Type, dto.MetadataProvider);
 
         library.FolderWatching = dto.FolderWatching;
         library.IncludeInDashboard = dto.IncludeInDashboard;
@@ -704,6 +727,7 @@ public class LibraryController(
         library.RemovePrefixForSortName = dto.RemovePrefixForSortName;
         library.InheritWebLinksFromFirstChapter = dto.InheritWebLinksFromFirstChapter;
         library.DefaultLanguage = dto.DefaultLanguage;
+        library.MetadataProvider = dto.MetadataProvider;
 
         library.LibraryFileTypes = dto.FileGroupTypes
             .Select(t => new LibraryFileTypeGroup() {FileTypeGroup = t, LibraryId = library.Id})
@@ -715,15 +739,15 @@ public class LibraryController(
             .Select(t => new LibraryExcludePattern() {Pattern = t, LibraryId = library.Id})
             .ToList();
 
-        // Override Scrobbling for Comic libraries since there are no providers to scrobble to
-        if (library.Type is LibraryType.Comic or LibraryType.ComicVine)
-        {
-            logger.LogInformation("Overrode Library {Name} to disable scrobbling since there are no providers for Comics", dto.Name.Replace(Environment.NewLine, string.Empty));
-            library.AllowScrobbling = false;
-        }
-
-
         unitOfWork.LibraryRepository.Update(library);
+    }
+
+    private static void ValidateMetadataProvider(LibraryType type, MetadataProvider provider)
+    {
+        if (!KavitaPlusConfiguration.MetadataProvidersForLibraryTypes.TryGetValue(type, out var validProviders) || !validProviders.Contains(provider))
+        {
+            throw new KavitaException("invalid-metadata-provider");
+        }
     }
 
     /// <summary>

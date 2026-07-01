@@ -31,6 +31,11 @@ public class AniListScrobbleProviderService(ILogger<AniListScrobbleProviderServi
         evt.AniListId = series.AniListId;
     }
 
+    protected override bool HasRequiredIds(Series series)
+    {
+        return series.AniListId > 0;
+    }
+
     // AniList's rate limit is enforced server-wide (~30 requests/min), shared across all users.
     // 30/min == one request every 2s
     public override RateProfile RateProfile => new(

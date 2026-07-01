@@ -21,6 +21,7 @@ public sealed record ExternalSeriesDetailDto
     /// </summary>
     public int? CbrId { get; set; }
     public int? HardcoverId { get; set; }
+    public bool IsStandAlone { get; set; }
     public int? MangabakaId { get; set; }
     public IList<string> Synonyms { get; set; } = [];
     public PlusMediaFormat PlusMediaFormat { get; set; }

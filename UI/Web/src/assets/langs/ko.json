@@ -58,17 +58,19 @@
         "not-processed": "처리되지 않음",
         "special": "{{entity-title.special}}",
         "scrobbling-disabled": "계정 설정에서 읽기 동기화가 꺼져 있습니다.",
-        "generate-scrobble-events": "채우기 이벤트",
         "token-expired": "AniList 토큰이 만료되었습니다! 계정 페이지에서 갱신하기 전까지는 Scrobbling 이벤트가 처리되지 않습니다.",
         "select-all-label": "모두 선택",
-        "delete-selected-label": "선택 취소"
+        "delete-selected-label": "선택 취소",
+        "provider-header": "제공자",
+        "read-status-update": "상태: {{status}}"
     },
     "scrobble-event-type-pipe": {
         "chapter-read": "읽기 진행률",
         "score-updated": "평점 업데이트",
         "want-to-read-add": "읽고 싶어요: 추가",
         "want-to-read-remove": "읽고 싶어요: 제거",
-        "review": "리뷰 업데이트"
+        "review": "리뷰 업데이트",
+        "read-status-update": "읽기 상태 업데이트"
     },
     "spoiler": {
         "click-to-show": "스포일러, 표시하려면 클릭"
@@ -500,7 +502,7 @@
     "invite-user": {
         "title": "사용자 초대",
         "close": "{{common.close}}",
-        "description": "이메일을 입력하여 사용자를 서버에 초대하세요. 계정을 만들 수 있는 이메일을 받게 됩니다. 이 기능이 작동하려면 <a href=\"/settings#email\" rel=\"noopener noreferrer\" target=\"_blank\">이메일</a> 탭에 호스트 이름 및 이메일 설정 필드가 설정되어 있어야 합니다. 그렇지 않으면 링크가 사용자를 대신하여 설정할 수 있도록 제공됩니다.<br/><br/>이메일이 유효할 필요는 없습니다.",
+        "description": "이메일을 입력하여 사용자를 서버에 초대하세요. 계정을 만들 수 있는 이메일을 받게 됩니다. 이 기능이 작동하려면 <a href=\"/settings#admin-email\" rel=\"noopener noreferrer\" target=\"_blank\">이메일</a> 탭에 호스트 이름 및 이메일 설정 필드가 설정되어 있어야 합니다. 그렇지 않으면 링크가 사용자를 대신하여 설정할 수 있도록 제공됩니다.<br/><br/>이메일이 유효할 필요는 없습니다.",
         "email": "{{common.email}}",
         "required-field": "{{common.required-field}}",
         "setup-user-title": "사용자 초대됨",
@@ -521,63 +523,6 @@
         "select-all": "{{common.select-all}}",
         "deselect-all": "{{common.deselect-all}}",
         "no-data": "아직 라이브러리 설정이 없습니다."
-    },
-    "license": {
-        "title": "Kavita+ 라이선스",
-        "manage": "관리",
-        "invalid-license-tooltip": "구독이 종료된 경우 새 구독을 생성하려면 지원팀에 이메일을 보내야 합니다",
-        "check": "확인",
-        "cancel": "{{common.cancel}}",
-        "edit": "{{common.edit}}",
-        "buy": "구입",
-        "activate": "활성화",
-        "renew": "갱신",
-        "no-license-key": "라이센스 키 없음",
-        "license-valid": "라이센스가 유효합니다",
-        "license-not-valid": "라이선스가 유효하지 않음",
-        "loading": "{{common.loading}}",
-        "activate-description": "Stripe에 등록하는 데 사용된 라이선스 키와 이메일을 입력하세요",
-        "activate-license-label": "라이선스 키",
-        "activate-email-label": "{{common.email}}",
-        "activate-discordId-label": "Discord 유저 아이디",
-        "activate-discordId-tooltip": "Kavita+와 Discord 계정을 연결하세요. 이렇게 하면 Kavita를 형성하는 데 도움이 되는 숨겨진 채널에 액세스할 수 있습니다.",
-        "discord-validation": "이것은 유효한 Discord 사용자 ID가 아닙니다. 사용자 ID는 Discord 사용자 이름이 아닙니다.",
-        "activate-delete": "{{common.delete}}",
-        "activate-reset": "라이센스 초기화",
-        "activate-reset-tooltip": "라이센스를 사용하여 이전 등록을 무효화합니다. 라이센스와 이메일이 모두 필요합니다",
-        "activate-save": "{{common.save}}",
-        "kavita+-desc-part-1": "Kavita+는 모든 사용자가 프리미엄 기능을 이용할 수 있도록 해주는 구독 서비스입니다. ",
-        "kavita+-desc-part-2": "프리미엄 혜택",
-        "kavita+-desc-part-3": "을 지금 바로 확인하세요!",
-        "kavita+-requirement": "Kavita+는 최신 3개의 릴리스 버전에서만 작동하도록 설계되었습니다. 그 외 버전에서는 작동하지 않을 수 있습니다.",
-        "help-label": "{{common.help}}",
-        "delete-label": "라이선스 삭제",
-        "delete-tooltip": "이 작업은 Kavita에서 라이선스를 제거하여 Kavita가 Kavita+와 통신하지 않도록 합니다. 구독을 취소하지는 않습니다. 먼저 '관리'를 사용하여 구독을 취소하십시오.",
-        "manage-tooltip": "결제 정보 업데이트, 구독 취소/일시 중지 등",
-        "email-label": "등록된 이메일",
-        "k+-already-registered-header": "라이선스가 이미 등록되었습니다",
-        "overwrite": "덮어쓰기",
-        "k+-unlocked": "Kavita+ 잠금 해제됨!",
-        "faq-title": "FAQ",
-        "license-mismatch": "라이선스가 다른 Kavita 인스턴스에 등록되었을 수 있습니다. 재등록하여 문제를 해결하십시오.",
-        "k+-unlocked-description": "Kavita+에 오신 것을 환영합니다! 계정에서 스크로블 제공자를 등록하면 Kavita는 진행 상황, 평점 및 읽고 싶은 항목에서 스크로블 이벤트를 생성합니다. 스크로블하고 싶지 않은 시리즈에 대해 스크로블 보류를 설정하는 데 시간을 할애하십시오.",
-        "reset-tooltip": "이 작업은 Kavita+ 라이선스가 연결된 서버 인스턴스를 초기화합니다. 이메일과 라이선스 키가 필요합니다",
-        "total-subbed-months-label": "총 구독 개월 수",
-        "k+-license-overwrite": "라이선스가 다른 Kavita 인스턴스에 등록되어 있습니다. 이는 재설치 시 또는 드물게 시스템 업데이트로 인해 발생할 수 있습니다. 덮어쓰기를 선택하여 이 인스턴스가 Kavita+에 강제로 등록되도록 합니다.",
-        "supported-version-label": "지원되는 Kavita 버전 사용 중",
-        "expiration-label": "만료",
-        "reset-label": "리셋",
-        "info-title": "라이센스 정보",
-        "actions-title": "액션",
-        "license-active-label": "라이선스 활성화됨",
-        "valid-tooltip": "유효",
-        "invalid-tooltip": "무효",
-        "kavita+-warning": "Kavita+는 Kavita와 분리되어 있습니다. 구독을 먼저 취소하지 않고 Kavita를 삭제할 경우 요금이 부과가 지속됩니다.",
-        "cancel-label": "구독 취소",
-        "cancel-tooltip": "구독을 취소하고 Kavita에서 라이선스를 제거합니다.",
-        "resend-license-email": "라이선스를 이메일로 보내기",
-        "resend-license-email-tooltip": "Kavita+ 라이선스를 이메일로 재발송합니다. 라이선스 동작을 위해서는 이 서버에 바인딩되어야 합니다.",
-        "supportId-label": "지원 ID"
     },
     "book-line-overlay": {
         "copy": "복사",
@@ -685,7 +630,8 @@
         "on": "{{reader-settings.on}}",
         "off": "{{reader-settings.off}}",
         "loading": "{{common.loading}}",
-        "read-count-tooltip": "총 읽은 수"
+        "read-count-tooltip": "총 읽은 수",
+        "kavitaplus-audit-alt": "Kavita+ 활동"
     },
     "metadata-fields": {
         "collections-title": "{{side-nav.collections}}",
@@ -954,7 +900,14 @@
         "reset": "{{common.reset}}",
         "image-num": "이미지 {{num}}",
         "apply": "{{common.apply}}",
-        "applied": "{{theme-manager.applied}}"
+        "applied": "{{theme-manager.applied}}",
+        "cover-locked": "표지 잠겨있음",
+        "cover-not-locked": "표지 잠겨있지 않음",
+        "reset-tab": "초기화",
+        "no-images": "사용 가능한 이미지 없음",
+        "loading": "{{common.loading}}",
+        "select-image-alt": "이미지를 선택하십시오",
+        "download-cover": "표지 다운로드"
     },
     "download-indicator": {
         "progress": "{{percentage}}% 다운로드 됨",
@@ -1503,7 +1456,6 @@
         "description": "MAL 관심 스택을 가져오고 Kavita 내에서 컬렉션을 생성하세요",
         "series-count": "{{common.series-count}}",
         "restack-count": "{{num}} 재정렬",
-        "nothing-found": "아무것도 찾을 수 없음",
         "track": "트랙",
         "by-author": "{{author}}별로"
     },
@@ -2192,7 +2144,6 @@
         "smart-filter-deleted": "스마트 필터가 삭제되었습니다",
         "smart-filter-updated": "스마트 필터 생성/업데이트 되었습니다",
         "external-source-already-exists": "이름/호스트/API 키가 동일한 외부 소스가 이미 존재합니다",
-        "anilist-token-expired": "AniList 토큰이 만료되었습니다. 읽기 동기화는 사용자 설정 > 계정에서 다시 생성할 때까지 더 이상 처리되지 않습니다",
         "collection-tag-deleted": "컬렉션 태그가 삭제되었습니다",
         "force-kavita+-refresh-success": "Kavita+ 외부 메타데이터가 무효화되었습니다",
         "collection-not-owned": "이 컬렉션의 소유자가 아닙니다",
@@ -2440,7 +2391,11 @@
         "bookmark-text-tab": "텍스트",
         "aliases-tab": "별칭",
         "chapters-tab": "챕터",
-        "sidenav-tab": "사이드 네비"
+        "sidenav-tab": "사이드 네비",
+        "uploaded-tab": "업로드됨",
+        "current-tab": "현재",
+        "kavita-plus-tab": "Kavita+",
+        "other-tab": "기타"
     },
     "common": {
         "reset-to-default": "기본값으로 재설정",
@@ -2638,23 +2593,16 @@
     },
     "match-series-modal": {
         "search": "검색",
-        "dont-match-tooltip": "이 시리즈를 메타데이터 매칭 및 스크로블 대상에서 제외합니다",
+        "dont-match-tooltip": "Kavita가 이 시리즈를 자동 매칭하거나 읽기 동기화하는 것을 막습니다",
         "save": "{{common.save}}",
-        "title": "{{seriesName}} 일치",
-        "dont-match-label": "매칭시키지 않음",
-        "description": "Kavita+ 메타데이터를 다시 연결하고 스크로블 이벤트를 재생성하려면 일치 항목을 선택하세요. ‘매칭시키지 않음’ 옵션을 사용하면, Kavita가 해당 시리즈의 메타데이터를 자동으로 매칭하거나 스크로블하는 것을 제한할 수 있습니다.",
-        "close": "{{common.close}}",
-        "query-label": "검색",
-        "no-results": "일치하는 항목을 찾을 수 없습니다. 지원되는 제공자의 URL을 추가한 뒤 다시 시도하세요.",
-        "query-tooltip": "시리즈 이름 또는 AniList / MyAnimeList / ComicBookRoundup URL을 입력하세요. URL을 입력하면 직접 조회(direct lookup) 방식으로 검색됩니다."
+        "dont-match-label": "일치하지 않음",
+        "description": "일치하는 항목을 선택하여 Kavita+ 메타데이터를 다시 연결하고 읽기 동기화 이벤트를 재생성하세요.",
+        "close": "{{common.close}}"
     },
     "match-series-result-item": {
-        "volume-count": "{{server-stats.volume-count}}",
-        "details": "페이지 보기",
-        "updating-metadata-status": "메타데이터 업데이트",
-        "releasing": "출시일",
-        "chapter-count": "{{common.chapter-count}}",
-        "issue-count": "{{common.issue-count}}"
+        "volume-count": "{{ num }}권",
+        "chapter-count": "{{ num }}화",
+        "issue-count": "{{ num }}호"
     },
     "email-history": {
         "sent-header": "성공",
@@ -2950,7 +2898,6 @@
         "auto-login-label": "자동 로그인",
         "auto-login-tooltip": "로그인 화면을 열 때 자동으로 OIDC 제공자 페이지로 연결합니다",
         "disable-password-authentication-label": "비밀번호 로그인 비활성화",
-        "disable-password-authentication-tooltip": "이 옵션을 활성화하면 일반 사용자 로그인에 비밀번호를 사용할 수 없습니다. 단, 관리자(Admin) 역할의 사용자는 이 제한을 우회할 수 있습니다",
         "provider-name-label": "프로바이더 이름",
         "provider-name-tooltip": "로그인 화면에 표시될 이름입니다",
         "defaults-title": "기본 설정",
@@ -3086,7 +3033,7 @@
     "keybind-setting-description-pipe": {
         "key-bind-title-open-search": "검색 열기",
         "key-bind-tooltip-open-search": "상단 검색창 열기",
-        "key-bind-title-navigate-to-scrobbling": "읽기 동기화 열기",
+        "key-bind-title-navigate-to-scrobbling": "내 활동 열기",
         "key-bind-title-toggle-fullscreen": "전체 화면 전환",
         "key-bind-tooltip-toggle-fullscreen": "F11 대체",
         "key-bind-title-bookmark-page": "현재 페이지 북마크",
@@ -3102,7 +3049,7 @@
         "key-bind-title-page-right": "다음 페이지",
         "key-bind-tooltip-page-right": "오른쪽으로 이동",
         "key-bind-tooltip-navigate-to-settings": "리더 외부에서 설정 열기",
-        "key-bind-tooltip-navigate-to-scrobbling": "설정의 읽기 동기화 탭 열기",
+        "key-bind-tooltip-navigate-to-scrobbling": "내 활동 탭에서 설정 페이지 열기",
         "key-bind-title-escape": "나가기",
         "key-bind-tooltip-escape": "현재 화면 닫기",
         "key-bind-title-navigate-to-settings": "설정 열기",
@@ -3147,7 +3094,7 @@
         "name-label": "이름",
         "key-length-label": "키 길이",
         "expiration-label": "만료일",
-        "required-field": "{{validations.required-field}}",
+        "required-field": "{{validation.required-field}}",
         "total-key-length": "인증 키 길이: {{length}}",
         "cancel": "{{common.cancel}}",
         "close": "{{common.close}}",
@@ -3552,7 +3499,8 @@
         "comicVineId-label": "Comic Vine Id",
         "metronId-label": "Metron Id",
         "not-set-label": "설정 없음",
-        "isbn-label": "{{edit-chapter-modal.isbn-label}}"
+        "isbn-label": "{{edit-chapter-modal.isbn-label}}",
+        "cbrId-label": "Comic Book Roundup Id"
     },
     "cbl-match-tier-pipe": {
         "remap-rule": "재배치 규칙",
@@ -3741,5 +3689,363 @@
         "reading-list": "{{add-to-list-modal.reading-list-label}}",
         "person": "인물",
         "annotation": "주석"
+    },
+    "edit-license-key": {
+        "activate-license-label": "라이선스 키",
+        "activate-email-label": "{{common.email}}",
+        "activate-discordId-label": "Discord 사용자 ID",
+        "activate-discordId-tooltip": "Discord 계정을 Kavita+에 연동합니다. 숨겨진 채널에 접속하여 Kavita를 만들어나가는 것을 도울 수 있습니다.",
+        "discord-validation": "유효한 Discord 사용자 ID가 아닙니다. 사용자 ID는 Discord 사용자 이름이 아닙니다.",
+        "email-help": "Stripe에 등록된 이메일",
+        "license-help": "보안을 위해, 저장된 키는 디스크에 암호화되어 있습니다. 다시 입력하여 업데이트하십시오.",
+        "help-label": "{{common.help}}",
+        "required-field-validation": "{{validation.required-field}}",
+        "license-length-validation": "라이선스 키는 19글자 길이입니다",
+        "license-format-validation": "라이선스는 다음 형식으로 이루어져 있습니다: XXXX-XXXX-XXXX-XXXX",
+        "discord-format-validation": "Discord ID는 19자리 숫자로 된 사용자 ID입니다",
+        "email-format-validation": "유효한 이메일 주소를 사용해야 합니다"
+    },
+    "search-input": {
+        "clear": "검색 이력 삭제"
+    },
+    "time-difference-pipe": {
+        "min": {
+            "ago": "1분 전"
+        },
+        "hour": {
+            "ago": "1시간 전"
+        },
+        "day": {
+            "ago": "1일 전"
+        },
+        "month": {
+            "ago": "1달 전"
+        },
+        "year": {
+            "ago": "1년 전"
+        },
+        "mins": {
+            "ago": "{{value}}분 전"
+        },
+        "hours": {
+            "ago": "{{value}}시간 전"
+        },
+        "days": {
+            "ago": "{{value}}일 전"
+        },
+        "months": {
+            "ago": "{{value}}달 전"
+        },
+        "years": {
+            "ago": "{{value}}년 전"
+        },
+        "never": "없음",
+        "just-now": "방금"
+    },
+    "manage-license-key-modal": {
+        "title": "Kavita+ 라이선스",
+        "last-validated": "{{timeAgo}}에 인증됨",
+        "activate-license": "라이선스 활성화",
+        "close": "{{common.close}}",
+        "delete-license": "라이선스 삭제",
+        "reset-license": "라이선스 초기화",
+        "save": "{{common.save}}"
+    },
+    "register-license-key": {
+        "title": "이미 라이선스를 가지고 있으신가요?",
+        "description": "이 서버에서 Kavita+를 활성화하려면 구매 이메일에서 키를 가져와 입력하세요.",
+        "activate-license": "라이선스 활성화"
+    },
+    "kavita-plus-registration-error-code-pipe": {
+        "registration-failed": "라이선스 활성화 실패. 라이선스 키와 이메일이 맞는지 확인해 주십시오.",
+        "already-registered": "이 라이선스는 다른 서버에 등록되어 있습니다. '라이선스 초기화'를 먼저 실행해 주십시오.",
+        "subscription-inactive": "구독이 활성 상태가 아닙니다. kavitareader.com에서 갱신해 주십시오.",
+        "internal-error": "내부 오류가 발생했습니다. Kavita+ 지원 측으로 연락해 주십시오."
+    },
+    "kavita-plus-subscription-status-pipe": {
+        "active": "활성화",
+        "paused": "일시정지",
+        "cancelling": "취소 중",
+        "expired": "취소됨"
+    },
+    "kavita-plus-provider-health-status-pipe": {
+        "unknown-label": "불명",
+        "operational-label": "선택적",
+        "degraded-label": "성능 저하됨",
+        "down-label": "다운됨"
+    },
+    "kavita-plus-api-name-title-desc-pipe": {
+        "cover-requests-title": "표지 요청",
+        "cover-requests-description": "시리즈, 화(챕터), 권 표지",
+        "metadata-sync-title": "메타데이터 동기화",
+        "metadata-sync-description": "시리즈 상세 정보 갱신",
+        "series-matched-title": "시리즈 매칭됨",
+        "series-matched-description": "업스트림 제공자와 매칭됨",
+        "scrobbles-title": "읽기 동기화",
+        "recommendations-title": "추천",
+        "recommendations-description": "외부 추천 불러옴",
+        "reviews-title": "리뷰",
+        "reviews-description": "외부 리뷰 불러옴"
+    },
+    "kavita-plus-billing-interval-pipe": {
+        "week-unit-label": "주",
+        "month-unit-label": "달",
+        "year-unit-label": "년"
+    },
+    "kavita-plus-upsell": {
+        "title": "Kavita+ 해금",
+        "description": "이 Kavita 인스턴스의 모든 사용자에 대해 메타데이터, 읽기 동기화, 추천 기능을 해금하는 프리미엄 구독입니다.",
+        "wiki-link-label": "위키 읽기",
+        "faq-btn-label": "FAQ",
+        "hero-headline-label": "메타데이터, 읽기 동기화 및 추천.",
+        "hero-subtitle-label": "읽기 진행상황을 자동 동기화하고, AniList, MyAnimeList, Hardcover 및 MangaBaka와 연결해 풍부한 메타데이터를 가져옵니다 - 이 모든 기능이 서버 전체에서 하나의 구독으로 가능합니다.",
+        "start-cta-label": "Kavita+ 시작하기",
+        "feature-list-link-label": "전체 기능 목록 보기",
+        "price-label": "$4",
+        "price-per-month-label": "/월",
+        "price-promo-label": "첫 달 $2",
+        "pricing-feature-1-label": "전체 서버를 하나의 구독으로",
+        "pricing-feature-2-label": "이 인스턴스의 모든 사용자에게 혜택",
+        "pricing-feature-3-label": "Stripe를 통해 언제든지 취소 가능",
+        "pricing-feature-4-label": "노드 귀속 - 사용자당 요금 없음",
+        "providers-more-label": "+ 그리고 더 많은 기능 예정",
+        "benefit-1-title-label": "읽기 진도 자동 동기화",
+        "benefit-1-body-label": "AniList, MangaBaka, Hardcover 등으로 진행상황 푸시 - 수동 트래킹이 필요 없습니다.",
+        "benefit-2-title-label": "평점 & 리뷰",
+        "benefit-2-body-label": "AniList, MyAnimeList, ComicBookRoundup의 평점과 리뷰를 Kavita로 바로 가져옵니다.",
+        "benefit-3-title-label": "풍부한 메타데이터로 태깅 부담 없음",
+        "benefit-3-body-label": "만화, 도서 및 코믹스에 표지, 요약, 장르 및 인물 메타데이터 자동 적용합니다.",
+        "benefit-4-title-label": "MAL 스택 가져오기 & 동기화",
+        "benefit-4-body-label": "관심 있는 스택을 가져와 동기화합니다. 더 많은 제공자와의 통합이 예정되어 있습니다.",
+        "benefit-5-title-label": "어디서든 읽기 리스트",
+        "benefit-5-body-label": "읽기 리스트를 MAL 및 AniList와 같은 업스트림 제공자와 양방향 동기화합니다.",
+        "benefit-6-title-label": "전체 서버 기능",
+        "benefit-6-body-label": "하나의 구독으로 서버 단위에 귀속됩니다. 이 인스턴스의 모든 사용자가 혜택을 받습니다.",
+        "faq-section-title-label": "FAQ",
+        "faq-1-question-label": "Kavita+는 Kavita와 별도인가요?",
+        "faq-1-answer-label": "네. Kavita는 무료이며 오픈 소스로 유지됩니다. Kavita+는 프리미엄 서비스를 추가합니다 - Kavita를 삭제해도 구독은 자동 취소되지 않습니다.",
+        "faq-2-question-label": "서버가 여러 개 있다면 어떻게 하나요?",
+        "faq-2-answer-label": "각 Kavita+ 라이선스는 하나의 서버에 노드 귀속됩니다. 마이그레이션하려면 지원 측으로 문의하십시오.",
+        "faq-3-question-label": "구독을 취소하려면 어떻게 하나요?",
+        "faq-3-answer-label": "관리 버튼을 사용해 Stripe 포털을 열면 언제든 취소 또는 정지할 수 있습니다.",
+        "faq-wiki-link-label": "wiki에서 전체 FAQ 확인"
+    },
+    "kavita-plus-connect-providers": {
+        "title": "준비가 완료되었습니다 - 마지막 단계",
+        "description": "읽기 동기화할 제공자를 연결합니다. Kavita+는 기존 독서 이력을 갱신하고 향후 읽기 진도를 동기화(단방향)할 것입니다.",
+        "faq-btn-label": "FAQ",
+        "activated-title-label": "라이선스 활성화됨",
+        "activated-body-label": "이 서버의 모든 사용자에게 프리미엄 기능이 해금되었습니다.",
+        "backfill-body-label": "지금 연결하면 Kavita+가 기존 진행상황을 이러한 서비스에서 가져와 라이브러리가 이미 읽은 것으로 표시됩니다. 나중에 연결할 수도 있지만 활성화 직후에 동기화하는 것이 가장 간단합니다.",
+        "step-2-of-2-label": "2 / 2단계",
+        "skip-for-now-label": "지금은 건너뛰기",
+        "go-to-dashboard-label": "대시보드로 이동",
+        "footer-hint-label": "나중에 설정 → Kavita+ → 연결된 계정에서 더 많은 제공자와 연결할 수 있습니다."
+    },
+    "scrobble-provider-media-title-pipe": {
+        "anilist-label": "만화 + 라이트노벨",
+        "mal-label": "{{scrobble-provider-media-title-pipe.anilist-label}}",
+        "mangabaka-label": "{{scrobble-provider-media-title-pipe.anilist-label}}",
+        "hardcover-label": "도서",
+        "cbr-label": "코믹스"
+    },
+    "scrobble-health": {
+        "title-label": "업스트림 제공자",
+        "checked-ago-label": "{{time}} 전에 확인"
+    },
+    "license-api-stats": {
+        "title": "API 사용량",
+        "description": "이 서버가 Kavita+에 호출한 것입니다. 단순한 정보성으로, 최대 제한은 없습니다.",
+        "last-30-days": "지난 30일",
+        "lifetime": "전체 기간",
+        "range-toggle-alt": "API 사용량 범위 토글"
+    },
+    "expired-license-api-stats": {
+        "title": "마지막 사용량 스냅샷"
+    },
+    "license-dashboard": {
+        "title": "라이선스 & Kavita+",
+        "description-inactive": "Kavita+ 구독이 만료되었습니다. 메타데이터 동기화, 읽기 동기화, 추천 등의 기능을 복원하려면 갱신하십시오.",
+        "description-active": "이 서버의 구독, 통합 및 사용량입니다.",
+        "faq-label": "FAQ",
+        "support-label": "도움"
+    },
+    "discord-connect-card": {
+        "connect-title": "Discord 연결"
+    },
+    "license-info-panel": {
+        "expires-label": "만료",
+        "days-ago-label": "{{count}}일 전",
+        "days-remaining-label": "{{count}}일 남음",
+        "days-left-label": "남은 일자",
+        "manage-label": "관리",
+        "renew-label": "갱신",
+        "edit-license-label": "라이선스 편집",
+        "check-license-label": "확인",
+        "support-id-label": "지원 Id",
+        "desc-inactive-label": "모든 사용자를 위한 프리미엄 기능 제공 중단됨",
+        "next-charge-label": "다음 결제일",
+        "supported-label": "지원됨",
+        "unsupported-label": "지원되지 않음",
+        "version-sub-label": "버전 v{{version}}",
+        "expired-label": "만료됨",
+        "last-plan-label": "지난 플랜",
+        "impacted-label": "활성 사용자 영향",
+        "impacted-value-label": "사용자 {{count}}명",
+        "impacted-sub-label": "프리미엄 기능 중단됨"
+    },
+    "kavitaplus-tooltip": {
+        "panel-title": "Kavita+: 감사 로그",
+        "matched": "매칭됨",
+        "unmatched": "매칭 안됨",
+        "filter-all": "모두",
+        "filter-match": "매칭",
+        "filter-metadata": "메타데이터",
+        "filter-scrobble": "읽기 동기화",
+        "filter-sync": "동기화",
+        "no-events": "최근 이벤트 없음",
+        "no-data": "데이터 없음",
+        "loading": "{{common.loading}}",
+        "close": "{{common.close}}",
+        "refreshed": "새로고침됨",
+        "next-refresh": "다음 새로고침",
+        "showing-latest": "최근 {{count}}개 이벤트 표시",
+        "my-activity": "나의 활동",
+        "admin-feed": "관리자 피드",
+        "read-progress-sent-label": "독서 진도 - {{chapter}}",
+        "fields-updated": "{{count}}개 필드 업데이트됨",
+        "rating-updated": "평점 업데이트됨",
+        "add-want-to-read": "읽고 싶어요에 추가됨",
+        "remove-want-to-read": "읽고 싶어요에서 제거됨",
+        "review-submitted": "리뷰 제출됨",
+        "metadata-source": "메타데이터 출처"
+    },
+    "kavitaplus-diff": {
+        "field-label": "필드",
+        "before-label": "이전",
+        "after-label": "이후",
+        "null-value": "—",
+        "object-expanded": "아래로 확장됨"
+    },
+    "scrobble-account-card": {
+        "provider-connected": "연결됨",
+        "provider-not-connected": "연결되지 않음",
+        "provider-expired": "토큰 만료됨",
+        "provider-connect": "연결",
+        "provider-settings": "설정"
+    },
+    "kavita-plus-audit-entry": {
+        "match": "매칭"
+    },
+    "audit-status-title-pipe": {
+        "success": "성공",
+        "failure": "실패",
+        "info": "정보"
+    },
+    "metadata-fetch-trigger-title-pipe": {
+        "series-added": "자동 추가",
+        "on-demand": "페이지 방문",
+        "manual-match": "수동",
+        "scheduled-refresh": "계획됨"
+    },
+    "audit-subject-title-pipe": {
+        "series": "시리즈",
+        "person": "인물",
+        "collection": "컬렉션",
+        "chapter": "화",
+        "global": "글로벌"
+    },
+    "metadata-field-change-kind-title-pipe": {
+        "relationships": "관련 작품",
+        "characters": "캐릭터",
+        "writers": "작가",
+        "tags": "태그",
+        "genres": "장르",
+        "publication-status": "출판 상태",
+        "title": "제목",
+        "release-date": "발매일",
+        "release-year": "발매연도"
+    },
+    "kavita-plus-event-description-pipe": {
+        "review-submitted": "제출된 리뷰",
+        "fields-updated": "{{count}}개 필드 업데이트됨",
+        "chapter-cover-updated": "표지 업데이트됨: {{chapter}}",
+        "series-cover-updated": "시리즈 표지 업데이트됨",
+        "series-match-fixed": "시리즈가 {{matchName}}와(과) 매칭됨",
+        "collection-synced": "{{collectionName}}: {{itemCount}}개 항목 동기화, {{missingCount}}개 불일치",
+        "collection-item-added": "{{collectionName}}에 추가됨",
+        "person-cover-updated": "{{personName}} 표지 업데이트됨",
+        "person-alias-added": "{{personName}}에 별칭 '{{aliasAdded}}' 추가됨",
+        "sync-started-collection": "{{collectionName}} 동기화 시작하는 중 ({{itemCount}}개 항목)",
+        "sync-failed-collection": "{{collectionName}} 동기화 실패"
+    },
+    "expired-license-info-card": {
+        "status-label": "상태"
+    },
+    "manage-kavitaplus-activity": {
+        "filter-scrobble": "읽기 동기화"
+    },
+    "scrobble-read-status-pipe": {
+        "want-to-read": "읽고 싶은 책",
+        "read": "읽음",
+        "unread": "읽지 않음"
+    },
+    "manage-license-modal": {
+        "hub-title": "구독 관리",
+        "hub-subtitle": "이 서버의 Kavita+ 플랜으로 무엇을 하고 싶으신지 선택하세요.",
+        "renew-title": "구독 갱신",
+        "renew-desc": "이 서버의 모든 사용자를 위해 Kavita+를 재활성화하세요.",
+        "cancel-title": "구독 취소",
+        "cancel-desc": "플랜을 종료합니다. Kavita+는 청구일까지 활성화되며 추가 요금은 부과되지 않습니다.",
+        "change-email-title": "이메일 변경",
+        "change-email-desc": "Stripe가 영수증, 라이선스 및 갱신 링크 전송에 사용하는 주소를 업데이트합니다.",
+        "billing-title": "청구 및 결제 세부 정보",
+        "billing-desc": "Stripe의 보안 포털에서 카드 업데이트, 청구서 확인, 영수증을 다운로드하세요.",
+        "close": "{{common.close}}"
+    },
+    "renew-license": {
+        "title": "Kavita+ 갱신",
+        "subtitle": "이 서버의 모든 사용자를 위해 프리미엄 기능을 다시 활성화하세요.",
+        "close": "{{common.close}}",
+        "billing-period-label": "청구 기간",
+        "monthly-label": "월간",
+        "yearly-label": "연간",
+        "billing-email-label": "청구 이메일",
+        "email-help": "이 인스턴스에서 자동으로 채워짐 - 원본 구매와 일치해야 합니다.",
+        "change-label": "변경",
+        "how-it-works-label": "갱신 작동 방식",
+        "how-step-1": "선택한 요금제에 대한 Stripe 보안 결제를 {{email}}에 생성합니다.",
+        "how-step-2": "그곳에서 카드를 확인하십시오 - 결제 세부 정보는 이 서버에 전달되지 않습니다.",
+        "how-step-3": "결제가 완료되면 서버의 모든 사용자가 Kavita+ 기능을 다시 사용할 수 있게 됩니다.",
+        "back-label": "뒤로",
+        "send-link-label": "계속해서 결제 진행",
+        "checkout-ready-label": "결제가 완료되었습니다",
+        "checkout-ready-help": "Stripe 보안 결제창을 열어 갱신을 완료하십시오. 결제가 완료되면 창을 닫고 다시 확인하실 수 있습니다.",
+        "pay-now-label": "지금 결제",
+        "done-label": "{{common.done}}",
+        "link-sent-error": "갱신을 시작할 수 없습니다. 다시 시도하거나 지원 측으로 문의해 주십시오."
+    },
+    "cancel-license": {
+        "title": "구독 취소",
+        "subtitle": "현재 청구 기간이 끝날 때까지 전체 액세스 권한을 유지할 수 있습니다.",
+        "close": "{{common.close}}",
+        "server-wide-label": "서버 전역",
+        "users-active-label": "사용자 {{count}}명 활동",
+        "what-happens-label": "무슨 일이 일어나는지",
+        "impact-1": "Kavita+는 현재 청구일까지 활성화되어 있습니다.",
+        "impact-2": "그 날짜 이후에는 추가 요금이 부과되지 않습니다.",
+        "impact-3": "언제든지 다시 구독하여 프리미엄 기능을 복구할 수 있습니다.",
+        "comment-label": "취소 이유 (선택)",
+        "comment-placeholder": "왜 구독을 취소하는지 저희에게 알려주세요...",
+        "cancelled-success": "구독이 취소되었습니다. 청구일까지 계속 사용하실 수 있습니다.",
+        "cancelled-error": "구독을 취소할 수 없었습니다. 다시 시도하거나 지원 측으로 문의해 주십시오.",
+        "back-label": "뒤로",
+        "confirm-label": "구독 취소"
+    },
+    "change-license-email": {
+        "title": "이메일 변경",
+        "subtitle": "영수증, 라이선스 키, 갱신 링크가 전송되는 주소를 업데이트합니다.",
+        "close": "{{common.close}}",
+        "current-email-label": "현재 이메일"
     }
 }

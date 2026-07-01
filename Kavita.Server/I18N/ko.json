@@ -277,5 +277,8 @@
     "email.username-change.title": "사용자 이름 변경 업데이트",
     "email.username-change.description": "계정의 사용자 이름이 {{InvitingUser}}님의 Kavita 인스턴스에서 업데이트되었습니다. 사용자 측에서 필요한 조치는 없습니다.",
     "cbl-import-download-from-url": "URL에서 파일을 다운로드할 수 없습니다",
-    "cbl-import-validation-types": ".cbl과 .json 파일만 허용됩니다"
+    "cbl-import-validation-types": ".cbl과 .json 파일만 허용됩니다",
+    "scrobble-provider-not-setup": "읽기 동기화 제공자 {0}이(가) 설정되지 않았습니다",
+    "unable-to-cancel-k+": "오류로 인해 Kavita+ 구독을 취소할 수 없습니다. Kavita+ 지원 측에 문의하십시오",
+    "unable-to-renew-k+": "오류로 인해 Kavita+ 구독을 갱신할 수 없습니다. Kavita+ 지원 측에 문의하십시오"
 }

@@ -31,11 +31,6 @@ public sealed record SeriesDetailRequestV3Dto: MetadataRequest
     /// </summary>
     /// <remarks>Make false for Recommendation data retrieval</remarks>
     public bool IncludeRelationships { get; set; } = true;
-    /// <summary>
-    /// Include Ratings
-    /// </summary>
-    /// <remarks>Make false for Recommendation data retrieval</remarks>
-    public bool IncludeRatings { get; set; } = true;
 
     /// <summary>
     /// Projects a v2 <see cref="PlusSeriesRequestDto"/> into the v3 series-detail request contract.

@@ -586,7 +586,7 @@ public class SeriesController(
     public async Task<ActionResult<IList<ExternalSeriesMatchDto>>> MatchSeries(MatchSeriesDto dto)
     {
         var ct = HttpContext.RequestAborted;
-        var cacheKey = $"{MatchSeriesCacheKey}-{dto.SeriesId}-{dto.Query}";
+        var cacheKey = $"{MatchSeriesCacheKey}-{dto.SeriesId}-{dto.Query}-{dto.IsStandAlone}";
         var results = await _matchSeriesCacheProvider.GetAsync<IList<ExternalSeriesMatchDto>>(cacheKey, ct);
         if (results.HasValue && !environment.IsDevelopment())
         {
@@ -636,8 +636,8 @@ public class SeriesController(
     /// </summary>
     /// <param name="seriesId"></param>
     /// <returns></returns>
-    [HttpGet("match-info")]
     [KPlus]
+    [HttpGet("match-info")]
     [Authorize(Policy = PolicyGroups.AdminPolicy)]
     public async Task<ActionResult<MatchSeriesInfoDto>> GetExistingMatchInfo(int seriesId)
     {
@@ -648,11 +648,7 @@ public class SeriesController(
         var libraryType = series.Library.Type;
         var externalMetadata = series.ExternalSeriesMetadata;
 
-        // This is assuming v2 logic. Not sure if we will change how we match on V3 yet
-        var primaryProvider = plusFormat.GetMetadataProvider(series.Library);
-
-        // We need provider derived from the primary id (null until the series is matched)
-        var provider = series.ResolveMatchedProvider();
+        var provider = externalMetadata?.Provider;
 
         return Ok(new MatchSeriesInfoDto
         {
@@ -666,7 +662,7 @@ public class SeriesController(
             LibraryType = libraryType,
             PlusMediaFormat = plusFormat,
             MatchedProvider = provider,
-            PrimaryProvider = primaryProvider,
+            PrimaryProvider = series.Library.MetadataProvider,
             SeriesFormat = series.Format
         });
     }

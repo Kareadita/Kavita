@@ -116,6 +116,15 @@ public static partial class StringExtensions
         {
             return string.IsNullOrEmpty(value) ? string.Empty : string.Concat(Enumerable.Repeat(value, n));
         }
+
+        /// <summary>
+        /// Returns true if this Kavita+ API error message indicates the series could not be matched ("Unknown Series").
+        /// </summary>
+        /// <remarks>Case-insensitive to tolerate K+ wording changes (e.g. "Unknown series" vs "Unknown Series")</remarks>
+        public bool IsUnknownSeriesError()
+        {
+            return !string.IsNullOrEmpty(value) && value.Contains("Unknown Series", StringComparison.OrdinalIgnoreCase);
+        }
     }
 
     extension(string value)

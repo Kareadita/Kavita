@@ -277,5 +277,8 @@
     "email.username-change.title": "Nuashonrú ar Athrú Ainm Úsáideora",
     "email.username-change.description": "Tá ainm úsáideora do chuntais nuashonraithe ar chás Kavita {{InvitingUser}}. Níl aon ghníomh ag teastáil uait.",
     "cbl-import-download-from-url": "Ní féidir an comhad a íoslódáil ón URL",
-    "cbl-import-validation-types": "Ní cheadaítear ach comhaid .cbl agus .json"
+    "cbl-import-validation-types": "Ní cheadaítear ach comhaid .cbl agus .json",
+    "scrobble-provider-not-setup": "Níl Soláthraí Scrobble {0} socraithe",
+    "unable-to-cancel-k+": "Ní féidir síntiús Kavita+ a chealú mar gheall ar earráid. Téigh i dteagmháil le Tacaíocht Kavita+",
+    "unable-to-renew-k+": "Ní féidir síntiús Kavita+ a athnuachan mar gheall ar earráid. Téigh i dteagmháil le Tacaíocht Kavita+"
 }

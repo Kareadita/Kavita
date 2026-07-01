@@ -145,6 +145,8 @@ public class ScrobblingServiceTests(ITestOutputHelper outputHelper): AbstractDbT
                 .Build())
             .Build();
 
+        series.AniListId = 39115;
+
         var library = new LibraryBuilder("Test Library", LibraryType.Manga)
             .WithAllowScrobbling(true)
             .WithSeries(series)
@@ -1030,6 +1032,8 @@ public class ScrobblingServiceTests(ITestOutputHelper outputHelper): AbstractDbT
                 .Build())
             .Build();
 
+        series.AniListId = 39115;
+
         lib.Series.Add(series);
 
         await unitOfWork.CommitAsync();
@@ -1095,6 +1099,8 @@ public class ScrobblingServiceTests(ITestOutputHelper outputHelper): AbstractDbT
                         .Build()])
                 .Build())
             .Build();
+
+        series.AniListId = 39115;
 
         lib.Series.Add(series);
 

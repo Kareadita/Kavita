@@ -54,10 +54,9 @@
         "processed": "Spracované",
         "not-processed": "Nespracované",
         "special": "{{entity-title.special}}",
-        "chapter-num": "Kapitola {{num}}",
+        "chapter-num": "{{entity-title.chapter-num}}",
         "not-read-warning": "Upstream poskytovatelia si vždy ponechajú najvyššie číslo",
-        "volume-num": "Zväzok {{num}}",
-        "generate-scrobble-events": "Záložné udalosti",
+        "volume-num": "{{entity-title.volume-num}}",
         "token-expired": "Platnosť vášho tokenu AniList vypršala! Scrobbling udalosti sa spracujú až po obnovení na stránke Účty.",
         "scrobbling-disabled": "Scrobblovanie je zakázané v nastaveniach vášho účtu.",
         "select-all-label": "Vybrať všetko",
@@ -118,7 +117,7 @@
         "collapse-series-relationships-tooltip": "Mala by Kavita ukázať seriál, ktorý nemá žiadne vzťahy alebo je nadradeným/prequel",
         "share-series-reviews-label": "Zdieľať recenzie série",
         "share-series-reviews-tooltip": "Povoliť zobrazenie vašich recenzií ostatným používateľom na tomto serveri",
-        "clients-opds-description": "Všetci klienti tretích strán budú používať kľúč API alebo pripájaciu adresu URL nižšie. Musí sa s nimi zaobchádzať dôverne, rovnako ako s heslami.",
+        "clients-opds-description": "Všetci klienti tretích strán budú používať buď overovací kľúč OPDS, alebo nižšie uvedenú URL adresu pripojenia. Ide o údaje podobné heslám, preto ich uchovávajte v tajnosti.",
         "reset": "{{common.reset}}",
         "save": "{{common.save}}",
         "clients-opds-alert": "OPDS nie je na tomto serveri povolený. Toto neovplyvní používateľov Mihonu.",
@@ -153,7 +152,9 @@
         "social-share-profile-label": "Zdieľať profil",
         "social-share-profile-tooltip": "Povoliť, aby ostatní členovia servera videli vaše čitateľské aktivity",
         "embed-progress-indicator-label": "Zobraziť indikátor priebehu",
-        "embed-progress-indicator-tooltip": "Zobraziť indikátor priebehu v názve"
+        "embed-progress-indicator-tooltip": "Zobraziť indikátor priebehu v názve",
+        "include-continue-from-label": "Zahrnúť Pokračovať od položky",
+        "include-continue-from-tooltip": "Vložte položku „Pokračovať od X“ do polí OPDS, aby ste sa vyhli nájdeniu posledného bodu čítania (emuluje tlačidlo Pokračovať v aplikácii Kavita)"
     },
     "user-holds": {
         "title": "Scrobble tituly",
@@ -202,17 +203,19 @@
     },
     "manage-devices": {
         "title": "Správca zariadení",
-        "description": "Táto časť je určená na nastavenie zariadení, ktoré sa nemôžu pripojiť ku Kavite cez webový prehliadač a namiesto toho majú e-mailovú adresu, ktorá prijíma súbory.",
+        "description": "Táto časť slúži na nastavenie e-mailových zariadení, ktoré sa nemôžu pripojiť k službe Kavita, ale majú e-mailovú adresu, ktorá prijíma súbory.",
         "platform-label": "Platforma",
         "add": "{{common.add}}",
         "delete": "{{common.delete}}",
         "edit": "{{common.edit}}",
         "no-data": "{{typeahead.no-data}}",
         "actions-header": "{{manage-users.actions-header}}",
-        "email-setup-alert": "Chcete posielať súbory do svojich zariadení? Správca musí prv nakonfigurovať nastavenia e-mailu!",
+        "email-setup-alert": "Chcete posielať súbory na svoj e-mail? Nech vám správca najprv nastaví e-mailové nastavenia!",
         "email-label": "Email",
         "name-label": "Meno",
-        "warning": "Pozor"
+        "warning": "Pozor",
+        "client-devices-header": "Klientske zariadenia",
+        "sendto-device-header": "Zariadenia založené na e-maile"
     },
     "edit-device-modal": {
         "device-name-label": "{{manage-devices.name-label}}",
@@ -222,9 +225,9 @@
         "cancel": "{{common.cancel}}",
         "required-field": "{{validation.required-field}}",
         "valid-email": "{{validation.valid-email}}",
-        "title": "Upraviť zariadenie",
+        "title": "Upraviť e-mailové zariadenie",
         "email-tooltip": "Tento e-mail sa použije na prijatie súboru prostredníctvom možnosti Poslať do",
-        "device-platform-label": "Platforma Zariadenia"
+        "device-platform-label": "{{manage-devices.platform-label}}"
     },
     "change-password": {
         "password-label": "{{common.password}}",
@@ -261,7 +264,7 @@
         "save": "{{common.save}}"
     },
     "api-key": {
-        "copy": "Kopírovať"
+        "copy": "{{book-line-overlay.copy}}"
     },
     "scrobbling-providers": {
         "title": "Poskytovatelia scrobbblingu",
@@ -481,7 +484,8 @@
     },
     "all-filters": {
         "title": "Všetky smart filtre",
-        "count": "{{count}} {{customize-dashboard-modal.title-smart-filters}}"
+        "count": "{{count}} Celkový počet inteligentných filtrov",
+        "description": "Inteligentné filtre sú uložené filtre, ktoré je možné priradiť k bočnému navigačnému panelu a riadiacej doske. Môžete ich vytvoriť pre série a zoznamy na čítanie tak, že im zadáte názov a kliknete na tlačidlo Uložiť."
     },
     "announcements": {
         "title": "Oznámenia"
@@ -517,63 +521,6 @@
         "deselect-all": "{{common.deselect-all}}",
         "no-data": "Zatiaľ nie sú nastavené žiadne knižnice."
     },
-    "license": {
-        "title": "Kavita+ Licencia",
-        "manage": "Spravovať",
-        "invalid-license-tooltip": "Ak sa vaše predplatné skončilo, musíte poslať e-mail podpore, aby ste si mohli vytvoriť nové predplatné",
-        "check": "Skontrolovať",
-        "cancel": "{{common.cancel}}",
-        "edit": "{{common.edit}}",
-        "buy": "Kúpiť",
-        "activate": "Aktivovať",
-        "renew": "Obnoviť",
-        "no-license-key": "Žiadny licenčný kľúč",
-        "license-valid": "Licencia je platná",
-        "license-not-valid": "Licencia nie je platná",
-        "loading": "{{common.loading}}",
-        "activate-description": "Zadajte licenčný kľúč a e-mail použitý na registráciu v Stripe",
-        "activate-license-label": "Licenčný kľúč",
-        "activate-email-label": "{{common.email}}",
-        "activate-discordId-tooltip": "Prepojte svoj Discord účet s Kavita+. To vám umožňuje prístup k skrytým kanálom, ktoré vám pomôžu tvarovať Kavitu.",
-        "discord-validation": "Toto nie je platné ID používateľa Discord. Vaše ID používateľa nie je vaše používateľské discord meno.",
-        "activate-delete": "{{common.delete}}",
-        "activate-reset": "Resetovať licenciu",
-        "activate-reset-tooltip": "Zrušte platnosť predchádzajúcej registrácie pomocou vašej licencie. Vyžaduje licenciu aj e-mail",
-        "activate-save": "{{common.save}}",
-        "help-label": "{{common.help}}",
-        "activate-discordId-label": "Discord Používateľské ID",
-        "kavita+-desc-part-2": "prémiové benefity",
-        "kavita+-desc-part-3": "dnes!",
-        "kavita+-requirement": "Kavita+ je navrhnutá tak, aby fungovala iba s najnovšími 3 vydaniami. Čokoľvek mimo toho môže byť nefunkčné.",
-        "kavita+-desc-part-1": "Kavita+ je prémiová predplatená služba, ktorá odomyká funkcie pre všetkých používateľov v tejto inštancii Kavita. Kúpte si predplatné pre odomknutie. ",
-        "info-title": "Info o licencii",
-        "actions-title": "Akcie",
-        "license-active-label": "Licencia je aktívna",
-        "supported-version-label": "Na podporovanej verzii Kavita",
-        "expiration-label": "Expirácia",
-        "valid-tooltip": "Platné",
-        "k+-unlocked-description": "Vitajte v Kavita+! Kavita bude generovať scrobble udalosti z vášho pokroku, hodnotení a čo si chcete prečítať, keď zaregistrujete svojich poskytovateľov scrobble pod účtom. Urobte si nejaký čas, aby ste sa uistili, že umiestnite scrobbling chyty pre každú sériu, ktorú nechcete scrobble.",
-        "invalid-tooltip": "Neplatné",
-        "reset-label": "Reset",
-        "reset-tooltip": "Týmto sa resetuje inštancia servera, ku ktorej je viazaná licencia Kavita+. Vyžaduje e-mail a licenčný kľúč",
-        "delete-label": "Odstrániť licenciu",
-        "delete-tooltip": "Týmto sa odstráni licencia pre Kavitu, aby Kavita nefungovala s Kavitou+. Neodhlási vás. Na zrušenie predplatného najskôr použite „spravovať“.",
-        "manage-tooltip": "Aktualizácia platobných údajov, zrušenie/pozastavenie odberu atď",
-        "faq-title": "Časté otázky",
-        "total-subbed-months-label": "Celkový počet predplatených mesiacov",
-        "email-label": "Registrovaný Email",
-        "license-mismatch": "Licencia môže byť zaregistrovaná v inej inštancii Kavita. Znova sa zaregistrujte pre opravu.",
-        "k+-license-overwrite": "Licencia je zaregistrovaná v inej inštancii Kavita. Môže sa to stať pri opätovnej inštalácii a zriedkavo kvôli aktualizáciám systému. Vyberte prepísať, aby ste vynútili registráciu tejto inštancie v Kavita+.",
-        "k+-already-registered-header": "Licencia je už zaregistrovaná",
-        "overwrite": "Prepísať",
-        "k+-unlocked": "Kavita+ odomknutá!",
-        "kavita+-warning": "Kavita+ je oddelená od aplikácie Kavita. Odinštalovanie bez predchádzajúceho zrušenia predplatného bude pokračovať vo fakturačnom cykle.",
-        "cancel-label": "Zrušiť predplatné",
-        "cancel-tooltip": "Zrušte svoje predplatné a odstráňte licenciu v aplikácii Kavita.",
-        "resend-license-email": "Pošlite licenciu na email",
-        "resend-license-email-tooltip": "Znovu odošlite licenciu Kavita+ na e-mail. Licencia musí byť prepojená s týmto serverom, aby fungovala.",
-        "supportId-label": "Support Id"
-    },
     "book-line-overlay": {
         "copy": "Kopírovať",
         "bookmark": "Záložka",
@@ -597,7 +544,9 @@
         "page-num-label": "Strana {{strana}}",
         "completion-label": "{{percent}} hotových",
         "force-selected-one-column": "Režim rozloženia prepnutý na jeden stĺpec z dôvodu nedostatku miesta na vykreslenie dvoch stĺpcov",
-        "forced-vertical-switch": "Režim rozloženia bol prepnutý, pretože dvojstĺpcové rozloženie nefunguje so zvislým štýlom písania"
+        "forced-vertical-switch": "Režim rozloženia bol prepnutý, pretože dvojstĺpcové rozloženie nefunguje so zvislým štýlom písania",
+        "close-reader-alt": "Zatvoriť čítačku",
+        "shortcuts-menu-alt": "{{manga-reader.shortcuts-menu-alt}}"
     },
     "personal-table-of-contents": {
         "no-data": "Zatiaľ nič nie je v záložkách",
@@ -677,7 +626,9 @@
         "release-date-title": "Vydanie",
         "on": "{{reader-settings.on}}",
         "off": "{{reader-settings.off}}",
-        "loading": "{{common.loading}}"
+        "loading": "{{common.loading}}",
+        "read-count-tooltip": "Celkový počet prečítaní",
+        "kavitaplus-audit-alt": "Aktivita Kavita+"
     },
     "metadata-fields": {
         "collections-title": "{{side-nav.collections}}",
@@ -1418,7 +1369,6 @@
         "close": "{{common.close}}",
         "series-count": "{{common.series-count}}",
         "title": "MAL záujmy Stack Importovanie",
-        "nothing-found": "Nič sa nenašlo",
         "description": "Importujte svoje MAL záujmy Stacks a vytvorte zbierky v rámci Kavita",
         "restack-count": "{{num}} Restackov",
         "track": "Skladba"
@@ -2008,7 +1958,6 @@
         "smart-filter-deleted": "Smart filter bol odstránený",
         "smart-filter-updated": "Vytvorený/aktualizovaný Smart filter",
         "external-source-already-exists": "Externý zdroj už existuje s rovnakým názvom/hostom/kľúčom API",
-        "anilist-token-expired": "Platnosť vášho tokenu AniList vypršala. Scrobbling sa už nebude spracovávať, kým ho znova nevygenerujete v časti Používateľské nastavenia > Účet",
         "collection-tag-deleted": "Tag zbierky bol odstránený",
         "force-kavita+-refresh-success": "Externé metadáta Kavita+ boli zrušené",
         "collections-unpromoted": "Nepropagované zbierky",
@@ -2370,12 +2319,8 @@
     },
     "match-series-modal": {
         "description": "Vyberte zhodu na opätovné prepojenie metadát Kavita+ a regeneráciu scrobble udalostí. \"Nezhoda\" sa dá použiť na obmedzenie Kavity v zhode metadát a scrobblingu.",
-        "title": "Zhoda {{seriesName}}",
         "save": "{{common.save}}",
         "close": "{{common.close}}",
-        "no-results": "Nedá sa nájsť zhoda. Skúste pridať adresu URL od podporovaného poskytovateľa a skúste to znova.",
-        "query-label": "Dopyt",
-        "query-tooltip": "Zadajte názov série, URL adresu AniList/MyAnimeList/ComicBookRoundup. URL adresy budú používať priame vyhľadávanie.",
         "dont-match-label": "Nezhoduj",
         "dont-match-tooltip": "Rozhodnite sa pre túto sériu z párovania a scrobblingu",
         "search": "Hľadať"
@@ -2402,9 +2347,6 @@
     "match-series-result-item": {
         "chapter-count": "{{common.chapter-count}}",
         "volume-count": "{{server-stats.volume-count}}",
-        "releasing": "Vydanie",
-        "details": "Zobraziť stránku",
-        "updating-metadata-status": "Aktualizácia metadát",
         "issue-count": "{{common.issue-count}}"
     },
     "manage-metadata-settings": {
@@ -2708,7 +2650,6 @@
         "auto-login-label": "Automatické prihlásenie",
         "auto-login-tooltip": "Automatické presmerovanie na poskytovateľa OIDC pri otvorení prihlasovacej obrazovky",
         "disable-password-authentication-label": "Zakázať autentifikáciu heslom",
-        "disable-password-authentication-tooltip": "Používatelia s rolou administrátora môžu toto obmedzenie obísť",
         "provider-name-label": "Meno poskytovateľa",
         "provider-name-tooltip": "Meno zobrazené na prihlasovacej obrazovke",
         "defaults-title": "Predvolené",
@@ -2733,8 +2674,9 @@
         "reset-tooltip": "Obnoviť externé ID od všetkých používateľov, použite to na obnovenie prepojení medzi používateľmi v Kavite a vaším poskytovateľom identity",
         "reset-confirm": "Naozaj chcete resetovať externé ID všetkých používateľov?",
         "reset-success": "Externé identifikátory boli resetované pre všetkých používateľov, pre prepojenie sa znova overte",
-        "auto-save-required": "Zmenili ste kritické nastavenia, automaticky sa uložia, aby sa zachovali",
-        "other-field-invalid": "{{validation.other-field-invalid}}"
+        "auto-save-required": "Zmenili ste dôležité nastavenia, ručne ich uložte, aby sa zachovali",
+        "other-field-invalid": "{{validation.other-field-invalid}}",
+        "checking-authority": "Kontrolujem platnosť oprávnenia, prosím o trpezlivosť..."
     },
     "identity-provider-pipe": {
         "kavita": "Kavita",
@@ -2742,7 +2684,8 @@
     },
     "multi-check-box-form": {
         "select-all": "Vybrať všetko",
-        "deselect-all": "Zrušiť výber všetkého"
+        "deselect-all": "Zrušiť výber všetkého",
+        "no-data": "{{typeahead.no-data}}"
     },
     "font-manager": {
         "description": "Čítačka epub súborov Kavita obsahuje niekoľko vstavaných fontov, pridajte si tu svoje vlastné fonty. Nahrajte súbor alebo použite URL adresu fontov Google. Viac informácií nájdete na <a href='{{wikiLink}}' target='_blank' rel='noreferrer noopener'>wiki</a>.",
@@ -2785,7 +2728,9 @@
         "create": "Vytvorte",
         "contains-spoilers-label": "{{annotation-card.contains-spoilers-label}}",
         "edit": "Upraviť",
-        "delete": "Odstrániť"
+        "delete": "Odstrániť",
+        "read-more": "{{read-more.read-more}}",
+        "read-less": "{{read-more.read-less}}"
     },
     "quill-wrapper": {
         "clean-tooltip": "Odstráňte všetky štýly"
@@ -2871,7 +2816,8 @@
         "image-only": "Obrázky",
         "add-auth-key": "Nový",
         "description": "Autorizačný kľúč je ako heslo. Jeho zmena zneplatní všetkých existujúcich klientov.",
-        "copy-key": "{{common.copy}}"
+        "copy-key": "{{common.copy}}",
+        "clients-opds-error": "Nepodarilo sa načítať URL adresu OPDS pre kľúč: {{key}}"
     },
     "create-auth-key": {
         "create-title": "Vytvor autorizačný kľúč",
@@ -2909,5 +2855,131 @@
             "help": "Ako aktualizovať",
             "download": "Stiahnuť"
         }
+    },
+    "title": {
+        "reading-list": "Zoznamy na čítanie",
+        "home": "Domov",
+        "bookmarks": "Záložky",
+        "collections": "Kolekcie",
+        "browse-genres": "Prehliadať žánre",
+        "browse-tags": "Prehliadať značky",
+        "want-to-read": "Chcem čítať",
+        "reading-lists": "Zoznamy na čítanie",
+        "settings": "Nastavenia",
+        "all-series": "Všetky série",
+        "profile": "Profil používateľa {{username}}"
+    },
+    "authority-validation-result-pipe": {
+        "success": "Autorizácia je platná",
+        "invalid-authority": "Kavita dokáže načítať konfiguráciu OIDC, ale vydavateľ sa nezhoduje.",
+        "failure": "Kavita nemôže načítať konfiguráciu OIDC",
+        "not-applicable": "Kavita nemôže overiť autoritu, pretože nie je nakonfigurovaná.",
+        "missing-https": "{{manage-oidc-connect.tls-required}}"
+    },
+    "reread-modal": {
+        "title": "Znovu prečítať",
+        "description-full-read": "Už si dokončil/a {{name}}! Chceš začať odznova?",
+        "description-time-passed": "Už je to {{days}} dní, odkedy ste naposledy čítali {{name}}, potrebujete si osviežiť vedomosti?",
+        "continue": "Pokračujte tam, kde ste prestali",
+        "reread": "Začať odznova",
+        "cancel": "{{common.cancel}}",
+        "read-incognito": "Čítať inkognito"
+    },
+    "file-drag-and-drop-upload": {
+        "drag-n-drop": "{{cover-image-chooser.drag-n-drop}}",
+        "upload": "{{cover-image-chooser.upload}}",
+        "enter-an-url-pre-title": "Zadajte {{url}}",
+        "url": "URL",
+        "url-label": "Url",
+        "back": "Späť",
+        "load": "Načítať"
+    },
+    "server-devices": {
+        "client-devices-header": "{{manage-devices.client-devices-header}}",
+        "client-devices-this-month-header": "Klientske zariadenia tento mesiac",
+        "client-devices-mobile-vs-pc-header": "Mobilné zariadenia vs. počítače tento mesiac",
+        "no-data": "{{common.no-data}}"
+    },
+    "client-device-card": {
+        "auth-type-label": "Typ overenia",
+        "browser-label": "Prehliadač",
+        "platform-label": "{{manage-devices.platform-label}}",
+        "screen-label": "Obrazovka",
+        "version-label": "Verzia aplikácie",
+        "first-seen-label": "Prvýkrát videný",
+        "last-seen-label": "Naposledy videný",
+        "active": "Aktívne",
+        "save": "{{common.save}}",
+        "local": "Miestne"
+    },
+    "change-username": {
+        "username-label": "{{common.username}}",
+        "new-username-label": "Nové používateľské meno",
+        "reset": "{{common.reset}}",
+        "save": "{{common.save}}",
+        "required-field": "{{validation.required-field}}"
+    },
+    "most-active-users": {
+        "title": "Najaktívnejší čitatelia",
+        "no-data": "Žiadna čitateľská aktivita za dané obdobie"
+    },
+    "active-user-card": {
+        "total-hours": "celkovo {{trvanie}}",
+        "comics-count": "komiksov ({{count}})",
+        "books-count": "{{count}} kníh"
+    },
+    "time-frame-label": {
+        "overall": "Celkovo",
+        "week": "Tento týždeň",
+        "month": "Tento mesiac",
+        "year": "Tento rok"
+    },
+    "cbl-match-tier-pipe": {
+        "remap-rule": "Pravidlo premapovania",
+        "external-id": "Externé ID",
+        "exact-name": "Presný názov",
+        "comicvine-naming": "Pomenovanie ComicVine",
+        "article-stripped": "Článok Stripped",
+        "reprint-stripped": "Dotlač Stripped",
+        "alternate-series": "Alternatívna séria",
+        "user-decision": "Rozhodnutie používateľa",
+        "unmatched": "Nezodpovedajúce"
+    },
+    "cbl-import-reason-pipe": {
+        "chapter-missing": "Chýbajúca kapitola",
+        "volume-missing": "Chýbajúci zväzok",
+        "series-missing": "Séria sa nenašla",
+        "name-conflict": "Konflikt názvov",
+        "all-series-missing": "Chýbajú všetky série",
+        "empty-file": "Prázdny súbor",
+        "series-collision": "Zápas viacerých sérií",
+        "all-chapter-missing": "Chýbajú všetky kapitoly",
+        "success": "Úspech",
+        "invalid-file": "Neplatný súbor"
+    },
+    "duration-pipe": {
+        "seconds": "{{num}} sekúnd",
+        "minutes": "{{num}} minút",
+        "hours": "{{num}} hodín",
+        "combo": "{{hour}} h{{min}} min"
+    },
+    "kavitaplus-activity": {
+        "description": "Čitateľská aktivita Kavita synchronizovala vo vašom mene údaje s externými službami – pokrok, hodnotenia a stav čítania."
+    },
+    "manage-kavitaplus-activity": {
+        "description": "90 dní udalostí týkajúcich sa metadát, porovnávania, scrobblovania a synchronizácie. Tu môžete posúdiť chyby a spustiť ručné porovnanie.",
+        "stats-events-label": "Udalosti (posledných 24 hodín)",
+        "stats-failures-label": "Poruchy",
+        "stats-match-label": "Zhoduje sa",
+        "stats-matched-label": "Zhoduje sa {{percent}}%",
+        "stats-coverage-subtitle": "{{percent}} % pokrytie",
+        "stats-queue-label": "Rad",
+        "stats-unresolved": "{{count}} nevyriešených",
+        "stats-stale-subtitle": "{{count}} zastarané",
+        "stats-blacklisted-subtitle": "{{count}} sa nepodarilo nájsť",
+        "filter-all": "Všetky",
+        "filter-match": "Zhoda",
+        "filter-metadata": "Metadáta",
+        "filter-scrobble": "Scrobblovanie"
     }
 }

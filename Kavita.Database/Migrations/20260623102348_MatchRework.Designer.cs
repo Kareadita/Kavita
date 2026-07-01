@@ -6,6 +6,7 @@ using Kavita.Models.Entities.MetadataMatching;
 using Kavita.Models.Entities.Progress;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -13,9 +14,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Kavita.Database.Migrations
 {
     [DbContext(typeof(DataContext))]
-    partial class DataContextModelSnapshot : ModelSnapshot
+    [Migration("20260623102348_MatchRework")]
+    partial class MatchRework
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "10.0.9");
@@ -507,9 +510,6 @@ namespace Kavita.Database.Migrations
                     b.Property<DateTime>("CreatedUtc")
                         .HasColumnType("TEXT");
 
-                    b.Property<string>("Family")
-                        .HasColumnType("TEXT");
-
                     b.Property<string>("FileName")
                         .HasColumnType("TEXT");
 
@@ -527,12 +527,6 @@ namespace Kavita.Database.Migrations
 
                     b.Property<int>("Provider")
                         .HasColumnType("INTEGER");
-
-                    b.Property<string>("Style")
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("Weight")
-                        .HasColumnType("TEXT");
 
                     b.HasKey("Id");
 
@@ -974,25 +968,13 @@ namespace Kavita.Database.Migrations
                     b.Property<string>("CoverUrl")
                         .HasColumnType("TEXT");
 
-                    b.Property<int?>("HardCoverId")
-                        .HasColumnType("INTEGER");
-
                     b.Property<long?>("MalId")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<int?>("MangaBakaId")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<int>("MetadataProvider")
                         .HasColumnType("INTEGER");
 
                     b.Property<string>("Name")
                         .HasColumnType("TEXT");
 
                     b.Property<int>("Provider")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<int>("RecommendationSource")
                         .HasColumnType("INTEGER");
 
                     b.Property<int?>("SeriesId")

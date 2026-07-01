@@ -16,6 +16,7 @@ using Kavita.Models.DTOs.Person;
 using Kavita.Models.DTOs.ReadingLists;
 using Kavita.Models.DTOs.SeriesDetail;
 using Kavita.Models.Entities.Enums;
+using Kavita.Models.Entities.Enums.Audit;
 using Kavita.Server.Extensions;
 using Kavita.Services.Helpers;
 using Microsoft.AspNetCore.Mvc;
@@ -240,7 +241,7 @@ public class MetadataController(IUnitOfWork unitOfWork, IExternalMetadataService
             .OrderByDescending(review => review.Username.Equals(Username!) ? 1 : 0)
             .ToList();
 
-        var ret = await metadataService.GetSeriesDetailPlus(seriesId, libraryType);
+        var ret = await metadataService.TryMatchAndLoadMetadataForSeries(seriesId, libraryType, MetadataFetchTrigger.OnDemand, HttpContext.RequestAborted);
 
         await PrepareSeriesDetail(userReviews, ret);
         return Ok(ret);

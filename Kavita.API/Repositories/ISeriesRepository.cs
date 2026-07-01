@@ -73,7 +73,7 @@ public interface ISeriesRepository
     /// <param name="includeChapterAndFiles">Includes Files in the Search</param>
     /// <param name="ct"></param>
     /// <returns></returns>
-    Task<SearchResultGroupDto> SearchSeriesAsync(int userId, bool isAdmin, IList<int> libraryIds, string searchQuery, bool includeChapterAndFiles = true, CancellationToken ct = default);
+    Task<SearchResultGroupDto> SearchSeriesAsync(int userId, bool isAdmin, IList<int> libraryIds, SearchDto dto, CancellationToken ct = default);
     Task<IEnumerable<Series>> GetSeriesForLibraryIdAsync(int libraryId, SeriesIncludes includes = SeriesIncludes.None, CancellationToken ct = default);
     Task<SeriesDto?> GetSeriesDtoByIdAsync(int seriesId, int userId, CancellationToken ct = default);
     Task<Series?> GetSeriesByIdAsync(int seriesId, SeriesIncludes includes = SeriesIncludes.Volumes | SeriesIncludes.Metadata, CancellationToken ct = default);
@@ -122,7 +122,7 @@ public interface ISeriesRepository
     Task RemoveFromOnDeckAsync(int seriesId, int userId, CancellationToken ct = default);
     Task ClearOnDeckRemovalAsync(int seriesId, int userId, CancellationToken ct = default);
     Task<PagedList<SeriesDto>> GetSeriesDtoForLibraryIdAsync(int userId, UserParams userParams, SeriesFilterV2Dto seriesFilterDto, QueryContext queryContext = QueryContext.None, CancellationToken ct = default);
-    Task<PlusSeriesRequestDto?> GetPlusSeriesDtoAsync(int seriesId, CancellationToken ct = default);
+    Task<SeriesDetailRequestV3Dto?> GetKavitaPlusSeriesDetailRequestV3Dto(int seriesId, CancellationToken ct = default);
     Task<Series?> MatchSeriesAsync(ExternalSeriesDetailDto externalSeries, CancellationToken ct = default);
     Task<List<Series>> GetSeriesForReadStatusTransitionRuleAsync(int userId, ReadStatusTransitionRule rule, bool requireUnReadChapters, CancellationToken ct);
 }

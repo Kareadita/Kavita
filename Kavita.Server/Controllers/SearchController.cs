@@ -59,15 +59,19 @@ public class SearchController(IUnitOfWork unitOfWork, ILocalizationService local
     [HttpGet("search")]
     public async Task<ActionResult<SearchResultGroupDto>> Search(string queryString, [FromQuery] bool includeChapterAndFiles = true)
     {
-        queryString = Parser.CleanQuery(queryString);
+        // Parse shortcodes off the raw query first; CleanQuery strips ':' which would destroy them
+        var searchDto = SearchDto.FromQuery(queryString, includeChapterAndFiles);
+        if (!searchDto.HasShortcode)
+        {
+            searchDto.Query = Parser.CleanQuery(queryString);
+        }
 
         var libraries = await unitOfWork.LibraryRepository.GetLibraryIdsForUserIdAsync(UserId, QueryContext.Search);
         if (libraries.Count == 0) return BadRequest(await localizationService.TranslateAsync(UserId, "libraries-restricted"));
 
         var isAdmin = UserContext.HasRole(PolicyConstants.AdminRole);
 
-        var series = await unitOfWork.SeriesRepository.SearchSeriesAsync(UserId, isAdmin,
-            libraries, queryString, includeChapterAndFiles);
+        var series = await unitOfWork.SeriesRepository.SearchSeriesAsync(UserId, isAdmin, libraries, searchDto);
 
         return Ok(series);
     }

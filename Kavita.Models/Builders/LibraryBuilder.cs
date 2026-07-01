@@ -121,4 +121,10 @@ public class LibraryBuilder : IEntityBuilder<Library>
         _library.AllowScrobbling = allowScrobbling;
         return this;
     }
+
+    public LibraryBuilder WithMetadataProvider(MetadataProvider metadataProvider)
+    {
+        _library.MetadataProvider = metadataProvider;
+        return this;
+    }
 }
