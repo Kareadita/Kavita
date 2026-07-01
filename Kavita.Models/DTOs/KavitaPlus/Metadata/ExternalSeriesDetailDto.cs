@@ -42,6 +42,7 @@ public sealed record ExternalSeriesDetailDto
     public int Volumes { get; set; }
     public IList<SeriesRelationship>? Relations { get; set; } = [];
     public IList<SeriesCharacter>? Characters { get; set; } = [];
+    public IList<RatingDto> Ratings { get; set; } = new List<RatingDto>();
 
     #region Comic Only
     public string? Publisher { get; set; }

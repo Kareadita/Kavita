@@ -16,6 +16,7 @@ using Kavita.Models.DTOs.Recommendation;
 using Kavita.Models.DTOs.SeriesDetail;
 using Kavita.Models.Entities;
 using Kavita.Models.Entities.Enums;
+using Kavita.Models.Entities.Enums.KavitaPlus;
 using Kavita.Models.Entities.Metadata;
 using Microsoft.EntityFrameworkCore;
 
@@ -109,19 +110,29 @@ public class ExternalSeriesMetadataRepository(DataContext context, IMapper mappe
             .Select(mapper.Map<ExternalSeriesDto>)
             .ToList();
 
-        var ownedIds = seriesDetailDto.ExternalRecommendations
+        // When the same series surfaced from more than one source, UserBased wins
+        var sourceBySeriesId = seriesDetailDto.ExternalRecommendations
             .Where(r => r.SeriesId != null)
-            .Select(r => r.SeriesId)
-            .ToList();
+            .GroupBy(r => r.SeriesId!.Value)
+            .ToDictionary(
+                g => g.Key,
+                g => g.OrderBy(r => r.RecommendationSource == RecommendationSource.UserBased ? 0 : 1)
+                    .First().RecommendationSource);
 
-        var ownedSeriesRecommendations = await context.Series
+        var ownedIds = sourceBySeriesId.Keys.ToList();
+
+        var ownedSeries = await context.Series
             .Where(s => ownedIds.Contains(s.Id))
             .OrderBy(s => s.SortName.ToLower())
             .ProjectTo<SeriesDto>(mapper.ConfigurationProvider)
             .ToListAsync(ct);
 
+        var ownedSeriesRecommendations = ownedSeries
+            .Select(s => new RecommendedSeriesDto { Series = s, Source = sourceBySeriesId[s.Id] })
+            .ToList();
+
         IEnumerable<UserReviewDto> reviews = [];
-        if (seriesDetailDto.ExternalReviews != null && seriesDetailDto.ExternalReviews.Any())
+        if (seriesDetailDto.ExternalReviews != null && seriesDetailDto.ExternalReviews.Count != 0)
         {
             reviews = seriesDetailDto.ExternalReviews
                 .Select(r =>

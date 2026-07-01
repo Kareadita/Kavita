@@ -395,16 +395,24 @@ public class ExternalMetadataService : IExternalMetadataService
     }
 
 
-    public async Task<ExternalSeriesDetailDto?> GetExternalSeriesDetail(int? aniListId, long? malId, int? seriesId, CancellationToken ct = default)
+    /// <summary>
+    /// Fetches metadata about an external Series
+    /// </summary>
+    /// <param name="aniListId"></param>
+    /// <param name="malId"></param>
+    /// <param name="seriesId"></param>
+    /// <param name="ct"></param>
+    /// <returns></returns>
+    /// <exception cref="KavitaException"></exception>
+    public async Task<ExternalSeriesDetailDto?> GetExternalSeriesDetail(int? aniListId, long? malId, int? mangaBakaId, int? seriesId, CancellationToken ct = default)
     {
-        if (!aniListId.HasValue && !malId.HasValue)
+        if (!aniListId.HasValue && !malId.HasValue && !mangaBakaId.HasValue && !seriesId.HasValue)
         {
             throw new KavitaException("Unable to find valid information from url for External Load");
         }
 
         // This is for the Series drawer. We can get this extra information during the initial SeriesDetail call so it's all coming from the DB
-        return await GetSeriesDetail(aniListId, malId, seriesId, ct);
-
+        return await GetSeriesDetail(aniListId, malId, mangaBakaId, seriesId, ct);
     }
 
     private async Task<SeriesDetailPlusDto?> GetSeriesDetailPlus(int seriesId, LibraryType libraryType,
@@ -541,6 +549,16 @@ public class ExternalMetadataService : IExternalMetadataService
     }
 
     /// <summary>
+    /// Derives the v3 <see cref="MetadataProvider"/> to route a series-detail request to, based on whichever
+    /// primary id is already present, falling back to the format default.
+    /// </summary>
+    private static MetadataProvider DeriveProvider(PlusSeriesRequestDto data, Series series)
+    {
+        // Use the matched id's provider when present, else fall back to the provider implied by the media format
+        return data.ResolveMatchedProvider() ?? data.MediaFormat.GetMetadataProvider(series.Library);
+    }
+
+    /// <summary>
     /// Requests the full SeriesDetail (rec, review, metadata) data for a Series. Will save to ExternalMetadata tables.
     /// </summary>
     /// <param name="seriesId"></param>
@@ -639,9 +657,15 @@ public class ExternalMetadataService : IExternalMetadataService
         }).ToList();
 
 
-        // Recommendations
-        externalSeriesMetadata.ExternalRecommendations ??= [];
-        var recs = await ProcessRecommendations(libraryType, result.Recommendations, externalSeriesMetadata);
+            // User-base runs first so that a duplicate prefers User-base
+            externalSeriesMetadata.ExternalRecommendations ??= [];
+            var seenRecommendations = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+            var recs = await ProcessRecommendations(libraryType, result.ReadersAlsoLike, externalSeriesMetadata,
+                RecommendationSource.UserBased, provider, seenRecommendations);
+            var similarRecs = await ProcessRecommendations(libraryType, result.SimilarSeries, externalSeriesMetadata,
+                RecommendationSource.Similar, provider, seenRecommendations);
+            recs.ExternalSeries = recs.ExternalSeries.Concat(similarRecs.ExternalSeries).ToList();
+            recs.OwnedSeries = recs.OwnedSeries.Concat(similarRecs.OwnedSeries).ToList();
 
         var extRatings = externalSeriesMetadata.ExternalRatings
             .Where(r => r.AverageScore > 0)
@@ -758,6 +782,7 @@ public class ExternalMetadataService : IExternalMetadataService
         Accumulate(ref madeModification, fieldChanges, await UpdateCharacters(series, settings, externalMetadata.Characters));
 
         Accumulate(ref madeModification, fieldChanges, await UpdateRelationships(series, settings, externalMetadata.Relations, defaultAdmin));
+
         try
         {
             madeModification = await UpdateCoverImage(series, settings, externalMetadata) || madeModification;
@@ -977,12 +1002,29 @@ public class ExternalMetadataService : IExternalMetadataService
         var addedRelations = new List<object>();
         foreach (var relation in externalMetadataRelations.Where(r => r.Relation != RelationKind.Parent))
         {
-            List<string> names = new [] {relation.SeriesName.PreferredTitle, relation.SeriesName.RomajiTitle, relation.SeriesName.EnglishTitle, relation.SeriesName.NativeTitle}.Where(s => !string.IsNullOrEmpty(s)).ToList()!;
-            var relatedSeries = await _unitOfWork.SeriesRepository.GetSeriesByAnyNameAsync(
+            List<string> names = new [] {
+                    relation.SeriesName.PreferredTitle,
+                    relation.SeriesName.RomajiTitle,
+                    relation.SeriesName.EnglishTitle,
+                    relation.SeriesName.NativeTitle}
+                .Concat(relation.Series?.Synonyms ?? [])
+                .Where(s => !string.IsNullOrEmpty(s)).ToList()!;
+
+            var externalIds = new ExternalMetadataIdsDto
+            {
+                AniListId = relation.AniListId,
+                MalId = relation.MalId,
+                MangabakaId = relation.MangabakaId,
+                PlusMediaFormat = relation.Format,
+            };
+
+            var formatTypes = relation.Format.GetMangaFormats();
+
+            var relatedSeries = await _unitOfWork.SeriesRepository.GetSeriesFromExternalMetadata(
                 names,
-                relation.PlusMediaFormat.GetMangaFormats(),
+                formatTypes,
                 defaultAdmin.Id,
-                relation.AniListId,
+                externalIds,
                 SeriesIncludes.Related);
 
             // Skip if no related series found or series is the parent
@@ -1002,7 +1044,13 @@ public class ExternalMetadataService : IExternalMetadataService
                 SeriesId = series.Id,
             };
             series.Relations.Add(newRelation);
-            addedRelations.Add(new { relatedSeriesName = relatedSeries.Name, relatedSeriesId = relatedSeries.Id, kind = relation.Relation.ToString() });
+            addedRelations.Add(new
+            {
+                relatedSeriesName = relatedSeries.Name,
+                relatedSeriesId = relatedSeries.Id,
+                relatedSeriesLibraryId = relatedSeries.LibraryId,
+                kind = (int) relation.Relation
+            });
 
             // Handle sequel/prequel: add reverse relationship
             if (relation.Relation is RelationKind.Prequel or RelationKind.Sequel)
@@ -2130,17 +2178,20 @@ public class ExternalMetadataService : IExternalMetadataService
     }
 
     private async Task<RecommendationDto> ProcessRecommendations(LibraryType libraryType, IEnumerable<MediaRecommendationDto> recs,
-        ExternalSeriesMetadata externalSeriesMetadata)
+        ExternalSeriesMetadata externalSeriesMetadata, RecommendationSource source, MetadataProvider provider, ISet<string> seen)
     {
         var recDto = new RecommendationDto()
         {
             ExternalSeries = new List<ExternalSeriesDto>(),
-            OwnedSeries = new List<SeriesDto>()
+            OwnedSeries = new List<RecommendedSeriesDto>()
         };
 
         // NOTE: This can result in a series being recommended that shares the same name but different format
         foreach (var rec in recs)
         {
+            // Skip recommendations already added from a higher-priority list (e.g. Personalized before Similar)
+            if (!seen.Add(GetRecommendationIdentity(rec))) continue;
+
             // Find the series based on name and type and that the user has access too
             var seriesForRec = await _unitOfWork.SeriesRepository.GetSeriesDtoByNamesAndMetadataIdsAsync(rec.RecommendationNames,
                 libraryType, ScrobblingHelper.CreateUrl(ScrobblingService.AniListWeblinkWebsite, rec.AniListId),
@@ -2148,7 +2199,7 @@ public class ExternalMetadataService : IExternalMetadataService
 
             if (seriesForRec != null)
             {
-                recDto.OwnedSeries.Add(seriesForRec);
+                recDto.OwnedSeries.Add(new RecommendedSeriesDto() { Series = seriesForRec, Source = source });
                 externalSeriesMetadata.ExternalRecommendations.Add(new ExternalRecommendation()
                 {
                     SeriesId = seriesForRec.Id,
@@ -2158,7 +2209,9 @@ public class ExternalMetadataService : IExternalMetadataService
                     Url = rec.SiteUrl,
                     CoverUrl = rec.CoverUrl,
                     Summary = rec.Summary,
-                    Provider = rec.Provider
+                    MangaBakaId = rec.MangabakaId,
+                    MetadataProvider = provider,
+                    RecommendationSource = source
                 });
                 continue;
             }
@@ -2172,7 +2225,10 @@ public class ExternalMetadataService : IExternalMetadataService
                 CoverUrl = rec.CoverUrl,
                 Summary = rec.Summary,
                 AniListId = rec.AniListId,
-                MalId = rec.MalId
+                MalId = rec.MalId,
+                MangaBakaId = rec.MangabakaId,
+                MetadataProvider = provider,
+                RecommendationSource = source
             });
             externalSeriesMetadata.ExternalRecommendations.Add(new ExternalRecommendation()
             {
@@ -2183,14 +2239,30 @@ public class ExternalMetadataService : IExternalMetadataService
                 Url = rec.SiteUrl,
                 CoverUrl = rec.CoverUrl,
                 Summary = rec.Summary,
-                Provider = rec.Provider
+                MangaBakaId = rec.MangabakaId,
+                MetadataProvider = provider,
+                RecommendationSource = source
             });
         }
 
-        recDto.OwnedSeries = recDto.OwnedSeries.DistinctBy(s => s.Id).OrderBy(r => r.Name).ToList();
+        recDto.OwnedSeries = recDto.OwnedSeries.DistinctBy(s => s.Series.Id).OrderBy(r => r.Series.Name).ToList();
         recDto.ExternalSeries = recDto.ExternalSeries.DistinctBy(s => s.Name.ToNormalized()).OrderBy(r => r.Name).ToList();
 
         return recDto;
+    }
+
+    /// <summary>
+    /// Stable key for a recommendation so the same series is only added once across the Similar/Personalized lists,
+    /// preferring whichever id is most navigable before falling back to the normalized name.
+    /// </summary>
+    private static string GetRecommendationIdentity(MediaRecommendationDto rec)
+    {
+        if (rec.MangabakaId is > 0) return $"mb:{rec.MangabakaId}";
+        if (rec.AniListId is > 0) return $"al:{rec.AniListId}";
+        if (rec.MalId is > 0) return $"mal:{rec.MalId}";
+
+        var name = string.IsNullOrEmpty(rec.Name) ? rec.RecommendationNames.FirstOrDefault() : rec.Name;
+        return $"name:{(name ?? string.Empty).ToNormalized()}";
     }
 
 
@@ -2200,19 +2272,28 @@ public class ExternalMetadataService : IExternalMetadataService
     /// <remarks>This uses a different API that series detail</remarks>
     /// <param name="aniListId"></param>
     /// <param name="malId"></param>
+    /// <param name="mangaBakaId"></param>
     /// <param name="seriesId"></param>
     /// <param name="ct"></param>
     /// <returns></returns>
-    private async Task<ExternalSeriesDetailDto?> GetSeriesDetail(int? aniListId, long? malId, int? seriesId, CancellationToken ct = default)
+    private async Task<ExternalSeriesDetailDto?> GetSeriesDetail(int? aniListId, long? malId, int? mangaBakaId, int? seriesId, CancellationToken ct = default)
     {
         // TODO: This is the primary point where we need to integrate ExternalIds since weblink parsing is already handled
         // TODO: Ensure when we set/update weblinks via API, we reparse and update external ids (if they are empty only)
-        var payload = new ExternalMetadataIdsDto()
+        var payload = new SeriesDetailRequestV3Dto()
         {
+            // We can hardcode this for now. But will need to load from Library setting once Hardcover providers
+            // recommendations too
+            Provider = MetadataProvider.Mangabaka,
             AniListId = aniListId,
             MalId = malId,
+            MangabakaId = mangaBakaId,
             SeriesName = string.Empty,
-            LocalizedSeriesName = string.Empty
+            AlternativeNames = [],
+            IncludeRecommendations = false,
+            IncludeReviews = false,
+            IncludeRelationships = false,
+            IncludeRatings = false
         };
 
         if (seriesId is > 0)
@@ -2230,26 +2311,25 @@ public class ExternalMetadataService : IExternalMetadataService
                     payload.MalId = ExternalIdParser.GetMalId(series.Metadata.WebLinks);
                 }
                 payload.SeriesName = series.Name;
-                payload.LocalizedSeriesName = series.LocalizedName;
-                payload.PlusMediaFormat = series.Library.Type.ConvertToPlusMediaFormat(series.Format);
+                payload.AlternativeNames = [series.LocalizedName];
+                payload.Format = series.Library.Type.ConvertToPlusMediaFormat(series.Format);
             }
-
         }
-        try
+
+
+        var result =  await _kavitaPlusApiService.GetSeriesDetailV3Async(payload, ct);
+        if (!result.IsSuccess)
         {
-            var ret =  await _kavitaPlusApiService.GetSeriesDetailByIdAsync(payload, ct);
-
-            ret.Summary = StringHelper.RemoveSourceInDescription(StringHelper.SquashBreaklines(ret.Summary));
-
-            return ret;
-
-        }
-        catch (Exception e)
-        {
-            _logger.LogError(e, "An error happened during the request to Kavita+ API");
+            _logger.LogError("Failed to retrieve series detail from Kavita Plus API: {ErrorMessage}", result.ErrorMessage);
+            return null;
         }
 
-        return null;
+        var extSeries = result.Data.Series;
+        if (extSeries == null) return null;
+
+        extSeries.Summary = StringHelper.RemoveSourceInDescription(StringHelper.SquashBreaklines(extSeries.Summary));
+
+        return extSeries;
     }
 
     private static bool HasForceOverride(MetadataSettingsDto settings, IHasKPlusMetadata kPlusMetadata,

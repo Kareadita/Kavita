@@ -1317,70 +1317,46 @@ public class SeriesRepository(DataContext context, IMapper mapper) : ISeriesRepo
 #nullable enable
     }
 
-    public async Task<Series?> GetSeriesByAnyNameAsync(string seriesName, string localizedName, IList<MangaFormat> formats,
-        int userId, int? aniListId = null, SeriesIncludes includes = SeriesIncludes.None, CancellationToken ct = default)
+    public async Task<Series?> GetSeriesFromExternalMetadata(IList<string> seriesNames, IList<MangaFormat> formats,
+        int userId, ExternalMetadataIdsDto? dto = null, SeriesIncludes includes = SeriesIncludes.None, CancellationToken ct = default)
     {
         var libraryIds = context.AppUser.GetLibraryIdsForUser(userId);
-        var normalizedSeries = seriesName.ToNormalized();
-        var normalizedLocalized = localizedName.ToNormalized();
 
-        var query = context.Series
-            .Where(s => libraryIds.Contains(s.LibraryId))
-            .Where(s => formats.Contains(s.Format));
+        // Prioritize direct id matches on ExternalSeriesMetadata
+        var aniListId = dto?.AniListId ?? 0;
+        var malId = dto?.MalId ?? 0;
+        var mangaBakaId = dto?.MangabakaId ?? 0;
 
-        if (aniListId is > 0)
+        if (aniListId > 0 || malId > 0 || mangaBakaId > 0)
         {
-            // If AniList ID is provided, override name checks
-            query = query.Where(s => s.ExternalSeriesMetadata.AniListId == aniListId.Value);
-        }
-        else
-        {
-            // Otherwise, use name checks
-            query = query.Where(s =>
-                s.NormalizedName.Equals(normalizedSeries)
-                || s.NormalizedName.Equals(normalizedLocalized)
-                || s.NormalizedLocalizedName.Equals(normalizedSeries)
-                || (!string.IsNullOrEmpty(normalizedLocalized) && s.NormalizedLocalizedName.Equals(normalizedLocalized))
-                || (s.OriginalName != null && s.OriginalName.Equals(seriesName))
-            );
+            var byId = await context.Series
+                .Where(s => libraryIds.Contains(s.LibraryId))
+                .Where(s => formats.Contains(s.Format))
+                .Where(s =>
+                    (aniListId > 0 && s.ExternalSeriesMetadata.AniListId == aniListId)
+                    || (malId > 0 && s.ExternalSeriesMetadata.MalId == malId)
+                    || (mangaBakaId > 0 && s.ExternalSeriesMetadata.MangabakaId == mangaBakaId))
+                .Includes(includes)
+                .FirstOrDefaultAsync(ct);
+
+            if (byId != null) return byId;
         }
 
-        return await query
-            .Includes(includes)
-            .FirstOrDefaultAsync(ct);
-    }
+        // Fallback to a name lookup against series.Name, LocalizedName, OriginalName. Names are matched against the
+        // normalized columns, which strip punctuation/whitespace - so "Series - Sub" and "Series: Sub" collapse to the
+        // same value and match.
+        var names = seriesNames.Where(s => !string.IsNullOrEmpty(s)).Distinct().ToList();
+        if (names.Count == 0) return null;
 
-
-    public async Task<Series?> GetSeriesByAnyNameAsync(IList<string> names, IList<MangaFormat> formats,
-        int userId, int? aniListId = null, SeriesIncludes includes = SeriesIncludes.None, CancellationToken ct = default)
-    {
-        var libraryIds = context.AppUser.GetLibraryIdsForUser(userId);
-        names = names.Where(s => !string.IsNullOrEmpty(s)).Distinct().ToList();
         var normalizedNames = names.Select(s => s.ToNormalized()).ToList();
 
-
-        var query = context.Series
+        return await context.Series
             .Where(s => libraryIds.Contains(s.LibraryId))
-            .Where(s => formats.Contains(s.Format));
-
-        if (aniListId is > 0)
-        {
-            // If AniList ID is provided, override name checks
-            query = query.Where(s => s.ExternalSeriesMetadata.AniListId == aniListId.Value ||
-                                     normalizedNames.Contains(s.NormalizedName)
-                                     || normalizedNames.Contains(s.NormalizedLocalizedName)
-                                     || names.Contains(s.OriginalName));
-        }
-        else
-        {
-            // Otherwise, use name checks
-            query = query.Where(s =>
+            .Where(s => formats.Contains(s.Format))
+            .Where(s =>
                 normalizedNames.Contains(s.NormalizedName)
                 || normalizedNames.Contains(s.NormalizedLocalizedName)
-                || names.Contains(s.OriginalName));
-        }
-
-        return await query
+                || names.Contains(s.OriginalName))
             .Includes(includes)
             .FirstOrDefaultAsync(ct);
     }
@@ -1484,7 +1460,8 @@ public class SeriesRepository(DataContext context, IMapper mapper) : ISeriesRepo
                 .AsNoTracking()
                 .ProjectToWithProgress<Series, SeriesDto>(mapper.ConfigurationProvider, userId)
                 .ToListAsync(ct),
-            Editions = await GetRelatedSeriesQuery(userId, seriesId, usersSeriesIds, RelationKind.Edition, userRating, ct)
+            Editions = await GetRelatedSeriesQuery(userId, seriesId, usersSeriesIds, RelationKind.Edition, userRating, ct),
+            Cameos = await GetRelatedSeriesQuery(userId, seriesId, usersSeriesIds, RelationKind.Cameo, userRating, ct)
         };
     }
 

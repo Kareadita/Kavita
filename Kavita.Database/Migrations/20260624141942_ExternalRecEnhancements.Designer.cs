@@ -6,6 +6,7 @@ using Kavita.Models.Entities.MetadataMatching;
 using Kavita.Models.Entities.Progress;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -13,9 +14,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Kavita.Database.Migrations
 {
     [DbContext(typeof(DataContext))]
-    partial class DataContextModelSnapshot : ModelSnapshot
+    [Migration("20260624141942_ExternalRecEnhancements")]
+    partial class ExternalRecEnhancements
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "10.0.9");
@@ -772,9 +775,6 @@ namespace Kavita.Database.Migrations
                         .HasColumnType("INTEGER");
 
                     b.Property<bool>("ManageReadingLists")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<int>("MetadataProvider")
                         .HasColumnType("INTEGER");
 
                     b.Property<string>("Name")
@@ -2226,9 +2226,6 @@ namespace Kavita.Database.Migrations
                         .HasColumnType("INTEGER");
 
                     b.Property<bool>("IsBlacklisted")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<bool>("IsStandAlone")
                         .HasColumnType("INTEGER");
 
                     b.Property<DateTime>("LastChapterAdded")

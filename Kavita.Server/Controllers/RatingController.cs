@@ -78,8 +78,7 @@ public class RatingController(
         return Ok(new RatingDto()
         {
             Provider = ScrobbleProvider.Kavita,
-            AverageScore = await unitOfWork.SeriesRepository.GetAverageUserRatingAsync(seriesId, UserId),
-            FavoriteCount = 0,
+            AverageScore = await unitOfWork.SeriesRepository.GetAverageUserRatingAsync(seriesId, UserId)
         });
     }
 
@@ -96,8 +95,7 @@ public class RatingController(
         return Ok(new RatingDto()
         {
             Provider = ScrobbleProvider.Kavita,
-            AverageScore = await unitOfWork.ChapterRepository.GetAverageUserRating(chapterId, UserId),
-            FavoriteCount = 0,
+            AverageScore = await unitOfWork.ChapterRepository.GetAverageUserRating(chapterId, UserId)
         });
     }
 }

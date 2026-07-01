@@ -1,6 +1,7 @@
 ﻿
 
 using Kavita.Models.Entities.Enums;
+using Kavita.Models.Entities.Enums.KavitaPlus;
 
 namespace Kavita.Models.DTOs.Recommendation;
 #nullable enable
@@ -12,8 +13,15 @@ public sealed record ExternalSeriesDto
     public required string Url { get; set; }
     public string? Summary { get; set; }
     public int? AniListId { get; set; }
+    public int? MangaBakaId { get; set; }
     public long? MalId { get; set; }
     public ScrobbleProvider Provider { get; set; } = ScrobbleProvider.AniList;
-
-
+    /// <summary>
+    /// Provider this recommendation came from (replaces <see cref="Provider"/> going forward).
+    /// </summary>
+    public MetadataProvider MetadataProvider { get; set; }
+    /// <summary>
+    /// Why this series was recommended (Similar vs Personalized), surfaced as a badge in the UI.
+    /// </summary>
+    public RecommendationSource RecommendationSource { get; set; }
 }

@@ -653,6 +653,7 @@ public class SeriesService(
         UpdateRelationForKind(dto.Doujinshis, series.Relations.Where(r => r.RelationKind == RelationKind.Doujinshi).ToList(), series, RelationKind.Doujinshi);
         UpdateRelationForKind(dto.Editions, series.Relations.Where(r => r.RelationKind == RelationKind.Edition).ToList(), series, RelationKind.Edition);
         UpdateRelationForKind(dto.Annuals, series.Relations.Where(r => r.RelationKind == RelationKind.Annual).ToList(), series, RelationKind.Annual);
+        UpdateRelationForKind(dto.Cameos, series.Relations.Where(r => r.RelationKind == RelationKind.Cameo).ToList(), series, RelationKind.Cameo);
 
         await UpdatePrequelSequelRelations(dto.Prequels, series, RelationKind.Prequel);
         await UpdatePrequelSequelRelations(dto.Sequels, series, RelationKind.Sequel);

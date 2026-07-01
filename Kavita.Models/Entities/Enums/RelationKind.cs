@@ -76,6 +76,15 @@ public enum RelationKind
     /// The target series is an annual of the Series
     /// </summary>
     [Description("Annual")]
-    Annual = 14
+    Annual = 14,
+
+    #region MangaBaka Only
+    /// <summary>
+    /// MangaBaka <c>cameo</c>: a brief appearance of characters from another series.
+    /// </summary>
+    [Description("Cameo")]
+    Cameo = 16,
+
+    #endregion
 
 }

@@ -120,6 +120,7 @@ import {patchEntitySignal, patchSignalArray} from "../../../../libs/patch";
 import {ModalService} from "../../../_services/modal.service";
 import {getResolvedData, getWritableResolvedData} from "../../../../libs/route-util";
 import {ExternalSeries} from "../../../_models/series-detail/external-series";
+import {RecommendedSeries} from "../../../_models/series-detail/recommended-series";
 import {Tabs} from "../../../_models/tabs";
 import {TabTitlePipe} from "../../../_pipes/tab-title.pipe";
 import {EntityTitleService} from "../../../_services/entity-title.service";
@@ -440,8 +441,17 @@ class SeriesDetailComponent implements OnInit, AfterViewInit {
   /**
    * Recommended Series
    */
-  combinedRecs = signal<Array<Series | ExternalSeries>>([]);
+  combinedRecs = signal<Array<RecommendedSeries | ExternalSeries>>([]);
   hasRecommendations = computed(() => this.combinedRecs().length > 0);
+
+  /** Narrows a recommendation item to an owned series (null when it is an external series) */
+  asRecommendedSeries(item: RecommendedSeries | ExternalSeries): RecommendedSeries | null {
+    return 'series' in item ? item : null;
+  }
+
+  asExternalSeries(item: RecommendedSeries | ExternalSeries): ExternalSeries {
+    return item as ExternalSeries;
+  }
 
   showChapterTab = computed(() => this.chapters().length > 0);
   annotations = signal<Annotation[]>([]);
@@ -713,6 +723,7 @@ class SeriesDetailComponent implements OnInit, AfterViewInit {
         ...relations.parent.map(item => this.createRelatedSeries(item, RelationKind.Parent)),
         ...relations.editions.map(item => this.createRelatedSeries(item, RelationKind.Edition)),
         ...relations.annuals.map(item => this.createRelatedSeries(item, RelationKind.Annual)),
+        ...relations.cameos.map(item => this.createRelatedSeries(item, RelationKind.Cameo)),
       ]);
     });
   }

@@ -9,10 +9,14 @@ import {CardEntity, CardEntityFactory} from "../../_models/card/card-entity";
 import {SeriesPreviewDrawerComponent} from "../../_single-module/series-preview-drawer/series-preview-drawer.component";
 import {ProgressUpdateResult} from "../../_models/card/card-configuration";
 import {DrawerService} from "../../_services/drawer.service";
+import {RecommendationSource} from "../../_models/kavitaplus/recommendation-source.enum";
+import {RecommendationSourcePipe} from "../../_pipes/recommendation-source.pipe";
+import {SeriesCardEntity} from "../../_models/card/card-entity";
 
 @Component({
   selector: 'app-series-card',
   imports: [FormsModule, EntityCardComponent],
+  providers: [RecommendationSourcePipe],
   templateUrl: './series-card.component.html',
   styleUrls: ['./series-card.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
@@ -22,6 +26,7 @@ export class SeriesCardComponent {
   private readonly router = inject(Router);
   private readonly drawerService = inject(DrawerService);
   private readonly configFactory = inject(CardConfigFactory);
+  private readonly recommendationSourcePipe = inject(RecommendationSourcePipe);
 
   series = input.required<Series>();
   suppressLibraryLink = input<boolean>(false);
@@ -29,6 +34,8 @@ export class SeriesCardComponent {
   relation = input<RelationKind | undefined>(undefined);
   isOnDeck = input<boolean>(false);
   previewOnClick = input<boolean>(false);
+  /** When set, renders a source badge over the cover (used in recommendations) */
+  recommendationSource = input<RecommendationSource | undefined>(undefined);
   index = input<number>(0);
   maxIndex = input<number>(1);
 
@@ -48,7 +55,8 @@ export class SeriesCardComponent {
     }
     return CardEntityFactory.series(series, {
       relation: this.relationSignal(),
-      isOnDeck: this.isOnDeckSignal()
+      isOnDeck: this.isOnDeckSignal(),
+      recommendationSource: this.recommendationSource()
     });
   });
 
@@ -56,7 +64,11 @@ export class SeriesCardComponent {
     return this.configFactory.forSeries({
       overrides: {
         allowSelection: this.allowSelection(),
-        clickFunc: this.handleClick.bind(this)
+        clickFunc: this.handleClick.bind(this),
+        overlayBadgeFunc: (_, wrapper) => {
+          const source = (wrapper as SeriesCardEntity).recommendationSource;
+          return source ? this.recommendationSourcePipe.transform(source) : null;
+        }
       }
     });
   });

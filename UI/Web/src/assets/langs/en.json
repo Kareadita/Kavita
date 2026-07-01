@@ -796,7 +796,8 @@
         "spin-off": "Spin Off",
         "parent": "Parent",
         "edition": "Edition",
-        "annual": "Annual"
+        "annual": "Annual",
+        "cameo": "Cameo"
     },
 
     "publication-status-pipe": {
@@ -1810,6 +1811,12 @@
         "hardcover": "Hardcover",
         "mangabaka": "MangaBaka",
         "cbr": "Comic Book Roundup"
+    },
+
+    "recommendation-source-pipe": {
+        "similar": "Similar",
+        "user-based": "Users Liked",
+        "personalized": "For You"
     },
 
     "scrobble-provider-tag-badge": {

@@ -2586,11 +2586,73 @@ public class ExternalMetadataServiceTests: AbstractDbTest
                     RomajiTitle = series2.Name,
                 },
                 AniListId = 10,
-                PlusMediaFormat = PlusMediaFormat.Manga
+                Format = PlusMediaFormat.Manga
             }]
         }, 1);
 
         // Repull Series and validate what is overwritten
+        var sourceSeries = await unitOfWork.SeriesRepository.GetSeriesByIdAsync(1, SeriesIncludes.Metadata | SeriesIncludes.Related);
+        Assert.NotNull(sourceSeries);
+        Assert.Single(sourceSeries.Relations);
+        Assert.Equal(series2.Name, sourceSeries.Relations.First().TargetSeries.Name);
+    }
+
+    // Non-Sequel matched purely via an external metadata id - names intentionally do not match the target,
+    // so the relationship can only resolve through the GetSeriesFromExternalMetadata id lookup.
+    [Fact]
+    public async Task Relationships_NonSequel_MatchByExternalId()
+    {
+        var (unitOfWork, context, mapper) = await CreateDatabase();
+        var (externalMetadataService, _, _, _) = await Setup(unitOfWork, context, mapper);
+
+        const string seriesName = "Test - Relationships Source";
+        var series = new SeriesBuilder(seriesName)
+            .WithLibraryId(1)
+            .WithFormat(MangaFormat.Archive)
+            .WithMetadata(new SeriesMetadataBuilder()
+                .Build())
+            .Build();
+        context.Series.Attach(series);
+
+        var series2 = new SeriesBuilder("Test - Relationships Target")
+            .WithLibraryId(1)
+            .WithFormat(MangaFormat.Archive)
+            .WithMetadata(new SeriesMetadataBuilder()
+                .Build())
+            .WithExternalMetadata(new ExternalSeriesMetadata()
+            {
+                MangabakaId = 555
+            })
+            .Build();
+        context.Series.Attach(series2);
+        await context.SaveChangesAsync();
+
+        var metadataSettings = await unitOfWork.SettingsRepository.GetMetadataSettings();
+        metadataSettings.Enabled = true;
+        metadataSettings.EnableRelationships = true;
+        context.MetadataSettings.Update(metadataSettings);
+        await context.SaveChangesAsync();
+
+        await externalMetadataService.WriteExternalMetadataToSeries(new ExternalSeriesDetailDto()
+        {
+            Name = seriesName,
+            Relations = [new SeriesRelationship()
+            {
+                Relation = RelationKind.SideStory,
+                // Names deliberately do not match series2 - resolution must happen via MangabakaId
+                SeriesName = new ALMediaTitle()
+                {
+                    PreferredTitle = "No Name Match Whatsoever",
+                    EnglishTitle = null,
+                    NativeTitle = "No Name Match Whatsoever",
+                    RomajiTitle = "No Name Match Whatsoever",
+                },
+                MangabakaId = 555,
+                Format = PlusMediaFormat.Manga
+            }]
+        }, 1);
+
+        // Repull Series and validate the relationship resolved via the external id
         var sourceSeries = await unitOfWork.SeriesRepository.GetSeriesByIdAsync(1, SeriesIncludes.Metadata | SeriesIncludes.Related);
         Assert.NotNull(sourceSeries);
         Assert.Single(sourceSeries.Relations);
@@ -2642,7 +2704,7 @@ public class ExternalMetadataServiceTests: AbstractDbTest
                     RomajiTitle = series2.Name,
                 },
                 AniListId = 10,
-                PlusMediaFormat = PlusMediaFormat.Manga
+                Format = PlusMediaFormat.Manga
             }]
         }, 1);
 
@@ -2699,7 +2761,7 @@ public class ExternalMetadataServiceTests: AbstractDbTest
                     RomajiTitle = series2.Name,
                 },
                 AniListId = 10,
-                PlusMediaFormat = PlusMediaFormat.Book
+                Format = PlusMediaFormat.Book
             }]
         }, 1);
 
@@ -2765,7 +2827,7 @@ public class ExternalMetadataServiceTests: AbstractDbTest
                     NativeTitle = series2.Name,
                     RomajiTitle = series2.Name,
                 },
-                PlusMediaFormat = PlusMediaFormat.Manga
+                Format = PlusMediaFormat.Manga
             }]
         }, 2);
 
@@ -2824,7 +2886,7 @@ public class ExternalMetadataServiceTests: AbstractDbTest
                     NativeTitle = series2.Name,
                     RomajiTitle = series2.Name,
                 },
-                PlusMediaFormat = PlusMediaFormat.Manga
+                Format = PlusMediaFormat.Manga
             }]
         }, 1);
 
@@ -2884,7 +2946,7 @@ public class ExternalMetadataServiceTests: AbstractDbTest
                     NativeTitle = "ブルーロック",
                     RomajiTitle = "Blue Lock",
                 },
-                PlusMediaFormat = PlusMediaFormat.Manga,
+                Format = PlusMediaFormat.Manga,
                 AniListId = 106130,
                 MalId = 114745,
                 Provider = ScrobbleProvider.AniList

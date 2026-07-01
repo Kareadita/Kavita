@@ -260,9 +260,14 @@ public class MetadataController(IUnitOfWork unitOfWork, IExternalMetadataService
         if (ret?.Recommendations != null && user != null)
         {
             // Re-obtain owned series and take into account age restriction and include series progress
-            var seriesIds = ret.Recommendations.OwnedSeries.Select(s => s.Id);
-            ret.Recommendations.OwnedSeries =
-                await unitOfWork.SeriesRepository.GetSeriesDtoByIdsAsync(seriesIds, user);
+            var seriesIds = ret.Recommendations.OwnedSeries.Select(s => s.Series.Id).ToList();
+            var series = await unitOfWork.SeriesRepository.GetSeriesDtoByIdsAsync(seriesIds, user);
+            var seriesById = series.ToDictionary(s => s.Id);
+
+            ret.Recommendations.OwnedSeries = ret.Recommendations.OwnedSeries
+                .Where(s => seriesById.ContainsKey(s.Series.Id))
+                .Select(s => { s.Series = seriesById[s.Series.Id]; return s; })
+                .ToList();
 
             if (!User.IsInRole(PolicyConstants.AdminRole))
             {
