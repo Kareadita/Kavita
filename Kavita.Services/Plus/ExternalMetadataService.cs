@@ -61,6 +61,14 @@ public class ExternalMetadataService : IExternalMetadataService
 
     private const int SeriesPerRefresh = 25;
     private readonly TimeSpan _externalSeriesMetadataCache = TimeSpan.FromDays(30);
+    private readonly string[] _artistRoleStrings = [
+        "Art", "Story & Art",  // AniList
+        "Artist" // MangaBaka
+    ];
+    private readonly string[] _writerRoleStrings = [
+        "Story", "Story & Art", // AniList
+        "Author" // MangaBaka
+    ];
     private readonly SeriesDetailPlusDto _defaultReturn = new()
     {
         Series =  null,
@@ -776,6 +784,7 @@ public class ExternalMetadataService : IExternalMetadataService
 
         var staff = await SetNameAndAddAliases(settings, externalMetadata.Staff);
 
+        // TODO: I need update Publisher as well
         Accumulate(ref madeModification, fieldChanges, await UpdateWriters(series, settings, staff));
         Accumulate(ref madeModification, fieldChanges, await UpdateArtists(series, settings, staff));
         Accumulate(ref madeModification, fieldChanges, await UpdateCharacters(series, settings, externalMetadata.Characters));
@@ -1162,7 +1171,7 @@ public class ExternalMetadataService : IExternalMetadataService
         if (!settings.EnablePeople) return (false, null);
 
         var upstreamArtists = staff
-            .Where(s => s.Role is "Art" or "Story & Art")
+            .Where(s => _artistRoleStrings.Contains(s.Role))
             .ToList();
 
         if (upstreamArtists.Count == 0) return (false, null);
@@ -1219,7 +1228,7 @@ public class ExternalMetadataService : IExternalMetadataService
         if (!settings.EnablePeople) return (false, null);
 
         var upstreamWriters = staff
-            .Where(s => s.Role is "Story" or "Story & Art")
+            .Where(s => _writerRoleStrings.Contains(s.Role))
             .ToList();
 
         if (upstreamWriters.Count == 0) return (false, null);
