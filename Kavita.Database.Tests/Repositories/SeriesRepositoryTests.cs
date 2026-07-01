@@ -86,6 +86,8 @@ public class SeriesRepositoryTests(ITestOutputHelper testOutputHelper) : Abstrac
             GoogleBooksId = string.Empty
         };
 
+        series.AniListId = externalAniListId;
+
         // Set up SeriesMetadata with WebLinks
         series.Metadata = new SeriesMetadata()
         {

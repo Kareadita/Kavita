@@ -615,11 +615,15 @@ public class SeriesRepository(DataContext context, IMapper mapper) : ISeriesRepo
                 SeriesName = series.Name,
                 AlternativeNames = new List<string> { series.LocalizedName },
                 AniListId = series.AniListId != 0
-                    ? series.ExternalSeriesMetadata.AniListId
-                    : ExternalIdParser.GetAniListId(series.Metadata.WebLinks),
+                    ? series.AniListId
+                    : series.ExternalSeriesMetadata.AniListId != 0
+                ? series.ExternalSeriesMetadata.AniListId
+                : ExternalIdParser.GetAniListId(series.Metadata.WebLinks),
                 MalId = series.MalId != 0
-                    ? series.ExternalSeriesMetadata.MalId
-                    : ExternalIdParser.GetMalId(series.Metadata.WebLinks),
+                    ? series.MalId
+                    : series.ExternalSeriesMetadata.MalId != 0
+                ? series.ExternalSeriesMetadata.MalId
+                : ExternalIdParser.GetMalId(series.Metadata.WebLinks),
                 CbrId = series.CbrId,
                 // TODO: Remove GoogleBooks and MangaDex, we don't use them anymore
                 GoogleBooksId = !string.IsNullOrEmpty(series.ExternalSeriesMetadata.GoogleBooksId)
