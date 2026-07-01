@@ -8,6 +8,7 @@ using System.Xml;
 using System.Xml.Serialization;
 using Kavita.API.Database;
 using Kavita.API.Errors;
+using Kavita.API.Repositories;
 using Kavita.API.Services;
 using Kavita.API.Services.Reading;
 using Kavita.API.Services.ReadingLists;
@@ -729,7 +730,7 @@ public class OpdsService(
         }
         query = query.Replace("%", string.Empty);
 
-        var libraries = (await unitOfWork.LibraryRepository.GetLibrariesForUserIdAsync(userId, ct)).ToList();
+        var libraries = (await unitOfWork.LibraryRepository.GetLibraryIdsForUserIdAsync(userId, QueryContext.Search, ct)).ToList();
         if (libraries.Count == 0)
         {
             throw new OpdsException(await localizationService.TranslateAsync(userId, "libraries-restricted"));
@@ -738,7 +739,7 @@ public class OpdsService(
         var isAdmin = await unitOfWork.UserRepository.IsUserAdminAsync(user, ct);
 
         var searchResults = await unitOfWork.SeriesRepository.SearchSeriesAsync(userId, isAdmin,
-            libraries.Select(l => l.Id).ToArray(), query, includeChapterAndFiles: false, ct: ct);
+            libraries, query, includeChapterAndFiles: false, ct: ct);
 
         var feed = CreateFeed(query, $"{apiKey}/series?query=" + query, apiKey, prefix);
         SetFeedId(feed, "search-series");
