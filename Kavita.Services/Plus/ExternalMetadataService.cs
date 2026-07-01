@@ -336,7 +336,7 @@ public class ExternalMetadataService : IExternalMetadataService
                              || potentialMalId.HasValue
                              || potentialMangabakaId > 0
                              || !string.IsNullOrEmpty(potentialHardcoverSlug)
-                             ;//|| !string.IsNullOrEmpty(potentialCbrSlug); // For now, we pass slug as query as there is a direct handling on Query currently
+                             || !string.IsNullOrEmpty(potentialCbrSlug); // For now, we pass slug as query as there is a direct handling on Query currently
 
         query = wasHeaderQuery ? null : dto.Query;
 
@@ -558,16 +558,6 @@ public class ExternalMetadataService : IExternalMetadataService
     }
 
     /// <summary>
-    /// Derives the v3 <see cref="MetadataProvider"/> to route a series-detail request to, based on whichever
-    /// primary id is already present, falling back to the format default.
-    /// </summary>
-    private static MetadataProvider DeriveProvider(PlusSeriesRequestDto data, Series series)
-    {
-        // Use the matched id's provider when present, else fall back to the provider implied by the media format
-        return data.ResolveMatchedProvider() ?? data.MediaFormat.GetMetadataProvider(series.Library);
-    }
-
-    /// <summary>
     /// Requests the full SeriesDetail (rec, review, metadata) data for a Series. Will save to ExternalMetadata tables.
     /// </summary>
     /// <param name="seriesId"></param>
@@ -684,7 +674,8 @@ public class ExternalMetadataService : IExternalMetadataService
             .Average(r => r.AverageScore) : 0;
 
         // prefer what was passed in (manual match), fall back to what K+ returned
-        var beforeIds = new AuditLogMatchExternalIdsParamsDto { AniListId = series.AniListId, MalId = series.MalId, MangaBakaId = series.MangaBakaId, CbrId = series.CbrId, HardcoverId = series.HardcoverId };
+        var beforeIds = new AuditLogMatchExternalIdsParamsDto { AniListId = series.AniListId, MalId = series.MalId,
+            MangaBakaId = series.MangaBakaId, CbrId = series.CbrId, HardcoverId = series.HardcoverId };
 
         externalSeriesMetadata.MalId = data.MalId ?? result.MalId ?? 0;
         externalSeriesMetadata.AniListId = data.AniListId ?? result.AniListId ?? 0;
@@ -766,7 +757,6 @@ public class ExternalMetadataService : IExternalMetadataService
         var processedGenres = new List<string>();
         var processedTags = new List<string>();
 
-        // TODO: Clean this up with a helper
         Accumulate(ref madeModification, fieldChanges, UpdateSummary(series, settings, externalMetadata));
         Accumulate(ref madeModification, fieldChanges, UpdateReleaseYear(series, settings, externalMetadata));
         Accumulate(ref madeModification, fieldChanges, UpdateLocalizedName(series, settings, externalMetadata));
@@ -813,7 +803,8 @@ public class ExternalMetadataService : IExternalMetadataService
 
     public async Task<IList<ExternalCoverResponseDto>> GetExternalCovers(int seriesId, int? volumeId = null, int? chapterId = null, CancellationToken ct = default)
     {
-        var series = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(seriesId, SeriesIncludes.Metadata | SeriesIncludes.Chapters | SeriesIncludes.Library, ct: ct);
+        var series = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(seriesId,
+            SeriesIncludes.Metadata | SeriesIncludes.Chapters | SeriesIncludes.Library, ct: ct);
         if (series == null) throw new KavitaException("Series not found");
 
         var libraryType = await _unitOfWork.LibraryRepository.GetLibraryTypeAsync(series.LibraryId, ct);
