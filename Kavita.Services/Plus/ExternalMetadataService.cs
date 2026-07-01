@@ -771,7 +771,7 @@ public class ExternalMetadataService : IExternalMetadataService
         Accumulate(ref madeModification, fieldChanges, UpdateReleaseYear(series, settings, externalMetadata));
         Accumulate(ref madeModification, fieldChanges, UpdateLocalizedName(series, settings, externalMetadata));
         Accumulate(ref madeModification, fieldChanges, await UpdatePublicationStatus(series, settings, externalMetadata));
-        if (trigger == MetadataFetchTrigger.OnDemand)
+        if (trigger is MetadataFetchTrigger.OnDemand or MetadataFetchTrigger.ManualMatch)
         {
             Accumulate(ref madeModification, fieldChanges, UpdateExternalIds(series, externalMetadata));
         }
@@ -785,7 +785,7 @@ public class ExternalMetadataService : IExternalMetadataService
 
         var staff = await SetNameAndAddAliases(settings, externalMetadata.Staff);
 
-        // TODO: I need update Publisher as well
+        // TODO: I need update Publisher as well (MB is complicated as there are multiple potential publishers, needs to be tied with Works PR)
         Accumulate(ref madeModification, fieldChanges, await UpdateWriters(series, settings, staff));
         Accumulate(ref madeModification, fieldChanges, await UpdateArtists(series, settings, staff));
         Accumulate(ref madeModification, fieldChanges, await UpdateCharacters(series, settings, externalMetadata.Characters));
