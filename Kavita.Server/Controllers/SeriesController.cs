@@ -560,11 +560,11 @@ public class SeriesController(
             }
             catch (Exception)
             {
-                return BadRequest("Unable to load External Series details");
+                return BadRequest(await localizationService.TranslateAsync("generic-error"));
             }
         }
 
-        if (ret == null) return BadRequest("Unable to load External Series details");
+        if (ret == null) return BadRequest(await localizationService.TranslateAsync("generic-error"));
 
         var user = await unitOfWork.UserRepository.GetUserByIdAsync(UserId, ct: ct);
         var restriction = new Models.Entities.AgeRestriction
@@ -578,7 +578,7 @@ public class SeriesController(
 
         if (!RecommendationHelper.IsWithinAgeRestriction(effectiveRating, restriction))
         {
-            throw new KavitaNotFoundException("External Series not found");
+            throw new KavitaNotFoundException(await localizationService.TranslateAsync("series-restricted-age-restriction"));
         }
 
         return Ok(ret);
