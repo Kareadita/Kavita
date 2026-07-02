@@ -1603,8 +1603,8 @@ public class SeriesRepository(DataContext context, IMapper mapper) : ISeriesRepo
     /// Uses multiple names to find a match against a series. If not, returns null.
     /// </summary>
     /// <remarks>This does not restrict to the user at all. That is handled at the API level.</remarks>
-    public async Task<SeriesDto?> GetSeriesDtoByNamesAndMetadataIdsAsync(IEnumerable<string> names, LibraryType libraryType,
-        string aniListUrl, string malUrl, CancellationToken ct = default)
+    public async Task<SeriesDto?> GetSeriesDtoByNamesAndMetadataIdsAsync(IEnumerable<string> names,
+        LibraryType libraryType, MetadataRequest metadataRequest, CancellationToken ct = default)
     {
         var libraryIds = await context.Library
             .Where(lib => lib.Type == libraryType)
@@ -1613,14 +1613,18 @@ public class SeriesRepository(DataContext context, IMapper mapper) : ISeriesRepo
 
         var normalizedNames = names.Select(n => n.ToNormalized()).ToList();
         SeriesDto? result = null;
-        if (!string.IsNullOrEmpty(aniListUrl) || !string.IsNullOrEmpty(malUrl))
+        if (metadataRequest.HasAnyIdsSet())
         {
-            // default: I can likely work AniList and MalIds from ExternalSeriesMetadata in here
-            result =  await context.Series
-                .Where(s => !string.IsNullOrEmpty(s.Metadata.WebLinks))
-                .Where(s => libraryIds.Contains(s.Library.Id))
-                .WhereIf(!string.IsNullOrEmpty(aniListUrl), s => s.Metadata.WebLinks.Contains(aniListUrl))
-                .WhereIf(!string.IsNullOrEmpty(malUrl), s => s.Metadata.WebLinks.Contains(malUrl))
+            result = await context.Series
+                .Where(s =>
+                    (metadataRequest.AniListId.HasValue && s.AniListId == metadataRequest.AniListId) ||
+                    (metadataRequest.MalId.HasValue && s.MalId == metadataRequest.MalId) ||
+                    (metadataRequest.MangabakaId.HasValue && s.MangaBakaId == metadataRequest.MangabakaId) ||
+                    (metadataRequest.HardcoverId != null && !metadataRequest.IsStandAlone
+                                                         && s.HardcoverId == metadataRequest.HardcoverId) ||
+                    (metadataRequest.HardcoverId != null && metadataRequest.IsStandAlone
+                                                         && s.Volumes.Any(v => v.Chapters.Any(c => c.HardcoverId == metadataRequest.HardcoverId)))
+                )
                 .ProjectTo<SeriesDto>(mapper.ConfigurationProvider)
                 .AsSplitQuery()
                 .FirstOrDefaultAsync(ct);

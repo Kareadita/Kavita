@@ -2194,8 +2194,7 @@ public class ExternalMetadataService : IExternalMetadataService
 
             // Find the series based on name and type and that the user has access too
             var seriesForRec = await _unitOfWork.SeriesRepository.GetSeriesDtoByNamesAndMetadataIdsAsync(rec.RecommendationNames,
-                libraryType, ScrobblingHelper.CreateUrl(ScrobblingService.AniListWeblinkWebsite, rec.AniListId),
-                ScrobblingHelper.CreateUrl(ScrobblingService.MalWeblinkWebsite, rec.MalId));
+                libraryType, rec);
 
             if (seriesForRec != null)
             {
@@ -2209,7 +2208,7 @@ public class ExternalMetadataService : IExternalMetadataService
                     Url = rec.SiteUrl,
                     CoverUrl = rec.CoverUrl,
                     Summary = rec.Summary,
-                    MangaBakaId = rec.MangabakaId,
+                    MangaBakaId = (int?) rec.MangabakaId,
                     MetadataProvider = provider,
                     RecommendationSource = source
                 });
@@ -2226,7 +2225,7 @@ public class ExternalMetadataService : IExternalMetadataService
                 Summary = rec.Summary,
                 AniListId = rec.AniListId,
                 MalId = rec.MalId,
-                MangaBakaId = rec.MangabakaId,
+                MangaBakaId = (int?) rec.MangabakaId,
                 MetadataProvider = provider,
                 RecommendationSource = source
             });
@@ -2239,7 +2238,7 @@ public class ExternalMetadataService : IExternalMetadataService
                 Url = rec.SiteUrl,
                 CoverUrl = rec.CoverUrl,
                 Summary = rec.Summary,
-                MangaBakaId = rec.MangabakaId,
+                MangaBakaId = (int?) rec.MangabakaId,
                 MetadataProvider = provider,
                 RecommendationSource = source
             });

@@ -17,4 +17,9 @@ public record MetadataRequest
     /// </summary>
     /// <remarks>This is important for Hardcover matching</remarks>
     public bool IsStandAlone { get; set; }
+
+    public bool HasAnyIdsSet()
+    {
+        return AniListId.HasValue || MalId.HasValue || HardcoverId.HasValue || CbrId.HasValue || MangabakaId.HasValue || GoogleBooksId != null || MangaDexId != null || MetronId.HasValue || ComicVineId != null;
+    }
 }
