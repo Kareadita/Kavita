@@ -319,4 +319,22 @@ public class TagHelperTests(ITestOutputHelper outputHelper) : AbstractDbTest(out
     }
 
     #endregion
+
+    [Fact]
+    public void UpdateTagList_DeduplicatesDuplicateNormalizedTitlesWithinSameInput()
+    {
+        var existingEntityTags = new List<Tag>();
+        var allDbTags = new List<Tag>();
+        var addedTags = new List<Tag>();
+
+        // Two new distinct tags which are equal when normalized
+        TagHelper.UpdateTagList(
+            new List<string> { "Fiction:Fantasy", "Fiction Fantasy" },
+            existingEntityTags,
+            allDbTags,
+            addedTags.Add,
+            () => { });
+
+        Assert.Single(addedTags);
+    }
 }

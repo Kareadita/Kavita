@@ -156,6 +156,7 @@ public static class TagHelper
                     NormalizedTitle = normalizedTitle
                 };
                 handleAdd(newTag);
+                allTagsDict[normalizedTitle] = newTag;
             }
             isModified = true;
         }
