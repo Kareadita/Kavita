@@ -2,12 +2,12 @@
   "openapi": "3.0.4",
   "info": {
     "title": "Kavita",
-    "description": "Kavita provides a set of APIs authenticated via an Auth Key passed in the `x-api-key` header. Generate an Auth Key under User Settings → Manage Auth Keys, paste it into the Authorize panel, and all Try It requests will include it. Assume all fields of a payload are required unless marked optional. Built against v0.9.0.11",
+    "description": "Kavita provides a set of APIs authenticated via an Auth Key passed in the `x-api-key` header. Generate an Auth Key under User Settings → Manage Auth Keys, paste it into the Authorize panel, and all Try It requests will include it. Assume all fields of a payload are required unless marked optional. Built against v0.9.0.12",
     "license": {
       "name": "GPL-3.0",
       "url": "https://github.com/Kareadita/Kavita/blob/develop/LICENSE"
     },
-    "version": "0.9.0.11"
+    "version": "0.9.0.12"
   },
   "servers": [
     {
@@ -6758,6 +6758,54 @@
         "responses": {
           "200": {
             "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/Library/metadata-providers": {
+      "get": {
+        "tags": [
+          "Library"
+        ],
+        "parameters": [
+          {
+            "name": "libraryType",
+            "in": "query",
+            "description": "Members:\n- `0` — Manga\n- `1` — Comic (Flexible) (Comic)\n- `2` — Book\n- `3` — Image\n- `4` — Light Novel (LightNovel)\n- `5` — Comic (ComicVine)",
+            "schema": {
+              "$ref": "#/components/schemas/LibraryType"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/MetadataProvider"
+                  }
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/MetadataProvider"
+                  }
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/MetadataProvider"
+                  }
+                }
+              }
+            }
           }
         }
       }
@@ -15916,10 +15964,12 @@
         "tags": [
           "Series"
         ],
+        "summary": "Returns external series metadata around a Given External Series",
         "parameters": [
           {
             "name": "aniListId",
             "in": "query",
+            "description": "",
             "schema": {
               "type": "integer",
               "format": "int32"
@@ -15928,14 +15978,25 @@
           {
             "name": "malId",
             "in": "query",
+            "description": "",
             "schema": {
               "type": "integer",
               "format": "int64"
             }
           },
           {
+            "name": "mangaBakaId",
+            "in": "query",
+            "description": "",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
             "name": "seriesId",
             "in": "query",
+            "description": "",
             "schema": {
               "type": "integer",
               "format": "int32"
@@ -15948,17 +16009,17 @@
             "content": {
               "text/plain": {
                 "schema": {
-                  "$ref": "#/components/schemas/ExternalSeriesDto"
+                  "$ref": "#/components/schemas/ExternalSeriesDetailDto"
                 }
               },
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ExternalSeriesDto"
+                  "$ref": "#/components/schemas/ExternalSeriesDetailDto"
                 }
               },
               "text/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ExternalSeriesDto"
+                  "$ref": "#/components/schemas/ExternalSeriesDetailDto"
                 }
               }
             }
@@ -24448,6 +24509,11 @@
             "type": "string",
             "nullable": true
           },
+          "hardcoverId": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
           "criticReviews": {
             "type": "array",
             "items": {
@@ -24551,6 +24617,9 @@
             "format": "int32",
             "nullable": true
           },
+          "isStandAlone": {
+            "type": "boolean"
+          },
           "cbrId": {
             "type": "integer",
             "format": "int32",
@@ -24596,6 +24665,9 @@
             "type": "integer",
             "format": "int32",
             "nullable": true
+          },
+          "isStandAlone": {
+            "type": "boolean"
           },
           "mangabakaId": {
             "type": "integer",
@@ -24645,6 +24717,9 @@
             "type": "string",
             "nullable": true
           },
+          "ageRating": {
+            "$ref": "#/components/schemas/AgeRating"
+          },
           "provider": {
             "$ref": "#/components/schemas/ScrobbleProvider"
           },
@@ -24681,6 +24756,13 @@
             "type": "array",
             "items": {
               "$ref": "#/components/schemas/SeriesCharacter"
+            },
+            "nullable": true
+          },
+          "ratings": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/RatingDto"
             },
             "nullable": true
           },
@@ -24727,6 +24809,11 @@
             "format": "int32",
             "nullable": true
           },
+          "mangaBakaId": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
           "malId": {
             "type": "integer",
             "format": "int64",
@@ -24734,6 +24821,15 @@
           },
           "provider": {
             "$ref": "#/components/schemas/ScrobbleProvider"
+          },
+          "metadataProvider": {
+            "$ref": "#/components/schemas/MetadataProvider"
+          },
+          "recommendationSource": {
+            "$ref": "#/components/schemas/RecommendationSource"
+          },
+          "ageRating": {
+            "$ref": "#/components/schemas/AgeRating"
           }
         },
         "additionalProperties": false
@@ -26797,6 +26893,9 @@
           "query": {
             "type": "string",
             "nullable": true
+          },
+          "isStandAlone": {
+            "type": "boolean"
           }
         },
         "additionalProperties": false
@@ -28231,7 +28330,8 @@
           },
           "favoriteCount": {
             "type": "integer",
-            "format": "int32"
+            "format": "int32",
+            "deprecated": true
           },
           "provider": {
             "$ref": "#/components/schemas/ScrobbleProvider"
@@ -29132,7 +29232,7 @@
           "ownedSeries": {
             "type": "array",
             "items": {
-              "$ref": "#/components/schemas/SeriesDto"
+              "$ref": "#/components/schemas/RecommendedSeriesDto"
             },
             "nullable": true
           },
@@ -29142,6 +29242,41 @@
               "$ref": "#/components/schemas/ExternalSeriesDto"
             },
             "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "RecommendationSource": {
+        "enum": [
+          1,
+          2,
+          3
+        ],
+        "type": "integer",
+        "description": "Members:\n- `1` — Similar\n- `2` — UserBased\n- `3` — Personalized",
+        "format": "int32",
+        "x-enum-varnames": [
+          "Similar",
+          "UserBased",
+          "Personalized"
+        ],
+        "x-enum-descriptions": [
+          "Similar",
+          "UserBased",
+          "Personalized"
+        ]
+      },
+      "RecommendedSeriesDto": {
+        "required": [
+          "series"
+        ],
+        "type": "object",
+        "properties": {
+          "series": {
+            "$ref": "#/components/schemas/SeriesDto"
+          },
+          "source": {
+            "$ref": "#/components/schemas/RecommendationSource"
           }
         },
         "additionalProperties": false
@@ -29293,6 +29428,13 @@
               "$ref": "#/components/schemas/SeriesDto"
             },
             "nullable": true
+          },
+          "cameos": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SeriesDto"
+            },
+            "nullable": true
           }
         },
         "additionalProperties": false
@@ -29312,10 +29454,11 @@
           11,
           12,
           13,
-          14
+          14,
+          16
         ],
         "type": "integer",
-        "description": "Members:\n- `1` — Prequel\n- `2` — Sequel\n- `3` — Spin Off (SpinOff)\n- `4` — Adaptation\n- `5` — Side Story (SideStory)\n- `6` — Character\n- `7` — Contains\n- `8` — Other\n- `9` — Alternative Setting (AlternativeSetting)\n- `10` — Alternative Version (AlternativeVersion)\n- `11` — Doujinshi\n- `12` — Parent\n- `13` — Edition\n- `14` — Annual",
+        "description": "Members:\n- `1` — Prequel\n- `2` — Sequel\n- `3` — Spin Off (SpinOff)\n- `4` — Adaptation\n- `5` — Side Story (SideStory)\n- `6` — Character\n- `7` — Contains\n- `8` — Other\n- `9` — Alternative Setting (AlternativeSetting)\n- `10` — Alternative Version (AlternativeVersion)\n- `11` — Doujinshi\n- `12` — Parent\n- `13` — Edition\n- `14` — Annual\n- `16` — Cameo",
         "format": "int32",
         "x-enum-varnames": [
           "Prequel",
@@ -29331,7 +29474,8 @@
           "Doujinshi",
           "Parent",
           "Edition",
-          "Annual"
+          "Annual",
+          "Cameo"
         ],
         "x-enum-descriptions": [
           "Prequel",
@@ -29347,7 +29491,8 @@
           "Doujinshi",
           "Parent",
           "Edition",
-          "Annual"
+          "Annual",
+          "Cameo"
         ]
       },
       "RemapRuleDto": {
@@ -30805,6 +30950,11 @@
             "format": "int32",
             "nullable": true
           },
+          "mangabakaId": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
           "seriesName": {
             "$ref": "#/components/schemas/ALMediaTitle"
           },
@@ -30814,8 +30964,14 @@
           "provider": {
             "$ref": "#/components/schemas/ScrobbleProvider"
           },
-          "plusMediaFormat": {
+          "format": {
             "$ref": "#/components/schemas/PlusMediaFormat"
+          },
+          "series": {
+            "$ref": "#/components/schemas/ExternalSeriesDetailDto"
+          },
+          "metadataProvider": {
+            "$ref": "#/components/schemas/MetadataProvider"
           }
         },
         "additionalProperties": false
@@ -32624,6 +32780,9 @@
             "type": "string",
             "nullable": true
           },
+          "metadataProvider": {
+            "$ref": "#/components/schemas/MetadataProvider"
+          },
           "fileGroupTypes": {
             "type": "array",
             "items": {
@@ -33151,6 +33310,14 @@
             "nullable": true
           },
           "annuals": {
+            "type": "array",
+            "items": {
+              "type": "integer",
+              "format": "int32"
+            },
+            "nullable": true
+          },
+          "cameos": {
             "type": "array",
             "items": {
               "type": "integer",
