@@ -100,46 +100,38 @@ public static class ExternalIdParser
 
     #region Header-based Parsing
     public static bool TryParseAniListHeader(string? text, out int id) =>
-        TryParseHeader(text, "ANILIST", out id);
+        TryParseHeader(text, "ANILIST", out id) || TryParseHeader(text, "AL", out id);
 
     public static bool TryParseHardcoverHeader(string? text, out string id) =>
         TryParseHeader(text, "HARDCOVER", out id);
 
     public static bool TryParseMangaBakaHeader(string? text, out long id) =>
-        TryParseHeader(text, "MANGABAKA", out id);
+        TryParseHeader(text, "MANGABAKA", out id) || TryParseHeader(text, "MB", out id);
 
     public static bool TryParseMalHeader(string? text, out int id) =>
         TryParseHeader(text, "MAL", out id);
 
-    public static int? ParseAniListHeader(string? text) => ParseHeader<int>(text, "ANILIST");
+    public static int? ParseAniListHeader(string? text) =>
+        TryParseHeader<int>(text, "ANILIST", out var id) ? id : null;
 
-    public static string? ParseHardcoverHeader(string? text) => ParseHeader<string>(text, "HARDCOVER");
+    public static string? ParseHardcoverHeader(string? text) =>
+        TryParseHeader<string>(text, "HARDCOVER", out var id) ? id : null;
 
-    public static long? ParseMangaBakaHeader(string? text) => ParseHeader<long>(text, "MANGABAKA");
+    public static long? ParseMangaBakaHeader(string? text) =>
+        TryParseHeader<long>(text, "MANGABAKA", out var id) ? id : null;
 
-    public static int? ParseMalHeader(string? text) => ParseHeader<int>(text, "MAL");
-
-    private static T? ParseHeader<T>(string? text, string header)
-        where T : IParsable<T>
-    {
-        if (string.IsNullOrWhiteSpace(text)) return default;
-        if (!text.StartsWith(header + ":", StringComparison.InvariantCultureIgnoreCase)) return default;
-        var valuePart = text.Split(':', 2)[1];
-
-        return T.TryParse(valuePart, CultureInfo.InvariantCulture, out var result) ? result : default;
-    }
+    public static int? ParseMalHeader(string? text) =>
+        TryParseHeader<int>(text, "MAL", out var id) ? id : null;
 
     private static bool TryParseHeader<T>(string? text, string header, out T id)
         where T : IParsable<T>
     {
-        var result = ParseHeader<T>(text, header);
-        if (result is not null)
-        {
-            id = result;
-            return true;
-        }
         id = default!;
-        return false;
+        if (string.IsNullOrWhiteSpace(text)) return false;
+        if (!text.StartsWith(header + ":", StringComparison.InvariantCultureIgnoreCase)) return false;
+
+        var valuePart = text.Split(':', 2)[1];
+        return T.TryParse(valuePart, CultureInfo.InvariantCulture, out id!);
     }
 
     #endregion

@@ -27,6 +27,7 @@ const PROVIDER_BRAND_COLORS: Partial<Record<ScrobbleProvider, string>> = {
 export class ScrobbleProviderTagBadgeComponent {
   provider = input.required<ScrobbleProvider>();
   id = input<number | null | undefined>(undefined);
+  isStandAlone = input<boolean>(false);
 
   protected showId = computed(() => {
     const v = this.id();
@@ -34,5 +35,5 @@ export class ScrobbleProviderTagBadgeComponent {
   });
 
   protected brandColor = computed(() => PROVIDER_BRAND_COLORS[this.provider()] ?? '#888');
-  protected url = computed(() => this.showId() ? getProviderUrl(this.provider(), this.id()!) : null);
+  protected url = computed(() => this.showId() ? getProviderUrl(this.provider(), this.id()!, this.isStandAlone()) : null);
 }

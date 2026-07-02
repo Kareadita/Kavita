@@ -15,7 +15,9 @@ using Kavita.Models.DTOs.Metadata.Browse;
 using Kavita.Models.DTOs.Person;
 using Kavita.Models.DTOs.ReadingLists;
 using Kavita.Models.DTOs.SeriesDetail;
+using Kavita.Models.Entities;
 using Kavita.Models.Entities.Enums;
+using Kavita.Models.Entities.Enums.Audit;
 using Kavita.Server.Extensions;
 using Kavita.Services.Helpers;
 using Microsoft.AspNetCore.Mvc;
@@ -240,7 +242,7 @@ public class MetadataController(IUnitOfWork unitOfWork, IExternalMetadataService
             .OrderByDescending(review => review.Username.Equals(Username!) ? 1 : 0)
             .ToList();
 
-        var ret = await metadataService.GetSeriesDetailPlus(seriesId, libraryType);
+        var ret = await metadataService.TryMatchAndLoadMetadataForSeries(seriesId, libraryType, MetadataFetchTrigger.OnDemand, HttpContext.RequestAborted);
 
         await PrepareSeriesDetail(userReviews, ret);
         return Ok(ret);
@@ -259,14 +261,23 @@ public class MetadataController(IUnitOfWork unitOfWork, IExternalMetadataService
         if (ret?.Recommendations != null && user != null)
         {
             // Re-obtain owned series and take into account age restriction and include series progress
-            var seriesIds = ret.Recommendations.OwnedSeries.Select(s => s.Id);
-            ret.Recommendations.OwnedSeries =
-                await unitOfWork.SeriesRepository.GetSeriesDtoByIdsAsync(seriesIds, user);
+            var seriesIds = ret.Recommendations.OwnedSeries.Select(s => s.Series.Id).ToList();
+            var series = await unitOfWork.SeriesRepository.GetSeriesDtoByIdsAsync(seriesIds, user);
+            var seriesById = series.ToDictionary(s => s.Id);
 
-            if (!User.IsInRole(PolicyConstants.AdminRole))
+            ret.Recommendations.OwnedSeries = ret.Recommendations.OwnedSeries
+                .Where(s => seriesById.ContainsKey(s.Series.Id))
+                .Select(s => { s.Series = seriesById[s.Series.Id]; return s; })
+                .ToList();
+
+            // Ensure non-admin's don't see anything about their AgeRating RBS
+            var restriction = new AgeRestriction
             {
-                ret.Recommendations.ExternalSeries = [];
-            }
+                AgeRating = user.AgeRestriction,
+                IncludeUnknowns = user.AgeRestrictionIncludeUnknowns
+            };
+            ret.Recommendations.ExternalSeries =
+                RecommendationHelper.FilterExternalRecommendations(ret.Recommendations.ExternalSeries, restriction);
         }
 
         if (ret?.Recommendations != null && user != null)

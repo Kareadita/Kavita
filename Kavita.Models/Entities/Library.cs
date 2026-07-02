@@ -64,7 +64,9 @@ public class Library : IEntityDate, IHasCoverImage
     /// <summary>
     /// Language to assign to series if none is set in the metadata
     /// </summary>
-    public string DefaultLanguage { get; set; } = "";
+    public string DefaultLanguage { get; set; } = string.Empty;
+
+    public MetadataProvider MetadataProvider { get; set; }
 
     public DateTime Created { get; set; }
     public DateTime LastModified { get; set; }

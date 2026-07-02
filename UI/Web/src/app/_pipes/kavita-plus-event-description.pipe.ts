@@ -26,6 +26,10 @@ export class KavitaPlusEventDescriptionPipe implements PipeTransform {
   transform(entry: KavitaPlusAuditEntry): string {
     const sd = entry.scrobbleDetails;
     if (sd) {
+      if (entry.eventType === KavitaPlusEventType.ScrobbleEventSkipped) {
+        return '';
+      }
+
       switch (sd.scrobbleEventType) {
         case ScrobbleEventType.ChapterRead: {
           // Note: there can be a discrepancy where creation event says Ch 2 and Sent event says Vol 0 Ch 2 due to

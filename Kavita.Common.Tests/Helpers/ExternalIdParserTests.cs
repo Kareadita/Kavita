@@ -33,4 +33,44 @@ public class ExternalIdParserTests
     {
         Assert.Equal(ExternalIdParser.GetMangaBakaId(link), expectedId);
     }
+
+    [Theory]
+    [InlineData("anilist:35851", true, 35851)]
+    [InlineData("al:30105", true, 30105)]
+    [InlineData("ANILIST:42", true, 42)]
+    // A non-matching header must report failure. Regression: a null-check on the parsed value is always
+    // true for value types (default(int) == 0 is not null), which made this return true with id 0.
+    [InlineData("hardcover:61176", false, 0)]
+    [InlineData("mangabaka:3391", false, 0)]
+    [InlineData("anilist:notanumber", false, 0)]
+    [InlineData("", false, 0)]
+    public void TryParseAniListHeader_OnlyMatchesAniList(string text, bool expectedResult, int expectedId)
+    {
+        var result = ExternalIdParser.TryParseAniListHeader(text, out var id);
+        Assert.Equal(expectedResult, result);
+        Assert.Equal(expectedId, id);
+    }
+
+    [Theory]
+    [InlineData("mangabaka:3391", true, 3391)]
+    [InlineData("mb:42", true, 42)]
+    [InlineData("hardcover:61176", false, 0)]
+    [InlineData("anilist:35851", false, 0)]
+    public void TryParseMangaBakaHeader_OnlyMatchesMangaBaka(string text, bool expectedResult, long expectedId)
+    {
+        var result = ExternalIdParser.TryParseMangaBakaHeader(text, out var id);
+        Assert.Equal(expectedResult, result);
+        Assert.Equal(expectedId, id);
+    }
+
+    [Theory]
+    [InlineData("hardcover:61176", true, "61176")]
+    [InlineData("anilist:35851", false, null)]
+    [InlineData("mangabaka:3391", false, null)]
+    public void TryParseHardcoverHeader_OnlyMatchesHardcover(string text, bool expectedResult, string? expectedId)
+    {
+        var result = ExternalIdParser.TryParseHardcoverHeader(text, out var id);
+        Assert.Equal(expectedResult, result);
+        Assert.Equal(expectedId, id);
+    }
 }

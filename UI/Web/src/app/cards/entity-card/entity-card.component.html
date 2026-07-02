@@ -26,6 +26,10 @@
       <!-- Overlay gradient -->
       <div class="card-overlay"></div>
 
+      @if (overlayBadge(); as badge) {
+        <span class="source-badge badge rounded-pill">{{ badge }}</span>
+      }
+
       @if (entityProgress.pagesRead === 0 && entityProgress.pages > 0) {
         <div class="badge-container">
           <div class="not-read-badge"></div>

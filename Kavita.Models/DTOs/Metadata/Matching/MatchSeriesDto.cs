@@ -13,4 +13,8 @@ public sealed record MatchSeriesDto
     /// Free form text to query for. Can be a url and ids will be parsed from it
     /// </summary>
     public string Query { get; set; }
+    /// <summary>
+    /// If the series should be consider a book (Hardcover)
+    /// </summary>
+    public bool IsStandAlone { get; set; }
 }

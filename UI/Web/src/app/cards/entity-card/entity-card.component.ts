@@ -154,6 +154,11 @@ export class EntityCardComponent<T> implements OnInit {
     this.config().formatBadgeFunc?.(this.data()) ?? null
   );
 
+  /** Overlay badge text shown over the cover (null hides it) */
+  protected readonly overlayBadge: Signal<string | null> = computed(() =>
+    this.config().overlayBadgeFunc?.(this.data(), this.entity()) ?? null
+  );
+
   /** Count badge value (0 or 1 hides it) */
   protected readonly count: Signal<number> = computed(() =>
     this.config().countFunc?.(this.data()) ?? 0

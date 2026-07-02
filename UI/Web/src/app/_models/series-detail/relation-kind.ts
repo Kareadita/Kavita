@@ -15,7 +15,9 @@ export enum RelationKind {
      */
     Parent = 12,
     Edition = 13,
-    Annual = 14
+    Annual = 14,
+    Cameo = 16,
+
 }
 
 const RelationKindsUnsorted = [
@@ -32,6 +34,7 @@ const RelationKindsUnsorted = [
     {text: 'Edition', value: RelationKind.Edition},
     {text: 'Doujinshi', value: RelationKind.Doujinshi},
     {text: 'Other', value: RelationKind.Other},
+    {text: 'Cameo', value: RelationKind.Cameo},
 ];
 
 export const RelationKinds = RelationKindsUnsorted.slice().sort((a, b) => a.text.localeCompare(b.text));

@@ -1,4 +1,5 @@
 import {ScrobbleProvider} from "../../_services/scrobbling.service";
+import {AgeRating} from "../metadata/age-rating";
 
 export enum PlusMediaFormat {
   Manga = 1,
@@ -31,6 +32,7 @@ export interface ExternalSeriesDetail {
   malId?: number | null;
   mangabakaId?: number | null;
   hardcoverId?: number | null;
+  isStandAlone: boolean;
   cbrId?: number | null;
   synonyms: Array<string>;
   plusMediaFormat: PlusMediaFormat;
@@ -51,4 +53,6 @@ export interface ExternalSeriesDetail {
   staff: Array<SeriesStaff>;
   tags: Array<MetadataTagDto>;
   provider: ScrobbleProvider;
+  ageRating: AgeRating;
+
 }

@@ -221,32 +221,12 @@ public class ScrobblingService : IScrobblingService
 
     private const SeriesIncludes ScrobbleSeriesIncludes = SeriesIncludes.Library | SeriesIncludes.ExternalMetadata | SeriesIncludes.Metadata;
 
-    // When adjusting these, also adjust in ManageScrobbleProvidersComponent in the UI
-    private static readonly IList<ScrobbleProvider> BookProviders = [
-        ScrobbleProvider.Hardcover
-    ];
-    private static readonly IList<ScrobbleProvider> LightNovelProviders =
-    [
-        ScrobbleProvider.AniList, ScrobbleProvider.Hardcover, ScrobbleProvider.MangaBaka, ScrobbleProvider.Mal
-    ];
-    private static readonly IList<ScrobbleProvider> ComicProviders = Array.Empty<ScrobbleProvider>();
-    private static readonly IList<ScrobbleProvider> MangaProviders = [
-        ScrobbleProvider.AniList, ScrobbleProvider.MangaBaka, ScrobbleProvider.Mal
-    ];
-
     private const string RateLimitHitErrorMessage = "Scrobbling rate limit hit";
     private const string UnknownSeriesErrorMessage = "Series cannot be matched for Scrobbling";
     private const string AccessTokenErrorMessage = "Access Token needs to be rotated to continue scrobbling";
     private const string InvalidKPlusLicenseErrorMessage = "Kavita+ subscription no longer active";
     private const string ReviewFailedErrorMessage = "Review was unable to be saved due to upstream requirements";
     private const string BadPayLoadErrorMessage = "Bad payload from Scrobble Provider";
-
-    /// <summary>
-    /// Everything but Kavita (internal)
-    /// </summary>
-    public static readonly List<ScrobbleProvider> AllScrobbleProviders =
-        Enum.GetValues<ScrobbleProvider>().Where(k => k != ScrobbleProvider.Kavita && k != ScrobbleProvider.Cbr).ToList();
-
 
     public ScrobblingService(IUnitOfWork unitOfWork, IEventHub eventHub, ILogger<ScrobblingService> logger,
         ILicenseService licenseService, ILocalizationService localizationService, IEmailService emailService,
@@ -405,16 +385,7 @@ public class ScrobblingService : IScrobblingService
 
     private static bool IsLibraryTypeSupported(ScrobbleProvider provider, LibraryType libraryType)
     {
-        return libraryType switch
-        {
-            LibraryType.Manga => MangaProviders.Contains(provider),
-            LibraryType.Comic => ComicProviders.Contains(provider),
-            LibraryType.Book => BookProviders.Contains(provider),
-            LibraryType.Image => false,
-            LibraryType.LightNovel => LightNovelProviders.Contains(provider),
-            LibraryType.ComicVine => ComicProviders.Contains(provider),
-            _ => throw new ArgumentOutOfRangeException(nameof(libraryType), libraryType, null)
-        };
+        return KavitaPlusConfiguration.ScrobbleProvidersForLibraryTypes.TryGetValue(libraryType, out var providers) && providers.Contains(provider);
     }
 
     private List<ScrobbleProvider> GetProvidersForScrobbleEvent(List<ScrobbleProvider>? scrobbleProviders,
@@ -449,7 +420,7 @@ public class ScrobblingService : IScrobblingService
             _ => throw new ArgumentOutOfRangeException(nameof(eventType), eventType, null)
         };
 
-        var providerCandidates = scrobbleProviders ?? AllScrobbleProviders;
+        var providerCandidates = scrobbleProviders ?? KavitaPlusConfiguration.AllInUseScrobbleProviders;
         List<ScrobbleProvider> providers = [];
 
         foreach (var provider in providerCandidates)
@@ -629,7 +600,7 @@ public class ScrobblingService : IScrobblingService
         var providers = GetProvidersForScrobbleEvent(null, ScrobbleEventType.ChapterRead, ctx);
         if (providers.Count == 0)
         {
-            _logger.LogDebug("Ignoring scrobble reading update on {SeriesId} - {ChapterId}, no providers matched", seriesId, chapterId);
+            _logger.LogTrace("Ignoring scrobble reading update on {SeriesId} - {ChapterId}, no providers matched", seriesId, chapterId);
             return;
         }
 
@@ -725,7 +696,7 @@ public class ScrobblingService : IScrobblingService
         var providers = GetProvidersForScrobbleEvent(scrobbleProviders, ScrobbleEventType.ChapterRead, ctx);
         if (providers.Count == 0)
         {
-            _logger.LogDebug("Ignoring scrobble reading update on {SeriesId} - chapters {ChapterIds}, no providers matched", series.Id, string.Join(", ", chapters.Select(c => c.Id)));
+            _logger.LogTrace("Ignoring scrobble reading update on {SeriesId} - chapters {ChapterIds}, no providers matched", series.Id, string.Join(", ", chapters.Select(c => c.Id)));
             return;
         }
 
@@ -846,24 +817,27 @@ public class ScrobblingService : IScrobblingService
         if (series.DontMatch)
         {
             _logger.LogInformation("Series {SeriesName} is marked don't match. Not scrobbling", series.Name);
-            await _auditService.LogScrobbleAsync(KavitaPlusEventType.ScrobbleEventSkipped, seriesId,
-                new AuditLogScrobbleParamsDto() {Provider = provider, ScrobbleEventType = eventType}, AuditStatus.Info, "series-dont-match", userId);
+            await _auditService.LogTemperedAsync(al => al.SeriesId == seriesId && al.UserId == userId, KavitaPlusAuditCategory.Scrobble,
+                KavitaPlusEventType.ScrobbleEventSkipped, AuditStatus.Info, AuditSubjectType.Series,
+                payload: new AuditLogScrobbleParamsDto() {Provider = provider, ScrobbleEventType = eventType}, seriesId: seriesId, error: "series-dont-match", userId: userId);
             return true;
         }
 
         if (await _unitOfWork.UserRepository.HasHoldOnSeries(userId, seriesId))
         {
             _logger.LogInformation("Series {SeriesName} is on AppUserId {AppUserId}'s hold list. Not scrobbling", series.Name, userId);
-            await _auditService.LogScrobbleAsync(KavitaPlusEventType.ScrobbleEventSkipped, seriesId,
-                new AuditLogScrobbleParamsDto() {Provider = provider, ScrobbleEventType = eventType}, AuditStatus.Info, "scrobble-hold-active", userId);
+            await _auditService.LogTemperedAsync(al => al.SeriesId == seriesId && al.UserId == userId, KavitaPlusAuditCategory.Scrobble,
+                KavitaPlusEventType.ScrobbleEventSkipped, AuditStatus.Info, AuditSubjectType.Series,
+                payload: new AuditLogScrobbleParamsDto() {Provider = provider, ScrobbleEventType = eventType}, seriesId: seriesId, error: "scrobble-hold-active", userId: userId);
             return true;
         }
 
         var library = series.Library ?? await _unitOfWork.LibraryRepository.GetLibraryForIdAsync(series.LibraryId);
         if (library is not {AllowScrobbling: true} || !ExternalMetadataService.IsPlusEligible(library.Type))
         {
-            await _auditService.LogScrobbleAsync(KavitaPlusEventType.ScrobbleEventSkipped, seriesId,
-                new AuditLogScrobbleParamsDto() {Provider = provider, ScrobbleEventType = eventType}, AuditStatus.Info, "library-scrobbling-disabled", userId);
+            await _auditService.LogTemperedAsync(al => al.SeriesId == seriesId && al.UserId == userId, KavitaPlusAuditCategory.Scrobble,
+                KavitaPlusEventType.ScrobbleEventSkipped, AuditStatus.Info, AuditSubjectType.Series,
+                payload: new AuditLogScrobbleParamsDto() {Provider = provider, ScrobbleEventType = eventType}, seriesId: seriesId, error: "library-scrobbling-disabled", userId: userId);
             return true;
         }
 
@@ -926,7 +900,7 @@ public class ScrobblingService : IScrobblingService
             ReviewEvents = reviewEvents,
             ReadStatusEvents = readStatusEvents,
             Decisions = CalculateNetWantToReadDecisions(addToWantToRead, removeWantToRead),
-            RateProfiles = AllScrobbleProviders.ToDictionary(
+            RateProfiles = KavitaPlusConfiguration.AllInUseScrobbleProviders.ToDictionary(
                 p => p,
                 p => _serviceProvider.GetRequiredKeyedService<IScrobbleProviderService>(p).RateProfile),
             License = (await _unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.LicenseKey, ct)).Value,
@@ -1405,8 +1379,8 @@ public class ScrobblingService : IScrobblingService
 
         foreach (var evt in eventList.Where(e => !CanProcessScrobbleEvent(e)))
         {
-            await _auditService.LogScrobbleAsync(KavitaPlusEventType.ScrobbleEventSkipped, evt.SeriesId,
-                ToAuditParams(evt), AuditStatus.Info, userId: evt.AppUserId, ct: ct);
+            await _auditService.LogTemperedAsync(al => al.SeriesId == evt.SeriesId, KavitaPlusAuditCategory.Scrobble,
+                KavitaPlusEventType.ScrobbleEventSkipped, AuditStatus.Info, AuditSubjectType.Series, evt.SeriesId, payload: ToAuditParams(evt), userId: evt.AppUserId, ct: ct);
         }
 
         foreach (var evt in eventList.Where(CanProcessScrobbleEvent))
@@ -1607,7 +1581,7 @@ public class ScrobblingService : IScrobblingService
                 throw new KavitaException("Access token is invalid");
             }
 
-            if (response.ErrorMessage.Contains("Unknown Series"))
+            if (response.ErrorMessage.IsUnknownSeriesError())
             {
                 // Log the Series name and Id in ScrobbleErrors
                 _logger.LogInformation("Kavita+ was unable to match the series: {SeriesName}", evt.Series.Name);
@@ -2061,16 +2035,8 @@ public class ScrobblingService : IScrobblingService
     private static bool CanProcessScrobbleEvent(ScrobbleEvent readEvent)
     {
         var userProviders = GetUserProviders(readEvent.AppUser);
-        switch (readEvent.Series.Library.Type)
-        {
-            case LibraryType.Manga when MangaProviders.Intersect(userProviders).Any():
-            case LibraryType.Comic when ComicProviders.Intersect(userProviders).Any():
-            case LibraryType.Book when BookProviders.Intersect(userProviders).Any():
-            case LibraryType.LightNovel when LightNovelProviders.Intersect(userProviders).Any():
-                return true;
-            default:
-                return false;
-        }
+        return KavitaPlusConfiguration.ScrobbleProvidersForLibraryTypes.TryGetValue(readEvent.Series.Library.Type, out var set)
+            && set.Intersect(userProviders).Any();
     }
 
     private static List<ScrobbleProvider> GetUserProviders(AppUser appUser)

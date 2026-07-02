@@ -120,6 +120,10 @@ public class Series : IEntityDate, IHasReadTimeEstimate, IHasCoverImage, IHasMet
     public int AniListId { get; set; }
     public long MalId { get; set; }
     public int HardcoverId { get; set; }
+    /// <summary>
+    /// True if <see cref="HardcoverId"/> points towards a book rather than a series. Must be set when matching externally
+    /// </summary>
+    public bool IsStandAlone { get; set; }
     public long MetronId { get; set; }
     public string ComicVineId { get; set; }
     public long MangaBakaId { get; set; } // TODO: Migrate this back to an int

@@ -1,4 +1,4 @@
-import { Pipe, PipeTransform } from '@angular/core';
+import {Pipe, PipeTransform} from '@angular/core';
 import {ScrobbleProvider} from "../../_services/scrobbling.service";
 import {translate} from "@jsverse/transloco";
 
@@ -12,7 +12,7 @@ export class ScrobbleProviderDescriptionPipe implements PipeTransform {
       case ScrobbleProvider.Kavita:
         return translate('scrobble-provider-description-pipe.kavita');
       case ScrobbleProvider.AniList:
-        return translate('scrobble-provider-description-pipe.ani-list');
+        return translate('scrobble-provider-description-pipe.anilist');
       case ScrobbleProvider.Mal:
         return translate('scrobble-provider-description-pipe.my-anime-list');
       case ScrobbleProvider.Cbr:
@@ -20,7 +20,7 @@ export class ScrobbleProviderDescriptionPipe implements PipeTransform {
       case ScrobbleProvider.Hardcover:
         return translate('scrobble-provider-description-pipe.hardcover');
       case ScrobbleProvider.MangaBaka:
-        return translate('scrobble-provider-description-pipe.manga-baka');
+        return translate('scrobble-provider-description-pipe.mangabaka');
     }
   }
 

@@ -352,10 +352,10 @@
                   <virtual-scroller #scroll [items]="combinedRecs()" [parentScroll]="scrollingBlock" [childHeight]="1">
                     <div class="card-container row g-0" #container>
                       @for(item of scroll.viewPortItems; let idx = $index; track idx) {
-                        @if (!item.hasOwnProperty('coverUrl')) {
-                          <app-series-card class="col-auto mt-2 mb-2" [series]="item" [previewOnClick]="true" />
+                        @if (asRecommendedSeries(item); as owned) {
+                          <app-series-card class="col-auto mt-2 mb-2" [series]="owned.series" [recommendationSource]="owned.source" [previewOnClick]="true" />
                         } @else {
-                          <app-external-series-card class="col-auto mt-2 mb-2" [previewOnClick]="true" [data]="item" />
+                          <app-external-series-card class="col-auto mt-2 mb-2" [previewOnClick]="true" [data]="asExternalSeries(item)" />
                         }
                       }
                     </div>

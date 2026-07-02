@@ -5,6 +5,7 @@ public record MetadataRequest
     public int? AniListId { get; set; }
     public long? MalId { get; set; }
     public int? HardcoverId { get; set; }
+    public string? Slug { get; set; }
     public int? CbrId { get; set; }
     public long? MangabakaId { get; set; }
     public string? GoogleBooksId { get; set; }
@@ -16,4 +17,9 @@ public record MetadataRequest
     /// </summary>
     /// <remarks>This is important for Hardcover matching</remarks>
     public bool IsStandAlone { get; set; }
+
+    public bool HasAnyIdsSet()
+    {
+        return AniListId.HasValue || MalId.HasValue || HardcoverId.HasValue || CbrId.HasValue || MangabakaId.HasValue || GoogleBooksId != null || MangaDexId != null || MetronId.HasValue || ComicVineId != null;
+    }
 }

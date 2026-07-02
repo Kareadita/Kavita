@@ -37,7 +37,7 @@
 
     @if (showBasicMetadata() && bm) {
       <section class="mb-4 ms-1">
-        <p class="kv-section-header">{{t('basic-metadata-title')}}</p>
+        <h4 class="kv-section-header">{{t('basic-metadata-title')}}</h4>
         <div class="label-card-grid">
           @if (bm.readingTime) {
             <app-label-card [label]="t('read-time-label')" [value]="bm.readingTime | readTime" />

@@ -2,7 +2,6 @@
 using System;
 using System.Collections.Generic;
 using Kavita.Models.DTOs.Recommendation;
-using Kavita.Models.DTOs.Scrobbling;
 using Kavita.Models.Entities.Enums;
 using Kavita.Models.Entities.Enums.KavitaPlus;
 
@@ -21,6 +20,7 @@ public sealed record ExternalSeriesDetailDto
     /// </summary>
     public int? CbrId { get; set; }
     public int? HardcoverId { get; set; }
+    public bool IsStandAlone { get; set; }
     public int? MangabakaId { get; set; }
     public IList<string> Synonyms { get; set; } = [];
     public PlusMediaFormat PlusMediaFormat { get; set; }
@@ -30,6 +30,13 @@ public sealed record ExternalSeriesDetailDto
     public IList<SeriesStaffDto> Staff { get; set; }
     public IList<MetadataTagDto> Tags { get; set; }
     public string? Summary { get; set; }
+
+    /// <summary>
+    /// Base age rating derived by the provider from its content rating. Kavita raises this via its own
+    /// tag/genre mappings, then applies the requesting user's age restriction before returning drill-down detail.
+    /// </summary>
+    /// <remarks>Unknown when the provider did not supply a mappable content rating.</remarks>
+    public AgeRating AgeRating { get; set; } = AgeRating.Unknown;
     public ScrobbleProvider Provider { get; set; } = ScrobbleProvider.AniList;
 
     public DateTime? StartDate { get; set; }
@@ -41,6 +48,7 @@ public sealed record ExternalSeriesDetailDto
     public int Volumes { get; set; }
     public IList<SeriesRelationship>? Relations { get; set; } = [];
     public IList<SeriesCharacter>? Characters { get; set; } = [];
+    public IList<RatingDto> Ratings { get; set; } = new List<RatingDto>();
 
     #region Comic Only
     public string? Publisher { get; set; }

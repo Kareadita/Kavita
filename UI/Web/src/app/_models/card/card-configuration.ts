@@ -46,6 +46,12 @@ export interface BaseCardConfiguration<T> {
   /** Returns the MangaFormat for the format badge, or null to hide */
   formatBadgeFunc?: (entity: T) => MangaFormat | null;
 
+  /**
+   * Returns already-localized text for an overlay badge shown in the top-left of the cover, or null to hide.
+   * Domain-agnostic: callers translate before returning (e.g. a recommendation source label).
+   */
+  overlayBadgeFunc?: (entity: T, wrapper: CardEntity) => string | null;
+
   /** Returns count for the badge (e.g., volume count, file count). 0 or 1 hides the badge. */
   countFunc?: (entity: T) => number;
 

@@ -33,6 +33,11 @@ public class HardcoverScrobbleProviderService(ILogger<HardcoverScrobbleProviderS
         evt.HardcoverId = chapter.HardcoverId;
     }
 
+    protected override bool HasRequiredIds(Chapter chapter)
+    {
+        return chapter.HardcoverId > 0;
+    }
+
     // Hardcover's rate limit is enforced per-user (~60 requests/min), so each user is tracked independently
     public override RateProfile RateProfile => new(
         BaseInterval: TimeSpan.FromSeconds(1),

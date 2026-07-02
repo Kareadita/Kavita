@@ -30,6 +30,11 @@ public class MangabakaScrobbleProviderService(ILogger<MangabakaScrobbleProviderS
         evt.MangabakaId = series.MangaBakaId;
     }
 
+    protected override bool HasRequiredIds(Series series)
+    {
+        return series.MangaBakaId > 0;
+    }
+
     // MangaBaka is technically unlimited and server-wide (API keys), but we still pace it to be polite (~80/min)
     public override RateProfile RateProfile => new(
         BaseInterval: TimeSpan.FromMilliseconds(500),

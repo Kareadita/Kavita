@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Kavita.Models.Builders;
 using Kavita.Models.Entities.Enums;
+using Kavita.Models.Entities.Enums.KavitaPlus;
 using Kavita.Models.Entities.Metadata;
 using Xunit;
 using Xunit.Abstractions;
@@ -33,6 +34,25 @@ public class ExternalSeriesMetadataRepositoryTests(ITestOutputHelper outputHelpe
         context.ExternalSeriesMetadata.Add(metadata);
         await context.SaveChangesAsync();
 
+        var result = await unitOfWork.ExternalSeriesMetadataRepository.NeedsDataRefresh(series.Id);
+
+        Assert.True(result);
+    }
+
+    [Fact]
+    public async Task NeedsDataRefresh_WhenNoMetadataRowExists_ReturnsTrue()
+    {
+        var (unitOfWork, context, _) = await CreateDatabase();
+
+        var lib = new LibraryBuilder("lib0")
+            .WithSeries(new SeriesBuilder("series0").Build())
+            .Build();
+        context.Library.Add(lib);
+        await context.SaveChangesAsync();
+
+        var series = context.Series.First(s => s.Name == "series0");
+
+        // No ExternalSeriesMetadata row exists for this series (e.g. freshly matched)
         var result = await unitOfWork.ExternalSeriesMetadataRepository.NeedsDataRefresh(series.Id);
 
         Assert.True(result);
@@ -199,7 +219,7 @@ public class ExternalSeriesMetadataRepositoryTests(ITestOutputHelper outputHelpe
         Assert.NotNull(result.Recommendations);
 
         Assert.Single(result.Recommendations.OwnedSeries);
-        Assert.Equal(ownedRecSeries.Name, result.Recommendations.OwnedSeries[0].Name);
+        Assert.Equal(ownedRecSeries.Name, result.Recommendations.OwnedSeries[0].Series.Name);
 
         Assert.Equal(2, result.Recommendations.ExternalSeries.Count());
         Assert.Contains(result.Recommendations.ExternalSeries, r => r.Name == "External Rec 1");
@@ -277,8 +297,78 @@ public class ExternalSeriesMetadataRepositoryTests(ITestOutputHelper outputHelpe
         Assert.NotNull(result);
         var owned = result.Recommendations?.OwnedSeries ?? [];
         Assert.Equal(3, owned.Count);
-        Assert.Equal("Alpha",   owned[0].Name);
-        Assert.Equal("Bravo",   owned[1].Name);
-        Assert.Equal("Charlie", owned[2].Name);
+        Assert.Equal("Alpha",   owned[0].Series.Name);
+        Assert.Equal("Bravo",   owned[1].Series.Name);
+        Assert.Equal("Charlie", owned[2].Series.Name);
+    }
+
+    [Fact]
+    public async Task GetSeriesDetailPlusDto_OwnedRecommendation_CarriesSource()
+    {
+        var (unitOfWork, context, _) = await CreateDatabase();
+
+        var lib = new LibraryBuilder("lib0")
+            .WithSeries(new SeriesBuilder("series0").Build())
+            .WithSeries(new SeriesBuilder("owned-rec-series").Build())
+            .Build();
+        context.Library.Add(lib);
+        await context.SaveChangesAsync();
+
+        var series         = context.Series.First(s => s.Name == "series0");
+        var ownedRecSeries = context.Series.First(s => s.Name == "owned-rec-series");
+
+        var metadata = new ExternalSeriesMetadata
+        {
+            SeriesId = series.Id,
+            ValidUntilUtc = DateTime.UtcNow.AddDays(7),
+            ExternalRecommendations = new List<ExternalRecommendation>
+            {
+                new() { SeriesId = ownedRecSeries.Id, Name = ownedRecSeries.Name, Provider = ScrobbleProvider.AniList, CoverUrl = string.Empty, Url = string.Empty, RecommendationSource = RecommendationSource.UserBased }
+            }
+        };
+        context.ExternalSeriesMetadata.Add(metadata);
+        await context.SaveChangesAsync();
+
+        var result = await unitOfWork.ExternalSeriesMetadataRepository.GetSeriesDetailPlusDto(series.Id);
+
+        Assert.NotNull(result);
+        Assert.Single(result.Recommendations!.OwnedSeries);
+        Assert.Equal(RecommendationSource.UserBased, result.Recommendations.OwnedSeries[0].Source);
+    }
+
+    [Fact]
+    public async Task GetSeriesDetailPlusDto_OwnedRecommendation_FromMultipleSources_UserBasedWins()
+    {
+        var (unitOfWork, context, _) = await CreateDatabase();
+
+        var lib = new LibraryBuilder("lib0")
+            .WithSeries(new SeriesBuilder("series0").Build())
+            .WithSeries(new SeriesBuilder("owned-rec-series").Build())
+            .Build();
+        context.Library.Add(lib);
+        await context.SaveChangesAsync();
+
+        var series         = context.Series.First(s => s.Name == "series0");
+        var ownedRecSeries = context.Series.First(s => s.Name == "owned-rec-series");
+
+        var metadata = new ExternalSeriesMetadata
+        {
+            SeriesId = series.Id,
+            ValidUntilUtc = DateTime.UtcNow.AddDays(7),
+            ExternalRecommendations = new List<ExternalRecommendation>
+            {
+                // Same series surfaced from both Similar and UserBased — UserBased should win
+                new() { SeriesId = ownedRecSeries.Id, Name = ownedRecSeries.Name, Provider = ScrobbleProvider.AniList, CoverUrl = string.Empty, Url = string.Empty, RecommendationSource = RecommendationSource.Similar },
+                new() { SeriesId = ownedRecSeries.Id, Name = ownedRecSeries.Name, Provider = ScrobbleProvider.AniList, CoverUrl = string.Empty, Url = string.Empty, RecommendationSource = RecommendationSource.UserBased }
+            }
+        };
+        context.ExternalSeriesMetadata.Add(metadata);
+        await context.SaveChangesAsync();
+
+        var result = await unitOfWork.ExternalSeriesMetadataRepository.GetSeriesDetailPlusDto(series.Id);
+
+        Assert.NotNull(result);
+        Assert.Single(result.Recommendations!.OwnedSeries);
+        Assert.Equal(RecommendationSource.UserBased, result.Recommendations.OwnedSeries[0].Source);
     }
 }

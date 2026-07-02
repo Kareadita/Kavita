@@ -142,7 +142,7 @@ public static class TagHelper
         {
             var normalizedTitle = tagName.ToNormalized();
 
-            if (existingTagSet.Contains(normalizedTitle)) continue;
+            if (!existingTagSet.Add(normalizedTitle)) continue;
 
             if (allTagsDict.TryGetValue(normalizedTitle, out var existingTag))
             {
@@ -156,6 +156,7 @@ public static class TagHelper
                     NormalizedTitle = normalizedTitle
                 };
                 handleAdd(newTag);
+                allTagsDict[normalizedTitle] = newTag;
             }
             isModified = true;
         }

@@ -23,9 +23,9 @@
       <div class="flex-grow-1 min-w-0">
         <div class="d-flex align-items-center gap-2 mb-1 flex-wrap">
           @if (entry().seriesId != null && entry().libraryId != null) {
-            <button class="series-link fw-semibold text-truncate btn-unstyled" (click)="navigateToSeries()">
+            <a [routerLink]="['/library', entry()!.libraryId, 'series', entry()!.seriesId]" class="series-link fw-semibold text-truncate btn-unstyled">
               {{entry().seriesName | truncate}}
-            </button>
+            </a>
           } @else {
             <span class="series-link fw-semibold text-truncate">{{(entityLabel() ?? t('system')) | truncate}}</span>
           }

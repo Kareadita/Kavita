@@ -8,6 +8,7 @@ import {LibraryType} from "../library/library";
 import {PageBookmark} from "../readers/page-bookmark";
 import {RelatedSeriesPair} from "../../_single-module/related-tab/related-tab.component";
 import {SeriesGroup} from "../series-group";
+import {RecommendationSource} from "../kavitaplus/recommendation-source.enum";
 
 /**
  * Discriminated union representing any entity that can be displayed as a card.
@@ -37,6 +38,8 @@ export interface SeriesCardEntity {
   relation?: RelationKind;
   /** UI-patched: Whether this card appears in the On Deck stream */
   isOnDeck?: boolean;
+  /** UI-patched: Why this series was recommended, when shown in a recommendations context */
+  recommendationSource?: RecommendationSource;
 }
 
 export interface CollectionCardEntity {

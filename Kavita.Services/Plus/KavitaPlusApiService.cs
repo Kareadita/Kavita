@@ -61,33 +61,6 @@ public class KavitaPlusApiService(ILogger<KavitaPlusApiService> logger, IUnitOfW
             .ReceiveJson<IList<ExternalSeriesMatchDto>>();
     }
 
-    public async Task<SeriesDetailPlusApiDto> GetSeriesDetailAsync(PlusSeriesRequestDto request, CancellationToken ct = default)
-    {
-        var license = (await unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.LicenseKey, ct)).Value;
-        var token = (await unitOfWork.UserRepository.GetDefaultAdminUser(ct: ct))
-            .ScrobbleProviders[ScrobbleProvider.AniList]
-            .AuthenticationToken;
-
-        return await (Configuration.KavitaPlusApiUrl + "/api/metadata/v2/series-detail")
-            .WithKavitaPlusHeaders(license, token)
-            .PostJsonAsync(request, cancellationToken: ct)
-            .ReceiveJson<SeriesDetailPlusApiDto>();
-    }
-
-    public async Task<ExternalSeriesDetailDto> GetSeriesDetailByIdAsync(ExternalMetadataIdsDto request,
-        CancellationToken ct = default)
-    {
-        var license = (await unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.LicenseKey, ct)).Value;
-        var token = (await unitOfWork.UserRepository.GetDefaultAdminUser(ct: ct))
-            .ScrobbleProviders[ScrobbleProvider.AniList]
-            .AuthenticationToken;
-
-        return await (Configuration.KavitaPlusApiUrl + "/api/metadata/v2/series-by-ids")
-            .WithKavitaPlusHeaders(license, token)
-            .PostJsonAsync(request, cancellationToken: ct)
-            .ReceiveJson<ExternalSeriesDetailDto>();
-    }
-
     public async Task<KPlusResult<SeriesDetailPlusApiDto?>> GetSeriesDetailV3Async(SeriesDetailRequestV3Dto request, CancellationToken ct = default)
     {
         try
@@ -98,6 +71,14 @@ public class KavitaPlusApiService(ILogger<KavitaPlusApiService> logger, IUnitOfW
                 .WithKavitaPlusHeaders(license)
                 .PostJsonAsync(request, cancellationToken: ct)
                 .ReceiveJson<KPlusResult<SeriesDetailPlusApiDto?>>();
+        }
+        catch (FlurlHttpException ex)
+        {
+            // Surface the response body (e.g. "Unknown Series", "Too many Requests") rather than the generic
+            // "Call failed with status code..." so callers can react to specific error markers.
+            var body = (await ex.GetResponseStringAsync() ?? string.Empty).Trim('"');
+            logger.LogError(ex, "There was an issue getting series detail from Kavita+ for Series ({SeriesName})", request.SeriesName);
+            return KPlusResult<SeriesDetailPlusApiDto?>.Failure(string.IsNullOrEmpty(body) ? ex.Message : body);
         }
         catch (Exception ex)
         {

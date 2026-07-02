@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using EasyCaching.Core;
@@ -19,6 +20,7 @@ using Kavita.Models.DTOs.Filtering.v2.Requests;
 using Kavita.Models.DTOs.Metadata.Matching;
 using Kavita.Models.DTOs.Recommendation;
 using Kavita.Models.DTOs.KavitaPlus.ExternalMetadata;
+using Kavita.Models.DTOs.KavitaPlus.Metadata;
 using Kavita.Models.DTOs.SeriesDetail;
 using Kavita.Models.Entities.Enums;
 using Kavita.Models.Entities.Enums.KavitaPlus;
@@ -27,6 +29,7 @@ using Kavita.Models.Extensions;
 using Kavita.Server.Attributes;
 using Kavita.Server.Extensions;
 using Kavita.Server.Helpers;
+using Kavita.Services.Helpers;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
@@ -527,29 +530,58 @@ public class SeriesController(
         return BadRequest(await localizationService.TranslateAsync(UserId, "generic-relationship"));
     }
 
+    /// <summary>
+    /// Returns external series metadata around a Given External Series
+    /// </summary>
+    /// <param name="aniListId"></param>
+    /// <param name="malId"></param>
+    /// <param name="mangaBakaId"></param>
+    /// <param name="seriesId"></param>
+    /// <returns></returns>
     [KPlus]
     [HttpGet("external-series-detail")]
-    [Authorize(Policy = PolicyGroups.AdminPolicy)]
-    public async Task<ActionResult<ExternalSeriesDto>> GetExternalSeriesInfo(int? aniListId, long? malId, int? seriesId)
+    public async Task<ActionResult<ExternalSeriesDetailDto>> GetExternalSeriesInfo(int? aniListId, long? malId, int? mangaBakaId, int? seriesId)
     {
         var ct = HttpContext.RequestAborted;
-        var cacheKey = $"{CacheKey}-{aniListId ?? 0}-{malId ?? 0}-{seriesId ?? 0}";
-        var results = await _externalSeriesCacheProvider.GetAsync<ExternalSeriesDto>(cacheKey, ct);
+        var cacheKey = $"{CacheKey}-{aniListId ?? 0}-{malId ?? 0}-{mangaBakaId ?? 0}-{seriesId ?? 0}";
+
+        ExternalSeriesDetailDto? ret;
+        var results = await _externalSeriesCacheProvider.GetAsync<ExternalSeriesDetailDto>(cacheKey, ct);
         if (results.HasValue)
         {
-            return Ok(results.Value);
+            ret = results.Value;
+        }
+        else
+        {
+            try
+            {
+                ret = await externalMetadataService.GetExternalSeriesDetail(aniListId, malId, mangaBakaId, seriesId, ct);
+                await _externalSeriesCacheProvider.SetAsync(cacheKey, ret, TimeSpan.FromMinutes(15), ct);
+            }
+            catch (Exception)
+            {
+                return BadRequest(await localizationService.TranslateAsync("generic-error"));
+            }
         }
 
-        try
+        if (ret == null) return BadRequest(await localizationService.TranslateAsync("generic-error"));
+
+        var user = await unitOfWork.UserRepository.GetUserByIdAsync(UserId, ct: ct);
+        var restriction = new Models.Entities.AgeRestriction
         {
-            var ret = await externalMetadataService.GetExternalSeriesDetail(aniListId, malId, seriesId, ct);
-            await _externalSeriesCacheProvider.SetAsync(cacheKey, ret, TimeSpan.FromMinutes(15), ct);
-            return Ok(ret);
-        }
-        catch (Exception)
+            AgeRating = user?.AgeRestriction ?? AgeRating.NotApplicable,
+            IncludeUnknowns = user?.AgeRestrictionIncludeUnknowns ?? true
+        };
+        var settings = await unitOfWork.SettingsRepository.GetMetadataSettingDto(ct);
+        var effectiveRating = RecommendationHelper.ComputeExternalAgeRating(ret.AgeRating,
+            ret.Genres ?? [], (ret.Tags ?? []).Select(t => t.Name), settings);
+
+        if (!RecommendationHelper.IsWithinAgeRestriction(effectiveRating, restriction))
         {
-            return BadRequest("Unable to load External Series details");
+            throw new KavitaNotFoundException(await localizationService.TranslateAsync("series-restricted-age-restriction"));
         }
+
+        return Ok(ret);
     }
 
     /// <summary>
@@ -579,7 +611,7 @@ public class SeriesController(
     public async Task<ActionResult<IList<ExternalSeriesMatchDto>>> MatchSeries(MatchSeriesDto dto)
     {
         var ct = HttpContext.RequestAborted;
-        var cacheKey = $"{MatchSeriesCacheKey}-{dto.SeriesId}-{dto.Query}";
+        var cacheKey = $"{MatchSeriesCacheKey}-{dto.SeriesId}-{dto.Query}-{dto.IsStandAlone}";
         var results = await _matchSeriesCacheProvider.GetAsync<IList<ExternalSeriesMatchDto>>(cacheKey, ct);
         if (results.HasValue && !environment.IsDevelopment())
         {
@@ -629,8 +661,8 @@ public class SeriesController(
     /// </summary>
     /// <param name="seriesId"></param>
     /// <returns></returns>
-    [HttpGet("match-info")]
     [KPlus]
+    [HttpGet("match-info")]
     [Authorize(Policy = PolicyGroups.AdminPolicy)]
     public async Task<ActionResult<MatchSeriesInfoDto>> GetExistingMatchInfo(int seriesId)
     {
@@ -641,33 +673,7 @@ public class SeriesController(
         var libraryType = series.Library.Type;
         var externalMetadata = series.ExternalSeriesMetadata;
 
-        // This is assuming v2 logic. Not sure if we will change how we match on V3 yet
-        var primaryProvider = Models.Entities.Enums.MetadataProvider.Mangabaka;
-        if (plusFormat is PlusMediaFormat.Comic)
-        {
-            primaryProvider = Models.Entities.Enums.MetadataProvider.ComicBookRoundup;
-        } else if (plusFormat is PlusMediaFormat.LightNovel)
-        {
-            primaryProvider = Models.Entities.Enums.MetadataProvider.Mangabaka;
-        } else if (plusFormat is PlusMediaFormat.Book)
-        {
-            primaryProvider = Models.Entities.Enums.MetadataProvider.Hardcover;
-        }
-
-        // We need provider derived from the primary id
-        MetadataProvider? provider = null;
-
-        // Set AniList as MangaBaka since the next update will fix this
-        if (series.MangaBakaId > 0 || series.AniListId > 0)
-        {
-            provider = Models.Entities.Enums.MetadataProvider.Mangabaka;
-        } else if (series.HardcoverId > 0)
-        {
-            provider = Models.Entities.Enums.MetadataProvider.Hardcover;
-        } else if (series.CbrId > 0)
-        {
-            provider = Models.Entities.Enums.MetadataProvider.ComicBookRoundup;
-        }
+        var provider = externalMetadata?.Provider;
 
         return Ok(new MatchSeriesInfoDto
         {
@@ -681,7 +687,7 @@ public class SeriesController(
             LibraryType = libraryType,
             PlusMediaFormat = plusFormat,
             MatchedProvider = provider,
-            PrimaryProvider = primaryProvider,
+            PrimaryProvider = series.Library.MetadataProvider,
             SeriesFormat = series.Format
         });
     }

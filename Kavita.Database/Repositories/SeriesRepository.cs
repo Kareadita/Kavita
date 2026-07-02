@@ -22,6 +22,7 @@ using Kavita.Models.DTOs.Filtering.v2;
 using Kavita.Models.DTOs.Filtering.v2.Requests;
 using Kavita.Models.DTOs.Filtering.v2.SortFields;
 using Kavita.Models.DTOs.Filtering.v2.SortOptions;
+using Kavita.Models.DTOs.KavitaPlus.ExternalMetadata;
 using Kavita.Models.DTOs.KavitaPlus.Metadata;
 using Kavita.Models.DTOs.KavitaPlus.Scrobble;
 using Kavita.Models.DTOs.Metadata;
@@ -208,11 +209,17 @@ public class SeriesRepository(DataContext context, IMapper mapper) : ISeriesRepo
     }
 
     public async Task<SearchResultGroupDto> SearchSeriesAsync(int userId, bool isAdmin, IList<int> libraryIds,
-        string searchQuery, bool includeChapterAndFiles = true, CancellationToken ct = default)
+        SearchDto dto, CancellationToken ct = default)
     {
         const int maxRecords = 15;
+        var searchQuery = dto.Query;
+        var hasQuery = !string.IsNullOrEmpty(searchQuery);
         var searchQueryNormalized = searchQuery.ToNormalized();
         var userRating = await context.AppUser.GetUserAgeRestriction(userId, ct: ct);
+
+        var aniListId = dto.AniListId ?? 0;
+        var mangaBakaId = dto.MangaBakaId ?? 0;
+        var hardcoverId = dto.HardcoverId ?? 0;
 
         var justYear = _yearRegex.Match(searchQuery).Value;
         var hasYearInQuery = !string.IsNullOrEmpty(justYear);
@@ -224,29 +231,41 @@ public class SeriesRepository(DataContext context, IMapper mapper) : ISeriesRepo
             .RestrictAgainstAgeRestriction(userRating);
 
         #region Independent Queries
-        var librariesTask = context.Library
-            .Search(searchQuery, userId, libraryIds)
-            .Take(maxRecords)
-            .OrderBy(l => l.Name.ToLower())
-            .ProjectTo<LibraryDto>(mapper.ConfigurationProvider)
-            .ToListAsync(ct);
+        var librariesTask = dto.HasShortcode
+            ? Task.FromResult(new List<LibraryDto>())
+            : context.Library
+                .Search(searchQuery, userId, libraryIds)
+                .Take(maxRecords)
+                .OrderBy(l => l.Name.ToLower())
+                .ProjectTo<LibraryDto>(mapper.ConfigurationProvider)
+                .ToListAsync(ct);
 
-        var annotationsTask = context.AppUserAnnotation
-            .Where(a => a.AppUserId == userId &&
-                        (EF.Functions.Like(a.Comment, $"%{searchQueryNormalized}%") ||
-                         EF.Functions.Like(a.Context, $"%{searchQueryNormalized}%")))
-            .Take(maxRecords)
-            .OrderBy(l => l.CreatedUtc)
-            .ProjectTo<AnnotationDto>(mapper.ConfigurationProvider)
-            .ToListAsync(ct);
+        var annotationsTask = dto.HasShortcode
+            ? Task.FromResult(new List<AnnotationDto>())
+            : context.AppUserAnnotation
+                .Where(a => a.AppUserId == userId &&
+                            (EF.Functions.Like(a.Comment, $"%{searchQueryNormalized}%") ||
+                             EF.Functions.Like(a.Context, $"%{searchQueryNormalized}%")))
+                .Take(maxRecords)
+                .OrderBy(l => l.CreatedUtc)
+                .ProjectTo<AnnotationDto>(mapper.ConfigurationProvider)
+                .ToListAsync(ct);
         #endregion
 
         var seriesTask = baseSeriesQuery
-            .Where(s =>
+            .WhereIf(hasQuery, s =>
                 (EF.Functions.Like(s.Name, $"%{searchQuery}%")
                  || (s.OriginalName != null && EF.Functions.Like(s.OriginalName, $"%{searchQuery}%"))
                  || (s.LocalizedName != null && EF.Functions.Like(s.LocalizedName, $"%{searchQuery}%"))
                  || EF.Functions.Like(s.NormalizedName, $"%{searchQueryNormalized}%")))
+            .WhereIf(dto.HasShortcode, s =>
+                (aniListId > 0 && s.AniListId == aniListId)
+                || (mangaBakaId > 0 && s.MangaBakaId == mangaBakaId)
+                || (hardcoverId > 0 &&
+                    // Series holds the Hardcover series id; chapters/volumes hold the Hardcover book id
+                    (s.HardcoverId == hardcoverId
+                     || s.Volumes.Any(v => v.HardcoverId == hardcoverId)
+                     || s.Volumes.Any(v => v.Chapters.Any(c => c.HardcoverId == hardcoverId)))))
             .WhereIf(hasYearInQuery, s =>
                 s.Metadata.ReleaseYear == yearComparison
                 || s.Name.Contains(justYear)
@@ -262,72 +281,84 @@ public class SeriesRepository(DataContext context, IMapper mapper) : ISeriesRepo
             .ProjectTo<SearchResultDto>(mapper.ConfigurationProvider)
             .ToListAsync(ct);
 
-        var readingListsTask = context.ReadingList
-            .Search(searchQuery, userId, userRating)
-            .Take(maxRecords)
-            .ProjectTo<ReadingListDto>(mapper.ConfigurationProvider)
-            .ToListAsync(ct);
+        var readingListsTask = dto.HasShortcode
+            ? Task.FromResult(new List<ReadingListDto>())
+            : context.ReadingList
+                .Search(searchQuery, userId, userRating)
+                .Take(maxRecords)
+                .ProjectTo<ReadingListDto>(mapper.ConfigurationProvider)
+                .ToListAsync(ct);
 
-        var collectionsTask = context.AppUserCollection
-            .Search(searchQuery, userId, userRating)
-            .Take(maxRecords)
-            .OrderBy(c => c.NormalizedTitle)
-            .ProjectTo<AppUserCollectionDto>(mapper.ConfigurationProvider)
-            .ToListAsync(ct);
+        var collectionsTask = dto.HasShortcode
+            ? Task.FromResult(new List<AppUserCollectionDto>())
+            : context.AppUserCollection
+                .Search(searchQuery, userId, userRating)
+                .Take(maxRecords)
+                .OrderBy(c => c.NormalizedTitle)
+                .ProjectTo<AppUserCollectionDto>(mapper.ConfigurationProvider)
+                .ToListAsync(ct);
 
-        var bookmarksTask = context.AppUserBookmark
-            .Where(b => b.AppUserId == userId)
-            .Where(b => libraryIds.Contains(b.Series.LibraryId))
-            .Where(b => EF.Functions.Like(b.Series.Name, $"%{searchQuery}%") ||
-                        (b.Series.OriginalName != null && EF.Functions.Like(b.Series.OriginalName, $"%{searchQuery}%")) ||
-                        (b.Series.LocalizedName != null && EF.Functions.Like(b.Series.LocalizedName, $"%{searchQuery}%")))
-            .GroupBy(b => new { b.SeriesId, b.Series.LibraryId, b.Series.Name, b.Series.LocalizedName, b.Series.NormalizedName })
-            .OrderBy(g => g.Key.NormalizedName.Length)
-            .ThenBy(g => g.Key.NormalizedName)
-            .Select(g => new BookmarkSearchResultDto
-            {
-                SeriesName = g.Key.Name,
-                LocalizedSeriesName = g.Key.LocalizedName,
-                LibraryId = g.Key.LibraryId,
-                SeriesId = g.Key.SeriesId,
-                ChapterId = g.First().ChapterId,
-                VolumeId = g.First().VolumeId
-            })
-            .Take(maxRecords)
-            .ToListAsync(ct);
+        var bookmarksTask = dto.HasShortcode
+            ? Task.FromResult(new List<BookmarkSearchResultDto>())
+            : context.AppUserBookmark
+                .Where(b => b.AppUserId == userId)
+                .Where(b => libraryIds.Contains(b.Series.LibraryId))
+                .Where(b => EF.Functions.Like(b.Series.Name, $"%{searchQuery}%") ||
+                            (b.Series.OriginalName != null && EF.Functions.Like(b.Series.OriginalName, $"%{searchQuery}%")) ||
+                            (b.Series.LocalizedName != null && EF.Functions.Like(b.Series.LocalizedName, $"%{searchQuery}%")))
+                .GroupBy(b => new { b.SeriesId, b.Series.LibraryId, b.Series.Name, b.Series.LocalizedName, b.Series.NormalizedName })
+                .OrderBy(g => g.Key.NormalizedName.Length)
+                .ThenBy(g => g.Key.NormalizedName)
+                .Select(g => new BookmarkSearchResultDto
+                {
+                    SeriesName = g.Key.Name,
+                    LocalizedSeriesName = g.Key.LocalizedName,
+                    LibraryId = g.Key.LibraryId,
+                    SeriesId = g.Key.SeriesId,
+                    ChapterId = g.First().ChapterId,
+                    VolumeId = g.First().VolumeId
+                })
+                .Take(maxRecords)
+                .ToListAsync(ct);
 
         var seriesIdsSubquery = baseSeriesQuery.Select(s => s.Id);
 
-        var personsTask = context.Person
-            .Where(p => context.SeriesMetadataPeople
-                .Any(smp => smp.PersonId == p.Id &&
-                            seriesIdsSubquery.Contains(smp.SeriesMetadata.SeriesId) &&
-                            (EF.Functions.Like(p.NormalizedName, $"%{searchQueryNormalized}%")
-                             || p.Aliases.Any(a => EF.Functions.Like(a.NormalizedAlias, $"%{searchQueryNormalized}%"))
-                            )))
-            .OrderBy(p => p.NormalizedName.Length)
-            .ThenBy(p => p.NormalizedName)
-            .Take(maxRecords)
-            .ProjectTo<PersonDto>(mapper.ConfigurationProvider)
-            .ToListAsync(ct);
+        var personsTask = dto.HasShortcode
+            ? Task.FromResult(new List<PersonDto>())
+            : context.Person
+                .Where(p => context.SeriesMetadataPeople
+                    .Any(smp => smp.PersonId == p.Id &&
+                                seriesIdsSubquery.Contains(smp.SeriesMetadata.SeriesId) &&
+                                (EF.Functions.Like(p.NormalizedName, $"%{searchQueryNormalized}%")
+                                 || p.Aliases.Any(a => EF.Functions.Like(a.NormalizedAlias, $"%{searchQueryNormalized}%"))
+                                )))
+                .OrderBy(p => p.NormalizedName.Length)
+                .ThenBy(p => p.NormalizedName)
+                .Take(maxRecords)
+                .ProjectTo<PersonDto>(mapper.ConfigurationProvider)
+                .ToListAsync(ct);
 
-        var genresTask = context.Genre
-            .Where(g => context.SeriesMetadata
-                            .Any(sm => seriesIdsSubquery.Contains(sm.SeriesId) &&
-                                       sm.Genres.Any(sg => sg.Id == g.Id)) &&
-                        EF.Functions.Like(g.NormalizedTitle, $"%{searchQueryNormalized}%"))
-            .Take(maxRecords)
-            .ProjectTo<GenreTagDto>(mapper.ConfigurationProvider)
-            .ToListAsync(ct);
+        var genresTask = dto.HasShortcode
+            ? Task.FromResult(new List<GenreTagDto>())
+            : context.Genre
+                .Where(g => context.SeriesMetadata
+                                .Any(sm => seriesIdsSubquery.Contains(sm.SeriesId) &&
+                                           sm.Genres.Any(sg => sg.Id == g.Id)) &&
+                            EF.Functions.Like(g.NormalizedTitle, $"%{searchQueryNormalized}%"))
+                .Take(maxRecords)
+                .ProjectTo<GenreTagDto>(mapper.ConfigurationProvider)
+                .ToListAsync(ct);
 
-        var tagsTask = context.Tag
-            .Where(t => context.SeriesMetadata
-                            .Any(sm => seriesIdsSubquery.Contains(sm.SeriesId) &&
-                                       sm.Tags.Any(st => st.Id == t.Id)) &&
-                        EF.Functions.Like(t.NormalizedTitle, $"%{searchQueryNormalized}%"))
-            .Take(maxRecords)
-            .ProjectTo<TagDto>(mapper.ConfigurationProvider)
-            .ToListAsync(ct);
+        var tagsTask = dto.HasShortcode
+            ? Task.FromResult(new List<TagDto>())
+            : context.Tag
+                .Where(t => context.SeriesMetadata
+                                .Any(sm => seriesIdsSubquery.Contains(sm.SeriesId) &&
+                                           sm.Tags.Any(st => st.Id == t.Id)) &&
+                            EF.Functions.Like(t.NormalizedTitle, $"%{searchQueryNormalized}%"))
+                .Take(maxRecords)
+                .ProjectTo<TagDto>(mapper.ConfigurationProvider)
+                .ToListAsync(ct);
 
         // Run separate DB queries in parallel
         await Task.WhenAll(
@@ -349,15 +380,18 @@ public class SeriesRepository(DataContext context, IMapper mapper) : ISeriesRepo
             Chapters = []
         };
 
-        if (includeChapterAndFiles)
+        // Chapters/Files have no external id of their own except the Hardcover book id, so on a shortcode
+        // lookup they only run for hardcover: (matching c.HardcoverId), never for the series-level codes
+        if (dto.IncludeChapterAndFiles && (hasQuery || hardcoverId > 0))
         {
             // Use EXISTS subquery pattern instead of loading IDs
             var chaptersQuery = context.Chapter
                 .Where(c => c.Volume.Series.LibraryId > 0 && // Ensure navigation works
                             libraryIds.Contains(c.Volume.Series.LibraryId))
-                .Where(c => EF.Functions.Like(c.TitleName, $"%{searchQuery}%")
+                .WhereIf(hasQuery, c => EF.Functions.Like(c.TitleName, $"%{searchQuery}%")
                             || EF.Functions.Like(c.ISBN, $"%{searchQuery}%")
-                            || EF.Functions.Like(c.Range, $"%{searchQuery}%"));
+                            || EF.Functions.Like(c.Range, $"%{searchQuery}%"))
+                .WhereIf(hardcoverId > 0, c => c.HardcoverId == hardcoverId);
 
             // Apply age restriction via series
             chaptersQuery = chaptersQuery
@@ -370,7 +404,8 @@ public class SeriesRepository(DataContext context, IMapper mapper) : ISeriesRepo
                 .ProjectTo<ChapterDto>(mapper.ConfigurationProvider)
                 .ToListAsync(ct);
 
-            if (isAdmin)
+            // Files only match on file path, which is meaningless for a shortcode lookup
+            if (isAdmin && hasQuery)
             {
                 result.Files = await context.MangaFile
                     .Where(f => EF.Functions.Like(f.FilePath, $"%{searchQuery}%"))
@@ -599,7 +634,7 @@ public class SeriesRepository(DataContext context, IMapper mapper) : ISeriesRepo
         return await PagedList<SeriesDto>.CreateAsync(retSeries, userParams.PageNumber, userParams.PageSize, ct);
     }
 
-    public async Task<PlusSeriesRequestDto?> GetPlusSeriesDtoAsync(int seriesId, CancellationToken ct = default)
+    public async Task<SeriesDetailRequestV3Dto?> GetKavitaPlusSeriesDetailRequestV3Dto(int seriesId, CancellationToken ct = default)
     {
 
         // I need to check Weblinks when AniListId/MalId is already set in ExternalSeries
@@ -607,24 +642,32 @@ public class SeriesRepository(DataContext context, IMapper mapper) : ISeriesRepo
         var result = await context.Series
             .Where(s => s.Id == seriesId)
             .Include(s => s.ExternalSeriesMetadata)
-            .Select(series => new PlusSeriesRequestDto()
+            .Select(series => new SeriesDetailRequestV3Dto
             {
-                MediaFormat = series.Library.Type.ConvertToPlusMediaFormat(series.Format),
+                Provider = series.Library.MetadataProvider,
+                Format = series.Library.Type.ConvertToPlusMediaFormat(series.Format),
                 SeriesName = series.Name,
-                AltSeriesName = series.LocalizedName,
-                // TODO: Refactor this to check from ExternalMetadataIds first then ExternalSeriesMetadata. Weblink parsing is pointless as it updates in externalMetadata
-                AniListId = series.ExternalSeriesMetadata.AniListId != 0
-                    ? series.ExternalSeriesMetadata.AniListId
-                    : ExternalIdParser.GetAniListId(series.Metadata.WebLinks),
-                MalId = series.ExternalSeriesMetadata.MalId != 0
-                    ? series.ExternalSeriesMetadata.MalId
-                    : ExternalIdParser.GetMalId(series.Metadata.WebLinks),
-                CbrId = series.ExternalSeriesMetadata.CbrId,
+                AlternativeNames = new List<string> { series.LocalizedName },
+                AniListId = series.AniListId != 0
+                    ? series.AniListId
+                    : series.ExternalSeriesMetadata.AniListId != 0
+                ? series.ExternalSeriesMetadata.AniListId
+                : ExternalIdParser.GetAniListId(series.Metadata.WebLinks),
+                MalId = series.MalId != 0
+                    ? series.MalId
+                    : series.ExternalSeriesMetadata.MalId != 0
+                ? series.ExternalSeriesMetadata.MalId
+                : ExternalIdParser.GetMalId(series.Metadata.WebLinks),
+                CbrId = series.CbrId,
+                // TODO: Remove GoogleBooks and MangaDex, we don't use them anymore
                 GoogleBooksId = !string.IsNullOrEmpty(series.ExternalSeriesMetadata.GoogleBooksId)
                     ? series.ExternalSeriesMetadata.GoogleBooksId
                     : ExternalIdParser.GetGoogleBooksId(series.Metadata.WebLinks),
-                MangabakaId = (int?) series.MangaBakaId,
                 MangaDexId = ExternalIdParser.GetMangaDexId(series.Metadata.WebLinks),
+
+                MangabakaId = (int?) series.MangaBakaId,
+                HardcoverId = series.HardcoverId,
+                IsStandAlone = series.IsStandAlone,
                 VolumeCount = series.Volumes.Count,
                 ChapterCount = series.Volumes.SelectMany(v => v.Chapters).Count(c => !c.IsSpecial),
                 Year = series.Metadata.ReleaseYear
@@ -1312,70 +1355,46 @@ public class SeriesRepository(DataContext context, IMapper mapper) : ISeriesRepo
 #nullable enable
     }
 
-    public async Task<Series?> GetSeriesByAnyNameAsync(string seriesName, string localizedName, IList<MangaFormat> formats,
-        int userId, int? aniListId = null, SeriesIncludes includes = SeriesIncludes.None, CancellationToken ct = default)
+    public async Task<Series?> GetSeriesFromExternalMetadata(IList<string> seriesNames, IList<MangaFormat> formats,
+        int userId, ExternalMetadataIdsDto? dto = null, SeriesIncludes includes = SeriesIncludes.None, CancellationToken ct = default)
     {
         var libraryIds = context.AppUser.GetLibraryIdsForUser(userId);
-        var normalizedSeries = seriesName.ToNormalized();
-        var normalizedLocalized = localizedName.ToNormalized();
 
-        var query = context.Series
-            .Where(s => libraryIds.Contains(s.LibraryId))
-            .Where(s => formats.Contains(s.Format));
+        // Prioritize direct id matches on ExternalSeriesMetadata
+        var aniListId = dto?.AniListId ?? 0;
+        var malId = dto?.MalId ?? 0;
+        var mangaBakaId = dto?.MangabakaId ?? 0;
 
-        if (aniListId is > 0)
+        if (aniListId > 0 || malId > 0 || mangaBakaId > 0)
         {
-            // If AniList ID is provided, override name checks
-            query = query.Where(s => s.ExternalSeriesMetadata.AniListId == aniListId.Value);
-        }
-        else
-        {
-            // Otherwise, use name checks
-            query = query.Where(s =>
-                s.NormalizedName.Equals(normalizedSeries)
-                || s.NormalizedName.Equals(normalizedLocalized)
-                || s.NormalizedLocalizedName.Equals(normalizedSeries)
-                || (!string.IsNullOrEmpty(normalizedLocalized) && s.NormalizedLocalizedName.Equals(normalizedLocalized))
-                || (s.OriginalName != null && s.OriginalName.Equals(seriesName))
-            );
+            var byId = await context.Series
+                .Where(s => libraryIds.Contains(s.LibraryId))
+                .Where(s => formats.Contains(s.Format))
+                .Where(s =>
+                    (aniListId > 0 && s.ExternalSeriesMetadata.AniListId == aniListId)
+                    || (malId > 0 && s.ExternalSeriesMetadata.MalId == malId)
+                    || (mangaBakaId > 0 && s.ExternalSeriesMetadata.MangabakaId == mangaBakaId))
+                .Includes(includes)
+                .FirstOrDefaultAsync(ct);
+
+            if (byId != null) return byId;
         }
 
-        return await query
-            .Includes(includes)
-            .FirstOrDefaultAsync(ct);
-    }
+        // Fallback to a name lookup against series.Name, LocalizedName, OriginalName. Names are matched against the
+        // normalized columns, which strip punctuation/whitespace - so "Series - Sub" and "Series: Sub" collapse to the
+        // same value and match.
+        var names = seriesNames.Where(s => !string.IsNullOrEmpty(s)).Distinct().ToList();
+        if (names.Count == 0) return null;
 
-
-    public async Task<Series?> GetSeriesByAnyNameAsync(IList<string> names, IList<MangaFormat> formats,
-        int userId, int? aniListId = null, SeriesIncludes includes = SeriesIncludes.None, CancellationToken ct = default)
-    {
-        var libraryIds = context.AppUser.GetLibraryIdsForUser(userId);
-        names = names.Where(s => !string.IsNullOrEmpty(s)).Distinct().ToList();
         var normalizedNames = names.Select(s => s.ToNormalized()).ToList();
 
-
-        var query = context.Series
+        return await context.Series
             .Where(s => libraryIds.Contains(s.LibraryId))
-            .Where(s => formats.Contains(s.Format));
-
-        if (aniListId is > 0)
-        {
-            // If AniList ID is provided, override name checks
-            query = query.Where(s => s.ExternalSeriesMetadata.AniListId == aniListId.Value ||
-                                     normalizedNames.Contains(s.NormalizedName)
-                                     || normalizedNames.Contains(s.NormalizedLocalizedName)
-                                     || names.Contains(s.OriginalName));
-        }
-        else
-        {
-            // Otherwise, use name checks
-            query = query.Where(s =>
+            .Where(s => formats.Contains(s.Format))
+            .Where(s =>
                 normalizedNames.Contains(s.NormalizedName)
                 || normalizedNames.Contains(s.NormalizedLocalizedName)
-                || names.Contains(s.OriginalName));
-        }
-
-        return await query
+                || names.Contains(s.OriginalName))
             .Includes(includes)
             .FirstOrDefaultAsync(ct);
     }
@@ -1479,7 +1498,8 @@ public class SeriesRepository(DataContext context, IMapper mapper) : ISeriesRepo
                 .AsNoTracking()
                 .ProjectToWithProgress<Series, SeriesDto>(mapper.ConfigurationProvider, userId)
                 .ToListAsync(ct),
-            Editions = await GetRelatedSeriesQuery(userId, seriesId, usersSeriesIds, RelationKind.Edition, userRating, ct)
+            Editions = await GetRelatedSeriesQuery(userId, seriesId, usersSeriesIds, RelationKind.Edition, userRating, ct),
+            Cameos = await GetRelatedSeriesQuery(userId, seriesId, usersSeriesIds, RelationKind.Cameo, userRating, ct)
         };
     }
 
@@ -1583,8 +1603,8 @@ public class SeriesRepository(DataContext context, IMapper mapper) : ISeriesRepo
     /// Uses multiple names to find a match against a series. If not, returns null.
     /// </summary>
     /// <remarks>This does not restrict to the user at all. That is handled at the API level.</remarks>
-    public async Task<SeriesDto?> GetSeriesDtoByNamesAndMetadataIdsAsync(IEnumerable<string> names, LibraryType libraryType,
-        string aniListUrl, string malUrl, CancellationToken ct = default)
+    public async Task<SeriesDto?> GetSeriesDtoByNamesAndMetadataIdsAsync(IEnumerable<string> names,
+        LibraryType libraryType, MetadataRequest metadataRequest, CancellationToken ct = default)
     {
         var libraryIds = await context.Library
             .Where(lib => lib.Type == libraryType)
@@ -1593,14 +1613,18 @@ public class SeriesRepository(DataContext context, IMapper mapper) : ISeriesRepo
 
         var normalizedNames = names.Select(n => n.ToNormalized()).ToList();
         SeriesDto? result = null;
-        if (!string.IsNullOrEmpty(aniListUrl) || !string.IsNullOrEmpty(malUrl))
+        if (metadataRequest.HasAnyIdsSet())
         {
-            // default: I can likely work AniList and MalIds from ExternalSeriesMetadata in here
-            result =  await context.Series
-                .Where(s => !string.IsNullOrEmpty(s.Metadata.WebLinks))
-                .Where(s => libraryIds.Contains(s.Library.Id))
-                .WhereIf(!string.IsNullOrEmpty(aniListUrl), s => s.Metadata.WebLinks.Contains(aniListUrl))
-                .WhereIf(!string.IsNullOrEmpty(malUrl), s => s.Metadata.WebLinks.Contains(malUrl))
+            result = await context.Series
+                .Where(s =>
+                    (metadataRequest.AniListId.HasValue && s.AniListId == metadataRequest.AniListId) ||
+                    (metadataRequest.MalId.HasValue && s.MalId == metadataRequest.MalId) ||
+                    (metadataRequest.MangabakaId.HasValue && s.MangaBakaId == metadataRequest.MangabakaId) ||
+                    (metadataRequest.HardcoverId != null && !metadataRequest.IsStandAlone
+                                                         && s.HardcoverId == metadataRequest.HardcoverId) ||
+                    (metadataRequest.HardcoverId != null && metadataRequest.IsStandAlone
+                                                         && s.Volumes.Any(v => v.Chapters.Any(c => c.HardcoverId == metadataRequest.HardcoverId)))
+                )
                 .ProjectTo<SeriesDto>(mapper.ConfigurationProvider)
                 .AsSplitQuery()
                 .FirstOrDefaultAsync(ct);

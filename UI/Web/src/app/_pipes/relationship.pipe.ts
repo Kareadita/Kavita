@@ -41,6 +41,8 @@ export class RelationshipPipe implements PipeTransform {
         return this.translocoService.translate('relationship-pipe.edition');
       case RelationKind.Annual:
         return this.translocoService.translate('relationship-pipe.annual');
+      case RelationKind.Cameo:
+        return this.translocoService.translate('relationship-pipe.cameo');
       default:
         return '';
     }
