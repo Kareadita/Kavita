@@ -15,6 +15,7 @@ using Kavita.Models.DTOs.Metadata.Browse;
 using Kavita.Models.DTOs.Person;
 using Kavita.Models.DTOs.ReadingLists;
 using Kavita.Models.DTOs.SeriesDetail;
+using Kavita.Models.Entities;
 using Kavita.Models.Entities.Enums;
 using Kavita.Models.Entities.Enums.Audit;
 using Kavita.Server.Extensions;
@@ -269,10 +270,14 @@ public class MetadataController(IUnitOfWork unitOfWork, IExternalMetadataService
                 .Select(s => { s.Series = seriesById[s.Series.Id]; return s; })
                 .ToList();
 
-            if (!User.IsInRole(PolicyConstants.AdminRole))
+            // Ensure non-admin's don't see anything about their AgeRating RBS
+            var restriction = new AgeRestriction
             {
-                ret.Recommendations.ExternalSeries = [];
-            }
+                AgeRating = user.AgeRestriction,
+                IncludeUnknowns = user.AgeRestrictionIncludeUnknowns
+            };
+            ret.Recommendations.ExternalSeries =
+                RecommendationHelper.FilterExternalRecommendations(ret.Recommendations.ExternalSeries, restriction);
         }
 
         if (ret?.Recommendations != null && user != null)

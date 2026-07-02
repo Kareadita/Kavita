@@ -24,4 +24,10 @@ public sealed record ExternalSeriesDto
     /// Why this series was recommended (Similar vs Personalized), surfaced as a badge in the UI.
     /// </summary>
     public RecommendationSource RecommendationSource { get; set; }
+
+    /// <summary>
+    /// The effective age rating for this recommendation, used to filter it against the requesting user's
+    /// age restriction. Unknown/indeterminate ratings are stored as the most restrictive value (fail closed).
+    /// </summary>
+    public AgeRating AgeRating { get; set; } = AgeRating.Unknown;
 }

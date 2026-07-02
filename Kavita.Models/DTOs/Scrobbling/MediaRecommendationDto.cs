@@ -18,5 +18,8 @@ public sealed record MediaRecommendationDto: MetadataRequest
     /// or shared-tag total (similar). Higher is more relevant.
     /// </summary>
     public double? Score { get; set; }
+    public AgeRating AgeRating { get; set; } = AgeRating.Unknown;
+    public IList<string> Genres { get; set; } = new List<string>();
+    public IList<string> Tags { get; set; } = new List<string>();
     public ScrobbleProvider Provider { get; set; }
 }

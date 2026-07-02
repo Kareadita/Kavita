@@ -27,6 +27,15 @@ public class ExternalRecommendation
     public RecommendationSource RecommendationSource { get; set; }
 
     /// <summary>
+    /// The effective age rating for this recommendation (provider base rating raised by Kavita's tag/genre
+    /// age-rating mappings). Used to filter external recommendations against a user's age restriction.
+    /// </summary>
+    /// <remarks>Only meaningful for external recs (<see cref="SeriesId"/> null); owned recs are filtered
+    /// against their real Series metadata instead. Unknown/indeterminate ratings are stored as the most
+    /// restrictive value so they fail closed for restricted users.</remarks>
+    public AgeRating AgeRating { get; set; } = AgeRating.Unknown;
+
+    /// <summary>
     /// When null, represents an external series. When set, it is a Series
     /// </summary>
     public int? SeriesId { get; set; }

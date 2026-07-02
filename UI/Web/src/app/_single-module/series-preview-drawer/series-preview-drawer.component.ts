@@ -14,11 +14,13 @@ import {ReadMoreComponent} from "../../shared/read-more/read-more.component";
 import {ActionService} from "../../_services/action.service";
 import {ProviderImagePipe} from "../../_pipes/provider-image.pipe";
 import {SeriesFilterField} from "../../_models/metadata/v2/series-filter-field";
+import {AgeRating} from "../../_models/metadata/age-rating";
+import {AgeRatingImageComponent} from "../age-rating-image/age-rating-image.component";
 
 @Component({
     selector: 'app-series-preview-drawer',
-    imports: [TranslocoDirective, ImageComponent, LoadingComponent, MetadataDetailComponent,
-      PublicationStatusPipe, ReadMoreComponent, NgbTooltip, NgOptimizedImage, ProviderImagePipe],
+  imports: [TranslocoDirective, ImageComponent, LoadingComponent, MetadataDetailComponent,
+    PublicationStatusPipe, ReadMoreComponent, NgbTooltip, NgOptimizedImage, ProviderImagePipe, AgeRatingImageComponent],
     templateUrl: './series-preview-drawer.component.html',
     styleUrls: ['./series-preview-drawer.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush
@@ -114,4 +116,6 @@ export class SeriesPreviewDrawerComponent implements OnInit {
   close() {
     this.activeOffcanvas.close();
   }
+
+  protected readonly AgeRating = AgeRating;
 }

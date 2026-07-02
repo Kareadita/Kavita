@@ -657,11 +657,12 @@ public class ExternalMetadataService : IExternalMetadataService
 
         // User-base runs first so that a duplicate prefers User-base
         externalSeriesMetadata.ExternalRecommendations ??= [];
+        var metadataSettings = await _unitOfWork.SettingsRepository.GetMetadataSettingDto(ct);
         var seenRecommendations = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
         var recs = await ProcessRecommendations(libraryType, result.ReadersAlsoLike, externalSeriesMetadata,
-            RecommendationSource.UserBased, series.Library!.MetadataProvider, seenRecommendations);
+            RecommendationSource.UserBased, series.Library!.MetadataProvider, metadataSettings, seenRecommendations);
         var similarRecs = await ProcessRecommendations(libraryType, result.SimilarSeries, externalSeriesMetadata,
-            RecommendationSource.Similar, series.Library.MetadataProvider, seenRecommendations);
+            RecommendationSource.Similar, series.Library.MetadataProvider, metadataSettings, seenRecommendations);
         recs.ExternalSeries = recs.ExternalSeries.Concat(similarRecs.ExternalSeries).ToList();
         recs.OwnedSeries = recs.OwnedSeries.Concat(similarRecs.OwnedSeries).ToList();
 
@@ -2178,7 +2179,8 @@ public class ExternalMetadataService : IExternalMetadataService
     }
 
     private async Task<RecommendationDto> ProcessRecommendations(LibraryType libraryType, IEnumerable<MediaRecommendationDto> recs,
-        ExternalSeriesMetadata externalSeriesMetadata, RecommendationSource source, MetadataProvider provider, ISet<string> seen)
+        ExternalSeriesMetadata externalSeriesMetadata, RecommendationSource source, MetadataProvider provider,
+        MetadataSettingsDto settings, ISet<string> seen)
     {
         var recDto = new RecommendationDto()
         {
@@ -2191,6 +2193,9 @@ public class ExternalMetadataService : IExternalMetadataService
         {
             // Skip recommendations already added from a higher-priority list (e.g. Personalized before Similar)
             if (!seen.Add(GetRecommendationIdentity(rec))) continue;
+
+            // Raise the provider's base rating via our own tag/genre mappings; fails closed when indeterminate
+            var ageRating = RecommendationHelper.ComputeExternalAgeRating(rec.AgeRating, rec.Genres, rec.Tags, settings);
 
             // Find the series based on name and type and that the user has access too
             var seriesForRec = await _unitOfWork.SeriesRepository.GetSeriesDtoByNamesAndMetadataIdsAsync(rec.RecommendationNames,
@@ -2210,7 +2215,8 @@ public class ExternalMetadataService : IExternalMetadataService
                     Summary = rec.Summary,
                     MangaBakaId = (int?) rec.MangabakaId,
                     MetadataProvider = provider,
-                    RecommendationSource = source
+                    RecommendationSource = source,
+                    AgeRating = ageRating
                 });
                 continue;
             }
@@ -2227,7 +2233,8 @@ public class ExternalMetadataService : IExternalMetadataService
                 MalId = rec.MalId,
                 MangaBakaId = (int?) rec.MangabakaId,
                 MetadataProvider = provider,
-                RecommendationSource = source
+                RecommendationSource = source,
+                AgeRating = ageRating
             });
             externalSeriesMetadata.ExternalRecommendations.Add(new ExternalRecommendation()
             {
@@ -2240,7 +2247,8 @@ public class ExternalMetadataService : IExternalMetadataService
                 Summary = rec.Summary,
                 MangaBakaId = (int?) rec.MangabakaId,
                 MetadataProvider = provider,
-                RecommendationSource = source
+                RecommendationSource = source,
+                AgeRating = ageRating
             });
         }
 

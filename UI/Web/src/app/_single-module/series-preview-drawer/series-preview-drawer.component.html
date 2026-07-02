@@ -24,10 +24,19 @@
         </div>
       }
 
-      <div class="text-muted muted mb-2">
-        {{t('series-preview-drawer.provided-by-label')}}
-        <img class="ms-1" [ngSrc]="externalSeriesValue.provider | providerImage" width="20" height="20" alt="">
+      <div class="row g-0">
+        <div class="text-muted muted mb-2 col-auto">
+          {{t('series-preview-drawer.provided-by-label')}}
+          <img class="ms-1" [ngSrc]="externalSeriesValue.provider | providerImage" width="20" height="20" alt="">
+        </div>
+
+        @if (externalSeriesValue.ageRating != AgeRating.Unknown) {
+          <div class="ms-auto col-auto">
+            <app-age-rating-image [rating]="externalSeriesValue.ageRating" />
+          </div>
+        }
       </div>
+
 
       @if (externalSeriesValue.summary) {
         <app-read-more [maxLength]="300" [text]="externalSeriesValue.summary" />

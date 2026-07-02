@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using EasyCaching.Core;
@@ -19,6 +20,7 @@ using Kavita.Models.DTOs.Filtering.v2.Requests;
 using Kavita.Models.DTOs.Metadata.Matching;
 using Kavita.Models.DTOs.Recommendation;
 using Kavita.Models.DTOs.KavitaPlus.ExternalMetadata;
+using Kavita.Models.DTOs.KavitaPlus.Metadata;
 using Kavita.Models.DTOs.SeriesDetail;
 using Kavita.Models.Entities.Enums;
 using Kavita.Models.Entities.Enums.KavitaPlus;
@@ -27,6 +29,7 @@ using Kavita.Models.Extensions;
 using Kavita.Server.Attributes;
 using Kavita.Server.Extensions;
 using Kavita.Server.Helpers;
+using Kavita.Services.Helpers;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
@@ -532,31 +535,53 @@ public class SeriesController(
     /// </summary>
     /// <param name="aniListId"></param>
     /// <param name="malId"></param>
+    /// <param name="mangaBakaId"></param>
     /// <param name="seriesId"></param>
     /// <returns></returns>
     [KPlus]
     [HttpGet("external-series-detail")]
-    [Authorize(Policy = PolicyGroups.AdminPolicy)]
-    public async Task<ActionResult<ExternalSeriesDto>> GetExternalSeriesInfo(int? aniListId, long? malId, int? mangaBakaId, int? seriesId)
+    public async Task<ActionResult<ExternalSeriesDetailDto>> GetExternalSeriesInfo(int? aniListId, long? malId, int? mangaBakaId, int? seriesId)
     {
         var ct = HttpContext.RequestAborted;
         var cacheKey = $"{CacheKey}-{aniListId ?? 0}-{malId ?? 0}-{mangaBakaId ?? 0}-{seriesId ?? 0}";
-        var results = await _externalSeriesCacheProvider.GetAsync<ExternalSeriesDto>(cacheKey, ct);
+
+        ExternalSeriesDetailDto? ret;
+        var results = await _externalSeriesCacheProvider.GetAsync<ExternalSeriesDetailDto>(cacheKey, ct);
         if (results.HasValue)
         {
-            return Ok(results.Value);
+            ret = results.Value;
+        }
+        else
+        {
+            try
+            {
+                ret = await externalMetadataService.GetExternalSeriesDetail(aniListId, malId, mangaBakaId, seriesId, ct);
+                await _externalSeriesCacheProvider.SetAsync(cacheKey, ret, TimeSpan.FromMinutes(15), ct);
+            }
+            catch (Exception)
+            {
+                return BadRequest("Unable to load External Series details");
+            }
         }
 
-        try
+        if (ret == null) return BadRequest("Unable to load External Series details");
+
+        var user = await unitOfWork.UserRepository.GetUserByIdAsync(UserId, ct: ct);
+        var restriction = new Models.Entities.AgeRestriction
         {
-            var ret = await externalMetadataService.GetExternalSeriesDetail(aniListId, malId, mangaBakaId, seriesId, ct);
-            await _externalSeriesCacheProvider.SetAsync(cacheKey, ret, TimeSpan.FromMinutes(15), ct);
-            return Ok(ret);
-        }
-        catch (Exception)
+            AgeRating = user?.AgeRestriction ?? AgeRating.NotApplicable,
+            IncludeUnknowns = user?.AgeRestrictionIncludeUnknowns ?? true
+        };
+        var settings = await unitOfWork.SettingsRepository.GetMetadataSettingDto(ct);
+        var effectiveRating = RecommendationHelper.ComputeExternalAgeRating(ret.AgeRating,
+            ret.Genres ?? [], (ret.Tags ?? []).Select(t => t.Name), settings);
+
+        if (!RecommendationHelper.IsWithinAgeRestriction(effectiveRating, restriction))
         {
-            return BadRequest("Unable to load External Series details");
+            throw new KavitaNotFoundException("External Series not found");
         }
+
+        return Ok(ret);
     }
 
     /// <summary>
