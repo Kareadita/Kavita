@@ -694,6 +694,11 @@ public class LibraryController(
 
     }
 
+    /// <summary>
+    /// Return all <see cref="MetadataProvider"/>s that are supported by the given <see cref="LibraryType"/>"/>
+    /// </summary>
+    /// <param name="libraryType"></param>
+    /// <returns></returns>
     [HttpGet("metadata-providers")]
     public ActionResult<List<MetadataProvider>> SupportedMetadataProviders([FromQuery] LibraryType libraryType)
     {
@@ -703,6 +708,26 @@ public class LibraryController(
         }
 
         return Ok(new List<MetadataProvider>());
+    }
+
+    /// <summary>
+    /// <see cref="LibraryType"/> with KavitaPlus metadata support
+    /// </summary>
+    /// <returns></returns>
+    [HttpGet("metadata-enabled-libraries")]
+    public ActionResult<List<LibraryType>> LibrariesWithMetadataSupport()
+    {
+        return Ok(KavitaPlusConfiguration.MetadataProvidersForLibraryTypes.Keys.ToList());
+    }
+
+    /// <summary>
+    /// <see cref="LibraryType"/> with KavitaPlus scrobble support
+    /// </summary>
+    /// <returns></returns>
+    [HttpGet("scrobble-enabled-libraries")]
+    public ActionResult<List<LibraryType>> LibrariesWithScrobbleSupport()
+    {
+        return Ok(KavitaPlusConfiguration.ScrobbleProvidersForLibraryTypes.Keys.ToList());
     }
 
     private void UpdateLibrarySettings(UpdateLibraryDto dto, Library library, bool updateType = true)

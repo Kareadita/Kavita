@@ -9,6 +9,7 @@ import {DirectoryDto} from '../_models/system/directory-dto';
 import {EVENTS, MessageHubService} from "./message-hub.service";
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import {MetadataProvider} from "../_models/kavitaplus/metadata-provider.enum";
+import {ScrobbleProvider} from "./scrobbling.service";
 
 
 @Injectable({
@@ -182,6 +183,14 @@ export class LibraryService {
     return httpResource<MetadataProvider[]>(
       () => this.baseUrl + 'library/metadata-providers?libraryType=' + libraryType()
     ).asReadonly();
+  }
+
+  getLibraryTypesWithMetadataSupport() {
+    return this.httpClient.get<LibraryType[]>(this.baseUrl + 'library/metadata-enabled-libraries')
+  }
+
+  getLibraryTypesWithScrobbleSupport() {
+    return this.httpClient.get<LibraryType[]>(this.baseUrl + 'library/scrobble-enabled-libraries')
   }
 
 }
