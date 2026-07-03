@@ -1652,6 +1652,7 @@ public class ScrobblingService : IScrobblingService
 
     #region BackFill
 
+    [DisableConcurrentExecution(60 * 60 * 60)]
     public async Task CreateEventsFromExistingHistory(List<ScrobbleProvider> scrobbleProviders, int userId, CancellationToken ct = default)
     {
         foreach (var scrobbleProvider in scrobbleProviders)
@@ -1660,6 +1661,7 @@ public class ScrobblingService : IScrobblingService
         }
     }
 
+    [DisableConcurrentExecution(60 * 60 * 60)]
     public async Task CreateEventsFromExistingHistory(ScrobbleProvider scrobbleProvider, int userId = 0,
         CancellationToken ct = default)
     {
@@ -1762,6 +1764,7 @@ public class ScrobblingService : IScrobblingService
         }
     }
 
+    [DisableConcurrentExecution(60 * 60 * 60)]
     public async Task CreateEventsFromExistingHistoryForSeries(int seriesId, CancellationToken ct = default)
     {
         if (!await _licenseService.HasActiveLicense(ct: ct)) return;

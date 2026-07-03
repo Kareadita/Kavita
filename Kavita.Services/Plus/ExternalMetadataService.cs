@@ -867,14 +867,13 @@ public class ExternalMetadataService : IExternalMetadataService
             // Volume covers only apply to real volumes (skip loose-leaf/specials)
             if (!settings.EnableVolumeCoverImage) continue;
             if (volume.MinNumber.Is(Parser.LooseLeafVolumeNumber) || volume.MinNumber.Is(Parser.SpecialVolumeNumber)) continue;
-            // Respect a user lock unless K+ already owns this cover or a global override is set
             if (volume.CoverImageLocked && !HasForceOverride(settings, volume, MetadataSettingField.VolumeCovers)) continue;
 
             try
             {
                 if (nonSpecialChapters.Count == 1)
                 {
-                    // Single-chapter volume reuses its chapter's cover (mirrors cover generation), avoiding a duplicate image
+                    // Single-chapter volume reuses its chapter's cover
                     var chapter = nonSpecialChapters[0];
 
                     // Prefer a chapter-scoped cover, fall back to the volume-scoped one
