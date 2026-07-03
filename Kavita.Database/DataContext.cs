@@ -219,6 +219,12 @@ public sealed class DataContext : IdentityDbContext<AppUser, AppRole, int,
             .HasJsonConversion([])
             .HasColumnType("TEXT")
             .HasDefaultValue(new List<MetadataSettingField>());
+
+        builder.Entity<Volume>()
+            .Property(sm => sm.KPlusOverrides)
+            .HasJsonConversion([])
+            .HasColumnType("TEXT")
+            .HasDefaultValue(new List<MetadataSettingField>());
         #endregion
 
         #region User & Preferences

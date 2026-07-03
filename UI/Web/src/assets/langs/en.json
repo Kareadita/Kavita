@@ -1358,7 +1358,10 @@
         "people-header": "People",
         "tags-header": "Tags",
         "source-genre-tags-placeholder": "Source genre/tag",
-        "dest-genre-tags-placeholder": "Destination genre/tag"
+        "dest-genre-tags-placeholder": "Destination genre/tag",
+        "volume-header": "Volume",
+        "enable-volume-cover-label": "Volume Cover",
+        "enable-volume-cover-tooltip": "Allow Kavita to set Volume covers"
     },
 
     "book-line-overlay": {
@@ -1665,6 +1668,7 @@
         "person": "Person",
         "collection": "Collection",
         "chapter": "Chapter",
+        "volume": "Volume",
         "global": "Global"
     },
 
@@ -1694,6 +1698,7 @@
         "review-submitted": "Review submitted",
         "fields-updated": "{{count}} fields updated",
         "chapter-cover-updated": "Cover updated: {{chapter}}",
+        "volume-cover-updated": "Volume cover updated: {{volume}}",
         "series-cover-updated": "Series cover updated",
         "series-match-fixed": "Series matched with {{matchName}}",
         "collection-synced": "{{collectionName}}: {{itemCount}} items synced, {{missingCount}} missing",
@@ -1722,6 +1727,7 @@
         "cover-updated": "Cover Updated",
         "chapter-metadata-updated": "Chapter Metadata Updated",
         "chapter-cover-updated": "Chapter Cover Updated",
+        "volume-cover-updated": "Volume Cover Updated",
         "person-cover-updated": "Person Cover Updated",
         "person-alias-added": "Person Alias Added",
         "collection-synced": "Collection Synced",
@@ -4403,7 +4409,8 @@
         "chapter-summary": "Summary (Chapter)",
         "chapter-covers": "Covers (Chapter)",
         "chapter-publisher": "{{person-role-pipe.publisher}} (Chapter)",
-        "chapter-title": "Title (Chapter)"
+        "chapter-title": "Title (Chapter)",
+        "volume-covers": "Covers (Volume)"
     },
 
 

@@ -21,6 +21,9 @@ public enum KavitaPlusEventType
     ChapterMetadataUpdated = 20,
     ChapterCoverUpdated = 21,
 
+    // Metadata - Volume
+    VolumeCoverUpdated = 22,
+
     // Metadata - People
     PersonCoverUpdated = 30,
     PersonAliasAdded = 31,

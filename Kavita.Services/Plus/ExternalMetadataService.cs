@@ -631,6 +631,7 @@ public class ExternalMetadataService : IExternalMetadataService
             return _defaultReturn;
         }
 
+
         // Clear out existing results
         var externalSeriesMetadata = await GetOrCreateExternalSeriesMetadataForSeries(seriesId, series);
         _unitOfWork.ExternalSeriesMetadataRepository.Remove(externalSeriesMetadata.ExternalReviews);
@@ -732,6 +733,16 @@ public class ExternalMetadataService : IExternalMetadataService
             await _eventHub.SendMessageAsync(MessageFactory.ScanSeries, MessageFactory.ScanSeriesEvent(series.LibraryId, series.Id, series.Name), false, ct);
         }
 
+        // Volume and MangaBaka chapter covers are not returned inline in the Series detail response, so fetch and apply them separately
+        try
+        {
+            await ApplyExternalCovers(series, metadataSettings, ct);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogWarning(ex, "[Covers] Failed to apply external covers for Series {SeriesId}", series.Id);
+        }
+
         return new SeriesDetailPlusDto
         {
             Recommendations = recs,
@@ -800,6 +811,119 @@ public class ExternalMetadataService : IExternalMetadataService
         }
 
         return madeModification;
+    }
+
+    /// <summary>
+    /// Fetches volume and chapter covers from the Kavita+ covers endpoint and applies the best matches. Series and chapter
+    /// covers arrive inline in the Series detail response for comic providers; volume covers (and MangaBaka chapter covers)
+    /// are not.
+    /// </summary>
+    /// <remarks>Not run for ComicBookRoundup, whose covers come from chapter/issue metadata already.</remarks>
+    private async Task ApplyExternalCovers(Series series, MetadataSettingsDto settings, CancellationToken ct = default)
+    {
+        if (!settings.EnableVolumeCoverImage && !settings.EnableChapterCoverImage) return;
+        if (series.Library?.MetadataProvider == MetadataProvider.ComicBookRoundup) return;
+
+        // All volumes: manga chapters can live in the loose-leaf volume, so we filter loose-leaf/specials only for volume covers
+        var volumes = (await _unitOfWork.VolumeRepository.GetVolumes(series.Id, ct)).ToList();
+        if (volumes.Count == 0) return;
+
+        var covers = await GetExternalCovers(series.Id, ct: ct);
+        var volumeCovers = covers
+            .Where(c => c.Type == ExternalCoverImageType.Volume && c.Number.HasValue && !string.IsNullOrEmpty(c.Url))
+            .ToList();
+        var chapterCovers = covers
+            .Where(c => c.Type is ExternalCoverImageType.Chapter or ExternalCoverImageType.Issue
+                        && c.Number.HasValue && !string.IsNullOrEmpty(c.Url))
+            .ToList();
+        if (volumeCovers.Count == 0 && chapterCovers.Count == 0) return;
+
+        foreach (var volume in volumes)
+        {
+            var nonSpecialChapters = volume.Chapters.Where(c => !c.IsSpecial).ToList();
+            var coveredChapterIds = new HashSet<int>();
+
+            if (settings.EnableChapterCoverImage && chapterCovers.Count > 0)
+            {
+                foreach (var chapter in nonSpecialChapters)
+                {
+                    var chapterMatch = chapterCovers.FirstOrDefault(c => c.Number!.Value.Is(chapter.MinNumber));
+                    if (chapterMatch == null) continue;
+
+                    try
+                    {
+                        if (await UpdateChapterCoverImage(chapter, settings, series.Id, chapterMatch.Url))
+                        {
+                            coveredChapterIds.Add(chapter.Id);
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        _logger.LogWarning(ex, "[Covers] Failed to set cover for Chapter {ChapterId} in Series {SeriesId}", chapter.Id, series.Id);
+                    }
+                }
+            }
+
+            // Volume covers only apply to real volumes (skip loose-leaf/specials)
+            if (!settings.EnableVolumeCoverImage) continue;
+            if (volume.MinNumber.Is(Parser.LooseLeafVolumeNumber) || volume.MinNumber.Is(Parser.SpecialVolumeNumber)) continue;
+            // Respect a user lock unless K+ already owns this cover or a global override is set
+            if (volume.CoverImageLocked && !HasForceOverride(settings, volume, MetadataSettingField.VolumeCovers)) continue;
+
+            try
+            {
+                if (nonSpecialChapters.Count == 1)
+                {
+                    // Single-chapter volume reuses its chapter's cover (mirrors cover generation), avoiding a duplicate image
+                    var chapter = nonSpecialChapters[0];
+
+                    // Prefer a chapter-scoped cover, fall back to the volume-scoped one
+                    var match = chapterCovers.FirstOrDefault(c => c.Number!.Value.Is(chapter.MinNumber))
+                                ?? volumeCovers.FirstOrDefault(c => c.Number!.Value.Is(volume.MinNumber));
+                    if (match == null) continue;
+
+                    // If the chapter loop didn't already write it, download onto the chapter now (bypassing the chapter-cover setting)
+                    if (!coveredChapterIds.Contains(chapter.Id))
+                    {
+                        var chooseBetterImage = !chapter.HasSetKPlusMetadata(MetadataSettingField.ChapterCovers);
+                        chapter.AddKPlusOverride(MetadataSettingField.ChapterCovers);
+                        await _coverDbService.SetChapterCoverByUrl(chapter, match.Url, false, chooseBetterImage, ct);
+                    }
+
+                    volume.AddKPlusOverride(MetadataSettingField.VolumeCovers);
+                    await _coverDbService.SetVolumeCoverFromChapter(volume, chapter, ct);
+                    await LogVolumeCoverAudit(series.Id, volume, match.Url, ct);
+                }
+                else
+                {
+                    var match = volumeCovers.FirstOrDefault(c => c.Number!.Value.Is(volume.MinNumber));
+                    if (match == null) continue;
+
+                    // Only choose the better image the first time; once K+ owns the cover, overwrite freely
+                    var chooseBetterImage = !volume.HasSetKPlusMetadata(MetadataSettingField.VolumeCovers);
+                    volume.AddKPlusOverride(MetadataSettingField.VolumeCovers);
+                    await _coverDbService.SetVolumeCoverByUrl(volume, match.Url, false, chooseBetterImage, ct);
+                    await LogVolumeCoverAudit(series.Id, volume, match.Url, ct);
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogWarning(ex, "[Covers] Failed to set cover for Volume {VolumeId} ({VolumeName}) in Series {SeriesId}",
+                    volume.Id, volume.Name, series.Id);
+            }
+        }
+
+        if (_unitOfWork.HasChanges())
+        {
+            await _unitOfWork.CommitAsync(ct);
+        }
+    }
+
+    private async Task LogVolumeCoverAudit(int seriesId, Volume volume, string coverUrl, CancellationToken ct)
+    {
+        await _auditService.LogAsync(KavitaPlusAuditCategory.Metadata, KavitaPlusEventType.VolumeCoverUpdated, AuditStatus.Success,
+            AuditSubjectType.Volume, seriesId: seriesId, subjectId: volume.Id,
+            payload: new AuditLogVolumeCoverParamsDto { VolumeNumber = volume.GetNumberTitle(), CoverUrl = coverUrl }, ct: ct);
     }
 
     public async Task<IList<ExternalCoverResponseDto>> GetExternalCovers(int seriesId, int? volumeId = null, int? chapterId = null, CancellationToken ct = default)

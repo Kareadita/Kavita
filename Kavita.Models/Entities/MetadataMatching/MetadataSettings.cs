@@ -74,6 +74,13 @@ public class MetadataSettings
     public bool EnableChapterCoverImage { get; set; }
     #endregion
 
+    #region Volume Metadata
+    /// <summary>
+    /// Allow setting the cover image for the Volume
+    /// </summary>
+    public bool EnableVolumeCoverImage { get; set; }
+    #endregion
+
     // Need to handle the Genre/tags stuff
     public bool EnableGenres { get; set; } = true;
     public bool EnableTags { get; set; } = true;

@@ -31,6 +31,8 @@ export class KavitaPlusEventTypePipe implements PipeTransform {
         return this.translocoService.translate('kavita-plus-event-type-pipe.chapter-metadata-updated');
       case KavitaPlusEventType.ChapterCoverUpdated:
         return this.translocoService.translate('kavita-plus-event-type-pipe.chapter-cover-updated');
+      case KavitaPlusEventType.VolumeCoverUpdated:
+        return this.translocoService.translate('kavita-plus-event-type-pipe.volume-cover-updated');
       case KavitaPlusEventType.PersonCoverUpdated:
         return this.translocoService.translate('kavita-plus-event-type-pipe.person-cover-updated');
       case KavitaPlusEventType.PersonAliasAdded:

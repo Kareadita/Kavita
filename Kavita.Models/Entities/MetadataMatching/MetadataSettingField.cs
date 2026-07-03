@@ -27,5 +27,11 @@ public enum MetadataSettingField
 
     #endregion
 
+    #region Volume Metadata
+
+    VolumeCovers = 15,
+
+    #endregion
+
 
 }

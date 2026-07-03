@@ -83,6 +83,9 @@ export class ManageMetadataSettingsComponent implements OnInit {
       this.settingsForm.addControl('enableChapterPublisher', new FormControl(settings.enableChapterPublisher, []));
       this.settingsForm.addControl('enableChapterCoverImage', new FormControl(settings.enableChapterCoverImage, []));
 
+
+      this.settingsForm.addControl('enableVolumeCoverImage', new FormControl(settings.enableVolumeCoverImage, []));
+
       this.settingsForm.addControl('firstLastPeopleNaming', new FormControl((settings.firstLastPeopleNaming), []));
       this.settingsForm.addControl('personRoles', this.fb.group(
         Object.fromEntries(
