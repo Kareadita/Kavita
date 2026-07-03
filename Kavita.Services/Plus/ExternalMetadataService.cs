@@ -1598,14 +1598,34 @@ public class ExternalMetadataService : IExternalMetadataService
         var madeModification = false;
         var allChapters =  await _unitOfWork.ChapterRepository.GetAllChaptersForSeries(series.Id);
 
-        var matchedChapters = allChapters
-            .Join(
-                externalMetadata.ChapterDtos,
-                chapter => Parser.IsLooseLeafVolume(chapter.Range) ? chapter.Volume.Name : chapter.Range,
-                dto => dto.IssueNumber.Replace(",", "."), // Ensure comma's are dots
-                (chapter, dto) => (chapter, dto)
-            )
-            .ToList();
+        List<(Chapter, ExternalChapterDto)> matchedChapters = [];
+
+        if (externalMetadata.IsStandAlone)
+        {
+            if (series.Volumes.Sum(v => v.Chapters.Count) != 1)
+            {
+                _logger.LogWarning("Series {SeriesName} ({SeriesId}) has more than one chapter. But is matched against a standalone series Skipping chapter update.", series.Name, series.Id);
+                return false;
+            }
+
+            if (externalMetadata.ChapterDtos.Count != 1)
+            {
+                return false;
+            }
+
+            matchedChapters.Add((allChapters[0], externalMetadata.ChapterDtos[0]));
+        }
+        else
+        {
+            matchedChapters = allChapters
+                .Join(
+                    externalMetadata.ChapterDtos,
+                    chapter => Parser.IsLooseLeafVolume(chapter.Range) ? chapter.Volume.Name : chapter.Range,
+                    dto => dto.IssueNumber.Replace(",", "."), // Ensure comma's are dots
+                    (chapter, dto) => (chapter, dto)
+                )
+                .ToList();
+        }
 
         foreach (var (chapter, potentialMatch) in matchedChapters)
         {
