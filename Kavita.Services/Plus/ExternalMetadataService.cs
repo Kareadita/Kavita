@@ -571,7 +571,7 @@ public class ExternalMetadataService : IExternalMetadataService
         bool fromMatchFlow = false, MetadataFetchTrigger trigger = MetadataFetchTrigger.OnDemand, CancellationToken ct = default)
     {
 
-        var series = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(seriesId, SeriesIncludes.Library, ct);
+        var series = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(seriesId, SeriesIncludes.Library | SeriesIncludes.Metadata, ct);
         if (series?.Library == null)
         {
             return _defaultReturn;
@@ -824,6 +824,9 @@ public class ExternalMetadataService : IExternalMetadataService
         if (!settings.EnableVolumeCoverImage && !settings.EnableChapterCoverImage) return;
         if (series.Library?.MetadataProvider == MetadataProvider.ComicBookRoundup) return;
 
+        // Prefer the cover based on Series/Library locale
+        var locale = series.Metadata.Language ?? series.Library?.DefaultLanguage;
+
         // All volumes: manga chapters can live in the loose-leaf volume, so we filter loose-leaf/specials only for volume covers
         var volumes = (await _unitOfWork.VolumeRepository.GetVolumes(series.Id, ct)).ToList();
         if (volumes.Count == 0) return;
@@ -876,9 +879,25 @@ public class ExternalMetadataService : IExternalMetadataService
                     // Single-chapter volume reuses its chapter's cover
                     var chapter = nonSpecialChapters[0];
 
+                    // Try and get the locale variant, else fallback to whatever we can
+
+
                     // Prefer a chapter-scoped cover, fall back to the volume-scoped one
-                    var match = chapterCovers.FirstOrDefault(c => c.Number!.Value.Is(chapter.MinNumber))
-                                ?? volumeCovers.FirstOrDefault(c => c.Number!.Value.Is(volume.MinNumber));
+                    var match = chapterCovers
+                                    .Where(c => c.Language == locale)
+                                    .FirstOrDefault(c => c.Number!.Value.Is(chapter.MinNumber))
+                                ?? volumeCovers
+                                    .Where(c => c.Language == locale)
+                                    .FirstOrDefault(c => c.Number!.Value.Is(volume.MinNumber));
+
+                    if (match == null)
+                    {
+                        match = chapterCovers
+                                    .FirstOrDefault(c => c.Number!.Value.Is(chapter.MinNumber))
+                                ?? volumeCovers
+                                    .FirstOrDefault(c => c.Number!.Value.Is(volume.MinNumber));
+                    }
+
                     if (match == null) continue;
 
                     // If the chapter loop didn't already write it, download onto the chapter now (bypassing the chapter-cover setting)
