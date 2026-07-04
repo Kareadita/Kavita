@@ -997,7 +997,7 @@ public class ScrobblingService : IScrobblingService
 
 
         await SaveToDb(ctx.ProgressCounter, true);
-        _logger.LogInformation("Scrobbling Events is complete");
+        _logger.LogInformation("Scrobbling Events is complete"); // TODO: Give a summary
 
         await CleanupOldOrBuggedEvents();
     }
@@ -1293,7 +1293,10 @@ public class ScrobblingService : IScrobblingService
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "There was an error while validating user token for Provider: {Provider}", evt.ScrobbleProvider);
+            _logger.LogError(ex, "A non-valid scrobble provider ({Provider}) was found, deleting event", evt.ScrobbleProvider);
+            evt.IsErrored = true;
+            _unitOfWork.ScrobbleRepository.Remove(evt);
+            await _unitOfWork.CommitAsync();
         }
 
         return false;
