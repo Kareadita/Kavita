@@ -1267,25 +1267,35 @@ public class ScrobblingService : IScrobblingService
     /// <remarks>If the token is not, adds a scrobble error</remarks>
     private async Task<bool> ValidateUserToken(AppUser user, ScrobbleEvent evt)
     {
-        var providerService = _serviceProvider.GetRequiredKeyedService<IScrobbleProviderService>(evt.ScrobbleProvider);
-        var userProvider = user.ScrobbleProviders[evt.ScrobbleProvider];
-
-        if (providerService.IsTokenValid(userProvider.AuthenticationToken))
+        try
         {
-            return true;
+            var providerService =
+                _serviceProvider.GetRequiredKeyedService<IScrobbleProviderService>(evt.ScrobbleProvider);
+            var userProvider = user.ScrobbleProviders[evt.ScrobbleProvider];
+
+            if (providerService.IsTokenValid(userProvider.AuthenticationToken))
+            {
+                return true;
+            }
+
+            _unitOfWork.ScrobbleRepository.Attach(new ScrobbleError
+            {
+                Comment =
+                    $"{evt.ScrobbleProvider} token has expired and needs rotating. Scrobbling wont work until then",
+                Details = $"User: {evt.AppUser.UserName}, Expired: {userProvider.ValidUntilUtc}",
+                LibraryId = evt.LibraryId,
+                SeriesId = evt.SeriesId
+            });
+            await _unitOfWork.CommitAsync();
+
+            await _auditService.LogScrobbleAsync(KavitaPlusEventType.ScrobbleEventFailed, evt.SeriesId,
+                ToAuditParams(evt), AuditStatus.Failure, "token-expired", evt.AppUserId);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "There was an error while validating user token for Provider: {Provider}", evt.ScrobbleProvider);
         }
 
-        _unitOfWork.ScrobbleRepository.Attach(new ScrobbleError
-        {
-            Comment = $"{evt.ScrobbleProvider} token has expired and needs rotating. Scrobbling wont work until then",
-            Details = $"User: {evt.AppUser.UserName}, Expired: {userProvider.ValidUntilUtc}",
-            LibraryId = evt.LibraryId,
-            SeriesId = evt.SeriesId
-        });
-        await _unitOfWork.CommitAsync();
-
-        await _auditService.LogScrobbleAsync(KavitaPlusEventType.ScrobbleEventFailed, evt.SeriesId,
-            ToAuditParams(evt), AuditStatus.Failure, "token-expired", evt.AppUserId);
         return false;
     }
 
@@ -1385,6 +1395,7 @@ public class ScrobblingService : IScrobblingService
 
         foreach (var evt in eventList.Where(CanProcessScrobbleEvent))
         {
+            // TODO: Why would ctx.Users ever be more than 1?
             var user = ctx.Users.FirstOrDefault(u => u.Id == evt.AppUserId);
             if (user is null)
             {
