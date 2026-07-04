@@ -47,6 +47,7 @@ export const errorInterceptor: HttpInterceptorFn = (req, next) => {
             toastr.previousToastMessage !== genericError) {
             toast(genericError, toastr);
           }
+          console.error(error);
           break;
       }
       return throwError(() => error);

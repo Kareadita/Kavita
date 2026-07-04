@@ -2385,7 +2385,8 @@
         "comment-header": "Comment",
         "edit-header": "Edit",
         "edit-item-alt": "Edit {{seriesName}}",
-        "no-data": "No issues"
+        "no-data": "No issues",
+        "generic": "There was an unknown error"
     },
 
     "default-date-pipe": {
