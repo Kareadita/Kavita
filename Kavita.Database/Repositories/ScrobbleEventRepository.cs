@@ -65,7 +65,7 @@ public class ScrobbleRepository(DataContext context, IMapper mapper) : IScrobble
             .Where(s => s.ScrobbleEventType == type)
             .Where(s => s.IsProcessed == isProcessed)
             .AsSplitQuery()
-            .GroupBy(s => new {s.SeriesId, s.ScrobbleProvider, s.AppUserId})
+            .GroupBy(s => new {s.SeriesId, s.ChapterId, s.ScrobbleProvider, s.AppUserId})
             .Select(g => g.OrderByDescending(e => e.ChapterNumber)
                 .ThenByDescending(e => e.VolumeNumber)
                 .First())
