@@ -42,6 +42,8 @@ export interface Library extends LiteLibrary{
     removePrefixForSortName: boolean;
     collapseSeriesRelationships: boolean;
     inheritWebLinksFromFirstChapter: boolean;
+    enablePdfExternalLinks: boolean;
+    enablePdfInternalLinks: boolean;
     defaultLanguage: string;
     metadataProvider: MetadataProvider;
     libraryFileTypes: Array<FileTypeGroup>;

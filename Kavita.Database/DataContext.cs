@@ -183,6 +183,12 @@ public sealed class DataContext : IdentityDbContext<AppUser, AppRole, int,
             .Property(b => b.EnableMetadata)
             .HasDefaultValue(true);
         builder.Entity<Library>()
+            .Property(b => b.EnablePdfExternalLinks)
+            .HasDefaultValue(true);
+        builder.Entity<Library>()
+            .Property(b => b.EnablePdfInternalLinks)
+            .HasDefaultValue(true);
+        builder.Entity<Library>()
             .Property(l => l.DefaultLanguage)
             .HasDefaultValue(string.Empty);
 

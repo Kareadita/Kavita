@@ -14,9 +14,11 @@ import {
 } from '@angular/core';
 import {ActivatedRoute, Router} from '@angular/router';
 import {
+  AnnotationLayerRenderedEvent,
   NgxExtendedPdfViewerModule,
   PageViewModeType,
   pdfDefaultOptions,
+  PDFNotificationService,
   ProgressBarEvent,
   ScrollModeType
 } from 'ngx-extended-pdf-viewer';
@@ -46,6 +48,7 @@ import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import {KeyBindService} from "../../../_services/key-bind.service";
 import {KeyBindTarget} from "../../../_models/preferences/preferences";
 import {Breakpoint, BreakpointService} from "../../../_services/breakpoint.service";
+import {LibraryService} from "../../../_services/library.service";
 
 const KEYBIND_TARGETS = [
   {keyBindTarget: KeyBindTarget.OpenHelp},
@@ -79,6 +82,8 @@ export class PdfReaderComponent implements OnInit, OnDestroy {
   public readonly document = inject(DOCUMENT);
   private readonly keyBindService = inject(KeyBindService);
   protected readonly breakpointService = inject(BreakpointService);
+  private readonly libraryService = inject(LibraryService);
+  private readonly pdfNotificationService = inject(PDFNotificationService);
 
   protected readonly ScrollModeType = ScrollModeType;
 
@@ -143,6 +148,10 @@ export class PdfReaderComponent implements OnInit, OnDestroy {
   spreadMode: SpreadType = 'off';
   isSearchOpen: boolean = false;
 
+  enablePdfExternalLinks = true;
+  enablePdfInternalLinks = true;
+  private originalGoToDestination: ((dest: string | Array<any> | null) => Promise<void>) | null = null;
+
   canDownload = computed(() =>
     this.accountService.hasDownloadRole()
   );
@@ -181,6 +190,11 @@ export class PdfReaderComponent implements OnInit, OnDestroy {
           pdfDefaultOptions.disableAutoFetch = prefs.dataSaver;
           this.cdRef.markForCheck();
         }
+      });
+
+      effect(() => {
+        this.pdfNotificationService.onPDFJSInitSignal();
+        this.configurePdfLinks();
       });
   }
 
@@ -238,6 +252,13 @@ export class PdfReaderComponent implements OnInit, OnDestroy {
     this.cdRef.markForCheck();
 
     window.addEventListener('keydown', this.downloadHandler, { capture: true });
+
+    this.libraryService.getLibrary(this.libraryId).pipe(take(1)).subscribe(library => {
+      this.enablePdfExternalLinks = library.enablePdfExternalLinks ?? true;
+      this.enablePdfInternalLinks = library.enablePdfInternalLinks ?? true;
+      this.configurePdfLinks();
+      this.cdRef.markForCheck();
+    });
 
     this.init();
   }
@@ -311,6 +332,46 @@ export class PdfReaderComponent implements OnInit, OnDestroy {
     this.scrollMode = this.convertPdfScrollMode(this.readingProfile.pdfScrollMode || PdfScrollMode.Vertical);
     this.spreadMode = this.convertPdfSpreadMode(this.readingProfile.pdfSpreadMode || PdfSpreadMode.None);
     this.theme = this.convertPdfTheme(this.readingProfile.pdfTheme || PdfTheme.Dark);
+  }
+
+  configurePdfLinks() {
+    const app = this.pdfNotificationService.onPDFJSInitSignal();
+    const linkService = app?.pdfLinkService;
+    if (!linkService) return;
+
+    linkService.externalLinkEnabled = this.enablePdfExternalLinks;
+
+    if (!this.enablePdfInternalLinks) {
+      if (!this.originalGoToDestination) {
+        this.originalGoToDestination = linkService.goToDestination.bind(linkService);
+      }
+      linkService.goToDestination = async () => {};
+    } else if (this.originalGoToDestination) {
+      linkService.goToDestination = this.originalGoToDestination;
+      this.originalGoToDestination = null;
+    }
+
+    this.updateLinkAnnotationVisibility();
+  }
+
+  onAnnotationLayerRendered(event: AnnotationLayerRenderedEvent) {
+    this.updateLinkAnnotationVisibility(event.source.div);
+  }
+
+  /**
+   * PDF.js marks in-document links with data-internal-link; URL links omit it.
+   * Hide the annotation section entirely so the yellow overlay and click target are removed.
+   */
+  updateLinkAnnotationVisibility(root?: ParentNode) {
+    const scope = root ?? this.container()?.nativeElement;
+    if (!scope) return;
+
+    scope.querySelectorAll('.annotationLayer section.linkAnnotation').forEach((section: Element) => {
+      const isInternal = section.hasAttribute('data-internal-link');
+      const hide = (isInternal && !this.enablePdfInternalLinks)
+        || (!isInternal && !this.enablePdfExternalLinks);
+      (section as HTMLElement).hidden = hide;
+    });
   }
 
   init() {
@@ -421,6 +482,9 @@ export class PdfReaderComponent implements OnInit, OnDestroy {
 
   updateLoading(state: boolean) {
     this.isLoading = state;
+    if (!state) {
+      this.configurePdfLinks();
+    }
     this.cdRef.markForCheck();
   }
 

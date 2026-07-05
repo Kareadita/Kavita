@@ -133,6 +133,8 @@ export class LibrarySettingsModalComponent implements OnInit {
     enableMetadata: new FormControl<boolean>(true, { nonNullable: true, validators: [] }), // required validator doesn't check value, just if true
     removePrefixForSortName: new FormControl<boolean>(false, { nonNullable: true, validators: [] }),
     inheritWebLinksFromFirstChapter: new FormControl<boolean>(false, { nonNullable: true, validators: []}),
+    enablePdfExternalLinks: new FormControl<boolean>(true, { nonNullable: true, validators: []}),
+    enablePdfInternalLinks: new FormControl<boolean>(true, { nonNullable: true, validators: []}),
     defaultLanguage: new FormControl<string>('', {nonNullable: true, validators: []}),
     metadataProvider: new FormControl<MetadataProvider>(MetadataProvider.Mangabaka, {nonNullable: true, validators: []}),
     // TODO: Missing excludePatterns
@@ -322,6 +324,8 @@ export class LibrarySettingsModalComponent implements OnInit {
       this.libraryForm.get('enableMetadata')?.setValue(this.library.enableMetadata);
       this.libraryForm.get('removePrefixForSortName')?.setValue(this.library.removePrefixForSortName);
       this.libraryForm.get('inheritWebLinksFromFirstChapter')?.setValue(this.library.inheritWebLinksFromFirstChapter);
+      this.libraryForm.get('enablePdfExternalLinks')?.setValue(this.library.enablePdfExternalLinks ?? true);
+      this.libraryForm.get('enablePdfInternalLinks')?.setValue(this.library.enablePdfInternalLinks ?? true);
       this.libraryForm.get('defaultLanguage')?.setValue(this.library.defaultLanguage);
       this.selectedFolders = this.library.folders;
       this.checkForFilesAtRoot(); // check after selectedFolders has been set

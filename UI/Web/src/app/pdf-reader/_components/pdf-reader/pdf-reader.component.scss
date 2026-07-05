@@ -106,4 +106,11 @@ $loading-bar-height: 1.5rem;
   }
 }
 
+// Hide disabled PDF link annotations (yellow overlay + click target).
+// PDF.js marks in-document links with data-internal-link; URL links omit it.
+.pdf-external-links-disabled ::ng-deep .annotationLayer section.linkAnnotation:not([data-internal-link]),
+.pdf-internal-links-disabled ::ng-deep .annotationLayer section.linkAnnotation[data-internal-link] {
+  display: none !important;
+  pointer-events: none !important;
+}
 

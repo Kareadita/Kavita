@@ -1,7 +1,9 @@
 <ng-container *transloco="let t; prefix: 'pdf-reader'">
   @let user = accountService.currentUser();
   @if (user) {
-    <div class="{{theme}}" #container>
+    <div class="{{theme}}" #container
+         [class.pdf-external-links-disabled]="!enablePdfExternalLinks"
+         [class.pdf-internal-links-disabled]="!enablePdfInternalLinks">
 
       @if (isLoading && !disableLoadingIndicator()) {
         <div class="loading-message-container">
@@ -45,6 +47,7 @@
         (zoomChange)="calcScrollbarNeeded()"
         (handToolChange)="updateHandTool($event)"
         (findbarVisibleChange)="updateSearchOpen($event)"
+        (annotationLayerRendered)="onAnnotationLayerRendered($event)"
        />
 
       @if (scrollMode === ScrollModeType.page && !isLoading) {

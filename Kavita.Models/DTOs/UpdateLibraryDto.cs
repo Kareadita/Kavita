@@ -48,6 +48,12 @@ public sealed record UpdateLibraryDto
     /// <inheritdoc cref="Library.InheritWebLinksFromFirstChapter"/>
     [Required]
     public bool InheritWebLinksFromFirstChapter { get; init; }
+    /// <inheritdoc cref="Library.EnablePdfExternalLinks"/>
+    [Required]
+    public bool EnablePdfExternalLinks { get; init; }
+    /// <inheritdoc cref="Library.EnablePdfInternalLinks"/>
+    [Required]
+    public bool EnablePdfInternalLinks { get; init; }
     /// <inheritdoc cref="Library.DefaultLanguage"/>
     public string DefaultLanguage { get; init; }
     /// <inheritdoc cref="Library.MetadataProvider"/>

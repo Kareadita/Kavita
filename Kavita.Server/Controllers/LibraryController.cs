@@ -94,6 +94,8 @@ public class LibraryController(
         library.RemovePrefixForSortName = dto.RemovePrefixForSortName;
         library.DefaultLanguage = dto.DefaultLanguage;
         library.InheritWebLinksFromFirstChapter = dto.InheritWebLinksFromFirstChapter;
+        library.EnablePdfExternalLinks = dto.EnablePdfExternalLinks;
+        library.EnablePdfInternalLinks = dto.EnablePdfInternalLinks;
 
         // Override Scrobbling for Comic libraries since there are no providers to scrobble to
         if (library.Type == LibraryType.Comic)
@@ -428,6 +430,8 @@ public class LibraryController(
                 EnableMetadata = sourceLibrary.EnableMetadata,
                 RemovePrefixForSortName = sourceLibrary.RemovePrefixForSortName,
                 InheritWebLinksFromFirstChapter = sourceLibrary.InheritWebLinksFromFirstChapter,
+                EnablePdfExternalLinks = sourceLibrary.EnablePdfExternalLinks,
+                EnablePdfInternalLinks = sourceLibrary.EnablePdfInternalLinks,
                 DefaultLanguage = sourceLibrary.DefaultLanguage,
                 MetadataProvider = sourceLibrary.MetadataProvider,
                 ExcludePatterns = sourceLibrary.LibraryExcludePatterns.Select(p => p.Pattern).ToList(),
@@ -726,6 +730,8 @@ public class LibraryController(
         library.EnableMetadata = dto.EnableMetadata;
         library.RemovePrefixForSortName = dto.RemovePrefixForSortName;
         library.InheritWebLinksFromFirstChapter = dto.InheritWebLinksFromFirstChapter;
+        library.EnablePdfExternalLinks = dto.EnablePdfExternalLinks;
+        library.EnablePdfInternalLinks = dto.EnablePdfInternalLinks;
         library.DefaultLanguage = dto.DefaultLanguage;
         library.MetadataProvider = dto.MetadataProvider;
 

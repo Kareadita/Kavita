@@ -261,6 +261,26 @@
             </div>
 
             <div class="row g-0 mt-4 mb-4">
+              <app-setting-switch [title]="t('enable-pdf-external-links-label')" [subtitle]="t('enable-pdf-external-links-tooltip')">
+                <ng-template #switch>
+                  <div class="form-check form-switch float-end">
+                    <input type="checkbox" id="enable-pdf-external-links" role="switch" formControlName="enablePdfExternalLinks" class="form-check-input">
+                  </div>
+                </ng-template>
+              </app-setting-switch>
+            </div>
+
+            <div class="row g-0 mt-4 mb-4">
+              <app-setting-switch [title]="t('enable-pdf-internal-links-label')" [subtitle]="t('enable-pdf-internal-links-tooltip')">
+                <ng-template #switch>
+                  <div class="form-check form-switch float-end">
+                    <input type="checkbox" id="enable-pdf-internal-links" role="switch" formControlName="enablePdfInternalLinks" class="form-check-input">
+                  </div>
+                </ng-template>
+              </app-setting-switch>
+            </div>
+
+            <div class="row g-0 mt-4 mb-4">
               <app-setting-item [title]="t('default-language-label')" [subtitle]="t('default-language-tooltip')" [toggleOnViewClick]="false" [showEdit]="false">
                 <ng-template #view>
                   @if (languageSettings) {
