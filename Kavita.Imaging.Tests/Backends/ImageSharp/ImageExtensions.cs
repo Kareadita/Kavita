@@ -2,14 +2,17 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using NetVips;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.PixelFormats;
 using SixLabors.ImageSharp.Processing;
 using Image = SixLabors.ImageSharp.Image;
 
-namespace Kavita.Common.Extensions;
+namespace Kavita.Imaging.Tests.Backends.ImageSharp;
 
+/// <summary>
+/// Frozen reference copy of Kavita.Common.Extensions.ImageExtensions as it existed on ImageSharp.
+/// Do NOT migrate this file. It is the oracle the NetVips implementation is validated against.
+/// </summary>
 public static class ImageExtensions
 {
 
@@ -41,8 +44,6 @@ public static class ImageExtensions
             throw new FileNotFoundException("One or both image files do not exist");
         }
 
-        // using var img1 = Image.NewFromFile(imagePath1);
-        // using var img2 = Image.NewFromFile(imagePath2);
         // Load both images as Rgba32
         using var img1 = Image.Load<Rgba32>(imagePath1);
         using var img2 = Image.Load<Rgba32>(imagePath2);

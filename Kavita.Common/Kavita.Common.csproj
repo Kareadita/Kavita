@@ -19,8 +19,8 @@
       <PackageReference Include="Microsoft.Extensions.Configuration.Abstractions" Version="10.0.9" />
       <PackageReference Include="Microsoft.Extensions.Hosting" Version="10.0.9" />
       <PackageReference Include="Microsoft.Net.Http.Headers" Version="10.0.9" />
+      <PackageReference Include="NetVips" Version="3.2.0" />
       <PackageReference Include="Newtonsoft.Json" Version="13.0.4" />
-      <PackageReference Include="SixLabors.ImageSharp" Version="3.1.12" />
       <PackageReference Include="SonarAnalyzer.CSharp" Version="10.27.0.140913">
         <PrivateAssets>all</PrivateAssets>
         <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
