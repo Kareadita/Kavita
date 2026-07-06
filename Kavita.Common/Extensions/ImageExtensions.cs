@@ -443,22 +443,25 @@ public static class ImageExtensions
     /// </summary>
     private static Image Normalize(Image img)
     {
-        if (img.Interpretation != Enums.Interpretation.Srgb)
+        var result = img;
+
+        if (result.Interpretation != Enums.Interpretation.Srgb)
         {
-            img = img.Colourspace(Enums.Interpretation.Srgb);
+            result = result.Colourspace(Enums.Interpretation.Srgb);
         }
 
-        if (img.HasAlpha())
+        if (result.HasAlpha())
         {
-            img = img.Flatten();
+            result = result.Flatten();
         }
 
-        if (img.Format != Enums.BandFormat.Uchar)
+        if (result.Format != Enums.BandFormat.Uchar)
         {
-            img = img.Cast(Enums.BandFormat.Uchar);
+            result = result.Cast(Enums.BandFormat.Uchar);
         }
 
-        return img;
+        // Ensure we always return a distinct instance, otherwise the caller's original instance will get disposed incorrectly
+        return ReferenceEquals(result, img) ? img.Copy() : result;
     }
 
     /// <summary>

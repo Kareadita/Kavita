@@ -10,6 +10,7 @@ using Kavita.Models.DTOs.KavitaPlus.ExternalMetadata.Covers;
 using Kavita.Models.DTOs.KavitaPlus.Metadata;
 using Kavita.Models.DTOs.Metadata.Matching;
 using Kavita.Models.DTOs.Scrobbling;
+using Kavita.Models.Entities.Enums;
 using Kavita.Models.Entities.Enums.KavitaPlus;
 using Xunit.Abstractions;
 
@@ -122,7 +123,8 @@ public sealed class KavitaPlusApiServiceTests(KavitaPlusFixture fixture, ITestOu
             SeriesName = "Berserk",
             AniListId = 30,
             MediaFormat = PlusMediaFormat.Manga,
-            IsStandAlone = false
+            IsStandAlone = false,
+            MetadataProvider = MetadataProvider.Mangabaka
         };
 
         var result = await (fixture.ApiUrl + "/api/v3/metadata/covers")
@@ -271,7 +273,8 @@ public sealed class KavitaPlusApiServiceTests(KavitaPlusFixture fixture, ITestOu
         {
             SeriesName = "Saga",
             MediaFormat = PlusMediaFormat.Comic,
-            IsStandAlone = false
+            IsStandAlone = false,
+            MetadataProvider = MetadataProvider.ComicBookRoundup
         };
 
         var result = await (fixture.ApiUrl + "/api/v3/metadata/covers")
@@ -297,7 +300,8 @@ public sealed class KavitaPlusApiServiceTests(KavitaPlusFixture fixture, ITestOu
             SeriesName = "Sword Art Online",
             AniListId = 21,
             MediaFormat = PlusMediaFormat.LightNovel,
-            IsStandAlone = false
+            IsStandAlone = false,
+            MetadataProvider = MetadataProvider.Mangabaka
         };
 
         var result = await (fixture.ApiUrl + "/api/v3/metadata/covers")

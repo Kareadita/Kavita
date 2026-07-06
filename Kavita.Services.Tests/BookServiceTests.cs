@@ -114,7 +114,7 @@ public class BookServiceTests
         // (NetVips) thumbnails it. A malformed intermediate PNG would throw or yield an empty file.
         var testDirectory = Path.Join(Directory.GetCurrentDirectory(), "../../../Test Data/BookService");
         var document = Path.Join(testDirectory, "test.pdf");
-        var outputDirectory = Path.Join(testDirectory, "PdfCoverOutput");
+        var outputDirectory = Path.Join(Path.GetTempPath(), $"PdfCoverOutput_{Guid.NewGuid():N}");
         Directory.CreateDirectory(outputDirectory);
 
         try

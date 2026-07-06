@@ -246,10 +246,15 @@ public class ImageService(ILogger<ImageService> logger, IDirectoryService direct
         try
         {
             // NetVips resolves the loader from the file header without decoding the pixels; if the
-            // file is not a recognised image, NewFromFile throws a VipsException.
+            // file is not a recognized image, NewFromFile throws a VipsException.
             ct.ThrowIfCancellationRequested();
             using var image = Image.NewFromFile(filePath, access: Enums.Access.Sequential);
             return Task.FromResult(true);
+        }
+        catch (OperationCanceledException)
+        {
+            // This allows cancellation to propagate upwards
+            throw;
         }
         catch (Exception)
         {
