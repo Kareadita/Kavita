@@ -16,9 +16,6 @@ using Kavita.Models.Extensions;
 using Kavita.Services.Scanner;
 using Microsoft.Extensions.Logging;
 using NetVips;
-using SixLabors.ImageSharp.PixelFormats;
-using SixLabors.ImageSharp.Processing;
-using SixLabors.ImageSharp.Processing.Processors.Quantization;
 using Image = NetVips.Image;
 
 namespace Kavita.Services;
@@ -244,21 +241,22 @@ public class ImageService(ILogger<ImageService> logger, IDirectoryService direct
         return Task.FromResult(outputFile);
     }
 
-    public async Task<bool> IsImage(string filePath, CancellationToken ct = default)
+    public Task<bool> IsImage(string filePath, CancellationToken ct = default)
     {
         try
         {
-            var info = await SixLabors.ImageSharp.Image.IdentifyAsync(filePath, ct);
-            if (info == null) return false;
-
-            return true;
+            // NetVips resolves the loader from the file header without decoding the pixels; if the
+            // file is not a recognised image, NewFromFile throws a VipsException.
+            ct.ThrowIfCancellationRequested();
+            using var image = Image.NewFromFile(filePath, access: Enums.Access.Sequential);
+            return Task.FromResult(true);
         }
         catch (Exception)
         {
             /* Swallow Exception */
         }
 
-        return false;
+        return Task.FromResult(false);
     }
 
 
@@ -300,25 +298,6 @@ public class ImageService(ILogger<ImageService> logger, IDirectoryService direct
         }
 
         return (null, null);
-    }
-
-    private static (Vector3?, Vector3?) GetPrimaryColorSharp(string imagePath)
-    {
-        using var image = SixLabors.ImageSharp.Image.Load<Rgb24>(imagePath);
-
-        image.Mutate(
-            x => x
-                // Scale the image down preserving the aspect ratio. This will speed up quantization.
-                // We use nearest neighbor as it will be the fastest approach.
-                .Resize(new ResizeOptions() { Sampler = KnownResamplers.NearestNeighbor, Size = new SixLabors.ImageSharp.Size(100, 0) })
-
-                // Reduce the color palette to 1 color without dithering.
-                .Quantize(new OctreeQuantizer(new QuantizerOptions { MaxColors = 4 })));
-
-        Rgb24 dominantColor = image[0, 0];
-
-        // This will give you a dominant color in HEX format i.e #5E35B1FF
-        return (new Vector3(dominantColor.R, dominantColor.G, dominantColor.B), new Vector3(dominantColor.R, dominantColor.G, dominantColor.B));
     }
 
     private static Image PreProcessImage(Image image)

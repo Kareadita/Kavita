@@ -20,6 +20,17 @@ public sealed class ImageFixture : IDisposable
     public string ColorfulACopy { get; }
     /// <summary>A grayscale 200x200 image (same structure as <see cref="ColorfulA"/>, desaturated).</summary>
     public string Grayscale { get; }
+    /// <summary>
+    /// A TRUE single-band (1-band) 8-bit grayscale PNG. Unlike <see cref="Grayscale"/> (which is
+    /// 4-band RGBA with R==G==B), this forces NetVips' <c>Colourspace(b-w -&gt; sRGB)</c> promotion
+    /// path — the branch real grayscale manga/comic covers hit.
+    /// </summary>
+    public string GrayscaleOneBand { get; }
+    /// <summary>
+    /// A TRUE 16-bit single-band grayscale PNG (L16). Forces NetVips' 16-&gt;8-bit downconversion in
+    /// <c>Normalize</c> (via <c>Colourspace</c>/<c>Cast</c>) — verifies it scales rather than clips.
+    /// </summary>
+    public string Grayscale16Bit { get; }
     /// <summary>A colorful 600x600 image (>3x the pixel count of the low-res one).</summary>
     public string HighRes { get; }
     /// <summary>A colorful 100x100 image.</summary>
@@ -35,6 +46,8 @@ public sealed class ImageFixture : IDisposable
         ColorfulA = WriteColorful(200, 200, "colorful-a.png");
         ColorfulACopy = WriteColorful(200, 200, "colorful-a-copy.png");
         Grayscale = WriteGrayscale(200, 200, "grayscale.png");
+        GrayscaleOneBand = WriteGrayscaleOneBand(200, 200, "grayscale-1band.png");
+        Grayscale16Bit = WriteGrayscale16Bit(200, 200, "grayscale-16bit.png");
         HighRes = WriteColorful(600, 600, "high-res.png");
         LowRes = WriteColorful(100, 100, "low-res.png");
         Missing = Path.Combine(_root, "does-not-exist.png");
@@ -75,6 +88,48 @@ public sealed class ImageFixture : IDisposable
             {
                 var v = (byte)((x + y) * 255 / (width + height));
                 image[x, y] = new Rgba32(v, v, v);
+            }
+        }
+
+        var path = Path.Combine(_root, name);
+        image.SaveAsPng(path);
+        return path;
+    }
+
+    /// <summary>
+    /// Writes a deterministic gradient as a genuine single-band 8-bit grayscale PNG (L8), so the
+    /// file on disk has one channel — not RGBA-with-equal-channels. Same gradient values as
+    /// <see cref="WriteGrayscale"/> so the two can be compared.
+    /// </summary>
+    private string WriteGrayscaleOneBand(int width, int height, string name)
+    {
+        using var image = new Image<L8>(width, height);
+        for (var y = 0; y < height; y++)
+        {
+            for (var x = 0; x < width; x++)
+            {
+                var v = (byte)((x + y) * 255 / (width + height));
+                image[x, y] = new L8(v);
+            }
+        }
+
+        var path = Path.Combine(_root, name);
+        image.SaveAsPng(path);
+        return path;
+    }
+
+    /// <summary>
+    /// Writes a deterministic gradient as a genuine 16-bit single-band grayscale PNG (L16).
+    /// </summary>
+    private string WriteGrayscale16Bit(int width, int height, string name)
+    {
+        using var image = new Image<L16>(width, height);
+        for (var y = 0; y < height; y++)
+        {
+            for (var x = 0; x < width; x++)
+            {
+                var v = (ushort)((x + y) * 65535 / (width + height));
+                image[x, y] = new L16(v);
             }
         }
 

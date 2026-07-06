@@ -229,7 +229,7 @@ public static class ImageExtensions
     /// <summary>
     /// Analyzes colorfulness of an image
     /// </summary>
-    private static (bool IsColor, double Colorfulness) AnalyzeColorfulness(Image<Rgba32> image)
+    internal static (bool IsColor, double Colorfulness) AnalyzeColorfulness(Image<Rgba32> image)
     {
         // For performance, sample a subset of pixels
         var sampleSize = Math.Min(1000, image.Width * image.Height);
@@ -312,7 +312,7 @@ public static class ImageExtensions
     /// <summary>
     /// Calculates contrast of an image
     /// </summary>
-    private static double CalculateContrast(Image<Rgba32> image)
+    internal static double CalculateContrast(Image<Rgba32> image)
     {
         // For performance, sample a subset of pixels
         var sampleSize = Math.Min(1000, image.Width * image.Height);
@@ -348,7 +348,7 @@ public static class ImageExtensions
     /// <summary>
     /// Estimates sharpness using simple Laplacian-based method
     /// </summary>
-    private static double EstimateSharpness(Image<Rgba32> image)
+    internal static double EstimateSharpness(Image<Rgba32> image)
     {
         // For simplicity, convert to grayscale
         var grayImage = new int[image.Width, image.Height];
@@ -396,7 +396,7 @@ public static class ImageExtensions
     /// <summary>
     /// Estimates noise level using simple block-based variance method
     /// </summary>
-    private static double EstimateNoiseLevel(Image<Rgba32> image)
+    internal static double EstimateNoiseLevel(Image<Rgba32> image)
     {
         // Block size for noise estimation
         const int blockSize = 8;
