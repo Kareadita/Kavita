@@ -29,8 +29,6 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Kavita.Benchmark", "Kavita.
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Kavita.Integration.Tests", "Kavita.Integration.Tests\Kavita.Integration.Tests.csproj", "{15A9CDCD-D4CE-4155-8338-6FB9CB2EDC56}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Kavita.Imaging.Tests", "Kavita.Imaging.Tests\Kavita.Imaging.Tests.csproj", "{B2C8F578-9035-4CC7-B363-94B7A85D0A9D}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -197,18 +195,6 @@ Global
 		{15A9CDCD-D4CE-4155-8338-6FB9CB2EDC56}.Release|x64.Build.0 = Release|Any CPU
 		{15A9CDCD-D4CE-4155-8338-6FB9CB2EDC56}.Release|x86.ActiveCfg = Release|Any CPU
 		{15A9CDCD-D4CE-4155-8338-6FB9CB2EDC56}.Release|x86.Build.0 = Release|Any CPU
-		{B2C8F578-9035-4CC7-B363-94B7A85D0A9D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{B2C8F578-9035-4CC7-B363-94B7A85D0A9D}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{B2C8F578-9035-4CC7-B363-94B7A85D0A9D}.Debug|x64.ActiveCfg = Debug|Any CPU
-		{B2C8F578-9035-4CC7-B363-94B7A85D0A9D}.Debug|x64.Build.0 = Debug|Any CPU
-		{B2C8F578-9035-4CC7-B363-94B7A85D0A9D}.Debug|x86.ActiveCfg = Debug|Any CPU
-		{B2C8F578-9035-4CC7-B363-94B7A85D0A9D}.Debug|x86.Build.0 = Debug|Any CPU
-		{B2C8F578-9035-4CC7-B363-94B7A85D0A9D}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{B2C8F578-9035-4CC7-B363-94B7A85D0A9D}.Release|Any CPU.Build.0 = Release|Any CPU
-		{B2C8F578-9035-4CC7-B363-94B7A85D0A9D}.Release|x64.ActiveCfg = Release|Any CPU
-		{B2C8F578-9035-4CC7-B363-94B7A85D0A9D}.Release|x64.Build.0 = Release|Any CPU
-		{B2C8F578-9035-4CC7-B363-94B7A85D0A9D}.Release|x86.ActiveCfg = Release|Any CPU
-		{B2C8F578-9035-4CC7-B363-94B7A85D0A9D}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
