@@ -50,10 +50,10 @@ public sealed record UpdateLibraryDto
     public bool InheritWebLinksFromFirstChapter { get; init; }
     /// <inheritdoc cref="Library.EnablePdfExternalLinks"/>
     [Required]
-    public bool EnablePdfExternalLinks { get; init; }
+    public bool EnablePdfExternalLinks { get; init; } = true;
     /// <inheritdoc cref="Library.EnablePdfInternalLinks"/>
     [Required]
-    public bool EnablePdfInternalLinks { get; init; }
+    public bool EnablePdfInternalLinks { get; init; } = true;
     /// <inheritdoc cref="Library.DefaultLanguage"/>
     public string DefaultLanguage { get; init; }
     /// <inheritdoc cref="Library.MetadataProvider"/>

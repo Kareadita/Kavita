@@ -1,7 +1,5 @@
 using System.Linq;
-using Kavita.API.Database;
 using Kavita.Models.DTOs;
-using Kavita.Models.Entities;
 using Kavita.Models.Entities;
 using Kavita.Models.Entities.Enums;
 
