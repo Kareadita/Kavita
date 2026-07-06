@@ -773,10 +773,7 @@ public class ExternalMetadataService : IExternalMetadataService
         Accumulate(ref madeModification, fieldChanges, UpdateReleaseYear(series, settings, externalMetadata));
         Accumulate(ref madeModification, fieldChanges, UpdateLocalizedName(series, settings, externalMetadata));
         Accumulate(ref madeModification, fieldChanges, await UpdatePublicationStatus(series, settings, externalMetadata));
-        if (trigger is MetadataFetchTrigger.OnDemand or MetadataFetchTrigger.ManualMatch)
-        {
-            Accumulate(ref madeModification, fieldChanges, UpdateExternalIds(series, externalMetadata));
-        }
+        Accumulate(ref madeModification, fieldChanges, UpdateExternalIds(series, externalMetadata));
 
         // Apply field mappings
         GenerateGenreAndTagLists(externalMetadata, settings, ref processedTags, ref processedGenres);
