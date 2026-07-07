@@ -408,7 +408,8 @@
         "spin-off": "Spin-off",
         "parent": "Rodič",
         "edition": "Edice",
-        "annual": "Roční"
+        "annual": "Roční",
+        "cameo": "Cameo"
     },
     "publication-status-pipe": {
         "ongoing": "Pokračující",
@@ -748,7 +749,9 @@
         "inherit-web-links-label": "Zdědit webové odkazy z první kapitoly",
         "inherit-web-links-tooltip": "Měla by série zdědit webové odkazy z první kapitoly",
         "default-language-label": "Výchozí jazyk",
-        "default-language-tooltip": "Jazyk, který se přiřadí sérii, pokud žádná z kapitol nemá v metadatech nastavený jazyk"
+        "default-language-tooltip": "Jazyk, který se přiřadí sérii, pokud žádná z kapitol nemá v metadatech nastavený jazyk",
+        "metadata-provider-label": "Poskytovatel metadat",
+        "metadata-provider-tooltip": "Vyberte zdroj, ze kterého Kavita načítá metadata."
     },
     "reader-settings": {
         "font-family-label": "{{manage-reading-profiles.font-family-label}}",
@@ -2006,10 +2009,9 @@
         "chapter-count": "{{match-series-result-item.chapter-count}}",
         "matched-to": "V současné době se shoduje s",
         "searching-against": "Vyhledávání v databázi {{provider}}",
-        "selected-desc": "Vybráno z důvodu: {{libraryType}} {{format}}",
-        "library-type": "Typ knihovny:",
-        "format-type": "Formát:",
-        "provider-help": "Jeden poskytovatel pro každý typ knihovny"
+        "change-provider-help": "V nastaveních knihovny můžete změnit, kterého poskytovatele chcete používat",
+        "is-standalone-label": "Je samostatná",
+        "is-standalone-tooltip": "Tuto možnost zaškrtněte, pokud se jedná o samostatnou knihu v sérii a Hardcover pro ni nemá vytvořený záznam v rámci sérií"
     },
     "manage-system": {
         "first-install-version-title": "První verze instalace",
@@ -3038,16 +3040,42 @@
         "clean-tooltip": "Odebrat všechny styly"
     },
     "font-manager": {
-        "description": "Čtečka epub Kavita obsahuje několik vestavěných fontů, zde můžete přidat své vlastní fonty. Nahrajte soubor nebo použijte adresu URL fontů Google. Další informace najdete na <a href='{{wikiLink}}' target='_blank' rel='noreferrer noopener'>wiki</a>.",
+        "description": "Písma, ze kterých si můžete v čtečce formátu ePub vybírat. Jsou seskupena podle rodin, tedy názvů, které si při čtení zvolíte. Každá rodina obsahuje jeden nebo více souborů pro různé tloušťky a styly písma. Písma si můžete stáhnout z {{googleFontsLink}}, případně další informace najdete na stránce {{wikiLink}}. ",
         "add": "{{common.add}}",
         "drag-n-drop": "{{cover-image-chooser.drag-n-drop}}",
         "upload": "{{cover-image-chooser.upload}}",
         "upload-continued": "soubor písma",
-        "preview-default": "Nahrajte vlastní písmo prostřednictvím souboru nebo adresy URL Google Font",
+        "preview-default": "Vyberte rodinu písma, abyste si ji prohlédli, nebo přidejte vlastní písmo z souboru či pomocí URL adresy Google Fonts",
         "delete": "{{common.delete}}",
         "no-preview": "Toto písmo nelze zobrazit v náhledu. Bude převzat výchozí styl z knihy.",
         "brown-fox": "Rychlá hnědá liška přeskočí líného psa",
-        "filter-system-fonts-label": "Filtrování systémových písem"
+        "filter-system-fonts-label": "Filtrování systémových písem",
+        "wiki": "Wiki",
+        "google-fonts": "Google Fonty",
+        "add-font": "Přidat písmo",
+        "families": "Rodiny",
+        "custom-only": "Pouze vlastní",
+        "var": "VAR",
+        "variable": "Variabilní",
+        "style": "styl",
+        "styles": "styly",
+        "file": "soubor",
+        "files": "soubory",
+        "in-this-family": "v této rodině",
+        "styles-summary": "· {{styles}}",
+        "roman": "Roman",
+        "italic": "Italic",
+        "regular": "Běžný",
+        "wght": "vážený",
+        "alphabet": "ABCDEFGHIJKLM abcdefghijklm 0123456789",
+        "weight-axis": "Osa vážnosti",
+        "weight-axis-hint": "přetažením si můžete prohlédnout celý rozsah",
+        "weight-thin": "tenký",
+        "weight-black": "černý",
+        "reading-sample": "Ukázka textu",
+        "reading-sample-text": "Pomalu otočila stránku a světlo lampy osvětlovalo každé písmeno. Z hřbetu knihy se linuly šeptané příběhy o inkoustu a papíru, pět boxujících kouzelníků rychle vyskočilo a noc pokračovala ve čtení.",
+        "provider-note-system": "Integrované, vždy k dispozici",
+        "provider-note-custom": "Nahráno vámi"
     },
     "all-annotations": {
         "title": "Všechny poznámky",
@@ -3767,7 +3795,8 @@
         "filter-timeframe-30d": "Posledních 30 dní",
         "system": "Systém",
         "next-scrobble": "Další scrobble: {{date}}",
-        "filter-provider-label": "Poskytovatel scrobblování"
+        "filter-provider-label": "Poskytovatel scrobblování",
+        "filter-system": "Systémové"
     },
     "kavitaplus-diff": {
         "field-label": "Pole",
@@ -3882,7 +3911,11 @@
         "series-dont-match": "Série označené jako „Neshoda“",
         "scrobble-hold-active": "Série je pozastavena",
         "library-scrobbling-disabled": "Skrobblování knihovny je deaktivováno",
-        "token-expired": "Platnost tokenu AniList vypršela"
+        "token-expired": "Platnost tokenu AniList vypršela",
+        "no-matches": "Nebyly nalezeny žádné shody s dostatečnou jistotou, které by bylo možné automaticky vybrat",
+        "too-many-matches": "Byla nalezena více než jedna shoda s vysokou mírou jistoty, je nutný ruční zásah",
+        "series-missing-required-ids": "Nelze provést scrobblování, protože této sérii chybí požadovaná externí ID",
+        "chapter-missing-required-ids": "Nelze provést scrobblování, protože v této kapitole chybí požadovaná externí ID"
     },
     "search-input": {
         "clear": "Vymazat vyhledávání"
@@ -4251,10 +4284,10 @@
         "connect-tooltip": "Budete přesměrováni na Kavita+ a poskytovatele Scrobble"
     },
     "scrobble-provider-description-pipe": {
-        "ani-list": "Vše kolem mangy a lehkých románů",
         "my-anime-list": "Synchronizace mezi \"Chci číst\" a „Balíčky“ pro mangu a lehké romány",
         "hardcover": "Vše o knihách, mangách a lehkých románech!",
-        "manga-baka": "Vše o mangách a lehkých románech"
+        "anilist": "Vše o mangách a lehkých románech",
+        "mangabaka": "Vše o mangách a lehkých románech"
     },
     "review-scrobble-target-name-pipe": {
         "private": "Jen ty",
@@ -4333,5 +4366,13 @@
         "confirm-help": "Než dojde k jakékoli změně, zašleme vám odkaz, přes který můžete změnu dokončit.",
         "back-label": "Zpět",
         "send-code-label": "Odeslat kód"
+    },
+    "epub-font-title-pipe": {
+        "user-font-suffix": "(Uživatel)"
+    },
+    "recommendation-source-pipe": {
+        "similar": "Podobné",
+        "user-based": "Uživatelům se líbilo",
+        "personalized": "Pro tebe"
     }
 }
