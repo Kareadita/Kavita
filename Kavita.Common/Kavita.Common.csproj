@@ -20,6 +20,7 @@
       <PackageReference Include="Microsoft.Extensions.Hosting" Version="10.0.9" />
       <PackageReference Include="Microsoft.Net.Http.Headers" Version="10.0.9" />
       <PackageReference Include="NetVips" Version="3.2.0" />
+      <PackageReference Include="NetVips.Native" Version="8.18.3" />
       <PackageReference Include="Newtonsoft.Json" Version="13.0.4" />
       <PackageReference Include="SonarAnalyzer.CSharp" Version="10.27.0.140913">
         <PrivateAssets>all</PrivateAssets>
