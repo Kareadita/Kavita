@@ -2536,11 +2536,7 @@
         "volume-count": "{{match-series-result-item.volume-count}}",
         "chapter-count": "{{match-series-result-item.chapter-count}}",
         "matched-to": "Meaitseáilte faoi láthair le",
-        "searching-against": "Ag cuardach i gcoinne {{provider}}",
-        "selected-desc": "Roghnaithe mar gheall ar: {{libraryType}} {{format}}",
-        "library-type": "Cineál Leabharlainne:",
-        "format-type": "Formáid:",
-        "provider-help": "Soláthraí amháin in aghaidh an chineáil leabharlainne"
+        "searching-against": "Ag cuardach i gcoinne {{provider}}"
     },
     "email-history": {
         "description": "Anseo gheobhaidh tú gach ríomhphost a sheoltar ó Kavita agus chuig an úsáideoir.",
@@ -3038,16 +3034,42 @@
         "clean-tooltip": "Bain gach stíl"
     },
     "font-manager": {
-        "description": "Tagann roinnt clónna ionsuite le léitheoir epub Kavita, cuir do chlónna féin leis anseo. Uaslódáil comhad, nó bain úsáid as url clónna google. Féach ar an <a href='{{wikiLink}}' target='_blank' rel='noreferrer noopener'>vicí</a> le haghaidh tuilleadh eolais.",
+        "description": "Clónna ar féidir leat a roghnú astu sa léitheoir epub. Tá siad grúpáilte de réir teaghlaigh, an t-ainm a roghnaíonn tú agus tú ag léamh. Tá comhad amháin nó níos mó i ngach teaghlach dá meáchain agus stíleanna éagsúla. Faigh clónna ó {{googleFontsLink}}, nó féach ar an {{wikiLink}} le haghaidh tuilleadh eolais. ",
         "add": "{{common.add}}",
         "drag-n-drop": "{{cover-image-chooser.drag-n-drop}}",
         "upload": "{{cover-image-chooser.upload}}",
         "upload-continued": "comhad cló",
-        "preview-default": "Uaslódáil do chló féin trí chomhad nó url Google Font",
+        "preview-default": "Roghnaigh teaghlach chun réamhamharc a fháil air, nó cuir do chló féin leis trí chomhad nó url Google Font",
         "delete": "{{common.delete}}",
         "no-preview": "Ní féidir réamhamharc a dhéanamh ar an gcló seo. Glacfaidh sé seo an stíl réamhshocraithe ón leabhar.",
         "brown-fox": "Léimeann an sionnach donn tapaidh thar an madra leisciúil",
-        "filter-system-fonts-label": "Clónna Córas Scagaire"
+        "filter-system-fonts-label": "Clónna Córas Scagaire",
+        "wiki": "Vicí",
+        "google-fonts": "Clónna Google",
+        "add-font": "Cuir cló leis",
+        "families": "Teaghlaigh",
+        "custom-only": "Saincheaptha amháin",
+        "var": "VAR",
+        "variable": "Athróg",
+        "style": "stíl",
+        "styles": "stíleanna",
+        "file": "comhad",
+        "files": "comhaid",
+        "in-this-family": "sa teaghlach seo",
+        "styles-summary": "· {{styles}}",
+        "roman": "Rómhánach",
+        "italic": "Iodálach",
+        "regular": "Rialta",
+        "alphabet": "ABCDEFGHIJKLM abcdefghijklm 0123456789",
+        "weight-axis": "Ais meáchain",
+        "weight-axis-hint": "tarraing chun réamhamharc a fháil ar an raon iomlán",
+        "weight-thin": "tanaí",
+        "weight-black": "dubh",
+        "reading-sample": "Sampla léitheoireachta",
+        "reading-sample-text": "Chas sí an leathanach go mall, solas an lampa ag glacadh gach litir. Shiúil scéalta cogarnacha faoi dhúch agus páipéar aníos ón dromlach, léim na cúig draoi dornálaíochta go tapaidh, agus lean an oíche ar aghaidh.",
+        "provider-note-system": "Tógtha isteach, ar fáil i gcónaí",
+        "provider-note-custom": "Uaslódáilte agatsa",
+        "wght": "meáchan"
     },
     "all-annotations": {
         "title": "Gach Anótáil",
@@ -3767,7 +3789,8 @@
         "filter-timeframe-30d": "30 Lá Deiridh",
         "system": "Córas",
         "next-scrobble": "An chéad Scrobble eile: {{date}}",
-        "filter-provider-label": "Soláthraí Scrobble"
+        "filter-provider-label": "Soláthraí Scrobble",
+        "filter-system": "Córas"
     },
     "kavitaplus-diff": {
         "field-label": "Réimse",
@@ -4214,10 +4237,8 @@
         "connect-tooltip": "Déanfar tú a atreorú chuig Kavita+ agus an soláthraí Scrobble"
     },
     "scrobble-provider-description-pipe": {
-        "ani-list": "Gach rud Manga & Úrscéalta Éadroma",
         "my-anime-list": "Sioncrónaíonn \"Want To Read & Stacks\" le haghaidh Manga agus Úrscéalta Éadroma",
-        "hardcover": "Gach rud Leabhair, Manga, agus Úrscéalta Éadroma!",
-        "manga-baka": "Gach rud Manga & Úrscéalta Éadroma"
+        "hardcover": "Gach rud Leabhair, Manga, agus Úrscéalta Éadroma!"
     },
     "review-scrobble-target-name-pipe": {
         "private": "Tusa amháin",
@@ -4333,5 +4354,8 @@
         "confirm-help": "Seolfaimid nasc chugat chun an t-athrú a chríochnú sula n-athraítear aon rud.",
         "back-label": "Ar ais",
         "send-code-label": "Seol cód"
+    },
+    "epub-font-title-pipe": {
+        "user-font-suffix": "(Úsáideoir)"
     }
 }

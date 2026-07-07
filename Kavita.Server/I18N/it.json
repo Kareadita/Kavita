@@ -201,5 +201,21 @@
     "generic-cover-person-save": "Impossibile salvare l'immagine di copertina nella Persona",
     "error-import-stack": "Si è verificato un errore durante l'importazione dello stack MAL",
     "kavitaplus-restricted": "Riservato a Kavita+",
-    "password-authentication-disabled": "Autenticazione tramite password è disabilitata, utilizzare OpenID Connect"
+    "password-authentication-disabled": "Autenticazione tramite password è disabilitata, utilizzare OpenID Connect",
+    "cannot-change-identity-provider-original-user": "Il provider di identità dell'account amministratore originale non può essere cambiato",
+    "client-device-doesnt-exist": "Il dispositivo non esiste",
+    "annotation-failed-create": "Impossibile creare annotazione, riprova",
+    "annotation-delete": "Impossibile rimuovere annotazione",
+    "url-malformed": "L'URL è malformato",
+    "url-https-only": "Solo gli URL HTTPS sono permessi",
+    "url-unable-to-resolve": "Impossibile risolvere nome host",
+    "url-blocked-address": "L'URL punta ad un indirizzo bloccato",
+    "opds-continue-reading-title": "Continua a leggere da: {0}",
+    "cbl-export-failed": "Impossibile esportare file CBL, controlla il registro",
+    "download-not-allowed": "L'utente non ha il permesso per scaricare",
+    "cbl-import-download-from-url": "Impossibile scaricare il file dall'URL",
+    "cbl-import-validation-types": "Solo file .cbl e .json sono permessi",
+    "email.auth-key-expired.subject": "Kavita - Una o più chiavi di autenticazione sono scadute!",
+    "email.auth-key-expired.header": "Una o più chiavi di autenticazione sono scadute!",
+    "oidc-managed": "Gli utenti gestiti tramite OIDC non possono essere modificati."
 }

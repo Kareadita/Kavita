@@ -51,7 +51,7 @@
         "no-data": "{{common.no-data}}",
         "volume-and-chapter-num": "第{{v}}卷 第{{n}}章",
         "volume-num": "{{num}} 卷",
-        "chapter-num": "章節 {{num}}",
+        "chapter-num": "{{entity-title.chapter-num}}",
         "rating": "評分{{r}}",
         "not-applicable": "不適用",
         "processed": "處理",
@@ -799,7 +799,8 @@
         "length-title": "{{edit-chapter-modal.words-label}}",
         "age-rating-title": "{{metadata-fields.age-rating-title}}",
         "folder-path-title": "資料夾路徑",
-        "file-path-title": "檔案"
+        "file-path-title": "檔案",
+        "bytes-count": "{{num}} bytes"
     },
     "related-tab": {
         "reading-lists-title": "{{reading-lists.title}}",
@@ -843,10 +844,12 @@
         "no-data": "尚未創建收藏"
     },
     "entity-title": {
-        "issue-num": "{{common.issue-hash-num}}",
-        "book-num": "{{common.book-num-shorthand}}",
+        "issue-num": "第 {{num}} 期",
+        "book-num": "Book {{num}}",
         "special": "特集",
-        "single-volume": "單卷"
+        "single-volume": "單卷",
+        "chapter-num": "第 {{num}} 章",
+        "volume-num": "第 {{num}} 卷"
     },
     "manage-media-issues": {
         "filter-label": "{{common.filter}}",
@@ -1879,10 +1882,10 @@
         "series-count": "{{num}} 個系列",
         "item-count": "{{num}} 個項目",
         "book-num": "書籍",
-        "chapter-num-shorthand": "第 {{num}}章",
+        "chapter-num-shorthand": "第 {{num}} 章",
         "issue-num-shorthand": "#{{num}}",
-        "book-num-shorthand": "第{{num}}本",
-        "volume-num-shorthand": "第{{num}}卷",
+        "book-num-shorthand": "第 {{num}} 本",
+        "volume-num-shorthand": "第 {{num}} 卷",
         "issue-num": "期",
         "add": "新增",
         "select-all": "全選",
@@ -2599,7 +2602,7 @@
     },
     "match-series-result-item": {
         "volume-count": "{{server-stats.volume-count}}",
-        "chapter-count": "{{common.chapter-count}}",
+        "chapter-count": "{{ num }} ch",
         "issue-count": "{{common.issue-count}}"
     },
     "role-localized-pipe": {

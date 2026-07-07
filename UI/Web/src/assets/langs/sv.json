@@ -3244,5 +3244,17 @@
             "help": "Hur du uppdaterar",
             "download": "Ladda ner"
         }
+    },
+    "review-scrobble-target-name-pipe": {
+        "friends": "Vänner",
+        "public": "Alla"
+    },
+    "scrobble-read-status-pipe": {
+        "ignore": "Ignorera",
+        "want-to-read": "Vill läsa",
+        "read": "Läst",
+        "unread": "Oläst",
+        "dropped": "Nedlagd",
+        "on-hold": "Pausad"
     }
 }
