@@ -23,6 +23,17 @@ public class KavitaPlusAuditRepository(DataContext context) : IKavitaPlusAuditRe
 
     public void Add(KavitaPlusAuditLog entry) => context.KavitaPlusAuditLogs.Add(entry);
 
+    public Task<int> GetScrobbleFailureCountAsync(int userId, CancellationToken ct = default)
+    {
+        return context.KavitaPlusAuditLogs
+            .Where(e => e.Category == KavitaPlusAuditCategory.Scrobble && e.UserId == userId &&
+                        e.Status == AuditStatus.Failure)
+            .Where(e => context.ScrobbleEvent
+                .Where(se => e.SubjectType != AuditSubjectType.Chapter || e.SubjectId == se.ChapterId)
+                .Any(se => !se.IsProcessed && se.AppUserId == userId && se.SeriesId == e.SeriesId)
+            ).CountAsync(ct);
+    }
+
     public async Task DeleteOlderThanAsync(DateTime cutoff, CancellationToken ct = default)
     {
         await context.KavitaPlusAuditLogs

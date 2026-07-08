@@ -1392,8 +1392,16 @@ public class ScrobblingService : IScrobblingService
 
         foreach (var evt in eventList.Where(e => !CanProcessScrobbleEvent(e)))
         {
-            await _auditService.LogTemperedAsync(al => al.SeriesId == evt.SeriesId, KavitaPlusAuditCategory.Scrobble,
-                KavitaPlusEventType.ScrobbleEventSkipped, AuditStatus.Info, AuditSubjectType.Series, evt.SeriesId, payload: ToAuditParams(evt), userId: evt.AppUserId, ct: ct);
+            if (evt.ChapterId is null)
+            {
+                await _auditService.LogTemperedAsync(al => al.SeriesId == evt.SeriesId, KavitaPlusAuditCategory.Scrobble,
+                    KavitaPlusEventType.ScrobbleEventSkipped, AuditStatus.Info, AuditSubjectType.Series, evt.SeriesId, payload: ToAuditParams(evt), userId: evt.AppUserId, ct: ct);
+            }
+            else
+            {
+                await _auditService.LogTemperedAsync(al => al.SeriesId == evt.SeriesId && al.SubjectId == evt.ChapterId, KavitaPlusAuditCategory.Scrobble,
+                    KavitaPlusEventType.ScrobbleEventSkipped, AuditStatus.Info, AuditSubjectType.Chapter, evt.SeriesId, payload: ToAuditParams(evt), userId: evt.AppUserId, subjectId: evt.ChapterId , ct: ct);
+            }
         }
 
         foreach (var evt in eventList.Where(CanProcessScrobbleEvent))
@@ -1417,8 +1425,17 @@ public class ScrobblingService : IScrobblingService
             if (!gate.HasRateLeft())
             {
                 _logger.LogDebug("Skipped processing Scrobble event due to premature rate exceeded, provider: {Provider}", evt.ScrobbleProvider);
-                await _auditService.LogScrobbleAsync(KavitaPlusEventType.ScrobbleEventSkipped, evt.SeriesId,
-                    ToAuditParams(evt), AuditStatus.Failure, "rate-limit-hit", userId: evt.AppUserId, ct: ct);
+
+                if (evt.ChapterId is null)
+                {
+                    await _auditService.LogScrobbleAsync(KavitaPlusEventType.ScrobbleEventSkipped, evt.SeriesId,
+                        ToAuditParams(evt), AuditStatus.Failure, "rate-limit-hit", userId: evt.AppUserId, ct: ct);
+                }
+                else
+                {
+                    await _auditService.LogChapterScrobbleAsync(KavitaPlusEventType.ScrobbleEventSkipped, evt.SeriesId, evt.ChapterId.Value,
+                        ToAuditParams(evt), AuditStatus.Failure, "rate-limit-hit", userId: evt.AppUserId, ct: ct);
+                }
 
                 continue;
             }
@@ -1549,22 +1566,32 @@ public class ScrobblingService : IScrobblingService
 
             if (response.Successful || response.ErrorMessage == null)
             {
-                await _auditService.LogScrobbleAsync(KavitaPlusEventType.ScrobbleEventSent, evt.SeriesId,
-                    new AuditLogScrobbleParamsDto
-                    {
-                        Provider = data.Provider,
-                        ScrobbleEventType = data.ScrobbleEventType,
-                        ChapterNumber = data.ChapterNumber,
-                        VolumeNumber = data.VolumeNumber,
-                        PercentRead = data.PercentRead,
-                        TotalReadCountForSeries = data.TotalReadCountForSeries,
-                        Rating = data.Rating,
-                        ReviewBody = data.ReviewBody,
-                        ReadStatus = data.ReadStatus ?? ScrobbleReadStatus.Ignore,
-                        TransitionRuleKind = evt.TransitionRuleKind,
-                        LibraryType = evt.Series?.Library?.Type ?? LibraryType.Manga
-                    },
-                    AuditStatus.Success, userId: evt.AppUserId);
+                var scrobbleParams = new AuditLogScrobbleParamsDto
+                {
+                    Provider = data.Provider,
+                    ScrobbleEventType = data.ScrobbleEventType,
+                    ChapterNumber = data.ChapterNumber,
+                    VolumeNumber = data.VolumeNumber,
+                    PercentRead = data.PercentRead,
+                    TotalReadCountForSeries = data.TotalReadCountForSeries,
+                    Rating = data.Rating,
+                    ReviewBody = data.ReviewBody,
+                    ReadStatus = data.ReadStatus ?? ScrobbleReadStatus.Ignore,
+                    TransitionRuleKind = evt.TransitionRuleKind,
+                    LibraryType = evt.Series?.Library?.Type ?? LibraryType.Manga
+                };
+
+                if (evt.ChapterId is null)
+                {
+                    await _auditService.LogScrobbleAsync(KavitaPlusEventType.ScrobbleEventSent, evt.SeriesId,
+                        scrobbleParams, AuditStatus.Success, userId: evt.AppUserId);
+                }
+                else
+                {
+                    await _auditService.LogChapterScrobbleAsync(KavitaPlusEventType.ScrobbleEventSent, evt.SeriesId,
+                        evt.ChapterId.Value, scrobbleParams, AuditStatus.Success, userId: evt.AppUserId);
+                }
+
                 return response.RateLeft;
             }
 
@@ -1606,10 +1633,8 @@ public class ScrobblingService : IScrobblingService
                 await _auditService.LogScrobbleAsync(KavitaPlusEventType.ScrobbleEventFailed, evt.SeriesId,
                     ToAuditParams(evt), AuditStatus.Failure, "unknown-series", userId: evt.AppUserId);
 
-            } else if (response.ErrorMessage.StartsWith("Review"))
+            } else
             {
-                // Log the Series name and Id in ScrobbleErrors
-                _logger.LogInformation("Kavita+ was unable to save the review");
                 if (!await _unitOfWork.ScrobbleRepository.HasErrorForSeries(evt.SeriesId))
                 {
                     _unitOfWork.ScrobbleRepository.Attach(new ScrobbleError()
@@ -1620,7 +1645,8 @@ public class ScrobblingService : IScrobblingService
                         SeriesId = evt.SeriesId
                     });
                 }
-                evt.SetErrorMessage(ReviewFailedErrorMessage);
+
+                evt.SetErrorMessage(response.ErrorMessage.StartsWith("Review") ? ReviewFailedErrorMessage : response.ErrorMessage);
             }
 
             throw new KavitaException(response.ErrorMessage);

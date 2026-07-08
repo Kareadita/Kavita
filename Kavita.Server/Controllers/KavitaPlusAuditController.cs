@@ -3,6 +3,7 @@ using Kavita.API.Database;
 using Kavita.Common.Helpers;
 using Kavita.Models.Constants;
 using Kavita.Models.DTOs.KavitaPlus;
+using Kavita.Models.Entities.Enums.Audit;
 using Kavita.Server.Attributes;
 using Kavita.Server.Extensions;
 using Microsoft.AspNetCore.Authorization;
@@ -68,5 +69,16 @@ public class KavitaPlusAuditController(IUnitOfWork unitOfWork) : BaseApiControll
         Response.AddPaginationHeader(res);
 
         return Ok(res);
+    }
+
+    /// <summary>
+    /// Returns the number of scrobble events that have failed to be sent to Kavita+. (I.e. Has a linked failure audit
+    /// & is not sent)
+    /// </summary>
+    /// <returns></returns>
+    [HttpGet("failed-scrobble-events")]
+    public async Task<ActionResult<int>> GetCurrentlyFailedScrobbleEvents()
+    {
+        return Ok(await unitOfWork.KavitaPlusAuditRepository.GetScrobbleFailureCountAsync(UserId, HttpContext.RequestAborted));
     }
 }
