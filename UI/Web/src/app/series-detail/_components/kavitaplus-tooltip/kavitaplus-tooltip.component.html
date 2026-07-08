@@ -96,7 +96,12 @@
               <app-kavitaplus-audit-event-type-icon [type]="event.eventType" [category]="event.category" />
             </div>
             <div class="kplus-event-body">
-              <div class="kplus-event-title">{{event.eventType | kavitaPlusEventType}}</div>
+              <div class="kplus-event-title">
+                @if (event.scrobbleDetails?.provider; as provider) {
+                  <app-scrobble-provider-image [provider]="provider" [size]="16" />
+                }
+                {{event.eventType | kavitaPlusEventType}}
+              </div>
 
               @let desc = event | kavitaPlusEventDescription;
               @if (desc) {
