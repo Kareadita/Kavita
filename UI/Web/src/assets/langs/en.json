@@ -2759,6 +2759,8 @@
         "key-bind-tooltip-navigate-to-scrobbling": "Open settings page on the My Activity tab",
         "key-bind-title-escape": "Escape",
         "key-bind-tooltip-escape": "Close the currently open context",
+        "key-bind-title-navigate-home": "Navigate home",
+        "key-bind-tooltip-navigate-home": "Navigate to the dashboard from anywhere in Kavita",
 
         "key-bind-title-toggle-fullscreen":  "Toggle full screen",
         "key-bind-tooltip-toggle-fullscreen":  "Alternative to F11",

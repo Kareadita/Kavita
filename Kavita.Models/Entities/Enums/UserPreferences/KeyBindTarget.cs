@@ -57,4 +57,7 @@ public enum KeyBindTarget
 
     [Description(nameof(LastPage))]
     LastPage = 17,
+
+    [Description(nameof(NavigateHome))]
+    NavigateHome = 18,
 }
