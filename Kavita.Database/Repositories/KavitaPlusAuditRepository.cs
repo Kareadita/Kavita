@@ -151,6 +151,7 @@ public class KavitaPlusAuditRepository(DataContext context) : IKavitaPlusAuditRe
             ComicVineId = series.ComicVineId != string.Empty ? series.ComicVineId : null,
             MalId = series.MalId != 0 ? series.MalId : null,
             MetronId = series.MetronId != 0 ? series.MetronId : null,
+            IsStandAlone = series.IsStandAlone,
             MetadataProvider = series.ExternalSeriesMetadata?.Provider,
             NextRefreshUtc = series.ExternalSeriesMetadata?.ValidUntilUtc,
             LastRefreshedUtc = series.ExternalSeriesMetadata?.LastModifiedUtc,

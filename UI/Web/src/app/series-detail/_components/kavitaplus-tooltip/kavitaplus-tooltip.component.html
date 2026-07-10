@@ -47,7 +47,7 @@
                   <app-scrobble-provider-tag-badge [provider]="ScrobbleProvider.MangaBaka" [id]="info.mangaBakaId" />
                 }
                 @if (info.hardcoverId) {
-                  <app-scrobble-provider-tag-badge [provider]="ScrobbleProvider.Hardcover" [id]="info.hardcoverId" />
+                  <app-scrobble-provider-tag-badge [provider]="ScrobbleProvider.Hardcover" [id]="info.hardcoverId" [isStandAlone]="info.isStandAlone" />
                 }
                 @if (info.cbrId) {
                   <div class="d-flex align-items-center gap-1">

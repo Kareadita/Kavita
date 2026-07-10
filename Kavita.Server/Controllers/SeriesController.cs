@@ -688,7 +688,8 @@ public class SeriesController(
             PlusMediaFormat = plusFormat,
             MatchedProvider = provider,
             PrimaryProvider = series.Library.MetadataProvider,
-            SeriesFormat = series.Format
+            SeriesFormat = series.Format,
+            IsStandalone = series.IsStandAlone,
         });
     }
 
