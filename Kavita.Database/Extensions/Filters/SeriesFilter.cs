@@ -319,24 +319,33 @@ public static class SeriesFilter
 
             var date = DateTime.Now.AddDays(-timeDeltaDays);
 
+            // ReadLast filters on the number of days since the series was last read, not on a raw date.
+            // A larger day-delta means the series was last read further in the past, i.e. an *earlier*
+            // MaxDate, so the numeric comparisons are inverted relative to the date they map to. For
+            // example 'read last greater than 30 days' means 'haven't read in over a month', which is
+            // MaxDate < date. (See #4716)
             switch (comparison)
             {
                 case FilterComparison.Equal:
                     subQuery = subQuery.Where(s => s.MaxDate != null && s.MaxDate.Equals(date));
                     break;
-                case FilterComparison.IsAfter:
                 case FilterComparison.GreaterThan:
-                    subQuery = subQuery.Where(s => s.MaxDate != null && s.MaxDate > date);
-                    break;
-                case FilterComparison.GreaterThanEqual:
-                    subQuery = subQuery.Where(s => s.MaxDate != null && s.MaxDate >= date);
-                    break;
-                case FilterComparison.IsBefore:
-                case FilterComparison.LessThan:
                     subQuery = subQuery.Where(s => s.MaxDate != null && s.MaxDate < date);
                     break;
-                case FilterComparison.LessThanEqual:
+                case FilterComparison.GreaterThanEqual:
                     subQuery = subQuery.Where(s => s.MaxDate != null && s.MaxDate <= date);
+                    break;
+                case FilterComparison.LessThan:
+                    subQuery = subQuery.Where(s => s.MaxDate != null && s.MaxDate > date);
+                    break;
+                case FilterComparison.LessThanEqual:
+                    subQuery = subQuery.Where(s => s.MaxDate != null && s.MaxDate >= date);
+                    break;
+                case FilterComparison.IsAfter:
+                    subQuery = subQuery.Where(s => s.MaxDate != null && s.MaxDate > date);
+                    break;
+                case FilterComparison.IsBefore:
+                    subQuery = subQuery.Where(s => s.MaxDate != null && s.MaxDate < date);
                     break;
                 case FilterComparison.NotEqual:
                     subQuery = subQuery.Where(s => s.MaxDate != null && !s.MaxDate.Equals(date));

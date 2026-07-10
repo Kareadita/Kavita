@@ -1102,7 +1102,125 @@ public class SeriesFilterTests(ITestOutputHelper outputHelper): AbstractDbTest(o
 
     #region HasReadLast
 
+    /// <summary>
+    /// Creates two series with reading progress: 'Recent' was last read today and 'Old' was last read 30 days ago.
+    /// </summary>
+    private async Task<AppUser> SetupHasReadLast(IUnitOfWork unitOfWork, DataContext context)
+    {
+        var library = new LibraryBuilder("Manga")
+            .WithSeries(new SeriesBuilder("Recent").WithPages(10)
+                .WithVolume(new VolumeBuilder("1")
+                    .WithChapter(new ChapterBuilder("1").WithPages(10).Build())
+                    .Build())
+                .Build())
+            .WithSeries(new SeriesBuilder("Old").WithPages(10)
+                .WithVolume(new VolumeBuilder("1")
+                    .WithChapter(new ChapterBuilder("1").WithPages(10).Build())
+                    .Build())
+                .Build())
+            .Build();
+        var user = new AppUserBuilder("user", "user@gmail.com")
+            .WithLibrary(library)
+            .Build();
 
+        context.Users.Add(user);
+        await context.SaveChangesAsync();
+
+        var readerService = new ReaderService(unitOfWork, Substitute.For<ILogger<ReaderService>>(),
+            Substitute.For<IEventHub>(), Substitute.For<IImageService>(),
+            Substitute.For<IDirectoryService>(), Substitute.For<IScrobblingService>(),
+            Substitute.For<IReadingSessionService>(), Substitute.For<IClientInfoAccessor>(),
+            Substitute.For<ISeriesService>(), Substitute.For<IEntityNamingService>(),
+            Substitute.For<ILocalizationService>(), Substitute.For<IBookService>());
+
+        var recentSeries = await unitOfWork.SeriesRepository.GetSeriesByIdAsync(1);
+        var recentChapter = recentSeries.Volumes.First().Chapters.First();
+        Assert.True(await readerService.SaveReadingProgress(new ProgressDto()
+        {
+            ChapterId = recentChapter.Id,
+            LibraryId = 1,
+            SeriesId = recentSeries.Id,
+            PageNum = 5,
+            VolumeId = recentChapter.VolumeId
+        }, user.Id));
+
+        var oldSeries = await unitOfWork.SeriesRepository.GetSeriesByIdAsync(2);
+        var oldChapter = oldSeries.Volumes.First().Chapters.First();
+        Assert.True(await readerService.SaveReadingProgress(new ProgressDto()
+        {
+            ChapterId = oldChapter.Id,
+            LibraryId = 1,
+            SeriesId = oldSeries.Id,
+            PageNum = 5,
+            VolumeId = oldChapter.VolumeId
+        }, user.Id));
+
+        // Back-date the 'Old' progress to 30 days ago. ExecuteUpdate bypasses change tracking so the
+        // DataContext IEntityDate hook doesn't reset LastModified back to now.
+        var thirtyDaysAgo = DateTime.Now.AddDays(-30);
+        await context.AppUserProgresses
+            .Where(p => p.SeriesId == oldSeries.Id)
+            .ExecuteUpdateAsync(setters => setters
+                .SetProperty(p => p.LastModified, thirtyDaysAgo)
+                .SetProperty(p => p.LastModifiedUtc, thirtyDaysAgo.ToUniversalTime()));
+
+        return user;
+    }
+
+    [Fact]
+    public async Task HasReadLast_GreaterThan_ReturnsSeriesNotReadRecently()
+    {
+        // 'Read Last greater than 10 days' means the last read was more than 10 days ago, i.e. 'Old'.
+        var (unitOfWork, context, _) = await CreateDatabase();
+        var user = await SetupHasReadLast(unitOfWork, context);
+
+        var queryResult = await context.Series.HasReadLast(true, FilterComparison.GreaterThan, 10, user.Id)
+            .ToListAsync();
+
+        Assert.Single(queryResult);
+        Assert.Equal("Old", queryResult.First().Name);
+    }
+
+    [Fact]
+    public async Task HasReadLast_LessThan_ReturnsSeriesReadRecently()
+    {
+        // 'Read Last less than 10 days' means the last read was within the last 10 days, i.e. 'Recent'.
+        var (unitOfWork, context, _) = await CreateDatabase();
+        var user = await SetupHasReadLast(unitOfWork, context);
+
+        var queryResult = await context.Series.HasReadLast(true, FilterComparison.LessThan, 10, user.Id)
+            .ToListAsync();
+
+        Assert.Single(queryResult);
+        Assert.Equal("Recent", queryResult.First().Name);
+    }
+
+    [Fact]
+    public async Task HasReadLast_GreaterThanEqual_IncludesBoundary()
+    {
+        // Boundary of exactly 30 days should include the 'Old' series (read 30 days ago) for 'more than or
+        // equal to' 30 days, and exclude the 'Recent' series read today.
+        var (unitOfWork, context, _) = await CreateDatabase();
+        var user = await SetupHasReadLast(unitOfWork, context);
+
+        var queryResult = await context.Series.HasReadLast(true, FilterComparison.GreaterThanEqual, 30, user.Id)
+            .ToListAsync();
+
+        Assert.Single(queryResult);
+        Assert.Equal("Old", queryResult.First().Name);
+    }
+
+    [Fact]
+    public async Task HasReadLast_ConditionFalse_ReturnsAll()
+    {
+        var (unitOfWork, context, _) = await CreateDatabase();
+        await SetupHasReadLast(unitOfWork, context);
+
+        var queryResult = await context.Series.HasReadLast(false, FilterComparison.GreaterThan, 10, 1)
+            .ToListAsync();
+
+        Assert.Equal(2, queryResult.Count);
+    }
 
     #endregion
 
