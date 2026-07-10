@@ -129,6 +129,7 @@ import {StatisticsService} from "src/app/_services/statistics.service";
 import {Pagination} from "src/app/_models/pagination";
 import {ReadingHistoryViewerComponent} from "src/app/shared/reading-history-viewer/reading-history-viewer.component";
 import {SeriesUpdateEvent} from "../../../_models/events/series-update-event";
+import {finalize} from "rxjs/operators";
 
 interface StoryLineItem {
   chapter?: ChapterCardEntity;
@@ -833,29 +834,25 @@ class SeriesDetailComponent implements OnInit, AfterViewInit {
   loadPlusMetadata(seriesId: number, libraryType: LibraryType) {
     this.isLoadingExtra.set(true);
 
-    this.metadataService.getSeriesMetadataFromPlus(seriesId, libraryType).subscribe(data => {
-      if (data === null) {
-        this.isLoadingExtra.set(false);
-        return;
-      }
+    this.metadataService.getSeriesMetadataFromPlus(seriesId, libraryType).pipe(
+      tap(data => {
+        if (data === null) {
+          return;
+        }
 
-      // Reviews
-      this.reviews.set(data.reviews.filter(r => !r.isExternal));
-      this.plusReviews.set(data.reviews.filter(r => r.isExternal));
+        this.reviews.set(data.reviews.filter(r => !r.isExternal));
+        this.plusReviews.set(data.reviews.filter(r => r.isExternal));
 
-      if (data.ratings) {
-        this.ratings.set([...data.ratings]);
-      }
+        if (data.ratings) {
+          this.ratings.set([...data.ratings]);
+        }
 
-
-      // Recommendations
-      if (data.recommendations) {
-        this.combinedRecs.set([...data.recommendations.ownedSeries, ...data.recommendations.externalSeries]);
-      }
-
-
-      this.isLoadingExtra.set(false);
-    });
+        if (data.recommendations) {
+          this.combinedRecs.set([...data.recommendations.ownedSeries, ...data.recommendations.externalSeries]);
+        }
+      }),
+      finalize(() => this.isLoadingExtra.set(false)),
+    ).subscribe();
   }
 
   setContinuePoint() {
