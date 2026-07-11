@@ -130,6 +130,7 @@ import {Pagination} from "src/app/_models/pagination";
 import {ReadingHistoryViewerComponent} from "src/app/shared/reading-history-viewer/reading-history-viewer.component";
 import {SeriesUpdateEvent} from "../../../_models/events/series-update-event";
 import {finalize} from "rxjs/operators";
+import {ExternalMetadataUpdateEvent} from "../../../_models/events/external-metadata-update-event";
 
 interface StoryLineItem {
   chapter?: ChapterCardEntity;
@@ -550,6 +551,10 @@ class SeriesDetailComponent implements OnInit, AfterViewInit {
       } else if (event.event === EVENTS.SeriesUpdated) {
         if ((event.payload as SeriesUpdateEvent).id === this.seriesId()) {
           this.loadPageSource.next(false);
+        }
+      } else if (event.event === EVENTS.ExternalMetadataUpdate) {
+        if ((event.payload as ExternalMetadataUpdateEvent).seriesId === this.seriesId()) {
+          this.loadPageSource.next(true);
         }
       }
     });

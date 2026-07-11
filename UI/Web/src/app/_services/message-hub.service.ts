@@ -161,6 +161,10 @@ export enum EVENTS {
    * The K+ license info has updated
    */
   LicenseInfoUpdate = 'LicenseInfoUpdate',
+  /**
+   * The K+ Metadata for a series has been updated
+   */
+  ExternalMetadataUpdate = 'ExternalMetadataUpdate',
 }
 
 export interface Message<T> {
@@ -471,6 +475,13 @@ export class MessageHubService {
       this.messagesSource.next({
         event: EVENTS.LicenseInfoUpdate,
         payload: resp.body,
+      });
+    });
+
+    this.hubConnection.on(EVENTS.ExternalMetadataUpdate, (resp) => {
+      this.messagesSource.next({
+        event: EVENTS.ExternalMetadataUpdate,
+        payload: resp.body
       });
     });
   }

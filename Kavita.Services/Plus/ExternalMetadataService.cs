@@ -730,7 +730,7 @@ public class ExternalMetadataService : IExternalMetadataService
         if (madeMetadataModification)
         {
             // Inform the UI of the update
-            await _eventHub.SendMessageAsync(MessageFactory.ScanSeries, MessageFactory.ScanSeriesEvent(series.LibraryId, series.Id, series.Name), false, ct);
+            await _eventHub.SendMessageAsync(MessageFactory.ExternalMetadataUpdate, MessageFactory.ExternalMetadataUpdateEvent(series.Id), false, ct);
         }
 
         // Volume and MangaBaka chapter covers are not returned inline in the Series detail response, so fetch and apply them separately

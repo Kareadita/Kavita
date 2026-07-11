@@ -200,6 +200,10 @@ public static class MessageFactory
     /// The K+ license info has updated
     /// </summary>
     public const string LicenseInfoUpdate = nameof(LicenseInfoUpdate);
+    /// <summary>
+    /// The K+ Metadata for a series has been updated
+    /// </summary>
+    public const string ExternalMetadataUpdate = nameof(ExternalMetadataUpdate);
 
 
     public static SignalRMessage DashboardUpdateEvent(int userId)
@@ -864,6 +868,18 @@ public static class MessageFactory
         return new SignalRMessage
         {
             Name = LicenseInfoUpdate
+        };
+    }
+
+    public static SignalRMessage ExternalMetadataUpdateEvent(int seriesId)
+    {
+        return new SignalRMessage
+        {
+            Name = ExternalMetadataUpdate,
+            Body = new
+            {
+                SeriesId = seriesId
+            }
         };
     }
 }
