@@ -1358,7 +1358,10 @@
         "people-header": "People",
         "tags-header": "Tags",
         "source-genre-tags-placeholder": "Source genre/tag",
-        "dest-genre-tags-placeholder": "Destination genre/tag"
+        "dest-genre-tags-placeholder": "Destination genre/tag",
+        "volume-header": "Volume",
+        "enable-volume-cover-label": "Volume Cover",
+        "enable-volume-cover-tooltip": "Allow Kavita to set Volume covers"
     },
 
     "book-line-overlay": {
@@ -1665,6 +1668,7 @@
         "person": "Person",
         "collection": "Collection",
         "chapter": "Chapter",
+        "volume": "Volume",
         "global": "Global"
     },
 
@@ -1694,6 +1698,7 @@
         "review-submitted": "Review submitted",
         "fields-updated": "{{count}} fields updated",
         "chapter-cover-updated": "Cover updated: {{chapter}}",
+        "volume-cover-updated": "Volume cover updated: {{volume}}",
         "series-cover-updated": "Series cover updated",
         "series-match-fixed": "Series matched with {{matchName}}",
         "collection-synced": "{{collectionName}}: {{itemCount}} items synced, {{missingCount}} missing",
@@ -1722,6 +1727,7 @@
         "cover-updated": "Cover Updated",
         "chapter-metadata-updated": "Chapter Metadata Updated",
         "chapter-cover-updated": "Chapter Cover Updated",
+        "volume-cover-updated": "Volume Cover Updated",
         "person-cover-updated": "Person Cover Updated",
         "person-alias-added": "Person Alias Added",
         "collection-synced": "Collection Synced",
@@ -2379,7 +2385,8 @@
         "comment-header": "Comment",
         "edit-header": "Edit",
         "edit-item-alt": "Edit {{seriesName}}",
-        "no-data": "No issues"
+        "no-data": "No issues",
+        "generic": "There was an unknown error"
     },
 
     "default-date-pipe": {
@@ -2752,6 +2759,8 @@
         "key-bind-tooltip-navigate-to-scrobbling": "Open settings page on the My Activity tab",
         "key-bind-title-escape": "Escape",
         "key-bind-tooltip-escape": "Close the currently open context",
+        "key-bind-title-navigate-home": "Navigate home",
+        "key-bind-tooltip-navigate-home": "Navigate to the dashboard from anywhere in Kavita",
 
         "key-bind-title-toggle-fullscreen":  "Toggle full screen",
         "key-bind-tooltip-toggle-fullscreen":  "Alternative to F11",
@@ -3614,7 +3623,7 @@
     },
 
     "day-breakdown": {
-        "title": "Day Breakdown",
+        "title": "Reading by Day",
         "no-data": "No progress, get to reading"
     },
 
@@ -4403,7 +4412,8 @@
         "chapter-summary": "Summary (Chapter)",
         "chapter-covers": "Covers (Chapter)",
         "chapter-publisher": "{{person-role-pipe.publisher}} (Chapter)",
-        "chapter-title": "Title (Chapter)"
+        "chapter-title": "Title (Chapter)",
+        "volume-covers": "Covers (Volume)"
     },
 
 

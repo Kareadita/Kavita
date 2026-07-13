@@ -48,7 +48,7 @@
                   <app-scrobble-provider-tag-badge [provider]="ScrobbleProvider.Cbr" [id]="match.cbrId" />
                 }
                 @case (MetadataProvider.Hardcover) {
-                  <app-scrobble-provider-tag-badge [provider]="ScrobbleProvider.Hardcover" [id]="match.hardcoverId" />
+                  <app-scrobble-provider-tag-badge [provider]="ScrobbleProvider.Hardcover" [id]="match.hardcoverId" [isStandAlone]="match.isStandAlone" />
                 }
               }
             }

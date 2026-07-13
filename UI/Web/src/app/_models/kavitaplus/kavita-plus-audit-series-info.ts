@@ -17,4 +17,5 @@ export interface KavitaPlusAuditSeriesInfo {
   nextRefreshUtc: string | null;
   lastRefreshedUtc: string | null;
   recentEvents: KavitaPlusAuditEntry[];
+  isStandAlone: boolean;
 }

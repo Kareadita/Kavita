@@ -26,4 +26,5 @@ public sealed record MatchSeriesInfoDto
     public int? AniListId { get; set; }
     public int? HardcoverId { get; set; }
     public int? CbrId { get; set; }
+    public bool IsStandalone { get; set; }
 }

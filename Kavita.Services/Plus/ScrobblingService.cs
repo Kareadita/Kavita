@@ -997,7 +997,7 @@ public class ScrobblingService : IScrobblingService
 
 
         await SaveToDb(ctx.ProgressCounter, true);
-        _logger.LogInformation("Scrobbling Events is complete");
+        _logger.LogInformation("Scrobbling Events is complete"); // TODO: Give a summary
 
         await CleanupOldOrBuggedEvents();
     }
@@ -1267,25 +1267,38 @@ public class ScrobblingService : IScrobblingService
     /// <remarks>If the token is not, adds a scrobble error</remarks>
     private async Task<bool> ValidateUserToken(AppUser user, ScrobbleEvent evt)
     {
-        var providerService = _serviceProvider.GetRequiredKeyedService<IScrobbleProviderService>(evt.ScrobbleProvider);
-        var userProvider = user.ScrobbleProviders[evt.ScrobbleProvider];
-
-        if (providerService.IsTokenValid(userProvider.AuthenticationToken))
+        try
         {
-            return true;
+            var providerService =
+                _serviceProvider.GetRequiredKeyedService<IScrobbleProviderService>(evt.ScrobbleProvider);
+            var userProvider = user.ScrobbleProviders[evt.ScrobbleProvider];
+
+            if (providerService.IsTokenValid(userProvider.AuthenticationToken))
+            {
+                return true;
+            }
+
+            _unitOfWork.ScrobbleRepository.Attach(new ScrobbleError
+            {
+                Comment =
+                    $"{evt.ScrobbleProvider} token has expired and needs rotating. Scrobbling wont work until then",
+                Details = $"User: {evt.AppUser.UserName}, Expired: {userProvider.ValidUntilUtc}",
+                LibraryId = evt.LibraryId,
+                SeriesId = evt.SeriesId
+            });
+            await _unitOfWork.CommitAsync();
+
+            await _auditService.LogScrobbleAsync(KavitaPlusEventType.ScrobbleEventFailed, evt.SeriesId,
+                ToAuditParams(evt), AuditStatus.Failure, "token-expired", evt.AppUserId);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "A non-valid scrobble provider ({Provider}) was found, deleting event", evt.ScrobbleProvider);
+            evt.IsErrored = true;
+            _unitOfWork.ScrobbleRepository.Remove(evt);
+            await _unitOfWork.CommitAsync();
         }
 
-        _unitOfWork.ScrobbleRepository.Attach(new ScrobbleError
-        {
-            Comment = $"{evt.ScrobbleProvider} token has expired and needs rotating. Scrobbling wont work until then",
-            Details = $"User: {evt.AppUser.UserName}, Expired: {userProvider.ValidUntilUtc}",
-            LibraryId = evt.LibraryId,
-            SeriesId = evt.SeriesId
-        });
-        await _unitOfWork.CommitAsync();
-
-        await _auditService.LogScrobbleAsync(KavitaPlusEventType.ScrobbleEventFailed, evt.SeriesId,
-            ToAuditParams(evt), AuditStatus.Failure, "token-expired", evt.AppUserId);
         return false;
     }
 
@@ -1379,12 +1392,21 @@ public class ScrobblingService : IScrobblingService
 
         foreach (var evt in eventList.Where(e => !CanProcessScrobbleEvent(e)))
         {
-            await _auditService.LogTemperedAsync(al => al.SeriesId == evt.SeriesId, KavitaPlusAuditCategory.Scrobble,
-                KavitaPlusEventType.ScrobbleEventSkipped, AuditStatus.Info, AuditSubjectType.Series, evt.SeriesId, payload: ToAuditParams(evt), userId: evt.AppUserId, ct: ct);
+            if (evt.ChapterId is null)
+            {
+                await _auditService.LogTemperedAsync(al => al.SeriesId == evt.SeriesId, KavitaPlusAuditCategory.Scrobble,
+                    KavitaPlusEventType.ScrobbleEventSkipped, AuditStatus.Info, AuditSubjectType.Series, evt.SeriesId, payload: ToAuditParams(evt), userId: evt.AppUserId, ct: ct);
+            }
+            else
+            {
+                await _auditService.LogTemperedAsync(al => al.SeriesId == evt.SeriesId && al.SubjectId == evt.ChapterId, KavitaPlusAuditCategory.Scrobble,
+                    KavitaPlusEventType.ScrobbleEventSkipped, AuditStatus.Info, AuditSubjectType.Chapter, evt.SeriesId, payload: ToAuditParams(evt), userId: evt.AppUserId, subjectId: evt.ChapterId , ct: ct);
+            }
         }
 
         foreach (var evt in eventList.Where(CanProcessScrobbleEvent))
         {
+            // TODO: Why would ctx.Users ever be more than 1?
             var user = ctx.Users.FirstOrDefault(u => u.Id == evt.AppUserId);
             if (user is null)
             {
@@ -1403,8 +1425,17 @@ public class ScrobblingService : IScrobblingService
             if (!gate.HasRateLeft())
             {
                 _logger.LogDebug("Skipped processing Scrobble event due to premature rate exceeded, provider: {Provider}", evt.ScrobbleProvider);
-                await _auditService.LogScrobbleAsync(KavitaPlusEventType.ScrobbleEventSkipped, evt.SeriesId,
-                    ToAuditParams(evt), AuditStatus.Failure, "rate-limit-hit", userId: evt.AppUserId, ct: ct);
+
+                if (evt.ChapterId is null)
+                {
+                    await _auditService.LogScrobbleAsync(KavitaPlusEventType.ScrobbleEventSkipped, evt.SeriesId,
+                        ToAuditParams(evt), AuditStatus.Failure, "rate-limit-hit", userId: evt.AppUserId, ct: ct);
+                }
+                else
+                {
+                    await _auditService.LogChapterScrobbleAsync(KavitaPlusEventType.ScrobbleEventSkipped, evt.SeriesId, evt.ChapterId.Value,
+                        ToAuditParams(evt), AuditStatus.Failure, "rate-limit-hit", userId: evt.AppUserId, ct: ct);
+                }
 
                 continue;
             }
@@ -1535,22 +1566,32 @@ public class ScrobblingService : IScrobblingService
 
             if (response.Successful || response.ErrorMessage == null)
             {
-                await _auditService.LogScrobbleAsync(KavitaPlusEventType.ScrobbleEventSent, evt.SeriesId,
-                    new AuditLogScrobbleParamsDto
-                    {
-                        Provider = data.Provider,
-                        ScrobbleEventType = data.ScrobbleEventType,
-                        ChapterNumber = data.ChapterNumber,
-                        VolumeNumber = data.VolumeNumber,
-                        PercentRead = data.PercentRead,
-                        TotalReadCountForSeries = data.TotalReadCountForSeries,
-                        Rating = data.Rating,
-                        ReviewBody = data.ReviewBody,
-                        ReadStatus = data.ReadStatus ?? ScrobbleReadStatus.Ignore,
-                        TransitionRuleKind = evt.TransitionRuleKind,
-                        LibraryType = evt.Series?.Library?.Type ?? LibraryType.Manga
-                    },
-                    AuditStatus.Success, userId: evt.AppUserId);
+                var scrobbleParams = new AuditLogScrobbleParamsDto
+                {
+                    Provider = data.Provider,
+                    ScrobbleEventType = data.ScrobbleEventType,
+                    ChapterNumber = data.ChapterNumber,
+                    VolumeNumber = data.VolumeNumber,
+                    PercentRead = data.PercentRead,
+                    TotalReadCountForSeries = data.TotalReadCountForSeries,
+                    Rating = data.Rating,
+                    ReviewBody = data.ReviewBody,
+                    ReadStatus = data.ReadStatus ?? ScrobbleReadStatus.Ignore,
+                    TransitionRuleKind = evt.TransitionRuleKind,
+                    LibraryType = evt.Series?.Library?.Type ?? LibraryType.Manga
+                };
+
+                if (evt.ChapterId is null)
+                {
+                    await _auditService.LogScrobbleAsync(KavitaPlusEventType.ScrobbleEventSent, evt.SeriesId,
+                        scrobbleParams, AuditStatus.Success, userId: evt.AppUserId);
+                }
+                else
+                {
+                    await _auditService.LogChapterScrobbleAsync(KavitaPlusEventType.ScrobbleEventSent, evt.SeriesId,
+                        evt.ChapterId.Value, scrobbleParams, AuditStatus.Success, userId: evt.AppUserId);
+                }
+
                 return response.RateLeft;
             }
 
@@ -1592,10 +1633,8 @@ public class ScrobblingService : IScrobblingService
                 await _auditService.LogScrobbleAsync(KavitaPlusEventType.ScrobbleEventFailed, evt.SeriesId,
                     ToAuditParams(evt), AuditStatus.Failure, "unknown-series", userId: evt.AppUserId);
 
-            } else if (response.ErrorMessage.StartsWith("Review"))
+            } else
             {
-                // Log the Series name and Id in ScrobbleErrors
-                _logger.LogInformation("Kavita+ was unable to save the review");
                 if (!await _unitOfWork.ScrobbleRepository.HasErrorForSeries(evt.SeriesId))
                 {
                     _unitOfWork.ScrobbleRepository.Attach(new ScrobbleError()
@@ -1606,7 +1645,8 @@ public class ScrobblingService : IScrobblingService
                         SeriesId = evt.SeriesId
                     });
                 }
-                evt.SetErrorMessage(ReviewFailedErrorMessage);
+
+                evt.SetErrorMessage(response.ErrorMessage.StartsWith("Review") ? ReviewFailedErrorMessage : response.ErrorMessage);
             }
 
             throw new KavitaException(response.ErrorMessage);
@@ -1652,6 +1692,7 @@ public class ScrobblingService : IScrobblingService
 
     #region BackFill
 
+    [DisableConcurrentExecution(60 * 60 * 60)]
     public async Task CreateEventsFromExistingHistory(List<ScrobbleProvider> scrobbleProviders, int userId, CancellationToken ct = default)
     {
         foreach (var scrobbleProvider in scrobbleProviders)
@@ -1660,6 +1701,7 @@ public class ScrobblingService : IScrobblingService
         }
     }
 
+    [DisableConcurrentExecution(60 * 60 * 60)]
     public async Task CreateEventsFromExistingHistory(ScrobbleProvider scrobbleProvider, int userId = 0,
         CancellationToken ct = default)
     {
@@ -1762,6 +1804,7 @@ public class ScrobblingService : IScrobblingService
         }
     }
 
+    [DisableConcurrentExecution(60 * 60 * 60)]
     public async Task CreateEventsFromExistingHistoryForSeries(int seriesId, CancellationToken ct = default)
     {
         if (!await _licenseService.HasActiveLicense(ct: ct)) return;

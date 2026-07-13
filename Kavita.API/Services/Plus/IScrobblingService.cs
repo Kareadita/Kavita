@@ -125,6 +125,7 @@ public interface IScrobblingService
     /// <param name="userId"></param>
     /// <param name="ct"></param>
     /// <returns></returns>
+    [DisableConcurrentExecution(60 * 60 * 60)]
     Task CreateEventsFromExistingHistory(List<ScrobbleProvider> scrobbleProviders, int userId, CancellationToken ct = default);
     /// <summary>
     /// This will backfill events from existing progress history, ratings, and want to read for users that have a valid license
@@ -132,8 +133,9 @@ public interface IScrobblingService
     /// <param name="scrobbleProvider"></param>
     /// <param name="userId">Defaults to 0 meaning all users. Allows a userId to be set if a scrobble key is added to a user</param>
     /// <param name="ct"></param>
-
+    [DisableConcurrentExecution(60 * 60 * 60)]
     Task CreateEventsFromExistingHistory(ScrobbleProvider scrobbleProvider, int userId = 0, CancellationToken ct = default);
+    [DisableConcurrentExecution(60 * 60 * 60)]
     Task CreateEventsFromExistingHistoryForSeries(int seriesId, CancellationToken ct = default);
     Task ClearEventsForSeries(int userId, int seriesId, CancellationToken ct = default);
     Task<bool> RetryScrobbleAsync(int authUserId, KavitaPlusAuditEntryDto auditEntry, CancellationToken ct = default);

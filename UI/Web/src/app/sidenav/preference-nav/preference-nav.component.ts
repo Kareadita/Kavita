@@ -189,15 +189,7 @@ export class PreferenceNavComponent implements AfterViewInit {
 
   private readonly scrobblingFailuresBadgeCount = toSignal(
     of(this.licenseService.hasActiveLicense()).pipe(
-      switchMap(hasLicense =>
-        hasLicense
-          ? this.kavitaplusAuditService.getMyActivity({
-            category: KavitaPlusAuditCategory.Scrobble,
-            userId: this.accountService.currentUser()!.id,
-            status: AuditStatus.Failure
-          }).pipe(map(d => d.pagination.totalItems))
-          : of(-1)
-      ),
+      switchMap(hasLicense => hasLicense ? this.kavitaplusAuditService.getFailedScrobbleEvents() : of(-1)),
       takeUntilDestroyed(this.destroyRef),
       shareReplay({ bufferSize: 1, refCount: true })
     ),

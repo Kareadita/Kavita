@@ -46,6 +46,8 @@ export class KeybindSettingDescriptionPipe implements PipeTransform {
         return this.create('key-bind-title-first-page', 'key-bind-tooltip-first-page');
       case KeyBindTarget.LastPage:
         return this.create('key-bind-title-last-page', 'key-bind-tooltip-last-page');
+      case KeyBindTarget.NavigateHome:
+        return this.create('key-bind-title-navigate-home', 'key-bind-tooltip-navigate-home');
     }
   }
 

@@ -33,6 +33,7 @@ export interface MetadataSettings {
   enableChapterPublisher: boolean;
   enableChapterCoverImage: boolean;
 
+  enableVolumeCoverImage: boolean;
 
   enableGenres: boolean;
   enableTags: boolean;

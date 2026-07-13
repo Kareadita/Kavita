@@ -31,6 +31,11 @@ public class TokenService(
     private static readonly SemaphoreSlim RefreshTokenLock = new(1, 1);
 
     private const string RefreshTokenName = "RefreshToken";
+    /// <summary>
+    /// Name of the dedicated token provider used for refresh tokens. Kept separate from the Default provider so the
+    /// refresh token can have a long lifespan without inflating password-reset/email-confirmation token lifespans.
+    /// </summary>
+    public const string RefreshTokenProviderName = "RefreshTokenProvider";
     private readonly SymmetricSecurityKey _key = new(Encoding.UTF8.GetBytes(config.Value.TokenKey));
 
     public async Task<string> CreateToken(AppUser user, CancellationToken ct = default)
@@ -48,7 +53,7 @@ public class TokenService(
         var tokenDescriptor = new SecurityTokenDescriptor()
         {
             Subject = new ClaimsIdentity(claims),
-            Expires = DateTime.UtcNow.AddDays(10),
+            Expires = DateTime.UtcNow.AddDays(3),
             SigningCredentials = credentials
         };
 
@@ -60,9 +65,9 @@ public class TokenService(
 
     public async Task<string> CreateRefreshToken(AppUser user, CancellationToken ct = default)
     {
-        await userManager.RemoveAuthenticationTokenAsync(user, TokenOptions.DefaultProvider, RefreshTokenName);
-        var refreshToken = await userManager.GenerateUserTokenAsync(user, TokenOptions.DefaultProvider, RefreshTokenName);
-        await userManager.SetAuthenticationTokenAsync(user, TokenOptions.DefaultProvider, RefreshTokenName, refreshToken);
+        await userManager.RemoveAuthenticationTokenAsync(user, RefreshTokenProviderName, RefreshTokenName);
+        var refreshToken = await userManager.GenerateUserTokenAsync(user, RefreshTokenProviderName, RefreshTokenName);
+        await userManager.SetAuthenticationTokenAsync(user, RefreshTokenProviderName, RefreshTokenName, refreshToken);
         return refreshToken;
     }
 
@@ -100,7 +105,7 @@ public class TokenService(
                 return null;
             }
 
-            var validated = await userManager.VerifyUserTokenAsync(user, TokenOptions.DefaultProvider,
+            var validated = await userManager.VerifyUserTokenAsync(user, RefreshTokenProviderName,
                 RefreshTokenName, request.RefreshToken);
             if (!validated)
             {
@@ -115,7 +120,7 @@ public class TokenService(
 
             // Remove the old refresh token first
             await userManager.RemoveAuthenticationTokenAsync(user,
-                TokenOptions.DefaultProvider,
+                RefreshTokenProviderName,
                 RefreshTokenName);
 
             return new TokenRequestDto()

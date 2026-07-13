@@ -1115,6 +1115,13 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
       let page = results.progress.pageNum;
 
+      // Handle an edge case where there is only 1 page, save progress instantly as progress saving is gated on pagination
+      if (direction === 'None' && page === 0 && this.maxPages === 1) {
+        if (!this.incognitoMode) {
+          this.readerService.saveProgress(this.libraryId, this.seriesId, this.volumeId, this.chapterId, 1).subscribe();
+        }
+      }
+
       // Reading forward into an already fully-read next chapter is a re-read: reset to the start so
       // it re-counts on completion (via reading sessions) instead of resuming at the last page.
       // Partially-read next chapters still resume where you left off. See readChapter()'s reread flow.

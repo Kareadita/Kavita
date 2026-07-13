@@ -197,8 +197,7 @@ public class ExternalSeriesMetadataRepository(DataContext context, IMapper mappe
             .WhereIf(includeStaleData, s => s.ExternalSeriesMetadata == null || s.ExternalSeriesMetadata.ValidUntilUtc < DateTime.UtcNow)
             .WhereIf(!includeStaleData, s => s.ExternalSeriesMetadata == null || s.ExternalSeriesMetadata.AniListId == 0)
             .Where(s => !s.IsBlacklisted && !s.DontMatch)
-            .OrderByDescending(s => s.Library.Type)
-            .ThenBy(s => s.NormalizedName)
+            .OrderBy(s => s.ExternalSeriesMetadata == null ? DateTime.MinValue : s.ExternalSeriesMetadata.ValidUntilUtc)
             .Select(s => s.Id)
             .Take(limit)
             .ToListAsync(ct);

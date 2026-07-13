@@ -91,7 +91,7 @@ public class ScrobblingServiceTests(ITestOutputHelper outputHelper): AbstractDbT
             Substitute.For<IImageService>(),
             Substitute.For<IDirectoryService>(),
             Substitute.For<IScrobblingService>(), Substitute.For<IReadingSessionService>(),
-            Substitute.For<IClientInfoAccessor>(), Substitute.For<ISeriesService>(), Substitute.For<IEntityNamingService>(),
+            Substitute.For<IClientInfoAccessor>(), Substitute.For<IEntityNamingService>(),
             Substitute.For<ILocalizationService>(), Substitute.For<IBookService>()); // Do not use the actual one
 
         var hookedUpReaderService = new ReaderService(unitOfWork,
@@ -100,7 +100,7 @@ public class ScrobblingServiceTests(ITestOutputHelper outputHelper): AbstractDbT
             Substitute.For<IImageService>(),
             Substitute.For<IDirectoryService>(),
             service, Substitute.For<IReadingSessionService>(),
-            Substitute.For<IClientInfoAccessor>(), Substitute.For<ISeriesService>(), Substitute.For<IEntityNamingService>(),
+            Substitute.For<IClientInfoAccessor>(), Substitute.For<IEntityNamingService>(),
             Substitute.For<ILocalizationService>(), Substitute.For<IBookService>());
 
         await SeedData(unitOfWork, context);
@@ -679,6 +679,55 @@ public class ScrobblingServiceTests(ITestOutputHelper outputHelper): AbstractDbT
         Assert.Single(events, evt => !evt.IsProcessed);
         Assert.Equal(5, events.First(evt => !evt.IsProcessed).Rating);
 
+    }
+
+    #endregion
+
+    #region GetByEvent Tests
+
+    /// <summary>
+    /// Two users each rating the same series+provider must both be returned. The grouping is keyed on
+    /// (SeriesId, ScrobbleProvider, AppUserId) so one user's event is never collapsed away by another's.
+    /// </summary>
+    [Fact]
+    public async Task GetByEvent_DoesNotCollapseEventsAcrossUsers()
+    {
+        var (unitOfWork, context, _) = await CreateDatabase();
+        await Setup(unitOfWork, context);
+
+        // Seeded user is Id 1. Add a second user rating the same series on the same provider.
+        var user2 = new AppUserBuilder("testuser2", "testuser2").Build();
+        AccountService.AddScrobbleProvidersToUser(user2);
+        unitOfWork.UserRepository.Add(user2);
+        await unitOfWork.CommitAsync();
+
+        unitOfWork.ScrobbleRepository.Attach(new ScrobbleEvent
+        {
+            ScrobbleEventType = ScrobbleEventType.ScoreUpdated,
+            ScrobbleProvider = ScrobbleProvider.AniList,
+            Format = PlusMediaFormat.Manga,
+            SeriesId = 1,
+            LibraryId = 1,
+            AppUserId = 1,
+            Rating = 5,
+        });
+        unitOfWork.ScrobbleRepository.Attach(new ScrobbleEvent
+        {
+            ScrobbleEventType = ScrobbleEventType.ScoreUpdated,
+            ScrobbleProvider = ScrobbleProvider.AniList,
+            Format = PlusMediaFormat.Manga,
+            SeriesId = 1,
+            LibraryId = 1,
+            AppUserId = user2.Id,
+            Rating = 3,
+        });
+        await unitOfWork.CommitAsync();
+
+        var events = await unitOfWork.ScrobbleRepository.GetByEvent(ScrobbleEventType.ScoreUpdated);
+
+        Assert.Equal(2, events.Count);
+        Assert.Contains(events, e => e.AppUserId == 1);
+        Assert.Contains(events, e => e.AppUserId == user2.Id);
     }
 
     #endregion

@@ -19,3 +19,9 @@ public sealed record AuditLogSeriesCoverParamsDto
     public string SeriesName { get; init; } = string.Empty;
     public string CoverUrl { get; init; } = string.Empty;
 }
+
+public sealed record AuditLogVolumeCoverParamsDto
+{
+    public string VolumeNumber { get; init; } = string.Empty;
+    public string CoverUrl { get; init; } = string.Empty;
+}

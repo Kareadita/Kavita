@@ -89,6 +89,8 @@ public sealed record SeriesDto : IHasReadTimeEstimate, IHasCoverImage, IHasMetad
     public bool DontMatch { get; set; }
     /// <inheritdoc cref="API.Entities.Series.IsBlacklisted"/>
     public bool IsBlacklisted { get; set; }
+    /// <inheritdoc cref="Kavita.Models.Entities.Series.IsStandAlone"/>
+    public bool IsStandAlone { get; set; }
     #endregion
 
     #region ColorScape

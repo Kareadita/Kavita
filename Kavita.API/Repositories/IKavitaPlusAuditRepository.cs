@@ -12,6 +12,8 @@ public interface IKavitaPlusAuditRepository
     void Add(KavitaPlusAuditLog entry);
     Task DeleteOlderThanAsync(DateTime cutoff, CancellationToken ct = default);
 
+    Task<int> GetScrobbleFailureCountAsync(int userId, CancellationToken ct = default);
+
     Task<PagedList<KavitaPlusAuditEntryDto>> GetPagedAsync(
         KavitaPlusAuditFilterDto filter, UserParams userParams, CancellationToken ct = default);
 
