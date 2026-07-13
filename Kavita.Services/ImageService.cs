@@ -237,21 +237,27 @@ public class ImageService(ILogger<ImageService> logger, IDirectoryService direct
         return Task.FromResult(outputFile);
     }
 
-    public async Task<bool> IsImage(string filePath, CancellationToken ct = default)
+    public Task<bool> IsImage(string filePath, CancellationToken ct = default)
     {
         try
         {
-            var info = await SixLabors.ImageSharp.Image.IdentifyAsync(filePath, ct);
-            if (info == null) return false;
-
-            return true;
+            // NetVips resolves the loader from the file header without decoding the pixels; if the
+            // file is not a recognized image, NewFromFile throws a VipsException.
+            ct.ThrowIfCancellationRequested();
+            using var image = Image.NewFromFile(filePath, access: Enums.Access.Sequential);
+            return Task.FromResult(true);
+        }
+        catch (OperationCanceledException)
+        {
+            // This allows cancellation to propagate upwards
+            throw;
         }
         catch (Exception)
         {
             /* Swallow Exception */
         }
 
-        return false;
+        return Task.FromResult(false);
     }
 
 
@@ -290,6 +296,23 @@ public class ImageService(ILogger<ImageService> logger, IDirectoryService direct
         }
 
         return (null, null);
+    }
+
+    private static Dictionary<Vector3, int> GenerateColorHistogram(Image image)
+    {
+        var pixels = image.WriteToMemory().ToArray();
+        var histogram = new Dictionary<Vector3, int>();
+
+        for (var i = 0; i < pixels.Length; i += 3)
+        {
+            var color = new Vector3(pixels[i], pixels[i + 1], pixels[i + 2]);
+            if (!histogram.TryAdd(color, 1))
+            {
+                histogram[color]++;
+            }
+        }
+
+        return histogram;
     }
 
     private static List<Vector3> KMeansClustering(List<Vector3> points, int k, int maxIterations = 100)
