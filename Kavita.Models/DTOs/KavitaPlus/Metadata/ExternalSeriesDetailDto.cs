@@ -50,13 +50,10 @@ public sealed record ExternalSeriesDetailDto
     public IList<SeriesCharacter>? Characters { get; set; } = [];
     public IList<RatingDto> Ratings { get; set; } = new List<RatingDto>();
 
-    #region Comic Only
     public string? Publisher { get; set; }
-    /// <summary>
-    /// Only from CBR for <see cref="ScrobbleProvider.Cbr"/>. Full metadata about issues
-    /// </summary>
-    public IList<ExternalChapterDto>? ChapterDtos { get; set; }
-    #endregion
 
+    public IList<ExternalChapterDto>? ChapterDtos { get; set; }
+
+    public IList<ExternalEditionDto> Editions { get; set; } = [];
 
 }

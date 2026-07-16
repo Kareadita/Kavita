@@ -8,6 +8,7 @@ public record MetadataRequest
     public string? Slug { get; set; }
     public int? CbrId { get; set; }
     public long? MangabakaId { get; set; }
+    public string? MangaBakaEditionId { get; set; }
     public string? GoogleBooksId { get; set; }
     public string? MangaDexId { get; set; }
     public long? MetronId { get; set; }

@@ -32,7 +32,7 @@ import {MatchSeriesInfo} from "../../_models/kavitaplus/match-series-info";
 import {MetadataProvider} from "../../_models/kavitaplus/metadata-provider.enum";
 import {ScrobbleProvider} from "../../_services/scrobbling.service";
 import {MetadataProviderTitlePipe} from "../../_pipes/metadata-provider-title.pipe";
-import {PlusMediaFormat} from "../../_models/series-detail/external-series-detail";
+import {ExternalEditionDto, PlusMediaFormat} from "../../_models/series-detail/external-series-detail";
 
 @Component({
   selector: 'app-match-series-modal',
@@ -77,6 +77,7 @@ export class MatchSeriesModalComponent implements OnInit {
   isLoading = signal<boolean>(false);
   hasSearched = signal<boolean>(false);
   selectedItem = signal<ExternalSeriesMatch | null>(null);
+  selectedEdition = signal<ExternalEditionDto | null>(null);
   lastQuery = signal<string>('');
 
   protected bodyState = computed<'empty' | 'dont-match' | 'loading' | 'results' | 'no-results'>(() => {
@@ -163,8 +164,9 @@ export class MatchSeriesModalComponent implements OnInit {
     return `${item.series.provider}_${item.series.mangabakaId}_${item.series.hardcoverId}_${item.series.cbrId}_${item.series.aniListId}_${item.series.malId}`;
   }
 
-  selectItem(item: ExternalSeriesMatch) {
+  selectItem(item: ExternalSeriesMatch, edition: ExternalEditionDto | null) {
     this.selectedItem.set(item);
+    this.selectedEdition.set(edition);
   }
 
   close() {
@@ -179,7 +181,7 @@ export class MatchSeriesModalComponent implements OnInit {
     data.tags = data.tags || [];
     data.genres = data.genres || [];
 
-    this.seriesService.updateMatch(this.series().id, data).subscribe(() => {
+    this.seriesService.updateMatch(this.series().id, data, this.selectedEdition()).subscribe(() => {
       this.toastr.success(translate('toasts.match-success'));
       this.modalService.close(true);
     });

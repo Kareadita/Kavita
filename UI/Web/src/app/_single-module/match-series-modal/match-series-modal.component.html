@@ -184,10 +184,13 @@
           @for (item of matches(); track matchKey(item)) {
             <app-match-series-result-item
               [item]="item"
+              [selectedEditionId]="selectedEdition()?.id ?? null"
               [isSelected]="!!selectedItem() && matchKey(item) === matchKey(selectedItem()!)"
               [showSynonyms]="true"
               [query]="lastQuery()"
-              (selected)="selectItem($event)" />
+              (selected)="selectItem($event, null)"
+              (editionSelected)="selectItem($event.item, $event.edition)"
+            />
           }
         }
       }

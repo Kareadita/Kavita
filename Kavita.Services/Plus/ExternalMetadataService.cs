@@ -481,6 +481,7 @@ public class ExternalMetadataService : IExternalMetadataService
                     MalId = ids.MalId,
                     CbrId = ids.CbrId,
                     MangabakaId = ids.MangabakaId,
+                    MangaBakaEditionId = ids.MangaBakaEditionId,
                     HardcoverId = ids.HardcoverId,
                     IsStandAlone = ids.IsStandAlone,
                     Format = series.Library.Type.ConvertToPlusMediaFormat(series.Format),
@@ -1645,9 +1646,10 @@ public class ExternalMetadataService : IExternalMetadataService
         foreach (var (chapter, potentialMatch) in matchedChapters)
         {
             var usedRange = Parser.IsLooseLeafVolume(chapter.Range) ? chapter.Volume.Name : chapter.Range;
+            var usedType = Parser.IsLooseLeafVolume(chapter.Range) ? "Volume" : "Chapter";
 
-            _logger.LogDebug("Updating {SeriesName} ({SeriesId}) - Chapter {ChapterNumber} with metadata. Matched to {IssueNumber} - {HardcoverId}",
-                series.Name, series.Id, usedRange, potentialMatch.IssueNumber, potentialMatch.HardcoverId);
+            _logger.LogDebug("Updating {SeriesName} ({SeriesId}) - {Type} {ChapterNumber} with metadata. Matched to IssueNumber: {IssueNumber} - HardcoverId: {HardcoverId} - MangaBakaWorkId: {WorkId}",
+                series.Name, series.Id, usedType, usedRange, potentialMatch.IssueNumber, potentialMatch.HardcoverId, potentialMatch.MangaBakaWorkId);
             var chapterFieldChanges = new List<MetadataFieldChangeDto>();
 
             Accumulate(ref madeModification, chapterFieldChanges, UpdateChapterTitle(chapter, settings, potentialMatch.Title, series.Name));

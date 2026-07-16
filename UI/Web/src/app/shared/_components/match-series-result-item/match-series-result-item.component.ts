@@ -9,6 +9,8 @@ import {ScrobbleProviderTagBadgeComponent} from "../scrobble-provider-tag-badge/
 import {MatchStatusDotComponent} from "../match-status-dot/match-status-dot.component";
 import {ConfidenceChipComponent} from "../confidence-chip/confidence-chip.component";
 import {SafeUrlPipe} from "../../../_pipes/safe-url.pipe";
+import {TagBadgeComponent} from "../../tag-badge/tag-badge.component";
+import {ExternalEditionDto} from "../../../_models/series-detail/external-series-detail";
 
 @Component({
   selector: 'app-match-series-result-item',
@@ -31,7 +33,10 @@ export class MatchSeriesResultItemComponent {
   isSelected = input<boolean>(false);
   showSynonyms = input<boolean>(true);
   query = input<string>('');
+  selectedEditionId = input<string | null>(null);
+
   selected = output<ExternalSeriesMatch>();
+  editionSelected = output<{ item: ExternalSeriesMatch, edition: ExternalEditionDto }>();
 
   protected readonly ScrobbleProvider = ScrobbleProvider;
 
@@ -60,6 +65,17 @@ export class MatchSeriesResultItemComponent {
   );
 
   protected pct = computed(() => Math.round(this.item().matchRating * 100));
+
+  protected isEditionSelected(edition: ExternalEditionDto) {
+    return this.selectedEditionId() === edition.id;
+  }
+
+  protected chooseEdition(edition: ExternalEditionDto, event: Event) {
+    event.stopPropagation();
+
+    this.selected.emit(this.item());
+    this.editionSelected.emit({item: this.item(), edition});
+  }
 
   selectItem() {
     this.selected.emit(this.item());

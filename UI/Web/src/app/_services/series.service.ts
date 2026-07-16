@@ -16,7 +16,7 @@ import {TextResonse} from '../_types/text-response';
 import {FilterV2} from '../_models/metadata/v2/filter-v2';
 import {Rating} from "../_models/rating";
 import {Recommendation} from "../_models/series-detail/recommendation";
-import {ExternalSeriesDetail} from "../_models/series-detail/external-series-detail";
+import {ExternalEditionDto, ExternalSeriesDetail} from "../_models/series-detail/external-series-detail";
 import {NextExpectedChapter} from "../_models/series-detail/next-expected-chapter";
 import {QueryContext} from "../_models/metadata/v2/query-context";
 import {ExternalSeriesMatch} from "../_models/series-detail/external-series-match";
@@ -251,12 +251,13 @@ export class SeriesService {
     return this.httpClient.post<Array<ExternalSeriesMatch>>(this.baseUrl + 'series/match', model);
   }
 
-  updateMatch(seriesId: number, series: ExternalSeriesDetail) {
+  updateMatch(seriesId: number, series: ExternalSeriesDetail, edition: ExternalEditionDto | null) {
     const ids = {
       aniListId: series.aniListId ?? null,
       malId: series.malId ?? null,
       cbrId: series.cbrId ?? null,
       mangabakaId: series.mangabakaId ?? null,
+      mangaBakaEditionId: edition?.id ?? null, // If we have other providers with editions. This will need updating
       hardcoverId: series.hardcoverId ?? null,
       isStandAlone: series.isStandAlone,
     };

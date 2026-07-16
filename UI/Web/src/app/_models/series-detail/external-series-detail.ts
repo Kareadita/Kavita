@@ -26,6 +26,14 @@ export interface MetadataTagDto {
   isAdult: boolean;
 }
 
+export interface ExternalEditionDto {
+  id: string;
+  title: string;
+  format: string;
+  language: string;
+  publisher: string;
+}
+
 export interface ExternalSeriesDetail {
   name: string;
   aniListId?: number | null;
@@ -54,5 +62,5 @@ export interface ExternalSeriesDetail {
   tags: Array<MetadataTagDto>;
   provider: ScrobbleProvider;
   ageRating: AgeRating;
-
+  editions: ExternalEditionDto[];
 }

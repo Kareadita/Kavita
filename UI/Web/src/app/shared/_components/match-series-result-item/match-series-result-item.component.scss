@@ -78,3 +78,45 @@
   padding-top: 0.25rem;
   min-width: 4.75rem;
 }
+
+.match-result-editions {
+  margin-top: 0.125rem;
+}
+
+.edition-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3125rem;
+  padding: 0.1875rem 0.5625rem;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid var(--hr-color);
+  border-radius: 999px;
+  color: var(--text-muted-color);
+  font-size: 0.71875rem;
+  line-height: 1.4;
+  cursor: pointer;
+  transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+
+  &:hover {
+    background: rgba(255, 255, 255, 0.08);
+    color: var(--body-text-color);
+  }
+
+  &.selected {
+    background: rgba(74, 198, 148, 0.14);
+    border-color: rgba(74, 198, 148, 0.6);
+    color: var(--body-text-color);
+    font-weight: 600;
+  }
+}
+
+.edition-chip-format {
+  margin-left: 0.25rem;
+  opacity: 0.75;
+  font-weight: 400;
+}
+
+.edition-chip-icon {
+  font-size: 0.625rem;
+  color: rgba(74, 198, 148, 0.9);
+}
