@@ -666,6 +666,7 @@ public class SeriesRepository(DataContext context, IMapper mapper) : ISeriesRepo
                 MangaDexId = ExternalIdParser.GetMangaDexId(series.Metadata.WebLinks),
 
                 MangabakaId = (int?) series.MangaBakaId,
+                MangaBakaEditionId = series.MangaBakaEditionId,
                 HardcoverId = series.HardcoverId,
                 IsStandAlone = series.IsStandAlone,
                 VolumeCount = series.Volumes.Count,

@@ -127,6 +127,7 @@ public class Series : IEntityDate, IHasReadTimeEstimate, IHasCoverImage, IHasMet
     public long MetronId { get; set; }
     public string ComicVineId { get; set; }
     public long MangaBakaId { get; set; } // TODO: Migrate this back to an int
+    public string MangaBakaEditionId { get; set; }
     public int CbrId { get; set; }
     #endregion
 

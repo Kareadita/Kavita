@@ -235,6 +235,7 @@ public class ExternalMetadataService : IExternalMetadataService
             AniListId = series.AniListId,
             MalId = series.MalId,
             MangaBakaId = series.MangaBakaId,
+            MangaBakaEditionId = series.MangaBakaEditionId,
             CbrId = series.CbrId,
             HardcoverId = series.HardcoverId,
         };
@@ -246,6 +247,19 @@ public class ExternalMetadataService : IExternalMetadataService
         series.CbrId = match.Series.CbrId ?? 0;
         series.IsStandAlone = match.Series.IsStandAlone;
 
+        if (series.Library.MetadataProvider == MetadataProvider.Mangabaka)
+        {
+            var editionMatch = match.Series.Editions.Count == 1
+                ? match.Series.Editions[0]
+                : match.Series.Editions.SingleOrDefault(edition => edition.Format.Equals("Digital", StringComparison.OrdinalIgnoreCase));
+
+            if (editionMatch != null)
+            {
+                _logger.LogInformation("Matches series {SeriesId} to MangaBaka Edition: {EditionId}", series.Id, editionMatch.Id);
+                series.MangaBakaEditionId = editionMatch.Id;
+            }
+        }
+
         await _auditService.LogMatchAsync(KavitaPlusEventType.SeriesMatched, seriesId,
             new AuditLogMatchedParamsDto {
                 SeriesName = series.Name,
@@ -254,6 +268,7 @@ public class ExternalMetadataService : IExternalMetadataService
                     AniListId = series.AniListId,
                     MalId = series.MalId,
                     MangaBakaId = series.MangaBakaId,
+                    MangaBakaEditionId = series.MangaBakaEditionId,
                     CbrId = series.CbrId,
                     HardcoverId = series.HardcoverId,
                 },
