@@ -718,7 +718,7 @@
         "just-now": "just now",
         "min-ago": "a minute ago",
         "mins-ago": "{{value}} minutes ago",
-        "hour-ago": "a hour ago",
+        "hour-ago": "an hour ago",
         "hours-ago": "{{value}} hours ago",
         "day-ago": "a day ago",
         "days-ago": "{{value}} days ago",
