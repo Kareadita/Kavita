@@ -4,7 +4,7 @@ import {
   computed,
   effect,
   inject,
-  input,
+  input, linkedSignal,
   OnInit,
   signal,
   Signal
@@ -78,6 +78,7 @@ export class MatchSeriesModalComponent implements OnInit {
   hasSearched = signal<boolean>(false);
   selectedItem = signal<ExternalSeriesMatch | null>(null);
   selectedEdition = signal<ExternalEditionDto | null>(null);
+  selectedEditionId = linkedSignal<string | null>(() => this.selectedEdition()?.id ?? null);
   lastQuery = signal<string>('');
 
   protected bodyState = computed<'empty' | 'dont-match' | 'loading' | 'results' | 'no-results'>(() => {
@@ -100,6 +101,10 @@ export class MatchSeriesModalComponent implements OnInit {
     this.kavitaChapterCount = computed(() => (this.seriesDetail()?.chapters ?? []).length);
 
     effect(() => {
+      if (this.series().mangaBakaEditionId) {
+        this.selectedEditionId.set(this.series().mangaBakaEditionId);
+      }
+
       this.seriesService.getMatchInfo(this.series().id).subscribe(res => {
         this.matchInfo.set(res);
       });

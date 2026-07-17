@@ -184,7 +184,7 @@
           @for (item of matches(); track matchKey(item)) {
             <app-match-series-result-item
               [item]="item"
-              [selectedEditionId]="selectedEdition()?.id ?? null"
+              [selectedEditionId]="selectedEditionId()"
               [isSelected]="!!selectedItem() && matchKey(item) === matchKey(selectedItem()!)"
               [showSynonyms]="true"
               [query]="lastQuery()"
