@@ -259,7 +259,7 @@ Substitute.For<IMediaConversionService>());
             VolumeId = 1
         }, $"{CacheDirectory}1/0001.jpg");
 
-        var files = await bookmarkService.GetBookmarkFilesById(new[] {1});
+        var files = await bookmarkService.GetBookmarkFilesById(1, new[] {1});
         var actualFiles = ds.GetFiles(BookmarkDirectory, searchOption: SearchOption.AllDirectories);
         Assert.Equal(files.Select(Parser.NormalizePath).ToList(), actualFiles.Select(Parser.NormalizePath).ToList());
     }

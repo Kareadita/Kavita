@@ -282,7 +282,7 @@ public class DownloadController(
         var username = Username!;
         var series = await unitOfWork.SeriesRepository.GetSeriesByIdAsync(seriesId);
 
-        var files = await bookmarkService.GetBookmarkFilesById(downloadBookmarkDto.Bookmarks.Select(b => b.Id));
+        var files = await bookmarkService.GetBookmarkFilesById(seriesId, downloadBookmarkDto.Bookmarks.Select(b => b.Id));
 
         var filename = $"{series!.Name} - Bookmarks.zip";
 
