@@ -57,7 +57,7 @@ public class DownloadController(
     [HttpPost("bulk-volume-size")]
     public async Task<ActionResult<Dictionary<int, long>>> GetBulkVolumeSize(BulkVolumeSizeRequest request)
     {
-        return Ok(await unitOfWork.VolumeRepository.GetFilesizesAsync(request.VolumeIds));
+        return Ok(await unitOfWork.VolumeRepository.GetFilesizesAsync(UserId, request.VolumeIds));
     }
 
     /// <summary>
@@ -81,7 +81,7 @@ public class DownloadController(
     [HttpPost("bulk-chapter-size")]
     public async Task<ActionResult<Dictionary<int, long>>> GetChapterSizeInBulk(BulkChapterSizeRequest request)
     {
-        return Ok(await unitOfWork.ChapterRepository.GetFilesizesAsync(request.ChapterIds));
+        return Ok(await unitOfWork.ChapterRepository.GetFilesizesAsync(UserId, request.ChapterIds));
     }
 
     /// <summary>
@@ -127,7 +127,7 @@ public class DownloadController(
     [HttpPost("bulk-series-size")]
     public async Task<ActionResult<Dictionary<int, long>>> GetBulkSeriesSize(BulkSeriesSizeRequest request)
     {
-        return Ok(await unitOfWork.SeriesRepository.GetFilesizesAsync(request.SeriesIds));
+        return Ok(await unitOfWork.SeriesRepository.GetFilesizesAsync(UserId, request.SeriesIds));
     }
 
 

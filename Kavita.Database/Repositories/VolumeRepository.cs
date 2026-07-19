@@ -224,9 +224,20 @@ public class VolumeRepository(DataContext context, IMapper mapper) : IVolumeRepo
             .SumAsync(f => f.Bytes, cancellationToken: ct);
     }
 
-    public async Task<Dictionary<int, long>> GetFilesizesAsync(IList<int> volumeIds, CancellationToken ct = default)
+    public async Task<Dictionary<int, long>> GetFilesizesAsync(int userId, IList<int> volumeIds,
+        CancellationToken ct = default)
     {
-        return await volumeIds.BatchToDictionaryAsync(50, batch =>
+        var ageRestriction = await context.AppUser.GetUserAgeRestriction(userId, ct);
+        var allowedLibraries = await context.Library.GetUserLibraries(userId).ToListAsync(ct);
+
+        var filteredVolumeIds = await context.Volume
+            .RestrictAgainstAgeRestriction(ageRestriction)
+            .Where(v => allowedLibraries.Contains(v.Series.LibraryId))
+            .Where(v => volumeIds.Contains(v.Id))
+            .Select(v => v.Id)
+            .ToListAsync(ct);
+
+        return await filteredVolumeIds.BatchToDictionaryAsync(50, batch =>
             context.Chapter
                 .Where(c => batch.Contains(c.VolumeId))
                 .GroupBy(c => c.VolumeId)

@@ -41,7 +41,7 @@ public interface IChapterRepository
     Task<IList<Chapter>> GetChaptersAsync(int volumeId, ChapterIncludes includes = ChapterIncludes.None, CancellationToken ct = default);
     Task<IList<MangaFile>> GetFilesForChaptersAsync(IReadOnlyList<int> chapterIds, CancellationToken ct = default);
     Task<long> GetFilesizeAsync(int chapterId, CancellationToken ct = default);
-    Task<Dictionary<int, long>> GetFilesizesAsync(IList<int> chapterIds, CancellationToken ct = default);
+    Task<Dictionary<int, long>> GetFilesizesAsync(int userId, IList<int> chapterIds, CancellationToken ct = default);
     Task<string?> GetChapterCoverImageAsync(int chapterId, CancellationToken ct = default);
     Task<IList<string>> GetAllCoverImagesAsync(CancellationToken ct = default);
     Task<IList<Chapter>> GetAllChaptersWithCoversInDifferentEncoding(EncodeFormat format, CancellationToken ct = default);
