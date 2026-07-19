@@ -249,9 +249,7 @@ public class ExternalMetadataService : IExternalMetadataService
 
         if (series.Library.MetadataProvider == MetadataProvider.Mangabaka)
         {
-            var editionMatch = match.Series.Editions.Count == 1
-                ? match.Series.Editions[0]
-                : match.Series.Editions.SingleOrDefault(edition => edition.Format.Equals("Digital", StringComparison.OrdinalIgnoreCase));
+            var editionMatch = PickBestEdition(series, match.Series.Editions);
 
             if (editionMatch != null)
             {
@@ -290,6 +288,47 @@ public class ExternalMetadataService : IExternalMetadataService
             MetadataProvider.ComicBookRoundup => series.CbrId > 0,
             _ => throw new ArgumentOutOfRangeException(nameof(metadataProvider), metadataProvider, null)
         };
+    }
+
+    private static ExternalEditionDto? PickBestEdition(Series series, IList<ExternalEditionDto> editions)
+    {
+        // No other options, use the present one so we get at least some volume/chapter metadata
+        if (editions.Count == 1)
+        {
+            return editions[0];
+        }
+
+        var parsedSeriesEdition = string.Empty; // TODO (Joe): Parse edition from series XXX
+        var parsedSeriesEditionMatches = editions
+            .Where(e => e.Format.Equals(parsedSeriesEdition, StringComparison.OrdinalIgnoreCase))
+            .ToList();
+
+        var digitalEditions = editions
+            .Where(e => e.Format.Equals("Digital", StringComparison.OrdinalIgnoreCase))
+            .ToList();
+
+        return parsedSeriesEditionMatches.SingleOrDefault()
+            ?? parsedSeriesEditionMatches.SingleOrDefault(MatchEditionToCount)
+            ?? digitalEditions.SingleOrDefault()
+            ?? digitalEditions.SingleOrDefault(MatchEditionToCount)
+            ?? editions.SingleOrDefault(MatchEditionToCount);
+
+        bool MatchEditionToCount(ExternalEditionDto edition)
+        {
+            var seriesCount = edition.Type switch
+            {
+                EditionEntryType.Volume => series.Volumes.Count,
+                EditionEntryType.Chapter or EditionEntryType.Other => series.Volumes.Sum(v => v.Chapters.Count),
+                _ => throw new ArgumentOutOfRangeException(nameof(edition.Type), edition.Type, null)
+            };
+
+            if (edition.Type != EditionEntryType.Other)
+            {
+                return seriesCount == edition.MainCount;
+            }
+
+            return seriesCount == edition.MainCount || seriesCount == edition.TotalCount;
+        }
     }
 
 

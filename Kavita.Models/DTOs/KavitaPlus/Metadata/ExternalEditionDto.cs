@@ -1,5 +1,12 @@
 namespace Kavita.Models.DTOs.KavitaPlus.Metadata;
 
+public enum EditionEntryType
+{
+    Chapter = 0,
+    Volume = 1,
+    Other = 2,
+}
+
 public sealed record ExternalEditionDto
 {
     /// <summary>
@@ -26,4 +33,19 @@ public sealed record ExternalEditionDto
     /// The publisher of the edition.
     /// </summary>
     public string? Publisher { get; set; }
+
+    /// <summary>
+    /// Which type of entries are counted
+    /// </summary>
+    public EditionEntryType Type { get; set; }
+
+    /// <summary>
+    /// Number of entries in the main storyline
+    /// </summary>
+    public int MainCount { get; set; }
+
+    /// <summary>
+    /// Total number of entries (Includes extras, etc.)
+    /// </summary>
+    public int TotalCount { get; set; }
 }
