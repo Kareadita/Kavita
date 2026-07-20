@@ -408,7 +408,8 @@
         "spin-off": "Spin-Off",
         "parent": "Übergeordnet",
         "edition": "Ausgabe",
-        "annual": "Jährlich"
+        "annual": "Jährlich",
+        "cameo": "Cameo"
     },
     "publication-status-pipe": {
         "ongoing": "Fortlaufend",
@@ -752,7 +753,9 @@
         "inherit-web-links-label": "Weblinks aus dem ersten Kapitel übernehmen",
         "inherit-web-links-tooltip": "Sollten Serien Weblinks aus ihrem ersten Kapitel übernehmen",
         "default-language-label": "Standardsprache",
-        "default-language-tooltip": "Sprache, die der Serie zugewiesen werden soll, wenn in den Metadaten keines der Kapitel eine Sprache festgelegt hat"
+        "default-language-tooltip": "Sprache, die der Serie zugewiesen werden soll, wenn in den Metadaten keines der Kapitel eine Sprache festgelegt hat",
+        "metadata-provider-label": "Metadatenanbieter",
+        "metadata-provider-tooltip": "Wählen Sie die Quelle aus, aus der Kavita Metadaten bezieht."
     },
     "file-type-group-pipe": {
         "archive": "Archiv",
@@ -2205,7 +2208,9 @@
         "confirm-delete-read-from-readinglist": "Möchten Sie wirklich alle gelesenen Titel aus dieser Leseliste entfernen? Dieser Vorgang kann nicht rückgängig gemacht werden.",
         "reading-list-sync-enqueued": "Die Leseliste wurde zur Synchronisierung in die Warteschlange gestellt.",
         "confirm-rerun-backfill": "Sie haben bereits mindestens einmal Scrobble-Ereignisse für {{provider}} generiert. Das Nachholen von Daten kann das Scrobbeln der zuletzt gelesenen Ereignisse verzögern. Möchten Sie wirklich fortfahren?",
-        "tokens-expired": "Ein oder mehrere Verbindungstoken sind abgelaufen. Das Scrobbeln und die Synchronisierung werden unterbrochen, bis Sie diese in Kavita+ > Verbindungen neu generieren"
+        "tokens-expired": "Ein oder mehrere Verbindungstoken sind abgelaufen. Das Scrobbeln und die Synchronisierung werden unterbrochen, bis Sie diese in Kavita+ > Verbindungen neu generieren",
+        "change-email-success": "Ein Bestätigungslink wurde an Ihre neue E-Mail-Adresse gesendet. Klicken Sie darauf, um die Änderung abzuschließen.",
+        "change-email-error": "Wir konnten Ihre E-Mail-Adresse nicht ändern. Bitte versuchen Sie es erneut oder wenden Sie sich an den Support, falls das Problem weiterhin auftritt."
     },
     "read-time-pipe": {
         "less-than-hour": "<1 Stunde",
@@ -2450,7 +2455,8 @@
         "unknown": "Unbekannt",
         "libraries": "Bibliotheken",
         "confirm": "Bestätigen",
-        "selected": "Ausgewählt"
+        "selected": "Ausgewählt",
+        "done": "Fertig"
     },
     "confirm": {
         "alert": "Alarm",
@@ -2544,7 +2550,10 @@
         "volume-count": "{{match-series-result-item.volume-count}}",
         "chapter-count": "{{match-series-result-item.chapter-count}}",
         "matched-to": "Derzeit zugeordnet zu",
-        "searching-against": "Suche bei {{provider}}"
+        "searching-against": "Suche bei {{provider}}",
+        "change-provider-help": "In den Bibliothekseinstellungen kannst du festlegen, welcher Anbieter verwendet werden soll",
+        "is-standalone-label": "Ist eigenständig",
+        "is-standalone-tooltip": "Aktivieren Sie diese Option, wenn es sich bei dieser Reihe um ein einzelnes Buch handelt und es für das gebundene Buch keinen Eintrag in der Reihe gibt"
     },
     "email-history": {
         "description": "Hier finden Sie alle E-Mails, die von Kavita gesendet wurden und an welchen Benutzer.",
@@ -3020,9 +3029,9 @@
         "close": "{{common.close}}"
     },
     "font-manager": {
-        "description": "Der E-Book-Reader von Kavita verfügt über einige integrierte Schriftarten. Hier können Sie Ihre eigenen Schriftarten hinzufügen. Laden Sie eine Datei hoch oder verwenden Sie eine Google-Fonts-URL. Weitere Informationen finden Sie im <a href='{{wikiLink}}' target='_blank' rel='noreferrer noopener'>wiki</a>.",
+        "description": "Schriftarten, aus denen Sie im EPUB-Reader auswählen können. Sie sind nach Familien gruppiert – das ist der Name, den Sie beim Lesen auswählen. Jede Familie umfasst eine oder mehrere Dateien für verschiedene Schriftstärken und -stile. Laden Sie Schriftarten von {{googleFontsLink}} herunter oder lesen Sie den {{wikiLink}} für weitere Informationen. ",
         "upload-continued": "eine Schriftartdatei",
-        "preview-default": "Lade deine eigene Schriftart über eine Datei oder die Google Font-URL hoch",
+        "preview-default": "Wählen Sie eine Schriftfamilie aus, um eine Vorschau anzuzeigen, oder fügen Sie eine eigene Schriftart über eine Datei oder eine Google-Font-URL hinzu",
         "no-preview": "Diese Schriftart kann nicht in der Vorschau angezeigt werden. Es wird der Standardstil aus dem Buch verwendet.",
         "brown-fox": "Der schnelle braune Fuchs springt über den faulen Hund",
         "filter-system-fonts-label": "Systemschriften filtern",
@@ -3047,7 +3056,15 @@
         "italic": "Kursiv",
         "regular": "Standard",
         "wght": "Fett",
-        "alphabet": "ABCDEFGHIJKLM abcdefghijklm 0123456789"
+        "alphabet": "ABCDEFGHIJKLM abcdefghijklm 0123456789",
+        "weight-axis": "Strichstärkenachse",
+        "weight-axis-hint": "Zum Anzeigen der gesamten Auswahl ziehen",
+        "weight-thin": "Dünn",
+        "weight-black": "Schwarz",
+        "reading-sample": "Leseprobe",
+        "reading-sample-text": "Sie blätterte langsam um, und das Lampenlicht fiel auf jeden einzelnen Buchstaben. Geflüsterte Geschichten aus Tinte und Papier stiegen aus dem Buchrücken empor, die fünf Boxzauberer sprangen schnell auf, und die Nacht las weiter.",
+        "provider-note-system": "Integriert, jederzeit verfügbar",
+        "provider-note-custom": "Von Ihnen hochgeladen"
     },
     "library-type-subtitle-pipe": {
         "book": "Universelle Buchbibliothek.",
@@ -3956,7 +3973,9 @@
         "connect-title": "Mit Discord verbinden",
         "connect-subtitle": "Erhalten Sie Zugang zu exklusiven Kanälen und zeigen Sie Ihr Gespür",
         "connect-button": "Verbinden",
-        "connected-label": "Mit Discord verbunden"
+        "connected-label": "Mit Discord verbunden",
+        "connecting-title": "Verbinden",
+        "connecting-subtitle": "Kavita verbindet gerade im Hintergrund deinen Discord-Account, bitte warte einen Moment..."
     },
     "expired-license-info-card": {
         "title-label": "Letztes Abonnement",
@@ -4050,7 +4069,8 @@
         "filter-timeframe-30d": "Letzte 30 Tage",
         "system": "System",
         "next-scrobble": "Nächster Scrobble: {{date}}",
-        "filter-provider-label": "Scrobble-Anbieter"
+        "filter-provider-label": "Scrobble-Anbieter",
+        "filter-system": "System"
     },
     "kavitaplus-diff": {
         "field-label": "Feld",
@@ -4079,7 +4099,8 @@
     },
     "kavita-plus-audit-entry": {
         "system": "{{manage-kavitaplus-activity.system}}",
-        "retry": "Erneut versuchen"
+        "retry": "Erneut versuchen",
+        "match": "Übereinstimmung"
     },
     "audit-status-title-pipe": {
         "success": "Erfolg",
@@ -4133,7 +4154,11 @@
         "sync-failed-collection": "DieSynchronisierung für {{collectionName}} ist fehlgeschlagen",
         "sync-completed-want-to-read": "{{seriesMatched}} Serien, die für {{userName}} gefunden wurden",
         "read-status-update": "Status {{status}}",
-        "series-matched-against": "Übereinstimmung mit „{{matchName}}“"
+        "series-matched-against": "Übereinstimmung mit „{{matchName}}“",
+        "system-token-refresh-success": "Authentifizierungstoken für {{provider}} aktualisieren. Sie sind bis {{validUntil}} gültig",
+        "system-token-refresh-failure": "Die Aktualisierung der Authentifizierungstoken für {{provider}} ist fehlgeschlagen",
+        "system-provider-info-sync-success": "Informationen für {{provider}} wurden erfolgreich synchronisiert. Verknüpft mit dem Konto {{username}}",
+        "system-provider-info-sync-failure": "Die Synchronisierung der Kontoinformationen für {{provider}} ist fehlgeschlagen"
     },
     "kavita-plus-event-type-pipe": {
         "series-matched": "Serie Übereinstimmend",
@@ -4160,7 +4185,9 @@
         "scrobble-hold-removed": "Scrobble-Sperre aufgehoben",
         "sync-started": "Synchronisierung gestartet",
         "sync-completed": "Synchronisierung abgeschlossen",
-        "sync-failed": "Synchronisierung fehlgeschlagen"
+        "sync-failed": "Synchronisierung fehlgeschlagen",
+        "system-provider-info-sync": "Scrobble-Anbieter-Info-Synchronisierung",
+        "system-token-refresh": "Aktualisierung des Scrobble-Provider-Tokens"
     },
     "audit-log-messages": {
         "rate-limit-hit": "Ratenbegrenzung erreicht",
@@ -4169,7 +4196,11 @@
         "series-dont-match": "Als „Keine Übereinstimmung“ gekennzeichnete Serien",
         "scrobble-hold-active": "Die Serie wurde vorläufig ausgesetzt",
         "library-scrobbling-disabled": "Bibliotheks-Scrobbling deaktiviert",
-        "token-expired": "Der AniList-Token ist abgelaufen"
+        "token-expired": "Der AniList-Token ist abgelaufen",
+        "no-matches": "Es wurden keine Treffer mit ausreichender Sicherheit gefunden, um eine automatische Auswahl vorzunehmen",
+        "too-many-matches": "Es wurden mehrere Übereinstimmungen mit hoher Sicherheit gefunden; ein manueller Eingriff ist erforderlich",
+        "series-missing-required-ids": "Das Scrobbeln ist nicht möglich, da bei dieser Serie die erforderlichen externen IDs fehlen",
+        "chapter-missing-required-ids": "Das Scrobbeln ist nicht möglich, da in diesem Kapitel die erforderlichen externen IDs fehlen"
     },
     "metadata-provider-title-pipe": {
         "hardcover": "Hardcover",
@@ -4208,7 +4239,7 @@
         "progress-sync-tooltip": "Kavita erfasst den Fortschritt der Serie, wenn Kapitel abgeschlossen werden, oder den Fortschritt innerhalb eines Kapitels bei Seitenwechseln",
         "rating-sync-label": "Bewertungen synchronisieren",
         "rating-sync-tooltip": "Kavita erfasst die Bewertungen für zugeordnete Serien und Episoden",
-        "want-to-read-sync-label": "Leseliste synchronisieren",
+        "want-to-read-sync-label": "„Leseliste“ synchronisieren",
         "want-to-read-sync-tooltip": "Halten Sie Ihre Leseliste auf dem neuesten Stand. Der Lesestatus wird dabei nicht geändert",
         "reviews-target-label": "Ziel der Überprüfung",
         "reviews-target-tooltip": "Wer synchronisierte Bewertungen sehen kann, hängt von der Unterstützung durch den Anbieter ab",
@@ -4232,7 +4263,8 @@
         "dropped-series-rule-status-aria": "Status des Übergangs bei eingestellten Serien",
         "dropped-series-rule-excluded-publication-aria": "Ausgeschlossene Veröffentlichungsstatus für die Regel zu eingestellten Serien",
         "backfill-events": "{{manage-user-scrobble-provider-modal.generate-scrobble-events}}",
-        "anilist-warning": "Die Synchronisierung von AniList kann zu Stoßzeiten langsamer sein. MangaBaka bietet eine umfangreichere Bibliothek und eine durchweg schnellere Synchronisierung."
+        "anilist-warning": "Die Synchronisierung von AniList kann zu Stoßzeiten langsamer sein. MangaBaka bietet eine umfangreichere Bibliothek und eine durchweg schnellere Synchronisierung.",
+        "loading-background": "Kavita lädt Ihre Verbindung im Hintergrund – bitte haben Sie einen Moment Geduld..."
     },
     "manage-user-scrobble-provider-modal": {
         "close": "{{common.close}}",
@@ -4246,11 +4278,16 @@
         "event-generation-label": "Nachträgliche Erfassung des letzten Scrobbles",
         "event-generation-not-run": "Die Nachberechnung wurde noch nicht durchgeführt",
         "generate": "Erstellen",
-        "generate-scrobble-events": "Bereinigungsmaßnahmen"
+        "generate-scrobble-events": "Bereinigungsmaßnahmen",
+        "refresh-token-label": "Aktualisierungstoken",
+        "connect-label": "Konto verbinden",
+        "connect-tooltip": "Sie werden zu Kavita+ und dem Scrobble-Anbieter weitergeleitet"
     },
     "scrobble-provider-description-pipe": {
         "my-anime-list": "„Want To Read“ und „Stacks“ synchronisieren für Manga und Light Novels",
-        "hardcover": "Alles rund um Bücher, Manga und Light Novels!"
+        "hardcover": "Alles rund um Bücher, Manga und Light Novels!",
+        "anilist": "Alles rund um Manga und Light Novels",
+        "mangabaka": "Alles rund um Manga und Light Novels"
     },
     "review-scrobble-target-name-pipe": {
         "private": "Nur Sie",
@@ -4266,6 +4303,76 @@
         "on-hold": "Angehalten"
     },
     "manage-license-modal": {
-        "hub-title": "Abonnement verwalten"
+        "hub-title": "Abonnement verwalten",
+        "hub-subtitle": "Wählen Sie aus, was Sie mit dem „Kavita+“-Tarif dieses Servers machen möchten.",
+        "renew-title": "Abonnement verlängern",
+        "renew-desc": "Kavita+ für alle Nutzer auf diesem Server wieder aktivieren.",
+        "cancel-title": "Abonnement kündigen",
+        "cancel-desc": "Beenden Sie Ihr Abonnement. Kavita+ bleibt bis zu Ihrem Abrechnungsdatum aktiv – es fallen keine weiteren Kosten an.",
+        "change-email-title": "E-Mail ändern",
+        "change-email-desc": "Aktualisieren Sie die Adresse, die Stripe für Quittungen verwendet und an die Ihre Lizenz- und Verlängerungslinks gesendet werden.",
+        "billing-title": "Rechnungs- & Zahlungsdetails",
+        "billing-desc": "Aktualisieren Sie Ihre Karte, rufen Sie Rechnungen ab und laden Sie Belege im sicheren Portal von Stripe herunter.",
+        "close": "{{common.close}}"
+    },
+    "renew-license": {
+        "yearly-label": "Jährlich",
+        "billing-email-label": "Rechnungs-E-Mail",
+        "on-file-label": "auf Datei",
+        "email-help": "Wird automatisch aus dieser Instanz ausgefüllt – muss mit Ihrem ursprünglichen Kauf übereinstimmen.",
+        "change-label": "Ändern",
+        "how-it-works-label": "So funktioniert die Verlängerung",
+        "how-step-1": "Wir richten für {{email}} einen sicheren Stripe-Bezahlvorgang für das ausgewählte Abonnement ein.",
+        "how-step-2": "Bestätigen Sie dort Ihre Karte – Ihre Daten werden zu keinem Zeitpunkt auf diesem Server gespeichert.",
+        "how-step-3": "Sobald die Zahlung eingegangen ist, stehen die Funktionen von Kavita+ wieder allen Nutzern auf dem Server zur Verfügung.",
+        "back-label": "Zurück",
+        "send-link-label": "Weiter zur Zahlung",
+        "checkout-ready-label": "Ihr Bestellvorgang ist abgeschlossen",
+        "checkout-ready-help": "Öffnen Sie den sicheren Stripe-Zahlungsvorgang, um Ihre Verlängerung abzuschließen. Sie können diesen nach Abschluss der Zahlung schließen und erneut überprüfen.",
+        "pay-now-label": "Jetzt bezahlen",
+        "done-label": "{{common.done}}",
+        "link-sent-error": "Die Verlängerung konnte nicht gestartet werden. Bitte versuchen Sie es erneut oder wenden Sie sich an den Support.",
+        "title": "Kavita+ verlängern",
+        "subtitle": "Premium-Funktionen für alle Nutzer dieses Servers wieder aktivieren.",
+        "close": "{{common.close}}",
+        "billing-period-label": "Abrechnungszeitraum",
+        "monthly-label": "Monatlich"
+    },
+    "cancel-license": {
+        "title": "Abonnement kündigen",
+        "subtitle": "Sie behalten den uneingeschränkten Zugriff bis zum Ende Ihres aktuellen Abrechnungszeitraums.",
+        "close": "{{common.close}}",
+        "server-wide-label": "Serverweit",
+        "users-active-label": "{{count}} aktive Nutzer",
+        "what-happens-label": "Was passiert",
+        "impact-1": "Kavita+ bleibt bis zu Ihrem aktuellen Abrechnungsdatum aktiv.",
+        "impact-2": "Nach diesem Datum fallen keine weiteren Gebühren mehr an.",
+        "impact-3": "Sie können Ihr Abonnement jederzeit verlängern, um die Premium-Funktionen wieder zu nutzen.",
+        "comment-label": "Grund für die Stornierung (optional)",
+        "comment-placeholder": "Teilen Sie uns bitte mit, warum Sie stornieren...",
+        "cancelled-success": "Das Abonnement wurde gekündigt. Der Zugriff bleibt bis zu Ihrem Abrechnungsdatum bestehen.",
+        "cancelled-error": "Wir konnten Ihr Abonnement nicht kündigen. Bitte versuchen Sie es erneut oder wenden Sie sich an den Support.",
+        "back-label": "Zurück",
+        "confirm-label": "Abonnement kündigen"
+    },
+    "change-license-email": {
+        "title": "E-Mail ändern",
+        "subtitle": "Aktualisieren Sie die Angaben dazu, wohin Quittungen, Lizenzschlüssel und Verlängerungslinks gesendet werden.",
+        "close": "{{common.close}}",
+        "current-email-label": "Aktuelle E-Mail",
+        "on-file-label": "in der Datei",
+        "new-email-label": "Neue E-Mail-Adresse",
+        "new-email-placeholder": "you@domain.com",
+        "confirm-help": "Wir senden Ihnen einen Link, über den Sie die Änderung vornehmen können, bevor sich etwas ändert.",
+        "back-label": "Zurück",
+        "send-code-label": "Code senden"
+    },
+    "recommendation-source-pipe": {
+        "similar": "Ähnlich",
+        "user-based": "Nutzer mochten es",
+        "personalized": "Für Sie"
+    },
+    "epub-font-title-pipe": {
+        "user-font-suffix": "(Benutzer)"
     }
 }

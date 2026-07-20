@@ -408,7 +408,8 @@
         "spin-off": "Casadh As",
         "parent": "Tuismitheoir",
         "edition": "Eagrán",
-        "annual": "Bliantúil"
+        "annual": "Bliantúil",
+        "cameo": "Cameo"
     },
     "publication-status-pipe": {
         "ongoing": "Ar siúl faoi láthair",
@@ -752,7 +753,9 @@
         "inherit-web-links-label": "Oidhreacht a fháil ar naisc ghréasáin ón gcéad chaibidil",
         "inherit-web-links-tooltip": "Ar cheart do shraitheanna naisc ghréasáin a oidhreacht óna gcéad chaibidil",
         "default-language-label": "Teanga réamhshocraithe",
-        "default-language-tooltip": "Teanga le sannadh do shraith, mura bhfuil aon teanga socraithe i meiteashonraí aon cheann de na caibidlí"
+        "default-language-tooltip": "Teanga le sannadh do shraith, mura bhfuil aon teanga socraithe i meiteashonraí aon cheann de na caibidlí",
+        "metadata-provider-label": "Soláthraí Meiteashonraí",
+        "metadata-provider-tooltip": "Roghnaigh an fhoinse as a dtarraingíonn Kavita meiteashonraí."
     },
     "file-type-group-pipe": {
         "archive": "Cartlann",
@@ -2536,7 +2539,10 @@
         "volume-count": "{{match-series-result-item.volume-count}}",
         "chapter-count": "{{match-series-result-item.chapter-count}}",
         "matched-to": "Meaitseáilte faoi láthair le",
-        "searching-against": "Ag cuardach i gcoinne {{provider}}"
+        "searching-against": "Ag cuardach i gcoinne {{provider}}",
+        "change-provider-help": "Is féidir leat an soláthraí atá le húsáid a athrú i socruithe na Leabharlainne",
+        "is-standalone-label": "Neamhspleách",
+        "is-standalone-tooltip": "Cumasaigh más leabhar aonair atá sa tsraith seo, agus mura bhfuil iontráil sraithe ann don chlúdach crua"
     },
     "email-history": {
         "description": "Anseo gheobhaidh tú gach ríomhphost a sheoltar ó Kavita agus chuig an úsáideoir.",
@@ -3905,7 +3911,11 @@
         "series-dont-match": "Sraith Marcáilte mar Neamh-Mheaitseála",
         "scrobble-hold-active": "Tá an tsraith ar fionraí",
         "library-scrobbling-disabled": "Scrobáil Leabharlainne Díchumasaithe",
-        "token-expired": "Tá Comhartha AniList imithe in éag"
+        "token-expired": "Tá Comhartha AniList imithe in éag",
+        "no-matches": "Ní bhfuarthas aon mheaitseálacha le cinnteacht leordhóthanach chun roghnú go huathoibríoch",
+        "too-many-matches": "Níos mó ná cluiche amháin le cinnteacht ard aimsithe, idirghabháil láimhe ag teastáil",
+        "series-missing-required-ids": "Ní féidir scrobble a dhéanamh mar tá na haitheantais sheachtracha riachtanacha ar iarraidh sa tsraith seo",
+        "chapter-missing-required-ids": "Ní féidir scrobble a dhéanamh mar tá na haitheantais sheachtracha riachtanacha ar iarraidh sa chaibidil seo"
     },
     "scrobble-provider-tag-badge": {
         "view-on": "Féach ar {{ provider }}"
@@ -4238,7 +4248,9 @@
     },
     "scrobble-provider-description-pipe": {
         "my-anime-list": "Sioncrónaíonn \"Want To Read & Stacks\" le haghaidh Manga agus Úrscéalta Éadroma",
-        "hardcover": "Gach rud Leabhair, Manga, agus Úrscéalta Éadroma!"
+        "hardcover": "Gach rud Leabhair, Manga, agus Úrscéalta Éadroma!",
+        "anilist": "Gach rud Manga & Úrscéalta Éadroma",
+        "mangabaka": "Gach rud Manga & Úrscéalta Éadroma"
     },
     "review-scrobble-target-name-pipe": {
         "private": "Tusa amháin",
@@ -4357,5 +4369,10 @@
     },
     "epub-font-title-pipe": {
         "user-font-suffix": "(Úsáideoir)"
+    },
+    "recommendation-source-pipe": {
+        "similar": "Cosúil",
+        "user-based": "Is maith le húsáideoirí",
+        "personalized": "Duit"
     }
 }
