@@ -4421,6 +4421,7 @@
         "chapter-covers": "Covers (Chapter)",
         "chapter-publisher": "{{person-role-pipe.publisher}} (Chapter)",
         "chapter-title": "Title (Chapter)",
+        "chapter-age-rating": "Age Rating (Chapter)",
         "volume-covers": "Covers (Volume)"
     },
 

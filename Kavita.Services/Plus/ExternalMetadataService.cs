@@ -1894,14 +1894,14 @@ public class ExternalMetadataService : IExternalMetadataService
 
     private static (bool, MetadataFieldChangeDto?) UpdateChapterAgeRating(Chapter chapter, MetadataSettingsDto settings, AgeRating ageRating)
     {
-        if (chapter.AgeRatingLocked && !HasForceOverride(settings, chapter, MetadataSettingField.AgeRating))
+        if (chapter.AgeRatingLocked && !HasForceOverride(settings, chapter, MetadataSettingField.ChapterAgeRating))
         {
             return (false, null);
         }
 
         var from = chapter.AgeRating;
         chapter.AgeRating = ageRating;
-        chapter.AddKPlusOverride(MetadataSettingField.AgeRating);
+        chapter.AddKPlusOverride(MetadataSettingField.ChapterAgeRating);
 
         return (true, new MetadataFieldChangeDto(MetadataFieldChangeKind.AgeRating, from, ageRating));
     }
