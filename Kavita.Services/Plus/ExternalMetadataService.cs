@@ -1701,7 +1701,7 @@ public class ExternalMetadataService : IExternalMetadataService
                 .Join(
                     externalMetadata.ChapterDtos,
                     chapter => Parser.IsLooseLeafVolume(chapter.Range) ? chapter.Volume.Name : chapter.Range,
-                    dto => dto.IssueNumber.Replace(",", "."), // Ensure comma's are dots
+                    dto => dto.IssueNumber.Replace(',', '.'), // Ensure comma's are dots
                     (chapter, dto) => (chapter, dto)
                 )
                 .ToList();
@@ -1719,6 +1719,7 @@ public class ExternalMetadataService : IExternalMetadataService
             Accumulate(ref madeModification, chapterFieldChanges, UpdateChapterTitle(chapter, settings, potentialMatch.Title, series.Name));
             Accumulate(ref madeModification, chapterFieldChanges, UpdateChapterSummary(chapter, settings, potentialMatch.Summary));
             Accumulate(ref madeModification, chapterFieldChanges, UpdateChapterReleaseDate(chapter, settings, potentialMatch.ReleaseDate));
+            Accumulate(ref madeModification, chapterFieldChanges, UpdateChapterAgeRating(chapter, settings, series.Metadata.AgeRating));
 
             var hasUpdatedPublisher = await UpdateChapterPublisher(chapter, settings, potentialMatch.Publisher);
             if (hasUpdatedPublisher) chapter.AddKPlusOverride(MetadataSettingField.ChapterPublisher);
@@ -1889,6 +1890,20 @@ public class ExternalMetadataService : IExternalMetadataService
         chapter.AddKPlusOverride(MetadataSettingField.ChapterTitle);
 
         return (true, new MetadataFieldChangeDto(MetadataFieldChangeKind.Title, from, title));
+    }
+
+    private static (bool, MetadataFieldChangeDto?) UpdateChapterAgeRating(Chapter chapter, MetadataSettingsDto settings, AgeRating ageRating)
+    {
+        if (chapter.AgeRatingLocked && !HasForceOverride(settings, chapter, MetadataSettingField.AgeRating))
+        {
+            return (false, null);
+        }
+
+        var from = chapter.AgeRating;
+        chapter.AgeRating = ageRating;
+        chapter.AddKPlusOverride(MetadataSettingField.AgeRating);
+
+        return (true, new MetadataFieldChangeDto(MetadataFieldChangeKind.AgeRating, from, ageRating));
     }
 
     private static (bool, MetadataFieldChangeDto?) UpdateChapterReleaseDate(Chapter chapter, MetadataSettingsDto settings, DateTime? releaseDate)
