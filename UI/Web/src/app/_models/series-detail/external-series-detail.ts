@@ -26,12 +26,27 @@ export interface MetadataTagDto {
   isAdult: boolean;
 }
 
+export enum EditionEntryType {
+  Chapter = 0,
+  Volume = 1,
+  Other = 2,
+}
+
 export interface ExternalEditionDto {
   id: string;
   title: string;
   format: string;
   language: string;
   publisher: string;
+  type: EditionEntryType;
+  /**
+   * Number of entries in the main storyline
+   */
+  mainCount: number;
+  /**
+   * Total number of entries (includes extras, etc.)
+   */
+  totalCount: number;
 }
 
 export interface ExternalSeriesDetail {

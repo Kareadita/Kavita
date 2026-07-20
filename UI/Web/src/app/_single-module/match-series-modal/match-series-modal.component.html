@@ -28,6 +28,9 @@
               @if (kavitaChapterCount() > 0) {
                 {{ t('chapter-count', {num: kavitaChapterCount()}) }}
               }
+              @if (kavitaSpecialCount() > 0) {
+                {{ t('special-count', {num: kavitaSpecialCount()}) }}
+              }
             </div>
           </div>
         </div>

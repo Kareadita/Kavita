@@ -732,7 +732,7 @@ public class ExternalMetadataService : IExternalMetadataService
 
         // prefer what was passed in (manual match), fall back to what K+ returned
         var beforeIds = new AuditLogMatchExternalIdsParamsDto { AniListId = series.AniListId, MalId = series.MalId,
-            MangaBakaId = series.MangaBakaId, CbrId = series.CbrId, HardcoverId = series.HardcoverId };
+            MangaBakaId = series.MangaBakaId, MangaBakaEditionId = series.MangaBakaEditionId, CbrId = series.CbrId, HardcoverId = series.HardcoverId };
 
         externalSeriesMetadata.MalId = data.MalId ?? result.MalId ?? 0;
         externalSeriesMetadata.AniListId = data.AniListId ?? result.AniListId ?? 0;
@@ -740,11 +740,21 @@ public class ExternalMetadataService : IExternalMetadataService
         externalSeriesMetadata.MangabakaId = data.MangabakaId ?? result.MangabakaId ?? 0;
         series.MangaBakaId = externalSeriesMetadata.MangabakaId;
 
+        if (!string.IsNullOrEmpty(data.MangaBakaEditionId))
+        {
+            series.MangaBakaEditionId = data.MangaBakaEditionId;
+        }
+        else if (series.MangaBakaId == 0)
+        {
+            series.MangaBakaEditionId = string.Empty;
+        }
+
         var hardcoverId = data.HardcoverId ?? result.Series?.HardcoverId ?? series.HardcoverId;
         var afterIds = new AuditLogMatchExternalIdsParamsDto {
             AniListId = externalSeriesMetadata.AniListId,
             MalId = externalSeriesMetadata.MalId,
             MangaBakaId = series.MangaBakaId,
+            MangaBakaEditionId = series.MangaBakaEditionId,
             CbrId = externalSeriesMetadata.CbrId,
             HardcoverId = hardcoverId };
 

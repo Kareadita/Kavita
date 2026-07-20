@@ -257,7 +257,7 @@ export class SeriesService {
       malId: series.malId ?? null,
       cbrId: series.cbrId ?? null,
       mangabakaId: series.mangabakaId ?? null,
-      mangaBakaEditionId: edition?.id ?? null, // If we have other providers with editions. This will need updating
+      mangaBakaEditionId: edition?.id ?? null, // NOTE: If we have other providers with editions. This will need updating
       hardcoverId: series.hardcoverId ?? null,
       isStandAlone: series.isStandAlone,
     };

@@ -101,6 +101,12 @@
             @if (edition.format) {
               <span class="edition-chip-format">{{ edition.format }}</span>
             }
+            @if (edition.mainCount > 0) {
+              <span class="edition-chip-count">{{ t('edition-main-count', {num: edition.mainCount}) }}</span>
+            }
+            @if (edition.totalCount - edition.mainCount > 0) {
+              <span class="edition-chip-count edition-chip-extra">{{ t('edition-extra-count', {num: edition.totalCount - edition.mainCount}) }}</span>
+            }
           </button>
         }
       </div>

@@ -91,6 +91,7 @@ export class MatchSeriesModalComponent implements OnInit {
   coverImageUrl!: Signal<string>;
   kavitaVolumeCount!: Signal<number>;
   kavitaChapterCount!: Signal<number>;
+  kavitaSpecialCount!: Signal<number>;
   seriesDetail = signal<SeriesDetail | null>(null);
   matchInfo = signal<MatchSeriesInfo | null>(null);
 
@@ -99,6 +100,7 @@ export class MatchSeriesModalComponent implements OnInit {
     this.coverImageUrl = computed(() => this.imageService.getSeriesCoverImage(this.series().id));
     this.kavitaVolumeCount = computed(() => (this.seriesDetail()?.volumes ?? []).length);
     this.kavitaChapterCount = computed(() => (this.seriesDetail()?.chapters ?? []).length);
+    this.kavitaSpecialCount = computed(() => (this.seriesDetail()?.specials ?? []).length);
 
     effect(() => {
       if (this.series().mangaBakaEditionId) {
@@ -107,6 +109,8 @@ export class MatchSeriesModalComponent implements OnInit {
 
       this.seriesService.getMatchInfo(this.series().id).subscribe(res => {
         this.matchInfo.set(res);
+        // Results may have already loaded before match info arrived; retry auto-select now.
+        this.autoSelectExistingMatch(this.matches());
       });
     });
 
@@ -152,6 +156,7 @@ export class MatchSeriesModalComponent implements OnInit {
         this.isLoading.set(false);
         this.hasSearched.set(true);
         this.matches.set(results);
+        this.autoSelectExistingMatch(results);
       }),
       catchError(() => {
         this.isLoading.set(false);
@@ -159,6 +164,47 @@ export class MatchSeriesModalComponent implements OnInit {
         return of([]);
       })
     ).subscribe();
+  }
+
+  /**
+   * Pre-selects the result (and its collection/edition, if any) that corresponds to the series' existing match.
+   * UI-state only; does not apply. Skips if the user already has a selection.
+   */
+  private autoSelectExistingMatch(results: ExternalSeriesMatch[]) {
+    if (this.selectedItem()) return;
+
+    const info = this.matchInfo();
+    if (!info || !info.hasMatch) return;
+
+    const existing = results.find(r => this.isExistingMatch(r, info));
+    if (!existing) return;
+
+    this.selectedItem.set(existing);
+
+    const editionId = info.mangaBakaEditionId || this.series().mangaBakaEditionId;
+    if (editionId) {
+      const edition = existing.series.editions.find(e => e.id === editionId) ?? null;
+      this.selectedEdition.set(edition);
+    }
+  }
+
+  private isExistingMatch(match: ExternalSeriesMatch, info: MatchSeriesInfo): boolean {
+    const s = match.series;
+
+    if (info.isLegacy) {
+      return !!info.aniListId && s.aniListId === info.aniListId;
+    }
+
+    switch (info.matchedProvider) {
+      case MetadataProvider.Mangabaka:
+        return !!info.mangaBakaId && s.mangabakaId === info.mangaBakaId;
+      case MetadataProvider.ComicBookRoundup:
+        return !!info.cbrId && s.cbrId === info.cbrId;
+      case MetadataProvider.Hardcover:
+        return !!info.hardcoverId && s.hardcoverId === info.hardcoverId;
+      default:
+        return false;
+    }
   }
 
   clearQuery() {

@@ -677,12 +677,14 @@ public class SeriesController(
 
         return Ok(new MatchSeriesInfoDto
         {
-            HasMatch = externalMetadata is {Id: > 0} && provider != null,
+            HasMatch = externalMetadata is {Id: > 0} &&
+                       (series.MangaBakaId > 0 || series.HardcoverId > 0 || series.CbrId > 0 || series.AniListId > 0),
             // MangaBaka will always set AniList if set
             IsLegacy = series is {AniListId: > 0, MangaBakaId: 0},
             CbrId = series.CbrId,
             HardcoverId = series.HardcoverId,
             MangaBakaId = (int) series.MangaBakaId,
+            MangaBakaEditionId = series.MangaBakaEditionId,
             AniListId = series.AniListId,
             LibraryType = libraryType,
             PlusMediaFormat = plusFormat,

@@ -1794,6 +1794,7 @@
         "save": "{{common.save}}",
         "volume-count": "{{match-series-result-item.volume-count}}",
         "chapter-count": "{{match-series-result-item.chapter-count}}",
+        "special-count": "{{match-series-result-item.special-count}}",
         "matched-to": "Currently matched to",
         "searching-against": "Searching against {{provider}}",
         "change-provider-help": "You can change which provider to use in Library settings",
@@ -1808,9 +1809,12 @@
         "alt-titles": "Alt titles",
         "more-titles": "+{{count}} more",
         "selected-alt": "Selected",
-        "volume-count": "{{ num }} vol",
-        "chapter-count": "{{ num }} ch",
-        "issue-count": "{{ num }} issues"
+        "volume-count": "{{num}} vol",
+        "chapter-count": "{{num}} ch",
+        "special-count": "{{num}} special",
+        "issue-count": "{{num}} issues",
+        "edition-main-count": "{{num}} main",
+        "edition-extra-count": "+{{num}} extra"
     },
 
     "metadata-provider-title-pipe": {
