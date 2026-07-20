@@ -4,7 +4,8 @@ import {
   computed,
   effect,
   inject,
-  input, linkedSignal,
+  input,
+  linkedSignal,
   OnInit,
   signal,
   Signal
@@ -13,7 +14,7 @@ import {Series} from "../../_models/series";
 import {SeriesService} from "../../_services/series.service";
 import {FormControl, FormGroup, ReactiveFormsModule} from "@angular/forms";
 import {NgbActiveModal, NgbTooltip} from "@ng-bootstrap/ng-bootstrap";
-import {translate, TranslocoDirective} from "@jsverse/transloco";
+import {TranslocoDirective} from "@jsverse/transloco";
 import {ExternalSeriesMatch} from "../../_models/series-detail/external-series-match";
 import {ToastrService} from "ngx-toastr";
 import {catchError, filter, of, skip, startWith, tap} from "rxjs";
@@ -109,7 +110,6 @@ export class MatchSeriesModalComponent implements OnInit {
 
       this.seriesService.getMatchInfo(this.series().id).subscribe(res => {
         this.matchInfo.set(res);
-        // Results may have already loaded before match info arrived; retry auto-select now.
         this.autoSelectExistingMatch(this.matches());
       });
     });
@@ -166,10 +166,6 @@ export class MatchSeriesModalComponent implements OnInit {
     ).subscribe();
   }
 
-  /**
-   * Pre-selects the result (and its collection/edition, if any) that corresponds to the series' existing match.
-   * UI-state only; does not apply. Skips if the user already has a selection.
-   */
   private autoSelectExistingMatch(results: ExternalSeriesMatch[]) {
     if (this.selectedItem()) return;
 
@@ -233,7 +229,6 @@ export class MatchSeriesModalComponent implements OnInit {
     data.genres = data.genres || [];
 
     this.seriesService.updateMatch(this.series().id, data, this.selectedEdition()).subscribe(() => {
-      this.toastr.success(translate('toasts.match-success'));
       this.modalService.close(true);
     });
   }
