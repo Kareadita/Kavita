@@ -14,8 +14,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Kavita.Database.Migrations
 {
     [DbContext(typeof(DataContext))]
-    [Migration("20260716091353_AddSeriesMangaBakaEditionId")]
-    partial class AddSeriesMangaBakaEditionId
+    [Migration("20260721200907_AddEditionsVolumeCoverAndSeriesNameLock")]
+    partial class AddEditionsVolumeCoverAndSeriesNameLock
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -1391,6 +1391,9 @@ namespace Kavita.Database.Migrations
                     b.Property<bool>("EnableLocalizedName")
                         .HasColumnType("INTEGER");
 
+                    b.Property<bool>("EnableName")
+                        .HasColumnType("INTEGER");
+
                     b.Property<bool>("EnablePeople")
                         .HasColumnType("INTEGER");
 
@@ -2291,10 +2294,16 @@ namespace Kavita.Database.Migrations
                     b.Property<string>("Name")
                         .HasColumnType("TEXT");
 
+                    b.Property<bool>("NameLocked")
+                        .HasColumnType("INTEGER");
+
                     b.Property<string>("NormalizedLocalizedName")
                         .HasColumnType("TEXT");
 
                     b.Property<string>("NormalizedName")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("NormalizedOriginalName")
                         .HasColumnType("TEXT");
 
                     b.Property<string>("OriginalName")
@@ -2323,8 +2332,14 @@ namespace Kavita.Database.Migrations
                     b.HasIndex("LibraryId")
                         .HasDatabaseName("IX_Series_LibraryId");
 
-                    b.HasIndex("NormalizedName")
-                        .HasDatabaseName("IX_Series_NormalizedName");
+                    b.HasIndex("LibraryId", "Format", "NormalizedLocalizedName")
+                        .HasDatabaseName("IX_Series_LibraryId_Format_NormalizedLocalizedName");
+
+                    b.HasIndex("LibraryId", "Format", "NormalizedName")
+                        .HasDatabaseName("IX_Series_LibraryId_Format_NormalizedName");
+
+                    b.HasIndex("LibraryId", "Format", "NormalizedOriginalName")
+                        .HasDatabaseName("IX_Series_LibraryId_Format_NormalizedOriginalName");
 
                     b.ToTable("Series");
                 });

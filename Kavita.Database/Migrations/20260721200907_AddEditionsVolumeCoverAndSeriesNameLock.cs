@@ -5,7 +5,7 @@
 namespace Kavita.Database.Migrations
 {
     /// <inheritdoc />
-    public partial class SeriesNameLockedAndRenameIndexes : Migration
+    public partial class AddEditionsVolumeCoverAndSeriesNameLock : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -13,6 +13,19 @@ namespace Kavita.Database.Migrations
             migrationBuilder.DropIndex(
                 name: "IX_Series_NormalizedName",
                 table: "Series");
+
+            migrationBuilder.AddColumn<string>(
+                name: "KPlusOverrides",
+                table: "Volume",
+                type: "TEXT",
+                nullable: true,
+                defaultValue: "[]");
+
+            migrationBuilder.AddColumn<string>(
+                name: "MangaBakaEditionId",
+                table: "Series",
+                type: "TEXT",
+                nullable: true);
 
             migrationBuilder.AddColumn<bool>(
                 name: "NameLocked",
@@ -29,6 +42,13 @@ namespace Kavita.Database.Migrations
 
             migrationBuilder.AddColumn<bool>(
                 name: "EnableName",
+                table: "MetadataSettings",
+                type: "INTEGER",
+                nullable: false,
+                defaultValue: false);
+
+            migrationBuilder.AddColumn<bool>(
+                name: "EnableVolumeCoverImage",
                 table: "MetadataSettings",
                 type: "INTEGER",
                 nullable: false,
@@ -66,6 +86,14 @@ namespace Kavita.Database.Migrations
                 table: "Series");
 
             migrationBuilder.DropColumn(
+                name: "KPlusOverrides",
+                table: "Volume");
+
+            migrationBuilder.DropColumn(
+                name: "MangaBakaEditionId",
+                table: "Series");
+
+            migrationBuilder.DropColumn(
                 name: "NameLocked",
                 table: "Series");
 
@@ -75,6 +103,10 @@ namespace Kavita.Database.Migrations
 
             migrationBuilder.DropColumn(
                 name: "EnableName",
+                table: "MetadataSettings");
+
+            migrationBuilder.DropColumn(
+                name: "EnableVolumeCoverImage",
                 table: "MetadataSettings");
 
             migrationBuilder.CreateIndex(
