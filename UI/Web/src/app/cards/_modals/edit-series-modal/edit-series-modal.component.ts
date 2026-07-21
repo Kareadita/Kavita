@@ -514,18 +514,12 @@ export class EditSeriesModalComponent implements OnInit {
       }
     }
 
-    // We only need to call updateSeries if we changed name, sort name, or localized name or reset a cover image
-    const nameFieldsDirty = this.editSeriesForm.get('name')?.dirty || this.editSeriesForm.get('sortName')?.dirty || this.editSeriesForm.get('localizedName')?.dirty;
-    const nameFieldLockChanged = this.series.nameLocked !== this.initSeries.nameLocked || this.series.sortNameLocked !== this.initSeries.sortNameLocked || this.series.localizedNameLocked !== this.initSeries.localizedNameLocked;
-
     let updatedSeries: Series | null = null;
-
-    if (nameFieldsDirty || nameFieldLockChanged) {
-      model.nameLocked = this.series.nameLocked;
-      model.sortNameLocked = this.series.sortNameLocked;
-      model.localizedNameLocked = this.series.localizedNameLocked;
-      model.language = this.metadata.language;
-    }
+    
+    model.nameLocked = this.series.nameLocked;
+    model.sortNameLocked = this.series.sortNameLocked;
+    model.localizedNameLocked = this.series.localizedNameLocked;
+    model.language = this.metadata.language;
 
     // updateSeries runs first so a name collision (400) short-circuits the chain before metadata is written
     const apis = [
