@@ -57,6 +57,7 @@ public class SeriesHelperTests
     {
         var series = new SeriesBuilder("Darker than Black").Build();
         series.OriginalName = "Something Random";
+        series.NormalizedOriginalName = "Something Random".ToNormalized();
         series.Format = MangaFormat.Archive;
         Assert.False(SeriesHelper.FindSeries(series, new ParsedSeries()
         {
@@ -85,6 +86,7 @@ public class SeriesHelperTests
     {
         var series = new SeriesBuilder("Darker than Black").Build();
         series.OriginalName = "Something Random";
+        series.NormalizedOriginalName = "Something Random".ToNormalized();
         series.Format = MangaFormat.Image;
         Assert.True(SeriesHelper.FindSeries(series, new ParsedSeries()
         {
@@ -120,6 +122,7 @@ public class SeriesHelperTests
     {
         var series = new SeriesBuilder("Darker than Black").Build();
         series.LocalizedName = "Something Random";
+        series.NormalizedLocalizedName = "Something Random".ToNormalized();
         series.Format = MangaFormat.Image;
         Assert.True(SeriesHelper.FindSeries(series, new ParsedSeries()
         {
@@ -155,6 +158,7 @@ public class SeriesHelperTests
     {
         var series = new SeriesBuilder("My Dress-Up Darling").Build();
         series.LocalizedName = "Sono Bisque Doll wa Koi wo Suru";
+        series.NormalizedLocalizedName = "Sono Bisque Doll wa Koi wo Suru".ToNormalized();
         series.Format = MangaFormat.Archive;
         Assert.True(SeriesHelper.FindSeries(series, new ParsedSeries()
         {

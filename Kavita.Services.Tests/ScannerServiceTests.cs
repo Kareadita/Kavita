@@ -168,16 +168,21 @@ public class ScannerServiceTests: AbstractDbTest
         Assert.Single(postLib.Series);
         var originalId = postLib.Series.First().Id;
 
-        // Simulate a legacy row where OriginalName was never populated
+        // Simulate a legacy row predating both OriginalName and NormalizedOriginalName being populated
         var legacy = await unitOfWork.SeriesRepository.GetSeriesByIdAsync(originalId);
         legacy!.OriginalName = null!;
+        legacy.NormalizedOriginalName = string.Empty;
         unitOfWork.SeriesRepository.Update(legacy);
         await unitOfWork.CommitAsync();
 
-        // Apply the backfill's effect (OriginalName <- Name) while Name is still the on-disk name
+        // Apply the backfills' effect (OriginalName <- Name, then NormalizedOriginalName <- normalized)
+        // while Name is still the on-disk name
         var toBackfill = await unitOfWork.SeriesRepository.GetSeriesByIdAsync(originalId);
         Assert.True(string.IsNullOrEmpty(toBackfill!.OriginalName));
+        Assert.True(string.IsNullOrEmpty(toBackfill.NormalizedOriginalName));
+
         toBackfill.OriginalName = toBackfill.Name;
+        toBackfill.NormalizedOriginalName = toBackfill.OriginalName.ToNormalized();
         unitOfWork.SeriesRepository.Update(toBackfill);
         await unitOfWork.CommitAsync();
 

@@ -2300,6 +2300,9 @@ namespace Kavita.Database.Migrations
                     b.Property<string>("NormalizedName")
                         .HasColumnType("TEXT");
 
+                    b.Property<string>("NormalizedOriginalName")
+                        .HasColumnType("TEXT");
+
                     b.Property<string>("OriginalName")
                         .HasColumnType("TEXT");
 
@@ -2331,6 +2334,9 @@ namespace Kavita.Database.Migrations
 
                     b.HasIndex("LibraryId", "Format", "NormalizedName")
                         .HasDatabaseName("IX_Series_LibraryId_Format_NormalizedName");
+
+                    b.HasIndex("LibraryId", "Format", "NormalizedOriginalName")
+                        .HasDatabaseName("IX_Series_LibraryId_Format_NormalizedOriginalName");
 
                     b.ToTable("Series");
                 });

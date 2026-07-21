@@ -529,6 +529,9 @@ public sealed class DataContext : IdentityDbContext<AppUser, AppRole, int,
             entity.HasIndex(s => new { s.LibraryId, s.Format, s.NormalizedLocalizedName })
                 .HasDatabaseName("IX_Series_LibraryId_Format_NormalizedLocalizedName");
 
+            entity.HasIndex(s => new { s.LibraryId, s.Format, s.NormalizedOriginalName })
+                .HasDatabaseName("IX_Series_LibraryId_Format_NormalizedOriginalName");
+
             entity.HasIndex(s => s.LibraryId)
                 .HasDatabaseName("IX_Series_LibraryId");
         });

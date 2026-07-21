@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using Kavita.Common.Extensions;
 using Kavita.Models.Entities.Enums;
 using Kavita.Models.Entities.Interfaces;
 using Kavita.Models.Entities.Metadata;
@@ -37,6 +36,11 @@ public class Series : IEntityDate, IHasReadTimeEstimate, IHasCoverImage, IHasMet
     /// Original Name on disk. Not exposed to UI.
     /// </summary>
     public required string OriginalName { get; set; }
+    /// <summary>
+    /// Normalized form of <see cref="OriginalName"/>. Not exposed to UI. Used for folder-to-series
+    /// matching and rename uniqueness checks.
+    /// </summary>
+    public string NormalizedOriginalName { get; set; } = string.Empty;
     /// <summary>
     /// Time of creation
     /// </summary>
@@ -180,13 +184,13 @@ public class Series : IEntityDate, IHasReadTimeEstimate, IHasCoverImage, IHasMet
     }
 
     /// <summary>
-    /// Does this Series correspond to the given folder-derived parsed series key (name and format)
+    /// Does this Series correspond to the given folder-derived parsed series key (name and format)?
     /// </summary>
     public bool MatchesParsedSeries(ParsedSeries key)
     {
         return (NormalizedName.Equals(key.NormalizedName)
-                || (LocalizedName != null && LocalizedName.ToNormalized().Equals(key.NormalizedName))
-                || (OriginalName != null && OriginalName.ToNormalized().Equals(key.NormalizedName)))
+                || NormalizedLocalizedName.Equals(key.NormalizedName)
+                || NormalizedOriginalName.Equals(key.NormalizedName))
                && (Format == key.Format || Format == MangaFormat.Unknown);
     }
 

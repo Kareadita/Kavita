@@ -14,7 +14,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Kavita.Database.Migrations
 {
     [DbContext(typeof(DataContext))]
-    [Migration("20260721161414_SeriesNameLockedAndRenameIndexes")]
+    [Migration("20260721182357_SeriesNameLockedAndRenameIndexes")]
     partial class SeriesNameLockedAndRenameIndexes
     {
         /// <inheritdoc />
@@ -1412,6 +1412,9 @@ namespace Kavita.Database.Migrations
                     b.Property<bool>("EnableTags")
                         .HasColumnType("INTEGER");
 
+                    b.Property<bool>("EnableVolumeCoverImage")
+                        .HasColumnType("INTEGER");
+
                     b.Property<bool>("Enabled")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER")
@@ -2273,6 +2276,9 @@ namespace Kavita.Database.Migrations
                     b.Property<long>("MalId")
                         .HasColumnType("INTEGER");
 
+                    b.Property<string>("MangaBakaEditionId")
+                        .HasColumnType("TEXT");
+
                     b.Property<long>("MangaBakaId")
                         .HasColumnType("INTEGER");
 
@@ -2295,6 +2301,9 @@ namespace Kavita.Database.Migrations
                         .HasColumnType("TEXT");
 
                     b.Property<string>("NormalizedName")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("NormalizedOriginalName")
                         .HasColumnType("TEXT");
 
                     b.Property<string>("OriginalName")
@@ -2328,6 +2337,9 @@ namespace Kavita.Database.Migrations
 
                     b.HasIndex("LibraryId", "Format", "NormalizedName")
                         .HasDatabaseName("IX_Series_LibraryId_Format_NormalizedName");
+
+                    b.HasIndex("LibraryId", "Format", "NormalizedOriginalName")
+                        .HasDatabaseName("IX_Series_LibraryId_Format_NormalizedOriginalName");
 
                     b.ToTable("Series");
                 });
@@ -3619,6 +3631,11 @@ namespace Kavita.Database.Migrations
 
                     b.Property<int>("HardcoverId")
                         .HasColumnType("INTEGER");
+
+                    b.Property<string>("KPlusOverrides")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("TEXT")
+                        .HasDefaultValue("[]");
 
                     b.Property<DateTime>("LastModified")
                         .HasColumnType("TEXT");

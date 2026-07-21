@@ -127,6 +127,8 @@ public class ProcessSeries(
 
             series.NormalizedName = series.Name.ToNormalized();
             series.OriginalName ??= firstParsedInfo.Series;
+            series.NormalizedOriginalName = series.OriginalName.ToNormalized();
+
             if (series.Format == MangaFormat.Unknown)
             {
                 series.Format = firstParsedInfo.Format;

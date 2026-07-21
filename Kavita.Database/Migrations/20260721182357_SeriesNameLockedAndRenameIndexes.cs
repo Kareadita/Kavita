@@ -21,6 +21,12 @@ namespace Kavita.Database.Migrations
                 nullable: false,
                 defaultValue: false);
 
+            migrationBuilder.AddColumn<string>(
+                name: "NormalizedOriginalName",
+                table: "Series",
+                type: "TEXT",
+                nullable: true);
+
             migrationBuilder.AddColumn<bool>(
                 name: "EnableName",
                 table: "MetadataSettings",
@@ -37,6 +43,11 @@ namespace Kavita.Database.Migrations
                 name: "IX_Series_LibraryId_Format_NormalizedName",
                 table: "Series",
                 columns: new[] { "LibraryId", "Format", "NormalizedName" });
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Series_LibraryId_Format_NormalizedOriginalName",
+                table: "Series",
+                columns: new[] { "LibraryId", "Format", "NormalizedOriginalName" });
         }
 
         /// <inheritdoc />
@@ -50,8 +61,16 @@ namespace Kavita.Database.Migrations
                 name: "IX_Series_LibraryId_Format_NormalizedName",
                 table: "Series");
 
+            migrationBuilder.DropIndex(
+                name: "IX_Series_LibraryId_Format_NormalizedOriginalName",
+                table: "Series");
+
             migrationBuilder.DropColumn(
                 name: "NameLocked",
+                table: "Series");
+
+            migrationBuilder.DropColumn(
+                name: "NormalizedOriginalName",
                 table: "Series");
 
             migrationBuilder.DropColumn(
