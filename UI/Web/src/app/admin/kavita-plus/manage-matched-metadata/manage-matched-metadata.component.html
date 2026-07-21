@@ -7,7 +7,7 @@
         <label for="libtype-filter">{{t('library-type')}}</label>
         <select class="form-select" formControlName="libraryType" id="libtype-filter">
           <option [value]="-1">{{t('all-status-label')}}</option>
-          @for(libType of allLibraryTypes; track libType) {
+          @for(libType of metadataEnabledLibraryTypes(); track libType) {
             <option [value]="libType">{{libType | libraryType}}</option>
           }
         </select>

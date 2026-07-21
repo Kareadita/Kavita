@@ -22,6 +22,12 @@ public class ExceptionMiddleware(RequestDelegate next, ILogger<ExceptionMiddlewa
         {
             await next(context); // downstream middlewares or http call
         }
+        catch (TaskCanceledException ex)
+        {
+            logger.LogTrace(ex, "Request was cancelled");
+            context.Response.StatusCode = (int)HttpStatusCode.RequestTimeout;
+            await context.Response.CompleteAsync();
+        }
         catch (Exception ex) when (ex is KavitaUnauthenticatedUserException or UnauthorizedAccessException)
         {
             context.Response.StatusCode = (int)HttpStatusCode.Unauthorized;

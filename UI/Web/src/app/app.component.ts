@@ -28,6 +28,8 @@ import {VersionService} from "./_services/version.service";
 import {LicenseService} from "./_services/license.service";
 import {LocalizationService} from "./_services/localization.service";
 import {BreakpointService} from "./_services/breakpoint.service";
+import {KeyBindService} from "./_services/key-bind.service";
+import {KeyBindTarget} from "./_models/preferences/preferences";
 
 @Component({
     selector: 'app-root',
@@ -54,6 +56,8 @@ export class AppComponent implements OnInit {
   private readonly licenseService = inject(LicenseService);
   private readonly localizationService = inject(LocalizationService);
   private readonly ngbCanvasConfig = inject(NgbOffcanvasConfig);
+  private readonly keyBindService = inject(KeyBindService);
+
   transitionState = computed(() => this.accountService.userPreferences()?.noTransitions ?? false);
 
 
@@ -93,6 +97,12 @@ export class AppComponent implements OnInit {
       });
 
     this.localizationService.getLocales().subscribe(); // This will cache the localizations on startup
+
+    this.keyBindService.registerListener(
+      this.destroyRef,
+      (_)=> this.router.navigateByUrl('/').catch(console.error),
+      [KeyBindTarget.NavigateHome]
+    );
   }
 
   @HostListener('window:resize', [])

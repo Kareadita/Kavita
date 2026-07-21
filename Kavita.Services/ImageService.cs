@@ -16,9 +16,6 @@ using Kavita.Models.Extensions;
 using Kavita.Services.Scanner;
 using Microsoft.Extensions.Logging;
 using NetVips;
-using SixLabors.ImageSharp.PixelFormats;
-using SixLabors.ImageSharp.Processing;
-using SixLabors.ImageSharp.Processing.Processors.Quantization;
 using Image = NetVips.Image;
 
 namespace Kavita.Services;
@@ -33,10 +30,6 @@ public class ImageService(ILogger<ImageService> logger, IDirectoryService direct
     public const string CollectionTagCoverImageRegex = @"tag\d+";
     public const string ReadingListCoverImageRegex = @"readinglist\d+";
     public const string PersonCoverImageRegex = @"person\d+";
-
-    private const double WhiteThreshold = 0.95; // Colors with lightness above this are considered too close to white
-    private const double BlackThreshold = 0.25; // Colors with lightness below this are considered too close to black
-
 
     /// <summary>
     /// Width of the Thumbnail generation
@@ -244,21 +237,27 @@ public class ImageService(ILogger<ImageService> logger, IDirectoryService direct
         return Task.FromResult(outputFile);
     }
 
-    public async Task<bool> IsImage(string filePath, CancellationToken ct = default)
+    public Task<bool> IsImage(string filePath, CancellationToken ct = default)
     {
         try
         {
-            var info = await SixLabors.ImageSharp.Image.IdentifyAsync(filePath, ct);
-            if (info == null) return false;
-
-            return true;
+            // NetVips resolves the loader from the file header without decoding the pixels; if the
+            // file is not a recognized image, NewFromFile throws a VipsException.
+            ct.ThrowIfCancellationRequested();
+            using var image = Image.NewFromFile(filePath, access: Enums.Access.Sequential);
+            return Task.FromResult(true);
+        }
+        catch (OperationCanceledException)
+        {
+            // This allows cancellation to propagate upwards
+            throw;
         }
         catch (Exception)
         {
             /* Swallow Exception */
         }
 
-        return false;
+        return Task.FromResult(false);
     }
 
 
@@ -269,11 +268,8 @@ public class ImageService(ILogger<ImageService> logger, IDirectoryService direct
         // Resize the image to speed up processing
         var resizedImage = image.Resize(0.1);
 
-        var processedImage = PreProcessImage(resizedImage);
-
-
         // Convert image to RGB array
-        var pixels = processedImage.WriteToMemory().ToArray();
+        var pixels = resizedImage.WriteToMemory<byte>().ToArray();
 
         // Convert to list of Vector3 (RGB)
         var rgbPixels = new List<Vector3>();
@@ -302,43 +298,6 @@ public class ImageService(ILogger<ImageService> logger, IDirectoryService direct
         return (null, null);
     }
 
-    private static (Vector3?, Vector3?) GetPrimaryColorSharp(string imagePath)
-    {
-        using var image = SixLabors.ImageSharp.Image.Load<Rgb24>(imagePath);
-
-        image.Mutate(
-            x => x
-                // Scale the image down preserving the aspect ratio. This will speed up quantization.
-                // We use nearest neighbor as it will be the fastest approach.
-                .Resize(new ResizeOptions() { Sampler = KnownResamplers.NearestNeighbor, Size = new SixLabors.ImageSharp.Size(100, 0) })
-
-                // Reduce the color palette to 1 color without dithering.
-                .Quantize(new OctreeQuantizer(new QuantizerOptions { MaxColors = 4 })));
-
-        Rgb24 dominantColor = image[0, 0];
-
-        // This will give you a dominant color in HEX format i.e #5E35B1FF
-        return (new Vector3(dominantColor.R, dominantColor.G, dominantColor.B), new Vector3(dominantColor.R, dominantColor.G, dominantColor.B));
-    }
-
-    private static Image PreProcessImage(Image image)
-    {
-        return image;
-        // Create a mask for white and black pixels
-        var whiteMask = image.Colourspace(Enums.Interpretation.Lab)[0] > (WhiteThreshold * 100);
-        var blackMask = image.Colourspace(Enums.Interpretation.Lab)[0] < (BlackThreshold * 100);
-
-        // Create a replacement color (e.g., medium gray)
-        var replacementColor = new[] { 240.0, 240.0, 240.0 };
-
-        // Apply the masks to replace white and black pixels
-        var processedImage = image.Copy();
-        processedImage = processedImage.Ifthenelse(whiteMask, replacementColor);
-        //processedImage = processedImage.Ifthenelse(blackMask, replacementColor);
-
-        return processedImage;
-    }
-
     private static Dictionary<Vector3, int> GenerateColorHistogram(Image image)
     {
         var pixels = image.WriteToMemory().ToArray();
@@ -354,12 +313,6 @@ public class ImageService(ILogger<ImageService> logger, IDirectoryService direct
         }
 
         return histogram;
-    }
-
-    private static bool IsColorCloseToWhiteOrBlack(Vector3 color)
-    {
-        var (_, _, lightness) = RgbToHsl(color);
-        return lightness is > WhiteThreshold or < BlackThreshold;
     }
 
     private static List<Vector3> KMeansClustering(List<Vector3> points, int k, int maxIterations = 100)
@@ -401,10 +354,6 @@ public class ImageService(ILogger<ImageService> logger, IDirectoryService direct
         return centroids;
     }
 
-    public static List<Vector3> SortByBrightness(List<Vector3> colors)
-    {
-        return colors.OrderBy(c => 0.299 * c.X + 0.587 * c.Y + 0.114 * c.Z).ToList();
-    }
 
     private static List<Vector3> SortByVibrancy(List<Vector3> colors)
     {
@@ -418,90 +367,14 @@ public class ImageService(ILogger<ImageService> logger, IDirectoryService direct
 
     private static bool IsCloseToWhiteOrBlack(Vector3 color)
     {
-        var threshold = 30;
-        return (color.X > 255 - threshold && color.Y > 255 - threshold && color.Z > 255 - threshold) ||
-               (color.X < threshold && color.Y < threshold && color.Z < threshold);
+        const int threshold = 30;
+        return color is {X: > 255 - threshold, Y: > 255 - threshold, Z: > 255 - threshold} ||
+               color is {X: < threshold, Y: < threshold, Z: < threshold};
     }
 
     private static string RgbToHex(Vector3 color)
     {
         return $"#{(int)color.X:X2}{(int)color.Y:X2}{(int)color.Z:X2}";
-    }
-
-    private static Vector3 GetComplementaryColor(Vector3 color)
-    {
-        // Convert RGB to HSL
-        var (h, s, l) = RgbToHsl(color);
-
-        // Rotate hue by 180 degrees
-        h = (h + 180) % 360;
-
-        // Convert back to RGB
-        return HslToRgb(h, s, l);
-    }
-
-    private static (double H, double S, double L) RgbToHsl(Vector3 rgb)
-    {
-        double r = rgb.X / 255;
-        double g = rgb.Y / 255;
-        double b = rgb.Z / 255;
-
-        var max = Math.Max(r, Math.Max(g, b));
-        var min = Math.Min(r, Math.Min(g, b));
-        var diff = max - min;
-
-        double h = 0;
-        double s = 0;
-        var l = (max + min) / 2;
-
-        if (Math.Abs(diff) > 0.00001)
-        {
-            s = l > 0.5 ? diff / (2 - max - min) : diff / (max + min);
-
-            if (max == r)
-                h = (g - b) / diff + (g < b ? 6 : 0);
-            else if (max == g)
-                h = (b - r) / diff + 2;
-            else if (max == b)
-                h = (r - g) / diff + 4;
-
-            h *= 60;
-        }
-
-        return (h, s, l);
-    }
-
-    private static Vector3 HslToRgb(double h, double s, double l)
-    {
-        double r, g, b;
-
-        if (Math.Abs(s) < 0.00001)
-        {
-            r = g = b = l;
-        }
-        else
-        {
-            var q = l < 0.5 ? l * (1 + s) : l + s - l * s;
-            var p = 2 * l - q;
-            r = HueToRgb(p, q, h + 120);
-            g = HueToRgb(p, q, h);
-            b = HueToRgb(p, q, h - 120);
-        }
-
-        return new Vector3((float)(r * 255), (float)(g * 255), (float)(b * 255));
-    }
-
-    private static double HueToRgb(double p, double q, double t)
-    {
-        if (t < 0) t += 360;
-        if (t > 360) t -= 360;
-        return t switch
-        {
-            < 60 => p + (q - p) * t / 60,
-            < 180 => q,
-            < 240 => p + (q - p) * (240 - t) / 60,
-            _ => p
-        };
     }
 
     /// <summary>
@@ -526,7 +399,8 @@ public class ImageService(ILogger<ImageService> logger, IDirectoryService direct
 
 
     /// <inheritdoc />
-    public string CreateThumbnailFromBase64(string encodedImage, string fileName, EncodeFormat encodeFormat, int thumbnailWidth = ThumbnailWidth, int thumbnailHeight = ThumbnailHeight, string? targetDirectory = null)
+    public string CreateThumbnailFromBase64(string encodedImage, string fileName, EncodeFormat encodeFormat,
+        int thumbnailWidth = ThumbnailWidth, int thumbnailHeight = ThumbnailHeight, string? targetDirectory = null)
     {
         // TODO: This code has no concept of cropping nor Thumbnail Size
         try

@@ -68,6 +68,8 @@ public class SettingsService(
         existingMetadataSetting.EnableChapterReleaseDate = dto.EnableChapterReleaseDate;
         existingMetadataSetting.EnableChapterCoverImage = dto.EnableChapterCoverImage;
 
+        existingMetadataSetting.EnableVolumeCoverImage = dto.EnableVolumeCoverImage;
+
         existingMetadataSetting.AgeRatingMappings = dto.AgeRatingMappings ?? [];
 
         existingMetadataSetting.Blacklist = (dto.Blacklist ?? []).Where(s => !string.IsNullOrWhiteSpace(s)).DistinctBy(d => d.ToNormalized()).ToList() ?? [];

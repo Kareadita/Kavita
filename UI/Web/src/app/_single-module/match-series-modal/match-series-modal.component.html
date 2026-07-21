@@ -28,6 +28,9 @@
               @if (kavitaChapterCount() > 0) {
                 {{ t('chapter-count', {num: kavitaChapterCount()}) }}
               }
+              @if (kavitaSpecialCount() > 0) {
+                {{ t('special-count', {num: kavitaSpecialCount()}) }}
+              }
             </div>
           </div>
         </div>
@@ -48,7 +51,7 @@
                   <app-scrobble-provider-tag-badge [provider]="ScrobbleProvider.Cbr" [id]="match.cbrId" />
                 }
                 @case (MetadataProvider.Hardcover) {
-                  <app-scrobble-provider-tag-badge [provider]="ScrobbleProvider.Hardcover" [id]="match.hardcoverId" />
+                  <app-scrobble-provider-tag-badge [provider]="ScrobbleProvider.Hardcover" [id]="match.hardcoverId" [isStandAlone]="match.isStandAlone" />
                 }
               }
             }
@@ -184,10 +187,13 @@
           @for (item of matches(); track matchKey(item)) {
             <app-match-series-result-item
               [item]="item"
+              [selectedEditionId]="selectedEditionId()"
               [isSelected]="!!selectedItem() && matchKey(item) === matchKey(selectedItem()!)"
               [showSynonyms]="true"
               [query]="lastQuery()"
-              (selected)="selectItem($event)" />
+              (selected)="selectItem($event, null)"
+              (editionSelected)="selectItem($event.item, $event.edition)"
+            />
           }
         }
       }

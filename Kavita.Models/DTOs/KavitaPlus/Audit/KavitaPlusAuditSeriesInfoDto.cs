@@ -19,6 +19,7 @@ public sealed record KavitaPlusAuditSeriesInfoDto : IUpdateExternalMetadataIds
     public string? ComicVineId { get; set; }
     public long? MangaBakaId { get; set; }
     public int? CbrId { get; set; }
+    public bool IsStandAlone { get; set; }
     public MetadataProvider? MetadataProvider { get; set; }
     public DateTime? NextRefreshUtc { get; init; }
     public DateTime? LastRefreshedUtc { get; init; }

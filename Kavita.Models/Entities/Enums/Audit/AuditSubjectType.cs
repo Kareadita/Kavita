@@ -7,4 +7,5 @@ public enum AuditSubjectType
     Collection = 2,
     Chapter = 3,
     Global = 4,
+    Volume = 5,
 }

@@ -14,6 +14,7 @@ function resolveIcon(type: KavitaPlusEventType): string {
     case KavitaPlusEventType.CoverUpdated:           return 'fas fa-image';
     case KavitaPlusEventType.ChapterMetadataUpdated: return 'fas fa-database';
     case KavitaPlusEventType.ChapterCoverUpdated:    return 'fas fa-image';
+    case KavitaPlusEventType.VolumeCoverUpdated:     return 'fas fa-image';
     case KavitaPlusEventType.PersonCoverUpdated:     return 'fas fa-database';
     case KavitaPlusEventType.PersonAliasAdded:       return 'fas fa-person-circle-plus';
     case KavitaPlusEventType.CollectionSynced:       return 'fas fa-folder-open';

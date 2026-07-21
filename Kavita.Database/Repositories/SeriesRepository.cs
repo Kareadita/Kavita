@@ -568,9 +568,20 @@ public class SeriesRepository(DataContext context, IMapper mapper) : ISeriesRepo
             .SumAsync(v => v.Chapters.Sum(c => c.Files.Sum(f => f.Bytes)), cancellationToken: ct);
     }
 
-    public async Task<Dictionary<int, long>> GetFilesizesAsync(IList<int> seriesIds, CancellationToken ct = default)
+    public async Task<Dictionary<int, long>> GetFilesizesAsync(int userId, IList<int> seriesIds,
+        CancellationToken ct = default)
     {
-        return await seriesIds.BatchToDictionaryAsync(50, batch =>
+        var ageRestriction = await context.AppUser.GetUserAgeRestriction(userId, ct);
+        var allowedLibraries = await context.Library.GetUserLibraries(userId).ToListAsync(ct);
+
+        var filteredSeriesIds = await context.Series
+            .RestrictAgainstAgeRestriction(ageRestriction)
+            .Where(s => allowedLibraries.Contains(s.LibraryId))
+            .Where(s => seriesIds.Contains(s.Id))
+            .Select(s => s.Id)
+            .ToListAsync(ct);
+
+        return await filteredSeriesIds.BatchToDictionaryAsync(50, batch =>
             context.Volume
                 .Where(v => batch.Contains(v.SeriesId))
                 .GroupBy(v => v.SeriesId)
@@ -666,6 +677,7 @@ public class SeriesRepository(DataContext context, IMapper mapper) : ISeriesRepo
                 MangaDexId = ExternalIdParser.GetMangaDexId(series.Metadata.WebLinks),
 
                 MangabakaId = (int?) series.MangaBakaId,
+                MangaBakaEditionId = series.MangaBakaEditionId,
                 HardcoverId = series.HardcoverId,
                 IsStandAlone = series.IsStandAlone,
                 VolumeCount = series.Volumes.Count,

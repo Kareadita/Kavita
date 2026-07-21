@@ -26,4 +26,9 @@ public sealed record MatchSeriesInfoDto
     public int? AniListId { get; set; }
     public int? HardcoverId { get; set; }
     public int? CbrId { get; set; }
+    /// <summary>
+    /// The currently selected MangaBaka edition, if any
+    /// </summary>
+    public string MangaBakaEditionId { get; set; } = string.Empty;
+    public bool IsStandalone { get; set; }
 }

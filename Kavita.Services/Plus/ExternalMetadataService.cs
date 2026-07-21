@@ -235,6 +235,7 @@ public class ExternalMetadataService : IExternalMetadataService
             AniListId = series.AniListId,
             MalId = series.MalId,
             MangaBakaId = series.MangaBakaId,
+            MangaBakaEditionId = series.MangaBakaEditionId,
             CbrId = series.CbrId,
             HardcoverId = series.HardcoverId,
         };
@@ -246,6 +247,17 @@ public class ExternalMetadataService : IExternalMetadataService
         series.CbrId = match.Series.CbrId ?? 0;
         series.IsStandAlone = match.Series.IsStandAlone;
 
+        if (series.Library.MetadataProvider == MetadataProvider.Mangabaka)
+        {
+            var editionMatch = PickBestEdition(series, match.Series.Editions);
+
+            if (editionMatch != null)
+            {
+                _logger.LogInformation("Matches series {SeriesId} to MangaBaka Edition: {EditionId}", series.Id, editionMatch.Id);
+                series.MangaBakaEditionId = editionMatch.Id;
+            }
+        }
+
         await _auditService.LogMatchAsync(KavitaPlusEventType.SeriesMatched, seriesId,
             new AuditLogMatchedParamsDto {
                 SeriesName = series.Name,
@@ -254,6 +266,7 @@ public class ExternalMetadataService : IExternalMetadataService
                     AniListId = series.AniListId,
                     MalId = series.MalId,
                     MangaBakaId = series.MangaBakaId,
+                    MangaBakaEditionId = series.MangaBakaEditionId,
                     CbrId = series.CbrId,
                     HardcoverId = series.HardcoverId,
                 },
@@ -275,6 +288,47 @@ public class ExternalMetadataService : IExternalMetadataService
             MetadataProvider.ComicBookRoundup => series.CbrId > 0,
             _ => throw new ArgumentOutOfRangeException(nameof(metadataProvider), metadataProvider, null)
         };
+    }
+
+    private static ExternalEditionDto? PickBestEdition(Series series, IList<ExternalEditionDto> editions)
+    {
+        // No other options, use the present one so we get at least some volume/chapter metadata
+        if (editions.Count == 1)
+        {
+            return editions[0];
+        }
+
+        var parsedSeriesEdition = string.Empty; // TODO (Joe): Parse edition from series XXX
+        var parsedSeriesEditionMatches = editions
+            .Where(e => e.Format.Equals(parsedSeriesEdition, StringComparison.OrdinalIgnoreCase))
+            .ToList();
+
+        var digitalEditions = editions
+            .Where(e => e.Format.Equals("Digital", StringComparison.OrdinalIgnoreCase))
+            .ToList();
+
+        return parsedSeriesEditionMatches.SingleOrDefault()
+            ?? parsedSeriesEditionMatches.SingleOrDefault(MatchEditionToCount)
+            ?? digitalEditions.SingleOrDefault()
+            ?? digitalEditions.SingleOrDefault(MatchEditionToCount)
+            ?? editions.SingleOrDefault(MatchEditionToCount);
+
+        bool MatchEditionToCount(ExternalEditionDto edition)
+        {
+            var seriesCount = edition.Type switch
+            {
+                EditionEntryType.Volume => series.Volumes.Count,
+                EditionEntryType.Chapter or EditionEntryType.Other => series.Volumes.Sum(v => v.Chapters.Count),
+                _ => throw new ArgumentOutOfRangeException(nameof(edition.Type), edition.Type, null)
+            };
+
+            if (edition.Type != EditionEntryType.Other)
+            {
+                return seriesCount == edition.MainCount;
+            }
+
+            return seriesCount == edition.MainCount || seriesCount == edition.TotalCount;
+        }
     }
 
 
@@ -481,6 +535,7 @@ public class ExternalMetadataService : IExternalMetadataService
                     MalId = ids.MalId,
                     CbrId = ids.CbrId,
                     MangabakaId = ids.MangabakaId,
+                    MangaBakaEditionId = ids.MangaBakaEditionId,
                     HardcoverId = ids.HardcoverId,
                     IsStandAlone = ids.IsStandAlone,
                     Format = series.Library.Type.ConvertToPlusMediaFormat(series.Format),
@@ -571,7 +626,7 @@ public class ExternalMetadataService : IExternalMetadataService
         bool fromMatchFlow = false, MetadataFetchTrigger trigger = MetadataFetchTrigger.OnDemand, CancellationToken ct = default)
     {
 
-        var series = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(seriesId, SeriesIncludes.Library, ct);
+        var series = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(seriesId, SeriesIncludes.Library | SeriesIncludes.Metadata, ct);
         if (series?.Library == null)
         {
             return _defaultReturn;
@@ -631,6 +686,7 @@ public class ExternalMetadataService : IExternalMetadataService
             return _defaultReturn;
         }
 
+
         // Clear out existing results
         var externalSeriesMetadata = await GetOrCreateExternalSeriesMetadataForSeries(seriesId, series);
         _unitOfWork.ExternalSeriesMetadataRepository.Remove(externalSeriesMetadata.ExternalReviews);
@@ -676,7 +732,7 @@ public class ExternalMetadataService : IExternalMetadataService
 
         // prefer what was passed in (manual match), fall back to what K+ returned
         var beforeIds = new AuditLogMatchExternalIdsParamsDto { AniListId = series.AniListId, MalId = series.MalId,
-            MangaBakaId = series.MangaBakaId, CbrId = series.CbrId, HardcoverId = series.HardcoverId };
+            MangaBakaId = series.MangaBakaId, MangaBakaEditionId = series.MangaBakaEditionId, CbrId = series.CbrId, HardcoverId = series.HardcoverId };
 
         externalSeriesMetadata.MalId = data.MalId ?? result.MalId ?? 0;
         externalSeriesMetadata.AniListId = data.AniListId ?? result.AniListId ?? 0;
@@ -684,11 +740,21 @@ public class ExternalMetadataService : IExternalMetadataService
         externalSeriesMetadata.MangabakaId = data.MangabakaId ?? result.MangabakaId ?? 0;
         series.MangaBakaId = externalSeriesMetadata.MangabakaId;
 
+        if (!string.IsNullOrEmpty(data.MangaBakaEditionId))
+        {
+            series.MangaBakaEditionId = data.MangaBakaEditionId;
+        }
+        else if (series.MangaBakaId == 0)
+        {
+            series.MangaBakaEditionId = string.Empty;
+        }
+
         var hardcoverId = data.HardcoverId ?? result.Series?.HardcoverId ?? series.HardcoverId;
         var afterIds = new AuditLogMatchExternalIdsParamsDto {
             AniListId = externalSeriesMetadata.AniListId,
             MalId = externalSeriesMetadata.MalId,
             MangaBakaId = series.MangaBakaId,
+            MangaBakaEditionId = series.MangaBakaEditionId,
             CbrId = externalSeriesMetadata.CbrId,
             HardcoverId = hardcoverId };
 
@@ -729,7 +795,17 @@ public class ExternalMetadataService : IExternalMetadataService
         if (madeMetadataModification)
         {
             // Inform the UI of the update
-            await _eventHub.SendMessageAsync(MessageFactory.ScanSeries, MessageFactory.ScanSeriesEvent(series.LibraryId, series.Id, series.Name), false, ct);
+            await _eventHub.SendMessageAsync(MessageFactory.ExternalMetadataUpdate, MessageFactory.ExternalMetadataUpdateEvent(series.Id), false, ct);
+        }
+
+        // Volume and MangaBaka chapter covers are not returned inline in the Series detail response, so fetch and apply them separately
+        try
+        {
+            await ApplyExternalCovers(series, metadataSettings, ct);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogWarning(ex, "[Covers] Failed to apply external covers for Series {SeriesId}", series.Id);
         }
 
         return new SeriesDetailPlusDto
@@ -763,10 +839,7 @@ public class ExternalMetadataService : IExternalMetadataService
         Accumulate(ref madeModification, fieldChanges, UpdateLocalizedName(series, settings, externalMetadata));
         Accumulate(ref madeModification, fieldChanges, await UpdateName(series, settings, externalMetadata, ct));
         Accumulate(ref madeModification, fieldChanges, await UpdatePublicationStatus(series, settings, externalMetadata));
-        if (trigger is MetadataFetchTrigger.OnDemand or MetadataFetchTrigger.ManualMatch)
-        {
-            Accumulate(ref madeModification, fieldChanges, UpdateExternalIds(series, externalMetadata));
-        }
+        Accumulate(ref madeModification, fieldChanges, UpdateExternalIds(series, externalMetadata));
 
         // Apply field mappings
         GenerateGenreAndTagLists(externalMetadata, settings, ref processedTags, ref processedGenres);
@@ -801,6 +874,137 @@ public class ExternalMetadataService : IExternalMetadataService
         }
 
         return madeModification;
+    }
+
+    /// <summary>
+    /// Fetches volume and chapter covers from the Kavita+ covers endpoint and applies the best matches. Series and chapter
+    /// covers arrive inline in the Series detail response for comic providers; volume covers (and MangaBaka chapter covers)
+    /// are not.
+    /// </summary>
+    /// <remarks>Not run for ComicBookRoundup, whose covers come from chapter/issue metadata already.</remarks>
+    private async Task ApplyExternalCovers(Series series, MetadataSettingsDto settings, CancellationToken ct = default)
+    {
+        if (!settings.EnableVolumeCoverImage && !settings.EnableChapterCoverImage) return;
+        if (series.Library?.MetadataProvider == MetadataProvider.ComicBookRoundup) return;
+
+        // Prefer the cover based on Series/Library locale
+        var locale = series.Metadata.Language ?? series.Library?.DefaultLanguage;
+
+        // All volumes: manga chapters can live in the loose-leaf volume, so we filter loose-leaf/specials only for volume covers
+        var volumes = (await _unitOfWork.VolumeRepository.GetVolumes(series.Id, ct)).ToList();
+        if (volumes.Count == 0) return;
+
+        var covers = await GetExternalCovers(series.Id, ct: ct);
+        var volumeCovers = covers
+            .Where(c => c.Type == ExternalCoverImageType.Volume && c.Number.HasValue && !string.IsNullOrEmpty(c.Url))
+            .ToList();
+        var chapterCovers = covers
+            .Where(c => c.Type is ExternalCoverImageType.Chapter or ExternalCoverImageType.Issue
+                        && c.Number.HasValue && !string.IsNullOrEmpty(c.Url))
+            .ToList();
+        if (volumeCovers.Count == 0 && chapterCovers.Count == 0) return;
+
+        foreach (var volume in volumes)
+        {
+            var nonSpecialChapters = volume.Chapters.Where(c => !c.IsSpecial).ToList();
+            var coveredChapterIds = new HashSet<int>();
+
+            if (settings.EnableChapterCoverImage && chapterCovers.Count > 0)
+            {
+                foreach (var chapter in nonSpecialChapters)
+                {
+                    var chapterMatch = chapterCovers.FirstOrDefault(c => c.Number!.Value.Is(chapter.MinNumber));
+                    if (chapterMatch == null) continue;
+
+                    try
+                    {
+                        if (await UpdateChapterCoverImage(chapter, settings, series.Id, chapterMatch.Url))
+                        {
+                            coveredChapterIds.Add(chapter.Id);
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        _logger.LogWarning(ex, "[Covers] Failed to set cover for Chapter {ChapterId} in Series {SeriesId}", chapter.Id, series.Id);
+                    }
+                }
+            }
+
+            // Volume covers only apply to real volumes (skip loose-leaf/specials)
+            if (!settings.EnableVolumeCoverImage) continue;
+            if (volume.MinNumber.Is(Parser.LooseLeafVolumeNumber) || volume.MinNumber.Is(Parser.SpecialVolumeNumber)) continue;
+            if (volume.CoverImageLocked && !HasForceOverride(settings, volume, MetadataSettingField.VolumeCovers)) continue;
+
+            try
+            {
+                if (nonSpecialChapters.Count == 1)
+                {
+                    // Single-chapter volume reuses its chapter's cover
+                    var chapter = nonSpecialChapters[0];
+
+                    // Try and get the locale variant, else fallback to whatever we can
+
+
+                    // Prefer a chapter-scoped cover, fall back to the volume-scoped one
+                    var match = chapterCovers
+                                    .Where(c => c.Language == locale)
+                                    .FirstOrDefault(c => c.Number!.Value.Is(chapter.MinNumber))
+                                ?? volumeCovers
+                                    .Where(c => c.Language == locale)
+                                    .FirstOrDefault(c => c.Number!.Value.Is(volume.MinNumber));
+
+                    if (match == null)
+                    {
+                        match = chapterCovers
+                                    .FirstOrDefault(c => c.Number!.Value.Is(chapter.MinNumber))
+                                ?? volumeCovers
+                                    .FirstOrDefault(c => c.Number!.Value.Is(volume.MinNumber));
+                    }
+
+                    if (match == null) continue;
+
+                    // If the chapter loop didn't already write it, download onto the chapter now (bypassing the chapter-cover setting)
+                    if (!coveredChapterIds.Contains(chapter.Id))
+                    {
+                        var chooseBetterImage = !chapter.HasSetKPlusMetadata(MetadataSettingField.ChapterCovers);
+                        chapter.AddKPlusOverride(MetadataSettingField.ChapterCovers);
+                        await _coverDbService.SetChapterCoverByUrl(chapter, match.Url, false, chooseBetterImage, ct);
+                    }
+
+                    volume.AddKPlusOverride(MetadataSettingField.VolumeCovers);
+                    await _coverDbService.SetVolumeCoverFromChapter(volume, chapter, ct);
+                    await LogVolumeCoverAudit(series.Id, volume, match.Url, ct);
+                }
+                else
+                {
+                    var match = volumeCovers.FirstOrDefault(c => c.Number!.Value.Is(volume.MinNumber));
+                    if (match == null) continue;
+
+                    // Only choose the better image the first time; once K+ owns the cover, overwrite freely
+                    var chooseBetterImage = !volume.HasSetKPlusMetadata(MetadataSettingField.VolumeCovers);
+                    volume.AddKPlusOverride(MetadataSettingField.VolumeCovers);
+                    await _coverDbService.SetVolumeCoverByUrl(volume, match.Url, false, chooseBetterImage, ct);
+                    await LogVolumeCoverAudit(series.Id, volume, match.Url, ct);
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogWarning(ex, "[Covers] Failed to set cover for Volume {VolumeId} ({VolumeName}) in Series {SeriesId}",
+                    volume.Id, volume.Name, series.Id);
+            }
+        }
+
+        if (_unitOfWork.HasChanges())
+        {
+            await _unitOfWork.CommitAsync(ct);
+        }
+    }
+
+    private async Task LogVolumeCoverAudit(int seriesId, Volume volume, string coverUrl, CancellationToken ct)
+    {
+        await _auditService.LogAsync(KavitaPlusAuditCategory.Metadata, KavitaPlusEventType.VolumeCoverUpdated, AuditStatus.Success,
+            AuditSubjectType.Volume, seriesId: seriesId, subjectId: volume.Id,
+            payload: new AuditLogVolumeCoverParamsDto { VolumeNumber = volume.GetNumberTitle(), CoverUrl = coverUrl }, ct: ct);
     }
 
     public async Task<IList<ExternalCoverResponseDto>> GetExternalCovers(int seriesId, int? volumeId = null, int? chapterId = null, CancellationToken ct = default)
@@ -1475,26 +1679,48 @@ public class ExternalMetadataService : IExternalMetadataService
         var madeModification = false;
         var allChapters =  await _unitOfWork.ChapterRepository.GetAllChaptersForSeries(series.Id);
 
-        var matchedChapters = allChapters
-            .Join(
-                externalMetadata.ChapterDtos,
-                chapter => Parser.IsLooseLeafVolume(chapter.Range) ? chapter.Volume.Name : chapter.Range,
-                dto => dto.IssueNumber.Replace(",", "."), // Ensure comma's are dots
-                (chapter, dto) => (chapter, dto)
-            )
-            .ToList();
+        List<(Chapter, ExternalChapterDto)> matchedChapters = [];
+
+        if (externalMetadata.IsStandAlone)
+        {
+            if (series.Volumes.Sum(v => v.Chapters.Count) != 1)
+            {
+                _logger.LogWarning("Series {SeriesName} ({SeriesId}) has more than one chapter. But is matched against a standalone series Skipping chapter update.", series.Name, series.Id);
+                return false;
+            }
+
+            if (externalMetadata.ChapterDtos.Count != 1)
+            {
+                return false;
+            }
+
+            matchedChapters.Add((allChapters[0], externalMetadata.ChapterDtos[0]));
+        }
+        else
+        {
+            matchedChapters = allChapters
+                .Join(
+                    externalMetadata.ChapterDtos,
+                    chapter => Parser.IsLooseLeafVolume(chapter.Range) ? chapter.Volume.Name : chapter.Range,
+                    dto => dto.IssueNumber.Replace(',', '.'), // Ensure comma's are dots
+                    (chapter, dto) => (chapter, dto)
+                )
+                .ToList();
+        }
 
         foreach (var (chapter, potentialMatch) in matchedChapters)
         {
             var usedRange = Parser.IsLooseLeafVolume(chapter.Range) ? chapter.Volume.Name : chapter.Range;
+            var usedType = Parser.IsLooseLeafVolume(chapter.Range) ? "Volume" : "Chapter";
 
-            _logger.LogDebug("Updating {SeriesName} ({SeriesId}) - Chapter {ChapterNumber} with metadata. Matched to {IssueNumber} - {HardcoverId}",
-                series.Name, series.Id, usedRange, potentialMatch.IssueNumber, potentialMatch.HardcoverId);
+            _logger.LogDebug("Updating {SeriesName} ({SeriesId}) - {Type} {ChapterNumber} with metadata. Matched to IssueNumber: {IssueNumber} - HardcoverId: {HardcoverId} - MangaBakaWorkId: {WorkId}",
+                series.Name, series.Id, usedType, usedRange, potentialMatch.IssueNumber, potentialMatch.HardcoverId, potentialMatch.MangaBakaWorkId);
             var chapterFieldChanges = new List<MetadataFieldChangeDto>();
 
             Accumulate(ref madeModification, chapterFieldChanges, UpdateChapterTitle(chapter, settings, potentialMatch.Title, series.Name));
             Accumulate(ref madeModification, chapterFieldChanges, UpdateChapterSummary(chapter, settings, potentialMatch.Summary));
             Accumulate(ref madeModification, chapterFieldChanges, UpdateChapterReleaseDate(chapter, settings, potentialMatch.ReleaseDate));
+            Accumulate(ref madeModification, chapterFieldChanges, UpdateChapterAgeRating(chapter, settings, series.Metadata.AgeRating));
 
             var hasUpdatedPublisher = await UpdateChapterPublisher(chapter, settings, potentialMatch.Publisher);
             if (hasUpdatedPublisher) chapter.AddKPlusOverride(MetadataSettingField.ChapterPublisher);
@@ -1665,6 +1891,20 @@ public class ExternalMetadataService : IExternalMetadataService
         chapter.AddKPlusOverride(MetadataSettingField.ChapterTitle);
 
         return (true, new MetadataFieldChangeDto(MetadataFieldChangeKind.Title, from, title));
+    }
+
+    private static (bool, MetadataFieldChangeDto?) UpdateChapterAgeRating(Chapter chapter, MetadataSettingsDto settings, AgeRating ageRating)
+    {
+        if (chapter.AgeRatingLocked && !HasForceOverride(settings, chapter, MetadataSettingField.ChapterAgeRating))
+        {
+            return (false, null);
+        }
+
+        var from = chapter.AgeRating;
+        chapter.AgeRating = ageRating;
+        chapter.AddKPlusOverride(MetadataSettingField.ChapterAgeRating);
+
+        return (true, new MetadataFieldChangeDto(MetadataFieldChangeKind.AgeRating, from, ageRating));
     }
 
     private static (bool, MetadataFieldChangeDto?) UpdateChapterReleaseDate(Chapter chapter, MetadataSettingsDto settings, DateTime? releaseDate)

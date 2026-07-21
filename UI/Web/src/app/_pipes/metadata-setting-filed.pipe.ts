@@ -20,6 +20,10 @@ export class MetadataSettingFiledPipe implements PipeTransform {
         return translate('metadata-setting-field-pipe.chapter-publisher');
       case MetadataSettingField.ChapterCovers:
         return translate('metadata-setting-field-pipe.chapter-covers');
+      case MetadataSettingField.ChapterAgeRating:
+        return translate('metadata-setting-field-pipe.chapter-age-rating');
+      case MetadataSettingField.VolumeCovers:
+        return translate('metadata-setting-field-pipe.volume-covers');
       case MetadataSettingField.AgeRating:
         return translate('metadata-setting-field-pipe.age-rating');
       case MetadataSettingField.People:

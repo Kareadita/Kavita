@@ -12,6 +12,7 @@ public sealed record ExternalMetadataIdsDto
     public long? MalId { get; set; }
     public int? AniListId { get; set; }
     public int? MangabakaId { get; set; }
+    public string? MangaBakaEditionId { get; set; }
     public int? HardcoverId { get; set; }
     /// <summary>
     /// If the series should be considered a standalone book. This is currently only used for Hardcover.

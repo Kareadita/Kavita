@@ -41,4 +41,8 @@ export class KavitaPlusAuditService {
       `${this.baseUrl}my-activity`, filter, { observe: 'response', params }
     ).pipe(map(res => this.utilityService.createPaginatedResult<KavitaPlusAuditEntry>(res)));
   }
+
+  getFailedScrobbleEvents() {
+    return this.httpClient.get<number>(this.baseUrl + 'failed-scrobble-events');
+  }
 }

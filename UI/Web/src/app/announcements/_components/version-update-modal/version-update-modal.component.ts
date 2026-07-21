@@ -38,7 +38,16 @@ export class VersionUpdateModalComponent {
     'update-available': 'update-notification',
     'out-of-date': 'out-of-date',
   };
-  title = computed(() => `${this.localePrefix[this.mode()]}.title`);
+  title = computed(() => {
+    const update = this.update();
+    const mode = this.mode();
+    if (mode === 'update-available' && update?.updateTitle != '') {
+        return update?.updateTitle ?? `${this.localePrefix[this.mode()]}.title`;
+    }
+
+    return `${this.localePrefix[this.mode()]}.title`;
+
+  });
 
   close() {
     this.modal.dismiss();

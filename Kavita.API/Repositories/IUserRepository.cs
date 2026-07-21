@@ -97,7 +97,7 @@ public interface IUserRepository
     Task<IEnumerable<AppUserBookmark>> GetAllBookmarksAsync(CancellationToken ct = default);
     Task<AppUserBookmark?> GetBookmarkForPage(int page, int chapterId, int imageOffset, int userId, CancellationToken ct = default);
     Task<AppUserBookmark?> GetBookmarkAsync(int bookmarkId, CancellationToken ct = default);
-    Task<IList<AppUserBookmark>> GetAllBookmarksByIds(IList<int> bookmarkIds, CancellationToken ct = default);
+    Task<IList<AppUserBookmark>> GetAllBookmarksByIds(int seriesId, IList<int> bookmarkIds, CancellationToken ct = default);
     #endregion
 
     #region Preferences & Settings

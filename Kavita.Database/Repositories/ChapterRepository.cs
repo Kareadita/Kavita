@@ -235,9 +235,20 @@ public class ChapterRepository(DataContext context, IMapper mapper) : IChapterRe
             .SumAsync(c => c.Bytes, cancellationToken: ct);
     }
 
-    public async Task<Dictionary<int, long>> GetFilesizesAsync(IList<int> chapterIds, CancellationToken ct = default)
+    public async Task<Dictionary<int, long>> GetFilesizesAsync(int userId, IList<int> chapterIds,
+        CancellationToken ct = default)
     {
-        return await chapterIds.BatchToDictionaryAsync(50, batch =>
+        var ageRestriction = await context.AppUser.GetUserAgeRestriction(userId, ct);
+        var allowedLibraries = await context.Library.GetUserLibraries(userId).ToListAsync(ct);
+
+        var filteredChapterIds = await context.Chapter
+            .RestrictAgainstAgeRestriction(ageRestriction)
+            .Where(c => allowedLibraries.Contains(c.Volume.Series.LibraryId))
+            .Where(c => chapterIds.Contains(c.Id))
+            .Select(c => c.Id)
+            .ToListAsync(ct);
+
+        return await filteredChapterIds.BatchToDictionaryAsync(50, batch =>
             context.MangaFile
                 .Where(f => batch.Contains(f.ChapterId))
                 .ToDictionaryAsync(f => f.ChapterId, f => f.Bytes, cancellationToken: ct));

@@ -766,6 +766,120 @@ public class CoverDbService : ICoverDbService
         }
     }
 
+    public async Task SetVolumeCoverByUrl(Volume volume, string url, bool fromBase64 = true,
+        bool chooseBetterImage = false, CancellationToken ct = default)
+    {
+        // TODO: See what we can refactor wtih SetChapterCoverByUrl
+        if (!string.IsNullOrEmpty(url))
+        {
+            var tempDirectory = _directoryService.TempDirectory;
+            var finalFileName = ImageService.GetVolumeFormat(volume.Id) + ".webp";
+            var tempFileName = ImageService.GetVolumeFormat(volume.Id) + "_new";
+
+            var tempFilePath = await CreateThumbnail(url, tempFileName, fromBase64, tempDirectory);
+
+            if (!string.IsNullOrEmpty(tempFilePath))
+            {
+                var tempFullPath = Path.Combine(tempDirectory, tempFilePath);
+                var finalFullPath = Path.Combine(_directoryService.CoverImageDirectory, finalFileName);
+
+                if (chooseBetterImage && !string.IsNullOrEmpty(volume.CoverImage))
+                {
+                    var existingPath = Path.Combine(_directoryService.CoverImageDirectory, volume.CoverImage);
+
+                    if (!File.Exists(existingPath))
+                    {
+                        // Existing cover reference is stale/missing on disk; accept the new image as it's better than nothing
+                        _logger.LogWarning("Existing cover for Volume {VolumeName} ({VolumeId}) is missing on disk ({Path}); accepting new cover from source", volume.Name, volume.Id, new FileInfo(existingPath).Name);
+                        _directoryService.CopyFile(tempFullPath, finalFullPath);
+                        _directoryService.DeleteFiles([tempFullPath]);
+                        volume.CoverImage = finalFileName;
+                    }
+                    else
+                    {
+                        try
+                        {
+                            var betterImage = existingPath.GetBetterImage(tempFullPath)!;
+                            var choseNewImage = string.Equals(betterImage, tempFullPath, StringComparison.OrdinalIgnoreCase);
+
+                            if (choseNewImage)
+                            {
+                                // This will fail if Cover gen is done just before this as there is a bug with files getting locked.
+                                _directoryService.DeleteFiles([existingPath]);
+                                _directoryService.CopyFile(tempFullPath, finalFullPath);
+                                _directoryService.DeleteFiles([tempFullPath]);
+                            }
+                            else
+                            {
+                                _directoryService.DeleteFiles([tempFullPath]);
+                                return;
+                            }
+
+                            volume.CoverImage = finalFileName;
+                        }
+                        catch (Exception ex)
+                        {
+                            // Accept the new image rather than keeping no/old cover, since a source is better than nothing
+                            _logger.LogWarning(ex, "There was an issue trying to choose a better cover image for Volume: {VolumeName} ({VolumeId}); accepting new cover from source", volume.Name, volume.Id);
+                            _directoryService.CopyFile(tempFullPath, finalFullPath);
+                            _directoryService.DeleteFiles([tempFullPath]);
+                            volume.CoverImage = finalFileName;
+                        }
+                    }
+                }
+                else
+                {
+                    // No comparison needed, just copy and rename to final
+                    _directoryService.CopyFile(tempFullPath, finalFullPath);
+                    _directoryService.DeleteFiles([tempFullPath]);
+                    volume.CoverImage = finalFileName;
+                }
+
+                volume.CoverImageLocked = true;
+                _imageService.UpdateColorScape(volume);
+                _unitOfWork.VolumeRepository.Update(volume);
+            }
+        }
+        else
+        {
+            volume.CoverImage = null;
+            volume.CoverImageLocked = false;
+            _imageService.UpdateColorScape(volume);
+            _unitOfWork.VolumeRepository.Update(volume);
+        }
+
+        if (_unitOfWork.HasChanges())
+        {
+            await _unitOfWork.CommitAsync(ct);
+            await _eventHub.SendMessageAsync(
+                MessageFactory.CoverUpdate,
+                MessageFactory.CoverUpdateEvent(volume.Id, MessageFactoryEntityTypes.Volume),
+                false, ct);
+        }
+    }
+
+    public async Task SetVolumeCoverFromChapter(Volume volume, Chapter chapter, CancellationToken ct = default)
+    {
+        if (string.IsNullOrEmpty(chapter.CoverImage)) return;
+
+        if (!string.Equals(volume.CoverImage, chapter.CoverImage, StringComparison.Ordinal))
+        {
+            volume.CoverImage = chapter.CoverImage;
+            volume.CoverImageLocked = true;
+            _imageService.UpdateColorScape(volume);
+            _unitOfWork.VolumeRepository.Update(volume);
+
+            if (_unitOfWork.HasChanges())
+            {
+                await _unitOfWork.CommitAsync(ct);
+                await _eventHub.SendMessageAsync(
+                    MessageFactory.CoverUpdate,
+                    MessageFactory.CoverUpdateEvent(volume.Id, MessageFactoryEntityTypes.Volume),
+                    false, ct);
+            }
+        }
+    }
+
     public async Task SetUserCoverByUrl(int userId, string url, bool fromBase64 = true, bool chooseBetterImage = false,
         CancellationToken ct = default)
     {

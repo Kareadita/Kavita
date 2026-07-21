@@ -23,6 +23,17 @@ public class KavitaPlusAuditRepository(DataContext context) : IKavitaPlusAuditRe
 
     public void Add(KavitaPlusAuditLog entry) => context.KavitaPlusAuditLogs.Add(entry);
 
+    public Task<int> GetScrobbleFailureCountAsync(int userId, CancellationToken ct = default)
+    {
+        return context.KavitaPlusAuditLogs
+            .Where(e => e.Category == KavitaPlusAuditCategory.Scrobble && e.UserId == userId &&
+                        e.Status == AuditStatus.Failure)
+            .Where(e => context.ScrobbleEvent
+                .Where(se => e.SubjectType != AuditSubjectType.Chapter || e.SubjectId == se.ChapterId)
+                .Any(se => !se.IsProcessed && se.AppUserId == userId && se.SeriesId == e.SeriesId)
+            ).CountAsync(ct);
+    }
+
     public async Task DeleteOlderThanAsync(DateTime cutoff, CancellationToken ct = default)
     {
         await context.KavitaPlusAuditLogs
@@ -140,6 +151,7 @@ public class KavitaPlusAuditRepository(DataContext context) : IKavitaPlusAuditRe
             ComicVineId = series.ComicVineId != string.Empty ? series.ComicVineId : null,
             MalId = series.MalId != 0 ? series.MalId : null,
             MetronId = series.MetronId != 0 ? series.MetronId : null,
+            IsStandAlone = series.IsStandAlone,
             MetadataProvider = series.ExternalSeriesMetadata?.Provider,
             NextRefreshUtc = series.ExternalSeriesMetadata?.ValidUntilUtc,
             LastRefreshedUtc = series.ExternalSeriesMetadata?.LastModifiedUtc,
@@ -305,6 +317,8 @@ public class KavitaPlusAuditRepository(DataContext context) : IKavitaPlusAuditRe
                         KavitaPlusAuditMetadataExtrasDto.From(JsonSerializer.Deserialize<AuditLogSeriesCoverParamsDto>(e.Payload, JsonOptions)),
                     KavitaPlusEventType.ChapterCoverUpdated =>
                         KavitaPlusAuditMetadataExtrasDto.From(JsonSerializer.Deserialize<AuditLogChapterCoverParamsDto>(e.Payload, JsonOptions)),
+                    KavitaPlusEventType.VolumeCoverUpdated =>
+                        KavitaPlusAuditMetadataExtrasDto.From(JsonSerializer.Deserialize<AuditLogVolumeCoverParamsDto>(e.Payload, JsonOptions)),
                     KavitaPlusEventType.PersonAliasAdded =>
                         KavitaPlusAuditMetadataExtrasDto.From(JsonSerializer.Deserialize<AuditLogPersonAliasParamsDto>(e.Payload, JsonOptions)),
                     KavitaPlusEventType.PersonCoverUpdated =>

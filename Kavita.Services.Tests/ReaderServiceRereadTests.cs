@@ -52,7 +52,6 @@ public class ReaderServiceRereadTests
             Substitute.For<IScrobblingService>(),
             Substitute.For<IReadingSessionService>(),
             Substitute.For<IClientInfoAccessor>(),
-            _seriesService,
             Substitute.For<IEntityNamingService>(),
             Substitute.For<ILocalizationService>(),
             Substitute.For<IBookService>()

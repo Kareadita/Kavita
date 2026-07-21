@@ -265,10 +265,8 @@ public class ReadingListRepository(DataContext context, IMapper mapper) : IReadi
     public async Task<IEnumerable<ReadingListDto>> GetReadingListDtosForSeriesAndUserAsync(int userId, int seriesId,
         bool includePromoted, CancellationToken ct = default)
     {
-        var user = await context.AppUser.FirstAsync(u => u.Id == userId, ct);
         var query = context.ReadingList
             .Where(l => l.AppUserId == userId || (includePromoted && l.Promoted ))
-            .RestrictAgainstAgeRestriction(user.GetAgeRestriction())
             .Where(l => l.Items.Any(i => i.SeriesId == seriesId))
             .AsSplitQuery()
             .OrderBy(l => l.Title)
@@ -464,11 +462,8 @@ public class ReadingListRepository(DataContext context, IMapper mapper) : IReadi
     public async Task<IList<ReadingListItemDto>> GetReadingListItemDtosByIdAsync(int readingListId, int userId,
         UserParams? userParams = null, CancellationToken ct = default)
     {
-        var userLibraries = context.Library.GetUserLibraries(userId);
-
         var query = context.ReadingListItem
             .Where(rli => rli.ReadingListId == readingListId)
-            .Where(rli => userLibraries.Contains(rli.Series.LibraryId))
             .OrderBy(rli => rli.Order)
             .ProjectToWithProgress<ReadingListItem, ReadingListItemDto>(mapper, userId)
             .AsSplitQuery();

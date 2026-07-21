@@ -66,6 +66,7 @@ public static class IdentityServiceExtensions
 
             })
             .AddTokenProvider<DataProtectorTokenProvider<AppUser>>(TokenOptions.DefaultProvider)
+            .AddTokenProvider<RefreshTokenProvider>(TokenService.RefreshTokenProviderName)
             .AddRoles<AppRole>()
             .AddRoleManager<RoleManager<AppRole>>()
             .AddSignInManager<SignInManager<AppUser>>()
