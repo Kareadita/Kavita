@@ -100,6 +100,53 @@ public class ScannerServiceTests: AbstractDbTest
         // TODO: Trigger a deletion of ch 10
     }
 
+    /// <summary>
+    /// End-to-end regression for the rename-then-full-scan bug: a UI/K+ rename (Name and
+    /// NormalizedName move off the folder name, OriginalName stays) must survive a subsequent full
+    /// library scan with the same Id and its data intact - not get deleted and re-created.
+    /// </summary>
+    [Fact]
+    public async Task ScanLibrary_RenamedSeries_SurvivesFullRescan()
+    {
+        var (unitOfWork, context, _) = await CreateDatabase();
+        var scannerHelper = new ScannerHelper(unitOfWork, _testOutputHelper);
+
+        const string testcase = "Flat Series - Manga.json";
+        var library = await scannerHelper.GenerateScannerData(testcase);
+        var scanner = scannerHelper.CreateServices();
+        await scanner.ScanLibrary(library.Id);
+
+        var postLib = await unitOfWork.LibraryRepository.GetLibraryForIdAsync(library.Id, LibraryIncludes.Series);
+        Assert.NotNull(postLib);
+        Assert.Single(postLib.Series);
+
+        var series = postLib.Series.First();
+        var originalId = series.Id;
+        var originalName = series.OriginalName;
+        var originalVolumeCount = series.Volumes.Count;
+
+        // Simulate a UI/K+ rename: Name and NormalizedName move off the folder name; OriginalName stays.
+        var renamed = await unitOfWork.SeriesRepository.GetSeriesByIdAsync(originalId);
+        renamed!.Name = "Completely Different Name";
+        renamed.NormalizedName = "Completely Different Name".ToNormalized();
+        unitOfWork.SeriesRepository.Update(renamed);
+        await unitOfWork.CommitAsync();
+
+        // Force a full rescan
+        await SetAllSeriesLastScannedInThePast(context, postLib);
+        await scanner.ScanLibrary(library.Id);
+
+        var postLib2 = await unitOfWork.LibraryRepository.GetLibraryForIdAsync(library.Id, LibraryIncludes.Series);
+        Assert.NotNull(postLib2);
+        Assert.Single(postLib2.Series);
+
+        var survivor = postLib2.Series.First();
+        Assert.Equal(originalId, survivor.Id);
+        Assert.Equal("Completely Different Name", survivor.Name);
+        Assert.Equal(originalName, survivor.OriginalName);
+        Assert.Equal(originalVolumeCount, survivor.Volumes.Count);
+    }
+
     [Fact]
     public async Task ScanLibrary_FlatSeriesWithSpecialFolder()
     {

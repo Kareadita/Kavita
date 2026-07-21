@@ -1,10 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
+using Kavita.Common.Extensions;
 using Kavita.Models.Entities.Enums;
 using Kavita.Models.Entities.Interfaces;
 using Kavita.Models.Entities.Metadata;
 using Kavita.Models.Entities.Progress;
 using Kavita.Models.Entities.User;
+using Kavita.Models.Parser;
 
 namespace Kavita.Models.Entities;
 
@@ -88,6 +90,11 @@ public class Series : IEntityDate, IHasReadTimeEstimate, IHasCoverImage, IHasMet
 
     public bool SortNameLocked { get; set; }
     public bool LocalizedNameLocked { get; set; }
+    /// <summary>
+    /// Denotes if the <see cref="Name"/> has been overridden by the user. If so, Kavita+ will not
+    /// overwrite it during a metadata match
+    /// </summary>
+    public bool NameLocked { get; set; }
 
     /// <summary>
     /// When a Chapter was last added onto the Series
@@ -169,6 +176,17 @@ public class Series : IEntityDate, IHasReadTimeEstimate, IHasCoverImage, IHasMet
     {
         return (!string.IsNullOrEmpty(NormalizedName) && (NormalizedName == nameNormalized || NormalizedName == localizedNameNormalized)) ||
                (!string.IsNullOrEmpty(NormalizedLocalizedName) && (NormalizedLocalizedName == nameNormalized || NormalizedLocalizedName == localizedNameNormalized));
+    }
+
+    /// <summary>
+    /// Does this Series correspond to the given folder-derived parsed series key (name and format)
+    /// </summary>
+    public bool MatchesParsedSeries(ParsedSeries key)
+    {
+        return (NormalizedName.Equals(key.NormalizedName)
+                || (LocalizedName != null && LocalizedName.ToNormalized().Equals(key.NormalizedName))
+                || (OriginalName != null && OriginalName.ToNormalized().Equals(key.NormalizedName)))
+               && (Format == key.Format || Format == MangaFormat.Unknown);
     }
 
     public void ResetColorScape()

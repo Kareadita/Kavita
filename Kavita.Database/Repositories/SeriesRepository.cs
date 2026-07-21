@@ -1355,6 +1355,22 @@ public class SeriesRepository(DataContext context, IMapper mapper) : ISeriesRepo
 #nullable enable
     }
 
+    public async Task<bool> IsSeriesNameUniqueInLibraryAsync(int libraryId, MangaFormat format, string normalizedName,
+        int excludeSeriesId, CancellationToken ct = default)
+    {
+        if (string.IsNullOrEmpty(normalizedName)) return true;
+
+        var candidates = await context.Series
+            .Where(s => s.LibraryId == libraryId && s.Format == format && s.Id != excludeSeriesId)
+            .Select(s => new { s.NormalizedName, s.NormalizedLocalizedName, s.OriginalName })
+            .ToListAsync(ct);
+
+        return !candidates.Any(c =>
+            c.NormalizedName == normalizedName
+            || c.NormalizedLocalizedName == normalizedName
+            || (c.OriginalName != null && c.OriginalName.ToNormalized() == normalizedName));
+    }
+
     public async Task<Series?> GetSeriesFromExternalMetadata(IList<string> seriesNames, IList<MangaFormat> formats,
         int userId, ExternalMetadataIdsDto? dto = null, SeriesIncludes includes = SeriesIncludes.None, CancellationToken ct = default)
     {
@@ -1442,8 +1458,11 @@ public class SeriesRepository(DataContext context, IMapper mapper) : ISeriesRepo
 
         foreach (var parsedSeries in seenSeries)
         {
+            // Match the same way the scanner's lookup does (NormalizedName OR normalized
+            // LocalizedName OR normalized OriginalName + Format). Matching on OriginalName is what
+            // keeps a user/K+-renamed series from being deleted here after ProcessSeries updated it.
             var matchingSeries = dbSeries
-                .Where(s => s.Format == parsedSeries.Format && s.NormalizedName == parsedSeries.NormalizedName)
+                .Where(s => s.MatchesParsedSeries(parsedSeries))
                 .OrderBy(s => s.Id) // Sort to handle potential duplicates
                 .ToList();
 

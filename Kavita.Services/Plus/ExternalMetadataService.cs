@@ -182,7 +182,7 @@ public class ExternalMetadataService : IExternalMetadataService
             IsStandAlone = series.Volumes.Sum(v => v.Chapters.Count) == 1,
             Provider = series.Library.MetadataProvider,
             SeriesName = series.Name,
-            AlternativeNames = [series.LocalizedName],
+            AlternativeNames = ExtractAlternativeNames(series),
             Format = series.Library.Type.ConvertToPlusMediaFormat(series.Format),
         };
 
@@ -761,6 +761,7 @@ public class ExternalMetadataService : IExternalMetadataService
         Accumulate(ref madeModification, fieldChanges, UpdateSummary(series, settings, externalMetadata));
         Accumulate(ref madeModification, fieldChanges, UpdateReleaseYear(series, settings, externalMetadata));
         Accumulate(ref madeModification, fieldChanges, UpdateLocalizedName(series, settings, externalMetadata));
+        Accumulate(ref madeModification, fieldChanges, await UpdateName(series, settings, externalMetadata, ct));
         Accumulate(ref madeModification, fieldChanges, await UpdatePublicationStatus(series, settings, externalMetadata));
         if (trigger is MetadataFetchTrigger.OnDemand or MetadataFetchTrigger.ManualMatch)
         {
@@ -1874,6 +1875,46 @@ public class ExternalMetadataService : IExternalMetadataService
         series.Metadata.AddKPlusOverride(MetadataSettingField.LocalizedName);
 
         return (true, new MetadataFieldChangeDto(MetadataFieldChangeKind.LocalizedName, from, series.LocalizedName));
+    }
+
+    /// <summary>
+    /// Writes the Series' visible Name from external metadata when enabled and not locked by the user.
+    /// OriginalName remains the on-disk anchor, so this rename stays scan-safe. Skipped if the new name
+    /// would collide (normalized) with another series in the library+format.
+    /// </summary>
+    private async Task<(bool, MetadataFieldChangeDto?)> UpdateName(Series series, MetadataSettingsDto settings,
+        ExternalSeriesDetailDto externalMetadata, CancellationToken ct)
+    {
+        if (!settings.EnableName) return (false, null);
+        if (string.IsNullOrWhiteSpace(externalMetadata.Name)) return (false, null);
+
+        if (series.NameLocked && !HasForceOverride(settings, series.Metadata, MetadataSettingField.Name))
+        {
+            return (false, null);
+        }
+
+        var newName = externalMetadata.Name.Trim();
+        if (newName == series.Name) return (false, null);
+
+        var normalizedNewName = newName.ToNormalized();
+
+        // Never create a normalized collision - it would make the scanner's SingleOrDefault lookup throw
+        if (!await _unitOfWork.SeriesRepository.IsSeriesNameUniqueInLibraryAsync(
+                series.LibraryId, series.Format, normalizedNewName, series.Id, ct))
+        {
+            _logger.LogInformation(
+                "[K+] Skipping name write for Series {SeriesId}: it would collide with another series in the library",
+                series.Id);
+            return (false, null);
+        }
+
+        var from = series.Name;
+        series.Name = newName;
+        series.NormalizedName = normalizedNewName;
+        series.NameLocked = true;
+        series.Metadata.AddKPlusOverride(MetadataSettingField.Name);
+
+        return (true, new MetadataFieldChangeDto(MetadataFieldChangeKind.Name, from, series.Name));
     }
 
     private static (bool, MetadataFieldChangeDto?) UpdateSummary(Series series, MetadataSettingsDto settings, ExternalSeriesDetailDto externalMetadata)

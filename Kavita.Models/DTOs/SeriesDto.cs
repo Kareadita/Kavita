@@ -66,6 +66,8 @@ public sealed record SeriesDto : IHasReadTimeEstimate, IHasCoverImage, IHasMetad
     public bool SortNameLocked { get; set; }
     /// <inheritdoc cref="API.Entities.Series.LocalizedNameLocked"/>
     public bool LocalizedNameLocked { get; set; }
+    /// <inheritdoc cref="API.Entities.Series.NameLocked"/>
+    public bool NameLocked { get; set; }
     /// <inheritdoc cref="API.Entities.Series.WordCount"/>
     public long WordCount { get; set; }
 

@@ -170,6 +170,48 @@ public class SeriesHelperTests
             NormalizedName = "Sono Bisque Doll wa Koi wo Suru".ToNormalized()
         }));
     }
+
+    [Fact]
+    public void FindSeries_ShouldFind_AfterRename_ViaOriginalName()
+    {
+        // Simulate a UI/K+ rename: Name (and its NormalizedName) move away from the folder name,
+        // but OriginalName still anchors to the on-disk folder.
+        var series = new SeriesBuilder("Batman").Build();
+        series.Format = MangaFormat.Archive;
+        series.Name = "The Dark Knight";
+        series.NormalizedName = "The Dark Knight".ToNormalized();
+        // OriginalName remains "Batman"
+
+        // The folder on disk still parses as "Batman"
+        Assert.True(SeriesHelper.FindSeries(series, new ParsedSeries()
+        {
+            Format = MangaFormat.Archive,
+            Name = "Batman",
+            NormalizedName = "Batman".ToNormalized()
+        }));
+
+        // And the renamed Name still resolves via NormalizedName
+        Assert.True(SeriesHelper.FindSeries(series, new ParsedSeries()
+        {
+            Format = MangaFormat.Archive,
+            Name = "The Dark Knight",
+            NormalizedName = "The Dark Knight".ToNormalized()
+        }));
+    }
+
+    [Fact]
+    public void FindSeries_ShouldNotFind_WhenNoNameMatches()
+    {
+        var series = new SeriesBuilder("Batman").Build();
+        series.Format = MangaFormat.Archive;
+
+        Assert.False(SeriesHelper.FindSeries(series, new ParsedSeries()
+        {
+            Format = MangaFormat.Archive,
+            Name = "Superman",
+            NormalizedName = "Superman".ToNormalized()
+        }));
+    }
     #endregion
 
     [Fact]

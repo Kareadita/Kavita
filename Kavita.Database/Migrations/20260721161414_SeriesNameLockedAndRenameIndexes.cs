@@ -1,0 +1,67 @@
+﻿using Microsoft.EntityFrameworkCore.Migrations;
+
+#nullable disable
+
+namespace Kavita.Database.Migrations
+{
+    /// <inheritdoc />
+    public partial class SeriesNameLockedAndRenameIndexes : Migration
+    {
+        /// <inheritdoc />
+        protected override void Up(MigrationBuilder migrationBuilder)
+        {
+            migrationBuilder.DropIndex(
+                name: "IX_Series_NormalizedName",
+                table: "Series");
+
+            migrationBuilder.AddColumn<bool>(
+                name: "NameLocked",
+                table: "Series",
+                type: "INTEGER",
+                nullable: false,
+                defaultValue: false);
+
+            migrationBuilder.AddColumn<bool>(
+                name: "EnableName",
+                table: "MetadataSettings",
+                type: "INTEGER",
+                nullable: false,
+                defaultValue: false);
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Series_LibraryId_Format_NormalizedLocalizedName",
+                table: "Series",
+                columns: new[] { "LibraryId", "Format", "NormalizedLocalizedName" });
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Series_LibraryId_Format_NormalizedName",
+                table: "Series",
+                columns: new[] { "LibraryId", "Format", "NormalizedName" });
+        }
+
+        /// <inheritdoc />
+        protected override void Down(MigrationBuilder migrationBuilder)
+        {
+            migrationBuilder.DropIndex(
+                name: "IX_Series_LibraryId_Format_NormalizedLocalizedName",
+                table: "Series");
+
+            migrationBuilder.DropIndex(
+                name: "IX_Series_LibraryId_Format_NormalizedName",
+                table: "Series");
+
+            migrationBuilder.DropColumn(
+                name: "NameLocked",
+                table: "Series");
+
+            migrationBuilder.DropColumn(
+                name: "EnableName",
+                table: "MetadataSettings");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Series_NormalizedName",
+                table: "Series",
+                column: "NormalizedName");
+        }
+    }
+}
