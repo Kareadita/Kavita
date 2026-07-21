@@ -1312,20 +1312,10 @@ public class SeriesRepository(DataContext context, IMapper mapper) : ISeriesRepo
     public Task<Series?> GetFullSeriesByAnyName(string seriesName, string localizedName, int libraryId,
         MangaFormat format, bool withFullIncludes = true, CancellationToken ct = default)
     {
-        var normalizedSeries = seriesName.ToNormalized();
-        var normalizedLocalized = localizedName.ToNormalized();
         var query = context.Series
             .Where(s => s.LibraryId == libraryId)
             .Where(s => s.Format == format && format != MangaFormat.Unknown)
-            .Where(s =>
-                s.NormalizedName.Equals(normalizedSeries)
-                || s.NormalizedName.Equals(normalizedLocalized)
-
-                || s.NormalizedLocalizedName.Equals(normalizedSeries)
-                || (!string.IsNullOrEmpty(normalizedLocalized) && s.NormalizedLocalizedName.Equals(normalizedLocalized))
-
-                || (s.OriginalName != null && s.OriginalName.Equals(seriesName))
-            );
+            .WhereSeriesNameMatches(seriesName, localizedName);
         if (!withFullIncludes)
         {
             return query.SingleOrDefaultAsync(ct);
@@ -1367,6 +1357,19 @@ public class SeriesRepository(DataContext context, IMapper mapper) : ISeriesRepo
 #nullable enable
     }
 
+    public async Task<bool> IsSeriesNameUniqueInLibraryAsync(int libraryId, MangaFormat format, string normalizedName,
+        int excludeSeriesId, CancellationToken ct = default)
+    {
+        if (string.IsNullOrEmpty(normalizedName)) return true;
+
+        return !await context.Series
+            .Where(s => s.LibraryId == libraryId && s.Format == format && s.Id != excludeSeriesId)
+            .AnyAsync(s =>
+                s.NormalizedName == normalizedName
+                || s.NormalizedLocalizedName == normalizedName
+                || s.NormalizedOriginalName == normalizedName, ct);
+    }
+
     public async Task<Series?> GetSeriesFromExternalMetadata(IList<string> seriesNames, IList<MangaFormat> formats,
         int userId, ExternalMetadataIdsDto? dto = null, SeriesIncludes includes = SeriesIncludes.None, CancellationToken ct = default)
     {
@@ -1406,7 +1409,7 @@ public class SeriesRepository(DataContext context, IMapper mapper) : ISeriesRepo
             .Where(s =>
                 normalizedNames.Contains(s.NormalizedName)
                 || normalizedNames.Contains(s.NormalizedLocalizedName)
-                || names.Contains(s.OriginalName))
+                || normalizedNames.Contains(s.NormalizedOriginalName))
             .Includes(includes)
             .FirstOrDefaultAsync(ct);
     }
@@ -1414,20 +1417,10 @@ public class SeriesRepository(DataContext context, IMapper mapper) : ISeriesRepo
     public async Task<IList<Series>> GetAllSeriesByAnyNameAsync(string seriesName, string localizedName, int libraryId,
         MangaFormat format, CancellationToken ct = default)
     {
-        var normalizedSeries = seriesName.ToNormalized();
-        var normalizedLocalized = localizedName.ToNormalized();
         return await context.Series
             .Where(s => s.LibraryId == libraryId)
             .Where(s => s.Format == format && format != MangaFormat.Unknown)
-            .Where(s =>
-                s.NormalizedName.Equals(normalizedSeries)
-                || s.NormalizedName.Equals(normalizedLocalized)
-
-                || s.NormalizedLocalizedName.Equals(normalizedSeries)
-                || (!string.IsNullOrEmpty(normalizedLocalized) && s.NormalizedLocalizedName.Equals(normalizedLocalized))
-
-                || (s.OriginalName != null && s.OriginalName.Equals(seriesName))
-            )
+            .WhereSeriesNameMatches(seriesName, localizedName)
             .AsSplitQuery()
             .ToListAsync(ct);
     }
@@ -1439,42 +1432,71 @@ public class SeriesRepository(DataContext context, IMapper mapper) : ISeriesRepo
     /// <param name="seenSeries"></param>
     /// <param name="libraryId"></param>
     /// <param name="ct"></param>
+    private sealed record SeriesNameMatch(int Id, MangaFormat Format, string NormalizedName,
+        string NormalizedLocalizedName, string NormalizedOriginalName);
+
     public async Task<IList<Series>> RemoveSeriesNotInListAsync(IList<ParsedSeries> seenSeries, int libraryId,
         CancellationToken ct = default)
     {
-        if (!seenSeries.Any()) return Array.Empty<Series>();
+        if (seenSeries.Count == 0) return Array.Empty<Series>();
 
-        // Get all series from DB in one go, based on libraryId
-        var dbSeries = await context.Series
+        var candidates = await context.Series
             .Where(s => s.LibraryId == libraryId)
+            .Select(s => new SeriesNameMatch(s.Id, s.Format, s.NormalizedName, s.NormalizedLocalizedName,
+                s.NormalizedOriginalName))
             .ToListAsync(ct);
+        if (candidates.Count == 0) return Array.Empty<Series>();
 
-        // Get a set of matching series ids for the given parsedSeries
-        var ids = new HashSet<int>();
+        var byName = new Dictionary<string, List<SeriesNameMatch>>(StringComparer.Ordinal);
 
-        foreach (var parsedSeries in seenSeries)
+        foreach (var s in candidates)
         {
-            var matchingSeries = dbSeries
-                .Where(s => s.Format == parsedSeries.Format && s.NormalizedName == parsedSeries.NormalizedName)
-                .OrderBy(s => s.Id) // Sort to handle potential duplicates
-                .ToList();
-
-            // Prefer the first match or handle duplicates by choosing the last one
-            if (matchingSeries.Count != 0)
-            {
-                ids.Add(matchingSeries.Last().Id);
-            }
+            Index(s.NormalizedName, s);
+            Index(s.NormalizedLocalizedName, s);
+            Index(s.NormalizedOriginalName, s);
         }
 
-        // Filter out series that are not in the seenSeries
-        var seriesToRemove = dbSeries
-            .Where(s => !ids.Contains(s.Id))
-            .ToList();
+        // For each seen key, keep the highest-Id match. Matching on all three normalized columns keeps
+        // a user/K+-renamed series (whose OriginalName still anchors the folder) from being deleted.
+        // Collapsing duplicates to the highest Id preserves the legacy self-heal for the v0.5.6 bug
+        // where a library could end up with multiple series sharing a (Format, NormalizedName).
+        var keepIds = new HashSet<int>();
+        foreach (var key in seenSeries)
+        {
+            if (!byName.TryGetValue(key.NormalizedName, out var matches)) continue;
 
-        // Remove series in bulk
+            var best = matches
+                .Where(m => m.Format == key.Format || m.Format == MangaFormat.Unknown)
+                .OrderBy(m => m.Id)
+                .LastOrDefault();
+            if (best != null) keepIds.Add(best.Id);
+        }
+
+        var removeIds = candidates.Where(s => !keepIds.Contains(s.Id)).Select(s => s.Id).ToList();
+        if (removeIds.Count == 0) return Array.Empty<Series>();
+
+        var seriesToRemove = new List<Series>();
+        foreach (var batch in removeIds.Chunk(50))
+        {
+            var batchList = batch.ToList();
+            seriesToRemove.AddRange(await context.Series
+                .Where(s => batchList.Contains(s.Id))
+                .ToListAsync(ct));
+        }
+
         context.Series.RemoveRange(seriesToRemove);
 
         return seriesToRemove;
+
+        void Index(string name, SeriesNameMatch s)
+        {
+            if (string.IsNullOrEmpty(name)) return;
+            if (!byName.TryGetValue(name, out var list))
+            {
+                byName[name] = list = [];
+            }
+            list.Add(s);
+        }
     }
 
     public async Task<RelatedSeriesDto> GetRelatedSeriesAsync(int userId, int seriesId, CancellationToken ct = default)

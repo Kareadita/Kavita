@@ -265,6 +265,7 @@ public static class Seed
                 EnableTags = false,
                 EnableGenres = true,
                 EnableLocalizedName = false,
+                EnableName = false,
                 FirstLastPeopleNaming = true,
                 EnableCoverImage = true,
                 EnableChapterTitle = false,

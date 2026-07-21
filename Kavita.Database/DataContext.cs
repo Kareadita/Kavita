@@ -523,8 +523,14 @@ public sealed class DataContext : IdentityDbContext<AppUser, AppRole, int,
         // Series indexes for search
         builder.Entity<Series>(entity =>
         {
-            entity.HasIndex(s => s.NormalizedName)
-                .HasDatabaseName("IX_Series_NormalizedName");
+            entity.HasIndex(s => new { s.LibraryId, s.Format, s.NormalizedName })
+                .HasDatabaseName("IX_Series_LibraryId_Format_NormalizedName");
+
+            entity.HasIndex(s => new { s.LibraryId, s.Format, s.NormalizedLocalizedName })
+                .HasDatabaseName("IX_Series_LibraryId_Format_NormalizedLocalizedName");
+
+            entity.HasIndex(s => new { s.LibraryId, s.Format, s.NormalizedOriginalName })
+                .HasDatabaseName("IX_Series_LibraryId_Format_NormalizedOriginalName");
 
             entity.HasIndex(s => s.LibraryId)
                 .HasDatabaseName("IX_Series_LibraryId");

@@ -2544,11 +2544,7 @@
         "volume-count": "{{match-series-result-item.volume-count}}",
         "chapter-count": "{{match-series-result-item.chapter-count}}",
         "matched-to": "Derzeit zugeordnet zu",
-        "searching-against": "Suche bei {{provider}}",
-        "selected-desc": "Ausgewählt, weil: {{libraryType}} {{format}}",
-        "library-type": "Bibliotheksart:",
-        "format-type": "Format:",
-        "provider-help": "Ein Anbieter pro Bibliothekstyp"
+        "searching-against": "Suche bei {{provider}}"
     },
     "email-history": {
         "description": "Hier finden Sie alle E-Mails, die von Kavita gesendet wurden und an welchen Benutzer.",
@@ -3033,7 +3029,25 @@
         "add": "{{common.add}}",
         "drag-n-drop": "{{cover-image-chooser.drag-n-drop}}",
         "upload": "{{cover-image-chooser.upload}}",
-        "delete": "{{common.delete}}"
+        "delete": "{{common.delete}}",
+        "wiki": "Wiki",
+        "google-fonts": "Google-Schriftarten",
+        "add-font": "Schriftart hinzufügen",
+        "families": "Familien",
+        "custom-only": "Allein individuell",
+        "var": "VAR",
+        "variable": "Variable",
+        "style": "Stil",
+        "styles": "Stile",
+        "file": "Datei",
+        "files": "Dateien",
+        "in-this-family": "in dieser Familie",
+        "styles-summary": "· {{styles}}",
+        "roman": "Roman",
+        "italic": "Kursiv",
+        "regular": "Standard",
+        "wght": "Fett",
+        "alphabet": "ABCDEFGHIJKLM abcdefghijklm 0123456789"
     },
     "library-type-subtitle-pipe": {
         "book": "Universelle Buchbibliothek.",
@@ -4235,10 +4249,8 @@
         "generate-scrobble-events": "Bereinigungsmaßnahmen"
     },
     "scrobble-provider-description-pipe": {
-        "ani-list": "Alles rund um Manga und Light Novels",
         "my-anime-list": "„Want To Read“ und „Stacks“ synchronisieren für Manga und Light Novels",
-        "hardcover": "Alles rund um Bücher, Manga und Light Novels!",
-        "manga-baka": "Alles rund um Manga und Light Novels"
+        "hardcover": "Alles rund um Bücher, Manga und Light Novels!"
     },
     "review-scrobble-target-name-pipe": {
         "private": "Nur Sie",

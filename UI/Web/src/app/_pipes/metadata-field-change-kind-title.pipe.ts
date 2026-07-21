@@ -44,6 +44,8 @@ export class MetadataFieldChangeKindTitlePipe implements PipeTransform {
         return 'release-year';
       case MetadataFieldChangeKind.LocalizedName:
         return 'localized-name';
+      case MetadataFieldChangeKind.Name:
+        return 'name';
     }
   }
 

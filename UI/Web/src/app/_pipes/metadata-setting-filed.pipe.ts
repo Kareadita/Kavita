@@ -42,6 +42,8 @@ export class MetadataSettingFiledPipe implements PipeTransform {
         return translate('metadata-setting-field-pipe.tags');
       case MetadataSettingField.LocalizedName:
         return translate('metadata-setting-field-pipe.localized-name');
+      case MetadataSettingField.Name:
+        return translate('metadata-setting-field-pipe.name');
 
     }
   }

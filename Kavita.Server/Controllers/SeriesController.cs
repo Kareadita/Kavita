@@ -177,12 +177,38 @@ public class SeriesController(
     public async Task<ActionResult<SeriesDto>> UpdateSeries(UpdateSeriesDto updateSeries)
     {
         var ct = HttpContext.RequestAborted;
-        var series = await unitOfWork.SeriesRepository.GetSeriesByIdAsync(updateSeries.Id, ct: ct);
+        var series = await unitOfWork.SeriesRepository.GetSeriesByIdAsync(updateSeries.Id,
+            SeriesIncludes.Metadata | SeriesIncludes.Library, ct);
         if (series == null)
             return BadRequest(await localizationService.TranslateAsync(UserId, "series-doesnt-exist"));
 
+        var renamed = false;
+        var newName = updateSeries.Name?.Trim();
+        if (!string.IsNullOrEmpty(newName) && newName != series.Name)
+        {
+            var normalizedNewName = newName.ToNormalized();
+            if (!await unitOfWork.SeriesRepository.IsSeriesNameUniqueInLibraryAsync(
+                    series.LibraryId, series.Format, normalizedNewName, series.Id, ct))
+            {
+                return BadRequest(await localizationService.TranslateAsync(UserId, "series-name-exists"));
+            }
+
+            series.Name = newName;
+            // A user rename is an override; drop any prior K+ name override so K+ respects it
+            series.Metadata.KPlusOverrides.Remove(MetadataSettingField.Name);
+            renamed = true;
+        }
+
         series.NormalizedName = series.Name.ToNormalized();
-        if (!string.IsNullOrEmpty(updateSeries.SortName?.Trim()))
+
+        if (renamed && !updateSeries.SortNameLocked)
+        {
+            // An unlocked sort name is derived from Name - reseed it (mirrors the scanner logic)
+            series.SortName = series.Library is {RemovePrefixForSortName: true}
+                ? BookSortTitlePrefixHelper.GetSortTitle(series.Name)
+                : series.Name;
+        }
+        else if (!string.IsNullOrEmpty(updateSeries.SortName?.Trim()))
         {
             series.SortName = updateSeries.SortName.Trim();
         }
@@ -196,6 +222,7 @@ public class SeriesController(
             series.Metadata.KPlusOverrides.Remove(MetadataSettingField.LocalizedName);
         }
 
+        series.NameLocked = updateSeries.NameLocked;
         series.SortNameLocked = updateSeries.SortNameLocked;
         series.LocalizedNameLocked = updateSeries.LocalizedNameLocked;
 

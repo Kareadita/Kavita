@@ -8,6 +8,7 @@ export enum MetadataSettingField {
   Covers = 7,
   AgeRating = 8,
   People = 9,
+  Name = 10,
 
   // Chapter fields
   ChapterTitle = 20,

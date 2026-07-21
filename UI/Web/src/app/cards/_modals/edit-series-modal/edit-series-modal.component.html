@@ -18,17 +18,18 @@
                   <div class="mb-3" style="width: 100%">
                     <app-setting-item [title]="t('name-label')" [toggleOnViewClick]="false" [showEdit]="false">
                       <ng-template #view>
-                        <div class="input-group">
-                          @if (editSeriesForm.get('name'); as formControl) {
-                            <input id="name" class="form-control" formControlName="name" type="text" readonly
+                        @if (editSeriesForm.get('name'); as formControl) {
+                          <div class="input-group {{series.nameLocked ? 'lock-active' : ''}}">
+                            <ng-container [ngTemplateOutlet]="lock" [ngTemplateOutletContext]="{ item: series, field: 'nameLocked' }" />
+                            <input id="name" class="form-control" formControlName="name" type="text"
                                    [class.is-invalid]="formControl.invalid && !formControl.untouched">
                             @if (formControl.errors) {
                               @if (formControl.errors.required) {
                                 <div class="invalid-feedback">{{t('required-field')}}</div>
                               }
                             }
-                          }
-                        </div>
+                          </div>
+                        }
                       </ng-template>
                     </app-setting-item>
                   </div>
