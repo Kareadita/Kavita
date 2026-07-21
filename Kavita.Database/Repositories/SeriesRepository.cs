@@ -1440,7 +1440,6 @@ public class SeriesRepository(DataContext context, IMapper mapper) : ISeriesRepo
     {
         if (seenSeries.Count == 0) return Array.Empty<Series>();
 
-        // Pull only the columns needed to decide keep/remove (not the full entity graph)
         var candidates = await context.Series
             .Where(s => s.LibraryId == libraryId)
             .Select(s => new SeriesNameMatch(s.Id, s.Format, s.NormalizedName, s.NormalizedLocalizedName,
@@ -1448,19 +1447,7 @@ public class SeriesRepository(DataContext context, IMapper mapper) : ISeriesRepo
             .ToListAsync(ct);
         if (candidates.Count == 0) return Array.Empty<Series>();
 
-        // Index each candidate by every one of its normalized names, so a parsed key resolves its
-        // matches in O(1) instead of scanning all series per key (was O(seenSeries * dbSeries)).
         var byName = new Dictionary<string, List<SeriesNameMatch>>(StringComparer.Ordinal);
-
-        void Index(string name, SeriesNameMatch s)
-        {
-            if (string.IsNullOrEmpty(name)) return;
-            if (!byName.TryGetValue(name, out var list))
-            {
-                byName[name] = list = [];
-            }
-            list.Add(s);
-        }
 
         foreach (var s in candidates)
         {
@@ -1488,14 +1475,28 @@ public class SeriesRepository(DataContext context, IMapper mapper) : ISeriesRepo
         var removeIds = candidates.Where(s => !keepIds.Contains(s.Id)).Select(s => s.Id).ToList();
         if (removeIds.Count == 0) return Array.Empty<Series>();
 
-        // Only load the (usually few) entities actually being removed
-        var seriesToRemove = await context.Series
-            .Where(s => removeIds.Contains(s.Id))
-            .ToListAsync(ct);
+        var seriesToRemove = new List<Series>();
+        foreach (var batch in removeIds.Chunk(50))
+        {
+            var batchList = batch.ToList();
+            seriesToRemove.AddRange(await context.Series
+                .Where(s => batchList.Contains(s.Id))
+                .ToListAsync(ct));
+        }
 
         context.Series.RemoveRange(seriesToRemove);
 
         return seriesToRemove;
+
+        void Index(string name, SeriesNameMatch s)
+        {
+            if (string.IsNullOrEmpty(name)) return;
+            if (!byName.TryGetValue(name, out var list))
+            {
+                byName[name] = list = [];
+            }
+            list.Add(s);
+        }
     }
 
     public async Task<RelatedSeriesDto> GetRelatedSeriesAsync(int userId, int seriesId, CancellationToken ct = default)
