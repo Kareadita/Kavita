@@ -74,6 +74,7 @@ import {
   CoverImageChooserConfig
 } from "../../../_services/cover-chooser-config-factory.service";
 import {Volume} from "../../../_models/volume";
+import {ConfirmService} from "../../../shared/confirm.service";
 
 
 @Component({
@@ -129,6 +130,7 @@ export class EditSeriesModalComponent implements OnInit {
   private readonly actionFactoryService = inject(ActionFactoryService);
   protected readonly breakpointService = inject(BreakpointService);
   private readonly coverChooserConfigFactory = inject(CoverChooserConfigFactoryService);
+  private readonly confirmService = inject(ConfirmService);
 
   protected readonly Tabs = Tabs;
   protected readonly PersonRole = PersonRole;
@@ -498,12 +500,19 @@ export class EditSeriesModalComponent implements OnInit {
   }
 
 
-  save() {
+  async save() {
     const model = this.editSeriesForm.getRawValue();
 
-    const apis = [
-      this.seriesService.updateMetadata(this.metadata)
-    ];
+    const nameChanged = this.editSeriesForm.get('name')?.dirty ?? false;
+
+    // If the user renamed the series but has a locked (custom) sort name, offer to align it.
+    // When the sort name is unlocked the backend reseeds it from the new name automatically.
+    if (nameChanged && this.series.sortNameLocked && model.sortName !== model.name) {
+      if (await this.confirmService.confirm(translate('edit-series-modal.align-sort-name'))) {
+        model.sortName = model.name;
+        this.editSeriesForm.get('sortName')?.patchValue(model.name);
+      }
+    }
 
     // We only need to call updateSeries if we changed name, sort name, or localized name or reset a cover image
     const nameFieldsDirty = this.editSeriesForm.get('name')?.dirty || this.editSeriesForm.get('sortName')?.dirty || this.editSeriesForm.get('localizedName')?.dirty;
@@ -518,9 +527,11 @@ export class EditSeriesModalComponent implements OnInit {
       model.language = this.metadata.language;
     }
 
-    apis.push(this.seriesService.updateSeries(model).pipe(
-      tap(result => updatedSeries = result)
-    ));
+    // updateSeries runs first so a name collision (400) short-circuits the chain before metadata is written
+    const apis = [
+      this.seriesService.updateSeries(model).pipe(tap(result => updatedSeries = result)),
+      this.seriesService.updateMetadata(this.metadata)
+    ];
 
     if (this.coverImageDirty) {
       apis.push(this.uploadService.updateSeriesCoverImage(model.id, this.selectedCover, true));
@@ -532,8 +543,14 @@ export class EditSeriesModalComponent implements OnInit {
     concat(...apis).pipe(
       delay(10),
       last()
-    ).subscribe(() => {
-      this.modal.close(modalSaved(updatedSeries ?? model, this.coverImageDirty || this.coverImageReset));
+    ).subscribe({
+      next: () => {
+        this.modal.close(modalSaved(updatedSeries ?? model, this.coverImageDirty || this.coverImageReset));
+      },
+      error: () => {
+        // A duplicate name (400) is surfaced by the global error interceptor; keep the modal open
+        this.cdRef.markForCheck();
+      }
     });
   }
 

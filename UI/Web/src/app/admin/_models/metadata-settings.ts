@@ -26,6 +26,7 @@ export interface MetadataSettings {
   enableStartDate: boolean;
   enableCoverImage: boolean;
   enableLocalizedName: boolean;
+  enableName: boolean;
 
   enableChapterSummary: boolean;
   enableChapterReleaseDate: boolean;

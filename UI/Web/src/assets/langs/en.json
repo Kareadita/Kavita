@@ -1306,6 +1306,8 @@
         "summary-tooltip": "Allow Summary to be written when the field is unlocked.",
         "localized-name-label": "Localized Series Name",
         "localized-name-tooltip": "Allow Localized Name to be written when the field is unlocked. Kavita will attempt to make the best guess.",
+        "name-label": "Series Name",
+        "name-tooltip": "Allow the Series Name to be written when the field is unlocked. The name on disk is still used to keep the series matched during scans.",
         "derive-publication-status-label": "Publication Status",
         "derive-publication-status-tooltip": "Allow Publication Status to be derived from Total Chapter/Volume counts.",
         "enable-relations-label": "Relationships",
@@ -1682,7 +1684,8 @@
         "title": "Title",
         "release-date": "Release Date",
         "release-year": "Release Year",
-        "localized-name": "Localized Name"
+        "localized-name": "Localized Name",
+        "name": "Series Name"
     },
 
 
@@ -3466,6 +3469,7 @@
         "required-field": "{{validation.required-field}}",
         "close": "{{common.close}}",
         "name-label": "Name",
+        "align-sort-name": "You've renamed this series but its sort name is locked. Update the sort name to match the new name?",
         "sort-name-label": "Sort Name",
         "localized-name-label": "Localized Name",
         "summary-label": "Summary",
@@ -4399,6 +4403,7 @@
         "genres": "{{metadata-fields.genres-title}}",
         "tags": "{{metadata-fields.tags-title}}",
         "localized-name": "{{edit-series-modal.localized-name-label}}",
+        "name": "{{edit-series-modal.name-label}}",
         "chapter-release-date": "Release Date (Chapter)",
         "chapter-summary": "Summary (Chapter)",
         "chapter-covers": "Covers (Chapter)",
