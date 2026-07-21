@@ -65,6 +65,7 @@ public interface IPersonRepository
     /// <returns></returns>
     Task<IList<Person>> GetPeopleByNames(List<string> normalizedNames, PersonIncludes includes = PersonIncludes.Aliases, CancellationToken ct = default);
     Task<Person?> GetPersonByAniListId(int aniListId, PersonIncludes includes = PersonIncludes.Aliases, CancellationToken ct = default);
+    Task<Person?> GetPersonByHardcoverId(string? hardcoverId, PersonIncludes includes = PersonIncludes.Aliases, CancellationToken ct = default);
 
     Task<IList<PersonDto>> SearchPeople(string searchQuery, PersonIncludes includes = PersonIncludes.Aliases, CancellationToken ct = default);
 

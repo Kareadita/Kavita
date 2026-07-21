@@ -37,6 +37,7 @@ using Kavita.Models.Entities.Enums.KavitaPlus;
 using Kavita.Models.Entities.Interfaces;
 using Kavita.Models.Entities.Metadata;
 using Kavita.Models.Entities.MetadataMatching;
+using Kavita.Models.Entities.Person;
 using Kavita.Models.Entities.User;
 using Kavita.Models.Extensions;
 using Kavita.Services.Extensions;
@@ -1409,6 +1410,7 @@ public class ExternalMetadataService : IExternalMetadataService
             {
                 Name = w.Name.Trim(),
                 AniListId = ExternalIdParser.GetAniListStaffId(w.Url),
+                HardcoverId = ExternalIdParser.GetHardcoverStaffId(w.Url),
                 Description = StringHelper.CorrectUrls(StringHelper.RemoveSourceInDescription(StringHelper.SquashBreaklines(w.Description))),
             })
             .Concat(series.Metadata.People
@@ -1466,6 +1468,7 @@ public class ExternalMetadataService : IExternalMetadataService
             {
                 Name = w.Name.Trim(),
                 AniListId = ExternalIdParser.GetAniListStaffId(w.Url),
+                HardcoverId = ExternalIdParser.GetHardcoverStaffId(w.Url),
                 Description = StringHelper.CorrectUrls(StringHelper.RemoveSourceInDescription(StringHelper.SquashBreaklines(w.Description))),
             })
             .Concat(series.Metadata.People
@@ -2243,19 +2246,35 @@ public class ExternalMetadataService : IExternalMetadataService
 
     private async Task DownloadAndSetPersonCovers(List<SeriesStaffDto> people)
     {
+
         foreach (var staff in people)
         {
+            if (string.IsNullOrEmpty(staff.ImageUrl)) continue;
+
             var aniListId = ExternalIdParser.GetAniListStaffId(staff.Url);
-            if (aniListId <= 0) continue;
-            var person = await _unitOfWork.PersonRepository.GetPersonByAniListId(aniListId);
-            if (person == null || string.IsNullOrEmpty(staff.ImageUrl) ||
-                !string.IsNullOrEmpty(person.CoverImage) || staff.ImageUrl.EndsWith("default.jpg")) continue;
+            var hardcoverId = ExternalIdParser.GetHardcoverStaffId(staff.Url);
+
+            if (aniListId > 0 && staff.ImageUrl.EndsWith("default.jpg")) continue;
+
+            Person? person = null;
+
+            if (aniListId > 0)
+            {
+                person = await _unitOfWork.PersonRepository.GetPersonByAniListId(aniListId);
+            }
+
+            if (person == null && !string.IsNullOrEmpty(hardcoverId))
+            {
+                person = await _unitOfWork.PersonRepository.GetPersonByHardcoverId(hardcoverId);
+            }
+
+            if (person == null|| !string.IsNullOrEmpty(person.CoverImage)) continue;
 
             try
             {
                 await _coverDbService.SetPersonCoverByUrl(person, staff.ImageUrl, false, true);
                 await _auditService.LogPersonAsync(KavitaPlusEventType.PersonCoverUpdated, person.Id,
-                    new AuditLogPersonCoverParamsDto { PersonName = person.Name, AniListId = aniListId, ImageUrl = staff.ImageUrl });
+                    new AuditLogPersonCoverParamsDto { PersonName = person.Name, AniListId = aniListId, HardcoverId = hardcoverId, ImageUrl = staff.ImageUrl });
             }
             catch (Exception ex)
             {
@@ -2263,6 +2282,7 @@ public class ExternalMetadataService : IExternalMetadataService
             }
         }
     }
+
 
     private PublicationStatus DeterminePublicationStatus(Series series, List<Chapter> chapters, ExternalSeriesDetailDto externalMetadata)
     {

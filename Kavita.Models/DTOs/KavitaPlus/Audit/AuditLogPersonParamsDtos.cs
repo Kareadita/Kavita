@@ -11,5 +11,6 @@ public sealed record AuditLogPersonCoverParamsDto
 {
     public string PersonName { get; init; } = string.Empty;
     public int AniListId { get; init; }
+    public string? HardcoverId { get; init; }
     public string ImageUrl { get; init; } = string.Empty;
 }
