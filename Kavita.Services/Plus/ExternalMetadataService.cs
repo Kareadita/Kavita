@@ -362,6 +362,13 @@ public class ExternalMetadataService : IExternalMetadataService
         }
     }
 
+    /// <summary>
+    /// Searches against Kavita+ for potential matched series/standalone books.
+    /// </summary>
+    /// <remarks>Explicitly does not include external ids if query is non-empty</remarks>
+    /// <param name="dto"></param>
+    /// <param name="ct"></param>
+    /// <returns></returns>
     public async Task<IList<ExternalSeriesMatchDto>> MatchSeries(MatchSeriesDto dto, CancellationToken ct = default)
     {
         const SeriesIncludes includes = SeriesIncludes.Metadata | SeriesIncludes.ExternalMetadata | SeriesIncludes.Library;
@@ -382,7 +389,6 @@ public class ExternalMetadataService : IExternalMetadataService
         var potentialHardcoverSlug = ExternalIdParser.TryParseHardcoverHeader(query, out var hardcoverId)
             ? hardcoverId : null;
 
-        // TODO: Clean this logic up once we move to v3
         var potentialCbrSlug = query.Contains("comicbookroundup.com/") ? query : null;
 
         // If any ID was extracted (header syntax or URL), the raw query string is meaningless to the backend
@@ -414,14 +420,27 @@ public class ExternalMetadataService : IExternalMetadataService
             _ => string.Empty,
         };
 
+        // If the query is empty, then use external ids. Otherwise, use what is being queried
+        var isQueryEmpty = string.IsNullOrEmpty(query);
+
+        var fallbackAniListId = series.AniListId > 0 && isQueryEmpty
+            ? series.AniListId
+            : ExternalIdParser.GetAniListId(series.Metadata.WebLinks);
+        var fallbackMalId = series.MalId > 0 && isQueryEmpty
+            ? series.MalId
+            : ExternalIdParser.GetMalId(series.Metadata.WebLinks);
+        var fallbackMangaBakaId = series.MangaBakaId > 0 && isQueryEmpty
+            ? series.MangaBakaId
+            : ExternalIdParser.GetMangaBakaId(series.Metadata.WebLinks);
+
         var matchV3Request = new MatchRequestV3Dto
         {
-            AniListId = potentialAnilistId ?? ExternalIdParser.GetAniListId(series.Metadata.WebLinks),
-            MalId = potentialMalId ?? ExternalIdParser.GetMalId(series.Metadata.WebLinks),
+            AniListId = potentialAnilistId ?? fallbackAniListId,
+            MalId = potentialMalId ?? fallbackMalId,
             HardcoverId = dto.IsStandAlone ? ExternalIdParser.GetHardcoverBookId(series.Metadata.WebLinks) : ExternalIdParser.GetHardcoverSeriesId(series.Metadata.WebLinks),
             Slug = slug,
             CbrId = null,
-            MangabakaId = potentialMangabakaId > 0 ? potentialMangabakaId : ExternalIdParser.GetMangaBakaId(series.Metadata.WebLinks),
+            MangabakaId = potentialMangabakaId > 0 ? potentialMangabakaId : fallbackMangaBakaId,
             IsStandAlone = dto.IsStandAlone,
             Provider = series.Library.MetadataProvider,
             SeriesName = series.Name,
