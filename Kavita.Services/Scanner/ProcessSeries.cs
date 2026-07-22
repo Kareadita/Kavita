@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using System.Linq;
+using System.Net;
 using System.Threading.Tasks;
 using Hangfire;
 using Kavita.API.Database;
@@ -252,28 +253,79 @@ public class ProcessSeries(
 
     private async Task ReportDuplicateSeriesLookup(Library library, ParserInfo firstInfo, Exception ex)
     {
-        var seriesCollisions = await unitOfWork.SeriesRepository.GetAllSeriesByAnyNameAsync(firstInfo.LocalizedSeries, string.Empty, library.Id, firstInfo.Format);
+        // Re-run the same lookup args that GetFullSeriesByAnyName used so the report reflects the real collision set.
+        var seriesCollisions = await unitOfWork.SeriesRepository.GetAllSeriesByAnyNameAsync(
+            firstInfo.Series, firstInfo.LocalizedSeries, library.Id, firstInfo.Format);
 
-        seriesCollisions = seriesCollisions.Where(collision =>
-            collision.Name != firstInfo.Series || collision.LocalizedName != firstInfo.LocalizedSeries).ToList();
+        var normalizedSeries = firstInfo.Series.ToNormalized();
+        var normalizedLocalized = firstInfo.LocalizedSeries.ToNormalized();
 
-        if (seriesCollisions.Count > 1)
+        if (seriesCollisions.Count == 0)
         {
-            var firstCollision = seriesCollisions[0];
-            var secondCollision = seriesCollisions[1];
+            // The lookup threw but the collision can't be reproduced
+            logger.LogError(ex,
+                "[ScannerService] Series lookup for {SeriesName} (normalized: {NormalizedName}) in Library {LibraryName} returned multiple matches, but the collision could not be reproduced for reporting",
+                firstInfo.Series.Sanitize(), normalizedSeries.Sanitize(), library.Name.Sanitize());
+            return;
+        }
 
-            var tableRows = $"<tr><td>Name: {firstCollision.Name}</td><td>Name: {secondCollision.Name}</td></tr>" +
-                            $"<tr><td>Localized: {firstCollision.LocalizedName}</td><td>Localized: {secondCollision.LocalizedName}</td></tr>" +
-                            $"<tr><td>Filename: {Parser.NormalizePath(firstCollision.FolderPath)}</td><td>Filename: {Parser.NormalizePath(secondCollision.FolderPath)}</td></tr>";
+        var rows = string.Join(string.Empty, seriesCollisions.Select(collision =>
+        {
+            var matched = DescribeMatchedFields(collision, normalizedSeries, normalizedLocalized);
+            return "<tr>" +
+                   $"<td>{WebUtility.HtmlEncode(collision.Name)}</td>" +
+                   $"<td>{WebUtility.HtmlEncode(collision.LocalizedName)}</td>" +
+                   $"<td>{WebUtility.HtmlEncode(collision.OriginalName)}</td>" +
+                   $"<td>{WebUtility.HtmlEncode(Parser.NormalizePath(collision.FolderPath))}</td>" +
+                   $"<td>{WebUtility.HtmlEncode(matched)}</td>" +
+                   "</tr>";
+        }));
 
-            var htmlTable = $"<table class='table table-striped'><thead><tr><th>Series 1</th><th>Series 2</th></tr></thead><tbody>{string.Join(string.Empty, tableRows)}</tbody></table>";
+        var explanation =
+            $"<p>The folder parsed as series <strong>{WebUtility.HtmlEncode(firstInfo.Series)}</strong> " +
+            $"(normalized to <code>{WebUtility.HtmlEncode(normalizedSeries)}</code>) matches {seriesCollisions.Count} " +
+            $"existing series in library <strong>{WebUtility.HtmlEncode(library.Name)}</strong>. " +
+            "Kavita cannot tell which one to update, so this folder was skipped.</p>";
 
-            logger.LogError(ex, "[ScannerService] Scanner found a Series {SeriesName} which matched another Series {LocalizedName} in a different folder parallel to Library {LibraryName} root folder. This is not allowed. Please correct, scan will abort",
-                firstInfo.Series, firstInfo.LocalizedSeries, library.Name);
+        const string remedy = "<p>To fix this, make the series names unambiguous: rename one of the folders, set a distinct Series or " +
+                              "LocalizedSeries (e.g. via ComicInfo.xml), or lock the series name on the correct entry. Then rescan the library.</p>";
 
-            await eventHub.SendMessageAsync(MessageFactory.Error,
-                MessageFactory.ErrorEvent($"Library {library.Name} Series collision on {firstInfo.Series}",
-                    htmlTable));
+        var htmlTable =
+            "<table class='table table-striped'><thead><tr>" +
+            "<th>Name</th><th>Localized</th><th>Original</th><th>Folder</th><th>Matched On</th>" +
+            $"</tr></thead><tbody>{rows}</tbody></table>";
+
+        logger.LogError(ex,
+            "[ScannerService] Series {SeriesName} (normalized: {NormalizedName}) in Library {LibraryName} collides with {Count} existing series on the same normalized name. This folder was skipped; please disambiguate and rescan",
+            firstInfo.Series.Sanitize(), normalizedSeries.Sanitize(), library.Name.Sanitize(), seriesCollisions.Count);
+
+        await eventHub.SendMessageAsync(MessageFactory.Error,
+            MessageFactory.ErrorEvent($"Series collision on \"{firstInfo.Series}\" in library {library.Name}",
+                explanation + remedy + htmlTable));
+    }
+
+    /// <summary>
+    /// Describes which of a colliding series' normalized columns matched the parsed series/localized name, including
+    /// the normalized value that collided, so the user can see why Kavita treats the entries as the same series.
+    /// </summary>
+    private static string DescribeMatchedFields(Series collision, string normalizedSeries, string normalizedLocalized)
+    {
+        var matches = new List<string>();
+
+        Check("Name", collision.NormalizedName);
+        Check("Localized", collision.NormalizedLocalizedName);
+        Check("Original", collision.NormalizedOriginalName);
+
+        return matches.Count == 0 ? "(normalized variant)" : string.Join(", ", matches);
+
+        void Check(string columnLabel, string? normalizedValue)
+        {
+            if (string.IsNullOrEmpty(normalizedValue)) return;
+            if (normalizedValue == normalizedSeries ||
+                (!string.IsNullOrEmpty(normalizedLocalized) && normalizedValue == normalizedLocalized))
+            {
+                matches.Add($"{columnLabel} = \"{normalizedValue}\"");
+            }
         }
     }
 
