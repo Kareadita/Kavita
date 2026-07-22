@@ -533,6 +533,7 @@ public class Startup
                     await new ManualMigrationOAuthMigration().RunAsync(dataContext, logger);
                     await new ManualMigrateRelationshipAuditHistory().RunAsync(dataContext, logger);
                     await new ManualMigrationSetDefaultMetadataProvidersForLibrary().RunAsync(dataContext, logger);
+                    await new ManualMigrateReadLastSmartFilterComparison().RunAsync(dataContext, logger);
 
                     #endregion
 
