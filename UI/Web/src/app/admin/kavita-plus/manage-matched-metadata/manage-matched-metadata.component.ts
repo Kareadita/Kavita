@@ -81,6 +81,7 @@ export class ManageMatchedMetadataComponent implements OnInit {
   ngOnInit() {
 
     this.libraryService.getLibraryTypesWithMetadataSupport().pipe(
+      takeUntilDestroyed(this.destroyRef),
       tap(types => this.metadataEnabledLibraryTypes.set(types))
     ).subscribe();
 

@@ -194,6 +194,7 @@ export class LibrarySettingsModalComponent implements OnInit {
     this.cdRef.markForCheck();
 
     this.libraryService.getLibraryTypesWithScrobbleSupport().pipe(
+      takeUntilDestroyed(this.destroyRef),
       tap(libraryTypes => {
         this.scrobbleEnabledLibraries.set(libraryTypes);
 

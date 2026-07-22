@@ -769,7 +769,7 @@ public class CoverDbService : ICoverDbService
     public async Task SetVolumeCoverByUrl(Volume volume, string url, bool fromBase64 = true,
         bool chooseBetterImage = false, CancellationToken ct = default)
     {
-        // TODO: See what we can refactor wtih SetChapterCoverByUrl
+        // TODO: See what we can refactor with SetChapterCoverByUrl
         if (!string.IsNullOrEmpty(url))
         {
             var tempDirectory = _directoryService.TempDirectory;

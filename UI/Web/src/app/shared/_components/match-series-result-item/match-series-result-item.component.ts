@@ -9,7 +9,6 @@ import {ScrobbleProviderTagBadgeComponent} from "../scrobble-provider-tag-badge/
 import {MatchStatusDotComponent} from "../match-status-dot/match-status-dot.component";
 import {ConfidenceChipComponent} from "../confidence-chip/confidence-chip.component";
 import {SafeUrlPipe} from "../../../_pipes/safe-url.pipe";
-import {TagBadgeComponent} from "../../tag-badge/tag-badge.component";
 import {ExternalEditionDto} from "../../../_models/series-detail/external-series-detail";
 
 @Component({
