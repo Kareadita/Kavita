@@ -211,7 +211,29 @@ export class MatchSeriesModalComponent implements OnInit {
     return `${item.series.provider}_${item.series.mangabakaId}_${item.series.hardcoverId}_${item.series.cbrId}_${item.series.aniListId}_${item.series.malId}`;
   }
 
-  selectItem(item: ExternalSeriesMatch, edition: ExternalEditionDto | null) {
+  private findDefaultEdition(item: ExternalSeriesMatch): ExternalEditionDto | null {
+    return item.series.editions?.find(e =>
+      e.title?.trim().toLowerCase().endsWith('standard edition') &&
+      e.format?.trim().toLowerCase() === 'digital') ?? null;
+  }
+
+  selectRow(item: ExternalSeriesMatch) {
+    const current = this.selectedItem();
+    if (current && this.matchKey(current) === this.matchKey(item)) return;
+
+    this.selectedItem.set(item);
+    this.selectedEdition.set(this.findDefaultEdition(item));
+  }
+
+  selectEdition(item: ExternalSeriesMatch, edition: ExternalEditionDto) {
+    const current = this.selectedItem();
+    const sameItem = !!current && this.matchKey(current) === this.matchKey(item);
+
+    if (sameItem && this.selectedEdition()?.id === edition.id) {
+      this.selectedEdition.set(null);
+      return;
+    }
+
     this.selectedItem.set(item);
     this.selectedEdition.set(edition);
   }

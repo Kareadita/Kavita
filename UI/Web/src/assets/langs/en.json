@@ -1776,7 +1776,7 @@
     "match-series-modal": {
         "title-prefix": "Match",
         "in-kavita": "In Kavita",
-        "description": "Pick a match to rewire Kavita+ metadata and regenerate scrobble events.",
+        "description": "Pick a match to rewire Kavita+ metadata and regenerate scrobble events. Click an edition to get Volume/Chapter level metadata (if applicable).",
         "dont-match-hint": "Use \"Do not match\" to opt this series out entirely.",
         "try": "Try",
         "search": "Search",

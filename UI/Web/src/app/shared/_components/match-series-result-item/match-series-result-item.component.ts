@@ -73,7 +73,6 @@ export class MatchSeriesResultItemComponent {
   protected chooseEdition(edition: ExternalEditionDto, event: Event) {
     event.stopPropagation();
 
-    this.selected.emit(this.item());
     this.editionSelected.emit({item: this.item(), edition});
   }
 

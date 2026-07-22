@@ -191,8 +191,8 @@
               [isSelected]="!!selectedItem() && matchKey(item) === matchKey(selectedItem()!)"
               [showSynonyms]="true"
               [query]="lastQuery()"
-              (selected)="selectItem($event, null)"
-              (editionSelected)="selectItem($event.item, $event.edition)"
+              (selected)="selectRow($event)"
+              (editionSelected)="selectEdition($event.item, $event.edition)"
             />
           }
         }
