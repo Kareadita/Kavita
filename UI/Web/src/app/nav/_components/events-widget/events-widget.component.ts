@@ -41,6 +41,8 @@ export class EventsWidgetComponent implements OnInit {
   readonly infos = signal<InfoEvent[]>([]);
   readonly activeReadingSessions = signal<Set<number>>(new Set());
 
+  readonly isConnected = this.messageHub.isConnectedSignal;
+
   /**
    * Does not include active reading sessions
    */

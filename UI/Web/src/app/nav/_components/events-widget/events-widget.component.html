@@ -124,7 +124,11 @@
       }
 
       @if (!downloadService.hasActiveDownloads() && activeEvents() === 0 && readingSessionCount === 0) {
-        <li class="list-group-item dark-menu-item">{{t('no-data')}}</li>
+        @if (isConnected()) {
+          <li class="list-group-item dark-menu-item">{{t('no-data')}}</li>
+        } @else {
+          <li class="list-group-item dark-menu-item">{{t('not-connected')}}</li>
+        }
       }
     </ul>
   </ng-template>

@@ -3044,7 +3044,8 @@
         "left-to-process": "Left to Process: {{leftToProcess}} / {{totalToProcess}}",
         "download-in-queue": "{{num}} downloads in Queue",
         "reading-now": "{{num}} reading now",
-        "downloads-active": "{{count}} download(s) in progress"
+        "downloads-active": "{{count}} download(s) in progress",
+        "not-connected": "Not connected, try refreshing"
     },
 
     "download-queue-drawer": {
