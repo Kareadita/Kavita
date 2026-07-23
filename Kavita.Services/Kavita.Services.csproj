@@ -12,6 +12,10 @@
       <ProjectReference Include="..\Kavita.Models\Kavita.Models.csproj" />
     </ItemGroup>
 
+    <ItemGroup>
+      <InternalsVisibleTo Include="Kavita.Services.Tests" />
+    </ItemGroup>
+
   <ItemGroup>
     <PackageReference Include="CsvHelper" Version="33.1.0" />
     <PackageReference Include="MailKit" Version="4.17.0" />

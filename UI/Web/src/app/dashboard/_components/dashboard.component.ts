@@ -156,7 +156,7 @@ export class DashboardComponent {
           filter(providers => providers.length > 0),
           map(providers => providers.map(this.scrobbleProviderNamePipe.transform).join(', ')),
           switchMap(providerNames => this.toastr.error(providerNames, translate('toasts.tokens-expired')).onTap),
-          tap(() => this.router.navigateByUrl('/settings#' + SettingsTabId.ScrobbleSettings).catch(console.error))
+          tap(() => this.router.navigateByUrl('/settings#' + SettingsTabId.Connections).catch(console.error))
         ).subscribe();
     }
   }

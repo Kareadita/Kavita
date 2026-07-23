@@ -36,6 +36,21 @@ internal sealed class SeriesCollection
     public int TotalItems { get; set; }
 }
 
+/// <summary>
+/// Outcome of linking an upstream stack's series to a collection
+/// </summary>
+internal sealed class CollectionLinkResult
+{
+    /// <summary>
+    /// Number of source series that could not be found on the server
+    /// </summary>
+    public int MissingCount { get; set; }
+    /// <summary>
+    /// A &lt;br/&gt; separated string of anchor links for every missing series
+    /// </summary>
+    public string MissingSeries { get; set; } = string.Empty;
+}
+
 public class SmartCollectionSyncService(
     IUnitOfWork unitOfWork,
     ILogger<SmartCollectionSyncService> logger,
@@ -156,80 +171,14 @@ public class SmartCollectionSyncService(
         await eventHub.SendMessageAsync(MessageFactory.NotificationProgress,
             MessageFactory.SmartCollectionProgressEvent(info.Title, string.Empty, 0, info.TotalItems, ProgressEventType.Started), ct: ct);
 
-        var missingCount = 0;
-        var missingSeries = new StringBuilder();
-        var counter = -1;
-        foreach (var seriesInfo in info.Series.OrderBy(s => s.SeriesName))
-        {
-            counter++;
-            try
-            {
-                // Normalize series name and localized name
-                var normalizedSeriesName = seriesInfo.SeriesName?.ToNormalized();
-                var normalizedLocalizedSeriesName = seriesInfo.LocalizedSeriesName?.ToNormalized();
-
-                // Search for existing series in the collection
-                var formats = seriesInfo.PlusMediaFormat.GetMangaFormats();
-                var existingSeries = collection.Items.FirstOrDefault(s =>
-                    (s.Name.ToNormalized() == normalizedSeriesName ||
-                     s.NormalizedName == normalizedSeriesName ||
-                     s.LocalizedName.ToNormalized() == normalizedLocalizedSeriesName ||
-                     s.NormalizedLocalizedName == normalizedLocalizedSeriesName ||
-
-                     s.NormalizedName == normalizedLocalizedSeriesName ||
-                     s.NormalizedLocalizedName == normalizedSeriesName)
-                    && formats.Contains(s.Format));
-
-                logger.LogDebug("Trying to find {SeriesName} with formats ({Formats}) within Kavita for linking. Found: {ExistingSeriesName} ({ExistingSeriesId})",
-                    seriesInfo.SeriesName, formats, existingSeries?.Name, existingSeries?.Id);
-
-                if (existingSeries != null)
-                {
-                    await eventHub.SendMessageAsync(MessageFactory.NotificationProgress,
-                        MessageFactory.SmartCollectionProgressEvent(info.Title, seriesInfo.SeriesName, counter, info.TotalItems, ProgressEventType.Updated), ct: ct);
-                    continue;
-                }
-
-                // Series not found in the collection, try to find it in the server
-                var newSeries = await unitOfWork.SeriesRepository.GetSeriesFromExternalMetadata(
-                    new[] { seriesInfo.SeriesName, seriesInfo.LocalizedSeriesName },
-                    formats, collection.AppUserId, ct: ct);
-
-                collection.Items ??= new List<Series>();
-                if (newSeries != null)
-                {
-                    // Add the new series to the collection
-                    collection.Items.Add(newSeries);
-                    await auditService.LogCollectionAsync(KavitaPlusEventType.CollectionItemAdded, collection.Id,
-                        new AuditLogCollectionItemParamsDto { CollectionName = collection.Title, SeriesName = newSeries.Name, SeriesId = newSeries.Id, Url = collection.SourceUrl }, userId: collection.AppUserId, ct: ct);
-                }
-                else
-                {
-                    logger.LogDebug("{Series} not found in the server", seriesInfo.SeriesName);
-                    missingCount++;
-                    missingSeries.Append(
-                        $"<a href='{ScrobblingService.MalWeblinkWebsite}{seriesInfo.MalId}' target='_blank' rel='noopener noreferrer'>{seriesInfo.SeriesName}</a>");
-                    missingSeries.Append("<br/>");
-                }
-            }
-            catch (Exception ex)
-            {
-                logger.LogError(ex, "An exception occured when linking up a series to the collection. Skipping");
-                missingCount++;
-                missingSeries.Append(
-                    $"<a href='{ScrobblingService.MalWeblinkWebsite}{seriesInfo.MalId}' target='_blank' rel='noopener noreferrer'>{seriesInfo.SeriesName}</a>");
-                missingSeries.Append("<br/>");
-            }
-
-            await eventHub.SendMessageAsync(MessageFactory.NotificationProgress,
-                MessageFactory.SmartCollectionProgressEvent(info.Title, seriesInfo.SeriesName, counter, info.TotalItems, ProgressEventType.Updated), ct: ct);
-        }
+        var linkResult = await LinkSeriesToCollection(collection, info, ct);
+        var missingCount = linkResult.MissingCount;
 
         // At this point, all series in the info have been checked and added if necessary
         collection.LastSyncUtc = DateTime.UtcNow.Truncate(TimeSpan.TicksPerHour);
         collection.TotalSourceCount = info.TotalItems;
         collection.Summary = info.Summary;
-        collection.MissingSeriesFromSource = missingSeries.ToString();
+        collection.MissingSeriesFromSource = linkResult.MissingSeries;
 
         unitOfWork.CollectionTagRepository.Update(collection);
 
@@ -268,6 +217,93 @@ public class SmartCollectionSyncService(
     }
 
 
+
+    /// <summary>
+    /// For each series in the upstream stack, find the matching Kavita series and link it to the collection if it
+    /// isn't already present. Series that can't be found on the server are collected into the returned result.
+    /// </summary>
+    internal async Task<CollectionLinkResult> LinkSeriesToCollection(AppUserCollection collection, SeriesCollection info, CancellationToken ct = default)
+    {
+        var result = new CollectionLinkResult();
+        var missingSeries = new StringBuilder();
+        var counter = -1;
+
+        collection.Items ??= new List<Series>();
+
+        foreach (var seriesInfo in info.Series.OrderBy(s => s.SeriesName))
+        {
+            counter++;
+            try
+            {
+                var match = await MatchSeries(collection, seriesInfo, ct);
+
+                logger.LogDebug("Trying to find {SeriesName} ({Format}) within Kavita for linking. Found: {ExistingSeriesName} ({ExistingSeriesId})",
+                    seriesInfo.SeriesName, seriesInfo.PlusMediaFormat, match?.Name, match?.Id);
+
+                if (match == null)
+                {
+                    logger.LogDebug("{Series} not found in the server", seriesInfo.SeriesName);
+                    result.MissingCount++;
+                    AppendMissingSeries(missingSeries, seriesInfo);
+                }
+                else if (IsAlreadyInCollection(collection, match))
+                {
+                    logger.LogDebug("{SeriesName} already present in collection {CollectionName}", match.Name, collection.Title);
+                }
+                else
+                {
+                    collection.Items.Add(match);
+                    await auditService.LogCollectionAsync(KavitaPlusEventType.CollectionItemAdded, collection.Id,
+                        new AuditLogCollectionItemParamsDto { CollectionName = collection.Title, SeriesName = match.Name, SeriesId = match.Id, Url = collection.SourceUrl },
+                        userId: collection.AppUserId, ct: ct);
+                }
+            }
+            catch (Exception ex)
+            {
+                logger.LogError(ex, "An exception occured when linking up a series to the collection. Skipping");
+                result.MissingCount++;
+                AppendMissingSeries(missingSeries, seriesInfo);
+            }
+
+            await eventHub.SendMessageAsync(MessageFactory.NotificationProgress,
+                MessageFactory.SmartCollectionProgressEvent(info.Title, seriesInfo.SeriesName, counter, info.TotalItems, ProgressEventType.Updated), ct: ct);
+        }
+
+        result.MissingSeries = missingSeries.ToString();
+        return result;
+    }
+
+    /// <summary>
+    /// Resolve the Kavita series that corresponds to an upstream stack entry. The <paramref name="seriesInfo"/> already
+    /// carries the external ids, so id-priority matching is used first with a normalized name fallback.
+    /// </summary>
+    private async Task<Series?> MatchSeries(AppUserCollection collection, ExternalMetadataIdsDto seriesInfo, CancellationToken ct)
+    {
+        var formats = seriesInfo.PlusMediaFormat.GetMangaFormats();
+        var names = new[] { seriesInfo.SeriesName, seriesInfo.LocalizedSeriesName }
+            .Where(s => !string.IsNullOrEmpty(s))
+            .Select(s => s!)
+            .ToList();
+
+        return await unitOfWork.SeriesRepository.GetSeriesFromExternalMetadata(
+            names, formats, collection.AppUserId, seriesInfo, SeriesIncludes.None, ct);
+    }
+
+    private static bool IsAlreadyInCollection(AppUserCollection collection, Series match)
+    {
+        return collection.Items.Any(s =>
+            s.Id == match.Id
+            || (s.Format == match.Format
+                && (s.NormalizedName == match.NormalizedName
+                    || s.NormalizedLocalizedName == match.NormalizedLocalizedName)));
+    }
+
+    private static void AppendMissingSeries(StringBuilder builder, ExternalMetadataIdsDto seriesInfo)
+    {
+        builder.Append(
+            $"<a href='{ScrobblingService.MalWeblinkWebsite}{seriesInfo.MalId}' target='_blank' rel='noopener noreferrer'>{seriesInfo.SeriesName}</a>");
+        builder.Append("<br/>");
+    }
 
     private static long GetStackId(string url)
     {

@@ -16,11 +16,16 @@ import {ProviderImagePipe} from "../../_pipes/provider-image.pipe";
 import {SeriesFilterField} from "../../_models/metadata/v2/series-filter-field";
 import {AgeRating} from "../../_models/metadata/age-rating";
 import {AgeRatingImageComponent} from "../age-rating-image/age-rating-image.component";
+import {
+  OffCanvasResizeComponent,
+  ResizeMode
+} from "../../shared/_components/off-canvas-resize/off-canvas-resize.component";
+import {BreakpointService} from "../../_services/breakpoint.service";
 
 @Component({
     selector: 'app-series-preview-drawer',
   imports: [TranslocoDirective, ImageComponent, LoadingComponent, MetadataDetailComponent,
-    PublicationStatusPipe, ReadMoreComponent, NgbTooltip, NgOptimizedImage, ProviderImagePipe, AgeRatingImageComponent],
+    PublicationStatusPipe, ReadMoreComponent, NgbTooltip, NgOptimizedImage, ProviderImagePipe, AgeRatingImageComponent, OffCanvasResizeComponent],
     templateUrl: './series-preview-drawer.component.html',
     styleUrls: ['./series-preview-drawer.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush
@@ -31,6 +36,7 @@ export class SeriesPreviewDrawerComponent implements OnInit {
   private readonly seriesService = inject(SeriesService);
   private readonly imageService = inject(ImageService);
   private readonly actionService = inject(ActionService);
+  protected readonly breakpointService = inject(BreakpointService);
 
   protected readonly FilterField = SeriesFilterField;
 
@@ -118,4 +124,6 @@ export class SeriesPreviewDrawerComponent implements OnInit {
   }
 
   protected readonly AgeRating = AgeRating;
+  protected readonly ResizeMode = ResizeMode;
+  protected readonly window = window;
 }

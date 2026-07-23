@@ -1375,10 +1375,11 @@ public class SeriesRepository(DataContext context, IMapper mapper) : ISeriesRepo
     {
         var libraryIds = context.AppUser.GetLibraryIdsForUser(userId);
 
-        // Prioritize direct id matches on ExternalSeriesMetadata
+        // Prioritize direct id matches
         var aniListId = dto?.AniListId ?? 0;
         var malId = dto?.MalId ?? 0;
         var mangaBakaId = dto?.MangabakaId ?? 0;
+        var hardcoverId = dto?.HardcoverId ?? 0;
 
         if (aniListId > 0 || malId > 0 || mangaBakaId > 0)
         {
@@ -1386,9 +1387,11 @@ public class SeriesRepository(DataContext context, IMapper mapper) : ISeriesRepo
                 .Where(s => libraryIds.Contains(s.LibraryId))
                 .Where(s => formats.Contains(s.Format))
                 .Where(s =>
-                    (aniListId > 0 && s.ExternalSeriesMetadata.AniListId == aniListId)
-                    || (malId > 0 && s.ExternalSeriesMetadata.MalId == malId)
-                    || (mangaBakaId > 0 && s.ExternalSeriesMetadata.MangabakaId == mangaBakaId))
+                    (aniListId > 0 && s.AniListId == aniListId)
+                    || (malId > 0 && s.MalId == malId)
+                    || (mangaBakaId > 0 && s.MangaBakaId == mangaBakaId)
+                    || (hardcoverId > 0 && s.HardcoverId == hardcoverId)
+                    )
                 .Includes(includes)
                 .FirstOrDefaultAsync(ct);
 
