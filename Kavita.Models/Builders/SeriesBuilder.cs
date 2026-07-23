@@ -26,6 +26,7 @@ public class SeriesBuilder : API.Helpers.Builders.IEntityBuilder<Series>
             NormalizedLocalizedName = name.ToNormalized(),
 
             OriginalName = name,
+            NormalizedOriginalName = name.ToNormalized(),
             SortName = name,
             NormalizedName = name.ToNormalized(),
             Metadata = new SeriesMetadataBuilder()
@@ -128,6 +129,12 @@ public class SeriesBuilder : API.Helpers.Builders.IEntityBuilder<Series>
             TargetSeriesId = targetSeriesId
         });
 
+        return this;
+    }
+
+    public SeriesBuilder WithMangaBakaId(int id)
+    {
+        _series.MangaBakaId = id;
         return this;
     }
 }

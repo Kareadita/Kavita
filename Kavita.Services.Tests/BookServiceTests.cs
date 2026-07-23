@@ -106,6 +106,40 @@ public class BookServiceTests
         Assert.Equal("Georges Bizet \\(1838-1875\\)", comicInfo.Writer);
     }
 
+    [Fact]
+    public void GetCoverImage_Pdf_ProducesValidImage()
+    {
+        // End-to-end coverage for the NetVips GetPdfPage migration: Docnet renders page 0 to raw
+        // BGRA bytes, GetPdfPage reorders to RGBA and encodes a PNG, then WriteCoverThumbnail
+        // (NetVips) thumbnails it. A malformed intermediate PNG would throw or yield an empty file.
+        var testDirectory = Path.Join(Directory.GetCurrentDirectory(), "../../../Test Data/BookService");
+        var document = Path.Join(testDirectory, "test.pdf");
+        var outputDirectory = Path.Join(Path.GetTempPath(), $"PdfCoverOutput_{Guid.NewGuid():N}");
+        Directory.CreateDirectory(outputDirectory);
+
+        try
+        {
+            var coverFile = _bookService.GetCoverImage(document, "test_pdf_cover", outputDirectory, EncodeFormat.PNG);
+
+            Assert.False(string.IsNullOrEmpty(coverFile), "Expected a cover image to be produced for the PDF");
+
+            var fullPath = Path.Join(outputDirectory, coverFile);
+            Assert.True(File.Exists(fullPath), $"Cover image was not written to {fullPath}");
+
+            // Reload the written cover and confirm it is a valid, non-empty raster.
+            using var image = NetVips.Image.NewFromFile(fullPath);
+            Assert.True(image.Width > 0 && image.Height > 0,
+                $"Expected a non-empty cover image, got {image.Width}x{image.Height}");
+        }
+        finally
+        {
+            if (Directory.Exists(outputDirectory))
+            {
+                Directory.Delete(outputDirectory, recursive: true);
+            }
+        }
+    }
+
     //[Fact]
     public void ShouldUsePdfInfoDict()
     {

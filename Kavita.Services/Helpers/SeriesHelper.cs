@@ -17,11 +17,7 @@ public static class SeriesHelper
     /// <returns></returns>
     public static bool FindSeries(Series series, ParsedSeries parsedInfoKey)
     {
-        return (series.NormalizedName.Equals(parsedInfoKey.NormalizedName)
-                || (series.LocalizedName != null && series.LocalizedName.ToNormalized().Equals(parsedInfoKey.NormalizedName))
-                || (series.OriginalName != null && series.OriginalName.ToNormalized().Equals(parsedInfoKey.NormalizedName))
-               )
-               && (series.Format == parsedInfoKey.Format || series.Format == MangaFormat.Unknown);
+        return series.MatchesParsedSeries(parsedInfoKey);
     }
 
     /// <summary>

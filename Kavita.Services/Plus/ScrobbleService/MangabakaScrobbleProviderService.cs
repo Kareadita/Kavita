@@ -23,7 +23,7 @@ public class MangabakaScrobbleProviderService(ILogger<MangabakaScrobbleProviderS
     protected override IReadOnlyList<ScrobbleEventType> SupportedEvents =>
     [
         ScrobbleEventType.ChapterRead, ScrobbleEventType.AddWantToRead, ScrobbleEventType.RemoveWantToRead,
-        ScrobbleEventType.ScoreUpdated, ScrobbleEventType.ReadStatusUpdate
+        ScrobbleEventType.ScoreUpdated, ScrobbleEventType.ReadStatusUpdate, ScrobbleEventType.Review
     ];
     protected override void SetScrobbleIds(ScrobbleEvent evt, Series series)
     {

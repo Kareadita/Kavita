@@ -89,4 +89,6 @@ export interface Series extends IHasCover, IHasReadingTime, IHasProgress, IHasMe
    * Min number of reads across all chapters
    */
   totalReads: number;
+  isStandAlone: boolean;
+  mangaBakaEditionId: string;
 }

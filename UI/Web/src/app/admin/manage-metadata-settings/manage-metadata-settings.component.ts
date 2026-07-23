@@ -67,6 +67,7 @@ export class ManageMetadataSettingsComponent implements OnInit {
       this.settingsForm.addControl('enableExtendedMetadataProcessing', new FormControl(settings.enableExtendedMetadataProcessing, []));
       this.settingsForm.addControl('enableSummary', new FormControl(settings.enableSummary, []));
       this.settingsForm.addControl('enableLocalizedName', new FormControl(settings.enableLocalizedName, []));
+      this.settingsForm.addControl('enableName', new FormControl(settings.enableName, []));
       this.settingsForm.addControl('enablePublicationStatus', new FormControl(settings.enablePublicationStatus, []));
       this.settingsForm.addControl('enableRelations', new FormControl(settings.enableRelationships, []));
       this.settingsForm.addControl('enableGenres', new FormControl(settings.enableGenres, []));
@@ -82,6 +83,9 @@ export class ManageMetadataSettingsComponent implements OnInit {
       this.settingsForm.addControl('enableChapterReleaseDate', new FormControl(settings.enableChapterReleaseDate, []));
       this.settingsForm.addControl('enableChapterPublisher', new FormControl(settings.enableChapterPublisher, []));
       this.settingsForm.addControl('enableChapterCoverImage', new FormControl(settings.enableChapterCoverImage, []));
+
+
+      this.settingsForm.addControl('enableVolumeCoverImage', new FormControl(settings.enableVolumeCoverImage, []));
 
       this.settingsForm.addControl('firstLastPeopleNaming', new FormControl((settings.firstLastPeopleNaming), []));
       this.settingsForm.addControl('personRoles', this.fb.group(

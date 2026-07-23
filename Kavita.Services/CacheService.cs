@@ -330,7 +330,7 @@ public class CacheService(
 
         var bookmarkDtos = await unitOfWork.UserRepository.GetBookmarkDtosForSeries(userId, seriesId, ct);
 
-        var files = (await bookmarkService.GetBookmarkFilesById(bookmarkDtos.Select(b => b.Id), ct)).ToList();
+        var files = (await bookmarkService.GetBookmarkFilesById(seriesId, bookmarkDtos.Select(b => b.Id), ct)).ToList();
         directoryService.CopyFilesToDirectory(files, destDirectory,
             Enumerable.Range(1, files.Count).Select(i => i + string.Empty).ToList());
 

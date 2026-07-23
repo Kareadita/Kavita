@@ -161,6 +161,10 @@ export enum EVENTS {
    * The K+ license info has updated
    */
   LicenseInfoUpdate = 'LicenseInfoUpdate',
+  /**
+   * The K+ Metadata for a series has been updated
+   */
+  ExternalMetadataUpdate = 'ExternalMetadataUpdate',
 }
 
 export interface Message<T> {
@@ -178,8 +182,9 @@ export class MessageHubService {
 
   private messagesSource = new ReplaySubject<Message<any>>(1);
   private onlineUsersSource = new BehaviorSubject<string[]>([]); // UserNames
+  private isConnectedSource =  new BehaviorSubject<boolean>(false);
 
-  /**
+    /**
    * Any events that come from the backend
    */
   public readonly messages$ = this.messagesSource.asObservable();
@@ -189,6 +194,9 @@ export class MessageHubService {
    */
   public onlineUsers$ = this.onlineUsersSource.asObservable();
   public readonly onlineUsersSignal = toSignal(this.onlineUsers$);
+
+
+  public readonly isConnectedSignal = toSignal(this.isConnectedSource);
 
   constructor() {}
 
@@ -215,9 +223,20 @@ export class MessageHubService {
       .withStatefulReconnect()
       .build();
 
-    this.hubConnection
-    .start()
-    .catch(err => console.error(err));
+    this.hubConnection.onreconnecting(() => this.isConnectedSource.next(false));
+    this.hubConnection.onreconnected(() => this.isConnectedSource.next(true));
+    this.hubConnection.onclose(() => this.isConnectedSource.next(false));
+
+    const started = this.hubConnection
+      .start()
+      .then(() => {
+        // Only report connected once the handshake actually resolves
+        this.isConnectedSource.next(true);
+      })
+      .catch(err => {
+        console.error(err);
+        this.isConnectedSource.next(false);
+      });
 
     this.hubConnection.on(EVENTS.OnlineUsers, (usernames: string[]) => {
       this.onlineUsersSource.next(usernames);
@@ -473,11 +492,21 @@ export class MessageHubService {
         payload: resp.body,
       });
     });
+
+    this.hubConnection.on(EVENTS.ExternalMetadataUpdate, (resp) => {
+      this.messagesSource.next({
+        event: EVENTS.ExternalMetadataUpdate,
+        payload: resp.body
+      });
+    });
+
+    return started;
   }
 
   stopHubConnection() {
     if (this.hubConnection) {
       this.hubConnection.stop().catch(err => console.error(err));
+      this.isConnectedSource.next(false);
     }
   }
 }

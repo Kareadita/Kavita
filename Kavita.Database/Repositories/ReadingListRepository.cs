@@ -266,9 +266,10 @@ public class ReadingListRepository(DataContext context, IMapper mapper) : IReadi
         bool includePromoted, CancellationToken ct = default)
     {
         var user = await context.AppUser.FirstAsync(u => u.Id == userId, ct);
+
         var query = context.ReadingList
-            .Where(l => l.AppUserId == userId || (includePromoted && l.Promoted ))
             .RestrictAgainstAgeRestriction(user.GetAgeRestriction())
+            .Where(l => l.AppUserId == userId || (includePromoted && l.Promoted ))
             .Where(l => l.Items.Any(i => i.SeriesId == seriesId))
             .AsSplitQuery()
             .OrderBy(l => l.Title)

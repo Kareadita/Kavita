@@ -27,6 +27,7 @@ public sealed record AuditLogMatchExternalIdsParamsDto
     public int AniListId { get; init; }
     public long MalId { get; init; }
     public long MangaBakaId { get; init; }
+    public string MangaBakaEditionId { get; set; }
     public int CbrId { get; init; }
     public int HardcoverId { get; init; }
 }

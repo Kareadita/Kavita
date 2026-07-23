@@ -24,5 +24,6 @@ public enum MetadataFieldChangeKind
     Title = 11,
     ReleaseDate = 12,
     ReleaseYear = 13,
-    LocalizedName = 14
+    LocalizedName = 14,
+    Name = 15
 }

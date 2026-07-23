@@ -298,6 +298,17 @@ public class PersonRepository(DataContext context, IMapper mapper) : IPersonRepo
             .FirstOrDefaultAsync(ct);
     }
 
+    public async Task<Person?> GetPersonByHardcoverId(string? hardcoverId, PersonIncludes includes = PersonIncludes.Aliases,
+        CancellationToken ct = default)
+    {
+        if (string.IsNullOrEmpty(hardcoverId)) return null;
+
+        return await context.Person
+            .Where(p => p.HardcoverId == hardcoverId)
+            .Includes(includes)
+            .FirstOrDefaultAsync(ct);
+    }
+
     public async Task<IList<PersonDto>> SearchPeople(string searchQuery,
         PersonIncludes includes = PersonIncludes.Aliases, CancellationToken ct = default)
     {

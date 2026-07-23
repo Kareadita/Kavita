@@ -9,17 +9,23 @@ import {RouterLink} from "@angular/router";
 import {DefaultDatePipe} from "../../_pipes/default-date.pipe";
 import {UtcToLocalTimePipe} from "../../_pipes/utc-to-local-time.pipe";
 import {SettingItemComponent} from "../../settings/_components/setting-item/setting-item.component";
+import {
+  OffCanvasResizeComponent,
+  ResizeMode
+} from "../../shared/_components/off-canvas-resize/off-canvas-resize.component";
+import {BreakpointService} from "../../_services/breakpoint.service";
 
 @Component({
   selector: 'app-smart-collection-drawer',
   imports: [
-      TranslocoDirective,
-      SafeHtmlPipe,
-      RouterLink,
-      DefaultDatePipe,
-      UtcToLocalTimePipe,
-      SettingItemComponent,
-      DecimalPipe
+    TranslocoDirective,
+    SafeHtmlPipe,
+    RouterLink,
+    DefaultDatePipe,
+    UtcToLocalTimePipe,
+    SettingItemComponent,
+    DecimalPipe,
+    OffCanvasResizeComponent
   ],
   templateUrl: './smart-collection-drawer.component.html',
   styleUrl: './smart-collection-drawer.component.scss',
@@ -27,6 +33,7 @@ import {SettingItemComponent} from "../../settings/_components/setting-item/sett
 })
 export class SmartCollectionDrawerComponent {
   private readonly activeOffcanvas = inject(NgbActiveOffcanvas);
+  protected readonly breakpointService = inject(BreakpointService);
 
   collection = input.required<UserCollection>();
   series = input.required<Series[]>();
@@ -34,4 +41,7 @@ export class SmartCollectionDrawerComponent {
   close() {
     this.activeOffcanvas.close();
   }
+
+  protected readonly ResizeMode = ResizeMode;
+  protected readonly window = window;
 }

@@ -66,6 +66,8 @@ public sealed record SeriesDto : IHasReadTimeEstimate, IHasCoverImage, IHasMetad
     public bool SortNameLocked { get; set; }
     /// <inheritdoc cref="API.Entities.Series.LocalizedNameLocked"/>
     public bool LocalizedNameLocked { get; set; }
+    /// <inheritdoc cref="API.Entities.Series.NameLocked"/>
+    public bool NameLocked { get; set; }
     /// <inheritdoc cref="API.Entities.Series.WordCount"/>
     public long WordCount { get; set; }
 
@@ -89,6 +91,8 @@ public sealed record SeriesDto : IHasReadTimeEstimate, IHasCoverImage, IHasMetad
     public bool DontMatch { get; set; }
     /// <inheritdoc cref="API.Entities.Series.IsBlacklisted"/>
     public bool IsBlacklisted { get; set; }
+    /// <inheritdoc cref="Kavita.Models.Entities.Series.IsStandAlone"/>
+    public bool IsStandAlone { get; set; }
     #endregion
 
     #region ColorScape
@@ -107,6 +111,7 @@ public sealed record SeriesDto : IHasReadTimeEstimate, IHasCoverImage, IHasMetad
     public long MetronId { get; set; }
     public string? ComicVineId { get; set; }
     public long MangaBakaId { get; set; }
+    public string MangaBakaEditionId { get; set; } = string.Empty;
     public int CbrId { get; set; }
 
     #endregion

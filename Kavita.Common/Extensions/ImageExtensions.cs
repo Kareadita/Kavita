@@ -2,16 +2,12 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using SixLabors.ImageSharp;
-using SixLabors.ImageSharp.PixelFormats;
-using SixLabors.ImageSharp.Processing;
-using Image = SixLabors.ImageSharp.Image;
+using NetVips;
 
 namespace Kavita.Common.Extensions;
 
 public static class ImageExtensions
 {
-
     /// <summary>
     /// Structure to hold various image quality metrics
     /// </summary>
@@ -26,7 +22,6 @@ public static class ImageExtensions
         public double NoiseLevel { get; set; }
     }
 
-
     /// <summary>
     /// Calculate a similarity score (0-1f) based on resolution difference and MSE.
     /// </summary>
@@ -40,9 +35,8 @@ public static class ImageExtensions
             throw new FileNotFoundException("One or both image files do not exist");
         }
 
-        // Load both images as Rgba32 (consistent with the rest of the code)
-        using var img1 = Image.Load<Rgba32>(imagePath1);
-        using var img2 = Image.Load<Rgba32>(imagePath2);
+        using var img1 = LoadRgb(imagePath1);
+        using var img2 = LoadRgb(imagePath2);
 
         // Calculate resolution difference factor
         var res1 = img1.Width * img1.Height;
@@ -60,39 +54,7 @@ public static class ImageExtensions
     }
 
     /// <summary>
-    /// Smaller is better
-    /// </summary>
-    /// <param name="img1"></param>
-    /// <param name="img2"></param>
-    /// <returns></returns>
-    public static float GetMeanSquaredError(this Image<Rgba32> img1, Image<Rgba32> img2)
-    {
-        if (img1.Width != img2.Width || img1.Height != img2.Height)
-        {
-            img2.Mutate(x => x.Resize(img1.Width, img1.Height));
-        }
-
-        double totalDiff = 0;
-        for (var y = 0; y < img1.Height; y++)
-        {
-            for (var x = 0; x < img1.Width; x++)
-            {
-                var pixel1 = img1[x, y];
-                var pixel2 = img2[x, y];
-
-                var diff = Math.Pow(pixel1.R - pixel2.R, 2) +
-                           Math.Pow(pixel1.G - pixel2.G, 2) +
-                           Math.Pow(pixel1.B - pixel2.B, 2);
-                totalDiff += diff;
-            }
-        }
-
-        return (float) (totalDiff / (img1.Width * img1.Height));
-    }
-
-    /// <summary>
-    /// Determines which image is "better" based on multiple quality factors
-    /// using only the cross-platform ImageSharp library
+    /// Determines which image is "better" based on multiple quality factors.
     /// </summary>
     /// <param name="imagePath1">Path to first image</param>
     /// <param name="imagePath2">Path to the second image</param>
@@ -105,13 +67,13 @@ public static class ImageExtensions
             throw new FileNotFoundException("One or both image files do not exist");
         }
 
-        // Quick metadata check to get width/height without loading full pixel data
-        var info1 = Image.Identify(imagePath1);
-        var info2 = Image.Identify(imagePath2);
+        // Quick metadata check to get width/height without decoding full pixel data
+        var (width1, height1) = GetDimensions(imagePath1);
+        var (width2, height2) = GetDimensions(imagePath2);
 
         // Calculate resolution factor
-        double resolutionFactor1 = info1.Width * info1.Height;
-        double resolutionFactor2 = info2.Width * info2.Height;
+        double resolutionFactor1 = width1 * height1;
+        double resolutionFactor2 = width2 * height2;
 
         // If one image is significantly higher resolution (3x or more), just pick it
         // This avoids fully loading both images when the choice is obvious
@@ -121,20 +83,19 @@ public static class ImageExtensions
             return imagePath2;
 
         // Otherwise, we need to analyze the actual image data for both
+        ImageQualityMetrics metrics1;
 
         // NOTE: We HAVE to use these scope blocks and load image here otherwise memory-mapped section exception will occur
-        ImageQualityMetrics metrics1;
-        using (var img1 = Image.Load<Rgba32>(imagePath1))
+        using (var img1 = Image.NewFromFile(imagePath1))
         {
             metrics1 = GetImageQualityMetrics(img1);
         }
 
         ImageQualityMetrics metrics2;
-        using (var img2 = Image.Load<Rgba32>(imagePath2))
+        using (var img2 = Image.NewFromFile(imagePath2))
         {
             metrics2 = GetImageQualityMetrics(img2);
         }
-
 
         // If one is color, and one is grayscale, then we prefer color
         if (preferColor && metrics1.IsColor != metrics2.IsColor)
@@ -149,6 +110,36 @@ public static class ImageExtensions
         return score1 >= score2 ? imagePath1 : imagePath2;
     }
 
+    /// <summary>
+    /// Smaller is better
+    /// </summary>
+    /// <param name="img1"></param>
+    /// <param name="img2"></param>
+    /// <returns></returns>
+    public static float GetMeanSquaredError(this Image img1, Image img2)
+    {
+        // If the dimensions differ, resample img2 up/down to img1's size, then compare
+        // pixel-by-pixel over the RGB bands (alpha is ignored).
+        if (img1.Width != img2.Width || img1.Height != img2.Height)
+        {
+            var hscale = (double) img1.Width / img2.Width;
+            var vscale = (double) img1.Height / img2.Height;
+            img2 = img2.Resize(hscale, vscale: vscale);
+            img2 = ForceSize(img2, img1.Width, img1.Height);
+        }
+
+        // Work in float so subtraction cannot wrap around (uchar - uchar would clip/overflow).
+        var f1 = img1.Cast(Enums.BandFormat.Float);
+        var f2 = img2.Cast(Enums.BandFormat.Float);
+
+        var diff = f1 - f2;
+        var squared = diff * diff;
+
+        // Avg() is the mean over every band-element. We sum R²+G²+B² per pixel and divide by the
+        // pixel count only, so multiply the per-element mean back up by the band count.
+        var meanSquaredPerElement = squared.Avg();
+        return (float) (meanSquaredPerElement * img1.Bands);
+    }
 
     /// <summary>
     /// Calculate a weighted overall score based on metrics
@@ -179,22 +170,18 @@ public static class ImageExtensions
     /// <summary>
     /// Gets quality metrics for an image
     /// </summary>
-    private static ImageQualityMetrics GetImageQualityMetrics(Image<Rgba32> image)
+    private static ImageQualityMetrics GetImageQualityMetrics(Image image)
     {
-        // Create a smaller version if the image is large to speed up analysis
-        Image<Rgba32> workingImage;
+        // Create a smaller version if the image is large to speed up analysis.
+        // This bounds the longest side to 512 while preserving aspect ratio.
+        var workingImage = image;
         if (image.Width > 512 || image.Height > 512)
         {
-            workingImage = image.Clone(ctx => ctx.Resize(
-                new ResizeOptions {
-                    Size = new Size(512),
-                    Mode = ResizeMode.Max
-                }));
+            var scale = 512.0 / Math.Max(image.Width, image.Height);
+            workingImage = image.Resize(scale);
         }
-        else
-        {
-            workingImage = image.Clone();
-        }
+
+        var buffer = ToRgbBuffer(workingImage);
 
         var metrics = new ImageQualityMetrics
         {
@@ -203,21 +190,18 @@ public static class ImageExtensions
         };
 
         // Color analysis (is the image color or grayscale?)
-        var colorInfo = AnalyzeColorfulness(workingImage);
+        var colorInfo = AnalyzeColorfulness(buffer);
         metrics.IsColor = colorInfo.IsColor;
         metrics.Colorfulness = colorInfo.Colorfulness;
 
         // Contrast analysis
-        metrics.Contrast = CalculateContrast(workingImage);
+        metrics.Contrast = CalculateContrast(buffer);
 
         // Sharpness estimation
-        metrics.Sharpness = EstimateSharpness(workingImage);
+        metrics.Sharpness = EstimateSharpness(buffer);
 
         // Noise estimation
-        metrics.NoiseLevel = EstimateNoiseLevel(workingImage);
-
-        // Clean up
-        workingImage.Dispose();
+        metrics.NoiseLevel = EstimateNoiseLevel(buffer);
 
         return metrics;
     }
@@ -225,7 +209,7 @@ public static class ImageExtensions
     /// <summary>
     /// Analyzes colorfulness of an image
     /// </summary>
-    private static (bool IsColor, double Colorfulness) AnalyzeColorfulness(Image<Rgba32> image)
+    private static (bool IsColor, double Colorfulness) AnalyzeColorfulness(RgbBuffer image)
     {
         // For performance, sample a subset of pixels
         var sampleSize = Math.Min(1000, image.Width * image.Height);
@@ -282,7 +266,6 @@ public static class ImageExtensions
         var isColor = (double)colorCount / samples.Count > 0.05;
 
         return (isColor, colorfulness);
-
     }
 
     /// <summary>
@@ -308,7 +291,7 @@ public static class ImageExtensions
     /// <summary>
     /// Calculates contrast of an image
     /// </summary>
-    private static double CalculateContrast(Image<Rgba32> image)
+    private static double CalculateContrast(RgbBuffer image)
     {
         // For performance, sample a subset of pixels
         var sampleSize = Math.Min(1000, image.Width * image.Height);
@@ -344,7 +327,7 @@ public static class ImageExtensions
     /// <summary>
     /// Estimates sharpness using simple Laplacian-based method
     /// </summary>
-    private static double EstimateSharpness(Image<Rgba32> image)
+    private static double EstimateSharpness(RgbBuffer image)
     {
         // For simplicity, convert to grayscale
         var grayImage = new int[image.Width, image.Height];
@@ -392,7 +375,7 @@ public static class ImageExtensions
     /// <summary>
     /// Estimates noise level using simple block-based variance method
     /// </summary>
-    private static double EstimateNoiseLevel(Image<Rgba32> image)
+    private static double EstimateNoiseLevel(RgbBuffer image)
     {
         // Block size for noise estimation
         const int blockSize = 8;
@@ -433,5 +416,113 @@ public static class ImageExtensions
 
         // Normalize to 0-1 range (typical noise variances are 0-100)
         return Math.Min(1.0, averageNoiseVariance / 100.0);
+    }
+
+    /// <summary>
+    /// Reads width/height from an image header without decoding the pixel data. NetVips loads
+    /// lazily, so reading the properties is cheap.
+    /// </summary>
+    private static (int Width, int Height) GetDimensions(string path)
+    {
+        using var img = Image.NewFromFile(path, access: Enums.Access.Sequential);
+        return (img.Width, img.Height);
+    }
+
+    /// <summary>
+    /// Loads an image and normalizes it to 3-band 8-bit sRGB so downstream pixel math can assume a
+    /// fixed R,G,B layout, regardless of the source format (1-band grayscale, 4-band CMYK, etc.).
+    /// </summary>
+    private static Image LoadRgb(string path)
+    {
+        using var img = Image.NewFromFile(path);
+        return Normalize(img);
+    }
+
+    /// <summary>
+    /// Normalizes any image to 3-band 8-bit sRGB (drops alpha, promotes grayscale/CMYK, casts to uchar).
+    /// </summary>
+    private static Image Normalize(Image img)
+    {
+        var result = img;
+
+        if (result.Interpretation != Enums.Interpretation.Srgb)
+        {
+            result = result.Colourspace(Enums.Interpretation.Srgb);
+        }
+
+        if (result.HasAlpha())
+        {
+            result = result.Flatten();
+        }
+
+        if (result.Format != Enums.BandFormat.Uchar)
+        {
+            result = result.Cast(Enums.BandFormat.Uchar);
+        }
+
+        // Ensure we always return a distinct instance, otherwise the caller's original instance will get disposed incorrectly
+        return ReferenceEquals(result, img) ? img.Copy() : result;
+    }
+
+    /// <summary>
+    /// Materializes a NetVips image into a fixed-layout RGB byte buffer for per-pixel math. This is
+    /// the one native round-trip; all pixel loops index the managed buffer.
+    /// </summary>
+    private static RgbBuffer ToRgbBuffer(Image image)
+    {
+        using var normalized = Normalize(image);
+        var bytes = normalized.WriteToMemory<byte>();
+        return new RgbBuffer(normalized.Width, normalized.Height, bytes);
+    }
+
+    /// <summary>
+    /// Forces an image to exact dimensions after a resize, guarding against NetVips' rounding
+    /// producing an off-by-one width/height (which would make band arithmetic throw).
+    /// </summary>
+    private static Image ForceSize(Image img, int width, int height)
+    {
+        if (img.Width == width && img.Height == height)
+        {
+            return img;
+        }
+
+        if (img.Width > width || img.Height > height)
+        {
+            img = img.Crop(0, 0, Math.Min(img.Width, width), Math.Min(img.Height, height));
+        }
+
+        if (img.Width != width || img.Height != height)
+        {
+            img = img.Embed(0, 0, width, height, extend: Enums.Extend.Copy);
+        }
+
+        return img;
+    }
+
+    /// <summary>
+    /// A fixed-layout, row-major, 3-band (R,G,B) 8-bit view over a materialized NetVips image. Pixel
+    /// access is managed array indexing, so the pixel-heavy analysis loops avoid native calls.
+    /// </summary>
+    private readonly struct RgbBuffer(int width, int height, byte[] data)
+    {
+        public int Width { get; } = width;
+        public int Height { get; } = height;
+
+        public Pixel this[int x, int y]
+        {
+            get
+            {
+                var offset = (y * Width + x) * 3;
+                return new Pixel(data[offset], data[offset + 1], data[offset + 2]);
+            }
+        }
+    }
+
+    /// <summary>A single RGB sample.</summary>
+    private readonly struct Pixel(byte r, byte g, byte b)
+    {
+        public byte R { get; } = r;
+        public byte G { get; } = g;
+        public byte B { get; } = b;
     }
 }

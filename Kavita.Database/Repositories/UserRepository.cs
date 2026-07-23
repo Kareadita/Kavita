@@ -174,13 +174,15 @@ public class UserRepository(DataContext context, UserManager<AppUser> userManage
     /// <summary>
     /// Returns all Bookmarks for a given set of Ids
     /// </summary>
+    /// <param name="seriesId"></param>
     /// <param name="bookmarkIds"></param>
     /// <param name="ct"></param>
     /// <returns></returns>
-    public async Task<IList<AppUserBookmark>> GetAllBookmarksByIds(IList<int> bookmarkIds, CancellationToken ct = default)
+    public async Task<IList<AppUserBookmark>> GetAllBookmarksByIds(int seriesId, IList<int> bookmarkIds,
+        CancellationToken ct = default)
     {
         return await context.AppUserBookmark
-            .Where(b => bookmarkIds.Contains(b.Id))
+            .Where(b => bookmarkIds.Contains(b.Id) && b.SeriesId == seriesId)
             .OrderBy(b => b.Created)
             .ToListAsync(ct);
     }

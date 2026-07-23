@@ -46,6 +46,10 @@ public class MetadataSettings
     /// </summary>
     public bool EnableLocalizedName { get; set; }
     /// <summary>
+    /// Allow setting the Series name
+    /// </summary>
+    public bool EnableName { get; set; }
+    /// <summary>
     /// Allow setting the cover image
     /// </summary>
     public bool EnableCoverImage { get; set; }
@@ -72,6 +76,13 @@ public class MetadataSettings
     /// Allow setting the cover image for the Chapter/Issue
     /// </summary>
     public bool EnableChapterCoverImage { get; set; }
+    #endregion
+
+    #region Volume Metadata
+    /// <summary>
+    /// Allow setting the cover image for the Volume
+    /// </summary>
+    public bool EnableVolumeCoverImage { get; set; }
     #endregion
 
     // Need to handle the Genre/tags stuff

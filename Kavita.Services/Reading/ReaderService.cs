@@ -31,13 +31,12 @@ namespace Kavita.Services.Reading;
 
 public class ReaderService(IUnitOfWork unitOfWork, ILogger<ReaderService> logger, IEventHub eventHub, IImageService imageService,
     IDirectoryService directoryService, IScrobblingService scrobblingService, IReadingSessionService readingSessionService,
-    IClientInfoAccessor clientInfoAccessor, ISeriesService seriesService, IEntityNamingService namingService,
+    IClientInfoAccessor clientInfoAccessor, IEntityNamingService namingService,
     ILocalizationService localizationService, IBookService bookService)
     : IReaderService
 {
     private readonly ChapterSortComparerDefaultLast _chapterSortComparerDefaultLast = ChapterSortComparerDefaultLast.Default;
     private readonly ChapterSortComparerDefaultFirst _chapterSortComparerForInChapterSorting = ChapterSortComparerDefaultFirst.Default;
-    private readonly ChapterSortComparerSpecialsLast _chapterSortComparerSpecialsLast = ChapterSortComparerSpecialsLast.Default;
 
     private const float MinWordsPerHour = IReaderService.MinWordsPerHour;
     private const float MaxWordsPerHour = IReaderService.MaxWordsPerHour;

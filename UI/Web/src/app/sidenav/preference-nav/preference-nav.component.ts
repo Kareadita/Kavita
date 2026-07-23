@@ -30,8 +30,6 @@ import {KeyBindService} from "../../_services/key-bind.service";
 import {KeyBindTarget} from "../../_models/preferences/preferences";
 import {BreakpointService} from "../../_services/breakpoint.service";
 import {KavitaPlusAuditService} from "../../_services/kavitaplus-audit.service";
-import {KavitaPlusAuditCategory} from "../../_models/kavitaplus/kavita-plus-audit-category.enum";
-import {AuditStatus} from "../../_models/kavitaplus/audit-status.enum";
 
 export enum SettingsTabId {
 
@@ -63,7 +61,7 @@ export enum SettingsTabId {
   // Non-Admin
   Account = 'account',
   Preferences = 'preferences',
-  ScrobbleSettings = 'scrobble-settings',
+  Connections = 'scrobble-settings',
   CustomKeyBinds = 'custom-key-binds',
   ReadingProfiles = 'reading-profiles',
   Font = 'font',
@@ -189,15 +187,7 @@ export class PreferenceNavComponent implements AfterViewInit {
 
   private readonly scrobblingFailuresBadgeCount = toSignal(
     of(this.licenseService.hasActiveLicense()).pipe(
-      switchMap(hasLicense =>
-        hasLicense
-          ? this.kavitaplusAuditService.getMyActivity({
-            category: KavitaPlusAuditCategory.Scrobble,
-            userId: this.accountService.currentUser()!.id,
-            status: AuditStatus.Failure
-          }).pipe(map(d => d.pagination.totalItems))
-          : of(-1)
-      ),
+      switchMap(hasLicense => hasLicense ? this.kavitaplusAuditService.getFailedScrobbleEvents() : of(-1)),
       takeUntilDestroyed(this.destroyRef),
       shareReplay({ bufferSize: 1, refCount: true })
     ),
@@ -309,13 +299,13 @@ export class PreferenceNavComponent implements AfterViewInit {
         title: SettingSectionId.KavitaPlusSection,
         children: [
           new SideNavItem(SettingsTabId.KavitaPlusLicense, [Role.Admin]),
+          SideNavItem.kPlusOnly(SettingsTabId.Connections),
           SideNavItem.kPlusOnly(SettingsTabId.ManageUserTokens, [Role.Admin]),
           SideNavItem.kPlusOnly(SettingsTabId.Metadata, [Role.Admin]),
           SideNavItem.kPlusOnly(SettingsTabId.MatchedMetadata, [Role.Admin], this.matchedMetadataBadgeCount),
           SideNavItem.kPlusOnly(SettingsTabId.ScrobblingHolds),
           SideNavItem.kPlusOnly(SettingsTabId.ManageKavitaPlusActivity),
           SideNavItem.kPlusOnly(SettingsTabId.MyActivity, [], this.scrobblingFailuresBadgeCount),
-          SideNavItem.kPlusOnly(SettingsTabId.ScrobbleSettings),
           SideNavItem.kPlusOnly(SettingsTabId.Scrobbling, [], this.scrobblingErrorBadgeCount),
         ]
       }

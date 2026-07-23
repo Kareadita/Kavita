@@ -52,6 +52,7 @@ public class SettingsService(
         existingMetadataSetting.EnableExtendedMetadataProcessing = dto.EnableExtendedMetadataProcessing;
         existingMetadataSetting.EnableSummary = dto.EnableSummary;
         existingMetadataSetting.EnableLocalizedName = dto.EnableLocalizedName;
+        existingMetadataSetting.EnableName = dto.EnableName;
         existingMetadataSetting.EnablePublicationStatus = dto.EnablePublicationStatus;
         existingMetadataSetting.EnableRelationships = dto.EnableRelationships;
         existingMetadataSetting.EnablePeople = dto.EnablePeople;
@@ -66,6 +67,8 @@ public class SettingsService(
         existingMetadataSetting.EnableChapterTitle = dto.EnableChapterTitle;
         existingMetadataSetting.EnableChapterReleaseDate = dto.EnableChapterReleaseDate;
         existingMetadataSetting.EnableChapterCoverImage = dto.EnableChapterCoverImage;
+
+        existingMetadataSetting.EnableVolumeCoverImage = dto.EnableVolumeCoverImage;
 
         existingMetadataSetting.AgeRatingMappings = dto.AgeRatingMappings ?? [];
 

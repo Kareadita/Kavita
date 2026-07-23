@@ -94,6 +94,9 @@ export class KavitaPlusAuditEntryComponent {
     if (e.subjectId !== null && e.subjectType === AuditSubjectType.Chapter) {
       return this.imageService.getChapterCoverImage(e.subjectId);
     }
+    if (e.subjectId !== null && e.subjectType === AuditSubjectType.Volume) {
+      return this.imageService.getVolumeCoverImage(e.subjectId);
+    }
     if (e.subjectId !== null && e.subjectType === AuditSubjectType.Collection) {
       return this.imageService.getCollectionCoverImage(e.subjectId);
     }

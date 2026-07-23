@@ -86,6 +86,32 @@
 
     <div class="match-result-synopsis">{{ item().series.summary }}</div>
 
+    @if (item().series.editions.length > 0) {
+      <div class="match-result-editions d-flex flex-row flex-wrap gap-1">
+        @for (edition of item().series.editions; track edition.id) {
+          <button type="button"
+                  class="edition-chip d-inline-flex align-items-center"
+                  [class.selected]="isEditionSelected(edition)"
+                  [attr.aria-pressed]="isEditionSelected(edition)"
+                  (click)="chooseEdition(edition, $event)">
+            @if (isEditionSelected(edition)) {
+              <i class="fa-solid fa-check edition-chip-icon" aria-hidden="true"></i>
+            }
+            <span>{{ edition.title }}</span>
+            @if (edition.format) {
+              <span class="edition-chip-format">{{ edition.format }}</span>
+            }
+            @if (edition.mainCount > 0) {
+              <span class="edition-chip-count">{{ t('edition-main-count', {num: edition.mainCount}) }}</span>
+            }
+            @if (edition.totalCount - edition.mainCount > 0) {
+              <span class="edition-chip-count edition-chip-extra">{{ t('edition-extra-count', {num: edition.totalCount - edition.mainCount}) }}</span>
+            }
+          </button>
+        }
+      </div>
+    }
+
   </div>
 
   <div class="match-result-rail d-flex flex-column flex-shrink-0 align-items-end">

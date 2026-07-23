@@ -12,7 +12,7 @@ import {NgxDatatableModule} from "@siemens/ngx-datatable";
 import {LibraryNamePipe} from "../../../_pipes/library-name.pipe";
 import {APP_BASE_HREF, AsyncPipe} from "@angular/common";
 import {ResponsiveTableComponent} from "../../../shared/_components/responsive-table/responsive-table.component";
-import {allKavitaPlusMetadataApplicableTypes} from "../../../_models/library/library";
+import {LibraryType} from "../../../_models/library/library";
 import {ActionService} from "../../../_services/action.service";
 import {ManageService} from "../../../_services/manage.service";
 import {EVENTS, MessageHubService} from "../../../_services/message-hub.service";
@@ -27,6 +27,7 @@ import {ImageService} from "../../../_services/image.service";
 import {Pagination} from "../../../_models/pagination";
 import {ScanSeriesEvent} from "../../../_models/events/scan-series-event";
 import {allMatchStates, MatchStateOption} from "../../../_models/kavitaplus/match-state-option";
+import {LibraryService} from "../../../_services/library.service";
 
 @Component({
   selector: 'app-manage-matched-metadata',
@@ -51,7 +52,6 @@ import {allMatchStates, MatchStateOption} from "../../../_models/kavitaplus/matc
 export class ManageMatchedMetadataComponent implements OnInit {
 
   protected readonly allMatchStates = allMatchStates.filter(m => m !== MatchStateOption.Matched); // Matched will have too many
-  protected readonly allLibraryTypes = allKavitaPlusMetadataApplicableTypes;
 
   private readonly actionService = inject(ActionService);
   private readonly manageService = inject(ManageService);
@@ -60,7 +60,9 @@ export class ManageMatchedMetadataComponent implements OnInit {
   protected readonly imageService = inject(ImageService);
   protected readonly baseUrl = inject(APP_BASE_HREF);
   protected readonly destroyRef = inject(DestroyRef);
+  private readonly libraryService = inject(LibraryService);
 
+  metadataEnabledLibraryTypes = signal<LibraryType[]>([]);
   isLoading = signal(true);
   data = signal<ManageMatchSeries[]>([]);
   pagination = signal<Pagination>({
@@ -77,6 +79,12 @@ export class ManageMatchedMetadataComponent implements OnInit {
   trackBy = (idx: number, item: ManageMatchSeries) => `${item.isMatched}_${item.series.name}_${idx}`;
 
   ngOnInit() {
+
+    this.libraryService.getLibraryTypesWithMetadataSupport().pipe(
+      takeUntilDestroyed(this.destroyRef),
+      tap(types => this.metadataEnabledLibraryTypes.set(types))
+    ).subscribe();
+
     this.messageHub.messages$.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(message => {
       if (message.event == EVENTS.ScanSeries) {
         const evt = message.payload as ScanSeriesEvent;

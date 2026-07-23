@@ -13,8 +13,11 @@ export interface MatchSeriesInfo {
   primaryProvider: MetadataProvider;
   seriesFormat: MangaFormat;
   mangaBakaId?: number;
+  /** The currently selected MangaBaka edition, if any */
+  mangaBakaEditionId?: string;
   hardcoverId?: number;
   /** This is here since pre-v0.9.1 series will only have AniList **/
   aniListId?: number;
   cbrId?: number;
+  isStandAlone: boolean;
 }

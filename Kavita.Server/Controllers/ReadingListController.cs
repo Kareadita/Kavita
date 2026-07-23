@@ -42,6 +42,7 @@ public class ReadingListController(
     /// <param name="readingListId"></param>
     /// <returns></returns>
     [HttpGet]
+    [ReadingListAccess]
     public async Task<ActionResult<ReadingListDto>> GetList(int readingListId)
     {
         var readingList = await unitOfWork.ReadingListRepository.GetReadingListDtoByIdAsync(readingListId, UserId);
@@ -91,6 +92,7 @@ public class ReadingListController(
     /// </summary>
     /// <param name="seriesId"></param>
     /// <returns></returns>
+    [SeriesAccess]
     [HttpGet("lists-for-series")]
     public async Task<ActionResult<IEnumerable<ReadingListDto>>> GetListsForSeries(int seriesId)
     {
@@ -103,6 +105,7 @@ public class ReadingListController(
     /// </summary>
     /// <param name="chapterId"></param>
     /// <returns></returns>
+    [ChapterAccess]
     [HttpGet("lists-for-chapter")]
     public async Task<ActionResult<IEnumerable<ReadingListDto>>> GetListsForChapter(int chapterId)
     {
@@ -116,6 +119,7 @@ public class ReadingListController(
     /// <remarks>This call is expensive</remarks>
     /// <param name="readingListId"></param>
     /// <returns></returns>
+    [ReadingListAccess]
     [HttpGet("items")]
     public async Task<ActionResult<IList<ReadingListItemDto>>> GetListForUser(int readingListId)
     {

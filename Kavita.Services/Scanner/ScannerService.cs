@@ -288,7 +288,7 @@ public class ScannerService(
         // Don't allow any processing on files that aren't part of this series
         var toProcess = parsedSeries.Keys.Where(key =>
             key.NormalizedName.Equals(series.NormalizedName) ||
-            key.NormalizedName.Equals(series.OriginalName?.ToNormalized()))
+            key.NormalizedName.Equals(series.NormalizedOriginalName))
             .ToList();
 
         var toProcessList = toProcess.Select(k => parsedSeries[k]).ToList();

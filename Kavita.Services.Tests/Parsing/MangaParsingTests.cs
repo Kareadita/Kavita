@@ -267,6 +267,11 @@ public class MangaParsingTests
     [InlineData("Chevaliers d'Héliopolis T3 - Rubedo, l'oeuvre au rouge (Jodorowsky & Jérémy)", "Chevaliers d'Héliopolis")]
     [InlineData("Bd Fr-Aldebaran-Antares-t6", "Bd Fr-Aldebaran-Antares")]
     [InlineData("Monster Ch. 001 [MangaPlus] [Digital] [amit34521]", "Monster")]
+    [InlineData("Rent-a-(Really Shy)-Girlfriend Vol 01", "Rent-a-(Really Shy)-Girlfriend")]
+    [InlineData("Rent-a-(Really Shy)-Girlfriend (Digital) Vol 01", "Rent-a-(Really Shy)-Girlfriend")]
+    [InlineData("Rent-a-Girlfriend v01 (Digital)", "Rent-a-Girlfriend")]
+    [InlineData("Fate-(stay night)-Heaven's Feel Vol 01", "Fate-(stay night)-Heaven's Feel")]
+    [InlineData("Some Series (2019) (Digital) (LuCaZ) v01", "Some Series")]
     public void ParseSeriesTest(string filename, string expected)
     {
         Assert.Equal(expected, Parser.ParseSeries(filename, LibraryType.Manga));

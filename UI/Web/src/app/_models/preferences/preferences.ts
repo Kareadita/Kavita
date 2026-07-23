@@ -74,6 +74,7 @@ export enum KeyBindTarget {
   PreviousChapter = 'PreviousChapter',
   FirstPage = 'FirstPage',
   LastPage = 'LastPage',
+  NavigateHome = 'NavigateHome',
 }
 
 export interface OpdsPreferences {

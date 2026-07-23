@@ -14,7 +14,7 @@ import {
 import {KavitaLocale} from "../../_models/metadata/language";
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import {debounceTime, distinctUntilChanged, filter, forkJoin, of, switchMap} from "rxjs";
-import {AsyncPipe, DecimalPipe, TitleCasePipe} from "@angular/common";
+import {DecimalPipe, TitleCasePipe} from "@angular/common";
 import {SettingItemComponent} from "../../settings/_components/setting-item/setting-item.component";
 import {SettingSwitchComponent} from "../../settings/_components/setting-switch/setting-switch.component";
 import {LicenseService} from "../../_services/license.service";
@@ -71,7 +71,6 @@ type UserPreferencesForm = FormGroup<{
     TitleCasePipe,
     SettingItemComponent,
     SettingSwitchComponent,
-    AsyncPipe,
     DecimalPipe,
     HighlightBarComponent,
     AgeRatingPipe,

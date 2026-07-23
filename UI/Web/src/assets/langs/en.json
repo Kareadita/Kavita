@@ -718,7 +718,7 @@
         "just-now": "just now",
         "min-ago": "a minute ago",
         "mins-ago": "{{value}} minutes ago",
-        "hour-ago": "a hour ago",
+        "hour-ago": "an hour ago",
         "hours-ago": "{{value}} hours ago",
         "day-ago": "a day ago",
         "days-ago": "{{value}} days ago",
@@ -1306,6 +1306,8 @@
         "summary-tooltip": "Allow Summary to be written when the field is unlocked.",
         "localized-name-label": "Localized Series Name",
         "localized-name-tooltip": "Allow Localized Name to be written when the field is unlocked. Kavita will attempt to make the best guess.",
+        "name-label": "Series Name",
+        "name-tooltip": "Allow the Series Name to be written when the field is unlocked. The name on disk is still used to keep the series matched during scans.",
         "derive-publication-status-label": "Publication Status",
         "derive-publication-status-tooltip": "Allow Publication Status to be derived from Total Chapter/Volume counts.",
         "enable-relations-label": "Relationships",
@@ -1358,7 +1360,10 @@
         "people-header": "People",
         "tags-header": "Tags",
         "source-genre-tags-placeholder": "Source genre/tag",
-        "dest-genre-tags-placeholder": "Destination genre/tag"
+        "dest-genre-tags-placeholder": "Destination genre/tag",
+        "volume-header": "Volume",
+        "enable-volume-cover-label": "Volume Cover",
+        "enable-volume-cover-tooltip": "Allow Kavita to set Volume covers"
     },
 
     "book-line-overlay": {
@@ -1665,6 +1670,7 @@
         "person": "Person",
         "collection": "Collection",
         "chapter": "Chapter",
+        "volume": "Volume",
         "global": "Global"
     },
 
@@ -1682,7 +1688,8 @@
         "title": "Title",
         "release-date": "Release Date",
         "release-year": "Release Year",
-        "localized-name": "Localized Name"
+        "localized-name": "Localized Name",
+        "name": "Series Name"
     },
 
 
@@ -1694,6 +1701,7 @@
         "review-submitted": "Review submitted",
         "fields-updated": "{{count}} fields updated",
         "chapter-cover-updated": "Cover updated: {{chapter}}",
+        "volume-cover-updated": "Volume cover updated: {{volume}}",
         "series-cover-updated": "Series cover updated",
         "series-match-fixed": "Series matched with {{matchName}}",
         "collection-synced": "{{collectionName}}: {{itemCount}} items synced, {{missingCount}} missing",
@@ -1722,6 +1730,7 @@
         "cover-updated": "Cover Updated",
         "chapter-metadata-updated": "Chapter Metadata Updated",
         "chapter-cover-updated": "Chapter Cover Updated",
+        "volume-cover-updated": "Volume Cover Updated",
         "person-cover-updated": "Person Cover Updated",
         "person-alias-added": "Person Alias Added",
         "collection-synced": "Collection Synced",
@@ -1767,7 +1776,7 @@
     "match-series-modal": {
         "title-prefix": "Match",
         "in-kavita": "In Kavita",
-        "description": "Pick a match to rewire Kavita+ metadata and regenerate scrobble events.",
+        "description": "Pick a match to rewire Kavita+ metadata and regenerate scrobble events. Click an edition to get Volume/Chapter level metadata (if applicable).",
         "dont-match-hint": "Use \"Do not match\" to opt this series out entirely.",
         "try": "Try",
         "search": "Search",
@@ -1788,6 +1797,7 @@
         "save": "{{common.save}}",
         "volume-count": "{{match-series-result-item.volume-count}}",
         "chapter-count": "{{match-series-result-item.chapter-count}}",
+        "special-count": "{{match-series-result-item.special-count}}",
         "matched-to": "Currently matched to",
         "searching-against": "Searching against {{provider}}",
         "change-provider-help": "You can change which provider to use in Library settings",
@@ -1802,9 +1812,12 @@
         "alt-titles": "Alt titles",
         "more-titles": "+{{count}} more",
         "selected-alt": "Selected",
-        "volume-count": "{{ num }} vol",
-        "chapter-count": "{{ num }} ch",
-        "issue-count": "{{ num }} issues"
+        "volume-count": "{{num}} vol",
+        "chapter-count": "{{num}} ch",
+        "special-count": "{{num}} special",
+        "issue-count": "{{num}} issues",
+        "edition-main-count": "{{num}} main",
+        "edition-extra-count": "+{{num}} extra"
     },
 
     "metadata-provider-title-pipe": {
@@ -2379,7 +2392,8 @@
         "comment-header": "Comment",
         "edit-header": "Edit",
         "edit-item-alt": "Edit {{seriesName}}",
-        "no-data": "No issues"
+        "no-data": "No issues",
+        "generic": "There was an unknown error"
     },
 
     "default-date-pipe": {
@@ -2575,7 +2589,9 @@
         "last-sync-tooltip": "Kavita syncs daily against upstream collection provider.",
         "source-url-title": "Source Url:",
         "total-series-title": "Total Series:",
-        "missing-series-title": "Missing Series:"
+        "missing-series-title": "Missing Series:",
+        "series-tab": "{{tabs.series-tab}}",
+        "matched-series": "Matched Series:"
     },
 
     "library-recommended": {
@@ -2752,6 +2768,8 @@
         "key-bind-tooltip-navigate-to-scrobbling": "Open settings page on the My Activity tab",
         "key-bind-title-escape": "Escape",
         "key-bind-tooltip-escape": "Close the currently open context",
+        "key-bind-title-navigate-home": "Navigate home",
+        "key-bind-tooltip-navigate-home": "Navigate to the dashboard from anywhere in Kavita",
 
         "key-bind-title-toggle-fullscreen":  "Toggle full screen",
         "key-bind-tooltip-toggle-fullscreen":  "Alternative to F11",
@@ -3026,7 +3044,8 @@
         "left-to-process": "Left to Process: {{leftToProcess}} / {{totalToProcess}}",
         "download-in-queue": "{{num}} downloads in Queue",
         "reading-now": "{{num}} reading now",
-        "downloads-active": "{{count}} download(s) in progress"
+        "downloads-active": "{{count}} download(s) in progress",
+        "not-connected": "Not connected, try refreshing"
     },
 
     "download-queue-drawer": {
@@ -3097,7 +3116,11 @@
         "close-reader": "Close reader",
         "toggle-menu": "Toggle Menu",
         "offset-double-page": "{{keybind-setting-description-pipe.key-bind-title-offset-double-page}}",
-        "navigate-to-settings": "{{keybind-setting-description-pipe.key-bind-title-navigate-to-settings}}"
+        "navigate-to-settings": "{{keybind-setting-description-pipe.key-bind-title-navigate-to-settings}}",
+        "previous-chapter": "{{keybind-setting-description-pipe.key-bind-title-previous-chapter}}",
+        "next-chapter": "{{keybind-setting-description-pipe.key-bind-title-next-chapter}}",
+        "first-page": "{{keybind-setting-description-pipe.key-bind-title-first-page}}",
+        "last-page": "{{keybind-setting-description-pipe.key-bind-title-last-page}}"
     },
 
     "grouped-typeahead": {
@@ -3466,6 +3489,7 @@
         "required-field": "{{validation.required-field}}",
         "close": "{{common.close}}",
         "name-label": "Name",
+        "align-sort-name": "You've renamed this series but its sort name is locked. Update the sort name to match the new name?",
         "sort-name-label": "Sort Name",
         "localized-name-label": "Localized Name",
         "summary-label": "Summary",
@@ -3614,7 +3638,7 @@
     },
 
     "day-breakdown": {
-        "title": "Day Breakdown",
+        "title": "Reading by Day",
         "no-data": "No progress, get to reading"
     },
 
@@ -4399,11 +4423,14 @@
         "genres": "{{metadata-fields.genres-title}}",
         "tags": "{{metadata-fields.tags-title}}",
         "localized-name": "{{edit-series-modal.localized-name-label}}",
+        "name": "{{edit-series-modal.name-label}}",
         "chapter-release-date": "Release Date (Chapter)",
         "chapter-summary": "Summary (Chapter)",
         "chapter-covers": "Covers (Chapter)",
         "chapter-publisher": "{{person-role-pipe.publisher}} (Chapter)",
-        "chapter-title": "Title (Chapter)"
+        "chapter-title": "Title (Chapter)",
+        "chapter-age-rating": "Age Rating (Chapter)",
+        "volume-covers": "Covers (Volume)"
     },
 
 

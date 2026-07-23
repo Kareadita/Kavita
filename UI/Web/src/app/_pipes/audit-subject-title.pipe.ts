@@ -18,6 +18,8 @@ export class AuditSubjectTitlePipe implements PipeTransform {
         return this.translocoService.translate('audit-subject-title-pipe.collection');
       case AuditSubjectType.Chapter:
         return this.translocoService.translate('audit-subject-title-pipe.chapter');
+      case AuditSubjectType.Volume:
+        return this.translocoService.translate('audit-subject-title-pipe.volume');
       case AuditSubjectType.Global:
         return this.translocoService.translate('audit-subject-title-pipe.global');
     }

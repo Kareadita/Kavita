@@ -1,4 +1,12 @@
 <ng-container *transloco="let t">
+
+  <app-off-canvas-resize
+    [resizeMode]="ResizeMode.Width"
+    canvasPosition="end"
+    [minWidth]="breakpointService.isTabletOrBelow() ? 200 : 300"
+    [maxWidth]="breakpointService.isTabletOrBelow() ? window.innerWidth : window.innerWidth*0.5"
+  />
+
   <div class="offcanvas-header">
     <h5 class="offcanvas-title">
       {{collection().title}}
@@ -28,6 +36,8 @@
           @if(collection().missingSeriesFromSource) {
             <p [innerHTML]="collection().missingSeriesFromSource ?? '' | safeHtml"></p>
           }
+
+          <h6 class="section-title">{{t('edit-collection-tags.matched-series')}}</h6>
           @for(s of series(); track s.name) {
             <div class="row g-0">
               <del><a [routerLink]="['library', s.libraryId, 'series', s.id]" target="_blank" class="strike">{{s.name}}</a></del>

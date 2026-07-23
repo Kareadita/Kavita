@@ -394,6 +394,10 @@ public class SeriesService(
                 {
                     p.AniListId = personDto.AniListId;
                 }
+                if (!string.IsNullOrEmpty(personDto.HardcoverId)  && p.HardcoverId != personDto.HardcoverId)
+                {
+                    p.HardcoverId = personDto.HardcoverId;
+                }
                 p.Description = string.IsNullOrEmpty(p.Description) ? personDto.Description : p.Description;
                 continue; // If we ever want to update metadata for existing people, we'd do it here
             }
@@ -404,11 +408,11 @@ public class SeriesService(
                 Name = personDto.Name,
                 NormalizedName = normalizedPersonName,
                 AniListId = personDto.AniListId,
+                MalId =  personDto.MalId,
+                HardcoverId = personDto.HardcoverId,
                 Description = personDto.Description,
                 Asin = personDto.Asin,
                 CoverImage = personDto.CoverImage,
-                MalId =  personDto.MalId,
-                HardcoverId = personDto.HardcoverId,
             };
 
             peopleToAdd.Add(newPerson);

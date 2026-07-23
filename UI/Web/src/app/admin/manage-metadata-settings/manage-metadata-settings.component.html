@@ -74,6 +74,18 @@
       </div>
 
       <div class="row g-0 mt-4 mb-4">
+        @if(settingsForm.get('enableName'); as formControl) {
+          <app-setting-switch [title]="t('name-label')" [subtitle]="t('name-tooltip')">
+            <ng-template #switch>
+              <div class="form-check form-switch float-end">
+                <input id="name" type="checkbox" class="form-check-input" formControlName="enableName">
+              </div>
+            </ng-template>
+          </app-setting-switch>
+        }
+      </div>
+
+      <div class="row g-0 mt-4 mb-4">
         @if(settingsForm.get('enablePublicationStatus'); as formControl) {
           <app-setting-switch [title]="t('derive-publication-status-label')" [subtitle]="t('derive-publication-status-tooltip')">
             <ng-template #switch>
@@ -178,6 +190,21 @@
             <ng-template #switch>
               <div class="form-check form-switch float-end">
                 <input id="enable-chapter-cover" type="checkbox" class="form-check-input" formControlName="enableChapterCoverImage">
+              </div>
+            </ng-template>
+          </app-setting-switch>
+        }
+      </div>
+
+      <div class="setting-section-break"></div>
+
+      <h4>{{t('volume-header')}}</h4>
+      <div class="row g-0 mt-4 mb-4">
+        @if(settingsForm.get('enableVolumeCoverImage'); as formControl) {
+          <app-setting-switch [title]="t('enable-volume-cover-label')" [subtitle]="t('enable-volume-cover-tooltip')">
+            <ng-template #switch>
+              <div class="form-check form-switch float-end">
+                <input id="enable-volume-cover" type="checkbox" class="form-check-input" formControlName="enableVolumeCoverImage">
               </div>
             </ng-template>
           </app-setting-switch>

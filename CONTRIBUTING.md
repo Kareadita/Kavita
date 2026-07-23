@@ -17,7 +17,7 @@ The docs are maintained in the [Wiki-Nextra](https://github.com/Kareadita/Wiki-N
 - HTML/Javascript editor (VS Code/Sublime Text/Webstorm/Atom/etc)
 - [Git](https://git-scm.com/downloads)
 - [NodeJS](https://nodejs.org/en/download/) (Node 18.13.X or higher)
-- .NET 9.0+
+- Latest .NET 
 - dotnet tool install -g Swashbuckle.AspNetCore.Cli
 - dotnet cli tools [link](https://learn.microsoft.com/en-us/ef/core/cli/dotnet) 
 
@@ -67,7 +67,7 @@ Run build.sh and pass the Runtime Identifier for your OS or just build.sh for al
 - Reach out to us on Discord if you have any questions
 
 ### Formatting
-- Commit with *nix line endings for consistency (We checkout Windows and commit *nix)
+- Commit with *nix line endings for consistency (We check out Windows and commit *nix)
 - Use 4 spaces instead of tabs, this is the default for VS 2019 and WebStorm (to our knowledge)
 - Use 2 spaces for UI files
 

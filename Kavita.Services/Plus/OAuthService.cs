@@ -9,6 +9,7 @@ using Kavita.API.Services.Plus;
 using Kavita.API.Services.SignalR;
 using Kavita.Models.DTOs.KavitaPlus.Audit;
 using Kavita.Models.DTOs.KavitaPlus.OAuth;
+using Kavita.Models.DTOs.KavitaPlus.Scrobble;
 using Kavita.Models.DTOs.SignalR;
 using Kavita.Models.Entities.Enums;
 using Kavita.Models.Entities.Enums.Audit;
@@ -128,75 +129,95 @@ public class OAuthService(
         {
             foreach (var provider in user.ScrobbleProviders.Keys)
             {
-                var settings = user.ScrobbleProviders[provider];
-
-                if (!provider.SupportsOAuthTokenRefresh()) continue;
-
-                var upstream = provider.ToOAuthUpstream();
-                if (upstream == null)
-                {
-                    logger.LogTrace("Skipping {Provider} as they could not be mapped to an OAuth upstream for automatic refresh", provider);
-                    continue;
-                }
-
-                if (string.IsNullOrEmpty(settings.AuthenticationToken) || string.IsNullOrEmpty(settings.RefreshToken))
-                {
-                    logger.LogTrace("Skipping {Provider} for {UserId} as they do not have a valid token for automatic refresh", provider, user.Id);
-                    continue;
-                }
-
-                var timeRemaining = settings.ValidUntilUtc - DateTime.UtcNow;
-
-                if (timeRemaining > TimeSpan.FromDays(1))
-                {
-                    logger.LogTrace("Skipping {Provider} for {UserId} as they have a token that is still valid for {TimeRemaining}", provider, user.Id, timeRemaining);
-                    continue;
-                }
-
-                logger.LogDebug("Token for {Provider} for user {UserId} is about to expire, refreshing", provider, user.Id);
-
-                var response = await kavitaPlusApiService.RefreshToken(new RefreshTokenRequestDto()
-                {
-                    RefreshToken = settings.RefreshToken,
-                    Upstream = upstream.Value,
-                }, ct);
-
-                if (!response.IsSuccess)
-                {
-                    logger.LogWarning("Failed to refresh token for {Provider} for user {UserId}: {ErrorMessage}", provider, user.Id, response.ErrorMessage);
-
-                    await kavitaPlusAuditService.LogAsync(KavitaPlusAuditCategory.System,
-                        KavitaPlusEventType.SystemTokenRefresh, AuditStatus.Failure,
-                        payload: new AuditLogSystemTokenRefreshParamsDto
-                        {
-                            Provider = provider
-                        }, userId: user.Id, ct: ct);
-
-                    continue;
-                }
-
-                settings.AuthenticationToken = response.Data.AccessToken;
-                settings.RefreshToken = response.Data.RefreshToken;
-                // Remove 30s for latency
-                settings.ValidUntilUtc = DateTime.UtcNow
-                                         + TimeSpan.FromSeconds(response.Data.ExpiresIn)
-                                         - TimeSpan.FromSeconds(30);
-                settings.LastSyncedUtc = DateTime.UtcNow;
-
-                await kavitaPlusAuditService.LogAsync(KavitaPlusAuditCategory.System,
-                    KavitaPlusEventType.SystemTokenRefresh, AuditStatus.Success,
-                    payload: new AuditLogSystemTokenRefreshParamsDto
-                    {
-                        Provider = provider,
-                        ValidUntilUtc = settings.ValidUntilUtc,
-                    }, error: response.ErrorMessage, userId: user.Id, ct: ct);
-
-                unitOfWork.UserRepository.Update(user);
-                await unitOfWork.CommitAsync(ct);
-
-                await eventHub.SendMessageToAsync(MessageFactory.ScrobbleProviderUpdated,
-                    MessageFactory.ScrobbleProviderUpdatedEvent(provider), user.Id, ct);
+                await RefreshToken(provider, user, ct);
             }
         }
+    }
+
+    public async Task RetryTokenRefresh(ScrobbleProvider provider, int userId, CancellationToken ct = default)
+    {
+        var user = await unitOfWork.UserRepository.GetUserByIdAsync(userId, ct: ct);
+        if (user == null) return;
+
+        logger.LogInformation("Retrying token refresh for {Provider} for user {UserId}", provider, user.Id);
+
+        await RefreshToken(provider, user, ct);
+    }
+
+    private async Task RefreshToken(ScrobbleProvider provider, AppUser user, CancellationToken ct)
+    {
+        var settings = user.ScrobbleProviders[provider];
+
+        if (!provider.SupportsOAuthTokenRefresh()) return;
+
+        var upstream = provider.ToOAuthUpstream();
+        if (upstream == null)
+        {
+            logger.LogTrace("Skipping {Provider} as they could not be mapped to an OAuth upstream for automatic refresh", provider);
+            return;
+        }
+
+        if (string.IsNullOrEmpty(settings.AuthenticationToken) || string.IsNullOrEmpty(settings.RefreshToken))
+        {
+            logger.LogTrace("Skipping {Provider} for {UserId} as they do not have a valid token for automatic refresh", provider, user.Id);
+            return;
+        }
+
+        var timeRemaining = settings.ValidUntilUtc - DateTime.UtcNow;
+
+        if (timeRemaining > TimeSpan.FromDays(1))
+        {
+            logger.LogTrace("Skipping {Provider} for {UserId} as they have a token that is still valid for {TimeRemaining}", provider, user.Id, timeRemaining);
+            return;
+        }
+
+        logger.LogDebug("Token for {Provider} for user {UserId} is about to expire, refreshing", provider, user.Id);
+
+        var response = await kavitaPlusApiService.RefreshToken(new RefreshTokenRequestDto()
+        {
+            RefreshToken = settings.RefreshToken,
+            Upstream = upstream.Value,
+        }, ct);
+
+        if (!response.IsSuccess)
+        {
+            logger.LogWarning("Failed to refresh token for {Provider} for user {UserId}: {ErrorMessage}", provider, user.Id, response.ErrorMessage);
+
+            await kavitaPlusAuditService.LogAsync(KavitaPlusAuditCategory.System,
+                KavitaPlusEventType.SystemTokenRefresh, AuditStatus.Failure,
+                payload: new AuditLogSystemTokenRefreshParamsDto
+                {
+                    Provider = provider
+                }, userId: user.Id, ct: ct);
+
+            logger.LogDebug("Scheduling retry for {Provider} for user {UserId} in 30m", provider, user.Id);
+
+            BackgroundJob.Schedule(() => RetryTokenRefresh(provider, user.Id, CancellationToken.None),
+                TimeSpan.FromMinutes(30));
+
+            return;
+        }
+
+        settings.AuthenticationToken = response.Data.AccessToken;
+        settings.RefreshToken = response.Data.RefreshToken;
+        // Remove 30s for latency
+        settings.ValidUntilUtc = DateTime.UtcNow
+                                 + TimeSpan.FromSeconds(response.Data.ExpiresIn)
+                                 - TimeSpan.FromSeconds(30);
+        settings.LastSyncedUtc = DateTime.UtcNow;
+
+        await kavitaPlusAuditService.LogAsync(KavitaPlusAuditCategory.System,
+            KavitaPlusEventType.SystemTokenRefresh, AuditStatus.Success,
+            payload: new AuditLogSystemTokenRefreshParamsDto
+            {
+                Provider = provider,
+                ValidUntilUtc = settings.ValidUntilUtc,
+            }, error: response.ErrorMessage, userId: user.Id, ct: ct);
+
+        unitOfWork.UserRepository.Update(user);
+        await unitOfWork.CommitAsync(ct);
+
+        await eventHub.SendMessageToAsync(MessageFactory.ScrobbleProviderUpdated,
+            MessageFactory.ScrobbleProviderUpdatedEvent(provider), user.Id, ct);
     }
 }
