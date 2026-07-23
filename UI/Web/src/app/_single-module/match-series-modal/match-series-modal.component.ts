@@ -96,6 +96,10 @@ export class MatchSeriesModalComponent implements OnInit {
   seriesDetail = signal<SeriesDetail | null>(null);
   matchInfo = signal<MatchSeriesInfo | null>(null);
 
+  mangaBakaSearchUrl = computed(() => {
+    return `https://mangabaka.org/search?q=${encodeURIComponent(this.series().name)}`;
+  });
+
   constructor() {
     this.canSaveDontMatch = computed(() => this.isDontMatch() === true && !this.series().dontMatch);
     this.coverImageUrl = computed(() => this.imageService.getSeriesCoverImage(this.series().id));
