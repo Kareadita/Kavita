@@ -131,4 +131,10 @@ public class SeriesBuilder : API.Helpers.Builders.IEntityBuilder<Series>
 
         return this;
     }
+
+    public SeriesBuilder WithMangaBakaId(int id)
+    {
+        _series.MangaBakaId = id;
+        return this;
+    }
 }

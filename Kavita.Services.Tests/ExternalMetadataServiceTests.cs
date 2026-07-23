@@ -2618,12 +2618,9 @@ public class ExternalMetadataServiceTests: AbstractDbTest
         var series2 = new SeriesBuilder("Test - Relationships Target")
             .WithLibraryId(1)
             .WithFormat(MangaFormat.Archive)
+            .WithMangaBakaId(555)
             .WithMetadata(new SeriesMetadataBuilder()
                 .Build())
-            .WithExternalMetadata(new ExternalSeriesMetadata()
-            {
-                MangabakaId = 555
-            })
             .Build();
         context.Series.Attach(series2);
         await context.SaveChangesAsync();
