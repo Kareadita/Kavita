@@ -65,16 +65,22 @@ public class TokenService(
 
     public async Task<string> CreateRefreshToken(AppUser user, CancellationToken ct = default)
     {
-        await userManager.RemoveAuthenticationTokenAsync(user, RefreshTokenProviderName, RefreshTokenName);
-        var refreshToken = await userManager.GenerateUserTokenAsync(user, RefreshTokenProviderName, RefreshTokenName);
-        await userManager.SetAuthenticationTokenAsync(user, RefreshTokenProviderName, RefreshTokenName, refreshToken);
-        return refreshToken;
+        await RefreshTokenLock.WaitAsync(ct);
+        try
+        {
+            await userManager.RemoveAuthenticationTokenAsync(user, RefreshTokenProviderName, RefreshTokenName);
+            var refreshToken = await userManager.GenerateUserTokenAsync(user, RefreshTokenProviderName, RefreshTokenName);
+            await userManager.SetAuthenticationTokenAsync(user, RefreshTokenProviderName, RefreshTokenName, refreshToken);
+            return refreshToken;
+        }
+        finally
+        {
+            RefreshTokenLock.Release();
+        }
     }
 
     public async Task<TokenRequestDto?> ValidateRefreshToken(TokenRequestDto request, CancellationToken ct = default)
     {
-        await RefreshTokenLock.WaitAsync(ct);
-
         try
         {
             var tokenHandler = new JwtSecurityTokenHandler();
@@ -118,11 +124,7 @@ public class TokenService(
                 return null;
             }
 
-            // Remove the old refresh token first
-            await userManager.RemoveAuthenticationTokenAsync(user,
-                RefreshTokenProviderName,
-                RefreshTokenName);
-
+            // CreateRefreshToken removes the old refresh token and writes the new one under RefreshTokenLock.
             return new TokenRequestDto()
             {
                 Token = await CreateToken(user, ct),
@@ -140,10 +142,6 @@ public class TokenService(
             // Handle other exceptions
             logger.LogError(ex, "Failed to validate refresh token");
             return null;
-        }
-        finally
-        {
-            RefreshTokenLock.Release();
         }
     }
 
