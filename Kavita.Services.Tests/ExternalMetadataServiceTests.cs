@@ -3539,6 +3539,61 @@ public class ExternalMetadataServiceTests: AbstractDbTest
 
     #endregion
 
+    #region Idempotency
+
+    /// <summary>
+    /// Validates that 2 concurrent writes (browse series-detail then try to match) only writes one new Genre
+    /// </summary>
+    [Fact]
+    public async Task WriteExternalMetadataToSeries_GenreAlreadyLinked_DoesNotDuplicate()
+    {
+        var (unitOfWork, context, mapper) = await CreateDatabase();
+        var (externalMetadataService, genreLookup, _, _) = await Setup(unitOfWork, context, mapper);
+
+        const string seriesName = "Test - Concurrent Genre";
+        var series = new SeriesBuilder(seriesName)
+            .WithLibraryId(1)
+            .WithMetadata(new SeriesMetadataBuilder().Build())
+            .Build();
+        context.Series.Attach(series);
+        await context.SaveChangesAsync();
+
+        var metadataSettings = await unitOfWork.SettingsRepository.GetMetadataSettings();
+        metadataSettings.Enabled = true;
+        metadataSettings.EnableGenres = true;
+        context.MetadataSettings.Update(metadataSettings);
+        await context.SaveChangesAsync();
+
+        var metadataId = (await unitOfWork.SeriesRepository.GetSeriesByIdAsync(1, SeriesIncludes.Metadata))!.Metadata.Id;
+        var actionGenreId = genreLookup["Action"].Id;
+        context.ChangeTracker.Clear();
+
+        // A prior/concurrent write already committed the "Action" link
+        await context.Database.ExecuteSqlRawAsync(
+            "INSERT INTO GenreSeriesMetadata (GenresId, SeriesMetadatasId) VALUES ({0}, {1})", actionGenreId, metadataId);
+
+        // Applying the same genre must not attempt to re-insert the existing join (UNIQUE constraint would throw)
+        var ex = await Record.ExceptionAsync(async () =>
+        {
+            await externalMetadataService.WriteExternalMetadataToSeries(new ExternalSeriesDetailDto()
+            {
+                Name = seriesName,
+                Genres = ["Action"]
+            }, 1);
+            await unitOfWork.CommitAsync();
+        });
+        Assert.Null(ex);
+
+        // Exactly one Action link should exist in the database
+        context.ChangeTracker.Clear();
+        var linkCount = await context.Database
+            .SqlQueryRaw<int>("SELECT COUNT(*) AS Value FROM GenreSeriesMetadata WHERE SeriesMetadatasId = {0}", metadataId)
+            .SingleAsync();
+        Assert.Equal(1, linkCount);
+    }
+
+    #endregion
+
     private static SeriesStaffDto CreateStaff(string first, string last, string role)
     {
         return new SeriesStaffDto() {Name = $"{first} {last}", Role = role, Url = "", FirstName = first, LastName = last};

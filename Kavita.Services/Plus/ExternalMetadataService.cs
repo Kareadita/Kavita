@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
@@ -78,8 +79,11 @@ public class ExternalMetadataService : IExternalMetadataService
         Ratings = [],
         Reviews = []
     };
+
     // Allow 50 requests per 24 hours
     private static readonly RateLimiter RateLimiter = new RateLimiter(50, TimeSpan.FromHours(24), false);
+    private static readonly ConcurrentDictionary<int, SemaphoreSlim> SeriesWriteLocks = new();
+    private static SemaphoreSlim GetSeriesWriteLock(int seriesId) => SeriesWriteLocks.GetOrAdd(seriesId, static _ => new SemaphoreSlim(1, 1));
     private static bool IsRomanCharacters(string input) => Regex.IsMatch(input, @"^[\p{IsBasicLatin}\p{IsLatin-1Supplement}]+$");
 
     public ExternalMetadataService(IUnitOfWork unitOfWork, ILogger<ExternalMetadataService> logger, IMapper mapper,
@@ -842,58 +846,68 @@ public class ExternalMetadataService : IExternalMetadataService
         var settings = await _unitOfWork.SettingsRepository.GetMetadataSettingDto(ct);
         if (!settings.Enabled) return false;
 
-        var series = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(seriesId, SeriesIncludes.Metadata | SeriesIncludes.Related, ct);
-        if (series == null) return false;
-
-        var defaultAdmin = await _unitOfWork.UserRepository.GetDefaultAdminUser(ct: ct);
-
-        _logger.LogInformation("Writing External metadata to Series {SeriesName}", series.Name);
-
-        var madeModification = false;
-        var fieldChanges = new List<MetadataFieldChangeDto>();
-        var processedGenres = new List<string>();
-        var processedTags = new List<string>();
-
-        Accumulate(ref madeModification, fieldChanges, UpdateSummary(series, settings, externalMetadata));
-        Accumulate(ref madeModification, fieldChanges, UpdateReleaseYear(series, settings, externalMetadata));
-        Accumulate(ref madeModification, fieldChanges, UpdateLocalizedName(series, settings, externalMetadata));
-        Accumulate(ref madeModification, fieldChanges, await UpdateName(series, settings, externalMetadata, ct));
-        Accumulate(ref madeModification, fieldChanges, await UpdatePublicationStatus(series, settings, externalMetadata));
-        Accumulate(ref madeModification, fieldChanges, UpdateExternalIds(series, externalMetadata));
-
-        // Apply field mappings
-        GenerateGenreAndTagLists(externalMetadata, settings, ref processedTags, ref processedGenres);
-
-        Accumulate(ref madeModification, fieldChanges, await UpdateGenres(series, settings, externalMetadata, processedGenres));
-        Accumulate(ref madeModification, fieldChanges, await UpdateTags(series, settings, externalMetadata, processedTags));
-        Accumulate(ref madeModification, fieldChanges, UpdateAgeRating(series, settings, processedGenres.Concat(processedTags)));
-
-        var staff = await SetNameAndAddAliases(settings, externalMetadata.Staff);
-
-        // TODO: I need update Publisher as well (MB is complicated as there are multiple potential publishers, needs to be tied with Works PR)
-        Accumulate(ref madeModification, fieldChanges, await UpdateWriters(series, settings, staff));
-        Accumulate(ref madeModification, fieldChanges, await UpdateArtists(series, settings, staff));
-        Accumulate(ref madeModification, fieldChanges, await UpdateCharacters(series, settings, externalMetadata.Characters));
-
-        Accumulate(ref madeModification, fieldChanges, await UpdateRelationships(series, settings, externalMetadata.Relations, defaultAdmin));
+        var writeLock = GetSeriesWriteLock(seriesId);
+        await writeLock.WaitAsync(ct);
 
         try
         {
-            madeModification = await UpdateCoverImage(series, settings, externalMetadata) || madeModification;
+            var series = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(seriesId, SeriesIncludes.Metadata | SeriesIncludes.Related, ct);
+            if (series == null) return false;
+
+            var defaultAdmin = await _unitOfWork.UserRepository.GetDefaultAdminUser(ct: ct);
+
+            _logger.LogInformation("Writing External metadata to Series {SeriesName}", series.Name);
+
+            var madeModification = false;
+            var fieldChanges = new List<MetadataFieldChangeDto>();
+            var processedGenres = new List<string>();
+            var processedTags = new List<string>();
+
+            Accumulate(ref madeModification, fieldChanges, UpdateSummary(series, settings, externalMetadata));
+            Accumulate(ref madeModification, fieldChanges, UpdateReleaseYear(series, settings, externalMetadata));
+            Accumulate(ref madeModification, fieldChanges, UpdateLocalizedName(series, settings, externalMetadata));
+            Accumulate(ref madeModification, fieldChanges, await UpdateName(series, settings, externalMetadata, ct));
+            Accumulate(ref madeModification, fieldChanges, await UpdatePublicationStatus(series, settings, externalMetadata));
+            Accumulate(ref madeModification, fieldChanges, UpdateExternalIds(series, externalMetadata));
+
+            // Apply field mappings
+            GenerateGenreAndTagLists(externalMetadata, settings, ref processedTags, ref processedGenres);
+
+            Accumulate(ref madeModification, fieldChanges, await UpdateGenres(series, settings, externalMetadata, processedGenres));
+            Accumulate(ref madeModification, fieldChanges, await UpdateTags(series, settings, externalMetadata, processedTags));
+            Accumulate(ref madeModification, fieldChanges, UpdateAgeRating(series, settings, processedGenres.Concat(processedTags)));
+
+            var staff = await SetNameAndAddAliases(settings, externalMetadata.Staff);
+
+            // TODO: I need update Publisher as well (MB is complicated as there are multiple potential publishers, needs to be tied with Works PR)
+            Accumulate(ref madeModification, fieldChanges, await UpdateWriters(series, settings, staff));
+            Accumulate(ref madeModification, fieldChanges, await UpdateArtists(series, settings, staff));
+            Accumulate(ref madeModification, fieldChanges, await UpdateCharacters(series, settings, externalMetadata.Characters));
+
+            Accumulate(ref madeModification, fieldChanges, await UpdateRelationships(series, settings, externalMetadata.Relations, defaultAdmin));
+
+            try
+            {
+                madeModification = await UpdateCoverImage(series, settings, externalMetadata) || madeModification;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogWarning(ex, "Failed to fetch cover image");
+            }
+
+            madeModification = await UpdateChapters(series, settings, externalMetadata) || madeModification;
+
+            if (fieldChanges.Count > 0)
+            {
+                await _auditService.LogMetadataAsync(seriesId, fieldChanges, ct);
+            }
+
+            return madeModification;
         }
-        catch (Exception ex)
+        finally
         {
-            _logger.LogWarning(ex, "Failed to fetch cover image");
+            writeLock.Release();
         }
-
-        madeModification = await UpdateChapters(series, settings, externalMetadata) || madeModification;
-
-        if (fieldChanges.Count > 0)
-        {
-            await _auditService.LogMetadataAsync(seriesId, fieldChanges, ct);
-        }
-
-        return madeModification;
     }
 
     /// <summary>
