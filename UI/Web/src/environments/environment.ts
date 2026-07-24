@@ -8,7 +8,7 @@ export const environment = {
   production: false,
   apiUrl: 'http://' + IP + ':5000/api/',
   hubUrl: 'http://'+ IP + ':5000/hubs/',
-  buyLink: 'https://buy.stripe.com/test_cNi6oAe6e5PhagN5p27Vm00?prefilled_promo_code=FREETRIAL',
+  buyLink: 'https://buy.stripe.com/test_00weV62nwgtV88F9Fi7Vm01?prefilled_promo_code=FREETRIAL',
   manageLink: 'https://billing.stripe.com/p/login/test_cNi6oAe6e5PhagN5p27Vm00'
 };
 
