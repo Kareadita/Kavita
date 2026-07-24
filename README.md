@@ -68,7 +68,7 @@ option which provides funding, and you get a benefit.
 ## Kavita+
 [Kavita+](https://wiki.kavitareader.com/kavita+) is a paid subscription that offers premium features that otherwise wouldn't be feasible to include in Kavita. It is run and operated by [majora2007](https://github.com/majora2007), the creator and primary developer of Kavita.
 
-If you are interested, you can use the promo code [`FIRSTTIME`](https://buy.stripe.com/8x23cw0uqdXy38Z15J8Vi05?prefilled_promo_code=FIRSTTIME) for your initial signup for a 50% discount on the first month (2$). This can be thought of as donating to Kavita's development and getting some sweet features out of it.
+If you are interested, you can use the promo code [`FIRSTTIME`](https://buy.stripe.com/8x23cw0uqdXy38Z15J8Vi05?prefilled_promo_code=FIRSTTIME) for your initial signup for 2$ off the first payment. This can be thought of as donating to Kavita's development and getting some sweet features out of it.
 
 **If you already contribute via OpenCollective, please reach out to majora2007 for a provisioned license.**
 
