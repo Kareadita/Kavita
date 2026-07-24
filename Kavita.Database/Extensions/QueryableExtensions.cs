@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
+using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Threading.Tasks;
 using Kavita.API.Repositories;
@@ -478,5 +479,47 @@ public static class QueryableExtensions
         }
 
         return result;
+    }
+
+    /// <summary>
+    /// Returns a <see cref="IAsyncEnumerable"/> that loads <see cref="batchSize"/> into memory at once and then yields
+    /// </summary>
+    /// <param name="query"></param>
+    /// <param name="batchSize"></param>
+    /// <param name="cancellationToken"></param>
+    /// <typeparam name="T"></typeparam>
+    /// <returns></returns>
+    public static async IAsyncEnumerable<T> BatchToAsyncEnumerable<T>(
+        this IOrderedQueryable<T> query,
+        int batchSize,
+        [EnumeratorCancellation] CancellationToken cancellationToken = default)
+    {
+        if (batchSize <= 0)
+            throw new ArgumentOutOfRangeException(nameof(batchSize), "Batch size must be greater than zero.");
+
+        var skip = 0;
+
+        while (true)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+
+            var batch = await query
+                .Skip(skip)
+                .Take(batchSize)
+                .ToListAsync(cancellationToken);
+
+            if (batch.Count == 0)
+                yield break;
+
+            foreach (var item in batch)
+            {
+                yield return item;
+            }
+
+            if (batch.Count < batchSize)
+                yield break;
+
+            skip += batchSize;
+        }
     }
 }

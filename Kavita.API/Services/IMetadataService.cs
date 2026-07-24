@@ -1,6 +1,7 @@
 using System.Threading;
 using System.Threading.Tasks;
 using Hangfire;
+using Kavita.Models.DTOs.Metadata;
 using Kavita.Models.DTOs.Settings;
 using Kavita.Models.Entities;
 using Kavita.Models.Entities.Enums;
@@ -32,4 +33,7 @@ public interface IMetadataService
     Task GenerateCoversForSeries(ServerSettingDto serverSetting, int libraryId, int seriesId, bool forceUpdate = true, bool forceColorScape = true, CancellationToken ct = default);
     Task GenerateCoversForSeries(Series series, EncodeFormat encodeFormat, CoverImageSize coverImageSize, bool forceUpdate = false, bool forceColorScape = true, CancellationToken ct = default);
     Task RemoveAbandonedMetadataKeys(CancellationToken ct = default);
+
+    [DisableConcurrentExecution(timeoutInSeconds: 60 * 60 * 60)]
+    Task ReRunMappings(ReRunMappingsRequest request, CancellationToken cancellationToken = default);
 }

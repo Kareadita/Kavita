@@ -2,9 +2,12 @@
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
+using Hangfire;
 using Kavita.API.Database;
 using Kavita.API.Repositories;
+using Kavita.API.Services;
 using Kavita.API.Services.Plus;
 using Kavita.Common.Extensions;
 using Kavita.Common.Helpers;
@@ -20,12 +23,23 @@ using Kavita.Models.Entities.Enums;
 using Kavita.Models.Entities.Enums.Audit;
 using Kavita.Server.Extensions;
 using Kavita.Services.Helpers;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Kavita.Server.Controllers;
 
 public class MetadataController(IUnitOfWork unitOfWork, IExternalMetadataService metadataService) : BaseApiController
 {
+
+    [Authorize(PolicyGroups.AdminPolicy)]
+    [HttpPost("re-run-mappings")]
+    public ActionResult ReRunMappings([FromBody] ReRunMappingsRequest request)
+    {
+        BackgroundJob.Enqueue<IMetadataService>(s => s.ReRunMappings(request, CancellationToken.None));
+
+        return Ok();
+    }
+
     /// <summary>
     /// Fetches genres from the instance
     /// </summary>

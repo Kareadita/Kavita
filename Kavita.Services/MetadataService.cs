@@ -6,11 +6,15 @@ using System.Threading;
 using System.Threading.Tasks;
 using Hangfire;
 using Kavita.API.Database;
+using Kavita.API.Repositories;
 using Kavita.API.Services;
 using Kavita.API.Services.Helpers;
 using Kavita.API.Services.SignalR;
 using Kavita.Common.Extensions;
 using Kavita.Common.Helpers;
+using Kavita.Database.Extensions;
+using Kavita.Models.DTOs.KavitaPlus.Metadata;
+using Kavita.Models.DTOs.Metadata;
 using Kavita.Models.DTOs.Settings;
 using Kavita.Models.DTOs.SignalR;
 using Kavita.Models.Entities;
@@ -18,6 +22,10 @@ using Kavita.Models.Entities.Enums;
 using Kavita.Models.Entities.Interfaces;
 using Kavita.Services.Comparators;
 using Kavita.Services.Extensions;
+using Kavita.Services.Helpers;
+using Kavita.Services.Plus;
+using Kavita.Services.Scanner;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 
 namespace Kavita.Services;
@@ -324,6 +332,109 @@ public class MetadataService(
         await unitOfWork.CollectionTagRepository.RemoveCollectionsWithoutSeries(ct);
         await unitOfWork.AppUserProgressRepository.CleanupAbandonedChapters(ct);
 
+    }
+
+    [DisableConcurrentExecution(timeoutInSeconds: 60 * 60 * 60)]
+    public async Task ReRunMappings(ReRunMappingsRequest request, CancellationToken cancellationToken = default)
+    {
+        var settings = await unitOfWork.SettingsRepository.GetMetadataSettingDto(cancellationToken);
+
+        if (!settings.EnableExtendedMetadataProcessing)
+        {
+            logger.LogWarning("Ignoring re-run mappings request as extended metadata processing is not enabled");
+            return;
+        }
+
+        var seriesSource = unitOfWork.DataContext.Series
+            .WhereIf(!request.AllLibraries, s => request.IncludedLibraries.Contains(s.LibraryId))
+            .WhereIf(request.ExcludedLibraries.Count > 0, s => !request.ExcludedLibraries.Contains(s.LibraryId))
+            .AsQueryable()
+            .AsSplitQuery()
+            .Include(s => s.Metadata)
+            .ThenInclude(m => m.Tags)
+            .Include(m => m.Metadata)
+            .ThenInclude(m => m.Genres)
+            .Include(m => m.Volumes)
+            .ThenInclude(v => v.Chapters)
+            .ThenInclude(c => c.Tags)
+            .Include(m => m.Volumes)
+            .ThenInclude(v => v.Chapters)
+            .ThenInclude(c => c.Genres)
+            .OrderBy(s => s.Id);
+
+        var counter = 0;
+
+        await foreach (var series in seriesSource.BatchToAsyncEnumerable(25, cancellationToken))
+        {
+            try
+            {
+                await ReRunMappingsForSeries(series, settings);
+
+                if (counter++ % 5 == 0)
+                {
+                    await unitOfWork.CommitAsync(cancellationToken);
+                }
+
+            }
+            catch (Exception ex)
+            {
+                logger.LogError(ex, "Failed to re-run mappings for series {SeriesName} - {SeriesId}", series.Name, series.Id);
+            }
+        }
+
+        await unitOfWork.CommitAsync(cancellationToken);
+    }
+
+    private async Task ReRunMappingsForSeries(Series series, MetadataSettingsDto settings)
+    {
+        foreach (var chapter in series.Volumes.SelectMany(v => v.Chapters))
+        {
+            if (chapter == null) continue;
+
+            ExternalMetadataService.GenerateExternalGenreAndTagsList(
+                chapter.Genres.Select(g => g.Title).ToList(),
+                chapter.Tags.Select(g => g.Title).ToList(),
+                settings, out var newTags, out var newGenres);
+
+            try
+            {
+                await TagHelper.UpdateEntityTags(chapter.Genres, newGenres, unitOfWork.DataContext.Genre, unitOfWork);
+                await TagHelper.UpdateEntityTags(chapter.Tags, newTags, unitOfWork.DataContext.Tag, unitOfWork);
+            }
+            catch (Exception ex)
+            {
+                logger.LogError(ex, "Failed to update genres or tags for series {SeriesId} chapter {ChapterId}, skipping", series.Id, chapter.Id);
+                continue;
+            }
+
+            var allTagsAndGenres = chapter.Genres
+                .Select(g => g.Title)
+                .Concat(chapter.Tags.Select(t => t.Title));
+
+            chapter.AgeRating = ExternalMetadataService.DetermineAgeRating(allTagsAndGenres, settings.AgeRatingMappings);
+
+            chapter.TagsLocked = true;
+            chapter.GenresLocked = true;
+            chapter.AgeRatingLocked = true;
+        }
+
+        var genres = series.Volumes.SelectMany(v => v.Chapters).SelectMany(c => c.Genres).ToList();
+        var tags = series.Volumes.SelectMany(v => v.Chapters).SelectMany(c => c.Tags).ToList();
+
+        ProcessSeries.UpdateSeriesMetadataGenres(series.Metadata.Genres, genres);
+        ProcessSeries.UpdateSeriesMetadataTags(series.Metadata.Tags, tags);
+
+        var allSeriesTagsAndGenres = series.Metadata.Genres
+            .Select(g => g.Title)
+            .Concat(series.Metadata.Tags.Select(t => t.Title));
+
+        series.Metadata.AgeRating = ExternalMetadataService.DetermineAgeRating(allSeriesTagsAndGenres, settings.AgeRatingMappings);
+
+        series.Metadata.TagsLocked = true;
+        series.Metadata.GenresLocked = true;
+        series.Metadata.AgeRatingLocked = true;
+
+        logger.LogDebug("Completed re-running mappings for series {SeriesName} - {SeriesId}", series.Name, series.Id);
     }
 
     /// <summary>
