@@ -489,7 +489,7 @@ public static class QueryableExtensions
     /// <param name="cancellationToken"></param>
     /// <typeparam name="T"></typeparam>
     /// <returns></returns>
-    public static async IAsyncEnumerable<T> BatchToAsyncEnumerable<T>(
+    public static async IAsyncEnumerable<List<T>> BatchToAsyncEnumerable<T>(
         this IOrderedQueryable<T> query,
         int batchSize,
         [EnumeratorCancellation] CancellationToken cancellationToken = default)
@@ -511,10 +511,7 @@ public static class QueryableExtensions
             if (batch.Count == 0)
                 yield break;
 
-            foreach (var item in batch)
-            {
-                yield return item;
-            }
+            yield return batch;
 
             if (batch.Count < batchSize)
                 yield break;

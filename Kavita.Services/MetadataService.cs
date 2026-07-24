@@ -26,6 +26,7 @@ using Kavita.Services.Helpers;
 using Kavita.Services.Plus;
 using Kavita.Services.Scanner;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
 namespace Kavita.Services;
@@ -34,6 +35,7 @@ namespace Kavita.Services;
 /// Handles everything around Cover/ColorScape management
 /// </summary>
 public class MetadataService(
+    IServiceScopeFactory scopeFactory,
     IUnitOfWork unitOfWork,
     ILogger<MetadataService> logger,
     IEventHub eventHub,
@@ -345,47 +347,46 @@ public class MetadataService(
             return;
         }
 
-        var seriesSource = unitOfWork.DataContext.Series
+        var seriesIds = unitOfWork.DataContext.Series
             .WhereIf(!request.AllLibraries, s => request.IncludedLibraries.Contains(s.LibraryId))
             .WhereIf(request.ExcludedLibraries.Count > 0, s => !request.ExcludedLibraries.Contains(s.LibraryId))
             .AsQueryable()
             .AsSplitQuery()
-            .Include(s => s.Metadata)
-            .ThenInclude(m => m.Tags)
-            .Include(m => m.Metadata)
-            .ThenInclude(m => m.Genres)
-            .Include(m => m.Volumes)
-            .ThenInclude(v => v.Chapters)
-            .ThenInclude(c => c.Tags)
-            .Include(m => m.Volumes)
-            .ThenInclude(v => v.Chapters)
-            .ThenInclude(c => c.Genres)
-            .OrderBy(s => s.Id);
+            .AsNoTracking()
+            .Select(s => s.Id)
+            .OrderBy(s => s);
 
-        var counter = 0;
-
-        await foreach (var series in seriesSource.BatchToAsyncEnumerable(25, cancellationToken))
+        await foreach (var idBatch in seriesIds.BatchToAsyncEnumerable(25, cancellationToken))
         {
-            try
-            {
-                await ReRunMappingsForSeries(series, settings);
+            using var scope = scopeFactory.CreateScope();
+            var unitOfWork = scope.ServiceProvider.GetRequiredService<IUnitOfWork>();
 
-                if (counter++ % 5 == 0)
+            var seriesBatch = await unitOfWork.DataContext.Series
+                .Where(s => idBatch.Contains(s.Id))
+                .AsSplitQuery()
+                .Include(s => s.Metadata).ThenInclude(m => m.Tags)
+                .Include(s => s.Metadata).ThenInclude(m => m.Genres)
+                .Include(s => s.Volumes).ThenInclude(v => v.Chapters).ThenInclude(c => c.Tags)
+                .Include(s => s.Volumes).ThenInclude(v => v.Chapters).ThenInclude(c => c.Genres)
+                .ToListAsync(cancellationToken);
+
+            foreach (var series in seriesBatch)
+            {
+                try
                 {
-                    await unitOfWork.CommitAsync(cancellationToken);
+                    await ReRunMappingsForSeries(unitOfWork, series, settings);
                 }
+                catch (Exception ex)
+                {
+                    logger.LogError(ex, "Failed to re-run mappings for series {SeriesName} - {SeriesId}", series.Name, series.Id);
+                }
+            }
 
-            }
-            catch (Exception ex)
-            {
-                logger.LogError(ex, "Failed to re-run mappings for series {SeriesName} - {SeriesId}", series.Name, series.Id);
-            }
+            await unitOfWork.CommitAsync(cancellationToken);
         }
-
-        await unitOfWork.CommitAsync(cancellationToken);
     }
 
-    private async Task ReRunMappingsForSeries(Series series, MetadataSettingsDto settings)
+    private async Task ReRunMappingsForSeries(IUnitOfWork unitOfWork, Series series, MetadataSettingsDto settings)
     {
         foreach (var chapter in series.Volumes.SelectMany(v => v.Chapters))
         {
