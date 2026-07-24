@@ -181,7 +181,7 @@ jobs:
         run: echo ${{ steps.docker_build.outputs.digest }}
 
       - name: Notify Discord
-        uses: rjstone/discord-webhook-notify@v1
+        uses: rjstone/discord-webhook-notify@v2
         if: ${{ github.repository_owner == 'Kareadita' }}
         with:
             severity: info
