@@ -198,7 +198,7 @@ export class LibrarySettingsModalComponent implements OnInit {
       tap(libraryTypes => {
         this.scrobbleEnabledLibraries.set(libraryTypes);
 
-        if (!libraryTypes.includes(this.library!.type)) {
+        if (!libraryTypes.includes(this.library?.type ?? this.LibraryTypeValue)) {
           this.libraryForm.get('allowScrobbling')?.setValue(false);
           this.libraryForm.get('allowScrobbling')?.disable();
         }
