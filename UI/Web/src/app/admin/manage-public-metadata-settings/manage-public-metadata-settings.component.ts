@@ -22,6 +22,11 @@ import {LicenseService} from "../../_services/license.service";
 import {SettingSwitchComponent} from "../../settings/_components/setting-switch/setting-switch.component";
 import {RouterLink} from "@angular/router";
 import {SettingsTabId} from "../../sidenav/preference-nav/preference-nav.component";
+import {
+  ReRunMetadataMappingsModalComponent
+} from "../manage-metadata-mappings/re-run-metadata-mappings-modal/re-run-metadata-mappings-modal.component";
+import {DefaultModalOptions} from "../../_models/modal/modal-options";
+import {ModalService} from "../../_services/modal.service";
 
 /**
  * Metadata settings for which a K+ license is not required
@@ -47,6 +52,7 @@ export class ManagePublicMetadataSettingsComponent implements OnInit {
   private readonly cdRef = inject(ChangeDetectorRef);
   private readonly destroyRef = inject(DestroyRef);
   protected readonly licenseService = inject(LicenseService);
+  private readonly modalService = inject(ModalService);
 
   settingsForm: FormGroup = new FormGroup({});
   settings: MetadataSettings | undefined = undefined;
@@ -80,6 +86,10 @@ export class ManagePublicMetadataSettingsComponent implements OnInit {
     model.blacklist = exp.blacklist;
 
     return model;
+  }
+
+  reRunMappings() {
+    this.modalService.open(ReRunMetadataMappingsModalComponent, DefaultModalOptions);
   }
 
   protected readonly SettingsTabId = SettingsTabId;

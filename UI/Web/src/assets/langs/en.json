@@ -1299,6 +1299,8 @@
         "export-file-name": "Kavita Metadata Settings Export.json",
         "import-settings": "Import",
         "import-tooltip": "Import your or someone else's settings",
+        "re-run-mappings": "Re Run Mappings",
+        "re-run-mappings-tooltip": "Re run your configured metadata mappings",
         "description": "Kavita+ has the ability to download and write some limited metadata to the Database. This page allows for you to toggle what is in scope.",
         "enabled-label": "Enable Metadata Download",
         "enabled-tooltip": "Allow Kavita to download metadata and write to it's database.",
@@ -4676,6 +4678,21 @@
         "isbn-label": "{{edit-chapter-modal.isbn-label}}"
     },
 
+    "re-run-metadata-mappings-modal": {
+        "title": "Re Run mappings",
+        "close": "{{common.close}}",
+        "cancel": "{{common.cancel}}",
+        "submit": "{{common.submit}}",
+        "saving": "{{common.saving}}",
+        "all-libraries-label": "All libraries",
+        "all-libraries-tooltip": "When enabled, metadata mappings will be re-run for all libraries. Disable this option to include or exclude specific libraries.",
+        "included-libraries-title": "Included libraries",
+        "included-libraries-tooltip": "Libraries to process if all libraries is not enabled",
+        "excluded-libraries-title": "Excluded libraries",
+        "excluded-libraries-tooltip": "Libraries to skip",
+        "queued-title": "Queued re run",
+        "queued-description": "Processing will kick of shortly, please be patient."
+    },
 
     "validation": {
         "required-field": "This field is required",

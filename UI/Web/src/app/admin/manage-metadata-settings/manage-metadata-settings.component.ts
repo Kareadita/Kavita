@@ -25,6 +25,11 @@ import {
 } from "../manage-metadata-mappings/manage-metadata-mappings.component";
 import {RouterLink} from "@angular/router";
 import {SettingsTabId} from "../../sidenav/preference-nav/preference-nav.component";
+import {ModalService} from "../../_services/modal.service";
+import {
+  ReRunMetadataMappingsModalComponent
+} from "../manage-metadata-mappings/re-run-metadata-mappings-modal/re-run-metadata-mappings-modal.component";
+import {DefaultModalOptions} from "../../_models/modal/modal-options";
 
 
 @Component({
@@ -51,6 +56,7 @@ export class ManageMetadataSettingsComponent implements OnInit {
   private readonly cdRef = inject(ChangeDetectorRef);
   private readonly destroyRef = inject(DestroyRef);
   private readonly fb = inject(FormBuilder);
+  private readonly modalService = inject(ModalService);
 
   settingsForm: FormGroup = new FormGroup({});
   settings: MetadataSettings | undefined = undefined;
@@ -160,6 +166,10 @@ export class ManageMetadataSettingsComponent implements OnInit {
         .filter(([_, value]) => value)
         .map(([key, _]) => this.allMetadataSettingFields[parseInt(key.split('_')[1], 10)])
     }
+  }
+
+  reRunMappings() {
+    this.modalService.open(ReRunMetadataMappingsModalComponent, DefaultModalOptions);
   }
 
 

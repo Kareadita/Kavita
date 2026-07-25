@@ -1,8 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using AutoMapper;
+using Hangfire;
 using Kavita.API.Database;
 using Kavita.API.Services;
 using Kavita.Common;
@@ -13,6 +15,7 @@ using Kavita.Models.Constants;
 using Kavita.Models.DTOs;
 using Kavita.Models.DTOs.Email;
 using Kavita.Models.DTOs.KavitaPlus.Metadata;
+using Kavita.Models.DTOs.Metadata;
 using Kavita.Models.DTOs.Settings;
 using Kavita.Models.Entities.Enums;
 using Kavita.Server.Extensions;
@@ -239,6 +242,15 @@ public class SettingsController(
             logger.LogError(ex, "There was an issue when updating metadata settings");
             return BadRequest(ex.Message);
         }
+    }
+
+    [Authorize(PolicyGroups.AdminPolicy)]
+    [HttpPost("re-run-mappings")]
+    public ActionResult ReRunMappings([FromBody] ReRunMappingsRequest request)
+    {
+        BackgroundJob.Enqueue<IMetadataService>(s => s.ReRunMappings(request, CancellationToken.None));
+
+        return Ok();
     }
 
     /// <summary>

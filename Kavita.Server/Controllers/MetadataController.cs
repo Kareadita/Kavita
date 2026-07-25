@@ -31,15 +31,6 @@ namespace Kavita.Server.Controllers;
 public class MetadataController(IUnitOfWork unitOfWork, IExternalMetadataService metadataService) : BaseApiController
 {
 
-    [Authorize(PolicyGroups.AdminPolicy)]
-    [HttpPost("re-run-mappings")]
-    public ActionResult ReRunMappings([FromBody] ReRunMappingsRequest request)
-    {
-        BackgroundJob.Enqueue<IMetadataService>(s => s.ReRunMappings(request, CancellationToken.None));
-
-        return Ok();
-    }
-
     /// <summary>
     /// Fetches genres from the instance
     /// </summary>
