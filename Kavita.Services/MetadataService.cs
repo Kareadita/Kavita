@@ -13,6 +13,7 @@ using Kavita.API.Services.SignalR;
 using Kavita.Common.Extensions;
 using Kavita.Common.Helpers;
 using Kavita.Database.Extensions;
+using Kavita.Models.Constants;
 using Kavita.Models.DTOs.KavitaPlus.Metadata;
 using Kavita.Models.DTOs.Metadata;
 using Kavita.Models.DTOs.Settings;
@@ -336,6 +337,7 @@ public class MetadataService(
 
     }
 
+    [Queue(TaskSchedulerConstants.ScanQueue)]
     [DisableConcurrentExecution(timeoutInSeconds: 60 * 60 * 60)]
     public async Task ReRunMappings(ReRunMappingsRequest request, CancellationToken cancellationToken = default)
     {
