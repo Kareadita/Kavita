@@ -72,8 +72,16 @@ public class SettingsService(
 
         existingMetadataSetting.AgeRatingMappings = dto.AgeRatingMappings ?? [];
 
-        existingMetadataSetting.Blacklist = (dto.Blacklist ?? []).Where(s => !string.IsNullOrWhiteSpace(s)).DistinctBy(d => d.ToNormalized()).ToList() ?? [];
-        existingMetadataSetting.Whitelist = (dto.Whitelist ?? []).Where(s => !string.IsNullOrWhiteSpace(s)).DistinctBy(d => d.ToNormalized()).ToList() ?? [];
+        existingMetadataSetting.Blacklist = (dto.Blacklist ?? [])
+            .Where(s => !string.IsNullOrWhiteSpace(s))
+            .DistinctBy(d => d.ToNormalized())
+            .Order()
+            .ToList();
+        existingMetadataSetting.Whitelist = (dto.Whitelist ?? [])
+            .Where(s => !string.IsNullOrWhiteSpace(s))
+            .DistinctBy(d => d.ToNormalized())
+            .Order()
+            .ToList();
         existingMetadataSetting.Overrides = [.. dto.Overrides ?? []];
         existingMetadataSetting.PersonRoles = dto.PersonRoles ?? [];
 
