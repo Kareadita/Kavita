@@ -13,6 +13,8 @@ namespace Kavita.Models.DTOs.KavitaPlus.Metadata;
 public sealed record ExternalSeriesDetailDto
 {
     public string Name { get; set; }
+    public ALMediaTitle Titles { get; set; } = new();
+    public Dictionary<string, IList<LocalizedTitleDto>> LocalizedTitles { get; set; } = [];
     public int? AniListId { get; set; }
     public long? MALId { get; set; }
     /// <summary>
