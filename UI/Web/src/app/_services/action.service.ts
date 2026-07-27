@@ -1221,10 +1221,10 @@ export class ActionService {
         return of(this.fromAction(action, bookmarks, 'none'));
 
       case Action.Delete:
-        return from(this.confirmService.confirm(translate('bookmarks.confirm-single-delete', {seriesName: ''}))).pipe(
+        return from(this.confirmService.confirm(translate('bookmarks.confirm-delete', {seriesName: ''}))).pipe(
           filter(confirmed => confirmed),
           switchMap(() => this.readerService.clearMultipleBookmarks(seriesIds)),
-          tap(() => this.toastr.success(translate('bookmarks.delete-single-success'))),
+          tap(() => this.toastr.success(translate('bookmarks.delete-success'))),
           map(() => this.fromAction(action, bookmarks, 'remove'))
         );
 
