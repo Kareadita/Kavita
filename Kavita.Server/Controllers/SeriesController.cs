@@ -213,10 +213,18 @@ public class SeriesController(
             series.SortName = updateSeries.SortName.Trim();
         }
 
-        var newNormalizedLocalizedName = updateSeries.LocalizedName?.Trim().ToNormalized();
+        var newLocalizedName = updateSeries.LocalizedName?.Trim();
+        var newNormalizedLocalizedName = newLocalizedName.ToNormalized();
         if (series.NormalizedLocalizedName != newNormalizedLocalizedName)
         {
-            series.LocalizedName = updateSeries.LocalizedName?.Trim();
+            // A localized name that collides (normalized) with another series' name in the library+format breaks the scanner
+            if (!string.IsNullOrEmpty(newNormalizedLocalizedName) && !await unitOfWork.SeriesRepository.IsSeriesNameUniqueInLibraryAsync(
+                    series.LibraryId, series.Format, newNormalizedLocalizedName, series.Id, ct))
+            {
+                return BadRequest(await localizationService.TranslateAsync(UserId, "series-localized-name-exists"));
+            }
+
+            series.LocalizedName = newLocalizedName;
             series.NormalizedLocalizedName = newNormalizedLocalizedName;
 
             series.Metadata.KPlusOverrides.Remove(MetadataSettingField.LocalizedName);

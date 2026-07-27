@@ -115,6 +115,7 @@ public interface ISeriesRepository
     /// <see cref="GetFullSeriesByAnyName"/> throw during a scan.
     /// </summary>
     Task<bool> IsSeriesNameUniqueInLibraryAsync(int libraryId, MangaFormat format, string normalizedName, int excludeSeriesId, CancellationToken ct = default);
+    Task<HashSet<string>> GetTakenNormalizedNamesInLibraryAsync(int libraryId, MangaFormat format, int excludeSeriesId, CancellationToken ct = default);
     Task<Series?> GetSeriesFromExternalMetadata(IList<string> seriesNames, IList<MangaFormat> formats,
         int userId, ExternalMetadataIdsDto? dto = null, SeriesIncludes includes = SeriesIncludes.None, CancellationToken ct = default);
     public Task<IList<Series>> GetAllSeriesByAnyNameAsync(string seriesName, string localizedName, int libraryId,

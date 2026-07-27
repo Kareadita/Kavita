@@ -722,6 +722,125 @@ public class ExternalMetadataServiceTests: AbstractDbTest
         Assert.True(string.IsNullOrEmpty(postSeries.LocalizedName));
     }
 
+    [Fact]
+    public async Task LocalizedName_SynonymCollidesWithOtherSeries_PicksNextUnique()
+    {
+        var (unitOfWork, context, mapper) = await CreateDatabase();
+        var (externalMetadataService, _, _, _) = await Setup(unitOfWork, context, mapper);
+
+        const string seriesName = "Test - Localized Name";
+        var series = new SeriesBuilder(seriesName)
+            .WithLibraryId(1)
+            .WithLocalizedNameAllowEmpty(string.Empty)
+            .WithMetadata(new SeriesMetadataBuilder()
+                .Build())
+            .Build();
+        context.Series.Attach(series);
+
+        // Another series already carries this name; picking it as the localized name would break the scanner's
+        // SingleOrDefault lookup, so it must be skipped in favour of the next unique candidate.
+        var other = new SeriesBuilder("Kimchi")
+            .WithLibraryId(1)
+            .Build();
+        context.Series.Attach(other);
+        await context.SaveChangesAsync();
+
+        var metadataSettings = await unitOfWork.SettingsRepository.GetMetadataSettings();
+        metadataSettings.Enabled = true;
+        metadataSettings.EnableLocalizedName = true;
+        context.MetadataSettings.Update(metadataSettings);
+        await context.SaveChangesAsync();
+
+        // Reversed order is ["Kimchi", "Bibimbap"] - Kimchi collides, so Bibimbap should win
+        await externalMetadataService.WriteExternalMetadataToSeries(new ExternalSeriesDetailDto()
+        {
+            Name = seriesName,
+            Synonyms = [seriesName, "設定しないでください", "Bibimbap", "Kimchi"]
+        }, 1);
+
+        var postSeries = await unitOfWork.SeriesRepository.GetSeriesByIdAsync(1, SeriesIncludes.Metadata);
+        Assert.NotNull(postSeries);
+        Assert.Equal("Bibimbap", postSeries.LocalizedName);
+    }
+
+    [Fact]
+    public async Task LocalizedName_AllSynonymsCollide_NoModification()
+    {
+        var (unitOfWork, context, mapper) = await CreateDatabase();
+        var (externalMetadataService, _, _, _) = await Setup(unitOfWork, context, mapper);
+
+        const string seriesName = "Test - Localized Name";
+        var series = new SeriesBuilder(seriesName)
+            .WithLibraryId(1)
+            .WithLocalizedNameAllowEmpty(string.Empty)
+            .WithMetadata(new SeriesMetadataBuilder()
+                .Build())
+            .Build();
+        context.Series.Attach(series);
+
+        var other = new SeriesBuilder("Kimchi")
+            .WithLibraryId(1)
+            .Build();
+        context.Series.Attach(other);
+        await context.SaveChangesAsync();
+
+        var metadataSettings = await unitOfWork.SettingsRepository.GetMetadataSettings();
+        metadataSettings.Enabled = true;
+        metadataSettings.EnableLocalizedName = true;
+        context.MetadataSettings.Update(metadataSettings);
+        await context.SaveChangesAsync();
+
+        // The only valid roman synonym collides with another series - nothing should be written
+        await externalMetadataService.WriteExternalMetadataToSeries(new ExternalSeriesDetailDto()
+        {
+            Name = seriesName,
+            Synonyms = [seriesName, "設定しないでください", "Kimchi"]
+        }, 1);
+
+        var postSeries = await unitOfWork.SeriesRepository.GetSeriesByIdAsync(1, SeriesIncludes.Metadata);
+        Assert.NotNull(postSeries);
+        Assert.True(string.IsNullOrEmpty(postSeries.LocalizedName));
+    }
+
+    [Fact]
+    public async Task LocalizedName_NameBranchCollidesWithOtherSeries_NoModification()
+    {
+        var (unitOfWork, context, mapper) = await CreateDatabase();
+        var (externalMetadataService, _, _, _) = await Setup(unitOfWork, context, mapper);
+
+        const string seriesName = "Test - Localized Name";
+        var series = new SeriesBuilder(seriesName)
+            .WithLibraryId(1)
+            .WithLocalizedNameAllowEmpty(string.Empty)
+            .WithMetadata(new SeriesMetadataBuilder()
+                .Build())
+            .Build();
+        context.Series.Attach(series);
+
+        var other = new SeriesBuilder("Kimchi")
+            .WithLibraryId(1)
+            .Build();
+        context.Series.Attach(other);
+        await context.SaveChangesAsync();
+
+        var metadataSettings = await unitOfWork.SettingsRepository.GetMetadataSettings();
+        metadataSettings.Enabled = true;
+        metadataSettings.EnableLocalizedName = true;
+        context.MetadataSettings.Update(metadataSettings);
+        await context.SaveChangesAsync();
+
+        // External Name differs from the series name and is roman, but it collides with another series
+        await externalMetadataService.WriteExternalMetadataToSeries(new ExternalSeriesDetailDto()
+        {
+            Name = "Kimchi",
+            Synonyms = []
+        }, 1);
+
+        var postSeries = await unitOfWork.SeriesRepository.GetSeriesByIdAsync(1, SeriesIncludes.Metadata);
+        Assert.NotNull(postSeries);
+        Assert.True(string.IsNullOrEmpty(postSeries.LocalizedName));
+    }
+
     #endregion
 
     #region Publication Status

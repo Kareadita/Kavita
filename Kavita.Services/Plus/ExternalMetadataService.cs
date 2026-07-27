@@ -865,7 +865,7 @@ public class ExternalMetadataService : IExternalMetadataService
 
             Accumulate(ref madeModification, fieldChanges, UpdateSummary(series, settings, externalMetadata));
             Accumulate(ref madeModification, fieldChanges, UpdateReleaseYear(series, settings, externalMetadata));
-            Accumulate(ref madeModification, fieldChanges, UpdateLocalizedName(series, settings, externalMetadata));
+            Accumulate(ref madeModification, fieldChanges, await UpdateLocalizedName(series, settings, externalMetadata, ct));
             Accumulate(ref madeModification, fieldChanges, await UpdateName(series, settings, externalMetadata, ct));
             Accumulate(ref madeModification, fieldChanges, await UpdatePublicationStatus(series, settings, externalMetadata));
             Accumulate(ref madeModification, fieldChanges, UpdateExternalIds(series, externalMetadata));
@@ -2112,7 +2112,8 @@ public class ExternalMetadataService : IExternalMetadataService
         return (true, new MetadataFieldChangeDto(MetadataFieldChangeKind.ReleaseYear, from, series.Metadata.ReleaseYear));
     }
 
-    private static (bool, MetadataFieldChangeDto?) UpdateLocalizedName(Series series, MetadataSettingsDto settings, ExternalSeriesDetailDto externalMetadata)
+    private async Task<(bool, MetadataFieldChangeDto?)> UpdateLocalizedName(Series series, MetadataSettingsDto settings,
+        ExternalSeriesDetailDto externalMetadata, CancellationToken ct)
     {
         if (!settings.EnableLocalizedName) return (false, null);
 
@@ -2128,29 +2129,37 @@ public class ExternalMetadataService : IExternalMetadataService
 
         var from = series.LocalizedName;
 
-        // Expansion: Allow the user to make a selection based on a K+ metadata setting: Title Language (code), Localized Language (code)
+        // A localized name that normalizes to another series' Name/LocalizedName/OriginalName in the same library+format
+        // breaks the scanner
+        var takenNames = await _unitOfWork.SeriesRepository.GetTakenNormalizedNamesInLibraryAsync(
+            series.LibraryId, series.Format, series.Id, ct);
+        string? chosen = null;
 
         // We need to make the best appropriate guess
         if (externalMetadata.Name == series.Name)
         {
-            // Choose closest (usually last) synonym
+            // Choose the closest (usually last) synonym that is unique across the library
             var validSynonyms = externalMetadata.Synonyms
                 .Where(IsRomanCharacters)
                 .Where(s => s.ToNormalized() != series.Name.ToNormalized())
+                .Reverse()
                 .ToList();
 
-            if (validSynonyms.Count == 0) return (false, null);
-
-            series.LocalizedName = validSynonyms[^1];
-            series.LocalizedNameLocked = true;
+            chosen = validSynonyms.FirstOrDefault(synonym => !takenNames.Contains(synonym.ToNormalized()));
         }
-        else if (IsRomanCharacters(externalMetadata.Name))
+        else if (IsRomanCharacters(externalMetadata.Name) && !takenNames.Contains(externalMetadata.Name.ToNormalized()))
         {
-            series.LocalizedName = externalMetadata.Name;
-            series.LocalizedNameLocked = true;
+            chosen = externalMetadata.Name;
         }
 
+        if (chosen == null)
+        {
+            _logger.LogInformation("[K+] Skipping localized name write for Series {SeriesId}: no unique candidate was found", series.Id);
+            return (false, null);
+        }
 
+        series.LocalizedName = chosen;
+        series.LocalizedNameLocked = true;
         series.Metadata.AddKPlusOverride(MetadataSettingField.LocalizedName);
 
         return (true, new MetadataFieldChangeDto(MetadataFieldChangeKind.LocalizedName, from, series.LocalizedName));

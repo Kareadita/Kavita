@@ -1370,6 +1370,27 @@ public class SeriesRepository(DataContext context, IMapper mapper) : ISeriesRepo
                 || s.NormalizedOriginalName == normalizedName, ct);
     }
 
+    public async Task<HashSet<string>> GetTakenNormalizedNamesInLibraryAsync(int libraryId, MangaFormat format,
+        int excludeSeriesId, CancellationToken ct = default)
+    {
+        // Pull every normalized name column for the library+format in one query so callers can test many
+        // candidates against an in-memory set instead of issuing a query per candidate.
+        var rows = await context.Series
+            .Where(s => s.LibraryId == libraryId && s.Format == format && s.Id != excludeSeriesId)
+            .Select(s => new { s.NormalizedName, s.NormalizedLocalizedName, s.NormalizedOriginalName })
+            .ToListAsync(ct);
+
+        var taken = new HashSet<string>();
+        foreach (var row in rows)
+        {
+            if (!string.IsNullOrEmpty(row.NormalizedName)) taken.Add(row.NormalizedName);
+            if (!string.IsNullOrEmpty(row.NormalizedLocalizedName)) taken.Add(row.NormalizedLocalizedName);
+            if (!string.IsNullOrEmpty(row.NormalizedOriginalName)) taken.Add(row.NormalizedOriginalName);
+        }
+
+        return taken;
+    }
+
     public async Task<Series?> GetSeriesFromExternalMetadata(IList<string> seriesNames, IList<MangaFormat> formats,
         int userId, ExternalMetadataIdsDto? dto = null, SeriesIncludes includes = SeriesIncludes.None, CancellationToken ct = default)
     {

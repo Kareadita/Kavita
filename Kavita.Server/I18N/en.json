@@ -70,6 +70,7 @@
     "generic-send-to": "There was an error sending the file(s) to the device",
     "series-doesnt-exist": "Series does not exist",
     "series-name-exists": "A series with this name already exists in this library",
+    "series-localized-name-exists": "Another series in this library already uses this name",
     "client-device-doesnt-exist": "Client Device does not exist",
     "volume-doesnt-exist": "Volume does not exist",
     "bookmarks-empty": "Bookmarks cannot be empty",
