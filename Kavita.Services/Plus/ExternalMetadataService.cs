@@ -1230,7 +1230,8 @@ public class ExternalMetadataService : IExternalMetadataService
         GenerateGenreAndTagLists(genres, tags, settings, ref processedTags, ref processedGenres);
     }
 
-    private async Task<(bool, MetadataFieldChangeDto?)> UpdateRelationships(Series series, MetadataSettingsDto settings, IList<SeriesRelationship>? externalMetadataRelations, AppUser defaultAdmin)
+    private async Task<(bool, MetadataFieldChangeDto?)> UpdateRelationships(Series series, MetadataSettingsDto settings,
+        IList<SeriesRelationship>? externalMetadataRelations, AppUser defaultAdmin)
     {
         if (!settings.EnableRelationships) return (false, null);
 
@@ -2126,6 +2127,8 @@ public class ExternalMetadataService : IExternalMetadataService
         }
 
         var from = series.LocalizedName;
+
+        // Expansion: Allow the user to make a selection based on a K+ metadata setting: Title Language (code), Localized Language (code)
 
         // We need to make the best appropriate guess
         if (externalMetadata.Name == series.Name)

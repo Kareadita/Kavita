@@ -100,6 +100,12 @@ export class MatchSeriesModalComponent implements OnInit {
     return `https://mangabaka.org/search?q=${encodeURIComponent(this.series().name)}`;
   });
 
+  hardcoverSearchUrl = computed(() => {
+    const isStandalone = this.series().isStandAlone;
+    const extraQuery = (isStandalone) ? '&type=Series' : '';
+    return `https://hardcover.app/search?q=${encodeURIComponent(this.series().name)}${extraQuery}`;
+  });
+
   constructor() {
     this.canSaveDontMatch = computed(() => this.isDontMatch() === true && !this.series().dontMatch);
     this.coverImageUrl = computed(() => this.imageService.getSeriesCoverImage(this.series().id));
