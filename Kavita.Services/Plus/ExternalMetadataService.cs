@@ -2199,6 +2199,10 @@ public class ExternalMetadataService : IExternalMetadataService
         var from = series.Name;
         series.Name = newName;
         series.NormalizedName = normalizedNewName;
+        series.SortName = series.Library is {RemovePrefixForSortName: true}
+            ? BookSortTitlePrefixHelper.GetSortTitle(series.Name)
+            : series.Name;
+
         series.NameLocked = true;
         series.Metadata.AddKPlusOverride(MetadataSettingField.Name);
 
