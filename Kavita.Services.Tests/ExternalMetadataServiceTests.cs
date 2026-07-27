@@ -841,6 +841,131 @@ public class ExternalMetadataServiceTests: AbstractDbTest
         Assert.True(string.IsNullOrEmpty(postSeries.LocalizedName));
     }
 
+    [Fact]
+    public async Task LocalizedName_Override_MergedFolderAnchor_NoModification()
+    {
+        var (unitOfWork, context, mapper) = await CreateDatabase();
+        var (externalMetadataService, _, _, _) = await Setup(unitOfWork, context, mapper);
+
+        // A folder literally named "Chained Soldier" is merged under this series via LocalizedName.
+        // OriginalName only anchors "Mato Seihei no Slave", so overwriting LocalizedName would orphan the folder.
+        const string seriesName = "Mato Seihei no Slave";
+        var series = new SeriesBuilder(seriesName)
+            .WithLibraryId(1)
+            .WithFormat(MangaFormat.Archive)
+            .WithLocalizedName("Chained Soldier", true)
+            .WithVolume(new VolumeBuilder("1")
+                .WithChapter(new ChapterBuilder("1")
+                    .WithFile(new MangaFileBuilder("C:/Manga/Chained Soldier/Chained Soldier v01.cbz", MangaFormat.Archive).Build())
+                    .Build())
+                .Build())
+            .WithMetadata(new SeriesMetadataBuilder().Build())
+            .Build();
+        context.Series.Attach(series);
+        await context.SaveChangesAsync();
+
+        var metadataSettings = await unitOfWork.SettingsRepository.GetMetadataSettings();
+        metadataSettings.Enabled = true;
+        metadataSettings.EnableLocalizedName = true;
+        metadataSettings.Overrides = [MetadataSettingField.LocalizedName];
+        context.MetadataSettings.Update(metadataSettings);
+        await context.SaveChangesAsync();
+
+        await externalMetadataService.WriteExternalMetadataToSeries(new ExternalSeriesDetailDto()
+        {
+            Name = seriesName,
+            Synonyms = [seriesName, "Slave Corps"]
+        }, 1);
+
+        var postSeries = await unitOfWork.SeriesRepository.GetSeriesByIdAsync(1, SeriesIncludes.Metadata);
+        Assert.NotNull(postSeries);
+        Assert.Equal("Chained Soldier", postSeries.LocalizedName);
+    }
+
+    [Fact]
+    public async Task LocalizedName_Override_AliasNotOnDisk_Modification()
+    {
+        var (unitOfWork, context, mapper) = await CreateDatabase();
+        var (externalMetadataService, _, _, _) = await Setup(unitOfWork, context, mapper);
+
+        // LocalizedName is a display alias no folder uses (files live under the series name), so overwriting
+        // it is safe and the force override should still apply.
+        const string seriesName = "Mato Seihei no Slave";
+        var series = new SeriesBuilder(seriesName)
+            .WithLibraryId(1)
+            .WithFormat(MangaFormat.Archive)
+            .WithLocalizedName("Localized Name here", true)
+            .WithVolume(new VolumeBuilder("1")
+                .WithChapter(new ChapterBuilder("1")
+                    .WithFile(new MangaFileBuilder("C:/Manga/Mato Seihei no Slave/vol01.cbz", MangaFormat.Archive).Build())
+                    .Build())
+                .Build())
+            .WithMetadata(new SeriesMetadataBuilder().Build())
+            .Build();
+        context.Series.Attach(series);
+        await context.SaveChangesAsync();
+
+        var metadataSettings = await unitOfWork.SettingsRepository.GetMetadataSettings();
+        metadataSettings.Enabled = true;
+        metadataSettings.EnableLocalizedName = true;
+        metadataSettings.Overrides = [MetadataSettingField.LocalizedName];
+        context.MetadataSettings.Update(metadataSettings);
+        await context.SaveChangesAsync();
+
+        await externalMetadataService.WriteExternalMetadataToSeries(new ExternalSeriesDetailDto()
+        {
+            Name = seriesName,
+            Synonyms = [seriesName, "Slave Corps"]
+        }, 1);
+
+        var postSeries = await unitOfWork.SeriesRepository.GetSeriesByIdAsync(1, SeriesIncludes.Metadata);
+        Assert.NotNull(postSeries);
+        Assert.Equal("Slave Corps", postSeries.LocalizedName);
+    }
+
+    [Fact]
+    public async Task Name_MergedFolderAnchor_NoModification()
+    {
+        var (unitOfWork, context, mapper) = await CreateDatabase();
+        var (externalMetadataService, _, _, _) = await Setup(unitOfWork, context, mapper);
+
+        // Name anchors a folder literally named "Mato Seihei no Slave"; OriginalName anchors the other folder
+        // ("Chained Soldier"). Renaming Name to the external title would orphan the "Mato Seihei no Slave" folder.
+        const string seriesName = "Mato Seihei no Slave";
+        var series = new SeriesBuilder(seriesName)
+            .WithLibraryId(1)
+            .WithFormat(MangaFormat.Archive)
+            .WithLocalizedNameAllowEmpty(string.Empty)
+            .WithVolume(new VolumeBuilder("1")
+                .WithChapter(new ChapterBuilder("1")
+                    .WithFile(new MangaFileBuilder("C:/Manga/Mato Seihei no Slave/vol01.cbz", MangaFormat.Archive).Build())
+                    .Build())
+                .Build())
+            .WithMetadata(new SeriesMetadataBuilder().Build())
+            .Build();
+        series.OriginalName = "Chained Soldier";
+        series.NormalizedOriginalName = "Chained Soldier".ToNormalized();
+        context.Series.Attach(series);
+        await context.SaveChangesAsync();
+
+        var metadataSettings = await unitOfWork.SettingsRepository.GetMetadataSettings();
+        metadataSettings.Enabled = true;
+        metadataSettings.EnableName = true;
+        metadataSettings.EnableLocalizedName = false;
+        context.MetadataSettings.Update(metadataSettings);
+        await context.SaveChangesAsync();
+
+        await externalMetadataService.WriteExternalMetadataToSeries(new ExternalSeriesDetailDto()
+        {
+            Name = "Some New Title",
+            Synonyms = []
+        }, 1);
+
+        var postSeries = await unitOfWork.SeriesRepository.GetSeriesByIdAsync(1, SeriesIncludes.Metadata);
+        Assert.NotNull(postSeries);
+        Assert.Equal(seriesName, postSeries.Name);
+    }
+
     #endregion
 
     #region Publication Status

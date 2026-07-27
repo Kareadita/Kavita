@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading;
@@ -865,8 +866,8 @@ public class ExternalMetadataService : IExternalMetadataService
 
             Accumulate(ref madeModification, fieldChanges, UpdateSummary(series, settings, externalMetadata));
             Accumulate(ref madeModification, fieldChanges, UpdateReleaseYear(series, settings, externalMetadata));
+            Accumulate(ref madeModification, fieldChanges, await UpdateName(series, settings, externalMetadata, ct)); // Put first so localized name can be set to something good
             Accumulate(ref madeModification, fieldChanges, await UpdateLocalizedName(series, settings, externalMetadata, ct));
-            Accumulate(ref madeModification, fieldChanges, await UpdateName(series, settings, externalMetadata, ct));
             Accumulate(ref madeModification, fieldChanges, await UpdatePublicationStatus(series, settings, externalMetadata));
             Accumulate(ref madeModification, fieldChanges, UpdateExternalIds(series, externalMetadata));
 
@@ -2158,7 +2159,14 @@ public class ExternalMetadataService : IExternalMetadataService
             return (false, null);
         }
 
+        if (await WouldOrphanMergedFiles(series, series.LocalizedName, chosen, series.NormalizedName, series.NormalizedOriginalName, ct))
+        {
+            _logger.LogInformation("[K+] Skipping localized name write for Series {SeriesId}: current value anchors merged files on disk", series.Id);
+            return (false, null);
+        }
+
         series.LocalizedName = chosen;
+        series.NormalizedLocalizedName = chosen.ToNormalized();
         series.LocalizedNameLocked = true;
         series.Metadata.AddKPlusOverride(MetadataSettingField.LocalizedName);
 
@@ -2196,6 +2204,12 @@ public class ExternalMetadataService : IExternalMetadataService
             return (false, null);
         }
 
+        if (await WouldOrphanMergedFiles(series, series.Name, newName, series.NormalizedLocalizedName, series.NormalizedOriginalName, ct))
+        {
+            _logger.LogInformation("[K+] Skipping name write for Series {SeriesId}: current name anchors merged files on disk", series.Id);
+            return (false, null);
+        }
+
         var from = series.Name;
         series.Name = newName;
         series.NormalizedName = normalizedNewName;
@@ -2207,6 +2221,32 @@ public class ExternalMetadataService : IExternalMetadataService
         series.Metadata.AddKPlusOverride(MetadataSettingField.Name);
 
         return (true, new MetadataFieldChangeDto(MetadataFieldChangeKind.Name, from, series.Name));
+    }
+
+    /// <summary>
+    /// Guards a K+ rename from orphaning merged files.
+    /// <example>
+    /// A folder literally named "Chained Soldier" is merged under Name "Mato Seihei no Slave" via
+    /// LocalizedName "Chained Soldier". OriginalName only anchors "Mato Seihei no Slave", so if K+ overwrites
+    /// LocalizedName the scanner stops matching the "Chained Soldier" folder and splits it into a new series.
+    /// </example>
+    /// Returns true when <paramref name="droppedName"/> still matches a folder on disk and is not covered by
+    /// the other two name fields - so the write must be skipped even under a force override.
+    /// </summary>
+    private async Task<bool> WouldOrphanMergedFiles(Series series, string droppedName, string proposedName,
+        string survivorA, string survivorB, CancellationToken ct)
+    {
+        var dropped = droppedName.ToNormalized();
+        if (string.IsNullOrEmpty(dropped)) return false;
+        if (dropped == proposedName.ToNormalized()) return false;       // not actually changing
+        if (dropped == survivorA || dropped == survivorB) return false; // still held by Name/OriginalName
+
+        var files = await _unitOfWork.SeriesRepository.GetFilesForSeriesAsync(series.Id, ct);
+        return files
+            .Select(f => Path.GetDirectoryName(f.FilePath))
+            .Where(d => !string.IsNullOrEmpty(d))
+            .SelectMany(d => d!.Split(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar))
+            .Any(segment => segment.ToNormalized() == dropped || Parser.CleanTitle(segment).ToNormalized() == dropped);
     }
 
     private static (bool, MetadataFieldChangeDto?) UpdateSummary(Series series, MetadataSettingsDto settings, ExternalSeriesDetailDto externalMetadata)
