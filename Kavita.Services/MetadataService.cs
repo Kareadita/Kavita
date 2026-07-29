@@ -358,12 +358,23 @@ public class MetadataService(
             .Select(s => s.Id)
             .OrderBy(s => s);
 
-        await foreach (var idBatch in seriesIds.BatchToAsyncEnumerable(25, cancellationToken))
-        {
-            using var scope = scopeFactory.CreateScope();
-            var unitOfWork = scope.ServiceProvider.GetRequiredService<IUnitOfWork>();
+        const int batchSize = 25;
 
-            var seriesBatch = await unitOfWork.DataContext.Series
+        var count = await seriesIds.CountAsync(cancellationToken);
+        var totalBatches = (count + batchSize - 1) / batchSize;
+        float currentBatch = 0;
+
+        await eventHub.SendMessageAsync(MessageFactory.NotificationProgress, MessageFactory.ReRunMappingsProgressEvent(
+            ProgressEventType.Started, 0), ct: cancellationToken);
+
+        await foreach (var idBatch in seriesIds.BatchToAsyncEnumerable(batchSize, cancellationToken))
+        {
+            currentBatch++;
+
+            using var scope = scopeFactory.CreateScope();
+            var scopedUnitOfWork = scope.ServiceProvider.GetRequiredService<IUnitOfWork>();
+
+            var seriesBatch = await scopedUnitOfWork.DataContext.Series
                 .Where(s => idBatch.Contains(s.Id))
                 .AsSplitQuery()
                 .Include(s => s.Metadata).ThenInclude(m => m.Tags)
@@ -376,7 +387,7 @@ public class MetadataService(
             {
                 try
                 {
-                    await ReRunMappingsForSeries(unitOfWork, series, settings);
+                    await ReRunMappingsForSeries(scopedUnitOfWork, series, settings);
                 }
                 catch (Exception ex)
                 {
@@ -384,11 +395,17 @@ public class MetadataService(
                 }
             }
 
-            await unitOfWork.CommitAsync(cancellationToken);
+            await scopedUnitOfWork.CommitAsync(cancellationToken);
+
+            await eventHub.SendMessageAsync(MessageFactory.NotificationProgress,
+                MessageFactory.ReRunMappingsProgressEvent(ProgressEventType.Updated, currentBatch / totalBatches), ct: cancellationToken);
         }
+
+        await eventHub.SendMessageAsync(MessageFactory.NotificationProgress,
+            MessageFactory.ReRunMappingsProgressEvent(ProgressEventType.Ended, 1), ct: cancellationToken);
     }
 
-    private async Task ReRunMappingsForSeries(IUnitOfWork unitOfWork, Series series, MetadataSettingsDto settings)
+    private async Task ReRunMappingsForSeries(IUnitOfWork scopedUnitOfWork, Series series, MetadataSettingsDto settings)
     {
         foreach (var chapter in series.Volumes.SelectMany(v => v.Chapters))
         {
@@ -401,8 +418,8 @@ public class MetadataService(
 
             try
             {
-                await TagHelper.UpdateEntityTags(chapter.Genres, newGenres, unitOfWork.DataContext.Genre, unitOfWork);
-                await TagHelper.UpdateEntityTags(chapter.Tags, newTags, unitOfWork.DataContext.Tag, unitOfWork);
+                await TagHelper.UpdateEntityTags(chapter.Genres, newGenres, scopedUnitOfWork.DataContext.Genre, scopedUnitOfWork);
+                await TagHelper.UpdateEntityTags(chapter.Tags, newTags, scopedUnitOfWork.DataContext.Tag, scopedUnitOfWork);
             }
             catch (Exception ex)
             {

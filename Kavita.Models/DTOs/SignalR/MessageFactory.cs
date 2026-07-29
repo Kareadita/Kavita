@@ -204,6 +204,10 @@ public static class MessageFactory
     /// The K+ Metadata for a series has been updated
     /// </summary>
     public const string ExternalMetadataUpdate = nameof(ExternalMetadataUpdate);
+    /// <summary>
+    /// Progress event send after a batch completes
+    /// </summary>
+    public const string ReRunMappingsProgress = nameof(ReRunMappingsProgress);
 
 
     public static SignalRMessage DashboardUpdateEvent(int userId)
@@ -879,6 +883,21 @@ public static class MessageFactory
             Body = new
             {
                 SeriesId = seriesId
+            }
+        };
+    }
+
+    public static SignalRMessage ReRunMappingsProgressEvent(string progressEventType, float progress)
+    {
+        return new SignalRMessage()
+        {
+            Name = ReRunMappingsProgress,
+            Title = "Re-run mappings",
+            Progress = ProgressType.Determinate,
+            EventType = progressEventType,
+            Body = new
+            {
+                Progress = progress,
             }
         };
     }
