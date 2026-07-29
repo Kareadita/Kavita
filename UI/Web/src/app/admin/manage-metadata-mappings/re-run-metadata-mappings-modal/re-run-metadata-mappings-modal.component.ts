@@ -3,12 +3,13 @@ import {NgbActiveModal} from "@ng-bootstrap/ng-bootstrap";
 import {SettingsService} from "../../settings.service";
 import {LibraryService} from "../../../_services/library.service";
 import {
+  AbstractControl,
   FormArray,
   FormControl,
   FormGroup,
   FormsModule,
   NonNullableFormBuilder,
-  ReactiveFormsModule
+  ReactiveFormsModule, ValidationErrors, ValidatorFn
 } from "@angular/forms";
 import {Library} from "../../../_models/library/library";
 import {catchError, finalize, map, tap} from "rxjs/operators";
@@ -58,7 +59,7 @@ export class ReRunMetadataMappingsModalComponent implements OnInit {
       allLibraries: this.fb.control(false),
       includedLibraries: this.fb.control<number[]>([]),
       excludedLibraries: this.fb.control<number[]>([]),
-    });
+    }, { validators: [atLeastOneLibraryValidator()] });
 
     this.libraryService.getLibraries().pipe(
       tap(libraries => this.libraries.set(libraries)),
@@ -123,4 +124,20 @@ export class ReRunMetadataMappingsModalComponent implements OnInit {
     ).subscribe();
   }
 
+}
+
+function atLeastOneLibraryValidator(): ValidatorFn {
+  return (control: AbstractControl): ValidationErrors | null => {
+    const allLibraries = control.get('allLibraries')?.value;
+    const includedLibraries = control.get('includedLibraries')?.value;
+
+    const hasAllLibraries = !!allLibraries;
+    const hasIncludedLibraries = Array.isArray(includedLibraries) && includedLibraries.length > 0;
+
+    if (hasAllLibraries || hasIncludedLibraries) {
+      return null;
+    }
+
+    return { librarySelectionRequired: true };
+  };
 }
