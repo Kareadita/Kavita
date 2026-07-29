@@ -72,16 +72,8 @@ public class SettingsService(
 
         existingMetadataSetting.AgeRatingMappings = dto.AgeRatingMappings ?? [];
 
-        existingMetadataSetting.Blacklist = (dto.Blacklist ?? [])
-            .Where(s => !string.IsNullOrWhiteSpace(s))
-            .DistinctBy(d => d.ToNormalized())
-            .Order()
-            .ToList();
-        existingMetadataSetting.Whitelist = (dto.Whitelist ?? [])
-            .Where(s => !string.IsNullOrWhiteSpace(s))
-            .DistinctBy(d => d.ToNormalized())
-            .Order()
-            .ToList();
+        existingMetadataSetting.Blacklist = NormalizeTags(dto.Blacklist);
+        existingMetadataSetting.Whitelist = NormalizeTags(dto.Whitelist);
         existingMetadataSetting.Overrides = [.. dto.Overrides ?? []];
         existingMetadataSetting.PersonRoles = dto.PersonRoles ?? [];
 
@@ -113,6 +105,15 @@ public class SettingsService(
 
         // Return updated settings
         return await unitOfWork.SettingsRepository.GetMetadataSettingDto(ct);
+
+        List<string> NormalizeTags(IEnumerable<string>? tags)
+        {
+            return (tags ?? [])
+                .Where(s => !string.IsNullOrWhiteSpace(s))
+                .DistinctBy(d => d.ToNormalized())
+                .Order()
+                .ToList();
+        }
     }
 
     public async Task<FieldMappingsImportResultDto> ImportFieldMappings(FieldMappingsDto dto,

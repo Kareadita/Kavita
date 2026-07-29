@@ -352,9 +352,7 @@ public class MetadataService(
         var seriesIds = unitOfWork.DataContext.Series
             .WhereIf(!request.AllLibraries, s => request.IncludedLibraries.Contains(s.LibraryId))
             .WhereIf(request.ExcludedLibraries.Count > 0, s => !request.ExcludedLibraries.Contains(s.LibraryId))
-            .AsQueryable()
             .AsSplitQuery()
-            .AsNoTracking()
             .Select(s => s.Id)
             .OrderBy(s => s);
 
@@ -367,48 +365,67 @@ public class MetadataService(
         await eventHub.SendMessageAsync(MessageFactory.NotificationProgress, MessageFactory.ReRunMappingsProgressEvent(
             ProgressEventType.Started, 0), ct: cancellationToken);
 
-        await foreach (var idBatch in seriesIds.BatchToAsyncEnumerable(batchSize, cancellationToken))
+        try
         {
-            currentBatch++;
-
-            using var scope = scopeFactory.CreateScope();
-            var scopedUnitOfWork = scope.ServiceProvider.GetRequiredService<IUnitOfWork>();
-
-            var seriesBatch = await scopedUnitOfWork.DataContext.Series
-                .Where(s => idBatch.Contains(s.Id))
-                .AsSplitQuery()
-                .Include(s => s.Metadata).ThenInclude(m => m.Tags)
-                .Include(s => s.Metadata).ThenInclude(m => m.Genres)
-                .Include(s => s.Volumes).ThenInclude(v => v.Chapters).ThenInclude(c => c.Tags)
-                .Include(s => s.Volumes).ThenInclude(v => v.Chapters).ThenInclude(c => c.Genres)
-                .ToListAsync(cancellationToken);
-
-            foreach (var series in seriesBatch)
+            await foreach (var idBatch in seriesIds.BatchToAsyncEnumerable(batchSize, cancellationToken))
             {
+                currentBatch++;
+
+                using var scope = scopeFactory.CreateScope();
+                var scopedUnitOfWork = scope.ServiceProvider.GetRequiredService<IUnitOfWork>();
+
+                var seriesBatch = await scopedUnitOfWork.DataContext.Series
+                    .Where(s => idBatch.Contains(s.Id))
+                    .AsSplitQuery()
+                    .Include(s => s.Metadata).ThenInclude(m => m.Tags)
+                    .Include(s => s.Metadata).ThenInclude(m => m.Genres)
+                    .Include(s => s.Volumes).ThenInclude(v => v.Chapters).ThenInclude(c => c.Tags)
+                    .Include(s => s.Volumes).ThenInclude(v => v.Chapters).ThenInclude(c => c.Genres)
+                    .ToListAsync(cancellationToken);
+
+                foreach (var series in seriesBatch)
+                {
+                    try
+                    {
+                        await ReRunMappingsForSeries(scopedUnitOfWork, series, settings);
+                    }
+                    catch (Exception ex)
+                    {
+                        logger.LogError(ex, "Failed to re-run mappings for series {SeriesName} ({SeriesId})",
+                            series.Name, series.Id);
+                    }
+                }
+
                 try
                 {
-                    await ReRunMappingsForSeries(scopedUnitOfWork, series, settings);
+                    await scopedUnitOfWork.CommitAsync(cancellationToken);
                 }
                 catch (Exception ex)
                 {
-                    logger.LogError(ex, "Failed to re-run mappings for series {SeriesName} - {SeriesId}", series.Name, series.Id);
+                    logger.LogError(ex, "Failed to save changed to the database. Aborting metadata processing");
+                    break;
                 }
+
+                await eventHub.SendMessageAsync(MessageFactory.NotificationProgress,
+                    MessageFactory.ReRunMappingsProgressEvent(ProgressEventType.Updated, currentBatch / totalBatches),
+                    ct: cancellationToken);
+
+                logger.LogDebug("Completed processing on {ProcessedCount}/{TotalCount} series",
+                    (currentBatch - 1) * batchSize + idBatch.Count, count);
             }
-
-            await scopedUnitOfWork.CommitAsync(cancellationToken);
-
-            await eventHub.SendMessageAsync(MessageFactory.NotificationProgress,
-                MessageFactory.ReRunMappingsProgressEvent(ProgressEventType.Updated, currentBatch / totalBatches), ct: cancellationToken);
-
-            logger.LogDebug("Completed processing on {ProcessedCount}/{TotalCount} series", (currentBatch - 1) * batchSize + idBatch.Count, count);
         }
-
-        await eventHub.SendMessageAsync(MessageFactory.NotificationProgress,
-            MessageFactory.ReRunMappingsProgressEvent(ProgressEventType.Ended, 1), ct: cancellationToken);
+        finally
+        {
+            await eventHub.SendMessageAsync(MessageFactory.NotificationProgress,
+                MessageFactory.ReRunMappingsProgressEvent(ProgressEventType.Ended, 1), ct: cancellationToken);
+        }
     }
 
     private async Task ReRunMappingsForSeries(IUnitOfWork scopedUnitOfWork, Series series, MetadataSettingsDto settings)
     {
+
+        #region Chapters
+
         foreach (var chapter in series.Volumes.SelectMany(v => v.Chapters))
         {
             if (chapter == null) continue;
@@ -434,11 +451,11 @@ public class MetadataService(
                 .Concat(chapter.Tags.Select(t => t.Title));
 
             chapter.AgeRating = ExternalMetadataService.DetermineAgeRating(allTagsAndGenres, settings.AgeRatingMappings);
-
-            chapter.TagsLocked = true;
-            chapter.GenresLocked = true;
-            chapter.AgeRatingLocked = true;
         }
+
+        #endregion
+
+        #region Series Metadata
 
         var genres = series.Volumes.SelectMany(v => v.Chapters).SelectMany(c => c.Genres).ToList();
         var tags = series.Volumes.SelectMany(v => v.Chapters).SelectMany(c => c.Tags).ToList();
@@ -452,11 +469,9 @@ public class MetadataService(
 
         series.Metadata.AgeRating = ExternalMetadataService.DetermineAgeRating(allSeriesTagsAndGenres, settings.AgeRatingMappings);
 
-        series.Metadata.TagsLocked = true;
-        series.Metadata.GenresLocked = true;
-        series.Metadata.AgeRatingLocked = true;
+        #endregion
 
-        logger.LogTrace("Completed re-running mappings for series {SeriesName} - {SeriesId}", series.Name, series.Id);
+        logger.LogTrace("Completed re-running mappings for series {SeriesName} ({SeriesId})", series.Name, series.Id);
     }
 
     /// <summary>

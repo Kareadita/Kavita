@@ -308,6 +308,7 @@ public class ExternalMetadataService : IExternalMetadataService
             .Where(e => e.Format.Equals("Digital", StringComparison.OrdinalIgnoreCase))
             .ToList();
 
+        // As these are automatic matches we want exactly one match for certainty
         return parsedSeriesEditionMatches.OneOrDefault()
             ?? parsedSeriesEditionMatches.OneOrDefault(MatchEditionToCount)
             ?? digitalEditions.OneOrDefault()

@@ -249,6 +249,16 @@ public class SettingsController(
     [HttpPost("re-run-mappings")]
     public async Task<ActionResult> ReRunMappings([FromBody] ReRunMappingsRequest request)
     {
+        if (!request.AllLibraries && request.IncludedLibraries.Count == 0)
+        {
+            return BadRequest(await localizationService.TranslateAsync("mappings-re-run-no-libraries-selected"));
+        }
+
+        if (request.ExcludedLibraries.Intersect(request.IncludedLibraries).Count() > 0)
+        {
+            return BadRequest(await localizationService.TranslateAsync("mappings-re-run-libraries-overlap"));
+        }
+
         if (TaskScheduler.IsMethodRunningOrEnqueued(nameof(IMetadataService.ReRunMappings), TaskSchedulerConstants.ScanQueue))
         {
             return BadRequest(await localizationService.TranslateAsync("mappings-re-run-in-progress"));
@@ -257,13 +267,6 @@ public class SettingsController(
         BackgroundJob.Enqueue<IMetadataService>(s => s.ReRunMappings(request, CancellationToken.None));
 
         return Ok();
-    }
-
-    [Authorize(PolicyGroups.AdminPolicy)]
-    [HttpGet("re-run-mappings-running-or-queued")]
-    public ActionResult<bool> ReRunMappingRequestRunningOrQueued()
-    {
-        return Ok(TaskScheduler.IsMethodRunningOrEnqueued(nameof(IMetadataService.ReRunMappings), TaskSchedulerConstants.ScanQueue));
     }
 
     /// <summary>

@@ -168,7 +168,7 @@ export enum EVENTS {
   /**
    * Progress event send after a batch completes
    */
-  ReRunMappingsProgress = 'ReRunMappingsProgress',
+  RerunMetadataMappingsProgress = 'RerunMetadataMappingsProgress',
 }
 
 export interface Message<T> {

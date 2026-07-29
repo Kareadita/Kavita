@@ -207,7 +207,7 @@ public static class MessageFactory
     /// <summary>
     /// Progress event send after a batch completes
     /// </summary>
-    public const string ReRunMappingsProgress = nameof(ReRunMappingsProgress);
+    public const string RerunMetadataMappingsProgress = nameof(RerunMetadataMappingsProgress);
 
 
     public static SignalRMessage DashboardUpdateEvent(int userId)
@@ -891,8 +891,8 @@ public static class MessageFactory
     {
         return new SignalRMessage()
         {
-            Name = ReRunMappingsProgress,
-            Title = "Re-run mappings",
+            Name = RerunMetadataMappingsProgress,
+            Title = "Rerun Metadata Mappings",
             Progress = ProgressType.Determinate,
             EventType = progressEventType,
             Body = new

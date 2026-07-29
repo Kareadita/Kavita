@@ -799,11 +799,15 @@ public class TaskScheduler : ITaskScheduler
 
         var processing = monitoring.ProcessingJobs(0, 100);
         if (processing.Any(j => j.Value.Job?.Method.Name == methodName))
+        {
             return true;
+        }
 
         var enqueued = monitoring.EnqueuedJobs(queue, 0, 100);
         if (enqueued.Any(j => j.Value.Job?.Method.Name == methodName))
+        {
             return true;
+        }
 
         return false;
     }

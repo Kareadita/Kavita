@@ -32,6 +32,7 @@ import {
 import {DefaultModalOptions} from "../../_models/modal/modal-options";
 import {EVENTS, MessageHubService} from "../../_services/message-hub.service";
 import {NotificationProgressEvent} from "../../_models/events/notification-progress-event";
+import {QueueNames, ServerService, TaskMethodNames} from "../../_services/server.service";
 
 
 @Component({
@@ -60,6 +61,7 @@ export class ManageMetadataSettingsComponent implements OnInit {
   private readonly fb = inject(FormBuilder);
   private readonly modalService = inject(ModalService);
   private readonly messageHub = inject(MessageHubService);
+  private readonly serverService = inject(ServerService);
 
   settingsForm: FormGroup = new FormGroup({});
   settings: MetadataSettings | undefined = undefined;
@@ -151,7 +153,7 @@ export class ManageMetadataSettingsComponent implements OnInit {
 
     });
 
-    this.settingService.isReRunMetadataMappingsRunningOrQueued().pipe(
+    this.serverService.isTaskRunning(TaskMethodNames.ReRunMappings, QueueNames.Default).pipe(
       tap(b => this.isReRunInProgress.set(b))
     ).subscribe();
 
@@ -159,7 +161,7 @@ export class ManageMetadataSettingsComponent implements OnInit {
       takeUntilDestroyed(this.destroyRef),
       filter(e => e.event === EVENTS.NotificationProgress),
       map(e => e.payload as NotificationProgressEvent),
-      filter(e => e.name === EVENTS.ReRunMappingsProgress),
+      filter(e => e.name === EVENTS.RerunMetadataMappingsProgress),
       map(e => e.eventType !== 'ended'),
       tap(inProgress => this.isReRunInProgress.set(inProgress))
     ).subscribe();

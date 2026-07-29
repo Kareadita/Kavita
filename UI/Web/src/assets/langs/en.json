@@ -1299,7 +1299,7 @@
         "export-file-name": "Kavita Metadata Settings Export.json",
         "import-settings": "Import",
         "import-tooltip": "Import your or someone else's settings",
-        "re-run-mappings": "Re Run Mappings",
+        "re-run-mappings": "ReRun Metadata Mappings",
         "re-run-mappings-tooltip": "Re run your configured metadata mappings",
         "description": "Kavita+ has the ability to download and write some limited metadata to the Database. This page allows for you to toggle what is in scope.",
         "enabled-label": "Enable Metadata Download",
