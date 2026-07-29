@@ -165,6 +165,10 @@ export enum EVENTS {
    * The K+ Metadata for a series has been updated
    */
   ExternalMetadataUpdate = 'ExternalMetadataUpdate',
+  /**
+   * Progress event send after a batch completes
+   */
+  ReRunMappingsProgress = 'ReRunMappingsProgress',
 }
 
 export interface Message<T> {

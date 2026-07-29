@@ -33,8 +33,8 @@
       <div class="text-muted mt-2">{{t('import-tooltip')}}</div>
     </div>
 
-    <div class="col-md-4 col-sm-12" (click)="reRunMappings()">
-      <button class="btn btn-secondary" >
+    <div class="col-md-4 col-sm-12">
+      <button class="btn btn-secondary" (click)="reRunMappings()" [disabled]="isReRunInProgress()">
         {{t('re-run-mappings')}}
       </button>
       <div class="text-muted mt-2">{{t('re-run-mappings-tooltip')}}</div>

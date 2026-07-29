@@ -47,6 +47,12 @@ export class SettingsService {
     return this.http.post(this.baseUrl + 'settings/re-run-mappings', request);
   }
 
+  isReRunMetadataMappingsRunningOrQueued() {
+    return this.http.get(this.baseUrl + 'settings/re-run-mappings-running-or-queued', {responseType: 'text'}).pipe(
+      map(response => response === 'true'),
+    );
+  }
+
   importFieldMappings(data: MetadataMappingsExport, settings: ImportSettings) {
     const body = {
       data: data,

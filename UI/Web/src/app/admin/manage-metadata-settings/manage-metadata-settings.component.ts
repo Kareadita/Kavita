@@ -4,16 +4,16 @@ import {
   Component,
   DestroyRef,
   inject,
-  OnInit,
+  OnInit, signal,
   viewChild
 } from '@angular/core';
 import {TranslocoDirective} from "@jsverse/transloco";
 import {FormArray, FormBuilder, FormControl, FormGroup, ReactiveFormsModule} from "@angular/forms";
 import {SettingSwitchComponent} from "../../settings/_components/setting-switch/setting-switch.component";
 import {SettingsService} from "../settings.service";
-import {debounceTime, switchMap} from "rxjs";
+import {debounceTime, filter, switchMap} from "rxjs";
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
-import {map} from "rxjs/operators";
+import {map, tap} from "rxjs/operators";
 import {MetadataSettings} from "../_models/metadata-settings";
 import {PersonRole} from "../../_models/metadata/person";
 import {PersonRolePipe} from "../../_pipes/person-role.pipe";
@@ -30,6 +30,8 @@ import {
   ReRunMetadataMappingsModalComponent
 } from "../manage-metadata-mappings/re-run-metadata-mappings-modal/re-run-metadata-mappings-modal.component";
 import {DefaultModalOptions} from "../../_models/modal/modal-options";
+import {EVENTS, MessageHubService} from "../../_services/message-hub.service";
+import {NotificationProgressEvent} from "../../_models/events/notification-progress-event";
 
 
 @Component({
@@ -57,12 +59,15 @@ export class ManageMetadataSettingsComponent implements OnInit {
   private readonly destroyRef = inject(DestroyRef);
   private readonly fb = inject(FormBuilder);
   private readonly modalService = inject(ModalService);
+  private readonly messageHub = inject(MessageHubService);
 
   settingsForm: FormGroup = new FormGroup({});
   settings: MetadataSettings | undefined = undefined;
   personRoles: PersonRole[] = [PersonRole.Writer, PersonRole.CoverArtist, PersonRole.Character];
   isLoaded = false;
   allMetadataSettingFields = allMetadataSettingField;
+
+  isReRunInProgress = signal(true);
 
   ngOnInit(): void {
     this.settingService.getMetadataSettings().subscribe(settings => {
@@ -146,6 +151,18 @@ export class ManageMetadataSettingsComponent implements OnInit {
 
     });
 
+    this.settingService.isReRunMetadataMappingsRunningOrQueued().pipe(
+      tap(b => this.isReRunInProgress.set(b))
+    ).subscribe();
+
+    this.messageHub.messages$.pipe(
+      takeUntilDestroyed(this.destroyRef),
+      filter(e => e.event === EVENTS.NotificationProgress),
+      map(e => e.payload as NotificationProgressEvent),
+      filter(e => e.name === EVENTS.ReRunMappingsProgress),
+      map(e => e.eventType !== 'ended'),
+      tap(inProgress => this.isReRunInProgress.set(inProgress))
+    ).subscribe();
   }
 
   packData(withFieldMappings: boolean = true) {

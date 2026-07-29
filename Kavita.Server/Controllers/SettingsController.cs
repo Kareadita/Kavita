@@ -24,6 +24,7 @@ using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
+using TaskScheduler = Kavita.Services.TaskScheduler;
 
 namespace Kavita.Server.Controllers;
 
@@ -246,11 +247,23 @@ public class SettingsController(
 
     [Authorize(PolicyGroups.AdminPolicy)]
     [HttpPost("re-run-mappings")]
-    public ActionResult ReRunMappings([FromBody] ReRunMappingsRequest request)
+    public async Task<ActionResult> ReRunMappings([FromBody] ReRunMappingsRequest request)
     {
+        if (TaskScheduler.IsMethodRunningOrEnqueued(nameof(IMetadataService.ReRunMappings), TaskSchedulerConstants.ScanQueue))
+        {
+            return BadRequest(await localizationService.TranslateAsync("mappings-re-run-in-progress"));
+        }
+
         BackgroundJob.Enqueue<IMetadataService>(s => s.ReRunMappings(request, CancellationToken.None));
 
         return Ok();
+    }
+
+    [Authorize(PolicyGroups.AdminPolicy)]
+    [HttpGet("re-run-mappings-running-or-queued")]
+    public ActionResult<bool> ReRunMappingRequestRunningOrQueued()
+    {
+        return Ok(TaskScheduler.IsMethodRunningOrEnqueued(nameof(IMetadataService.ReRunMappings), TaskSchedulerConstants.ScanQueue));
     }
 
     /// <summary>
