@@ -278,5 +278,7 @@
     "email.username-change.description": "Der Benutzername Ihres Kontos wurde auf der Kavita-Instanz von {{InvitingUser}} aktualisiert. Ihrerseits sind keine weiteren Maßnahmen erforderlich.",
     "cbl-import-download-from-url": "Die Datei kann nicht von der URL heruntergeladen werden",
     "cbl-import-validation-types": "Es sind nur Dateien mit den Endungen .cbl und .json zulässig",
-    "scrobble-provider-not-setup": "Der Scrobble-Anbieter {0} ist nicht eingerichtet"
+    "scrobble-provider-not-setup": "Der Scrobble-Anbieter {0} ist nicht eingerichtet",
+    "unable-to-cancel-k+": "Das Kavita+-Abonnement konnte aufgrund eines Fehlers nicht gekündigt werden. Wenden Sie sich bitte an den Kavita+-Support",
+    "unable-to-renew-k+": "Das Kavita+-Abonnement konnte aufgrund eines Fehlers nicht verlängert werden. Wenden Sie sich bitte an den Kavita+-Support"
 }
