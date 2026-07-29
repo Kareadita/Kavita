@@ -399,6 +399,8 @@ public class MetadataService(
 
             await eventHub.SendMessageAsync(MessageFactory.NotificationProgress,
                 MessageFactory.ReRunMappingsProgressEvent(ProgressEventType.Updated, currentBatch / totalBatches), ct: cancellationToken);
+
+            logger.LogDebug("Completed processing on {ProcessedCount}/{TotalCount} series", (currentBatch - 1) * batchSize + idBatch.Count, count);
         }
 
         await eventHub.SendMessageAsync(MessageFactory.NotificationProgress,
@@ -454,7 +456,7 @@ public class MetadataService(
         series.Metadata.GenresLocked = true;
         series.Metadata.AgeRatingLocked = true;
 
-        logger.LogDebug("Completed re-running mappings for series {SeriesName} - {SeriesId}", series.Name, series.Id);
+        logger.LogTrace("Completed re-running mappings for series {SeriesName} - {SeriesId}", series.Name, series.Id);
     }
 
     /// <summary>
