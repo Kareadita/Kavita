@@ -276,6 +276,7 @@ public class StatsController(
 
     #region Reading History
 
+    [ProfilePrivacy]
     [HttpGet("reading-activity")]
     public async Task<ActionResult<ReadingActivityGraphDto>> GetReadingActivity([FromQuery] StatsFilterDto filter, int userId, int year)
     {

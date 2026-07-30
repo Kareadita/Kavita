@@ -3,6 +3,7 @@ using System.Threading.Tasks;
 using Kavita.API.Attributes;
 using Kavita.API.Services.SignalR;
 using Kavita.Common.Extensions;
+using Kavita.Models.Constants;
 using Kavita.Models.DTOs.SignalR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.SignalR;
@@ -38,6 +39,7 @@ public class LogHub : Hub<ILogHub>
         await base.OnDisconnectedAsync(exception);
     }
 
+    [Authorize(PolicyConstants.AdminRole)]
     public async Task SendLogAsString(string message)
     {
         await _eventHub.SendMessageAsync("LogString", new SignalRMessage()
@@ -48,6 +50,7 @@ public class LogHub : Hub<ILogHub>
         }, true);
     }
 
+    [Authorize(PolicyConstants.AdminRole)]
     public async Task SendLogAsObject(object messageObject)
     {
         await _eventHub.SendMessageAsync("LogObject", new SignalRMessage()

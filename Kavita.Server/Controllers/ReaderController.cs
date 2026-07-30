@@ -1081,6 +1081,7 @@ public class ReaderController(ICacheService cacheService,
         return Ok(await readerService.CheckChapterForReRead(UserId, chapterId, seriesId, libraryId));
     }
 
+    [ProfilePrivacy]
     [HttpGet("first-progress-date")]
     public async Task<ActionResult<DateTime>> GetFirstReadingDate(int userId)
     {
