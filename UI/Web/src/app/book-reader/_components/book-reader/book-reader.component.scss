@@ -310,14 +310,7 @@ $action-bar-height: 2.375rem;
   color: $primary-color;
 }
 
-$pagination-color: transparent;
-$pagination-opacity: 0;
-
-//$pagination-color: red;
-//$pagination-opacity: 0.7;
-
-
-.tap-to-paginate {
+.pagination-indicators {
   position: fixed;
   top: 0;
   left: 0;
@@ -374,13 +367,28 @@ $pagination-opacity: 0;
   left: 0;
   top: $action-bar-height;
   width: 20vw;
-  height: calc(100vh - $action-bar-height*2);
-  background: $pagination-color;
-  opacity: $pagination-opacity;
-  border-color: transparent;
-  border: none !important;
-  outline: none;
-  cursor: pointer;
+  height: calc(100vh - $action-bar-height * 2);
+  pointer-events: none;
+  box-sizing: border-box;
+  animation: fadeIn 0.2s ease-in, fadeOut 0.3s ease-out 1.7s forwards;
+  user-select: none;
+
+  &.left-indicator {
+    left: 0;
+  }
+
+  &.right-indicator {
+    right: 0;
+
+  }
+
+  &.forward {
+    background: rgba(65, 225, 100, 0.5);
+  }
+
+  &.backward {
+    background: rgba(255, 165, 0, 0.5);
+  }
 
   &.immersive {
     top: 0;
@@ -388,16 +396,22 @@ $pagination-opacity: 0;
   }
 }
 
-
-
-
-.highlight {
-  background-color: rgba(65, 225, 100, 0.5) !important;
-  animation: fadein .5s both;
+@keyframes fadeIn {
+  0% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 1;
+  }
 }
-.highlight-2 {
-  background-color: rgba(65, 105, 225, 0.5) !important;
-  animation: fadein .5s both;
+
+@keyframes fadeOut {
+  0% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+  }
 }
 
 

@@ -18,21 +18,16 @@
       }
     </div>
 
-    @if (clickToPaginate() && !hidePagination()) {
-      <div class="tap-to-paginate">
-        <div class="left {{clickOverlayClass('left')}} no-observe"
-            (click)="movePage(isLeftToRight ? PAGING_DIRECTION.BACKWARDS : PAGING_DIRECTION.FORWARD)"
-            [ngClass]="{'immersive' : immersiveMode()}"
-            tabindex="-1"></div>
-        <div class="{{scrollbarNeeded() ? 'right-with-scrollbar' : 'right'}} {{clickOverlayClass('right')}} no-observe"
-            (click)="movePage(isLeftToRight ? PAGING_DIRECTION.FORWARD : PAGING_DIRECTION.BACKWARDS)"
-            [ngClass]="{'immersive' : immersiveMode()}"
-            tabindex="-1"></div>
+    @if (clickToPaginate() && !hidePagination() && showPaginationIndicators()) {
+      <div class="pagination-indicators" [ngClass]="{'immersive' : immersiveMode()}">
+        <div class="pagination-indicator left-indicator" [ngClass]="{'immersive' : immersiveMode(), 'forward': !isLeftToRight, 'backward': isLeftToRight}"></div>
+        <div class="pagination-indicator right-indicator" [ngClass]="{'immersive' : immersiveMode(), 'forward': isLeftToRight, 'backward': !isLeftToRight}"></div>
       </div>
     }
+
     <div #readingSection class="reading-section {{layoutMode() | columnLayoutClass}} {{writingStyle() | writingStyleClass}}"
          [ngStyle]="{'width': pageWidthForPagination()}"
-         [ngClass]="{'immersive' : immersiveMode() || !actionBarVisible(), 'is-loading': isLoading()}" (click)="handleReaderClick($event)">
+         [ngClass]="{'immersive' : immersiveMode() || !actionBarVisible()}" [@isLoading]="isLoading()" (click)="handleReaderClick($event)" (mousedown)="handleReadingSectionMouseDown($event)">
 
 
       <div #bookContainer class="book-container {{writingStyle() | writingStyleClass}}"

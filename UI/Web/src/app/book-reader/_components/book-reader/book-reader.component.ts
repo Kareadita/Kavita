@@ -239,11 +239,10 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
    */
   authorText = signal<string>('');
   /**
-   * The boolean that decides if the clickToPaginate overlay is visible or not.
+   * The boolean that decides if the pagination zone indicators should be visible
    */
-  clickToPaginateVisualOverlay = false;
-  clickToPaginateVisualOverlayTimeout: any = undefined; // For animation
-  clickToPaginateVisualOverlayTimeout2: any = undefined; // For kicking off animation, giving enough time to render html
+  showPaginationIndicators = signal<boolean>(false);
+  paginationIndicatorsTimeout: any = undefined;
   updateImageSizeTimeout: any = undefined;
   /**
    * This is the html we get from the server
@@ -763,7 +762,6 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
         tap((e) => {
           const selection = window.getSelection();
           this.hidePagination.set(selection !== null && selection.toString().trim() !== '');
-          this.cdRef.markForCheck();
         })
       )
       .subscribe();
@@ -849,6 +847,9 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   ngOnDestroy(): void {
+    this.clearTimeoutId(this.paginationIndicatorsTimeout);
+    this.paginationIndicatorsTimeout = undefined;
+
     this.clearTimeout(this.clickToPaginateVisualOverlayTimeout);
     this.clearTimeout(this.clickToPaginateVisualOverlayTimeout2);
     this.clearTimeout(this.delayedScrollEventTimeout);
@@ -2247,7 +2248,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   applyLayoutMode(mode: BookPageLayoutMode, isChange: boolean = false) {
-    this.clearTimeout(this.updateImageSizeTimeout);
+    this.clearTimeoutId(this.updateImageSizeTimeout);
     this.updateImageSizeTimeout = setTimeout( () => {
       this.updateImageSizes();
       this.injectImageBookmarkIndicators(true);
@@ -2345,65 +2346,66 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     this.readerSettingsService.updateClickToPaginate(clickToPaginate);
     this.cdRef.markForCheck();
 
-    this.clearTimeout(this.clickToPaginateVisualOverlayTimeout2);
-    if (!clickToPaginate) { return; }
+    this.clearTimeoutId(this.paginationIndicatorsTimeout);
+    this.paginationIndicatorsTimeout = undefined;
 
-    this.clickToPaginateVisualOverlayTimeout2 = setTimeout(() => {
-      this.showClickToPaginateVisualOverlay();
-    }, 200);
+    this.showPaginationIndicators.set(clickToPaginate);
+
+    if (clickToPaginate) {
+      this.paginationIndicatorsTimeout = setTimeout(() => {
+        this.showPaginationIndicators.set(false);
+      }, 2000);
+    }
   }
 
-  clearTimeout(timeoutId: number | undefined) {
+  clearTimeoutId(timeoutId: number | undefined) {
     if (timeoutId !== undefined) {
       clearTimeout(timeoutId);
-      timeoutId = undefined;
     }
   }
 
-  showClickToPaginateVisualOverlay() {
-    this.clickToPaginateVisualOverlay = true;
-    this.cdRef.markForCheck();
+  handleReadingSectionMouseDown(event: MouseEvent) {
+    const bookContent = this.bookContentElemRef?.nativeElement;
+    const target = event.target as HTMLElement;
+    const isInBottomBar = target.closest('.bottom-bar') !== null;
 
-    if (this.clickToPaginateVisualOverlay && this.clickToPaginateVisualOverlayTimeout !== undefined) {
-      clearTimeout(this.clickToPaginateVisualOverlayTimeout);
-      this.clickToPaginateVisualOverlayTimeout = undefined;
+    if (bookContent && !bookContent.contains(target) && !isInBottomBar) {
+      event.preventDefault();
     }
-    this.clickToPaginateVisualOverlayTimeout = setTimeout(() => {
-      this.clickToPaginateVisualOverlay = false;
-      this.cdRef.markForCheck();
-    }, 1000);
-
-  }
-
-  /**
-   * Responsible for returning the class to show an overlay or not
-   * @param side
-   * @returns
-   */
-  clickOverlayClass(side: 'right' | 'left') {
-    // TODO: See if we can use RXjs or a component to manage this aka an observable that emits the highlight to show at any given time
-    if (!this.clickToPaginateVisualOverlay) {
-      return '';
-    }
-
-    if (this.readingDirection() === ReadingDirection.LeftToRight) {
-      return side === 'right' ? 'highlight' : 'highlight-2';
-    }
-    return side === 'right' ? 'highlight-2' : 'highlight';
   }
 
   handleReaderClick(event: MouseEvent) {
+    const isHighlighting = window.getSelection()?.toString() != '';
+
+    if (this.clickToPaginate() && !this.hidePagination()) {
+      if (isHighlighting) {
+        return;
+      }
+
+      const readingSection = this.readingSectionElemRef?.nativeElement;
+      if (readingSection) {
+        const rect = readingSection.getBoundingClientRect();
+        const clickX = event.clientX - rect.left;
+        const sectionWidth = rect.width;
+        const leftZoneThreshold = sectionWidth * 0.2;
+        const rightZoneThreshold = sectionWidth * 0.8;
+
+        const isLeftToRight = this.readingDirection() === ReadingDirection.LeftToRight;
+
+        if (clickX < leftZoneThreshold) {
+          this.movePage(isLeftToRight ? PAGING_DIRECTION.BACKWARDS : PAGING_DIRECTION.FORWARD);
+          return;
+        } else if (clickX > rightZoneThreshold) {
+          this.movePage(isLeftToRight ? PAGING_DIRECTION.FORWARD : PAGING_DIRECTION.BACKWARDS);
+          return;
+        }
+      }
+    }
+
     if (!this.clickToPaginate() && !this.immersiveMode()) {
       event.preventDefault();
       event.stopPropagation();
       this.toggleMenu(event);
-      return;
-    }
-
-    const isHighlighting = window.getSelection()?.toString() != '';
-    if (isHighlighting) {
-      event.preventDefault();
-      event.stopPropagation();
       return;
     }
   }
