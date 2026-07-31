@@ -548,9 +548,22 @@ public partial class BookService(
         }
     }
 
-    private static bool IsIsbnScheme(EpubMetadataIdentifier identifier) =>
-        !string.IsNullOrEmpty(identifier.Scheme) &&
-        identifier.Scheme.Equals("ISBN", StringComparison.InvariantCultureIgnoreCase);
+    private static bool IsIsbnScheme(EpubMetadataIdentifier identifier)
+    {
+        if (!string.IsNullOrEmpty(identifier.Scheme))
+        {
+            return identifier.Scheme.Equals("ISBN", StringComparison.InvariantCultureIgnoreCase);
+        }
+
+        if (!string.IsNullOrEmpty(identifier.Id))
+        {
+            // https://www.w3.org/TR/epub-33/#sec-opf-dcidentifier
+            return identifier.Id.Equals("pub-id", StringComparison.InvariantCultureIgnoreCase);
+        }
+
+        return identifier.Identifier.StartsWith("ISBN:", StringComparison.InvariantCultureIgnoreCase)
+            || identifier.Identifier.StartsWith("URN:ISBN:", StringComparison.InvariantCultureIgnoreCase);
+    }
 
     private static bool IsUrlScheme(EpubMetadataIdentifier identifier) =>
         (!string.IsNullOrEmpty(identifier.Scheme) &&
@@ -560,12 +573,12 @@ public partial class BookService(
     private void TryApplyIsbn(EpubMetadataIdentifier identifier, ComicInfo info, string filePath)
     {
         var isbn = identifier.Identifier
-            .Replace("urn:isbn:", string.Empty)
-            .Replace("isbn:", string.Empty);
+            .Replace("urn:isbn:", string.Empty, StringComparison.InvariantCultureIgnoreCase)
+            .Replace("isbn:", string.Empty, StringComparison.InvariantCultureIgnoreCase);
 
         if (!ArticleNumberHelper.IsValidIsbn10(isbn) && !ArticleNumberHelper.IsValidIsbn13(isbn))
         {
-            logger.LogDebug("[BookService] {File} has invalid ISBN number", filePath);
+            logger.LogTrace("[BookService] {File} has invalid ISBN number", filePath);
             return;
         }
 
