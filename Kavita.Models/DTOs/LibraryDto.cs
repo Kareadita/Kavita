@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using Kavita.Models.Entities;
 using Kavita.Models.Entities.Enums;
+using System.ComponentModel.DataAnnotations;
+using Kavita.Models.Attributes;
 
 namespace Kavita.Models.DTOs;
 #nullable enable
@@ -13,6 +15,7 @@ public record LiteLibraryDto
 {
     public int Id { get; init; }
     public string? Name { get; init; }
+    [EnumDataType(typeof(LibraryType))]
     public LibraryType Type { get; init; }
 }
 
@@ -63,6 +66,7 @@ public sealed record LibraryDto : LiteLibraryDto
     /// <summary>
     /// The types of file type groups the library will scan for
     /// </summary>
+    [EnumCollection(typeof(FileTypeGroup))]
     public ICollection<FileTypeGroup> LibraryFileTypes { get; set; }
     /// <summary>
     /// A set of globs that will exclude matching content from being scanned

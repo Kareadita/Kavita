@@ -1,5 +1,6 @@
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using Kavita.Models.Entities.Enums.Theme;
+using System.ComponentModel.DataAnnotations;
 
 namespace Kavita.Models.DTOs.Theme;
 
@@ -29,6 +30,7 @@ public sealed record SiteThemeDto
     /// <summary>
     /// Where did the theme come from
     /// </summary>
+    [EnumDataType(typeof(ThemeProvider))]
     public ThemeProvider Provider { get; set; }
 
     public IList<string> PreviewUrls { get; set; }

@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using Kavita.Models.Entities.Enums;
+using System.ComponentModel.DataAnnotations;
 
 namespace Kavita.Models.DTOs.Reader;
 #nullable enable
@@ -7,9 +8,11 @@ namespace Kavita.Models.DTOs.Reader;
 public class BookmarkInfoDto
 {
     public string SeriesName { get; set; } = default!;
+    [EnumDataType(typeof(MangaFormat))]
     public MangaFormat SeriesFormat { get; set; }
     public int SeriesId { get; set; }
     public int LibraryId { get; set; }
+    [EnumDataType(typeof(LibraryType))]
     public LibraryType LibraryType { get; set; }
     public int Pages { get; set; }
     /// <summary>

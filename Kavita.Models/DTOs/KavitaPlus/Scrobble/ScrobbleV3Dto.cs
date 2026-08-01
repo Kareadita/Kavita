@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using Kavita.Models.DTOs.KavitaPlus.ExternalMetadata;
 using Kavita.Models.DTOs.Scrobbling;
@@ -6,12 +6,14 @@ using Kavita.Models.Entities.Enums;
 using Kavita.Models.Entities.Enums.KavitaPlus;
 using Kavita.Models.Entities.Enums.UserPreferences;
 using Kavita.Models.Entities.Scrobble;
+using System.ComponentModel.DataAnnotations;
 
 namespace Kavita.Models.DTOs.KavitaPlus.Scrobble;
 #nullable enable
 
 public record ScrobbleV3Dto: MetadataRequest
 {
+    [EnumDataType(typeof(ScrobbleProvider))]
     public required ScrobbleProvider Provider { get; set; }
     public required string AuthenticationToken { get; set; }
 
@@ -21,6 +23,7 @@ public record ScrobbleV3Dto: MetadataRequest
     /// <remarks>This may be a book's name if <see cref="MetadataRequest.IsStandAlone"/> is true</remarks>
     public required string SeriesName { get; set; }
     public List<string> AlternativeNames { get; set; } = [];
+    [EnumDataType(typeof(PlusMediaFormat))]
     public required PlusMediaFormat Format { get; set; }
     public int? Year { get; set; }
 
@@ -31,6 +34,7 @@ public record ScrobbleV3Dto: MetadataRequest
     /// <remarks>Defaults to English</remarks>
     public string? Language { get; set; }
 
+    [EnumDataType(typeof(ScrobbleEventType))]
     public ScrobbleEventType ScrobbleEventType { get; set; }
     /// <summary>
     /// Number of chapters read
@@ -71,6 +75,8 @@ public record ScrobbleV3Dto: MetadataRequest
     public DateTime? ScrobbleDateUtc { get; set; }
     public string? ReviewTitle { get; set; }
     public string? ReviewBody { get; set; }
+    [EnumDataType(typeof(ReviewScrobbleTarget))]
     public ReviewScrobbleTarget? ReviewScrobbleTarget { get; set; }
+    [EnumDataType(typeof(ScrobbleReadStatus))]
     public ScrobbleReadStatus? ReadStatus { get; set; }
 }

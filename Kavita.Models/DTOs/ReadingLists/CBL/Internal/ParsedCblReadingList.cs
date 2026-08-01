@@ -1,4 +1,5 @@
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 
 namespace Kavita.Models.DTOs.ReadingLists.CBL.Internal;
 
@@ -60,6 +61,7 @@ public sealed record ParsedCblReadingList
     /// Classification of the list (master, character, story, etc.)
     /// </summary>
     /// <remarks>V2 only</remarks>
+    [EnumDataType(typeof(CblListType))]
     public CblListType ListType { get; set; } = CblListType.Unknown;
     /// <summary>
     /// User-defined tags

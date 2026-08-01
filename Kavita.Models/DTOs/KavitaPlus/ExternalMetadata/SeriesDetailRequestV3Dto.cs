@@ -1,16 +1,19 @@
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using Kavita.Models.DTOs.Scrobbling;
 using Kavita.Models.Entities.Enums;
 using Kavita.Models.Entities.Enums.KavitaPlus;
+using System.ComponentModel.DataAnnotations;
 
 namespace Kavita.Models.DTOs.KavitaPlus.ExternalMetadata;
 #nullable enable
 
 public sealed record SeriesDetailRequestV3Dto: MetadataRequest
 {
+    [EnumDataType(typeof(MetadataProvider))]
     public required MetadataProvider Provider { get; set; }
     public required string SeriesName { get; set; }
     public List<string> AlternativeNames { get; set; } = [];
+    [EnumDataType(typeof(PlusMediaFormat))]
     public PlusMediaFormat Format { get; set; }
     public int? ChapterCount { get; set; }
     public int? VolumeCount { get; set; }

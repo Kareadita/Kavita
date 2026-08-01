@@ -1,6 +1,7 @@
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.ComponentModel;
 using Kavita.Models.DTOs.KavitaPlus.Metadata;
+using System.ComponentModel.DataAnnotations;
 
 namespace Kavita.Models.DTOs;
 
@@ -42,10 +43,12 @@ public sealed record ImportSettingsDto
     /// <summary>
     /// How Kavita should import the new settings
     /// </summary>
+    [EnumDataType(typeof(ImportMode))]
     public ImportMode ImportMode { get; init; }
     /// <summary>
     /// Default conflict resolution, override with <see cref="AgeRatingConflictResolutions"/> and <see cref="FieldMappingsConflictResolutions"/>
     /// </summary>
+    [EnumDataType(typeof(ConflictResolution))]
     public ConflictResolution Resolution { get; init; }
     /// <summary>
     /// Import <see cref="MetadataSettingsDto.Whitelist"/>

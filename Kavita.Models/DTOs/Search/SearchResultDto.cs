@@ -1,4 +1,5 @@
 ﻿using Kavita.Models.Entities.Enums;
+using System.ComponentModel.DataAnnotations;
 
 namespace Kavita.Models.DTOs.Search;
 
@@ -9,6 +10,7 @@ public sealed record SearchResultDto
     public string OriginalName { get; init; } = default!;
     public string SortName { get; init; } = default!;
     public string LocalizedName { get; init; } = default!;
+    [EnumDataType(typeof(MangaFormat))]
     public MangaFormat Format { get; init; }
 
     // Grouping information

@@ -1,4 +1,5 @@
 ﻿using Kavita.Models.DTOs.Filtering.v2.SortFields;
+using System.ComponentModel.DataAnnotations;
 
 namespace Kavita.Models.DTOs.Filtering.v2.SortOptions;
 
@@ -7,10 +8,10 @@ namespace Kavita.Models.DTOs.Filtering.v2.SortOptions;
 /// </summary>
 public sealed record SeriesSortOptionDto : ISortOptionDto<SeriesSortField>
 {
+    [EnumDataType(typeof(SeriesSortField))]
     public SeriesSortField SortField { get; set; }
     public bool IsAscending { get; set; } = true;
 }
-
 
 
 

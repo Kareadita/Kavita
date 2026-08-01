@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using Kavita.Models.Entities;
 using Kavita.Models.Entities.Enums;
+using System.ComponentModel.DataAnnotations;
 
 namespace Kavita.Models.DTOs.Progress;
 #nullable enable
@@ -44,7 +45,9 @@ public class ReadingActivitySnapshotDto
     /// </summary>
     public float VolumeNumber { get; set; }
 
+    [EnumDataType(typeof(MangaFormat))]
     public MangaFormat Format { get; set; }
+    [EnumDataType(typeof(LibraryType))]
     public LibraryType LibraryType { get; set; }
 
     // Reading metrics for this specific activity

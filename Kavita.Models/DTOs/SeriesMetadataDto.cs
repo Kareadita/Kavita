@@ -2,6 +2,7 @@
 using Kavita.Models.DTOs.Metadata;
 using Kavita.Models.DTOs.Person;
 using Kavita.Models.Entities.Enums;
+using System.ComponentModel.DataAnnotations;
 
 namespace Kavita.Models.DTOs;
 #nullable enable
@@ -37,6 +38,7 @@ public sealed record SeriesMetadataDto
     /// <summary>
     /// Highest Age Rating from all Chapters
     /// </summary>
+    [EnumDataType(typeof(AgeRating))]
     public AgeRating AgeRating { get; set; } = AgeRating.Unknown;
     /// <summary>
     /// Earliest Year from all chapters
@@ -57,6 +59,7 @@ public sealed record SeriesMetadataDto
     /// <summary>
     /// Publication status of the Series
     /// </summary>
+    [EnumDataType(typeof(PublicationStatus))]
     public PublicationStatus PublicationStatus { get; set; }
     /// <summary>
     /// A comma-separated list of Urls

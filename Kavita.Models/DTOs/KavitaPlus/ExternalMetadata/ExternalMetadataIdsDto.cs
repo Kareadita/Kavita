@@ -1,5 +1,6 @@
 ﻿using Kavita.Models.DTOs.Scrobbling;
 using Kavita.Models.Entities.Enums.KavitaPlus;
+using System.ComponentModel.DataAnnotations;
 
 namespace Kavita.Models.DTOs.KavitaPlus.ExternalMetadata;
 #nullable enable
@@ -23,5 +24,6 @@ public sealed record ExternalMetadataIdsDto
 
     public string? SeriesName { get; set; }
     public string? LocalizedSeriesName { get; set; }
+    [EnumDataType(typeof(PlusMediaFormat))]
     public PlusMediaFormat? PlusMediaFormat { get; set; } = Kavita.Models.Entities.Enums.KavitaPlus.PlusMediaFormat.Unknown;
 }

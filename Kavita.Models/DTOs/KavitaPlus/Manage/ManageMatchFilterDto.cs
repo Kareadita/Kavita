@@ -1,4 +1,5 @@
-﻿namespace Kavita.Models.DTOs.KavitaPlus.Manage;
+﻿using System.ComponentModel.DataAnnotations;
+namespace Kavita.Models.DTOs.KavitaPlus.Manage;
 
 /// <summary>
 /// Represents an option in the UI layer for Filtering
@@ -14,6 +15,7 @@ public enum MatchStateOption
 
 public sealed record ManageMatchFilterDto
 {
+    [EnumDataType(typeof(MatchStateOption))]
     public MatchStateOption MatchStateOption { get; set; } = MatchStateOption.All;
     /// <summary>
     /// Library Type in int form. -1 indicates to ignore the field.

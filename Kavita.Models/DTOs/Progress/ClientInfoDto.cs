@@ -1,5 +1,6 @@
 ﻿using Kavita.Models.Entities.Enums;
 using Kavita.Models.Entities.Progress;
+using System.ComponentModel.DataAnnotations;
 
 namespace Kavita.Models.DTOs.Progress;
 #nullable enable
@@ -19,12 +20,14 @@ public sealed record ClientInfoDto
     /// <summary>
     /// How the user authenticated (JWT token vs API key)
     /// </summary>
+    [EnumDataType(typeof(AuthenticationType))]
     public AuthenticationType AuthType { get; set; }
 
     /// <summary>
     /// Parsed client type from User-Agent or custom Kavita header
     /// Examples: Web App, OPDS Reader, KOReader, Tachiyomi, etc.
     /// </summary>
+    [EnumDataType(typeof(ClientDeviceType))]
     public ClientDeviceType ClientType { get; set; } = ClientDeviceType.Unknown;
 
     /// <summary>
@@ -45,6 +48,7 @@ public sealed record ClientInfoDto
     /// <summary>
     /// Platform/OS (Windows, macOS, Linux, iOS, Android)
     /// </summary>
+    [EnumDataType(typeof(ClientDevicePlatform))]
     public ClientDevicePlatform Platform { get; set; } = ClientDevicePlatform.Unknown;
 
     /// <summary>

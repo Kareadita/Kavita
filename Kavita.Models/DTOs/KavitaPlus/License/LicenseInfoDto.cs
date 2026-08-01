@@ -1,4 +1,5 @@
 ﻿using System;
+using System.ComponentModel.DataAnnotations;
 
 namespace Kavita.Models.DTOs.KavitaPlus.License;
 #nullable enable
@@ -28,6 +29,7 @@ public sealed record LicenseInfoDto
     /// <summary>
     /// Overall subscription state
     /// </summary>
+    [EnumDataType(typeof(KavitaPlusSubscriptionState))]
     public KavitaPlusSubscriptionState State { get; set; }
 
     /// <summary>
@@ -73,6 +75,7 @@ public sealed record LicenseInfoDto
     /// <summary>
     /// Billing cycle interval
     /// </summary>
+    [EnumDataType(typeof(KavitaPlusBillingInterval))]
     public KavitaPlusBillingInterval? BillingInterval { get; set; }
 
     /// <summary>

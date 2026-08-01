@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using Kavita.Models.Entities.Enums;
 using Kavita.Models.Entities.Enums.ReadingList;
 using Kavita.Models.Entities.Interfaces;
+using System.ComponentModel.DataAnnotations;
 
 namespace Kavita.Models.DTOs.ReadingLists;
 #nullable enable
@@ -49,6 +50,7 @@ public sealed record ReadingListDto : IHasCoverImage
     /// <summary>
     /// The highest age rating from all Series within the reading list
     /// </summary>
+    [EnumDataType(typeof(AgeRating))]
     public required AgeRating AgeRating { get; set; } = AgeRating.Unknown;
 
     /// <summary>
@@ -76,6 +78,7 @@ public sealed record ReadingListDto : IHasCoverImage
     /// <summary>
     /// Determines how the list was created and if it's syncable.
     /// </summary>
+    [EnumDataType(typeof(ReadingListProvider))]
     public ReadingListProvider Provider { get; set; } = ReadingListProvider.None;
     /// <summary>
     /// When we last checked the remote for changes (compared SHA). This can happen

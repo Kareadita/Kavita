@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using Kavita.Models.Entities.Enums;
+using System.ComponentModel.DataAnnotations;
+using Kavita.Models.Attributes;
 
 namespace Kavita.Models.DTOs.Stats.V3;
 
@@ -28,7 +30,9 @@ public sealed record LibraryStatV3
     /// <summary>
     /// Type of the Library
     /// </summary>
+    [EnumDataType(typeof(LibraryType))]
     public LibraryType LibraryType { get; set; }
+    [EnumCollection(typeof(FileTypeGroup))]
     public ICollection<FileTypeGroup> FileTypes { get; set; }
     /// <summary>
     /// Last time library was fully scanned

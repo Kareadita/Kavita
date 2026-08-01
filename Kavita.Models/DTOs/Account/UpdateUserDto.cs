@@ -2,6 +2,7 @@
 using Kavita.Models.Entities;
 using Kavita.Models.Entities.Enums;
 using Kavita.Models.Entities.User;
+using System.ComponentModel.DataAnnotations;
 
 namespace Kavita.Models.DTOs.Account;
 
@@ -26,5 +27,6 @@ public sealed record UpdateUserDto
     public AgeRestrictionDto AgeRestriction { get; init; } = default!;
     /// <inheritdoc cref="AppUser.Email"/>
     public string? Email { get; set; } = default!;
+    [EnumDataType(typeof(IdentityProvider))]
     public IdentityProvider IdentityProvider { get; init; } = IdentityProvider.Kavita;
 }

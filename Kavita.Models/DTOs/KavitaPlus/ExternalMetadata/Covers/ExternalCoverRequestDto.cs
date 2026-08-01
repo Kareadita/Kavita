@@ -2,6 +2,7 @@
 using Kavita.Models.Entities.Enums;
 using Kavita.Models.Entities.Enums.KavitaPlus;
 using Kavita.Models.Entities.Interfaces;
+using System.ComponentModel.DataAnnotations;
 
 namespace Kavita.Models.DTOs.KavitaPlus.ExternalMetadata.Covers;
 #nullable enable
@@ -23,7 +24,9 @@ public sealed record ExternalCoverRequestDto
     public int? CbrId { get; set; }
     public bool IsStandAlone { get; set; }
 
+    [EnumDataType(typeof(PlusMediaFormat))]
     public PlusMediaFormat MediaFormat { get; set; }
+    [EnumDataType(typeof(MetadataProvider))]
     public MetadataProvider MetadataProvider { get; set; }
 
     /// <summary>When true, only volume/volume_back type images are returned.</summary>

@@ -1,6 +1,8 @@
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using Kavita.Models.Entities.Enums;
 using Kavita.Models.Entities.Enums.UserPreferences;
+using System.ComponentModel.DataAnnotations;
+using Kavita.Models.Attributes;
 
 namespace Kavita.Models.DTOs.KavitaPlus.Scrobble;
 
@@ -25,6 +27,7 @@ public sealed record ScrobbleProviderSettingsDto
     /// <summary>
     /// Review Scrobble Target
     /// </summary>
+    [EnumDataType(typeof(ReviewScrobbleTarget))]
     public ReviewScrobbleTarget ReviewScrobbleTarget { get; set; }
     /// <summary>
     /// Enable for all libraries. Ignoring <see cref="Libraries"/>
@@ -40,6 +43,7 @@ public sealed record ScrobbleProviderSettingsDto
     /// <summary>
     /// Highest (inclusive) age rating to scrobble for.
     /// </summary>
+    [EnumDataType(typeof(AgeRating))]
     public AgeRating HighestAgeRating { get; set; } = AgeRating.NotApplicable;
     /// <summary>
     /// Triggers if a series hasn't been read for n days and has unread chapters
@@ -64,9 +68,11 @@ public sealed record ReadStatusTransitionRule
     /// <summary>
     /// To which status should the series be transitioned?
     /// </summary>
+    [EnumDataType(typeof(ScrobbleReadStatus))]
     public ScrobbleReadStatus TransitionStatus { get; set; }
     /// <summary>
     /// Exclude series with these publication statuses from the rule
     /// </summary>
+    [EnumCollection(typeof(PublicationStatus))]
     public List<PublicationStatus> ExcludedPublicationStatus { get; set; }
 }
