@@ -448,6 +448,10 @@ export class AccountService {
     return this.httpClient.delete(this.baseUrl + 'account/kobo-sync-url');
   }
 
+  forceFullKoboSync() {
+    return this.httpClient.post(this.baseUrl + 'account/kobo-sync-url/force-full-sync', {});
+  }
+
   getAuthKeys() {
     return this.httpClient.get<AuthKey[]>(this.baseUrl + `account/auth-keys`);
   }

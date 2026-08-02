@@ -72,6 +72,13 @@ public class KoboController(IKoboService koboService) : ControllerBase
         return KoboJson(result.Items);
     }
 
+    [HttpDelete("v1/library/{entitlementId}")]
+    public async Task<IActionResult> DeleteEntitlement(string apiKey, string entitlementId)
+    {
+        await koboService.DeleteEntitlementAsync(apiKey, entitlementId, HttpContext.RequestAborted);
+        return NoContent();
+    }
+
     [HttpGet("v1/library/{entitlementId}/metadata")]
     public async Task<IActionResult> Metadata(string apiKey, string entitlementId)
     {

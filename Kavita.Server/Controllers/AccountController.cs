@@ -1283,6 +1283,26 @@ public class AccountController(UserManager<AppUser> userManager,
         }
     }
 
+    /// <summary>
+    /// Force a full Kobo sync by clearing this user's synced-set cursor only.
+    /// Does not rotate the AuthKey or clear device-deleted archives.
+    /// </summary>
+    [HttpPost("kobo-sync-url/force-full-sync")]
+    [DisallowRole(PolicyConstants.ReadOnlyRole)]
+    public async Task<ActionResult> ForceFullKoboSync()
+    {
+        var ct = HttpContext.RequestAborted;
+        try
+        {
+            await koboService.ForceFullSyncAsync(UserId, ct);
+            return Ok();
+        }
+        catch (KavitaException ex)
+        {
+            return BadRequest(await localizationService.TranslateAsync(UserId, ex.Message));
+        }
+    }
+
 
     /// <summary>
     /// Is the user's current email valid or not

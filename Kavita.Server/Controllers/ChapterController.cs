@@ -29,6 +29,7 @@ public class ChapterController(
     IUnitOfWork unitOfWork,
     ILocalizationService localizationService,
     IEventHub eventHub,
+    IKoboService koboService,
     ILogger<ChapterController> logger)
     : BaseApiController
 {
@@ -64,6 +65,8 @@ public class ChapterController(
 
         var vol = await unitOfWork.VolumeRepository.GetVolumeByIdAsync(chapter.VolumeId, VolumeIncludes.Chapters);
         if (vol == null) return BadRequest(await localizationService.TranslateAsync(UserId, "volume-doesnt-exist"));
+
+        await koboService.PrepareHardDeleteAsync([chapterId], HttpContext.RequestAborted);
 
         // If there is only 1 chapter within the volume, then we need to remove the volume
         var needToRemoveVolume = vol.Chapters.Count == 1;
@@ -123,6 +126,8 @@ public class ChapterController(
 
             // Fetch all chapters to be deleted
             var chapters = (await unitOfWork.ChapterRepository.GetChaptersByIdsAsync(chapterIds)).ToList();
+
+            await koboService.PrepareHardDeleteAsync(chapterIds, HttpContext.RequestAborted);
 
             // Group chapters by their volume
             var volumesToUpdate = chapters.GroupBy(c => c.VolumeId).ToList();

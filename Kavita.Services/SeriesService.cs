@@ -43,7 +43,8 @@ public class SeriesService(
     ILogger<SeriesService> logger,
     ILocalizationService localizationService,
     IReadingListService readingListService,
-    IEntityNamingService namingService)
+    IEntityNamingService namingService,
+    IKoboService koboService)
     : ISeriesService
 {
     private readonly NextExpectedChapterDto _emptyExpectedChapter = new NextExpectedChapterDto
@@ -481,6 +482,8 @@ public class SeriesService(
             {
                 allChapterIds.AddRange(mapping.Value);
             }
+
+            await koboService.PrepareHardDeleteAsync(allChapterIds, ct);
 
             // NOTE: This isn't getting all the people and whatnot currently due to the lack of includes
             var series = await unitOfWork.SeriesRepository.GetSeriesByIdsAsync(seriesIds, ct: ct);

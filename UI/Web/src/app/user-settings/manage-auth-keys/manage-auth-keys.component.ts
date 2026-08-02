@@ -164,6 +164,20 @@ export class ManageAuthKeysComponent implements OnInit {
     });
   }
 
+  async forceFullKoboSync() {
+    if (!await this.confirmService.confirm(translate('toasts.confirm-force-full-kobo-sync'))) {
+      return;
+    }
+    this.accountService.forceFullKoboSync().subscribe({
+      next: () => {
+        this.toastr.success(translate('toasts.kobo-force-full-sync'));
+      },
+      error: (err) => {
+        this.toastr.error(err?.error || translate('errors.generic'));
+      }
+    });
+  }
+
   copy(data: string) {
     this.clipboard.copy(data);
     this.toastr.success(translate('toasts.copied-to-clipboard'));

@@ -180,6 +180,8 @@ public class KoboService(
             throw new KavitaException("kobo-hostname-required");
         }
 
+        await ReconcileEligibilityLossAsync(userId, ct);
+
         var syncToken = KoboSyncToken.FromHeader(syncTokenHeader);
         var hasSyncedRows = await unitOfWork.DataContext.AppUserKoboSyncedChapter
             .AnyAsync(s => s.AppUserId == userId, ct);
@@ -194,56 +196,87 @@ public class KoboService(
         var tokenBase = $"{publicBase}/{SyncPathPrefix}{authToken}";
 
         var libraryIds = await GetAllowedLibraryIdsAsync(userId, ct);
-        var unsyncedQuery = EligibleChaptersQuery(libraryIds)
-            .Where(c => !unitOfWork.DataContext.AppUserKoboSyncedChapter
-                .Any(s => s.AppUserId == userId && s.ChapterId == c.Id))
-            .OrderBy(c => c.LastModifiedUtc)
-            .ThenBy(c => c.Id);
-
-        var page = await unsyncedQuery
-            .Take(SyncItemLimit)
-            .Include(c => c.Files)
-            .Include(c => c.People).ThenInclude(p => p.Person)
-            .Include(c => c.Volume).ThenInclude(v => v.Series).ThenInclude(s => s.Metadata)
-            .ThenInclude(m => m!.People).ThenInclude(p => p.Person)
-            .AsSplitQuery()
-            .ToListAsync(ct);
-
+        var items = new JsonArray();
         var newBooksLastModified = syncToken.BooksLastModified;
         var newBooksLastCreated = syncToken.BooksLastCreated;
-        var items = new JsonArray();
+        var newArchiveLastModified = syncToken.ArchiveLastModified;
+        var remainingSlots = SyncItemLimit;
 
-        foreach (var chapter in page)
+        // Removals first: archived (not in synced-set) + hard-delete tombstones.
+        var removalSlots = await AppendArchiveRemovalsAsync(userId, tokenBase, syncToken, items,
+            remainingSlots, ct);
+        remainingSlots -= removalSlots.Emitted;
+        if (removalSlots.MaxArchiveModified > newArchiveLastModified)
         {
-            var series = chapter.Volume.Series;
-            var entitlementUuid = KoboEntitlementId.FromChapterIdString(chapter.Id);
-            var entitlement = BuildEntitlementPayload(chapter, series, entitlementUuid, tokenBase, isRemoved: false);
-
-            var created = chapter.CreatedUtc == default ? chapter.Created : chapter.CreatedUtc;
-            var isNew = created > syncToken.BooksLastCreated;
-            items.Add(new JsonObject
-            {
-                [isNew ? "NewEntitlement" : "ChangedEntitlement"] = entitlement,
-            });
-
-            var modified = chapter.LastModifiedUtc == default ? chapter.LastModified : chapter.LastModifiedUtc;
-            if (modified > newBooksLastModified) newBooksLastModified = modified;
-            if (created > newBooksLastCreated) newBooksLastCreated = created;
-
-            unitOfWork.DataContext.AppUserKoboSyncedChapter.Add(new AppUserKoboSyncedChapter
-            {
-                AppUserId = userId,
-                ChapterId = chapter.Id,
-            });
+            newArchiveLastModified = removalSlots.MaxArchiveModified;
         }
 
-        if (page.Count > 0)
+        if (remainingSlots > 0)
+        {
+            var tombstoneSlots = await AppendTombstoneRemovalsAsync(userId, items, remainingSlots, ct);
+            remainingSlots -= tombstoneSlots;
+        }
+
+        if (remainingSlots > 0)
+        {
+            var unsyncedQuery = EligibleChaptersQuery(libraryIds)
+                .Where(c => !unitOfWork.DataContext.AppUserKoboArchivedChapter
+                    .Any(a => a.AppUserId == userId && a.ChapterId == c.Id))
+                .Where(c => !unitOfWork.DataContext.AppUserKoboSyncedChapter
+                    .Any(s => s.AppUserId == userId && s.ChapterId == c.Id))
+                .OrderBy(c => c.LastModifiedUtc)
+                .ThenBy(c => c.Id);
+
+            var page = await unsyncedQuery
+                .Take(remainingSlots)
+                .Include(c => c.Files)
+                .Include(c => c.People).ThenInclude(p => p.Person)
+                .Include(c => c.Volume).ThenInclude(v => v.Series).ThenInclude(s => s.Metadata)
+                .ThenInclude(m => m!.People).ThenInclude(p => p.Person)
+                .AsSplitQuery()
+                .ToListAsync(ct);
+
+            foreach (var chapter in page)
+            {
+                var series = chapter.Volume.Series;
+                var entitlementUuid = KoboEntitlementId.FromChapterIdString(chapter.Id);
+                var entitlement = BuildEntitlementPayload(chapter, series, entitlementUuid, tokenBase,
+                    isRemoved: false);
+
+                var created = chapter.CreatedUtc == default ? chapter.Created : chapter.CreatedUtc;
+                var isNew = created > syncToken.BooksLastCreated;
+                items.Add(new JsonObject
+                {
+                    [isNew ? "NewEntitlement" : "ChangedEntitlement"] = entitlement,
+                });
+
+                var modified = chapter.LastModifiedUtc == default ? chapter.LastModified : chapter.LastModifiedUtc;
+                if (modified > newBooksLastModified) newBooksLastModified = modified;
+                if (created > newBooksLastCreated) newBooksLastCreated = created;
+
+                unitOfWork.DataContext.AppUserKoboSyncedChapter.Add(new AppUserKoboSyncedChapter
+                {
+                    AppUserId = userId,
+                    ChapterId = chapter.Id,
+                });
+            }
+
+            remainingSlots -= page.Count;
+        }
+
+        if (items.Count > 0)
         {
             await unitOfWork.CommitAsync(ct);
         }
 
-        var remaining = await unsyncedQuery.CountAsync(ct);
-        var contSync = remaining > 0;
+        var remainingRemovals = await CountPendingRemovalsAsync(userId, ct);
+        var remainingNew = await EligibleChaptersQuery(libraryIds)
+            .Where(c => !unitOfWork.DataContext.AppUserKoboArchivedChapter
+                .Any(a => a.AppUserId == userId && a.ChapterId == c.Id))
+            .Where(c => !unitOfWork.DataContext.AppUserKoboSyncedChapter
+                .Any(s => s.AppUserId == userId && s.ChapterId == c.Id))
+            .CountAsync(ct);
+        var contSync = remainingRemovals + remainingNew > 0;
 
         // Hold books_last_created until the final page so New vs Changed stays stable across continue pages.
         if (!contSync)
@@ -252,6 +285,7 @@ public class KoboService(
         }
 
         syncToken.BooksLastModified = newBooksLastModified;
+        syncToken.ArchiveLastModified = newArchiveLastModified;
 
         return new KoboLibrarySyncResult
         {
@@ -259,6 +293,94 @@ public class KoboService(
             SyncToken = syncToken.ToHeaderValue(),
             Continue = contSync,
         };
+    }
+
+    public async Task DeleteEntitlementAsync(string authToken, string entitlementId,
+        CancellationToken ct = default)
+    {
+        var userId = await ResolveUserIdAsync(authToken, ct);
+        if (!Guid.TryParse(entitlementId, out var entitlementGuid))
+        {
+            return;
+        }
+
+        var chapterId = await ResolveChapterIdByEntitlementAsync(entitlementGuid, ct);
+        if (chapterId <= 0)
+        {
+            // Already gone (or unknown): treat as success so the device can finish cleanup.
+            return;
+        }
+
+        await ArchiveAndUnsyncAsync(userId, chapterId, ct);
+        await unitOfWork.CommitAsync(ct);
+    }
+
+    public async Task ForceFullSyncAsync(int userId, CancellationToken ct = default)
+    {
+        var user = await unitOfWork.UserRepository.GetUserByIdAsync(userId, AppUserIncludes.None, ct);
+        if (user == null) throw new KavitaException("access-denied");
+
+        var synced = await unitOfWork.DataContext.AppUserKoboSyncedChapter
+            .Where(s => s.AppUserId == userId)
+            .ToListAsync(ct);
+        if (synced.Count == 0) return;
+
+        unitOfWork.DataContext.AppUserKoboSyncedChapter.RemoveRange(synced);
+        await unitOfWork.CommitAsync(ct);
+    }
+
+    public async Task PrepareHardDeleteAsync(IEnumerable<int> chapterIds,
+        CancellationToken ct = default)
+    {
+        var distinctIds = chapterIds.Distinct().ToList();
+        if (distinctIds.Count == 0) return;
+
+        var syncedRows = await unitOfWork.DataContext.AppUserKoboSyncedChapter
+            .Where(s => distinctIds.Contains(s.ChapterId))
+            .ToListAsync(ct);
+        if (syncedRows.Count == 0) return;
+
+        var chapters = await unitOfWork.DataContext.Chapter
+            .Where(c => distinctIds.Contains(c.Id))
+            .Include(c => c.Volume).ThenInclude(v => v.Series)
+            .AsSplitQuery()
+            .ToListAsync(ct);
+        var chapterById = chapters.ToDictionary(c => c.Id);
+
+        var existingTombstones = await unitOfWork.DataContext.AppUserKoboTombstone
+            .Where(t => distinctIds.Contains(t.ChapterId))
+            .Select(t => new { t.AppUserId, t.ChapterId })
+            .ToListAsync(ct);
+        var tombstoneKeys = existingTombstones
+            .Select(t => (t.AppUserId, t.ChapterId))
+            .ToHashSet();
+
+        var now = DateTime.UtcNow;
+        foreach (var group in syncedRows.GroupBy(s => s.ChapterId))
+        {
+            if (!chapterById.TryGetValue(group.Key, out var chapter)) continue;
+            var title = BuildTitle(chapter.Volume.Series, chapter);
+            var entitlementId = KoboEntitlementId.FromChapterId(chapter.Id);
+
+            foreach (var row in group)
+            {
+                if (!tombstoneKeys.Contains((row.AppUserId, row.ChapterId)))
+                {
+                    unitOfWork.DataContext.AppUserKoboTombstone.Add(new AppUserKoboTombstone
+                    {
+                        AppUserId = row.AppUserId,
+                        ChapterId = row.ChapterId,
+                        EntitlementId = entitlementId,
+                        Title = title,
+                        CreatedUtc = now,
+                    });
+                    tombstoneKeys.Add((row.AppUserId, row.ChapterId));
+                }
+            }
+        }
+
+        unitOfWork.DataContext.AppUserKoboSyncedChapter.RemoveRange(syncedRows);
+        await unitOfWork.CommitAsync(ct);
     }
 
     public async Task<IReadOnlyList<JsonObject>> GetMetadataAsync(string authToken, string entitlementId,
@@ -427,6 +549,185 @@ public class KoboService(
                         && c.Files.Any(f => f.Format == MangaFormat.Epub));
     }
 
+    /// <summary>
+    /// Synced chapters that are no longer eligible are archived and unsynced so the next
+    /// (or current) sync page can emit <c>IsRemoved</c>. Already-archived synced rows are
+    /// left alone (removal already delivered).
+    /// </summary>
+    private async Task ReconcileEligibilityLossAsync(int userId, CancellationToken ct)
+    {
+        var libraryIds = await GetAllowedLibraryIdsAsync(userId, ct);
+        var syncedIds = await unitOfWork.DataContext.AppUserKoboSyncedChapter
+            .Where(s => s.AppUserId == userId)
+            .Where(s => !unitOfWork.DataContext.AppUserKoboArchivedChapter
+                .Any(a => a.AppUserId == userId && a.ChapterId == s.ChapterId))
+            .Select(s => s.ChapterId)
+            .ToListAsync(ct);
+        if (syncedIds.Count == 0) return;
+
+        var stillEligible = await EligibleChaptersQuery(libraryIds)
+            .Where(c => syncedIds.Contains(c.Id))
+            .Select(c => c.Id)
+            .ToListAsync(ct);
+        var stillEligibleSet = stillEligible.ToHashSet();
+        var lost = syncedIds.Where(id => !stillEligibleSet.Contains(id)).ToList();
+        if (lost.Count == 0) return;
+
+        foreach (var chapterId in lost)
+        {
+            await ArchiveAndUnsyncAsync(userId, chapterId, ct);
+        }
+
+        await unitOfWork.CommitAsync(ct);
+    }
+
+    private async Task ArchiveAndUnsyncAsync(int userId, int chapterId, CancellationToken ct)
+    {
+        var archived = await unitOfWork.DataContext.AppUserKoboArchivedChapter
+            .FirstOrDefaultAsync(a => a.AppUserId == userId && a.ChapterId == chapterId, ct);
+        var now = DateTime.UtcNow;
+        if (archived == null)
+        {
+            unitOfWork.DataContext.AppUserKoboArchivedChapter.Add(new AppUserKoboArchivedChapter
+            {
+                AppUserId = userId,
+                ChapterId = chapterId,
+                LastModifiedUtc = now,
+            });
+        }
+        else
+        {
+            archived.LastModifiedUtc = now;
+        }
+
+        var synced = await unitOfWork.DataContext.AppUserKoboSyncedChapter
+            .Where(s => s.AppUserId == userId && s.ChapterId == chapterId)
+            .ToListAsync(ct);
+        if (synced.Count > 0)
+        {
+            unitOfWork.DataContext.AppUserKoboSyncedChapter.RemoveRange(synced);
+        }
+    }
+
+    private async Task<(int Emitted, DateTime MaxArchiveModified)> AppendArchiveRemovalsAsync(
+        int userId, string tokenBase, KoboSyncToken syncToken, JsonArray items, int limit,
+        CancellationToken ct)
+    {
+        if (limit <= 0) return (0, DateTime.MinValue);
+
+        // Pending archive removals are not constrained to current library allow-list —
+        // eligibility loss may have already revoked access.
+        var pending = await unitOfWork.DataContext.AppUserKoboArchivedChapter
+            .Where(a => a.AppUserId == userId)
+            .Where(a => !unitOfWork.DataContext.AppUserKoboSyncedChapter
+                .Any(s => s.AppUserId == userId && s.ChapterId == a.ChapterId))
+            .OrderBy(a => a.LastModifiedUtc)
+            .ThenBy(a => a.ChapterId)
+            .Take(limit)
+            .ToListAsync(ct);
+
+        if (pending.Count == 0) return (0, DateTime.MinValue);
+
+        var chapterIds = pending.Select(a => a.ChapterId).ToList();
+        var chapters = await unitOfWork.DataContext.Chapter
+            .Where(c => chapterIds.Contains(c.Id))
+            .Include(c => c.Files)
+            .Include(c => c.People).ThenInclude(p => p.Person)
+            .Include(c => c.Volume).ThenInclude(v => v.Series).ThenInclude(s => s.Metadata)
+            .ThenInclude(m => m!.People).ThenInclude(p => p.Person)
+            .AsSplitQuery()
+            .ToListAsync(ct);
+        var chapterById = chapters.ToDictionary(c => c.Id);
+
+        var maxArchive = DateTime.MinValue;
+        var emitted = 0;
+        foreach (var archive in pending)
+        {
+            if (!chapterById.TryGetValue(archive.ChapterId, out var chapter))
+            {
+                // Chapter vanished without a tombstone — drop orphan archive row.
+                unitOfWork.DataContext.AppUserKoboArchivedChapter.Remove(archive);
+                continue;
+            }
+
+            var series = chapter.Volume.Series;
+            var entitlementUuid = KoboEntitlementId.FromChapterIdString(chapter.Id);
+            var entitlement = BuildEntitlementPayload(chapter, series, entitlementUuid, tokenBase,
+                isRemoved: true);
+
+            var created = chapter.CreatedUtc == default ? chapter.Created : chapter.CreatedUtc;
+            var isNew = created > syncToken.BooksLastCreated;
+            items.Add(new JsonObject
+            {
+                [isNew ? "NewEntitlement" : "ChangedEntitlement"] = entitlement,
+            });
+
+            unitOfWork.DataContext.AppUserKoboSyncedChapter.Add(new AppUserKoboSyncedChapter
+            {
+                AppUserId = userId,
+                ChapterId = chapter.Id,
+            });
+
+            if (archive.LastModifiedUtc > maxArchive) maxArchive = archive.LastModifiedUtc;
+            emitted++;
+        }
+
+        return (emitted, maxArchive);
+    }
+
+    private async Task<int> AppendTombstoneRemovalsAsync(int userId, JsonArray items, int limit,
+        CancellationToken ct)
+    {
+        if (limit <= 0) return 0;
+
+        var tombstones = await unitOfWork.DataContext.AppUserKoboTombstone
+            .Where(t => t.AppUserId == userId)
+            .OrderBy(t => t.CreatedUtc)
+            .ThenBy(t => t.ChapterId)
+            .Take(limit)
+            .ToListAsync(ct);
+
+        foreach (var tombstone in tombstones)
+        {
+            var entitlementUuid = tombstone.EntitlementId.ToString();
+            var entitlement = BuildTombstoneEntitlementPayload(tombstone, entitlementUuid);
+            items.Add(new JsonObject
+            {
+                ["ChangedEntitlement"] = entitlement,
+            });
+            unitOfWork.DataContext.AppUserKoboTombstone.Remove(tombstone);
+        }
+
+        return tombstones.Count;
+    }
+
+    private async Task<int> CountPendingRemovalsAsync(int userId, CancellationToken ct)
+    {
+        var archiveCount = await unitOfWork.DataContext.AppUserKoboArchivedChapter
+            .Where(a => a.AppUserId == userId)
+            .Where(a => !unitOfWork.DataContext.AppUserKoboSyncedChapter
+                .Any(s => s.AppUserId == userId && s.ChapterId == a.ChapterId))
+            .CountAsync(ct);
+        var tombstoneCount = await unitOfWork.DataContext.AppUserKoboTombstone
+            .CountAsync(t => t.AppUserId == userId, ct);
+        return archiveCount + tombstoneCount;
+    }
+
+    private async Task<int> ResolveChapterIdByEntitlementAsync(Guid entitlementGuid, CancellationToken ct)
+    {
+        // Prefer exact match via known synced/archived rows, then scan chapter ids.
+        var knownIds = await unitOfWork.DataContext.AppUserKoboSyncedChapter
+            .Select(s => s.ChapterId)
+            .Union(unitOfWork.DataContext.AppUserKoboArchivedChapter.Select(a => a.ChapterId))
+            .Distinct()
+            .ToListAsync(ct);
+        var fromKnown = knownIds.FirstOrDefault(id => KoboEntitlementId.FromChapterId(id) == entitlementGuid);
+        if (fromKnown > 0) return fromKnown;
+
+        var allIds = await unitOfWork.DataContext.Chapter.Select(c => c.Id).ToListAsync(ct);
+        return allIds.FirstOrDefault(id => KoboEntitlementId.FromChapterId(id) == entitlementGuid);
+    }
+
     private async Task<Chapter?> ResolveEligibleChapterAsync(int userId, string entitlementId,
         CancellationToken ct) =>
         await ResolveAccessibleChapterAsync(userId, entitlementId, requireEpub: true, ct);
@@ -461,6 +762,63 @@ public class KoboService(
             .ThenInclude(m => m!.People).ThenInclude(p => p.Person)
             .AsSplitQuery()
             .FirstOrDefaultAsync(c => c.Id == chapterId, ct);
+    }
+
+    private JsonObject BuildTombstoneEntitlementPayload(AppUserKoboTombstone tombstone,
+        string entitlementUuid)
+    {
+        var now = FormatKoboTimestamp(DateTime.UtcNow);
+        var created = FormatKoboTimestamp(tombstone.CreatedUtc);
+        return new JsonObject
+        {
+            ["BookEntitlement"] = new JsonObject
+            {
+                ["Accessibility"] = "Full",
+                ["ActivePeriod"] = new JsonObject { ["From"] = now },
+                ["Created"] = created,
+                ["CrossRevisionId"] = entitlementUuid,
+                ["Id"] = entitlementUuid,
+                ["IsRemoved"] = true,
+                ["IsHiddenFromArchive"] = false,
+                ["IsLocked"] = false,
+                ["LastModified"] = now,
+                ["OriginCategory"] = "Imported",
+                ["RevisionId"] = entitlementUuid,
+                ["Status"] = "Active",
+            },
+            ["BookMetadata"] = new JsonObject
+            {
+                ["Categories"] = new JsonArray { EmptyGenreId.ToString() },
+                ["CoverImageId"] = entitlementUuid,
+                ["CrossRevisionId"] = entitlementUuid,
+                ["CurrentDisplayPrice"] = new JsonObject
+                {
+                    ["CurrencyCode"] = "USD",
+                    ["TotalAmount"] = 0,
+                },
+                ["CurrentLoveDisplayPrice"] = new JsonObject { ["TotalAmount"] = 0 },
+                ["Description"] = null,
+                ["DownloadUrls"] = new JsonArray(),
+                ["EntitlementId"] = entitlementUuid,
+                ["ExternalIds"] = new JsonArray(),
+                ["Genre"] = EmptyGenreId.ToString(),
+                ["IsEligibleForKoboLove"] = false,
+                ["IsInternetArchive"] = false,
+                ["IsPreOrder"] = false,
+                ["IsSocialEnabled"] = true,
+                ["Language"] = "en",
+                ["PhoneticPronunciations"] = new JsonObject(),
+                ["Publisher"] = new JsonObject
+                {
+                    ["Imprint"] = string.Empty,
+                    ["Name"] = null,
+                },
+                ["RevisionId"] = entitlementUuid,
+                ["Title"] = tombstone.Title,
+                ["WorkId"] = entitlementUuid,
+                ["Contributors"] = null,
+            },
+        };
     }
 
     private JsonObject BuildEntitlementPayload(Chapter chapter, Series series, string entitlementUuid,

@@ -66,6 +66,22 @@ public interface IKoboService
     Task<KoboCoverResult?> GetCoverAsync(string authToken, string entitlementId,
         CancellationToken ct = default);
 
+    /// <summary>
+    /// Device DELETE: archive for the user, drop synced-set row, leave chapter in Kavita.
+    /// </summary>
+    Task DeleteEntitlementAsync(string authToken, string entitlementId, CancellationToken ct = default);
+
+    /// <summary>
+    /// Clears the user's synced-set rows only. Does not rotate the AuthKey or clear archives.
+    /// </summary>
+    Task ForceFullSyncAsync(int userId, CancellationToken ct = default);
+
+    /// <summary>
+    /// Before hard-deleting chapters: for users who had them synced, create tombstones and
+    /// archive-for-removal so the next sync can emit <c>IsRemoved</c>.
+    /// </summary>
+    Task PrepareHardDeleteAsync(IEnumerable<int> chapterIds, CancellationToken ct = default);
+
     /// <summary>Empty keep-alive stub body (<c>{}</c>).</summary>
     object GetEmptyStub();
 

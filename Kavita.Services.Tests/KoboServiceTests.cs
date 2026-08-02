@@ -612,6 +612,161 @@ public class KoboServiceTests(ITestOutputHelper testOutputHelper) : AbstractDbTe
         Assert.Equal(5, a.Version);
     }
 
+    [Fact]
+    public async Task DeleteEntitlement_ArchivesAndNextSyncEmitsIsRemoved()
+    {
+        var (unitOfWork, context, mapper) = await CreateDatabase();
+        var (user, _, chapter) = await SeedEpubChapter(unitOfWork, context,
+            seriesName: "Delete Me", chapterNumber: "1", titleName: "Ch1",
+            writerName: "Author", language: "en", summary: "s",
+            releaseDate: new DateTime(2020, 1, 1, 0, 0, 0, DateTimeKind.Utc));
+        await ConfigureKoboSettings(unitOfWork, "https://kavita.example.com");
+        var koboService = CreateKoboService(unitOfWork, mapper);
+        var token = (await koboService.GetOrCreateSyncUrlAsync(user.Id)).Split('/').Last();
+        var uuid = KoboEntitlementId.FromChapterIdString(chapter.Id);
+
+        var first = await koboService.SyncLibraryAsync(token, null);
+        Assert.Single(first.Items);
+        Assert.False(first.Items[0]!["NewEntitlement"]!["BookEntitlement"]!["IsRemoved"]!.GetValue<bool>());
+
+        await koboService.DeleteEntitlementAsync(token, uuid);
+
+        Assert.True(await context.Chapter.AnyAsync(c => c.Id == chapter.Id));
+        Assert.Equal(1, await context.AppUserKoboArchivedChapter.CountAsync(a =>
+            a.AppUserId == user.Id && a.ChapterId == chapter.Id));
+        Assert.Equal(0, await context.AppUserKoboSyncedChapter.CountAsync(s =>
+            s.AppUserId == user.Id && s.ChapterId == chapter.Id));
+
+        var removal = await koboService.SyncLibraryAsync(token, first.SyncToken);
+        Assert.Single(removal.Items);
+        var book = removal.Items[0]!["NewEntitlement"]?["BookEntitlement"]
+                   ?? removal.Items[0]!["ChangedEntitlement"]!["BookEntitlement"]!;
+        Assert.True(book["IsRemoved"]!.GetValue<bool>());
+        Assert.Equal(uuid, book["Id"]!.GetValue<string>());
+        Assert.Equal(1, await context.AppUserKoboSyncedChapter.CountAsync(s =>
+            s.AppUserId == user.Id && s.ChapterId == chapter.Id));
+
+        var again = await koboService.SyncLibraryAsync(token, removal.SyncToken);
+        Assert.Empty(again.Items);
+    }
+
+    [Fact]
+    public async Task EligibilityLoss_ArchivesAndNextSyncEmitsIsRemoved()
+    {
+        var (unitOfWork, context, mapper) = await CreateDatabase();
+        var (user, library, chapter) = await SeedEpubChapter(unitOfWork, context,
+            seriesName: "Lose Access", chapterNumber: "1", titleName: "Ch1",
+            writerName: "Author", language: "en", summary: "s",
+            releaseDate: new DateTime(2020, 1, 1, 0, 0, 0, DateTimeKind.Utc));
+        await ConfigureKoboSettings(unitOfWork, "https://kavita.example.com");
+        var koboService = CreateKoboService(unitOfWork, mapper);
+        var token = (await koboService.GetOrCreateSyncUrlAsync(user.Id)).Split('/').Last();
+        var uuid = KoboEntitlementId.FromChapterIdString(chapter.Id);
+
+        var first = await koboService.SyncLibraryAsync(token, null);
+        Assert.Single(first.Items);
+
+        library = await context.Library.SingleAsync(l => l.Id == library.Id);
+        library.AllowKoboSync = false;
+        await context.SaveChangesAsync();
+        context.ChangeTracker.Clear();
+
+        var removal = await koboService.SyncLibraryAsync(token, first.SyncToken);
+        Assert.Single(removal.Items);
+        var book = removal.Items[0]!["NewEntitlement"]?["BookEntitlement"]
+                   ?? removal.Items[0]!["ChangedEntitlement"]!["BookEntitlement"]!;
+        Assert.True(book["IsRemoved"]!.GetValue<bool>());
+        Assert.Equal(uuid, book["Id"]!.GetValue<string>());
+        Assert.Equal(1, await context.AppUserKoboArchivedChapter.CountAsync(a =>
+            a.AppUserId == user.Id && a.ChapterId == chapter.Id));
+
+        var again = await koboService.SyncLibraryAsync(token, removal.SyncToken);
+        Assert.Empty(again.Items);
+    }
+
+    [Fact]
+    public async Task HardDelete_CreatesTombstone_AndSyncEmitsIsRemovedOnce()
+    {
+        var (unitOfWork, context, mapper) = await CreateDatabase();
+        var (user, _, chapter) = await SeedEpubChapter(unitOfWork, context,
+            seriesName: "Hard Delete", chapterNumber: "1", titleName: "Gone",
+            writerName: "Author", language: "en", summary: "s",
+            releaseDate: new DateTime(2020, 1, 1, 0, 0, 0, DateTimeKind.Utc));
+        await ConfigureKoboSettings(unitOfWork, "https://kavita.example.com");
+        var koboService = CreateKoboService(unitOfWork, mapper);
+        var token = (await koboService.GetOrCreateSyncUrlAsync(user.Id)).Split('/').Last();
+        var uuid = KoboEntitlementId.FromChapterIdString(chapter.Id);
+        var chapterId = chapter.Id;
+
+        var first = await koboService.SyncLibraryAsync(token, null);
+        Assert.Single(first.Items);
+
+        await koboService.PrepareHardDeleteAsync([chapterId]);
+        Assert.Equal(1, await context.AppUserKoboTombstone.CountAsync(t =>
+            t.AppUserId == user.Id && t.ChapterId == chapterId));
+        Assert.Equal(0, await context.AppUserKoboSyncedChapter.CountAsync(s =>
+            s.AppUserId == user.Id && s.ChapterId == chapterId));
+
+        var series = await context.Series.Include(s => s.Volumes).ThenInclude(v => v.Chapters)
+            .SingleAsync(s => s.Name == "Hard Delete");
+        context.Series.Remove(series);
+        await context.SaveChangesAsync();
+        context.ChangeTracker.Clear();
+
+        Assert.False(await context.Chapter.AnyAsync(c => c.Id == chapterId));
+        Assert.Equal(1, await context.AppUserKoboTombstone.CountAsync(t => t.ChapterId == chapterId));
+
+        var removal = await koboService.SyncLibraryAsync(token, first.SyncToken);
+        Assert.Single(removal.Items);
+        var book = removal.Items[0]!["ChangedEntitlement"]!["BookEntitlement"]!;
+        Assert.True(book["IsRemoved"]!.GetValue<bool>());
+        Assert.Equal(uuid, book["Id"]!.GetValue<string>());
+        Assert.Equal(0, await context.AppUserKoboTombstone.CountAsync(t => t.ChapterId == chapterId));
+
+        var again = await koboService.SyncLibraryAsync(token, removal.SyncToken);
+        Assert.Empty(again.Items);
+    }
+
+    [Fact]
+    public async Task ForceFullSync_ClearsSyncedSetOnly_LeavesArchivesAndAuthKey()
+    {
+        var (unitOfWork, context, mapper) = await CreateDatabase();
+        var (user, _, chapter) = await SeedEpubChapter(unitOfWork, context,
+            seriesName: "Force Sync", chapterNumber: "1", titleName: "Ch1",
+            writerName: "Author", language: "en", summary: "s",
+            releaseDate: new DateTime(2020, 1, 1, 0, 0, 0, DateTimeKind.Utc));
+        await ConfigureKoboSettings(unitOfWork, "https://kavita.example.com");
+        var koboService = CreateKoboService(unitOfWork, mapper);
+        var syncUrl = await koboService.GetOrCreateSyncUrlAsync(user.Id);
+        var token = syncUrl.Split('/').Last();
+        var uuid = KoboEntitlementId.FromChapterIdString(chapter.Id);
+
+        await koboService.SyncLibraryAsync(token, null);
+        await koboService.DeleteEntitlementAsync(token, uuid);
+        Assert.Equal(1, await context.AppUserKoboArchivedChapter.CountAsync(a => a.AppUserId == user.Id));
+        Assert.Equal(0, await context.AppUserKoboSyncedChapter.CountAsync(s => s.AppUserId == user.Id));
+
+        // Deliver IsRemoved so synced-set has a row again while archive remains
+        await koboService.SyncLibraryAsync(token, null);
+        Assert.Equal(1, await context.AppUserKoboSyncedChapter.CountAsync(s => s.AppUserId == user.Id));
+        Assert.Equal(1, await context.AppUserKoboArchivedChapter.CountAsync(a => a.AppUserId == user.Id));
+
+        await koboService.ForceFullSyncAsync(user.Id);
+
+        Assert.Equal(0, await context.AppUserKoboSyncedChapter.CountAsync(s => s.AppUserId == user.Id));
+        Assert.Equal(1, await context.AppUserKoboArchivedChapter.CountAsync(a => a.AppUserId == user.Id));
+        var afterUrl = await koboService.GetOrCreateSyncUrlAsync(user.Id);
+        Assert.Equal(syncUrl, afterUrl);
+
+        // Cursor reset: next sync re-emits IsRemoved for the still-archived chapter (not the eligible add)
+        var afterForce = await koboService.SyncLibraryAsync(token, null);
+        Assert.Single(afterForce.Items);
+        var book = afterForce.Items[0]!["NewEntitlement"]?["BookEntitlement"]
+                   ?? afterForce.Items[0]!["ChangedEntitlement"]!["BookEntitlement"]!;
+        Assert.True(book["IsRemoved"]!.GetValue<bool>());
+        Assert.Equal(uuid, book["Id"]!.GetValue<string>());
+    }
+
     private async Task<(AppUser User, Library Library, Chapter Chapter)> SeedEpubChapter(
         IUnitOfWork unitOfWork, DataContext context, string seriesName, string chapterNumber,
         string titleName, string writerName, string language, string summary, DateTime releaseDate)

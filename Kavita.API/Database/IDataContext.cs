@@ -58,6 +58,8 @@ public interface IDataContext : IDisposable
     DbSet<ScrobbleHold> ScrobbleHold { get; }
     DbSet<AppUserOnDeckRemoval> AppUserOnDeckRemoval { get; }
     DbSet<AppUserKoboSyncedChapter> AppUserKoboSyncedChapter { get; }
+    DbSet<AppUserKoboArchivedChapter> AppUserKoboArchivedChapter { get; }
+    DbSet<AppUserKoboTombstone> AppUserKoboTombstone { get; }
     DbSet<AppUserTableOfContent> AppUserTableOfContent { get; }
     DbSet<AppUserSmartFilter> AppUserSmartFilter { get; }
     DbSet<AppUserDashboardStream> AppUserDashboardStream { get; }

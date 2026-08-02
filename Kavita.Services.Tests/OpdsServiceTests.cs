@@ -64,7 +64,8 @@ public class OpdsServiceTests(ITestOutputHelper testOutputHelper) : AbstractDbTe
 
         var seriesService = new SeriesService(unitOfWork, Substitute.For<IEventHub>(), Substitute.For<ITaskScheduler>(),
             Substitute.For<ILogger<SeriesService>>(),
-            localizationService, Substitute.For<IReadingListService>(), namingService);
+            localizationService, Substitute.For<IReadingListService>(), namingService,
+            Substitute.For<IKoboService>());
 
         var opdsService = new OpdsService(unitOfWork, localizationService,
             seriesService, Substitute.For<DownloadService>(),

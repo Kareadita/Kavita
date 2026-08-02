@@ -60,6 +60,10 @@
               <i class="fa-solid fa-rotate" aria-hidden="true"></i>
               <span class="ms-1">{{t('clients-kobo-rotate')}}</span>
             </button>
+            <button class="btn btn-outline-secondary" (click)="forceFullKoboSync()">
+              <i class="fa-solid fa-arrows-rotate" aria-hidden="true"></i>
+              <span class="ms-1">{{t('clients-kobo-force-full-sync')}}</span>
+            </button>
             <button class="btn btn-danger" (click)="revokeKoboSyncUrl()">
               <i class="fa fa-trash" aria-hidden="true"></i>
               <span class="ms-1">{{t('clients-kobo-revoke')}}</span>

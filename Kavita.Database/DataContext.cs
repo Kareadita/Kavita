@@ -71,6 +71,8 @@ public sealed class DataContext : IdentityDbContext<AppUser, AppRole, int,
     public DbSet<ScrobbleHold> ScrobbleHold { get; set; } = null!;
     public DbSet<AppUserOnDeckRemoval> AppUserOnDeckRemoval { get; set; } = null!;
     public DbSet<AppUserKoboSyncedChapter> AppUserKoboSyncedChapter { get; set; } = null!;
+    public DbSet<AppUserKoboArchivedChapter> AppUserKoboArchivedChapter { get; set; } = null!;
+    public DbSet<AppUserKoboTombstone> AppUserKoboTombstone { get; set; } = null!;
     public DbSet<AppUserTableOfContent> AppUserTableOfContent { get; set; } = null!;
     public DbSet<AppUserSmartFilter> AppUserSmartFilter { get; set; } = null!;
     public DbSet<AppUserDashboardStream> AppUserDashboardStream { get; set; } = null!;
@@ -199,6 +201,32 @@ public sealed class DataContext : IdentityDbContext<AppUser, AppRole, int,
             entity.HasOne(e => e.Chapter)
                 .WithMany()
                 .HasForeignKey(e => e.ChapterId)
+                .OnDelete(DeleteBehavior.Cascade);
+        });
+        builder.Entity<AppUserKoboArchivedChapter>(entity =>
+        {
+            entity.HasIndex(e => new { e.AppUserId, e.ChapterId })
+                .IsUnique()
+                .HasDatabaseName("IX_AppUserKoboArchivedChapter_AppUserId_ChapterId");
+            entity.HasOne(e => e.AppUser)
+                .WithMany()
+                .HasForeignKey(e => e.AppUserId)
+                .OnDelete(DeleteBehavior.Cascade);
+            entity.HasOne(e => e.Chapter)
+                .WithMany()
+                .HasForeignKey(e => e.ChapterId)
+                .OnDelete(DeleteBehavior.Cascade);
+        });
+        builder.Entity<AppUserKoboTombstone>(entity =>
+        {
+            entity.HasIndex(e => new { e.AppUserId, e.ChapterId })
+                .IsUnique()
+                .HasDatabaseName("IX_AppUserKoboTombstone_AppUserId_ChapterId");
+            entity.HasIndex(e => e.EntitlementId)
+                .HasDatabaseName("IX_AppUserKoboTombstone_EntitlementId");
+            entity.HasOne(e => e.AppUser)
+                .WithMany()
+                .HasForeignKey(e => e.AppUserId)
                 .OnDelete(DeleteBehavior.Cascade);
         });
         builder.Entity<Library>()
