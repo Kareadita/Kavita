@@ -178,6 +178,20 @@ export class ManageAuthKeysComponent implements OnInit {
     });
   }
 
+  async restoreRemovedKoboBooks() {
+    if (!await this.confirmService.confirm(translate('toasts.confirm-restore-removed-kobo-books'))) {
+      return;
+    }
+    this.accountService.restoreRemovedKoboBooks().subscribe({
+      next: () => {
+        this.toastr.success(translate('toasts.kobo-restore-removed-books'));
+      },
+      error: (err) => {
+        this.toastr.error(err?.error || translate('errors.generic'));
+      }
+    });
+  }
+
   copy(data: string) {
     this.clipboard.copy(data);
     this.toastr.success(translate('toasts.copied-to-clipboard'));

@@ -452,6 +452,10 @@ export class AccountService {
     return this.httpClient.post(this.baseUrl + 'account/kobo-sync-url/force-full-sync', {});
   }
 
+  restoreRemovedKoboBooks() {
+    return this.httpClient.post(this.baseUrl + 'account/kobo-sync-url/restore-removed', {});
+  }
+
   getAuthKeys() {
     return this.httpClient.get<AuthKey[]>(this.baseUrl + `account/auth-keys`);
   }

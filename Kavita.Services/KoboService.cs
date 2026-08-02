@@ -183,6 +183,7 @@ public class KoboService(
             throw new KavitaException("kobo-hostname-required");
         }
 
+        await ReconcileEligibilityRestoreAsync(userId, ct);
         await ReconcileEligibilityLossAsync(userId, ct);
 
         var syncToken = KoboSyncToken.FromHeader(syncTokenHeader);
@@ -314,7 +315,7 @@ public class KoboService(
             return;
         }
 
-        await ArchiveAndUnsyncAsync(userId, chapterId, ct);
+        await ArchiveAndUnsyncAsync(userId, chapterId, isDeviceDeleted: true, ct);
         await unitOfWork.CommitAsync(ct);
     }
 
@@ -329,6 +330,41 @@ public class KoboService(
         if (synced.Count == 0) return;
 
         unitOfWork.DataContext.AppUserKoboSyncedChapter.RemoveRange(synced);
+        await unitOfWork.CommitAsync(ct);
+    }
+
+    public async Task RestoreRemovedBooksAsync(int userId, CancellationToken ct = default)
+    {
+        var user = await unitOfWork.UserRepository.GetUserByIdAsync(userId, AppUserIncludes.None, ct);
+        if (user == null) throw new KavitaException("access-denied");
+
+        var libraryIds = await GetAllowedLibraryIdsAsync(userId, ct);
+        var deviceArchives = await unitOfWork.DataContext.AppUserKoboArchivedChapter
+            .Where(a => a.AppUserId == userId && a.IsDeviceDeleted)
+            .ToListAsync(ct);
+        if (deviceArchives.Count == 0) return;
+
+        var archivedIds = deviceArchives.Select(a => a.ChapterId).ToList();
+        var eligibleIds = await EligibleChaptersQuery(libraryIds)
+            .Where(c => archivedIds.Contains(c.Id))
+            .Select(c => c.Id)
+            .ToListAsync(ct);
+        if (eligibleIds.Count == 0) return;
+
+        var eligibleSet = eligibleIds.ToHashSet();
+        var toClear = deviceArchives.Where(a => eligibleSet.Contains(a.ChapterId)).ToList();
+        var clearedIds = toClear.Select(a => a.ChapterId).ToList();
+
+        unitOfWork.DataContext.AppUserKoboArchivedChapter.RemoveRange(toClear);
+
+        var synced = await unitOfWork.DataContext.AppUserKoboSyncedChapter
+            .Where(s => s.AppUserId == userId && clearedIds.Contains(s.ChapterId))
+            .ToListAsync(ct);
+        if (synced.Count > 0)
+        {
+            unitOfWork.DataContext.AppUserKoboSyncedChapter.RemoveRange(synced);
+        }
+
         await unitOfWork.CommitAsync(ct);
     }
 
@@ -599,13 +635,50 @@ public class KoboService(
 
         foreach (var chapterId in lost)
         {
-            await ArchiveAndUnsyncAsync(userId, chapterId, ct);
+            await ArchiveAndUnsyncAsync(userId, chapterId, isDeviceDeleted: false, ct);
         }
 
         await unitOfWork.CommitAsync(ct);
     }
 
-    private async Task ArchiveAndUnsyncAsync(int userId, int chapterId, CancellationToken ct)
+    /// <summary>
+    /// Eligibility archives for chapters that are eligible again are cleared (and unsynced) so
+    /// the next sync can re-entitle them. Device-deleted archives are left alone.
+    /// </summary>
+    private async Task ReconcileEligibilityRestoreAsync(int userId, CancellationToken ct)
+    {
+        var libraryIds = await GetAllowedLibraryIdsAsync(userId, ct);
+        var eligibilityArchives = await unitOfWork.DataContext.AppUserKoboArchivedChapter
+            .Where(a => a.AppUserId == userId && !a.IsDeviceDeleted)
+            .ToListAsync(ct);
+        if (eligibilityArchives.Count == 0) return;
+
+        var archivedIds = eligibilityArchives.Select(a => a.ChapterId).ToList();
+        var eligibleIds = await EligibleChaptersQuery(libraryIds)
+            .Where(c => archivedIds.Contains(c.Id))
+            .Select(c => c.Id)
+            .ToListAsync(ct);
+        if (eligibleIds.Count == 0) return;
+
+        var eligibleSet = eligibleIds.ToHashSet();
+        var toClear = eligibilityArchives.Where(a => eligibleSet.Contains(a.ChapterId)).ToList();
+        var clearedIds = toClear.Select(a => a.ChapterId).ToList();
+
+        unitOfWork.DataContext.AppUserKoboArchivedChapter.RemoveRange(toClear);
+
+        var synced = await unitOfWork.DataContext.AppUserKoboSyncedChapter
+            .Where(s => s.AppUserId == userId && clearedIds.Contains(s.ChapterId))
+            .ToListAsync(ct);
+        if (synced.Count > 0)
+        {
+            unitOfWork.DataContext.AppUserKoboSyncedChapter.RemoveRange(synced);
+        }
+
+        await unitOfWork.CommitAsync(ct);
+    }
+
+    private async Task ArchiveAndUnsyncAsync(int userId, int chapterId, bool isDeviceDeleted,
+        CancellationToken ct)
     {
         var archived = await unitOfWork.DataContext.AppUserKoboArchivedChapter
             .FirstOrDefaultAsync(a => a.AppUserId == userId && a.ChapterId == chapterId, ct);
@@ -617,11 +690,17 @@ public class KoboService(
                 AppUserId = userId,
                 ChapterId = chapterId,
                 LastModifiedUtc = now,
+                IsDeviceDeleted = isDeviceDeleted,
             });
         }
         else
         {
             archived.LastModifiedUtc = now;
+            // Device DELETE upgrades an eligibility archive; eligibility loss never clears the flag.
+            if (isDeviceDeleted)
+            {
+                archived.IsDeviceDeleted = true;
+            }
         }
 
         var synced = await unitOfWork.DataContext.AppUserKoboSyncedChapter

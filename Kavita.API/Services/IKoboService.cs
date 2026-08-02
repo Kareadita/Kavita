@@ -78,6 +78,13 @@ public interface IKoboService
     Task ForceFullSyncAsync(int userId, CancellationToken ct = default);
 
     /// <summary>
+    /// Bulk-restores books the user removed on the device: clears device-deleted archives for
+    /// still-eligible chapters and drops those chapters from the synced-set. Tombstones / hard
+    /// deletes are not restored. Does not clear eligibility archives (those auto-unarchive).
+    /// </summary>
+    Task RestoreRemovedBooksAsync(int userId, CancellationToken ct = default);
+
+    /// <summary>
     /// Before hard-deleting chapters: for users who had them synced, create tombstones and
     /// archive-for-removal so the next sync can emit <c>IsRemoved</c>.
     /// </summary>

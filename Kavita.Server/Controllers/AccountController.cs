@@ -1303,6 +1303,26 @@ public class AccountController(UserManager<AppUser> userManager,
         }
     }
 
+    /// <summary>
+    /// Restore books removed on the Kobo device: clears device-deleted archives for still-eligible
+    /// chapters and drops them from the synced-set so the next sync re-entitles them.
+    /// </summary>
+    [HttpPost("kobo-sync-url/restore-removed")]
+    [DisallowRole(PolicyConstants.ReadOnlyRole)]
+    public async Task<ActionResult> RestoreRemovedKoboBooks()
+    {
+        var ct = HttpContext.RequestAborted;
+        try
+        {
+            await koboService.RestoreRemovedBooksAsync(UserId, ct);
+            return Ok();
+        }
+        catch (KavitaException ex)
+        {
+            return BadRequest(await localizationService.TranslateAsync(UserId, ex.Message));
+        }
+    }
+
 
     /// <summary>
     /// Is the user's current email valid or not
