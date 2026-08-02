@@ -60,7 +60,7 @@ public class KoboService(
             authKey.ExpiresAtUtc = DateTime.UtcNow.Add(originalDuration);
         }
 
-        authKey.Key = AuthKeyHelper.GenerateKey();
+        authKey.Key = AuthKeyHelper.GenerateKey(32);
         await unitOfWork.CommitAsync(ct);
         await authKeyService.InvalidateAsync(oldKeyValue, ct);
 
@@ -233,7 +233,7 @@ public class KoboService(
         var newKey = new AppUserAuthKey
         {
             Name = AuthKeyHelper.KoboKeyName,
-            Key = AuthKeyHelper.GenerateKey(),
+            Key = AuthKeyHelper.GenerateKey(32),
             AppUserId = userId,
             CreatedAtUtc = DateTime.UtcNow,
             Provider = AuthKeyProvider.User,
