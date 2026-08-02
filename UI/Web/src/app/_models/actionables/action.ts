@@ -126,4 +126,8 @@ export enum Action {
   Navigate = 38,
   AddToDashboard = 39,
   AddToSideNav = 40,
+  /**
+   * Warm shared Kobo CBZ/CBR → EPUB conversion cache for a library
+   */
+  ConvertLibraryForKobo = 41,
 }

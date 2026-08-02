@@ -8,7 +8,9 @@ using System.Threading;
 using System.Threading.Tasks;
 using Kavita.API.Database;
 using Kavita.API.Services;
+using Kavita.API.Services.SignalR;
 using Kavita.Common;
+using Kavita.Models.DTOs.SignalR;
 using Kavita.Models.Entities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
@@ -23,9 +25,11 @@ public class KoboConversionService(
     IDirectoryService directoryService,
     IKoboArchiveEpubConverter archiveEpubConverter,
     IKoboConversionJobScheduler jobScheduler,
-    IUnitOfWork unitOfWork)
+    IUnitOfWork unitOfWork,
+    IEventHub eventHub)
     : IKoboConversionService
 {
+    public const string Name = "KoboConversionService";
     public const string CacheFolderName = "kobo";
     public const string ConvertUnavailableMessage = "kobo-convert-unavailable";
     public const string ConvertFailedMessage = "kobo-convert-failed";
@@ -105,29 +109,7 @@ public class KoboConversionService(
                 return;
             }
 
-            var archive = KoboService.PreferConvertibleArchive(chapter.Files);
-            if (archive == null)
-            {
-                logger.LogWarning("Background Kobo convert: chapter {ChapterId} has no CBZ/CBR source",
-                    chapterId);
-                return;
-            }
-
-            if (KoboService.PreferNativeEpub(chapter.Files) != null)
-            {
-                logger.LogDebug("Background Kobo convert skipped for chapter {ChapterId}: native EPUB present",
-                    chapterId);
-                return;
-            }
-
-            var fingerprint = ComputeFingerprint(archive);
-            if (TryGetCachedPath(chapterId, fingerprint) != null) return;
-
-            var title = chapter.Volume?.Series == null
-                ? archive.FileName
-                : KoboService.BuildTitle(chapter.Volume.Series, chapter);
-
-            await ConvertAndCacheAsync(chapterId, archive, title, fingerprint, ct);
+            await ConvertChapterIfNeededAsync(chapter, ct);
         }
         catch (Exception ex)
         {
@@ -137,6 +119,98 @@ public class KoboConversionService(
         {
             InFlight.TryRemove(chapterId, out _);
         }
+    }
+
+    public async Task ConvertLibraryForKoboAsync(int libraryId, CancellationToken ct = default)
+    {
+        var library = await unitOfWork.LibraryRepository.GetLibraryForIdAsync(libraryId, ct: ct);
+        if (library == null)
+        {
+            logger.LogWarning("Kobo library convert: library {LibraryId} not found", libraryId);
+            return;
+        }
+
+        logger.LogInformation(
+            "[KoboConversionService] Beginning whole-library Kobo convert for {LibraryName}. This can grow disk use under cache-long/kobo.",
+            library.Name);
+
+        var chapters = await unitOfWork.DataContext.Chapter
+            .Include(c => c.Files)
+            .Include(c => c.Volume).ThenInclude(v => v.Series)
+            .Where(c => c.Volume.Series.LibraryId == libraryId)
+            .AsSplitQuery()
+            .ToListAsync(ct);
+
+        var convertible = chapters
+            .Where(c => KoboService.PreferNativeEpub(c.Files) == null
+                        && KoboService.PreferConvertibleArchive(c.Files) != null)
+            .ToList();
+
+        var total = convertible.Count;
+        logger.LogInformation(
+            "[KoboConversionService] Library {LibraryName}: {ConvertibleCount} CBZ/CBR chapter(s) to convert",
+            library.Name, total);
+
+        await eventHub.SendMessageAsync(MessageFactory.NotificationProgress,
+            MessageFactory.KoboConvertProgressEvent(library.Id, 0F, ProgressEventType.Started,
+                $"Starting {library.Name}"), ct: ct);
+
+        var index = 0;
+        foreach (var chapter in convertible)
+        {
+            ct.ThrowIfCancellationRequested();
+
+            var progress = total == 0 ? 1F : Math.Max(0F, Math.Min(1F, index * 1F / total));
+            var subtitle = chapter.Volume?.Series?.Name ?? $"Chapter {chapter.Id}";
+            await eventHub.SendMessageAsync(MessageFactory.NotificationProgress,
+                MessageFactory.KoboConvertProgressEvent(library.Id, progress, ProgressEventType.Updated, subtitle),
+                ct: ct);
+
+            // Library warm-up is not bound by the in-request download time budget.
+            InFlight.TryAdd(chapter.Id, 0);
+            try
+            {
+                await ConvertChapterIfNeededAsync(chapter, ct);
+            }
+            catch (Exception ex)
+            {
+                logger.LogError(ex,
+                    "[KoboConversionService] Failed converting chapter {ChapterId} during library {LibraryId} warm-up",
+                    chapter.Id, libraryId);
+            }
+            finally
+            {
+                InFlight.TryRemove(chapter.Id, out _);
+            }
+
+            index++;
+        }
+
+        await eventHub.SendMessageAsync(MessageFactory.NotificationProgress,
+            MessageFactory.KoboConvertProgressEvent(library.Id, 1F, ProgressEventType.Ended, "Complete"), ct: ct);
+
+        logger.LogInformation(
+            "[KoboConversionService] Finished whole-library Kobo convert for {LibraryName}: {Converted}/{Total}",
+            library.Name, index, total);
+    }
+
+    public Task ClearConversionCacheAsync(CancellationToken ct = default)
+    {
+        var path = Path.Combine(directoryService.LongTermCacheDirectory, CacheFolderName);
+        logger.LogInformation("Clearing Kobo conversion cache at {Path}", path);
+        directoryService.ExistOrCreate(path);
+
+        try
+        {
+            directoryService.ClearDirectory(path);
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "There was an issue clearing the Kobo conversion cache");
+        }
+
+        logger.LogInformation("Kobo conversion cache cleared");
+        return Task.CompletedTask;
     }
 
     /// <summary>Test seam: clear process-wide in-flight markers between tests.</summary>
@@ -154,6 +228,33 @@ public class KoboConversionService(
 
     internal string GetCacheFilePath(int chapterId, string fingerprint) =>
         Path.Combine(GetCacheDirectory(chapterId), $"{fingerprint}.epub");
+
+    private async Task ConvertChapterIfNeededAsync(Chapter chapter, CancellationToken ct)
+    {
+        var archive = KoboService.PreferConvertibleArchive(chapter.Files);
+        if (archive == null)
+        {
+            logger.LogWarning("Background Kobo convert: chapter {ChapterId} has no CBZ/CBR source",
+                chapter.Id);
+            return;
+        }
+
+        if (KoboService.PreferNativeEpub(chapter.Files) != null)
+        {
+            logger.LogDebug("Background Kobo convert skipped for chapter {ChapterId}: native EPUB present",
+                chapter.Id);
+            return;
+        }
+
+        var fingerprint = ComputeFingerprint(archive);
+        if (TryGetCachedPath(chapter.Id, fingerprint) != null) return;
+
+        var title = chapter.Volume?.Series == null
+            ? archive.FileName
+            : KoboService.BuildTitle(chapter.Volume.Series, chapter);
+
+        await ConvertAndCacheAsync(chapter.Id, archive, title, fingerprint, ct);
+    }
 
     private string? TryGetCachedPath(int chapterId, string fingerprint)
     {

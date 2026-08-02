@@ -390,6 +390,18 @@ public class LibraryController(
         return Ok();
     }
 
+    /// <summary>
+    /// Enqueues a whole-library CBZ/CBR → EPUB conversion into the shared Kobo cache (admin only).
+    /// Not bound by the in-request download time budget. Can grow disk use under cache-long/kobo.
+    /// </summary>
+    [HttpPost("convert-kobo")]
+    [Authorize(Policy = PolicyGroups.AdminPolicy)]
+    public ActionResult ConvertLibraryForKobo(int libraryId)
+    {
+        taskScheduler.ConvertLibraryForKobo(libraryId);
+        return Ok();
+    }
+
     [Authorize(Policy = PolicyGroups.AdminPolicy)]
     [HttpPost("refresh-metadata-multiple")]
     public ActionResult RefreshMetadataMultiple(BulkActionDto dto, bool forceColorscape = true)

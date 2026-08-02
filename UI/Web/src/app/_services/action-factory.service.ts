@@ -371,6 +371,17 @@ export class ActionFactoryService {
             children: [],
           },
           {
+            action: Action.ConvertLibraryForKobo,
+            title: 'convert-library-for-kobo',
+            description: 'convert-library-for-kobo-tooltip',
+
+            callback: this.dummyCallback,
+            shouldRender: this.dummyShouldRender,
+
+            requiredRoles: [Role.Admin],
+            children: [],
+          },
+          {
             action: Action.Delete,
             title: 'delete',
             description: 'delete-tooltip',

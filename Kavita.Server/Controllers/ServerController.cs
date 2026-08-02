@@ -34,6 +34,7 @@ public class ServerController(
     IVersionUpdaterService versionUpdaterService,
     IStatsService statsService,
     ICleanupService cleanupService,
+    IKoboConversionService koboConversionService,
     IScannerService scannerService,
     ITaskScheduler taskScheduler,
     IUnitOfWork unitOfWork,
@@ -52,6 +53,17 @@ public class ServerController(
         logger.LogInformation("{UserName} is clearing cache of server from admin dashboard", Username!);
         cleanupService.CleanupCacheAndTempDirectories();
 
+        return Ok();
+    }
+
+    /// <summary>
+    /// Clears the shared Kobo CBZ/CBR → EPUB conversion cache (cache-long/kobo). No automatic LRU.
+    /// </summary>
+    [HttpPost("clear-kobo-conversion-cache")]
+    public async Task<ActionResult> ClearKoboConversionCache()
+    {
+        logger.LogInformation("{UserName} is clearing Kobo conversion cache from admin dashboard", Username!);
+        await koboConversionService.ClearConversionCacheAsync(HttpContext.RequestAborted);
         return Ok();
     }
 

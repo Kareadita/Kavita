@@ -2529,6 +2529,10 @@
         "clear-reading-cache-task-desc": "Clears cached files for reading. Useful when you've just updated a file that you were previously reading within the last 24 hours.",
         "clear-reading-cache-task-success": "Cache has been cleared",
 
+        "clear-kobo-conversion-cache-task": "Clear Kobo Conversion Cache",
+        "clear-kobo-conversion-cache-task-desc": "Deletes converted EPUBs stored for Kobo sync (CBZ/CBR warm-up and on-download converts). There is no automatic size limit; whole-library convert can grow disk use until you clear this cache.",
+        "clear-kobo-conversion-cache-task-success": "Kobo conversion cache has been cleared",
+
         "clean-up-want-to-read-task": "Clean up Want to Read",
         "clean-up-want-to-read-task-desc": "Removes any series that users have fully read that are within Want to Read and have a publication status of Completed. Runs every 24 hours.",
         "clean-up-want-to-read-task-success": "Want to Read has been cleaned up",
@@ -4316,6 +4320,7 @@
         "incognito-off": "Incognito mode is off. Progress will now start being tracked.",
         "refresh-covers-queued": "Refresh covers queued for {{name}}",
         "generate-colorscape-queued": "Generate colorscape queued for {{name}}",
+        "convert-library-for-kobo-queued": "Convert for Kobo queued for {{name}}",
         "entity-read": "{{name}} is now read",
         "entity-unread": "{{name}} is now unread",
         "mark-read": "Marked as Read",
@@ -4467,6 +4472,8 @@
         "refresh-covers-tooltip": "Regenerate all covers",
         "generate-colorscape": "Generate ColorScape",
         "generate-colorscape-tooltip": "Generate colorscapes and any missing covers",
+        "convert-library-for-kobo": "Convert for Kobo",
+        "convert-library-for-kobo-tooltip": "Warm the shared Kobo conversion cache for CBZ/CBR chapters in this library. Can grow disk use; clear via Admin Tasks when needed.",
         "analyze-files": "Analyze Files",
         "analyze-files-tooltip": "Analyze Files for extension type and size",
         "settings": "Settings",

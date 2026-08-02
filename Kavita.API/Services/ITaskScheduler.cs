@@ -16,6 +16,7 @@ public interface ITaskScheduler
     Task ScanLibraries(bool force = false);
     void CleanupChapters(int[] chapterIds);
     void RefreshMetadata(int libraryId, bool forceUpdate = true, bool forceColorscape = true);
+    void ConvertLibraryForKobo(int libraryId);
     Task RefreshSeriesMetadata(int libraryId, int seriesId, bool forceUpdate = false, bool forceColorscape = false);
     Task ScanSeries(int libraryId, int seriesId, bool forceUpdate = false);
     void AnalyzeFilesForSeries(int libraryId, int seriesId, bool forceUpdate = false);

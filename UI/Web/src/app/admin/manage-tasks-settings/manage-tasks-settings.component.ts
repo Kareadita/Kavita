@@ -85,6 +85,12 @@ export class ManageTasksSettingsComponent implements OnInit {
       successMessage: 'clear-reading-cache-task-success'
     },
     {
+      name: 'clear-kobo-conversion-cache-task',
+      description: 'clear-kobo-conversion-cache-task-desc',
+      api: this.serverService.clearKoboConversionCache(),
+      successMessage: 'clear-kobo-conversion-cache-task-success'
+    },
+    {
       name: 'clean-up-want-to-read-task',
       description: 'clean-up-want-to-read-task-desc',
       api: this.serverService.cleanupWantToRead(),

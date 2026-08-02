@@ -35,6 +35,10 @@ public static class MessageFactory
     /// </summary>
     private const string CoverUpdateProgress = "CoverUpdateProgress";
     /// <summary>
+    /// Event sent out during whole-library Kobo conversion for progress tracking
+    /// </summary>
+    private const string KoboConvertProgress = "KoboConvertProgress";
+    /// <summary>
     /// Series is added to server
     /// </summary>
     public const string SeriesAdded = "SeriesAdded";
@@ -344,6 +348,24 @@ public static class MessageFactory
         {
             Name = CoverUpdateProgress,
             Title = "Refreshing Covers",
+            SubTitle = subtitle,
+            EventType = eventType,
+            Progress = ProgressType.Determinate,
+            Body = new
+            {
+                LibraryId = libraryId,
+                Progress = progress,
+                EventTime = DateTime.Now
+            }
+        };
+    }
+
+    public static SignalRMessage KoboConvertProgressEvent(int libraryId, float progress, string eventType, string subtitle = "")
+    {
+        return new SignalRMessage()
+        {
+            Name = KoboConvertProgress,
+            Title = "Converting for Kobo",
             SubTitle = subtitle,
             EventType = eventType,
             Progress = ProgressType.Determinate,

@@ -69,6 +69,10 @@ export enum EVENTS {
    * A subtype of NotificationProgress that represents a file being processed for cover image extraction
    */
   CoverUpdateProgress = 'CoverUpdateProgress',
+  /**
+   * A subtype of NotificationProgress for whole-library Kobo CBZ/CBR conversion
+   */
+  KoboConvertProgress = 'KoboConvertProgress',
    /**
     * A library is created or removed from the instance
     */

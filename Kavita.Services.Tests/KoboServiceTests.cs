@@ -928,7 +928,8 @@ public class KoboServiceTests(ITestOutputHelper testOutputHelper) : AbstractDbTe
             directoryService,
             converter,
             Substitute.For<IKoboConversionJobScheduler>(),
-            unitOfWork);
+            unitOfWork,
+            Substitute.For<IEventHub>());
         KoboConversionService.ResetInFlightForTests();
 
         var koboService = CreateKoboService(unitOfWork, mapper, conversionService: conversion);
@@ -1012,7 +1013,8 @@ public class KoboServiceTests(ITestOutputHelper testOutputHelper) : AbstractDbTe
             directoryService,
             converter,
             scheduler,
-            unitOfWork);
+            unitOfWork,
+            Substitute.For<IEventHub>());
         KoboConversionService.ResetInFlightForTests();
 
         var koboService = CreateKoboService(unitOfWork, mapper, conversionService: conversion);

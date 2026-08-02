@@ -139,6 +139,12 @@ export class ActionService {
           map(() => this.fromAction(action, library, 'none'))
         );
 
+      case Action.ConvertLibraryForKobo:
+        return this.libraryService.convertLibraryForKobo(library.id).pipe(
+          tap(() => this.toastr.info(translate('toasts.convert-library-for-kobo-queued', {name: library.name}))),
+          map(() => this.fromAction(action, library, 'none'))
+        );
+
       case Action.Delete:
         return from(this.confirmService.alert(translate('toasts.confirm-library-delete'))).pipe(
           filter(confirmed => confirmed),

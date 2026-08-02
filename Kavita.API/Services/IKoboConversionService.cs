@@ -5,7 +5,7 @@ using Kavita.Models.Entities;
 namespace Kavita.API.Services;
 
 /// <summary>
-/// Shared CBZ/CBR → EPUB conversion cache for Kobo download (and later whole-library warm-up).
+/// Shared CBZ/CBR → EPUB conversion cache for Kobo download and whole-library warm-up.
 /// </summary>
 public interface IKoboConversionService
 {
@@ -23,4 +23,15 @@ public interface IKoboConversionService
     /// Background convert into the shared cache without the in-request time budget.
     /// </summary>
     Task ConvertChapterInBackgroundAsync(int chapterId, CancellationToken ct = default);
+
+    /// <summary>
+    /// Warms the shared conversion cache for all CBZ/CBR-only chapters in a library (no in-request budget).
+    /// Reports SignalR progress (cover-gen style).
+    /// </summary>
+    Task ConvertLibraryForKoboAsync(int libraryId, CancellationToken ct = default);
+
+    /// <summary>
+    /// Deletes all files under the shared Kobo conversion cache. No automatic LRU.
+    /// </summary>
+    Task ClearConversionCacheAsync(CancellationToken ct = default);
 }

@@ -29,6 +29,10 @@ export class ServerService {
     return this.http.post(this.baseUrl + 'server/clear-cache', {});
   }
 
+  clearKoboConversionCache() {
+    return this.http.post(this.baseUrl + 'server/clear-kobo-conversion-cache', {});
+  }
+
   cleanupWantToRead() {
     return this.http.post(this.baseUrl + 'server/cleanup-want-to-read', {});
   }

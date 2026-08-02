@@ -131,6 +131,10 @@ export class LibraryService {
     return this.httpClient.post(this.baseUrl + `library/refresh-metadata?libraryId=${libraryId}&force=${forceUpdate}&forceColorscape=${forceColorscape}`, {});
   }
 
+  convertLibraryForKobo(libraryId: number) {
+    return this.httpClient.post(this.baseUrl + `library/convert-kobo?libraryId=${libraryId}`, {});
+  }
+
   refreshMetadataMultipleLibraries(libraryIds: Array<number>, force = false, forceColorscape = false) {
     return this.httpClient.post(this.baseUrl + 'library/refresh-metadata-multiple?forceColorscape=' + forceColorscape, {ids: libraryIds, force: force});
   }
