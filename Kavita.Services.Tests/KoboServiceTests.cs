@@ -1,6 +1,10 @@
+using System;
 using System.IO;
 using System.IO.Abstractions;
+using System.Linq;
 using System.Text.Json.Nodes;
+using System.Threading;
+using System.Threading.Tasks;
 using AutoMapper;
 using Kavita.API.Database;
 using Kavita.API.Repositories;
@@ -31,6 +35,8 @@ namespace Kavita.Services.Tests;
 public class KoboServiceTests(ITestOutputHelper testOutputHelper) : AbstractDbTest(testOutputHelper)
 {
     private readonly string _epubPath = Path.Join(Directory.GetCurrentDirectory(), "Data", "AesopsFables.epub");
+    private readonly string _cbzPath = Path.GetFullPath(Path.Join(Directory.GetCurrentDirectory(),
+        "../../../Test Data/ArchiveService/CoverImages/v10.cbz"));
 
     private static SettingsService CreateSettingsService(IUnitOfWork unitOfWork)
     {
@@ -41,12 +47,13 @@ public class KoboServiceTests(ITestOutputHelper testOutputHelper) : AbstractDbTe
     }
 
     private static KoboService CreateKoboService(IUnitOfWork unitOfWork, IMapper mapper,
-        string? coverImageDirectory = null)
+        string? coverImageDirectory = null, IKoboConversionService? conversionService = null)
     {
         var directoryService = Substitute.For<IDirectoryService>();
         directoryService.CoverImageDirectory.Returns(coverImageDirectory ?? Path.GetTempPath());
         return new KoboService(unitOfWork, Substitute.For<IAuthKeyService>(), Substitute.For<IEventHub>(), mapper,
-            directoryService, new DownloadService());
+            directoryService, new DownloadService(),
+            conversionService ?? Substitute.For<IKoboConversionService>());
     }
 
     private static async Task<AppUser> SeedUser(IUnitOfWork unitOfWork, DataContext context)
@@ -476,7 +483,7 @@ public class KoboServiceTests(ITestOutputHelper testOutputHelper) : AbstractDbTe
     }
 
     [Fact]
-    public async Task SyncLibrary_Eligibility_RequiresAllowKoboSyncAndNativeEpub()
+    public async Task SyncLibrary_Eligibility_RequiresAllowKoboSyncAndEpubOrCbz()
     {
         var (unitOfWork, context, mapper) = await CreateDatabase();
         var user = await SeedUser(unitOfWork, context);
@@ -491,6 +498,7 @@ public class KoboServiceTests(ITestOutputHelper testOutputHelper) : AbstractDbTe
         await context.SaveChangesAsync();
 
         var epubChapter = await AddEpubChapter(context, allowed, "Epub Book", "1");
+        var cbzChapter = await AddCbzChapter(context, allowed, "Cbz Book", "1");
         await AddChapterWithFormat(context, allowed, "Pdf Book", "1", MangaFormat.Pdf);
         await AddChapterWithFormat(context, disallowed, "Disallowed Epub", "1", MangaFormat.Epub);
         await context.SaveChangesAsync();
@@ -500,9 +508,20 @@ public class KoboServiceTests(ITestOutputHelper testOutputHelper) : AbstractDbTe
         var token = (await koboService.GetOrCreateSyncUrlAsync(user.Id)).Split('/').Last();
 
         var result = await koboService.SyncLibraryAsync(token, null);
-        Assert.Single(result.Items);
-        var uuid = result.Items[0]!["NewEntitlement"]!["BookEntitlement"]!["Id"]!.GetValue<string>();
-        Assert.Equal(KoboEntitlementId.FromChapterIdString(epubChapter.Id), uuid);
+        Assert.Equal(2, result.Items.Count);
+        var uuids = result.Items
+            .Select(i => i!["NewEntitlement"]!["BookEntitlement"]!["Id"]!.GetValue<string>())
+            .ToHashSet();
+        Assert.Contains(KoboEntitlementId.FromChapterIdString(epubChapter.Id), uuids);
+        Assert.Contains(KoboEntitlementId.FromChapterIdString(cbzChapter.Id), uuids);
+
+        // Convert-eligible chapters still advertise EPUB download URLs immediately.
+        var cbzItem = result.Items.First(i =>
+            i!["NewEntitlement"]!["BookEntitlement"]!["Id"]!.GetValue<string>() ==
+            KoboEntitlementId.FromChapterIdString(cbzChapter.Id));
+        var downloadUrls = cbzItem!["NewEntitlement"]!["BookMetadata"]!["DownloadUrls"]!.AsArray();
+        Assert.Equal(2, downloadUrls.Count);
+        Assert.Equal(KoboService.EpubFormat, downloadUrls[1]!["Format"]!.GetValue<string>());
     }
 
     [Fact]
@@ -842,6 +861,23 @@ public class KoboServiceTests(ITestOutputHelper testOutputHelper) : AbstractDbTe
         return await AddChapterWithFormat(context, library, seriesName, chapterNumber, MangaFormat.Epub);
     }
 
+    private async Task<Chapter> AddCbzChapter(DataContext context, Library library, string seriesName,
+        string chapterNumber)
+    {
+        var chapter = new ChapterBuilder(chapterNumber)
+            .WithPages(10)
+            .WithFile(new MangaFileBuilder(_cbzPath, MangaFormat.Archive, 10).WithExtension(".cbz").Build())
+            .Build();
+        var series = new SeriesBuilder(seriesName)
+            .WithFormat(MangaFormat.Archive)
+            .WithVolume(new VolumeBuilder(Parser.LooseLeafVolume).WithChapter(chapter).Build())
+            .Build();
+        series.Library = library;
+        context.Series.Add(series);
+        await context.SaveChangesAsync();
+        return chapter;
+    }
+
     private async Task<Chapter> AddChapterWithFormat(DataContext context, Library library, string seriesName,
         string chapterNumber, MangaFormat format)
     {
@@ -857,5 +893,165 @@ public class KoboServiceTests(ITestOutputHelper testOutputHelper) : AbstractDbTe
         context.Series.Add(series);
         await context.SaveChangesAsync();
         return chapter;
+    }
+
+    [Fact]
+    public async Task Download_ConvertedArchive_CacheHitAndMiss_ThroughService()
+    {
+        var (unitOfWork, context, mapper) = await CreateDatabase();
+        var user = await SeedUser(unitOfWork, context);
+        var library = await context.Library.SingleAsync(l => l.Name == "Kobo Lib");
+        var chapter = await AddCbzChapter(context, library, "Convert Me", "1");
+
+        await ConfigureKoboSettings(unitOfWork, "https://kavita.example.com", convertBudget: 30);
+        var cacheDir = Path.Join(Path.GetTempPath(), "kavita-kobo-cache-" + Guid.NewGuid().ToString("N"));
+        Directory.CreateDirectory(cacheDir);
+
+        var convertCalls = 0;
+        var converter = Substitute.For<IKoboArchiveEpubConverter>();
+        converter.ConvertAsync(Arg.Any<string>(), Arg.Any<string>(), Arg.Any<string>(), Arg.Any<CancellationToken>())
+            .Returns(ci =>
+            {
+                convertCalls++;
+                var output = ci.ArgAt<string>(1);
+                Directory.CreateDirectory(Path.GetDirectoryName(output)!);
+                File.WriteAllText(output, "epub-bytes");
+                return Task.CompletedTask;
+            });
+
+        var directoryService = Substitute.For<IDirectoryService>();
+        directoryService.LongTermCacheDirectory.Returns(cacheDir);
+        directoryService.ExistOrCreate(Arg.Any<string>()).Returns(true);
+
+        var conversion = new KoboConversionService(
+            Substitute.For<ILogger<KoboConversionService>>(),
+            directoryService,
+            converter,
+            Substitute.For<IKoboConversionJobScheduler>(),
+            unitOfWork);
+        KoboConversionService.ResetInFlightForTests();
+
+        var koboService = CreateKoboService(unitOfWork, mapper, conversionService: conversion);
+        var token = (await koboService.GetOrCreateSyncUrlAsync(user.Id)).Split('/').Last();
+        var uuid = KoboEntitlementId.FromChapterIdString(chapter.Id);
+
+        var first = await koboService.GetDownloadAsync(token, uuid, "epub");
+        Assert.True(File.Exists(first.FilePath));
+        Assert.Equal(1, convertCalls);
+
+        var second = await koboService.GetDownloadAsync(token, uuid, "epub");
+        Assert.Equal(first.FilePath, second.FilePath);
+        Assert.Equal(1, convertCalls); // cache hit — no reconvert
+
+        // Fingerprint change invalidates cache
+        var file = await context.MangaFile.SingleAsync(f => f.ChapterId == chapter.Id);
+        file.Bytes = 99999;
+        file.LastModifiedUtc = DateTime.UtcNow.AddMinutes(1);
+        await context.SaveChangesAsync();
+
+        var third = await koboService.GetDownloadAsync(token, uuid, "epub");
+        Assert.Equal(2, convertCalls);
+        Assert.NotEqual(first.FilePath, third.FilePath);
+    }
+
+    [Fact]
+    public async Task Download_ConvertUnavailable_PropagatesFromConversionService()
+    {
+        var (unitOfWork, context, mapper) = await CreateDatabase();
+        var user = await SeedUser(unitOfWork, context);
+        var library = await context.Library.SingleAsync(l => l.Name == "Kobo Lib");
+        var chapter = await AddCbzChapter(context, library, "Slow Convert", "1");
+
+        await ConfigureKoboSettings(unitOfWork, "https://kavita.example.com", convertBudget: 1);
+        var conversion = Substitute.For<IKoboConversionService>();
+        conversion.GetOrConvertEpubAsync(chapter.Id, Arg.Any<MangaFile>(), Arg.Any<string>(), 1,
+                Arg.Any<CancellationToken>())
+            .Returns<Task<string>>(_ => throw new KavitaException(KoboConversionService.ConvertUnavailableMessage));
+
+        var koboService = CreateKoboService(unitOfWork, mapper, conversionService: conversion);
+        var token = (await koboService.GetOrCreateSyncUrlAsync(user.Id)).Split('/').Last();
+        var uuid = KoboEntitlementId.FromChapterIdString(chapter.Id);
+
+        var ex = await Assert.ThrowsAsync<KavitaException>(() =>
+            koboService.GetDownloadAsync(token, uuid, "epub"));
+        Assert.Equal(KoboConversionService.ConvertUnavailableMessage, ex.Message);
+    }
+
+    [Fact]
+    public async Task Download_ConvertInFlight_ThrowsUnavailable_WithoutSecondJob()
+    {
+        var (unitOfWork, context, mapper) = await CreateDatabase();
+        var user = await SeedUser(unitOfWork, context);
+        var library = await context.Library.SingleAsync(l => l.Name == "Kobo Lib");
+        var chapter = await AddCbzChapter(context, library, "In Flight", "1");
+
+        await ConfigureKoboSettings(unitOfWork, "https://kavita.example.com");
+        var cacheDir = Path.Join(Path.GetTempPath(), "kavita-kobo-cache-" + Guid.NewGuid().ToString("N"));
+        Directory.CreateDirectory(cacheDir);
+
+        var started = new TaskCompletionSource();
+        var release = new TaskCompletionSource();
+        var converter = Substitute.For<IKoboArchiveEpubConverter>();
+        converter.ConvertAsync(Arg.Any<string>(), Arg.Any<string>(), Arg.Any<string>(), Arg.Any<CancellationToken>())
+            .Returns(async ci =>
+            {
+                started.TrySetResult();
+                await release.Task;
+                var output = ci.ArgAt<string>(1);
+                Directory.CreateDirectory(Path.GetDirectoryName(output)!);
+                File.WriteAllText(output, "epub-bytes");
+            });
+
+        var scheduler = Substitute.For<IKoboConversionJobScheduler>();
+        var directoryService = Substitute.For<IDirectoryService>();
+        directoryService.LongTermCacheDirectory.Returns(cacheDir);
+        directoryService.ExistOrCreate(Arg.Any<string>()).Returns(true);
+
+        var conversion = new KoboConversionService(
+            Substitute.For<ILogger<KoboConversionService>>(),
+            directoryService,
+            converter,
+            scheduler,
+            unitOfWork);
+        KoboConversionService.ResetInFlightForTests();
+
+        var koboService = CreateKoboService(unitOfWork, mapper, conversionService: conversion);
+        var token = (await koboService.GetOrCreateSyncUrlAsync(user.Id)).Split('/').Last();
+        var uuid = KoboEntitlementId.FromChapterIdString(chapter.Id);
+
+        var firstTask = koboService.GetDownloadAsync(token, uuid, "epub");
+        await started.Task;
+
+        var inflightEx = await Assert.ThrowsAsync<KavitaException>(() =>
+            koboService.GetDownloadAsync(token, uuid, "epub"));
+        Assert.Equal(KoboConversionService.ConvertUnavailableMessage, inflightEx.Message);
+        scheduler.DidNotReceive().EnqueueBackgroundConvert(Arg.Any<int>());
+
+        release.TrySetResult();
+        var result = await firstTask;
+        Assert.True(File.Exists(result.FilePath));
+    }
+
+    [Fact]
+    public async Task Download_ConvertHardFail_ThrowsFailed()
+    {
+        var (unitOfWork, context, mapper) = await CreateDatabase();
+        var user = await SeedUser(unitOfWork, context);
+        var library = await context.Library.SingleAsync(l => l.Name == "Kobo Lib");
+        var chapter = await AddCbzChapter(context, library, "Broken Archive", "1");
+
+        await ConfigureKoboSettings(unitOfWork, "https://kavita.example.com");
+        var conversion = Substitute.For<IKoboConversionService>();
+        conversion.GetOrConvertEpubAsync(Arg.Any<int>(), Arg.Any<MangaFile>(), Arg.Any<string>(),
+                Arg.Any<int>(), Arg.Any<CancellationToken>())
+            .Returns<Task<string>>(_ => throw new KavitaException(KoboConversionService.ConvertFailedMessage));
+
+        var koboService = CreateKoboService(unitOfWork, mapper, conversionService: conversion);
+        var token = (await koboService.GetOrCreateSyncUrlAsync(user.Id)).Split('/').Last();
+        var uuid = KoboEntitlementId.FromChapterIdString(chapter.Id);
+
+        var ex = await Assert.ThrowsAsync<KavitaException>(() =>
+            koboService.GetDownloadAsync(token, uuid, "epub"));
+        Assert.Equal(KoboConversionService.ConvertFailedMessage, ex.Message);
     }
 }

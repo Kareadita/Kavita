@@ -37,7 +37,8 @@ public class KoboService(
     IEventHub eventHub,
     IMapper mapper,
     IDirectoryService directoryService,
-    IDownloadService downloadService)
+    IDownloadService downloadService,
+    IKoboConversionService koboConversionService)
     : IKoboService
 {
     public const string SyncPathPrefix = "api/kobo/";
@@ -418,13 +419,30 @@ public class KoboService(
         if (chapter == null) throw new KavitaException("kobo-entitlement-not-found");
 
         var epub = PreferNativeEpub(chapter.Files);
-        if (epub == null) throw new KavitaException("kobo-epub-missing");
+        if (epub != null)
+        {
+            return new KoboDownloadResult
+            {
+                FilePath = epub.FilePath,
+                ContentType = downloadService.GetContentTypeFromFile(epub.FilePath),
+                FileDownloadName = Path.GetFileName(epub.FilePath),
+            };
+        }
+
+        var archive = PreferConvertibleArchive(chapter.Files);
+        if (archive == null) throw new KavitaException("kobo-epub-missing");
+
+        var settings = await unitOfWork.SettingsRepository.GetSettingsDtoAsync(ct);
+        var series = chapter.Volume.Series;
+        var title = BuildTitle(series, chapter);
+        var convertedPath = await koboConversionService.GetOrConvertEpubAsync(chapter.Id, archive, title,
+            settings.KoboConvertTimeBudgetSeconds, ct);
 
         return new KoboDownloadResult
         {
-            FilePath = epub.FilePath,
-            ContentType = downloadService.GetContentTypeFromFile(epub.FilePath),
-            FileDownloadName = Path.GetFileName(epub.FilePath),
+            FilePath = convertedPath,
+            ContentType = downloadService.GetContentTypeFromFile(convertedPath),
+            FileDownloadName = Path.GetFileName(convertedPath),
         };
     }
 
@@ -432,7 +450,7 @@ public class KoboService(
         CancellationToken ct = default)
     {
         var userId = await ResolveUserIdAsync(authToken, ct);
-        var chapter = await ResolveAccessibleChapterAsync(userId, entitlementId, requireEpub: false, ct);
+        var chapter = await ResolveAccessibleChapterAsync(userId, entitlementId, requireEligibleFormat: false, ct);
         if (chapter == null) return null;
 
         var coverFile = ResolveCoverFileName(chapter);
@@ -545,9 +563,14 @@ public class KoboService(
 
     private IQueryable<Chapter> EligibleChaptersQuery(IReadOnlyCollection<int> libraryIds)
     {
+        // Native EPUB or CBZ/CBR (extension / path). PDF-only is excluded.
         return unitOfWork.DataContext.Chapter
             .Where(c => libraryIds.Contains(c.Volume.Series.LibraryId)
-                        && c.Files.Any(f => f.Format == MangaFormat.Epub));
+                        && c.Files.Any(f => f.Format == MangaFormat.Epub
+                                           || (f.Format == MangaFormat.Archive && (
+                                               f.Extension == ".cbz" || f.Extension == ".cbr"
+                                               || f.FilePath.EndsWith(".cbz") || f.FilePath.EndsWith(".CBZ")
+                                               || f.FilePath.EndsWith(".cbr") || f.FilePath.EndsWith(".CBR")))));
     }
 
     /// <summary>
@@ -731,10 +754,10 @@ public class KoboService(
 
     private async Task<Chapter?> ResolveEligibleChapterAsync(int userId, string entitlementId,
         CancellationToken ct) =>
-        await ResolveAccessibleChapterAsync(userId, entitlementId, requireEpub: true, ct);
+        await ResolveAccessibleChapterAsync(userId, entitlementId, requireEligibleFormat: true, ct);
 
     private async Task<Chapter?> ResolveAccessibleChapterAsync(int userId, string entitlementId,
-        bool requireEpub, CancellationToken ct)
+        bool requireEligibleFormat, CancellationToken ct)
     {
         if (!Guid.TryParse(entitlementId, out var entitlementGuid)) return null;
 
@@ -743,9 +766,15 @@ public class KoboService(
 
         var query = unitOfWork.DataContext.Chapter
             .Where(c => libraryIds.Contains(c.Volume.Series.LibraryId));
-        if (requireEpub)
+        if (requireEligibleFormat)
         {
-            query = query.Where(c => c.Files.Any(f => f.Format == MangaFormat.Epub));
+            query = query.Where(c => c.Files.Any(f => f.Format == MangaFormat.Epub
+                                                     || (f.Format == MangaFormat.Archive && (
+                                                         f.Extension == ".cbz" || f.Extension == ".cbr"
+                                                         || f.FilePath.EndsWith(".cbz") ||
+                                                         f.FilePath.EndsWith(".CBZ")
+                                                         || f.FilePath.EndsWith(".cbr") ||
+                                                         f.FilePath.EndsWith(".CBR")))));
         }
 
         var candidates = await query
@@ -858,10 +887,12 @@ public class KoboService(
     private JsonObject BuildBookMetadata(Chapter chapter, Series series, string entitlementUuid, string tokenBase)
     {
         var epub = PreferNativeEpub(chapter.Files);
+        var archive = PreferConvertibleArchive(chapter.Files);
         var downloadUrls = new JsonArray();
-        if (epub != null)
+        // Immediate catalog presence: advertise EPUB download even when conversion is still pending.
+        if (epub != null || archive != null)
         {
-            var size = epub.Bytes > 0 ? epub.Bytes : 0;
+            var size = epub?.Bytes > 0 ? epub.Bytes : 0;
             var url = $"{tokenBase}/download/{entitlementUuid}/epub";
             // Advertise both so firmware that prefers EPUB3 still resolves a download.
             downloadUrls.Add(BuildDownloadUrl(Epub3Format, size, url));
@@ -997,6 +1028,29 @@ public class KoboService(
 
     internal static MangaFile? PreferNativeEpub(IEnumerable<MangaFile> files) =>
         files.FirstOrDefault(f => f.Format == MangaFormat.Epub);
+
+    /// <summary>
+    /// First CBZ/CBR archive file when present. Native EPUB preference is handled by callers.
+    /// </summary>
+    internal static MangaFile? PreferConvertibleArchive(IEnumerable<MangaFile> files) =>
+        files.FirstOrDefault(IsConvertibleArchive);
+
+    internal static bool IsConvertibleArchive(MangaFile file)
+    {
+        if (file.Format != MangaFormat.Archive) return false;
+        if (!string.IsNullOrEmpty(file.Extension))
+        {
+            var ext = file.Extension.StartsWith('.') ? file.Extension : "." + file.Extension;
+            if (ext.Equals(".cbz", StringComparison.OrdinalIgnoreCase) ||
+                ext.Equals(".cbr", StringComparison.OrdinalIgnoreCase))
+            {
+                return true;
+            }
+        }
+
+        return file.FilePath.EndsWith(".cbz", StringComparison.OrdinalIgnoreCase)
+               || file.FilePath.EndsWith(".cbr", StringComparison.OrdinalIgnoreCase);
+    }
 
     private static List<string> ResolveWriters(Chapter chapter, SeriesMetadata? metadata)
     {

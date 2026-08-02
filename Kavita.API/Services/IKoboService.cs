@@ -55,7 +55,8 @@ public interface IKoboService
         CancellationToken ct = default);
 
     /// <summary>
-    /// Serves the preferred native EPUB for the entitlement UUID.
+    /// Serves the preferred native EPUB, or a CBZ/CBR converted EPUB from the shared cache.
+    /// May throw <c>kobo-convert-unavailable</c> (503) or <c>kobo-convert-failed</c> (500).
     /// </summary>
     Task<KoboDownloadResult> GetDownloadAsync(string authToken, string entitlementId, string format,
         CancellationToken ct = default);

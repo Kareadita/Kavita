@@ -7,6 +7,7 @@ using Kavita.Common;
 using Kavita.Models.DTOs.Kobo;
 using Kavita.Services.Kobo;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Kavita.Server.Controllers;
@@ -108,6 +109,15 @@ public class KoboController(IKoboService koboService) : ControllerBase
                                             or "kobo-format-unsupported")
         {
             return NotFound();
+        }
+        catch (KavitaException ex) when (ex.Message == "kobo-convert-unavailable")
+        {
+            Response.Headers.RetryAfter = "30";
+            return StatusCode(StatusCodes.Status503ServiceUnavailable);
+        }
+        catch (KavitaException ex) when (ex.Message == "kobo-convert-failed")
+        {
+            return StatusCode(StatusCodes.Status500InternalServerError);
         }
     }
 
