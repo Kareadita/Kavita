@@ -1,8 +1,11 @@
+using System.IO;
 using System.Text.Json;
 using System.Text.Json.Nodes;
 using System.Threading.Tasks;
 using Kavita.API.Services;
+using Kavita.Common;
 using Kavita.Models.DTOs.Kobo;
+using Kavita.Services.Kobo;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -51,6 +54,70 @@ public class KoboController(IKoboService koboService) : ControllerBase
         var response = await koboService.CreateDeviceAuthResponseAsync(apiKey, body?.UserKey,
             HttpContext.RequestAborted);
         return KoboJson(response);
+    }
+
+    [HttpGet("v1/library/sync")]
+    public async Task<IActionResult> LibrarySync(string apiKey)
+    {
+        Request.Headers.TryGetValue(KoboSyncToken.HeaderName, out var syncToken);
+        var result = await koboService.SyncLibraryAsync(apiKey, syncToken.ToString(),
+            HttpContext.RequestAborted);
+
+        Response.Headers[KoboSyncToken.HeaderName] = result.SyncToken;
+        if (result.Continue)
+        {
+            Response.Headers[KoboSyncToken.ContinueHeaderName] = KoboSyncToken.ContinueHeaderValue;
+        }
+
+        return KoboJson(result.Items);
+    }
+
+    [HttpGet("v1/library/{entitlementId}/metadata")]
+    public async Task<IActionResult> Metadata(string apiKey, string entitlementId)
+    {
+        try
+        {
+            var metadata = await koboService.GetMetadataAsync(apiKey, entitlementId,
+                HttpContext.RequestAborted);
+            return KoboJson(metadata);
+        }
+        catch (KavitaException ex) when (ex.Message == "kobo-entitlement-not-found")
+        {
+            return NotFound();
+        }
+    }
+
+    [HttpGet("download/{entitlementId}/{format}")]
+    public async Task<IActionResult> Download(string apiKey, string entitlementId, string format)
+    {
+        try
+        {
+            var download = await koboService.GetDownloadAsync(apiKey, entitlementId, format,
+                HttpContext.RequestAborted);
+            return PhysicalFile(download.FilePath, download.ContentType, download.FileDownloadName,
+                enableRangeProcessing: true);
+        }
+        catch (KavitaException ex) when (ex.Message is "kobo-entitlement-not-found" or "kobo-epub-missing"
+                                            or "kobo-format-unsupported")
+        {
+            return NotFound();
+        }
+    }
+
+    [HttpGet("{entitlementId}/{width}/{height}/{isGreyscale}/image.jpg")]
+    [HttpGet("{entitlementId}/{width}/{height}/{quality}/{isGreyscale}/image.jpg")]
+    public async Task<IActionResult> Cover(string apiKey, string entitlementId)
+    {
+        var cover = await koboService.GetCoverAsync(apiKey, entitlementId, HttpContext.RequestAborted);
+        if (cover == null || !System.IO.File.Exists(cover.FilePath)) return NotFound();
+
+        var contentType = Path.GetExtension(cover.FilePath).ToLowerInvariant() switch
+        {
+            ".png" => "image/png",
+            ".webp" => "image/webp",
+            _ => "image/jpeg",
+        };
+        return PhysicalFile(cover.FilePath, contentType);
     }
 
     [HttpGet("v1/user/loyalty/benefits")]

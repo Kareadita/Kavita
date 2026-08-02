@@ -1,3 +1,5 @@
+using System.Collections.Generic;
+using System.Text.Json.Nodes;
 using System.Threading;
 using System.Threading.Tasks;
 using Kavita.Models.DTOs.Kobo;
@@ -38,6 +40,30 @@ public interface IKoboService
     /// Returns dummy bearer token JSON for auth/device and auth/refresh.
     /// </summary>
     Task<KoboAuthTokenDto> CreateDeviceAuthResponseAsync(string authToken, string? userKey,
+        CancellationToken ct = default);
+
+    /// <summary>
+    /// Incremental library sync page (max 100). Persists synced-set rows; no ReadingState objects.
+    /// </summary>
+    Task<KoboLibrarySyncResult> SyncLibraryAsync(string authToken, string? syncTokenHeader,
+        CancellationToken ct = default);
+
+    /// <summary>
+    /// Fresh metadata (including DownloadUrls Format EPUB) for one entitlement UUID.
+    /// </summary>
+    Task<IReadOnlyList<JsonObject>> GetMetadataAsync(string authToken, string entitlementId,
+        CancellationToken ct = default);
+
+    /// <summary>
+    /// Serves the preferred native EPUB for the entitlement UUID.
+    /// </summary>
+    Task<KoboDownloadResult> GetDownloadAsync(string authToken, string entitlementId, string format,
+        CancellationToken ct = default);
+
+    /// <summary>
+    /// Resolves cover bytes path for the entitlement UUID (chapter → volume → series).
+    /// </summary>
+    Task<KoboCoverResult?> GetCoverAsync(string authToken, string entitlementId,
         CancellationToken ct = default);
 
     /// <summary>Empty keep-alive stub body (<c>{}</c>).</summary>
