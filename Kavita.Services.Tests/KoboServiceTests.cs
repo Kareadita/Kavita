@@ -1,4 +1,5 @@
 using System.IO.Abstractions;
+using System.Text.Json.Nodes;
 using AutoMapper;
 using Kavita.API.Database;
 using Kavita.API.Repositories;
@@ -11,7 +12,7 @@ using Kavita.Database;
 using Kavita.Database.Tests;
 using Kavita.Models.Builders;
 using Kavita.Models.Constants;
-using Kavita.Models.DTOs.Settings;
+using Kavita.Models.DTOs.Kobo;
 using Kavita.Models.Entities.Enums;
 using Kavita.Models.Entities.Enums.User;
 using Kavita.Models.Entities.User;
@@ -231,5 +232,144 @@ public class KoboServiceTests(ITestOutputHelper testOutputHelper) : AbstractDbTe
             KoboService.BuildSyncUrl("https://example.com", "/", "abc123"));
         Assert.Equal("https://example.com/base/api/kobo/abc123",
             KoboService.BuildSyncUrl("https://example.com/", "/base/", "abc123"));
+    }
+
+    [Fact]
+    public async Task ResolveUserId_Rejects_InvalidMissingAndRevokedTokens()
+    {
+        var (unitOfWork, context, mapper) = await CreateDatabase();
+        var user = await SeedUser(unitOfWork, context);
+        await ConfigureKoboSettings(unitOfWork, "https://kavita.example.com");
+        var koboService = CreateKoboService(unitOfWork, mapper);
+
+        await Assert.ThrowsAsync<KavitaUnauthenticatedUserException>(() =>
+            koboService.ResolveUserIdAsync(string.Empty));
+        await Assert.ThrowsAsync<KavitaUnauthenticatedUserException>(() =>
+            koboService.ResolveUserIdAsync("not-a-real-token"));
+
+        var url = await koboService.GetOrCreateSyncUrlAsync(user.Id);
+        var token = url[(url.LastIndexOf('/') + 1)..];
+        Assert.Equal(user.Id, await koboService.ResolveUserIdAsync(token));
+
+        // OPDS key must not authenticate as a Kobo sync token
+        unitOfWork.UserRepository.Add(new AppUserAuthKey
+        {
+            Name = AuthKeyHelper.OpdsKeyName,
+            Key = "opdskey12",
+            AppUserId = user.Id,
+            CreatedAtUtc = DateTime.UtcNow,
+            Provider = AuthKeyProvider.User,
+        });
+        await unitOfWork.CommitAsync();
+        await Assert.ThrowsAsync<KavitaUnauthenticatedUserException>(() =>
+            koboService.ResolveUserIdAsync("opdskey12"));
+
+        await koboService.RevokeSyncAuthKeyAsync(user.Id);
+        await Assert.ThrowsAsync<KavitaUnauthenticatedUserException>(() =>
+            koboService.ResolveUserIdAsync(token));
+    }
+
+    [Fact]
+    public async Task ResolveUserId_Rejects_WhenFeatureDisabled()
+    {
+        var (unitOfWork, context, mapper) = await CreateDatabase();
+        var user = await SeedUser(unitOfWork, context);
+        await ConfigureKoboSettings(unitOfWork, "https://kavita.example.com");
+        var koboService = CreateKoboService(unitOfWork, mapper);
+        var token = (await koboService.GetOrCreateSyncUrlAsync(user.Id)).Split('/').Last();
+
+        await ConfigureKoboSettings(unitOfWork, "https://kavita.example.com", enableKoboSync: false);
+
+        await Assert.ThrowsAsync<KavitaUnauthenticatedUserException>(() =>
+            koboService.ResolveUserIdAsync(token));
+    }
+
+    [Fact]
+    public async Task GetInitialization_RewritesResources_FromHostNameAndBaseUrl()
+    {
+        var (unitOfWork, context, mapper) = await CreateDatabase();
+        var user = await SeedUser(unitOfWork, context);
+        await ConfigureKoboSettings(unitOfWork, "https://kavita.example.com", baseUrl: "/kavita/");
+        var koboService = CreateKoboService(unitOfWork, mapper);
+        var token = (await koboService.GetOrCreateSyncUrlAsync(user.Id)).Split('/').Last();
+
+        var result = await koboService.GetInitializationAsync(token);
+        var resources = result.Resources;
+        var tokenBase = $"https://kavita.example.com/kavita/api/kobo/{token}";
+
+        Assert.Equal("https://kavita.example.com/kavita", resources["image_host"]!.GetValue<string>());
+        Assert.Equal($"{tokenBase}/{{ImageId}}/{{width}}/{{height}}/false/image.jpg",
+            resources["image_url_template"]!.GetValue<string>());
+        Assert.Equal(
+            $"{tokenBase}/{{ImageId}}/{{width}}/{{height}}/{{Quality}}/{{IsGreyscale}}/image.jpg",
+            resources["image_url_quality_template"]!.GetValue<string>());
+        Assert.Equal($"{tokenBase}/v1/library/sync", resources["library_sync"]!.GetValue<string>());
+        Assert.Equal(KoboInitializationResult.ApiTokenHeaderValue, "e30=");
+        // Native map still present (not request-host based)
+        Assert.False(string.IsNullOrEmpty(resources["device_auth"]?.GetValue<string>()));
+        Assert.DoesNotContain("127.0.0.1", resources["image_host"]!.GetValue<string>());
+    }
+
+    [Fact]
+    public async Task CreateDeviceAuthResponse_ReturnsDummyBearerTokens()
+    {
+        var (unitOfWork, context, mapper) = await CreateDatabase();
+        var user = await SeedUser(unitOfWork, context);
+        await ConfigureKoboSettings(unitOfWork, "https://kavita.example.com");
+        var koboService = CreateKoboService(unitOfWork, mapper);
+        var token = (await koboService.GetOrCreateSyncUrlAsync(user.Id)).Split('/').Last();
+
+        var auth = await koboService.CreateDeviceAuthResponseAsync(token, "device-user-key");
+
+        Assert.Equal("Bearer", auth.TokenType);
+        Assert.Equal("device-user-key", auth.UserKey);
+        Assert.False(string.IsNullOrWhiteSpace(auth.AccessToken));
+        Assert.False(string.IsNullOrWhiteSpace(auth.RefreshToken));
+        Assert.True(Guid.TryParse(auth.TrackingId, out _));
+    }
+
+    [Fact]
+    public async Task KeepAliveStubs_MatchCalibreWebKnownBodies()
+    {
+        var (unitOfWork, context, mapper) = await CreateDatabase();
+        var user = await SeedUser(unitOfWork, context);
+        await ConfigureKoboSettings(unitOfWork, "https://kavita.example.com");
+        var koboService = CreateKoboService(unitOfWork, mapper);
+        _ = await koboService.GetOrCreateSyncUrlAsync(user.Id);
+
+        var empty = Assert.IsType<JsonObject>(koboService.GetEmptyStub());
+        Assert.Empty(empty);
+
+        var benefits = Assert.IsType<JsonObject>(koboService.GetLoyaltyBenefitsStub());
+        Assert.NotNull(benefits["Benefits"]?.AsObject());
+        Assert.Empty(benefits["Benefits"]!.AsObject());
+
+        var tests = Assert.IsType<JsonObject>(koboService.GetAnalyticsTestsStub("abc"));
+        Assert.Equal("Success", tests["Result"]!.GetValue<string>());
+        Assert.Equal("abc", tests["TestKey"]!.GetValue<string>());
+        Assert.Empty(tests["Tests"]!.AsObject());
+    }
+
+    [Fact]
+    public async Task ReadingStateStubs_AcknowledgeWithoutProgressSideEffects()
+    {
+        var (unitOfWork, context, mapper) = await CreateDatabase();
+        var user = await SeedUser(unitOfWork, context);
+        await ConfigureKoboSettings(unitOfWork, "https://kavita.example.com");
+        var koboService = CreateKoboService(unitOfWork, mapper);
+        _ = await koboService.GetOrCreateSyncUrlAsync(user.Id);
+
+        const string entitlementId = "11111111-1111-1111-1111-111111111111";
+        var getState = Assert.IsType<JsonArray>(koboService.GetReadingStateStub(entitlementId));
+        Assert.Equal(entitlementId, getState[0]!["EntitlementId"]!.GetValue<string>());
+        Assert.Equal("ReadyToRead", getState[0]!["StatusInfo"]!["Status"]!.GetValue<string>());
+
+        var putState = Assert.IsType<JsonObject>(koboService.PutReadingStateStub(entitlementId));
+        Assert.Equal("Success", putState["RequestResult"]!.GetValue<string>());
+        Assert.Equal(entitlementId,
+            putState["UpdateResults"]![0]!["EntitlementId"]!.GetValue<string>());
+
+        // No progress / reading-history rows written by ACK stubs
+        Assert.Empty(context.AppUserProgresses);
     }
 }

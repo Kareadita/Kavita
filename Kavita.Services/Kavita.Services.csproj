@@ -16,6 +16,10 @@
       <InternalsVisibleTo Include="Kavita.Services.Tests" />
     </ItemGroup>
 
+    <ItemGroup>
+      <EmbeddedResource Include="Kobo\native_kobo_resources.json" />
+    </ItemGroup>
+
   <ItemGroup>
     <PackageReference Include="CsvHelper" Version="33.1.0" />
     <PackageReference Include="MailKit" Version="4.17.0" />

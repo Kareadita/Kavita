@@ -1,5 +1,6 @@
 using System.Threading;
 using System.Threading.Tasks;
+using Kavita.Models.DTOs.Kobo;
 
 namespace Kavita.API.Services;
 
@@ -20,4 +21,37 @@ public interface IKoboService
     /// Revokes the user's <c>kobo</c> AuthKey until Create/View mints a new one.
     /// </summary>
     Task RevokeSyncAuthKeyAsync(int userId, CancellationToken ct = default);
+
+    /// <summary>
+    /// Resolves a Kobo URL token to the owning user id.
+    /// Rejects missing, expired, revoked, or non-<c>kobo</c> keys, and when the feature is disabled.
+    /// </summary>
+    Task<int> ResolveUserIdAsync(string authToken, CancellationToken ct = default);
+
+    /// <summary>
+    /// Builds initialization Resources with image_host, cover templates, and library_sync
+    /// rewritten from configured HostName + BaseUrl (not the device request host).
+    /// </summary>
+    Task<KoboInitializationResult> GetInitializationAsync(string authToken, CancellationToken ct = default);
+
+    /// <summary>
+    /// Returns dummy bearer token JSON for auth/device and auth/refresh.
+    /// </summary>
+    Task<KoboAuthTokenDto> CreateDeviceAuthResponseAsync(string authToken, string? userKey,
+        CancellationToken ct = default);
+
+    /// <summary>Empty keep-alive stub body (<c>{}</c>).</summary>
+    object GetEmptyStub();
+
+    /// <summary>Calibre-Web loyalty benefits stub: <c>{"Benefits":{}}</c>.</summary>
+    object GetLoyaltyBenefitsStub();
+
+    /// <summary>Calibre-Web analytics gettests stub.</summary>
+    object GetAnalyticsTestsStub(string? koboUserKey);
+
+    /// <summary>Reading-state GET ACK stub (no persistence).</summary>
+    object GetReadingStateStub(string entitlementId);
+
+    /// <summary>Reading-state PUT ACK stub (no persistence).</summary>
+    object PutReadingStateStub(string entitlementId);
 }

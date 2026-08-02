@@ -1,5 +1,7 @@
 using System;
 using System.Linq;
+using System.Security.Cryptography;
+using System.Text.Json.Nodes;
 using System.Threading;
 using System.Threading.Tasks;
 using AutoMapper;
@@ -10,10 +12,14 @@ using Kavita.API.Services.SignalR;
 using Kavita.Common;
 using Kavita.Common.Helpers;
 using Configuration = Kavita.Common.Configuration;
+using Kavita.Database.Extensions;
 using Kavita.Models.DTOs.Account;
+using Kavita.Models.DTOs.Kobo;
 using Kavita.Models.DTOs.SignalR;
 using Kavita.Models.Entities.Enums.User;
 using Kavita.Models.Entities.User;
+using Kavita.Services.Kobo;
+using Microsoft.EntityFrameworkCore;
 
 namespace Kavita.Services;
 
@@ -84,6 +90,137 @@ public class KoboService(
             userId, ct);
     }
 
+    public async Task<int> ResolveUserIdAsync(string authToken, CancellationToken ct = default)
+    {
+        if (string.IsNullOrWhiteSpace(authToken))
+        {
+            throw new KavitaUnauthenticatedUserException("kobo-auth-invalid");
+        }
+
+        var settings = await unitOfWork.SettingsRepository.GetSettingsDtoAsync(ct);
+        if (!settings.EnableKoboSync)
+        {
+            throw new KavitaUnauthenticatedUserException("kobo-sync-disabled");
+        }
+
+        var userId = await unitOfWork.DataContext.AppUserAuthKey
+            .Where(k => k.Key == authToken && k.Name == AuthKeyHelper.KoboKeyName)
+            .HasNotExpired()
+            .Select(k => k.AppUserId)
+            .FirstOrDefaultAsync(ct);
+
+        if (userId <= 0)
+        {
+            throw new KavitaUnauthenticatedUserException("kobo-auth-invalid");
+        }
+
+        return userId;
+    }
+
+    public async Task<KoboInitializationResult> GetInitializationAsync(string authToken,
+        CancellationToken ct = default)
+    {
+        await ResolveUserIdAsync(authToken, ct);
+
+        var settings = await unitOfWork.SettingsRepository.GetSettingsDtoAsync(ct);
+        if (string.IsNullOrWhiteSpace(settings.HostName))
+        {
+            throw new KavitaException("kobo-hostname-required");
+        }
+
+        var publicBase = BuildPublicBase(settings.HostName, settings.BaseUrl);
+        var tokenBase = $"{publicBase}/{SyncPathPrefix}{authToken}";
+
+        var resources = NativeKoboResources.CreateCopy();
+        resources["image_host"] = publicBase;
+        resources["image_url_template"] =
+            $"{tokenBase}/{{ImageId}}/{{width}}/{{height}}/false/image.jpg";
+        resources["image_url_quality_template"] =
+            $"{tokenBase}/{{ImageId}}/{{width}}/{{height}}/{{Quality}}/{{IsGreyscale}}/image.jpg";
+        resources["library_sync"] = $"{tokenBase}/v1/library/sync";
+
+        return new KoboInitializationResult { Resources = resources };
+    }
+
+    public async Task<KoboAuthTokenDto> CreateDeviceAuthResponseAsync(string authToken, string? userKey,
+        CancellationToken ct = default)
+    {
+        await ResolveUserIdAsync(authToken, ct);
+
+        return new KoboAuthTokenDto
+        {
+            AccessToken = Convert.ToBase64String(RandomNumberGenerator.GetBytes(24)),
+            RefreshToken = Convert.ToBase64String(RandomNumberGenerator.GetBytes(24)),
+            TokenType = "Bearer",
+            TrackingId = Guid.NewGuid().ToString(),
+            UserKey = userKey ?? string.Empty,
+        };
+    }
+
+    public object GetEmptyStub() => new JsonObject();
+
+    public object GetLoyaltyBenefitsStub() => new JsonObject
+    {
+        ["Benefits"] = new JsonObject(),
+    };
+
+    public object GetAnalyticsTestsStub(string? koboUserKey) => new JsonObject
+    {
+        ["Result"] = "Success",
+        ["TestKey"] = koboUserKey ?? string.Empty,
+        ["Tests"] = new JsonObject(),
+    };
+
+    public object GetReadingStateStub(string entitlementId)
+    {
+        var now = DateTime.UtcNow.ToString("yyyy-MM-ddTHH:mm:ssZ");
+        return new JsonArray
+        {
+            new JsonObject
+            {
+                ["EntitlementId"] = entitlementId,
+                ["Created"] = now,
+                ["LastModified"] = now,
+                ["PriorityTimestamp"] = now,
+                ["StatusInfo"] = new JsonObject
+                {
+                    ["LastModified"] = now,
+                    ["Status"] = "ReadyToRead",
+                    ["TimesStartedReading"] = 0,
+                },
+                ["Statistics"] = new JsonObject
+                {
+                    ["LastModified"] = now,
+                },
+                ["CurrentBookmark"] = new JsonObject
+                {
+                    ["LastModified"] = now,
+                },
+            },
+        };
+    }
+
+    public object PutReadingStateStub(string entitlementId)
+    {
+        var now = DateTime.UtcNow.ToString("yyyy-MM-ddTHH:mm:ssZ");
+        return new JsonObject
+        {
+            ["RequestResult"] = "Success",
+            ["UpdateResults"] = new JsonArray
+            {
+                new JsonObject
+                {
+                    ["EntitlementId"] = entitlementId,
+                    ["LastModified"] = now,
+                    ["PriorityTimestamp"] = now,
+                    ["CurrentBookmarkResult"] = new JsonObject { ["Result"] = "Success" },
+                    ["StatisticsResult"] = new JsonObject { ["Result"] = "Success" },
+                    ["StatusInfoResult"] = new JsonObject { ["Result"] = "Success" },
+                },
+            },
+        };
+    }
+
     private async Task<AppUserAuthKey> GetOrCreateKoboAuthKeyAsync(int userId, CancellationToken ct)
     {
         var user = await unitOfWork.UserRepository.GetUserByIdAsync(userId, AppUserIncludes.AuthKeys, ct);
@@ -122,6 +259,14 @@ public class KoboService(
     /// </summary>
     public static string BuildSyncUrl(string hostName, string baseUrl, string authKey)
     {
+        return $"{BuildPublicBase(hostName, baseUrl)}/{SyncPathPrefix}{authKey}";
+    }
+
+    /// <summary>
+    /// Public origin + optional BaseUrl path prefix (no trailing slash).
+    /// </summary>
+    public static string BuildPublicBase(string hostName, string baseUrl)
+    {
         var origin = UrlHelper.RemoveEndingSlash(hostName.Trim());
         var pathBase = string.Empty;
         if (!string.IsNullOrEmpty(baseUrl) && !baseUrl.Equals(Configuration.DefaultBaseUrl))
@@ -138,6 +283,6 @@ public class KoboService(
             }
         }
 
-        return $"{origin}{pathBase}/{SyncPathPrefix}{authKey}";
+        return $"{origin}{pathBase}";
     }
 }
