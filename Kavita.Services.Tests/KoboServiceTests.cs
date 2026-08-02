@@ -424,12 +424,17 @@ public class KoboServiceTests(ITestOutputHelper testOutputHelper) : AbstractDbTe
         Assert.Equal("Frank Herbert", metadata["Contributors"]![0]!.GetValue<string>());
         Assert.Equal("Dune", metadata["Series"]!["Name"]!.GetValue<string>());
         Assert.Equal(1f, metadata["Series"]!["Number"]!.GetValue<float>());
+        Assert.Equal(1f, metadata["Series"]!["NumberFloat"]!.GetValue<float>());
 
-        var downloadUrl = metadata["DownloadUrls"]![0]!;
-        Assert.Equal(KoboService.EpubFormat, downloadUrl["Format"]!.GetValue<string>());
+        var downloadUrls = metadata["DownloadUrls"]!.AsArray();
+        Assert.Equal(2, downloadUrls.Count);
+        Assert.Equal(KoboService.Epub3Format, downloadUrls[0]!["Format"]!.GetValue<string>());
+        Assert.Equal(KoboService.EpubFormat, downloadUrls[1]!["Format"]!.GetValue<string>());
         Assert.Equal(
             $"https://kavita.example.com/base/api/kobo/{token}/download/{expectedUuid}/epub",
-            downloadUrl["Url"]!.GetValue<string>());
+            downloadUrls[0]!["Url"]!.GetValue<string>());
+        Assert.Equal(downloadUrls[0]!["Url"]!.GetValue<string>(),
+            downloadUrls[1]!["Url"]!.GetValue<string>());
 
         Assert.Equal(1, await context.AppUserKoboSyncedChapter.CountAsync(s => s.AppUserId == user.Id));
 
@@ -528,19 +533,56 @@ public class KoboServiceTests(ITestOutputHelper testOutputHelper) : AbstractDbTe
         var sync = await koboService.SyncLibraryAsync(token, null);
         Assert.Single(sync.Items);
         var downloadUrls = sync.Items[0]!["NewEntitlement"]!["BookMetadata"]!["DownloadUrls"]!.AsArray();
-        Assert.Single(downloadUrls);
-        Assert.Equal(KoboService.EpubFormat, downloadUrls[0]!["Format"]!.GetValue<string>());
+        Assert.Equal(2, downloadUrls.Count);
+        Assert.Equal(KoboService.Epub3Format, downloadUrls[0]!["Format"]!.GetValue<string>());
+        Assert.Equal(KoboService.EpubFormat, downloadUrls[1]!["Format"]!.GetValue<string>());
         Assert.Equal(1234, downloadUrls[0]!["Size"]!.GetValue<long>());
+        Assert.Equal(1234, downloadUrls[1]!["Size"]!.GetValue<long>());
 
         var uuid = KoboEntitlementId.FromChapterIdString(chapter.Id);
         var download = await koboService.GetDownloadAsync(token, uuid, "epub");
         Assert.Equal(_epubPath, download.FilePath);
         Assert.Equal("application/epub+zip", download.ContentType);
 
+        var downloadEpub3 = await koboService.GetDownloadAsync(token, uuid, "epub3");
+        Assert.Equal(_epubPath, downloadEpub3.FilePath);
+
         var metadata = await koboService.GetMetadataAsync(token, uuid);
-        Assert.Equal(KoboService.EpubFormat, metadata[0]["DownloadUrls"]![0]!["Format"]!.GetValue<string>());
+        Assert.Equal(KoboService.Epub3Format, metadata[0]["DownloadUrls"]![0]!["Format"]!.GetValue<string>());
+        Assert.Equal(KoboService.EpubFormat, metadata[0]["DownloadUrls"]![1]!["Format"]!.GetValue<string>());
         Assert.StartsWith("https://kavita.example.com/api/kobo/",
             metadata[0]["DownloadUrls"]![0]!["Url"]!.GetValue<string>());
+    }
+
+    [Fact]
+    public async Task BuildBookMetadata_OmitsSeriesNumber_WhenChapterNumberIsDefault()
+    {
+        var (unitOfWork, context, mapper) = await CreateDatabase();
+        var user = await SeedUser(unitOfWork, context);
+        var library = await context.Library.SingleAsync(l => l.Name == "Kobo Lib");
+
+        var chapter = new ChapterBuilder(Parser.DefaultChapter)
+            .WithPages(10)
+            .WithFile(new MangaFileBuilder(_epubPath, MangaFormat.Epub, 10).Build())
+            .Build();
+        chapter.TitleName = "Oneshot";
+        var series = new SeriesBuilder("No Number Series")
+            .WithFormat(MangaFormat.Epub)
+            .WithVolume(new VolumeBuilder(Parser.LooseLeafVolume).WithChapter(chapter).Build())
+            .Build();
+        series.Library = library;
+        context.Series.Add(series);
+        await context.SaveChangesAsync();
+
+        await ConfigureKoboSettings(unitOfWork, "https://kavita.example.com");
+        var koboService = CreateKoboService(unitOfWork, mapper);
+        var token = (await koboService.GetOrCreateSyncUrlAsync(user.Id)).Split('/').Last();
+
+        var sync = await koboService.SyncLibraryAsync(token, null);
+        var seriesMeta = sync.Items[0]!["NewEntitlement"]!["BookMetadata"]!["Series"]!.AsObject();
+        Assert.Equal("No Number Series", seriesMeta["Name"]!.GetValue<string>());
+        Assert.False(seriesMeta.ContainsKey("Number"));
+        Assert.False(seriesMeta.ContainsKey("NumberFloat"));
     }
 
     [Fact]

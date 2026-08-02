@@ -12,6 +12,7 @@ using Kavita.API.Repositories;
 using Kavita.API.Services;
 using Kavita.API.Services.SignalR;
 using Kavita.Common;
+using Kavita.Common.Extensions;
 using Kavita.Common.Helpers;
 using Configuration = Kavita.Common.Configuration;
 using Kavita.Database.Extensions;
@@ -42,6 +43,7 @@ public class KoboService(
     public const string SyncPathPrefix = "api/kobo/";
     public const int SyncItemLimit = 100;
     public const string EpubFormat = "EPUB";
+    public const string Epub3Format = "EPUB3";
 
     private static readonly Guid EmptyGenreId = Guid.Parse("00000000-0000-0000-0000-000000000001");
 
@@ -407,8 +409,7 @@ public class KoboService(
         CancellationToken ct = default)
     {
         var userId = await ResolveUserIdAsync(authToken, ct);
-        if (!string.Equals(format, "epub", StringComparison.OrdinalIgnoreCase) &&
-            !string.Equals(format, EpubFormat, StringComparison.OrdinalIgnoreCase))
+        if (!IsSupportedDownloadFormat(format))
         {
             throw new KavitaException("kobo-format-unsupported");
         }
@@ -860,13 +861,11 @@ public class KoboService(
         var downloadUrls = new JsonArray();
         if (epub != null)
         {
-            downloadUrls.Add(new JsonObject
-            {
-                ["Format"] = EpubFormat,
-                ["Size"] = epub.Bytes > 0 ? epub.Bytes : 0,
-                ["Url"] = $"{tokenBase}/download/{entitlementUuid}/epub",
-                ["Platform"] = "Generic",
-            });
+            var size = epub.Bytes > 0 ? epub.Bytes : 0;
+            var url = $"{tokenBase}/download/{entitlementUuid}/epub";
+            // Advertise both so firmware that prefers EPUB3 still resolves a download.
+            downloadUrls.Add(BuildDownloadUrl(Epub3Format, size, url));
+            downloadUrls.Add(BuildDownloadUrl(EpubFormat, size, url));
         }
 
         var writers = ResolveWriters(chapter, series.Metadata);
@@ -908,6 +907,7 @@ public class KoboService(
             ["RevisionId"] = entitlementUuid,
             ["Title"] = BuildTitle(series, chapter),
             ["WorkId"] = entitlementUuid,
+            ["Series"] = BuildSeriesMetadata(series, chapter),
         };
 
         if (chapter.ReleaseDate != default)
@@ -933,17 +933,41 @@ public class KoboService(
             metadata["Contributors"] = null;
         }
 
-        metadata["Series"] = new JsonObject
+        return metadata;
+    }
+
+    private static JsonObject BuildDownloadUrl(string format, long size, string url) => new()
+    {
+        ["Format"] = format,
+        ["Size"] = size,
+        ["Url"] = url,
+        ["Platform"] = "Generic",
+    };
+
+    private static JsonObject BuildSeriesMetadata(Series series, Chapter chapter)
+    {
+        var seriesMeta = new JsonObject
         {
             ["Name"] = series.Name,
-            ["Number"] = chapter.MinNumber,
-            ["NumberFloat"] = chapter.MinNumber,
             ["Id"] = KoboEntitlementId.CreateVersion5(KoboEntitlementId.Namespace, $"series:{series.Name}")
                 .ToString(),
         };
 
-        return metadata;
+        // Omit placeholder/default chapter numbers so Kobo does not sort specials as -100000.
+        if (chapter.MinNumber.IsNot(Parser.DefaultChapterNumber) && chapter.MinNumber > 0)
+        {
+            seriesMeta["Number"] = chapter.MinNumber;
+            seriesMeta["NumberFloat"] = chapter.MinNumber;
+        }
+
+        return seriesMeta;
     }
+
+    private static bool IsSupportedDownloadFormat(string format) =>
+        string.Equals(format, "epub", StringComparison.OrdinalIgnoreCase) ||
+        string.Equals(format, EpubFormat, StringComparison.OrdinalIgnoreCase) ||
+        string.Equals(format, "epub3", StringComparison.OrdinalIgnoreCase) ||
+        string.Equals(format, Epub3Format, StringComparison.OrdinalIgnoreCase);
 
     internal static string BuildTitle(Series series, Chapter chapter)
     {
