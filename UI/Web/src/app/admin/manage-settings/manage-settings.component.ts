@@ -67,6 +67,8 @@ export class ManageSettingsComponent implements OnInit {
       this.settingsForm.addControl('loggingLevel', new FormControl(this.serverSettings.loggingLevel, [Validators.required]));
       this.settingsForm.addControl('allowStatCollection', new FormControl(this.serverSettings.allowStatCollection, [Validators.required]));
       this.settingsForm.addControl('enableOpds', new FormControl(this.serverSettings.enableOpds, [Validators.required]));
+      this.settingsForm.addControl('enableKoboSync', new FormControl(this.serverSettings.enableKoboSync, [Validators.required]));
+      this.settingsForm.addControl('koboConvertTimeBudgetSeconds', new FormControl(this.serverSettings.koboConvertTimeBudgetSeconds, [Validators.required, Validators.min(1)]));
       this.settingsForm.addControl('baseUrl', new FormControl(this.serverSettings.baseUrl, [Validators.pattern(/^(\/[\w-]+)*\/$/)]));
       this.settingsForm.addControl('totalBackups', new FormControl(this.serverSettings.totalBackups, [Validators.required, Validators.min(1), Validators.max(30)]));
       this.settingsForm.addControl('cacheSize', new FormControl(this.serverSettings.cacheSize, [Validators.required, Validators.min(50)]));
@@ -78,6 +80,11 @@ export class ManageSettingsComponent implements OnInit {
       this.settingsForm.addControl('onDeckUpdateDays', new FormControl(this.serverSettings.onDeckUpdateDays, [Validators.required]));
 
 
+      this.updateKoboSyncControlState();
+      this.settingsForm.get('hostName')?.valueChanges.pipe(
+        takeUntilDestroyed(this.destroyRef)
+      ).subscribe(() => this.updateKoboSyncControlState());
+
       // Automatically save settings as we edit them
       this.settingsForm.valueChanges.pipe(
         distinctUntilChanged(),
@@ -88,6 +95,8 @@ export class ManageSettingsComponent implements OnInit {
           const data = this.packData();
           return this.settingsService.updateServerSettings(data).pipe(catchError(err => {
             console.error(err);
+            this.toastr.error(err?.error || translate('errors.generic'));
+            this.resetForm();
             return of(null);
           }));
         }),
@@ -115,6 +124,22 @@ export class ManageSettingsComponent implements OnInit {
     this.cdRef.markForCheck();
   }
 
+  private updateKoboSyncControlState() {
+    const hostName = (this.settingsForm.get('hostName')?.value || '').trim();
+    const enableKobo = this.settingsForm.get('enableKoboSync');
+    if (!enableKobo) return;
+
+    if (!hostName) {
+      if (enableKobo.value) {
+        enableKobo.setValue(false, {emitEvent: false});
+      }
+      enableKobo.disable({emitEvent: false});
+    } else {
+      enableKobo.enable({emitEvent: false});
+    }
+    this.cdRef.markForCheck();
+  }
+
   resetForm() {
     this.settingsForm.get('cacheDirectory')?.setValue(this.serverSettings.cacheDirectory, {onlySelf: true, emitEvent: false});
     this.settingsForm.get('scanTask')?.setValue(this.serverSettings.taskScan, {onlySelf: true, emitEvent: false});
@@ -125,7 +150,10 @@ export class ManageSettingsComponent implements OnInit {
     this.settingsForm.get('loggingLevel')?.setValue(this.serverSettings.loggingLevel, {onlySelf: true, emitEvent: false});
     this.settingsForm.get('allowStatCollection')?.setValue(this.serverSettings.allowStatCollection, {onlySelf: true, emitEvent: false});
     this.settingsForm.get('enableOpds')?.setValue(this.serverSettings.enableOpds, {onlySelf: true, emitEvent: false});
+    this.settingsForm.get('enableKoboSync')?.setValue(this.serverSettings.enableKoboSync, {onlySelf: true, emitEvent: false});
+    this.settingsForm.get('koboConvertTimeBudgetSeconds')?.setValue(this.serverSettings.koboConvertTimeBudgetSeconds, {onlySelf: true, emitEvent: false});
     this.settingsForm.get('baseUrl')?.setValue(this.serverSettings.baseUrl, {onlySelf: true, emitEvent: false});
+    this.updateKoboSyncControlState();
     this.settingsForm.get('emailServiceUrl')?.setValue(this.serverSettings.emailServiceUrl, {onlySelf: true, emitEvent: false});
     this.settingsForm.get('totalBackups')?.setValue(this.serverSettings.totalBackups, {onlySelf: true, emitEvent: false});
     this.settingsForm.get('totalLogs')?.setValue(this.serverSettings.totalLogs, {onlySelf: true, emitEvent: false});
@@ -140,10 +168,14 @@ export class ManageSettingsComponent implements OnInit {
   }
 
   packData() {
-    return {
+    const data = {
       ...this.serverSettings,
-      ...this.settingsForm.value,
+      ...this.settingsForm.getRawValue(),
     };
+    if (!(data.hostName || '').trim()) {
+      data.enableKoboSync = false;
+    }
+    return data;
   }
 
   async resetToDefaults() {

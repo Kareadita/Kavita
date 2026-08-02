@@ -167,6 +167,8 @@ public static class Seed
                 }, // Not used from DB, but DB is sync with appSettings.json
                 new() {Key = ServerSettingKey.AllowStatCollection, Value = "true"},
                 new() {Key = ServerSettingKey.EnableOpds, Value = "true"},
+                new() {Key = ServerSettingKey.EnableKoboSync, Value = "false"},
+                new() {Key = ServerSettingKey.KoboConvertTimeBudgetSeconds, Value = "30"},
                 new() {Key = ServerSettingKey.BaseUrl, Value = "/"},
                 new() {Key = ServerSettingKey.InstallId, Value = HashUtil.AnonymousToken()},
                 new() {Key = ServerSettingKey.InstallVersion, Value = BuildInfo.Version.ToString()},

@@ -21,6 +21,7 @@ public class LibraryBuilder : IEntityBuilder<Library>
             Folders = new List<FolderPath>(),
             AppUsers = new List<AppUser>(),
             AllowScrobbling = type is LibraryType.LightNovel or LibraryType.Manga,
+            AllowKoboSync = false,
             LibraryFileTypes = new List<LibraryFileTypeGroup>()
         };
 
@@ -119,6 +120,12 @@ public class LibraryBuilder : IEntityBuilder<Library>
     public LibraryBuilder WithAllowScrobbling(bool allowScrobbling)
     {
         _library.AllowScrobbling = allowScrobbling;
+        return this;
+    }
+
+    public LibraryBuilder WithAllowKoboSync(bool allowKoboSync)
+    {
+        _library.AllowKoboSync = allowKoboSync;
         return this;
     }
 

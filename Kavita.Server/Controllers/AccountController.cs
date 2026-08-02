@@ -53,7 +53,8 @@ public class AccountController(UserManager<AppUser> userManager,
     IEmailService emailService, IEventHub eventHub,
     ILocalizationService localizationService,
     IAuthenticationSchemeProvider authenticationSchemeProvider,
-    IAuthKeyService authKeyService, IOidcService oidcService) : BaseApiController
+    IAuthKeyService authKeyService, IOidcService oidcService,
+    IKoboService koboService) : BaseApiController
 {
     // Hardcoded to avoid localization multiple enumeration: https://github.com/Kareadita/Kavita/issues/2829
     private const string BadCredentialsMessage = "Your credentials are not correct";
@@ -1226,6 +1227,60 @@ public class AccountController(UserManager<AppUser> userManager,
             return NotFound();
 
         return Ok(origin + "/" + baseUrl + "api/opds/" + opdsAuthKey);
+    }
+
+    /// <summary>
+    /// Create or view the Kobo sync URL for this user (lazy-mints a named <c>kobo</c> AuthKey).
+    /// </summary>
+    [HttpGet("kobo-sync-url")]
+    public async Task<ActionResult<string>> GetKoboSyncUrl()
+    {
+        var ct = HttpContext.RequestAborted;
+        try
+        {
+            return Ok(await koboService.GetOrCreateSyncUrlAsync(UserId, ct));
+        }
+        catch (KavitaException ex)
+        {
+            return BadRequest(await localizationService.TranslateAsync(UserId, ex.Message));
+        }
+    }
+
+    /// <summary>
+    /// Rotate the Kobo AuthKey so previous sync URLs stop working.
+    /// </summary>
+    [HttpPost("kobo-sync-url/rotate")]
+    [DisallowRole(PolicyConstants.ReadOnlyRole)]
+    public async Task<ActionResult<string>> RotateKoboSyncUrl()
+    {
+        var ct = HttpContext.RequestAborted;
+        try
+        {
+            return Ok(await koboService.RotateSyncAuthKeyAsync(UserId, ct));
+        }
+        catch (KavitaException ex)
+        {
+            return BadRequest(await localizationService.TranslateAsync(UserId, ex.Message));
+        }
+    }
+
+    /// <summary>
+    /// Revoke the Kobo AuthKey until Create/View mints a new one.
+    /// </summary>
+    [HttpDelete("kobo-sync-url")]
+    [DisallowRole(PolicyConstants.ReadOnlyRole)]
+    public async Task<ActionResult> RevokeKoboSyncUrl()
+    {
+        var ct = HttpContext.RequestAborted;
+        try
+        {
+            await koboService.RevokeSyncAuthKeyAsync(UserId, ct);
+            return Ok();
+        }
+        catch (KavitaException ex)
+        {
+            return BadRequest(await localizationService.TranslateAsync(UserId, ex.Message));
+        }
     }
 
 

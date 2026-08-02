@@ -36,6 +36,7 @@ export interface Library extends LiteLibrary{
     manageReadingLists: boolean;
     allowScrobbling: boolean;
     allowMetadataMatching: boolean;
+    allowKoboSync: boolean;
     enableMetadata: boolean;
     removePrefixForSortName: boolean;
     collapseSeriesRelationships: boolean;

@@ -5,7 +5,7 @@ import {AccountService} from "../../_services/account.service";
 import {SettingsService} from "../../admin/settings.service";
 import {WikiLink} from "../../_models/wiki";
 import {NgxDatatableModule} from "@siemens/ngx-datatable";
-import {AuthKey, AuthKeyProvider, OpdsName} from "../../_models/user/auth-key";
+import {AuthKey, AuthKeyProvider, KoboName, OpdsName} from "../../_models/user/auth-key";
 import {UtcToLocalDatePipe} from "../../_pipes/utc-to-locale-date.pipe";
 import {DefaultDatePipe} from "../../_pipes/default-date.pipe";
 import {ToggleVisibilityDirective} from "../../_directives/toggle-visibility.directive";
@@ -52,6 +52,8 @@ export class ManageAuthKeysComponent implements OnInit {
   opdsAuthKeyModel = signal<string>(OpdsName);
   opdsAuthKeyForm = form(this.opdsAuthKeyModel);
   opdsUrlRsc = this.accountService.opdsUrlRsc(() => this.opdsAuthKeyModel());
+  koboSyncUrl = signal<string | null>(null);
+  koboSyncError = signal<string | null>(null);
 
   authKeys = computed(() => {
     const account = this.accountService.currentUser();
@@ -60,9 +62,14 @@ export class ManageAuthKeysComponent implements OnInit {
     return account.authKeys;
   });
 
+  hasKoboAuthKey = computed(() => {
+    return this.authKeys()?.some(k => k.name === KoboName) ?? false;
+  });
+
   trackByAuthKey = (index: number, item: AuthKey) => `${item.id}_${item.key}_${item.name}`;
 
   protected readonly isOpdsEnabledResource = this.settingsService.getOpdsEnabledResource();
+  protected readonly isKoboEnabledResource = this.settingsService.getKoboEnabledResource();
 
   ngOnInit() {
     this.opdsUrlRsc.reload();
@@ -86,6 +93,9 @@ export class ManageAuthKeysComponent implements OnInit {
       if (result === null) return;
 
       this.opdsUrlRsc.reload();
+      if (authKey.name === KoboName && this.koboSyncUrl()) {
+        this.createOrViewKoboSyncUrl();
+      }
     });
   }
 
@@ -99,7 +109,59 @@ export class ManageAuthKeysComponent implements OnInit {
       }
 
       this.opdsUrlRsc.reload();
+      if (authKey.name === KoboName) {
+        this.koboSyncUrl.set(null);
+        this.koboSyncError.set(null);
+      }
     })
+  }
+
+  createOrViewKoboSyncUrl() {
+    this.koboSyncError.set(null);
+    this.accountService.getKoboSyncUrl().subscribe({
+      next: (url) => {
+        this.koboSyncUrl.set(url);
+        this.accountService.refreshAccount().subscribe();
+      },
+      error: (err) => {
+        this.koboSyncUrl.set(null);
+        this.koboSyncError.set(err?.error || translate('manage-auth-keys.clients-kobo-error'));
+      }
+    });
+  }
+
+  async rotateKoboSyncUrl() {
+    if (!await this.confirmService.confirm(translate('toasts.confirm-rotate-kobo-sync'))) {
+      return;
+    }
+    this.accountService.rotateKoboSyncUrl().subscribe({
+      next: (url) => {
+        this.koboSyncUrl.set(url);
+        this.koboSyncError.set(null);
+        this.accountService.refreshAccount().subscribe();
+        this.toastr.success(translate('toasts.kobo-sync-rotated'));
+      },
+      error: (err) => {
+        this.toastr.error(err?.error || translate('errors.generic'));
+      }
+    });
+  }
+
+  async revokeKoboSyncUrl() {
+    if (!await this.confirmService.confirm(translate('toasts.confirm-revoke-kobo-sync'))) {
+      return;
+    }
+    this.accountService.revokeKoboSyncUrl().subscribe({
+      next: () => {
+        this.koboSyncUrl.set(null);
+        this.koboSyncError.set(null);
+        this.accountService.refreshAccount().subscribe();
+        this.toastr.success(translate('toasts.kobo-sync-revoked'));
+      },
+      error: (err) => {
+        this.toastr.error(err?.error || translate('errors.generic'));
+      }
+    });
   }
 
   copy(data: string) {

@@ -128,6 +128,7 @@ export class LibrarySettingsModalComponent implements OnInit {
     manageReadingLists: new FormControl<boolean>(false, { nonNullable: true, validators: [] }),
     allowScrobbling: new FormControl<boolean>(true, { nonNullable: true, validators: [] }),
     allowMetadataMatching: new FormControl<boolean>(true, { nonNullable: true, validators: [] }),
+    allowKoboSync: new FormControl<boolean>(false, { nonNullable: true, validators: [] }),
     collapseSeriesRelationships: new FormControl<boolean>(false, { nonNullable: true, validators: [] }),
     enableMetadata: new FormControl<boolean>(true, { nonNullable: true, validators: [] }), // required validator doesn't check value, just if true
     removePrefixForSortName: new FormControl<boolean>(false, { nonNullable: true, validators: [] }),
@@ -308,6 +309,7 @@ export class LibrarySettingsModalComponent implements OnInit {
       this.libraryForm.get('collapseSeriesRelationships')?.setValue(this.library.collapseSeriesRelationships);
       this.libraryForm.get('allowScrobbling')?.setValue(this.scrobbleEnabledLibraries().includes(this.library.type) ? this.library.allowScrobbling : false);
       this.libraryForm.get('allowMetadataMatching')?.setValue(this.library.allowMetadataMatching);
+      this.libraryForm.get('allowKoboSync')?.setValue(this.library.allowKoboSync);
       this.libraryForm.get('metadataProvider')?.setValue(this.library.metadataProvider);
       this.libraryForm.get('excludePatterns')?.setValue(this.excludePatterns ? this.library.excludePatterns : false);
       this.libraryForm.get('enableMetadata')?.setValue(this.library.enableMetadata);

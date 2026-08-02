@@ -232,6 +232,44 @@
       </div>
 
       <div class="row g-0 mt-4 mb-4">
+        @if(settingsForm.get('enableKoboSync'); as formControl) {
+          <app-setting-switch [title]="t('kobo-sync-label')" [subtitle]="t('kobo-sync-tooltip')">
+            <ng-template #switch>
+              <div class="form-check form-switch float-end">
+                <input id="kobo-sync" type="checkbox" [attr.aria-label]="t('kobo-sync-label')" class="form-check-input" formControlName="enableKoboSync">
+              </div>
+            </ng-template>
+          </app-setting-switch>
+        }
+      </div>
+
+      <div class="row g-0 mt-4 mb-4">
+        @if (settingsForm.get('koboConvertTimeBudgetSeconds'); as formControl) {
+          <app-setting-item [title]="t('kobo-convert-budget-label')" [subtitle]="t('kobo-convert-budget-tooltip')">
+            <ng-template #view>
+              {{formControl.value}}
+            </ng-template>
+            <ng-template #edit>
+              <input id="setting-kobo-convert-budget" aria-describedby="kobo-convert-budget-help" class="form-control" formControlName="koboConvertTimeBudgetSeconds"
+                     type="number" inputmode="numeric" step="1" min="1" onkeypress="return event.charCode >= 48 && event.charCode <= 57"
+                     [class.is-invalid]="formControl.invalid && !formControl.untouched" appEnterBlur>
+
+              @if(settingsForm.dirty || !settingsForm.untouched) {
+                <div id="kobo-convert-budget-validations" class="invalid-feedback">
+                  @if (formControl.errors?.required) {
+                    <div>{{t('field-required')}}</div>
+                  }
+                  @if (formControl.errors?.min) {
+                    <div>{{t('kobo-convert-budget-validation')}}</div>
+                  }
+                </div>
+              }
+            </ng-template>
+          </app-setting-item>
+        }
+      </div>
+
+      <div class="row g-0 mt-4 mb-4">
         @if(settingsForm.get('enableFolderWatching'); as formControl) {
           <app-setting-switch [title]="t('folder-watching-label')" [subtitle]="t('folder-watching-tooltip')">
             <ng-template #switch>

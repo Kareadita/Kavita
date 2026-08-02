@@ -196,5 +196,15 @@ public enum ServerSettingKey
     /// When the CBL Sync task should run
     /// </summary>
     [Description("TaskCblSync")]
-    TaskCblSync = 43
+    TaskCblSync = 43,
+    /// <summary>
+    /// Is Kobo sync enabled for the server. Requires a configured HostName.
+    /// </summary>
+    [Description("EnableKoboSync")]
+    EnableKoboSync = 44,
+    /// <summary>
+    /// Wall-clock budget in seconds for in-request CBZ/CBR to EPUB conversion on Kobo download.
+    /// </summary>
+    [Description("KoboConvertTimeBudgetSeconds")]
+    KoboConvertTimeBudgetSeconds = 45
 }

@@ -48,6 +48,12 @@ public class ServerSettingConverter : ITypeConverter<IEnumerable<ServerSetting>,
                 case ServerSettingKey.EnableOpds:
                     destination.EnableOpds = bool.Parse(row.Value);
                     break;
+                case ServerSettingKey.EnableKoboSync:
+                    destination.EnableKoboSync = bool.Parse(row.Value);
+                    break;
+                case ServerSettingKey.KoboConvertTimeBudgetSeconds:
+                    destination.KoboConvertTimeBudgetSeconds = int.Parse(row.Value, CultureInfo.InvariantCulture);
+                    break;
                 case ServerSettingKey.BaseUrl:
                     destination.BaseUrl = row.Value;
                     break;

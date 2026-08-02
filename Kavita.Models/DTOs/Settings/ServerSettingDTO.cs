@@ -33,6 +33,14 @@ public sealed record ServerSettingDto
     /// </summary>
     public bool EnableOpds { get; set; }
     /// <summary>
+    /// Enables Kobo sync for the server. Requires a non-empty HostName.
+    /// </summary>
+    public bool EnableKoboSync { get; set; }
+    /// <summary>
+    /// Wall-clock budget in seconds for in-request CBZ/CBR to EPUB conversion on Kobo download.
+    /// </summary>
+    public int KoboConvertTimeBudgetSeconds { get; set; } = 30;
+    /// <summary>
     /// Base Url for the kavita. Requires restart to take effect.
     /// </summary>
     public string BaseUrl { get; set; } = default!;

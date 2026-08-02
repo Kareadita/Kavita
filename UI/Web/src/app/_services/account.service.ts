@@ -436,6 +436,18 @@ export class AccountService {
     return httpResource.text<string>(() =>this.baseUrl + 'account/opds-url?authKeyName=' + keyName());
   }
 
+  getKoboSyncUrl() {
+    return this.httpClient.get<string>(this.baseUrl + 'account/kobo-sync-url', TextResonse);
+  }
+
+  rotateKoboSyncUrl() {
+    return this.httpClient.post<string>(this.baseUrl + 'account/kobo-sync-url/rotate', {}, TextResonse);
+  }
+
+  revokeKoboSyncUrl() {
+    return this.httpClient.delete(this.baseUrl + 'account/kobo-sync-url');
+  }
+
   getAuthKeys() {
     return this.httpClient.get<AuthKey[]>(this.baseUrl + `account/auth-keys`);
   }

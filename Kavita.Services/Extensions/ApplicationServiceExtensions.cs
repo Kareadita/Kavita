@@ -59,6 +59,7 @@ public static class ApplicationServiceExtensions
         services.AddScoped<IFontService, FontService>();
         services.AddScoped<IAnnotationService, AnnotationService>();
         services.AddScoped<IOpdsService, OpdsService>();
+        services.AddScoped<IKoboService, KoboService>();
         services.AddScoped<IOAuthService, OAuthService>();
 
         services.AddScoped<IUrlValidationService, UrlValidationService>();

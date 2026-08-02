@@ -180,6 +180,9 @@ public sealed class DataContext : IdentityDbContext<AppUser, AppRole, int,
             .Property(b => b.AllowMetadataMatching)
             .HasDefaultValue(true);
         builder.Entity<Library>()
+            .Property(b => b.AllowKoboSync)
+            .HasDefaultValue(false);
+        builder.Entity<Library>()
             .Property(b => b.EnableMetadata)
             .HasDefaultValue(true);
         builder.Entity<Library>()

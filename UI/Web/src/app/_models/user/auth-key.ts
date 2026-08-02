@@ -15,4 +15,5 @@ export enum AuthKeyProvider {
 
 export const ImageOnlyName = 'image-only';
 export const OpdsName = 'opds';
+export const KoboName = 'kobo';
 

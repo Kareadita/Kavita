@@ -79,6 +79,7 @@ public class LibraryController(
             .WithManageReadingLists(dto.ManageReadingLists)
             .WithAllowScrobbling(dto.AllowScrobbling)
             .WithAllowMetadataMatching(dto.AllowMetadataMatching)
+            .WithAllowKoboSync(dto.AllowKoboSync)
             .WithEnableMetadata(dto.EnableMetadata)
             .WithMetadataProvider(dto.MetadataProvider)
             .Build();
@@ -425,6 +426,7 @@ public class LibraryController(
                 Type = sourceLibrary.Type,
                 AllowScrobbling = sourceLibrary.AllowScrobbling,
                 AllowMetadataMatching = sourceLibrary.AllowMetadataMatching,
+                AllowKoboSync = sourceLibrary.AllowKoboSync,
                 EnableMetadata = sourceLibrary.EnableMetadata,
                 RemovePrefixForSortName = sourceLibrary.RemovePrefixForSortName,
                 InheritWebLinksFromFirstChapter = sourceLibrary.InheritWebLinksFromFirstChapter,
@@ -748,6 +750,7 @@ public class LibraryController(
         library.ManageReadingLists = dto.ManageReadingLists;
         library.AllowScrobbling = dto.AllowScrobbling;
         library.AllowMetadataMatching = dto.AllowMetadataMatching;
+        library.AllowKoboSync = dto.AllowKoboSync;
         library.EnableMetadata = dto.EnableMetadata;
         library.RemovePrefixForSortName = dto.RemovePrefixForSortName;
         library.InheritWebLinksFromFirstChapter = dto.InheritWebLinksFromFirstChapter;

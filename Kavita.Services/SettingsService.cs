@@ -368,6 +368,31 @@ public class SettingsService(
                 unitOfWork.SettingsRepository.Update(setting);
             }
 
+            if (setting.Key == ServerSettingKey.EnableKoboSync &&
+                updateSettingsDto.EnableKoboSync + string.Empty != setting.Value)
+            {
+                if (updateSettingsDto.EnableKoboSync &&
+                    string.IsNullOrWhiteSpace(updateSettingsDto.HostName))
+                {
+                    throw new KavitaException("kobo-hostname-required");
+                }
+
+                setting.Value = updateSettingsDto.EnableKoboSync + string.Empty;
+                unitOfWork.SettingsRepository.Update(setting);
+            }
+
+            if (setting.Key == ServerSettingKey.KoboConvertTimeBudgetSeconds &&
+                updateSettingsDto.KoboConvertTimeBudgetSeconds + string.Empty != setting.Value)
+            {
+                if (updateSettingsDto.KoboConvertTimeBudgetSeconds < 1)
+                {
+                    throw new KavitaException("kobo-convert-budget");
+                }
+
+                setting.Value = updateSettingsDto.KoboConvertTimeBudgetSeconds + string.Empty;
+                unitOfWork.SettingsRepository.Update(setting);
+            }
+
             if (setting.Key == ServerSettingKey.EncodeMediaAs &&
                 ((int)updateSettingsDto.EncodeMediaAs).ToString() != setting.Value)
             {

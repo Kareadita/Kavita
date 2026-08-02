@@ -39,6 +39,9 @@ public sealed record UpdateLibraryDto
     /// <inheritdoc cref="Library.AllowMetadataMatching"/>
     [Required]
     public bool AllowMetadataMatching { get; init; }
+    /// <inheritdoc cref="Library.AllowKoboSync"/>
+    [Required]
+    public bool AllowKoboSync { get; init; }
     /// <inheritdoc cref="Library.EnableMetadata"/>
     [Required]
     public bool EnableMetadata { get; init; }

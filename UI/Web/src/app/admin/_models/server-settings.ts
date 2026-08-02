@@ -15,6 +15,8 @@ export interface ServerSettings {
   ipAddresses: string;
   allowStatCollection: boolean;
   enableOpds: boolean;
+  enableKoboSync: boolean;
+  koboConvertTimeBudgetSeconds: number;
   baseUrl: string;
   bookmarksDirectory: string;
   emailServiceUrl: string;

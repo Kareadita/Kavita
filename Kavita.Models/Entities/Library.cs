@@ -50,6 +50,10 @@ public class Library : IEntityDate, IHasCoverImage
     /// <remarks>Requires a valid LicenseKey</remarks>
     public bool AllowMetadataMatching { get; set; } = true;
     /// <summary>
+    /// Allow chapters in this library to appear on Kobo sync when the server feature is enabled.
+    /// </summary>
+    public bool AllowKoboSync { get; set; } = false;
+    /// <summary>
     /// Should Kavita read metadata files from the library
     /// </summary>
     public bool EnableMetadata { get; set; } = true;

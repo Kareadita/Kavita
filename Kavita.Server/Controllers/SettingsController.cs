@@ -184,6 +184,13 @@ public class SettingsController(
         return Ok(settingsDto.EnableOpds);
     }
 
+    [HttpGet("kobo-enabled")]
+    public async Task<ActionResult<bool>> GetKoboEnabled()
+    {
+        var settingsDto = await unitOfWork.SettingsRepository.GetSettingsDtoAsync();
+        return Ok(settingsDto.EnableKoboSync && !string.IsNullOrWhiteSpace(settingsDto.HostName));
+    }
+
     /// <summary>
     /// Is the cron expression valid for Kavita's scheduler
     /// </summary>
