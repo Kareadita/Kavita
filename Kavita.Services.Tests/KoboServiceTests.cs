@@ -1818,6 +1818,102 @@ public class KoboServiceTests(ITestOutputHelper testOutputHelper) : AbstractDbTe
     }
 
     [Fact]
+    public async Task GetRemovedBooks_ListsOnlyEligibleDeviceDeletes()
+    {
+        var (unitOfWork, context, mapper) = await CreateDatabase();
+        var (user, library, eligible) = await SeedEpubChapter(unitOfWork, context,
+            seriesName: "Restorable", chapterNumber: "1", titleName: "Keep Me",
+            writerName: "Author", language: "en", summary: "s",
+            releaseDate: new DateTime(2020, 1, 1, 0, 0, 0, DateTimeKind.Utc));
+        var ineligible = await AddChapterWithFormat(context, library, "Pdf Gone", "1", MangaFormat.Pdf);
+        await context.SaveChangesAsync();
+        await ConfigureKoboSettings(unitOfWork, "https://kavita.example.com");
+        var koboService = CreateKoboService(unitOfWork, mapper);
+        var token = (await koboService.GetOrCreateSyncUrlAsync(user.Id)).Split('/').Last();
+        var eligibleUuid = KoboEntitlementId.FromChapterIdString(eligible.Id);
+
+        await koboService.SyncLibraryAsync(token, null);
+        await koboService.DeleteEntitlementAsync(token, eligibleUuid);
+        await koboService.SyncLibraryAsync(token, null);
+
+        // Ineligible archive (eligibility-loss style) must not appear.
+        context.AppUserKoboArchivedChapter.Add(new AppUserKoboArchivedChapter
+        {
+            AppUserId = user.Id,
+            ChapterId = ineligible.Id,
+            IsDeviceDeleted = true,
+            LastModifiedUtc = DateTime.UtcNow,
+        });
+        await context.SaveChangesAsync();
+
+        // Hard-deleted chapter with tombstone must not appear.
+        var hardDeleted = await AddEpubChapter(context, library, "Hard Delete", "1");
+        await context.SaveChangesAsync();
+        await koboService.SyncLibraryAsync(token, null);
+        await koboService.PrepareHardDeleteAsync([hardDeleted.Id]);
+        var hardSeries = await context.Series.Include(s => s.Volumes).ThenInclude(v => v.Chapters)
+            .SingleAsync(s => s.Name == "Hard Delete");
+        context.Series.Remove(hardSeries);
+        await context.SaveChangesAsync();
+        context.ChangeTracker.Clear();
+
+        var removed = await koboService.GetRemovedBooksAsync(user.Id);
+
+        Assert.Single(removed);
+        Assert.Equal(eligible.Id, removed[0].ChapterId);
+        Assert.Equal("Restorable", removed[0].SeriesName);
+        Assert.Contains("Keep Me", removed[0].Title);
+        Assert.Equal(library.Id, removed[0].LibraryId);
+    }
+
+    [Fact]
+    public async Task RestoreRemovedBooks_Selected_OnlyClearsChosenChapters()
+    {
+        var (unitOfWork, context, mapper) = await CreateDatabase();
+        var (user, library, first) = await SeedEpubChapter(unitOfWork, context,
+            seriesName: "Select A", chapterNumber: "1", titleName: "A",
+            writerName: "Author", language: "en", summary: "s",
+            releaseDate: new DateTime(2020, 1, 1, 0, 0, 0, DateTimeKind.Utc));
+        var second = await AddEpubChapter(context, library, "Select B", "1");
+        await context.SaveChangesAsync();
+        await ConfigureKoboSettings(unitOfWork, "https://kavita.example.com");
+        var koboService = CreateKoboService(unitOfWork, mapper);
+        var token = (await koboService.GetOrCreateSyncUrlAsync(user.Id)).Split('/').Last();
+        var firstUuid = KoboEntitlementId.FromChapterIdString(first.Id);
+        var secondUuid = KoboEntitlementId.FromChapterIdString(second.Id);
+
+        // Sync until both chapters are in the synced-set (default page size covers both).
+        string? syncToken = null;
+        for (var i = 0; i < 5; i++)
+        {
+            var page = await koboService.SyncLibraryAsync(token, syncToken);
+            syncToken = page.SyncToken;
+            if (!page.Continue) break;
+        }
+        Assert.Equal(2, await context.AppUserKoboSyncedChapter.CountAsync(s => s.AppUserId == user.Id));
+
+        await koboService.DeleteEntitlementAsync(token, firstUuid);
+        await koboService.DeleteEntitlementAsync(token, secondUuid);
+        await koboService.SyncLibraryAsync(token, null);
+
+        Assert.Equal(2, await context.AppUserKoboArchivedChapter.CountAsync(a =>
+            a.AppUserId == user.Id && a.IsDeviceDeleted));
+
+        await koboService.RestoreRemovedBooksAsync(user.Id, [first.Id]);
+
+        Assert.Equal(1, await context.AppUserKoboArchivedChapter.CountAsync(a =>
+            a.AppUserId == user.Id && a.IsDeviceDeleted && a.ChapterId == second.Id));
+        Assert.False(await context.AppUserKoboArchivedChapter.AnyAsync(a =>
+            a.AppUserId == user.Id && a.ChapterId == first.Id));
+        Assert.False(await context.AppUserKoboSyncedChapter.AnyAsync(s =>
+            s.AppUserId == user.Id && s.ChapterId == first.Id));
+
+        var listed = await koboService.GetRemovedBooksAsync(user.Id);
+        Assert.Single(listed);
+        Assert.Equal(second.Id, listed[0].ChapterId);
+    }
+
+    [Fact]
     public async Task EligibilityRestore_DoesNotAutoClearDeviceDeletedArchives()
     {
         var (unitOfWork, context, mapper) = await CreateDatabase();

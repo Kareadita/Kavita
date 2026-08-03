@@ -499,7 +499,44 @@ public partial class KoboService(
         }
     }
 
-    public async Task RestoreRemovedBooksAsync(int userId, CancellationToken ct = default)
+    public async Task<IReadOnlyList<KoboRemovedBookDto>> GetRemovedBooksAsync(int userId,
+        CancellationToken ct = default)
+    {
+        var user = await unitOfWork.UserRepository.GetUserByIdAsync(userId, AppUserIncludes.None, ct);
+        if (user == null) throw new KavitaException("access-denied");
+
+        var libraryIds = await GetAllowedLibraryIdsAsync(userId, ct);
+        var deviceArchives = await unitOfWork.DataContext.AppUserKoboArchivedChapter
+            .Where(a => a.AppUserId == userId && a.IsDeviceDeleted)
+            .ToListAsync(ct);
+        if (deviceArchives.Count == 0) return [];
+
+        var archivedIds = deviceArchives.Select(a => a.ChapterId).ToList();
+        var eligibleChapters = await EligibleChaptersQuery(libraryIds)
+            .Where(c => archivedIds.Contains(c.Id))
+            .Include(c => c.Volume)
+            .ThenInclude(v => v.Series)
+            .ToListAsync(ct);
+        if (eligibleChapters.Count == 0) return [];
+
+        var archiveByChapter = deviceArchives.ToDictionary(a => a.ChapterId);
+        return eligibleChapters
+            .OrderBy(c => c.Volume.Series.Name)
+            .ThenBy(c => c.SortOrder)
+            .Select(c => new KoboRemovedBookDto
+            {
+                ChapterId = c.Id,
+                SeriesId = c.Volume.SeriesId,
+                LibraryId = c.Volume.Series.LibraryId,
+                SeriesName = c.Volume.Series.Name,
+                Title = BuildTitle(c.Volume.Series, c),
+                RemovedUtc = archiveByChapter[c.Id].LastModifiedUtc,
+            })
+            .ToList();
+    }
+
+    public async Task RestoreRemovedBooksAsync(int userId, IReadOnlyCollection<int>? chapterIds = null,
+        CancellationToken ct = default)
     {
         var user = await unitOfWork.UserRepository.GetUserByIdAsync(userId, AppUserIncludes.None, ct);
         if (user == null) throw new KavitaException("access-denied");
@@ -509,6 +546,13 @@ public partial class KoboService(
             .Where(a => a.AppUserId == userId && a.IsDeviceDeleted)
             .ToListAsync(ct);
         if (deviceArchives.Count == 0) return;
+
+        if (chapterIds is { Count: > 0 })
+        {
+            var requested = chapterIds.ToHashSet();
+            deviceArchives = deviceArchives.Where(a => requested.Contains(a.ChapterId)).ToList();
+            if (deviceArchives.Count == 0) return;
+        }
 
         var archivedIds = deviceArchives.Select(a => a.ChapterId).ToList();
         var eligibleIds = await EligibleChaptersQuery(libraryIds)

@@ -66,6 +66,7 @@ export enum SettingsTabId {
   ReadingProfiles = 'reading-profiles',
   Font = 'font',
   Clients = 'clients',
+  RemovedFromKobo = 'removed-from-kobo',
   Theme = 'theme',
   Devices = 'devices',
   Scrobbling = 'scrobbling',

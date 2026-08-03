@@ -125,10 +125,24 @@
         "clients-kobo-view": "View Sync URL",
         "clients-kobo-rotate": "Rotate",
         "clients-kobo-force-full-sync": "Force full sync",
-        "clients-kobo-restore-removed": "Restore removed Kobo books",
+        "clients-kobo-removed-page": "Removed from Kobo",
         "clients-kobo-revoke": "Revoke",
         "clients-kobo-error": "Failed to load Kobo sync URL",
         "kobo": "Kobo"
+    },
+
+    "removed-from-kobo": {
+        "description": "Books you removed on your Kobo that are still in Kavita and eligible to sync. Restore clears the device removal so they reappear on the next sync. Hard-deleted or ineligible titles are not listed.",
+        "back-to-clients": "Back to Auth Keys / OPDS",
+        "restore-selected": "Restore selected",
+        "restore-all": "Restore all",
+        "loading": "Loading…",
+        "empty": "No removed Kobo books to restore.",
+        "select-all": "Select all",
+        "select-row": "Select book",
+        "title-header": "Title",
+        "series-header": "Series",
+        "removed-header": "Removed"
     },
 
     "create-auth-key": {
@@ -2679,6 +2693,7 @@
         "custom-key-binds": "Key Binds",
         "reading-profiles": "Reading Profiles",
         "clients": "Auth Keys / OPDS",
+        "removed-from-kobo": "Removed from Kobo",
         "devices": "Devices",
         "scrobbling": "Scrobbling",
         "theme": "Theme",
@@ -4385,7 +4400,8 @@
         "confirm-rotate-kobo-sync": "Rotate the Kobo sync URL? Existing devices will stop syncing until updated with the new URL.",
         "confirm-revoke-kobo-sync": "Revoke the Kobo sync URL? Sync will stop until you create a new URL.",
         "confirm-force-full-kobo-sync": "Force a full Kobo sync? This clears your sync cursor so the next device sync re-sends entitlements. Use this if sync got stuck after overlapping multi-page syncs across devices. Books you removed on the device stay removed.",
-        "confirm-restore-removed-kobo-books": "Restore books you removed on your Kobo? They will appear again on the next device sync. Hard-deleted titles cannot be restored.",
+        "confirm-restore-removed-kobo-books": "Restore all books you removed on your Kobo? They will appear again on the next device sync. Hard-deleted titles cannot be restored.",
+        "confirm-restore-selected-kobo-books": "Restore the selected books you removed on your Kobo? They will appear again on the next device sync.",
         "kobo-sync-rotated": "Kobo sync URL rotated",
         "kobo-sync-revoked": "Kobo sync URL revoked",
         "kobo-force-full-sync": "Full Kobo sync queued for the next device sync",

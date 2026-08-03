@@ -81,11 +81,21 @@ public interface IKoboService
     Task ForceFullSyncAsync(int userId, CancellationToken ct = default);
 
     /// <summary>
-    /// Bulk-restores books the user removed on the device: clears device-deleted archives for
-    /// still-eligible chapters and drops those chapters from the synced-set. Tombstones / hard
-    /// deletes are not restored. Does not clear eligibility archives (those auto-unarchive).
+    /// Lists archived device-deleted chapters that are still eligible for Kobo sync (restorable).
+    /// Hard-delete tombstones and ineligible archives are omitted.
     /// </summary>
-    Task RestoreRemovedBooksAsync(int userId, CancellationToken ct = default);
+    Task<IReadOnlyList<KoboRemovedBookDto>> GetRemovedBooksAsync(int userId,
+        CancellationToken ct = default);
+
+    /// <summary>
+    /// Restores books the user removed on the device: clears device-deleted archives for
+    /// still-eligible chapters and drops those chapters from the synced-set. When
+    /// <paramref name="chapterIds"/> is null or empty, restores all restorable titles;
+    /// otherwise only the listed chapter ids. Tombstones / hard deletes are not restored.
+    /// Does not clear eligibility archives (those auto-unarchive).
+    /// </summary>
+    Task RestoreRemovedBooksAsync(int userId, IReadOnlyCollection<int>? chapterIds = null,
+        CancellationToken ct = default);
 
     /// <summary>
     /// Before hard-deleting chapters: for users who had them synced, create tombstones and

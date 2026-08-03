@@ -21,6 +21,7 @@ using Kavita.Models.Constants;
 using Kavita.Models.DTOs;
 using Kavita.Models.DTOs.Account;
 using Kavita.Models.DTOs.Email;
+using Kavita.Models.DTOs.Kobo;
 using Kavita.Models.DTOs.Settings;
 using Kavita.Models.DTOs.SignalR;
 using Kavita.Models.Entities;
@@ -1304,17 +1305,35 @@ public class AccountController(UserManager<AppUser> userManager,
     }
 
     /// <summary>
-    /// Restore books removed on the Kobo device: clears device-deleted archives for still-eligible
-    /// chapters and drops them from the synced-set so the next sync re-entitles them.
+    /// Lists still-eligible device-deleted Kobo books that can be restored.
     /// </summary>
-    [HttpPost("kobo-sync-url/restore-removed")]
-    [DisallowRole(PolicyConstants.ReadOnlyRole)]
-    public async Task<ActionResult> RestoreRemovedKoboBooks()
+    [HttpGet("kobo-sync-url/removed")]
+    public async Task<ActionResult<IReadOnlyList<KoboRemovedBookDto>>> GetRemovedKoboBooks()
     {
         var ct = HttpContext.RequestAborted;
         try
         {
-            await koboService.RestoreRemovedBooksAsync(UserId, ct);
+            return Ok(await koboService.GetRemovedBooksAsync(UserId, ct));
+        }
+        catch (KavitaException ex)
+        {
+            return BadRequest(await localizationService.TranslateAsync(UserId, ex.Message));
+        }
+    }
+
+    /// <summary>
+    /// Restore books removed on the Kobo device: clears device-deleted archives for still-eligible
+    /// chapters and drops them from the synced-set so the next sync re-entitles them.
+    /// Pass chapter ids to restore a selection; omit or pass an empty list to restore all.
+    /// </summary>
+    [HttpPost("kobo-sync-url/restore-removed")]
+    [DisallowRole(PolicyConstants.ReadOnlyRole)]
+    public async Task<ActionResult> RestoreRemovedKoboBooks(RestoreKoboRemovedBooksDto? dto)
+    {
+        var ct = HttpContext.RequestAborted;
+        try
+        {
+            await koboService.RestoreRemovedBooksAsync(UserId, dto?.ChapterIds, ct);
             return Ok();
         }
         catch (KavitaException ex)

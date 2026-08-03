@@ -1,0 +1,111 @@
+<ng-container *transloco="let t; prefix:'removed-from-kobo'">
+  <p>
+    <a class="btn btn-link px-0" [routerLink]="['/settings']" [fragment]="clientsTab">{{t('back-to-clients')}}</a>
+  </p>
+  <p>{{t('description')}}</p>
+
+  @if (!isReadOnly()) {
+    <div class="mb-3 d-flex flex-wrap gap-2">
+      <button class="btn btn-primary" [disabled]="selectedCount() === 0" (click)="restoreSelected()">
+        {{t('restore-selected')}}
+      </button>
+      <button class="btn btn-outline-primary" [disabled]="books().length === 0" (click)="restoreAll()">
+        {{t('restore-all')}}
+      </button>
+    </div>
+  }
+
+  @if (isLoading()) {
+    <div class="text-muted">{{t('loading')}}</div>
+  } @else if (books().length === 0) {
+    <div class="alert alert-info" role="status">{{t('empty')}}</div>
+  } @else {
+    <app-responsive-table [rows]="books()" [trackByFn]="trackBy">
+      <ng-template #tableTemplate>
+        <ngx-datatable
+          class="bootstrap"
+          [rows]="books()"
+          [columnMode]="'flex'"
+          rowHeight="auto"
+          [footerHeight]="50"
+          [limit]="15"
+        >
+          <ngx-datatable-column [sortable]="false" [draggable]="false" [flexGrow]="0.4" [width]="48" [canAutoResize]="false">
+            <ng-template ngx-datatable-header-template>
+              @if (!isReadOnly()) {
+                <input type="checkbox" class="form-check-input"
+                       [checked]="allSelected()"
+                       (change)="toggleAll()"
+                       [attr.aria-label]="t('select-all')" />
+              }
+            </ng-template>
+            <ng-template let-item="row" ngx-datatable-cell-template>
+              @if (!isReadOnly()) {
+                <input type="checkbox" class="form-check-input"
+                       [checked]="isSelected(item.chapterId)"
+                       (change)="toggle(item.chapterId)"
+                       [attr.aria-label]="t('select-row')" />
+              }
+            </ng-template>
+          </ngx-datatable-column>
+
+          <ngx-datatable-column prop="title" [sortable]="true" [draggable]="false" [flexGrow]="3">
+            <ng-template let-column="column" ngx-datatable-header-template>
+              {{t('title-header')}}
+            </ng-template>
+            <ng-template let-item="row" ngx-datatable-cell-template>
+              <app-image [width]="'32px'" [height]="'32px'" [imageUrl]="imageService.getSeriesCoverImage(item.seriesId)" />
+              <a class="btn-link ms-2"
+                 href="{{baseUrl}}library/{{item.libraryId}}/series/{{item.seriesId}}"
+                 target="_blank" rel="noopener noreferrer">{{item.title}}</a>
+            </ng-template>
+          </ngx-datatable-column>
+
+          <ngx-datatable-column prop="seriesName" [sortable]="true" [draggable]="false" [flexGrow]="2">
+            <ng-template let-column="column" ngx-datatable-header-template>
+              {{t('series-header')}}
+            </ng-template>
+            <ng-template let-item="row" ngx-datatable-cell-template>
+              {{item.seriesName}}
+            </ng-template>
+          </ngx-datatable-column>
+
+          <ngx-datatable-column prop="removedUtc" [sortable]="true" [draggable]="false" [flexGrow]="1">
+            <ng-template let-column="column" ngx-datatable-header-template>
+              {{t('removed-header')}}
+            </ng-template>
+            <ng-template let-item="row" ngx-datatable-cell-template>
+              {{item.removedUtc | utcToLocalDate | date:'mediumDate' | defaultDate}}
+            </ng-template>
+          </ngx-datatable-column>
+        </ngx-datatable>
+      </ng-template>
+
+      <ng-template #cardTemplate let-item let-idx="index">
+        <div class="card mb-3">
+          <div class="card-body">
+            <div class="d-flex align-items-start gap-3">
+              @if (!isReadOnly()) {
+                <input type="checkbox" class="form-check-input mt-1"
+                       [checked]="isSelected(item.chapterId)"
+                       (change)="toggle(item.chapterId)"
+                       [attr.aria-label]="t('select-row')" />
+              }
+              <app-image [width]="'48px'" [height]="'48px'"
+                         [imageUrl]="imageService.getSeriesCoverImage(item.seriesId)" />
+              <div class="flex-grow-1">
+                <h5 class="card-title mb-1">
+                  <a class="btn-link"
+                     href="{{baseUrl}}library/{{item.libraryId}}/series/{{item.seriesId}}"
+                     target="_blank" rel="noopener noreferrer">{{item.title}}</a>
+                </h5>
+                <div class="text-muted small">{{item.seriesName}}</div>
+                <div class="text-muted small">{{item.removedUtc | utcToLocalDate | date:'mediumDate' | defaultDate}}</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </ng-template>
+    </app-responsive-table>
+  }
+</ng-container>

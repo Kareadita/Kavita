@@ -65,6 +65,7 @@ import {LicenseComponent} from "../../../admin/kavita-plus/license/license.compo
 import {
   ManageScrobbleProvidersComponent
 } from "../../../user-settings/manage-scrobble-providers/manage-scrobble-providers.component";
+import {RemovedFromKoboComponent} from "../../../user-settings/removed-from-kobo/removed-from-kobo.component";
 
 @Component({
   selector: 'app-settings',
@@ -107,7 +108,8 @@ import {
     ManageRemapRulesComponent,
     KavitaplusActivityComponent,
     ManageKavitaplusActivityComponent,
-    ManageScrobbleProvidersComponent
+    ManageScrobbleProvidersComponent,
+    RemovedFromKoboComponent
   ],
   templateUrl: './settings.component.html',
   styleUrl: './settings.component.scss',

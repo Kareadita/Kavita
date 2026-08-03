@@ -18,6 +18,8 @@ import {ResponsiveTableComponent} from "../../shared/_components/responsive-tabl
 import {ModalService} from "../../_services/modal.service";
 import {form, FormField} from "@angular/forms/signals";
 import {FormsModule} from "@angular/forms";
+import {RouterLink} from "@angular/router";
+import {SettingsTabId} from "../../sidenav/preference-nav/preference-nav.component";
 
 @Component({
   selector: 'app-manage-auth-keys',
@@ -32,6 +34,7 @@ import {FormsModule} from "@angular/forms";
     ResponsiveTableComponent,
     FormField,
     FormsModule,
+    RouterLink,
   ],
   templateUrl: './manage-auth-keys.component.html',
   styleUrl: './manage-auth-keys.component.scss',
@@ -46,6 +49,7 @@ export class ManageAuthKeysComponent implements OnInit {
   private readonly toastr = inject(ToastrService);
 
   protected readonly opdsUrlLink = `<a href="${WikiLink.OpdsClients}" target="_blank" rel="noopener noreferrer">Wiki</a>`
+  protected readonly removedFromKoboTab = SettingsTabId.RemovedFromKobo;
 
   isReadOnly = this.accountService.hasReadOnlyRole;
 
@@ -171,20 +175,6 @@ export class ManageAuthKeysComponent implements OnInit {
     this.accountService.forceFullKoboSync().subscribe({
       next: () => {
         this.toastr.success(translate('toasts.kobo-force-full-sync'));
-      },
-      error: (err) => {
-        this.toastr.error(err?.error || translate('errors.generic'));
-      }
-    });
-  }
-
-  async restoreRemovedKoboBooks() {
-    if (!await this.confirmService.confirm(translate('toasts.confirm-restore-removed-kobo-books'))) {
-      return;
-    }
-    this.accountService.restoreRemovedKoboBooks().subscribe({
-      next: () => {
-        this.toastr.success(translate('toasts.kobo-restore-removed-books'));
       },
       error: (err) => {
         this.toastr.error(err?.error || translate('errors.generic'));

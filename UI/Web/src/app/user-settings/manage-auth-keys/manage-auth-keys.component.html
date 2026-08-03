@@ -64,10 +64,10 @@
               <i class="fa-solid fa-arrows-rotate" aria-hidden="true"></i>
               <span class="ms-1">{{t('clients-kobo-force-full-sync')}}</span>
             </button>
-            <button class="btn btn-outline-secondary" (click)="restoreRemovedKoboBooks()">
+            <a class="btn btn-outline-secondary" [routerLink]="['/settings']" [fragment]="removedFromKoboTab">
               <i class="fa-solid fa-book" aria-hidden="true"></i>
-              <span class="ms-1">{{t('clients-kobo-restore-removed')}}</span>
-            </button>
+              <span class="ms-1">{{t('clients-kobo-removed-page')}}</span>
+            </a>
             <button class="btn btn-danger" (click)="revokeKoboSyncUrl()">
               <i class="fa fa-trash" aria-hidden="true"></i>
               <span class="ms-1">{{t('clients-kobo-revoke')}}</span>
