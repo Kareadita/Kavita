@@ -71,9 +71,18 @@ public class AnnotationController(
     /// <param name="annotationId"></param>
     /// <returns></returns>
     [HttpGet("{annotationId}")]
-    public async Task<ActionResult<AnnotationDto>> GetAnnotation(int annotationId)
+    public async Task<ActionResult<AnnotationDto?>> GetAnnotation(int annotationId)
     {
-        return Ok(await unitOfWork.UserRepository.GetAnnotationDtoById(UserId, annotationId));
+        var annotation = await unitOfWork.UserRepository.GetAnnotationDtoById(UserId, annotationId);
+        if (annotation == null) return NotFound();
+
+        if (!await unitOfWork.UserRepository.HasAccessToChapter(UserId, annotation.ChapterId,
+                HttpContext.RequestAborted))
+        {
+            return NotFound();
+        }
+
+        return Ok(annotation);
     }
 
     /// <summary>
