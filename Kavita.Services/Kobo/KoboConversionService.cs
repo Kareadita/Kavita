@@ -31,7 +31,8 @@ public class KoboConversionService(
     IKepubifyRunner kepubifyRunner,
     IKoboConversionJobScheduler jobScheduler,
     IUnitOfWork unitOfWork,
-    IEventHub eventHub)
+    IEventHub eventHub,
+    IKoboLocationRematchService koboLocationRematchService)
     : IKoboConversionService
 {
     public const string Name = "KoboConversionService";
@@ -525,6 +526,7 @@ public class KoboConversionService(
             }
 
             await DropSyncedSetForChapterAsync(chapterId, ct);
+            await koboLocationRematchService.RematchAfterDeviceFileChangeAsync(chapterId, finalPath, ct);
             await EnforceKepubCapAfterWriteAsync(finalPath, ct);
             return finalPath;
         }

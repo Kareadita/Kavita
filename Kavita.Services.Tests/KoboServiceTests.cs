@@ -2519,7 +2519,8 @@ public class KoboServiceTests(ITestOutputHelper testOutputHelper) : AbstractDbTe
             Substitute.For<IKepubifyRunner>(),
             Substitute.For<IKoboConversionJobScheduler>(),
             unitOfWork,
-            Substitute.For<IEventHub>());
+            Substitute.For<IEventHub>(),
+            Substitute.For<IKoboLocationRematchService>());
         KoboConversionService.ResetInFlightForTests();
 
         var koboService = CreateKoboService(unitOfWork, mapper, conversionService: conversion);
@@ -2605,7 +2606,8 @@ public class KoboServiceTests(ITestOutputHelper testOutputHelper) : AbstractDbTe
             Substitute.For<IKepubifyRunner>(),
             scheduler,
             unitOfWork,
-            Substitute.For<IEventHub>());
+            Substitute.For<IEventHub>(),
+            Substitute.For<IKoboLocationRematchService>());
         KoboConversionService.ResetInFlightForTests();
 
         var koboService = CreateKoboService(unitOfWork, mapper, conversionService: conversion);
@@ -2788,6 +2790,7 @@ public class KoboServiceTests(ITestOutputHelper testOutputHelper) : AbstractDbTe
             return true;
         });
 
+        var rematch = Substitute.For<IKoboLocationRematchService>();
         var conversion = new KoboConversionService(
             Substitute.For<ILogger<KoboConversionService>>(),
             directoryService,
@@ -2795,7 +2798,8 @@ public class KoboServiceTests(ITestOutputHelper testOutputHelper) : AbstractDbTe
             kepubify,
             Substitute.For<IKoboConversionJobScheduler>(),
             unitOfWork,
-            Substitute.For<IEventHub>());
+            Substitute.For<IEventHub>(),
+            rematch);
         KoboConversionService.ResetInFlightForTests();
 
         // First sync: EPUB fallback, chapter enters synced-set, enqueue would fire (real conversion).
@@ -2811,6 +2815,9 @@ public class KoboServiceTests(ITestOutputHelper testOutputHelper) : AbstractDbTe
         await conversion.GetOrConvertKepubAsync(chapter.Id, source, "Title", budgetSeconds: 30);
         Assert.Equal(0, await context.AppUserKoboSyncedChapter.CountAsync(s =>
             s.AppUserId == user.Id && s.ChapterId == chapter.Id));
+        await rematch.Received(1).RematchAfterDeviceFileChangeAsync(
+            chapter.Id, Arg.Is<string>(p => p.EndsWith(KoboConversionService.KepubCacheExtension)),
+            Arg.Any<CancellationToken>());
 
         // Next sync re-emits with KEPUB-only DownloadUrls.
         var secondSync = await koboService.SyncLibraryAsync(token, firstSync.SyncToken);

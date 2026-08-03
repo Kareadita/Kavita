@@ -691,6 +691,7 @@ public class KoboConversionServiceTests(ITestOutputHelper testOutputHelper) : Ab
             kepubify ?? Substitute.For<IKepubifyRunner>(),
             scheduler ?? Substitute.For<IKoboConversionJobScheduler>(),
             unitOfWork,
-            eventHub ?? Substitute.For<IEventHub>());
+            eventHub ?? Substitute.For<IEventHub>(),
+            Substitute.For<IKoboLocationRematchService>());
     }
 }
