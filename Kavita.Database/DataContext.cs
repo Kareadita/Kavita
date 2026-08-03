@@ -74,6 +74,7 @@ public sealed class DataContext : IdentityDbContext<AppUser, AppRole, int,
     public DbSet<AppUserKoboArchivedChapter> AppUserKoboArchivedChapter { get; set; } = null!;
     public DbSet<AppUserKoboTombstone> AppUserKoboTombstone { get; set; } = null!;
     public DbSet<AppUserKoboTagTombstone> AppUserKoboTagTombstone { get; set; } = null!;
+    public DbSet<AppUserKoboReadingLocation> AppUserKoboReadingLocation { get; set; } = null!;
     public DbSet<AppUserTableOfContent> AppUserTableOfContent { get; set; } = null!;
     public DbSet<AppUserSmartFilter> AppUserSmartFilter { get; set; } = null!;
     public DbSet<AppUserDashboardStream> AppUserDashboardStream { get; set; } = null!;
@@ -240,6 +241,20 @@ public sealed class DataContext : IdentityDbContext<AppUser, AppRole, int,
             entity.HasOne(e => e.AppUser)
                 .WithMany()
                 .HasForeignKey(e => e.AppUserId)
+                .OnDelete(DeleteBehavior.Cascade);
+        });
+        builder.Entity<AppUserKoboReadingLocation>(entity =>
+        {
+            entity.HasIndex(e => new { e.AppUserId, e.ChapterId })
+                .IsUnique()
+                .HasDatabaseName("IX_AppUserKoboReadingLocation_AppUserId_ChapterId");
+            entity.HasOne(e => e.AppUser)
+                .WithMany()
+                .HasForeignKey(e => e.AppUserId)
+                .OnDelete(DeleteBehavior.Cascade);
+            entity.HasOne(e => e.Chapter)
+                .WithMany()
+                .HasForeignKey(e => e.ChapterId)
                 .OnDelete(DeleteBehavior.Cascade);
         });
         builder.Entity<Library>()

@@ -61,6 +61,7 @@ public interface IDataContext : IDisposable
     DbSet<AppUserKoboArchivedChapter> AppUserKoboArchivedChapter { get; }
     DbSet<AppUserKoboTombstone> AppUserKoboTombstone { get; }
     DbSet<AppUserKoboTagTombstone> AppUserKoboTagTombstone { get; }
+    DbSet<AppUserKoboReadingLocation> AppUserKoboReadingLocation { get; }
     DbSet<AppUserTableOfContent> AppUserTableOfContent { get; }
     DbSet<AppUserSmartFilter> AppUserSmartFilter { get; }
     DbSet<AppUserDashboardStream> AppUserDashboardStream { get; }

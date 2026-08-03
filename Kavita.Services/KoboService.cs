@@ -286,6 +286,7 @@ public partial class KoboService(
 
             var pageIds = page.Select(c => c.Id).ToList();
             var progressByChapter = await LoadProgressByChapterAsync(userId, pageIds, ct);
+            var locationByChapter = await LoadLocationsByChapterAsync(userId, pageIds, ct);
 
             foreach (var chapter in page)
             {
@@ -295,7 +296,8 @@ public partial class KoboService(
                     isRemoved: false, preferKepub: settings.EnableKepubConversion);
 
                 progressByChapter.TryGetValue(chapter.Id, out var progress);
-                if (TryAttachReadingState(entitlement, entitlementUuid, chapter, progress,
+                locationByChapter.TryGetValue(chapter.Id, out var location);
+                if (TryAttachReadingState(entitlement, entitlementUuid, chapter, progress, location,
                         syncToken.ReadingStateLastModified, out var stateTs))
                 {
                     nestedReadingStateChapterIds.Add(chapter.Id);
@@ -766,6 +768,8 @@ public partial class KoboService(
         }
 
         var progress = await unitOfWork.AppUserProgressRepository.GetUserProgressAsync(chapter.Id, userId, ct);
+        var location = await unitOfWork.DataContext.AppUserKoboReadingLocation
+            .FirstOrDefaultAsync(l => l.AppUserId == userId && l.ChapterId == chapter.Id, ct);
         var created = chapter.CreatedUtc == default ? chapter.Created : chapter.CreatedUtc;
         var pagesRead = progress?.PagesRead ?? 0;
         var modified = progress?.LastModifiedUtc == default || progress == null
@@ -779,7 +783,8 @@ public partial class KoboService(
                 created,
                 pagesRead,
                 chapter.Pages,
-                modified),
+                modified,
+                location),
         };
     }
 
@@ -810,15 +815,18 @@ public partial class KoboService(
         var deviceTs = AsUtc(KoboReadingStateMapper.ResolveDeviceTimestamp(readingState, now));
 
         // Last-write-wins: keep server progress when it is strictly newer than the device timestamp.
+        // Losing write ignored as a package (percent, status, BookScrollId, and Location).
         if (existing != null && AsUtc(existing.LastModifiedUtc) > deviceTs)
         {
             return KoboReadingStateMapper.BuildPutSuccess(entitlementId, AsUtc(existing.LastModifiedUtc),
                 bookmarkPresent, statisticsPresent, statusPresent);
         }
 
-        // Statistics and Location are intentionally ignored (not persisted).
+        // Statistics are intentionally ignored (not persisted).
         var pagesRead = KoboReadingStateMapper.ResolvePagesRead(readingState, chapter.Pages,
             existing?.PagesRead ?? 0);
+        var hasTruthyLocation = KoboReadingStateMapper.TryGetTruthyLocation(readingState,
+            out var locationValue, out var locationType, out var locationSource);
 
         if (existing == null)
         {
@@ -849,6 +857,30 @@ public partial class KoboService(
             unitOfWork.AppUserProgressRepository.Update(existing);
         }
 
+        // Truthy Location writes all three columns; falsy/absent leaves prior columns unchanged.
+        if (hasTruthyLocation)
+        {
+            var locationRow = await unitOfWork.DataContext.AppUserKoboReadingLocation
+                .FirstOrDefaultAsync(l => l.AppUserId == userId && l.ChapterId == chapter.Id, ct);
+            if (locationRow == null)
+            {
+                unitOfWork.DataContext.AppUserKoboReadingLocation.Add(new AppUserKoboReadingLocation
+                {
+                    AppUserId = userId,
+                    ChapterId = chapter.Id,
+                    LocationValue = locationValue,
+                    LocationType = locationType,
+                    LocationSource = locationSource,
+                });
+            }
+            else
+            {
+                locationRow.LocationValue = locationValue;
+                locationRow.LocationType = locationType;
+                locationRow.LocationSource = locationSource;
+            }
+        }
+
         await unitOfWork.CommitAsync(ct);
         var savedTs = existing.LastModifiedUtc == default ? now : existing.LastModifiedUtc;
         return KoboReadingStateMapper.BuildPutSuccess(entitlementId, savedTs,
@@ -864,8 +896,18 @@ public partial class KoboService(
             .ToDictionaryAsync(p => p.ChapterId, ct);
     }
 
+    private async Task<Dictionary<int, AppUserKoboReadingLocation>> LoadLocationsByChapterAsync(int userId,
+        IReadOnlyCollection<int> chapterIds, CancellationToken ct)
+    {
+        if (chapterIds.Count == 0) return new Dictionary<int, AppUserKoboReadingLocation>();
+        return await unitOfWork.DataContext.AppUserKoboReadingLocation
+            .Where(l => l.AppUserId == userId && chapterIds.Contains(l.ChapterId))
+            .ToDictionaryAsync(l => l.ChapterId, ct);
+    }
+
     private static bool TryAttachReadingState(JsonObject entitlement, string entitlementUuid, Chapter chapter,
-        AppUserProgress? progress, DateTime readingStateWatermark, out DateTime stateTimestamp)
+        AppUserProgress? progress, AppUserKoboReadingLocation? location, DateTime readingStateWatermark,
+        out DateTime stateTimestamp)
     {
         stateTimestamp = default;
         if (progress == null) return false;
@@ -874,7 +916,7 @@ public partial class KoboService(
 
         var created = chapter.CreatedUtc == default ? chapter.Created : chapter.CreatedUtc;
         entitlement["ReadingState"] = KoboReadingStateMapper.BuildReadingState(entitlementUuid, created,
-            progress.PagesRead, chapter.Pages, modified);
+            progress.PagesRead, chapter.Pages, modified, location);
         stateTimestamp = modified;
         return true;
     }
@@ -908,6 +950,7 @@ public partial class KoboService(
             .Select(c => new { c.Id, c.Pages, c.CreatedUtc, c.Created })
             .ToListAsync(ct);
         var chapterById = chapters.ToDictionary(c => c.Id);
+        var locationByChapter = await LoadLocationsByChapterAsync(userId, chapterIds, ct);
 
         var maxModified = readingStateWatermark;
         var emittedIds = new List<int>();
@@ -917,8 +960,9 @@ public partial class KoboService(
             var uuid = KoboEntitlementId.FromChapterIdString(row.ChapterId);
             var created = chapter.CreatedUtc == default ? chapter.Created : chapter.CreatedUtc;
             var modified = row.LastModifiedUtc;
+            locationByChapter.TryGetValue(row.ChapterId, out var location);
             var readingState = KoboReadingStateMapper.BuildReadingState(uuid, created, row.PagesRead,
-                chapter.Pages, modified);
+                chapter.Pages, modified, location);
             items.Add(new JsonObject
             {
                 ["ChangedReadingState"] = new JsonObject

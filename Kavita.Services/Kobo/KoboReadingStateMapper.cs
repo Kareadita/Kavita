@@ -2,12 +2,13 @@ using System;
 using System.Globalization;
 using System.Text.Json.Nodes;
 using Kavita.Models.Entities.Progress;
+using Kavita.Models.Entities.User;
 
 namespace Kavita.Services.Kobo;
 
 /// <summary>
-/// Maps between Kobo ReadingState wire shapes and Kavita <see cref="AppUserProgress"/>.
-/// Statistics and Location are ignored (not persisted).
+/// Maps between Kobo ReadingState wire shapes and Kavita <see cref="AppUserProgress"/> /
+/// <see cref="AppUserKoboReadingLocation"/>. Statistics are ignored (not persisted).
 /// </summary>
 public static class KoboReadingStateMapper
 {
@@ -94,8 +95,29 @@ public static class KoboReadingStateMapper
         return max ?? fallback;
     }
 
+    /// <summary>
+    /// Reads <c>CurrentBookmark.Location</c>. Returns true when Value is truthy (Calibre-Web ingest).
+    /// </summary>
+    public static bool TryGetTruthyLocation(JsonObject? readingState,
+        out string? value, out string? type, out string? source)
+    {
+        value = null;
+        type = null;
+        source = null;
+        if (readingState?["CurrentBookmark"] is not JsonObject bookmark) return false;
+        if (bookmark["Location"] is not JsonObject location) return false;
+
+        value = ReadOptionalString(location["Value"]);
+        if (string.IsNullOrEmpty(value)) return false;
+
+        type = ReadOptionalString(location["Type"]);
+        source = ReadOptionalString(location["Source"]);
+        return true;
+    }
+
     public static JsonObject BuildReadingState(string entitlementId, DateTime createdUtc,
-        int pagesRead, int totalPages, DateTime lastModifiedUtc)
+        int pagesRead, int totalPages, DateTime lastModifiedUtc,
+        AppUserKoboReadingLocation? location = null)
     {
         var created = FormatTimestamp(createdUtc == default ? lastModifiedUtc : createdUtc);
         var modified = FormatTimestamp(lastModifiedUtc == default ? DateTime.UtcNow : lastModifiedUtc);
@@ -110,6 +132,16 @@ public static class KoboReadingStateMapper
         {
             bookmark["ProgressPercent"] = percent;
             bookmark["ContentSourceProgressPercent"] = percent;
+        }
+
+        if (location != null && !string.IsNullOrEmpty(location.LocationValue))
+        {
+            bookmark["Location"] = new JsonObject
+            {
+                ["Value"] = location.LocationValue,
+                ["Type"] = JsonValue.Create(location.LocationType),
+                ["Source"] = JsonValue.Create(location.LocationSource),
+            };
         }
 
         return new JsonObject
@@ -186,6 +218,19 @@ public static class KoboReadingStateMapper
         }
 
         return false;
+    }
+
+    private static string? ReadOptionalString(JsonNode? node)
+    {
+        if (node == null) return null;
+        try
+        {
+            return node.GetValue<string?>();
+        }
+        catch
+        {
+            return null;
+        }
     }
 
     private static bool TryGetProgressPercent(JsonObject? bookmark, out double percent)

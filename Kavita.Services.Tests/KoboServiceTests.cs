@@ -481,7 +481,7 @@ public class KoboServiceTests(ITestOutputHelper testOutputHelper) : AbstractDbTe
     }
 
     [Fact]
-    public async Task ReadingState_GetPut_MapsAppUserProgress_IgnoresStatisticsAndLocation()
+    public async Task ReadingState_GetPut_MapsAppUserProgress_PersistsLocation_IgnoresStatistics()
     {
         var (unitOfWork, context, mapper) = await CreateDatabase();
         var (user, _, chapter) = await SeedEpubChapter(unitOfWork, context,
@@ -497,6 +497,7 @@ public class KoboServiceTests(ITestOutputHelper testOutputHelper) : AbstractDbTe
             await koboService.GetReadingStateAsync(token, entitlementId));
         Assert.Equal("ReadyToRead", emptyGet[0]!["StatusInfo"]!["Status"]!.GetValue<string>());
         Assert.Null(emptyGet[0]!["CurrentBookmark"]!["ProgressPercent"]);
+        Assert.Null(emptyGet[0]!["CurrentBookmark"]!["Location"]);
 
         var putBody = new JsonObject
         {
@@ -509,9 +510,9 @@ public class KoboServiceTests(ITestOutputHelper testOutputHelper) : AbstractDbTe
                         ["ProgressPercent"] = 40,
                         ["Location"] = new JsonObject
                         {
-                            ["Value"] = "epubcfi(/6/4)",
-                            ["Type"] = "Type",
-                            ["Source"] = "Source",
+                            ["Value"] = "kobo.1.2",
+                            ["Type"] = "KoboSpan",
+                            ["Source"] = "OEBPS/chapter1.xhtml",
                         },
                     },
                     ["Statistics"] = new JsonObject
@@ -538,12 +539,100 @@ public class KoboServiceTests(ITestOutputHelper testOutputHelper) : AbstractDbTe
         Assert.Equal(4, progress.PagesRead); // 40% of 10 pages
         Assert.Null(progress.BookScrollId);
 
+        var location = Assert.Single(context.AppUserKoboReadingLocation);
+        Assert.Equal("kobo.1.2", location.LocationValue);
+        Assert.Equal("KoboSpan", location.LocationType);
+        Assert.Equal("OEBPS/chapter1.xhtml", location.LocationSource);
+
         var getState = Assert.IsType<JsonArray>(
             await koboService.GetReadingStateAsync(token, entitlementId));
         Assert.Equal("Reading", getState[0]!["StatusInfo"]!["Status"]!.GetValue<string>());
         Assert.Equal(40, getState[0]!["CurrentBookmark"]!["ProgressPercent"]!.GetValue<double>());
-        Assert.Null(getState[0]!["CurrentBookmark"]!["Location"]);
+        var getLocation = Assert.IsType<JsonObject>(getState[0]!["CurrentBookmark"]!["Location"]);
+        Assert.Equal("kobo.1.2", getLocation["Value"]!.GetValue<string>());
+        Assert.Equal("KoboSpan", getLocation["Type"]!.GetValue<string>());
+        Assert.Equal("OEBPS/chapter1.xhtml", getLocation["Source"]!.GetValue<string>());
         Assert.Null(getState[0]!["Statistics"]!["SpentReadingMinutes"]);
+    }
+
+    [Fact]
+    public async Task ReadingState_Put_FalsyLocation_LeavesPriorLocation()
+    {
+        var (unitOfWork, context, mapper) = await CreateDatabase();
+        var (user, _, chapter) = await SeedEpubChapter(unitOfWork, context,
+            seriesName: "Falsy Location", chapterNumber: "1", titleName: "Ch1",
+            writerName: "Author", language: "en", summary: "s",
+            releaseDate: new DateTime(2020, 1, 1, 0, 0, 0, DateTimeKind.Utc));
+        await ConfigureKoboSettings(unitOfWork, "https://kavita.example.com");
+        var koboService = CreateKoboService(unitOfWork, mapper);
+        var token = (await koboService.GetOrCreateSyncUrlAsync(user.Id)).Split('/').Last();
+        var entitlementId = KoboEntitlementId.FromChapterIdString(chapter.Id);
+
+        await koboService.PutReadingStateAsync(token, entitlementId, new JsonObject
+        {
+            ["ReadingStates"] = new JsonArray
+            {
+                new JsonObject
+                {
+                    ["CurrentBookmark"] = new JsonObject
+                    {
+                        ["ProgressPercent"] = 40,
+                        ["Location"] = new JsonObject
+                        {
+                            ["Value"] = "kobo.3.4",
+                            ["Type"] = "KoboSpan",
+                            ["Source"] = "OEBPS/c2.xhtml",
+                        },
+                    },
+                    ["StatusInfo"] = new JsonObject { ["Status"] = "Reading" },
+                },
+            },
+        });
+
+        // Percent-only update (absent Location) must not wipe prior Location columns.
+        await koboService.PutReadingStateAsync(token, entitlementId, new JsonObject
+        {
+            ["ReadingStates"] = new JsonArray
+            {
+                new JsonObject
+                {
+                    ["CurrentBookmark"] = new JsonObject { ["ProgressPercent"] = 60 },
+                    ["StatusInfo"] = new JsonObject { ["Status"] = "Reading" },
+                },
+            },
+        });
+
+        var location = Assert.Single(context.AppUserKoboReadingLocation);
+        Assert.Equal("kobo.3.4", location.LocationValue);
+        Assert.Equal(6, Assert.Single(context.AppUserProgresses).PagesRead);
+
+        // Explicit empty Value is falsy — also leave prior.
+        await koboService.PutReadingStateAsync(token, entitlementId, new JsonObject
+        {
+            ["ReadingStates"] = new JsonArray
+            {
+                new JsonObject
+                {
+                    ["CurrentBookmark"] = new JsonObject
+                    {
+                        ["ProgressPercent"] = 70,
+                        ["Location"] = new JsonObject
+                        {
+                            ["Value"] = "",
+                            ["Type"] = "Ignored",
+                            ["Source"] = "Ignored",
+                        },
+                    },
+                    ["StatusInfo"] = new JsonObject { ["Status"] = "Reading" },
+                },
+            },
+        });
+
+        await context.Entry(location).ReloadAsync();
+        Assert.Equal("kobo.3.4", location.LocationValue);
+        Assert.Equal("KoboSpan", location.LocationType);
+        Assert.Equal("OEBPS/c2.xhtml", location.LocationSource);
+        Assert.Equal(7, Assert.Single(context.AppUserProgresses).PagesRead);
     }
 
     [Fact]
@@ -559,14 +648,23 @@ public class KoboServiceTests(ITestOutputHelper testOutputHelper) : AbstractDbTe
         var token = (await koboService.GetOrCreateSyncUrlAsync(user.Id)).Split('/').Last();
         var entitlementId = KoboEntitlementId.FromChapterIdString(chapter.Id);
 
-        // Server progress at 80%
+        // Server progress at 80% with Location
         var serverPut = new JsonObject
         {
             ["ReadingStates"] = new JsonArray
             {
                 new JsonObject
                 {
-                    ["CurrentBookmark"] = new JsonObject { ["ProgressPercent"] = 80 },
+                    ["CurrentBookmark"] = new JsonObject
+                    {
+                        ["ProgressPercent"] = 80,
+                        ["Location"] = new JsonObject
+                        {
+                            ["Value"] = "kobo.8.1",
+                            ["Type"] = "KoboSpan",
+                            ["Source"] = "OEBPS/end.xhtml",
+                        },
+                    },
                     ["StatusInfo"] = new JsonObject { ["Status"] = "Reading" },
                 },
             },
@@ -575,8 +673,9 @@ public class KoboServiceTests(ITestOutputHelper testOutputHelper) : AbstractDbTe
         var serverProgress = Assert.Single(context.AppUserProgresses);
         Assert.Equal(8, serverProgress.PagesRead);
         var serverTs = serverProgress.LastModifiedUtc;
+        Assert.Equal("kobo.8.1", Assert.Single(context.AppUserKoboReadingLocation).LocationValue);
 
-        // Older device timestamp must not overwrite
+        // Older device timestamp must not overwrite percent or Location (shared LWW package)
         var stalePut = new JsonObject
         {
             ["ReadingStates"] = new JsonArray
@@ -588,6 +687,12 @@ public class KoboServiceTests(ITestOutputHelper testOutputHelper) : AbstractDbTe
                     {
                         ["LastModified"] = serverTs.AddMinutes(-5).ToString("yyyy-MM-ddTHH:mm:ssZ"),
                         ["ProgressPercent"] = 10,
+                        ["Location"] = new JsonObject
+                        {
+                            ["Value"] = "kobo.stale",
+                            ["Type"] = "KoboSpan",
+                            ["Source"] = "OEBPS/stale.xhtml",
+                        },
                     },
                     ["StatusInfo"] = new JsonObject { ["Status"] = "Reading" },
                 },
@@ -596,8 +701,9 @@ public class KoboServiceTests(ITestOutputHelper testOutputHelper) : AbstractDbTe
         await koboService.PutReadingStateAsync(token, entitlementId, stalePut);
         await context.Entry(serverProgress).ReloadAsync();
         Assert.Equal(8, serverProgress.PagesRead);
+        Assert.Equal("kobo.8.1", Assert.Single(context.AppUserKoboReadingLocation).LocationValue);
 
-        // Newer device timestamp wins
+        // Newer device timestamp wins percent + Location together
         var freshPut = new JsonObject
         {
             ["ReadingStates"] = new JsonArray
@@ -609,6 +715,12 @@ public class KoboServiceTests(ITestOutputHelper testOutputHelper) : AbstractDbTe
                     {
                         ["LastModified"] = serverTs.AddMinutes(5).ToString("yyyy-MM-ddTHH:mm:ssZ"),
                         ["ProgressPercent"] = 100,
+                        ["Location"] = new JsonObject
+                        {
+                            ["Value"] = "kobo.10.1",
+                            ["Type"] = "KoboSpan",
+                            ["Source"] = "OEBPS/done.xhtml",
+                        },
                     },
                     ["StatusInfo"] = new JsonObject { ["Status"] = "Finished" },
                 },
@@ -617,10 +729,45 @@ public class KoboServiceTests(ITestOutputHelper testOutputHelper) : AbstractDbTe
         await koboService.PutReadingStateAsync(token, entitlementId, freshPut);
         await context.Entry(serverProgress).ReloadAsync();
         Assert.Equal(10, serverProgress.PagesRead);
+        Assert.Equal("kobo.10.1", Assert.Single(context.AppUserKoboReadingLocation).LocationValue);
 
         var getState = Assert.IsType<JsonArray>(
             await koboService.GetReadingStateAsync(token, entitlementId));
         Assert.Equal("Finished", getState[0]!["StatusInfo"]!["Status"]!.GetValue<string>());
+    }
+
+    [Fact]
+    public async Task ReadingState_NoBackfill_ExistingProgressHasNoLocationUntilPut()
+    {
+        var (unitOfWork, context, mapper) = await CreateDatabase();
+        var (user, _, chapter) = await SeedEpubChapter(unitOfWork, context,
+            seriesName: "No Backfill", chapterNumber: "1", titleName: "Ch1",
+            writerName: "Author", language: "en", summary: "s",
+            releaseDate: new DateTime(2020, 1, 1, 0, 0, 0, DateTimeKind.Utc));
+        await ConfigureKoboSettings(unitOfWork, "https://kavita.example.com");
+        var koboService = CreateKoboService(unitOfWork, mapper);
+        var token = (await koboService.GetOrCreateSyncUrlAsync(user.Id)).Split('/').Last();
+        var entitlementId = KoboEntitlementId.FromChapterIdString(chapter.Id);
+
+        context.AppUserProgresses.Add(new AppUserProgress
+        {
+            AppUserId = user.Id,
+            ChapterId = chapter.Id,
+            VolumeId = chapter.VolumeId,
+            SeriesId = chapter.Volume.SeriesId,
+            LibraryId = chapter.Volume.Series.LibraryId,
+            PagesRead = 5,
+            BookScrollId = "//body/p[1]",
+        });
+        await context.SaveChangesAsync();
+
+        Assert.Empty(context.AppUserKoboReadingLocation);
+
+        var getState = Assert.IsType<JsonArray>(
+            await koboService.GetReadingStateAsync(token, entitlementId));
+        Assert.Equal(50, getState[0]!["CurrentBookmark"]!["ProgressPercent"]!.GetValue<double>());
+        Assert.Null(getState[0]!["CurrentBookmark"]!["Location"]);
+        Assert.Empty(context.AppUserKoboReadingLocation);
     }
 
     [Fact]
@@ -636,7 +783,7 @@ public class KoboServiceTests(ITestOutputHelper testOutputHelper) : AbstractDbTe
         var token = (await koboService.GetOrCreateSyncUrlAsync(user.Id)).Split('/').Last();
         var entitlementId = KoboEntitlementId.FromChapterIdString(chapter.Id);
 
-        // Pre-existing progress → nested on NewEntitlement
+        // Pre-existing progress + Location → nested on NewEntitlement
         context.AppUserProgresses.Add(new AppUserProgress
         {
             AppUserId = user.Id,
@@ -645,6 +792,14 @@ public class KoboServiceTests(ITestOutputHelper testOutputHelper) : AbstractDbTe
             SeriesId = chapter.Volume.SeriesId,
             LibraryId = chapter.Volume.Series.LibraryId,
             PagesRead = 5,
+        });
+        context.AppUserKoboReadingLocation.Add(new AppUserKoboReadingLocation
+        {
+            AppUserId = user.Id,
+            ChapterId = chapter.Id,
+            LocationValue = "kobo.5.1",
+            LocationType = "KoboSpan",
+            LocationSource = "OEBPS/mid.xhtml",
         });
         await context.SaveChangesAsync();
 
@@ -656,11 +811,13 @@ public class KoboServiceTests(ITestOutputHelper testOutputHelper) : AbstractDbTe
             entitlement["ReadingState"]!["StatusInfo"]!["Status"]!.GetValue<string>());
         Assert.Equal(50,
             entitlement["ReadingState"]!["CurrentBookmark"]!["ProgressPercent"]!.GetValue<double>());
+        Assert.Equal("kobo.5.1",
+            entitlement["ReadingState"]!["CurrentBookmark"]!["Location"]!["Value"]!.GetValue<string>());
 
         var tokenAfterFirst = KoboSyncToken.FromHeader(first.SyncToken);
         Assert.True(tokenAfterFirst.ReadingStateLastModified > DateTime.MinValue);
 
-        // Later progress change → ChangedReadingState on next sync
+        // Later progress change → ChangedReadingState on next sync (Location still present)
         var progress = Assert.Single(context.AppUserProgresses);
         progress.PagesRead = 10;
         await context.SaveChangesAsync();
@@ -672,6 +829,7 @@ public class KoboServiceTests(ITestOutputHelper testOutputHelper) : AbstractDbTe
         Assert.Equal(entitlementId, state["EntitlementId"]!.GetValue<string>());
         Assert.Equal("Finished", state["StatusInfo"]!["Status"]!.GetValue<string>());
         Assert.Equal(100, state["CurrentBookmark"]!["ProgressPercent"]!.GetValue<double>());
+        Assert.Equal("kobo.5.1", state["CurrentBookmark"]!["Location"]!["Value"]!.GetValue<string>());
 
         var tokenAfterSecond = KoboSyncToken.FromHeader(second.SyncToken);
         Assert.True(tokenAfterSecond.ReadingStateLastModified >= tokenAfterFirst.ReadingStateLastModified);

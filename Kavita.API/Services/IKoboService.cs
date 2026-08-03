@@ -122,13 +122,15 @@ public interface IKoboService
 
     /// <summary>
     /// GET reading-state shaped from <c>AppUserProgress</c> (ReadyToRead when none).
+    /// Includes <c>CurrentBookmark.Location</c> from the side table when Value is set.
     /// </summary>
     Task<object> GetReadingStateAsync(string authToken, string entitlementId,
         CancellationToken ct = default);
 
     /// <summary>
     /// PUT reading-state into <c>AppUserProgress</c> with last-write-wins on timestamps.
-    /// Ignores Statistics and Location. ACK shape matches Calibre-Web.
+    /// Persists truthy Location to the side table; falsy/absent Location leaves prior columns.
+    /// Ignores Statistics. ACK shape matches Calibre-Web.
     /// </summary>
     Task<object> PutReadingStateAsync(string authToken, string entitlementId, JsonObject? body,
         CancellationToken ct = default);
