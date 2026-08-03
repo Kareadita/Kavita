@@ -184,6 +184,114 @@ public class KoboConversionServiceTests(ITestOutputHelper testOutputHelper) : Ab
     }
 
     [Fact]
+    public async Task GetOrConvertEpub_HardFails_WhenSpinePageCountMismatchesChapterPages()
+    {
+        KoboConversionService.ResetInFlightForTests();
+        var (unitOfWork, context, _) = await CreateDatabase();
+        var library = new LibraryBuilder("Mismatch Lib").WithAllowKoboSync(true).Build();
+        context.Library.Add(library);
+        var chapter = new ChapterBuilder("1")
+            .WithPages(10)
+            .WithFile(new MangaFileBuilder(_cbzPath, MangaFormat.Archive, 10).WithExtension(".cbz").Build())
+            .Build();
+        var series = new SeriesBuilder("Mismatch Series")
+            .WithFormat(MangaFormat.Archive)
+            .WithVolume(new VolumeBuilder(Parser.LooseLeafVolume).WithChapter(chapter).Build())
+            .Build();
+        series.Library = library;
+        context.Series.Add(series);
+        await context.SaveChangesAsync();
+        chapter = await context.Chapter.Include(c => c.Files).SingleAsync(c => c.Id == chapter.Id);
+
+        var cacheDir = Path.Join(Path.GetTempPath(), "kavita-kobo-mismatch-" + Guid.NewGuid().ToString("N"));
+        Directory.CreateDirectory(cacheDir);
+
+        var converter = Substitute.For<IKoboArchiveEpubConverter>();
+        converter.ConvertAsync(Arg.Any<string>(), Arg.Any<string>(), Arg.Any<string>(), Arg.Any<CancellationToken>())
+            .Returns(ci =>
+            {
+                // Convert produced 3 pages; chapter.Pages is 10.
+                KoboConvertEpubInspector.WriteMinimalConvertEpub(ci.ArgAt<string>(1), 3);
+                return Task.CompletedTask;
+            });
+
+        var directoryService = Substitute.For<IDirectoryService>();
+        directoryService.LongTermCacheDirectory.Returns(cacheDir);
+        directoryService.ExistOrCreate(Arg.Any<string>()).Returns(ci =>
+        {
+            Directory.CreateDirectory(ci.ArgAt<string>(0));
+            return true;
+        });
+
+        var service = CreateService(unitOfWork, directoryService, converter);
+        var ex = await Assert.ThrowsAsync<KavitaException>(() =>
+            service.GetOrConvertEpubAsync(chapter.Id, chapter.Files.First(), "Title", budgetSeconds: 30));
+        Assert.Equal(KoboConversionService.ConvertFailedMessage, ex.Message);
+
+        var cacheRoot = Path.Combine(cacheDir, KoboConversionService.CacheFolderName);
+        if (Directory.Exists(cacheRoot))
+        {
+            Assert.Empty(Directory.GetFiles(cacheRoot, "*.epub", SearchOption.AllDirectories)
+                .Where(KoboConversionService.IsEpubPoolFile));
+        }
+    }
+
+    [Fact]
+    public async Task GetOrConvertEpub_InvalidatesStaleCache_WhenSpineMismatchesChapterPages()
+    {
+        KoboConversionService.ResetInFlightForTests();
+        var (unitOfWork, context, _) = await CreateDatabase();
+        var library = new LibraryBuilder("Stale Lib").WithAllowKoboSync(true).Build();
+        context.Library.Add(library);
+        var chapter = new ChapterBuilder("1")
+            .WithPages(10)
+            .WithFile(new MangaFileBuilder(_cbzPath, MangaFormat.Archive, 10).WithExtension(".cbz")
+                .WithBytes(100).Build())
+            .Build();
+        var series = new SeriesBuilder("Stale Series")
+            .WithFormat(MangaFormat.Archive)
+            .WithVolume(new VolumeBuilder(Parser.LooseLeafVolume).WithChapter(chapter).Build())
+            .Build();
+        series.Library = library;
+        context.Series.Add(series);
+        await context.SaveChangesAsync();
+        chapter = await context.Chapter.Include(c => c.Files).SingleAsync(c => c.Id == chapter.Id);
+
+        var cacheDir = Path.Join(Path.GetTempPath(), "kavita-kobo-stale-" + Guid.NewGuid().ToString("N"));
+        Directory.CreateDirectory(cacheDir);
+
+        var convertCalls = 0;
+        var converter = Substitute.For<IKoboArchiveEpubConverter>();
+        converter.ConvertAsync(Arg.Any<string>(), Arg.Any<string>(), Arg.Any<string>(), Arg.Any<CancellationToken>())
+            .Returns(ci =>
+            {
+                convertCalls++;
+                KoboConvertEpubInspector.WriteMinimalConvertEpub(ci.ArgAt<string>(1), 10);
+                return Task.CompletedTask;
+            });
+
+        var directoryService = Substitute.For<IDirectoryService>();
+        directoryService.LongTermCacheDirectory.Returns(cacheDir);
+        directoryService.ExistOrCreate(Arg.Any<string>()).Returns(ci =>
+        {
+            Directory.CreateDirectory(ci.ArgAt<string>(0));
+            return true;
+        });
+
+        var service = CreateService(unitOfWork, directoryService, converter);
+        var fingerprint = KoboConversionService.ComputeFingerprint(chapter.Files.First());
+        var stalePath = service.GetCacheFilePath(chapter.Id, fingerprint);
+        KoboConvertEpubInspector.WriteMinimalConvertEpub(stalePath, 3); // stale spine ≠ Pages
+
+        var path = await service.GetOrConvertEpubAsync(chapter.Id, chapter.Files.First(), "Title",
+            budgetSeconds: 30);
+
+        Assert.Equal(1, convertCalls);
+        Assert.Equal(stalePath, path);
+        Assert.Equal(10, KoboConvertEpubInspector.TryCountSpinePages(path));
+    }
+
+    [Fact]
     public async Task ConvertLibraryForKobo_FillsSharedCache_WithoutBudget_AndReportsProgress()
     {
         KoboConversionService.ResetInFlightForTests();
@@ -225,8 +333,7 @@ public class KoboConversionServiceTests(ITestOutputHelper testOutputHelper) : Ab
                 // Simulate work longer than a typical in-request budget to show library warm-up is unbound.
                 Thread.Sleep(50);
                 var output = ci.ArgAt<string>(1);
-                Directory.CreateDirectory(Path.GetDirectoryName(output)!);
-                File.WriteAllText(output, "epub-bytes");
+                KoboConvertEpubInspector.WriteMinimalConvertEpub(output, 10);
                 return Task.CompletedTask;
             });
 
@@ -484,8 +591,7 @@ public class KoboConversionServiceTests(ITestOutputHelper testOutputHelper) : Ab
             {
                 convertCalls++;
                 var output = ci.ArgAt<string>(1);
-                Directory.CreateDirectory(Path.GetDirectoryName(output)!);
-                File.WriteAllText(output, "epub-bytes");
+                KoboConvertEpubInspector.WriteMinimalConvertEpub(output, 10);
                 return Task.CompletedTask;
             });
 
@@ -681,8 +787,7 @@ public class KoboConversionServiceTests(ITestOutputHelper testOutputHelper) : Ab
             {
                 archiveCalls++;
                 var output = ci.ArgAt<string>(1);
-                Directory.CreateDirectory(Path.GetDirectoryName(output)!);
-                File.WriteAllText(output, "epub-bytes");
+                KoboConvertEpubInspector.WriteMinimalConvertEpub(output, 10);
                 return Task.CompletedTask;
             });
 
@@ -694,8 +799,8 @@ public class KoboConversionServiceTests(ITestOutputHelper testOutputHelper) : Ab
             {
                 kepubCalls++;
                 var output = ci.ArgAt<string>(2);
-                Directory.CreateDirectory(Path.GetDirectoryName(output)!);
-                File.WriteAllText(output, "kepub-bytes");
+                // Archive KEPUB must match chapter.Pages; native EPUB KEPUB skips that check.
+                KoboConvertEpubInspector.WriteMinimalConvertEpub(output, 10);
                 return Task.CompletedTask;
             });
 

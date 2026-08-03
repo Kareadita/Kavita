@@ -57,7 +57,11 @@ public class KoboConversionService(
         ArgumentNullException.ThrowIfNull(sourceFile);
         var fingerprint = ComputeFingerprint(sourceFile);
         var path = GetKepubCacheFilePath(chapterId, fingerprint);
-        return TouchIfExists(path);
+        // Page-count trust applies to CBZ/CBR converts; native EPUB spines are not remapped.
+        var expectedPages = sourceFile.Format == MangaFormat.Epub
+            ? null
+            : TryGetChapterPages(chapterId);
+        return TouchIfValidCache(path, chapterId, expectedPages, "KEPUB");
     }
 
     public async Task EnqueueKepubifyIfNeededAsync(int chapterId, MangaFile sourceFile,
@@ -78,8 +82,9 @@ public class KoboConversionService(
         ArgumentNullException.ThrowIfNull(archiveFile);
         if (budgetSeconds < 1) budgetSeconds = 1;
 
+        var expectedPages = await GetChapterPagesAsync(chapterId, ct);
         var fingerprint = ComputeFingerprint(archiveFile);
-        var cached = TryGetCachedPath(chapterId, fingerprint);
+        var cached = TryGetCachedPath(chapterId, fingerprint, expectedPages);
         if (cached != null) return cached;
 
         if (!InFlight.TryAdd(chapterId, 0))
@@ -98,7 +103,7 @@ public class KoboConversionService(
             try
             {
                 return await ConvertAndCacheEpubAsync(chapterId, archiveFile, title, fingerprint,
-                    budgetCts.Token);
+                    expectedPages, budgetCts.Token);
             }
             catch (OperationCanceledException) when (!ct.IsCancellationRequested)
             {
@@ -389,9 +394,9 @@ public class KoboConversionService(
         if (nativeEpub == null && archive != null)
         {
             var fingerprint = ComputeFingerprint(archive);
-            if (TryGetCachedPath(chapter.Id, fingerprint) == null)
+            if (TryGetCachedPath(chapter.Id, fingerprint, chapter.Pages) == null)
             {
-                await ConvertAndCacheEpubAsync(chapter.Id, archive, title, fingerprint, ct);
+                await ConvertAndCacheEpubAsync(chapter.Id, archive, title, fingerprint, chapter.Pages, ct);
             }
         }
 
@@ -409,9 +414,34 @@ public class KoboConversionService(
         await ConvertAndCacheKepubAsync(chapter.Id, source, title, settings.KepubifyPath, ct);
     }
 
-    private string? TryGetCachedPath(int chapterId, string fingerprint)
+    private string? TryGetCachedPath(int chapterId, string fingerprint, int? expectedPages)
     {
         var path = GetCacheFilePath(chapterId, fingerprint);
+        return TouchIfValidCache(path, chapterId, expectedPages, "EPUB");
+    }
+
+    private string? TouchIfValidCache(string path, int chapterId, int? expectedPages, string poolLabel)
+    {
+        if (!File.Exists(path)) return null;
+
+        if (expectedPages is > 0)
+        {
+            var spinePages = KoboConvertEpubInspector.TryCountSpinePages(path);
+            if (spinePages == null || spinePages.Value != expectedPages.Value)
+            {
+                logger.LogError(
+                    "Kobo {Pool} cache page-count mismatch for chapter {ChapterId}: spine={SpinePages}, chapter.Pages={ChapterPages}. Invalidating {Path}",
+                    poolLabel, chapterId, spinePages, expectedPages.Value, path);
+                try { File.Delete(path); }
+                catch (Exception ex)
+                {
+                    logger.LogDebug(ex, "Could not delete mismatched Kobo cache file {Path}", path);
+                }
+
+                return null;
+            }
+        }
+
         return TouchIfExists(path);
     }
 
@@ -430,6 +460,47 @@ public class KoboConversionService(
         return path;
     }
 
+    private async Task<int?> GetChapterPagesAsync(int chapterId, CancellationToken ct)
+    {
+        return await unitOfWork.DataContext.Chapter
+            .AsNoTracking()
+            .Where(c => c.Id == chapterId)
+            .Select(c => (int?)c.Pages)
+            .FirstOrDefaultAsync(ct);
+    }
+
+    private int? TryGetChapterPages(int chapterId)
+    {
+        try
+        {
+            var context = unitOfWork.DataContext;
+            if (context?.Chapter == null) return null;
+            return context.Chapter
+                .AsNoTracking()
+                .Where(c => c.Id == chapterId)
+                .Select(c => (int?)c.Pages)
+                .FirstOrDefault();
+        }
+        catch
+        {
+            // Unit tests may substitute IUnitOfWork without an EF context.
+            return null;
+        }
+    }
+
+    private void EnsureSpineMatchesChapterPages(string epubPath, int chapterId, int? expectedPages, string poolLabel)
+    {
+        if (expectedPages is null or <= 0) return;
+
+        var spinePages = KoboConvertEpubInspector.TryCountSpinePages(epubPath);
+        if (spinePages == expectedPages.Value) return;
+
+        logger.LogError(
+            "Kobo {Pool} convert page-count mismatch for chapter {ChapterId}: spine={SpinePages}, chapter.Pages={ChapterPages}. Refusing cache write for {Path}",
+            poolLabel, chapterId, spinePages, expectedPages.Value, epubPath);
+        throw new KavitaException(ConvertFailedMessage);
+    }
+
     private async Task<string> ResolveEpubInputPathAsync(int chapterId, MangaFile sourceFile, string title,
         CancellationToken ct)
     {
@@ -438,15 +509,16 @@ public class KoboConversionService(
             return sourceFile.FilePath;
         }
 
+        var expectedPages = await GetChapterPagesAsync(chapterId, ct);
         var fingerprint = ComputeFingerprint(sourceFile);
-        var cached = TryGetCachedPath(chapterId, fingerprint);
+        var cached = TryGetCachedPath(chapterId, fingerprint, expectedPages);
         if (cached != null) return cached;
 
-        return await ConvertAndCacheEpubAsync(chapterId, sourceFile, title, fingerprint, ct);
+        return await ConvertAndCacheEpubAsync(chapterId, sourceFile, title, fingerprint, expectedPages, ct);
     }
 
     private async Task<string> ConvertAndCacheEpubAsync(int chapterId, MangaFile archiveFile, string title,
-        string fingerprint, CancellationToken ct)
+        string fingerprint, int? expectedPages, CancellationToken ct)
     {
         var cacheDir = GetCacheDirectory(chapterId);
         directoryService.ExistOrCreate(cacheDir);
@@ -459,6 +531,8 @@ public class KoboConversionService(
             if (File.Exists(tempPath)) File.Delete(tempPath);
             await archiveEpubConverter.ConvertAsync(archiveFile.FilePath, tempPath, title, ct);
             ct.ThrowIfCancellationRequested();
+
+            EnsureSpineMatchesChapterPages(tempPath, chapterId, expectedPages, "EPUB");
 
             if (File.Exists(finalPath)) File.Delete(finalPath);
             File.Move(tempPath, finalPath);
@@ -495,11 +569,12 @@ public class KoboConversionService(
     private async Task<string> ConvertAndCacheKepubAsync(int chapterId, MangaFile sourceFile, string title,
         string kepubifyPath, CancellationToken ct)
     {
+        var expectedPages = await GetChapterPagesAsync(chapterId, ct);
         var fingerprint = ComputeFingerprint(sourceFile);
         var existing = GetKepubCacheFilePath(chapterId, fingerprint);
-        if (File.Exists(existing))
+        var expectedForCache = sourceFile.Format == MangaFormat.Epub ? null : expectedPages;
+        if (TouchIfValidCache(existing, chapterId, expectedForCache, "KEPUB") != null)
         {
-            TouchIfExists(existing);
             return existing;
         }
 
@@ -517,6 +592,12 @@ public class KoboConversionService(
             if (File.Exists(tempPath)) File.Delete(tempPath);
             await kepubifyRunner.ConvertAsync(kepubifyPath, epubInput, tempPath, ct);
             ct.ThrowIfCancellationRequested();
+
+            // Archive converts must match chapter.Pages; native EPUB KEPUB keeps source spine as-is.
+            if (sourceFile.Format != MangaFormat.Epub)
+            {
+                EnsureSpineMatchesChapterPages(tempPath, chapterId, expectedPages, "KEPUB");
+            }
 
             if (File.Exists(finalPath)) File.Delete(finalPath);
             File.Move(tempPath, finalPath);

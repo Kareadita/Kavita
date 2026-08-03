@@ -2503,8 +2503,7 @@ public class KoboServiceTests(ITestOutputHelper testOutputHelper) : AbstractDbTe
             {
                 convertCalls++;
                 var output = ci.ArgAt<string>(1);
-                Directory.CreateDirectory(Path.GetDirectoryName(output)!);
-                File.WriteAllText(output, "epub-bytes");
+                KoboConvertEpubInspector.WriteMinimalConvertEpub(output, 10);
                 return Task.CompletedTask;
             });
 
@@ -2590,8 +2589,7 @@ public class KoboServiceTests(ITestOutputHelper testOutputHelper) : AbstractDbTe
                 started.TrySetResult();
                 await release.Task;
                 var output = ci.ArgAt<string>(1);
-                Directory.CreateDirectory(Path.GetDirectoryName(output)!);
-                File.WriteAllText(output, "epub-bytes");
+                KoboConvertEpubInspector.WriteMinimalConvertEpub(output, 10);
             });
 
         var scheduler = Substitute.For<IKoboConversionJobScheduler>();
