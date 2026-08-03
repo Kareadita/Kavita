@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using Kavita.API.Services;
 using Kavita.Common;
 using Kavita.Models.DTOs.Kobo;
+using Kavita.Services;
 using Kavita.Services.Kobo;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
@@ -60,17 +61,25 @@ public class KoboController(IKoboService koboService) : ControllerBase
     [HttpGet("v1/library/sync")]
     public async Task<IActionResult> LibrarySync(string apiKey)
     {
-        Request.Headers.TryGetValue(KoboSyncToken.HeaderName, out var syncToken);
-        var result = await koboService.SyncLibraryAsync(apiKey, syncToken.ToString(),
-            HttpContext.RequestAborted);
-
-        Response.Headers[KoboSyncToken.HeaderName] = result.SyncToken;
-        if (result.Continue)
+        try
         {
-            Response.Headers[KoboSyncToken.ContinueHeaderName] = KoboSyncToken.ContinueHeaderValue;
-        }
+            Request.Headers.TryGetValue(KoboSyncToken.HeaderName, out var syncToken);
+            var result = await koboService.SyncLibraryAsync(apiKey, syncToken.ToString(),
+                HttpContext.RequestAborted);
 
-        return KoboJson(result.Items);
+            Response.Headers[KoboSyncToken.HeaderName] = result.SyncToken;
+            if (result.Continue)
+            {
+                Response.Headers[KoboSyncToken.ContinueHeaderName] = KoboSyncToken.ContinueHeaderValue;
+            }
+
+            return KoboJson(result.Items);
+        }
+        catch (KavitaException ex) when (ex.Message == KoboService.SyncBusyMessage)
+        {
+            Response.Headers.RetryAfter = KoboService.SyncLockWaitSeconds.ToString();
+            return StatusCode(StatusCodes.Status503ServiceUnavailable);
+        }
     }
 
     [HttpDelete("v1/library/{entitlementId}")]

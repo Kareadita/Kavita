@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -45,10 +46,25 @@ public class KoboService(
     public const int DefaultSyncPageSize = 100;
     public const int MinSyncPageSize = 1;
     public const int MaxSyncPageSize = 1000;
+    public const int SyncLockWaitSeconds = 30;
+    public const string SyncBusyMessage = "kobo-sync-busy";
     public const string EpubFormat = "EPUB";
     public const string Epub3Format = "EPUB3";
 
     private static readonly Guid EmptyGenreId = Guid.Parse("00000000-0000-0000-0000-000000000001");
+
+    /// <summary>Per-user mutex for <c>library/sync</c> only (process-wide).</summary>
+    private static readonly ConcurrentDictionary<int, SemaphoreSlim> LibrarySyncLocks = new();
+
+    /// <summary>Test seam: override lock wait. Reset via <see cref="ResetSyncLockForTests"/>.</summary>
+    internal static TimeSpan? SyncLockWaitOverride { get; set; }
+
+    internal static void ResetSyncLockForTests() => SyncLockWaitOverride = null;
+
+    /// <summary>Test seam: hold the per-user sync lock (caller must dispose).</summary>
+    internal static Task<IDisposable> HoldLibrarySyncLockForTestsAsync(int userId,
+        CancellationToken ct = default) =>
+        AcquireLibrarySyncLockAsync(userId, ct);
 
     public async Task<string> GetOrCreateSyncUrlAsync(int userId, CancellationToken ct = default)
     {
@@ -179,6 +195,13 @@ public class KoboService(
         CancellationToken ct = default)
     {
         var userId = await ResolveUserIdAsync(authToken, ct);
+        using var syncLock = await AcquireLibrarySyncLockAsync(userId, ct);
+        return await SyncLibraryCoreAsync(userId, authToken, syncTokenHeader, ct);
+    }
+
+    private async Task<KoboLibrarySyncResult> SyncLibraryCoreAsync(int userId, string authToken,
+        string? syncTokenHeader, CancellationToken ct)
+    {
         var settings = await unitOfWork.SettingsRepository.GetSettingsDtoAsync(ct);
         if (string.IsNullOrWhiteSpace(settings.HostName))
         {
@@ -302,6 +325,29 @@ public class KoboService(
             SyncToken = syncToken.ToHeaderValue(),
             Continue = contSync,
         };
+    }
+
+    private static async Task<IDisposable> AcquireLibrarySyncLockAsync(int userId, CancellationToken ct)
+    {
+        var gate = LibrarySyncLocks.GetOrAdd(userId, _ => new SemaphoreSlim(1, 1));
+        var wait = SyncLockWaitOverride ?? TimeSpan.FromSeconds(SyncLockWaitSeconds);
+        if (!await gate.WaitAsync(wait, ct))
+        {
+            throw new KavitaException(SyncBusyMessage);
+        }
+
+        return new LibrarySyncLockReleaser(gate);
+    }
+
+    private sealed class LibrarySyncLockReleaser(SemaphoreSlim gate) : IDisposable
+    {
+        private int _disposed;
+
+        public void Dispose()
+        {
+            if (Interlocked.Exchange(ref _disposed, 1) != 0) return;
+            gate.Release();
+        }
     }
 
     public async Task DeleteEntitlementAsync(string authToken, string entitlementId,

@@ -43,7 +43,8 @@ public interface IKoboService
         CancellationToken ct = default);
 
     /// <summary>
-    /// Incremental library sync page (max 100). Persists synced-set rows; no ReadingState objects.
+    /// Incremental library sync page (admin-configurable size). Persists synced-set rows.
+    /// Serializes concurrent calls per user; may throw <c>kobo-sync-busy</c> (503) after a 30s wait.
     /// </summary>
     Task<KoboLibrarySyncResult> SyncLibraryAsync(string authToken, string? syncTokenHeader,
         CancellationToken ct = default);

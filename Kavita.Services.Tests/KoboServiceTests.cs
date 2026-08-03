@@ -1037,6 +1037,96 @@ public class KoboServiceTests(ITestOutputHelper testOutputHelper) : AbstractDbTe
             a.AppUserId == user.Id && a.IsDeviceDeleted));
     }
 
+    [Fact]
+    public async Task SyncLibrary_WaitsForPerUserLock_ThenSucceeds()
+    {
+        var (unitOfWork, context, mapper) = await CreateDatabase();
+        var (user, _, _) = await SeedEpubChapter(unitOfWork, context,
+            seriesName: "Lock Wait", chapterNumber: "1", titleName: "Ch1",
+            writerName: "Author", language: "en", summary: "s",
+            releaseDate: new DateTime(2020, 1, 1, 0, 0, 0, DateTimeKind.Utc));
+        await ConfigureKoboSettings(unitOfWork, "https://kavita.example.com");
+        var koboService = CreateKoboService(unitOfWork, mapper);
+        var token = (await koboService.GetOrCreateSyncUrlAsync(user.Id)).Split('/').Last();
+
+        KoboService.ResetSyncLockForTests();
+        KoboService.SyncLockWaitOverride = TimeSpan.FromSeconds(5);
+        try
+        {
+            var hold = await KoboService.HoldLibrarySyncLockForTestsAsync(user.Id);
+            var syncTask = koboService.SyncLibraryAsync(token, null);
+
+            await Task.Delay(100);
+            Assert.False(syncTask.IsCompleted);
+
+            hold.Dispose();
+            var result = await syncTask;
+            Assert.Single(result.Items);
+        }
+        finally
+        {
+            KoboService.ResetSyncLockForTests();
+        }
+    }
+
+    [Fact]
+    public async Task SyncLibrary_LockWaitTimeout_ThrowsSyncBusy()
+    {
+        var (unitOfWork, context, mapper) = await CreateDatabase();
+        var user = await SeedUser(unitOfWork, context);
+        await ConfigureKoboSettings(unitOfWork, "https://kavita.example.com");
+        var koboService = CreateKoboService(unitOfWork, mapper);
+        var token = (await koboService.GetOrCreateSyncUrlAsync(user.Id)).Split('/').Last();
+
+        KoboService.ResetSyncLockForTests();
+        KoboService.SyncLockWaitOverride = TimeSpan.FromMilliseconds(50);
+        try
+        {
+            using var hold = await KoboService.HoldLibrarySyncLockForTestsAsync(user.Id);
+            var ex = await Assert.ThrowsAsync<KavitaException>(() =>
+                koboService.SyncLibraryAsync(token, null));
+            Assert.Equal(KoboService.SyncBusyMessage, ex.Message);
+        }
+        finally
+        {
+            KoboService.ResetSyncLockForTests();
+        }
+    }
+
+    [Fact]
+    public async Task NonSyncRoutes_AreNotBlockedByLibrarySyncLock()
+    {
+        var (unitOfWork, context, mapper) = await CreateDatabase();
+        var (user, _, chapter) = await SeedEpubChapter(unitOfWork, context,
+            seriesName: "Unlocked Routes", chapterNumber: "1", titleName: "Ch1",
+            writerName: "Author", language: "en", summary: "s",
+            releaseDate: new DateTime(2020, 1, 1, 0, 0, 0, DateTimeKind.Utc));
+        await ConfigureKoboSettings(unitOfWork, "https://kavita.example.com");
+        var koboService = CreateKoboService(unitOfWork, mapper);
+        var token = (await koboService.GetOrCreateSyncUrlAsync(user.Id)).Split('/').Last();
+        var uuid = KoboEntitlementId.FromChapterIdString(chapter.Id);
+
+        KoboService.ResetSyncLockForTests();
+        try
+        {
+            using var hold = await KoboService.HoldLibrarySyncLockForTestsAsync(user.Id);
+
+            Assert.Equal(user.Id, await koboService.ResolveUserIdAsync(token));
+            var init = await koboService.GetInitializationAsync(token);
+            Assert.NotNull(init.Resources["library_sync"]);
+            var metadata = await koboService.GetMetadataAsync(token, uuid);
+            Assert.Single(metadata);
+            var download = await koboService.GetDownloadAsync(token, uuid, "epub");
+            Assert.True(File.Exists(download.FilePath));
+            Assert.NotNull(koboService.GetReadingStateStub(uuid));
+            Assert.NotNull(koboService.PutReadingStateStub(uuid));
+        }
+        finally
+        {
+            KoboService.ResetSyncLockForTests();
+        }
+    }
+
     private async Task<(AppUser User, Library Library, Chapter Chapter)> SeedEpubChapter(
         IUnitOfWork unitOfWork, DataContext context, string seriesName, string chapterNumber,
         string titleName, string writerName, string language, string summary, DateTime releaseDate)
