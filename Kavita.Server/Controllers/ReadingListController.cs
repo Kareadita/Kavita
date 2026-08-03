@@ -21,6 +21,7 @@ using Kavita.Models.DTOs.SignalR;
 using Kavita.Models.Entities.Enums;
 using Kavita.Server.Attributes;
 using Kavita.Server.Extensions;
+using Kavita.Services.Kobo;
 using Kavita.Services.Reading;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -33,7 +34,8 @@ public class ReadingListController(
     IReadingListService readingListService,
     ILocalizationService localizationService,
     ICblExportService  cblExportService,
-    IEventHub eventHub)
+    IEventHub eventHub,
+    IKoboService koboService)
     : BaseApiController
 {
     /// <summary>
@@ -636,6 +638,15 @@ public class ReadingListController(
         // This needs to take into account owner as I can select other users cards
         var user = await unitOfWork.UserRepository.GetUserByIdAsync(UserId, AppUserIncludes.ReadingLists);
         if (user == null) return Unauthorized();
+
+        var toDelete = user.ReadingLists.Where(uc => dto.ReadingListIds.Contains(uc.Id)).ToList();
+        foreach (var list in toDelete)
+        {
+            await koboService.PrepareTagDeleteAsync(
+                KoboTagId.FromReadingListId(list.Id),
+                list.AppUserId,
+                list.Promoted);
+        }
 
         user.ReadingLists = user.ReadingLists.Where(uc => !dto.ReadingListIds.Contains(uc.Id)).ToList();
         unitOfWork.UserRepository.Update(user);

@@ -13,15 +13,26 @@ using Kavita.Models.DTOs.SignalR;
 using Kavita.Models.Entities.Enums;
 using Kavita.Models.Entities.User;
 using Kavita.Models.Extensions;
+using Kavita.Services.Kobo;
 
 namespace Kavita.Services;
 
-public class CollectionTagService(IUnitOfWork unitOfWork, IEventHub eventHub, IDirectoryService directoryService) : ICollectionTagService
+public class CollectionTagService(
+    IUnitOfWork unitOfWork,
+    IEventHub eventHub,
+    IDirectoryService directoryService,
+    IKoboService koboService) : ICollectionTagService
 {
     public async Task<bool> DeleteTag(int tagId, AppUser user, CancellationToken ct = default)
     {
         var collectionTag = await unitOfWork.CollectionTagRepository.GetCollectionAsync(tagId, ct: ct);
         if (collectionTag == null) return true;
+
+        await koboService.PrepareTagDeleteAsync(
+            KoboTagId.FromCollectionId(collectionTag.Id),
+            collectionTag.AppUserId,
+            collectionTag.Promoted,
+            ct);
 
         user.Collections.Remove(collectionTag);
 
@@ -90,6 +101,11 @@ public class CollectionTagService(IUnitOfWork unitOfWork, IEventHub eventHub, ID
 
         if (tag.Items.Count == 0)
         {
+            await koboService.PrepareTagDeleteAsync(
+                KoboTagId.FromCollectionId(tag.Id),
+                tag.AppUserId,
+                tag.Promoted,
+                ct);
             unitOfWork.CollectionTagRepository.Remove(tag);
         }
 

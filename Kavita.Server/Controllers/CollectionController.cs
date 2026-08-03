@@ -18,6 +18,7 @@ using Kavita.Models.DTOs.SignalR;
 using Kavita.Models.Entities.Enums;
 using Kavita.Models.Entities.User;
 using Kavita.Server.Attributes;
+using Kavita.Services.Kobo;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 
@@ -30,7 +31,7 @@ namespace Kavita.Server.Controllers;
 public class CollectionController(IUnitOfWork unitOfWork, ICollectionTagService collectionService,
     ILocalizationService localizationService, IExternalMetadataService externalMetadataService,
     ISmartCollectionSyncService collectionSyncService, ILogger<CollectionController> logger,
-    IEventHub eventHub) : BaseApiController
+    IEventHub eventHub, IKoboService koboService) : BaseApiController
 {
 
     /// <summary>
@@ -161,6 +162,16 @@ public class CollectionController(IUnitOfWork unitOfWork, ICollectionTagService 
         // This needs to take into account owner as I can select other users cards
         var user = await unitOfWork.UserRepository.GetUserByIdAsync(UserId, AppUserIncludes.Collections, ct);
         if (user == null) return Unauthorized();
+
+        var toDelete = user.Collections.Where(uc => dto.CollectionIds.Contains(uc.Id)).ToList();
+        foreach (var collection in toDelete)
+        {
+            await koboService.PrepareTagDeleteAsync(
+                KoboTagId.FromCollectionId(collection.Id),
+                collection.AppUserId,
+                collection.Promoted,
+                ct);
+        }
 
         user.Collections = user.Collections.Where(uc => !dto.CollectionIds.Contains(uc.Id)).ToList();
         unitOfWork.UserRepository.Update(user);

@@ -23,6 +23,7 @@ using Kavita.Models.Entities.User;
 using Kavita.Models.Extensions;
 using Kavita.Models.Helpers;
 using Kavita.Services.Helpers;
+using Kavita.Services.Kobo;
 using Kavita.Services.Reading;
 using Kavita.Services.Scanner;
 using Microsoft.Extensions.Logging;
@@ -39,7 +40,8 @@ public class ReadingListService(
     IEventHub eventHub,
     IImageService imageService,
     IDirectoryService directoryService,
-    IEntityNamingService namingService)
+    IEntityNamingService namingService,
+    IKoboService koboService)
     : IReadingListService
 {
     /// <summary>
@@ -301,6 +303,12 @@ public class ReadingListService(
     {
         var readingList = await unitOfWork.ReadingListRepository.GetReadingListByIdAsync(readingListId);
         if (readingList == null) return true;
+
+        await koboService.PrepareTagDeleteAsync(
+            KoboTagId.FromReadingListId(readingList.Id),
+            readingList.AppUserId,
+            readingList.Promoted);
+
         user.ReadingLists.Remove(readingList);
 
         if (!unitOfWork.HasChanges()) return true;

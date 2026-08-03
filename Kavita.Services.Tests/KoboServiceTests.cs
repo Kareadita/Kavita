@@ -22,9 +22,11 @@ using Kavita.Models.Entities;
 using Kavita.Models.Entities.Enums;
 using Kavita.Models.Entities.Enums.User;
 using Kavita.Models.Entities.Progress;
+using Kavita.Models.Entities.ReadingLists;
 using Kavita.Models.Entities.User;
 using Kavita.Services.Builders;
 using Kavita.Services.Kobo;
+using Kavita.Services.ReadingLists;
 using Kavita.Services.Scanner;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
@@ -914,6 +916,202 @@ public class KoboServiceTests(ITestOutputHelper testOutputHelper) : AbstractDbTe
         Assert.Equal(a, b);
         Assert.NotEqual(a, c);
         Assert.Equal(5, a.Version);
+    }
+
+    [Fact]
+    public void TagId_IsStableUuidV5_DistinctNamespaces()
+    {
+        var listA = KoboTagId.FromReadingListId(7);
+        var listB = KoboTagId.FromReadingListId(7);
+        var collection = KoboTagId.FromCollectionId(7);
+        Assert.Equal(listA, listB);
+        Assert.NotEqual(listA, collection);
+        Assert.Equal(5, listA.Version);
+        Assert.Equal(5, collection.Version);
+    }
+
+    [Fact]
+    public async Task SyncLibrary_EmitsNewTag_ForReadingListAndCollection_WithEligibleItems()
+    {
+        var (unitOfWork, context, mapper) = await CreateDatabase();
+        var (user, library, epubChapter) = await SeedEpubChapter(unitOfWork, context,
+            seriesName: "Shelf Series", chapterNumber: "1", titleName: "Ch1",
+            writerName: "Author", language: "en", summary: "s",
+            releaseDate: new DateTime(2020, 1, 1, 0, 0, 0, DateTimeKind.Utc));
+        var pdfChapter = await AddChapterWithFormat(context, library, "Pdf Series", "1", MangaFormat.Pdf);
+
+        var readingList = new ReadingListBuilder("My List")
+            .WithAppUserId(user.Id)
+            .WithItem(new ReadingListItemBuilder(0, epubChapter.Volume.SeriesId, epubChapter.VolumeId, epubChapter.Id).Build())
+            .WithItem(new ReadingListItemBuilder(1, pdfChapter.Volume.SeriesId, pdfChapter.VolumeId, pdfChapter.Id).Build())
+            .Build();
+        user = await context.AppUser.Include(u => u.ReadingLists).SingleAsync(u => u.Id == user.Id);
+        user.ReadingLists.Add(readingList);
+
+        var series = await context.Series.SingleAsync(s => s.Name == "Shelf Series");
+        var pdfSeries = await context.Series.SingleAsync(s => s.Name == "Pdf Series");
+        user.Collections = [new AppUserCollectionBuilder("My Collection").WithItems([series, pdfSeries]).Build()];
+        await context.SaveChangesAsync();
+        context.ChangeTracker.Clear();
+
+        readingList = await context.ReadingList.SingleAsync(r => r.Title == "My List");
+        var collection = await context.AppUserCollection.SingleAsync(c => c.Title == "My Collection");
+        var expectedListUuid = KoboTagId.FromReadingListIdString(readingList.Id);
+        var expectedCollectionUuid = KoboTagId.FromCollectionIdString(collection.Id);
+        var epubUuid = KoboEntitlementId.FromChapterIdString(epubChapter.Id);
+        var pdfUuid = KoboEntitlementId.FromChapterIdString(pdfChapter.Id);
+
+        await ConfigureKoboSettings(unitOfWork, "https://kavita.example.com");
+        var koboService = CreateKoboService(unitOfWork, mapper);
+        var token = (await koboService.GetOrCreateSyncUrlAsync(user.Id)).Split('/').Last();
+
+        var sync = await koboService.SyncLibraryAsync(token, null);
+        var newTags = sync.Items.Where(i => i!["NewTag"] != null).ToList();
+        Assert.Equal(2, newTags.Count);
+
+        var listTag = newTags.Select(i => i!["NewTag"]!["Tag"]!.AsObject())
+            .Single(t => t["Id"]!.GetValue<string>() == expectedListUuid);
+        Assert.Equal("My List", listTag["Name"]!.GetValue<string>());
+        Assert.Equal("UserTag", listTag["Type"]!.GetValue<string>());
+        var listItems = listTag["Items"]!.AsArray().Select(i => i!["RevisionId"]!.GetValue<string>()).ToList();
+        Assert.Contains(epubUuid, listItems);
+        Assert.DoesNotContain(pdfUuid, listItems);
+
+        var collectionTag = newTags.Select(i => i!["NewTag"]!["Tag"]!.AsObject())
+            .Single(t => t["Id"]!.GetValue<string>() == expectedCollectionUuid);
+        Assert.Equal("My Collection", collectionTag["Name"]!.GetValue<string>());
+        var collectionItems = collectionTag["Items"]!.AsArray().Select(i => i!["RevisionId"]!.GetValue<string>()).ToList();
+        Assert.Contains(epubUuid, collectionItems);
+        Assert.DoesNotContain(pdfUuid, collectionItems);
+
+        var syncToken = KoboSyncToken.FromHeader(sync.SyncToken);
+        Assert.True(syncToken.TagsLastModified > DateTime.MinValue);
+
+        // Incremental: no tag re-emit when watermark is current
+        var second = await koboService.SyncLibraryAsync(token, sync.SyncToken);
+        Assert.DoesNotContain(second.Items, i => i!["NewTag"] != null || i!["ChangedTag"] != null);
+    }
+
+    [Fact]
+    public async Task SyncLibrary_RenameEmitsChangedTag_SameUuid()
+    {
+        var (unitOfWork, context, mapper) = await CreateDatabase();
+        var (user, _, chapter) = await SeedEpubChapter(unitOfWork, context,
+            seriesName: "Rename Series", chapterNumber: "1", titleName: "Ch1",
+            writerName: "Author", language: "en", summary: "s",
+            releaseDate: new DateTime(2020, 1, 1, 0, 0, 0, DateTimeKind.Utc));
+
+        user = await context.AppUser.Include(u => u.ReadingLists).SingleAsync(u => u.Id == user.Id);
+        user.ReadingLists.Add(new ReadingListBuilder("Before")
+            .WithAppUserId(user.Id)
+            .WithItem(new ReadingListItemBuilder(0, chapter.Volume.SeriesId, chapter.VolumeId, chapter.Id).Build())
+            .Build());
+        await context.SaveChangesAsync();
+        context.ChangeTracker.Clear();
+
+        await ConfigureKoboSettings(unitOfWork, "https://kavita.example.com");
+        var koboService = CreateKoboService(unitOfWork, mapper);
+        var token = (await koboService.GetOrCreateSyncUrlAsync(user.Id)).Split('/').Last();
+        var first = await koboService.SyncLibraryAsync(token, null);
+        var list = await context.ReadingList.SingleAsync(r => r.Title == "Before");
+        var tagUuid = KoboTagId.FromReadingListIdString(list.Id);
+        Assert.Contains(first.Items, i => i!["NewTag"]?["Tag"]?["Id"]?.GetValue<string>() == tagUuid);
+
+        list = await context.ReadingList.SingleAsync(r => r.Id == list.Id);
+        list.Title = "After";
+        list.NormalizedTitle = "after";
+        await context.SaveChangesAsync();
+        context.ChangeTracker.Clear();
+
+        var second = await koboService.SyncLibraryAsync(token, first.SyncToken);
+        var changed = Assert.Single(second.Items, i => i!["ChangedTag"] != null);
+        var tag = changed!["ChangedTag"]!["Tag"]!.AsObject();
+        Assert.Equal(tagUuid, tag["Id"]!.GetValue<string>());
+        Assert.Equal("After", tag["Name"]!.GetValue<string>());
+    }
+
+    [Fact]
+    public async Task SyncLibrary_DeleteEmitsDeletedTag_ThenClearsTombstone()
+    {
+        var (unitOfWork, context, mapper) = await CreateDatabase();
+        var (user, _, chapter) = await SeedEpubChapter(unitOfWork, context,
+            seriesName: "Delete List Series", chapterNumber: "1", titleName: "Ch1",
+            writerName: "Author", language: "en", summary: "s",
+            releaseDate: new DateTime(2020, 1, 1, 0, 0, 0, DateTimeKind.Utc));
+
+        user = await context.AppUser.Include(u => u.ReadingLists).SingleAsync(u => u.Id == user.Id);
+        user.ReadingLists.Add(new ReadingListBuilder("Doomed")
+            .WithAppUserId(user.Id)
+            .WithItem(new ReadingListItemBuilder(0, chapter.Volume.SeriesId, chapter.VolumeId, chapter.Id).Build())
+            .Build());
+        await context.SaveChangesAsync();
+        context.ChangeTracker.Clear();
+
+        await ConfigureKoboSettings(unitOfWork, "https://kavita.example.com");
+        var koboService = CreateKoboService(unitOfWork, mapper);
+        var token = (await koboService.GetOrCreateSyncUrlAsync(user.Id)).Split('/').Last();
+        var first = await koboService.SyncLibraryAsync(token, null);
+        var list = await context.ReadingList.SingleAsync(r => r.Title == "Doomed");
+        var tagUuid = KoboTagId.FromReadingListId(list.Id);
+
+        user = await context.AppUser.Include(u => u.ReadingLists).SingleAsync(u => u.Id == user.Id);
+        var readingListService = new ReadingListService(unitOfWork,
+            Substitute.For<ILogger<ReadingListService>>(), Substitute.For<IEventHub>(),
+            Substitute.For<IImageService>(), Substitute.For<IDirectoryService>(),
+            new EntityNamingService(), koboService);
+        Assert.True(await readingListService.DeleteReadingList(list.Id, user));
+        Assert.Equal(1, await context.AppUserKoboTagTombstone.CountAsync(t => t.TagId == tagUuid));
+
+        var second = await koboService.SyncLibraryAsync(token, first.SyncToken);
+        var deleted = Assert.Single(second.Items, i => i!["DeletedTag"] != null);
+        Assert.Equal(tagUuid.ToString(), deleted!["DeletedTag"]!["Tag"]!["Id"]!.GetValue<string>());
+        Assert.Equal(0, await context.AppUserKoboTagTombstone.CountAsync(t => t.TagId == tagUuid));
+
+        var third = await koboService.SyncLibraryAsync(token, second.SyncToken);
+        Assert.DoesNotContain(third.Items, i => i!["DeletedTag"] != null);
+    }
+
+    [Fact]
+    public async Task SyncLibrary_TagsNotLimitedByPageSize_AndForceFullSyncResetsTagsWatermark()
+    {
+        var (unitOfWork, context, mapper) = await CreateDatabase();
+        var (user, library, _) = await SeedEpubChapter(unitOfWork, context,
+            seriesName: "Page Series 1", chapterNumber: "1", titleName: "Ch1",
+            writerName: "Author", language: "en", summary: "s",
+            releaseDate: new DateTime(2020, 1, 1, 0, 0, 0, DateTimeKind.Utc));
+        await AddEpubChapter(context, library, "Page Series 2", "1");
+        await AddEpubChapter(context, library, "Page Series 3", "1");
+
+        user = await context.AppUser.Include(u => u.ReadingLists).SingleAsync(u => u.Id == user.Id);
+        user.ReadingLists.Add(new ReadingListBuilder("Shelf A").WithAppUserId(user.Id).Build());
+        user.ReadingLists.Add(new ReadingListBuilder("Shelf B").WithAppUserId(user.Id).Build());
+        await context.SaveChangesAsync();
+        context.ChangeTracker.Clear();
+
+        await ConfigureKoboSettings(unitOfWork, "https://kavita.example.com", syncPageSize: 1);
+        var koboService = CreateKoboService(unitOfWork, mapper);
+        var token = (await koboService.GetOrCreateSyncUrlAsync(user.Id)).Split('/').Last();
+
+        var page1 = await koboService.SyncLibraryAsync(token, null);
+        Assert.True(page1.Continue);
+        // One book slot + both tags (tags not page-limited)
+        Assert.Equal(1, page1.Items.Count(i => i!["NewEntitlement"] != null || i!["ChangedEntitlement"] != null));
+        Assert.Equal(2, page1.Items.Count(i => i!["NewTag"] != null));
+
+        var afterFirst = KoboSyncToken.FromHeader(page1.SyncToken);
+        Assert.True(afterFirst.TagsLastModified > DateTime.MinValue);
+
+        // Finish remaining books without re-emitting tags
+        var page2 = await koboService.SyncLibraryAsync(token, page1.SyncToken);
+        Assert.DoesNotContain(page2.Items, i => i!["NewTag"] != null || i!["ChangedTag"] != null);
+        var page3 = await koboService.SyncLibraryAsync(token, page2.SyncToken);
+        Assert.False(page3.Continue);
+
+        await koboService.ForceFullSyncAsync(user.Id);
+        var afterForce = await koboService.SyncLibraryAsync(token, page3.SyncToken);
+        Assert.Equal(2, afterForce.Items.Count(i => i!["NewTag"] != null));
+        var forceToken = KoboSyncToken.FromHeader(afterForce.SyncToken);
+        Assert.True(forceToken.TagsLastModified > DateTime.MinValue);
     }
 
     [Fact]

@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Text.Json.Nodes;
 using System.Threading;
@@ -75,6 +76,7 @@ public interface IKoboService
 
     /// <summary>
     /// Clears the user's synced-set rows only. Does not rotate the AuthKey or clear archives.
+    /// The next sync resets book and tags watermarks so shelves re-emit.
     /// </summary>
     Task ForceFullSyncAsync(int userId, CancellationToken ct = default);
 
@@ -90,6 +92,14 @@ public interface IKoboService
     /// archive-for-removal so the next sync can emit <c>IsRemoved</c>.
     /// </summary>
     Task PrepareHardDeleteAsync(IEnumerable<int> chapterIds, CancellationToken ct = default);
+
+    /// <summary>
+    /// Before deleting a Reading List or Collection: create per-user Tag tombstones so the next
+    /// <c>library/sync</c> can emit <c>DeletedTag</c>. Promoted shelves tombstone for all users;
+    /// private shelves only for the owner.
+    /// </summary>
+    Task PrepareTagDeleteAsync(Guid tagId, int ownerUserId, bool wasPromoted,
+        CancellationToken ct = default);
 
     /// <summary>Empty keep-alive stub body (<c>{}</c>).</summary>
     object GetEmptyStub();

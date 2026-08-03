@@ -73,6 +73,7 @@ public sealed class DataContext : IdentityDbContext<AppUser, AppRole, int,
     public DbSet<AppUserKoboSyncedChapter> AppUserKoboSyncedChapter { get; set; } = null!;
     public DbSet<AppUserKoboArchivedChapter> AppUserKoboArchivedChapter { get; set; } = null!;
     public DbSet<AppUserKoboTombstone> AppUserKoboTombstone { get; set; } = null!;
+    public DbSet<AppUserKoboTagTombstone> AppUserKoboTagTombstone { get; set; } = null!;
     public DbSet<AppUserTableOfContent> AppUserTableOfContent { get; set; } = null!;
     public DbSet<AppUserSmartFilter> AppUserSmartFilter { get; set; } = null!;
     public DbSet<AppUserDashboardStream> AppUserDashboardStream { get; set; } = null!;
@@ -224,6 +225,18 @@ public sealed class DataContext : IdentityDbContext<AppUser, AppRole, int,
                 .HasDatabaseName("IX_AppUserKoboTombstone_AppUserId_ChapterId");
             entity.HasIndex(e => e.EntitlementId)
                 .HasDatabaseName("IX_AppUserKoboTombstone_EntitlementId");
+            entity.HasOne(e => e.AppUser)
+                .WithMany()
+                .HasForeignKey(e => e.AppUserId)
+                .OnDelete(DeleteBehavior.Cascade);
+        });
+        builder.Entity<AppUserKoboTagTombstone>(entity =>
+        {
+            entity.HasIndex(e => new { e.AppUserId, e.TagId })
+                .IsUnique()
+                .HasDatabaseName("IX_AppUserKoboTagTombstone_AppUserId_TagId");
+            entity.HasIndex(e => e.TagId)
+                .HasDatabaseName("IX_AppUserKoboTagTombstone_TagId");
             entity.HasOne(e => e.AppUser)
                 .WithMany()
                 .HasForeignKey(e => e.AppUserId)

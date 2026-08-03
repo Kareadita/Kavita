@@ -25,7 +25,8 @@ public class CollectionTagServiceTests(ITestOutputHelper outputHelper): Abstract
 
         if (context.AppUserCollection.Any())
         {
-            return new CollectionTagService(unitOfWork, Substitute.For<IEventHub>(), Substitute.For<IDirectoryService>());
+            return new CollectionTagService(unitOfWork, Substitute.For<IEventHub>(), Substitute.For<IDirectoryService>(),
+                Substitute.For<IKoboService>());
         }
 
         var s1 = new SeriesBuilder("Series 1").WithMetadata(new SeriesMetadataBuilder().WithAgeRating(AgeRating.Mature).Build()).Build();
@@ -45,7 +46,8 @@ public class CollectionTagServiceTests(ITestOutputHelper outputHelper): Abstract
 
         await unitOfWork.CommitAsync();
 
-        return new CollectionTagService(unitOfWork, Substitute.For<IEventHub>(), Substitute.For<IDirectoryService>());
+        return new CollectionTagService(unitOfWork, Substitute.For<IEventHub>(), Substitute.For<IDirectoryService>(),
+            Substitute.For<IKoboService>());
     }
 
     #region DeleteTag

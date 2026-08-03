@@ -33,7 +33,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Kavita.Services;
 
-public class KoboService(
+public partial class KoboService(
     IUnitOfWork unitOfWork,
     IAuthKeyService authKeyService,
     IEventHub eventHub,
@@ -220,6 +220,8 @@ public class KoboService(
             syncToken.BooksLastCreated = DateTime.MinValue;
             syncToken.BooksLastModified = DateTime.MinValue;
             syncToken.ReadingStateLastModified = DateTime.MinValue;
+            // Force full sync clears the synced-set; reset tags watermark so shelves re-emit.
+            syncToken.TagsLastModified = DateTime.MinValue;
         }
 
         var publicBase = BuildPublicBase(settings.HostName, settings.BaseUrl);
@@ -231,6 +233,7 @@ public class KoboService(
         var newBooksLastCreated = syncToken.BooksLastCreated;
         var newArchiveLastModified = syncToken.ArchiveLastModified;
         var newReadingStateLastModified = syncToken.ReadingStateLastModified;
+        var newTagsLastModified = syncToken.TagsLastModified;
         var pageSize = settings.KoboSyncPageSize > 0
             ? Math.Clamp(settings.KoboSyncPageSize, MinSyncPageSize, MaxSyncPageSize)
             : DefaultSyncPageSize;
@@ -328,6 +331,10 @@ public class KoboService(
             }
         }
 
+        // Tag deltas are not limited by page size — append all matching shelves every page.
+        var tagWatermark = await AppendTagDeltasAsync(userId, libraryIds, items, syncToken.TagsLastModified, ct);
+        if (tagWatermark > newTagsLastModified) newTagsLastModified = tagWatermark;
+
         if (unitOfWork.HasChanges())
         {
             await unitOfWork.CommitAsync(ct);
@@ -362,6 +369,7 @@ public class KoboService(
         syncToken.BooksLastModified = newBooksLastModified;
         syncToken.ArchiveLastModified = newArchiveLastModified;
         syncToken.ReadingStateLastModified = newReadingStateLastModified;
+        syncToken.TagsLastModified = newTagsLastModified;
 
         return new KoboLibrarySyncResult
         {
@@ -414,6 +422,10 @@ public class KoboService(
         await unitOfWork.CommitAsync(ct);
     }
 
+    /// <summary>
+    /// Clears the user's synced-set rows only. Does not rotate the AuthKey or clear archives.
+    /// The next sync sees an empty synced-set and resets book + tags watermarks so shelves re-emit.
+    /// </summary>
     public async Task ForceFullSyncAsync(int userId, CancellationToken ct = default)
     {
         var user = await unitOfWork.UserRepository.GetUserByIdAsync(userId, AppUserIncludes.None, ct);
@@ -426,6 +438,47 @@ public class KoboService(
 
         unitOfWork.DataContext.AppUserKoboSyncedChapter.RemoveRange(synced);
         await unitOfWork.CommitAsync(ct);
+    }
+
+    public async Task PrepareTagDeleteAsync(Guid tagId, int ownerUserId, bool wasPromoted,
+        CancellationToken ct = default)
+    {
+        List<int> recipientIds;
+        if (wasPromoted)
+        {
+            recipientIds = await unitOfWork.DataContext.AppUser.Select(u => u.Id).ToListAsync(ct);
+        }
+        else
+        {
+            recipientIds = [ownerUserId];
+        }
+
+        if (recipientIds.Count == 0) return;
+
+        var existing = await unitOfWork.DataContext.AppUserKoboTagTombstone
+            .Where(t => t.TagId == tagId && recipientIds.Contains(t.AppUserId))
+            .Select(t => t.AppUserId)
+            .ToListAsync(ct);
+        var existingSet = existing.ToHashSet();
+
+        var now = DateTime.UtcNow;
+        var added = false;
+        foreach (var recipientId in recipientIds)
+        {
+            if (!existingSet.Add(recipientId)) continue;
+            unitOfWork.DataContext.AppUserKoboTagTombstone.Add(new AppUserKoboTagTombstone
+            {
+                AppUserId = recipientId,
+                TagId = tagId,
+                LastModifiedUtc = now,
+            });
+            added = true;
+        }
+
+        if (added)
+        {
+            await unitOfWork.CommitAsync(ct);
+        }
     }
 
     public async Task RestoreRemovedBooksAsync(int userId, CancellationToken ct = default)
