@@ -46,7 +46,8 @@ public partial class KoboLocationMapper(ILogger<KoboLocationMapper> logger) : IK
         }
 
         var native = KoboService.PreferNativeEpub(chapter.Files);
-        // Archive-only converts stay percent-only for exact position (no Location invent).
+        // Archive-only converts: prefer cached KEPUB when provided; otherwise no device-openable
+        // file for Location invent (percent-only until KEPUB appears).
         if (native == null) return null;
 
         if (string.IsNullOrWhiteSpace(native.FilePath) || !File.Exists(native.FilePath))

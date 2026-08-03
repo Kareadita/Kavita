@@ -1,9 +1,11 @@
 using System;
+using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Kavita.API.Database;
 using Kavita.API.Services;
+using Kavita.Models.Entities;
 using Kavita.Models.Entities.User;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
@@ -11,7 +13,8 @@ using Microsoft.Extensions.Logging;
 namespace Kavita.Services.Kobo;
 
 /// <summary>
-/// On device-file format change (KEPUB re-offer), rematch or clear Location per user+chapter.
+/// On device-file format change (KEPUB re-offer / convert generation), rematch or clear Location.
+/// Convert chapters rematch from <c>PagesRead</c>; prose chapters use BookScrollId ↔ Location.
 /// </summary>
 public class KoboLocationRematchService(
     IUnitOfWork unitOfWork,
@@ -24,6 +27,113 @@ public class KoboLocationRematchService(
     {
         if (string.IsNullOrWhiteSpace(newDeviceOpenablePath)) return;
 
+        var chapter = await unitOfWork.DataContext.Chapter
+            .Include(c => c.Files)
+            .AsNoTracking()
+            .FirstOrDefaultAsync(c => c.Id == chapterId, ct);
+        if (chapter == null) return;
+
+        if (IsConvertChapter(chapter))
+        {
+            await RematchConvertChapterAsync(chapter, newDeviceOpenablePath, ct);
+            return;
+        }
+
+        await RematchProseChapterAsync(chapterId, newDeviceOpenablePath, ct);
+    }
+
+    private static bool IsConvertChapter(Chapter chapter) =>
+        KoboService.PreferNativeEpub(chapter.Files) == null
+        && KoboService.PreferConvertibleArchive(chapter.Files) != null;
+
+    private async Task RematchConvertChapterAsync(Chapter chapter, string newDeviceOpenablePath,
+        CancellationToken ct)
+    {
+        var locations = await unitOfWork.DataContext.AppUserKoboReadingLocation
+            .Where(l => l.ChapterId == chapter.Id)
+            .ToListAsync(ct);
+        var progresses = await unitOfWork.DataContext.AppUserProgresses
+            .Where(p => p.ChapterId == chapter.Id)
+            .ToListAsync(ct);
+
+        if (locations.Count == 0 && progresses.Count == 0) return;
+
+        var trustedKepub = IsTrustedConvertKepub(newDeviceOpenablePath, chapter.Pages);
+        var progressByUser = progresses.ToDictionary(p => p.AppUserId);
+        var locationByUser = locations.ToDictionary(l => l.AppUserId);
+        var userIds = progressByUser.Keys.Union(locationByUser.Keys).ToHashSet();
+
+        var upserted = 0;
+        var cleared = 0;
+
+        foreach (var userId in userIds)
+        {
+            progressByUser.TryGetValue(userId, out var progress);
+            locationByUser.TryGetValue(userId, out var location);
+            var pagesRead = progress?.PagesRead ?? 0;
+
+            // No Location migration across generations — re-encode from PagesRead when KEPUB is trusted.
+            KoboMappedLocation? mapped = null;
+            if (trustedKepub && progress != null)
+            {
+                mapped = KoboConvertLocationCodec.TryEncode(pagesRead, chapter.Pages, readyToRead: false);
+            }
+
+            if (mapped != null)
+            {
+                if (location == null)
+                {
+                    unitOfWork.DataContext.AppUserKoboReadingLocation.Add(new AppUserKoboReadingLocation
+                    {
+                        AppUserId = userId,
+                        ChapterId = chapter.Id,
+                        LocationValue = mapped.Value,
+                        LocationType = mapped.Type,
+                        LocationSource = mapped.Source,
+                    });
+                }
+                else
+                {
+                    location.LocationValue = mapped.Value;
+                    location.LocationType = mapped.Type;
+                    location.LocationSource = mapped.Source;
+                }
+
+                upserted++;
+                continue;
+            }
+
+            if (location == null) continue;
+
+            location.LocationValue = null;
+            location.LocationType = null;
+            location.LocationSource = null;
+            cleared++;
+        }
+
+        if (unitOfWork.HasChanges())
+        {
+            await unitOfWork.CommitAsync(ct);
+        }
+
+        if (upserted > 0 || cleared > 0)
+        {
+            logger.LogInformation(
+                "Convert KEPUB Location rematch for chapter {ChapterId}: upserted={Upserted}, cleared={Cleared}, trusted={Trusted}",
+                chapter.Id, upserted, cleared, trustedKepub);
+        }
+    }
+
+    private static bool IsTrustedConvertKepub(string path, int chapterPages)
+    {
+        if (chapterPages <= 0 || !File.Exists(path)) return false;
+        var spine = KoboConvertEpubInspector.TryCountSpinePages(path);
+        return spine == chapterPages;
+    }
+
+    private async Task RematchProseChapterAsync(int chapterId, string newDeviceOpenablePath,
+        CancellationToken ct)
+    {
         var locations = await unitOfWork.DataContext.AppUserKoboReadingLocation
             .Where(l => l.ChapterId == chapterId)
             .ToListAsync(ct);

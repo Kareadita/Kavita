@@ -9,9 +9,10 @@ namespace Kavita.API.Services;
 public interface IKoboLocationRematchService
 {
     /// <summary>
-    /// For each user progress/Location on <paramref name="chapterId"/>, remap from
-    /// <c>BookScrollId</c> against <paramref name="newDeviceOpenablePath"/>. Keep Location only
-    /// when valid in that file; otherwise clear Location columns. Never clears
+    /// For each user progress/Location on <paramref name="chapterId"/>, rematch against
+    /// <paramref name="newDeviceOpenablePath"/>. Convert chapters re-encode from
+    /// <c>PagesRead</c> when the new file is a trusted KEPUB; prose chapters remap from
+    /// <c>BookScrollId</c> or keep Location only when still valid-in-file. Never clears
     /// <c>BookScrollId</c> or percent/<c>PagesRead</c>.
     /// </summary>
     Task RematchAfterDeviceFileChangeAsync(int chapterId, string newDeviceOpenablePath,
