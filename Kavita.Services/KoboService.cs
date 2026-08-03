@@ -173,6 +173,12 @@ public partial class KoboService(
         resources["image_url_quality_template"] =
             $"{tokenBase}/{{ImageId}}/{{width}}/{{height}}/{{Quality}}/{{IsGreyscale}}/image.jpg";
         resources["library_sync"] = $"{tokenBase}/v1/library/sync";
+        // Device Tag mutations must hit Kavita (no store proxy in v2).
+        resources["tags"] = $"{tokenBase}/v1/library/tags";
+        resources["tag_items"] = $"{tokenBase}/v1/library/tags/{{TagId}}/Items";
+        resources["delete_tag"] = $"{tokenBase}/v1/library/tags/{{TagId}}";
+        resources["delete_tag_items"] = $"{tokenBase}/v1/library/tags/{{TagId}}/items/delete";
+        resources["rename_tag"] = $"{tokenBase}/v1/library/tags/{{TagId}}";
 
         return new KoboInitializationResult { Resources = resources };
     }

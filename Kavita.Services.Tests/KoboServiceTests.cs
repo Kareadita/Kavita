@@ -353,6 +353,15 @@ public class KoboServiceTests(ITestOutputHelper testOutputHelper) : AbstractDbTe
             $"{tokenBase}/{{ImageId}}/{{width}}/{{height}}/{{Quality}}/{{IsGreyscale}}/image.jpg",
             resources["image_url_quality_template"]!.GetValue<string>());
         Assert.Equal($"{tokenBase}/v1/library/sync", resources["library_sync"]!.GetValue<string>());
+        Assert.Equal($"{tokenBase}/v1/library/tags", resources["tags"]!.GetValue<string>());
+        Assert.Equal($"{tokenBase}/v1/library/tags/{{TagId}}/Items",
+            resources["tag_items"]!.GetValue<string>());
+        Assert.Equal($"{tokenBase}/v1/library/tags/{{TagId}}",
+            resources["delete_tag"]!.GetValue<string>());
+        Assert.Equal($"{tokenBase}/v1/library/tags/{{TagId}}/items/delete",
+            resources["delete_tag_items"]!.GetValue<string>());
+        Assert.Equal($"{tokenBase}/v1/library/tags/{{TagId}}",
+            resources["rename_tag"]!.GetValue<string>());
         Assert.Equal(KoboInitializationResult.ApiTokenHeaderValue, "e30=");
         // Native map still present (not request-host based)
         Assert.False(string.IsNullOrEmpty(resources["device_auth"]?.GetValue<string>()));
@@ -1112,6 +1121,207 @@ public class KoboServiceTests(ITestOutputHelper testOutputHelper) : AbstractDbTe
         Assert.Equal(2, afterForce.Items.Count(i => i!["NewTag"] != null));
         var forceToken = KoboSyncToken.FromHeader(afterForce.SyncToken);
         Assert.True(forceToken.TagsLastModified > DateTime.MinValue);
+    }
+
+    [Fact]
+    public async Task DeviceTag_CreateRenameItemsDelete_MutatesOwnedReadingList()
+    {
+        var (unitOfWork, context, mapper) = await CreateDatabase();
+        var (user, library, chapter) = await SeedEpubChapter(unitOfWork, context,
+            seriesName: "Device Tag Series", chapterNumber: "1", titleName: "Ch1",
+            writerName: "Author", language: "en", summary: "s",
+            releaseDate: new DateTime(2020, 1, 1, 0, 0, 0, DateTimeKind.Utc));
+        var chapter2 = await AddEpubChapter(context, library, "Device Tag Series 2", "1");
+        await context.SaveChangesAsync();
+        context.ChangeTracker.Clear();
+
+        await ConfigureKoboSettings(unitOfWork, "https://kavita.example.com");
+        var koboService = CreateKoboService(unitOfWork, mapper);
+        var token = (await koboService.GetOrCreateSyncUrlAsync(user.Id)).Split('/').Last();
+        var chapterUuid = KoboEntitlementId.FromChapterIdString(chapter.Id);
+        var chapter2Uuid = KoboEntitlementId.FromChapterIdString(chapter2.Id);
+
+        var createBody = new JsonObject
+        {
+            ["Name"] = "From Device",
+            ["Items"] = new JsonArray
+            {
+                new JsonObject
+                {
+                    ["Type"] = "ProductRevisionTagItem",
+                    ["RevisionId"] = chapterUuid,
+                },
+            },
+        };
+        var tagUuid = await koboService.CreateTagAsync(token, createBody);
+        var list = await context.ReadingList.Include(r => r.Items).SingleAsync(r => r.Title == "From Device");
+        Assert.Equal(user.Id, list.AppUserId);
+        Assert.Equal(KoboTagId.FromReadingListIdString(list.Id), tagUuid);
+        Assert.Single(list.Items);
+        Assert.Equal(chapter.Id, list.Items.Single().ChapterId);
+
+        // Subsequent sync uses readinglist:{id} identity
+        var sync = await koboService.SyncLibraryAsync(token, null);
+        Assert.Contains(sync.Items, i =>
+            i!["NewTag"]?["Tag"]?["Id"]?.GetValue<string>() == tagUuid
+            && i!["NewTag"]!["Tag"]!["Name"]!.GetValue<string>() == "From Device");
+
+        await koboService.RenameTagAsync(token, tagUuid, new JsonObject { ["Name"] = "Renamed Shelf" });
+        list = await context.ReadingList.SingleAsync(r => r.Id == list.Id);
+        Assert.Equal("Renamed Shelf", list.Title);
+
+        await koboService.AddTagItemsAsync(token, tagUuid, new JsonObject
+        {
+            ["Items"] = new JsonArray
+            {
+                new JsonObject
+                {
+                    ["Type"] = "ProductRevisionTagItem",
+                    ["RevisionId"] = chapter2Uuid,
+                },
+            },
+        });
+        list = await context.ReadingList.Include(r => r.Items).SingleAsync(r => r.Id == list.Id);
+        Assert.Equal(2, list.Items.Count);
+
+        await koboService.RemoveTagItemsAsync(token, tagUuid, new JsonObject
+        {
+            ["Items"] = new JsonArray
+            {
+                new JsonObject
+                {
+                    ["Type"] = "ProductRevisionTagItem",
+                    ["RevisionId"] = chapterUuid,
+                },
+            },
+        });
+        list = await context.ReadingList.Include(r => r.Items).SingleAsync(r => r.Id == list.Id);
+        Assert.Single(list.Items);
+        Assert.Equal(chapter2.Id, list.Items.Single().ChapterId);
+
+        // Same-name create merges items
+        var mergeUuid = await koboService.CreateTagAsync(token, new JsonObject
+        {
+            ["Name"] = "Renamed Shelf",
+            ["Items"] = new JsonArray
+            {
+                new JsonObject
+                {
+                    ["Type"] = "ProductRevisionTagItem",
+                    ["RevisionId"] = chapterUuid,
+                },
+            },
+        });
+        Assert.Equal(tagUuid, mergeUuid);
+        list = await context.ReadingList.Include(r => r.Items).SingleAsync(r => r.Id == list.Id);
+        Assert.Equal(2, list.Items.Count);
+
+        await koboService.DeleteTagAsync(token, tagUuid);
+        Assert.False(await context.ReadingList.AnyAsync(r => r.Id == list.Id));
+        Assert.Equal(1, await context.AppUserKoboTagTombstone.CountAsync(t =>
+            t.TagId == Guid.Parse(tagUuid) && t.AppUserId == user.Id));
+    }
+
+    [Fact]
+    public async Task DeviceTag_RejectsCollectionAndNonOwnedList()
+    {
+        var (unitOfWork, context, mapper) = await CreateDatabase();
+        var (user, library, chapter) = await SeedEpubChapter(unitOfWork, context,
+            seriesName: "Reject Series", chapterNumber: "1", titleName: "Ch1",
+            writerName: "Author", language: "en", summary: "s",
+            releaseDate: new DateTime(2020, 1, 1, 0, 0, 0, DateTimeKind.Utc));
+
+        var other = new AppUserBuilder("otherkobo", "other@localhost")
+            .WithLibrary(library)
+            .WithLocale("en")
+            .WithRole(PolicyConstants.LoginRole)
+            .Build();
+        context.AppUser.Add(other);
+        await context.SaveChangesAsync();
+
+        other = await context.AppUser.Include(u => u.ReadingLists).Include(u => u.Collections)
+            .SingleAsync(u => u.UserName == "otherkobo");
+        other.ReadingLists.Add(new ReadingListBuilder("Promoted List")
+            .WithAppUserId(other.Id)
+            .WithPromoted(true)
+            .WithItem(new ReadingListItemBuilder(0, chapter.Volume.SeriesId, chapter.VolumeId, chapter.Id)
+                .Build())
+            .Build());
+        await context.SaveChangesAsync();
+
+        // Collection owned by the acting user — visible on device, but mutations rejected.
+        user = await context.AppUser.Include(u => u.Collections).SingleAsync(u => u.Id == user.Id);
+        var series = await context.Series.SingleAsync(s => s.Name == "Reject Series");
+        user.Collections =
+        [
+            new AppUserCollectionBuilder("Owned Collection").WithItems([series]).Build(),
+        ];
+        await context.SaveChangesAsync();
+        context.ChangeTracker.Clear();
+
+        var promotedList = await context.ReadingList.SingleAsync(r => r.Title == "Promoted List");
+        var collection = await context.AppUserCollection.SingleAsync(c => c.Title == "Owned Collection");
+        var promotedUuid = KoboTagId.FromReadingListIdString(promotedList.Id);
+        var collectionUuid = KoboTagId.FromCollectionIdString(collection.Id);
+
+        await ConfigureKoboSettings(unitOfWork, "https://kavita.example.com");
+        var koboService = CreateKoboService(unitOfWork, mapper);
+        var token = (await koboService.GetOrCreateSyncUrlAsync(user.Id)).Split('/').Last();
+
+        var renameBody = new JsonObject { ["Name"] = "Hacked" };
+        var itemsBody = new JsonObject
+        {
+            ["Items"] = new JsonArray
+            {
+                new JsonObject
+                {
+                    ["Type"] = "ProductRevisionTagItem",
+                    ["RevisionId"] = KoboEntitlementId.FromChapterIdString(chapter.Id),
+                },
+            },
+        };
+
+        var promotedRename = await Assert.ThrowsAsync<KavitaException>(() =>
+            koboService.RenameTagAsync(token, promotedUuid, renameBody));
+        Assert.Equal(KoboService.TagForbiddenMessage, promotedRename.Message);
+
+        var collectionRename = await Assert.ThrowsAsync<KavitaException>(() =>
+            koboService.RenameTagAsync(token, collectionUuid, renameBody));
+        Assert.Equal(KoboService.TagForbiddenMessage, collectionRename.Message);
+
+        var collectionAdd = await Assert.ThrowsAsync<KavitaException>(() =>
+            koboService.AddTagItemsAsync(token, collectionUuid, itemsBody));
+        Assert.Equal(KoboService.TagForbiddenMessage, collectionAdd.Message);
+
+        var collectionDelete = await Assert.ThrowsAsync<KavitaException>(() =>
+            koboService.DeleteTagAsync(token, collectionUuid));
+        Assert.Equal(KoboService.TagForbiddenMessage, collectionDelete.Message);
+
+        var unknown = await Assert.ThrowsAsync<KavitaException>(() =>
+            koboService.DeleteTagAsync(token, Guid.NewGuid().ToString()));
+        Assert.Equal(KoboService.TagNotFoundMessage, unknown.Message);
+
+        // Nothing mutated
+        Assert.Equal("Promoted List",
+            (await context.ReadingList.SingleAsync(r => r.Id == promotedList.Id)).Title);
+        Assert.Equal("Owned Collection",
+            (await context.AppUserCollection.SingleAsync(c => c.Id == collection.Id)).Title);
+        Assert.Equal(0, await context.AppUserKoboTagTombstone.CountAsync());
+    }
+
+    [Fact]
+    public async Task DeviceTag_Create_RequiresName()
+    {
+        var (unitOfWork, context, mapper) = await CreateDatabase();
+        var user = await SeedUser(unitOfWork, context);
+        await ConfigureKoboSettings(unitOfWork, "https://kavita.example.com");
+        var koboService = CreateKoboService(unitOfWork, mapper);
+        var token = (await koboService.GetOrCreateSyncUrlAsync(user.Id)).Split('/').Last();
+
+        var ex = await Assert.ThrowsAsync<KavitaException>(() =>
+            koboService.CreateTagAsync(token, new JsonObject { ["Name"] = "  ", ["Items"] = new JsonArray() }));
+        Assert.Equal(KoboService.TagNameRequiredMessage, ex.Message);
+        Assert.Equal(0, await context.ReadingList.CountAsync());
     }
 
     [Fact]

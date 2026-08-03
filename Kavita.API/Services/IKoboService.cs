@@ -122,4 +122,30 @@ public interface IKoboService
     /// </summary>
     Task<object> PutReadingStateAsync(string authToken, string entitlementId, JsonObject? body,
         CancellationToken ct = default);
+
+    /// <summary>
+    /// Device create Tag → owned Reading List. Returns deterministic <c>readinglist:{id}</c> UUID.
+    /// Same-name list merges Items. Empty Name → <c>kobo-tag-name-required</c>.
+    /// </summary>
+    Task<string> CreateTagAsync(string authToken, JsonObject? body, CancellationToken ct = default);
+
+    /// <summary>
+    /// Device rename Tag → owned Reading List title. Collection / non-owned → forbidden/not-found.
+    /// </summary>
+    Task RenameTagAsync(string authToken, string tagId, JsonObject? body, CancellationToken ct = default);
+
+    /// <summary>
+    /// Device delete Tag → owned Reading List (with Tag tombstone). Collection / non-owned rejected.
+    /// </summary>
+    Task DeleteTagAsync(string authToken, string tagId, CancellationToken ct = default);
+
+    /// <summary>
+    /// Device add Tag Items → owned Reading List (eligible entitlement UUIDs only; unknowns ignored).
+    /// </summary>
+    Task AddTagItemsAsync(string authToken, string tagId, JsonObject? body, CancellationToken ct = default);
+
+    /// <summary>
+    /// Device remove Tag Items → owned Reading List (unknowns ignored).
+    /// </summary>
+    Task RemoveTagItemsAsync(string authToken, string tagId, JsonObject? body, CancellationToken ct = default);
 }

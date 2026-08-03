@@ -184,6 +184,113 @@ public class KoboController(IKoboService koboService) : ControllerBase
         }
     }
 
+    /// <summary>
+    /// Device create Tag → owned Reading List. Returns the deterministic Tag UUID string.
+    /// </summary>
+    [HttpPost("v1/library/tags")]
+    public async Task<IActionResult> CreateTag(string apiKey, [FromBody] JsonObject? body)
+    {
+        try
+        {
+            var tagId = await koboService.CreateTagAsync(apiKey, body, HttpContext.RequestAborted);
+            return new ContentResult
+            {
+                Content = JsonSerializer.Serialize(tagId, KoboJsonOptions),
+                ContentType = "application/json",
+                StatusCode = StatusCodes.Status201Created,
+            };
+        }
+        catch (KavitaException ex) when (ex.Message == KoboService.TagNameRequiredMessage)
+        {
+            return BadRequest(ex.Message);
+        }
+    }
+
+    /// <summary>
+    /// Explicit 405 so DELETE /tags is not treated as an entitlement delete.
+    /// </summary>
+    [HttpDelete("v1/library/tags")]
+    public IActionResult DeleteTagsCollection() => StatusCode(StatusCodes.Status405MethodNotAllowed);
+
+    [HttpPut("v1/library/tags/{tagId}")]
+    public async Task<IActionResult> RenameTag(string apiKey, string tagId, [FromBody] JsonObject? body)
+    {
+        try
+        {
+            await koboService.RenameTagAsync(apiKey, tagId, body, HttpContext.RequestAborted);
+            return KoboAckSpace();
+        }
+        catch (KavitaException ex) when (ex.Message is KoboService.TagNameRequiredMessage
+                                            or "reading-list-name-exists")
+        {
+            return BadRequest(ex.Message);
+        }
+        catch (KavitaException ex) when (ex.Message == KoboService.TagNotFoundMessage)
+        {
+            return NotFound();
+        }
+        catch (KavitaException ex) when (ex.Message == KoboService.TagForbiddenMessage)
+        {
+            return StatusCode(StatusCodes.Status403Forbidden);
+        }
+    }
+
+    [HttpDelete("v1/library/tags/{tagId}")]
+    public async Task<IActionResult> DeleteTag(string apiKey, string tagId)
+    {
+        try
+        {
+            await koboService.DeleteTagAsync(apiKey, tagId, HttpContext.RequestAborted);
+            return KoboAckSpace();
+        }
+        catch (KavitaException ex) when (ex.Message == KoboService.TagNotFoundMessage)
+        {
+            return NotFound();
+        }
+        catch (KavitaException ex) when (ex.Message == KoboService.TagForbiddenMessage)
+        {
+            return StatusCode(StatusCodes.Status403Forbidden);
+        }
+    }
+
+    [HttpPost("v1/library/tags/{tagId}/items")]
+    [HttpPost("v1/library/tags/{tagId}/Items")]
+    public async Task<IActionResult> AddTagItems(string apiKey, string tagId, [FromBody] JsonObject? body)
+    {
+        try
+        {
+            await koboService.AddTagItemsAsync(apiKey, tagId, body, HttpContext.RequestAborted);
+            return StatusCode(StatusCodes.Status201Created);
+        }
+        catch (KavitaException ex) when (ex.Message == KoboService.TagNotFoundMessage)
+        {
+            return NotFound();
+        }
+        catch (KavitaException ex) when (ex.Message == KoboService.TagForbiddenMessage)
+        {
+            return StatusCode(StatusCodes.Status403Forbidden);
+        }
+    }
+
+    [HttpPost("v1/library/tags/{tagId}/items/delete")]
+    [HttpPost("v1/library/tags/{tagId}/Items/delete")]
+    public async Task<IActionResult> RemoveTagItems(string apiKey, string tagId, [FromBody] JsonObject? body)
+    {
+        try
+        {
+            await koboService.RemoveTagItemsAsync(apiKey, tagId, body, HttpContext.RequestAborted);
+            return Ok();
+        }
+        catch (KavitaException ex) when (ex.Message == KoboService.TagNotFoundMessage)
+        {
+            return NotFound();
+        }
+        catch (KavitaException ex) when (ex.Message == KoboService.TagForbiddenMessage)
+        {
+            return StatusCode(StatusCodes.Status403Forbidden);
+        }
+    }
+
     // Keep-alive stubs that return {} (Calibre-Web non-proxy behaviour)
     [HttpGet("v1/user/profile")]
     [HttpPost("v1/user/profile")]
@@ -222,4 +329,12 @@ public class KoboController(IKoboService koboService) : ControllerBase
             StatusCode = 200,
         };
     }
+
+    /// <summary>Calibre-Web ACK body for rename/delete Tag: a single space.</summary>
+    private static ContentResult KoboAckSpace() => new()
+    {
+        Content = " ",
+        ContentType = "application/json",
+        StatusCode = StatusCodes.Status200OK,
+    };
 }
