@@ -25,6 +25,7 @@ using Kavita.Services.Comparators;
 using Kavita.Services.Extensions;
 using Kavita.Services.Metadata;
 using Kavita.Services.Scanner;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 
 namespace Kavita.Services.Reading;
@@ -32,7 +33,8 @@ namespace Kavita.Services.Reading;
 public class ReaderService(IUnitOfWork unitOfWork, ILogger<ReaderService> logger, IEventHub eventHub, IImageService imageService,
     IDirectoryService directoryService, IScrobblingService scrobblingService, IReadingSessionService readingSessionService,
     IClientInfoAccessor clientInfoAccessor, IEntityNamingService namingService,
-    ILocalizationService localizationService, IBookService bookService)
+    ILocalizationService localizationService, IBookService bookService,
+    IKoboLocationMapper? koboLocationMapper = null)
     : IReaderService
 {
     private readonly ChapterSortComparerDefaultLast _chapterSortComparerDefaultLast = ChapterSortComparerDefaultLast.Default;
@@ -259,6 +261,12 @@ public class ReaderService(IUnitOfWork unitOfWork, ILogger<ReaderService> logger
                 unitOfWork.AppUserProgressRepository.Update(userProgress);
             }
 
+            // Best-effort BookScrollId → Kobo Location when valid in the device-openable file.
+            if (koboLocationMapper != null && !string.IsNullOrWhiteSpace(progressDto.BookScrollId))
+            {
+                await TryMapBookScrollIdToKoboLocationAsync(userId, progressDto, koboLocationMapper);
+            }
+
             if (!unitOfWork.HasChanges() || await unitOfWork.CommitAsync())
             {
                 if (saveToReadingSession)
@@ -296,6 +304,51 @@ public class ReaderService(IUnitOfWork unitOfWork, ILogger<ReaderService> logger
         }
 
         return false;
+    }
+
+    /// <summary>
+    /// Best-effort map of web BookScrollId to Kobo Location side-table columns.
+    /// Leaves prior Location unchanged when mapping fails or the chapter has no device-openable EPUB.
+    /// </summary>
+    private async Task TryMapBookScrollIdToKoboLocationAsync(int userId, ProgressDto progressDto,
+        IKoboLocationMapper mapper)
+    {
+        try
+        {
+            var chapter = await unitOfWork.ChapterRepository.GetChapterAsync(progressDto.ChapterId);
+            if (chapter == null) return;
+
+            var settings = await unitOfWork.SettingsRepository.GetSettingsDtoAsync();
+            var devicePath = mapper.ResolveDeviceOpenablePath(chapter, settings.EnableKepubConversion);
+            var mapped = await mapper.TryMapBookScrollIdToLocationAsync(
+                devicePath, progressDto.PageNum, progressDto.BookScrollId);
+            if (mapped == null) return;
+
+            var locationRow = await unitOfWork.DataContext.AppUserKoboReadingLocation
+                .FirstOrDefaultAsync(l => l.AppUserId == userId && l.ChapterId == progressDto.ChapterId);
+            if (locationRow == null)
+            {
+                unitOfWork.DataContext.AppUserKoboReadingLocation.Add(new AppUserKoboReadingLocation
+                {
+                    AppUserId = userId,
+                    ChapterId = progressDto.ChapterId,
+                    LocationValue = mapped.Value,
+                    LocationType = mapped.Type,
+                    LocationSource = mapped.Source,
+                });
+            }
+            else
+            {
+                locationRow.LocationValue = mapped.Value;
+                locationRow.LocationType = mapped.Type;
+                locationRow.LocationSource = mapped.Source;
+            }
+        }
+        catch (Exception ex)
+        {
+            logger.LogDebug(ex, "Kobo Location map from BookScrollId failed for chapter {ChapterId}",
+                progressDto.ChapterId);
+        }
     }
 
     /// <summary>

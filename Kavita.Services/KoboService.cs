@@ -40,7 +40,8 @@ public partial class KoboService(
     IMapper mapper,
     IDirectoryService directoryService,
     IDownloadService downloadService,
-    IKoboConversionService koboConversionService)
+    IKoboConversionService koboConversionService,
+    IKoboLocationMapper koboLocationMapper)
     : IKoboService
 {
     public const string SyncPathPrefix = "api/kobo/";
@@ -878,6 +879,15 @@ public partial class KoboService(
                 locationRow.LocationValue = locationValue;
                 locationRow.LocationType = locationType;
                 locationRow.LocationSource = locationSource;
+            }
+
+            // Best-effort Location → BookScrollId when valid in the library EPUB; else leave.
+            var libraryEpub = koboLocationMapper.ResolveLibraryEpubPath(chapter);
+            var mappedScroll = await koboLocationMapper.TryMapLocationToBookScrollIdAsync(
+                libraryEpub, locationValue, locationType, locationSource, ct);
+            if (!string.IsNullOrEmpty(mappedScroll))
+            {
+                existing.BookScrollId = mappedScroll;
             }
         }
 

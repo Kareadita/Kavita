@@ -1,6 +1,7 @@
 using System;
 using System.IO;
 using System.IO.Abstractions;
+using System.IO.Abstractions.TestingHelpers;
 using System.Linq;
 using System.Text.Json.Nodes;
 using System.Threading;
@@ -9,6 +10,8 @@ using AutoMapper;
 using Kavita.API.Database;
 using Kavita.API.Repositories;
 using Kavita.API.Services;
+using Kavita.API.Services.Plus;
+using Kavita.API.Services.Reading;
 using Kavita.API.Services.Scanner;
 using Kavita.API.Services.SignalR;
 using Kavita.Common;
@@ -18,6 +21,7 @@ using Kavita.Database.Tests;
 using Kavita.Models.Builders;
 using Kavita.Models.Constants;
 using Kavita.Models.DTOs.Kobo;
+using Kavita.Models.DTOs.Progress;
 using Kavita.Models.Entities;
 using Kavita.Models.Entities.Enums;
 using Kavita.Models.Entities.Enums.User;
@@ -26,6 +30,7 @@ using Kavita.Models.Entities.ReadingLists;
 using Kavita.Models.Entities.User;
 using Kavita.Services.Builders;
 using Kavita.Services.Kobo;
+using Kavita.Services.Reading;
 using Kavita.Services.ReadingLists;
 using Kavita.Services.Scanner;
 using Microsoft.EntityFrameworkCore;
@@ -50,13 +55,27 @@ public class KoboServiceTests(ITestOutputHelper testOutputHelper) : AbstractDbTe
     }
 
     private static KoboService CreateKoboService(IUnitOfWork unitOfWork, IMapper mapper,
-        string? coverImageDirectory = null, IKoboConversionService? conversionService = null)
+        string? coverImageDirectory = null, IKoboConversionService? conversionService = null,
+        IKoboLocationMapper? locationMapper = null)
     {
         var directoryService = Substitute.For<IDirectoryService>();
         directoryService.CoverImageDirectory.Returns(coverImageDirectory ?? Path.GetTempPath());
+        var koboLocationMapper = locationMapper ?? Substitute.For<IKoboLocationMapper>();
+        if (locationMapper == null)
+        {
+            koboLocationMapper.TryMapLocationToBookScrollIdAsync(
+                    Arg.Any<string?>(), Arg.Any<string?>(), Arg.Any<string?>(), Arg.Any<string?>(),
+                    Arg.Any<CancellationToken>())
+                .Returns((string?)null);
+            koboLocationMapper.TryMapBookScrollIdToLocationAsync(
+                    Arg.Any<string?>(), Arg.Any<int>(), Arg.Any<string?>(), Arg.Any<CancellationToken>())
+                .Returns((KoboMappedLocation?)null);
+        }
+
         return new KoboService(unitOfWork, Substitute.For<IAuthKeyService>(), Substitute.For<IEventHub>(), mapper,
             directoryService, new DownloadService(),
-            conversionService ?? Substitute.For<IKoboConversionService>());
+            conversionService ?? Substitute.For<IKoboConversionService>(),
+            koboLocationMapper);
     }
 
     private static async Task<AppUser> SeedUser(IUnitOfWork unitOfWork, DataContext context)
@@ -634,6 +653,210 @@ public class KoboServiceTests(ITestOutputHelper testOutputHelper) : AbstractDbTe
         Assert.Equal("OEBPS/c2.xhtml", location.LocationSource);
         Assert.Equal(7, Assert.Single(context.AppUserProgresses).PagesRead);
     }
+
+    [Fact]
+    public async Task ReadingState_Put_MapsLocationToBookScrollId_WhenMapperSucceeds()
+    {
+        var (unitOfWork, context, mapper) = await CreateDatabase();
+        var (user, _, chapter) = await SeedEpubChapter(unitOfWork, context,
+            seriesName: "Map Success", chapterNumber: "1", titleName: "Ch1",
+            writerName: "Author", language: "en", summary: "s",
+            releaseDate: new DateTime(2020, 1, 1, 0, 0, 0, DateTimeKind.Utc));
+        await ConfigureKoboSettings(unitOfWork, "https://kavita.example.com");
+
+        var locationMapper = Substitute.For<IKoboLocationMapper>();
+        locationMapper.ResolveLibraryEpubPath(Arg.Any<Chapter>()).Returns("/library/book.epub");
+        locationMapper.TryMapLocationToBookScrollIdAsync(
+                "/library/book.epub", "kobo.1.2", "KoboSpan", "OEBPS/ch.xhtml", Arg.Any<CancellationToken>())
+            .Returns("id(\"kobo.1.2\")");
+
+        var koboService = CreateKoboService(unitOfWork, mapper, locationMapper: locationMapper);
+        var token = (await koboService.GetOrCreateSyncUrlAsync(user.Id)).Split('/').Last();
+        var entitlementId = KoboEntitlementId.FromChapterIdString(chapter.Id);
+
+        await koboService.PutReadingStateAsync(token, entitlementId, new JsonObject
+        {
+            ["ReadingStates"] = new JsonArray
+            {
+                new JsonObject
+                {
+                    ["CurrentBookmark"] = new JsonObject
+                    {
+                        ["ProgressPercent"] = 40,
+                        ["Location"] = new JsonObject
+                        {
+                            ["Value"] = "kobo.1.2",
+                            ["Type"] = "KoboSpan",
+                            ["Source"] = "OEBPS/ch.xhtml",
+                        },
+                    },
+                    ["StatusInfo"] = new JsonObject { ["Status"] = "Reading" },
+                },
+            },
+        });
+
+        var progress = Assert.Single(context.AppUserProgresses);
+        Assert.Equal(4, progress.PagesRead);
+        Assert.Equal("id(\"kobo.1.2\")", progress.BookScrollId);
+        Assert.Equal("kobo.1.2", Assert.Single(context.AppUserKoboReadingLocation).LocationValue);
+    }
+
+    [Fact]
+    public async Task ReadingState_Put_LeavesBookScrollId_WhenMapperFails_StillSyncsPercent()
+    {
+        var (unitOfWork, context, mapper) = await CreateDatabase();
+        var (user, _, chapter) = await SeedEpubChapter(unitOfWork, context,
+            seriesName: "Map Fail", chapterNumber: "1", titleName: "Ch1",
+            writerName: "Author", language: "en", summary: "s",
+            releaseDate: new DateTime(2020, 1, 1, 0, 0, 0, DateTimeKind.Utc));
+        await ConfigureKoboSettings(unitOfWork, "https://kavita.example.com");
+
+        context.AppUserProgresses.Add(new AppUserProgress
+        {
+            AppUserId = user.Id,
+            ChapterId = chapter.Id,
+            VolumeId = chapter.VolumeId,
+            SeriesId = chapter.Volume.SeriesId,
+            LibraryId = chapter.Volume.Series.LibraryId,
+            PagesRead = 1,
+            BookScrollId = "//body/p[1]",
+        });
+        await context.SaveChangesAsync();
+
+        var locationMapper = Substitute.For<IKoboLocationMapper>();
+        locationMapper.ResolveLibraryEpubPath(Arg.Any<Chapter>()).Returns("/library/book.epub");
+        locationMapper.TryMapLocationToBookScrollIdAsync(
+                Arg.Any<string?>(), Arg.Any<string?>(), Arg.Any<string?>(), Arg.Any<string?>(),
+                Arg.Any<CancellationToken>())
+            .Returns((string?)null);
+
+        var koboService = CreateKoboService(unitOfWork, mapper, locationMapper: locationMapper);
+        var token = (await koboService.GetOrCreateSyncUrlAsync(user.Id)).Split('/').Last();
+        var entitlementId = KoboEntitlementId.FromChapterIdString(chapter.Id);
+
+        await koboService.PutReadingStateAsync(token, entitlementId, new JsonObject
+        {
+            ["ReadingStates"] = new JsonArray
+            {
+                new JsonObject
+                {
+                    ["CurrentBookmark"] = new JsonObject
+                    {
+                        ["ProgressPercent"] = 60,
+                        ["Location"] = new JsonObject
+                        {
+                            ["Value"] = "kobo.missing",
+                            ["Type"] = "KoboSpan",
+                            ["Source"] = "OEBPS/ch.xhtml",
+                        },
+                    },
+                    ["StatusInfo"] = new JsonObject { ["Status"] = "Reading" },
+                },
+            },
+        });
+
+        var progress = Assert.Single(context.AppUserProgresses);
+        Assert.Equal(6, progress.PagesRead);
+        Assert.Equal("//body/p[1]", progress.BookScrollId);
+        Assert.Equal("kobo.missing", Assert.Single(context.AppUserKoboReadingLocation).LocationValue);
+    }
+
+    [Fact]
+    public async Task SaveReadingProgress_MapsBookScrollIdToLocation_WhenMapperSucceeds()
+    {
+        var (unitOfWork, context, _) = await CreateDatabase();
+        var (user, _, chapter) = await SeedEpubChapter(unitOfWork, context,
+            seriesName: "Web Map Success", chapterNumber: "1", titleName: "Ch1",
+            writerName: "Author", language: "en", summary: "s",
+            releaseDate: new DateTime(2020, 1, 1, 0, 0, 0, DateTimeKind.Utc));
+        await ConfigureKoboSettings(unitOfWork, "https://kavita.example.com");
+
+        context.AppUserKoboReadingLocation.Add(new AppUserKoboReadingLocation
+        {
+            AppUserId = user.Id,
+            ChapterId = chapter.Id,
+            LocationValue = "kobo.old",
+            LocationType = "KoboSpan",
+            LocationSource = "OEBPS/old.xhtml",
+        });
+        await context.SaveChangesAsync();
+
+        var locationMapper = Substitute.For<IKoboLocationMapper>();
+        locationMapper.ResolveDeviceOpenablePath(Arg.Any<Chapter>(), Arg.Any<bool>())
+            .Returns("/device/book.kepub.epub");
+        locationMapper.TryMapBookScrollIdToLocationAsync(
+                "/device/book.kepub.epub", 4, "id(\"kobo.1.2\")", Arg.Any<CancellationToken>())
+            .Returns(new KoboMappedLocation("kobo.1.2", "KoboSpan", "OEBPS/ch.xhtml"));
+
+        var readerService = CreateReaderService(unitOfWork, locationMapper);
+        Assert.True(await readerService.SaveReadingProgress(new ProgressDto
+        {
+            ChapterId = chapter.Id,
+            VolumeId = chapter.VolumeId,
+            SeriesId = chapter.Volume.SeriesId,
+            LibraryId = chapter.Volume.Series.LibraryId,
+            PageNum = 4,
+            BookScrollId = "id(\"kobo.1.2\")",
+        }, user.Id, saveToReadingSession: false));
+
+        var location = Assert.Single(context.AppUserKoboReadingLocation);
+        Assert.Equal("kobo.1.2", location.LocationValue);
+        Assert.Equal("OEBPS/ch.xhtml", location.LocationSource);
+        Assert.Equal("id(\"kobo.1.2\")", Assert.Single(context.AppUserProgresses).BookScrollId);
+    }
+
+    [Fact]
+    public async Task SaveReadingProgress_LeavesLocation_WhenMapperFails()
+    {
+        var (unitOfWork, context, _) = await CreateDatabase();
+        var (user, _, chapter) = await SeedEpubChapter(unitOfWork, context,
+            seriesName: "Web Map Fail", chapterNumber: "1", titleName: "Ch1",
+            writerName: "Author", language: "en", summary: "s",
+            releaseDate: new DateTime(2020, 1, 1, 0, 0, 0, DateTimeKind.Utc));
+        await ConfigureKoboSettings(unitOfWork, "https://kavita.example.com");
+
+        context.AppUserKoboReadingLocation.Add(new AppUserKoboReadingLocation
+        {
+            AppUserId = user.Id,
+            ChapterId = chapter.Id,
+            LocationValue = "kobo.keep",
+            LocationType = "KoboSpan",
+            LocationSource = "OEBPS/keep.xhtml",
+        });
+        await context.SaveChangesAsync();
+
+        var locationMapper = Substitute.For<IKoboLocationMapper>();
+        locationMapper.ResolveDeviceOpenablePath(Arg.Any<Chapter>(), Arg.Any<bool>())
+            .Returns("/device/book.epub");
+        locationMapper.TryMapBookScrollIdToLocationAsync(
+                Arg.Any<string?>(), Arg.Any<int>(), Arg.Any<string?>(), Arg.Any<CancellationToken>())
+            .Returns((KoboMappedLocation?)null);
+
+        var readerService = CreateReaderService(unitOfWork, locationMapper);
+        Assert.True(await readerService.SaveReadingProgress(new ProgressDto
+        {
+            ChapterId = chapter.Id,
+            VolumeId = chapter.VolumeId,
+            SeriesId = chapter.Volume.SeriesId,
+            LibraryId = chapter.Volume.Series.LibraryId,
+            PageNum = 5,
+            BookScrollId = "//body/p[3]",
+        }, user.Id, saveToReadingSession: false));
+
+        var location = Assert.Single(context.AppUserKoboReadingLocation);
+        Assert.Equal("kobo.keep", location.LocationValue);
+        Assert.Equal(5, Assert.Single(context.AppUserProgresses).PagesRead);
+        Assert.Equal("//body/p[3]", Assert.Single(context.AppUserProgresses).BookScrollId);
+    }
+
+    private static ReaderService CreateReaderService(IUnitOfWork unitOfWork, IKoboLocationMapper locationMapper) =>
+        new(unitOfWork, Substitute.For<ILogger<ReaderService>>(),
+            Substitute.For<IEventHub>(), Substitute.For<IImageService>(),
+            new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), new MockFileSystem()),
+            Substitute.For<IScrobblingService>(), Substitute.For<IReadingSessionService>(),
+            Substitute.For<IClientInfoAccessor>(), Substitute.For<IEntityNamingService>(),
+            Substitute.For<ILocalizationService>(), Substitute.For<IBookService>(),
+            locationMapper);
 
     [Fact]
     public async Task ReadingState_Put_LastWriteWins_KeepsNewerServerProgress()
