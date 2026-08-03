@@ -349,16 +349,12 @@ public class MetadataService(
             return;
         }
 
-        var seriesIds = unitOfWork.DataContext.Series
-            .WhereIf(!requestDto.AllLibraries, s => requestDto.IncludedLibraries.Contains(s.LibraryId))
-            .WhereIf(requestDto.ExcludedLibraries.Count > 0, s => !requestDto.ExcludedLibraries.Contains(s.LibraryId))
-            .AsSplitQuery()
-            .Select(s => s.Id)
-            .OrderBy(s => s);
+        var seriesIds = await GetSeriesIdsAsync(requestDto);
 
+        // separate batch size for loading full series info
         const int batchSize = 25;
 
-        var count = await seriesIds.CountAsync(cancellationToken);
+        var count = seriesIds.Count;
         var totalBatches = (count + batchSize - 1) / batchSize;
         float currentBatch = 0;
 
@@ -367,7 +363,7 @@ public class MetadataService(
 
         try
         {
-            await foreach (var idBatch in seriesIds.BatchToAsyncEnumerable(batchSize, cancellationToken))
+            foreach (var idBatch in seriesIds.Chunk(batchSize))
             {
                 currentBatch++;
 
@@ -411,7 +407,7 @@ public class MetadataService(
                     ct: cancellationToken);
 
                 logger.LogDebug("Completed processing on {ProcessedCount}/{TotalCount} series",
-                    (currentBatch - 1) * batchSize + idBatch.Count, count);
+                    (currentBatch - 1) * batchSize + idBatch.Length, count);
             }
         }
         finally
@@ -419,6 +415,40 @@ public class MetadataService(
             await eventHub.SendMessageAsync(MessageFactory.NotificationProgress,
                 MessageFactory.ReRunMappingsProgressEvent(ProgressEventType.Ended, 1), ct: cancellationToken);
         }
+    }
+
+    private async Task<List<int>> GetSeriesIdsAsync(RunMetadataMappingsRequestDto requestDto)
+    {
+        // Max size of IN arrays in sqlite
+        const int batchSize = 50;
+
+        var baseQuery = unitOfWork.DataContext.Series.AsQueryable();
+
+        if (requestDto.ExcludedLibraries.Count > 0)
+        {
+            foreach (var chunk in requestDto.ExcludedLibraries.Chunk(batchSize))
+                baseQuery = baseQuery.Where(s => !chunk.Contains(s.LibraryId));
+        }
+
+        if (!requestDto.AllLibraries && requestDto.IncludedLibraries.Count > batchSize)
+        {
+            var result = new HashSet<int>();
+            foreach (var chunk in requestDto.IncludedLibraries.Chunk(batchSize))
+            {
+                var ids = await baseQuery
+                    .Where(s => chunk.Contains(s.LibraryId))
+                    .Select(s => s.Id)
+                    .ToListAsync();
+                result.UnionWith(ids);
+            }
+            return result.ToList();
+        }
+
+        return await baseQuery
+            .WhereIf(!requestDto.AllLibraries, s => requestDto.IncludedLibraries.Contains(s.LibraryId))
+            .AsSplitQuery()
+            .Select(s => s.Id)
+            .ToListAsync();
     }
 
     private async Task ReRunMappingsForSeries(IUnitOfWork scopedUnitOfWork, Series series, MetadataSettingsDto settings)
