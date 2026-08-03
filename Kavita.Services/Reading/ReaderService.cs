@@ -36,7 +36,8 @@ public class ReaderService(IUnitOfWork unitOfWork, ILogger<ReaderService> logger
     IClientInfoAccessor clientInfoAccessor, IEntityNamingService namingService,
     ILocalizationService localizationService, IBookService bookService,
     IKoboLocationMapper? koboLocationMapper = null,
-    IKoboConversionService? koboConversionService = null)
+    IKoboConversionService? koboConversionService = null,
+    IKoboConvertProgressLocationService? koboConvertProgressLocation = null)
     : IReaderService
 {
     private readonly ChapterSortComparerDefaultLast _chapterSortComparerDefaultLast = ChapterSortComparerDefaultLast.Default;
@@ -263,8 +264,22 @@ public class ReaderService(IUnitOfWork unitOfWork, ILogger<ReaderService> logger
                 unitOfWork.AppUserProgressRepository.Update(userProgress);
             }
 
-            // Best-effort BookScrollId → Kobo Location when valid in the device-openable file.
-            if (koboLocationMapper != null && !string.IsNullOrWhiteSpace(progressDto.BookScrollId))
+            // Convert chapters: always upsert/clear factual KEPUB Location from PagesRead.
+            // Prose EPUB: best-effort BookScrollId → Location when BookScrollId is present.
+            if (koboConvertProgressLocation != null)
+            {
+                var chapter = await unitOfWork.ChapterRepository.GetChapterAsync(progressDto.ChapterId);
+                if (chapter != null && koboConvertProgressLocation.IsConvertChapter(chapter))
+                {
+                    await koboConvertProgressLocation.UpsertFromPagesReadAsync(userId, chapter,
+                        progressDto.PageNum, readyToRead: false);
+                }
+                else if (koboLocationMapper != null && !string.IsNullOrWhiteSpace(progressDto.BookScrollId))
+                {
+                    await TryMapBookScrollIdToKoboLocationAsync(userId, progressDto, koboLocationMapper);
+                }
+            }
+            else if (koboLocationMapper != null && !string.IsNullOrWhiteSpace(progressDto.BookScrollId))
             {
                 await TryMapBookScrollIdToKoboLocationAsync(userId, progressDto, koboLocationMapper);
             }

@@ -67,6 +67,7 @@ public static class ApplicationServiceExtensions
         services.AddScoped<IKoboConversionService, KoboConversionService>();
         services.AddScoped<IKoboLocationMapper, KoboLocationMapper>();
         services.AddScoped<IKoboLocationRematchService, KoboLocationRematchService>();
+        services.AddScoped<IKoboConvertProgressLocationService, KoboConvertProgressLocationService>();
         services.AddScoped<IOAuthService, OAuthService>();
 
         services.AddScoped<IUrlValidationService, UrlValidationService>();

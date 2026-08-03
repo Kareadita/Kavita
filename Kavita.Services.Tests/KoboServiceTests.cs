@@ -56,7 +56,8 @@ public class KoboServiceTests(ITestOutputHelper testOutputHelper) : AbstractDbTe
 
     private static KoboService CreateKoboService(IUnitOfWork unitOfWork, IMapper mapper,
         string? coverImageDirectory = null, IKoboConversionService? conversionService = null,
-        IKoboLocationMapper? locationMapper = null)
+        IKoboLocationMapper? locationMapper = null,
+        IKoboConvertProgressLocationService? convertProgressLocation = null)
     {
         var directoryService = Substitute.For<IDirectoryService>();
         directoryService.CoverImageDirectory.Returns(coverImageDirectory ?? Path.GetTempPath());
@@ -72,10 +73,18 @@ public class KoboServiceTests(ITestOutputHelper testOutputHelper) : AbstractDbTe
                 .Returns((KoboMappedLocation?)null);
         }
 
+        var conversion = conversionService ?? Substitute.For<IKoboConversionService>();
+        var convertLocation = convertProgressLocation
+            ?? new KoboConvertProgressLocationService(
+                Substitute.For<ILogger<KoboConvertProgressLocationService>>(),
+                unitOfWork,
+                conversion);
+
         return new KoboService(unitOfWork, Substitute.For<IAuthKeyService>(), Substitute.For<IEventHub>(), mapper,
             directoryService, new DownloadService(),
-            conversionService ?? Substitute.For<IKoboConversionService>(),
-            koboLocationMapper);
+            conversion,
+            koboLocationMapper,
+            convertLocation);
     }
 
     private static async Task<AppUser> SeedUser(IUnitOfWork unitOfWork, DataContext context)
@@ -655,6 +664,267 @@ public class KoboServiceTests(ITestOutputHelper testOutputHelper) : AbstractDbTe
     }
 
     [Fact]
+    public async Task ConvertReadingState_Put_ValidLocation_StoresAndDecodesPagesRead()
+    {
+        var (unitOfWork, context, mapper) = await CreateDatabase();
+        var user = await SeedUser(unitOfWork, context);
+        var library = await context.Library.SingleAsync(l => l.Name == "Kobo Lib");
+        var chapter = await AddCbzChapter(context, library, "Convert Loc Valid", "1");
+        await ConfigureKoboSettings(unitOfWork, "https://kavita.example.com");
+
+        var kepubPath = Path.Join(Path.GetTempPath(), "kavita-convert-loc-" + Guid.NewGuid().ToString("N") + ".kepub.epub");
+        KoboConvertEpubInspector.WriteMinimalConvertEpub(kepubPath, 10);
+        var conversion = Substitute.For<IKoboConversionService>();
+        conversion.TryGetCachedKepubPath(chapter.Id, Arg.Any<MangaFile>()).Returns(kepubPath);
+
+        var koboService = CreateKoboService(unitOfWork, mapper, conversionService: conversion);
+        var token = (await koboService.GetOrCreateSyncUrlAsync(user.Id)).Split('/').Last();
+        var entitlementId = KoboEntitlementId.FromChapterIdString(chapter.Id);
+
+        await koboService.PutReadingStateAsync(token, entitlementId, new JsonObject
+        {
+            ["ReadingStates"] = new JsonArray
+            {
+                new JsonObject
+                {
+                    ["CurrentBookmark"] = new JsonObject
+                    {
+                        ["ProgressPercent"] = 10,
+                        ["Location"] = new JsonObject
+                        {
+                            ["Value"] = KoboConvertLocationCodec.ValueKoboSpan,
+                            ["Type"] = KoboConvertLocationCodec.TypeKoboSpan,
+                            ["Source"] = "OEBPS/Text/page_0005.xhtml",
+                        },
+                    },
+                    ["StatusInfo"] = new JsonObject { ["Status"] = "Reading" },
+                },
+            },
+        });
+
+        Assert.Equal(4, Assert.Single(context.AppUserProgresses).PagesRead);
+        var location = Assert.Single(context.AppUserKoboReadingLocation);
+        Assert.Equal(KoboConvertLocationCodec.ValueKoboSpan, location.LocationValue);
+        Assert.Equal("OEBPS/Text/page_0005.xhtml", location.LocationSource);
+
+        var getState = Assert.IsType<JsonArray>(await koboService.GetReadingStateAsync(token, entitlementId));
+        Assert.Equal("OEBPS/Text/page_0005.xhtml",
+            getState[0]!["CurrentBookmark"]!["Location"]!["Source"]!.GetValue<string>());
+
+        try { File.Delete(kepubPath); } catch { /* ignore */ }
+    }
+
+    [Fact]
+    public async Task ConvertReadingState_Put_FalsyLocation_ReencodesFromPagesRead_WhenKepubExists()
+    {
+        var (unitOfWork, context, mapper) = await CreateDatabase();
+        var user = await SeedUser(unitOfWork, context);
+        var library = await context.Library.SingleAsync(l => l.Name == "Kobo Lib");
+        var chapter = await AddCbzChapter(context, library, "Convert Loc Falsy", "1");
+        await ConfigureKoboSettings(unitOfWork, "https://kavita.example.com");
+
+        var kepubPath = Path.Join(Path.GetTempPath(), "kavita-convert-falsy-" + Guid.NewGuid().ToString("N") + ".kepub.epub");
+        KoboConvertEpubInspector.WriteMinimalConvertEpub(kepubPath, 10);
+        var conversion = Substitute.For<IKoboConversionService>();
+        conversion.TryGetCachedKepubPath(chapter.Id, Arg.Any<MangaFile>()).Returns(kepubPath);
+
+        var koboService = CreateKoboService(unitOfWork, mapper, conversionService: conversion);
+        var token = (await koboService.GetOrCreateSyncUrlAsync(user.Id)).Split('/').Last();
+        var entitlementId = KoboEntitlementId.FromChapterIdString(chapter.Id);
+
+        context.AppUserKoboReadingLocation.Add(new AppUserKoboReadingLocation
+        {
+            AppUserId = user.Id,
+            ChapterId = chapter.Id,
+            LocationValue = KoboConvertLocationCodec.ValueKoboSpan,
+            LocationType = KoboConvertLocationCodec.TypeKoboSpan,
+            LocationSource = "OEBPS/Text/page_0002.xhtml",
+        });
+        await context.SaveChangesAsync();
+
+        await koboService.PutReadingStateAsync(token, entitlementId, new JsonObject
+        {
+            ["ReadingStates"] = new JsonArray
+            {
+                new JsonObject
+                {
+                    ["CurrentBookmark"] = new JsonObject { ["ProgressPercent"] = 50 },
+                    ["StatusInfo"] = new JsonObject { ["Status"] = "Reading" },
+                },
+            },
+        });
+
+        Assert.Equal(5, Assert.Single(context.AppUserProgresses).PagesRead);
+        var location = Assert.Single(context.AppUserKoboReadingLocation);
+        Assert.Equal("OEBPS/Text/page_0006.xhtml", location.LocationSource); // PagesRead 5 → page_0006
+        try { File.Delete(kepubPath); } catch { /* ignore */ }
+    }
+
+    [Fact]
+    public async Task ConvertReadingState_Put_InvalidLocation_ClearsThenEncodes_WhenKepubExists()
+    {
+        var (unitOfWork, context, mapper) = await CreateDatabase();
+        var user = await SeedUser(unitOfWork, context);
+        var library = await context.Library.SingleAsync(l => l.Name == "Kobo Lib");
+        var chapter = await AddCbzChapter(context, library, "Convert Loc Invalid", "1");
+        await ConfigureKoboSettings(unitOfWork, "https://kavita.example.com");
+
+        var kepubPath = Path.Join(Path.GetTempPath(), "kavita-convert-inv-" + Guid.NewGuid().ToString("N") + ".kepub.epub");
+        KoboConvertEpubInspector.WriteMinimalConvertEpub(kepubPath, 10);
+        var conversion = Substitute.For<IKoboConversionService>();
+        conversion.TryGetCachedKepubPath(chapter.Id, Arg.Any<MangaFile>()).Returns(kepubPath);
+
+        var koboService = CreateKoboService(unitOfWork, mapper, conversionService: conversion);
+        var token = (await koboService.GetOrCreateSyncUrlAsync(user.Id)).Split('/').Last();
+        var entitlementId = KoboEntitlementId.FromChapterIdString(chapter.Id);
+
+        await koboService.PutReadingStateAsync(token, entitlementId, new JsonObject
+        {
+            ["ReadingStates"] = new JsonArray
+            {
+                new JsonObject
+                {
+                    ["CurrentBookmark"] = new JsonObject
+                    {
+                        ["ProgressPercent"] = 40,
+                        ["Location"] = new JsonObject
+                        {
+                            ["Value"] = "kobo.9.9",
+                            ["Type"] = "KoboSpan",
+                            ["Source"] = "OEBPS/Text/page_0004.xhtml",
+                        },
+                    },
+                    ["StatusInfo"] = new JsonObject { ["Status"] = "Reading" },
+                },
+            },
+        });
+
+        Assert.Equal(4, Assert.Single(context.AppUserProgresses).PagesRead);
+        var location = Assert.Single(context.AppUserKoboReadingLocation);
+        Assert.Equal(KoboConvertLocationCodec.ValueKoboSpan, location.LocationValue);
+        Assert.Equal("OEBPS/Text/page_0005.xhtml", location.LocationSource);
+        try { File.Delete(kepubPath); } catch { /* ignore */ }
+    }
+
+    [Fact]
+    public async Task ConvertReadingState_Put_EpubOnly_OmitsLocation()
+    {
+        var (unitOfWork, context, mapper) = await CreateDatabase();
+        var user = await SeedUser(unitOfWork, context);
+        var library = await context.Library.SingleAsync(l => l.Name == "Kobo Lib");
+        var chapter = await AddCbzChapter(context, library, "Convert Epub Only", "1");
+        await ConfigureKoboSettings(unitOfWork, "https://kavita.example.com");
+
+        var conversion = Substitute.For<IKoboConversionService>();
+        conversion.TryGetCachedKepubPath(Arg.Any<int>(), Arg.Any<MangaFile>()).Returns((string?)null);
+
+        var koboService = CreateKoboService(unitOfWork, mapper, conversionService: conversion);
+        var token = (await koboService.GetOrCreateSyncUrlAsync(user.Id)).Split('/').Last();
+        var entitlementId = KoboEntitlementId.FromChapterIdString(chapter.Id);
+
+        context.AppUserKoboReadingLocation.Add(new AppUserKoboReadingLocation
+        {
+            AppUserId = user.Id,
+            ChapterId = chapter.Id,
+            LocationValue = KoboConvertLocationCodec.ValueKoboSpan,
+            LocationType = KoboConvertLocationCodec.TypeKoboSpan,
+            LocationSource = "OEBPS/Text/page_0003.xhtml",
+        });
+        await context.SaveChangesAsync();
+
+        await koboService.PutReadingStateAsync(token, entitlementId, new JsonObject
+        {
+            ["ReadingStates"] = new JsonArray
+            {
+                new JsonObject
+                {
+                    ["CurrentBookmark"] = new JsonObject { ["ProgressPercent"] = 30 },
+                    ["StatusInfo"] = new JsonObject { ["Status"] = "Reading" },
+                },
+            },
+        });
+
+        Assert.Equal(3, Assert.Single(context.AppUserProgresses).PagesRead);
+        var location = Assert.Single(context.AppUserKoboReadingLocation);
+        Assert.Null(location.LocationValue);
+
+        var getState = Assert.IsType<JsonArray>(await koboService.GetReadingStateAsync(token, entitlementId));
+        Assert.Null(getState[0]!["CurrentBookmark"]!["Location"]);
+    }
+
+    [Fact]
+    public async Task ConvertReadingState_Put_LosingLww_AppliesNeitherPercentNorLocation()
+    {
+        var (unitOfWork, context, mapper) = await CreateDatabase();
+        var user = await SeedUser(unitOfWork, context);
+        var library = await context.Library.SingleAsync(l => l.Name == "Kobo Lib");
+        var chapter = await AddCbzChapter(context, library, "Convert Loc LWW", "1");
+        await ConfigureKoboSettings(unitOfWork, "https://kavita.example.com");
+
+        var kepubPath = Path.Join(Path.GetTempPath(), "kavita-convert-lww-" + Guid.NewGuid().ToString("N") + ".kepub.epub");
+        KoboConvertEpubInspector.WriteMinimalConvertEpub(kepubPath, 10);
+        var conversion = Substitute.For<IKoboConversionService>();
+        conversion.TryGetCachedKepubPath(chapter.Id, Arg.Any<MangaFile>()).Returns(kepubPath);
+
+        var koboService = CreateKoboService(unitOfWork, mapper, conversionService: conversion);
+        var token = (await koboService.GetOrCreateSyncUrlAsync(user.Id)).Split('/').Last();
+        var entitlementId = KoboEntitlementId.FromChapterIdString(chapter.Id);
+
+        context.AppUserProgresses.Add(new AppUserProgress
+        {
+            AppUserId = user.Id,
+            ChapterId = chapter.Id,
+            VolumeId = chapter.VolumeId,
+            SeriesId = chapter.Volume.SeriesId,
+            LibraryId = chapter.Volume.Series.LibraryId,
+            PagesRead = 8,
+        });
+        context.AppUserKoboReadingLocation.Add(new AppUserKoboReadingLocation
+        {
+            AppUserId = user.Id,
+            ChapterId = chapter.Id,
+            LocationValue = KoboConvertLocationCodec.ValueKoboSpan,
+            LocationType = KoboConvertLocationCodec.TypeKoboSpan,
+            LocationSource = "OEBPS/Text/page_0009.xhtml",
+        });
+        await context.SaveChangesAsync();
+        var progress = Assert.Single(context.AppUserProgresses);
+        // Force a known LastModifiedUtc for LWW
+        progress.LastModifiedUtc = DateTime.UtcNow;
+        await context.SaveChangesAsync();
+        var serverTs = progress.LastModifiedUtc;
+
+        await koboService.PutReadingStateAsync(token, entitlementId, new JsonObject
+        {
+            ["ReadingStates"] = new JsonArray
+            {
+                new JsonObject
+                {
+                    ["LastModified"] = serverTs.AddMinutes(-5).ToString("yyyy-MM-ddTHH:mm:ssZ"),
+                    ["CurrentBookmark"] = new JsonObject
+                    {
+                        ["LastModified"] = serverTs.AddMinutes(-5).ToString("yyyy-MM-ddTHH:mm:ssZ"),
+                        ["ProgressPercent"] = 10,
+                        ["Location"] = new JsonObject
+                        {
+                            ["Value"] = KoboConvertLocationCodec.ValueKoboSpan,
+                            ["Type"] = KoboConvertLocationCodec.TypeKoboSpan,
+                            ["Source"] = "OEBPS/Text/page_0001.xhtml",
+                        },
+                    },
+                    ["StatusInfo"] = new JsonObject { ["Status"] = "Reading" },
+                },
+            },
+        });
+
+        await context.Entry(progress).ReloadAsync();
+        Assert.Equal(8, progress.PagesRead);
+        Assert.Equal("OEBPS/Text/page_0009.xhtml",
+            Assert.Single(context.AppUserKoboReadingLocation).LocationSource);
+        try { File.Delete(kepubPath); } catch { /* ignore */ }
+    }
+
+    [Fact]
     public async Task ReadingState_Put_MapsLocationToBookScrollId_WhenMapperSucceeds()
     {
         var (unitOfWork, context, mapper) = await CreateDatabase();
@@ -849,14 +1119,56 @@ public class KoboServiceTests(ITestOutputHelper testOutputHelper) : AbstractDbTe
         Assert.Equal("//body/p[3]", Assert.Single(context.AppUserProgresses).BookScrollId);
     }
 
-    private static ReaderService CreateReaderService(IUnitOfWork unitOfWork, IKoboLocationMapper locationMapper) =>
-        new(unitOfWork, Substitute.For<ILogger<ReaderService>>(),
+    private static ReaderService CreateReaderService(IUnitOfWork unitOfWork, IKoboLocationMapper locationMapper,
+        IKoboConversionService? conversionService = null,
+        IKoboConvertProgressLocationService? convertProgressLocation = null)
+    {
+        var conversion = conversionService ?? Substitute.For<IKoboConversionService>();
+        var convertLocation = convertProgressLocation
+            ?? new KoboConvertProgressLocationService(
+                Substitute.For<ILogger<KoboConvertProgressLocationService>>(),
+                unitOfWork,
+                conversion);
+        return new ReaderService(unitOfWork, Substitute.For<ILogger<ReaderService>>(),
             Substitute.For<IEventHub>(), Substitute.For<IImageService>(),
             new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), new MockFileSystem()),
             Substitute.For<IScrobblingService>(), Substitute.For<IReadingSessionService>(),
             Substitute.For<IClientInfoAccessor>(), Substitute.For<IEntityNamingService>(),
             Substitute.For<ILocalizationService>(), Substitute.For<IBookService>(),
-            locationMapper);
+            locationMapper, conversion, convertLocation);
+    }
+
+    [Fact]
+    public async Task SaveReadingProgress_ConvertChapter_UpsertsKepubLocationFromPagesRead()
+    {
+        var (unitOfWork, context, _) = await CreateDatabase();
+        var user = await SeedUser(unitOfWork, context);
+        var library = await context.Library.SingleAsync(l => l.Name == "Kobo Lib");
+        var chapter = await AddCbzChapter(context, library, "Web Convert Upsert", "1");
+        await ConfigureKoboSettings(unitOfWork, "https://kavita.example.com");
+
+        var kepubPath = Path.Join(Path.GetTempPath(),
+            "kavita-web-convert-" + Guid.NewGuid().ToString("N") + ".kepub.epub");
+        KoboConvertEpubInspector.WriteMinimalConvertEpub(kepubPath, 10);
+        var conversion = Substitute.For<IKoboConversionService>();
+        conversion.TryGetCachedKepubPath(chapter.Id, Arg.Any<MangaFile>()).Returns(kepubPath);
+
+        var readerService = CreateReaderService(unitOfWork, Substitute.For<IKoboLocationMapper>(), conversion);
+        Assert.True(await readerService.SaveReadingProgress(new ProgressDto
+        {
+            ChapterId = chapter.Id,
+            VolumeId = chapter.VolumeId,
+            SeriesId = chapter.Volume.SeriesId,
+            LibraryId = chapter.Volume.Series.LibraryId,
+            PageNum = 3,
+        }, user.Id, saveToReadingSession: false));
+
+        var location = Assert.Single(context.AppUserKoboReadingLocation);
+        Assert.Equal(KoboConvertLocationCodec.ValueKoboSpan, location.LocationValue);
+        Assert.Equal("OEBPS/Text/page_0004.xhtml", location.LocationSource);
+        Assert.Equal(3, Assert.Single(context.AppUserProgresses).PagesRead);
+        try { File.Delete(kepubPath); } catch { /* ignore */ }
+    }
 
     [Fact]
     public async Task ReadingState_Put_LastWriteWins_KeepsNewerServerProgress()

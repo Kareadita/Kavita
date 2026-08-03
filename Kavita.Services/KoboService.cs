@@ -41,7 +41,8 @@ public partial class KoboService(
     IDirectoryService directoryService,
     IDownloadService downloadService,
     IKoboConversionService koboConversionService,
-    IKoboLocationMapper koboLocationMapper)
+    IKoboLocationMapper koboLocationMapper,
+    IKoboConvertProgressLocationService koboConvertProgressLocation)
     : IKoboService
 {
     public const string SyncPathPrefix = "api/kobo/";
@@ -828,6 +829,7 @@ public partial class KoboService(
             existing?.PagesRead ?? 0);
         var hasTruthyLocation = KoboReadingStateMapper.TryGetTruthyLocation(readingState,
             out var locationValue, out var locationType, out var locationSource);
+        var isConvertChapter = koboConvertProgressLocation.IsConvertChapter(chapter);
 
         if (existing == null)
         {
@@ -858,9 +860,14 @@ public partial class KoboService(
             unitOfWork.AppUserProgressRepository.Update(existing);
         }
 
-        // Truthy Location writes all three columns; falsy/absent leaves prior columns unchanged.
-        if (hasTruthyLocation)
+        if (isConvertChapter)
         {
+            await ApplyConvertChapterLocationWinAsync(userId, chapter, existing, hasTruthyLocation,
+                locationValue, locationType, locationSource, readingState, ct);
+        }
+        else if (hasTruthyLocation)
+        {
+            // Truthy Location writes all three columns; falsy/absent leaves prior columns unchanged.
             var locationRow = await unitOfWork.DataContext.AppUserKoboReadingLocation
                 .FirstOrDefaultAsync(l => l.AppUserId == userId && l.ChapterId == chapter.Id, ct);
             if (locationRow == null)
@@ -895,6 +902,55 @@ public partial class KoboService(
         var savedTs = existing.LastModifiedUtc == default ? now : existing.LastModifiedUtc;
         return KoboReadingStateMapper.BuildPutSuccess(entitlementId, savedTs,
             bookmarkPresent, statisticsPresent, statusPresent);
+    }
+
+    /// <summary>
+    /// Convert chapters: after a winning write, always refresh Location (upsert encode or clear).
+    /// Never leave a stale convert Location on falsy/absent/invalid device Location.
+    /// </summary>
+    private async Task ApplyConvertChapterLocationWinAsync(int userId, Chapter chapter, AppUserProgress existing,
+        bool hasTruthyLocation, string? locationValue, string? locationType, string? locationSource,
+        JsonObject readingState, CancellationToken ct)
+    {
+        var kepub = koboConvertProgressLocation.TryResolveTrustedKepubPath(chapter);
+        var readyToRead = string.Equals(
+            (readingState["StatusInfo"] as JsonObject)?["Status"]?.GetValue<string>(),
+            KoboReadingStateMapper.StatusReadyToRead,
+            StringComparison.OrdinalIgnoreCase);
+
+        if (hasTruthyLocation)
+        {
+            if (kepub != null &&
+                KoboConvertLocationCodec.TryDecode(locationValue, locationType, locationSource, chapter.Pages,
+                    out var decodedPages))
+            {
+                await koboConvertProgressLocation.UpsertLocationAsync(userId, chapter.Id,
+                    locationValue, locationType, locationSource, ct);
+                existing.PagesRead = decodedPages;
+                return;
+            }
+
+            // Invalid device Location: clear then encode from winning PagesRead when KEPUB exists.
+            if (kepub == null)
+            {
+                await koboConvertProgressLocation.ClearLocationAsync(userId, chapter.Id, ct);
+                return;
+            }
+
+            await koboConvertProgressLocation.UpsertFromPagesReadAsync(userId, chapter, existing.PagesRead,
+                readyToRead, ct);
+            return;
+        }
+
+        // Falsy/absent Location: do not leave prior convert Location.
+        if (kepub == null)
+        {
+            await koboConvertProgressLocation.ClearLocationAsync(userId, chapter.Id, ct);
+            return;
+        }
+
+        await koboConvertProgressLocation.UpsertFromPagesReadAsync(userId, chapter, existing.PagesRead,
+            readyToRead, ct);
     }
 
     private async Task<Dictionary<int, AppUserProgress>> LoadProgressByChapterAsync(int userId,
