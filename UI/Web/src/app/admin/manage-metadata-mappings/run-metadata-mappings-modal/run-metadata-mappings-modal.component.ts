@@ -20,14 +20,14 @@ import {of} from "rxjs";
 import {SettingItemComponent} from "../../../settings/_components/setting-item/setting-item.component";
 import {ToastrService} from "ngx-toastr";
 
-type ReRunMappingsRequestFormGroup = FormGroup<{
+type RunMetadataMappingsRequestFormGroup = FormGroup<{
   allLibraries: FormControl<boolean>,
   includedLibraries: FormControl<number[]>,
   excludedLibraries: FormControl<number[]>,
 }>;
 
 @Component({
-  selector: 'app-re-run-metadata-mappings-modal',
+  selector: 'app-run-metadata-mappings-modal',
   imports: [
     FormsModule,
     ReactiveFormsModule,
@@ -35,11 +35,11 @@ type ReRunMappingsRequestFormGroup = FormGroup<{
     TypeaheadComponent,
     SettingItemComponent
   ],
-  templateUrl: './re-run-metadata-mappings-modal.component.html',
-  styleUrl: './re-run-metadata-mappings-modal.component.scss',
+  templateUrl: './run-metadata-mappings-modal.component.html',
+  styleUrl: './run-metadata-mappings-modal.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class ReRunMetadataMappingsModalComponent implements OnInit {
+export class RunMetadataMappingsModalComponent implements OnInit {
 
   private readonly modal = inject(NgbActiveModal);
   private readonly settingsService = inject(SettingsService);
@@ -48,7 +48,7 @@ export class ReRunMetadataMappingsModalComponent implements OnInit {
   private readonly toastR = inject(ToastrService);
 
   libraries = signal<Library[]>([]);
-  requestForm!: ReRunMappingsRequestFormGroup;
+  requestForm!: RunMetadataMappingsRequestFormGroup;
   isSaving = signal(false);
 
   includedLibrariesTypeaheadSettings = signal<TypeaheadSettings<Library> | null>(null);
@@ -115,10 +115,10 @@ export class ReRunMetadataMappingsModalComponent implements OnInit {
   protected submit() {
     const request = this.requestForm.getRawValue();
 
-    this.settingsService.reRunMetadataMappings(request).pipe(
+    this.settingsService.runMetadataMappings(request).pipe(
       tap(() => this.toastR.info(
-        translate('re-run-metadata-mappings-modal.queued-description'),
-        translate('re-run-metadata-mappings-modal.queued-title')
+        translate('run-metadata-mappings-modal.queued-description'),
+        translate('run-metadata-mappings-modal.queued-title')
       )),
       finalize(() => this.close())
     ).subscribe();

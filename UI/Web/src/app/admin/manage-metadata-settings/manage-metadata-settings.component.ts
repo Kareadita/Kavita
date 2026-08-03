@@ -27,8 +27,8 @@ import {RouterLink} from "@angular/router";
 import {SettingsTabId} from "../../sidenav/preference-nav/preference-nav.component";
 import {ModalService} from "../../_services/modal.service";
 import {
-  ReRunMetadataMappingsModalComponent
-} from "../manage-metadata-mappings/re-run-metadata-mappings-modal/re-run-metadata-mappings-modal.component";
+  RunMetadataMappingsModalComponent
+} from "../manage-metadata-mappings/run-metadata-mappings-modal/run-metadata-mappings-modal.component";
 import {DefaultModalOptions} from "../../_models/modal/modal-options";
 import {EVENTS, MessageHubService} from "../../_services/message-hub.service";
 import {NotificationProgressEvent} from "../../_models/events/notification-progress-event";
@@ -153,7 +153,7 @@ export class ManageMetadataSettingsComponent implements OnInit {
 
     });
 
-    this.serverService.isTaskRunning(TaskMethodNames.ReRunMappings, QueueNames.Default).pipe(
+    this.serverService.isTaskRunning(TaskMethodNames.RunMetadataMappings, QueueNames.Scan).pipe(
       tap(b => this.isReRunInProgress.set(b))
     ).subscribe();
 
@@ -188,7 +188,7 @@ export class ManageMetadataSettingsComponent implements OnInit {
   }
 
   reRunMappings() {
-    this.modalService.open(ReRunMetadataMappingsModalComponent, DefaultModalOptions);
+    this.modalService.open(RunMetadataMappingsModalComponent, DefaultModalOptions);
   }
 
 

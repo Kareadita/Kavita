@@ -2,7 +2,7 @@ using System.Collections.Generic;
 
 namespace Kavita.Models.DTOs.Metadata;
 
-public sealed record ReRunMappingsRequest
+public sealed record RunMetadataMappingsRequestDto
 {
 
     /// <summary>

@@ -9,7 +9,7 @@ import {TextResonse} from "../_types/text-response";
 import {map} from "rxjs/operators";
 
 export enum TaskMethodNames {
-  ReRunMappings = 'ReRunMappings'
+  RunMetadataMappings = 'RunMetadataMappings'
 }
 
 export enum QueueNames {

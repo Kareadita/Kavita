@@ -4,6 +4,11 @@ using System.ComponentModel.DataAnnotations;
 
 namespace Kavita.Models.Attributes;
 
+/// <summary>
+/// An attribute to apply on fields in our DTOs to validate all passed values in the collection is valid enum types
+/// </summary>
+/// <param name="enumType"></param>
+/// <param name="allowNull"></param>
 public class EnumCollectionAttribute(Type enumType, bool allowNull = false): ValidationAttribute
 {
 

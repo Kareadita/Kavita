@@ -37,5 +37,5 @@ public interface IMetadataService
 
     [Queue(TaskSchedulerConstants.ScanQueue)]
     [DisableConcurrentExecution(timeoutInSeconds: 60 * 60 * 60)]
-    Task ReRunMappings(ReRunMappingsRequest request, CancellationToken cancellationToken = default);
+    Task RunMetadataMappings(RunMetadataMappingsRequestDto requestDto, CancellationToken cancellationToken = default);
 }

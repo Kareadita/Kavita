@@ -23,8 +23,8 @@ import {SettingSwitchComponent} from "../../settings/_components/setting-switch/
 import {RouterLink} from "@angular/router";
 import {SettingsTabId} from "../../sidenav/preference-nav/preference-nav.component";
 import {
-  ReRunMetadataMappingsModalComponent
-} from "../manage-metadata-mappings/re-run-metadata-mappings-modal/re-run-metadata-mappings-modal.component";
+  RunMetadataMappingsModalComponent
+} from "../manage-metadata-mappings/run-metadata-mappings-modal/run-metadata-mappings-modal.component";
 import {DefaultModalOptions} from "../../_models/modal/modal-options";
 import {ModalService} from "../../_services/modal.service";
 import {EVENTS, MessageHubService} from "../../_services/message-hub.service";
@@ -78,7 +78,7 @@ export class ManagePublicMetadataSettingsComponent implements OnInit {
       switchMap((data) => this.settingService.updateMetadataSettings(data)),
     ).subscribe();
 
-    this.serverService.isTaskRunning(TaskMethodNames.ReRunMappings, QueueNames.Default).pipe(
+    this.serverService.isTaskRunning(TaskMethodNames.RunMetadataMappings, QueueNames.Scan).pipe(
       tap(b => this.isReRunInProgress.set(b))
     ).subscribe();
 
@@ -108,7 +108,7 @@ export class ManagePublicMetadataSettingsComponent implements OnInit {
   }
 
   reRunMappings() {
-    this.modalService.open(ReRunMetadataMappingsModalComponent, DefaultModalOptions);
+    this.modalService.open(RunMetadataMappingsModalComponent, DefaultModalOptions);
   }
 
   protected readonly SettingsTabId = SettingsTabId;

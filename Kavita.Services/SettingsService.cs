@@ -20,6 +20,7 @@ using Kavita.Models.DTOs.KavitaPlus.Metadata;
 using Kavita.Models.DTOs.Settings;
 using Kavita.Models.Entities;
 using Kavita.Models.Entities.Enums;
+using Kavita.Services.Helpers;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.IdentityModel.Protocols.OpenIdConnect;
@@ -72,8 +73,8 @@ public class SettingsService(
 
         existingMetadataSetting.AgeRatingMappings = dto.AgeRatingMappings ?? [];
 
-        existingMetadataSetting.Blacklist = NormalizeTags(dto.Blacklist);
-        existingMetadataSetting.Whitelist = NormalizeTags(dto.Whitelist);
+        existingMetadataSetting.Blacklist = TagHelper.SortAndCleanTagList(dto.Blacklist);
+        existingMetadataSetting.Whitelist = TagHelper.SortAndCleanTagList(dto.Whitelist);
         existingMetadataSetting.Overrides = [.. dto.Overrides ?? []];
         existingMetadataSetting.PersonRoles = dto.PersonRoles ?? [];
 
@@ -105,15 +106,6 @@ public class SettingsService(
 
         // Return updated settings
         return await unitOfWork.SettingsRepository.GetMetadataSettingDto(ct);
-
-        List<string> NormalizeTags(IEnumerable<string>? tags)
-        {
-            return (tags ?? [])
-                .Where(s => !string.IsNullOrWhiteSpace(s))
-                .DistinctBy(d => d.ToNormalized())
-                .Order()
-                .ToList();
-        }
     }
 
     public async Task<FieldMappingsImportResultDto> ImportFieldMappings(FieldMappingsDto dto,

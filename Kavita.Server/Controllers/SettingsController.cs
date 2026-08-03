@@ -246,25 +246,25 @@ public class SettingsController(
     }
 
     [Authorize(PolicyGroups.AdminPolicy)]
-    [HttpPost("re-run-mappings")]
-    public async Task<ActionResult> ReRunMappings([FromBody] ReRunMappingsRequest request)
+    [HttpPost("run-metadata-mappings")]
+    public async Task<ActionResult> RunMetadataMappings([FromBody] RunMetadataMappingsRequestDto requestDto)
     {
-        if (!request.AllLibraries && request.IncludedLibraries.Count == 0)
+        if (!requestDto.AllLibraries && requestDto.IncludedLibraries.Count == 0)
         {
             return BadRequest(await localizationService.TranslateAsync("mappings-re-run-no-libraries-selected"));
         }
 
-        if (request.ExcludedLibraries.Intersect(request.IncludedLibraries).Count() > 0)
+        if (requestDto.ExcludedLibraries.Intersect(requestDto.IncludedLibraries).Any())
         {
             return BadRequest(await localizationService.TranslateAsync("mappings-re-run-libraries-overlap"));
         }
 
-        if (TaskScheduler.IsMethodRunningOrEnqueued(nameof(IMetadataService.ReRunMappings), TaskSchedulerConstants.ScanQueue))
+        if (TaskScheduler.IsMethodRunningOrEnqueued(nameof(IMetadataService.RunMetadataMappings), TaskSchedulerConstants.ScanQueue))
         {
             return BadRequest(await localizationService.TranslateAsync("mappings-re-run-in-progress"));
         }
 
-        BackgroundJob.Enqueue<IMetadataService>(s => s.ReRunMappings(request, CancellationToken.None));
+        BackgroundJob.Enqueue<IMetadataService>(s => s.RunMetadataMappings(requestDto, CancellationToken.None));
 
         return Ok();
     }

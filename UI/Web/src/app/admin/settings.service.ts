@@ -8,7 +8,7 @@ import {MetadataSettings} from "./_models/metadata-settings";
 import {MetadataMappingsExport} from "./manage-metadata-mappings/manage-metadata-mappings.component";
 import {FieldMappingsImportResult, ImportSettings} from "../_models/import-field-mappings";
 import {AuthorityValidationResult, OidcPublicConfig} from "./_models/oidc-config";
-import {ReRunMappingsRequest} from "../_models/metadata/re-run-mappings-request";
+import {RunMetadataMappingsRequest} from "../_models/metadata/run-metadata-mappings-request";
 
 /**
  * Used only for the Test Email Service call
@@ -43,8 +43,8 @@ export class SettingsService {
     return this.http.post<MetadataSettings>(this.baseUrl + 'settings/metadata-settings', model);
   }
 
-  reRunMetadataMappings(request: ReRunMappingsRequest) {
-    return this.http.post(this.baseUrl + 'settings/re-run-mappings', request);
+  runMetadataMappings(request: RunMetadataMappingsRequest) {
+    return this.http.post(this.baseUrl + 'settings/run-metadata-mappings', request);
   }
 
   importFieldMappings(data: MetadataMappingsExport, settings: ImportSettings) {

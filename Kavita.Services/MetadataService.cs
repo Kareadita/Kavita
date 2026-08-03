@@ -339,7 +339,7 @@ public class MetadataService(
 
     [Queue(TaskSchedulerConstants.ScanQueue)]
     [DisableConcurrentExecution(timeoutInSeconds: 60 * 60 * 60)]
-    public async Task ReRunMappings(ReRunMappingsRequest request, CancellationToken cancellationToken = default)
+    public async Task RunMetadataMappings(RunMetadataMappingsRequestDto requestDto, CancellationToken cancellationToken = default)
     {
         var settings = await unitOfWork.SettingsRepository.GetMetadataSettingDto(cancellationToken);
 
@@ -350,8 +350,8 @@ public class MetadataService(
         }
 
         var seriesIds = unitOfWork.DataContext.Series
-            .WhereIf(!request.AllLibraries, s => request.IncludedLibraries.Contains(s.LibraryId))
-            .WhereIf(request.ExcludedLibraries.Count > 0, s => !request.ExcludedLibraries.Contains(s.LibraryId))
+            .WhereIf(!requestDto.AllLibraries, s => requestDto.IncludedLibraries.Contains(s.LibraryId))
+            .WhereIf(requestDto.ExcludedLibraries.Count > 0, s => !requestDto.ExcludedLibraries.Contains(s.LibraryId))
             .AsSplitQuery()
             .Select(s => s.Id)
             .OrderBy(s => s);
