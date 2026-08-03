@@ -782,7 +782,7 @@ public class KoboServiceTests(ITestOutputHelper testOutputHelper) : AbstractDbTe
         await context.SaveChangesAsync();
 
         var locationMapper = Substitute.For<IKoboLocationMapper>();
-        locationMapper.ResolveDeviceOpenablePath(Arg.Any<Chapter>(), Arg.Any<bool>())
+        locationMapper.ResolveDeviceOpenablePath(Arg.Any<Chapter>(), Arg.Any<string?>())
             .Returns("/device/book.kepub.epub");
         locationMapper.TryMapBookScrollIdToLocationAsync(
                 "/device/book.kepub.epub", 4, "id(\"kobo.1.2\")", Arg.Any<CancellationToken>())
@@ -826,7 +826,7 @@ public class KoboServiceTests(ITestOutputHelper testOutputHelper) : AbstractDbTe
         await context.SaveChangesAsync();
 
         var locationMapper = Substitute.For<IKoboLocationMapper>();
-        locationMapper.ResolveDeviceOpenablePath(Arg.Any<Chapter>(), Arg.Any<bool>())
+        locationMapper.ResolveDeviceOpenablePath(Arg.Any<Chapter>(), Arg.Any<string?>())
             .Returns("/device/book.epub");
         locationMapper.TryMapBookScrollIdToLocationAsync(
                 Arg.Any<string?>(), Arg.Any<int>(), Arg.Any<string?>(), Arg.Any<CancellationToken>())

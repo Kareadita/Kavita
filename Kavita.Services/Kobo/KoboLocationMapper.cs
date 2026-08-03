@@ -17,10 +17,7 @@ namespace Kavita.Services.Kobo;
 /// <summary>
 /// Best-effort XPath ↔ Kobo Location mapper with in-file validation (VersOne + HtmlAgilityPack).
 /// </summary>
-public partial class KoboLocationMapper(
-    IKoboConversionService koboConversionService,
-    ILogger<KoboLocationMapper> logger)
-    : IKoboLocationMapper
+public partial class KoboLocationMapper(ILogger<KoboLocationMapper> logger) : IKoboLocationMapper
 {
     public const string TypeKoboSpan = "KoboSpan";
 
@@ -41,22 +38,14 @@ public partial class KoboLocationMapper(
         return native.FilePath;
     }
 
-    public string? ResolveDeviceOpenablePath(Chapter chapter, bool preferKepubWhenCached)
+    public string? ResolveDeviceOpenablePath(Chapter chapter, string? cachedKepubPath = null)
     {
-        var native = KoboService.PreferNativeEpub(chapter.Files);
-        var archive = KoboService.PreferConvertibleArchive(chapter.Files);
-        var source = native ?? archive;
-        if (source == null) return null;
-
-        if (preferKepubWhenCached)
+        if (!string.IsNullOrWhiteSpace(cachedKepubPath) && File.Exists(cachedKepubPath))
         {
-            var kepub = koboConversionService.TryGetCachedKepubPath(chapter.Id, source);
-            if (!string.IsNullOrWhiteSpace(kepub) && File.Exists(kepub))
-            {
-                return kepub;
-            }
+            return cachedKepubPath;
         }
 
+        var native = KoboService.PreferNativeEpub(chapter.Files);
         // Archive-only converts stay percent-only for exact position (no Location invent).
         if (native == null) return null;
 

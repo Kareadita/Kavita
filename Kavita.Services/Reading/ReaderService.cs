@@ -23,6 +23,7 @@ using Kavita.Models.Entities.Progress;
 using Kavita.Models.Entities.User;
 using Kavita.Services.Comparators;
 using Kavita.Services.Extensions;
+using Kavita.Services.Kobo;
 using Kavita.Services.Metadata;
 using Kavita.Services.Scanner;
 using Microsoft.EntityFrameworkCore;
@@ -34,7 +35,8 @@ public class ReaderService(IUnitOfWork unitOfWork, ILogger<ReaderService> logger
     IDirectoryService directoryService, IScrobblingService scrobblingService, IReadingSessionService readingSessionService,
     IClientInfoAccessor clientInfoAccessor, IEntityNamingService namingService,
     ILocalizationService localizationService, IBookService bookService,
-    IKoboLocationMapper? koboLocationMapper = null)
+    IKoboLocationMapper? koboLocationMapper = null,
+    IKoboConversionService? koboConversionService = null)
     : IReaderService
 {
     private readonly ChapterSortComparerDefaultLast _chapterSortComparerDefaultLast = ChapterSortComparerDefaultLast.Default;
@@ -319,7 +321,18 @@ public class ReaderService(IUnitOfWork unitOfWork, ILogger<ReaderService> logger
             if (chapter == null) return;
 
             var settings = await unitOfWork.SettingsRepository.GetSettingsDtoAsync();
-            var devicePath = mapper.ResolveDeviceOpenablePath(chapter, settings.EnableKepubConversion);
+            string? cachedKepub = null;
+            if (settings.EnableKepubConversion && koboConversionService != null)
+            {
+                var source = global::Kavita.Services.KoboService.PreferNativeEpub(chapter.Files)
+                             ?? global::Kavita.Services.KoboService.PreferConvertibleArchive(chapter.Files);
+                if (source != null)
+                {
+                    cachedKepub = koboConversionService.TryGetCachedKepubPath(chapter.Id, source);
+                }
+            }
+
+            var devicePath = mapper.ResolveDeviceOpenablePath(chapter, cachedKepub);
             var mapped = await mapper.TryMapBookScrollIdToLocationAsync(
                 devicePath, progressDto.PageNum, progressDto.BookScrollId);
             if (mapped == null) return;

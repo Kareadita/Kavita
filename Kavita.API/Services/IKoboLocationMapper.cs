@@ -32,10 +32,11 @@ public interface IKoboLocationMapper
     string? ResolveLibraryEpubPath(Chapter chapter);
 
     /// <summary>
-    /// Device-openable EPUB/KEPUB path for Location validation. Prefers cached KEPUB when present;
+    /// Device-openable EPUB/KEPUB path for Location validation.
+    /// When <paramref name="cachedKepubPath"/> is set and exists, that path is preferred;
     /// otherwise native EPUB. Null for archive-only chapters (no Location invent from converts).
     /// </summary>
-    string? ResolveDeviceOpenablePath(Chapter chapter, bool preferKepubWhenCached);
+    string? ResolveDeviceOpenablePath(Chapter chapter, string? cachedKepubPath = null);
 }
 
 /// <summary>Mapped Kobo Location fields.</summary>
