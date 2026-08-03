@@ -2,12 +2,12 @@
   "openapi": "3.0.4",
   "info": {
     "title": "Kavita",
-    "description": "Kavita provides a set of APIs authenticated via an Auth Key passed in the `x-api-key` header. Generate an Auth Key under User Settings → Manage Auth Keys, paste it into the Authorize panel, and all Try It requests will include it. Assume all fields of a payload are required unless marked optional. Built against v0.9.0.13",
+    "description": "Kavita provides a set of APIs authenticated via an Auth Key passed in the `x-api-key` header. Generate an Auth Key under User Settings → Manage Auth Keys, paste it into the Authorize panel, and all Try It requests will include it. Assume all fields of a payload are required unless marked optional. Built against v0.9.0.15",
     "license": {
       "name": "GPL-3.0",
       "url": "https://github.com/Kareadita/Kavita/blob/develop/LICENSE"
     },
-    "version": "0.9.0.13"
+    "version": "0.9.0.15"
   },
   "servers": [
     {
@@ -16772,6 +16772,54 @@
         }
       }
     },
+    "/api/Server/is-task-running": {
+      "get": {
+        "tags": [
+          "Server"
+        ],
+        "summary": "Returns true if a task is currently running or has been queued. Can be scoped to a queue, default to the default queue",
+        "parameters": [
+          {
+            "name": "methodName",
+            "in": "query",
+            "description": "",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "queue",
+            "in": "query",
+            "description": "",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "boolean"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "boolean"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "boolean"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/Settings/base-url": {
       "get": {
         "tags": [
@@ -17287,6 +17335,37 @@
                 }
               }
             }
+          }
+        }
+      }
+    },
+    "/api/Settings/run-metadata-mappings": {
+      "post": {
+        "tags": [
+          "Settings"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RunMetadataMappingsRequestDto"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RunMetadataMappingsRequestDto"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/RunMetadataMappingsRequestDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
           }
         }
       }
@@ -29974,6 +30053,31 @@
           },
           "expiresUtc": {
             "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "RunMetadataMappingsRequestDto": {
+        "type": "object",
+        "properties": {
+          "allLibraries": {
+            "type": "boolean"
+          },
+          "includedLibraries": {
+            "type": "array",
+            "items": {
+              "type": "integer",
+              "format": "int32"
+            },
+            "nullable": true
+          },
+          "excludedLibraries": {
+            "type": "array",
+            "items": {
+              "type": "integer",
+              "format": "int32"
+            },
             "nullable": true
           }
         },
