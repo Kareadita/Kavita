@@ -406,6 +406,32 @@ public class SettingsService(
                 unitOfWork.SettingsRepository.Update(setting);
             }
 
+            if (setting.Key == ServerSettingKey.EnableKepubConversion &&
+                updateSettingsDto.EnableKepubConversion + string.Empty != setting.Value)
+            {
+                if (updateSettingsDto.EnableKepubConversion &&
+                    string.IsNullOrWhiteSpace(updateSettingsDto.KepubifyPath))
+                {
+                    throw new KavitaException("kobo-kepubify-path-required");
+                }
+
+                setting.Value = updateSettingsDto.EnableKepubConversion + string.Empty;
+                unitOfWork.SettingsRepository.Update(setting);
+            }
+
+            if (setting.Key == ServerSettingKey.KepubifyPath &&
+                (updateSettingsDto.KepubifyPath ?? string.Empty) != setting.Value)
+            {
+                var path = (updateSettingsDto.KepubifyPath ?? string.Empty).Trim();
+                if (updateSettingsDto.EnableKepubConversion && string.IsNullOrWhiteSpace(path))
+                {
+                    throw new KavitaException("kobo-kepubify-path-required");
+                }
+
+                setting.Value = path;
+                unitOfWork.SettingsRepository.Update(setting);
+            }
+
             if (setting.Key == ServerSettingKey.EncodeMediaAs &&
                 ((int)updateSettingsDto.EncodeMediaAs).ToString() != setting.Value)
             {

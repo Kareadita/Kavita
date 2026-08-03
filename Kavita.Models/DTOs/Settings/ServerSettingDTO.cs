@@ -45,6 +45,14 @@ public sealed record ServerSettingDto
     /// </summary>
     public int KoboSyncPageSize { get; set; } = 100;
     /// <summary>
+    /// When enabled, Kobo sync prefers cached KEPUB download URLs. Off by default (EPUB-only advertising).
+    /// </summary>
+    public bool EnableKepubConversion { get; set; }
+    /// <summary>
+    /// Path to the kepubify binary. Required when <see cref="EnableKepubConversion"/> is enabled.
+    /// </summary>
+    public string KepubifyPath { get; set; } = string.Empty;
+    /// <summary>
     /// Base Url for the kavita. Requires restart to take effect.
     /// </summary>
     public string BaseUrl { get; set; } = default!;

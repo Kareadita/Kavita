@@ -51,6 +51,8 @@ public partial class KoboService(
     public const string SyncBusyMessage = "kobo-sync-busy";
     public const string EpubFormat = "EPUB";
     public const string Epub3Format = "EPUB3";
+    public const string KepubFormat = "KEPUB";
+    public const string KepubDownloadFileExtension = ".kepub.epub";
 
     private static readonly Guid EmptyGenreId = Guid.Parse("00000000-0000-0000-0000-000000000001");
 
@@ -250,7 +252,7 @@ public partial class KoboService(
 
         // Removals first: archived (not in synced-set) + hard-delete tombstones.
         var removalSlots = await AppendArchiveRemovalsAsync(userId, tokenBase, syncToken, items,
-            remainingSlots, ct);
+            remainingSlots, settings.EnableKepubConversion, ct);
         remainingSlots -= removalSlots.Emitted;
         if (removalSlots.MaxArchiveModified > newArchiveLastModified)
         {
@@ -290,7 +292,7 @@ public partial class KoboService(
                 var series = chapter.Volume.Series;
                 var entitlementUuid = KoboEntitlementId.FromChapterIdString(chapter.Id);
                 var entitlement = BuildEntitlementPayload(chapter, series, entitlementUuid, tokenBase,
-                    isRemoved: false);
+                    isRemoved: false, preferKepub: settings.EnableKepubConversion);
 
                 progressByChapter.TryGetValue(chapter.Id, out var progress);
                 if (TryAttachReadingState(entitlement, entitlementUuid, chapter, progress,
@@ -592,7 +594,8 @@ public partial class KoboService(
         var publicBase = BuildPublicBase(settings.HostName, settings.BaseUrl);
         var tokenBase = $"{publicBase}/{SyncPathPrefix}{authToken}";
         var uuid = KoboEntitlementId.FromChapterIdString(chapter.Id);
-        var metadata = BuildBookMetadata(chapter, chapter.Volume.Series, uuid, tokenBase);
+        var metadata = BuildBookMetadata(chapter, chapter.Volume.Series, uuid, tokenBase,
+            settings.EnableKepubConversion);
         return [metadata];
     }
 
@@ -607,6 +610,11 @@ public partial class KoboService(
 
         var chapter = await ResolveEligibleChapterAsync(userId, entitlementId, ct);
         if (chapter == null) throw new KavitaException("kobo-entitlement-not-found");
+
+        if (IsKepubDownloadFormat(format))
+        {
+            return await GetKepubDownloadAsync(chapter, ct);
+        }
 
         var epub = PreferNativeEpub(chapter.Files);
         if (epub != null)
@@ -633,6 +641,28 @@ public partial class KoboService(
             FilePath = convertedPath,
             ContentType = downloadService.GetContentTypeFromFile(convertedPath),
             FileDownloadName = Path.GetFileName(convertedPath),
+        };
+    }
+
+    private async Task<KoboDownloadResult> GetKepubDownloadAsync(Chapter chapter, CancellationToken ct)
+    {
+        var settings = await unitOfWork.SettingsRepository.GetSettingsDtoAsync(ct);
+        if (!settings.EnableKepubConversion)
+        {
+            throw new KavitaException("kobo-format-unsupported");
+        }
+
+        var source = PreferNativeEpub(chapter.Files) ?? PreferConvertibleArchive(chapter.Files);
+        if (source == null) throw new KavitaException("kobo-epub-missing");
+
+        var kepubPath = koboConversionService.TryGetCachedKepubPath(chapter.Id, source);
+        if (kepubPath == null) throw new KavitaException("kobo-entitlement-not-found");
+
+        return new KoboDownloadResult
+        {
+            FilePath = kepubPath,
+            ContentType = downloadService.GetContentTypeFromFile(kepubPath),
+            FileDownloadName = BuildKepubDownloadFileName(source),
         };
     }
 
@@ -1040,7 +1070,7 @@ public partial class KoboService(
 
     private async Task<(int Emitted, DateTime MaxArchiveModified)> AppendArchiveRemovalsAsync(
         int userId, string tokenBase, KoboSyncToken syncToken, JsonArray items, int limit,
-        CancellationToken ct)
+        bool preferKepub, CancellationToken ct)
     {
         if (limit <= 0) return (0, DateTime.MinValue);
 
@@ -1082,7 +1112,7 @@ public partial class KoboService(
             var series = chapter.Volume.Series;
             var entitlementUuid = KoboEntitlementId.FromChapterIdString(chapter.Id);
             var entitlement = BuildEntitlementPayload(chapter, series, entitlementUuid, tokenBase,
-                isRemoved: true);
+                isRemoved: true, preferKepub: preferKepub);
 
             var created = chapter.CreatedUtc == default ? chapter.Created : chapter.CreatedUtc;
             var isNew = created > syncToken.BooksLastCreated;
@@ -1257,12 +1287,12 @@ public partial class KoboService(
     }
 
     private JsonObject BuildEntitlementPayload(Chapter chapter, Series series, string entitlementUuid,
-        string tokenBase, bool isRemoved)
+        string tokenBase, bool isRemoved, bool preferKepub)
     {
         return new JsonObject
         {
             ["BookEntitlement"] = BuildBookEntitlement(chapter, entitlementUuid, isRemoved),
-            ["BookMetadata"] = BuildBookMetadata(chapter, series, entitlementUuid, tokenBase),
+            ["BookMetadata"] = BuildBookMetadata(chapter, series, entitlementUuid, tokenBase, preferKepub),
         };
     }
 
@@ -1289,7 +1319,8 @@ public partial class KoboService(
         };
     }
 
-    private JsonObject BuildBookMetadata(Chapter chapter, Series series, string entitlementUuid, string tokenBase)
+    private JsonObject BuildBookMetadata(Chapter chapter, Series series, string entitlementUuid, string tokenBase,
+        bool preferKepub)
     {
         var epub = PreferNativeEpub(chapter.Files);
         var archive = PreferConvertibleArchive(chapter.Files);
@@ -1297,11 +1328,33 @@ public partial class KoboService(
         // Immediate catalog presence: advertise EPUB download even when conversion is still pending.
         if (epub != null || archive != null)
         {
-            var size = epub?.Bytes > 0 ? epub.Bytes : 0;
-            var url = $"{tokenBase}/download/{entitlementUuid}/epub";
-            // Advertise both so firmware that prefers EPUB3 still resolves a download.
-            downloadUrls.Add(BuildDownloadUrl(Epub3Format, size, url));
-            downloadUrls.Add(BuildDownloadUrl(EpubFormat, size, url));
+            var source = epub ?? archive!;
+            var kepubPath = preferKepub
+                ? koboConversionService.TryGetCachedKepubPath(chapter.Id, source)
+                : null;
+            if (kepubPath != null)
+            {
+                long size = 0;
+                try
+                {
+                    size = new FileInfo(kepubPath).Length;
+                }
+                catch (IOException)
+                {
+                    // Size is advisory; advertise KEPUB even if size cannot be read.
+                }
+
+                var kepubUrl = $"{tokenBase}/download/{entitlementUuid}/kepub";
+                downloadUrls.Add(BuildDownloadUrl(KepubFormat, size, kepubUrl));
+            }
+            else
+            {
+                var size = epub?.Bytes > 0 ? epub.Bytes : 0;
+                var url = $"{tokenBase}/download/{entitlementUuid}/epub";
+                // Advertise both so firmware that prefers EPUB3 still resolves a download.
+                downloadUrls.Add(BuildDownloadUrl(Epub3Format, size, url));
+                downloadUrls.Add(BuildDownloadUrl(EpubFormat, size, url));
+            }
         }
 
         var writers = ResolveWriters(chapter, series.Metadata);
@@ -1400,10 +1453,37 @@ public partial class KoboService(
     }
 
     private static bool IsSupportedDownloadFormat(string format) =>
+        IsEpubDownloadFormat(format) || IsKepubDownloadFormat(format);
+
+    private static bool IsEpubDownloadFormat(string format) =>
         string.Equals(format, "epub", StringComparison.OrdinalIgnoreCase) ||
         string.Equals(format, EpubFormat, StringComparison.OrdinalIgnoreCase) ||
         string.Equals(format, "epub3", StringComparison.OrdinalIgnoreCase) ||
         string.Equals(format, Epub3Format, StringComparison.OrdinalIgnoreCase);
+
+    private static bool IsKepubDownloadFormat(string format) =>
+        string.Equals(format, "kepub", StringComparison.OrdinalIgnoreCase) ||
+        string.Equals(format, KepubFormat, StringComparison.OrdinalIgnoreCase);
+
+    /// <summary>
+    /// Kobo clients expect Content-Disposition to end in <c>.kepub.epub</c> for sync downloads.
+    /// </summary>
+    internal static string BuildKepubDownloadFileName(MangaFile sourceFile)
+    {
+        ArgumentNullException.ThrowIfNull(sourceFile);
+        var stem = Path.GetFileNameWithoutExtension(sourceFile.FileName);
+        if (string.IsNullOrWhiteSpace(stem))
+        {
+            stem = Path.GetFileNameWithoutExtension(sourceFile.FilePath);
+        }
+
+        if (string.IsNullOrWhiteSpace(stem))
+        {
+            stem = "book";
+        }
+
+        return stem + KepubDownloadFileExtension;
+    }
 
     internal static string BuildTitle(Series series, Chapter chapter)
     {

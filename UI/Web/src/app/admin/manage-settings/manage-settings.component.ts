@@ -70,6 +70,8 @@ export class ManageSettingsComponent implements OnInit {
       this.settingsForm.addControl('enableKoboSync', new FormControl(this.serverSettings.enableKoboSync, [Validators.required]));
       this.settingsForm.addControl('koboConvertTimeBudgetSeconds', new FormControl(this.serverSettings.koboConvertTimeBudgetSeconds, [Validators.required, Validators.min(1)]));
       this.settingsForm.addControl('koboSyncPageSize', new FormControl(this.serverSettings.koboSyncPageSize, [Validators.required, Validators.min(1), Validators.max(1000)]));
+      this.settingsForm.addControl('enableKepubConversion', new FormControl(this.serverSettings.enableKepubConversion, [Validators.required]));
+      this.settingsForm.addControl('kepubifyPath', new FormControl(this.serverSettings.kepubifyPath || ''));
       this.settingsForm.addControl('baseUrl', new FormControl(this.serverSettings.baseUrl, [Validators.pattern(/^(\/[\w-]+)*\/$/)]));
       this.settingsForm.addControl('totalBackups', new FormControl(this.serverSettings.totalBackups, [Validators.required, Validators.min(1), Validators.max(30)]));
       this.settingsForm.addControl('cacheSize', new FormControl(this.serverSettings.cacheSize, [Validators.required, Validators.min(50)]));
@@ -82,9 +84,13 @@ export class ManageSettingsComponent implements OnInit {
 
 
       this.updateKoboSyncControlState();
+      this.updateKepubConversionValidators();
       this.settingsForm.get('hostName')?.valueChanges.pipe(
         takeUntilDestroyed(this.destroyRef)
       ).subscribe(() => this.updateKoboSyncControlState());
+      this.settingsForm.get('enableKepubConversion')?.valueChanges.pipe(
+        takeUntilDestroyed(this.destroyRef)
+      ).subscribe(() => this.updateKepubConversionValidators());
 
       // Automatically save settings as we edit them
       this.settingsForm.valueChanges.pipe(
@@ -141,6 +147,20 @@ export class ManageSettingsComponent implements OnInit {
     this.cdRef.markForCheck();
   }
 
+  private updateKepubConversionValidators() {
+    const enableKepub = this.settingsForm.get('enableKepubConversion');
+    const kepubifyPath = this.settingsForm.get('kepubifyPath');
+    if (!enableKepub || !kepubifyPath) return;
+
+    if (enableKepub.value) {
+      kepubifyPath.setValidators([Validators.required]);
+    } else {
+      kepubifyPath.clearValidators();
+    }
+    kepubifyPath.updateValueAndValidity({emitEvent: false});
+    this.cdRef.markForCheck();
+  }
+
   resetForm() {
     this.settingsForm.get('cacheDirectory')?.setValue(this.serverSettings.cacheDirectory, {onlySelf: true, emitEvent: false});
     this.settingsForm.get('scanTask')?.setValue(this.serverSettings.taskScan, {onlySelf: true, emitEvent: false});
@@ -154,8 +174,11 @@ export class ManageSettingsComponent implements OnInit {
     this.settingsForm.get('enableKoboSync')?.setValue(this.serverSettings.enableKoboSync, {onlySelf: true, emitEvent: false});
     this.settingsForm.get('koboConvertTimeBudgetSeconds')?.setValue(this.serverSettings.koboConvertTimeBudgetSeconds, {onlySelf: true, emitEvent: false});
     this.settingsForm.get('koboSyncPageSize')?.setValue(this.serverSettings.koboSyncPageSize, {onlySelf: true, emitEvent: false});
+    this.settingsForm.get('enableKepubConversion')?.setValue(this.serverSettings.enableKepubConversion, {onlySelf: true, emitEvent: false});
+    this.settingsForm.get('kepubifyPath')?.setValue(this.serverSettings.kepubifyPath || '', {onlySelf: true, emitEvent: false});
     this.settingsForm.get('baseUrl')?.setValue(this.serverSettings.baseUrl, {onlySelf: true, emitEvent: false});
     this.updateKoboSyncControlState();
+    this.updateKepubConversionValidators();
     this.settingsForm.get('emailServiceUrl')?.setValue(this.serverSettings.emailServiceUrl, {onlySelf: true, emitEvent: false});
     this.settingsForm.get('totalBackups')?.setValue(this.serverSettings.totalBackups, {onlySelf: true, emitEvent: false});
     this.settingsForm.get('totalLogs')?.setValue(this.serverSettings.totalLogs, {onlySelf: true, emitEvent: false});

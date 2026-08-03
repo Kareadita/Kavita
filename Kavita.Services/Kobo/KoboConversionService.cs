@@ -31,11 +31,20 @@ public class KoboConversionService(
 {
     public const string Name = "KoboConversionService";
     public const string CacheFolderName = "kobo";
+    public const string KepubCacheExtension = ".kepub.epub";
     public const string ConvertUnavailableMessage = "kobo-convert-unavailable";
     public const string ConvertFailedMessage = "kobo-convert-failed";
 
     /// <summary>Process-wide in-flight chapter converts (download + background).</summary>
     private static readonly ConcurrentDictionary<int, byte> InFlight = new();
+
+    public string? TryGetCachedKepubPath(int chapterId, MangaFile sourceFile)
+    {
+        ArgumentNullException.ThrowIfNull(sourceFile);
+        var fingerprint = ComputeFingerprint(sourceFile);
+        var path = GetKepubCacheFilePath(chapterId, fingerprint);
+        return File.Exists(path) ? path : null;
+    }
 
     public async Task<string> GetOrConvertEpubAsync(int chapterId, MangaFile archiveFile, string title,
         int budgetSeconds, CancellationToken ct = default)
@@ -229,6 +238,9 @@ public class KoboConversionService(
     internal string GetCacheFilePath(int chapterId, string fingerprint) =>
         Path.Combine(GetCacheDirectory(chapterId), $"{fingerprint}.epub");
 
+    internal string GetKepubCacheFilePath(int chapterId, string fingerprint) =>
+        Path.Combine(GetCacheDirectory(chapterId), $"{fingerprint}{KepubCacheExtension}");
+
     private async Task ConvertChapterIfNeededAsync(Chapter chapter, CancellationToken ct)
     {
         var archive = KoboService.PreferConvertibleArchive(chapter.Files);
@@ -280,8 +292,9 @@ public class KoboConversionService(
             if (File.Exists(finalPath)) File.Delete(finalPath);
             File.Move(tempPath, finalPath);
 
-            // Drop stale fingerprints for this chapter (source changed).
+            // Drop stale fingerprints for this chapter (source changed). Keep KEPUB artifacts.
             foreach (var stale in Directory.EnumerateFiles(cacheDir, "*.epub")
+                         .Where(p => !p.EndsWith(KepubCacheExtension, StringComparison.OrdinalIgnoreCase))
                          .Where(p => !string.Equals(p, finalPath, StringComparison.OrdinalIgnoreCase)))
             {
                 try { File.Delete(stale); }

@@ -211,5 +211,15 @@ public enum ServerSettingKey
     /// Max book/reading-state items returned per Kobo library/sync page.
     /// </summary>
     [Description("KoboSyncPageSize")]
-    KoboSyncPageSize = 46
+    KoboSyncPageSize = 46,
+    /// <summary>
+    /// When enabled, Kobo sync prefers cached KEPUB download URLs (requires a kepubify path).
+    /// </summary>
+    [Description("EnableKepubConversion")]
+    EnableKepubConversion = 47,
+    /// <summary>
+    /// Filesystem path to the kepubify binary. Required when <see cref="EnableKepubConversion"/> is on.
+    /// </summary>
+    [Description("KepubifyPath")]
+    KepubifyPath = 48
 }

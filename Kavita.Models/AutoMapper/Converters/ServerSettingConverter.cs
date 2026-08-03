@@ -57,6 +57,12 @@ public class ServerSettingConverter : ITypeConverter<IEnumerable<ServerSetting>,
                 case ServerSettingKey.KoboSyncPageSize:
                     destination.KoboSyncPageSize = int.Parse(row.Value, CultureInfo.InvariantCulture);
                     break;
+                case ServerSettingKey.EnableKepubConversion:
+                    destination.EnableKepubConversion = bool.Parse(row.Value);
+                    break;
+                case ServerSettingKey.KepubifyPath:
+                    destination.KepubifyPath = row.Value ?? string.Empty;
+                    break;
                 case ServerSettingKey.BaseUrl:
                     destination.BaseUrl = row.Value;
                     break;

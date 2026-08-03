@@ -266,6 +266,33 @@ public class KoboConversionServiceTests(ITestOutputHelper testOutputHelper) : Ab
         Assert.Equal(1, convertCalls);
     }
 
+    [Fact]
+    public void TryGetCachedKepubPath_ReturnsPath_WhenArtifactExists()
+    {
+        var cacheDir = Path.Join(Path.GetTempPath(), "kavita-kobo-kepub-" + Guid.NewGuid().ToString("N"));
+        Directory.CreateDirectory(cacheDir);
+        try
+        {
+            var directoryService = Substitute.For<IDirectoryService>();
+            directoryService.LongTermCacheDirectory.Returns(cacheDir);
+
+            var service = CreateService(Substitute.For<IUnitOfWork>(), directoryService,
+                Substitute.For<IKoboArchiveEpubConverter>());
+            var file = new MangaFileBuilder(_epubPath, MangaFormat.Epub, 10).WithBytes(100).Build();
+            var fingerprint = KoboConversionService.ComputeFingerprint(file);
+            var expected = service.GetKepubCacheFilePath(99, fingerprint);
+            Directory.CreateDirectory(Path.GetDirectoryName(expected)!);
+            File.WriteAllText(expected, "kepub");
+
+            Assert.Equal(expected, service.TryGetCachedKepubPath(99, file));
+            Assert.Null(service.TryGetCachedKepubPath(100, file));
+        }
+        finally
+        {
+            if (Directory.Exists(cacheDir)) Directory.Delete(cacheDir, true);
+        }
+    }
+
     private static KoboConversionService CreateService(
         IUnitOfWork unitOfWork,
         IDirectoryService directoryService,

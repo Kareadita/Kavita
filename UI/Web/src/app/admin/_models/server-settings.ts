@@ -18,6 +18,8 @@ export interface ServerSettings {
   enableKoboSync: boolean;
   koboConvertTimeBudgetSeconds: number;
   koboSyncPageSize: number;
+  enableKepubConversion: boolean;
+  kepubifyPath: string;
   baseUrl: string;
   bookmarksDirectory: string;
   emailServiceUrl: string;

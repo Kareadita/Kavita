@@ -79,7 +79,8 @@ public class KoboServiceTests(ITestOutputHelper testOutputHelper) : AbstractDbTe
 
     private static async Task ConfigureKoboSettings(IUnitOfWork unitOfWork, string hostName,
         bool enableKoboSync = true, string baseUrl = "/", int convertBudget = 30,
-        int syncPageSize = KoboService.DefaultSyncPageSize)
+        int syncPageSize = KoboService.DefaultSyncPageSize, bool enableKepubConversion = false,
+        string kepubifyPath = "")
     {
         var settingsService = CreateSettingsService(unitOfWork);
         var settings = await unitOfWork.SettingsRepository.GetSettingsDtoAsync();
@@ -88,6 +89,8 @@ public class KoboServiceTests(ITestOutputHelper testOutputHelper) : AbstractDbTe
         settings.EnableKoboSync = enableKoboSync;
         settings.KoboConvertTimeBudgetSeconds = convertBudget;
         settings.KoboSyncPageSize = syncPageSize;
+        settings.EnableKepubConversion = enableKepubConversion;
+        settings.KepubifyPath = kepubifyPath;
         await settingsService.UpdateSettings(settings);
     }
 
@@ -157,6 +160,46 @@ public class KoboServiceTests(ITestOutputHelper testOutputHelper) : AbstractDbTe
 
         var reloaded = await unitOfWork.SettingsRepository.GetSettingsDtoAsync();
         Assert.Equal(KoboService.DefaultSyncPageSize, reloaded.KoboSyncPageSize);
+    }
+
+    [Fact]
+    public async Task UpdateSettings_EnableKepubConversion_RequiresKepubifyPath()
+    {
+        var (unitOfWork, _, _) = await CreateDatabase();
+        var settingsService = CreateSettingsService(unitOfWork);
+
+        var settings = await unitOfWork.SettingsRepository.GetSettingsDtoAsync();
+        Assert.False(settings.EnableKepubConversion);
+        Assert.Equal(string.Empty, settings.KepubifyPath);
+
+        settings.EnableKepubConversion = true;
+        settings.KepubifyPath = string.Empty;
+
+        var ex = await Assert.ThrowsAsync<KavitaException>(() => settingsService.UpdateSettings(settings));
+        Assert.Equal("kobo-kepubify-path-required", ex.Message);
+
+        var reloaded = await unitOfWork.SettingsRepository.GetSettingsDtoAsync();
+        Assert.False(reloaded.EnableKepubConversion);
+    }
+
+    [Fact]
+    public async Task UpdateSettings_EnableKepubConversion_Persists_WhenPathSet()
+    {
+        var (unitOfWork, _, _) = await CreateDatabase();
+        var settingsService = CreateSettingsService(unitOfWork);
+
+        var settings = await unitOfWork.SettingsRepository.GetSettingsDtoAsync();
+        settings.EnableKepubConversion = true;
+        settings.KepubifyPath = "/usr/bin/kepubify";
+
+        var updated = await settingsService.UpdateSettings(settings);
+
+        Assert.True(updated.EnableKepubConversion);
+        Assert.Equal("/usr/bin/kepubify", updated.KepubifyPath);
+
+        var reloaded = await unitOfWork.SettingsRepository.GetSettingsDtoAsync();
+        Assert.True(reloaded.EnableKepubConversion);
+        Assert.Equal("/usr/bin/kepubify", reloaded.KepubifyPath);
     }
 
     [Fact]
@@ -825,6 +868,145 @@ public class KoboServiceTests(ITestOutputHelper testOutputHelper) : AbstractDbTe
         Assert.Equal(KoboService.EpubFormat, metadata[0]["DownloadUrls"]![1]!["Format"]!.GetValue<string>());
         Assert.StartsWith("https://kavita.example.com/api/kobo/",
             metadata[0]["DownloadUrls"]![0]!["Url"]!.GetValue<string>());
+    }
+
+    [Fact]
+    public async Task KepubAdvertise_WhenEnabledAndCached_IsKepubOnly()
+    {
+        var (unitOfWork, context, mapper) = await CreateDatabase();
+        var user = await SeedUser(unitOfWork, context);
+        var library = await context.Library.SingleAsync(l => l.Name == "Kobo Lib");
+        var chapter = await AddEpubChapter(context, library, "Kepub Series", "1");
+        await context.SaveChangesAsync();
+
+        const string kepubPath = "/tmp/kobo-test/AesopsFables.kepub.epub";
+        var conversion = Substitute.For<IKoboConversionService>();
+        conversion.TryGetCachedKepubPath(chapter.Id, Arg.Any<MangaFile>())
+            .Returns(kepubPath);
+
+        await ConfigureKoboSettings(unitOfWork, "https://kavita.example.com",
+            enableKepubConversion: true, kepubifyPath: "/usr/bin/kepubify");
+        var koboService = CreateKoboService(unitOfWork, mapper, conversionService: conversion);
+        var token = (await koboService.GetOrCreateSyncUrlAsync(user.Id)).Split('/').Last();
+        var uuid = KoboEntitlementId.FromChapterIdString(chapter.Id);
+
+        var sync = await koboService.SyncLibraryAsync(token, null);
+        var downloadUrls = sync.Items[0]!["NewEntitlement"]!["BookMetadata"]!["DownloadUrls"]!.AsArray();
+        Assert.Single(downloadUrls);
+        Assert.Equal(KoboService.KepubFormat, downloadUrls[0]!["Format"]!.GetValue<string>());
+        Assert.Equal(
+            $"https://kavita.example.com/api/kobo/{token}/download/{uuid}/kepub",
+            downloadUrls[0]!["Url"]!.GetValue<string>());
+
+        var metadata = await koboService.GetMetadataAsync(token, uuid);
+        Assert.Single(metadata[0]["DownloadUrls"]!.AsArray());
+        Assert.Equal(KoboService.KepubFormat, metadata[0]["DownloadUrls"]![0]!["Format"]!.GetValue<string>());
+    }
+
+    [Fact]
+    public async Task KepubAdvertise_WhenEnabledWithoutCache_FallsBackToEpub()
+    {
+        var (unitOfWork, context, mapper) = await CreateDatabase();
+        var user = await SeedUser(unitOfWork, context);
+        var library = await context.Library.SingleAsync(l => l.Name == "Kobo Lib");
+        var chapter = await AddEpubChapter(context, library, "Epub Fallback Series", "1");
+        await context.SaveChangesAsync();
+
+        var conversion = Substitute.For<IKoboConversionService>();
+        conversion.TryGetCachedKepubPath(Arg.Any<int>(), Arg.Any<MangaFile>()).Returns((string?)null);
+
+        await ConfigureKoboSettings(unitOfWork, "https://kavita.example.com",
+            enableKepubConversion: true, kepubifyPath: "/usr/bin/kepubify");
+        var koboService = CreateKoboService(unitOfWork, mapper, conversionService: conversion);
+        var token = (await koboService.GetOrCreateSyncUrlAsync(user.Id)).Split('/').Last();
+
+        var sync = await koboService.SyncLibraryAsync(token, null);
+        var downloadUrls = sync.Items[0]!["NewEntitlement"]!["BookMetadata"]!["DownloadUrls"]!.AsArray();
+        Assert.Equal(2, downloadUrls.Count);
+        Assert.Equal(KoboService.Epub3Format, downloadUrls[0]!["Format"]!.GetValue<string>());
+        Assert.Equal(KoboService.EpubFormat, downloadUrls[1]!["Format"]!.GetValue<string>());
+        Assert.EndsWith("/epub", downloadUrls[0]!["Url"]!.GetValue<string>());
+    }
+
+    [Fact]
+    public async Task KepubAdvertise_WhenDisabled_IgnoresCachedKepub()
+    {
+        var (unitOfWork, context, mapper) = await CreateDatabase();
+        var user = await SeedUser(unitOfWork, context);
+        var library = await context.Library.SingleAsync(l => l.Name == "Kobo Lib");
+        var chapter = await AddEpubChapter(context, library, "Kepub Disabled Series", "1");
+        await context.SaveChangesAsync();
+
+        var conversion = Substitute.For<IKoboConversionService>();
+        conversion.TryGetCachedKepubPath(Arg.Any<int>(), Arg.Any<MangaFile>())
+            .Returns("/tmp/should-not-advertise.kepub.epub");
+
+        await ConfigureKoboSettings(unitOfWork, "https://kavita.example.com",
+            enableKepubConversion: false);
+        var koboService = CreateKoboService(unitOfWork, mapper, conversionService: conversion);
+        var token = (await koboService.GetOrCreateSyncUrlAsync(user.Id)).Split('/').Last();
+
+        var sync = await koboService.SyncLibraryAsync(token, null);
+        var downloadUrls = sync.Items[0]!["NewEntitlement"]!["BookMetadata"]!["DownloadUrls"]!.AsArray();
+        Assert.Equal(2, downloadUrls.Count);
+        Assert.Equal(KoboService.Epub3Format, downloadUrls[0]!["Format"]!.GetValue<string>());
+        Assert.Equal(KoboService.EpubFormat, downloadUrls[1]!["Format"]!.GetValue<string>());
+        conversion.DidNotReceive().TryGetCachedKepubPath(Arg.Any<int>(), Arg.Any<MangaFile>());
+    }
+
+    [Fact]
+    public async Task Download_Kepub_UsesKepubEpubContentDisposition()
+    {
+        var (unitOfWork, context, mapper) = await CreateDatabase();
+        var user = await SeedUser(unitOfWork, context);
+        var library = await context.Library.SingleAsync(l => l.Name == "Kobo Lib");
+        var chapter = await AddEpubChapter(context, library, "Kepub Download Series", "1");
+        await context.SaveChangesAsync();
+
+        var source = chapter.Files.Single(f => f.Format == MangaFormat.Epub);
+        var kepubPath = Path.Combine(Path.GetTempPath(), $"kobo-kepub-{Guid.NewGuid():N}.kepub.epub");
+        await File.WriteAllTextAsync(kepubPath, "kepub-bytes");
+        try
+        {
+            var conversion = Substitute.For<IKoboConversionService>();
+            conversion.TryGetCachedKepubPath(chapter.Id, Arg.Any<MangaFile>()).Returns(kepubPath);
+
+            await ConfigureKoboSettings(unitOfWork, "https://kavita.example.com",
+                enableKepubConversion: true, kepubifyPath: "/usr/bin/kepubify");
+            var koboService = CreateKoboService(unitOfWork, mapper, conversionService: conversion);
+            var token = (await koboService.GetOrCreateSyncUrlAsync(user.Id)).Split('/').Last();
+            var uuid = KoboEntitlementId.FromChapterIdString(chapter.Id);
+
+            var download = await koboService.GetDownloadAsync(token, uuid, "kepub");
+            Assert.Equal(kepubPath, download.FilePath);
+            Assert.Equal("application/epub+zip", download.ContentType);
+            Assert.EndsWith(KoboService.KepubDownloadFileExtension, download.FileDownloadName);
+            Assert.Equal(KoboService.BuildKepubDownloadFileName(source), download.FileDownloadName);
+        }
+        finally
+        {
+            if (File.Exists(kepubPath)) File.Delete(kepubPath);
+        }
+    }
+
+    [Fact]
+    public async Task Download_Kepub_Throws_WhenConversionDisabled()
+    {
+        var (unitOfWork, context, mapper) = await CreateDatabase();
+        var user = await SeedUser(unitOfWork, context);
+        var library = await context.Library.SingleAsync(l => l.Name == "Kobo Lib");
+        var chapter = await AddEpubChapter(context, library, "Kepub Disabled Download", "1");
+        await context.SaveChangesAsync();
+
+        await ConfigureKoboSettings(unitOfWork, "https://kavita.example.com",
+            enableKepubConversion: false);
+        var koboService = CreateKoboService(unitOfWork, mapper);
+        var token = (await koboService.GetOrCreateSyncUrlAsync(user.Id)).Split('/').Last();
+        var uuid = KoboEntitlementId.FromChapterIdString(chapter.Id);
+
+        var ex = await Assert.ThrowsAsync<KavitaException>(() =>
+            koboService.GetDownloadAsync(token, uuid, "kepub"));
+        Assert.Equal("kobo-format-unsupported", ex.Message);
     }
 
     [Fact]
