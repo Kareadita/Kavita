@@ -221,5 +221,15 @@ public enum ServerSettingKey
     /// Filesystem path to the kepubify binary. Required when <see cref="EnableKepubConversion"/> is on.
     /// </summary>
     [Description("KepubifyPath")]
-    KepubifyPath = 48
+    KepubifyPath = 48,
+    /// <summary>
+    /// Max bytes for the archive→EPUB Kobo conversion cache pool. Empty/0 = unlimited (no LRU).
+    /// </summary>
+    [Description("KoboEpubCacheMaxBytes")]
+    KoboEpubCacheMaxBytes = 49,
+    /// <summary>
+    /// Max bytes for the EPUB→KEPUB Kobo conversion cache pool. Empty/0 = unlimited (no LRU).
+    /// </summary>
+    [Description("KoboKepubCacheMaxBytes")]
+    KoboKepubCacheMaxBytes = 50
 }

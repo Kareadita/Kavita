@@ -28,4 +28,5 @@ public static class TaskSchedulerConstants
     public const string PurgeKavitaPlusAuditLogsId = "kavita+-purge-audit-logs";
     public const string CreateReadStatusTransitionRuleEventsId = "kavita+-create-read-status-transition-rule-events";
     public const string RefreshConnectedTokensId = "kavita+-refresh-connected-tokens";
+    public const string KoboConversionCacheLruId = "kobo-conversion-cache-lru";
 }

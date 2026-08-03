@@ -57,7 +57,8 @@ public class ServerController(
     }
 
     /// <summary>
-    /// Clears the shared Kobo CBZ/CBR → EPUB conversion cache (cache-long/kobo). No automatic LRU.
+    /// Clears the shared Kobo conversion cache (cache-long/kobo), including archive→EPUB and EPUB→KEPUB artifacts.
+    /// When byte caps are configured, LRU also runs on write and via a daily cleanup job.
     /// </summary>
     [HttpPost("clear-kobo-conversion-cache")]
     public async Task<ActionResult> ClearKoboConversionCache()

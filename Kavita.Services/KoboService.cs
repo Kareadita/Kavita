@@ -319,6 +319,16 @@ public partial class KoboService(
                     AppUserId = userId,
                     ChapterId = chapter.Id,
                 });
+
+                // Queue background kepubify when this synced chapter still lacks a KEPUB artifact.
+                if (settings.EnableKepubConversion)
+                {
+                    var source = PreferNativeEpub(chapter.Files) ?? PreferConvertibleArchive(chapter.Files);
+                    if (source != null)
+                    {
+                        await koboConversionService.EnqueueKepubifyIfNeededAsync(chapter.Id, source, ct);
+                    }
+                }
             }
 
             remainingSlots -= page.Count;
@@ -655,8 +665,10 @@ public partial class KoboService(
         var source = PreferNativeEpub(chapter.Files) ?? PreferConvertibleArchive(chapter.Files);
         if (source == null) throw new KavitaException("kobo-epub-missing");
 
-        var kepubPath = koboConversionService.TryGetCachedKepubPath(chapter.Id, source);
-        if (kepubPath == null) throw new KavitaException("kobo-entitlement-not-found");
+        var series = chapter.Volume.Series;
+        var title = BuildTitle(series, chapter);
+        var kepubPath = await koboConversionService.GetOrConvertKepubAsync(chapter.Id, source, title,
+            settings.KoboConvertTimeBudgetSeconds, ct);
 
         return new KoboDownloadResult
         {

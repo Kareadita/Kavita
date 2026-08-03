@@ -72,6 +72,8 @@ export class ManageSettingsComponent implements OnInit {
       this.settingsForm.addControl('koboSyncPageSize', new FormControl(this.serverSettings.koboSyncPageSize, [Validators.required, Validators.min(1), Validators.max(1000)]));
       this.settingsForm.addControl('enableKepubConversion', new FormControl(this.serverSettings.enableKepubConversion, [Validators.required]));
       this.settingsForm.addControl('kepubifyPath', new FormControl(this.serverSettings.kepubifyPath || ''));
+      this.settingsForm.addControl('koboEpubCacheMaxBytes', new FormControl(this.serverSettings.koboEpubCacheMaxBytes ?? null, [Validators.min(1)]));
+      this.settingsForm.addControl('koboKepubCacheMaxBytes', new FormControl(this.serverSettings.koboKepubCacheMaxBytes ?? null, [Validators.min(1)]));
       this.settingsForm.addControl('baseUrl', new FormControl(this.serverSettings.baseUrl, [Validators.pattern(/^(\/[\w-]+)*\/$/)]));
       this.settingsForm.addControl('totalBackups', new FormControl(this.serverSettings.totalBackups, [Validators.required, Validators.min(1), Validators.max(30)]));
       this.settingsForm.addControl('cacheSize', new FormControl(this.serverSettings.cacheSize, [Validators.required, Validators.min(50)]));
@@ -176,6 +178,8 @@ export class ManageSettingsComponent implements OnInit {
     this.settingsForm.get('koboSyncPageSize')?.setValue(this.serverSettings.koboSyncPageSize, {onlySelf: true, emitEvent: false});
     this.settingsForm.get('enableKepubConversion')?.setValue(this.serverSettings.enableKepubConversion, {onlySelf: true, emitEvent: false});
     this.settingsForm.get('kepubifyPath')?.setValue(this.serverSettings.kepubifyPath || '', {onlySelf: true, emitEvent: false});
+    this.settingsForm.get('koboEpubCacheMaxBytes')?.setValue(this.serverSettings.koboEpubCacheMaxBytes ?? null, {onlySelf: true, emitEvent: false});
+    this.settingsForm.get('koboKepubCacheMaxBytes')?.setValue(this.serverSettings.koboKepubCacheMaxBytes ?? null, {onlySelf: true, emitEvent: false});
     this.settingsForm.get('baseUrl')?.setValue(this.serverSettings.baseUrl, {onlySelf: true, emitEvent: false});
     this.updateKoboSyncControlState();
     this.updateKepubConversionValidators();
@@ -200,7 +204,16 @@ export class ManageSettingsComponent implements OnInit {
     if (!(data.hostName || '').trim()) {
       data.enableKoboSync = false;
     }
+    data.koboEpubCacheMaxBytes = this.normalizeOptionalByteCap(data.koboEpubCacheMaxBytes);
+    data.koboKepubCacheMaxBytes = this.normalizeOptionalByteCap(data.koboKepubCacheMaxBytes);
     return data;
+  }
+
+  private normalizeOptionalByteCap(value: unknown): number | null {
+    if (value === null || value === undefined || value === '') return null;
+    const n = typeof value === 'number' ? value : Number(value);
+    if (!Number.isFinite(n) || n <= 0) return null;
+    return Math.trunc(n);
   }
 
   async resetToDefaults() {

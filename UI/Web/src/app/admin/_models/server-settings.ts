@@ -20,6 +20,10 @@ export interface ServerSettings {
   koboSyncPageSize: number;
   enableKepubConversion: boolean;
   kepubifyPath: string;
+  /** Max bytes for archive→EPUB cache; null/0/omitted = unlimited */
+  koboEpubCacheMaxBytes?: number | null;
+  /** Max bytes for EPUB→KEPUB cache; null/0/omitted = unlimited */
+  koboKepubCacheMaxBytes?: number | null;
   baseUrl: string;
   bookmarksDirectory: string;
   emailServiceUrl: string;

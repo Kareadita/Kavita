@@ -53,6 +53,14 @@ public sealed record ServerSettingDto
     /// </summary>
     public string KepubifyPath { get; set; } = string.Empty;
     /// <summary>
+    /// Max bytes for the archive→EPUB Kobo conversion cache. Null/0 = unlimited (no automatic LRU).
+    /// </summary>
+    public long? KoboEpubCacheMaxBytes { get; set; }
+    /// <summary>
+    /// Max bytes for the EPUB→KEPUB Kobo conversion cache. Null/0 = unlimited (no automatic LRU).
+    /// </summary>
+    public long? KoboKepubCacheMaxBytes { get; set; }
+    /// <summary>
     /// Base Url for the kavita. Requires restart to take effect.
     /// </summary>
     public string BaseUrl { get; set; } = default!;

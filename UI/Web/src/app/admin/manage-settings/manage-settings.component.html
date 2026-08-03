@@ -330,6 +330,54 @@
       </div>
 
       <div class="row g-0 mt-4 mb-4">
+        @if (settingsForm.get('koboEpubCacheMaxBytes'); as formControl) {
+          <app-setting-item [title]="t('kobo-epub-cache-max-bytes-label')" [subtitle]="t('kobo-epub-cache-max-bytes-tooltip')">
+            <ng-template #view>
+              {{formControl.value ? formControl.value : t('kobo-cache-max-bytes-unlimited')}}
+            </ng-template>
+            <ng-template #edit>
+              <input id="setting-kobo-epub-cache-max-bytes" aria-describedby="kobo-epub-cache-max-bytes-help" class="form-control" formControlName="koboEpubCacheMaxBytes"
+                     type="number" inputmode="numeric" step="1" min="1" placeholder="{{t('kobo-cache-max-bytes-unlimited')}}"
+                     onkeypress="return event.charCode >= 48 && event.charCode <= 57"
+                     [class.is-invalid]="formControl.invalid && !formControl.untouched" appEnterBlur>
+
+              @if(settingsForm.dirty || !settingsForm.untouched) {
+                <div id="kobo-epub-cache-max-bytes-validations" class="invalid-feedback">
+                  @if (formControl.errors?.min) {
+                    <div>{{t('kobo-cache-max-bytes-validation')}}</div>
+                  }
+                </div>
+              }
+            </ng-template>
+          </app-setting-item>
+        }
+      </div>
+
+      <div class="row g-0 mt-4 mb-4">
+        @if (settingsForm.get('koboKepubCacheMaxBytes'); as formControl) {
+          <app-setting-item [title]="t('kobo-kepub-cache-max-bytes-label')" [subtitle]="t('kobo-kepub-cache-max-bytes-tooltip')">
+            <ng-template #view>
+              {{formControl.value ? formControl.value : t('kobo-cache-max-bytes-unlimited')}}
+            </ng-template>
+            <ng-template #edit>
+              <input id="setting-kobo-kepub-cache-max-bytes" aria-describedby="kobo-kepub-cache-max-bytes-help" class="form-control" formControlName="koboKepubCacheMaxBytes"
+                     type="number" inputmode="numeric" step="1" min="1" placeholder="{{t('kobo-cache-max-bytes-unlimited')}}"
+                     onkeypress="return event.charCode >= 48 && event.charCode <= 57"
+                     [class.is-invalid]="formControl.invalid && !formControl.untouched" appEnterBlur>
+
+              @if(settingsForm.dirty || !settingsForm.untouched) {
+                <div id="kobo-kepub-cache-max-bytes-validations" class="invalid-feedback">
+                  @if (formControl.errors?.min) {
+                    <div>{{t('kobo-cache-max-bytes-validation')}}</div>
+                  }
+                </div>
+              }
+            </ng-template>
+          </app-setting-item>
+        }
+      </div>
+
+      <div class="row g-0 mt-4 mb-4">
         @if(settingsForm.get('enableFolderWatching'); as formControl) {
           <app-setting-switch [title]="t('folder-watching-label')" [subtitle]="t('folder-watching-tooltip')">
             <ng-template #switch>

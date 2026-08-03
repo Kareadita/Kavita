@@ -172,6 +172,8 @@ public static class Seed
                 new() {Key = ServerSettingKey.KoboSyncPageSize, Value = "100"},
                 new() {Key = ServerSettingKey.EnableKepubConversion, Value = "false"},
                 new() {Key = ServerSettingKey.KepubifyPath, Value = string.Empty},
+                new() {Key = ServerSettingKey.KoboEpubCacheMaxBytes, Value = string.Empty},
+                new() {Key = ServerSettingKey.KoboKepubCacheMaxBytes, Value = string.Empty},
                 new() {Key = ServerSettingKey.BaseUrl, Value = "/"},
                 new() {Key = ServerSettingKey.InstallId, Value = HashUtil.AnonymousToken()},
                 new() {Key = ServerSettingKey.InstallVersion, Value = BuildInfo.Version.ToString()},

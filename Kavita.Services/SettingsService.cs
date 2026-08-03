@@ -432,6 +432,26 @@ public class SettingsService(
                 unitOfWork.SettingsRepository.Update(setting);
             }
 
+            if (setting.Key == ServerSettingKey.KoboEpubCacheMaxBytes)
+            {
+                var stored = FormatOptionalByteCap(updateSettingsDto.KoboEpubCacheMaxBytes, "kobo-epub-cache-max-bytes");
+                if (stored != setting.Value)
+                {
+                    setting.Value = stored;
+                    unitOfWork.SettingsRepository.Update(setting);
+                }
+            }
+
+            if (setting.Key == ServerSettingKey.KoboKepubCacheMaxBytes)
+            {
+                var stored = FormatOptionalByteCap(updateSettingsDto.KoboKepubCacheMaxBytes, "kobo-kepub-cache-max-bytes");
+                if (stored != setting.Value)
+                {
+                    setting.Value = stored;
+                    unitOfWork.SettingsRepository.Update(setting);
+                }
+            }
+
             if (setting.Key == ServerSettingKey.EncodeMediaAs &&
                 ((int)updateSettingsDto.EncodeMediaAs).ToString() != setting.Value)
             {
@@ -755,5 +775,20 @@ public class SettingsService(
             setting.Value = updateSettingsDto.SmtpConfig.CustomizedTemplates + string.Empty;
             unitOfWork.SettingsRepository.Update(setting);
         }
+    }
+
+    /// <summary>
+    /// Null or 0 → empty (unlimited). Negative values throw. Positive → invariant string.
+    /// </summary>
+    private static string FormatOptionalByteCap(long? value, string errorKey)
+    {
+        if (value is < 0)
+        {
+            throw new KavitaException(errorKey);
+        }
+
+        return value is null or 0
+            ? string.Empty
+            : value.Value.ToString(System.Globalization.CultureInfo.InvariantCulture);
     }
 }

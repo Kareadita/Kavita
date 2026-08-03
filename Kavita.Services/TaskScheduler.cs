@@ -81,6 +81,7 @@ public class TaskScheduler : ITaskScheduler
     public const string EnsureSideNavId = TaskSchedulerConstants.EnsureSideNavId;
     public const string FlushUserActiveTaskId = TaskSchedulerConstants.FlushUserActiveTaskId;
     public const string PurgeKavitaPlusAuditLogsId = TaskSchedulerConstants.PurgeKavitaPlusAuditLogsId;
+    public const string KoboConversionCacheLruId = TaskSchedulerConstants.KoboConversionCacheLruId;
 
     private const int BaseRetryDelay = 60; // 1-minute
 
@@ -244,6 +245,10 @@ public class TaskScheduler : ITaskScheduler
         RecurringJob.AddOrUpdate<IActiveUserTrackerService>(FlushUserActiveTaskId,
             service => service.FlushAsync(CancellationToken.None),
             "*/5 * * * *", RecurringJobOptions);
+
+        RecurringJob.AddOrUpdate<IKoboConversionService>(KoboConversionCacheLruId,
+            service => service.EnforceConversionCacheCapsAsync(CancellationToken.None),
+            Cron.Daily, RecurringJobOptions);
 
     }
 

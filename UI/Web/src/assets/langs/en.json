@@ -2460,6 +2460,12 @@
         "kobo-kepubify-path-label": "Kepubify Path",
         "kobo-kepubify-path-tooltip": "Filesystem path to the kepubify binary used to convert EPUB to KEPUB. Required when KEPUB conversion is enabled.",
         "kobo-kepubify-path-validation": "Kepubify path is required when KEPUB conversion is enabled",
+        "kobo-epub-cache-max-bytes-label": "Kobo Archive→EPUB Cache Max Bytes",
+        "kobo-epub-cache-max-bytes-tooltip": "Maximum disk size for CBZ/CBR→EPUB conversion cache. Leave empty for unlimited. When set, least-recently-used files are evicted on write and during daily cleanup.",
+        "kobo-kepub-cache-max-bytes-label": "Kobo EPUB→KEPUB Cache Max Bytes",
+        "kobo-kepub-cache-max-bytes-tooltip": "Maximum disk size for EPUB→KEPUB conversion cache. Leave empty for unlimited. When set, least-recently-used files are evicted on write and during daily cleanup.",
+        "kobo-cache-max-bytes-unlimited": "Unlimited",
+        "kobo-cache-max-bytes-validation": "Must be empty (unlimited) or at least 1 byte",
         "folder-watching-label": "Folder Watching",
         "folder-watching-tooltip": "Allows Kavita to monitor Library Folders to detect changes and invoke scanning on those changes. This allows content to be updated without manually invoking scans or waiting for nightly scans. Will always wait 10 minutes before triggering scan.",
         "enable-folder-watching": "Enable Folder Watching",
@@ -2539,7 +2545,7 @@
         "clear-reading-cache-task-success": "Cache has been cleared",
 
         "clear-kobo-conversion-cache-task": "Clear Kobo Conversion Cache",
-        "clear-kobo-conversion-cache-task-desc": "Deletes converted EPUBs stored for Kobo sync (CBZ/CBR warm-up and on-download converts). There is no automatic size limit; whole-library convert can grow disk use until you clear this cache.",
+        "clear-kobo-conversion-cache-task-desc": "Deletes converted EPUBs and KEPUBs stored for Kobo sync (warm-up and on-download converts). Optional per-pool byte caps enable automatic LRU eviction; Clear still wipes the entire cache.",
         "clear-kobo-conversion-cache-task-success": "Kobo conversion cache has been cleared",
 
         "clean-up-want-to-read-task": "Clean up Want to Read",

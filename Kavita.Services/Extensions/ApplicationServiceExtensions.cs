@@ -62,6 +62,7 @@ public static class ApplicationServiceExtensions
         services.AddScoped<IOpdsService, OpdsService>();
         services.AddScoped<IKoboService, KoboService>();
         services.AddScoped<IKoboArchiveEpubConverter, KoboArchiveEpubConverter>();
+        services.AddScoped<IKepubifyRunner, KepubifyRunner>();
         services.AddScoped<IKoboConversionJobScheduler, HangfireKoboConversionJobScheduler>();
         services.AddScoped<IKoboConversionService, KoboConversionService>();
         services.AddScoped<IOAuthService, OAuthService>();
