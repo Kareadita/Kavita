@@ -16,6 +16,10 @@ namespace Kavita.Services.Kobo;
 
 /// <summary>
 /// Builds a minimal reflowable EPUB3 from comic archive images (CBZ/CBR).
+/// Frozen structural contract (bump <see cref="KoboConversionService.ConvertContractVersion"/> on change):
+/// one spine doc per image at <c>OEBPS/Text/page_NNNN.xhtml</c> with a single <c>img</c>;
+/// matching <c>OEBPS/Images/page_NNNN{ext}</c>; ids <c>page_NNNN</c>/<c>img_NNNN</c>;
+/// nav in manifest only (never spine); no cover meta; no hand-authored Kobo spans.
 /// </summary>
 public class KoboArchiveEpubConverter(
     ILogger<KoboArchiveEpubConverter> logger,

@@ -41,6 +41,14 @@ public class KoboConversionService(
     public const string ConvertUnavailableMessage = "kobo-convert-unavailable";
     public const string ConvertFailedMessage = "kobo-convert-failed";
 
+    /// <summary>
+    /// Monotonic version of the archive→EPUB structural contract
+    /// (<see cref="KoboArchiveEpubConverter"/> / <see cref="KoboConvertLocationCodec"/>).
+    /// Bump when paths, spine membership, or page DOM rules change so EPUB and KEPUB
+    /// cache fingerprints miss and old artifacts are orphaned.
+    /// </summary>
+    public const int ConvertContractVersion = 1;
+
     /// <summary>Process-wide in-flight chapter converts (download + background).</summary>
     private static readonly ConcurrentDictionary<int, byte> InFlight = new();
 
@@ -323,7 +331,8 @@ public class KoboConversionService(
 
     internal static string ComputeFingerprint(MangaFile file)
     {
-        var raw = $"{file.FilePath}|{file.Bytes}|{file.LastModifiedUtc.Ticks}";
+        var raw =
+            $"{ConvertContractVersion}|{file.FilePath}|{file.Bytes}|{file.LastModifiedUtc.Ticks}";
         var hash = SHA256.HashData(Encoding.UTF8.GetBytes(raw));
         return Convert.ToHexString(hash).ToLowerInvariant();
     }
