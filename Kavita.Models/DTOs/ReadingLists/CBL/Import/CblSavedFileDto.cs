@@ -1,4 +1,5 @@
-using Kavita.Models.Entities.Enums.ReadingList;
+﻿using Kavita.Models.Entities.Enums.ReadingList;
+using System.ComponentModel.DataAnnotations;
 
 namespace Kavita.Models.DTOs.ReadingLists.CBL.Import;
 #nullable enable
@@ -19,6 +20,7 @@ public record CblSavedFileDto
     /// <summary>
     /// Import source type (File, Url, or None)
     /// </summary>
+    [EnumDataType(typeof(ReadingListProvider))]
     public ReadingListProvider Provider { get; set; } = ReadingListProvider.None;
     /// <summary>
     /// Repo-relative path (null for file/URL sources)

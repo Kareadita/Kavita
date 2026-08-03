@@ -1,9 +1,11 @@
-using Microsoft.AspNetCore.DataProtection;
+﻿using Microsoft.AspNetCore.DataProtection;
+using System.ComponentModel.DataAnnotations;
 
 namespace Kavita.Models.DTOs.KavitaPlus.OAuth;
 
 public sealed record StartOAuthFlowRequestDto
 {
+    [EnumDataType(typeof(OAuthUpstream))]
     public required OAuthUpstream Upstream { get; set; }
     public required string InstanceUrl { get; set; }
     /// <summary>

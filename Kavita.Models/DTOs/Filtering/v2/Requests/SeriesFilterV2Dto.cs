@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using Kavita.Models.DTOs.Filtering.v2.SortOptions;
+using System.ComponentModel.DataAnnotations;
 
 namespace Kavita.Models.DTOs.Filtering.v2.Requests;
 #nullable enable
@@ -18,6 +19,7 @@ public sealed record SeriesFilterV2Dto : IFilterDto<SeriesFilterStatementDto, Se
     /// </summary>
     public string? Name { get; set; }
     public ICollection<SeriesFilterStatementDto> Statements { get; set; } = [];
+    [EnumDataType(typeof(FilterCombination))]
     public FilterCombination Combination { get; set; } = FilterCombination.And;
     public SeriesSortOptionDto? SortOptions { get; set; }
     public FilterEntityType EntityType => FilterEntityType.Series;
@@ -27,7 +29,6 @@ public sealed record SeriesFilterV2Dto : IFilterDto<SeriesFilterStatementDto, Se
     /// </summary>
     public int LimitTo { get; set; } = 0;
 }
-
 
 
 

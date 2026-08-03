@@ -1,4 +1,5 @@
 ﻿using Kavita.Models.Entities.Enums.KavitaPlus;
+using System.ComponentModel.DataAnnotations;
 
 namespace Kavita.Models.DTOs.Scrobbling;
 #nullable enable
@@ -20,6 +21,7 @@ public class PlusSeriesRequestDto
     public int? CbrId { get; set; }
     public string SeriesName { get; set; }
     public string? AltSeriesName { get; set; }
+    [EnumDataType(typeof(PlusMediaFormat))]
     public PlusMediaFormat MediaFormat { get; set; }
     /// <summary>
     /// Optional but can help with matching

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using Kavita.Models.Entities.Enums;
+using System.ComponentModel.DataAnnotations;
 
 namespace Kavita.Models.DTOs.KavitaPlus.Account;
 
@@ -16,6 +17,7 @@ public sealed record UserTokenInfoDto
 
 public sealed record TokenValidityInfoDto
 {
+    [EnumDataType(typeof(ScrobbleProvider))]
     public ScrobbleProvider Provider { get; set; }
     public DateTime ValidUntilUtc { get; set; }
 }

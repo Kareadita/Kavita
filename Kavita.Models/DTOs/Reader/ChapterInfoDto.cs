@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using Kavita.Models.Entities.Enums;
+using System.ComponentModel.DataAnnotations;
 
 namespace Kavita.Models.DTOs.Reader;
 #nullable enable
@@ -28,6 +29,7 @@ public sealed record ChapterInfoDto : IChapterInfoDto
     /// <summary>
     /// Series Format
     /// </summary>
+    [EnumDataType(typeof(MangaFormat))]
     public MangaFormat SeriesFormat { get; set; }
     /// <summary>
     /// Series entity Id
@@ -40,6 +42,7 @@ public sealed record ChapterInfoDto : IChapterInfoDto
     /// <summary>
     /// Library type
     /// </summary>
+    [EnumDataType(typeof(LibraryType))]
     public LibraryType LibraryType { get; set; }
     /// <summary>
     /// Chapter's title if set via ComicInfo.xml (Title field)

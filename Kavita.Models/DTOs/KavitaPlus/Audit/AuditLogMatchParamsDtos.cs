@@ -1,5 +1,6 @@
-using Kavita.Models.Entities.Enums;
+﻿using Kavita.Models.Entities.Enums;
 using Kavita.Models.Entities.Enums.Audit;
+using System.ComponentModel.DataAnnotations;
 
 namespace Kavita.Models.DTOs.KavitaPlus.Audit;
 #nullable enable
@@ -44,10 +45,12 @@ public sealed record AuditLogMetadataFetchParamsDto
 {
     public int SeriesId { get; init; }
     public int? LibraryId { get; init; }
+    [EnumDataType(typeof(MangaFormat))]
     public MangaFormat Format { get; init; }
     public long MangaBakaId { get; init; }
     public int CbrId { get; init; }
     public int AniListId { get; init; }
     public int HardcoverId { get; init; }
+    [EnumDataType(typeof(MetadataFetchTrigger))]
     public MetadataFetchTrigger Trigger { get; init; }
 }

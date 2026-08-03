@@ -1,4 +1,4 @@
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using Kavita.Models.Entities;
 using Kavita.Models.Entities.Enums;
@@ -14,6 +14,7 @@ public sealed record UserReadingProfileDto
     public int UserId { get; init; }
 
     public string Name { get; init; }
+    [EnumDataType(typeof(ReadingProfileKind))]
     public ReadingProfileKind Kind { get; init; }
     public List<int> DeviceIds { get; init; }
     public List<int> SeriesIds { get; init; }
@@ -22,18 +23,22 @@ public sealed record UserReadingProfileDto
     #region MangaReader
 
     /// <inheritdoc cref="Kavita.Models.Entities.User.AppUserReadingProfile.ReadingDirection"/>
+    [EnumDataType(typeof(ReadingDirection))]
     [Required]
     public ReadingDirection ReadingDirection { get; set; }
 
     /// <inheritdoc cref="Kavita.Models.Entities.User.AppUserReadingProfile.ScalingOption"/>
+    [EnumDataType(typeof(ScalingOption))]
     [Required]
     public ScalingOption ScalingOption { get; set; }
 
     /// <inheritdoc cref="Kavita.Models.Entities.User.AppUserReadingProfile.PageSplitOption"/>
+    [EnumDataType(typeof(PageSplitOption))]
     [Required]
     public PageSplitOption PageSplitOption { get; set; }
 
     /// <inheritdoc cref="Kavita.Models.Entities.User.AppUserReadingProfile.ReaderMode"/>
+    [EnumDataType(typeof(ReaderMode))]
     [Required]
     public ReaderMode ReaderMode { get; set; }
 
@@ -50,6 +55,7 @@ public sealed record UserReadingProfileDto
     public bool EmulateBook { get; set; }
 
     /// <inheritdoc cref="Kavita.Models.Entities.User.AppUserReadingProfile.LayoutMode"/>
+    [EnumDataType(typeof(LayoutMode))]
     [Required]
     public LayoutMode LayoutMode { get; set; }
 
@@ -69,6 +75,7 @@ public sealed record UserReadingProfileDto
     public int? WidthOverride { get; set; }
 
     /// <inheritdoc cref="AppUserReadingProfile.DisableWidthOverride"/>
+    [EnumDataType(typeof(BreakPoint))]
     public BreakPoint DisableWidthOverride { get; set; } = BreakPoint.Never;
 
     #endregion
@@ -96,10 +103,12 @@ public sealed record UserReadingProfileDto
     public bool BookReaderTapToPaginate { get; set; }
 
     /// <inheritdoc cref="Kavita.Models.Entities.User.AppUserReadingProfile.BookReaderReadingDirection"/>
+    [EnumDataType(typeof(ReadingDirection))]
     [Required]
     public ReadingDirection BookReaderReadingDirection { get; set; }
 
     /// <inheritdoc cref="Kavita.Models.Entities.User.AppUserReadingProfile.BookReaderWritingStyle"/>
+    [EnumDataType(typeof(WritingStyle))]
     [Required]
     public WritingStyle BookReaderWritingStyle { get; set; }
 
@@ -108,6 +117,7 @@ public sealed record UserReadingProfileDto
     public string BookReaderThemeName { get; set; } = null!;
 
     /// <inheritdoc cref="Kavita.Models.Entities.User.AppUserReadingProfile.BookReaderLayoutMode"/>
+    [EnumDataType(typeof(BookPageLayoutMode))]
     [Required]
     public BookPageLayoutMode BookReaderLayoutMode { get; set; }
 
@@ -124,14 +134,17 @@ public sealed record UserReadingProfileDto
     #region PdfReader
 
     /// <inheritdoc cref="Kavita.Models.Entities.User.AppUserReadingProfile.PdfTheme"/>
+    [EnumDataType(typeof(PdfTheme))]
     [Required]
     public PdfTheme PdfTheme { get; set; } = PdfTheme.Dark;
 
     /// <inheritdoc cref="Kavita.Models.Entities.User.AppUserReadingProfile.PdfScrollMode"/>
+    [EnumDataType(typeof(PdfScrollMode))]
     [Required]
     public PdfScrollMode PdfScrollMode { get; set; } = PdfScrollMode.Vertical;
 
     /// <inheritdoc cref="Kavita.Models.Entities.User.AppUserReadingProfile.PdfSpreadMode"/>
+    [EnumDataType(typeof(PdfSpreadMode))]
     [Required]
     public PdfSpreadMode PdfSpreadMode { get; set; } = PdfSpreadMode.None;
 

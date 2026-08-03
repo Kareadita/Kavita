@@ -1,4 +1,5 @@
-﻿namespace Kavita.Models.DTOs.KavitaPlus.Metadata;
+﻿using System.ComponentModel.DataAnnotations;
+namespace Kavita.Models.DTOs.KavitaPlus.Metadata;
 #nullable enable
 
 public enum CharacterRole
@@ -15,5 +16,6 @@ public sealed record SeriesCharacter
     public required string Description { get; set; }
     public required string Url { get; set; }
     public string? ImageUrl { get; set; }
+    [EnumDataType(typeof(CharacterRole))]
     public CharacterRole Role { get; set; }
 }

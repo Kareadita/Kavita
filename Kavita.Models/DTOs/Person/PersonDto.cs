@@ -1,5 +1,7 @@
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using Kavita.Models.Entities.Enums;
+using System.ComponentModel.DataAnnotations;
+using Kavita.Models.Attributes;
 
 namespace Kavita.Models.DTOs.Person;
 #nullable enable
@@ -49,6 +51,7 @@ public class PersonDto
     /// All roles as if returned by the /api/person/roles endpoint
     /// </summary>
     /// <remarks>Only present when retrieving from person info endpoint</remarks>
+    [EnumCollection(typeof(PersonRole))]
     public IList<PersonRole>? Roles { get; set; } = [];
 
 }

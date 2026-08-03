@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 
 namespace Kavita.Models.DTOs.KavitaPlus.License;
 
@@ -11,6 +12,7 @@ public sealed record KavitaPlusLicenseUsageDto
 
 public sealed record ApiUsageDto
 {
+    [EnumDataType(typeof(KavitaPlusApiName))]
     public KavitaPlusApiName ApiName { get; set; }
     public long LifetimeCount { get; set; }
     public long Last30DaysCount { get; set; }

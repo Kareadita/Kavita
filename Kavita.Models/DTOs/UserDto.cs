@@ -8,6 +8,7 @@ using Kavita.Models.Entities.Enums.User;
 using Kavita.Models.Entities.Interfaces;
 using Kavita.Models.Entities.User;
 using NotImplementedException = System.NotImplementedException;
+using System.ComponentModel.DataAnnotations;
 
 namespace Kavita.Models.DTOs;
 #nullable enable
@@ -26,6 +27,7 @@ public sealed record UserDto : IHasCoverImage
     public AgeRestrictionDto? AgeRestriction { get; init; }
     public string KavitaVersion { get; set; }
     /// <inheritdoc cref="AppUser.IdentityProvider"/>
+    [EnumDataType(typeof(IdentityProvider))]
     public IdentityProvider IdentityProvider { get; init; }
     public DateTime Created { get; set; }
     public DateTime CreatedUtc { get; set; }

@@ -3,6 +3,7 @@
 using System.Collections.Generic;
 using System.Security.Claims;
 using Kavita.Models.Entities.Enums;
+using System.ComponentModel.DataAnnotations;
 
 namespace Kavita.Models.DTOs.Settings;
 
@@ -55,6 +56,7 @@ public sealed record OidcConfigDto: OidcPublicConfigDto
 
     public List<string> DefaultRoles { get; set; } = [];
     public List<int> DefaultLibraries { get; set; } = [];
+    [EnumDataType(typeof(AgeRating))]
     public AgeRating DefaultAgeRestriction { get; set; } = AgeRating.Unknown;
     public bool DefaultIncludeUnknowns { get; set; } = false;
 

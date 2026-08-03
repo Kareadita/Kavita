@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using Kavita.Models.DTOs.Filtering.v2.SortOptions;
 using NotImplementedException = System.NotImplementedException;
+using System.ComponentModel.DataAnnotations;
 
 namespace Kavita.Models.DTOs.Filtering.v2.Requests;
 #nullable enable
@@ -16,6 +17,7 @@ public sealed record ReadingListFilterDto : IFilterDto<ReadingListFilterStatemen
     /// </summary>
     public string? Name { get; set; }
     public ICollection<ReadingListFilterStatementDto> Statements { get; set; } = [];
+    [EnumDataType(typeof(FilterCombination))]
     public FilterCombination Combination { get; set; } = FilterCombination.And;
     public ReadingListSortOptionDto? SortOptions { get; set; }
     public FilterEntityType EntityType => FilterEntityType.ReadingList;

@@ -1,5 +1,6 @@
-using System;
+﻿using System;
 using Kavita.Models.Entities.Enums;
+using System.ComponentModel.DataAnnotations;
 
 namespace Kavita.Models.DTOs.ReadingLists;
 #nullable enable
@@ -12,6 +13,7 @@ public sealed record ReadingListItemDto
     public int SeriesId { get; init; }
     public string? SeriesName { get; set; }
     public string? SeriesSortName { get; set; }
+    [EnumDataType(typeof(MangaFormat))]
     public MangaFormat SeriesFormat { get; set; }
     public int PagesRead { get; set; }
 
@@ -30,6 +32,7 @@ public sealed record ReadingListItemDto
     public int VolumeId { get; set; }
     public int LibraryId { get; set; }
     public string? Title { get; set; }
+    [EnumDataType(typeof(LibraryType))]
     public LibraryType LibraryType { get; set; }
     public string? LibraryName { get; set; }
 

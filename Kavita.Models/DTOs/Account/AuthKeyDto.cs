@@ -1,5 +1,7 @@
 ﻿
 using System;
+using System.ComponentModel.DataAnnotations;
+using Kavita.Models.Entities.Enums;
 using Kavita.Models.Entities.Enums.User;
 
 namespace Kavita.Models.DTOs.Account;
@@ -27,5 +29,6 @@ public sealed record AuthKeyDto
     /// <summary>
     /// Kavita will have a short-lived key
     /// </summary>
+    [EnumDataType(typeof(AuthKeyProvider))]
     public AuthKeyProvider Provider { get; set; } = AuthKeyProvider.User;
 }

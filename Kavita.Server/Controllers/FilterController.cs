@@ -176,6 +176,11 @@ public class FilterController(
         var filter = await unitOfWork.AppUserSmartFilterRepository.GetById(filterId);
         if (filter == null) return Ok();
 
+        if (filter.AppUserId != UserId)
+        {
+            return NotFound();
+        }
+
         // This needs to delete any dashboard filters that have it too
         var streams = await unitOfWork.UserRepository.GetDashboardStreamWithFilter(filter.Id);
         unitOfWork.UserRepository.Delete(streams);

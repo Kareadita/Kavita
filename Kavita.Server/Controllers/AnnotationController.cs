@@ -46,6 +46,7 @@ public class AnnotationController(
     /// </summary>
     /// <param name="chapterId"></param>
     /// <returns></returns>
+    [ChapterAccess]
     [HttpGet("all")]
     public async Task<ActionResult<IEnumerable<AnnotationDto>>> GetAnnotations(int chapterId)
     {
@@ -57,6 +58,7 @@ public class AnnotationController(
     /// </summary>
     /// <param name="seriesId"></param>
     /// <returns></returns>
+    [SeriesAccess]
     [HttpGet("all-for-series")]
     public async Task<ActionResult<AnnotationDto>> GetAnnotationsBySeries(int seriesId)
     {
@@ -69,9 +71,18 @@ public class AnnotationController(
     /// <param name="annotationId"></param>
     /// <returns></returns>
     [HttpGet("{annotationId}")]
-    public async Task<ActionResult<AnnotationDto>> GetAnnotation(int annotationId)
+    public async Task<ActionResult<AnnotationDto?>> GetAnnotation(int annotationId)
     {
-        return Ok(await unitOfWork.UserRepository.GetAnnotationDtoById(UserId, annotationId));
+        var annotation = await unitOfWork.UserRepository.GetAnnotationDtoById(UserId, annotationId);
+        if (annotation == null) return NotFound();
+
+        if (!await unitOfWork.UserRepository.HasAccessToChapter(UserId, annotation.ChapterId,
+                HttpContext.RequestAborted))
+        {
+            return NotFound();
+        }
+
+        return Ok(annotation);
     }
 
     /// <summary>

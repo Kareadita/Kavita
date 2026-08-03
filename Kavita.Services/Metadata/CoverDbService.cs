@@ -110,7 +110,7 @@ public class CoverDbService : ICoverDbService
         if (res.HasValue)
         {
             var sanitizedBaseUrl = baseUrl.Sanitize();
-            _logger.LogInformation("Kavita has already tried to fetch from {BaseUrl} and failed. Skipping duplicate check", sanitizedBaseUrl);
+            _logger.LogTrace("Kavita has already tried to fetch from {BaseUrl} and failed. Skipping duplicate check", sanitizedBaseUrl);
             throw new KavitaException($"Kavita has already tried to fetch from {sanitizedBaseUrl} and failed. Skipping duplicate check");
         }
 

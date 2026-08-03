@@ -791,6 +791,27 @@ public class TaskScheduler : ITaskScheduler
         return runningJobs.Exists(j => classNames.Contains(j.Value.Job.Method.DeclaringType?.Name));
     }
 
+    public static bool IsMethodRunningOrEnqueued(string methodName, string queue = DefaultQueue)
+    {
+        using var connection = JobStorage.Current.GetConnection();
+
+        var monitoring = JobStorage.Current.GetMonitoringApi();
+
+        var processing = monitoring.ProcessingJobs(0, 100);
+        if (processing.Any(j => j.Value.Job?.Method.Name == methodName))
+        {
+            return true;
+        }
+
+        var enqueued = monitoring.EnqueuedJobs(queue, 0, 100);
+        if (enqueued.Any(j => j.Value.Job?.Method.Name == methodName))
+        {
+            return true;
+        }
+
+        return false;
+    }
+
     /// <summary>
     /// Returns Utc DateTime of next run of a given Job Id
     /// </summary>

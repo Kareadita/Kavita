@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using Kavita.Models.DTOs.Recommendation;
 using Kavita.Models.Entities.Enums;
 using Kavita.Models.Entities.Enums.KavitaPlus;
+using System.ComponentModel.DataAnnotations;
 
 namespace Kavita.Models.DTOs.KavitaPlus.Metadata;
 
@@ -23,6 +24,7 @@ public sealed record ExternalSeriesDetailDto
     public bool IsStandAlone { get; set; }
     public int? MangabakaId { get; set; }
     public IList<string> Synonyms { get; set; } = [];
+    [EnumDataType(typeof(PlusMediaFormat))]
     public PlusMediaFormat PlusMediaFormat { get; set; }
     public string? SiteUrl { get; set; }
     public string? CoverUrl { get; set; }
@@ -36,7 +38,9 @@ public sealed record ExternalSeriesDetailDto
     /// tag/genre mappings, then applies the requesting user's age restriction before returning drill-down detail.
     /// </summary>
     /// <remarks>Unknown when the provider did not supply a mappable content rating.</remarks>
+    [EnumDataType(typeof(AgeRating))]
     public AgeRating AgeRating { get; set; } = AgeRating.Unknown;
+    [EnumDataType(typeof(ScrobbleProvider))]
     public ScrobbleProvider Provider { get; set; } = ScrobbleProvider.AniList;
 
     public DateTime? StartDate { get; set; }

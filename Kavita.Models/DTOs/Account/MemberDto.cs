@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using Kavita.Models.Entities.Enums;
+using System.ComponentModel.DataAnnotations;
 
 namespace Kavita.Models.DTOs.Account;
 
@@ -23,5 +24,6 @@ public sealed record MemberDto
     public DateTime LastActiveUtc { get; init; }
     public IEnumerable<LibraryDto>? Libraries { get; init; }
     public IEnumerable<string>? Roles { get; init; }
+    [EnumDataType(typeof(IdentityProvider))]
     public IdentityProvider IdentityProvider { get; init; }
 }

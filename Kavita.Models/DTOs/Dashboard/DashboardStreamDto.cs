@@ -1,6 +1,7 @@
 ﻿
 using Kavita.Models.DTOs.Filtering.v2;
 using Kavita.Models.Entities.Enums;
+using System.ComponentModel.DataAnnotations;
 
 namespace Kavita.Models.DTOs.Dashboard;
 #nullable enable
@@ -26,10 +27,12 @@ public sealed record DashboardStreamDto
     /// <summary>
     /// For system provided
     /// </summary>
+    [EnumDataType(typeof(DashboardStreamType))]
     public DashboardStreamType StreamType { get; set; }
     public bool Visible { get; set; }
     /// <summary>
     /// For Smart Filters, this is the underlying FilterEntityType
     /// </summary>
+    [EnumDataType(typeof(FilterEntityType))]
     public FilterEntityType EntityType { get; set; }
 }

@@ -83,7 +83,7 @@ public class ThemeController(
     /// <param name="themeId"></param>
     /// <returns></returns>
     [HttpDelete]
-    [DisallowRole(PolicyConstants.ReadOnlyRole)]
+    [Authorize(PolicyGroups.AdminPolicy)]
     public async Task<ActionResult<IEnumerable<DownloadableSiteThemeDto>>> DeleteTheme(int themeId)
     {
         await themeService.DeleteTheme(themeId);
@@ -97,6 +97,7 @@ public class ThemeController(
     /// <param name="dto"></param>
     /// <returns></returns>
     [HttpPost("download-theme")]
+    [DisallowRole(PolicyConstants.ReadOnlyRole)]
     public async Task<ActionResult<SiteThemeDto>> DownloadTheme(DownloadableSiteThemeDto dto)
     {
         return Ok(mapper.Map<SiteThemeDto>(await themeService.DownloadRepoTheme(dto)));
@@ -108,7 +109,7 @@ public class ThemeController(
     /// <param name="formFile"></param>
     /// <returns></returns>
     [HttpPost("upload-theme")]
-    [DisallowRole(PolicyConstants.ReadOnlyRole)]
+    [Authorize(PolicyGroups.AdminPolicy)]
     public async Task<ActionResult<SiteThemeDto>> DownloadTheme(IFormFile formFile)
     {
         if (!formFile.FileName.EndsWith(".css")) return BadRequest("Invalid file");
