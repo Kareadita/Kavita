@@ -75,7 +75,8 @@ public class KoboServiceTests(ITestOutputHelper testOutputHelper) : AbstractDbTe
     }
 
     private static async Task ConfigureKoboSettings(IUnitOfWork unitOfWork, string hostName,
-        bool enableKoboSync = true, string baseUrl = "/", int convertBudget = 30)
+        bool enableKoboSync = true, string baseUrl = "/", int convertBudget = 30,
+        int syncPageSize = KoboService.DefaultSyncPageSize)
     {
         var settingsService = CreateSettingsService(unitOfWork);
         var settings = await unitOfWork.SettingsRepository.GetSettingsDtoAsync();
@@ -83,6 +84,7 @@ public class KoboServiceTests(ITestOutputHelper testOutputHelper) : AbstractDbTe
         settings.BaseUrl = baseUrl;
         settings.EnableKoboSync = enableKoboSync;
         settings.KoboConvertTimeBudgetSeconds = convertBudget;
+        settings.KoboSyncPageSize = syncPageSize;
         await settingsService.UpdateSettings(settings);
     }
 
@@ -95,6 +97,7 @@ public class KoboServiceTests(ITestOutputHelper testOutputHelper) : AbstractDbTe
         var settings = await unitOfWork.SettingsRepository.GetSettingsDtoAsync();
         Assert.False(settings.EnableKoboSync);
         Assert.Equal(30, settings.KoboConvertTimeBudgetSeconds);
+        Assert.Equal(KoboService.DefaultSyncPageSize, settings.KoboSyncPageSize);
 
         settings.HostName = string.Empty;
         settings.EnableKoboSync = true;
@@ -116,16 +119,41 @@ public class KoboServiceTests(ITestOutputHelper testOutputHelper) : AbstractDbTe
         settings.HostName = "https://kavita.example.com";
         settings.EnableKoboSync = true;
         settings.KoboConvertTimeBudgetSeconds = 45;
+        settings.KoboSyncPageSize = 50;
 
         var updated = await settingsService.UpdateSettings(settings);
 
         Assert.True(updated.EnableKoboSync);
         Assert.Equal("https://kavita.example.com", updated.HostName);
         Assert.Equal(45, updated.KoboConvertTimeBudgetSeconds);
+        Assert.Equal(50, updated.KoboSyncPageSize);
 
         var reloaded = await unitOfWork.SettingsRepository.GetSettingsDtoAsync();
         Assert.True(reloaded.EnableKoboSync);
         Assert.Equal(45, reloaded.KoboConvertTimeBudgetSeconds);
+        Assert.Equal(50, reloaded.KoboSyncPageSize);
+    }
+
+    [Fact]
+    public async Task UpdateSettings_KoboSyncPageSize_RejectsOutOfBounds()
+    {
+        var (unitOfWork, _, _) = await CreateDatabase();
+        var settingsService = CreateSettingsService(unitOfWork);
+
+        var settings = await unitOfWork.SettingsRepository.GetSettingsDtoAsync();
+        settings.KoboSyncPageSize = 0;
+
+        var tooLow = await Assert.ThrowsAsync<KavitaException>(() => settingsService.UpdateSettings(settings));
+        Assert.Equal("kobo-sync-page-size", tooLow.Message);
+
+        settings = await unitOfWork.SettingsRepository.GetSettingsDtoAsync();
+        settings.KoboSyncPageSize = KoboService.MaxSyncPageSize + 1;
+
+        var tooHigh = await Assert.ThrowsAsync<KavitaException>(() => settingsService.UpdateSettings(settings));
+        Assert.Equal("kobo-sync-page-size", tooHigh.Message);
+
+        var reloaded = await unitOfWork.SettingsRepository.GetSettingsDtoAsync();
+        Assert.Equal(KoboService.DefaultSyncPageSize, reloaded.KoboSyncPageSize);
     }
 
     [Fact]
@@ -454,16 +482,17 @@ public class KoboServiceTests(ITestOutputHelper testOutputHelper) : AbstractDbTe
     }
 
     [Fact]
-    public async Task SyncLibrary_PaginatesAt100_WithContinueHeaderFlag()
+    public async Task SyncLibrary_PaginatesAtConfiguredPageSize_WithContinueHeaderFlag()
     {
         var (unitOfWork, context, mapper) = await CreateDatabase();
         var user = await SeedUser(unitOfWork, context);
         var library = await context.Library.SingleAsync(l => l.Name == "Kobo Lib");
-        await ConfigureKoboSettings(unitOfWork, "https://kavita.example.com");
+        const int pageSize = 3;
+        await ConfigureKoboSettings(unitOfWork, "https://kavita.example.com", syncPageSize: pageSize);
         var koboService = CreateKoboService(unitOfWork, mapper);
         var token = (await koboService.GetOrCreateSyncUrlAsync(user.Id)).Split('/').Last();
 
-        for (var i = 0; i < KoboService.SyncItemLimit + 5; i++)
+        for (var i = 0; i < pageSize + 2; i++)
         {
             await AddEpubChapter(context, library, $"Series {i}", "1");
         }
@@ -471,15 +500,47 @@ public class KoboServiceTests(ITestOutputHelper testOutputHelper) : AbstractDbTe
         await context.SaveChangesAsync();
 
         var page1 = await koboService.SyncLibraryAsync(token, null);
-        Assert.Equal(KoboService.SyncItemLimit, page1.Items.Count);
+        Assert.Equal(pageSize, page1.Items.Count);
         Assert.True(page1.Continue);
 
         var page2 = await koboService.SyncLibraryAsync(token, page1.SyncToken);
-        Assert.Equal(5, page2.Items.Count);
+        Assert.Equal(2, page2.Items.Count);
         Assert.False(page2.Continue);
 
-        Assert.Equal(KoboService.SyncItemLimit + 5,
+        Assert.Equal(pageSize + 2,
             await context.AppUserKoboSyncedChapter.CountAsync(s => s.AppUserId == user.Id));
+    }
+
+    [Fact]
+    public async Task SyncLibrary_PageSizeChange_AppliesOnNextContinueWithoutResettingWatermark()
+    {
+        var (unitOfWork, context, mapper) = await CreateDatabase();
+        var user = await SeedUser(unitOfWork, context);
+        var library = await context.Library.SingleAsync(l => l.Name == "Kobo Lib");
+        await ConfigureKoboSettings(unitOfWork, "https://kavita.example.com", syncPageSize: 2);
+        var koboService = CreateKoboService(unitOfWork, mapper);
+        var token = (await koboService.GetOrCreateSyncUrlAsync(user.Id)).Split('/').Last();
+
+        for (var i = 0; i < 5; i++)
+        {
+            await AddEpubChapter(context, library, $"Series {i}", "1");
+        }
+
+        await context.SaveChangesAsync();
+
+        var page1 = await koboService.SyncLibraryAsync(token, null);
+        Assert.Equal(2, page1.Items.Count);
+        Assert.True(page1.Continue);
+        Assert.False(string.IsNullOrWhiteSpace(page1.SyncToken));
+
+        await ConfigureKoboSettings(unitOfWork, "https://kavita.example.com", syncPageSize: 3);
+
+        var page2 = await koboService.SyncLibraryAsync(token, page1.SyncToken);
+        Assert.Equal(3, page2.Items.Count);
+        Assert.False(page2.Continue);
+        Assert.False(string.IsNullOrWhiteSpace(page2.SyncToken));
+
+        Assert.Equal(5, await context.AppUserKoboSyncedChapter.CountAsync(s => s.AppUserId == user.Id));
     }
 
     [Fact]

@@ -393,6 +393,19 @@ public class SettingsService(
                 unitOfWork.SettingsRepository.Update(setting);
             }
 
+            if (setting.Key == ServerSettingKey.KoboSyncPageSize &&
+                updateSettingsDto.KoboSyncPageSize + string.Empty != setting.Value)
+            {
+                if (updateSettingsDto.KoboSyncPageSize < KoboService.MinSyncPageSize ||
+                    updateSettingsDto.KoboSyncPageSize > KoboService.MaxSyncPageSize)
+                {
+                    throw new KavitaException("kobo-sync-page-size");
+                }
+
+                setting.Value = updateSettingsDto.KoboSyncPageSize + string.Empty;
+                unitOfWork.SettingsRepository.Update(setting);
+            }
+
             if (setting.Key == ServerSettingKey.EncodeMediaAs &&
                 ((int)updateSettingsDto.EncodeMediaAs).ToString() != setting.Value)
             {

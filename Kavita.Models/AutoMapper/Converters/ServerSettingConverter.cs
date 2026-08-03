@@ -54,6 +54,9 @@ public class ServerSettingConverter : ITypeConverter<IEnumerable<ServerSetting>,
                 case ServerSettingKey.KoboConvertTimeBudgetSeconds:
                     destination.KoboConvertTimeBudgetSeconds = int.Parse(row.Value, CultureInfo.InvariantCulture);
                     break;
+                case ServerSettingKey.KoboSyncPageSize:
+                    destination.KoboSyncPageSize = int.Parse(row.Value, CultureInfo.InvariantCulture);
+                    break;
                 case ServerSettingKey.BaseUrl:
                     destination.BaseUrl = row.Value;
                     break;

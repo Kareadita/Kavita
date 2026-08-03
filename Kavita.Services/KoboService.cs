@@ -42,7 +42,9 @@ public class KoboService(
     : IKoboService
 {
     public const string SyncPathPrefix = "api/kobo/";
-    public const int SyncItemLimit = 100;
+    public const int DefaultSyncPageSize = 100;
+    public const int MinSyncPageSize = 1;
+    public const int MaxSyncPageSize = 1000;
     public const string EpubFormat = "EPUB";
     public const string Epub3Format = "EPUB3";
 
@@ -204,7 +206,10 @@ public class KoboService(
         var newBooksLastModified = syncToken.BooksLastModified;
         var newBooksLastCreated = syncToken.BooksLastCreated;
         var newArchiveLastModified = syncToken.ArchiveLastModified;
-        var remainingSlots = SyncItemLimit;
+        var pageSize = settings.KoboSyncPageSize > 0
+            ? Math.Clamp(settings.KoboSyncPageSize, MinSyncPageSize, MaxSyncPageSize)
+            : DefaultSyncPageSize;
+        var remainingSlots = pageSize;
 
         // Removals first: archived (not in synced-set) + hard-delete tombstones.
         var removalSlots = await AppendArchiveRemovalsAsync(userId, tokenBase, syncToken, items,

@@ -17,6 +17,7 @@ export interface ServerSettings {
   enableOpds: boolean;
   enableKoboSync: boolean;
   koboConvertTimeBudgetSeconds: number;
+  koboSyncPageSize: number;
   baseUrl: string;
   bookmarksDirectory: string;
   emailServiceUrl: string;

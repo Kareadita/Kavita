@@ -41,6 +41,10 @@ public sealed record ServerSettingDto
     /// </summary>
     public int KoboConvertTimeBudgetSeconds { get; set; } = 30;
     /// <summary>
+    /// Max book/reading-state items returned per Kobo library/sync page. Default 100; bounds 1–1000.
+    /// </summary>
+    public int KoboSyncPageSize { get; set; } = 100;
+    /// <summary>
     /// Base Url for the kavita. Requires restart to take effect.
     /// </summary>
     public string BaseUrl { get; set; } = default!;

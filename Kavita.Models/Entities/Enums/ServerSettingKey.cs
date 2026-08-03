@@ -206,5 +206,10 @@ public enum ServerSettingKey
     /// Wall-clock budget in seconds for in-request CBZ/CBR to EPUB conversion on Kobo download.
     /// </summary>
     [Description("KoboConvertTimeBudgetSeconds")]
-    KoboConvertTimeBudgetSeconds = 45
+    KoboConvertTimeBudgetSeconds = 45,
+    /// <summary>
+    /// Max book/reading-state items returned per Kobo library/sync page.
+    /// </summary>
+    [Description("KoboSyncPageSize")]
+    KoboSyncPageSize = 46
 }

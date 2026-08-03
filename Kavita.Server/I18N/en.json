@@ -129,6 +129,7 @@
     "total-logs": "Total Logs must be between 1 and 30",
     "kobo-hostname-required": "Host Name must be configured before enabling Kobo sync",
     "kobo-convert-budget": "Kobo convert time budget must be at least 1 second",
+    "kobo-sync-page-size": "Kobo sync page size must be between 1 and 1000",
     "kobo-sync-disabled": "Kobo sync is not enabled on this server",
     "kobo-sync-key-missing": "No Kobo sync Auth Key exists. Create or View the sync URL first",
     "stats-permission-denied": "You are not authorized to view another user's statistics",

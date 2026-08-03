@@ -69,6 +69,7 @@ export class ManageSettingsComponent implements OnInit {
       this.settingsForm.addControl('enableOpds', new FormControl(this.serverSettings.enableOpds, [Validators.required]));
       this.settingsForm.addControl('enableKoboSync', new FormControl(this.serverSettings.enableKoboSync, [Validators.required]));
       this.settingsForm.addControl('koboConvertTimeBudgetSeconds', new FormControl(this.serverSettings.koboConvertTimeBudgetSeconds, [Validators.required, Validators.min(1)]));
+      this.settingsForm.addControl('koboSyncPageSize', new FormControl(this.serverSettings.koboSyncPageSize, [Validators.required, Validators.min(1), Validators.max(1000)]));
       this.settingsForm.addControl('baseUrl', new FormControl(this.serverSettings.baseUrl, [Validators.pattern(/^(\/[\w-]+)*\/$/)]));
       this.settingsForm.addControl('totalBackups', new FormControl(this.serverSettings.totalBackups, [Validators.required, Validators.min(1), Validators.max(30)]));
       this.settingsForm.addControl('cacheSize', new FormControl(this.serverSettings.cacheSize, [Validators.required, Validators.min(50)]));
@@ -152,6 +153,7 @@ export class ManageSettingsComponent implements OnInit {
     this.settingsForm.get('enableOpds')?.setValue(this.serverSettings.enableOpds, {onlySelf: true, emitEvent: false});
     this.settingsForm.get('enableKoboSync')?.setValue(this.serverSettings.enableKoboSync, {onlySelf: true, emitEvent: false});
     this.settingsForm.get('koboConvertTimeBudgetSeconds')?.setValue(this.serverSettings.koboConvertTimeBudgetSeconds, {onlySelf: true, emitEvent: false});
+    this.settingsForm.get('koboSyncPageSize')?.setValue(this.serverSettings.koboSyncPageSize, {onlySelf: true, emitEvent: false});
     this.settingsForm.get('baseUrl')?.setValue(this.serverSettings.baseUrl, {onlySelf: true, emitEvent: false});
     this.updateKoboSyncControlState();
     this.settingsForm.get('emailServiceUrl')?.setValue(this.serverSettings.emailServiceUrl, {onlySelf: true, emitEvent: false});
