@@ -165,15 +165,23 @@ public class KoboController(IKoboService koboService) : ControllerBase
     [HttpGet("v1/library/{entitlementId}/state")]
     public async Task<IActionResult> GetReadingState(string apiKey, string entitlementId)
     {
-        await koboService.ResolveUserIdAsync(apiKey, HttpContext.RequestAborted);
-        return KoboJson(koboService.GetReadingStateStub(entitlementId));
+        return KoboJson(await koboService.GetReadingStateAsync(apiKey, entitlementId,
+            HttpContext.RequestAborted));
     }
 
     [HttpPut("v1/library/{entitlementId}/state")]
-    public async Task<IActionResult> PutReadingState(string apiKey, string entitlementId)
+    public async Task<IActionResult> PutReadingState(string apiKey, string entitlementId,
+        [FromBody] JsonObject? body)
     {
-        await koboService.ResolveUserIdAsync(apiKey, HttpContext.RequestAborted);
-        return KoboJson(koboService.PutReadingStateStub(entitlementId));
+        try
+        {
+            return KoboJson(await koboService.PutReadingStateAsync(apiKey, entitlementId, body,
+                HttpContext.RequestAborted));
+        }
+        catch (KavitaException ex) when (ex.Message == "kobo-reading-state-malformed")
+        {
+            return BadRequest(ex.Message);
+        }
     }
 
     // Keep-alive stubs that return {} (Calibre-Web non-proxy behaviour)

@@ -100,9 +100,16 @@ public interface IKoboService
     /// <summary>Calibre-Web analytics gettests stub.</summary>
     object GetAnalyticsTestsStub(string? koboUserKey);
 
-    /// <summary>Reading-state GET ACK stub (no persistence).</summary>
-    object GetReadingStateStub(string entitlementId);
+    /// <summary>
+    /// GET reading-state shaped from <c>AppUserProgress</c> (ReadyToRead when none).
+    /// </summary>
+    Task<object> GetReadingStateAsync(string authToken, string entitlementId,
+        CancellationToken ct = default);
 
-    /// <summary>Reading-state PUT ACK stub (no persistence).</summary>
-    object PutReadingStateStub(string entitlementId);
+    /// <summary>
+    /// PUT reading-state into <c>AppUserProgress</c> with last-write-wins on timestamps.
+    /// Ignores Statistics and Location. ACK shape matches Calibre-Web.
+    /// </summary>
+    Task<object> PutReadingStateAsync(string authToken, string entitlementId, JsonObject? body,
+        CancellationToken ct = default);
 }

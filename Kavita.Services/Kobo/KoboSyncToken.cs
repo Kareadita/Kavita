@@ -97,7 +97,11 @@ public sealed class KoboSyncToken
     private static double ToEpoch(DateTime value)
     {
         if (value == DateTime.MinValue) return 0;
-        return (value.ToUniversalTime() - DateTime.UnixEpoch).TotalSeconds;
+        // Kavita/SQLite commonly returns UTC timestamps as Unspecified — do not treat as local.
+        var utc = value.Kind == DateTimeKind.Unspecified
+            ? DateTime.SpecifyKind(value, DateTimeKind.Utc)
+            : value.ToUniversalTime();
+        return (utc - DateTime.UnixEpoch).TotalSeconds;
     }
 
     private sealed class TokenEnvelope

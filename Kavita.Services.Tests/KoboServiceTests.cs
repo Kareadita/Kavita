@@ -21,6 +21,7 @@ using Kavita.Models.DTOs.Kobo;
 using Kavita.Models.Entities;
 using Kavita.Models.Entities.Enums;
 using Kavita.Models.Entities.Enums.User;
+using Kavita.Models.Entities.Progress;
 using Kavita.Models.Entities.User;
 using Kavita.Services.Builders;
 using Kavita.Services.Kobo;
@@ -397,26 +398,207 @@ public class KoboServiceTests(ITestOutputHelper testOutputHelper) : AbstractDbTe
     }
 
     [Fact]
-    public async Task ReadingStateStubs_AcknowledgeWithoutProgressSideEffects()
+    public async Task ReadingState_GetPut_MapsAppUserProgress_IgnoresStatisticsAndLocation()
     {
         var (unitOfWork, context, mapper) = await CreateDatabase();
-        var user = await SeedUser(unitOfWork, context);
+        var (user, _, chapter) = await SeedEpubChapter(unitOfWork, context,
+            seriesName: "Progress Book", chapterNumber: "1", titleName: "Ch1",
+            writerName: "Author", language: "en", summary: "s",
+            releaseDate: new DateTime(2020, 1, 1, 0, 0, 0, DateTimeKind.Utc));
         await ConfigureKoboSettings(unitOfWork, "https://kavita.example.com");
         var koboService = CreateKoboService(unitOfWork, mapper);
-        _ = await koboService.GetOrCreateSyncUrlAsync(user.Id);
+        var token = (await koboService.GetOrCreateSyncUrlAsync(user.Id)).Split('/').Last();
+        var entitlementId = KoboEntitlementId.FromChapterIdString(chapter.Id);
 
-        const string entitlementId = "11111111-1111-1111-1111-111111111111";
-        var getState = Assert.IsType<JsonArray>(koboService.GetReadingStateStub(entitlementId));
-        Assert.Equal(entitlementId, getState[0]!["EntitlementId"]!.GetValue<string>());
-        Assert.Equal("ReadyToRead", getState[0]!["StatusInfo"]!["Status"]!.GetValue<string>());
+        var emptyGet = Assert.IsType<JsonArray>(
+            await koboService.GetReadingStateAsync(token, entitlementId));
+        Assert.Equal("ReadyToRead", emptyGet[0]!["StatusInfo"]!["Status"]!.GetValue<string>());
+        Assert.Null(emptyGet[0]!["CurrentBookmark"]!["ProgressPercent"]);
 
-        var putState = Assert.IsType<JsonObject>(koboService.PutReadingStateStub(entitlementId));
+        var putBody = new JsonObject
+        {
+            ["ReadingStates"] = new JsonArray
+            {
+                new JsonObject
+                {
+                    ["CurrentBookmark"] = new JsonObject
+                    {
+                        ["ProgressPercent"] = 40,
+                        ["Location"] = new JsonObject
+                        {
+                            ["Value"] = "epubcfi(/6/4)",
+                            ["Type"] = "Type",
+                            ["Source"] = "Source",
+                        },
+                    },
+                    ["Statistics"] = new JsonObject
+                    {
+                        ["SpentReadingMinutes"] = 12,
+                        ["RemainingTimeMinutes"] = 30,
+                    },
+                    ["StatusInfo"] = new JsonObject
+                    {
+                        ["Status"] = "Reading",
+                    },
+                },
+            },
+        };
+
+        var putState = Assert.IsType<JsonObject>(
+            await koboService.PutReadingStateAsync(token, entitlementId, putBody));
         Assert.Equal("Success", putState["RequestResult"]!.GetValue<string>());
-        Assert.Equal(entitlementId,
-            putState["UpdateResults"]![0]!["EntitlementId"]!.GetValue<string>());
+        Assert.NotNull(putState["UpdateResults"]![0]!["CurrentBookmarkResult"]);
+        Assert.NotNull(putState["UpdateResults"]![0]!["StatisticsResult"]);
+        Assert.NotNull(putState["UpdateResults"]![0]!["StatusInfoResult"]);
 
-        // No progress / reading-history rows written by ACK stubs
-        Assert.Empty(context.AppUserProgresses);
+        var progress = Assert.Single(context.AppUserProgresses);
+        Assert.Equal(4, progress.PagesRead); // 40% of 10 pages
+        Assert.Null(progress.BookScrollId);
+
+        var getState = Assert.IsType<JsonArray>(
+            await koboService.GetReadingStateAsync(token, entitlementId));
+        Assert.Equal("Reading", getState[0]!["StatusInfo"]!["Status"]!.GetValue<string>());
+        Assert.Equal(40, getState[0]!["CurrentBookmark"]!["ProgressPercent"]!.GetValue<double>());
+        Assert.Null(getState[0]!["CurrentBookmark"]!["Location"]);
+        Assert.Null(getState[0]!["Statistics"]!["SpentReadingMinutes"]);
+    }
+
+    [Fact]
+    public async Task ReadingState_Put_LastWriteWins_KeepsNewerServerProgress()
+    {
+        var (unitOfWork, context, mapper) = await CreateDatabase();
+        var (user, _, chapter) = await SeedEpubChapter(unitOfWork, context,
+            seriesName: "LWW Book", chapterNumber: "1", titleName: "Ch1",
+            writerName: "Author", language: "en", summary: "s",
+            releaseDate: new DateTime(2020, 1, 1, 0, 0, 0, DateTimeKind.Utc));
+        await ConfigureKoboSettings(unitOfWork, "https://kavita.example.com");
+        var koboService = CreateKoboService(unitOfWork, mapper);
+        var token = (await koboService.GetOrCreateSyncUrlAsync(user.Id)).Split('/').Last();
+        var entitlementId = KoboEntitlementId.FromChapterIdString(chapter.Id);
+
+        // Server progress at 80%
+        var serverPut = new JsonObject
+        {
+            ["ReadingStates"] = new JsonArray
+            {
+                new JsonObject
+                {
+                    ["CurrentBookmark"] = new JsonObject { ["ProgressPercent"] = 80 },
+                    ["StatusInfo"] = new JsonObject { ["Status"] = "Reading" },
+                },
+            },
+        };
+        await koboService.PutReadingStateAsync(token, entitlementId, serverPut);
+        var serverProgress = Assert.Single(context.AppUserProgresses);
+        Assert.Equal(8, serverProgress.PagesRead);
+        var serverTs = serverProgress.LastModifiedUtc;
+
+        // Older device timestamp must not overwrite
+        var stalePut = new JsonObject
+        {
+            ["ReadingStates"] = new JsonArray
+            {
+                new JsonObject
+                {
+                    ["LastModified"] = serverTs.AddMinutes(-5).ToString("yyyy-MM-ddTHH:mm:ssZ"),
+                    ["CurrentBookmark"] = new JsonObject
+                    {
+                        ["LastModified"] = serverTs.AddMinutes(-5).ToString("yyyy-MM-ddTHH:mm:ssZ"),
+                        ["ProgressPercent"] = 10,
+                    },
+                    ["StatusInfo"] = new JsonObject { ["Status"] = "Reading" },
+                },
+            },
+        };
+        await koboService.PutReadingStateAsync(token, entitlementId, stalePut);
+        await context.Entry(serverProgress).ReloadAsync();
+        Assert.Equal(8, serverProgress.PagesRead);
+
+        // Newer device timestamp wins
+        var freshPut = new JsonObject
+        {
+            ["ReadingStates"] = new JsonArray
+            {
+                new JsonObject
+                {
+                    ["LastModified"] = serverTs.AddMinutes(5).ToString("yyyy-MM-ddTHH:mm:ssZ"),
+                    ["CurrentBookmark"] = new JsonObject
+                    {
+                        ["LastModified"] = serverTs.AddMinutes(5).ToString("yyyy-MM-ddTHH:mm:ssZ"),
+                        ["ProgressPercent"] = 100,
+                    },
+                    ["StatusInfo"] = new JsonObject { ["Status"] = "Finished" },
+                },
+            },
+        };
+        await koboService.PutReadingStateAsync(token, entitlementId, freshPut);
+        await context.Entry(serverProgress).ReloadAsync();
+        Assert.Equal(10, serverProgress.PagesRead);
+
+        var getState = Assert.IsType<JsonArray>(
+            await koboService.GetReadingStateAsync(token, entitlementId));
+        Assert.Equal("Finished", getState[0]!["StatusInfo"]!["Status"]!.GetValue<string>());
+    }
+
+    [Fact]
+    public async Task SyncLibrary_NestsReadingState_AndEmitsChangedReadingState()
+    {
+        var (unitOfWork, context, mapper) = await CreateDatabase();
+        var (user, _, chapter) = await SeedEpubChapter(unitOfWork, context,
+            seriesName: "Sync Progress", chapterNumber: "1", titleName: "Ch1",
+            writerName: "Author", language: "en", summary: "s",
+            releaseDate: new DateTime(2020, 1, 1, 0, 0, 0, DateTimeKind.Utc));
+        await ConfigureKoboSettings(unitOfWork, "https://kavita.example.com");
+        var koboService = CreateKoboService(unitOfWork, mapper);
+        var token = (await koboService.GetOrCreateSyncUrlAsync(user.Id)).Split('/').Last();
+        var entitlementId = KoboEntitlementId.FromChapterIdString(chapter.Id);
+
+        // Pre-existing progress → nested on NewEntitlement
+        context.AppUserProgresses.Add(new AppUserProgress
+        {
+            AppUserId = user.Id,
+            ChapterId = chapter.Id,
+            VolumeId = chapter.VolumeId,
+            SeriesId = chapter.Volume.SeriesId,
+            LibraryId = chapter.Volume.Series.LibraryId,
+            PagesRead = 5,
+        });
+        await context.SaveChangesAsync();
+
+        var first = await koboService.SyncLibraryAsync(token, syncTokenHeader: null);
+        Assert.False(first.Continue);
+        var entitlement = first.Items[0]!["NewEntitlement"]!.AsObject();
+        Assert.True(entitlement.ContainsKey("ReadingState"));
+        Assert.Equal("Reading",
+            entitlement["ReadingState"]!["StatusInfo"]!["Status"]!.GetValue<string>());
+        Assert.Equal(50,
+            entitlement["ReadingState"]!["CurrentBookmark"]!["ProgressPercent"]!.GetValue<double>());
+
+        var tokenAfterFirst = KoboSyncToken.FromHeader(first.SyncToken);
+        Assert.True(tokenAfterFirst.ReadingStateLastModified > DateTime.MinValue);
+
+        // Later progress change → ChangedReadingState on next sync
+        var progress = Assert.Single(context.AppUserProgresses);
+        progress.PagesRead = 10;
+        await context.SaveChangesAsync();
+
+        var second = await koboService.SyncLibraryAsync(token, first.SyncToken);
+        Assert.False(second.Continue);
+        var changed = Assert.Single(second.Items, i => i!["ChangedReadingState"] != null);
+        var state = changed!["ChangedReadingState"]!["ReadingState"]!.AsObject();
+        Assert.Equal(entitlementId, state["EntitlementId"]!.GetValue<string>());
+        Assert.Equal("Finished", state["StatusInfo"]!["Status"]!.GetValue<string>());
+        Assert.Equal(100, state["CurrentBookmark"]!["ProgressPercent"]!.GetValue<double>());
+
+        var tokenAfterSecond = KoboSyncToken.FromHeader(second.SyncToken);
+        Assert.True(tokenAfterSecond.ReadingStateLastModified >= tokenAfterFirst.ReadingStateLastModified);
+
+        // Third sync with same token watermark: no further reading-state items
+        var third = await koboService.SyncLibraryAsync(token, second.SyncToken);
+        Assert.DoesNotContain(third.Items, i =>
+            i!["ChangedReadingState"] != null
+            || i!["NewEntitlement"]?["ReadingState"] != null
+            || i!["ChangedEntitlement"]?["ReadingState"] != null);
     }
 
     [Fact]
@@ -1118,8 +1300,18 @@ public class KoboServiceTests(ITestOutputHelper testOutputHelper) : AbstractDbTe
             Assert.Single(metadata);
             var download = await koboService.GetDownloadAsync(token, uuid, "epub");
             Assert.True(File.Exists(download.FilePath));
-            Assert.NotNull(koboService.GetReadingStateStub(uuid));
-            Assert.NotNull(koboService.PutReadingStateStub(uuid));
+            Assert.NotNull(await koboService.GetReadingStateAsync(token, uuid));
+            var putBody = new JsonObject
+            {
+                ["ReadingStates"] = new JsonArray
+                {
+                    new JsonObject
+                    {
+                        ["StatusInfo"] = new JsonObject { ["Status"] = "ReadyToRead" },
+                    },
+                },
+            };
+            Assert.NotNull(await koboService.PutReadingStateAsync(token, uuid, putBody));
         }
         finally
         {

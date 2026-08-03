@@ -25,6 +25,7 @@ using Kavita.Models.Entities.Enums;
 using Kavita.Models.Entities.Enums.User;
 using Kavita.Models.Entities.Metadata;
 using Kavita.Models.Entities.Person;
+using Kavita.Models.Entities.Progress;
 using Kavita.Models.Entities.User;
 using Kavita.Services.Kobo;
 using Kavita.Services.Scanner;
@@ -229,10 +230,14 @@ public class KoboService(
         var newBooksLastModified = syncToken.BooksLastModified;
         var newBooksLastCreated = syncToken.BooksLastCreated;
         var newArchiveLastModified = syncToken.ArchiveLastModified;
+        var newReadingStateLastModified = syncToken.ReadingStateLastModified;
         var pageSize = settings.KoboSyncPageSize > 0
             ? Math.Clamp(settings.KoboSyncPageSize, MinSyncPageSize, MaxSyncPageSize)
             : DefaultSyncPageSize;
         var remainingSlots = pageSize;
+        var nestedReadingStateChapterIds = new HashSet<int>();
+        var emittedReadingStateChapterIds = new HashSet<int>();
+        var pageReadingStateWatermark = syncToken.ReadingStateLastModified;
 
         // Removals first: archived (not in synced-set) + hard-delete tombstones.
         var removalSlots = await AppendArchiveRemovalsAsync(userId, tokenBase, syncToken, items,
@@ -268,12 +273,24 @@ public class KoboService(
                 .AsSplitQuery()
                 .ToListAsync(ct);
 
+            var pageIds = page.Select(c => c.Id).ToList();
+            var progressByChapter = await LoadProgressByChapterAsync(userId, pageIds, ct);
+
             foreach (var chapter in page)
             {
                 var series = chapter.Volume.Series;
                 var entitlementUuid = KoboEntitlementId.FromChapterIdString(chapter.Id);
                 var entitlement = BuildEntitlementPayload(chapter, series, entitlementUuid, tokenBase,
                     isRemoved: false);
+
+                progressByChapter.TryGetValue(chapter.Id, out var progress);
+                if (TryAttachReadingState(entitlement, entitlementUuid, chapter, progress,
+                        syncToken.ReadingStateLastModified, out var stateTs))
+                {
+                    nestedReadingStateChapterIds.Add(chapter.Id);
+                    emittedReadingStateChapterIds.Add(chapter.Id);
+                    if (stateTs > newReadingStateLastModified) newReadingStateLastModified = stateTs;
+                }
 
                 var created = chapter.CreatedUtc == default ? chapter.Created : chapter.CreatedUtc;
                 var isNew = created > syncToken.BooksLastCreated;
@@ -296,9 +313,33 @@ public class KoboService(
             remainingSlots -= page.Count;
         }
 
-        if (items.Count > 0)
+        if (remainingSlots > 0)
+        {
+            var changedSlots = await AppendChangedReadingStatesAsync(userId, items, remainingSlots,
+                syncToken.ReadingStateLastModified, nestedReadingStateChapterIds, ct);
+            foreach (var chapterId in changedSlots.EmittedChapterIds)
+            {
+                emittedReadingStateChapterIds.Add(chapterId);
+            }
+
+            if (changedSlots.MaxReadingStateModified > newReadingStateLastModified)
+            {
+                newReadingStateLastModified = changedSlots.MaxReadingStateModified;
+            }
+        }
+
+        if (unitOfWork.HasChanges())
         {
             await unitOfWork.CommitAsync(ct);
+        }
+
+        // Contiguous cursor: do not advance past an unemitted older reading-state.
+        // Bump 1ms past the last emitted timestamp so float epoch round-trips cannot re-select it.
+        newReadingStateLastModified = await AdvanceReadingStateWatermarkAsync(userId,
+            pageReadingStateWatermark, emittedReadingStateChapterIds, ct);
+        if (newReadingStateLastModified > pageReadingStateWatermark)
+        {
+            newReadingStateLastModified = newReadingStateLastModified.AddMilliseconds(1);
         }
 
         var remainingRemovals = await CountPendingRemovalsAsync(userId, ct);
@@ -308,7 +349,9 @@ public class KoboService(
             .Where(c => !unitOfWork.DataContext.AppUserKoboSyncedChapter
                 .Any(s => s.AppUserId == userId && s.ChapterId == c.Id))
             .CountAsync(ct);
-        var contSync = remainingRemovals + remainingNew > 0;
+        var remainingReadingStates = await CountChangedReadingStatesAsync(userId,
+            newReadingStateLastModified, ct);
+        var contSync = remainingRemovals + remainingNew + remainingReadingStates > 0;
 
         // Hold books_last_created until the final page so New vs Changed stays stable across continue pages.
         if (!contSync)
@@ -318,6 +361,7 @@ public class KoboService(
 
         syncToken.BooksLastModified = newBooksLastModified;
         syncToken.ArchiveLastModified = newArchiveLastModified;
+        syncToken.ReadingStateLastModified = newReadingStateLastModified;
 
         return new KoboLibrarySyncResult
         {
@@ -563,54 +607,226 @@ public class KoboService(
         ["Tests"] = new JsonObject(),
     };
 
-    public object GetReadingStateStub(string entitlementId)
+    public async Task<object> GetReadingStateAsync(string authToken, string entitlementId,
+        CancellationToken ct = default)
     {
-        var now = DateTime.UtcNow.ToString("yyyy-MM-ddTHH:mm:ssZ");
+        var userId = await ResolveUserIdAsync(authToken, ct);
+        var chapter = await ResolveAccessibleChapterAsync(userId, entitlementId, requireEligibleFormat: false, ct);
+        if (chapter == null)
+        {
+            return new JsonArray
+            {
+                KoboReadingStateMapper.BuildReadingState(entitlementId, DateTime.UtcNow, 0, 0, DateTime.UtcNow),
+            };
+        }
+
+        var progress = await unitOfWork.AppUserProgressRepository.GetUserProgressAsync(chapter.Id, userId, ct);
+        var created = chapter.CreatedUtc == default ? chapter.Created : chapter.CreatedUtc;
+        var pagesRead = progress?.PagesRead ?? 0;
+        var modified = progress?.LastModifiedUtc == default || progress == null
+            ? created
+            : progress.LastModifiedUtc;
+
         return new JsonArray
         {
-            new JsonObject
-            {
-                ["EntitlementId"] = entitlementId,
-                ["Created"] = now,
-                ["LastModified"] = now,
-                ["PriorityTimestamp"] = now,
-                ["StatusInfo"] = new JsonObject
-                {
-                    ["LastModified"] = now,
-                    ["Status"] = "ReadyToRead",
-                    ["TimesStartedReading"] = 0,
-                },
-                ["Statistics"] = new JsonObject
-                {
-                    ["LastModified"] = now,
-                },
-                ["CurrentBookmark"] = new JsonObject
-                {
-                    ["LastModified"] = now,
-                },
-            },
+            KoboReadingStateMapper.BuildReadingState(
+                KoboEntitlementId.FromChapterIdString(chapter.Id),
+                created,
+                pagesRead,
+                chapter.Pages,
+                modified),
         };
     }
 
-    public object PutReadingStateStub(string entitlementId)
+    public async Task<object> PutReadingStateAsync(string authToken, string entitlementId, JsonObject? body,
+        CancellationToken ct = default)
     {
-        var now = DateTime.UtcNow.ToString("yyyy-MM-ddTHH:mm:ssZ");
-        return new JsonObject
+        var userId = await ResolveUserIdAsync(authToken, ct);
+
+        if (body == null || body["ReadingStates"] is not JsonArray states || states.Count == 0
+            || states[0] is not JsonObject readingState)
         {
-            ["RequestResult"] = "Success",
-            ["UpdateResults"] = new JsonArray
+            throw new KavitaException("kobo-reading-state-malformed");
+        }
+
+        var bookmarkPresent = readingState["CurrentBookmark"] is JsonObject bookmark && bookmark.Count > 0;
+        var statisticsPresent = readingState["Statistics"] is JsonObject stats && stats.Count > 0;
+        var statusPresent = readingState["StatusInfo"] is JsonObject statusInfo && statusInfo.Count > 0;
+
+        var chapter = await ResolveAccessibleChapterAsync(userId, entitlementId, requireEligibleFormat: false, ct);
+        var now = DateTime.UtcNow;
+        if (chapter == null)
+        {
+            return KoboReadingStateMapper.BuildPutSuccess(entitlementId, now,
+                bookmarkPresent, statisticsPresent, statusPresent);
+        }
+
+        var existing = await unitOfWork.AppUserProgressRepository.GetUserProgressAsync(chapter.Id, userId, ct);
+        var deviceTs = AsUtc(KoboReadingStateMapper.ResolveDeviceTimestamp(readingState, now));
+
+        // Last-write-wins: keep server progress when it is strictly newer than the device timestamp.
+        if (existing != null && AsUtc(existing.LastModifiedUtc) > deviceTs)
+        {
+            return KoboReadingStateMapper.BuildPutSuccess(entitlementId, AsUtc(existing.LastModifiedUtc),
+                bookmarkPresent, statisticsPresent, statusPresent);
+        }
+
+        // Statistics and Location are intentionally ignored (not persisted).
+        var pagesRead = KoboReadingStateMapper.ResolvePagesRead(readingState, chapter.Pages,
+            existing?.PagesRead ?? 0);
+
+        if (existing == null)
+        {
+            if (pagesRead == 0 && !statusPresent && !bookmarkPresent)
             {
-                new JsonObject
+                return KoboReadingStateMapper.BuildPutSuccess(entitlementId, now,
+                    bookmarkPresent, statisticsPresent, statusPresent);
+            }
+
+            var series = chapter.Volume.Series;
+            existing = new AppUserProgress
+            {
+                AppUserId = userId,
+                ChapterId = chapter.Id,
+                VolumeId = chapter.VolumeId,
+                SeriesId = series.Id,
+                LibraryId = series.LibraryId,
+                PagesRead = pagesRead,
+            };
+            unitOfWork.DataContext.AppUserProgresses.Add(existing);
+        }
+        else
+        {
+            existing.PagesRead = pagesRead;
+            existing.VolumeId = chapter.VolumeId;
+            existing.SeriesId = chapter.Volume.SeriesId;
+            existing.LibraryId = chapter.Volume.Series.LibraryId;
+            unitOfWork.AppUserProgressRepository.Update(existing);
+        }
+
+        await unitOfWork.CommitAsync(ct);
+        var savedTs = existing.LastModifiedUtc == default ? now : existing.LastModifiedUtc;
+        return KoboReadingStateMapper.BuildPutSuccess(entitlementId, savedTs,
+            bookmarkPresent, statisticsPresent, statusPresent);
+    }
+
+    private async Task<Dictionary<int, AppUserProgress>> LoadProgressByChapterAsync(int userId,
+        IReadOnlyCollection<int> chapterIds, CancellationToken ct)
+    {
+        if (chapterIds.Count == 0) return new Dictionary<int, AppUserProgress>();
+        return await unitOfWork.DataContext.AppUserProgresses
+            .Where(p => p.AppUserId == userId && chapterIds.Contains(p.ChapterId))
+            .ToDictionaryAsync(p => p.ChapterId, ct);
+    }
+
+    private static bool TryAttachReadingState(JsonObject entitlement, string entitlementUuid, Chapter chapter,
+        AppUserProgress? progress, DateTime readingStateWatermark, out DateTime stateTimestamp)
+    {
+        stateTimestamp = default;
+        if (progress == null) return false;
+        var modified = AsUtc(progress.LastModifiedUtc == default ? progress.LastModified : progress.LastModifiedUtc);
+        if (modified <= AsUtc(readingStateWatermark)) return false;
+
+        var created = chapter.CreatedUtc == default ? chapter.Created : chapter.CreatedUtc;
+        entitlement["ReadingState"] = KoboReadingStateMapper.BuildReadingState(entitlementUuid, created,
+            progress.PagesRead, chapter.Pages, modified);
+        stateTimestamp = modified;
+        return true;
+    }
+
+    private async Task<(int Emitted, DateTime MaxReadingStateModified, List<int> EmittedChapterIds)>
+        AppendChangedReadingStatesAsync(
+        int userId, JsonArray items, int remainingSlots, DateTime readingStateWatermark,
+        HashSet<int> excludeChapterIds, CancellationToken ct)
+    {
+        if (remainingSlots <= 0)
+        {
+            return (0, readingStateWatermark, []);
+        }
+
+        var candidates = await PendingReadingStateQuery(userId, readingStateWatermark)
+            .Where(p => !excludeChapterIds.Contains(p.ChapterId))
+            .OrderBy(p => p.LastModifiedUtc)
+            .ThenBy(p => p.ChapterId)
+            .Take(remainingSlots)
+            .Select(p => new { p.ChapterId, p.PagesRead, p.LastModifiedUtc })
+            .ToListAsync(ct);
+
+        if (candidates.Count == 0)
+        {
+            return (0, readingStateWatermark, []);
+        }
+
+        var chapterIds = candidates.Select(c => c.ChapterId).ToList();
+        var chapters = await unitOfWork.DataContext.Chapter
+            .Where(c => chapterIds.Contains(c.Id))
+            .Select(c => new { c.Id, c.Pages, c.CreatedUtc, c.Created })
+            .ToListAsync(ct);
+        var chapterById = chapters.ToDictionary(c => c.Id);
+
+        var maxModified = readingStateWatermark;
+        var emittedIds = new List<int>();
+        foreach (var row in candidates)
+        {
+            if (!chapterById.TryGetValue(row.ChapterId, out var chapter)) continue;
+            var uuid = KoboEntitlementId.FromChapterIdString(row.ChapterId);
+            var created = chapter.CreatedUtc == default ? chapter.Created : chapter.CreatedUtc;
+            var modified = row.LastModifiedUtc;
+            var readingState = KoboReadingStateMapper.BuildReadingState(uuid, created, row.PagesRead,
+                chapter.Pages, modified);
+            items.Add(new JsonObject
+            {
+                ["ChangedReadingState"] = new JsonObject
                 {
-                    ["EntitlementId"] = entitlementId,
-                    ["LastModified"] = now,
-                    ["PriorityTimestamp"] = now,
-                    ["CurrentBookmarkResult"] = new JsonObject { ["Result"] = "Success" },
-                    ["StatisticsResult"] = new JsonObject { ["Result"] = "Success" },
-                    ["StatusInfoResult"] = new JsonObject { ["Result"] = "Success" },
+                    ["ReadingState"] = readingState,
                 },
-            },
-        };
+            });
+            if (modified > maxModified) maxModified = modified;
+            emittedIds.Add(row.ChapterId);
+        }
+
+        return (emittedIds.Count, maxModified, emittedIds);
+    }
+
+    private async Task<DateTime> AdvanceReadingStateWatermarkAsync(int userId, DateTime previousWatermark,
+        HashSet<int> emittedChapterIds, CancellationToken ct)
+    {
+        if (emittedChapterIds.Count == 0) return previousWatermark;
+
+        var pending = await PendingReadingStateQuery(userId, previousWatermark)
+            .OrderBy(p => p.LastModifiedUtc)
+            .ThenBy(p => p.ChapterId)
+            .Select(p => new { p.ChapterId, p.LastModifiedUtc })
+            .ToListAsync(ct);
+
+        var watermark = previousWatermark;
+        foreach (var row in pending)
+        {
+            if (!emittedChapterIds.Contains(row.ChapterId)) break;
+            var modified = AsUtc(row.LastModifiedUtc);
+            if (modified > watermark) watermark = modified;
+        }
+
+        return watermark;
+    }
+
+    private async Task<int> CountChangedReadingStatesAsync(int userId, DateTime readingStateWatermark,
+        CancellationToken ct) =>
+        await PendingReadingStateQuery(userId, readingStateWatermark).CountAsync(ct);
+
+    private static DateTime AsUtc(DateTime value) =>
+        value.Kind == DateTimeKind.Unspecified
+            ? DateTime.SpecifyKind(value, DateTimeKind.Utc)
+            : value.ToUniversalTime();
+
+    private IQueryable<AppUserProgress> PendingReadingStateQuery(int userId, DateTime readingStateWatermark)
+    {
+        var watermark = AsUtc(readingStateWatermark);
+        return unitOfWork.DataContext.AppUserProgresses
+            .Where(p => p.AppUserId == userId)
+            .Where(p => p.LastModifiedUtc > watermark)
+            .Where(p => unitOfWork.DataContext.AppUserKoboSyncedChapter
+                .Any(s => s.AppUserId == userId && s.ChapterId == p.ChapterId));
     }
 
     private async Task<AppUserAuthKey> GetOrCreateKoboAuthKeyAsync(int userId, CancellationToken ct)
