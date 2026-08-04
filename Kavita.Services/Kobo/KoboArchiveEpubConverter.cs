@@ -228,7 +228,7 @@ public class KoboArchiveEpubConverter(
         "<head>\n" +
         $"<title>{EscapeXml(bookTitle)} — {pageNumber}</title>\n" +
         "<meta charset=\"utf-8\"/>\n" +
-        "<style type=\"text/css\">html, body { margin: 0; padding: 0; text-align: center; background: #000; } img { max-width: 100%; height: auto; }</style>\n" +
+        "<style type=\"text/css\">html, body { margin: 0; padding: 0; text-align: center; } img { max-width: 100%; height: auto; }</style>\n" +
         "</head>\n" +
         "<body>\n" +
         $"<img src=\"../{KoboConvertEpubContract.ImagesFolder}/{imageFileName}\" alt=\"Page {pageNumber}\"/>\n" +

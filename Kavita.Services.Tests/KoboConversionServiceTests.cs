@@ -99,7 +99,7 @@ public class KoboConversionServiceTests(ITestOutputHelper testOutputHelper) : Ab
     [Fact]
     public void ComputeFingerprint_IncludesConvertContractVersion()
     {
-        Assert.Equal(1, KoboConversionService.ConvertContractVersion);
+        Assert.Equal(2, KoboConversionService.ConvertContractVersion);
 
         var file = new MangaFileBuilder(_cbzPath, MangaFormat.Archive, 10).WithBytes(10)
             .WithLastModified(new DateTime(2026, 1, 2, 3, 4, 5, DateTimeKind.Utc)).Build();

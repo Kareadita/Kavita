@@ -46,7 +46,7 @@ public class KoboConversionService(
     /// Bump when paths, spine membership, or page DOM rules change so EPUB and KEPUB
     /// cache fingerprints miss and old artifacts are orphaned.
     /// </summary>
-    public const int ConvertContractVersion = 1;
+    public const int ConvertContractVersion = 2;
 
     /// <summary>Process-wide in-flight chapter converts (download + background).</summary>
     private static readonly ConcurrentDictionary<int, byte> InFlight = new();
