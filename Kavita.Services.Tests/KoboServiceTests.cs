@@ -33,6 +33,7 @@ using Kavita.Services.Kobo;
 using Kavita.Services.Reading;
 using Kavita.Services.ReadingLists;
 using Kavita.Services.Scanner;
+using Kavita.Services.Tests.Kobo;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using NSubstitute;
@@ -543,7 +544,7 @@ public class KoboServiceTests(ITestOutputHelper testOutputHelper) : AbstractDbTe
             resources["delete_tag_items"]!.GetValue<string>());
         Assert.Equal($"{tokenBase}/v1/library/tags/{{TagId}}",
             resources["rename_tag"]!.GetValue<string>());
-        Assert.Equal(KoboInitializationResult.ApiTokenHeaderValue, "e30=");
+        Assert.Equal(KoboHttpConstants.ApiTokenHeaderValue, "e30=");
         // Native map still present (not request-host based)
         Assert.False(string.IsNullOrEmpty(resources["device_auth"]?.GetValue<string>()));
         Assert.DoesNotContain("127.0.0.1", resources["image_host"]!.GetValue<string>());
@@ -754,7 +755,7 @@ public class KoboServiceTests(ITestOutputHelper testOutputHelper) : AbstractDbTe
         await ConfigureKoboSettings(unitOfWork, "https://kavita.example.com");
 
         var kepubPath = Path.Join(Path.GetTempPath(), "kavita-convert-loc-" + Guid.NewGuid().ToString("N") + ".kepub.epub");
-        KoboConvertEpubInspector.WriteMinimalConvertEpub(kepubPath, 10);
+        KoboConvertEpubTestFactory.WriteMinimalConvertEpub(kepubPath, 10);
         var conversion = Substitute.For<IKoboConversionService>();
         conversion.TryGetCachedKepubPathAsync(chapter.Id, Arg.Any<MangaFile>()).Returns(kepubPath);
 
@@ -805,7 +806,7 @@ public class KoboServiceTests(ITestOutputHelper testOutputHelper) : AbstractDbTe
         await ConfigureKoboSettings(unitOfWork, "https://kavita.example.com");
 
         var kepubPath = Path.Join(Path.GetTempPath(), "kavita-convert-falsy-" + Guid.NewGuid().ToString("N") + ".kepub.epub");
-        KoboConvertEpubInspector.WriteMinimalConvertEpub(kepubPath, 10);
+        KoboConvertEpubTestFactory.WriteMinimalConvertEpub(kepubPath, 10);
         var conversion = Substitute.For<IKoboConversionService>();
         conversion.TryGetCachedKepubPathAsync(chapter.Id, Arg.Any<MangaFile>()).Returns(kepubPath);
 
@@ -851,7 +852,7 @@ public class KoboServiceTests(ITestOutputHelper testOutputHelper) : AbstractDbTe
         await ConfigureKoboSettings(unitOfWork, "https://kavita.example.com");
 
         var kepubPath = Path.Join(Path.GetTempPath(), "kavita-convert-inv-" + Guid.NewGuid().ToString("N") + ".kepub.epub");
-        KoboConvertEpubInspector.WriteMinimalConvertEpub(kepubPath, 10);
+        KoboConvertEpubTestFactory.WriteMinimalConvertEpub(kepubPath, 10);
         var conversion = Substitute.For<IKoboConversionService>();
         conversion.TryGetCachedKepubPathAsync(chapter.Id, Arg.Any<MangaFile>()).Returns(kepubPath);
 
@@ -943,7 +944,7 @@ public class KoboServiceTests(ITestOutputHelper testOutputHelper) : AbstractDbTe
         await ConfigureKoboSettings(unitOfWork, "https://kavita.example.com");
 
         var kepubPath = Path.Join(Path.GetTempPath(), "kavita-convert-lww-" + Guid.NewGuid().ToString("N") + ".kepub.epub");
-        KoboConvertEpubInspector.WriteMinimalConvertEpub(kepubPath, 10);
+        KoboConvertEpubTestFactory.WriteMinimalConvertEpub(kepubPath, 10);
         var conversion = Substitute.For<IKoboConversionService>();
         conversion.TryGetCachedKepubPathAsync(chapter.Id, Arg.Any<MangaFile>()).Returns(kepubPath);
 
@@ -1230,7 +1231,7 @@ public class KoboServiceTests(ITestOutputHelper testOutputHelper) : AbstractDbTe
 
         var kepubPath = Path.Join(Path.GetTempPath(),
             "kavita-web-convert-" + Guid.NewGuid().ToString("N") + ".kepub.epub");
-        KoboConvertEpubInspector.WriteMinimalConvertEpub(kepubPath, 10);
+        KoboConvertEpubTestFactory.WriteMinimalConvertEpub(kepubPath, 10);
         var conversion = Substitute.For<IKoboConversionService>();
         conversion.TryGetCachedKepubPathAsync(chapter.Id, Arg.Any<MangaFile>()).Returns(kepubPath);
 
@@ -2792,6 +2793,32 @@ public class KoboServiceTests(ITestOutputHelper testOutputHelper) : AbstractDbTe
             var download = await koboService.GetDownloadAsync(token, uuid, "epub");
             Assert.True(File.Exists(download.FilePath));
             Assert.NotNull(await koboService.GetReadingStateAsync(token, uuid));
+            // PutReadingStateAsync takes the sync lock (mutates progress/synced state); omit here.
+        }
+        finally
+        {
+            KoboService.ResetSyncLockForTests();
+        }
+    }
+
+    [Fact]
+    public async Task PutReadingState_IsBlockedByLibrarySyncLock()
+    {
+        var (unitOfWork, context, mapper) = await CreateDatabase();
+        var (user, _, chapter) = await SeedEpubChapter(unitOfWork, context,
+            seriesName: "Locked Put", chapterNumber: "1", titleName: "Ch1",
+            writerName: "Author", language: "en", summary: "s",
+            releaseDate: new DateTime(2020, 1, 1, 0, 0, 0, DateTimeKind.Utc));
+        await ConfigureKoboSettings(unitOfWork, "https://kavita.example.com");
+        var koboService = CreateKoboService(unitOfWork, mapper);
+        var token = (await koboService.GetOrCreateSyncUrlAsync(user.Id)).Split('/').Last();
+        var uuid = KoboEntitlementId.FromChapterIdString(chapter.Id);
+
+        KoboService.ResetSyncLockForTests();
+        KoboService.SyncLockWaitOverride = TimeSpan.FromMilliseconds(50);
+        try
+        {
+            using var hold = await KoboService.HoldLibrarySyncLockForTestsAsync(user.Id);
             var putBody = new JsonObject
             {
                 ["ReadingStates"] = new JsonArray
@@ -2802,7 +2829,9 @@ public class KoboServiceTests(ITestOutputHelper testOutputHelper) : AbstractDbTe
                     },
                 },
             };
-            Assert.NotNull(await koboService.PutReadingStateAsync(token, uuid, putBody));
+            var ex = await Assert.ThrowsAsync<KavitaException>(() =>
+                koboService.PutReadingStateAsync(token, uuid, putBody));
+            Assert.Equal(KoboService.SyncBusyMessage, ex.Message);
         }
         finally
         {
@@ -2896,7 +2925,7 @@ public class KoboServiceTests(ITestOutputHelper testOutputHelper) : AbstractDbTe
             {
                 convertCalls++;
                 var output = ci.ArgAt<string>(1);
-                KoboConvertEpubInspector.WriteMinimalConvertEpub(output, 10);
+                KoboConvertEpubTestFactory.WriteMinimalConvertEpub(output, 10);
                 return Task.CompletedTask;
             });
 
@@ -2987,7 +3016,7 @@ public class KoboServiceTests(ITestOutputHelper testOutputHelper) : AbstractDbTe
                 started.TrySetResult();
                 await release.Task;
                 var output = ci.ArgAt<string>(1);
-                KoboConvertEpubInspector.WriteMinimalConvertEpub(output, 10);
+                KoboConvertEpubTestFactory.WriteMinimalConvertEpub(output, 10);
             });
 
         var scheduler = Substitute.For<IKoboConversionJobScheduler>();

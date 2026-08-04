@@ -17,8 +17,10 @@ using Kavita.Common.Extensions;
 using Kavita.Common.Helpers;
 using Configuration = Kavita.Common.Configuration;
 using Kavita.Database.Extensions;
+using Kavita.Models.Constants;
 using Kavita.Models.DTOs.Account;
 using Kavita.Models.DTOs.Kobo;
+using Kavita.Models.DTOs.Settings;
 using Kavita.Models.DTOs.SignalR;
 using Kavita.Models.Entities;
 using Kavita.Models.Entities.Enums;
@@ -46,19 +48,21 @@ public partial class KoboService(
     : IKoboService
 {
     public const string SyncPathPrefix = "api/kobo/";
-    public const int DefaultSyncPageSize = 100;
-    public const int MinSyncPageSize = 1;
-    public const int MaxSyncPageSize = 1000;
+    public const int DefaultSyncPageSize = KoboSettingsDefaults.SyncPageSize;
+    public const int MinSyncPageSize = KoboSettingsDefaults.MinSyncPageSize;
+    public const int MaxSyncPageSize = KoboSettingsDefaults.MaxSyncPageSize;
     public const int SyncLockWaitSeconds = 30;
     public const string SyncBusyMessage = "kobo-sync-busy";
+    public const string EntitlementNotFoundMessage = "kobo-entitlement-not-found";
+    public const string EpubMissingMessage = "kobo-epub-missing";
+    public const string FormatUnsupportedMessage = "kobo-format-unsupported";
+    public const string ReadingStateMalformedMessage = "kobo-reading-state-malformed";
     public const string EpubFormat = "EPUB";
     public const string Epub3Format = "EPUB3";
     public const string KepubFormat = "KEPUB";
     public const string KepubDownloadFileExtension = ".kepub.epub";
 
-    private static readonly Guid EmptyGenreId = Guid.Parse("00000000-0000-0000-0000-000000000001");
-
-    /// <summary>Per-user mutex for <c>library/sync</c> only (process-wide).</summary>
+    /// <summary>Per-user mutex for sync-state mutations (library/sync, entitlements, reading state, tags; process-wide).</summary>
     private static readonly ConcurrentDictionary<int, SemaphoreSlim> LibrarySyncLocks = new();
 
     /// <summary>Test seam: override lock wait. Reset via <see cref="ResetSyncLockForTests"/>.</summary>
@@ -223,161 +227,182 @@ public partial class KoboService(
         await ReconcileEligibilityLossAsync(userId, ct);
 
         var syncToken = KoboSyncToken.FromHeader(syncTokenHeader);
-        var hasSyncedRows = await unitOfWork.DataContext.AppUserKoboSyncedChapter
-            .AnyAsync(s => s.AppUserId == userId, ct);
-        if (!hasSyncedRows)
-        {
-            syncToken.BooksLastCreated = DateTime.MinValue;
-            syncToken.BooksLastModified = DateTime.MinValue;
-            syncToken.ReadingStateLastModified = DateTime.MinValue;
-            // Force full sync clears the synced-set; reset tags watermark so shelves re-emit.
-            syncToken.TagsLastModified = DateTime.MinValue;
-        }
+        await ApplyForcedFullSyncResetAsync(userId, syncToken, ct);
 
-        var publicBase = BuildPublicBase(settings.HostName, settings.BaseUrl);
-        var tokenBase = $"{publicBase}/{SyncPathPrefix}{authToken}";
-
+        var tokenBase = BuildTokenBase(settings, authToken);
         var libraryIds = await GetAllowedLibraryIdsAsync(userId, ct);
-        var items = new JsonArray();
-        var newBooksLastModified = syncToken.BooksLastModified;
-        var newBooksLastCreated = syncToken.BooksLastCreated;
-        var newArchiveLastModified = syncToken.ArchiveLastModified;
-        var newReadingStateLastModified = syncToken.ReadingStateLastModified;
-        var newTagsLastModified = syncToken.TagsLastModified;
-        var pageSize = settings.KoboSyncPageSize > 0
-            ? Math.Clamp(settings.KoboSyncPageSize, MinSyncPageSize, MaxSyncPageSize)
-            : DefaultSyncPageSize;
-        var remainingSlots = pageSize;
-        var nestedReadingStateChapterIds = new HashSet<int>();
-        var emittedReadingStateChapterIds = new HashSet<int>();
-        var pageReadingStateWatermark = syncToken.ReadingStateLastModified;
+        var state = new SyncPageState(syncToken, ResolvePageSize(settings));
 
         // Removals first: archived (not in synced-set) + hard-delete tombstones.
-        var removalSlots = await AppendArchiveRemovalsAsync(userId, tokenBase, syncToken, items,
-            remainingSlots, settings.EnableKepubConversion, ct);
-        remainingSlots -= removalSlots.Emitted;
-        if (removalSlots.MaxArchiveModified > newArchiveLastModified)
-        {
-            newArchiveLastModified = removalSlots.MaxArchiveModified;
-        }
-
-        if (remainingSlots > 0)
-        {
-            var tombstoneSlots = await AppendTombstoneRemovalsAsync(userId, items, remainingSlots, ct);
-            remainingSlots -= tombstoneSlots;
-        }
-
-        if (remainingSlots > 0)
-        {
-            var unsyncedQuery = EligibleChaptersQuery(libraryIds)
-                .Where(c => !unitOfWork.DataContext.AppUserKoboArchivedChapter
-                    .Any(a => a.AppUserId == userId && a.ChapterId == c.Id))
-                .Where(c => !unitOfWork.DataContext.AppUserKoboSyncedChapter
-                    .Any(s => s.AppUserId == userId && s.ChapterId == c.Id))
-                .OrderBy(c => c.LastModifiedUtc)
-                .ThenBy(c => c.Id);
-
-            var page = await unsyncedQuery
-                .Take(remainingSlots)
-                .Include(c => c.Files)
-                .Include(c => c.People).ThenInclude(p => p.Person)
-                .Include(c => c.Volume).ThenInclude(v => v.Series).ThenInclude(s => s.Metadata)
-                .ThenInclude(m => m!.People).ThenInclude(p => p.Person)
-                .AsSplitQuery()
-                .ToListAsync(ct);
-
-            var pageIds = page.Select(c => c.Id).ToList();
-            var progressByChapter = await LoadProgressByChapterAsync(userId, pageIds, ct);
-            var locationByChapter = await LoadLocationsByChapterAsync(userId, pageIds, ct);
-
-            foreach (var chapter in page)
-            {
-                var series = chapter.Volume.Series;
-                var entitlementUuid = KoboEntitlementId.FromChapterIdString(chapter.Id);
-                var entitlement = await BuildEntitlementPayloadAsync(chapter, series, entitlementUuid, tokenBase,
-                    isRemoved: false, preferKepub: settings.EnableKepubConversion);
-
-                progressByChapter.TryGetValue(chapter.Id, out var progress);
-                locationByChapter.TryGetValue(chapter.Id, out var location);
-                if (TryAttachReadingState(entitlement, entitlementUuid, chapter, progress, location,
-                        syncToken.ReadingStateLastModified, out var stateTs))
-                {
-                    nestedReadingStateChapterIds.Add(chapter.Id);
-                    emittedReadingStateChapterIds.Add(chapter.Id);
-                    if (stateTs > newReadingStateLastModified) newReadingStateLastModified = stateTs;
-                }
-
-                var created = chapter.CreatedUtc == default ? chapter.Created : chapter.CreatedUtc;
-                var isNew = created > syncToken.BooksLastCreated;
-                items.Add(new JsonObject
-                {
-                    [isNew ? "NewEntitlement" : "ChangedEntitlement"] = entitlement,
-                });
-
-                var modified = chapter.LastModifiedUtc == default ? chapter.LastModified : chapter.LastModifiedUtc;
-                if (modified > newBooksLastModified) newBooksLastModified = modified;
-                if (created > newBooksLastCreated) newBooksLastCreated = created;
-
-                unitOfWork.DataContext.AppUserKoboSyncedChapter.Add(new AppUserKoboSyncedChapter
-                {
-                    AppUserId = userId,
-                    ChapterId = chapter.Id,
-                });
-
-                // Queue background kepubify when this synced chapter still lacks a KEPUB artifact.
-                if (settings.EnableKepubConversion)
-                {
-                    var source = PreferNativeEpub(chapter.Files) ?? PreferConvertibleArchive(chapter.Files);
-                    if (source != null)
-                    {
-                        await koboConversionService.EnqueueKepubifyIfNeededAsync(chapter.Id, source, ct);
-                    }
-                }
-            }
-
-            remainingSlots -= page.Count;
-        }
-
-        if (remainingSlots > 0)
-        {
-            var changedSlots = await AppendChangedReadingStatesAsync(userId, items, remainingSlots,
-                syncToken.ReadingStateLastModified, nestedReadingStateChapterIds, ct);
-            foreach (var chapterId in changedSlots.EmittedChapterIds)
-            {
-                emittedReadingStateChapterIds.Add(chapterId);
-            }
-
-            if (changedSlots.MaxReadingStateModified > newReadingStateLastModified)
-            {
-                newReadingStateLastModified = changedSlots.MaxReadingStateModified;
-            }
-        }
+        await AppendRemovalsAsync(userId, tokenBase, syncToken, settings, state, ct);
+        await EmitNewEntitlementsAsync(userId, libraryIds, tokenBase, syncToken, settings, state, ct);
+        await AppendChangedReadingStatesToPageAsync(userId, syncToken, state, ct);
 
         // Tag deltas are not limited by page size — append all matching shelves every page.
-        var tagWatermark = await AppendTagDeltasAsync(userId, libraryIds, items, syncToken.TagsLastModified, ct);
-        if (tagWatermark > newTagsLastModified) newTagsLastModified = tagWatermark;
+        var tagWatermark = await AppendTagDeltasAsync(userId, libraryIds, state.Items,
+            syncToken.TagsLastModified, ct);
+        if (tagWatermark > state.NewTagsLastModified) state.NewTagsLastModified = tagWatermark;
 
         if (unitOfWork.HasChanges())
         {
             await unitOfWork.CommitAsync(ct);
         }
 
+        return await FinalizeSyncTokenAsync(userId, libraryIds, syncToken, state, ct);
+    }
+
+    /// <summary>
+    /// A cleared synced-set (force full sync) resets book/reading-state/tags watermarks so the next
+    /// page re-emits everything from scratch.
+    /// </summary>
+    private async Task ApplyForcedFullSyncResetAsync(int userId, KoboSyncToken syncToken, CancellationToken ct)
+    {
+        var hasSyncedRows = await unitOfWork.DataContext.AppUserKoboSyncedChapter
+            .AnyAsync(s => s.AppUserId == userId, ct);
+        if (hasSyncedRows) return;
+
+        syncToken.BooksLastCreated = DateTime.MinValue;
+        syncToken.BooksLastModified = DateTime.MinValue;
+        syncToken.ReadingStateLastModified = DateTime.MinValue;
+        // Force full sync clears the synced-set; reset tags watermark so shelves re-emit.
+        syncToken.TagsLastModified = DateTime.MinValue;
+    }
+
+    private static int ResolvePageSize(ServerSettingDto settings) =>
+        settings.KoboSyncPageSize > 0
+            ? Math.Clamp(settings.KoboSyncPageSize, MinSyncPageSize, MaxSyncPageSize)
+            : DefaultSyncPageSize;
+
+    private static string BuildTokenBase(ServerSettingDto settings, string authToken) =>
+        $"{BuildPublicBase(settings.HostName, settings.BaseUrl)}/{SyncPathPrefix}{authToken}";
+
+    /// <summary>Eligible chapters that are neither archived nor already in this user's synced-set.</summary>
+    private IQueryable<Chapter> UnsyncedEligibleChaptersQuery(int userId, IReadOnlyCollection<int> libraryIds) =>
+        EligibleChaptersQuery(libraryIds)
+            .Where(c => !unitOfWork.DataContext.AppUserKoboArchivedChapter
+                .Any(a => a.AppUserId == userId && a.ChapterId == c.Id))
+            .Where(c => !unitOfWork.DataContext.AppUserKoboSyncedChapter
+                .Any(s => s.AppUserId == userId && s.ChapterId == c.Id));
+
+    private async Task AppendRemovalsAsync(int userId, string tokenBase, KoboSyncToken syncToken,
+        ServerSettingDto settings, SyncPageState state, CancellationToken ct)
+    {
+        var removalSlots = await AppendArchiveRemovalsAsync(userId, tokenBase, syncToken, state.Items,
+            state.RemainingSlots, settings.EnableKepubConversion, ct);
+        state.RemainingSlots -= removalSlots.Emitted;
+        if (removalSlots.MaxArchiveModified > state.NewArchiveLastModified)
+        {
+            state.NewArchiveLastModified = removalSlots.MaxArchiveModified;
+        }
+
+        if (state.RemainingSlots > 0)
+        {
+            var tombstoneSlots = await AppendTombstoneRemovalsAsync(userId, state.Items, state.RemainingSlots, ct);
+            state.RemainingSlots -= tombstoneSlots;
+        }
+    }
+
+    private async Task EmitNewEntitlementsAsync(int userId, IReadOnlyCollection<int> libraryIds, string tokenBase,
+        KoboSyncToken syncToken, ServerSettingDto settings, SyncPageState state, CancellationToken ct)
+    {
+        if (state.RemainingSlots <= 0) return;
+
+        var page = await UnsyncedEligibleChaptersQuery(userId, libraryIds)
+            .OrderBy(c => c.LastModifiedUtc)
+            .ThenBy(c => c.Id)
+            .Take(state.RemainingSlots)
+            .Include(c => c.Files)
+            .Include(c => c.People).ThenInclude(p => p.Person)
+            .Include(c => c.Volume).ThenInclude(v => v.Series).ThenInclude(s => s.Metadata)
+            .ThenInclude(m => m!.People).ThenInclude(p => p.Person)
+            .AsSplitQuery()
+            .ToListAsync(ct);
+
+        var pageIds = page.Select(c => c.Id).ToList();
+        var progressByChapter = await LoadProgressByChapterAsync(userId, pageIds, ct);
+        var locationByChapter = await LoadLocationsByChapterAsync(userId, pageIds, ct);
+
+        foreach (var chapter in page)
+        {
+            var series = chapter.Volume.Series;
+            var entitlementUuid = KoboEntitlementId.FromChapterIdString(chapter.Id);
+            var entitlement = await KoboEntitlementPayloadBuilder.BuildEntitlementPayloadAsync(chapter, series,
+                entitlementUuid, tokenBase, isRemoved: false, preferKepub: settings.EnableKepubConversion,
+                (id, source) => koboConversionService.TryGetCachedKepubPathAsync(id, source, ct));
+
+            progressByChapter.TryGetValue(chapter.Id, out var progress);
+            locationByChapter.TryGetValue(chapter.Id, out var location);
+            if (TryAttachReadingState(entitlement, entitlementUuid, chapter, progress, location,
+                    syncToken.ReadingStateLastModified, out var stateTs))
+            {
+                state.NestedReadingStateChapterIds.Add(chapter.Id);
+                state.EmittedReadingStateChapterIds.Add(chapter.Id);
+                if (stateTs > state.NewReadingStateLastModified) state.NewReadingStateLastModified = stateTs;
+            }
+
+            var created = KoboDateTime.CoalesceUtc(chapter.CreatedUtc, chapter.Created);
+            var isNew = created > syncToken.BooksLastCreated;
+            state.Items.Add(new JsonObject
+            {
+                [isNew ? "NewEntitlement" : "ChangedEntitlement"] = entitlement,
+            });
+
+            var modified = chapter.LastModifiedUtc == default ? chapter.LastModified : chapter.LastModifiedUtc;
+            if (modified > state.NewBooksLastModified) state.NewBooksLastModified = modified;
+            if (created > state.NewBooksLastCreated) state.NewBooksLastCreated = created;
+
+            unitOfWork.DataContext.AppUserKoboSyncedChapter.Add(new AppUserKoboSyncedChapter
+            {
+                AppUserId = userId,
+                ChapterId = chapter.Id,
+            });
+
+            // Queue background kepubify when this synced chapter still lacks a KEPUB artifact.
+            if (settings.EnableKepubConversion)
+            {
+                var source = PreferNativeEpub(chapter.Files) ?? PreferConvertibleArchive(chapter.Files);
+                if (source != null)
+                {
+                    await koboConversionService.EnqueueKepubifyIfNeededAsync(chapter.Id, source, ct);
+                }
+            }
+        }
+
+        state.RemainingSlots -= page.Count;
+    }
+
+    private async Task AppendChangedReadingStatesToPageAsync(int userId, KoboSyncToken syncToken,
+        SyncPageState state, CancellationToken ct)
+    {
+        if (state.RemainingSlots <= 0) return;
+
+        var changedSlots = await AppendChangedReadingStatesAsync(userId, state.Items, state.RemainingSlots,
+            syncToken.ReadingStateLastModified, state.NestedReadingStateChapterIds, ct);
+        foreach (var chapterId in changedSlots.EmittedChapterIds)
+        {
+            state.EmittedReadingStateChapterIds.Add(chapterId);
+        }
+
+        if (changedSlots.MaxReadingStateModified > state.NewReadingStateLastModified)
+        {
+            state.NewReadingStateLastModified = changedSlots.MaxReadingStateModified;
+        }
+    }
+
+    private async Task<KoboLibrarySyncResult> FinalizeSyncTokenAsync(int userId,
+        IReadOnlyCollection<int> libraryIds, KoboSyncToken syncToken, SyncPageState state, CancellationToken ct)
+    {
         // Contiguous cursor: do not advance past an unemitted older reading-state.
         // Bump 1ms past the last emitted timestamp so float epoch round-trips cannot re-select it.
-        newReadingStateLastModified = await AdvanceReadingStateWatermarkAsync(userId,
-            pageReadingStateWatermark, emittedReadingStateChapterIds, ct);
-        if (newReadingStateLastModified > pageReadingStateWatermark)
+        var newReadingStateLastModified = await AdvanceReadingStateWatermarkAsync(userId,
+            state.PageReadingStateWatermark, state.EmittedReadingStateChapterIds, ct);
+        if (newReadingStateLastModified > state.PageReadingStateWatermark)
         {
             newReadingStateLastModified = newReadingStateLastModified.AddMilliseconds(1);
         }
 
         var remainingRemovals = await CountPendingRemovalsAsync(userId, ct);
-        var remainingNew = await EligibleChaptersQuery(libraryIds)
-            .Where(c => !unitOfWork.DataContext.AppUserKoboArchivedChapter
-                .Any(a => a.AppUserId == userId && a.ChapterId == c.Id))
-            .Where(c => !unitOfWork.DataContext.AppUserKoboSyncedChapter
-                .Any(s => s.AppUserId == userId && s.ChapterId == c.Id))
-            .CountAsync(ct);
+        var remainingNew = await UnsyncedEligibleChaptersQuery(userId, libraryIds).CountAsync(ct);
         var remainingReadingStates = await CountChangedReadingStatesAsync(userId,
             newReadingStateLastModified, ct);
         var contSync = remainingRemovals + remainingNew + remainingReadingStates > 0;
@@ -385,20 +410,46 @@ public partial class KoboService(
         // Hold books_last_created until the final page so New vs Changed stays stable across continue pages.
         if (!contSync)
         {
-            syncToken.BooksLastCreated = newBooksLastCreated;
+            syncToken.BooksLastCreated = state.NewBooksLastCreated;
         }
 
-        syncToken.BooksLastModified = newBooksLastModified;
-        syncToken.ArchiveLastModified = newArchiveLastModified;
+        syncToken.BooksLastModified = state.NewBooksLastModified;
+        syncToken.ArchiveLastModified = state.NewArchiveLastModified;
         syncToken.ReadingStateLastModified = newReadingStateLastModified;
-        syncToken.TagsLastModified = newTagsLastModified;
+        syncToken.TagsLastModified = state.NewTagsLastModified;
 
         return new KoboLibrarySyncResult
         {
-            Items = items,
+            Items = state.Items,
             SyncToken = syncToken.ToHeaderValue(),
             Continue = contSync,
         };
+    }
+
+    /// <summary>Mutable accumulator for a single sync page: emitted items, remaining slots, watermarks.</summary>
+    private sealed class SyncPageState
+    {
+        public SyncPageState(KoboSyncToken token, int pageSize)
+        {
+            RemainingSlots = pageSize;
+            NewBooksLastModified = token.BooksLastModified;
+            NewBooksLastCreated = token.BooksLastCreated;
+            NewArchiveLastModified = token.ArchiveLastModified;
+            NewReadingStateLastModified = token.ReadingStateLastModified;
+            NewTagsLastModified = token.TagsLastModified;
+            PageReadingStateWatermark = token.ReadingStateLastModified;
+        }
+
+        public JsonArray Items { get; } = new();
+        public int RemainingSlots { get; set; }
+        public DateTime NewBooksLastModified { get; set; }
+        public DateTime NewBooksLastCreated { get; set; }
+        public DateTime NewArchiveLastModified { get; set; }
+        public DateTime NewReadingStateLastModified { get; set; }
+        public DateTime NewTagsLastModified { get; set; }
+        public DateTime PageReadingStateWatermark { get; }
+        public HashSet<int> NestedReadingStateChapterIds { get; } = [];
+        public HashSet<int> EmittedReadingStateChapterIds { get; } = [];
     }
 
     private static async Task<IDisposable> AcquireLibrarySyncLockAsync(int userId, CancellationToken ct)
@@ -428,12 +479,13 @@ public partial class KoboService(
         CancellationToken ct = default)
     {
         var userId = await ResolveUserIdAsync(authToken, ct);
+        using var syncLock = await AcquireLibrarySyncLockAsync(userId, ct);
         if (!Guid.TryParse(entitlementId, out var entitlementGuid))
         {
             return;
         }
 
-        var chapterId = await ResolveChapterIdByEntitlementAsync(entitlementGuid, ct);
+        var chapterId = await ResolveChapterIdByEntitlementAsync(userId, entitlementGuid, ct);
         if (chapterId <= 0)
         {
             // Already gone (or unknown): treat as success so the device can finish cleanup.
@@ -450,6 +502,7 @@ public partial class KoboService(
     /// </summary>
     public async Task ForceFullSyncAsync(int userId, CancellationToken ct = default)
     {
+        using var syncLock = await AcquireLibrarySyncLockAsync(userId, ct);
         var user = await unitOfWork.UserRepository.GetUserByIdAsync(userId, AppUserIncludes.None, ct);
         if (user == null) throw new KavitaException("access-denied");
 
@@ -503,139 +556,6 @@ public partial class KoboService(
         }
     }
 
-    public async Task<IReadOnlyList<KoboRemovedBookDto>> GetRemovedBooksAsync(int userId,
-        CancellationToken ct = default)
-    {
-        var user = await unitOfWork.UserRepository.GetUserByIdAsync(userId, AppUserIncludes.None, ct);
-        if (user == null) throw new KavitaException("access-denied");
-
-        var libraryIds = await GetAllowedLibraryIdsAsync(userId, ct);
-        var deviceArchives = await unitOfWork.DataContext.AppUserKoboArchivedChapter
-            .Where(a => a.AppUserId == userId && a.IsDeviceDeleted)
-            .ToListAsync(ct);
-        if (deviceArchives.Count == 0) return [];
-
-        var archivedIds = deviceArchives.Select(a => a.ChapterId).ToList();
-        var eligibleChapters = await EligibleChaptersQuery(libraryIds)
-            .Where(c => archivedIds.Contains(c.Id))
-            .Include(c => c.Volume)
-            .ThenInclude(v => v.Series)
-            .ToListAsync(ct);
-        if (eligibleChapters.Count == 0) return [];
-
-        var archiveByChapter = deviceArchives.ToDictionary(a => a.ChapterId);
-        return eligibleChapters
-            .OrderBy(c => c.Volume.Series.Name)
-            .ThenBy(c => c.SortOrder)
-            .Select(c => new KoboRemovedBookDto
-            {
-                ChapterId = c.Id,
-                SeriesId = c.Volume.SeriesId,
-                LibraryId = c.Volume.Series.LibraryId,
-                SeriesName = c.Volume.Series.Name,
-                Title = BuildTitle(c.Volume.Series, c),
-                RemovedUtc = archiveByChapter[c.Id].LastModifiedUtc,
-            })
-            .ToList();
-    }
-
-    public async Task RestoreRemovedBooksAsync(int userId, IReadOnlyCollection<int>? chapterIds = null,
-        CancellationToken ct = default)
-    {
-        var user = await unitOfWork.UserRepository.GetUserByIdAsync(userId, AppUserIncludes.None, ct);
-        if (user == null) throw new KavitaException("access-denied");
-
-        var libraryIds = await GetAllowedLibraryIdsAsync(userId, ct);
-        var deviceArchives = await unitOfWork.DataContext.AppUserKoboArchivedChapter
-            .Where(a => a.AppUserId == userId && a.IsDeviceDeleted)
-            .ToListAsync(ct);
-        if (deviceArchives.Count == 0) return;
-
-        if (chapterIds is { Count: > 0 })
-        {
-            var requested = chapterIds.ToHashSet();
-            deviceArchives = deviceArchives.Where(a => requested.Contains(a.ChapterId)).ToList();
-            if (deviceArchives.Count == 0) return;
-        }
-
-        var archivedIds = deviceArchives.Select(a => a.ChapterId).ToList();
-        var eligibleIds = await EligibleChaptersQuery(libraryIds)
-            .Where(c => archivedIds.Contains(c.Id))
-            .Select(c => c.Id)
-            .ToListAsync(ct);
-        if (eligibleIds.Count == 0) return;
-
-        var eligibleSet = eligibleIds.ToHashSet();
-        var toClear = deviceArchives.Where(a => eligibleSet.Contains(a.ChapterId)).ToList();
-        var clearedIds = toClear.Select(a => a.ChapterId).ToList();
-
-        unitOfWork.DataContext.AppUserKoboArchivedChapter.RemoveRange(toClear);
-
-        var synced = await unitOfWork.DataContext.AppUserKoboSyncedChapter
-            .Where(s => s.AppUserId == userId && clearedIds.Contains(s.ChapterId))
-            .ToListAsync(ct);
-        if (synced.Count > 0)
-        {
-            unitOfWork.DataContext.AppUserKoboSyncedChapter.RemoveRange(synced);
-        }
-
-        await unitOfWork.CommitAsync(ct);
-    }
-
-    public async Task PrepareHardDeleteAsync(IEnumerable<int> chapterIds,
-        CancellationToken ct = default)
-    {
-        var distinctIds = chapterIds.Distinct().ToList();
-        if (distinctIds.Count == 0) return;
-
-        var syncedRows = await unitOfWork.DataContext.AppUserKoboSyncedChapter
-            .Where(s => distinctIds.Contains(s.ChapterId))
-            .ToListAsync(ct);
-        if (syncedRows.Count == 0) return;
-
-        var chapters = await unitOfWork.DataContext.Chapter
-            .Where(c => distinctIds.Contains(c.Id))
-            .Include(c => c.Volume).ThenInclude(v => v.Series)
-            .AsSplitQuery()
-            .ToListAsync(ct);
-        var chapterById = chapters.ToDictionary(c => c.Id);
-
-        var existingTombstones = await unitOfWork.DataContext.AppUserKoboTombstone
-            .Where(t => distinctIds.Contains(t.ChapterId))
-            .Select(t => new { t.AppUserId, t.ChapterId })
-            .ToListAsync(ct);
-        var tombstoneKeys = existingTombstones
-            .Select(t => (t.AppUserId, t.ChapterId))
-            .ToHashSet();
-
-        var now = DateTime.UtcNow;
-        foreach (var group in syncedRows.GroupBy(s => s.ChapterId))
-        {
-            if (!chapterById.TryGetValue(group.Key, out var chapter)) continue;
-            var title = BuildTitle(chapter.Volume.Series, chapter);
-            var entitlementId = KoboEntitlementId.FromChapterId(chapter.Id);
-
-            foreach (var row in group)
-            {
-                if (!tombstoneKeys.Contains((row.AppUserId, row.ChapterId)))
-                {
-                    unitOfWork.DataContext.AppUserKoboTombstone.Add(new AppUserKoboTombstone
-                    {
-                        AppUserId = row.AppUserId,
-                        ChapterId = row.ChapterId,
-                        EntitlementId = entitlementId,
-                        Title = title,
-                        CreatedUtc = now,
-                    });
-                    tombstoneKeys.Add((row.AppUserId, row.ChapterId));
-                }
-            }
-        }
-
-        unitOfWork.DataContext.AppUserKoboSyncedChapter.RemoveRange(syncedRows);
-        await unitOfWork.CommitAsync(ct);
-    }
-
     public async Task<IReadOnlyList<JsonObject>> GetMetadataAsync(string authToken, string entitlementId,
         CancellationToken ct = default)
     {
@@ -647,13 +567,14 @@ public partial class KoboService(
         }
 
         var chapter = await ResolveEligibleChapterAsync(userId, entitlementId, ct);
-        if (chapter == null) throw new KavitaException("kobo-entitlement-not-found");
+        if (chapter == null) throw new KavitaException(EntitlementNotFoundMessage);
 
         var publicBase = BuildPublicBase(settings.HostName, settings.BaseUrl);
         var tokenBase = $"{publicBase}/{SyncPathPrefix}{authToken}";
         var uuid = KoboEntitlementId.FromChapterIdString(chapter.Id);
-        var metadata = await BuildBookMetadataAsync(chapter, chapter.Volume.Series, uuid, tokenBase,
-            settings.EnableKepubConversion);
+        var metadata = await KoboEntitlementPayloadBuilder.BuildBookMetadataAsync(chapter, chapter.Volume.Series,
+            uuid, tokenBase, settings.EnableKepubConversion,
+            (id, source) => koboConversionService.TryGetCachedKepubPathAsync(id, source, ct));
         return [metadata];
     }
 
@@ -663,11 +584,11 @@ public partial class KoboService(
         var userId = await ResolveUserIdAsync(authToken, ct);
         if (!IsSupportedDownloadFormat(format))
         {
-            throw new KavitaException("kobo-format-unsupported");
+            throw new KavitaException(FormatUnsupportedMessage);
         }
 
         var chapter = await ResolveEligibleChapterAsync(userId, entitlementId, ct);
-        if (chapter == null) throw new KavitaException("kobo-entitlement-not-found");
+        if (chapter == null) throw new KavitaException(EntitlementNotFoundMessage);
 
         if (IsKepubDownloadFormat(format))
         {
@@ -686,11 +607,11 @@ public partial class KoboService(
         }
 
         var archive = PreferConvertibleArchive(chapter.Files);
-        if (archive == null) throw new KavitaException("kobo-epub-missing");
+        if (archive == null) throw new KavitaException(EpubMissingMessage);
 
         var settings = await unitOfWork.SettingsRepository.GetSettingsDtoAsync(ct);
         var series = chapter.Volume.Series;
-        var title = BuildTitle(series, chapter);
+        var title = KoboEntitlementPayloadBuilder.BuildTitle(series, chapter);
         var convertedPath = await koboConversionService.GetOrConvertEpubAsync(chapter.Id, archive, title,
             settings.KoboConvertTimeBudgetSeconds, ct);
 
@@ -707,14 +628,14 @@ public partial class KoboService(
         var settings = await unitOfWork.SettingsRepository.GetSettingsDtoAsync(ct);
         if (!settings.EnableKepubConversion)
         {
-            throw new KavitaException("kobo-format-unsupported");
+            throw new KavitaException(FormatUnsupportedMessage);
         }
 
         var source = PreferNativeEpub(chapter.Files) ?? PreferConvertibleArchive(chapter.Files);
-        if (source == null) throw new KavitaException("kobo-epub-missing");
+        if (source == null) throw new KavitaException(EpubMissingMessage);
 
         var series = chapter.Volume.Series;
-        var title = BuildTitle(series, chapter);
+        var title = KoboEntitlementPayloadBuilder.BuildTitle(series, chapter);
         var kepubPath = await koboConversionService.GetOrConvertKepubAsync(chapter.Id, source, title,
             settings.KoboConvertTimeBudgetSeconds, ct);
 
@@ -739,8 +660,16 @@ public partial class KoboService(
         var path = Path.Join(directoryService.CoverImageDirectory, coverFile);
         if (!File.Exists(path)) return null;
 
-        return new KoboCoverResult { FilePath = path };
+        return new KoboCoverResult { FilePath = path, ContentType = ResolveCoverContentType(path) };
     }
+
+    private static string ResolveCoverContentType(string path) =>
+        Path.GetExtension(path).ToLowerInvariant() switch
+        {
+            ".png" => "image/png",
+            ".webp" => "image/webp",
+            _ => "image/jpeg",
+        };
 
     public object GetEmptyStub() => new JsonObject();
 
@@ -772,7 +701,7 @@ public partial class KoboService(
         var progress = await unitOfWork.AppUserProgressRepository.GetUserProgressAsync(chapter.Id, userId, ct);
         var location = await unitOfWork.DataContext.AppUserKoboReadingLocation
             .FirstOrDefaultAsync(l => l.AppUserId == userId && l.ChapterId == chapter.Id, ct);
-        var created = chapter.CreatedUtc == default ? chapter.Created : chapter.CreatedUtc;
+        var created = KoboDateTime.CoalesceUtc(chapter.CreatedUtc, chapter.Created);
         var pagesRead = progress?.PagesRead ?? 0;
         var modified = progress?.LastModifiedUtc == default || progress == null
             ? created
@@ -794,11 +723,12 @@ public partial class KoboService(
         CancellationToken ct = default)
     {
         var userId = await ResolveUserIdAsync(authToken, ct);
+        using var syncLock = await AcquireLibrarySyncLockAsync(userId, ct);
 
         if (body == null || body["ReadingStates"] is not JsonArray states || states.Count == 0
             || states[0] is not JsonObject readingState)
         {
-            throw new KavitaException("kobo-reading-state-malformed");
+            throw new KavitaException(ReadingStateMalformedMessage);
         }
 
         var bookmarkPresent = readingState["CurrentBookmark"] is JsonObject bookmark && bookmark.Count > 0;
@@ -814,13 +744,13 @@ public partial class KoboService(
         }
 
         var existing = await unitOfWork.AppUserProgressRepository.GetUserProgressAsync(chapter.Id, userId, ct);
-        var deviceTs = AsUtc(KoboReadingStateMapper.ResolveDeviceTimestamp(readingState, now));
+        var deviceTs = KoboDateTime.AsUtc(KoboReadingStateMapper.ResolveDeviceTimestamp(readingState, now));
 
         // Last-write-wins: keep server progress when it is strictly newer than the device timestamp.
         // Losing write ignored as a package (percent, status, BookScrollId, and Location).
-        if (existing != null && AsUtc(existing.LastModifiedUtc) > deviceTs)
+        if (existing != null && KoboDateTime.AsUtc(existing.LastModifiedUtc) > deviceTs)
         {
-            return KoboReadingStateMapper.BuildPutSuccess(entitlementId, AsUtc(existing.LastModifiedUtc),
+            return KoboReadingStateMapper.BuildPutSuccess(entitlementId, KoboDateTime.AsUtc(existing.LastModifiedUtc),
                 bookmarkPresent, statisticsPresent, statusPresent);
         }
 
@@ -829,16 +759,41 @@ public partial class KoboService(
             existing?.PagesRead ?? 0);
         var hasTruthyLocation = KoboReadingStateMapper.TryGetTruthyLocation(readingState,
             out var locationValue, out var locationType, out var locationSource);
-        var isConvertChapter = koboConvertProgressLocation.IsConvertChapter(chapter);
+        var locationWrite = new ReadingStateLocationWrite(hasTruthyLocation, locationValue, locationType,
+            locationSource);
 
+        if (existing == null && pagesRead == 0 && !statusPresent && !bookmarkPresent)
+        {
+            return KoboReadingStateMapper.BuildPutSuccess(entitlementId, now,
+                bookmarkPresent, statisticsPresent, statusPresent);
+        }
+
+        existing = UpsertProgress(userId, chapter, existing, pagesRead);
+
+        if (koboConvertProgressLocation.IsConvertChapter(chapter))
+        {
+            await ApplyConvertChapterLocationWinAsync(userId, chapter, existing, locationWrite, readingState, ct);
+        }
+        else if (locationWrite.HasTruthyLocation)
+        {
+            await ApplyLibraryChapterLocationWriteAsync(userId, chapter, existing, locationWrite, ct);
+        }
+
+        await unitOfWork.CommitAsync(ct);
+        var savedTs = existing.LastModifiedUtc == default ? now : existing.LastModifiedUtc;
+        return KoboReadingStateMapper.BuildPutSuccess(entitlementId, savedTs,
+            bookmarkPresent, statisticsPresent, statusPresent);
+    }
+
+    /// <summary>Location columns parsed from a device reading-state PUT (truthy = write all three).</summary>
+    private readonly record struct ReadingStateLocationWrite(bool HasTruthyLocation, string? Value, string? Type,
+        string? Source);
+
+    /// <summary>Creates or updates the user's progress row for a chapter and returns the tracked entity.</summary>
+    private AppUserProgress UpsertProgress(int userId, Chapter chapter, AppUserProgress? existing, int pagesRead)
+    {
         if (existing == null)
         {
-            if (pagesRead == 0 && !statusPresent && !bookmarkPresent)
-            {
-                return KoboReadingStateMapper.BuildPutSuccess(entitlementId, now,
-                    bookmarkPresent, statisticsPresent, statusPresent);
-            }
-
             var series = chapter.Volume.Series;
             existing = new AppUserProgress
             {
@@ -860,48 +815,45 @@ public partial class KoboService(
             unitOfWork.AppUserProgressRepository.Update(existing);
         }
 
-        if (isConvertChapter)
-        {
-            await ApplyConvertChapterLocationWinAsync(userId, chapter, existing, hasTruthyLocation,
-                locationValue, locationType, locationSource, readingState, ct);
-        }
-        else if (hasTruthyLocation)
-        {
-            // Truthy Location writes all three columns; falsy/absent leaves prior columns unchanged.
-            var locationRow = await unitOfWork.DataContext.AppUserKoboReadingLocation
-                .FirstOrDefaultAsync(l => l.AppUserId == userId && l.ChapterId == chapter.Id, ct);
-            if (locationRow == null)
-            {
-                unitOfWork.DataContext.AppUserKoboReadingLocation.Add(new AppUserKoboReadingLocation
-                {
-                    AppUserId = userId,
-                    ChapterId = chapter.Id,
-                    LocationValue = locationValue,
-                    LocationType = locationType,
-                    LocationSource = locationSource,
-                });
-            }
-            else
-            {
-                locationRow.LocationValue = locationValue;
-                locationRow.LocationType = locationType;
-                locationRow.LocationSource = locationSource;
-            }
+        return existing;
+    }
 
-            // Best-effort Location → BookScrollId when valid in the library EPUB; else leave.
-            var libraryEpub = koboLocationMapper.ResolveLibraryEpubPath(chapter);
-            var mappedScroll = await koboLocationMapper.TryMapLocationToBookScrollIdAsync(
-                libraryEpub, locationValue, locationType, locationSource, ct);
-            if (!string.IsNullOrEmpty(mappedScroll))
+    /// <summary>
+    /// Library (non-convert) chapters: a truthy Location writes all three columns and best-effort maps
+    /// the Location to a BookScrollId when it resolves inside the library EPUB.
+    /// </summary>
+    private async Task ApplyLibraryChapterLocationWriteAsync(int userId, Chapter chapter, AppUserProgress existing,
+        ReadingStateLocationWrite location, CancellationToken ct)
+    {
+        // Truthy Location writes all three columns; falsy/absent leaves prior columns unchanged.
+        var locationRow = await unitOfWork.DataContext.AppUserKoboReadingLocation
+            .FirstOrDefaultAsync(l => l.AppUserId == userId && l.ChapterId == chapter.Id, ct);
+        if (locationRow == null)
+        {
+            unitOfWork.DataContext.AppUserKoboReadingLocation.Add(new AppUserKoboReadingLocation
             {
-                existing.BookScrollId = mappedScroll;
-            }
+                AppUserId = userId,
+                ChapterId = chapter.Id,
+                LocationValue = location.Value,
+                LocationType = location.Type,
+                LocationSource = location.Source,
+            });
+        }
+        else
+        {
+            locationRow.LocationValue = location.Value;
+            locationRow.LocationType = location.Type;
+            locationRow.LocationSource = location.Source;
         }
 
-        await unitOfWork.CommitAsync(ct);
-        var savedTs = existing.LastModifiedUtc == default ? now : existing.LastModifiedUtc;
-        return KoboReadingStateMapper.BuildPutSuccess(entitlementId, savedTs,
-            bookmarkPresent, statisticsPresent, statusPresent);
+        // Best-effort Location → BookScrollId when valid in the library EPUB; else leave.
+        var libraryEpub = koboLocationMapper.ResolveLibraryEpubPath(chapter);
+        var mappedScroll = await koboLocationMapper.TryMapLocationToBookScrollIdAsync(
+            libraryEpub, location.Value, location.Type, location.Source, ct);
+        if (!string.IsNullOrEmpty(mappedScroll))
+        {
+            existing.BookScrollId = mappedScroll;
+        }
     }
 
     /// <summary>
@@ -909,8 +861,7 @@ public partial class KoboService(
     /// Never leave a stale convert Location on falsy/absent/invalid device Location.
     /// </summary>
     private async Task ApplyConvertChapterLocationWinAsync(int userId, Chapter chapter, AppUserProgress existing,
-        bool hasTruthyLocation, string? locationValue, string? locationType, string? locationSource,
-        JsonObject readingState, CancellationToken ct)
+        ReadingStateLocationWrite location, JsonObject readingState, CancellationToken ct)
     {
         var kepub = await koboConvertProgressLocation.TryResolveTrustedKepubPathAsync(chapter, ct);
         var readyToRead = string.Equals(
@@ -918,14 +869,14 @@ public partial class KoboService(
             KoboReadingStateMapper.StatusReadyToRead,
             StringComparison.OrdinalIgnoreCase);
 
-        if (hasTruthyLocation)
+        if (location.HasTruthyLocation)
         {
             if (kepub != null &&
-                KoboConvertLocationCodec.TryDecode(locationValue, locationType, locationSource, chapter.Pages,
+                KoboConvertLocationCodec.TryDecode(location.Value, location.Type, location.Source, chapter.Pages,
                     out var decodedPages))
             {
                 await koboConvertProgressLocation.UpsertLocationAsync(userId, chapter.Id,
-                    locationValue, locationType, locationSource, ct);
+                    location.Value, location.Type, location.Source, ct);
                 existing.PagesRead = decodedPages;
                 return;
             }
@@ -977,10 +928,10 @@ public partial class KoboService(
     {
         stateTimestamp = default;
         if (progress == null) return false;
-        var modified = AsUtc(progress.LastModifiedUtc == default ? progress.LastModified : progress.LastModifiedUtc);
-        if (modified <= AsUtc(readingStateWatermark)) return false;
+        var modified = KoboDateTime.AsUtc(KoboDateTime.CoalesceUtc(progress.LastModifiedUtc, progress.LastModified));
+        if (modified <= KoboDateTime.AsUtc(readingStateWatermark)) return false;
 
-        var created = chapter.CreatedUtc == default ? chapter.Created : chapter.CreatedUtc;
+        var created = KoboDateTime.CoalesceUtc(chapter.CreatedUtc, chapter.Created);
         entitlement["ReadingState"] = KoboReadingStateMapper.BuildReadingState(entitlementUuid, created,
             progress.PagesRead, chapter.Pages, modified, location);
         stateTimestamp = modified;
@@ -1024,7 +975,7 @@ public partial class KoboService(
         {
             if (!chapterById.TryGetValue(row.ChapterId, out var chapter)) continue;
             var uuid = KoboEntitlementId.FromChapterIdString(row.ChapterId);
-            var created = chapter.CreatedUtc == default ? chapter.Created : chapter.CreatedUtc;
+            var created = KoboDateTime.CoalesceUtc(chapter.CreatedUtc, chapter.Created);
             var modified = row.LastModifiedUtc;
             locationByChapter.TryGetValue(row.ChapterId, out var location);
             var readingState = KoboReadingStateMapper.BuildReadingState(uuid, created, row.PagesRead,
@@ -1058,7 +1009,7 @@ public partial class KoboService(
         foreach (var row in pending)
         {
             if (!emittedChapterIds.Contains(row.ChapterId)) break;
-            var modified = AsUtc(row.LastModifiedUtc);
+            var modified = KoboDateTime.AsUtc(row.LastModifiedUtc);
             if (modified > watermark) watermark = modified;
         }
 
@@ -1069,14 +1020,10 @@ public partial class KoboService(
         CancellationToken ct) =>
         await PendingReadingStateQuery(userId, readingStateWatermark).CountAsync(ct);
 
-    private static DateTime AsUtc(DateTime value) =>
-        value.Kind == DateTimeKind.Unspecified
-            ? DateTime.SpecifyKind(value, DateTimeKind.Utc)
-            : value.ToUniversalTime();
 
     private IQueryable<AppUserProgress> PendingReadingStateQuery(int userId, DateTime readingStateWatermark)
     {
-        var watermark = AsUtc(readingStateWatermark);
+        var watermark = KoboDateTime.AsUtc(readingStateWatermark);
         return unitOfWork.DataContext.AppUserProgresses
             .Where(p => p.AppUserId == userId)
             .Where(p => p.LastModifiedUtc > watermark)
@@ -1123,115 +1070,8 @@ public partial class KoboService(
     {
         // Native EPUB or CBZ/CBR (extension / path). PDF-only is excluded.
         return unitOfWork.DataContext.Chapter
-            .Where(c => libraryIds.Contains(c.Volume.Series.LibraryId)
-                        && c.Files.Any(f => f.Format == MangaFormat.Epub
-                                           || (f.Format == MangaFormat.Archive && (
-                                               f.Extension == ".cbz" || f.Extension == ".cbr"
-                                               || f.FilePath.EndsWith(".cbz") || f.FilePath.EndsWith(".CBZ")
-                                               || f.FilePath.EndsWith(".cbr") || f.FilePath.EndsWith(".CBR")))));
-    }
-
-    /// <summary>
-    /// Synced chapters that are no longer eligible are archived and unsynced so the next
-    /// (or current) sync page can emit <c>IsRemoved</c>. Already-archived synced rows are
-    /// left alone (removal already delivered).
-    /// </summary>
-    private async Task ReconcileEligibilityLossAsync(int userId, CancellationToken ct)
-    {
-        var libraryIds = await GetAllowedLibraryIdsAsync(userId, ct);
-        var syncedIds = await unitOfWork.DataContext.AppUserKoboSyncedChapter
-            .Where(s => s.AppUserId == userId)
-            .Where(s => !unitOfWork.DataContext.AppUserKoboArchivedChapter
-                .Any(a => a.AppUserId == userId && a.ChapterId == s.ChapterId))
-            .Select(s => s.ChapterId)
-            .ToListAsync(ct);
-        if (syncedIds.Count == 0) return;
-
-        var stillEligible = await EligibleChaptersQuery(libraryIds)
-            .Where(c => syncedIds.Contains(c.Id))
-            .Select(c => c.Id)
-            .ToListAsync(ct);
-        var stillEligibleSet = stillEligible.ToHashSet();
-        var lost = syncedIds.Where(id => !stillEligibleSet.Contains(id)).ToList();
-        if (lost.Count == 0) return;
-
-        foreach (var chapterId in lost)
-        {
-            await ArchiveAndUnsyncAsync(userId, chapterId, isDeviceDeleted: false, ct);
-        }
-
-        await unitOfWork.CommitAsync(ct);
-    }
-
-    /// <summary>
-    /// Eligibility archives for chapters that are eligible again are cleared (and unsynced) so
-    /// the next sync can re-entitle them. Device-deleted archives are left alone.
-    /// </summary>
-    private async Task ReconcileEligibilityRestoreAsync(int userId, CancellationToken ct)
-    {
-        var libraryIds = await GetAllowedLibraryIdsAsync(userId, ct);
-        var eligibilityArchives = await unitOfWork.DataContext.AppUserKoboArchivedChapter
-            .Where(a => a.AppUserId == userId && !a.IsDeviceDeleted)
-            .ToListAsync(ct);
-        if (eligibilityArchives.Count == 0) return;
-
-        var archivedIds = eligibilityArchives.Select(a => a.ChapterId).ToList();
-        var eligibleIds = await EligibleChaptersQuery(libraryIds)
-            .Where(c => archivedIds.Contains(c.Id))
-            .Select(c => c.Id)
-            .ToListAsync(ct);
-        if (eligibleIds.Count == 0) return;
-
-        var eligibleSet = eligibleIds.ToHashSet();
-        var toClear = eligibilityArchives.Where(a => eligibleSet.Contains(a.ChapterId)).ToList();
-        var clearedIds = toClear.Select(a => a.ChapterId).ToList();
-
-        unitOfWork.DataContext.AppUserKoboArchivedChapter.RemoveRange(toClear);
-
-        var synced = await unitOfWork.DataContext.AppUserKoboSyncedChapter
-            .Where(s => s.AppUserId == userId && clearedIds.Contains(s.ChapterId))
-            .ToListAsync(ct);
-        if (synced.Count > 0)
-        {
-            unitOfWork.DataContext.AppUserKoboSyncedChapter.RemoveRange(synced);
-        }
-
-        await unitOfWork.CommitAsync(ct);
-    }
-
-    private async Task ArchiveAndUnsyncAsync(int userId, int chapterId, bool isDeviceDeleted,
-        CancellationToken ct)
-    {
-        var archived = await unitOfWork.DataContext.AppUserKoboArchivedChapter
-            .FirstOrDefaultAsync(a => a.AppUserId == userId && a.ChapterId == chapterId, ct);
-        var now = DateTime.UtcNow;
-        if (archived == null)
-        {
-            unitOfWork.DataContext.AppUserKoboArchivedChapter.Add(new AppUserKoboArchivedChapter
-            {
-                AppUserId = userId,
-                ChapterId = chapterId,
-                LastModifiedUtc = now,
-                IsDeviceDeleted = isDeviceDeleted,
-            });
-        }
-        else
-        {
-            archived.LastModifiedUtc = now;
-            // Device DELETE upgrades an eligibility archive; eligibility loss never clears the flag.
-            if (isDeviceDeleted)
-            {
-                archived.IsDeviceDeleted = true;
-            }
-        }
-
-        var synced = await unitOfWork.DataContext.AppUserKoboSyncedChapter
-            .Where(s => s.AppUserId == userId && s.ChapterId == chapterId)
-            .ToListAsync(ct);
-        if (synced.Count > 0)
-        {
-            unitOfWork.DataContext.AppUserKoboSyncedChapter.RemoveRange(synced);
-        }
+            .Where(c => libraryIds.Contains(c.Volume.Series.LibraryId))
+            .Where(KoboEligibleFormats.ChapterHasEligibleFile);
     }
 
     private async Task<(int Emitted, DateTime MaxArchiveModified)> AppendArchiveRemovalsAsync(
@@ -1277,10 +1117,11 @@ public partial class KoboService(
 
             var series = chapter.Volume.Series;
             var entitlementUuid = KoboEntitlementId.FromChapterIdString(chapter.Id);
-            var entitlement = await BuildEntitlementPayloadAsync(chapter, series, entitlementUuid, tokenBase,
-                isRemoved: true, preferKepub: preferKepub);
+            var entitlement = await KoboEntitlementPayloadBuilder.BuildEntitlementPayloadAsync(chapter, series,
+                entitlementUuid, tokenBase, isRemoved: true, preferKepub: preferKepub,
+                (id, source) => koboConversionService.TryGetCachedKepubPathAsync(id, source, ct));
 
-            var created = chapter.CreatedUtc == default ? chapter.Created : chapter.CreatedUtc;
+            var created = KoboDateTime.CoalesceUtc(chapter.CreatedUtc, chapter.Created);
             var isNew = created > syncToken.BooksLastCreated;
             items.Add(new JsonObject
             {
@@ -1315,7 +1156,8 @@ public partial class KoboService(
         foreach (var tombstone in tombstones)
         {
             var entitlementUuid = tombstone.EntitlementId.ToString();
-            var entitlement = BuildTombstoneEntitlementPayload(tombstone, entitlementUuid);
+            var entitlement = KoboEntitlementPayloadBuilder.BuildTombstoneEntitlementPayload(tombstone,
+                entitlementUuid);
             items.Add(new JsonObject
             {
                 ["ChangedEntitlement"] = entitlement,
@@ -1338,19 +1180,29 @@ public partial class KoboService(
         return archiveCount + tombstoneCount;
     }
 
-    private async Task<int> ResolveChapterIdByEntitlementAsync(Guid entitlementGuid, CancellationToken ct)
+    private async Task<int> ResolveChapterIdByEntitlementAsync(int userId, Guid entitlementGuid,
+        CancellationToken ct)
     {
-        // Prefer exact match via known synced/archived rows, then scan chapter ids.
+        // Prefer exact match via this user's synced/archived rows, then scan accessible libraries.
         var knownIds = await unitOfWork.DataContext.AppUserKoboSyncedChapter
+            .Where(s => s.AppUserId == userId)
             .Select(s => s.ChapterId)
-            .Union(unitOfWork.DataContext.AppUserKoboArchivedChapter.Select(a => a.ChapterId))
+            .Union(unitOfWork.DataContext.AppUserKoboArchivedChapter
+                .Where(a => a.AppUserId == userId)
+                .Select(a => a.ChapterId))
             .Distinct()
             .ToListAsync(ct);
         var fromKnown = knownIds.FirstOrDefault(id => KoboEntitlementId.FromChapterId(id) == entitlementGuid);
         if (fromKnown > 0) return fromKnown;
 
-        var allIds = await unitOfWork.DataContext.Chapter.Select(c => c.Id).ToListAsync(ct);
-        return allIds.FirstOrDefault(id => KoboEntitlementId.FromChapterId(id) == entitlementGuid);
+        var libraryIds = await GetAllowedLibraryIdsAsync(userId, ct);
+        if (libraryIds.Count == 0) return 0;
+
+        var candidateIds = await unitOfWork.DataContext.Chapter
+            .Where(c => libraryIds.Contains(c.Volume.Series.LibraryId))
+            .Select(c => c.Id)
+            .ToListAsync(ct);
+        return candidateIds.FirstOrDefault(id => KoboEntitlementId.FromChapterId(id) == entitlementGuid);
     }
 
     private async Task<Chapter?> ResolveEligibleChapterAsync(int userId, string entitlementId,
@@ -1369,13 +1221,7 @@ public partial class KoboService(
             .Where(c => libraryIds.Contains(c.Volume.Series.LibraryId));
         if (requireEligibleFormat)
         {
-            query = query.Where(c => c.Files.Any(f => f.Format == MangaFormat.Epub
-                                                     || (f.Format == MangaFormat.Archive && (
-                                                         f.Extension == ".cbz" || f.Extension == ".cbr"
-                                                         || f.FilePath.EndsWith(".cbz") ||
-                                                         f.FilePath.EndsWith(".CBZ")
-                                                         || f.FilePath.EndsWith(".cbr") ||
-                                                         f.FilePath.EndsWith(".CBR")))));
+            query = query.Where(KoboEligibleFormats.ChapterHasEligibleFile);
         }
 
         var candidates = await query
@@ -1393,229 +1239,6 @@ public partial class KoboService(
             .ThenInclude(m => m!.People).ThenInclude(p => p.Person)
             .AsSplitQuery()
             .FirstOrDefaultAsync(c => c.Id == chapterId, ct);
-    }
-
-    private JsonObject BuildTombstoneEntitlementPayload(AppUserKoboTombstone tombstone,
-        string entitlementUuid)
-    {
-        var now = FormatKoboTimestamp(DateTime.UtcNow);
-        var created = FormatKoboTimestamp(tombstone.CreatedUtc);
-        return new JsonObject
-        {
-            ["BookEntitlement"] = new JsonObject
-            {
-                ["Accessibility"] = "Full",
-                ["ActivePeriod"] = new JsonObject { ["From"] = now },
-                ["Created"] = created,
-                ["CrossRevisionId"] = entitlementUuid,
-                ["Id"] = entitlementUuid,
-                ["IsRemoved"] = true,
-                ["IsHiddenFromArchive"] = false,
-                ["IsLocked"] = false,
-                ["LastModified"] = now,
-                ["OriginCategory"] = "Imported",
-                ["RevisionId"] = entitlementUuid,
-                ["Status"] = "Active",
-            },
-            ["BookMetadata"] = new JsonObject
-            {
-                ["Categories"] = new JsonArray { EmptyGenreId.ToString() },
-                ["CoverImageId"] = entitlementUuid,
-                ["CrossRevisionId"] = entitlementUuid,
-                ["CurrentDisplayPrice"] = new JsonObject
-                {
-                    ["CurrencyCode"] = "USD",
-                    ["TotalAmount"] = 0,
-                },
-                ["CurrentLoveDisplayPrice"] = new JsonObject { ["TotalAmount"] = 0 },
-                ["Description"] = null,
-                ["DownloadUrls"] = new JsonArray(),
-                ["EntitlementId"] = entitlementUuid,
-                ["ExternalIds"] = new JsonArray(),
-                ["Genre"] = EmptyGenreId.ToString(),
-                ["IsEligibleForKoboLove"] = false,
-                ["IsInternetArchive"] = false,
-                ["IsPreOrder"] = false,
-                ["IsSocialEnabled"] = true,
-                ["Language"] = "en",
-                ["PhoneticPronunciations"] = new JsonObject(),
-                ["Publisher"] = new JsonObject
-                {
-                    ["Imprint"] = string.Empty,
-                    ["Name"] = null,
-                },
-                ["RevisionId"] = entitlementUuid,
-                ["Title"] = tombstone.Title,
-                ["WorkId"] = entitlementUuid,
-                ["Contributors"] = null,
-            },
-        };
-    }
-
-    private async Task<JsonObject> BuildEntitlementPayloadAsync(Chapter chapter, Series series,
-        string entitlementUuid, string tokenBase, bool isRemoved, bool preferKepub)
-    {
-        return new JsonObject
-        {
-            ["BookEntitlement"] = BuildBookEntitlement(chapter, entitlementUuid, isRemoved),
-            ["BookMetadata"] = await BuildBookMetadataAsync(chapter, series, entitlementUuid, tokenBase, preferKepub),
-        };
-    }
-
-    private static JsonObject BuildBookEntitlement(Chapter chapter, string entitlementUuid, bool isRemoved)
-    {
-        var created = FormatKoboTimestamp(chapter.CreatedUtc == default ? chapter.Created : chapter.CreatedUtc);
-        var modified = FormatKoboTimestamp(
-            chapter.LastModifiedUtc == default ? chapter.LastModified : chapter.LastModifiedUtc);
-
-        return new JsonObject
-        {
-            ["Accessibility"] = "Full",
-            ["ActivePeriod"] = new JsonObject { ["From"] = FormatKoboTimestamp(DateTime.UtcNow) },
-            ["Created"] = created,
-            ["CrossRevisionId"] = entitlementUuid,
-            ["Id"] = entitlementUuid,
-            ["IsRemoved"] = isRemoved,
-            ["IsHiddenFromArchive"] = false,
-            ["IsLocked"] = false,
-            ["LastModified"] = modified,
-            ["OriginCategory"] = "Imported",
-            ["RevisionId"] = entitlementUuid,
-            ["Status"] = "Active",
-        };
-    }
-
-    private async Task<JsonObject> BuildBookMetadataAsync(Chapter chapter, Series series, string entitlementUuid,
-        string tokenBase, bool preferKepub)
-    {
-        var epub = PreferNativeEpub(chapter.Files);
-        var archive = PreferConvertibleArchive(chapter.Files);
-        var downloadUrls = new JsonArray();
-        // Immediate catalog presence: advertise EPUB download even when conversion is still pending.
-        if (epub != null || archive != null)
-        {
-            var source = epub ?? archive!;
-            var kepubPath = preferKepub
-                ? await koboConversionService.TryGetCachedKepubPathAsync(chapter.Id, source)
-                : null;
-            if (kepubPath != null)
-            {
-                long size = 0;
-                try
-                {
-                    size = new FileInfo(kepubPath).Length;
-                }
-                catch (IOException)
-                {
-                    // Size is advisory; advertise KEPUB even if size cannot be read.
-                }
-
-                var kepubUrl = $"{tokenBase}/download/{entitlementUuid}/kepub";
-                downloadUrls.Add(BuildDownloadUrl(KepubFormat, size, kepubUrl));
-            }
-            else
-            {
-                var size = epub?.Bytes > 0 ? epub.Bytes : 0;
-                var url = $"{tokenBase}/download/{entitlementUuid}/epub";
-                // Advertise both so firmware that prefers EPUB3 still resolves a download.
-                downloadUrls.Add(BuildDownloadUrl(Epub3Format, size, url));
-                downloadUrls.Add(BuildDownloadUrl(EpubFormat, size, url));
-            }
-        }
-
-        var writers = ResolveWriters(chapter, series.Metadata);
-        var publisher = ResolvePublisher(chapter, series.Metadata);
-        var description = !string.IsNullOrWhiteSpace(chapter.Summary)
-            ? chapter.Summary
-            : series.Metadata?.Summary;
-        var language = !string.IsNullOrWhiteSpace(series.Metadata?.Language)
-            ? series.Metadata!.Language
-            : "en";
-
-        var metadata = new JsonObject
-        {
-            ["Categories"] = new JsonArray { EmptyGenreId.ToString() },
-            ["CoverImageId"] = entitlementUuid,
-            ["CrossRevisionId"] = entitlementUuid,
-            ["CurrentDisplayPrice"] = new JsonObject
-            {
-                ["CurrencyCode"] = "USD",
-                ["TotalAmount"] = 0,
-            },
-            ["CurrentLoveDisplayPrice"] = new JsonObject { ["TotalAmount"] = 0 },
-            ["Description"] = description,
-            ["DownloadUrls"] = downloadUrls,
-            ["EntitlementId"] = entitlementUuid,
-            ["ExternalIds"] = new JsonArray(),
-            ["Genre"] = EmptyGenreId.ToString(),
-            ["IsEligibleForKoboLove"] = false,
-            ["IsInternetArchive"] = false,
-            ["IsPreOrder"] = false,
-            ["IsSocialEnabled"] = true,
-            ["Language"] = language,
-            ["PhoneticPronunciations"] = new JsonObject(),
-            ["Publisher"] = new JsonObject
-            {
-                ["Imprint"] = string.Empty,
-                ["Name"] = publisher,
-            },
-            ["RevisionId"] = entitlementUuid,
-            ["Title"] = BuildTitle(series, chapter),
-            ["WorkId"] = entitlementUuid,
-            ["Series"] = BuildSeriesMetadata(series, chapter),
-        };
-
-        if (chapter.ReleaseDate != default)
-        {
-            metadata["PublicationDate"] = FormatKoboTimestamp(chapter.ReleaseDate);
-        }
-
-        if (writers.Count > 0)
-        {
-            var roles = new JsonArray();
-            var names = new JsonArray();
-            foreach (var writer in writers)
-            {
-                roles.Add(new JsonObject { ["Name"] = writer });
-                names.Add(writer);
-            }
-
-            metadata["ContributorRoles"] = roles;
-            metadata["Contributors"] = names;
-        }
-        else
-        {
-            metadata["Contributors"] = null;
-        }
-
-        return metadata;
-    }
-
-    private static JsonObject BuildDownloadUrl(string format, long size, string url) => new()
-    {
-        ["Format"] = format,
-        ["Size"] = size,
-        ["Url"] = url,
-        ["Platform"] = "Generic",
-    };
-
-    private static JsonObject BuildSeriesMetadata(Series series, Chapter chapter)
-    {
-        var seriesMeta = new JsonObject
-        {
-            ["Name"] = series.Name,
-            ["Id"] = KoboEntitlementId.CreateVersion5(KoboEntitlementId.Namespace, $"series:{series.Name}")
-                .ToString(),
-        };
-
-        // Omit placeholder/default chapter numbers so Kobo does not sort specials as -100000.
-        if (chapter.MinNumber.IsNot(Parser.DefaultChapterNumber) && chapter.MinNumber > 0)
-        {
-            seriesMeta["Number"] = chapter.MinNumber;
-            seriesMeta["NumberFloat"] = chapter.MinNumber;
-        }
-
-        return seriesMeta;
     }
 
     private static bool IsSupportedDownloadFormat(string format) =>
@@ -1651,97 +1274,23 @@ public partial class KoboService(
         return stem + KepubDownloadFileExtension;
     }
 
-    internal static string BuildTitle(Series series, Chapter chapter)
-    {
-        string chapterLabel;
-        if (chapter.IsSpecial)
-        {
-            var special = !string.IsNullOrWhiteSpace(chapter.TitleName)
-                ? chapter.TitleName
-                : Parser.CleanSpecialTitle(chapter.Title);
-            chapterLabel = string.IsNullOrWhiteSpace(special) ? chapter.Range : special;
-        }
-        else if (!string.IsNullOrWhiteSpace(chapter.TitleName))
-        {
-            chapterLabel = chapter.TitleName;
-        }
-        else if (!string.IsNullOrWhiteSpace(chapter.Title))
-        {
-            chapterLabel = chapter.Title;
-        }
-        else
-        {
-            chapterLabel = chapter.Range;
-        }
-
-        return $"{series.Name} - {chapterLabel}";
-    }
-
     internal static MangaFile? PreferNativeEpub(IEnumerable<MangaFile> files) =>
-        files.FirstOrDefault(f => f.Format == MangaFormat.Epub);
+        KoboEligibleFormats.PreferNativeEpub(files);
 
     /// <summary>
     /// First CBZ/CBR archive file when present. Native EPUB preference is handled by callers.
     /// </summary>
     internal static MangaFile? PreferConvertibleArchive(IEnumerable<MangaFile> files) =>
-        files.FirstOrDefault(IsConvertibleArchive);
+        KoboEligibleFormats.PreferConvertibleArchive(files);
 
-    internal static bool IsConvertibleArchive(MangaFile file)
-    {
-        if (file.Format != MangaFormat.Archive) return false;
-        if (!string.IsNullOrEmpty(file.Extension))
-        {
-            var ext = file.Extension.StartsWith('.') ? file.Extension : "." + file.Extension;
-            if (ext.Equals(".cbz", StringComparison.OrdinalIgnoreCase) ||
-                ext.Equals(".cbr", StringComparison.OrdinalIgnoreCase))
-            {
-                return true;
-            }
-        }
-
-        return file.FilePath.EndsWith(".cbz", StringComparison.OrdinalIgnoreCase)
-               || file.FilePath.EndsWith(".cbr", StringComparison.OrdinalIgnoreCase);
-    }
-
-    private static List<string> ResolveWriters(Chapter chapter, SeriesMetadata? metadata)
-    {
-        var chapterWriters = chapter.People
-            .Where(p => p.Role == PersonRole.Writer)
-            .Select(p => p.Person.Name)
-            .Where(n => !string.IsNullOrWhiteSpace(n))
-            .ToList();
-        if (chapterWriters.Count > 0) return chapterWriters;
-
-        return metadata?.People
-            .Where(p => p.Role == PersonRole.Writer)
-            .Select(p => p.Person.Name)
-            .Where(n => !string.IsNullOrWhiteSpace(n))
-            .ToList() ?? [];
-    }
-
-    private static string? ResolvePublisher(Chapter chapter, SeriesMetadata? metadata)
-    {
-        var chapterPublisher = chapter.People
-            .FirstOrDefault(p => p.Role == PersonRole.Publisher)?.Person.Name;
-        if (!string.IsNullOrWhiteSpace(chapterPublisher)) return chapterPublisher;
-
-        return metadata?.People
-            .FirstOrDefault(p => p.Role == PersonRole.Publisher)?.Person.Name;
-    }
+    internal static bool IsConvertibleArchive(MangaFile file) =>
+        KoboEligibleFormats.IsConvertibleArchive(file);
 
     private static string? ResolveCoverFileName(Chapter chapter)
     {
         if (!string.IsNullOrEmpty(chapter.CoverImage)) return chapter.CoverImage;
         if (!string.IsNullOrEmpty(chapter.Volume?.CoverImage)) return chapter.Volume.CoverImage;
         return chapter.Volume?.Series?.CoverImage;
-    }
-
-    private static string FormatKoboTimestamp(DateTime value)
-    {
-        var utc = value.Kind == DateTimeKind.Unspecified
-            ? DateTime.SpecifyKind(value, DateTimeKind.Utc)
-            : value.ToUniversalTime();
-        return utc.ToString("yyyy-MM-ddTHH:mm:ssZ");
     }
 
     private static void EnsureSyncUrlAvailable(bool enableKoboSync, string? hostName)

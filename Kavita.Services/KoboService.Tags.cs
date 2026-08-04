@@ -24,6 +24,7 @@ public partial class KoboService
     public async Task<string> CreateTagAsync(string authToken, JsonObject? body, CancellationToken ct = default)
     {
         var userId = await ResolveUserIdAsync(authToken, ct);
+        using var syncLock = await AcquireLibrarySyncLockAsync(userId, ct);
         var name = body?["Name"]?.GetValue<string>()?.Trim() ?? string.Empty;
         if (string.IsNullOrEmpty(name))
         {
@@ -49,11 +50,7 @@ public partial class KoboService
         }
 
         await ApplyTagItemsAsync(userId, list, body?["Items"]?.AsArray(), add: true, ct);
-        if (unitOfWork.HasChanges())
-        {
-            TouchReadingList(list);
-            await unitOfWork.CommitAsync(ct);
-        }
+        await CommitTagMutationAsync(list, ct);
 
         return KoboTagId.FromReadingListIdString(list.Id);
     }
@@ -62,6 +59,7 @@ public partial class KoboService
         CancellationToken ct = default)
     {
         var userId = await ResolveUserIdAsync(authToken, ct);
+        using var syncLock = await AcquireLibrarySyncLockAsync(userId, ct);
         var list = await ResolveOwnedReadingListForMutationAsync(userId, tagId, ct);
         var name = body?["Name"]?.GetValue<string>()?.Trim() ?? string.Empty;
         if (string.IsNullOrEmpty(name))
@@ -89,6 +87,7 @@ public partial class KoboService
     public async Task DeleteTagAsync(string authToken, string tagId, CancellationToken ct = default)
     {
         var userId = await ResolveUserIdAsync(authToken, ct);
+        using var syncLock = await AcquireLibrarySyncLockAsync(userId, ct);
         var list = await ResolveOwnedReadingListForMutationAsync(userId, tagId, ct);
 
         await PrepareTagDeleteAsync(KoboTagId.FromReadingListId(list.Id), list.AppUserId, list.Promoted, ct);
@@ -100,26 +99,20 @@ public partial class KoboService
         CancellationToken ct = default)
     {
         var userId = await ResolveUserIdAsync(authToken, ct);
+        using var syncLock = await AcquireLibrarySyncLockAsync(userId, ct);
         var list = await ResolveOwnedReadingListForMutationAsync(userId, tagId, ct);
         await ApplyTagItemsAsync(userId, list, body?["Items"]?.AsArray(), add: true, ct);
-        if (unitOfWork.HasChanges())
-        {
-            TouchReadingList(list);
-            await unitOfWork.CommitAsync(ct);
-        }
+        await CommitTagMutationAsync(list, ct);
     }
 
     public async Task RemoveTagItemsAsync(string authToken, string tagId, JsonObject? body,
         CancellationToken ct = default)
     {
         var userId = await ResolveUserIdAsync(authToken, ct);
+        using var syncLock = await AcquireLibrarySyncLockAsync(userId, ct);
         var list = await ResolveOwnedReadingListForMutationAsync(userId, tagId, ct);
         await ApplyTagItemsAsync(userId, list, body?["Items"]?.AsArray(), add: false, ct);
-        if (unitOfWork.HasChanges())
-        {
-            TouchReadingList(list);
-            await unitOfWork.CommitAsync(ct);
-        }
+        await CommitTagMutationAsync(list, ct);
     }
 
     /// <summary>
@@ -145,8 +138,8 @@ public partial class KoboService
 
         foreach (var list in lists)
         {
-            var created = UtcOrUnspecified(list.CreatedUtc == default ? list.Created : list.CreatedUtc);
-            var modified = UtcOrUnspecified(list.LastModifiedUtc == default ? list.LastModified : list.LastModifiedUtc);
+            var created = KoboDateTime.CoalesceUtc(list.CreatedUtc, list.Created);
+            var modified = KoboDateTime.CoalesceUtc(list.LastModifiedUtc, list.LastModified);
             if (created <= tagsWatermark && modified <= tagsWatermark) continue;
 
             var tagId = KoboTagId.FromReadingListIdString(list.Id);
@@ -175,10 +168,8 @@ public partial class KoboService
 
         foreach (var collection in collections)
         {
-            var created = UtcOrUnspecified(
-                collection.CreatedUtc == default ? collection.Created : collection.CreatedUtc);
-            var modified = UtcOrUnspecified(
-                collection.LastModifiedUtc == default ? collection.LastModified : collection.LastModifiedUtc);
+            var created = KoboDateTime.CoalesceUtc(collection.CreatedUtc, collection.Created);
+            var modified = KoboDateTime.CoalesceUtc(collection.LastModifiedUtc, collection.LastModified);
             if (created <= tagsWatermark && modified <= tagsWatermark) continue;
 
             var tagId = KoboTagId.FromCollectionIdString(collection.Id);
@@ -217,7 +208,7 @@ public partial class KoboService
         var maxModified = DateTime.MinValue;
         foreach (var tombstone in tombstones)
         {
-            var modified = UtcOrUnspecified(tombstone.LastModifiedUtc);
+            var modified = KoboDateTime.AsUtc(tombstone.LastModifiedUtc);
             items.Add(new JsonObject
             {
                 ["DeletedTag"] = new JsonObject
@@ -225,7 +216,7 @@ public partial class KoboService
                     ["Tag"] = new JsonObject
                     {
                         ["Id"] = tombstone.TagId.ToString(),
-                        ["LastModified"] = FormatKoboTimestamp(modified),
+                        ["LastModified"] = KoboDateTime.FormatTimestamp(modified),
                     },
                 },
             });
@@ -252,10 +243,7 @@ public partial class KoboService
             .ToListAsync(ct);
         var eligibleSet = eligible.ToHashSet();
 
-        return orderedChapterIds
-            .Where(eligibleSet.Contains)
-            .Select(KoboEntitlementId.FromChapterIdString)
-            .ToList();
+        return ToEntitlementUuids(orderedChapterIds.Where(eligibleSet.Contains));
     }
 
     private async Task<List<string>> ResolveCollectionItemUuidsAsync(AppUserCollection collection,
@@ -272,8 +260,12 @@ public partial class KoboService
             .Select(c => c.Id)
             .ToListAsync(ct);
 
-        return chapterIds.Select(KoboEntitlementId.FromChapterIdString).ToList();
+        return ToEntitlementUuids(chapterIds);
     }
+
+    /// <summary>Maps chapter ids to their deterministic Kobo entitlement UUID strings.</summary>
+    private static List<string> ToEntitlementUuids(IEnumerable<int> chapterIds) =>
+        chapterIds.Select(KoboEntitlementId.FromChapterIdString).ToList();
 
     private static JsonObject BuildTagPayload(string tagId, string name, DateTime created, DateTime modified,
         IReadOnlyList<string> itemUuids)
@@ -290,19 +282,15 @@ public partial class KoboService
 
         return new JsonObject
         {
-            ["Created"] = FormatKoboTimestamp(created),
+            ["Created"] = KoboDateTime.FormatTimestamp(created),
             ["Id"] = tagId,
             ["Items"] = items,
-            ["LastModified"] = FormatKoboTimestamp(modified),
+            ["LastModified"] = KoboDateTime.FormatTimestamp(modified),
             ["Name"] = name,
             ["Type"] = "UserTag",
         };
     }
 
-    private static DateTime UtcOrUnspecified(DateTime value) =>
-        value.Kind == DateTimeKind.Unspecified
-            ? DateTime.SpecifyKind(value, DateTimeKind.Utc)
-            : value.ToUniversalTime();
 
     /// <summary>
     /// Resolves a Tag UUID to an owned Reading List for mutation. Collections and non-owned lists
@@ -396,4 +384,16 @@ public partial class KoboService
 
     private void TouchReadingList(ReadingList list) =>
         unitOfWork.ReadingListRepository.Update(list);
+
+    /// <summary>
+    /// Commits a pending tag mutation only when the unit of work has changes, touching the list's
+    /// LastModified so the next sync re-emits it. No-op when nothing changed.
+    /// </summary>
+    private async Task CommitTagMutationAsync(ReadingList list, CancellationToken ct)
+    {
+        if (!unitOfWork.HasChanges()) return;
+
+        TouchReadingList(list);
+        await unitOfWork.CommitAsync(ct);
+    }
 }
