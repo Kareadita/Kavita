@@ -794,7 +794,7 @@ public class SettingsService(
         if (setting.Key == ServerSettingKey.KoboConversionCacheDirectory &&
             koboConversionCacheDirectory != setting.Value)
         {
-            if (!await directoryService.CheckWriteAccess(koboConversionCacheDirectory))
+            if (!await directoryService.CheckWriteAccessPreservingDirectory(koboConversionCacheDirectory))
             {
                 throw new KavitaException("kobo-conversion-cache-dir-permissions");
             }

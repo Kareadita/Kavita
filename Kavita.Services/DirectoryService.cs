@@ -1028,6 +1028,40 @@ public class DirectoryService : IDirectoryService
         return true;
     }
 
+    /// <summary>
+    /// Checks whether a directory has write permissions without deleting or clearing it.
+    /// Use for paths that may already exist or be mount points (e.g. Kobo conversion cache).
+    /// </summary>
+    /// <param name="directoryName">Fully qualified path</param>
+    public async Task<bool> CheckWriteAccessPreservingDirectory(string directoryName)
+    {
+        var testFile = FileSystem.Path.Join(directoryName, ".kavita-write-test");
+        try
+        {
+            ExistOrCreate(directoryName);
+            await FileSystem.File.WriteAllTextAsync(testFile, string.Empty);
+            return true;
+        }
+        catch (Exception)
+        {
+            return false;
+        }
+        finally
+        {
+            try
+            {
+                if (FileSystem.File.Exists(testFile))
+                {
+                    FileSystem.File.Delete(testFile);
+                }
+            }
+            catch (Exception)
+            {
+                // Probe cleanup must not fail the access check (e.g. busy mount points).
+            }
+        }
+    }
+
 
     private static void FlattenDirectory(IFileSystemInfo root, IDirectoryInfo directory, ref int directoryIndex)
     {

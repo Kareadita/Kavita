@@ -928,6 +928,44 @@ public class DirectoryServiceTests: AbstractFsTest
 
     #endregion
 
+    #region CheckWriteAccessPreservingDirectory
+
+    [Fact]
+    public async Task CheckWriteAccessPreservingDirectory_ShouldHaveAccess()
+    {
+        const string testDirectory = "/manga/";
+        var fileSystem = new MockFileSystem();
+
+        var ds = new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), fileSystem);
+        var kepubPath = ds.FileSystem.Path.Join(testDirectory, "kepub");
+        var hasAccess = await ds.CheckWriteAccessPreservingDirectory(kepubPath);
+        Assert.True(hasAccess);
+
+        Assert.True(ds.FileSystem.Directory.Exists(kepubPath));
+        Assert.False(ds.FileSystem.File.Exists(ds.FileSystem.Path.Join(kepubPath, ".kavita-write-test")));
+    }
+
+    [Fact]
+    public async Task CheckWriteAccessPreservingDirectory_ShouldPreserveExistingDirectoryContents()
+    {
+        const string testDirectory = "/manga/kepub/";
+        var fileSystem = new MockFileSystem();
+        fileSystem.AddDirectory(testDirectory);
+        fileSystem.AddFile("/manga/kepub/cached.epub", new MockFileData("keep-me"));
+
+        var ds = new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), fileSystem);
+        var hasAccess = await ds.CheckWriteAccessPreservingDirectory(testDirectory);
+
+        Assert.True(hasAccess);
+        Assert.True(ds.FileSystem.Directory.Exists(testDirectory));
+        Assert.True(ds.FileSystem.File.Exists("/manga/kepub/cached.epub"));
+        Assert.Equal("keep-me", ds.FileSystem.File.ReadAllText("/manga/kepub/cached.epub"));
+        Assert.False(ds.FileSystem.File.Exists(ds.FileSystem.Path.Join(testDirectory, ".kavita-write-test")));
+    }
+
+
+    #endregion
+
     #region GetHumanReadableBytes
 
     [Theory]

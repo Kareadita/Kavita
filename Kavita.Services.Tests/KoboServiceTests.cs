@@ -362,7 +362,6 @@ public class KoboServiceTests(ITestOutputHelper testOutputHelper) : AbstractDbTe
 
         try
         {
-            // CheckWriteAccess clears the target directory; create artifacts after the first move.
             settings.KoboConversionCacheDirectory = oldRoot;
             await settingsService.UpdateSettings(settings);
             Directory.CreateDirectory(Path.Combine(oldRoot, "42"));

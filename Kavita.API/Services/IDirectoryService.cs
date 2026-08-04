@@ -70,6 +70,7 @@ public interface IDirectoryService
     void RemoveNonImages(string directoryName);
     void Flatten(string directoryName);
     Task<bool> CheckWriteAccess(string directoryName);
+    Task<bool> CheckWriteAccessPreservingDirectory(string directoryName);
     IEnumerable<string> GetFilesWithCertainExtensions(string path,
         string searchPatternExpression = "",
         SearchOption searchOption = SearchOption.TopDirectoryOnly);
