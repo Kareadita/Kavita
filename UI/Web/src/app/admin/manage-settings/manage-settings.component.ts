@@ -15,6 +15,8 @@ import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import {DefaultValuePipe} from "../../_pipes/default-value.pipe";
 import {EnterBlurDirective} from "../../_directives/enter-blur.directive";
 import {LogLevelPipe} from "../../_pipes/log-level.pipe";
+import {DirectoryPickerComponent, DirectoryPickerResult} from '../_modals/directory-picker/directory-picker.component';
+import {ModalService} from "../../_services/modal.service";
 
 const ValidIpAddress = /^(\s*((([12]?\d{1,2}\.){3}[12]?\d{1,2})|(([\da-f]{0,4}\:){0,7}([\da-f]{0,4})))\s*\,)*\s*((([12]?\d{1,2}\.){3}[12]?\d{1,2})|(([\da-f]{0,4}\:){0,7}([\da-f]{0,4})))\s*$/i;
 
@@ -34,6 +36,7 @@ export class ManageSettingsComponent implements OnInit {
   private readonly serverService = inject(ServerService);
   private readonly confirmService = inject(ConfirmService);
   private readonly destroyRef = inject(DestroyRef);
+  private readonly modalService = inject(ModalService);
   protected readonly WikiLink = WikiLink;
 
   serverSettings!: ServerSettings;
@@ -74,6 +77,7 @@ export class ManageSettingsComponent implements OnInit {
       this.settingsForm.addControl('kepubifyPath', new FormControl(this.serverSettings.kepubifyPath || ''));
       this.settingsForm.addControl('koboEpubCacheMaxBytes', new FormControl(this.serverSettings.koboEpubCacheMaxBytes ?? null, [Validators.min(1)]));
       this.settingsForm.addControl('koboKepubCacheMaxBytes', new FormControl(this.serverSettings.koboKepubCacheMaxBytes ?? null, [Validators.min(1)]));
+      this.settingsForm.addControl('koboConversionCacheDirectory', new FormControl(this.serverSettings.koboConversionCacheDirectory || '', [Validators.required]));
       this.settingsForm.addControl('baseUrl', new FormControl(this.serverSettings.baseUrl, [Validators.pattern(/^(\/[\w-]+)*\/$/)]));
       this.settingsForm.addControl('totalBackups', new FormControl(this.serverSettings.totalBackups, [Validators.required, Validators.min(1), Validators.max(30)]));
       this.settingsForm.addControl('cacheSize', new FormControl(this.serverSettings.cacheSize, [Validators.required, Validators.min(50)]));
@@ -180,6 +184,7 @@ export class ManageSettingsComponent implements OnInit {
     this.settingsForm.get('kepubifyPath')?.setValue(this.serverSettings.kepubifyPath || '', {onlySelf: true, emitEvent: false});
     this.settingsForm.get('koboEpubCacheMaxBytes')?.setValue(this.serverSettings.koboEpubCacheMaxBytes ?? null, {onlySelf: true, emitEvent: false});
     this.settingsForm.get('koboKepubCacheMaxBytes')?.setValue(this.serverSettings.koboKepubCacheMaxBytes ?? null, {onlySelf: true, emitEvent: false});
+    this.settingsForm.get('koboConversionCacheDirectory')?.setValue(this.serverSettings.koboConversionCacheDirectory || '', {onlySelf: true, emitEvent: false});
     this.settingsForm.get('baseUrl')?.setValue(this.serverSettings.baseUrl, {onlySelf: true, emitEvent: false});
     this.updateKoboSyncControlState();
     this.updateKepubConversionValidators();
@@ -261,6 +266,18 @@ export class ManageSettingsComponent implements OnInit {
 
       return { 'emptyOrPattern': { 'requiredPattern': pattern.toString(), 'actualValue': control.value } };
     }
+  }
+
+  openDirectoryChooser(existingDirectory: string, formControl: string) {
+    const modalRef = this.modalService.open(DirectoryPickerComponent);
+    modalRef.setInput('startingFolder', existingDirectory || '');
+    modalRef.setInput('helpUrl', '');
+    modalRef.closed.subscribe((closeResult: DirectoryPickerResult) => {
+      if (closeResult.success && closeResult.folderPath !== '') {
+        this.settingsForm.get(formControl)?.setValue(closeResult.folderPath);
+        this.cdRef.markForCheck();
+      }
+    });
   }
 
 }

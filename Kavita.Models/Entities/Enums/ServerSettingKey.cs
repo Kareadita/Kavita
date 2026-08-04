@@ -231,5 +231,11 @@ public enum ServerSettingKey
     /// Max bytes for the EPUB→KEPUB Kobo conversion cache pool. Empty/0 = unlimited (no LRU).
     /// </summary>
     [Description("KoboKepubCacheMaxBytes")]
-    KoboKepubCacheMaxBytes = 50
+    KoboKepubCacheMaxBytes = 50,
+    /// <summary>
+    /// Durable cache root for Kobo archive→EPUB and EPUB→KEPUB conversion artifacts.
+    /// Empty resets to the default under long-term cache (<c>cache-long/kobo</c>).
+    /// </summary>
+    [Description("KoboConversionCacheDirectory")]
+    KoboConversionCacheDirectory = 51
 }

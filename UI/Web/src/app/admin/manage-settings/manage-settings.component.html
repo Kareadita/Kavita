@@ -330,6 +330,26 @@
       </div>
 
       <div class="row g-0 mt-4 mb-4">
+        @if (settingsForm.get('koboConversionCacheDirectory'); as formControl) {
+          <app-setting-item [title]="t('kobo-conversion-cache-dir-label')" [subtitle]="t('kobo-conversion-cache-dir-tooltip')">
+            <ng-template #view>
+              {{formControl.value}}
+            </ng-template>
+            <ng-template #edit>
+              <div class="input-group">
+                <input readonly id="setting-kobo-conversion-cache-dir" class="form-control" formControlName="koboConversionCacheDirectory"
+                       type="text" aria-describedby="change-kobo-conversion-cache-dir">
+                <button id="change-kobo-conversion-cache-dir" class="btn btn-primary"
+                        (click)="openDirectoryChooser(formControl.value, 'koboConversionCacheDirectory')">
+                  {{t('change')}}
+                </button>
+              </div>
+            </ng-template>
+          </app-setting-item>
+        }
+      </div>
+
+      <div class="row g-0 mt-4 mb-4">
         @if (settingsForm.get('koboEpubCacheMaxBytes'); as formControl) {
           <app-setting-item [title]="t('kobo-epub-cache-max-bytes-label')" [subtitle]="t('kobo-epub-cache-max-bytes-tooltip')">
             <ng-template #view>

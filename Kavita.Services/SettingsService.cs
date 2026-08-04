@@ -265,6 +265,10 @@ public class SettingsService(
         var currentSettings = await unitOfWork.SettingsRepository.GetSettingsAsync(ct);
         var updateBookmarks = false;
         var originalBookmarkDirectory = directoryService.BookmarkDirectory;
+        var updateKoboConversionCache = false;
+        var defaultKoboConversionCacheDirectory = directoryService.FileSystem.Path.Combine(
+            directoryService.LongTermCacheDirectory, "kobo");
+        var originalKoboConversionCacheDirectory = defaultKoboConversionCacheDirectory;
 
         var bookmarkDirectory = updateSettingsDto.BookmarksDirectory;
         if (!updateSettingsDto.BookmarksDirectory.EndsWith("bookmarks") &&
@@ -278,6 +282,12 @@ public class SettingsService(
         {
             bookmarkDirectory = directoryService.BookmarkDirectory;
         }
+
+        var koboConversionCacheDirectory = string.IsNullOrWhiteSpace(updateSettingsDto.KoboConversionCacheDirectory)
+            ? defaultKoboConversionCacheDirectory
+            : updateSettingsDto.KoboConversionCacheDirectory.Trim();
+        koboConversionCacheDirectory = directoryService.FileSystem.Path.GetFullPath(koboConversionCacheDirectory);
+        updateSettingsDto.KoboConversionCacheDirectory = koboConversionCacheDirectory;
 
         var updateTask = false;
         var updatedOidcSettings = false;
@@ -452,6 +462,23 @@ public class SettingsService(
                 }
             }
 
+            if (setting.Key == ServerSettingKey.KoboConversionCacheDirectory &&
+                koboConversionCacheDirectory != setting.Value)
+            {
+                if (!await directoryService.CheckWriteAccess(koboConversionCacheDirectory))
+                {
+                    throw new KavitaException("kobo-conversion-cache-dir-permissions");
+                }
+
+                originalKoboConversionCacheDirectory = string.IsNullOrWhiteSpace(setting.Value)
+                    ? defaultKoboConversionCacheDirectory
+                    : setting.Value;
+
+                setting.Value = directoryService.FileSystem.Path.GetFullPath(koboConversionCacheDirectory);
+                unitOfWork.SettingsRepository.Update(setting);
+                updateKoboConversionCache = true;
+            }
+
             if (setting.Key == ServerSettingKey.EncodeMediaAs &&
                 ((int)updateSettingsDto.EncodeMediaAs).ToString() != setting.Value)
             {
@@ -556,6 +583,12 @@ public class SettingsService(
                 UpdateBookmarkDirectory(originalBookmarkDirectory, bookmarkDirectory);
             }
 
+            if (updateKoboConversionCache)
+            {
+                UpdateKoboConversionCacheDirectory(originalKoboConversionCacheDirectory,
+                    koboConversionCacheDirectory);
+            }
+
             if (updateTask)
             {
                 BackgroundJob.Enqueue(() => taskScheduler.ScheduleTasks());
@@ -629,6 +662,24 @@ public class SettingsService(
         directoryService.ExistOrCreate(bookmarkDirectory);
         directoryService.CopyDirectoryToDirectory(originalBookmarkDirectory, bookmarkDirectory);
         directoryService.ClearAndDeleteDirectory(originalBookmarkDirectory);
+    }
+
+    private void UpdateKoboConversionCacheDirectory(string originalDirectory, string newDirectory)
+    {
+        if (string.Equals(
+                directoryService.FileSystem.Path.GetFullPath(originalDirectory),
+                directoryService.FileSystem.Path.GetFullPath(newDirectory),
+                StringComparison.OrdinalIgnoreCase))
+        {
+            return;
+        }
+
+        directoryService.ExistOrCreate(newDirectory);
+        if (directoryService.FileSystem.Directory.Exists(originalDirectory))
+        {
+            directoryService.CopyDirectoryToDirectory(originalDirectory, newDirectory);
+            directoryService.ClearAndDeleteDirectory(originalDirectory);
+        }
     }
 
     private bool UpdateSchedulingSettings(ServerSetting setting, ServerSettingDto updateSettingsDto)

@@ -80,6 +80,10 @@ public abstract class AbstractDbTest(ITestOutputHelper testOutputHelper): Abstra
             var bookmarkSetting = await context.ServerSetting.Where(s => s.Key == ServerSettingKey.BookmarkDirectory).SingleAsync();
             bookmarkSetting.Value = BookmarkDirectory;
 
+            var koboCacheSetting = await context.ServerSetting
+                .Where(s => s.Key == ServerSettingKey.KoboConversionCacheDirectory).SingleAsync();
+            koboCacheSetting.Value = CacheLongDirectory + "kobo/";
+
             var logSetting = await context.ServerSetting.Where(s => s.Key == ServerSettingKey.TotalLogs).SingleAsync();
             logSetting.Value = "10";
 

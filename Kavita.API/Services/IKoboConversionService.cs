@@ -35,7 +35,8 @@ public interface IKoboConversionService
     /// Returns a cached KEPUB path for the chapter source fingerprint, or null when missing.
     /// Fingerprint is derived from <paramref name="sourceFile"/> (native EPUB or convertible archive).
     /// </summary>
-    string? TryGetCachedKepubPath(int chapterId, MangaFile sourceFile);
+    Task<string?> TryGetCachedKepubPathAsync(int chapterId, MangaFile sourceFile,
+        CancellationToken ct = default);
 
     /// <summary>
     /// When KEPUB conversion is enabled and no cached KEPUB exists for <paramref name="sourceFile"/>,

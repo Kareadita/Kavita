@@ -69,6 +69,9 @@ public class ServerSettingConverter : ITypeConverter<IEnumerable<ServerSetting>,
                 case ServerSettingKey.KoboKepubCacheMaxBytes:
                     destination.KoboKepubCacheMaxBytes = ParseOptionalPositiveLong(row.Value);
                     break;
+                case ServerSettingKey.KoboConversionCacheDirectory:
+                    destination.KoboConversionCacheDirectory = row.Value ?? string.Empty;
+                    break;
                 case ServerSettingKey.BaseUrl:
                     destination.BaseUrl = row.Value;
                     break;

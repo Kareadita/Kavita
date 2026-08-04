@@ -61,6 +61,11 @@ public sealed record ServerSettingDto
     /// </summary>
     public long? KoboKepubCacheMaxBytes { get; set; }
     /// <summary>
+    /// Durable root for Kobo EPUB/KEPUB conversion cache artifacts (<c>{chapterId}/{fingerprint}.epub</c>).
+    /// </summary>
+    /// <remarks>If null or empty string, defaults to <c>{LongTermCacheDirectory}/kobo</c>.</remarks>
+    public string KoboConversionCacheDirectory { get; set; } = default!;
+    /// <summary>
     /// Base Url for the kavita. Requires restart to take effect.
     /// </summary>
     public string BaseUrl { get; set; } = default!;

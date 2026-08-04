@@ -21,7 +21,7 @@ public interface IKoboConvertProgressLocationService
     /// <summary>
     /// Cached KEPUB path when present and spine length matches <see cref="Chapter.Pages"/>; otherwise null.
     /// </summary>
-    string? TryResolveTrustedKepubPath(Chapter chapter);
+    Task<string?> TryResolveTrustedKepubPathAsync(Chapter chapter, CancellationToken ct = default);
 
     Task UpsertFromPagesReadAsync(int userId, Chapter chapter, int pagesRead, bool readyToRead,
         CancellationToken ct = default);
@@ -45,13 +45,13 @@ public class KoboConvertProgressLocationService(
                && KoboService.PreferConvertibleArchive(chapter.Files) != null;
     }
 
-    public string? TryResolveTrustedKepubPath(Chapter chapter)
+    public async Task<string?> TryResolveTrustedKepubPathAsync(Chapter chapter, CancellationToken ct = default)
     {
         ArgumentNullException.ThrowIfNull(chapter);
         var archive = KoboService.PreferConvertibleArchive(chapter.Files);
         if (archive == null) return null;
 
-        var path = koboConversionService.TryGetCachedKepubPath(chapter.Id, archive);
+        var path = await koboConversionService.TryGetCachedKepubPathAsync(chapter.Id, archive, ct);
         if (path == null || !File.Exists(path)) return null;
 
         if (chapter.Pages <= 0) return null;
@@ -72,7 +72,7 @@ public class KoboConvertProgressLocationService(
     {
         ArgumentNullException.ThrowIfNull(chapter);
 
-        var kepub = TryResolveTrustedKepubPath(chapter);
+        var kepub = await TryResolveTrustedKepubPathAsync(chapter, ct);
         if (kepub == null)
         {
             await ClearLocationAsync(userId, chapter.Id, ct);

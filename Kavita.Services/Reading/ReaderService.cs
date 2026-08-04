@@ -343,7 +343,7 @@ public class ReaderService(IUnitOfWork unitOfWork, ILogger<ReaderService> logger
                              ?? global::Kavita.Services.KoboService.PreferConvertibleArchive(chapter.Files);
                 if (source != null)
                 {
-                    cachedKepub = koboConversionService.TryGetCachedKepubPath(chapter.Id, source);
+                    cachedKepub = await koboConversionService.TryGetCachedKepubPathAsync(chapter.Id, source);
                 }
             }
 

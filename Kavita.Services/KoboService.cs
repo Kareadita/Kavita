@@ -294,7 +294,7 @@ public partial class KoboService(
             {
                 var series = chapter.Volume.Series;
                 var entitlementUuid = KoboEntitlementId.FromChapterIdString(chapter.Id);
-                var entitlement = BuildEntitlementPayload(chapter, series, entitlementUuid, tokenBase,
+                var entitlement = await BuildEntitlementPayloadAsync(chapter, series, entitlementUuid, tokenBase,
                     isRemoved: false, preferKepub: settings.EnableKepubConversion);
 
                 progressByChapter.TryGetValue(chapter.Id, out var progress);
@@ -652,7 +652,7 @@ public partial class KoboService(
         var publicBase = BuildPublicBase(settings.HostName, settings.BaseUrl);
         var tokenBase = $"{publicBase}/{SyncPathPrefix}{authToken}";
         var uuid = KoboEntitlementId.FromChapterIdString(chapter.Id);
-        var metadata = BuildBookMetadata(chapter, chapter.Volume.Series, uuid, tokenBase,
+        var metadata = await BuildBookMetadataAsync(chapter, chapter.Volume.Series, uuid, tokenBase,
             settings.EnableKepubConversion);
         return [metadata];
     }
@@ -912,7 +912,7 @@ public partial class KoboService(
         bool hasTruthyLocation, string? locationValue, string? locationType, string? locationSource,
         JsonObject readingState, CancellationToken ct)
     {
-        var kepub = koboConvertProgressLocation.TryResolveTrustedKepubPath(chapter);
+        var kepub = await koboConvertProgressLocation.TryResolveTrustedKepubPathAsync(chapter, ct);
         var readyToRead = string.Equals(
             (readingState["StatusInfo"] as JsonObject)?["Status"]?.GetValue<string>(),
             KoboReadingStateMapper.StatusReadyToRead,
@@ -1277,7 +1277,7 @@ public partial class KoboService(
 
             var series = chapter.Volume.Series;
             var entitlementUuid = KoboEntitlementId.FromChapterIdString(chapter.Id);
-            var entitlement = BuildEntitlementPayload(chapter, series, entitlementUuid, tokenBase,
+            var entitlement = await BuildEntitlementPayloadAsync(chapter, series, entitlementUuid, tokenBase,
                 isRemoved: true, preferKepub: preferKepub);
 
             var created = chapter.CreatedUtc == default ? chapter.Created : chapter.CreatedUtc;
@@ -1452,13 +1452,13 @@ public partial class KoboService(
         };
     }
 
-    private JsonObject BuildEntitlementPayload(Chapter chapter, Series series, string entitlementUuid,
-        string tokenBase, bool isRemoved, bool preferKepub)
+    private async Task<JsonObject> BuildEntitlementPayloadAsync(Chapter chapter, Series series,
+        string entitlementUuid, string tokenBase, bool isRemoved, bool preferKepub)
     {
         return new JsonObject
         {
             ["BookEntitlement"] = BuildBookEntitlement(chapter, entitlementUuid, isRemoved),
-            ["BookMetadata"] = BuildBookMetadata(chapter, series, entitlementUuid, tokenBase, preferKepub),
+            ["BookMetadata"] = await BuildBookMetadataAsync(chapter, series, entitlementUuid, tokenBase, preferKepub),
         };
     }
 
@@ -1485,8 +1485,8 @@ public partial class KoboService(
         };
     }
 
-    private JsonObject BuildBookMetadata(Chapter chapter, Series series, string entitlementUuid, string tokenBase,
-        bool preferKepub)
+    private async Task<JsonObject> BuildBookMetadataAsync(Chapter chapter, Series series, string entitlementUuid,
+        string tokenBase, bool preferKepub)
     {
         var epub = PreferNativeEpub(chapter.Files);
         var archive = PreferConvertibleArchive(chapter.Files);
@@ -1496,7 +1496,7 @@ public partial class KoboService(
         {
             var source = epub ?? archive!;
             var kepubPath = preferKepub
-                ? koboConversionService.TryGetCachedKepubPath(chapter.Id, source)
+                ? await koboConversionService.TryGetCachedKepubPathAsync(chapter.Id, source)
                 : null;
             if (kepubPath != null)
             {

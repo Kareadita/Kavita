@@ -47,6 +47,7 @@ public class KoboConversionServiceTests(ITestOutputHelper testOutputHelper) : Ab
         var scheduler = Substitute.For<IKoboConversionJobScheduler>();
         var directoryService = Substitute.For<IDirectoryService>();
         directoryService.LongTermCacheDirectory.Returns(cacheDir);
+        await SetConversionCacheDirectory(unitOfWork, Path.Combine(cacheDir, KoboConversionService.CacheFolderName));
         directoryService.ExistOrCreate(Arg.Any<string>()).Returns(true);
 
         var service = CreateService(unitOfWork, directoryService, converter, scheduler);
@@ -72,6 +73,7 @@ public class KoboConversionServiceTests(ITestOutputHelper testOutputHelper) : Ab
 
         var directoryService = Substitute.For<IDirectoryService>();
         directoryService.LongTermCacheDirectory.Returns(cacheDir);
+        await SetConversionCacheDirectory(unitOfWork, Path.Combine(cacheDir, KoboConversionService.CacheFolderName));
         directoryService.ExistOrCreate(Arg.Any<string>()).Returns(true);
 
         var service = CreateService(unitOfWork, directoryService, converter);
@@ -128,6 +130,7 @@ public class KoboConversionServiceTests(ITestOutputHelper testOutputHelper) : Ab
 
         var directoryService = Substitute.For<IDirectoryService>();
         directoryService.LongTermCacheDirectory.Returns(cacheDir);
+        await SetConversionCacheDirectory(unitOfWork, Path.Combine(cacheDir, KoboConversionService.CacheFolderName));
         directoryService.ExistOrCreate(Arg.Any<string>()).Returns(ci =>
         {
             Directory.CreateDirectory(ci.ArgAt<string>(0));
@@ -217,6 +220,7 @@ public class KoboConversionServiceTests(ITestOutputHelper testOutputHelper) : Ab
 
         var directoryService = Substitute.For<IDirectoryService>();
         directoryService.LongTermCacheDirectory.Returns(cacheDir);
+        await SetConversionCacheDirectory(unitOfWork, Path.Combine(cacheDir, KoboConversionService.CacheFolderName));
         directoryService.ExistOrCreate(Arg.Any<string>()).Returns(ci =>
         {
             Directory.CreateDirectory(ci.ArgAt<string>(0));
@@ -272,6 +276,7 @@ public class KoboConversionServiceTests(ITestOutputHelper testOutputHelper) : Ab
 
         var directoryService = Substitute.For<IDirectoryService>();
         directoryService.LongTermCacheDirectory.Returns(cacheDir);
+        await SetConversionCacheDirectory(unitOfWork, Path.Combine(cacheDir, KoboConversionService.CacheFolderName));
         directoryService.ExistOrCreate(Arg.Any<string>()).Returns(ci =>
         {
             Directory.CreateDirectory(ci.ArgAt<string>(0));
@@ -339,6 +344,7 @@ public class KoboConversionServiceTests(ITestOutputHelper testOutputHelper) : Ab
 
         var directoryService = Substitute.For<IDirectoryService>();
         directoryService.LongTermCacheDirectory.Returns(cacheDir);
+        await SetConversionCacheDirectory(unitOfWork, Path.Combine(cacheDir, KoboConversionService.CacheFolderName));
         directoryService.ExistOrCreate(Arg.Any<string>()).Returns(ci =>
         {
             Directory.CreateDirectory(ci.ArgAt<string>(0));
@@ -382,6 +388,7 @@ public class KoboConversionServiceTests(ITestOutputHelper testOutputHelper) : Ab
 
         var directoryService = Substitute.For<IDirectoryService>();
         directoryService.LongTermCacheDirectory.Returns(cacheDir);
+        await SetConversionCacheDirectory(unitOfWork, Path.Combine(cacheDir, KoboConversionService.CacheFolderName));
         directoryService.ExistOrCreate(Arg.Any<string>()).Returns(ci =>
         {
             Directory.CreateDirectory(ci.ArgAt<string>(0));
@@ -430,6 +437,7 @@ public class KoboConversionServiceTests(ITestOutputHelper testOutputHelper) : Ab
 
         var directoryService = Substitute.For<IDirectoryService>();
         directoryService.LongTermCacheDirectory.Returns(cacheDir);
+        await SetConversionCacheDirectory(unitOfWork, Path.Combine(cacheDir, KoboConversionService.CacheFolderName));
         var service = CreateService(unitOfWork, directoryService, Substitute.For<IKoboArchiveEpubConverter>());
 
         await service.EnforceConversionCacheCapsAsync();
@@ -455,6 +463,7 @@ public class KoboConversionServiceTests(ITestOutputHelper testOutputHelper) : Ab
 
         var directoryService = Substitute.For<IDirectoryService>();
         directoryService.LongTermCacheDirectory.Returns(cacheDir);
+        await SetConversionCacheDirectory(unitOfWork, Path.Combine(cacheDir, KoboConversionService.CacheFolderName));
         var service = CreateService(unitOfWork, directoryService, Substitute.For<IKoboArchiveEpubConverter>());
 
         await service.EnforceConversionCacheCapsAsync();
@@ -491,6 +500,7 @@ public class KoboConversionServiceTests(ITestOutputHelper testOutputHelper) : Ab
 
         var directoryService = Substitute.For<IDirectoryService>();
         directoryService.LongTermCacheDirectory.Returns(cacheDir);
+        await SetConversionCacheDirectory(unitOfWork, Path.Combine(cacheDir, KoboConversionService.CacheFolderName));
         directoryService.ExistOrCreate(Arg.Any<string>()).Returns(ci =>
         {
             Directory.CreateDirectory(ci.ArgAt<string>(0));
@@ -530,6 +540,7 @@ public class KoboConversionServiceTests(ITestOutputHelper testOutputHelper) : Ab
 
         var directoryService = Substitute.For<IDirectoryService>();
         directoryService.LongTermCacheDirectory.Returns(cacheDir);
+        await SetConversionCacheDirectory(unitOfWork, Path.Combine(cacheDir, KoboConversionService.CacheFolderName));
         directoryService.ExistOrCreate(Arg.Any<string>()).Returns(ci =>
         {
             Directory.CreateDirectory(ci.ArgAt<string>(0));
@@ -597,6 +608,7 @@ public class KoboConversionServiceTests(ITestOutputHelper testOutputHelper) : Ab
 
         var directoryService = Substitute.For<IDirectoryService>();
         directoryService.LongTermCacheDirectory.Returns(cacheDir);
+        await SetConversionCacheDirectory(unitOfWork, Path.Combine(cacheDir, KoboConversionService.CacheFolderName));
         directoryService.ExistOrCreate(Arg.Any<string>()).Returns(ci =>
         {
             Directory.CreateDirectory(ci.ArgAt<string>(0));
@@ -632,6 +644,7 @@ public class KoboConversionServiceTests(ITestOutputHelper testOutputHelper) : Ab
         var scheduler = Substitute.For<IKoboConversionJobScheduler>();
         var directoryService = Substitute.For<IDirectoryService>();
         directoryService.LongTermCacheDirectory.Returns(cacheDir);
+        await SetConversionCacheDirectory(unitOfWork, Path.Combine(cacheDir, KoboConversionService.CacheFolderName));
         directoryService.ExistOrCreate(Arg.Any<string>()).Returns(true);
 
         var service = CreateService(unitOfWork, directoryService, Substitute.For<IKoboArchiveEpubConverter>(),
@@ -693,6 +706,7 @@ public class KoboConversionServiceTests(ITestOutputHelper testOutputHelper) : Ab
 
         var directoryService = Substitute.For<IDirectoryService>();
         directoryService.LongTermCacheDirectory.Returns(cacheDir);
+        await SetConversionCacheDirectory(unitOfWork, Path.Combine(cacheDir, KoboConversionService.CacheFolderName));
         directoryService.ExistOrCreate(Arg.Any<string>()).Returns(ci =>
         {
             Directory.CreateDirectory(ci.ArgAt<string>(0));
@@ -726,6 +740,7 @@ public class KoboConversionServiceTests(ITestOutputHelper testOutputHelper) : Ab
         Directory.CreateDirectory(cacheDir);
         var directoryService = Substitute.For<IDirectoryService>();
         directoryService.LongTermCacheDirectory.Returns(cacheDir);
+        await SetConversionCacheDirectory(unitOfWork, Path.Combine(cacheDir, KoboConversionService.CacheFolderName));
 
         var scheduler = Substitute.For<IKoboConversionJobScheduler>();
         var service = CreateService(unitOfWork, directoryService, Substitute.For<IKoboArchiveEpubConverter>(),
@@ -806,6 +821,7 @@ public class KoboConversionServiceTests(ITestOutputHelper testOutputHelper) : Ab
 
         var directoryService = Substitute.For<IDirectoryService>();
         directoryService.LongTermCacheDirectory.Returns(cacheDir);
+        await SetConversionCacheDirectory(unitOfWork, Path.Combine(cacheDir, KoboConversionService.CacheFolderName));
         directoryService.ExistOrCreate(Arg.Any<string>()).Returns(ci =>
         {
             Directory.CreateDirectory(ci.ArgAt<string>(0));
@@ -823,7 +839,7 @@ public class KoboConversionServiceTests(ITestOutputHelper testOutputHelper) : Ab
     }
 
     [Fact]
-    public void TryGetCachedKepubPath_ReturnsPath_WhenArtifactExists()
+    public async Task TryGetCachedKepubPath_ReturnsPath_WhenArtifactExists()
     {
         var cacheDir = Path.Join(Path.GetTempPath(), "kavita-kobo-kepub-" + Guid.NewGuid().ToString("N"));
         Directory.CreateDirectory(cacheDir);
@@ -840,13 +856,22 @@ public class KoboConversionServiceTests(ITestOutputHelper testOutputHelper) : Ab
             Directory.CreateDirectory(Path.GetDirectoryName(expected)!);
             File.WriteAllText(expected, "kepub");
 
-            Assert.Equal(expected, service.TryGetCachedKepubPath(99, file));
-            Assert.Null(service.TryGetCachedKepubPath(100, file));
+            Assert.Equal(expected, await service.TryGetCachedKepubPathAsync(99, file));
+            Assert.Null(await service.TryGetCachedKepubPathAsync(100, file));
         }
         finally
         {
             if (Directory.Exists(cacheDir)) Directory.Delete(cacheDir, true);
         }
+    }
+
+    private static async Task SetConversionCacheDirectory(IUnitOfWork unitOfWork, string cacheRoot)
+    {
+        Directory.CreateDirectory(cacheRoot);
+        var setting = await unitOfWork.DataContext.ServerSetting
+            .FirstAsync(s => s.Key == ServerSettingKey.KoboConversionCacheDirectory);
+        setting.Value = cacheRoot;
+        await unitOfWork.CommitAsync();
     }
 
     private static async Task ConfigureCacheCaps(IUnitOfWork unitOfWork, long? epubMaxBytes, long? kepubMaxBytes)

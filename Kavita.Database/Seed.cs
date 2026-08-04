@@ -174,6 +174,15 @@ public static class Seed
                 new() {Key = ServerSettingKey.KepubifyPath, Value = string.Empty},
                 new() {Key = ServerSettingKey.KoboEpubCacheMaxBytes, Value = string.Empty},
                 new() {Key = ServerSettingKey.KoboKepubCacheMaxBytes, Value = string.Empty},
+                new()
+                {
+                    Key = ServerSettingKey.KoboConversionCacheDirectory,
+                    Value = Path.Combine(
+                        string.IsNullOrWhiteSpace(directoryService.LongTermCacheDirectory)
+                            ? Path.Combine("config", "cache-long")
+                            : directoryService.LongTermCacheDirectory,
+                        "kobo")
+                },
                 new() {Key = ServerSettingKey.BaseUrl, Value = "/"},
                 new() {Key = ServerSettingKey.InstallId, Value = HashUtil.AnonymousToken()},
                 new() {Key = ServerSettingKey.InstallVersion, Value = BuildInfo.Version.ToString()},

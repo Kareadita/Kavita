@@ -24,6 +24,8 @@ export interface ServerSettings {
   koboEpubCacheMaxBytes?: number | null;
   /** Max bytes for EPUB→KEPUB cache; null/0/omitted = unlimited */
   koboKepubCacheMaxBytes?: number | null;
+  /** Durable root for converted EPUB/KEPUB artifacts */
+  koboConversionCacheDirectory: string;
   baseUrl: string;
   bookmarksDirectory: string;
   emailServiceUrl: string;
