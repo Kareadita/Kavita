@@ -22,6 +22,7 @@ using Kavita.Models.DTOs.SignalR;
 using Kavita.Models.Entities.Enums;
 using Kavita.Models.Entities.Enums.User;
 using Kavita.Models.Extensions;
+using Kavita.Services.Kobo;
 using Kavita.Services.Plus;
 using Kavita.Services.ReadingLists;
 using Kavita.Services.Scanner;
@@ -54,7 +55,6 @@ public class TaskScheduler : ITaskScheduler
     private readonly IEventHub _eventHub;
     private readonly IEmailService _emailService;
     private readonly IAuthKeyService _authKeyService;
-    private readonly IKoboConversionService _koboConversionService;
 
     public static BackgroundJobServer Client => new ();
     public const string ScanQueue = TaskSchedulerConstants.ScanQueue;
@@ -108,7 +108,7 @@ public class TaskScheduler : ITaskScheduler
         IMediaConversionService mediaConversionService, IScrobblingService scrobblingService, ILicenseService licenseService,
         IExternalMetadataService externalMetadataService, ISmartCollectionSyncService smartCollectionSyncService,
         IWantToReadSyncService wantToReadSyncService, IEventHub eventHub, IEmailService emailService,
-        IAuthKeyService authKeyService, IKoboConversionService koboConversionService)
+        IAuthKeyService authKeyService)
     {
         _cacheService = cacheService;
         _logger = logger;
@@ -129,7 +129,6 @@ public class TaskScheduler : ITaskScheduler
         _eventHub = eventHub;
         _emailService = emailService;
         _authKeyService = authKeyService;
-        _koboConversionService = koboConversionService;
 
         _defaultRetryPolicy = Policy
             .Handle<Exception>()
@@ -512,8 +511,10 @@ public class TaskScheduler : ITaskScheduler
     {
         object[] args = [libraryId, CancellationToken.None];
         var alreadyEnqueued =
-            HasAlreadyEnqueuedTask("KoboConversionService", "ConvertLibraryForKoboAsync", args) ||
-            HasAlreadyEnqueuedTask("IKoboConversionService", "ConvertLibraryForKoboAsync", args);
+            HasAlreadyEnqueuedTask(KoboConversionService.Name,
+                nameof(IKoboConversionService.ConvertLibraryForKoboAsync), args) ||
+            HasAlreadyEnqueuedTask(nameof(IKoboConversionService),
+                nameof(IKoboConversionService.ConvertLibraryForKoboAsync), args);
         if (alreadyEnqueued)
         {
             _logger.LogInformation("A duplicate request to convert library {LibraryId} for Kobo occurred. Skipping",
@@ -522,7 +523,8 @@ public class TaskScheduler : ITaskScheduler
         }
 
         _logger.LogInformation("Enqueuing whole-library Kobo convert for: {LibraryId}", libraryId);
-        BackgroundJob.Enqueue(() => _koboConversionService.ConvertLibraryForKoboAsync(libraryId, CancellationToken.None));
+        BackgroundJob.Enqueue<IKoboConversionService>(s =>
+            s.ConvertLibraryForKoboAsync(libraryId, CancellationToken.None));
     }
 
     public async Task RefreshSeriesMetadata(int libraryId, int seriesId, bool forceUpdate = false, bool forceColorscape = false)

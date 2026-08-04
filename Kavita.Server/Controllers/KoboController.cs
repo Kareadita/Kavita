@@ -41,7 +41,7 @@ public class KoboController(IKoboService koboService) : ControllerBase
     public async Task<IActionResult> Initialization(string apiKey)
     {
         var result = await koboService.GetInitializationAsync(apiKey, HttpContext.RequestAborted);
-        Response.Headers["x-kobo-apitoken"] = KoboInitializationResult.ApiTokenHeaderValue;
+        Response.Headers[KoboHttpConstants.ApiTokenHeaderName] = KoboHttpConstants.ApiTokenHeaderValue;
 
         return KoboJson(new JsonObject
         {
@@ -75,10 +75,9 @@ public class KoboController(IKoboService koboService) : ControllerBase
 
             return KoboJson(result.Items);
         }
-        catch (KavitaException ex) when (ex.Message == KoboService.SyncBusyMessage)
+        catch (KavitaException ex) when (MapKoboException(ex) is { } result)
         {
-            Response.Headers.RetryAfter = KoboService.SyncLockWaitSeconds.ToString();
-            return StatusCode(StatusCodes.Status503ServiceUnavailable);
+            return result;
         }
     }
 
@@ -98,9 +97,9 @@ public class KoboController(IKoboService koboService) : ControllerBase
                 HttpContext.RequestAborted);
             return KoboJson(metadata);
         }
-        catch (KavitaException ex) when (ex.Message == "kobo-entitlement-not-found")
+        catch (KavitaException ex) when (MapKoboException(ex) is { } result)
         {
-            return NotFound();
+            return result;
         }
     }
 
@@ -114,19 +113,9 @@ public class KoboController(IKoboService koboService) : ControllerBase
             return PhysicalFile(download.FilePath, download.ContentType, download.FileDownloadName,
                 enableRangeProcessing: true);
         }
-        catch (KavitaException ex) when (ex.Message is "kobo-entitlement-not-found" or "kobo-epub-missing"
-                                            or "kobo-format-unsupported")
+        catch (KavitaException ex) when (MapKoboException(ex) is { } result)
         {
-            return NotFound();
-        }
-        catch (KavitaException ex) when (ex.Message == "kobo-convert-unavailable")
-        {
-            Response.Headers.RetryAfter = "30";
-            return StatusCode(StatusCodes.Status503ServiceUnavailable);
-        }
-        catch (KavitaException ex) when (ex.Message == "kobo-convert-failed")
-        {
-            return StatusCode(StatusCodes.Status500InternalServerError);
+            return result;
         }
     }
 
@@ -137,13 +126,7 @@ public class KoboController(IKoboService koboService) : ControllerBase
         var cover = await koboService.GetCoverAsync(apiKey, entitlementId, HttpContext.RequestAborted);
         if (cover == null || !System.IO.File.Exists(cover.FilePath)) return NotFound();
 
-        var contentType = Path.GetExtension(cover.FilePath).ToLowerInvariant() switch
-        {
-            ".png" => "image/png",
-            ".webp" => "image/webp",
-            _ => "image/jpeg",
-        };
-        return PhysicalFile(cover.FilePath, contentType);
+        return PhysicalFile(cover.FilePath, cover.ContentType);
     }
 
     [HttpGet("v1/user/loyalty/benefits")]
@@ -158,7 +141,7 @@ public class KoboController(IKoboService koboService) : ControllerBase
     public async Task<IActionResult> AnalyticsGetTests(string apiKey)
     {
         await koboService.ResolveUserIdAsync(apiKey, HttpContext.RequestAborted);
-        Request.Headers.TryGetValue("X-Kobo-userkey", out var userKey);
+        Request.Headers.TryGetValue(KoboHttpConstants.UserKeyHeaderName, out var userKey);
         return KoboJson(koboService.GetAnalyticsTestsStub(userKey.ToString()));
     }
 
@@ -178,9 +161,9 @@ public class KoboController(IKoboService koboService) : ControllerBase
             return KoboJson(await koboService.PutReadingStateAsync(apiKey, entitlementId, body,
                 HttpContext.RequestAborted));
         }
-        catch (KavitaException ex) when (ex.Message == "kobo-reading-state-malformed")
+        catch (KavitaException ex) when (MapKoboException(ex) is { } result)
         {
-            return BadRequest(ex.Message);
+            return result;
         }
     }
 
@@ -200,9 +183,9 @@ public class KoboController(IKoboService koboService) : ControllerBase
                 StatusCode = StatusCodes.Status201Created,
             };
         }
-        catch (KavitaException ex) when (ex.Message == KoboService.TagNameRequiredMessage)
+        catch (KavitaException ex) when (MapKoboException(ex) is { } result)
         {
-            return BadRequest(ex.Message);
+            return result;
         }
     }
 
@@ -220,18 +203,9 @@ public class KoboController(IKoboService koboService) : ControllerBase
             await koboService.RenameTagAsync(apiKey, tagId, body, HttpContext.RequestAborted);
             return KoboAckSpace();
         }
-        catch (KavitaException ex) when (ex.Message is KoboService.TagNameRequiredMessage
-                                            or "reading-list-name-exists")
+        catch (KavitaException ex) when (MapKoboException(ex) is { } result)
         {
-            return BadRequest(ex.Message);
-        }
-        catch (KavitaException ex) when (ex.Message == KoboService.TagNotFoundMessage)
-        {
-            return NotFound();
-        }
-        catch (KavitaException ex) when (ex.Message == KoboService.TagForbiddenMessage)
-        {
-            return StatusCode(StatusCodes.Status403Forbidden);
+            return result;
         }
     }
 
@@ -243,13 +217,9 @@ public class KoboController(IKoboService koboService) : ControllerBase
             await koboService.DeleteTagAsync(apiKey, tagId, HttpContext.RequestAborted);
             return KoboAckSpace();
         }
-        catch (KavitaException ex) when (ex.Message == KoboService.TagNotFoundMessage)
+        catch (KavitaException ex) when (MapKoboException(ex) is { } result)
         {
-            return NotFound();
-        }
-        catch (KavitaException ex) when (ex.Message == KoboService.TagForbiddenMessage)
-        {
-            return StatusCode(StatusCodes.Status403Forbidden);
+            return result;
         }
     }
 
@@ -262,13 +232,9 @@ public class KoboController(IKoboService koboService) : ControllerBase
             await koboService.AddTagItemsAsync(apiKey, tagId, body, HttpContext.RequestAborted);
             return StatusCode(StatusCodes.Status201Created);
         }
-        catch (KavitaException ex) when (ex.Message == KoboService.TagNotFoundMessage)
+        catch (KavitaException ex) when (MapKoboException(ex) is { } result)
         {
-            return NotFound();
-        }
-        catch (KavitaException ex) when (ex.Message == KoboService.TagForbiddenMessage)
-        {
-            return StatusCode(StatusCodes.Status403Forbidden);
+            return result;
         }
     }
 
@@ -281,13 +247,9 @@ public class KoboController(IKoboService koboService) : ControllerBase
             await koboService.RemoveTagItemsAsync(apiKey, tagId, body, HttpContext.RequestAborted);
             return Ok();
         }
-        catch (KavitaException ex) when (ex.Message == KoboService.TagNotFoundMessage)
+        catch (KavitaException ex) when (MapKoboException(ex) is { } result)
         {
-            return NotFound();
-        }
-        catch (KavitaException ex) when (ex.Message == KoboService.TagForbiddenMessage)
-        {
-            return StatusCode(StatusCodes.Status403Forbidden);
+            return result;
         }
     }
 
@@ -318,6 +280,38 @@ public class KoboController(IKoboService koboService) : ControllerBase
     {
         await koboService.ResolveUserIdAsync(apiKey, HttpContext.RequestAborted);
         return KoboJson(koboService.GetEmptyStub());
+    }
+
+    /// <summary>
+    /// Maps a <see cref="KavitaException"/> raised by <see cref="IKoboService"/> to the Kobo-shaped
+    /// HTTP response, or <c>null</c> when the message is not a recognised Kobo error (rethrow).
+    /// </summary>
+    private IActionResult? MapKoboException(KavitaException ex)
+    {
+        switch (ex.Message)
+        {
+            case KoboService.EntitlementNotFoundMessage:
+            case KoboService.EpubMissingMessage:
+            case KoboService.FormatUnsupportedMessage:
+            case KoboService.TagNotFoundMessage:
+                return NotFound();
+            case KoboService.TagForbiddenMessage:
+                return StatusCode(StatusCodes.Status403Forbidden);
+            case KoboService.SyncBusyMessage:
+                Response.Headers.RetryAfter = KoboService.SyncLockWaitSeconds.ToString();
+                return StatusCode(StatusCodes.Status503ServiceUnavailable);
+            case KoboConversionService.ConvertUnavailableMessage:
+                Response.Headers.RetryAfter = KoboHttpConstants.ConvertRetryAfterSeconds.ToString();
+                return StatusCode(StatusCodes.Status503ServiceUnavailable);
+            case KoboConversionService.ConvertFailedMessage:
+                return StatusCode(StatusCodes.Status500InternalServerError);
+            case KoboService.ReadingStateMalformedMessage:
+            case KoboService.TagNameRequiredMessage:
+            case "reading-list-name-exists":
+                return BadRequest(ex.Message);
+            default:
+                return null;
+        }
     }
 
     private ContentResult KoboJson(object payload)

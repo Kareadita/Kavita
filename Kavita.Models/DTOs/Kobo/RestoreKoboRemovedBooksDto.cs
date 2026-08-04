@@ -1,3 +1,5 @@
+using System.ComponentModel.DataAnnotations;
+
 namespace Kavita.Models.DTOs.Kobo;
 
 /// <summary>
@@ -6,5 +8,7 @@ namespace Kavita.Models.DTOs.Kobo;
 /// </summary>
 public sealed record RestoreKoboRemovedBooksDto
 {
+    /// <summary>Bounded to guard against an unreasonably large restore payload.</summary>
+    [MaxLength(10000)]
     public int[]? ChapterIds { get; init; }
 }

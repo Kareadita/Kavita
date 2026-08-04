@@ -6,4 +6,5 @@ namespace Kavita.Models.DTOs.Kobo;
 public class KoboCoverResult
 {
     public required string FilePath { get; init; }
+    public required string ContentType { get; init; }
 }
