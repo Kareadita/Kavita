@@ -1701,11 +1701,11 @@ public class KoboServiceTests(ITestOutputHelper testOutputHelper) : AbstractDbTe
 
         var uuid = KoboEntitlementId.FromChapterIdString(chapter.Id);
         var download = await koboService.GetDownloadAsync(token, uuid, "epub");
-        Assert.Equal(_epubPath, download.FilePath);
+        Assert.Equal(Parser.NormalizePath(_epubPath), download.FilePath);
         Assert.Equal("application/epub+zip", download.ContentType);
 
         var downloadEpub3 = await koboService.GetDownloadAsync(token, uuid, "epub3");
-        Assert.Equal(_epubPath, downloadEpub3.FilePath);
+        Assert.Equal(Parser.NormalizePath(_epubPath), downloadEpub3.FilePath);
 
         var metadata = await koboService.GetMetadataAsync(token, uuid);
         Assert.Equal(KoboService.Epub3Format, metadata[0]["DownloadUrls"]![0]!["Format"]!.GetValue<string>());
@@ -2983,6 +2983,7 @@ public class KoboServiceTests(ITestOutputHelper testOutputHelper) : AbstractDbTe
             directoryService,
             converter,
             Substitute.For<IKepubifyRunner>(),
+            Substitute.For<IKepubifyPathResolver>(),
             Substitute.For<IKoboConversionJobScheduler>(),
             unitOfWork,
             Substitute.For<IEventHub>(),
@@ -3074,6 +3075,7 @@ public class KoboServiceTests(ITestOutputHelper testOutputHelper) : AbstractDbTe
             directoryService,
             converter,
             Substitute.For<IKepubifyRunner>(),
+            Substitute.For<IKepubifyPathResolver>(),
             scheduler,
             unitOfWork,
             Substitute.For<IEventHub>(),
@@ -3267,6 +3269,7 @@ public class KoboServiceTests(ITestOutputHelper testOutputHelper) : AbstractDbTe
             directoryService,
             Substitute.For<IKoboArchiveEpubConverter>(),
             kepubify,
+            Substitute.For<IKepubifyPathResolver>(),
             Substitute.For<IKoboConversionJobScheduler>(),
             unitOfWork,
             Substitute.For<IEventHub>(),

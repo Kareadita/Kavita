@@ -1,4 +1,5 @@
 using System.IdentityModel.Tokens.Jwt;
+using System.IO.Abstractions;
 using System.Security.Claims;
 using AutoMapper;
 using Kavita.API.Database;
@@ -637,9 +638,11 @@ public class OidcServiceTests(ITestOutputHelper outputHelper): AbstractDbTest(ou
     }
 
     private static SettingsService CreateSettingsService(IUnitOfWork unitOfWork)
-        => new(
+    {
+        var directoryService = new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), new FileSystem());
+        return new(
             unitOfWork,
-            Substitute.For<IDirectoryService>(),
+            directoryService,
             Substitute.For<ILibraryWatcher>(),
             Substitute.For<ITaskScheduler>(),
             Substitute.For<ILogger<SettingsService>>(),
@@ -647,6 +650,7 @@ public class OidcServiceTests(ITestOutputHelper outputHelper): AbstractDbTest(ou
             Substitute.For<ILoggingService>(),
             Substitute.For<IKepubifyPathResolver>()
         );
+    }
 
     private static ClaimsPrincipal BuildPrincipal(IEnumerable<Claim> claims)
         => new(new ClaimsIdentity(claims));
