@@ -863,7 +863,7 @@ public partial class KoboService(
     private async Task ApplyConvertChapterLocationWinAsync(int userId, Chapter chapter, AppUserProgress existing,
         ReadingStateLocationWrite location, JsonObject readingState, CancellationToken ct)
     {
-        var kepub = await koboConvertProgressLocation.TryResolveTrustedKepubPathAsync(chapter, ct);
+        var kepub = await koboConvertProgressLocation.TryResolveSpineAlignedKepubPathAsync(chapter, ct);
         var readyToRead = string.Equals(
             (readingState["StatusInfo"] as JsonObject)?["Status"]?.GetValue<string>(),
             KoboReadingStateMapper.StatusReadyToRead,

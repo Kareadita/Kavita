@@ -3,11 +3,12 @@ using System.IO;
 namespace Kavita.Services.Kobo;
 
 /// <summary>
-/// Trusts a convert KEPUB only when the spine page count matches <c>Chapter.Pages</c>.
+/// A convert KEPUB is spine-aligned when its OPF spine length matches <c>Chapter.Pages</c>.
+/// Location encode/decode requires this alignment.
 /// </summary>
-public static class KoboTrustedKepubResolver
+public static class KoboSpineAlignedKepub
 {
-    public static bool IsTrusted(string path, int chapterPages)
+    public static bool IsSpineAligned(string path, int chapterPages)
     {
         if (chapterPages <= 0 || string.IsNullOrWhiteSpace(path) || !File.Exists(path)) return false;
         var spine = KoboConvertEpubInspector.TryCountSpinePages(path);

@@ -161,7 +161,7 @@ public class KoboLocationRematchServiceTests(ITestOutputHelper testOutputHelper)
     }
 
     [Fact]
-    public async Task Rematch_ConvertChapter_UpsertsLocationFromPagesRead_WhenKepubTrusted()
+    public async Task Rematch_ConvertChapter_UpsertsLocationFromPagesRead_WhenKepubSpineAligned()
     {
         var (unitOfWork, context, _) = await CreateDatabase();
         var (user, chapter) = await SeedConvertChapter(unitOfWork, context);
@@ -201,7 +201,7 @@ public class KoboLocationRematchServiceTests(ITestOutputHelper testOutputHelper)
     }
 
     [Fact]
-    public async Task Rematch_ConvertChapter_ClearsLocation_WhenNewArtifactUntrusted()
+    public async Task Rematch_ConvertChapter_ClearsLocation_WhenNewArtifactNotSpineAligned()
     {
         var (unitOfWork, context, _) = await CreateDatabase();
         var (user, chapter) = await SeedConvertChapter(unitOfWork, context);

@@ -19,9 +19,9 @@ public interface IKoboConvertProgressLocationService
     bool IsConvertChapter(Chapter chapter);
 
     /// <summary>
-    /// Cached KEPUB path when present and spine length matches <see cref="Chapter.Pages"/>; otherwise null.
+    /// Cached KEPUB path when present and spine-aligned with <see cref="Chapter.Pages"/>; otherwise null.
     /// </summary>
-    Task<string?> TryResolveTrustedKepubPathAsync(Chapter chapter, CancellationToken ct = default);
+    Task<string?> TryResolveSpineAlignedKepubPathAsync(Chapter chapter, CancellationToken ct = default);
 
     Task UpsertFromPagesReadAsync(int userId, Chapter chapter, int pagesRead, bool readyToRead,
         CancellationToken ct = default);
@@ -41,7 +41,7 @@ public class KoboConvertProgressLocationService(
     public bool IsConvertChapter(Chapter chapter) =>
         KoboConvertChapterDetector.IsConvertChapter(chapter);
 
-    public async Task<string?> TryResolveTrustedKepubPathAsync(Chapter chapter, CancellationToken ct = default)
+    public async Task<string?> TryResolveSpineAlignedKepubPathAsync(Chapter chapter, CancellationToken ct = default)
     {
         ArgumentNullException.ThrowIfNull(chapter);
         var archive = KoboEligibleFormats.PreferConvertibleArchive(chapter.Files);
@@ -50,10 +50,10 @@ public class KoboConvertProgressLocationService(
         var path = await koboConversionService.TryGetCachedKepubPathAsync(chapter.Id, archive, ct);
         if (path == null || !File.Exists(path)) return null;
 
-        if (!KoboTrustedKepubResolver.IsTrusted(path, chapter.Pages))
+        if (!KoboSpineAlignedKepub.IsSpineAligned(path, chapter.Pages))
         {
             logger.LogDebug(
-                "Convert KEPUB page-count untrusted for chapter {ChapterId}: Pages={Pages}",
+                "Convert KEPUB spine not aligned for chapter {ChapterId}: Pages={Pages}",
                 chapter.Id, chapter.Pages);
             return null;
         }
@@ -66,7 +66,7 @@ public class KoboConvertProgressLocationService(
     {
         ArgumentNullException.ThrowIfNull(chapter);
 
-        var kepub = await TryResolveTrustedKepubPathAsync(chapter, ct);
+        var kepub = await TryResolveSpineAlignedKepubPathAsync(chapter, ct);
         if (kepub == null)
         {
             await ClearLocationAsync(userId, chapter.Id, ct);

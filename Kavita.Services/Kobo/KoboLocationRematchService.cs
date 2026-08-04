@@ -57,7 +57,7 @@ public class KoboLocationRematchService(
 
         if (locations.Count == 0 && progresses.Count == 0) return;
 
-        var trustedKepub = KoboTrustedKepubResolver.IsTrusted(newDeviceOpenablePath, chapter.Pages);
+        var spineAligned = KoboSpineAlignedKepub.IsSpineAligned(newDeviceOpenablePath, chapter.Pages);
         var progressByUser = progresses.ToDictionary(p => p.AppUserId);
         var locationByUser = locations.ToDictionary(l => l.AppUserId);
         var userIds = progressByUser.Keys.Union(locationByUser.Keys).ToHashSet();
@@ -71,9 +71,9 @@ public class KoboLocationRematchService(
             locationByUser.TryGetValue(userId, out var location);
             var pagesRead = progress?.PagesRead ?? 0;
 
-            // No Location migration across generations — re-encode from PagesRead when KEPUB is trusted.
+            // No Location migration across generations — re-encode from PagesRead when KEPUB is spine-aligned.
             KoboMappedLocation? mapped = null;
-            if (trustedKepub && progress != null)
+            if (spineAligned && progress != null)
             {
                 mapped = KoboConvertLocationCodec.TryEncode(pagesRead, chapter.Pages, readyToRead: false);
             }
@@ -118,8 +118,8 @@ public class KoboLocationRematchService(
         if (upserted > 0 || cleared > 0)
         {
             logger.LogInformation(
-                "Convert KEPUB Location rematch for chapter {ChapterId}: upserted={Upserted}, cleared={Cleared}, trusted={Trusted}",
-                chapter.Id, upserted, cleared, trustedKepub);
+                "Convert KEPUB Location rematch for chapter {ChapterId}: upserted={Upserted}, cleared={Cleared}, spineAligned={SpineAligned}",
+                chapter.Id, upserted, cleared, spineAligned);
         }
     }
 

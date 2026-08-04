@@ -8,7 +8,7 @@ namespace Kavita.Services.Kobo;
 
 /// <summary>
 /// Pure PagesRead ↔ factual Kobo Location codec for CBZ/CBR convert KEPUB artifacts.
-/// Encode/decode only; callers decide when KEPUB is device-openable and page count is trusted.
+/// Encode/decode only; callers decide when KEPUB is device-openable and spine-aligned.
 /// </summary>
 public static partial class KoboConvertLocationCodec
 {
