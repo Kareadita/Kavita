@@ -28,6 +28,7 @@ public class KoboConversionService(
     IDirectoryService directoryService,
     IKoboArchiveEpubConverter archiveEpubConverter,
     IKepubifyRunner kepubifyRunner,
+    IKepubifyPathResolver kepubifyPathResolver,
     IKoboConversionJobScheduler jobScheduler,
     IUnitOfWork unitOfWork,
     IEventHub eventHub,
@@ -73,7 +74,7 @@ public class KoboConversionService(
         ArgumentNullException.ThrowIfNull(sourceFile);
         var settings = await unitOfWork.SettingsRepository.GetSettingsDtoAsync(ct);
         if (!settings.EnableKepubConversion) return;
-        if (string.IsNullOrWhiteSpace(settings.KepubifyPath)) return;
+        if (kepubifyPathResolver.Resolve(settings.KepubifyPath) == null) return;
         if (await TryGetCachedKepubPathAsync(chapterId, sourceFile, ct) != null) return;
 
         jobScheduler.EnqueueBackgroundConvert(chapterId);
@@ -106,7 +107,8 @@ public class KoboConversionService(
             throw new KavitaException("kobo-format-unsupported");
         }
 
-        if (string.IsNullOrWhiteSpace(settings.KepubifyPath))
+        var kepubifyPath = kepubifyPathResolver.Resolve(settings.KepubifyPath);
+        if (kepubifyPath == null)
         {
             throw new KavitaException(ConvertFailedMessage);
         }
@@ -116,7 +118,7 @@ public class KoboConversionService(
         if (cached != null) return cached;
 
         return await GetOrConvertWithBudgetAsync(chapterId, budgetSeconds, isKepub: true,
-            token => ConvertAndCacheKepubAsync(cacheRoot, chapterId, sourceFile, title, settings.KepubifyPath,
+            token => ConvertAndCacheKepubAsync(cacheRoot, chapterId, sourceFile, title, kepubifyPath,
                 token), ct);
     }
 
@@ -245,7 +247,7 @@ public class KoboConversionService(
 
         var settings = await unitOfWork.SettingsRepository.GetSettingsDtoAsync(ct);
         var kepubEnabled = settings.EnableKepubConversion &&
-                           !string.IsNullOrWhiteSpace(settings.KepubifyPath);
+                           kepubifyPathResolver.Resolve(settings.KepubifyPath) != null;
         var cacheRoot = ResolveCacheRoot(settings);
 
         logger.LogInformation(
@@ -435,17 +437,18 @@ public class KoboConversionService(
         }
 
         if (!settings.EnableKepubConversion) return;
-        if (string.IsNullOrWhiteSpace(settings.KepubifyPath))
+        var kepubifyPath = kepubifyPathResolver.Resolve(settings.KepubifyPath);
+        if (kepubifyPath == null)
         {
             logger.LogWarning(
-                "Background Kobo KEPUB convert skipped for chapter {ChapterId}: kepubify path is empty",
+                "Background Kobo KEPUB convert skipped for chapter {ChapterId}: kepubify binary not found",
                 chapter.Id);
             return;
         }
 
         if (await TryGetCachedKepubPathAsync(chapter.Id, source, ct) != null) return;
 
-        await ConvertAndCacheKepubAsync(cacheRoot, chapter.Id, source, title, settings.KepubifyPath, ct);
+        await ConvertAndCacheKepubAsync(cacheRoot, chapter.Id, source, title, kepubifyPath, ct);
     }
 
     private string? TryGetCachedPath(string cacheRoot, int chapterId, string fingerprint, int? expectedPages)

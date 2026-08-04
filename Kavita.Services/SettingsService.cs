@@ -35,7 +35,8 @@ public class SettingsService(
     ITaskScheduler taskScheduler,
     ILogger<SettingsService> logger,
     IOidcService oidcService,
-    ILoggingService loggingService)
+    ILoggingService loggingService,
+    IKepubifyPathResolver kepubifyPathResolver)
     : ISettingsService
 {
     private readonly bool _isDevelopment = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") == Environments.Development;
@@ -474,9 +475,9 @@ public class SettingsService(
         }
 
         if (updateSettingsDto.EnableKepubConversion &&
-            string.IsNullOrWhiteSpace(updateSettingsDto.KepubifyPath))
+            kepubifyPathResolver.Resolve(updateSettingsDto.KepubifyPath) == null)
         {
-            throw new KavitaException("kobo-kepubify-path-required");
+            throw new KavitaException("kobo-kepubify-not-found");
         }
 
         if (updateSettingsDto.EnableKoboSync &&
@@ -747,9 +748,9 @@ public class SettingsService(
             updateSettingsDto.EnableKepubConversion + string.Empty != setting.Value)
         {
             if (updateSettingsDto.EnableKepubConversion &&
-                string.IsNullOrWhiteSpace(updateSettingsDto.KepubifyPath))
+                kepubifyPathResolver.Resolve(updateSettingsDto.KepubifyPath) == null)
             {
-                throw new KavitaException("kobo-kepubify-path-required");
+                throw new KavitaException("kobo-kepubify-not-found");
             }
 
             setting.Value = updateSettingsDto.EnableKepubConversion + string.Empty;
@@ -760,9 +761,10 @@ public class SettingsService(
             (updateSettingsDto.KepubifyPath ?? string.Empty) != setting.Value)
         {
             var path = (updateSettingsDto.KepubifyPath ?? string.Empty).Trim();
-            if (updateSettingsDto.EnableKepubConversion && string.IsNullOrWhiteSpace(path))
+            if (updateSettingsDto.EnableKepubConversion &&
+                kepubifyPathResolver.Resolve(path) == null)
             {
-                throw new KavitaException("kobo-kepubify-path-required");
+                throw new KavitaException("kobo-kepubify-not-found");
             }
 
             setting.Value = path;

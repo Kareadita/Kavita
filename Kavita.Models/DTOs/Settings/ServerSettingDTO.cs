@@ -50,7 +50,9 @@ public sealed record ServerSettingDto
     /// </summary>
     public bool EnableKepubConversion { get; set; }
     /// <summary>
-    /// Path to the kepubify binary. Required when <see cref="EnableKepubConversion"/> is enabled.
+    /// Optional override path to the kepubify binary. When empty, Kavita uses bundled
+    /// <c>tools/kepubify</c> or <c>kepubify</c> on PATH. A resolvable binary is required when
+    /// <see cref="EnableKepubConversion"/> is enabled.
     /// </summary>
     public string KepubifyPath { get; set; } = string.Empty;
     /// <summary>

@@ -57,12 +57,18 @@ Package()
     echo "Copying LICENSE"
     cp ../LICENSE "$lOutputFolder"/LICENSE.txt
 
+    echo "Copying third-party notices"
+    cp ../THIRD-PARTY-NOTICES.txt "$lOutputFolder"/THIRD-PARTY-NOTICES.txt
+
 	echo "Copying appsettings.json"
 	mkdir $lOutputFolder/config
     cp config/appsettings.json $lOutputFolder/config/appsettings-init.json
 
     echo "Renaming Kavita.Server -> Kavita"
     mv "$lOutputFolder"/Kavita.Server "$lOutputFolder"/Kavita
+
+    echo "Bundling kepubify"
+    bash ../scripts/fetch-kepubify.sh "$runtime" "$lOutputFolder"
 
     echo "Creating tar"
     cd ../$outputFolder/"$runtime"/

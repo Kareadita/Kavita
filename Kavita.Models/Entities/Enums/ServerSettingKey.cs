@@ -213,12 +213,13 @@ public enum ServerSettingKey
     [Description("KoboSyncPageSize")]
     KoboSyncPageSize = 46,
     /// <summary>
-    /// When enabled, Kobo sync prefers cached KEPUB download URLs (requires a kepubify path).
+    /// When enabled, Kobo sync prefers cached KEPUB download URLs (requires a resolvable kepubify binary).
     /// </summary>
     [Description("EnableKepubConversion")]
     EnableKepubConversion = 47,
     /// <summary>
-    /// Filesystem path to the kepubify binary. Required when <see cref="EnableKepubConversion"/> is on.
+    /// Optional override path to the kepubify binary. When empty, Kavita uses a bundled
+    /// <c>tools/kepubify</c> or <c>kepubify</c> on PATH.
     /// </summary>
     [Description("KepubifyPath")]
     KepubifyPath = 48,

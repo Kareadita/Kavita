@@ -880,7 +880,8 @@ public class KoboConversionServiceTests(ITestOutputHelper testOutputHelper) : Ab
         var ds = new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), new FileSystem());
         var settingsService = new SettingsService(unitOfWork, ds, Substitute.For<ILibraryWatcher>(),
             Substitute.For<ITaskScheduler>(), Substitute.For<ILogger<SettingsService>>(),
-            Substitute.For<IOidcService>(), Substitute.For<ILoggingService>());
+            Substitute.For<IOidcService>(), Substitute.For<ILoggingService>(),
+            CreateTestKepubifyPathResolver());
         var settings = await unitOfWork.SettingsRepository.GetSettingsDtoAsync();
         settings.KoboEpubCacheMaxBytes = epubMaxBytes;
         settings.KoboKepubCacheMaxBytes = kepubMaxBytes;
@@ -892,11 +893,25 @@ public class KoboConversionServiceTests(ITestOutputHelper testOutputHelper) : Ab
         var ds = new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), new FileSystem());
         var settingsService = new SettingsService(unitOfWork, ds, Substitute.For<ILibraryWatcher>(),
             Substitute.For<ITaskScheduler>(), Substitute.For<ILogger<SettingsService>>(),
-            Substitute.For<IOidcService>(), Substitute.For<ILoggingService>());
+            Substitute.For<IOidcService>(), Substitute.For<ILoggingService>(),
+            CreateTestKepubifyPathResolver());
         var settings = await unitOfWork.SettingsRepository.GetSettingsDtoAsync();
         settings.EnableKepubConversion = true;
         settings.KepubifyPath = "/usr/bin/kepubify";
         await settingsService.UpdateSettings(settings);
+    }
+
+    private static IKepubifyPathResolver CreateTestKepubifyPathResolver()
+    {
+        var resolver = Substitute.For<IKepubifyPathResolver>();
+        resolver.Resolve(Arg.Any<string?>()).Returns(ci =>
+        {
+            var configured = ci.ArgAt<string?>(0);
+            return string.IsNullOrWhiteSpace(configured)
+                ? "/test/tools/kepubify"
+                : configured.Trim();
+        });
+        return resolver;
     }
 
     private static KoboConversionService CreateService(
@@ -905,13 +920,15 @@ public class KoboConversionServiceTests(ITestOutputHelper testOutputHelper) : Ab
         IKoboArchiveEpubConverter converter,
         IKoboConversionJobScheduler? scheduler = null,
         IEventHub? eventHub = null,
-        IKepubifyRunner? kepubify = null)
+        IKepubifyRunner? kepubify = null,
+        IKepubifyPathResolver? kepubifyPathResolver = null)
     {
         return new KoboConversionService(
             Substitute.For<ILogger<KoboConversionService>>(),
             directoryService,
             converter,
             kepubify ?? Substitute.For<IKepubifyRunner>(),
+            kepubifyPathResolver ?? CreateTestKepubifyPathResolver(),
             scheduler ?? Substitute.For<IKoboConversionJobScheduler>(),
             unitOfWork,
             eventHub ?? Substitute.For<IEventHub>(),

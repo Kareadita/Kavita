@@ -285,7 +285,7 @@ public class AccountServiceTests(ITestOutputHelper outputHelper): AbstractDbTest
         await userManager.CreateAsync(defaultAdmin);
 
         var accountService = new AccountService(userManager, Substitute.For<ILogger<AccountService>>(), unitOfWork, mapper, Substitute.For<ILocalizationService>());
-        var settingsService = new SettingsService(unitOfWork, Substitute.For<IDirectoryService>(), Substitute.For<ILibraryWatcher>(), Substitute.For<ITaskScheduler>(), Substitute.For<ILogger<SettingsService>> (), Substitute.For<IOidcService>(), Substitute.For<ILoggingService>());
+        var settingsService = new SettingsService(unitOfWork, Substitute.For<IDirectoryService>(), Substitute.For<ILibraryWatcher>(), Substitute.For<ITaskScheduler>(), Substitute.For<ILogger<SettingsService>> (), Substitute.For<IOidcService>(), Substitute.For<ILoggingService>(), Substitute.For<IKepubifyPathResolver>());
 
         user = await unitOfWork.UserRepository.GetUserByIdAsync(user.Id, AppUserIncludes.SideNavStreams);
         return (user!, accountService, userManager, settingsService);

@@ -56,12 +56,30 @@ public class KoboServiceTests(ITestOutputHelper testOutputHelper) : AbstractDbTe
         await unitOfWork.CommitAsync();
     }
 
-    private static SettingsService CreateSettingsService(IUnitOfWork unitOfWork)
+    private static SettingsService CreateSettingsService(IUnitOfWork unitOfWork,
+        IKepubifyPathResolver? kepubifyPathResolver = null)
     {
         var ds = new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), new FileSystem());
         return new SettingsService(unitOfWork, ds, Substitute.For<ILibraryWatcher>(),
             Substitute.For<ITaskScheduler>(), Substitute.For<ILogger<SettingsService>>(),
-            Substitute.For<IOidcService>(), Substitute.For<ILoggingService>());
+            Substitute.For<IOidcService>(), Substitute.For<ILoggingService>(),
+            kepubifyPathResolver ?? CreateTestKepubifyPathResolver());
+    }
+
+    /// <summary>
+    /// Test resolver: non-empty configured path is treated as found; empty falls back to a fake bundled path.
+    /// </summary>
+    private static IKepubifyPathResolver CreateTestKepubifyPathResolver()
+    {
+        var resolver = Substitute.For<IKepubifyPathResolver>();
+        resolver.Resolve(Arg.Any<string?>()).Returns(ci =>
+        {
+            var configured = ci.ArgAt<string?>(0);
+            return string.IsNullOrWhiteSpace(configured)
+                ? "/test/tools/kepubify"
+                : configured.Trim();
+        });
+        return resolver;
     }
 
     private static KoboService CreateKoboService(IUnitOfWork unitOfWork, IMapper mapper,
@@ -201,10 +219,12 @@ public class KoboServiceTests(ITestOutputHelper testOutputHelper) : AbstractDbTe
     }
 
     [Fact]
-    public async Task UpdateSettings_EnableKepubConversion_RequiresKepubifyPath()
+    public async Task UpdateSettings_EnableKepubConversion_Fails_WhenBinaryNotFound()
     {
         var (unitOfWork, _, _) = await CreateDatabase();
-        var settingsService = CreateSettingsService(unitOfWork);
+        var resolver = Substitute.For<IKepubifyPathResolver>();
+        resolver.Resolve(Arg.Any<string?>()).Returns((string?)null);
+        var settingsService = CreateSettingsService(unitOfWork, resolver);
 
         var settings = await unitOfWork.SettingsRepository.GetSettingsDtoAsync();
         Assert.False(settings.EnableKepubConversion);
@@ -214,10 +234,30 @@ public class KoboServiceTests(ITestOutputHelper testOutputHelper) : AbstractDbTe
         settings.KepubifyPath = string.Empty;
 
         var ex = await Assert.ThrowsAsync<KavitaException>(() => settingsService.UpdateSettings(settings));
-        Assert.Equal("kobo-kepubify-path-required", ex.Message);
+        Assert.Equal("kobo-kepubify-not-found", ex.Message);
 
         var reloaded = await unitOfWork.SettingsRepository.GetSettingsDtoAsync();
         Assert.False(reloaded.EnableKepubConversion);
+    }
+
+    [Fact]
+    public async Task UpdateSettings_EnableKepubConversion_AllowsEmptyPath_WhenResolved()
+    {
+        var (unitOfWork, _, _) = await CreateDatabase();
+        var settingsService = CreateSettingsService(unitOfWork);
+
+        var settings = await unitOfWork.SettingsRepository.GetSettingsDtoAsync();
+        settings.EnableKepubConversion = true;
+        settings.KepubifyPath = string.Empty;
+
+        var updated = await settingsService.UpdateSettings(settings);
+
+        Assert.True(updated.EnableKepubConversion);
+        Assert.Equal(string.Empty, updated.KepubifyPath);
+
+        var reloaded = await unitOfWork.SettingsRepository.GetSettingsDtoAsync();
+        Assert.True(reloaded.EnableKepubConversion);
+        Assert.Equal(string.Empty, reloaded.KepubifyPath);
     }
 
     [Fact]

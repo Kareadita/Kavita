@@ -13,7 +13,8 @@ COPY copy_runtime.sh /copy_runtime.sh
 
 RUN chmod +x /copy_runtime.sh
 RUN /copy_runtime.sh
-RUN chmod +x /Kavita/Kavita
+RUN chmod +x /Kavita/Kavita \
+  && if [ -f /Kavita/tools/kepubify ]; then chmod +x /Kavita/tools/kepubify; fi
 
 #Production image
 FROM ubuntu:noble

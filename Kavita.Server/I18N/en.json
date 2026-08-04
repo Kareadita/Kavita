@@ -131,6 +131,7 @@
     "kobo-convert-budget": "Kobo convert time budget must be at least 1 second",
     "kobo-sync-page-size": "Kobo sync page size must be between 1 and 1000",
     "kobo-kepubify-path-required": "Kepubify path is required when KEPUB conversion is enabled",
+    "kobo-kepubify-not-found": "Could not find a kepubify binary. Install kepubify, use a release that bundles it, or set an override path.",
     "kobo-epub-cache-max-bytes": "Kobo archive→EPUB cache max bytes must be empty (unlimited) or a positive number",
     "kobo-kepub-cache-max-bytes": "Kobo EPUB→KEPUB cache max bytes must be empty (unlimited) or a positive number",
     "kobo-sync-disabled": "Kobo sync is not enabled on this server",

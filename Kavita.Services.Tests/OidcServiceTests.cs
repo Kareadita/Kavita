@@ -644,7 +644,8 @@ public class OidcServiceTests(ITestOutputHelper outputHelper): AbstractDbTest(ou
             Substitute.For<ITaskScheduler>(),
             Substitute.For<ILogger<SettingsService>>(),
             Substitute.For<IOidcService>(),
-            Substitute.For<ILoggingService>()
+            Substitute.For<ILoggingService>(),
+            Substitute.For<IKepubifyPathResolver>()
         );
 
     private static ClaimsPrincipal BuildPrincipal(IEnumerable<Claim> claims)

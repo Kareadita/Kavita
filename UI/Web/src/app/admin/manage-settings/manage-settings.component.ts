@@ -154,15 +154,11 @@ export class ManageSettingsComponent implements OnInit {
   }
 
   private updateKepubConversionValidators() {
-    const enableKepub = this.settingsForm.get('enableKepubConversion');
     const kepubifyPath = this.settingsForm.get('kepubifyPath');
-    if (!enableKepub || !kepubifyPath) return;
+    if (!kepubifyPath) return;
 
-    if (enableKepub.value) {
-      kepubifyPath.setValidators([Validators.required]);
-    } else {
-      kepubifyPath.clearValidators();
-    }
+    // Path is an optional override; server resolves bundled/PATH kepubify when blank.
+    kepubifyPath.clearValidators();
     kepubifyPath.updateValueAndValidity({emitEvent: false});
     this.cdRef.markForCheck();
   }

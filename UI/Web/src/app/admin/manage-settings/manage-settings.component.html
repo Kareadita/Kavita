@@ -315,15 +315,7 @@
             </ng-template>
             <ng-template #edit>
               <input id="setting-kepubify-path" aria-describedby="kepubify-path-help" class="form-control" formControlName="kepubifyPath"
-                     type="text" [class.is-invalid]="formControl.invalid && !formControl.untouched" appEnterBlur>
-
-              @if(settingsForm.dirty || !settingsForm.untouched) {
-                <div id="kepubify-path-validations" class="invalid-feedback">
-                  @if (formControl.errors?.required) {
-                    <div>{{t('kobo-kepubify-path-validation')}}</div>
-                  }
-                </div>
-              }
+                     type="text" [placeholder]="t('kobo-kepubify-path-placeholder')" appEnterBlur>
             </ng-template>
           </app-setting-item>
         }

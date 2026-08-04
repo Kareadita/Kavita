@@ -13,6 +13,7 @@ public static class KoboServiceCollectionExtensions
     {
         services.AddScoped<IKoboService, KoboService>();
         services.AddScoped<IKoboArchiveEpubConverter, KoboArchiveEpubConverter>();
+        services.AddSingleton<IKepubifyPathResolver, KepubifyPathResolver>();
         services.AddScoped<IKepubifyRunner, KepubifyRunner>();
         services.AddScoped<IKoboConversionJobScheduler, HangfireKoboConversionJobScheduler>();
         services.AddScoped<IKoboConversionService, KoboConversionService>();
