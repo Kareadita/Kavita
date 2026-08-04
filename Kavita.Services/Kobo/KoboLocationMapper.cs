@@ -29,7 +29,7 @@ public partial class KoboLocationMapper(ILogger<KoboLocationMapper> logger) : IK
 
     public string? ResolveLibraryEpubPath(Chapter chapter)
     {
-        var native = KoboService.PreferNativeEpub(chapter.Files);
+        var native = KoboEligibleFormats.PreferNativeEpub(chapter.Files);
         if (native == null || string.IsNullOrWhiteSpace(native.FilePath) || !File.Exists(native.FilePath))
         {
             return null;
@@ -45,7 +45,7 @@ public partial class KoboLocationMapper(ILogger<KoboLocationMapper> logger) : IK
             return cachedKepubPath;
         }
 
-        var native = KoboService.PreferNativeEpub(chapter.Files);
+        var native = KoboEligibleFormats.PreferNativeEpub(chapter.Files);
         // Archive-only converts: prefer cached KEPUB when provided; otherwise no device-openable
         // file for Location invent (percent-only until KEPUB appears).
         if (native == null) return null;
@@ -63,6 +63,17 @@ public partial class KoboLocationMapper(ILogger<KoboLocationMapper> logger) : IK
         CancellationToken ct = default)
     {
         if (string.IsNullOrWhiteSpace(libraryEpubPath) || string.IsNullOrWhiteSpace(locationValue))
+        {
+            return null;
+        }
+
+        if (KoboLocationCodec.IsConvertSentinel(locationValue))
+        {
+            return null;
+        }
+
+        if (!string.IsNullOrEmpty(locationType) &&
+            !string.Equals(locationType, TypeKoboSpan, StringComparison.OrdinalIgnoreCase))
         {
             return null;
         }

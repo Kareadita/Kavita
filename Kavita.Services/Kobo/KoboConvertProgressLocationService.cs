@@ -38,29 +38,23 @@ public class KoboConvertProgressLocationService(
     IKoboConversionService koboConversionService)
     : IKoboConvertProgressLocationService
 {
-    public bool IsConvertChapter(Chapter chapter)
-    {
-        ArgumentNullException.ThrowIfNull(chapter);
-        return KoboService.PreferNativeEpub(chapter.Files) == null
-               && KoboService.PreferConvertibleArchive(chapter.Files) != null;
-    }
+    public bool IsConvertChapter(Chapter chapter) =>
+        KoboConvertChapterDetector.IsConvertChapter(chapter);
 
     public async Task<string?> TryResolveTrustedKepubPathAsync(Chapter chapter, CancellationToken ct = default)
     {
         ArgumentNullException.ThrowIfNull(chapter);
-        var archive = KoboService.PreferConvertibleArchive(chapter.Files);
+        var archive = KoboEligibleFormats.PreferConvertibleArchive(chapter.Files);
         if (archive == null) return null;
 
         var path = await koboConversionService.TryGetCachedKepubPathAsync(chapter.Id, archive, ct);
         if (path == null || !File.Exists(path)) return null;
 
-        if (chapter.Pages <= 0) return null;
-        var spine = KoboConvertEpubInspector.TryCountSpinePages(path);
-        if (spine != chapter.Pages)
+        if (!KoboTrustedKepubResolver.IsTrusted(path, chapter.Pages))
         {
             logger.LogDebug(
-                "Convert KEPUB page-count untrusted for chapter {ChapterId}: spine={Spine}, Pages={Pages}",
-                chapter.Id, spine, chapter.Pages);
+                "Convert KEPUB page-count untrusted for chapter {ChapterId}: Pages={Pages}",
+                chapter.Id, chapter.Pages);
             return null;
         }
 

@@ -17,6 +17,7 @@ using Kavita.Common.Extensions;
 using Kavita.Common.Helpers;
 using Kavita.Models.DTOs;
 using Kavita.Models.DTOs.KavitaPlus.Metadata;
+using Kavita.Models.Constants;
 using Kavita.Models.DTOs.Settings;
 using Kavita.Models.Entities;
 using Kavita.Models.Entities.Enums;
@@ -265,10 +266,12 @@ public class SettingsService(
         var currentSettings = await unitOfWork.SettingsRepository.GetSettingsAsync(ct);
         var updateBookmarks = false;
         var originalBookmarkDirectory = directoryService.BookmarkDirectory;
-        var updateKoboConversionCache = false;
         var defaultKoboConversionCacheDirectory = directoryService.FileSystem.Path.Combine(
-            directoryService.LongTermCacheDirectory, "kobo");
-        var originalKoboConversionCacheDirectory = defaultKoboConversionCacheDirectory;
+            directoryService.LongTermCacheDirectory, KoboSettingsDefaults.CacheFolderName);
+        var koboCacheUpdate = new KoboCacheDirectoryUpdate
+        {
+            OriginalDirectory = defaultKoboConversionCacheDirectory,
+        };
 
         var bookmarkDirectory = updateSettingsDto.BookmarksDirectory;
         if (!updateSettingsDto.BookmarksDirectory.EndsWith("bookmarks") &&
@@ -378,106 +381,8 @@ public class SettingsService(
                 unitOfWork.SettingsRepository.Update(setting);
             }
 
-            if (setting.Key == ServerSettingKey.EnableKoboSync &&
-                updateSettingsDto.EnableKoboSync + string.Empty != setting.Value)
-            {
-                if (updateSettingsDto.EnableKoboSync &&
-                    string.IsNullOrWhiteSpace(updateSettingsDto.HostName))
-                {
-                    throw new KavitaException("kobo-hostname-required");
-                }
-
-                setting.Value = updateSettingsDto.EnableKoboSync + string.Empty;
-                unitOfWork.SettingsRepository.Update(setting);
-            }
-
-            if (setting.Key == ServerSettingKey.KoboConvertTimeBudgetSeconds &&
-                updateSettingsDto.KoboConvertTimeBudgetSeconds + string.Empty != setting.Value)
-            {
-                if (updateSettingsDto.KoboConvertTimeBudgetSeconds < 1)
-                {
-                    throw new KavitaException("kobo-convert-budget");
-                }
-
-                setting.Value = updateSettingsDto.KoboConvertTimeBudgetSeconds + string.Empty;
-                unitOfWork.SettingsRepository.Update(setting);
-            }
-
-            if (setting.Key == ServerSettingKey.KoboSyncPageSize &&
-                updateSettingsDto.KoboSyncPageSize + string.Empty != setting.Value)
-            {
-                if (updateSettingsDto.KoboSyncPageSize < KoboService.MinSyncPageSize ||
-                    updateSettingsDto.KoboSyncPageSize > KoboService.MaxSyncPageSize)
-                {
-                    throw new KavitaException("kobo-sync-page-size");
-                }
-
-                setting.Value = updateSettingsDto.KoboSyncPageSize + string.Empty;
-                unitOfWork.SettingsRepository.Update(setting);
-            }
-
-            if (setting.Key == ServerSettingKey.EnableKepubConversion &&
-                updateSettingsDto.EnableKepubConversion + string.Empty != setting.Value)
-            {
-                if (updateSettingsDto.EnableKepubConversion &&
-                    string.IsNullOrWhiteSpace(updateSettingsDto.KepubifyPath))
-                {
-                    throw new KavitaException("kobo-kepubify-path-required");
-                }
-
-                setting.Value = updateSettingsDto.EnableKepubConversion + string.Empty;
-                unitOfWork.SettingsRepository.Update(setting);
-            }
-
-            if (setting.Key == ServerSettingKey.KepubifyPath &&
-                (updateSettingsDto.KepubifyPath ?? string.Empty) != setting.Value)
-            {
-                var path = (updateSettingsDto.KepubifyPath ?? string.Empty).Trim();
-                if (updateSettingsDto.EnableKepubConversion && string.IsNullOrWhiteSpace(path))
-                {
-                    throw new KavitaException("kobo-kepubify-path-required");
-                }
-
-                setting.Value = path;
-                unitOfWork.SettingsRepository.Update(setting);
-            }
-
-            if (setting.Key == ServerSettingKey.KoboEpubCacheMaxBytes)
-            {
-                var stored = FormatOptionalByteCap(updateSettingsDto.KoboEpubCacheMaxBytes, "kobo-epub-cache-max-bytes");
-                if (stored != setting.Value)
-                {
-                    setting.Value = stored;
-                    unitOfWork.SettingsRepository.Update(setting);
-                }
-            }
-
-            if (setting.Key == ServerSettingKey.KoboKepubCacheMaxBytes)
-            {
-                var stored = FormatOptionalByteCap(updateSettingsDto.KoboKepubCacheMaxBytes, "kobo-kepub-cache-max-bytes");
-                if (stored != setting.Value)
-                {
-                    setting.Value = stored;
-                    unitOfWork.SettingsRepository.Update(setting);
-                }
-            }
-
-            if (setting.Key == ServerSettingKey.KoboConversionCacheDirectory &&
-                koboConversionCacheDirectory != setting.Value)
-            {
-                if (!await directoryService.CheckWriteAccess(koboConversionCacheDirectory))
-                {
-                    throw new KavitaException("kobo-conversion-cache-dir-permissions");
-                }
-
-                originalKoboConversionCacheDirectory = string.IsNullOrWhiteSpace(setting.Value)
-                    ? defaultKoboConversionCacheDirectory
-                    : setting.Value;
-
-                setting.Value = directoryService.FileSystem.Path.GetFullPath(koboConversionCacheDirectory);
-                unitOfWork.SettingsRepository.Update(setting);
-                updateKoboConversionCache = true;
-            }
+            await UpdateKoboSettings(setting, updateSettingsDto, koboConversionCacheDirectory,
+                defaultKoboConversionCacheDirectory, koboCacheUpdate);
 
             if (setting.Key == ServerSettingKey.EncodeMediaAs &&
                 ((int)updateSettingsDto.EncodeMediaAs).ToString() != setting.Value)
@@ -502,8 +407,13 @@ public class SettingsService(
 
             if (setting.Key == ServerSettingKey.HostName && updateSettingsDto.HostName + string.Empty != setting.Value)
             {
-                setting.Value = (updateSettingsDto.HostName + string.Empty).Trim();
-                setting.Value = UrlHelper.RemoveEndingSlash(setting.Value);
+                var trimmedHost = (updateSettingsDto.HostName + string.Empty).Trim();
+                if (updateSettingsDto.EnableKoboSync && string.IsNullOrWhiteSpace(trimmedHost))
+                {
+                    throw new KavitaException("kobo-hostname-required");
+                }
+
+                setting.Value = UrlHelper.RemoveEndingSlash(trimmedHost);
                 unitOfWork.SettingsRepository.Update(setting);
             }
 
@@ -563,6 +473,18 @@ public class SettingsService(
             }
         }
 
+        if (updateSettingsDto.EnableKepubConversion &&
+            string.IsNullOrWhiteSpace(updateSettingsDto.KepubifyPath))
+        {
+            throw new KavitaException("kobo-kepubify-path-required");
+        }
+
+        if (updateSettingsDto.EnableKoboSync &&
+            string.IsNullOrWhiteSpace(updateSettingsDto.HostName))
+        {
+            throw new KavitaException("kobo-hostname-required");
+        }
+
         if (!unitOfWork.HasChanges()) return updateSettingsDto;
 
         try
@@ -583,9 +505,9 @@ public class SettingsService(
                 UpdateBookmarkDirectory(originalBookmarkDirectory, bookmarkDirectory);
             }
 
-            if (updateKoboConversionCache)
+            if (koboCacheUpdate.Requested)
             {
-                UpdateKoboConversionCacheDirectory(originalKoboConversionCacheDirectory,
+                UpdateKoboConversionCacheDirectory(koboCacheUpdate.OriginalDirectory,
                     koboConversionCacheDirectory);
             }
 
@@ -760,6 +682,129 @@ public class SettingsService(
         unitOfWork.SettingsRepository.Update(setting);
 
         return true;
+    }
+
+    /// <summary>
+    /// Mutable cache-directory outcome carried across the settings loop (async precludes ref params).
+    /// </summary>
+    private sealed class KoboCacheDirectoryUpdate
+    {
+        public bool Requested { get; set; }
+        public required string OriginalDirectory { get; set; }
+    }
+
+    /// <summary>
+    /// Applies all Kobo-related settings for a single <paramref name="setting"/>: sync toggle, convert
+    /// budget, page size, kepub conversion + kepubify path, cache byte caps, and the conversion cache
+    /// directory. Cache-directory changes are recorded on <paramref name="cacheUpdate"/> so the caller
+    /// can relocate the directory after commit.
+    /// </summary>
+    /// <remarks>Does not commit any changes.</remarks>
+    /// <exception cref="KavitaException">When a Kobo setting fails its validation.</exception>
+    private async Task UpdateKoboSettings(ServerSetting setting, ServerSettingDto updateSettingsDto,
+        string koboConversionCacheDirectory, string defaultKoboConversionCacheDirectory,
+        KoboCacheDirectoryUpdate cacheUpdate)
+    {
+        if (setting.Key == ServerSettingKey.EnableKoboSync &&
+            updateSettingsDto.EnableKoboSync + string.Empty != setting.Value)
+        {
+            if (updateSettingsDto.EnableKoboSync &&
+                string.IsNullOrWhiteSpace(updateSettingsDto.HostName))
+            {
+                throw new KavitaException("kobo-hostname-required");
+            }
+
+            setting.Value = updateSettingsDto.EnableKoboSync + string.Empty;
+            unitOfWork.SettingsRepository.Update(setting);
+        }
+
+        if (setting.Key == ServerSettingKey.KoboConvertTimeBudgetSeconds &&
+            updateSettingsDto.KoboConvertTimeBudgetSeconds + string.Empty != setting.Value)
+        {
+            if (updateSettingsDto.KoboConvertTimeBudgetSeconds < 1)
+            {
+                throw new KavitaException("kobo-convert-budget");
+            }
+
+            setting.Value = updateSettingsDto.KoboConvertTimeBudgetSeconds + string.Empty;
+            unitOfWork.SettingsRepository.Update(setting);
+        }
+
+        if (setting.Key == ServerSettingKey.KoboSyncPageSize &&
+            updateSettingsDto.KoboSyncPageSize + string.Empty != setting.Value)
+        {
+            if (updateSettingsDto.KoboSyncPageSize < KoboSettingsDefaults.MinSyncPageSize ||
+                updateSettingsDto.KoboSyncPageSize > KoboSettingsDefaults.MaxSyncPageSize)
+            {
+                throw new KavitaException("kobo-sync-page-size");
+            }
+
+            setting.Value = updateSettingsDto.KoboSyncPageSize + string.Empty;
+            unitOfWork.SettingsRepository.Update(setting);
+        }
+
+        if (setting.Key == ServerSettingKey.EnableKepubConversion &&
+            updateSettingsDto.EnableKepubConversion + string.Empty != setting.Value)
+        {
+            if (updateSettingsDto.EnableKepubConversion &&
+                string.IsNullOrWhiteSpace(updateSettingsDto.KepubifyPath))
+            {
+                throw new KavitaException("kobo-kepubify-path-required");
+            }
+
+            setting.Value = updateSettingsDto.EnableKepubConversion + string.Empty;
+            unitOfWork.SettingsRepository.Update(setting);
+        }
+
+        if (setting.Key == ServerSettingKey.KepubifyPath &&
+            (updateSettingsDto.KepubifyPath ?? string.Empty) != setting.Value)
+        {
+            var path = (updateSettingsDto.KepubifyPath ?? string.Empty).Trim();
+            if (updateSettingsDto.EnableKepubConversion && string.IsNullOrWhiteSpace(path))
+            {
+                throw new KavitaException("kobo-kepubify-path-required");
+            }
+
+            setting.Value = path;
+            unitOfWork.SettingsRepository.Update(setting);
+        }
+
+        if (setting.Key == ServerSettingKey.KoboEpubCacheMaxBytes)
+        {
+            var stored = FormatOptionalByteCap(updateSettingsDto.KoboEpubCacheMaxBytes, "kobo-epub-cache-max-bytes");
+            if (stored != setting.Value)
+            {
+                setting.Value = stored;
+                unitOfWork.SettingsRepository.Update(setting);
+            }
+        }
+
+        if (setting.Key == ServerSettingKey.KoboKepubCacheMaxBytes)
+        {
+            var stored = FormatOptionalByteCap(updateSettingsDto.KoboKepubCacheMaxBytes, "kobo-kepub-cache-max-bytes");
+            if (stored != setting.Value)
+            {
+                setting.Value = stored;
+                unitOfWork.SettingsRepository.Update(setting);
+            }
+        }
+
+        if (setting.Key == ServerSettingKey.KoboConversionCacheDirectory &&
+            koboConversionCacheDirectory != setting.Value)
+        {
+            if (!await directoryService.CheckWriteAccess(koboConversionCacheDirectory))
+            {
+                throw new KavitaException("kobo-conversion-cache-dir-permissions");
+            }
+
+            cacheUpdate.OriginalDirectory = string.IsNullOrWhiteSpace(setting.Value)
+                ? defaultKoboConversionCacheDirectory
+                : setting.Value;
+
+            setting.Value = directoryService.FileSystem.Path.GetFullPath(koboConversionCacheDirectory);
+            unitOfWork.SettingsRepository.Update(setting);
+            cacheUpdate.Requested = true;
+        }
     }
 
     private void UpdateEmailSettings(ServerSetting setting, ServerSettingDto updateSettingsDto)

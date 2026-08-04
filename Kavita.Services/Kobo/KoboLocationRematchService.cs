@@ -43,8 +43,7 @@ public class KoboLocationRematchService(
     }
 
     private static bool IsConvertChapter(Chapter chapter) =>
-        KoboService.PreferNativeEpub(chapter.Files) == null
-        && KoboService.PreferConvertibleArchive(chapter.Files) != null;
+        KoboConvertChapterDetector.IsConvertChapter(chapter);
 
     private async Task RematchConvertChapterAsync(Chapter chapter, string newDeviceOpenablePath,
         CancellationToken ct)
@@ -58,7 +57,7 @@ public class KoboLocationRematchService(
 
         if (locations.Count == 0 && progresses.Count == 0) return;
 
-        var trustedKepub = IsTrustedConvertKepub(newDeviceOpenablePath, chapter.Pages);
+        var trustedKepub = KoboTrustedKepubResolver.IsTrusted(newDeviceOpenablePath, chapter.Pages);
         var progressByUser = progresses.ToDictionary(p => p.AppUserId);
         var locationByUser = locations.ToDictionary(l => l.AppUserId);
         var userIds = progressByUser.Keys.Union(locationByUser.Keys).ToHashSet();
@@ -124,12 +123,6 @@ public class KoboLocationRematchService(
         }
     }
 
-    private static bool IsTrustedConvertKepub(string path, int chapterPages)
-    {
-        if (chapterPages <= 0 || !File.Exists(path)) return false;
-        var spine = KoboConvertEpubInspector.TryCountSpinePages(path);
-        return spine == chapterPages;
-    }
 
     private async Task RematchProseChapterAsync(int chapterId, string newDeviceOpenablePath,
         CancellationToken ct)

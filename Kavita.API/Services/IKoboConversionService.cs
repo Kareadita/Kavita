@@ -1,5 +1,6 @@
 using System.Threading;
 using System.Threading.Tasks;
+using Hangfire;
 using Kavita.Models.Entities;
 
 namespace Kavita.API.Services;
@@ -48,6 +49,7 @@ public interface IKoboConversionService
     /// Background convert into the shared cache without the in-request time budget.
     /// Produces archive→EPUB when needed and KEPUB when enabled.
     /// </summary>
+    [DisableConcurrentExecution(timeoutInSeconds: 60 * 60)]
     Task ConvertChapterInBackgroundAsync(int chapterId, CancellationToken ct = default);
 
     /// <summary>

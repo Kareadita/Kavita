@@ -36,9 +36,15 @@ public static partial class KoboConvertLocationCodec
     }
 
     /// <summary>
-    /// Decodes a convert Location to 0-based <paramref name="pagesRead"/> clamped to
-    /// <c>[0, totalPages - 1]</c>. Fail-closed on bad Type/Value/Source/range.
+    /// Decodes a convert Location to <paramref name="pagesRead"/> in <c>[0, totalPages]</c>.
+    /// Page <c>N</c> of <c>N</c> maps to <c>totalPages</c> (finished), matching
+    /// <see cref="TryEncode"/> for <c>pagesRead &gt;= totalPages</c>. Earlier pages map to
+    /// 0-based indices. Fail-closed on bad Type/Value/Source/range.
     /// </summary>
+    /// <remarks>
+    /// Encode maps both <c>totalPages - 1</c> (on last page) and <c>totalPages</c> (finished)
+    /// to the same last-page Source; decode prefers finished so finished round-trips.
+    /// </remarks>
     public static bool TryDecode(string? locationValue, string? locationType, string? locationSource,
         int totalPages, out int pagesRead)
     {
@@ -49,7 +55,10 @@ public static partial class KoboConvertLocationCodec
         if (!TryParsePageNumber(locationSource, out var oneBased)) return false;
         if (oneBased < 1 || oneBased > totalPages) return false;
 
-        pagesRead = Math.Clamp(oneBased - 1, 0, totalPages - 1);
+        // Last page document ↔ finished (totalPages); earlier pages ↔ 0-based index.
+        pagesRead = oneBased == totalPages
+            ? totalPages
+            : Math.Clamp(oneBased - 1, 0, totalPages - 1);
         return true;
     }
 

@@ -60,7 +60,7 @@ public class KoboConvertLocationCodecTests
     [InlineData("page_0003.xhtml", 2)]
     [InlineData(@"OEBPS\Text\page_0003.xhtml", 2)]
     [InlineData("OEBPS/Text/page_0001.xhtml", 0)]
-    [InlineData("OEBPS/Text/page_0010.xhtml", 9)]
+    [InlineData("OEBPS/Text/page_0010.xhtml", 10)]
     public void TryDecode_AcceptsFullPathOrSuffixOrBasename(string source, int expectedPagesRead)
     {
         Assert.True(KoboConvertLocationCodec.TryDecode(
@@ -73,7 +73,7 @@ public class KoboConvertLocationCodecTests
     }
 
     [Fact]
-    public void TryDecode_ClampsToLastReadablePageIndex()
+    public void TryDecode_MapsLastPageDocument_ToFinishedPagesRead()
     {
         Assert.True(KoboConvertLocationCodec.TryDecode(
             KoboConvertLocationCodec.ValueKoboSpan,
@@ -81,7 +81,7 @@ public class KoboConvertLocationCodecTests
             "OEBPS/Text/page_0010.xhtml",
             10,
             out var pagesRead));
-        Assert.Equal(9, pagesRead);
+        Assert.Equal(10, pagesRead);
     }
 
     [Theory]
@@ -117,7 +117,8 @@ public class KoboConvertLocationCodecTests
     [Fact]
     public void EncodeDecode_RoundTripsInProgressPages()
     {
-        for (var pagesRead = 0; pagesRead < 10; pagesRead++)
+        // Last in-progress index (totalPages-1) shares a Source with finished and decodes as finished.
+        for (var pagesRead = 0; pagesRead < 9; pagesRead++)
         {
             var encoded = KoboConvertLocationCodec.TryEncode(pagesRead, 10);
             Assert.NotNull(encoded);
@@ -125,5 +126,21 @@ public class KoboConvertLocationCodecTests
                 out var decoded));
             Assert.Equal(pagesRead, decoded);
         }
+    }
+
+    [Fact]
+    public void EncodeDecode_RoundTripsFinished()
+    {
+        var encoded = KoboConvertLocationCodec.TryEncode(10, 10);
+        Assert.NotNull(encoded);
+        Assert.True(KoboConvertLocationCodec.TryDecode(encoded.Value, encoded.Type, encoded.Source, 10,
+            out var decoded));
+        Assert.Equal(10, decoded);
+
+        encoded = KoboConvertLocationCodec.TryEncode(15, 10);
+        Assert.NotNull(encoded);
+        Assert.True(KoboConvertLocationCodec.TryDecode(encoded.Value, encoded.Type, encoded.Source, 10,
+            out decoded));
+        Assert.Equal(10, decoded);
     }
 }
