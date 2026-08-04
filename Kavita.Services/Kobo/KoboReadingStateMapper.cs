@@ -196,13 +196,8 @@ public static class KoboReadingStateMapper
         };
     }
 
-    public static string FormatTimestamp(DateTime value)
-    {
-        var utc = value.Kind == DateTimeKind.Unspecified
-            ? DateTime.SpecifyKind(value, DateTimeKind.Utc)
-            : value.ToUniversalTime();
-        return utc.ToString("yyyy-MM-ddTHH:mm:ssZ");
-    }
+    public static string FormatTimestamp(DateTime value) =>
+        KoboDateTime.AsUtc(value).ToString("yyyy-MM-ddTHH:mm:ssZ");
 
     public static bool TryParseTimestamp(JsonNode? node, out DateTime value)
     {

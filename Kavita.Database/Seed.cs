@@ -168,8 +168,8 @@ public static class Seed
                 new() {Key = ServerSettingKey.AllowStatCollection, Value = "true"},
                 new() {Key = ServerSettingKey.EnableOpds, Value = "true"},
                 new() {Key = ServerSettingKey.EnableKoboSync, Value = "false"},
-                new() {Key = ServerSettingKey.KoboConvertTimeBudgetSeconds, Value = "30"},
-                new() {Key = ServerSettingKey.KoboSyncPageSize, Value = "100"},
+                new() {Key = ServerSettingKey.KoboConvertTimeBudgetSeconds, Value = KoboSettingsDefaults.ConvertTimeBudgetSeconds.ToString()},
+                new() {Key = ServerSettingKey.KoboSyncPageSize, Value = KoboSettingsDefaults.SyncPageSize.ToString()},
                 new() {Key = ServerSettingKey.EnableKepubConversion, Value = "false"},
                 new() {Key = ServerSettingKey.KepubifyPath, Value = string.Empty},
                 new() {Key = ServerSettingKey.KoboEpubCacheMaxBytes, Value = string.Empty},
@@ -181,7 +181,7 @@ public static class Seed
                         string.IsNullOrWhiteSpace(directoryService.LongTermCacheDirectory)
                             ? Path.Combine("config", "cache-long")
                             : directoryService.LongTermCacheDirectory,
-                        "kobo")
+                        KoboSettingsDefaults.CacheFolderName)
                 },
                 new() {Key = ServerSettingKey.BaseUrl, Value = "/"},
                 new() {Key = ServerSettingKey.InstallId, Value = HashUtil.AnonymousToken()},
