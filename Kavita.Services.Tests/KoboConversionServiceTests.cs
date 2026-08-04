@@ -19,6 +19,7 @@ using Kavita.Models.Entities.User;
 using Kavita.Services.Builders;
 using Kavita.Services.Kobo;
 using Kavita.Services.Scanner;
+using Kavita.Services.Tests.Kobo;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using NSubstitute;
@@ -214,7 +215,7 @@ public class KoboConversionServiceTests(ITestOutputHelper testOutputHelper) : Ab
             .Returns(ci =>
             {
                 // Convert produced 3 pages; chapter.Pages is 10.
-                KoboConvertEpubInspector.WriteMinimalConvertEpub(ci.ArgAt<string>(1), 3);
+                KoboConvertEpubTestFactory.WriteMinimalConvertEpub(ci.ArgAt<string>(1), 3);
                 return Task.CompletedTask;
             });
 
@@ -270,7 +271,7 @@ public class KoboConversionServiceTests(ITestOutputHelper testOutputHelper) : Ab
             .Returns(ci =>
             {
                 convertCalls++;
-                KoboConvertEpubInspector.WriteMinimalConvertEpub(ci.ArgAt<string>(1), 10);
+                KoboConvertEpubTestFactory.WriteMinimalConvertEpub(ci.ArgAt<string>(1), 10);
                 return Task.CompletedTask;
             });
 
@@ -286,7 +287,7 @@ public class KoboConversionServiceTests(ITestOutputHelper testOutputHelper) : Ab
         var service = CreateService(unitOfWork, directoryService, converter);
         var fingerprint = KoboConversionService.ComputeFingerprint(chapter.Files.First());
         var stalePath = service.GetCacheFilePath(chapter.Id, fingerprint);
-        KoboConvertEpubInspector.WriteMinimalConvertEpub(stalePath, 3); // stale spine ≠ Pages
+        KoboConvertEpubTestFactory.WriteMinimalConvertEpub(stalePath, 3); // stale spine ≠ Pages
 
         var path = await service.GetOrConvertEpubAsync(chapter.Id, chapter.Files.First(), "Title",
             budgetSeconds: 30);
@@ -338,7 +339,7 @@ public class KoboConversionServiceTests(ITestOutputHelper testOutputHelper) : Ab
                 // Simulate work longer than a typical in-request budget to show library warm-up is unbound.
                 Thread.Sleep(50);
                 var output = ci.ArgAt<string>(1);
-                KoboConvertEpubInspector.WriteMinimalConvertEpub(output, 10);
+                KoboConvertEpubTestFactory.WriteMinimalConvertEpub(output, 10);
                 return Task.CompletedTask;
             });
 
@@ -602,7 +603,7 @@ public class KoboConversionServiceTests(ITestOutputHelper testOutputHelper) : Ab
             {
                 convertCalls++;
                 var output = ci.ArgAt<string>(1);
-                KoboConvertEpubInspector.WriteMinimalConvertEpub(output, 10);
+                KoboConvertEpubTestFactory.WriteMinimalConvertEpub(output, 10);
                 return Task.CompletedTask;
             });
 
@@ -802,7 +803,7 @@ public class KoboConversionServiceTests(ITestOutputHelper testOutputHelper) : Ab
             {
                 archiveCalls++;
                 var output = ci.ArgAt<string>(1);
-                KoboConvertEpubInspector.WriteMinimalConvertEpub(output, 10);
+                KoboConvertEpubTestFactory.WriteMinimalConvertEpub(output, 10);
                 return Task.CompletedTask;
             });
 
@@ -815,7 +816,7 @@ public class KoboConversionServiceTests(ITestOutputHelper testOutputHelper) : Ab
                 kepubCalls++;
                 var output = ci.ArgAt<string>(2);
                 // Archive KEPUB must match chapter.Pages; native EPUB KEPUB skips that check.
-                KoboConvertEpubInspector.WriteMinimalConvertEpub(output, 10);
+                KoboConvertEpubTestFactory.WriteMinimalConvertEpub(output, 10);
                 return Task.CompletedTask;
             });
 

@@ -3,18 +3,16 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Security.Cryptography;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Kavita.API.Database;
 using Kavita.API.Services;
 using Kavita.API.Services.SignalR;
 using Kavita.Common;
+using Kavita.Models.Constants;
 using Kavita.Models.DTOs.SignalR;
 using Kavita.Models.Entities;
 using Kavita.Models.Entities.Enums;
-using Kavita.Models.Entities.User;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 
@@ -37,7 +35,7 @@ public class KoboConversionService(
     : IKoboConversionService
 {
     public const string Name = "KoboConversionService";
-    public const string CacheFolderName = "kobo";
+    public const string CacheFolderName = KoboSettingsDefaults.CacheFolderName;
     public const string KepubCacheExtension = ".kepub.epub";
     public const string ConvertUnavailableMessage = "kobo-convert-unavailable";
     public const string ConvertFailedMessage = "kobo-convert-failed";
@@ -53,18 +51,20 @@ public class KoboConversionService(
     /// <summary>Process-wide in-flight chapter converts (download + background).</summary>
     private static readonly ConcurrentDictionary<int, byte> InFlight = new();
 
+    private readonly KoboConversionCacheStore _cacheStore = new(directoryService, logger);
+
     public async Task<string?> TryGetCachedKepubPathAsync(int chapterId, MangaFile sourceFile,
         CancellationToken ct = default)
     {
         ArgumentNullException.ThrowIfNull(sourceFile);
         var cacheRoot = await ResolveCacheRootAsync(ct);
-        var fingerprint = ComputeFingerprint(sourceFile);
-        var path = GetKepubCacheFilePath(cacheRoot, chapterId, fingerprint);
+        var fingerprint = KoboConversionCacheStore.ComputeFingerprint(sourceFile);
+        var path = _cacheStore.GetKepubCacheFilePath(cacheRoot, chapterId, fingerprint);
         // Page-count trust applies to CBZ/CBR converts; native EPUB spines are not remapped.
         var expectedPages = sourceFile.Format == MangaFormat.Epub
             ? null
             : TryGetChapterPages(chapterId);
-        return TouchIfValidCache(path, chapterId, expectedPages, "KEPUB");
+        return _cacheStore.TouchIfValidCache(path, chapterId, expectedPages, "KEPUB");
     }
 
     public async Task EnqueueKepubifyIfNeededAsync(int chapterId, MangaFile sourceFile,
@@ -83,65 +83,22 @@ public class KoboConversionService(
         int budgetSeconds, CancellationToken ct = default)
     {
         ArgumentNullException.ThrowIfNull(archiveFile);
-        if (budgetSeconds < 1) budgetSeconds = 1;
 
         var cacheRoot = await ResolveCacheRootAsync(ct);
         var expectedPages = await GetChapterPagesAsync(chapterId, ct);
-        var fingerprint = ComputeFingerprint(archiveFile);
+        var fingerprint = KoboConversionCacheStore.ComputeFingerprint(archiveFile);
         var cached = TryGetCachedPath(cacheRoot, chapterId, fingerprint, expectedPages);
         if (cached != null) return cached;
 
-        if (!InFlight.TryAdd(chapterId, 0))
-        {
-            logger.LogWarning("Kobo convert already in flight for chapter {ChapterId}; failing download fast",
-                chapterId);
-            throw new KavitaException(ConvertUnavailableMessage);
-        }
-
-        var handedOffToBackground = false;
-        try
-        {
-            using var budgetCts = CancellationTokenSource.CreateLinkedTokenSource(ct);
-            budgetCts.CancelAfter(TimeSpan.FromSeconds(budgetSeconds));
-
-            try
-            {
-                return await ConvertAndCacheEpubAsync(cacheRoot, chapterId, archiveFile, title, fingerprint,
-                    expectedPages, budgetCts.Token);
-            }
-            catch (OperationCanceledException) when (!ct.IsCancellationRequested)
-            {
-                handedOffToBackground = true;
-                logger.LogWarning(
-                    "Kobo in-request convert for chapter {ChapterId} exceeded {BudgetSeconds}s budget; enqueueing background convert",
-                    chapterId, budgetSeconds);
-                jobScheduler.EnqueueBackgroundConvert(chapterId);
-                throw new KavitaException(ConvertUnavailableMessage);
-            }
-        }
-        catch (KavitaException)
-        {
-            throw;
-        }
-        catch (Exception ex)
-        {
-            logger.LogError(ex, "Hard failure converting chapter {ChapterId} for Kobo", chapterId);
-            throw new KavitaException(ConvertFailedMessage);
-        }
-        finally
-        {
-            if (!handedOffToBackground)
-            {
-                InFlight.TryRemove(chapterId, out _);
-            }
-        }
+        return await GetOrConvertWithBudgetAsync(chapterId, budgetSeconds, isKepub: false,
+            token => ConvertAndCacheEpubAsync(cacheRoot, chapterId, archiveFile, title, fingerprint,
+                expectedPages, token), ct);
     }
 
     public async Task<string> GetOrConvertKepubAsync(int chapterId, MangaFile sourceFile, string title,
         int budgetSeconds, CancellationToken ct = default)
     {
         ArgumentNullException.ThrowIfNull(sourceFile);
-        if (budgetSeconds < 1) budgetSeconds = 1;
 
         var settings = await unitOfWork.SettingsRepository.GetSettingsDtoAsync(ct);
         if (!settings.EnableKepubConversion)
@@ -158,10 +115,33 @@ public class KoboConversionService(
         var cached = await TryGetCachedKepubPathAsync(chapterId, sourceFile, ct);
         if (cached != null) return cached;
 
+        return await GetOrConvertWithBudgetAsync(chapterId, budgetSeconds, isKepub: true,
+            token => ConvertAndCacheKepubAsync(cacheRoot, chapterId, sourceFile, title, settings.KepubifyPath,
+                token), ct);
+    }
+
+    /// <summary>
+    /// Shared in-request skeleton for the EPUB and KEPUB download paths: fail-fast in-flight gate,
+    /// per-request time budget, background hand-off on budget exhaustion, and error normalization.
+    /// </summary>
+    private async Task<string> GetOrConvertWithBudgetAsync(int chapterId, int budgetSeconds, bool isKepub,
+        Func<CancellationToken, Task<string>> convert, CancellationToken ct)
+    {
+        if (budgetSeconds < 1) budgetSeconds = 1;
+
         if (!InFlight.TryAdd(chapterId, 0))
         {
-            logger.LogWarning("Kobo convert already in flight for chapter {ChapterId}; failing KEPUB download fast",
-                chapterId);
+            if (isKepub)
+            {
+                logger.LogWarning(
+                    "Kobo convert already in flight for chapter {ChapterId}; failing KEPUB download fast", chapterId);
+            }
+            else
+            {
+                logger.LogWarning(
+                    "Kobo convert already in flight for chapter {ChapterId}; failing download fast", chapterId);
+            }
+
             throw new KavitaException(ConvertUnavailableMessage);
         }
 
@@ -173,15 +153,24 @@ public class KoboConversionService(
 
             try
             {
-                return await ConvertAndCacheKepubAsync(cacheRoot, chapterId, sourceFile, title, settings.KepubifyPath,
-                    budgetCts.Token);
+                return await convert(budgetCts.Token);
             }
             catch (OperationCanceledException) when (!ct.IsCancellationRequested)
             {
                 handedOffToBackground = true;
-                logger.LogWarning(
-                    "Kobo in-request KEPUB convert for chapter {ChapterId} exceeded {BudgetSeconds}s budget; enqueueing background convert",
-                    chapterId, budgetSeconds);
+                if (isKepub)
+                {
+                    logger.LogWarning(
+                        "Kobo in-request KEPUB convert for chapter {ChapterId} exceeded {BudgetSeconds}s budget; enqueueing background convert",
+                        chapterId, budgetSeconds);
+                }
+                else
+                {
+                    logger.LogWarning(
+                        "Kobo in-request convert for chapter {ChapterId} exceeded {BudgetSeconds}s budget; enqueueing background convert",
+                        chapterId, budgetSeconds);
+                }
+
                 jobScheduler.EnqueueBackgroundConvert(chapterId);
                 throw new KavitaException(ConvertUnavailableMessage);
             }
@@ -192,7 +181,15 @@ public class KoboConversionService(
         }
         catch (Exception ex)
         {
-            logger.LogError(ex, "Hard failure converting chapter {ChapterId} to KEPUB", chapterId);
+            if (isKepub)
+            {
+                logger.LogError(ex, "Hard failure converting chapter {ChapterId} to KEPUB", chapterId);
+            }
+            else
+            {
+                logger.LogError(ex, "Hard failure converting chapter {ChapterId} for Kobo", chapterId);
+            }
+
             throw new KavitaException(ConvertFailedMessage);
         }
         finally
@@ -206,8 +203,12 @@ public class KoboConversionService(
 
     public async Task ConvertChapterInBackgroundAsync(int chapterId, CancellationToken ct = default)
     {
-        // May already be marked in-flight by a timed-out download request.
-        InFlight.TryAdd(chapterId, 0);
+        if (!InFlight.TryAdd(chapterId, 0))
+        {
+            logger.LogDebug("Background Kobo convert skipped; chapter {ChapterId} already in flight", chapterId);
+            return;
+        }
+
         try
         {
             var chapter = await unitOfWork.DataContext.Chapter
@@ -251,25 +252,13 @@ public class KoboConversionService(
             "[KoboConversionService] Beginning whole-library Kobo convert for {LibraryName} (kepub={KepubEnabled}). This can grow disk use under {CacheRoot}.",
             library.Name, kepubEnabled, cacheRoot);
 
-        var chapters = await unitOfWork.DataContext.Chapter
-            .Include(c => c.Files)
-            .Include(c => c.Volume).ThenInclude(v => v.Series)
-            .Where(c => c.Volume.Series.LibraryId == libraryId)
-            .AsSplitQuery()
-            .ToListAsync(ct);
-
-        var convertible = chapters
-            .Where(c => NeedsLibraryWarmup(c, kepubEnabled))
-            .ToList();
-
+        var convertible = await LoadConvertibleChaptersAsync(libraryId, kepubEnabled, ct);
         var total = convertible.Count;
         logger.LogInformation(
             "[KoboConversionService] Library {LibraryName}: {ConvertibleCount} chapter(s) to convert",
             library.Name, total);
 
-        await eventHub.SendMessageAsync(MessageFactory.NotificationProgress,
-            MessageFactory.KoboConvertProgressEvent(library.Id, 0F, ProgressEventType.Started,
-                $"Starting {library.Name}"), ct: ct);
+        await ReportWarmupProgressAsync(library.Id, 0F, ProgressEventType.Started, $"Starting {library.Name}", ct);
 
         var index = 0;
         foreach (var chapter in convertible)
@@ -278,37 +267,63 @@ public class KoboConversionService(
 
             var progress = total == 0 ? 1F : Math.Max(0F, Math.Min(1F, index * 1F / total));
             var subtitle = chapter.Volume?.Series?.Name ?? $"Chapter {chapter.Id}";
-            await eventHub.SendMessageAsync(MessageFactory.NotificationProgress,
-                MessageFactory.KoboConvertProgressEvent(library.Id, progress, ProgressEventType.Updated, subtitle),
-                ct: ct);
+            await ReportWarmupProgressAsync(library.Id, progress, ProgressEventType.Updated, subtitle, ct);
 
-            // Library warm-up is not bound by the in-request download time budget.
-            InFlight.TryAdd(chapter.Id, 0);
-            try
-            {
-                await ConvertChapterIfNeededAsync(chapter, ct);
-            }
-            catch (Exception ex)
-            {
-                logger.LogError(ex,
-                    "[KoboConversionService] Failed converting chapter {ChapterId} during library {LibraryId} warm-up",
-                    chapter.Id, libraryId);
-            }
-            finally
-            {
-                InFlight.TryRemove(chapter.Id, out _);
-            }
-
+            await WarmChapterAsync(chapter, libraryId, ct);
             index++;
         }
 
-        await eventHub.SendMessageAsync(MessageFactory.NotificationProgress,
-            MessageFactory.KoboConvertProgressEvent(library.Id, 1F, ProgressEventType.Ended, "Complete"), ct: ct);
+        await ReportWarmupProgressAsync(library.Id, 1F, ProgressEventType.Ended, "Complete", ct);
 
         logger.LogInformation(
             "[KoboConversionService] Finished whole-library Kobo convert for {LibraryName}: {Converted}/{Total}",
             library.Name, index, total);
     }
+
+    private async Task<List<Chapter>> LoadConvertibleChaptersAsync(int libraryId, bool kepubEnabled,
+        CancellationToken ct)
+    {
+        var chapters = await unitOfWork.DataContext.Chapter
+            .Include(c => c.Files)
+            .Include(c => c.Volume).ThenInclude(v => v.Series)
+            .Where(c => c.Volume.Series.LibraryId == libraryId)
+            .AsSplitQuery()
+            .ToListAsync(ct);
+
+        return chapters
+            .Where(c => NeedsLibraryWarmup(c, kepubEnabled))
+            .ToList();
+    }
+
+    private async Task WarmChapterAsync(Chapter chapter, int libraryId, CancellationToken ct)
+    {
+        // Library warm-up is not bound by the in-request download time budget.
+        if (!InFlight.TryAdd(chapter.Id, 0))
+        {
+            logger.LogDebug("Background Kobo convert skipped; chapter {ChapterId} already in flight", chapter.Id);
+            return;
+        }
+
+        try
+        {
+            await ConvertChapterIfNeededAsync(chapter, ct);
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex,
+                "[KoboConversionService] Failed converting chapter {ChapterId} during library {LibraryId} warm-up",
+                chapter.Id, libraryId);
+        }
+        finally
+        {
+            InFlight.TryRemove(chapter.Id, out _);
+        }
+    }
+
+    private Task ReportWarmupProgressAsync(int libraryId, float progress, string eventType,
+        string subtitle, CancellationToken ct) =>
+        eventHub.SendMessageAsync(MessageFactory.NotificationProgress,
+            MessageFactory.KoboConvertProgressEvent(libraryId, progress, eventType, subtitle), ct: ct);
 
     public async Task ClearConversionCacheAsync(CancellationToken ct = default)
     {
@@ -319,37 +334,40 @@ public class KoboConversionService(
         try
         {
             directoryService.ClearDirectory(path);
+            logger.LogInformation("Kobo conversion cache cleared");
         }
         catch (Exception ex)
         {
             logger.LogError(ex, "There was an issue clearing the Kobo conversion cache");
         }
-
-        logger.LogInformation("Kobo conversion cache cleared");
     }
 
     public async Task EnforceConversionCacheCapsAsync(CancellationToken ct = default)
     {
         var settings = await unitOfWork.SettingsRepository.GetSettingsDtoAsync(ct);
         var cacheRoot = ResolveCacheRoot(settings);
-        EnforcePoolCap(cacheRoot, settings.KoboEpubCacheMaxBytes, isKepubPool: false, protectPath: null);
+        _cacheStore.EnforceEpubCap(cacheRoot, settings.KoboEpubCacheMaxBytes, protectPath: null);
         ct.ThrowIfCancellationRequested();
-        EnforcePoolCap(cacheRoot, settings.KoboKepubCacheMaxBytes, isKepubPool: true, protectPath: null);
+        _cacheStore.EnforceKepubCap(cacheRoot, settings.KoboKepubCacheMaxBytes, protectPath: null);
     }
 
     /// <summary>Test seam: clear process-wide in-flight markers between tests.</summary>
     internal static void ResetInFlightForTests() => InFlight.Clear();
 
-    internal static string ComputeFingerprint(MangaFile file)
-    {
-        var raw =
-            $"{ConvertContractVersion}|{file.FilePath}|{file.Bytes}|{file.LastModifiedUtc.Ticks}";
-        var hash = SHA256.HashData(Encoding.UTF8.GetBytes(raw));
-        return Convert.ToHexString(hash).ToLowerInvariant();
-    }
+    /// <summary>Test seam over <see cref="KoboConversionCacheStore.ComputeFingerprint"/>.</summary>
+    internal static string ComputeFingerprint(MangaFile file) =>
+        KoboConversionCacheStore.ComputeFingerprint(file);
 
-    internal string GetDefaultCacheRoot() =>
-        Path.Combine(directoryService.LongTermCacheDirectory, CacheFolderName);
+    /// <summary>Test seam over <see cref="KoboConversionCacheStore.IsEpubPoolFile"/>.</summary>
+    internal static bool IsEpubPoolFile(string path) => KoboConversionCacheStore.IsEpubPoolFile(path);
+
+    /// <summary>Test seam over the default-root EPUB cache path.</summary>
+    internal string GetCacheFilePath(int chapterId, string fingerprint) =>
+        _cacheStore.GetCacheFilePath(chapterId, fingerprint);
+
+    /// <summary>Test seam over the default-root KEPUB cache path.</summary>
+    internal string GetKepubCacheFilePath(int chapterId, string fingerprint) =>
+        _cacheStore.GetKepubCacheFilePath(chapterId, fingerprint);
 
     internal async Task<string> ResolveCacheRootAsync(CancellationToken ct = default)
     {
@@ -361,7 +379,7 @@ public class KoboConversionService(
         catch
         {
             // Unit tests may substitute IUnitOfWork without settings.
-            return GetDefaultCacheRoot();
+            return _cacheStore.GetDefaultCacheRoot();
         }
     }
 
@@ -372,41 +390,13 @@ public class KoboConversionService(
             return settings.KoboConversionCacheDirectory;
         }
 
-        return GetDefaultCacheRoot();
+        return _cacheStore.GetDefaultCacheRoot();
     }
-
-    internal string GetCacheDirectory(string cacheRoot, int chapterId) =>
-        Path.Combine(cacheRoot, chapterId.ToString());
-
-    internal string GetCacheFilePath(string cacheRoot, int chapterId, string fingerprint) =>
-        Path.Combine(GetCacheDirectory(cacheRoot, chapterId), $"{fingerprint}.epub");
-
-    internal string GetKepubCacheFilePath(string cacheRoot, int chapterId, string fingerprint) =>
-        Path.Combine(GetCacheDirectory(cacheRoot, chapterId), $"{fingerprint}{KepubCacheExtension}");
-
-    /// <summary>Convenience for tests that use the default/stubbed long-term cache root.</summary>
-    internal string GetCacheDirectory(int chapterId) =>
-        GetCacheDirectory(GetDefaultCacheRoot(), chapterId);
-
-    internal string GetCacheFilePath(int chapterId, string fingerprint) =>
-        GetCacheFilePath(GetDefaultCacheRoot(), chapterId, fingerprint);
-
-    internal string GetKepubCacheFilePath(int chapterId, string fingerprint) =>
-        GetKepubCacheFilePath(GetDefaultCacheRoot(), chapterId, fingerprint);
-
-    internal static bool IsEpubPoolFile(string path) =>
-        path.EndsWith(".epub", StringComparison.OrdinalIgnoreCase) &&
-        !path.EndsWith(KepubCacheExtension, StringComparison.OrdinalIgnoreCase) &&
-        !path.EndsWith(".partial", StringComparison.OrdinalIgnoreCase);
-
-    internal static bool IsKepubPoolFile(string path) =>
-        path.EndsWith(KepubCacheExtension, StringComparison.OrdinalIgnoreCase) &&
-        !path.EndsWith(".partial", StringComparison.OrdinalIgnoreCase);
 
     private static bool NeedsLibraryWarmup(Chapter chapter, bool kepubEnabled)
     {
-        var nativeEpub = KoboService.PreferNativeEpub(chapter.Files);
-        var archive = KoboService.PreferConvertibleArchive(chapter.Files);
+        var nativeEpub = KoboEligibleFormats.PreferNativeEpub(chapter.Files);
+        var archive = KoboEligibleFormats.PreferConvertibleArchive(chapter.Files);
         if (nativeEpub == null && archive == null) return false;
 
         // Always warm archive→EPUB for CBZ/CBR without a native EPUB.
@@ -420,8 +410,8 @@ public class KoboConversionService(
     {
         var settings = await unitOfWork.SettingsRepository.GetSettingsDtoAsync(ct);
         var cacheRoot = ResolveCacheRoot(settings);
-        var nativeEpub = KoboService.PreferNativeEpub(chapter.Files);
-        var archive = KoboService.PreferConvertibleArchive(chapter.Files);
+        var nativeEpub = KoboEligibleFormats.PreferNativeEpub(chapter.Files);
+        var archive = KoboEligibleFormats.PreferConvertibleArchive(chapter.Files);
         var source = nativeEpub ?? archive;
         if (source == null)
         {
@@ -432,12 +422,12 @@ public class KoboConversionService(
 
         var title = chapter.Volume?.Series == null
             ? source.FileName
-            : KoboService.BuildTitle(chapter.Volume.Series, chapter);
+            : KoboEntitlementPayloadBuilder.BuildTitle(chapter.Volume.Series, chapter);
 
         // Archive → EPUB when there is no native EPUB.
         if (nativeEpub == null && archive != null)
         {
-            var fingerprint = ComputeFingerprint(archive);
+            var fingerprint = KoboConversionCacheStore.ComputeFingerprint(archive);
             if (TryGetCachedPath(cacheRoot, chapter.Id, fingerprint, chapter.Pages) == null)
             {
                 await ConvertAndCacheEpubAsync(cacheRoot, chapter.Id, archive, title, fingerprint, chapter.Pages, ct);
@@ -460,48 +450,8 @@ public class KoboConversionService(
 
     private string? TryGetCachedPath(string cacheRoot, int chapterId, string fingerprint, int? expectedPages)
     {
-        var path = GetCacheFilePath(cacheRoot, chapterId, fingerprint);
-        return TouchIfValidCache(path, chapterId, expectedPages, "EPUB");
-    }
-
-    private string? TouchIfValidCache(string path, int chapterId, int? expectedPages, string poolLabel)
-    {
-        if (!File.Exists(path)) return null;
-
-        if (expectedPages is > 0)
-        {
-            var spinePages = KoboConvertEpubInspector.TryCountSpinePages(path);
-            if (spinePages == null || spinePages.Value != expectedPages.Value)
-            {
-                logger.LogError(
-                    "Kobo {Pool} cache page-count mismatch for chapter {ChapterId}: spine={SpinePages}, chapter.Pages={ChapterPages}. Invalidating {Path}",
-                    poolLabel, chapterId, spinePages, expectedPages.Value, path);
-                try { File.Delete(path); }
-                catch (Exception ex)
-                {
-                    logger.LogDebug(ex, "Could not delete mismatched Kobo cache file {Path}", path);
-                }
-
-                return null;
-            }
-        }
-
-        return TouchIfExists(path);
-    }
-
-    private static string? TouchIfExists(string path)
-    {
-        if (!File.Exists(path)) return null;
-        try
-        {
-            File.SetLastAccessTimeUtc(path, DateTime.UtcNow);
-        }
-        catch
-        {
-            // Access-time updates are best-effort for LRU ordering.
-        }
-
-        return path;
+        var path = _cacheStore.GetCacheFilePath(cacheRoot, chapterId, fingerprint);
+        return _cacheStore.TouchIfValidCache(path, chapterId, expectedPages, "EPUB");
     }
 
     private async Task<int?> GetChapterPagesAsync(int chapterId, CancellationToken ct)
@@ -532,17 +482,18 @@ public class KoboConversionService(
         }
     }
 
+    /// <summary>
+    /// Write-path guard: refuses to cache an archive convert whose spine does not match chapter.Pages.
+    /// </summary>
     private void EnsureSpineMatchesChapterPages(string epubPath, int chapterId, int? expectedPages, string poolLabel)
     {
-        if (expectedPages is null or <= 0) return;
-
-        var spinePages = KoboConvertEpubInspector.TryCountSpinePages(epubPath);
-        if (spinePages == expectedPages.Value) return;
-
-        logger.LogError(
-            "Kobo {Pool} convert page-count mismatch for chapter {ChapterId}: spine={SpinePages}, chapter.Pages={ChapterPages}. Refusing cache write for {Path}",
-            poolLabel, chapterId, spinePages, expectedPages.Value, epubPath);
-        throw new KavitaException(ConvertFailedMessage);
+        KoboConversionCacheStore.ValidateSpinePageCount(epubPath, expectedPages, spinePages =>
+        {
+            logger.LogError(
+                "Kobo {Pool} convert page-count mismatch for chapter {ChapterId}: spine={SpinePages}, chapter.Pages={ChapterPages}. Refusing cache write for {Path}",
+                poolLabel, chapterId, spinePages, expectedPages!.Value, epubPath);
+            throw new KavitaException(ConvertFailedMessage);
+        });
     }
 
     private async Task<string> ResolveEpubInputPathAsync(string cacheRoot, int chapterId, MangaFile sourceFile,
@@ -554,7 +505,7 @@ public class KoboConversionService(
         }
 
         var expectedPages = await GetChapterPagesAsync(chapterId, ct);
-        var fingerprint = ComputeFingerprint(sourceFile);
+        var fingerprint = KoboConversionCacheStore.ComputeFingerprint(sourceFile);
         var cached = TryGetCachedPath(cacheRoot, chapterId, fingerprint, expectedPages);
         if (cached != null) return cached;
 
@@ -564,105 +515,77 @@ public class KoboConversionService(
     private async Task<string> ConvertAndCacheEpubAsync(string cacheRoot, int chapterId, MangaFile archiveFile,
         string title, string fingerprint, int? expectedPages, CancellationToken ct)
     {
-        var cacheDir = GetCacheDirectory(cacheRoot, chapterId);
-        directoryService.ExistOrCreate(cacheDir);
+        var cacheDir = _cacheStore.GetCacheDirectory(cacheRoot, chapterId);
+        var finalPath = _cacheStore.GetCacheFilePath(cacheRoot, chapterId, fingerprint);
 
-        var finalPath = GetCacheFilePath(cacheRoot, chapterId, fingerprint);
-        var tempPath = finalPath + ".partial";
+        await WriteCacheArtifactAsync(cacheDir, finalPath,
+            (tempPath, token) => archiveEpubConverter.ConvertAsync(archiveFile.FilePath, tempPath, title, token),
+            tempPath => EnsureSpineMatchesChapterPages(tempPath, chapterId, expectedPages, "EPUB"),
+            isKepubPool: false, ct);
 
-        try
-        {
-            if (File.Exists(tempPath)) File.Delete(tempPath);
-            await archiveEpubConverter.ConvertAsync(archiveFile.FilePath, tempPath, title, ct);
-            ct.ThrowIfCancellationRequested();
-
-            EnsureSpineMatchesChapterPages(tempPath, chapterId, expectedPages, "EPUB");
-
-            if (File.Exists(finalPath)) File.Delete(finalPath);
-            File.Move(tempPath, finalPath);
-            TouchIfExists(finalPath);
-
-            // Drop stale fingerprints for this chapter (source changed). Keep KEPUB artifacts.
-            foreach (var stale in Directory.EnumerateFiles(cacheDir, "*.epub")
-                         .Where(IsEpubPoolFile)
-                         .Where(p => !string.Equals(p, finalPath, StringComparison.OrdinalIgnoreCase)))
-            {
-                try { File.Delete(stale); }
-                catch (Exception ex)
-                {
-                    logger.LogDebug(ex, "Could not delete stale Kobo cache file {Path}", stale);
-                }
-            }
-
-            await EnforceEpubCapAfterWriteAsync(cacheRoot, finalPath, ct);
-            return finalPath;
-        }
-        finally
-        {
-            try
-            {
-                if (File.Exists(tempPath)) File.Delete(tempPath);
-            }
-            catch
-            {
-                // ignore cleanup races
-            }
-        }
+        await EnforceEpubCapAfterWriteAsync(cacheRoot, finalPath, ct);
+        return finalPath;
     }
 
     private async Task<string> ConvertAndCacheKepubAsync(string cacheRoot, int chapterId, MangaFile sourceFile,
         string title, string kepubifyPath, CancellationToken ct)
     {
         var expectedPages = await GetChapterPagesAsync(chapterId, ct);
-        var fingerprint = ComputeFingerprint(sourceFile);
-        var existing = GetKepubCacheFilePath(cacheRoot, chapterId, fingerprint);
+        var fingerprint = KoboConversionCacheStore.ComputeFingerprint(sourceFile);
+        var finalPath = _cacheStore.GetKepubCacheFilePath(cacheRoot, chapterId, fingerprint);
         var expectedForCache = sourceFile.Format == MangaFormat.Epub ? null : expectedPages;
-        if (TouchIfValidCache(existing, chapterId, expectedForCache, "KEPUB") != null)
+        if (_cacheStore.TouchIfValidCache(finalPath, chapterId, expectedForCache, "KEPUB") != null)
         {
-            return existing;
+            return finalPath;
         }
 
         var epubInput = await ResolveEpubInputPathAsync(cacheRoot, chapterId, sourceFile, title, ct);
         ct.ThrowIfCancellationRequested();
 
-        var cacheDir = GetCacheDirectory(cacheRoot, chapterId);
+        var cacheDir = _cacheStore.GetCacheDirectory(cacheRoot, chapterId);
+
+        await WriteCacheArtifactAsync(cacheDir, finalPath,
+            (tempPath, token) => kepubifyRunner.ConvertAsync(kepubifyPath, epubInput, tempPath, token),
+            tempPath =>
+            {
+                // Archive converts must match chapter.Pages; native EPUB KEPUB keeps source spine as-is.
+                if (sourceFile.Format != MangaFormat.Epub)
+                {
+                    EnsureSpineMatchesChapterPages(tempPath, chapterId, expectedPages, "KEPUB");
+                }
+            },
+            isKepubPool: true, ct);
+
+        await DropSyncedSetForChapterAsync(chapterId, ct);
+        await koboLocationRematchService.RematchAfterDeviceFileChangeAsync(chapterId, finalPath, ct);
+        await EnforceKepubCapAfterWriteAsync(cacheRoot, finalPath, ct);
+        return finalPath;
+    }
+
+    /// <summary>
+    /// Produces an artifact into a <c>.partial</c> sibling, validates it, atomically moves it into place,
+    /// touches it for LRU, and sweeps stale same-pool fingerprints for the chapter. Always cleans the temp file.
+    /// </summary>
+    private async Task WriteCacheArtifactAsync(string cacheDir, string finalPath,
+        Func<string, CancellationToken, Task> produce, Action<string> validate, bool isKepubPool,
+        CancellationToken ct)
+    {
         directoryService.ExistOrCreate(cacheDir);
 
-        var finalPath = GetKepubCacheFilePath(cacheRoot, chapterId, fingerprint);
         var tempPath = finalPath + ".partial";
-
         try
         {
             if (File.Exists(tempPath)) File.Delete(tempPath);
-            await kepubifyRunner.ConvertAsync(kepubifyPath, epubInput, tempPath, ct);
+            await produce(tempPath, ct);
             ct.ThrowIfCancellationRequested();
 
-            // Archive converts must match chapter.Pages; native EPUB KEPUB keeps source spine as-is.
-            if (sourceFile.Format != MangaFormat.Epub)
-            {
-                EnsureSpineMatchesChapterPages(tempPath, chapterId, expectedPages, "KEPUB");
-            }
+            validate(tempPath);
 
             if (File.Exists(finalPath)) File.Delete(finalPath);
             File.Move(tempPath, finalPath);
-            TouchIfExists(finalPath);
+            KoboConversionCacheStore.TouchIfExists(finalPath);
 
-            // Drop stale KEPUB fingerprints for this chapter (source changed).
-            foreach (var stale in Directory.EnumerateFiles(cacheDir, "*" + KepubCacheExtension)
-                         .Where(IsKepubPoolFile)
-                         .Where(p => !string.Equals(p, finalPath, StringComparison.OrdinalIgnoreCase)))
-            {
-                try { File.Delete(stale); }
-                catch (Exception ex)
-                {
-                    logger.LogDebug(ex, "Could not delete stale Kobo KEPUB cache file {Path}", stale);
-                }
-            }
-
-            await DropSyncedSetForChapterAsync(chapterId, ct);
-            await koboLocationRematchService.RematchAfterDeviceFileChangeAsync(chapterId, finalPath, ct);
-            await EnforceKepubCapAfterWriteAsync(cacheRoot, finalPath, ct);
-            return finalPath;
+            _cacheStore.DeleteStaleFingerprints(cacheDir, finalPath, isKepubPool);
         }
         finally
         {
@@ -680,67 +603,13 @@ public class KoboConversionService(
     private async Task EnforceEpubCapAfterWriteAsync(string cacheRoot, string justWrittenPath, CancellationToken ct)
     {
         var settings = await unitOfWork.SettingsRepository.GetSettingsDtoAsync(ct);
-        EnforcePoolCap(cacheRoot, settings.KoboEpubCacheMaxBytes, isKepubPool: false, protectPath: justWrittenPath);
+        _cacheStore.EnforceEpubCap(cacheRoot, settings.KoboEpubCacheMaxBytes, justWrittenPath);
     }
 
     private async Task EnforceKepubCapAfterWriteAsync(string cacheRoot, string justWrittenPath, CancellationToken ct)
     {
         var settings = await unitOfWork.SettingsRepository.GetSettingsDtoAsync(ct);
-        EnforcePoolCap(cacheRoot, settings.KoboKepubCacheMaxBytes, isKepubPool: true, protectPath: justWrittenPath);
-    }
-
-    /// <summary>
-    /// Evicts least-recently-accessed artifacts in one pool until under <paramref name="maxBytes"/>.
-    /// Null/≤0 means unlimited. Never deletes <paramref name="protectPath"/> (just-written file).
-    /// </summary>
-    private void EnforcePoolCap(string cacheRoot, long? maxBytes, bool isKepubPool, string? protectPath)
-    {
-        if (maxBytes is null or <= 0) return;
-
-        if (!Directory.Exists(cacheRoot)) return;
-
-        Func<string, bool> isPoolFile = isKepubPool ? IsKepubPoolFile : IsEpubPoolFile;
-        var files = new List<FileInfo>();
-        foreach (var path in Directory.EnumerateFiles(cacheRoot, "*", SearchOption.AllDirectories))
-        {
-            if (!isPoolFile(path)) continue;
-            try
-            {
-                var info = new FileInfo(path);
-                if (info.Exists) files.Add(info);
-            }
-            catch (Exception ex)
-            {
-                logger.LogDebug(ex, "Could not stat Kobo cache file {Path}", path);
-            }
-        }
-
-        var total = files.Sum(f => f.Length);
-        if (total <= maxBytes.Value) return;
-
-        foreach (var file in files.OrderBy(f => f.LastAccessTimeUtc).ThenBy(f => f.FullName))
-        {
-            if (total <= maxBytes.Value) break;
-            if (protectPath != null &&
-                string.Equals(file.FullName, protectPath, StringComparison.OrdinalIgnoreCase))
-            {
-                continue;
-            }
-
-            try
-            {
-                var length = file.Length;
-                file.Delete();
-                total -= length;
-                logger.LogInformation(
-                    "Evicted Kobo {Pool} cache file {Path} ({Bytes} bytes) to enforce max {MaxBytes}",
-                    isKepubPool ? "KEPUB" : "EPUB", file.FullName, length, maxBytes.Value);
-            }
-            catch (Exception ex)
-            {
-                logger.LogDebug(ex, "Could not evict Kobo cache file {Path}", file.FullName);
-            }
-        }
+        _cacheStore.EnforceKepubCap(cacheRoot, settings.KoboKepubCacheMaxBytes, justWrittenPath);
     }
 
     /// <summary>

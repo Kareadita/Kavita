@@ -187,7 +187,7 @@ public class KoboLocationRematchServiceTests(ITestOutputHelper testOutputHelper)
 
         var kepubPath = Path.Join(Path.GetTempPath(),
             "kavita-rematch-convert-" + Guid.NewGuid().ToString("N") + ".kepub.epub");
-        KoboConvertEpubInspector.WriteMinimalConvertEpub(kepubPath, 10);
+        KoboConvertEpubTestFactory.WriteMinimalConvertEpub(kepubPath, 10);
 
         var rematch = new KoboLocationRematchService(unitOfWork, Substitute.For<IKoboLocationMapper>(),
             Substitute.For<ILogger<KoboLocationRematchService>>());
@@ -227,7 +227,7 @@ public class KoboLocationRematchServiceTests(ITestOutputHelper testOutputHelper)
 
         var badPath = Path.Join(Path.GetTempPath(),
             "kavita-rematch-bad-" + Guid.NewGuid().ToString("N") + ".kepub.epub");
-        KoboConvertEpubInspector.WriteMinimalConvertEpub(badPath, 3); // ≠ chapter.Pages (10)
+        KoboConvertEpubTestFactory.WriteMinimalConvertEpub(badPath, 3); // ≠ chapter.Pages (10)
 
         var rematch = new KoboLocationRematchService(unitOfWork, Substitute.For<IKoboLocationMapper>(),
             Substitute.For<ILogger<KoboLocationRematchService>>());
