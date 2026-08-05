@@ -161,15 +161,15 @@ public class PluginController(IUnitOfWork unitOfWork, ITokenService tokenService
 
             try
             {
-                successfulParses.Add(name, ParseText(name, dto.LibraryType));
+                successfulParses.TryAdd(name, ParseText(name, dto.LibraryType));
             }
             catch (RegexMatchTimeoutException)
             {
-                errorParses.Add(name, "Input could not be parsed in allowed time");
+                errorParses.TryAdd(name, "Input could not be parsed in allowed time");
             }
             catch (Exception)
             {
-                errorParses.Add(name, "Failed to parse input");
+                errorParses.TryAdd(name, "Failed to parse input");
             }
         }
 
