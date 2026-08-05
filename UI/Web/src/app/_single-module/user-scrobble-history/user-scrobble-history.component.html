@@ -92,7 +92,7 @@
           <ng-template let-item="row" ngx-datatable-cell-template>
             @switch (item.scrobbleEventType) {
               @case (ScrobbleEventType.ChapterRead) {
-                @if(item.volumeNumber === LooseLeafOrDefaultNumber) {
+                @if(item.volumeNumber === LooseLeafOrDefaultNumber || item.volumeNumber === SpecialVolumeNumber) {
                   @if (item.chapterNumber === LooseLeafOrDefaultNumber) {
                     {{t('special')}}
                   } @else {

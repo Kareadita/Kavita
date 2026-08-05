@@ -35,6 +35,7 @@ import {
   ScrobbleProviderImageComponent
 } from "../../shared/_components/scrobble-provider-image/scrobble-provider-image.component";
 import {ScrobbleReadStatusPipe} from "../../_pipes/scrobble-read-status.pipe";
+import {EntityTitleService} from "../../_services/entity-title.service";
 
 export interface DataTablePage {
   pageNumber: number,
@@ -64,6 +65,7 @@ export class UserScrobbleHistoryComponent implements OnInit {
   private readonly toastr = inject(ToastrService);
   protected readonly accountService = inject(AccountService);
   protected readonly baseUrl = inject(APP_BASE_HREF);
+  private readonly entityTitleService = inject(EntityTitleService);
 
   formGroup: FormGroup = new FormGroup({
     'filter': new FormControl('', [])
