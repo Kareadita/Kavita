@@ -72,6 +72,9 @@ public class ServerSettingConverter : ITypeConverter<IEnumerable<ServerSetting>,
                 case ServerSettingKey.KoboConversionCacheDirectory:
                     destination.KoboConversionCacheDirectory = row.Value ?? string.Empty;
                     break;
+                case ServerSettingKey.ReplaceEpubWithKepub:
+                    destination.ReplaceEpubWithKepub = bool.Parse(row.Value);
+                    break;
                 case ServerSettingKey.BaseUrl:
                     destination.BaseUrl = row.Value;
                     break;

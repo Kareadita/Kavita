@@ -308,6 +308,18 @@
       </div>
 
       <div class="row g-0 mt-4 mb-4">
+        @if(settingsForm.get('replaceEpubWithKepub'); as formControl) {
+          <app-setting-switch [title]="t('kobo-replace-epub-label')" [subtitle]="t('kobo-replace-epub-tooltip')">
+            <ng-template #switch>
+              <div class="form-check form-switch float-end">
+                <input id="kobo-replace-epub" type="checkbox" [attr.aria-label]="t('kobo-replace-epub-label')" class="form-check-input" formControlName="replaceEpubWithKepub">
+              </div>
+            </ng-template>
+          </app-setting-switch>
+        }
+      </div>
+
+      <div class="row g-0 mt-4 mb-4">
         @if (settingsForm.get('kepubifyPath'); as formControl) {
           <app-setting-item [title]="t('kobo-kepubify-path-label')" [subtitle]="t('kobo-kepubify-path-tooltip')">
             <ng-template #view>

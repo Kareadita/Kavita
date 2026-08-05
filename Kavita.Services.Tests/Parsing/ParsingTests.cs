@@ -193,6 +193,8 @@ public class ParsingTests
     [Theory]
     [InlineData("test.epub", true)]
     [InlineData("test.EPUB", true)]
+    [InlineData("test.kepub.epub", true)]
+    [InlineData("book.kepub.EPUB", true)]
     [InlineData("test.mobi", false)]
     [InlineData("test.epub.!qb", false)]
     [InlineData("[shf-ma-khs-aqs]negi_pa_vol15007.ebub", false)]

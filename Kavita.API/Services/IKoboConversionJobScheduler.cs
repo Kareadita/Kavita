@@ -6,4 +6,9 @@ namespace Kavita.API.Services;
 public interface IKoboConversionJobScheduler
 {
     void EnqueueBackgroundConvert(int chapterId);
+
+    /// <summary>
+    /// Enqueues in-place promotion of a cached KEPUB into the library folder (replaces the original EPUB).
+    /// </summary>
+    void EnqueuePromoteKepubToLibrary(int chapterId);
 }

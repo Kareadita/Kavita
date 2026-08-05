@@ -238,5 +238,12 @@ public enum ServerSettingKey
     /// Empty resets to the default under long-term cache (<c>cache-long/kobo</c>).
     /// </summary>
     [Description("KoboConversionCacheDirectory")]
-    KoboConversionCacheDirectory = 51
+    KoboConversionCacheDirectory = 51,
+    /// <summary>
+    /// When enabled (and KEPUB conversion is on), after a successful native-EPUB→KEPUB
+    /// conversion the generated .kepub.epub replaces the original library .epub in place.
+    /// Destructive to original library files; default off.
+    /// </summary>
+    [Description("ReplaceEpubWithKepub")]
+    ReplaceEpubWithKepub = 52
 }

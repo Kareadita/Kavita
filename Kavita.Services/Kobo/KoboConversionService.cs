@@ -13,6 +13,8 @@ using Kavita.Models.Constants;
 using Kavita.Models.DTOs.SignalR;
 using Kavita.Models.Entities;
 using Kavita.Models.Entities.Enums;
+using Kavita.Services.Helpers;
+using Kavita.Services.Scanner;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 
@@ -76,7 +78,13 @@ public class KoboConversionService(
         var settings = await unitOfWork.SettingsRepository.GetSettingsDtoAsync(ct);
         if (!settings.EnableKepubConversion) return;
         if (kepubifyPathResolver.Resolve(settings.KepubifyPath) == null) return;
-        if (await TryGetCachedKepubPathAsync(chapterId, sourceFile, ct) != null) return;
+        if (IsAlreadyKepubLibraryFile(sourceFile)) return;
+
+        if (await TryGetCachedKepubPathAsync(chapterId, sourceFile, ct) != null)
+        {
+            EnqueuePromoteIfNeeded(chapterId, sourceFile, settings);
+            return;
+        }
 
         jobScheduler.EnqueueBackgroundConvert(chapterId);
     }
@@ -103,6 +111,12 @@ public class KoboConversionService(
     {
         ArgumentNullException.ThrowIfNull(sourceFile);
 
+        // Library file already promoted to KEPUB: serve it directly (no re-convert / no cache).
+        if (IsAlreadyKepubLibraryFile(sourceFile))
+        {
+            return sourceFile.FilePath;
+        }
+
         var settings = await unitOfWork.SettingsRepository.GetSettingsDtoAsync(ct);
         if (!settings.EnableKepubConversion)
         {
@@ -118,7 +132,11 @@ public class KoboConversionService(
         var cacheRoot = ResolveCacheRoot(settings);
         var identity = await TryResolveCacheIdentityAsync(chapterId, ct);
         var cached = await TryGetCachedKepubPathAsync(chapterId, sourceFile, ct);
-        if (cached != null) return cached;
+        if (cached != null)
+        {
+            EnqueuePromoteIfNeeded(chapterId, sourceFile, settings);
+            return cached;
+        }
 
         return await GetOrConvertWithBudgetAsync(chapterId, budgetSeconds, isKepub: true,
             token => ConvertAndCacheKepubAsync(cacheRoot, identity, chapterId, sourceFile, title, kepubifyPath,
@@ -416,11 +434,14 @@ public class KoboConversionService(
         var archive = KoboEligibleFormats.PreferConvertibleArchive(chapter.Files);
         if (nativeEpub == null && archive == null) return false;
 
-        // Always warm archive→EPUB for CBZ/CBR without a native EPUB.
-        if (nativeEpub == null && archive != null) return true;
+        // Native EPUB chapters are only warmed when KEPUB production is enabled and not already kepub.
+        if (nativeEpub != null)
+        {
+            return kepubEnabled && !IsAlreadyKepubLibraryFile(nativeEpub);
+        }
 
-        // Native EPUB chapters are only warmed when KEPUB production is enabled.
-        return kepubEnabled && nativeEpub != null;
+        // Always warm archive→EPUB for CBZ/CBR without a native EPUB.
+        return true;
     }
 
     private async Task ConvertChapterIfNeededAsync(Chapter chapter, CancellationToken ct)
@@ -435,6 +456,14 @@ public class KoboConversionService(
         if (source == null)
         {
             logger.LogWarning("Background Kobo convert: chapter {ChapterId} has no EPUB/CBZ/CBR source",
+                chapter.Id);
+            return;
+        }
+
+        if (IsAlreadyKepubLibraryFile(source))
+        {
+            logger.LogDebug(
+                "Background Kobo convert skipped; chapter {ChapterId} library file is already KEPUB",
                 chapter.Id);
             return;
         }
@@ -464,7 +493,11 @@ public class KoboConversionService(
             return;
         }
 
-        if (await TryGetCachedKepubPathAsync(chapter.Id, source, ct) != null) return;
+        if (await TryGetCachedKepubPathAsync(chapter.Id, source, ct) != null)
+        {
+            EnqueuePromoteIfNeeded(chapter.Id, source, settings);
+            return;
+        }
 
         await ConvertAndCacheKepubAsync(cacheRoot, identity, chapter.Id, source, title, kepubifyPath, ct);
     }
@@ -615,6 +648,7 @@ public class KoboConversionService(
         var expectedForCache = sourceFile.Format == MangaFormat.Epub ? null : expectedPages;
         if (_cacheStore.TouchIfValidCache(finalPath, chapterId, expectedForCache, "KEPUB") != null)
         {
+            await EnqueuePromoteIfNeededAsync(chapterId, sourceFile, ct);
             return finalPath;
         }
 
@@ -638,6 +672,7 @@ public class KoboConversionService(
         await DropSyncedSetForChapterAsync(chapterId, ct);
         await koboLocationRematchService.RematchAfterDeviceFileChangeAsync(chapterId, finalPath, ct);
         await EnforceKepubCapAfterWriteAsync(cacheRoot, finalPath, ct);
+        await EnqueuePromoteIfNeededAsync(chapterId, sourceFile, ct);
         return finalPath;
     }
 
@@ -706,5 +741,220 @@ public class KoboConversionService(
         logger.LogInformation(
             "Dropped {Count} Kobo synced-set row(s) for chapter {ChapterId} after KEPUB cache write",
             rows.Count, chapterId);
+    }
+
+    /// <summary>
+    /// True when <paramref name="file"/> is a native library EPUB already named <c>*.kepub.epub</c>.
+    /// </summary>
+    public static bool IsAlreadyKepubLibraryFile(MangaFile file)
+    {
+        if (file is not { Format: MangaFormat.Epub } || string.IsNullOrWhiteSpace(file.FilePath))
+        {
+            return false;
+        }
+
+        return file.FilePath.EndsWith(KepubCacheExtension, StringComparison.OrdinalIgnoreCase);
+    }
+
+    private void EnqueuePromoteIfNeeded(int chapterId, MangaFile sourceFile,
+        Kavita.Models.DTOs.Settings.ServerSettingDto settings)
+    {
+        if (!settings.ReplaceEpubWithKepub) return;
+        if (!settings.EnableKepubConversion) return;
+        if (sourceFile.Format != MangaFormat.Epub) return;
+        if (IsAlreadyKepubLibraryFile(sourceFile)) return;
+
+        jobScheduler.EnqueuePromoteKepubToLibrary(chapterId);
+    }
+
+    private async Task EnqueuePromoteIfNeededAsync(int chapterId, MangaFile sourceFile, CancellationToken ct)
+    {
+        try
+        {
+            var settings = await unitOfWork.SettingsRepository.GetSettingsDtoAsync(ct);
+            EnqueuePromoteIfNeeded(chapterId, sourceFile, settings);
+        }
+        catch (Exception ex)
+        {
+            logger.LogDebug(ex,
+                "Unable to evaluate ReplaceEpubWithKepub for chapter {ChapterId}; skipping promote enqueue",
+                chapterId);
+        }
+    }
+
+    /// <inheritdoc />
+    public async Task PromoteKepubToLibraryAsync(int chapterId, CancellationToken ct = default)
+    {
+        var settings = await unitOfWork.SettingsRepository.GetSettingsDtoAsync(ct);
+        if (!settings.ReplaceEpubWithKepub || !settings.EnableKepubConversion)
+        {
+            return;
+        }
+
+        Chapter? chapter;
+        try
+        {
+            chapter = await unitOfWork.DataContext.Chapter
+                .Include(c => c.Files)
+                .FirstOrDefaultAsync(c => c.Id == chapterId, ct);
+        }
+        catch (Exception ex)
+        {
+            logger.LogWarning(ex, "Promote KEPUB: unable to load chapter {ChapterId}", chapterId);
+            return;
+        }
+
+        if (chapter == null)
+        {
+            logger.LogWarning("Promote KEPUB: chapter {ChapterId} not found", chapterId);
+            return;
+        }
+
+        var source = KoboEligibleFormats.PreferNativeEpub(chapter.Files);
+        if (source == null)
+        {
+            logger.LogDebug("Promote KEPUB skipped for chapter {ChapterId}: no native EPUB", chapterId);
+            return;
+        }
+
+        if (IsAlreadyKepubLibraryFile(source))
+        {
+            logger.LogDebug("Promote KEPUB skipped for chapter {ChapterId}: already KEPUB", chapterId);
+            return;
+        }
+
+        var cachedKepub = await TryGetCachedKepubPathAsync(chapterId, source, ct);
+        if (cachedKepub == null || !File.Exists(cachedKepub))
+        {
+            logger.LogDebug(
+                "Promote KEPUB skipped for chapter {ChapterId}: no cached KEPUB available", chapterId);
+            return;
+        }
+
+        if (!ValidateKepubForPromotion(cachedKepub))
+        {
+            logger.LogWarning(
+                "Promote KEPUB aborted for chapter {ChapterId}: cached KEPUB failed validation at {Path}",
+                chapterId, cachedKepub);
+            return;
+        }
+
+        var originalPath = source.FilePath;
+        var libraryDir = Path.GetDirectoryName(originalPath);
+        if (string.IsNullOrWhiteSpace(libraryDir))
+        {
+            logger.LogWarning(
+                "Promote KEPUB aborted for chapter {ChapterId}: cannot resolve library directory for {Path}",
+                chapterId, originalPath);
+            return;
+        }
+
+        var stem = Path.GetFileNameWithoutExtension(originalPath);
+        var targetPath = Parser.NormalizePath(Path.Combine(libraryDir, stem + KepubCacheExtension));
+        if (string.Equals(Parser.NormalizePath(originalPath), targetPath, StringComparison.OrdinalIgnoreCase))
+        {
+            return;
+        }
+
+        var partialPath = targetPath + ".partial";
+        try
+        {
+            if (File.Exists(partialPath)) File.Delete(partialPath);
+            File.Copy(cachedKepub, partialPath, overwrite: true);
+
+            if (!ValidateKepubForPromotion(partialPath))
+            {
+                logger.LogWarning(
+                    "Promote KEPUB aborted for chapter {ChapterId}: copied KEPUB failed validation",
+                    chapterId);
+                TryDelete(partialPath);
+                return;
+            }
+
+            if (File.Exists(targetPath)) File.Delete(targetPath);
+            File.Move(partialPath, targetPath);
+
+            // New file is safely in place; remove the original EPUB.
+            if (!string.Equals(Parser.NormalizePath(originalPath), targetPath, StringComparison.OrdinalIgnoreCase)
+                && File.Exists(originalPath))
+            {
+                File.Delete(originalPath);
+            }
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex,
+                "Promote KEPUB failed during file swap for chapter {ChapterId} ({Original} -> {Target})",
+                chapterId, originalPath, targetPath);
+            TryDelete(partialPath);
+            return;
+        }
+
+        try
+        {
+            var fileInfo = new FileInfo(targetPath);
+            source.FilePath = targetPath;
+            source.FileName = Parser.RemoveExtensionIfSupported(targetPath) ?? stem;
+            source.Extension = fileInfo.Extension.ToLowerInvariant();
+            source.Bytes = fileInfo.Length;
+            source.LastModified = fileInfo.LastWriteTime;
+            source.LastModifiedUtc = fileInfo.LastWriteTimeUtc;
+            source.KoreaderHash = KoreaderHelper.HashContents(targetPath);
+
+            unitOfWork.MangaFileRepository.Update(source);
+            await unitOfWork.CommitAsync(ct);
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex,
+                "Promote KEPUB: file swap succeeded for chapter {ChapterId} but DB update failed. Path is now {Target}; scanner will self-heal.",
+                chapterId, targetPath);
+            // Do not roll back the file swap — scanner will reconcile on next pass.
+        }
+
+        TryDelete(cachedKepub);
+
+        try
+        {
+            await DropSyncedSetForChapterAsync(chapterId, ct);
+            await koboLocationRematchService.RematchAfterDeviceFileChangeAsync(chapterId, targetPath, ct);
+        }
+        catch (Exception ex)
+        {
+            logger.LogWarning(ex,
+                "Promote KEPUB: post-promote rematch/synced-set cleanup failed for chapter {ChapterId}",
+                chapterId);
+        }
+
+        logger.LogInformation(
+            "Promoted KEPUB into library for chapter {ChapterId}: {Original} -> {Target}",
+            chapterId, originalPath, targetPath);
+    }
+
+    private static bool ValidateKepubForPromotion(string kepubPath)
+    {
+        try
+        {
+            var info = new FileInfo(kepubPath);
+            if (!info.Exists || info.Length <= 0) return false;
+            // Spine readable implies valid zip + package.
+            return KoboConvertEpubInspector.TryCountSpinePages(kepubPath) is > 0;
+        }
+        catch
+        {
+            return false;
+        }
+    }
+
+    private static void TryDelete(string path)
+    {
+        try
+        {
+            if (File.Exists(path)) File.Delete(path);
+        }
+        catch
+        {
+            // ignore cleanup races
+        }
     }
 }

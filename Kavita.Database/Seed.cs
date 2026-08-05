@@ -183,6 +183,7 @@ public static class Seed
                             : directoryService.LongTermCacheDirectory,
                         KoboSettingsDefaults.CacheFolderName)
                 },
+                new() {Key = ServerSettingKey.ReplaceEpubWithKepub, Value = "false"},
                 new() {Key = ServerSettingKey.BaseUrl, Value = "/"},
                 new() {Key = ServerSettingKey.InstallId, Value = HashUtil.AnonymousToken()},
                 new() {Key = ServerSettingKey.InstallVersion, Value = BuildInfo.Version.ToString()},

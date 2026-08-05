@@ -20,6 +20,8 @@ export interface ServerSettings {
   koboSyncPageSize: number;
   enableKepubConversion: boolean;
   kepubifyPath: string;
+  /** When enabled, replaces the original library EPUB with the generated KEPUB after conversion */
+  replaceEpubWithKepub: boolean;
   /** Max bytes for archive→EPUB cache; null/0/omitted = unlimited */
   koboEpubCacheMaxBytes?: number | null;
   /** Max bytes for EPUB→KEPUB cache; null/0/omitted = unlimited */

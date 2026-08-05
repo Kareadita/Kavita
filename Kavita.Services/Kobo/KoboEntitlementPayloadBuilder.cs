@@ -189,9 +189,20 @@ public static class KoboEntitlementPayloadBuilder
         if (epub == null && archive == null) return downloadUrls;
 
         var source = epub ?? archive!;
-        var kepubPath = preferKepub
-            ? await tryGetCachedKepubPathAsync(chapter.Id, source)
-            : null;
+        string? kepubPath = null;
+        if (preferKepub)
+        {
+            // Library file already promoted to KEPUB: advertise kepub URL from the library path.
+            if (epub != null && KoboConversionService.IsAlreadyKepubLibraryFile(epub))
+            {
+                kepubPath = epub.FilePath;
+            }
+            else
+            {
+                kepubPath = await tryGetCachedKepubPathAsync(chapter.Id, source);
+            }
+        }
+
         if (kepubPath != null)
         {
             long size = 0;

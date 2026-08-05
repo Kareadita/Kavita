@@ -1094,6 +1094,290 @@ public class KoboConversionServiceTests(ITestOutputHelper testOutputHelper) : Ab
         }
     }
 
+    [Fact]
+    public void IsAlreadyKepubLibraryFile_DetectsKepubExtension()
+    {
+        var kepub = new MangaFileBuilder(
+                Path.Combine(Path.GetTempPath(), "book.kepub.epub"), MangaFormat.Epub, 10)
+            .WithBytes(10).Build();
+        Assert.True(KoboConversionService.IsAlreadyKepubLibraryFile(kepub));
+
+        var epub = new MangaFileBuilder(_epubPath, MangaFormat.Epub, 10).WithBytes(10).Build();
+        Assert.False(KoboConversionService.IsAlreadyKepubLibraryFile(epub));
+
+        var archive = new MangaFileBuilder(_cbzPath, MangaFormat.Archive, 10).WithExtension(".cbz").Build();
+        Assert.False(KoboConversionService.IsAlreadyKepubLibraryFile(archive));
+    }
+
+    [Fact]
+    public async Task GetOrConvertKepub_AlreadyKepub_ReturnsLibraryPathWithoutConverting()
+    {
+        KoboConversionService.ResetInFlightForTests();
+        var (unitOfWork, _, _) = await CreateDatabase();
+        await ConfigureKepubSettings(unitOfWork);
+
+        var libraryDir = Path.Join(Path.GetTempPath(), "kavita-kepub-lib-" + Guid.NewGuid().ToString("N"));
+        Directory.CreateDirectory(libraryDir);
+        var kepubPath = Path.Combine(libraryDir, "promoted.kepub.epub");
+        File.Copy(_epubPath, kepubPath);
+
+        try
+        {
+            var kepubify = Substitute.For<IKepubifyRunner>();
+            var scheduler = Substitute.For<IKoboConversionJobScheduler>();
+            var directoryService = Substitute.For<IDirectoryService>();
+            directoryService.LongTermCacheDirectory.Returns(Path.Join(libraryDir, "cache"));
+            directoryService.ExistOrCreate(Arg.Any<string>()).Returns(true);
+
+            var service = CreateService(unitOfWork, directoryService, Substitute.For<IKoboArchiveEpubConverter>(),
+                scheduler, kepubify: kepubify);
+            var file = new MangaFileBuilder(kepubPath, MangaFormat.Epub, 10)
+                .WithBytes(new FileInfo(kepubPath).Length).Build();
+
+            var path = await service.GetOrConvertKepubAsync(1, file, "Title", budgetSeconds: 30);
+            Assert.Equal(Parser.NormalizePath(kepubPath), Parser.NormalizePath(path));
+            await kepubify.DidNotReceive().ConvertAsync(Arg.Any<string>(), Arg.Any<string>(),
+                Arg.Any<string>(), Arg.Any<CancellationToken>());
+            scheduler.DidNotReceive().EnqueuePromoteKepubToLibrary(Arg.Any<int>());
+        }
+        finally
+        {
+            if (Directory.Exists(libraryDir)) Directory.Delete(libraryDir, true);
+        }
+    }
+
+    [Fact]
+    public async Task GetOrConvertKepub_ReplaceOff_DoesNotEnqueuePromote()
+    {
+        KoboConversionService.ResetInFlightForTests();
+        var (unitOfWork, context, _) = await CreateDatabase();
+        await ConfigureKepubSettings(unitOfWork, replaceEpubWithKepub: false);
+
+        var library = new LibraryBuilder("No Promote Lib").WithAllowKoboSync(true).Build();
+        context.Library.Add(library);
+        await context.SaveChangesAsync();
+
+        var chapter = new ChapterBuilder("1")
+            .WithPages(10)
+            .WithFile(new MangaFileBuilder(_epubPath, MangaFormat.Epub, 10).WithBytes(100).Build())
+            .Build();
+        var series = new SeriesBuilder("No Promote Series")
+            .WithFormat(MangaFormat.Epub)
+            .WithVolume(new VolumeBuilder(Parser.LooseLeafVolume).WithChapter(chapter).Build())
+            .Build();
+        series.Library = library;
+        context.Series.Add(series);
+        await context.SaveChangesAsync();
+        chapter = await context.Chapter.Include(c => c.Files).SingleAsync(c => c.Id == chapter.Id);
+
+        var cacheDir = Path.Join(Path.GetTempPath(), "kavita-kobo-cache-" + Guid.NewGuid().ToString("N"));
+        Directory.CreateDirectory(cacheDir);
+        var kepubify = Substitute.For<IKepubifyRunner>();
+        kepubify.ConvertAsync(Arg.Any<string>(), Arg.Any<string>(), Arg.Any<string>(),
+                Arg.Any<CancellationToken>())
+            .Returns(ci =>
+            {
+                var output = ci.ArgAt<string>(2);
+                Directory.CreateDirectory(Path.GetDirectoryName(output)!);
+                File.Copy(_epubPath, output, overwrite: true);
+                return Task.CompletedTask;
+            });
+
+        var scheduler = Substitute.For<IKoboConversionJobScheduler>();
+        var directoryService = Substitute.For<IDirectoryService>();
+        directoryService.LongTermCacheDirectory.Returns(cacheDir);
+        await SetConversionCacheDirectory(unitOfWork, Path.Combine(cacheDir, KoboConversionService.CacheFolderName));
+        directoryService.ExistOrCreate(Arg.Any<string>()).Returns(ci =>
+        {
+            Directory.CreateDirectory(ci.ArgAt<string>(0));
+            return true;
+        });
+
+        try
+        {
+            var service = CreateService(unitOfWork, directoryService, Substitute.For<IKoboArchiveEpubConverter>(),
+                scheduler, kepubify: kepubify);
+            var source = chapter.Files.First();
+            var originalPath = source.FilePath;
+
+            await service.GetOrConvertKepubAsync(chapter.Id, source, "Title", budgetSeconds: 30);
+
+            scheduler.DidNotReceive().EnqueuePromoteKepubToLibrary(Arg.Any<int>());
+            Assert.True(File.Exists(originalPath));
+            Assert.False(originalPath.EndsWith(KoboConversionService.KepubCacheExtension,
+                StringComparison.OrdinalIgnoreCase));
+        }
+        finally
+        {
+            if (Directory.Exists(cacheDir)) Directory.Delete(cacheDir, true);
+        }
+    }
+
+    [Fact]
+    public async Task GetOrConvertKepub_ArchiveSource_DoesNotEnqueuePromote()
+    {
+        KoboConversionService.ResetInFlightForTests();
+        var (unitOfWork, context, _) = await CreateDatabase();
+        await ConfigureKepubSettings(unitOfWork, replaceEpubWithKepub: true);
+
+        var library = new LibraryBuilder("Archive Promote Lib").WithAllowKoboSync(true).Build();
+        context.Library.Add(library);
+        await context.SaveChangesAsync();
+
+        var chapter = new ChapterBuilder("1")
+            .WithPages(10)
+            .WithFile(new MangaFileBuilder(_cbzPath, MangaFormat.Archive, 10).WithExtension(".cbz")
+                .WithBytes(100).Build())
+            .Build();
+        var series = new SeriesBuilder("Archive Promote Series")
+            .WithFormat(MangaFormat.Archive)
+            .WithVolume(new VolumeBuilder(Parser.LooseLeafVolume).WithChapter(chapter).Build())
+            .Build();
+        series.Library = library;
+        context.Series.Add(series);
+        await context.SaveChangesAsync();
+        chapter = await context.Chapter.Include(c => c.Files).SingleAsync(c => c.Id == chapter.Id);
+
+        var cacheDir = Path.Join(Path.GetTempPath(), "kavita-kobo-cache-" + Guid.NewGuid().ToString("N"));
+        Directory.CreateDirectory(cacheDir);
+
+        var converter = Substitute.For<IKoboArchiveEpubConverter>();
+        converter.ConvertAsync(Arg.Any<string>(), Arg.Any<string>(), Arg.Any<string>(),
+                Arg.Any<CancellationToken>())
+            .Returns(ci =>
+            {
+                var output = ci.ArgAt<string>(1);
+                KoboConvertEpubTestFactory.WriteMinimalConvertEpub(output, 10);
+                return Task.CompletedTask;
+            });
+
+        var kepubify = Substitute.For<IKepubifyRunner>();
+        kepubify.ConvertAsync(Arg.Any<string>(), Arg.Any<string>(), Arg.Any<string>(),
+                Arg.Any<CancellationToken>())
+            .Returns(ci =>
+            {
+                var output = ci.ArgAt<string>(2);
+                KoboConvertEpubTestFactory.WriteMinimalConvertEpub(output, 10);
+                return Task.CompletedTask;
+            });
+
+        var scheduler = Substitute.For<IKoboConversionJobScheduler>();
+        var directoryService = Substitute.For<IDirectoryService>();
+        directoryService.LongTermCacheDirectory.Returns(cacheDir);
+        await SetConversionCacheDirectory(unitOfWork, Path.Combine(cacheDir, KoboConversionService.CacheFolderName));
+        directoryService.ExistOrCreate(Arg.Any<string>()).Returns(ci =>
+        {
+            Directory.CreateDirectory(ci.ArgAt<string>(0));
+            return true;
+        });
+
+        try
+        {
+            var service = CreateService(unitOfWork, directoryService, converter, scheduler, kepubify: kepubify);
+            var source = chapter.Files.First();
+            await service.GetOrConvertKepubAsync(chapter.Id, source, "Title", budgetSeconds: 30);
+            scheduler.DidNotReceive().EnqueuePromoteKepubToLibrary(Arg.Any<int>());
+        }
+        finally
+        {
+            if (Directory.Exists(cacheDir)) Directory.Delete(cacheDir, true);
+        }
+    }
+
+    [Fact]
+    public async Task PromoteKepubToLibrary_ReplacesEpubAndUpdatesMangaFile()
+    {
+        KoboConversionService.ResetInFlightForTests();
+        var (unitOfWork, context, _) = await CreateDatabase();
+        await ConfigureKepubSettings(unitOfWork, replaceEpubWithKepub: true);
+
+        var libraryDir = Path.Join(Path.GetTempPath(), "kavita-promote-lib-" + Guid.NewGuid().ToString("N"));
+        Directory.CreateDirectory(libraryDir);
+        var originalEpub = Path.Combine(libraryDir, "story.epub");
+        File.Copy(_epubPath, originalEpub);
+
+        var library = new LibraryBuilder("Promote Lib").WithAllowKoboSync(true).Build();
+        context.Library.Add(library);
+        await context.SaveChangesAsync();
+
+        var chapter = new ChapterBuilder("1")
+            .WithPages(10)
+            .WithFile(new MangaFileBuilder(originalEpub, MangaFormat.Epub, 10)
+                .WithBytes(new FileInfo(originalEpub).Length)
+                .WithExtension(".epub")
+                .Build())
+            .Build();
+        var series = new SeriesBuilder("Promote Series")
+            .WithFormat(MangaFormat.Epub)
+            .WithVolume(new VolumeBuilder(Parser.LooseLeafVolume).WithChapter(chapter).Build())
+            .Build();
+        series.Library = library;
+        context.Series.Add(series);
+        await context.SaveChangesAsync();
+        chapter = await context.Chapter.Include(c => c.Files).SingleAsync(c => c.Id == chapter.Id);
+        var mangaFileId = chapter.Files.First().Id;
+
+        var cacheDir = Path.Join(Path.GetTempPath(), "kavita-kobo-cache-" + Guid.NewGuid().ToString("N"));
+        Directory.CreateDirectory(cacheDir);
+
+        var kepubify = Substitute.For<IKepubifyRunner>();
+        kepubify.ConvertAsync(Arg.Any<string>(), Arg.Any<string>(), Arg.Any<string>(),
+                Arg.Any<CancellationToken>())
+            .Returns(ci =>
+            {
+                var output = ci.ArgAt<string>(2);
+                Directory.CreateDirectory(Path.GetDirectoryName(output)!);
+                File.Copy(_epubPath, output, overwrite: true);
+                return Task.CompletedTask;
+            });
+
+        var scheduler = Substitute.For<IKoboConversionJobScheduler>();
+        var directoryService = Substitute.For<IDirectoryService>();
+        directoryService.LongTermCacheDirectory.Returns(cacheDir);
+        await SetConversionCacheDirectory(unitOfWork, Path.Combine(cacheDir, KoboConversionService.CacheFolderName));
+        directoryService.ExistOrCreate(Arg.Any<string>()).Returns(ci =>
+        {
+            Directory.CreateDirectory(ci.ArgAt<string>(0));
+            return true;
+        });
+
+        try
+        {
+            var service = CreateService(unitOfWork, directoryService, Substitute.For<IKoboArchiveEpubConverter>(),
+                scheduler, kepubify: kepubify);
+            var source = chapter.Files.First();
+
+            var cachePath = await service.GetOrConvertKepubAsync(chapter.Id, source, "Title", budgetSeconds: 30);
+            Assert.True(File.Exists(cachePath));
+            scheduler.Received(1).EnqueuePromoteKepubToLibrary(chapter.Id);
+
+            // Simulate Hangfire running the promote job.
+            await service.PromoteKepubToLibraryAsync(chapter.Id);
+
+            var expectedKepub = Path.Combine(libraryDir, "story.kepub.epub");
+            Assert.True(File.Exists(expectedKepub));
+            Assert.False(File.Exists(originalEpub));
+            Assert.False(File.Exists(cachePath));
+
+            var updated = await context.MangaFile.SingleAsync(f => f.Id == mangaFileId);
+            Assert.Equal(Parser.NormalizePath(expectedKepub), Parser.NormalizePath(updated.FilePath));
+            Assert.Equal(mangaFileId, updated.Id);
+            Assert.Equal(chapter.Id, updated.ChapterId);
+            Assert.True(KoboConversionService.IsAlreadyKepubLibraryFile(updated));
+
+            // Idempotent: already-kepub short-circuits without re-convert.
+            var again = await service.GetOrConvertKepubAsync(chapter.Id, updated, "Title", budgetSeconds: 1);
+            Assert.Equal(Parser.NormalizePath(expectedKepub), Parser.NormalizePath(again));
+            await kepubify.Received(1).ConvertAsync(Arg.Any<string>(), Arg.Any<string>(), Arg.Any<string>(),
+                Arg.Any<CancellationToken>());
+        }
+        finally
+        {
+            if (Directory.Exists(libraryDir)) Directory.Delete(libraryDir, true);
+            if (Directory.Exists(cacheDir)) Directory.Delete(cacheDir, true);
+        }
+    }
+
     private static async Task SetConversionCacheDirectory(IUnitOfWork unitOfWork, string cacheRoot)
     {
         Directory.CreateDirectory(cacheRoot);
@@ -1116,7 +1400,7 @@ public class KoboConversionServiceTests(ITestOutputHelper testOutputHelper) : Ab
         await settingsService.UpdateSettings(settings);
     }
 
-    private static async Task ConfigureKepubSettings(IUnitOfWork unitOfWork)
+    private static async Task ConfigureKepubSettings(IUnitOfWork unitOfWork, bool replaceEpubWithKepub = false)
     {
         var ds = new DirectoryService(Substitute.For<ILogger<DirectoryService>>(), new FileSystem());
         var settingsService = new SettingsService(unitOfWork, ds, Substitute.For<ILibraryWatcher>(),
@@ -1126,6 +1410,7 @@ public class KoboConversionServiceTests(ITestOutputHelper testOutputHelper) : Ab
         var settings = await unitOfWork.SettingsRepository.GetSettingsDtoAsync();
         settings.EnableKepubConversion = true;
         settings.KepubifyPath = "/usr/bin/kepubify";
+        settings.ReplaceEpubWithKepub = replaceEpubWithKepub;
         await settingsService.UpdateSettings(settings);
     }
 

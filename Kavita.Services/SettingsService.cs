@@ -791,6 +791,14 @@ public class SettingsService(
             }
         }
 
+        if (setting.Key == ServerSettingKey.ReplaceEpubWithKepub &&
+            updateSettingsDto.ReplaceEpubWithKepub + string.Empty != setting.Value)
+        {
+            // Inert unless EnableKepubConversion is also on; no validation error when kepub is off.
+            setting.Value = updateSettingsDto.ReplaceEpubWithKepub + string.Empty;
+            unitOfWork.SettingsRepository.Update(setting);
+        }
+
         if (setting.Key == ServerSettingKey.KoboConversionCacheDirectory &&
             koboConversionCacheDirectory != setting.Value)
         {

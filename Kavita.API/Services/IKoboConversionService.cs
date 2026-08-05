@@ -42,6 +42,7 @@ public interface IKoboConversionService
     /// <summary>
     /// When KEPUB conversion is enabled and no cached KEPUB exists for <paramref name="sourceFile"/>,
     /// enqueues a background convert (archive→EPUB if needed, then kepubify).
+    /// When a cache hit exists and Replace EPUB with KEPUB is on, enqueues promotion instead.
     /// </summary>
     Task EnqueueKepubifyIfNeededAsync(int chapterId, MangaFile sourceFile, CancellationToken ct = default);
 
@@ -51,6 +52,14 @@ public interface IKoboConversionService
     /// </summary>
     [DisableConcurrentExecution(timeoutInSeconds: 60 * 60)]
     Task ConvertChapterInBackgroundAsync(int chapterId, CancellationToken ct = default);
+
+    /// <summary>
+    /// When Replace EPUB with KEPUB is enabled, promotes a cached KEPUB into the library folder
+    /// in place of the original native EPUB (updates MangaFile, drops cache copy).
+    /// No-op for archive sources, already-kepub files, or when the setting is off.
+    /// </summary>
+    [DisableConcurrentExecution(timeoutInSeconds: 60 * 10)]
+    Task PromoteKepubToLibraryAsync(int chapterId, CancellationToken ct = default);
 
     /// <summary>
     /// Warms the shared conversion cache for a library (no in-request budget).
