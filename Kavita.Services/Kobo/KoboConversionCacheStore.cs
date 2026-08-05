@@ -4,11 +4,18 @@ using System.IO;
 using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
+using System.Text.RegularExpressions;
 using Kavita.API.Services;
 using Kavita.Models.Entities;
 using Microsoft.Extensions.Logging;
 
 namespace Kavita.Services.Kobo;
+
+/// <summary>
+/// Library + series + chapter identity used to build nested conversion-cache paths.
+/// </summary>
+internal readonly record struct KoboCacheIdentity(
+    int LibraryId, string LibraryName, int SeriesId, string SeriesName, int ChapterId);
 
 /// <summary>
 /// Owns the on-disk layout and lifecycle of the shared Kobo conversion cache:
@@ -17,6 +24,16 @@ namespace Kavita.Services.Kobo;
 /// </summary>
 internal sealed class KoboConversionCacheStore(IDirectoryService directoryService, ILogger logger)
 {
+    private const int MaxSanitizedNameLength = 100;
+    private static readonly Regex CollapsedWhitespace = new(@"\s+", RegexOptions.Compiled);
+
+    /// <summary>
+    /// Characters unsafe in folder names on Windows (and awkward elsewhere). Always stripped so
+    /// cache paths stay portable regardless of the host OS's <see cref="Path.GetInvalidFileNameChars"/>.
+    /// </summary>
+    private static readonly char[] CrossPlatformInvalidNameChars =
+        ['<', '>', ':', '"', '/', '\\', '|', '?', '*'];
+
     /// <summary>
     /// Cache fingerprint over the source identity plus the structural contract version, so a contract
     /// bump orphans old artifacts. Shared by the EPUB and KEPUB pools for a chapter.
@@ -29,28 +46,241 @@ internal sealed class KoboConversionCacheStore(IDirectoryService directoryServic
         return Convert.ToHexString(hash).ToLowerInvariant();
     }
 
+    /// <summary>
+    /// Formats a recognizable folder segment as <c>{id} - {sanitizedName}</c>, or just <c>{id}</c>
+    /// when the name sanitizes to empty.
+    /// </summary>
+    public static string FormatIdNameFolder(int id, string? name)
+    {
+        var sanitized = SanitizeFolderName(name);
+        return string.IsNullOrEmpty(sanitized) ? id.ToString() : $"{id} - {sanitized}";
+    }
+
+    public static string SanitizeFolderName(string? name)
+    {
+        if (string.IsNullOrWhiteSpace(name)) return string.Empty;
+
+        var invalid = Path.GetInvalidFileNameChars();
+        var buffer = new StringBuilder(name.Length);
+        foreach (var c in name)
+        {
+            if (char.IsControl(c) ||
+                Array.IndexOf(invalid, c) >= 0 ||
+                Array.IndexOf(CrossPlatformInvalidNameChars, c) >= 0)
+            {
+                buffer.Append(' ');
+            }
+            else
+            {
+                buffer.Append(c);
+            }
+        }
+
+        var collapsed = CollapsedWhitespace.Replace(buffer.ToString(), " ").Trim().Trim('.');
+        if (collapsed.Length > MaxSanitizedNameLength)
+        {
+            collapsed = collapsed[..MaxSanitizedNameLength].Trim().Trim('.');
+        }
+
+        return collapsed;
+    }
+
     public string GetDefaultCacheRoot() =>
         Path.Combine(directoryService.LongTermCacheDirectory, KoboConversionService.CacheFolderName);
 
-    public string GetCacheDirectory(string cacheRoot, int chapterId) =>
+    public string GetCacheDirectory(string cacheRoot, KoboCacheIdentity identity) =>
+        Path.Combine(cacheRoot,
+            FormatIdNameFolder(identity.LibraryId, identity.LibraryName),
+            FormatIdNameFolder(identity.SeriesId, identity.SeriesName),
+            identity.ChapterId.ToString());
+
+    /// <summary>Legacy flat layout used when series/library identity is unavailable.</summary>
+    public string GetLegacyCacheDirectory(string cacheRoot, int chapterId) =>
         Path.Combine(cacheRoot, chapterId.ToString());
 
-    public string GetCacheFilePath(string cacheRoot, int chapterId, string fingerprint) =>
-        Path.Combine(GetCacheDirectory(cacheRoot, chapterId), $"{fingerprint}.epub");
+    public string GetCacheFilePath(string cacheRoot, KoboCacheIdentity identity, string fingerprint) =>
+        Path.Combine(GetCacheDirectory(cacheRoot, identity), $"{fingerprint}.epub");
 
-    public string GetKepubCacheFilePath(string cacheRoot, int chapterId, string fingerprint) =>
-        Path.Combine(GetCacheDirectory(cacheRoot, chapterId),
+    public string GetKepubCacheFilePath(string cacheRoot, KoboCacheIdentity identity, string fingerprint) =>
+        Path.Combine(GetCacheDirectory(cacheRoot, identity),
             $"{fingerprint}{KoboConversionService.KepubCacheExtension}");
 
-    /// <summary>Convenience for callers/tests that use the default/stubbed long-term cache root.</summary>
-    public string GetCacheDirectory(int chapterId) =>
-        GetCacheDirectory(GetDefaultCacheRoot(), chapterId);
+    public string GetLegacyCacheFilePath(string cacheRoot, int chapterId, string fingerprint) =>
+        Path.Combine(GetLegacyCacheDirectory(cacheRoot, chapterId), $"{fingerprint}.epub");
 
-    public string GetCacheFilePath(int chapterId, string fingerprint) =>
-        GetCacheFilePath(GetDefaultCacheRoot(), chapterId, fingerprint);
+    public string GetLegacyKepubCacheFilePath(string cacheRoot, int chapterId, string fingerprint) =>
+        Path.Combine(GetLegacyCacheDirectory(cacheRoot, chapterId),
+            $"{fingerprint}{KoboConversionService.KepubCacheExtension}");
 
-    public string GetKepubCacheFilePath(int chapterId, string fingerprint) =>
-        GetKepubCacheFilePath(GetDefaultCacheRoot(), chapterId, fingerprint);
+    /// <summary>
+    /// Returns the preferred artifact path, migrating a legacy or renamed chapter directory into place
+    /// when an older layout still holds the file.
+    /// </summary>
+    public string ResolveCacheFilePath(string cacheRoot, KoboCacheIdentity identity, string fingerprint,
+        bool isKepub)
+    {
+        var preferredDir = GetCacheDirectory(cacheRoot, identity);
+        var fileName = isKepub
+            ? $"{fingerprint}{KoboConversionService.KepubCacheExtension}"
+            : $"{fingerprint}.epub";
+        var preferredPath = Path.Combine(preferredDir, fileName);
+
+        if (File.Exists(preferredPath)) return preferredPath;
+
+        var sourceFile = FindExistingArtifactFile(cacheRoot, identity, fileName, preferredPath);
+        if (sourceFile == null) return preferredPath;
+
+        var sourceChapterDir = Path.GetDirectoryName(sourceFile);
+        if (sourceChapterDir != null &&
+            !string.Equals(sourceChapterDir, preferredDir, StringComparison.OrdinalIgnoreCase))
+        {
+            MigrateChapterDirectory(cacheRoot, sourceChapterDir, preferredDir);
+        }
+
+        return preferredPath;
+    }
+
+    /// <summary>
+    /// Locates an artifact file for <paramref name="identity"/> under preferred-adjacent, renamed,
+    /// cross-library, or legacy layouts. Skips <paramref name="excludePath"/>.
+    /// </summary>
+    public string? FindExistingArtifactFile(string cacheRoot, KoboCacheIdentity identity, string fileName,
+        string? excludePath = null)
+    {
+        var preferredLibraryDir = Path.Combine(cacheRoot,
+            FormatIdNameFolder(identity.LibraryId, identity.LibraryName));
+        var underPreferredLibrary = FindSeriesChapterArtifact(preferredLibraryDir, identity.SeriesId,
+            identity.ChapterId, fileName, excludePath);
+        if (underPreferredLibrary != null) return underPreferredLibrary;
+
+        foreach (var libraryDir in EnumerateIdPrefixedDirectories(cacheRoot, identity.LibraryId))
+        {
+            var found = FindSeriesChapterArtifact(libraryDir, identity.SeriesId, identity.ChapterId,
+                fileName, excludePath);
+            if (found != null) return found;
+        }
+
+        // Series moved between libraries: scan other top-level folders (library count is small).
+        if (Directory.Exists(cacheRoot))
+        {
+            foreach (var libraryDir in Directory.EnumerateDirectories(cacheRoot))
+            {
+                var name = Path.GetFileName(libraryDir);
+                // Skip legacy flat chapter dirs at the cache root.
+                if (int.TryParse(name, out _)) continue;
+
+                var found = FindSeriesChapterArtifact(libraryDir, identity.SeriesId, identity.ChapterId,
+                    fileName, excludePath);
+                if (found != null) return found;
+            }
+        }
+
+        var legacy = Path.Combine(GetLegacyCacheDirectory(cacheRoot, identity.ChapterId), fileName);
+        if (File.Exists(legacy) &&
+            (excludePath == null ||
+             !string.Equals(legacy, excludePath, StringComparison.OrdinalIgnoreCase)))
+        {
+            return legacy;
+        }
+
+        return null;
+    }
+
+    private static string? FindSeriesChapterArtifact(string libraryDir, int seriesId, int chapterId,
+        string fileName, string? excludePath)
+    {
+        if (!Directory.Exists(libraryDir)) return null;
+
+        var chapterSegment = chapterId.ToString();
+        foreach (var seriesDir in EnumerateIdPrefixedDirectories(libraryDir, seriesId))
+        {
+            var candidate = Path.Combine(seriesDir, chapterSegment, fileName);
+            if (excludePath != null &&
+                string.Equals(candidate, excludePath, StringComparison.OrdinalIgnoreCase))
+            {
+                continue;
+            }
+
+            if (File.Exists(candidate)) return candidate;
+        }
+
+        return null;
+    }
+
+    private static IEnumerable<string> EnumerateIdPrefixedDirectories(string parent, int id)
+    {
+        if (!Directory.Exists(parent)) yield break;
+
+        var prefix = $"{id} - ";
+        var idOnly = id.ToString();
+        foreach (var dir in Directory.EnumerateDirectories(parent))
+        {
+            var name = Path.GetFileName(dir);
+            if (name.StartsWith(prefix, StringComparison.Ordinal) ||
+                string.Equals(name, idOnly, StringComparison.Ordinal))
+            {
+                yield return dir;
+            }
+        }
+    }
+
+    private void MigrateChapterDirectory(string cacheRoot, string sourceDir, string destDir)
+    {
+        try
+        {
+            directoryService.ExistOrCreate(destDir);
+
+            foreach (var file in Directory.EnumerateFiles(sourceDir))
+            {
+                var dest = Path.Combine(destDir, Path.GetFileName(file));
+                try
+                {
+                    if (File.Exists(dest))
+                    {
+                        File.Delete(file);
+                        continue;
+                    }
+
+                    File.Move(file, dest);
+                }
+                catch (Exception ex)
+                {
+                    logger.LogDebug(ex, "Could not migrate Kobo cache file {Source} to {Dest}", file, dest);
+                }
+            }
+
+            TryDeleteEmptyAncestors(sourceDir, cacheRoot);
+        }
+        catch (Exception ex)
+        {
+            logger.LogDebug(ex, "Could not migrate Kobo cache directory {Source} to {Dest}", sourceDir, destDir);
+        }
+    }
+
+    private void TryDeleteEmptyAncestors(string startDir, string stopAtRoot)
+    {
+        var current = startDir;
+        while (!string.IsNullOrEmpty(current) &&
+               !string.Equals(current, stopAtRoot, StringComparison.OrdinalIgnoreCase))
+        {
+            try
+            {
+                if (!Directory.Exists(current) || Directory.EnumerateFileSystemEntries(current).Any())
+                {
+                    break;
+                }
+
+                var parent = Directory.GetParent(current)?.FullName;
+                Directory.Delete(current);
+                current = parent;
+            }
+            catch (Exception ex)
+            {
+                logger.LogDebug(ex, "Could not delete empty Kobo cache directory {Path}", current);
+                break;
+            }
+        }
+    }
 
     public static bool IsEpubPoolFile(string path) =>
         path.EndsWith(".epub", StringComparison.OrdinalIgnoreCase) &&
@@ -118,6 +348,8 @@ internal sealed class KoboConversionCacheStore(IDirectoryService directoryServic
     /// <summary>Drops other-fingerprint artifacts in the same pool for this chapter (source changed).</summary>
     public void DeleteStaleFingerprints(string cacheDir, string keepPath, bool isKepubPool)
     {
+        if (!Directory.Exists(cacheDir)) return;
+
         var pattern = isKepubPool ? "*" + KoboConversionService.KepubCacheExtension : "*.epub";
         Func<string, bool> isPoolFile = isKepubPool ? IsKepubPoolFile : IsEpubPoolFile;
 

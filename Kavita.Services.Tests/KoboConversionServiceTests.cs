@@ -146,7 +146,7 @@ public class KoboConversionServiceTests(ITestOutputHelper testOutputHelper) : Ab
         var legacyRaw = $"{file.FilePath}|{file.Bytes}|{file.LastModifiedUtc.Ticks}";
         var legacyFingerprint = Convert.ToHexString(SHA256.HashData(Encoding.UTF8.GetBytes(legacyRaw)))
             .ToLowerInvariant();
-        var legacyPath = service.GetCacheFilePath(42, legacyFingerprint);
+        var legacyPath = service.GetLegacyCacheFilePath(42, legacyFingerprint);
         Directory.CreateDirectory(Path.GetDirectoryName(legacyPath)!);
         await File.WriteAllTextAsync(legacyPath, "stale-epub");
 
@@ -155,7 +155,7 @@ public class KoboConversionServiceTests(ITestOutputHelper testOutputHelper) : Ab
 
         Assert.Equal(1, convertCalls);
         Assert.NotEqual(legacyFingerprint, currentFingerprint);
-        Assert.Equal(service.GetCacheFilePath(42, currentFingerprint), path);
+        Assert.Equal(service.GetLegacyCacheFilePath(42, currentFingerprint), path);
         Assert.True(File.Exists(path));
         Assert.Equal("epub-bytes", await File.ReadAllTextAsync(path));
     }
@@ -175,8 +175,8 @@ public class KoboConversionServiceTests(ITestOutputHelper testOutputHelper) : Ab
             var file = new MangaFileBuilder(_epubPath, MangaFormat.Epub, 10).WithBytes(100).Build();
             var fingerprint = KoboConversionService.ComputeFingerprint(file);
 
-            var epubPath = service.GetCacheFilePath(7, fingerprint);
-            var kepubPath = service.GetKepubCacheFilePath(7, fingerprint);
+            var epubPath = service.GetLegacyCacheFilePath(7, fingerprint);
+            var kepubPath = service.GetLegacyKepubCacheFilePath(7, fingerprint);
             Assert.Equal(Path.GetDirectoryName(epubPath), Path.GetDirectoryName(kepubPath));
             Assert.Equal(fingerprint, Path.GetFileNameWithoutExtension(epubPath));
             Assert.StartsWith(fingerprint, Path.GetFileName(kepubPath), StringComparison.OrdinalIgnoreCase);
@@ -286,7 +286,8 @@ public class KoboConversionServiceTests(ITestOutputHelper testOutputHelper) : Ab
 
         var service = CreateService(unitOfWork, directoryService, converter);
         var fingerprint = KoboConversionService.ComputeFingerprint(chapter.Files.First());
-        var stalePath = service.GetCacheFilePath(chapter.Id, fingerprint);
+        var identity = new KoboCacheIdentity(library.Id, library.Name, series.Id, series.Name, chapter.Id);
+        var stalePath = service.GetCacheFilePath(identity, fingerprint);
         KoboConvertEpubTestFactory.WriteMinimalConvertEpub(stalePath, 3); // stale spine ≠ Pages
 
         var path = await service.GetOrConvertEpubAsync(chapter.Id, chapter.Files.First(), "Title",
@@ -721,6 +722,8 @@ public class KoboConversionServiceTests(ITestOutputHelper testOutputHelper) : Ab
 
         Assert.True(File.Exists(path));
         Assert.EndsWith(KoboConversionService.KepubCacheExtension, path);
+        Assert.Contains(KoboConversionService.FormatIdNameFolder(library.Id, library.Name), path);
+        Assert.Contains(KoboConversionService.FormatIdNameFolder(series.Id, series.Name), path);
         Assert.Equal(0, await context.AppUserKoboSyncedChapter.CountAsync(s => s.ChapterId == chapter.Id));
 
         // Cache hit does not re-run kepubify.
@@ -752,7 +755,7 @@ public class KoboConversionServiceTests(ITestOutputHelper testOutputHelper) : Ab
         scheduler.Received(1).EnqueueBackgroundConvert(7);
 
         var fingerprint = KoboConversionService.ComputeFingerprint(file);
-        var cached = service.GetKepubCacheFilePath(7, fingerprint);
+        var cached = service.GetLegacyKepubCacheFilePath(7, fingerprint);
         Directory.CreateDirectory(Path.GetDirectoryName(cached)!);
         await File.WriteAllTextAsync(cached, "kepub");
 
@@ -840,6 +843,231 @@ public class KoboConversionServiceTests(ITestOutputHelper testOutputHelper) : Ab
     }
 
     [Fact]
+    public void FormatIdNameFolder_SanitizesInvalidCharacters_AndFallsBackToId()
+    {
+        Assert.Equal("42 - One Piece", KoboConversionService.FormatIdNameFolder(42, "One Piece"));
+        Assert.Equal("7 - A B", KoboConversionService.FormatIdNameFolder(7, "A<>B"));
+        Assert.Equal("9", KoboConversionService.FormatIdNameFolder(9, "   "));
+        Assert.Equal("3", KoboConversionService.FormatIdNameFolder(3, null));
+    }
+
+    [Fact]
+    public async Task GetOrConvertEpub_WritesUnderLibraryAndSeriesFolders()
+    {
+        KoboConversionService.ResetInFlightForTests();
+        var (unitOfWork, context, _) = await CreateDatabase();
+        var library = new LibraryBuilder("Manga Lib").WithAllowKoboSync(true).Build();
+        context.Library.Add(library);
+        var chapter = new ChapterBuilder("1")
+            .WithPages(10)
+            .WithFile(new MangaFileBuilder(_cbzPath, MangaFormat.Archive, 10).WithExtension(".cbz")
+                .WithBytes(100).Build())
+            .Build();
+        var series = new SeriesBuilder("One Piece")
+            .WithFormat(MangaFormat.Archive)
+            .WithVolume(new VolumeBuilder(Parser.LooseLeafVolume).WithChapter(chapter).Build())
+            .Build();
+        series.Library = library;
+        context.Series.Add(series);
+        await context.SaveChangesAsync();
+        chapter = await context.Chapter.Include(c => c.Files).SingleAsync(c => c.Id == chapter.Id);
+
+        var cacheDir = Path.Join(Path.GetTempPath(), "kavita-kobo-nested-" + Guid.NewGuid().ToString("N"));
+        Directory.CreateDirectory(cacheDir);
+
+        var converter = Substitute.For<IKoboArchiveEpubConverter>();
+        converter.ConvertAsync(Arg.Any<string>(), Arg.Any<string>(), Arg.Any<string>(), Arg.Any<CancellationToken>())
+            .Returns(ci =>
+            {
+                KoboConvertEpubTestFactory.WriteMinimalConvertEpub(ci.ArgAt<string>(1), 10);
+                return Task.CompletedTask;
+            });
+
+        var directoryService = Substitute.For<IDirectoryService>();
+        directoryService.LongTermCacheDirectory.Returns(cacheDir);
+        await SetConversionCacheDirectory(unitOfWork, Path.Combine(cacheDir, KoboConversionService.CacheFolderName));
+        directoryService.ExistOrCreate(Arg.Any<string>()).Returns(ci =>
+        {
+            Directory.CreateDirectory(ci.ArgAt<string>(0));
+            return true;
+        });
+
+        var service = CreateService(unitOfWork, directoryService, converter);
+        var identity = new KoboCacheIdentity(library.Id, library.Name, series.Id, series.Name, chapter.Id);
+        var expected = service.GetCacheFilePath(identity, KoboConversionService.ComputeFingerprint(chapter.Files.First()));
+
+        var path = await service.GetOrConvertEpubAsync(chapter.Id, chapter.Files.First(), "Title",
+            budgetSeconds: 30);
+
+        Assert.Equal(expected, path);
+        Assert.True(File.Exists(path));
+        Assert.Contains(Path.Combine(KoboConversionService.FormatIdNameFolder(library.Id, library.Name),
+            KoboConversionService.FormatIdNameFolder(series.Id, series.Name), chapter.Id.ToString()), path);
+    }
+
+    [Fact]
+    public async Task GetOrConvertEpub_MigratesLegacyChapterDirOnHit()
+    {
+        KoboConversionService.ResetInFlightForTests();
+        var (unitOfWork, context, _) = await CreateDatabase();
+        var library = new LibraryBuilder("Legacy Lib").WithAllowKoboSync(true).Build();
+        context.Library.Add(library);
+        var chapter = new ChapterBuilder("1")
+            .WithPages(10)
+            .WithFile(new MangaFileBuilder(_cbzPath, MangaFormat.Archive, 10).WithExtension(".cbz")
+                .WithBytes(100).Build())
+            .Build();
+        var series = new SeriesBuilder("Legacy Series")
+            .WithFormat(MangaFormat.Archive)
+            .WithVolume(new VolumeBuilder(Parser.LooseLeafVolume).WithChapter(chapter).Build())
+            .Build();
+        series.Library = library;
+        context.Series.Add(series);
+        await context.SaveChangesAsync();
+        chapter = await context.Chapter.Include(c => c.Files).SingleAsync(c => c.Id == chapter.Id);
+
+        var cacheDir = Path.Join(Path.GetTempPath(), "kavita-kobo-migrate-legacy-" + Guid.NewGuid().ToString("N"));
+        var cacheRoot = Path.Combine(cacheDir, KoboConversionService.CacheFolderName);
+        Directory.CreateDirectory(cacheRoot);
+
+        var fingerprint = KoboConversionService.ComputeFingerprint(chapter.Files.First());
+        var legacyPath = Path.Combine(cacheRoot, chapter.Id.ToString(), $"{fingerprint}.epub");
+        KoboConvertEpubTestFactory.WriteMinimalConvertEpub(legacyPath, 10);
+
+        var directoryService = Substitute.For<IDirectoryService>();
+        directoryService.LongTermCacheDirectory.Returns(cacheDir);
+        await SetConversionCacheDirectory(unitOfWork, cacheRoot);
+        directoryService.ExistOrCreate(Arg.Any<string>()).Returns(ci =>
+        {
+            Directory.CreateDirectory(ci.ArgAt<string>(0));
+            return true;
+        });
+
+        var converter = Substitute.For<IKoboArchiveEpubConverter>();
+        var service = CreateService(unitOfWork, directoryService, converter);
+        var identity = new KoboCacheIdentity(library.Id, library.Name, series.Id, series.Name, chapter.Id);
+        var preferred = service.GetCacheFilePath(identity, fingerprint);
+
+        var path = await service.GetOrConvertEpubAsync(chapter.Id, chapter.Files.First(), "Title",
+            budgetSeconds: 30);
+
+        Assert.Equal(preferred, path);
+        Assert.True(File.Exists(preferred));
+        Assert.False(File.Exists(legacyPath));
+        await converter.DidNotReceive().ConvertAsync(Arg.Any<string>(), Arg.Any<string>(), Arg.Any<string>(),
+            Arg.Any<CancellationToken>());
+    }
+
+    [Fact]
+    public async Task GetOrConvertEpub_MigratesRenamedSeriesFolderOnHit()
+    {
+        KoboConversionService.ResetInFlightForTests();
+        var (unitOfWork, context, _) = await CreateDatabase();
+        var library = new LibraryBuilder("Rename Lib").WithAllowKoboSync(true).Build();
+        context.Library.Add(library);
+        var chapter = new ChapterBuilder("1")
+            .WithPages(10)
+            .WithFile(new MangaFileBuilder(_cbzPath, MangaFormat.Archive, 10).WithExtension(".cbz")
+                .WithBytes(100).Build())
+            .Build();
+        var series = new SeriesBuilder("New Series Name")
+            .WithFormat(MangaFormat.Archive)
+            .WithVolume(new VolumeBuilder(Parser.LooseLeafVolume).WithChapter(chapter).Build())
+            .Build();
+        series.Library = library;
+        context.Series.Add(series);
+        await context.SaveChangesAsync();
+        chapter = await context.Chapter.Include(c => c.Files).SingleAsync(c => c.Id == chapter.Id);
+
+        var cacheDir = Path.Join(Path.GetTempPath(), "kavita-kobo-migrate-series-" + Guid.NewGuid().ToString("N"));
+        var cacheRoot = Path.Combine(cacheDir, KoboConversionService.CacheFolderName);
+        var fingerprint = KoboConversionService.ComputeFingerprint(chapter.Files.First());
+        var oldSeriesDir = Path.Combine(cacheRoot,
+            KoboConversionService.FormatIdNameFolder(library.Id, library.Name),
+            KoboConversionService.FormatIdNameFolder(series.Id, "Old Series Name"),
+            chapter.Id.ToString());
+        var oldPath = Path.Combine(oldSeriesDir, $"{fingerprint}.epub");
+        KoboConvertEpubTestFactory.WriteMinimalConvertEpub(oldPath, 10);
+
+        var directoryService = Substitute.For<IDirectoryService>();
+        directoryService.LongTermCacheDirectory.Returns(cacheDir);
+        await SetConversionCacheDirectory(unitOfWork, cacheRoot);
+        directoryService.ExistOrCreate(Arg.Any<string>()).Returns(ci =>
+        {
+            Directory.CreateDirectory(ci.ArgAt<string>(0));
+            return true;
+        });
+
+        var converter = Substitute.For<IKoboArchiveEpubConverter>();
+        var service = CreateService(unitOfWork, directoryService, converter);
+        var identity = new KoboCacheIdentity(library.Id, library.Name, series.Id, series.Name, chapter.Id);
+        var preferred = service.GetCacheFilePath(identity, fingerprint);
+
+        var path = await service.GetOrConvertEpubAsync(chapter.Id, chapter.Files.First(), "Title",
+            budgetSeconds: 30);
+
+        Assert.Equal(preferred, path);
+        Assert.True(File.Exists(preferred));
+        Assert.False(File.Exists(oldPath));
+        await converter.DidNotReceive().ConvertAsync(Arg.Any<string>(), Arg.Any<string>(), Arg.Any<string>(),
+            Arg.Any<CancellationToken>());
+    }
+
+    [Fact]
+    public async Task GetOrConvertEpub_MigratesRenamedLibraryFolderOnHit()
+    {
+        KoboConversionService.ResetInFlightForTests();
+        var (unitOfWork, context, _) = await CreateDatabase();
+        var library = new LibraryBuilder("New Library Name").WithAllowKoboSync(true).Build();
+        context.Library.Add(library);
+        var chapter = new ChapterBuilder("1")
+            .WithPages(10)
+            .WithFile(new MangaFileBuilder(_cbzPath, MangaFormat.Archive, 10).WithExtension(".cbz")
+                .WithBytes(100).Build())
+            .Build();
+        var series = new SeriesBuilder("Stable Series")
+            .WithFormat(MangaFormat.Archive)
+            .WithVolume(new VolumeBuilder(Parser.LooseLeafVolume).WithChapter(chapter).Build())
+            .Build();
+        series.Library = library;
+        context.Series.Add(series);
+        await context.SaveChangesAsync();
+        chapter = await context.Chapter.Include(c => c.Files).SingleAsync(c => c.Id == chapter.Id);
+
+        var cacheDir = Path.Join(Path.GetTempPath(), "kavita-kobo-migrate-lib-" + Guid.NewGuid().ToString("N"));
+        var cacheRoot = Path.Combine(cacheDir, KoboConversionService.CacheFolderName);
+        var fingerprint = KoboConversionService.ComputeFingerprint(chapter.Files.First());
+        var oldLibPath = Path.Combine(cacheRoot,
+            KoboConversionService.FormatIdNameFolder(library.Id, "Old Library Name"),
+            KoboConversionService.FormatIdNameFolder(series.Id, series.Name),
+            chapter.Id.ToString(), $"{fingerprint}.epub");
+        KoboConvertEpubTestFactory.WriteMinimalConvertEpub(oldLibPath, 10);
+
+        var directoryService = Substitute.For<IDirectoryService>();
+        directoryService.LongTermCacheDirectory.Returns(cacheDir);
+        await SetConversionCacheDirectory(unitOfWork, cacheRoot);
+        directoryService.ExistOrCreate(Arg.Any<string>()).Returns(ci =>
+        {
+            Directory.CreateDirectory(ci.ArgAt<string>(0));
+            return true;
+        });
+
+        var converter = Substitute.For<IKoboArchiveEpubConverter>();
+        var service = CreateService(unitOfWork, directoryService, converter);
+        var identity = new KoboCacheIdentity(library.Id, library.Name, series.Id, series.Name, chapter.Id);
+        var preferred = service.GetCacheFilePath(identity, fingerprint);
+
+        var path = await service.GetOrConvertEpubAsync(chapter.Id, chapter.Files.First(), "Title",
+            budgetSeconds: 30);
+
+        Assert.Equal(preferred, path);
+        Assert.True(File.Exists(preferred));
+        Assert.False(File.Exists(oldLibPath));
+        await converter.DidNotReceive().ConvertAsync(Arg.Any<string>(), Arg.Any<string>(), Arg.Any<string>(),
+            Arg.Any<CancellationToken>());
+    }
+
+    [Fact]
     public async Task TryGetCachedKepubPath_ReturnsPath_WhenArtifactExists()
     {
         var cacheDir = Path.Join(Path.GetTempPath(), "kavita-kobo-kepub-" + Guid.NewGuid().ToString("N"));
@@ -853,7 +1081,7 @@ public class KoboConversionServiceTests(ITestOutputHelper testOutputHelper) : Ab
                 Substitute.For<IKoboArchiveEpubConverter>());
             var file = new MangaFileBuilder(_epubPath, MangaFormat.Epub, 10).WithBytes(100).Build();
             var fingerprint = KoboConversionService.ComputeFingerprint(file);
-            var expected = service.GetKepubCacheFilePath(99, fingerprint);
+            var expected = service.GetLegacyKepubCacheFilePath(99, fingerprint);
             Directory.CreateDirectory(Path.GetDirectoryName(expected)!);
             File.WriteAllText(expected, "kepub");
 
