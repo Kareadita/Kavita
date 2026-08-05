@@ -692,6 +692,17 @@ export class ActionFactoryService {
             children: [],
           },
           {
+            action: Action.ConvertForKobo,
+            title: 'convert-for-kobo',
+            description: 'convert-for-kobo-tooltip',
+
+            callback: this.dummyCallback,
+            shouldRender: this.dummyShouldRender,
+
+            requiredRoles: [Role.Admin],
+            children: [],
+          },
+          {
             action: Action.Delete,
             title: 'delete',
             description: 'delete-tooltip',
@@ -866,6 +877,17 @@ export class ActionFactoryService {
             children: [],
           },
           {
+            action: Action.ConvertForKobo,
+            title: 'convert-for-kobo',
+            description: 'convert-for-kobo-tooltip',
+
+            callback: this.dummyCallback,
+            shouldRender: this.dummyShouldRender,
+
+            requiredRoles: [Role.Admin],
+            children: [],
+          },
+          {
             action: Action.Download,
             title: 'download',
             description: 'download-tooltip',
@@ -1010,6 +1032,17 @@ export class ActionFactoryService {
             action: Action.Delete,
             title: 'delete',
             description: 'delete-tooltip',
+
+            callback: this.dummyCallback,
+            shouldRender: this.dummyShouldRender,
+
+            requiredRoles: [Role.Admin],
+            children: [],
+          },
+          {
+            action: Action.ConvertForKobo,
+            title: 'convert-for-kobo',
+            description: 'convert-for-kobo-tooltip',
 
             callback: this.dummyCallback,
             shouldRender: this.dummyShouldRender,

@@ -409,6 +409,18 @@ public class SeriesController(
     }
 
     /// <summary>
+    /// Enqueues a series-scoped CBZ/CBR → EPUB conversion into the shared Kobo cache (admin only).
+    /// Not bound by the in-request download time budget. Can grow disk use under cache-long/kobo.
+    /// </summary>
+    [HttpPost("convert-kobo")]
+    [Authorize(Policy = PolicyGroups.AdminPolicy)]
+    public ActionResult ConvertSeriesForKobo(int seriesId)
+    {
+        taskScheduler.ConvertSeriesForKobo(seriesId);
+        return Ok();
+    }
+
+    /// <summary>
     /// Returns metadata for a given series
     /// </summary>
     /// <param name="seriesId"></param>

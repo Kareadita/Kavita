@@ -30,7 +30,8 @@ public class ChapterController(
     ILocalizationService localizationService,
     IEventHub eventHub,
     IKoboService koboService,
-    ILogger<ChapterController> logger)
+    ILogger<ChapterController> logger,
+    ITaskScheduler taskScheduler)
     : BaseApiController
 {
 
@@ -46,6 +47,18 @@ public class ChapterController(
         var chapter = await unitOfWork.ChapterRepository.GetChapterDtoAsync(chapterId, UserId);
 
         return Ok(chapter);
+    }
+
+    /// <summary>
+    /// Enqueues a chapter-scoped CBZ/CBR → EPUB conversion into the shared Kobo cache (admin only).
+    /// Not bound by the in-request download time budget. Can grow disk use under cache-long/kobo.
+    /// </summary>
+    [HttpPost("convert-kobo")]
+    [Authorize(Policy = PolicyGroups.AdminPolicy)]
+    public ActionResult ConvertChapterForKobo(int chapterId)
+    {
+        taskScheduler.ConvertChapterForKobo(chapterId);
+        return Ok();
     }
 
     /// <summary>

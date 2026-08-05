@@ -30,4 +30,8 @@ export class VolumeService {
     return this.httpClient.post(this.baseUrl + 'volume/update', volume, TextResonse);
   }
 
+  convertForKobo(volumeId: number) {
+    return this.httpClient.post(this.baseUrl + `volume/convert-kobo?volumeId=${volumeId}`, {});
+  }
+
 }

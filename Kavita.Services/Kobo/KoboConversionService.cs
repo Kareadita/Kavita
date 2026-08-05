@@ -3,6 +3,7 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Threading;
 using System.Threading.Tasks;
 using Kavita.API.Database;
@@ -275,41 +276,144 @@ public class KoboConversionService(
             "[KoboConversionService] Beginning whole-library Kobo convert for {LibraryName} (kepub={KepubEnabled}). This can grow disk use under {CacheRoot}.",
             library.Name, kepubEnabled, cacheRoot);
 
-        var convertible = await LoadConvertibleChaptersAsync(libraryId, kepubEnabled, ct);
-        var total = convertible.Count;
-        logger.LogInformation(
-            "[KoboConversionService] Library {LibraryName}: {ConvertibleCount} chapter(s) to convert",
-            library.Name, total);
+        var convertible = await LoadConvertibleChaptersAsync(
+            c => c.Volume.Series.LibraryId == libraryId, kepubEnabled, ct);
 
-        await ReportWarmupProgressAsync(library.Id, 0F, ProgressEventType.Started, $"Starting {library.Name}", ct);
+        await WarmChaptersAsync(library.Id, convertible, library.Name, ct);
+    }
+
+    public async Task ConvertSeriesForKoboAsync(int seriesId, CancellationToken ct = default)
+    {
+        var series = await unitOfWork.DataContext.Series
+            .AsNoTracking()
+            .FirstOrDefaultAsync(s => s.Id == seriesId, ct);
+        if (series == null)
+        {
+            logger.LogWarning("Kobo series convert: series {SeriesId} not found", seriesId);
+            return;
+        }
+
+        var settings = await unitOfWork.SettingsRepository.GetSettingsDtoAsync(ct);
+        var kepubEnabled = settings.EnableKepubConversion &&
+                           kepubifyPathResolver.Resolve(settings.KepubifyPath) != null;
+        var cacheRoot = ResolveCacheRoot(settings);
+
+        logger.LogInformation(
+            "[KoboConversionService] Beginning series Kobo convert for {SeriesName} (kepub={KepubEnabled}). This can grow disk use under {CacheRoot}.",
+            series.Name, kepubEnabled, cacheRoot);
+
+        var convertible = await LoadConvertibleChaptersAsync(
+            c => c.Volume.SeriesId == seriesId, kepubEnabled, ct);
+
+        await WarmChaptersAsync(series.LibraryId, convertible, series.Name, ct);
+    }
+
+    public async Task ConvertVolumeForKoboAsync(int volumeId, CancellationToken ct = default)
+    {
+        var volume = await unitOfWork.DataContext.Volume
+            .Include(v => v.Series)
+            .AsNoTracking()
+            .FirstOrDefaultAsync(v => v.Id == volumeId, ct);
+        if (volume?.Series == null)
+        {
+            logger.LogWarning("Kobo volume convert: volume {VolumeId} not found", volumeId);
+            return;
+        }
+
+        var settings = await unitOfWork.SettingsRepository.GetSettingsDtoAsync(ct);
+        var kepubEnabled = settings.EnableKepubConversion &&
+                           kepubifyPathResolver.Resolve(settings.KepubifyPath) != null;
+        var cacheRoot = ResolveCacheRoot(settings);
+        var scopeName = $"{volume.Series.Name} Vol {volume.Name}";
+
+        logger.LogInformation(
+            "[KoboConversionService] Beginning volume Kobo convert for {ScopeName} (kepub={KepubEnabled}). This can grow disk use under {CacheRoot}.",
+            scopeName, kepubEnabled, cacheRoot);
+
+        var convertible = await LoadConvertibleChaptersAsync(
+            c => c.VolumeId == volumeId, kepubEnabled, ct);
+
+        await WarmChaptersAsync(volume.Series.LibraryId, convertible, scopeName, ct);
+    }
+
+    public async Task ConvertChapterForKoboAsync(int chapterId, CancellationToken ct = default)
+    {
+        var settings = await unitOfWork.SettingsRepository.GetSettingsDtoAsync(ct);
+        var kepubEnabled = settings.EnableKepubConversion &&
+                           kepubifyPathResolver.Resolve(settings.KepubifyPath) != null;
+        var cacheRoot = ResolveCacheRoot(settings);
+
+        var convertible = await LoadConvertibleChaptersAsync(
+            c => c.Id == chapterId, kepubEnabled, ct);
+        if (convertible.Count == 0)
+        {
+            // Still resolve library for a no-op progress frame when the chapter exists but needs no work.
+            var chapter = await unitOfWork.DataContext.Chapter
+                .Include(c => c.Volume).ThenInclude(v => v.Series)
+                .AsNoTracking()
+                .FirstOrDefaultAsync(c => c.Id == chapterId, ct);
+            if (chapter?.Volume?.Series == null)
+            {
+                logger.LogWarning("Kobo chapter convert: chapter {ChapterId} not found", chapterId);
+                return;
+            }
+
+            logger.LogInformation(
+                "[KoboConversionService] Chapter {ChapterId} needs no Kobo convert (already warm or ineligible)",
+                chapterId);
+            await WarmChaptersAsync(chapter.Volume.Series.LibraryId, convertible,
+                chapter.Volume.Series.Name ?? $"Chapter {chapterId}", ct);
+            return;
+        }
+
+        var first = convertible[0];
+        var libraryId = first.Volume.Series.LibraryId;
+        var scopeName = first.Volume?.Series?.Name ?? $"Chapter {chapterId}";
+
+        logger.LogInformation(
+            "[KoboConversionService] Beginning chapter Kobo convert for {ScopeName} chapter {ChapterId} (kepub={KepubEnabled}). This can grow disk use under {CacheRoot}.",
+            scopeName, chapterId, kepubEnabled, cacheRoot);
+
+        await WarmChaptersAsync(libraryId, convertible, scopeName, ct);
+    }
+
+    private async Task WarmChaptersAsync(int libraryId, IList<Chapter> chapters, string scopeName,
+        CancellationToken ct)
+    {
+        var total = chapters.Count;
+        logger.LogInformation(
+            "[KoboConversionService] {ScopeName}: {ConvertibleCount} chapter(s) to convert",
+            scopeName, total);
+
+        await ReportWarmupProgressAsync(libraryId, 0F, ProgressEventType.Started, $"Starting {scopeName}", ct);
 
         var index = 0;
-        foreach (var chapter in convertible)
+        foreach (var chapter in chapters)
         {
             ct.ThrowIfCancellationRequested();
 
             var progress = total == 0 ? 1F : Math.Max(0F, Math.Min(1F, index * 1F / total));
             var subtitle = chapter.Volume?.Series?.Name ?? $"Chapter {chapter.Id}";
-            await ReportWarmupProgressAsync(library.Id, progress, ProgressEventType.Updated, subtitle, ct);
+            await ReportWarmupProgressAsync(libraryId, progress, ProgressEventType.Updated, subtitle, ct);
 
             await WarmChapterAsync(chapter, libraryId, ct);
             index++;
         }
 
-        await ReportWarmupProgressAsync(library.Id, 1F, ProgressEventType.Ended, "Complete", ct);
+        await ReportWarmupProgressAsync(libraryId, 1F, ProgressEventType.Ended, "Complete", ct);
 
         logger.LogInformation(
-            "[KoboConversionService] Finished whole-library Kobo convert for {LibraryName}: {Converted}/{Total}",
-            library.Name, index, total);
+            "[KoboConversionService] Finished Kobo convert for {ScopeName}: {Converted}/{Total}",
+            scopeName, index, total);
     }
 
-    private async Task<List<Chapter>> LoadConvertibleChaptersAsync(int libraryId, bool kepubEnabled,
-        CancellationToken ct)
+    private async Task<List<Chapter>> LoadConvertibleChaptersAsync(
+        Expression<Func<Chapter, bool>> filter, bool kepubEnabled, CancellationToken ct)
     {
         var chapters = await unitOfWork.DataContext.Chapter
             .Include(c => c.Files)
             .Include(c => c.Volume).ThenInclude(v => v.Series).ThenInclude(s => s.Library)
-            .Where(c => c.Volume.Series.LibraryId == libraryId)
+            .Where(filter)
             .AsSplitQuery()
             .ToListAsync(ct);
 

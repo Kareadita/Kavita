@@ -69,6 +69,21 @@ public interface IKoboConversionService
     Task ConvertLibraryForKoboAsync(int libraryId, CancellationToken ct = default);
 
     /// <summary>
+    /// Warms the shared conversion cache for a series (same behavior as library warm-up, scoped).
+    /// </summary>
+    Task ConvertSeriesForKoboAsync(int seriesId, CancellationToken ct = default);
+
+    /// <summary>
+    /// Warms the shared conversion cache for a volume (same behavior as library warm-up, scoped).
+    /// </summary>
+    Task ConvertVolumeForKoboAsync(int volumeId, CancellationToken ct = default);
+
+    /// <summary>
+    /// Warms the shared conversion cache for a single chapter with Started/Updated/Ended progress.
+    /// </summary>
+    Task ConvertChapterForKoboAsync(int chapterId, CancellationToken ct = default);
+
+    /// <summary>
     /// Deletes all files under the shared Kobo conversion cache.
     /// When admin byte caps are set, LRU eviction also runs on write and via periodic cleanup.
     /// </summary>

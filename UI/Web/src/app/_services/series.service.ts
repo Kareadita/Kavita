@@ -185,6 +185,10 @@ export class SeriesService {
     return this.httpClient.post(this.baseUrl + 'series/analyze', {libraryId: libraryId, seriesId: seriesId});
   }
 
+  convertForKobo(seriesId: number) {
+    return this.httpClient.post(this.baseUrl + `series/convert-kobo?seriesId=${seriesId}`, {});
+  }
+
   getMetadata(seriesId: number) {
     return this.httpClient.get<SeriesMetadata>(this.baseUrl + 'series/metadata?seriesId=' + seriesId);
   }

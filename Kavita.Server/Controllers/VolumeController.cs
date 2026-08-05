@@ -13,7 +13,11 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace Kavita.Server.Controllers;
 
-public class VolumeController(IUnitOfWork unitOfWork, ILocalizationService localizationService, IEventHub eventHub)
+public class VolumeController(
+    IUnitOfWork unitOfWork,
+    ILocalizationService localizationService,
+    IEventHub eventHub,
+    ITaskScheduler taskScheduler)
     : BaseApiController
 {
     /// <summary>
@@ -103,5 +107,17 @@ public class VolumeController(IUnitOfWork unitOfWork, ILocalizationService local
         }
 
         return Ok(true);
+    }
+
+    /// <summary>
+    /// Enqueues a volume-scoped CBZ/CBR → EPUB conversion into the shared Kobo cache (admin only).
+    /// Not bound by the in-request download time budget. Can grow disk use under cache-long/kobo.
+    /// </summary>
+    [HttpPost("convert-kobo")]
+    [Authorize(Policy = PolicyGroups.AdminPolicy)]
+    public ActionResult ConvertVolumeForKobo(int volumeId)
+    {
+        taskScheduler.ConvertVolumeForKobo(volumeId);
+        return Ok();
     }
 }

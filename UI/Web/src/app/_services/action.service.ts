@@ -220,6 +220,12 @@ export class ActionService {
           map(() => this.fromAction(action, series, 'none'))
         );
 
+      case Action.ConvertForKobo:
+        return this.seriesService.convertForKobo(series.id).pipe(
+          tap(() => this.toastr.info(translate('toasts.convert-for-kobo-queued', {name: series.name}))),
+          map(() => this.fromAction(action, series, 'none'))
+        );
+
       case Action.Delete:
         return from(this.confirmService.confirm(translate('toasts.confirm-delete-series'))).pipe(
           filter(confirmed => confirmed),
@@ -427,6 +433,12 @@ export class ActionService {
           map(() => this.fromAction(action, volume, 'remove'))
         );
 
+      case Action.ConvertForKobo:
+        return this.volumeService.convertForKobo(volume.id).pipe(
+          tap(() => this.toastr.info(translate('toasts.convert-for-kobo-queued', {name: volume.name}))),
+          map(() => this.fromAction(action, volume, 'none'))
+        );
+
       case Action.Edit: {
         const ref = this.modalService.open(EditVolumeModalComponent, editModal());
         ref.componentInstance.volume = volume;
@@ -547,6 +559,12 @@ export class ActionService {
           filter(success => success),
           tap(() => this.toastr.success(translate('toasts.chapter-deleted'))),
           map(() => this.fromAction(action, chapter, 'remove'))
+        );
+
+      case Action.ConvertForKobo:
+        return this.chapterService.convertForKobo(chapter.id).pipe(
+          tap(() => this.toastr.info(translate('toasts.convert-for-kobo-queued', {name: chapter.title || chapter.range}))),
+          map(() => this.fromAction(action, chapter, 'none'))
         );
 
       case Action.Download:

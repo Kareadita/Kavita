@@ -34,4 +34,8 @@ export class ChapterService {
     return this.httpClient.get<ChapterDetailPlus>(this.baseUrl + `chapter/chapter-detail-plus?chapterId=${chapterId}&seriesId=${seriesId}`);
   }
 
+  convertForKobo(chapterId: number) {
+    return this.httpClient.post(this.baseUrl + `chapter/convert-kobo?chapterId=${chapterId}`, {});
+  }
+
 }
