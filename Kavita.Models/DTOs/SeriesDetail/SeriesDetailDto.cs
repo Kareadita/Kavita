@@ -1,4 +1,6 @@
 ﻿using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
+using Kavita.Models.Entities.Enums;
 
 namespace Kavita.Models.DTOs.SeriesDetail;
 #nullable enable
@@ -25,6 +27,11 @@ public sealed record SeriesDetailDto
     /// These are chapters that are in Volume 0 and should be read AFTER the volumes
     /// </summary>
     public IEnumerable<ChapterDto> StorylineChapters { get; set; } = default!;
+    /// <summary>
+    /// Type of library this series is in.
+    /// </summary>
+    [EnumDataType(typeof(LibraryType))]
+    public LibraryType LibraryType { get; set; }
     /// <summary>
     /// How many chapters are unread
     /// </summary>
