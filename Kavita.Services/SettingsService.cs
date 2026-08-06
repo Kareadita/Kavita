@@ -795,6 +795,8 @@ public class SettingsService(
             updateSettingsDto.ReplaceEpubWithKepub + string.Empty != setting.Value)
         {
             // Inert unless EnableKepubConversion is also on; no validation error when kepub is off.
+            // For archives: drops intermediate cached EPUB after KEPUB write (library CBZ/CBR untouched).
+            // For native EPUB: promotes KEPUB into the library folder (see PromoteKepubToLibraryAsync).
             setting.Value = updateSettingsDto.ReplaceEpubWithKepub + string.Empty;
             unitOfWork.SettingsRepository.Update(setting);
         }

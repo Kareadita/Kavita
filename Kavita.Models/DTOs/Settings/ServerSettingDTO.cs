@@ -69,9 +69,11 @@ public sealed record ServerSettingDto
     /// <remarks>If null or empty string, defaults to <c>{LongTermCacheDirectory}/kobo</c>.</remarks>
     public string KoboConversionCacheDirectory { get; set; } = default!;
     /// <summary>
-    /// When enabled (and <see cref="EnableKepubConversion"/> is on), after a successful
-    /// native-EPUB→KEPUB conversion the generated .kepub.epub replaces the original library
-    /// .epub in place. Destructive; default off. No-op when KEPUB conversion is disabled.
+    /// When enabled (and <see cref="EnableKepubConversion"/> is on): for native EPUB sources
+    /// the generated .kepub.epub replaces the original library .epub in place; for archive
+    /// (CBZ/CBR) sources the intermediate cached EPUB is dropped so only the KEPUB remains
+    /// in the conversion cache (CBZ/CBR library files are never modified). Destructive to
+    /// original library EPUBs; default off. No-op when KEPUB conversion is disabled.
     /// </summary>
     public bool ReplaceEpubWithKepub { get; set; }
     /// <summary>

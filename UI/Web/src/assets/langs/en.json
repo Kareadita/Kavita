@@ -2472,7 +2472,7 @@
         "kobo-kepub-label": "Enable KEPUB Conversion",
         "kobo-kepub-tooltip": "When enabled, Kobo sync advertises KEPUB downloads when a converted file is available. Requires a kepubify path. Off by default so devices keep receiving EPUB until you opt in.",
         "kobo-replace-epub-label": "Replace EPUB with KEPUB",
-        "kobo-replace-epub-tooltip": "After converting a library EPUB to KEPUB, permanently replace the original .epub with the .kepub.epub in your library folder. This rewrites your original files—keep backups. Only applies to native EPUB sources (not CBZ/CBR). Disabled when KEPUB conversion is off.",
+        "kobo-replace-epub-tooltip": "After converting to KEPUB: for native EPUB sources, permanently replace the original .epub with the .kepub.epub in your library folder (rewrites original files—keep backups); for CBZ/CBR sources, drop the intermediate cached EPUB so only the KEPUB remains in the conversion cache (library archives are never modified). Disabled when KEPUB conversion is off.",
         "kobo-kepubify-path-label": "Kepubify Path (optional)",
         "kobo-kepubify-path-tooltip": "Optional override path to kepubify. Leave blank to use the bundled tools/kepubify binary or kepubify on PATH.",
         "kobo-kepubify-path-placeholder": "Bundled or PATH (default)",

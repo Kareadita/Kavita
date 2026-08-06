@@ -776,8 +776,39 @@ public class KoboConversionService(
         await DropSyncedSetForChapterAsync(chapterId, ct);
         await koboLocationRematchService.RematchAfterDeviceFileChangeAsync(chapterId, finalPath, ct);
         await EnforceKepubCapAfterWriteAsync(cacheRoot, finalPath, ct);
+        await ReplaceIntermediateEpubIfNeededAsync(sourceFile, epubInput, chapterId, ct);
         await EnqueuePromoteIfNeededAsync(chapterId, sourceFile, ct);
         return finalPath;
+    }
+
+    /// <summary>
+    /// When Replace EPUB with KEPUB is on and the source is an archive (CBZ/CBR), deletes the
+    /// intermediate cached EPUB after a successful KEPUB write. Native EPUB library files are
+    /// handled by <see cref="PromoteKepubToLibraryAsync"/>; this never touches library paths.
+    /// </summary>
+    private async Task ReplaceIntermediateEpubIfNeededAsync(MangaFile sourceFile, string epubInput,
+        int chapterId, CancellationToken ct)
+    {
+        if (sourceFile.Format == MangaFormat.Epub) return;
+        if (!KoboConversionCacheStore.IsEpubPoolFile(epubInput)) return;
+
+        try
+        {
+            var settings = await unitOfWork.SettingsRepository.GetSettingsDtoAsync(ct);
+            if (!settings.ReplaceEpubWithKepub || !settings.EnableKepubConversion) return;
+            if (!File.Exists(epubInput)) return;
+
+            File.Delete(epubInput);
+            logger.LogInformation(
+                "Replaced intermediate Kobo EPUB with KEPUB for chapter {ChapterId}; deleted {Path}",
+                chapterId, epubInput);
+        }
+        catch (Exception ex)
+        {
+            logger.LogDebug(ex,
+                "Could not delete intermediate Kobo EPUB for chapter {ChapterId} at {Path}",
+                chapterId, epubInput);
+        }
     }
 
     /// <summary>
