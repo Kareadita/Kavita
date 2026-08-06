@@ -158,6 +158,10 @@ export class MetadataService {
       .pipe(tap(l => this.validLanguages = l));
   }
 
+  getAllBcp47Languages() {
+    return this.httpClient.get<Array<Language>>(this.baseUrl + 'metadata/all-bcp47-languages');
+  }
+
   getAllPeople(libraries?: Array<number>) {
     let method = 'metadata/people'
     if (libraries != undefined && libraries.length > 0) {

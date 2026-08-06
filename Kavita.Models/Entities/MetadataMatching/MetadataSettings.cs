@@ -95,6 +95,22 @@ public class MetadataSettings
     public bool FirstLastPeopleNaming { get; set; }
 
     /// <summary>
+    /// Server-wide semicolon separated list of BCP-47 language codes to prioritize for <c>Series.Name</c>
+    /// </summary>
+    public string GlobalNameLanguages { get; set; } = "en";
+
+    /// <summary>
+    /// Server-wide semicolon separated list of BCP-47 language codes to prioritize for <c>Series.LocalizedName</c>
+    /// </summary>
+    public string GlobalLocalizedNameLanguages { get; set; } = "ja-Latn";
+
+    /// <summary>
+    /// Per-library overrides of the global language priority, keyed by LibraryId.
+    /// </summary>
+    /// <remarks>An override fully replaces the global list for that library, it does not prepend to it.</remarks>
+    public Dictionary<int, SeriesNameLanguage> LibraryLanguageTitleOverrides { get; set; } = [];
+
+    /// <summary>
     /// Any Genres or Tags that if present, will trigger an Age Rating Override. Highest rating will be prioritized for matching.
     /// </summary>
     public Dictionary<string, AgeRating> AgeRatingMappings { get; set; }

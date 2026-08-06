@@ -4,6 +4,18 @@
   @if (isLoaded) {
     <form [formGroup]="settingsForm">
 
+      <!--
+        The page autosaves on every change, so an invalid control silently blocks saves for the whole form,
+        including panels that are collapsed. This has to be visible from anywhere on the page.
+      -->
+      @if (hasMalformedLanguageCodes()) {
+        <div class="alert alert-warning" role="alert">
+          <i class="fa-solid fa-triangle-exclamation me-2" aria-hidden="true"></i>
+          {{t('unsaved-changes-invalid')}}
+        </div>
+      }
+
+
       <div class="row g-0 mt-4 mb-4">
         <div class="col-md-6 col-sm-12">
           @if(settingsForm.get('enabled'); as formControl) {
@@ -46,9 +58,125 @@
         </div>
       </div>
 
+
       <div class="setting-section-break"></div>
 
+
       <div ngbAccordion [closeOthers]="false">
+        <div ngbAccordionItem="language-panel" [collapsed]="false">
+          <h2 class="accordion-header" ngbAccordionHeader>
+            <button ngbAccordionButton class="accordion-button" type="button">
+              {{t('language-header')}}
+            </button>
+          </h2>
+          <div ngbAccordionCollapse>
+            <div ngbAccordionBody>
+              <ng-template>
+                <p>{{t('language-description')}}</p>
+                
+                <ng-template #languageCodeField let-control let-id="id" let-label="label">
+                  <label class="form-label" [for]="id">{{label}}</label>
+                  <input type="text" class="form-control" [formControl]="control" [id]="id"
+                         [class.is-invalid]="control.errors?.malformedLanguageCodes"
+                         placeholder="en;ja-Latn;ja"
+                         [attr.aria-describedby]="id + '-feedback'" />
+                  <div class="language-code-feedback" [id]="id + '-feedback'">
+                    @if (control.errors?.malformedLanguageCodes; as malformed) {
+                      <span class="text-danger">
+                        {{t('language-code-malformed', {codes: malformed.join(', ')})}}
+                      </span>
+                    } @else if (warningCodesFor(control.value); as unknown) {
+                      @if (unknown.length > 0) {
+                        <span class="text-warning">
+                          {{t('language-code-unknown', {codes: unknown.join(', ')})}}
+                        </span>
+                      } @else if (resolvedLanguageNames(control.value); as resolved) {
+                        @if (resolved.length > 0) {
+                          <span class="text-muted">{{resolved.join(' → ')}}</span>
+                        }
+                      }
+                    }
+                  </div>
+                </ng-template>
+
+                @if(globalLanguageGroup; as globalGroup) {
+                  <div class="row g-3 mb-4" [formGroup]="globalGroup">
+                    <div class="col-md-6 col-12">
+                      <ng-container *ngTemplateOutlet="languageCodeField; context: {
+                        $implicit: globalGroup.get('name'),
+                        id: 'global-language-name',
+                        label: t('global-series-name-language-label')
+                      }" />
+                      <div class="form-text">{{t('global-series-name-language-tooltip')}}</div>
+                    </div>
+                    <div class="col-md-6 col-12">
+                      <ng-container *ngTemplateOutlet="languageCodeField; context: {
+                        $implicit: globalGroup.get('localizedName'),
+                        id: 'global-language-localized-name',
+                        label: t('global-series-name-localized-language-label')
+                      }" />
+                      <div class="form-text">{{t('global-series-name-localized-language-tooltip')}}</div>
+                    </div>
+                  </div>
+                }
+
+                <div class="setting-section-break"></div>
+
+                <h3 class="mt-3">
+                  <span>{{t('language-library-override-header')}}</span>
+                  <button class="btn btn-secondary btn-sm float-end" type="button"
+                          [disabled]="libraryLanguageOverrides.length >= libraries().length"
+                          (click)="addLibraryLanguageOverride()">
+                    <i class="fa-solid fa-plus" aria-hidden="true"></i>
+                    {{t('add')}}
+                  </button>
+                </h3>
+                <p class="text-muted">{{t('language-library-override-description')}}</p>
+
+                <div formArrayName="libraryLanguageTitleOverrides">
+                  @for (row of libraryLanguageOverrides.controls; track row; let i = $index) {
+                    <div class="row g-3 align-items-start mb-3" [formGroupName]="i">
+                      <div class="col-12">
+                        <label class="form-label" [for]="'language-override-library-' + i">{{t('language-override-library-label')}}</label>
+                        <div class="d-flex gap-2">
+                          <select class="form-select" formControlName="libraryId" [id]="'language-override-library-' + i">
+                            <option [ngValue]="null">{{t('language-override-library-placeholder')}}</option>
+                            @for (library of availableLibrariesFor(i); track library.id) {
+                              <option [ngValue]="library.id">{{library.name}}</option>
+                            }
+                          </select>
+                          <button class="btn btn-outline-danger" type="button" (click)="removeLibraryLanguageOverride(i)">
+                            <i class="fa-solid fa-trash" aria-hidden="true"></i>
+                            <span class="visually-hidden">{{t('language-override-remove')}}</span>
+                          </button>
+                        </div>
+                      </div>
+
+                      <div class="col-md-6 col-12">
+                        <ng-container *ngTemplateOutlet="languageCodeField; context: {
+                          $implicit: row.get('name'),
+                          id: 'language-override-name-' + i,
+                          label: t('global-series-name-language-label')
+                        }" />
+                      </div>
+                      <div class="col-md-6 col-12">
+                        <ng-container *ngTemplateOutlet="languageCodeField; context: {
+                          $implicit: row.get('localizedName'),
+                          id: 'language-override-localized-name-' + i,
+                          label: t('global-series-name-localized-language-label')
+                        }" />
+                      </div>
+                    </div>
+                  } @empty {
+                    <p class="text-muted">{{t('language-library-override-empty')}}</p>
+                  }
+                </div>
+
+              </ng-template>
+            </div>
+          </div>
+        </div>
+
         <div ngbAccordionItem="series-panel" [collapsed]="false">
           <h2 class="accordion-header" ngbAccordionHeader>
             <button ngbAccordionButton class="accordion-button" type="button">
@@ -58,6 +186,7 @@
           <div ngbAccordionCollapse>
             <div ngbAccordionBody>
               <ng-template>
+
                 <div class="row g-0 mt-4 mb-4">
                   @if(settingsForm.get('enableSummary'); as formControl) {
                     <app-setting-switch [title]="t('summary-label')" [subtitle]="t('summary-tooltip')">

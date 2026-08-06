@@ -207,7 +207,28 @@ public class MetadataController(IUnitOfWork unitOfWork, IExternalMetadataService
             {
                 Title = c.DisplayName,
                 IsoCode = c.IetfLanguageTag
-            }).Where(l => !string.IsNullOrEmpty(l.IsoCode));
+            })
+            .Where(l => !string.IsNullOrEmpty(l.IsoCode))
+            .OrderBy(name => name.Title);
+    }
+
+    /// <summary>
+    /// Returns a list of all BCP47 Languages. <c>IsoCode</c> stores the BCP47 code
+    /// </summary>
+    /// <returns></returns>
+    [HttpGet("all-bcp47-languages")]
+    [ResponseCache(CacheProfileName = ResponseCacheProfiles.Month)]
+    public IEnumerable<LanguageDto> GetAllBcp47Languages()
+    {
+        return CultureInfo.GetCultures(CultureTypes.AllCultures)
+            .Select(c =>
+                new LanguageDto()
+                {
+                    Title = c.DisplayName,
+                    IsoCode = c.Name
+                }).
+            Where(l => !string.IsNullOrEmpty(l.IsoCode))
+            .OrderBy(name => name.Title);
     }
 
     /// <summary>

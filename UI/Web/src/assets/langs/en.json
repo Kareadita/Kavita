@@ -1363,7 +1363,24 @@
         "dest-genre-tags-placeholder": "Destination genre/tag",
         "volume-header": "Volume",
         "enable-volume-cover-label": "Volume Cover",
-        "enable-volume-cover-tooltip": "Allow Kavita to set Volume covers"
+        "enable-volume-cover-tooltip": "Allow Kavita to set Volume covers",
+
+        "language-header": "Language",
+        "language-description": "Setup the priority order of languages that Kavita uses when setting Series Name/LocalizedName. You can add overrides just for specific libraries. Note that Localized Name will not always write if it will affect Series with 2 separate filenames.",
+        "global-series-name-language-label": "Name",
+        "global-series-name-language-tooltip": "Determines the order in which series name is prioritized. Separate BCP47 language codes with a semicolon. i.e. en;ja-Latn;ja",
+        "global-series-name-localized-language-label": "Localized Name",
+        "global-series-name-localized-language-tooltip": "Determines the order in which series localized name is prioritized. Separate BCP47 language codes with a semicolon. i.e. en;ja-Latn;ja",
+        "language-library-override-header": "Library Overrides",
+        "language-library-override-description": "A library override fully replaces the global order for that library, it does not add to it.",
+        "language-library-override-empty": "No library overrides. All libraries use the global order above.",
+        "language-override-library-label": "Library",
+        "language-override-library-placeholder": "Select a library",
+        "language-override-remove": "Remove override",
+        "language-code-malformed": "Not a valid language code: {{codes}}",
+        "language-code-unknown": "Unrecognized language code: {{codes}}. Double check the spelling, it will still be saved.",
+        "unsaved-changes-invalid": "Changes are not being saved. Fix the highlighted fields to resume saving.",
+        "add": "{{common.add}}"
     },
 
     "book-line-overlay": {
