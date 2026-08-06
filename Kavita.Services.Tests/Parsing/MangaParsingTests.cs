@@ -383,12 +383,60 @@ public class MangaParsingTests
     [InlineData("Blade Runner 2019 - Vol. 1.pdf", Parser.DefaultChapter)]
     [InlineData("Blade Runner 2019 - Tome 1.cbz", Parser.DefaultChapter)]
     [InlineData("Cyberpunk 2077 - Volume 2.cbz", Parser.DefaultChapter)]
-    // Sanity check: a bare number immediately before an abbreviated volume marker is still a valid chapter
-    [InlineData("Foo 50 v1.cbz", "50")]
+    // A bare number immediately before an abbreviated volume marker is part of the series title
+    // ("Foo 50", like "Golgo 13" or "Kaiju No. 8"), not a chapter number.
+    [InlineData("Foo 50 v1.cbz", Parser.DefaultChapter)]
     // A bare year in the title before an explicit Chapter marker should not be mistaken for the chapter number itself
     [InlineData("Blade Runner 2019 - Ch. 1.pdf", "1")]
     [InlineData("Blade Runner 2019 - Chapter 1.pdf", "1")]
     [InlineData("Blade Runner 2019 - Ch 1.pdf", "1")]
+    // GH #1534: a number embedded in the series title of a volume-only release should not be
+    // mistaken for a chapter number just because a Volume marker exists elsewhere in the filename.
+    // NOTE: as of this writing these are all FAILING - they document the bug, not a fix.
+    [InlineData("ACCA - 13-Territory Inspection Department v01 (2017) (Digital) (Uasaha).cbz", Parser.DefaultChapter)]
+    [InlineData("ACCA - 13-Territory Inspection Department P.S. v01 (2020) (Digital) (LuCaZ).cbz", Parser.DefaultChapter)]
+    [InlineData("Brave 10 v01 (2013) (Digital) (Lovag-Empire).cbz", Parser.DefaultChapter)]
+    [InlineData("Black Panther and Sweet 16 v01 (2017) (Digital) (danke-Empire).cbz", Parser.DefaultChapter)]
+    [InlineData("Boys Over Flowers Season 2 v01 (2017) (Digital) (ripper).cbz", Parser.DefaultChapter)]
+    [InlineData("Chillin' in Another World with Level 2 Super Cheat Powers v01 (2021) (Digital) (danke-Empire + nao).cbz", Parser.DefaultChapter)]
+    [InlineData("Cyborg 009 v01 (2003) (Digital) (BlurPixel-Empire).cbr", Parser.DefaultChapter)]
+    [InlineData("Dementia 21 v01 (2018) (digital) (tunafan).cbr", Parser.DefaultChapter)]
+    [InlineData("Golgo 13 v01 - Supergun (2006) (Digital) (danke-Empire).cbz", Parser.DefaultChapter)]
+    [InlineData("GTO - 14 Days in Shonan v01 (2022) (Digital) (danke-Empire).cbz", Parser.DefaultChapter)]
+    [InlineData("Level 1 Demon Lord & One Room Hero v01 (2021) (Digital) (danke-Empire).cbz", Parser.DefaultChapter)]
+    [InlineData("My Unique Skill Makes Me OP Even at Level 1 v01 (2021) (Digital) (danke-Empire) (F).cbz", Parser.DefaultChapter)]
+    [InlineData("Otherworldly Munchkin - Let's Speedrun the Dungeon with Only 1 HP! v01 (2020) (Digital) (danke-Empire) (F).cbz", Parser.DefaultChapter)]
+    [InlineData("Rosario+Vampire Season 2 v01 (2010) (Digital) (LostNerevarine-Empire).cbz", Parser.DefaultChapter)]
+    [InlineData("Samurai 8 v01 (2020) (Digital) (danke-Empire).cbz", Parser.DefaultChapter)]
+    [InlineData("Samurai 8 - The Tale of Hachimaru v01 (2020) (Digital) (danke-Empire).cbz", Parser.DefaultChapter)]
+    [InlineData("Saving 80,000 Gold in Another World for my Retirement v01 (2019) (Digital) (danke-Empire).cbz", Parser.DefaultChapter)]
+    [InlineData("Sekirei v19 - 365 Days Without Her (2018) (Digital) (RedRain).cbz", Parser.DefaultChapter)]
+    [InlineData("Sex Ed 120% v01 (2021) (Digital) (danke-Empire).cbz", Parser.DefaultChapter)]
+    [InlineData("Higurashi When They Cry - Arc 1 - Abducted by Demons Arc v01 (2008) (Digital) (LuCaZ).cbz", Parser.DefaultChapter)]
+    [InlineData("Higurashi When They Cry - Arc 9 - Dice Killing Arc (2014) (Digital) (LuCaZ).cbz", Parser.DefaultChapter)]
+    [InlineData("Umineko When They Cry - Episode 1 - Legend of the Golden Witch v01 (2-in-1 Edition) (2012) (Digital SD) (Ushi) (Spreads Joined).cbz", Parser.DefaultChapter)]
+    [InlineData("Umineko When They Cry - Episode 8 - Twilight of the Golden Witch v01 (3-in-1 Edition) (2019) (Digital SD) (Ushi) (Spreads Joined).cbz", Parser.DefaultChapter)]
+    [InlineData("JoJo's Bizarre Adventure - Part 1 - Phantom Blood v01 (2014) (Digital) (BlackManta-Empire).cbz", Parser.DefaultChapter)]
+    [InlineData("JoJo's Bizarre Adventure - Part 5 - Golden Wind v01 (2021) (Digital) (1r0n) (f2).cbz", Parser.DefaultChapter)]
+    [InlineData("Ascendance of a Bookworm - Part 01 v01 (2021) (Digital) (Ushi).cbz", Parser.DefaultChapter)]
+    [InlineData("Ascendance of a Bookworm - Part 02 v01 (2021) (Digital) (Ushi).cbz", Parser.DefaultChapter)]
+    [InlineData("Rose Guns Days - Season 1 v01 (2015) (Digital) (LuCaZ).cbz", Parser.DefaultChapter)]
+    [InlineData("Rose Guns Days - Season 2 v01 (2016) (Digital) (LuCaZ).cbz", Parser.DefaultChapter)]
+    [InlineData("Showa - A History of Japan v01 - 1926-1939 (2013) (Digital) (XRA-Empire).cbz", Parser.DefaultChapter)]
+    [InlineData("Showa - A History of Japan v02 - 1939-1944 (2014) (Digital) (XRA-Empire).cbz", Parser.DefaultChapter)]
+    [InlineData("Showa - A History of Japan v03 - 1944-1953 (2014) (Digital) (XRA-Empire).cbz", Parser.DefaultChapter)]
+    [InlineData("Showa - A History of Japan v04 - 1953-1989 (2015) (Digital) (XRA-Empire).cbz", Parser.DefaultChapter)]
+    [InlineData("Path of the Assassin v09 - Battle for Power Part 1 (2008) (Digital) (Lovag-Empire).cbz", Parser.DefaultChapter)]
+    [InlineData("Path of the Assassin v10 - Battle for Power Part 2 (2008) (Digital) (Lovag-Empire).cbz", Parser.DefaultChapter)]
+    [InlineData("Kaiju No. 8 v01 (2021) (Digital) (1r0n) (f).cbz", Parser.DefaultChapter)]
+    [InlineData("No. 5 v01 (2021) (Digital) (1r0n) (f2).cbz", Parser.DefaultChapter)]
+    [InlineData("No. 6 v1 (2015) (Digital) (ripper).cbz", Parser.DefaultChapter)]
+    [InlineData("ReZERO -Starting Life in Another World- Chapter 1 - A Day in the Capital v01 (2016) (Digital) (LuCaZ).cbz", Parser.DefaultChapter)]
+    [InlineData("ReZERO -Starting Life in Another World- Chapter 2 - A Week at the Mansion v01 (2017) (Digital) (LuCaZ).cbz", Parser.DefaultChapter)]
+    [InlineData("ReZERO -Starting Life in Another World- Chapter 3 - Truth of Zero v01 (2017) (Digital) (LuCaZ).cbz", Parser.DefaultChapter)]
+    // GH #1534: ripper tag "c1fi7" (a scanlation group's name, not a chapter marker) gets misread as "c1"
+    [InlineData("No. 6 v1 (2015) (Digital) (c1fi7).cbz", Parser.DefaultChapter)]
+    [InlineData("Some Manga v01 (2015) (Digital) (Mr. Kimiko-c1fi7).cbz", Parser.DefaultChapter)]
     public void ParseChaptersTest(string filename, string expected)
     {
         Assert.Equal(expected, Parser.ParseChapter(filename, LibraryType.Manga));

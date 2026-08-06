@@ -628,8 +628,10 @@ public static partial class Parser
             @"(?<Volume>((เล่ม|เล่มที่))?(\s|_)?\.?\d+)(\s|_)(บทที่|ตอนที่)\.?(\s|_)?(?<Chapter>\d+)",
             MatchOptions, RegexTimeout),
         // Historys Strongest Disciple Kenichi_v11_c90-98.zip, ...c90.5-100.5
+        // Trailing (?(Range)|(?![a-zA-Z])) keeps this from matching inside ripper/scanlator tags like "(c1fi7)"
+        // (a bare short number glued to more letters) while still allowing ranges like c001-006x1.
         new Regex(
-            @"(\b|_)(c|ch)(\.?\s?)(?<Chapter>(\d+(\.\d)?)(-c?\d+(\.\d)?)?)",
+            @"(\b|_)(c|ch)(\.?\s?)(?<Chapter>(\d+(\.\d)?)(?<Range>-c?\d+(\.\d)?)?)(?(Range)|(?![a-zA-Z]))",
             MatchOptions, RegexTimeout),
         // [Suihei Kiki]_Kasumi_Otoko_no_Ko_[Taruby]_v1.1.zip
         new Regex(
@@ -668,16 +670,19 @@ public static partial class Parser
             @"^(?<Series>.+?)\schapter(?:s)?\s(?<Chapter>\d+-\d+)",
             MatchOptions, RegexTimeout),
         // Hinowa ga CRUSH! 018 (2019) (Digital) (LuCaZ).cbz, Hinowa ga CRUSH! 018.5 (2019) (Digital) (LuCaZ).cbz
+        // EXPERIMENTAL: extra (?!.*\bv\.?\d) / (?!.*\b(?:vol(?:ume)?|tome)\.?\s*\d) reject if ANY volume marker
+        // (including bare v01) appears anywhere later in the filename, not just immediately after the number.
         new Regex(
-            @"^(?<Series>.+?)(?<!Vol)(?<!Vol.)(?<!Volume)(?<!Tome)\s(\d\s)?(?<Chapter>\d+(?:\.\d+|-\d+)?)(?![\d.권])(?:\s\(\d{4}\))?(?!\d)(?![\s_]*-?[\s_]*(?:vol(?:ume)?|tome)(?![a-zA-Z]))(\b|_|-)",
+            @"^(?<Series>.+?)(?<!Vol)(?<!Vol.)(?<!Volume)(?<!Tome)\s(\d\s)?(?<Chapter>\d+(?:\.\d+|-\d+)?)(?![\d.권])(?:\s\(\d{4}\))?(?!\d)(?![\s_]*-?[\s_]*(?:vol(?:ume)?|tome)(?![a-zA-Z]))(?!.*\bv\.?\d)(?!.*\b(?:vol(?:ume)?|tome)\.?\s*\d)(?<!\bv\.?\d.*)(?<!\b(?:vol(?:ume)?|tome)\.?\s*\d.*)(\b|_|-)",
             MatchOptions, RegexTimeout),
         // Tower Of God S01 014 (CBT) (digital).cbz
         new Regex(
             @"(?<Series>.*)\sS(?<Volume>\d+)\s(?<Chapter>\d+(?:.\d+|-\d+)?)",
             MatchOptions, RegexTimeout),
         // Beelzebub_01_[Noodles].zip, Beelzebub_153b_RHS.zip
+        // EXPERIMENTAL: same "volume marker anywhere later" reject as the Hinowa-style regex above.
         new Regex(
-            @"^((?!v|vo|vol|Volume).)*(\s|_)(?<Chapter>\.?\d+(?:.\d+|-\d+)?)(?<Part>b)?(?!\d)(?![\s_]*-?[\s_]*(?:vol(?:ume)?|tome)(?![a-zA-Z]))(\s|_|\[|\()",
+            @"^((?!v|vo|vol|Volume).)*(\s|_)(?<Chapter>\.?\d+(?:.\d+|-\d+)?)(?<Part>b)?(?!\d)(?![\s_]*-?[\s_]*(?:vol(?:ume)?|tome)(?![a-zA-Z]))(?!.*\bv\.?\d)(?!.*\b(?:vol(?:ume)?|tome)\.?\s*\d)(\s|_|\[|\()",
             MatchOptions, RegexTimeout),
         // Yumekui-Merry_DKThias_Chapter21.zip
         new Regex(
