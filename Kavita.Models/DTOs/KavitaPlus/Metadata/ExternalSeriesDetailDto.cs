@@ -17,6 +17,8 @@ public sealed record ExternalSeriesDetailDto
     public Dictionary<string, IList<LocalizedTitleDto>> LocalizedTitles { get; set; } = [];
     public int? AniListId { get; set; }
     public long? MALId { get; set; }
+    public ALMediaTitle Titles { get; set; } = new();
+    public Dictionary<string, IList<LocalizedTitleDto>> LocalizedTitles { get; set; } = [];
     /// <summary>
     /// ComicBookRoundup Id for direct matching
     /// </summary>
@@ -58,4 +60,19 @@ public sealed record ExternalSeriesDetailDto
 
     public IList<ExternalEditionDto> Editions { get; set; } = [];
 
+}
+
+public sealed record LocalizedTitleDto
+{
+    public string Title { get; init; } = string.Empty;
+
+    /// <summary>
+    /// The provider's preferred title within this language.
+    /// </summary>
+    public bool IsPrimary { get; init; }
+
+    /// <summary>
+    /// An officially licensed title, as opposed to a fan or community translation.
+    /// </summary>
+    public bool IsOfficial { get; init; }
 }

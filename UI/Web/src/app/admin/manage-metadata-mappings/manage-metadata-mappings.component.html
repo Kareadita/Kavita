@@ -1,30 +1,18 @@
 <ng-container *transloco="let t; prefix: 'manage-metadata-settings'" [formGroup]="settingsForm()">
 
-  <div class="row g-0 align-items-start mb-4">
-    <div class="col">
-      <app-setting-multi-text-field
-        [title]="t('blacklist-label')"
-        [tooltip]="t('blacklist-tooltip')"
-        formControlName="blacklist"
-      />
-    </div>
-  </div>
+  <div ngbAccordion [closeOthers]="false">
+    <div ngbAccordionItem="age-rating-panel" [collapsed]="ageRatingCollapsed()">
+      <h2 class="accordion-header" ngbAccordionHeader>
+        <button ngbAccordionButton class="accordion-button" type="button">
+          {{t('age-rating-mapping-title')}}
+        </button>
+      </h2>
+      <div ngbAccordionCollapse>
+        <div ngbAccordionBody>
+          <ng-template>
+            <p>{{t('age-rating-mapping-description')}}</p>
 
-
-  <div class="row g-0 mt-4 mb-4">
-    <app-setting-multi-text-field
-      [title]="t('whitelist-label')"
-      [tooltip]="t('whitelist-tooltip')"
-      formControlName="whitelist"
-    />
-  </div>
-
-  <div class="setting-section-break"></div>
-
-  <h4 id="age-rating-header">{{t('age-rating-mapping-title')}}</h4>
-  <p>{{t('age-rating-mapping-description')}}</p>
-
-  <div formArrayName="ageRatingMappings">
+            <div formArrayName="ageRatingMappings">
     @for(mapping of ageRatingMappings.controls; track mapping; let i = $index) {
       <div [formGroupName]="i" class="row mb-2">
         <div class="col-md-4 d-flex align-items-center justify-content-center">
@@ -63,13 +51,23 @@
     }
 
 
-  </div>
+            </div>
+          </ng-template>
+        </div>
+      </div>
+    </div>
 
-  <div class="setting-section-break"></div>
-
-  <h4 id="field-mapping-header">{{t('field-mapping-title')}}</h4>
-  <p>{{t('field-mapping-description')}}</p>
-  <div formArrayName="fieldMappings">
+    <div ngbAccordionItem="field-mapping-panel" [collapsed]="fieldMappingCollapsed()">
+      <h2 class="accordion-header" ngbAccordionHeader>
+        <button ngbAccordionButton class="accordion-button" type="button">
+          {{t('field-mapping-title')}}
+        </button>
+      </h2>
+      <div ngbAccordionCollapse>
+        <div ngbAccordionBody>
+          <ng-template>
+            <p>{{t('field-mapping-description')}}</p>
+            <div formArrayName="fieldMappings">
     @for (mapping of fieldMappings.controls; track mapping; let i = $index) {
       <div [formGroupName]="i" class="row mb-2">
         <div class="col-md-2">
@@ -121,5 +119,10 @@
       </button>
     }
 
+            </div>
+          </ng-template>
+        </div>
+      </div>
+    </div>
   </div>
 </ng-container>

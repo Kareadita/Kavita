@@ -25,6 +25,17 @@ import {
 } from "../manage-metadata-mappings/manage-metadata-mappings.component";
 import {RouterLink} from "@angular/router";
 import {SettingsTabId} from "../../sidenav/preference-nav/preference-nav.component";
+import {
+  NgbAccordionBody,
+  NgbAccordionButton,
+  NgbAccordionCollapse,
+  NgbAccordionDirective,
+  NgbAccordionHeader,
+  NgbAccordionItem
+} from "@ng-bootstrap/ng-bootstrap";
+import {
+  SettingMultiTextFieldComponent
+} from "../../settings/_components/setting-multi-text-field/setting-multi-text-field.component";
 
 
 @Component({
@@ -37,7 +48,13 @@ import {SettingsTabId} from "../../sidenav/preference-nav/preference-nav.compone
     MetadataSettingFiledPipe,
     ManageMetadataMappingsComponent,
     RouterLink,
-
+    NgbAccordionDirective,
+    NgbAccordionItem,
+    NgbAccordionHeader,
+    NgbAccordionButton,
+    NgbAccordionCollapse,
+    NgbAccordionBody,
+    SettingMultiTextFieldComponent,
   ],
   templateUrl: './manage-metadata-settings.component.html',
   styleUrl: './manage-metadata-settings.component.scss',
@@ -86,6 +103,9 @@ export class ManageMetadataSettingsComponent implements OnInit {
 
 
       this.settingsForm.addControl('enableVolumeCoverImage', new FormControl(settings.enableVolumeCoverImage, []));
+
+      this.settingsForm.addControl('blacklist', new FormControl(settings.blacklist, []));
+      this.settingsForm.addControl('whitelist', new FormControl(settings.whitelist, []));
 
       this.settingsForm.addControl('firstLastPeopleNaming', new FormControl((settings.firstLastPeopleNaming), []));
       this.settingsForm.addControl('personRoles', this.fb.group(
