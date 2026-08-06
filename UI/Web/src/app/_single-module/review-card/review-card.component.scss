@@ -33,8 +33,10 @@
 }
 
 .card-text.no-images {
-    text-overflow: ellipsis;
-    overflow: hidden;
+  -webkit-line-clamp: 5;
+  -webkit-box-orient: vertical;
+  text-overflow: ellipsis;
+  overflow: hidden;
 }
 
 .no-images img {
@@ -55,8 +57,9 @@
 }
 
 .card-body {
-    display: block;
-    visibility: visible;
-    min-height: 5.8438rem;
-    max-height: 5.8438rem;
+  display: block;
+  visibility: visible;
+  min-height: 5.8438rem;
+  max-height: 5.8438rem;
+  overflow: hidden;
 }
