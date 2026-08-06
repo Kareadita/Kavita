@@ -42,3 +42,7 @@
 .drag-handle {
   cursor: grab;
 }
+
+.side-nav-item.closed .side-nav-text {
+  display: none;
+}
