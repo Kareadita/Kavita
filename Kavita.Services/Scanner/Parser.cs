@@ -584,7 +584,7 @@ public static partial class Parser
             MatchOptions, RegexTimeout),
         // Invincible 070.5 - Invincible Returns 1 (2010) (digital) (Minutemen-InnerDemons).cbr
         new Regex(
-            @"^(?<Series>.+?)(?:\s|_)(c? ?(chapter)?)(?<Chapter>(\d+(\.\d)?)-?(\d+(\.\d)?)?)(c? ?)-",
+            @"^(?<Series>.+?)(?<!Vol)(?<!Vol.)(?<!Volume)(?<!Tome)(?:\s|_)(c? ?(chapter)?)(?<Chapter>(\d+(\.\d)?)-?(\d+(\.\d)?)?)(?!\d)(?![\s_]*-?[\s_]*(?:vol(?:ume)?|tome)(?![a-zA-Z]))(c? ?)-",
             MatchOptions, RegexTimeout),
         // Batgirl Vol.2000 #57 (December, 2004)
         new Regex(
@@ -601,7 +601,7 @@ public static partial class Parser
             MatchOptions, RegexTimeout),
         // Batman & Catwoman - Trail of the Gun 01, Batman & Grendel (1996) 01 - Devil's Bones, Teen Titans v1 001 (1966-02) (digital) (OkC.O.M.P.U.T.O.-Novus)
         new Regex(
-            @"^(?<Series>.+?)(?: (?<Chapter>\d+))",
+            @"^(?<Series>.+?)(?<!Vol)(?<!Vol.)(?<!Volume)(?<!Tome)(?: (?<Chapter>\d+))(?!\d)(?![\s_]*-?[\s_]*(?:vol(?:ume)?|tome)(?![a-zA-Z]))",
             MatchOptions, RegexTimeout),
         // Saga 001 (2012) (Digital) (Empire-Zone)
         new Regex(
@@ -669,7 +669,7 @@ public static partial class Parser
             MatchOptions, RegexTimeout),
         // Hinowa ga CRUSH! 018 (2019) (Digital) (LuCaZ).cbz, Hinowa ga CRUSH! 018.5 (2019) (Digital) (LuCaZ).cbz
         new Regex(
-            @"^(?<Series>.+?)(?<!Vol)(?<!Vol.)(?<!Volume)\s(\d\s)?(?<Chapter>\d+(?:\.\d+|-\d+)?)(?![\d.권])(?:\s\(\d{4}\))?(\b|_|-)",
+            @"^(?<Series>.+?)(?<!Vol)(?<!Vol.)(?<!Volume)(?<!Tome)\s(\d\s)?(?<Chapter>\d+(?:\.\d+|-\d+)?)(?![\d.권])(?:\s\(\d{4}\))?(?!\d)(?![\s_]*-?[\s_]*(?:vol(?:ume)?|tome)(?![a-zA-Z]))(\b|_|-)",
             MatchOptions, RegexTimeout),
         // Tower Of God S01 014 (CBT) (digital).cbz
         new Regex(
@@ -677,7 +677,7 @@ public static partial class Parser
             MatchOptions, RegexTimeout),
         // Beelzebub_01_[Noodles].zip, Beelzebub_153b_RHS.zip
         new Regex(
-            @"^((?!v|vo|vol|Volume).)*(\s|_)(?<Chapter>\.?\d+(?:.\d+|-\d+)?)(?<Part>b)?(\s|_|\[|\()",
+            @"^((?!v|vo|vol|Volume).)*(\s|_)(?<Chapter>\.?\d+(?:.\d+|-\d+)?)(?<Part>b)?(?!\d)(?![\s_]*-?[\s_]*(?:vol(?:ume)?|tome)(?![a-zA-Z]))(\s|_|\[|\()",
             MatchOptions, RegexTimeout),
         // Yumekui-Merry_DKThias_Chapter21.zip
         new Regex(

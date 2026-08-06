@@ -91,6 +91,10 @@ public class MangaParsingTests
     [InlineData("The Space Pirate COBRA v11 - Magic Doll Vol.1 [MDKM] (Creek & River)", "11")]
     [InlineData("Pokémon Adventures v04 - Yellow v01 (AnHeroGold-Empire)", "4")]
     [InlineData("조선왕조실톡 106권", "106")]
+    // Bare year before an explicit Volume/Tome marker should not be swallowed into the volume number
+    [InlineData("Blade Runner 2019 - Volume 1.pdf", "1")]
+    [InlineData("Cyberpunk 2077 - Volume 2.cbz", "2")]
+    [InlineData("Blade Runner 2019 - Tome 1.cbz", "1")]
     public void ParseVolumeTest(string filename, string expected)
     {
         Assert.Equal(expected, Parser.ParseVolume(filename, LibraryType.Manga));
@@ -369,6 +373,15 @@ public class MangaParsingTests
     [InlineData("Naruto v2.5", Parser.DefaultChapter)]
     [InlineData("조선왕조실톡 106화", "106")]
     [InlineData("나루토 1.5권", Parser.DefaultChapter)]
+    // A bare year in the title before an explicit Volume/Tome marker should not be mistaken for a chapter number
+    [InlineData("Blade Runner 2019 - Volume 1.pdf", Parser.DefaultChapter)]
+    [InlineData("Blade Runner 2019 - Volume 1", Parser.DefaultChapter)]
+    [InlineData("Blade_Runner_2019_-_Volume_1", Parser.DefaultChapter)]
+    [InlineData("Blade Runner 2019 - Vol. 1.pdf", Parser.DefaultChapter)]
+    [InlineData("Blade Runner 2019 - Tome 1.cbz", Parser.DefaultChapter)]
+    [InlineData("Cyberpunk 2077 - Volume 2.cbz", Parser.DefaultChapter)]
+    // Sanity check: a bare number immediately before an abbreviated volume marker is still a valid chapter
+    [InlineData("Foo 50 v1.cbz", "50")]
     public void ParseChaptersTest(string filename, string expected)
     {
         Assert.Equal(expected, Parser.ParseChapter(filename, LibraryType.Manga));
