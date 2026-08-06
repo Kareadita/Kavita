@@ -95,6 +95,9 @@ public class MangaParsingTests
     [InlineData("Blade Runner 2019 - Volume 1.pdf", "1")]
     [InlineData("Cyberpunk 2077 - Volume 2.cbz", "2")]
     [InlineData("Blade Runner 2019 - Tome 1.cbz", "1")]
+    // A bare year before an explicit Chapter marker (no volume marker present) should not leak into the volume either
+    [InlineData("Blade Runner 2019 - Ch. 1.pdf", Parser.LooseLeafVolume)]
+    [InlineData("Blade Runner 2019 - Chapter 1.pdf", Parser.LooseLeafVolume)]
     public void ParseVolumeTest(string filename, string expected)
     {
         Assert.Equal(expected, Parser.ParseVolume(filename, LibraryType.Manga));
@@ -382,6 +385,10 @@ public class MangaParsingTests
     [InlineData("Cyberpunk 2077 - Volume 2.cbz", Parser.DefaultChapter)]
     // Sanity check: a bare number immediately before an abbreviated volume marker is still a valid chapter
     [InlineData("Foo 50 v1.cbz", "50")]
+    // A bare year in the title before an explicit Chapter marker should not be mistaken for the chapter number itself
+    [InlineData("Blade Runner 2019 - Ch. 1.pdf", "1")]
+    [InlineData("Blade Runner 2019 - Chapter 1.pdf", "1")]
+    [InlineData("Blade Runner 2019 - Ch 1.pdf", "1")]
     public void ParseChaptersTest(string filename, string expected)
     {
         Assert.Equal(expected, Parser.ParseChapter(filename, LibraryType.Manga));

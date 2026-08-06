@@ -578,9 +578,9 @@ public static partial class Parser
         new Regex(
             @"^(?<Series>.+?)(?:\s|_)#(?<Chapter>\d+)",
             MatchOptions, RegexTimeout),
-        // Batman 2016 - Chapter 01, Batman 2016 - Issue 01, Batman 2016 - Issue #01
+        // Batman 2016 - Chapter 01, Batman 2016 - Issue 01, Batman 2016 - Issue #01, Blade Runner 2019 - Ch. 01
         new Regex(
-            @"^(?<Series>.+?)((c(hapter)?)|issue)(_|\s)#?(?<Chapter>(\d+(\.\d)?)-?(\d+(\.\d)?)?)",
+            @"^(?<Series>.+?)((chapter|ch|c)\.?|issue)(_|\s)#?(?<Chapter>(\d+(\.\d)?)-?(\d+(\.\d)?)?)",
             MatchOptions, RegexTimeout),
         // Invincible 070.5 - Invincible Returns 1 (2010) (digital) (Minutemen-InnerDemons).cbr
         new Regex(

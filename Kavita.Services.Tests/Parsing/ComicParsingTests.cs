@@ -122,6 +122,9 @@ public class ComicParsingTests
     // Bare year before an explicit Vol./Tome marker should not be swallowed into the volume number
     [InlineData("Blade Runner 2019 - Vol. 1.pdf", "1")]
     [InlineData("Blade Runner 2019 - Tome 1.cbz", "1")]
+    // A bare year before an explicit Chapter marker (no volume marker present) should not leak into the volume either
+    [InlineData("Blade Runner 2019 - Ch. 1.pdf", Parser.LooseLeafVolume)]
+    [InlineData("Blade Runner 2019 - Chapter 1.pdf", Parser.LooseLeafVolume)]
     public void ParseComicVolumeTest(string filename, string expected)
     {
         Assert.Equal(expected, Parser.ParseComicVolume(filename));
@@ -179,6 +182,9 @@ public class ComicParsingTests
     [InlineData("Blade Runner 2019 - Vol. 1.pdf", Parser.DefaultChapter)]
     [InlineData("Blade Runner 2019 - Tome 1.cbz", Parser.DefaultChapter)]
     [InlineData("Cyberpunk 2077 - Volume 2.cbz", Parser.DefaultChapter)]
+    // A bare year before an explicit Chapter marker should not stop the actual chapter number from being parsed
+    [InlineData("Blade Runner 2019 - Ch. 1.pdf", "1")]
+    [InlineData("Blade Runner 2019 - Chapter 1.pdf", "1")]
     public void ParseComicChapterTest(string filename, string expected)
     {
         Assert.Equal(expected, Parser.ParseChapter(filename, LibraryType.Comic));
