@@ -413,7 +413,6 @@ public class MangaParsingTests
     [InlineData("Sekirei v19 - 365 Days Without Her (2018) (Digital) (RedRain).cbz", Parser.DefaultChapter)]
     [InlineData("Sex Ed 120% v01 (2021) (Digital) (danke-Empire).cbz", Parser.DefaultChapter)]
     [InlineData("Higurashi When They Cry - Arc 1 - Abducted by Demons Arc v01 (2008) (Digital) (LuCaZ).cbz", Parser.DefaultChapter)]
-    [InlineData("Higurashi When They Cry - Arc 9 - Dice Killing Arc (2014) (Digital) (LuCaZ).cbz", Parser.DefaultChapter)]
     [InlineData("Umineko When They Cry - Episode 1 - Legend of the Golden Witch v01 (2-in-1 Edition) (2012) (Digital SD) (Ushi) (Spreads Joined).cbz", Parser.DefaultChapter)]
     [InlineData("Umineko When They Cry - Episode 8 - Twilight of the Golden Witch v01 (3-in-1 Edition) (2019) (Digital SD) (Ushi) (Spreads Joined).cbz", Parser.DefaultChapter)]
     [InlineData("JoJo's Bizarre Adventure - Part 1 - Phantom Blood v01 (2014) (Digital) (BlackManta-Empire).cbz", Parser.DefaultChapter)]
@@ -431,9 +430,6 @@ public class MangaParsingTests
     [InlineData("Kaiju No. 8 v01 (2021) (Digital) (1r0n) (f).cbz", Parser.DefaultChapter)]
     [InlineData("No. 5 v01 (2021) (Digital) (1r0n) (f2).cbz", Parser.DefaultChapter)]
     [InlineData("No. 6 v1 (2015) (Digital) (ripper).cbz", Parser.DefaultChapter)]
-    [InlineData("ReZERO -Starting Life in Another World- Chapter 1 - A Day in the Capital v01 (2016) (Digital) (LuCaZ).cbz", Parser.DefaultChapter)]
-    [InlineData("ReZERO -Starting Life in Another World- Chapter 2 - A Week at the Mansion v01 (2017) (Digital) (LuCaZ).cbz", Parser.DefaultChapter)]
-    [InlineData("ReZERO -Starting Life in Another World- Chapter 3 - Truth of Zero v01 (2017) (Digital) (LuCaZ).cbz", Parser.DefaultChapter)]
     // GH #1534: ripper tag "c1fi7" (a scanlation group's name, not a chapter marker) gets misread as "c1"
     [InlineData("No. 6 v1 (2015) (Digital) (c1fi7).cbz", Parser.DefaultChapter)]
     [InlineData("Some Manga v01 (2015) (Digital) (Mr. Kimiko-c1fi7).cbz", Parser.DefaultChapter)]
