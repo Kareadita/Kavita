@@ -155,6 +155,8 @@ export class GenericFilterFieldPipe implements PipeTransform {
         return translate('filter-field-pipe.average-rating');
       case SeriesFilterField.FileSize:
         return translate('filter-field-pipe.file-size');
+      case SeriesFilterField.CollapseSeriesRelationships:
+        return translate('filter-field-pipe.collapse-series-relationships');
       default:
         throw new Error(`Invalid FilterField value: ${value}`);
     }

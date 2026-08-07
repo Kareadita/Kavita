@@ -4153,7 +4153,8 @@
         "read-date": "Reading Date",
         "read-last": "Read Last",
         "average-rating": "Average rating",
-        "file-size": "File size"
+        "file-size": "File size",
+        "collapse-series-relationships": "{{user-preferences.collapse-series-relationships-label}}"
     },
 
     "filter-entity-type-pipe": {

@@ -37,6 +37,7 @@ export enum SeriesFilterField
     Location = 31,
     ReadLast = 32,
     FileSize = 33,
+    CollapseSeriesRelationships = 34,
 }
 
 

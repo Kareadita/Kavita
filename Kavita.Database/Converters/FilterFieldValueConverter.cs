@@ -106,6 +106,7 @@ public static class SeriesFilterFieldValueConverter
             SeriesFilterField.ReadTime => string.IsNullOrEmpty(value) ? 0 : int.Parse(value),
             SeriesFilterField.AverageRating => string.IsNullOrEmpty(value) ? 0f : value.AsFloat(),
             SeriesFilterField.FileSize => value.ParseHumanReadableBytes(),
+            SeriesFilterField.CollapseSeriesRelationships => bool.Parse(value),
             _ => throw new ArgumentException("Invalid field type")
         };
     }
