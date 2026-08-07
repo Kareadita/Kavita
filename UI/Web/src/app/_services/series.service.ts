@@ -22,6 +22,7 @@ import {QueryContext} from "../_models/metadata/v2/query-context";
 import {ExternalSeriesMatch} from "../_models/series-detail/external-series-match";
 import {SeriesFilterField} from "../_models/metadata/v2/series-filter-field";
 import {MatchSeriesInfo} from "../_models/kavitaplus/match-series-info";
+import {MetadataProvider} from "../_models/kavitaplus/metadata-provider.enum";
 
 @Injectable({
   providedIn: 'root'
@@ -266,6 +267,10 @@ export class SeriesService {
 
   updateDontMatch(seriesId: number, dontMatch: boolean) {
     return this.httpClient.post<string>(this.baseUrl + `series/dont-match?seriesId=${seriesId}&dontMatch=${dontMatch}`, {}, TextResonse);
+  }
+
+  updateMetadataProviderOverride(seriesId: number, metadataProviderOverride: MetadataProvider | null) {
+    return this.httpClient.post(this.baseUrl + 'series/update-metadata-provider-override', {seriesId, metadataProviderOverride});
   }
 
   getSeriesWithAnnotations() {

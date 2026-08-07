@@ -11,6 +11,8 @@ export interface MatchSeriesInfo {
   libraryType: LibraryType;
   matchedProvider?: MetadataProvider | null;
   primaryProvider: MetadataProvider;
+  /** If set, this Series overrides its Library's default Metadata Provider */
+  metadataProviderOverride?: MetadataProvider | null;
   seriesFormat: MangaFormat;
   mangaBakaId?: number;
   /** The currently selected MangaBaka edition, if any */

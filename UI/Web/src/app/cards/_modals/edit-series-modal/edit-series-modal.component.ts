@@ -68,7 +68,7 @@ import {Volume} from "../../../_models/volume";
 import {ConfirmService} from "../../../shared/confirm.service";
 import {EditModalShellComponent} from "../../../shared/edit-modal-shell/edit-modal-shell.component";
 import {EditTabDirective} from "../../../shared/_directive/edit-tab.directive";
-import {MetadataProvider} from "src/app/_models/kavitaplus/metadata-provider.enum";
+import {AllMetadataProviders, MetadataProvider} from "src/app/_models/kavitaplus/metadata-provider.enum";
 import {MetadataProviderTitlePipe} from "../../../_pipes/metadata-provider-title.pipe";
 
 
@@ -144,7 +144,7 @@ export class EditSeriesModalComponent implements OnInit {
   libraryName: string | undefined = undefined;
   size: number = 0;
   libraryType = signal<LibraryType>(LibraryType.Manga);
-  protected readonly allMetadataProviders = [MetadataProvider.Hardcover, MetadataProvider.Mangabaka, MetadataProvider.ComicBookRoundup];
+  protected readonly allMetadataProviders = AllMetadataProviders;
 
 
   // Typeaheads

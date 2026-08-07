@@ -1850,7 +1850,8 @@
         "special-count": "{{match-series-result-item.special-count}}",
         "matched-to": "Currently matched to",
         "searching-against": "Searching against {{provider}}",
-        "change-provider-help": "You can change which provider to use in Library settings",
+        "change-provider-help": "Choose a different provider to search against for this series",
+        "metadata-provider-override-default": "Use Library Default",
         "is-standalone-label": "Is standalone",
         "is-standalone-tooltip": "Enable if this series represents a single book, and hardcover doesn't have a series entry for it"
     },

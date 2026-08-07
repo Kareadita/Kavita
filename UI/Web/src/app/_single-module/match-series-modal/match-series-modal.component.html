@@ -71,16 +71,24 @@
           <i class="fas fa-database" aria-hidden="true"></i>
         </div>
 
-        <div class="flex-grow-1 min-w-0">
+        <div class="flex-grow-1 min-w-0" [formGroup]="formGroup">
           <div class="d-flex align-items-center gap-2 flex-wrap">
             <span class="fw-semibold small text-truncate">
               {{t('searching-against', {provider: match.primaryProvider! | metadataProviderTitle })}}
             </span>
           </div>
 
-          <div class="small text-muted">
+          <div class="small text-muted mb-1">
             {{t('change-provider-help')}}
           </div>
+
+          <select class="form-select form-select-sm w-auto" formControlName="metadataProviderOverride"
+                  [attr.aria-label]="t('change-provider-help')">
+            <option [ngValue]="null">{{ t('metadata-provider-override-default') }}</option>
+            @for (provider of allMetadataProviders; track provider) {
+              <option [ngValue]="provider">{{ provider | metadataProviderTitle }}</option>
+            }
+          </select>
         </div>
 
         @if (match.primaryProvider === MetadataProvider.Hardcover) {

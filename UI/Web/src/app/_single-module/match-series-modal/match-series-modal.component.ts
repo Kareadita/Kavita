@@ -30,7 +30,7 @@ import {
   ScrobbleProviderTagBadgeComponent
 } from "../../shared/_components/scrobble-provider-tag-badge/scrobble-provider-tag-badge.component";
 import {MatchSeriesInfo} from "../../_models/kavitaplus/match-series-info";
-import {MetadataProvider} from "../../_models/kavitaplus/metadata-provider.enum";
+import {AllMetadataProviders, MetadataProvider} from "../../_models/kavitaplus/metadata-provider.enum";
 import {ScrobbleProvider} from "../../_services/scrobbling.service";
 import {MetadataProviderTitlePipe} from "../../_pipes/metadata-provider-title.pipe";
 import {ExternalEditionDto, PlusMediaFormat} from "../../_models/series-detail/external-series-detail";
@@ -70,6 +70,7 @@ export class MatchSeriesModalComponent implements OnInit {
     query: new FormControl('', []),
     isStandAlone: new FormControl(false),
     dontMatch: new FormControl(false, []),
+    metadataProviderOverride: new FormControl<MetadataProvider | null>(null),
   });
 
   protected readonly isDontMatch = toSignal(
@@ -126,6 +127,7 @@ export class MatchSeriesModalComponent implements OnInit {
 
       this.seriesService.getMatchInfo(this.series().id).subscribe(res => {
         this.matchInfo.set(res);
+        this.formGroup.controls.metadataProviderOverride.setValue(res.metadataProviderOverride ?? null, { emitEvent: false });
         this.autoSelectExistingMatch(this.matches());
       });
     });
@@ -143,6 +145,21 @@ export class MatchSeriesModalComponent implements OnInit {
       filter(v => v === false),
       takeUntilDestroyed()
     ).subscribe(() => this.search());
+
+    this.formGroup.controls.metadataProviderOverride.valueChanges.pipe(
+      takeUntilDestroyed()
+    ).subscribe(provider => this.changeProvider(provider));
+  }
+
+  private changeProvider(provider: MetadataProvider | null) {
+    this.seriesService.updateMetadataProviderOverride(this.series().id, provider).subscribe(() => {
+      this.selectedItem.set(null);
+      this.selectedEdition.set(null);
+      this.seriesService.getMatchInfo(this.series().id).subscribe(res => {
+        this.matchInfo.set(res);
+        this.search();
+      });
+    });
   }
 
   ngOnInit() {
@@ -282,4 +299,5 @@ export class MatchSeriesModalComponent implements OnInit {
   protected readonly MetadataProvider = MetadataProvider;
   protected readonly ScrobbleProvider = ScrobbleProvider;
   protected readonly PlusMediaFormat = PlusMediaFormat;
+  protected readonly allMetadataProviders = AllMetadataProviders;
 }
