@@ -22,6 +22,7 @@ import {SafeStylePipe} from '../../../_pipes/safe-style.pipe';
 import {ReaderService} from "../../../_services/reader.service";
 import {PageSplitOption} from "../../../_models/preferences/page-split-option";
 import {ReaderMode} from "../../../_models/preferences/reader-mode";
+import {ImageZoomDirective} from '../../../_directives/image-zoom.directive';
 
 /**
  * This is aimed at manga. Double page renderer but where if we have page = 10, you will see
@@ -32,7 +33,7 @@ import {ReaderMode} from "../../../_models/preferences/reader-mode";
     templateUrl: './double-reverse-renderer.component.html',
     styleUrls: ['./double-reverse-renderer.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush,
-    imports: [NgClass, AsyncPipe, SafeStylePipe]
+    imports: [NgClass, AsyncPipe, SafeStylePipe, ImageZoomDirective]
 })
 export class DoubleReverseRendererComponent implements OnInit, ImageRenderer {
   private readonly cdRef = inject(ChangeDetectorRef);

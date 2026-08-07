@@ -22,6 +22,7 @@ import {SafeStylePipe} from '../../../_pipes/safe-style.pipe';
 import {ReaderMode} from "../../../_models/preferences/reader-mode";
 import {ReaderService} from "../../../_services/reader.service";
 import {PageSplitOption} from "../../../_models/preferences/page-split-option";
+import {ImageZoomDirective} from '../../../_directives/image-zoom.directive';
 
 /**
  * Renders 2 pages except on last page, and before a wide image
@@ -31,7 +32,7 @@ import {PageSplitOption} from "../../../_models/preferences/page-split-option";
     templateUrl: './double-no-cover-renderer.component.html',
     styleUrls: ['./double-no-cover-renderer.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush,
-    imports: [NgClass, AsyncPipe, SafeStylePipe]
+    imports: [NgClass, AsyncPipe, SafeStylePipe, ImageZoomDirective]
 })
 export class DoubleNoCoverRendererComponent implements OnInit {
   private readonly cdRef = inject(ChangeDetectorRef);

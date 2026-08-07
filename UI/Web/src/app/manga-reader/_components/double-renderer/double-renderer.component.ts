@@ -22,6 +22,7 @@ import {SafeStylePipe} from '../../../_pipes/safe-style.pipe';
 import {ReaderService} from "../../../_services/reader.service";
 import {PageSplitOption} from "../../../_models/preferences/page-split-option";
 import {ReaderMode} from "../../../_models/preferences/reader-mode";
+import {ImageZoomDirective} from '../../../_directives/image-zoom.directive';
 
 /**
  * Renders 2 pages except on first page, last page, and before a wide image
@@ -31,7 +32,7 @@ import {ReaderMode} from "../../../_models/preferences/reader-mode";
     templateUrl: './double-renderer.component.html',
     styleUrls: ['./double-renderer.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush,
-    imports: [NgClass, AsyncPipe, SafeStylePipe]
+    imports: [NgClass, AsyncPipe, SafeStylePipe, ImageZoomDirective]
 })
 export class DoubleRendererComponent implements OnInit, ImageRenderer {
   private readonly cdRef = inject(ChangeDetectorRef);
