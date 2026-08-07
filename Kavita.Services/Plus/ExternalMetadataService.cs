@@ -866,8 +866,6 @@ public class ExternalMetadataService : IExternalMetadataService
 
             Accumulate(ref madeModification, fieldChanges, UpdateSummary(series, settings, externalMetadata));
             Accumulate(ref madeModification, fieldChanges, UpdateReleaseYear(series, settings, externalMetadata));
-            Accumulate(ref madeModification, fieldChanges, await UpdateName(series, settings, externalMetadata, ct)); // Put first so localized name can be set to something good
-            Accumulate(ref madeModification, fieldChanges, await UpdateLocalizedName(series, settings, externalMetadata, ct));
             Accumulate(ref madeModification, fieldChanges, await UpdatePublicationStatus(series, settings, externalMetadata));
             Accumulate(ref madeModification, fieldChanges, UpdateExternalIds(series, externalMetadata));
 
@@ -886,6 +884,27 @@ public class ExternalMetadataService : IExternalMetadataService
             Accumulate(ref madeModification, fieldChanges, await UpdateCharacters(series, settings, externalMetadata.Characters));
 
             Accumulate(ref madeModification, fieldChanges, await UpdateRelationships(series, settings, externalMetadata.Relations, defaultAdmin));
+
+            if (settings.EnableName || settings.EnableLocalizedName)
+            {
+                var (namePriority, localizedNamePriority) = ResolveTitleLanguagePriorities(settings, series.LibraryId);
+
+                // One query serves both writes. The set unions NormalizedName/NormalizedLocalizedName/NormalizedOriginalName
+                // for every OTHER series in this library+format - a collision there makes the scanner's SingleOrDefault throw.
+                var takenNames = await _unitOfWork.SeriesRepository.GetTakenNormalizedNamesInLibraryAsync(
+                    series.LibraryId, series.Format, series.Id, ct);
+
+                // Name must be first, LocalizedName will drop the language code that Name eats
+                Accumulate(ref madeModification, fieldChanges,
+                    await UpdateName(series, settings, externalMetadata, namePriority, takenNames, ct));
+
+                var heldNameLanguageCode = settings.EnableName
+                    ? FindHeldLanguageCode(namePriority, externalMetadata, series.NormalizedName)
+                    : null;
+
+                Accumulate(ref madeModification, fieldChanges,
+                    await UpdateLocalizedName(series, settings, externalMetadata, localizedNamePriority, heldNameLanguageCode, takenNames, ct));
+            }
 
             try
             {
@@ -910,6 +929,7 @@ public class ExternalMetadataService : IExternalMetadataService
             writeLock.Release();
         }
     }
+
 
     /// <summary>
     /// Fetches volume and chapter covers from the Kavita+ covers endpoint and applies the best matches. Series and chapter
@@ -2113,8 +2133,173 @@ public class ExternalMetadataService : IExternalMetadataService
         return (true, new MetadataFieldChangeDto(MetadataFieldChangeKind.ReleaseYear, from, series.Metadata.ReleaseYear));
     }
 
+    /// <summary>
+    /// Admin will set up a set of Language codes to prioritize the selection from Kavita+ for both Name and LocalizedName.
+    /// This method is responsible for finding the best fit. Caller should handle Global/Library override
+    /// </summary>
+    private static (string? newName, string? languageCode) FindSeriesName(IReadOnlyList<string> priorities, ExternalSeriesDetailDto externalMetadata)
+    {
+        foreach (var languageCode in priorities)
+        {
+            if (externalMetadata.LocalizedTitles.TryGetValue(languageCode, out var title) && title.Count > 0)
+            {
+                var titleValue = title[0].Title;
+                if (string.IsNullOrEmpty(titleValue)) continue;
+                return (titleValue.Trim(), languageCode);
+            }
+        }
+
+        return (null, null);
+    }
+
+    /// <summary>
+    /// Resolves which language priority lists apply to a Series. A library override replaces the global settings
+    /// outright, including any field left blank on it.
+    /// </summary>
+    /// <remarks>
+    /// A blank field means "no languages", which resolves no candidate and therefore writes nothing. That is
+    /// deliberate: overriding a library and clearing a field is how an admin opts that field out for the library.
+    /// </remarks>
+    private static (IReadOnlyList<string> Name, IReadOnlyList<string> LocalizedName) ResolveTitleLanguagePriorities(
+        MetadataSettingsDto settings, int libraryId)
+    {
+        if (settings.LibraryLanguageTitleOverrides.TryGetValue(libraryId, out var libraryOverride) && libraryOverride != null)
+        {
+            return (libraryOverride.NamePriority, libraryOverride.LocalizedNamePriority);
+        }
+
+        var global = settings.GlobalLanguageTitleSettings;
+        return (global.NamePriority, global.LocalizedNamePriority);
+    }
+
+    /// <summary>
+    /// Yields every candidate title in the admin's priority order, best-first, so a caller can walk to the next
+    /// candidate when one is rejected instead of giving up on the whole field.
+    /// </summary>
+    /// <remarks>
+    /// Walks every title within a language, not just the first. K+ orders each list best-first, so when
+    /// <c>en[0]</c> collides <c>en[1]</c> is still a better answer than dropping English entirely.
+    /// </remarks>
+    private static IEnumerable<(string Title, string LanguageCode)> EnumerateTitlesByPriority(
+        IReadOnlyList<string> priorities, ExternalSeriesDetailDto externalMetadata)
+    {
+        if (priorities.Count == 0 || externalMetadata.LocalizedTitles.Count == 0) yield break;
+
+        // K+ sends canonical BCP-47 casing ("ja-Latn", "pt-BR") but admins type freely and System.Text.Json hands
+        // us an ordinal dictionary, so "ja-latn" would miss. Re-key case-insensitively, first entry wins.
+        var titlesByLanguage = new Dictionary<string, IList<LocalizedTitleDto>>(StringComparer.OrdinalIgnoreCase);
+        foreach (var pair in externalMetadata.LocalizedTitles)
+        {
+            titlesByLanguage.TryAdd(pair.Key, pair.Value);
+        }
+
+        foreach (var languageCode in priorities)
+        {
+            if (!titlesByLanguage.TryGetValue(languageCode, out var titles)) continue;
+
+            foreach (var title in titles)
+            {
+                if (string.IsNullOrWhiteSpace(title.Title)) continue;
+                yield return (title.Title.Trim(), languageCode);
+            }
+        }
+    }
+
+    /// <summary>
+    /// Finds which priority language code produced the name the Series currently holds, or null when none did.
+    /// </summary>
+    /// <remarks>
+    /// Matching on the value rather than on our last write is what makes this correct across re-runs and for
+    /// user-locked names: if the admin locked Name to something no provider language produces, nothing is
+    /// excluded from the LocalizedName list and the value-level self checks still prevent a duplicate.
+    /// </remarks>
+    private static string? FindHeldLanguageCode(IReadOnlyList<string> priorities,
+        ExternalSeriesDetailDto externalMetadata, string? normalizedName)
+    {
+        if (string.IsNullOrEmpty(normalizedName)) return null;
+
+        foreach (var (title, languageCode) in EnumerateTitlesByPriority(priorities, externalMetadata))
+        {
+            if (title.ToNormalized() == normalizedName) return languageCode;
+        }
+
+        return null;
+    }
+
+    /// <summary>
+    /// Writes the Series' visible Name from external metadata when enabled and not locked by the user.
+    /// OriginalName remains the on-disk anchor, so this rename stays scan-safe. Walks down the admin's language
+    /// priority list, skipping any candidate that would collide (normalized) with another series in the library+format.
+    /// </summary>
+    private async Task<(bool, MetadataFieldChangeDto?)> UpdateName(Series series, MetadataSettingsDto settings,
+        ExternalSeriesDetailDto externalMetadata, IReadOnlyList<string> namePriority,
+        IReadOnlySet<string> takenNames, CancellationToken ct)
+    {
+        if (!settings.EnableName) return (false, null);
+
+        if (series.NameLocked && !HasForceOverride(settings, series.Metadata, MetadataSettingField.Name))
+        {
+            return (false, null);
+        }
+
+        string? chosen = null;
+        string? chosenLanguageCode = null;
+
+        foreach (var (title, languageCode) in EnumerateTitlesByPriority(namePriority, externalMetadata))
+        {
+            var normalized = title.ToNormalized();
+            if (string.IsNullOrEmpty(normalized)) continue;
+
+            // The best candidate is already our Name. Stop rather than continue - sliding to a lower-priority
+            // language here would rename the series away from a title it correctly holds.
+            if (normalized == series.NormalizedName) return (false, null);
+
+            // Never create a normalized collision - it would make the scanner's SingleOrDefault lookup throw
+            if (takenNames.Contains(normalized)) continue;
+
+            chosen = title;
+            chosenLanguageCode = languageCode;
+            break;
+        }
+
+        if (chosen == null)
+        {
+            _logger.LogInformation(
+                "[K+] Skipping name write for Series {SeriesId}: no unique candidate matched the configured languages",
+                series.Id);
+            return (false, null);
+        }
+
+        if (await WouldOrphanMergedFiles(series, series.Name, chosen, series.NormalizedLocalizedName, series.NormalizedOriginalName, ct))
+        {
+            _logger.LogInformation("[K+] Skipping name write for Series {SeriesId}: current name anchors merged files on disk", series.Id);
+            return (false, null);
+        }
+
+        var from = series.Name;
+        series.Name = chosen;
+        series.NormalizedName = chosen.ToNormalized();
+        series.SortName = series.Library is {RemovePrefixForSortName: true}
+            ? BookSortTitlePrefixHelper.GetSortTitle(series.Name)
+            : series.Name;
+
+        series.NameLocked = true;
+        series.Metadata.AddKPlusOverride(MetadataSettingField.Name);
+
+        return (true, new MetadataFieldChangeDto(MetadataFieldChangeKind.Name, from, series.Name, chosenLanguageCode));
+    }
+
+    /// <summary>
+    /// Writes the Series' LocalizedName from external metadata, walking down the admin's language priority list
+    /// and skipping any candidate that would collide with another series or with this Series' own name fields.
+    /// </summary>
+    /// <param name="heldNameLanguageCode">
+    /// The language code Series.Name currently holds. Dropped from the priority list so the two fields never
+    /// resolve from the same language.
+    /// </param>
     private async Task<(bool, MetadataFieldChangeDto?)> UpdateLocalizedName(Series series, MetadataSettingsDto settings,
-        ExternalSeriesDetailDto externalMetadata, CancellationToken ct)
+        ExternalSeriesDetailDto externalMetadata, IReadOnlyList<string> localizedNamePriority,
+        string? heldNameLanguageCode, IReadOnlySet<string> takenNames, CancellationToken ct)
     {
         if (!settings.EnableLocalizedName) return (false, null);
 
@@ -2128,34 +2313,41 @@ public class ExternalMetadataService : IExternalMetadataService
             return (false, null);
         }
 
-        var from = series.LocalizedName;
-
-        // A localized name that normalizes to another series' Name/LocalizedName/OriginalName in the same library+format
-        // breaks the scanner
-        var takenNames = await _unitOfWork.SeriesRepository.GetTakenNormalizedNamesInLibraryAsync(
-            series.LibraryId, series.Format, series.Id, ct);
-        string? chosen = null;
-
-        // We need to make the best appropriate guess
-        if (externalMetadata.Name == series.Name)
+        // If Name took a language, LocalizedName can't have it
+        if (!string.IsNullOrEmpty(heldNameLanguageCode))
         {
-            // Choose the closest (usually last) synonym that is unique across the library
-            var validSynonyms = externalMetadata.Synonyms
-                .Where(IsRomanCharacters)
-                .Where(s => s.ToNormalized() != series.Name.ToNormalized())
-                .Reverse()
+            localizedNamePriority = localizedNamePriority
+                .Where(c => !string.Equals(c, heldNameLanguageCode, StringComparison.OrdinalIgnoreCase))
                 .ToList();
-
-            chosen = validSynonyms.FirstOrDefault(synonym => !takenNames.Contains(synonym.ToNormalized()));
         }
-        else if (IsRomanCharacters(externalMetadata.Name) && !takenNames.Contains(externalMetadata.Name.ToNormalized()))
+
+        string? chosen = null;
+        string? chosenLanguageCode = null;
+
+        foreach (var (title, languageCode) in EnumerateTitlesByPriority(localizedNamePriority, externalMetadata))
         {
-            chosen = externalMetadata.Name;
+            var normalized = title.ToNormalized();
+            if (string.IsNullOrEmpty(normalized)) continue;
+
+            // A localized name that normalizes to another series' Name/LocalizedName/OriginalName in the same
+            // library+format breaks the scanner
+            if (takenNames.Contains(normalized)) continue;
+
+            // takenNames excludes this Series, so our own columns need checking separately. Dropping the language
+            // code above is not enough - two languages can carry the same title text (en and ja-Latn "Bleach").
+            // series.NormalizedName is already the post-UpdateName value here.
+            if (normalized == series.NormalizedName || normalized == series.NormalizedOriginalName) continue;
+
+            chosen = title;
+            chosenLanguageCode = languageCode;
+            break;
         }
 
         if (chosen == null)
         {
-            _logger.LogInformation("[K+] Skipping localized name write for Series {SeriesId}: no unique candidate was found", series.Id);
+            _logger.LogInformation(
+                "[K+] Skipping localized name write for Series {SeriesId}: no unique candidate matched the configured languages",
+                series.Id);
             return (false, null);
         }
 
@@ -2165,62 +2357,13 @@ public class ExternalMetadataService : IExternalMetadataService
             return (false, null);
         }
 
+        var from = series.LocalizedName;
         series.LocalizedName = chosen;
         series.NormalizedLocalizedName = chosen.ToNormalized();
         series.LocalizedNameLocked = true;
         series.Metadata.AddKPlusOverride(MetadataSettingField.LocalizedName);
 
-        return (true, new MetadataFieldChangeDto(MetadataFieldChangeKind.LocalizedName, from, series.LocalizedName));
-    }
-
-    /// <summary>
-    /// Writes the Series' visible Name from external metadata when enabled and not locked by the user.
-    /// OriginalName remains the on-disk anchor, so this rename stays scan-safe. Skipped if the new name
-    /// would collide (normalized) with another series in the library+format.
-    /// </summary>
-    private async Task<(bool, MetadataFieldChangeDto?)> UpdateName(Series series, MetadataSettingsDto settings,
-        ExternalSeriesDetailDto externalMetadata, CancellationToken ct)
-    {
-        if (!settings.EnableName) return (false, null);
-        if (string.IsNullOrWhiteSpace(externalMetadata.Name)) return (false, null);
-
-        if (series.NameLocked && !HasForceOverride(settings, series.Metadata, MetadataSettingField.Name))
-        {
-            return (false, null);
-        }
-
-        var newName = externalMetadata.Name.Trim();
-        if (newName == series.Name) return (false, null);
-
-        var normalizedNewName = newName.ToNormalized();
-
-        // Never create a normalized collision - it would make the scanner's SingleOrDefault lookup throw
-        if (!await _unitOfWork.SeriesRepository.IsSeriesNameUniqueInLibraryAsync(
-                series.LibraryId, series.Format, normalizedNewName, series.Id, ct))
-        {
-            _logger.LogInformation(
-                "[K+] Skipping name write for Series {SeriesId}: it would collide with another series in the library",
-                series.Id);
-            return (false, null);
-        }
-
-        if (await WouldOrphanMergedFiles(series, series.Name, newName, series.NormalizedLocalizedName, series.NormalizedOriginalName, ct))
-        {
-            _logger.LogInformation("[K+] Skipping name write for Series {SeriesId}: current name anchors merged files on disk", series.Id);
-            return (false, null);
-        }
-
-        var from = series.Name;
-        series.Name = newName;
-        series.NormalizedName = normalizedNewName;
-        series.SortName = series.Library is {RemovePrefixForSortName: true}
-            ? BookSortTitlePrefixHelper.GetSortTitle(series.Name)
-            : series.Name;
-
-        series.NameLocked = true;
-        series.Metadata.AddKPlusOverride(MetadataSettingField.Name);
-
-        return (true, new MetadataFieldChangeDto(MetadataFieldChangeKind.Name, from, series.Name));
+        return (true, new MetadataFieldChangeDto(MetadataFieldChangeKind.LocalizedName, from, series.LocalizedName, chosenLanguageCode));
     }
 
     /// <summary>

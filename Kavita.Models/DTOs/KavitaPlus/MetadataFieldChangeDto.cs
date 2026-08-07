@@ -4,7 +4,7 @@ namespace Kavita.Models.DTOs.KavitaPlus;
 /// <summary>
 /// Records a single field's before/after state during a metadata write
 /// </summary>
-public sealed record MetadataFieldChangeDto(MetadataFieldChangeKind Field, object? From, object? To);
+public sealed record MetadataFieldChangeDto(MetadataFieldChangeKind Field, object? From, object? To, string? Note = null);
 
 /// <summary>
 /// Represents individual fields for any entity type. Will be localized in the UI layer.
