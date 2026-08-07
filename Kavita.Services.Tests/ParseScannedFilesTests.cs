@@ -771,33 +771,75 @@ public class ParseScannedFilesTests: AbstractDbTest
 
     #region Sort Order
 
-    [Fact]
-    public void TestUpdateSortOrder_BEY_LR_Nonsense()
+    public static IEnumerable<object[]> UpdateSortOrderData => new List<object[]>
+    {
+        // All whole numbers
+        new object[] { new[] { "1", "2", "3" }, new[] { 1f, 2f, 3f } },
+
+        // Whole and float numbers
+        new object[] { new[] { "1", "2.5", "3" }, new[] { 1f, 2.5f, 3f } },
+
+        // Whole ranges (uses min of range)
+        new object[] { new[] { "1-3", "4-6" }, new[] { 1f, 4f } },
+
+        // Whole, float, and ranges mixed
+        new object[] { new[] { "1", "2.5", "4-6" }, new[] { 1f, 2.5f, 4f } },
+
+        // Out-of-order input still resolves correctly per item
+        new object[] { new[] { "3", "1", "2" }, new[] { 3f, 1f, 2f } },
+
+        // Original: single nonsense suffix
+        new object[] { new[] { "15", "15.HU" }, new[] { 15f, 15.1f } },
+
+        // Original: story A/B suffixes
+        new object[] { new[] { "15", "15 (A Story)", "15 (B Story)" }, new[] { 15f, 15.1f, 15.2f } },
+
+        // Two different nonsense suffixes on the same base
+        // BEY comes before UH
+        new object[] { new[] { "15", "15.UH", "15.BEY" }, new[] { 15f, 15.2f, 15.1f } },
+
+        // Duplicate whole numbers (no suffix at all)
+        new object[] { new[] { "15", "15" }, new[] { 15f, 15.1f } },
+
+        // Nonsense suffixes with different bases: no bump between them
+        new object[] { new[] { "15.UH", "16.BEY" }, new[] { 15f, 16f } },
+
+        // Decimal base with story suffixes
+        new object[] { new[] { "15.5 (A Story)", "15.5 (B Story)" }, new[] { 15.5f, 15.6f } },
+
+        // Range collides with a plain duplicate of its min value. Non range goes first; numbers get priority
+        new object[] { new[] { "4-6", "4" }, new[] { 4.1f, 4f } },
+
+        // Three-way duplicate nonsense chain
+        new object[] { new[] { "15", "15.HU", "15.LR" }, new[] { 15f, 15.1f, 15.2f } },
+    };
+
+    [Theory]
+    [MemberData(nameof(UpdateSortOrderData))]
+    public void TestUpdateSortOrder(string[] chapters, float[] expectedOrders)
     {
         var series = new ParsedSeries
         {
-            Name = "Amazing Spider-Man (2018)",
-            NormalizedName = "Amazing Spider-Man (2018)".ToNormalized(),
+            Name = "Spice and Wolf",
+            NormalizedName = "Spice and Wolf".ToNormalized(),
             Format = MangaFormat.Archive
         };
 
         ConcurrentDictionary<ParsedSeries, List<ParserInfo>> scannedSeries = [];
-        scannedSeries[series] = [
-            new ParserInfo
+        scannedSeries[series] = chapters
+            .Select(c => new ParserInfo
             {
-                Series = "Amazing Spider-Man",
-                Chapters = "15"
-            },
-            new ParserInfo
-            {
-                Series = "Amazing Spider-Man",
-                Chapters = "15.HU"
-            },
-        ];
+                Series = "Spice and Wolf",
+                Chapters = c
+            })
+            .ToList();
 
         ParseScannedFiles.UpdateSortOrder(scannedSeries, series);
-        Assert.Equal(15f, scannedSeries[series][0].IssueOrder);
-        Assert.Equal(15.1f, scannedSeries[series][1].IssueOrder);
+
+        for (var i = 0; i < expectedOrders.Length; i++)
+        {
+            Assert.Equal(expectedOrders[i], scannedSeries[series][i].IssueOrder, precision: 2);
+        }
     }
 
     #endregion
