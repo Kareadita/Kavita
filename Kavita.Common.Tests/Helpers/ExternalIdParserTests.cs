@@ -73,4 +73,19 @@ public class ExternalIdParserTests
         Assert.Equal(expectedResult, result);
         Assert.Equal(expectedId, id);
     }
+
+    [Theory]
+    [InlineData("https://hardcover.app/books/wicked-town-1", "wicked-town-1")]
+    [InlineData("https://hardcover.app/books/wicked-town-1/", "wicked-town-1")]
+    [InlineData("https://hardcover.app/books/wicked-town-1/editions/12345", "wicked-town-1")]
+    [InlineData("https://hardcover.app/series/the-expanse", "the-expanse")]
+    [InlineData("https://HARDCOVER.app/books/wicked-town-1", "wicked-town-1")]
+    [InlineData("https://mangabaka.org/3391", null)]
+    [InlineData("hardcover:61176", null)]
+    [InlineData("", null)]
+    [InlineData(null, null)]
+    public void GetHardcoverSlugFromUrl_ExtractsSlug(string? text, string? expectedSlug)
+    {
+        Assert.Equal(expectedSlug, ExternalIdParser.GetHardcoverSlugFromUrl(text));
+    }
 }

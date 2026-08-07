@@ -410,7 +410,7 @@ public class ExternalMetadataService : IExternalMetadataService
             ? mangabakaId : ExternalIdParser.GetMangaBakaId(query);
 
         var potentialHardcoverSlug = ExternalIdParser.TryParseHardcoverHeader(query, out var hardcoverId)
-            ? hardcoverId : null;
+            ? hardcoverId : ExternalIdParser.GetHardcoverSlugFromUrl(query);
 
         var potentialCbrSlug = query.Contains("comicbookroundup.com/") ? query : null;
 

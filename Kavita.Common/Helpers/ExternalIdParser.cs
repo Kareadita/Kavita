@@ -25,6 +25,16 @@ public static class ExternalIdParser
     private const string HardcoverBookWebsite = "https://hardcover.app/id/book/";
     private const string MangaBakaWebsite = "https://mangabaka.org/";
 
+    /// <summary>
+    /// Hardcover's public, slug-based URLs (as pasted by a user), distinct from the internal numeric-id
+    /// <see cref="HardcoverSeriesWebsite"/>/<see cref="HardcoverBookWebsite"/> links Kavita generates itself
+    /// </summary>
+    private static readonly string[] HardcoverPublicWebsites =
+    [
+        "https://hardcover.app/books/",
+        "https://hardcover.app/series/",
+    ];
+
 
     /// <summary>
     /// The 4050 implies this is a Series (TPB/Series) and 4000 implies single issue
@@ -144,6 +154,21 @@ public static class ExternalIdParser
     public static int GetHardcoverBookId(string? weblinks)
     {
         return ExtractId<int?>(weblinks, HardcoverBookWebsite) ?? 0;
+    }
+
+    /// <summary>
+    /// Extracts the slug from a public hardcover.app book/series URL (e.g. https://hardcover.app/books/{slug})
+    /// </summary>
+    public static string? GetHardcoverSlugFromUrl(string? text)
+    {
+        if (string.IsNullOrWhiteSpace(text)) return null;
+
+        var trimmed = text.Trim();
+        var website = HardcoverPublicWebsites.FirstOrDefault(w => trimmed.StartsWith(w, StringComparison.OrdinalIgnoreCase));
+        if (website == null) return null;
+
+        var slug = trimmed[website.Length..].Split('/', '?', '#')[0];
+        return string.IsNullOrEmpty(slug) ? null : slug;
     }
 
     public static string GetHardcoverStaffId(string? url)
