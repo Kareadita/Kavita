@@ -80,6 +80,9 @@ public class ExternalIdParserTests
     [InlineData("https://hardcover.app/books/wicked-town-1/editions/12345", "wicked-town-1")]
     [InlineData("https://hardcover.app/series/the-expanse", "the-expanse")]
     [InlineData("https://HARDCOVER.app/books/wicked-town-1", "wicked-town-1")]
+    // The numeric-id links Kavita generates itself are not slugs
+    [InlineData("https://hardcover.app/series/id/12345", null)]
+    [InlineData("https://hardcover.app/book/id/12345", null)]
     [InlineData("https://mangabaka.org/3391", null)]
     [InlineData("hardcover:61176", null)]
     [InlineData("", null)]

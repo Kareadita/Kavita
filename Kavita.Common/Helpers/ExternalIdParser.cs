@@ -159,11 +159,17 @@ public static class ExternalIdParser
     /// <summary>
     /// Extracts the slug from a public hardcover.app book/series URL (e.g. https://hardcover.app/books/{slug})
     /// </summary>
+    /// <remarks>Returns null for the numeric-id links Kavita generates itself, as those carry an id and not a slug</remarks>
     public static string? GetHardcoverSlugFromUrl(string? text)
     {
         if (string.IsNullOrWhiteSpace(text)) return null;
 
         var trimmed = text.Trim();
+
+        // https://hardcover.app/series/id/{id} would otherwise be read as the slug "id"
+        if (trimmed.StartsWith(HardcoverSeriesWebsite, StringComparison.OrdinalIgnoreCase)
+            || trimmed.StartsWith(HardcoverBookWebsite, StringComparison.OrdinalIgnoreCase)) return null;
+
         var website = HardcoverPublicWebsites.FirstOrDefault(w => trimmed.StartsWith(w, StringComparison.OrdinalIgnoreCase));
         if (website == null) return null;
 
