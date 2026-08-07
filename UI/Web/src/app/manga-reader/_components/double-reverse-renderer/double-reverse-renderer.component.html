@@ -2,7 +2,8 @@
   <div class="image-container {{layoutClass()}} {{emulateBookClass()}}"
        [class.center-double]="shouldRenderDouble()"
        [class.reverse]="shouldRenderDouble()"
-       [style.filter]="darkness() | safeStyle">
+       [style.filter]="darkness() | safeStyle"
+       appImageZoom [zoomResetKey]="leftImage">
 
     @if(leftImage) {
       <img alt=" "
