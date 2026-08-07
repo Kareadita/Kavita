@@ -179,8 +179,19 @@ export class MatchSeriesModalComponent implements OnInit {
   search() {
     if (this.isDontMatch()) return;
 
+    const query = this.formGroup.value.query ?? '';
+    const detectedProvider = this.detectProviderFromQuery(query);
+    const currentProvider = this.matchInfo()?.primaryProvider ?? null;
+
+    if (detectedProvider !== null && detectedProvider !== currentProvider) {
+      // Switches the override to the detected provider; changeProvider() re-runs search() once that lands
+      this.isLoading.set(true);
+      this.formGroup.controls.metadataProviderOverride.setValue(detectedProvider);
+      return;
+    }
+
     this.isLoading.set(true);
-    this.lastQuery.set(this.formGroup.value.query ?? '');
+    this.lastQuery.set(query);
 
     const model: any = { ...this.formGroup.value, seriesId: this.series().id };
 
@@ -197,6 +208,31 @@ export class MatchSeriesModalComponent implements OnInit {
         return of([]);
       })
     ).subscribe();
+  }
+
+  /**
+   * Mirrors the header/URL detection ExternalIdParser does server-side, so the dialog can switch the
+   * provider override to match a pasted URL/header before actually issuing the search
+   */
+  private detectProviderFromQuery(query: string): MetadataProvider | null {
+    const text = (query || '').trim().toLowerCase();
+    if (!text) return null;
+
+    if (text.startsWith('hardcover:') || text.includes('hardcover.app/')) {
+      return MetadataProvider.Hardcover;
+    }
+
+    if (text.startsWith('mangabaka:') || text.startsWith('mb:') || text.includes('mangabaka.org/')
+      || text.startsWith('anilist:') || text.startsWith('al:') || text.includes('anilist.co/')
+      || text.startsWith('mal:') || text.includes('myanimelist.net/')) {
+      return MetadataProvider.Mangabaka;
+    }
+
+    if (text.includes('comicbookroundup.com/')) {
+      return MetadataProvider.ComicBookRoundup;
+    }
+
+    return null;
   }
 
   private autoSelectExistingMatch(results: ExternalSeriesMatch[]) {
