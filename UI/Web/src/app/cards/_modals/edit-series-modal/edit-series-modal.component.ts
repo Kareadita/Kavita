@@ -3,7 +3,6 @@ import {
   ChangeDetectorRef,
   Component,
   DestroyRef,
-  effect,
   EventEmitter,
   inject,
   Input,
@@ -145,7 +144,7 @@ export class EditSeriesModalComponent implements OnInit {
   libraryName: string | undefined = undefined;
   size: number = 0;
   libraryType = signal<LibraryType>(LibraryType.Manga);
-  validMetadataProviders = this.libraryService.getSupportedMetadataProviders(() => this.libraryType());
+  protected readonly allMetadataProviders = [MetadataProvider.Hardcover, MetadataProvider.Mangabaka, MetadataProvider.ComicBookRoundup];
 
 
   // Typeaheads
@@ -166,20 +165,6 @@ export class EditSeriesModalComponent implements OnInit {
   chooserConfig: CoverImageChooserConfig = {};
 
   saveNestedComponents: EventEmitter<void> = new EventEmitter();
-
-  constructor() {
-    effect(() => {
-      if (!this.validMetadataProviders.hasValue()) return;
-      const validProviders = this.validMetadataProviders.value();
-      const control = this.editSeriesForm?.get('metadataProviderOverride');
-      if (!control) return;
-
-      const selected = control.value as MetadataProvider | null;
-      if (selected !== null && !validProviders.includes(selected)) {
-        control.setValue(null);
-      }
-    });
-  }
 
   get blacklist() {
     return [Action.Edit, Action.Info, Action.IncognitoRead, Action.Read, Action.SendTo,

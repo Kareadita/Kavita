@@ -250,11 +250,6 @@ public class SeriesController(
 
         ExternalMetadataIdHelper.SetExternalMetadataIds(series, updateSeries);
 
-        if (updateSeries.MetadataProviderOverride.HasValue &&
-            !KavitaPlusConfiguration.IsValidMetadataProviderForLibraryType(series.Library.Type, updateSeries.MetadataProviderOverride.Value))
-        {
-            return BadRequest(await localizationService.TranslateAsync(UserId, "invalid-metadata-provider"));
-        }
         series.MetadataProviderOverride = updateSeries.MetadataProviderOverride;
 
         var needsRefreshMetadata = false;
