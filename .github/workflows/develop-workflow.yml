@@ -70,23 +70,23 @@ jobs:
 
       - name: Parse PR body
         id: parse-body
+        env:
+          BODY: ${{ steps.findPr.outputs.body }}
+          PR_NUM: ${{ steps.findPr.outputs.pr }}
         run: |
-          body="${{ steps.findPr.outputs.body }}"
+          body="$BODY"
           if [[ ${#body} -gt 1870 ]] ; then
             body=${body:0:1870}
             body="${body}...and much more.
-
-            Read full changelog: https://github.com/Kareadita/Kavita/pull/${{ steps.findPr.outputs.pr }}"
+            Read full changelog: https://github.com/Kareadita/Kavita/pull/${PR_NUM}"
           fi
-
           body=${body//\'/}
           body=${body//'%'/'%25'}
           body=${body//$'\n'/'%0A'}
           body=${body//$'\r'/'%0D'}
           body=${body//$'`'/'%60'}
           body=${body//$'>'/'%3E'}
-          echo $body
-          echo "BODY=$body" >> $GITHUB_OUTPUT
+          echo "BODY=$body" >> "$GITHUB_OUTPUT"
 
       - name: Check Out Repo
         uses: actions/checkout@v4

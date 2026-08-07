@@ -2690,7 +2690,7 @@
         "dropped-series-rule-condition": "If a series/chapter hasn't been read for",
         "all-libraries-label": "All libraries",
         "all-libraries-tooltip": "When enabled, scrobbling runs on all applicable libraries. Disable to restrict it to specific libraries using the selection below.",
-        "confirm-delete": "Are you sure want to disconnect {{provider}}",
+        "confirm-delete": "Are you sure you want to disconnect {{provider}}?",
         "inactive-series-rule-days-aria": "Inactive series threshold in days",
         "inactive-series-rule-status-aria": "Inactive series transition status",
         "inactive-series-rule-excluded-publication-aria": "Excluded publication statuses for inactive series rule",

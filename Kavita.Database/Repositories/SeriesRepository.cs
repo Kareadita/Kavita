@@ -14,6 +14,7 @@ using Kavita.Common.Helpers;
 using Kavita.Database.Converters;
 using Kavita.Database.Extensions;
 using Kavita.Database.Extensions.Filters;
+using Kavita.Models.Constants;
 using Kavita.Models.DTOs;
 using Kavita.Models.DTOs.Collection;
 using Kavita.Models.DTOs.Dashboard;
@@ -1914,5 +1915,20 @@ public class SeriesRepository(DataContext context, IMapper mapper) : ISeriesRepo
             .Select(x => x.Series)
             .Includes(SeriesIncludes.Chapters | SeriesIncludes.ExternalMetadata | SeriesIncludes.Metadata | SeriesIncludes.Library)
             .ToListAsync(ct);
+    }
+
+    public async Task<int?> GetChapterCountIfAllSpecials(int seriesId, CancellationToken ct = default)
+    {
+        var result = await context.Chapter
+            .Where(c => c.Volume.SeriesId == seriesId)
+            .GroupBy(c => c.Volume.SeriesId)
+            .Select(g => new
+            {
+                Count = g.Count(),
+                AllSpecial = g.All(c => c.Volume.MaxNumber == ParserConstants.SpecialVolumeNumber)
+            })
+            .FirstOrDefaultAsync(cancellationToken: ct);
+
+        return result is { AllSpecial: true } ? result.Count : null;
     }
 }

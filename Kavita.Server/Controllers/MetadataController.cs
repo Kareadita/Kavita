@@ -248,22 +248,26 @@ public class MetadataController(IUnitOfWork unitOfWork, IExternalMetadataService
             .ToList();
 
         var ret = await metadataService.TryMatchAndLoadMetadataForSeries(seriesId, libraryType, MetadataFetchTrigger.OnDemand, HttpContext.RequestAborted);
+        if (ret == null)
+        {
+            return Ok(new SeriesDetailPlusDto
+            {
+                Reviews = userReviews,
+            });
+        }
 
         await PrepareSeriesDetail(userReviews, ret);
         return Ok(ret);
     }
 
-    private async Task PrepareSeriesDetail(List<UserReviewDto> userReviews, SeriesDetailPlusDto? ret)
+    private async Task PrepareSeriesDetail(List<UserReviewDto> userReviews, SeriesDetailPlusDto ret)
     {
         var user = await unitOfWork.UserRepository.GetUserByIdAsync(UserId)!;
 
-        if (ret != null)
-        {
-            userReviews.AddRange(ReviewHelper.SelectSpectrumOfReviews(ret.Reviews.ToList()));
-            ret.Reviews = userReviews;
-        }
+        userReviews.AddRange(ReviewHelper.SelectSpectrumOfReviews(ret.Reviews.ToList()));
+        ret.Reviews = userReviews;
 
-        if (ret?.Recommendations != null && user != null)
+        if (ret.Recommendations != null && user != null)
         {
             // Re-obtain owned series and take into account age restriction and include series progress
             var seriesIds = ret.Recommendations.OwnedSeries.Select(s => s.Series.Id).ToList();
@@ -285,7 +289,7 @@ public class MetadataController(IUnitOfWork unitOfWork, IExternalMetadataService
                 RecommendationHelper.FilterExternalRecommendations(ret.Recommendations.ExternalSeries, restriction);
         }
 
-        if (ret?.Recommendations != null && user != null)
+        if (ret.Recommendations != null && user != null)
         {
             ret.Recommendations.OwnedSeries ??= [];
         }
