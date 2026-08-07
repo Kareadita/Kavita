@@ -6,6 +6,7 @@ using Kavita.Models.Entities.MetadataMatching;
 using Kavita.Models.Entities.Progress;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -13,12 +14,14 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Kavita.Database.Migrations
 {
     [DbContext(typeof(DataContext))]
-    partial class DataContextModelSnapshot : ModelSnapshot
+    [Migration("20260807133345_AddSeriesMetadataProviderOverride")]
+    partial class AddSeriesMetadataProviderOverride
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
-            modelBuilder.HasAnnotation("ProductVersion", "10.0.10");
+            modelBuilder.HasAnnotation("ProductVersion", "10.0.9");
 
             modelBuilder.Entity("AppUserCollectionSeries", b =>
                 {
@@ -1359,11 +1362,6 @@ namespace Kavita.Database.Migrations
                     b.Property<string>("Blacklist")
                         .HasColumnType("TEXT");
 
-                    b.Property<bool>("EnableAgeRating")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER")
-                        .HasDefaultValue(true);
-
                     b.Property<bool>("EnableChapterCoverImage")
                         .HasColumnType("INTEGER");
 
@@ -1422,29 +1420,8 @@ namespace Kavita.Database.Migrations
                         .HasColumnType("INTEGER")
                         .HasDefaultValue(true);
 
-                    b.Property<string>("ExternalAgeRatingMappings")
-                        .HasColumnType("TEXT");
-
-                    b.Property<int?>("FilterAboveWeight")
-                        .HasColumnType("INTEGER");
-
                     b.Property<bool>("FirstLastPeopleNaming")
                         .HasColumnType("INTEGER");
-
-                    b.Property<string>("GlobalLocalizedNameLanguages")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("TEXT")
-                        .HasDefaultValue("ja-Latn");
-
-                    b.Property<string>("GlobalNameLanguages")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("TEXT")
-                        .HasDefaultValue("en");
-
-                    b.Property<string>("LibraryLanguageTitleOverrides")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("TEXT")
-                        .HasDefaultValue("{}");
 
                     b.Property<string>("Overrides")
                         .HasColumnType("TEXT");
