@@ -88,6 +88,8 @@ export class MatchSeriesModalComponent implements OnInit {
   selectedEdition = signal<ExternalEditionDto | null>(null);
   selectedEditionId = linkedSignal<string | null>(() => this.selectedEdition()?.id ?? null);
   lastQuery = signal<string>('');
+  /** The query we last auto-switched the provider for, so a switch that doesn't take effect can't loop */
+  private autoSwitchedQuery: string | null = null;
 
   protected bodyState = computed<'empty' | 'dont-match' | 'loading' | 'results' | 'no-results'>(() => {
     if (this.isDontMatch()) return 'dont-match';
@@ -152,13 +154,24 @@ export class MatchSeriesModalComponent implements OnInit {
   }
 
   private changeProvider(provider: MetadataProvider | null) {
-    this.seriesService.updateMetadataProviderOverride(this.series().id, provider).subscribe(() => {
-      this.selectedItem.set(null);
-      this.selectedEdition.set(null);
-      this.seriesService.getMatchInfo(this.series().id).subscribe(res => {
-        this.matchInfo.set(res);
-        this.search();
-      });
+    this.seriesService.updateMetadataProviderOverride(this.series().id, provider).subscribe({
+      next: () => {
+        this.selectedItem.set(null);
+        this.selectedEdition.set(null);
+        this.seriesService.getMatchInfo(this.series().id).subscribe({
+          next: res => {
+            this.matchInfo.set(res);
+            this.search();
+          },
+          error: () => this.isLoading.set(false),
+        });
+      },
+      error: () => {
+        // Put the dropdown back to what the server actually has, without re-entering this handler
+        this.formGroup.controls.metadataProviderOverride.setValue(this.matchInfo()?.metadataProviderOverride ?? null,
+          { emitEvent: false });
+        this.isLoading.set(false);
+      },
     });
   }
 
@@ -183,8 +196,9 @@ export class MatchSeriesModalComponent implements OnInit {
     const detectedProvider = this.detectProviderFromQuery(query);
     const currentProvider = this.matchInfo()?.primaryProvider ?? null;
 
-    if (detectedProvider !== null && detectedProvider !== currentProvider) {
+    if (detectedProvider !== null && detectedProvider !== currentProvider && this.autoSwitchedQuery !== query) {
       // Switches the override to the detected provider; changeProvider() re-runs search() once that lands
+      this.autoSwitchedQuery = query;
       this.isLoading.set(true);
       this.formGroup.controls.metadataProviderOverride.setValue(detectedProvider);
       return;
