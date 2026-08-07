@@ -654,6 +654,19 @@ public class ExternalMetadataService : IExternalMetadataService
             new AuditLogMatchDontMatchParamsDto { SeriesName = series.Name, DontMatch = dontMatch }, ct: ct);
     }
 
+    public async Task UpdateSeriesMetadataProviderOverride(int seriesId, MetadataProvider? metadataProviderOverride, CancellationToken ct = default)
+    {
+        var series = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(seriesId, SeriesIncludes.None, ct);
+        if (series == null) return;
+
+        series.MetadataProviderOverride = metadataProviderOverride;
+
+        _unitOfWork.SeriesRepository.Update(series);
+        await _unitOfWork.CommitAsync(ct);
+
+        await _eventHub.SendMessageAsync(MessageFactory.SeriesUpdated, MessageFactory.SeriesUpdatedEvent(series.Id), ct: ct);
+    }
+
     /// <summary>
     /// Requests the full SeriesDetail (rec, review, metadata) data for a Series. Will save to ExternalMetadata tables.
     /// </summary>

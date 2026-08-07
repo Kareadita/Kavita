@@ -707,6 +707,20 @@ public class SeriesController(
     }
 
     /// <summary>
+    /// Changes (or clears) which Metadata Provider a Series should match against, overriding its Library's default
+    /// </summary>
+    /// <param name="dto"></param>
+    /// <returns></returns>
+    [KPlus]
+    [HttpPost("update-metadata-provider-override")]
+    [Authorize(Policy = PolicyGroups.AdminPolicy)]
+    public async Task<ActionResult> UpdateMetadataProviderOverride(UpdateSeriesMetadataProviderOverrideDto dto)
+    {
+        await externalMetadataService.UpdateSeriesMetadataProviderOverride(dto.SeriesId, dto.MetadataProviderOverride, HttpContext.RequestAborted);
+        return Ok();
+    }
+
+    /// <summary>
     /// Returns extra information around an existing match (and series) to display on the Match Screen.
     /// </summary>
     /// <param name="seriesId"></param>

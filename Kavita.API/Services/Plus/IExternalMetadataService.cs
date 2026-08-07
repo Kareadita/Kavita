@@ -68,6 +68,14 @@ public interface IExternalMetadataService
     Task UpdateSeriesDontMatch(int seriesId, bool dontMatch, CancellationToken ct = default);
 
     /// <summary>
+    /// Changes (or clears) which <see cref="MetadataProvider"/> a Series should match against, overriding its Library's default
+    /// </summary>
+    /// <param name="seriesId"></param>
+    /// <param name="metadataProviderOverride">Null clears the override</param>
+    /// <param name="ct"></param>
+    Task UpdateSeriesMetadataProviderOverride(int seriesId, MetadataProvider? metadataProviderOverride, CancellationToken ct = default);
+
+    /// <summary>
     /// Given external metadata from Kavita+, write as much as possible to the Kavita series as possible
     /// </summary>
     /// <param name="externalMetadata"></param>
