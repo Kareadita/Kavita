@@ -22,6 +22,7 @@ import {ImageRenderer} from '../../_models/renderer';
 import {MangaReaderService} from '../../_service/manga-reader.service';
 import {takeUntilDestroyed, toSignal} from "@angular/core/rxjs-interop";
 import {SafeStylePipe} from '../../../_pipes/safe-style.pipe';
+import {ImageZoomDirective} from '../../../_directives/image-zoom.directive';
 import {ReadingProfile} from "../../../_models/preferences/reading-profiles";
 import {BreakpointService} from "../../../_services/breakpoint.service";
 
@@ -29,7 +30,7 @@ import {BreakpointService} from "../../../_services/breakpoint.service";
     selector: 'app-single-renderer',
     templateUrl: './single-renderer.component.html',
     styleUrls: ['./single-renderer.component.scss'],
-    imports: [AsyncPipe, SafeStylePipe],
+    imports: [AsyncPipe, SafeStylePipe, ImageZoomDirective],
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class SingleRendererComponent implements OnInit, ImageRenderer {

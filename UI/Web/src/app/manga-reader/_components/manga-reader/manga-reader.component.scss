@@ -37,6 +37,11 @@ $pointer-offset: 0.3125rem;
 
 }
 
+.reading-area.image-zoom-active,
+.reader.image-zoom-active {
+  overflow: hidden;
+}
+
 
 .reader {
     background-color: var(--manga-reader-bg-color);
