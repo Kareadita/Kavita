@@ -250,6 +250,12 @@ public class SeriesController(
 
         ExternalMetadataIdHelper.SetExternalMetadataIds(series, updateSeries);
 
+        if (updateSeries.MetadataProviderOverride.HasValue &&
+            !KavitaPlusConfiguration.IsValidMetadataProviderForLibraryType(series.Library.Type, updateSeries.MetadataProviderOverride.Value))
+        {
+            return BadRequest(await localizationService.TranslateAsync(UserId, "invalid-metadata-provider"));
+        }
+        series.MetadataProviderOverride = updateSeries.MetadataProviderOverride;
 
         var needsRefreshMetadata = false;
         // This is when you hit Reset
@@ -738,7 +744,8 @@ public class SeriesController(
             LibraryType = libraryType,
             PlusMediaFormat = plusFormat,
             MatchedProvider = provider,
-            PrimaryProvider = series.Library.MetadataProvider,
+            PrimaryProvider = series.GetEffectiveMetadataProvider(),
+            MetadataProviderOverride = series.MetadataProviderOverride,
             SeriesFormat = series.Format,
             IsStandalone = series.IsStandAlone,
         });

@@ -172,7 +172,7 @@ public class ExternalMetadataService : IExternalMetadataService
             return null;
         }
 
-        if (HasRequiredId(series, series.Library.MetadataProvider))
+        if (HasRequiredId(series, series.GetEffectiveMetadataProvider()))
         {
             return await GetSeriesDetailPlus(seriesId, libraryType, trigger, ct: ct);
         }
@@ -187,7 +187,7 @@ public class ExternalMetadataService : IExternalMetadataService
             MetronId = series.MetronId,
             ComicVineId = series.ComicVineId,
             IsStandAlone = series.Volumes.Sum(v => v.Chapters.Count) == 1,
-            Provider = series.Library.MetadataProvider,
+            Provider = series.GetEffectiveMetadataProvider(),
             SeriesName = series.Name,
             AlternativeNames = ExtractAlternativeNames(series),
             Format = series.Library.Type.ConvertToPlusMediaFormat(series.Format),
@@ -223,7 +223,7 @@ public class ExternalMetadataService : IExternalMetadataService
         series.CbrId = match.Series.CbrId ?? 0;
         series.IsStandAlone = match.Series.IsStandAlone;
 
-        if (series.Library.MetadataProvider == MetadataProvider.Mangabaka)
+        if (series.GetEffectiveMetadataProvider() == MetadataProvider.Mangabaka)
         {
             var editionMatch = PickBestEdition(series, match.Series.Editions);
 
@@ -436,7 +436,7 @@ public class ExternalMetadataService : IExternalMetadataService
             }
         }
 
-        var slug = series.Library.MetadataProvider switch
+        var slug = series.GetEffectiveMetadataProvider() switch
         {
             MetadataProvider.Hardcover => potentialHardcoverSlug,
             MetadataProvider.ComicBookRoundup => potentialCbrSlug,
@@ -465,7 +465,7 @@ public class ExternalMetadataService : IExternalMetadataService
             CbrId = null,
             MangabakaId = potentialMangabakaId > 0 ? potentialMangabakaId : fallbackMangaBakaId,
             IsStandAlone = dto.IsStandAlone,
-            Provider = series.Library.MetadataProvider,
+            Provider = series.GetEffectiveMetadataProvider(),
             SeriesName = series.Name,
             AlternativeNames = otherNames,
             Year = year,
@@ -572,7 +572,7 @@ public class ExternalMetadataService : IExternalMetadataService
             var metadata = await FetchExternalMetadataForSeries(seriesId, series.Library.Type,
                 new  SeriesDetailRequestV3Dto()
                 {
-                    Provider = series.Library.MetadataProvider,
+                    Provider = series.GetEffectiveMetadataProvider(),
                     AniListId = ids.AniListId,
                     MalId = ids.MalId,
                     CbrId = ids.CbrId,
@@ -758,9 +758,9 @@ public class ExternalMetadataService : IExternalMetadataService
         var metadataSettings = await _unitOfWork.SettingsRepository.GetMetadataSettingDto(ct);
         var seenRecommendations = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
         var recs = await ProcessRecommendations(libraryType, result.ReadersAlsoLike, externalSeriesMetadata,
-            RecommendationSource.UserBased, series.Library!.MetadataProvider, metadataSettings, seenRecommendations);
+            RecommendationSource.UserBased, series.GetEffectiveMetadataProvider(), metadataSettings, seenRecommendations);
         var similarRecs = await ProcessRecommendations(libraryType, result.SimilarSeries, externalSeriesMetadata,
-            RecommendationSource.Similar, series.Library.MetadataProvider, metadataSettings, seenRecommendations);
+            RecommendationSource.Similar, series.GetEffectiveMetadataProvider(), metadataSettings, seenRecommendations);
         recs.ExternalSeries = recs.ExternalSeries.Concat(similarRecs.ExternalSeries).ToList();
         recs.OwnedSeries = recs.OwnedSeries.Concat(similarRecs.OwnedSeries).ToList();
 
@@ -988,7 +988,7 @@ public class ExternalMetadataService : IExternalMetadataService
     private async Task ApplyExternalCovers(Series series, MetadataSettingsDto settings, CancellationToken ct = default)
     {
         if (!settings.EnableVolumeCoverImage && !settings.EnableChapterCoverImage) return;
-        if (series.Library?.MetadataProvider == MetadataProvider.ComicBookRoundup) return;
+        if ((series.MetadataProviderOverride ?? series.Library?.MetadataProvider) == MetadataProvider.ComicBookRoundup) return;
 
         // Prefer the cover based on Series/Library locale
         var locale = series.Metadata.Language ?? series.Library?.DefaultLanguage;
@@ -1131,7 +1131,7 @@ public class ExternalMetadataService : IExternalMetadataService
             MetronId = series.MetronId,
             CbrId = series.CbrId,
             IsStandAlone = series.IsStandAlone,
-            MetadataProvider = series.Library.MetadataProvider
+            MetadataProvider = series.GetEffectiveMetadataProvider()
         };
 
         if (volumeId.HasValue)
