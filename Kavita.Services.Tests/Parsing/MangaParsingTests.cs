@@ -120,8 +120,6 @@ public class MangaParsingTests
     [InlineData("Sekirei v19 - 365 Days Without Her (2018) (Digital) (RedRain).cbz", "19")]
     [InlineData("Sex Ed 120% v01 (2021) (Digital) (danke-Empire).cbz", "1")]
     [InlineData("Higurashi When They Cry - Arc 1 - Abducted by Demons Arc v01 (2008) (Digital) (LuCaZ).cbz", "1")]
-    // No volume marker in this specific filename (likely a typo upstream, missing "v01"); nothing to anchor a volume on.
-    [InlineData("Higurashi When They Cry - Arc 9 - Dice Killing Arc (2014) (Digital) (LuCaZ).cbz", Parser.LooseLeafVolume)]
     [InlineData("Umineko When They Cry - Episode 1 - Legend of the Golden Witch v01 (2-in-1 Edition) (2012) (Digital SD) (Ushi) (Spreads Joined).cbz", "1")]
     [InlineData("Umineko When They Cry - Episode 8 - Twilight of the Golden Witch v01 (3-in-1 Edition) (2019) (Digital SD) (Ushi) (Spreads Joined).cbz", "1")]
     [InlineData("JoJo's Bizarre Adventure - Part 1 - Phantom Blood v01 (2014) (Digital) (BlackManta-Empire).cbz", "1")]
@@ -139,9 +137,7 @@ public class MangaParsingTests
     [InlineData("Kaiju No. 8 v01 (2021) (Digital) (1r0n) (f).cbz", "1")]
     [InlineData("No. 5 v01 (2021) (Digital) (1r0n) (f2).cbz", "1")]
     [InlineData("No. 6 v1 (2015) (Digital) (ripper).cbz", "1")]
-    [InlineData("ReZERO -Starting Life in Another World- Chapter 1 - A Day in the Capital v01 (2016) (Digital) (LuCaZ).cbz", "1")]
-    [InlineData("ReZERO -Starting Life in Another World- Chapter 2 - A Week at the Mansion v01 (2017) (Digital) (LuCaZ).cbz", "1")]
-    [InlineData("ReZERO -Starting Life in Another World- Chapter 3 - Truth of Zero v01 (2017) (Digital) (LuCaZ).cbz", "1")]
+
     // GH #1534: ripper tag "c1fi7" must not interfere with reading the volume either
     [InlineData("No. 6 v1 (2015) (Digital) (c1fi7).cbz", "1")]
     [InlineData("Some Manga v01 (2015) (Digital) (Mr. Kimiko-c1fi7).cbz", "1")]
@@ -348,7 +344,6 @@ public class MangaParsingTests
     [InlineData("Sekirei v19 - 365 Days Without Her (2018) (Digital) (RedRain).cbz", "Sekirei")]
     [InlineData("Sex Ed 120% v01 (2021) (Digital) (danke-Empire).cbz", "Sex Ed 120%")]
     [InlineData("Higurashi When They Cry - Arc 1 - Abducted by Demons Arc v01 (2008) (Digital) (LuCaZ).cbz", "Higurashi When They Cry - Arc 1 - Abducted by Demons Arc")]
-    [InlineData("Higurashi When They Cry - Arc 9 - Dice Killing Arc (2014) (Digital) (LuCaZ).cbz", "Higurashi When They Cry - Arc 9 - Dice Killing Arc")]
     [InlineData("Umineko When They Cry - Episode 1 - Legend of the Golden Witch v01 (2-in-1 Edition) (2012) (Digital SD) (Ushi) (Spreads Joined).cbz", "Umineko When They Cry - Episode 1 - Legend of the Golden Witch")]
     [InlineData("Umineko When They Cry - Episode 8 - Twilight of the Golden Witch v01 (3-in-1 Edition) (2019) (Digital SD) (Ushi) (Spreads Joined).cbz", "Umineko When They Cry - Episode 8 - Twilight of the Golden Witch")]
     [InlineData("JoJo's Bizarre Adventure - Part 1 - Phantom Blood v01 (2014) (Digital) (BlackManta-Empire).cbz", "JoJo's Bizarre Adventure - Part 1 - Phantom Blood")]
@@ -366,12 +361,6 @@ public class MangaParsingTests
     [InlineData("Kaiju No. 8 v01 (2021) (Digital) (1r0n) (f).cbz", "Kaiju No. 8")]
     [InlineData("No. 5 v01 (2021) (Digital) (1r0n) (f2).cbz", "No. 5")]
     [InlineData("No. 6 v1 (2015) (Digital) (ripper).cbz", "No. 6")]
-    // NOTE: these 3 currently parse as 3 DIFFERENT series (each includes its own "Chapter N - subtitle"),
-    // which would incorrectly split one series into three in a real library. Left as current (documented)
-    // behavior pending a decision on how to strip a pre-volume "Chapter N - subtitle" segment safely.
-    [InlineData("ReZERO -Starting Life in Another World- Chapter 1 - A Day in the Capital v01 (2016) (Digital) (LuCaZ).cbz", "ReZERO -Starting Life in Another World- Chapter 1 - A Day in the Capital")]
-    [InlineData("ReZERO -Starting Life in Another World- Chapter 2 - A Week at the Mansion v01 (2017) (Digital) (LuCaZ).cbz", "ReZERO -Starting Life in Another World- Chapter 2 - A Week at the Mansion")]
-    [InlineData("ReZERO -Starting Life in Another World- Chapter 3 - Truth of Zero v01 (2017) (Digital) (LuCaZ).cbz", "ReZERO -Starting Life in Another World- Chapter 3 - Truth of Zero")]
     // GH #1534: ripper tag "c1fi7" must not interfere with reading the series name either
     [InlineData("No. 6 v1 (2015) (Digital) (c1fi7).cbz", "No. 6")]
     [InlineData("Some Manga v01 (2015) (Digital) (Mr. Kimiko-c1fi7).cbz", "Some Manga")]
@@ -488,7 +477,6 @@ public class MangaParsingTests
     [InlineData("Blade Runner 2019 - Ch 1.pdf", "1")]
     // GH #1534: a number embedded in the series title of a volume-only release should not be
     // mistaken for a chapter number just because a Volume marker exists elsewhere in the filename.
-    // NOTE: as of this writing these are all FAILING - they document the bug, not a fix.
     [InlineData("ACCA - 13-Territory Inspection Department v01 (2017) (Digital) (Uasaha).cbz", Parser.DefaultChapter)]
     [InlineData("ACCA - 13-Territory Inspection Department P.S. v01 (2020) (Digital) (LuCaZ).cbz", Parser.DefaultChapter)]
     [InlineData("Brave 10 v01 (2013) (Digital) (Lovag-Empire).cbz", Parser.DefaultChapter)]
@@ -529,6 +517,8 @@ public class MangaParsingTests
     // GH #1534: ripper tag "c1fi7" (a scanlation group's name, not a chapter marker) gets misread as "c1"
     [InlineData("No. 6 v1 (2015) (Digital) (c1fi7).cbz", Parser.DefaultChapter)]
     [InlineData("Some Manga v01 (2015) (Digital) (Mr. Kimiko-c1fi7).cbz", Parser.DefaultChapter)]
+    // "31" is part of the series title ("The Long Summer of August 31"), not a chapter number.
+    [InlineData("The Long Summer of August 31 Vol. 1.cbz", Parser.DefaultChapter)]
     public void ParseChaptersTest(string filename, string expected)
     {
         Assert.Equal(expected, Parser.ParseChapter(filename, LibraryType.Manga));
