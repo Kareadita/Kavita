@@ -101,6 +101,8 @@ public static partial class Parser
     [GeneratedRegex(@"[^a-zA-Z0-9]")]
     public static partial Regex NonAlphanumericRegex();
 
+
+
     private static readonly Regex ImageRegex = new(ImageFileExtensions,
         MatchOptions, RegexTimeout);
     private static readonly Regex ArchiveFileRegex = new(ArchiveFileExtensions,
@@ -1055,6 +1057,10 @@ public static partial class Parser
         return XmlRegex.IsMatch(Path.GetExtension(filePath));
     }
 
+    public static bool IsRange(string range)
+    {
+        return !string.IsNullOrEmpty(range) && Regex.IsMatch(range, @"^[\d\-.]+$", MatchOptions, RegexTimeout);
+    }
 
     public static float MinNumberFromRange(string range)
     {

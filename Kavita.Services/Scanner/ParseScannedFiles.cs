@@ -811,7 +811,7 @@ public class ParseScannedFiles
     }
 
 
-    private static void UpdateSortOrder(ConcurrentDictionary<ParsedSeries, List<ParserInfo>> scannedSeries, ParsedSeries series)
+    public static void UpdateSortOrder(ConcurrentDictionary<ParsedSeries, List<ParserInfo>> scannedSeries, ParsedSeries series)
     {
         // Set the Sort order per Volume
         var volumes = scannedSeries[series].GroupBy(info => info.Volumes);
@@ -863,8 +863,9 @@ public class ParseScannedFiles
             foreach (var chapter in chapters)
             {
                 // Use MinNumber in case there is a range, as otherwise sort order will cause it to be processed last
-                var chapterNum =
-                    $"{Parser.MinNumberFromRange(chapter.Chapters).ToString(CultureInfo.InvariantCulture)}";
+                var chapterNum = Parser.IsRange(chapter.Chapters) ?
+                    $"{Parser.MinNumberFromRange(chapter.Chapters).ToString(CultureInfo.InvariantCulture)}"
+                    : chapter.Chapters;
                 if (float.TryParse(chapterNum, NumberStyles.Any, CultureInfo.InvariantCulture, out var parsedChapter))
                 {
                     // Parsed successfully, use the numeric value

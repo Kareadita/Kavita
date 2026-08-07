@@ -6,6 +6,7 @@ using Kavita.API.Database;
 using Kavita.API.Repositories;
 using Kavita.API.Services;
 using Kavita.API.Services.SignalR;
+using Kavita.Common.Extensions;
 using Kavita.Database.Tests;
 using Kavita.Models.Entities.Enums;
 using Kavita.Models.Metadata;
@@ -764,6 +765,39 @@ public class ParseScannedFilesTests: AbstractDbTest
         var expectedMax = Math.Max(1, Environment.ProcessorCount / 2);
         Assert.True(readingItemService.MaxObservedConcurrency <= expectedMax,
             $"Observed parse concurrency {readingItemService.MaxObservedConcurrency} exceeded the cap {expectedMax}");
+    }
+
+    #endregion
+
+    #region Sort Order
+
+    [Fact]
+    public void TestUpdateSortOrder_BEY_LR_Nonsense()
+    {
+        var series = new ParsedSeries
+        {
+            Name = "Amazing Spider-Man (2018)",
+            NormalizedName = "Amazing Spider-Man (2018)".ToNormalized(),
+            Format = MangaFormat.Archive
+        };
+
+        ConcurrentDictionary<ParsedSeries, List<ParserInfo>> scannedSeries = [];
+        scannedSeries[series] = [
+            new ParserInfo
+            {
+                Series = "Amazing Spider-Man",
+                Chapters = "15"
+            },
+            new ParserInfo
+            {
+                Series = "Amazing Spider-Man",
+                Chapters = "15.HU"
+            },
+        ];
+
+        ParseScannedFiles.UpdateSortOrder(scannedSeries, series);
+        Assert.Equal(15f, scannedSeries[series][0].IssueOrder);
+        Assert.Equal(15.1f, scannedSeries[series][1].IssueOrder);
     }
 
     #endregion
