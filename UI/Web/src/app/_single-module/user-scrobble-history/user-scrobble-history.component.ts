@@ -9,7 +9,7 @@ import {
   signal
 } from '@angular/core';
 
-import {ScrobbleProvider, ScrobblingService} from "../../_services/scrobbling.service";
+import {ScrobblingService} from "../../_services/scrobbling.service";
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import {ScrobbleEvent, ScrobbleEventType} from "../../_models/scrobbling/scrobble-event";
 import {ScrobbleEventTypePipe} from "../../_pipes/scrobble-event-type.pipe";
@@ -18,24 +18,21 @@ import {ScrobbleEventSortField} from "../../_models/scrobbling/scrobble-event-fi
 import {debounceTime, take} from "rxjs/operators";
 import {PaginatedResult} from "../../_models/pagination";
 import {FormControl, FormGroup, ReactiveFormsModule} from "@angular/forms";
-import {translate, TranslocoModule} from "@jsverse/transloco";
+import {TranslocoModule} from "@jsverse/transloco";
 import {DefaultValuePipe} from "../../_pipes/default-value.pipe";
 import {TranslocoLocaleModule} from "@jsverse/transloco-locale";
 import {UtcToLocalTimePipe} from "../../_pipes/utc-to-local-time.pipe";
 import {LooseLeafOrDefaultNumber, SpecialVolumeNumber} from "../../_models/chapter";
-import {ColumnMode, NgxDatatableModule} from "@siemens/ngx-datatable";
+import {NgxDatatableModule} from "@siemens/ngx-datatable";
 import {APP_BASE_HREF} from "@angular/common";
 import {AccountService} from "../../_services/account.service";
-import {ToastrService} from "ngx-toastr";
 import {SelectionModel} from "../../typeahead/_models/selection-model";
 import {ResponsiveTableComponent} from "../../shared/_components/responsive-table/responsive-table.component";
 import {RouterLink} from "@angular/router";
-import {ScrobbleProviderNamePipe} from "../../_pipes/scrobble-provider-name.pipe";
 import {
   ScrobbleProviderImageComponent
 } from "../../shared/_components/scrobble-provider-image/scrobble-provider-image.component";
 import {ScrobbleReadStatusPipe} from "../../_pipes/scrobble-read-status.pipe";
-import {EntityTitleService} from "../../_services/entity-title.service";
 
 export interface DataTablePage {
   pageNumber: number,
@@ -48,7 +45,7 @@ export interface DataTablePage {
   selector: 'app-user-scrobble-history',
   imports: [ScrobbleEventTypePipe, ReactiveFormsModule, TranslocoModule,
     DefaultValuePipe, TranslocoLocaleModule, UtcToLocalTimePipe, NgbTooltip, NgxDatatableModule,
-    ResponsiveTableComponent, RouterLink, ScrobbleProviderNamePipe, ScrobbleProviderImageComponent, ScrobbleReadStatusPipe],
+    ResponsiveTableComponent, RouterLink, ScrobbleProviderImageComponent, ScrobbleReadStatusPipe],
   templateUrl: './user-scrobble-history.component.html',
   styleUrls: ['./user-scrobble-history.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
@@ -57,15 +54,12 @@ export class UserScrobbleHistoryComponent implements OnInit {
 
   protected readonly SpecialVolumeNumber = SpecialVolumeNumber;
   protected readonly LooseLeafOrDefaultNumber = LooseLeafOrDefaultNumber;
-  protected readonly ColumnMode = ColumnMode;
   protected readonly ScrobbleEventType = ScrobbleEventType;
 
   private readonly scrobblingService = inject(ScrobblingService);
   private readonly destroyRef = inject(DestroyRef);
-  private readonly toastr = inject(ToastrService);
   protected readonly accountService = inject(AccountService);
   protected readonly baseUrl = inject(APP_BASE_HREF);
-  private readonly entityTitleService = inject(EntityTitleService);
 
   formGroup: FormGroup = new FormGroup({
     'filter': new FormControl('', [])

@@ -35,7 +35,6 @@ public class ImageController(IUnitOfWork unitOfWork, IDirectoryService directory
     /// Returns cover image for Chapter
     /// </summary>
     /// <param name="chapterId"></param>
-    /// <param name="apiKey"></param>
     /// <returns></returns>
     [ChapterAccess]
     [HttpGet("chapter-cover")]
@@ -49,7 +48,6 @@ public class ImageController(IUnitOfWork unitOfWork, IDirectoryService directory
     /// Returns cover image for Library
     /// </summary>
     /// <param name="libraryId"></param>
-    /// <param name="apiKey"></param>
     /// <returns></returns>
     [LibraryAccess]
     [HttpGet("library-cover")]
@@ -63,7 +61,6 @@ public class ImageController(IUnitOfWork unitOfWork, IDirectoryService directory
     /// Returns cover image for Volume
     /// </summary>
     /// <param name="volumeId"></param>
-    /// <param name="apiKey"></param>
     /// <returns></returns>
     [VolumeAccess]
     [HttpGet("volume-cover")]
@@ -77,7 +74,6 @@ public class ImageController(IUnitOfWork unitOfWork, IDirectoryService directory
     /// Returns cover image for Series
     /// </summary>
     /// <param name="seriesId">Id of Series</param>
-    /// <param name="apiKey"></param>
     /// <returns></returns>
     [SeriesAccess]
     [HttpGet("series-cover")]
@@ -91,7 +87,6 @@ public class ImageController(IUnitOfWork unitOfWork, IDirectoryService directory
     /// Returns cover image for Collection
     /// </summary>
     /// <param name="collectionTagId"></param>
-    /// <param name="apiKey"></param>
     /// <returns></returns>
     [HttpGet("collection-cover")]
     public async Task<ActionResult> GetCollectionCoverImage(int collectionTagId)
@@ -112,7 +107,6 @@ public class ImageController(IUnitOfWork unitOfWork, IDirectoryService directory
     /// Returns cover image for a Reading List
     /// </summary>
     /// <param name="readingListId"></param>
-    /// <param name="apiKey"></param>
     /// <returns></returns>
     [HttpGet("readinglist-cover")]
     public async Task<ActionResult> GetReadingListCoverImage(int readingListId)
@@ -137,7 +131,6 @@ public class ImageController(IUnitOfWork unitOfWork, IDirectoryService directory
     /// <remarks>This request is served unauthenticated, but user must be passed via api key to validate</remarks>
     /// <param name="chapterId"></param>
     /// <param name="pageNum">Starts at 0</param>
-    /// <param name="apiKey">API Key for user. Needed to authenticate request</param>
     /// <param name="imageOffset">Only applicable for Epubs - handles multiple images on one page</param>
     /// <returns></returns>
     [ChapterAccess]
@@ -158,7 +151,6 @@ public class ImageController(IUnitOfWork unitOfWork, IDirectoryService directory
     /// Returns the image associated with a web-link
     /// </summary>
     /// <param name="url"></param>
-    /// <param name="apiKey"></param>
     /// <returns></returns>
     [HttpGet("web-link")]
     public async Task<ActionResult> GetWebLinkImage(string url)
@@ -194,7 +186,6 @@ public class ImageController(IUnitOfWork unitOfWork, IDirectoryService directory
     /// Returns the image associated with a publisher
     /// </summary>
     /// <param name="publisherName"></param>
-    /// <param name="apiKey"></param>
     /// <returns></returns>
     [HttpGet("publisher")]
     public async Task<ActionResult> GetPublisherImage(string publisherName)
@@ -234,7 +225,6 @@ public class ImageController(IUnitOfWork unitOfWork, IDirectoryService directory
     /// Returns cover image for Person
     /// </summary>
     /// <param name="personId"></param>
-    /// <param name="apiKey"></param>
     /// <returns></returns>
     [PersonAccess]
     [HttpGet("person-cover")]
@@ -248,7 +238,6 @@ public class ImageController(IUnitOfWork unitOfWork, IDirectoryService directory
     /// Returns cover image for User
     /// </summary>
     /// <param name="userId"></param>
-    /// <param name="apiKey"></param>
     /// <returns></returns>
     [HttpGet("user-cover")]
     public async Task<ActionResult> GetUserCoverImage(int userId)
@@ -265,7 +254,6 @@ public class ImageController(IUnitOfWork unitOfWork, IDirectoryService directory
     /// </summary>
     /// <remarks>Requires Admin Role to perform upload</remarks>
     /// <param name="filename">Filename of file. This is used with upload/upload-by-url</param>
-    /// <param name="apiKey"></param>
     /// <returns></returns>
     [HttpGet("cover-upload")]
     [Authorize(PolicyGroups.AdminPolicy)]

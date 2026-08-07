@@ -155,7 +155,7 @@ public class PluginController(IUnitOfWork unitOfWork, ITokenService tokenService
 
             if (name.Length > 1000)
             {
-                errorParses.Add(name, "Length > 1000 characters");
+                errorParses.TryAdd(name, "Length > 1000 characters");
                 continue;
             }
 
