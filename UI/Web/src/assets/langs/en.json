@@ -3582,7 +3582,10 @@
         "specials-volume": "Specials",
         "release-year-validation": "{{validation.year-validation}}",
         "volumes-title": "{{tab.volumes-tab}}",
-        "no-data": "{{common.no-data}}"
+        "no-data": "{{common.no-data}}",
+        "metadata-provider-override-label": "Metadata Provider Override",
+        "metadata-provider-override-tooltip": "Use a different Metadata Provider than the Library default for this Series",
+        "metadata-provider-override-default": "Use Library Default"
     },
 
     "edit-chapter-modal": {

@@ -87,6 +87,24 @@
 
     @if (series && metadata) {
       <ng-template [appEditTab]="Tabs.Metadata">
+        @if (editSeriesForm.get('metadataProviderOverride'); as control) {
+          <div class="row g-0 mb-4">
+            <app-setting-item [title]="t('metadata-provider-override-label')" [subtitle]="t('metadata-provider-override-tooltip')" [canEdit]="true">
+              <ng-template #view>
+                {{ control.value ? (control.value | metadataProviderTitle) : t('metadata-provider-override-default') }}
+              </ng-template>
+              <ng-template #edit>
+                <select class="form-select" formControlName="metadataProviderOverride">
+                  <option [ngValue]="null">{{ t('metadata-provider-override-default') }}</option>
+                  @let validMetadataProvidersOptions = validMetadataProviders.hasValue() ? validMetadataProviders.value() : [];
+                  @for (metadataProvider of validMetadataProvidersOptions; track metadataProvider) {
+                    <option [ngValue]="metadataProvider">{{ metadataProvider | metadataProviderTitle }}</option>
+                  }
+                </select>
+              </ng-template>
+            </app-setting-item>
+          </div>
+        }
         <app-edit-external-metadata-form [form]="editSeriesForm" [entity]="series"/>
       </ng-template>
     }

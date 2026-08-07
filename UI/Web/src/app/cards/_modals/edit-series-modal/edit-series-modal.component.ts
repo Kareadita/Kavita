@@ -3,6 +3,7 @@ import {
   ChangeDetectorRef,
   Component,
   DestroyRef,
+  effect,
   EventEmitter,
   inject,
   Input,
@@ -68,6 +69,8 @@ import {Volume} from "../../../_models/volume";
 import {ConfirmService} from "../../../shared/confirm.service";
 import {EditModalShellComponent} from "../../../shared/edit-modal-shell/edit-modal-shell.component";
 import {EditTabDirective} from "../../../shared/_directive/edit-tab.directive";
+import {MetadataProvider} from "src/app/_models/kavitaplus/metadata-provider.enum";
+import {MetadataProviderTitlePipe} from "../../../_pipes/metadata-provider-title.pipe";
 
 
 @Component({
@@ -95,7 +98,8 @@ import {EditTabDirective} from "../../../shared/_directive/edit-tab.directive";
     DecimalPipe,
     EditExternalMetadataFormComponent,
     EditModalShellComponent,
-    EditTabDirective
+    EditTabDirective,
+    MetadataProviderTitlePipe
   ],
   templateUrl: './edit-series-modal.component.html',
   styleUrls: ['./edit-series-modal.component.scss'],
@@ -140,7 +144,8 @@ export class EditSeriesModalComponent implements OnInit {
   editSeriesForm!: FormGroup;
   libraryName: string | undefined = undefined;
   size: number = 0;
-  libraryType = LibraryType.Manga;
+  libraryType = signal<LibraryType>(LibraryType.Manga);
+  validMetadataProviders = this.libraryService.getSupportedMetadataProviders(() => this.libraryType());
 
 
   // Typeaheads
@@ -161,6 +166,20 @@ export class EditSeriesModalComponent implements OnInit {
   chooserConfig: CoverImageChooserConfig = {};
 
   saveNestedComponents: EventEmitter<void> = new EventEmitter();
+
+  constructor() {
+    effect(() => {
+      if (!this.validMetadataProviders.hasValue()) return;
+      const validProviders = this.validMetadataProviders.value();
+      const control = this.editSeriesForm?.get('metadataProviderOverride');
+      if (!control) return;
+
+      const selected = control.value as MetadataProvider | null;
+      if (selected !== null && !validProviders.includes(selected)) {
+        control.setValue(null);
+      }
+    });
+  }
 
   get blacklist() {
     return [Action.Edit, Action.Info, Action.IncognitoRead, Action.Read, Action.SendTo,
@@ -200,6 +219,7 @@ export class EditSeriesModalComponent implements OnInit {
       publicationStatus: new FormControl('', []),
       language: new FormControl('', []),
       releaseYear: new FormControl('', [Validators.minLength(4), Validators.maxLength(4), Validators.pattern(/([1-9]\d{3})|[0]{1}/)]),
+      metadataProviderOverride: new FormControl<MetadataProvider | null>(this.series.metadataProviderOverride ?? null, []),
     });
     this.cdRef.markForCheck();
 
@@ -278,9 +298,9 @@ export class EditSeriesModalComponent implements OnInit {
       const libraryType = res.libraryType;
 
       this.seriesVolumes = volumes;
-      this.libraryType = libraryType;
+      this.libraryType.set(libraryType);
       this.isLoadingVolumes.set(false);
-      this.chooserConfig = this.coverChooserConfigFactory.forSeries(this.series, this.seriesVolumes, this.libraryType);
+      this.chooserConfig = this.coverChooserConfigFactory.forSeries(this.series, this.seriesVolumes, this.libraryType());
 
       volumes.forEach(v => {
         this.volumeCollapsed[v.name] = true;
