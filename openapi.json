@@ -2,12 +2,12 @@
   "openapi": "3.0.4",
   "info": {
     "title": "Kavita",
-    "description": "Kavita provides a set of APIs authenticated via an Auth Key passed in the `x-api-key` header. Generate an Auth Key under User Settings → Manage Auth Keys, paste it into the Authorize panel, and all Try It requests will include it. Assume all fields of a payload are required unless marked optional. Built against v0.9.0.15",
+    "description": "Kavita provides a set of APIs authenticated via an Auth Key passed in the `x-api-key` header. Generate an Auth Key under User Settings → Manage Auth Keys, paste it into the Authorize panel, and all Try It requests will include it. Assume all fields of a payload are required unless marked optional. Built against v0.9.0.17",
     "license": {
       "name": "GPL-3.0",
       "url": "https://github.com/Kareadita/Kavita/blob/develop/LICENSE"
     },
-    "version": "0.9.0.15"
+    "version": "0.9.0.17"
   },
   "servers": [
     {
@@ -5076,14 +5076,6 @@
               "type": "integer",
               "format": "int32"
             }
-          },
-          {
-            "name": "apiKey",
-            "in": "query",
-            "description": "",
-            "schema": {
-              "type": "string"
-            }
           }
         ],
         "responses": {
@@ -5107,14 +5099,6 @@
             "schema": {
               "type": "integer",
               "format": "int32"
-            }
-          },
-          {
-            "name": "apiKey",
-            "in": "query",
-            "description": "",
-            "schema": {
-              "type": "string"
             }
           }
         ],
@@ -5140,14 +5124,6 @@
               "type": "integer",
               "format": "int32"
             }
-          },
-          {
-            "name": "apiKey",
-            "in": "query",
-            "description": "",
-            "schema": {
-              "type": "string"
-            }
           }
         ],
         "responses": {
@@ -5171,14 +5147,6 @@
             "schema": {
               "type": "integer",
               "format": "int32"
-            }
-          },
-          {
-            "name": "apiKey",
-            "in": "query",
-            "description": "",
-            "schema": {
-              "type": "string"
             }
           }
         ],
@@ -5204,14 +5172,6 @@
               "type": "integer",
               "format": "int32"
             }
-          },
-          {
-            "name": "apiKey",
-            "in": "query",
-            "description": "",
-            "schema": {
-              "type": "string"
-            }
           }
         ],
         "responses": {
@@ -5235,14 +5195,6 @@
             "schema": {
               "type": "integer",
               "format": "int32"
-            }
-          },
-          {
-            "name": "apiKey",
-            "in": "query",
-            "description": "",
-            "schema": {
-              "type": "string"
             }
           }
         ],
@@ -5280,14 +5232,6 @@
             }
           },
           {
-            "name": "apiKey",
-            "in": "query",
-            "description": "API Key for user. Needed to authenticate request",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
             "name": "imageOffset",
             "in": "query",
             "description": "Only applicable for Epubs - handles multiple images on one page",
@@ -5319,14 +5263,6 @@
             "schema": {
               "type": "string"
             }
-          },
-          {
-            "name": "apiKey",
-            "in": "query",
-            "description": "",
-            "schema": {
-              "type": "string"
-            }
           }
         ],
         "responses": {
@@ -5345,14 +5281,6 @@
         "parameters": [
           {
             "name": "publisherName",
-            "in": "query",
-            "description": "",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "apiKey",
             "in": "query",
             "description": "",
             "schema": {
@@ -5382,14 +5310,6 @@
               "type": "integer",
               "format": "int32"
             }
-          },
-          {
-            "name": "apiKey",
-            "in": "query",
-            "description": "",
-            "schema": {
-              "type": "string"
-            }
           }
         ],
         "responses": {
@@ -5414,14 +5334,6 @@
               "type": "integer",
               "format": "int32"
             }
-          },
-          {
-            "name": "apiKey",
-            "in": "query",
-            "description": "",
-            "schema": {
-              "type": "string"
-            }
           }
         ],
         "responses": {
@@ -5443,14 +5355,6 @@
             "name": "filename",
             "in": "query",
             "description": "Filename of file. This is used with upload/upload-by-url",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "apiKey",
-            "in": "query",
-            "description": "",
             "schema": {
               "type": "string"
             }
@@ -30694,6 +30598,9 @@
               "$ref": "#/components/schemas/ChapterDto"
             },
             "nullable": true
+          },
+          "libraryType": {
+            "$ref": "#/components/schemas/LibraryType"
           },
           "unreadCount": {
             "type": "integer",
