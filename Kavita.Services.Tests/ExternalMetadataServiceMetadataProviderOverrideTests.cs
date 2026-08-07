@@ -121,4 +121,68 @@ public class ExternalMetadataServiceMetadataProviderOverrideTests : AbstractDbTe
         await kavitaPlusApiService.Received(1).MatchSeriesV3Async(
             Arg.Is<MatchRequestV3Dto>(r => r.Provider == MetadataProvider.Mangabaka), Arg.Any<CancellationToken>());
     }
+
+    [Fact]
+    public async Task UpdateSeriesMetadataProviderOverride_InvalidatesCachedMetadata_WhenProviderChanges()
+    {
+        var (unitOfWork, context, mapper) = await CreateDatabase();
+        var (service, _) = CreateService(unitOfWork, mapper);
+
+        var library = await context.Library.FirstAsync(l => l.Id == 1);
+        library.MetadataProvider = MetadataProvider.Mangabaka;
+        context.Library.Update(library);
+        await context.SaveChangesAsync();
+
+        var series = new SeriesBuilder("Cached Series")
+            .WithLibraryId(1)
+            .WithFormat(MangaFormat.Archive)
+            .WithMetadata(new SeriesMetadataBuilder().Build())
+            .Build();
+        // Data cached from the Library's default provider (Mangabaka), and a failed match against it
+        series.ExternalSeriesMetadata.ValidUntilUtc = DateTime.UtcNow.AddDays(1);
+        series.IsBlacklisted = true;
+        context.Series.Add(series);
+        await context.SaveChangesAsync();
+
+        await service.UpdateSeriesMetadataProviderOverride(series.Id, MetadataProvider.Hardcover);
+
+        var updated = await context.Series
+            .Include(s => s.ExternalSeriesMetadata)
+            .FirstAsync(s => s.Id == series.Id);
+
+        Assert.Equal(MetadataProvider.Hardcover, updated.MetadataProviderOverride);
+        // Everything held came from Mangabaka, so it must be refetched rather than served from cache
+        Assert.True(await unitOfWork.ExternalSeriesMetadataRepository.NeedsDataRefresh(series.Id));
+        // A failure to match against Mangabaka says nothing about Hardcover
+        Assert.False(updated.IsBlacklisted);
+    }
+
+    [Fact]
+    public async Task UpdateSeriesMetadataProviderOverride_KeepsCachedMetadata_WhenEffectiveProviderIsUnchanged()
+    {
+        var (unitOfWork, context, mapper) = await CreateDatabase();
+        var (service, _) = CreateService(unitOfWork, mapper);
+
+        var library = await context.Library.FirstAsync(l => l.Id == 1);
+        library.MetadataProvider = MetadataProvider.Mangabaka;
+        context.Library.Update(library);
+        await context.SaveChangesAsync();
+
+        var series = new SeriesBuilder("Pinned Series")
+            .WithLibraryId(1)
+            .WithFormat(MangaFormat.Archive)
+            .WithMetadata(new SeriesMetadataBuilder().Build())
+            .Build();
+        series.ExternalSeriesMetadata.ValidUntilUtc = DateTime.UtcNow.AddDays(1);
+        context.Series.Add(series);
+        await context.SaveChangesAsync();
+
+        // Pinning the Library's current default doesn't change who we match against
+        await service.UpdateSeriesMetadataProviderOverride(series.Id, MetadataProvider.Mangabaka);
+
+        var updated = await context.Series.FirstAsync(s => s.Id == series.Id);
+
+        Assert.Equal(MetadataProvider.Mangabaka, updated.MetadataProviderOverride);
+        Assert.False(await unitOfWork.ExternalSeriesMetadataRepository.NeedsDataRefresh(series.Id));
+    }
 }

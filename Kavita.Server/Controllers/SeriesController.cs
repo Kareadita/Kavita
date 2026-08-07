@@ -250,8 +250,6 @@ public class SeriesController(
 
         ExternalMetadataIdHelper.SetExternalMetadataIds(series, updateSeries);
 
-        series.MetadataProviderOverride = updateSeries.MetadataProviderOverride;
-
         var needsRefreshMetadata = false;
         // This is when you hit Reset
         if (series.CoverImageLocked && !updateSeries.CoverImageLocked)
@@ -272,6 +270,10 @@ public class SeriesController(
         {
             return BadRequest(await localizationService.TranslateAsync(UserId, "generic-series-update"));
         }
+
+        // Routed through the service (rather than set inline) so that changing the provider also invalidates the
+        // metadata we cached from the previous one. No-ops when the override is unchanged.
+        await externalMetadataService.UpdateSeriesMetadataProviderOverride(series.Id, updateSeries.MetadataProviderOverride, ct);
 
         if (needsRefreshMetadata)
         {
@@ -661,7 +663,11 @@ public class SeriesController(
     public async Task<ActionResult<IList<ExternalSeriesMatchDto>>> MatchSeries(MatchSeriesDto dto)
     {
         var ct = HttpContext.RequestAborted;
-        var cacheKey = $"{MatchSeriesCacheKey}-{dto.SeriesId}-{dto.Query}-{dto.IsStandAlone}";
+
+        // The provider is part of the key as it can be changed (via the Series' override) from within the Match dialog itself,
+        // and the same query against a different provider is a different search
+        var provider = await unitOfWork.SeriesRepository.GetEffectiveMetadataProviderAsync(dto.SeriesId, ct);
+        var cacheKey = $"{MatchSeriesCacheKey}-{dto.SeriesId}-{provider}-{dto.Query}-{dto.IsStandAlone}";
         var results = await _matchSeriesCacheProvider.GetAsync<IList<ExternalSeriesMatchDto>>(cacheKey, ct);
         if (results.HasValue && !environment.IsDevelopment())
         {

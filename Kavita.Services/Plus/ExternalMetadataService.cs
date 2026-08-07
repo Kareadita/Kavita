@@ -656,15 +656,47 @@ public class ExternalMetadataService : IExternalMetadataService
 
     public async Task UpdateSeriesMetadataProviderOverride(int seriesId, MetadataProvider? metadataProviderOverride, CancellationToken ct = default)
     {
-        var series = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(seriesId, SeriesIncludes.None, ct);
+        var series = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(seriesId,
+            SeriesIncludes.Library | SeriesIncludes.ExternalMetadata, ct);
         if (series == null) return;
+        if (series.MetadataProviderOverride == metadataProviderOverride) return;
 
+        var previousProvider = series.GetEffectiveMetadataProvider();
         series.MetadataProviderOverride = metadataProviderOverride;
+        var newProvider = series.GetEffectiveMetadataProvider();
+
+        // Pinning the Library's current default (or dropping back to it) doesn't change who we match against,
+        // so the data we already hold is still from the right provider
+        if (previousProvider != newProvider)
+        {
+            _logger.LogInformation("Series {SeriesName} is switching Metadata Provider from {PreviousProvider} to {NewProvider}",
+                series.Name, previousProvider, newProvider);
+
+            // Everything cached came from the previous provider and must be refetched rather than served from cache
+            var externalSeriesMetadata = await GetOrCreateExternalSeriesMetadataForSeries(seriesId, series);
+            _unitOfWork.ExternalSeriesMetadataRepository.Remove(externalSeriesMetadata.ExternalReviews);
+            _unitOfWork.ExternalSeriesMetadataRepository.Remove(externalSeriesMetadata.ExternalRatings);
+            _unitOfWork.ExternalSeriesMetadataRepository.Remove(externalSeriesMetadata.ExternalRecommendations);
+            externalSeriesMetadata.ValidUntilUtc = DateTime.MinValue;
+            _fileCacheService.InvalidatePrefix(GetCoversCacheKey(seriesId), FileCacheService.KavitaPlusCacheDirectory);
+
+            // Failing to match against the previous provider says nothing about the new one
+            series.IsBlacklisted = false;
+        }
 
         _unitOfWork.SeriesRepository.Update(series);
         await _unitOfWork.CommitAsync(ct);
 
         await _eventHub.SendMessageAsync(MessageFactory.SeriesUpdated, MessageFactory.SeriesUpdatedEvent(series.Id), ct: ct);
+
+        await _auditService.LogMatchAsync(KavitaPlusEventType.SeriesMetadataProviderOverrideSet, seriesId,
+            new AuditLogMatchProviderOverrideParamsDto
+            {
+                SeriesName = series.Name,
+                PreviousProvider = previousProvider,
+                NewProvider = newProvider,
+                IsOverride = metadataProviderOverride.HasValue,
+            }, ct: ct);
     }
 
     /// <summary>

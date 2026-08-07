@@ -692,6 +692,15 @@ public class SeriesRepository(DataContext context, IMapper mapper) : ISeriesRepo
         return result;
     }
 
+    public async Task<MetadataProvider?> GetEffectiveMetadataProviderAsync(int seriesId, CancellationToken ct = default)
+    {
+        // Inlined rather than calling Series.GetEffectiveMetadataProvider(), see GetKavitaPlusSeriesDetailRequestV3Dto
+        return await context.Series
+            .Where(s => s.Id == seriesId)
+            .Select(s => (MetadataProvider?) (s.MetadataProviderOverride ?? s.Library.MetadataProvider))
+            .FirstOrDefaultAsync(ct);
+    }
+
     public async Task<string?> GetSeriesCoverImageAsync(int seriesId, CancellationToken ct = default)
     {
         return await context.Series

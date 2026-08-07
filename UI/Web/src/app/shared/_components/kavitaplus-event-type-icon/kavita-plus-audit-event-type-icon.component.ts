@@ -9,6 +9,7 @@ function resolveIcon(type: KavitaPlusEventType): string {
     case KavitaPlusEventType.SeriesBlacklisted:      return 'fas fa-circle-xmark';
     case KavitaPlusEventType.SeriesMatchFixed:       return 'fas fa-eraser';
     case KavitaPlusEventType.SeriesDontMatchSet:     return 'fas fa-table-cells-row-lock';
+    case KavitaPlusEventType.SeriesMetadataProviderOverrideSet: return 'fas fa-right-left';
     case KavitaPlusEventType.MetadataFetched:        return 'fas fa-magnifying-glass';
     case KavitaPlusEventType.MetadataUpdated:        return 'fas fa-database';
     case KavitaPlusEventType.CoverUpdated:           return 'fas fa-image';

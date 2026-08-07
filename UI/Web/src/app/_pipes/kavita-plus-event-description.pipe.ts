@@ -8,6 +8,7 @@ import {ScrobbleReadStatusPipe} from "./scrobble-read-status.pipe";
 import {ScrobbleProviderNamePipe} from "./scrobble-provider-name.pipe";
 import {UtcToLocalTimePipe} from "./utc-to-local-time.pipe";
 import {AuditStatus} from "../_models/kavitaplus/audit-status.enum";
+import {MetadataProvider} from "../_models/kavitaplus/metadata-provider.enum";
 
 const PREFIX = 'kavita-plus-event-description-pipe';
 
@@ -68,6 +69,11 @@ export class KavitaPlusEventDescriptionPipe implements PipeTransform {
       return this.translocoService.translate(`${PREFIX}.series-cover-updated`);
     } else if (entry.eventType === KavitaPlusEventType.SeriesMatchFixed) {
       return this.translocoService.translate(`${PREFIX}.series-match-fixed`, {matchName: entry.matchDetails?.matchedName});
+    } else if (entry.eventType === KavitaPlusEventType.SeriesMetadataProviderOverrideSet && entry.matchDetails) {
+      return this.translocoService.translate(`${PREFIX}.metadata-provider-changed`, {
+        previousProvider: this.metadataProviderName(entry.matchDetails.previousProvider),
+        newProvider: this.metadataProviderName(entry.matchDetails.newProvider),
+      });
     } else if (entry.eventType === KavitaPlusEventType.CollectionSynced && entry.syncDetails) {
       return this.translocoService.translate(`${PREFIX}.collection-synced`, {
         collectionName: entry.syncDetails.collectionName,
@@ -136,5 +142,15 @@ export class KavitaPlusEventDescriptionPipe implements PipeTransform {
     }
 
     return '';
+  }
+
+  /** MetadataProviderTitlePipe can't be instantiated here as it relies on DI, so resolve the same keys directly */
+  private metadataProviderName(provider: MetadataProvider | null): string {
+    switch (provider) {
+      case MetadataProvider.Hardcover: return this.translocoService.translate('metadata-provider-title-pipe.hardcover');
+      case MetadataProvider.Mangabaka: return this.translocoService.translate('metadata-provider-title-pipe.mangabaka');
+      case MetadataProvider.ComicBookRoundup: return this.translocoService.translate('metadata-provider-title-pipe.cbr');
+      default: return '';
+    }
   }
 }
