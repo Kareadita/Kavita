@@ -10,7 +10,7 @@ import {
   viewChild
 } from '@angular/core';
 import {NgTemplateOutlet} from "@angular/common";
-import {TranslocoDirective, translate} from "@jsverse/transloco";
+import {translate, TranslocoDirective} from "@jsverse/transloco";
 import {AbstractControl, FormArray, FormBuilder, FormControl, FormGroup, ReactiveFormsModule} from "@angular/forms";
 import {SettingSwitchComponent} from "../../settings/_components/setting-switch/setting-switch.component";
 import {SettingsService} from "../settings.service";
@@ -261,8 +261,7 @@ export class ManageMetadataSettingsComponent implements OnInit {
       this.settingsForm.valueChanges.pipe(
         debounceTime(300),
         takeUntilDestroyed(this.destroyRef),
-        // Never persist a malformed language code
-        filter(() => !this.hasMalformedLanguageCodes()),
+        filter(() => this.settingsForm.valid),
         map(_ => this.packData()),
         switchMap((data) => this.settingService.updateMetadataSettings(data)),
       ).subscribe();
