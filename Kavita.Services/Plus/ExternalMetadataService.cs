@@ -130,12 +130,12 @@ public class ExternalMetadataService : IExternalMetadataService
 
         if (ids.Count == 0)
         {
-            _logger.LogInformation("[Kavita+ Data Refresh] No series need matching or refreshing (stale data)");
+            _logger.LogDebug("[Kavita+ Data Refresh] No series need matching or refreshing (stale data)");
             return;
         }
 
 
-        _logger.LogInformation("[Kavita+ Data Refresh] Started Refreshing {Count} series data from Kavita+: {Ids}", ids.Count, string.Join(',', ids));
+        _logger.LogDebug("[Kavita+ Data Refresh] Started Refreshing {Count} series data from Kavita+: {Ids}", ids.Count, string.Join(',', ids));
         var count = 0;
         var successfulMatches = new List<int>();
         var libTypes = await _unitOfWork.LibraryRepository.GetLibraryTypesBySeriesIdsAsync(ids, ct);
@@ -150,7 +150,7 @@ public class ExternalMetadataService : IExternalMetadataService
             }
             await Task.Delay(10000, ct); // Currently AL is degraded and has 30 requests/min, give a little padding since this is a background request
         }
-        _logger.LogInformation("[Kavita+ Data Refresh] Finished Refreshing {Count} / {Total} series data from Kavita+: {Ids}", count, ids.Count, string.Join(',', successfulMatches));
+        _logger.LogDebug("[Kavita+ Data Refresh] Finished Refreshing {Count} / {Total} series data from Kavita+: {Ids}", count, ids.Count, string.Join(',', successfulMatches));
     }
 
     public async Task<SeriesDetailPlusDto?> TryMatchAndLoadMetadataForSeries(int seriesId, LibraryType libraryType, MetadataFetchTrigger trigger,
@@ -213,11 +213,11 @@ public class ExternalMetadataService : IExternalMetadataService
             await _auditService.LogAsync(KavitaPlusAuditCategory.Match, KavitaPlusEventType.SeriesBlacklisted,
                 AuditStatus.Failure, seriesId: seriesId, error: "no-matches", ct: ct);
 
-            _logger.LogInformation("No good enough matches out of {TotalMatch} found for Series {SeriesId}", result.Data.Count, seriesId);
+            _logger.LogDebug("No good enough matches out of {TotalMatch} found for Series {SeriesId}", result.Data.Count, seriesId);
             return null;
         }
 
-        // WE can add a new case for validatedAutomatedMatches.Count == 2 && validatedAutomatedMatches[1] < 1f && validatedAutomatedMatches[0] == 1f
+        // Amelia: WE can add a new case for validatedAutomatedMatches.Count == 2 && validatedAutomatedMatches[1] < 1f && validatedAutomatedMatches[0] == 1f
 
         if (validAutomatedMatches.Count > 1)
         {
@@ -227,14 +227,14 @@ public class ExternalMetadataService : IExternalMetadataService
             await _auditService.LogAsync(KavitaPlusAuditCategory.Match, KavitaPlusEventType.SeriesBlacklisted,
                 AuditStatus.Failure, seriesId: seriesId, error: "too-many-matches", ct: ct);
 
-            _logger.LogInformation("Found {GoodMatch} good enough matches out of {TotalMatch} found for Series {SeriesId}. Will not automatically choose",
+            _logger.LogDebug("Found {GoodMatch} good enough matches out of {TotalMatch} found for Series {SeriesId}. Will not automatically choose",
                 validAutomatedMatches.Count, result.Data.Count, seriesId);
             return null;
         }
 
         var match = validAutomatedMatches[0];
 
-        _logger.LogInformation("Matches series {SeriesId} to MangaBaka: {MangaBakaId}, HardcoverId: {HardcoverId}, CbrId: {CbrId} with {Certainty}% certainty",
+        _logger.LogDebug("Matches series {SeriesId} to MangaBaka: {MangaBakaId}, HardcoverId: {HardcoverId}, CbrId: {CbrId} with {Certainty}% certainty",
             seriesId, match.Series.MangabakaId, match.Series.HardcoverId, match.Series.CbrId, match.MatchRating * 100);
 
         var beforeIds = new AuditLogMatchExternalIdsParamsDto
@@ -2159,25 +2159,6 @@ public class ExternalMetadataService : IExternalMetadataService
     }
 
     /// <summary>
-    /// Admin will set up a set of Language codes to prioritize the selection from Kavita+ for both Name and LocalizedName.
-    /// This method is responsible for finding the best fit. Caller should handle Global/Library override
-    /// </summary>
-    private static (string? newName, string? languageCode) FindSeriesName(IReadOnlyList<string> priorities, ExternalSeriesDetailDto externalMetadata)
-    {
-        foreach (var languageCode in priorities)
-        {
-            if (externalMetadata.LocalizedTitles.TryGetValue(languageCode, out var title) && title.Count > 0)
-            {
-                var titleValue = title[0].Title;
-                if (string.IsNullOrEmpty(titleValue)) continue;
-                return (titleValue.Trim(), languageCode);
-            }
-        }
-
-        return (null, null);
-    }
-
-    /// <summary>
     /// Resolves which language priority lists apply to a Series. A library override replaces the global settings
     /// outright, including any field left blank on it.
     /// </summary>
@@ -2289,7 +2270,7 @@ public class ExternalMetadataService : IExternalMetadataService
 
         if (chosen == null)
         {
-            _logger.LogInformation(
+            _logger.LogDebug(
                 "[K+] Skipping name write for Series {SeriesId}: no unique candidate matched the configured languages",
                 series.Id);
             return (false, null);
@@ -2297,7 +2278,7 @@ public class ExternalMetadataService : IExternalMetadataService
 
         if (await WouldOrphanMergedFiles(series, series.Name, chosen, series.NormalizedLocalizedName, series.NormalizedOriginalName, ct))
         {
-            _logger.LogInformation("[K+] Skipping name write for Series {SeriesId}: current name anchors merged files on disk", series.Id);
+            _logger.LogDebug("[K+] Skipping name write for Series {SeriesId}: current name anchors merged files on disk", series.Id);
             return (false, null);
         }
 
@@ -2370,7 +2351,7 @@ public class ExternalMetadataService : IExternalMetadataService
 
         if (chosen == null)
         {
-            _logger.LogInformation(
+            _logger.LogDebug(
                 "[K+] Skipping localized name write for Series {SeriesId}: no unique candidate matched the configured languages",
                 series.Id);
             return (false, null);
@@ -2378,7 +2359,7 @@ public class ExternalMetadataService : IExternalMetadataService
 
         if (await WouldOrphanMergedFiles(series, series.LocalizedName, chosen, series.NormalizedName, series.NormalizedOriginalName, ct))
         {
-            _logger.LogInformation("[K+] Skipping localized name write for Series {SeriesId}: current value anchors merged files on disk", series.Id);
+            _logger.LogDebug("[K+] Skipping localized name write for Series {SeriesId}: current value anchors merged files on disk", series.Id);
             return (false, null);
         }
 
