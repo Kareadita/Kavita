@@ -38,8 +38,6 @@ export class ImageZoomDirective {
     } else if (event.touches.length === 1 && instance.isPaginationEvent(event) && instance.isZoomedIn()) {
       const touch = event.touches[0];
       if (instance.containsPoint(touch.clientX, touch.clientY)) {
-        event.preventDefault();
-        event.stopPropagation();
         instance.startPan(touch.clientX, touch.clientY, true);
       }
     }
@@ -110,8 +108,6 @@ export class ImageZoomDirective {
 
     // Pan
     if (event.touches.length === 1 && this.isZoomedIn()) {
-      event.preventDefault();
-      event.stopPropagation();
       this.startPan(event.touches[0].clientX, event.touches[0].clientY);
     }
   }
@@ -182,7 +178,6 @@ export class ImageZoomDirective {
       return;
     }
 
-    event.preventDefault();
     this.startPan(event.touches[0].clientX, event.touches[0].clientY, true);
   }
 
