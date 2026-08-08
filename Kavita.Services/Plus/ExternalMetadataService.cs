@@ -200,39 +200,8 @@ public class ExternalMetadataService : IExternalMetadataService
             return null;
         }
 
-        var validAutomatedMatches = result.Data
-            .Where(m => m.MatchRating > 0.9)
-            .OrderBy(m => m.MatchRating)
-            .ToList();
-
-        if (validAutomatedMatches.Count == 0)
-        {
-            series.IsBlacklisted = true;
-            await _unitOfWork.CommitAsync(ct);
-
-            await _auditService.LogAsync(KavitaPlusAuditCategory.Match, KavitaPlusEventType.SeriesBlacklisted,
-                AuditStatus.Failure, seriesId: seriesId, error: "no-matches", ct: ct);
-
-            _logger.LogDebug("No good enough matches out of {TotalMatch} found for Series {SeriesId}", result.Data.Count, seriesId);
-            return null;
-        }
-
-        // Amelia: WE can add a new case for validatedAutomatedMatches.Count == 2 && validatedAutomatedMatches[1] < 1f && validatedAutomatedMatches[0] == 1f
-
-        if (validAutomatedMatches.Count > 1)
-        {
-            series.IsBlacklisted = true;
-            await _unitOfWork.CommitAsync(ct);
-
-            await _auditService.LogAsync(KavitaPlusAuditCategory.Match, KavitaPlusEventType.SeriesBlacklisted,
-                AuditStatus.Failure, seriesId: seriesId, error: "too-many-matches", ct: ct);
-
-            _logger.LogDebug("Found {GoodMatch} good enough matches out of {TotalMatch} found for Series {SeriesId}. Will not automatically choose",
-                validAutomatedMatches.Count, result.Data.Count, seriesId);
-            return null;
-        }
-
-        var match = validAutomatedMatches[0];
+        var match = await PickBestMatch(series, result.Data, ct);
+        if (match == null) return null;
 
         _logger.LogDebug("Matches series {SeriesId} to MangaBaka: {MangaBakaId}, HardcoverId: {HardcoverId}, CbrId: {CbrId} with {Certainty}% certainty",
             seriesId, match.Series.MangabakaId, match.Series.HardcoverId, match.Series.CbrId, match.MatchRating * 100);
@@ -295,6 +264,52 @@ public class ExternalMetadataService : IExternalMetadataService
             MetadataProvider.ComicBookRoundup => series.CbrId > 0,
             _ => throw new ArgumentOutOfRangeException(nameof(metadataProvider), metadataProvider, null)
         };
+    }
+
+    private async Task<ExternalSeriesMatchDto?> PickBestMatch(Series series, IList<ExternalSeriesMatchDto> matches, CancellationToken ct)
+    {
+        var perfectAutomatedMatches = matches
+            .Where(m => m.MatchRating == 1f)
+            .ToList();
+
+        // Exactly one perfect match, use it regardless of other good (> 0.9) matches
+        if (perfectAutomatedMatches.Count == 1)
+        {
+            return perfectAutomatedMatches[0];
+        }
+
+        var validAutomatedMatches = matches
+            .Where(m => m.MatchRating > 0.9)
+            .OrderBy(m => m.MatchRating)
+            .ToList();
+
+        // Exactly one good enough match, use it
+        if (validAutomatedMatches.Count == 1)
+        {
+            return validAutomatedMatches[0];
+        }
+
+        if (validAutomatedMatches.Count == 0)
+        {
+            series.IsBlacklisted = true;
+            await _unitOfWork.CommitAsync(ct);
+
+            await _auditService.LogAsync(KavitaPlusAuditCategory.Match, KavitaPlusEventType.SeriesBlacklisted,
+                AuditStatus.Failure, seriesId: series.Id, error: "no-matches", ct: ct);
+
+            _logger.LogDebug("No good enough matches out of {TotalMatch} found for Series {SeriesId}",matches.Count, series.Id);
+            return null;
+        }
+
+        series.IsBlacklisted = true;
+        await _unitOfWork.CommitAsync(ct);
+
+        await _auditService.LogAsync(KavitaPlusAuditCategory.Match, KavitaPlusEventType.SeriesBlacklisted,
+            AuditStatus.Failure, seriesId: series.Id, error: "too-many-matches", ct: ct);
+
+        _logger.LogDebug("Found {GoodMatch} good enough matches out of {TotalMatch} found for Series {SeriesId}. Will not automatically choose",
+            validAutomatedMatches.Count, matches.Count, series.Id);
+        return null;
     }
 
     private static ExternalEditionDto? PickBestEdition(Series series, IList<ExternalEditionDto> editions)
