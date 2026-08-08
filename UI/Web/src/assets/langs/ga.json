@@ -1065,7 +1065,8 @@
         "comment-header": "Nóta Tráchta",
         "edit-header": "Cuir in eagar",
         "edit-item-alt": "Cuir {{seriesName}} in eagar",
-        "no-data": "Gan aon saincheisteanna"
+        "no-data": "Gan aon saincheisteanna",
+        "generic": "Bhí earráid anaithnid ann"
     },
     "default-date-pipe": {
         "never": "Riamh"
@@ -1231,7 +1232,9 @@
         "source-url-title": "Url Foinseach:",
         "total-series-title": "Sraith Iomlán:",
         "missing-series-title": "Sraith ar iarraidh:",
-        "last-sync-tooltip": "Sioncrónaíonn Kavita go laethúil le soláthraí bailiúcháin réamhtheachtacha."
+        "last-sync-tooltip": "Sioncrónaíonn Kavita go laethúil le soláthraí bailiúcháin réamhtheachtacha.",
+        "series-tab": "{{tabs.series-tab}}",
+        "matched-series": "Sraith Mheaitseáilte:"
     },
     "library-recommended": {
         "no-data": "Níl aon rud le taispeáint anseo. Cuir roinnt meiteashonraí le do leabharlann, léigh rud éigin nó déan rud éigin a rátáil. D'fhéadfadh moltaí a bheith casta as an leabharlann seo freisin.",
@@ -1371,7 +1374,8 @@
         "left-to-process": "Fágtha le Próiseáil: {{leftToProcess}} / {{totalToProcess}}",
         "download-in-queue": "{{num}} íoslódálacha sa Scuaine",
         "reading-now": "{{num}} ag léamh anois",
-        "downloads-active": "{{count}} íoslódáil ar siúl"
+        "downloads-active": "{{count}} íoslódáil ar siúl",
+        "not-connected": "Gan nasc, bain triail as athnuachan"
     },
     "shortcuts-modal": {
         "title": "Aicearraí Méarchláir",
@@ -1384,7 +1388,11 @@
         "close-reader": "Dún an léitheoir",
         "toggle-menu": "Scoránaigh an Roghchlár",
         "offset-double-page": "{{keybind-setting-description-pipe.key-bind-title-offset-double-page}}",
-        "navigate-to-settings": "{{keybind-setting-description-pipe.key-bind-title-navigate-to-settings}}"
+        "navigate-to-settings": "{{keybind-setting-description-pipe.key-bind-title-navigate-to-settings}}",
+        "previous-chapter": "{{keybind-setting-description-pipe.key-bind-title-previous-chapter}}",
+        "next-chapter": "{{keybind-setting-description-pipe.key-bind-title-next-chapter}}",
+        "first-page": "{{keybind-setting-description-pipe.key-bind-title-first-page}}",
+        "last-page": "{{keybind-setting-description-pipe.key-bind-title-last-page}}"
     },
     "grouped-typeahead": {
         "files": "Comhaid",
@@ -1733,7 +1741,8 @@
         "volumes-title": "{{tab.volumes-tab}}",
         "no-data": "{{common.no-data}}",
         "weblinks-tab": "{{tabs.weblink-tab}}",
-        "external-ids-tab": "{{tabs.external-ids-tab}}"
+        "external-ids-tab": "{{tabs.external-ids-tab}}",
+        "align-sort-name": "D'athraigh tú ainm an tsraith seo ach tá a hainm sórtála faoi ghlas. An bhfuil tú ag iarraidh an t-ainm sórtála a nuashonrú chun go mbeidh sé ag teacht leis an ainm nua?"
     },
     "edit-chapter-modal": {
         "title": "Cuir in eagar",
@@ -1800,7 +1809,7 @@
         "external-ids-tab": "{{tabs.external-ids-tab}}"
     },
     "day-breakdown": {
-        "title": "Miondealú Lae",
+        "title": "Léitheoireacht i rith an lae",
         "no-data": "Gan dul chun cinn, téigh chuig an léitheoireacht"
     },
     "file-breakdown-stats": {
@@ -2516,7 +2525,7 @@
     },
     "match-series-modal": {
         "save": "{{common.save}}",
-        "description": "Roghnaigh meaitseáil chun meiteashonraí Kavita+ a athshreangú agus imeachtaí scrobble a athghiniúint.",
+        "description": "Roghnaigh meaitseáil chun meiteashonraí Kavita+ a athshreangú agus imeachtaí scrobble a athghiniúint. Cliceáil ar eagrán chun meiteashonraí leibhéal Imleabhair/Caibidle a fháil (más infheidhme).",
         "close": "{{common.close}}",
         "dont-match-label": "Ná meaitseáil",
         "dont-match-tooltip": "Stop Kavita ó mheaitseáil nó scrobáil uathoibríoch a dhéanamh ar an tsraith seo",
@@ -2542,7 +2551,8 @@
         "searching-against": "Ag cuardach i gcoinne {{provider}}",
         "change-provider-help": "Is féidir leat an soláthraí atá le húsáid a athrú i socruithe na Leabharlainne",
         "is-standalone-label": "Neamhspleách",
-        "is-standalone-tooltip": "Cumasaigh más leabhar aonair atá sa tsraith seo, agus mura bhfuil iontráil sraithe ann don chlúdach crua"
+        "is-standalone-tooltip": "Cumasaigh más leabhar aonair atá sa tsraith seo, agus mura bhfuil iontráil sraithe ann don chlúdach crua",
+        "special-count": "{{match-series-result-item.special-count}}"
     },
     "email-history": {
         "description": "Anseo gheobhaidh tú gach ríomhphost a sheoltar ó Kavita agus chuig an úsáideoir.",
@@ -2574,15 +2584,18 @@
         "library-type": "Cineál Leabharlainne"
     },
     "match-series-result-item": {
-        "volume-count": "{{ num }} imleabhar",
-        "chapter-count": "{{ num }} caibidil",
-        "issue-count": "{{ num }} saincheisteanna",
+        "volume-count": "{{num}} imleabhar",
+        "chapter-count": "{{num}} caibidil",
+        "issue-count": "{{num}} saincheisteanna",
         "matched-alt": "Alt meaitseáilte:",
         "more": "níos mó",
         "matched-alt-count": "teidil mhalartacha meaitseáilte",
         "selected-alt": "Roghnaithe",
         "alt-titles": "Teidil eile",
-        "more-titles": "+{{count}} eile"
+        "more-titles": "+{{count}} eile",
+        "special-count": "{{num}} speisialta",
+        "edition-main-count": "{{num}} príomh",
+        "edition-extra-count": "+{{num}} breise"
     },
     "manage-user-tokens": {
         "description": "Seans go mbeidh gá le hathnuachan a dhéanamh ó am go chéile ar úsáideoirí a bhfuil comharthaí scrobarnaí acu. Seolfaidh Kavita ríomhphost chucu go huathoibríoch má tá ríomhphost socraithe agus má tá ríomhphost bailí acu.",
@@ -2658,7 +2671,14 @@
         "people-header": "Daoine",
         "tags-header": "Clibeanna",
         "source-genre-tags-placeholder": "Seánra/clib foinse",
-        "dest-genre-tags-placeholder": "Seánra/clib ceann scríbe"
+        "dest-genre-tags-placeholder": "Seánra/clib ceann scríbe",
+        "name-label": "Ainm na Sraithe",
+        "name-tooltip": "Ceadaigh Ainm na Sraithe a scríobh nuair a bhíonn an réimse díghlasáilte. Úsáidtear an t-ainm ar an diosca fós chun an tsraith a choinneáil meaitseáilte le linn scananna.",
+        "volume-header": "Imleabhar",
+        "enable-volume-cover-label": "Clúdach Imleabhair",
+        "enable-volume-cover-tooltip": "Lig do Kavita clúdaigh Imleabhair a shocrú",
+        "run-metadata-mappings": "Rith Mapálacha Meiteashonraí",
+        "run-metadata-mappings-tooltip": "Próiseáil sraitheanna trí do mhapálacha meiteashonraí. D’fhéadfadh sé seo tamall a thógáil agus níos mó acmhainní a úsáid."
     },
     "metadata-setting-field-pipe": {
         "people": "{{tabs.people-tab}}",
@@ -2674,7 +2694,10 @@
         "chapter-release-date": "Dáta Eisiúna (Caibidil)",
         "chapter-title": "Teideal (Caibidil)",
         "chapter-summary": "Achoimre (Caibidil)",
-        "chapter-publisher": "{{person-role-pipe.publisher}} (Caibidil)"
+        "chapter-publisher": "{{person-role-pipe.publisher}} (Caibidil)",
+        "name": "{{edit-series-modal.name-label}}",
+        "chapter-age-rating": "Rátáil Aois (Caibidil)",
+        "volume-covers": "Clúdaigh (Imleabhar)"
     },
     "role-localized-pipe": {
         "admin": "Riarachán",
@@ -3138,7 +3161,9 @@
         "key-bind-title-first-page": "An Chéad Leathanach",
         "key-bind-tooltip-first-page": "Bog go dtí an chéad leathanach",
         "key-bind-title-last-page": "Leathanach Deireanach",
-        "key-bind-tooltip-last-page": "Bog go dtí an leathanach deireanach"
+        "key-bind-tooltip-last-page": "Bog go dtí an leathanach deireanach",
+        "key-bind-title-navigate-home": "Nascleanúint abhaile",
+        "key-bind-tooltip-navigate-home": "Nascleanúint chuig an deais ó áit ar bith i Kavita"
     },
     "manage-auth-keys": {
         "auth-keys-title": "Bainistigh Eochracha Údaraithe",
@@ -3833,7 +3858,8 @@
         "person": "Duine",
         "collection": "Bailiúchán",
         "chapter": "Caibidil",
-        "global": "Domhanda"
+        "global": "Domhanda",
+        "volume": "Imleabhar"
     },
     "metadata-field-change-kind-title-pipe": {
         "relationships": "Caidrimh",
@@ -3849,7 +3875,8 @@
         "title": "Teideal",
         "release-date": "Dáta Eisiúna",
         "release-year": "Bliain Scaoilte",
-        "localized-name": "Ainm Áitiúil"
+        "localized-name": "Ainm Áitiúil",
+        "name": "Ainm na Sraithe"
     },
     "kavita-plus-event-description-pipe": {
         "read-progress-sent": "{{chapter}}",
@@ -3873,7 +3900,8 @@
         "system-token-refresh-success": "Athnuaigh comharthaí fíordheimhnithe do {{provider}}. Tá siad bailí go dtí {{validUntil}}",
         "system-token-refresh-failure": "Theip ar chomharthaí fíordheimhnithe a athnuachan do {{provider}}",
         "system-provider-info-sync-success": "Faisnéis sioncronaithe go rathúil do {{provider}}. Nasctha le cuntas {{username}}",
-        "system-provider-info-sync-failure": "Theip ar fhaisnéis chuntais a shioncronú do {{provider}}"
+        "system-provider-info-sync-failure": "Theip ar fhaisnéis chuntais a shioncronú do {{provider}}",
+        "volume-cover-updated": "Clúdach imleabhair nuashonraithe: {{volume}}"
     },
     "kavita-plus-event-type-pipe": {
         "series-matched": "Sraith Mheaitseáilte",
@@ -3902,7 +3930,8 @@
         "sync-completed": "Sioncrónú Críochnaithe",
         "sync-failed": "Theip ar an sioncrónú",
         "system-provider-info-sync": "Sioncrónú Faisnéise Soláthraí Scrobble",
-        "system-token-refresh": "Athnuachan comhartha Soláthraí Scrobble"
+        "system-token-refresh": "Athnuachan comhartha Soláthraí Scrobble",
+        "volume-cover-updated": "Clúdach Imleabhair Nuashonraithe"
     },
     "audit-log-messages": {
         "rate-limit-hit": "Buille Teorainn Ráta",
@@ -4218,7 +4247,7 @@
         "dropped-series-rule-condition": "Mura bhfuil sraith/caibidil léite le",
         "all-libraries-label": "Gach leabharlann",
         "all-libraries-tooltip": "Nuair a bhíonn sé cumasaithe, ritheann scrobbling ar na leabharlanna uile is infheidhme. Díchumasaigh chun é a shrianadh do leabharlanna sonracha ag baint úsáide as an rogha thíos.",
-        "confirm-delete": "An bhfuil tú cinnte gur mian leat {{provider}} a dhícheangal",
+        "confirm-delete": "An bhfuil tú cinnte gur mian leat {{provider}} a dhícheangal?",
         "inactive-series-rule-days-aria": "Tairseach sraith neamhghníomhach i laethanta",
         "inactive-series-rule-status-aria": "Stádas aistrithe sraithe neamhghníomhach",
         "inactive-series-rule-excluded-publication-aria": "Stádas foilsitheoireachta eisiata don riail sraith neamhghníomhach",
@@ -4374,5 +4403,20 @@
         "similar": "Cosúil",
         "user-based": "Is maith le húsáideoirí",
         "personalized": "Duit"
+    },
+    "run-metadata-mappings-modal": {
+        "title": "Athrith mapálacha",
+        "close": "{{common.close}}",
+        "cancel": "{{common.cancel}}",
+        "submit": "{{common.submit}}",
+        "saving": "{{common.saving}}",
+        "all-libraries-label": "Gach leabharlann",
+        "all-libraries-tooltip": "Nuair a bheidh sé cumasaithe, rithfear mapálacha meiteashonraí do na leabharlanna uile. Díchumasaigh an rogha seo chun leabharlanna sonracha a áireamh nó a eisiamh.",
+        "included-libraries-title": "Leabharlanna san áireamh",
+        "included-libraries-tooltip": "Leabharlanna le próiseáil mura bhfuil na leabharlanna uile cumasaithe",
+        "excluded-libraries-title": "Leabharlanna eisiata",
+        "excluded-libraries-tooltip": "Leabharlanna le scipeáil",
+        "queued-title": "Athrith scuaineáilte",
+        "queued-description": "Tosóidh an phróiseáil go luath, bí foighneach le do thoil."
     }
 }

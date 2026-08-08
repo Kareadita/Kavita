@@ -393,10 +393,10 @@
     },
     "relationship-pipe": {
         "adaptation": "改編",
-        "alternative-setting": "架空世界／平行設定",
-        "alternative-version": "不同版本／IF線",
-        "character": "客串角色",
-        "contains": "包含",
+        "alternative-setting": "同世界觀",
+        "alternative-version": "IF線",
+        "character": "角色連動",
+        "contains": "收錄",
         "doujinshi": "同人",
         "other": "其他",
         "prequel": "前傳",
@@ -405,7 +405,8 @@
         "spin-off": "衍伸作",
         "parent": "主系列",
         "edition": "特別版",
-        "annual": "年度特刊"
+        "annual": "年度特刊",
+        "cameo": "角色客串"
     },
     "publication-status-pipe": {
         "ongoing": "連載中",
@@ -3247,5 +3248,14 @@
             "help": "更新方法",
             "download": "下載"
         }
+    },
+    "title": {
+        "reading-list": "書單",
+        "home": "首頁",
+        "bookmarks": "書籤",
+        "collections": "收藏"
+    },
+    "audit-subject-title-pipe": {
+        "collection": "收藏"
     }
 }

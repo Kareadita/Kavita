@@ -280,5 +280,9 @@
     "email.username-change.subject": "Tu nombre de usuario ha sido cambiado en el servidor de {{InvitingUser}}",
     "email.username-change.title": "Actualización de cambio de nombre de usuario",
     "email.username-change.description": "El nombre de usuario de tu cuenta ha sido actualizado en la instancia de Kavita de {{InvitingUser}}. No se requiere ninguna acción por tu parte.",
-    "email.send-to-device.description": "Adjunto encontrarás el archivo(s) que nos has enviado."
+    "email.send-to-device.description": "Adjunto encontrarás el archivo(s) que nos has enviado.",
+    "series-name-exists": "Ya existe una serie con este nombre en esta biblioteca",
+    "mappings-re-run-no-libraries-selected": "Tu consulta debe incluir al menos 1 biblioteca",
+    "mappings-re-run-libraries-overlap": "ExcludedLibraries y IncludedLibraries no pueden contener las mismas bibliotecas",
+    "mappings-re-run-in-progress": "Actualmente se está procesando una solicitud de reejecución de asignaciones de metadatos. Espera a que finalice para volver a ponerla en cola"
 }

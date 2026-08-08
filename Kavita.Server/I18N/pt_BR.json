@@ -280,5 +280,9 @@
     "cbl-import-validation-types": "Apenas arquivos .cbl e .json são permitidos",
     "scrobble-provider-not-setup": "O provedor de scrobble {0} não está configurado",
     "unable-to-cancel-k+": "Não foi possível cancelar a assinatura do Kavita+ devido a um erro. Entre em contato com o Suporte do Kavita+",
-    "unable-to-renew-k+": "Não foi possível renovar a assinatura do Kavita+ devido a um erro. Entre em contato com o Suporte do Kavita+"
+    "unable-to-renew-k+": "Não foi possível renovar a assinatura do Kavita+ devido a um erro. Entre em contato com o Suporte do Kavita+",
+    "series-name-exists": "Já existe uma série com esse nome nesta biblioteca",
+    "mappings-re-run-in-progress": "Uma solicitação de mapeamentos de reexecução de metadados está sendo processada no momento. Aguarde até que seja concluído para recolocar na fila",
+    "mappings-re-run-no-libraries-selected": "Sua solicitação deve incluir pelo menos 1 biblioteca",
+    "mappings-re-run-libraries-overlap": "ExcludedLibraries e IncludedLibraries não podem conter as mesmas bibliotecas"
 }

@@ -2590,7 +2590,8 @@
         "people-header": "인물",
         "tags-header": "태그",
         "source-genre-tags-placeholder": "원본 장르/태그",
-        "dest-genre-tags-placeholder": "대상 장르/태그"
+        "dest-genre-tags-placeholder": "대상 장르/태그",
+        "volume-header": "권"
     },
     "match-series-modal": {
         "search": "검색",
@@ -2606,9 +2607,9 @@
         "chapter-count": "{{match-series-result-item.chapter-count}}"
     },
     "match-series-result-item": {
-        "volume-count": "{{ num }}권",
-        "chapter-count": "{{ num }}화",
-        "issue-count": "{{ num }}호"
+        "volume-count": "{{num}}권",
+        "chapter-count": "{{num}}화",
+        "issue-count": "{{num}}호"
     },
     "email-history": {
         "sent-header": "성공",
@@ -4022,7 +4023,8 @@
         "person": "인물",
         "collection": "컬렉션",
         "chapter": "화",
-        "global": "글로벌"
+        "global": "글로벌",
+        "volume": "권"
     },
     "metadata-field-change-kind-title-pipe": {
         "relationships": "관련 작품",

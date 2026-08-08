@@ -2327,7 +2327,7 @@
         "overview-tab": "概述",
         "management-tab": "管理",
         "activity-tab": "活动",
-        "external-sources-tab": "外部源",
+        "external-sources-tab": "外部来源",
         "image-reader-tab": "图像阅读器",
         "book-reader-tab": "书籍阅读器",
         "pdf-reader-tab": "PDF 阅读器",
@@ -2814,7 +2814,7 @@
         "notice": "注意",
         "restart-required": "更改提供商或高级设置需要手动重启 Kavita 才能生效。",
         "provider-title": "提供商",
-        "provider-tooltip": "提供商设置需要您手动点击“保存”。Kavita 必须配置为机密客户端，并且需要重定向网址。更多详情，请参阅<a href='https://wiki.kavitareader.com/guides/admin-settings/open-id-connect/' target='_blank' rel='noreferrer noopener'>wiki</a>。",
+        "provider-tooltip": "提供商设置需要您手动点击“保存”。Kavita 必须配置为机密客户端，并且需要重定向网址。更多详情，请参阅<a href='https://wiki.kavitareader.com/guides/admin-settings/open-id-connect/' target='_blank' rel='noreferrer noopener'>wiki</a>获取更多信息。",
         "behavior-title": "行为",
         "other-field-required": "{{validation.other-field-required}}",
         "invalid-uri": "{{validation.invalid-uri}}",
@@ -2964,7 +2964,8 @@
         "in-this-family": "字体家族",
         "weight-axis": "字体粗细",
         "styles-summary": "· {{styles}}",
-        "weight-thin": "细"
+        "weight-thin": "细",
+        "wght": "粗细"
     },
     "all-annotations": {
         "title": "全部注释",
@@ -3584,7 +3585,7 @@
             "in": "一天后"
         },
         "days": {
-            "ago": "{{value}}天前",
+            "ago": "{{value}} 天前",
             "in": "{{value}}天后"
         },
         "month": {
@@ -3600,7 +3601,7 @@
             "in": "一年后"
         },
         "years": {
-            "ago": "{{value}}年前",
+            "ago": "{{value}} 年前",
             "in": "{{value}}年前"
         }
     },
@@ -3668,7 +3669,7 @@
         "title": "取消订阅",
         "subtitle": "在当前账单周期结束前，你都能一直保持完整的使用权限。",
         "close": "{{common.close}}",
-        "users-active-label": "{>活跃用户",
+        "users-active-label": "{{count}} 活跃用户",
         "what-happens-label": "发生了什么",
         "impact-1": "Kavita+ 在当前账单日期之前一直有效。",
         "impact-2": "在该日期之后将不再收费。",
@@ -3678,7 +3679,8 @@
         "cancelled-success": "订阅已取消。你的访问权限将持续到结算日为止。",
         "cancelled-error": "我们没办法取消您的订阅，请重试或者联系客服。",
         "back-label": "返回",
-        "confirm-label": "取消订阅"
+        "confirm-label": "取消订阅",
+        "server-wide-label": "服务器范围"
     },
     "change-license-email": {
         "title": "更改邮箱",
@@ -3687,7 +3689,10 @@
         "new-email-label": "添加新的邮件地址",
         "new-email-placeholder": "you@domain.com",
         "back-label": "返回",
-        "send-code-label": "发送验证码"
+        "send-code-label": "发送验证码",
+        "close": "{{common.close}}",
+        "on-file-label": "存档",
+        "confirm-help": "我们会先发送一个链接，以便您在更改生效前完成更改。"
     },
     "register-license-key": {
         "title": "已有许可证?",
@@ -3707,12 +3712,15 @@
         "expired": "已取消"
     },
     "kavita-plus-provider-health-status-pipe": {
-        "unknown-label": "未知"
+        "unknown-label": "未知",
+        "operational-label": "运行",
+        "degraded-label": "降级",
+        "down-label": "向下"
     },
     "kavita-plus-api-name-title-desc-pipe": {
         "cover-requests-description": "系列、章节和每卷封面",
         "metadata-sync-title": "元数据同步",
-        "metadata-sync-description": "刷新丛书信息",
+        "metadata-sync-description": "刷新系列信息",
         "series-matched-title": "已匹配系列",
         "series-matched-description": "已匹配数据源",
         "scrobbles-title": "同步",
@@ -3721,11 +3729,18 @@
         "mal-stack-import-description": "兴趣分组已导入",
         "want-to-read-title": "想读同步",
         "want-to-read-description": "从MAL/AniList/Hardcover/MangaBaka同步",
-        "recommendations-title": "建议"
+        "recommendations-title": "建议",
+        "cover-requests-title": "封面请求",
+        "recommendations-description": "外部推荐已加载",
+        "reviews-title": "评论",
+        "reviews-description": "外部评论已加载"
     },
     "scrobble-provider-media-title-pipe": {
         "hardcover-label": "书籍",
-        "cbr-label": "漫画"
+        "cbr-label": "漫画",
+        "anilist-label": "漫画 + 轻小说",
+        "mal-label": "{{scrobble-provider-media-title-pipe.anilist-label}}",
+        "mangabaka-label": "{{scrobble-provider-media-title-pipe.anilist-label}}"
     },
     "kavita-plus-billing-interval-pipe": {
         "day-label": "每日",
@@ -3748,5 +3763,11 @@
         "price-promo-label": "第一个月只需支付 $2",
         "pricing-feature-1-label": "一个订阅 — 全服务器可用",
         "pricing-feature-2-label": "每个用户都会受益"
+    },
+    "scrobble-health": {
+        "title-label": "上游供应商",
+        "checked-ago-label": "已于 {{time}} 前查看",
+        "refresh-alt": "刷新提供商状态",
+        "no-data-label": "无提供商状态数据可用"
     }
 }
