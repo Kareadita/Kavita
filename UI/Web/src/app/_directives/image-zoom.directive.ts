@@ -78,6 +78,9 @@ export class ImageZoomDirective {
     this.reset();
   }
 
+  @Input() lockScroll = true;
+  @Input() recenterOnZoomOut = true;
+
   onWheel(event: WheelEvent): void {
     if (!event.ctrlKey && !event.metaKey) {
       return;
@@ -245,9 +248,7 @@ export class ImageZoomDirective {
     this.scale = nextScaleClamped;
     const focalTranslateX = clientX - layoutCenterX - imagePointX * this.scale;
     const focalTranslateY = clientY - layoutCenterY - imagePointY * this.scale;
-
-    // As the image returns to 1x, gradually release the pan offset instead of snapping it away.
-    const zoomOutRatio = nextScaleClamped < previousScale
+    const zoomOutRatio = this.recenterOnZoomOut && nextScaleClamped < previousScale
       ? Math.max(0, Math.min(1, (nextScaleClamped - 1) / (previousScale - 1)))
       : 1;
     this.translateX = focalTranslateX * zoomOutRatio;
@@ -284,6 +285,8 @@ export class ImageZoomDirective {
   }
 
   private updateOverflowState(): void {
+    if (!this.lockScroll) return;
+
     let ancestor = this.element.nativeElement.parentElement;
     while (ancestor) {
       if (ancestor.matches('.reading-area, .reader')) {

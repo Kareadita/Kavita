@@ -36,6 +36,7 @@ import {ReadingProfile} from "../../../_models/preferences/reading-profiles";
 import {BreakpointService} from "../../../_services/breakpoint.service";
 import {Queue} from "../../../shared/data-structures/queue";
 import {PullState, PullToLoadComponent} from "../../../shared/_components/pull-to-load/pull-to-load.component";
+import { ImageZoomDirective } from '../../../_directives/image-zoom.directive';
 
 /**
  * Default debounce time from scroll and scrollend event listeners
@@ -87,7 +88,7 @@ const enum DEBUG_MODES {
     templateUrl: './infinite-scroller.component.html',
     styleUrls: ['./infinite-scroller.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [AsyncPipe, TranslocoDirective, InfiniteScrollDirective, SafeStylePipe, PullToLoadComponent]
+  imports: [AsyncPipe, TranslocoDirective, InfiniteScrollDirective, SafeStylePipe, PullToLoadComponent, ImageZoomDirective]
 })
 export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy, AfterViewInit {
   private readonly document = inject<Document>(DOCUMENT);
