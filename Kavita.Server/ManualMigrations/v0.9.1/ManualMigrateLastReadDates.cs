@@ -40,7 +40,7 @@ public class ManualMigrateLastReadDates: ManualMigration
             var encodedFilter = SmartFilterHelper.Encode(decodedFilter);
             if (encodedFilter != filter.Filter)
             {
-                filter.Filter = SmartFilterHelper.Encode(decodedFilter);
+                filter.Filter = encodedFilter;
                 context.AppUserSmartFilter.Update(filter);
                 updatedCount++;
             }

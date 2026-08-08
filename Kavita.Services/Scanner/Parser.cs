@@ -101,8 +101,6 @@ public static partial class Parser
     [GeneratedRegex(@"[^a-zA-Z0-9]")]
     public static partial Regex NonAlphanumericRegex();
 
-
-
     private static readonly Regex ImageRegex = new(ImageFileExtensions,
         MatchOptions, RegexTimeout);
     private static readonly Regex ArchiveFileRegex = new(ArchiveFileExtensions,
