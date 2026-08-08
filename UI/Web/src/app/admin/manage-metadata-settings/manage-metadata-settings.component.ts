@@ -10,7 +10,7 @@ import {
   viewChild
 } from '@angular/core';
 import {NgTemplateOutlet} from "@angular/common";
-import {TranslocoDirective} from "@jsverse/transloco";
+import {TranslocoDirective, translate} from "@jsverse/transloco";
 import {AbstractControl, FormArray, FormBuilder, FormControl, FormGroup, ReactiveFormsModule} from "@angular/forms";
 import {SettingSwitchComponent} from "../../settings/_components/setting-switch/setting-switch.component";
 import {SettingsService} from "../settings.service";
@@ -52,6 +52,8 @@ import {LibraryService} from "../../_services/library.service";
 import {Library} from "../../_models/library/library";
 import {Language} from "../../_models/metadata/language";
 import {
+  isNativeToken,
+  isRomajiToken,
   languageCodeListValidator,
   primarySubtag,
   splitLanguageCodes,
@@ -344,7 +346,12 @@ export class ManageMetadataSettingsComponent implements OnInit {
 
   resolvedLanguageNames(codes: string | null | undefined): Array<string> {
     const titles = this.languageTitleByCode();
-    return splitLanguageCodes(codes).map(code => titles.get(code.toLowerCase()) || code);
+    return splitLanguageCodes(codes).map(code => {
+      if (isNativeToken(code)) return translate('manage-metadata-settings.native-title-token-label');
+      if (isRomajiToken(code)) return translate('manage-metadata-settings.romaji-title-token-label');
+
+      return titles.get(code.toLowerCase()) || code;
+    });
   }
 
   warningCodesFor(codes: string | null | undefined): Array<string> {

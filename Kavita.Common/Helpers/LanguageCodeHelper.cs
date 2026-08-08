@@ -20,16 +20,46 @@ public static class LanguageCodeHelper
     private const char Separator = ';';
 
     /// <summary>
+    /// Reserved priority token that resolves to the provider's native (original-script) title rather than a
+    /// BCP-47 language tag. See <see cref="IsReservedToken"/>.
+    /// </summary>
+    public const string NativeToken = "{Native}";
+
+    /// <summary>
+    /// Reserved priority token that resolves to the provider's romanized title. Unlike a fixed <c>ja-Latn</c>
+    /// tag, it follows the series' real native language (a Korean work romanizes from <c>ko-Latn</c>).
+    /// </summary>
+    public const string RomajiToken = "{Romaji}";
+
+    /// <summary>
     /// Splits a semicolon separated priority list into individual codes, highest priority first.
     /// </summary>
     public static IReadOnlyList<string> Split(string? codes) =>
         (codes ?? string.Empty).Split(Separator, StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries);
 
     /// <summary>
-    /// Drops any code that is not well-formed, preserving order and re-joining with semicolons.
+    /// Drops any code that is neither well-formed nor a reserved token, preserving order and re-joining with semicolons.
     /// </summary>
     public static string Sanitize(string? codes) =>
-        string.Join(Separator, Split(codes).Where(IsWellFormed));
+        string.Join(Separator, Split(codes).Where(c => IsWellFormed(c) || IsReservedToken(c)));
+
+    /// <summary>
+    /// Is the given code a reserved priority token (e.g. <c>{Native}</c>, <c>{Romaji}</c>) rather than a BCP-47
+    /// language tag.
+    /// </summary>
+    /// <remarks>
+    /// Reserved tokens resolve to a provider-supplied title slot that no language tag can name reliably: the
+    /// native/romanized title's real language varies per series and per provider. Matched case-insensitively.
+    /// </remarks>
+    public static bool IsReservedToken(string? code) => IsNativeToken(code) || IsRomajiToken(code);
+
+    /// <summary>Is the given code the <see cref="NativeToken"/>, matched case-insensitively.</summary>
+    public static bool IsNativeToken(string? code) =>
+        !string.IsNullOrWhiteSpace(code) && string.Equals(code, NativeToken, StringComparison.OrdinalIgnoreCase);
+
+    /// <summary>Is the given code the <see cref="RomajiToken"/>, matched case-insensitively.</summary>
+    public static bool IsRomajiToken(string? code) =>
+        !string.IsNullOrWhiteSpace(code) && string.Equals(code, RomajiToken, StringComparison.OrdinalIgnoreCase);
 
     /// <summary>
     /// Is the given single code well-formed per the RFC 5646 subtag shape rules.

@@ -2205,7 +2205,9 @@ public class ExternalMetadataService : IExternalMetadataService
     private static IEnumerable<(string Title, string LanguageCode)> EnumerateTitlesByPriority(
         IReadOnlyList<string> priorities, ExternalSeriesDetailDto externalMetadata)
     {
-        if (priorities.Count == 0 || externalMetadata.LocalizedTitles.Count == 0) yield break;
+        // Not gated on LocalizedTitles being non-empty: the {Native} token resolves from Titles instead, and a
+        // provider can send a native title with no per-language breakdown at all.
+        if (priorities.Count == 0) yield break;
 
         // K+ sends canonical BCP-47 casing ("ja-Latn", "pt-BR") but admins type freely and System.Text.Json hands
         // us an ordinal dictionary, so "ja-latn" would miss. Re-key case-insensitively, first entry wins.
@@ -2217,6 +2219,27 @@ public class ExternalMetadataService : IExternalMetadataService
 
         foreach (var languageCode in priorities)
         {
+            // // Since {Native}/{Romaji} is not a languageCode, we need to handle separately and first
+            if (LanguageCodeHelper.IsNativeToken(languageCode))
+            {
+                var native = externalMetadata.Titles?.NativeTitle;
+                if (!string.IsNullOrWhiteSpace(native))
+                {
+                    yield return (native.Trim(), LanguageCodeHelper.NativeToken);
+                }
+                continue;
+            }
+
+            if (LanguageCodeHelper.IsRomajiToken(languageCode))
+            {
+                var romaji = externalMetadata.Titles?.RomajiTitle;
+                if (!string.IsNullOrWhiteSpace(romaji))
+                {
+                    yield return (romaji.Trim(), LanguageCodeHelper.RomajiToken);
+                }
+                continue;
+            }
+
             if (!titlesByLanguage.TryGetValue(languageCode, out var titles)) continue;
 
             foreach (var title in titles)

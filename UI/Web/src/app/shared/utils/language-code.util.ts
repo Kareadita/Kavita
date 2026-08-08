@@ -17,6 +17,42 @@ import {AbstractControl, ValidationErrors, ValidatorFn} from "@angular/forms";
 export const LANGUAGE_CODE_SEPARATOR = ';';
 
 /**
+ * Reserved priority token that resolves to the provider's native (original-script) title rather than a BCP-47
+ * language tag. The native title's real language varies per series and per provider, so no tag names it reliably.
+ */
+export const NATIVE_TOKEN = '{Native}';
+
+/**
+ * Reserved priority token that resolves to the provider's romanized title. Unlike a fixed `ja-Latn` tag, it
+ * follows the series' real native language (a Korean work romanizes from `ko-Latn`).
+ */
+export const ROMAJI_TOKEN = '{Romaji}';
+
+const RESERVED_TOKENS: ReadonlyArray<string> = [NATIVE_TOKEN, ROMAJI_TOKEN];
+
+/**
+ * Is the given code a reserved priority token (e.g. `{Native}`, `{Romaji}`) rather than a BCP-47 language tag.
+ * Case-insensitive.
+ */
+export function isReservedToken(code: string): boolean {
+  return !!code && RESERVED_TOKENS.some(t => t.toLowerCase() === code.toLowerCase());
+}
+
+/**
+ * Is the given code the `{Native}` token, matched case-insensitively.
+ */
+export function isNativeToken(code: string): boolean {
+  return !!code && code.toLowerCase() === NATIVE_TOKEN.toLowerCase();
+}
+
+/**
+ * Is the given code the `{Romaji}` token, matched case-insensitively.
+ */
+export function isRomajiToken(code: string): boolean {
+  return !!code && code.toLowerCase() === ROMAJI_TOKEN.toLowerCase();
+}
+
+/**
  * Well-known ISO 15924 script subtags.
  *
  * Intentionally not exhaustive (ISO 15924 defines ~200) and intentionally only used to warn. Note that
@@ -105,7 +141,8 @@ export function scriptSubtag(code: string): string | null {
  */
 export function languageCodeListValidator(): ValidatorFn {
   return (control: AbstractControl): ValidationErrors | null => {
-    const malformed = splitLanguageCodes(control.value).filter(c => !isWellFormedLanguageCode(c));
+    const malformed = splitLanguageCodes(control.value)
+      .filter(c => !isWellFormedLanguageCode(c) && !isReservedToken(c));
 
     return malformed.length > 0 ? {malformedLanguageCodes: malformed} : null;
   };
