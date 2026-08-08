@@ -2391,6 +2391,20 @@ public class ExternalMetadataService : IExternalMetadataService
         return (true, new MetadataFieldChangeDto(MetadataFieldChangeKind.LocalizedName, from, series.LocalizedName, chosenLanguageCode));
     }
 
+    /// <inheritdoc />
+    public Task<bool> WouldNameChangeOrphanMergedFiles(Series series, string? proposedName, CancellationToken ct = default)
+    {
+        return WouldOrphanMergedFiles(series, series.Name, proposedName ?? string.Empty,
+            series.NormalizedLocalizedName, series.NormalizedOriginalName, ct);
+    }
+
+    /// <inheritdoc />
+    public Task<bool> WouldLocalizedNameChangeOrphanMergedFiles(Series series, string? proposedLocalizedName, CancellationToken ct = default)
+    {
+        return WouldOrphanMergedFiles(series, series.LocalizedName, proposedLocalizedName ?? string.Empty,
+            series.NormalizedName, series.NormalizedOriginalName, ct);
+    }
+
     /// <summary>
     /// Guards a K+ rename from orphaning merged files.
     /// <example>

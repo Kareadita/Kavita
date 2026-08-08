@@ -193,6 +193,13 @@ public class SeriesController(
                 return BadRequest(await localizationService.TranslateAsync(UserId, "series-name-exists"));
             }
 
+            // The current name may anchor merged folders on disk. Changing it would orphan those files and the scanner
+            // would split them into a new series, so reject the edit.
+            if (await externalMetadataService.WouldNameChangeOrphanMergedFiles(series, newName, ct))
+            {
+                return BadRequest(await localizationService.TranslateAsync(UserId, "series-name-orphans-files"));
+            }
+
             series.Name = newName;
             // A user rename is an override; drop any prior K+ name override so K+ respects it
             series.Metadata.KPlusOverrides.Remove(MetadataSettingField.Name);
@@ -222,6 +229,13 @@ public class SeriesController(
                     series.LibraryId, series.Format, newNormalizedLocalizedName, series.Id, ct))
             {
                 return BadRequest(await localizationService.TranslateAsync(UserId, "series-localized-name-exists"));
+            }
+
+            // The current localized name may anchor merged folders on disk. Changing/clearing it would orphan those
+            // files and the scanner would split them into a new series, so reject the edit.
+            if (await externalMetadataService.WouldLocalizedNameChangeOrphanMergedFiles(series, newLocalizedName, ct))
+            {
+                return BadRequest(await localizationService.TranslateAsync(UserId, "series-localized-name-orphans-files"));
             }
 
             series.LocalizedName = newLocalizedName;

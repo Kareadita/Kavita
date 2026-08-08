@@ -1187,6 +1187,179 @@ public class ExternalMetadataServiceTests: AbstractDbTest
 
     #endregion
 
+    #region OrphanMergedFiles Validation Hooks
+
+    // These cover the public wrappers the SeriesController calls when a user renames a series by hand. They mirror
+    // the K+ guard but are the surface the manual-edit path relies on, so they get their own coverage.
+
+    [Fact]
+    public async Task WouldLocalizedNameChangeOrphanMergedFiles_DroppingMergedAnchor_ReturnsTrue()
+    {
+        var (unitOfWork, context, mapper) = await CreateDatabase();
+        var (externalMetadataService, _, _, _) = await Setup(unitOfWork, context, mapper);
+
+        // A folder literally named "Chained Soldier" is merged under this series via LocalizedName. Name and
+        // OriginalName only anchor "Mato Seihei no Slave", so changing LocalizedName would orphan the folder.
+        var series = new SeriesBuilder("Mato Seihei no Slave")
+            .WithLibraryId(1)
+            .WithFormat(MangaFormat.Archive)
+            .WithLocalizedName("Chained Soldier")
+            .WithVolume(new VolumeBuilder("1")
+                .WithChapter(new ChapterBuilder("1")
+                    .WithFile(new MangaFileBuilder("C:/Manga/Chained Soldier/Chained Soldier v01.cbz", MangaFormat.Archive).Build())
+                    .Build())
+                .Build())
+            .WithMetadata(new SeriesMetadataBuilder().Build())
+            .Build();
+        context.Series.Attach(series);
+        await context.SaveChangesAsync();
+
+        var postSeries = await unitOfWork.SeriesRepository.GetSeriesByIdAsync(1, SeriesIncludes.Metadata);
+        Assert.NotNull(postSeries);
+
+        Assert.True(await externalMetadataService.WouldLocalizedNameChangeOrphanMergedFiles(postSeries, "Slave Corps"));
+    }
+
+    [Fact]
+    public async Task WouldLocalizedNameChangeOrphanMergedFiles_AliasNotOnDisk_ReturnsFalse()
+    {
+        var (unitOfWork, context, mapper) = await CreateDatabase();
+        var (externalMetadataService, _, _, _) = await Setup(unitOfWork, context, mapper);
+
+        // LocalizedName is a display alias no folder uses (files live under the series name), so changing it is safe.
+        var series = new SeriesBuilder("Mato Seihei no Slave")
+            .WithLibraryId(1)
+            .WithFormat(MangaFormat.Archive)
+            .WithLocalizedName("Localized Name here")
+            .WithVolume(new VolumeBuilder("1")
+                .WithChapter(new ChapterBuilder("1")
+                    .WithFile(new MangaFileBuilder("C:/Manga/Mato Seihei no Slave/vol01.cbz", MangaFormat.Archive).Build())
+                    .Build())
+                .Build())
+            .WithMetadata(new SeriesMetadataBuilder().Build())
+            .Build();
+        context.Series.Attach(series);
+        await context.SaveChangesAsync();
+
+        var postSeries = await unitOfWork.SeriesRepository.GetSeriesByIdAsync(1, SeriesIncludes.Metadata);
+        Assert.NotNull(postSeries);
+
+        Assert.False(await externalMetadataService.WouldLocalizedNameChangeOrphanMergedFiles(postSeries, "Slave Corps"));
+    }
+
+    [Fact]
+    public async Task WouldLocalizedNameChangeOrphanMergedFiles_Unchanged_ReturnsFalse()
+    {
+        var (unitOfWork, context, mapper) = await CreateDatabase();
+        var (externalMetadataService, _, _, _) = await Setup(unitOfWork, context, mapper);
+
+        // Even though the localized name anchors a folder, the value isn't actually changing, so it's not orphaned.
+        var series = new SeriesBuilder("Mato Seihei no Slave")
+            .WithLibraryId(1)
+            .WithFormat(MangaFormat.Archive)
+            .WithLocalizedName("Chained Soldier")
+            .WithVolume(new VolumeBuilder("1")
+                .WithChapter(new ChapterBuilder("1")
+                    .WithFile(new MangaFileBuilder("C:/Manga/Chained Soldier/Chained Soldier v01.cbz", MangaFormat.Archive).Build())
+                    .Build())
+                .Build())
+            .WithMetadata(new SeriesMetadataBuilder().Build())
+            .Build();
+        context.Series.Attach(series);
+        await context.SaveChangesAsync();
+
+        var postSeries = await unitOfWork.SeriesRepository.GetSeriesByIdAsync(1, SeriesIncludes.Metadata);
+        Assert.NotNull(postSeries);
+
+        Assert.False(await externalMetadataService.WouldLocalizedNameChangeOrphanMergedFiles(postSeries, "Chained Soldier"));
+    }
+
+    [Fact]
+    public async Task WouldLocalizedNameChangeOrphanMergedFiles_ClearingMergedAnchor_ReturnsTrue()
+    {
+        var (unitOfWork, context, mapper) = await CreateDatabase();
+        var (externalMetadataService, _, _, _) = await Setup(unitOfWork, context, mapper);
+
+        // Clearing the field is still a drop - the "Chained Soldier" folder would be orphaned.
+        var series = new SeriesBuilder("Mato Seihei no Slave")
+            .WithLibraryId(1)
+            .WithFormat(MangaFormat.Archive)
+            .WithLocalizedName("Chained Soldier")
+            .WithVolume(new VolumeBuilder("1")
+                .WithChapter(new ChapterBuilder("1")
+                    .WithFile(new MangaFileBuilder("C:/Manga/Chained Soldier/Chained Soldier v01.cbz", MangaFormat.Archive).Build())
+                    .Build())
+                .Build())
+            .WithMetadata(new SeriesMetadataBuilder().Build())
+            .Build();
+        context.Series.Attach(series);
+        await context.SaveChangesAsync();
+
+        var postSeries = await unitOfWork.SeriesRepository.GetSeriesByIdAsync(1, SeriesIncludes.Metadata);
+        Assert.NotNull(postSeries);
+
+        Assert.True(await externalMetadataService.WouldLocalizedNameChangeOrphanMergedFiles(postSeries, null));
+    }
+
+    [Fact]
+    public async Task WouldNameChangeOrphanMergedFiles_DroppingMergedAnchor_ReturnsTrue()
+    {
+        var (unitOfWork, context, mapper) = await CreateDatabase();
+        var (externalMetadataService, _, _, _) = await Setup(unitOfWork, context, mapper);
+
+        // Name anchors the "Mato Seihei no Slave" folder; OriginalName anchors the other. Renaming Name would
+        // orphan the folder held only by Name.
+        var series = new SeriesBuilder("Mato Seihei no Slave")
+            .WithLibraryId(1)
+            .WithFormat(MangaFormat.Archive)
+            .WithLocalizedNameAllowEmpty(string.Empty)
+            .WithVolume(new VolumeBuilder("1")
+                .WithChapter(new ChapterBuilder("1")
+                    .WithFile(new MangaFileBuilder("C:/Manga/Mato Seihei no Slave/vol01.cbz", MangaFormat.Archive).Build())
+                    .Build())
+                .Build())
+            .WithMetadata(new SeriesMetadataBuilder().Build())
+            .Build();
+        series.OriginalName = "Chained Soldier";
+        series.NormalizedOriginalName = "Chained Soldier".ToNormalized();
+        context.Series.Attach(series);
+        await context.SaveChangesAsync();
+
+        var postSeries = await unitOfWork.SeriesRepository.GetSeriesByIdAsync(1, SeriesIncludes.Metadata);
+        Assert.NotNull(postSeries);
+
+        Assert.True(await externalMetadataService.WouldNameChangeOrphanMergedFiles(postSeries, "Some New Title"));
+    }
+
+    [Fact]
+    public async Task WouldNameChangeOrphanMergedFiles_SafeRename_ReturnsFalse()
+    {
+        var (unitOfWork, context, mapper) = await CreateDatabase();
+        var (externalMetadataService, _, _, _) = await Setup(unitOfWork, context, mapper);
+
+        // Files live under the LocalizedName folder, so the Name is only a display value - renaming it is safe.
+        var series = new SeriesBuilder("Mato Seihei no Slave")
+            .WithLibraryId(1)
+            .WithFormat(MangaFormat.Archive)
+            .WithLocalizedName("Chained Soldier")
+            .WithVolume(new VolumeBuilder("1")
+                .WithChapter(new ChapterBuilder("1")
+                    .WithFile(new MangaFileBuilder("C:/Manga/Chained Soldier/Chained Soldier v01.cbz", MangaFormat.Archive).Build())
+                    .Build())
+                .Build())
+            .WithMetadata(new SeriesMetadataBuilder().Build())
+            .Build();
+        context.Series.Attach(series);
+        await context.SaveChangesAsync();
+
+        var postSeries = await unitOfWork.SeriesRepository.GetSeriesByIdAsync(1, SeriesIncludes.Metadata);
+        Assert.NotNull(postSeries);
+
+        Assert.False(await externalMetadataService.WouldNameChangeOrphanMergedFiles(postSeries, "Some New Title"));
+    }
+
+    #endregion
+
     #region Publication Status
 
     [Fact]
