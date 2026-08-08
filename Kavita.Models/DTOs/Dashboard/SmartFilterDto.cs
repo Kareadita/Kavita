@@ -1,5 +1,6 @@
 ﻿using Kavita.Models.DTOs.Filtering.v2;
 using Kavita.Models.DTOs.Filtering.v2.Requests;
+using System.ComponentModel.DataAnnotations;
 
 namespace Kavita.Models.DTOs.Dashboard;
 
@@ -14,5 +15,6 @@ public sealed record SmartFilterDto
     /// <summary>
     /// The underlying type which drives which API and entity to expect
     /// </summary>
+    [EnumDataType(typeof(FilterEntityType))]
     public required FilterEntityType EntityType { get; set; }
 }

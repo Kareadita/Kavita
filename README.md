@@ -79,6 +79,12 @@ Thank you to [Weblate](https://hosted.weblate.org/engage/kavita/) who hosts our 
 <img src="https://hosted.weblate.org/widget/kavita/horizontal-auto.svg" alt="Translation status" />
 </a>
 
+## Zenith
+[![Deploy with Zenith](https://cdn.zenith.hosting/buttons/deploy-with-zenith.svg)](https://zenith.hosting/host/kavita)
+
+One-click managed Kavita: storage, backups, email and a free subdomain included. A share of every subscription goes back to Kavita.
+
+
 ## PikaPods
 If you are looking to try your hand at self-hosting but lack the machine, [PikaPods](https://www.pikapods.com/pods?run=kavita) is a great service that 
 allows you to easily spin up a server. 20% of app revenues are contributed back to Kavita via OpenCollective.

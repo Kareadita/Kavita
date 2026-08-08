@@ -1,4 +1,5 @@
 ﻿using Kavita.Models.Entities.Enums;
+using System.ComponentModel.DataAnnotations;
 
 namespace Kavita.Models.DTOs.Stats.V3;
 
@@ -8,5 +9,6 @@ namespace Kavita.Models.DTOs.Stats.V3;
 public sealed record RelationshipStatV3
 {
     public int Count { get; set; }
+    [EnumDataType(typeof(RelationKind))]
     public RelationKind Relationship { get; set; }
 }

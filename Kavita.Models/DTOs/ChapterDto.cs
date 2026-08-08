@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.InteropServices.JavaScript;
@@ -7,6 +7,7 @@ using Kavita.Models.DTOs.Person;
 using Kavita.Models.Entities;
 using Kavita.Models.Entities.Enums;
 using Kavita.Models.Entities.Interfaces;
+using System.ComponentModel.DataAnnotations;
 
 namespace Kavita.Models.DTOs;
 #nullable enable
@@ -74,6 +75,7 @@ public class ChapterDto : IHasReadTimeEstimate, IHasCoverImage, IHasMetadataIds
     /// <inheritdoc cref="Chapter.Summary"/>
     public string Summary { get; init; } = default!;
     /// <inheritdoc cref="Kavita.Models.Entities.Enums.AgeRating"/>
+    [EnumDataType(typeof(AgeRating))]
     public AgeRating AgeRating { get; init; }
     /// <inheritdoc cref="Chapter.WordCount"/>
     public long WordCount { get; set; } = 0L;
@@ -115,6 +117,7 @@ public class ChapterDto : IHasReadTimeEstimate, IHasCoverImage, IHasMetadataIds
     /// Collection of all Tags from underlying chapters for a Series
     /// </summary>
     public ICollection<TagDto> Tags { get; set; } = new List<TagDto>();
+    [EnumDataType(typeof(PublicationStatus))]
     public PublicationStatus PublicationStatus { get; set; }
     /// <inheritdoc cref="Chapter.Language"/>
     public string? Language { get; set; }

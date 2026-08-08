@@ -1,6 +1,7 @@
-using System;
+﻿using System;
 using Kavita.Models.Entities.Enums;
 using Kavita.Models.Entities.Enums.ReadingList;
+using System.ComponentModel.DataAnnotations;
 
 namespace Kavita.Models.DTOs.ReadingLists.CBL.RemapRules;
 #nullable enable
@@ -16,10 +17,12 @@ public sealed record RemapRuleDto
     public int? VolumeId { get; set; }
     public string VolumeNumber { get; set; } = string.Empty;
     public int? ChapterId { get; set; }
+    [EnumDataType(typeof(CblRemapRuleKind))]
     public CblRemapRuleKind Kind { get; set; }
     public string ChapterRange { get; set; } = string.Empty;
     public string ChapterTitleName { get; set; } = string.Empty;
     public bool ChapterIsSpecial { get; set; }
+    [EnumDataType(typeof(LibraryType))]
     public LibraryType LibraryType { get; set; }
     public string SeriesNameAtMapping { get; set; } = string.Empty;
     public int AppUserId { get; set; }

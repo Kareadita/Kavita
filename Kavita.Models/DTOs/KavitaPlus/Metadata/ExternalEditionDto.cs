@@ -1,3 +1,4 @@
+﻿using System.ComponentModel.DataAnnotations;
 namespace Kavita.Models.DTOs.KavitaPlus.Metadata;
 
 public enum EditionEntryType
@@ -37,6 +38,7 @@ public sealed record ExternalEditionDto
     /// <summary>
     /// Which type of entries are counted
     /// </summary>
+    [EnumDataType(typeof(EditionEntryType))]
     public EditionEntryType Type { get; set; }
 
     /// <summary>

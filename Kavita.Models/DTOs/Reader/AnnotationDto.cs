@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using Kavita.Models.Entities;
 using Kavita.Models.Entities.Enums;
 using Kavita.Models.Entities.User;
+using System.ComponentModel.DataAnnotations;
 
 namespace Kavita.Models.DTOs.Reader;
 
@@ -72,6 +73,7 @@ public sealed record AnnotationDto
     /// The age rating of the series this annotation is linked to
     /// </summary>
     /// <remarks>Not required when creating/updating an annotation, this is added in flight</remarks>
+    [EnumDataType(typeof(AgeRating))]
     public AgeRating AgeRating { get; set; }
 
     public DateTime CreatedUtc { get; set; }

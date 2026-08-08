@@ -271,4 +271,22 @@ public class ServerController(
         return Ok();
     }
 
+    /// <summary>
+    /// Returns true if a task is currently running or has been queued. Can be scoped to a queue, default to the default queue
+    /// </summary>
+    /// <param name="methodName"></param>
+    /// <param name="queue"></param>
+    /// <returns></returns>
+    [Authorize(PolicyGroups.AdminPolicy)]
+    [HttpGet("is-task-running")]
+    public ActionResult<bool> HasRunningOrQueuedTask([FromQuery] string methodName, [FromQuery] string? queue = null)
+    {
+        if (string.IsNullOrEmpty(queue))
+        {
+            return Ok(TaskScheduler.IsMethodRunningOrEnqueued(methodName));
+        }
+
+        return Ok(TaskScheduler.IsMethodRunningOrEnqueued(methodName, queue));
+    }
+
 }

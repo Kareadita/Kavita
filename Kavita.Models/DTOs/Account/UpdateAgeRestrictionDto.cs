@@ -5,6 +5,7 @@ namespace Kavita.Models.DTOs.Account;
 
 public sealed record UpdateAgeRestrictionDto
 {
+    [EnumDataType(typeof(AgeRating))]
     [Required]
     public AgeRating AgeRating { get; set; }
     [Required]

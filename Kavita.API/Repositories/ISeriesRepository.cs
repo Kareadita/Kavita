@@ -133,4 +133,11 @@ public interface ISeriesRepository
     Task<SeriesDetailRequestV3Dto?> GetKavitaPlusSeriesDetailRequestV3Dto(int seriesId, CancellationToken ct = default);
     Task<Series?> MatchSeriesAsync(ExternalSeriesDetailDto externalSeries, CancellationToken ct = default);
     Task<List<Series>> GetSeriesForReadStatusTransitionRuleAsync(int userId, ReadStatusTransitionRule rule, bool requireUnReadChapters, CancellationToken ct);
+    /// <summary>
+    /// Returns the total amount of chapters, if all chapters in the series are specials
+    /// </summary>
+    /// <param name="seriesId"></param>
+    /// <param name="ct"></param>
+    /// <returns></returns>
+    Task<int?> GetChapterCountIfAllSpecials(int seriesId, CancellationToken ct = default);
 }

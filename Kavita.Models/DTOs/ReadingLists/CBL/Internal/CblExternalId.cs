@@ -1,3 +1,4 @@
+﻿using System.ComponentModel.DataAnnotations;
 namespace Kavita.Models.DTOs.ReadingLists.CBL.Internal;
 
 /// <summary>
@@ -9,6 +10,7 @@ public sealed record CblExternalId
     /// <summary>
     /// The external database provider (e.g. ComicVine, Metron).
     /// </summary>
+    [EnumDataType(typeof(CblExternalDbProvider))]
     public CblExternalDbProvider Provider { get; set; }
     /// <summary>
     /// Provider-specific series identifier.

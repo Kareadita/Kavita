@@ -1,4 +1,5 @@
 ﻿using Kavita.Models.Entities.Enums;
+using System.ComponentModel.DataAnnotations;
 
 namespace Kavita.Models.DTOs.SeriesDetail;
 #nullable enable
@@ -58,9 +59,11 @@ public sealed record UserReviewDto
     /// <summary>
     /// If this review is External, which Provider did it come from
     /// </summary>
+    [EnumDataType(typeof(ScrobbleProvider))]
     public ScrobbleProvider Provider { get; set; } = ScrobbleProvider.Kavita;
     /// <summary>
     /// Source of the Rating
     /// </summary>
+    [EnumDataType(typeof(RatingAuthority))]
     public RatingAuthority Authority { get; set; } = RatingAuthority.User;
 }

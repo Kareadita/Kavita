@@ -16,7 +16,7 @@ import {SettingSwitchComponent} from "../../settings/_components/setting-switch/
 import {SettingsService} from "../settings.service";
 import {debounceTime, filter, switchMap} from "rxjs";
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
-import {map} from "rxjs/operators";
+import {map, tap} from "rxjs/operators";
 import {MetadataSettings, SeriesNameLanguage} from "../_models/metadata-settings";
 import {PersonRole} from "../../_models/metadata/person";
 import {PersonRolePipe} from "../../_pipes/person-role.pipe";
@@ -28,6 +28,14 @@ import {
 } from "../manage-metadata-mappings/manage-metadata-mappings.component";
 import {RouterLink} from "@angular/router";
 import {SettingsTabId} from "../../sidenav/preference-nav/preference-nav.component";
+import {ModalService} from "../../_services/modal.service";
+import {
+  RunMetadataMappingsModalComponent
+} from "../manage-metadata-mappings/run-metadata-mappings-modal/run-metadata-mappings-modal.component";
+import {DefaultModalOptions} from "../../_models/modal/modal-options";
+import {EVENTS, MessageHubService} from "../../_services/message-hub.service";
+import {NotificationProgressEvent} from "../../_models/events/notification-progress-event";
+import {QueueNames, ServerService, TaskMethodNames} from "../../_services/server.service";
 import {
   NgbAccordionBody,
   NgbAccordionButton,
@@ -86,12 +94,17 @@ export class ManageMetadataSettingsComponent implements OnInit {
   private readonly cdRef = inject(ChangeDetectorRef);
   private readonly destroyRef = inject(DestroyRef);
   private readonly fb = inject(FormBuilder);
+  private readonly modalService = inject(ModalService);
+  private readonly messageHub = inject(MessageHubService);
+  private readonly serverService = inject(ServerService);
 
   settingsForm: FormGroup = new FormGroup({});
   settings: MetadataSettings | undefined = undefined;
   personRoles: PersonRole[] = [PersonRole.Writer, PersonRole.CoverArtist, PersonRole.Character];
   isLoaded = false;
   allMetadataSettingFields = allMetadataSettingField;
+
+  isReRunInProgress = signal(true);
 
   libraryLanguageOverrides = this.fb.array<FormGroup<{
     libraryId: FormControl<number | null>,
@@ -137,7 +150,7 @@ export class ManageMetadataSettingsComponent implements OnInit {
   });
 
   /**
-   * The set of language subtags the server recognises, used only to warn
+   * The set of language subtags the server recognizes, used only to warn
    */
   private readonly knownPrimarySubtags = computed(
     () => new Set(this.bcp47Languages().map(l => primarySubtag(l.isoCode)))
@@ -254,6 +267,18 @@ export class ManageMetadataSettingsComponent implements OnInit {
 
     });
 
+    this.serverService.isTaskRunning(TaskMethodNames.RunMetadataMappings, QueueNames.Scan).pipe(
+      tap(b => this.isReRunInProgress.set(b))
+    ).subscribe();
+
+    this.messageHub.messages$.pipe(
+      takeUntilDestroyed(this.destroyRef),
+      filter(e => e.event === EVENTS.NotificationProgress),
+      map(e => e.payload as NotificationProgressEvent),
+      filter(e => e.name === EVENTS.RerunMetadataMappingsProgress),
+      map(e => e.eventType !== 'ended'),
+      tap(inProgress => this.isReRunInProgress.set(inProgress))
+    ).subscribe();
   }
 
   packData(withFieldMappings: boolean = true) {
@@ -286,6 +311,10 @@ export class ManageMetadataSettingsComponent implements OnInit {
       acc[libraryId] = {name: name || '', localizedName: localizedName || ''};
       return acc;
     }, {});
+  }
+
+  reRunMappings() {
+    this.modalService.open(RunMetadataMappingsModalComponent, DefaultModalOptions);
   }
 
   addLibraryLanguageOverride(libraryId: number | null = null, override: SeriesNameLanguage | null = null) {

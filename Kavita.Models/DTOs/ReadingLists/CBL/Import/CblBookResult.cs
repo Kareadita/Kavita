@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using Kavita.Models.DTOs.ReadingLists.CBL.Internal;
 using Kavita.Models.Entities.Enums;
+using System.ComponentModel.DataAnnotations;
 
 namespace Kavita.Models.DTOs.ReadingLists.CBL.Import;
 #nullable enable
@@ -26,10 +27,12 @@ public sealed record CblBookResult
     /// The name of the reading list
     /// </summary>
     public string ReadingListName { get; set; }
+    [EnumDataType(typeof(CblImportReason))]
     public CblImportReason Reason { get; set; }
     /// <summary>
     /// Which matching tier resolved this item (null if not processed by new matcher)
     /// </summary>
+    [EnumDataType(typeof(CblMatchTier))]
     public CblMatchTier? MatchTier { get; set; }
     /// <summary>
     /// The matched chapter's ID (0 if not matched)
@@ -46,6 +49,7 @@ public sealed record CblBookResult
     /// <summary>
     /// The library type of the matched series (for entity-title rendering)
     /// </summary>
+    [EnumDataType(typeof(LibraryType))]
     public LibraryType LibraryType { get; set; }
     /// <summary>
     /// The raw chapter range/number (e.g. "5", "10.5") — separate from ChapterTitle

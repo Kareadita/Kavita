@@ -1,4 +1,5 @@
-using Kavita.Models.Entities.Enums;
+﻿using Kavita.Models.Entities.Enums;
+using System.ComponentModel.DataAnnotations;
 
 namespace Kavita.Models.DTOs.Reader;
 
@@ -38,4 +39,4 @@ public sealed record RereadDto
     }
 }
 
-public sealed record RereadChapterDto(int LibraryId, int SeriesId, int VolumeId, int ChapterId, string Label, MangaFormat? Format);
+public sealed record RereadChapterDto(int LibraryId, int SeriesId, int VolumeId, int ChapterId, string Label, [EnumDataType(typeof(MangaFormat))] MangaFormat? Format);

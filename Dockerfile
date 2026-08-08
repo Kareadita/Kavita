@@ -26,7 +26,7 @@ COPY Kavita.Server/config/appsettings.json /tmp/config/appsettings.json
 ENV DEBIAN_FRONTEND=noninteractive
 
 RUN apt-get update \
-  && apt-get install -y libicu-dev libgdiplus curl tzdata \
+  && apt-get install -y libicu-dev libgdiplus curl tzdata libjemalloc2 \
   && rm -rf /var/lib/apt/lists/*
 
 COPY entrypoint.sh /entrypoint.sh

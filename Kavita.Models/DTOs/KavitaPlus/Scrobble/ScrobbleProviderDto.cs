@@ -1,10 +1,12 @@
-using System;
+﻿using System;
 using Kavita.Models.Entities.Enums;
+using System.ComponentModel.DataAnnotations;
 
 namespace Kavita.Models.DTOs.KavitaPlus.Scrobble;
 
 public sealed record ScrobbleProviderDto
 {
+    [EnumDataType(typeof(ScrobbleProvider))]
     public ScrobbleProvider Provider { get; set; }
 
     /// <summary>

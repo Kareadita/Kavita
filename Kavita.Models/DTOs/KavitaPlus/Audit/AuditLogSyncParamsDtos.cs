@@ -1,6 +1,8 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using Kavita.Models.Entities.Enums;
+using System.ComponentModel.DataAnnotations;
+using Kavita.Models.Attributes;
 
 namespace Kavita.Models.DTOs.KavitaPlus.Audit;
 #nullable enable
@@ -41,6 +43,7 @@ public sealed record AuditLogWantToReadSyncParamsDto
     public bool HasMal { get; init; }
     [Obsolete("Use Providers instead")]
     public bool HasAniList { get; init; }
+    [EnumCollection(typeof(ScrobbleProvider))]
     public List<ScrobbleProvider> Providers { get; init; }
 }
 
@@ -52,5 +55,6 @@ public sealed record AuditLogWantToReadSyncCompletedParamsDto
     public bool HasMal { get; init; }
     [Obsolete("Use Providers instead")]
     public bool HasAniList { get; init; }
+    [EnumCollection(typeof(ScrobbleProvider))]
     public List<ScrobbleProvider> Providers { get; init; }
 }

@@ -39,7 +39,7 @@ export class ReadMoreComponent {
 
   private readonly effectiveMaxLength = computed(() => {
     if (this.useResponsiveLength()) {
-      return this.breakpointService.isDesktopOrBelow() ? 170 : 200;
+      return this.breakpointService.isTabletOrBelow() ? 170 : 400;
     }
     return this.maxLength();
   });

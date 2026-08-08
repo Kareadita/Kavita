@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 
 namespace Kavita.Models.DTOs.ReadingLists.CBL.Import;
 
@@ -13,6 +14,7 @@ public sealed record CblImportSummaryDto
     /// </summary>
     public string FileName { get; set; }
     public ICollection<CblBookResult> Results { get; set; }
+    [EnumDataType(typeof(CblImportResult))]
     public CblImportResult Success { get; set; }
     public ICollection<CblBookResult> SuccessfulInserts { get; set; }
     /// <summary>

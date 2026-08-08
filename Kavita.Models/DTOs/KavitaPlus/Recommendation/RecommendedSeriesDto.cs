@@ -1,4 +1,5 @@
-using Kavita.Models.Entities.Enums.KavitaPlus;
+﻿using Kavita.Models.Entities.Enums.KavitaPlus;
+using System.ComponentModel.DataAnnotations;
 
 namespace Kavita.Models.DTOs.Recommendation;
 #nullable enable
@@ -12,5 +13,6 @@ public sealed record RecommendedSeriesDto
     /// <summary>
     /// Why this series was recommended
     /// </summary>
+    [EnumDataType(typeof(RecommendationSource))]
     public RecommendationSource Source { get; set; }
 }

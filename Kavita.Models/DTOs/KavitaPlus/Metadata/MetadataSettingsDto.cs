@@ -2,6 +2,8 @@
 using Kavita.Models.DTOs.Settings;
 using Kavita.Models.Entities.Enums;
 using Kavita.Models.Entities.MetadataMatching;
+using System.ComponentModel.DataAnnotations;
+using Kavita.Models.Attributes;
 
 namespace Kavita.Models.DTOs.KavitaPlus.Metadata;
 #nullable enable
@@ -107,12 +109,14 @@ public sealed record MetadataSettingsDto: FieldMappingsDto
     /// <summary>
     /// A list of overrides that will enable writing to locked fields
     /// </summary>
-    public List<MetadataSettingField> Overrides { get; set; } = [];
+    [EnumCollection(typeof(MetadataSettingField))]
+    public List<MetadataSettingField> Overrides { get; set; }
 
     /// <summary>
     /// Which Roles to allow metadata downloading for
     /// </summary>
-    public List<PersonRole> PersonRoles { get; set; } = [];
+    [EnumCollection(typeof(PersonRole))]
+    public List<PersonRole> PersonRoles { get; set; }
 
 
     /// <summary>

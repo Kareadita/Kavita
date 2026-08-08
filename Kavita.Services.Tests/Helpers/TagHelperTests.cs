@@ -337,4 +337,17 @@ public class TagHelperTests(ITestOutputHelper outputHelper) : AbstractDbTest(out
 
         Assert.Single(addedTags);
     }
+
+    #region SortAndCleanTagList
+
+    [Fact]
+    public void SortAndCleanTagListTests()
+    {
+        List<string> list = ["a", "A", "b", "c"];
+        var normalized = TagHelper.SortAndCleanTagList(list);
+
+        Assert.Equal(new[] { "a", "b", "c" }, normalized);
+    }
+
+    #endregion
 }

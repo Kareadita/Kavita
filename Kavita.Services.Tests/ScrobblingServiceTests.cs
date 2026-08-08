@@ -359,6 +359,8 @@ public class ScrobblingServiceTests(ITestOutputHelper outputHelper): AbstractDbT
         await readerService.MarkChaptersAsRead(user, 1, [chapter]);
         await unitOfWork.CommitAsync();
 
+        await service.ScrobbleReadingUpdate(user.Id, 1, chapter.Id);
+
         await service.ProcessUpdatesSinceLastSync();
 
         await kavitaPlusApiService.Received(1).PostScrobbleV3UpdateAsync(

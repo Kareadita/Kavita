@@ -1,5 +1,6 @@
-using Kavita.Models.DTOs.KavitaPlus.Audit;
+﻿using Kavita.Models.DTOs.KavitaPlus.Audit;
 using Kavita.Models.Entities.Enums.Audit;
+using System.ComponentModel.DataAnnotations;
 
 namespace Kavita.Models.DTOs.KavitaPlus;
 #nullable enable
@@ -27,6 +28,7 @@ public sealed record KavitaPlusAuditMetadataExtrasDto
     public string? AliasAdded { get; init; }
 
     // MetadataFetched - why the fetch fired
+    [EnumDataType(typeof(MetadataFetchTrigger))]
     public MetadataFetchTrigger? FetchTrigger { get; init; }
 
     public static KavitaPlusAuditMetadataExtrasDto? From(AuditLogSeriesCoverParamsDto? p) =>

@@ -8,6 +8,7 @@ import {MetadataSettings} from "./_models/metadata-settings";
 import {MetadataMappingsExport} from "./manage-metadata-mappings/manage-metadata-mappings.component";
 import {FieldMappingsImportResult, ImportSettings} from "../_models/import-field-mappings";
 import {AuthorityValidationResult, OidcPublicConfig} from "./_models/oidc-config";
+import {RunMetadataMappingsRequest} from "../_models/metadata/run-metadata-mappings-request";
 
 /**
  * Used only for the Test Email Service call
@@ -40,6 +41,10 @@ export class SettingsService {
   }
   updateMetadataSettings(model: MetadataSettings) {
     return this.http.post<MetadataSettings>(this.baseUrl + 'settings/metadata-settings', model);
+  }
+
+  runMetadataMappings(request: RunMetadataMappingsRequest) {
+    return this.http.post(this.baseUrl + 'settings/run-metadata-mappings', request);
   }
 
   importFieldMappings(data: MetadataMappingsExport, settings: ImportSettings) {

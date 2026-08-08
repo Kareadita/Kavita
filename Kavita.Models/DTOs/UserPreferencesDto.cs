@@ -18,6 +18,7 @@ public sealed record UserPreferencesDto
     [Required]
     public SiteThemeDto? Theme { get; set; }
 
+    [EnumDataType(typeof(PageLayoutMode))]
     public PageLayoutMode GlobalPageLayoutMode { get; set; } = PageLayoutMode.Cards;
     /// <inheritdoc cref="AppUserPreferences.BlurUnreadSummaries"/>
     [Required]

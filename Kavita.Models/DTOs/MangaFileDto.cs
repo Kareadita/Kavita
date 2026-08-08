@@ -1,5 +1,6 @@
 ﻿using System;
 using Kavita.Models.Entities.Enums;
+using System.ComponentModel.DataAnnotations;
 
 namespace Kavita.Models.DTOs;
 #nullable enable
@@ -19,6 +20,7 @@ public sealed record MangaFileDto
     /// How many bytes make up this file
     /// </summary>
     public long Bytes { get; init; }
+    [EnumDataType(typeof(MangaFormat))]
     public MangaFormat Format { get; init; }
     public DateTime Created { get; init; }
     /// <summary>

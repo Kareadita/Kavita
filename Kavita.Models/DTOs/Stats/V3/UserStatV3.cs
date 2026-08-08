@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using Kavita.Models.Entities;
 using Kavita.Models.Entities.Enums;
 using Kavita.Models.Entities.Enums.Device;
+using System.ComponentModel.DataAnnotations;
+using Kavita.Models.Attributes;
 
 namespace Kavita.Models.DTOs.Stats.V3;
 
@@ -80,6 +82,7 @@ public sealed record UserStatV3
     /// <summary>
     /// The number of devices setup and their platforms
     /// </summary>
+    [EnumCollection(typeof(EmailDevicePlatform))]
     public ICollection<EmailDevicePlatform> DevicePlatforms { get; set; }
     /// <summary>
     /// Roles for this user
@@ -88,6 +91,7 @@ public sealed record UserStatV3
     /// <summary>
     /// Who manages the user (OIDC, Kavita)
     /// </summary>
+    [EnumDataType(typeof(IdentityProvider))]
     public IdentityProvider IdentityProvider { get; set; }
     /// <summary>
     /// Total seconds read

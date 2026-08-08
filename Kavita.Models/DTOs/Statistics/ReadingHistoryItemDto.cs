@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using Kavita.Models.Entities.Enums;
+using System.ComponentModel.DataAnnotations;
 
 namespace Kavita.Models.DTOs.Statistics;
 
@@ -16,6 +17,7 @@ public sealed record ReadingHistoryItemDto
     // Series info
     public int SeriesId { get; set; }
     public string SeriesName { get; set; } = string.Empty;
+    [EnumDataType(typeof(MangaFormat))]
     public MangaFormat SeriesFormat { get; set; }
 
     // Chapter info

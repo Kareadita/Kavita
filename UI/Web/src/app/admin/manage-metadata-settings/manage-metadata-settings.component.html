@@ -43,18 +43,25 @@
       </div>
 
       <div class="row g-0 mt-4 mb-4">
-        <div class="col-md-6 col-sm-12">
+        <div class="col-md-4 col-sm-12">
           <button class="btn btn-secondary" (click)="manageMetadataMappingsComponent().export()">
             {{t('export-settings')}}
           </button>
           <div class="text-muted mt-2">{{t('export-tooltip')}}</div>
         </div>
 
-        <div class="col-md-6 col-sm-12">
+        <div class="col-md-4 col-sm-12">
           <button class="btn btn-secondary" routerLink="/settings" [fragment]="SettingsTabId.MappingsImport">
             {{t('import-settings')}}
           </button>
           <div class="text-muted mt-2">{{t('import-tooltip')}}</div>
+        </div>
+
+        <div class="col-md-4 col-sm-12">
+          <button class="btn btn-secondary" (click)="reRunMappings()" [disabled]="isReRunInProgress()">
+            {{t('run-metadata-mappings')}}
+          </button>
+          <div class="text-muted mt-2">{{t('run-metadata-mappings-tooltip')}}</div>
         </div>
       </div>
 

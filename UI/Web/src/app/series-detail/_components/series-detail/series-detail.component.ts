@@ -972,6 +972,7 @@ class SeriesDetailComponent implements OnInit, AfterViewInit {
   protected readonly encodeURIComponent = encodeURIComponent;
   protected readonly Breakpoint = Breakpoint;
   protected readonly READING_HISTORY_PAGE_SIZE = READING_HISTORY_PAGE_SIZE;
+  protected readonly PublicationStatus = PublicationStatus;
 }
 
 export default SeriesDetailComponent
