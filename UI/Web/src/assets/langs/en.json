@@ -3444,7 +3444,7 @@
         "unit-average-rating": "Kavita+ external rating, percent",
         "unit-reading-progress": "Percent",
         "unit-user-rating": "0.0 - 5.0 Stars",
-        "unit-read-last": "Days from TODAY",
+        "unit-read-last": "Days ago",
         "disclaimer-highlight-slots": "When using this field, only your own annotations will be shown",
         "unit-file-size": "GB, MB, KB, B",
         "disclaimer-file-size": "File size must include the unit"
@@ -4170,7 +4170,8 @@
         "read-date": "Reading Date",
         "read-last": "Read Last",
         "average-rating": "Average rating",
-        "file-size": "File size"
+        "file-size": "File size",
+        "collapse-series-relationships": "{{user-preferences.collapse-series-relationships-label}}"
     },
 
     "filter-entity-type-pipe": {

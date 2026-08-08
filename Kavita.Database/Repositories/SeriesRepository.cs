@@ -775,9 +775,8 @@ public class SeriesRepository(DataContext context, IMapper mapper) : ISeriesRepo
         var userLibraries = await GetUserLibrariesForFilteredQuery(0, userId, queryContext, ct);
         var allLibraryCount = await context.Library.CountAsync(ct);
         var userRating = await context.AppUser.GetUserAgeRestriction(userId, ct: ct);
-        var onlyParentSeries = await context.AppUserPreferences.Where(u => u.AppUserId == userId)
-            .Select(u => u.CollapseSeriesRelationships)
-            .SingleOrDefaultAsync(ct);
+
+
 
         query ??= context.Series
             .AsNoTracking();
@@ -795,17 +794,14 @@ public class SeriesRepository(DataContext context, IMapper mapper) : ISeriesRepo
 
         query = await ApplyCollectionFilter(seriesFilter, query, userId, userRating, ct);
 
+        query = await AppleCollapseSeriesRelationshipsFilter(query, seriesFilter, userId, ct);
 
         query = FilterQueryBuilder.Apply(seriesFilter, query,
             (stmt, q) => BuildFilterGroup(userId, stmt, q));
 
         query = query
             .WhereIf(allLibraryCount != userLibraries.Count && userLibraries.Count > 0, s => userLibraries.Contains(s.LibraryId))
-            .WhereIf(onlyParentSeries, s =>
-                s.RelationOf.Count == 0 ||
-                s.RelationOf.All(p => p.RelationKind == RelationKind.Prequel))
             .RestrictAgainstAgeRestriction(userRating);
-
 
         return query
                 .Sort(userId, seriesFilter.SortOptions)
@@ -866,6 +862,29 @@ public class SeriesRepository(DataContext context, IMapper mapper) : ISeriesRepo
         }
 
         return query;
+    }
+
+    private async Task<IQueryable<Series>> AppleCollapseSeriesRelationshipsFilter(IQueryable<Series> query,
+        SeriesFilterV2Dto seriesFilter, int userId, CancellationToken ct = default)
+    {
+        bool onlyParentSeries;
+
+        var collapseSeriesRelationshipsStmt = seriesFilter.Statements
+            .FirstOrDefault(stmt => stmt.Field == SeriesFilterField.CollapseSeriesRelationships);
+        if (collapseSeriesRelationshipsStmt != null)
+        {
+            onlyParentSeries = bool.Parse(collapseSeriesRelationshipsStmt.Value);
+        }
+        else
+        {
+            onlyParentSeries = await context.AppUserPreferences.Where(u => u.AppUserId == userId)
+                .Select(u => u.CollapseSeriesRelationships)
+                .SingleOrDefaultAsync(ct);
+        }
+
+        return query.WhereIf(onlyParentSeries, s =>
+            s.RelationOf.Count == 0 ||
+            s.RelationOf.All(p => p.RelationKind == RelationKind.Prequel));
     }
 
     private IQueryable<Series> ApplyWantToReadFilter(SeriesFilterV2Dto seriesFilter, IQueryable<Series> query, int userId)
@@ -970,6 +989,9 @@ public class SeriesRepository(DataContext context, IMapper mapper) : ISeriesRepo
                 // This is handled in the code before this as it's handled in a more general, combined manner
                 query,
             SeriesFilterField.WantToRead =>
+                // This is handled in the higher level of code as it's more general
+                query,
+            SeriesFilterField.CollapseSeriesRelationships =>
                 // This is handled in the higher level of code as it's more general
                 query,
             SeriesFilterField.ReadProgress => query.HasReadingProgress(true, statement.Comparison, (float) value, userId),

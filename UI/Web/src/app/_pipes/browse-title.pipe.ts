@@ -71,6 +71,7 @@ export class BrowseTitlePipe implements PipeTransform {
       case SeriesFilterField.Summary:
       case SeriesFilterField.SeriesName:
       case SeriesFilterField.FileSize:
+      case SeriesFilterField.CollapseSeriesRelationships:
       default:
         return '';
     }
