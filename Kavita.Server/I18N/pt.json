@@ -277,5 +277,12 @@
     "email.send-to-device.description": "Vai encontrar os ficheiros que enviou em anexo.",
     "email.username-change.subject": "O seu nome de utilizador foi alterado no servidor de {{InvitingUser}}",
     "email.username-change.title": "Atualização de Alteração do Nome de Utilizador",
-    "email.username-change.description": "O nome de utilizador da sua conta foi atualizado na instância Kavita de {{InvitingUser}}. Não é necessária nenhuma ação da sua parte."
+    "email.username-change.description": "O nome de utilizador da sua conta foi atualizado na instância Kavita de {{InvitingUser}}. Não é necessária nenhuma ação da sua parte.",
+    "series-name-exists": "Uma série com este nome já existe nesta biblioteca",
+    "unable-to-cancel-k+": "Não foi possível cancelar a subscrição Kavita+ devido a um erro. Contacte o suporte Kavita+",
+    "unable-to-renew-k+": "Não foi possível renovar a subscrição Kavita+ devido a um erro. Contacte o suporte Kavita+",
+    "scrobble-provider-not-setup": "O provedor de scrobbling {0} não está configurado",
+    "mappings-re-run-in-progress": "Já está em processamento um pedido de reexecução dos mapeamentos de metadados. Aguarde até que esteja concluído para voltar a colocá-lo em fila",
+    "mappings-re-run-no-libraries-selected": "O pedido tem que incluir pelo menos 1 biblioteca",
+    "mappings-re-run-libraries-overlap": "BibliotecasExcluídas e BibliotecasIncluídas não podem conter as mesmas bibliotecas"
 }

@@ -275,5 +275,12 @@
     "email.send-to-device.description": "お送りいただいたファイルを添付いたしましたのでご確認ください。",
     "email.username-change.subject": "{{InvitingUser}} さんのサーバーでユーザー名が変更されました",
     "email.username-change.title": "ユーザー名の変更の更新",
-    "email.username-change.description": "{{InvitingUser}} さんの Kavita インスタンス上で、お客様のアカウントのユーザー名が更新されました。お客様側で何か操作する必要はありません。"
+    "email.username-change.description": "{{InvitingUser}} さんの Kavita インスタンス上で、お客様のアカウントのユーザー名が更新されました。お客様側で何か操作する必要はありません。",
+    "series-name-exists": "このライブラリには既に同じ名前のシリーズが存在します",
+    "mappings-re-run-in-progress": "メタデータ再実行マッピングのリクエストが現在処理中です。処理が完了するまで待ってから、再度キューに追加してください",
+    "mappings-re-run-no-libraries-selected": "リクエストには少なくとも 1 つのライブラリを含める必要があります",
+    "mappings-re-run-libraries-overlap": "ExcludedLibraries と IncludedLibraries には同じライブラリを含めることはできません",
+    "email.token-expiring-soon.cta": "更新",
+    "email.email-confirm.cta": "招待を受け入れる",
+    "email.password-reset.cta": "パスワードをリセットする"
 }
