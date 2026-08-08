@@ -359,7 +359,7 @@ public class AccountController(UserManager<AppUser> userManager,
     /// </summary>
     /// <returns></returns>
     [HttpGet("roles")]
-    public static ActionResult<IList<string>> GetRoles()
+    public ActionResult<IList<string>> GetRoles()
     {
         return typeof(PolicyConstants)
             .GetFields(BindingFlags.Public | BindingFlags.Static)

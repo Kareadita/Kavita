@@ -319,6 +319,9 @@ public static class SeriesFilter
 
             var date = DateTime.Now.AddDays(-timeDeltaDays);
 
+            // We are flipping the logical comparisons such that the read filter in the UI is more natural
+            // I.e. return all series where my last read is less than 30 days ago. Should return series read in the last
+            // 30 days
             switch (comparison)
             {
                 case FilterComparison.Equal:
@@ -326,17 +329,17 @@ public static class SeriesFilter
                     break;
                 case FilterComparison.IsAfter:
                 case FilterComparison.GreaterThan:
-                    subQuery = subQuery.Where(s => s.MaxDate != null && s.MaxDate > date);
+                    subQuery = subQuery.Where(s => s.MaxDate != null && s.MaxDate < date);
                     break;
                 case FilterComparison.GreaterThanEqual:
-                    subQuery = subQuery.Where(s => s.MaxDate != null && s.MaxDate >= date);
+                    subQuery = subQuery.Where(s => s.MaxDate != null && s.MaxDate <= date);
                     break;
                 case FilterComparison.IsBefore:
                 case FilterComparison.LessThan:
-                    subQuery = subQuery.Where(s => s.MaxDate != null && s.MaxDate < date);
+                    subQuery = subQuery.Where(s => s.MaxDate != null && s.MaxDate > date);
                     break;
                 case FilterComparison.LessThanEqual:
-                    subQuery = subQuery.Where(s => s.MaxDate != null && s.MaxDate <= date);
+                    subQuery = subQuery.Where(s => s.MaxDate != null && s.MaxDate >= date);
                     break;
                 case FilterComparison.NotEqual:
                     subQuery = subQuery.Where(s => s.MaxDate != null && !s.MaxDate.Equals(date));

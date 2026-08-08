@@ -30,11 +30,11 @@ jobs:
     if: github.event.pull_request.merged == true && contains(github.head_ref, 'release')
     steps:
       - name: Checkout Repo
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           fetch-depth: 0
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v5
         with:
           name: csproj
           path: Kavita.Common/Kavita.Common.csproj
@@ -64,12 +64,12 @@ jobs:
           echo "BODY=$body" >> $GITHUB_OUTPUT
 
       - name: Check Out Repo
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           ref: develop
 
       - name: NodeJS to Compile WebUI
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v5
         with:
           node-version: 24
       - run: |
@@ -104,7 +104,7 @@ jobs:
         id: parse-version
 
       - name: Compile dotnet app
-        uses: actions/setup-dotnet@v4
+        uses: actions/setup-dotnet@v5
         with:
           dotnet-version: 10.0.x
       - name: Install Swashbuckle CLI

@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Linq;
+using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 using Kavita.API.Services;
@@ -811,7 +812,7 @@ public class ParseScannedFiles
     }
 
 
-    private static void UpdateSortOrder(ConcurrentDictionary<ParsedSeries, List<ParserInfo>> scannedSeries, ParsedSeries series)
+    public static void UpdateSortOrder(ConcurrentDictionary<ParsedSeries, List<ParserInfo>> scannedSeries, ParsedSeries series)
     {
         // Set the Sort order per Volume
         var volumes = scannedSeries[series].GroupBy(info => info.Volumes);
@@ -856,38 +857,52 @@ public class ParseScannedFiles
             // Ensure chapters are sorted numerically when possible, otherwise push unparseable to the end
             chapters = infos
                 .OrderBy(info => float.TryParse(info.Chapters, NumberStyles.Any, CultureInfo.InvariantCulture, out var val) ? val : float.MaxValue)
+                .ThenBy(info => info.Chapters, StringComparer.OrdinalIgnoreCase)
                 .ToList();
 
             counter = 0f;
-            var prevIssue = string.Empty;
+            float? prevBase = null;
+
             foreach (var chapter in chapters)
             {
-                // Use MinNumber in case there is a range, as otherwise sort order will cause it to be processed last
-                var chapterNum =
-                    $"{Parser.MinNumberFromRange(chapter.Chapters).ToString(CultureInfo.InvariantCulture)}";
+                var chapterNum = Parser.IsRange(chapter.Chapters) ?
+                    $"{Parser.MinNumberFromRange(chapter.Chapters).ToString(CultureInfo.InvariantCulture)}"
+                    : chapter.Chapters;
+
                 if (float.TryParse(chapterNum, NumberStyles.Any, CultureInfo.InvariantCulture, out var parsedChapter))
                 {
-                    // Parsed successfully, use the numeric value
                     counter = parsedChapter;
-                    chapter.IssueOrder = counter;
-
-                    // Increment for next chapter (unless the next has a similar value, then add 0.1)
-                    if (!string.IsNullOrEmpty(prevIssue) && float.TryParse(prevIssue, NumberStyles.Any, CultureInfo.InvariantCulture, out var prevIssueFloat) && parsedChapter.Is(prevIssueFloat))
+                    if (prevBase.HasValue && parsedChapter.Is(prevBase.Value))
                     {
-                        counter += 0.1f; // bump if same value as the previous issue
+                        counter += 0.1f;
                     }
-                    prevIssue = $"{parsedChapter.ToString(CultureInfo.InvariantCulture)}";
+                    chapter.IssueOrder = counter;
+                    prevBase = parsedChapter;
                 }
                 else
                 {
-                    // Unparsed chapters: use the current counter and bump for the next
-                    if (!string.IsNullOrEmpty(prevIssue) && prevIssue == counter.ToString(CultureInfo.InvariantCulture))
+                    // Pull out the leading numeric part, e.g. "15.UH" -> 15, "15.BEY" -> 15
+                    var leadingMatch = Regex.Match(chapter.Chapters, @"^\d+(\.\d+)?");
+                    float? currentBase = leadingMatch.Success &&
+                                         float.TryParse(leadingMatch.Value, NumberStyles.Any, CultureInfo.InvariantCulture, out var lb)
+                        ? lb : null;
+
+                    if (currentBase.HasValue && prevBase.HasValue && currentBase.Value.Is(prevBase.Value))
                     {
-                        counter += 0.1f; // bump if same value as the previous issue
+                        // Same base number as the previous entry -> keep bumping within the group
+                        counter += 0.1f;
                     }
+                    else if (currentBase.HasValue)
+                    {
+                        counter = currentBase.Value;
+                    }
+                    else
+                    {
+                        counter++;
+                    }
+
                     chapter.IssueOrder = counter;
-                    counter++;
-                    prevIssue = chapter.Chapters;
+                    prevBase = currentBase ?? prevBase;
                 }
             }
         }

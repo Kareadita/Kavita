@@ -59,6 +59,43 @@ public class SeriesRepositoryTests(ITestOutputHelper testOutputHelper) : Abstrac
     }
 
     [Theory]
+    // Collides with another series' Name
+    [InlineData("The Idaten Deities Know Only Peace", MangaFormat.Archive, false)]
+    // Collides with another series' LocalizedName
+    [InlineData("Heion Sedai no Idaten-tachi", MangaFormat.Archive, false)]
+    // Same name, different format - no collision
+    [InlineData("The Idaten Deities Know Only Peace", MangaFormat.Pdf, true)]
+    // Genuinely unique
+    [InlineData("A Completely Unique Series Name", MangaFormat.Archive, true)]
+    public async Task IsSeriesNameUniqueInLibraryAsync_ChecksAllNameColumns(string candidate, MangaFormat format, bool expectedUnique)
+    {
+        var (unitOfWork, _, _) = await CreateDatabase();
+        await SetupSeriesData(unitOfWork);
+
+        var isUnique = await unitOfWork.SeriesRepository.IsSeriesNameUniqueInLibraryAsync(
+            2, format, candidate.ToNormalized(), 0);
+
+        Assert.Equal(expectedUnique, isUnique);
+    }
+
+    [Fact]
+    public async Task IsSeriesNameUniqueInLibraryAsync_ExcludesSelf()
+    {
+        var (unitOfWork, _, _) = await CreateDatabase();
+        await SetupSeriesData(unitOfWork);
+
+        var series = await unitOfWork.SeriesRepository.GetFullSeriesByAnyName(
+            "The Idaten Deities Know Only Peace", "", 2, MangaFormat.Archive, false);
+        Assert.NotNull(series);
+
+        // A series never collides with itself
+        var isUnique = await unitOfWork.SeriesRepository.IsSeriesNameUniqueInLibraryAsync(
+            2, MangaFormat.Archive, series.NormalizedName, series.Id);
+
+        Assert.True(isUnique);
+    }
+
+    [Theory]
     // Case 1: Prioritize existing ExternalSeries id
     [InlineData(12345, null, 12345)]
     // Case 2: Extract from weblink if no external series id

@@ -6,7 +6,7 @@ using System.ComponentModel.DataAnnotations;
 using Kavita.Models.Attributes;
 
 namespace Kavita.Models.DTOs.KavitaPlus.Metadata;
-
+#nullable enable
 
 public sealed record MetadataSettingsDto: FieldMappingsDto
 {
@@ -93,6 +93,20 @@ public sealed record MetadataSettingsDto: FieldMappingsDto
     public bool FirstLastPeopleNaming { get; set; }
 
     /// <summary>
+    /// The server-wide priority order of BCP-47 language codes used when setting <c>Series.Name</c> and
+    /// <c>Series.LocalizedName</c>. In case of no matches, will not change/set.
+    /// </summary>
+    /// <remarks>en;ja-Latn translates to trying to set <c>Series.Name</c> as English, if no english, use Romanji.</remarks>
+    public SeriesNameLanguageDto GlobalLanguageTitleSettings { get; set; } =
+        new() { Name = "en", LocalizedName = "ja-Latn" };
+
+    /// <summary>
+    /// Per-library overrides of <see cref="GlobalLanguageTitleSettings"/>, keyed by LibraryId.
+    /// </summary>
+    /// <remarks>An override fully replaces the global list for that library, it does not prepend to it.</remarks>
+    public Dictionary<int, SeriesNameLanguageDto> LibraryLanguageTitleOverrides { get; set; } = [];
+
+    /// <summary>
     /// A list of overrides that will enable writing to locked fields
     /// </summary>
     [EnumCollection(typeof(MetadataSettingField))]
@@ -135,20 +149,20 @@ public record FieldMappingsDto
     /// <summary>
     /// Do not allow any Genre/Tag in this list to be written to Kavita
     /// </summary>
-    public List<string> Blacklist { get; set; }
+    public List<string> Blacklist { get; set; } = [];
 
     /// <summary>
     /// Only allow these Tags to be written to Kavita
     /// </summary>
-    public List<string> Whitelist { get; set; }
+    public List<string> Whitelist { get; set; } = [];
 
     /// <summary>
     /// Any Genres or Tags that if present, will trigger an Age Rating Override. Highest rating will be prioritized for matching.
     /// </summary>
-    public Dictionary<string, AgeRating> AgeRatingMappings { get; set; }
+    public Dictionary<string, AgeRating> AgeRatingMappings { get; set; } = [];
 
     /// <summary>
     /// A list of rules that allow mapping a genre/tag to another genre/tag
     /// </summary>
-    public List<MetadataFieldMappingDto> FieldMappings { get; set; }
+    public List<MetadataFieldMappingDto> FieldMappings { get; set; } = [];
 }

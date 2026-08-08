@@ -1,4 +1,6 @@
-﻿namespace Kavita.Models.DTOs.Filtering.v2;
+﻿using Kavita.Models.Entities.User;
+
+namespace Kavita.Models.DTOs.Filtering.v2;
 
 /// <summary>
 /// Represents the field which will dictate the value type and the Extension used for filtering
@@ -60,6 +62,10 @@ public enum SeriesFilterField
     /// Total filesize accross all files for all chapters of the series
     /// </summary>
     FileSize = 33,
+    /// <summary>
+    /// If presents in the filter overwrites <see cref="AppUserPreferences.CollapseSeriesRelationships"/>
+    /// </summary>
+    CollapseSeriesRelationships = 34,
 }
 
 

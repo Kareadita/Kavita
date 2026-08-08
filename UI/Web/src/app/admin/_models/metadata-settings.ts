@@ -45,4 +45,12 @@ export interface MetadataSettings {
   whitelist: Array<string>;
   personRoles: Array<PersonRole>;
   overrides: Array<MetadataSettingField>;
+
+  globalLanguageTitleSettings: SeriesNameLanguage;
+  libraryLanguageTitleOverrides: Record<string, SeriesNameLanguage>;
+}
+
+export interface SeriesNameLanguage {
+  name: string;
+  localizedName: string;
 }

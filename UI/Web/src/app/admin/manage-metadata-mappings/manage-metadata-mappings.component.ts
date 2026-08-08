@@ -1,5 +1,13 @@
 import {ChangeDetectionStrategy, ChangeDetectorRef, Component, inject, input, OnInit, signal} from '@angular/core';
 import {AgeRatingPipe} from "../../_pipes/age-rating.pipe";
+import {
+  NgbAccordionBody,
+  NgbAccordionButton,
+  NgbAccordionCollapse,
+  NgbAccordionDirective,
+  NgbAccordionHeader,
+  NgbAccordionItem
+} from "@ng-bootstrap/ng-bootstrap";
 import {FormBuilder, FormControl, FormGroup, FormsModule, ReactiveFormsModule, Validators} from "@angular/forms";
 import {MetadataFieldMapping, MetadataFieldType, MetadataSettings} from "../_models/metadata-settings";
 import {AgeRatingDto} from "../../_models/metadata/age-rating-dto";
@@ -7,9 +15,6 @@ import {MetadataService} from "../../_services/metadata.service";
 import {translate, TranslocoDirective} from "@jsverse/transloco";
 import {AgeRating} from "../../_models/metadata/age-rating";
 import {DownloadService} from "../../shared/_services/download.service";
-import {
-  SettingMultiTextFieldComponent
-} from "../../settings/_components/setting-multi-text-field/setting-multi-text-field.component";
 
 export type MetadataMappingsExport = {
   ageRatingMappings: Record<string, AgeRating>,
@@ -25,7 +30,12 @@ export type MetadataMappingsExport = {
     FormsModule,
     ReactiveFormsModule,
     TranslocoDirective,
-    SettingMultiTextFieldComponent,
+    NgbAccordionDirective,
+    NgbAccordionItem,
+    NgbAccordionHeader,
+    NgbAccordionButton,
+    NgbAccordionCollapse,
+    NgbAccordionBody,
   ],
   templateUrl: './manage-metadata-mappings.component.html',
   styleUrl: './manage-metadata-mappings.component.scss',
@@ -51,6 +61,13 @@ export class ManageMetadataMappingsComponent implements OnInit {
 
   ageRatings = signal<Array<AgeRatingDto>>([]);
 
+  /**
+   * Sections start expanded, but collapse by default when they contain more than this many rows
+   */
+  private readonly collapseThreshold = 10;
+  ageRatingCollapsed = signal(false);
+  fieldMappingCollapsed = signal(false);
+
   ageRatingMappings = this.fb.array<FormGroup<{
     str: FormControl<string | null>,
     rating: FormControl<AgeRating | null>
@@ -72,8 +89,6 @@ export class ManageMetadataMappingsComponent implements OnInit {
     const settings = this.settings();
     const settingsForm = this.settingsForm();
 
-    settingsForm.addControl('blacklist', new FormControl(settings.blacklist, []));
-    settingsForm.addControl('whitelist', new FormControl(settings.whitelist, []));
     settingsForm.addControl('ageRatingMappings', this.ageRatingMappings);
     settingsForm.addControl('fieldMappings', this.fieldMappings);
 
@@ -88,6 +103,9 @@ export class ManageMetadataMappingsComponent implements OnInit {
         this.addFieldMapping(mapping);
       });
     }
+
+    this.ageRatingCollapsed.set(this.ageRatingMappings.length > this.collapseThreshold);
+    this.fieldMappingCollapsed.set(this.fieldMappings.length > this.collapseThreshold);
 
     this.cdRef.markForCheck();
   }

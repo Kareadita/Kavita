@@ -273,7 +273,10 @@ public static class Seed
                 EnableChapterPublisher = true,
                 EnableChapterCoverImage = false,
                 EnableChapterReleaseDate = true,
-                PersonRoles = [PersonRole.Writer, PersonRole.CoverArtist, PersonRole.Character]
+                PersonRoles = [PersonRole.Writer, PersonRole.CoverArtist, PersonRole.Character],
+                GlobalNameLanguages = "en",
+                GlobalLocalizedNameLanguages = "ja-Latn",
+                LibraryLanguageTitleOverrides = []
             };
             await context.MetadataSettings.AddAsync(existing);
         }

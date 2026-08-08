@@ -534,10 +534,14 @@ public class ExternalMetadataServiceTests: AbstractDbTest
         await context.SaveChangesAsync();
 
 
+        // A perfectly viable candidate - the setting being off is the only reason nothing is written
         await externalMetadataService.WriteExternalMetadataToSeries(new ExternalSeriesDetailDto()
         {
             Name = seriesName,
-            Synonyms = [seriesName, "設定しないでください", "Kimchi"]
+            LocalizedTitles = new Dictionary<string, IList<LocalizedTitleDto>>
+            {
+                ["ja-Latn"] = [new LocalizedTitleDto { Title = "Kimchi" }]
+            }
         }, 1);
 
         // Repull Series and validate what is overwritten
@@ -549,6 +553,7 @@ public class ExternalMetadataServiceTests: AbstractDbTest
     [Fact]
     public async Task LocalizedName_NoExisting_Modification()
     {
+        // Default seeded priorities are Name "en" and LocalizedName "ja-Latn"
         var (unitOfWork, context, mapper) = await CreateDatabase();
         var (externalMetadataService, _, _, _) = await Setup(unitOfWork, context, mapper);
 
@@ -572,7 +577,10 @@ public class ExternalMetadataServiceTests: AbstractDbTest
         await externalMetadataService.WriteExternalMetadataToSeries(new ExternalSeriesDetailDto()
         {
             Name = seriesName,
-            Synonyms = [seriesName, "設定しないでください", "Kimchi"]
+            LocalizedTitles = new Dictionary<string, IList<LocalizedTitleDto>>
+            {
+                ["ja-Latn"] = [new LocalizedTitleDto { Title = "Kimchi" }]
+            }
         }, 1);
 
         // Repull Series and validate what is overwritten
@@ -604,10 +612,14 @@ public class ExternalMetadataServiceTests: AbstractDbTest
         await context.SaveChangesAsync();
 
 
+        // A perfectly viable candidate - the existing value with no force override is why nothing is written
         await externalMetadataService.WriteExternalMetadataToSeries(new ExternalSeriesDetailDto()
         {
             Name = seriesName,
-            Synonyms = [seriesName, "設定しないでください", "Kimchi"]
+            LocalizedTitles = new Dictionary<string, IList<LocalizedTitleDto>>
+            {
+                ["ja-Latn"] = [new LocalizedTitleDto { Title = "Kimchi" }]
+            }
         }, 1);
 
         // Repull Series and validate what is overwritten
@@ -639,10 +651,14 @@ public class ExternalMetadataServiceTests: AbstractDbTest
         await context.SaveChangesAsync();
 
 
+        // A perfectly viable candidate - the lock with no force override is why nothing is written
         await externalMetadataService.WriteExternalMetadataToSeries(new ExternalSeriesDetailDto()
         {
             Name = seriesName,
-            Synonyms = [seriesName, "設定しないでください", "Kimchi"]
+            LocalizedTitles = new Dictionary<string, IList<LocalizedTitleDto>>
+            {
+                ["ja-Latn"] = [new LocalizedTitleDto { Title = "Kimchi" }]
+            }
         }, 1);
 
         // Repull Series and validate what is overwritten
@@ -678,7 +694,10 @@ public class ExternalMetadataServiceTests: AbstractDbTest
         await externalMetadataService.WriteExternalMetadataToSeries(new ExternalSeriesDetailDto()
         {
             Name = seriesName,
-            Synonyms = [seriesName, "設定しないでください", "Kimchi"]
+            LocalizedTitles = new Dictionary<string, IList<LocalizedTitleDto>>
+            {
+                ["ja-Latn"] = [new LocalizedTitleDto { Title = "Kimchi" }]
+            }
         }, 1);
 
         // Repull Series and validate what is overwritten
@@ -688,8 +707,10 @@ public class ExternalMetadataServiceTests: AbstractDbTest
     }
 
     [Fact]
-    public async Task LocalizedName_OnlyNonEnglishSynonyms_Modification()
+    public async Task LocalizedName_NoLocalizedTitles_NoModification()
     {
+        // LocalizedTitles is the only source now. A provider that sends none gives us no way to know a synonym's
+        // script, so nothing is written rather than guessing.
         var (unitOfWork, context, mapper) = await CreateDatabase();
         var (externalMetadataService, _, _, _) = await Setup(unitOfWork, context, mapper);
 
@@ -713,13 +734,883 @@ public class ExternalMetadataServiceTests: AbstractDbTest
         await externalMetadataService.WriteExternalMetadataToSeries(new ExternalSeriesDetailDto()
         {
             Name = seriesName,
-            Synonyms = [seriesName, "設定しないでください"]
+            Synonyms = [seriesName, "設定しないでください", "Kimchi"]
         }, 1);
 
         // Repull Series and validate what is overwritten
         var postSeries = await unitOfWork.SeriesRepository.GetSeriesByIdAsync(1, SeriesIncludes.Metadata);
         Assert.NotNull(postSeries);
         Assert.True(string.IsNullOrEmpty(postSeries.LocalizedName));
+    }
+
+    [Fact]
+    public async Task LocalizedName_CandidateCollidesWithOtherSeries_PicksNextUnique()
+    {
+        var (unitOfWork, context, mapper) = await CreateDatabase();
+        var (externalMetadataService, _, _, _) = await Setup(unitOfWork, context, mapper);
+
+        const string seriesName = "Test - Localized Name";
+        var series = new SeriesBuilder(seriesName)
+            .WithLibraryId(1)
+            .WithLocalizedNameAllowEmpty(string.Empty)
+            .WithMetadata(new SeriesMetadataBuilder()
+                .Build())
+            .Build();
+        context.Series.Attach(series);
+
+        // Another series already carries this name; picking it as the localized name would break the scanner's
+        // SingleOrDefault lookup, so it must be skipped in favour of the next unique candidate.
+        var other = new SeriesBuilder("Kimchi")
+            .WithLibraryId(1)
+            .Build();
+        context.Series.Attach(other);
+        await context.SaveChangesAsync();
+
+        var metadataSettings = await unitOfWork.SettingsRepository.GetMetadataSettings();
+        metadataSettings.Enabled = true;
+        metadataSettings.EnableLocalizedName = true;
+        context.MetadataSettings.Update(metadataSettings);
+        await context.SaveChangesAsync();
+
+        // Retry happens WITHIN a language too - "Kimchi" collides, so we walk to ja-Latn's next title rather
+        // than abandoning the language entirely
+        await externalMetadataService.WriteExternalMetadataToSeries(new ExternalSeriesDetailDto()
+        {
+            Name = seriesName,
+            LocalizedTitles = new Dictionary<string, IList<LocalizedTitleDto>>
+            {
+                ["ja-Latn"] =
+                [
+                    new LocalizedTitleDto { Title = "Kimchi" },
+                    new LocalizedTitleDto { Title = "Bibimbap" }
+                ]
+            }
+        }, 1);
+
+        var postSeries = await unitOfWork.SeriesRepository.GetSeriesByIdAsync(1, SeriesIncludes.Metadata);
+        Assert.NotNull(postSeries);
+        Assert.Equal("Bibimbap", postSeries.LocalizedName);
+    }
+
+    [Fact]
+    public async Task LocalizedName_AllCandidatesCollide_NoModification()
+    {
+        var (unitOfWork, context, mapper) = await CreateDatabase();
+        var (externalMetadataService, _, _, _) = await Setup(unitOfWork, context, mapper);
+
+        const string seriesName = "Test - Localized Name";
+        var series = new SeriesBuilder(seriesName)
+            .WithLibraryId(1)
+            .WithLocalizedNameAllowEmpty(string.Empty)
+            .WithMetadata(new SeriesMetadataBuilder()
+                .Build())
+            .Build();
+        context.Series.Attach(series);
+
+        var other = new SeriesBuilder("Kimchi")
+            .WithLibraryId(1)
+            .Build();
+        context.Series.Attach(other);
+        await context.SaveChangesAsync();
+
+        var metadataSettings = await unitOfWork.SettingsRepository.GetMetadataSettings();
+        metadataSettings.Enabled = true;
+        metadataSettings.EnableLocalizedName = true;
+        context.MetadataSettings.Update(metadataSettings);
+        await context.SaveChangesAsync();
+
+        // Every candidate collides with another series - nothing should be written
+        await externalMetadataService.WriteExternalMetadataToSeries(new ExternalSeriesDetailDto()
+        {
+            Name = seriesName,
+            LocalizedTitles = new Dictionary<string, IList<LocalizedTitleDto>>
+            {
+                ["ja-Latn"] = [new LocalizedTitleDto { Title = "Kimchi" }]
+            }
+        }, 1);
+
+        var postSeries = await unitOfWork.SeriesRepository.GetSeriesByIdAsync(1, SeriesIncludes.Metadata);
+        Assert.NotNull(postSeries);
+        Assert.True(string.IsNullOrEmpty(postSeries.LocalizedName));
+    }
+
+    [Fact]
+    public async Task LocalizedName_CandidateMatchesOwnName_NoModification()
+    {
+        var (unitOfWork, context, mapper) = await CreateDatabase();
+        var (externalMetadataService, _, _, _) = await Setup(unitOfWork, context, mapper);
+
+        const string seriesName = "Test - Localized Name";
+        var series = new SeriesBuilder(seriesName)
+            .WithLibraryId(1)
+            .WithLocalizedNameAllowEmpty(string.Empty)
+            .WithMetadata(new SeriesMetadataBuilder()
+                .Build())
+            .Build();
+        context.Series.Attach(series);
+        await context.SaveChangesAsync();
+
+        var metadataSettings = await unitOfWork.SettingsRepository.GetMetadataSettings();
+        metadataSettings.Enabled = true;
+        metadataSettings.EnableLocalizedName = true;
+        context.MetadataSettings.Update(metadataSettings);
+        await context.SaveChangesAsync();
+
+        // The taken-names set excludes this series, so a candidate matching our OWN Name has to be caught by
+        // the explicit self guard - otherwise LocalizedName would just duplicate Name
+        await externalMetadataService.WriteExternalMetadataToSeries(new ExternalSeriesDetailDto()
+        {
+            Name = seriesName,
+            LocalizedTitles = new Dictionary<string, IList<LocalizedTitleDto>>
+            {
+                ["ja-Latn"] = [new LocalizedTitleDto { Title = seriesName }]
+            }
+        }, 1);
+
+        var postSeries = await unitOfWork.SeriesRepository.GetSeriesByIdAsync(1, SeriesIncludes.Metadata);
+        Assert.NotNull(postSeries);
+        Assert.True(string.IsNullOrEmpty(postSeries.LocalizedName));
+    }
+
+    [Fact]
+    public async Task LocalizedName_SharesTopLanguageWithName_FallsToNextLanguage()
+    {
+        var (unitOfWork, context, mapper) = await CreateDatabase();
+        var (externalMetadataService, _, _, _) = await Setup(unitOfWork, context, mapper);
+
+        var series = new SeriesBuilder("Original Name")
+            .WithLibraryId(1)
+            .WithFormat(MangaFormat.Archive)
+            .WithLocalizedNameAllowEmpty(string.Empty)
+            .WithMetadata(new SeriesMetadataBuilder().Build())
+            .Build();
+        context.Series.Attach(series);
+        await context.SaveChangesAsync();
+
+        var metadataSettings = await unitOfWork.SettingsRepository.GetMetadataSettings();
+        metadataSettings.Enabled = true;
+        metadataSettings.EnableName = true;
+        metadataSettings.EnableLocalizedName = true;
+        metadataSettings.GlobalNameLanguages = "en";
+        metadataSettings.GlobalLocalizedNameLanguages = "en;ja-Latn";
+        context.MetadataSettings.Update(metadataSettings);
+        await context.SaveChangesAsync();
+
+        // Both lists lead with "en". Name eats it, so LocalizedName has to fall through to ja-Latn.
+        await externalMetadataService.WriteExternalMetadataToSeries(new ExternalSeriesDetailDto()
+        {
+            Name = "Bleach",
+            LocalizedTitles = new Dictionary<string, IList<LocalizedTitleDto>>
+            {
+                ["en"] = [new LocalizedTitleDto { Title = "Bleach" }],
+                ["ja-Latn"] = [new LocalizedTitleDto { Title = "Burichi" }]
+            }
+        }, 1);
+
+        var postSeries = await unitOfWork.SeriesRepository.GetSeriesByIdAsync(1, SeriesIncludes.Metadata);
+        Assert.NotNull(postSeries);
+        Assert.Equal("Bleach", postSeries.Name);
+        Assert.Equal("Burichi", postSeries.LocalizedName);
+    }
+
+    [Fact]
+    public async Task LibraryOverride_BlankField_SkipsWrite()
+    {
+        var (unitOfWork, context, mapper) = await CreateDatabase();
+        var (externalMetadataService, _, _, _) = await Setup(unitOfWork, context, mapper);
+
+        var series = new SeriesBuilder("Original Name")
+            .WithLibraryId(1)
+            .WithFormat(MangaFormat.Archive)
+            .WithLocalizedNameAllowEmpty(string.Empty)
+            .WithMetadata(new SeriesMetadataBuilder().Build())
+            .Build();
+        context.Series.Attach(series);
+        await context.SaveChangesAsync();
+
+        var metadataSettings = await unitOfWork.SettingsRepository.GetMetadataSettings();
+        metadataSettings.Enabled = true;
+        metadataSettings.EnableName = true;
+        metadataSettings.EnableLocalizedName = true;
+        // Global Name priority is deliberately a language the provider does not send, so a Name write proves the
+        // library override won for that field. The global would happily resolve LocalizedName if it were consulted.
+        metadataSettings.GlobalNameLanguages = "de";
+        metadataSettings.GlobalLocalizedNameLanguages = "ja-Latn";
+        metadataSettings.LibraryLanguageTitleOverrides = new Dictionary<int, SeriesNameLanguage>
+        {
+            [1] = new SeriesNameLanguage { Name = "en", LocalizedName = string.Empty }
+        };
+        context.MetadataSettings.Update(metadataSettings);
+        await context.SaveChangesAsync();
+
+        await externalMetadataService.WriteExternalMetadataToSeries(new ExternalSeriesDetailDto()
+        {
+            Name = "Bleach",
+            LocalizedTitles = new Dictionary<string, IList<LocalizedTitleDto>>
+            {
+                ["en"] = [new LocalizedTitleDto { Title = "Bleach" }],
+                ["ja-Latn"] = [new LocalizedTitleDto { Title = "Burichi" }]
+            }
+        }, 1);
+
+        var postSeries = await unitOfWork.SeriesRepository.GetSeriesByIdAsync(1, SeriesIncludes.Metadata);
+        Assert.NotNull(postSeries);
+        // The override replaces the global outright - clearing LocalizedName on it opts the field out for this
+        // library rather than falling back to the global
+        Assert.Equal("Bleach", postSeries.Name);
+        Assert.True(string.IsNullOrEmpty(postSeries.LocalizedName));
+    }
+
+    [Fact]
+    public async Task LanguageCodes_MatchCaseInsensitively()
+    {
+        var (unitOfWork, context, mapper) = await CreateDatabase();
+        var (externalMetadataService, _, _, _) = await Setup(unitOfWork, context, mapper);
+
+        var series = new SeriesBuilder("Original Name")
+            .WithLibraryId(1)
+            .WithFormat(MangaFormat.Archive)
+            .WithLocalizedNameAllowEmpty(string.Empty)
+            .WithMetadata(new SeriesMetadataBuilder().Build())
+            .Build();
+        context.Series.Attach(series);
+        await context.SaveChangesAsync();
+
+        var metadataSettings = await unitOfWork.SettingsRepository.GetMetadataSettings();
+        metadataSettings.Enabled = true;
+        metadataSettings.EnableName = true;
+        metadataSettings.EnableLocalizedName = true;
+        // Admin-typed casing, versus the canonical BCP-47 casing K+ sends
+        metadataSettings.GlobalNameLanguages = "EN";
+        metadataSettings.GlobalLocalizedNameLanguages = "ja-latn";
+        context.MetadataSettings.Update(metadataSettings);
+        await context.SaveChangesAsync();
+
+        await externalMetadataService.WriteExternalMetadataToSeries(new ExternalSeriesDetailDto()
+        {
+            Name = "Bleach",
+            LocalizedTitles = new Dictionary<string, IList<LocalizedTitleDto>>
+            {
+                ["en"] = [new LocalizedTitleDto { Title = "Bleach" }],
+                ["ja-Latn"] = [new LocalizedTitleDto { Title = "Burichi" }]
+            }
+        }, 1);
+
+        var postSeries = await unitOfWork.SeriesRepository.GetSeriesByIdAsync(1, SeriesIncludes.Metadata);
+        Assert.NotNull(postSeries);
+        Assert.Equal("Bleach", postSeries.Name);
+        Assert.Equal("Burichi", postSeries.LocalizedName);
+    }
+
+    [Fact]
+    public async Task LocalizedName_NameAlreadyLocked_StillExcludesNameLanguage()
+    {
+        var (unitOfWork, context, mapper) = await CreateDatabase();
+        var (externalMetadataService, _, _, _) = await Setup(unitOfWork, context, mapper);
+
+        // Simulates the second K+ run: a previous pass wrote Name from "en" and set NameLocked, so UpdateName
+        // is now a no-op. The excluded language has to come from the Name the series HOLDS, not from this run's
+        // write result - otherwise "en" is no longer excluded and LocalizedName takes a second English title.
+        var series = new SeriesBuilder("Bleach")
+            .WithLibraryId(1)
+            .WithFormat(MangaFormat.Archive)
+            .WithLocalizedNameAllowEmpty(string.Empty)
+            .WithMetadata(new SeriesMetadataBuilder().Build())
+            .Build();
+        series.NameLocked = true;
+        context.Series.Attach(series);
+        await context.SaveChangesAsync();
+
+        var metadataSettings = await unitOfWork.SettingsRepository.GetMetadataSettings();
+        metadataSettings.Enabled = true;
+        metadataSettings.EnableName = true;
+        metadataSettings.EnableLocalizedName = true;
+        metadataSettings.GlobalNameLanguages = "en";
+        metadataSettings.GlobalLocalizedNameLanguages = "en;ja-Latn";
+        context.MetadataSettings.Update(metadataSettings);
+        await context.SaveChangesAsync();
+
+        await externalMetadataService.WriteExternalMetadataToSeries(new ExternalSeriesDetailDto()
+        {
+            Name = "Bleach",
+            LocalizedTitles = new Dictionary<string, IList<LocalizedTitleDto>>
+            {
+                // The second English title is what a self-check alone would wrongly accept
+                ["en"] =
+                [
+                    new LocalizedTitleDto { Title = "Bleach" },
+                    new LocalizedTitleDto { Title = "Bleach: Official" }
+                ],
+                ["ja-Latn"] = [new LocalizedTitleDto { Title = "Burichi" }]
+            }
+        }, 1);
+
+        var postSeries = await unitOfWork.SeriesRepository.GetSeriesByIdAsync(1, SeriesIncludes.Metadata);
+        Assert.NotNull(postSeries);
+        Assert.Equal("Bleach", postSeries.Name);
+        Assert.Equal("Burichi", postSeries.LocalizedName);
+    }
+
+    [Fact]
+    public async Task Name_NativeToken_ResolvesFromNativeTitle()
+    {
+        var (unitOfWork, context, mapper) = await CreateDatabase();
+        var (externalMetadataService, _, _, _) = await Setup(unitOfWork, context, mapper);
+
+        var series = new SeriesBuilder("Original Name")
+            .WithLibraryId(1)
+            .WithFormat(MangaFormat.Archive)
+            .WithLocalizedNameAllowEmpty(string.Empty)
+            .WithMetadata(new SeriesMetadataBuilder().Build())
+            .Build();
+        context.Series.Attach(series);
+        await context.SaveChangesAsync();
+
+        var metadataSettings = await unitOfWork.SettingsRepository.GetMetadataSettings();
+        metadataSettings.Enabled = true;
+        metadataSettings.EnableName = true;
+        // {Native} is not a language tag - it resolves to the provider's native title regardless of its language
+        metadataSettings.GlobalNameLanguages = "{Native}";
+        context.MetadataSettings.Update(metadataSettings);
+        await context.SaveChangesAsync();
+
+        await externalMetadataService.WriteExternalMetadataToSeries(new ExternalSeriesDetailDto()
+        {
+            Name = "Bleach",
+            Titles = new ALMediaTitle { NativeTitle = "Native Bleach" },
+            LocalizedTitles = new Dictionary<string, IList<LocalizedTitleDto>>
+            {
+                ["en"] = [new LocalizedTitleDto { Title = "Bleach" }]
+            }
+        }, 1);
+
+        var postSeries = await unitOfWork.SeriesRepository.GetSeriesByIdAsync(1, SeriesIncludes.Metadata);
+        Assert.NotNull(postSeries);
+        Assert.Equal("Native Bleach", postSeries.Name);
+    }
+
+    [Fact]
+    public async Task Name_NativeToken_ResolvesWithNoLocalizedTitles()
+    {
+        var (unitOfWork, context, mapper) = await CreateDatabase();
+        var (externalMetadataService, _, _, _) = await Setup(unitOfWork, context, mapper);
+
+        var series = new SeriesBuilder("Original Name")
+            .WithLibraryId(1)
+            .WithFormat(MangaFormat.Archive)
+            .WithLocalizedNameAllowEmpty(string.Empty)
+            .WithMetadata(new SeriesMetadataBuilder().Build())
+            .Build();
+        context.Series.Attach(series);
+        await context.SaveChangesAsync();
+
+        var metadataSettings = await unitOfWork.SettingsRepository.GetMetadataSettings();
+        metadataSettings.Enabled = true;
+        metadataSettings.EnableName = true;
+        metadataSettings.GlobalNameLanguages = "{Native}";
+        context.MetadataSettings.Update(metadataSettings);
+        await context.SaveChangesAsync();
+
+        // A provider can send a native title with no per-language breakdown at all - the token must still resolve
+        await externalMetadataService.WriteExternalMetadataToSeries(new ExternalSeriesDetailDto()
+        {
+            Name = "Bleach",
+            Titles = new ALMediaTitle { NativeTitle = "Native Bleach" }
+        }, 1);
+
+        var postSeries = await unitOfWork.SeriesRepository.GetSeriesByIdAsync(1, SeriesIncludes.Metadata);
+        Assert.NotNull(postSeries);
+        Assert.Equal("Native Bleach", postSeries.Name);
+    }
+
+    [Fact]
+    public async Task LocalizedName_NativeTokenSharedWithName_FallsToNextLanguage()
+    {
+        var (unitOfWork, context, mapper) = await CreateDatabase();
+        var (externalMetadataService, _, _, _) = await Setup(unitOfWork, context, mapper);
+
+        var series = new SeriesBuilder("Original Name")
+            .WithLibraryId(1)
+            .WithFormat(MangaFormat.Archive)
+            .WithLocalizedNameAllowEmpty(string.Empty)
+            .WithMetadata(new SeriesMetadataBuilder().Build())
+            .Build();
+        context.Series.Attach(series);
+        await context.SaveChangesAsync();
+
+        var metadataSettings = await unitOfWork.SettingsRepository.GetMetadataSettings();
+        metadataSettings.Enabled = true;
+        metadataSettings.EnableName = true;
+        metadataSettings.EnableLocalizedName = true;
+        // Both lists lead with {Native}. Name eats it, so LocalizedName has to fall through to ja-Latn.
+        metadataSettings.GlobalNameLanguages = "{Native}";
+        metadataSettings.GlobalLocalizedNameLanguages = "{Native};ja-Latn";
+        context.MetadataSettings.Update(metadataSettings);
+        await context.SaveChangesAsync();
+
+        await externalMetadataService.WriteExternalMetadataToSeries(new ExternalSeriesDetailDto()
+        {
+            Name = "Bleach",
+            Titles = new ALMediaTitle { NativeTitle = "Native Bleach" },
+            LocalizedTitles = new Dictionary<string, IList<LocalizedTitleDto>>
+            {
+                ["ja-Latn"] = [new LocalizedTitleDto { Title = "Burichi" }]
+            }
+        }, 1);
+
+        var postSeries = await unitOfWork.SeriesRepository.GetSeriesByIdAsync(1, SeriesIncludes.Metadata);
+        Assert.NotNull(postSeries);
+        Assert.Equal("Native Bleach", postSeries.Name);
+        Assert.Equal("Burichi", postSeries.LocalizedName);
+    }
+
+    [Fact]
+    public async Task Name_NativeToken_EmptyNativeTitle_FallsToNextLanguage()
+    {
+        var (unitOfWork, context, mapper) = await CreateDatabase();
+        var (externalMetadataService, _, _, _) = await Setup(unitOfWork, context, mapper);
+
+        var series = new SeriesBuilder("Original Name")
+            .WithLibraryId(1)
+            .WithFormat(MangaFormat.Archive)
+            .WithLocalizedNameAllowEmpty(string.Empty)
+            .WithMetadata(new SeriesMetadataBuilder().Build())
+            .Build();
+        context.Series.Attach(series);
+        await context.SaveChangesAsync();
+
+        var metadataSettings = await unitOfWork.SettingsRepository.GetMetadataSettings();
+        metadataSettings.Enabled = true;
+        metadataSettings.EnableName = true;
+        metadataSettings.GlobalNameLanguages = "{Native};en";
+        context.MetadataSettings.Update(metadataSettings);
+        await context.SaveChangesAsync();
+
+        // Provider sent no native title - the token is skipped and the next priority (en) wins
+        await externalMetadataService.WriteExternalMetadataToSeries(new ExternalSeriesDetailDto()
+        {
+            Name = "Bleach",
+            Titles = new ALMediaTitle { NativeTitle = string.Empty },
+            LocalizedTitles = new Dictionary<string, IList<LocalizedTitleDto>>
+            {
+                ["en"] = [new LocalizedTitleDto { Title = "Bleach" }]
+            }
+        }, 1);
+
+        var postSeries = await unitOfWork.SeriesRepository.GetSeriesByIdAsync(1, SeriesIncludes.Metadata);
+        Assert.NotNull(postSeries);
+        Assert.Equal("Bleach", postSeries.Name);
+    }
+
+    [Fact]
+    public async Task Name_NativeToken_MatchesCaseInsensitively()
+    {
+        var (unitOfWork, context, mapper) = await CreateDatabase();
+        var (externalMetadataService, _, _, _) = await Setup(unitOfWork, context, mapper);
+
+        var series = new SeriesBuilder("Original Name")
+            .WithLibraryId(1)
+            .WithFormat(MangaFormat.Archive)
+            .WithLocalizedNameAllowEmpty(string.Empty)
+            .WithMetadata(new SeriesMetadataBuilder().Build())
+            .Build();
+        context.Series.Attach(series);
+        await context.SaveChangesAsync();
+
+        var metadataSettings = await unitOfWork.SettingsRepository.GetMetadataSettings();
+        metadataSettings.Enabled = true;
+        metadataSettings.EnableName = true;
+        // Admin-typed lowercase, versus the canonical {Native} casing
+        metadataSettings.GlobalNameLanguages = "{native}";
+        context.MetadataSettings.Update(metadataSettings);
+        await context.SaveChangesAsync();
+
+        await externalMetadataService.WriteExternalMetadataToSeries(new ExternalSeriesDetailDto()
+        {
+            Name = "Bleach",
+            Titles = new ALMediaTitle { NativeTitle = "Native Bleach" }
+        }, 1);
+
+        var postSeries = await unitOfWork.SeriesRepository.GetSeriesByIdAsync(1, SeriesIncludes.Metadata);
+        Assert.NotNull(postSeries);
+        Assert.Equal("Native Bleach", postSeries.Name);
+    }
+
+    [Fact]
+    public async Task Name_RomajiToken_ResolvesFromRomajiTitle()
+    {
+        var (unitOfWork, context, mapper) = await CreateDatabase();
+        var (externalMetadataService, _, _, _) = await Setup(unitOfWork, context, mapper);
+
+        var series = new SeriesBuilder("Original Name")
+            .WithLibraryId(1)
+            .WithFormat(MangaFormat.Archive)
+            .WithLocalizedNameAllowEmpty(string.Empty)
+            .WithMetadata(new SeriesMetadataBuilder().Build())
+            .Build();
+        context.Series.Attach(series);
+        await context.SaveChangesAsync();
+
+        var metadataSettings = await unitOfWork.SettingsRepository.GetMetadataSettings();
+        metadataSettings.Enabled = true;
+        metadataSettings.EnableName = true;
+        metadataSettings.GlobalNameLanguages = "{Romaji}";
+        context.MetadataSettings.Update(metadataSettings);
+        await context.SaveChangesAsync();
+
+        await externalMetadataService.WriteExternalMetadataToSeries(new ExternalSeriesDetailDto()
+        {
+            Name = "Bleach",
+            Titles = new ALMediaTitle { RomajiTitle = "Burichi", NativeTitle = "Native Bleach" }
+        }, 1);
+
+        var postSeries = await unitOfWork.SeriesRepository.GetSeriesByIdAsync(1, SeriesIncludes.Metadata);
+        Assert.NotNull(postSeries);
+        Assert.Equal("Burichi", postSeries.Name);
+    }
+
+    [Fact]
+    public async Task NameAndLocalized_NativeAndRomajiTokens_ResolveIndependently()
+    {
+        var (unitOfWork, context, mapper) = await CreateDatabase();
+        var (externalMetadataService, _, _, _) = await Setup(unitOfWork, context, mapper);
+
+        var series = new SeriesBuilder("Original Name")
+            .WithLibraryId(1)
+            .WithFormat(MangaFormat.Archive)
+            .WithLocalizedNameAllowEmpty(string.Empty)
+            .WithMetadata(new SeriesMetadataBuilder().Build())
+            .Build();
+        context.Series.Attach(series);
+        await context.SaveChangesAsync();
+
+        var metadataSettings = await unitOfWork.SettingsRepository.GetMetadataSettings();
+        metadataSettings.Enabled = true;
+        metadataSettings.EnableName = true;
+        metadataSettings.EnableLocalizedName = true;
+        // The two tokens are distinct: Name takes {Native}, LocalizedName takes {Romaji} - neither collides
+        metadataSettings.GlobalNameLanguages = "{Native}";
+        metadataSettings.GlobalLocalizedNameLanguages = "{Romaji}";
+        context.MetadataSettings.Update(metadataSettings);
+        await context.SaveChangesAsync();
+
+        await externalMetadataService.WriteExternalMetadataToSeries(new ExternalSeriesDetailDto()
+        {
+            Name = "Bleach",
+            Titles = new ALMediaTitle { NativeTitle = "Native Bleach", RomajiTitle = "Burichi" }
+        }, 1);
+
+        var postSeries = await unitOfWork.SeriesRepository.GetSeriesByIdAsync(1, SeriesIncludes.Metadata);
+        Assert.NotNull(postSeries);
+        Assert.Equal("Native Bleach", postSeries.Name);
+        Assert.Equal("Burichi", postSeries.LocalizedName);
+    }
+
+    [Fact]
+    public async Task LocalizedName_Override_MergedFolderAnchor_NoModification()
+    {
+        var (unitOfWork, context, mapper) = await CreateDatabase();
+        var (externalMetadataService, _, _, _) = await Setup(unitOfWork, context, mapper);
+
+        // A folder literally named "Chained Soldier" is merged under this series via LocalizedName.
+        // OriginalName only anchors "Mato Seihei no Slave", so overwriting LocalizedName would orphan the folder.
+        const string seriesName = "Mato Seihei no Slave";
+        var series = new SeriesBuilder(seriesName)
+            .WithLibraryId(1)
+            .WithFormat(MangaFormat.Archive)
+            .WithLocalizedName("Chained Soldier", true)
+            .WithVolume(new VolumeBuilder("1")
+                .WithChapter(new ChapterBuilder("1")
+                    .WithFile(new MangaFileBuilder("C:/Manga/Chained Soldier/Chained Soldier v01.cbz", MangaFormat.Archive).Build())
+                    .Build())
+                .Build())
+            .WithMetadata(new SeriesMetadataBuilder().Build())
+            .Build();
+        context.Series.Attach(series);
+        await context.SaveChangesAsync();
+
+        var metadataSettings = await unitOfWork.SettingsRepository.GetMetadataSettings();
+        metadataSettings.Enabled = true;
+        metadataSettings.EnableLocalizedName = true;
+        metadataSettings.Overrides = [MetadataSettingField.LocalizedName];
+        context.MetadataSettings.Update(metadataSettings);
+        await context.SaveChangesAsync();
+
+        await externalMetadataService.WriteExternalMetadataToSeries(new ExternalSeriesDetailDto()
+        {
+            Name = seriesName,
+            LocalizedTitles = new Dictionary<string, IList<LocalizedTitleDto>>
+            {
+                ["ja-Latn"] = [new LocalizedTitleDto { Title = "Slave Corps" }]
+            }
+        }, 1);
+
+        var postSeries = await unitOfWork.SeriesRepository.GetSeriesByIdAsync(1, SeriesIncludes.Metadata);
+        Assert.NotNull(postSeries);
+        Assert.Equal("Chained Soldier", postSeries.LocalizedName);
+    }
+
+    [Fact]
+    public async Task LocalizedName_Override_AliasNotOnDisk_Modification()
+    {
+        var (unitOfWork, context, mapper) = await CreateDatabase();
+        var (externalMetadataService, _, _, _) = await Setup(unitOfWork, context, mapper);
+
+        // LocalizedName is a display alias no folder uses (files live under the series name), so overwriting
+        // it is safe and the force override should still apply.
+        const string seriesName = "Mato Seihei no Slave";
+        var series = new SeriesBuilder(seriesName)
+            .WithLibraryId(1)
+            .WithFormat(MangaFormat.Archive)
+            .WithLocalizedName("Localized Name here", true)
+            .WithVolume(new VolumeBuilder("1")
+                .WithChapter(new ChapterBuilder("1")
+                    .WithFile(new MangaFileBuilder("C:/Manga/Mato Seihei no Slave/vol01.cbz", MangaFormat.Archive).Build())
+                    .Build())
+                .Build())
+            .WithMetadata(new SeriesMetadataBuilder().Build())
+            .Build();
+        context.Series.Attach(series);
+        await context.SaveChangesAsync();
+
+        var metadataSettings = await unitOfWork.SettingsRepository.GetMetadataSettings();
+        metadataSettings.Enabled = true;
+        metadataSettings.EnableLocalizedName = true;
+        metadataSettings.Overrides = [MetadataSettingField.LocalizedName];
+        context.MetadataSettings.Update(metadataSettings);
+        await context.SaveChangesAsync();
+
+        await externalMetadataService.WriteExternalMetadataToSeries(new ExternalSeriesDetailDto()
+        {
+            Name = seriesName,
+            LocalizedTitles = new Dictionary<string, IList<LocalizedTitleDto>>
+            {
+                ["ja-Latn"] = [new LocalizedTitleDto { Title = "Slave Corps" }]
+            }
+        }, 1);
+
+        var postSeries = await unitOfWork.SeriesRepository.GetSeriesByIdAsync(1, SeriesIncludes.Metadata);
+        Assert.NotNull(postSeries);
+        Assert.Equal("Slave Corps", postSeries.LocalizedName);
+    }
+
+    [Fact]
+    public async Task Name_MergedFolderAnchor_NoModification()
+    {
+        var (unitOfWork, context, mapper) = await CreateDatabase();
+        var (externalMetadataService, _, _, _) = await Setup(unitOfWork, context, mapper);
+
+        // Name anchors a folder literally named "Mato Seihei no Slave"; OriginalName anchors the other folder
+        // ("Chained Soldier"). Renaming Name to the external title would orphan the "Mato Seihei no Slave" folder.
+        const string seriesName = "Mato Seihei no Slave";
+        var series = new SeriesBuilder(seriesName)
+            .WithLibraryId(1)
+            .WithFormat(MangaFormat.Archive)
+            .WithLocalizedNameAllowEmpty(string.Empty)
+            .WithVolume(new VolumeBuilder("1")
+                .WithChapter(new ChapterBuilder("1")
+                    .WithFile(new MangaFileBuilder("C:/Manga/Mato Seihei no Slave/vol01.cbz", MangaFormat.Archive).Build())
+                    .Build())
+                .Build())
+            .WithMetadata(new SeriesMetadataBuilder().Build())
+            .Build();
+        series.OriginalName = "Chained Soldier";
+        series.NormalizedOriginalName = "Chained Soldier".ToNormalized();
+        context.Series.Attach(series);
+        await context.SaveChangesAsync();
+
+        var metadataSettings = await unitOfWork.SettingsRepository.GetMetadataSettings();
+        metadataSettings.Enabled = true;
+        metadataSettings.EnableName = true;
+        metadataSettings.EnableLocalizedName = false;
+        context.MetadataSettings.Update(metadataSettings);
+        await context.SaveChangesAsync();
+
+        await externalMetadataService.WriteExternalMetadataToSeries(new ExternalSeriesDetailDto()
+        {
+            Name = "Some New Title",
+            LocalizedTitles = new Dictionary<string, IList<LocalizedTitleDto>>
+            {
+                ["en"] = [new LocalizedTitleDto { Title = "Some New Title" }]
+            }
+        }, 1);
+
+        var postSeries = await unitOfWork.SeriesRepository.GetSeriesByIdAsync(1, SeriesIncludes.Metadata);
+        Assert.NotNull(postSeries);
+        Assert.Equal(seriesName, postSeries.Name);
+    }
+
+    #endregion
+
+    #region OrphanMergedFiles Validation Hooks
+
+    // These cover the public wrappers the SeriesController calls when a user renames a series by hand. They mirror
+    // the K+ guard but are the surface the manual-edit path relies on, so they get their own coverage.
+
+    [Fact]
+    public async Task WouldLocalizedNameChangeOrphanMergedFiles_DroppingMergedAnchor_ReturnsTrue()
+    {
+        var (unitOfWork, context, mapper) = await CreateDatabase();
+        var (externalMetadataService, _, _, _) = await Setup(unitOfWork, context, mapper);
+
+        // A folder literally named "Chained Soldier" is merged under this series via LocalizedName. Name and
+        // OriginalName only anchor "Mato Seihei no Slave", so changing LocalizedName would orphan the folder.
+        var series = new SeriesBuilder("Mato Seihei no Slave")
+            .WithLibraryId(1)
+            .WithFormat(MangaFormat.Archive)
+            .WithLocalizedName("Chained Soldier")
+            .WithVolume(new VolumeBuilder("1")
+                .WithChapter(new ChapterBuilder("1")
+                    .WithFile(new MangaFileBuilder("C:/Manga/Chained Soldier/Chained Soldier v01.cbz", MangaFormat.Archive).Build())
+                    .Build())
+                .Build())
+            .WithMetadata(new SeriesMetadataBuilder().Build())
+            .Build();
+        context.Series.Attach(series);
+        await context.SaveChangesAsync();
+
+        var postSeries = await unitOfWork.SeriesRepository.GetSeriesByIdAsync(1, SeriesIncludes.Metadata);
+        Assert.NotNull(postSeries);
+
+        Assert.True(await externalMetadataService.WouldLocalizedNameChangeOrphanMergedFiles(postSeries, "Slave Corps"));
+    }
+
+    [Fact]
+    public async Task WouldLocalizedNameChangeOrphanMergedFiles_AliasNotOnDisk_ReturnsFalse()
+    {
+        var (unitOfWork, context, mapper) = await CreateDatabase();
+        var (externalMetadataService, _, _, _) = await Setup(unitOfWork, context, mapper);
+
+        // LocalizedName is a display alias no folder uses (files live under the series name), so changing it is safe.
+        var series = new SeriesBuilder("Mato Seihei no Slave")
+            .WithLibraryId(1)
+            .WithFormat(MangaFormat.Archive)
+            .WithLocalizedName("Localized Name here")
+            .WithVolume(new VolumeBuilder("1")
+                .WithChapter(new ChapterBuilder("1")
+                    .WithFile(new MangaFileBuilder("C:/Manga/Mato Seihei no Slave/vol01.cbz", MangaFormat.Archive).Build())
+                    .Build())
+                .Build())
+            .WithMetadata(new SeriesMetadataBuilder().Build())
+            .Build();
+        context.Series.Attach(series);
+        await context.SaveChangesAsync();
+
+        var postSeries = await unitOfWork.SeriesRepository.GetSeriesByIdAsync(1, SeriesIncludes.Metadata);
+        Assert.NotNull(postSeries);
+
+        Assert.False(await externalMetadataService.WouldLocalizedNameChangeOrphanMergedFiles(postSeries, "Slave Corps"));
+    }
+
+    [Fact]
+    public async Task WouldLocalizedNameChangeOrphanMergedFiles_Unchanged_ReturnsFalse()
+    {
+        var (unitOfWork, context, mapper) = await CreateDatabase();
+        var (externalMetadataService, _, _, _) = await Setup(unitOfWork, context, mapper);
+
+        // Even though the localized name anchors a folder, the value isn't actually changing, so it's not orphaned.
+        var series = new SeriesBuilder("Mato Seihei no Slave")
+            .WithLibraryId(1)
+            .WithFormat(MangaFormat.Archive)
+            .WithLocalizedName("Chained Soldier")
+            .WithVolume(new VolumeBuilder("1")
+                .WithChapter(new ChapterBuilder("1")
+                    .WithFile(new MangaFileBuilder("C:/Manga/Chained Soldier/Chained Soldier v01.cbz", MangaFormat.Archive).Build())
+                    .Build())
+                .Build())
+            .WithMetadata(new SeriesMetadataBuilder().Build())
+            .Build();
+        context.Series.Attach(series);
+        await context.SaveChangesAsync();
+
+        var postSeries = await unitOfWork.SeriesRepository.GetSeriesByIdAsync(1, SeriesIncludes.Metadata);
+        Assert.NotNull(postSeries);
+
+        Assert.False(await externalMetadataService.WouldLocalizedNameChangeOrphanMergedFiles(postSeries, "Chained Soldier"));
+    }
+
+    [Fact]
+    public async Task WouldLocalizedNameChangeOrphanMergedFiles_ClearingMergedAnchor_ReturnsTrue()
+    {
+        var (unitOfWork, context, mapper) = await CreateDatabase();
+        var (externalMetadataService, _, _, _) = await Setup(unitOfWork, context, mapper);
+
+        // Clearing the field is still a drop - the "Chained Soldier" folder would be orphaned.
+        var series = new SeriesBuilder("Mato Seihei no Slave")
+            .WithLibraryId(1)
+            .WithFormat(MangaFormat.Archive)
+            .WithLocalizedName("Chained Soldier")
+            .WithVolume(new VolumeBuilder("1")
+                .WithChapter(new ChapterBuilder("1")
+                    .WithFile(new MangaFileBuilder("C:/Manga/Chained Soldier/Chained Soldier v01.cbz", MangaFormat.Archive).Build())
+                    .Build())
+                .Build())
+            .WithMetadata(new SeriesMetadataBuilder().Build())
+            .Build();
+        context.Series.Attach(series);
+        await context.SaveChangesAsync();
+
+        var postSeries = await unitOfWork.SeriesRepository.GetSeriesByIdAsync(1, SeriesIncludes.Metadata);
+        Assert.NotNull(postSeries);
+
+        Assert.True(await externalMetadataService.WouldLocalizedNameChangeOrphanMergedFiles(postSeries, null));
+    }
+
+    [Fact]
+    public async Task WouldNameChangeOrphanMergedFiles_DroppingMergedAnchor_ReturnsTrue()
+    {
+        var (unitOfWork, context, mapper) = await CreateDatabase();
+        var (externalMetadataService, _, _, _) = await Setup(unitOfWork, context, mapper);
+
+        // Name anchors the "Mato Seihei no Slave" folder; OriginalName anchors the other. Renaming Name would
+        // orphan the folder held only by Name.
+        var series = new SeriesBuilder("Mato Seihei no Slave")
+            .WithLibraryId(1)
+            .WithFormat(MangaFormat.Archive)
+            .WithLocalizedNameAllowEmpty(string.Empty)
+            .WithVolume(new VolumeBuilder("1")
+                .WithChapter(new ChapterBuilder("1")
+                    .WithFile(new MangaFileBuilder("C:/Manga/Mato Seihei no Slave/vol01.cbz", MangaFormat.Archive).Build())
+                    .Build())
+                .Build())
+            .WithMetadata(new SeriesMetadataBuilder().Build())
+            .Build();
+        series.OriginalName = "Chained Soldier";
+        series.NormalizedOriginalName = "Chained Soldier".ToNormalized();
+        context.Series.Attach(series);
+        await context.SaveChangesAsync();
+
+        var postSeries = await unitOfWork.SeriesRepository.GetSeriesByIdAsync(1, SeriesIncludes.Metadata);
+        Assert.NotNull(postSeries);
+
+        Assert.True(await externalMetadataService.WouldNameChangeOrphanMergedFiles(postSeries, "Some New Title"));
+    }
+
+    [Fact]
+    public async Task WouldNameChangeOrphanMergedFiles_SafeRename_ReturnsFalse()
+    {
+        var (unitOfWork, context, mapper) = await CreateDatabase();
+        var (externalMetadataService, _, _, _) = await Setup(unitOfWork, context, mapper);
+
+        // Files live under the LocalizedName folder, so the Name is only a display value - renaming it is safe.
+        var series = new SeriesBuilder("Mato Seihei no Slave")
+            .WithLibraryId(1)
+            .WithFormat(MangaFormat.Archive)
+            .WithLocalizedName("Chained Soldier")
+            .WithVolume(new VolumeBuilder("1")
+                .WithChapter(new ChapterBuilder("1")
+                    .WithFile(new MangaFileBuilder("C:/Manga/Chained Soldier/Chained Soldier v01.cbz", MangaFormat.Archive).Build())
+                    .Build())
+                .Build())
+            .WithMetadata(new SeriesMetadataBuilder().Build())
+            .Build();
+        context.Series.Attach(series);
+        await context.SaveChangesAsync();
+
+        var postSeries = await unitOfWork.SeriesRepository.GetSeriesByIdAsync(1, SeriesIncludes.Metadata);
+        Assert.NotNull(postSeries);
+
+        Assert.False(await externalMetadataService.WouldNameChangeOrphanMergedFiles(postSeries, "Some New Title"));
     }
 
     #endregion
@@ -3454,7 +4345,10 @@ public class ExternalMetadataServiceTests: AbstractDbTest
         await externalMetadataService.WriteExternalMetadataToSeries(new ExternalSeriesDetailDto()
         {
             Name = "New K+ Name",
-            Synonyms = []
+            LocalizedTitles = new Dictionary<string, IList<LocalizedTitleDto>>
+            {
+                ["en"] = [new LocalizedTitleDto { Title = "New K+ Name" }]
+            }
         }, 1);
 
         var postSeries = await unitOfWork.SeriesRepository.GetSeriesByIdAsync(1, SeriesIncludes.Metadata);
@@ -3489,7 +4383,10 @@ public class ExternalMetadataServiceTests: AbstractDbTest
         await externalMetadataService.WriteExternalMetadataToSeries(new ExternalSeriesDetailDto()
         {
             Name = "New K+ Name",
-            Synonyms = []
+            LocalizedTitles = new Dictionary<string, IList<LocalizedTitleDto>>
+            {
+                ["en"] = [new LocalizedTitleDto { Title = "New K+ Name" }]
+            }
         }, 1);
 
         var postSeries = await unitOfWork.SeriesRepository.GetSeriesByIdAsync(1, SeriesIncludes.Metadata);
@@ -3529,12 +4426,70 @@ public class ExternalMetadataServiceTests: AbstractDbTest
         await externalMetadataService.WriteExternalMetadataToSeries(new ExternalSeriesDetailDto()
         {
             Name = "Existing Name",
-            Synonyms = []
+            LocalizedTitles = new Dictionary<string, IList<LocalizedTitleDto>>
+            {
+                ["en"] = [new LocalizedTitleDto { Title = "Existing Name" }]
+            }
         }, target.Id);
 
         var postSeries = await unitOfWork.SeriesRepository.GetSeriesByIdAsync(target.Id, SeriesIncludes.Metadata);
         Assert.NotNull(postSeries);
         Assert.Equal("Original Name", postSeries.Name);
+    }
+
+    #endregion
+
+    #region Idempotency
+
+    /// <summary>
+    /// Validates that 2 concurrent writes (browse series-detail then try to match) only writes one new Genre
+    /// </summary>
+    [Fact]
+    public async Task WriteExternalMetadataToSeries_GenreAlreadyLinked_DoesNotDuplicate()
+    {
+        var (unitOfWork, context, mapper) = await CreateDatabase();
+        var (externalMetadataService, genreLookup, _, _) = await Setup(unitOfWork, context, mapper);
+
+        const string seriesName = "Test - Concurrent Genre";
+        var series = new SeriesBuilder(seriesName)
+            .WithLibraryId(1)
+            .WithMetadata(new SeriesMetadataBuilder().Build())
+            .Build();
+        context.Series.Attach(series);
+        await context.SaveChangesAsync();
+
+        var metadataSettings = await unitOfWork.SettingsRepository.GetMetadataSettings();
+        metadataSettings.Enabled = true;
+        metadataSettings.EnableGenres = true;
+        context.MetadataSettings.Update(metadataSettings);
+        await context.SaveChangesAsync();
+
+        var metadataId = (await unitOfWork.SeriesRepository.GetSeriesByIdAsync(1, SeriesIncludes.Metadata))!.Metadata.Id;
+        var actionGenreId = genreLookup["Action"].Id;
+        context.ChangeTracker.Clear();
+
+        // A prior/concurrent write already committed the "Action" link
+        await context.Database.ExecuteSqlRawAsync(
+            "INSERT INTO GenreSeriesMetadata (GenresId, SeriesMetadatasId) VALUES ({0}, {1})", actionGenreId, metadataId);
+
+        // Applying the same genre must not attempt to re-insert the existing join (UNIQUE constraint would throw)
+        var ex = await Record.ExceptionAsync(async () =>
+        {
+            await externalMetadataService.WriteExternalMetadataToSeries(new ExternalSeriesDetailDto()
+            {
+                Name = seriesName,
+                Genres = ["Action"]
+            }, 1);
+            await unitOfWork.CommitAsync();
+        });
+        Assert.Null(ex);
+
+        // Exactly one Action link should exist in the database
+        context.ChangeTracker.Clear();
+        var linkCount = await context.Database
+            .SqlQueryRaw<int>("SELECT COUNT(*) AS Value FROM GenreSeriesMetadata WHERE SeriesMetadatasId = {0}", metadataId)
+            .SingleAsync();
+        Assert.Equal(1, linkCount);
     }
 
     #endregion

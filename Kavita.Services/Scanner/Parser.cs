@@ -1055,6 +1055,10 @@ public static partial class Parser
         return XmlRegex.IsMatch(Path.GetExtension(filePath));
     }
 
+    public static bool IsRange(string range)
+    {
+        return !string.IsNullOrEmpty(range) && Regex.IsMatch(range, @"^[\d\-.]+$", MatchOptions, RegexTimeout);
+    }
 
     public static float MinNumberFromRange(string range)
     {

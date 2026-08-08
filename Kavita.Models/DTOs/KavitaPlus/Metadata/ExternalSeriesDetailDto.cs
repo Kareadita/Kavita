@@ -14,6 +14,14 @@ namespace Kavita.Models.DTOs.KavitaPlus.Metadata;
 public sealed record ExternalSeriesDetailDto
 {
     public string Name { get; set; }
+    public ALMediaTitle Titles { get; set; } = new();
+    /// <summary>
+    /// Every known title, grouped by normalized BCP-47 language tag ("en", "ja", "ja-Latn", "pt-BR", "zh-HK").
+    /// Each list is ordered best-first, so a client honouring a language preference can take [0] and stop.
+    /// Empty for providers that do not expose per-language titles.
+    /// </summary>
+    /// <remarks>v3 only.</remarks>
+    public Dictionary<string, IList<LocalizedTitleDto>> LocalizedTitles { get; set; } = [];
     public int? AniListId { get; set; }
     public long? MALId { get; set; }
     /// <summary>
