@@ -1219,6 +1219,13 @@
         "support-label": "Help"
     },
 
+    "register-license": {
+        "k+-already-registered-header": "License already registered",
+        "k+-license-overwrite": "This license is already registered to a different server. Are you sure you want to overwrite? This will deregister the other server.",
+        "overwrite": "Overwrite",
+        "cancel": "{{common.cancel}}"
+    },
+
     "discord-connect-card": {
         "connect-title": "Connect Discord",
         "connect-subtitle": "Access exclusive channels and show your flair",
