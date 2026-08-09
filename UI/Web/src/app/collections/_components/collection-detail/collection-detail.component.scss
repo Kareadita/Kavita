@@ -1,3 +1,5 @@
+@use '../../../../theme/variables' as theme;
+
 .main-container {
   margin-top: 0.625rem;
   padding: 0 0 0 0.625rem;
@@ -9,13 +11,13 @@
   max-width: 18.75rem;
 }
 
-@media(max-width: var(--grid-breakpoints-sm)) {
+@media(max-width: theme.$grid-breakpoints-sm) {
   .poster {
     display: none;
   }
 }
 
-@media(max-width: var(--grid-breakpoints-sm)) {
+@media(max-width: theme.$grid-breakpoints-sm) {
   .read-btn--text {
     display: none;
   }
