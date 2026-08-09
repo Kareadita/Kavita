@@ -10,7 +10,17 @@
       }
     </div>
 
-    <div class="tabs-scroller">
+    <div class="d-md-none mb-3">
+      <label for="activity-tab-select" class="visually-hidden">{{t('tab-select-label')}}</label>
+      <select id="activity-tab-select" class="form-select"
+              (change)="activeTab.set($any($event.target).value)">
+        @for (tab of tabList; track tab) {
+          <option [value]="tab" [selected]="activeTab() === tab">{{tab | tabTitle}} ({{countFor(tab)}})</option>
+        }
+      </select>
+    </div>
+
+    <div class="tabs-scroller d-none d-md-block">
       <ul ngbNav [activeId]="activeTab()" (activeIdChange)="activeTab.set($event)" class="nav-tabs mb-3 flex-nowrap">
         <li [ngbNavItem]="Tabs.All">
           <a ngbNavLink>{{Tabs.All | tabTitle}} <span class="badge text-bg-secondary ms-1 phone-hidden">{{allCount()}}</span></a>

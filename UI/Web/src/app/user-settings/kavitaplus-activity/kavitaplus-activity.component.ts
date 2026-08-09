@@ -29,7 +29,9 @@ export class KavitaplusActivityComponent implements OnInit {
   private readonly auditService = inject(KavitaPlusAuditService);
   private readonly scrobblingService = inject(ScrobblingService);
   private readonly destroyRef = inject(DestroyRef);
+  
   private readonly PAGE_SIZE = 50;
+  protected readonly tabList = [Tabs.All, Tabs.Scrobbles, Tabs.Failed, Tabs.MyChanges, Tabs.ScrobbleHolds];
 
   entries = signal<KavitaPlusAuditEntry[]>([]);
   isLoading = signal(true);
@@ -98,6 +100,16 @@ export class KavitaplusActivityComponent implements OnInit {
   loadMore() {
     this.currentPage.update(p => p + 1);
     this.loadData(false);
+  }
+
+  countFor(tab: Tabs): number {
+    switch (tab) {
+      case Tabs.Scrobbles: return this.scrobbleCount();
+      case Tabs.Failed: return this.failedCount();
+      case Tabs.MyChanges: return this.myChangesCount();
+      case Tabs.ScrobbleHolds: return this.scrobbleHoldsCount();
+      default: return this.allCount();
+    }
   }
 
   retryScrobbleEvent(event: KavitaPlusAuditEntry) {
