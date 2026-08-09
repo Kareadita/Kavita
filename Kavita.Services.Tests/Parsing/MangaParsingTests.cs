@@ -519,6 +519,7 @@ public class MangaParsingTests
     [InlineData("Some Manga v01 (2015) (Digital) (Mr. Kimiko-c1fi7).cbz", Parser.DefaultChapter)]
     // "31" is part of the series title ("The Long Summer of August 31"), not a chapter number.
     [InlineData("The Long Summer of August 31 Vol. 1.cbz", Parser.DefaultChapter)]
+    [InlineData("BTOOOM! v03 (2013) (Digital) (c1fi7) (ED).cbz", Parser.DefaultChapter)]
     public void ParseChaptersTest(string filename, string expected)
     {
         Assert.Equal(expected, Parser.ParseChapter(filename, LibraryType.Manga));
