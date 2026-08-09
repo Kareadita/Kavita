@@ -40,6 +40,7 @@ import {ToastNoAnimationModule} from "ngx-toastr";
 import {MessageHubService} from "src/app/_services/message-hub.service";
 import {DownloadService} from "./app/shared/_services/download.service";
 import {LibraryService} from "./app/_services/library.service";
+import {translocoPrefixKey} from "./libs/transloco-util";
 
 const disableAnimations = !('animate' in document.documentElement);
 if (disableAnimations) {
@@ -186,7 +187,8 @@ bootstrapApplication(AppComponent, {
         provideTranslocoPersistTranslations({
           loader: HttpLoader,
           storage: { useValue: localStorage },
-          ttl: environment.production ? 129600 : 0 // 1.5 days in seconds for prod
+          ttl: environment.production ? 129600 : 0, // 1.5 days in seconds for prod
+          storageKey: translocoPrefixKey
         }),
         Title,
         { provide: TitleStrategy, useClass: KavitaTitleStrategy },

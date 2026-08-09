@@ -21,6 +21,7 @@ import {ResponsiveTableComponent} from "../../shared/_components/responsive-tabl
 import {VersionService} from "../../_services/version.service";
 import {CronFrequency} from "../../shared/_models/cron-frequency";
 import {SettingCronItemComponent} from "../../settings/_components/setting-cron-item/setting-cron-item.component";
+import {clearTransloco} from "../../../libs/transloco-util";
 
 interface AdhocTask {
   name: string;
@@ -71,8 +72,7 @@ export class ManageTasksSettingsComponent implements OnInit {
       name: 'bust-locale-task',
       description: 'bust-locale-task-desc',
       api: defer(() => {
-        localStorage.removeItem('@transloco/translations/timestamp');
-        localStorage.removeItem('@transloco/translations');
+        clearTransloco();
         location.reload();
         return of();
       }),
