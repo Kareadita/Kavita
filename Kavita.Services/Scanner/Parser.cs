@@ -670,8 +670,6 @@ public static partial class Parser
             @"^(?<Series>.+?)\schapter(?:s)?\s(?<Chapter>\d+-\d+)",
             MatchOptions, RegexTimeout),
         // Hinowa ga CRUSH! 018 (2019) (Digital) (LuCaZ).cbz, Hinowa ga CRUSH! 018.5 (2019) (Digital) (LuCaZ).cbz
-        // EXPERIMENTAL: extra (?!.*\bv\.?\d) / (?!.*\b(?:vol(?:ume)?|tome)\.?\s*\d) reject if ANY volume marker
-        // (including bare v01) appears anywhere later in the filename, not just immediately after the number.
         new Regex(
             @"^(?<Series>.+?)(?<!Vol)(?<!Vol.)(?<!Volume)(?<!Tome)\s(\d\s)?(?<Chapter>\d+(?:\.\d+|-\d+)?)(?![\d.권])(?:\s\(\d{4}\))?(?!\d)(?![\s_]*-?[\s_]*(?:vol(?:ume)?|tome)(?![a-zA-Z]))(?!.*\bv\.?\d)(?!.*\b(?:vol(?:ume)?|tome)\.?\s*\d)(?<!\bv\.?\d.*)(?<!\b(?:vol(?:ume)?|tome)\.?\s*\d.*)(\b|_|-)",
             MatchOptions, RegexTimeout),
@@ -680,7 +678,6 @@ public static partial class Parser
             @"(?<Series>.*)\sS(?<Volume>\d+)\s(?<Chapter>\d+(?:.\d+|-\d+)?)",
             MatchOptions, RegexTimeout),
         // Beelzebub_01_[Noodles].zip, Beelzebub_153b_RHS.zip
-        // EXPERIMENTAL: same "volume marker anywhere later" reject as the Hinowa-style regex above.
         new Regex(
             @"^((?!v|vo|vol|Volume).)*(\s|_)(?<Chapter>\.?\d+(?:.\d+|-\d+)?)(?<Part>b)?(?!\d)(?![\s_]*-?[\s_]*(?:vol(?:ume)?|tome)(?![a-zA-Z]))(?!.*\bv\.?\d)(?!.*\b(?:vol(?:ume)?|tome)\.?\s*\d)(\s|_|\[|\()",
             MatchOptions, RegexTimeout),
