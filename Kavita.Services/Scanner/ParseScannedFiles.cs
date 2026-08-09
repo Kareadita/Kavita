@@ -881,10 +881,7 @@ public partial class ParseScannedFiles
                 else
                 {
                     // Pull out the leading numeric part, e.g. "15.UH" -> 15, "15.BEY" -> 15
-                    var leadingMatch = LeaderFloatRegex().Match(chapter.Chapters);
-                    float? currentBase = leadingMatch.Success &&
-                                         float.TryParse(leadingMatch.Value, NumberStyles.Any, CultureInfo.InvariantCulture, out var lb)
-                        ? lb : null;
+                    var currentBase = ParseLeadingFloat(chapter.Chapters);
 
                     if (currentBase.HasValue && prevBase.HasValue && currentBase.Value.Is(prevBase.Value))
                     {
@@ -923,14 +920,23 @@ public partial class ParseScannedFiles
                 return val;
             }
 
-            var leadingMatch = LeaderFloatRegex().Match(info.Chapters);
-            return leadingMatch.Success &&
-                   float.TryParse(leadingMatch.Value, NumberStyles.Any, CultureInfo.InvariantCulture, out var lb)
-                ? lb
-                : float.MaxValue;
+            return ParseLeadingFloat(info.Chapters) ?? float.MaxValue;
+        }
+
+        float? ParseLeadingFloat(string input)
+        {
+            var leadingMatch = LeadingFloatRegex().Match(input);
+            if (!leadingMatch.Success) return null;
+
+            if (float.TryParse(leadingMatch.Value, NumberStyles.Any, CultureInfo.InvariantCulture, out var lb))
+            {
+                return lb;
+            }
+
+            return null;
         }
     }
 
     [GeneratedRegex(@"^\d+(\.\d+)?")]
-    private static partial Regex LeaderFloatRegex();
+    private static partial Regex LeadingFloatRegex();
 }
