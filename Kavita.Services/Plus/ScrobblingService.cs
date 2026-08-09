@@ -705,6 +705,8 @@ public class ScrobblingService : IScrobblingService
 
         foreach (var provider in providers)
         {
+            if (await CheckIfCannotScrobble(provider, ScrobbleEventType.ChapterRead, user.Id, ctx.Series.Id, ctx.Series)) continue;
+
             var scrobbleProviderService = _serviceProvider.GetRequiredKeyedService<IScrobbleProviderService>(provider);
 
             // Explicit check to reduce DB calls and work done
