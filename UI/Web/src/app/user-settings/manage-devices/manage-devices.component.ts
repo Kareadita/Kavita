@@ -11,7 +11,9 @@ import {NgxDatatableModule} from "@siemens/ngx-datatable";
 import {ClientDevice} from "../../_models/client-device";
 import {ClientDeviceCardComponent} from "../../_single-module/client-device-card/client-device-card.component";
 import {LoadingComponent} from "../../shared/loading/loading.component";
+import {EmptyStateComponent} from "../../shared/_components/empty-state/empty-state.component";
 import {ResponsiveTableComponent} from "../../shared/_components/responsive-table/responsive-table.component";
+import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import {ModalService} from "../../_services/modal.service";
 import {ModalResult} from "../../_models/modal/modal-result";
 import {patchSignalArray} from "../../../libs/patch";
@@ -21,7 +23,7 @@ import {patchSignalArray} from "../../../libs/patch";
   templateUrl: './manage-devices.component.html',
   styleUrls: ['./manage-devices.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [DevicePlatformPipe, TranslocoDirective, NgxDatatableModule, ClientDeviceCardComponent, LoadingComponent, ResponsiveTableComponent]
+  imports: [DevicePlatformPipe, TranslocoDirective, NgxDatatableModule, ClientDeviceCardComponent, LoadingComponent, EmptyStateComponent, ResponsiveTableComponent]
 })
 export class ManageDevicesComponent implements OnInit {
 
@@ -33,6 +35,7 @@ export class ManageDevicesComponent implements OnInit {
   private readonly accountService = inject(AccountService);
 
   devices = signal<Device[]>([]);
+  protected readonly isLoading = signal(true);
   hasEmailSetup = signal<boolean>(false);
   trackBy = (idx: number, item: Device) => `${item.name}_${item.emailAddress}_${item.platform}_${item.lastUsed}`;
 
@@ -58,8 +61,10 @@ export class ManageDevicesComponent implements OnInit {
   }
 
   loadDevices() {
-    this.deviceService.getEmailDevices().subscribe(devices => {
+    this.isLoading.set(true);
+    this.deviceService.getEmailDevices().pipe(takeUntilDestroyed(this.destroyRef)).subscribe(devices => {
       this.devices.set([...devices]);
+      this.isLoading.set(false);
     });
   }
 

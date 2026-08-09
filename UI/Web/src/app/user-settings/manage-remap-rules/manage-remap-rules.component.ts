@@ -1,4 +1,5 @@
-import {ChangeDetectionStrategy, Component, computed, inject, OnInit, signal} from '@angular/core';
+import {ChangeDetectionStrategy, Component, computed, DestroyRef, inject, OnInit, signal} from '@angular/core';
+import {takeUntilDestroyed} from '@angular/core/rxjs-interop';
 import {CblService} from '../../_services/cbl.service';
 import {AccountService} from '../../_services/account.service';
 import {ConfirmService} from '../../shared/confirm.service';
@@ -12,13 +13,15 @@ import {DefaultValuePipe} from '../../_pipes/default-value.pipe';
 import {CblRemapRuleChapterTitlePipe} from '../../_pipes/cbl-remap-rule-chapter-title.pipe';
 import {EditRemapRuleComponent} from './edit-remap-rule/edit-remap-rule.component';
 import {UtcToLocalDatePipe} from "../../_pipes/utc-to-locale-date.pipe";
+import {LoadingComponent} from "../../shared/loading/loading.component";
+import {EmptyStateComponent} from "../../shared/_components/empty-state/empty-state.component";
 
 @Component({
   selector: 'app-manage-remap-rules',
   templateUrl: './manage-remap-rules.component.html',
   styleUrls: ['./manage-remap-rules.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [TranslocoDirective, NgxDatatableModule, ResponsiveTableComponent, DatePipe, DefaultValuePipe, CblRemapRuleChapterTitlePipe, EditRemapRuleComponent, UtcToLocalDatePipe]
+  imports: [TranslocoDirective, NgxDatatableModule, ResponsiveTableComponent, DatePipe, DefaultValuePipe, CblRemapRuleChapterTitlePipe, EditRemapRuleComponent, UtcToLocalDatePipe, LoadingComponent, EmptyStateComponent]
 })
 export class ManageRemapRulesComponent implements OnInit {
 
@@ -26,8 +29,10 @@ export class ManageRemapRulesComponent implements OnInit {
   private readonly accountService = inject(AccountService);
   private readonly confirmService = inject(ConfirmService);
   private readonly toastr = inject(ToastrService);
+  private readonly destroyRef = inject(DestroyRef);
 
   rules = signal<RemapRule[]>([]);
+  protected readonly isLoading = signal(true);
   isAdmin = this.accountService.hasAdminRole;
   isReadOnly = this.accountService.hasReadOnlyRole;
   currentUserId = computed(() => this.accountService.currentUser()?.id ?? 0);
@@ -55,8 +60,12 @@ export class ManageRemapRulesComponent implements OnInit {
   }
 
   loadRules() {
+    this.isLoading.set(true);
     const obs = this.isAdmin() ? this.cblService.getAllRemapRules() : this.cblService.getRemapRules();
-    obs.subscribe(rules => this.rules.set(rules));
+    obs.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(rules => {
+      this.rules.set(rules);
+      this.isLoading.set(false);
+    });
   }
 
   openCreateForm() {

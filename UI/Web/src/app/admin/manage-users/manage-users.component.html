@@ -1,16 +1,23 @@
 <ng-container *transloco="let t; prefix: 'manage-users'">
   <div class="position-relative mb-3">
-    <button class="btn btn-primary position-absolute custom-position" (click)="inviteUser()">
+    <button class="btn btn-outline-primary position-absolute custom-position" (click)="inviteUser()">
       <i class="fa fa-plus" aria-hidden="true"></i>
       <span class="phone-hidden">&nbsp;{{t('invite')}}</span>
     </button>
   </div>
 
-  <app-responsive-table [rows]="members" [trackByFn]="trackByMember">
+  @if (isLoading()) {
+    <app-loading [loading]="true" />
+  } @else if (members().length === 0) {
+    <app-empty-state [titleKey]="'no-data'" [descriptionKey]="'no-data-description'" [i18nPrefix]="'manage-users'">
+      <i icon class="fa-solid fa-users" aria-hidden="true"></i>
+    </app-empty-state>
+  } @else {
+  <app-responsive-table [rows]="members()" [trackByFn]="trackByMember">
     <ng-template #tableTemplate>
       <ngx-datatable
         class="bootstrap"
-        [rows]="members"
+        [rows]="members()"
         [columnMode]="'force'"
         rowHeight="auto"
         [footerHeight]="50"
@@ -83,14 +90,6 @@
       </ngx-datatable>
     </ng-template>
 
-    <ng-template #cardEmpty>
-      @if (loadingMembers) {
-        <app-loading [loading]="loadingMembers" />
-      } @else {
-        <div class="text-center text-muted py-4">{{t('no-data')}}</div>
-      }
-    </ng-template>
-
     <ng-template #cardTemplate let-member let-idx="index">
       <div class="card mb-3">
         <div class="card-body">
@@ -141,11 +140,12 @@
       </div>
     </ng-template>
   </app-responsive-table>
+  }
 
   <!-- Shared Templates -->
   <ng-template #librariesTemplate let-member>
     @if (member.libraries.length > 0) {
-      @if (hasAdminRole(member) || member.libraries.length === libraryCount) {
+      @if (hasAdminRole(member) || member.libraries.length === libraryCount()) {
         {{t('all-libraries')}}
       } @else if (member.libraries.length > 5) {
         {{t('too-many-libraries')}}
@@ -197,7 +197,7 @@
           </button>
         } @else {
           <button class="btn btn-secondary btn-sm me-2 mb-2" (click)="updatePassword(member)"
-                  [disabled]="member.identityProvider === IdentityProvider.OpenIdConnect && oidcSyncEnabled"
+                  [disabled]="member.identityProvider === IdentityProvider.OpenIdConnect && oidcSyncEnabled()"
                   [ngbTooltip]="t('change-password-tooltip')" [attr.aria-label]="t('change-password-alt', {user: member.username | titlecase})">
             <i class="fa fa-key" aria-hidden="true"></i>
           </button>
