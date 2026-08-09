@@ -1,0 +1,39 @@
+<ng-container *transloco="let t; prefix: translocoPrefix()">
+  <div class="modal-container">
+
+    <div class="modal-header">
+      <h4 class="modal-title">{{ modalTitle() }}</h4>
+      <button type="button" class="btn-close" [attr.aria-label]="t('close')" (click)="close.emit()"></button>
+    </div>
+
+    <div class="modal-body scrollable-modal" [class.d-flex]="!isMobile()">
+
+      <form [formGroup]="formGroup()" class="w-100 d-flex" [class.flex-column]="isMobile()">
+
+        <ul ngbNav #nav="ngbNav" [activeId]="activeTabId()" class="nav-pills"
+            [orientation]="isMobile() ? 'horizontal' : 'vertical'" style="min-width: 135px;">
+
+          @for (tab of tabs(); track tab.id()) {
+            <li [ngbNavItem]="tab.id()">
+              <a ngbNavLink (click)="onTabChange(tab.id(), $event)">{{ tab.id() | tabTitle }}</a>
+              <ng-template ngbNavContent>
+                <ng-container [ngTemplateOutlet]="tab.template"></ng-container>
+              </ng-template>
+            </li>
+          }
+
+        </ul>
+
+        <div [ngbNavOutlet]="nav" class="tab-content flex-fill"
+             [class.mt-3]="isMobile()" [class.ms-4]="!isMobile()"></div>
+      </form>
+
+    </div>
+
+    <div class="modal-footer">
+      <button type="button" class="btn btn-secondary" (click)="close.emit()">{{ t('close') }}</button>
+      <button type="submit" class="btn btn-primary" [disabled]="!formGroup().valid" (click)="save.emit()">{{ t('save') }}</button>
+    </div>
+
+  </div>
+</ng-container>

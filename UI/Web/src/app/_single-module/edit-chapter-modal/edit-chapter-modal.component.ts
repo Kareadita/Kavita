@@ -60,8 +60,6 @@ import {
   EditExternalMetadataFormComponent
 } from "../../shared/_components/edit-external-metadata-form/edit-external-metadata-form.component";
 import {NULL_DATE} from "../../_pipes/date-year-range.pipe";
-import {EntityTitleService} from "../../_services/entity-title.service";
-import {LibraryService} from "../../_services/library.service";
 import {DownloadEntityType} from "../../shared/_models/download-queue-item";
 
 
@@ -115,8 +113,6 @@ export class EditChapterModalComponent implements OnInit {
   private readonly downloadService = inject(DownloadService);
   private readonly chapterService = inject(ChapterService);
   protected readonly breakpointService = inject(BreakpointService);
-  private readonly entityTitleService = inject(EntityTitleService);
-  private readonly libraryService = inject(LibraryService);
   private readonly coverChooserConfigFactory = inject(CoverChooserConfigFactoryService);
 
   @Input({required: true}) chapter!: Chapter;
