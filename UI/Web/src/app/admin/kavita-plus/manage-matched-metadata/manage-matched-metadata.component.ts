@@ -28,6 +28,7 @@ import {Pagination} from "../../../_models/pagination";
 import {ScanSeriesEvent} from "../../../_models/events/scan-series-event";
 import {allMatchStates, MatchStateOption} from "../../../_models/kavitaplus/match-state-option";
 import {LibraryService} from "../../../_services/library.service";
+import {LoadingComponent} from "../../../shared/loading/loading.component";
 
 @Component({
   selector: 'app-manage-matched-metadata',
@@ -44,6 +45,7 @@ import {LibraryService} from "../../../_services/library.service";
     AsyncPipe,
     LibraryTypePipe,
     ResponsiveTableComponent,
+    LoadingComponent,
   ],
   templateUrl: './manage-matched-metadata.component.html',
   styleUrl: './manage-matched-metadata.component.scss',

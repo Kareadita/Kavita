@@ -15,6 +15,7 @@ import {MetadataService} from "../../_services/metadata.service";
 import {translate, TranslocoDirective} from "@jsverse/transloco";
 import {AgeRating} from "../../_models/metadata/age-rating";
 import {DownloadService} from "../../shared/_services/download.service";
+import {LoadingComponent} from "../../shared/loading/loading.component";
 
 export type MetadataMappingsExport = {
   ageRatingMappings: Record<string, AgeRating>,
@@ -36,6 +37,7 @@ export type MetadataMappingsExport = {
     NgbAccordionButton,
     NgbAccordionCollapse,
     NgbAccordionBody,
+    LoadingComponent,
   ],
   templateUrl: './manage-metadata-mappings.component.html',
   styleUrl: './manage-metadata-mappings.component.scss',
@@ -47,7 +49,6 @@ export class ManageMetadataMappingsComponent implements OnInit {
   private readonly metadataService = inject(MetadataService);
   private readonly cdRef = inject(ChangeDetectorRef);
   private readonly fb = inject(FormBuilder);
-
 
   /**
    * The FormGroup to use, this component will add its own controls
@@ -67,6 +68,7 @@ export class ManageMetadataMappingsComponent implements OnInit {
   private readonly collapseThreshold = 10;
   ageRatingCollapsed = signal(false);
   fieldMappingCollapsed = signal(false);
+  isLoading = signal<boolean>(true);
 
   ageRatingMappings = this.fb.array<FormGroup<{
     str: FormControl<string | null>,
@@ -106,7 +108,7 @@ export class ManageMetadataMappingsComponent implements OnInit {
 
     this.ageRatingCollapsed.set(this.ageRatingMappings.length > this.collapseThreshold);
     this.fieldMappingCollapsed.set(this.fieldMappings.length > this.collapseThreshold);
-
+    this.isLoading.set(false);
     this.cdRef.markForCheck();
   }
 

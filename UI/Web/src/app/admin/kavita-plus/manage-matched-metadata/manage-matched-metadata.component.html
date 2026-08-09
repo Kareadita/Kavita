@@ -115,6 +115,7 @@
     </ng-template>
 
     <ng-template #cardTemplate let-item let-idx="index">
+      <app-loading [loading]="isLoading()" />
       <div class="card mb-3">
         <div class="card-body">
           <!-- Header with cover, series name and action button -->
