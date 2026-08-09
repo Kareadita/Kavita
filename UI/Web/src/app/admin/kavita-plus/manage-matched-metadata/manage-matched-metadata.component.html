@@ -2,8 +2,8 @@
   <p>{{t('description')}}</p>
 
   <form [formGroup]="filterGroup">
-    <div class="row g-0">
-      <div class="col-auto ms-auto me-3">
+    <div class="row g-2">
+      <div class="col-12 col-md-auto ms-md-auto">
         <label for="libtype-filter">{{t('library-type')}}</label>
         <select class="form-select" formControlName="libraryType" id="libtype-filter">
           <option [value]="-1">{{t('all-status-label')}}</option>
@@ -12,7 +12,7 @@
           }
         </select>
       </div>
-      <div class="col-auto">
+      <div class="col-12 col-md-auto">
         <label for="match-filter">{{t('matched-state-label')}}</label>
         <select class="form-select" formControlName="matchState" id="match-filter">
           @for(state of allMatchStates; track state) {
