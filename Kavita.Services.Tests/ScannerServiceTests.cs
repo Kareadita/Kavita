@@ -1230,4 +1230,52 @@ public class ScannerServiceTests: AbstractDbTest
         Assert.Equal("The Avengers", postLib.Series.First().Name);
         Assert.Equal("Avengers", postLib.Series.First().SortName);
     }
+
+    /// <summary>
+    /// When parsing rules change, a file that used to map to one chapter and now maps to another must shed the
+    /// old chapter. Ex: "Blade Runner 2019 - Volume 1.pdf" used to parse as Volume 1/Chapter 2019 and now parses
+    /// as Volume 1 only, but Chapter 2019 lingered in the library forever, even on a forced scan.
+    /// </summary>
+    [Fact]
+    public async Task ScanLibrary_ChapterNoLongerParsed_IsRemovedOnRescan()
+    {
+        var (unitOfWork, context, _) = await CreateDatabase();
+        var scannerHelper = new ScannerHelper(unitOfWork, _testOutputHelper);
+
+        const string testcase = "Stale Chapter - Book.json";
+        var library = await scannerHelper.GenerateScannerData(testcase);
+        var scanner = scannerHelper.CreateServices();
+        await scanner.ScanLibrary(library.Id);
+
+        var postLib = await unitOfWork.LibraryRepository.GetLibraryForIdAsync(library.Id, LibraryIncludes.Series);
+        Assert.NotNull(postLib);
+        Assert.Single(postLib.Series);
+
+        var volume = postLib.Series.First().Volumes.Single();
+        var chapter = volume.Chapters.Single();
+        var expectedRange = chapter.Range;
+        Assert.NotEqual("2019", expectedRange);
+
+        // Simulate what the old parser wrote to the DB for this exact file: Chapter 2019
+        var stale = await unitOfWork.ChapterRepository.GetChapterAsync(chapter.Id);
+        stale!.Range = "2019";
+        stale.MinNumber = 2019f;
+        stale.MaxNumber = 2019f;
+        unitOfWork.ChapterRepository.Update(stale);
+        await unitOfWork.CommitAsync();
+
+        // Force a full rescan, which is what a user would reach for
+        await SetAllSeriesLastScannedInThePast(context, postLib);
+        await scanner.ScanLibrary(library.Id, true);
+
+        var postLib2 = await unitOfWork.LibraryRepository.GetLibraryForIdAsync(library.Id, LibraryIncludes.Series);
+        Assert.NotNull(postLib2);
+        Assert.Single(postLib2.Series);
+
+        var volume2 = postLib2.Series.First().Volumes.Single();
+        Assert.DoesNotContain(volume2.Chapters, c => c.Range == "2019");
+        var survivor = Assert.Single(volume2.Chapters);
+        Assert.Equal(expectedRange, survivor.Range);
+        Assert.Single(survivor.Files);
+    }
 }

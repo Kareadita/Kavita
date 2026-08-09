@@ -744,6 +744,10 @@ public class ProcessSeries(
 
     private async Task UpdateChapters(UpdateChapterArgs args)
     {
+        // Tracks which files this scan actually mapped onto each chapter. Needed so that when parsing rules change
+        // and a file resolves to a different chapter than it did before, the old chapter can be shed (see RemoveChapters)
+        var parsedChapterFiles = new Dictionary<Chapter, HashSet<string>>();
+
         // Add new chapters
         foreach (var info in args.ParsedInfos)
         {
@@ -773,6 +777,12 @@ public class ProcessSeries(
                 chapter.UpdateFrom(info);
             }
 
+            if (!parsedChapterFiles.TryGetValue(chapter, out var mappedFiles))
+            {
+                mappedFiles = [];
+                parsedChapterFiles[chapter] = mappedFiles;
+            }
+            mappedFiles.Add(Parser.NormalizePath(info.FullFilePath));
 
             // Add files
             AddOrUpdateFileForChapter(chapter, info, args.ForceUpdate);
@@ -846,10 +856,16 @@ public class ProcessSeries(
             }
         }
 
-        RemoveChapters(args.Volume, args.ParsedInfos);
+        RemoveChapters(args.Volume, args.ParsedInfos, parsedChapterFiles);
     }
 
-    private void RemoveChapters(Volume volume, IList<ParserInfo> parsedInfos)
+    /// <summary>
+    /// Removes any chapters (and files on them) that the current parse no longer maps onto them
+    /// </summary>
+    /// <param name="volume">Volume being updated</param>
+    /// <param name="parsedInfos">The infos parsed for this volume</param>
+    /// <param name="parsedChapterFiles">Normalized file paths this parse mapped onto each chapter, from <see cref="UpdateChapters"/></param>
+    private void RemoveChapters(Volume volume, IList<ParserInfo> parsedInfos, Dictionary<Chapter, HashSet<string>> parsedChapterFiles)
     {
         // Chapters to remove after enumeration
         var chaptersToRemove = new List<Chapter>();
@@ -873,8 +889,16 @@ public class ProcessSeries(
 
             if (hasMatchingDirectory)
             {
+                // Only keep the files this parse mapped onto this exact chapter. Checking against all parsedInfos instead
+                // would keep a stale chapter alive whenever parsing rules change and its file now maps to another chapter
+                // (ex: "Blade Runner 2019 - Volume 1.pdf" used to parse as Chapter 2019 and no longer does)
+                if (!parsedChapterFiles.TryGetValue(existingChapter, out var mappedFiles))
+                {
+                    mappedFiles = [];
+                }
+
                 existingChapter.Files = existingChapter.Files
-                    .Where(f => parsedInfos.Any(p => Parser.NormalizePath(p.FullFilePath) == Parser.NormalizePath(f.FilePath)))
+                    .Where(f => mappedFiles.Contains(Parser.NormalizePath(f.FilePath)))
                     .OrderByNatural(f => f.FilePath)
                     .ToList();
 
