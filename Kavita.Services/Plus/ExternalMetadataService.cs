@@ -1960,7 +1960,7 @@ public class ExternalMetadataService : IExternalMetadataService
             return (false, null);
         }
 
-        if (!string.IsNullOrWhiteSpace(summary) && !HasForceOverride(settings, chapter, MetadataSettingField.ChapterSummary))
+        if (string.IsNullOrWhiteSpace(summary) && !HasForceOverride(settings, chapter, MetadataSettingField.ChapterSummary))
         {
             return (false, null);
         }
