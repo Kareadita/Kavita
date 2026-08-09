@@ -1842,8 +1842,11 @@ public class ExternalMetadataService : IExternalMetadataService
                 await _auditService.LogChapterMetadataAsync(chapter.Id, series.Id, chapterFieldChanges);
             }
 
-            _unitOfWork.ChapterRepository.Update(chapter);
-            await _unitOfWork.CommitAsync();
+            if (madeModification)
+            {
+                _unitOfWork.ChapterRepository.Update(chapter);
+                await _unitOfWork.CommitAsync();
+            }
         }
 
         return madeModification;
