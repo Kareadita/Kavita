@@ -812,6 +812,9 @@ public class ParseScannedFilesTests: AbstractDbTest
 
         // Three-way duplicate nonsense chain
         new object[] { new[] { "15", "15.HU", "15.LR" }, new[] { 15f, 15.1f, 15.2f } },
+
+        // Different base values with nonsense after
+        new object[] { new[] { "15", "15.HU", "16", "16 (A Story)", "17" }, new[] { 15f, 15.1f, 16, 16.1f, 17f } },
     };
 
     [Theory]

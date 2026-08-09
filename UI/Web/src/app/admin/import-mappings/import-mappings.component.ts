@@ -116,6 +116,10 @@ export class ImportMappingsComponent implements OnInit {
   isFileSelected = toSignal(this.uploadForm.get('files')!.valueChanges
     .pipe(map((files) => !!files && files.length == 1)), {initialValue: false});
 
+  isImportSettingsFormValid = toSignal(this.importSettingsForm.valueChanges.pipe(
+    map(() => this.importSettingsForm.valid),
+  ), { initialValue: false });
+
   nextButtonLabel = computed(() => {
     switch(this.currentStepIndex()) {
       case Step.Configure:
@@ -136,7 +140,7 @@ export class ImportMappingsComponent implements OnInit {
       case Step.Configure:
         return true;
       case Step.Conflicts:
-        return this.importSettingsForm.valid;
+        return this.isImportSettingsFormValid();
       default:
         return false;
     }

@@ -114,7 +114,9 @@
         "add-auth-key": "New",
         "description": "An Auth Key is like a password. Rotating it will invalidate any existing clients.",
         "copy-key": "{{common.copy}}",
-        "clients-opds-error": "Failed to load OPDS url for key: {{key}}"
+        "clients-opds-error": "Failed to load OPDS url for key: {{key}}",
+        "no-data": "{{common.no-data}}",
+        "no-data-description": "You have no authorization keys yet."
     },
 
     "create-auth-key": {
@@ -344,6 +346,7 @@
         "title": "Scrobble Holds",
         "description": "This is a user-managed list of Series that will not be scrobbled to upstream providers. You can remove a series at any time and the next scrobble-able event (reading progress, rating, want to read status) will trigger scrobbling.",
         "no-data": "{{typeahead.no-data}}",
+        "no-data-description": "You don't have any series on hold. Series you place on hold will appear here.",
         "series-name-header": "{{manage-matched-metadata.series-name-header}}",
         "created-header": "{{manage-media-issues.created-header}}",
         "delete-label": "{{common.remove}}"
@@ -454,7 +457,8 @@
         "add": "{{common.add}}",
         "delete": "{{common.delete}}",
         "edit": "{{common.edit}}",
-        "no-data": "{{typeahead.no-data}}",
+        "no-data": "{{common.no-data}}",
+        "no-data-description": "You have no email-based devices setup yet.",
         "actions-header": "{{manage-users.actions-header}}",
         "warning": "Warning",
         "client-devices-header": "Client Devices",
@@ -1300,12 +1304,12 @@
     },
 
     "manage-metadata-settings": {
-        "k+-warning": "The settings below are shared with those found on the K+ page. You may change them in either location",
+        "k+-warning": "The settings below are shared with those found on the K+ page. You may change them in either location.",
         "export-settings": "Export",
-        "export-tooltip": "Export your blacklist and whitelist, age rating, and field mappings",
+        "export-tooltip": "Export your blacklist and whitelist, age rating, and field mappings.",
         "export-file-name": "Kavita Metadata Settings Export.json",
         "import-settings": "Import",
-        "import-tooltip": "Import your or someone else's settings",
+        "import-tooltip": "Import your or someone else's settings.",
         "run-metadata-mappings": "Run Metadata Mappings",
         "run-metadata-mappings-tooltip": "Process series through your metadata mappings. This may take a while and consume more resources.",
         "description": "Kavita+ has the ability to download and write some limited metadata to the Database. This page allows for you to toggle what is in scope.",
@@ -1609,7 +1613,8 @@
     },
 
     "kavitaplus-activity": {
-        "description": "Reading activity Kavita has synced to external services on your behalf - progress, ratings, and reading status."
+        "description": "Reading activity Kavita has synced to external services on your behalf - progress, ratings, and reading status.",
+        "tab-select-label": "Filter activity"
     },
 
     "manage-kavitaplus-activity": {
@@ -2580,7 +2585,8 @@
         "all-libraries": "All Libraries",
         "too-many-libraries": "A lot",
         "sharing-header": "Sharing",
-        "no-data": "There are no other users.",
+        "no-data": "{{common.no-data}}",
+        "no-data-description": "There are no other users.",
         "actions-header": "Actions",
         "pending-tooltip": "This user has not validated their email",
         "identity-provider-oidc-tooltip": "OIDC",
@@ -2955,7 +2961,9 @@
         "cbl-number-placeholder": "e.g. 1",
         "kavita-chapter-label": "Kavita Chapter (optional)",
         "series-level": "Series-level",
-        "edit": "{{common.edit}}"
+        "edit": "{{common.edit}}",
+        "no-data": "{{common.no-data}}",
+        "no-data-description": "There are no remap rules to display here yet."
     },
 
     "browse-cbl-repo-modal": {

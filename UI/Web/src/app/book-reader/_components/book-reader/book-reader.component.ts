@@ -324,10 +324,6 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
    * Library Type used for rendering chapter or issue
    */
    libraryType: LibraryType = LibraryType.Book;
-  /**
-   * If the web browser is in fullscreen mode
-   */
-  isFullscreen: boolean = false;
 
 
   /**
@@ -699,7 +695,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
             await this.goToPage();
             break;
           case KeyBindTarget.ToggleFullScreen:
-            this.applyFullscreen();
+            this.toggleFullscreen();
             break;
           case KeyBindTarget.ToggleMenu:
             this.actionBarVisible.update(x => !x);
@@ -866,6 +862,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
     this.navService.showNavBar();
     this.navService.showSideNav();
+    this.readerService.exitFullscreen();
   }
 
   async ngOnInit() {
@@ -2103,7 +2100,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
         this.showPaginationOverlay(res.object as boolean);
         break;
       case "fullscreen":
-        this.applyFullscreen();
+        this.toggleFullscreen();
         break;
       case "writingStyle":
         this.applyWritingStyle();
@@ -2206,26 +2203,8 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     this.saveProgress();
   }
 
-  applyFullscreen() {
-    this.isFullscreen = this.readerService.checkFullscreenMode();
-    if (this.isFullscreen) {
-      this.readerService.toggleFullscreen(this.reader().nativeElement, () => {
-        this.isFullscreen = false;
-        this.cdRef.markForCheck();
-        this.renderer.removeStyle(this.reader().nativeElement, 'background');
-      });
-    } else {
-      this.readerService.toggleFullscreen(this.reader().nativeElement, () => {
-        this.isFullscreen = true;
-        this.cdRef.markForCheck();
-        // HACK: This is a bug with how browsers change the background color for fullscreen mode
-        const reader = this.reader();
-        this.renderer.setStyle(reader.nativeElement, 'background', this.themeService.getCssVariable('--bs-body-color'));
-        if (!this.darkMode()) {
-          this.renderer.setStyle(reader.nativeElement, 'background', 'white');
-        }
-      });
-    }
+  toggleFullscreen() {
+    this.readerService.toggleFullscreen();
   }
 
   applyWritingStyle() {

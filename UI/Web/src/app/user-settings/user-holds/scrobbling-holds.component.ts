@@ -1,29 +1,32 @@
-import {ChangeDetectionStrategy, ChangeDetectorRef, Component, inject} from '@angular/core';
+import {ChangeDetectionStrategy, Component, DestroyRef, inject, signal} from '@angular/core';
+import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import {ScrobblingService} from "../../_services/scrobbling.service";
 import {TranslocoDirective} from "@jsverse/transloco";
 import {ImageService} from "../../_services/image.service";
 import {ImageComponent} from "../../shared/image/image.component";
 import {UtcToLocalTimePipe} from "../../_pipes/utc-to-local-time.pipe";
 import {ScrobbleHold} from "../../_models/scrobbling/scrobble-hold";
-import {ColumnMode, NgxDatatableModule} from "@siemens/ngx-datatable";
+import {NgxDatatableModule} from "@siemens/ngx-datatable";
 import {APP_BASE_HREF} from "@angular/common";
 import {ResponsiveTableComponent} from "../../shared/_components/responsive-table/responsive-table.component";
+import {LoadingComponent} from "../../shared/loading/loading.component";
+import {EmptyStateComponent} from "../../shared/_components/empty-state/empty-state.component";
 
 @Component({
-    selector: 'app-user-holds',
-  imports: [TranslocoDirective, ImageComponent, UtcToLocalTimePipe, NgxDatatableModule, ResponsiveTableComponent],
-    templateUrl: './scrobbling-holds.component.html',
-    styleUrls: ['./scrobbling-holds.component.scss'],
-    changeDetection: ChangeDetectionStrategy.OnPush
+  selector: 'app-user-holds',
+  imports: [TranslocoDirective, ImageComponent, UtcToLocalTimePipe, NgxDatatableModule, ResponsiveTableComponent, LoadingComponent, EmptyStateComponent],
+  templateUrl: './scrobbling-holds.component.html',
+  styleUrls: ['./scrobbling-holds.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class ScrobblingHoldsComponent {
-  private readonly cdRef = inject(ChangeDetectorRef);
   private readonly scrobblingService = inject(ScrobblingService);
   protected readonly imageService = inject(ImageService);
   protected readonly baseUrl = inject(APP_BASE_HREF);
+  private readonly destroyRef = inject(DestroyRef);
 
-  isLoading = true;
-  data: Array<ScrobbleHold> = [];
+  protected readonly isLoading = signal(true);
+  protected readonly data = signal<Array<ScrobbleHold>>([]);
   trackBy = (idx: number, item: ScrobbleHold) => `${item.seriesId}_${idx}`;
 
   constructor() {
@@ -31,15 +34,15 @@ export class ScrobblingHoldsComponent {
   }
 
   loadData() {
-    this.scrobblingService.getHolds().subscribe(data => {
-      this.data = data;
-      this.isLoading = false;
-      this.cdRef.markForCheck();
-    })
+    this.isLoading.set(true);
+    this.scrobblingService.getHolds().pipe(takeUntilDestroyed(this.destroyRef)).subscribe(data => {
+      this.data.set(data);
+      this.isLoading.set(false);
+    });
   }
 
   removeHold(hold: ScrobbleHold) {
-    this.scrobblingService.removeHold(hold.seriesId).subscribe(_ => {
+    this.scrobblingService.removeHold(hold.seriesId).pipe(takeUntilDestroyed(this.destroyRef)).subscribe(_ => {
       this.loadData();
     });
   }

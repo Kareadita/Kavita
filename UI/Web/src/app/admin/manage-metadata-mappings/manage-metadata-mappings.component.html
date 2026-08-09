@@ -1,5 +1,6 @@
 <ng-container *transloco="let t; prefix: 'manage-metadata-settings'" [formGroup]="settingsForm()">
 
+  <app-loading [loading]="isLoading()" />
   <div ngbAccordion [closeOthers]="false">
     <div ngbAccordionItem="age-rating-panel" [collapsed]="ageRatingCollapsed()">
       <h2 class="accordion-header" ngbAccordionHeader>

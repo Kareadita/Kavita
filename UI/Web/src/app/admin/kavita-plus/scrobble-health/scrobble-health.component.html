@@ -7,8 +7,10 @@
           <span class="live-indicator">
             <span class="live-dot"></span>
             {{t('live-label')}}
-            <span class="mx-1 dot-separator"></span>
-            {{t('checked-ago-label', {time: minutesAgo() + 'm'})}}
+            <span class="phone-hidden">
+              <span class="mx-1 dot-separator"></span>
+              {{t('checked-ago-label', {time: minutesAgo() + 'm'})}}
+            </span>
           </span>
         }
         <button class="btn btn-sm btn-link p-0" (click)="load(true)" [disabled]="loading()" [attr.aria-label]="t('refresh-alt')">
@@ -37,7 +39,7 @@
           <span class="latency text-muted">{{formatLatency(snap.avgLatencyMs)}}</span>
           <span class="status-badge" [class]="'status-' + snap.status">
             <span class="status-dot"></span>
-            {{snap.status | kavitaPlusProviderHealthStatus}}
+            <span class="phone-hidden">{{snap.status | kavitaPlusProviderHealthStatus}}</span>
           </span>
         </div>
       </div>

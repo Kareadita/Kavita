@@ -347,9 +347,14 @@ export class InfiniteScrollerComponent implements OnInit, OnChanges, OnDestroy, 
       if(!this.currentPageElem)
         return;
 
-      let images = Array.from(document.querySelectorAll('img[id^="page-"]')) as HTMLImageElement[];
+      const images = Array.from(document.querySelectorAll('img[id^="page-"]')) as HTMLImageElement[];
       images.forEach((img) => {
         this.renderer.setStyle(img, "width", width);
+
+        if (img.naturalWidth > 0 && img.naturalHeight > 0) {
+          const height = Math.round(img.getBoundingClientRect().width * img.naturalHeight / img.naturalWidth);
+          this.renderer.setAttribute(img, 'height', height + '');
+        }
       });
 
       this.prevScrollPosition = this.currentPageElem.getBoundingClientRect().top;

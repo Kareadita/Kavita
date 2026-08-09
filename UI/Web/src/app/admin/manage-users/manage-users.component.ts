@@ -1,4 +1,5 @@
-import {ChangeDetectionStrategy, ChangeDetectorRef, Component, inject, OnInit, TrackByFunction} from '@angular/core';
+import {ChangeDetectionStrategy, Component, DestroyRef, inject, OnInit, signal, TrackByFunction} from '@angular/core';
+import {takeUntilDestroyed} from '@angular/core/rxjs-interop';
 import {NgbTooltip} from '@ng-bootstrap/ng-bootstrap';
 import {MemberService} from 'src/app/_services/member.service';
 import {Member} from 'src/app/_models/auth/member';
@@ -25,6 +26,7 @@ import {SettingsService} from "../settings.service";
 import {ServerSettings} from "../_models/server-settings";
 import {IdentityProvider} from "../../_models/user/user";
 import {ImageComponent} from "../../shared/image/image.component";
+import {EmptyStateComponent} from "../../shared/_components/empty-state/empty-state.component";
 import {ResponsiveTableComponent} from "../../shared/_components/responsive-table/responsive-table.component";
 import {
   DataTableColumnCellDirective,
@@ -41,14 +43,13 @@ import {ModalService} from "../../_services/modal.service";
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [NgbTooltip, TagBadgeComponent, AsyncPipe, TitleCasePipe, TranslocoModule, DefaultDatePipe, NgClass,
     DefaultValuePipe, UtcToLocalTimePipe, LoadingComponent, TimeAgoPipe, SentenceCasePipe, UtcToLocalDatePipe,
-    RoleLocalizedPipe, ImageComponent, ResponsiveTableComponent, NgTemplateOutlet, DatatableComponent, DataTableColumnDirective, DataTableColumnCellDirective, DataTableColumnHeaderDirective, RouterLink]
+    RoleLocalizedPipe, ImageComponent, EmptyStateComponent, ResponsiveTableComponent, NgTemplateOutlet, DatatableComponent, DataTableColumnDirective, DataTableColumnCellDirective, DataTableColumnHeaderDirective, RouterLink]
 })
 export class ManageUsersComponent implements OnInit {
 
   protected readonly Role = Role;
 
   private readonly translocoService = inject(TranslocoService);
-  private readonly cdRef = inject(ChangeDetectorRef);
   private readonly memberService = inject(MemberService);
   protected readonly accountService = inject(AccountService);
   private readonly settingsService = inject(SettingsService);
@@ -57,13 +58,14 @@ export class ManageUsersComponent implements OnInit {
   private readonly confirmService = inject(ConfirmService);
   protected readonly messageHub = inject(MessageHubService);
   private readonly router = inject(Router);
+  private readonly destroyRef = inject(DestroyRef);
 
-  members: Member[] = [];
+  protected readonly members = signal<Member[]>([]);
   settings: ServerSettings | undefined = undefined;
-  oidcSyncEnabled: boolean = false;
+  protected readonly oidcSyncEnabled = signal(false);
   loggedInUsername = this.accountService.username;
-  loadingMembers = false;
-  libraryCount: number = 0;
+  protected readonly isLoading = signal(true);
+  protected readonly libraryCount = signal(0);
 
   trackByMember: TrackByFunction<Member> = (_, m) =>
     `${m.username}_${m.lastActiveUtc}_${m.roles.length}`;
@@ -72,20 +74,18 @@ export class ManageUsersComponent implements OnInit {
   ngOnInit(): void {
     this.loadMembers();
 
-    this.settingsService.getServerSettings().subscribe(settings => {
+    this.settingsService.getServerSettings().pipe(takeUntilDestroyed(this.destroyRef)).subscribe(settings => {
       this.settings = settings;
-      this.oidcSyncEnabled = settings.oidcConfig.syncUserSettings && settings.oidcConfig.enabled;
+      this.oidcSyncEnabled.set(settings.oidcConfig.syncUserSettings && settings.oidcConfig.enabled);
     });
   }
 
 
   loadMembers() {
-    this.loadingMembers = true;
-    this.cdRef.markForCheck();
-    this.memberService.getMembers(true).subscribe(members => {
-      this.members = members;
+    this.isLoading.set(true);
+    this.memberService.getMembers(true).pipe(takeUntilDestroyed(this.destroyRef)).subscribe(members => {
       // Show logged-in user at the top of the list
-      this.members.sort((a: Member, b: Member) => {
+      const sorted = [...members].sort((a: Member, b: Member) => {
         if (a.username === this.loggedInUsername()) return -1;
         if (b.username === this.loggedInUsername()) return 1;
 
@@ -97,11 +97,12 @@ export class ManageUsersComponent implements OnInit {
         return 0;
       });
 
-      // Get the admin and get their library count
-      this.libraryCount = this.members.filter(m => this.hasAdminRole(m))[0].libraries.length;
+      this.members.set(sorted);
 
-      this.loadingMembers = false;
-      this.cdRef.markForCheck();
+      // Get the admin and get their library count
+      this.libraryCount.set(sorted.filter(m => this.hasAdminRole(m))[0]?.libraries.length ?? 0);
+
+      this.isLoading.set(false);
     });
   }
 

@@ -24,7 +24,7 @@ namespace Kavita.Services.Scanner;
 /// Responsible for taking parsed info from ReadingItemService and DirectoryService and combining them to emit DB work
 /// on a series by series.
 /// </summary>
-public class ParseScannedFiles
+public partial class ParseScannedFiles
 {
     private readonly ILogger _logger;
     private readonly IDirectoryService _directoryService;
@@ -854,9 +854,8 @@ public class ParseScannedFiles
                 continue;
             }
 
-            // Ensure chapters are sorted numerically when possible, otherwise push unparseable to the end
             chapters = infos
-                .OrderBy(info => float.TryParse(info.Chapters, NumberStyles.Any, CultureInfo.InvariantCulture, out var val) ? val : float.MaxValue)
+                .OrderBy(GetSortKey)
                 .ThenBy(info => info.Chapters, StringComparer.OrdinalIgnoreCase)
                 .ToList();
 
@@ -882,10 +881,7 @@ public class ParseScannedFiles
                 else
                 {
                     // Pull out the leading numeric part, e.g. "15.UH" -> 15, "15.BEY" -> 15
-                    var leadingMatch = Regex.Match(chapter.Chapters, @"^\d+(\.\d+)?");
-                    float? currentBase = leadingMatch.Success &&
-                                         float.TryParse(leadingMatch.Value, NumberStyles.Any, CultureInfo.InvariantCulture, out var lb)
-                        ? lb : null;
+                    var currentBase = ParseLeadingFloat(chapter.Chapters);
 
                     if (currentBase.HasValue && prevBase.HasValue && currentBase.Value.Is(prevBase.Value))
                     {
@@ -906,5 +902,41 @@ public class ParseScannedFiles
                 }
             }
         }
+
+        return;
+
+        // Ensure chapters are sorted numerically when possible. For entries that don't parse
+        // cleanly as a float, fall back to their leading numeric prefix (e.g. "15.HU" -> 15)
+        // so they stay adjacent to their numeric siblings instead of being pushed to the end.
+        // Only entries with no numeric component at all fall back to float.MaxValue.
+        float GetSortKey(ParserInfo info)
+        {
+            var chapterNum = Parser.IsRange(info.Chapters)
+                ? Parser.MinNumberFromRange(info.Chapters).ToString(CultureInfo.InvariantCulture)
+                : info.Chapters;
+
+            if (float.TryParse(chapterNum, NumberStyles.Any, CultureInfo.InvariantCulture, out var val))
+            {
+                return val;
+            }
+
+            return ParseLeadingFloat(info.Chapters) ?? float.MaxValue;
+        }
+
+        float? ParseLeadingFloat(string input)
+        {
+            var leadingMatch = LeadingFloatRegex().Match(input);
+            if (!leadingMatch.Success) return null;
+
+            if (float.TryParse(leadingMatch.Value, NumberStyles.Any, CultureInfo.InvariantCulture, out var lb))
+            {
+                return lb;
+            }
+
+            return null;
+        }
     }
+
+    [GeneratedRegex(@"^\d+(\.\d+)?")]
+    private static partial Regex LeadingFloatRegex();
 }

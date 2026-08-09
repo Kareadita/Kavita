@@ -677,6 +677,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     if (this.goToPageEvent !== undefined) this.goToPageEvent.complete();
 
     this.readerService.disableWakeLock();
+    this.readerService.exitFullscreen();
   }
 
   private handlePageUp(e: KeyBindEvent) {
@@ -1806,11 +1807,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
   // This is menu only code
   toggleFullscreen() {
-      this.readerService.toggleFullscreen(this.reader().nativeElement, () => {
-        this.isFullscreen = true;
-        this.fullscreenEvent.next(true);
-        this.render();
-      });
+    this.readerService.toggleFullscreen();
   }
 
   togglePageOffset() {
