@@ -416,11 +416,10 @@ public class DefaultParserTests
         var parser = new BasicParser(ds, new ImageParser(ds));
 
         var filepath = @"E:/Manga/Foo 50/Foo 50 v1.cbz";
-        // There is a bad parse for series like "Foo 50", so we have parsed chapter as 50
         var expected = new ParserInfo
         {
             Series = "Foo 50", Volumes = "1",
-            Chapters = "50", Filename = "Foo 50 v1.cbz", Format = MangaFormat.Archive,
+            Chapters = Parser.DefaultChapter, Filename = "Foo 50 v1.cbz", Format = MangaFormat.Archive,
             FullFilePath = filepath
         };
 
