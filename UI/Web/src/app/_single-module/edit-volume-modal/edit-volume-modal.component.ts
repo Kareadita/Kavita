@@ -1,8 +1,7 @@
 import {ChangeDetectionStrategy, ChangeDetectorRef, Component, inject, Input, OnInit} from '@angular/core';
 import {FormControl, FormGroup, FormsModule, ReactiveFormsModule} from "@angular/forms";
-import {NgbActiveModal, NgbNav, NgbNavContent, NgbNavItem, NgbNavLink, NgbNavOutlet} from "@ng-bootstrap/ng-bootstrap";
+import {NgbActiveModal} from "@ng-bootstrap/ng-bootstrap";
 import {TranslocoDirective} from "@jsverse/transloco";
-import {NgClass} from "@angular/common";
 import {SettingItemComponent} from "../../settings/_components/setting-item/setting-item.component";
 import {EntityTitleComponent} from "../../cards/entity-title/entity-title.component";
 import {SettingButtonComponent} from "../../settings/_components/setting-button/setting-button.component";
@@ -37,25 +36,20 @@ import {modalDeleted, modalSaved} from "../../_models/modal/modal-result";
 import {VolumeService} from "../../_services/volume.service";
 import {UpdateVolume} from "../../_models/update-volume";
 import {Tabs} from "../../_models/tabs";
-import {TabTitlePipe} from "../../_pipes/tab-title.pipe";
 import {
   EditExternalMetadataFormComponent
 } from "../../shared/_components/edit-external-metadata-form/edit-external-metadata-form.component";
+import {EditModalShellComponent} from "../../shared/edit-modal-shell/edit-modal-shell.component";
+import {EditTabDirective} from "../../shared/_directive/edit-tab.directive";
 
 
 @Component({
   selector: 'app-edit-volume-modal',
   imports: [
     FormsModule,
-    NgbNav,
-    NgbNavContent,
-    NgbNavLink,
     TranslocoDirective,
-    NgbNavOutlet,
     ReactiveFormsModule,
-    NgbNavItem,
     SettingItemComponent,
-    NgClass,
     EntityTitleComponent,
     SettingButtonComponent,
     CoverImageChooserComponent,
@@ -64,8 +58,9 @@ import {
     UtcToLocalTimePipe,
     BytesPipe,
     ReadTimePipe,
-    TabTitlePipe,
-    EditExternalMetadataFormComponent
+    EditExternalMetadataFormComponent,
+    EditModalShellComponent,
+    EditTabDirective
   ],
   templateUrl: './edit-volume-modal.component.html',
   styleUrl: './edit-volume-modal.component.scss',
@@ -192,6 +187,12 @@ export class EditVolumeModalComponent implements OnInit {
     this.coverImageReset = true;
     this.editForm.patchValue({ coverImageLocked: false });
     this.chooserConfig = { ...this.chooserConfig, isLocked: false };
+    this.cdRef.markForCheck();
+  }
+
+  changeTab(tab?: Tabs) {
+    if (!tab) return;
+    this.activeId = tab;
     this.cdRef.markForCheck();
   }
 
