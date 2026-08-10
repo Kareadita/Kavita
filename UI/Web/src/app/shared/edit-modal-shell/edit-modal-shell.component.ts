@@ -48,7 +48,7 @@ export class EditModalShellComponent {
   save = output<void>();
   // eslint-disable-next-line @angular-eslint/no-output-native
   close = output<void>();
-  tabSwitch = output<Tabs>()
+  tabSwitch = output<Tabs>();
 
   // Automatically tracks projected tabs
   tabs = contentChildren(EditTabDirective);

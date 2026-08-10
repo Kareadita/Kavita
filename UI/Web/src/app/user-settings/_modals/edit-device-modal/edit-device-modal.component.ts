@@ -9,7 +9,6 @@ import {translate, TranslocoDirective} from "@jsverse/transloco";
 import {NgbActiveModal, NgbTooltip} from "@ng-bootstrap/ng-bootstrap";
 import {DevicePlatformPipe} from "../../../_pipes/device-platform.pipe";
 import {modalSaved} from "../../../_models/modal/modal-result";
-import {active} from "d3";
 
 @Component({
   selector: 'app-edit-device-modal',
@@ -81,6 +80,4 @@ export class EditDeviceModalComponent implements OnInit {
     }
     this.modalRef.dismiss();
   }
-
-  protected readonly active = active;
 }

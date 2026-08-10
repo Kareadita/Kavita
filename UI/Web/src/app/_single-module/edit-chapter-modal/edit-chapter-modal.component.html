@@ -1,7 +1,7 @@
 <ng-container *transloco="let t; prefix: 'edit-chapter-modal'">
 
   <app-edit-modal-shell
-    [(activeTabId)]="activeId"
+    [activeTabId]="activeId"
     (activeTabIdChange)="changeTab($event)"
     [formGroup]="editForm"
     [translocoPrefix]="'edit-chapter-modal'"
