@@ -1,4 +1,14 @@
-import {ChangeDetectionStrategy, Component, contentChildren, inject, input, model, output} from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  contentChild,
+  contentChildren,
+  inject,
+  input,
+  model,
+  output,
+  TemplateRef
+} from '@angular/core';
 import {Tabs} from "../../_models/tabs";
 import {EditTabDirective} from "../_directive/edit-tab.directive";
 import {BreakpointService} from "../../_services/breakpoint.service";
@@ -42,6 +52,8 @@ export class EditModalShellComponent {
 
   // Automatically tracks projected tabs
   tabs = contentChildren(EditTabDirective);
+  /*Optional title for rich content*/
+  titleTemplate = contentChild<TemplateRef<any>>('title');
 
   readonly isMobile = this.breakpointService.isMobile;
 

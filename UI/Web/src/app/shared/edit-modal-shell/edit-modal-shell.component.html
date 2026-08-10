@@ -2,7 +2,13 @@
   <div class="modal-container">
 
     <div class="modal-header">
-      <h4 class="modal-title">{{ modalTitle() }}</h4>
+      <h4 class="modal-title">
+        @if (titleTemplate() !== undefined) {
+          <ng-container [ngTemplateOutlet]="titleTemplate()" />
+        } @else {
+          {{ modalTitle() }}
+        }
+      </h4>
       <button type="button" class="btn-close" [attr.aria-label]="t('close')" (click)="close.emit()"></button>
     </div>
 

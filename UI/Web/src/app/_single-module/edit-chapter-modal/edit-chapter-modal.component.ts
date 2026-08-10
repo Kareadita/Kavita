@@ -11,7 +11,7 @@ import {
 import {UtilityService} from "../../shared/_services/utility.service";
 import {FormControl, FormGroup, FormsModule, ReactiveFormsModule, Validators} from "@angular/forms";
 import {NgClass, NgTemplateOutlet, TitleCasePipe} from "@angular/common";
-import {NgbActiveModal, NgbNav, NgbNavContent, NgbNavItem, NgbNavLink, NgbNavOutlet} from "@ng-bootstrap/ng-bootstrap";
+import {NgbActiveModal} from "@ng-bootstrap/ng-bootstrap";
 import {TranslocoDirective} from "@jsverse/transloco";
 import {AccountService} from "../../_services/account.service";
 import {Chapter} from "../../_models/chapter";
@@ -55,12 +55,14 @@ import {Action} from "../../_models/actionables/action";
 import {ActionFactoryService} from "../../_services/action-factory.service";
 import {modalDeleted, modalSaved} from "../../_models/modal/modal-result";
 import {Tabs} from "../../_models/tabs";
-import {TabTitlePipe} from "../../_pipes/tab-title.pipe";
 import {
   EditExternalMetadataFormComponent
 } from "../../shared/_components/edit-external-metadata-form/edit-external-metadata-form.component";
 import {NULL_DATE} from "../../_pipes/date-year-range.pipe";
 import {DownloadEntityType} from "../../shared/_models/download-queue-item";
+import {EditModalShellComponent} from "../../shared/edit-modal-shell/edit-modal-shell.component";
+import {EditTabDirective} from "../../shared/_directive/edit-tab.directive";
+import {form} from "@angular/forms/signals";
 
 
 const blackList = [Action.Edit, Action.IncognitoRead, Action.AddToReadingList];
@@ -69,13 +71,8 @@ const blackList = [Action.Edit, Action.IncognitoRead, Action.AddToReadingList];
   selector: 'app-edit-chapter-modal',
   imports: [
     FormsModule,
-    NgbNav,
-    NgbNavContent,
-    NgbNavLink,
     TranslocoDirective,
-    NgbNavOutlet,
     ReactiveFormsModule,
-    NgbNavItem,
     SettingItemComponent,
     NgTemplateOutlet,
     NgClass,
@@ -91,8 +88,9 @@ const blackList = [Action.Edit, Action.IncognitoRead, Action.AddToReadingList];
     ImageComponent,
     SafeHtmlPipe,
     ReadTimePipe,
-    TabTitlePipe,
     EditExternalMetadataFormComponent,
+    EditModalShellComponent,
+    EditTabDirective,
   ],
   templateUrl: './edit-chapter-modal.component.html',
   styleUrl: './edit-chapter-modal.component.scss',
@@ -513,8 +511,16 @@ export class EditChapterModalComponent implements OnInit {
     return this.peopleSettings[role];
   }
 
+  changeTab(tab?: Tabs) {
+    if (tab) {
+      this.activeId = tab;
+      this.cdRef.markForCheck();
+    }
+  }
+
   protected readonly Tabs = Tabs;
   protected readonly Action = Action;
   protected readonly PersonRole = PersonRole;
   protected readonly MangaFormat = MangaFormat;
+  protected readonly form = form;
 }
