@@ -371,13 +371,7 @@ export class ImageZoomDirective {
     const focalTranslateX = clientX - layoutCenterX - imagePointX * this.scale;
     const focalTranslateY = clientY - layoutCenterY - imagePointY * this.scale;
 
-    // As the image returns to 1x, gradually release the pan offset instead of snapping it away.
-    const zoomOutRatio = nextScaleClamped < previousScale
-      ? Math.max(0, Math.min(1, (nextScaleClamped - 1) / (previousScale - 1)))
-      : 1;
-
-    // Apply the zoom out ratio to the focal translation
-    [this.translateX, this.translateY] = this.clampTranslation(focalTranslateX * zoomOutRatio, focalTranslateY * zoomOutRatio);
+    [this.translateX, this.translateY] = this.clampTranslation(focalTranslateX, focalTranslateY);
 
     this.updateTransform();
   }
