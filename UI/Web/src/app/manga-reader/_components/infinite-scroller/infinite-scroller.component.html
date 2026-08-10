@@ -21,7 +21,7 @@
     [scrollContainer]="scrollElement"
     (triggered)="loadPrevChapter.emit()" />
 
-  <div #scroller appImageZoom [zoomResetKey]="webtoonImages" [lockScroll]="false" [recenterOnZoomOut]="false" tabindex="0" [style.outline]="'none'" infinite-scroll [infiniteScrollDistance]="1" [infiniteScrollThrottle]="50">
+  <div #scroller appImageZoom [zoomResetKey]="webtoonImages" [lockScroll]="false" [recenterOnZoomOut]="false" tabindex="0" [style.outline]="'none'" [style.touch-action]="'pan-y'" infinite-scroll [infiniteScrollDistance]="1" [infiniteScrollThrottle]="50">
     @for(item of webtoonImages | async; let index = $index; track item.src) {
       <img src="{{item.src}}" style="display: block;"
            [style.filter]="(darkness$ | async)  ?? '' | safeStyle"
