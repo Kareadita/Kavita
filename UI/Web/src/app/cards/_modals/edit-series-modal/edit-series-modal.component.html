@@ -1,797 +1,636 @@
 <ng-container *transloco="let t; prefix: 'edit-series-modal'">
-  @if (series) {
-    <div class="modal-container">
-      <div class="modal-header">
-        <h5 class="modal-title">
-          {{t('title', {seriesName: this.series.name})}}</h5>
-        <button type="button" class="btn-close" [attr.aria-label]="t('close')" (click)="close()"></button>
-      </div>
-      <div class="modal-body scrollable-modal {{breakpointService.isMobile() ? '' : 'd-flex'}}">
-        <form [formGroup]="editSeriesForm">
-          <ul ngbNav #nav="ngbNav" [(activeId)]="active" class="nav-pills" [destroyOnHide]="false"
-              orientation="{{breakpointService.isMobile() ? 'horizontal' : 'vertical'}}" style="min-width: 8.4375rem;">
 
-            <li [ngbNavItem]="Tabs.General">
-              <a ngbNavLink>{{Tabs.General | tabTitle}}</a>
-              <ng-template ngbNavContent>
-                <div class="row">
-                  <div class="mb-3" style="width: 100%">
-                    <app-setting-item [title]="t('name-label')" [toggleOnViewClick]="false" [showEdit]="false">
-                      <ng-template #view>
-                        @if (editSeriesForm.get('name'); as formControl) {
-                          <div class="input-group {{series.nameLocked ? 'lock-active' : ''}}">
-                            <ng-container [ngTemplateOutlet]="lock" [ngTemplateOutletContext]="{ item: series, field: 'nameLocked' }" />
-                            <input id="name" class="form-control" formControlName="name" type="text"
-                                   [class.is-invalid]="formControl.invalid && !formControl.untouched">
-                            @if (formControl.errors) {
-                              @if (formControl.errors.required) {
-                                <div class="invalid-feedback">{{t('required-field')}}</div>
-                              }
-                            }
-                          </div>
-                        }
-                      </ng-template>
-                    </app-setting-item>
-                  </div>
-                </div>
+  <app-edit-modal-shell
+    translocoPrefix="edit-series-modal"
+    [title]="t('title', {seriesName: this.series.name})"
+    (save)="save()"
+    (close)="close()"
+    [activeTabId]="active"
+    (activeTabIdChange)="changeTab($event)"
+    [formGroup]="editSeriesForm"
+  >
 
-                <div class="row">
-                  <div class="mb-3" style="width: 100%">
-                    @if (editSeriesForm.get('sortName'); as formControl) {
-                      <app-setting-item [title]="t('sort-name-label')" [toggleOnViewClick]="false" [showEdit]="false">
-                        <ng-template #view>
-                          <div class="input-group {{series.sortNameLocked ? 'lock-active' : ''}}">
-                            <ng-container [ngTemplateOutlet]="lock" [ngTemplateOutletContext]="{ item: series, field: 'sortNameLocked' }" />
-                            <input id="sort-name" class="form-control" formControlName="sortName" type="text" [class.is-invalid]="formControl.invalid && !formControl.untouched">
-                            @if (formControl.errors) {
-                              @if (formControl.errors.required) {
-                                <div class="invalid-feedback">{{t('required-field')}}</div>
-                              }
-                            }
-                          </div>
-                        </ng-template>
-                      </app-setting-item>
+    @if (series) {
+      <ng-template [appEditTab]="Tabs.General">
+        <div class="row">
+          <div class="mb-3" style="width: 100%">
+            <app-setting-item [title]="t('name-label')" [toggleOnViewClick]="false" [showEdit]="false">
+              <ng-template #view>
+                @if (editSeriesForm.get('name'); as formControl) {
+                  <div class="input-group {{series.nameLocked ? 'lock-active' : ''}}">
+                    <ng-container [ngTemplateOutlet]="lock" [ngTemplateOutletContext]="{ item: series, field: 'nameLocked' }" />
+                    <input id="name" class="form-control" formControlName="name" type="text"
+                           [class.is-invalid]="formControl.invalid && !formControl.untouched">
+                    @if (formControl.errors) {
+                      @if (formControl.errors.required) {
+                        <div class="invalid-feedback">{{t('required-field')}}</div>
+                      }
                     }
                   </div>
-                </div>
-
-                <div class="row">
-                  <div class="mb-3" style="width: 100%">
-                    <app-setting-item [title]="t('localized-name-label')" [toggleOnViewClick]="false" [showEdit]="false">
-                      <ng-template #view>
-                        @if (editSeriesForm.get('localizedName'); as formControl) {
-                          <div class="input-group {{series.localizedNameLocked ? 'lock-active' : ''}}">
-                            <ng-container [ngTemplateOutlet]="lock" [ngTemplateOutletContext]="{ item: series, field: 'localizedNameLocked' }" />
-                            <input id="localized-name" class="form-control" formControlName="localizedName" type="text">
-                          </div>
-                        }
-                      </ng-template>
-                    </app-setting-item>
-                  </div>
-                </div>
-
-                @if (metadata) {
-                  <div class="row">
-                    <div class="mb-3" style="width: 100%">
-                      <app-setting-item [title]="t('summary-label')" [toggleOnViewClick]="false" [showEdit]="false">
-                        <ng-template #view>
-                          <div class="input-group {{metadata.summaryLocked ? 'lock-active' : ''}}">
-                            <ng-container [ngTemplateOutlet]="lock" [ngTemplateOutletContext]="{ item: metadata, field: 'summaryLocked' }" />
-                            <textarea id="summary" class="form-control" formControlName="summary" rows="4"></textarea>
-                          </div>
-                        </ng-template>
-                      </app-setting-item>
-                    </div>
-                  </div>
                 }
-
               </ng-template>
-            </li>
+            </app-setting-item>
+          </div>
+        </div>
 
-            @if (metadata) {
-              <li [ngbNavItem]="Tabs.Metadata">
-                <a ngbNavLink>{{Tabs.Metadata | tabTitle}}</a>
-                <ng-template ngbNavContent>
-
-                  <div class="row">
-                    <div class="col-lg-8 col-md-12 pe-2">
-                      <div class="mb-3">
-                        @if (languageSettings) {
-                          <app-setting-item [title]="t('language-label')" [toggleOnViewClick]="false" [showEdit]="false">
-                            <ng-template #view>
-                              <app-typeahead (selectedData)="updateLanguage($event);metadata.languageLocked = true;" [settings]="languageSettings"
-                                             [(locked)]="metadata.languageLocked" (onUnlock)="metadata.languageLocked = false"
-                                             (newItemAdded)="metadata.languageLocked = true">
-                                <ng-template #badgeItem let-item let-position="idx">
-                                  {{item.title}}
-                                </ng-template>
-                                <ng-template #optionItem let-item let-position="idx">
-                                  {{item.title}} ({{item.isoCode}})
-                                </ng-template>
-                              </app-typeahead>
-                            </ng-template>
-                          </app-setting-item>
-                        }
-                      </div>
-                    </div>
-                    <div class="col-lg-4 col-md-12">
-                      <div class="mb-3" style="width: 100%">
-                        <app-setting-item [title]="t('release-year-label')" [toggleOnViewClick]="false" [showEdit]="false">
-                          <ng-template #view>
-                            <div class="input-group {{metadata.releaseYearLocked ? 'lock-active' : ''}}">
-                              <ng-container [ngTemplateOutlet]="lock" [ngTemplateOutletContext]="{ item: metadata, field: 'releaseYearLocked' }" />
-                              <input type="number" inputmode="numeric" class="form-control" id="release-year" formControlName="releaseYear"
-                                     maxlength="4" minlength="4"
-                                     [class.is-invalid]="editSeriesForm.get('releaseYear')?.invalid && editSeriesForm.get('releaseYear')?.touched">
-                              @if (editSeriesForm.get('releaseYear')?.errors; as errors) {
-                                @if (errors.pattern) {
-                                  <p class="invalid-feedback">{{t('release-year-validation')}}</p>
-                                }
-                              }
-                            </div>
-                          </ng-template>
-                        </app-setting-item>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div class="row">
-                    <div class="col-md-12">
-                      <div class="mb-3">
-                        @if (genreSettings) {
-                          <app-setting-item [title]="t('genres-label')" [toggleOnViewClick]="false" [showEdit]="false">
-                            <ng-template #view>
-                              <app-typeahead (selectedData)="updateGenres($event);metadata.genresLocked = true" [settings]="genreSettings"
-                                             [(locked)]="metadata.genresLocked" (onUnlock)="metadata.genresLocked = false"
-                                             (newItemAdded)="metadata.genresLocked = true">
-                                <ng-template #badgeItem let-item let-position="idx">
-                                  {{item.title}}
-                                </ng-template>
-                                <ng-template #optionItem let-item let-position="idx">
-                                  {{item.title}}
-                                </ng-template>
-                              </app-typeahead>
-                            </ng-template>
-                          </app-setting-item>
-                        }
-                      </div>
-                    </div>
-                  </div>
-
-                  <div class="row">
-                    <div class="col-md-12">
-                      <div class="mb-3">
-                        @if (tagsSettings) {
-                          <app-setting-item [title]="t('tags-label')" [toggleOnViewClick]="false" [showEdit]="false">
-                            <ng-template #view>
-                              <app-typeahead (selectedData)="updateTags($event);metadata.tagsLocked = true" [settings]="tagsSettings"
-                                             [(locked)]="metadata.tagsLocked" (onUnlock)="metadata.tagsLocked = false"
-                                             (newItemAdded)="metadata.tagsLocked = true">
-                                <ng-template #badgeItem let-item let-position="idx">
-                                  {{item.title}}
-                                </ng-template>
-                                <ng-template #optionItem let-item let-position="idx">
-                                  {{item.title}}
-                                </ng-template>
-                              </app-typeahead>
-                            </ng-template>
-                          </app-setting-item>
-                        }
-                      </div>
-                    </div>
-                  </div>
-
-                  <div class="row">
-                    <div class="col-lg-6 col-md-12 pe-2">
-                      <div class="mb-3">
-                        <app-setting-item [title]="t('age-rating-label')" [toggleOnViewClick]="false" [showEdit]="false">
-                          <ng-template #view>
-                            <div class="input-group {{metadata.ageRatingLocked ? 'lock-active' : ''}}">
-                              <ng-container [ngTemplateOutlet]="lock" [ngTemplateOutletContext]="{ item: metadata, field: 'ageRatingLocked' }" />
-                              <select class="form-select" id="age-rating" formControlName="ageRating">
-                                @for (opt of ageRatings; track opt.title) {
-                                  <option [value]="opt.value">{{opt.title | titlecase}}</option>
-                                }
-                              </select>
-                            </div>
-                          </ng-template>
-                        </app-setting-item>
-                      </div>
-                    </div>
-                    <div class="col-lg-6 col-md-12">
-                      <div class="mb-3">
-                        <app-setting-item [title]="t('publication-status-label')" [toggleOnViewClick]="false" [showEdit]="false">
-                          <ng-template #view>
-                            <div class="input-group {{metadata.publicationStatusLocked ? 'lock-active' : ''}}">
-                              <ng-container [ngTemplateOutlet]="lock" [ngTemplateOutletContext]="{ item: metadata, field: 'publicationStatusLocked' }" />
-                              <select class="form-select" id="publication-status" formControlName="publicationStatus">
-                                @for (opt of publicationStatuses; track opt.value) {
-                                  <option [value]="opt.value">{{opt.value | publicationStatus}}</option>
-                                }
-                              </select>
-                            </div>
-                          </ng-template>
-                        </app-setting-item>
-                      </div>
-                    </div>
+        <div class="row">
+          <div class="mb-3" style="width: 100%">
+            @if (editSeriesForm.get('sortName'); as formControl) {
+              <app-setting-item [title]="t('sort-name-label')" [toggleOnViewClick]="false" [showEdit]="false">
+                <ng-template #view>
+                  <div class="input-group {{series.sortNameLocked ? 'lock-active' : ''}}">
+                    <ng-container [ngTemplateOutlet]="lock" [ngTemplateOutletContext]="{ item: series, field: 'sortNameLocked' }" />
+                    <input id="sort-name" class="form-control" formControlName="sortName" type="text" [class.is-invalid]="formControl.invalid && !formControl.untouched">
+                    @if (formControl.errors) {
+                      @if (formControl.errors.required) {
+                        <div class="invalid-feedback">{{t('required-field')}}</div>
+                      }
+                    }
                   </div>
                 </ng-template>
-              </li>
+              </app-setting-item>
             }
+          </div>
+        </div>
 
-
-            <li [ngbNavItem]="Tabs.People">
-              <a ngbNavLink>{{Tabs.People | tabTitle}}</a>
-              <ng-template ngbNavContent>
-                <div class="row">
-                  <div class="mb-3">
-                    @if (getPersonsSettings(PersonRole.Writer); as settings) {
-                      <app-setting-item [title]="t('writer-label')" [toggleOnViewClick]="false" [showEdit]="false">
-                        <ng-template #view>
-                          <app-typeahead (selectedData)="updatePerson($event, PersonRole.Writer);metadata.writerLocked = true" [settings]="settings"
-                                         [(locked)]="metadata.writerLocked" (onUnlock)="metadata.writerLocked = false"
-                                         (newItemAdded)="metadata.writerLocked = true">
-                            <ng-template #badgeItem let-item let-position="idx">
-                              {{item.name}}
-                            </ng-template>
-                            <ng-template #optionItem let-item let-position="idx">
-                              {{item.name}}
-                            </ng-template>
-                          </app-typeahead>
-                        </ng-template>
-                      </app-setting-item>
-                    }
+        <div class="row">
+          <div class="mb-3" style="width: 100%">
+            <app-setting-item [title]="t('localized-name-label')" [toggleOnViewClick]="false" [showEdit]="false">
+              <ng-template #view>
+                @if (editSeriesForm.get('localizedName'); as formControl) {
+                  <div class="input-group {{series.localizedNameLocked ? 'lock-active' : ''}}">
+                    <ng-container [ngTemplateOutlet]="lock" [ngTemplateOutletContext]="{ item: series, field: 'localizedNameLocked' }" />
+                    <input id="localized-name" class="form-control" formControlName="localizedName" type="text">
                   </div>
-                </div>
-                <div class="row">
-                  <div class="mb-3">
-                    @if (getPersonsSettings(PersonRole.CoverArtist); as settings) {
-                      <app-setting-item [title]="t('cover-artist-label')" [toggleOnViewClick]="false" [showEdit]="false">
-                        <ng-template #view>
-                          <app-typeahead (selectedData)="updatePerson($event, PersonRole.CoverArtist);metadata.coverArtistLocked = true" [settings]="settings"
-                                         [(locked)]="metadata.coverArtistLocked" (onUnlock)="metadata.coverArtistLocked = false"
-                                         (newItemAdded)="metadata.coverArtistLocked = true">
-                            <ng-template #badgeItem let-item let-position="idx">
-                              {{item.name}}
-                            </ng-template>
-                            <ng-template #optionItem let-item let-position="idx">
-                              {{item.name}}
-                            </ng-template>
-                          </app-typeahead>
-                        </ng-template>
-                      </app-setting-item>
-                    }
-                  </div>
-                </div>
-
-
-                <div class="row">
-                  <div class="mb-3">
-                    @if (getPersonsSettings(PersonRole.Publisher); as settings) {
-                      <app-setting-item [title]="t('publisher-label')" [toggleOnViewClick]="false" [showEdit]="false">
-                        <ng-template #view>
-                          <app-typeahead (selectedData)="updatePerson($event, PersonRole.Publisher);metadata.publisherLocked = true" [settings]="settings"
-                                         [(locked)]="metadata.publisherLocked" (onUnlock)="metadata.publisherLocked = false"
-                                         (newItemAdded)="metadata.publisherLocked = true">
-                            <ng-template #badgeItem let-item let-position="idx">
-                              {{item.name}}
-                            </ng-template>
-                            <ng-template #optionItem let-item let-position="idx">
-                              {{item.name}}
-                            </ng-template>
-                          </app-typeahead>
-                        </ng-template>
-                      </app-setting-item>
-                    }
-                  </div>
-                </div>
-
-                <div class="row">
-                  <div class="mb-3">
-                    @if (getPersonsSettings(PersonRole.Imprint); as settings) {
-                      <app-setting-item [title]="t('imprint-label')" [toggleOnViewClick]="false" [showEdit]="false">
-                        <ng-template #view>
-                          <app-typeahead (selectedData)="updatePerson($event, PersonRole.Imprint);metadata.publisherLocked = true" [settings]="settings"
-                                         [(locked)]="metadata.imprintLocked" (onUnlock)="metadata.imprintLocked = false"
-                                         (newItemAdded)="metadata.imprintLocked = true">
-                            <ng-template #badgeItem let-item let-position="idx">
-                              {{item.name}}
-                            </ng-template>
-                            <ng-template #optionItem let-item let-position="idx">
-                              {{item.name}}
-                            </ng-template>
-                          </app-typeahead>
-                        </ng-template>
-                      </app-setting-item>
-                    }
-                  </div>
-                </div>
-
-                <div class="row">
-                  <div class="mb-3">
-                    @if (getPersonsSettings(PersonRole.Penciller); as settings) {
-                      <app-setting-item [title]="t('penciller-label')" [toggleOnViewClick]="false" [showEdit]="false">
-                        <ng-template #view>
-                          <app-typeahead (selectedData)="updatePerson($event, PersonRole.Penciller);metadata.pencillerLocked = true" [settings]="settings"
-                                         [(locked)]="metadata.pencillerLocked" (onUnlock)="metadata.pencillerLocked = false"
-                                         (newItemAdded)="metadata.pencillerLocked = true">
-                            <ng-template #badgeItem let-item let-position="idx">
-                              {{item.name}}
-                            </ng-template>
-                            <ng-template #optionItem let-item let-position="idx">
-                              {{item.name}}
-                            </ng-template>
-                          </app-typeahead>
-                        </ng-template>
-                      </app-setting-item>
-                    }
-                  </div>
-                </div>
-
-
-                <div class="row">
-                  <div class="mb-3">
-                    @if (getPersonsSettings(PersonRole.Letterer); as settings) {
-                      <app-setting-item [title]="t('letterer-label')" [toggleOnViewClick]="false" [showEdit]="false">
-                        <ng-template #view>
-                          <app-typeahead (selectedData)="updatePerson($event, PersonRole.Letterer);metadata.lettererLocked = true" [settings]="settings"
-                                         [(locked)]="metadata.lettererLocked" (onUnlock)="metadata.lettererLocked = false"
-                                         (newItemAdded)="metadata.lettererLocked = true">
-                            <ng-template #badgeItem let-item let-position="idx">
-                              {{item.name}}
-                            </ng-template>
-                            <ng-template #optionItem let-item let-position="idx">
-                              {{item.name}}
-                            </ng-template>
-                          </app-typeahead>
-                        </ng-template>
-                      </app-setting-item>
-                    }
-                  </div>
-                </div>
-                <div class="row">
-                  <div class="mb-3">
-                    @if (getPersonsSettings(PersonRole.Inker); as settings) {
-                      <app-setting-item [title]="t('inker-label')" [toggleOnViewClick]="false" [showEdit]="false">
-                        <ng-template #view>
-                          <app-typeahead (selectedData)="updatePerson($event, PersonRole.Inker);metadata.inkerLocked = true" [settings]="settings"
-                                         [(locked)]="metadata.inkerLocked" (onUnlock)="metadata.inkerLocked = false"
-                                         (newItemAdded)="metadata.inkerLocked = true">
-                            <ng-template #badgeItem let-item let-position="idx">
-                              {{item.name}}
-                            </ng-template>
-                            <ng-template #optionItem let-item let-position="idx">
-                              {{item.name}}
-                            </ng-template>
-                          </app-typeahead>
-                        </ng-template>
-                      </app-setting-item>
-                    }
-                  </div>
-                </div>
-
-
-
-                <div class="row">
-                  <div class="mb-3">
-                    @if (getPersonsSettings(PersonRole.Editor); as settings) {
-                      <app-setting-item [title]="t('editor-label')" [toggleOnViewClick]="false" [showEdit]="false">
-                        <ng-template #view>
-                          <app-typeahead (selectedData)="updatePerson($event, PersonRole.Editor);metadata.editorLocked = true" [settings]="settings"
-                                         [(locked)]="metadata.editorLocked" (onUnlock)="metadata.editorLocked = false"
-                                         (newItemAdded)="metadata.editorLocked = true">
-                            <ng-template #badgeItem let-item let-position="idx">
-                              {{item.name}}
-                            </ng-template>
-                            <ng-template #optionItem let-item let-position="idx">
-                              {{item.name}}
-                            </ng-template>
-                          </app-typeahead>
-                        </ng-template>
-                      </app-setting-item>
-                    }
-                  </div>
-                </div>
-                <div class="row">
-                  <div class="mb-3">
-                    @if (getPersonsSettings(PersonRole.Colorist); as settings) {
-                      <app-setting-item [title]="t('colorist-label')" [toggleOnViewClick]="false" [showEdit]="false">
-                        <ng-template #view>
-                          <app-typeahead (selectedData)="updatePerson($event, PersonRole.Colorist);metadata.coloristLocked = true" [settings]="settings"
-                                         [(locked)]="metadata.coloristLocked" (onUnlock)="metadata.coloristLocked = false"
-                                         (newItemAdded)="metadata.coloristLocked = true">
-                            <ng-template #badgeItem let-item let-position="idx">
-                              {{item.name}}
-                            </ng-template>
-                            <ng-template #optionItem let-item let-position="idx">
-                              {{item.name}}
-                            </ng-template>
-                          </app-typeahead>
-                        </ng-template>
-                      </app-setting-item>
-                    }
-                  </div>
-                </div>
-
-                <div class="row">
-                  <div class="mb-3">
-                    @if (getPersonsSettings(PersonRole.Translator); as settings) {
-                      <app-setting-item [title]="t('translator-label')" [toggleOnViewClick]="false" [showEdit]="false">
-                        <ng-template #view>
-                          <app-typeahead (selectedData)="updatePerson($event, PersonRole.Translator);metadata.translatorLocked = true;" [settings]="settings"
-                                         [(locked)]="metadata.translatorLocked" (onUnlock)="metadata.translatorLocked = false"
-                                         (newItemAdded)="metadata.translatorLocked = true">
-                            <ng-template #badgeItem let-item let-position="idx">
-                              {{item.name}}
-                            </ng-template>
-                            <ng-template #optionItem let-item let-position="idx">
-                              {{item.name}}
-                            </ng-template>
-                          </app-typeahead>
-                        </ng-template>
-                      </app-setting-item>
-                    }
-                  </div>
-                </div>
-
-                <div class="row">
-                  <div class="mb-3">
-                    @if (getPersonsSettings(PersonRole.Character); as settings) {
-                      <app-setting-item [title]="t('character-label')" [toggleOnViewClick]="false" [showEdit]="false">
-                        <ng-template #view>
-                          <app-typeahead (selectedData)="updatePerson($event, PersonRole.Character);metadata.characterLocked = true" [settings]="settings"
-                                         [(locked)]="metadata.characterLocked" (onUnlock)="metadata.characterLocked = false"
-                                         (newItemAdded)="metadata.characterLocked = true">
-                            <ng-template #badgeItem let-item let-position="idx">
-                              {{item.name}}
-                            </ng-template>
-                            <ng-template #optionItem let-item let-position="idx">
-                              {{item.name}}
-                            </ng-template>
-                          </app-typeahead>
-                        </ng-template>
-                      </app-setting-item>
-                    }
-                  </div>
-                </div>
-
-                <div class="row">
-                  <div class="mb-3">
-                    @if (getPersonsSettings(PersonRole.Team); as settings) {
-                      <app-setting-item [title]="t('team-label')" [toggleOnViewClick]="false" [showEdit]="false">
-                        <ng-template #view>
-                          <app-typeahead (selectedData)="updatePerson($event, PersonRole.Team);metadata.teamLocked = true" [settings]="settings"
-                                         [(locked)]="metadata.teamLocked" (onUnlock)="metadata.teamLocked = false"
-                                         (newItemAdded)="metadata.teamLocked = true">
-                            <ng-template #badgeItem let-item let-position="idx">
-                              {{item.name}}
-                            </ng-template>
-                            <ng-template #optionItem let-item let-position="idx">
-                              {{item.name}}
-                            </ng-template>
-                          </app-typeahead>
-                        </ng-template>
-                      </app-setting-item>
-                    }
-                  </div>
-                </div>
-
-                <div class="row">
-                  <div class="mb-3">
-                    @if (getPersonsSettings(PersonRole.Location); as settings) {
-                      <app-setting-item [title]="t('location-label')" [toggleOnViewClick]="false" [showEdit]="false">
-                        <ng-template #view>
-                          <app-typeahead (selectedData)="updatePerson($event, PersonRole.Location)" [settings]="settings"
-                                         [(locked)]="metadata.locationLocked" (onUnlock)="metadata.locationLocked = false"
-                                         (newItemAdded)="metadata.locationLocked = true">
-                            <ng-template #badgeItem let-item let-position="idx">
-                              {{item.name}}
-                            </ng-template>
-                            <ng-template #optionItem let-item let-position="idx">
-                              {{item.name}}
-                            </ng-template>
-                          </app-typeahead>
-                        </ng-template>
-                      </app-setting-item>
-                    }
-                  </div>
-                </div>
-
+                }
               </ng-template>
-            </li>
+            </app-setting-item>
+          </div>
+        </div>
 
-            @if (metadata) {
-              <li [ngbNavItem]="Tabs.WebLinks">
-                <a ngbNavLink>{{Tabs.WebLinks | tabTitle}}</a>
-                <ng-template ngbNavContent>
-                  <p>{{t('web-link-description')}}</p>
-                  <app-edit-list [items]="WebLinks" [label]="t('web-link-label')" (updateItems)="updateWeblinks($event)" />
+        @if (metadata) {
+          <div class="row">
+            <div class="mb-3" style="width: 100%">
+              <app-setting-item [title]="t('summary-label')" [toggleOnViewClick]="false" [showEdit]="false">
+                <ng-template #view>
+                  <div class="input-group {{metadata.summaryLocked ? 'lock-active' : ''}}">
+                    <ng-container [ngTemplateOutlet]="lock" [ngTemplateOutletContext]="{ item: metadata, field: 'summaryLocked' }" />
+                    <textarea id="summary" class="form-control" formControlName="summary" rows="4"></textarea>
+                  </div>
                 </ng-template>
-              </li>
-            }
+              </app-setting-item>
+            </div>
+          </div>
+        }
+      </ng-template>
+    }
 
-            <!--External Metadata Ids-->
-            @if (accountService.hasAdminRole()) {
-              <li [ngbNavItem]="Tabs.ExternalMetadataIds">
-                <a ngbNavLink>{{Tabs.ExternalMetadataIds | tabTitle}}</a>
-                <ng-template ngbNavContent>
-                  <app-edit-external-metadata-form [form]="editSeriesForm" [entity]="series"/>
+    @if (series && metadata) {
+      <ng-template [appEditTab]="Tabs.Metadata">
+        <app-edit-external-metadata-form [form]="editSeriesForm" [entity]="series"/>
+      </ng-template>
+    }
+
+    @if (series) {
+      <ng-template [appEditTab]="Tabs.People">
+        <div class="row">
+          <div class="mb-3">
+            @if (getPersonsSettings(PersonRole.Writer); as settings) {
+              <app-setting-item [title]="t('writer-label')" [toggleOnViewClick]="false" [showEdit]="false">
+                <ng-template #view>
+                  <app-typeahead (selectedData)="updatePerson($event, PersonRole.Writer);metadata.writerLocked = true" [settings]="settings"
+                                 [(locked)]="metadata.writerLocked" (onUnlock)="metadata.writerLocked = false"
+                                 (newItemAdded)="metadata.writerLocked = true">
+                    <ng-template #badgeItem let-item let-position="idx">
+                      {{item.name}}
+                    </ng-template>
+                    <ng-template #optionItem let-item let-position="idx">
+                      {{item.name}}
+                    </ng-template>
+                  </app-typeahead>
                 </ng-template>
-              </li>
+              </app-setting-item>
             }
+          </div>
+        </div>
+        <div class="row">
+          <div class="mb-3">
+            @if (getPersonsSettings(PersonRole.CoverArtist); as settings) {
+              <app-setting-item [title]="t('cover-artist-label')" [toggleOnViewClick]="false" [showEdit]="false">
+                <ng-template #view>
+                  <app-typeahead (selectedData)="updatePerson($event, PersonRole.CoverArtist);metadata.coverArtistLocked = true" [settings]="settings"
+                                 [(locked)]="metadata.coverArtistLocked" (onUnlock)="metadata.coverArtistLocked = false"
+                                 (newItemAdded)="metadata.coverArtistLocked = true">
+                    <ng-template #badgeItem let-item let-position="idx">
+                      {{item.name}}
+                    </ng-template>
+                    <ng-template #optionItem let-item let-position="idx">
+                      {{item.name}}
+                    </ng-template>
+                  </app-typeahead>
+                </ng-template>
+              </app-setting-item>
+            }
+          </div>
+        </div>
 
 
-            <li [ngbNavItem]="Tabs.CoverImage">
-              <a ngbNavLink>{{Tabs.CoverImage | tabTitle}}</a>
-              <ng-template ngbNavContent>
-                <p class="alert alert-warning" role="alert">
-                  {{t('cover-image-description')}}
-                </p>
-                <app-cover-image-chooser [config]="chooserConfig" (coverChanged)="handleCoverChanged($event)" (resetClicked)="handleReset()" />
-              </ng-template>
-            </li>
+        <div class="row">
+          <div class="mb-3">
+            @if (getPersonsSettings(PersonRole.Publisher); as settings) {
+              <app-setting-item [title]="t('publisher-label')" [toggleOnViewClick]="false" [showEdit]="false">
+                <ng-template #view>
+                  <app-typeahead (selectedData)="updatePerson($event, PersonRole.Publisher);metadata.publisherLocked = true" [settings]="settings"
+                                 [(locked)]="metadata.publisherLocked" (onUnlock)="metadata.publisherLocked = false"
+                                 (newItemAdded)="metadata.publisherLocked = true">
+                    <ng-template #badgeItem let-item let-position="idx">
+                      {{item.name}}
+                    </ng-template>
+                    <ng-template #optionItem let-item let-position="idx">
+                      {{item.name}}
+                    </ng-template>
+                  </app-typeahead>
+                </ng-template>
+              </app-setting-item>
+            }
+          </div>
+        </div>
 
-            <li [ngbNavItem]="Tabs.Related">
-              <a ngbNavLink>{{Tabs.Related | tabTitle}}</a>
-              <ng-template ngbNavContent>
-                <app-edit-series-relation [series]="series" [save]="saveNestedComponents" />
-              </ng-template>
-            </li>
+        <div class="row">
+          <div class="mb-3">
+            @if (getPersonsSettings(PersonRole.Imprint); as settings) {
+              <app-setting-item [title]="t('imprint-label')" [toggleOnViewClick]="false" [showEdit]="false">
+                <ng-template #view>
+                  <app-typeahead (selectedData)="updatePerson($event, PersonRole.Imprint);metadata.publisherLocked = true" [settings]="settings"
+                                 [(locked)]="metadata.imprintLocked" (onUnlock)="metadata.imprintLocked = false"
+                                 (newItemAdded)="metadata.imprintLocked = true">
+                    <ng-template #badgeItem let-item let-position="idx">
+                      {{item.name}}
+                    </ng-template>
+                    <ng-template #optionItem let-item let-position="idx">
+                      {{item.name}}
+                    </ng-template>
+                  </app-typeahead>
+                </ng-template>
+              </app-setting-item>
+            }
+          </div>
+        </div>
 
-            <li [ngbNavItem]="Tabs.Info">
-              <a ngbNavLink>{{Tabs.Info | tabTitle}}</a>
-              <ng-template ngbNavContent>
-                <h5>{{t('info-title')}}</h5>
-
-                <div class="row">
-                  <div class="col-lg-6 col-md-12 pe-2">
-                    <div class="mb-3">
-                      <app-setting-item [title]="t('library-title')" [toggleOnViewClick]="false" [showEdit]="false">
-                        <ng-template #view>
-                          {{libraryName! | sentenceCase}}
-                        </ng-template>
-                      </app-setting-item>
-                    </div>
-                  </div>
-                  <div class="col-lg-6 col-md-12 pe-2">
-                    <div class="mb-3">
-                      <app-setting-item [title]="t('format-title')" [toggleOnViewClick]="false" [showEdit]="false">
-                        <ng-template #view>
-                          {{series.format | mangaFormat}}
-                        </ng-template>
-                      </app-setting-item>
-                    </div>
-                  </div>
-                </div>
-
-                <div class="row">
-                  <div class="col-lg-6 col-md-12 pe-2">
-                    <div class="mb-3">
-                      <app-setting-item [title]="t('folder-path-title')" [subtitle]="t('folder-path-tooltip')" [toggleOnViewClick]="false" [showEdit]="false">
-                        <ng-template #view>
-                          {{series.folderPath | defaultValue}}
-                        </ng-template>
-                      </app-setting-item>
-                    </div>
-                  </div>
-                  <div class="col-lg-6 col-md-12 pe-2">
-                    <div class="mb-3">
-                      <app-setting-item [title]="t('lowest-folder-path-title')" [subtitle]="t('lowest-folder-path-tooltip')" [toggleOnViewClick]="false" [showEdit]="false">
-                        <ng-template #view>
-                          {{series.lowestFolderPath | defaultValue}}
-                        </ng-template>
-                      </app-setting-item>
-                    </div>
-                  </div>
-                </div>
-
-                @if (metadata) {
-                  <div class="row">
-                    <div class="col-lg-6 col-md-12 pe-2">
-                      <div class="mb-3">
-                        <app-setting-item [title]="t('max-items-title')" [subtitle]="t('highest-count-tooltip')" [toggleOnViewClick]="false" [showEdit]="false">
-                          <ng-template #view>
-                            @if (metadata.maxCount === LooseLeafOrDefaultNumber) {
-                              {{t('no-data')}}
-                            } @else {
-                              {{metadata.maxCount}}
-                            }
-                          </ng-template>
-                        </app-setting-item>
-                      </div>
-                    </div>
-                    <div class="col-lg-6 col-md-12 pe-2">
-                      <div class="mb-3">
-                        <app-setting-item [title]="t('total-items-title')" [subtitle]="t('max-issue-tooltip')" [toggleOnViewClick]="false" [showEdit]="false">
-                          <ng-template #view>
-                            {{metadata.totalCount}}
-                          </ng-template>
-                        </app-setting-item>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div class="row">
-                    <div class="col-lg-6 col-md-12 pe-2">
-                      <div class="mb-3">
-                        <app-setting-item [title]="t('publication-status-title')" [toggleOnViewClick]="false" [showEdit]="false">
-                          <ng-template #view>
-                            {{metadata.publicationStatus | publicationStatus}}
-                          </ng-template>
-                        </app-setting-item>
-                      </div>
-                    </div>
-                    <div class="col-lg-6 col-md-12 pe-2">
-                      <div class="mb-3">
-                        <app-setting-item [title]="t('size-title')" [toggleOnViewClick]="false" [showEdit]="false">
-                          <ng-template #view>
-                            {{size | bytes}}
-                          </ng-template>
-                        </app-setting-item>
-                      </div>
-                    </div>
-                  </div>
-                }
-
-                <div class="row">
-                  <div class="col-lg-6 col-md-12 pe-2">
-                    <div class="mb-3">
-                      <app-setting-item [title]="t('created-title')" [toggleOnViewClick]="false" [showEdit]="false">
-                        <ng-template #view>
-                          {{series.created | utcToLocalTime:'shortDate'}}
-                        </ng-template>
-                      </app-setting-item>
-                    </div>
-                  </div>
-                  <div class="col-lg-6 col-md-12 pe-2">
-                    <div class="mb-3">
-                      <app-setting-item [title]="t('last-added-title')" [toggleOnViewClick]="false" [showEdit]="false">
-                        <ng-template #view>
-                          {{series.lastChapterAdded | defaultDate | timeAgo}}
-                        </ng-template>
-                      </app-setting-item>
-                    </div>
-                  </div>
-                </div>
-
-                <div class="row">
-                  <div class="col-lg-6 col-md-12 pe-2">
-                    <div class="mb-3">
-                      <app-setting-item [title]="t('last-scanned-title')" [toggleOnViewClick]="false" [showEdit]="false">
-                        <ng-template #view>
-                          {{series.lastFolderScanned | defaultDate | timeAgo}}
-                        </ng-template>
-                      </app-setting-item>
-                    </div>
-                  </div>
-                  <div class="col-lg-6 col-md-12 pe-2">
-                    <div class="mb-3">
-                      <app-setting-item [title]="t('last-read-title')" [toggleOnViewClick]="false" [showEdit]="false">
-                        <ng-template #view>
-                          {{series.lastChapterAdded | defaultDate | timeAgo}}
-                        </ng-template>
-                      </app-setting-item>
-                    </div>
-                  </div>
-                </div>
-
-                <div class="row">
-                  <div class="col-lg-6 col-md-12 pe-2">
-                    <div class="mb-3">
-                      <app-setting-item [title]="t('total-pages-title')" [toggleOnViewClick]="false" [showEdit]="false">
-                        <ng-template #view>
-                          {{series.pages | number}}
-                        </ng-template>
-                      </app-setting-item>
-                    </div>
-                  </div>
-                  <div class="col-lg-6 col-md-12 pe-2">
-                    <div class="mb-3">
-                      <app-setting-item [title]="t('total-words-title')" [toggleOnViewClick]="false" [showEdit]="false">
-                        <ng-template #view>
-                          {{series.wordCount | number}}
-                        </ng-template>
-                      </app-setting-item>
-                    </div>
-                  </div>
-                </div>
-
-                <h4>{{t('volumes-title')}}</h4>
-                @if (isLoadingVolumes()) {
-                  <div class="spinner-border text-primary" role="status">
-                    <span class="visually-hidden">{{t('loading')}}</span>
-                  </div>
-                } @else {
-                  <ul class="list-unstyled">
-                    @for (volume of seriesVolumes; track volume.id) {
-                      <li class="d-flex my-4">
-                        <app-image class="me-3" style="width: 4.625rem;" width="74px" [imageUrl]="imageService.getVolumeCoverImage(volume.id)" />
-                        <div class="flex-grow-1">
-                          <h5 class="mt-0 mb-1">{{formatVolumeName(volume)}}</h5>
-                          <div>
-                            <div class="row">
-                              <div class="col">
-                                {{t('added-title')}} {{volume.createdUtc | utcToLocalTime | defaultDate}}
-                              </div>
-                              <div class="col">
-                                {{t('last-modified-title')}} {{volume.lastModifiedUtc | utcToLocalTime:'short' | defaultDate}}
-                              </div>
-                            </div>
-                            <div class="row">
-                              <div class="col">
-                                <button type="button" class="btn btn-outline-primary" (click)="collapse.toggle()"
-                                        [attr.aria-expanded]="!volumeCollapsed[volume.name]" [disabled]="!accountService.hasAdminRole()">
-                                  {{t('view-files')}}
-                                </button>
-                              </div>
-                              <div class="col">
-                                {{t('pages-title')}} {{volume.pages}}
-                              </div>
-                            </div>
-
-                            <div #collapse="ngbCollapse" [(ngbCollapse)]="volumeCollapsed[volume.name]">
-                              <ul class="list-group mt-2">
-                                @for(file of volume.volumeFiles; track file.id) {
-                                  <li class="list-group-item">
-                                    <span>{{file.filePath}}</span>
-                                    <div class="row">
-                                      <div class="col">
-                                        {{t('chapter-title')}} {{file.chapter}}
-                                      </div>
-                                      <div class="col">
-                                        {{t('pages-title')}} {{file.pages}}
-                                      </div>
-                                      <div class="col">
-                                        {{t('format-title')}} <span class="badge badge-secondary">{{file.format | mangaFormat}}</span>
-                                      </div>
-                                    </div>
-                                  </li>
-                                }
-                              </ul>
-                            </div>
-                          </div>
-                        </div>
-                      </li>
-                    }
-                  </ul>
-                }
-              </ng-template>
-            </li>
-
-            <li [ngbNavItem]="Tabs.Tasks">
-              <a ngbNavLink>{{Tabs.Tasks | tabTitle}}</a>
-              <ng-template ngbNavContent>
-                @for(task of tasks; track task.action) {
-                  @if (accountService.canCurrentUserInvokeAction(task.action)) {
-                    <div class="mt-3 mb-3">
-                      <app-setting-button [subtitle]="task.description">
-                        <button class="btn btn-{{task.action === Action.Delete ? 'danger' : 'secondary'}} btn-sm mb-2" (click)="runTask(task)">{{task.title}}</button>
-                      </app-setting-button>
-                    </div>
-                  }
-                }
-              </ng-template>
-            </li>
-          </ul>
-        </form>
-
-        <div [ngbNavOutlet]="nav" class="tab-content {{breakpointService.isMobile() ? 'mt-3' : 'ms-4 flex-fill'}}"></div>
-      </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" (click)="close()">{{t('close')}}</button>
-        <button type="submit" class="btn btn-primary" [disabled]="!editSeriesForm.valid" (click)="save()">{{t('save')}}</button>
-      </div>
-    </div>
+        <div class="row">
+          <div class="mb-3">
+            @if (getPersonsSettings(PersonRole.Penciller); as settings) {
+              <app-setting-item [title]="t('penciller-label')" [toggleOnViewClick]="false" [showEdit]="false">
+                <ng-template #view>
+                  <app-typeahead (selectedData)="updatePerson($event, PersonRole.Penciller);metadata.pencillerLocked = true" [settings]="settings"
+                                 [(locked)]="metadata.pencillerLocked" (onUnlock)="metadata.pencillerLocked = false"
+                                 (newItemAdded)="metadata.pencillerLocked = true">
+                    <ng-template #badgeItem let-item let-position="idx">
+                      {{item.name}}
+                    </ng-template>
+                    <ng-template #optionItem let-item let-position="idx">
+                      {{item.name}}
+                    </ng-template>
+                  </app-typeahead>
+                </ng-template>
+              </app-setting-item>
+            }
+          </div>
+        </div>
 
 
-    <ng-template #lock let-item="item" let-field="field">
+        <div class="row">
+          <div class="mb-3">
+            @if (getPersonsSettings(PersonRole.Letterer); as settings) {
+              <app-setting-item [title]="t('letterer-label')" [toggleOnViewClick]="false" [showEdit]="false">
+                <ng-template #view>
+                  <app-typeahead (selectedData)="updatePerson($event, PersonRole.Letterer);metadata.lettererLocked = true" [settings]="settings"
+                                 [(locked)]="metadata.lettererLocked" (onUnlock)="metadata.lettererLocked = false"
+                                 (newItemAdded)="metadata.lettererLocked = true">
+                    <ng-template #badgeItem let-item let-position="idx">
+                      {{item.name}}
+                    </ng-template>
+                    <ng-template #optionItem let-item let-position="idx">
+                      {{item.name}}
+                    </ng-template>
+                  </app-typeahead>
+                </ng-template>
+              </app-setting-item>
+            }
+          </div>
+        </div>
+        <div class="row">
+          <div class="mb-3">
+            @if (getPersonsSettings(PersonRole.Inker); as settings) {
+              <app-setting-item [title]="t('inker-label')" [toggleOnViewClick]="false" [showEdit]="false">
+                <ng-template #view>
+                  <app-typeahead (selectedData)="updatePerson($event, PersonRole.Inker);metadata.inkerLocked = true" [settings]="settings"
+                                 [(locked)]="metadata.inkerLocked" (onUnlock)="metadata.inkerLocked = false"
+                                 (newItemAdded)="metadata.inkerLocked = true">
+                    <ng-template #badgeItem let-item let-position="idx">
+                      {{item.name}}
+                    </ng-template>
+                    <ng-template #optionItem let-item let-position="idx">
+                      {{item.name}}
+                    </ng-template>
+                  </app-typeahead>
+                </ng-template>
+              </app-setting-item>
+            }
+          </div>
+        </div>
+
+
+
+        <div class="row">
+          <div class="mb-3">
+            @if (getPersonsSettings(PersonRole.Editor); as settings) {
+              <app-setting-item [title]="t('editor-label')" [toggleOnViewClick]="false" [showEdit]="false">
+                <ng-template #view>
+                  <app-typeahead (selectedData)="updatePerson($event, PersonRole.Editor);metadata.editorLocked = true" [settings]="settings"
+                                 [(locked)]="metadata.editorLocked" (onUnlock)="metadata.editorLocked = false"
+                                 (newItemAdded)="metadata.editorLocked = true">
+                    <ng-template #badgeItem let-item let-position="idx">
+                      {{item.name}}
+                    </ng-template>
+                    <ng-template #optionItem let-item let-position="idx">
+                      {{item.name}}
+                    </ng-template>
+                  </app-typeahead>
+                </ng-template>
+              </app-setting-item>
+            }
+          </div>
+        </div>
+        <div class="row">
+          <div class="mb-3">
+            @if (getPersonsSettings(PersonRole.Colorist); as settings) {
+              <app-setting-item [title]="t('colorist-label')" [toggleOnViewClick]="false" [showEdit]="false">
+                <ng-template #view>
+                  <app-typeahead (selectedData)="updatePerson($event, PersonRole.Colorist);metadata.coloristLocked = true" [settings]="settings"
+                                 [(locked)]="metadata.coloristLocked" (onUnlock)="metadata.coloristLocked = false"
+                                 (newItemAdded)="metadata.coloristLocked = true">
+                    <ng-template #badgeItem let-item let-position="idx">
+                      {{item.name}}
+                    </ng-template>
+                    <ng-template #optionItem let-item let-position="idx">
+                      {{item.name}}
+                    </ng-template>
+                  </app-typeahead>
+                </ng-template>
+              </app-setting-item>
+            }
+          </div>
+        </div>
+
+        <div class="row">
+          <div class="mb-3">
+            @if (getPersonsSettings(PersonRole.Translator); as settings) {
+              <app-setting-item [title]="t('translator-label')" [toggleOnViewClick]="false" [showEdit]="false">
+                <ng-template #view>
+                  <app-typeahead (selectedData)="updatePerson($event, PersonRole.Translator);metadata.translatorLocked = true;" [settings]="settings"
+                                 [(locked)]="metadata.translatorLocked" (onUnlock)="metadata.translatorLocked = false"
+                                 (newItemAdded)="metadata.translatorLocked = true">
+                    <ng-template #badgeItem let-item let-position="idx">
+                      {{item.name}}
+                    </ng-template>
+                    <ng-template #optionItem let-item let-position="idx">
+                      {{item.name}}
+                    </ng-template>
+                  </app-typeahead>
+                </ng-template>
+              </app-setting-item>
+            }
+          </div>
+        </div>
+
+        <div class="row">
+          <div class="mb-3">
+            @if (getPersonsSettings(PersonRole.Character); as settings) {
+              <app-setting-item [title]="t('character-label')" [toggleOnViewClick]="false" [showEdit]="false">
+                <ng-template #view>
+                  <app-typeahead (selectedData)="updatePerson($event, PersonRole.Character);metadata.characterLocked = true" [settings]="settings"
+                                 [(locked)]="metadata.characterLocked" (onUnlock)="metadata.characterLocked = false"
+                                 (newItemAdded)="metadata.characterLocked = true">
+                    <ng-template #badgeItem let-item let-position="idx">
+                      {{item.name}}
+                    </ng-template>
+                    <ng-template #optionItem let-item let-position="idx">
+                      {{item.name}}
+                    </ng-template>
+                  </app-typeahead>
+                </ng-template>
+              </app-setting-item>
+            }
+          </div>
+        </div>
+
+        <div class="row">
+          <div class="mb-3">
+            @if (getPersonsSettings(PersonRole.Team); as settings) {
+              <app-setting-item [title]="t('team-label')" [toggleOnViewClick]="false" [showEdit]="false">
+                <ng-template #view>
+                  <app-typeahead (selectedData)="updatePerson($event, PersonRole.Team);metadata.teamLocked = true" [settings]="settings"
+                                 [(locked)]="metadata.teamLocked" (onUnlock)="metadata.teamLocked = false"
+                                 (newItemAdded)="metadata.teamLocked = true">
+                    <ng-template #badgeItem let-item let-position="idx">
+                      {{item.name}}
+                    </ng-template>
+                    <ng-template #optionItem let-item let-position="idx">
+                      {{item.name}}
+                    </ng-template>
+                  </app-typeahead>
+                </ng-template>
+              </app-setting-item>
+            }
+          </div>
+        </div>
+
+        <div class="row">
+          <div class="mb-3">
+            @if (getPersonsSettings(PersonRole.Location); as settings) {
+              <app-setting-item [title]="t('location-label')" [toggleOnViewClick]="false" [showEdit]="false">
+                <ng-template #view>
+                  <app-typeahead (selectedData)="updatePerson($event, PersonRole.Location)" [settings]="settings"
+                                 [(locked)]="metadata.locationLocked" (onUnlock)="metadata.locationLocked = false"
+                                 (newItemAdded)="metadata.locationLocked = true">
+                    <ng-template #badgeItem let-item let-position="idx">
+                      {{item.name}}
+                    </ng-template>
+                    <ng-template #optionItem let-item let-position="idx">
+                      {{item.name}}
+                    </ng-template>
+                  </app-typeahead>
+                </ng-template>
+              </app-setting-item>
+            }
+          </div>
+        </div>
+      </ng-template>
+    }
+
+    @if (series && metadata) {
+      <ng-template [appEditTab]="Tabs.WebLinks">
+        <p>{{t('web-link-description')}}</p>
+        <app-edit-list [items]="WebLinks" [label]="t('web-link-label')" (updateItems)="updateWeblinks($event)" />
+      </ng-template>
+    }
+
+    @if (series) {
+     <ng-template [appEditTab]="Tabs.CoverImage">
+       <p class="alert alert-warning" role="alert">
+         {{t('cover-image-description')}}
+       </p>
+       <app-cover-image-chooser [config]="chooserConfig" (coverChanged)="handleCoverChanged($event)" (resetClicked)="handleReset()" />
+     </ng-template>
+    }
+
+    @if(series) {
+      <ng-template [appEditTab]="Tabs.Related">
+        <app-edit-series-relation [series]="series" [save]="saveNestedComponents" />
+      </ng-template>
+    }
+
+    @if (series) {
+     <ng-template [appEditTab]="Tabs.Info">
+       <div class="row">
+         <div class="col-lg-6 col-md-12 pe-2">
+           <div class="mb-3">
+             <app-setting-item [title]="t('library-title')" [toggleOnViewClick]="false" [showEdit]="false">
+               <ng-template #view>
+                 {{libraryName! | sentenceCase}}
+               </ng-template>
+             </app-setting-item>
+           </div>
+         </div>
+         <div class="col-lg-6 col-md-12 pe-2">
+           <div class="mb-3">
+             <app-setting-item [title]="t('format-title')" [toggleOnViewClick]="false" [showEdit]="false">
+               <ng-template #view>
+                 {{series.format | mangaFormat}}
+               </ng-template>
+             </app-setting-item>
+           </div>
+         </div>
+       </div>
+
+       <div class="row">
+         <div class="col-lg-6 col-md-12 pe-2">
+           <div class="mb-3">
+             <app-setting-item [title]="t('folder-path-title')" [subtitle]="t('folder-path-tooltip')" [toggleOnViewClick]="false" [showEdit]="false">
+               <ng-template #view>
+                 {{series.folderPath | defaultValue}}
+               </ng-template>
+             </app-setting-item>
+           </div>
+         </div>
+         <div class="col-lg-6 col-md-12 pe-2">
+           <div class="mb-3">
+             <app-setting-item [title]="t('lowest-folder-path-title')" [subtitle]="t('lowest-folder-path-tooltip')" [toggleOnViewClick]="false" [showEdit]="false">
+               <ng-template #view>
+                 {{series.lowestFolderPath | defaultValue}}
+               </ng-template>
+             </app-setting-item>
+           </div>
+         </div>
+       </div>
+
+       @if (metadata) {
+         <div class="row">
+           <div class="col-lg-6 col-md-12 pe-2">
+             <div class="mb-3">
+               <app-setting-item [title]="t('max-items-title')" [subtitle]="t('highest-count-tooltip')" [toggleOnViewClick]="false" [showEdit]="false">
+                 <ng-template #view>
+                   @if (metadata.maxCount === LooseLeafOrDefaultNumber) {
+                     {{t('no-data')}}
+                   } @else {
+                     {{metadata.maxCount}}
+                   }
+                 </ng-template>
+               </app-setting-item>
+             </div>
+           </div>
+           <div class="col-lg-6 col-md-12 pe-2">
+             <div class="mb-3">
+               <app-setting-item [title]="t('total-items-title')" [subtitle]="t('max-issue-tooltip')" [toggleOnViewClick]="false" [showEdit]="false">
+                 <ng-template #view>
+                   {{metadata.totalCount}}
+                 </ng-template>
+               </app-setting-item>
+             </div>
+           </div>
+         </div>
+
+         <div class="row">
+           <div class="col-lg-6 col-md-12 pe-2">
+             <div class="mb-3">
+               <app-setting-item [title]="t('publication-status-title')" [toggleOnViewClick]="false" [showEdit]="false">
+                 <ng-template #view>
+                   {{metadata.publicationStatus | publicationStatus}}
+                 </ng-template>
+               </app-setting-item>
+             </div>
+           </div>
+           <div class="col-lg-6 col-md-12 pe-2">
+             <div class="mb-3">
+               <app-setting-item [title]="t('size-title')" [toggleOnViewClick]="false" [showEdit]="false">
+                 <ng-template #view>
+                   {{size | bytes}}
+                 </ng-template>
+               </app-setting-item>
+             </div>
+           </div>
+         </div>
+       }
+
+       <div class="row">
+         <div class="col-lg-6 col-md-12 pe-2">
+           <div class="mb-3">
+             <app-setting-item [title]="t('created-title')" [toggleOnViewClick]="false" [showEdit]="false">
+               <ng-template #view>
+                 {{series.created | utcToLocalTime:'shortDate'}}
+               </ng-template>
+             </app-setting-item>
+           </div>
+         </div>
+         <div class="col-lg-6 col-md-12 pe-2">
+           <div class="mb-3">
+             <app-setting-item [title]="t('last-added-title')" [toggleOnViewClick]="false" [showEdit]="false">
+               <ng-template #view>
+                 {{series.lastChapterAdded | defaultDate | timeAgo}}
+               </ng-template>
+             </app-setting-item>
+           </div>
+         </div>
+       </div>
+
+       <div class="row">
+         <div class="col-lg-6 col-md-12 pe-2">
+           <div class="mb-3">
+             <app-setting-item [title]="t('last-scanned-title')" [toggleOnViewClick]="false" [showEdit]="false">
+               <ng-template #view>
+                 {{series.lastFolderScanned | defaultDate | timeAgo}}
+               </ng-template>
+             </app-setting-item>
+           </div>
+         </div>
+         <div class="col-lg-6 col-md-12 pe-2">
+           <div class="mb-3">
+             <app-setting-item [title]="t('last-read-title')" [toggleOnViewClick]="false" [showEdit]="false">
+               <ng-template #view>
+                 {{series.lastChapterAdded | defaultDate | timeAgo}}
+               </ng-template>
+             </app-setting-item>
+           </div>
+         </div>
+       </div>
+
+       <div class="row">
+         <div class="col-lg-6 col-md-12 pe-2">
+           <div class="mb-3">
+             <app-setting-item [title]="t('total-pages-title')" [toggleOnViewClick]="false" [showEdit]="false">
+               <ng-template #view>
+                 {{series.pages | number}}
+               </ng-template>
+             </app-setting-item>
+           </div>
+         </div>
+         <div class="col-lg-6 col-md-12 pe-2">
+           <div class="mb-3">
+             <app-setting-item [title]="t('total-words-title')" [toggleOnViewClick]="false" [showEdit]="false">
+               <ng-template #view>
+                 {{series.wordCount | number}}
+               </ng-template>
+             </app-setting-item>
+           </div>
+         </div>
+       </div>
+
+       <h4>{{t('volumes-title')}}</h4>
+       @if (isLoadingVolumes()) {
+         <div class="spinner-border text-primary" role="status">
+           <span class="visually-hidden">{{t('loading')}}</span>
+         </div>
+       } @else {
+         <ul class="list-unstyled">
+           @for (volume of seriesVolumes; track volume.id) {
+             <li class="d-flex my-4">
+               <app-image class="me-3" style="width: 4.625rem;" width="74px" [imageUrl]="imageService.getVolumeCoverImage(volume.id)" />
+               <div class="flex-grow-1">
+                 <h5 class="mt-0 mb-1">{{formatVolumeName(volume)}}</h5>
+                 <div>
+                   <div class="row">
+                     <div class="col">
+                       {{t('added-title')}} {{volume.createdUtc | utcToLocalTime | defaultDate}}
+                     </div>
+                     <div class="col">
+                       {{t('last-modified-title')}} {{volume.lastModifiedUtc | utcToLocalTime:'short' | defaultDate}}
+                     </div>
+                   </div>
+                   <div class="row">
+                     <div class="col">
+                       <button type="button" class="btn btn-outline-primary" (click)="collapse.toggle()"
+                               [attr.aria-expanded]="!volumeCollapsed[volume.name]" [disabled]="!accountService.hasAdminRole()">
+                         {{t('view-files')}}
+                       </button>
+                     </div>
+                     <div class="col">
+                       {{t('pages-title')}} {{volume.pages}}
+                     </div>
+                   </div>
+
+                   <div #collapse="ngbCollapse" [(ngbCollapse)]="volumeCollapsed[volume.name]">
+                     <ul class="list-group mt-2">
+                       @for(file of volume.volumeFiles; track file.id) {
+                         <li class="list-group-item">
+                           <span>{{file.filePath}}</span>
+                           <div class="row">
+                             <div class="col">
+                               {{t('chapter-title')}} {{file.chapter}}
+                             </div>
+                             <div class="col">
+                               {{t('pages-title')}} {{file.pages}}
+                             </div>
+                             <div class="col">
+                               {{t('format-title')}} <span class="badge badge-secondary">{{file.format | mangaFormat}}</span>
+                             </div>
+                           </div>
+                         </li>
+                       }
+                     </ul>
+                   </div>
+                 </div>
+               </div>
+             </li>
+           }
+         </ul>
+       }
+     </ng-template>
+    }
+
+    @if (series) {
+     <ng-template [appEditTab]="Tabs.Tasks">
+       @for(task of tasks; track task.action) {
+         @if (accountService.canCurrentUserInvokeAction(task.action)) {
+           <div class="mt-3 mb-3">
+             <app-setting-button [subtitle]="task.description">
+               <button class="btn btn-{{task.action === Action.Delete ? 'danger' : 'secondary'}} btn-sm mb-2" (click)="runTask(task)">{{task.title}}</button>
+             </app-setting-button>
+           </div>
+         }
+       }
+     </ng-template>
+    }
+
+  </app-edit-modal-shell>
+
+
+  <ng-template #lock let-item="item" let-field="field">
     <span class="input-group-text clickable" (click)="unlock(item, field)">
         <i class="fa fa-lock" aria-hidden="true"></i>
         <span class="visually-hidden">{{t('field-locked-alt')}}</span>
     </span>
-    </ng-template>
-  }
-
+  </ng-template>
 
 
 </ng-container>

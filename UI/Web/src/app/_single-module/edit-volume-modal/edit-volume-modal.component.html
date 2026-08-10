@@ -1,146 +1,130 @@
 <ng-container *transloco="let t; prefix: 'edit-volume-modal'">
-  <div class="modal-container">
-    <div class="modal-header">
-      <h4 class="modal-title">{{t('title')}} <app-entity-title [libraryType]="libraryType" [entity]="volume" [prioritizeTitleName]="false" /></h4>
-      <button type="button" class="btn-close" [attr.aria-label]="t('close')" (click)="close()"></button>
-    </div>
-    <div class="modal-body scrollable-modal" [ngClass]="{'d-flex': breakpointService.isAboveMobile()}">
-      <form [formGroup]="editForm">
-        <ul ngbNav #nav="ngbNav" [(activeId)]="activeId" class="nav-pills" orientation="{{breakpointService.isMobile() ? 'horizontal' : 'vertical'}}" style="min-width: 8.4375rem;">
 
-          <!--External Metadata Ids-->
-          @if (accountService.hasAdminRole()) {
-            <li [ngbNavItem]="Tabs.ExternalMetadataIds">
-              <a ngbNavLink>{{Tabs.ExternalMetadataIds | tabTitle}}</a>
-              <ng-template ngbNavContent>
-                <app-edit-external-metadata-form [form]="editForm" [entity]="volume"/>
+
+  <app-edit-modal-shell
+    [title]="t('title')"
+    [translocoPrefix]="'edit-volume-modal'"
+    [formGroup]="editForm"
+    (activeTabIdChange)="changeTab($event)"
+    [activeTabId]="activeId"
+    (close)="close()"
+    (save)="save()"
+    >
+
+    <ng-template #title>
+      {{t('title')}} <app-entity-title [libraryType]="libraryType" [entity]="volume" [prioritizeTitleName]="false" />
+    </ng-template>
+
+
+    <!-- Info Tab -->
+    <ng-template [appEditTab]="Tabs.Info">
+      <div class="row">
+        <div class="col-lg-6 col-md-12 pe-2">
+          <div class="mb-3">
+            <app-setting-item [title]="t('pages-label')" [toggleOnViewClick]="false" [showEdit]="false">
+              <ng-template #view>
+                {{t('pages-count', {num: volume.pages | compactNumber})}}
               </ng-template>
-            </li>
-          }
-
-
-          <!-- Info Tab -->
-          <li [ngbNavItem]="Tabs.Info">
-            <a ngbNavLink>{{t(Tabs.Info)}}</a>
-            <ng-template ngbNavContent>
-              <div class="row">
-                <div class="col-lg-6 col-md-12 pe-2">
-                  <div class="mb-3">
-                    <app-setting-item [title]="t('pages-label')" [toggleOnViewClick]="false" [showEdit]="false">
-                      <ng-template #view>
-                        {{t('pages-count', {num: volume.pages | compactNumber})}}
-                      </ng-template>
-                    </app-setting-item>
-                  </div>
-                </div>
-                <div class="col-lg-6 col-md-12 pe-2">
-                  <div class="mb-3">
-                    <app-setting-item [title]="t('words-label')" [toggleOnViewClick]="false" [showEdit]="false">
-                      <ng-template #view>
-                        {{t('words-count', {num: volume.wordCount | compactNumber})}}
-                      </ng-template>
-                    </app-setting-item>
-                  </div>
-                </div>
-              </div>
-
-              <div class="row">
-                <div class="col-lg-6 col-md-12 pe-2">
-                  <div class="mb-3">
-                    <app-setting-item [title]="t('read-time-label')" [toggleOnViewClick]="false" [showEdit]="false">
-                      <ng-template #view>
-                        {{volume | readTime }}
-                      </ng-template>
-                    </app-setting-item>
-                  </div>
-                </div>
-                <div class="col-lg-6 col-md-12 pe-2">
-                  <div class="mb-3">
-                    <app-setting-item [title]="t('size-label')" [toggleOnViewClick]="false" [showEdit]="false">
-                      <ng-template #view>
-                        {{size | bytes}}
-                      </ng-template>
-                    </app-setting-item>
-                  </div>
-                </div>
-              </div>
-
-
-              <div class="row">
-                <div class="col-lg-6 col-md-12 pe-2">
-                  <div class="mb-3">
-                    <app-setting-item [title]="t('date-added-label')" [toggleOnViewClick]="false" [showEdit]="false">
-                      <ng-template #view>
-                        {{volume.createdUtc | utcToLocalTime:'short' | defaultDate}}
-                      </ng-template>
-                    </app-setting-item>
-                  </div>
-                </div>
-                <div class="col-lg-6 col-md-12 pe-2">
-                  <div class="mb-3">
-                    <app-setting-item [title]="t('id-label')" [toggleOnViewClick]="false" [showEdit]="false">
-                      <ng-template #view>
-                        {{volume.id}}
-                      </ng-template>
-                    </app-setting-item>
-                  </div>
-                </div>
-              </div>
-
-              @if (accountService.hasAdminRole()) {
-                <app-setting-item [title]="t('files-label')" [toggleOnViewClick]="false" [showEdit]="false">
-                  <ng-template #view>
-                    @for (file of files; track file.id) {
-                      <div>
-                        <span>{{file.filePath}}</span><span class="dot-separator mx-2"></span><span>{{file.bytes | bytes}}</span>
-                      </div>
-                    }
-                  </ng-template>
-                </app-setting-item>
-              }
-
-            </ng-template>
-          </li>
-
-          <!-- Cover Tab -->
-          @if (accountService.hasAdminRole()) {
-            <li [ngbNavItem]="Tabs.CoverImage">
-              <a ngbNavLink>{{Tabs.CoverImage | tabTitle}}</a>
-              <ng-template ngbNavContent>
-                <p class="alert alert-warning" role="alert">
-                  {{t('cover-image-description')}}
-                </p>
-                <app-cover-image-chooser [config]="chooserConfig" (coverChanged)="handleCoverChanged($event)" (resetClicked)="handleReset()" />
+            </app-setting-item>
+          </div>
+        </div>
+        <div class="col-lg-6 col-md-12 pe-2">
+          <div class="mb-3">
+            <app-setting-item [title]="t('words-label')" [toggleOnViewClick]="false" [showEdit]="false">
+              <ng-template #view>
+                {{t('words-count', {num: volume.wordCount | compactNumber})}}
               </ng-template>
-            </li>
-          }
+            </app-setting-item>
+          </div>
+        </div>
+      </div>
 
-          <!-- Tasks Tab -->
-          <li [ngbNavItem]="Tabs.Tasks">
-            <a ngbNavLink>{{Tabs.Tasks | tabTitle}}</a>
-            <ng-template ngbNavContent>
-              @for(task of tasks; track task.action) {
-                @if (accountService.canCurrentUserInvokeAction(task.action)) {
-                  <div class="mt-3 mb-3">
-                    <app-setting-button [subtitle]="task.description">
-                      <button class="btn btn-{{task.action === Action.Delete ? 'danger' : 'secondary'}} btn-sm mb-2" (click)="runTask(task)">{{task.title}}</button>
-                    </app-setting-button>
-                  </div>
-                }
-              }
-            </ng-template>
-          </li>
-        </ul>
-      </form>
-
-      <div [ngbNavOutlet]="nav" class="tab-content {{breakpointService.isMobile() ? 'mt-3' : 'ms-4 flex-fill'}}"></div>
-    </div>
-    <div class="modal-footer">
-      <button type="button" class="btn btn-secondary" (click)="close()">{{t('close')}}</button>
-      <button type="submit" class="btn btn-primary" [disabled]="!editForm.valid" (click)="save()">{{t('save')}}</button>
-    </div>
-  </div>
+      <div class="row">
+        <div class="col-lg-6 col-md-12 pe-2">
+          <div class="mb-3">
+            <app-setting-item [title]="t('read-time-label')" [toggleOnViewClick]="false" [showEdit]="false">
+              <ng-template #view>
+                {{volume | readTime }}
+              </ng-template>
+            </app-setting-item>
+          </div>
+        </div>
+        <div class="col-lg-6 col-md-12 pe-2">
+          <div class="mb-3">
+            <app-setting-item [title]="t('size-label')" [toggleOnViewClick]="false" [showEdit]="false">
+              <ng-template #view>
+                {{size | bytes}}
+              </ng-template>
+            </app-setting-item>
+          </div>
+        </div>
+      </div>
 
 
+      <div class="row">
+        <div class="col-lg-6 col-md-12 pe-2">
+          <div class="mb-3">
+            <app-setting-item [title]="t('date-added-label')" [toggleOnViewClick]="false" [showEdit]="false">
+              <ng-template #view>
+                {{volume.createdUtc | utcToLocalTime:'short' | defaultDate}}
+              </ng-template>
+            </app-setting-item>
+          </div>
+        </div>
+        <div class="col-lg-6 col-md-12 pe-2">
+          <div class="mb-3">
+            <app-setting-item [title]="t('id-label')" [toggleOnViewClick]="false" [showEdit]="false">
+              <ng-template #view>
+                {{volume.id}}
+              </ng-template>
+            </app-setting-item>
+          </div>
+        </div>
+      </div>
+
+      @if (accountService.hasAdminRole()) {
+        <app-setting-item [title]="t('files-label')" [toggleOnViewClick]="false" [showEdit]="false">
+          <ng-template #view>
+            @for (file of files; track file.id) {
+              <div>
+                <span>{{file.filePath}}</span><span class="dot-separator mx-2"></span><span>{{file.bytes | bytes}}</span>
+              </div>
+            }
+          </ng-template>
+        </app-setting-item>
+      }
+    </ng-template>
+
+    <!--External Metadata Ids-->
+    @if (accountService.hasAdminRole()) {
+      <ng-template [appEditTab]="Tabs.ExternalMetadataIds">
+        <app-edit-external-metadata-form [form]="editForm" [entity]="volume"/>
+      </ng-template>
+    }
+
+    <!-- Cover Tab -->
+    @if (accountService.hasAdminRole()) {
+      <ng-template [appEditTab]="Tabs.CoverImage">
+        <p class="alert alert-warning" role="alert">
+          {{t('cover-image-description')}}
+        </p>
+        <app-cover-image-chooser [config]="chooserConfig" (coverChanged)="handleCoverChanged($event)" (resetClicked)="handleReset()" />
+      </ng-template>
+    }
+
+    <!-- Tasks Tab -->
+    <ng-template [appEditTab]="Tabs.Tasks">
+      @for(task of tasks; track task.action) {
+        @if (accountService.canCurrentUserInvokeAction(task.action)) {
+          <div class="mt-3 mb-3">
+            <app-setting-button [subtitle]="task.description">
+              <button class="btn btn-{{task.action === Action.Delete ? 'danger' : 'secondary'}} btn-sm mb-2" (click)="runTask(task)">{{task.title}}</button>
+            </app-setting-button>
+          </div>
+        }
+      }
+    </ng-template>
+
+  </app-edit-modal-shell>
 
 </ng-container>
