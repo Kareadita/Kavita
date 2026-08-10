@@ -1,7 +1,7 @@
 <ng-container *transloco="let t; prefix:'manage-metadata-settings'">
 
   <p>{{t('description')}}</p>
-  @if (isLoaded) {
+  @if (isLoaded()) {
     <form [formGroup]="settingsForm">
 
       <!--
@@ -80,7 +80,7 @@
             <div ngbAccordionBody>
               <ng-template>
                 <p>{{t('language-description')}}</p>
-                
+
                 <ng-template #languageCodeField let-control let-id="id" let-label="label">
                   <label class="form-label" [for]="id">{{label}}</label>
                   <input type="text" class="form-control" [formControl]="control" [id]="id"
@@ -417,7 +417,7 @@
                   @if (settingsForm.get('personRoles')) {
                     <h5>{{t('person-roles-label')}}</h5>
                     <div class="row g-0 mt-4 mb-4" formArrayName="personRoles">
-                      @for(role of personRoles; track role; let i = $index) {
+                      @for(role of personRoles(); track role; let i = $index) {
                         <div class="col-md-3">
                           <div class="form-check">
                             <input type="checkbox" class="form-check-input" [formControlName]="'personRole_' + i" [id]="'role-' + role">
@@ -490,8 +490,8 @@
         </div>
       </div>
 
-      @if (settings) {
-        <app-manage-metadata-mappings [settings]="settings" [settingsForm]="settingsForm" />
+      @if (settings(); as s) {
+        <app-manage-metadata-mappings [settings]="s" [settingsForm]="settingsForm" />
       }
 
       @if (settingsForm.get('overrides')) {

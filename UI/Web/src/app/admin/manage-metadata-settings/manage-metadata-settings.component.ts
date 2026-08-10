@@ -101,10 +101,10 @@ export class ManageMetadataSettingsComponent implements OnInit {
   private readonly serverService = inject(ServerService);
 
   settingsForm: FormGroup = new FormGroup({});
-  settings: MetadataSettings | undefined = undefined;
-  personRoles: PersonRole[] = [PersonRole.Writer, PersonRole.CoverArtist, PersonRole.Character];
-  isLoaded = false;
-  allMetadataSettingFields = allMetadataSettingField;
+  settings = signal<MetadataSettings | undefined>(undefined);
+  personRoles = signal<PersonRole[]>([PersonRole.Writer, PersonRole.CoverArtist, PersonRole.Character]);
+  isLoaded = signal<boolean>(false);
+
 
   isReRunInProgress = signal(true);
 
@@ -168,8 +168,7 @@ export class ManageMetadataSettingsComponent implements OnInit {
     });
 
     this.settingService.getMetadataSettings().subscribe(settings => {
-      this.settings = settings;
-      this.cdRef.markForCheck();
+      this.settings.set(settings);
 
       this.settingsForm.addControl('enabled', new FormControl(settings.enabled, []));
       this.settingsForm.addControl('enableExtendedMetadataProcessing', new FormControl(settings.enableExtendedMetadataProcessing, []));
@@ -213,7 +212,7 @@ export class ManageMetadataSettingsComponent implements OnInit {
       this.settingsForm.addControl('firstLastPeopleNaming', new FormControl((settings.firstLastPeopleNaming), []));
       this.settingsForm.addControl('personRoles', this.fb.group(
         Object.fromEntries(
-          this.personRoles.map((role, index) => [
+          this.personRoles().map((role, index) => [
             `personRole_${index}`,
             this.fb.control((settings.personRoles || this.personRoles).includes(role)),
           ])
@@ -250,8 +249,7 @@ export class ManageMetadataSettingsComponent implements OnInit {
         }
       });
 
-      this.isLoaded = true;
-      this.cdRef.markForCheck();
+      this.isLoaded.set(true);
 
 
       this.settingsForm.valueChanges.pipe(
@@ -295,7 +293,7 @@ export class ManageMetadataSettingsComponent implements OnInit {
       whitelist: exp.whitelist,
       personRoles: Object.entries(this.settingsForm.get('personRoles')!.value)
         .filter(([_, value]) => value)
-        .map(([key, _]) => this.personRoles[parseInt(key.split('_')[1], 10)]),
+        .map(([key, _]) => this.personRoles()[parseInt(key.split('_')[1], 10)]),
       overrides: Object.entries(this.settingsForm.get('overrides')!.value)
         .filter(([_, value]) => value)
         .map(([key, _]) => this.allMetadataSettingFields[parseInt(key.split('_')[1], 10)]),
@@ -360,5 +358,6 @@ export class ManageMetadataSettingsComponent implements OnInit {
     ];
   }
 
+  protected readonly allMetadataSettingFields = allMetadataSettingField;
   protected readonly SettingsTabId = SettingsTabId;
 }
