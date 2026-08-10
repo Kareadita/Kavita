@@ -110,7 +110,7 @@ export class ImageZoomDirective {
   /** The scalar for zooming with the mouse wheel */
   private readonly zoomScalar = 0.0015;
   /** The maximum zoom level */
-  private readonly maxZoomLevel = 4;
+  private readonly maxZoomLevel = 8;
 
   transform = 'translate3d(0, 0, 0) scale(1)';
   cursor = 'default';
