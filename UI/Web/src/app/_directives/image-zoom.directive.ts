@@ -386,8 +386,7 @@ export class ImageZoomDirective {
       : 1;
 
     // Apply the zoom out ratio to the focal translation
-    this.translateX = focalTranslateX * zoomOutRatio;
-    this.translateY = focalTranslateY * zoomOutRatio;
+    [this.translateX, this.translateY] = this.clampTranslation(focalTranslateX * zoomOutRatio, focalTranslateY * zoomOutRatio);
 
     this.updateTransform();
   }
@@ -424,9 +423,45 @@ export class ImageZoomDirective {
       this.suppressNextPaginationClick = true;
     }
 
-    this.translateX = this.panStartTranslateX + clientX - this.panStartX;
-    this.translateY = this.panStartTranslateY + clientY - this.panStartY;
+    [this.translateX, this.translateY] = this.clampTranslation(this.panStartTranslateX + clientX - this.panStartX, this.panStartTranslateY + clientY - this.panStartY);
     this.updateTransform();
+  }
+
+  /**
+   * Keeps the scaled image within the reading area's viewport.
+   * An axis with no overflow is kept centered, which leaves its black bars
+   * untouched while allowing panning on the other axis.
+   * @param translateX The proposed X translation
+   * @param translateY The proposed Y translation
+   * @returns The clamped X and Y translations
+   */
+  private clampTranslation(translateX: number, translateY: number): [number, number] {
+    const readingArea = this.element.nativeElement.closest('.reading-area');
+    if (!readingArea) {
+      return [translateX, translateY];
+    }
+
+    const elementRect = this.element.nativeElement.getBoundingClientRect();
+    const readingAreaRect = readingArea.getBoundingClientRect();
+    const elementWidth = this.element.nativeElement.offsetWidth || elementRect.width / this.scale;
+    const elementHeight = this.element.nativeElement.offsetHeight || elementRect.height / this.scale;
+    const elementCenterX = (elementRect.left + elementRect.right) / 2 - this.translateX;
+    const elementCenterY = (elementRect.top + elementRect.bottom) / 2 - this.translateY;
+
+    const minTranslateX = readingAreaRect.right - elementCenterX - elementWidth * this.scale / 2;
+    const maxTranslateX = readingAreaRect.left - elementCenterX + elementWidth * this.scale / 2;
+    const minTranslateY = readingAreaRect.bottom - elementCenterY - elementHeight * this.scale / 2;
+    const maxTranslateY = readingAreaRect.top - elementCenterY + elementHeight * this.scale / 2;
+    const scaledWidth = elementWidth * this.scale;
+    const scaledHeight = elementHeight * this.scale;
+    const clampedX = scaledWidth <= readingAreaRect.width
+      ? (readingAreaRect.left + readingAreaRect.right) / 2 - elementCenterX
+      : Math.min(maxTranslateX, Math.max(minTranslateX, translateX));
+    const clampedY = scaledHeight <= readingAreaRect.height
+      ? (readingAreaRect.top + readingAreaRect.bottom) / 2 - elementCenterY
+      : Math.min(maxTranslateY, Math.max(minTranslateY, translateY));
+
+    return [clampedX, clampedY];
   }
 
   /**
