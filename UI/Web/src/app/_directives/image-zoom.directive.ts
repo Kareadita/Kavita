@@ -487,16 +487,24 @@ export class ImageZoomDirective {
    */
   private updateOverflowState(): void {
     if (!this.lockScroll) return;
-
+    
     // Prevent unnecessary DOM manipulations
+    const isZoomedIn = this.isZoomedIn();
     const wasZoomedIn = this.element.nativeElement.dataset['imagezoomedin'] === 'true';
-    if (wasZoomedIn === this.isZoomedIn()) { return; }
-    this.element.nativeElement.dataset['imagezoomedin'] = this.isZoomedIn().toString();
+    if (wasZoomedIn === isZoomedIn) { return; }
+    this.element.nativeElement.dataset['imagezoomedin'] = isZoomedIn.toString();
 
     const readingArea = this.element.nativeElement.closest('.reading-area');
     const reader = readingArea?.closest('.reader');
-    readingArea?.classList.toggle('image-zoom-active', this.isZoomedIn());
-    reader?.classList.toggle('image-zoom-active', this.isZoomedIn());
+    readingArea?.classList.toggle('image-zoom-active', isZoomedIn);
+    reader?.classList.toggle('image-zoom-active', isZoomedIn);
+
+    const imageContainer = this.element.nativeElement.closest<HTMLElement>('.image-container');
+    if (isZoomedIn) {
+      imageContainer?.style.setProperty('overflow', 'hidden');
+    } else {
+      imageContainer?.style.removeProperty('overflow');
+    }
   }
 
   /**
