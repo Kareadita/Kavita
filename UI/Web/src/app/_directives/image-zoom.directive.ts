@@ -453,6 +453,11 @@ export class ImageZoomDirective {
   private updateOverflowState(): void {
     if (!this.lockScroll) return;
 
+    // Prevent unnecessary DOM manipulations
+    const wasZoomedIn = this.element.nativeElement.dataset['imagezoomedin'] === 'true';
+    if (wasZoomedIn === this.isZoomedIn()) { return; }
+    this.element.nativeElement.dataset['imagezoomedin'] = this.isZoomedIn().toString();
+
     const readingArea = this.element.nativeElement.closest('.reading-area');
     const reader = readingArea?.closest('.reader');
     readingArea?.classList.toggle('image-zoom-active', this.isZoomedIn());
