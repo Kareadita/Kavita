@@ -899,7 +899,7 @@ public class ExternalMetadataService : IExternalMetadataService
 
             Accumulate(ref madeModification, fieldChanges, await UpdateGenres(series, settings, externalMetadata, processedGenres));
             Accumulate(ref madeModification, fieldChanges, await UpdateTags(series, settings, externalMetadata, processedTags));
-            Accumulate(ref madeModification, fieldChanges, UpdateAgeRating(series, settings, processedGenres.Concat(processedTags)));
+            Accumulate(ref madeModification, fieldChanges, UpdateAgeRating(series, settings, externalMetadata, processedGenres.Concat(processedTags)));
             // _logger.LogDebug("Tags/Genres took {Time}ms", sw.ElapsedMilliseconds);
             // sw.Restart();
 
@@ -1695,7 +1695,7 @@ public class ExternalMetadataService : IExternalMetadataService
         return (false, null);
     }
 
-    private (bool, MetadataFieldChangeDto?) UpdateAgeRating(Series series, MetadataSettingsDto settings, IEnumerable<string> allExternalTags)
+    private (bool, MetadataFieldChangeDto?) UpdateAgeRating(Series series, MetadataSettingsDto settings, ExternalSeriesDetailDto externalMetadata, IEnumerable<string> allExternalTags)
     {
         if (series.Metadata.AgeRatingLocked && !HasForceOverride(settings, series.Metadata, MetadataSettingField.AgeRating))
         {
@@ -1709,14 +1709,22 @@ public class ExternalMetadataService : IExternalMetadataService
                 .Concat(series.Metadata.Tags.Select(g => g.Title));
 
             var from = series.Metadata.AgeRating;
-            var ageRating = DetermineAgeRating(totalTags, settings.AgeRatingMappings);
-            if (series.Metadata.AgeRating <= ageRating)
-            {
-                series.Metadata.AgeRating = ageRating;
-                series.Metadata.AddKPlusOverride(MetadataSettingField.AgeRating);
 
-                return (true, new MetadataFieldChangeDto(MetadataFieldChangeKind.AgeRating, from.ToString(), ageRating.ToString()));
-            }
+            // Find the highest age rating from the different mapping mechanisms + the age rating from Kavita+
+            var externalAgeRating = externalMetadata.AgeRating;
+            var baseDerivedAgeRating = !string.IsNullOrEmpty(externalMetadata.AgeRatingRaw) ?
+                DetermineAgeRating([externalMetadata.AgeRatingRaw], settings.ExternalAgeRatingMappings)
+                : AgeRating.Unknown;
+            var tagDerivedAgeRating = DetermineAgeRating(totalTags, settings.AgeRatingMappings);
+            AgeRating[] candidates = [externalAgeRating, baseDerivedAgeRating, tagDerivedAgeRating];
+
+            var toSetAgeRating = candidates.Max();
+
+            if (toSetAgeRating == AgeRating.Unknown || toSetAgeRating == from) return (false, null);
+
+            series.Metadata.AgeRating = toSetAgeRating;
+            series.Metadata.AddKPlusOverride(MetadataSettingField.AgeRating);
+            return (true, new MetadataFieldChangeDto(MetadataFieldChangeKind.AgeRating, from.ToString(), series.Metadata.AgeRating.ToString()));
         }
         catch (Exception ex)
         {

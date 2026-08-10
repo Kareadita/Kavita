@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using Kavita.Models.DTOs.KavitaPlus.Metadata;
 using Kavita.Models.Entities.Enums;
 
 namespace Kavita.Models.Entities.MetadataMatching;
@@ -139,4 +140,8 @@ public class MetadataSettings
     /// Which Roles to allow metadata downloading for
     /// </summary>
     public List<PersonRole> PersonRoles { get; set; }
+    /// <summary>
+    /// Optional mappings of strings -> ComicInfo Age Ratings
+    /// </summary>
+    public Dictionary<string, AgeRating> ExternalAgeRatingMappings { get; set; } = [];
 }

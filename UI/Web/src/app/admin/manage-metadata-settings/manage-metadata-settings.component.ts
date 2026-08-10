@@ -60,6 +60,11 @@ import {
   unknownLanguageSubtags,
   unknownScriptSubtags
 } from "../../shared/utils/language-code.util";
+import {
+  AgeRatingMapperComponent,
+  buildAgeRatingMappingsArray,
+  packAgeRatingMappings
+} from "../../shared/_components/age-rating-mapper/age-rating-mapper.component";
 
 
 @Component({
@@ -80,6 +85,7 @@ import {
     NgbAccordionBody,
     SettingMultiTextFieldComponent,
     NgTemplateOutlet,
+    AgeRatingMapperComponent,
 
   ],
   templateUrl: './manage-metadata-settings.component.html',
@@ -208,6 +214,9 @@ export class ManageMetadataSettingsComponent implements OnInit {
         this.addLibraryLanguageOverride(parseInt(libraryId, 10), override);
       });
 
+      
+      this.settingsForm.addControl('externalAgeRatingMappings',
+        buildAgeRatingMappingsArray(this.fb, settings.externalAgeRatingMappings));
 
       this.settingsForm.addControl('firstLastPeopleNaming', new FormControl((settings.firstLastPeopleNaming), []));
       this.settingsForm.addControl('personRoles', this.fb.group(
@@ -298,6 +307,7 @@ export class ManageMetadataSettingsComponent implements OnInit {
         .filter(([_, value]) => value)
         .map(([key, _]) => this.allMetadataSettingFields[parseInt(key.split('_')[1], 10)]),
       libraryLanguageTitleOverrides: this.packLibraryLanguageOverrides(),
+      externalAgeRatingMappings: packAgeRatingMappings(this.settingsForm.get('externalAgeRatingMappings')?.value ?? []),
     }
   }
 

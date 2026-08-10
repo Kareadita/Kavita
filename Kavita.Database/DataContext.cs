@@ -457,6 +457,10 @@ public sealed class DataContext : IdentityDbContext<AppUser, AppRole, int,
             .Property(x => x.AgeRatingMappings)
             .HasJsonConversion([]);
 
+        builder.Entity<MetadataSettings>()
+            .Property(x => x.ExternalAgeRatingMappings)
+            .HasJsonConversion([]);
+
         builder.Entity<SeriesMetadata>()
             .Property(b => b.WebLinks)
             .HasDefaultValue(string.Empty);

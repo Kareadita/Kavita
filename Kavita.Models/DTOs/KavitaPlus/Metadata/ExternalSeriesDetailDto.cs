@@ -48,6 +48,10 @@ public sealed record ExternalSeriesDetailDto
     /// <remarks>Unknown when the provider did not supply a mappable content rating.</remarks>
     [EnumDataType(typeof(AgeRating))]
     public AgeRating AgeRating { get; set; } = AgeRating.Unknown;
+    /// <summary>
+    /// Raw content rating string for manual mapping via <see cref="MetadataSettingsDto.ExternalAgeRatingMappings"/>
+    /// </summary>
+    public string? AgeRatingRaw { get; set; }
     [EnumDataType(typeof(ScrobbleProvider))]
     public ScrobbleProvider Provider { get; set; } = ScrobbleProvider.AniList;
 

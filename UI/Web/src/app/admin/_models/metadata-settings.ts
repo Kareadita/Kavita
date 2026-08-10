@@ -48,6 +48,8 @@ export interface MetadataSettings {
 
   globalLanguageTitleSettings: SeriesNameLanguage;
   libraryLanguageTitleOverrides: Record<string, SeriesNameLanguage>;
+  /*Like ageRatingMappings but scoped to ContentRating from metadata sites*/
+  externalAgeRatingMappings: Record<string, AgeRating>;
 }
 
 export interface SeriesNameLanguage {

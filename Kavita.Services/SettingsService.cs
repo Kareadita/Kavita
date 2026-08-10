@@ -73,6 +73,7 @@ public class SettingsService(
         existingMetadataSetting.EnableVolumeCoverImage = dto.EnableVolumeCoverImage;
 
         existingMetadataSetting.AgeRatingMappings = dto.AgeRatingMappings ?? [];
+        existingMetadataSetting.ExternalAgeRatingMappings = dto.ExternalAgeRatingMappings ?? [];
 
         existingMetadataSetting.Blacklist = TagHelper.SortAndCleanTagList(dto.Blacklist);
         existingMetadataSetting.Whitelist = TagHelper.SortAndCleanTagList(dto.Whitelist);
@@ -165,6 +166,7 @@ public class SettingsService(
         {
             existingMetadataSetting.AgeRatingMappings = dto.AgeRatingMappings;
         }
+
 
         if (settings.FieldMappings)
         {

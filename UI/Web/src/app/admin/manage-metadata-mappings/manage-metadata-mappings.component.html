@@ -13,44 +13,9 @@
           <ng-template>
             <p>{{t('age-rating-mapping-description')}}</p>
 
-            <div formArrayName="ageRatingMappings">
-              @for(mapping of ageRatingMappings.controls; track mapping; let i = $index) {
-                <div [formGroupName]="i" class="row mb-2">
-                  <div class="col-md-4 d-flex align-items-center justify-content-center">
-                    <input id="age-rating-{{i}}" type="text" class="form-control" formControlName="str" autocomplete="off" />
-                  </div>
-                  <div class="col-md-2 d-flex align-items-center justify-content-center">
-                    <i class="fa fa-arrow-right" aria-hidden="true"></i>
-                  </div>
-                  <div class="col-md-4 d-flex align-items-center justify-content-center">
-                    <select class="form-select" formControlName="rating">
-                      @for (ageRating of ageRatings(); track ageRating.value) {
-                        <option [ngValue]="ageRating.value">
-                          {{ageRating.value | ageRating}}
-                        </option>
-                      }
-                    </select>
-                  </div>
-                  <div class="col-md-2">
-                    <button [attr.aria-label]="'age-rating-' + i" class="btn btn-icon" (click)="removeAgeRatingMappingRow(i)">
-                      <i class="fa fa-trash-alt" aria-hidden="true"></i>
-                      <span class="visually-hidden">{{t('remove-age-rating-mapping-label')}}</span>
-                    </button>
-
-                    @if($last) {
-                      <button [attr.aria-label]="'age-rating-header'" class="btn btn-icon" (click)="addAgeRatingMapping()">
-                        <i class="fa fa-plus" aria-hidden="true"></i>
-                        <span class="visually-hidden">{{t('add-age-rating-mapping-label')}}</span>
-                      </button>
-                    }
-                  </div>
-                </div>
-              } @empty {
-                <button [attr.aria-label]="'age-rating-header'" class="btn btn-secondary" (click)="addAgeRatingMapping()">
-                  <i class="fa fa-plus me-1" aria-hidden="true"></i>{{t('add-age-rating-mapping-label')}}
-                </button>
-              }
-            </div>
+            <app-age-rating-mapper [form]="settingsForm()" controlName="ageRatingMappings"
+                                   [addLabel]="t('add-age-rating-mapping-label')"
+                                   [removeLabel]="t('remove-age-rating-mapping-label')" />
           </ng-template>
         </div>
       </div>

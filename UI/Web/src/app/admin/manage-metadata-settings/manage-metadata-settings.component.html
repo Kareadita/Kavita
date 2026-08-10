@@ -70,6 +70,8 @@
 
 
       <div ngbAccordion [closeOthers]="false">
+
+        <!--Language-->
         <div ngbAccordionItem="language-panel" [collapsed]="false">
           <h2 class="accordion-header" ngbAccordionHeader>
             <button ngbAccordionButton class="accordion-button" type="button">
@@ -184,6 +186,7 @@
           </div>
         </div>
 
+        <!--Series-->
         <div ngbAccordionItem="series-panel" [collapsed]="false">
           <h2 class="accordion-header" ngbAccordionHeader>
             <button ngbAccordionButton class="accordion-button" type="button">
@@ -282,6 +285,7 @@
           </div>
         </div>
 
+        <!--Chapter-->
         <div ngbAccordionItem="chapter-panel" [collapsed]="false">
           <h2 class="accordion-header" ngbAccordionHeader>
             <button ngbAccordionButton class="accordion-button" type="button">
@@ -355,6 +359,7 @@
           </div>
         </div>
 
+        <!--Volume-->
         <div ngbAccordionItem="volume-panel" [collapsed]="false">
           <h2 class="accordion-header" ngbAccordionHeader>
             <button ngbAccordionButton class="accordion-button" type="button">
@@ -380,6 +385,7 @@
           </div>
         </div>
 
+        <!--People-->
         @if(settingsForm.get('enablePeople'); as formControl) {
           <div ngbAccordionItem="people-panel" [collapsed]="false">
             <h2 class="accordion-header" ngbAccordionHeader>
@@ -433,6 +439,7 @@
           </div>
         }
 
+        <!--Tags-->
         <div ngbAccordionItem="tags-panel" [collapsed]="false">
           <h2 class="accordion-header" ngbAccordionHeader>
             <button ngbAccordionButton class="accordion-button" type="button">
@@ -488,12 +495,33 @@
             </div>
           </div>
         </div>
+
+        <!--Base Age Rating Mappings-->
+        <div ngbAccordionItem="external-age-rating-panel" [collapsed]="false">
+          <h2 class="accordion-header" ngbAccordionHeader>
+            <button ngbAccordionButton class="accordion-button" type="button">
+              {{t('external-age-rating-header')}}
+            </button>
+          </h2>
+          <div ngbAccordionCollapse>
+            <div ngbAccordionBody>
+              <ng-template>
+                <p>{{t('external-age-rating-description')}}</p>
+                <app-age-rating-mapper [form]="settingsForm" controlName="externalAgeRatingMappings"
+                                       [sourceLabel]="t('external-age-rating-label')"
+                                       [addLabel]="t('add-age-rating-mapping-label')"
+                                       [removeLabel]="t('remove-age-rating-mapping-label')" />
+              </ng-template>
+            </div>
+          </div>
+        </div>
       </div>
 
       @if (settings(); as s) {
         <app-manage-metadata-mappings [settings]="s" [settingsForm]="settingsForm" />
       }
 
+      <!--Overrides-->
       @if (settingsForm.get('overrides')) {
         <div ngbAccordion [closeOthers]="false">
           <div ngbAccordionItem="overrides-panel" [collapsed]="allMetadataSettingFields.length > 10">

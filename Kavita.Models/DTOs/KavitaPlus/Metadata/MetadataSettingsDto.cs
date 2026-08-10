@@ -2,7 +2,6 @@
 using Kavita.Models.DTOs.Settings;
 using Kavita.Models.Entities.Enums;
 using Kavita.Models.Entities.MetadataMatching;
-using System.ComponentModel.DataAnnotations;
 using Kavita.Models.Attributes;
 
 namespace Kavita.Models.DTOs.KavitaPlus.Metadata;
@@ -91,6 +90,11 @@ public sealed record MetadataSettingsDto: FieldMappingsDto
     /// For Authors and Writers, how should names be stored (Exclusively applied for AniList). This does not affect Character names.
     /// </summary>
     public bool FirstLastPeopleNaming { get; set; }
+
+    /// <summary>
+    /// Optional mappings of strings -> ComicInfo Age Ratings
+    /// </summary>
+    public Dictionary<string, AgeRating> ExternalAgeRatingMappings { get; set; } = [];
 
     /// <summary>
     /// The server-wide priority order of BCP-47 language codes used when setting <c>Series.Name</c> and
