@@ -55,7 +55,7 @@ export class ImageZoomDirective {
     } else if (event.touches.length === 1 && instance.isPaginationEvent(event) && instance.isZoomedIn()) {
       const touch = event.touches[0];
       if (instance.containsPoint(touch.clientX, touch.clientY)) {
-        instance.startPan(touch.clientX, touch.clientY, true);
+        instance.startPan(touch.clientX, touch.clientY);
       }
     }
   };
@@ -102,10 +102,8 @@ export class ImageZoomDirective {
   private panStartTranslateY = 0;
   /** Whether the image is currently being panned */
   private isPanning = false;
-  /** Whether the panning was started within the pagination area */
-  private panStartedInPagination = false;
-  /** Whether to suppress the next pagination click */
-  private suppressNextPaginationClick = false;
+  /** Whether to suppress the next click after a pan */
+  private suppressNextClick = false;
 
   /** The scalar for zooming with the mouse wheel */
   private readonly zoomScalar = 0.0015;
@@ -235,7 +233,7 @@ export class ImageZoomDirective {
     }
 
     event.preventDefault();
-    this.startPan(event.clientX, event.clientY, true);
+    this.startPan(event.clientX, event.clientY);
   }
   
   /**
@@ -264,7 +262,7 @@ export class ImageZoomDirective {
       return;
     }
 
-    this.startPan(event.touches[0].clientX, event.touches[0].clientY, true);
+    this.startPan(event.touches[0].clientX, event.touches[0].clientY);
   }
 
   /**
@@ -395,9 +393,8 @@ export class ImageZoomDirective {
    * Starts panning the image.
    * @param clientX The x-coordinate of the mouse/touch event
    * @param clientY The y-coordinate of the mouse/touch event
-   * @param startedInPagination Set to true if the pan event started from a pagination area
    */
-  private startPan(clientX: number, clientY: number, startedInPagination = false): void {
+  private startPan(clientX: number, clientY: number): void {
     // Save off where the pan started from
     this.panStartX = clientX;
     this.panStartY = clientY;
@@ -407,7 +404,6 @@ export class ImageZoomDirective {
     this.panStartTranslateY = this.translateY;
 
     this.isPanning = true;
-    this.panStartedInPagination = startedInPagination;
     this.cursor = 'grabbing';
   }
 
@@ -417,10 +413,9 @@ export class ImageZoomDirective {
    * @param clientY The y-coordinate of the mouse/touch event
    */
   private setPan(clientX: number, clientY: number): void {
-    // If a touch/click started in a pagination area and the position has changed
-    // (i.e., a pan), don't toggle a pagination event
-    if (this.panStartedInPagination && (clientX !== this.panStartX || clientY !== this.panStartY)) {
-      this.suppressNextPaginationClick = true;
+    // A pan should not be interpreted as a click by the reader or pagination controls.
+    if (clientX !== this.panStartX || clientY !== this.panStartY) {
+      this.suppressNextClick = true;
     }
 
     [this.translateX, this.translateY] = this.clampTranslation(this.panStartTranslateX + clientX - this.panStartX, this.panStartTranslateY + clientY - this.panStartY);
@@ -548,16 +543,18 @@ export class ImageZoomDirective {
     };
 
     /**
-     * Prevents click events from being handled by the pagination areas
-     * when the click is being handled as a pan.
+     * Prevents click events from being handled when the click is actually the
+     * end of a pan.
      * @param event The mouse event
      */
     const suppressClick = (event: MouseEvent) => {
-      if (!this.suppressNextPaginationClick || !this.isPaginationEvent(event)) {
+      const target = event.target instanceof Element ? event.target : null;
+      const isImageClick = target !== null && this.element.nativeElement.contains(target);
+      if (!this.suppressNextClick || (!isImageClick && !this.isPaginationEvent(event))) {
         return;
       }
 
-      this.suppressNextPaginationClick = false;
+      this.suppressNextClick = false;
       event.preventDefault();
       event.stopPropagation();
     };
