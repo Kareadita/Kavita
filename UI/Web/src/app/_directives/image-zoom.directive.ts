@@ -378,13 +378,7 @@ export class ImageZoomDirective {
     const focalTranslateX = clientX - layoutCenterX - imagePointX * nextScaleClamped;
     const focalTranslateY = clientY - layoutCenterY - imagePointY * nextScaleClamped;
 
-    // Calculate the ratio for recentering on zoom out (no-op when zooming in)
-    const zoomOutRatio = this.recenterOnZoomOut && nextScaleClamped < previousScale
-      ? Math.max(0, Math.min(1, (nextScaleClamped - 1) / (previousScale - 1)))
-      : 1;
-
-    // Apply the zoom out ratio to the focal translation
-    [this.translateX, this.translateY] = this.clampTranslation(focalTranslateX * zoomOutRatio, focalTranslateY * zoomOutRatio);
+    [this.translateX, this.translateY] = this.clampTranslation(focalTranslateX, focalTranslateY);
 
     this.updateTransform();
   }
