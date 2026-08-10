@@ -92,6 +92,10 @@ export class ImageZoomDirective {
   private translateY = 0;
   /** The distance between the two fingers during a pinch gesture */
   private pinchDistance = 0;
+  /** The midpoint X-coordinate between the two fingers during a pinch gesture */
+  private pinchMidpointX = 0;
+  /** The midpoint Y-coordinate between the two fingers during a pinch gesture */
+  private pinchMidpointY = 0;
   /** The starting X-coordinate for panning */
   private panStartX = 0;
   /** The starting Y-coordinate for panning */
@@ -156,6 +160,9 @@ export class ImageZoomDirective {
       event.stopPropagation();
       ImageZoomDirective.activeInstance = this;
       this.pinchDistance = this.getDistance(event.touches[0], event.touches[1]);
+      const midpoint = this.getMidpoint(event.touches[0], event.touches[1]);
+      this.pinchMidpointX = midpoint.x;
+      this.pinchMidpointY = midpoint.y;
       this.isPanning = false;
       return;
     }
@@ -179,7 +186,10 @@ export class ImageZoomDirective {
       const nextScale = this.scale * (nextDistance / this.pinchDistance);
       const midpoint = this.getMidpoint(event.touches[0], event.touches[1]);
       this.setScale(nextScale, midpoint.x, midpoint.y);
+      this.setPanByDelta(midpoint.x - this.pinchMidpointX, midpoint.y - this.pinchMidpointY, this.translateX, this.translateY);
       this.pinchDistance = nextDistance;
+      this.pinchMidpointX = midpoint.x;
+      this.pinchMidpointY = midpoint.y;
       return;
     }
 
@@ -412,7 +422,18 @@ export class ImageZoomDirective {
       this.suppressNextClick = true;
     }
 
-    [this.translateX, this.translateY] = this.clampTranslation(this.panStartTranslateX + clientX - this.panStartX, this.panStartTranslateY + clientY - this.panStartY);
+    this.setPanByDelta(clientX - this.panStartX, clientY - this.panStartY, this.panStartTranslateX, this.panStartTranslateY);
+  }
+
+  /**
+   * Translates the image by the given delta and keeps it within the reading area.
+   * @param deltaX The translation delta on the X-axis
+   * @param deltaY The translation delta on the Y-axis
+   * @param startTranslateX The translation on the X-axis to apply the delta to
+   * @param startTranslateY The translation on the Y-axis to apply the delta to
+   */
+  private setPanByDelta(deltaX: number, deltaY: number, startTranslateX: number, startTranslateY: number): void {
+    [this.translateX, this.translateY] = this.clampTranslation(startTranslateX + deltaX, startTranslateY + deltaY);
     this.updateTransform();
   }
 
