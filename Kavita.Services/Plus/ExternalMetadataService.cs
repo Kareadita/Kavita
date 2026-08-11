@@ -1230,11 +1230,15 @@ public class ExternalMetadataService : IExternalMetadataService
         externalMetadata.Tags ??= [];
         externalMetadata.Genres ??= [];
 
+        var whitelist = settings.Whitelist is { Count: > 0 }
+            ? settings.Whitelist.ToHashSet(StringComparer.OrdinalIgnoreCase)
+            : null;
+
         // Since tag mappings outputs a list of strings, we need to find all the tags that will be removed first, then map, then remove those that survived
         var tagsToRemove = settings.FilterAboveWeight == null
             ? []
             : externalMetadata.Tags
-                .Where(t => t.TagWeight != null && t.TagWeight > settings.FilterAboveWeight)
+                .Where(t => t.TagWeight != null && t.TagWeight > settings.FilterAboveWeight && whitelist?.Contains(t.Name) != true)
                 .Select(t => t.Name)
                 .ToHashSet(StringComparer.OrdinalIgnoreCase);
 
