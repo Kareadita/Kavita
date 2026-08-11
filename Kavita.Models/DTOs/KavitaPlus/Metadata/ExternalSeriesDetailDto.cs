@@ -5,7 +5,6 @@ using Kavita.Models.DTOs.Recommendation;
 using Kavita.Models.Entities.Enums;
 using Kavita.Models.Entities.Enums.KavitaPlus;
 using System.ComponentModel.DataAnnotations;
-using Kavita.Models.DTOs.KavitaPlus.Recommendation;
 
 namespace Kavita.Models.DTOs.KavitaPlus.Metadata;
 
@@ -18,7 +17,7 @@ public sealed record ExternalSeriesDetailDto
     public ALMediaTitle Titles { get; set; } = new();
     /// <summary>
     /// Every known title, grouped by normalized BCP-47 language tag ("en", "ja", "ja-Latn", "pt-BR", "zh-HK").
-    /// Each list is ordered best-first, so a client honouring a language preference can take [0] and stop.
+    /// Each list is ordered best-first, so a client honoring a language preference can take [0] and stop.
     /// Empty for providers that do not expose per-language titles.
     /// </summary>
     /// <remarks>v3 only.</remarks>

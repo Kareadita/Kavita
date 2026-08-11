@@ -1,7 +1,7 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using Kavita.Models.Entities.Enums.KavitaPlus;
 
-namespace Kavita.Models.DTOs.KavitaPlus.Recommendation;
+namespace Kavita.Models.DTOs.Recommendation;
 
 public sealed record MetadataTagDto
 {

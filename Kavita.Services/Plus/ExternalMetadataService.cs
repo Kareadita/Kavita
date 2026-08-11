@@ -1231,7 +1231,7 @@ public class ExternalMetadataService : IExternalMetadataService
         externalMetadata.Genres ??= [];
 
         var whitelist = settings.Whitelist is { Count: > 0 }
-            ? settings.Whitelist.ToHashSet(StringComparer.OrdinalIgnoreCase)
+            ? settings.Whitelist.Select(s => s.ToNormalized()).ToHashSet()
             : null;
 
         // Since tag mappings outputs a list of strings, we need to find all the tags that will be removed first, then map, then remove those that survived
@@ -1732,7 +1732,7 @@ public class ExternalMetadataService : IExternalMetadataService
                 DetermineAgeRating([externalMetadata.AgeRatingRaw], settings.ExternalAgeRatingMappings)
                 : AgeRating.Unknown;
             var tagDerivedAgeRating = DetermineAgeRating(totalTags, settings.AgeRatingMappings);
-            AgeRating[] candidates = [externalAgeRating, baseDerivedAgeRating, tagDerivedAgeRating];
+            AgeRating[] candidates = [from, externalAgeRating, baseDerivedAgeRating, tagDerivedAgeRating];
 
             var toSetAgeRating = candidates.Max();
 

@@ -4,7 +4,6 @@ using Kavita.Models.DTOs.Settings;
 using Kavita.Models.Entities.Enums;
 using Kavita.Models.Entities.MetadataMatching;
 using Kavita.Models.Attributes;
-using Kavita.Models.DTOs.KavitaPlus.Recommendation;
 using Kavita.Models.Entities.Enums.KavitaPlus;
 
 namespace Kavita.Models.DTOs.KavitaPlus.Metadata;

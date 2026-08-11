@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
 using Kavita.Models.DTOs.KavitaPlus.Metadata;
-using Kavita.Models.DTOs.KavitaPlus.Recommendation;
 using Kavita.Models.Entities.Enums;
 using Kavita.Models.Entities.Enums.KavitaPlus;
 
