@@ -864,13 +864,8 @@ public class ExternalMetadataService : IExternalMetadataService
         var settings = await _unitOfWork.SettingsRepository.GetMetadataSettingDto(ct);
         if (!settings.Enabled) return false;
 
-        //var sw = Stopwatch.StartNew();
-
         var writeLock = GetSeriesWriteLock(seriesId);
         await writeLock.WaitAsync(ct);
-
-        //_logger.LogDebug("Write lock took {Time}ms", sw.ElapsedMilliseconds);
-
 
         try
         {
@@ -885,7 +880,6 @@ public class ExternalMetadataService : IExternalMetadataService
             var fieldChanges = new List<MetadataFieldChangeDto>();
             var processedGenres = new List<string>();
             var processedTags = new List<string>();
-            //sw.Restart();
 
 
             Accumulate(ref madeModification, fieldChanges, UpdateSummary(series, settings, externalMetadata));
@@ -897,7 +891,8 @@ public class ExternalMetadataService : IExternalMetadataService
             // Apply field mappings
             GenerateGenreAndTagLists(externalMetadata, settings, ref processedTags, ref processedGenres);
 
-            // Since tag mappings outputs a list of strings, we need to find all the tags that will be removed first, then map, then remove those that survived
+            // Since tag mappings outputs a list of strings, we need to find all the tags that will be removed first, then map,
+            // then remove those that survived before writing (not age rating mapping)
             var tagsToRemove = GetTagsToRemove(externalMetadata, settings);
 
             // Filter out by tag-weight
@@ -914,9 +909,6 @@ public class ExternalMetadataService : IExternalMetadataService
                 .ToList();
 
             Accumulate(ref madeModification, fieldChanges, UpdateAgeRating(series, settings, externalMetadata, allTags));
-            // _logger.LogDebug("Tags/Genres took {Time}ms", sw.ElapsedMilliseconds);
-            // sw.Restart();
-
 
             var staff = await SetNameAndAddAliases(settings, externalMetadata.Staff);
 
@@ -925,13 +917,7 @@ public class ExternalMetadataService : IExternalMetadataService
             Accumulate(ref madeModification, fieldChanges, await UpdateArtists(series, settings, staff));
             Accumulate(ref madeModification, fieldChanges, await UpdateCharacters(series, settings, externalMetadata.Characters));
 
-            // _logger.LogDebug("People took {Time}ms", sw.ElapsedMilliseconds);
-            // sw.Restart();
-
             Accumulate(ref madeModification, fieldChanges, await UpdateRelationships(series, settings, externalMetadata.Relations, defaultAdmin));
-            //
-            // _logger.LogDebug("Relationships took {Time}ms", sw.ElapsedMilliseconds);
-            // sw.Restart();
 
             if (settings.EnableName || settings.EnableLocalizedName)
             {
@@ -952,16 +938,11 @@ public class ExternalMetadataService : IExternalMetadataService
 
                 Accumulate(ref madeModification, fieldChanges,
                     await UpdateLocalizedName(series, settings, externalMetadata, localizedNamePriority, heldNameLanguageCode, takenNames, ct));
-
-                // _logger.LogDebug("Names took {Time}ms", sw.ElapsedMilliseconds);
-                // sw.Restart();
             }
 
             try
             {
                 madeModification = await UpdateCoverImage(series, settings, externalMetadata) || madeModification;
-                // _logger.LogDebug("Cover Image took {Time}ms", sw.ElapsedMilliseconds);
-                // sw.Restart();
             }
             catch (Exception ex)
             {
@@ -969,8 +950,6 @@ public class ExternalMetadataService : IExternalMetadataService
             }
 
             madeModification = await UpdateChapters(series, settings, externalMetadata) || madeModification;
-            // _logger.LogDebug("Chapters took {Time}ms", sw.ElapsedMilliseconds);
-            // sw.Restart();
 
             if (fieldChanges.Count > 0)
             {
