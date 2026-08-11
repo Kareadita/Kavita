@@ -21,8 +21,8 @@ public static class ExternalIdParser
     private const string AniListStaffWebsite = "https://anilist.co/staff/";
     private const string AniListCharacterWebsite = "https://anilist.co/character/";
     private const string HardcoverStaffWebsite = "https://hardcover.app/id/authors/";
-    private const string HardcoverSeriesWebsite = "https://hardcover.app/series/id/";
-    private const string HardcoverBookWebsite = "https://hardcover.app/book/id/";
+    private const string HardcoverSeriesWebsite = "https://hardcover.app/id/series/";
+    private const string HardcoverBookWebsite = "https://hardcover.app/id/book/";
     private const string MangaBakaWebsite = "https://mangabaka.org/";
 
 
