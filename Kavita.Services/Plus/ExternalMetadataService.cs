@@ -897,16 +897,30 @@ public class ExternalMetadataService : IExternalMetadataService
             // Apply field mappings
             GenerateGenreAndTagLists(externalMetadata, settings, ref processedTags, ref processedGenres);
 
+            // Since tag mappings outputs a list of strings, we need to find all the tags that will be removed first, then map, then remove those that survived
+            var tagsToRemove = GetTagsToRemove(externalMetadata, settings);
+
+            // Filter out by tag-weight
+            processedTags = processedTags.Where(pt => !tagsToRemove.Contains(pt)).ToList();
+
             Accumulate(ref madeModification, fieldChanges, await UpdateGenres(series, settings, externalMetadata, processedGenres));
             Accumulate(ref madeModification, fieldChanges, await UpdateTags(series, settings, externalMetadata, processedTags));
-            Accumulate(ref madeModification, fieldChanges, UpdateAgeRating(series, settings, externalMetadata, processedGenres.Concat(processedTags)));
+
+            // In order to ensure that a filtered weight tag doesn't get excluded, age rating is processed on ALL tags + our remapped ones
+            var allTags = externalMetadata.Tags.Select(t => t.Name)
+                .Concat(externalMetadata.Genres)
+                .Concat(processedGenres).Concat(processedTags)
+                .Distinct()
+                .ToList();
+
+            Accumulate(ref madeModification, fieldChanges, UpdateAgeRating(series, settings, externalMetadata, allTags));
             // _logger.LogDebug("Tags/Genres took {Time}ms", sw.ElapsedMilliseconds);
             // sw.Restart();
 
 
             var staff = await SetNameAndAddAliases(settings, externalMetadata.Staff);
 
-            // TODO: I need update Publisher as well (MB is complicated as there are multiple potential publishers, needs to be tied with Works PR)
+            // TODO: I can update Publisher as well but MB is not fully vetted out yet
             Accumulate(ref madeModification, fieldChanges, await UpdateWriters(series, settings, staff));
             Accumulate(ref madeModification, fieldChanges, await UpdateArtists(series, settings, staff));
             Accumulate(ref madeModification, fieldChanges, await UpdateCharacters(series, settings, externalMetadata.Characters));
@@ -969,6 +983,22 @@ public class ExternalMetadataService : IExternalMetadataService
         {
             writeLock.Release();
         }
+    }
+
+    private static HashSet<string> GetTagsToRemove(ExternalSeriesDetailDto externalMetadata, MetadataSettingsDto settings)
+    {
+        var whitelist = settings.Whitelist is { Count: > 0 }
+            ? settings.Whitelist.Select(s => s.ToNormalized()).ToHashSet()
+            : null;
+
+
+        var tagsToRemove = settings.FilterAboveWeight == null
+            ? []
+            : externalMetadata.Tags
+                .Where(t => t.TagWeight != null && t.TagWeight > settings.FilterAboveWeight && whitelist?.Contains(t.Name.ToNormalized()) != true)
+                .Select(t => t.Name)
+                .ToHashSet(StringComparer.OrdinalIgnoreCase);
+        return tagsToRemove;
     }
 
 
@@ -1230,23 +1260,8 @@ public class ExternalMetadataService : IExternalMetadataService
         externalMetadata.Tags ??= [];
         externalMetadata.Genres ??= [];
 
-        var whitelist = settings.Whitelist is { Count: > 0 }
-            ? settings.Whitelist.Select(s => s.ToNormalized()).ToHashSet()
-            : null;
-
-        // Since tag mappings outputs a list of strings, we need to find all the tags that will be removed first, then map, then remove those that survived
-        var tagsToRemove = settings.FilterAboveWeight == null
-            ? []
-            : externalMetadata.Tags
-                .Where(t => t.TagWeight != null && t.TagWeight > settings.FilterAboveWeight && whitelist?.Contains(t.Name) != true)
-                .Select(t => t.Name)
-                .ToHashSet(StringComparer.OrdinalIgnoreCase);
-
         GenerateGenreAndTagLists(externalMetadata.Genres, externalMetadata.Tags.Select(t => t.Name).ToList(),
             settings, ref processedTags, ref processedGenres);
-
-        // Filter out by tag-weight
-        processedTags = processedTags.Where(pt => !tagsToRemove.Contains(pt)).ToList();
     }
 
     /// <summary>
