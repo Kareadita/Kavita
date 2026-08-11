@@ -10,11 +10,16 @@ jobs:
     runs-on: ubuntu-24.04
     steps:
       - name: Debug Info
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          GIT_REF: ${{ github.ref }}
+          NOT_CONTAINS_RELEASE: ${{ !contains(github.head_ref, 'release') }}
+          MATCHES_DEVELOP: ${{ github.ref == 'refs/heads/develop' }}
         run: |
-          echo "Event Name: ${{ github.event_name }}"
-          echo "Ref: ${{ github.ref }}"
-          echo "Not Contains Release: ${{ !contains(github.head_ref, 'release') }}"
-          echo "Matches Develop: ${{ github.ref == 'refs/heads/develop' }}"
+          echo "Event Name: $EVENT_NAME"
+          echo "Ref: $GIT_REF"
+          echo "Not Contains Release: $NOT_CONTAINS_RELEASE"
+          echo "Matches Develop: $MATCHES_DEVELOP"
   build:
     name: Upload Kavita.Common for Version Bump
     runs-on: ubuntu-24.04
