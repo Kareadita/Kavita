@@ -36,7 +36,7 @@ jobs:
             dotnet-version: 10.0.x
 
       - name: Bump versions
-        uses: SiqiLu/dotnet-bump-version@2.0.0
+        uses: majora2007/dotnet-bump-version@a01d35d737a36f2732f750ecaa6b35bc628da4da # v0.0.10
         with:
           version_files: Kavita.Common/Kavita.Common.csproj
           github_token: ${{ secrets.REPO_GHA_PAT }}
