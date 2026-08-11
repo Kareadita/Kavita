@@ -1727,7 +1727,7 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
 
   /**
-   * This is the total space for the book content, excluding margin and the column gap (aka how big each column is)
+   * This is the total space for the book content, excluding margin
    * @returns Total Page width (excluding margin)
    */
   pageWidth = computed(() => {
