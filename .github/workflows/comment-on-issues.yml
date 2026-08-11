@@ -16,6 +16,12 @@ on:
         required: false
         type: string
 
+permissions:
+  contents: read
+  # Reads the linked pull requests and comments on their issues.
+  pull-requests: read
+  issues: write
+
 jobs:
   comment-issues:
     name: Comment on Linked Issues

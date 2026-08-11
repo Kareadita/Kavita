@@ -10,6 +10,8 @@ jobs:
   build:
     name: Upload Kavita.Common for Version Bump
     runs-on: ubuntu-24.04
+    permissions:
+      contents: read
     steps:
       - name: Checkout Repo
         uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5.1.0
@@ -23,6 +25,9 @@ jobs:
 
   version:
     name: Bump version
+    # The bump commit is pushed with the repository PAT, not this token.
+    permissions:
+      contents: read
     needs: [ build ]
     runs-on: ubuntu-24.04
     steps:

@@ -11,6 +11,10 @@ on:
   workflow_dispatch:
 
 
+# The documentation push uses the repository PAT, not this token.
+permissions:
+  contents: read
+
 jobs:
   generate-openapi:
     runs-on: ubuntu-latest

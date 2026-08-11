@@ -5,6 +5,11 @@ on:
         branches: [ main, develop, canary ]
         types: [synchronize]
 
+permissions:
+  contents: read
+  # The body check reads the pull request through the API.
+  pull-requests: read
+
 jobs:
     check_pr:
         runs-on: ubuntu-24.04
