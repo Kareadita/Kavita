@@ -12,6 +12,7 @@ using Kavita.Database.Tests;
 using Kavita.Models.Builders;
 using Kavita.Models.Constants;
 using Kavita.Models.DTOs.KavitaPlus.Metadata;
+using Kavita.Models.DTOs.KavitaPlus.Recommendation;
 using Kavita.Models.DTOs.Recommendation;
 using Kavita.Models.DTOs.Scrobbling;
 using Kavita.Models.Entities;

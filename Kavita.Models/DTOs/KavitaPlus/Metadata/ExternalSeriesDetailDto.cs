@@ -5,6 +5,7 @@ using Kavita.Models.DTOs.Recommendation;
 using Kavita.Models.Entities.Enums;
 using Kavita.Models.Entities.Enums.KavitaPlus;
 using System.ComponentModel.DataAnnotations;
+using Kavita.Models.DTOs.KavitaPlus.Recommendation;
 
 namespace Kavita.Models.DTOs.KavitaPlus.Metadata;
 

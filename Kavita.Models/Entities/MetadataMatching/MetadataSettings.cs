@@ -1,6 +1,8 @@
 ﻿using System.Collections.Generic;
 using Kavita.Models.DTOs.KavitaPlus.Metadata;
+using Kavita.Models.DTOs.KavitaPlus.Recommendation;
 using Kavita.Models.Entities.Enums;
+using Kavita.Models.Entities.Enums.KavitaPlus;
 
 namespace Kavita.Models.Entities.MetadataMatching;
 
@@ -144,4 +146,10 @@ public class MetadataSettings
     /// Optional mappings of strings -> ComicInfo Age Ratings
     /// </summary>
     public Dictionary<string, AgeRating> ExternalAgeRatingMappings { get; set; } = [];
+    /// <summary>
+    /// Filter Tags above this level. This takes effect after tag mapping.
+    /// </summary>
+    /// <example>FilterAboveWeight = Recurrent, all tags with weight above Recurrent (incidental, unweighted) will be filtered out after tag mapping step</example>
+    /// <remarks>This is only applicable for <see cref="MetadataProvider.Mangabaka"/>. Tag weights are: Core, Defining, Recurrent, etc impact on the Series</remarks>
+    public TagWeight? FilterAboveWeight { get; set; }
 }

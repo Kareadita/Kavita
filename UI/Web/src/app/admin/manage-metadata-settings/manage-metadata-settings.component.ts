@@ -65,6 +65,9 @@ import {
   buildAgeRatingMappingsArray,
   packAgeRatingMappings
 } from "../../shared/_components/age-rating-mapper/age-rating-mapper.component";
+import {SettingItemComponent} from "../../settings/_components/setting-item/setting-item.component";
+import {TagWeightTitlePipe} from "../../_pipes/tag-weight-title.pipe";
+import {allTagWeights} from "../_models/tag-weight.enum";
 
 
 @Component({
@@ -86,6 +89,8 @@ import {
     SettingMultiTextFieldComponent,
     NgTemplateOutlet,
     AgeRatingMapperComponent,
+    SettingItemComponent,
+    TagWeightTitlePipe,
 
   ],
   templateUrl: './manage-metadata-settings.component.html',
@@ -202,6 +207,7 @@ export class ManageMetadataSettingsComponent implements OnInit {
 
       this.settingsForm.addControl('blacklist', new FormControl(settings.blacklist, []));
       this.settingsForm.addControl('whitelist', new FormControl(settings.whitelist, []));
+      this.settingsForm.addControl('filterAboveWeight', new FormControl(settings.filterAboveWeight, []));
 
 
       this.settingsForm.addControl('globalLanguageTitleSettings', this.fb.group({
@@ -214,7 +220,7 @@ export class ManageMetadataSettingsComponent implements OnInit {
         this.addLibraryLanguageOverride(parseInt(libraryId, 10), override);
       });
 
-      
+
       this.settingsForm.addControl('externalAgeRatingMappings',
         buildAgeRatingMappingsArray(this.fb, settings.externalAgeRatingMappings));
 
@@ -369,5 +375,6 @@ export class ManageMetadataSettingsComponent implements OnInit {
   }
 
   protected readonly allMetadataSettingFields = allMetadataSettingField;
+  protected readonly allTagWeights = allTagWeights;
   protected readonly SettingsTabId = SettingsTabId;
 }

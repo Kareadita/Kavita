@@ -1398,7 +1398,11 @@
         "language-code-malformed": "Not a valid language code: {{codes}}",
         "language-code-unknown": "Unrecognized language code: {{codes}}. Double check the spelling, it will still be saved.",
         "unsaved-changes-invalid": "Changes are not being saved. Fix the highlighted fields to resume saving.",
-        "add": "{{common.add}}"
+        "add": "{{common.add}}",
+
+        "tag-weight-label": "Filter Tags above weight (Mangabaka only)",
+        "tag-weight-tooltip": "Select a tag weight to filter out after tag mapping. For example, Recurrent will filter out Incidental and Unweighted.",
+        "tag-weight-disabled": "Don't filter tags"
     },
 
     "book-line-overlay": {
@@ -1454,6 +1458,14 @@
     "page-chapter-label-pipe": {
         "page-only": "— Page {{pageNumber}}",
         "full": "— Page {{pageNumber}}, Chapter \"{{chapterTitle}}\""
+    },
+
+    "tag-weight-title-pipe": {
+        "core": "Core",
+        "defining": "Defining",
+        "recurrent": "Recurrent",
+        "incidental": "Incidental",
+        "unweighted": "Unweighted"
     },
 
     "view-toc-drawer": {

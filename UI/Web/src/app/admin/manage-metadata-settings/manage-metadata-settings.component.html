@@ -491,6 +491,29 @@
                     formControlName="whitelist"
                   />
                 </div>
+
+
+                <div class="row g-0 mt-4 mb-4">
+                  <app-setting-item [title]="t('tag-weight-label')" [subtitle]="t('tag-weight-tooltip')" [labelId]="'filter-above-weight'">
+                    <ng-template #view>
+                      @if (settingsForm.get('filterAboveWeight')?.value == null) {
+                        {{t('tag-weight-disabled')}}
+                      } @else {
+                        {{settingsForm.get('filterAboveWeight')?.value | tagWeightTitle}}
+                      }
+
+                    </ng-template>
+                    <ng-template #edit>
+                      <select class="form-select" formControlName="filterAboveWeight" [id]="'filter-above-weight'">
+                        <option [ngValue]="null">{{t('tag-weight-disabled')}}</option>
+                        @for(weight of allTagWeights; track weight) {
+                          <option [ngValue]="weight">{{weight | tagWeightTitle}}</option>
+                        }
+                      </select>
+                    </ng-template>
+                  </app-setting-item>
+                </div>
+
               </ng-template>
             </div>
           </div>

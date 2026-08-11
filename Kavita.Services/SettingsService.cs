@@ -79,6 +79,7 @@ public class SettingsService(
         existingMetadataSetting.Whitelist = TagHelper.SortAndCleanTagList(dto.Whitelist);
         existingMetadataSetting.Overrides = [.. dto.Overrides ?? []];
         existingMetadataSetting.PersonRoles = dto.PersonRoles ?? [];
+        existingMetadataSetting.FilterAboveWeight = dto.FilterAboveWeight;
 
         // Sanitize the tags by shape only as Windows/Linux will differ on supported codes from CultureInfo.GetCultures, like ja-Latn
         existingMetadataSetting.GlobalNameLanguages = LanguageCodeHelper.Sanitize(dto.GlobalLanguageTitleSettings.Name);

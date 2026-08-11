@@ -1,8 +1,11 @@
 ﻿using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using Kavita.Models.DTOs.Settings;
 using Kavita.Models.Entities.Enums;
 using Kavita.Models.Entities.MetadataMatching;
 using Kavita.Models.Attributes;
+using Kavita.Models.DTOs.KavitaPlus.Recommendation;
+using Kavita.Models.Entities.Enums.KavitaPlus;
 
 namespace Kavita.Models.DTOs.KavitaPlus.Metadata;
 #nullable enable
@@ -121,6 +124,14 @@ public sealed record MetadataSettingsDto: FieldMappingsDto
     /// </summary>
     [EnumCollection(typeof(PersonRole))]
     public List<PersonRole> PersonRoles { get; set; }
+
+    /// <summary>
+    /// Filter Tags above this level. This takes effect after tag mapping.
+    /// </summary>
+    /// <example>FilterAboveWeight = Recurrent, all tags with weight above Recurrent (incidental, unweighted) will be filtered out after tag mapping step</example>
+    /// <remarks>This is only applicable for <see cref="MetadataProvider.Mangabaka"/>. Tag weights are: Core, Defining, Recurrent, etc impact on the Series</remarks>
+    [EnumDataType((typeof(TagWeight)))]
+    public TagWeight? FilterAboveWeight { get; set; }
 
 
     /// <summary>

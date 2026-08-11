@@ -1229,8 +1229,20 @@ public class ExternalMetadataService : IExternalMetadataService
     {
         externalMetadata.Tags ??= [];
         externalMetadata.Genres ??= [];
+
+        // Since tag mappings outputs a list of strings, we need to find all the tags that will be removed first, then map, then remove those that survived
+        var tagsToRemove = settings.FilterAboveWeight == null
+            ? []
+            : externalMetadata.Tags
+                .Where(t => t.TagWeight != null && t.TagWeight > settings.FilterAboveWeight)
+                .Select(t => t.Name)
+                .ToHashSet(StringComparer.OrdinalIgnoreCase);
+
         GenerateGenreAndTagLists(externalMetadata.Genres, externalMetadata.Tags.Select(t => t.Name).ToList(),
             settings, ref processedTags, ref processedGenres);
+
+        // Filter out by tag-weight
+        processedTags = processedTags.Where(pt => !tagsToRemove.Contains(pt)).ToList();
     }
 
     /// <summary>
