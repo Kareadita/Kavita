@@ -1732,13 +1732,13 @@ export class BookReaderComponent implements OnInit, AfterViewInit, OnDestroy {
    */
   pageWidth = computed(() => {
     this.windowWidth(); // Ensure re-compute when windows size changes (element clientWidth isn't a signal)
+    this.pageStyles(); // Ensure re-compute when margins change
 
-    const marginLeft = this.pageStyles()['margin-left'];
-    const margin = (this.convertVwToPx(parseInt(marginLeft, 10)) * 2);
     const columnGapModifier = this.columnGapModifier();
-    if (this.readingSectionElemRef() == null) return 0;
+    const bookContent = this.bookContentElemRef()?.nativeElement;
+    if (this.readingSectionElemRef() == null || bookContent == null) return 0;
 
-    return this.reader().nativeElement.offsetWidth - margin + (COLUMN_GAP * columnGapModifier);
+    return bookContent.clientWidth + (COLUMN_GAP * columnGapModifier);
   });
 
   columnGapModifier = computed(() => {
