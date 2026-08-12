@@ -47,6 +47,7 @@ public class ExternalMetadataServiceTests: AbstractDbTest
        var metadataSettings = await unitOfWork.SettingsRepository.GetMetadataSettings();
        metadataSettings.Enabled = false;
        metadataSettings.EnableSummary = false;
+       metadataSettings.EnableAgeRating = true;
        metadataSettings.EnableCoverImage = false;
        metadataSettings.EnableLocalizedName = false;
        metadataSettings.EnableGenres = false;

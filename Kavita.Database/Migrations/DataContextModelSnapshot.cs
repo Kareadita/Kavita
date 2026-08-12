@@ -1360,7 +1360,9 @@ namespace Kavita.Database.Migrations
                         .HasColumnType("TEXT");
 
                     b.Property<bool>("EnableAgeRating")
-                        .HasColumnType("INTEGER");
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER")
+                        .HasDefaultValue(true);
 
                     b.Property<bool>("EnableChapterCoverImage")
                         .HasColumnType("INTEGER");

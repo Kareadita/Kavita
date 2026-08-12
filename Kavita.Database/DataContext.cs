@@ -504,6 +504,9 @@ public sealed class DataContext : IdentityDbContext<AppUser, AppRole, int,
         builder.Entity<MetadataSettings>()
             .Property(b => b.EnableCoverImage)
             .HasDefaultValue(true);
+        builder.Entity<MetadataSettings>()
+            .Property(b => b.EnableAgeRating)
+            .HasDefaultValue(true);
 
         #endregion
 

@@ -14,7 +14,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Kavita.Database.Migrations
 {
     [DbContext(typeof(DataContext))]
-    [Migration("20260812183651_KPlusTagAndAgeRatingFilters")]
+    [Migration("20260812190751_KPlusTagAndAgeRatingFilters")]
     partial class KPlusTagAndAgeRatingFilters
     {
         /// <inheritdoc />
@@ -1363,7 +1363,9 @@ namespace Kavita.Database.Migrations
                         .HasColumnType("TEXT");
 
                     b.Property<bool>("EnableAgeRating")
-                        .HasColumnType("INTEGER");
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER")
+                        .HasDefaultValue(true);
 
                     b.Property<bool>("EnableChapterCoverImage")
                         .HasColumnType("INTEGER");

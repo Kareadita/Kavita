@@ -975,7 +975,7 @@ public class ExternalMetadataService : IExternalMetadataService
         return externalMetadata.Tags
             .Where(t => t.TagWeight != null && t.TagWeight > settings.FilterAboveWeight && whitelist?.Contains(t.Name.ToNormalized()) != true)
             .Select(t => t.Name)
-            .ToHashSet(StringComparer.OrdinalIgnoreCase);;
+            .ToHashSet(StringComparer.OrdinalIgnoreCase);
     }
 
 

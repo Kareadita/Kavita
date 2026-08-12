@@ -15,7 +15,7 @@ namespace Kavita.Database.Migrations
                 table: "MetadataSettings",
                 type: "INTEGER",
                 nullable: false,
-                defaultValue: false);
+                defaultValue: true);
 
             migrationBuilder.AddColumn<string>(
                 name: "ExternalAgeRatingMappings",
