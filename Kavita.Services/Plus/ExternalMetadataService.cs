@@ -68,7 +68,7 @@ public class ExternalMetadataService : IExternalMetadataService
     private readonly string[] _artistRoleStrings = [
         "Art", "Story & Art",  // AniList
         "Artist", // MangaBaka, Hardcover
-        "Illustrations", "Cover Artist" // Hardcover
+        "Illustrations", "Cover Artist", "Illustrator" // Hardcover
     ];
     private readonly string[] _writerRoleStrings = [
         "Story", "Story & Art", // AniList
@@ -1465,6 +1465,7 @@ public class ExternalMetadataService : IExternalMetadataService
         }
 
         series.Metadata.AddKPlusOverride(MetadataSettingField.People);
+        series.Metadata.CharacterLocked = true;
 
         return (true, new MetadataFieldChangeDto(MetadataFieldChangeKind.Characters, null, externalCharacters.Select(c => c.Name).ToList()));
     }
@@ -1523,6 +1524,7 @@ public class ExternalMetadataService : IExternalMetadataService
 
         await DownloadAndSetPersonCovers(upstreamArtists);
         series.Metadata.AddKPlusOverride(MetadataSettingField.People);
+        series.Metadata.CoverArtistLocked = true;
 
         return (true, new MetadataFieldChangeDto(MetadataFieldChangeKind.Artists, null, upstreamArtists.Select(a => a.Name).ToList()));
     }
@@ -1581,6 +1583,7 @@ public class ExternalMetadataService : IExternalMetadataService
 
         await DownloadAndSetPersonCovers(upstreamWriters);
         series.Metadata.AddKPlusOverride(MetadataSettingField.People);
+        series.Metadata.WriterLocked = true;
 
         return (true, new MetadataFieldChangeDto(MetadataFieldChangeKind.Writers, null, upstreamWriters.Select(w => w.Name).ToList()));
     }
@@ -1740,6 +1743,7 @@ public class ExternalMetadataService : IExternalMetadataService
 
             series.Metadata.AgeRating = toSetAgeRating;
             series.Metadata.AddKPlusOverride(MetadataSettingField.AgeRating);
+            series.Metadata.AgeRatingLocked = true;
             return (true, new MetadataFieldChangeDto(MetadataFieldChangeKind.AgeRating, from.ToString(), series.Metadata.AgeRating.ToString()));
         }
         catch (Exception ex)
@@ -1846,7 +1850,11 @@ public class ExternalMetadataService : IExternalMetadataService
             Accumulate(ref madeModification, chapterFieldChanges, UpdateChapterAgeRating(chapter, settings, series.Metadata.AgeRating));
 
             var hasUpdatedPublisher = await UpdateChapterPublisher(chapter, settings, potentialMatch.Publisher);
-            if (hasUpdatedPublisher) chapter.AddKPlusOverride(MetadataSettingField.ChapterPublisher);
+            if (hasUpdatedPublisher)
+            {
+                chapter.AddKPlusOverride(MetadataSettingField.ChapterPublisher);
+                chapter.PublisherLocked = true;
+            }
             madeModification = hasUpdatedPublisher || madeModification;
 
             madeModification = await UpdateChapterPeople(chapter, settings, PersonRole.CoverArtist, potentialMatch.Artists) || madeModification;
@@ -1866,8 +1874,11 @@ public class ExternalMetadataService : IExternalMetadataService
                 await _auditService.LogChapterMetadataAsync(chapter.Id, series.Id, chapterFieldChanges);
             }
 
-            _unitOfWork.ChapterRepository.Update(chapter);
-            await _unitOfWork.CommitAsync();
+            if (madeModification)
+            {
+                _unitOfWork.ChapterRepository.Update(chapter);
+                await _unitOfWork.CommitAsync();
+            }
         }
 
         return madeModification;
@@ -1981,7 +1992,7 @@ public class ExternalMetadataService : IExternalMetadataService
             return (false, null);
         }
 
-        if (!string.IsNullOrWhiteSpace(summary) && !HasForceOverride(settings, chapter, MetadataSettingField.ChapterSummary))
+        if (string.IsNullOrWhiteSpace(summary) && !HasForceOverride(settings, chapter, MetadataSettingField.ChapterSummary))
         {
             return (false, null);
         }
@@ -1989,6 +2000,7 @@ public class ExternalMetadataService : IExternalMetadataService
         var from = chapter.Summary;
         chapter.Summary = StringHelper.RemoveSourceInDescription(StringHelper.SquashBreaklines(summary));
         chapter.AddKPlusOverride(MetadataSettingField.ChapterSummary);
+        chapter.SummaryLocked = true;
 
         return (true, new MetadataFieldChangeDto(MetadataFieldChangeKind.Summary, from, chapter.Summary));
     }
@@ -2012,6 +2024,7 @@ public class ExternalMetadataService : IExternalMetadataService
         var from = chapter.TitleName;
         chapter.TitleName = title;
         chapter.AddKPlusOverride(MetadataSettingField.ChapterTitle);
+        chapter.TitleNameLocked = true;
 
         return (true, new MetadataFieldChangeDto(MetadataFieldChangeKind.Title, from, title));
     }
@@ -2026,6 +2039,7 @@ public class ExternalMetadataService : IExternalMetadataService
         var from = chapter.AgeRating;
         chapter.AgeRating = ageRating;
         chapter.AddKPlusOverride(MetadataSettingField.ChapterAgeRating);
+        chapter.AgeRatingLocked = true;
 
         return (true, new MetadataFieldChangeDto(MetadataFieldChangeKind.AgeRating, from, ageRating));
     }
@@ -2049,6 +2063,7 @@ public class ExternalMetadataService : IExternalMetadataService
         var from = chapter.ReleaseDate;
         chapter.ReleaseDate = releaseDate.Value;
         chapter.AddKPlusOverride(MetadataSettingField.ChapterReleaseDate);
+        chapter.ReleaseDateLocked = true;
 
         return (true, new MetadataFieldChangeDto(MetadataFieldChangeKind.ReleaseDate, from, releaseDate.Value));
     }
@@ -2147,6 +2162,9 @@ public class ExternalMetadataService : IExternalMetadataService
         _unitOfWork.ChapterRepository.Update(chapter);
         await _unitOfWork.CommitAsync();
 
+        chapter.AddKPlusOverride(MetadataSettingField.People);
+        chapter.LockPersonRole(role);
+
         return true;
     }
 
@@ -2194,6 +2212,7 @@ public class ExternalMetadataService : IExternalMetadataService
         var from = series.Metadata.ReleaseYear;
         series.Metadata.ReleaseYear = externalMetadata.StartDate.Value.Year;
         series.Metadata.AddKPlusOverride(MetadataSettingField.StartDate);
+        series.Metadata.ReleaseYearLocked = true;
 
         return (true, new MetadataFieldChangeDto(MetadataFieldChangeKind.ReleaseYear, from, series.Metadata.ReleaseYear));
     }
@@ -2494,6 +2513,7 @@ public class ExternalMetadataService : IExternalMetadataService
         var from = series.Metadata.Summary;
         series.Metadata.Summary = StringHelper.RemoveSourceInDescription(StringHelper.SquashBreaklines(externalMetadata.Summary));
         series.Metadata.AddKPlusOverride(MetadataSettingField.Summary);
+        series.Metadata.SummaryLocked = true;
 
         return (true, new MetadataFieldChangeDto(MetadataFieldChangeKind.Summary, from, series.Metadata.Summary));
     }
