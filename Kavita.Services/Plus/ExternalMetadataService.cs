@@ -864,13 +864,8 @@ public class ExternalMetadataService : IExternalMetadataService
         var settings = await _unitOfWork.SettingsRepository.GetMetadataSettingDto(ct);
         if (!settings.Enabled) return false;
 
-        //var sw = Stopwatch.StartNew();
-
         var writeLock = GetSeriesWriteLock(seriesId);
         await writeLock.WaitAsync(ct);
-
-        //_logger.LogDebug("Write lock took {Time}ms", sw.ElapsedMilliseconds);
-
 
         try
         {
@@ -885,7 +880,6 @@ public class ExternalMetadataService : IExternalMetadataService
             var fieldChanges = new List<MetadataFieldChangeDto>();
             var processedGenres = new List<string>();
             var processedTags = new List<string>();
-            //sw.Restart();
 
 
             Accumulate(ref madeModification, fieldChanges, UpdateSummary(series, settings, externalMetadata));
@@ -897,27 +891,33 @@ public class ExternalMetadataService : IExternalMetadataService
             // Apply field mappings
             GenerateGenreAndTagLists(externalMetadata, settings, ref processedTags, ref processedGenres);
 
+            // Since tag mappings outputs a list of strings, we need to find all the tags that will be removed first, then map,
+            // then remove those that survived before writing (not age rating mapping)
+            var tagsToRemove = GetTagsToRemove(externalMetadata, settings);
+
+            // Filter out by tag-weight
+            processedTags = processedTags.Where(pt => !tagsToRemove.Contains(pt)).ToList();
+
             Accumulate(ref madeModification, fieldChanges, await UpdateGenres(series, settings, externalMetadata, processedGenres));
             Accumulate(ref madeModification, fieldChanges, await UpdateTags(series, settings, externalMetadata, processedTags));
-            Accumulate(ref madeModification, fieldChanges, UpdateAgeRating(series, settings, processedGenres.Concat(processedTags)));
-            // _logger.LogDebug("Tags/Genres took {Time}ms", sw.ElapsedMilliseconds);
-            // sw.Restart();
 
+            // In order to ensure that a filtered weight tag doesn't get excluded, age rating is processed on ALL tags + our remapped ones
+            var allTags = externalMetadata.Tags.Select(t => t.Name)
+                .Concat(externalMetadata.Genres)
+                .Concat(processedGenres).Concat(processedTags)
+                .Distinct()
+                .ToList();
+
+            Accumulate(ref madeModification, fieldChanges, UpdateAgeRating(series, settings, externalMetadata, allTags));
 
             var staff = await SetNameAndAddAliases(settings, externalMetadata.Staff);
 
-            // TODO: I need update Publisher as well (MB is complicated as there are multiple potential publishers, needs to be tied with Works PR)
+            // TODO: I can update Publisher as well but MB is not fully vetted out yet
             Accumulate(ref madeModification, fieldChanges, await UpdateWriters(series, settings, staff));
             Accumulate(ref madeModification, fieldChanges, await UpdateArtists(series, settings, staff));
             Accumulate(ref madeModification, fieldChanges, await UpdateCharacters(series, settings, externalMetadata.Characters));
 
-            // _logger.LogDebug("People took {Time}ms", sw.ElapsedMilliseconds);
-            // sw.Restart();
-
             Accumulate(ref madeModification, fieldChanges, await UpdateRelationships(series, settings, externalMetadata.Relations, defaultAdmin));
-            //
-            // _logger.LogDebug("Relationships took {Time}ms", sw.ElapsedMilliseconds);
-            // sw.Restart();
 
             if (settings.EnableName || settings.EnableLocalizedName)
             {
@@ -938,16 +938,11 @@ public class ExternalMetadataService : IExternalMetadataService
 
                 Accumulate(ref madeModification, fieldChanges,
                     await UpdateLocalizedName(series, settings, externalMetadata, localizedNamePriority, heldNameLanguageCode, takenNames, ct));
-
-                // _logger.LogDebug("Names took {Time}ms", sw.ElapsedMilliseconds);
-                // sw.Restart();
             }
 
             try
             {
                 madeModification = await UpdateCoverImage(series, settings, externalMetadata) || madeModification;
-                // _logger.LogDebug("Cover Image took {Time}ms", sw.ElapsedMilliseconds);
-                // sw.Restart();
             }
             catch (Exception ex)
             {
@@ -955,8 +950,6 @@ public class ExternalMetadataService : IExternalMetadataService
             }
 
             madeModification = await UpdateChapters(series, settings, externalMetadata) || madeModification;
-            // _logger.LogDebug("Chapters took {Time}ms", sw.ElapsedMilliseconds);
-            // sw.Restart();
 
             if (fieldChanges.Count > 0)
             {
@@ -969,6 +962,20 @@ public class ExternalMetadataService : IExternalMetadataService
         {
             writeLock.Release();
         }
+    }
+
+    private static HashSet<string> GetTagsToRemove(ExternalSeriesDetailDto externalMetadata, MetadataSettingsDto settings)
+    {
+        var whitelist = settings.Whitelist is { Count: > 0 }
+            ? settings.Whitelist.Select(s => s.ToNormalized()).ToHashSet()
+            : null;
+
+        if (settings.FilterAboveWeight == null) return [];
+
+        return externalMetadata.Tags
+            .Where(t => t.TagWeight != null && t.TagWeight > settings.FilterAboveWeight && whitelist?.Contains(t.Name.ToNormalized()) != true)
+            .Select(t => t.Name)
+            .ToHashSet(StringComparer.OrdinalIgnoreCase);
     }
 
 
@@ -1229,6 +1236,7 @@ public class ExternalMetadataService : IExternalMetadataService
     {
         externalMetadata.Tags ??= [];
         externalMetadata.Genres ??= [];
+
         GenerateGenreAndTagLists(externalMetadata.Genres, externalMetadata.Tags.Select(t => t.Name).ToList(),
             settings, ref processedTags, ref processedGenres);
     }
@@ -1698,8 +1706,10 @@ public class ExternalMetadataService : IExternalMetadataService
         return (false, null);
     }
 
-    private (bool, MetadataFieldChangeDto?) UpdateAgeRating(Series series, MetadataSettingsDto settings, IEnumerable<string> allExternalTags)
+    private (bool, MetadataFieldChangeDto?) UpdateAgeRating(Series series, MetadataSettingsDto settings, ExternalSeriesDetailDto externalMetadata, IEnumerable<string> allExternalTags)
     {
+        if (!settings.EnableAgeRating) return (false, null);
+
         if (series.Metadata.AgeRatingLocked && !HasForceOverride(settings, series.Metadata, MetadataSettingField.AgeRating))
         {
             return (false, null);
@@ -1712,15 +1722,29 @@ public class ExternalMetadataService : IExternalMetadataService
                 .Concat(series.Metadata.Tags.Select(g => g.Title));
 
             var from = series.Metadata.AgeRating;
-            var ageRating = DetermineAgeRating(totalTags, settings.AgeRatingMappings);
-            if (series.Metadata.AgeRating <= ageRating)
-            {
-                series.Metadata.AgeRating = ageRating;
-                series.Metadata.AddKPlusOverride(MetadataSettingField.AgeRating);
-                series.Metadata.AgeRatingLocked = true;
 
-                return (true, new MetadataFieldChangeDto(MetadataFieldChangeKind.AgeRating, from.ToString(), ageRating.ToString()));
+            // Find the highest age rating from the different mapping mechanisms
+            var externalAgeRating = externalMetadata.AgeRating;
+            var baseDerivedAgeRating = !string.IsNullOrEmpty(externalMetadata.AgeRatingRaw) ?
+                DetermineAgeRating([externalMetadata.AgeRatingRaw], settings.ExternalAgeRatingMappings)
+                : AgeRating.Unknown;
+            var tagDerivedAgeRating = DetermineAgeRating(totalTags, settings.AgeRatingMappings);
+
+            var kPlusRating = baseDerivedAgeRating;
+            if (string.IsNullOrEmpty(externalMetadata.AgeRatingRaw))
+            {
+                kPlusRating = externalAgeRating;
             }
+
+            // If the admin set up a raw mapping, then we use that, otherwise fallback to Kavita+'s mapping
+            var toSetAgeRating = new[]{from, kPlusRating, tagDerivedAgeRating}.Max();
+
+            if (toSetAgeRating == AgeRating.Unknown || toSetAgeRating == from) return (false, null);
+
+            series.Metadata.AgeRating = toSetAgeRating;
+            series.Metadata.AddKPlusOverride(MetadataSettingField.AgeRating);
+            series.Metadata.AgeRatingLocked = true;
+            return (true, new MetadataFieldChangeDto(MetadataFieldChangeKind.AgeRating, from.ToString(), series.Metadata.AgeRating.ToString()));
         }
         catch (Exception ex)
         {

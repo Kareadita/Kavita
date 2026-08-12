@@ -1,11 +1,13 @@
 import {AgeRating} from "../../_models/metadata/age-rating";
 import {PersonRole} from "../../_models/metadata/person";
 import {MetadataSettingField} from "./metadata-setting-field";
+import {TagWeight} from "./tag-weight.enum";
 
 export enum MetadataFieldType {
   Genre = 0,
   Tag = 1
 }
+
 
 export interface MetadataFieldMapping {
   id: number;
@@ -21,6 +23,7 @@ export interface MetadataSettings {
   enableExtendedMetadataProcessing: boolean;
   enableSummary: boolean;
   enablePublicationStatus: boolean;
+  enableAgeRating: boolean;
   enableRelationships: boolean;
   enablePeople: boolean;
   enableStartDate: boolean;
@@ -45,9 +48,12 @@ export interface MetadataSettings {
   whitelist: Array<string>;
   personRoles: Array<PersonRole>;
   overrides: Array<MetadataSettingField>;
+  filterAboveWeight: TagWeight | null;
 
   globalLanguageTitleSettings: SeriesNameLanguage;
   libraryLanguageTitleOverrides: Record<string, SeriesNameLanguage>;
+  /*Like ageRatingMappings but scoped to ContentRating from metadata sites*/
+  externalAgeRatingMappings: Record<string, AgeRating>;
 }
 
 export interface SeriesNameLanguage {

@@ -56,6 +56,7 @@ public class SettingsService(
         existingMetadataSetting.EnableLocalizedName = dto.EnableLocalizedName;
         existingMetadataSetting.EnableName = dto.EnableName;
         existingMetadataSetting.EnablePublicationStatus = dto.EnablePublicationStatus;
+        existingMetadataSetting.EnableAgeRating = dto.EnableAgeRating;
         existingMetadataSetting.EnableRelationships = dto.EnableRelationships;
         existingMetadataSetting.EnablePeople = dto.EnablePeople;
         existingMetadataSetting.EnableStartDate = dto.EnableStartDate;
@@ -73,11 +74,13 @@ public class SettingsService(
         existingMetadataSetting.EnableVolumeCoverImage = dto.EnableVolumeCoverImage;
 
         existingMetadataSetting.AgeRatingMappings = dto.AgeRatingMappings ?? [];
+        existingMetadataSetting.ExternalAgeRatingMappings = dto.ExternalAgeRatingMappings ?? [];
 
         existingMetadataSetting.Blacklist = TagHelper.SortAndCleanTagList(dto.Blacklist);
         existingMetadataSetting.Whitelist = TagHelper.SortAndCleanTagList(dto.Whitelist);
         existingMetadataSetting.Overrides = [.. dto.Overrides ?? []];
         existingMetadataSetting.PersonRoles = dto.PersonRoles ?? [];
+        existingMetadataSetting.FilterAboveWeight = dto.FilterAboveWeight;
 
         // Sanitize the tags by shape only as Windows/Linux will differ on supported codes from CultureInfo.GetCultures, like ja-Latn
         existingMetadataSetting.GlobalNameLanguages = LanguageCodeHelper.Sanitize(dto.GlobalLanguageTitleSettings.Name);
@@ -165,6 +168,7 @@ public class SettingsService(
         {
             existingMetadataSetting.AgeRatingMappings = dto.AgeRatingMappings;
         }
+
 
         if (settings.FieldMappings)
         {

@@ -1,4 +1,7 @@
-﻿namespace Kavita.Models.DTOs.Recommendation;
+﻿using System.ComponentModel.DataAnnotations;
+using Kavita.Models.Entities.Enums.KavitaPlus;
+
+namespace Kavita.Models.DTOs.Recommendation;
 
 public sealed record MetadataTagDto
 {
@@ -8,4 +11,9 @@ public sealed record MetadataTagDto
     public bool IsGeneralSpoiler { get; private set; }
     public bool IsMediaSpoiler { get; private set; }
     public bool IsAdult { get; private set; }
+    /// <summary>
+    /// Null indicates not supported
+    /// </summary>
+    [EnumDataType(typeof(TagWeight))]
+    public TagWeight? TagWeight { get; set; } = null;
 }

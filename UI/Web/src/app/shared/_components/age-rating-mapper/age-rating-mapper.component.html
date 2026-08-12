@@ -1,0 +1,44 @@
+<div [formGroup]="form()">
+  <div [formArrayName]="controlName()">
+    @for (mapping of mappingRows.controls; track mapping; let i = $index) {
+      <div [formGroupName]="i" class="row mb-2">
+        <div class="col-md-4 d-flex align-items-center justify-content-center">
+          @if (sourceLabel()) {
+            <label class="visually-hidden" [for]="idPrefix() + '-' + i">{{sourceLabel()}}</label>
+          }
+          <input [id]="idPrefix() + '-' + i" type="text" class="form-control" formControlName="str"
+                 [placeholder]="sourceLabel()" autocomplete="off" />
+        </div>
+        <div class="col-md-2 d-flex align-items-center justify-content-center">
+          <i class="fa fa-arrow-right" aria-hidden="true"></i>
+        </div>
+        <div class="col-md-4 d-flex align-items-center justify-content-center">
+          <select class="form-select" formControlName="rating">
+            @for (ageRating of ageRatings(); track ageRating.value) {
+              <option [ngValue]="ageRating.value">
+                {{ageRating.value | ageRating}}
+              </option>
+            }
+          </select>
+        </div>
+        <div class="col-md-2">
+          <button type="button" class="btn btn-icon" (click)="removeRow(i)">
+            <i class="fa fa-trash-alt" aria-hidden="true"></i>
+            <span class="visually-hidden">{{removeText()}}</span>
+          </button>
+
+          @if ($last) {
+            <button type="button" class="btn btn-icon" (click)="addRow()">
+              <i class="fa fa-plus" aria-hidden="true"></i>
+              <span class="visually-hidden">{{addText()}}</span>
+            </button>
+          }
+        </div>
+      </div>
+    } @empty {
+      <button type="button" class="btn btn-secondary" (click)="addRow()">
+        <i class="fa fa-plus me-1" aria-hidden="true"></i>{{addText()}}
+      </button>
+    }
+  </div>
+</div>
