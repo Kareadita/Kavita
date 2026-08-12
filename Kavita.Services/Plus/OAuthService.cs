@@ -9,7 +9,6 @@ using Kavita.API.Services.Plus;
 using Kavita.API.Services.SignalR;
 using Kavita.Models.DTOs.KavitaPlus.Audit;
 using Kavita.Models.DTOs.KavitaPlus.OAuth;
-using Kavita.Models.DTOs.KavitaPlus.Scrobble;
 using Kavita.Models.DTOs.SignalR;
 using Kavita.Models.Entities.Enums;
 using Kavita.Models.Entities.Enums.Audit;
@@ -22,7 +21,6 @@ namespace Kavita.Services.Plus;
 public class OAuthService(
     ILogger<OAuthService> logger,
     IUnitOfWork unitOfWork,
-    IScrobblingService scrobblingService,
     IKavitaPlusApiService kavitaPlusApiService,
     IEventHub eventHub,
     IKavitaPlusAuditService kavitaPlusAuditService): IOAuthService
@@ -121,11 +119,11 @@ public class OAuthService(
     /// <param name="userId"></param>
     /// <param name="provider"></param>
     /// <param name="ct"></param>
-    public async Task SyncWithDelay(int userId, ScrobbleProvider provider, CancellationToken ct = default)
+    public static async Task SyncWithDelay(int userId, ScrobbleProvider provider, CancellationToken ct = default)
     {
         await Task.Delay(TimeSpan.FromSeconds(1), ct);
 
-        await scrobblingService.SyncProviderInfo(userId, provider, ct);
+        BackgroundJob.Enqueue<IScrobblingService>(s => s.SyncProviderInfo(userId, provider, CancellationToken.None));
     }
 
     public async Task RefreshTokens(CancellationToken ct = default)

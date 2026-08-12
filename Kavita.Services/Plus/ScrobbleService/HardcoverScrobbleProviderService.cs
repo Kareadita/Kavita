@@ -48,6 +48,6 @@ public class HardcoverScrobbleProviderService(ILogger<HardcoverScrobbleProviderS
 
     public override bool IsTokenValid(string token)
     {
-        return JwtHelper.IsTokenValid(token);
+        return !string.IsNullOrEmpty(token);
     }
 }

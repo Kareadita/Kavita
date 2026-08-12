@@ -6,6 +6,7 @@ using Kavita.API.Database;
 using Kavita.API.Repositories;
 using Kavita.API.Services;
 using Kavita.API.Services.Metadata;
+using Kavita.API.Services.Plus;
 using Kavita.API.Services.SignalR;
 using Kavita.Common.Extensions;
 using Kavita.Common.Helpers;
@@ -62,20 +63,20 @@ public class PersonController(
 
         if (personDto.AniListId != 0)
         {
-            var urlPrefix = isCharacter ? ScrobblingService.AniListCharacterWebsite : ScrobblingService.AniListStaffWebsite;
+            var urlPrefix = isCharacter ? ScrobblingHelper.AniListCharacterWebsite : ScrobblingHelper.AniListStaffWebsite;
             personDto.WebLinks.Add($"{urlPrefix}{personDto.AniListId}");
         }
 
         if (personDto.MalId != 0)
         {
-            var urlPrefix = isCharacter ? ScrobblingService.MalCharacterWebsite : ScrobblingService.MalStaffWebsite;
+            var urlPrefix = isCharacter ? ScrobblingHelper.MalCharacterWebsite : ScrobblingHelper.MalStaffWebsite;
             personDto.WebLinks.Add($"{urlPrefix}{personDto.MalId}");
         }
 
         // Hardcover currently does not seem to have characters
         if (!string.IsNullOrEmpty(personDto.HardcoverId) && !isCharacter)
         {
-            personDto.WebLinks.Add($"{ScrobblingService.HardcoverStaffWebsite}{personDto.HardcoverId}");
+            personDto.WebLinks.Add($"{ScrobblingHelper.HardcoverStaffWebsite}{personDto.HardcoverId}");
         }
     }
 
