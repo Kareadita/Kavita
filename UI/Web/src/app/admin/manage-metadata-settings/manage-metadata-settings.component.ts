@@ -187,6 +187,7 @@ export class ManageMetadataSettingsComponent implements OnInit {
       this.settingsForm.addControl('enableLocalizedName', new FormControl(settings.enableLocalizedName, []));
       this.settingsForm.addControl('enableName', new FormControl(settings.enableName, []));
       this.settingsForm.addControl('enablePublicationStatus', new FormControl(settings.enablePublicationStatus, []));
+      this.settingsForm.addControl('enableAgeRating', new FormControl(settings.enableAgeRating, []));
       this.settingsForm.addControl('enableRelations', new FormControl(settings.enableRelationships, []));
       this.settingsForm.addControl('enableGenres', new FormControl(settings.enableGenres, []));
       this.settingsForm.addControl('enableTags', new FormControl(settings.enableTags, []));

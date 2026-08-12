@@ -234,6 +234,18 @@
                 </div>
 
                 <div class="row g-0 mt-4 mb-4">
+                  @if(settingsForm.get('enableAgeRating'); as formControl) {
+                    <app-setting-switch [title]="t('enable-age-rating-label')" [subtitle]="t('enable-age-rating-tooltip')">
+                      <ng-template #switch>
+                        <div class="form-check form-switch float-end">
+                          <input id="enable-age-rating" type="checkbox" class="form-check-input" formControlName="enableAgeRating">
+                        </div>
+                      </ng-template>
+                    </app-setting-switch>
+                  }
+                </div>
+
+                <div class="row g-0 mt-4 mb-4">
                   @if(settingsForm.get('enablePublicationStatus'); as formControl) {
                     <app-setting-switch [title]="t('derive-publication-status-label')" [subtitle]="t('derive-publication-status-tooltip')">
                       <ng-template #switch>

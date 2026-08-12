@@ -10,6 +10,13 @@ namespace Kavita.Database.Migrations
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
+            migrationBuilder.AddColumn<bool>(
+                name: "EnableAgeRating",
+                table: "MetadataSettings",
+                type: "INTEGER",
+                nullable: false,
+                defaultValue: false);
+
             migrationBuilder.AddColumn<string>(
                 name: "ExternalAgeRatingMappings",
                 table: "MetadataSettings",
@@ -26,6 +33,10 @@ namespace Kavita.Database.Migrations
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
+            migrationBuilder.DropColumn(
+                name: "EnableAgeRating",
+                table: "MetadataSettings");
+
             migrationBuilder.DropColumn(
                 name: "ExternalAgeRatingMappings",
                 table: "MetadataSettings");

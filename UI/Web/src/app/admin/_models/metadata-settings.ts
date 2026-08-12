@@ -23,6 +23,7 @@ export interface MetadataSettings {
   enableExtendedMetadataProcessing: boolean;
   enableSummary: boolean;
   enablePublicationStatus: boolean;
+  enableAgeRating: boolean;
   enableRelationships: boolean;
   enablePeople: boolean;
   enableStartDate: boolean;

@@ -32,6 +32,10 @@ public class MetadataSettings
     /// </summary>
     public bool EnablePublicationStatus { get; set; }
     /// <summary>
+    /// Allow Age Rating status to be derived and updated
+    /// </summary>
+    public bool EnableAgeRating { get; set; }
+    /// <summary>
     /// Allow Relationships between series to be set
     /// </summary>
     public bool EnableRelationships { get; set; }

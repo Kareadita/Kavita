@@ -56,6 +56,7 @@ public class SettingsService(
         existingMetadataSetting.EnableLocalizedName = dto.EnableLocalizedName;
         existingMetadataSetting.EnableName = dto.EnableName;
         existingMetadataSetting.EnablePublicationStatus = dto.EnablePublicationStatus;
+        existingMetadataSetting.EnableAgeRating = dto.EnableAgeRating;
         existingMetadataSetting.EnableRelationships = dto.EnableRelationships;
         existingMetadataSetting.EnablePeople = dto.EnablePeople;
         existingMetadataSetting.EnableStartDate = dto.EnableStartDate;

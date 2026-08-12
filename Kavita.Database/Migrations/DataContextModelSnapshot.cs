@@ -1359,6 +1359,9 @@ namespace Kavita.Database.Migrations
                     b.Property<string>("Blacklist")
                         .HasColumnType("TEXT");
 
+                    b.Property<bool>("EnableAgeRating")
+                        .HasColumnType("INTEGER");
+
                     b.Property<bool>("EnableChapterCoverImage")
                         .HasColumnType("INTEGER");
 

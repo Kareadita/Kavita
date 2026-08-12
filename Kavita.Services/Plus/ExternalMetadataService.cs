@@ -970,14 +970,12 @@ public class ExternalMetadataService : IExternalMetadataService
             ? settings.Whitelist.Select(s => s.ToNormalized()).ToHashSet()
             : null;
 
+        if (settings.FilterAboveWeight == null) return [];
 
-        var tagsToRemove = settings.FilterAboveWeight == null
-            ? []
-            : externalMetadata.Tags
-                .Where(t => t.TagWeight != null && t.TagWeight > settings.FilterAboveWeight && whitelist?.Contains(t.Name.ToNormalized()) != true)
-                .Select(t => t.Name)
-                .ToHashSet(StringComparer.OrdinalIgnoreCase);
-        return tagsToRemove;
+        return externalMetadata.Tags
+            .Where(t => t.TagWeight != null && t.TagWeight > settings.FilterAboveWeight && whitelist?.Contains(t.Name.ToNormalized()) != true)
+            .Select(t => t.Name)
+            .ToHashSet(StringComparer.OrdinalIgnoreCase);;
     }
 
 
@@ -1707,6 +1705,8 @@ public class ExternalMetadataService : IExternalMetadataService
 
     private (bool, MetadataFieldChangeDto?) UpdateAgeRating(Series series, MetadataSettingsDto settings, ExternalSeriesDetailDto externalMetadata, IEnumerable<string> allExternalTags)
     {
+        if (!settings.EnableAgeRating) return (false, null);
+
         if (series.Metadata.AgeRatingLocked && !HasForceOverride(settings, series.Metadata, MetadataSettingField.AgeRating))
         {
             return (false, null);

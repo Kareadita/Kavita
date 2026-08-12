@@ -1321,6 +1321,8 @@
         "localized-name-tooltip": "Allow Localized Name to be written when the field is unlocked. Kavita will attempt to make the best guess.",
         "name-label": "Series Name",
         "name-tooltip": "Allow the Series Name to be written when the field is unlocked. The name on disk is still used to keep the series matched during scans.",
+        "enable-age-rating-label": "Age Rating",
+        "enable-age-rating-tooltip": "Allow Age Rating to be written when the field is unlocked. Kavita will always take the highest from mapping controls.",
         "derive-publication-status-label": "Publication Status",
         "derive-publication-status-tooltip": "Allow Publication Status to be derived from Total Chapter/Volume counts.",
         "enable-relations-label": "Relationships",
