@@ -23,7 +23,7 @@ export class UserScrobbleProvider {
   }
 
   get supportsOAuthFlow() {
-    return ![ScrobbleProvider.Hardcover, ScrobbleProvider.Cbr, ScrobbleProvider.Kavita].includes(this.provider);
+    return ![ScrobbleProvider.Cbr, ScrobbleProvider.Kavita].includes(this.provider);
   }
 
   get oAuthUpStream() {
@@ -34,6 +34,8 @@ export class UserScrobbleProvider {
         return OAuthUpstream.MyAnimeList;
       case ScrobbleProvider.MangaBaka:
         return OAuthUpstream.MangaBaka;
+      case ScrobbleProvider.Hardcover:
+        return OAuthUpstream.Hardcover;
     }
 
     return null;

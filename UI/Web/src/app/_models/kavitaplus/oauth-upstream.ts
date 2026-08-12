@@ -3,4 +3,5 @@ export enum OAuthUpstream {
   MangaBaka = 1,
   AniList = 2,
   MyAnimeList = 3,
+  Hardcover = 4,
 }
