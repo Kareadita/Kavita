@@ -83,7 +83,7 @@ public class ScrobblingServiceTests(ITestOutputHelper outputHelper): AbstractDbT
 
         var service = new ScrobblingService(unitOfWork, Substitute.For<IEventHub>(), logger,  licenseService,
             localizationService, emailService, kavitaPlusApiService, serviceCollection.BuildServiceProvider(),
-            Substitute.For<IKavitaPlusAuditService>(), ruleService);
+            Substitute.For<IKavitaPlusAuditService>(), ruleService, Substitute.For<IOAuthService>());
 
         var readerService = new ReaderService(unitOfWork,
             Substitute.For<ILogger<ReaderService>>(),
