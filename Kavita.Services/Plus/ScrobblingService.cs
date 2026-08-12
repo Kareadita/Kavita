@@ -210,7 +210,14 @@ public class ScrobblingService : IScrobblingService
     private readonly IServiceProvider _serviceProvider;
     private readonly IKavitaPlusAuditService _auditService;
     private readonly IScrobbleRuleService _ruleService;
-    private readonly IOAuthService _oAuthService;
+
+    public const string AniListWeblinkWebsite = ScrobblingHelper.AniListWeblinkWebsite;
+    public const string MalWeblinkWebsite = ScrobblingHelper.MalWeblinkWebsite;
+    public const string MalStaffWebsite = ScrobblingHelper.MalStaffWebsite;
+    public const string MalCharacterWebsite = ScrobblingHelper.MalCharacterWebsite;
+    public const string AniListStaffWebsite = ScrobblingHelper.AniListStaffWebsite;
+    public const string AniListCharacterWebsite = ScrobblingHelper.AniListCharacterWebsite;
+    public const string HardcoverStaffWebsite = ScrobblingHelper.HardcoverStaffWebsite;
 
     private const SeriesIncludes ScrobbleSeriesIncludes = SeriesIncludes.Library | SeriesIncludes.ExternalMetadata | SeriesIncludes.Metadata;
 
@@ -224,7 +231,7 @@ public class ScrobblingService : IScrobblingService
     public ScrobblingService(IUnitOfWork unitOfWork, IEventHub eventHub, ILogger<ScrobblingService> logger,
         ILicenseService licenseService, ILocalizationService localizationService, IEmailService emailService,
         IKavitaPlusApiService kavitaPlusApiService, IServiceProvider serviceProvider, IKavitaPlusAuditService auditService,
-        IScrobbleRuleService ruleService, IOAuthService oAuthService)
+        IScrobbleRuleService ruleService)
     {
         _unitOfWork = unitOfWork;
         _eventHub = eventHub;
@@ -236,7 +243,6 @@ public class ScrobblingService : IScrobblingService
         _serviceProvider = serviceProvider;
         _auditService = auditService;
         _ruleService = ruleService;
-        _oAuthService = oAuthService;
 
         FlurlConfiguration.ConfigureClientForUrl(Configuration.KavitaPlusApiUrl);
     }
@@ -904,6 +910,28 @@ public class ScrobblingService : IScrobblingService
     }
 
     /// <summary>
+    /// Filters users who can scrobble, sets their rate limit and updates the <see cref="ScrobbleSyncContext.Users"/>
+    /// </summary>
+    /// <param name="ctx"></param>
+    /// <param name="ct"></param>
+    /// <returns></returns>
+    private async Task PrepareUsersToScrobble(ScrobbleSyncContext ctx, CancellationToken ct)
+    {
+        // For all userIds, ensure that we can connect and have access
+        var usersToScrobble = ctx.GetEventsToProcess()
+            .Select(u => u.AppUser)
+            .DistinctBy(u => u.Id)
+            .ToList();
+
+        foreach (var user in usersToScrobble)
+        {
+            await SetAndCheckRateLimit(ctx, user, ct);
+        }
+
+        ctx.Users = usersToScrobble;
+    }
+
+    /// <summary>
     /// Cleans up any events that are due to bugs or legacy
     /// </summary>
     private async Task CleanupOldOrBuggedEvents()
@@ -936,7 +964,8 @@ public class ScrobblingService : IScrobblingService
         var ctx = await PrepareScrobbleContext(ct);
         if (ctx.TotalCount == 0) return;
 
-        await LoadUsersAndEnsureTokensAreValid(ctx, ct);
+        // Get all the applicable users to scrobble and set their rate limits
+        await PrepareUsersToScrobble(ctx, ct);
 
         _logger.LogInformation("Scrobble Processing Details:" +
                                "\n  Read Events: {ReadEventsCount}" +
@@ -973,32 +1002,6 @@ public class ScrobblingService : IScrobblingService
         _logger.LogInformation("Scrobbling Events is complete"); // TODO: Give a summary
 
         await CleanupOldOrBuggedEvents();
-    }
-
-    private async Task LoadUsersAndEnsureTokensAreValid(ScrobbleSyncContext ctx, CancellationToken ct)
-    {
-        // Get all the applicable users to scrobble and set their rate limits
-        // For all userIds, ensure that we can connect and have access
-        var usersToScrobble = ctx.GetEventsToProcess()
-            .GroupBy(u => u.AppUser)
-            .ToDictionary(
-                g => g.Key,
-                g => g.Select(u => u.ScrobbleProvider).Distinct().ToList());
-
-        foreach (var kv in usersToScrobble)
-        {
-            foreach (var provider in kv.Value)
-            {
-                await _oAuthService.RefreshToken(provider, kv.Key, ct);
-            }
-        }
-
-        ctx.Users = usersToScrobble.Keys.ToList();
-
-        foreach (var user in ctx.Users)
-        {
-            await SetAndCheckRateLimit(ctx, user, ct);
-        }
     }
 
     [DisableConcurrentExecution(60 * 60 * 60)]
@@ -1259,7 +1262,7 @@ public class ScrobblingService : IScrobblingService
                 _serviceProvider.GetRequiredKeyedService<IScrobbleProviderService>(evt.ScrobbleProvider);
             var userProvider = user.ScrobbleProviders[evt.ScrobbleProvider];
 
-            if (providerService.IsTokenValid(userProvider.AuthenticationToken) && userProvider.ValidUntilUtc > DateTime.UtcNow)
+            if (providerService.IsTokenValid(userProvider.AuthenticationToken))
             {
                 return true;
             }
@@ -1392,6 +1395,7 @@ public class ScrobblingService : IScrobblingService
 
         foreach (var evt in eventList.Where(CanProcessScrobbleEvent))
         {
+            // TODO: Why would ctx.Users ever be more than 1?
             var user = ctx.Users.FirstOrDefault(u => u.Id == evt.AppUserId);
             if (user is null)
             {
@@ -2083,7 +2087,7 @@ public class ScrobblingService : IScrobblingService
         var allUserProviders = ctx.ProvidersForUser(user.Id);
 
         var providersToCheck = user.ScrobbleProviders
-            .Where(kv => !string.IsNullOrEmpty(kv.Value.AuthenticationToken) && kv.Value.ValidUntilUtc > DateTime.UtcNow)
+            .Where(kv => !string.IsNullOrEmpty(kv.Value.AuthenticationToken))
             .Where(kv => allUserProviders.Contains(kv.Key))
             .ToList();
 

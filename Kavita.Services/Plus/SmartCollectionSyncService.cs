@@ -301,7 +301,7 @@ public class SmartCollectionSyncService(
     private static void AppendMissingSeries(StringBuilder builder, ExternalMetadataIdsDto seriesInfo)
     {
         builder.Append(
-            $"<a href='{ScrobblingHelper.MalWeblinkWebsite}{seriesInfo.MalId}' target='_blank' rel='noopener noreferrer'>{seriesInfo.SeriesName}</a>");
+            $"<a href='{ScrobblingService.MalWeblinkWebsite}{seriesInfo.MalId}' target='_blank' rel='noopener noreferrer'>{seriesInfo.SeriesName}</a>");
         builder.Append("<br/>");
     }
 
