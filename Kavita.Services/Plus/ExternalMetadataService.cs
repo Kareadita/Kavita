@@ -1720,15 +1720,21 @@ public class ExternalMetadataService : IExternalMetadataService
 
             var from = series.Metadata.AgeRating;
 
-            // Find the highest age rating from the different mapping mechanisms + the age rating from Kavita+
+            // Find the highest age rating from the different mapping mechanisms
             var externalAgeRating = externalMetadata.AgeRating;
             var baseDerivedAgeRating = !string.IsNullOrEmpty(externalMetadata.AgeRatingRaw) ?
                 DetermineAgeRating([externalMetadata.AgeRatingRaw], settings.ExternalAgeRatingMappings)
                 : AgeRating.Unknown;
             var tagDerivedAgeRating = DetermineAgeRating(totalTags, settings.AgeRatingMappings);
-            AgeRating[] candidates = [from, externalAgeRating, baseDerivedAgeRating, tagDerivedAgeRating];
 
-            var toSetAgeRating = candidates.Max();
+            var kPlusRating = baseDerivedAgeRating;
+            if (string.IsNullOrEmpty(externalMetadata.AgeRatingRaw))
+            {
+                kPlusRating = externalAgeRating;
+            }
+
+            // If the admin set up a raw mapping, then we use that, otherwise fallback to Kavita+'s mapping
+            var toSetAgeRating = new[]{from, kPlusRating, tagDerivedAgeRating}.Max();
 
             if (toSetAgeRating == AgeRating.Unknown || toSetAgeRating == from) return (false, null);
 
