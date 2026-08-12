@@ -151,7 +151,7 @@ public class OAuthService(
         await RefreshToken(provider, user, ct);
     }
 
-    public async Task RefreshToken(ScrobbleProvider provider, AppUser user, CancellationToken ct)
+    private async Task RefreshToken(ScrobbleProvider provider, AppUser user, CancellationToken ct)
     {
         var settings = user.ScrobbleProviders[provider];
 
