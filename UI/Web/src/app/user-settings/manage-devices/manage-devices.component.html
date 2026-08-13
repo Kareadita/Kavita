@@ -18,6 +18,13 @@
       </div>
     }
 
+    @if (isLoading()) {
+      <app-loading [loading]="true" />
+    } @else if (devices().length === 0) {
+      <app-empty-state [titleKey]="'no-data'" [descriptionKey]="'no-data-description'" [i18nPrefix]="'manage-devices'">
+        <i icon class="fa-solid fa-mobile-screen-button" aria-hidden="true"></i>
+      </app-empty-state>
+    } @else {
     <app-responsive-table [rows]="devices()" [trackByFn]="trackBy">
       <ng-template #tableTemplate>
         <ngx-datatable
@@ -110,6 +117,7 @@
       </ng-template>
 
     </app-responsive-table>
+    }
   </ng-container>
 
   <div class="setting-section-break"></div>

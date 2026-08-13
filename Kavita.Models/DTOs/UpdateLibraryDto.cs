@@ -2,6 +2,7 @@
 using System.ComponentModel.DataAnnotations;
 using Kavita.Models.Entities;
 using Kavita.Models.Entities.Enums;
+using Kavita.Models.Attributes;
 
 namespace Kavita.Models.DTOs;
 
@@ -13,6 +14,7 @@ public sealed record UpdateLibraryDto
     [Required]
     public required string Name { get; init; }
     /// <inheritdoc cref="Library.Type"/>
+    [EnumDataType(typeof(LibraryType))]
     [Required]
     public LibraryType Type { get; set; }
     /// <inheritdoc cref="Library.Folders"/>
@@ -54,10 +56,12 @@ public sealed record UpdateLibraryDto
     /// <inheritdoc cref="Library.DefaultLanguage"/>
     public string DefaultLanguage { get; init; }
     /// <inheritdoc cref="Library.MetadataProvider"/>
+    [EnumDataType(typeof(MetadataProvider))]
     public MetadataProvider MetadataProvider { get; init; }
     /// <summary>
     /// What types of files to allow the scanner to pickup
     /// </summary>
+    [EnumCollection(typeof(FileTypeGroup))]
     [Required]
     public ICollection<FileTypeGroup> FileGroupTypes { get; init; }
     /// <summary>

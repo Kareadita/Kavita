@@ -280,5 +280,9 @@
     "cbl-import-validation-types": "Ní cheadaítear ach comhaid .cbl agus .json",
     "scrobble-provider-not-setup": "Níl Soláthraí Scrobble {0} socraithe",
     "unable-to-cancel-k+": "Ní féidir síntiús Kavita+ a chealú mar gheall ar earráid. Téigh i dteagmháil le Tacaíocht Kavita+",
-    "unable-to-renew-k+": "Ní féidir síntiús Kavita+ a athnuachan mar gheall ar earráid. Téigh i dteagmháil le Tacaíocht Kavita+"
+    "unable-to-renew-k+": "Ní féidir síntiús Kavita+ a athnuachan mar gheall ar earráid. Téigh i dteagmháil le Tacaíocht Kavita+",
+    "series-name-exists": "Tá sraith leis an ainm seo ann cheana féin sa leabharlann seo",
+    "mappings-re-run-in-progress": "Tá iarratas ar mhapálacha athrith meiteashonraí á phróiseáil faoi láthair. Fan go dtí go mbeidh sé críochnaithe le cur sa scuaine arís",
+    "mappings-re-run-no-libraries-selected": "Ní mór leabharlann amháin ar a laghad a bheith san áireamh i d’iarratas",
+    "mappings-re-run-libraries-overlap": "Ní féidir leis na leabharlanna céanna a bheith i ExcludedLibraries agus IncludedLibraries"
 }

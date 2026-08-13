@@ -1,10 +1,11 @@
+﻿using System.ComponentModel.DataAnnotations;
 namespace Kavita.Models.DTOs.KavitaPlus;
 #nullable enable
 
 /// <summary>
 /// Records a single field's before/after state during a metadata write
 /// </summary>
-public sealed record MetadataFieldChangeDto(MetadataFieldChangeKind Field, object? From, object? To);
+public sealed record MetadataFieldChangeDto([EnumDataType(typeof(MetadataFieldChangeKind))] MetadataFieldChangeKind Field, object? From, object? To, string? Note = null);
 
 /// <summary>
 /// Represents individual fields for any entity type. Will be localized in the UI layer.

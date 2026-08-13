@@ -12,6 +12,7 @@ public sealed record UpdateEmailDeviceDto
     /// <summary>
     /// Platform of the device. If not know, defaults to "Custom"
     /// </summary>
+    [EnumDataType(typeof(EmailDevicePlatform))]
     [Required]
     public EmailDevicePlatform Platform { get; set; }
     [Required]

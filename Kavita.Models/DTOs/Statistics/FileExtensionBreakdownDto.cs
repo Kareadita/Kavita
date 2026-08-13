@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using Kavita.Models.Entities.Enums;
+using System.ComponentModel.DataAnnotations;
 
 namespace Kavita.Models.DTOs.Statistics;
 #nullable enable
@@ -7,6 +8,7 @@ namespace Kavita.Models.DTOs.Statistics;
 public sealed record FileExtensionDto
 {
     public string? Extension { get; set; }
+    [EnumDataType(typeof(MangaFormat))]
     public MangaFormat Format { get; set; }
     public long TotalSize { get; set; }
     public long TotalFiles { get; set; }

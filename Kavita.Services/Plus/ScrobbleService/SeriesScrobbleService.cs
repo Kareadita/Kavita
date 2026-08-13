@@ -3,6 +3,7 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Kavita.API.Database;
+using Kavita.API.Repositories;
 using Kavita.API.Services.Plus;
 using Kavita.Models.DTOs.KavitaPlus;
 using Kavita.Models.DTOs.Scrobbling;
@@ -321,8 +322,12 @@ where T: IScrobbleProviderService
 
         if (evt.VolumeNumber is Parser.SpecialVolumeNumber)
         {
-            // We don't process Specials because they will never match on AniList
-            return;
+            var countIfAllSpecial = await unitOfWork.SeriesRepository.GetChapterCountIfAllSpecials(ctx.Series.Id, ct);
+            if (countIfAllSpecial is null or 0)
+                return;
+
+            // In case of a series only being specials, send the amount of specials as chapter count
+            evt.ChapterNumber = countIfAllSpecial;
         }
 
         unitOfWork.ScrobbleRepository.Attach(evt);
@@ -333,13 +338,13 @@ where T: IScrobbleProviderService
             {
                 Provider = Provider,
                 ScrobbleEventType = ScrobbleEventType.ChapterRead,
-                ChapterNumber = chapterNumber,
-                VolumeNumber = volumeNumber,
+                ChapterNumber = evt.ChapterNumber,
+                VolumeNumber = evt.VolumeNumber,
                 LibraryType = ctx.Series.Library.Type,
             }, AuditStatus.Info, userId: ctx.User.Id, ct: ct);
 
         logger.LogDebug("Created new scrobble read event for {Series} with Volume {Volume}, Chapter {Chapter} for User: {UserId}",
-            ctx.Series.Name, volumeNumber, chapterNumber, ctx.User.Id);
+            ctx.Series.Name, evt.VolumeNumber, evt.ChapterNumber, ctx.User.Id);
 
     }
 

@@ -71,4 +71,33 @@ public static class EnumerableExtensions
     {
         return source.Where(item => item != null)!;
     }
+
+    /// <summary>
+    /// Returns the single element of a sequence, or null if the sequence is empty
+    /// or contains more than one element. Unlike SingleOrDefault, this never throws.
+    /// </summary>
+    public static TSource? OneOrDefault<TSource>(this IEnumerable<TSource> source)
+    {
+        using var enumerator = source.GetEnumerator();
+
+        if (!enumerator.MoveNext())
+        {
+            return default;
+        }
+
+        var result = enumerator.Current;
+
+        if (enumerator.MoveNext())
+        {
+            return default;
+        }
+
+        return result;
+    }
+
+    /// <inheritdoc cref="OneOrDefault{TSource}(System.Collections.Generic.IEnumerable{TSource})"/>
+    public static TSource? OneOrDefault<TSource>(this IEnumerable<TSource> source, Func<TSource, bool> predicate)
+    {
+        return source.Where(predicate).OneOrDefault();
+    }
 }

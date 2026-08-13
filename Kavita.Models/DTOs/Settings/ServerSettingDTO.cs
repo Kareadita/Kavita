@@ -1,6 +1,7 @@
 ﻿using System;
 using Kavita.Models.Constants;
 using Kavita.Models.Entities.Enums;
+using System.ComponentModel.DataAnnotations;
 
 namespace Kavita.Models.DTOs.Settings;
 #nullable enable
@@ -95,6 +96,7 @@ public sealed record ServerSettingDto
     /// The format that should be used when saving media for Kavita
     /// </summary>
     /// <example>This includes things like: Covers, Bookmarks, Favicons</example>
+    [EnumDataType(typeof(EncodeFormat))]
     public EncodeFormat EncodeMediaAs { get; set; }
 
     /// <summary>
@@ -130,10 +132,12 @@ public sealed record ServerSettingDto
     /// <summary>
     /// How large the cover images should be
     /// </summary>
+    [EnumDataType(typeof(CoverImageSize))]
     public CoverImageSize CoverImageSize { get; set; }
     /// <summary>
     /// How large rendered PDF images should be
     /// </summary>
+    [EnumDataType(typeof(PdfRenderResolution))]
     public PdfRenderResolution PdfRenderResolution { get; set; }
     /// <summary>
     /// SMTP Configuration

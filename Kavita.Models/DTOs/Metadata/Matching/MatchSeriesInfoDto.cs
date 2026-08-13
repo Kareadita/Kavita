@@ -1,6 +1,7 @@
 ﻿using Kavita.Models.DTOs.Scrobbling;
 using Kavita.Models.Entities.Enums;
 using Kavita.Models.Entities.Enums.KavitaPlus;
+using System.ComponentModel.DataAnnotations;
 
 namespace Kavita.Models.DTOs.Metadata.Matching;
 
@@ -11,16 +12,21 @@ public sealed record MatchSeriesInfoDto
     /// Dictates there is a Match AND it's AniList
     /// </summary>
     public bool IsLegacy { get; set; }
+    [EnumDataType(typeof(PlusMediaFormat))]
     public PlusMediaFormat PlusMediaFormat { get; set; }
+    [EnumDataType(typeof(LibraryType))]
     public LibraryType LibraryType { get; set; }
     /// <summary>
     /// Where the Match came from
     /// </summary>
+    [EnumDataType(typeof(MetadataProvider))]
     public MetadataProvider? MatchedProvider { get; set; }
     /// <summary>
     /// Who we would match against
     /// </summary>
+    [EnumDataType(typeof(MetadataProvider))]
     public MetadataProvider PrimaryProvider { get; set; }
+    [EnumDataType(typeof(MangaFormat))]
     public MangaFormat SeriesFormat { get; set; }
     public int? MangaBakaId { get; set; }
     public int? AniListId { get; set; }

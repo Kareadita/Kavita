@@ -15,6 +15,8 @@ import {Clipboard} from "@angular/cdk/clipboard";
 import {DatePipe} from "@angular/common";
 import {ToastrService} from "ngx-toastr";
 import {ResponsiveTableComponent} from "../../shared/_components/responsive-table/responsive-table.component";
+import {LoadingComponent} from "../../shared/loading/loading.component";
+import {EmptyStateComponent} from "../../shared/_components/empty-state/empty-state.component";
 import {ModalService} from "../../_services/modal.service";
 import {form, FormField} from "@angular/forms/signals";
 import {FormsModule} from "@angular/forms";
@@ -32,6 +34,8 @@ import {SettingsTabId} from "../../sidenav/preference-nav/preference-nav.compone
     ToggleVisibilityDirective,
     DatePipe,
     ResponsiveTableComponent,
+    LoadingComponent,
+    EmptyStateComponent,
     FormField,
     FormsModule,
     RouterLink,

@@ -1,6 +1,7 @@
 ﻿using System;
 using Kavita.Models.Entities.Enums;
 using Kavita.Models.Entities.Interfaces;
+using System.ComponentModel.DataAnnotations;
 
 namespace Kavita.Models.DTOs.Collection;
 #nullable enable
@@ -11,6 +12,7 @@ public sealed record AppUserCollectionDto : IHasCoverImage
     public string Title { get; init; } = default!;
     public string? Summary { get; init; } = default!;
     public bool Promoted { get; init; }
+    [EnumDataType(typeof(AgeRating))]
     public AgeRating AgeRating { get; init; }
 
     /// <summary>
@@ -38,6 +40,7 @@ public sealed record AppUserCollectionDto : IHasCoverImage
     /// <summary>
     /// Who created/manages the list. Non-Kavita lists are not editable by the user, except to promote
     /// </summary>
+    [EnumDataType(typeof(ScrobbleProvider))]
     public ScrobbleProvider Source { get; init; } = ScrobbleProvider.Kavita;
     /// <summary>
     /// For Non-Kavita sourced collections, the url to sync from

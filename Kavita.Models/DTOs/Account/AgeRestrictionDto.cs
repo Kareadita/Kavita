@@ -1,5 +1,6 @@
 ﻿
 
+using System.ComponentModel.DataAnnotations;
 using Kavita.Models.Entities.Enums;
 
 namespace Kavita.Models.DTOs.Account;
@@ -9,6 +10,7 @@ public sealed record AgeRestrictionDto
     /// <summary>
     /// The maximum age rating a user has access to. -1 if not applicable
     /// </summary>
+    [EnumDataType(typeof(AgeRating))]
     public required AgeRating AgeRating { get; init; } = AgeRating.NotApplicable;
     /// <summary>
     /// Are Unknowns explicitly allowed against age rating

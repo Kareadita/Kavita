@@ -1,5 +1,6 @@
 ﻿using System;
 using Kavita.Models.Entities.Enums;
+using System.ComponentModel.DataAnnotations;
 
 namespace Kavita.Models.DTOs.Dashboard;
 /// <summary>
@@ -10,6 +11,7 @@ public sealed record GroupedSeriesDto
     public string SeriesName { get; set; } = default!;
     public int SeriesId { get; set; }
     public int LibraryId { get; set; }
+    [EnumDataType(typeof(LibraryType))]
     public LibraryType LibraryType { get; set; }
     public DateTime Created { get; set; }
     /// <summary>
@@ -24,6 +26,7 @@ public sealed record GroupedSeriesDto
     /// This is used only on the UI. It is just index of being added.
     /// </summary>
     public int Id { get; set; }
+    [EnumDataType(typeof(MangaFormat))]
     public MangaFormat Format { get; set; }
     /// <summary>
     /// Number of items that are updated. This provides a sort of grouping when multiple chapters are added per Volume/Series

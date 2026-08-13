@@ -8,6 +8,7 @@ using Kavita.Models.DTOs.KavitaPlus.ExternalMetadata.Covers;
 using Kavita.Models.DTOs.KavitaPlus.Metadata;
 using Kavita.Models.DTOs.Metadata.Matching;
 using Kavita.Models.DTOs.SeriesDetail;
+using Kavita.Models.Entities;
 using Kavita.Models.Entities.Enums;
 using Kavita.Models.Entities.Enums.Audit;
 
@@ -98,4 +99,25 @@ public interface IExternalMetadataService
     /// <returns></returns>
     Task<SeriesDetailPlusDto?> TryMatchAndLoadMetadataForSeries(int seriesId, LibraryType libraryType, MetadataFetchTrigger trigger,
         CancellationToken ct = default);
+
+    /// <summary>
+    /// Determines whether changing the Series' Name to <paramref name="proposedName"/> would orphan merged files on
+    /// disk, i.e. the current Name still anchors a folder on disk that is not covered by the Series' LocalizedName or
+    /// OriginalName. When true, the scanner would split those files into a new series and the write should be rejected.
+    /// </summary>
+    /// <param name="series">The Series being edited. Loaded scalar fields (Name, NormalizedLocalizedName, NormalizedOriginalName) are used.</param>
+    /// <param name="proposedName">The new (raw, un-normalized) name.</param>
+    /// <param name="ct"></param>
+    Task<bool> WouldNameChangeOrphanMergedFiles(Series series, string? proposedName, CancellationToken ct = default);
+
+    /// <summary>
+    /// Determines whether changing the Series' LocalizedName to <paramref name="proposedLocalizedName"/> would orphan
+    /// merged files on disk, i.e. the current LocalizedName still anchors a folder on disk that is not covered by the
+    /// Series' Name or OriginalName. When true, the scanner would split those files into a new series and the write
+    /// should be rejected.
+    /// </summary>
+    /// <param name="series">The Series being edited. Loaded scalar fields (LocalizedName, NormalizedName, NormalizedOriginalName) are used.</param>
+    /// <param name="proposedLocalizedName">The new (raw, un-normalized) localized name. Null or empty represents clearing the field.</param>
+    /// <param name="ct"></param>
+    Task<bool> WouldLocalizedNameChangeOrphanMergedFiles(Series series, string? proposedLocalizedName, CancellationToken ct = default);
 }

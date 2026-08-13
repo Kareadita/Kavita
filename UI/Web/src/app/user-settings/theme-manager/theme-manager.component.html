@@ -69,7 +69,7 @@
             {{selectedTheme.name | sentenceCase}}
             <div class="float-end">
               @if (selectedTheme.isSiteTheme) {
-                @if (selectedTheme.name !== 'Dark' && canUseThemes()) {
+                @if (selectedTheme.name !== 'Dark' && accountService.hasAdminRole()) {
                   <button class="btn btn-danger me-1" (click)="deleteTheme(selectedTheme.site!)">{{t('delete')}}</button>
                 }
                 @if (accountService.hasAdminRole()) {

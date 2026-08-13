@@ -532,6 +532,10 @@ public sealed class DataContext : IdentityDbContext<AppUser, AppRole, int,
             .Property(x => x.AgeRatingMappings)
             .HasJsonConversion([]);
 
+        builder.Entity<MetadataSettings>()
+            .Property(x => x.ExternalAgeRatingMappings)
+            .HasJsonConversion([]);
+
         builder.Entity<SeriesMetadata>()
             .Property(b => b.WebLinks)
             .HasDefaultValue(string.Empty);
@@ -547,6 +551,21 @@ public sealed class DataContext : IdentityDbContext<AppUser, AppRole, int,
             .Property(x => x.Overrides)
             .HasJsonConversion([]);
 
+        builder.Entity<MetadataSettings>()
+            .Property(x => x.LibraryLanguageTitleOverrides)
+            .HasJsonConversion(new Dictionary<int, SeriesNameLanguage>())
+            .HasColumnType("TEXT")
+            .HasDefaultValue(new Dictionary<int, SeriesNameLanguage>());
+
+        // Defaults must match the property initializers on MetadataSettings, else existing installs (which take
+        // the column default) and fresh installs (which take the initializer) would ship different behaviour
+        builder.Entity<MetadataSettings>()
+            .Property(b => b.GlobalNameLanguages)
+            .HasDefaultValue("en");
+        builder.Entity<MetadataSettings>()
+            .Property(b => b.GlobalLocalizedNameLanguages)
+            .HasDefaultValue("ja-Latn");
+
         // Configure one-to-many relationship
         builder.Entity<MetadataSettings>()
             .HasMany(x => x.FieldMappings)
@@ -559,6 +578,9 @@ public sealed class DataContext : IdentityDbContext<AppUser, AppRole, int,
             .HasDefaultValue(true);
         builder.Entity<MetadataSettings>()
             .Property(b => b.EnableCoverImage)
+            .HasDefaultValue(true);
+        builder.Entity<MetadataSettings>()
+            .Property(b => b.EnableAgeRating)
             .HasDefaultValue(true);
 
         #endregion

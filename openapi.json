@@ -2,12 +2,12 @@
   "openapi": "3.0.4",
   "info": {
     "title": "Kavita",
-    "description": "Kavita provides a set of APIs authenticated via an Auth Key passed in the `x-api-key` header. Generate an Auth Key under User Settings → Manage Auth Keys, paste it into the Authorize panel, and all Try It requests will include it. Assume all fields of a payload are required unless marked optional. Built against v0.9.0.13",
+    "description": "Kavita provides a set of APIs authenticated via an Auth Key passed in the `x-api-key` header. Generate an Auth Key under User Settings → Manage Auth Keys, paste it into the Authorize panel, and all Try It requests will include it. Assume all fields of a payload are required unless marked optional. Built against v0.9.0.20",
     "license": {
       "name": "GPL-3.0",
       "url": "https://github.com/Kareadita/Kavita/blob/develop/LICENSE"
     },
-    "version": "0.9.0.13"
+    "version": "0.9.0.20"
   },
   "servers": [
     {
@@ -308,6 +308,45 @@
               "text/json": {
                 "schema": {
                   "$ref": "#/components/schemas/TokenRequestDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/Account/roles": {
+      "get": {
+        "tags": [
+          "Account"
+        ],
+        "summary": "Get All Roles back. See Kavita.Models.Constants.PolicyConstants",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
                 }
               }
             }
@@ -5076,14 +5115,6 @@
               "type": "integer",
               "format": "int32"
             }
-          },
-          {
-            "name": "apiKey",
-            "in": "query",
-            "description": "",
-            "schema": {
-              "type": "string"
-            }
           }
         ],
         "responses": {
@@ -5107,14 +5138,6 @@
             "schema": {
               "type": "integer",
               "format": "int32"
-            }
-          },
-          {
-            "name": "apiKey",
-            "in": "query",
-            "description": "",
-            "schema": {
-              "type": "string"
             }
           }
         ],
@@ -5140,14 +5163,6 @@
               "type": "integer",
               "format": "int32"
             }
-          },
-          {
-            "name": "apiKey",
-            "in": "query",
-            "description": "",
-            "schema": {
-              "type": "string"
-            }
           }
         ],
         "responses": {
@@ -5171,14 +5186,6 @@
             "schema": {
               "type": "integer",
               "format": "int32"
-            }
-          },
-          {
-            "name": "apiKey",
-            "in": "query",
-            "description": "",
-            "schema": {
-              "type": "string"
             }
           }
         ],
@@ -5204,14 +5211,6 @@
               "type": "integer",
               "format": "int32"
             }
-          },
-          {
-            "name": "apiKey",
-            "in": "query",
-            "description": "",
-            "schema": {
-              "type": "string"
-            }
           }
         ],
         "responses": {
@@ -5235,14 +5234,6 @@
             "schema": {
               "type": "integer",
               "format": "int32"
-            }
-          },
-          {
-            "name": "apiKey",
-            "in": "query",
-            "description": "",
-            "schema": {
-              "type": "string"
             }
           }
         ],
@@ -5280,14 +5271,6 @@
             }
           },
           {
-            "name": "apiKey",
-            "in": "query",
-            "description": "API Key for user. Needed to authenticate request",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
             "name": "imageOffset",
             "in": "query",
             "description": "Only applicable for Epubs - handles multiple images on one page",
@@ -5319,14 +5302,6 @@
             "schema": {
               "type": "string"
             }
-          },
-          {
-            "name": "apiKey",
-            "in": "query",
-            "description": "",
-            "schema": {
-              "type": "string"
-            }
           }
         ],
         "responses": {
@@ -5345,14 +5320,6 @@
         "parameters": [
           {
             "name": "publisherName",
-            "in": "query",
-            "description": "",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "apiKey",
             "in": "query",
             "description": "",
             "schema": {
@@ -5382,14 +5349,6 @@
               "type": "integer",
               "format": "int32"
             }
-          },
-          {
-            "name": "apiKey",
-            "in": "query",
-            "description": "",
-            "schema": {
-              "type": "string"
-            }
           }
         ],
         "responses": {
@@ -5414,14 +5373,6 @@
               "type": "integer",
               "format": "int32"
             }
-          },
-          {
-            "name": "apiKey",
-            "in": "query",
-            "description": "",
-            "schema": {
-              "type": "string"
-            }
           }
         ],
         "responses": {
@@ -5443,14 +5394,6 @@
             "name": "filename",
             "in": "query",
             "description": "Filename of file. This is used with upload/upload-by-url",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "apiKey",
-            "in": "query",
-            "description": "",
             "schema": {
               "type": "string"
             }
@@ -8078,6 +8021,45 @@
           "Metadata"
         ],
         "summary": "Returns all languages Kavita can accept",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/LanguageDto"
+                  }
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/LanguageDto"
+                  }
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/LanguageDto"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/Metadata/all-bcp47-languages": {
+      "get": {
+        "tags": [
+          "Metadata"
+        ],
+        "summary": "Returns a list of all BCP47 Languages. `IsoCode` stores the BCP47 code",
         "responses": {
           "200": {
             "description": "OK",
@@ -16772,6 +16754,54 @@
         }
       }
     },
+    "/api/Server/is-task-running": {
+      "get": {
+        "tags": [
+          "Server"
+        ],
+        "summary": "Returns true if a task is currently running or has been queued. Can be scoped to a queue, default to the default queue",
+        "parameters": [
+          {
+            "name": "methodName",
+            "in": "query",
+            "description": "",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "queue",
+            "in": "query",
+            "description": "",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "boolean"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "boolean"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "boolean"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/Settings/base-url": {
       "get": {
         "tags": [
@@ -17287,6 +17317,37 @@
                 }
               }
             }
+          }
+        }
+      }
+    },
+    "/api/Settings/run-metadata-mappings": {
+      "post": {
+        "tags": [
+          "Settings"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RunMetadataMappingsRequestDto"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RunMetadataMappingsRequestDto"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/RunMetadataMappingsRequestDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
           }
         }
       }
@@ -24834,6 +24895,19 @@
             "type": "string",
             "nullable": true
           },
+          "titles": {
+            "$ref": "#/components/schemas/ALMediaTitle"
+          },
+          "localizedTitles": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "array",
+              "items": {
+                "$ref": "#/components/schemas/LocalizedTitleDto"
+              }
+            },
+            "nullable": true
+          },
           "aniListId": {
             "type": "integer",
             "format": "int32",
@@ -24907,6 +24981,10 @@
           },
           "ageRating": {
             "$ref": "#/components/schemas/AgeRating"
+          },
+          "ageRatingRaw": {
+            "type": "string",
+            "nullable": true
           },
           "provider": {
             "$ref": "#/components/schemas/ScrobbleProvider"
@@ -26699,6 +26777,9 @@
           "defaultLanguage": {
             "type": "string",
             "nullable": true
+          },
+          "metadataProvider": {
+            "$ref": "#/components/schemas/MetadataProvider"
           }
         },
         "additionalProperties": false
@@ -26822,6 +26903,22 @@
           "hasDiscordSet": {
             "type": "boolean",
             "readOnly": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "LocalizedTitleDto": {
+        "type": "object",
+        "properties": {
+          "title": {
+            "type": "string",
+            "nullable": true
+          },
+          "isPrimary": {
+            "type": "boolean"
+          },
+          "isOfficial": {
+            "type": "boolean"
           }
         },
         "additionalProperties": false
@@ -27335,6 +27432,10 @@
           },
           "to": {
             "nullable": true
+          },
+          "note": {
+            "type": "string",
+            "nullable": true
           }
         },
         "additionalProperties": false
@@ -27564,6 +27665,9 @@
           "enablePublicationStatus": {
             "type": "boolean"
           },
+          "enableAgeRating": {
+            "type": "boolean"
+          },
           "enableRelationships": {
             "type": "boolean"
           },
@@ -27609,6 +27713,23 @@
           "firstLastPeopleNaming": {
             "type": "boolean"
           },
+          "externalAgeRatingMappings": {
+            "type": "object",
+            "additionalProperties": {
+              "$ref": "#/components/schemas/AgeRating"
+            },
+            "nullable": true
+          },
+          "globalLanguageTitleSettings": {
+            "$ref": "#/components/schemas/SeriesNameLanguageDto"
+          },
+          "libraryLanguageTitleOverrides": {
+            "type": "object",
+            "additionalProperties": {
+              "$ref": "#/components/schemas/SeriesNameLanguageDto"
+            },
+            "nullable": true
+          },
           "overrides": {
             "type": "array",
             "items": {
@@ -27622,6 +27743,9 @@
               "$ref": "#/components/schemas/PersonRole"
             },
             "nullable": true
+          },
+          "filterAboveWeight": {
+            "$ref": "#/components/schemas/TagWeight"
           }
         },
         "additionalProperties": false
@@ -27655,6 +27779,9 @@
           "isAdult": {
             "type": "boolean",
             "readOnly": true
+          },
+          "tagWeight": {
+            "$ref": "#/components/schemas/TagWeight"
           }
         },
         "additionalProperties": false
@@ -29979,6 +30106,31 @@
         },
         "additionalProperties": false
       },
+      "RunMetadataMappingsRequestDto": {
+        "type": "object",
+        "properties": {
+          "allLibraries": {
+            "type": "boolean"
+          },
+          "includedLibraries": {
+            "type": "array",
+            "items": {
+              "type": "integer",
+              "format": "int32"
+            },
+            "nullable": true
+          },
+          "excludedLibraries": {
+            "type": "array",
+            "items": {
+              "type": "integer",
+              "format": "int32"
+            },
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
       "ScalingOption": {
         "enum": [
           0,
@@ -30591,6 +30743,9 @@
             },
             "nullable": true
           },
+          "libraryType": {
+            "$ref": "#/components/schemas/LibraryType"
+          },
           "unreadCount": {
             "type": "integer",
             "format": "int32"
@@ -30841,10 +30996,11 @@
           30,
           31,
           32,
-          33
+          33,
+          34
         ],
         "type": "integer",
-        "description": "Members:\n- `0` — Summary\n- `1` — SeriesName\n- `2` — PublicationStatus\n- `3` — Languages\n- `4` — AgeRating\n- `5` — UserRating\n- `6` — Tags\n- `7` — CollectionTags\n- `8` — Translators\n- `9` — Characters\n- `10` — Publisher\n- `11` — Editor\n- `12` — CoverArtist\n- `13` — Letterer\n- `14` — Colorist\n- `15` — Inker\n- `16` — Penciller\n- `17` — Writers\n- `18` — Genres\n- `19` — Libraries\n- `20` — ReadProgress\n- `21` — Formats\n- `22` — ReleaseYear\n- `23` — ReadTime\n- `24` — Path\n- `25` — FilePath\n- `26` — WantToRead\n- `27` — ReadingDate\n- `28` — AverageRating\n- `29` — Imprint\n- `30` — Team\n- `31` — Location\n- `32` — ReadLast\n- `33` — FileSize",
+        "description": "Members:\n- `0` — Summary\n- `1` — SeriesName\n- `2` — PublicationStatus\n- `3` — Languages\n- `4` — AgeRating\n- `5` — UserRating\n- `6` — Tags\n- `7` — CollectionTags\n- `8` — Translators\n- `9` — Characters\n- `10` — Publisher\n- `11` — Editor\n- `12` — CoverArtist\n- `13` — Letterer\n- `14` — Colorist\n- `15` — Inker\n- `16` — Penciller\n- `17` — Writers\n- `18` — Genres\n- `19` — Libraries\n- `20` — ReadProgress\n- `21` — Formats\n- `22` — ReleaseYear\n- `23` — ReadTime\n- `24` — Path\n- `25` — FilePath\n- `26` — WantToRead\n- `27` — ReadingDate\n- `28` — AverageRating\n- `29` — Imprint\n- `30` — Team\n- `31` — Location\n- `32` — ReadLast\n- `33` — FileSize\n- `34` — CollapseSeriesRelationships",
         "format": "int32",
         "x-enum-varnames": [
           "Summary",
@@ -30880,7 +31036,8 @@
           "Team",
           "Location",
           "ReadLast",
-          "FileSize"
+          "FileSize",
+          "CollapseSeriesRelationships"
         ],
         "x-enum-descriptions": [
           "Summary",
@@ -30916,7 +31073,8 @@
           "Team",
           "Location",
           "ReadLast",
-          "FileSize"
+          "FileSize",
+          "CollapseSeriesRelationships"
         ]
       },
       "SeriesFilterStatementDto": {
@@ -31174,6 +31332,20 @@
           "seriesId": {
             "type": "integer",
             "format": "int32"
+          }
+        },
+        "additionalProperties": false
+      },
+      "SeriesNameLanguageDto": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "nullable": true
+          },
+          "localizedName": {
+            "type": "string",
+            "nullable": true
           }
         },
         "additionalProperties": false
@@ -32550,6 +32722,32 @@
           }
         },
         "additionalProperties": false
+      },
+      "TagWeight": {
+        "enum": [
+          1,
+          2,
+          3,
+          4,
+          5
+        ],
+        "type": "integer",
+        "description": "Members:\n- `1` — Core\n- `2` — Defining\n- `3` — Recurrent\n- `4` — Incidental\n- `5` — Unweighted",
+        "format": "int32",
+        "x-enum-varnames": [
+          "Core",
+          "Defining",
+          "Recurrent",
+          "Incidental",
+          "Unweighted"
+        ],
+        "x-enum-descriptions": [
+          "Core",
+          "Defining",
+          "Recurrent",
+          "Incidental",
+          "Unweighted"
+        ]
       },
       "ThemeProvider": {
         "enum": [

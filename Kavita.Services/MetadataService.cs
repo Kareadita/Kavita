@@ -6,11 +6,16 @@ using System.Threading;
 using System.Threading.Tasks;
 using Hangfire;
 using Kavita.API.Database;
+using Kavita.API.Repositories;
 using Kavita.API.Services;
 using Kavita.API.Services.Helpers;
 using Kavita.API.Services.SignalR;
 using Kavita.Common.Extensions;
 using Kavita.Common.Helpers;
+using Kavita.Database.Extensions;
+using Kavita.Models.Constants;
+using Kavita.Models.DTOs.KavitaPlus.Metadata;
+using Kavita.Models.DTOs.Metadata;
 using Kavita.Models.DTOs.Settings;
 using Kavita.Models.DTOs.SignalR;
 using Kavita.Models.Entities;
@@ -18,6 +23,11 @@ using Kavita.Models.Entities.Enums;
 using Kavita.Models.Entities.Interfaces;
 using Kavita.Services.Comparators;
 using Kavita.Services.Extensions;
+using Kavita.Services.Helpers;
+using Kavita.Services.Plus;
+using Kavita.Services.Scanner;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
 namespace Kavita.Services;
@@ -26,6 +36,7 @@ namespace Kavita.Services;
 /// Handles everything around Cover/ColorScape management
 /// </summary>
 public class MetadataService(
+    IServiceScopeFactory scopeFactory,
     IUnitOfWork unitOfWork,
     ILogger<MetadataService> logger,
     IEventHub eventHub,
@@ -324,6 +335,173 @@ public class MetadataService(
         await unitOfWork.CollectionTagRepository.RemoveCollectionsWithoutSeries(ct);
         await unitOfWork.AppUserProgressRepository.CleanupAbandonedChapters(ct);
 
+    }
+
+    [Queue(TaskSchedulerConstants.ScanQueue)]
+    [DisableConcurrentExecution(timeoutInSeconds: 60 * 60 * 60)]
+    public async Task RunMetadataMappings(RunMetadataMappingsRequestDto requestDto, CancellationToken cancellationToken = default)
+    {
+        var settings = await unitOfWork.SettingsRepository.GetMetadataSettingDto(cancellationToken);
+
+        if (!settings.EnableExtendedMetadataProcessing)
+        {
+            logger.LogWarning("Ignoring re-run mappings request as extended metadata processing is not enabled");
+            return;
+        }
+
+        var seriesIds = await GetSeriesIdsAsync(requestDto);
+
+        // separate batch size for loading full series info
+        const int batchSize = 25;
+
+        var count = seriesIds.Count;
+        var totalBatches = (count + batchSize - 1) / batchSize;
+        float currentBatch = 0;
+
+        await eventHub.SendMessageAsync(MessageFactory.NotificationProgress, MessageFactory.ReRunMappingsProgressEvent(
+            ProgressEventType.Started, 0), ct: cancellationToken);
+
+        try
+        {
+            foreach (var idBatch in seriesIds.Chunk(batchSize))
+            {
+                currentBatch++;
+
+                using var scope = scopeFactory.CreateScope();
+                var scopedUnitOfWork = scope.ServiceProvider.GetRequiredService<IUnitOfWork>();
+
+                var seriesBatch = await scopedUnitOfWork.DataContext.Series
+                    .Where(s => idBatch.Contains(s.Id))
+                    .AsSplitQuery()
+                    .Include(s => s.Metadata).ThenInclude(m => m.Tags)
+                    .Include(s => s.Metadata).ThenInclude(m => m.Genres)
+                    .Include(s => s.Volumes).ThenInclude(v => v.Chapters).ThenInclude(c => c.Tags)
+                    .Include(s => s.Volumes).ThenInclude(v => v.Chapters).ThenInclude(c => c.Genres)
+                    .ToListAsync(cancellationToken);
+
+                foreach (var series in seriesBatch)
+                {
+                    try
+                    {
+                        await ReRunMappingsForSeries(scopedUnitOfWork, series, settings);
+                    }
+                    catch (Exception ex)
+                    {
+                        logger.LogError(ex, "Failed to re-run mappings for series {SeriesName} ({SeriesId})",
+                            series.Name, series.Id);
+                    }
+                }
+
+                try
+                {
+                    await scopedUnitOfWork.CommitAsync(cancellationToken);
+                }
+                catch (Exception ex)
+                {
+                    logger.LogError(ex, "Failed to save changed to the database. Aborting metadata processing");
+                    break;
+                }
+
+                await eventHub.SendMessageAsync(MessageFactory.NotificationProgress,
+                    MessageFactory.ReRunMappingsProgressEvent(ProgressEventType.Updated, currentBatch / totalBatches),
+                    ct: cancellationToken);
+
+                logger.LogDebug("Completed processing on {ProcessedCount}/{TotalCount} series",
+                    (currentBatch - 1) * batchSize + idBatch.Length, count);
+            }
+        }
+        finally
+        {
+            await eventHub.SendMessageAsync(MessageFactory.NotificationProgress,
+                MessageFactory.ReRunMappingsProgressEvent(ProgressEventType.Ended, 1), ct: cancellationToken);
+        }
+    }
+
+    private async Task<List<int>> GetSeriesIdsAsync(RunMetadataMappingsRequestDto requestDto)
+    {
+        // Max size of IN arrays in sqlite
+        const int batchSize = 50;
+
+        var baseQuery = unitOfWork.DataContext.Series.AsQueryable();
+
+        if (requestDto.ExcludedLibraries.Count > 0)
+        {
+            foreach (var chunk in requestDto.ExcludedLibraries.Chunk(batchSize))
+                baseQuery = baseQuery.Where(s => !chunk.Contains(s.LibraryId));
+        }
+
+        if (!requestDto.AllLibraries && requestDto.IncludedLibraries.Count > batchSize)
+        {
+            var result = new HashSet<int>();
+            foreach (var chunk in requestDto.IncludedLibraries.Chunk(batchSize))
+            {
+                var ids = await baseQuery
+                    .Where(s => chunk.Contains(s.LibraryId))
+                    .Select(s => s.Id)
+                    .ToListAsync();
+                result.UnionWith(ids);
+            }
+            return result.ToList();
+        }
+
+        return await baseQuery
+            .WhereIf(!requestDto.AllLibraries, s => requestDto.IncludedLibraries.Contains(s.LibraryId))
+            .AsSplitQuery()
+            .Select(s => s.Id)
+            .ToListAsync();
+    }
+
+    private async Task ReRunMappingsForSeries(IUnitOfWork scopedUnitOfWork, Series series, MetadataSettingsDto settings)
+    {
+
+        #region Chapters
+
+        foreach (var chapter in series.Volumes.SelectMany(v => v.Chapters))
+        {
+            if (chapter == null) continue;
+
+            ExternalMetadataService.GenerateExternalGenreAndTagsList(
+                chapter.Genres.Select(g => g.Title).ToList(),
+                chapter.Tags.Select(g => g.Title).ToList(),
+                settings, out var newTags, out var newGenres);
+
+            try
+            {
+                await TagHelper.UpdateEntityTags(chapter.Genres, newGenres, scopedUnitOfWork.DataContext.Genre, scopedUnitOfWork);
+                await TagHelper.UpdateEntityTags(chapter.Tags, newTags, scopedUnitOfWork.DataContext.Tag, scopedUnitOfWork);
+            }
+            catch (Exception ex)
+            {
+                logger.LogError(ex, "Failed to update genres or tags for series {SeriesId} chapter {ChapterId}, skipping", series.Id, chapter.Id);
+                continue;
+            }
+
+            var allTagsAndGenres = chapter.Genres
+                .Select(g => g.Title)
+                .Concat(chapter.Tags.Select(t => t.Title));
+
+            chapter.AgeRating = ExternalMetadataService.DetermineAgeRating(allTagsAndGenres, settings.AgeRatingMappings);
+        }
+
+        #endregion
+
+        #region Series Metadata
+
+        var genres = series.Volumes.SelectMany(v => v.Chapters).SelectMany(c => c.Genres).ToList();
+        var tags = series.Volumes.SelectMany(v => v.Chapters).SelectMany(c => c.Tags).ToList();
+
+        ProcessSeries.UpdateSeriesMetadataGenres(series.Metadata.Genres, genres);
+        ProcessSeries.UpdateSeriesMetadataTags(series.Metadata.Tags, tags);
+
+        var allSeriesTagsAndGenres = series.Metadata.Genres
+            .Select(g => g.Title)
+            .Concat(series.Metadata.Tags.Select(t => t.Title));
+
+        series.Metadata.AgeRating = ExternalMetadataService.DetermineAgeRating(allSeriesTagsAndGenres, settings.AgeRatingMappings);
+
+        #endregion
+
+        logger.LogTrace("Completed re-running mappings for series {SeriesName} ({SeriesId})", series.Name, series.Id);
     }
 
     /// <summary>

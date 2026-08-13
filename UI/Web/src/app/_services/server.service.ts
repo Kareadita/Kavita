@@ -8,6 +8,15 @@ import {KavitaMediaError} from '../admin/_models/media-error';
 import {TextResonse} from "../_types/text-response";
 import {map} from "rxjs/operators";
 
+export enum TaskMethodNames {
+  RunMetadataMappings = 'RunMetadataMappings'
+}
+
+export enum QueueNames {
+  Default = 'default',
+  Scan = 'scan',
+}
+
 @Injectable({
   providedIn: 'root'
 })
@@ -80,5 +89,13 @@ export class ServerService {
 
   clearMediaAlerts() {
     return this.http.post(this.baseUrl + 'server/clear-media-alerts', {});
+  }
+
+  isTaskRunning(methodName: string, queue?: string) {
+    const url = `${this.baseUrl}server/is-task-running?methodName=${methodName}` + (!!queue ? `&queue=${queue}` : '');
+
+    return this.http.get(url, { responseType: 'text' }).pipe(
+      map(response => response === 'true')
+    );
   }
 }

@@ -280,5 +280,6 @@
     "email.username-change.title": "用户名更新提示",
     "email.username-change.description": "您账户的用户名已在{{InvitingUser}}的Kavita实例上更新。您无需进行任何操作。",
     "email.auth-key-expiring-soon.cta": "轮换",
-    "email.auth-key-expired.cta": "轮换"
+    "email.auth-key-expired.cta": "轮换",
+    "series-name-exists": "库里已经有一个叫这个名字的系列"
 }

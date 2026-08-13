@@ -317,7 +317,16 @@ public class AutoMapperProfiles : Profile
             .ForMember(dest => dest.Blacklist, opt => opt.MapFrom(src => src.Blacklist ?? new List<string>()))
             .ForMember(dest => dest.Whitelist, opt => opt.MapFrom(src => src.Whitelist ?? new List<string>()))
             .ForMember(dest => dest.Overrides, opt => opt.MapFrom(src => src.Overrides ?? new List<MetadataSettingField>()))
-            .ForMember(dest => dest.AgeRatingMappings, opt => opt.MapFrom(src => src.AgeRatingMappings ?? new Dictionary<string, AgeRating>()));
+            .ForMember(dest => dest.AgeRatingMappings, opt => opt.MapFrom(src => src.AgeRatingMappings ?? new Dictionary<string, AgeRating>()))
+            .ForMember(dest => dest.GlobalLanguageTitleSettings, opt => opt.MapFrom(src => new SeriesNameLanguageDto
+            {
+                Name = src.GlobalNameLanguages ?? string.Empty,
+                LocalizedName = src.GlobalLocalizedNameLanguages ?? string.Empty,
+            }))
+            .ForMember(dest => dest.LibraryLanguageTitleOverrides,
+                opt => opt.MapFrom(src => src.LibraryLanguageTitleOverrides ?? new Dictionary<int, SeriesNameLanguage>()));
+
+        CreateMap<SeriesNameLanguage, SeriesNameLanguageDto>();
 
         CreateMap<AppUserAnnotation, AnnotationDto>()
             .ForMember(dest => dest.OwnerUsername, opt => opt.MapFrom(src => src.AppUser.UserName))

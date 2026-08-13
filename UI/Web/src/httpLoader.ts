@@ -1,7 +1,8 @@
 import {inject, Injectable} from "@angular/core";
 import {HttpClient} from "@angular/common/http";
 import {Translation, TranslocoLoader} from "@jsverse/transloco";
-import cacheBusting from 'i18n-cache-busting.json'; // allowSyntheticDefaultImports must be true
+import cacheBusting from 'i18n-cache-busting.json';
+import {clearTransloco} from "./libs/transloco-util"; // allowSyntheticDefaultImports must be true
 
 @Injectable({ providedIn: 'root' })
 export class HttpLoader implements TranslocoLoader {
@@ -44,8 +45,6 @@ export class HttpLoader implements TranslocoLoader {
    * Clears Transloco cache for a specific language
    */
   private clearTranslocoCache(langCode: string): void {
-    localStorage.removeItem('translocoLang');
-    localStorage.removeItem('@transloco/translations');
-    localStorage.removeItem('@transloco/translations/timestamp');
+    clearTransloco()
   }
 }

@@ -254,7 +254,8 @@ export class MetadataFilterRowComponent<TFilter extends number = number, TSort e
     if (stringFields.includes(this.preset.field)) {
       this.formGroup.get('filterValue')?.patchValue(val);
     } else if (booleanFields.includes(this.preset.field)) {
-      this.formGroup.get('filterValue')?.patchValue(val);
+      // Must be an empty string for checkbox to see it as false
+      this.formGroup.get('filterValue')?.patchValue(val === 'true' ? val : '');
     } else if (dateFields.includes(this.preset.field)) {
       this.formGroup.get('filterValue')?.patchValue(this.dateParser.parse(val));
     }

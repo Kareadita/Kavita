@@ -1,4 +1,9 @@
+@use '../../../../theme/variables' as theme;
+
 :host {
+  display: block;
+  padding-bottom: 2rem;
+
   --upsell-hero-bg: radial-gradient(circle at 100% 0%, rgba(74,198,148,0.28), transparent 50%),
                     radial-gradient(circle at 0% 100%, rgba(74,198,148,0.10), transparent 40%),
                     linear-gradient(135deg, #102018 0%, #0A1310 100%);
@@ -64,6 +69,7 @@
   font-size: 2.2rem;
   line-height: 1.15;
   letter-spacing: -0.02em;
+  overflow-wrap: break-word;
 }
 .upsell-subtitle {
   font-size: 0.96rem;
@@ -74,7 +80,6 @@
 
 // Pricing card
 .upsell-price-card-width {
-  min-width: 16rem;
   max-width: 20rem;
   width: 100%;
 }
@@ -123,4 +128,22 @@
 .upsell-faq-answer {
   font-size: 0.78rem;
   line-height: 1.55;
+}
+
+// Pricing card only needs a minimum width once it sits beside the copy (lg+)
+@media (min-width: theme.$grid-breakpoints-lg) {
+  .upsell-price-card-width {
+    min-width: 16rem;
+  }
+}
+
+// Scale hero typography down on small screens so nothing overflows the viewport
+@media (max-width: theme.$grid-breakpoints-md) {
+  .upsell-brand-name,
+  .upsell-headline {
+    font-size: 1.7rem;
+  }
+  .upsell-price-number {
+    font-size: 2.5rem;
+  }
 }

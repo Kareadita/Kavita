@@ -705,6 +705,8 @@ public class ScrobblingService : IScrobblingService
 
         foreach (var provider in providers)
         {
+            if (await CheckIfCannotScrobble(provider, ScrobbleEventType.ChapterRead, user.Id, ctx.Series.Id, ctx.Series)) continue;
+
             var scrobbleProviderService = _serviceProvider.GetRequiredKeyedService<IScrobbleProviderService>(provider);
 
             // Explicit check to reduce DB calls and work done
@@ -1221,19 +1223,6 @@ public class ScrobblingService : IScrobblingService
 
     private async Task ProcessReadEvents(ScrobbleSyncContext ctx, CancellationToken ct)
     {
-        // Recalculate the highest volume/chapter for non chapter events
-        foreach (var readEvt in ctx.ReadEvents.Where(e => e.ChapterId is null))
-        {
-            // Note: this causes skewing in the scrobble history because it makes it look like there are duplicate events
-            readEvt.VolumeNumber =
-                (int) await _unitOfWork.AppUserProgressRepository.GetHighestFullyReadVolumeForSeries(readEvt.SeriesId,
-                    readEvt.AppUser.Id, ct);
-            readEvt.ChapterNumber =
-                await _unitOfWork.AppUserProgressRepository.GetHighestFullyReadChapterForSeries(readEvt.SeriesId,
-                    readEvt.AppUser.Id, ct);
-            _unitOfWork.ScrobbleRepository.Update(readEvt);
-        }
-
         await ProcessEvents(ctx.ReadEvents, ctx, async evt => new ScrobbleV3Dto
         {
             Provider = evt.ScrobbleProvider,

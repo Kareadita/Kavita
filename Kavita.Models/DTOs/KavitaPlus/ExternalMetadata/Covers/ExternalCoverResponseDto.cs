@@ -1,4 +1,5 @@
-﻿namespace Kavita.Models.DTOs.KavitaPlus.ExternalMetadata.Covers;
+﻿using System.ComponentModel.DataAnnotations;
+namespace Kavita.Models.DTOs.KavitaPlus.ExternalMetadata.Covers;
 #nullable enable
 
 public enum ExternalCoverImageType
@@ -17,6 +18,7 @@ public enum ExternalCoverImageType
 public sealed record ExternalCoverResponseDto
 {
     public required string Url { get; set; } = string.Empty;
+    [EnumDataType(typeof(ExternalCoverImageType))]
     public ExternalCoverImageType? Type { get; set; }
     /// <summary>
     /// Represents Volume or Chapter Number

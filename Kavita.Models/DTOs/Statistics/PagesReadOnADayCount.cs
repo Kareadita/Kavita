@@ -1,4 +1,5 @@
 ﻿using Kavita.Models.Entities.Enums;
+using System.ComponentModel.DataAnnotations;
 
 namespace Kavita.Models.DTOs.Statistics;
 
@@ -15,5 +16,6 @@ public sealed record StatCountWithFormat<T> : ICount<T>
     /// <summary>
     /// Format of those files
     /// </summary>
+    [EnumDataType(typeof(MangaFormat))]
     public MangaFormat Format { get; set; }
 }

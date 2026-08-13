@@ -128,7 +128,9 @@
         "clients-kobo-removed-page": "Removed from Kobo",
         "clients-kobo-revoke": "Revoke",
         "clients-kobo-error": "Failed to load Kobo sync URL",
-        "kobo": "Kobo"
+        "kobo": "Kobo",
+        "no-data": "{{common.no-data}}",
+        "no-data-description": "You have no authorization keys yet."
     },
 
     "removed-from-kobo": {
@@ -372,6 +374,7 @@
         "title": "Scrobble Holds",
         "description": "This is a user-managed list of Series that will not be scrobbled to upstream providers. You can remove a series at any time and the next scrobble-able event (reading progress, rating, want to read status) will trigger scrobbling.",
         "no-data": "{{typeahead.no-data}}",
+        "no-data-description": "You don't have any series on hold. Series you place on hold will appear here.",
         "series-name-header": "{{manage-matched-metadata.series-name-header}}",
         "created-header": "{{manage-media-issues.created-header}}",
         "delete-label": "{{common.remove}}"
@@ -482,7 +485,8 @@
         "add": "{{common.add}}",
         "delete": "{{common.delete}}",
         "edit": "{{common.edit}}",
-        "no-data": "{{typeahead.no-data}}",
+        "no-data": "{{common.no-data}}",
+        "no-data-description": "You have no email-based devices setup yet.",
         "actions-header": "{{manage-users.actions-header}}",
         "warning": "Warning",
         "client-devices-header": "Client Devices",
@@ -1247,6 +1251,13 @@
         "support-label": "Help"
     },
 
+    "register-license": {
+        "k+-already-registered-header": "License already registered",
+        "k+-license-overwrite": "This license is already registered to a different server. Are you sure you want to overwrite? This will deregister the other server.",
+        "overwrite": "Overwrite",
+        "cancel": "{{common.cancel}}"
+    },
+
     "discord-connect-card": {
         "connect-title": "Connect Discord",
         "connect-subtitle": "Access exclusive channels and show your flair",
@@ -1321,12 +1332,14 @@
     },
 
     "manage-metadata-settings": {
-        "k+-warning": "The settings below are shared with those found on the K+ page. You may change them in either location",
+        "k+-warning": "The settings below are shared with those found on the K+ page. You may change them in either location.",
         "export-settings": "Export",
-        "export-tooltip": "Export your blacklist and whitelist, age rating, and field mappings",
+        "export-tooltip": "Export your blacklist and whitelist, age rating, and field mappings.",
         "export-file-name": "Kavita Metadata Settings Export.json",
         "import-settings": "Import",
-        "import-tooltip": "Import your or someone else's settings",
+        "import-tooltip": "Import your or someone else's settings.",
+        "run-metadata-mappings": "Run Metadata Mappings",
+        "run-metadata-mappings-tooltip": "Process series through your metadata mappings. This may take a while and consume more resources.",
         "description": "Kavita+ has the ability to download and write some limited metadata to the Database. This page allows for you to toggle what is in scope.",
         "enabled-label": "Enable Metadata Download",
         "enabled-tooltip": "Allow Kavita to download metadata and write to it's database.",
@@ -1336,6 +1349,8 @@
         "localized-name-tooltip": "Allow Localized Name to be written when the field is unlocked. Kavita will attempt to make the best guess.",
         "name-label": "Series Name",
         "name-tooltip": "Allow the Series Name to be written when the field is unlocked. The name on disk is still used to keep the series matched during scans.",
+        "enable-age-rating-label": "Age Rating",
+        "enable-age-rating-tooltip": "Allow Age Rating to be written when the field is unlocked. Kavita will always take the highest from mapping controls.",
         "derive-publication-status-label": "Publication Status",
         "derive-publication-status-tooltip": "Allow Publication Status to be derived from Total Chapter/Volume counts.",
         "enable-relations-label": "Relationships",
@@ -1369,6 +1384,9 @@
         "whitelist-tooltip": "Only allow a string in this list from being written for <b>Tags</b>. Ensure they are comma-separated.",
         "age-rating-mapping-title": "Age Rating Mapping",
         "age-rating-mapping-description": "Any strings on the left, if found in either Genre or Tags, will set the Age Rating on the Series. Matching is normalized and case-insensitive, the highest age rating is used.",
+        "external-age-rating-header": "Provider Age Rating Mapping",
+        "external-age-rating-description": "Map a raw content rating string from a metadata provider to an Age Rating. Kavita+ will already map for you. This is additive, highest Age Rating will always win.",
+        "external-age-rating-label": "Provider Content Rating",
         "genre": "Genre",
         "tag": "Tag",
         "remove-source-tag-label": "Remove Source Tag",
@@ -1391,7 +1409,30 @@
         "dest-genre-tags-placeholder": "Destination genre/tag",
         "volume-header": "Volume",
         "enable-volume-cover-label": "Volume Cover",
-        "enable-volume-cover-tooltip": "Allow Kavita to set Volume covers"
+        "enable-volume-cover-tooltip": "Allow Kavita to set Volume covers",
+
+        "language-header": "Language",
+        "language-description": "Setup the priority order of languages that Kavita uses when setting Series Name/LocalizedName. You can add overrides just for specific libraries. Note that Localized Name will not always write if it will affect Series with 2 separate filenames.",
+        "global-series-name-language-label": "Name",
+        "global-series-name-language-tooltip": "Determines the order in which series name is prioritized. Separate BCP47 language codes with a semicolon. i.e. en;ja-Latn;ja. Use {Native} for the provider's native (original-script) title or {Romaji} for its romanized title, regardless of language.",
+        "global-series-name-localized-language-label": "Localized Name",
+        "global-series-name-localized-language-tooltip": "Determines the order in which series localized name is prioritized. Separate BCP47 language codes with a semicolon. i.e. en;ja-Latn;ja. Use {Native} for the provider's native (original-script) title or {Romaji} for its romanized title, regardless of language.",
+        "native-title-token-label": "Native title (original script)",
+        "romaji-title-token-label": "Romanized title",
+        "language-library-override-header": "Library Overrides",
+        "language-library-override-description": "A library override fully replaces the global order for that library, it does not add to it.",
+        "language-library-override-empty": "No library overrides. All libraries use the global order above.",
+        "language-override-library-label": "Library",
+        "language-override-library-placeholder": "Select a library",
+        "language-override-remove": "Remove override",
+        "language-code-malformed": "Not a valid language code: {{codes}}",
+        "language-code-unknown": "Unrecognized language code: {{codes}}. Double check the spelling, it will still be saved.",
+        "unsaved-changes-invalid": "Changes are not being saved. Fix the highlighted fields to resume saving.",
+        "add": "{{common.add}}",
+
+        "tag-weight-label": "Filter Tags above weight (Mangabaka only)",
+        "tag-weight-tooltip": "Select a tag weight to filter out after tag mapping. For example, Recurrent will filter out Incidental and Unweighted.",
+        "tag-weight-disabled": "Don't filter tags"
     },
 
     "book-line-overlay": {
@@ -1447,6 +1488,14 @@
     "page-chapter-label-pipe": {
         "page-only": "— Page {{pageNumber}}",
         "full": "— Page {{pageNumber}}, Chapter \"{{chapterTitle}}\""
+    },
+
+    "tag-weight-title-pipe": {
+        "core": "Core",
+        "defining": "Defining",
+        "recurrent": "Recurrent",
+        "incidental": "Incidental",
+        "unweighted": "Unweighted"
     },
 
     "view-toc-drawer": {
@@ -1609,7 +1658,8 @@
     },
 
     "kavitaplus-activity": {
-        "description": "Reading activity Kavita has synced to external services on your behalf - progress, ratings, and reading status."
+        "description": "Reading activity Kavita has synced to external services on your behalf - progress, ratings, and reading status.",
+        "tab-select-label": "Filter activity"
     },
 
     "manage-kavitaplus-activity": {
@@ -2612,7 +2662,8 @@
         "all-libraries": "All Libraries",
         "too-many-libraries": "A lot",
         "sharing-header": "Sharing",
-        "no-data": "There are no other users.",
+        "no-data": "{{common.no-data}}",
+        "no-data-description": "There are no other users.",
         "actions-header": "Actions",
         "pending-tooltip": "This user has not validated their email",
         "identity-provider-oidc-tooltip": "OIDC",
@@ -2689,10 +2740,10 @@
         "admin-system": "System",
         "admin-email-history": "Email History",
         "admin-kavitaplus": "License",
-        "admin-matched-metadata": "Matched Metadata",
-        "admin-manage-tokens": "Manage User Tokens",
-        "admin-metadata": "Manage Metadata",
-        "admin-mappings-import": "Metadata Settings",
+        "admin-matched-metadata": "Matched Series",
+        "admin-manage-tokens": "User Tokens",
+        "admin-metadata": "Metadata Controls",
+        "admin-mappings-import": "Metadata Controls",
         "scrobble-holds": "Scrobble Holds",
         "my-activity": "My Activity",
         "account": "Account",
@@ -2709,8 +2760,8 @@
         "cbl-import": "Reading List Manager",
         "remap-rules": "Remap Rules",
         "mal-stack-import": "MAL Stack",
-        "admin-public-metadata": "Manage Metadata",
-        "admin-manage-kavitaplus-activity": "Manage Kavita+ Activity",
+        "admin-public-metadata": "Metadata Controls",
+        "admin-manage-kavitaplus-activity": "Kavita+ Activity",
         "scrobble-settings": "Connections"
     },
 
@@ -2749,7 +2800,7 @@
         "dropped-series-rule-condition": "If a series/chapter hasn't been read for",
         "all-libraries-label": "All libraries",
         "all-libraries-tooltip": "When enabled, scrobbling runs on all applicable libraries. Disable to restrict it to specific libraries using the selection below.",
-        "confirm-delete": "Are you sure want to disconnect {{provider}}",
+        "confirm-delete": "Are you sure you want to disconnect {{provider}}?",
         "inactive-series-rule-days-aria": "Inactive series threshold in days",
         "inactive-series-rule-status-aria": "Inactive series transition status",
         "inactive-series-rule-excluded-publication-aria": "Excluded publication statuses for inactive series rule",
@@ -2988,7 +3039,9 @@
         "cbl-number-placeholder": "e.g. 1",
         "kavita-chapter-label": "Kavita Chapter (optional)",
         "series-level": "Series-level",
-        "edit": "{{common.edit}}"
+        "edit": "{{common.edit}}",
+        "no-data": "{{common.no-data}}",
+        "no-data-description": "There are no remap rules to display here yet."
     },
 
     "browse-cbl-repo-modal": {
@@ -3486,7 +3539,7 @@
         "unit-average-rating": "Kavita+ external rating, percent",
         "unit-reading-progress": "Percent",
         "unit-user-rating": "0.0 - 5.0 Stars",
-        "unit-read-last": "Days from TODAY",
+        "unit-read-last": "Days ago",
         "disclaimer-highlight-slots": "When using this field, only your own annotations will be shown",
         "unit-file-size": "GB, MB, KB, B",
         "disclaimer-file-size": "File size must include the unit"
@@ -4212,7 +4265,8 @@
         "read-date": "Reading Date",
         "read-last": "Read Last",
         "average-rating": "Average rating",
-        "file-size": "File size"
+        "file-size": "File size",
+        "collapse-series-relationships": "{{user-preferences.collapse-series-relationships-label}}"
     },
 
     "filter-entity-type-pipe": {
@@ -4752,6 +4806,21 @@
         "isbn-label": "{{edit-chapter-modal.isbn-label}}"
     },
 
+    "run-metadata-mappings-modal": {
+        "title": "Re Run mappings",
+        "close": "{{common.close}}",
+        "cancel": "{{common.cancel}}",
+        "submit": "{{common.submit}}",
+        "saving": "{{common.saving}}",
+        "all-libraries-label": "All libraries",
+        "all-libraries-tooltip": "When enabled, metadata mappings will be run for all libraries. Disable this option to include or exclude specific libraries.",
+        "included-libraries-title": "Included libraries",
+        "included-libraries-tooltip": "Libraries to process if all libraries is not enabled",
+        "excluded-libraries-title": "Excluded libraries",
+        "excluded-libraries-tooltip": "Libraries to skip",
+        "queued-title": "Queued re run",
+        "queued-description": "Processing will kick of shortly, please be patient."
+    },
 
     "validation": {
         "required-field": "This field is required",

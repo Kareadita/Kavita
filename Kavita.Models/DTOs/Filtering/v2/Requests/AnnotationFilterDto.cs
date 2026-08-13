@@ -1,7 +1,8 @@
-#nullable enable
+﻿#nullable enable
 using System.Collections.Generic;
 using Kavita.Models.DTOs.Filtering.v2.SortOptions;
 using NotImplementedException = System.NotImplementedException;
+using System.ComponentModel.DataAnnotations;
 
 namespace Kavita.Models.DTOs.Filtering.v2.Requests;
 
@@ -16,6 +17,7 @@ public class AnnotationFilterDto : IFilterDto<AnnotationFilterStatementDto, Anno
     /// </summary>
     public string? Name { get; set; }
     public ICollection<AnnotationFilterStatementDto> Statements { get; set; } = [];
+    [EnumDataType(typeof(FilterCombination))]
     public FilterCombination Combination { get; set; } = FilterCombination.And;
     public AnnotationSortOptionDto? SortOptions { get; set; }
     public FilterEntityType EntityType => FilterEntityType.Annotation;

@@ -612,6 +612,7 @@ public class SeriesService(
             StorylineChapters = storylineChapters,
             TotalCount = chapters.Count,
             UnreadCount = chapters.Count(c => c.Pages > 0 && c.PagesRead < c.Pages),
+            LibraryType = libraryType,
             // default: See if we can get the ContinueFrom here
         };
     }

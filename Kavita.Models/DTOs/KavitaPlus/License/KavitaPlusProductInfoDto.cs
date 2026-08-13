@@ -1,4 +1,5 @@
-﻿namespace Kavita.Models.DTOs.KavitaPlus.License;
+﻿using System.ComponentModel.DataAnnotations;
+namespace Kavita.Models.DTOs.KavitaPlus.License;
 #nullable enable
 
 public sealed record KavitaPlusProductInfoDto
@@ -21,5 +22,6 @@ public sealed record KavitaPlusProductInfoDto
     /// <summary>
     /// Billing cycle interval the renewal request should send to select this product
     /// </summary>
+    [EnumDataType(typeof(KavitaPlusBillingInterval))]
     public KavitaPlusBillingInterval BillingInterval { get; set; }
 }

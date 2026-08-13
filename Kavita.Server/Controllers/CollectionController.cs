@@ -241,6 +241,11 @@ public class CollectionController(IUnitOfWork unitOfWork, ICollectionTagService 
             var tag = await unitOfWork.CollectionTagRepository.GetCollectionAsync(updateSeriesForTagDto.Tag.Id, CollectionIncludes.Series, ct);
             if (tag == null) return BadRequest(await localizationService.TranslateAsync(UserId, "collection-doesnt-exist"));
 
+            if (tag.AppUserId != UserId)
+            {
+                return NotFound();
+            }
+
             if (await collectionService.RemoveTagFromSeries(tag, updateSeriesForTagDto.SeriesIdsToRemove, ct))
                 return Ok(await localizationService.TranslateAsync(UserId, "collection-updated"));
         }

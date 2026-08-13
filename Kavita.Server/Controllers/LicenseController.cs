@@ -72,7 +72,13 @@ public class LicenseController(
         var ct = HttpContext.RequestAborted;
         try
         {
-            return Ok(await licenseService.GetLicenseInfo(forceCheck, ct));
+            var license = await licenseService.GetLicenseInfo(forceCheck, ct);
+            if (forceCheck && (license?.IsActive ?? false))
+            {
+                await taskScheduler.ScheduleKavitaPlusTasks(ct);
+            }
+
+            return Ok(license);
         }
         catch (Exception)
         {

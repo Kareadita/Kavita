@@ -160,9 +160,9 @@
                           <div class="row g-0 mt-4 mb-4">
                             <app-setting-item [title]="t('background-color-label')" [subtitle]="t('background-color-tooltip')">
                               <ng-template #view>
-                                <div class="color-box-container">
+                                <div class="d-flex align-items-center">
                                   <div class="color-box" [ngStyle]="{'background-color': selectedProfile!.backgroundColor}"></div>
-                                  <span class="hex-code">{{ selectedProfile!.backgroundColor.toUpperCase() }}</span>
+                                  <span class="hex-code ms-2">{{ selectedProfile!.backgroundColor.toUpperCase() }}</span>
                                 </div>
                               </ng-template>
                               <ng-template #edit>

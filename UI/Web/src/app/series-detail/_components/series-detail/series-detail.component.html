@@ -170,13 +170,17 @@
                 <span class="fw-bold">{{t('publication-status-title')}}</span>
                 <div>
                   @if (seriesMetadataValue.publicationStatus | publicationStatus; as pubStatus) {
+                    @let extraInfo = ((seriesMetadataValue.totalCount === 0 || seriesMetadataValue.maxCount === LooseLeafOrSpecialNumber)
+                        ? '' : ' (' + seriesMetadataValue?.maxCount + ' / ' + seriesMetadataValue?.totalCount + ')');
+
                     <a class="dark-exempt btn-icon font-size" (click)="openFilter(FilterField.PublicationStatus, seriesMetadataValue!.publicationStatus)"
                        href="javascript:void(0);"
-                       [ngbTooltip]="t('publication-status-tooltip') +
-                       ((seriesMetadataValue.totalCount === 0 || seriesMetadataValue.maxCount === LooseLeafOrSpecialNumber)
-                       ? '' : ' (' + seriesMetadataValue?.maxCount + ' / ' + seriesMetadataValue?.totalCount + ')')"
+                       [ngbTooltip]="t('publication-status-tooltip') + extraInfo"
                     >
                       {{pubStatus}}
+                      @if (seriesMetadataValue.publicationStatus === PublicationStatus.Ended) {
+                        {{extraInfo}}
+                      }
                     </a>
                   }
                 </div>

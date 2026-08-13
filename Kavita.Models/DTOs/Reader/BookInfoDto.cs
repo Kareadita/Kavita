@@ -1,4 +1,5 @@
 ﻿using Kavita.Models.Entities.Enums;
+using System.ComponentModel.DataAnnotations;
 
 namespace Kavita.Models.DTOs.Reader;
 
@@ -7,6 +8,7 @@ public sealed record BookInfoDto : IChapterInfoDto
     public string BookTitle { get; set; } = default! ;
     public int SeriesId { get; set; }
     public int VolumeId { get; set; }
+    [EnumDataType(typeof(MangaFormat))]
     public MangaFormat SeriesFormat { get; set; }
     public string SeriesName { get; set; } = default! ;
     public string ChapterNumber { get; set; } = default! ;

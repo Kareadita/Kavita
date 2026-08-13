@@ -1,6 +1,7 @@
 ﻿using System;
 using Kavita.Models.Entities.Enums;
 using Kavita.Models.Entities.Interfaces;
+using System.ComponentModel.DataAnnotations;
 
 namespace Kavita.Models.DTOs;
 #nullable enable
@@ -58,6 +59,7 @@ public sealed record SeriesDto : IHasReadTimeEstimate, IHasCoverImage, IHasMetad
 
 
     /// <inheritdoc cref="API.Entities.Series.Format"/>
+    [EnumDataType(typeof(MangaFormat))]
     public MangaFormat Format { get; set; }
     /// <inheritdoc cref="API.Entities.Series.Created"/>
     public DateTime Created { get; set; }

@@ -166,4 +166,18 @@ public static class TagHelper
             onModified();
         }
     }
+
+    /// <summary>
+    /// Return a list sorted alphabetically and with duplicates (normalized) removed.
+    /// </summary>
+    /// <param name="tags"></param>
+    /// <returns></returns>
+    public static List<string> SortAndCleanTagList(IEnumerable<string>? tags)
+    {
+        return (tags ?? [])
+            .Where(s => !string.IsNullOrWhiteSpace(s))
+            .DistinctBy(d => d.ToNormalized())
+            .Order()
+            .ToList();
+    }
 }

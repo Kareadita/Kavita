@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using Kavita.Models.Entities.Enums;
+using System.ComponentModel.DataAnnotations;
 
 namespace Kavita.Models.DTOs.Stats.V3;
 
@@ -122,6 +123,7 @@ public sealed record ServerInfoV3Dto
     /// <summary>
     /// The encoding the server is using to save media
     /// </summary>
+    [EnumDataType(typeof(EncodeFormat))]
     public EncodeFormat EncodeMediaAs { get; set; }
     /// <summary>
     /// The last user reading progress on the server (in UTC)

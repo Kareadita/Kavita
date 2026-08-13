@@ -91,6 +91,12 @@ public class StreamService(
     {
         var stream = await unitOfWork.UserRepository.GetDashboardStream(dto.Id, ct);
         if (stream == null) throw new KavitaException(await localizationService.TranslateAsync(userId, "dashboard-stream-doesnt-exist"));
+
+        if (stream.AppUserId != userId)
+        {
+            throw new KavitaNotFoundException();
+        }
+
         stream.Visible = dto.Visible;
 
         unitOfWork.UserRepository.Update(stream);

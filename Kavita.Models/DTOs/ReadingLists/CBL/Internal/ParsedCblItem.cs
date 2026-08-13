@@ -1,4 +1,5 @@
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 
 namespace Kavita.Models.DTOs.ReadingLists.CBL.Internal;
 
@@ -42,6 +43,7 @@ public sealed record ParsedCblItem
     /// <summary>
     /// Issue classification from V2. Always <see cref="CblIssueType.Unknown"/> for V1
     /// </summary>
+    [EnumDataType(typeof(CblIssueType))]
     public CblIssueType IssueType { get; set; } = CblIssueType.Unknown;
     /// <summary>
     /// External database references for this issue.

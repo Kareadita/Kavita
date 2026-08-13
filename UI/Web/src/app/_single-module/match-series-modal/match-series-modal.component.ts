@@ -34,6 +34,9 @@ import {MetadataProvider} from "../../_models/kavitaplus/metadata-provider.enum"
 import {ScrobbleProvider} from "../../_services/scrobbling.service";
 import {MetadataProviderTitlePipe} from "../../_pipes/metadata-provider-title.pipe";
 import {ExternalEditionDto, PlusMediaFormat} from "../../_models/series-detail/external-series-detail";
+import {SeriesFormatComponent} from "../../shared/series-format/series-format.component";
+import {LibraryTypePipe} from "../../_pipes/library-type.pipe";
+import {TagBadgeComponent} from "../../shared/tag-badge/tag-badge.component";
 
 @Component({
   selector: 'app-match-series-modal',
@@ -46,6 +49,9 @@ import {ExternalEditionDto, PlusMediaFormat} from "../../_models/series-detail/e
     ImageComponent,
     ScrobbleProviderTagBadgeComponent,
     MetadataProviderTitlePipe,
+    SeriesFormatComponent,
+    LibraryTypePipe,
+    TagBadgeComponent,
   ],
   templateUrl: './match-series-modal.component.html',
   styleUrl: './match-series-modal.component.scss',
@@ -98,6 +104,12 @@ export class MatchSeriesModalComponent implements OnInit {
 
   mangaBakaSearchUrl = computed(() => {
     return `https://mangabaka.org/search?q=${encodeURIComponent(this.series().name)}`;
+  });
+
+  hardcoverSearchUrl = computed(() => {
+    const isStandalone = this.series().isStandAlone;
+    const extraQuery = (isStandalone) ? '&type=Series' : '';
+    return `https://hardcover.app/search?q=${encodeURIComponent(this.series().name)}${extraQuery}`;
   });
 
   constructor() {

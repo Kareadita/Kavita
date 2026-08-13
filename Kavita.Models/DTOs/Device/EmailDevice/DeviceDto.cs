@@ -1,6 +1,7 @@
 ﻿
 
 using Kavita.Models.Entities.Enums.Device;
+using System.ComponentModel.DataAnnotations;
 
 namespace Kavita.Models.DTOs.Device.EmailDevice;
 
@@ -26,5 +27,6 @@ public sealed record EmailDeviceDto
     /// <summary>
     /// Platform (ie) Windows 10
     /// </summary>
+    [EnumDataType(typeof(EmailDevicePlatform))]
     public EmailDevicePlatform Platform { get; set; }
 }

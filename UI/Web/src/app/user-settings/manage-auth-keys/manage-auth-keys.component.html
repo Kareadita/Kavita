@@ -91,7 +91,13 @@
 
   @let authKeysValue = authKeys();
 
-  @if (authKeysValue) {
+  @if (authKeysValue === null) {
+    <app-loading [loading]="true" />
+  } @else if (authKeysValue.length === 0) {
+    <app-empty-state [titleKey]="'no-data'" [descriptionKey]="'no-data-description'" [i18nPrefix]="'manage-auth-keys'">
+      <i icon class="fa-solid fa-key" aria-hidden="true"></i>
+    </app-empty-state>
+  } @else {
     <app-responsive-table [rows]="authKeysValue" [trackByFn]="trackByAuthKey ">
       <ng-template #tableTemplate>
         <ngx-datatable
