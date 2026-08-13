@@ -35,7 +35,12 @@ public class CollectionTagService(IUnitOfWork unitOfWork, IEventHub eventHub, ID
     {
         var existingTag = await unitOfWork.CollectionTagRepository.GetCollectionAsync(dto.Id, ct: ct);
         if (existingTag == null) throw new KavitaException("collection-doesnt-exist");
-        if (existingTag.AppUserId != userId) throw new KavitaException("access-denied");
+
+        var user = await unitOfWork.UserRepository.GetUserByIdAsync(userId, ct: ct);
+        if (user == null) throw new KavitaException("user-doesnt-exist");
+
+        var isAdmin = await unitOfWork.UserRepository.IsUserAdminAsync(user, ct);
+        if (existingTag.AppUserId != userId && !isAdmin) throw new KavitaException("access-denied");
 
         var title = dto.Title.Trim();
         if (string.IsNullOrEmpty(title)) throw new KavitaException("collection-tag-title-required");
