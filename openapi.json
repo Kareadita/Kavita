@@ -2,12 +2,12 @@
   "openapi": "3.0.4",
   "info": {
     "title": "Kavita",
-    "description": "Kavita provides a set of APIs authenticated via an Auth Key passed in the `x-api-key` header. Generate an Auth Key under User Settings → Manage Auth Keys, paste it into the Authorize panel, and all Try It requests will include it. Assume all fields of a payload are required unless marked optional. Built against v0.9.0.19",
+    "description": "Kavita provides a set of APIs authenticated via an Auth Key passed in the `x-api-key` header. Generate an Auth Key under User Settings → Manage Auth Keys, paste it into the Authorize panel, and all Try It requests will include it. Assume all fields of a payload are required unless marked optional. Built against v0.9.0.20",
     "license": {
       "name": "GPL-3.0",
       "url": "https://github.com/Kareadita/Kavita/blob/develop/LICENSE"
     },
-    "version": "0.9.0.19"
+    "version": "0.9.0.20"
   },
   "servers": [
     {
@@ -24982,6 +24982,10 @@
           "ageRating": {
             "$ref": "#/components/schemas/AgeRating"
           },
+          "ageRatingRaw": {
+            "type": "string",
+            "nullable": true
+          },
           "provider": {
             "$ref": "#/components/schemas/ScrobbleProvider"
           },
@@ -26773,6 +26777,9 @@
           "defaultLanguage": {
             "type": "string",
             "nullable": true
+          },
+          "metadataProvider": {
+            "$ref": "#/components/schemas/MetadataProvider"
           }
         },
         "additionalProperties": false
@@ -27658,6 +27665,9 @@
           "enablePublicationStatus": {
             "type": "boolean"
           },
+          "enableAgeRating": {
+            "type": "boolean"
+          },
           "enableRelationships": {
             "type": "boolean"
           },
@@ -27703,6 +27713,13 @@
           "firstLastPeopleNaming": {
             "type": "boolean"
           },
+          "externalAgeRatingMappings": {
+            "type": "object",
+            "additionalProperties": {
+              "$ref": "#/components/schemas/AgeRating"
+            },
+            "nullable": true
+          },
           "globalLanguageTitleSettings": {
             "$ref": "#/components/schemas/SeriesNameLanguageDto"
           },
@@ -27726,6 +27743,9 @@
               "$ref": "#/components/schemas/PersonRole"
             },
             "nullable": true
+          },
+          "filterAboveWeight": {
+            "$ref": "#/components/schemas/TagWeight"
           }
         },
         "additionalProperties": false
@@ -27759,6 +27779,9 @@
           "isAdult": {
             "type": "boolean",
             "readOnly": true
+          },
+          "tagWeight": {
+            "$ref": "#/components/schemas/TagWeight"
           }
         },
         "additionalProperties": false
@@ -32699,6 +32722,32 @@
           }
         },
         "additionalProperties": false
+      },
+      "TagWeight": {
+        "enum": [
+          1,
+          2,
+          3,
+          4,
+          5
+        ],
+        "type": "integer",
+        "description": "Members:\n- `1` — Core\n- `2` — Defining\n- `3` — Recurrent\n- `4` — Incidental\n- `5` — Unweighted",
+        "format": "int32",
+        "x-enum-varnames": [
+          "Core",
+          "Defining",
+          "Recurrent",
+          "Incidental",
+          "Unweighted"
+        ],
+        "x-enum-descriptions": [
+          "Core",
+          "Defining",
+          "Recurrent",
+          "Incidental",
+          "Unweighted"
+        ]
       },
       "ThemeProvider": {
         "enum": [
