@@ -46,14 +46,16 @@ public static class KoboReadingStateMapper
         var statusInfo = readingState?["StatusInfo"] as JsonObject;
         var status = statusInfo?["Status"]?.GetValue<string>();
 
-        if (TryGetProgressPercent(bookmark, out var percent))
-        {
-            return ProgressPercentToPages(percent, totalPages);
-        }
-
+        // Finished is authoritative (Calibre-Web stores status independently of ProgressPercent).
+        // Devices often send Status=Finished with ProgressPercent < 100 (last reading position).
         if (string.Equals(status, StatusFinished, StringComparison.OrdinalIgnoreCase))
         {
             return Math.Max(totalPages, 0);
+        }
+
+        if (TryGetProgressPercent(bookmark, out var percent))
+        {
+            return ProgressPercentToPages(percent, totalPages);
         }
 
         if (string.Equals(status, StatusReadyToRead, StringComparison.OrdinalIgnoreCase))

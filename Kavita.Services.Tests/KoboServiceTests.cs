@@ -705,6 +705,39 @@ public class KoboServiceTests(ITestOutputHelper testOutputHelper) : AbstractDbTe
     }
 
     [Fact]
+    public async Task ReadingState_Put_Finished_WithProgressPercentBelow100_MarksFullyRead()
+    {
+        var (unitOfWork, context, mapper) = await CreateDatabase();
+        var (user, _, chapter) = await SeedEpubChapter(unitOfWork, context,
+            seriesName: "Finished Below 100", chapterNumber: "1", titleName: "Ch1",
+            writerName: "Author", language: "en", summary: "s",
+            releaseDate: new DateTime(2020, 1, 1, 0, 0, 0, DateTimeKind.Utc));
+        await ConfigureKoboSettings(unitOfWork, "https://kavita.example.com");
+        var koboService = CreateKoboService(unitOfWork, mapper);
+        var token = (await koboService.GetOrCreateSyncUrlAsync(user.Id)).Split('/').Last();
+        var entitlementId = KoboEntitlementId.FromChapterIdString(chapter.Id);
+
+        await koboService.PutReadingStateAsync(token, entitlementId, new JsonObject
+        {
+            ["ReadingStates"] = new JsonArray
+            {
+                new JsonObject
+                {
+                    ["CurrentBookmark"] = new JsonObject { ["ProgressPercent"] = 85 },
+                    ["StatusInfo"] = new JsonObject { ["Status"] = "Finished" },
+                },
+            },
+        });
+
+        Assert.Equal(chapter.Pages, Assert.Single(context.AppUserProgresses).PagesRead);
+
+        var getState = Assert.IsType<JsonArray>(
+            await koboService.GetReadingStateAsync(token, entitlementId));
+        Assert.Equal("Finished", getState[0]!["StatusInfo"]!["Status"]!.GetValue<string>());
+        Assert.Equal(100, getState[0]!["CurrentBookmark"]!["ProgressPercent"]!.GetValue<double>());
+    }
+
+    [Fact]
     public async Task ReadingState_Put_FalsyLocation_LeavesPriorLocation()
     {
         var (unitOfWork, context, mapper) = await CreateDatabase();
@@ -831,6 +864,55 @@ public class KoboServiceTests(ITestOutputHelper testOutputHelper) : AbstractDbTe
         var getState = Assert.IsType<JsonArray>(await koboService.GetReadingStateAsync(token, entitlementId));
         Assert.Equal("OEBPS/Text/page_0005.xhtml",
             getState[0]!["CurrentBookmark"]!["Location"]!["Source"]!.GetValue<string>());
+
+        try { File.Delete(kepubPath); } catch { /* ignore */ }
+    }
+
+    [Fact]
+    public async Task ConvertReadingState_Put_Finished_WithMidBookLocation_MarksFullyRead()
+    {
+        var (unitOfWork, context, mapper) = await CreateDatabase();
+        var user = await SeedUser(unitOfWork, context);
+        var library = await context.Library.SingleAsync(l => l.Name == "Kobo Lib");
+        var chapter = await AddCbzChapter(context, library, "Convert Finished Mid Loc", "1");
+        await ConfigureKoboSettings(unitOfWork, "https://kavita.example.com");
+
+        var kepubPath = Path.Join(Path.GetTempPath(), "kavita-convert-fin-" + Guid.NewGuid().ToString("N") + ".kepub.epub");
+        KoboConvertEpubTestFactory.WriteMinimalConvertEpub(kepubPath, 10);
+        var conversion = Substitute.For<IKoboConversionService>();
+        conversion.TryGetCachedKepubPathAsync(chapter.Id, Arg.Any<MangaFile>()).Returns(kepubPath);
+
+        var koboService = CreateKoboService(unitOfWork, mapper, conversionService: conversion);
+        var token = (await koboService.GetOrCreateSyncUrlAsync(user.Id)).Split('/').Last();
+        var entitlementId = KoboEntitlementId.FromChapterIdString(chapter.Id);
+
+        await koboService.PutReadingStateAsync(token, entitlementId, new JsonObject
+        {
+            ["ReadingStates"] = new JsonArray
+            {
+                new JsonObject
+                {
+                    ["CurrentBookmark"] = new JsonObject
+                    {
+                        ["ProgressPercent"] = 40,
+                        ["Location"] = new JsonObject
+                        {
+                            ["Value"] = KoboConvertLocationCodec.ValueKoboSpan,
+                            ["Type"] = KoboConvertLocationCodec.TypeKoboSpan,
+                            ["Source"] = "OEBPS/Text/page_0005.xhtml",
+                        },
+                    },
+                    ["StatusInfo"] = new JsonObject { ["Status"] = "Finished" },
+                },
+            },
+        });
+
+        Assert.Equal(chapter.Pages, Assert.Single(context.AppUserProgresses).PagesRead);
+        var location = Assert.Single(context.AppUserKoboReadingLocation);
+        Assert.Equal("OEBPS/Text/page_0005.xhtml", location.LocationSource);
+
+        var getState = Assert.IsType<JsonArray>(await koboService.GetReadingStateAsync(token, entitlementId));
+        Assert.Equal("Finished", getState[0]!["StatusInfo"]!["Status"]!.GetValue<string>());
 
         try { File.Delete(kepubPath); } catch { /* ignore */ }
     }

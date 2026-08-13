@@ -864,9 +864,10 @@ public partial class KoboService(
         ReadingStateLocationWrite location, JsonObject readingState, CancellationToken ct)
     {
         var kepub = await koboConvertProgressLocation.TryResolveSpineAlignedKepubPathAsync(chapter, ct);
-        var readyToRead = string.Equals(
-            (readingState["StatusInfo"] as JsonObject)?["Status"]?.GetValue<string>(),
-            KoboReadingStateMapper.StatusReadyToRead,
+        var status = (readingState["StatusInfo"] as JsonObject)?["Status"]?.GetValue<string>();
+        var readyToRead = string.Equals(status, KoboReadingStateMapper.StatusReadyToRead,
+            StringComparison.OrdinalIgnoreCase);
+        var finished = string.Equals(status, KoboReadingStateMapper.StatusFinished,
             StringComparison.OrdinalIgnoreCase);
 
         if (location.HasTruthyLocation)
@@ -877,7 +878,8 @@ public partial class KoboService(
             {
                 await koboConvertProgressLocation.UpsertLocationAsync(userId, chapter.Id,
                     location.Value, location.Type, location.Source, ct);
-                existing.PagesRead = decodedPages;
+                // Finished is authoritative: keep Location but do not let a mid-book decode undo completion.
+                existing.PagesRead = finished ? chapter.Pages : decodedPages;
                 return;
             }
 
