@@ -457,6 +457,10 @@ public sealed class DataContext : IdentityDbContext<AppUser, AppRole, int,
             .Property(x => x.AgeRatingMappings)
             .HasJsonConversion([]);
 
+        builder.Entity<MetadataSettings>()
+            .Property(x => x.ExternalAgeRatingMappings)
+            .HasJsonConversion([]);
+
         builder.Entity<SeriesMetadata>()
             .Property(b => b.WebLinks)
             .HasDefaultValue(string.Empty);
@@ -499,6 +503,9 @@ public sealed class DataContext : IdentityDbContext<AppUser, AppRole, int,
             .HasDefaultValue(true);
         builder.Entity<MetadataSettings>()
             .Property(b => b.EnableCoverImage)
+            .HasDefaultValue(true);
+        builder.Entity<MetadataSettings>()
+            .Property(b => b.EnableAgeRating)
             .HasDefaultValue(true);
 
         #endregion

@@ -90,4 +90,7 @@ public sealed record LibraryDto : LiteLibraryDto
     public bool InheritWebLinksFromFirstChapter { get; init; }
     /// <inheritdoc cref="Library.DefaultLanguage"/>
     public string DefaultLanguage { get; init; }
+    /// <inheritdoc cref="Library.MetadataProvider"/>
+    [EnumDataType(typeof(MetadataProvider))]
+    public MetadataProvider MetadataProvider { get; init; }
 }

@@ -1,7 +1,7 @@
 <ng-container *transloco="let t; prefix:'manage-metadata-settings'">
 
   <p>{{t('description')}}</p>
-  @if (isLoaded) {
+  @if (isLoaded()) {
     <form [formGroup]="settingsForm">
 
       <!--
@@ -70,6 +70,8 @@
 
 
       <div ngbAccordion [closeOthers]="false">
+
+        <!--Language-->
         <div ngbAccordionItem="language-panel" [collapsed]="false">
           <h2 class="accordion-header" ngbAccordionHeader>
             <button ngbAccordionButton class="accordion-button" type="button">
@@ -80,7 +82,7 @@
             <div ngbAccordionBody>
               <ng-template>
                 <p>{{t('language-description')}}</p>
-                
+
                 <ng-template #languageCodeField let-control let-id="id" let-label="label">
                   <label class="form-label" [for]="id">{{label}}</label>
                   <input type="text" class="form-control" [formControl]="control" [id]="id"
@@ -184,6 +186,7 @@
           </div>
         </div>
 
+        <!--Series-->
         <div ngbAccordionItem="series-panel" [collapsed]="false">
           <h2 class="accordion-header" ngbAccordionHeader>
             <button ngbAccordionButton class="accordion-button" type="button">
@@ -224,6 +227,18 @@
                       <ng-template #switch>
                         <div class="form-check form-switch float-end">
                           <input id="name" type="checkbox" class="form-check-input" formControlName="enableName">
+                        </div>
+                      </ng-template>
+                    </app-setting-switch>
+                  }
+                </div>
+
+                <div class="row g-0 mt-4 mb-4">
+                  @if(settingsForm.get('enableAgeRating'); as formControl) {
+                    <app-setting-switch [title]="t('enable-age-rating-label')" [subtitle]="t('enable-age-rating-tooltip')">
+                      <ng-template #switch>
+                        <div class="form-check form-switch float-end">
+                          <input id="enable-age-rating" type="checkbox" class="form-check-input" formControlName="enableAgeRating">
                         </div>
                       </ng-template>
                     </app-setting-switch>
@@ -282,6 +297,7 @@
           </div>
         </div>
 
+        <!--Chapter-->
         <div ngbAccordionItem="chapter-panel" [collapsed]="false">
           <h2 class="accordion-header" ngbAccordionHeader>
             <button ngbAccordionButton class="accordion-button" type="button">
@@ -355,6 +371,7 @@
           </div>
         </div>
 
+        <!--Volume-->
         <div ngbAccordionItem="volume-panel" [collapsed]="false">
           <h2 class="accordion-header" ngbAccordionHeader>
             <button ngbAccordionButton class="accordion-button" type="button">
@@ -380,6 +397,7 @@
           </div>
         </div>
 
+        <!--People-->
         @if(settingsForm.get('enablePeople'); as formControl) {
           <div ngbAccordionItem="people-panel" [collapsed]="false">
             <h2 class="accordion-header" ngbAccordionHeader>
@@ -417,7 +435,7 @@
                   @if (settingsForm.get('personRoles')) {
                     <h5>{{t('person-roles-label')}}</h5>
                     <div class="row g-0 mt-4 mb-4" formArrayName="personRoles">
-                      @for(role of personRoles; track role; let i = $index) {
+                      @for(role of personRoles(); track role; let i = $index) {
                         <div class="col-md-3">
                           <div class="form-check">
                             <input type="checkbox" class="form-check-input" [formControlName]="'personRole_' + i" [id]="'role-' + role">
@@ -433,6 +451,7 @@
           </div>
         }
 
+        <!--Tags-->
         <div ngbAccordionItem="tags-panel" [collapsed]="false">
           <h2 class="accordion-header" ngbAccordionHeader>
             <button ngbAccordionButton class="accordion-button" type="button">
@@ -484,16 +503,60 @@
                     formControlName="whitelist"
                   />
                 </div>
+
+
+                <div class="row g-0 mt-4 mb-4">
+                  <app-setting-item [title]="t('tag-weight-label')" [subtitle]="t('tag-weight-tooltip')" [labelId]="'filter-above-weight'">
+                    <ng-template #view>
+                      @if (settingsForm.get('filterAboveWeight')?.value == null) {
+                        {{t('tag-weight-disabled')}}
+                      } @else {
+                        {{settingsForm.get('filterAboveWeight')?.value | tagWeightTitle}}
+                      }
+
+                    </ng-template>
+                    <ng-template #edit>
+                      <select class="form-select" formControlName="filterAboveWeight" [id]="'filter-above-weight'">
+                        <option [ngValue]="null">{{t('tag-weight-disabled')}}</option>
+                        @for(weight of allTagWeights; track weight) {
+                          <option [ngValue]="weight">{{weight | tagWeightTitle}}</option>
+                        }
+                      </select>
+                    </ng-template>
+                  </app-setting-item>
+                </div>
+
+              </ng-template>
+            </div>
+          </div>
+        </div>
+
+        <!--Base Age Rating Mappings-->
+        <div ngbAccordionItem="external-age-rating-panel" [collapsed]="false">
+          <h2 class="accordion-header" ngbAccordionHeader>
+            <button ngbAccordionButton class="accordion-button" type="button">
+              {{t('external-age-rating-header')}}
+            </button>
+          </h2>
+          <div ngbAccordionCollapse>
+            <div ngbAccordionBody>
+              <ng-template>
+                <p>{{t('external-age-rating-description')}}</p>
+                <app-age-rating-mapper [form]="settingsForm" controlName="externalAgeRatingMappings"
+                                       [sourceLabel]="t('external-age-rating-label')"
+                                       [addLabel]="t('add-age-rating-mapping-label')"
+                                       [removeLabel]="t('remove-age-rating-mapping-label')" />
               </ng-template>
             </div>
           </div>
         </div>
       </div>
 
-      @if (settings) {
-        <app-manage-metadata-mappings [settings]="settings" [settingsForm]="settingsForm" />
+      @if (settings(); as s) {
+        <app-manage-metadata-mappings [settings]="s" [settingsForm]="settingsForm" />
       }
 
+      <!--Overrides-->
       @if (settingsForm.get('overrides')) {
         <div ngbAccordion [closeOthers]="false">
           <div ngbAccordionItem="overrides-panel" [collapsed]="allMetadataSettingFields.length > 10">

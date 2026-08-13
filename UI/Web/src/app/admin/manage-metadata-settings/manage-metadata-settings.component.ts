@@ -60,6 +60,14 @@ import {
   unknownLanguageSubtags,
   unknownScriptSubtags
 } from "../../shared/utils/language-code.util";
+import {
+  AgeRatingMapperComponent,
+  buildAgeRatingMappingsArray,
+  packAgeRatingMappings
+} from "../../shared/_components/age-rating-mapper/age-rating-mapper.component";
+import {SettingItemComponent} from "../../settings/_components/setting-item/setting-item.component";
+import {TagWeightTitlePipe} from "../../_pipes/tag-weight-title.pipe";
+import {allTagWeights} from "../_models/tag-weight.enum";
 
 
 @Component({
@@ -80,6 +88,9 @@ import {
     NgbAccordionBody,
     SettingMultiTextFieldComponent,
     NgTemplateOutlet,
+    AgeRatingMapperComponent,
+    SettingItemComponent,
+    TagWeightTitlePipe,
 
   ],
   templateUrl: './manage-metadata-settings.component.html',
@@ -101,10 +112,10 @@ export class ManageMetadataSettingsComponent implements OnInit {
   private readonly serverService = inject(ServerService);
 
   settingsForm: FormGroup = new FormGroup({});
-  settings: MetadataSettings | undefined = undefined;
-  personRoles: PersonRole[] = [PersonRole.Writer, PersonRole.CoverArtist, PersonRole.Character];
-  isLoaded = false;
-  allMetadataSettingFields = allMetadataSettingField;
+  settings = signal<MetadataSettings | undefined>(undefined);
+  personRoles = signal<PersonRole[]>([PersonRole.Writer, PersonRole.CoverArtist, PersonRole.Character]);
+  isLoaded = signal<boolean>(false);
+
 
   isReRunInProgress = signal(true);
 
@@ -168,8 +179,7 @@ export class ManageMetadataSettingsComponent implements OnInit {
     });
 
     this.settingService.getMetadataSettings().subscribe(settings => {
-      this.settings = settings;
-      this.cdRef.markForCheck();
+      this.settings.set(settings);
 
       this.settingsForm.addControl('enabled', new FormControl(settings.enabled, []));
       this.settingsForm.addControl('enableExtendedMetadataProcessing', new FormControl(settings.enableExtendedMetadataProcessing, []));
@@ -177,6 +187,7 @@ export class ManageMetadataSettingsComponent implements OnInit {
       this.settingsForm.addControl('enableLocalizedName', new FormControl(settings.enableLocalizedName, []));
       this.settingsForm.addControl('enableName', new FormControl(settings.enableName, []));
       this.settingsForm.addControl('enablePublicationStatus', new FormControl(settings.enablePublicationStatus, []));
+      this.settingsForm.addControl('enableAgeRating', new FormControl(settings.enableAgeRating, []));
       this.settingsForm.addControl('enableRelations', new FormControl(settings.enableRelationships, []));
       this.settingsForm.addControl('enableGenres', new FormControl(settings.enableGenres, []));
       this.settingsForm.addControl('enableTags', new FormControl(settings.enableTags, []));
@@ -197,6 +208,7 @@ export class ManageMetadataSettingsComponent implements OnInit {
 
       this.settingsForm.addControl('blacklist', new FormControl(settings.blacklist, []));
       this.settingsForm.addControl('whitelist', new FormControl(settings.whitelist, []));
+      this.settingsForm.addControl('filterAboveWeight', new FormControl(settings.filterAboveWeight, []));
 
 
       this.settingsForm.addControl('globalLanguageTitleSettings', this.fb.group({
@@ -210,10 +222,13 @@ export class ManageMetadataSettingsComponent implements OnInit {
       });
 
 
+      this.settingsForm.addControl('externalAgeRatingMappings',
+        buildAgeRatingMappingsArray(this.fb, settings.externalAgeRatingMappings));
+
       this.settingsForm.addControl('firstLastPeopleNaming', new FormControl((settings.firstLastPeopleNaming), []));
       this.settingsForm.addControl('personRoles', this.fb.group(
         Object.fromEntries(
-          this.personRoles.map((role, index) => [
+          this.personRoles().map((role, index) => [
             `personRole_${index}`,
             this.fb.control((settings.personRoles || this.personRoles).includes(role)),
           ])
@@ -250,8 +265,7 @@ export class ManageMetadataSettingsComponent implements OnInit {
         }
       });
 
-      this.isLoaded = true;
-      this.cdRef.markForCheck();
+      this.isLoaded.set(true);
 
 
       this.settingsForm.valueChanges.pipe(
@@ -295,11 +309,12 @@ export class ManageMetadataSettingsComponent implements OnInit {
       whitelist: exp.whitelist,
       personRoles: Object.entries(this.settingsForm.get('personRoles')!.value)
         .filter(([_, value]) => value)
-        .map(([key, _]) => this.personRoles[parseInt(key.split('_')[1], 10)]),
+        .map(([key, _]) => this.personRoles()[parseInt(key.split('_')[1], 10)]),
       overrides: Object.entries(this.settingsForm.get('overrides')!.value)
         .filter(([_, value]) => value)
         .map(([key, _]) => this.allMetadataSettingFields[parseInt(key.split('_')[1], 10)]),
       libraryLanguageTitleOverrides: this.packLibraryLanguageOverrides(),
+      externalAgeRatingMappings: packAgeRatingMappings(this.settingsForm.get('externalAgeRatingMappings')?.value ?? []),
     }
   }
 
@@ -360,5 +375,7 @@ export class ManageMetadataSettingsComponent implements OnInit {
     ];
   }
 
+  protected readonly allMetadataSettingFields = allMetadataSettingField;
+  protected readonly allTagWeights = allTagWeights;
   protected readonly SettingsTabId = SettingsTabId;
 }

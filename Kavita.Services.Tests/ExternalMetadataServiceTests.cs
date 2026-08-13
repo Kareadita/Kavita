@@ -47,6 +47,7 @@ public class ExternalMetadataServiceTests: AbstractDbTest
        var metadataSettings = await unitOfWork.SettingsRepository.GetMetadataSettings();
        metadataSettings.Enabled = false;
        metadataSettings.EnableSummary = false;
+       metadataSettings.EnableAgeRating = true;
        metadataSettings.EnableCoverImage = false;
        metadataSettings.EnableLocalizedName = false;
        metadataSettings.EnableGenres = false;
@@ -57,6 +58,8 @@ public class ExternalMetadataServiceTests: AbstractDbTest
        metadataSettings.EnableStartDate = false;
        metadataSettings.FieldMappings = [];
        metadataSettings.AgeRatingMappings = new Dictionary<string, AgeRating>();
+       metadataSettings.ExternalAgeRatingMappings = new Dictionary<string, AgeRating>();
+       metadataSettings.FilterAboveWeight = null;
        context.MetadataSettings.Update(metadataSettings);
 
        await context.SaveChangesAsync();
@@ -140,7 +143,7 @@ public class ExternalMetadataServiceTests: AbstractDbTest
             Summary = "Test"
         }, 1);
 
-        // Repull Series and validate what is overwritten
+
         var postSeries = await unitOfWork.SeriesRepository.GetSeriesByIdAsync(1, SeriesIncludes.Metadata);
         Assert.NotNull(postSeries);
         Assert.Equal(string.Empty, postSeries.Metadata.Summary);
@@ -178,7 +181,7 @@ public class ExternalMetadataServiceTests: AbstractDbTest
             Summary = "Test"
         }, 1);
 
-        // Repull Series and validate what is overwritten
+
         var postSeries = await unitOfWork.SeriesRepository.GetSeriesByIdAsync(1, SeriesIncludes.Metadata);
         Assert.NotNull(postSeries);
         Assert.Equal(string.Empty, postSeries.Metadata.Summary);
@@ -212,7 +215,7 @@ public class ExternalMetadataServiceTests: AbstractDbTest
             Summary = "Test"
         }, 1);
 
-        // Repull Series and validate what is overwritten
+
         var postSeries = await unitOfWork.SeriesRepository.GetSeriesByIdAsync(1, SeriesIncludes.Metadata);
         Assert.NotNull(postSeries);
         Assert.False(string.IsNullOrEmpty(postSeries.Metadata.Summary));
@@ -248,7 +251,7 @@ public class ExternalMetadataServiceTests: AbstractDbTest
             Summary = "This should not write"
         }, 1);
 
-        // Repull Series and validate what is overwritten
+
         var postSeries = await unitOfWork.SeriesRepository.GetSeriesByIdAsync(1, SeriesIncludes.Metadata);
         Assert.NotNull(postSeries);
         Assert.False(string.IsNullOrEmpty(postSeries.Metadata.Summary));
@@ -284,7 +287,7 @@ public class ExternalMetadataServiceTests: AbstractDbTest
             Summary = "This should not write"
         }, 1);
 
-        // Repull Series and validate what is overwritten
+
         var postSeries = await unitOfWork.SeriesRepository.GetSeriesByIdAsync(1, SeriesIncludes.Metadata);
         Assert.NotNull(postSeries);
         Assert.False(string.IsNullOrEmpty(postSeries.Metadata.Summary));
@@ -321,7 +324,7 @@ public class ExternalMetadataServiceTests: AbstractDbTest
             Summary = "This should write"
         }, 1);
 
-        // Repull Series and validate what is overwritten
+
         var postSeries = await unitOfWork.SeriesRepository.GetSeriesByIdAsync(1, SeriesIncludes.Metadata);
         Assert.NotNull(postSeries);
         Assert.False(string.IsNullOrEmpty(postSeries.Metadata.Summary));
@@ -361,7 +364,7 @@ public class ExternalMetadataServiceTests: AbstractDbTest
             StartDate = DateTime.UtcNow
         }, 1);
 
-        // Repull Series and validate what is overwritten
+
         var postSeries = await unitOfWork.SeriesRepository.GetSeriesByIdAsync(1, SeriesIncludes.Metadata);
         Assert.NotNull(postSeries);
         Assert.Equal(0, postSeries.Metadata.ReleaseYear);
@@ -395,7 +398,7 @@ public class ExternalMetadataServiceTests: AbstractDbTest
             StartDate = DateTime.UtcNow
         }, 1);
 
-        // Repull Series and validate what is overwritten
+
         var postSeries = await unitOfWork.SeriesRepository.GetSeriesByIdAsync(1, SeriesIncludes.Metadata);
         Assert.NotNull(postSeries);
         Assert.Equal(DateTime.UtcNow.Year, postSeries.Metadata.ReleaseYear);
@@ -430,7 +433,7 @@ public class ExternalMetadataServiceTests: AbstractDbTest
             StartDate = DateTime.UtcNow
         }, 1);
 
-        // Repull Series and validate what is overwritten
+
         var postSeries = await unitOfWork.SeriesRepository.GetSeriesByIdAsync(1, SeriesIncludes.Metadata);
         Assert.NotNull(postSeries);
         Assert.Equal(1990, postSeries.Metadata.ReleaseYear);
@@ -465,7 +468,7 @@ public class ExternalMetadataServiceTests: AbstractDbTest
             StartDate = DateTime.UtcNow
         }, 1);
 
-        // Repull Series and validate what is overwritten
+
         var postSeries = await unitOfWork.SeriesRepository.GetSeriesByIdAsync(1, SeriesIncludes.Metadata);
         Assert.NotNull(postSeries);
         Assert.Equal(1990, postSeries.Metadata.ReleaseYear);
@@ -501,7 +504,7 @@ public class ExternalMetadataServiceTests: AbstractDbTest
             StartDate = DateTime.UtcNow
         }, 1);
 
-        // Repull Series and validate what is overwritten
+
         var postSeries = await unitOfWork.SeriesRepository.GetSeriesByIdAsync(1, SeriesIncludes.Metadata);
         Assert.NotNull(postSeries);
         Assert.Equal(DateTime.UtcNow.Year, postSeries.Metadata.ReleaseYear);
@@ -544,7 +547,7 @@ public class ExternalMetadataServiceTests: AbstractDbTest
             }
         }, 1);
 
-        // Repull Series and validate what is overwritten
+
         var postSeries = await unitOfWork.SeriesRepository.GetSeriesByIdAsync(1, SeriesIncludes.Metadata);
         Assert.NotNull(postSeries);
         Assert.Equal(string.Empty, postSeries.LocalizedName);
@@ -583,7 +586,7 @@ public class ExternalMetadataServiceTests: AbstractDbTest
             }
         }, 1);
 
-        // Repull Series and validate what is overwritten
+
         var postSeries = await unitOfWork.SeriesRepository.GetSeriesByIdAsync(1, SeriesIncludes.Metadata);
         Assert.NotNull(postSeries);
         Assert.Equal("Kimchi", postSeries.LocalizedName);
@@ -622,7 +625,7 @@ public class ExternalMetadataServiceTests: AbstractDbTest
             }
         }, 1);
 
-        // Repull Series and validate what is overwritten
+
         var postSeries = await unitOfWork.SeriesRepository.GetSeriesByIdAsync(1, SeriesIncludes.Metadata);
         Assert.NotNull(postSeries);
         Assert.Equal("Localized Name here", postSeries.LocalizedName);
@@ -661,7 +664,7 @@ public class ExternalMetadataServiceTests: AbstractDbTest
             }
         }, 1);
 
-        // Repull Series and validate what is overwritten
+
         var postSeries = await unitOfWork.SeriesRepository.GetSeriesByIdAsync(1, SeriesIncludes.Metadata);
         Assert.NotNull(postSeries);
         Assert.Equal("Localized Name here", postSeries.LocalizedName);
@@ -700,7 +703,7 @@ public class ExternalMetadataServiceTests: AbstractDbTest
             }
         }, 1);
 
-        // Repull Series and validate what is overwritten
+
         var postSeries = await unitOfWork.SeriesRepository.GetSeriesByIdAsync(1, SeriesIncludes.Metadata);
         Assert.NotNull(postSeries);
         Assert.Equal("Kimchi", postSeries.LocalizedName);
@@ -737,7 +740,7 @@ public class ExternalMetadataServiceTests: AbstractDbTest
             Synonyms = [seriesName, "設定しないでください", "Kimchi"]
         }, 1);
 
-        // Repull Series and validate what is overwritten
+
         var postSeries = await unitOfWork.SeriesRepository.GetSeriesByIdAsync(1, SeriesIncludes.Metadata);
         Assert.NotNull(postSeries);
         Assert.True(string.IsNullOrEmpty(postSeries.LocalizedName));
@@ -1651,7 +1654,7 @@ public class ExternalMetadataServiceTests: AbstractDbTest
             Volumes = 2
         }, 1);
 
-        // Repull Series and validate what is overwritten
+
         var postSeries = await unitOfWork.SeriesRepository.GetSeriesByIdAsync(1, SeriesIncludes.Metadata);
         Assert.NotNull(postSeries);
         Assert.Equal(PublicationStatus.OnGoing, postSeries.Metadata.PublicationStatus);
@@ -1691,7 +1694,7 @@ public class ExternalMetadataServiceTests: AbstractDbTest
             Volumes = 2
         }, 1);
 
-        // Repull Series and validate what is overwritten
+
         var postSeries = await unitOfWork.SeriesRepository.GetSeriesByIdAsync(1, SeriesIncludes.Metadata);
         Assert.NotNull(postSeries);
         Assert.Equal(PublicationStatus.Completed, postSeries.Metadata.PublicationStatus);
@@ -1732,7 +1735,7 @@ public class ExternalMetadataServiceTests: AbstractDbTest
             Volumes = 2
         }, 1);
 
-        // Repull Series and validate what is overwritten
+
         var postSeries = await unitOfWork.SeriesRepository.GetSeriesByIdAsync(1, SeriesIncludes.Metadata);
         Assert.NotNull(postSeries);
         Assert.Equal(PublicationStatus.Completed, postSeries.Metadata.PublicationStatus);
@@ -1773,7 +1776,7 @@ public class ExternalMetadataServiceTests: AbstractDbTest
             Volumes = 2
         }, 1);
 
-        // Repull Series and validate what is overwritten
+
         var postSeries = await unitOfWork.SeriesRepository.GetSeriesByIdAsync(1, SeriesIncludes.Metadata);
         Assert.NotNull(postSeries);
         Assert.Equal(PublicationStatus.Hiatus, postSeries.Metadata.PublicationStatus);
@@ -1815,7 +1818,7 @@ public class ExternalMetadataServiceTests: AbstractDbTest
             Volumes = 2
         }, 1);
 
-        // Repull Series and validate what is overwritten
+
         var postSeries = await unitOfWork.SeriesRepository.GetSeriesByIdAsync(1, SeriesIncludes.Metadata);
         Assert.NotNull(postSeries);
         Assert.Equal(PublicationStatus.Completed, postSeries.Metadata.PublicationStatus);
@@ -1853,7 +1856,7 @@ public class ExternalMetadataServiceTests: AbstractDbTest
             Volumes = 2
         }, 1);
 
-        // Repull Series and validate what is overwritten
+
         var postSeries = await unitOfWork.SeriesRepository.GetSeriesByIdAsync(1, SeriesIncludes.Metadata);
         Assert.NotNull(postSeries);
         Assert.Equal(PublicationStatus.Ended, postSeries.Metadata.PublicationStatus);
@@ -2108,7 +2111,7 @@ public class ExternalMetadataServiceTests: AbstractDbTest
             Genres = ["Ecchi"]
         }, 1);
 
-        // Repull Series and validate what is overwritten
+
         var postSeries = await unitOfWork.SeriesRepository.GetSeriesByIdAsync(1, SeriesIncludes.Metadata);
         Assert.NotNull(postSeries);
         Assert.Equal(AgeRating.Teen, postSeries.Metadata.AgeRating);
@@ -2147,7 +2150,7 @@ public class ExternalMetadataServiceTests: AbstractDbTest
             Genres = ["Ecchi"]
         }, 1);
 
-        // Repull Series and validate what is overwritten
+
         var postSeries = await unitOfWork.SeriesRepository.GetSeriesByIdAsync(1, SeriesIncludes.Metadata);
         Assert.NotNull(postSeries);
         Assert.Equal(AgeRating.Mature, postSeries.Metadata.AgeRating);
@@ -2186,7 +2189,7 @@ public class ExternalMetadataServiceTests: AbstractDbTest
             Genres = ["Ecchi"]
         }, 1);
 
-        // Repull Series and validate what is overwritten
+
         var postSeries = await unitOfWork.SeriesRepository.GetSeriesByIdAsync(1, SeriesIncludes.Metadata);
         Assert.NotNull(postSeries);
         Assert.Equal(AgeRating.Teen, postSeries.Metadata.AgeRating);
@@ -2225,7 +2228,7 @@ public class ExternalMetadataServiceTests: AbstractDbTest
             Genres = ["Ecchi"]
         }, 1);
 
-        // Repull Series and validate what is overwritten
+
         var postSeries = await unitOfWork.SeriesRepository.GetSeriesByIdAsync(1, SeriesIncludes.Metadata);
         Assert.NotNull(postSeries);
         Assert.Equal(AgeRating.Everyone, postSeries.Metadata.AgeRating);
@@ -2265,7 +2268,7 @@ public class ExternalMetadataServiceTests: AbstractDbTest
             Genres = ["Ecchi"]
         }, 1);
 
-        // Repull Series and validate what is overwritten
+
         var postSeries = await unitOfWork.SeriesRepository.GetSeriesByIdAsync(1, SeriesIncludes.Metadata);
         Assert.NotNull(postSeries);
         Assert.Equal(AgeRating.Teen, postSeries.Metadata.AgeRating);
@@ -2284,6 +2287,400 @@ public class ExternalMetadataServiceTests: AbstractDbTest
 
         mappings.Add("tag2", AgeRating.AdultsOnly);
         Assert.Equal(AgeRating.AdultsOnly, ExternalMetadataService.DetermineAgeRating(tags, mappings));
+    }
+
+    [Fact]
+    public async Task AgeRating_Raw_WithMapping_Modification()
+    {
+        var (unitOfWork, context, mapper) = await CreateDatabase();
+        var (externalMetadataService, _, _, _) = await Setup(unitOfWork, context, mapper);
+
+        const string seriesName = "Test - Age Rating Raw";
+        var series = new SeriesBuilder(seriesName)
+            .WithLibraryId(1)
+            .WithMetadata(new SeriesMetadataBuilder()
+                .Build())
+            .Build();
+        context.Series.Attach(series);
+        await context.SaveChangesAsync();
+
+        var metadataSettings = await unitOfWork.SettingsRepository.GetMetadataSettings();
+        metadataSettings.Enabled = true;
+        metadataSettings.ExternalAgeRatingMappings = new Dictionary<string, AgeRating>()
+        {
+            {"Mature 17+", AgeRating.Mature17Plus},
+        };
+        context.MetadataSettings.Update(metadataSettings);
+        await context.SaveChangesAsync();
+
+
+        await externalMetadataService.WriteExternalMetadataToSeries(new ExternalSeriesDetailDto()
+        {
+            Name = seriesName,
+            AgeRatingRaw = "Mature 17+"
+        }, 1);
+
+
+        var postSeries = await unitOfWork.SeriesRepository.GetSeriesByIdAsync(1, SeriesIncludes.Metadata);
+        Assert.NotNull(postSeries);
+        Assert.Equal(AgeRating.Mature17Plus, postSeries.Metadata.AgeRating);
+    }
+
+    /// <summary>
+    /// The raw string is run through <see cref="ExternalMetadataService.DetermineAgeRating"/>, so the mapping key
+    /// matches on the normalized form rather than an exact string match
+    /// </summary>
+    [Fact]
+    public async Task AgeRating_Raw_MappingIsNormalized_Modification()
+    {
+        var (unitOfWork, context, mapper) = await CreateDatabase();
+        var (externalMetadataService, _, _, _) = await Setup(unitOfWork, context, mapper);
+
+        const string seriesName = "Test - Age Rating Raw";
+        var series = new SeriesBuilder(seriesName)
+            .WithLibraryId(1)
+            .WithMetadata(new SeriesMetadataBuilder()
+                .Build())
+            .Build();
+        context.Series.Attach(series);
+        await context.SaveChangesAsync();
+
+        var metadataSettings = await unitOfWork.SettingsRepository.GetMetadataSettings();
+        metadataSettings.Enabled = true;
+        metadataSettings.ExternalAgeRatingMappings = new Dictionary<string, AgeRating>()
+        {
+            {"mature 17+", AgeRating.Mature17Plus},
+        };
+        context.MetadataSettings.Update(metadataSettings);
+        await context.SaveChangesAsync();
+
+
+        await externalMetadataService.WriteExternalMetadataToSeries(new ExternalSeriesDetailDto()
+        {
+            Name = seriesName,
+            AgeRatingRaw = "MATURE 17 +"
+        }, 1);
+
+
+        var postSeries = await unitOfWork.SeriesRepository.GetSeriesByIdAsync(1, SeriesIncludes.Metadata);
+        Assert.NotNull(postSeries);
+        Assert.Equal(AgeRating.Mature17Plus, postSeries.Metadata.AgeRating);
+    }
+
+    [Fact]
+    public async Task AgeRating_Raw_NoMapping_NoModification()
+    {
+        var (unitOfWork, context, mapper) = await CreateDatabase();
+        var (externalMetadataService, _, _, _) = await Setup(unitOfWork, context, mapper);
+
+        const string seriesName = "Test - Age Rating Raw";
+        var series = new SeriesBuilder(seriesName)
+            .WithLibraryId(1)
+            .WithMetadata(new SeriesMetadataBuilder()
+                .Build())
+            .Build();
+        context.Series.Attach(series);
+        await context.SaveChangesAsync();
+
+        var metadataSettings = await unitOfWork.SettingsRepository.GetMetadataSettings();
+        metadataSettings.Enabled = true;
+        metadataSettings.ExternalAgeRatingMappings = new Dictionary<string, AgeRating>()
+        {
+            {"Mature 17+", AgeRating.Mature17Plus},
+        };
+        context.MetadataSettings.Update(metadataSettings);
+        await context.SaveChangesAsync();
+
+
+        await externalMetadataService.WriteExternalMetadataToSeries(new ExternalSeriesDetailDto()
+        {
+            Name = seriesName,
+            AgeRatingRaw = "Unrated"
+        }, 1);
+
+
+        var postSeries = await unitOfWork.SeriesRepository.GetSeriesByIdAsync(1, SeriesIncludes.Metadata);
+        Assert.NotNull(postSeries);
+        Assert.Equal(AgeRating.Unknown, postSeries.Metadata.AgeRating);
+        Assert.DoesNotContain(MetadataSettingField.AgeRating, postSeries.Metadata.KPlusOverrides);
+    }
+
+    /// <summary>
+    /// Kavita+ maps the content rating itself and sends it down on AgeRating, which is a candidate on its own
+    /// </summary>
+    [Fact]
+    public async Task AgeRating_ExternalAgeRating_Modification()
+    {
+        var (unitOfWork, context, mapper) = await CreateDatabase();
+        var (externalMetadataService, _, _, _) = await Setup(unitOfWork, context, mapper);
+
+        const string seriesName = "Test - Age Rating Raw";
+        var series = new SeriesBuilder(seriesName)
+            .WithLibraryId(1)
+            .WithMetadata(new SeriesMetadataBuilder()
+                .Build())
+            .Build();
+        context.Series.Attach(series);
+        await context.SaveChangesAsync();
+
+        var metadataSettings = await unitOfWork.SettingsRepository.GetMetadataSettings();
+        metadataSettings.Enabled = true;
+        context.MetadataSettings.Update(metadataSettings);
+        await context.SaveChangesAsync();
+
+
+        await externalMetadataService.WriteExternalMetadataToSeries(new ExternalSeriesDetailDto()
+        {
+            Name = seriesName,
+            AgeRating = AgeRating.Teen
+        }, 1);
+
+
+        var postSeries = await unitOfWork.SeriesRepository.GetSeriesByIdAsync(1, SeriesIncludes.Metadata);
+        Assert.NotNull(postSeries);
+        Assert.Equal(AgeRating.Teen, postSeries.Metadata.AgeRating);
+        Assert.Contains(MetadataSettingField.AgeRating, postSeries.Metadata.KPlusOverrides);
+    }
+
+    /// <summary>
+    /// The highest of (existing, Kavita+ AgeRating, raw string mapping, tag/genre mapping) wins
+    /// </summary>
+    [Fact]
+    public async Task AgeRating_HighestOfAllCandidates_Modification()
+    {
+        var (unitOfWork, context, mapper) = await CreateDatabase();
+        var (externalMetadataService, _, _, _) = await Setup(unitOfWork, context, mapper);
+
+        const string seriesName = "Test - Age Rating Raw";
+        var series = new SeriesBuilder(seriesName)
+            .WithLibraryId(1)
+            .WithMetadata(new SeriesMetadataBuilder()
+                .WithAgeRating(AgeRating.Everyone)
+                .Build())
+            .Build();
+        context.Series.Attach(series);
+        await context.SaveChangesAsync();
+
+        var metadataSettings = await unitOfWork.SettingsRepository.GetMetadataSettings();
+        metadataSettings.Enabled = true;
+        metadataSettings.AgeRatingMappings = new Dictionary<string, AgeRating>()
+        {
+            {"Ecchi", AgeRating.G}, // Genre
+        };
+        metadataSettings.ExternalAgeRatingMappings = new Dictionary<string, AgeRating>()
+        {
+            {"Seinen", AgeRating.Mature},
+        };
+        context.MetadataSettings.Update(metadataSettings);
+        await context.SaveChangesAsync();
+
+
+        await externalMetadataService.WriteExternalMetadataToSeries(new ExternalSeriesDetailDto()
+        {
+            Name = seriesName,
+            Genres = ["Ecchi"],       // -> G
+            AgeRating = AgeRating.Teen,
+            AgeRatingRaw = "Seinen"   // -> Mature
+        }, 1);
+
+
+        var postSeries = await unitOfWork.SeriesRepository.GetSeriesByIdAsync(1, SeriesIncludes.Metadata);
+        Assert.NotNull(postSeries);
+        Assert.Equal(AgeRating.Mature, postSeries.Metadata.AgeRating);
+    }
+
+    [Fact]
+    public async Task AgeRating_ExistingHigherThanAllCandidates_NoModification()
+    {
+        var (unitOfWork, context, mapper) = await CreateDatabase();
+        var (externalMetadataService, _, _, _) = await Setup(unitOfWork, context, mapper);
+
+        const string seriesName = "Test - Age Rating Raw";
+        var series = new SeriesBuilder(seriesName)
+            .WithLibraryId(1)
+            .WithMetadata(new SeriesMetadataBuilder()
+                .WithAgeRating(AgeRating.X18Plus)
+                .Build())
+            .Build();
+        context.Series.Attach(series);
+        await context.SaveChangesAsync();
+
+        var metadataSettings = await unitOfWork.SettingsRepository.GetMetadataSettings();
+        metadataSettings.Enabled = true;
+        metadataSettings.ExternalAgeRatingMappings = new Dictionary<string, AgeRating>()
+        {
+            {"Seinen", AgeRating.Mature},
+        };
+        context.MetadataSettings.Update(metadataSettings);
+        await context.SaveChangesAsync();
+
+
+        await externalMetadataService.WriteExternalMetadataToSeries(new ExternalSeriesDetailDto()
+        {
+            Name = seriesName,
+            AgeRating = AgeRating.Teen,
+            AgeRatingRaw = "Seinen"
+        }, 1);
+
+
+        var postSeries = await unitOfWork.SeriesRepository.GetSeriesByIdAsync(1, SeriesIncludes.Metadata);
+        Assert.NotNull(postSeries);
+        Assert.Equal(AgeRating.X18Plus, postSeries.Metadata.AgeRating);
+        Assert.DoesNotContain(MetadataSettingField.AgeRating, postSeries.Metadata.KPlusOverrides);
+    }
+
+    /// <summary>
+    /// When the winning candidate is what the Series already has, nothing is written and no Kavita+ override is recorded
+    /// </summary>
+    [Fact]
+    public async Task AgeRating_EqualToExisting_NoModification()
+    {
+        var (unitOfWork, context, mapper) = await CreateDatabase();
+        var (externalMetadataService, _, _, _) = await Setup(unitOfWork, context, mapper);
+
+        const string seriesName = "Test - Age Rating Raw";
+        var series = new SeriesBuilder(seriesName)
+            .WithLibraryId(1)
+            .WithMetadata(new SeriesMetadataBuilder()
+                .WithAgeRating(AgeRating.Teen)
+                .Build())
+            .Build();
+        context.Series.Attach(series);
+        await context.SaveChangesAsync();
+
+        var metadataSettings = await unitOfWork.SettingsRepository.GetMetadataSettings();
+        metadataSettings.Enabled = true;
+        metadataSettings.AgeRatingMappings = new Dictionary<string, AgeRating>()
+        {
+            {"Ecchi", AgeRating.Teen}, // Genre
+        };
+        context.MetadataSettings.Update(metadataSettings);
+        await context.SaveChangesAsync();
+
+
+        await externalMetadataService.WriteExternalMetadataToSeries(new ExternalSeriesDetailDto()
+        {
+            Name = seriesName,
+            Genres = ["Ecchi"],
+            AgeRating = AgeRating.Teen
+        }, 1);
+
+
+        var postSeries = await unitOfWork.SeriesRepository.GetSeriesByIdAsync(1, SeriesIncludes.Metadata);
+        Assert.NotNull(postSeries);
+        Assert.Equal(AgeRating.Teen, postSeries.Metadata.AgeRating);
+        Assert.DoesNotContain(MetadataSettingField.AgeRating, postSeries.Metadata.KPlusOverrides);
+    }
+
+    [Fact]
+    public async Task AgeRating_AllCandidatesUnknown_NoModification()
+    {
+        var (unitOfWork, context, mapper) = await CreateDatabase();
+        var (externalMetadataService, _, _, _) = await Setup(unitOfWork, context, mapper);
+
+        const string seriesName = "Test - Age Rating Raw";
+        var series = new SeriesBuilder(seriesName)
+            .WithLibraryId(1)
+            .WithMetadata(new SeriesMetadataBuilder()
+                .Build())
+            .Build();
+        context.Series.Attach(series);
+        await context.SaveChangesAsync();
+
+        var metadataSettings = await unitOfWork.SettingsRepository.GetMetadataSettings();
+        metadataSettings.Enabled = true;
+        context.MetadataSettings.Update(metadataSettings);
+        await context.SaveChangesAsync();
+
+
+        await externalMetadataService.WriteExternalMetadataToSeries(new ExternalSeriesDetailDto()
+        {
+            Name = seriesName,
+            Genres = ["Ecchi"]
+        }, 1);
+
+
+        var postSeries = await unitOfWork.SeriesRepository.GetSeriesByIdAsync(1, SeriesIncludes.Metadata);
+        Assert.NotNull(postSeries);
+        Assert.Equal(AgeRating.Unknown, postSeries.Metadata.AgeRating);
+        Assert.DoesNotContain(MetadataSettingField.AgeRating, postSeries.Metadata.KPlusOverrides);
+    }
+
+    [Fact]
+    public async Task AgeRating_Raw_Locked_NoModification()
+    {
+        var (unitOfWork, context, mapper) = await CreateDatabase();
+        var (externalMetadataService, _, _, _) = await Setup(unitOfWork, context, mapper);
+
+        const string seriesName = "Test - Age Rating Raw";
+        var series = new SeriesBuilder(seriesName)
+            .WithLibraryId(1)
+            .WithMetadata(new SeriesMetadataBuilder()
+                .WithAgeRating(AgeRating.Everyone, true)
+                .Build())
+            .Build();
+        context.Series.Attach(series);
+        await context.SaveChangesAsync();
+
+        var metadataSettings = await unitOfWork.SettingsRepository.GetMetadataSettings();
+        metadataSettings.Enabled = true;
+        metadataSettings.ExternalAgeRatingMappings = new Dictionary<string, AgeRating>()
+        {
+            {"Seinen", AgeRating.Mature},
+        };
+        context.MetadataSettings.Update(metadataSettings);
+        await context.SaveChangesAsync();
+
+
+        await externalMetadataService.WriteExternalMetadataToSeries(new ExternalSeriesDetailDto()
+        {
+            Name = seriesName,
+            AgeRatingRaw = "Seinen"
+        }, 1);
+
+
+        var postSeries = await unitOfWork.SeriesRepository.GetSeriesByIdAsync(1, SeriesIncludes.Metadata);
+        Assert.NotNull(postSeries);
+        Assert.Equal(AgeRating.Everyone, postSeries.Metadata.AgeRating);
+    }
+
+    [Fact]
+    public async Task AgeRating_Raw_Locked_Override_Modification()
+    {
+        var (unitOfWork, context, mapper) = await CreateDatabase();
+        var (externalMetadataService, _, _, _) = await Setup(unitOfWork, context, mapper);
+
+        const string seriesName = "Test - Age Rating Raw";
+        var series = new SeriesBuilder(seriesName)
+            .WithLibraryId(1)
+            .WithMetadata(new SeriesMetadataBuilder()
+                .WithAgeRating(AgeRating.Everyone, true)
+                .Build())
+            .Build();
+        context.Series.Attach(series);
+        await context.SaveChangesAsync();
+
+        var metadataSettings = await unitOfWork.SettingsRepository.GetMetadataSettings();
+        metadataSettings.Enabled = true;
+        metadataSettings.Overrides = [MetadataSettingField.AgeRating];
+        metadataSettings.ExternalAgeRatingMappings = new Dictionary<string, AgeRating>()
+        {
+            {"Seinen", AgeRating.Mature},
+        };
+        context.MetadataSettings.Update(metadataSettings);
+        await context.SaveChangesAsync();
+
+
+        await externalMetadataService.WriteExternalMetadataToSeries(new ExternalSeriesDetailDto()
+        {
+            Name = seriesName,
+            AgeRatingRaw = "Seinen"
+        }, 1);
+
+
+        var postSeries = await unitOfWork.SeriesRepository.GetSeriesByIdAsync(1, SeriesIncludes.Metadata);
+        Assert.NotNull(postSeries);
+        Assert.Equal(AgeRating.Mature, postSeries.Metadata.AgeRating);
     }
 
     #endregion
@@ -2318,7 +2715,7 @@ public class ExternalMetadataServiceTests: AbstractDbTest
             Genres = ["Ecchi"]
         }, 1);
 
-        // Repull Series and validate what is overwritten
+
         var postSeries = await unitOfWork.SeriesRepository.GetSeriesByIdAsync(1, SeriesIncludes.Metadata);
         Assert.NotNull(postSeries);
         Assert.Equal([], postSeries.Metadata.Genres);
@@ -2352,7 +2749,7 @@ public class ExternalMetadataServiceTests: AbstractDbTest
             Genres = ["Ecchi"]
         }, 1);
 
-        // Repull Series and validate what is overwritten
+
         var postSeries = await unitOfWork.SeriesRepository.GetSeriesByIdAsync(1, SeriesIncludes.Metadata);
         Assert.NotNull(postSeries);
         Assert.Equal(["Ecchi"], postSeries.Metadata.Genres.Select(g => g.Title));
@@ -2387,7 +2784,7 @@ public class ExternalMetadataServiceTests: AbstractDbTest
             Genres = ["Ecchi"]
         }, 1);
 
-        // Repull Series and validate what is overwritten
+
         var postSeries = await unitOfWork.SeriesRepository.GetSeriesByIdAsync(1, SeriesIncludes.Metadata);
         Assert.NotNull(postSeries);
         Assert.Equal(["Ecchi"], postSeries.Metadata.Genres.Select(g => g.Title));
@@ -2422,7 +2819,7 @@ public class ExternalMetadataServiceTests: AbstractDbTest
             Genres = ["Ecchi"]
         }, 1);
 
-        // Repull Series and validate what is overwritten
+
         var postSeries = await unitOfWork.SeriesRepository.GetSeriesByIdAsync(1, SeriesIncludes.Metadata);
         Assert.NotNull(postSeries);
         Assert.Equal(["Action"], postSeries.Metadata.Genres.Select(g => g.Title));
@@ -2458,7 +2855,7 @@ public class ExternalMetadataServiceTests: AbstractDbTest
             Genres = ["Ecchi"]
         }, 1);
 
-        // Repull Series and validate what is overwritten
+
         var postSeries = await unitOfWork.SeriesRepository.GetSeriesByIdAsync(1, SeriesIncludes.Metadata);
         Assert.NotNull(postSeries);
         Assert.Equal(["Ecchi"], postSeries.Metadata.Genres.Select(g => g.Title));
@@ -2496,7 +2893,7 @@ public class ExternalMetadataServiceTests: AbstractDbTest
             Tags = [new MetadataTagDto() {Name = "Boxing"}]
         }, 1);
 
-        // Repull Series and validate what is overwritten
+
         var postSeries = await unitOfWork.SeriesRepository.GetSeriesByIdAsync(1, SeriesIncludes.Metadata);
         Assert.NotNull(postSeries);
         Assert.Equal([], postSeries.Metadata.Tags);
@@ -2530,7 +2927,7 @@ public class ExternalMetadataServiceTests: AbstractDbTest
             Tags = [new MetadataTagDto() {Name = "Boxing"}]
         }, 1);
 
-        // Repull Series and validate what is overwritten
+
         var postSeries = await unitOfWork.SeriesRepository.GetSeriesByIdAsync(1, SeriesIncludes.Metadata);
         Assert.NotNull(postSeries);
         Assert.Equal(["Boxing"], postSeries.Metadata.Tags.Select(t => t.Title));
@@ -2565,7 +2962,7 @@ public class ExternalMetadataServiceTests: AbstractDbTest
             Tags = [new MetadataTagDto() {Name = "Boxing"}]
         }, 1);
 
-        // Repull Series and validate what is overwritten
+
         var postSeries = await unitOfWork.SeriesRepository.GetSeriesByIdAsync(1, SeriesIncludes.Metadata);
         Assert.NotNull(postSeries);
         Assert.Equal(["H"], postSeries.Metadata.Tags.Select(t => t.Title));
@@ -2601,10 +2998,497 @@ public class ExternalMetadataServiceTests: AbstractDbTest
             Tags = [new MetadataTagDto() {Name = "Boxing"}]
         }, 1);
 
-        // Repull Series and validate what is overwritten
+
         var postSeries = await unitOfWork.SeriesRepository.GetSeriesByIdAsync(1, SeriesIncludes.Metadata);
         Assert.NotNull(postSeries);
         Assert.Equal(["Boxing"], postSeries.Metadata.Tags.Select(t => t.Title));
+    }
+
+    #endregion
+
+    #region Tag Weight Filtering
+
+    [Fact]
+    public async Task TagWeight_NoFilterSet_AllTagsKept()
+    {
+        var (unitOfWork, context, mapper) = await CreateDatabase();
+        var (externalMetadataService, _, _, _) = await Setup(unitOfWork, context, mapper);
+
+        const string seriesName = "Test - Tag Weight";
+        var series = new SeriesBuilder(seriesName)
+            .WithLibraryId(1)
+            .WithMetadata(new SeriesMetadataBuilder()
+                .Build())
+            .Build();
+        context.Series.Attach(series);
+        await context.SaveChangesAsync();
+
+        var metadataSettings = await unitOfWork.SettingsRepository.GetMetadataSettings();
+        metadataSettings.Enabled = true;
+        metadataSettings.EnableTags = true;
+        metadataSettings.FilterAboveWeight = null;
+        context.MetadataSettings.Update(metadataSettings);
+        await context.SaveChangesAsync();
+
+
+        await externalMetadataService.WriteExternalMetadataToSeries(new ExternalSeriesDetailDto()
+        {
+            Name = seriesName,
+            Tags =
+            [
+                new MetadataTagDto() {Name = "H", TagWeight = TagWeight.Core},
+                new MetadataTagDto() {Name = "Boxing", TagWeight = TagWeight.Unweighted},
+            ]
+        }, 1);
+
+
+        var postSeries = await unitOfWork.SeriesRepository.GetSeriesByIdAsync(1, SeriesIncludes.Metadata);
+        Assert.NotNull(postSeries);
+        var tags = postSeries.Metadata.Tags.Select(t => t.Title).ToList();
+        Assert.Contains("H", tags);
+        Assert.Contains("Boxing", tags);
+    }
+
+    /// <summary>
+    /// The filter is exclusive, tags at the configured weight survive, only those above (lesser impact) are removed
+    /// </summary>
+    [Fact]
+    public async Task TagWeight_FilterAboveRecurrent_KeepsBoundaryRemovesLesser()
+    {
+        var (unitOfWork, context, mapper) = await CreateDatabase();
+        var (externalMetadataService, _, _, _) = await Setup(unitOfWork, context, mapper);
+
+        const string seriesName = "Test - Tag Weight";
+        var series = new SeriesBuilder(seriesName)
+            .WithLibraryId(1)
+            .WithMetadata(new SeriesMetadataBuilder()
+                .Build())
+            .Build();
+        context.Series.Attach(series);
+        await context.SaveChangesAsync();
+
+        var metadataSettings = await unitOfWork.SettingsRepository.GetMetadataSettings();
+        metadataSettings.Enabled = true;
+        metadataSettings.EnableTags = true;
+        metadataSettings.FilterAboveWeight = TagWeight.Recurrent;
+        context.MetadataSettings.Update(metadataSettings);
+        await context.SaveChangesAsync();
+
+
+        await externalMetadataService.WriteExternalMetadataToSeries(new ExternalSeriesDetailDto()
+        {
+            Name = seriesName,
+            Tags =
+            [
+                new MetadataTagDto() {Name = "Boxing", TagWeight = TagWeight.Core},
+                new MetadataTagDto() {Name = "Fighting", TagWeight = TagWeight.Defining},
+                new MetadataTagDto() {Name = "Sports", TagWeight = TagWeight.Recurrent},
+                new MetadataTagDto() {Name = "Slice of Life", TagWeight = TagWeight.Incidental},
+                new MetadataTagDto() {Name = "Drama", TagWeight = TagWeight.Unweighted},
+            ]
+        }, 1);
+
+
+        var postSeries = await unitOfWork.SeriesRepository.GetSeriesByIdAsync(1, SeriesIncludes.Metadata);
+        Assert.NotNull(postSeries);
+        var tags = postSeries.Metadata.Tags.Select(t => t.Title).ToList();
+        Assert.Contains("Boxing", tags);
+        Assert.Contains("Fighting", tags);
+        Assert.Contains("Sports", tags);
+        Assert.DoesNotContain("Slice of Life", tags);
+        Assert.DoesNotContain("Drama", tags);
+    }
+
+    /// <summary>
+    /// A null weight means the provider doesn't support weights, those tags must never be filtered out
+    /// </summary>
+    [Fact]
+    public async Task TagWeight_NullWeight_Kept()
+    {
+        var (unitOfWork, context, mapper) = await CreateDatabase();
+        var (externalMetadataService, _, _, _) = await Setup(unitOfWork, context, mapper);
+
+        const string seriesName = "Test - Tag Weight";
+        var series = new SeriesBuilder(seriesName)
+            .WithLibraryId(1)
+            .WithMetadata(new SeriesMetadataBuilder()
+                .Build())
+            .Build();
+        context.Series.Attach(series);
+        await context.SaveChangesAsync();
+
+        var metadataSettings = await unitOfWork.SettingsRepository.GetMetadataSettings();
+        metadataSettings.Enabled = true;
+        metadataSettings.EnableTags = true;
+        metadataSettings.FilterAboveWeight = TagWeight.Core;
+        context.MetadataSettings.Update(metadataSettings);
+        await context.SaveChangesAsync();
+
+
+        await externalMetadataService.WriteExternalMetadataToSeries(new ExternalSeriesDetailDto()
+        {
+            Name = seriesName,
+            Tags = [new MetadataTagDto() {Name = "Boxing"}]
+        }, 1);
+
+
+        var postSeries = await unitOfWork.SeriesRepository.GetSeriesByIdAsync(1, SeriesIncludes.Metadata);
+        Assert.NotNull(postSeries);
+        Assert.Equal(["Boxing"], postSeries.Metadata.Tags.Select(t => t.Title));
+    }
+
+    /// <summary>
+    /// Control for <see cref="TagWeight_Whitelisted_AboveWeightTagKept"/>, same tags with no whitelist
+    /// </summary>
+    [Fact]
+    public async Task TagWeight_NotWhitelisted_AboveWeightTagRemoved()
+    {
+        var (unitOfWork, context, mapper) = await CreateDatabase();
+        var (externalMetadataService, _, _, _) = await Setup(unitOfWork, context, mapper);
+
+        const string seriesName = "Test - Tag Weight";
+        var series = new SeriesBuilder(seriesName)
+            .WithLibraryId(1)
+            .WithMetadata(new SeriesMetadataBuilder()
+                .Build())
+            .Build();
+        context.Series.Attach(series);
+        await context.SaveChangesAsync();
+
+        var metadataSettings = await unitOfWork.SettingsRepository.GetMetadataSettings();
+        metadataSettings.Enabled = true;
+        metadataSettings.EnableTags = true;
+        metadataSettings.Whitelist = [];
+        metadataSettings.FilterAboveWeight = TagWeight.Recurrent;
+        context.MetadataSettings.Update(metadataSettings);
+        await context.SaveChangesAsync();
+
+
+        await externalMetadataService.WriteExternalMetadataToSeries(new ExternalSeriesDetailDto()
+        {
+            Name = seriesName,
+            Tags =
+            [
+                new MetadataTagDto() {Name = "H", TagWeight = TagWeight.Core},
+                new MetadataTagDto() {Name = "Boxing", TagWeight = TagWeight.Unweighted},
+            ]
+        }, 1);
+
+        var postSeries = await unitOfWork.SeriesRepository.GetSeriesByIdAsync(1, SeriesIncludes.Metadata);
+        Assert.NotNull(postSeries);
+        Assert.Equal(["H"], postSeries.Metadata.Tags.Select(t => t.Title));
+    }
+
+    /// <summary>
+    /// A whitelisted tag is exempt from weight filtering. Note the whitelist is an allow-list for tags, so every
+    /// expected survivor has to be on it for this to isolate the weight logic
+    /// </summary>
+    [Fact]
+    public async Task TagWeight_Whitelisted_AboveWeightTagKept()
+    {
+        var (unitOfWork, context, mapper) = await CreateDatabase();
+        var (externalMetadataService, _, _, _) = await Setup(unitOfWork, context, mapper);
+
+        const string seriesName = "Test - Tag Weight";
+        var series = new SeriesBuilder(seriesName)
+            .WithLibraryId(1)
+            .WithMetadata(new SeriesMetadataBuilder()
+                .Build())
+            .Build();
+        context.Series.Attach(series);
+        await context.SaveChangesAsync();
+
+        var metadataSettings = await unitOfWork.SettingsRepository.GetMetadataSettings();
+        metadataSettings.Enabled = true;
+        metadataSettings.EnableTags = true;
+        metadataSettings.Whitelist = ["H", "Boxing"];
+        metadataSettings.FilterAboveWeight = TagWeight.Recurrent;
+        context.MetadataSettings.Update(metadataSettings);
+        await context.SaveChangesAsync();
+
+
+        await externalMetadataService.WriteExternalMetadataToSeries(new ExternalSeriesDetailDto()
+        {
+            Name = seriesName,
+            Tags =
+            [
+                new MetadataTagDto() {Name = "H", TagWeight = TagWeight.Core},
+                new MetadataTagDto() {Name = "Boxing", TagWeight = TagWeight.Unweighted},
+            ]
+        }, 1);
+
+
+        var postSeries = await unitOfWork.SeriesRepository.GetSeriesByIdAsync(1, SeriesIncludes.Metadata);
+        Assert.NotNull(postSeries);
+        var tags = postSeries.Metadata.Tags.Select(t => t.Title).ToList();
+        Assert.Contains("H", tags);
+        Assert.Contains("Boxing", tags);
+    }
+
+    /// <summary>
+    /// The whitelist match is case-insensitive
+    /// </summary>
+    [Fact]
+    public async Task TagWeight_WhitelistedDifferentCasing_AboveWeightTagKept()
+    {
+        var (unitOfWork, context, mapper) = await CreateDatabase();
+        var (externalMetadataService, _, _, _) = await Setup(unitOfWork, context, mapper);
+
+        const string seriesName = "Test - Tag Weight";
+        var series = new SeriesBuilder(seriesName)
+            .WithLibraryId(1)
+            .WithMetadata(new SeriesMetadataBuilder()
+                .Build())
+            .Build();
+        context.Series.Attach(series);
+        await context.SaveChangesAsync();
+
+        var metadataSettings = await unitOfWork.SettingsRepository.GetMetadataSettings();
+        metadataSettings.Enabled = true;
+        metadataSettings.EnableTags = true;
+        metadataSettings.Whitelist = ["boxing"];
+        metadataSettings.FilterAboveWeight = TagWeight.Recurrent;
+        context.MetadataSettings.Update(metadataSettings);
+        await context.SaveChangesAsync();
+
+
+        await externalMetadataService.WriteExternalMetadataToSeries(new ExternalSeriesDetailDto()
+        {
+            Name = seriesName,
+            Tags = [new MetadataTagDto() {Name = "Boxing", TagWeight = TagWeight.Unweighted}]
+        }, 1);
+
+
+        var postSeries = await unitOfWork.SeriesRepository.GetSeriesByIdAsync(1, SeriesIncludes.Metadata);
+        Assert.NotNull(postSeries);
+        Assert.Equal(["Boxing"], postSeries.Metadata.Tags.Select(t => t.Title));
+    }
+
+    /// <summary>
+    /// Filtering runs on the source tag names after mapping, so a mapped destination name survives even when the
+    /// source tag it came from is above the weight
+    /// </summary>
+    [Fact]
+    public async Task TagWeight_MappedTagName_SurvivesFilter()
+    {
+        var (unitOfWork, context, mapper) = await CreateDatabase();
+        var (externalMetadataService, _, _, _) = await Setup(unitOfWork, context, mapper);
+
+        const string seriesName = "Test - Tag Weight";
+        var series = new SeriesBuilder(seriesName)
+            .WithLibraryId(1)
+            .WithMetadata(new SeriesMetadataBuilder()
+                .Build())
+            .Build();
+        context.Series.Attach(series);
+        await context.SaveChangesAsync();
+
+        var metadataSettings = await unitOfWork.SettingsRepository.GetMetadataSettings();
+        metadataSettings.Enabled = true;
+        metadataSettings.EnableTags = true;
+        metadataSettings.FilterAboveWeight = TagWeight.Recurrent;
+        metadataSettings.FieldMappings = [new MetadataFieldMapping()
+        {
+            SourceType = MetadataFieldType.Tag,
+            SourceValue = "Boxing",
+            DestinationType = MetadataFieldType.Tag,
+            DestinationValue = "Sports",
+            ExcludeFromSource = false
+        }];
+        context.MetadataSettings.Update(metadataSettings);
+        await context.SaveChangesAsync();
+
+
+        await externalMetadataService.WriteExternalMetadataToSeries(new ExternalSeriesDetailDto()
+        {
+            Name = seriesName,
+            Tags = [new MetadataTagDto() {Name = "Boxing", TagWeight = TagWeight.Unweighted}]
+        }, 1);
+
+
+        var postSeries = await unitOfWork.SeriesRepository.GetSeriesByIdAsync(1, SeriesIncludes.Metadata);
+        Assert.NotNull(postSeries);
+        Assert.Equal(["Sports"], postSeries.Metadata.Tags.Select(t => t.Title));
+    }
+
+    /// <summary>
+    /// Weight filtering only applies to tags, a tag mapped over to a Genre is unaffected
+    /// </summary>
+    [Fact]
+    public async Task TagWeight_TagMappedToGenre_NotFiltered()
+    {
+        var (unitOfWork, context, mapper) = await CreateDatabase();
+        var (externalMetadataService, _, _, _) = await Setup(unitOfWork, context, mapper);
+
+        const string seriesName = "Test - Tag Weight";
+        var series = new SeriesBuilder(seriesName)
+            .WithLibraryId(1)
+            .WithMetadata(new SeriesMetadataBuilder()
+                .Build())
+            .Build();
+        context.Series.Attach(series);
+        await context.SaveChangesAsync();
+
+        var metadataSettings = await unitOfWork.SettingsRepository.GetMetadataSettings();
+        metadataSettings.Enabled = true;
+        metadataSettings.EnableTags = true;
+        metadataSettings.EnableGenres = true;
+        metadataSettings.FilterAboveWeight = TagWeight.Recurrent;
+        metadataSettings.FieldMappings = [new MetadataFieldMapping()
+        {
+            SourceType = MetadataFieldType.Tag,
+            SourceValue = "Boxing",
+            DestinationType = MetadataFieldType.Genre,
+            DestinationValue = "Sports",
+            ExcludeFromSource = true
+        }];
+        context.MetadataSettings.Update(metadataSettings);
+        await context.SaveChangesAsync();
+
+
+        await externalMetadataService.WriteExternalMetadataToSeries(new ExternalSeriesDetailDto()
+        {
+            Name = seriesName,
+            Tags = [new MetadataTagDto() {Name = "Boxing", TagWeight = TagWeight.Unweighted}]
+        }, 1);
+
+
+        var postSeries = await unitOfWork.SeriesRepository.GetSeriesByIdAsync(1, SeriesIncludes.Metadata);
+        Assert.NotNull(postSeries);
+        Assert.Equal(["Sports"], postSeries.Metadata.Genres.Select(g => g.Title));
+        Assert.Equal([], postSeries.Metadata.Tags);
+    }
+
+    /// <summary>
+    /// Age Rating is derived from all external tags, before weight filtering, so a tag too weak to be written
+    /// still raises the rating
+    /// </summary>
+    [Fact]
+    public async Task TagWeight_FilteredTag_NotWrittenButStillRaisesAgeRating()
+    {
+        var (unitOfWork, context, mapper) = await CreateDatabase();
+        var (externalMetadataService, _, _, _) = await Setup(unitOfWork, context, mapper);
+
+        const string seriesName = "Test - Tag Weight";
+        var series = new SeriesBuilder(seriesName)
+            .WithLibraryId(1)
+            .WithMetadata(new SeriesMetadataBuilder()
+                .Build())
+            .Build();
+        context.Series.Attach(series);
+        await context.SaveChangesAsync();
+
+        var metadataSettings = await unitOfWork.SettingsRepository.GetMetadataSettings();
+        metadataSettings.Enabled = true;
+        metadataSettings.EnableTags = true;
+        metadataSettings.FilterAboveWeight = TagWeight.Recurrent;
+        metadataSettings.AgeRatingMappings = new Dictionary<string, AgeRating>()
+        {
+            {"H", AgeRating.R18Plus},
+        };
+        context.MetadataSettings.Update(metadataSettings);
+        await context.SaveChangesAsync();
+
+
+        await externalMetadataService.WriteExternalMetadataToSeries(new ExternalSeriesDetailDto()
+        {
+            Name = seriesName,
+            Tags = [new MetadataTagDto() {Name = "H", TagWeight = TagWeight.Unweighted}]
+        }, 1);
+
+
+        var postSeries = await unitOfWork.SeriesRepository.GetSeriesByIdAsync(1, SeriesIncludes.Metadata);
+        Assert.NotNull(postSeries);
+        Assert.Equal([], postSeries.Metadata.Tags);
+        Assert.Equal(AgeRating.R18Plus, postSeries.Metadata.AgeRating);
+    }
+
+    /// <summary>
+    /// Control for <see cref="TagWeight_FilteredTag_NotWrittenButStillRaisesAgeRating"/>. Weight decides whether the
+    /// tag is written, it never decides the rating
+    /// </summary>
+    [Fact]
+    public async Task TagWeight_UnfilteredTag_WrittenAndRaisesAgeRating()
+    {
+        var (unitOfWork, context, mapper) = await CreateDatabase();
+        var (externalMetadataService, _, _, _) = await Setup(unitOfWork, context, mapper);
+
+        const string seriesName = "Test - Tag Weight";
+        var series = new SeriesBuilder(seriesName)
+            .WithLibraryId(1)
+            .WithMetadata(new SeriesMetadataBuilder()
+                .Build())
+            .Build();
+        context.Series.Attach(series);
+        await context.SaveChangesAsync();
+
+        var metadataSettings = await unitOfWork.SettingsRepository.GetMetadataSettings();
+        metadataSettings.Enabled = true;
+        metadataSettings.EnableTags = true;
+        metadataSettings.FilterAboveWeight = TagWeight.Recurrent;
+        metadataSettings.AgeRatingMappings = new Dictionary<string, AgeRating>()
+        {
+            {"H", AgeRating.R18Plus},
+        };
+        context.MetadataSettings.Update(metadataSettings);
+        await context.SaveChangesAsync();
+
+
+        await externalMetadataService.WriteExternalMetadataToSeries(new ExternalSeriesDetailDto()
+        {
+            Name = seriesName,
+            Tags = [new MetadataTagDto() {Name = "H", TagWeight = TagWeight.Core}]
+        }, 1);
+
+
+        var postSeries = await unitOfWork.SeriesRepository.GetSeriesByIdAsync(1, SeriesIncludes.Metadata);
+        Assert.NotNull(postSeries);
+        Assert.Equal(["H"], postSeries.Metadata.Tags.Select(t => t.Title));
+        Assert.Equal(AgeRating.R18Plus, postSeries.Metadata.AgeRating);
+    }
+
+    /// <summary>
+    /// The blacklist guards what gets written, not what the rating is derived from, so a blacklisted tag still
+    /// raises the Age Rating
+    /// </summary>
+    [Fact]
+    public async Task TagWeight_BlacklistedTag_NotWrittenButStillRaisesAgeRating()
+    {
+        var (unitOfWork, context, mapper) = await CreateDatabase();
+        var (externalMetadataService, _, _, _) = await Setup(unitOfWork, context, mapper);
+
+        const string seriesName = "Test - Tag Weight";
+        var series = new SeriesBuilder(seriesName)
+            .WithLibraryId(1)
+            .WithMetadata(new SeriesMetadataBuilder()
+                .Build())
+            .Build();
+        context.Series.Attach(series);
+        await context.SaveChangesAsync();
+
+        var metadataSettings = await unitOfWork.SettingsRepository.GetMetadataSettings();
+        metadataSettings.Enabled = true;
+        metadataSettings.EnableTags = true;
+        metadataSettings.Blacklist = ["H"];
+        metadataSettings.AgeRatingMappings = new Dictionary<string, AgeRating>()
+        {
+            {"H", AgeRating.R18Plus},
+        };
+        context.MetadataSettings.Update(metadataSettings);
+        await context.SaveChangesAsync();
+
+
+        await externalMetadataService.WriteExternalMetadataToSeries(new ExternalSeriesDetailDto()
+        {
+            Name = seriesName,
+            Tags = [new MetadataTagDto() {Name = "H", TagWeight = TagWeight.Core}]
+        }, 1);
+
+        // Repull Series and validate what is overwritten
+        var postSeries = await unitOfWork.SeriesRepository.GetSeriesByIdAsync(1, SeriesIncludes.Metadata);
+        Assert.NotNull(postSeries);
+        Assert.Equal([], postSeries.Metadata.Tags);
+        Assert.Equal(AgeRating.R18Plus, postSeries.Metadata.AgeRating);
     }
 
     #endregion
@@ -2733,7 +3617,7 @@ public class ExternalMetadataServiceTests: AbstractDbTest
             Staff = [CreateStaff("John", "Doe", "Story")]
         }, 1);
 
-        // Repull Series and validate what is overwritten
+
         var postSeries = await unitOfWork.SeriesRepository.GetSeriesByIdAsync(1, SeriesIncludes.Metadata);
         Assert.NotNull(postSeries);
         Assert.Equal([], postSeries.Metadata.People.Where(p => p.Role == PersonRole.Writer));
@@ -2768,7 +3652,7 @@ public class ExternalMetadataServiceTests: AbstractDbTest
             Staff = [CreateStaff("John", "Doe", "Story")]
         }, 1);
 
-        // Repull Series and validate what is overwritten
+
         var postSeries = await unitOfWork.SeriesRepository.GetSeriesByIdAsync(1, SeriesIncludes.Metadata);
         Assert.NotNull(postSeries);
         Assert.Equal(["John Doe"], postSeries.Metadata.People.Where(p => p.Role == PersonRole.Writer).Select(p => p.Person.Name));
@@ -2805,7 +3689,7 @@ public class ExternalMetadataServiceTests: AbstractDbTest
             Staff = [CreateStaff("John", "Doe", "Story")]
         }, 1);
 
-        // Repull Series and validate what is overwritten
+
         var postSeries = await unitOfWork.SeriesRepository.GetSeriesByIdAsync(1, SeriesIncludes.Metadata);
         Assert.NotNull(postSeries);
         Assert.Equal(new[]{"Johnny Twowheeler"}.OrderBy(s => s),
@@ -2847,7 +3731,7 @@ public class ExternalMetadataServiceTests: AbstractDbTest
             Staff = [CreateStaff("John", "Doe", "Story")]
         }, 1);
 
-        // Repull Series and validate what is overwritten
+
         var postSeries = await unitOfWork.SeriesRepository.GetSeriesByIdAsync(1, SeriesIncludes.Metadata);
         Assert.NotNull(postSeries);
         Assert.Equal(new[]{"John Doe", "Johnny Twowheeler"}.OrderBy(s => s),
@@ -2891,7 +3775,7 @@ public class ExternalMetadataServiceTests: AbstractDbTest
             Staff = [CreateStaff("Twowheeler", "Johnny", "Story")]
         }, 1);
 
-        // Repull Series and validate what is overwritten
+
         var postSeries = await unitOfWork.SeriesRepository.GetSeriesByIdAsync(1, SeriesIncludes.Metadata);
         Assert.NotNull(postSeries);
         Assert.Equal(new[]{"Johnny Twowheeler"}.OrderBy(s => s),
@@ -2933,7 +3817,7 @@ public class ExternalMetadataServiceTests: AbstractDbTest
             Staff = [CreateStaff("John", "Doe", "Story")]
         }, 1);
 
-        // Repull Series and validate what is overwritten
+
         var postSeries = await unitOfWork.SeriesRepository.GetSeriesByIdAsync(1, SeriesIncludes.Metadata);
         Assert.NotNull(postSeries);
         Assert.Equal(new[]{"Johnny Twowheeler"}.OrderBy(s => s),
@@ -2974,7 +3858,7 @@ public class ExternalMetadataServiceTests: AbstractDbTest
             Staff = [CreateStaff("John", "Doe", "Story")]
         }, 1);
 
-        // Repull Series and validate what is overwritten
+
         var postSeries = await unitOfWork.SeriesRepository.GetSeriesByIdAsync(1, SeriesIncludes.Metadata);
         Assert.NotNull(postSeries);
         Assert.Equal(new[]{"John Doe"}.OrderBy(s => s),
@@ -3155,7 +4039,7 @@ public class ExternalMetadataServiceTests: AbstractDbTest
             Characters = [CreateCharacter("John", "Doe", CharacterRole.Main)]
         }, 1);
 
-        // Repull Series and validate what is overwritten
+
         var postSeries = await unitOfWork.SeriesRepository.GetSeriesByIdAsync(1, SeriesIncludes.Metadata);
         Assert.NotNull(postSeries);
         Assert.Equal([], postSeries.Metadata.People.Where(p => p.Role == PersonRole.Character));
@@ -3190,7 +4074,7 @@ public class ExternalMetadataServiceTests: AbstractDbTest
             Characters = [CreateCharacter("John", "Doe", CharacterRole.Main)]
         }, 1);
 
-        // Repull Series and validate what is overwritten
+
         var postSeries = await unitOfWork.SeriesRepository.GetSeriesByIdAsync(1, SeriesIncludes.Metadata);
         Assert.NotNull(postSeries);
         Assert.Equal(["John Doe"], postSeries.Metadata.People.Where(p => p.Role == PersonRole.Character).Select(p => p.Person.Name));
@@ -3227,7 +4111,7 @@ public class ExternalMetadataServiceTests: AbstractDbTest
             Characters = [CreateCharacter("John", "Doe", CharacterRole.Main)]
         }, 1);
 
-        // Repull Series and validate what is overwritten
+
         var postSeries = await unitOfWork.SeriesRepository.GetSeriesByIdAsync(1, SeriesIncludes.Metadata);
         Assert.NotNull(postSeries);
         Assert.Equal(new[]{"Johnny Twowheeler"}.OrderBy(s => s),
@@ -3269,7 +4153,7 @@ public class ExternalMetadataServiceTests: AbstractDbTest
             Characters = [CreateCharacter("John", "Doe", CharacterRole.Main)]
         }, 1);
 
-        // Repull Series and validate what is overwritten
+
         var postSeries = await unitOfWork.SeriesRepository.GetSeriesByIdAsync(1, SeriesIncludes.Metadata);
         Assert.NotNull(postSeries);
         Assert.Equal(new[]{"John Doe", "Johnny Twowheeler"}.OrderBy(s => s),
@@ -3313,7 +4197,7 @@ public class ExternalMetadataServiceTests: AbstractDbTest
             Characters = [CreateCharacter("Twowheeler", "Johnny", CharacterRole.Main)]
         }, 1);
 
-        // Repull Series and validate what is overwritten
+
         var postSeries = await unitOfWork.SeriesRepository.GetSeriesByIdAsync(1, SeriesIncludes.Metadata);
         Assert.NotNull(postSeries);
         Assert.Equal(new[]{"Johnny Twowheeler", "Twowheeler Johnny"}.OrderBy(s => s),
@@ -3355,7 +4239,7 @@ public class ExternalMetadataServiceTests: AbstractDbTest
             Characters = [CreateCharacter("John", "Doe", CharacterRole.Main)]
         }, 1);
 
-        // Repull Series and validate what is overwritten
+
         var postSeries = await unitOfWork.SeriesRepository.GetSeriesByIdAsync(1, SeriesIncludes.Metadata);
         Assert.NotNull(postSeries);
         Assert.Equal(new[]{"Johnny Twowheeler"}.OrderBy(s => s),
@@ -3396,7 +4280,7 @@ public class ExternalMetadataServiceTests: AbstractDbTest
             Characters = [CreateCharacter("John", "Doe", CharacterRole.Main)]
         }, 1);
 
-        // Repull Series and validate what is overwritten
+
         var postSeries = await unitOfWork.SeriesRepository.GetSeriesByIdAsync(1, SeriesIncludes.Metadata);
         Assert.NotNull(postSeries);
         Assert.Equal(new[]{"John Doe"}.OrderBy(s => s),
@@ -3482,7 +4366,7 @@ public class ExternalMetadataServiceTests: AbstractDbTest
             }]
         }, 1);
 
-        // Repull Series and validate what is overwritten
+
         var sourceSeries = await unitOfWork.SeriesRepository.GetSeriesByIdAsync(1, SeriesIncludes.Metadata | SeriesIncludes.Related);
         Assert.NotNull(sourceSeries);
         Assert.Single(sourceSeries.Relations);
@@ -3597,7 +4481,7 @@ public class ExternalMetadataServiceTests: AbstractDbTest
             }]
         }, 1);
 
-        // Repull Series and validate what is overwritten
+
         var sourceSeries = await unitOfWork.SeriesRepository.GetSeriesByIdAsync(1, SeriesIncludes.Metadata | SeriesIncludes.Related);
         Assert.NotNull(sourceSeries);
         Assert.Single(sourceSeries.Relations);
@@ -3654,7 +4538,7 @@ public class ExternalMetadataServiceTests: AbstractDbTest
             }]
         }, 1);
 
-        // Repull Series and validate what is overwritten
+
         var sourceSeries = await unitOfWork.SeriesRepository.GetSeriesByIdAsync(1, SeriesIncludes.Metadata | SeriesIncludes.Related);
         Assert.NotNull(sourceSeries);
         Assert.Empty(sourceSeries.Relations);
@@ -3720,7 +4604,7 @@ public class ExternalMetadataServiceTests: AbstractDbTest
             }]
         }, 2);
 
-        // Repull Series and validate what is overwritten
+
        var sourceSeries = await unitOfWork.SeriesRepository.GetSeriesByIdAsync(2, SeriesIncludes.Metadata | SeriesIncludes.Related);
         Assert.NotNull(sourceSeries);
         Assert.Equal(seriesName, sourceSeries.Name);
@@ -3779,7 +4663,7 @@ public class ExternalMetadataServiceTests: AbstractDbTest
             }]
         }, 1);
 
-        // Repull Series and validate what is overwritten
+
         var sourceSeries = await unitOfWork.SeriesRepository.GetSeriesByIdAsync(1, SeriesIncludes.Metadata | SeriesIncludes.Related);
         Assert.NotNull(sourceSeries);
         Assert.Single(sourceSeries.Relations);
@@ -3892,7 +4776,7 @@ public class ExternalMetadataServiceTests: AbstractDbTest
             Genres = ["Boxing", "Sports", "Action"],
         }, 1);
 
-        // Repull Series and validate what is overwritten
+
         var postSeries = await unitOfWork.SeriesRepository.GetSeriesByIdAsync(1, SeriesIncludes.Metadata);
         Assert.NotNull(postSeries);
         Assert.Equal(new[] {"Boxing"}.OrderBy(s => s), postSeries.Metadata.Genres.Select(t => t.Title).OrderBy(s => s));
@@ -3929,7 +4813,7 @@ public class ExternalMetadataServiceTests: AbstractDbTest
             Tags = [new MetadataTagDto() {Name = "Boxing"}, new MetadataTagDto() {Name = "Sports"}, new MetadataTagDto() {Name = "Action"}]
         }, 1);
 
-        // Repull Series and validate what is overwritten
+
         var postSeries = await unitOfWork.SeriesRepository.GetSeriesByIdAsync(1, SeriesIncludes.Metadata);
         Assert.NotNull(postSeries);
         Assert.Equal(new[] {"Boxing"}.OrderBy(s => s), postSeries.Metadata.Tags.Select(t => t.Title).OrderBy(s => s));
@@ -3974,7 +4858,7 @@ public class ExternalMetadataServiceTests: AbstractDbTest
             Tags = [new MetadataTagDto() {Name = "Boxing"}, new MetadataTagDto() {Name = "Sports"}, new MetadataTagDto() {Name = "Action"}]
         }, 1);
 
-        // Repull Series and validate what is overwritten
+
         var postSeries = await unitOfWork.SeriesRepository.GetSeriesByIdAsync(1, SeriesIncludes.Metadata);
         Assert.NotNull(postSeries);
         Assert.Equal(new[] {"Sports", "Action"}.OrderBy(s => s), postSeries.Metadata.Tags.Select(t => t.Title).OrderBy(s => s));
@@ -4018,7 +4902,7 @@ public class ExternalMetadataServiceTests: AbstractDbTest
             Tags = [new MetadataTagDto() {Name = "Boxing"}, new MetadataTagDto() {Name = "Action"}]
         }, 1);
 
-        // Repull Series and validate what is overwritten
+
         var postSeries = await unitOfWork.SeriesRepository.GetSeriesByIdAsync(1, SeriesIncludes.Metadata);
         Assert.NotNull(postSeries);
         Assert.Equal(new[] {"Sports", "Action"}.OrderBy(s => s), postSeries.Metadata.Tags.Select(t => t.Title).OrderBy(s => s));
@@ -4067,7 +4951,7 @@ public class ExternalMetadataServiceTests: AbstractDbTest
             Genres = ["Ecchi"]
         }, 1);
 
-        // Repull Series and validate what is overwritten
+
         var postSeries = await unitOfWork.SeriesRepository.GetSeriesByIdAsync(1, SeriesIncludes.Metadata);
         Assert.NotNull(postSeries);
         Assert.Equal(
@@ -4115,7 +4999,7 @@ public class ExternalMetadataServiceTests: AbstractDbTest
             Genres = ["Ecchi"]
         }, 1);
 
-        // Repull Series and validate what is overwritten
+
         var postSeries = await unitOfWork.SeriesRepository.GetSeriesByIdAsync(1, SeriesIncludes.Metadata);
         Assert.NotNull(postSeries);
         Assert.Equal(["Fanservice"], postSeries.Metadata.Genres.Select(g => g.Title));
@@ -4159,7 +5043,7 @@ public class ExternalMetadataServiceTests: AbstractDbTest
             Tags = [new MetadataTagDto() {Name = "Ecchi"}]
         }, 1);
 
-        // Repull Series and validate what is overwritten
+
         var postSeries = await unitOfWork.SeriesRepository.GetSeriesByIdAsync(1, SeriesIncludes.Metadata);
         Assert.NotNull(postSeries);
         Assert.Equal(
@@ -4207,7 +5091,7 @@ public class ExternalMetadataServiceTests: AbstractDbTest
             Tags = [new MetadataTagDto() {Name = "Ecchi"}]
         }, 1);
 
-        // Repull Series and validate what is overwritten
+
         var postSeries = await unitOfWork.SeriesRepository.GetSeriesByIdAsync(1, SeriesIncludes.Metadata);
         Assert.NotNull(postSeries);
         Assert.Equal(["Fanservice"], postSeries.Metadata.Tags.Select(g => g.Title));
@@ -4253,7 +5137,7 @@ public class ExternalMetadataServiceTests: AbstractDbTest
             Genres = ["Ecchi"]
         }, 1);
 
-        // Repull Series and validate what is overwritten
+
         var postSeries = await unitOfWork.SeriesRepository.GetSeriesByIdAsync(1, SeriesIncludes.Metadata);
         Assert.NotNull(postSeries);
         Assert.Equal(
@@ -4308,7 +5192,7 @@ public class ExternalMetadataServiceTests: AbstractDbTest
             Name = seriesName,
         }, 1);
 
-        // Repull Series and validate what is overwritten
+
         var postSeries = await unitOfWork.SeriesRepository.GetSeriesByIdAsync(1, SeriesIncludes.Metadata);
         Assert.NotNull(postSeries);
         Assert.Equal(

@@ -1,9 +1,10 @@
 ﻿using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using Kavita.Models.DTOs.Settings;
 using Kavita.Models.Entities.Enums;
 using Kavita.Models.Entities.MetadataMatching;
-using System.ComponentModel.DataAnnotations;
 using Kavita.Models.Attributes;
+using Kavita.Models.Entities.Enums.KavitaPlus;
 
 namespace Kavita.Models.DTOs.KavitaPlus.Metadata;
 #nullable enable
@@ -28,6 +29,10 @@ public sealed record MetadataSettingsDto: FieldMappingsDto
     /// Allow Publication status to be derived and updated
     /// </summary>
     public bool EnablePublicationStatus { get; set; }
+    /// <summary>
+    /// Allow Age Rating status to be derived and updated
+    /// </summary>
+    public bool EnableAgeRating { get; set; }
     /// <summary>
     /// Allow Relationships between series to be set
     /// </summary>
@@ -93,6 +98,11 @@ public sealed record MetadataSettingsDto: FieldMappingsDto
     public bool FirstLastPeopleNaming { get; set; }
 
     /// <summary>
+    /// Optional mappings of strings -> ComicInfo Age Ratings
+    /// </summary>
+    public Dictionary<string, AgeRating> ExternalAgeRatingMappings { get; set; } = [];
+
+    /// <summary>
     /// The server-wide priority order of BCP-47 language codes used when setting <c>Series.Name</c> and
     /// <c>Series.LocalizedName</c>. In case of no matches, will not change/set.
     /// </summary>
@@ -117,6 +127,14 @@ public sealed record MetadataSettingsDto: FieldMappingsDto
     /// </summary>
     [EnumCollection(typeof(PersonRole))]
     public List<PersonRole> PersonRoles { get; set; }
+
+    /// <summary>
+    /// Filter Tags above this level. This takes effect after tag mapping.
+    /// </summary>
+    /// <example>FilterAboveWeight = Recurrent, all tags with weight above Recurrent (incidental, unweighted) will be filtered out after tag mapping step</example>
+    /// <remarks>This is only applicable for <see cref="MetadataProvider.Mangabaka"/>. Tag weights are: Core, Defining, Recurrent, etc impact on the Series</remarks>
+    [EnumDataType((typeof(TagWeight)))]
+    public TagWeight? FilterAboveWeight { get; set; }
 
 
     /// <summary>

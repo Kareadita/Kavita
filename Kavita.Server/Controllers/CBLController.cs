@@ -66,8 +66,6 @@ public class CblController(IReadingListService readingListService, IDirectorySer
         var (isInvalid, actionResult) = await HasInvalidExtensionAsync(filename, filename);
         if (isInvalid) return actionResult!;
 
-
-
         await SaveCblFile(cblFile, userId, filename);
 
         return Ok(new CblSavedFileDto
@@ -121,7 +119,7 @@ public class CblController(IReadingListService readingListService, IDirectorySer
         });
     }
 
-    private async Task<(bool IsInvalid, ActionResult<CblSavedFileDto>? ActionResult)> HasInvalidExtensionAsync(string filename, string fullPath)
+    private async Task<(bool IsInvalid, ActionResult? ActionResult)> HasInvalidExtensionAsync(string filename, string fullPath)
     {
         if (!IsPathWithinDirectory(GetCblManagerFolder(UserId), filename))
         {
@@ -151,6 +149,9 @@ public class CblController(IReadingListService readingListService, IDirectorySer
 
         foreach (var item in request.Items)
         {
+            var (isInvalid, actionResult) = await HasInvalidExtensionAsync(item.Name, item.Path);
+            if (isInvalid) return actionResult!;
+
             var content = await cblGithubService.GetFileContent(item.Path);
             SaveCblFileFromContent(content, userId, item.Name);
 
