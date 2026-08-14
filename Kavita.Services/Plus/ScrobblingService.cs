@@ -513,7 +513,7 @@ public class ScrobblingService : IScrobblingService
         var providers = GetProvidersForScrobbleEvent(scrobbleProviders, ScrobbleEventType.Review, ctx);
         if (providers.Count == 0)
         {
-            _logger.LogDebug("Ignoring scrobble review update on {SeriesId} - {ChapterId}, no providers matched", seriesId, chapterId);
+            _logger.LogTrace("Ignoring scrobble review update on {SeriesId} - {ChapterId}, no providers matched", seriesId, chapterId);
             return;
         }
 
@@ -559,7 +559,7 @@ public class ScrobblingService : IScrobblingService
         var providers = GetProvidersForScrobbleEvent(scrobbleProviders, ScrobbleEventType.ScoreUpdated, ctx);
         if (providers.Count == 0)
         {
-            _logger.LogDebug("Ignoring scrobble rating update on {SeriesId} - {ChapterId}, no providers matched", seriesId, chapterId);
+            _logger.LogTrace("Ignoring scrobble rating update on {SeriesId} - {ChapterId}, no providers matched", seriesId, chapterId);
             return;
         }
 
@@ -760,7 +760,7 @@ public class ScrobblingService : IScrobblingService
         var providers = GetProvidersForScrobbleEvent(scrobbleProviders, eventType, ctx);
         if (providers.Count == 0)
         {
-            _logger.LogDebug("Ignoring scrobble want to read update on {SeriesId} (onWantToRead: {OnWantToRead}), no providers matched", seriesId, onWantToRead);
+            _logger.LogTrace("Ignoring scrobble want to read update on {SeriesId} (onWantToRead: {OnWantToRead}), no providers matched", seriesId, onWantToRead);
             return;
         }
 
