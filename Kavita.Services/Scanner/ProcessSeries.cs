@@ -695,7 +695,12 @@ public class ProcessSeries(
             volume.LookupName = volumeNumber;
             volume.Name = volume.GetNumberTitle();
 
-            var infos = parsedInfos.Where(p => p.Volumes == volumeNumber).ToArray();
+            var minNumber = Parser.MinNumberFromRange(volumeNumber);
+            var maxNumber = Parser.MaxNumberFromRange(volumeNumber);
+            var infos = parsedInfos
+                .Where(p => Parser.MinNumberFromRange(p.Volumes).Is(minNumber)
+                            && Parser.MaxNumberFromRange(p.Volumes).Is(maxNumber))
+                .ToArray();
 
             await UpdateChapters(new UpdateChapterArgs
             {

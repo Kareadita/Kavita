@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Kavita.Models.Entities;
 using Kavita.Models.Parser;
+using Kavita.Services.Scanner;
 
 namespace Kavita.Services.Extensions;
 
@@ -14,7 +15,13 @@ public static class ParserInfoListExtensions
     /// <returns></returns>
     public static IList<string> DistinctVolumes(this IList<ParserInfo> infos)
     {
-        return infos.Select(p => p.Volumes).Distinct().ToList();
+        return infos
+            .Select(p => p.Volumes)
+            .Distinct()
+            .GroupBy(v => (Min: Parser.MinNumberFromRange(v), Max: Parser.MaxNumberFromRange(v)))
+            // shortest tends to be the "cleanest" form (1 over 01)
+            .Select(g => g.OrderBy(v => v.Length).First())
+            .ToList();
     }
 
     /// <summary>
