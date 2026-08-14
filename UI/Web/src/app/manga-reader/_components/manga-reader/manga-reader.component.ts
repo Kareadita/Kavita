@@ -19,6 +19,7 @@ import {AsyncPipe, NgClass, NgStyle, PercentPipe} from '@angular/common';
 import {ActivatedRoute, Router} from '@angular/router';
 import {
   BehaviorSubject,
+  concat,
   debounceTime,
   distinctUntilChanged,
   filter,
@@ -1893,6 +1894,8 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     const isDouble = canvasRenderer !== undefined && doubleRenderer !== undefined && Math.max(canvasRenderer.getBookmarkPageCount(), this.singleRenderer()!.getBookmarkPageCount(),
       doubleRenderer.getBookmarkPageCount(), this.doubleReverseRenderer()!.getBookmarkPageCount(), this.doubleNoCoverRenderer()!.getBookmarkPageCount()) > 1;
 
+    // Don't use forkJoin() here because order matters
+
     if (this.CurrentPageBookmarked) {
       const apis = [this.readerService.unbookmark(this.seriesId, this.volumeId, this.chapterId, pageNum)];
 
@@ -1900,12 +1903,14 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
         apis.push(this.readerService.unbookmark(this.seriesId, this.volumeId, this.chapterId, pageNum + 1));
       }
 
-      forkJoin(apis).subscribe(() => {
-        delete this.bookmarks[pageNum];
+      concat(...apis).subscribe({
+        complete: () => {
+          delete this.bookmarks[pageNum];
 
-        if (isDouble) delete this.bookmarks[pageNum + 1];
+          if (isDouble) delete this.bookmarks[pageNum + 1];
 
-        this.cdRef.detectChanges();
+          this.cdRef.detectChanges();
+        }
       });
 
     } else {
@@ -1915,13 +1920,16 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
         apis.push(this.readerService.bookmark(this.seriesId, this.volumeId, this.chapterId, pageNum + 1));
       }
 
-      forkJoin(apis).subscribe(() => {
-        this.bookmarks[pageNum] = this.chapterInfo()?.chapterTitle ?? '';
+      concat(...apis).subscribe({
+        complete: () => {
+          this.bookmarks[pageNum] = this.chapterInfo()?.chapterTitle ?? '';
 
-        if (isDouble) this.bookmarks[pageNum + 1] = this.chapterInfo()?.chapterTitle ?? '';
+          if (isDouble) this.bookmarks[pageNum + 1] = this.chapterInfo()?.chapterTitle ?? '';
 
-        this.cdRef.detectChanges();
+          this.cdRef.detectChanges();
+        }
       });
+
     }
 
     // Show an effect on the image to show that it was bookmarked
