@@ -158,7 +158,7 @@ export class EditSeriesModalComponent implements OnInit {
   selectedCover: string = '';
   coverImageReset = false;
   coverImageDirty = false;
-  chooserConfig: CoverImageChooserConfig = {};
+  chooserConfig = signal<CoverImageChooserConfig>({});
 
   saveNestedComponents: EventEmitter<void> = new EventEmitter();
 
@@ -280,7 +280,7 @@ export class EditSeriesModalComponent implements OnInit {
       this.seriesVolumes = volumes;
       this.libraryType = libraryType;
       this.isLoadingVolumes.set(false);
-      this.chooserConfig = this.coverChooserConfigFactory.forSeries(this.series, this.seriesVolumes, this.libraryType);
+      this.chooserConfig.set(this.coverChooserConfigFactory.forSeries(this.series, this.seriesVolumes, this.libraryType));
 
       volumes.forEach(v => {
         this.volumeCollapsed[v.name] = true;
@@ -571,8 +571,7 @@ export class EditSeriesModalComponent implements OnInit {
   handleReset() {
     this.coverImageReset = true;
     this.editSeriesForm.patchValue({ coverImageLocked: false });
-    this.chooserConfig = { ...this.chooserConfig, isLocked: false };
-    this.cdRef.markForCheck();
+    this.chooserConfig.set({ ...this.chooserConfig, isLocked: false });
   }
 
   unlock(b: any, field: string) {

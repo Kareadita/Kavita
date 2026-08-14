@@ -98,6 +98,7 @@ export class CoverImageChooserComponent  {
       }
 
       this.hasInit = true;
+      this.cdRef.detectChanges();
     });
   }
 

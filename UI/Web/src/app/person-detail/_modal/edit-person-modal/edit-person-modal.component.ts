@@ -1,4 +1,13 @@
-import {ChangeDetectionStrategy, ChangeDetectorRef, Component, inject, Input, OnInit, ViewChild} from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  ChangeDetectorRef,
+  Component,
+  inject,
+  Input,
+  OnInit,
+  signal,
+  ViewChild
+} from '@angular/core';
 import {UtilityService} from "../../../shared/_services/utility.service";
 import {
   AbstractControl,
@@ -89,7 +98,7 @@ export class EditPersonModalComponent implements OnInit {
   selectedCover: string = '';
   coverImageReset = false;
   coverImageDirty = false;
-  chooserConfig: CoverImageChooserConfig = {};
+  chooserConfig = signal<CoverImageChooserConfig>({});
   fetchDisabled: boolean = false;
   /**
    * Suffix to include in the tooltip for external ids if they support characters
@@ -107,7 +116,7 @@ export class EditPersonModalComponent implements OnInit {
       this.editForm.get('hardcoverId')!.setValue(this.person.hardcoverId || '');
 
       this.editForm.addControl('coverImageLocked', new FormControl(this.person.coverImageLocked, []));
-      this.chooserConfig = this.coverChooserConfigFactory.forPerson(this.person);
+      this.chooserConfig.set(this.coverChooserConfigFactory.forPerson(this.person));
 
       const roles = (this.person.roles ?? []);
       if (roles.length === 1 && roles.includes(PersonRole.Character)) {
@@ -167,8 +176,7 @@ export class EditPersonModalComponent implements OnInit {
   handleReset() {
     this.coverImageReset = true;
     this.editForm.patchValue({ coverImageLocked: false });
-    this.chooserConfig = { ...this.chooserConfig, isLocked: false };
-    this.cdRef.markForCheck();
+    this.chooserConfig.set({ ...this.chooserConfig, isLocked: false });
   }
 
   downloadCover() {

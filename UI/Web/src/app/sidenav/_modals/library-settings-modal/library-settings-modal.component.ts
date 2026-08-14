@@ -1,8 +1,10 @@
 import {
   ChangeDetectionStrategy,
   ChangeDetectorRef,
-  Component, computed,
-  DestroyRef, effect,
+  Component,
+  computed,
+  DestroyRef,
+  effect,
   inject,
   Input,
   OnInit,
@@ -27,11 +29,7 @@ import {
 } from 'src/app/admin/_modals/directory-picker/directory-picker.component';
 import {ConfirmService} from 'src/app/shared/confirm.service';
 import {UtilityService} from 'src/app/shared/_services/utility.service';
-import {
-  allLibraryTypes,
-  Library,
-  LibraryType
-} from 'src/app/_models/library/library';
+import {allLibraryTypes, Library, LibraryType} from 'src/app/_models/library/library';
 import {ImageService} from 'src/app/_services/image.service';
 import {LibraryService} from 'src/app/_services/library.service';
 import {UploadService} from 'src/app/_services/upload.service';
@@ -69,6 +67,8 @@ import {TabTitlePipe} from "../../../_pipes/tab-title.pipe";
 import {MetadataProvider} from "../../../_models/kavitaplus/metadata-provider.enum";
 import {map} from "rxjs/operators";
 import {MetadataProviderTitlePipe} from "../../../_pipes/metadata-provider-title.pipe";
+import {EditModalShellComponent} from "../../../shared/edit-modal-shell/edit-modal-shell.component";
+import {EditTabDirective} from "../../../shared/_directive/edit-tab.directive";
 
 enum StepID {
   General = 0,
@@ -81,7 +81,7 @@ enum StepID {
   selector: 'app-library-settings-modal',
   imports: [NgbModalModule, NgbNavLink, NgbNavItem, NgbNavContent, ReactiveFormsModule, NgbTooltip,
     SentenceCasePipe, NgbNav, NgbNavOutlet, CoverImageChooserComponent, TranslocoModule, DefaultDatePipe,
-    FileTypeGroupPipe, EditListComponent, SettingItemComponent, SettingSwitchComponent, SettingButtonComponent, LibraryTypeSubtitlePipe, NgTemplateOutlet, DatePipe, TypeaheadComponent, TabTitlePipe, MetadataProviderTitlePipe],
+    FileTypeGroupPipe, EditListComponent, SettingItemComponent, SettingSwitchComponent, SettingButtonComponent, LibraryTypeSubtitlePipe, NgTemplateOutlet, DatePipe, TypeaheadComponent, TabTitlePipe, MetadataProviderTitlePipe, EditModalShellComponent, EditTabDirective],
   templateUrl: './library-settings-modal.component.html',
   styleUrls: ['./library-settings-modal.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
@@ -112,7 +112,7 @@ export class LibrarySettingsModalComponent implements OnInit {
   @Input({required: true}) library!: Library | undefined;
 
   active = Tabs.General;
-  chooserConfig: CoverImageChooserConfig = {};
+  chooserConfig = signal<CoverImageChooserConfig>({});
   protected readonly excludePatternTooltip = `<span>` + translate('library-settings-modal.exclude-patterns-tooltip') +
   `<a class="ms-1" href="${WikiLink.ScannerExclude}" rel="noopener noreferrer" target="_blank">${translate('library-settings-modal.help')}` +
   `<i class="fa fa-external-link-alt ms-1" aria-hidden="true"></i></a>`;
@@ -160,7 +160,7 @@ export class LibrarySettingsModalComponent implements OnInit {
 
   languageSettings: TypeaheadSettings<Language> | null = null;
 
-  isAddLibrary = false;
+  isAddLibrary= signal<boolean>(false);
   setupStep = StepID.General;
   fileTypeGroups = allFileTypeGroup;
   excludePatterns: Array<string> = [''];
@@ -186,12 +186,10 @@ export class LibrarySettingsModalComponent implements OnInit {
 
   ngOnInit(): void {
     if (this.library === undefined) {
-      this.isAddLibrary = true;
-      this.cdRef.markForCheck();
+      this.isAddLibrary.set(true);
     }
 
-    this.chooserConfig = this.coverChooserConfigFactory.forLibrary(this.library);
-    this.cdRef.markForCheck();
+    this.chooserConfig.set(this.coverChooserConfigFactory.forLibrary(this.library));
 
     this.libraryService.getLibraryTypesWithScrobbleSupport().pipe(
       takeUntilDestroyed(this.destroyRef),
