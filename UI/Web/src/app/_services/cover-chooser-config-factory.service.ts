@@ -20,6 +20,12 @@ export interface CoverImageOption {
   subtitle?: string;
   /** Filename of the image once staged in the temp directory. Populated lazily on selection. */
   fileName?: string;
+  /**
+   * Set when the cover represents an internal image. Used to load from disk instead
+   */
+  chapterId?: number;
+  volumeId?: number;
+  seriesId?: number;
 }
 
 export interface CoverImageChooserConfig {
@@ -51,7 +57,7 @@ export class CoverChooserConfigFactoryService {
     if (looseLeafChapterVolume.length > 0) {
       const opts = looseLeafChapterVolume.flatMap(v =>
         v.chapters.map((c: Chapter) => ({
-          url: this.imageService.getChapterCoverImage(c.id),
+          url: this.imageService.getChapterCoverImage(c.id), chapterId: c.id,
           title: this.entityTitleService.computeTitle(c, libraryType, { prioritizeTitleName: false, includeVolume: false })
         } as CoverImageOption))
       );
@@ -65,7 +71,7 @@ export class CoverChooserConfigFactoryService {
       resetFunc: () => this.uploadService.updateSeriesCoverImage(series.id, '', false),
       selected: { url: this.imageService.getSeriesCoverImage(series.id), title: series.name },
       volumeFunc: nonLooseLeafChapterVolumes.length > 0
-        ? of(nonLooseLeafChapterVolumes.map(v => ({ url: this.imageService.getVolumeCoverImage(v.id),
+        ? of(nonLooseLeafChapterVolumes.map(v => ({ url: this.imageService.getVolumeCoverImage(v.id), volumeId: v.id,
           title: this.entityTitleService.computeTitle(v, libraryType, { prioritizeTitleName: false, includeVolume: true }) } as CoverImageOption)))
         : undefined,
       chapterFunc: looseLeafChapters,
@@ -104,7 +110,7 @@ export class CoverChooserConfigFactoryService {
       resetFunc: () => this.uploadService.updateCollectionCoverImage(tag.id, '', false),
       selected: { url: this.imageService.getCollectionCoverImage(tag.id), title: tag.title },
       otherFunc: of(series.map(s => {
-        return {url: this.imageService.getSeriesCoverImage(s.id), title: s.name}
+        return {url: this.imageService.getSeriesCoverImage(s.id), seriesId: s.id, title: s.name}
       }) as CoverImageOption[])
     };
   }
