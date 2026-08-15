@@ -2604,21 +2604,23 @@ public class ExternalMetadataService : IExternalMetadataService
     {
         try
         {
-            // Determine the expected total count based on local metadata
-            series.Metadata.TotalCount = Math.Max(
-                chapters.Max(chapter => chapter.TotalCount),
-                externalMetadata.Volumes > 0 ? externalMetadata.Volumes : externalMetadata.Chapters
-            );
-
-            // The actual number of count's defined across all chapter's metadata
-            series.Metadata.MaxCount = chapters.Max(chapter => chapter.Count);
-
-            var nonSpecialVolumes = series.Volumes
-                .Where(v => v.MaxNumber.IsNot(Parser.SpecialVolumeNumber))
+            var realVolumes = series.Volumes
+                .Where(v => v.MaxNumber.IsNot(Parser.SpecialVolumeNumber) && v.MaxNumber.IsNot(Parser.LooseLeafVolumeNumber))
                 .ToList();
 
-            var maxVolume = (int)(nonSpecialVolumes.Count != 0 ? nonSpecialVolumes.Max(v => v.MaxNumber) : 0);
+            var isVolumeBased = realVolumes.Count != 0;
+
+            var maxVolume = (int)(realVolumes.Count != 0 ? realVolumes.Max(v => v.MaxNumber) : 0);
             var maxChapter = (int)chapters.Max(c => c.MaxNumber);
+
+            var externalExpectedCount = isVolumeBased ? externalMetadata.Volumes : externalMetadata.Chapters;
+
+            series.Metadata.TotalCount = Math.Max(
+                chapters.Max(chapter => chapter.TotalCount),
+                externalExpectedCount
+            );
+
+            series.Metadata.MaxCount = isVolumeBased ? maxVolume : maxChapter;
 
             if (series.Format is MangaFormat.Epub or MangaFormat.Pdf && chapters.Count == 1)
             {
@@ -2628,23 +2630,9 @@ public class ExternalMetadataService : IExternalMetadataService
             {
                 series.Metadata.MaxCount = series.Metadata.TotalCount;
             }
-            else if ((maxChapter == Parser.DefaultChapterNumber || maxChapter > series.Metadata.TotalCount) &&
-                     maxVolume <= series.Metadata.TotalCount && maxVolume != Parser.DefaultChapterNumber)
-            {
-                series.Metadata.MaxCount = maxVolume;
-            }
-            else if (maxVolume == series.Metadata.TotalCount)
-            {
-                series.Metadata.MaxCount = maxVolume;
-            }
-            else
-            {
-                series.Metadata.MaxCount = maxChapter;
-            }
 
             var status = PublicationStatus.OnGoing;
-
-            var hasExternalCounts = externalMetadata.Volumes > 0 || externalMetadata.Chapters > 0;
+            var hasExternalCounts = isVolumeBased ? externalMetadata.Volumes > 0 : externalMetadata.Chapters > 0;
 
             if (hasExternalCounts)
             {
