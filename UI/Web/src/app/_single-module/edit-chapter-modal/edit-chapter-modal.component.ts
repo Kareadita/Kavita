@@ -57,6 +57,7 @@ import {ActionFactoryService} from "../../_services/action-factory.service";
 import {modalDeleted, modalSaved} from "../../_models/modal/modal-result";
 import {Tabs} from "../../_models/tabs";
 import {
+  addMetadataIdControls,
   EditExternalMetadataFormComponent
 } from "../../shared/_components/edit-external-metadata-form/edit-external-metadata-form.component";
 import {NULL_DATE} from "../../_pipes/date-year-range.pipe";
@@ -171,6 +172,7 @@ export class EditChapterModalComponent implements OnInit {
     this.editForm.addControl('language', new FormControl(this.chapter.language, []));
     this.editForm.addControl('isbn', new FormControl(this.chapter.isbn, []));
     this.editForm.addControl('ageRating', new FormControl(this.chapter.ageRating, []));
+    addMetadataIdControls(this.editForm, this.chapter);
 
     if (this.chapter.releaseDate !== NULL_DATE) {
       this.editForm.addControl('releaseDate', new FormControl(this.chapter.releaseDate.substring(0, 10), []));

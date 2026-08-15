@@ -37,6 +37,7 @@ import {VolumeService} from "../../_services/volume.service";
 import {UpdateVolume} from "../../_models/update-volume";
 import {Tabs} from "../../_models/tabs";
 import {
+  addMetadataIdControls,
   EditExternalMetadataFormComponent
 } from "../../shared/_components/edit-external-metadata-form/edit-external-metadata-form.component";
 import {EditModalShellComponent} from "../../shared/edit-modal-shell/edit-modal-shell.component";
@@ -119,6 +120,7 @@ export class EditVolumeModalComponent implements OnInit {
     this.size = this.files.reduce((sum, v) => sum + v.bytes, 0);
 
     this.editForm.addControl('coverImageLocked', new FormControl(this.volume.coverImageLocked, []));
+    addMetadataIdControls(this.editForm, this.volume);
 
     this.chooserConfig.set(this.coverChooserConfigFactory.forVolume(this.volume, this.libraryType));
   }

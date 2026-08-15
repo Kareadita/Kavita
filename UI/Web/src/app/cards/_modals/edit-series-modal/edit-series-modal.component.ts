@@ -56,6 +56,7 @@ import {Action} from "../../../_models/actionables/action";
 import {modalSaved} from "../../../_models/modal/modal-result";
 import {Tabs} from "../../../_models/tabs";
 import {
+  addMetadataIdControls,
   EditExternalMetadataFormComponent
 } from "../../../shared/_components/edit-external-metadata-form/edit-external-metadata-form.component";
 import {MangaFormat} from "../../../_models/manga-format";
@@ -177,12 +178,9 @@ export class EditSeriesModalComponent implements OnInit {
   }
 
   ngOnInit(): void {
-
     this.libraryService.getLibraryNames().pipe(takeUntilDestroyed(this.destroyRef)).subscribe(names => {
       this.libraryName = names[this.series.libraryId];
     });
-
-
 
     this.initSeries = Object.assign({}, this.series);
 
@@ -201,6 +199,9 @@ export class EditSeriesModalComponent implements OnInit {
       language: new FormControl('', []),
       releaseYear: new FormControl('', [Validators.minLength(4), Validators.maxLength(4), Validators.pattern(/([1-9]\d{3})|[0]{1}/)]),
     });
+
+    addMetadataIdControls(this.editSeriesForm, this.series);
+
     this.cdRef.markForCheck();
 
 
