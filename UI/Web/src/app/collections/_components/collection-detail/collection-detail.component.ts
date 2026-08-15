@@ -150,6 +150,14 @@ export class CollectionDetailComponent implements AfterContentChecked {
           filter!.statements.push(defaultStmt);
         }
 
+        if (!filter.statements.find(stmt => stmt.field === SeriesFilterField.CollapseSeriesRelationships)) {
+          filter.statements.push({
+            field: SeriesFilterField.CollapseSeriesRelationships,
+            value: 'false',
+            comparison: FilterComparison.Equal,
+          })
+        }
+
         this.filter.set(filter);
 
         const settings = new SeriesFilterSettings();
