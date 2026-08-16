@@ -2957,6 +2957,21 @@ public class ExternalMetadataService : IExternalMetadataService
         var extSeries = result.Data.Series;
         if (extSeries == null) return null;
 
+        var settings = await _unitOfWork.SettingsRepository.GetMetadataSettingDto(ct);
+
+        var genres = new List<string>();
+        var tags = new List<string>();
+        GenerateGenreAndTagLists(extSeries, settings, ref tags, ref genres);
+
+        var tagsToRemove = GetTagsToRemove(extSeries, settings);
+        var finalTags = tags.Except(tagsToRemove).ToHashSet();
+
+        extSeries.Genres = genres;
+        extSeries.Tags = extSeries.Tags.Where(t => finalTags.Contains(t.Name)).ToList();
+
+        var ageRating = DetermineAgeRating(extSeries.Tags.Select(t => t.Name).Concat(extSeries.Genres), settings.AgeRatingMappings);
+
+        extSeries.AgeRating = ageRating;
         extSeries.Summary = StringHelper.RemoveSourceInDescription(StringHelper.SquashBreaklines(extSeries.Summary));
 
         return extSeries;
