@@ -69,6 +69,7 @@ import {SettingItemComponent} from "../../settings/_components/setting-item/sett
 import {TagWeightTitlePipe} from "../../_pipes/tag-weight-title.pipe";
 import {allTagWeights} from "../_models/tag-weight.enum";
 
+const MangaBakaAgeRatings = ['Safe', 'Suggestive', 'Erotica', 'Pornographic'];
 
 @Component({
   selector: 'app-manage-metadata-settings',
@@ -378,4 +379,5 @@ export class ManageMetadataSettingsComponent implements OnInit {
   protected readonly allMetadataSettingFields = allMetadataSettingField;
   protected readonly allTagWeights = allTagWeights;
   protected readonly SettingsTabId = SettingsTabId;
+  protected readonly MangaBakaAgeRatings = MangaBakaAgeRatings;
 }
