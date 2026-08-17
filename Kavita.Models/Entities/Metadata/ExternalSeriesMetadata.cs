@@ -32,11 +32,17 @@ public class ExternalSeriesMetadata : IEntityDate
     /// </summary>
     public int AverageExternalRating { get; set; } = -1;
 
+    [Obsolete("Use Series.AniListId")]
     public int AniListId { get; set; }
+    [Obsolete("Use Series.CbrId")]
     public int CbrId { get; set; }
+    [Obsolete("Use Series.MalId")]
     public long MalId { get; set; }
+    [Obsolete("Google Books isn't supported")]
     public string GoogleBooksId { get; set; }
+    [Obsolete("Use Series.MangaBakaId")]
     public long MangabakaId { get; set; }
+    [Obsolete("Use Series.HardcoverId")]
     public int HardcoverId { get; set; }
 
     /// <summary>
