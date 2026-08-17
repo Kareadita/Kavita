@@ -195,7 +195,13 @@ public class ExternalSeriesMetadataRepository(DataContext context, IMapper mappe
             .Where(s => !IExternalMetadataService.NonEligibleLibraryTypes.Contains(s.Library.Type))
             .Where(s => s.Library.AllowMetadataMatching)
             .WhereIf(includeStaleData, s => s.ExternalSeriesMetadata == null || s.ExternalSeriesMetadata.ValidUntilUtc < DateTime.UtcNow)
-            .WhereIf(!includeStaleData, s => s.ExternalSeriesMetadata == null || s.ExternalSeriesMetadata.AniListId == 0)
+
+            .WhereIf(!includeStaleData, s =>
+                (s.Library.MetadataProvider == MetadataProvider.Hardcover && s.HardcoverId == 0) ||
+                (s.Library.MetadataProvider == MetadataProvider.Mangabaka
+                 && s.MangaBakaId == 0 && s.AniListId == 0 && s.MalId == 0) ||
+                (s.Library.MetadataProvider == MetadataProvider.ComicBookRoundup && s.CbrId == 0))
+
             .Where(s => !s.IsBlacklisted && !s.DontMatch)
             .OrderBy(s => s.ExternalSeriesMetadata == null ? DateTime.MinValue : s.ExternalSeriesMetadata.ValidUntilUtc)
             .Select(s => s.Id)
