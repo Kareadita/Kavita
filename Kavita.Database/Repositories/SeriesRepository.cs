@@ -1457,6 +1457,10 @@ public class SeriesRepository(DataContext context, IMapper mapper) : ISeriesRepo
                 normalizedNames.Contains(s.NormalizedName)
                 || normalizedNames.Contains(s.NormalizedLocalizedName)
                 || normalizedNames.Contains(s.NormalizedOriginalName))
+            .WhereIf(aniListId > 0, s => s.AniListId == 0 || s.AniListId == aniListId)
+            .WhereIf(malId > 0, s => s.MalId == 0 || s.MalId == malId)
+            .WhereIf(mangaBakaId > 0, s => s.MangaBakaId == 0 || s.MangaBakaId == mangaBakaId)
+            .WhereIf(hardcoverId > 0, s => s.HardcoverId == 0 || s.HardcoverId == hardcoverId)
             .Includes(includes)
             .FirstOrDefaultAsync(ct);
     }
