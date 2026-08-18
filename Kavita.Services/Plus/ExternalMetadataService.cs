@@ -659,6 +659,12 @@ public class ExternalMetadataService : IExternalMetadataService
         var series = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(seriesId,
             SeriesIncludes.Library | SeriesIncludes.ExternalMetadata, ct);
         if (series == null) return;
+
+        if (series.Library.MetadataProvider == metadataProviderOverride)
+        {
+            metadataProviderOverride = null;
+        }
+
         if (series.MetadataProviderOverride == metadataProviderOverride) return;
 
         var previousProvider = series.GetEffectiveMetadataProvider();
