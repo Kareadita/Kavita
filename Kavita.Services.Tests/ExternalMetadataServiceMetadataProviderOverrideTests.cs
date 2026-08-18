@@ -177,12 +177,12 @@ public class ExternalMetadataServiceMetadataProviderOverrideTests : AbstractDbTe
         context.Series.Add(series);
         await context.SaveChangesAsync();
 
-        // Pinning the Library's current default doesn't change who we match against
+        // Pinning the Library's current default doesn't change who we match against, so it's not stored as an override
         await service.UpdateSeriesMetadataProviderOverride(series.Id, MetadataProvider.Mangabaka);
 
         var updated = await context.Series.FirstAsync(s => s.Id == series.Id);
 
-        Assert.Equal(MetadataProvider.Mangabaka, updated.MetadataProviderOverride);
+        Assert.Null(updated.MetadataProviderOverride);
         Assert.False(await unitOfWork.ExternalSeriesMetadataRepository.NeedsDataRefresh(series.Id));
     }
 }
