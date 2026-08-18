@@ -173,15 +173,17 @@ public static class ExternalIdParser
 
         var trimmed = text.Trim();
 
-        // https://hardcover.app/series/id/{id} would otherwise be read as the slug "id"
-        if (trimmed.StartsWith(HardcoverSeriesWebsite, StringComparison.OrdinalIgnoreCase)
-            || trimmed.StartsWith(HardcoverBookWebsite, StringComparison.OrdinalIgnoreCase)) return null;
-
         var website = HardcoverPublicWebsites.Keys.FirstOrDefault(w => trimmed.StartsWith(w, StringComparison.OrdinalIgnoreCase));
         if (website == null) return null;
 
         var slug = trimmed[website.Length..].Split('/', '?', '#')[0];
-        return string.IsNullOrEmpty(slug) ? null : new HardcoverUrlSlug(slug, HardcoverPublicWebsites[website]);
+        if (string.IsNullOrEmpty(slug)) return null;
+
+        // The legacy https://hardcover.app/series/id/{id} links Kavita used to generate would otherwise be read as
+        // the slug "id". The current HardcoverSeriesWebsite layout doesn't start with a public url
+        if (slug.Equals("id", StringComparison.OrdinalIgnoreCase)) return null;
+
+        return new HardcoverUrlSlug(slug, HardcoverPublicWebsites[website]);
     }
 
     public static string GetHardcoverStaffId(string? url)

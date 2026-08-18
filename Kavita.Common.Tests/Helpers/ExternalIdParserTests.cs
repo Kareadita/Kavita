@@ -81,9 +81,11 @@ public class ExternalIdParserTests
     // A series url is not standalone, even if the user ticked the toggle
     [InlineData("https://hardcover.app/series/the-expanse", "the-expanse", false)]
     [InlineData("https://HARDCOVER.app/books/wicked-town-1", "wicked-town-1", true)]
-    // The numeric-id links Kavita generates itself are not slugs
+    // The numeric-id links Kavita generates itself are not slugs, both current and legacy
+    [InlineData("https://hardcover.app/id/series/12345", null, false)]
+    [InlineData("https://hardcover.app/id/book/12345", null, false)]
     [InlineData("https://hardcover.app/series/id/12345", null, false)]
-    [InlineData("https://hardcover.app/book/id/12345", null, false)]
+    [InlineData("https://hardcover.app/books/id/12345", null, false)]
     [InlineData("https://mangabaka.org/3391", null, false)]
     [InlineData("hardcover:61176", null, false)]
     [InlineData("", null, false)]
