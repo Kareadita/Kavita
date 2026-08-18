@@ -70,7 +70,7 @@ export class MatchSeriesModalComponent implements OnInit {
     query: new FormControl('', []),
     isStandAlone: new FormControl(false),
     dontMatch: new FormControl(false, []),
-    metadataProviderOverride: new FormControl<MetadataProvider | null>(null),
+    provider: new FormControl<MetadataProvider | null>(null),
   });
 
   protected readonly isDontMatch = toSignal(
@@ -88,8 +88,8 @@ export class MatchSeriesModalComponent implements OnInit {
   selectedEdition = signal<ExternalEditionDto | null>(null);
   selectedEditionId = linkedSignal<string | null>(() => this.selectedEdition()?.id ?? null);
   lastQuery = signal<string>('');
-  /** The query we last auto-switched the provider for, so a switch that doesn't take effect can't loop */
-  private autoSwitchedQuery: string | null = null;
+  /** Provider the results on screen came from. */
+  resultProvider = signal<MetadataProvider | null>(null);
 
   protected bodyState = computed<'empty' | 'dont-match' | 'loading' | 'results' | 'no-results'>(() => {
     if (this.isDontMatch()) return 'dont-match';
@@ -115,6 +115,14 @@ export class MatchSeriesModalComponent implements OnInit {
     return `https://hardcover.app/search?q=${encodeURIComponent(this.series().name)}${extraQuery}`;
   });
 
+  /** Provider the results came from, falling back to the series' own before the first search lands */
+  protected activeProvider = computed(() => this.resultProvider() ?? this.matchInfo()?.primaryProvider ?? null);
+  /** The search ran against another provider than the series own, so applying a match will switch the Series over */
+  protected isProviderSwitched = computed(() => {
+    const provider = this.resultProvider();
+    return provider !== null && provider !== this.matchInfo()?.primaryProvider;
+  });
+
   constructor() {
     this.canSaveDontMatch = computed(() => this.isDontMatch() === true && !this.series().dontMatch);
     this.coverImageUrl = computed(() => this.imageService.getSeriesCoverImage(this.series().id));
@@ -129,7 +137,7 @@ export class MatchSeriesModalComponent implements OnInit {
 
       this.seriesService.getMatchInfo(this.series().id).subscribe(res => {
         this.matchInfo.set(res);
-        this.formGroup.controls.metadataProviderOverride.setValue(res.metadataProviderOverride ?? null, { emitEvent: false });
+        this.formGroup.controls.provider.setValue(res.primaryProvider, { emitEvent: false });
         this.autoSelectExistingMatch(this.matches());
       });
     });
@@ -148,30 +156,12 @@ export class MatchSeriesModalComponent implements OnInit {
       takeUntilDestroyed()
     ).subscribe(() => this.search());
 
-    this.formGroup.controls.metadataProviderOverride.valueChanges.pipe(
+    this.formGroup.controls.provider.valueChanges.pipe(
       takeUntilDestroyed()
-    ).subscribe(provider => this.changeProvider(provider));
-  }
-
-  private changeProvider(provider: MetadataProvider | null) {
-    this.seriesService.updateMetadataProviderOverride(this.series().id, provider).subscribe({
-      next: () => {
-        this.selectedItem.set(null);
-        this.selectedEdition.set(null);
-        this.seriesService.getMatchInfo(this.series().id).subscribe({
-          next: res => {
-            this.matchInfo.set(res);
-            this.search();
-          },
-          error: () => this.isLoading.set(false),
-        });
-      },
-      error: () => {
-        // Put the dropdown back to what the server actually has, without re-entering this handler
-        this.formGroup.controls.metadataProviderOverride.setValue(this.matchInfo()?.metadataProviderOverride ?? null,
-          { emitEvent: false });
-        this.isLoading.set(false);
-      },
+    ).subscribe(() => {
+      this.selectedItem.set(null);
+      this.selectedEdition.set(null);
+      this.search();
     });
   }
 
@@ -193,16 +183,6 @@ export class MatchSeriesModalComponent implements OnInit {
     if (this.isDontMatch()) return;
 
     const query = this.formGroup.value.query ?? '';
-    const detectedProvider = this.detectProviderFromQuery(query);
-    const currentProvider = this.matchInfo()?.primaryProvider ?? null;
-
-    if (detectedProvider !== null && detectedProvider !== currentProvider && this.autoSwitchedQuery !== query) {
-      // Switches the override to the detected provider; changeProvider() re-runs search() once that lands
-      this.autoSwitchedQuery = query;
-      this.isLoading.set(true);
-      this.formGroup.controls.metadataProviderOverride.setValue(detectedProvider);
-      return;
-    }
 
     this.isLoading.set(true);
     this.lastQuery.set(query);
@@ -210,43 +190,24 @@ export class MatchSeriesModalComponent implements OnInit {
     const model: any = { ...this.formGroup.value, seriesId: this.series().id };
 
     this.seriesService.matchSeries(model).pipe(
-      tap(results => {
+      tap(res => {
         this.isLoading.set(false);
         this.hasSearched.set(true);
-        this.matches.set(results);
-        this.autoSelectExistingMatch(results);
+        this.matches.set(res.matches);
+
+        // The backend can search against another provider than the one asked for, when the query is a
+        // provider specific url/header. Show what the results actually came from
+        this.resultProvider.set(res.provider);
+        this.formGroup.controls.provider.setValue(res.provider, { emitEvent: false });
+
+        this.autoSelectExistingMatch(res.matches);
       }),
       catchError(() => {
         this.isLoading.set(false);
         this.hasSearched.set(true);
-        return of([]);
+        return of(null);
       })
     ).subscribe();
-  }
-
-  /**
-   * Mirrors the header/URL detection ExternalIdParser does server-side, so the dialog can switch the
-   * provider override to match a pasted URL/header before actually issuing the search
-   */
-  private detectProviderFromQuery(query: string): MetadataProvider | null {
-    const text = (query || '').trim().toLowerCase();
-    if (!text) return null;
-
-    if (text.startsWith('hardcover:') || text.includes('hardcover.app/')) {
-      return MetadataProvider.Hardcover;
-    }
-
-    if (text.startsWith('mangabaka:') || text.startsWith('mb:') || text.includes('mangabaka.org/')
-      || text.startsWith('anilist:') || text.startsWith('al:') || text.includes('anilist.co/')
-      || text.startsWith('mal:') || text.includes('myanimelist.net/')) {
-      return MetadataProvider.Mangabaka;
-    }
-
-    if (text.includes('comicbookroundup.com/')) {
-      return MetadataProvider.ComicBookRoundup;
-    }
-
-    return null;
   }
 
   private autoSelectExistingMatch(results: ExternalSeriesMatch[]) {
@@ -333,7 +294,8 @@ export class MatchSeriesModalComponent implements OnInit {
     data.tags = data.tags || [];
     data.genres = data.genres || [];
 
-    this.seriesService.updateMatch(this.series().id, data, this.selectedEdition()).subscribe(() => {
+    // Sending the provider the results came from lets the backend switch the Series over to it, if it differs
+    this.seriesService.updateMatch(this.series().id, data, this.selectedEdition(), this.resultProvider()).subscribe(() => {
       this.modalService.close(true);
     });
   }

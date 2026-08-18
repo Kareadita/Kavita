@@ -74,24 +74,27 @@
         <div class="flex-grow-1 min-w-0" [formGroup]="formGroup">
           <div class="d-flex align-items-center gap-2 flex-wrap">
             <span class="fw-semibold small text-truncate">
-              {{t('searching-against', {provider: match.primaryProvider! | metadataProviderTitle })}}
+              {{t('searching-against', {provider: activeProvider()! | metadataProviderTitle })}}
             </span>
           </div>
 
           <div class="small text-muted mb-1">
-            {{t('change-provider-help')}}
+            @if (isProviderSwitched()) {
+              {{t('provider-switch-help', {provider: activeProvider()! | metadataProviderTitle })}}
+            } @else {
+              {{t('change-provider-help')}}
+            }
           </div>
 
-          <select class="form-select form-select-sm w-auto" formControlName="metadataProviderOverride"
+          <select class="form-select form-select-sm w-auto" formControlName="provider"
                   [attr.aria-label]="t('change-provider-help')">
-            <option [ngValue]="null">{{ t('metadata-provider-override-default') }}</option>
             @for (provider of allMetadataProviders; track provider) {
               <option [ngValue]="provider">{{ provider | metadataProviderTitle }}</option>
             }
           </select>
         </div>
 
-        @if (match.primaryProvider === MetadataProvider.Hardcover) {
+        @if (activeProvider() === MetadataProvider.Hardcover) {
           <form [formGroup]="formGroup">
             <div class="form-check form-switch mb-0">
               <input type="checkbox" class="form-check-input" formControlName="isStandAlone"
