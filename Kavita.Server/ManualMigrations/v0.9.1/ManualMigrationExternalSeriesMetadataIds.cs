@@ -1,11 +1,15 @@
 using System.Linq;
 using System.Threading.Tasks;
 using Kavita.Database;
+using Kavita.Models.Entities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 
 namespace Kavita.Server.ManualMigrations.v0._9._1;
 
+/// <summary>
+/// v0.9.1 introduced more metadata providers and shifted the Id store to the <see cref="Series"/>. Map the AL/MAL ids over
+/// </summary>
 public class ManualMigrationExternalSeriesMetadataIds: ManualMigration
 {
     protected override string MigrationName => nameof(ManualMigrationExternalSeriesMetadataIds);
