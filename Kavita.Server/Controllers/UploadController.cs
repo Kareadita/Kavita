@@ -155,15 +155,15 @@ public class UploadController : BaseApiController
 
     private ActionResult<string> CopyCoverImageIntoTemp(string fileName)
     {
-        var path = Path.Join(_directoryService.CoverImageDirectory, fileName);
+        var safeFileName = Path.GetFileName(fileName);
+        var sourcePath = Path.Join(_directoryService.CoverImageDirectory, safeFileName);
+        if (!_directoryService.FileSystem.File.Exists(sourcePath)) return NotFound();
 
-        var now = DateTime.UtcNow;
-        var dateString = $"{now:d}_{now:T}".Replace('/', '_').Replace(':', '_');
-        var finalFileName = $"coverupload_{dateString}_{fileName}";
+        var finalFileName = $"coverupload_{Guid.NewGuid():N}_{safeFileName}";
 
         var tempPath = Path.Join(_directoryService.TempDirectory, finalFileName);
 
-        _directoryService.FileSystem.File.Copy(path, tempPath);
+        _directoryService.FileSystem.File.Copy(sourcePath, tempPath, true);
 
         return Ok(finalFileName);
     }
