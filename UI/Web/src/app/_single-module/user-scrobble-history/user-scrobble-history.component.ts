@@ -41,6 +41,7 @@ export interface DataTablePage {
   totalPages: number
 }
 
+// TODO: We can remove this component
 @Component({
   selector: 'app-user-scrobble-history',
   imports: [ScrobbleEventTypePipe, ReactiveFormsModule, TranslocoModule,
