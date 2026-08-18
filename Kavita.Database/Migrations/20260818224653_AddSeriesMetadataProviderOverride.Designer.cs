@@ -14,14 +14,14 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Kavita.Database.Migrations
 {
     [DbContext(typeof(DataContext))]
-    [Migration("20260807133345_AddSeriesMetadataProviderOverride")]
+    [Migration("20260818224653_AddSeriesMetadataProviderOverride")]
     partial class AddSeriesMetadataProviderOverride
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
-            modelBuilder.HasAnnotation("ProductVersion", "10.0.9");
+            modelBuilder.HasAnnotation("ProductVersion", "10.0.10");
 
             modelBuilder.Entity("AppUserCollectionSeries", b =>
                 {
@@ -1362,6 +1362,11 @@ namespace Kavita.Database.Migrations
                     b.Property<string>("Blacklist")
                         .HasColumnType("TEXT");
 
+                    b.Property<bool>("EnableAgeRating")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER")
+                        .HasDefaultValue(true);
+
                     b.Property<bool>("EnableChapterCoverImage")
                         .HasColumnType("INTEGER");
 
@@ -1420,8 +1425,29 @@ namespace Kavita.Database.Migrations
                         .HasColumnType("INTEGER")
                         .HasDefaultValue(true);
 
+                    b.Property<string>("ExternalAgeRatingMappings")
+                        .HasColumnType("TEXT");
+
+                    b.Property<int?>("FilterAboveWeight")
+                        .HasColumnType("INTEGER");
+
                     b.Property<bool>("FirstLastPeopleNaming")
                         .HasColumnType("INTEGER");
+
+                    b.Property<string>("GlobalLocalizedNameLanguages")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("TEXT")
+                        .HasDefaultValue("ja-Latn");
+
+                    b.Property<string>("GlobalNameLanguages")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("TEXT")
+                        .HasDefaultValue("en");
+
+                    b.Property<string>("LibraryLanguageTitleOverrides")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("TEXT")
+                        .HasDefaultValue("{}");
 
                     b.Property<string>("Overrides")
                         .HasColumnType("TEXT");
