@@ -656,8 +656,6 @@ public class SeriesRepository(DataContext context, IMapper mapper) : ISeriesRepo
             .Include(s => s.ExternalSeriesMetadata)
             .Select(series => new SeriesDetailRequestV3Dto
             {
-                // Inlined rather than calling Series.GetEffectiveMetadataProvider(): this projection is translated to SQL by EF Core,
-                // which cannot translate an arbitrary instance method call.
                 Provider = series.MetadataProviderOverride ?? series.Library.MetadataProvider,
                 Format = series.Library.Type.ConvertToPlusMediaFormat(series.Format),
                 SeriesName = series.Name,
