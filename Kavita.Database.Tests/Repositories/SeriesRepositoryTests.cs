@@ -95,61 +95,6 @@ public class SeriesRepositoryTests(ITestOutputHelper testOutputHelper) : Abstrac
         Assert.True(isUnique);
     }
 
-    [Theory]
-    // Case 1: Prioritize existing ExternalSeries id
-    [InlineData(12345, null, 12345)]
-    // Case 2: Extract from weblink if no external series id
-    [InlineData(0, "https://anilist.co/manga/100664/Ijiranaide-Nagatorosan/", 100664)]
-    // Case 3: Return null if neither exist
-    [InlineData(0, "", null)]
-    public async Task GetPlusSeriesDto_Should_PrioritizeAniListId_Correctly(int externalAniListId, string? webLinks, int? expectedAniListId)
-    {
-
-        var (unitOfWork, _, _) = await CreateDatabase();
-        await SetupSeriesData(unitOfWork);
-
-        var series = new SeriesBuilder("Test Series")
-            .WithFormat(MangaFormat.Archive)
-            .Build();
-
-        var library = new LibraryBuilder("Test Library", LibraryType.Manga)
-            .WithFolderPath(new FolderPathBuilder("C:/data/manga/").Build())
-            .WithSeries(series)
-            .Build();
-
-
-
-        // Set up ExternalSeriesMetadata
-        series.ExternalSeriesMetadata = new ExternalSeriesMetadata()
-        {
-            AniListId = externalAniListId,
-            CbrId = 0,
-            MalId = 0,
-            GoogleBooksId = string.Empty
-        };
-
-        series.AniListId = externalAniListId;
-
-        // Set up SeriesMetadata with WebLinks
-        series.Metadata = new SeriesMetadata()
-        {
-            WebLinks = webLinks,
-            ReleaseYear = 2021
-        };
-
-        unitOfWork.LibraryRepository.Add(library);
-        unitOfWork.SeriesRepository.Add(series);
-        await unitOfWork.CommitAsync();
-
-        // Act
-        var result = await unitOfWork.SeriesRepository.GetKavitaPlusSeriesDetailRequestV3Dto(series.Id);
-
-        // Assert
-        Assert.NotNull(result);
-        Assert.Equal(expectedAniListId, result.AniListId);
-        Assert.Equal("Test Series", result.SeriesName);
-    }
-
     // TODO: GetSeriesDtoForLibraryIdV2Async Tests (On Deck)
 
 

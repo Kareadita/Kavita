@@ -4416,10 +4416,6 @@ public class ExternalMetadataServiceTests: AbstractDbTest
             .WithFormat(MangaFormat.Archive)
             .WithMetadata(new SeriesMetadataBuilder()
                 .Build())
-            .WithExternalMetadata(new ExternalSeriesMetadata()
-            {
-                AniListId = 10
-            })
             .Build();
         context.Series.Attach(series2);
         await context.SaveChangesAsync();
@@ -4654,10 +4650,6 @@ public class ExternalMetadataServiceTests: AbstractDbTest
             .WithFormat(MangaFormat.Archive)
             .WithMetadata(new SeriesMetadataBuilder()
                 .Build())
-            .WithExternalMetadata(new ExternalSeriesMetadata()
-            {
-                AniListId = 10
-            })
             .Build();
         context.Series.Attach(series2);
         await context.SaveChangesAsync();
