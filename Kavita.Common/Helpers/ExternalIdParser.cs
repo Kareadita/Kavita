@@ -90,9 +90,9 @@ public static class ExternalIdParser
         return ExtractId<string?>(weblinks, MangaDexWeblinkWebsite);
     }
 
-    public static long GetMangaBakaId(string? weblinks)
+    public static int GetMangaBakaId(string? weblinks)
     {
-        return ExtractId<long?>(weblinks, MangaBakaWebsite) ?? 0;
+        return ExtractId<int?>(weblinks, MangaBakaWebsite) ?? 0;
     }
 
     #region Header-based Parsing

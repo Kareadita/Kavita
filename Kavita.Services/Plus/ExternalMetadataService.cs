@@ -776,12 +776,6 @@ public class ExternalMetadataService : IExternalMetadataService
         var beforeIds = new AuditLogMatchExternalIdsParamsDto { AniListId = series.AniListId, MalId = series.MalId,
             MangaBakaId = series.MangaBakaId, MangaBakaEditionId = series.MangaBakaEditionId, CbrId = series.CbrId, HardcoverId = series.HardcoverId };
 
-        externalSeriesMetadata.MalId = data.MalId ?? result.MalId ?? 0;
-        externalSeriesMetadata.AniListId = data.AniListId ?? result.AniListId ?? 0;
-        externalSeriesMetadata.CbrId = data.CbrId ?? result.CbrId ?? 0;
-        externalSeriesMetadata.MangabakaId = data.MangabakaId ?? result.MangabakaId ?? 0;
-        series.MangaBakaId = externalSeriesMetadata.MangabakaId;
-
         if (!string.IsNullOrEmpty(data.MangaBakaEditionId))
         {
             series.MangaBakaEditionId = data.MangaBakaEditionId;
@@ -791,14 +785,20 @@ public class ExternalMetadataService : IExternalMetadataService
             series.MangaBakaEditionId = string.Empty;
         }
 
-        var hardcoverId = data.HardcoverId ?? result.Series?.HardcoverId ?? series.HardcoverId;
+        // Update ids from K+ in case of merges upstream
+        series.AniListId = result.AniListId ?? series.AniListId;
+        series.MalId = result.MalId ?? series.MalId;
+        series.MangaBakaId = result.MangabakaId ?? series.MangaBakaId;
+        series.CbrId = result.CbrId ?? series.CbrId;
+        series.HardcoverId = result.HardCoverId ?? series.HardcoverId;
+
         var afterIds = new AuditLogMatchExternalIdsParamsDto {
-            AniListId = externalSeriesMetadata.AniListId,
-            MalId = externalSeriesMetadata.MalId,
+            AniListId = series.AniListId,
+            MalId = series.MalId,
             MangaBakaId = series.MangaBakaId,
             MangaBakaEditionId = series.MangaBakaEditionId,
-            CbrId = externalSeriesMetadata.CbrId,
-            HardcoverId = hardcoverId };
+            CbrId = series.CbrId,
+            HardcoverId = series.HardcoverId };
 
         await _auditService.LogMatchAsync(KavitaPlusEventType.SeriesMatched, seriesId,
             new AuditLogMatchedParamsDto {

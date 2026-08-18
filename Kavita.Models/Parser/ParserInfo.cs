@@ -111,7 +111,7 @@ public class ParserInfo
     /// <summary>
     /// Extracted from Notes field, not explicitly part of spec
     /// </summary>
-    public long? MangaBakaId { get; set; }
+    public int? MangaBakaId { get; set; }
     /// <summary>
     /// Has an explicit "End" marker like (완결) which tells Kavita to use that as the Count, assuming no Count defined in ComicInfo.
     /// </summary>
