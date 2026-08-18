@@ -392,11 +392,11 @@ public class ExternalMetadataService : IExternalMetadataService
     /// <param name="dto"></param>
     /// <param name="ct"></param>
     /// <returns></returns>
-    public async Task<IList<ExternalSeriesMatchDto>> MatchSeries(MatchSeriesDto dto, CancellationToken ct = default)
+    public async Task<MatchSeriesResultDto?> MatchSeries(MatchSeriesDto dto, CancellationToken ct = default)
     {
         const SeriesIncludes includes = SeriesIncludes.Metadata | SeriesIncludes.ExternalMetadata | SeriesIncludes.Library;
         var series = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(dto.SeriesId, includes, ct);
-        if (series == null) return [];
+        if (series == null) return null;
 
         var query = dto.Query ?? string.Empty;
 
@@ -436,7 +436,13 @@ public class ExternalMetadataService : IExternalMetadataService
             }
         }
 
-        var slug = series.GetEffectiveMetadataProvider() switch
+        // Prioritize detection over requested provider.
+        var provider = DetectProviderFromQuery(potentialAnilistId, potentialMalId, potentialMangabakaId,
+                           potentialHardcoverSlug, potentialCbrSlug)
+                       ?? dto.Provider
+                       ?? series.GetEffectiveMetadataProvider();
+
+        var slug = provider switch
         {
             MetadataProvider.Hardcover => potentialHardcoverSlug,
             MetadataProvider.ComicBookRoundup => potentialCbrSlug,
@@ -465,7 +471,7 @@ public class ExternalMetadataService : IExternalMetadataService
             CbrId = null,
             MangabakaId = potentialMangabakaId > 0 ? potentialMangabakaId : fallbackMangaBakaId,
             IsStandAlone = dto.IsStandAlone,
-            Provider = series.GetEffectiveMetadataProvider(),
+            Provider = provider,
             SeriesName = series.Name,
             AlternativeNames = otherNames,
             Year = year,
@@ -479,7 +485,7 @@ public class ExternalMetadataService : IExternalMetadataService
         if (!kPlusResult.IsSuccess)
         {
             _logger.LogError("Match request failed for {SeriesName}: {Error}", series.Name, kPlusResult.ErrorMessage);
-            return [];
+            return new MatchSeriesResultDto {Provider = provider};
         }
 
         var results = kPlusResult.Data;
@@ -490,7 +496,21 @@ public class ExternalMetadataService : IExternalMetadataService
             result.Series.Summary = StringHelper.RemoveSourceInDescription(StringHelper.SquashBreaklines(result.Series.Summary));
         }
 
-        return results;
+        return new MatchSeriesResultDto
+        {
+            Provider = provider,
+            Matches = results,
+        };
+    }
+
+    private static MetadataProvider? DetectProviderFromQuery(int? aniListId, long? malId, long mangabakaId,
+        string? hardcoverSlug, string? cbrSlug)
+    {
+        if (!string.IsNullOrEmpty(hardcoverSlug)) return MetadataProvider.Hardcover;
+        if (!string.IsNullOrEmpty(cbrSlug)) return MetadataProvider.ComicBookRoundup;
+        if (mangabakaId > 0 || aniListId.HasValue || malId.HasValue) return MetadataProvider.Mangabaka;
+
+        return null;
     }
 
     private static List<string> ExtractAlternativeNames(Series series)
@@ -555,10 +575,16 @@ public class ExternalMetadataService : IExternalMetadataService
         }
     }
 
-    public async Task FixSeriesMatch(int seriesId, ExternalMetadataIdsDto ids, CancellationToken ct = default)
+    public async Task FixSeriesMatch(int seriesId, ExternalMetadataIdsDto ids, MetadataProvider? provider = null, CancellationToken ct = default)
     {
         var series = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(seriesId, SeriesIncludes.Library, ct);
         if (series == null) return;
+
+        // The user matched against a provider that isnt the series own, so that choice becomes the series provider
+        if (provider.HasValue && provider.Value != series.GetEffectiveMetadataProvider())
+        {
+            await UpdateSeriesMetadataProviderOverride(seriesId, provider.Value, ct);
+        }
 
         // Remove from Blacklist
         series.IsBlacklisted = false;

@@ -48,16 +48,17 @@ public interface IExternalMetadataService
     /// </remarks>
     /// <param name="dto"></param>
     /// <param name="ct"></param>
-    /// <returns></returns>
-    Task<IList<ExternalSeriesMatchDto>> MatchSeries(MatchSeriesDto dto, CancellationToken ct = default);
+    /// <returns>The matches and the provider they came from, or null if the series doesn't exist</returns>
+    Task<MatchSeriesResultDto?> MatchSeries(MatchSeriesDto dto, CancellationToken ct = default);
 
     /// <summary>
     /// This will override any sort of matching that was done prior and force it to be what the user Selected
     /// </summary>
     /// <param name="seriesId"></param>
     /// <param name="ids"></param>
+    /// <param name="provider">The provider the match came from.</param>
     /// <param name="ct"></param>
-    Task FixSeriesMatch(int seriesId, ExternalMetadataIdsDto ids, CancellationToken ct = default);
+    Task FixSeriesMatch(int seriesId, ExternalMetadataIdsDto ids, MetadataProvider? provider = null, CancellationToken ct = default);
 
     /// <summary>
     /// Sets a series to Don't Match and removes all previously cached
