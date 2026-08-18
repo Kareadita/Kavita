@@ -1039,7 +1039,7 @@ public class ExternalMetadataService : IExternalMetadataService
     private async Task ApplyExternalCovers(Series series, MetadataSettingsDto settings, CancellationToken ct = default)
     {
         if (!settings.EnableVolumeCoverImage && !settings.EnableChapterCoverImage) return;
-        if ((series.MetadataProviderOverride ?? series.Library?.MetadataProvider) == MetadataProvider.ComicBookRoundup) return;
+        if (series.GetEffectiveMetadataProvider() == MetadataProvider.ComicBookRoundup) return;
 
         // Prefer the cover based on Series/Library locale
         var locale = series.Metadata.Language ?? series.Library?.DefaultLanguage;
