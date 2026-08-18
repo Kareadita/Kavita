@@ -291,7 +291,7 @@ public class ScrobblingController(
             // When a hold is placed on a series, clear any pre-existing Scrobble Events
             await scrobblingService.ClearEventsForSeries(user.Id, seriesId);
             await kavitaPlusAuditService.LogScrobbleAsync(KavitaPlusEventType.ScrobbleHoldAdded, seriesId,
-                new AuditLogScrobbleParamsDto(), AuditStatus.Success, null, UserId, HttpContext.RequestAborted);
+                new AuditLogScrobbleParamsDto(), AuditStatus.Success, null, UserId, ct: HttpContext.RequestAborted);
             return Ok();
         }
         catch (DbUpdateConcurrencyException ex)
@@ -306,7 +306,7 @@ public class ScrobblingController(
             unitOfWork.UserRepository.Update(user);
             await unitOfWork.CommitAsync();
             await kavitaPlusAuditService.LogScrobbleAsync(KavitaPlusEventType.ScrobbleHoldAdded, seriesId,
-                new AuditLogScrobbleParamsDto(), AuditStatus.Success, null, UserId, HttpContext.RequestAborted);
+                new AuditLogScrobbleParamsDto(), AuditStatus.Success, null, UserId, ct: HttpContext.RequestAborted);
             return Ok();
         }
         catch (Exception ex)
@@ -336,7 +336,7 @@ public class ScrobblingController(
         await unitOfWork.CommitAsync(HttpContext.RequestAborted);
 
         await kavitaPlusAuditService.LogScrobbleAsync(KavitaPlusEventType.ScrobbleHoldRemoved, seriesId,
-            new AuditLogScrobbleParamsDto(), AuditStatus.Success, null, UserId, HttpContext.RequestAborted);
+            new AuditLogScrobbleParamsDto(), AuditStatus.Success, null, UserId, ct: HttpContext.RequestAborted);
 
         return Ok();
     }
@@ -356,6 +356,18 @@ public class ScrobblingController(
         return Ok();
     }
 
+    [HttpDelete("remove-error/{id:int}")]
+    [Authorize(Policy = PolicyGroups.AdminPolicy)]
+    public async Task<ActionResult> RemoveScrobbleError(int id)
+    {
+        var scrobbleError = await unitOfWork.ScrobbleRepository.GetScrobbleError(id, HttpContext.RequestAborted);
+        if (scrobbleError == null) return NotFound();
+
+        unitOfWork.ScrobbleRepository.Remove([scrobbleError]);
+        await unitOfWork.CommitAsync(HttpContext.RequestAborted);
+
+        return Ok();
+    }
 
     /// <summary>
     /// Attempts to retry Scrobble Events for the current authenticated user (or admin-allowed).

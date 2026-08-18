@@ -823,8 +823,7 @@ public class ScrobblingService : IScrobblingService
         {
             _logger.LogInformation("Series {SeriesName} is marked don't match. Not scrobbling", series.Name);
             await _auditService.LogTemperedAsync(al => al.SeriesId == seriesId && al.UserId == userId, KavitaPlusAuditCategory.Scrobble,
-                KavitaPlusEventType.ScrobbleEventSkipped, AuditStatus.Info, AuditSubjectType.Series,
-                payload: new AuditLogScrobbleParamsDto() {Provider = provider, ScrobbleEventType = eventType}, seriesId: seriesId, error: "series-dont-match", userId: userId);
+                KavitaPlusEventType.ScrobbleEventSkipped, AuditStatus.Info, AuditSubjectType.Series, seriesId: seriesId, payload: new AuditLogScrobbleParamsDto() {Provider = provider, ScrobbleEventType = eventType}, error: "series-dont-match", userId: userId);
             return true;
         }
 
@@ -832,8 +831,7 @@ public class ScrobblingService : IScrobblingService
         {
             _logger.LogInformation("Series {SeriesName} is on AppUserId {AppUserId}'s hold list. Not scrobbling", series.Name, userId);
             await _auditService.LogTemperedAsync(al => al.SeriesId == seriesId && al.UserId == userId, KavitaPlusAuditCategory.Scrobble,
-                KavitaPlusEventType.ScrobbleEventSkipped, AuditStatus.Info, AuditSubjectType.Series,
-                payload: new AuditLogScrobbleParamsDto() {Provider = provider, ScrobbleEventType = eventType}, seriesId: seriesId, error: "scrobble-hold-active", userId: userId);
+                KavitaPlusEventType.ScrobbleEventSkipped, AuditStatus.Info, AuditSubjectType.Series, seriesId: seriesId, payload: new AuditLogScrobbleParamsDto() {Provider = provider, ScrobbleEventType = eventType}, error: "scrobble-hold-active", userId: userId);
             return true;
         }
 
@@ -841,8 +839,7 @@ public class ScrobblingService : IScrobblingService
         if (library is not {AllowScrobbling: true} || !ExternalMetadataService.IsPlusEligible(library.Type))
         {
             await _auditService.LogTemperedAsync(al => al.SeriesId == seriesId && al.UserId == userId, KavitaPlusAuditCategory.Scrobble,
-                KavitaPlusEventType.ScrobbleEventSkipped, AuditStatus.Info, AuditSubjectType.Series,
-                payload: new AuditLogScrobbleParamsDto() {Provider = provider, ScrobbleEventType = eventType}, seriesId: seriesId, error: "library-scrobbling-disabled", userId: userId);
+                KavitaPlusEventType.ScrobbleEventSkipped, AuditStatus.Info, AuditSubjectType.Series, seriesId: seriesId, payload: new AuditLogScrobbleParamsDto() {Provider = provider, ScrobbleEventType = eventType}, error: "library-scrobbling-disabled", userId: userId);
             return true;
         }
 
@@ -1270,23 +1267,23 @@ public class ScrobblingService : IScrobblingService
                 return true;
             }
 
-            _unitOfWork.ScrobbleRepository.Attach(new ScrobbleError
+            var scrobbleError = new ScrobbleError
             {
                 Comment =
                     $"{evt.ScrobbleProvider} token has expired and needs rotating. Scrobbling wont work until then",
                 Details = $"User: {evt.AppUser.UserName}, Expired: {userProvider.ValidUntilUtc}",
                 LibraryId = evt.LibraryId,
                 SeriesId = evt.SeriesId
-            });
+            };
+            _unitOfWork.ScrobbleRepository.Attach(scrobbleError);
             await _unitOfWork.CommitAsync();
 
             await _auditService.LogScrobbleAsync(KavitaPlusEventType.ScrobbleEventFailed, evt.SeriesId,
-                ToAuditParams(evt), AuditStatus.Failure, "token-expired", evt.AppUserId);
+                ToAuditParams(evt), AuditStatus.Failure, "token-expired", evt.AppUserId, scrobbleError: scrobbleError);
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "A non-valid scrobble provider ({Provider}) was found, deleting event", evt.ScrobbleProvider);
-            evt.IsErrored = true;
             _unitOfWork.ScrobbleRepository.Remove(evt);
             await _unitOfWork.CommitAsync();
         }
@@ -1308,20 +1305,22 @@ public class ScrobblingService : IScrobblingService
         _logger.LogInformation("Series {SeriesName} ({SeriesId}) can't be matched and thus cannot scrobble this event",
             evt.Series.Name, evt.SeriesId);
 
-        _unitOfWork.ScrobbleRepository.Attach(new ScrobbleError
+        var scrobbleError = new ScrobbleError
         {
             Comment = UnknownSeriesErrorMessage,
             Details = $"User: {evt.AppUser.UserName} Series: {evt.Series.Name}",
             LibraryId = evt.LibraryId,
             SeriesId = evt.SeriesId
-        });
+        };
+        _unitOfWork.ScrobbleRepository.Attach(scrobbleError);
 
         evt.SetErrorMessage(UnknownSeriesErrorMessage);
         evt.ProcessDateUtc = DateTime.UtcNow;
         _unitOfWork.ScrobbleRepository.Update(evt);
         await _unitOfWork.CommitAsync();
+
         await _auditService.LogScrobbleAsync(KavitaPlusEventType.ScrobbleEventFailed, evt.SeriesId,
-            ToAuditParams(evt), AuditStatus.Failure, "unknown-series", evt.AppUserId);
+            ToAuditParams(evt), AuditStatus.Failure, "unknown-series", evt.AppUserId, scrobbleError: scrobbleError);
         return false;
     }
 
@@ -1392,7 +1391,7 @@ public class ScrobblingService : IScrobblingService
             else
             {
                 await _auditService.LogTemperedAsync(al => al.SeriesId == evt.SeriesId && al.SubjectId == evt.ChapterId, KavitaPlusAuditCategory.Scrobble,
-                    KavitaPlusEventType.ScrobbleEventSkipped, AuditStatus.Info, AuditSubjectType.Chapter, evt.SeriesId, payload: ToAuditParams(evt), userId: evt.AppUserId, subjectId: evt.ChapterId , ct: ct);
+                    KavitaPlusEventType.ScrobbleEventSkipped, AuditStatus.Info, AuditSubjectType.Chapter, evt.SeriesId, subjectId: evt.ChapterId , payload: ToAuditParams(evt), userId: evt.AppUserId, ct: ct);
             }
         }
 
@@ -1463,28 +1462,11 @@ public class ScrobblingService : IScrobblingService
             }
             catch (KavitaException ex)
             {
-                if (ex.Message.Contains("Access token is invalid"))
-                {
-                    _logger.LogCritical(ex, "Access Token for AppUserId: {AppUserId} needs to be regenerated/renewed to continue scrobbling", evt.AppUser.Id);
-                    evt.SetErrorMessage(AccessTokenErrorMessage);
-                    _unitOfWork.ScrobbleRepository.Update(evt);
-
-                    // Ensure series with this error do not get re-processed next sync
-                    _unitOfWork.ScrobbleRepository.Attach(new ScrobbleError
-                    {
-                        Comment = AccessTokenErrorMessage,
-                        Details = $"{evt.AppUser.UserName} has an invalid access token (K+ Error)",
-                        LibraryId = evt.LibraryId,
-                        SeriesId = evt.SeriesId,
-                    });
-                }
-
                 if (ex.Message.Contains(RateLimitHitErrorMessage))
                 {
                     // Ensure we skip all remaining events for this scope this cycle
                     gate.RecordResult(0);
                 }
-
             }
             catch (Exception ex)
             {
@@ -1529,13 +1511,19 @@ public class ScrobblingService : IScrobblingService
         series.IsBlacklisted = true;
         _unitOfWork.SeriesRepository.Update(series);
 
-        _unitOfWork.ScrobbleRepository.Attach(new ScrobbleError
+        var scrobbleError = new ScrobbleError
         {
             Comment = UnknownSeriesErrorMessage,
             Details = data.SeriesName,
             LibraryId = evt.LibraryId,
             SeriesId = evt.SeriesId
-        });
+        };
+        _unitOfWork.ScrobbleRepository.Attach(scrobbleError);
+        await _unitOfWork.CommitAsync();
+
+        await _auditService.LogScrobbleAsync(KavitaPlusEventType.ScrobbleEventFailed, evt.SeriesId,
+            ToAuditParams(evt), AuditStatus.Failure, "unknown-series", userId: evt.AppUserId,
+            scrobbleError: scrobbleError);
     }
 
     /// <summary>
@@ -1608,8 +1596,19 @@ public class ScrobblingService : IScrobblingService
             {
                 evt.SetErrorMessage(AccessTokenErrorMessage);
 
+                var scrobbleError = new ScrobbleError
+                {
+                    Comment = AccessTokenErrorMessage,
+                    Details = $"{evt.AppUser.UserName} has an invalid access token (K+ Error)",
+                    LibraryId = evt.LibraryId,
+                    SeriesId = evt.SeriesId,
+                };
+                _unitOfWork.ScrobbleRepository.Attach(scrobbleError);
+                await _unitOfWork.CommitAsync();
+
                 await _auditService.LogScrobbleAsync(KavitaPlusEventType.ScrobbleEventFailed, evt.SeriesId,
-                    ToAuditParams(evt), AuditStatus.Failure, "invalid-token", userId: evt.AppUserId);
+                    ToAuditParams(evt), AuditStatus.Failure, "invalid-token", userId: evt.AppUserId,
+                    scrobbleError: scrobbleError);
 
                 throw new KavitaException("Access token is invalid");
             }
@@ -1621,30 +1620,29 @@ public class ScrobblingService : IScrobblingService
 
                 await MarkSeriesAsUnknown(data, evt);
                 evt.SetErrorMessage(UnknownSeriesErrorMessage);
-
-                await _auditService.LogScrobbleAsync(KavitaPlusEventType.ScrobbleEventFailed, evt.SeriesId,
-                    ToAuditParams(evt), AuditStatus.Failure, "unknown-series", userId: evt.AppUserId);
-
             }
             else
             {
                 var errorMessage = response.ErrorMessage.StartsWith("Review") ? ReviewFailedErrorMessage : response.ErrorMessage;
 
+                ScrobbleError? scrobbleError = null;
                 if (!await _unitOfWork.ScrobbleRepository.HasErrorForSeries(evt.SeriesId))
                 {
-                    _unitOfWork.ScrobbleRepository.Attach(new ScrobbleError()
+                    scrobbleError = new ScrobbleError
                     {
                         Comment = errorMessage,
                         Details = data.SeriesName,
                         LibraryId = evt.LibraryId,
                         SeriesId = evt.SeriesId
-                    });
+                    };
+                    _unitOfWork.ScrobbleRepository.Attach(scrobbleError);
                 }
 
                 evt.SetErrorMessage(errorMessage);
 
                 await _auditService.LogScrobbleAsync(KavitaPlusEventType.ScrobbleEventFailed, evt.SeriesId,
-                    ToAuditParams(evt), AuditStatus.Failure, errorMessage, userId: evt.AppUserId);
+                    ToAuditParams(evt), AuditStatus.Failure, errorMessage, userId: evt.AppUserId,
+                    scrobbleError: scrobbleError);
             }
 
             throw new KavitaException(response.ErrorMessage);
@@ -1669,16 +1667,6 @@ public class ScrobblingService : IScrobblingService
             _logger.LogError(ex, "Scrobbling to Kavita+ API failed due to error: {ErrorMessage}", ex.Message);
             if (ex.StatusCode == 500 || ex.Message.Contains("Call failed with status code 500 (Internal Server Error)"))
             {
-                if (!await _unitOfWork.ScrobbleRepository.HasErrorForSeries(evt.SeriesId))
-                {
-                    _unitOfWork.ScrobbleRepository.Attach(new ScrobbleError()
-                    {
-                        Comment = UnknownSeriesErrorMessage,
-                        Details = data.SeriesName,
-                        LibraryId = evt.LibraryId,
-                        SeriesId = evt.SeriesId
-                    });
-                }
                 evt.SetErrorMessage(BadPayLoadErrorMessage);
                 throw new KavitaException(BadPayLoadErrorMessage);
             }

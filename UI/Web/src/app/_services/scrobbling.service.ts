@@ -137,4 +137,8 @@ export class ScrobblingService {
     return this.httpClient.post(this.baseUrl + "scrobbling/bulk-remove-events", eventIds)
   }
 
+  removeScrobbleError(id: number) {
+    return this.httpClient.delete(this.baseUrl + 'scrobbling/remove-error/' + id);
+  }
+
 }

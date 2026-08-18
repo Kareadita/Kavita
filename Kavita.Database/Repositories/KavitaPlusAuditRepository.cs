@@ -129,7 +129,7 @@ public class KavitaPlusAuditRepository(DataContext context) : IKavitaPlusAuditRe
                 e.SeriesId, series.LibraryId, series.Name,
                 e.SubjectType, e.SubjectId,
                 e.UserId, e.User != null ? e.User.UserName : null,
-                e.Payload, e.ErrorMessage, e.HasRetried))
+                e.Payload, e.ErrorMessage, e.ScrobbleErrorId, e.HasRetried))
             .ToListAsync(ct);
 
         // Due to Json deserialization, I can't use automapper here and need to do in-mem
@@ -195,7 +195,7 @@ public class KavitaPlusAuditRepository(DataContext context) : IKavitaPlusAuditRe
                 context.Series.Where(s => s.Id == e.SeriesId).Select(s => s.Name).FirstOrDefault(),
                 e.SubjectType, e.SubjectId,
                 e.UserId, e.User != null ? e.User.UserName : null,
-                e.Payload, e.ErrorMessage, e.HasRetried))
+                e.Payload, e.ErrorMessage, e.ScrobbleErrorId, e.HasRetried))
             .ToListAsync(ct);
 
         var items = raw.Select(MapToDto).ToList();
@@ -369,6 +369,7 @@ public class KavitaPlusAuditRepository(DataContext context) : IKavitaPlusAuditRe
             Username = e.Username,
             Diff = diff,
             ErrorMessage = e.ErrorMessage,
+            ScrobbleErrorId = e.ScrobbleErrorId,
             ScrobbleDetails = scrobbleDetails,
             MatchDetails = matchDetails,
             SyncDetails = syncDetails,
@@ -391,7 +392,7 @@ public class KavitaPlusAuditRepository(DataContext context) : IKavitaPlusAuditRe
         int? SeriesId, int? LibraryId, string? SeriesName,
         AuditSubjectType SubjectType, int? SubjectId,
         int? UserId, string? Username,
-        string? Payload, string? ErrorMessage, bool HasRetried);
+        string? Payload, string? ErrorMessage, int? ScrobbleErrorId, bool HasRetried);
 
     private sealed class ChangesWrapper
     {

@@ -49,9 +49,8 @@ public class WantToReadSyncService(
                 KavitaPlusAuditCategory.Sync,
                 KavitaPlusEventType.SyncStarted,
                 AuditStatus.Info,
-                userId: user.Id,
                 payload: new AuditLogWantToReadSyncParamsDto { UserName = user.UserName, Providers = userScrobbleProviders.Select(kv => kv.Key).ToList()},
-                ct: ct);
+                userId: user.Id, ct: ct);
 
             var externalSeries = new List<ExternalSeriesDetailDto>();
 
@@ -71,10 +70,9 @@ public class WantToReadSyncService(
                         KavitaPlusAuditCategory.Sync,
                         KavitaPlusEventType.SyncFailed,
                         AuditStatus.Failure,
-                        userId: user.Id,
                         payload: new AuditLogWantToReadSyncParamsDto { UserName = user.UserName },
                         error: result.ErrorMessage,
-                        ct: ct);
+                        userId: user.Id, ct: ct);
 
                     logger.LogError("Failed to retrieve Want To Read for user {UserName} from {Provider}: {Error}", user.UserName, kv.Key, result.ErrorMessage);
                     continue;
@@ -108,14 +106,13 @@ public class WantToReadSyncService(
                 KavitaPlusAuditCategory.Sync,
                 KavitaPlusEventType.SyncCompleted,
                 AuditStatus.Success,
-                userId: user.Id,
                 payload: new AuditLogWantToReadSyncCompletedParamsDto
                 {
                     UserName = user.UserName,
                     SeriesMatched = user.WantToRead.Count,
                     Providers = userScrobbleProviders.Select(kv => kv.Key).ToList()
                 },
-                ct: ct);
+                userId: user.Id, ct: ct);
 
             RecurringJob.TriggerJob(TaskScheduler.RemoveFromWantToReadTaskId);
         }

@@ -102,6 +102,11 @@ public class ScrobbleRepository(DataContext context, IMapper mapper) : IScrobble
             .ToListAsync(ct);
     }
 
+    public Task<ScrobbleError?> GetScrobbleError(int id, CancellationToken ct = default)
+    {
+        return context.ScrobbleError.FirstOrDefaultAsync(e => e.Id == id, ct);
+    }
+
     public async Task ClearScrobbleErrors(CancellationToken ct = default)
     {
         context.ScrobbleError.RemoveRange(context.ScrobbleError);
