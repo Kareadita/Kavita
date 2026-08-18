@@ -197,7 +197,7 @@ export class EditReadingListModalComponent implements OnInit {
   handleReset() {
     this.coverImageReset = true;
     this.coverImageLocked = false;
-    this.chooserConfig.set({ ...this.chooserConfig, isLocked: false });
+    this.chooserConfig.set({ ...this.chooserConfig() isLocked: false });
   }
 
   updateTags(tags: ReadingListTag[]) {

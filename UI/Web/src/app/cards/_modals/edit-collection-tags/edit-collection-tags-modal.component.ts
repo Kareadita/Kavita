@@ -253,7 +253,7 @@ export class EditCollectionTagsModalComponent implements OnInit {
   handleReset() {
     this.coverImageReset = true;
     this.collectionTagForm.patchValue({ coverImageLocked: false });
-    this.chooserConfig.set({ ...this.chooserConfig, isLocked: false });
+    this.chooserConfig.set({ ...this.chooserConfig(), isLocked: false });
   }
 
   protected readonly Tabs = Tabs;
