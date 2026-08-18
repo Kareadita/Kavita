@@ -1625,20 +1625,26 @@ public class ScrobblingService : IScrobblingService
                 await _auditService.LogScrobbleAsync(KavitaPlusEventType.ScrobbleEventFailed, evt.SeriesId,
                     ToAuditParams(evt), AuditStatus.Failure, "unknown-series", userId: evt.AppUserId);
 
-            } else
+            }
+            else
             {
+                var errorMessage = response.ErrorMessage.StartsWith("Review") ? ReviewFailedErrorMessage : response.ErrorMessage;
+
                 if (!await _unitOfWork.ScrobbleRepository.HasErrorForSeries(evt.SeriesId))
                 {
                     _unitOfWork.ScrobbleRepository.Attach(new ScrobbleError()
                     {
-                        Comment = response.ErrorMessage,
+                        Comment = errorMessage,
                         Details = data.SeriesName,
                         LibraryId = evt.LibraryId,
                         SeriesId = evt.SeriesId
                     });
                 }
 
-                evt.SetErrorMessage(response.ErrorMessage.StartsWith("Review") ? ReviewFailedErrorMessage : response.ErrorMessage);
+                evt.SetErrorMessage(errorMessage);
+
+                await _auditService.LogScrobbleAsync(KavitaPlusEventType.ScrobbleEventFailed, evt.SeriesId,
+                    ToAuditParams(evt), AuditStatus.Failure, errorMessage, userId: evt.AppUserId);
             }
 
             throw new KavitaException(response.ErrorMessage);
