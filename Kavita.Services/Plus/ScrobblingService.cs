@@ -1278,8 +1278,7 @@ public class ScrobblingService : IScrobblingService
             _unitOfWork.ScrobbleRepository.Attach(scrobbleError);
             await _unitOfWork.CommitAsync();
 
-            await _auditService.LogScrobbleAsync(KavitaPlusEventType.ScrobbleEventFailed, evt.SeriesId,
-                ToAuditParams(evt), AuditStatus.Failure, "token-expired", evt.AppUserId, scrobbleError: scrobbleError);
+            await LogScrobbleEvent(evt, KavitaPlusEventType.ScrobbleEventFailed, AuditStatus.Failure, "token-expired", scrobbleError);
         }
         catch (Exception ex)
         {
@@ -1319,8 +1318,7 @@ public class ScrobblingService : IScrobblingService
         _unitOfWork.ScrobbleRepository.Update(evt);
         await _unitOfWork.CommitAsync();
 
-        await _auditService.LogScrobbleAsync(KavitaPlusEventType.ScrobbleEventFailed, evt.SeriesId,
-            ToAuditParams(evt), AuditStatus.Failure, "unknown-series", evt.AppUserId, scrobbleError: scrobbleError);
+        await LogScrobbleEvent(evt, KavitaPlusEventType.ScrobbleEventFailed, AuditStatus.Failure, "unknown-series", scrobbleError);
         return false;
     }
 
@@ -1417,17 +1415,7 @@ public class ScrobblingService : IScrobblingService
             {
                 _logger.LogDebug("Skipped processing Scrobble event due to premature rate exceeded, provider: {Provider}", evt.ScrobbleProvider);
 
-                if (evt.ChapterId is null)
-                {
-                    await _auditService.LogScrobbleAsync(KavitaPlusEventType.ScrobbleEventSkipped, evt.SeriesId,
-                        ToAuditParams(evt), AuditStatus.Failure, "rate-limit-hit", userId: evt.AppUserId, ct: ct);
-                }
-                else
-                {
-                    await _auditService.LogChapterScrobbleAsync(KavitaPlusEventType.ScrobbleEventSkipped, evt.SeriesId, evt.ChapterId.Value,
-                        ToAuditParams(evt), AuditStatus.Failure, "rate-limit-hit", userId: evt.AppUserId, ct: ct);
-                }
-
+                await LogScrobbleEvent(evt, KavitaPlusEventType.ScrobbleEventSkipped, AuditStatus.Failure, "rate-limit-hit", ct: ct);
                 continue;
             }
 
@@ -1521,9 +1509,7 @@ public class ScrobblingService : IScrobblingService
         _unitOfWork.ScrobbleRepository.Attach(scrobbleError);
         await _unitOfWork.CommitAsync();
 
-        await _auditService.LogScrobbleAsync(KavitaPlusEventType.ScrobbleEventFailed, evt.SeriesId,
-            ToAuditParams(evt), AuditStatus.Failure, "unknown-series", userId: evt.AppUserId,
-            scrobbleError: scrobbleError);
+        await LogScrobbleEvent(evt, KavitaPlusEventType.ScrobbleEventFailed, AuditStatus.Failure, "unknown-series", scrobbleError);
     }
 
     /// <summary>
@@ -1561,16 +1547,7 @@ public class ScrobblingService : IScrobblingService
                     LibraryType = evt.Series?.Library?.Type ?? LibraryType.Manga
                 };
 
-                if (evt.ChapterId is null)
-                {
-                    await _auditService.LogScrobbleAsync(KavitaPlusEventType.ScrobbleEventSent, evt.SeriesId,
-                        scrobbleParams, AuditStatus.Success, userId: evt.AppUserId);
-                }
-                else
-                {
-                    await _auditService.LogChapterScrobbleAsync(KavitaPlusEventType.ScrobbleEventSent, evt.SeriesId,
-                        evt.ChapterId.Value, scrobbleParams, AuditStatus.Success, userId: evt.AppUserId);
-                }
+                await LogScrobbleEvent(evt, KavitaPlusEventType.ScrobbleEventSent, AuditStatus.Success);
 
                 return response.RateLeft;
             }
@@ -1606,9 +1583,7 @@ public class ScrobblingService : IScrobblingService
                 _unitOfWork.ScrobbleRepository.Attach(scrobbleError);
                 await _unitOfWork.CommitAsync();
 
-                await _auditService.LogScrobbleAsync(KavitaPlusEventType.ScrobbleEventFailed, evt.SeriesId,
-                    ToAuditParams(evt), AuditStatus.Failure, "invalid-token", userId: evt.AppUserId,
-                    scrobbleError: scrobbleError);
+                await LogScrobbleEvent(evt, KavitaPlusEventType.ScrobbleEventFailed, AuditStatus.Failure, "invalid-token", scrobbleError);
 
                 throw new KavitaException("Access token is invalid");
             }
@@ -1640,9 +1615,7 @@ public class ScrobblingService : IScrobblingService
 
                 evt.SetErrorMessage(errorMessage);
 
-                await _auditService.LogScrobbleAsync(KavitaPlusEventType.ScrobbleEventFailed, evt.SeriesId,
-                    ToAuditParams(evt), AuditStatus.Failure, errorMessage, userId: evt.AppUserId,
-                    scrobbleError: scrobbleError);
+                await LogScrobbleEvent(evt, KavitaPlusEventType.ScrobbleEventFailed, AuditStatus.Failure, errorMessage, scrobbleError);
             }
 
             throw new KavitaException(response.ErrorMessage);
@@ -2100,6 +2073,28 @@ public class ScrobblingService : IScrobblingService
                 _logger.LogWarning("User {UserName} has no remaining rate limit for {Provider}", user.UserName, kv.Key);
             }
         }
+    }
+
+    /// <summary>
+    /// Logs a scrobble event scoped to the chapter if an id is present. Always use this method when logging Event audit logs
+    /// </summary>
+    /// <param name="evt"></param>
+    /// <param name="eventType"></param>
+    /// <param name="status"></param>
+    /// <param name="error"></param>
+    /// <param name="scrobbleError"></param>
+    /// <param name="ct"></param>
+    private async Task LogScrobbleEvent(ScrobbleEvent evt, KavitaPlusEventType eventType, AuditStatus status, string? error = null, ScrobbleError? scrobbleError = null, CancellationToken ct = default)
+    {
+        if (evt.ChapterId is null)
+        {
+            await _auditService.LogScrobbleAsync(eventType, evt.SeriesId,
+                ToAuditParams(evt), status, error, userId: evt.AppUserId, scrobbleError, ct: ct);
+            return;
+        }
+
+        await _auditService.LogChapterScrobbleAsync(eventType, evt.SeriesId, evt.ChapterId.Value,
+            ToAuditParams(evt), status, error, userId: evt.AppUserId, scrobbleError, ct: ct);
     }
 
 }
