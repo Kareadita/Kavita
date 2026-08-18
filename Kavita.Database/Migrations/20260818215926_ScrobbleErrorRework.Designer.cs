@@ -14,8 +14,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Kavita.Database.Migrations
 {
     [DbContext(typeof(DataContext))]
-    [Migration("20260818195641_AddScrobbleErrorLinkInAuditLog")]
-    partial class AddScrobbleErrorLinkInAuditLog
+    [Migration("20260818215926_ScrobbleErrorRework")]
+    partial class ScrobbleErrorRework
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -2048,6 +2048,9 @@ namespace Kavita.Database.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
 
+                    b.Property<int?>("ChapterId")
+                        .HasColumnType("INTEGER");
+
                     b.Property<string>("Comment")
                         .HasColumnType("TEXT");
 
@@ -2079,6 +2082,8 @@ namespace Kavita.Database.Migrations
                         .HasColumnType("INTEGER");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("ChapterId");
 
                     b.HasIndex("ScrobbleEventId1");
 
@@ -4414,6 +4419,10 @@ namespace Kavita.Database.Migrations
 
             modelBuilder.Entity("Kavita.Models.Entities.Scrobble.ScrobbleError", b =>
                 {
+                    b.HasOne("Kavita.Models.Entities.Chapter", "Chapter")
+                        .WithMany()
+                        .HasForeignKey("ChapterId");
+
                     b.HasOne("Kavita.Models.Entities.Scrobble.ScrobbleEvent", "ScrobbleEvent")
                         .WithMany()
                         .HasForeignKey("ScrobbleEventId1");
@@ -4423,6 +4432,8 @@ namespace Kavita.Database.Migrations
                         .HasForeignKey("SeriesId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.Navigation("Chapter");
 
                     b.Navigation("ScrobbleEvent");
 

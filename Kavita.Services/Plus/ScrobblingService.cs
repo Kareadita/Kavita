@@ -869,28 +869,29 @@ public class ScrobblingService : IScrobblingService
     /// </summary>
     private async Task<ScrobbleSyncContext> PrepareScrobbleContext(CancellationToken ct)
     {
-        var erroredSeries = (await _unitOfWork.ScrobbleRepository.GetScrobbleErrors(ct))
+        var errorKeys = (await _unitOfWork.ScrobbleRepository.GetScrobbleErrors(ct))
+            // What's this where for? Why are we not skipping others?
             .Where(e => e.Comment is "Unknown Series" or UnknownSeriesErrorMessage or AccessTokenErrorMessage)
-            .Select(e => e.SeriesId)
+            .Select(e => (e.SeriesId, e.ChapterId))
             .ToList();
 
         var readEvents = (await _unitOfWork.ScrobbleRepository.GetByEvent(ScrobbleEventType.ChapterRead, ct: ct))
-            .Where(e => !erroredSeries.Contains(e.SeriesId))
+            .Where(e => !errorKeys.Contains((e.SeriesId, e.ChapterId)))
             .ToList();
         var addToWantToRead = (await _unitOfWork.ScrobbleRepository.GetByEvent(ScrobbleEventType.AddWantToRead, ct: ct))
-            .Where(e => !erroredSeries.Contains(e.SeriesId))
+            .Where(e => !errorKeys.Contains((e.SeriesId, e.ChapterId)))
             .ToList();
         var removeWantToRead = (await _unitOfWork.ScrobbleRepository.GetByEvent(ScrobbleEventType.RemoveWantToRead, ct: ct))
-            .Where(e => !erroredSeries.Contains(e.SeriesId))
+            .Where(e => !errorKeys.Contains((e.SeriesId, e.ChapterId)))
             .ToList();
         var ratingEvents = (await _unitOfWork.ScrobbleRepository.GetByEvent(ScrobbleEventType.ScoreUpdated, ct: ct))
-            .Where(e => !erroredSeries.Contains(e.SeriesId))
+            .Where(e => !errorKeys.Contains((e.SeriesId, e.ChapterId)))
             .ToList();
         var reviewEvents = (await _unitOfWork.ScrobbleRepository.GetByEvent(ScrobbleEventType.Review, ct: ct))
-            .Where(e => !erroredSeries.Contains(e.SeriesId))
+            .Where(e => !errorKeys.Contains((e.SeriesId, e.ChapterId)))
             .ToList();
         var readStatusEvents = (await _unitOfWork.ScrobbleRepository.GetByEvent(ScrobbleEventType.ReadStatusUpdate, ct: ct))
-            .Where(e => !erroredSeries.Contains(e.SeriesId))
+            .Where(e => !errorKeys.Contains((e.SeriesId, e.ChapterId)))
             .ToList();
 
         return new ScrobbleSyncContext
@@ -1273,7 +1274,8 @@ public class ScrobblingService : IScrobblingService
                     $"{evt.ScrobbleProvider} token has expired and needs rotating. Scrobbling wont work until then",
                 Details = $"User: {evt.AppUser.UserName}, Expired: {userProvider.ValidUntilUtc}",
                 LibraryId = evt.LibraryId,
-                SeriesId = evt.SeriesId
+                SeriesId = evt.SeriesId,
+                ChapterId = evt.ChapterId,
             };
             _unitOfWork.ScrobbleRepository.Attach(scrobbleError);
             await _unitOfWork.CommitAsync();
@@ -1309,7 +1311,8 @@ public class ScrobblingService : IScrobblingService
             Comment = UnknownSeriesErrorMessage,
             Details = $"User: {evt.AppUser.UserName} Series: {evt.Series.Name}",
             LibraryId = evt.LibraryId,
-            SeriesId = evt.SeriesId
+            SeriesId = evt.SeriesId,
+            ChapterId = evt.ChapterId,
         };
         _unitOfWork.ScrobbleRepository.Attach(scrobbleError);
 
@@ -1504,7 +1507,8 @@ public class ScrobblingService : IScrobblingService
             Comment = UnknownSeriesErrorMessage,
             Details = data.SeriesName,
             LibraryId = evt.LibraryId,
-            SeriesId = evt.SeriesId
+            SeriesId = evt.SeriesId,
+            ChapterId = evt.ChapterId,
         };
         _unitOfWork.ScrobbleRepository.Attach(scrobbleError);
         await _unitOfWork.CommitAsync();
@@ -1579,6 +1583,7 @@ public class ScrobblingService : IScrobblingService
                     Details = $"{evt.AppUser.UserName} has an invalid access token (K+ Error)",
                     LibraryId = evt.LibraryId,
                     SeriesId = evt.SeriesId,
+                    ChapterId = evt.ChapterId,
                 };
                 _unitOfWork.ScrobbleRepository.Attach(scrobbleError);
                 await _unitOfWork.CommitAsync();
@@ -1608,7 +1613,8 @@ public class ScrobblingService : IScrobblingService
                         Comment = errorMessage,
                         Details = data.SeriesName,
                         LibraryId = evt.LibraryId,
-                        SeriesId = evt.SeriesId
+                        SeriesId = evt.SeriesId,
+                        ChapterId = evt.ChapterId,
                     };
                     _unitOfWork.ScrobbleRepository.Attach(scrobbleError);
                 }

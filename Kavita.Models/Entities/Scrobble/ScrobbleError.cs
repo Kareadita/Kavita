@@ -22,6 +22,12 @@ public class ScrobbleError : IEntityDate
     public int SeriesId { get; set; }
     public Series Series { get; set; }
 
+    /// <summary>
+    /// An optional chapter. Only valid for chapter-based providers
+    /// </summary>
+    public int? ChapterId { get; set; }
+    public Chapter? Chapter { get; set; }
+
     public int LibraryId { get; set; }
 
     public int ScrobbleEventId { get; set; }
