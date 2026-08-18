@@ -398,91 +398,12 @@ public class ExternalMetadataService : IExternalMetadataService
         var series = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(dto.SeriesId, includes, ct);
         if (series == null) return null;
 
-        var query = dto.Query ?? string.Empty;
-
-        var potentialAnilistId = ExternalIdParser.TryParseAniListHeader(query, out var aniListId)
-            ? aniListId : ExternalIdParser.GetAniListId(query);
-
-        var potentialMalId = ExternalIdParser.TryParseMalHeader(query, out var malId)
-            ? malId : ExternalIdParser.GetMalId(query);
-
-        var potentialMangabakaId = ExternalIdParser.TryParseMangaBakaHeader(query, out var mangabakaId)
-            ? mangabakaId : ExternalIdParser.GetMangaBakaId(query);
-
-        var hardcoverUrl = ExternalIdParser.GetHardcoverSlugFromUrl(query);
-
-        var potentialHardcoverSlug = ExternalIdParser.TryParseHardcoverHeader(query, out var hardcoverId)
-            ? hardcoverId : hardcoverUrl?.Slug;
-
-        // A hardcover url says itself if it's a book or a series, which beats the toggle in the dialog being wrong
-        var isStandAlone = hardcoverUrl?.IsStandAlone ?? dto.IsStandAlone;
-
-        var potentialCbrSlug = query.Contains("comicbookroundup.com/") ? query : null;
-
-        // If any ID was extracted (header syntax or URL), the raw query string is meaningless to the backend
-        var wasHeaderQuery = potentialAnilistId.HasValue
-                             || potentialMalId.HasValue
-                             || potentialMangabakaId > 0
-                             || !string.IsNullOrEmpty(potentialHardcoverSlug)
-                             || !string.IsNullOrEmpty(potentialCbrSlug); // For now, we pass slug as query as there is a direct handling on Query currently
-
-        query = wasHeaderQuery ? null : dto.Query;
-
-        var format = series.Library.Type.ConvertToPlusMediaFormat(series.Format);
-        var otherNames = ExtractAlternativeNames(series);
-
-        var year = series.Metadata.ReleaseYear;
-        if (year == 0 && format == PlusMediaFormat.Comic && !string.IsNullOrWhiteSpace(series.Name))
-        {
-            var potentialYear = Parser.ParseYear(series.Name);
-            if (!string.IsNullOrEmpty(potentialYear))
-            {
-                year = int.Parse(potentialYear);
-            }
-        }
+        var queried = ParseQueriedIds(dto.Query);
 
         // Prioritize detection over requested provider.
-        var provider = DetectProviderFromQuery(potentialAnilistId, potentialMalId, potentialMangabakaId,
-                           potentialHardcoverSlug, potentialCbrSlug)
-                       ?? dto.Provider
-                       ?? series.GetEffectiveMetadataProvider();
+        var provider = queried.Provider ?? dto.Provider ?? series.GetEffectiveMetadataProvider();
 
-        var slug = provider switch
-        {
-            MetadataProvider.Hardcover => potentialHardcoverSlug,
-            MetadataProvider.ComicBookRoundup => potentialCbrSlug,
-            _ => string.Empty,
-        };
-
-        // If the query is empty, then use external ids. Otherwise, use what is being queried
-        var isQueryEmpty = string.IsNullOrEmpty(query);
-
-        var fallbackAniListId = series.AniListId > 0 && isQueryEmpty
-            ? series.AniListId
-            : ExternalIdParser.GetAniListId(series.Metadata.WebLinks);
-        var fallbackMalId = series.MalId > 0 && isQueryEmpty
-            ? series.MalId
-            : ExternalIdParser.GetMalId(series.Metadata.WebLinks);
-        var fallbackMangaBakaId = series.MangaBakaId > 0 && isQueryEmpty
-            ? series.MangaBakaId
-            : ExternalIdParser.GetMangaBakaId(series.Metadata.WebLinks);
-
-        var matchV3Request = new MatchRequestV3Dto
-        {
-            AniListId = potentialAnilistId ?? fallbackAniListId,
-            MalId = potentialMalId ?? fallbackMalId,
-            HardcoverId = isStandAlone ? ExternalIdParser.GetHardcoverBookId(series.Metadata.WebLinks) : ExternalIdParser.GetHardcoverSeriesId(series.Metadata.WebLinks),
-            Slug = slug,
-            CbrId = null,
-            MangabakaId = potentialMangabakaId > 0 ? potentialMangabakaId : fallbackMangaBakaId,
-            IsStandAlone = isStandAlone,
-            Provider = provider,
-            SeriesName = series.Name,
-            AlternativeNames = otherNames,
-            Year = year,
-            Query = query,
-            Format = format,
-        };
+        var matchV3Request = BuildMatchRequest(series, dto, queried, provider);
 
         _logger.LogDebug("Making match request for series {SeriesId}: {@Request}", series.Id, matchV3Request);
 
@@ -508,14 +429,126 @@ public class ExternalMetadataService : IExternalMetadataService
         };
     }
 
-    private static MetadataProvider? DetectProviderFromQuery(int? aniListId, long? malId, long mangabakaId,
-        string? hardcoverSlug, string? cbrSlug)
+    /// <summary>
+    /// The ids/slugs the user queried for directly, through header syntax or a pasted url
+    /// </summary>
+    private sealed record QueriedExternalIds
     {
-        if (!string.IsNullOrEmpty(hardcoverSlug)) return MetadataProvider.Hardcover;
-        if (!string.IsNullOrEmpty(cbrSlug)) return MetadataProvider.ComicBookRoundup;
-        if (mangabakaId > 0 || aniListId.HasValue || malId.HasValue) return MetadataProvider.Mangabaka;
+        public int? AniListId { get; init; }
+        public long? MalId { get; init; }
+        public long MangaBakaId { get; init; }
+        public string? HardcoverSlug { get; init; }
+        public string? CbrSlug { get; init; }
+        /// <summary>
+        /// Set when the queried url itself says if it points at a single book or at a series
+        /// </summary>
+        public bool? IsStandAlone { get; init; }
 
-        return null;
+        /// <summary>
+        /// If any id was found, the raw query string is meaningless to Kavita+ and shouldn't be sent along
+        /// </summary>
+        public bool HasAny => AniListId.HasValue || MalId.HasValue || MangaBakaId > 0
+                              || !string.IsNullOrEmpty(HardcoverSlug) || !string.IsNullOrEmpty(CbrSlug);
+
+        /// <summary>
+        /// The provider that owns these ids, if the user queried a provider-specific url/header
+        /// </summary>
+        public MetadataProvider? Provider
+        {
+            get
+            {
+                if (!string.IsNullOrEmpty(HardcoverSlug)) return MetadataProvider.Hardcover;
+                if (!string.IsNullOrEmpty(CbrSlug)) return MetadataProvider.ComicBookRoundup;
+                if (MangaBakaId > 0 || AniListId.HasValue || MalId.HasValue) return MetadataProvider.Mangabaka;
+
+                return null;
+            }
+        }
+    }
+
+    private static QueriedExternalIds ParseQueriedIds(string? rawQuery)
+    {
+        var query = rawQuery ?? string.Empty;
+        var hardcoverUrl = ExternalIdParser.GetHardcoverSlugFromUrl(query);
+
+        return new QueriedExternalIds
+        {
+            AniListId = ExternalIdParser.TryParseAniListHeader(query, out var aniListId)
+                ? aniListId : ExternalIdParser.GetAniListId(query),
+            MalId = ExternalIdParser.TryParseMalHeader(query, out var malId)
+                ? malId : ExternalIdParser.GetMalId(query),
+            MangaBakaId = ExternalIdParser.TryParseMangaBakaHeader(query, out var mangaBakaId)
+                ? mangaBakaId : ExternalIdParser.GetMangaBakaId(query),
+            HardcoverSlug = ExternalIdParser.TryParseHardcoverHeader(query, out var hardcoverSlug)
+                ? hardcoverSlug : hardcoverUrl?.Slug,
+            // For now, we pass the slug as query as there is a direct handling on query currently
+            CbrSlug = query.Contains("comicbookroundup.com/") ? query : null,
+            // A hardcover url says itself if it's a book or a series, which beats the toggle in the dialog being wrong
+            IsStandAlone = hardcoverUrl?.IsStandAlone,
+        };
+    }
+
+    private static MatchRequestV3Dto BuildMatchRequest(Series series, MatchSeriesDto dto, QueriedExternalIds queried,
+        MetadataProvider provider)
+    {
+        // If any id was extracted, the raw query string is meaningless to the backend
+        var query = queried.HasAny ? null : dto.Query;
+        var isStandAlone = queried.IsStandAlone ?? dto.IsStandAlone;
+        var format = series.Library.Type.ConvertToPlusMediaFormat(series.Format);
+        var webLinks = series.Metadata.WebLinks;
+
+        // If the query is empty, then use external ids. Otherwise, use what is being queried
+        var fallback = GetFallbackIds(series, string.IsNullOrEmpty(query));
+
+        return new MatchRequestV3Dto
+        {
+            AniListId = queried.AniListId ?? fallback.AniListId,
+            MalId = queried.MalId ?? fallback.MalId,
+            HardcoverId = isStandAlone ? ExternalIdParser.GetHardcoverBookId(webLinks) : ExternalIdParser.GetHardcoverSeriesId(webLinks),
+            Slug = provider switch
+            {
+                MetadataProvider.Hardcover => queried.HardcoverSlug,
+                MetadataProvider.ComicBookRoundup => queried.CbrSlug,
+                _ => string.Empty,
+            },
+            CbrId = null,
+            MangabakaId = queried.MangaBakaId > 0 ? queried.MangaBakaId : fallback.MangaBakaId,
+            IsStandAlone = isStandAlone,
+            Provider = provider,
+            SeriesName = series.Name,
+            AlternativeNames = ExtractAlternativeNames(series),
+            Year = GetReleaseYear(series, format),
+            Query = query,
+            Format = format,
+        };
+    }
+
+    /// <summary>
+    /// The ids to fall back on when the user didn't query one: the Series' own when nothing is being queried,
+    /// otherwise whatever its weblinks carry
+    /// </summary>
+    private static (int? AniListId, long? MalId, long MangaBakaId) GetFallbackIds(Series series, bool isQueryEmpty)
+    {
+        var webLinks = series.Metadata.WebLinks;
+
+        return (
+            series.AniListId > 0 && isQueryEmpty ? series.AniListId : ExternalIdParser.GetAniListId(webLinks),
+            series.MalId > 0 && isQueryEmpty ? series.MalId : ExternalIdParser.GetMalId(webLinks),
+            series.MangaBakaId > 0 && isQueryEmpty ? series.MangaBakaId : ExternalIdParser.GetMangaBakaId(webLinks)
+        );
+    }
+
+    /// <summary>
+    /// Comics rarely carry a release year on their metadata, but often have one in their name
+    /// </summary>
+    private static int GetReleaseYear(Series series, PlusMediaFormat format)
+    {
+        var year = series.Metadata.ReleaseYear;
+        if (year != 0 || format != PlusMediaFormat.Comic || string.IsNullOrWhiteSpace(series.Name)) return year;
+
+        var potentialYear = Parser.ParseYear(series.Name);
+
+        return string.IsNullOrEmpty(potentialYear) ? year : int.Parse(potentialYear);
     }
 
     private static List<string> ExtractAlternativeNames(Series series)
