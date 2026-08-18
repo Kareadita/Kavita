@@ -192,7 +192,6 @@ public class ExternalSeriesMetadataRepository(DataContext context, IMapper mappe
         CancellationToken ct = default)
     {
         return await context.Series
-            .Where(s => !IExternalMetadataService.NonEligibleLibraryTypes.Contains(s.Library.Type))
             .Where(s => s.Library.AllowMetadataMatching)
             .WhereIf(includeStaleData, s => s.ExternalSeriesMetadata == null || s.ExternalSeriesMetadata.ValidUntilUtc < DateTime.UtcNow)
 
@@ -215,7 +214,6 @@ public class ExternalSeriesMetadataRepository(DataContext context, IMapper mappe
         var source =  context.Series
             .Include(s => s.Library)
             .Include(s => s.ExternalSeriesMetadata)
-            .Where(s => !IExternalMetadataService.NonEligibleLibraryTypes.Contains(s.Library.Type))
             .Where(s => s.Library.AllowMetadataMatching)
             .WhereIf(filter.LibraryType >= 0, s => s.Library.Type == (LibraryType) filter.LibraryType)
             .FilterMatchState(filter.MatchStateOption)

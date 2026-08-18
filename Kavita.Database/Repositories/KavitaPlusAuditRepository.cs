@@ -72,7 +72,6 @@ public class KavitaPlusAuditRepository(DataContext context) : IKavitaPlusAuditRe
                              && e.Status == AuditStatus.Failure, ct);
 
         var baseEligible = context.Series
-            .Where(s => !IExternalMetadataService.NonEligibleLibraryTypes.Contains(s.Library.Type))
             .Where(s => s.Library.AllowMetadataMatching)
             .Where(s => !s.DontMatch);
 
