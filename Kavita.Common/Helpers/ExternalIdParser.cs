@@ -8,6 +8,11 @@ namespace Kavita.Common.Helpers;
 #nullable enable
 
 /// <summary>
+/// A slug parsed out of a public hardcover.app url, and if that url pointed at a single book rather than a series
+/// </summary>
+public sealed record HardcoverUrlSlug(string Slug, bool IsStandAlone);
+
+/// <summary>
 /// Handles all things parsing of External Ids (weblinks, not set checks, anilist:X)
 /// </summary>
 public static class ExternalIdParser
@@ -27,13 +32,14 @@ public static class ExternalIdParser
 
     /// <summary>
     /// Hardcover's public, slug-based URLs (as pasted by a user), distinct from the internal numeric-id
-    /// <see cref="HardcoverSeriesWebsite"/>/<see cref="HardcoverBookWebsite"/> links Kavita generates itself
+    /// <see cref="HardcoverSeriesWebsite"/>/<see cref="HardcoverBookWebsite"/> links Kavita generates itself.
+    /// The value is if the url points at a single book, rather than a series
     /// </summary>
-    private static readonly string[] HardcoverPublicWebsites =
-    [
-        "https://hardcover.app/books/",
-        "https://hardcover.app/series/",
-    ];
+    private static readonly Dictionary<string, bool> HardcoverPublicWebsites = new()
+    {
+        {"https://hardcover.app/books/", true},
+        {"https://hardcover.app/series/", false},
+    };
 
 
     /// <summary>
@@ -157,10 +163,11 @@ public static class ExternalIdParser
     }
 
     /// <summary>
-    /// Extracts the slug from a public hardcover.app book/series URL (e.g. https://hardcover.app/books/{slug})
+    /// Extracts the slug from a public hardcover.app book/series URL (e.g. https://hardcover.app/books/{slug}),
+    /// along with if the url pointed at a single book or at a series
     /// </summary>
     /// <remarks>Returns null for the numeric-id links Kavita generates itself, as those carry an id and not a slug</remarks>
-    public static string? GetHardcoverSlugFromUrl(string? text)
+    public static HardcoverUrlSlug? GetHardcoverSlugFromUrl(string? text)
     {
         if (string.IsNullOrWhiteSpace(text)) return null;
 
@@ -170,11 +177,11 @@ public static class ExternalIdParser
         if (trimmed.StartsWith(HardcoverSeriesWebsite, StringComparison.OrdinalIgnoreCase)
             || trimmed.StartsWith(HardcoverBookWebsite, StringComparison.OrdinalIgnoreCase)) return null;
 
-        var website = HardcoverPublicWebsites.FirstOrDefault(w => trimmed.StartsWith(w, StringComparison.OrdinalIgnoreCase));
+        var website = HardcoverPublicWebsites.Keys.FirstOrDefault(w => trimmed.StartsWith(w, StringComparison.OrdinalIgnoreCase));
         if (website == null) return null;
 
         var slug = trimmed[website.Length..].Split('/', '?', '#')[0];
-        return string.IsNullOrEmpty(slug) ? null : slug;
+        return string.IsNullOrEmpty(slug) ? null : new HardcoverUrlSlug(slug, HardcoverPublicWebsites[website]);
     }
 
     public static string GetHardcoverStaffId(string? url)

@@ -75,20 +75,24 @@ public class ExternalIdParserTests
     }
 
     [Theory]
-    [InlineData("https://hardcover.app/books/wicked-town-1", "wicked-town-1")]
-    [InlineData("https://hardcover.app/books/wicked-town-1/", "wicked-town-1")]
-    [InlineData("https://hardcover.app/books/wicked-town-1/editions/12345", "wicked-town-1")]
-    [InlineData("https://hardcover.app/series/the-expanse", "the-expanse")]
-    [InlineData("https://HARDCOVER.app/books/wicked-town-1", "wicked-town-1")]
+    [InlineData("https://hardcover.app/books/wicked-town-1", "wicked-town-1", true)]
+    [InlineData("https://hardcover.app/books/wicked-town-1/", "wicked-town-1", true)]
+    [InlineData("https://hardcover.app/books/wicked-town-1/editions/12345", "wicked-town-1", true)]
+    // A series url is not standalone, even if the user ticked the toggle
+    [InlineData("https://hardcover.app/series/the-expanse", "the-expanse", false)]
+    [InlineData("https://HARDCOVER.app/books/wicked-town-1", "wicked-town-1", true)]
     // The numeric-id links Kavita generates itself are not slugs
-    [InlineData("https://hardcover.app/series/id/12345", null)]
-    [InlineData("https://hardcover.app/book/id/12345", null)]
-    [InlineData("https://mangabaka.org/3391", null)]
-    [InlineData("hardcover:61176", null)]
-    [InlineData("", null)]
-    [InlineData(null, null)]
-    public void GetHardcoverSlugFromUrl_ExtractsSlug(string? text, string? expectedSlug)
+    [InlineData("https://hardcover.app/series/id/12345", null, false)]
+    [InlineData("https://hardcover.app/book/id/12345", null, false)]
+    [InlineData("https://mangabaka.org/3391", null, false)]
+    [InlineData("hardcover:61176", null, false)]
+    [InlineData("", null, false)]
+    [InlineData(null, null, false)]
+    public void GetHardcoverSlugFromUrl_ExtractsSlugAndStandAlone(string? text, string? expectedSlug, bool expectedIsStandAlone)
     {
-        Assert.Equal(expectedSlug, ExternalIdParser.GetHardcoverSlugFromUrl(text));
+        var result = ExternalIdParser.GetHardcoverSlugFromUrl(text);
+
+        Assert.Equal(expectedSlug, result?.Slug);
+        Assert.Equal(expectedIsStandAlone, result?.IsStandAlone ?? false);
     }
 }

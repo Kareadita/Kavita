@@ -409,8 +409,13 @@ public class ExternalMetadataService : IExternalMetadataService
         var potentialMangabakaId = ExternalIdParser.TryParseMangaBakaHeader(query, out var mangabakaId)
             ? mangabakaId : ExternalIdParser.GetMangaBakaId(query);
 
+        var hardcoverUrl = ExternalIdParser.GetHardcoverSlugFromUrl(query);
+
         var potentialHardcoverSlug = ExternalIdParser.TryParseHardcoverHeader(query, out var hardcoverId)
-            ? hardcoverId : ExternalIdParser.GetHardcoverSlugFromUrl(query);
+            ? hardcoverId : hardcoverUrl?.Slug;
+
+        // A hardcover url says itself if it's a book or a series, which beats the toggle in the dialog being wrong
+        var isStandAlone = hardcoverUrl?.IsStandAlone ?? dto.IsStandAlone;
 
         var potentialCbrSlug = query.Contains("comicbookroundup.com/") ? query : null;
 
@@ -466,11 +471,11 @@ public class ExternalMetadataService : IExternalMetadataService
         {
             AniListId = potentialAnilistId ?? fallbackAniListId,
             MalId = potentialMalId ?? fallbackMalId,
-            HardcoverId = dto.IsStandAlone ? ExternalIdParser.GetHardcoverBookId(series.Metadata.WebLinks) : ExternalIdParser.GetHardcoverSeriesId(series.Metadata.WebLinks),
+            HardcoverId = isStandAlone ? ExternalIdParser.GetHardcoverBookId(series.Metadata.WebLinks) : ExternalIdParser.GetHardcoverSeriesId(series.Metadata.WebLinks),
             Slug = slug,
             CbrId = null,
             MangabakaId = potentialMangabakaId > 0 ? potentialMangabakaId : fallbackMangaBakaId,
-            IsStandAlone = dto.IsStandAlone,
+            IsStandAlone = isStandAlone,
             Provider = provider,
             SeriesName = series.Name,
             AlternativeNames = otherNames,
