@@ -572,7 +572,7 @@ export class EditSeriesModalComponent implements OnInit {
   handleReset() {
     this.coverImageReset = true;
     this.editSeriesForm.patchValue({ coverImageLocked: false });
-    this.chooserConfig.set({ ...this.chooserConfig() isLocked: false });
+    this.chooserConfig.set({ ...this.chooserConfig(), isLocked: false });
   }
 
   unlock(b: any, field: string) {

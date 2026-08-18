@@ -505,7 +505,7 @@ export class EditChapterModalComponent implements OnInit {
   handleReset() {
     this.coverImageReset = true;
     this.editForm.patchValue({ coverImageLocked: false });
-    this.chooserConfig.set({ ...this.chooserConfig() isLocked: false });
+    this.chooserConfig.set({ ...this.chooserConfig(), isLocked: false });
   }
 
   getPersonsSettings(role: PersonRole) {
