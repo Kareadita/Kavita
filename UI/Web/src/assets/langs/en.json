@@ -1290,7 +1290,9 @@
         "all-status-label": "All",
         "dont-match-label": "Don't Match",
         "no-data": "{{common.no-data}}",
-        "match-alt": "Match {{seriesName}}"
+        "match-alt": "Match {{seriesName}}",
+        "total-matched-label": "Total Matched",
+        "total-count": "Total: {{count}}"
     },
 
     "manage-user-tokens": {

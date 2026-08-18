@@ -5,3 +5,10 @@ export interface ManageMatchSeries {
   isMatched: boolean;
   validUntilUtc: string;
 }
+
+export interface MatchedExternalSeriesCount {
+  totalCount: number;
+  dontMatchCount: number;
+  notMatchedCount: number;
+  erroredCount: number;
+}

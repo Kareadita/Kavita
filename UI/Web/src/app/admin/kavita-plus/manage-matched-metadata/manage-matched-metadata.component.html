@@ -1,6 +1,45 @@
 <ng-container *transloco="let t; prefix:'manage-matched-metadata'">
   <p>{{t('description')}}</p>
 
+  <div class="stats-strip d-flex justify-content-between mb-4 gap-3">
+
+    <div class="stats-card card p-3 flex-fill">
+      <div class="stat-header">
+        <i class="fa-solid fa-percent" aria-hidden="true"></i>
+        <span>{{t('total-matched-label')}}</span>
+      </div>
+      <div class="stat-value">{{ percentageMatched() | percent | defaultValue}}</div>
+      <div class="stat-subtitle phone-hidden">{{t('total-count', {count: matchedCounts()?.totalCount | number})}}</div>
+    </div>
+
+    <div class="stats-card card p-3 flex-fill">
+      <div class="stat-header">
+        <i class="fa-solid fa-question" aria-hidden="true"></i>
+        <span>{{MatchStateOption.NotMatched | matchStateOption}}</span>
+      </div>
+      <div class="stat-value">{{ matchedCounts()?.notMatchedCount | number | defaultValue}}</div>
+    </div>
+
+    <div class="stats-card card p-3 flex-fill">
+      <div class="stat-header">
+        <i class="fa-solid fa-xmark" aria-hidden="true"></i>
+        <span>{{MatchStateOption.DontMatch | matchStateOption}}</span>
+      </div>
+      <div class="stat-value">{{ matchedCounts()?.dontMatchCount | number | defaultValue}}</div>
+    </div>
+
+    <div class="stats-card card p-3 flex-fill">
+      <div class="stat-header text-danger">
+        <i class="fa-solid fa-triangle-exclamation" aria-hidden="true"></i>
+        <span>{{MatchStateOption.Error | matchStateOption}}</span>
+      </div>
+      <div class="stat-value text-danger">{{ matchedCounts()?.erroredCount | number | defaultValue}}</div>
+    </div>
+
+  </div>
+
+
+
   <form [formGroup]="filterGroup">
     <div class="row g-2">
       <div class="col-12 col-md-auto ms-md-auto">

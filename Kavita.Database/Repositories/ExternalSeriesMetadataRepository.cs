@@ -222,4 +222,23 @@ public class ExternalSeriesMetadataRepository(DataContext context, IMapper mappe
 
         return PagedList<ManageMatchSeriesDto>.CreateAsync(source, userParams, ct);
     }
+
+    public async Task<MatchedExternalSeriesCountDto> GetMatchedExternalSeriesCount(CancellationToken ct = default)
+    {
+        var source = context.Series
+            .Include(s => s.Library)
+            .Include(s => s.ExternalSeriesMetadata)
+            .Where(s => s.Library.AllowMetadataMatching);
+
+        return new MatchedExternalSeriesCountDto
+        {
+            TotalCount = await source.CountAsync(ct),
+            DontMatchCount = await source.FilterMatchState(MatchStateOption.DontMatch)
+            .CountAsync(ct),
+            NotMatchedCount = await source.FilterMatchState(MatchStateOption.NotMatched)
+                .CountAsync(ct),
+            ErroredCount = await source.FilterMatchState(MatchStateOption.Error)
+                .CountAsync(ct),
+        };
+    }
 }
