@@ -34,7 +34,7 @@ import {ImageService} from 'src/app/_services/image.service';
 import {LibraryService} from 'src/app/_services/library.service';
 import {UploadService} from 'src/app/_services/upload.service';
 import {takeUntilDestroyed, toSignal} from "@angular/core/rxjs-interop";
-import {DatePipe, NgTemplateOutlet} from "@angular/common";
+import {NgTemplateOutlet} from "@angular/common";
 import {SentenceCasePipe} from "../../../_pipes/sentence-case.pipe";
 import {CoverImageChooserComponent} from "../../../cards/cover-image-chooser/cover-image-chooser.component";
 import {
@@ -67,8 +67,7 @@ import {TabTitlePipe} from "../../../_pipes/tab-title.pipe";
 import {MetadataProvider} from "../../../_models/kavitaplus/metadata-provider.enum";
 import {map} from "rxjs/operators";
 import {MetadataProviderTitlePipe} from "../../../_pipes/metadata-provider-title.pipe";
-import {EditModalShellComponent} from "../../../shared/edit-modal-shell/edit-modal-shell.component";
-import {EditTabDirective} from "../../../shared/_directive/edit-tab.directive";
+import {UtcToLocalTimePipe} from "../../../_pipes/utc-to-local-time.pipe";
 
 enum StepID {
   General = 0,
@@ -81,7 +80,7 @@ enum StepID {
   selector: 'app-library-settings-modal',
   imports: [NgbModalModule, NgbNavLink, NgbNavItem, NgbNavContent, ReactiveFormsModule, NgbTooltip,
     SentenceCasePipe, NgbNav, NgbNavOutlet, CoverImageChooserComponent, TranslocoModule, DefaultDatePipe,
-    FileTypeGroupPipe, EditListComponent, SettingItemComponent, SettingSwitchComponent, SettingButtonComponent, LibraryTypeSubtitlePipe, NgTemplateOutlet, DatePipe, TypeaheadComponent, TabTitlePipe, MetadataProviderTitlePipe, EditModalShellComponent, EditTabDirective],
+    FileTypeGroupPipe, EditListComponent, SettingItemComponent, SettingSwitchComponent, SettingButtonComponent, LibraryTypeSubtitlePipe, NgTemplateOutlet, TypeaheadComponent, TabTitlePipe, MetadataProviderTitlePipe, UtcToLocalTimePipe],
   templateUrl: './library-settings-modal.component.html',
   styleUrls: ['./library-settings-modal.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush

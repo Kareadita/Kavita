@@ -8,10 +8,10 @@
       </span>
 
       <span class="row-label">{{t('expired-on-label')}}</span>
-      <span class="row-value">{{licenseService.licenseInfo()?.expirationDate | date:'mediumDate'}}</span>
+      <span class="row-value">{{licenseService.licenseInfo()?.expirationDate | utcToLocalTime:'mediumDate'}}</span>
 
       <span class="row-label">{{t('member-since-label')}}</span>
-      <span class="row-value">{{licenseService.licenseInfo()?.subscribedSince | date:'mediumDate'}}</span>
+      <span class="row-value">{{licenseService.licenseInfo()?.subscribedSince | utcToLocalTime:'mediumDate'}}</span>
 
       <span class="row-label">{{t('total-months-label')}}</span>
       <span class="row-value">{{licenseService.licenseInfo()?.totalMonthsSubbed}}</span>

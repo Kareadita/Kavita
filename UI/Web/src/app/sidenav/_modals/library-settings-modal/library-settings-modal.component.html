@@ -64,7 +64,7 @@
             @if (!isAddLibrary()) {
               <div>
                 {{t('last-scanned-label')}}
-                <span>{{library?.lastScanned | date: 'short' | defaultDate}}</span>
+                <span>{{library?.lastScanned | utcToLocalTime: 'short' | defaultDate}}</span>
               </div>
             }
           </ng-template>

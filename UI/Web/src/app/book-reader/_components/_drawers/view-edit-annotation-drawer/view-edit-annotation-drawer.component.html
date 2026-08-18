@@ -69,7 +69,7 @@
                     {{ an.ownerUsername }}
                   </a>
                 </div>
-                <div class="ms-2">{{ an.createdUtc | utcToLocalDate | date: 'shortDate' }}</div>
+                <div class="ms-2">{{ an.createdUtc | utcToLocalTime: 'shortDate' }}</div>
               </div>
 
               @if (an.ownerUsername === accountService.currentUser()?.username) {

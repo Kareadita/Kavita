@@ -1,4 +1,3 @@
-import {DatePipe} from '@angular/common';
 import {
   AfterContentChecked,
   ChangeDetectionStrategy,
@@ -65,7 +64,7 @@ import {ActionResult} from "../../../_models/actionables/action-result";
 import {getWritableResolvedData} from "../../../../libs/route-util";
 import {User} from "../../../_models/user/user";
 import {DrawerService} from "../../../_services/drawer.service";
-import {UtcToLocalDatePipe} from "../../../_pipes/utc-to-locale-date.pipe";
+import {UtcToLocalTimePipe} from "../../../_pipes/utc-to-local-time.pipe";
 
 @Component({
   selector: 'app-collection-detail',
@@ -74,7 +73,7 @@ import {UtcToLocalDatePipe} from "../../../_pipes/utc-to-locale-date.pipe";
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [SideNavCompanionBarComponent, CardActionablesComponent, ImageComponent, ReadMoreComponent,
     BulkOperationsComponent, CardDetailLayoutComponent, SeriesCardComponent, TranslocoDirective, NgbTooltip,
-    DatePipe, DefaultDatePipe, ProviderImagePipe, ScrobbleProviderNamePipe, PromotedIconComponent, UtcToLocalDatePipe]
+    DefaultDatePipe, ProviderImagePipe, ScrobbleProviderNamePipe, PromotedIconComponent, UtcToLocalTimePipe]
 })
 export class CollectionDetailComponent implements AfterContentChecked {
   public readonly imageService = inject(ImageService);

@@ -1,5 +1,5 @@
 import {ChangeDetectionStrategy, Component, computed, inject, input, output, signal} from '@angular/core';
-import {DatePipe, UpperCasePipe} from '@angular/common';
+import {UpperCasePipe} from '@angular/common';
 import {
   KavitaPlusBillingInterval,
   KavitaPlusSubscriptionState,
@@ -21,7 +21,7 @@ import {mediumModal} from "../../../_models/modal/modal-options";
   templateUrl: './license-info-panel.component.html',
   styleUrl: './license-info-panel.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [UtcToLocalTimePipe, UpperCasePipe, DatePipe, TranslocoDirective, KavitaPlusSubscriptionStatusPipe, KavitaPlusBillingIntervalPipe],
+  imports: [UtcToLocalTimePipe, UpperCasePipe, TranslocoDirective, KavitaPlusSubscriptionStatusPipe, KavitaPlusBillingIntervalPipe],
   host: { '[attr.data-status]': 'statusToken()' }
 })
 export class LicenseInfoPanelComponent {

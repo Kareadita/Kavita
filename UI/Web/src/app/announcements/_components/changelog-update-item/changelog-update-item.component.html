@@ -24,7 +24,7 @@
         <div class="setting-section-break"></div>
 
         <div class="mb-1 mt-2">
-          <span class="text-muted">{{t('published-label')}}{{updateValue.publishDate | date: 'short'}}</span>
+          <span class="text-muted">{{t('published-label')}}{{updateValue.publishDate | utcToLocalTime: 'short'}}</span>
           @if (!updateValue.isDocker && (accountService.hasAdminRole())) {
             @if (updateValue.updateVersion === updateValue.currentVersion) {
               <a href="{{updateValue.updateUrl}}" class="btn disabled btn-{{index() === 0 ? 'primary' : 'secondary'}} float-end" target="_blank" rel="noopener noreferrer">{{t('installed')}}</a>
