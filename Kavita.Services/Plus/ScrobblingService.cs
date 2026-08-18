@@ -732,7 +732,7 @@ public class ScrobblingService : IScrobblingService
 
     #endregion
 
-    # region Want To Read
+    #region Want To Read
     public Task ScrobbleWantToReadUpdate(int userId, int seriesId, bool onWantToRead, CancellationToken ct = default)
     {
         return ScrobbleWantToReadUpdate(null, userId, seriesId, onWantToRead, false, ct);
