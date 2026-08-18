@@ -538,6 +538,7 @@ public class Startup
                     await new ManualMigrateNormalizedOriginalNameBackfill().RunAsync(dataContext, logger);
                     await new ManualMigrateLastReadDates().RunAsync(dataContext, logger);
                     await new ManualMigrateVersionCacheFiles(directoryService).RunAsync(dataContext, logger);
+                    await new ManualMigrationExternalSeriesMetadataIds().RunAsync(dataContext, logger);
 
                     #endregion
 
