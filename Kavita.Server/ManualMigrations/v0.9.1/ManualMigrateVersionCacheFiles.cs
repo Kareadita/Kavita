@@ -39,7 +39,7 @@ public class ManualMigrateVersionCacheFiles(IDirectoryService directoryService) 
         try
         {
             directoryService.ExistOrCreate(updateScopePath);
-            directoryService.CopyDirectoryToDirectory(Path.Combine(updateScopePath, "pr_cache"), updateScopePath);
+            directoryService.CopyDirectoryToDirectory(Path.Combine(directoryService.LongTermCacheDirectory, "pr_cache"), updateScopePath);
         }
         catch (Exception ex)
         {
