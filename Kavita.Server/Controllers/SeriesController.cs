@@ -660,21 +660,25 @@ public class SeriesController(
     [KPlus]
     [HttpPost("match")]
     [Authorize(Policy = PolicyGroups.AdminPolicy)]
-    public async Task<ActionResult<IList<ExternalSeriesMatchDto>>> MatchSeries(MatchSeriesDto dto)
+    public async Task<ActionResult<MatchSeriesResultDto>> MatchSeries(MatchSeriesDto dto)
     {
         var ct = HttpContext.RequestAborted;
 
-        // The provider is part of the key as it can be changed (via the Series' override) from within the Match dialog itself,
+        // The provider is part of the key as the dialog can search against a different one than the series,
         // and the same query against a different provider is a different search
-        var provider = await unitOfWork.SeriesRepository.GetEffectiveMetadataProviderAsync(dto.SeriesId, ct);
-        var cacheKey = $"{MatchSeriesCacheKey}-{dto.SeriesId}-{provider}-{dto.Query}-{dto.IsStandAlone}";
-        var results = await _matchSeriesCacheProvider.GetAsync<IList<ExternalSeriesMatchDto>>(cacheKey, ct);
+        var seriesProvider = await unitOfWork.SeriesRepository.GetEffectiveMetadataProviderAsync(dto.SeriesId, ct);
+        if (seriesProvider == null) return NotFound();
+
+        var cacheKey = $"{MatchSeriesCacheKey}-{dto.SeriesId}-{dto.Provider ?? seriesProvider}-{dto.Query}-{dto.IsStandAlone}";
+        var results = await _matchSeriesCacheProvider.GetAsync<MatchSeriesResultDto>(cacheKey, ct);
         if (results.HasValue && !environment.IsDevelopment())
         {
             return Ok(results.Value);
         }
 
         var ret = await externalMetadataService.MatchSeries(dto, ct);
+        if (ret == null) return NotFound();
+
         await _matchSeriesCacheProvider.SetAsync(cacheKey, ret, TimeSpan.FromMinutes(1), ct);
 
         return Ok(ret);
@@ -684,14 +688,15 @@ public class SeriesController(
     /// This will perform the fix match
     /// </summary>
     /// <param name="seriesId"></param>
+    /// <param name="provider">The provider the match came from.</param>
     /// <param name="ids"></param>
     /// <returns></returns>
     [KPlus]
     [HttpPost("update-match")]
     [Authorize(Policy = PolicyGroups.AdminPolicy)]
-    public ActionResult UpdateSeriesMatch([FromQuery] int seriesId, [FromBody] ExternalMetadataIdsDto ids)
+    public ActionResult UpdateSeriesMatch([FromQuery] int seriesId, [FromQuery] MetadataProvider? provider, [FromBody] ExternalMetadataIdsDto ids)
     {
-        BackgroundJob.Enqueue(() => externalMetadataService.FixSeriesMatch(seriesId, ids, CancellationToken.None));
+        BackgroundJob.Enqueue(() => externalMetadataService.FixSeriesMatch(seriesId, ids, provider, CancellationToken.None));
 
         return Ok();
     }
@@ -709,20 +714,6 @@ public class SeriesController(
     {
         var ct = HttpContext.RequestAborted;
         await externalMetadataService.UpdateSeriesDontMatch(seriesId, dontMatch, ct);
-        return Ok();
-    }
-
-    /// <summary>
-    /// Changes (or clears) which Metadata Provider a Series should match against, overriding its Library's default
-    /// </summary>
-    /// <param name="dto"></param>
-    /// <returns></returns>
-    [KPlus]
-    [HttpPost("update-metadata-provider-override")]
-    [Authorize(Policy = PolicyGroups.AdminPolicy)]
-    public async Task<ActionResult> UpdateMetadataProviderOverride(UpdateSeriesMetadataProviderOverrideDto dto)
-    {
-        await externalMetadataService.UpdateSeriesMetadataProviderOverride(dto.SeriesId, dto.MetadataProviderOverride, HttpContext.RequestAborted);
         return Ok();
     }
 
