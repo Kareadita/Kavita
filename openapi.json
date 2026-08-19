@@ -2,12 +2,12 @@
   "openapi": "3.0.4",
   "info": {
     "title": "Kavita",
-    "description": "Kavita provides a set of APIs authenticated via an Auth Key passed in the `x-api-key` header. Generate an Auth Key under User Settings → Manage Auth Keys, paste it into the Authorize panel, and all Try It requests will include it. Assume all fields of a payload are required unless marked optional. Built against v0.9.0.20",
+    "description": "Kavita provides a set of APIs authenticated via an Auth Key passed in the `x-api-key` header. Generate an Auth Key under User Settings → Manage Auth Keys, paste it into the Authorize panel, and all Try It requests will include it. Assume all fields of a payload are required unless marked optional. Built against v0.9.0.21",
     "license": {
       "name": "GPL-3.0",
       "url": "https://github.com/Kareadita/Kavita/blob/develop/LICENSE"
     },
-    "version": "0.9.0.20"
+    "version": "0.9.0.21"
   },
   "servers": [
     {
@@ -5688,7 +5688,7 @@
         "tags": [
           "KavitaPlusAudit"
         ],
-        "summary": "Returns aggregate stats for the admin audit feed header strip.",
+        "summary": "Returns aggregate stats for the admin audit feed",
         "responses": {
           "200": {
             "description": "OK",
@@ -5706,6 +5706,36 @@
               "text/json": {
                 "schema": {
                   "$ref": "#/components/schemas/KavitaPlusAuditStatsDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/kavita-plus-audit/my-stats": {
+      "get": {
+        "tags": [
+          "KavitaPlusAudit"
+        ],
+        "summary": "Aggregate stats for my activity audit feed",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/KavitaPlusMyAuditStatsDto"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/KavitaPlusMyAuditStatsDto"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/KavitaPlusMyAuditStatsDto"
                 }
               }
             }
@@ -7499,6 +7529,36 @@
                   "items": {
                     "$ref": "#/components/schemas/ManageMatchSeriesDto"
                   }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/Manage/matched-series-counts": {
+      "get": {
+        "tags": [
+          "Manage"
+        ],
+        "summary": "Returns high level counts for matched series page",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/MatchedExternalSeriesCountDto"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MatchedExternalSeriesCountDto"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MatchedExternalSeriesCountDto"
                 }
               }
             }
@@ -14517,6 +14577,29 @@
         }
       }
     },
+    "/api/Scrobbling/remove-error/{id}": {
+      "delete": {
+        "tags": [
+          "Scrobbling"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
     "/api/Scrobbling/retry-scrobble": {
       "post": {
         "tags": [
@@ -16193,26 +16276,17 @@
             "content": {
               "text/plain": {
                 "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/ExternalSeriesMatchDto"
-                  }
+                  "$ref": "#/components/schemas/MatchSeriesResultDto"
                 }
               },
               "application/json": {
                 "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/ExternalSeriesMatchDto"
-                  }
+                  "$ref": "#/components/schemas/MatchSeriesResultDto"
                 }
               },
               "text/json": {
                 "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/ExternalSeriesMatchDto"
-                  }
+                  "$ref": "#/components/schemas/MatchSeriesResultDto"
                 }
               }
             }
@@ -16234,6 +16308,14 @@
             "schema": {
               "type": "integer",
               "format": "int32"
+            }
+          },
+          {
+            "name": "provider",
+            "in": "query",
+            "description": "The provider the match came from.",
+            "schema": {
+              "$ref": "#/components/schemas/MetadataProvider"
             }
           }
         ],
@@ -20462,6 +20544,123 @@
         }
       }
     },
+    "/api/Upload/upload-chapter-cover": {
+      "post": {
+        "tags": [
+          "Upload"
+        ],
+        "parameters": [
+          {
+            "name": "chapterId",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/Upload/upload-volume-cover": {
+      "post": {
+        "tags": [
+          "Upload"
+        ],
+        "parameters": [
+          {
+            "name": "volumeId",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/Upload/upload-series-cover": {
+      "post": {
+        "tags": [
+          "Upload"
+        ],
+        "parameters": [
+          {
+            "name": "seriesId",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/Upload/upload-by-file": {
       "post": {
         "tags": [
@@ -23598,7 +23797,7 @@
           },
           "mangaBakaId": {
             "type": "integer",
-            "format": "int64"
+            "format": "int32"
           },
           "cbrId": {
             "type": "integer",
@@ -25923,6 +26122,11 @@
             "type": "string",
             "nullable": true
           },
+          "scrobbleErrorId": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
           "scrobbleDetails": {
             "$ref": "#/components/schemas/KavitaPlusScrobbleDetailsDto"
           },
@@ -26006,6 +26210,16 @@
           "dontMatch": {
             "type": "boolean",
             "nullable": true
+          },
+          "previousProvider": {
+            "$ref": "#/components/schemas/MetadataProvider"
+          },
+          "newProvider": {
+            "$ref": "#/components/schemas/MetadataProvider"
+          },
+          "isProviderOverride": {
+            "type": "boolean",
+            "nullable": true
           }
         },
         "additionalProperties": false
@@ -26083,7 +26297,7 @@
           },
           "mangaBakaId": {
             "type": "integer",
-            "format": "int64",
+            "format": "int32",
             "nullable": true
           },
           "cbrId": {
@@ -26256,6 +26470,7 @@
           2,
           3,
           4,
+          5,
           10,
           11,
           13,
@@ -26281,7 +26496,7 @@
           81
         ],
         "type": "integer",
-        "description": "Members:\n- `0` — SeriesMatched\n- `1` — SeriesMatchFailed\n- `2` — SeriesBlacklisted\n- `3` — SeriesMatchFixed\n- `4` — SeriesDontMatchSet\n- `10` — MetadataFetched\n- `11` — MetadataUpdated\n- `13` — CoverUpdated\n- `20` — ChapterMetadataUpdated\n- `21` — ChapterCoverUpdated\n- `22` — VolumeCoverUpdated\n- `30` — PersonCoverUpdated\n- `31` — PersonAliasAdded\n- `40` — CollectionSynced\n- `41` — CollectionItemAdded\n- `50` — ScrobbleEventCreated\n- `51` — ScrobbleEventUpdated\n- `52` — ScrobbleEventSent\n- `53` — ScrobbleEventFailed\n- `54` — ScrobbleRateLimitHit\n- `55` — ScrobbleEventSkipped\n- `56` — ScrobbleHoldRemoved\n- `57` — ScrobbleHoldAdded\n- `60` — SyncStarted\n- `61` — SyncCompleted\n- `62` — SyncFailed\n- `80` — SystemTokenRefresh\n- `81` — SystemProviderInfoSync",
+        "description": "Members:\n- `0` — SeriesMatched\n- `1` — SeriesMatchFailed\n- `2` — SeriesBlacklisted\n- `3` — SeriesMatchFixed\n- `4` — SeriesDontMatchSet\n- `5` — SeriesMetadataProviderOverrideSet\n- `10` — MetadataFetched\n- `11` — MetadataUpdated\n- `13` — CoverUpdated\n- `20` — ChapterMetadataUpdated\n- `21` — ChapterCoverUpdated\n- `22` — VolumeCoverUpdated\n- `30` — PersonCoverUpdated\n- `31` — PersonAliasAdded\n- `40` — CollectionSynced\n- `41` — CollectionItemAdded\n- `50` — ScrobbleEventCreated\n- `51` — ScrobbleEventUpdated\n- `52` — ScrobbleEventSent\n- `53` — ScrobbleEventFailed\n- `54` — ScrobbleRateLimitHit\n- `55` — ScrobbleEventSkipped\n- `56` — ScrobbleHoldRemoved\n- `57` — ScrobbleHoldAdded\n- `60` — SyncStarted\n- `61` — SyncCompleted\n- `62` — SyncFailed\n- `80` — SystemTokenRefresh\n- `81` — SystemProviderInfoSync",
         "format": "int32",
         "x-enum-varnames": [
           "SeriesMatched",
@@ -26289,6 +26504,7 @@
           "SeriesBlacklisted",
           "SeriesMatchFixed",
           "SeriesDontMatchSet",
+          "SeriesMetadataProviderOverrideSet",
           "MetadataFetched",
           "MetadataUpdated",
           "CoverUpdated",
@@ -26319,6 +26535,7 @@
           "SeriesBlacklisted",
           "SeriesMatchFixed",
           "SeriesDontMatchSet",
+          "SeriesMetadataProviderOverrideSet",
           "MetadataFetched",
           "MetadataUpdated",
           "CoverUpdated",
@@ -26357,6 +26574,24 @@
               "$ref": "#/components/schemas/ApiUsageDto"
             },
             "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "KavitaPlusMyAuditStatsDto": {
+        "type": "object",
+        "properties": {
+          "events24H": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "failures24H": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "scrobbleQueueCount": {
+            "type": "integer",
+            "format": "int32"
           }
         },
         "additionalProperties": false
@@ -27198,6 +27433,9 @@
           },
           "isStandAlone": {
             "type": "boolean"
+          },
+          "provider": {
+            "$ref": "#/components/schemas/MetadataProvider"
           }
         },
         "additionalProperties": false
@@ -27217,10 +27455,7 @@
           "libraryType": {
             "$ref": "#/components/schemas/LibraryType"
           },
-          "matchedProvider": {
-            "$ref": "#/components/schemas/MetadataProvider"
-          },
-          "primaryProvider": {
+          "metadataProvider": {
             "$ref": "#/components/schemas/MetadataProvider"
           },
           "seriesFormat": {
@@ -27256,6 +27491,22 @@
         },
         "additionalProperties": false
       },
+      "MatchSeriesResultDto": {
+        "type": "object",
+        "properties": {
+          "provider": {
+            "$ref": "#/components/schemas/MetadataProvider"
+          },
+          "matches": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ExternalSeriesMatchDto"
+            },
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
       "MatchStateOption": {
         "enum": [
           0,
@@ -27281,6 +27532,28 @@
           "Error",
           "DontMatch"
         ]
+      },
+      "MatchedExternalSeriesCountDto": {
+        "type": "object",
+        "properties": {
+          "totalCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "dontMatchCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "notMatchedCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "erroredCount": {
+            "type": "integer",
+            "format": "int32"
+          }
+        },
+        "additionalProperties": false
       },
       "MediaErrorDto": {
         "required": [
@@ -30186,6 +30459,11 @@
             "type": "integer",
             "format": "int32"
           },
+          "chapterId": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
           "libraryId": {
             "type": "integer",
             "format": "int32"
@@ -30901,6 +31179,9 @@
           "isStandAlone": {
             "type": "boolean"
           },
+          "metadataProviderOverride": {
+            "$ref": "#/components/schemas/MetadataProvider"
+          },
           "coverImage": {
             "type": "string",
             "nullable": true
@@ -30935,7 +31216,7 @@
           },
           "mangaBakaId": {
             "type": "integer",
-            "format": "int64"
+            "format": "int32"
           },
           "mangaBakaEditionId": {
             "type": "string",
@@ -32252,7 +32533,7 @@
           },
           "mangaBakaId": {
             "type": "integer",
-            "format": "int64"
+            "format": "int32"
           },
           "cbrId": {
             "type": "integer",
@@ -32680,7 +32961,7 @@
           },
           "mangaBakaId": {
             "type": "integer",
-            "format": "int64"
+            "format": "int32"
           },
           "cbrId": {
             "type": "integer",
@@ -33070,7 +33351,7 @@
           },
           "mangaBakaId": {
             "type": "integer",
-            "format": "int64",
+            "format": "int32",
             "nullable": true
           },
           "cbrId": {
@@ -33854,6 +34135,9 @@
           "localizedNameLocked": {
             "type": "boolean"
           },
+          "metadataProviderOverride": {
+            "$ref": "#/components/schemas/MetadataProvider"
+          },
           "aniListId": {
             "type": "integer",
             "format": "int32",
@@ -33880,7 +34164,7 @@
           },
           "mangaBakaId": {
             "type": "integer",
-            "format": "int64",
+            "format": "int32",
             "nullable": true
           },
           "cbrId": {
@@ -34046,7 +34330,7 @@
           },
           "mangaBakaId": {
             "type": "integer",
-            "format": "int64",
+            "format": "int32",
             "nullable": true
           },
           "cbrId": {
@@ -34104,9 +34388,6 @@
           "url": {
             "minLength": 1,
             "type": "string"
-          },
-          "isInternalUrl": {
-            "type": "boolean"
           }
         },
         "additionalProperties": false
@@ -34835,7 +35116,7 @@
           },
           "mangaBakaId": {
             "type": "integer",
-            "format": "int64"
+            "format": "int32"
           },
           "cbrId": {
             "type": "integer",
