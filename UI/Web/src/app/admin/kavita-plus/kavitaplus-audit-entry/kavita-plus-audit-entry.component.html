@@ -89,7 +89,7 @@
           </button>
         }
 
-        @if (entry().category === KavitaPlusAuditCategory.Match && !!entry().libraryId) {
+        @if ((entry().category === KavitaPlusAuditCategory.Match || entry().status === AuditStatus.Failure) && !!entry().libraryId) {
           <button class="btn btn-outline-primary btn-sm" (click)="matchSeries()">
             <i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i> {{t('match')}}
           </button>
