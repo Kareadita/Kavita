@@ -22,7 +22,7 @@ public class ReadingHistoryService(IDataContext context, ILogger<ReadingHistoryS
 
     public async Task AggregateYesterdaysActivity(CancellationToken ct = default)
     {
-        var yesterdayUtc = DateTime.Now.Date.AddDays(-1).ToUniversalTime();
+        var yesterdayUtc = DateTime.UtcNow.Date.AddDays(-1);
         var startUtc = yesterdayUtc;
         var endUtc = yesterdayUtc.AddDays(1).AddTicks(-1);
 
