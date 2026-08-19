@@ -91,6 +91,8 @@ export class ManageMatchedMetadataComponent implements OnInit {
 
     const totalItems = matchedCount.totalCount;
 
+    if (totalItems == 0) return 0;
+
     return  (matchedCount.dontMatchCount + matchedCount.erroredCount) / totalItems;
   });
 

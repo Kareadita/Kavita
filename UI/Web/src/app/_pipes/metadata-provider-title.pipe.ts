@@ -7,7 +7,7 @@ import {translate} from "@jsverse/transloco";
 })
 export class MetadataProviderTitlePipe implements PipeTransform {
 
-  // We need to use the static method to avoid code duplciation as this pipe is constructed in KavitaPlusEventDescriptionPipe
+  // We need to use the static method to avoid code duplication as this pipe is constructed in KavitaPlusEventDescriptionPipe
   transform(value: MetadataProvider | null): string {
     switch (value) {
       case MetadataProvider.Hardcover:
