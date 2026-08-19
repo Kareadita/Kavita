@@ -252,9 +252,6 @@ export class SeriesService {
     return this.httpClient.post<MatchSeriesResult>(this.baseUrl + 'series/match', model);
   }
 
-  /**
-   * @param provider The provider the match came from
-   */
   updateMatch(seriesId: number, series: ExternalSeriesDetail, edition: ExternalEditionDto | null, provider: MetadataProvider | null) {
     const ids = {
       aniListId: series.aniListId ?? null,

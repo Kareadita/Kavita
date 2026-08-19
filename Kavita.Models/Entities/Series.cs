@@ -221,6 +221,14 @@ public class Series : IEntityDate, IHasReadTimeEstimate, IHasCoverImage, IHasMet
     /// </summary>
     public MetadataProvider GetEffectiveMetadataProvider()
     {
-        return MetadataProviderOverride ?? Library.MetadataProvider;
+        if (MetadataProviderOverride.HasValue) return MetadataProviderOverride.Value;
+        if (Library == null)
+        {
+            throw new InvalidOperationException(
+                $"{nameof(Library)} navigation property was not loaded. " +
+                $"Include it in the query before calling {nameof(GetEffectiveMetadataProvider)}().");
+        }
+
+        return Library.MetadataProvider;
     }
 }

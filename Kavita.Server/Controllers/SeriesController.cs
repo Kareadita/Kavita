@@ -271,8 +271,7 @@ public class SeriesController(
             return BadRequest(await localizationService.TranslateAsync(UserId, "generic-series-update"));
         }
 
-        // Routed through the service (rather than set inline) so that changing the provider also invalidates the
-        // metadata we cached from the previous one. No-ops when the override is unchanged.
+        // Pulls a fresh Series, must be after commit
         await externalMetadataService.UpdateSeriesMetadataProviderOverride(series.Id, updateSeries.MetadataProviderOverride, ct);
 
         if (needsRefreshMetadata)
