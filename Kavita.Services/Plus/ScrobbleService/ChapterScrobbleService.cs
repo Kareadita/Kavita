@@ -5,6 +5,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Kavita.API.Database;
 using Kavita.API.Services.Plus;
+using Kavita.Common.Extensions;
 using Kavita.Models.DTOs.KavitaPlus;
 using Kavita.Models.Entities;
 using Kavita.Models.Entities.Enums;
@@ -287,6 +288,12 @@ where T: IScrobbleProviderService
             }
 
             var prevProgress = existingEvent.Progress;
+            if (prevProgress.Is(currentProgress))
+            {
+                logger.LogTrace("Ignoring reading update for {Series} - ChapterId: {ChapterId} as progress is the same", ctx.Series.Name, ctx.Chapter.Id);
+                return;
+            }
+
             existingEvent.Progress = currentProgress;
             existingEvent.IsBackFill &= ctx.IsBackfill;
 
