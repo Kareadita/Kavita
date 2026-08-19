@@ -78,7 +78,7 @@
         </span>
 
         @if (entry().scrobbleErrorId && accountService.hasAdminRole()) {
-          <button class="btn btn-outline-primary btn-sm" (click)="deleteScrobbleErrors()">
+          <button class="btn btn-outline-danger btn-sm" (click)="deleteScrobbleErrors()">
             <i class="fa-solid fa-trash-can" aria-hidden="true"></i> {{t('remove-error')}}
           </button>
         }

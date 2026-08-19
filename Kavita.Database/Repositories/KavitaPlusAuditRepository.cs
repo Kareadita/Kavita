@@ -12,6 +12,7 @@ using Kavita.Models.DTOs.KavitaPlus;
 using Kavita.Models.DTOs.KavitaPlus.Audit;
 using Kavita.Models.Entities.Enums;
 using Kavita.Models.Entities.Enums.Audit;
+using Kavita.Models.Entities.Enums.KavitaPlus;
 using Kavita.Models.Entities.History;
 using Microsoft.EntityFrameworkCore;
 
@@ -375,7 +376,9 @@ public class KavitaPlusAuditRepository(DataContext context) : IKavitaPlusAuditRe
             SyncDetails = syncDetails,
             MetadataExtras = metadataExtras,
             SystemDetails = systemDetails,
-            CanRetry = e is { Status: AuditStatus.Failure, Category: KavitaPlusAuditCategory.Scrobble, HasRetried: false },
+            CanRetry = e is { Status: AuditStatus.Failure, Category: KavitaPlusAuditCategory.Scrobble, HasRetried: false }
+                       // We are currently unable to retry chapter reads. See ScrobblingService#RetryScrobbleAsync:L1977
+                       && scrobbleDetails?.ScrobbleEventType != ScrobbleEventType.ChapterRead,
         };
     }
 

@@ -870,8 +870,6 @@ public class ScrobblingService : IScrobblingService
     private async Task<ScrobbleSyncContext> PrepareScrobbleContext(CancellationToken ct)
     {
         var errorKeys = (await _unitOfWork.ScrobbleRepository.GetScrobbleErrors(ct))
-            // What's this where for? Why are we not skipping others?
-            .Where(e => e.Comment is "Unknown Series" or UnknownSeriesErrorMessage or AccessTokenErrorMessage)
             .Select(e => (e.SeriesId, e.ChapterId))
             .ToList();
 
@@ -963,7 +961,11 @@ public class ScrobblingService : IScrobblingService
     public async Task ProcessUpdatesSinceLastSync(CancellationToken ct = default)
     {
         var ctx = await PrepareScrobbleContext(ct);
-        if (ctx.TotalCount == 0) return;
+        if (ctx.TotalCount == 0)
+        {
+            _logger.LogDebug("No scrobble events to process");
+            return;
+        }
 
         // Get all the applicable users to scrobble and set their rate limits
         await PrepareUsersToScrobble(ctx, ct);
