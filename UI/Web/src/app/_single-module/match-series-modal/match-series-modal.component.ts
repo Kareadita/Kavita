@@ -36,7 +36,6 @@ import {MetadataProviderTitlePipe} from "../../_pipes/metadata-provider-title.pi
 import {ExternalEditionDto, PlusMediaFormat} from "../../_models/series-detail/external-series-detail";
 import {SeriesFormatComponent} from "../../shared/series-format/series-format.component";
 import {LibraryTypePipe} from "../../_pipes/library-type.pipe";
-import {TagBadgeComponent} from "../../shared/tag-badge/tag-badge.component";
 
 @Component({
   selector: 'app-match-series-modal',
@@ -51,7 +50,7 @@ import {TagBadgeComponent} from "../../shared/tag-badge/tag-badge.component";
     MetadataProviderTitlePipe,
     SeriesFormatComponent,
     LibraryTypePipe,
-    TagBadgeComponent,
+
   ],
   templateUrl: './match-series-modal.component.html',
   styleUrl: './match-series-modal.component.scss',
@@ -111,6 +110,10 @@ export class MatchSeriesModalComponent implements OnInit {
     const extraQuery = (isStandalone) ? '&type=Series' : '';
     return `https://hardcover.app/search?q=${encodeURIComponent(this.series().name)}${extraQuery}`;
   });
+
+  cbrSearchUrl = computed(() => {
+    return `https://comicbookroundup.com/search-results?keyword=${encodeURIComponent(this.series().name)}`;
+  })
 
   constructor() {
     this.canSaveDontMatch = computed(() => this.isDontMatch() === true && !this.series().dontMatch);
