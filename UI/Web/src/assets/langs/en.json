@@ -1701,7 +1701,8 @@
     "kavita-plus-audit-entry": {
         "system": "{{manage-kavitaplus-activity.system}}",
         "retry": "Retry",
-        "match": "Match"
+        "match": "Match",
+        "remove-error": "Remove Scrobble Error"
     },
 
     "audit-status-title-pipe": {
