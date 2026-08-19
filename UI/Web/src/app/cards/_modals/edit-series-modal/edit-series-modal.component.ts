@@ -286,7 +286,7 @@ export class EditSeriesModalComponent implements OnInit {
       this.seriesVolumes = volumes;
       this.libraryType.set(libraryType);
       this.isLoadingVolumes.set(false);
-      this.chooserConfig.set(this.coverChooserConfigFactory.forSeries(this.series, this.seriesVolumes, this.libraryType));
+      this.chooserConfig.set(this.coverChooserConfigFactory.forSeries(this.series, this.seriesVolumes, this.libraryType()));
 
       volumes.forEach(v => {
         this.volumeCollapsed[v.name] = true;

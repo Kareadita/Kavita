@@ -16,22 +16,8 @@ public sealed record MatchSeriesInfoDto
     public PlusMediaFormat PlusMediaFormat { get; set; }
     [EnumDataType(typeof(LibraryType))]
     public LibraryType LibraryType { get; set; }
-    /// <summary>
-    /// Where the Match came from
-    /// </summary>
     [EnumDataType(typeof(MetadataProvider))]
-    public MetadataProvider? MatchedProvider { get; set; }
-    /// <summary>
-    /// Who we would match against. This is the effective provider: the Series' <see cref="MetadataProviderOverride"/>
-    /// when set, otherwise the Library's default.
-    /// </summary>
-    [EnumDataType(typeof(MetadataProvider))]
-    public MetadataProvider PrimaryProvider { get; set; }
-    /// <summary>
-    /// If set, this Series overrides its Library's default Metadata Provider. Null means it inherits the Library default.
-    /// </summary>
-    [EnumDataType(typeof(MetadataProvider))]
-    public MetadataProvider? MetadataProviderOverride { get; set; }
+    public MetadataProvider MetadataProvider { get; set; }
     [EnumDataType(typeof(MangaFormat))]
     public MangaFormat SeriesFormat { get; set; }
     public int? MangaBakaId { get; set; }

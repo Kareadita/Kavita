@@ -119,13 +119,13 @@ export class MatchSeriesModalComponent implements OnInit {
   });
 
   /** Provider the results came from, falling back to the series' own before the first search lands */
-  protected activeProvider = computed(() => this.resultProvider() ?? this.matchInfo()?.primaryProvider ?? null);
+  protected activeProvider = computed(() => this.resultProvider() ?? this.matchInfo()?.metadataProvider ?? null);
   /** The search ran against another provider than the series own, so applying a match will switch the Series over */
   protected isProviderSwitched = computed(() => {
     const provider = this.resultProvider();
-    return provider !== null && provider !== this.matchInfo()?.primaryProvider;
+    return provider !== null && provider !== this.matchInfo()?.metadataProvider;
   });
-  
+
 
   constructor() {
     this.canSaveDontMatch = computed(() => this.isDontMatch() === true && !this.series().dontMatch);
@@ -141,7 +141,7 @@ export class MatchSeriesModalComponent implements OnInit {
 
       this.seriesService.getMatchInfo(this.series().id).subscribe(res => {
         this.matchInfo.set(res);
-        this.formGroup.controls.provider.setValue(res.primaryProvider, { emitEvent: false });
+        this.formGroup.controls.provider.setValue(res.metadataProvider, { emitEvent: false });
         this.autoSelectExistingMatch(this.matches());
       });
     });
@@ -239,7 +239,7 @@ export class MatchSeriesModalComponent implements OnInit {
       return !!info.aniListId && s.aniListId === info.aniListId;
     }
 
-    switch (info.matchedProvider) {
+    switch (info.metadataProvider) {
       case MetadataProvider.Mangabaka:
         return !!info.mangaBakaId && s.mangabakaId === info.mangaBakaId;
       case MetadataProvider.ComicBookRoundup:

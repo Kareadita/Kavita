@@ -733,8 +733,6 @@ public class SeriesController(
         var libraryType = series.Library.Type;
         var externalMetadata = series.ExternalSeriesMetadata;
 
-        var provider = externalMetadata?.Provider;
-
         return Ok(new MatchSeriesInfoDto
         {
             HasMatch = externalMetadata is {Id: > 0} &&
@@ -743,14 +741,12 @@ public class SeriesController(
             IsLegacy = series is {AniListId: > 0, MangaBakaId: 0},
             CbrId = series.CbrId,
             HardcoverId = series.HardcoverId,
-            MangaBakaId = (int) series.MangaBakaId,
+            MangaBakaId = series.MangaBakaId,
             MangaBakaEditionId = series.MangaBakaEditionId,
             AniListId = series.AniListId,
             LibraryType = libraryType,
             PlusMediaFormat = plusFormat,
-            MatchedProvider = provider,
-            PrimaryProvider = series.GetEffectiveMetadataProvider(),
-            MetadataProviderOverride = series.MetadataProviderOverride,
+            MetadataProvider = series.GetEffectiveMetadataProvider(),
             SeriesFormat = series.Format,
             IsStandalone = series.IsStandAlone,
         });

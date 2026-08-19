@@ -400,7 +400,6 @@ public class ExternalMetadataService : IExternalMetadataService
 
         var queried = ParseQueriedIds(dto.Query);
 
-        // Prioritize detection over requested provider.
         var provider = queried.Provider ?? dto.Provider ?? series.GetEffectiveMetadataProvider();
 
         var matchV3Request = BuildMatchRequest(series, dto, queried, provider);
@@ -429,9 +428,6 @@ public class ExternalMetadataService : IExternalMetadataService
         };
     }
 
-    /// <summary>
-    /// The ids/slugs the user queried for directly, through header syntax or a pasted url
-    /// </summary>
     private sealed record QueriedExternalIds
     {
         public int? AniListId { get; init; }
@@ -483,7 +479,6 @@ public class ExternalMetadataService : IExternalMetadataService
                 ? hardcoverSlug : hardcoverUrl?.Slug,
             // For now, we pass the slug as query as there is a direct handling on query currently
             CbrSlug = query.Contains("comicbookroundup.com/") ? query : null,
-            // A hardcover url says itself if it's a book or a series, which beats the toggle in the dialog being wrong
             IsStandAlone = hardcoverUrl?.IsStandAlone,
         };
     }
