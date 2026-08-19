@@ -12,6 +12,7 @@ using Kavita.Models.DTOs.KavitaPlus;
 using Kavita.Models.DTOs.KavitaPlus.Audit;
 using Kavita.Models.Entities.Enums.Audit;
 using Kavita.Models.Entities.History;
+using Kavita.Models.Entities.Scrobble;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 
@@ -25,8 +26,7 @@ public class KavitaPlusAuditService(IUnitOfWork unitOfWork, ILogger<KavitaPlusAu
     // 24h before we log the audit log again
     private const int TemperedLoggingCoolDownHours = 24;
 
-    public async Task LogAsync(
-        KavitaPlusAuditCategory category,
+    public async Task LogAsync(KavitaPlusAuditCategory category,
         KavitaPlusEventType eventType,
         AuditStatus status,
         AuditSubjectType subjectType = AuditSubjectType.Global,
@@ -35,6 +35,7 @@ public class KavitaPlusAuditService(IUnitOfWork unitOfWork, ILogger<KavitaPlusAu
         object? payload = null,
         string? error = null,
         int? userId = null,
+        ScrobbleError? scrobbleError = null,
         CancellationToken ct = default)
     {
         try
@@ -51,6 +52,7 @@ public class KavitaPlusAuditService(IUnitOfWork unitOfWork, ILogger<KavitaPlusAu
                 Payload = payload != null ? JsonSerializer.Serialize(payload, JsonOptions) : null,
                 ErrorMessage = error,
                 UserId = userId,
+                ScrobbleError = scrobbleError
             };
             unitOfWork.KavitaPlusAuditRepository.Add(entry);
             await unitOfWork.CommitAsync(ct);
@@ -82,7 +84,7 @@ public class KavitaPlusAuditService(IUnitOfWork unitOfWork, ILogger<KavitaPlusAu
             return;
         }
 
-        await LogAsync(category, eventType, status, subjectType, seriesId, subjectId, payload, error, userId, ct);
+        await LogAsync(category, eventType, status, subjectType, seriesId, subjectId, payload, error, userId, ct: ct);
     }
 
     public Task LogMatchAsync(KavitaPlusEventType type, int seriesId, object payload,
@@ -110,14 +112,17 @@ public class KavitaPlusAuditService(IUnitOfWork unitOfWork, ILogger<KavitaPlusAu
             AuditSubjectType.Collection, subjectId: collectionId, payload: payload, userId: userId, ct: ct);
 
     public Task LogScrobbleAsync(KavitaPlusEventType type, int seriesId, AuditLogScrobbleParamsDto details,
-        AuditStatus status, string? error = null, int? userId = null, CancellationToken ct = default) =>
+        AuditStatus status, string? error = null, int? userId = null, ScrobbleError? scrobbleError = null,
+        CancellationToken ct = default) =>
         LogAsync(KavitaPlusAuditCategory.Scrobble, type, status,
-            AuditSubjectType.Series, seriesId: seriesId, payload: details, error: error, userId: userId, ct: ct);
+            AuditSubjectType.Series, seriesId: seriesId, payload: details, error: error, userId: userId, scrobbleError: scrobbleError, ct: ct);
 
-    public Task LogChapterScrobbleAsync(KavitaPlusEventType type, int seriesId, int chapterId, AuditLogScrobbleParamsDto details,
-        AuditStatus status, string? error = null, int? userId = null, CancellationToken ct = default) =>
+    public Task LogChapterScrobbleAsync(KavitaPlusEventType type, int seriesId, int chapterId,
+        AuditLogScrobbleParamsDto details,
+        AuditStatus status, string? error = null, int? userId = null, ScrobbleError? scrobbleError = null,
+        CancellationToken ct = default) =>
         LogAsync(KavitaPlusAuditCategory.Scrobble, type, status,
-            AuditSubjectType.Chapter, seriesId: seriesId, subjectId: chapterId, payload: details, error: error, userId: userId, ct: ct);
+            AuditSubjectType.Chapter, seriesId: seriesId, subjectId: chapterId, payload: details, error: error, userId: userId, scrobbleError: scrobbleError, ct: ct);
 
     public async Task PurgeOldLogsAsync(CancellationToken ct = default)
     {

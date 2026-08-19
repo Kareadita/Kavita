@@ -192,10 +192,15 @@ public class ExternalSeriesMetadataRepository(DataContext context, IMapper mappe
         CancellationToken ct = default)
     {
         return await context.Series
-            .Where(s => !IExternalMetadataService.NonEligibleLibraryTypes.Contains(s.Library.Type))
             .Where(s => s.Library.AllowMetadataMatching)
             .WhereIf(includeStaleData, s => s.ExternalSeriesMetadata == null || s.ExternalSeriesMetadata.ValidUntilUtc < DateTime.UtcNow)
-            .WhereIf(!includeStaleData, s => s.ExternalSeriesMetadata == null || s.ExternalSeriesMetadata.AniListId == 0)
+
+            .WhereIf(!includeStaleData, s =>
+                (s.Library.MetadataProvider == MetadataProvider.Hardcover && s.HardcoverId == 0) ||
+                (s.Library.MetadataProvider == MetadataProvider.Mangabaka
+                 && s.MangaBakaId == 0 && s.AniListId == 0 && s.MalId == 0) ||
+                (s.Library.MetadataProvider == MetadataProvider.ComicBookRoundup && s.CbrId == 0))
+
             .Where(s => !s.IsBlacklisted && !s.DontMatch)
             .OrderBy(s => s.ExternalSeriesMetadata == null ? DateTime.MinValue : s.ExternalSeriesMetadata.ValidUntilUtc)
             .Select(s => s.Id)
@@ -209,7 +214,6 @@ public class ExternalSeriesMetadataRepository(DataContext context, IMapper mappe
         var source =  context.Series
             .Include(s => s.Library)
             .Include(s => s.ExternalSeriesMetadata)
-            .Where(s => !IExternalMetadataService.NonEligibleLibraryTypes.Contains(s.Library.Type))
             .Where(s => s.Library.AllowMetadataMatching)
             .WhereIf(filter.LibraryType >= 0, s => s.Library.Type == (LibraryType) filter.LibraryType)
             .FilterMatchState(filter.MatchStateOption)
@@ -217,5 +221,24 @@ public class ExternalSeriesMetadataRepository(DataContext context, IMapper mappe
             .ProjectTo<ManageMatchSeriesDto>(mapper.ConfigurationProvider);
 
         return PagedList<ManageMatchSeriesDto>.CreateAsync(source, userParams, ct);
+    }
+
+    public async Task<MatchedExternalSeriesCountDto> GetMatchedExternalSeriesCount(CancellationToken ct = default)
+    {
+        var source = context.Series
+            .Include(s => s.Library)
+            .Include(s => s.ExternalSeriesMetadata)
+            .Where(s => s.Library.AllowMetadataMatching);
+
+        return new MatchedExternalSeriesCountDto
+        {
+            TotalCount = await source.CountAsync(ct),
+            DontMatchCount = await source.FilterMatchState(MatchStateOption.DontMatch)
+            .CountAsync(ct),
+            NotMatchedCount = await source.FilterMatchState(MatchStateOption.NotMatched)
+                .CountAsync(ct),
+            ErroredCount = await source.FilterMatchState(MatchStateOption.Error)
+                .CountAsync(ct),
+        };
     }
 }

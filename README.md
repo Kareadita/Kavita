@@ -24,15 +24,14 @@ your reading collection with your friends and family!
 ## What Kavita Provides
 - Serve up Manga/Webtoons/Comics (cbr, cbz, zip/rar/rar5, 7zip, raw images) and Books (epub, pdf)
 - First class responsive readers that work great on any device (phone, tablet, desktop)
-- Customizable theming support: [Theme Repo](https://github.com/Kareadita/Themes) and [Documentation](https://wiki.kavitareader.com/guides/themes)
-- External metadata integration and scrobbling for read status, ratings, and reviews (available via [Kavita+](https://wiki.kavitareader.com/kavita+)) 
+- Customizable theming support: [Theme Repo](https://github.com/Kareadita/Themes) and [Documentation](https://wiki.kavitareader.com/guides/themes) 
+- Ability to download metadata, reviews, ratings, recommendations, and more (scrobbling, smart collections, ...) (available via [Kavita+](https://wiki.kavitareader.com/kavita+))
 - Rich Metadata support with filtering, searching, and smart filters
 - Ways to group reading material: Collections, Reading Lists (CBL Import), Want to Read
 - Ability to manage users with rich Role-based management for age restrictions, abilities within the app, OIDC, etc
 - Rich web readers supporting webtoon, continuous reading mode (continue without leaving the reader), virtual pages (epub), etc
 - Ability to customize your dashboard and side nav with smart filters, custom order and visibility toggles
 - Full Localization Support ([Weblate](https://hosted.weblate.org/engage/kavita/))
-- Ability to download metadata, reviews, ratings, and more (available via [Kavita+](https://wiki.kavitareader.com/kavita+))
 - Epub-based Annotation/Highlight support 
 
 ## Support
@@ -62,13 +61,13 @@ vision. You may lose data and have to restart. The Kavita team strives to avoid 
 
 ## Donate
 If you like Kavita, have gotten good use out of it, or feel like you want to say thanks with a few bucks, feel free to donate. Money will go towards
-expenses related to Kavita. Back us through [OpenCollective](https://opencollective.com/Kavita#backer). You can also use [Paypal](https://www.paypal.com/paypalme/majora2007?locale.x=en_US), however your name will not show below. Kavita+ is also an 
-option which provides funding, and you get a benefit.
+expenses related to Kavita. Back us through [OpenCollective](https://opencollective.com/Kavita#backer). You can also use [Paypal](https://www.paypal.com/paypalme/majora2007?locale.x=en_US), however your name will not show below. [Kavita+](https://wiki.kavitareader.com/kavita+) is also an 
+option which provides funding and a benefit.
 
 ## Kavita+
-[Kavita+](https://wiki.kavitareader.com/kavita+) is a paid subscription that offers premium features that otherwise wouldn't be feasible to include in Kavita. It is run and operated by [majora2007](https://github.com/majora2007), the creator and primary developer of Kavita.
+[Kavita+](https://wiki.kavitareader.com/kavita+) is a paid subscription that offers premium (internet-facing) features that otherwise wouldn't be feasible to include in Kavita. It is run and operated by [majora2007](https://github.com/majora2007), the creator and primary developer of Kavita.
 
-If you are interested, you can use the promo code [`FIRSTTIME`](https://buy.stripe.com/8x23cw0uqdXy38Z15J8Vi05?prefilled_promo_code=FIRSTTIME) for your initial signup for 2$ off the first payment. This can be thought of as donating to Kavita's development and getting some sweet features out of it.
+If you are interested, you can use the promo code [`FIRSTTIME`](https://buy.stripe.com/8x23cw0uqdXy38Z15J8Vi05?prefilled_promo_code=FIRSTTIME) for your initial signup for 2$ off the first payment. Get some sweet features, while supporting majora2007's goal to go full time on Kavita development.
 
 **If you already contribute via OpenCollective, please reach out to majora2007 for a provisioned license.**
 
@@ -79,16 +78,9 @@ Thank you to [Weblate](https://hosted.weblate.org/engage/kavita/) who hosts our 
 <img src="https://hosted.weblate.org/widget/kavita/horizontal-auto.svg" alt="Translation status" />
 </a>
 
-## Zenith
-[![Deploy with Zenith](https://cdn.zenith.hosting/buttons/deploy-with-zenith.svg)](https://zenith.hosting/host/kavita)
-
-One-click managed Kavita: storage, backups, email and a free subdomain included. A share of every subscription goes back to Kavita.
-
-
-## PikaPods
-If you are looking to try your hand at self-hosting but lack the machine, [PikaPods](https://www.pikapods.com/pods?run=kavita) is a great service that 
-allows you to easily spin up a server. 20% of app revenues are contributed back to Kavita via OpenCollective.
-
+## I don't have a Server
+If you want to take a stab at self-hosting, but don't have a PC, you can use either [Zenith](https://zenith.hosting/host/kavita) or [PikaPods](https://www.pikapods.com/pods?run=kavita). 
+Both these companies offer a simple interface to self-hosting and contribute back to Kavita via OpenCollective.
 
 ## Contributors
 

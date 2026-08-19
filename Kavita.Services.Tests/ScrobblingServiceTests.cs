@@ -180,17 +180,16 @@ public class ScrobblingServiceTests(ITestOutputHelper outputHelper): AbstractDbT
 
     private async Task<ScrobbleEvent> CreateScrobbleEvent(IUnitOfWork unitOfWork, int? seriesId = null)
     {
-        // var (unitOfWork, context, _) = await CreateDatabase();
-        // await Setup(unitOfWork, context);
-        //
+        var user = await unitOfWork.DataContext.Users.FirstAsync();
 
         var evt = new ScrobbleEvent
         {
             ScrobbleEventType = ScrobbleEventType.ChapterRead,
             Format = PlusMediaFormat.Manga,
-            SeriesId = seriesId ?? 0,
-            LibraryId = 0,
-            AppUserId = 0,
+            SeriesId = seriesId ?? 1,
+            LibraryId = 1,
+            AppUserId = user.Id,
+            AppUser = user,
         };
 
         if (seriesId != null)

@@ -6,8 +6,16 @@
           @if (sourceLabel()) {
             <label class="visually-hidden" [for]="idPrefix() + '-' + i">{{sourceLabel()}}</label>
           }
-          <input [id]="idPrefix() + '-' + i" type="text" class="form-control" formControlName="str"
-                 [placeholder]="sourceLabel()" autocomplete="off" />
+          @if (strValues().length > 0) {
+            <select [id]="idPrefix() + '-' + i" class="form-control form-select" formControlName="str">
+              @for (str of strValues(); track $index) {
+                <option [value]="str">{{str}}</option>
+              }
+            </select>
+          } @else {
+            <input [id]="idPrefix() + '-' + i" type="text" class="form-control" formControlName="str"
+                   [placeholder]="sourceLabel()" autocomplete="off" />
+          }
         </div>
         <div class="col-md-2 d-flex align-items-center justify-content-center">
           <i class="fa fa-arrow-right" aria-hidden="true"></i>

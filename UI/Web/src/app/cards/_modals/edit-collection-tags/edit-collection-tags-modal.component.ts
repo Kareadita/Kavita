@@ -6,7 +6,8 @@ import {
   effect,
   inject,
   input,
-  OnInit
+  OnInit,
+  signal
 } from '@angular/core';
 import {FormControl, FormGroup, FormsModule, ReactiveFormsModule, Validators} from '@angular/forms';
 import {
@@ -93,7 +94,7 @@ export class EditCollectionTagsModalComponent implements OnInit {
   selectedCover: string = '';
   coverImageDirty = false;
   coverImageReset = false;
-  chooserConfig: CoverImageChooserConfig = {};
+  chooserConfig = signal<CoverImageChooserConfig>({});
   formGroup = new FormGroup({'filter': new FormControl('', [])});
 
 
@@ -173,7 +174,7 @@ export class EditCollectionTagsModalComponent implements OnInit {
       this.pagination = series.pagination;
       this.series = series.result;
 
-      this.chooserConfig = this.coverChooserConfigFactory.forCollection(this.tag(), this.series);
+      this.chooserConfig.set(this.coverChooserConfigFactory.forCollection(this.tag(), this.series));
 
       this.selections = new SelectionModel<Series>(true, this.series);
       this.isLoading = false;
@@ -252,8 +253,7 @@ export class EditCollectionTagsModalComponent implements OnInit {
   handleReset() {
     this.coverImageReset = true;
     this.collectionTagForm.patchValue({ coverImageLocked: false });
-    this.chooserConfig = { ...this.chooserConfig, isLocked: false };
-    this.cdRef.markForCheck();
+    this.chooserConfig.set({ ...this.chooserConfig(), isLocked: false });
   }
 
   protected readonly Tabs = Tabs;

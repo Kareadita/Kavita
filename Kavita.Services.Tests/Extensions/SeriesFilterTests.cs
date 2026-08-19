@@ -515,7 +515,7 @@ public class SeriesFilterTests(ITestOutputHelper outputHelper): AbstractDbTest(o
 
     #endregion
 
-    # region HasPublicationStatus
+    #region HasPublicationStatus
 
     private async Task<AppUser> SetupHasPublicationStatus(DataContext context)
     {

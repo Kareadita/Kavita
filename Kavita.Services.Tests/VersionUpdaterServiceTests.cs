@@ -241,7 +241,8 @@ public class VersionUpdaterServiceTests : IDisposable
         });
 
         // Create cache file
-        var cacheFilePath = Path.Combine(_tempPath, "github_releases_cache.json");
+        Directory.CreateDirectory(Path.Combine(_tempPath, "update"));
+        var cacheFilePath = Path.Combine(_tempPath, "update", "github_releases_cache.json");
         await File.WriteAllTextAsync(cacheFilePath, System.Text.Json.JsonSerializer.Serialize(releases));
         File.SetLastWriteTimeUtc(cacheFilePath, DateTime.UtcNow); // Ensure it's fresh
 

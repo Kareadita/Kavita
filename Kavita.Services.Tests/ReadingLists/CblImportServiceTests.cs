@@ -224,6 +224,93 @@ public class CblImportServiceTests : AbstractDbTest
         Assert.Equal(3, updated!.Items.Count);
     }
 
+    [Fact]
+    public async Task UpsertReadingList_RemovesItemsNoLongerInCbl()
+    {
+        var (unitOfWork, context, _) = await CreateDatabase();
+        using var helper = new CblTestHelper(unitOfWork);
+        var seed = await helper.SeedLibrary("simple-comic.json");
+
+        var ids1 = seed.Lookup[("Fables", "1", "1")];
+        var ids2 = seed.Lookup[("Fables", "1", "2")];
+        var ids3 = seed.Lookup[("Fables", "1", "3")];
+
+        // Pre-create reading list with Fables #1, #2, #3
+        var rl = new ReadingListBuilder("Removal Test")
+            .WithAppUserId(seed.User.Id)
+            .WithItem(new ReadingListItemBuilder(0, ids1.SeriesId, ids1.VolumeId, ids1.ChapterId).Build())
+            .WithItem(new ReadingListItemBuilder(1, ids2.SeriesId, ids2.VolumeId, ids2.ChapterId).Build())
+            .WithItem(new ReadingListItemBuilder(2, ids3.SeriesId, ids3.VolumeId, ids3.ChapterId).Build())
+            .Build();
+        unitOfWork.ReadingListRepository.Add(rl);
+        await unitOfWork.CommitAsync();
+
+        // Re-import the same list with #2 dropped
+        var cbl = CblFileBuilder.Create("Removal Test")
+            .AddBook("Fables", volume: "1", number: "1")
+            .AddBook("Fables", volume: "1", number: "3")
+            .Build();
+
+        var filePath = helper.WriteCblToDisk(cbl);
+        var svc = helper.CreateImportService();
+        var decisions = new CblImportDecisions
+        {
+            ItemResolutions = new Dictionary<int, CblItemDecision>(),
+            SaveAsRemapRules = false
+        };
+        var summary = await svc.UpsertReadingList(seed.User.Id, filePath, decisions);
+
+        Assert.True(summary.IsUpdate);
+
+        var updated = await unitOfWork.ReadingListRepository.GetReadingListByTitleAsync("Removal Test", seed.User.Id);
+        Assert.NotNull(updated);
+        Assert.Equal(2, updated!.Items.Count);
+
+        // #2 is gone, and the survivors are re-ordered contiguously
+        Assert.DoesNotContain(updated.Items, i => i.ChapterId == ids2.ChapterId);
+        var items = updated.Items.OrderBy(i => i.Order).ToList();
+        Assert.Equal(ids1.ChapterId, items[0].ChapterId);
+        Assert.Equal(0, items[0].Order);
+        Assert.Equal(ids3.ChapterId, items[1].ChapterId);
+        Assert.Equal(1, items[1].Order);
+    }
+
+    [Fact]
+    public async Task UpsertReadingList_NothingMatches_KeepsExistingItems()
+    {
+        var (unitOfWork, context, _) = await CreateDatabase();
+        using var helper = new CblTestHelper(unitOfWork);
+        var seed = await helper.SeedLibrary("simple-comic.json");
+
+        var ids = seed.Lookup[("Fables", "1", "1")];
+
+        var rl = new ReadingListBuilder("Failed Import Test")
+            .WithAppUserId(seed.User.Id)
+            .WithItem(new ReadingListItemBuilder(0, ids.SeriesId, ids.VolumeId, ids.ChapterId).Build())
+            .Build();
+        unitOfWork.ReadingListRepository.Add(rl);
+        await unitOfWork.CommitAsync();
+
+        // Nothing in this CBL resolves, so the existing list must be left intact
+        var cbl = CblFileBuilder.Create("Failed Import Test")
+            .AddBook("Some Series Not In The Library", volume: "1", number: "1")
+            .Build();
+
+        var filePath = helper.WriteCblToDisk(cbl);
+        var svc = helper.CreateImportService();
+        var decisions = new CblImportDecisions
+        {
+            ItemResolutions = new Dictionary<int, CblItemDecision>(),
+            SaveAsRemapRules = false
+        };
+        await svc.UpsertReadingList(seed.User.Id, filePath, decisions);
+
+        var updated = await unitOfWork.ReadingListRepository.GetReadingListByTitleAsync("Failed Import Test", seed.User.Id);
+        Assert.NotNull(updated);
+        Assert.Single(updated!.Items);
+        Assert.Equal(ids.ChapterId, updated.Items.First().ChapterId);
+    }
+
     #endregion
 
     #region Group 3: Series-Level Remap Rules

@@ -1290,7 +1290,9 @@
         "all-status-label": "All",
         "dont-match-label": "Don't Match",
         "no-data": "{{common.no-data}}",
-        "match-alt": "Match {{seriesName}}"
+        "match-alt": "Match {{seriesName}}",
+        "total-matched-label": "Total Matched",
+        "total-count": "Total: {{count}}"
     },
 
     "manage-user-tokens": {
@@ -1699,7 +1701,8 @@
     "kavita-plus-audit-entry": {
         "system": "{{manage-kavitaplus-activity.system}}",
         "retry": "Retry",
-        "match": "Match"
+        "match": "Match",
+        "remove-error": "Remove Scrobble Error"
     },
 
     "audit-status-title-pipe": {
@@ -2773,10 +2776,8 @@
     },
 
     "scrobble-provider-description-pipe": {
-        "kavita": "",
         "anilist": "Everything Manga & Light Novels",
         "my-anime-list": "Want To Read & Stacks sync for Manga & Light Novels",
-        "comic-book-roundup": "",
         "hardcover": "Everything Books, Manga, and Light Novels!",
         "mangabaka": "Everything Manga & Light Novels"
     },

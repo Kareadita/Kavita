@@ -6,7 +6,8 @@ import {
   effect,
   inject,
   Input,
-  OnInit
+  OnInit,
+  signal
 } from '@angular/core';
 import {UtilityService} from "../../shared/_services/utility.service";
 import {FormControl, FormGroup, FormsModule, ReactiveFormsModule, Validators} from "@angular/forms";
@@ -56,13 +57,13 @@ import {ActionFactoryService} from "../../_services/action-factory.service";
 import {modalDeleted, modalSaved} from "../../_models/modal/modal-result";
 import {Tabs} from "../../_models/tabs";
 import {
+  addMetadataIdControls,
   EditExternalMetadataFormComponent
 } from "../../shared/_components/edit-external-metadata-form/edit-external-metadata-form.component";
 import {NULL_DATE} from "../../_pipes/date-year-range.pipe";
 import {DownloadEntityType} from "../../shared/_models/download-queue-item";
 import {EditModalShellComponent} from "../../shared/edit-modal-shell/edit-modal-shell.component";
 import {EditTabDirective} from "../../shared/_directive/edit-tab.directive";
-import {form} from "@angular/forms/signals";
 
 
 const blackList = [Action.Edit, Action.IncognitoRead, Action.AddToReadingList];
@@ -123,7 +124,7 @@ export class EditChapterModalComponent implements OnInit {
   selectedCover: string = '';
   coverImageReset = false;
   coverImageDirty = false;
-  chooserConfig: CoverImageChooserConfig = {};
+  chooserConfig = signal<CoverImageChooserConfig>({});
 
 
   tagsSettings: TypeaheadSettings<Tag> = new TypeaheadSettings();
@@ -163,7 +164,7 @@ export class EditChapterModalComponent implements OnInit {
 
     this.size = (<Chapter>this.chapter).files.reduce((sum, v) => sum + v.bytes, 0);
 
-    this.chooserConfig = this.coverChooserConfigFactory.forChapter(this.chapter, this.libraryType, this.seriesId);
+    this.chooserConfig.set(this.coverChooserConfigFactory.forChapter(this.chapter, this.libraryType, this.seriesId));
 
     this.editForm.addControl('titleName', new FormControl(this.chapter.titleName, []));
     this.editForm.addControl('sortOrder', new FormControl(Math.max(0, this.chapter.sortOrder), [Validators.required, Validators.min(0)]));
@@ -171,6 +172,7 @@ export class EditChapterModalComponent implements OnInit {
     this.editForm.addControl('language', new FormControl(this.chapter.language, []));
     this.editForm.addControl('isbn', new FormControl(this.chapter.isbn, []));
     this.editForm.addControl('ageRating', new FormControl(this.chapter.ageRating, []));
+    addMetadataIdControls(this.editForm, this.chapter);
 
     if (this.chapter.releaseDate !== NULL_DATE) {
       this.editForm.addControl('releaseDate', new FormControl(this.chapter.releaseDate.substring(0, 10), []));
@@ -503,8 +505,7 @@ export class EditChapterModalComponent implements OnInit {
   handleReset() {
     this.coverImageReset = true;
     this.editForm.patchValue({ coverImageLocked: false });
-    this.chooserConfig = { ...this.chooserConfig, isLocked: false };
-    this.cdRef.markForCheck();
+    this.chooserConfig.set({ ...this.chooserConfig(), isLocked: false });
   }
 
   getPersonsSettings(role: PersonRole) {
@@ -522,5 +523,4 @@ export class EditChapterModalComponent implements OnInit {
   protected readonly Action = Action;
   protected readonly PersonRole = PersonRole;
   protected readonly MangaFormat = MangaFormat;
-  protected readonly form = form;
 }

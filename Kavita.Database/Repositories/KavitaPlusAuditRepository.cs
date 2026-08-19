@@ -12,6 +12,7 @@ using Kavita.Models.DTOs.KavitaPlus;
 using Kavita.Models.DTOs.KavitaPlus.Audit;
 using Kavita.Models.Entities.Enums;
 using Kavita.Models.Entities.Enums.Audit;
+using Kavita.Models.Entities.Enums.KavitaPlus;
 using Kavita.Models.Entities.History;
 using Microsoft.EntityFrameworkCore;
 
@@ -72,7 +73,6 @@ public class KavitaPlusAuditRepository(DataContext context) : IKavitaPlusAuditRe
                              && e.Status == AuditStatus.Failure, ct);
 
         var baseEligible = context.Series
-            .Where(s => !IExternalMetadataService.NonEligibleLibraryTypes.Contains(s.Library.Type))
             .Where(s => s.Library.AllowMetadataMatching)
             .Where(s => !s.DontMatch);
 
@@ -130,7 +130,7 @@ public class KavitaPlusAuditRepository(DataContext context) : IKavitaPlusAuditRe
                 e.SeriesId, series.LibraryId, series.Name,
                 e.SubjectType, e.SubjectId,
                 e.UserId, e.User != null ? e.User.UserName : null,
-                e.Payload, e.ErrorMessage, e.HasRetried))
+                e.Payload, e.ErrorMessage, e.ScrobbleErrorId, e.HasRetried))
             .ToListAsync(ct);
 
         // Due to Json deserialization, I can't use automapper here and need to do in-mem
@@ -196,7 +196,7 @@ public class KavitaPlusAuditRepository(DataContext context) : IKavitaPlusAuditRe
                 context.Series.Where(s => s.Id == e.SeriesId).Select(s => s.Name).FirstOrDefault(),
                 e.SubjectType, e.SubjectId,
                 e.UserId, e.User != null ? e.User.UserName : null,
-                e.Payload, e.ErrorMessage, e.HasRetried))
+                e.Payload, e.ErrorMessage, e.ScrobbleErrorId, e.HasRetried))
             .ToListAsync(ct);
 
         var items = raw.Select(MapToDto).ToList();
@@ -372,12 +372,15 @@ public class KavitaPlusAuditRepository(DataContext context) : IKavitaPlusAuditRe
             Username = e.Username,
             Diff = diff,
             ErrorMessage = e.ErrorMessage,
+            ScrobbleErrorId = e.ScrobbleErrorId,
             ScrobbleDetails = scrobbleDetails,
             MatchDetails = matchDetails,
             SyncDetails = syncDetails,
             MetadataExtras = metadataExtras,
             SystemDetails = systemDetails,
-            CanRetry = e is { Status: AuditStatus.Failure, Category: KavitaPlusAuditCategory.Scrobble, HasRetried: false },
+            CanRetry = e is { Status: AuditStatus.Failure, Category: KavitaPlusAuditCategory.Scrobble, HasRetried: false }
+                       // We are currently unable to retry chapter reads. See ScrobblingService#RetryScrobbleAsync:L1977
+                       && scrobbleDetails?.ScrobbleEventType != ScrobbleEventType.ChapterRead,
         };
     }
 
@@ -394,7 +397,7 @@ public class KavitaPlusAuditRepository(DataContext context) : IKavitaPlusAuditRe
         int? SeriesId, int? LibraryId, string? SeriesName,
         AuditSubjectType SubjectType, int? SubjectId,
         int? UserId, string? Username,
-        string? Payload, string? ErrorMessage, bool HasRetried);
+        string? Payload, string? ErrorMessage, int? ScrobbleErrorId, bool HasRetried);
 
     private sealed class ChangesWrapper
     {

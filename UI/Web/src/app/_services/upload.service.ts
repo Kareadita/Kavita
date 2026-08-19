@@ -16,8 +16,20 @@ export class UploadService {
   private baseUrl = environment.apiUrl;
 
 
-  uploadByUrl(url: string,  isInternalUrl = false) {
-    return this.httpClient.post<string>(this.baseUrl + 'upload/upload-by-url', {url, isInternalUrl}, TextResonse);
+  uploadByUrl(url: string) {
+    return this.httpClient.post<string>(this.baseUrl + 'upload/upload-by-url', {url}, TextResonse);
+  }
+
+  uploadChapterCover(chapterId: number) {
+    return this.httpClient.post<string>(this.baseUrl + 'upload/upload-chapter-cover?chapterId=' + chapterId, {}, TextResonse);
+  }
+
+  uploadVolumeCover(volumeId: number) {
+    return this.httpClient.post<string>(this.baseUrl + 'upload/upload-volume-cover?volumeId=' + volumeId, {}, TextResonse);
+  }
+
+  uploadSeriesCover(seriesId: number) {
+    return this.httpClient.post<string>(this.baseUrl + 'upload/upload-series-cover?seriesId=' + seriesId, {}, TextResonse);
   }
 
   /**

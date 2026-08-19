@@ -9,14 +9,13 @@ export class ScrobbleProviderDescriptionPipe implements PipeTransform {
 
   transform(value: ScrobbleProvider): string {
     switch (value) {
+      case ScrobbleProvider.Cbr:
       case ScrobbleProvider.Kavita:
-        return translate('scrobble-provider-description-pipe.kavita');
+        return ''; // These don't have any description and leaving a blank key in en.json breaks weblate
       case ScrobbleProvider.AniList:
         return translate('scrobble-provider-description-pipe.anilist');
       case ScrobbleProvider.Mal:
         return translate('scrobble-provider-description-pipe.my-anime-list');
-      case ScrobbleProvider.Cbr:
-        return translate('scrobble-provider-description-pipe.comic-book-roundup');
       case ScrobbleProvider.Hardcover:
         return translate('scrobble-provider-description-pipe.hardcover');
       case ScrobbleProvider.MangaBaka:

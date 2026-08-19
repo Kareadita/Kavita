@@ -644,7 +644,7 @@ public class OpdsController(
 
         // Multi-file chapter: produce a single flat .cbz by reusing the
         // page-streaming cache, which already extracts and orders pages
-        // across all the chapter's files. Otherwise OPDS clients only
+        // across all the chapter's files. Otherwise, OPDS clients only
         // receive the first file of the chapter.
         var chapter = await cacheService.Ensure(chapterId);
         if (chapter == null)
@@ -660,7 +660,7 @@ public class OpdsController(
         if (!System.IO.File.Exists(outputPath))
         {
             var cacheDir = cacheService.GetCachePath(chapterId);
-            ZipFile.CreateFromDirectory(cacheDir, outputPath);
+            await ZipFile.CreateFromDirectoryAsync(cacheDir, outputPath);
         }
 
         return PhysicalFile(outputPath, "application/x-cbz", downloadName, true);

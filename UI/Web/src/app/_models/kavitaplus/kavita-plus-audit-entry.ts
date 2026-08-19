@@ -25,6 +25,7 @@ export interface KavitaPlusAuditEntry {
   username: string | null;
   diff: MetadataFieldChange[] | null;
   errorMessage: string | null;
+  scrobbleErrorId: number | null;
   scrobbleDetails: KavitaPlusScrobbleDetails | null;
   matchDetails: KavitaPlusAuditMatchDetails | null;
   syncDetails: KavitaPlusAuditSyncDetails | null;

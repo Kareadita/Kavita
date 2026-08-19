@@ -26,6 +26,7 @@ public sealed record KavitaPlusAuditEntryDto
     public string? Username { get; init; }
     public IList<MetadataFieldChangeDto>? Diff { get; init; }
     public string? ErrorMessage { get; init; }
+    public int? ScrobbleErrorId { get; init; }
     public KavitaPlusScrobbleDetailsDto? ScrobbleDetails { get; init; }
     public KavitaPlusAuditMatchDetailsDto? MatchDetails { get; init; }
     public KavitaPlusAuditSyncDetailsDto? SyncDetails { get; init; }

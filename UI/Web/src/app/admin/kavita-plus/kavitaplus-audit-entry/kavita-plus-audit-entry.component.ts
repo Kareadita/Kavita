@@ -1,4 +1,4 @@
-import {ChangeDetectionStrategy, Component, computed, inject, input, output, signal} from '@angular/core';
+import {ChangeDetectionStrategy, Component, computed, inject, input, model, output, signal} from '@angular/core';
 import {NgbCollapse} from '@ng-bootstrap/ng-bootstrap';
 import {NgClass} from '@angular/common';
 import {Router, RouterLink} from '@angular/router';
@@ -13,7 +13,7 @@ import {ProfileIconComponent} from '../../../_single-module/profile-icon/profile
 import {
   ScrobbleProviderImageComponent
 } from '../../../shared/_components/scrobble-provider-image/scrobble-provider-image.component';
-import {ScrobbleProvider} from '../../../_services/scrobbling.service';
+import {ScrobbleProvider, ScrobblingService} from '../../../_services/scrobbling.service';
 import {ScrobbleProviderNamePipe} from '../../../_pipes/scrobble-provider-name.pipe';
 import {
   ScrobbleProviderTagBadgeComponent
@@ -32,6 +32,7 @@ import {SafeUrlPipe} from "../../../_pipes/safe-url.pipe";
 import {SeriesService} from "../../../_services/series.service";
 import {ActionService} from "../../../_services/action.service";
 import {tap} from "rxjs";
+import {AccountService} from "../../../_services/account.service";
 
 @Component({
   selector: 'app-kavitaplus-audit-entry',
@@ -65,9 +66,11 @@ export class KavitaPlusAuditEntryComponent {
   protected readonly imageService = inject(ImageService);
   private readonly seriesService = inject(SeriesService);
   private readonly actionService = inject(ActionService);
+  private readonly scrobblingService = inject(ScrobblingService);
+  protected readonly accountService = inject(AccountService);
   private readonly router = inject(Router);
 
-  entry = input.required<KavitaPlusAuditEntry>();
+  entry = model.required<KavitaPlusAuditEntry>();
   /** Show the status badge plus the match-provider and fetch-trigger badges (admin "rich" view). */
   showStatus = input<boolean>(false);
   /** Show the acting user's avatar and username. */
@@ -162,6 +165,18 @@ export class KavitaPlusAuditEntryComponent {
   supportsDiff = computed(() => {
     return [KavitaPlusEventType.MetadataUpdated, KavitaPlusEventType.ChapterMetadataUpdated].includes(this.entry().eventType);
   });
+
+  deleteScrobbleErrors() {
+    const e = this.entry();
+    if (e.scrobbleErrorId == null) return;
+
+    this.scrobblingService.removeScrobbleError(e.scrobbleErrorId).pipe(
+      tap(() => this.entry.update(e => ({
+        ...e,
+        scrobbleErrorId: null,
+      })))
+    ).subscribe();
+  }
 
   retryEntry() {
     this.retry.emit(this.entry());

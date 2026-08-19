@@ -891,12 +891,6 @@ public class ExternalMetadataService : IExternalMetadataService
         var beforeIds = new AuditLogMatchExternalIdsParamsDto { AniListId = series.AniListId, MalId = series.MalId,
             MangaBakaId = series.MangaBakaId, MangaBakaEditionId = series.MangaBakaEditionId, CbrId = series.CbrId, HardcoverId = series.HardcoverId };
 
-        externalSeriesMetadata.MalId = data.MalId ?? result.MalId ?? 0;
-        externalSeriesMetadata.AniListId = data.AniListId ?? result.AniListId ?? 0;
-        externalSeriesMetadata.CbrId = data.CbrId ?? result.CbrId ?? 0;
-        externalSeriesMetadata.MangabakaId = data.MangabakaId ?? result.MangabakaId ?? 0;
-        series.MangaBakaId = externalSeriesMetadata.MangabakaId;
-
         if (!string.IsNullOrEmpty(data.MangaBakaEditionId))
         {
             series.MangaBakaEditionId = data.MangaBakaEditionId;
@@ -906,14 +900,20 @@ public class ExternalMetadataService : IExternalMetadataService
             series.MangaBakaEditionId = string.Empty;
         }
 
-        var hardcoverId = data.HardcoverId ?? result.Series?.HardcoverId ?? series.HardcoverId;
+        // Update ids from K+ in case of merges upstream
+        series.AniListId = result.AniListId ?? series.AniListId;
+        series.MalId = result.MalId ?? series.MalId;
+        series.MangaBakaId = result.MangabakaId ?? series.MangaBakaId;
+        series.CbrId = result.CbrId ?? series.CbrId;
+        series.HardcoverId = result.HardCoverId ?? series.HardcoverId;
+
         var afterIds = new AuditLogMatchExternalIdsParamsDto {
-            AniListId = externalSeriesMetadata.AniListId,
-            MalId = externalSeriesMetadata.MalId,
+            AniListId = series.AniListId,
+            MalId = series.MalId,
             MangaBakaId = series.MangaBakaId,
             MangaBakaEditionId = series.MangaBakaEditionId,
-            CbrId = externalSeriesMetadata.CbrId,
-            HardcoverId = hardcoverId };
+            CbrId = series.CbrId,
+            HardcoverId = series.HardcoverId };
 
         await _auditService.LogMatchAsync(KavitaPlusEventType.SeriesMatched, seriesId,
             new AuditLogMatchedParamsDto {
@@ -2719,21 +2719,23 @@ public class ExternalMetadataService : IExternalMetadataService
     {
         try
         {
-            // Determine the expected total count based on local metadata
-            series.Metadata.TotalCount = Math.Max(
-                chapters.Max(chapter => chapter.TotalCount),
-                externalMetadata.Volumes > 0 ? externalMetadata.Volumes : externalMetadata.Chapters
-            );
-
-            // The actual number of count's defined across all chapter's metadata
-            series.Metadata.MaxCount = chapters.Max(chapter => chapter.Count);
-
-            var nonSpecialVolumes = series.Volumes
-                .Where(v => v.MaxNumber.IsNot(Parser.SpecialVolumeNumber))
+            var realVolumes = series.Volumes
+                .Where(v => v.MaxNumber.IsNot(Parser.SpecialVolumeNumber) && v.MaxNumber.IsNot(Parser.LooseLeafVolumeNumber))
                 .ToList();
 
-            var maxVolume = (int)(nonSpecialVolumes.Count != 0 ? nonSpecialVolumes.Max(v => v.MaxNumber) : 0);
+            var isVolumeBased = realVolumes.Count != 0;
+
+            var maxVolume = (int)(realVolumes.Count != 0 ? realVolumes.Max(v => v.MaxNumber) : 0);
             var maxChapter = (int)chapters.Max(c => c.MaxNumber);
+
+            var externalExpectedCount = isVolumeBased ? externalMetadata.Volumes : externalMetadata.Chapters;
+
+            series.Metadata.TotalCount = Math.Max(
+                chapters.Max(chapter => chapter.TotalCount),
+                externalExpectedCount
+            );
+
+            series.Metadata.MaxCount = isVolumeBased ? maxVolume : maxChapter;
 
             if (series.Format is MangaFormat.Epub or MangaFormat.Pdf && chapters.Count == 1)
             {
@@ -2743,23 +2745,9 @@ public class ExternalMetadataService : IExternalMetadataService
             {
                 series.Metadata.MaxCount = series.Metadata.TotalCount;
             }
-            else if ((maxChapter == Parser.DefaultChapterNumber || maxChapter > series.Metadata.TotalCount) &&
-                     maxVolume <= series.Metadata.TotalCount && maxVolume != Parser.DefaultChapterNumber)
-            {
-                series.Metadata.MaxCount = maxVolume;
-            }
-            else if (maxVolume == series.Metadata.TotalCount)
-            {
-                series.Metadata.MaxCount = maxVolume;
-            }
-            else
-            {
-                series.Metadata.MaxCount = maxChapter;
-            }
 
             var status = PublicationStatus.OnGoing;
-
-            var hasExternalCounts = externalMetadata.Volumes > 0 || externalMetadata.Chapters > 0;
+            var hasExternalCounts = isVolumeBased ? externalMetadata.Volumes > 0 : externalMetadata.Chapters > 0;
 
             if (hasExternalCounts)
             {
@@ -3084,6 +3072,21 @@ public class ExternalMetadataService : IExternalMetadataService
         var extSeries = result.Data.Series;
         if (extSeries == null) return null;
 
+        var settings = await _unitOfWork.SettingsRepository.GetMetadataSettingDto(ct);
+
+        var genres = new List<string>();
+        var tags = new List<string>();
+        GenerateGenreAndTagLists(extSeries, settings, ref tags, ref genres);
+
+        var tagsToRemove = GetTagsToRemove(extSeries, settings);
+        var finalTags = tags.Except(tagsToRemove).ToHashSet();
+
+        extSeries.Genres = genres;
+        extSeries.Tags = extSeries.Tags.Where(t => finalTags.Contains(t.Name)).ToList();
+
+        var ageRating = DetermineAgeRating(extSeries.Tags.Select(t => t.Name).Concat(extSeries.Genres), settings.AgeRatingMappings);
+
+        extSeries.AgeRating = ageRating;
         extSeries.Summary = StringHelper.RemoveSourceInDescription(StringHelper.SquashBreaklines(extSeries.Summary));
 
         return extSeries;

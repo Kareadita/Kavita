@@ -71,6 +71,7 @@ public class BookParser(IDirectoryService directoryService, IBookService bookSer
         }
 
         FinalizeNumbers(info);
+        ParseExternalIdsFromNotesAndWeblinks(info);
 
         return string.IsNullOrEmpty(info.Series) ? null : info;
     }

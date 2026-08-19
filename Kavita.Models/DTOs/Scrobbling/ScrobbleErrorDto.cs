@@ -13,6 +13,7 @@ public sealed record ScrobbleErrorDto
     /// </summary>
     public string Details { get; set; }
     public int SeriesId { get; set; }
+    public int? ChapterId { get; set; }
     public int LibraryId { get; set; }
     public DateTime Created { get; set; }
 }

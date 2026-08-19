@@ -56,6 +56,7 @@ import {Action} from "../../../_models/actionables/action";
 import {modalSaved} from "../../../_models/modal/modal-result";
 import {Tabs} from "../../../_models/tabs";
 import {
+  addMetadataIdControls,
   EditExternalMetadataFormComponent
 } from "../../../shared/_components/edit-external-metadata-form/edit-external-metadata-form.component";
 import {MangaFormat} from "../../../_models/manga-format";
@@ -162,7 +163,7 @@ export class EditSeriesModalComponent implements OnInit {
   selectedCover: string = '';
   coverImageReset = false;
   coverImageDirty = false;
-  chooserConfig: CoverImageChooserConfig = {};
+  chooserConfig = signal<CoverImageChooserConfig>({});
 
   saveNestedComponents: EventEmitter<void> = new EventEmitter();
 
@@ -181,12 +182,9 @@ export class EditSeriesModalComponent implements OnInit {
   }
 
   ngOnInit(): void {
-
     this.libraryService.getLibraryNames().pipe(takeUntilDestroyed(this.destroyRef)).subscribe(names => {
       this.libraryName = names[this.series.libraryId];
     });
-
-
 
     this.initSeries = Object.assign({}, this.series);
 
@@ -206,6 +204,9 @@ export class EditSeriesModalComponent implements OnInit {
       releaseYear: new FormControl('', [Validators.minLength(4), Validators.maxLength(4), Validators.pattern(/([1-9]\d{3})|[0]{1}/)]),
       metadataProviderOverride: new FormControl<MetadataProvider | null>(this.series.metadataProviderOverride ?? null, []),
     });
+
+    addMetadataIdControls(this.editSeriesForm, this.series);
+
     this.cdRef.markForCheck();
 
 
@@ -285,7 +286,7 @@ export class EditSeriesModalComponent implements OnInit {
       this.seriesVolumes = volumes;
       this.libraryType.set(libraryType);
       this.isLoadingVolumes.set(false);
-      this.chooserConfig = this.coverChooserConfigFactory.forSeries(this.series, this.seriesVolumes, this.libraryType());
+      this.chooserConfig.set(this.coverChooserConfigFactory.forSeries(this.series, this.seriesVolumes, this.libraryType));
 
       volumes.forEach(v => {
         this.volumeCollapsed[v.name] = true;
@@ -576,8 +577,7 @@ export class EditSeriesModalComponent implements OnInit {
   handleReset() {
     this.coverImageReset = true;
     this.editSeriesForm.patchValue({ coverImageLocked: false });
-    this.chooserConfig = { ...this.chooserConfig, isLocked: false };
-    this.cdRef.markForCheck();
+    this.chooserConfig.set({ ...this.chooserConfig(), isLocked: false });
   }
 
   unlock(b: any, field: string) {

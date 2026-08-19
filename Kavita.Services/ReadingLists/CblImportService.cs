@@ -153,12 +153,8 @@ public class CblImportService(IUnitOfWork unitOfWork, ICblGithubService cblGithu
         // Set metadata from CBL
         await SetMetadataFromParsedCblAsync(cbl, readingList);
 
-        // Add resolved items
-        foreach (var (order, (match, _)) in matchResults.OrderBy(kv => kv.Key))
-        {
-            if (match == null) continue;
-            ExistsOrAddReadingListItem(readingList, match.SeriesId, match.VolumeId, match.ChapterId, order);
-        }
+        // The CBL is the source of truth, so a re-import drops items it no longer contains
+        ApplyMatchesToReadingList(readingList, matchResults);
 
         // Save remap rules from user decisions
         if (decisions.SaveAsRemapRules && decisions.ItemResolutions.Count > 0)
@@ -600,6 +596,42 @@ public class CblImportService(IUnitOfWork unitOfWork, ICblGithubService cblGithu
             Results = results,
             SuccessfulInserts = successfulInserts
         };
+    }
+
+    /// <summary>
+    /// Aligns the reading list's items with the matched CBL items. Items the CBL no longer contains are
+    /// removed, while surviving items keep their Id and have their Order refreshed.
+    /// </summary>
+    /// <remarks>
+    /// When nothing matched, existing items are left alone so that a wholly failed import can't empty a list.
+    /// Does not commit changes.
+    /// </remarks>
+    private void ApplyMatchesToReadingList(ReadingList readingList,
+        Dictionary<int, (MatchedItem? Match, CblBookResult Result)> matchResults)
+    {
+        var matched = new HashSet<(int SeriesId, int ChapterId)>();
+
+        foreach (var (order, (match, _)) in matchResults.OrderBy(kv => kv.Key))
+        {
+            if (match == null) continue;
+            ExistsOrAddReadingListItem(readingList, match.SeriesId, match.VolumeId, match.ChapterId, order);
+            matched.Add((match.SeriesId, match.ChapterId));
+        }
+
+        if (matched.Count == 0) return;
+
+        var stale = readingList.Items
+            .Where(item => !matched.Contains((item.SeriesId, item.ChapterId)))
+            .ToList();
+
+        if (stale.Count == 0) return;
+
+        foreach (var item in stale)
+        {
+            readingList.Items.Remove(item);
+        }
+
+        unitOfWork.ReadingListRepository.BulkRemove(stale);
     }
 
     private static void ExistsOrAddReadingListItem(ReadingList readingList, int seriesId, int volumeId, int chapterId, int order)

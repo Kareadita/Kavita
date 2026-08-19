@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.Globalization;
-using System.Linq;
 
 namespace Kavita.Common.Helpers;
 #nullable enable
@@ -19,8 +17,6 @@ public static class ExternalIdParser
 {
     private const string AniListWeblinkWebsite = "https://anilist.co/manga/";
     private const string MalWeblinkWebsite = "https://myanimelist.net/manga/";
-    private const string MalStaffWebsite = "https://myanimelist.net/people/";
-    private const string MalCharacterWebsite = "https://myanimelist.net/character/";
     private const string GoogleBooksWeblinkWebsite = "https://books.google.com/books?id=";
     private const string MangaDexWeblinkWebsite = "https://mangadex.org/title/";
     private const string AniListStaffWebsite = "https://anilist.co/staff/";
@@ -110,9 +106,9 @@ public static class ExternalIdParser
         return ExtractId<string?>(weblinks, MangaDexWeblinkWebsite);
     }
 
-    public static long GetMangaBakaId(string? weblinks)
+    public static int GetMangaBakaId(string? weblinks)
     {
-        return ExtractId<long?>(weblinks, MangaBakaWebsite) ?? 0;
+        return ExtractId<int?>(weblinks, MangaBakaWebsite) ?? 0;
     }
 
     #region Header-based Parsing
@@ -192,7 +188,7 @@ public static class ExternalIdParser
         {
             return ExtractId<string?>(url, HardcoverStaffWebsite) ?? string.Empty;
         }
-        catch (Exception ex)
+        catch (Exception)
         {
             return string.Empty;
         }

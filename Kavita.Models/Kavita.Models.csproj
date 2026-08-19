@@ -12,9 +12,9 @@
 
     <ItemGroup>
       <PackageReference Include="CsvHelper" Version="33.1.0" />
-      <PackageReference Include="Microsoft.AspNetCore.Identity" Version="2.3.11" />
-      <PackageReference Include="Microsoft.EntityFrameworkCore.Abstractions" Version="10.0.10" />
-      <PackageReference Include="Microsoft.Extensions.Identity.Stores" Version="10.0.10" />
+      <PackageReference Include="Microsoft.AspNetCore.Identity" Version="2.3.12" />
+      <PackageReference Include="Microsoft.EntityFrameworkCore.Abstractions" Version="10.0.11" />
+      <PackageReference Include="Microsoft.Extensions.Identity.Stores" Version="10.0.11" />
       <PackageReference Include="YamlDotNet" Version="18.1.0" />
     </ItemGroup>
 

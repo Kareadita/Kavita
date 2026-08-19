@@ -649,35 +649,20 @@ public class SeriesRepository(DataContext context, IMapper mapper) : ISeriesRepo
     public async Task<SeriesDetailRequestV3Dto?> GetKavitaPlusSeriesDetailRequestV3Dto(int seriesId, CancellationToken ct = default)
     {
 
-        // I need to check Weblinks when AniListId/MalId is already set in ExternalSeries
-        // Updating stale data should prioritize ExternalSeriesMetadata before Weblinks, to prioritize prior matches
         var result = await context.Series
             .Where(s => s.Id == seriesId)
-            .Include(s => s.ExternalSeriesMetadata)
             .Select(series => new SeriesDetailRequestV3Dto
             {
                 Provider = series.MetadataProviderOverride ?? series.Library.MetadataProvider,
                 Format = series.Library.Type.ConvertToPlusMediaFormat(series.Format),
                 SeriesName = series.Name,
                 AlternativeNames = new List<string> { series.LocalizedName },
-                AniListId = series.AniListId != 0
-                    ? series.AniListId
-                    : series.ExternalSeriesMetadata.AniListId != 0
-                ? series.ExternalSeriesMetadata.AniListId
-                : ExternalIdParser.GetAniListId(series.Metadata.WebLinks),
-                MalId = series.MalId != 0
-                    ? series.MalId
-                    : series.ExternalSeriesMetadata.MalId != 0
-                ? series.ExternalSeriesMetadata.MalId
-                : ExternalIdParser.GetMalId(series.Metadata.WebLinks),
+                // No longer parsing from WebLinks as ExternalIds should always be set. This reduces confusion with users
+                // Ids are parsed from WebLinks during the scan loop and set as ExternalIds
+                AniListId = series.AniListId,
+                MalId = series.MalId,
                 CbrId = series.CbrId,
-                // TODO: Remove GoogleBooks and MangaDex, we don't use them anymore
-                GoogleBooksId = !string.IsNullOrEmpty(series.ExternalSeriesMetadata.GoogleBooksId)
-                    ? series.ExternalSeriesMetadata.GoogleBooksId
-                    : ExternalIdParser.GetGoogleBooksId(series.Metadata.WebLinks),
-                MangaDexId = ExternalIdParser.GetMangaDexId(series.Metadata.WebLinks),
-
-                MangabakaId = (int?) series.MangaBakaId,
+                MangabakaId = series.MangaBakaId,
                 MangaBakaEditionId = series.MangaBakaEditionId,
                 HardcoverId = series.HardcoverId,
                 IsStandAlone = series.IsStandAlone,
@@ -1465,6 +1450,10 @@ public class SeriesRepository(DataContext context, IMapper mapper) : ISeriesRepo
                 normalizedNames.Contains(s.NormalizedName)
                 || normalizedNames.Contains(s.NormalizedLocalizedName)
                 || normalizedNames.Contains(s.NormalizedOriginalName))
+            .WhereIf(aniListId > 0, s => s.AniListId == 0 || s.AniListId == aniListId)
+            .WhereIf(malId > 0, s => s.MalId == 0 || s.MalId == malId)
+            .WhereIf(mangaBakaId > 0, s => s.MangaBakaId == 0 || s.MangaBakaId == mangaBakaId)
+            .WhereIf(hardcoverId > 0, s => s.HardcoverId == 0 || s.HardcoverId == hardcoverId)
             .Includes(includes)
             .FirstOrDefaultAsync(ct);
     }

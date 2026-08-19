@@ -198,11 +198,11 @@
               <ng-template>
 
                 <div class="row g-0 mt-4 mb-4">
-                  @if(settingsForm.get('enableSummary'); as formControl) {
-                    <app-setting-switch [title]="t('summary-label')" [subtitle]="t('summary-tooltip')">
+                  @if(settingsForm.get('enableName'); as formControl) {
+                    <app-setting-switch [title]="t('name-label')" [subtitle]="t('name-tooltip')">
                       <ng-template #switch>
                         <div class="form-check form-switch float-end">
-                          <input id="summary" type="checkbox" class="form-check-input" formControlName="enableSummary">
+                          <input id="name" type="checkbox" class="form-check-input" formControlName="enableName">
                         </div>
                       </ng-template>
                     </app-setting-switch>
@@ -222,11 +222,11 @@
                 </div>
 
                 <div class="row g-0 mt-4 mb-4">
-                  @if(settingsForm.get('enableName'); as formControl) {
-                    <app-setting-switch [title]="t('name-label')" [subtitle]="t('name-tooltip')">
+                  @if(settingsForm.get('enableSummary'); as formControl) {
+                    <app-setting-switch [title]="t('summary-label')" [subtitle]="t('summary-tooltip')">
                       <ng-template #switch>
                         <div class="form-check form-switch float-end">
-                          <input id="name" type="checkbox" class="form-check-input" formControlName="enableName">
+                          <input id="summary" type="checkbox" class="form-check-input" formControlName="enableSummary">
                         </div>
                       </ng-template>
                     </app-setting-switch>
@@ -545,7 +545,9 @@
                 <app-age-rating-mapper [form]="settingsForm" controlName="externalAgeRatingMappings"
                                        [sourceLabel]="t('external-age-rating-label')"
                                        [addLabel]="t('add-age-rating-mapping-label')"
-                                       [removeLabel]="t('remove-age-rating-mapping-label')" />
+                                       [removeLabel]="t('remove-age-rating-mapping-label')"
+                                       [strValues]="MangaBakaAgeRatings"
+                />
               </ng-template>
             </div>
           </div>

@@ -94,6 +94,10 @@ export class AgeRatingMapperComponent implements OnInit {
   sourceLabel = input<string>('');
   /** Prefix for generated DOM ids, so multiple mappers on a page don't collide */
   idPrefix = input<string>(`age-rating-mapper-${nextId++}`);
+  /**
+   * If any values present replaces the input field with a dropdown with these options
+   */
+  strValues = input<string[]>([]);
 
   ageRatings = signal<Array<AgeRatingDto>>([]);
 

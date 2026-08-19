@@ -193,7 +193,7 @@ public class ChapterDto : IHasReadTimeEstimate, IHasCoverImage, IHasMetadataIds
     public int HardcoverId { get; set; }
     public long MetronId { get; set; }
     public string? ComicVineId { get; set; }
-    public long MangaBakaId { get; set; }
+    public int MangaBakaId { get; set; }
     public int CbrId { get; set; }
 
     #endregion

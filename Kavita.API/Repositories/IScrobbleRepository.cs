@@ -23,6 +23,7 @@ public interface IScrobbleRepository
     Task<IList<ScrobbleEvent>> GetProcessedEvents(int daysAgo, CancellationToken ct = default);
     Task<IEnumerable<ScrobbleErrorDto>> GetScrobbleErrors(CancellationToken ct = default);
     Task<IList<ScrobbleError>> GetAllScrobbleErrorsForSeries(int seriesId, CancellationToken ct = default);
+    Task<ScrobbleError?> GetScrobbleError(int id, CancellationToken ct = default);
     Task ClearScrobbleErrors(CancellationToken ct = default);
     Task<bool> HasErrorForSeries(int seriesId, CancellationToken ct = default);
 

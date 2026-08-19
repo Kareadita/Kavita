@@ -8,20 +8,19 @@ import {RemapRule} from '../../_models/reading-list/cbl/remap-rule';
 import {translate, TranslocoDirective} from '@jsverse/transloco';
 import {NgxDatatableModule} from '@siemens/ngx-datatable';
 import {ResponsiveTableComponent} from '../../shared/_components/responsive-table/responsive-table.component';
-import {DatePipe} from '@angular/common';
 import {DefaultValuePipe} from '../../_pipes/default-value.pipe';
 import {CblRemapRuleChapterTitlePipe} from '../../_pipes/cbl-remap-rule-chapter-title.pipe';
 import {EditRemapRuleComponent} from './edit-remap-rule/edit-remap-rule.component';
-import {UtcToLocalDatePipe} from "../../_pipes/utc-to-locale-date.pipe";
 import {LoadingComponent} from "../../shared/loading/loading.component";
 import {EmptyStateComponent} from "../../shared/_components/empty-state/empty-state.component";
+import {UtcToLocalTimePipe} from "../../_pipes/utc-to-local-time.pipe";
 
 @Component({
   selector: 'app-manage-remap-rules',
   templateUrl: './manage-remap-rules.component.html',
   styleUrls: ['./manage-remap-rules.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [TranslocoDirective, NgxDatatableModule, ResponsiveTableComponent, DatePipe, DefaultValuePipe, CblRemapRuleChapterTitlePipe, EditRemapRuleComponent, UtcToLocalDatePipe, LoadingComponent, EmptyStateComponent]
+  imports: [TranslocoDirective, NgxDatatableModule, ResponsiveTableComponent, DefaultValuePipe, CblRemapRuleChapterTitlePipe, EditRemapRuleComponent, LoadingComponent, EmptyStateComponent, UtcToLocalTimePipe]
 })
 export class ManageRemapRulesComponent implements OnInit {
 

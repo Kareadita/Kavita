@@ -16,8 +16,6 @@ namespace Kavita.API.Services.Plus;
 
 public interface IExternalMetadataService
 {
-    public static readonly HashSet<LibraryType> NonEligibleLibraryTypes = [LibraryType.Comic, LibraryType.Book, LibraryType.Image];
-
     /// <summary>
     /// Retrieves Metadata about a Recommended External Series
     /// </summary>

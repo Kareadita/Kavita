@@ -17,7 +17,7 @@
       <form [formGroup]="formGroup()" class="w-100 d-flex" [class.flex-column]="isMobile()">
 
         <ul ngbNav #nav="ngbNav" [activeId]="activeTabId()" class="nav-pills"
-            [orientation]="isMobile() ? 'horizontal' : 'vertical'" style="min-width: 135px;">
+            [orientation]="isMobile() ? 'horizontal' : 'vertical'" style="min-width: 8.4375rem;">
 
           @for (tab of tabs(); track tab.id()) {
             <li [ngbNavItem]="tab.id()">

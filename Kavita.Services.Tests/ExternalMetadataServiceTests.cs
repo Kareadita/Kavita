@@ -2077,6 +2077,88 @@ public class ExternalMetadataServiceTests: AbstractDbTest
 
     #endregion
 
+    #region Publication Status - Count Selection
+
+    private static Series BuildPublicationStatusTestSeries(string seriesName, int volumesOnDisk, int looseChaptersOnDisk)
+    {
+        var builder = new SeriesBuilder(seriesName).WithLibraryId(1);
+
+        if (volumesOnDisk > 0)
+        {
+            for (var i = 1; i <= volumesOnDisk; i++)
+            {
+                builder = builder.WithVolume(new VolumeBuilder(i.ToString())
+                    .WithNumber(i)
+                    .WithChapter(new ChapterBuilder(i.ToString()).Build())
+                    .Build());
+            }
+        }
+
+        if (looseChaptersOnDisk > 0)
+        {
+            var looseVolume = new VolumeBuilder(Parser.LooseLeafVolume);
+
+            for (var i = 1; i <= looseChaptersOnDisk; i++)
+            {
+                looseVolume = looseVolume.WithChapter(new ChapterBuilder(i.ToString()).Build());
+            }
+
+            builder = builder.WithVolume(looseVolume.Build());
+        }
+
+        return builder.WithMetadata(new SeriesMetadataBuilder().Build()).Build();
+    }
+
+    [Theory]
+    // Only loose chapters: use chapters
+    [InlineData(0, 24, 0, 36, 36, 24, PublicationStatus.Ended)]
+    [InlineData(0, 36, 0, 36, 36, 36, PublicationStatus.Completed)]
+    // Only volumes: use Volumes
+    [InlineData(3, 0, 3, 0, 3, 3, PublicationStatus.Completed)]
+    [InlineData(3, 0, 7, 0, 7, 3, PublicationStatus.Ended)]
+    // Volumes + some loose/unassigned chapters on disk: use volumes
+    [InlineData(3, 5, 7, 36, 7, 3, PublicationStatus.Ended)]
+    // Volume-based series, but no volumes from K+. Don't use (Not valid count)
+    [InlineData(3, 0, 0, 36, 0, 3, PublicationStatus.OnGoing)]
+    public async Task DeterminePublicationStatus_UsesCorrectCount(
+        int volumesOnDisk,
+        int looseChaptersOnDisk,
+        int externalVolumes,
+        int externalChapters,
+        int expectedTotalCount,
+        int expectedMaxCount,
+        PublicationStatus expectedStatus)
+    {
+        var (unitOfWork, context, mapper) = await CreateDatabase();
+        var (externalMetadataService, _, _, _) = await Setup(unitOfWork, context, mapper);
+
+        var seriesName = $"Test - DeterminePublicationStatus_UsesCorrectCount {volumesOnDisk}v-{looseChaptersOnDisk}c";
+        var series = BuildPublicationStatusTestSeries(seriesName, volumesOnDisk, looseChaptersOnDisk);
+        context.Series.Attach(series);
+        await context.SaveChangesAsync();
+
+        var metadataSettings = await unitOfWork.SettingsRepository.GetMetadataSettings();
+        metadataSettings.Enabled = true;
+        metadataSettings.EnablePublicationStatus = true;
+        context.MetadataSettings.Update(metadataSettings);
+        await context.SaveChangesAsync();
+
+        await externalMetadataService.WriteExternalMetadataToSeries(new ExternalSeriesDetailDto
+        {
+            Name = seriesName,
+            Volumes = externalVolumes,
+            Chapters = externalChapters
+        }, series.Id);
+
+        var postSeries = await unitOfWork.SeriesRepository.GetSeriesByIdAsync(series.Id, SeriesIncludes.Metadata);
+        Assert.NotNull(postSeries);
+        Assert.Equal(expectedTotalCount, postSeries.Metadata.TotalCount);
+        Assert.Equal(expectedMaxCount, postSeries.Metadata.MaxCount);
+        Assert.Equal(expectedStatus, postSeries.Metadata.PublicationStatus);
+    }
+
+    #endregion
+
     #region Age Rating
 
     [Fact]
@@ -4334,10 +4416,6 @@ public class ExternalMetadataServiceTests: AbstractDbTest
             .WithFormat(MangaFormat.Archive)
             .WithMetadata(new SeriesMetadataBuilder()
                 .Build())
-            .WithExternalMetadata(new ExternalSeriesMetadata()
-            {
-                AniListId = 10
-            })
             .Build();
         context.Series.Attach(series2);
         await context.SaveChangesAsync();
@@ -4572,10 +4650,6 @@ public class ExternalMetadataServiceTests: AbstractDbTest
             .WithFormat(MangaFormat.Archive)
             .WithMetadata(new SeriesMetadataBuilder()
                 .Build())
-            .WithExternalMetadata(new ExternalSeriesMetadata()
-            {
-                AniListId = 10
-            })
             .Build();
         context.Series.Attach(series2);
         await context.SaveChangesAsync();

@@ -42,7 +42,7 @@
           </div>
           <div class="data-col">
             <span class="data-label">{{ t('member-since-label') }}</span>
-            <span class="data-value">{{licenseInfo()?.subscribedSince | date:'shortDate'}}</span>
+            <span class="data-value">{{licenseInfo()?.subscribedSince | utcToLocalTime:'shortDate'}}</span>
             <span class="data-sub">{{ t('months-subscribed-label', { count: licenseInfo()?.totalMonthsSubbed ?? 0 }) }}</span>
           </div>
           <div class="data-col">
