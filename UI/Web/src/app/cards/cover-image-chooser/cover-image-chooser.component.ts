@@ -22,6 +22,7 @@ import {TabTitlePipe} from "../../_pipes/tab-title.pipe";
 import {Tabs} from "../../_models/tabs";
 import {CoverImageChooserConfig, CoverImageOption} from "../../_services/cover-chooser-config-factory.service";
 import {NgTemplateOutlet} from "@angular/common";
+import {Observable} from "rxjs";
 
 
 @Component({
@@ -98,6 +99,7 @@ export class CoverImageChooserComponent  {
       }
 
       this.hasInit = true;
+      this.cdRef.detectChanges();
     });
   }
 
@@ -121,8 +123,19 @@ export class CoverImageChooserComponent  {
       return;
     }
 
+    let apiCall: Observable<string>;
+    if (option.chapterId) {
+      apiCall = this.uploadService.uploadChapterCover(option.chapterId);
+    } else if (option.volumeId) {
+      apiCall = this.uploadService.uploadVolumeCover(option.volumeId);
+    } else if (option.seriesId) {
+      apiCall = this.uploadService.uploadSeriesCover(option.seriesId);
+    } else {
+      apiCall = this.uploadService.uploadByUrl(option.url);
+    }
+
     // Remote option (Volumes/Chapters/Kavita+/Other): stage it into temp, then emit the resulting filename.
-    this.uploadService.uploadByUrl(option.url, true).subscribe({
+    apiCall.subscribe({
       next: filename => {
         option.fileName = filename;
         this.coverChanged.emit({ isDirty, fileName: filename });

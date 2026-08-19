@@ -169,34 +169,6 @@
         "roles-label": "{{common.roles}}"
     },
 
-    "user-scrobble-history": {
-        "title": "Scrobble History",
-        "description": "Here you will find any scrobble events linked with your account. In order for events to exist, you must have an active scrobble provider configured. All events that have been processed will clear after a month. If there are non-processed events, it is likely these cannot form matches upstream. Please reach out to your admin to get them corrected.",
-        "not-read-warning": "Upstream providers will always keep the highest number",
-        "filter-label": "{{common.filter}}",
-        "provider-header": "Provider",
-        "created-header": "Created",
-        "last-modified-header": "Last Modified",
-        "type-header": "Type",
-        "series-header": "Series",
-        "data-header": "Data",
-        "is-processed-header": "Is Processed",
-        "select-all-label": "Select all",
-        "delete-selected-label": "Delete selected",
-        "no-data": "{{common.no-data}}",
-        "volume-and-chapter-num": "Volume {{v}} Chapter {{n}}",
-        "volume-num": "{{entity-title.volume-num}}",
-        "chapter-num": "{{entity-title.chapter-num}}",
-        "rating": "Rating {{r}}",
-        "not-applicable": "Not Applicable",
-        "processed": "Processed",
-        "not-processed": "Not Processed",
-        "special": "{{entity-title.special}}",
-        "token-expired": "Your AniList token is Expired! Scrobbling events will not process until you renew on Accounts page.",
-        "scrobbling-disabled": "Scrobbling is disabled on your Account Settings.",
-        "read-status-update": "Status: {{status}}"
-    },
-
     "scrobble-event-type-pipe": {
         "chapter-read": "Reading Progress",
         "score-updated": "Rating Update",
@@ -1290,7 +1262,9 @@
         "all-status-label": "All",
         "dont-match-label": "Don't Match",
         "no-data": "{{common.no-data}}",
-        "match-alt": "Match {{seriesName}}"
+        "match-alt": "Match {{seriesName}}",
+        "total-matched-label": "Total Matched",
+        "total-count": "Total: {{count}}"
     },
 
     "manage-user-tokens": {
@@ -1631,7 +1605,12 @@
 
     "kavitaplus-activity": {
         "description": "Reading activity Kavita has synced to external services on your behalf - progress, ratings, and reading status.",
-        "tab-select-label": "Filter activity"
+        "tab-select-label": "Filter activity",
+        "stats-queue-label": "{{manage-kavitaplus-activity.stats-queue-label}}",
+        "next-scrobble": "{{manage-kavitaplus-activity.next-scrobble}}",
+        "stats-events-label": "{{manage-kavitaplus-activity.stats-events-label}}",
+        "stats-failures-label": "{{manage-kavitaplus-activity.stats-failures-label}}"
+
     },
 
     "manage-kavitaplus-activity": {
@@ -1699,7 +1678,8 @@
     "kavita-plus-audit-entry": {
         "system": "{{manage-kavitaplus-activity.system}}",
         "retry": "Retry",
-        "match": "Match"
+        "match": "Match",
+        "remove-error": "Remove Scrobble Error"
     },
 
     "audit-status-title-pipe": {
@@ -1754,6 +1734,7 @@
         "volume-cover-updated": "Volume cover updated: {{volume}}",
         "series-cover-updated": "Series cover updated",
         "series-match-fixed": "Series matched with {{matchName}}",
+        "metadata-provider-changed": "Metadata Provider changed from {{previousProvider}} to {{newProvider}}",
         "collection-synced": "{{collectionName}}: {{itemCount}} items synced, {{missingCount}} missing",
         "collection-item-added": "Added to {{collectionName}}",
         "person-cover-updated": "Cover updated for {{personName}}",
@@ -1775,6 +1756,7 @@
         "series-blacklisted": "Blacklisted",
         "series-match-fixed": "Match Fixed",
         "series-dont-match-set": "Don't Match Set",
+        "series-metadata-provider-override-set": "Metadata Provider Changed",
         "metadata-fetched": "Metadata Fetched",
         "metadata-updated": "Metadata Updated",
         "cover-updated": "Cover Updated",
@@ -1850,7 +1832,8 @@
         "special-count": "{{match-series-result-item.special-count}}",
         "matched-to": "Currently matched to",
         "searching-against": "Searching against {{provider}}",
-        "change-provider-help": "You can change which provider to use in Library settings",
+        "change-provider-help": "Choose a different provider to search against for this series",
+        "provider-switch-help": "Results are from {{provider}}. Applying a match will switch this series to {{provider}}",
         "is-standalone-label": "Is standalone",
         "is-standalone-tooltip": "Enable if this series represents a single book, and hardcover doesn't have a series entry for it"
     },
@@ -2434,7 +2417,7 @@
 
     "manage-scrobble-errors": {
         "title": "Scrobbling Errors",
-        "description": "This table contains issues found during scrobbling. You can clear it at any time and wait for the next scrobble upload to see. If there is an unknown series, you are best correcting the series name or localized series name or adding a weblink for the providers.",
+        "description": "This table contains issues found during scrobbling. You can clear it at any time and wait for the next scrobble upload to see. If there is an unknown series, use the match to correct and enqueue events again.",
         "filter-label": "{{common.filter}}",
         "clear-errors": "Clear Errors",
         "series-header": "Series",
@@ -2770,10 +2753,8 @@
     },
 
     "scrobble-provider-description-pipe": {
-        "kavita": "",
         "anilist": "Everything Manga & Light Novels",
         "my-anime-list": "Want To Read & Stacks sync for Manga & Light Novels",
-        "comic-book-roundup": "",
         "hardcover": "Everything Books, Manga, and Light Novels!",
         "mangabaka": "Everything Manga & Light Novels"
     },
@@ -3582,7 +3563,10 @@
         "specials-volume": "Specials",
         "release-year-validation": "{{validation.year-validation}}",
         "volumes-title": "{{tab.volumes-tab}}",
-        "no-data": "{{common.no-data}}"
+        "no-data": "{{common.no-data}}",
+        "metadata-provider-override-label": "Metadata Provider Override",
+        "metadata-provider-override-tooltip": "Use a different Metadata Provider than the Library default for this Series",
+        "metadata-provider-override-default": "Use Library Default"
     },
 
     "edit-chapter-modal": {

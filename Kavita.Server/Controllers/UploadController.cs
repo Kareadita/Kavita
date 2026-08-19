@@ -1,4 +1,5 @@
 using System;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using Flurl.Http;
@@ -75,11 +76,7 @@ public class UploadController : BaseApiController
     {
         try
         {
-            // We need to allow any images that are coming from within Kavita to bypass Validation
-            if (!dto.IsInternalUrl)
-            {
-                await _urlValidationService.ValidateUrlAsync(dto.Url);
-            }
+            await _urlValidationService.ValidateUrlAsync(dto.Url);
         }
         catch (Exception)
         {
@@ -115,6 +112,60 @@ public class UploadController : BaseApiController
         }
 
         return BadRequest(await _localizationService.TranslateAsync(UserId, "url-not-valid"));
+    }
+
+    [HttpPost("upload-chapter-cover")]
+    [Authorize(Policy = PolicyGroups.AdminPolicy)]
+    public async Task<ActionResult<string>> GetImageFromChapterCover([FromQuery] int chapterId)
+    {
+        var fileName = await _unitOfWork.ChapterRepository.GetChapterCoverImageAsync(chapterId);
+        if (string.IsNullOrEmpty(fileName))
+        {
+            return NotFound();
+        }
+
+        return CopyCoverImageIntoTemp(fileName);
+    }
+
+    [HttpPost("upload-volume-cover")]
+    [Authorize(Policy = PolicyGroups.AdminPolicy)]
+    public async Task<ActionResult<string>> GetImageFromVolumeCover([FromQuery] int volumeId)
+    {
+        var fileName = await _unitOfWork.VolumeRepository.GetVolumeCoverImageAsync(volumeId);
+        if (string.IsNullOrEmpty(fileName))
+        {
+            return NotFound();
+        }
+
+        return CopyCoverImageIntoTemp(fileName);
+    }
+
+    [HttpPost("upload-series-cover")]
+    [Authorize(Policy = PolicyGroups.AdminPolicy)]
+    public async Task<ActionResult<string>> GetImageFromSeriesCover([FromQuery] int seriesId)
+    {
+        var fileName = await _unitOfWork.SeriesRepository.GetSeriesCoverImageAsync(seriesId);
+        if (string.IsNullOrEmpty(fileName))
+        {
+            return NotFound();
+        }
+
+        return CopyCoverImageIntoTemp(fileName);
+    }
+
+    private ActionResult<string> CopyCoverImageIntoTemp(string fileName)
+    {
+        var safeFileName = Path.GetFileName(fileName);
+        var sourcePath = Path.Join(_directoryService.CoverImageDirectory, safeFileName);
+        if (!_directoryService.FileSystem.File.Exists(sourcePath)) return NotFound();
+
+        var finalFileName = $"coverupload_{Guid.NewGuid():N}_{safeFileName}";
+
+        var tempPath = Path.Join(_directoryService.TempDirectory, finalFileName);
+
+        _directoryService.FileSystem.File.Copy(sourcePath, tempPath, true);
+
+        return Ok(finalFileName);
     }
 
     /// <summary>

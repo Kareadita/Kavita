@@ -18,7 +18,7 @@ namespace Kavita.Database.Migrations
         protected override void BuildModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
-            modelBuilder.HasAnnotation("ProductVersion", "10.0.10");
+            modelBuilder.HasAnnotation("ProductVersion", "10.0.11");
 
             modelBuilder.Entity("AppUserCollectionSeries", b =>
                 {
@@ -252,7 +252,7 @@ namespace Kavita.Database.Migrations
                     b.Property<long>("MalId")
                         .HasColumnType("INTEGER");
 
-                    b.Property<long>("MangaBakaId")
+                    b.Property<int>("MangaBakaId")
                         .HasColumnType("INTEGER");
 
                     b.Property<int>("MaxHoursToRead")
@@ -605,6 +605,9 @@ namespace Kavita.Database.Migrations
                     b.Property<string>("Payload")
                         .HasColumnType("TEXT");
 
+                    b.Property<int?>("ScrobbleErrorId")
+                        .HasColumnType("INTEGER");
+
                     b.Property<int?>("SeriesId")
                         .HasColumnType("INTEGER");
 
@@ -624,6 +627,8 @@ namespace Kavita.Database.Migrations
 
                     b.HasIndex("CreatedUtc")
                         .HasDatabaseName("IX_KavitaPlusAuditLog_CreatedUtc");
+
+                    b.HasIndex("ScrobbleErrorId");
 
                     b.HasIndex("UserId")
                         .HasDatabaseName("IX_KavitaPlusAuditLog_UserId");
@@ -2040,6 +2045,9 @@ namespace Kavita.Database.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
 
+                    b.Property<int?>("ChapterId")
+                        .HasColumnType("INTEGER");
+
                     b.Property<string>("Comment")
                         .HasColumnType("TEXT");
 
@@ -2071,6 +2079,8 @@ namespace Kavita.Database.Migrations
                         .HasColumnType("INTEGER");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("ChapterId");
 
                     b.HasIndex("ScrobbleEventId1");
 
@@ -2302,10 +2312,13 @@ namespace Kavita.Database.Migrations
                     b.Property<string>("MangaBakaEditionId")
                         .HasColumnType("TEXT");
 
-                    b.Property<long>("MangaBakaId")
+                    b.Property<int>("MangaBakaId")
                         .HasColumnType("INTEGER");
 
                     b.Property<int>("MaxHoursToRead")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int?>("MetadataProviderOverride")
                         .HasColumnType("INTEGER");
 
                     b.Property<long>("MetronId")
@@ -3672,7 +3685,7 @@ namespace Kavita.Database.Migrations
                     b.Property<long>("MalId")
                         .HasColumnType("INTEGER");
 
-                    b.Property<long>("MangaBakaId")
+                    b.Property<int>("MangaBakaId")
                         .HasColumnType("INTEGER");
 
                     b.Property<int>("MaxHoursToRead")
@@ -4000,10 +4013,17 @@ namespace Kavita.Database.Migrations
 
             modelBuilder.Entity("Kavita.Models.Entities.History.KavitaPlusAuditLog", b =>
                 {
+                    b.HasOne("Kavita.Models.Entities.Scrobble.ScrobbleError", "ScrobbleError")
+                        .WithMany()
+                        .HasForeignKey("ScrobbleErrorId")
+                        .OnDelete(DeleteBehavior.SetNull);
+
                     b.HasOne("Kavita.Models.Entities.User.AppUser", "User")
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.SetNull);
+
+                    b.Navigation("ScrobbleError");
 
                     b.Navigation("User");
                 });
@@ -4399,6 +4419,10 @@ namespace Kavita.Database.Migrations
 
             modelBuilder.Entity("Kavita.Models.Entities.Scrobble.ScrobbleError", b =>
                 {
+                    b.HasOne("Kavita.Models.Entities.Chapter", "Chapter")
+                        .WithMany()
+                        .HasForeignKey("ChapterId");
+
                     b.HasOne("Kavita.Models.Entities.Scrobble.ScrobbleEvent", "ScrobbleEvent")
                         .WithMany()
                         .HasForeignKey("ScrobbleEventId1");
@@ -4408,6 +4432,8 @@ namespace Kavita.Database.Migrations
                         .HasForeignKey("SeriesId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.Navigation("Chapter");
 
                     b.Navigation("ScrobbleEvent");
 

@@ -84,12 +84,15 @@ public partial class VersionUpdaterService : IVersionUpdaterService
         _logger = logger;
         _eventHub = eventHub;
 
-        _cacheFilePath = Path.Combine(directoryService.LongTermCacheDirectory, "github_releases_cache.json");
-        _cacheLatestReleaseFilePath = Path.Combine(directoryService.LongTermCacheDirectory, "github_latest_release_cache.json");
-        _cacheNightlyInfoFilePath = Path.Combine(directoryService.LongTermCacheDirectory, "github_nightly_cache.json");
-        _cacheCommitsFilePath = Path.Combine(directoryService.LongTermCacheDirectory, "github_commits_cache.json");
+        var updateScopePath = Path.Combine(directoryService.LongTermCacheDirectory, "update");
+        directoryService.ExistOrCreate(updateScopePath);
 
-        _cachePrInfoDirectory = Path.Combine(directoryService.LongTermCacheDirectory, "pr_cache");
+        _cacheFilePath = Path.Combine(updateScopePath, "github_releases_cache.json");
+        _cacheLatestReleaseFilePath = Path.Combine(updateScopePath, "github_latest_release_cache.json");
+        _cacheNightlyInfoFilePath = Path.Combine(updateScopePath, "github_nightly_cache.json");
+        _cacheCommitsFilePath = Path.Combine(updateScopePath, "github_commits_cache.json");
+
+        _cachePrInfoDirectory = Path.Combine(updateScopePath, "pr_cache");
         directoryService.ExistOrCreate(_cachePrInfoDirectory);
 
         FlurlConfiguration.ConfigureClientForUrl(GithubLatestReleasesUrl);

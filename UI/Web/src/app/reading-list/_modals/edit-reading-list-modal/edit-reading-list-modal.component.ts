@@ -1,4 +1,13 @@
-import {ChangeDetectionStrategy, ChangeDetectorRef, Component, DestroyRef, inject, Input, OnInit} from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  ChangeDetectorRef,
+  Component,
+  DestroyRef,
+  inject,
+  Input,
+  OnInit,
+  signal
+} from '@angular/core';
 import {FormControl, FormGroup, ReactiveFormsModule, Validators} from '@angular/forms';
 import {
   NgbActiveModal,
@@ -68,7 +77,7 @@ export class EditReadingListModalComponent implements OnInit {
   coverImageDirty = false;
   coverImageLocked: boolean = false;
   coverImageReset = false;
-  chooserConfig: CoverImageChooserConfig = {};
+  chooserConfig = signal<CoverImageChooserConfig>({});
   active = Tabs.General;
   tags: ReadingListTag[] = [];
   tagsSettings: TypeaheadSettings<Tag> = new TypeaheadSettings();
@@ -89,7 +98,7 @@ export class EditReadingListModalComponent implements OnInit {
 
     this.coverImageLocked = this.readingList.coverImageLocked;
     this.tags = this.readingList.tags;
-    this.chooserConfig = this.coverChooserConfigFactory.forReadingList(this.readingList);
+    this.chooserConfig.set(this.coverChooserConfigFactory.forReadingList(this.readingList));
 
     this.reviewGroup.get('title')?.valueChanges.pipe(
       debounceTime(100),
@@ -188,8 +197,7 @@ export class EditReadingListModalComponent implements OnInit {
   handleReset() {
     this.coverImageReset = true;
     this.coverImageLocked = false;
-    this.chooserConfig = { ...this.chooserConfig, isLocked: false };
-    this.cdRef.markForCheck();
+    this.chooserConfig.set({ ...this.chooserConfig(), isLocked: false });
   }
 
   updateTags(tags: ReadingListTag[]) {

@@ -77,13 +77,19 @@
           {{entry().createdUtc | utcToLocalDate | timeDifference}}
         </span>
 
+        @if (entry().scrobbleErrorId && accountService.hasAdminRole()) {
+          <button class="btn btn-outline-danger btn-sm" (click)="deleteScrobbleErrors()">
+            <i class="fa-solid fa-trash-can" aria-hidden="true"></i> {{t('remove-error')}}
+          </button>
+        }
+
         @if (showRetry() && entry().canRetry) {
           <button class="btn btn-outline-primary btn-sm" (click)="retryEntry()">
             <i class="fa-solid fa-rotate-left" aria-hidden="true"></i> {{t('retry')}}
           </button>
         }
 
-        @if (entry().category === KavitaPlusAuditCategory.Match && !!entry().libraryId) {
+        @if ((entry().category === KavitaPlusAuditCategory.Match || entry().status === AuditStatus.Failure) && !!entry().libraryId) {
           <button class="btn btn-outline-primary btn-sm" (click)="matchSeries()">
             <i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i> {{t('match')}}
           </button>

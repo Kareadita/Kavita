@@ -51,7 +51,7 @@
               @if (formControl.value === '' || formControl.value === null) {
                 {{t('never')}}
               } @else {
-                {{formControl.value | date}}
+                {{formControl.value | utcToLocalTime}}
               }
             </ng-template>
             <ng-template #edit>

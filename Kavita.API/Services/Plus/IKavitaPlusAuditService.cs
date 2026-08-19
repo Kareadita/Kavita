@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using Kavita.Models.DTOs.KavitaPlus;
 using Kavita.Models.Entities.Enums.Audit;
 using Kavita.Models.Entities.History;
+using Kavita.Models.Entities.Scrobble;
 
 namespace Kavita.API.Services.Plus;
 
@@ -21,6 +22,7 @@ public interface IKavitaPlusAuditService
         object? payload = null,
         string? error = null,
         int? userId = null,
+        ScrobbleError? scrobbleError = null,
         CancellationToken ct = default);
 
     /// <summary>
@@ -57,10 +59,10 @@ public interface IKavitaPlusAuditService
         AuditStatus status = AuditStatus.Success, int? userId = null, CancellationToken ct = default);
 
     Task LogScrobbleAsync(KavitaPlusEventType type, int seriesId, AuditLogScrobbleParamsDto details,
-        AuditStatus status, string? error = null, int? userId = null, CancellationToken ct = default);
+        AuditStatus status, string? error = null, int? userId = null, ScrobbleError? scrobbleError = null, CancellationToken ct = default);
 
     Task LogChapterScrobbleAsync(KavitaPlusEventType type, int seriesId, int chapterId, AuditLogScrobbleParamsDto details,
-        AuditStatus status, string? error = null, int? userId = null, CancellationToken ct = default);
+        AuditStatus status, string? error = null, int? userId = null, ScrobbleError? scrobbleError = null, CancellationToken ct = default);
 
     Task PurgeOldLogsAsync(CancellationToken ct = default);
 }

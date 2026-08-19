@@ -11,9 +11,8 @@ import {
   Signal
 } from '@angular/core';
 import {Annotation} from "../../../_models/annotations/annotation";
-import {UtcToLocalDatePipe} from "../../../../_pipes/utc-to-locale-date.pipe";
 import {QuillViewComponent} from "ngx-quill";
-import {DatePipe, NgClass, NgStyle} from "@angular/common";
+import {NgClass, NgStyle} from "@angular/common";
 import {translate, TranslocoDirective} from "@jsverse/transloco";
 import {ConfirmService} from "../../../../shared/confirm.service";
 import {AnnotationService} from "../../../../_services/annotation.service";
@@ -28,13 +27,12 @@ import {EVENTS, MessageHubService} from "../../../../_services/message-hub.servi
 import {AnnotationUpdateEvent} from "../../../../_models/events/annotation-update-event";
 import {AnnotationLikesComponent} from "../annotation-likes/annotation-likes.component";
 import {ProfileIconComponent} from "../../../../_single-module/profile-icon/profile-icon.component";
+import {UtcToLocalTimePipe} from "../../../../_pipes/utc-to-local-time.pipe";
 
 @Component({
   selector: 'app-annotation-card',
   imports: [
-    UtcToLocalDatePipe,
     QuillViewComponent,
-    DatePipe,
     TranslocoDirective,
     DefaultValuePipe,
     NgStyle,
@@ -42,7 +40,8 @@ import {ProfileIconComponent} from "../../../../_single-module/profile-icon/prof
     NgClass,
     NgbTooltip,
     AnnotationLikesComponent,
-    ProfileIconComponent
+    ProfileIconComponent,
+    UtcToLocalTimePipe
   ],
   templateUrl: './annotation-card.component.html',
   styleUrl: './annotation-card.component.scss',

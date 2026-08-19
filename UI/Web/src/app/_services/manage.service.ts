@@ -1,12 +1,10 @@
 import {inject, Injectable} from '@angular/core';
 import {environment} from "../../environments/environment";
 import {HttpClient, HttpParams} from "@angular/common/http";
-import {ManageMatchSeries} from "../_models/kavitaplus/manage-match-series";
+import {ManageMatchSeries, MatchedExternalSeriesCount} from "../_models/kavitaplus/manage-match-series";
 import {ManageMatchFilter} from "../_models/kavitaplus/manage-match-filter";
 import {UtilityService} from "../shared/_services/utility.service";
 import {map} from "rxjs/operators";
-import {Observable} from "rxjs";
-import {PaginatedResult} from "../_models/pagination";
 
 @Injectable({
   providedIn: 'root'
@@ -26,5 +24,9 @@ export class ManageService {
           return this.utilityService.createPaginatedResult<ManageMatchSeries>(res)
         }),
     );
+  }
+
+  getMatchedExternalSeriesCount() {
+    return this.httpClient.get<MatchedExternalSeriesCount>(this.baseUrl + 'manage/matched-series-counts');
   }
 }

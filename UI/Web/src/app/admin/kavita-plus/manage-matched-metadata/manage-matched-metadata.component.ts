@@ -1,4 +1,4 @@
-import {ChangeDetectionStrategy, Component, DestroyRef, inject, OnInit, signal} from '@angular/core';
+import {ChangeDetectionStrategy, Component, computed, DestroyRef, inject, OnInit, signal} from '@angular/core';
 import {translate, TranslocoDirective} from "@jsverse/transloco";
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import {LibraryTypePipe} from "../../../_pipes/library-type.pipe";
@@ -10,13 +10,13 @@ import {UtcToLocalTimePipe} from "../../../_pipes/utc-to-local-time.pipe";
 import {DefaultValuePipe} from "../../../_pipes/default-value.pipe";
 import {NgxDatatableModule} from "@siemens/ngx-datatable";
 import {LibraryNamePipe} from "../../../_pipes/library-name.pipe";
-import {APP_BASE_HREF, AsyncPipe} from "@angular/common";
+import {APP_BASE_HREF, AsyncPipe, DecimalPipe, PercentPipe} from "@angular/common";
 import {ResponsiveTableComponent} from "../../../shared/_components/responsive-table/responsive-table.component";
 import {LibraryType} from "../../../_models/library/library";
 import {ActionService} from "../../../_services/action.service";
 import {ManageService} from "../../../_services/manage.service";
 import {EVENTS, MessageHubService} from "../../../_services/message-hub.service";
-import {ManageMatchSeries} from "../../../_models/kavitaplus/manage-match-series";
+import {ManageMatchSeries, MatchedExternalSeriesCount} from "../../../_models/kavitaplus/manage-match-series";
 import {Series} from "../../../_models/series";
 import {ManageMatchFilter} from "../../../_models/kavitaplus/manage-match-filter";
 import {debounceTime, distinctUntilChanged, tap} from "rxjs";
@@ -46,6 +46,9 @@ import {LoadingComponent} from "../../../shared/loading/loading.component";
     LibraryTypePipe,
     ResponsiveTableComponent,
     LoadingComponent,
+    PercentPipe,
+    DecimalPipe,
+
   ],
   templateUrl: './manage-matched-metadata.component.html',
   styleUrl: './manage-matched-metadata.component.scss',
@@ -80,6 +83,25 @@ export class ManageMatchedMetadataComponent implements OnInit {
   });
   trackBy = (idx: number, item: ManageMatchSeries) => `${item.isMatched}_${item.series.name}_${idx}`;
 
+  matchedCounts = signal<MatchedExternalSeriesCount | null>(null);
+  totalCount = signal<number>(0);
+  percentageMatched = computed(() => {
+    const matchedCount = this.matchedCounts();
+    if (!matchedCount) { return null }
+
+    const totalItems = matchedCount.totalCount;
+
+    if (totalItems == 0) return 0;
+
+    return  (matchedCount.dontMatchCount + matchedCount.erroredCount) / totalItems;
+  });
+
+  private readonly baseFilter: ManageMatchFilter = {
+    matchStateOption: MatchStateOption.NotMatched,
+    libraryType: -1,
+    searchTerm: ''
+  };
+
   ngOnInit() {
 
     this.libraryService.getLibraryTypesWithMetadataSupport().pipe(
@@ -104,15 +126,13 @@ export class ManageMatchedMetadataComponent implements OnInit {
     this.filterGroup.valueChanges.pipe(
       debounceTime(300),
       distinctUntilChanged(),
-      tap(_ => {
-        this.isLoading.set(true);
-      }),
       switchMap(_ => this.loadData()),
-      tap(_ => {
-        this.isLoading.set(false);
-      }),
       takeUntilDestroyed(this.destroyRef)
     ).subscribe();
+
+    this.manageService.getMatchedExternalSeriesCount().subscribe(res => {
+      this.matchedCounts.set(res);
+    });
 
     this.loadData().subscribe();
   }
@@ -139,6 +159,7 @@ export class ManageMatchedMetadataComponent implements OnInit {
         currentPage: data.pagination.currentPage - 1, // ngx-datatable is 0 based, Kavita is 1 based
       });
       this.isLoading.set(false);
+
     }));
   }
 
@@ -147,6 +168,9 @@ export class ManageMatchedMetadataComponent implements OnInit {
       if (!result) return;
 
       this.data.update(x => x.filter(s => s.series.id !== series.id));
+      this.manageService.getMatchedExternalSeriesCount().subscribe(res => {
+        this.matchedCounts.set(res);
+      });
     });
   }
 

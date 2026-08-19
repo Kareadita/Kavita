@@ -14,6 +14,16 @@ export const HAS_METADATA_DEFAULTS: Required<IHasMetadataIds> = {
   cbrId: 0
 };
 
+export function addMetadataIdControls(form: FormGroup, metadata: IHasMetadataIds): void {
+  form.addControl('aniListId', new FormControl(metadata.aniListId, []));
+  form.addControl('malId', new FormControl(metadata.malId, []));
+  form.addControl('hardcoverId', new FormControl(metadata.hardcoverId, []));
+  form.addControl('metronId', new FormControl(metadata.metronId, []));
+  form.addControl('comicVineId', new FormControl(metadata.comicVineId, []));
+  form.addControl('mangaBakaId', new FormControl(metadata.mangaBakaId, []));
+  form.addControl('cbrId', new FormControl(metadata.cbrId, []));
+}
+
 @Component({
   selector: 'app-edit-external-metadata-form',
   imports: [

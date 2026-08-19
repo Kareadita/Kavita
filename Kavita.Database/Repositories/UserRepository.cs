@@ -633,6 +633,15 @@ public class UserRepository(DataContext context, UserManager<AppUser> userManage
     public async Task<bool> IsUserAdminAsync(AppUser? user, CancellationToken ct = default)
     {
         if (user == null) return false;
+
+        // ReSharper disable once ConditionIsAlwaysTrueOrFalseAccordingToNullableAPIContract
+        if (userManager == null)
+        {
+            // userManager is null on Unit Tests only
+            return await context.UserRoles
+                .AnyAsync(ur => ur.UserId == user.Id && ur.Role.Name == PolicyConstants.AdminRole, ct);
+        }
+
         return await userManager.IsInRoleAsync(user, PolicyConstants.AdminRole);
     }
 

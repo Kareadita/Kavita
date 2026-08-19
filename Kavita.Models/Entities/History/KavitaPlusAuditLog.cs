@@ -1,5 +1,6 @@
 using System;
 using Kavita.Models.Entities.Enums.Audit;
+using Kavita.Models.Entities.Scrobble;
 using Kavita.Models.Entities.User;
 
 namespace Kavita.Models.Entities.History;
@@ -22,6 +23,9 @@ public class KavitaPlusAuditLog
     /// Series FK - set for Series, Chapter, and series-contextual events. No cascade delete: logs outlive entities
     /// </summary>
     public int? SeriesId { get; set; }
+
+    public int? ScrobbleErrorId { get; set; }
+    public ScrobbleError? ScrobbleError { get; set; }
 
     /// <summary>
     /// Discriminator describing what SubjectId refers to

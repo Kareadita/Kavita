@@ -610,6 +610,10 @@ public sealed class DataContext : IdentityDbContext<AppUser, AppRole, int,
                 .WithMany()
                 .HasForeignKey(e => e.UserId)
                 .OnDelete(DeleteBehavior.SetNull);
+            entity.HasOne(e => e.ScrobbleError)
+                .WithMany()
+                .HasForeignKey(e => e.ScrobbleErrorId)
+                .OnDelete(DeleteBehavior.SetNull);
         });
 
         builder.Entity<ScrobbleRuleHistory>(entity =>

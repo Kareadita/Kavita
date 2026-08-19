@@ -270,27 +270,9 @@ public static class ScrobblingHelper
     public const string MalWeblinkWebsite = "https://myanimelist.net/manga/";
     public const string MalStaffWebsite = "https://myanimelist.net/people/";
     public const string MalCharacterWebsite = "https://myanimelist.net/character/";
-    public const string GoogleBooksWeblinkWebsite = "https://books.google.com/books?id=";
-    public const string MangaDexWeblinkWebsite = "https://mangadex.org/title/";
     public const string AniListStaffWebsite = "https://anilist.co/staff/";
     public const string AniListCharacterWebsite = "https://anilist.co/character/";
     public const string HardcoverStaffWebsite = "https://hardcover.app/authors/";
-
-    public static long? GetMalId(Series series)
-    {
-        if (series.MalId != 0) return series.MalId;
-
-        return ExternalIdParser.GetMalId(series.Metadata.WebLinks) ?? series.ExternalSeriesMetadata?.MalId;
-    }
-
-
-    public static int? GetAniListId(Series seriesWithExternalMetadata)
-    {
-        if (seriesWithExternalMetadata.AniListId != 0) return seriesWithExternalMetadata.AniListId;
-
-        var aniListId = ExternalIdParser.GetAniListId(seriesWithExternalMetadata.Metadata.WebLinks);
-        return aniListId ?? seriesWithExternalMetadata.ExternalSeriesMetadata?.AniListId;
-    }
 
 
     public static string CreateUrl(string url, long? id)

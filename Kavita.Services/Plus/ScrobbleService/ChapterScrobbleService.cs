@@ -5,16 +5,14 @@ using System.Threading;
 using System.Threading.Tasks;
 using Kavita.API.Database;
 using Kavita.API.Services.Plus;
+using Kavita.Common.Extensions;
 using Kavita.Models.DTOs.KavitaPlus;
-using Kavita.Models.DTOs.KavitaPlus.Scrobble;
-using Kavita.Models.DTOs.Scrobbling;
 using Kavita.Models.Entities;
 using Kavita.Models.Entities.Enums;
 using Kavita.Models.Entities.Enums.Audit;
 using Kavita.Models.Entities.Enums.KavitaPlus;
 using Kavita.Models.Entities.Enums.UserPreferences;
 using Kavita.Models.Entities.Scrobble;
-using Kavita.Models.Entities.User;
 using Kavita.Models.Extensions;
 using Microsoft.Extensions.Logging;
 
@@ -44,10 +42,9 @@ where T: IScrobbleProviderService
         if (HasRequiredIds(ctx.Chapter!)) return true;
 
         await auditService.LogTemperedAsync(al => al.SubjectId == ctx.Chapter!.Id && al.UserId == ctx.User.Id, KavitaPlusAuditCategory.Scrobble,
-            KavitaPlusEventType.ScrobbleEventSkipped, AuditStatus.Info, AuditSubjectType.Chapter,
+            KavitaPlusEventType.ScrobbleEventSkipped, AuditStatus.Failure, AuditSubjectType.Chapter,
             seriesId: ctx.Series.Id,
-            payload: new AuditLogScrobbleParamsDto { ScrobbleEventType = eventType, Provider = Provider },
-            subjectId: ctx.Chapter!.Id, error: "chapter-missing-required-ids", userId: ctx.User.Id, ct: ct);
+            subjectId: ctx.Chapter!.Id, payload: new AuditLogScrobbleParamsDto { ScrobbleEventType = eventType, Provider = Provider }, error: "chapter-missing-required-ids", userId: ctx.User.Id, ct: ct);
 
         return false;
     }
@@ -83,6 +80,8 @@ where T: IScrobbleProviderService
                     ScrobbleEventType = ScrobbleEventType.ReadStatusUpdate,
                     ReadStatus = status,
                     TransitionRuleKind = ruleKind,
+                    ChapterNumber = (int) ctx.Chapter.MaxNumber,
+                    VolumeNumber = ctx.Chapter.Volume?.MaxNumber,
                 }, AuditStatus.Info, userId: ctx.User.Id, ct: ct);
             return;
         }
@@ -114,6 +113,8 @@ where T: IScrobbleProviderService
                 ScrobbleEventType = ScrobbleEventType.ReadStatusUpdate,
                 ReadStatus = status,
                 TransitionRuleKind = ruleKind,
+                ChapterNumber = (int) ctx.Chapter.MaxNumber,
+                VolumeNumber = ctx.Chapter.Volume?.MaxNumber,
             }, AuditStatus.Info, userId: ctx.User.Id, ct: ct);
 
         logger.LogDebug("Created new scrobble event for {Series} - {ChapterId} with Read Status {Status}", ctx.Series.Name, ctx.Chapter.Id, status);
@@ -147,6 +148,8 @@ where T: IScrobbleProviderService
                     ScrobbleEventType = ScrobbleEventType.ScoreUpdated,
                     Rating = rating,
                     LibraryType = ctx.Series.Library.Type,
+                    ChapterNumber = (int) ctx.Chapter.MaxNumber,
+                    VolumeNumber = ctx.Chapter.Volume?.MaxNumber,
                 }, AuditStatus.Info, userId: ctx.User.Id, ct: ct);
 
             return;
@@ -177,6 +180,8 @@ where T: IScrobbleProviderService
                 ScrobbleEventType = ScrobbleEventType.ScoreUpdated,
                 Rating = rating,
                 LibraryType = ctx.Series.Library.Type,
+                ChapterNumber = (int) ctx.Chapter.MaxNumber,
+                VolumeNumber = ctx.Chapter.Volume?.MaxNumber,
             }, AuditStatus.Info, userId: ctx.User.Id, ct: ct);
 
         logger.LogDebug("Created new scrobble event for {Series}, ChapterId: {ChapterId} with Rating {Rating}",
@@ -213,6 +218,8 @@ where T: IScrobbleProviderService
                     ScrobbleEventType = ScrobbleEventType.Review,
                     ReviewBody = reviewBody,
                     LibraryType = ctx.Series.Library.Type,
+                    ChapterNumber = (int) ctx.Chapter.MaxNumber,
+                    VolumeNumber = ctx.Chapter.Volume?.MaxNumber,
                 }, AuditStatus.Info, userId: ctx.User.Id, ct: ct);
 
             return;
@@ -244,6 +251,8 @@ where T: IScrobbleProviderService
                 ScrobbleEventType = ScrobbleEventType.Review,
                 ReviewBody = reviewBody,
                 LibraryType = ctx.Series.Library.Type,
+                ChapterNumber = (int) ctx.Chapter.MaxNumber,
+                VolumeNumber = ctx.Chapter.Volume?.MaxNumber,
             }, AuditStatus.Info, userId: ctx.User.Id, ct: ct);
 
         logger.LogDebug("Created new scrobble event for {Series} - ChapterId: {ChapterId} with Review Title {Title}",
@@ -279,6 +288,12 @@ where T: IScrobbleProviderService
             }
 
             var prevProgress = existingEvent.Progress;
+            if (prevProgress.Is(currentProgress))
+            {
+                logger.LogTrace("Ignoring reading update for {Series} - ChapterId: {ChapterId} as progress is the same", ctx.Series.Name, ctx.Chapter.Id);
+                return;
+            }
+
             existingEvent.Progress = currentProgress;
             existingEvent.IsBackFill &= ctx.IsBackfill;
 
@@ -295,6 +310,8 @@ where T: IScrobbleProviderService
                     ScrobbleEventType = ScrobbleEventType.ChapterRead,
                     PercentRead = currentProgress,
                     LibraryType = ctx.Series.Library.Type,
+                    ChapterNumber = (int) ctx.Chapter.MaxNumber,
+                    VolumeNumber = ctx.Chapter.Volume?.MaxNumber,
                 }, AuditStatus.Info, userId: ctx.User.Id, ct: ct);
 
             logger.LogDebug("Overriding scrobble event for {Series} - ChapterId: {ChapterId} from {PrevProgress}% -> {Progress}%",
@@ -379,6 +396,8 @@ where T: IScrobbleProviderService
                 Provider = Provider,
                 ScrobbleEventType = eventType,
                 LibraryType = ctx.Series.Library.Type,
+                ChapterNumber = (int) ctx.Chapter.MaxNumber,
+                VolumeNumber = ctx.Chapter.Volume?.MaxNumber,
             }, AuditStatus.Info, userId: ctx.User.Id, ct: ct);
 
         logger.LogDebug("Created new scrobble {EventType} event for {Series} - ChapterId: {ChapterId}",

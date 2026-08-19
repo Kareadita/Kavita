@@ -56,6 +56,7 @@ import {Action} from "../../../_models/actionables/action";
 import {modalSaved} from "../../../_models/modal/modal-result";
 import {Tabs} from "../../../_models/tabs";
 import {
+  addMetadataIdControls,
   EditExternalMetadataFormComponent
 } from "../../../shared/_components/edit-external-metadata-form/edit-external-metadata-form.component";
 import {MangaFormat} from "../../../_models/manga-format";
@@ -68,6 +69,8 @@ import {Volume} from "../../../_models/volume";
 import {ConfirmService} from "../../../shared/confirm.service";
 import {EditModalShellComponent} from "../../../shared/edit-modal-shell/edit-modal-shell.component";
 import {EditTabDirective} from "../../../shared/_directive/edit-tab.directive";
+import {AllMetadataProviders, MetadataProvider} from "src/app/_models/kavitaplus/metadata-provider.enum";
+import {MetadataProviderTitlePipe} from "../../../_pipes/metadata-provider-title.pipe";
 
 
 @Component({
@@ -95,7 +98,8 @@ import {EditTabDirective} from "../../../shared/_directive/edit-tab.directive";
     DecimalPipe,
     EditExternalMetadataFormComponent,
     EditModalShellComponent,
-    EditTabDirective
+    EditTabDirective,
+    MetadataProviderTitlePipe
   ],
   templateUrl: './edit-series-modal.component.html',
   styleUrls: ['./edit-series-modal.component.scss'],
@@ -140,7 +144,8 @@ export class EditSeriesModalComponent implements OnInit {
   editSeriesForm!: FormGroup;
   libraryName: string | undefined = undefined;
   size: number = 0;
-  libraryType = LibraryType.Manga;
+  libraryType = signal<LibraryType>(LibraryType.Manga);
+  protected readonly allMetadataProviders = AllMetadataProviders;
 
 
   // Typeaheads
@@ -158,7 +163,7 @@ export class EditSeriesModalComponent implements OnInit {
   selectedCover: string = '';
   coverImageReset = false;
   coverImageDirty = false;
-  chooserConfig: CoverImageChooserConfig = {};
+  chooserConfig = signal<CoverImageChooserConfig>({});
 
   saveNestedComponents: EventEmitter<void> = new EventEmitter();
 
@@ -177,12 +182,9 @@ export class EditSeriesModalComponent implements OnInit {
   }
 
   ngOnInit(): void {
-
     this.libraryService.getLibraryNames().pipe(takeUntilDestroyed(this.destroyRef)).subscribe(names => {
       this.libraryName = names[this.series.libraryId];
     });
-
-
 
     this.initSeries = Object.assign({}, this.series);
 
@@ -200,7 +202,11 @@ export class EditSeriesModalComponent implements OnInit {
       publicationStatus: new FormControl('', []),
       language: new FormControl('', []),
       releaseYear: new FormControl('', [Validators.minLength(4), Validators.maxLength(4), Validators.pattern(/([1-9]\d{3})|[0]{1}/)]),
+      metadataProviderOverride: new FormControl<MetadataProvider | null>(this.series.metadataProviderOverride ?? null, []),
     });
+
+    addMetadataIdControls(this.editSeriesForm, this.series);
+
     this.cdRef.markForCheck();
 
 
@@ -278,9 +284,9 @@ export class EditSeriesModalComponent implements OnInit {
       const libraryType = res.libraryType;
 
       this.seriesVolumes = volumes;
-      this.libraryType = libraryType;
+      this.libraryType.set(libraryType);
       this.isLoadingVolumes.set(false);
-      this.chooserConfig = this.coverChooserConfigFactory.forSeries(this.series, this.seriesVolumes, this.libraryType);
+      this.chooserConfig.set(this.coverChooserConfigFactory.forSeries(this.series, this.seriesVolumes, this.libraryType()));
 
       volumes.forEach(v => {
         this.volumeCollapsed[v.name] = true;
@@ -571,8 +577,7 @@ export class EditSeriesModalComponent implements OnInit {
   handleReset() {
     this.coverImageReset = true;
     this.editSeriesForm.patchValue({ coverImageLocked: false });
-    this.chooserConfig = { ...this.chooserConfig, isLocked: false };
-    this.cdRef.markForCheck();
+    this.chooserConfig.set({ ...this.chooserConfig(), isLocked: false });
   }
 
   unlock(b: any, field: string) {

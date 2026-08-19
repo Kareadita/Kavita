@@ -95,6 +95,9 @@ public sealed record SeriesDto : IHasReadTimeEstimate, IHasCoverImage, IHasMetad
     public bool IsBlacklisted { get; set; }
     /// <inheritdoc cref="Kavita.Models.Entities.Series.IsStandAlone"/>
     public bool IsStandAlone { get; set; }
+    /// <inheritdoc cref="Kavita.Models.Entities.Series.MetadataProviderOverride"/>
+    [EnumDataType(typeof(MetadataProvider))]
+    public MetadataProvider? MetadataProviderOverride { get; set; }
     #endregion
 
     #region ColorScape
@@ -112,7 +115,7 @@ public sealed record SeriesDto : IHasReadTimeEstimate, IHasCoverImage, IHasMetad
     public int HardcoverId { get; set; }
     public long MetronId { get; set; }
     public string? ComicVineId { get; set; }
-    public long MangaBakaId { get; set; }
+    public int MangaBakaId { get; set; }
     public string MangaBakaEditionId { get; set; } = string.Empty;
     public int CbrId { get; set; }
 

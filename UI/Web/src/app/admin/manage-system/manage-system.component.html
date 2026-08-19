@@ -23,7 +23,7 @@
 
         <div class="col-4">
           <div>{{t('first-install-date-title')}}</div>
-          <div>{{serverInfo.firstInstallDate | date:'shortDate'}}</div>
+          <div>{{serverInfo.firstInstallDate | utcToLocalTime:'shortDate'}}</div>
         </div>
       </div>
     </div>

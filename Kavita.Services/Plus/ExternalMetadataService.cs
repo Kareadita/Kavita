@@ -172,7 +172,7 @@ public class ExternalMetadataService : IExternalMetadataService
             return null;
         }
 
-        if (HasRequiredId(series, series.Library.MetadataProvider))
+        if (HasRequiredId(series, series.GetEffectiveMetadataProvider()))
         {
             return await GetSeriesDetailPlus(seriesId, libraryType, trigger, ct: ct);
         }
@@ -187,7 +187,7 @@ public class ExternalMetadataService : IExternalMetadataService
             MetronId = series.MetronId,
             ComicVineId = series.ComicVineId,
             IsStandAlone = series.Volumes.Sum(v => v.Chapters.Count) == 1,
-            Provider = series.Library.MetadataProvider,
+            Provider = series.GetEffectiveMetadataProvider(),
             SeriesName = series.Name,
             AlternativeNames = ExtractAlternativeNames(series),
             Format = series.Library.Type.ConvertToPlusMediaFormat(series.Format),
@@ -223,7 +223,7 @@ public class ExternalMetadataService : IExternalMetadataService
         series.CbrId = match.Series.CbrId ?? 0;
         series.IsStandAlone = match.Series.IsStandAlone;
 
-        if (series.Library.MetadataProvider == MetadataProvider.Mangabaka)
+        if (series.GetEffectiveMetadataProvider() == MetadataProvider.Mangabaka)
         {
             var editionMatch = PickBestEdition(series, match.Series.Editions);
 
@@ -392,86 +392,17 @@ public class ExternalMetadataService : IExternalMetadataService
     /// <param name="dto"></param>
     /// <param name="ct"></param>
     /// <returns></returns>
-    public async Task<IList<ExternalSeriesMatchDto>> MatchSeries(MatchSeriesDto dto, CancellationToken ct = default)
+    public async Task<MatchSeriesResultDto?> MatchSeries(MatchSeriesDto dto, CancellationToken ct = default)
     {
         const SeriesIncludes includes = SeriesIncludes.Metadata | SeriesIncludes.ExternalMetadata | SeriesIncludes.Library;
         var series = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(dto.SeriesId, includes, ct);
-        if (series == null) return [];
+        if (series == null) return null;
 
-        var query = dto.Query ?? string.Empty;
+        var queried = ParseQueriedIds(dto.Query);
 
-        var potentialAnilistId = ExternalIdParser.TryParseAniListHeader(query, out var aniListId)
-            ? aniListId : ExternalIdParser.GetAniListId(query);
+        var provider = queried.Provider ?? dto.Provider ?? series.GetEffectiveMetadataProvider();
 
-        var potentialMalId = ExternalIdParser.TryParseMalHeader(query, out var malId)
-            ? malId : ExternalIdParser.GetMalId(query);
-
-        var potentialMangabakaId = ExternalIdParser.TryParseMangaBakaHeader(query, out var mangabakaId)
-            ? mangabakaId : ExternalIdParser.GetMangaBakaId(query);
-
-        var potentialHardcoverSlug = ExternalIdParser.TryParseHardcoverHeader(query, out var hardcoverId)
-            ? hardcoverId : null;
-
-        var potentialCbrSlug = query.Contains("comicbookroundup.com/") ? query : null;
-
-        // If any ID was extracted (header syntax or URL), the raw query string is meaningless to the backend
-        var wasHeaderQuery = potentialAnilistId.HasValue
-                             || potentialMalId.HasValue
-                             || potentialMangabakaId > 0
-                             || !string.IsNullOrEmpty(potentialHardcoverSlug)
-                             || !string.IsNullOrEmpty(potentialCbrSlug); // For now, we pass slug as query as there is a direct handling on Query currently
-
-        query = wasHeaderQuery ? null : dto.Query;
-
-        var format = series.Library.Type.ConvertToPlusMediaFormat(series.Format);
-        var otherNames = ExtractAlternativeNames(series);
-
-        var year = series.Metadata.ReleaseYear;
-        if (year == 0 && format == PlusMediaFormat.Comic && !string.IsNullOrWhiteSpace(series.Name))
-        {
-            var potentialYear = Parser.ParseYear(series.Name);
-            if (!string.IsNullOrEmpty(potentialYear))
-            {
-                year = int.Parse(potentialYear);
-            }
-        }
-
-        var slug = series.Library.MetadataProvider switch
-        {
-            MetadataProvider.Hardcover => potentialHardcoverSlug,
-            MetadataProvider.ComicBookRoundup => potentialCbrSlug,
-            _ => string.Empty,
-        };
-
-        // If the query is empty, then use external ids. Otherwise, use what is being queried
-        var isQueryEmpty = string.IsNullOrEmpty(query);
-
-        var fallbackAniListId = series.AniListId > 0 && isQueryEmpty
-            ? series.AniListId
-            : ExternalIdParser.GetAniListId(series.Metadata.WebLinks);
-        var fallbackMalId = series.MalId > 0 && isQueryEmpty
-            ? series.MalId
-            : ExternalIdParser.GetMalId(series.Metadata.WebLinks);
-        var fallbackMangaBakaId = series.MangaBakaId > 0 && isQueryEmpty
-            ? series.MangaBakaId
-            : ExternalIdParser.GetMangaBakaId(series.Metadata.WebLinks);
-
-        var matchV3Request = new MatchRequestV3Dto
-        {
-            AniListId = potentialAnilistId ?? fallbackAniListId,
-            MalId = potentialMalId ?? fallbackMalId,
-            HardcoverId = dto.IsStandAlone ? ExternalIdParser.GetHardcoverBookId(series.Metadata.WebLinks) : ExternalIdParser.GetHardcoverSeriesId(series.Metadata.WebLinks),
-            Slug = slug,
-            CbrId = null,
-            MangabakaId = potentialMangabakaId > 0 ? potentialMangabakaId : fallbackMangaBakaId,
-            IsStandAlone = dto.IsStandAlone,
-            Provider = series.Library.MetadataProvider,
-            SeriesName = series.Name,
-            AlternativeNames = otherNames,
-            Year = year,
-            Query = query,
-            Format = format,
-        };
+        var matchV3Request = BuildMatchRequest(series, dto, queried, provider);
 
         _logger.LogDebug("Making match request for series {SeriesId}: {@Request}", series.Id, matchV3Request);
 
@@ -479,7 +410,7 @@ public class ExternalMetadataService : IExternalMetadataService
         if (!kPlusResult.IsSuccess)
         {
             _logger.LogError("Match request failed for {SeriesName}: {Error}", series.Name, kPlusResult.ErrorMessage);
-            return [];
+            return new MatchSeriesResultDto {Provider = provider};
         }
 
         var results = kPlusResult.Data;
@@ -490,7 +421,116 @@ public class ExternalMetadataService : IExternalMetadataService
             result.Series.Summary = StringHelper.RemoveSourceInDescription(StringHelper.SquashBreaklines(result.Series.Summary));
         }
 
-        return results;
+        return new MatchSeriesResultDto
+        {
+            Provider = provider,
+            Matches = results,
+        };
+    }
+
+    private sealed record QueriedExternalIds
+    {
+        public int? AniListId { get; init; }
+        public long? MalId { get; init; }
+        public long MangaBakaId { get; init; }
+        public string? HardcoverSlug { get; init; }
+        public string? CbrSlug { get; init; }
+        /// <summary>
+        /// Set when the queried url itself says if it points at a single book or at a series
+        /// </summary>
+        public bool? IsStandAlone { get; init; }
+
+        /// <summary>
+        /// If any id was found, the raw query string is meaningless to Kavita+ and shouldn't be sent along
+        /// </summary>
+        public bool HasAny => AniListId.HasValue || MalId.HasValue || MangaBakaId > 0
+                              || !string.IsNullOrEmpty(HardcoverSlug) || !string.IsNullOrEmpty(CbrSlug);
+
+        /// <summary>
+        /// The provider that owns these ids, if the user queried a provider-specific url/header
+        /// </summary>
+        public MetadataProvider? Provider
+        {
+            get
+            {
+                if (!string.IsNullOrEmpty(HardcoverSlug)) return MetadataProvider.Hardcover;
+                if (!string.IsNullOrEmpty(CbrSlug)) return MetadataProvider.ComicBookRoundup;
+                if (MangaBakaId > 0 || AniListId.HasValue || MalId.HasValue) return MetadataProvider.Mangabaka;
+
+                return null;
+            }
+        }
+    }
+
+    private static QueriedExternalIds ParseQueriedIds(string? rawQuery)
+    {
+        var query = rawQuery ?? string.Empty;
+        var hardcoverUrl = ExternalIdParser.GetHardcoverSlugFromUrl(query);
+
+        return new QueriedExternalIds
+        {
+            AniListId = ExternalIdParser.TryParseAniListHeader(query, out var aniListId)
+                ? aniListId : ExternalIdParser.GetAniListId(query),
+            MalId = ExternalIdParser.TryParseMalHeader(query, out var malId)
+                ? malId : ExternalIdParser.GetMalId(query),
+            MangaBakaId = ExternalIdParser.TryParseMangaBakaHeader(query, out var mangaBakaId)
+                ? mangaBakaId : ExternalIdParser.GetMangaBakaId(query),
+            HardcoverSlug = ExternalIdParser.TryParseHardcoverHeader(query, out var hardcoverSlug)
+                ? hardcoverSlug : hardcoverUrl?.Slug,
+            // For now, we pass the slug as query as there is a direct handling on query currently
+            CbrSlug = query.Contains("comicbookroundup.com/") ? query : null,
+            IsStandAlone = hardcoverUrl?.IsStandAlone,
+        };
+    }
+
+    private static MatchRequestV3Dto BuildMatchRequest(Series series, MatchSeriesDto dto, QueriedExternalIds queried,
+        MetadataProvider provider)
+    {
+        // If any id was extracted, the raw query string is meaningless to the backend
+        var query = queried.HasAny ? null : dto.Query;
+        var isStandAlone = queried.IsStandAlone ?? dto.IsStandAlone;
+        var format = series.Library.Type.ConvertToPlusMediaFormat(series.Format);
+        var webLinks = series.Metadata.WebLinks;
+
+        // Only use series ids if no ids have been supplied via the query
+        var aniListId = queried.HasAny ? queried.AniListId : series.AniListId;
+        var malId = queried.HasAny ? queried.MalId : series.MalId;
+        var mangaBakaId = queried.HasAny ? queried.MangaBakaId : series.MangaBakaId;
+
+        return new MatchRequestV3Dto
+        {
+            AniListId = aniListId,
+            MalId = malId,
+            HardcoverId = isStandAlone ? ExternalIdParser.GetHardcoverBookId(webLinks) : ExternalIdParser.GetHardcoverSeriesId(webLinks),
+            Slug = provider switch
+            {
+                MetadataProvider.Hardcover => queried.HardcoverSlug,
+                MetadataProvider.ComicBookRoundup => queried.CbrSlug,
+                _ => string.Empty,
+            },
+            CbrId = null,
+            MangabakaId = mangaBakaId,
+            IsStandAlone = isStandAlone,
+            Provider = provider,
+            SeriesName = series.Name,
+            AlternativeNames = ExtractAlternativeNames(series),
+            Year = GetReleaseYear(series, format),
+            Query = query,
+            Format = format,
+        };
+    }
+
+    /// <summary>
+    /// Comics rarely carry a release year on their metadata, but often have one in their name
+    /// </summary>
+    private static int GetReleaseYear(Series series, PlusMediaFormat format)
+    {
+        var year = series.Metadata.ReleaseYear;
+        if (year != 0 || format != PlusMediaFormat.Comic || string.IsNullOrWhiteSpace(series.Name)) return year;
+
+        var potentialYear = Parser.ParseYear(series.Name);
+
+        return string.IsNullOrEmpty(potentialYear) ? year : int.Parse(potentialYear);
     }
 
     private static List<string> ExtractAlternativeNames(Series series)
@@ -555,10 +595,16 @@ public class ExternalMetadataService : IExternalMetadataService
         }
     }
 
-    public async Task FixSeriesMatch(int seriesId, ExternalMetadataIdsDto ids, CancellationToken ct = default)
+    public async Task FixSeriesMatch(int seriesId, ExternalMetadataIdsDto ids, MetadataProvider? provider = null, CancellationToken ct = default)
     {
         var series = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(seriesId, SeriesIncludes.Library, ct);
         if (series == null) return;
+
+        // The user matched against a provider that isnt the series own, so that choice becomes the series provider
+        if (provider.HasValue && provider.Value != series.GetEffectiveMetadataProvider())
+        {
+            await UpdateSeriesMetadataProviderOverride(seriesId, provider.Value, ct);
+        }
 
         // Remove from Blacklist
         series.IsBlacklisted = false;
@@ -572,7 +618,7 @@ public class ExternalMetadataService : IExternalMetadataService
             var metadata = await FetchExternalMetadataForSeries(seriesId, series.Library.Type,
                 new  SeriesDetailRequestV3Dto()
                 {
-                    Provider = series.Library.MetadataProvider,
+                    Provider = series.GetEffectiveMetadataProvider(),
                     AniListId = ids.AniListId,
                     MalId = ids.MalId,
                     CbrId = ids.CbrId,
@@ -652,6 +698,57 @@ public class ExternalMetadataService : IExternalMetadataService
 
         await _auditService.LogMatchAsync(KavitaPlusEventType.SeriesDontMatchSet, seriesId,
             new AuditLogMatchDontMatchParamsDto { SeriesName = series.Name, DontMatch = dontMatch }, ct: ct);
+    }
+
+    public async Task UpdateSeriesMetadataProviderOverride(int seriesId, MetadataProvider? metadataProviderOverride, CancellationToken ct = default)
+    {
+        var series = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(seriesId,
+            SeriesIncludes.Library | SeriesIncludes.ExternalMetadata, ct);
+        if (series == null) return;
+
+        if (series.Library.MetadataProvider == metadataProviderOverride)
+        {
+            metadataProviderOverride = null;
+        }
+
+        if (series.MetadataProviderOverride == metadataProviderOverride) return;
+
+        var previousProvider = series.GetEffectiveMetadataProvider();
+        series.MetadataProviderOverride = metadataProviderOverride;
+        var newProvider = series.GetEffectiveMetadataProvider();
+
+        // Pinning the Library's current default (or dropping back to it) doesn't change who we match against,
+        // so the data we already hold is still from the right provider
+        if (previousProvider != newProvider)
+        {
+            _logger.LogInformation("Series {SeriesName} is switching Metadata Provider from {PreviousProvider} to {NewProvider}",
+                series.Name, previousProvider, newProvider);
+
+            // Everything cached came from the previous provider and must be refetched rather than served from cache
+            var externalSeriesMetadata = await GetOrCreateExternalSeriesMetadataForSeries(seriesId, series);
+            _unitOfWork.ExternalSeriesMetadataRepository.Remove(externalSeriesMetadata.ExternalReviews);
+            _unitOfWork.ExternalSeriesMetadataRepository.Remove(externalSeriesMetadata.ExternalRatings);
+            _unitOfWork.ExternalSeriesMetadataRepository.Remove(externalSeriesMetadata.ExternalRecommendations);
+            externalSeriesMetadata.ValidUntilUtc = DateTime.MinValue;
+            _fileCacheService.InvalidatePrefix(GetCoversCacheKey(seriesId), FileCacheService.KavitaPlusCacheDirectory);
+
+            // Failing to match against the previous provider says nothing about the new one
+            series.IsBlacklisted = false;
+        }
+
+        _unitOfWork.SeriesRepository.Update(series);
+        await _unitOfWork.CommitAsync(ct);
+
+        await _eventHub.SendMessageAsync(MessageFactory.SeriesUpdated, MessageFactory.SeriesUpdatedEvent(series.Id), ct: ct);
+
+        await _auditService.LogMatchAsync(KavitaPlusEventType.SeriesMetadataProviderOverrideSet, seriesId,
+            new AuditLogMatchProviderOverrideParamsDto
+            {
+                SeriesName = series.Name,
+                PreviousProvider = previousProvider,
+                NewProvider = newProvider,
+                IsOverride = metadataProviderOverride.HasValue,
+            }, ct: ct);
     }
 
     /// <summary>
@@ -758,9 +855,9 @@ public class ExternalMetadataService : IExternalMetadataService
         var metadataSettings = await _unitOfWork.SettingsRepository.GetMetadataSettingDto(ct);
         var seenRecommendations = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
         var recs = await ProcessRecommendations(libraryType, result.ReadersAlsoLike, externalSeriesMetadata,
-            RecommendationSource.UserBased, series.Library!.MetadataProvider, metadataSettings, seenRecommendations);
+            RecommendationSource.UserBased, series.GetEffectiveMetadataProvider(), metadataSettings, seenRecommendations);
         var similarRecs = await ProcessRecommendations(libraryType, result.SimilarSeries, externalSeriesMetadata,
-            RecommendationSource.Similar, series.Library.MetadataProvider, metadataSettings, seenRecommendations);
+            RecommendationSource.Similar, series.GetEffectiveMetadataProvider(), metadataSettings, seenRecommendations);
         recs.ExternalSeries = recs.ExternalSeries.Concat(similarRecs.ExternalSeries).ToList();
         recs.OwnedSeries = recs.OwnedSeries.Concat(similarRecs.OwnedSeries).ToList();
 
@@ -776,12 +873,6 @@ public class ExternalMetadataService : IExternalMetadataService
         var beforeIds = new AuditLogMatchExternalIdsParamsDto { AniListId = series.AniListId, MalId = series.MalId,
             MangaBakaId = series.MangaBakaId, MangaBakaEditionId = series.MangaBakaEditionId, CbrId = series.CbrId, HardcoverId = series.HardcoverId };
 
-        externalSeriesMetadata.MalId = data.MalId ?? result.MalId ?? 0;
-        externalSeriesMetadata.AniListId = data.AniListId ?? result.AniListId ?? 0;
-        externalSeriesMetadata.CbrId = data.CbrId ?? result.CbrId ?? 0;
-        externalSeriesMetadata.MangabakaId = data.MangabakaId ?? result.MangabakaId ?? 0;
-        series.MangaBakaId = externalSeriesMetadata.MangabakaId;
-
         if (!string.IsNullOrEmpty(data.MangaBakaEditionId))
         {
             series.MangaBakaEditionId = data.MangaBakaEditionId;
@@ -791,14 +882,20 @@ public class ExternalMetadataService : IExternalMetadataService
             series.MangaBakaEditionId = string.Empty;
         }
 
-        var hardcoverId = data.HardcoverId ?? result.Series?.HardcoverId ?? series.HardcoverId;
+        // Update ids from K+ in case of merges upstream
+        series.AniListId = result.AniListId ?? series.AniListId;
+        series.MalId = result.MalId ?? series.MalId;
+        series.MangaBakaId = result.MangabakaId ?? series.MangaBakaId;
+        series.CbrId = result.CbrId ?? series.CbrId;
+        series.HardcoverId = result.HardCoverId ?? series.HardcoverId;
+
         var afterIds = new AuditLogMatchExternalIdsParamsDto {
-            AniListId = externalSeriesMetadata.AniListId,
-            MalId = externalSeriesMetadata.MalId,
+            AniListId = series.AniListId,
+            MalId = series.MalId,
             MangaBakaId = series.MangaBakaId,
             MangaBakaEditionId = series.MangaBakaEditionId,
-            CbrId = externalSeriesMetadata.CbrId,
-            HardcoverId = hardcoverId };
+            CbrId = series.CbrId,
+            HardcoverId = series.HardcoverId };
 
         await _auditService.LogMatchAsync(KavitaPlusEventType.SeriesMatched, seriesId,
             new AuditLogMatchedParamsDto {
@@ -988,7 +1085,7 @@ public class ExternalMetadataService : IExternalMetadataService
     private async Task ApplyExternalCovers(Series series, MetadataSettingsDto settings, CancellationToken ct = default)
     {
         if (!settings.EnableVolumeCoverImage && !settings.EnableChapterCoverImage) return;
-        if (series.Library?.MetadataProvider == MetadataProvider.ComicBookRoundup) return;
+        if (series.GetEffectiveMetadataProvider() == MetadataProvider.ComicBookRoundup) return;
 
         // Prefer the cover based on Series/Library locale
         var locale = series.Metadata.Language ?? series.Library?.DefaultLanguage;
@@ -1131,7 +1228,7 @@ public class ExternalMetadataService : IExternalMetadataService
             MetronId = series.MetronId,
             CbrId = series.CbrId,
             IsStandAlone = series.IsStandAlone,
-            MetadataProvider = series.Library.MetadataProvider
+            MetadataProvider = series.GetEffectiveMetadataProvider()
         };
 
         if (volumeId.HasValue)
@@ -2604,21 +2701,23 @@ public class ExternalMetadataService : IExternalMetadataService
     {
         try
         {
-            // Determine the expected total count based on local metadata
-            series.Metadata.TotalCount = Math.Max(
-                chapters.Max(chapter => chapter.TotalCount),
-                externalMetadata.Volumes > 0 ? externalMetadata.Volumes : externalMetadata.Chapters
-            );
-
-            // The actual number of count's defined across all chapter's metadata
-            series.Metadata.MaxCount = chapters.Max(chapter => chapter.Count);
-
-            var nonSpecialVolumes = series.Volumes
-                .Where(v => v.MaxNumber.IsNot(Parser.SpecialVolumeNumber))
+            var realVolumes = series.Volumes
+                .Where(v => v.MaxNumber.IsNot(Parser.SpecialVolumeNumber) && v.MaxNumber.IsNot(Parser.LooseLeafVolumeNumber))
                 .ToList();
 
-            var maxVolume = (int)(nonSpecialVolumes.Count != 0 ? nonSpecialVolumes.Max(v => v.MaxNumber) : 0);
+            var isVolumeBased = realVolumes.Count != 0;
+
+            var maxVolume = (int)(realVolumes.Count != 0 ? realVolumes.Max(v => v.MaxNumber) : 0);
             var maxChapter = (int)chapters.Max(c => c.MaxNumber);
+
+            var externalExpectedCount = isVolumeBased ? externalMetadata.Volumes : externalMetadata.Chapters;
+
+            series.Metadata.TotalCount = Math.Max(
+                chapters.Max(chapter => chapter.TotalCount),
+                externalExpectedCount
+            );
+
+            series.Metadata.MaxCount = isVolumeBased ? maxVolume : maxChapter;
 
             if (series.Format is MangaFormat.Epub or MangaFormat.Pdf && chapters.Count == 1)
             {
@@ -2628,23 +2727,9 @@ public class ExternalMetadataService : IExternalMetadataService
             {
                 series.Metadata.MaxCount = series.Metadata.TotalCount;
             }
-            else if ((maxChapter == Parser.DefaultChapterNumber || maxChapter > series.Metadata.TotalCount) &&
-                     maxVolume <= series.Metadata.TotalCount && maxVolume != Parser.DefaultChapterNumber)
-            {
-                series.Metadata.MaxCount = maxVolume;
-            }
-            else if (maxVolume == series.Metadata.TotalCount)
-            {
-                series.Metadata.MaxCount = maxVolume;
-            }
-            else
-            {
-                series.Metadata.MaxCount = maxChapter;
-            }
 
             var status = PublicationStatus.OnGoing;
-
-            var hasExternalCounts = externalMetadata.Volumes > 0 || externalMetadata.Chapters > 0;
+            var hasExternalCounts = isVolumeBased ? externalMetadata.Volumes > 0 : externalMetadata.Chapters > 0;
 
             if (hasExternalCounts)
             {
@@ -2969,6 +3054,21 @@ public class ExternalMetadataService : IExternalMetadataService
         var extSeries = result.Data.Series;
         if (extSeries == null) return null;
 
+        var settings = await _unitOfWork.SettingsRepository.GetMetadataSettingDto(ct);
+
+        var genres = new List<string>();
+        var tags = new List<string>();
+        GenerateGenreAndTagLists(extSeries, settings, ref tags, ref genres);
+
+        var tagsToRemove = GetTagsToRemove(extSeries, settings);
+        var finalTags = tags.Except(tagsToRemove).ToHashSet();
+
+        extSeries.Genres = genres;
+        extSeries.Tags = extSeries.Tags.Where(t => finalTags.Contains(t.Name)).ToList();
+
+        var ageRating = DetermineAgeRating(extSeries.Tags.Select(t => t.Name).Concat(extSeries.Genres), settings.AgeRatingMappings);
+
+        extSeries.AgeRating = ageRating;
         extSeries.Summary = StringHelper.RemoveSourceInDescription(StringHelper.SquashBreaklines(extSeries.Summary));
 
         return extSeries;

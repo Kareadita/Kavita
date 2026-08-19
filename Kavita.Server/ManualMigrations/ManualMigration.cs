@@ -1,4 +1,5 @@
 ﻿using System.Threading.Tasks;
+using Kavita.API.Services;
 using Kavita.Database;
 using Kavita.Models.Entities.History;
 using Microsoft.EntityFrameworkCore;

@@ -21,8 +21,8 @@
       <ng-template #cardItem let-item let-position="idx">
         <app-entity-card [entity]="item" [index]="position" [maxIndex]="collectionEntities().length"
                          [config]="collectionConfig()" (reload)="loadPage()" (dataChanged)="updateCollection($event)">
-          <ng-template #subtitle>
-            <app-collection-owner [collection]="item.data" />
+          <ng-template #subtitle let-entity>
+            <app-collection-owner [collection]="entity.data" />
           </ng-template>
           <ng-template #title let-entity>
             <app-promoted-icon [promoted]="entity.data.promoted" /> {{entity.data.title}}

@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using Kavita.API.Database;
 using Kavita.API.Repositories;
 using Kavita.API.Services.Plus;
+using Kavita.Common.Extensions;
 using Kavita.Models.DTOs.KavitaPlus;
 using Kavita.Models.DTOs.Scrobbling;
 using Kavita.Models.Entities;
@@ -46,9 +47,8 @@ where T: IScrobbleProviderService
         if (HasRequiredIds(ctx.Series)) return true;
 
         await auditService.LogTemperedAsync(al => al.SeriesId == ctx.Series.Id && al.UserId == ctx.User.Id, KavitaPlusAuditCategory.Scrobble,
-            KavitaPlusEventType.ScrobbleEventSkipped, AuditStatus.Info, AuditSubjectType.Series,
-            payload: new AuditLogScrobbleParamsDto { ScrobbleEventType = eventType, Provider = Provider },
-            seriesId: ctx.Series.Id, error: "series-missing-required-ids", userId: ctx.User.Id, ct: ct);
+            KavitaPlusEventType.ScrobbleEventSkipped, AuditStatus.Failure, AuditSubjectType.Series,
+            seriesId: ctx.Series.Id, payload: new AuditLogScrobbleParamsDto { ScrobbleEventType = eventType, Provider = Provider }, error: "series-missing-required-ids", userId: ctx.User.Id, ct: ct);
 
         return false;
     }
@@ -279,6 +279,12 @@ where T: IScrobbleProviderService
 
             var prevChapterNumber = existingEvent.ChapterNumber;
             var prevVolumeNumber = existingEvent.VolumeNumber;
+
+            if (prevVolumeNumber.Is(volumeNumber) && prevChapterNumber == chapterNumber)
+            {
+                logger.LogTrace("Ignoring reading update for {Series} as volume & chapter have not changed", ctx.Series.Name);
+                return;
+            }
 
             existingEvent.VolumeNumber = volumeNumber;
             existingEvent.ChapterNumber = chapterNumber;

@@ -79,7 +79,7 @@ public class ReadingHistoryServiceTests(ITestOutputHelper testOutputHelper) : Ab
 
         await dataContext.AppUser.AddAsync(new AppUser() { UserName = "Test" });
 
-        await  dataContext.SaveChangesAsync();
+        await dataContext.SaveChangesAsync();
 
         // Create an active session dated for yesterday
         var yesterday= DateTime.Now.Date.AddDays(-1);
@@ -106,7 +106,7 @@ public class ReadingHistoryServiceTests(ITestOutputHelper testOutputHelper) : Ab
             IsActive = false,
         });
 
-        await  dataContext.SaveChangesAsync();
+        await dataContext.SaveChangesAsync();
 
         // Run the service
         await service.AggregateYesterdaysActivity();

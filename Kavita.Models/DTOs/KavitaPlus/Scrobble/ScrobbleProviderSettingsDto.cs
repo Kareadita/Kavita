@@ -73,6 +73,6 @@ public sealed record ReadStatusTransitionRule
     /// <summary>
     /// Exclude series with these publication statuses from the rule
     /// </summary>
-    [EnumCollection(typeof(PublicationStatus))]
+    [EnumCollection(typeof(PublicationStatus), true)]
     public List<PublicationStatus> ExcludedPublicationStatus { get; set; }
 }

@@ -185,7 +185,11 @@ public class BookmarkService(
             return false;
         }
 
-        await DeleteBookmarkFiles([bookmarkToDelete], ct);
+        if (bookmarkToDelete != null)
+        {
+            await DeleteBookmarkFiles([bookmarkToDelete], ct);
+        }
+
         return true;
     }
 

@@ -24,4 +24,5 @@ public interface IExternalSeriesMetadataRepository
     Task LinkRecommendationsToSeries(Series series, CancellationToken ct = default);
     Task<List<int>> GetSeriesThatNeedExternalMetadata(int limit, bool includeStaleData = false, CancellationToken ct = default);
     Task<PagedList<ManageMatchSeriesDto>> GetAllSeries(ManageMatchFilterDto filter, UserParams userParams, CancellationToken ct = default);
+    Task<MatchedExternalSeriesCountDto> GetMatchedExternalSeriesCount(CancellationToken ct = default);
 }

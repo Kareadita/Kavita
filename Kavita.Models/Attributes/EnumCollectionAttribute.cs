@@ -14,6 +14,9 @@ public class EnumCollectionAttribute(Type enumType, bool allowNull = false): Val
 
     public override bool IsValid(object value)
     {
+        if (value == null)
+            return allowNull;
+
         if (value is not IEnumerable enumerable)
             return false;
 

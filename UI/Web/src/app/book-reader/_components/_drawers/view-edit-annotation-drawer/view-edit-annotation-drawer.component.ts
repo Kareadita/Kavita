@@ -23,14 +23,13 @@ import {of} from "rxjs";
 import {HighlightBarComponent} from "../../_annotations/highlight-bar/highlight-bar.component";
 import {SlotColorPipe} from "../../../../_pipes/slot-color.pipe";
 import {DomSanitizer, SafeHtml} from "@angular/platform-browser";
-import {DatePipe, DOCUMENT, NgStyle} from "@angular/common";
+import {DOCUMENT, NgStyle} from "@angular/common";
 import {SafeHtmlPipe} from "../../../../_pipes/safe-html.pipe";
 import {EpubHighlightService} from "../../../../_services/epub-highlight.service";
 import {PageChapterLabelPipe} from "../../../../_pipes/page-chapter-label.pipe";
 import {UtilityService} from "../../../../shared/_services/utility.service";
 import {QuillTheme, QuillWrapperComponent} from "../../quill-wrapper/quill-wrapper.component";
 import {ContentChange, QuillViewComponent} from "ngx-quill";
-import {UtcToLocalDatePipe} from "../../../../_pipes/utc-to-locale-date.pipe";
 import {AccountService} from "../../../../_services/account.service";
 import {
   OffCanvasResizeComponent,
@@ -42,6 +41,7 @@ import {ProfileIconComponent} from "../../../../_single-module/profile-icon/prof
 import {RouterLink} from "@angular/router";
 import {BreakpointService} from "../../../../_services/breakpoint.service";
 import {DrawerService} from "../../../../_services/drawer.service";
+import {UtcToLocalTimePipe} from "../../../../_pipes/utc-to-local-time.pipe";
 
 export enum AnnotationMode {
   View = 0,
@@ -62,12 +62,11 @@ const INIT_HIGHLIGHT_DELAY = 200;
     PageChapterLabelPipe,
     QuillWrapperComponent,
     QuillViewComponent,
-    DatePipe,
-    UtcToLocalDatePipe,
     OffCanvasResizeComponent,
     AnnotationLikesComponent,
     ProfileIconComponent,
-    RouterLink
+    RouterLink,
+    UtcToLocalTimePipe
   ],
   templateUrl: './view-edit-annotation-drawer.component.html',
   styleUrl: './view-edit-annotation-drawer.component.scss',

@@ -769,7 +769,7 @@ public class LibraryController(
 
     private static void ValidateMetadataProvider(LibraryType type, MetadataProvider provider)
     {
-        if (!KavitaPlusConfiguration.MetadataProvidersForLibraryTypes.TryGetValue(type, out var validProviders) || !validProviders.Contains(provider))
+        if (!KavitaPlusConfiguration.IsValidMetadataProviderForLibraryType(type, provider))
         {
             throw new KavitaException("invalid-metadata-provider");
         }

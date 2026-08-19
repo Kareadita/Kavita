@@ -15,14 +15,14 @@
       <PackageReference Include="Flurl.Http" Version="4.0.2" />
       <PackageReference Include="Hangfire.Core" Version="1.8.24" />
       <PackageReference Include="HtmlAgilityPack" Version="1.12.4" />
-      <PackageReference Include="Microsoft.AspNetCore.StaticFiles" Version="2.3.11" />
-      <PackageReference Include="Microsoft.Extensions.Configuration.Abstractions" Version="10.0.10" />
-      <PackageReference Include="Microsoft.Extensions.Hosting" Version="10.0.10" />
-      <PackageReference Include="Microsoft.Net.Http.Headers" Version="10.0.10" />
+      <PackageReference Include="Microsoft.AspNetCore.StaticFiles" Version="2.3.12" />
+      <PackageReference Include="Microsoft.Extensions.Configuration.Abstractions" Version="10.0.11" />
+      <PackageReference Include="Microsoft.Extensions.Hosting" Version="10.0.11" />
+      <PackageReference Include="Microsoft.Net.Http.Headers" Version="10.0.11" />
       <PackageReference Include="NetVips" Version="3.2.0" />
-      <PackageReference Include="NetVips.Native" Version="8.18.4" />
+      <PackageReference Include="NetVips.Native" Version="8.18.5" />
       <PackageReference Include="Newtonsoft.Json" Version="13.0.4" />
-      <PackageReference Include="SonarAnalyzer.CSharp" Version="10.31.0.145097">
+      <PackageReference Include="SonarAnalyzer.CSharp" Version="10.32.0.713">
         <PrivateAssets>all</PrivateAssets>
         <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
       </PackageReference>

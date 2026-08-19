@@ -11,6 +11,10 @@ public enum KavitaPlusEventType
     /// </summary>
     SeriesMatchFixed = 3,
     SeriesDontMatchSet = 4,
+    /// <summary>
+    /// The Series' Metadata Provider was changed away from (or back to) its Library's default
+    /// </summary>
+    SeriesMetadataProviderOverrideSet = 5,
 
     // Metadata - Series
     MetadataFetched = 10,

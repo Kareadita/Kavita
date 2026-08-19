@@ -16,16 +16,8 @@ public sealed record MatchSeriesInfoDto
     public PlusMediaFormat PlusMediaFormat { get; set; }
     [EnumDataType(typeof(LibraryType))]
     public LibraryType LibraryType { get; set; }
-    /// <summary>
-    /// Where the Match came from
-    /// </summary>
     [EnumDataType(typeof(MetadataProvider))]
-    public MetadataProvider? MatchedProvider { get; set; }
-    /// <summary>
-    /// Who we would match against
-    /// </summary>
-    [EnumDataType(typeof(MetadataProvider))]
-    public MetadataProvider PrimaryProvider { get; set; }
+    public MetadataProvider MetadataProvider { get; set; }
     [EnumDataType(typeof(MangaFormat))]
     public MangaFormat SeriesFormat { get; set; }
     public int? MangaBakaId { get; set; }

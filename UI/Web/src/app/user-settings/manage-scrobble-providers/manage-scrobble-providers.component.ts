@@ -208,7 +208,11 @@ export class ManageScrobbleProvidersComponent implements OnInit {
       distinctUntilChanged(),
       debounceTime(500),
       switchMap(s => this.scrobbleService.saveScrobbleSettings(provider, group.getRawValue())),
-      catchError(() => of(null))
+      catchError(err => {
+        console.error(err);
+        this.toastr.error(translate('errors.generic'))
+        return of(null);
+      })
     ).subscribe();
   }
 
