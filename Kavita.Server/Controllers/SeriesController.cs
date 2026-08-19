@@ -663,8 +663,6 @@ public class SeriesController(
     {
         var ct = HttpContext.RequestAborted;
 
-        // The provider is part of the key as the dialog can search against a different one than the series,
-        // and the same query against a different provider is a different search
         var seriesProvider = await unitOfWork.SeriesRepository.GetEffectiveMetadataProviderAsync(dto.SeriesId, ct);
         if (seriesProvider == null) return NotFound();
 
