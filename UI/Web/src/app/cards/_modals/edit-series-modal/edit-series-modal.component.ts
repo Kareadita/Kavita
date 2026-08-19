@@ -69,6 +69,8 @@ import {Volume} from "../../../_models/volume";
 import {ConfirmService} from "../../../shared/confirm.service";
 import {EditModalShellComponent} from "../../../shared/edit-modal-shell/edit-modal-shell.component";
 import {EditTabDirective} from "../../../shared/_directive/edit-tab.directive";
+import {AllMetadataProviders, MetadataProvider} from "src/app/_models/kavitaplus/metadata-provider.enum";
+import {MetadataProviderTitlePipe} from "../../../_pipes/metadata-provider-title.pipe";
 
 
 @Component({
@@ -96,7 +98,8 @@ import {EditTabDirective} from "../../../shared/_directive/edit-tab.directive";
     DecimalPipe,
     EditExternalMetadataFormComponent,
     EditModalShellComponent,
-    EditTabDirective
+    EditTabDirective,
+    MetadataProviderTitlePipe
   ],
   templateUrl: './edit-series-modal.component.html',
   styleUrls: ['./edit-series-modal.component.scss'],
@@ -141,7 +144,8 @@ export class EditSeriesModalComponent implements OnInit {
   editSeriesForm!: FormGroup;
   libraryName: string | undefined = undefined;
   size: number = 0;
-  libraryType = LibraryType.Manga;
+  libraryType = signal<LibraryType>(LibraryType.Manga);
+  protected readonly allMetadataProviders = AllMetadataProviders;
 
 
   // Typeaheads
@@ -198,6 +202,7 @@ export class EditSeriesModalComponent implements OnInit {
       publicationStatus: new FormControl('', []),
       language: new FormControl('', []),
       releaseYear: new FormControl('', [Validators.minLength(4), Validators.maxLength(4), Validators.pattern(/([1-9]\d{3})|[0]{1}/)]),
+      metadataProviderOverride: new FormControl<MetadataProvider | null>(this.series.metadataProviderOverride ?? null, []),
     });
 
     addMetadataIdControls(this.editSeriesForm, this.series);
@@ -279,7 +284,7 @@ export class EditSeriesModalComponent implements OnInit {
       const libraryType = res.libraryType;
 
       this.seriesVolumes = volumes;
-      this.libraryType = libraryType;
+      this.libraryType.set(libraryType);
       this.isLoadingVolumes.set(false);
       this.chooserConfig.set(this.coverChooserConfigFactory.forSeries(this.series, this.seriesVolumes, this.libraryType));
 

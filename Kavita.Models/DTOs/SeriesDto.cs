@@ -95,6 +95,9 @@ public sealed record SeriesDto : IHasReadTimeEstimate, IHasCoverImage, IHasMetad
     public bool IsBlacklisted { get; set; }
     /// <inheritdoc cref="Kavita.Models.Entities.Series.IsStandAlone"/>
     public bool IsStandAlone { get; set; }
+    /// <inheritdoc cref="Kavita.Models.Entities.Series.MetadataProviderOverride"/>
+    [EnumDataType(typeof(MetadataProvider))]
+    public MetadataProvider? MetadataProviderOverride { get; set; }
     #endregion
 
     #region ColorScape

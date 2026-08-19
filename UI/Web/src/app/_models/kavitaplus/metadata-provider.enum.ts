@@ -3,3 +3,9 @@ export enum MetadataProvider {
   Mangabaka = 3,
   ComicBookRoundup = 4,
 }
+
+export const AllMetadataProviders: MetadataProvider[] = [
+  MetadataProvider.Hardcover,
+  MetadataProvider.Mangabaka,
+  MetadataProvider.ComicBookRoundup,
+];

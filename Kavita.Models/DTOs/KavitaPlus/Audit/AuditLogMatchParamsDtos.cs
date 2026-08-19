@@ -17,6 +17,25 @@ public sealed record AuditLogMatchDontMatchParamsDto
     public bool DontMatch { get; init; }
 }
 
+public sealed record AuditLogMatchProviderOverrideParamsDto
+{
+    public string SeriesName { get; init; } = string.Empty;
+    /// <summary>
+    /// The provider that was matched against before the change
+    /// </summary>
+    [EnumDataType(typeof(MetadataProvider))]
+    public MetadataProvider PreviousProvider { get; init; }
+    /// <summary>
+    /// The provider that will be matched against going forward
+    /// </summary>
+    [EnumDataType(typeof(MetadataProvider))]
+    public MetadataProvider NewProvider { get; init; }
+    /// <summary>
+    /// False when the Series fell back to its Library's default provider
+    /// </summary>
+    public bool IsOverride { get; init; }
+}
+
 public sealed record AuditLogMatchFailureParamsDto
 {
     public string SeriesName { get; init; } = string.Empty;

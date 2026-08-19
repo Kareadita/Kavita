@@ -1,3 +1,6 @@
+using System.ComponentModel.DataAnnotations;
+using Kavita.Models.Entities.Enums;
+
 namespace Kavita.Models.DTOs.Metadata.Matching;
 
 /// <summary>
@@ -17,4 +20,11 @@ public sealed record MatchSeriesDto
     /// If the series should be consider a book (Hardcover)
     /// </summary>
     public bool IsStandAlone { get; set; }
+    /// <summary>
+    /// Search against this Provider instead of the Series' current one. Nothing is written to the Series, the
+    /// Provider is only applied to this search
+    /// </summary>
+    /// <remarks>A provider-specific url/header in <see cref="Query"/> takes precedence over this</remarks>
+    [EnumDataType(typeof(MetadataProvider))]
+    public MetadataProvider? Provider { get; set; }
 }

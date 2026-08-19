@@ -19,9 +19,10 @@ import {Recommendation} from "../_models/series-detail/recommendation";
 import {ExternalEditionDto, ExternalSeriesDetail} from "../_models/series-detail/external-series-detail";
 import {NextExpectedChapter} from "../_models/series-detail/next-expected-chapter";
 import {QueryContext} from "../_models/metadata/v2/query-context";
-import {ExternalSeriesMatch} from "../_models/series-detail/external-series-match";
+import {MatchSeriesResult} from "../_models/series-detail/match-series-result";
 import {SeriesFilterField} from "../_models/metadata/v2/series-filter-field";
 import {MatchSeriesInfo} from "../_models/kavitaplus/match-series-info";
+import {MetadataProvider} from "../_models/kavitaplus/metadata-provider.enum";
 
 @Injectable({
   providedIn: 'root'
@@ -248,10 +249,13 @@ export class SeriesService {
   }
 
   matchSeries(model: any) {
-    return this.httpClient.post<Array<ExternalSeriesMatch>>(this.baseUrl + 'series/match', model);
+    return this.httpClient.post<MatchSeriesResult>(this.baseUrl + 'series/match', model);
   }
 
-  updateMatch(seriesId: number, series: ExternalSeriesDetail, edition: ExternalEditionDto | null) {
+  /**
+   * @param provider The provider the match came from
+   */
+  updateMatch(seriesId: number, series: ExternalSeriesDetail, edition: ExternalEditionDto | null, provider: MetadataProvider | null) {
     const ids = {
       aniListId: series.aniListId ?? null,
       malId: series.malId ?? null,
@@ -261,7 +265,13 @@ export class SeriesService {
       hardcoverId: series.hardcoverId ?? null,
       isStandAlone: series.isStandAlone,
     };
-    return this.httpClient.post<string>(this.baseUrl + `series/update-match?seriesId=${seriesId}`, ids, TextResonse);
+
+    let url = this.baseUrl + `series/update-match?seriesId=${seriesId}`;
+    if (provider !== null) {
+      url += `&provider=${provider}`;
+    }
+
+    return this.httpClient.post<string>(url, ids, TextResonse);
   }
 
   updateDontMatch(seriesId: number, dontMatch: boolean) {

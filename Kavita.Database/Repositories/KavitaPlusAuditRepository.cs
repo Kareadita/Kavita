@@ -286,6 +286,8 @@ public class KavitaPlusAuditRepository(DataContext context) : IKavitaPlusAuditRe
                         KavitaPlusAuditMatchDetailsDto.From(JsonSerializer.Deserialize<AuditLogMatchFailureParamsDto>(e.Payload, JsonOptions)),
                     KavitaPlusEventType.SeriesDontMatchSet =>
                         KavitaPlusAuditMatchDetailsDto.From(JsonSerializer.Deserialize<AuditLogMatchDontMatchParamsDto>(e.Payload, JsonOptions)),
+                    KavitaPlusEventType.SeriesMetadataProviderOverrideSet =>
+                        KavitaPlusAuditMatchDetailsDto.From(JsonSerializer.Deserialize<AuditLogMatchProviderOverrideParamsDto>(e.Payload, JsonOptions)),
                     _ => null
                 };
             }

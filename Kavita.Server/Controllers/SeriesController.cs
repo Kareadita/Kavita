@@ -250,7 +250,6 @@ public class SeriesController(
 
         ExternalMetadataIdHelper.SetExternalMetadataIds(series, updateSeries);
 
-
         var needsRefreshMetadata = false;
         // This is when you hit Reset
         if (series.CoverImageLocked && !updateSeries.CoverImageLocked)
@@ -271,6 +270,10 @@ public class SeriesController(
         {
             return BadRequest(await localizationService.TranslateAsync(UserId, "generic-series-update"));
         }
+
+        // Routed through the service (rather than set inline) so that changing the provider also invalidates the
+        // metadata we cached from the previous one. No-ops when the override is unchanged.
+        await externalMetadataService.UpdateSeriesMetadataProviderOverride(series.Id, updateSeries.MetadataProviderOverride, ct);
 
         if (needsRefreshMetadata)
         {
@@ -657,17 +660,25 @@ public class SeriesController(
     [KPlus]
     [HttpPost("match")]
     [Authorize(Policy = PolicyGroups.AdminPolicy)]
-    public async Task<ActionResult<IList<ExternalSeriesMatchDto>>> MatchSeries(MatchSeriesDto dto)
+    public async Task<ActionResult<MatchSeriesResultDto>> MatchSeries(MatchSeriesDto dto)
     {
         var ct = HttpContext.RequestAborted;
-        var cacheKey = $"{MatchSeriesCacheKey}-{dto.SeriesId}-{dto.Query}-{dto.IsStandAlone}";
-        var results = await _matchSeriesCacheProvider.GetAsync<IList<ExternalSeriesMatchDto>>(cacheKey, ct);
+
+        // The provider is part of the key as the dialog can search against a different one than the series,
+        // and the same query against a different provider is a different search
+        var seriesProvider = await unitOfWork.SeriesRepository.GetEffectiveMetadataProviderAsync(dto.SeriesId, ct);
+        if (seriesProvider == null) return NotFound();
+
+        var cacheKey = $"{MatchSeriesCacheKey}-{dto.SeriesId}-{dto.Provider ?? seriesProvider}-{dto.Query}-{dto.IsStandAlone}";
+        var results = await _matchSeriesCacheProvider.GetAsync<MatchSeriesResultDto>(cacheKey, ct);
         if (results.HasValue && !environment.IsDevelopment())
         {
             return Ok(results.Value);
         }
 
         var ret = await externalMetadataService.MatchSeries(dto, ct);
+        if (ret == null) return NotFound();
+
         await _matchSeriesCacheProvider.SetAsync(cacheKey, ret, TimeSpan.FromMinutes(1), ct);
 
         return Ok(ret);
@@ -677,14 +688,15 @@ public class SeriesController(
     /// This will perform the fix match
     /// </summary>
     /// <param name="seriesId"></param>
+    /// <param name="provider">The provider the match came from.</param>
     /// <param name="ids"></param>
     /// <returns></returns>
     [KPlus]
     [HttpPost("update-match")]
     [Authorize(Policy = PolicyGroups.AdminPolicy)]
-    public ActionResult UpdateSeriesMatch([FromQuery] int seriesId, [FromBody] ExternalMetadataIdsDto ids)
+    public ActionResult UpdateSeriesMatch([FromQuery] int seriesId, [FromQuery] MetadataProvider? provider, [FromBody] ExternalMetadataIdsDto ids)
     {
-        BackgroundJob.Enqueue(() => externalMetadataService.FixSeriesMatch(seriesId, ids, CancellationToken.None));
+        BackgroundJob.Enqueue(() => externalMetadataService.FixSeriesMatch(seriesId, ids, provider, CancellationToken.None));
 
         return Ok();
     }
@@ -738,7 +750,8 @@ public class SeriesController(
             LibraryType = libraryType,
             PlusMediaFormat = plusFormat,
             MatchedProvider = provider,
-            PrimaryProvider = series.Library.MetadataProvider,
+            PrimaryProvider = series.GetEffectiveMetadataProvider(),
+            MetadataProviderOverride = series.MetadataProviderOverride,
             SeriesFormat = series.Format,
             IsStandalone = series.IsStandAlone,
         });

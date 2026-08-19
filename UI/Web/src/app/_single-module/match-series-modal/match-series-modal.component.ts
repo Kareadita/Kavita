@@ -30,7 +30,7 @@ import {
   ScrobbleProviderTagBadgeComponent
 } from "../../shared/_components/scrobble-provider-tag-badge/scrobble-provider-tag-badge.component";
 import {MatchSeriesInfo} from "../../_models/kavitaplus/match-series-info";
-import {MetadataProvider} from "../../_models/kavitaplus/metadata-provider.enum";
+import {AllMetadataProviders, MetadataProvider} from "../../_models/kavitaplus/metadata-provider.enum";
 import {ScrobbleProvider} from "../../_services/scrobbling.service";
 import {MetadataProviderTitlePipe} from "../../_pipes/metadata-provider-title.pipe";
 import {ExternalEditionDto, PlusMediaFormat} from "../../_models/series-detail/external-series-detail";
@@ -69,6 +69,7 @@ export class MatchSeriesModalComponent implements OnInit {
     query: new FormControl('', []),
     isStandAlone: new FormControl(false),
     dontMatch: new FormControl(false, []),
+    provider: new FormControl<MetadataProvider | null>(null),
   });
 
   protected readonly isDontMatch = toSignal(
@@ -86,6 +87,8 @@ export class MatchSeriesModalComponent implements OnInit {
   selectedEdition = signal<ExternalEditionDto | null>(null);
   selectedEditionId = linkedSignal<string | null>(() => this.selectedEdition()?.id ?? null);
   lastQuery = signal<string>('');
+  /** Provider the results on screen came from. */
+  resultProvider = signal<MetadataProvider | null>(null);
 
   protected bodyState = computed<'empty' | 'dont-match' | 'loading' | 'results' | 'no-results'>(() => {
     if (this.isDontMatch()) return 'dont-match';
@@ -113,7 +116,16 @@ export class MatchSeriesModalComponent implements OnInit {
 
   cbrSearchUrl = computed(() => {
     return `https://comicbookroundup.com/search-results?keyword=${encodeURIComponent(this.series().name)}`;
-  })
+  });
+
+  /** Provider the results came from, falling back to the series' own before the first search lands */
+  protected activeProvider = computed(() => this.resultProvider() ?? this.matchInfo()?.primaryProvider ?? null);
+  /** The search ran against another provider than the series own, so applying a match will switch the Series over */
+  protected isProviderSwitched = computed(() => {
+    const provider = this.resultProvider();
+    return provider !== null && provider !== this.matchInfo()?.primaryProvider;
+  });
+  
 
   constructor() {
     this.canSaveDontMatch = computed(() => this.isDontMatch() === true && !this.series().dontMatch);
@@ -129,6 +141,7 @@ export class MatchSeriesModalComponent implements OnInit {
 
       this.seriesService.getMatchInfo(this.series().id).subscribe(res => {
         this.matchInfo.set(res);
+        this.formGroup.controls.provider.setValue(res.primaryProvider, { emitEvent: false });
         this.autoSelectExistingMatch(this.matches());
       });
     });
@@ -146,6 +159,14 @@ export class MatchSeriesModalComponent implements OnInit {
       filter(v => v === false),
       takeUntilDestroyed()
     ).subscribe(() => this.search());
+
+    this.formGroup.controls.provider.valueChanges.pipe(
+      takeUntilDestroyed()
+    ).subscribe(() => {
+      this.selectedItem.set(null);
+      this.selectedEdition.set(null);
+      this.search();
+    });
   }
 
   ngOnInit() {
@@ -165,22 +186,30 @@ export class MatchSeriesModalComponent implements OnInit {
   search() {
     if (this.isDontMatch()) return;
 
+    const query = this.formGroup.value.query ?? '';
+
     this.isLoading.set(true);
-    this.lastQuery.set(this.formGroup.value.query ?? '');
+    this.lastQuery.set(query);
 
     const model: any = { ...this.formGroup.value, seriesId: this.series().id };
 
     this.seriesService.matchSeries(model).pipe(
-      tap(results => {
+      tap(res => {
         this.isLoading.set(false);
         this.hasSearched.set(true);
-        this.matches.set(results);
-        this.autoSelectExistingMatch(results);
+        this.matches.set(res.matches);
+
+        // The backend can search against another provider than the one asked for, when the query is a
+        // provider specific url/header. Show what the results actually came from
+        this.resultProvider.set(res.provider);
+        this.formGroup.controls.provider.setValue(res.provider, { emitEvent: false });
+
+        this.autoSelectExistingMatch(res.matches);
       }),
       catchError(() => {
         this.isLoading.set(false);
         this.hasSearched.set(true);
-        return of([]);
+        return of(null);
       })
     ).subscribe();
   }
@@ -269,7 +298,8 @@ export class MatchSeriesModalComponent implements OnInit {
     data.tags = data.tags || [];
     data.genres = data.genres || [];
 
-    this.seriesService.updateMatch(this.series().id, data, this.selectedEdition()).subscribe(() => {
+    // Sending the provider the results came from lets the backend switch the Series over to it, if it differs
+    this.seriesService.updateMatch(this.series().id, data, this.selectedEdition(), this.resultProvider()).subscribe(() => {
       this.modalService.close(true);
     });
   }
@@ -285,4 +315,5 @@ export class MatchSeriesModalComponent implements OnInit {
   protected readonly MetadataProvider = MetadataProvider;
   protected readonly ScrobbleProvider = ScrobbleProvider;
   protected readonly PlusMediaFormat = PlusMediaFormat;
+  protected readonly allMetadataProviders = AllMetadataProviders;
 }

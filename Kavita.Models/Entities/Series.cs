@@ -125,6 +125,11 @@ public class Series : IEntityDate, IHasReadTimeEstimate, IHasCoverImage, IHasMet
     /// If the series was unable to match, it will be blacklisted until a manual metadata match overrides it
     /// </summary>
     public bool IsBlacklisted { get; set; }
+    /// <summary>
+    /// Overrides the parent <see cref="Library"/>'s <see cref="Library.MetadataProvider"/> for this Series only.
+    /// Null means this Series inherits the Library's default provider.
+    /// </summary>
+    public MetadataProvider? MetadataProviderOverride { get; set; }
     #endregion
 
     #region Metadata
@@ -208,5 +213,14 @@ public class Series : IEntityDate, IHasReadTimeEstimate, IHasCoverImage, IHasMet
     public bool WillScrobble()
     {
         return !IsBlacklisted && !DontMatch;
+    }
+
+    /// <summary>
+    /// The <see cref="MetadataProvider"/> that should be used for this Series: <see cref="MetadataProviderOverride"/>
+    /// when set, otherwise the parent <see cref="Library"/>'s default.
+    /// </summary>
+    public MetadataProvider GetEffectiveMetadataProvider()
+    {
+        return MetadataProviderOverride ?? Library.MetadataProvider;
     }
 }

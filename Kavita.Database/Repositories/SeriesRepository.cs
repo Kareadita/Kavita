@@ -653,7 +653,7 @@ public class SeriesRepository(DataContext context, IMapper mapper) : ISeriesRepo
             .Where(s => s.Id == seriesId)
             .Select(series => new SeriesDetailRequestV3Dto
             {
-                Provider = series.Library.MetadataProvider,
+                Provider = series.MetadataProviderOverride ?? series.Library.MetadataProvider,
                 Format = series.Library.Type.ConvertToPlusMediaFormat(series.Format),
                 SeriesName = series.Name,
                 AlternativeNames = new List<string> { series.LocalizedName },
@@ -673,6 +673,14 @@ public class SeriesRepository(DataContext context, IMapper mapper) : ISeriesRepo
             .FirstOrDefaultAsync(ct);
 
         return result;
+    }
+
+    public async Task<MetadataProvider?> GetEffectiveMetadataProviderAsync(int seriesId, CancellationToken ct = default)
+    {
+        return await context.Series
+            .Where(s => s.Id == seriesId)
+            .Select(s => (MetadataProvider?) (s.MetadataProviderOverride ?? s.Library.MetadataProvider))
+            .FirstOrDefaultAsync(ct);
     }
 
     public async Task<string?> GetSeriesCoverImageAsync(int seriesId, CancellationToken ct = default)
