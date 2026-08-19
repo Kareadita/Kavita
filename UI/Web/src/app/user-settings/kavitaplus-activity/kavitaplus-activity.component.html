@@ -2,13 +2,39 @@
   <div class="container-fluid px-0">
     <p class="text-muted mb-4">{{t('description')}}</p>
 
-    <div class="row g-3 mb-4">
-      @for(provider of scrobblingProviders(); track provider.provider) {
-        <div class="col-12 col-md-auto">
-          <app-scrobble-account-card [provider]="provider" class="d-block" />
+    <div class="stats-strip d-flex justify-content-between mb-4 gap-3">
+
+      <div class="stats-card card p-3 flex-fill">
+        <div class="stat-header">
+          <i class="fa-solid fa-bolt" aria-hidden="true"></i>
+          <span>{{t('stats-events-label')}}</span>
         </div>
-      }
+        <div class="stat-value">{{stats()?.events24H | defaultValue}}</div>
+      </div>
+
+      <div class="stats-card card p-3 flex-fill">
+        <div class="stat-header text-danger">
+          <i class="fa-solid fa-triangle-exclamation" aria-hidden="true"></i>
+          <span>{{t('stats-failures-label')}}</span>
+        </div>
+        <div class="stat-value text-danger">{{stats()?.failures24H | defaultValue}}</div>
+      </div>
+
+
+
+      <div class="stats-card card p-3 flex-fill">
+        <div class="stat-header text-warning">
+          <i class="fa-solid fa-tower-broadcast" aria-hidden="true"></i>
+          <span>{{t('stats-queue-label')}}</span>
+        </div>
+        <div class="stat-value text-warning">{{stats()?.scrobbleQueueCount | defaultValue}}</div>
+        @let nextScrobbleDate = nextScrobble();
+        @if (nextScrobbleDate != null) {
+          <div class="stat-subtitle">{{t('next-scrobble', {date: nextScrobbleDate | utcToLocalDate | timeDifference})}}</div>
+        }
+      </div>
     </div>
+
 
     <div class="d-md-none mb-3">
       <label for="activity-tab-select" class="visually-hidden">{{t('tab-select-label')}}</label>

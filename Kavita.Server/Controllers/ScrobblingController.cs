@@ -390,7 +390,6 @@ public class ScrobblingController(
     /// </summary>
     /// <returns></returns>
     [HttpGet("next-scrobble-time")]
-    [Authorize(Policy = PolicyGroups.AdminPolicy)]
     public ActionResult<DateTime?> GetNextScrobbleTime()
     {
         return Ok(TaskScheduler.GetNextRun(TaskSchedulerConstants.ProcessScrobblingEventsId));

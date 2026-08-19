@@ -102,6 +102,30 @@ public class KavitaPlusAuditRepository(DataContext context) : IKavitaPlusAuditRe
         };
     }
 
+    public async Task<KavitaPlusMyAuditStatsDto> GetMyStatsAsync(int userId, CancellationToken ct = default)
+    {
+        var cutoff24H = DateTime.UtcNow.AddHours(-24);
+
+        var events24H = await context.KavitaPlusAuditLogs
+            .Where(e => e.UserId == userId)
+            .CountAsync(e => e.CreatedUtc >= cutoff24H, ct);
+
+        var failures24H = await context.KavitaPlusAuditLogs
+            .Where(e => e.UserId == userId)
+            .CountAsync(e => e.CreatedUtc >= cutoff24H && e.Status == AuditStatus.Failure, ct);
+
+        var scrobbleQueueCount = await context.ScrobbleEvent
+            .Where(e => e.AppUserId == userId)
+            .CountAsync(e => !e.IsProcessed, ct);
+
+        return new KavitaPlusMyAuditStatsDto
+        {
+            Events24H = events24H,
+            Failures24H = failures24H,
+            ScrobbleQueueCount = scrobbleQueueCount,
+        };
+    }
+
     public async Task<KavitaPlusAuditSeriesInfoDto> GetSeriesInfoAsync(
         int seriesId, int callingUserId, bool isAdmin, CancellationToken ct = default)
     {

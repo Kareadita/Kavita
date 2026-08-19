@@ -1633,7 +1633,12 @@
 
     "kavitaplus-activity": {
         "description": "Reading activity Kavita has synced to external services on your behalf - progress, ratings, and reading status.",
-        "tab-select-label": "Filter activity"
+        "tab-select-label": "Filter activity",
+        "stats-queue-label": "{{manage-kavitaplus-activity.stats-queue-label}}",
+        "next-scrobble": "{{manage-kavitaplus-activity.next-scrobble}}",
+        "stats-events-label": "{{manage-kavitaplus-activity.stats-events-label}}",
+        "stats-failures-label": "{{manage-kavitaplus-activity.stats-failures-label}}"
+
     },
 
     "manage-kavitaplus-activity": {
