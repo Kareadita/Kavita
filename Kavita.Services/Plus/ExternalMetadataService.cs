@@ -400,7 +400,6 @@ public class ExternalMetadataService : IExternalMetadataService
 
         var queried = ParseQueriedIds(dto.Query);
 
-        // Prioritize detection over requested provider.
         var provider = queried.Provider ?? dto.Provider ?? series.GetEffectiveMetadataProvider();
 
         var matchV3Request = BuildMatchRequest(series, dto, queried, provider);
@@ -429,9 +428,6 @@ public class ExternalMetadataService : IExternalMetadataService
         };
     }
 
-    /// <summary>
-    /// The ids/slugs the user queried for directly, through header syntax or a pasted url
-    /// </summary>
     private sealed record QueriedExternalIds
     {
         public int? AniListId { get; init; }
@@ -483,7 +479,6 @@ public class ExternalMetadataService : IExternalMetadataService
                 ? hardcoverSlug : hardcoverUrl?.Slug,
             // For now, we pass the slug as query as there is a direct handling on query currently
             CbrSlug = query.Contains("comicbookroundup.com/") ? query : null,
-            // A hardcover url says itself if it's a book or a series, which beats the toggle in the dialog being wrong
             IsStandAlone = hardcoverUrl?.IsStandAlone,
         };
     }
@@ -497,13 +492,15 @@ public class ExternalMetadataService : IExternalMetadataService
         var format = series.Library.Type.ConvertToPlusMediaFormat(series.Format);
         var webLinks = series.Metadata.WebLinks;
 
-        // If the query is empty, then use external ids. Otherwise, use what is being queried
-        var fallback = GetFallbackIds(series, string.IsNullOrEmpty(query));
+        // Only use series ids if no ids have been supplied via the query
+        var aniListId = queried.HasAny ? queried.AniListId : series.AniListId;
+        var malId = queried.HasAny ? queried.MalId : series.MalId;
+        var mangaBakaId = queried.HasAny ? queried.MangaBakaId : series.MangaBakaId;
 
         return new MatchRequestV3Dto
         {
-            AniListId = queried.AniListId ?? fallback.AniListId,
-            MalId = queried.MalId ?? fallback.MalId,
+            AniListId = aniListId,
+            MalId = malId,
             HardcoverId = isStandAlone ? ExternalIdParser.GetHardcoverBookId(webLinks) : ExternalIdParser.GetHardcoverSeriesId(webLinks),
             Slug = provider switch
             {
@@ -512,7 +509,7 @@ public class ExternalMetadataService : IExternalMetadataService
                 _ => string.Empty,
             },
             CbrId = null,
-            MangabakaId = queried.MangaBakaId > 0 ? queried.MangaBakaId : fallback.MangaBakaId,
+            MangabakaId = mangaBakaId,
             IsStandAlone = isStandAlone,
             Provider = provider,
             SeriesName = series.Name,
@@ -521,21 +518,6 @@ public class ExternalMetadataService : IExternalMetadataService
             Query = query,
             Format = format,
         };
-    }
-
-    /// <summary>
-    /// The ids to fall back on when the user didn't query one: the Series' own when nothing is being queried,
-    /// otherwise whatever its weblinks carry
-    /// </summary>
-    private static (int? AniListId, long? MalId, long MangaBakaId) GetFallbackIds(Series series, bool isQueryEmpty)
-    {
-        var webLinks = series.Metadata.WebLinks;
-
-        return (
-            series.AniListId > 0 && isQueryEmpty ? series.AniListId : ExternalIdParser.GetAniListId(webLinks),
-            series.MalId > 0 && isQueryEmpty ? series.MalId : ExternalIdParser.GetMalId(webLinks),
-            series.MangaBakaId > 0 && isQueryEmpty ? series.MangaBakaId : ExternalIdParser.GetMangaBakaId(webLinks)
-        );
     }
 
     /// <summary>

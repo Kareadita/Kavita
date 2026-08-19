@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using Kavita.API.Database;
 using Kavita.API.Repositories;
 using Kavita.API.Services.Plus;
+using Kavita.Common.Extensions;
 using Kavita.Models.DTOs.KavitaPlus;
 using Kavita.Models.DTOs.Scrobbling;
 using Kavita.Models.Entities;
@@ -278,6 +279,12 @@ where T: IScrobbleProviderService
 
             var prevChapterNumber = existingEvent.ChapterNumber;
             var prevVolumeNumber = existingEvent.VolumeNumber;
+
+            if (prevVolumeNumber.Is(volumeNumber) && prevChapterNumber == chapterNumber)
+            {
+                logger.LogTrace("Ignoring reading update for {Series} as volume & chapter have not changed", ctx.Series.Name);
+                return;
+            }
 
             existingEvent.VolumeNumber = volumeNumber;
             existingEvent.ChapterNumber = chapterNumber;

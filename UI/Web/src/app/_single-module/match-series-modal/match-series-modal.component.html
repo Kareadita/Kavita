@@ -47,7 +47,7 @@
             @if (match.isLegacy) {
               <app-scrobble-provider-tag-badge [provider]="ScrobbleProvider.AniList" [id]="match.aniListId" />
             } @else {
-              @switch (match.matchedProvider) {
+              @switch (match.metadataProvider) {
                 @case (MetadataProvider.Mangabaka) {
                   <app-scrobble-provider-tag-badge [provider]="ScrobbleProvider.MangaBaka" [id]="match.mangaBakaId" />
                 }
