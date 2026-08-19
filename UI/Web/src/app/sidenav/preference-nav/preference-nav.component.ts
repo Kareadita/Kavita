@@ -48,6 +48,7 @@ export enum SettingsTabId {
   EmailHistory = 'admin-email-history',
   ManageMetadata = 'admin-public-metadata',
   AdminDevices = 'admin-device',
+  Scrobbling = 'scrobbling',
 
   // Kavita+
   KavitaPlusLicense = 'admin-kavitaplus',
@@ -68,7 +69,6 @@ export enum SettingsTabId {
   Clients = 'clients',
   Theme = 'theme',
   Devices = 'devices',
-  Scrobbling = 'scrobbling',
   ScrobblingHolds = 'scrobble-holds',
   MyActivity = 'my-activity',
   Customize = 'customize',
@@ -303,10 +303,10 @@ export class PreferenceNavComponent implements AfterViewInit {
           SideNavItem.kPlusOnly(SettingsTabId.ManageUserTokens, [Role.Admin]),
           SideNavItem.kPlusOnly(SettingsTabId.Metadata, [Role.Admin]),
           SideNavItem.kPlusOnly(SettingsTabId.MatchedMetadata, [Role.Admin], this.matchedMetadataBadgeCount),
-          SideNavItem.kPlusOnly(SettingsTabId.ScrobblingHolds),
           SideNavItem.kPlusOnly(SettingsTabId.ManageKavitaPlusActivity),
           SideNavItem.kPlusOnly(SettingsTabId.MyActivity, [], this.scrobblingFailuresBadgeCount),
-          SideNavItem.kPlusOnly(SettingsTabId.Scrobbling, [], this.scrobblingErrorBadgeCount),
+          SideNavItem.kPlusOnly(SettingsTabId.ScrobblingHolds),
+          SideNavItem.kPlusOnly(SettingsTabId.Scrobbling, [Role.Admin], this.scrobblingErrorBadgeCount),
         ]
       }
     ];

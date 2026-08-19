@@ -187,11 +187,12 @@ export class KavitaPlusAuditEntryComponent {
     if (e.seriesId == null) return;
 
     this.seriesService.getSeries(e.seriesId).pipe(
-      tap(series => this.actionService.matchSeries(series))
+      tap(series => this.actionService.matchSeries(series)),
     ).subscribe();
   }
 
   protected readonly KavitaPlusAuditCategory = KavitaPlusAuditCategory;
   protected readonly AuditSubjectType = AuditSubjectType;
   protected readonly ScrobbleProvider = ScrobbleProvider;
+  protected readonly AuditStatus = AuditStatus;
 }

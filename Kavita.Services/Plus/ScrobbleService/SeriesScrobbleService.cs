@@ -46,7 +46,7 @@ where T: IScrobbleProviderService
         if (HasRequiredIds(ctx.Series)) return true;
 
         await auditService.LogTemperedAsync(al => al.SeriesId == ctx.Series.Id && al.UserId == ctx.User.Id, KavitaPlusAuditCategory.Scrobble,
-            KavitaPlusEventType.ScrobbleEventSkipped, AuditStatus.Info, AuditSubjectType.Series,
+            KavitaPlusEventType.ScrobbleEventSkipped, AuditStatus.Failure, AuditSubjectType.Series,
             seriesId: ctx.Series.Id, payload: new AuditLogScrobbleParamsDto { ScrobbleEventType = eventType, Provider = Provider }, error: "series-missing-required-ids", userId: ctx.User.Id, ct: ct);
 
         return false;

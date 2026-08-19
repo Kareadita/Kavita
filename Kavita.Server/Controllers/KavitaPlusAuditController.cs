@@ -3,6 +3,7 @@ using Kavita.API.Database;
 using Kavita.Common.Helpers;
 using Kavita.Models.Constants;
 using Kavita.Models.DTOs.KavitaPlus;
+using Kavita.Models.DTOs.KavitaPlus.Audit;
 using Kavita.Models.Entities.Enums.Audit;
 using Kavita.Server.Attributes;
 using Kavita.Server.Extensions;
@@ -46,13 +47,23 @@ public class KavitaPlusAuditController(IUnitOfWork unitOfWork) : BaseApiControll
     }
 
     /// <summary>
-    /// Returns aggregate stats for the admin audit feed header strip.
+    /// Returns aggregate stats for the admin audit feed
     /// </summary>
     [HttpGet("stats")]
     [Authorize(Policy = PolicyGroups.AdminPolicy)]
     public async Task<ActionResult<KavitaPlusAuditStatsDto>> GetStats()
     {
-        return Ok(await unitOfWork.KavitaPlusAuditRepository.GetStatsAsync());
+        return Ok(await unitOfWork.KavitaPlusAuditRepository.GetStatsAsync(HttpContext.RequestAborted));
+    }
+
+    /// <summary>
+    /// Aggregate stats for my activity audit feed
+    /// </summary>
+    /// <returns></returns>
+    [HttpGet("my-stats")]
+    public async Task<ActionResult<KavitaPlusMyAuditStatsDto>> GetMyStats()
+    {
+        return Ok(await unitOfWork.KavitaPlusAuditRepository.GetMyStatsAsync(UserId, HttpContext.RequestAborted));
     }
 
     /// <summary>

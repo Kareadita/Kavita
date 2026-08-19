@@ -10,3 +10,9 @@ export interface KavitaPlusAuditStats {
   /** Failed to match **/
   blacklistedSeriesCount: number;
 }
+
+export interface KavitaPlusMyAuditStats {
+  events24H: number;
+  failures24H: number;
+  scrobbleQueueCount: number;
+}

@@ -169,34 +169,6 @@
         "roles-label": "{{common.roles}}"
     },
 
-    "user-scrobble-history": {
-        "title": "Scrobble History",
-        "description": "Here you will find any scrobble events linked with your account. In order for events to exist, you must have an active scrobble provider configured. All events that have been processed will clear after a month. If there are non-processed events, it is likely these cannot form matches upstream. Please reach out to your admin to get them corrected.",
-        "not-read-warning": "Upstream providers will always keep the highest number",
-        "filter-label": "{{common.filter}}",
-        "provider-header": "Provider",
-        "created-header": "Created",
-        "last-modified-header": "Last Modified",
-        "type-header": "Type",
-        "series-header": "Series",
-        "data-header": "Data",
-        "is-processed-header": "Is Processed",
-        "select-all-label": "Select all",
-        "delete-selected-label": "Delete selected",
-        "no-data": "{{common.no-data}}",
-        "volume-and-chapter-num": "Volume {{v}} Chapter {{n}}",
-        "volume-num": "{{entity-title.volume-num}}",
-        "chapter-num": "{{entity-title.chapter-num}}",
-        "rating": "Rating {{r}}",
-        "not-applicable": "Not Applicable",
-        "processed": "Processed",
-        "not-processed": "Not Processed",
-        "special": "{{entity-title.special}}",
-        "token-expired": "Your AniList token is Expired! Scrobbling events will not process until you renew on Accounts page.",
-        "scrobbling-disabled": "Scrobbling is disabled on your Account Settings.",
-        "read-status-update": "Status: {{status}}"
-    },
-
     "scrobble-event-type-pipe": {
         "chapter-read": "Reading Progress",
         "score-updated": "Rating Update",
@@ -1633,7 +1605,12 @@
 
     "kavitaplus-activity": {
         "description": "Reading activity Kavita has synced to external services on your behalf - progress, ratings, and reading status.",
-        "tab-select-label": "Filter activity"
+        "tab-select-label": "Filter activity",
+        "stats-queue-label": "{{manage-kavitaplus-activity.stats-queue-label}}",
+        "next-scrobble": "{{manage-kavitaplus-activity.next-scrobble}}",
+        "stats-events-label": "{{manage-kavitaplus-activity.stats-events-label}}",
+        "stats-failures-label": "{{manage-kavitaplus-activity.stats-failures-label}}"
+
     },
 
     "manage-kavitaplus-activity": {
@@ -2440,7 +2417,7 @@
 
     "manage-scrobble-errors": {
         "title": "Scrobbling Errors",
-        "description": "This table contains issues found during scrobbling. You can clear it at any time and wait for the next scrobble upload to see. If there is an unknown series, you are best correcting the series name or localized series name or adding a weblink for the providers.",
+        "description": "This table contains issues found during scrobbling. You can clear it at any time and wait for the next scrobble upload to see. If there is an unknown series, use the match to correct and enqueue events again.",
         "filter-label": "{{common.filter}}",
         "clear-errors": "Clear Errors",
         "series-header": "Series",

@@ -6,7 +6,7 @@ import {environment} from '../../environments/environment';
 import {UtilityService} from '../shared/_services/utility.service';
 import {KavitaPlusAuditEntry} from '../_models/kavitaplus/kavita-plus-audit-entry';
 import {KavitaPlusAuditFilter} from '../_models/kavitaplus/kavita-plus-audit-filter';
-import {KavitaPlusAuditStats} from '../_models/kavitaplus/kavita-plus-audit-stats';
+import {KavitaPlusAuditStats, KavitaPlusMyAuditStats} from '../_models/kavitaplus/kavita-plus-audit-stats';
 import {KavitaPlusAuditSeriesInfo} from '../_models/kavitaplus/kavita-plus-audit-series-info';
 import {PaginatedResult} from '../_models/pagination';
 
@@ -31,8 +31,12 @@ export class KavitaPlusAuditService {
     ).pipe(map(res => this.utilityService.createPaginatedResult<KavitaPlusAuditEntry>(res)));
   }
 
-  getStats(): Observable<KavitaPlusAuditStats> {
+  getStats() {
     return this.httpClient.get<KavitaPlusAuditStats>(`${this.baseUrl}stats`);
+  }
+
+  getMyStats() {
+    return this.httpClient.get<KavitaPlusMyAuditStats>(`${this.baseUrl}my-stats`);
   }
 
   getMyActivity(filter: KavitaPlusAuditFilter, pageNum?: number, itemsPerPage?: number): Observable<PaginatedResult<KavitaPlusAuditEntry[]>> {
