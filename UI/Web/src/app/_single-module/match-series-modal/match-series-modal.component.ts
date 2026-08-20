@@ -17,7 +17,7 @@ import {NgbActiveModal, NgbTooltip} from "@ng-bootstrap/ng-bootstrap";
 import {TranslocoDirective} from "@jsverse/transloco";
 import {ExternalSeriesMatch} from "../../_models/series-detail/external-series-match";
 import {ToastrService} from "ngx-toastr";
-import {catchError, filter, of, skip, startWith, tap} from "rxjs";
+import {catchError, filter, of, pairwise, skip, startWith, tap} from "rxjs";
 import {takeUntilDestroyed, toSignal} from "@angular/core/rxjs-interop";
 import {EmptyStateComponent} from "../../shared/_components/empty-state/empty-state.component";
 import {
@@ -149,18 +149,6 @@ export class MatchSeriesModalComponent implements OnInit {
     this.kavitaSpecialCount = computed(() => (this.seriesDetail()?.specials ?? []).length);
 
     effect(() => {
-      if (this.series().mangaBakaEditionId) {
-        this.selectedEditionId.set(this.series().mangaBakaEditionId);
-      }
-
-      this.seriesService.getMatchInfo(this.series().id).subscribe(res => {
-        this.matchInfo.set(res);
-        this.formGroup.controls.provider.setValue(res.metadataProvider, { emitEvent: false });
-        this.autoSelectExistingMatch(this.matches());
-      });
-    });
-
-    effect(() => {
       if (this.isDontMatch()) {
         this.formGroup.controls.query.disable({ emitEvent: false });
       } else {
@@ -174,8 +162,10 @@ export class MatchSeriesModalComponent implements OnInit {
       takeUntilDestroyed()
     ).subscribe(() => this.search());
 
-    this.formGroup.controls.provider.valueChanges.pipe(
-      takeUntilDestroyed()
+    this.formGroup.valueChanges.pipe(
+      takeUntilDestroyed(),
+      pairwise(),
+      filter(([prev, curr]) => prev.provider !== curr.provider),
     ).subscribe(() => {
       this.selectedItem.set(null);
       this.selectedEdition.set(null);
@@ -184,6 +174,16 @@ export class MatchSeriesModalComponent implements OnInit {
   }
 
   ngOnInit() {
+    if (this.series().mangaBakaEditionId) {
+      this.selectedEditionId.set(this.series().mangaBakaEditionId);
+    }
+
+    this.seriesService.getMatchInfo(this.series().id).subscribe(res => {
+      this.matchInfo.set(res);
+      this.formGroup.controls.provider.setValue(res.metadataProvider, { emitEvent: false });
+      this.autoSelectExistingMatch(this.matches());
+    });
+
     this.formGroup.patchValue({ dontMatch: this.series().dontMatch || false });
     this.seriesService.getSeriesDetail(this.series().id).pipe(
       tap(detail => {
