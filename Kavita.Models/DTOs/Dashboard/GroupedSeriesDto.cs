@@ -9,6 +9,7 @@ namespace Kavita.Models.DTOs.Dashboard;
 public sealed record GroupedSeriesDto
 {
     public string SeriesName { get; set; } = default!;
+    public string LocalizedSeriesName { get; set; } = string.Empty;
     public int SeriesId { get; set; }
     public int LibraryId { get; set; }
     [EnumDataType(typeof(LibraryType))]
