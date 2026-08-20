@@ -36,6 +36,7 @@ import {MetadataProviderTitlePipe} from "../../_pipes/metadata-provider-title.pi
 import {ExternalEditionDto, PlusMediaFormat} from "../../_models/series-detail/external-series-detail";
 import {SeriesFormatComponent} from "../../shared/series-format/series-format.component";
 import {LibraryTypePipe} from "../../_pipes/library-type.pipe";
+import {SeriesMetadata} from "../../_models/metadata/series-metadata";
 
 @Component({
   selector: 'app-match-series-modal',
@@ -102,7 +103,20 @@ export class MatchSeriesModalComponent implements OnInit {
   kavitaChapterCount!: Signal<number>;
   kavitaSpecialCount!: Signal<number>;
   seriesDetail = signal<SeriesDetail | null>(null);
+  seriesMetadata = signal<SeriesMetadata | null>(null);
   matchInfo = signal<MatchSeriesInfo | null>(null);
+
+  peopleHint = computed(() => {
+    const metadata = this.seriesMetadata();
+    if (!metadata) return null;
+
+    return metadata.writers
+      .concat(metadata.colorists)
+      .concat(metadata.coverArtists)
+      .slice(0, 3)
+      .map(person => person.name)
+      .join(', ');
+  });
 
   mangaBakaSearchUrl = computed(() => {
     return `https://mangabaka.org/search?q=${encodeURIComponent(this.series().name)}`;
@@ -180,6 +194,10 @@ export class MatchSeriesModalComponent implements OnInit {
 
         this.search();
       }),
+    ).subscribe();
+
+    this.seriesService.getMetadata(this.series().id).pipe(
+      tap(metadata => this.seriesMetadata.set(metadata)),
     ).subscribe();
   }
 

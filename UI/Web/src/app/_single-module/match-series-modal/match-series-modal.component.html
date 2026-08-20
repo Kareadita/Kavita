@@ -21,6 +21,11 @@
           <div class="d-flex flex-column gap-0">
             <div class="in-kavita-label text-uppercase">{{ t('in-kavita') }}</div>
             <div class="in-kavita-name fw-bold">{{ series().name }}</div>
+            @if (peopleHint(); as hint) {
+              <div class="in-kavita-meta text-muted small">
+                {{hint}}
+              </div>
+            }
             <div class="in-kavita-meta text-muted small">
               @if (kavitaVolumeCount() > 0) {
                 {{ t('volume-count', {num: kavitaVolumeCount()}) }}
