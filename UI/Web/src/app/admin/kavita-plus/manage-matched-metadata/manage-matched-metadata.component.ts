@@ -93,7 +93,7 @@ export class ManageMatchedMetadataComponent implements OnInit {
 
     if (totalItems == 0) return 0;
 
-    return  (matchedCount.dontMatchCount + matchedCount.erroredCount) / totalItems;
+    return  (totalItems - matchedCount.dontMatchCount + matchedCount.erroredCount) / totalItems;
   });
 
   private readonly baseFilter: ManageMatchFilter = {
