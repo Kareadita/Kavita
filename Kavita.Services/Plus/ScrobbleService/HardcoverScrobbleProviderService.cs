@@ -48,6 +48,7 @@ public class HardcoverScrobbleProviderService(ILogger<HardcoverScrobbleProviderS
 
     public override bool IsTokenValid(string token)
     {
-        return JwtHelper.IsTokenValid(token);
+        // PAT is always valid. When we switch to OAuth, they're also always valid (I.e. can't check)
+        return true;
     }
 }
