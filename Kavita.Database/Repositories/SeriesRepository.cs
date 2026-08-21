@@ -1425,7 +1425,6 @@ public class SeriesRepository(DataContext context, IMapper mapper) : ISeriesRepo
         {
             var byId = await context.Series
                 .Where(s => libraryIds.Contains(s.LibraryId))
-                .Where(s => formats.Contains(s.Format))
                 .Where(s =>
                     (aniListId > 0 && s.AniListId == aniListId)
                     || (malId > 0 && s.MalId == malId)
