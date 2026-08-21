@@ -48,7 +48,7 @@ import {AccountService} from "../../../_services/account.service";
 import {SettingButtonComponent} from "../../../settings/_components/setting-button/setting-button.component";
 import {SettingItemComponent} from "../../../settings/_components/setting-item/setting-item.component";
 import {LicenseService} from "../../../_services/license.service";
-import {DecimalPipe, NgTemplateOutlet} from "@angular/common";
+import {DecimalPipe, NgTemplateOutlet, TitleCasePipe} from "@angular/common";
 import {BreakpointService} from "../../../_services/breakpoint.service";
 import {ActionFactoryService} from "../../../_services/action-factory.service";
 import {ActionItem} from "../../../_models/actionables/action-item";
@@ -99,7 +99,8 @@ import {MetadataProviderTitlePipe} from "../../../_pipes/metadata-provider-title
     EditExternalMetadataFormComponent,
     EditModalShellComponent,
     EditTabDirective,
-    MetadataProviderTitlePipe
+    MetadataProviderTitlePipe,
+    TitleCasePipe
   ],
   templateUrl: './edit-series-modal.component.html',
   styleUrls: ['./edit-series-modal.component.scss'],
