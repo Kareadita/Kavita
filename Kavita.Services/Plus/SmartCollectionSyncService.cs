@@ -235,24 +235,28 @@ public class SmartCollectionSyncService(
             counter++;
             try
             {
-                var match = await MatchSeries(collection, seriesInfo, ct);
+                var matches = await MatchSeries(collection, seriesInfo, ct);
 
-                logger.LogDebug("Trying to find {SeriesName} ({Format}) within Kavita for linking. Found: {ExistingSeriesName} ({ExistingSeriesId})",
-                    seriesInfo.SeriesName, seriesInfo.PlusMediaFormat, match?.Name, match?.Id);
-
-                if (match == null)
+                if (matches.Count == 0)
                 {
                     logger.LogDebug("{Series} not found in the server", seriesInfo.SeriesName);
                     result.MissingCount++;
                     AppendMissingSeries(missingSeries, seriesInfo);
                 }
-                else if (IsAlreadyInCollection(collection, match))
+
+                foreach (var match in matches)
                 {
-                    logger.LogDebug("{SeriesName} already present in collection {CollectionName}", match.Name, collection.Title);
-                }
-                else
-                {
+                    logger.LogDebug("Trying to find {SeriesName} ({Format}) within Kavita for linking. Found: {ExistingSeriesName} ({ExistingSeriesId})",
+                        seriesInfo.SeriesName, seriesInfo.PlusMediaFormat, match.Name, match.Id);
+
+                    if (IsAlreadyInCollection(collection, match))
+                    {
+                        logger.LogDebug("{SeriesName} already present in collection {CollectionName}", match.Name, collection.Title);
+                        continue;
+                    }
+
                     collection.Items.Add(match);
+
                     await auditService.LogCollectionAsync(KavitaPlusEventType.CollectionItemAdded, collection.Id,
                         new AuditLogCollectionItemParamsDto { CollectionName = collection.Title, SeriesName = match.Name, SeriesId = match.Id, Url = collection.SourceUrl },
                         userId: collection.AppUserId, ct: ct);
@@ -277,7 +281,7 @@ public class SmartCollectionSyncService(
     /// Resolve the Kavita series that corresponds to an upstream stack entry. The <paramref name="seriesInfo"/> already
     /// carries the external ids, so id-priority matching is used first with a normalized name fallback.
     /// </summary>
-    private async Task<Series?> MatchSeries(AppUserCollection collection, ExternalMetadataIdsDto seriesInfo, CancellationToken ct)
+    private async Task<List<Series>> MatchSeries(AppUserCollection collection, ExternalMetadataIdsDto seriesInfo, CancellationToken ct)
     {
         var formats = seriesInfo.PlusMediaFormat.GetMangaFormats();
         var names = new[] { seriesInfo.SeriesName, seriesInfo.LocalizedSeriesName }

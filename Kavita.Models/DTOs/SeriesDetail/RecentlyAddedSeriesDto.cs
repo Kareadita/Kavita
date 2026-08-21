@@ -13,6 +13,7 @@ public class RecentlyAddedSeriesDto
     public DateTime Created { get; init; }
     public int SeriesId { get; init; }
     public string? SeriesName { get; init; }
+    public string LocalizedSeriesName { get; set; } = string.Empty;
     [EnumDataType(typeof(MangaFormat))]
     public MangaFormat Format { get; init; }
     public int ChapterId { get; init; }

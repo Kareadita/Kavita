@@ -410,7 +410,7 @@ export class CardConfigFactory {
       coverFunc: (s) => this.imageService.getSeriesCoverImage(s.seriesId),
       titleFunc: (s) => s.seriesName,
       titleRouteFunc: (s) => `/library/${s.libraryId}/series/${s.seriesId}`,
-      metaTitleFunc: (s, wrapper) => '',
+      metaTitleFunc: (s, wrapper) => s.localizedSeriesName || s.seriesName,
       titleTemplate: params?.titleRef,
       metaTitleTemplate: params?.metaTitleRef,
       tooltipFunc: (s) => s.seriesName,

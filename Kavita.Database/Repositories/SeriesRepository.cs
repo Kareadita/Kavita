@@ -1177,6 +1177,7 @@ public class SeriesRepository(DataContext context, IMapper mapper) : ISeriesRepo
                     LibraryType = item.LibraryType,
                     SeriesId = item.SeriesId,
                     SeriesName = item.SeriesName,
+                    LocalizedSeriesName = item.LocalizedSeriesName,
                     Created = item.Created,
                     Id = index,
                     Format = item.Format,
@@ -1407,9 +1408,11 @@ public class SeriesRepository(DataContext context, IMapper mapper) : ISeriesRepo
         return taken;
     }
 
-    public async Task<Series?> GetSeriesFromExternalMetadata(IList<string> seriesNames, IList<MangaFormat> formats,
+    public async Task<List<Series>> GetSeriesFromExternalMetadata(IList<string> seriesNames, IList<MangaFormat> formats,
         int userId, ExternalMetadataIdsDto? dto = null, SeriesIncludes includes = SeriesIncludes.None, CancellationToken ct = default)
     {
+        List<Series> matches = [];
+
         var libraryIds = context.AppUser.GetLibraryIdsForUser(userId);
 
         // Prioritize direct id matches
@@ -1430,20 +1433,22 @@ public class SeriesRepository(DataContext context, IMapper mapper) : ISeriesRepo
                     || (hardcoverId > 0 && s.HardcoverId == hardcoverId)
                     )
                 .Includes(includes)
-                .FirstOrDefaultAsync(ct);
+                .ToListAsync(ct);
 
-            if (byId != null) return byId;
+            matches.AddRange(byId);
         }
 
         // Fallback to a name lookup against series.Name, LocalizedName, OriginalName. Names are matched against the
         // normalized columns, which strip punctuation/whitespace - so "Series - Sub" and "Series: Sub" collapse to the
         // same value and match.
         var names = seriesNames.Where(s => !string.IsNullOrEmpty(s)).Distinct().ToList();
-        if (names.Count == 0) return null;
+        if (names.Count == 0) return matches;
 
         var normalizedNames = names.Select(s => s.ToNormalized()).ToList();
 
-        return await context.Series
+        // This has a low chance of false positives in a tagged library as external ids are not allowed to be wrong
+        // So we can always include this
+        var byName = await context.Series
             .Where(s => libraryIds.Contains(s.LibraryId))
             .Where(s => formats.Contains(s.Format))
             .Where(s =>
@@ -1455,7 +1460,9 @@ public class SeriesRepository(DataContext context, IMapper mapper) : ISeriesRepo
             .WhereIf(mangaBakaId > 0, s => s.MangaBakaId == 0 || s.MangaBakaId == mangaBakaId)
             .WhereIf(hardcoverId > 0, s => s.HardcoverId == 0 || s.HardcoverId == hardcoverId)
             .Includes(includes)
-            .FirstOrDefaultAsync(ct);
+            .ToListAsync(ct);
+
+        return matches.Concat(byName).ToList();
     }
 
     public async Task<IList<Series>> GetAllSeriesByAnyNameAsync(string seriesName, string localizedName, int libraryId,
@@ -1624,6 +1631,7 @@ public class SeriesRepository(DataContext context, IMapper mapper) : ISeriesRepo
                 Created = c.Created,
                 SeriesId = c.Volume.Series.Id,
                 SeriesName = c.Volume.Series.Name,
+                LocalizedSeriesName = c.Volume.Series.LocalizedName,
                 VolumeId = c.VolumeId,
                 ChapterId = c.Id,
                 Format = c.Volume.Series.Format,

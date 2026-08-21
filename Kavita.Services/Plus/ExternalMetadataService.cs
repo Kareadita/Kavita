@@ -1428,58 +1428,61 @@ public class ExternalMetadataService : IExternalMetadataService
 
             var formatTypes = relation.Format.GetMangaFormats();
 
-            var relatedSeries = await _unitOfWork.SeriesRepository.GetSeriesFromExternalMetadata(
+            var relatedSeriesList = await _unitOfWork.SeriesRepository.GetSeriesFromExternalMetadata(
                 names,
                 formatTypes,
                 defaultAdmin.Id,
                 externalIds,
                 SeriesIncludes.Related);
 
-            // Skip if no related series found or series is the parent
-            if (relatedSeries == null || relatedSeries.Id == series.Id || relation.Relation == RelationKind.Parent) continue;
-
-            // Check if the relationship already exists
-            var relationshipExists = series.Relations.Any(r =>
-                r.TargetSeriesId == relatedSeries.Id && r.RelationKind == relation.Relation);
-
-            if (relationshipExists) continue;
-
-            // Add new relationship
-            var newRelation = new SeriesRelation
+            foreach (var relatedSeries in relatedSeriesList)
             {
-                RelationKind = relation.Relation,
-                TargetSeriesId = relatedSeries.Id,
-                SeriesId = series.Id,
-            };
-            series.Relations.Add(newRelation);
-            addedRelations.Add(new
-            {
-                relatedSeriesName = relatedSeries.Name,
-                relatedSeriesId = relatedSeries.Id,
-                relatedSeriesLibraryId = relatedSeries.LibraryId,
-                kind = (int) relation.Relation
-            });
+                // Skip if no related series found or series is the parent
+                if (relatedSeries.Id == series.Id || relation.Relation == RelationKind.Parent) continue;
 
-            // Handle sequel/prequel: add reverse relationship
-            if (relation.Relation is RelationKind.Prequel or RelationKind.Sequel)
-            {
-                var reverseExists = relatedSeries.Relations.Any(r =>
-                    r.TargetSeriesId == series.Id && r.RelationKind == GetReverseRelation(relation.Relation));
+                // Check if the relationship already exists
+                var relationshipExists = series.Relations.Any(r =>
+                    r.TargetSeriesId == relatedSeries.Id && r.RelationKind == relation.Relation);
 
-                if (!reverseExists)
+                if (relationshipExists) continue;
+
+                // Add new relationship
+                var newRelation = new SeriesRelation
                 {
-                    var reverseRelation = new SeriesRelation
-                    {
-                        RelationKind = GetReverseRelation(relation.Relation),
-                        TargetSeriesId = series.Id,
-                        SeriesId = relatedSeries.Id,
-                    };
-                    relatedSeries.Relations.Add(reverseRelation);
-                    _unitOfWork.SeriesRepository.Attach(reverseRelation);
-                }
-            }
+                    RelationKind = relation.Relation,
+                    TargetSeriesId = relatedSeries.Id,
+                    SeriesId = series.Id,
+                };
+                series.Relations.Add(newRelation);
+                addedRelations.Add(new
+                {
+                    relatedSeriesName = relatedSeries.Name,
+                    relatedSeriesId = relatedSeries.Id,
+                    relatedSeriesLibraryId = relatedSeries.LibraryId,
+                    kind = (int) relation.Relation
+                });
 
-            _unitOfWork.SeriesRepository.Update(series);
+                // Handle sequel/prequel: add reverse relationship
+                if (relation.Relation is RelationKind.Prequel or RelationKind.Sequel)
+                {
+                    var reverseExists = relatedSeries.Relations.Any(r =>
+                        r.TargetSeriesId == series.Id && r.RelationKind == GetReverseRelation(relation.Relation));
+
+                    if (!reverseExists)
+                    {
+                        var reverseRelation = new SeriesRelation
+                        {
+                            RelationKind = GetReverseRelation(relation.Relation),
+                            TargetSeriesId = series.Id,
+                            SeriesId = relatedSeries.Id,
+                        };
+                        relatedSeries.Relations.Add(reverseRelation);
+                        _unitOfWork.SeriesRepository.Attach(reverseRelation);
+                    }
+                }
+
+                _unitOfWork.SeriesRepository.Update(series);
+            }
         }
 
         if (!_unitOfWork.HasChanges()) return (false, null);
@@ -2089,7 +2092,7 @@ public class ExternalMetadataService : IExternalMetadataService
             return (false, null);
         }
 
-        if (string.IsNullOrWhiteSpace(summary) && !HasForceOverride(settings, chapter, MetadataSettingField.ChapterSummary))
+        if (!string.IsNullOrWhiteSpace(chapter.Summary) && !HasForceOverride(settings, chapter, MetadataSettingField.ChapterSummary))
         {
             return (false, null);
         }

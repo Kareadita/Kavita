@@ -17,7 +17,7 @@ import {NgbActiveModal, NgbTooltip} from "@ng-bootstrap/ng-bootstrap";
 import {TranslocoDirective} from "@jsverse/transloco";
 import {ExternalSeriesMatch} from "../../_models/series-detail/external-series-match";
 import {ToastrService} from "ngx-toastr";
-import {catchError, filter, of, skip, startWith, tap} from "rxjs";
+import {catchError, filter, of, pairwise, skip, startWith, tap} from "rxjs";
 import {takeUntilDestroyed, toSignal} from "@angular/core/rxjs-interop";
 import {EmptyStateComponent} from "../../shared/_components/empty-state/empty-state.component";
 import {
@@ -36,6 +36,7 @@ import {MetadataProviderTitlePipe} from "../../_pipes/metadata-provider-title.pi
 import {ExternalEditionDto, PlusMediaFormat} from "../../_models/series-detail/external-series-detail";
 import {SeriesFormatComponent} from "../../shared/series-format/series-format.component";
 import {LibraryTypePipe} from "../../_pipes/library-type.pipe";
+import {SeriesMetadata} from "../../_models/metadata/series-metadata";
 
 @Component({
   selector: 'app-match-series-modal',
@@ -102,7 +103,20 @@ export class MatchSeriesModalComponent implements OnInit {
   kavitaChapterCount!: Signal<number>;
   kavitaSpecialCount!: Signal<number>;
   seriesDetail = signal<SeriesDetail | null>(null);
+  seriesMetadata = signal<SeriesMetadata | null>(null);
   matchInfo = signal<MatchSeriesInfo | null>(null);
+
+  peopleHint = computed(() => {
+    const metadata = this.seriesMetadata();
+    if (!metadata) return null;
+
+    return metadata.writers
+      .concat(metadata.colorists)
+      .concat(metadata.coverArtists)
+      .slice(0, 3)
+      .map(person => person.name)
+      .join(', ');
+  });
 
   mangaBakaSearchUrl = computed(() => {
     return `https://mangabaka.org/search?q=${encodeURIComponent(this.series().name)}`;
@@ -135,18 +149,6 @@ export class MatchSeriesModalComponent implements OnInit {
     this.kavitaSpecialCount = computed(() => (this.seriesDetail()?.specials ?? []).length);
 
     effect(() => {
-      if (this.series().mangaBakaEditionId) {
-        this.selectedEditionId.set(this.series().mangaBakaEditionId);
-      }
-
-      this.seriesService.getMatchInfo(this.series().id).subscribe(res => {
-        this.matchInfo.set(res);
-        this.formGroup.controls.provider.setValue(res.metadataProvider, { emitEvent: false });
-        this.autoSelectExistingMatch(this.matches());
-      });
-    });
-
-    effect(() => {
       if (this.isDontMatch()) {
         this.formGroup.controls.query.disable({ emitEvent: false });
       } else {
@@ -160,8 +162,10 @@ export class MatchSeriesModalComponent implements OnInit {
       takeUntilDestroyed()
     ).subscribe(() => this.search());
 
-    this.formGroup.controls.provider.valueChanges.pipe(
-      takeUntilDestroyed()
+    this.formGroup.valueChanges.pipe(
+      takeUntilDestroyed(),
+      pairwise(),
+      filter(([prev, curr]) => prev.provider !== curr.provider),
     ).subscribe(() => {
       this.selectedItem.set(null);
       this.selectedEdition.set(null);
@@ -170,6 +174,16 @@ export class MatchSeriesModalComponent implements OnInit {
   }
 
   ngOnInit() {
+    if (this.series().mangaBakaEditionId) {
+      this.selectedEditionId.set(this.series().mangaBakaEditionId);
+    }
+
+    this.seriesService.getMatchInfo(this.series().id).subscribe(res => {
+      this.matchInfo.set(res);
+      this.formGroup.controls.provider.setValue(res.metadataProvider, { emitEvent: false });
+      this.autoSelectExistingMatch(this.matches());
+    });
+
     this.formGroup.patchValue({ dontMatch: this.series().dontMatch || false });
     this.seriesService.getSeriesDetail(this.series().id).pipe(
       tap(detail => {
@@ -180,6 +194,10 @@ export class MatchSeriesModalComponent implements OnInit {
 
         this.search();
       }),
+    ).subscribe();
+
+    this.seriesService.getMetadata(this.series().id).pipe(
+      tap(metadata => this.seriesMetadata.set(metadata)),
     ).subscribe();
   }
 

@@ -4,6 +4,7 @@ import {MangaFormat} from "./manga-format";
 export interface SeriesGroup {
     seriesId: number;
     seriesName: string;
+    localizedSeriesName: string;
     created: string;
     title: string;
     libraryId: number;
