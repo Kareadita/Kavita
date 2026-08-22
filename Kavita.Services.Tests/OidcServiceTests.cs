@@ -740,7 +740,8 @@ public class OidcServiceTests(ITestOutputHelper outputHelper): AbstractDbTest(ou
         var accountService = new AccountService(userManager, Substitute.For<ILogger<AccountService>>(),
             unitOfWork, mapper, Substitute.For<ILocalizationService>());
         var oidcService = new OidcService(Substitute.For<ILogger<OidcService>>(), userManager, unitOfWork,
-            accountService, Substitute.For<IEmailService>(), Substitute.For<ICoverDbService>());
+            accountService, Substitute.For<IEmailService>(), Substitute.For<ICoverDbService>(),
+            Substitute.For<IAuthKeyService>());
 
         return (oidcService, user, accountService, userManager);
     }

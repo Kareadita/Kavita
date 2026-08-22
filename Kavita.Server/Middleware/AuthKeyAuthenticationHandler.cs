@@ -24,12 +24,16 @@ public class AuthKeyAuthenticationOptions : AuthenticationSchemeOptions
     public const string SchemeName = "AuthKey";
 }
 
-public class AuthKeyAuthenticationHandler : AuthenticationHandler<AuthKeyAuthenticationOptions>
+public class AuthKeyAuthenticationHandler(
+    IOptionsMonitor<AuthKeyAuthenticationOptions> options,
+    ILoggerFactory logger,
+    UrlEncoder encoder,
+    IUnitOfWork unitOfWork,
+    HybridCache cache,
+    IMemoryCache memoryCache,
+    IAuthKeyService authKeyService)
+    : AuthenticationHandler<AuthKeyAuthenticationOptions>(options, logger, encoder)
 {
-private readonly IUnitOfWork _unitOfWork;
-    private readonly HybridCache _cache;
-    private readonly IMemoryCache _memoryCache;
-
     private static readonly HybridCacheEntryOptions CacheOptions = new()
     {
         Expiration = TimeSpan.FromMinutes(15),
@@ -42,20 +46,6 @@ private readonly IUnitOfWork _unitOfWork;
         Size = 1
     };
 
-    public AuthKeyAuthenticationHandler(
-        IOptionsMonitor<AuthKeyAuthenticationOptions> options,
-        ILoggerFactory logger,
-        UrlEncoder encoder,
-        IUnitOfWork unitOfWork,
-        HybridCache cache,
-        IMemoryCache memoryCache)
-        : base(options, logger, encoder)
-    {
-        _unitOfWork = unitOfWork;
-        _cache = cache;
-        _memoryCache = memoryCache;
-    }
-
     protected override async Task<AuthenticateResult> HandleAuthenticateAsync()
     {
         var apiKey = ExtractAuthKey(Request);
@@ -67,12 +57,12 @@ private readonly IUnitOfWork _unitOfWork;
 
         try
         {
-            var cacheKey = CreateCacheKey(apiKey);
-            var user = await _cache.GetOrCreateAsync(
+            var cacheKey = authKeyService.CreateCacheKey(apiKey);
+            var user = await cache.GetOrCreateAsync(
                 cacheKey,
-                (apiKey, _unitOfWork),
+                (apiKey, _unitOfWork: unitOfWork),
                 static async (state, cancel) =>
-                    await state._unitOfWork.UserRepository.GetUserDtoByAuthKeyAsync(state.apiKey),
+                    await state._unitOfWork.UserRepository.GetUserDtoByAuthKeyAsync(state.apiKey, cancel),
                 CacheOptions,
                 cancellationToken: Context.RequestAborted).ConfigureAwait(false);
 
@@ -137,22 +127,17 @@ private readonly IUnitOfWork _unitOfWork;
         return null;
     }
 
-    public static string CreateCacheKey(string keyValue)
-    {
-        return $"authKey_{keyValue}";
-    }
-
     private void EnqueueAccessUpdateIfNeeded(string apiKey)
     {
         var throttleKey = $"authkey_access_{apiKey}";
 
-        if (_memoryCache.TryGetValue(throttleKey, out _))
+        if (memoryCache.TryGetValue(throttleKey, out _))
         {
             return;
         }
 
         // Mark as recently queued
-        _memoryCache.Set(throttleKey, true, AuthKeyCacheOptions);
+        memoryCache.Set(throttleKey, true, AuthKeyCacheOptions);
 
         BackgroundJob.Enqueue<IAuthKeyService>(s => s.UpdateLastAccessedAsync(apiKey));
     }

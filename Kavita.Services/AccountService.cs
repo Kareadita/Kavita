@@ -185,7 +185,7 @@ public partial class AccountService(
         }
     }
 
-    public async Task<IEnumerable<IdentityError>> UpdateRolesForUser(AppUser user, IList<string> roles,
+    public async Task<(IEnumerable<IdentityError>, bool)> UpdateRolesForUser(AppUser user, IList<string> roles,
         CancellationToken ct = default)
     {
         var existingRoles = await userManager.GetRolesAsync(user);
@@ -198,13 +198,15 @@ public partial class AccountService(
         if (existingRoles.Except(roles).Any() || roles.Except(existingRoles).Any())
         {
             var roleResult = await userManager.RemoveFromRolesAsync(user, existingRoles);
-            if (!roleResult.Succeeded) return roleResult.Errors;
+            if (!roleResult.Succeeded) return (roleResult.Errors, false);
 
             roleResult = await userManager.AddToRolesAsync(user, roles);
-            if (!roleResult.Succeeded) return roleResult.Errors;
+            if (!roleResult.Succeeded) return (roleResult.Errors, false);
+
+            return ([], true);
         }
 
-        return [];
+        return ([], false);
     }
 
     public async Task SeedUser(AppUser user, CancellationToken ct = default)

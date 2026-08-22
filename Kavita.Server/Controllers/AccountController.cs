@@ -30,6 +30,7 @@ using Kavita.Models.Entities.User;
 using Kavita.Models.Extensions;
 using Kavita.Server.Attributes;
 using Kavita.Server.Extensions;
+using Kavita.Server.Middleware;
 using Kavita.Services;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
@@ -614,7 +615,7 @@ public class AccountController(UserManager<AppUser> userManager,
         if (adminUser == null) return Unauthorized();
         if (!await unitOfWork.UserRepository.IsUserAdminAsync(adminUser, ct)) return Unauthorized(await localizationService.TranslateAsync(UserId, "permission-denied"));
 
-        var user = await unitOfWork.UserRepository.GetUserByIdAsync(dto.UserId, AppUserIncludes.SideNavStreams, ct);
+        var user = await unitOfWork.UserRepository.GetUserByIdAsync(dto.UserId, AppUserIncludes.SideNavStreams | AppUserIncludes.AuthKeys, ct);
         if (user == null) return BadRequest(await localizationService.TranslateAsync(UserId, "no-user"));
 
         try
@@ -668,6 +669,8 @@ public class AccountController(UserManager<AppUser> userManager,
             if (!roleResult.Succeeded) return BadRequest(roleResult.Errors);
             roleResult = await userManager.AddToRolesAsync(user, roles);
             if (!roleResult.Succeeded) return BadRequest(roleResult.Errors);
+
+            await authKeyService.InvalidateAllForUserAsync(user, ct);
         }
 
         // We might want to check if they had admin and no longer, if so:
