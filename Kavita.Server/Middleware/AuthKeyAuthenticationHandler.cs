@@ -9,6 +9,7 @@ using Hangfire;
 using Kavita.API.Database;
 using Kavita.API.Services;
 using Kavita.Common.Constants;
+using Kavita.Common.Helpers;
 using Kavita.Models.Entities.Progress;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Http;
@@ -53,6 +54,11 @@ public class AuthKeyAuthenticationHandler(
         if (string.IsNullOrEmpty(apiKey))
         {
             return AuthenticateResult.NoResult();
+        }
+
+        if (!AuthKeyHelper.IsValidAuthKey(apiKey))
+        {
+            return AuthenticateResult.Fail("Invalid API Key");
         }
 
         try
