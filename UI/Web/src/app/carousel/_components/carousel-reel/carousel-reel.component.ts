@@ -84,7 +84,9 @@ export class CarouselReelComponent {
   swiper: Swiper | undefined;
 
   private tryLoadNextPage() {
-    if (!this.paginationEnabled() || this.loadingNextPage()) return;
+    if (!this.paginationEnabled() || this.loadingNextPage() || this.currentPage() >= this.totalPages()) {
+      return;
+    }
 
     this.currentPage.update(x => x + 1);
     this.loadingNextPage.set(true);
@@ -108,7 +110,7 @@ export class CarouselReelComponent {
         this.swiper?.setProgress(newCurrentProgress);
         this.cdRef.markForCheck();
       }),
-      tap(() => this.nextPage()),
+      //tap(() => this.nextPage()),
       tap(() => this.loadingNextPage.set(false)),
     ).subscribe();
   }
@@ -153,5 +155,13 @@ export class CarouselReelComponent {
 
   performAction(event: ActionResult<any>) {
     this.actionHandler.emit(event);
+  }
+
+  onReachEnd() {
+    if (this.currentPage() >= this.totalPages()) {
+      return;
+    }
+
+    this.tryLoadNextPage();
   }
 }

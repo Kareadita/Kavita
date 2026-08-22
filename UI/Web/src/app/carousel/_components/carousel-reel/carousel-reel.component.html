@@ -31,9 +31,13 @@
       @if (items.length > 0) {
         <div>
           <swiper-container #swiperContainer
-            slides-per-view="auto"
-            free-mode="true"
-            (swiperprogress)="onProgress($event)">
+                            slides-per-view="auto"
+                            free-mode="true"
+                            mousewheel="true"
+                            mousewheel-force-to-axis="true"
+                            (swiperprogress)="onProgress($event)"
+                            (swiperreachend)="onReachEnd()"
+          >
             @for(item of items; track item; let i = $index;) {
               <swiper-slide>
                 <ng-container [ngTemplateOutlet]="carouselItemTemplate()" [ngTemplateOutletContext]="{ $implicit: item, idx: i }" />
