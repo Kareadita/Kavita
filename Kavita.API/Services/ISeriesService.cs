@@ -3,6 +3,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Kavita.Common.Helpers;
 using Kavita.Models.DTOs;
+using Kavita.Models.DTOs.Dashboard;
 using Kavita.Models.DTOs.Filtering.v2;
 using Kavita.Models.DTOs.SeriesDetail;
 
@@ -18,4 +19,5 @@ public interface ISeriesService
     Task<NextExpectedChapterDto> GetEstimatedChapterCreationDate(int seriesId, int userId, CancellationToken ct = default);
     Task<PagedList<SeriesDto>> GetCurrentlyReading(int userId, int requestingUserId, UserParams userParams, CancellationToken ct = default);
     Task<List<SeriesFilterStatementDto>> GetProfilePrivacyStatements(int userId, int requestingUserId, CancellationToken ct = default);
+    Task<IList<GroupedSeriesDto>> GetRecentlyUpdatedSeriesForDashboardAsync(int userId, UserParams? userParams, CancellationToken ct = default);
 }

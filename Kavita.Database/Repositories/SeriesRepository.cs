@@ -1128,6 +1128,9 @@ public class SeriesRepository(DataContext context, IMapper mapper) : ISeriesRepo
 
     /// <summary>
     /// Return recently updated series, regardless of read progress, and group the number of volume or chapters added.
+    /// Each returned entry also carries the ChapterId/VolumeId (and raw naming fields) of the newest chapter added
+    /// to that series, so a card can display and link directly to that specific chapter/file rather than just the
+    /// series, while still being deduped to one card per series and reflecting how many new files it has.
     /// </summary>
     /// <remarks>This provides 2 levels of pagination. Fetching the individual chapters only looks at 3000. Then when performing grouping
     /// in memory, we stop after 30 series. </remarks>
@@ -1171,6 +1174,7 @@ public class SeriesRepository(DataContext context, IMapper mapper) : ISeriesRepo
             }
             else
             {
+                // items is ordered newest-first, so the first occurrence of a series is its newest chapter/file
                 seriesMap[item.SeriesId] = new GroupedSeriesDto()
                 {
                     LibraryId = item.LibraryId,
@@ -1182,6 +1186,11 @@ public class SeriesRepository(DataContext context, IMapper mapper) : ISeriesRepo
                     Id = index,
                     Format = item.Format,
                     Count = 1,
+                    ChapterId = item.ChapterId,
+                    VolumeId = item.VolumeId,
+                    IsSpecial = item.IsSpecial,
+                    ChapterRange = item.ChapterRange ?? string.Empty,
+                    ChapterTitle = item.ChapterTitle,
                 };
                 index += 1;
             }

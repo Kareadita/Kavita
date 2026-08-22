@@ -33,4 +33,20 @@ public sealed record GroupedSeriesDto
     /// Number of items that are updated. This provides a sort of grouping when multiple chapters are added per Volume/Series
     /// </summary>
     public int Count { get; set; }
+    /// <summary>
+    /// Whether the newest chapter/file (see <see cref="ChapterId"/>) is a special. Used server-side to compute <see cref="Title"/>.
+    /// </summary>
+    public bool IsSpecial { get; set; }
+    /// <summary>
+    /// Range of the newest chapter/file (e.g. "42"). Used server-side to compute <see cref="Title"/>.
+    /// </summary>
+    public string ChapterRange { get; set; } = string.Empty;
+    /// <summary>
+    /// Raw title of the newest chapter/file, if any. Used server-side to compute <see cref="Title"/>.
+    /// </summary>
+    public string? ChapterTitle { get; set; }
+    /// <summary>
+    /// Display title for the newest chapter/file this entry represents (e.g. "Issue #42"). Empty if not set.
+    /// </summary>
+    public string Title { get; set; } = string.Empty;
 }

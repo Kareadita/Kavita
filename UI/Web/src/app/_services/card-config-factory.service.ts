@@ -407,22 +407,26 @@ export class CardConfigFactory {
       selectionType: 'series',
       suppressArchiveWarning: false,
 
-      coverFunc: (s) => this.imageService.getSeriesCoverImage(s.seriesId),
-      titleFunc: (s) => s.seriesName,
-      titleRouteFunc: (s) => `/library/${s.libraryId}/series/${s.seriesId}`,
+      coverFunc: (s) => s.chapterId ? this.imageService.getChapterCoverImage(s.chapterId) : this.imageService.getSeriesCoverImage(s.seriesId),
+      titleFunc: (s) => s.title || s.seriesName,
+      titleRouteFunc: (s) => s.chapterId
+        ? `/library/${s.libraryId}/series/${s.seriesId}/chapter/${s.chapterId}`
+        : `/library/${s.libraryId}/series/${s.seriesId}`,
       metaTitleFunc: (s, wrapper) => s.localizedSeriesName || s.seriesName,
       titleTemplate: params?.titleRef,
       metaTitleTemplate: params?.metaTitleRef,
-      tooltipFunc: (s) => s.seriesName,
+      tooltipFunc: (s) => s.title || s.seriesName,
       progressFunc: (s) => ({ pages: 0, pagesRead: 0 }),
 
       formatBadgeFunc: (s) => s.format,
       countFunc: (s) => s.count,
       showErrorFunc: (s) => false,
-      ariaLabelFunc: (s) => s.seriesName,
+      ariaLabelFunc: (s) => s.title || s.seriesName,
 
       readFunc: null,
-      clickFunc: (s) => this.router.navigate(['library', s.libraryId, 'series', s.seriesId]),
+      clickFunc: (s) => s.chapterId
+        ? this.router.navigate(['library', s.libraryId, 'series', s.seriesId, 'chapter', s.chapterId])
+        : this.router.navigate(['library', s.libraryId, 'series', s.seriesId]),
     };
 
     return this.mergeConfig(defaults, params?.overrides);

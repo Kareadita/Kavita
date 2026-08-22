@@ -13,6 +13,7 @@ using Kavita.Common.Extensions;
 using Kavita.Common.Helpers;
 using Kavita.Models.Builders;
 using Kavita.Models.DTOs;
+using Kavita.Models.DTOs.Dashboard;
 using Kavita.Models.DTOs.Filtering;
 using Kavita.Models.DTOs.Filtering.v2;
 using Kavita.Models.DTOs.Filtering.v2.Requests;
@@ -1036,6 +1037,37 @@ public class SeriesService(
         }
 
         return filters;
+    }
+
+    /// <summary>
+    /// Returns recently updated series, deduped to one card per series (see
+    /// <see cref="ISeriesRepository.GetRecentlyUpdatedSeriesAsync"/>), with each card's <see cref="GroupedSeriesDto.Title"/>
+    /// formatted for the newest chapter/file added to that series (e.g. "Issue #42"), so the dashboard card reflects
+    /// and links to the latest file even though it's still one card per series.
+    /// </summary>
+    /// <param name="userId"></param>
+    /// <param name="userParams">Page size and offset</param>
+    /// <param name="ct"></param>
+    /// <returns></returns>
+    public async Task<IList<GroupedSeriesDto>> GetRecentlyUpdatedSeriesForDashboardAsync(int userId, UserParams? userParams,
+        CancellationToken ct = default)
+    {
+        var items = await unitOfWork.SeriesRepository.GetRecentlyUpdatedSeriesAsync(userId, userParams, ct);
+        var namingContexts = new Dictionary<LibraryType, LocalizedNamingContext>();
+
+        foreach (var item in items)
+        {
+            if (!namingContexts.TryGetValue(item.LibraryType, out var namingContext))
+            {
+                namingContext = await LocalizedNamingContext.CreateAsync(namingService, localizationService, userId, item.LibraryType);
+                namingContexts[item.LibraryType] = namingContext;
+            }
+
+            item.Title = namingService.FormatChapterTitle(item.LibraryType, item.IsSpecial, item.ChapterRange,
+                item.ChapterTitle, namingContext.ChapterLabel, namingContext.IssueLabel, namingContext.BookLabel);
+        }
+
+        return items;
     }
 
     private static double ExponentialSmoothing(IList<double> data, double alpha)

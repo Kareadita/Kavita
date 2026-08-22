@@ -311,7 +311,7 @@ public class SeriesController(
     {
         userParams ??= UserParams.Default;
         var ct = HttpContext.RequestAborted;
-        return Ok(await unitOfWork.SeriesRepository.GetRecentlyUpdatedSeriesAsync(UserId, userParams, ct));
+        return Ok(await seriesService.GetRecentlyUpdatedSeriesForDashboardAsync(UserId, userParams, ct));
     }
 
     /// <summary>

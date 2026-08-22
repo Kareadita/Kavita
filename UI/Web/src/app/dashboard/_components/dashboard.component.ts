@@ -299,6 +299,14 @@ export class DashboardComponent {
   }
 
   async handleRecentlyAddedChapterRead(item: RecentlyAddedItem) {
+    if (item.chapterId) {
+      // Open the specific chapter/file this card represents
+      this.seriesService.getChapter(item.chapterId).subscribe(chapter => {
+        this.readerService.readChapter(item.libraryId, item.seriesId, chapter, false);
+      });
+      return;
+    }
+
     // Get Continue Reading point and open directly
     this.readerService.getCurrentChapter(item.seriesId).subscribe(chapter => {
       this.readerService.readChapter(item.libraryId, item.seriesId, chapter, false);
