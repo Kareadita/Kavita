@@ -37,33 +37,6 @@
         "roles-label": "{{common.roles}}",
         "warning-read-only": "읽기 전용 계정은 권한이 제한됩니다"
     },
-    "user-scrobble-history": {
-        "title": "읽기 동기화 이력",
-        "description": "여기에서 계정과 연결된 읽기 동기화 기록을 확인할 수 있습니다. 기록이 생성되려면 활성화된 동기화 서비스가 설정되어 있어야 합니다. 처리가 완료된 기록은 한 달 후 자동으로 삭제됩니다. 처리되지 않은 기록이 남아 있는 경우, 상위 서비스에서 매칭되지 않았을 수 있습니다. 이 경우 관리자에게 문의해 주세요.",
-        "not-read-warning": "업스트림 공급자는 항상 가장 높은 숫자를 유지합니다",
-        "filter-label": "{{common.filter}}",
-        "created-header": "생성됨",
-        "last-modified-header": "마지막으로 수정한 날짜",
-        "type-header": "유형",
-        "series-header": "시리즈",
-        "data-header": "데이터",
-        "is-processed-header": "처리됨",
-        "no-data": "{{common.no-data}}",
-        "volume-and-chapter-num": "{{v}}권 {{n}}화",
-        "volume-num": "{{entity-title.volume-num}}권",
-        "chapter-num": "{{entity-title.chapter-num}}화",
-        "rating": "평점 {{r}}",
-        "not-applicable": "해당 사항 없음",
-        "processed": "처리됨",
-        "not-processed": "처리되지 않음",
-        "special": "{{entity-title.special}}",
-        "scrobbling-disabled": "계정 설정에서 읽기 동기화가 꺼져 있습니다.",
-        "token-expired": "AniList 토큰이 만료되었습니다! 계정 페이지에서 갱신하기 전까지는 Scrobbling 이벤트가 처리되지 않습니다.",
-        "select-all-label": "모두 선택",
-        "delete-selected-label": "선택 취소",
-        "provider-header": "제공자",
-        "read-status-update": "상태: {{status}}"
-    },
     "scrobble-event-type-pipe": {
         "chapter-read": "읽기 진행률",
         "score-updated": "평점 업데이트",
@@ -160,12 +133,13 @@
         "social-share-profile-tooltip": "내 독서 활동을 다른 회원들과 공유합니다"
     },
     "user-holds": {
-        "title": "읽기 동기화 보류",
+        "title": "독서 기록 동기화 보류",
         "description": "이 목록의 시리즈는 외부 서비스로 동기화되지 않습니다. 목록에서 시리즈를 제거하면, 다음 읽기 진행이나 평점 변경 시 자동으로 동기화가 재개됩니다.",
         "no-data": "{{typeahead.no-data}}",
         "series-name-header": "{{manage-matched-metadata.series-name-header}}",
         "created-header": "{{manage-media-issues.created-header}}",
-        "delete-label": "{{common.remove}}"
+        "delete-label": "{{common.remove}}",
+        "no-data-description": "보류 중인 시리즈가 없습니다. 보류한 시리즈가 여기에 나타납니다."
     },
     "theme-manager": {
         "description": "Kavita는 다양한 색상을 제공하며, 귀하의 필요에 맞는 색상 구성표를 찾거나 직접 만들어 공유할 수 있습니다. 테마는 귀하의 계정에 적용되거나 모든 계정에 적용될 수 있습니다.",
@@ -214,11 +188,12 @@
         "add": "{{common.add}}",
         "delete": "{{common.delete}}",
         "edit": "{{common.edit}}",
-        "no-data": "{{typeahead.no-data}}",
+        "no-data": "{{common.no-data}}",
         "actions-header": "{{manage-users.actions-header}}",
         "warning": "경고",
         "client-devices-header": "인증된 기기",
-        "sendto-device-header": "이메일 기반 기기"
+        "sendto-device-header": "이메일 기반 기기",
+        "no-data-description": "이메일 기반 기기가 아직 설정되어 있지 않습니다."
     },
     "edit-device-modal": {
         "title": "이메일 장치 편집",
@@ -270,7 +245,7 @@
         "copy": "{{book-line-overlay.copy}}"
     },
     "scrobbling-providers": {
-        "title": "읽기 동기화 공급자",
+        "title": "독서 기록 동기화 공급자",
         "requires": "이 기능에는 활성 {{product}} 라이선스가 필요합니다",
         "token-valid": "유효한 토큰",
         "token-expired": "만료된 토큰",
@@ -280,7 +255,7 @@
         "generic-instructions": "Kavita+가 상호 작용할 수 있도록 허용해야 하는 다양한 외부 서비스에 대한 정보를 입력하세요.",
         "instructions": "처음 사용자들은 아래의 \"{{scrobbling-providers.generate}}\"을 클릭하여 Kavita+가 {{service}}와 통신할 수 있도록 해야 합니다. 프로그램을 승인하면 아래 입력란에 토큰을 복사하여 붙여넣으세요. 언제든지 토큰을 재생성할 수 있습니다.",
         "mal-instructions": "Kavita는 인증을 위해 MAL 클라이언트 ID를 사용합니다. Kavita에 대한 새 클라이언트를 생성하고 승인되면 클라이언트 ID와 사용자 이름을 제공하십시오.",
-        "scrobbling-applicable-label": "읽기 동기화 적용 가능",
+        "scrobbling-applicable-label": "독서 기록 동기화 적용",
         "token-input-label": "{{service}} 토큰",
         "mal-token-input-label": "MAL 클라이언트 ID",
         "mal-username-input-label": "MAL 사용자 이름",
@@ -753,7 +728,9 @@
         "inherit-web-links-label": "첫 번째 챕터의 웹 링크 상속",
         "inherit-web-links-tooltip": "시리즈가 첫 번째 챕터에 등록된 웹 링크를 자동으로 가져옵니다",
         "default-language-label": "기본 언어",
-        "default-language-tooltip": "메타데이터에 언어가 지정되지 않은 경우 시리즈에 기본으로 설정할 언어입니다"
+        "default-language-tooltip": "메타데이터에 언어가 지정되지 않은 경우 시리즈에 기본으로 설정할 언어입니다",
+        "metadata-provider-label": "메타데이터 제공처",
+        "metadata-provider-tooltip": "Kavita가 메타데이터를 가져오는 출처를 선택하세요."
     },
     "file-type-group-pipe": {
         "archive": "아카이브",
@@ -1041,7 +1018,7 @@
         "reset": "{{common.reset}}",
         "save": "{{common.save}}",
         "media-issue-title": "미디어 문제",
-        "scrobble-issue-title": "읽기 동기화 문제",
+        "scrobble-issue-title": "독서 기록 동기화 문제",
         "cover-image-size-label": "커버 이미지 크기",
         "cover-image-size-tooltip": "표지 이미지가 생성되어야 하는 크기입니다. 참고: 기본값보다 크면 페이지 로드 시간이 길어집니다.",
         "pdf-render-resolution-label": "PDF 렌더링 해상도",
@@ -1054,7 +1031,7 @@
         "xlarge": "매우 크게 (1265x1795)"
     },
     "manage-scrobble-errors": {
-        "title": "읽기 동기화 오류",
+        "title": "독서 기록 동기화 오류",
         "description": "읽기 동기화 중 발생한 문제가 이곳에 표시됩니다. 언제든 초기화할 수 있으며, 다음 기록 업로드 시 다시 확인할 수 있습니다. 알 수 없는 시리즈가 있다면 이름을 수정하거나 연동 서비스 링크를 추가하세요.",
         "filter-label": "{{common.filter}}",
         "clear-errors": "오류 지우기",
@@ -1063,7 +1040,8 @@
         "comment-header": "코멘트",
         "edit-header": "편집",
         "edit-item-alt": "편집 {{seriesName}}",
-        "no-data": "문제 없음"
+        "no-data": "문제 없음",
+        "generic": "알 수 없는 오류가 발생했습니다"
     },
     "default-date-pipe": {
         "never": "없음"
@@ -1203,13 +1181,14 @@
         "online-now-tooltip": "지금 온라인",
         "too-many-libraries": "많이",
         "sharing-header": "공유",
-        "no-data": "다른 사용자가 없습니다.",
+        "no-data": "{{common.no-data}}",
         "actions-header": "작업",
         "pending-tooltip": "이 사용자는 이메일을 확인하지 않았습니다",
         "all-libraries": "모든 라이브러리",
         "identity-provider-oidc-tooltip": "OIDC",
         "identity-provider-native-tooltip": "네이티브",
-        "profile-link-alt": "프로필"
+        "profile-link-alt": "프로필",
+        "no-data-description": "다른 사용자가 없습니다."
     },
     "edit-collection-tags": {
         "title": "편집 {{collectionName}} 컬렉션",
@@ -1229,7 +1208,9 @@
         "source-url-title": "소스 URL:",
         "total-series-title": "총 시리즈:",
         "missing-series-title": "누락된 시리즈:",
-        "last-sync-tooltip": "Kavita는 업스트림 컬렉션 공급자와 매일 동기화합니다."
+        "last-sync-tooltip": "Kavita는 업스트림 컬렉션 공급자와 매일 동기화합니다.",
+        "series-tab": "{{tabs.series-tab}}",
+        "matched-series": "일치하는 시리즈:"
     },
     "library-recommended": {
         "no-data": "여기에 표시할 내용이 없습니다. 라이브러리에 일부 메타데이터를 추가하거나 무언가를 읽거나 평가하십시오. 이 라이브러리에는 추천 항목이 꺼져 있을 수도 있습니다.",
@@ -1261,18 +1242,18 @@
         "preferences": "환경설정",
         "clients": "인증키 / OPDS",
         "devices": "디바이스",
-        "scrobbling": "읽기 동기화",
+        "scrobbling": "독서 기록 동기화",
         "theme": "테마",
         "customize": "커스터마이즈",
         "cbl-import": "읽기 목록 관리자",
         "mal-stack-import": "MAL 스택",
-        "admin-manage-tokens": "사용자 토큰 관리",
-        "admin-metadata": "메타데이터 관리",
-        "scrobble-holds": "읽기 동기화 홀드",
+        "admin-manage-tokens": "사용자 토큰",
+        "admin-metadata": "메타데이터 제어",
+        "scrobble-holds": "독서 기록 동기화 보류",
         "admin-email-history": "이메일 기록",
-        "admin-matched-metadata": "일치하는 메타데이터",
+        "admin-matched-metadata": "일치하는시리즈",
         "reading-profiles": "읽기 프로필",
-        "admin-mappings-import": "메타데이터 설정",
+        "admin-mappings-import": "메타데이터 제어",
         "admin-public-metadata": "메타데이터 관리",
         "admin-oidc": "OpenID 연결",
         "font": "EPUB 폰트",
@@ -1280,7 +1261,10 @@
         "insights-section-title": "인사이트",
         "admin-activity": "활동",
         "admin-device": "디바이스",
-        "remap-rules": "규칙 재배치"
+        "remap-rules": "규칙 재배치",
+        "my-activity": "내 활동",
+        "admin-manage-kavitaplus-activity": "Kavita+ 활동",
+        "scrobble-settings": "연결"
     },
     "collection-detail": {
         "no-data": "항목이 없습니다. 시리즈를 추가해 보세요.",
@@ -1366,7 +1350,8 @@
         "left-to-process": "처리할 남은 항목: {{leftToProcess}} / {{totalToProcess}}",
         "download-in-queue": "대기열에서 {{num}} 다운로드",
         "reading-now": "{{num}}명이 읽는 중",
-        "downloads-active": "{{count}}개 다운로드 진행 중"
+        "downloads-active": "{{count}}개 다운로드 진행 중",
+        "not-connected": "연결되지 않았습니다. 새로 고침을 시도해 보세요"
     },
     "shortcuts-modal": {
         "title": "키보드 단축키",
@@ -1379,7 +1364,11 @@
         "close-reader": "리더 닫기",
         "toggle-menu": "메뉴 전환",
         "offset-double-page": "{{keybind-setting-description-pipe.key-bind-title-offset-double-page}}",
-        "navigate-to-settings": "{{keybind-setting-description-pipe.key-bind-title-navigate-to-settings}}"
+        "navigate-to-settings": "{{keybind-setting-description-pipe.key-bind-title-navigate-to-settings}}",
+        "previous-chapter": "{{keybind-setting-description-pipe.key-bind-title-previous-chapter}}",
+        "next-chapter": "{{keybind-setting-description-pipe.key-bind-title-next-chapter}}",
+        "first-page": "{{keybind-setting-description-pipe.key-bind-title-first-page}}",
+        "last-page": "{{keybind-setting-description-pipe.key-bind-title-last-page}}"
     },
     "grouped-typeahead": {
         "files": "파일",
@@ -1458,7 +1447,9 @@
         "series-count": "{{common.series-count}}",
         "restack-count": "{{num}} 재정렬",
         "track": "트랙",
-        "by-author": "{{author}}별로"
+        "by-author": "{{author}}별로",
+        "no-data": "{{common.no-data}}",
+        "no-data-description": "유효한 MAL 토큰이 있고 일부 스택을 팔로우했는지 확인하세요"
     },
     "import-cbl-modal": {
         "close": "{{common.close}}",
@@ -1627,7 +1618,7 @@
         "unit-average-rating": "Kavita+ 외부 평점, 백분율",
         "unit-reading-progress": "퍼센트",
         "unit-user-rating": "0.0 - 5.0 별",
-        "unit-read-last": "오늘부터의 일수",
+        "unit-read-last": "일 전",
         "disclaimer-highlight-slots": "이 필드를 사용할 경우, 사용자 고유의 주석만 표시합니다",
         "unit-file-size": "GB, MB, KB, B",
         "disclaimer-file-size": "파일 크기는 단위를 포함해야 합니다"
@@ -1726,7 +1717,8 @@
         "volumes-title": "{{tab.volumes-tab}}",
         "no-data": "{{common.no-data}}",
         "weblinks-tab": "{{tabs.weblink-tab}}",
-        "external-ids-tab": "{{tabs.external-ids-tab}}"
+        "external-ids-tab": "{{tabs.external-ids-tab}}",
+        "align-sort-name": "이 시리즈의 이름을 변경했지만 정렬 이름이 잠겨 있습니다. 정렬 이름을 새 이름에 맞게 변경하시겠습니까?"
     },
     "edit-chapter-modal": {
         "title": "편집",
@@ -2042,7 +2034,8 @@
         "read-date": "읽은 날짜",
         "average-rating": "평균 평점",
         "read-last": "마지막으로 읽기",
-        "file-size": "파일 크기"
+        "file-size": "파일 크기",
+        "collapse-series-relationships": "{{user-preferences.collapse-series-relationships-label}}"
     },
     "filter-comparison-pipe": {
         "begins-with": "시작",
@@ -2058,8 +2051,8 @@
         "ends-with": "로 끝남",
         "is-before": "이전 날짜",
         "is-after": "이후 날짜",
-        "is-in-last": "마지막에 있음",
-        "is-not-in-last": "마지막에 없음",
+        "is-in-last": "최근 ~일 이내",
+        "is-not-in-last": "최근 ~일 이전",
         "must-contains": "모두 포함함",
         "is-empty": "빈 값",
         "is-not-empty": "빈 값 아님"
@@ -2199,7 +2192,11 @@
         "cbl-remap-rule-promoted": "규칙이 전역으로 승격됨",
         "cbl-remap-rule-demoted": "규칙이 사용자 범위로 강등됨",
         "confirm-delete-read-from-readinglist": "이 읽기 리스트에서 읽은 항목을 모두 제거하시겠습니까? 이 작업은 되돌릴 수 없습니다.",
-        "reading-list-sync-enqueued": "읽기 리스트가 동기화 대기열에 포함되었습니다."
+        "reading-list-sync-enqueued": "읽기 리스트가 동기화 대기열에 포함되었습니다.",
+        "tokens-expired": "하나 이상의 연결 토큰이 만료되었습니다. Kavita+ > 연결에서 토큰을 다시 생성할 때까지 스크로블링/동기화가 일시 중지됩니다",
+        "confirm-rerun-backfill": "이미 {{provider}}에 대한 스크로블 이벤트를 한 번 이상 생성했습니다. 기존 독서 이력 반영을 진행하면 최근 읽기 이벤트의 스크로블링이 지연될 수 있습니다. 계속하시겠습니까?",
+        "change-email-success": "새 이메일 주소로 확인 링크를 보냈습니다. 링크를 클릭하여 변경을 완료하세요.",
+        "change-email-error": "이메일 주소를 변경하지 못했습니다. 다시 시도해 주세요. 문제가 계속되면 고객지원에 문의하세요."
     },
     "read-time-pipe": {
         "less-than-hour": "<1시간",
@@ -2376,7 +2373,7 @@
         "theme-tab": "테마",
         "devices-tab": "디바이스",
         "stats-tab": "통계",
-        "scrobbling-tab": "읽기 동기화",
+        "scrobbling-tab": "독서 기록 동기화",
         "smart-filters-tab": "스마트 필터",
         "annotations-tab": "주석",
         "overview-tab": "개요",
@@ -2396,7 +2393,12 @@
         "uploaded-tab": "업로드됨",
         "current-tab": "현재",
         "kavita-plus-tab": "Kavita+",
-        "other-tab": "기타"
+        "other-tab": "기타",
+        "all-tab": "모두",
+        "scrobbles-tab": "독서 기록",
+        "failed-tab": "실패",
+        "my-changes-tab": "내 변경 사항",
+        "scrobble-holds-tab": "독서 기록 동기화 보류"
     },
     "common": {
         "reset-to-default": "기본값으로 재설정",
@@ -2439,7 +2441,8 @@
         "unknown": "알수없음",
         "libraries": "라이브러리",
         "confirm": "확인",
-        "selected": "선택"
+        "selected": "선택",
+        "done": "완료"
     },
     "confirm": {
         "alert": "긴급",
@@ -2521,7 +2524,7 @@
         "anilist-header": "AniList",
         "no-data": "{{common.no-data}}",
         "token-set-label": "토큰 셋",
-        "description": "스크로블링 토큰을 보유한 사용자는 가끔 갱신해야 할 수 있습니다. 이메일이 설정되어 있고 유효한 이메일이 있는 경우 Kavita가 자동으로 이메일을 보냅니다.",
+        "description": "읽기 기록 동기화 토큰을 보유한 사용자는 가끔 갱신해야 할 수 있습니다. 이메일이 설정되어 있고 유효한 이메일이 있는 경우 Kavita가 자동으로 이메일을 보냅니다.",
         "mal-header": "MAL",
         "expires-label": "만료: {{date}}"
     },
@@ -2576,12 +2579,12 @@
         "enable-chapter-publisher-tooltip": "화(챕터)/호(이슈)의 출판사를 기록할 수 있습니다",
         "enable-chapter-cover-label": "챕터 커버",
         "enable-chapter-cover-tooltip": "화(챕터)/호(이슈)의 커버 이미지를 설정할 수 있습니다",
-        "k+-warning": "아래 설정은 Kavita+ 관리 설정과 공유됩니다. 어느 쪽에서든 변경할 수 있습니다",
+        "k+-warning": "아래 설정은 Kavita+ 관리 설정과 공유됩니다. 어느 쪽에서든 변경할 수 있습니다.",
         "export-settings": "내보내기",
-        "export-tooltip": "블랙/화이트 리스트, 연령 등급, 필드 매핑 내보내기",
+        "export-tooltip": "블랙/화이트 리스트, 연령 등급, 필드 매핑 내보내기.",
         "export-file-name": "Kavita Metadata Settings Export.json",
         "import-settings": "가져오기",
-        "import-tooltip": "내 설정 혹은 다른 사용자의 설정 가져오기",
+        "import-tooltip": "내 설정 혹은 다른 사용자의 설정 가져오기.",
         "enable-extended-metadata-processing-label": "확장 메타데이터 처리",
         "enable-extended-metadata-processing-tooltip": "ComicInfo에서 가져오거나 UI에서 추가된 장르 및 태그를 블랙리스트/화이트리스트, 연령 등급 매핑, 필드 매핑 규칙을 사용하여 처리할지 여부를 설정합니다.",
         "remove-age-rating-mapping-label": "연령 등급 매핑 제거",
@@ -2591,7 +2594,39 @@
         "tags-header": "태그",
         "source-genre-tags-placeholder": "원본 장르/태그",
         "dest-genre-tags-placeholder": "대상 장르/태그",
-        "volume-header": "권"
+        "volume-header": "권",
+        "global-series-name-language-label": "이름",
+        "run-metadata-mappings": "메타데이터 매핑 실행",
+        "run-metadata-mappings-tooltip": "메타데이터 매핑을 통해 시리즈를 처리합니다. 시간과 자원을 더 많이 소모할 수 있습니다.",
+        "name-label": "시리즈 이름",
+        "name-tooltip": "필드가 잠금 해제된 경우, 시리즈 이름을 기록할 수 있습니다. 스캔 시 시리즈 매칭에는 디스크상의 이름이 계속 사용됩니다.",
+        "enable-volume-cover-label": "권 표지",
+        "enable-volume-cover-tooltip": "Kavita의 권 표지 설정 허용",
+        "language-header": "언어",
+        "enable-age-rating-label": "연령 등급",
+        "enable-age-rating-tooltip": "필드가 잠금 해제된 경우 연령 등급을 표시하도록 허용합니다. 카비타에서 수동 설정 시 제일 우선순위 값을 가집니다.",
+        "external-age-rating-header": "콘텐츠 제공자별 연령 등급 매핑",
+        "external-age-rating-description": "메타데이터 제공자가 제공하는 연령 등급 문자열을 추가합니다. Kavita+가 자동으로 추가하며 이 추가는 누적 적용되고, 항상 가장 높은 연령 등급이 우선 적용됩니다.",
+        "external-age-rating-label": "콘텐츠 제공자 연령 등급",
+        "language-description": "Kavita가 시리즈 명 또는 현지화된 이름을 설정할 때 사용하는 언어의 우선순위를 지정합니다. 특정 라이브러리에 대해서만 예외 설정을 추가할 수도 있습니다. 단, 현지화된 이름이 서로 다른 두 개의 파일명을 가진 시리즈에 영향을 주는 경우에는 해당 이름이 항상 반영(저장)되지는 않을 수 있으니 주의하세요.",
+        "global-series-name-language-tooltip": "시리즈 이름의 우선순위 순서를 결정합니다. BCP47 언어 코드는 세미콜론(;)으로 구분하세요. (예: en;ja-Latn;ja) 언어와 상관없이 콘텐츠 제공자가 제공하는 원어(오리지널 스크립트) 제목을 사용하려면 {Native}를, 로마자 표기 제목을 사용하려면 {Romaji}를 입력하십시오.",
+        "global-series-name-localized-language-label": "현지화된 이름",
+        "global-series-name-localized-language-tooltip": "시리즈의 현지화된 이름의 우선순위 순서를 결정합니다. BCP47 언어 코드는 세미콜론(;)으로 구분하세요. (예: en;ja-Latn;ja) 언어와 상관없이 콘텐츠 제공자가 제공하는 원어(오리지널 스크립트) 제목을 사용하려면 {Native}를, 로마자 표기 제목을 사용하려면 {Romaji}를 입력하십시오.",
+        "native-title-token-label": "원어 (오리지널 스크립트)",
+        "romaji-title-token-label": "로마자 제목",
+        "language-library-override-header": "라이브러리 재정의",
+        "language-library-override-description": "라이브러리 재정의는 해당 라이브러리에 대한 전역 순서를 완전히 대체하며, 순서에 추가되는 것은 아닙니다.",
+        "language-library-override-empty": "라이브러리 재정의가 없습니다. 모든 라이브러리는 위의 전역 순서를 따릅니다.",
+        "language-override-library-label": "라이브러리",
+        "language-override-library-placeholder": "라이브러리 선택",
+        "language-override-remove": "재정의 제거",
+        "language-code-malformed": "유효하지 않은 언어 코드: {{codes}}",
+        "language-code-unknown": "알 수 없는 언어 코드: {{codes}}. 철자를 다시 한 번 확인해 주세요. 그래도 저장되기는 합니다.",
+        "unsaved-changes-invalid": "변경 사항이 저장되지 않고 있습니다. 강조 표시된 필드를 수정하여 저장을 재개하세요.",
+        "add": "{{common.add}}",
+        "tag-weight-label": "가중치 이상의 태그 필터링 (Mangabaka 전용)",
+        "tag-weight-tooltip": "태그 매핑 후 필터링할 태그 가중치를 선택하세요. 예를 들어, 'Recurrent'를 선택하면 'Incidental'과 'Unweighted'가 필터링됩니다.",
+        "tag-weight-disabled": "태그 필터링하지 않기"
     },
     "match-series-modal": {
         "search": "검색",
@@ -2604,12 +2639,39 @@
         "clear": "검색 기록 삭제",
         "match-count": "{{ count }}개 매칭",
         "volume-count": "{{match-series-result-item.volume-count}}",
-        "chapter-count": "{{match-series-result-item.chapter-count}}"
+        "chapter-count": "{{match-series-result-item.chapter-count}}",
+        "title-prefix": "일치",
+        "in-kavita": "Kavita 내",
+        "try": "다시 시도",
+        "dont-match-hint": "이 시리즈를 완전히 제외하려면 “일치하지 않음”을 선택하세요.",
+        "apply-match": "일치항목 적용",
+        "loading-alt": "결과 불러오는 중",
+        "empty-title": "일치하는 항목 검색",
+        "empty-description": "시리즈 제목을 입력하거나 AniList, MAL, MangaBaka, CBR, Hardcover의 직접 URL을 붙여넣어 보세요.",
+        "no-results-title": "일치하는 항목이 없습니다",
+        "special-count": "{{match-series-result-item.special-count}}",
+        "no-results-description": "\"{{ query }}\"에 대한 검색 결과가 없습니다. 더 짧은 검색어, 로마자 표기 제목 또는 직접 ID를 사용해 보세요.",
+        "dont-match-active-title": "매칭 비활성화됨",
+        "dont-match-active-description": "이 시리즈는 Kavita+ 매칭 및 스크로블링에서 제외되었습니다.",
+        "matched-to": "현재 매칭된 항목",
+        "searching-against": "{{provider}}에서 검색 중",
+        "change-provider-help": "라이브러리 설정에서 사용할 제공자를 변경할 수 있습니다",
+        "is-standalone-label": "단독 도서",
+        "is-standalone-tooltip": "이 시리즈가 단일 도서를 나타내며, 하드커버 버전에 해당 시리즈 항목이 없는 경우 이 옵션을 활성화하세요"
     },
     "match-series-result-item": {
         "volume-count": "{{num}}권",
         "chapter-count": "{{num}}화",
-        "issue-count": "{{num}}호"
+        "issue-count": "{{num}}호",
+        "matched-alt": "일치하는 대체 제목:",
+        "more": "더 보기",
+        "matched-alt-count": "일치하는 대체 제목",
+        "alt-titles": "대체 제목",
+        "more-titles": "+{{count}}개 더 보기",
+        "selected-alt": "선택됨",
+        "special-count": "{{num}} 특별판",
+        "edition-main-count": "{{num}} 본편",
+        "edition-extra-count": "+{{num}} 추가편"
     },
     "email-history": {
         "sent-header": "성공",
@@ -2635,7 +2697,10 @@
         "chapter-covers": "커버 (Chapter)",
         "chapter-title": "제목 (챕터)",
         "chapter-release-date": "발매일 (Chapter)",
-        "chapter-summary": "요약 (Chapter)"
+        "chapter-summary": "요약 (Chapter)",
+        "name": "{{edit-series-modal.name-label}}",
+        "chapter-age-rating": "연령 등급 (챕터)",
+        "volume-covers": "표지 (권)"
     },
     "role-localized-pipe": {
         "admin": "관리자",
@@ -3099,7 +3164,9 @@
         "key-bind-title-first-page": "첫 페이지",
         "key-bind-tooltip-first-page": "첫 페이지로 이동",
         "key-bind-title-last-page": "마지막 페이지",
-        "key-bind-tooltip-last-page": "마지막 페이지로 이동"
+        "key-bind-tooltip-last-page": "마지막 페이지로 이동",
+        "key-bind-tooltip-navigate-home": "Kavita 내 어디서나 대시보드로 이동",
+        "key-bind-title-navigate-home": "홈으로 이동"
     },
     "manage-auth-keys": {
         "auth-keys-title": "인증키 관리",
@@ -3119,7 +3186,9 @@
         "add-auth-key": "신규",
         "description": "인증 키는 비밀번호와 유사합니다. 새로고침을 할 경우 기존 클라이언트에 적용된 키는 모두 작동되지 않습니다.",
         "copy-key": "{{common.copy}}",
-        "clients-opds-error": "키에 대한 OPDS url 불러오기 실패: {{key}}"
+        "clients-opds-error": "키에 대한 OPDS url 불러오기 실패: {{key}}",
+        "no-data": "{{common.no-data}}",
+        "no-data-description": "아직 인증 키가 없습니다."
     },
     "create-auth-key": {
         "create-title": "인증 키 만들기",
@@ -3636,7 +3705,9 @@
         "kavita-chapter-label": "Kavita 화 (선택)",
         "edit": "{{common.edit}}",
         "cbl-number-placeholder": "e.g. 1",
-        "by": "에 따라"
+        "by": "에 따라",
+        "no-data": "{{common.no-data}}",
+        "no-data-description": "여기에 표시할 리맵 규칙이 아직 없습니다."
     },
     "browse-cbl-repo-modal": {
         "title": "CBL 레포 탐색",
@@ -3824,13 +3895,16 @@
         "metadata-sync-description": "시리즈 상세 정보 갱신",
         "series-matched-title": "시리즈 매칭됨",
         "series-matched-description": "업스트림 제공자와 매칭됨",
-        "scrobbles-title": "읽기 동기화",
+        "scrobbles-title": "독서 기록",
         "recommendations-title": "추천",
         "recommendations-description": "외부 추천 불러옴",
         "reviews-title": "리뷰",
         "reviews-description": "외부 리뷰 불러옴",
         "want-to-read-description": "MAL/AniList/Hardcover/MangaBaka에서 동기화됨",
-        "mal-stack-import-title": "MAL 스택 가져옴"
+        "mal-stack-import-title": "MAL 스택 가져옴",
+        "scrobbles-description": "제공자에게 읽기 진도 전송됨",
+        "mal-stack-import-description": "관심 스택 가져옴",
+        "want-to-read-title": "읽고 싶어요 동기화"
     },
     "kavita-plus-billing-interval-pipe": {
         "week-unit-label": "주",
@@ -3843,7 +3917,7 @@
         "day-unit-label": "일"
     },
     "kavita-plus-upsell": {
-        "title": "Kavita+ 해금",
+        "title": "Kavita+ 이용하기",
         "description": "이 Kavita 인스턴스의 모든 사용자에 대해 메타데이터, 읽기 동기화, 추천 기능을 해금하는 프리미엄 구독입니다.",
         "wiki-link-label": "위키 읽기",
         "faq-btn-label": "FAQ",
@@ -3858,7 +3932,7 @@
         "pricing-feature-2-label": "이 인스턴스의 모든 사용자에게 혜택",
         "pricing-feature-3-label": "Stripe를 통해 언제든지 취소 가능",
         "pricing-feature-4-label": "노드 귀속 - 사용자당 요금 없음",
-        "providers-more-label": "+ 그리고 더 많은 기능 예정",
+        "providers-more-label": "+ 추가 예정",
         "benefit-1-title-label": "읽기 진도 자동 동기화",
         "benefit-1-body-label": "AniList, MangaBaka, Hardcover 등으로 진행상황 푸시 - 수동 트래킹이 필요 없습니다.",
         "benefit-2-title-label": "평점 & 리뷰",
@@ -3879,7 +3953,8 @@
         "faq-3-question-label": "구독을 취소하려면 어떻게 하나요?",
         "faq-3-answer-label": "관리 버튼을 사용해 Stripe 포털을 열면 언제든 취소 또는 정지할 수 있습니다.",
         "faq-wiki-link-label": "wiki에서 전체 FAQ 확인",
-        "providers-label": "연결할 곳"
+        "providers-label": "연결할 곳",
+        "benefits-section-label": "구독 포함 기능"
     },
     "kavita-plus-connect-providers": {
         "title": "준비가 완료되었습니다 - 마지막 단계",
@@ -4040,7 +4115,8 @@
         "age-rating": "연령 등급",
         "external-ids": "외부 ID",
         "summary": "줄거리",
-        "localized-name": "현지화 이름"
+        "localized-name": "현지화 이름",
+        "name": "시리즈 명"
     },
     "kavita-plus-event-description-pipe": {
         "review-submitted": "제출된 리뷰",
@@ -4058,7 +4134,14 @@
         "rating-updated": "평점 업데이트됨: {{rating}}/5",
         "add-want-to-read": "읽고 싶은 책에 추가됨",
         "remove-want-to-read": "읽고 싶은 책에서 제거됨",
-        "read-status-update": "상태 {{status}}"
+        "read-status-update": "상태 {{status}}",
+        "volume-cover-updated": "{{volume}}권 표지 업데이트됨",
+        "sync-completed-want-to-read": "{{userName}}에게 일치하는 {{seriesMatched}} 시리즈가 있습니다",
+        "series-matched-against": "\"{{matchName}}\"과 일치합니다",
+        "system-token-refresh-success": "{{provider}}의 인증 토큰을 새로 고침하십시오. 유효 기간은 {{validUntil}}까지입니다",
+        "system-token-refresh-failure": "{{provider}}의 인증 토큰 새로 고침에 실패했습니다",
+        "system-provider-info-sync-success": "{{provider}} 정보가 성공적으로 동기화되었습니다. 계정 {{username}}에 연결되었습니다",
+        "system-provider-info-sync-failure": "{{provider}} 계정 정보 동기화에 실패했습니다"
     },
     "expired-license-info-card": {
         "status-label": "상태",
@@ -4098,12 +4181,15 @@
         "filter-timeframe-30d": "최근 30일",
         "system": "시스템",
         "next-scrobble": "다음 읽기 동기화: {{date}}",
-        "filter-provider-label": "읽기 동기화 제공자"
+        "filter-provider-label": "독서 기록 동기화 제공자"
     },
     "scrobble-read-status-pipe": {
         "want-to-read": "읽고 싶은 책",
         "read": "읽음",
-        "unread": "읽지 않음"
+        "unread": "읽지 않음",
+        "on-hold": "일시 정지",
+        "dropped": "중단",
+        "ignore": "무시"
     },
     "manage-license-modal": {
         "hub-title": "구독 관리",
@@ -4171,7 +4257,8 @@
         "send-code-label": "코드 전송"
     },
     "kavitaplus-activity": {
-        "description": "Kavita가 대신 외부 서비스에 동기화한 독서 활동입니다 – 진행 상황, 평점, 읽음 상태."
+        "description": "Kavita가 대신 외부 서비스에 동기화한 독서 활동입니다 – 진행 상황, 평점, 읽음 상태.",
+        "tab-select-label": "필터 활성화"
     },
     "kavitaplus-timeline": {
         "today": "오늘",
@@ -4195,24 +4282,162 @@
         "collection-synced": "컬렉션 동기화됨",
         "collection-item-added": "컬렉션 항목 추가됨",
         "scrobble-created": "읽기 동기화 생성됨",
-        "scrobble-updated": "읽기 동기화 업데이트됨",
-        "scrobble-sent": "읽기 동기화 전송됨",
+        "scrobble-updated": "독서 기록 동기화 업데이트됨",
+        "scrobble-sent": "독서 기록 보내기",
         "scrobble-failed": "읽기 동기화 실패",
-        "scrobble-skipped": "읽기 동기화 건너뜀",
+        "scrobble-skipped": "독서 기록 동기화 건너뜀",
         "sync-started": "동기화 시작",
         "sync-completed": "동기화 완료",
         "sync-failed": "동기화 실패",
-        "system-provider-info-sync": "읽기 동기화 제공자 정보 동기화",
-        "system-token-refresh": "읽기 동기화 제공자 토큰 새로고침"
+        "system-provider-info-sync": "독서 기록 제공자 정보 동기화",
+        "system-token-refresh": "독서 기록 제공자 토큰 새로고침",
+        "series-dont-match-set": "일치하는 항목 없음",
+        "chapter-metadata-updated": "챕터 메타데이터가 업데이트되었습니다",
+        "chapter-cover-updated": "챕터 표지가 업데이트되었습니다",
+        "volume-cover-updated": "권 표지가 업데이트되었습니다",
+        "scrobble-rate-limit": "요청 제한 초과",
+        "scrobble-hold-added": "독서 기록 동기화 일시 중지 추가",
+        "scrobble-hold-removed": "독서 기록 동기화 일시 중지 해제"
     },
     "audit-log-messages": {
         "invalid-token": "유효하지 않은 AniList 토큰",
         "unknown-series": "알 수 없는 시리즈",
         "library-scrobbling-disabled": "라이브러리 읽기 동기화 비활성화됨",
-        "token-expired": "AniList 토큰 만료됨"
+        "token-expired": "AniList 토큰 만료됨",
+        "rate-limit-hit": "요청 제한 초과",
+        "series-dont-match": "‘일치하지 않음’으로 표시된 시리즈",
+        "scrobble-hold-active": "시리즈가 보류 중입니다",
+        "no-matches": "자동으로 선택할 수 있을 만큼 확실한 일치 항목이 발견되지 않았습니다",
+        "too-many-matches": "확실도가 높은 일치 항목이 두 개 이상 발견되었으므로 수동 처리가 필요합니다",
+        "series-missing-required-ids": "확실도가 높은 일치 항목이 두 개 이상 발견되었으므로 수동 처리가 필요합니다",
+        "chapter-missing-required-ids": "이 챕터에는 필수 외부 ID가 누락되어 있어 스크로블링할 수 없습니다"
     },
     "metadata-provider-title-pipe": {
         "hardcover": "Hardcover",
-        "mangabaka": "MangaBaka"
+        "mangabaka": "MangaBaka",
+        "cbr": "만화책 모음"
+    },
+    "register-license": {
+        "k+-already-registered-header": "이미 등록된 라이선스입니다",
+        "k+-license-overwrite": "이 라이선스는 이미 다른 서버에 등록되어 있습니다. 덮어쓰시겠습니까? 다른 서버의 등록을 해제하게 됩니다.",
+        "overwrite": "덮어쓰기",
+        "cancel": "{{common.cancel}}"
+    },
+    "tag-weight-title-pipe": {
+        "core": "코어",
+        "defining": "정의 기준",
+        "recurrent": "반복성",
+        "incidental": "우발성",
+        "unweighted": "가중치 없음"
+    },
+    "recommendation-source-pipe": {
+        "similar": "비슷한 작품",
+        "user-based": "사용자들이 좋아한 작품",
+        "personalized": "추천 작품"
+    },
+    "scrobble-provider-tag-badge": {
+        "view-on": "{{ provider }}에서 보기"
+    },
+    "confidence-chip": {
+        "strong": "강력 추천",
+        "likely": "추천",
+        "weak": "약간 추천",
+        "doubt": "의심스러움"
+    },
+    "match-status-dot": {
+        "ongoing": "연재중",
+        "completed": "완결"
+    },
+    "epub-font-title-pipe": {
+        "user-font-suffix": "(사용자)"
+    },
+    "scrobble-provider-settings-manager": {
+        "info": "사용자 정보",
+        "connect": "연결",
+        "description": "어떤 항목이, 언제, 어디로 스크로블링될지 관리하세요. 스크로블링은 매시간 실행됩니다.",
+        "none-setup": "아직 설정된 읽기 기록 동기화 제공자가 없습니다! 시작하려면 위의 추가 버튼을 클릭하세요",
+        "select-provider-title": "새 스크로블링 제공자",
+        "connected": "연결됨",
+        "regenerate": "다시 생성",
+        "disconnect": "연결 해제",
+        "last-synced": "마지막 동기화: {{time}}",
+        "not-setup": "서비스 제공자가 설정되지 않았습니다, 연결하여 시작하세요",
+        "expires": "만료: {{time}}",
+        "sync-options": "옵션 동기화",
+        "reviews-sync-label": "리뷰 동기화",
+        "reviews-sync-tooltip": "Kavita는 일치하는 시리즈 및 챕터에 대한 리뷰를 스크로블합니다",
+        "progress-sync-label": "진행 상황 동기화",
+        "progress-sync-tooltip": "Kavita는 챕터가 완료되거나 페이지가 변경될 때 시리즈 진행 상황 또는 챕터 진행 상황을 스크로블합니다",
+        "rating-sync-label": "평점 동기화",
+        "rating-sync-tooltip": "Kavita는 일치하는 시리즈 및 챕터에 대한 평점을 스크로블합니다",
+        "want-to-read-sync-label": "‘읽고 싶은 책’ 목록 동기화",
+        "want-to-read-sync-tooltip": "‘읽고 싶은 책’ 목록을 동기화하세요. 읽은 상태는 변경되지 않습니다",
+        "reviews-target-label": "리뷰 대상",
+        "reviews-target-tooltip": "동기화된 리뷰를 누가 볼 수 있는지는 서비스 제공업체의 지원 여부에 따라 다릅니다",
+        "filter-rules": "필터",
+        "highest-age-rating-label": "최고 연령 등급",
+        "highest-age-rating-tooltip": "시리즈가 스크로블링되려면 해당 시리즈가 가질 수 있는 최고(포함) 연령 등급",
+        "automations": "자동화",
+        "inactive-series-rule-label": "비활성 시리즈 규칙",
+        "inactive-series-rule-condition": "만약 시리즈/챕터가",
+        "rule-days-mark": "일 동안 읽히지 않은 경우,",
+        "rule-publication-exception": "출판 상태가",
+        "dropped-series-rule-label": "중단된 시리즈 규칙",
+        "dropped-series-rule-condition": "시리즈/챕터가",
+        "all-libraries-label": "모든 라이브러리",
+        "all-libraries-tooltip": "이 기능을 활성화하면 해당되는 모든 라이브러리에서 스크로블링이 실행됩니다. 아래 선택 항목을 사용하여 특정 라이브러리로만 제한하려면 비활성화하세요.",
+        "confirm-delete": "{{provider}}와의 연결을 끊으시겠습니까?",
+        "inactive-series-rule-days-aria": "비활성 시리즈 기준 일수",
+        "inactive-series-rule-status-aria": "비활성 시리즈 전환 상태",
+        "inactive-series-rule-excluded-publication-aria": "비활성 시리즈 규칙에서 제외되는 출간 상태",
+        "dropped-series-rule-days-aria": "시리즈 삭제 기준 일수",
+        "dropped-series-rule-status-aria": "시리즈 삭제 전환 상태",
+        "dropped-series-rule-excluded-publication-aria": "시리즈 삭제 규칙에서 제외되는 게시 상태",
+        "backfill-events": "{{manage-user-scrobble-provider-modal.generate-scrobble-events}}",
+        "anilist-warning": "이용자가 많은 시간대에는 AniList 동기화 속도가 느려질 수 있습니다. MangaBaka는 더 방대한 라이브러리를 제공하며, 항상 더 빠른 동기화 속도를 자랑합니다.",
+        "loading-background": "Kavita가 백그라운드에서 연결 정보를 불러오고 있습니다. 잠시만 기다려 주세요..."
+    },
+    "manage-user-scrobble-provider-modal": {
+        "close": "{{common.close}}",
+        "save": "{{common.save}}",
+        "username-label": "사용자명",
+        "title": "{{provider}}에 대한 인증 정보를 관리하세요",
+        "authentication-token-label": "인증 토큰",
+        "refresh-token-label": "토큰 갱신",
+        "valid-until-label": "유효 기간",
+        "last-synced-label": "마지막 동기화 일시",
+        "not-synced": "아직 동기화되지 않음",
+        "connect-tooltip": "Kavita+ 및 스크로블 제공업체로 이동합니다",
+        "connect-label": "계정 연결",
+        "event-generation-label": "마지막 스크로블 기존 독서 이력",
+        "event-generation-not-run": "기존 독서 이력 반영이 아직 실행되지 않았습니다",
+        "generate": "생성",
+        "generate-scrobble-events": "기존 독서 이력 반영 이벤트"
+    },
+    "review-scrobble-target-name-pipe": {
+        "public": "모두",
+        "friends": "친구",
+        "private": "나만 보기"
+    },
+    "scrobble-provider-description-pipe": {
+        "mangabaka": "만화 및 라이트 노벨 모음",
+        "hardcover": "책, 만화, 라이트 노벨 모두!",
+        "my-anime-list": "만화 및 라이트 노벨의 ‘읽고 싶은 책’ 및 ‘스택’ 동기화",
+        "anilist": "모든 만화 및 라이트 노벨"
+    },
+    "run-metadata-mappings-modal": {
+        "close": "{{common.close}}",
+        "title": "매핑 다시 실행",
+        "cancel": "{{common.cancel}}",
+        "submit": "{{common.submit}}",
+        "saving": "{{common.saving}}",
+        "all-libraries-label": "모든 라이브러리",
+        "all-libraries-tooltip": "활성화하면 모든 라이브러리에 대해 메타데이터 매핑을 실행합니다. 특정 라이브러리만 포함하거나 제외하려면 이 옵션을 비활성화하세요.",
+        "included-libraries-title": "포함할 라이브러리",
+        "included-libraries-tooltip": "모든 라이브러리가 활성화되지 않은 경우 처리할 라이브러리",
+        "excluded-libraries-title": "제외할 라이브러리",
+        "excluded-libraries-tooltip": "건너뛸 라이브러리",
+        "queued-title": "다시 실행 대기 중",
+        "queued-description": "곧 처리가 시작됩니다. 잠시 기다려 주세요."
     }
 }

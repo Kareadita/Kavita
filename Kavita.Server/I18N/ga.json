@@ -284,5 +284,8 @@
     "series-name-exists": "Tá sraith leis an ainm seo ann cheana féin sa leabharlann seo",
     "mappings-re-run-in-progress": "Tá iarratas ar mhapálacha athrith meiteashonraí á phróiseáil faoi láthair. Fan go dtí go mbeidh sé críochnaithe le cur sa scuaine arís",
     "mappings-re-run-no-libraries-selected": "Ní mór leabharlann amháin ar a laghad a bheith san áireamh i d’iarratas",
-    "mappings-re-run-libraries-overlap": "Ní féidir leis na leabharlanna céanna a bheith i ExcludedLibraries agus IncludedLibraries"
+    "mappings-re-run-libraries-overlap": "Ní féidir leis na leabharlanna céanna a bheith i ExcludedLibraries agus IncludedLibraries",
+    "series-name-orphans-files": "Dá n-athrófaí an t-ainm seo, scoiltfí comhaid atá cumasctha sa tsraith seo faoi láthair",
+    "series-localized-name-exists": "Úsáideann sraith eile sa leabharlann seo an t-ainm seo cheana féin",
+    "series-localized-name-orphans-files": "Dá n-athrófaí an t-ainm logánta seo, scoiltfí comhaid atá cumasctha sa tsraith seo faoi láthair"
 }

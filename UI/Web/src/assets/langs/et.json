@@ -25,27 +25,6 @@
         "saving": "Salvestan…",
         "update": "Uuendus"
     },
-    "user-scrobble-history": {
-        "title": "Scrobble ajalugu",
-        "description": "Siit leiad oma kontoga seotud scrobble juhtumid. Selleks, et juhtumid tekiks, pead seadistama scrobble serveri seaded. Kõik scrobble juhtumid, mis on serverisse ära saadetud, kustuvad peale ühte kuud. Kui on üleslaadimata juhtumeid, on tõenäoline, et need ei klapi üleslaetud scrobble juhtumitega - palun võta ühendust enda administraatoriga, et need korda saada.",
-        "not-read-warning": "Allavoolu teenusepakkujad hoiavad alati alles kõrgeima arvu",
-        "filter-label": "{{common.filter}}",
-        "created-header": "Loodud",
-        "last-modified-header": "Viimati muudetud",
-        "type-header": "Tüüp",
-        "series-header": "Sari",
-        "data-header": "Andmed",
-        "is-processed-header": "On töödeldud",
-        "no-data": "Andmed puuduvad",
-        "volume-and-chapter-num": "Raamat {{v}} peatükk {{n}}",
-        "volume-num": "Raamat {{num}}",
-        "chapter-num": "peatükk {{num}}",
-        "rating": "Hinnang {{r}}",
-        "not-applicable": "Ei rakendu",
-        "processed": "Töödeldud",
-        "not-processed": "Töötlemata",
-        "special": "{{entity-title.special}}"
-    },
     "scrobble-event-type-pipe": {
         "chapter-read": "Järg",
         "score-updated": "Hinnangu uuendus",

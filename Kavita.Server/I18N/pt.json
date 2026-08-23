@@ -284,5 +284,8 @@
     "scrobble-provider-not-setup": "O provedor de scrobbling {0} não está configurado",
     "mappings-re-run-in-progress": "Já está em processamento um pedido de reexecução dos mapeamentos de metadados. Aguarde até que esteja concluído para voltar a colocá-lo em fila",
     "mappings-re-run-no-libraries-selected": "O pedido tem que incluir pelo menos 1 biblioteca",
-    "mappings-re-run-libraries-overlap": "BibliotecasExcluídas e BibliotecasIncluídas não podem conter as mesmas bibliotecas"
+    "mappings-re-run-libraries-overlap": "BibliotecasExcluídas e BibliotecasIncluídas não podem conter as mesmas bibliotecas",
+    "series-name-orphans-files": "Alterar este nome irá separar ficheiros que estão atualmente agrupados nesta série",
+    "series-localized-name-exists": "Outra série nesta biblioteca já utiliza este nome",
+    "series-localized-name-orphans-files": "Alterar este nome localizado fará com que ficheiros atualmente agrupados nesta série sejam separados"
 }

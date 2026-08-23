@@ -277,5 +277,15 @@
     "email.username-change.title": "Mise à jour concernant le changement de nom d'utilisateur",
     "email.username-change.description": "Le nom d'utilisateur de votre compte a été mis à jour sur l'instance Kavita de {{InvitingUser}}. Aucune action n'est requise de votre part.",
     "cbl-import-download-from-url": "Impossible de télécharger le fichier à partir de l'URL",
-    "cbl-import-validation-types": "Seuls les fichiers .cbl et .json sont autorisés"
+    "cbl-import-validation-types": "Seuls les fichiers .cbl et .json sont autorisés",
+    "series-name-exists": "Une série avec ce nom existe déjà dans cette bibliothèque",
+    "series-name-orphans-files": "Changer ce nom diviserait les fichiers qui sont actuellement fusionnés dans cette série",
+    "series-localized-name-exists": "Une autre série de cette bibliothèque utilise déjà ce nom",
+    "series-localized-name-orphans-files": "Changer ce nom localisé diviserait les fichiers qui sont actuellement fusionnés dans cette série",
+    "unable-to-cancel-k+": "Impossible d'annuler l'abonnement Kavita+ en raison d'une erreur. Contactez le support de Kavita+",
+    "unable-to-renew-k+": "Impossible de renouveler l'abonnement Kavita+ en raison d'une erreur. Contactez le support de Kavita+",
+    "scrobble-provider-not-setup": "Le fournisseur de Scrobble {0} n'est pas configuré",
+    "mappings-re-run-in-progress": "Une demande de mappages de métadonnées est en cours de traitement. Attendez qu'il soit complet pour faire la demande",
+    "mappings-re-run-no-libraries-selected": "Votre demande doit inclure au moins 1 bibliothèque",
+    "mappings-re-run-libraries-overlap": "ExcludedLibraries et IncludedLibraries ne peut pas contenir les mêmes bibliothèques"
 }

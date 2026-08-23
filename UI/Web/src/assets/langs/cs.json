@@ -37,33 +37,6 @@
         "roles-label": "{{common.roles}}",
         "warning-read-only": "Účty pouze pro čtení mají omezená oprávnění"
     },
-    "user-scrobble-history": {
-        "title": "Scrobble historie",
-        "description": "Zde najdete všechny scrobble události spojené s vaším účtem. Aby události existovaly, musíte mít nakonfigurovaného aktivního poskytovatele scrobble. Všechny události, které byly zpracovány, budou po měsíci vymazány. Pokud existují nezpracované události, je pravděpodobné, že nemohou tvořit shody proti proudu. Obraťte se prosím na svého administrátora a nechte je opravit.",
-        "filter-label": "{{common.filter}}",
-        "created-header": "Vytvořeno",
-        "last-modified-header": "Naposledy změněno",
-        "type-header": "Typ",
-        "series-header": "Série",
-        "data-header": "Data",
-        "is-processed-header": "Je zpracováno",
-        "no-data": "{{common.no-data}}",
-        "volume-and-chapter-num": "Svazek {{v}} Kapitola {{n}}",
-        "volume-num": "{{entity-title.volume-num}}",
-        "chapter-num": "{{entity-title.chapter-num}}",
-        "rating": "Hodnocení {{r}}",
-        "not-applicable": "Nelze použít",
-        "processed": "Zpracováno",
-        "not-processed": "Nezpracováno",
-        "special": "{{entity-title.special}}",
-        "token-expired": "Platnost vašeho tokenu AniListu vypršela! Události Scrobbling nebudou zpracovány, dokud je neobnovíte na stránce Účty.",
-        "not-read-warning": "Upstream poskytovatelé si vždy ponechají nejvyšší počet",
-        "scrobbling-disabled": "Skroblování je v nastavení účtu zakázáno.",
-        "select-all-label": "Vybrat vše",
-        "delete-selected-label": "Odstranit vybrané",
-        "provider-header": "Poskytovatel",
-        "read-status-update": "Stav: {{status}}"
-    },
     "scrobble-event-type-pipe": {
         "chapter-read": "Pokrok ve čtení",
         "score-updated": "Aktualizace hodnocení",
@@ -165,7 +138,8 @@
         "no-data": "{{typeahead.no-data}}",
         "series-name-header": "{{manage-matched-metadata.series-name-header}}",
         "created-header": "{{manage-media-issues.created-header}}",
-        "delete-label": "{{common.remove}}"
+        "delete-label": "{{common.remove}}",
+        "no-data-description": "Nemáte žádné přerušené série. Série, které si přerušíte, se zde zobrazí."
     },
     "theme-manager": {
         "set-default": "Nastavit výchozí",
@@ -213,12 +187,13 @@
         "add": "{{common.add}}",
         "delete": "{{common.delete}}",
         "edit": "{{common.edit}}",
-        "no-data": "{{typeahead.no-data}}",
+        "no-data": "{{common.no-data}}",
         "actions-header": "{{manage-users.actions-header}}",
         "name-label": "Název",
         "warning": "Varování",
         "client-devices-header": "Klientská zařízení",
-        "sendto-device-header": "Zařízení založená na e-mailu"
+        "sendto-device-header": "Zařízení založená na e-mailu",
+        "no-data-description": "Zatím nemáte nastavená žádná zařízení využívající e-mail."
     },
     "edit-device-modal": {
         "device-name-label": "{{manage-devices.name-label}}",
@@ -1137,7 +1112,7 @@
         "change-password-alt": "Změna hesla {{user}}",
         "invite": "Pozvat",
         "change-password-tooltip": "Změnit heslo",
-        "no-data": "Žádní další uživatelé nejsou k dispozici.",
+        "no-data": "{{common.no-data}}",
         "pending-tooltip": "Tento uživatel neověřil svůj e-mail",
         "edit-user-tooltip": "Upravit",
         "edit-user-alt": "Upravit uživatele {{user}}",
@@ -1158,7 +1133,8 @@
         "all-libraries": "Všechny knihovny",
         "identity-provider-oidc-tooltip": "OIDC",
         "identity-provider-native-tooltip": "Nativní",
-        "profile-link-alt": "Profil"
+        "profile-link-alt": "Profil",
+        "no-data-description": "Žádní další uživatelé nejsou."
     },
     "edit-collection-tags": {
         "required-field": "{{validation.required-field}}",
@@ -1217,15 +1193,15 @@
         "theme": "Motiv",
         "info-section-title": "Informace",
         "admin-email-history": "Historie e-mailů",
-        "admin-matched-metadata": "Shodná metadata",
-        "admin-manage-tokens": "Správa uživ. tokenů",
+        "admin-matched-metadata": "Sladěná série",
+        "admin-manage-tokens": "Uživatelské tokeny",
         "scrobble-holds": "Podržení Scrobble",
         "account": "Účet",
-        "admin-metadata": "Správa metadat",
+        "admin-metadata": "Ovládací prvky metadat",
         "reading-profiles": "Profily čtení",
         "admin-oidc": "OpenID Connect",
-        "admin-mappings-import": "Nastavení Metadat",
-        "admin-public-metadata": "Správa metadat",
+        "admin-mappings-import": "Ovládací prvky metadat",
+        "admin-public-metadata": "Ovládací prvky metadat",
         "font": "Písma Epub",
         "custom-key-binds": "Klávesové zkratky",
         "insights-section-title": "Postřehy",
@@ -1233,7 +1209,7 @@
         "admin-device": "Zařízení",
         "remap-rules": "Pravidla pro přemapování",
         "my-activity": "Moje aktivita",
-        "admin-manage-kavitaplus-activity": "Správa aktivit v Kavita+",
+        "admin-manage-kavitaplus-activity": "Aktivita Kavita+",
         "scrobble-settings": "Propojení"
     },
     "collection-detail": {
@@ -1542,7 +1518,7 @@
         "unit-average-rating": "Externí hodnocení Kavita+, procenta",
         "unit-reading-progress": "Procenta",
         "unit-reading-date": "Datum",
-        "unit-read-last": "Dny od DNEŠKA",
+        "unit-read-last": "Dní zpět",
         "disclaimer-highlight-slots": "Při použití tohoto pole se zobrazí pouze vaše vlastní poznámky",
         "unit-file-size": "GB, MB, KB, B",
         "disclaimer-file-size": "Velikost souboru musí zahrnovat jednotku"
@@ -1859,7 +1835,8 @@
         "collection-tags": "Štítky sbírky",
         "colorist": "Kolorista",
         "path": "Cesta",
-        "file-size": "Velikost souboru"
+        "file-size": "Velikost souboru",
+        "collapse-series-relationships": "{{user-preferences.collapse-series-relationships-label}}"
     },
     "actionable": {
         "clear": "{{common.clear}}",
@@ -2657,12 +2634,12 @@
         "enable-chapter-title-tooltip": "Umožnit napsání názvu kapitoly/vydání",
         "enable-chapter-summary-label": "{{manage-metadata-settings.summary-label}}",
         "enable-chapter-summary-tooltip": "{{manage-metadata-settings.summary-tooltip}}",
-        "k+-warning": "Níže uvedená nastavení jsou společná s nastaveními na stránce K+. Můžete je změnit na kterémkoli z těchto míst",
+        "k+-warning": "Níže uvedená nastavení jsou stejná jako ta na stránce K+. Můžete je změnit na kterémkoli z těchto míst.",
         "export-settings": "Exportovat",
-        "export-tooltip": "Exportujte svůj zakázaný a povolený seznam, věkové hodnocení a mapování polí",
+        "export-tooltip": "Exportujte své blokované a povolené seznamy, věkové hodnocení a přiřazení polí.",
         "export-file-name": "Kavita Nastavení metadat Export.json",
         "import-settings": "Importovat",
-        "import-tooltip": "Importujte svá nastavení nebo nastavení někoho jiného",
+        "import-tooltip": "Načtěte svá nastavení nebo nastavení někoho jiného.",
         "enable-extended-metadata-processing-label": "Rozšířené zpracování metadat",
         "enable-extended-metadata-processing-tooltip": "Mají být žánry a tagy získané z ComicInfo nebo přidané prostřednictvím uživatelského rozhraní zpracovány pomocí zakázaného seznamu, povoleného seznamu, přiřazení věkových kategorií a přiřazení polí.",
         "remove-age-rating-mapping-label": "Odebrat přiřazení věkové kategorie",
@@ -2678,7 +2655,33 @@
         "enable-volume-cover-label": "Obálka svazku",
         "enable-volume-cover-tooltip": "Povolit Kavitě nastavit přebaly svazků",
         "run-metadata-mappings": "Spustit mapování metadat",
-        "run-metadata-mappings-tooltip": "Zpracujte řady pomocí mapování metadat. Tento proces může chvíli trvat a spotřebovat více zdrojů."
+        "run-metadata-mappings-tooltip": "Zpracujte řady pomocí mapování metadat. Tento proces může chvíli trvat a spotřebovat více zdrojů.",
+        "language-header": "Jazyk",
+        "language-description": "Nastavte pořadí priorit jazyků, které Kavita používá při určování názvu série (Series Name) a lokalizovaného názvu (LocalizedName). Přepsání můžete přidat pouze pro konkrétní knihovny. Upozorňujeme, že lokalizovaný název se nezapíše vždy, pokud by to mělo vliv na sérii se dvěma odlišnými názvy souborů.",
+        "global-series-name-language-label": "Název",
+        "global-series-name-language-tooltip": "Určuje pořadí, v jakém se upřednostňují názvy sérií. Kódy jazyků podle standardu BCP47 oddělte středníkem, např. en;ja-Latn;ja. Použijte {Native} pro název v původním písmu poskytovatele nebo {Romaji} pro jeho romanizovaný název, a to bez ohledu na jazyk.",
+        "global-series-name-localized-language-label": "Lokalizovaný název",
+        "global-series-name-localized-language-tooltip": "Určuje pořadí, v jakém se upřednostňují lokalizované názvy jednotlivých sérií. Kódy jazyků podle standardu BCP47 oddělte středníkem, např. en;ja-Latn;ja. Použijte {Native} pro název v původním písmu poskytovatele nebo {Romaji} pro jeho romanizovaný název, a to bez ohledu na jazyk.",
+        "native-title-token-label": "Původní název (původní scénář)",
+        "romaji-title-token-label": "Název v latince",
+        "language-library-override-header": "Přepsání knihovny",
+        "language-library-override-description": "Priorita knihovny zcela nahrazuje globální pořadí pro danou knihovnu, nepřidává se k němu.",
+        "language-library-override-empty": "Žádná knihovna nemá přednost. Všechny knihovny používají výše uvedené globální pořadí.",
+        "language-override-library-label": "Knihovna",
+        "language-override-library-placeholder": "Vyberte knihovnu",
+        "language-override-remove": "Odstranit přednost",
+        "language-code-malformed": "Neplatný kód jazyka: {{codes}}",
+        "language-code-unknown": "Neznámý kód jazyka: {{codes}}. Zkontrolujte pravopis, záznam se i tak uloží.",
+        "unsaved-changes-invalid": "Změny se neukládají. Opravte zvýrazněná pole, abyste mohli pokračovat v ukládání.",
+        "add": "{{common.add}}",
+        "enable-age-rating-label": "Věková kategorie",
+        "enable-age-rating-tooltip": "Umožnit zadání věkového hodnocení, pokud je pole odemčené. Kavita vždy použije nejvyšší hodnotu z mapovacích ovládacích prvků.",
+        "external-age-rating-header": "Převod věkových kategorií poskytovatelů",
+        "external-age-rating-description": "Přiřaďte nezpracovaný řetězec hodnocení obsahu od poskytovatele metadat k věkovému hodnocení. Kavita+ toto přiřazení provede za vás. Jedná se o kumulativní postup, přičemž vždy platí nejvyšší věkové hodnocení.",
+        "external-age-rating-label": "Hodnocení obsahu poskytovatelem",
+        "tag-weight-label": "Filtrovat štítky nad váhou (pouze Mangabaka)",
+        "tag-weight-tooltip": "Vyberte váhu značky, kterou chcete po přiřazení značek odfiltrovat. Například značka „Opakující se“ odfiltruje značky „Vedlejší“ a „Nevážené“.",
+        "tag-weight-disabled": "Nefiltrovat štítky"
     },
     "metadata-setting-field-pipe": {
         "people": "{{tabs.people-tab}}",
@@ -3183,7 +3186,9 @@
         "add-auth-key": "Nový",
         "description": "Nový autentizační klíč je jako heslo. Jeho změna zneplatní všechny stávající klienty.",
         "copy-key": "{{common.copy}}",
-        "clients-opds-error": "Nepodařilo se načíst adresu URL OPDS pro klíč: {{key}}"
+        "clients-opds-error": "Nepodařilo se načíst adresu URL OPDS pro klíč: {{key}}",
+        "no-data": "{{common.no-data}}",
+        "no-data-description": "Zatím nemáte žádné autorizační klíče."
     },
     "create-auth-key": {
         "create-title": "Vytvořit autentizační klíč",
@@ -3700,7 +3705,9 @@
         "cbl-number-label": "Číslo vydání CBL #",
         "cbl-number-placeholder": "např. 1",
         "kavita-chapter-label": "Kavita Kapitola (volitelné)",
-        "edit": "{{common.edit}}"
+        "edit": "{{common.edit}}",
+        "no-data": "{{common.no-data}}",
+        "no-data-description": "Zatím zde nejsou žádná pravidla pro přemapování, která by se měla zobrazit."
     },
     "browse-cbl-repo-modal": {
         "title": "Prohlížeč repo CBL",
@@ -3788,7 +3795,8 @@
         "annotation": "Anotace"
     },
     "kavitaplus-activity": {
-        "description": "Aktivita čtení, kterou Kavita za vás synchronizovala s externími službami – pokrok, hodnocení a stav čtení."
+        "description": "Aktivita čtení, kterou Kavita za vás synchronizovala s externími službami – pokrok, hodnocení a stav čtení.",
+        "tab-select-label": "Filtrovat aktivity"
     },
     "manage-kavitaplus-activity": {
         "description": "90 dní událostí týkajících se metadat, přiřazování, scrobblování a synchronizace. Zde můžete provést třídění chyb a spustit ruční přiřazení.",
@@ -4418,5 +4426,18 @@
         "excluded-libraries-tooltip": "Knihovny, které přeskočit",
         "queued-title": "Opakované spuštění ve frontě",
         "queued-description": "Zpracování začne za chvíli, prosím, buďte trpěliví."
+    },
+    "register-license": {
+        "k+-already-registered-header": "Licence je již zaregistrována",
+        "k+-license-overwrite": "Tato licence je již zaregistrována na jiném serveru. Opravdu chcete provést přepsání? Tím dojde k odregistrování druhého serveru.",
+        "overwrite": "Přepsat",
+        "cancel": "{{common.cancel}}"
+    },
+    "tag-weight-title-pipe": {
+        "core": "Jádro",
+        "defining": "Definující",
+        "recurrent": "Opakující se",
+        "incidental": "Vedlejší",
+        "unweighted": "Nevážené"
     }
 }
