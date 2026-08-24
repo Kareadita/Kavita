@@ -1,4 +1,14 @@
-import {Component, computed, DestroyRef, inject, input, OnInit, signal, viewChild, ChangeDetectionStrategy} from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  computed,
+  DestroyRef,
+  inject,
+  input,
+  OnInit,
+  signal,
+  viewChild
+} from '@angular/core';
 import {NgbActiveModal, NgbHighlight, NgbTypeahead} from '@ng-bootstrap/ng-bootstrap';
 import {
   catchError,
@@ -15,13 +25,13 @@ import {
   tap
 } from 'rxjs';
 import {takeUntilDestroyed} from '@angular/core/rxjs-interop';
-import {Stack} from 'src/app/shared/data-structures/stack';
-import {DirectoryDto} from 'src/app/_models/system/directory-dto';
 import {LibraryService} from '../../../_services/library.service';
 import {NgClass} from '@angular/common';
 import {FormControl, ReactiveFormsModule} from '@angular/forms';
 import {TranslocoDirective} from "@jsverse/transloco";
 import {WikiLink} from "../../../_models/wiki";
+import {DirectoryDto} from "../../../_models/system/directory-dto";
+import {Stack} from "../../../shared/data-structures/stack";
 
 
 export interface DirectoryPickerResult {

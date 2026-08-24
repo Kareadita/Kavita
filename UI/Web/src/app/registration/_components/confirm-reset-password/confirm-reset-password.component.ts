@@ -2,12 +2,12 @@ import {ChangeDetectionStrategy, ChangeDetectorRef, Component, inject} from '@an
 import {FormControl, FormGroup, ReactiveFormsModule, Validators} from '@angular/forms';
 import {ActivatedRoute, Router} from '@angular/router';
 import {ToastrService} from '@openng/ngx-toastr';
-import {AccountService} from 'src/app/_services/account.service';
-import {NavService} from 'src/app/_services/nav.service';
 import {NgTemplateOutlet} from '@angular/common';
 import {NgbTooltip} from '@ng-bootstrap/ng-bootstrap';
 import {SplashContainerComponent} from '../splash-container/splash-container.component';
 import {translate, TranslocoDirective} from "@jsverse/transloco";
+import {AccountService} from "../../../_services/account.service";
+import {NavService} from "../../../_services/nav.service";
 
 @Component({
     selector: 'app-confirm-reset-password',

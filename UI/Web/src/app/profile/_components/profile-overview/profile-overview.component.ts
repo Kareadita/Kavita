@@ -1,25 +1,25 @@
 import {ChangeDetectionStrategy, Component, computed, inject, input} from '@angular/core';
-import {MemberInfo} from "src/app/_models/user/member-info";
 import {AsyncPipe} from "@angular/common";
+import {map, Observable, OperatorFunction} from "rxjs";
+import {translate, TranslocoDirective} from "@jsverse/transloco";
+import {FilterEntityType} from "../../../_models/metadata/v2/filter-entity-type";
+import {CardEntityFactory, SeriesCardEntity} from "../../../_models/card/card-entity";
 import {
   CarouselReelComponent,
   NextPageLoader
-} from "src/app/carousel/_components/carousel-reel/carousel-reel.component";
-import {map, Observable, OperatorFunction} from "rxjs";
-import {translate, TranslocoDirective} from "@jsverse/transloco";
-import {SeriesService} from "src/app/_services/series.service";
-import {FilterV2} from "src/app/_models/metadata/v2/filter-v2";
-import {FilterCombination} from "src/app/_models/metadata/v2/filter-combination";
-import {FilterStatement} from "src/app/_models/metadata/v2/filter-statement";
-import {FilterComparison} from "src/app/_models/metadata/v2/filter-comparison";
-import {SeriesFilterField} from "src/app/_models/metadata/v2/series-filter-field";
-import {SeriesSortField} from "src/app/_models/metadata/series-filter";
-import {QueryContext} from "src/app/_models/metadata/v2/query-context";
-import {EntityCardComponent} from "src/app/cards/entity-card/entity-card.component";
-import {CardConfigFactory} from "src/app/_services/card-config-factory.service";
-import {CardEntityFactory, SeriesCardEntity} from "src/app/_models/card/card-entity";
-import {Series} from "src/app/_models/series";
-import {FilterEntityType} from "../../../_models/metadata/v2/filter-entity-type";
+} from "../../../carousel/_components/carousel-reel/carousel-reel.component";
+import {FilterCombination} from "../../../_models/metadata/v2/filter-combination";
+import {SeriesFilterField} from "../../../_models/metadata/v2/series-filter-field";
+import {FilterComparison} from "../../../_models/metadata/v2/filter-comparison";
+import {FilterStatement} from "../../../_models/metadata/v2/filter-statement";
+import {SeriesSortField} from "../../../_models/metadata/series-filter";
+import {FilterV2} from "../../../_models/metadata/v2/filter-v2";
+import {EntityCardComponent} from "../../../cards/entity-card/entity-card.component";
+import {SeriesService} from "../../../_services/series.service";
+import {CardConfigFactory} from "../../../_services/card-config-factory.service";
+import {MemberInfo} from "../../../_models/user/member-info";
+import {QueryContext} from "../../../_models/metadata/v2/query-context";
+import {Series} from "../../../_models/series";
 
 type OverviewStream = {
   title: string;

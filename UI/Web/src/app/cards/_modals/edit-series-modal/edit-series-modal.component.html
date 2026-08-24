@@ -640,7 +640,7 @@
            <div class="mb-3">
              <app-setting-item [title]="t('last-added-title')" [toggleOnViewClick]="false" [showEdit]="false">
                <ng-template #view>
-                 {{series.lastChapterAdded | defaultDate | timeAgo}}
+                 {{series.lastChapterAdded | defaultDate | timeDifference}}
                </ng-template>
              </app-setting-item>
            </div>
@@ -652,7 +652,7 @@
            <div class="mb-3">
              <app-setting-item [title]="t('last-scanned-title')" [toggleOnViewClick]="false" [showEdit]="false">
                <ng-template #view>
-                 {{series.lastFolderScanned | defaultDate | timeAgo}}
+                 {{series.lastFolderScanned | defaultDate | timeDifference}}
                </ng-template>
              </app-setting-item>
            </div>
@@ -661,7 +661,7 @@
            <div class="mb-3">
              <app-setting-item [title]="t('last-read-title')" [toggleOnViewClick]="false" [showEdit]="false">
                <ng-template #view>
-                 {{series.lastChapterAdded | defaultDate | timeAgo}}
+                 {{series.lastChapterAdded | defaultDate | timeDifference}}
                </ng-template>
              </app-setting-item>
            </div>

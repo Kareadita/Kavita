@@ -2,7 +2,7 @@ import {HttpClient} from '@angular/common/http';
 import {effect, inject, Injectable, signal} from '@angular/core';
 import {DOCUMENT, Location} from '@angular/common';
 import {Router} from '@angular/router';
-import {environment} from 'src/environments/environment';
+import {environment} from '../../environments/environment';
 import {ChapterInfo} from '../manga-reader/_models/chapter-info';
 import {Chapter} from '../_models/chapter';
 import {HourEstimateRange} from '../_models/series-detail/hour-estimate-range';

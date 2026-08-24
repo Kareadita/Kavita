@@ -1,13 +1,8 @@
 import {ChangeDetectionStrategy, Component, DestroyRef, inject, OnInit, signal, TrackByFunction} from '@angular/core';
 import {takeUntilDestroyed} from '@angular/core/rxjs-interop';
 import {NgbTooltip} from '@ng-bootstrap/ng-bootstrap';
-import {MemberService} from 'src/app/_services/member.service';
-import {Member} from 'src/app/_models/auth/member';
-import {AccountService, Role} from 'src/app/_services/account.service';
 import {ToastrService} from '@openng/ngx-toastr';
 import {ResetPasswordModalComponent} from '../_modals/reset-password-modal/reset-password-modal.component';
-import {ConfirmService} from 'src/app/shared/confirm.service';
-import {MessageHubService} from 'src/app/_services/message-hub.service';
 import {InviteUserComponent} from '../invite-user/invite-user.component';
 import {EditUserComponent} from '../edit-user/edit-user.component';
 import {Router, RouterLink} from '@angular/router';
@@ -35,6 +30,11 @@ import {
   DatatableComponent
 } from "@siemens/ngx-datatable";
 import {ModalService} from "../../_services/modal.service";
+import {AccountService, Role} from "../../_services/account.service";
+import {MemberService} from "../../_services/member.service";
+import {ConfirmService} from "../../shared/confirm.service";
+import {MessageHubService} from "../../_services/message-hub.service";
+import {Member} from "../../_models/auth/member";
 
 @Component({
   selector: 'app-manage-users',

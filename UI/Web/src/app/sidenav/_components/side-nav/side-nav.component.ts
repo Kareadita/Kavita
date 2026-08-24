@@ -2,8 +2,6 @@ import {ChangeDetectionStrategy, ChangeDetectorRef, Component, DestroyRef, effec
 import {NavigationEnd, Router} from '@angular/router';
 import {NgbTooltip} from '@ng-bootstrap/ng-bootstrap';
 import {distinctUntilChanged, filter, map, tap} from 'rxjs/operators';
-import {ImageService} from 'src/app/_services/image.service';
-import {EVENTS, MessageHubService} from 'src/app/_services/message-hub.service';
 import {UtilityService} from '../../../shared/_services/utility.service';
 import {Library, LibraryType} from '../../../_models/library/library';
 import {AccountService} from '../../../_services/account.service';
@@ -31,6 +29,8 @@ import {ActionItem} from "../../../_models/actionables/action-item";
 import {Action} from "../../../_models/actionables/action";
 import {ActionResult} from "../../../_models/actionables/action-result";
 import {FilterUtilitiesService} from "../../../shared/_services/filter-utilities.service";
+import {EVENTS, MessageHubService} from "../../../_services/message-hub.service";
+import {ImageService} from "../../../_services/image.service";
 
 @Component({
   selector: 'app-side-nav',

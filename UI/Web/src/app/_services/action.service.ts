@@ -62,8 +62,8 @@ import {NavService} from "./nav.service";
 import {ModalResult} from "../_models/modal/modal-result";
 import {addToModal, editModal} from "../_models/modal/modal-options";
 import {ModalService, TypedModalRef} from "./modal.service";
-import {FilterService} from "src/app/_services/filter.service";
 import {DashboardService} from "./dashboard.service";
+import {FilterService} from "./filter.service";
 
 
 export type LibraryActionCallback = (library: Partial<Library>) => void;

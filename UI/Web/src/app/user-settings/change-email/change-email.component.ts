@@ -1,12 +1,12 @@
 import {ChangeDetectionStrategy, ChangeDetectorRef, Component, computed, effect, inject} from '@angular/core';
 import {FormControl, FormGroup, ReactiveFormsModule, Validators} from '@angular/forms';
 import {ToastrService} from '@openng/ngx-toastr';
-import {AccountService} from 'src/app/_services/account.service';
 import {ApiKeyComponent} from '../api-key/api-key.component';
 import {NgbTooltip} from '@ng-bootstrap/ng-bootstrap';
 import {translate, TranslocoDirective} from "@jsverse/transloco";
 import {SettingItemComponent} from "../../settings/_components/setting-item/setting-item.component";
 import {DefaultValuePipe} from "../../_pipes/default-value.pipe";
+import {AccountService} from "../../_services/account.service";
 
 @Component({
   selector: 'app-change-email',

@@ -1,11 +1,11 @@
 import {ElementRef, inject, Injectable, Renderer2, RendererFactory2} from '@angular/core';
-import {PageSplitOption} from 'src/app/_models/preferences/page-split-option';
-import {ScalingOption} from 'src/app/_models/preferences/scaling-option';
-import {ReaderService} from 'src/app/_services/reader.service';
 import {ChapterInfo} from '../_models/chapter-info';
 import {DimensionMap} from '../_models/file-dimension';
 import {FITTING_OPTION} from '../_models/reader-enums';
-import {BookmarkInfo} from 'src/app/_models/manga-reader/bookmark-info';
+import {ReaderService} from "../../_services/reader.service";
+import {BookmarkInfo} from "../../_models/manga-reader/bookmark-info";
+import {PageSplitOption} from "../../_models/preferences/page-split-option";
+import {ScalingOption} from "../../_models/preferences/scaling-option";
 
 @Injectable({
   providedIn: 'root'

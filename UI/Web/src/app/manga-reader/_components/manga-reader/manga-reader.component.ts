@@ -36,18 +36,6 @@ import {ChangeContext, LabelType, NgxSliderModule, Options} from '@angular-slide
 import {FormBuilder, FormControl, FormGroup, ReactiveFormsModule} from '@angular/forms';
 import {NgbTooltip} from '@ng-bootstrap/ng-bootstrap';
 import {ToastrService} from '@openng/ngx-toastr';
-import {Stack} from 'src/app/shared/data-structures/stack';
-import {UtilityService} from 'src/app/shared/_services/utility.service';
-import {LibraryType} from 'src/app/_models/library/library';
-import {MangaFormat} from 'src/app/_models/manga-format';
-import {PageSplitOption} from 'src/app/_models/preferences/page-split-option';
-import {ReaderMode} from 'src/app/_models/preferences/reader-mode';
-import {ReadingDirection} from 'src/app/_models/preferences/reading-direction';
-import {ScalingOption} from 'src/app/_models/preferences/scaling-option';
-import {AccountService} from 'src/app/_services/account.service';
-import {MemberService} from 'src/app/_services/member.service';
-import {NavService} from 'src/app/_services/nav.service';
-import {ReaderService} from 'src/app/_services/reader.service';
 import {LayoutMode} from '../../_models/layout-mode';
 import {FITTING_OPTION, PAGING_DIRECTION} from '../../_models/reader-enums';
 import {ReaderSetting} from '../../_models/reader-setting';
@@ -58,7 +46,6 @@ import {DoubleReverseRendererComponent} from '../double-reverse-renderer/double-
 import {SingleRendererComponent} from '../single-renderer/single-renderer.component';
 import {ChapterInfo} from '../../_models/chapter-info';
 import {DoubleNoCoverRendererComponent} from '../double-renderer-no-cover/double-no-cover-renderer.component';
-import {SwipeEvent} from 'src/app/ng-swipe/ag-swipe.core';
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import {FullscreenIconPipe} from '../../../_pipes/fullscreen-icon.pipe';
 import {ReaderModeIconPipe} from '../../../_pipes/reader-mode-icon.pipe';
@@ -81,6 +68,19 @@ import {PageBookmark} from "../../../_models/readers/page-bookmark";
 import {KeyBindEvent, KeyBindService} from "../../../_services/key-bind.service";
 import {KeyBindTarget} from "../../../_models/preferences/preferences";
 import {EntityTitleService} from "../../../_services/entity-title.service";
+import {AccountService} from "../../../_services/account.service";
+import {NavService} from "../../../_services/nav.service";
+import {MemberService} from "../../../_services/member.service";
+import {ReaderService} from "../../../_services/reader.service";
+import {UtilityService} from "../../../shared/_services/utility.service";
+import {ReaderMode} from "../../../_models/preferences/reader-mode";
+import {ReadingDirection} from "../../../_models/preferences/reading-direction";
+import {ScalingOption} from "../../../_models/preferences/scaling-option";
+import {PageSplitOption} from "../../../_models/preferences/page-split-option";
+import {LibraryType} from "../../../_models/library/library";
+import {MangaFormat} from "../../../_models/manga-format";
+import {Stack} from "../../../shared/data-structures/stack";
+import {SwipeEvent} from "../../../ng-swipe/ag-swipe.core";
 
 
 const PREFETCH_PAGES = 10;

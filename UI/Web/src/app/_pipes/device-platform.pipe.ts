@@ -1,6 +1,6 @@
 import {inject, Pipe, PipeTransform} from '@angular/core';
-import { DevicePlatform } from 'src/app/_models/device/device-platform';
 import {TranslocoService} from "@jsverse/transloco";
+import {DevicePlatform} from "../_models/device/device-platform";
 
 @Pipe({
     name: 'devicePlatform',
@@ -8,7 +8,7 @@ import {TranslocoService} from "@jsverse/transloco";
 })
 export class DevicePlatformPipe implements PipeTransform {
 
-  translocoService = inject(TranslocoService);
+  readonly translocoService = inject(TranslocoService);
 
   transform(value: DevicePlatform): string {
     switch(value) {

@@ -18,8 +18,8 @@ import {SplashContainerComponent} from '../_components/splash-container/splash-c
 import {translate, TranslocoDirective} from "@jsverse/transloco";
 import {environment} from "../../../environments/environment";
 import {ImageComponent} from "../../shared/image/image.component";
-import {SettingsService} from 'src/app/admin/settings.service';
 import {OidcPublicConfig} from "../../admin/_models/oidc-config";
+import {SettingsService} from "../../admin/settings.service";
 
 
 @Component({

@@ -1,15 +1,15 @@
 import {ChangeDetectionStrategy, Component, effect, inject, input, output, signal} from '@angular/core';
 import {FormControl, FormGroup, ReactiveFormsModule} from '@angular/forms';
-import {AgeRestriction} from 'src/app/_models/metadata/age-restriction';
-import {Member} from 'src/app/_models/auth/member';
-import {AgeRating} from 'src/app/_models/metadata/age-rating';
-import {AgeRatingDto} from 'src/app/_models/metadata/age-rating-dto';
-import {User} from 'src/app/_models/user/user';
-import {MetadataService} from 'src/app/_services/metadata.service';
 import {NgbTooltip} from '@ng-bootstrap/ng-bootstrap';
 import {NgTemplateOutlet, TitleCasePipe} from '@angular/common';
 import {TranslocoModule} from "@jsverse/transloco";
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
+import {MetadataService} from "../../_services/metadata.service";
+import {Member} from "../../_models/auth/member";
+import {AgeRestriction} from "../../_models/metadata/age-restriction";
+import {AgeRatingDto} from "../../_models/metadata/age-rating-dto";
+import {AgeRating} from "../../_models/metadata/age-rating";
+import {User} from "../../_models/user/user";
 
 @Component({
     selector: 'app-restriction-selector',

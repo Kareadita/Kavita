@@ -1,6 +1,6 @@
-import { LibraryType } from "src/app/_models/library/library";
-import { MangaFormat } from "src/app/_models/manga-format";
-import { FileDimension } from "./file-dimension";
+import {FileDimension} from "./file-dimension";
+import {LibraryType} from "../../_models/library/library";
+import {MangaFormat} from "../../_models/manga-format";
 
 export interface ChapterInfo {
     chapterNumber: string;

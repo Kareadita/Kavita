@@ -1,8 +1,8 @@
 import {ChangeDetectionStrategy, Component, input} from '@angular/core';
-import {MangaFormat} from 'src/app/_models/manga-format';
 import {MangaFormatIconPipe} from "../../_pipes/manga-format-icon.pipe";
 import {MangaFormatPipe} from "../../_pipes/manga-format.pipe";
 import {NgbTooltip} from "@ng-bootstrap/ng-bootstrap";
+import {MangaFormat} from "../../_models/manga-format";
 
 @Component({
     selector: 'app-series-format',

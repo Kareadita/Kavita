@@ -1,7 +1,5 @@
 import {ChangeDetectionStrategy, Component, computed, inject, input, OnDestroy, output} from '@angular/core';
 import {NgbDropdown, NgbDropdownItem, NgbDropdownMenu, NgbDropdownToggle} from '@ng-bootstrap/ng-bootstrap';
-import {AccountService} from 'src/app/_services/account.service';
-import {ActionableEntity} from 'src/app/_services/action-factory.service';
 import {AsyncPipe, NgClass, NgTemplateOutlet} from "@angular/common";
 import {TranslocoDirective} from "@jsverse/transloco";
 import {DynamicListPipe} from "./_pipes/dynamic-list.pipe";
@@ -12,6 +10,8 @@ import {ActionItem} from "../../_models/actionables/action-item";
 import {ActionResult} from "../../_models/actionables/action-result";
 import {filterActionTree} from "../../../libs/action-utils";
 import {ModalService} from "../../_services/modal.service";
+import {AccountService} from "../../_services/account.service";
+import {ActionableEntity} from "../../_services/action-factory.service";
 
 
 @Component({

@@ -11,20 +11,20 @@ import {
 } from '@angular/core';
 import {FormControl, ReactiveFormsModule} from '@angular/forms';
 import {map} from 'rxjs';
-import {UtilityService} from 'src/app/shared/_services/utility.service';
-import {TypeaheadSettings} from 'src/app/typeahead/_models/typeahead-settings';
-import {SearchResult} from 'src/app/_models/search/search-result';
-import {Series} from 'src/app/_models/series';
-import {RelationKind, RelationKinds} from 'src/app/_models/series-detail/relation-kind';
-import {ImageService} from 'src/app/_services/image.service';
-import {LibraryService} from 'src/app/_services/library.service';
-import {SearchService} from 'src/app/_services/search.service';
-import {SeriesService} from 'src/app/_services/series.service';
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import {TypeaheadComponent} from "../../typeahead/_components/typeahead.component";
 import {TranslocoModule} from "@jsverse/transloco";
 import {RelationshipPipe} from "../../_pipes/relationship.pipe";
 import {WikiLink} from "../../_models/wiki";
+import {TypeaheadSettings} from "../../typeahead/_models/typeahead-settings";
+import {SeriesService} from "../../_services/series.service";
+import {UtilityService} from "../../shared/_services/utility.service";
+import {LibraryService} from "../../_services/library.service";
+import {SearchService} from "../../_services/search.service";
+import {ImageService} from "../../_services/image.service";
+import {RelationKind, RelationKinds} from "../../_models/series-detail/relation-kind";
+import {SearchResult} from "../../_models/search/search-result";
+import {Series} from "../../_models/series";
 
 interface RelationControl {
   series: {id: number, name: string} | undefined; // Will add type as well

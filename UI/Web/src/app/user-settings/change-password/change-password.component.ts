@@ -9,9 +9,9 @@ import {
 } from '@angular/core';
 import {FormControl, FormGroup, ReactiveFormsModule, Validators} from '@angular/forms';
 import {ToastrService} from '@openng/ngx-toastr';
-import {AccountService} from 'src/app/_services/account.service';
 import {translate, TranslocoDirective} from "@jsverse/transloco";
 import {SettingItemComponent} from "../../settings/_components/setting-item/setting-item.component";
+import {AccountService} from "../../_services/account.service";
 
 @Component({
     selector: 'app-change-password',

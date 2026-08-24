@@ -1,7 +1,7 @@
-import { PageSplitOption } from "src/app/_models/preferences/page-split-option";
-import { ReaderMode } from "src/app/_models/preferences/reader-mode";
-import { LayoutMode } from "./layout-mode";
-import { FITTING_OPTION, PAGING_DIRECTION } from "./reader-enums";
+import {LayoutMode} from "./layout-mode";
+import {FITTING_OPTION, PAGING_DIRECTION} from "./reader-enums";
+import {ReaderMode} from "../../_models/preferences/reader-mode";
+import {PageSplitOption} from "../../_models/preferences/page-split-option";
 
 export interface ReaderSetting {
     pageSplit: PageSplitOption;

@@ -1,7 +1,6 @@
 import {ChangeDetectionStrategy, ChangeDetectorRef, Component, inject, OnInit, signal,} from '@angular/core';
 import {ReactiveFormsModule} from '@angular/forms';
 import {tap} from 'rxjs';
-import {StatisticsService} from 'src/app/_services/statistics.service';
 import {FileExtension} from '../../_models/file-breakdown';
 import {TranslocoDirective} from "@jsverse/transloco";
 import {NgbTooltip} from "@ng-bootstrap/ng-bootstrap";
@@ -11,6 +10,7 @@ import {BytesPipe} from "../../../_pipes/bytes.pipe";
 import {CompactNumberPipe} from "../../../_pipes/compact-number.pipe";
 import {ResponsiveTableComponent} from "../../../shared/_components/responsive-table/responsive-table.component";
 import {StatsNoDataComponent} from "../../../common/stats-no-data/stats-no-data.component";
+import {StatisticsService} from "../../../_services/statistics.service";
 
 @Component({
   selector: 'app-file-breakdown-stats',

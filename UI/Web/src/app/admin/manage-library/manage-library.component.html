@@ -78,7 +78,7 @@
         <ngx-datatable-column prop="lastScanned" [sortable]="false" [draggable]="false" [resizeable]="false">
           <ng-template ngx-datatable-header-template>{{t('last-scanned-title')}}</ng-template>
           <ng-template let-library="row" ngx-datatable-cell-template>
-            {{library.lastScanned | timeAgo | defaultDate}}
+            {{library.lastScanned | timeDifference | defaultDate}}
           </ng-template>
         </ngx-datatable-column>
 
@@ -141,7 +141,7 @@
 
             <div class="col-12">
               <div class="text-muted small">{{t('last-scanned-title')}}</div>
-              <div>{{library.lastScanned | timeAgo | defaultDate}}</div>
+              <div>{{library.lastScanned | timeDifference | defaultDate}}</div>
             </div>
           </div>
         </div>

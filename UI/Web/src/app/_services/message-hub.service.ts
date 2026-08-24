@@ -1,7 +1,7 @@
 import {Injectable} from '@angular/core';
 import {HubConnection, HubConnectionBuilder} from '@microsoft/signalr';
 import {BehaviorSubject, ReplaySubject} from 'rxjs';
-import {environment} from 'src/environments/environment';
+import {environment} from '../../environments/environment';
 import {LibraryModifiedEvent} from '../_models/events/library-modified-event';
 import {NotificationProgressEvent} from '../_models/events/notification-progress-event';
 import {ThemeProgressEvent} from '../_models/events/theme-progress-event';

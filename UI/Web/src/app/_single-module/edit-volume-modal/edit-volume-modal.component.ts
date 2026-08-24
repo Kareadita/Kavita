@@ -26,7 +26,6 @@ import {DownloadEntityType} from '../../shared/_models/download-queue-item';
 import {LibraryType} from "../../_models/library/library";
 import {PersonRole} from "../../_models/metadata/person";
 import {concat} from "rxjs";
-import {MangaFormat} from 'src/app/_models/manga-format';
 import {MangaFile} from "../../_models/manga-file";
 import {BreakpointService} from "../../_services/breakpoint.service";
 import {ActionFactoryService} from "../../_services/action-factory.service";
@@ -42,6 +41,7 @@ import {
 } from "../../shared/_components/edit-external-metadata-form/edit-external-metadata-form.component";
 import {EditModalShellComponent} from "../../shared/edit-modal-shell/edit-modal-shell.component";
 import {EditTabDirective} from "../../shared/_directive/edit-tab.directive";
+import {MangaFormat} from "../../_models/manga-format";
 
 
 @Component({

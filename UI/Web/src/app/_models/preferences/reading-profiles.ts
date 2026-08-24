@@ -1,4 +1,3 @@
-import {LayoutMode} from 'src/app/manga-reader/_models/layout-mode';
 import {BookPageLayoutMode} from '../readers/book-page-layout-mode';
 import {PageLayoutMode} from '../page-layout-mode';
 import {PageSplitOption} from './page-split-option';
@@ -11,6 +10,7 @@ import {PdfScrollMode} from "./pdf-scroll-mode";
 import {PdfLayoutMode} from "./pdf-layout-mode";
 import {PdfSpreadMode} from "./pdf-spread-mode";
 import {Breakpoint} from "../../_services/breakpoint.service";
+import {LayoutMode} from "../../manga-reader/_models/layout-mode";
 
 export enum ReadingProfileKind {
   Default = 0,

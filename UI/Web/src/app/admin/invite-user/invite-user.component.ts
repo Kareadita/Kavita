@@ -1,12 +1,16 @@
-import {ChangeDetectorRef, Component, computed, DestroyRef, inject, OnInit, signal, ChangeDetectionStrategy} from '@angular/core';
-import {FormControl, FormGroup, NonNullableFormBuilder, ReactiveFormsModule, Validators} from '@angular/forms';
+import {
+  ChangeDetectionStrategy,
+  ChangeDetectorRef,
+  Component,
+  computed,
+  DestroyRef,
+  inject,
+  OnInit,
+  signal
+} from '@angular/core';
+import {FormControl, FormGroup, ReactiveFormsModule} from '@angular/forms';
 import {NgbActiveModal} from '@ng-bootstrap/ng-bootstrap';
 import {ToastrService} from '@openng/ngx-toastr';
-import {AgeRestriction} from 'src/app/_models/metadata/age-restriction';
-import {InviteUserResponse} from 'src/app/_models/auth/invite-user-response';
-import {Library} from 'src/app/_models/library/library';
-import {AgeRating} from 'src/app/_models/metadata/age-rating';
-import {AccountService, allRoles, Role} from 'src/app/_services/account.service';
 import {ApiKeyComponent} from '../../user-settings/api-key/api-key.component';
 import {RestrictionSelectorComponent} from '../../user-settings/restriction-selector/restriction-selector.component';
 import {translate, TranslocoDirective} from "@jsverse/transloco";
@@ -20,6 +24,11 @@ import {debounceTime, distinctUntilChanged, Observable, startWith} from "rxjs";
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import {map} from "rxjs/operators";
 import {AsyncPipe} from "@angular/common";
+import {AccountService, allRoles, Role} from "../../_services/account.service";
+import {AgeRestriction} from "../../_models/metadata/age-restriction";
+import {AgeRating} from "../../_models/metadata/age-rating";
+import {Library} from "../../_models/library/library";
+import {InviteUserResponse} from "../../_models/auth/invite-user-response";
 
 @Component({
     selector: 'app-invite-user',

@@ -10,12 +10,12 @@ import {
   TemplateRef
 } from '@angular/core';
 import {NgbOffcanvas, NgbTooltip} from '@ng-bootstrap/ng-bootstrap';
-import {NavService} from 'src/app/_services/nav.service';
-import {ToggleService} from 'src/app/_services/toggle.service';
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import {TranslocoDirective} from "@jsverse/transloco";
 import {tap} from "rxjs";
 import {BreakpointService} from "../../../_services/breakpoint.service";
+import {NavService} from "../../../_services/nav.service";
+import {ToggleService} from "../../../_services/toggle.service";
 
 /**
  * This should go on all pages which have the side nav present and is not Settings related.

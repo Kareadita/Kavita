@@ -1,9 +1,6 @@
 import {ChangeDetectionStrategy, Component, computed, DestroyRef, inject, input, OnInit, signal} from '@angular/core';
 import {FormControl, FormGroup, ReactiveFormsModule} from '@angular/forms';
 import {filter, Observable, of, shareReplay} from 'rxjs';
-import {Member} from 'src/app/_models/auth/member';
-import {MemberService} from 'src/app/_services/member.service';
-import {StatisticsService} from 'src/app/_services/statistics.service';
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import {AsyncPipe} from '@angular/common';
 import {TranslocoDirective} from "@jsverse/transloco";
@@ -13,6 +10,9 @@ import {MangaFormat} from "../../../_models/manga-format";
 import {StatsFilter} from "../../_models/stats-filter";
 import {AccountService} from "../../../_services/account.service";
 import {StatsNoDataComponent} from "../../../common/stats-no-data/stats-no-data.component";
+import {StatisticsService} from "../../../_services/statistics.service";
+import {MemberService} from "../../../_services/member.service";
+import {Member} from "../../../_models/auth/member";
 
 const dateOptions: Intl.DateTimeFormatOptions = { month: 'short', day: 'numeric' };
 

@@ -1,9 +1,9 @@
 import {ChangeDetectionStrategy, ChangeDetectorRef, Component, inject, OnInit} from '@angular/core';
-import {ServerService} from 'src/app/_services/server.service';
 import {ServerInfoSlim} from '../_models/server-info';
 import {TranslocoDirective} from "@jsverse/transloco";
 import {ChangelogComponent} from "../../announcements/_components/changelog/changelog.component";
 import {UtcToLocalTimePipe} from "../../_pipes/utc-to-local-time.pipe";
+import {ServerService} from "../../_services/server.service";
 
 @Component({
     selector: 'app-manage-system',

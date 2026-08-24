@@ -1,15 +1,13 @@
 import {ChangeDetectionStrategy, Component, inject} from '@angular/core';
-import {
-  ChangeAgeRestrictionComponent
-} from "src/app/user-settings/change-age-restriction/change-age-restriction.component";
-import {ChangeEmailComponent} from "src/app/user-settings/change-email/change-email.component";
-import {ChangePasswordComponent} from "src/app/user-settings/change-password/change-password.component";
-import {AccountService} from "src/app/_services/account.service";
-import {ConfirmService} from "src/app/shared/confirm.service";
 import {EMPTY, filter, from, switchMap} from "rxjs";
-import {ImageComponent} from "src/app/shared/image/image.component";
 import {translate, TranslocoDirective} from "@jsverse/transloco";
 import {ChangeUsernameComponent} from "../change-username/change-username.component";
+import {ChangeAgeRestrictionComponent} from "../change-age-restriction/change-age-restriction.component";
+import {ChangeEmailComponent} from "../change-email/change-email.component";
+import {ChangePasswordComponent} from "../change-password/change-password.component";
+import {ImageComponent} from "../../shared/image/image.component";
+import {AccountService} from "../../_services/account.service";
+import {ConfirmService} from "../../shared/confirm.service";
 
 @Component({
   selector: 'app-account-settings',

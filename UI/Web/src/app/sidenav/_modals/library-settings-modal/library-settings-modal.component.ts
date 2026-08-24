@@ -23,16 +23,6 @@ import {
 } from '@ng-bootstrap/ng-bootstrap';
 import {ToastrService} from '@openng/ngx-toastr';
 import {debounceTime, distinctUntilChanged, of, switchMap, tap} from 'rxjs';
-import {
-  DirectoryPickerComponent,
-  DirectoryPickerResult
-} from 'src/app/admin/_modals/directory-picker/directory-picker.component';
-import {ConfirmService} from 'src/app/shared/confirm.service';
-import {UtilityService} from 'src/app/shared/_services/utility.service';
-import {allLibraryTypes, Library, LibraryType} from 'src/app/_models/library/library';
-import {ImageService} from 'src/app/_services/image.service';
-import {LibraryService} from 'src/app/_services/library.service';
-import {UploadService} from 'src/app/_services/upload.service';
 import {takeUntilDestroyed, toSignal} from "@angular/core/rxjs-interop";
 import {NgTemplateOutlet} from "@angular/common";
 import {SentenceCasePipe} from "../../../_pipes/sentence-case.pipe";
@@ -68,6 +58,16 @@ import {MetadataProvider} from "../../../_models/kavitaplus/metadata-provider.en
 import {map} from "rxjs/operators";
 import {MetadataProviderTitlePipe} from "../../../_pipes/metadata-provider-title.pipe";
 import {UtcToLocalTimePipe} from "../../../_pipes/utc-to-local-time.pipe";
+import {UtilityService} from "../../../shared/_services/utility.service";
+import {UploadService} from "../../../_services/upload.service";
+import {ConfirmService} from "../../../shared/confirm.service";
+import {LibraryService} from "../../../_services/library.service";
+import {ImageService} from "../../../_services/image.service";
+import {allLibraryTypes, Library, LibraryType} from "../../../_models/library/library";
+import {
+  DirectoryPickerComponent,
+  DirectoryPickerResult
+} from "../../../admin/_modals/directory-picker/directory-picker.component";
 
 enum StepID {
   General = 0,

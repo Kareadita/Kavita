@@ -1,11 +1,11 @@
-import {Component, inject, input, ChangeDetectionStrategy} from '@angular/core';
+import {ChangeDetectionStrategy, Component, inject, input} from '@angular/core';
 import {FormControl, FormGroup, ReactiveFormsModule, Validators} from '@angular/forms';
 import {NgbActiveModal} from '@ng-bootstrap/ng-bootstrap';
-import {Member} from 'src/app/_models/auth/member';
-import {AccountService} from 'src/app/_services/account.service';
 import {SentenceCasePipe} from '../../../_pipes/sentence-case.pipe';
 import {translate, TranslocoDirective} from "@jsverse/transloco";
 import {ToastrService} from '@openng/ngx-toastr';
+import {AccountService} from "../../../_services/account.service";
+import {Member} from "../../../_models/auth/member";
 
 @Component({
   selector: 'app-reset-password-modal',
@@ -22,7 +22,6 @@ export class ResetPasswordModalComponent {
 
   member = input.required<Member>();
 
-  errorMessage = '';
   resetPasswordForm: FormGroup = new FormGroup({
     password: new FormControl('', [Validators.required]),
   });

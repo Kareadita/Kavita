@@ -11,18 +11,6 @@ import {
 } from '@angular/core';
 import {DownloadQueueWidgetComponent} from '../download-queue-widget/download-queue-widget.component';
 import {Router, RouterLink, RouterLinkActive} from '@angular/router';
-import {Chapter} from 'src/app/_models/chapter';
-import {UserCollection} from 'src/app/_models/collection-tag';
-import {Library} from 'src/app/_models/library/library';
-import {MangaFile} from 'src/app/_models/manga-file';
-import {Person} from 'src/app/_models/metadata/person';
-import {ReadingList} from 'src/app/_models/reading-list/reading-list';
-import {SearchResult} from 'src/app/_models/search/search-result';
-import {SearchResultGroup} from 'src/app/_models/search/search-result-group';
-import {AccountService} from 'src/app/_services/account.service';
-import {ImageService} from 'src/app/_services/image.service';
-import {NavService} from 'src/app/_services/nav.service';
-import {SearchService} from 'src/app/_services/search.service';
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import {SentenceCasePipe} from '../../../_pipes/sentence-case.pipe';
 import {NgbDropdown, NgbDropdownItem, NgbDropdownMenu, NgbDropdownToggle} from '@ng-bootstrap/ng-bootstrap';
@@ -49,6 +37,18 @@ import {AnnotationService} from "../../../_services/annotation.service";
 import {ProfileIconComponent} from "../../../_single-module/profile-icon/profile-icon.component";
 import {BreakpointService} from "../../../_services/breakpoint.service";
 import {ModalService} from "../../../_services/modal.service";
+import {SearchService} from "../../../_services/search.service";
+import {AccountService} from "../../../_services/account.service";
+import {NavService} from "../../../_services/nav.service";
+import {ImageService} from "../../../_services/image.service";
+import {SearchResultGroup} from "../../../_models/search/search-result-group";
+import {Person} from "../../../_models/metadata/person";
+import {SearchResult} from "../../../_models/search/search-result";
+import {MangaFile} from "../../../_models/manga-file";
+import {Chapter} from "../../../_models/chapter";
+import {Library} from "../../../_models/library/library";
+import {UserCollection} from "../../../_models/collection-tag";
+import {ReadingList} from "../../../_models/reading-list/reading-list";
 
 @Component({
   selector: 'app-nav-header',

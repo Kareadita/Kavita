@@ -10,12 +10,6 @@ import {
   viewChild
 } from '@angular/core';
 import {Router} from '@angular/router';
-import {UserCollection} from 'src/app/_models/collection-tag';
-import {Tag} from 'src/app/_models/tag';
-import {AccountService} from 'src/app/_services/account.service';
-import {CollectionTagService} from 'src/app/_services/collection-tag.service';
-import {ImageService} from 'src/app/_services/image.service';
-import {JumpbarService} from 'src/app/_services/jumpbar.service';
 import {DecimalPipe} from '@angular/common';
 import {CardDetailLayoutComponent} from '../../../cards/card-detail-layout/card-detail-layout.component';
 import {
@@ -36,6 +30,12 @@ import {ActionItem} from "../../../_models/actionables/action-item";
 import {Action} from "../../../_models/actionables/action";
 import {PromotedIconComponent} from "../../../shared/_components/promoted-icon/promoted-icon.component";
 import {ActionResult} from "../../../_models/actionables/action-result";
+import {CollectionTagService} from "../../../_services/collection-tag.service";
+import {JumpbarService} from "../../../_services/jumpbar.service";
+import {ImageService} from "../../../_services/image.service";
+import {AccountService} from "../../../_services/account.service";
+import {UserCollection} from "../../../_models/collection-tag";
+import {Tag} from "../../../_models/tag";
 
 
 @Component({
@@ -101,7 +101,7 @@ export class AllCollectionsComponent implements OnInit {
     this.loadPage();
   }
 
-  shouldRenderCollection(action: ActionItem<UserCollection>, entity: UserCollection, user: User) {
+  shouldRenderCollection(action: ActionItem<UserCollection>, entity: UserCollection, _: User) {
 
     const hasPromotionRights = this.accountService.canCurrentUserInvokeAction(action.action);
 

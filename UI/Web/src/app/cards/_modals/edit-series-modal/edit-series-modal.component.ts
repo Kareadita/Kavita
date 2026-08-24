@@ -13,22 +13,6 @@ import {FormBuilder, FormControl, FormGroup, ReactiveFormsModule, Validators} fr
 import {NgbActiveModal, NgbCollapse} from '@ng-bootstrap/ng-bootstrap';
 import {concat, delay, forkJoin, last, Observable, of, tap} from 'rxjs';
 import {map, switchMap} from 'rxjs/operators';
-import {UtilityService} from 'src/app/shared/_services/utility.service';
-import {setupLanguageSettings, TypeaheadSettings} from 'src/app/typeahead/_models/typeahead-settings';
-import {Chapter, LooseLeafOrDefaultNumber, SpecialVolumeNumber} from 'src/app/_models/chapter';
-import {Genre} from 'src/app/_models/metadata/genre';
-import {AgeRatingDto} from 'src/app/_models/metadata/age-rating-dto';
-import {Language} from 'src/app/_models/metadata/language';
-import {PublicationStatusDto} from 'src/app/_models/metadata/publication-status-dto';
-import {Person, PersonRole} from 'src/app/_models/metadata/person';
-import {Series} from 'src/app/_models/series';
-import {SeriesMetadata} from 'src/app/_models/metadata/series-metadata';
-import {Tag} from 'src/app/_models/tag';
-import {ImageService} from 'src/app/_services/image.service';
-import {LibraryService} from 'src/app/_services/library.service';
-import {MetadataService} from 'src/app/_services/metadata.service';
-import {SeriesService} from 'src/app/_services/series.service';
-import {UploadService} from 'src/app/_services/upload.service';
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import {TypeaheadComponent} from "../../../typeahead/_components/typeahead.component";
 import {CoverImageChooserComponent} from "../../cover-image-chooser/cover-image-chooser.component";
@@ -36,7 +20,6 @@ import {EditSeriesRelationComponent} from "../../edit-series-relation/edit-serie
 import {SentenceCasePipe} from "../../../_pipes/sentence-case.pipe";
 import {MangaFormatPipe} from "../../../_pipes/manga-format.pipe";
 import {DefaultDatePipe} from "../../../_pipes/default-date.pipe";
-import {TimeAgoPipe} from "../../../_pipes/time-ago.pipe";
 import {PublicationStatusPipe} from "../../../_pipes/publication-status.pipe";
 import {BytesPipe} from "../../../_pipes/bytes.pipe";
 import {ImageComponent} from "../../../shared/image/image.component";
@@ -69,8 +52,25 @@ import {Volume} from "../../../_models/volume";
 import {ConfirmService} from "../../../shared/confirm.service";
 import {EditModalShellComponent} from "../../../shared/edit-modal-shell/edit-modal-shell.component";
 import {EditTabDirective} from "../../../shared/_directive/edit-tab.directive";
-import {AllMetadataProviders, MetadataProvider} from "src/app/_models/kavitaplus/metadata-provider.enum";
 import {MetadataProviderTitlePipe} from "../../../_pipes/metadata-provider-title.pipe";
+import {SeriesService} from "../../../_services/series.service";
+import {UtilityService} from "../../../shared/_services/utility.service";
+import {ImageService} from "../../../_services/image.service";
+import {LibraryService} from "../../../_services/library.service";
+import {UploadService} from "../../../_services/upload.service";
+import {MetadataService} from "../../../_services/metadata.service";
+import {Person, PersonRole} from "../../../_models/metadata/person";
+import {setupLanguageSettings, TypeaheadSettings} from "../../../typeahead/_models/typeahead-settings";
+import {Genre} from "../../../_models/metadata/genre";
+import {AgeRatingDto} from "../../../_models/metadata/age-rating-dto";
+import {PublicationStatusDto} from "../../../_models/metadata/publication-status-dto";
+import {SeriesMetadata} from "../../../_models/metadata/series-metadata";
+import {Chapter, LooseLeafOrDefaultNumber, SpecialVolumeNumber} from "../../../_models/chapter";
+import {Language} from "../../../_models/metadata/language";
+import {Series} from "../../../_models/series";
+import {Tag} from "../../../_models/tag";
+import {AllMetadataProviders, MetadataProvider} from "../../../_models/kavitaplus/metadata-provider.enum";
+import {TimeDifferencePipe} from "../../../_pipes/time-difference.pipe";
 
 
 @Component({
@@ -83,7 +83,6 @@ import {MetadataProviderTitlePipe} from "../../../_pipes/metadata-provider-title
     SentenceCasePipe,
     MangaFormatPipe,
     DefaultDatePipe,
-    TimeAgoPipe,
     PublicationStatusPipe,
     BytesPipe,
     ImageComponent,
@@ -100,7 +99,8 @@ import {MetadataProviderTitlePipe} from "../../../_pipes/metadata-provider-title
     EditModalShellComponent,
     EditTabDirective,
     MetadataProviderTitlePipe,
-    TitleCasePipe
+    TitleCasePipe,
+    TimeDifferencePipe
   ],
   templateUrl: './edit-series-modal.component.html',
   styleUrls: ['./edit-series-modal.component.scss'],

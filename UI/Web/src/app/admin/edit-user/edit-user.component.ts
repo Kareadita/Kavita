@@ -11,10 +11,6 @@ import {
 } from '@angular/core';
 import {FormControl, FormGroup, ReactiveFormsModule, Validators} from '@angular/forms';
 import {NgbActiveModal} from '@ng-bootstrap/ng-bootstrap';
-import {AgeRestriction} from 'src/app/_models/metadata/age-restriction';
-import {Library} from 'src/app/_models/library/library';
-import {Member} from 'src/app/_models/auth/member';
-import {AccountService, allRoles, Role} from 'src/app/_services/account.service';
 import {SentenceCasePipe} from '../../_pipes/sentence-case.pipe';
 import {RestrictionSelectorComponent} from '../../user-settings/restriction-selector/restriction-selector.component';
 import {AsyncPipe} from '@angular/common';
@@ -30,6 +26,10 @@ import {
   SettingMultiCheckBox
 } from "../../settings/_components/setting-multi-check-box/setting-multi-check-box.component";
 import {LibraryService} from "../../_services/library.service";
+import {AccountService, allRoles, Role} from "../../_services/account.service";
+import {Member} from "../../_models/auth/member";
+import {Library} from "../../_models/library/library";
+import {AgeRestriction} from "../../_models/metadata/age-restriction";
 
 const AllowedUsernameCharacters = /^[a-zA-Z0-9\-._@+/]*$/;
 const EmailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;

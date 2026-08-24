@@ -21,11 +21,6 @@ import {
 } from '@ng-bootstrap/ng-bootstrap';
 import {ToastrService} from '@openng/ngx-toastr';
 import {concat, debounceTime, delay, distinctUntilChanged, last, Observable, of, switchMap, tap} from 'rxjs';
-import {ReadingList} from 'src/app/_models/reading-list/reading-list';
-import {AccountService} from 'src/app/_services/account.service';
-import {ImageService} from 'src/app/_services/image.service';
-import {ReadingListService} from 'src/app/_services/reading-list.service';
-import {UploadService} from 'src/app/_services/upload.service';
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import {CoverImageChooserComponent} from '../../../cards/cover-image-chooser/cover-image-chooser.component';
 import {
@@ -46,6 +41,10 @@ import {UtilityService} from "../../../shared/_services/utility.service";
 import {MetadataService} from "../../../_services/metadata.service";
 import {SettingItemComponent} from "../../../settings/_components/setting-item/setting-item.component";
 import {TypeaheadComponent} from "../../../typeahead/_components/typeahead.component";
+import {ReadingListService} from "../../../_services/reading-list.service";
+import {UploadService} from "../../../_services/upload.service";
+import {AccountService} from "../../../_services/account.service";
+import {ReadingList} from "../../../_models/reading-list/reading-list";
 
 
 @Component({
@@ -62,7 +61,6 @@ export class EditReadingListModalComponent implements OnInit {
   protected readonly breakpointService = inject(BreakpointService);
   private readonly uploadService = inject(UploadService);
   private readonly toastr = inject(ToastrService);
-  private readonly imageService = inject(ImageService);
   private readonly cdRef = inject(ChangeDetectorRef);
   protected readonly accountService = inject(AccountService);
   private readonly destroyRef = inject(DestroyRef);
