@@ -64,6 +64,7 @@ import {NULL_DATE} from "../../_pipes/date-year-range.pipe";
 import {DownloadEntityType} from "../../shared/_models/download-queue-item";
 import {EditModalShellComponent} from "../../shared/edit-modal-shell/edit-modal-shell.component";
 import {EditTabDirective} from "../../shared/_directive/edit-tab.directive";
+import {TypeaheadSettingsFactoryService} from "../../typeahead-settings-factory.service";
 
 
 const blackList = [Action.Edit, Action.IncognitoRead, Action.AddToReadingList];
@@ -113,6 +114,7 @@ export class EditChapterModalComponent implements OnInit {
   private readonly chapterService = inject(ChapterService);
   protected readonly breakpointService = inject(BreakpointService);
   private readonly coverChooserConfigFactory = inject(CoverChooserConfigFactoryService);
+  private readonly typeaheadSettingsFactory = inject(TypeaheadSettingsFactoryService);
 
   @Input({required: true}) chapter!: Chapter;
   @Input({required: true}) libraryType!: LibraryType;
@@ -390,7 +392,7 @@ export class EditChapterModalComponent implements OnInit {
 
 
   updateFromPreset(id: string, presetField: Array<Person> | undefined, role: PersonRole) {
-    const personSettings = this.createBlankPersonSettings(id, role)
+    const personSettings = this.typeaheadSettingsFactory.forPerson({id, role})
 
     if (presetField && presetField.length > 0) {
       const fetch = personSettings.fetchFn as ((filter: string) => Observable<Person[]>);
@@ -429,43 +431,6 @@ export class EditChapterModalComponent implements OnInit {
     ]).pipe(map(_ => {
       return of(true);
     }));
-  }
-
-  fetchPeople(role: PersonRole, filter: string) {
-    return this.metadataService.getAllPeople().pipe(map(people => {
-      return people.filter(p => this.utilityService.filter(p.name, filter));
-    }));
-  }
-
-  createBlankPersonSettings(id: string, role: PersonRole) {
-    let personSettings = new TypeaheadSettings<Person>();
-    personSettings.minCharacters = 0;
-    personSettings.multiple = true;
-    personSettings.showLocked = true;
-    personSettings.unique = true;
-    personSettings.addIfNonExisting = true;
-    personSettings.id = id;
-    personSettings.compareFn = (options: Person[], filter: string) => {
-      return options.filter(m => this.utilityService.filter(m.name, filter));
-    }
-    personSettings.compareFnForAdd = (options: Person[], filter: string) => {
-      return options.filter(m => this.utilityService.filterMatches(m.name, filter));
-    }
-
-    personSettings.selectionCompareFn = (a: Person, b: Person) => {
-      return a.name == b.name;
-    }
-    personSettings.fetchFn = (filter: string) => {
-      return this.fetchPeople(role, filter).pipe(map(items => personSettings.compareFn(items, filter)));
-    };
-
-    personSettings.addTransformFn = ((title: string) => {
-      return {id: 0, name: title, aliases: [], role: role, description: '', coverImage: '', coverImageLocked: false, primaryColor: '', secondaryColor: '' };
-    });
-
-    personSettings.trackByIdentityFn = (index, value) => value.name + (value.id + '');
-
-    return personSettings;
   }
 
   updateTags(tags: Tag[]) {

@@ -25,6 +25,7 @@ import {Series} from "../../../_models/series";
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import {AsyncPipe} from "@angular/common";
 import {modalSaved} from "../../../_models/modal/modal-result";
+import {TypeaheadSettingsFactoryService} from "../../../typeahead-settings-factory.service";
 
 @Component({
   selector: 'app-merge-person-modal',
@@ -46,6 +47,7 @@ export class MergePersonModalComponent implements OnInit {
   private readonly destroyRef = inject(DestroyRef);
   private readonly modal = inject(NgbActiveModal);
   protected readonly toastr = inject(ToastrService);
+  private readonly typeaheadSettingsFactory = inject(TypeaheadSettingsFactoryService);
 
   typeAheadSettings!: TypeaheadSettings<Person>;
   typeAheadUnfocus = new EventEmitter<string>();
@@ -72,26 +74,19 @@ export class MergePersonModalComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    this.typeAheadSettings = new TypeaheadSettings<Person>();
-    this.typeAheadSettings.minCharacters = 0;
-    this.typeAheadSettings.multiple = false;
-    this.typeAheadSettings.addIfNonExisting = false;
-    this.typeAheadSettings.id = "merge-person-modal-typeahead";
-    this.typeAheadSettings.compareFn = (options: Person[], filter: string) => {
-      return options.filter(m => this.utilityService.filter(m.name, filter));
-    }
-    this.typeAheadSettings.selectionCompareFn = (a: Person, b: Person) => {
-      return a.name == b.name;
-    }
-    this.typeAheadSettings.fetchFn = (filter: string) => {
-      if (filter.length == 0) return of([]);
 
-      return this.personService.searchPerson(filter).pipe(map(people => {
-        return people.filter(p => this.utilityService.filter(p.name, filter) && p.id != this.person().id);
-      }));
-    };
 
-    this.typeAheadSettings.trackByIdentityFn = (index, value) => `${value.name}_${value.id}`;
+    this.typeAheadSettings = this.typeaheadSettingsFactory.forPerson({id: 'merge-person-modal-typeahead', addIfNonExisting: false,
+      overrides: {
+      fetchFn: (filter: string) => {
+          if (filter.length == 0) return of([]);
+
+          return this.personService.searchPerson(filter).pipe(map(people => {
+            return people.filter(p => this.utilityService.filter(p.name, filter) && p.id != this.person().id);
+          }));
+        },
+      multiple: false
+    }});
   }
 
   updatePerson(people: Person[]) {
