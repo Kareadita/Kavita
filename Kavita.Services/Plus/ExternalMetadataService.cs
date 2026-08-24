@@ -490,7 +490,6 @@ public class ExternalMetadataService : IExternalMetadataService
         var query = queried.HasAny ? null : dto.Query;
         var isStandAlone = queried.IsStandAlone ?? dto.IsStandAlone;
         var format = series.Library.Type.ConvertToPlusMediaFormat(series.Format);
-        var webLinks = series.Metadata.WebLinks;
 
         // Only use series ids if no ids have been supplied via the query
         var aniListId = queried.HasAny ? queried.AniListId : series.AniListId;
@@ -501,7 +500,7 @@ public class ExternalMetadataService : IExternalMetadataService
         {
             AniListId = aniListId,
             MalId = malId,
-            HardcoverId = isStandAlone ? ExternalIdParser.GetHardcoverBookId(webLinks) : ExternalIdParser.GetHardcoverSeriesId(webLinks),
+            HardcoverId = queried.HasAny ? null : series.HardcoverId,
             Slug = provider switch
             {
                 MetadataProvider.Hardcover => queried.HardcoverSlug,

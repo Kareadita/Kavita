@@ -40,7 +40,7 @@ public interface IAccountService
     /// <remarks>Ensure that the users SideNavStreams are loaded</remarks>
     /// <remarks>Does NOT commit</remarks>
     Task UpdateLibrariesForUser(AppUser user, IList<int> librariesIds, bool hasAdminRole, CancellationToken ct = default);
-    Task<IEnumerable<IdentityError>> UpdateRolesForUser(AppUser user, IList<string> roles, CancellationToken ct = default);
+    Task<(IEnumerable<IdentityError>, bool)> UpdateRolesForUser(AppUser user, IList<string> roles, CancellationToken ct = default);
 
     /// <summary>
     /// Seeds all information necessary for a new user
