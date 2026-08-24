@@ -9,7 +9,8 @@ import {
   OnInit,
   output,
   signal,
-  viewChild
+  viewChild,
+  ChangeDetectionStrategy
 } from '@angular/core';
 import {NgClass, NgStyle} from '@angular/common';
 import {SlotColorPipe} from "../../../_pipes/slot-color.pipe";
@@ -26,6 +27,7 @@ import {Breakpoint, BreakpointService} from "../../../_services/breakpoint.servi
   standalone: true,
   imports: [SlotColorPipe, LongClickDirective, ChromePickerComponent, NgClass, NgStyle],
   templateUrl: './setting-color-picker.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './setting-color-picker.component.scss'
 })
 export class SettingColorPickerComponent implements OnInit {

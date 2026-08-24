@@ -1,4 +1,4 @@
-import {ChangeDetectionStrategy, Component, input, model, output} from '@angular/core';
+import {ChangeDetectionStrategy, Component, input, output, linkedSignal} from '@angular/core';
 import {NgStyle} from "@angular/common";
 import {TranslocoDirective} from "@jsverse/transloco";
 
@@ -19,7 +19,8 @@ export class DrawerOptions {
 })
 export class DrawerComponent {
 
-  isOpen = model<boolean>(false);
+  isOpenInput = input<boolean>(false, {alias: 'isOpen'});
+  isOpen = linkedSignal(this.isOpenInput);
   width = input<number>(400);
   /**
    * Side of the screen the drawer should animate from

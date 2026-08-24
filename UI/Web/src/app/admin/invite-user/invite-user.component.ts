@@ -1,4 +1,4 @@
-import {ChangeDetectorRef, Component, computed, DestroyRef, inject, OnInit, signal} from '@angular/core';
+import {ChangeDetectorRef, Component, computed, DestroyRef, inject, OnInit, signal, ChangeDetectionStrategy} from '@angular/core';
 import {FormControl, FormGroup, NonNullableFormBuilder, ReactiveFormsModule, Validators} from '@angular/forms';
 import {NgbActiveModal} from '@ng-bootstrap/ng-bootstrap';
 import {ToastrService} from '@openng/ngx-toastr';
@@ -25,6 +25,7 @@ import {AsyncPipe} from "@angular/common";
     selector: 'app-invite-user',
     templateUrl: './invite-user.component.html',
     styleUrls: ['./invite-user.component.scss'],
+  changeDetection: ChangeDetectionStrategy.Eager,
   imports: [ReactiveFormsModule, RestrictionSelectorComponent,
     ApiKeyComponent, TranslocoDirective, SafeHtmlPipe, SettingMultiCheckBox, AsyncPipe]
 })

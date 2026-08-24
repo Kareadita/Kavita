@@ -1,4 +1,4 @@
-import {NgClass, NgStyle, NgTemplateOutlet, TitleCasePipe} from '@angular/common';
+import {NgClass, NgStyle, NgTemplateOutlet, PercentPipe} from '@angular/common';
 import {ChangeDetectionStrategy, ChangeDetectorRef, Component, inject, Input, OnInit, Signal} from '@angular/core';
 import {ReactiveFormsModule} from '@angular/forms';
 import {BookPageLayoutMode} from 'src/app/_models/readers/book-page-layout-mode';
@@ -86,7 +86,7 @@ export const bookColorThemes = [
     changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [ReactiveFormsModule, NgbAccordionDirective, NgbAccordionItem, NgbAccordionHeader, NgbAccordionButton,
     NgbAccordionCollapse, NgbAccordionBody, NgbTooltip, NgTemplateOutlet, NgClass, NgStyle,
-    TitleCasePipe, TranslocoDirective, EpubFontTitlePipe]
+    TranslocoDirective, EpubFontTitlePipe, PercentPipe]
 })
 export class ReaderSettingsComponent implements OnInit {
 

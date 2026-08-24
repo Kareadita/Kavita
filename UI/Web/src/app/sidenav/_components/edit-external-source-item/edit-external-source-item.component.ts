@@ -1,4 +1,4 @@
-import {ChangeDetectorRef, Component, inject, Input, OnInit, output} from '@angular/core';
+import {ChangeDetectorRef, Component, inject, Input, OnInit, output, ChangeDetectionStrategy} from '@angular/core';
 import {FormControl, FormGroup, ReactiveFormsModule, Validators} from "@angular/forms";
 import {ExternalSource} from "../../../_models/sidenav/external-source";
 import {NgbCollapse} from "@ng-bootstrap/ng-bootstrap";
@@ -10,6 +10,7 @@ import {ToastrService} from '@openng/ngx-toastr';
     selector: 'app-edit-external-source-item',
     imports: [NgbCollapse, ReactiveFormsModule, TranslocoDirective],
     templateUrl: './edit-external-source-item.component.html',
+    changeDetection: ChangeDetectionStrategy.Eager,
     styleUrls: ['./edit-external-source-item.component.scss']
 })
 export class EditExternalSourceItemComponent implements OnInit {

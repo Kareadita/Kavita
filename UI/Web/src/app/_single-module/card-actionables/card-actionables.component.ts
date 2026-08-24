@@ -1,12 +1,4 @@
-import {
-  ChangeDetectionStrategy,
-  Component,
-  computed,
-  inject,
-  input,
-  OnDestroy,
-  output
-} from '@angular/core';
+import {ChangeDetectionStrategy, Component, computed, inject, input, OnDestroy, output} from '@angular/core';
 import {NgbDropdown, NgbDropdownItem, NgbDropdownMenu, NgbDropdownToggle} from '@ng-bootstrap/ng-bootstrap';
 import {AccountService} from 'src/app/_services/account.service';
 import {ActionableEntity} from 'src/app/_services/action-factory.service';
@@ -101,8 +93,8 @@ export class CardActionablesComponent implements OnDestroy {
     return hasValidRole && shouldRenderFuncPasses;
   }
 
-  shouldRenderSubMenu(action: ActionItem<any>, dynamicList: null | Array<any>) {
-    return (action.children[0].dynamicList === undefined || action.children[0].dynamicList === null) || (dynamicList !== null && dynamicList.length > 0);
+  shouldRenderSubMenu(action: ActionItem<any>, dynamicList: null | undefined | Array<any>) {
+    return (action.children[0].dynamicList === undefined || action.children[0].dynamicList === null) || (dynamicList && dynamicList.length > 0);
   }
 
   openSubmenu(actionTitle: string, subMenu: NgbDropdown) {

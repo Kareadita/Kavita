@@ -49,7 +49,7 @@
                     <label for="margin" class="form-label col-6">{{t('margin-label')}}</label>
                     <span class="col-6 float-end" style="display: inline-flex;">
                             <i class="fa-solid fa-outdent"></i>
-                            <input type="range" class="form-range ms-2 me-2" id="margin" min="0" max="30" step="5" formControlName="bookReaderMargin" [ngbTooltip]="settingsForm.get('bookReaderMargin')?.value + '%'">
+                            <input type="range" class="form-range ms-2 me-2" id="margin" min="0" max="30" step="5" formControlName="bookReaderMargin" [ngbTooltip]="settingsForm.get('bookReaderMargin')?.value | percent">
                             <i class="fa-solid fa-indent"></i>
                         </span>
                   </div>

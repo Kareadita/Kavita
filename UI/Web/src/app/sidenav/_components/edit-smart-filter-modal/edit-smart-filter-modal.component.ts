@@ -1,4 +1,4 @@
-import {ChangeDetectorRef, Component, DestroyRef, inject, Input, OnInit} from '@angular/core';
+import {ChangeDetectorRef, Component, DestroyRef, inject, Input, OnInit, ChangeDetectionStrategy} from '@angular/core';
 import {SmartFilter} from "../../../_models/metadata/v2/smart-filter";
 import {TranslocoDirective} from "@jsverse/transloco";
 import {SentenceCasePipe} from "../../../_pipes/sentence-case.pipe";
@@ -18,6 +18,7 @@ import {modalSaved} from "../../../_models/modal/modal-result";
     ReactiveFormsModule
   ],
   templateUrl: './edit-smart-filter-modal.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './edit-smart-filter-modal.component.scss'
 })
 export class EditSmartFilterModalComponent implements OnInit {

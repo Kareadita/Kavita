@@ -1,4 +1,4 @@
-import {Component, computed, DestroyRef, inject, input, OnInit, signal, viewChild} from '@angular/core';
+import {Component, computed, DestroyRef, inject, input, OnInit, signal, viewChild, ChangeDetectionStrategy} from '@angular/core';
 import {NgbActiveModal, NgbHighlight, NgbTypeahead} from '@ng-bootstrap/ng-bootstrap';
 import {
   catchError,
@@ -33,6 +33,7 @@ export interface DirectoryPickerResult {
     selector: 'app-directory-picker',
     templateUrl: './directory-picker.component.html',
     styleUrls: ['./directory-picker.component.scss'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     imports: [ReactiveFormsModule, NgbTypeahead, NgbHighlight, NgClass, TranslocoDirective]
 })
 export class DirectoryPickerComponent implements OnInit {

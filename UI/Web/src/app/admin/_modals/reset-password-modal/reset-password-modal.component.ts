@@ -1,4 +1,4 @@
-import {Component, inject, input} from '@angular/core';
+import {Component, inject, input, ChangeDetectionStrategy} from '@angular/core';
 import {FormControl, FormGroup, ReactiveFormsModule, Validators} from '@angular/forms';
 import {NgbActiveModal} from '@ng-bootstrap/ng-bootstrap';
 import {Member} from 'src/app/_models/auth/member';
@@ -11,6 +11,7 @@ import {ToastrService} from '@openng/ngx-toastr';
   selector: 'app-reset-password-modal',
   templateUrl: './reset-password-modal.component.html',
   styleUrls: ['./reset-password-modal.component.scss'],
+  changeDetection: ChangeDetectionStrategy.Eager,
   imports: [ReactiveFormsModule, SentenceCasePipe, TranslocoDirective]
 })
 export class ResetPasswordModalComponent {

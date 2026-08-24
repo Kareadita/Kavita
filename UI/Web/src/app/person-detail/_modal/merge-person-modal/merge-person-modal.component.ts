@@ -1,4 +1,4 @@
-import {Component, DestroyRef, EventEmitter, inject, Input, OnInit} from '@angular/core';
+import {Component, DestroyRef, EventEmitter, inject, Input, OnInit, ChangeDetectionStrategy} from '@angular/core';
 import {Person} from "../../../_models/metadata/person";
 import {PersonService} from "../../../_services/person.service";
 import {NgbActiveModal} from "@ng-bootstrap/ng-bootstrap";
@@ -27,6 +27,7 @@ import {modalSaved} from "../../../_models/modal/modal-result";
     AsyncPipe
   ],
   templateUrl: './merge-person-modal.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './merge-person-modal.component.scss'
 })
 export class MergePersonModalComponent implements OnInit {
