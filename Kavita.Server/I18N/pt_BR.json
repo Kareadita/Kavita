@@ -284,5 +284,8 @@
     "series-name-exists": "Já existe uma série com esse nome nesta biblioteca",
     "mappings-re-run-in-progress": "Uma solicitação de mapeamentos de reexecução de metadados está sendo processada no momento. Aguarde até que seja concluído para recolocar na fila",
     "mappings-re-run-no-libraries-selected": "Sua solicitação deve incluir pelo menos 1 biblioteca",
-    "mappings-re-run-libraries-overlap": "ExcludedLibraries e IncludedLibraries não podem conter as mesmas bibliotecas"
+    "mappings-re-run-libraries-overlap": "ExcludedLibraries e IncludedLibraries não podem conter as mesmas bibliotecas",
+    "series-name-orphans-files": "Alterar este nome dividiria arquivos que estão atualmente mesclados nesta série",
+    "series-localized-name-exists": "Outra série nesta biblioteca já usa esse nome",
+    "series-localized-name-orphans-files": "Alterar este nome localizado dividiria arquivos que estão atualmente mesclados nesta série"
 }

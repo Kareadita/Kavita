@@ -284,5 +284,8 @@
     "series-name-exists": "V této knihovně již existuje série s tímto názvem",
     "mappings-re-run-in-progress": "V současné době se zpracovává požadavek na opakované spuštění mapování metadat. Počkejte, až bude dokončen, a teprve poté jej zařaďte znovu do fronty",
     "mappings-re-run-no-libraries-selected": "Vaše žádost musí obsahovat alespoň 1 knihovnu",
-    "mappings-re-run-libraries-overlap": "Seznamy ExcludedLibraries a IncludedLibraries nesmí obsahovat stejné knihovny"
+    "mappings-re-run-libraries-overlap": "Seznamy ExcludedLibraries a IncludedLibraries nesmí obsahovat stejné knihovny",
+    "series-name-orphans-files": "Změna tohoto názvu by vedla k rozdělení souborů, které jsou v současné době sloučeny do této série",
+    "series-localized-name-exists": "Tento název již používá jiná série v této knihovně",
+    "series-localized-name-orphans-files": "Změna tohoto lokalizovaného názvu by vedla k rozdělení souborů, které jsou v současné době sloučeny do této série"
 }

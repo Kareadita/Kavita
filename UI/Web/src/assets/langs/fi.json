@@ -66,27 +66,6 @@
         "edit": "{{common.edit}}",
         "cancel": "{{common.cancel}}"
     },
-    "user-scrobble-history": {
-        "title": "Scrobble-historia",
-        "not-read-warning": "Ylävirran palveluntarjoajat pitävät aina suurimman numeron",
-        "filter-label": "{{common.filter}}",
-        "created-header": "Luotu",
-        "last-modified-header": "Viimeksi muokattu",
-        "type-header": "Tyyppi",
-        "series-header": "Sarjat",
-        "data-header": "Tiedot",
-        "is-processed-header": "On käsitelty",
-        "no-data": "Ei tietoja",
-        "volume-and-chapter-num": "Osa {{v}} Luku {{n}}",
-        "volume-num": "Osa {{num}}",
-        "rating": "Arvosana {{r}}",
-        "chapter-num": "Luku {{num}}",
-        "not-applicable": "Ei sovellettavissa",
-        "processed": "Käsitelty",
-        "not-processed": "Ei käsitelty",
-        "special": "{{entity-title.special}}",
-        "description": "Täältä löydät kaikki tiliisi linkitetyt scrobble-tapahtumat. Jotta tapahtumat olisivat olemassa, sinulla on oltava aktiivinen scrobble-palveluntarjoaja määritettynä. Kaikki käsitellyt tapahtumat tyhjennetään kuukauden kuluttua. Jos on käsittelemättömiä tapahtumia, ne eivät todennäköisesti pysty muodostamaan osumia ylävirtaan. Ota yhteyttä järjestelmänvalvojaasi saadaksesi ne korjattua."
-    },
     "scrobble-event-type-pipe": {
         "chapter-read": "Lukemisen eteneminen",
         "score-updated": "Luokituksen päivitys",

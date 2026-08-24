@@ -13,10 +13,6 @@
         "email": "{{common.email}}",
         "cancel": "{{common.cancel}}"
     },
-    "user-scrobble-history": {
-        "filter-label": "{{common.filter}}",
-        "special": "{{entity-title.special}}"
-    },
     "review-card-modal": {
         "close": "{{common.close}}"
     },
