@@ -43,7 +43,7 @@ Do **NOT** commit appsettings.development.json while testing OIDC. It'll contain
 - all components must be standalone
 
 # Update latest angular
-`ng update @angular/core @angular/cli @typescript-eslint/parser @angular/localize @angular/compiler-cli @angular/cdk @angular/animations @angular/common @angular/forms @angular/platform-browser @angular/platform-browser-dynamic @angular/router`
+`ng update @angular/core @angular/cli @typescript-eslint/parser @angular/localize @angular/compiler-cli @angular/cdk @angular/common @angular/forms @angular/platform-browser @angular/router`
 
 `npm install @angular-eslint/builder@latest @angular-eslint/eslint-plugin@latest @angular-eslint/eslint-plugin-template@latest @angular-eslint/schematics@latest @angular-eslint/template-parser@latest`
 
