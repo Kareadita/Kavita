@@ -27,6 +27,8 @@ public static class AuthKeyHelper
 
     public static bool IsValidAuthKey(string key)
     {
-        return key.Length is >= MinKeyLength and <= MaxKeyLength && key.All(AllowedCharacters.Contains);
+        return (key.Length is >= MinKeyLength and <= MaxKeyLength && key.All(AllowedCharacters.Contains))
+               // Pre v0.8.9 used a GUID
+               || Guid.TryParseExact(key, "D", out _);
     }
 }

@@ -16,7 +16,7 @@ public interface IAuthKeyService
     /// <param name="cancellationToken">Cancellation token</param>
     Task InvalidateAsync(string keyValue, CancellationToken cancellationToken = default);
     /// <summary>
-    /// User should have <see cref="AppUser.AuthKeys"/> laoded
+    /// User should have <see cref="AppUser.AuthKeys"/> loaded
     /// </summary>
     /// <param name="user"></param>
     /// <param name="cancellationToken"></param>
