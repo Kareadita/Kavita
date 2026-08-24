@@ -1,4 +1,13 @@
-import {Component, DestroyRef, EventEmitter, inject, Input, OnInit, ChangeDetectionStrategy} from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  DestroyRef,
+  EventEmitter,
+  inject,
+  input,
+  OnInit,
+  signal
+} from '@angular/core';
 import {Person} from "../../../_models/metadata/person";
 import {PersonService} from "../../../_services/person.service";
 import {NgbActiveModal} from "@ng-bootstrap/ng-bootstrap";
@@ -41,18 +50,19 @@ export class MergePersonModalComponent implements OnInit {
   typeAheadSettings!: TypeaheadSettings<Person>;
   typeAheadUnfocus = new EventEmitter<string>();
 
-  @Input({required: true}) person!: Person;
+  person = input.required<Person>();
 
-  mergee: Person | null = null;
+  mergee = signal<Person | null>(null);
   knownFor$: Observable<Series[]> | null = null;
 
   save() {
-    if (!this.mergee) {
+    const mergee = this.mergee();
+    if (!mergee) {
       this.close();
       return;
     }
 
-    this.personService.mergePerson(this.person.id, this.mergee.id).subscribe(person => {
+    this.personService.mergePerson(this.person().id, mergee.id).subscribe(person => {
       this.modal.close(modalSaved(person));
     })
   }
@@ -77,7 +87,7 @@ export class MergePersonModalComponent implements OnInit {
       if (filter.length == 0) return of([]);
 
       return this.personService.searchPerson(filter).pipe(map(people => {
-        return people.filter(p => this.utilityService.filter(p.name, filter) && p.id != this.person.id);
+        return people.filter(p => this.utilityService.filter(p.name, filter) && p.id != this.person().id);
       }));
     };
 
@@ -88,16 +98,18 @@ export class MergePersonModalComponent implements OnInit {
     if (people.length == 0) return;
 
     this.typeAheadUnfocus.emit(this.typeAheadSettings.id);
-    this.mergee = people[0];
-    this.knownFor$ = this.personService.getSeriesMostKnownFor(this.mergee.id)
+    this.mergee.set(people[0]);
+
+    this.knownFor$ = this.personService.getSeriesMostKnownFor(this.mergee()!.id)
         .pipe(takeUntilDestroyed(this.destroyRef));
   }
 
   protected readonly FilterField = SeriesFilterField;
 
   allNewAliases() {
-    if (!this.mergee) return [];
+    const mergee = this.mergee();
+    if (!mergee) return [];
 
-    return [this.mergee.name, ...this.mergee.aliases]
+    return [mergee.name, ...mergee.aliases]
   }
 }

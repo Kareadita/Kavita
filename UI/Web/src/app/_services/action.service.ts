@@ -808,7 +808,7 @@ export class ActionService {
 
       case Action.Merge:
         const ref2 = this.modalService.open(MergePersonModalComponent, editModal());
-        ref2.componentInstance.person = person;
+        ref2.setInput('person', person);
 
         return from(ref2.closed).pipe(
           filter((res: ModalResult<Person>) => res.success),

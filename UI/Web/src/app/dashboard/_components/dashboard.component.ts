@@ -66,7 +66,8 @@ enum StreamId {
   templateUrl: './dashboard.component.html',
   styleUrls: ['./dashboard.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [SideNavCompanionBarComponent, RouterLink, CarouselReelComponent, AsyncPipe, TranslocoDirective, NgTemplateOutlet, LoadingComponent, EntityCardComponent, PromotedIconComponent]
+  imports: [SideNavCompanionBarComponent, RouterLink, CarouselReelComponent, AsyncPipe, TranslocoDirective,
+    NgTemplateOutlet, LoadingComponent, EntityCardComponent, PromotedIconComponent]
 })
 export class DashboardComponent {
 
@@ -81,7 +82,7 @@ export class DashboardComponent {
   private readonly personService = inject(PersonService);
   private readonly annotationService = inject(AnnotationService);
   private readonly router = inject(Router);
-  public readonly imageService = inject(ImageService);
+  protected readonly imageService = inject(ImageService);
   private readonly messageHub = inject(MessageHubService);
   private readonly cdRef = inject(ChangeDetectorRef);
   private readonly dashboardService = inject(DashboardService);
