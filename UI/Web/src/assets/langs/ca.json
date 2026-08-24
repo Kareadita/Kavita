@@ -16,16 +16,6 @@
         "account-detail-title": "Detalls del compte",
         "saving": "S'està desant…"
     },
-    "user-scrobble-history": {
-        "last-modified-header": "Darrera modificació",
-        "type-header": "Tipus",
-        "series-header": "Sèrie",
-        "volume-and-chapter-num": "Volum {{v}}, capítol {{n}}",
-        "volume-num": "Volum {{num}}",
-        "chapter-num": "Capítol {{num}}",
-        "rating": "Valoració {{r}}",
-        "data-header": "Dades"
-    },
     "want-to-read": {
         "title": "Vull llegir"
     },

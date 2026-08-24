@@ -26,24 +26,6 @@
         "saving": "Menyimpan…",
         "update": "Perbarui"
     },
-    "user-scrobble-history": {
-        "title": "Riwayat Ekstrak",
-        "description": "Di sini Anda akan menemukan semua peristiwa scrobble yang ditautkan dengan akun Anda. Agar peristiwa dapat muncul, Anda harus memiliki penyedia scrobble yang aktif dan terkonfigurasi. Semua peristiwa yang telah diproses akan dihapus setelah satu bulan. Jika ada peristiwa yang tidak diproses, kemungkinan peristiwa tersebut tidak dapat membentuk pertandingan di hulu. Silakan hubungi admin Anda untuk memperbaikinya.",
-        "filter-label": "{{common.filter}}",
-        "created-header": "Dibuat",
-        "last-modified-header": "Terakhir Diubah",
-        "type-header": "Tipe",
-        "series-header": "Seri",
-        "data-header": "Data",
-        "is-processed-header": "Telah Diproses",
-        "no-data": "Data Kosong",
-        "volume-and-chapter-num": "Volume {{v}} Bab {{n}}",
-        "rating": "Penilaian {{r}}",
-        "not-applicable": "Tidak Dapat Diterapkan",
-        "processed": "Telah Diproses",
-        "not-processed": "Belum Diproses",
-        "special": "{{entity-title.special}}"
-    },
     "scrobble-event-type-pipe": {
         "chapter-read": "Progres Bacaan",
         "score-updated": "Pembaruan Penilaian",

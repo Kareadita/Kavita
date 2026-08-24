@@ -25,26 +25,6 @@
         "saving": "Αποθήκευση…",
         "update": "Ενημέρωση"
     },
-    "user-scrobble-history": {
-        "title": "Ιστορικό Scrobble",
-        "description": "Εδώ θα βρείτε όλα τα συμβάντα scrobble συνδεδεμένα με τον λογαριασμό σας. Για να υπάρχουν αυτά τα συμβάντα, πρέπει να έχετε ρυθμίσει έναν ενεργό πάροχο scrobble. Όλα τα συμβάντα που έχουν επεξεργαστεί θα διαγραφούν μετά απο έναν μήνα. Εάν υπάρχουν μη-επεξεργασμένα συμβάντα, είναι αρκετά πιθανό να μην μπορούν να σχηματίσουν αντιστοιχίες upstream. Παρακαλούμε επικοινωνήστε με τον διαχειριστή σας για να τα διορθώσετε.",
-        "not-read-warning": "Upstream πάροχοι πάντα κρατάνε τον υψηλότερο αριθμό",
-        "filter-label": "{{common.filter}}",
-        "created-header": "Δημιουργήθηκε",
-        "last-modified-header": "Τελευταία Τροποποίηση",
-        "series-header": "Σειρά",
-        "data-header": "Δεδομένα",
-        "is-processed-header": "Έχει Επεξεργαστεί",
-        "no-data": "Χωρίς Δεδομένα",
-        "volume-and-chapter-num": "Τόμος {{v}} Κεφάλαιο {{n}}",
-        "volume-num": "Τόμος {{num}}",
-        "chapter-num": "Κεφάλαιο {{num}}",
-        "rating": "Βαθμολογία {{r}}",
-        "not-applicable": "Μη Εφαρμόσιμο",
-        "processed": "Επεξεργασμένο",
-        "not-processed": "Μη Επεξεργασμένο",
-        "special": "{{entity-title.special}}"
-    },
     "scrobble-event-type-pipe": {
         "chapter-read": "Πρόοδος Ανάγνωσης",
         "score-updated": "Ενημέρωση Βαθμολογίας",
