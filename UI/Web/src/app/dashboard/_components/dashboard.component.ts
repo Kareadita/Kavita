@@ -38,7 +38,7 @@ import {DashboardStream} from "../../_models/dashboard/dashboard-stream";
 import {StreamType} from "../../_models/dashboard/stream-type.enum";
 import {LoadingComponent} from "../../shared/loading/loading.component";
 import {ScrobblingService} from "../../_services/scrobbling.service";
-import {ToastrService} from "ngx-toastr";
+import {ToastrService} from '@openng/ngx-toastr';
 import {SettingsTabId} from "../../sidenav/preference-nav/preference-nav.component";
 import {ReaderService} from "../../_services/reader.service";
 import {QueryContext} from "../../_models/metadata/v2/query-context";

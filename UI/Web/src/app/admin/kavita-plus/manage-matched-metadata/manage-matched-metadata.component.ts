@@ -22,7 +22,7 @@ import {ManageMatchFilter} from "../../../_models/kavitaplus/manage-match-filter
 import {debounceTime, distinctUntilChanged, tap} from "rxjs";
 import {switchMap} from "rxjs/operators";
 import {ExternalMatchRateLimitErrorEvent} from "../../../_models/events/external-match-rate-limit-error-event";
-import {ToastrService} from "ngx-toastr";
+import {ToastrService} from '@openng/ngx-toastr';
 import {ImageService} from "../../../_services/image.service";
 import {Pagination} from "../../../_models/pagination";
 import {ScanSeriesEvent} from "../../../_models/events/scan-series-event";

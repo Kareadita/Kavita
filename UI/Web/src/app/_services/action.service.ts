@@ -1,6 +1,6 @@
 import {inject, Injectable} from '@angular/core';
 import {NgbModalRef} from '@ng-bootstrap/ng-bootstrap';
-import {ToastrService} from 'ngx-toastr';
+import {ToastrService} from '@openng/ngx-toastr';
 import {catchError, finalize, map, take} from 'rxjs/operators';
 import {ListSelectModalComponent} from '../shared/_components/list-select-modal/list-select-modal.component';
 import {ScrobbleProvider} from './scrobbling.service';

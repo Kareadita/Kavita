@@ -1,8 +1,8 @@
-import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
-import { ActivatedRoute, Router } from '@angular/router';
-import { ToastrService } from 'ngx-toastr';
-import { ThemeService } from 'src/app/_services/theme.service';
-import { AccountService } from 'src/app/_services/account.service';
+import {ChangeDetectionStrategy, Component, inject} from '@angular/core';
+import {ActivatedRoute, Router} from '@angular/router';
+import {ToastrService} from '@openng/ngx-toastr';
+import {ThemeService} from 'src/app/_services/theme.service';
+import {AccountService} from 'src/app/_services/account.service';
 import {translate} from "@jsverse/transloco";
 
 @Component({

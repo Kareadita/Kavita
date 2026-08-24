@@ -1,12 +1,12 @@
-import { ChangeDetectionStrategy, ChangeDetectorRef, Component, inject } from '@angular/core';
-import { FormGroup, FormControl, Validators, ReactiveFormsModule } from '@angular/forms';
-import { ActivatedRoute, Router } from '@angular/router';
-import { ToastrService } from 'ngx-toastr';
-import { AccountService } from 'src/app/_services/account.service';
-import { NavService } from 'src/app/_services/nav.service';
-import { NgTemplateOutlet } from '@angular/common';
-import { NgbTooltip } from '@ng-bootstrap/ng-bootstrap';
-import { SplashContainerComponent } from '../splash-container/splash-container.component';
+import {ChangeDetectionStrategy, ChangeDetectorRef, Component, inject} from '@angular/core';
+import {FormControl, FormGroup, ReactiveFormsModule, Validators} from '@angular/forms';
+import {ActivatedRoute, Router} from '@angular/router';
+import {ToastrService} from '@openng/ngx-toastr';
+import {AccountService} from 'src/app/_services/account.service';
+import {NavService} from 'src/app/_services/nav.service';
+import {NgTemplateOutlet} from '@angular/common';
+import {NgbTooltip} from '@ng-bootstrap/ng-bootstrap';
+import {SplashContainerComponent} from '../splash-container/splash-container.component';
 import {translate, TranslocoDirective} from "@jsverse/transloco";
 
 @Component({

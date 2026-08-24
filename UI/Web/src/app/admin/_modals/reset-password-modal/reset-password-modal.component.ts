@@ -5,7 +5,7 @@ import {Member} from 'src/app/_models/auth/member';
 import {AccountService} from 'src/app/_services/account.service';
 import {SentenceCasePipe} from '../../../_pipes/sentence-case.pipe';
 import {translate, TranslocoDirective} from "@jsverse/transloco";
-import {ToastrService} from "ngx-toastr";
+import {ToastrService} from '@openng/ngx-toastr';
 
 @Component({
   selector: 'app-reset-password-modal',

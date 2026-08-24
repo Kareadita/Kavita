@@ -1,6 +1,6 @@
 import {Component, computed, inject, input, OnInit, signal, TemplateRef, viewChild} from '@angular/core';
 import {NgbActiveModal} from "@ng-bootstrap/ng-bootstrap";
-import {ToastrService} from "ngx-toastr";
+import {ToastrService} from '@openng/ngx-toastr';
 import {ReactiveFormsModule} from "@angular/forms";
 import {translate, TranslocoDirective} from "@jsverse/transloco";
 import {ReadingProfileService} from "../../../_services/reading-profile.service";

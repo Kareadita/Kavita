@@ -20,7 +20,7 @@ import {
   ProgressBarEvent,
   ScrollModeType
 } from 'ngx-extended-pdf-viewer';
-import {ToastrService} from 'ngx-toastr';
+import {ToastrService} from '@openng/ngx-toastr';
 import {take} from 'rxjs';
 import {BookService} from 'src/app/book-reader/_services/book.service';
 import {UtilityService} from 'src/app/shared/_services/utility.service';

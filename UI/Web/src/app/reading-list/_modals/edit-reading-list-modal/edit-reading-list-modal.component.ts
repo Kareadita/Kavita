@@ -19,7 +19,7 @@ import {
   NgbNavOutlet,
   NgbTooltip
 } from '@ng-bootstrap/ng-bootstrap';
-import {ToastrService} from 'ngx-toastr';
+import {ToastrService} from '@openng/ngx-toastr';
 import {concat, debounceTime, delay, distinctUntilChanged, last, Observable, of, switchMap, tap} from 'rxjs';
 import {ReadingList} from 'src/app/_models/reading-list/reading-list';
 import {AccountService} from 'src/app/_services/account.service';

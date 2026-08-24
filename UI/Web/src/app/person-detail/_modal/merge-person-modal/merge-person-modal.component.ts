@@ -2,7 +2,7 @@ import {Component, DestroyRef, EventEmitter, inject, Input, OnInit} from '@angul
 import {Person} from "../../../_models/metadata/person";
 import {PersonService} from "../../../_services/person.service";
 import {NgbActiveModal} from "@ng-bootstrap/ng-bootstrap";
-import {ToastrService} from "ngx-toastr";
+import {ToastrService} from '@openng/ngx-toastr';
 import {TranslocoDirective} from "@jsverse/transloco";
 import {TypeaheadComponent} from "../../../typeahead/_components/typeahead.component";
 import {TypeaheadSettings} from "../../../typeahead/_models/typeahead-settings";

@@ -19,7 +19,7 @@ import {
   ManageMetadataMappingsComponent,
   MetadataMappingsExport
 } from "../manage-metadata-mappings/manage-metadata-mappings.component";
-import {ToastrService} from "ngx-toastr";
+import {ToastrService} from '@openng/ngx-toastr';
 import {LoadingComponent} from "../../shared/loading/loading.component";
 import {SettingSwitchComponent} from "../../settings/_components/setting-switch/setting-switch.component";
 import {SettingItemComponent} from "../../settings/_components/setting-item/setting-item.component";

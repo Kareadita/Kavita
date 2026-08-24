@@ -1,6 +1,6 @@
 import {ChangeDetectionStrategy, Component, computed, inject, output, signal} from '@angular/core';
 import {FormsModule} from '@angular/forms';
-import {ToastrService} from 'ngx-toastr';
+import {ToastrService} from '@openng/ngx-toastr';
 import {TranslocoDirective, TranslocoService} from '@jsverse/transloco';
 import {LicenseService} from '../../../_services/license.service';
 import {MemberService} from '../../../_services/member.service';

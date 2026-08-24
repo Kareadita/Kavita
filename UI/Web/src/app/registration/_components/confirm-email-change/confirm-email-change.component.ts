@@ -1,10 +1,10 @@
-import { ChangeDetectionStrategy, ChangeDetectorRef, Component, OnInit, inject } from '@angular/core';
-import { ActivatedRoute, Router } from '@angular/router';
-import { ToastrService } from 'ngx-toastr';
-import { AccountService } from 'src/app/_services/account.service';
-import { NavService } from 'src/app/_services/nav.service';
-import { ThemeService } from 'src/app/_services/theme.service';
-import { SplashContainerComponent } from '../splash-container/splash-container.component';
+import {ChangeDetectionStrategy, ChangeDetectorRef, Component, inject, OnInit} from '@angular/core';
+import {ActivatedRoute, Router} from '@angular/router';
+import {ToastrService} from '@openng/ngx-toastr';
+import {AccountService} from 'src/app/_services/account.service';
+import {NavService} from 'src/app/_services/nav.service';
+import {ThemeService} from 'src/app/_services/theme.service';
+import {SplashContainerComponent} from '../splash-container/splash-container.component';
 import {translate, TranslocoDirective} from "@jsverse/transloco";
 
 /**

@@ -36,11 +36,11 @@ import {KavitaTitleStrategy} from "./app/_services/kavita-title.strategy";
 import {routingErrorHandler} from "./app/_interceptors/routing-error.handler";
 import {NgbModalConfig, NgbRatingConfig} from "@ng-bootstrap/ng-bootstrap";
 import {DefaultModalOptions} from "./app/_models/modal/modal-options";
-import {ToastNoAnimationModule} from "ngx-toastr";
 import {MessageHubService} from "src/app/_services/message-hub.service";
 import {DownloadService} from "./app/shared/_services/download.service";
 import {LibraryService} from "./app/_services/library.service";
 import {translocoPrefixKey} from "./libs/transloco-util";
+import {ToastrModule} from "@openng/ngx-toastr";
 
 const disableAnimations = !('animate' in document.documentElement);
 if (disableAnimations) {
@@ -165,7 +165,7 @@ bootstrapApplication(AppComponent, {
     providers: [
         importProvidersFrom(BrowserModule,
           LazyLoadImageModule,
-          ToastNoAnimationModule.forRoot({
+          ToastrModule.forRoot({
             positionClass: 'toast-bottom-right',
             preventDuplicates: true,
             timeOut: 6000,

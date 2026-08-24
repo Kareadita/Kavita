@@ -19,7 +19,7 @@ import {FilterV2} from "../_models/metadata/v2/filter-v2";
 import NoSleep from 'nosleep.js';
 import {Volume} from "../_models/volume";
 import {translate} from "@jsverse/transloco";
-import {ToastrService} from "ngx-toastr";
+import {ToastrService} from '@openng/ngx-toastr';
 import {SeriesFilterField} from "../_models/metadata/v2/series-filter-field";
 import {ModalService, TypedModalRef} from "./modal.service";
 import {catchError, map, merge, Observable, of, switchMap, tap} from "rxjs";

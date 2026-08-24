@@ -11,7 +11,7 @@ import {
   SecurityContext
 } from '@angular/core';
 import {DomSanitizer} from '@angular/platform-browser';
-import {ToastrService} from 'ngx-toastr';
+import {ToastrService} from '@openng/ngx-toastr';
 import {EMPTY, map, of, ReplaySubject, take, tap} from 'rxjs';
 import {environment} from 'src/environments/environment';
 import {ConfirmService} from '../shared/confirm.service';

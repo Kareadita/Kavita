@@ -33,7 +33,7 @@ import {AgeRatingDto} from "../../_models/metadata/age-rating-dto";
 import {AccountService, allRoles, Role} from "../../_services/account.service";
 import {Library} from "../../_models/library/library";
 import {LibraryService} from "../../_services/library.service";
-import {ToastrService} from "ngx-toastr";
+import {ToastrService} from '@openng/ngx-toastr';
 import {SafeHtmlPipe} from "../../_pipes/safe-html.pipe";
 import {DefaultValuePipe} from "../../_pipes/default-value.pipe";
 import {

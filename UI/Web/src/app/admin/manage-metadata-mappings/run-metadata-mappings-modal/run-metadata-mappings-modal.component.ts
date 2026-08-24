@@ -4,21 +4,22 @@ import {SettingsService} from "../../settings.service";
 import {LibraryService} from "../../../_services/library.service";
 import {
   AbstractControl,
-  FormArray,
   FormControl,
   FormGroup,
   FormsModule,
   NonNullableFormBuilder,
-  ReactiveFormsModule, ValidationErrors, ValidatorFn
+  ReactiveFormsModule,
+  ValidationErrors,
+  ValidatorFn
 } from "@angular/forms";
 import {Library} from "../../../_models/library/library";
-import {catchError, finalize, map, tap} from "rxjs/operators";
+import {finalize, tap} from "rxjs/operators";
 import {TypeaheadSettings} from "../../../typeahead/_models/typeahead-settings";
 import {translate, TranslocoDirective} from "@jsverse/transloco";
 import {TypeaheadComponent} from "../../../typeahead/_components/typeahead.component";
 import {of} from "rxjs";
 import {SettingItemComponent} from "../../../settings/_components/setting-item/setting-item.component";
-import {ToastrService} from "ngx-toastr";
+import {ToastrService} from '@openng/ngx-toastr';
 
 type RunMetadataMappingsRequestFormGroup = FormGroup<{
   allLibraries: FormControl<boolean>,

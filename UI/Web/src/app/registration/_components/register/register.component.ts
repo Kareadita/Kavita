@@ -1,7 +1,7 @@
 import {ChangeDetectionStrategy, Component, inject} from '@angular/core';
 import {FormControl, FormGroup, ReactiveFormsModule, Validators} from '@angular/forms';
 import {Router} from '@angular/router';
-import {ToastrService} from 'ngx-toastr';
+import {ToastrService} from '@openng/ngx-toastr';
 import {AccountService} from 'src/app/_services/account.service';
 import {MemberService} from 'src/app/_services/member.service';
 import {NgbTooltip} from '@ng-bootstrap/ng-bootstrap';

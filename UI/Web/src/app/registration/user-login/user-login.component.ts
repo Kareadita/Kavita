@@ -10,7 +10,7 @@ import {
 } from '@angular/core';
 import {FormControl, FormGroup, ReactiveFormsModule, Validators} from '@angular/forms';
 import {ActivatedRoute, Router, RouterLink} from '@angular/router';
-import {ToastrService} from 'ngx-toastr';
+import {ToastrService} from '@openng/ngx-toastr';
 import {AccountService} from '../../_services/account.service';
 import {MemberService} from '../../_services/member.service';
 import {NavService} from '../../_services/nav.service';

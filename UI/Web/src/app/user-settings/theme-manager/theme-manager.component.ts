@@ -1,5 +1,5 @@
 import {ChangeDetectionStrategy, ChangeDetectorRef, Component, computed, DestroyRef, inject,} from '@angular/core';
-import {ToastrService} from 'ngx-toastr';
+import {ToastrService} from '@openng/ngx-toastr';
 import {distinctUntilChanged, tap} from 'rxjs';
 import {ThemeService} from 'src/app/_services/theme.service';
 import {SiteTheme, ThemeProvider} from 'src/app/_models/preferences/site-theme';

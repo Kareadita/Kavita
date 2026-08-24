@@ -1,7 +1,7 @@
 import {ChangeDetectionStrategy, Component, inject, signal} from '@angular/core';
 import {SettingItemComponent} from "../../settings/_components/setting-item/setting-item.component";
 import {AccountService} from "../../_services/account.service";
-import {ToastrService} from "ngx-toastr";
+import {ToastrService} from '@openng/ngx-toastr';
 import {FormControl, FormGroup, ReactiveFormsModule, Validators} from "@angular/forms";
 import {translate, TranslocoDirective} from "@jsverse/transloco";
 

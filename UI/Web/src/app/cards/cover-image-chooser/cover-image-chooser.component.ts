@@ -9,7 +9,7 @@ import {
   signal
 } from '@angular/core';
 import {FileSystemFileEntry, NgxFileDropEntry} from 'ngx-file-drop';
-import {ToastrService} from 'ngx-toastr';
+import {ToastrService} from '@openng/ngx-toastr';
 import {ImageService} from 'src/app/_services/image.service';
 import {UploadService} from 'src/app/_services/upload.service';
 import {ImageComponent} from "../../shared/image/image.component";

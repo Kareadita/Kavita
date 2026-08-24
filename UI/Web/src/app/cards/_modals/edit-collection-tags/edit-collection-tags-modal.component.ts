@@ -20,7 +20,7 @@ import {
   NgbPagination,
   NgbTooltip
 } from '@ng-bootstrap/ng-bootstrap';
-import {ToastrService} from 'ngx-toastr';
+import {ToastrService} from '@openng/ngx-toastr';
 import {concat, debounceTime, delay, distinctUntilChanged, forkJoin, last, Observable, switchMap, tap} from 'rxjs';
 import {ConfirmService} from 'src/app/shared/confirm.service';
 import {UtilityService} from 'src/app/shared/_services/utility.service';

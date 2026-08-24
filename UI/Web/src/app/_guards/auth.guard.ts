@@ -1,6 +1,6 @@
 import {inject} from '@angular/core';
 import {CanActivateFn, Router} from '@angular/router';
-import {ToastrService} from 'ngx-toastr';
+import {ToastrService} from '@openng/ngx-toastr';
 import {AccountService} from '../_services/account.service';
 import {TranslocoService} from "@jsverse/transloco";
 import {APP_BASE_HREF} from "@angular/common";

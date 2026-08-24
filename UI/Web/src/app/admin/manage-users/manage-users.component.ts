@@ -4,7 +4,7 @@ import {NgbTooltip} from '@ng-bootstrap/ng-bootstrap';
 import {MemberService} from 'src/app/_services/member.service';
 import {Member} from 'src/app/_models/auth/member';
 import {AccountService, Role} from 'src/app/_services/account.service';
-import {ToastrService} from 'ngx-toastr';
+import {ToastrService} from '@openng/ngx-toastr';
 import {ResetPasswordModalComponent} from '../_modals/reset-password-modal/reset-password-modal.component';
 import {ConfirmService} from 'src/app/shared/confirm.service';
 import {MessageHubService} from 'src/app/_services/message-hub.service';

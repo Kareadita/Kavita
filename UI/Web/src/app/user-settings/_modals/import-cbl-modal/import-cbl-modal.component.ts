@@ -12,7 +12,7 @@ import {CblSeriesCandidate} from '../../../_models/reading-list/cbl/cbl-series-c
 import {Chapter} from '../../../_models/chapter';
 import {CblService} from '../../../_services/cbl.service';
 import {SearchService} from '../../../_services/search.service';
-import {ToastrService} from 'ngx-toastr';
+import {ToastrService} from '@openng/ngx-toastr';
 import {TypeaheadSettings} from '../../../typeahead/_models/typeahead-settings';
 import {SearchResult} from '../../../_models/search/search-result';
 import {UtilityService} from '../../../shared/_services/utility.service';

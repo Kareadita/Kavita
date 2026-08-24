@@ -10,7 +10,7 @@ import {
   TrackByFunction
 } from '@angular/core';
 import {NgbTooltip} from '@ng-bootstrap/ng-bootstrap';
-import {ToastrService} from 'ngx-toastr';
+import {ToastrService} from '@openng/ngx-toastr';
 import {distinctUntilChanged, filter, finalize, take} from 'rxjs/operators';
 import {ConfirmService} from 'src/app/shared/confirm.service';
 import {

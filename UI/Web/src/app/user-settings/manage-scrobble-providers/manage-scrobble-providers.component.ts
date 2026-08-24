@@ -37,7 +37,7 @@ import {EVENTS, MessageHubService} from "../../_services/message-hub.service";
 import {ScrobbleProviderUpdatedEvent} from "../../_models/events/scrobble-provider-updated-event";
 import {NgOptimizedImage} from "@angular/common";
 import {NgbTooltip} from "@ng-bootstrap/ng-bootstrap";
-import {ToastrService} from "ngx-toastr";
+import {ToastrService} from '@openng/ngx-toastr';
 import {AccordionComponent} from "../../shared/accordion/accordion.component";
 import {LoadingComponent} from "../../shared/loading/loading.component";
 import {ProviderImagePipe} from "../../_pipes/provider-image.pipe";

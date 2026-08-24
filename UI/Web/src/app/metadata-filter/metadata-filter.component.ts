@@ -28,7 +28,7 @@ import {AsyncPipe, NgClass, NgTemplateOutlet} from '@angular/common';
 import {translate, TranslocoModule, TranslocoService} from "@jsverse/transloco";
 import {MetadataBuilderComponent} from "./_components/metadata-builder/metadata-builder.component";
 import {FilterService} from "../_services/filter.service";
-import {ToastrService} from "ngx-toastr";
+import {ToastrService} from '@openng/ngx-toastr';
 import {SortButtonComponent} from "../_single-module/sort-button/sort-button.component";
 import {FilterSettingsBase} from "./filter-settings";
 import {FilterUtilitiesService} from "../shared/_services/filter-utilities.service";

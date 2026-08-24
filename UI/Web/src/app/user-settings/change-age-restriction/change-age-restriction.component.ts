@@ -1,5 +1,5 @@
 import {ChangeDetectionStrategy, Component, effect, inject, signal} from '@angular/core';
-import {ToastrService} from 'ngx-toastr';
+import {ToastrService} from '@openng/ngx-toastr';
 import {AgeRestriction} from 'src/app/_models/metadata/age-restriction';
 import {AgeRating} from 'src/app/_models/metadata/age-rating';
 import {AccountService} from 'src/app/_services/account.service';

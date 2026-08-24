@@ -1,6 +1,6 @@
 import {ChangeDetectionStrategy, ChangeDetectorRef, Component, DestroyRef, inject, input, OnInit,} from '@angular/core';
 import {DeviceService} from "../../../_services/device.service";
-import {ToastrService} from "ngx-toastr";
+import {ToastrService} from '@openng/ngx-toastr';
 import {Device} from "../../../_models/device/device";
 import {FormControl, FormGroup, ReactiveFormsModule, Validators} from "@angular/forms";
 import {DevicePlatform, devicePlatforms} from "../../../_models/device/device-platform";

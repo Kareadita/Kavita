@@ -34,7 +34,7 @@ import {
 import {DrawerService} from '../../../_services/drawer.service';
 import {KavitaplusDrawerComponent} from '../kavitaplus-drawer/kavitaplus-drawer.component';
 import {KavitaplusTooltipComponent} from '../kavitaplus-tooltip/kavitaplus-tooltip.component';
-import {ToastrService} from 'ngx-toastr';
+import {ToastrService} from '@openng/ngx-toastr';
 import {catchError, debounceTime, EMPTY, of, ReplaySubject, tap} from 'rxjs';
 import {BulkSelectionService} from 'src/app/cards/bulk-selection.service';
 import {EditSeriesModalComponent} from 'src/app/cards/_modals/edit-series-modal/edit-series-modal.component';

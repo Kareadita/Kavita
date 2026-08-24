@@ -1,7 +1,7 @@
 import {ChangeDetectorRef, Component, computed, DestroyRef, inject, OnInit, signal} from '@angular/core';
 import {FormControl, FormGroup, NonNullableFormBuilder, ReactiveFormsModule, Validators} from '@angular/forms';
 import {NgbActiveModal} from '@ng-bootstrap/ng-bootstrap';
-import {ToastrService} from 'ngx-toastr';
+import {ToastrService} from '@openng/ngx-toastr';
 import {AgeRestriction} from 'src/app/_models/metadata/age-restriction';
 import {InviteUserResponse} from 'src/app/_models/auth/invite-user-response';
 import {Library} from 'src/app/_models/library/library';
