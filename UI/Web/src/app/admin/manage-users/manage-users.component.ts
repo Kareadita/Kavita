@@ -13,7 +13,6 @@ import {DefaultDatePipe} from "../../_pipes/default-date.pipe";
 import {DefaultValuePipe} from "../../_pipes/default-value.pipe";
 import {UtcToLocalTimePipe} from "../../_pipes/utc-to-local-time.pipe";
 import {LoadingComponent} from "../../shared/loading/loading.component";
-import {TimeAgoPipe} from "../../_pipes/time-ago.pipe";
 import {SentenceCasePipe} from "../../_pipes/sentence-case.pipe";
 import {UtcToLocalDatePipe} from "../../_pipes/utc-to-locale-date.pipe";
 import {RoleLocalizedPipe} from "../../_pipes/role-localized.pipe";
@@ -35,6 +34,7 @@ import {MemberService} from "../../_services/member.service";
 import {ConfirmService} from "../../shared/confirm.service";
 import {MessageHubService} from "../../_services/message-hub.service";
 import {Member} from "../../_models/auth/member";
+import {TimeDifferencePipe} from "../../_pipes/time-difference.pipe";
 
 @Component({
   selector: 'app-manage-users',
@@ -42,8 +42,9 @@ import {Member} from "../../_models/auth/member";
   styleUrls: ['./manage-users.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [NgbTooltip, TagBadgeComponent, AsyncPipe, TitleCasePipe, TranslocoModule, DefaultDatePipe, NgClass,
-    DefaultValuePipe, UtcToLocalTimePipe, LoadingComponent, TimeAgoPipe, SentenceCasePipe, UtcToLocalDatePipe,
-    RoleLocalizedPipe, ImageComponent, EmptyStateComponent, ResponsiveTableComponent, NgTemplateOutlet, DatatableComponent, DataTableColumnDirective, DataTableColumnCellDirective, DataTableColumnHeaderDirective, RouterLink]
+    DefaultValuePipe, UtcToLocalTimePipe, LoadingComponent, SentenceCasePipe, UtcToLocalDatePipe,
+    RoleLocalizedPipe, ImageComponent, EmptyStateComponent, ResponsiveTableComponent, NgTemplateOutlet, DatatableComponent,
+    DataTableColumnDirective, DataTableColumnCellDirective, DataTableColumnHeaderDirective, RouterLink, TimeDifferencePipe]
 })
 export class ManageUsersComponent implements OnInit {
 

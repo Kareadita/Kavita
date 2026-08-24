@@ -30,14 +30,14 @@
 
           <div class="small mt-2">
             <span class="fw-bold me-1">{{t('joined-label')}}</span>
-             {{user.createdUtc | utcToLocalDate | timeAgo}}
+             {{user.createdUtc | utcToLocalDate | timeDifference}}
           </div>
 
           @if (userStatsResource.hasValue() && userStatsResource.value()) {
             @let data = userStatsResource.value();
             <div class="small mt-2">
               <span class="fw-bold me-1">{{t('last-read-label')}}</span>
-              {{data.lastActiveUtc | utcToLocalDate | timeAgo | sentenceCase}}
+              {{data.lastActiveUtc | utcToLocalDate | timeDifference | sentenceCase}}
             </div>
 
             <div class="fw-bold small mt-2">
