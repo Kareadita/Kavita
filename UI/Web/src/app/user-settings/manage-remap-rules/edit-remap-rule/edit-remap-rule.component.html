@@ -18,14 +18,17 @@
           </div>
           <div class="col-md-4">
             <label class="form-label">{{t('kavita-series-label')}}</label>
-            <app-typeahead [settings]="seriesSettings" [reset]="seriesReset" (selectedData)="onSeriesSelected($event)" id="remap-series">
-              <ng-template #optionItem let-item let-position="idx" let-value="value">
-                {{item.name}}
-              </ng-template>
-              <ng-template #badgeItem let-item let-position="idx">
-                {{item.name}}
-              </ng-template>
-            </app-typeahead>
+            @let seriesConfig = seriesSettings();
+            @if (seriesConfig) {
+              <app-typeahead [settings]="seriesConfig" [reset]="seriesReset" (selectedData)="onSeriesSelected($event)" id="remap-series">
+                <ng-template #optionItem let-item let-position="idx" let-value="value">
+                  {{item.name}}
+                </ng-template>
+                <ng-template #badgeItem let-item let-position="idx">
+                  {{item.name}}
+                </ng-template>
+              </app-typeahead>
+            }
           </div>
         </div>
 

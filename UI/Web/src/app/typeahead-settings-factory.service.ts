@@ -10,6 +10,8 @@ import {of} from "rxjs";
 import {AccountService} from "./_services/account.service";
 import {Language} from "./_models/metadata/language";
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
+import {SearchResult} from "./_models/search/search-result";
+import {SearchService} from "./_services/search.service";
 
 /**
  * Partial configuration for overrides. All properties optional.
@@ -56,12 +58,17 @@ export interface TypeaheadFactoryLanguageParameters extends TypeaheadFactoryPara
   currentSelectedLanguage?: string | Array<string> | undefined;
 }
 
+export interface TypeaheadFactorySearchResultParameters extends TypeaheadFactoryParameters<SearchResult> {
+  excludeSeriesId?: number;
+}
+
 @Injectable({providedIn: 'root'})
 export class TypeaheadSettingsFactoryService {
 
   private readonly utilityService = inject(UtilityService);
   private readonly metadataService = inject(MetadataService);
   private readonly accountService = inject(AccountService);
+  private readonly searchService = inject(SearchService);
   private readonly destroyRef = inject(DestroyRef);
 
 
@@ -171,6 +178,36 @@ export class TypeaheadSettingsFactoryService {
     return this.applyOverrides(settings, overrides);
   }
 
+  forSearchResult(params: TypeaheadFactorySearchResultParameters) {
+    const {id, savedData, excludeSeriesId, overrides} = params;
+
+    const settings = new TypeaheadSettings<SearchResult>();
+    settings.minCharacters = 2;
+    settings.multiple = false;
+    settings.id = id;
+    settings.unique = true;
+    settings.addIfNonExisting = false;
+    settings.fetchFn = (searchFilter: string) => this.searchService.search(searchFilter).pipe(
+      map(group => group.series),
+      map(items => settings.compareFn(items, searchFilter)),
+      map(series => series.filter(s => !excludeSeriesId || s.seriesId !== excludeSeriesId)),
+    );
+    settings.trackByIdentityFn = (idx, item) => item.seriesId + '';
+    settings.compareFn = (options: SearchResult[], filter: string) => {
+      return options.filter(m => {
+        return this.utilityService.filter(m.name, filter) || this.utilityService.filter(m.localizedName, filter);
+      });
+    };
+    settings.selectionCompareFn = (a: SearchResult, b: SearchResult) => {
+      return a.seriesId === b.seriesId;
+    };
+    settings.dropdownPosition = 'body';
+    settings.overlayMinWidth = 400;
+
+    if (savedData !== undefined) settings.savedData = savedData;
+
+    return this.applyOverrides(settings, overrides);
+  }
 
 
 
