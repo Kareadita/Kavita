@@ -1,0 +1,9 @@
+<ng-container *transloco="let t; prefix: 'validation'">
+  @if (visibleErrors().length) {
+    <div [id]="id() + '-validations'" class="invalid-feedback d-block" role="alert">
+      @for (error of visibleErrors(); track error.key) {
+        <div>{{ error.title }}</div>
+      }
+    </div>
+  }
+</ng-container>
