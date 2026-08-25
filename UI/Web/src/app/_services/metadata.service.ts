@@ -148,7 +148,7 @@ export class MetadataService {
 
 
   /**
-   * All the potential language tags there can be
+   * All the potential language tags there can be. Cached in memory.
    */
   getAllValidLanguages() {
     if (this.validLanguages != undefined && this.validLanguages.length > 0) {

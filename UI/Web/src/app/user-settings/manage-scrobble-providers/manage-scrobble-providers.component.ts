@@ -50,6 +50,7 @@ import {TimeDifferencePipe} from "../../_pipes/time-difference.pipe";
 import {TypeaheadComponent} from "../../typeahead/_components/typeahead.component";
 import {AgeRatingPipe} from "../../_pipes/age-rating.pipe";
 import {ActivatedRoute} from "@angular/router";
+import {TypeaheadSettingsFactoryService} from "../../typeahead-settings-factory.service";
 
 type ReadStatusTransitionRuleFromGroup = FormGroup<{
   enabled: FormControl<boolean>;
@@ -128,6 +129,7 @@ export class ManageScrobbleProvidersComponent implements OnInit {
   private readonly scrobblingService = inject(ScrobblingService);
   private readonly toastr = inject(ToastrService);
   private readonly route = inject(ActivatedRoute);
+  private readonly typeaheadSettingsFactory = inject(TypeaheadSettingsFactoryService);
 
   formGroups = signal<Map<ScrobbleProvider, ScrobbleProviderSettingsFormGroup>>(new Map());
   userScrobbleProviders = signal<Map<ScrobbleProvider, UserScrobbleProvider>>(new Map());
@@ -254,16 +256,10 @@ export class ManageScrobbleProvidersComponent implements OnInit {
 
     const userScrobbleProvider = this.userScrobbleProviders().get(provider)!;
 
-    const settings = new TypeaheadSettings<Library>();
-    settings.id = "libraries-" + provider;
-    settings.multiple = true;
-    settings.fetchFn = () => of(libraries);
-    settings.compareFn = (optionList, filter) => optionList.filter(item => item.name.toLowerCase().includes(filter.toLowerCase()));
-    settings.savedData = libraries.filter(l => userScrobbleProvider.settings.libraries.includes(l.id));
-    settings.trackByIdentityFn = (index, value) => value.id + '';
-    settings.minCharacters = 0; // All preloaded
-
-    return settings;
+    return this.typeaheadSettingsFactory.forLibraries({id: `libraries-${provider}`, libraries, overrides: {
+        savedData: libraries.filter(l => userScrobbleProvider.settings.libraries.includes(l.id))
+      }
+    });
   }
 
   updateLibrarySelection(provider: ScrobbleProvider, libraries: Library[]) {

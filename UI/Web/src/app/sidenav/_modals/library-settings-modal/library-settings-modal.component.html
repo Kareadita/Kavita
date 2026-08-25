@@ -264,8 +264,9 @@
             <div class="row g-0 mt-4 mb-4">
               <app-setting-item [title]="t('default-language-label')" [subtitle]="t('default-language-tooltip')" [toggleOnViewClick]="false" [showEdit]="false">
                 <ng-template #view>
-                  @if (languageSettings) {
-                    <app-typeahead (selectedData)="updateLanguage($event)" [settings]="languageSettings" [locked]="false">
+                  @let langConfig = languageSettings();
+                  @if (langConfig) {
+                    <app-typeahead (selectedData)="updateLanguage($event)" [settings]="langConfig" [locked]="false">
                       <ng-template #badgeItem let-item let-position="idx">
                         {{item.title}}
                       </ng-template>

@@ -17,7 +17,7 @@ import {TranslocoDirective} from "@jsverse/transloco";
 import {AccountService} from "../../_services/account.service";
 import {Chapter} from "../../_models/chapter";
 import {LibraryType} from "../../_models/library/library";
-import {setupLanguageSettings, TypeaheadSettings} from "../../typeahead/_models/typeahead-settings";
+import {TypeaheadSettings} from "../../typeahead/_models/typeahead-settings";
 import {Tag} from "../../_models/tag";
 import {Language} from "../../_models/metadata/language";
 import {Person, PersonRole} from "../../_models/metadata/person";
@@ -30,7 +30,7 @@ import {ActionService} from "../../_services/action.service";
 import {DownloadService} from '../../shared/_services/download.service';
 import {SettingItemComponent} from "../../settings/_components/setting-item/setting-item.component";
 import {TypeaheadComponent} from "../../typeahead/_components/typeahead.component";
-import {concat, forkJoin, Observable, of, tap} from "rxjs";
+import {concat, forkJoin, Observable, of} from "rxjs";
 import {map} from "rxjs/operators";
 import {EntityTitleComponent} from "../../cards/entity-title/entity-title.component";
 import {SettingButtonComponent} from "../../settings/_components/setting-button/setting-button.component";
@@ -130,7 +130,7 @@ export class EditChapterModalComponent implements OnInit {
 
 
   tagsSettings: TypeaheadSettings<Tag> = new TypeaheadSettings();
-  languageSettings: TypeaheadSettings<Language> | null = null;
+  languageSettings = signal<TypeaheadSettings<Language> | null>(null);
   peopleSettings: {[PersonRole: string]: TypeaheadSettings<Person>} = {};
   genreSettings: TypeaheadSettings<Genre> = new TypeaheadSettings();
 
@@ -189,12 +189,7 @@ export class EditChapterModalComponent implements OnInit {
 
     this.editForm.addControl('coverImageLocked', new FormControl(this.chapter.coverImageLocked, []));
 
-    this.metadataService.getAllValidLanguages().pipe(
-      tap(validLanguages => {
-        this.languageSettings = setupLanguageSettings(true, this.utilityService, validLanguages, this.chapter.language);
-        this.cdRef.markForCheck();
-      }),
-    ).subscribe();
+    this.languageSettings.set(this.typeaheadSettingsFactory.forLanguage({id: 'language', currentSelectedLanguage: this.chapter.language}));
 
     this.metadataService.getAllAgeRatings().subscribe(ratings => {
       this.ageRatings = ratings;

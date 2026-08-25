@@ -90,13 +90,13 @@ export class ManageUserPreferencesComponent implements OnInit {
   private readonly libraryService = inject(LibraryService);
   private readonly fb = inject(NonNullableFormBuilder);
   private readonly metadataService = inject(MetadataService);
-  private readonly typeaheadSettingFactoryService = inject(TypeaheadSettingsFactoryService);
+  private readonly typeaheadSettingFactory = inject(TypeaheadSettingsFactoryService);
 
   protected readonly isReadOnly = this.accountService.hasReadOnlyRole;
   loading = signal(true);
   ageRatings = signal<AgeRatingDto[]>([]);
   locales = signal<KavitaLocale[]>([]);
-  socialLibrariesTypeaheadSettings = signal(new TypeaheadSettings<Library>());
+  socialLibrariesTypeaheadSettings = signal<TypeaheadSettings<Library> | null>(null);
 
   settingsForm!: UserPreferencesForm;
 
@@ -131,7 +131,7 @@ export class ManageUserPreferencesComponent implements OnInit {
         title: '',
       }, ...ageRatings]);
 
-      this.socialLibrariesTypeaheadSettings.set(this.typeaheadSettingFactoryService.forLibraries({id: 'social-libraries', libraries}));
+      this.socialLibrariesTypeaheadSettings.set(this.typeaheadSettingFactory.forLibraries({id: 'social-libraries', libraries}));
 
       this.settingsForm = this.fb.group({
         theme: this.fb.control<SiteTheme>(pref.theme),

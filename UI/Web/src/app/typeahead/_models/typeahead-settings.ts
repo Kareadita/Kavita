@@ -1,8 +1,5 @@
-import {Observable, of} from 'rxjs';
+import {Observable} from 'rxjs';
 import {FormControl} from '@angular/forms';
-import {Language} from "../../_models/metadata/language";
-import {map} from "rxjs/operators";
-import {UtilityService} from "../../shared/_services/utility.service";
 
 export type SelectionCompareFn<T> = (a: T, b: T) => boolean;
 
@@ -83,49 +80,4 @@ export class TypeaheadSettings<T> {
      * Defaults to 0 (overlay matches trigger width exactly).
      */
     overlayMinWidth: number = 0;
-}
-
-/**
- * Configure a new TypeaheadSettings<Language> as a language type ahead
- * @param showLocked
- * @param utilityService
- * @param allLanguages
- * @param currentSelectedLanguage
- * @returns settings
- */
-export function setupLanguageSettings(
-  showLocked: boolean,
-  utilityService: UtilityService,
-  allLanguages: Array<Language>,
-  currentSelectedLanguage: string | Array<string> | undefined,
-): TypeaheadSettings<Language> {
-  const settings = new TypeaheadSettings<Language>();
-
-  settings.minCharacters = 0;
-  settings.multiple = false;
-  settings.id = 'language';
-  settings.unique = true;
-  settings.showLocked = showLocked;
-  settings.addIfNonExisting = false;
-  settings.compareFn = (options: Language[], filter: string) => {
-    return options.filter(m => utilityService.filter(m.title, filter));
-  }
-  settings.compareFnForAdd = (options: Language[], filter: string) => {
-    return options.filter(m => utilityService.filterMatches(m.title, filter));
-  }
-  settings.fetchFn = (filter: string) => of(allLanguages)
-    .pipe(map(items => settings.compareFn(items, filter)));
-
-  settings.selectionCompareFn = (a: Language, b: Language) => {
-    return a.isoCode === b.isoCode;
-  }
-
-  settings.trackByIdentityFn = (_, value) => value.isoCode;
-
-  const l = allLanguages.find(l => l.isoCode === currentSelectedLanguage);
-  if (l !== undefined) {
-    settings.savedData = l;
-  }
-
-  return settings;
 }

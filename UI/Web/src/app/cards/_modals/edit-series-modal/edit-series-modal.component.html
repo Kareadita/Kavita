@@ -91,10 +91,11 @@
         <div class="row">
           <div class="col-lg-8 col-md-12 pe-2">
             <div class="mb-3">
-              @if (languageSettings) {
+              @let langConf = languageSettings();
+              @if (langConf) {
                 <app-setting-item [title]="t('language-label')" [toggleOnViewClick]="false" [showEdit]="false">
                   <ng-template #view>
-                    <app-typeahead (selectedData)="updateLanguage($event);metadata.languageLocked = true;" [settings]="languageSettings"
+                    <app-typeahead (selectedData)="updateLanguage($event);metadata.languageLocked = true;" [settings]="langConf"
                                    [(locked)]="metadata.languageLocked" (onUnlock)="metadata.languageLocked = false"
                                    (newItemAdded)="metadata.languageLocked = true">
                       <ng-template #badgeItem let-item let-position="idx">

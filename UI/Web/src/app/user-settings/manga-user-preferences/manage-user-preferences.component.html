@@ -186,14 +186,17 @@
               [showEdit]="false" [canEdit]="false"
             >
               <ng-template #view>
-                <app-typeahead [settings]="socialLibrariesTypeaheadSettings()" (selectedData)="syncFormWithTypeahead($event)" [disabled]="isReadOnly()">
-                  <ng-template #optionItem let-lib>
-                    {{lib.name}}
-                  </ng-template>
-                  <ng-template #badgeItem let-lib>
-                    {{lib.name}}
-                  </ng-template>
-                </app-typeahead>
+                @let socialLibConfig = socialLibrariesTypeaheadSettings();
+                @if (socialLibConfig) {
+                  <app-typeahead [settings]="socialLibConfig" (selectedData)="syncFormWithTypeahead($event)" [disabled]="isReadOnly()">
+                    <ng-template #optionItem let-lib>
+                      {{lib.name}}
+                    </ng-template>
+                    <ng-template #badgeItem let-lib>
+                      {{lib.name}}
+                    </ng-template>
+                  </app-typeahead>
+                }
               </ng-template>
             </app-setting-item>
           }

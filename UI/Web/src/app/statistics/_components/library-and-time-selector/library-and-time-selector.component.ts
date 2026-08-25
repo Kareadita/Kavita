@@ -22,7 +22,6 @@ import {StatsFilter} from "../../_models/stats-filter";
 import {tap} from "rxjs";
 import {LibraryService} from "../../../_services/library.service";
 import {TranslocoDirective} from "@jsverse/transloco";
-import {UtilityService} from "../../../shared/_services/utility.service";
 import {ReaderService} from "../../../_services/reader.service";
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import {TypeaheadSettingsFactoryService} from "../../../typeahead-settings-factory.service";
@@ -50,7 +49,6 @@ export interface LibraryAndTimeFilterGroup {
 export class LibraryAndTimeSelectorComponent implements OnInit {
 
   private readonly libraryService = inject(LibraryService);
-  private readonly utilityService = inject(UtilityService);
   private readonly readerService = inject(ReaderService);
   private readonly elementRef = inject(ElementRef);
   private readonly typeaheadSettingFactoryService = inject(TypeaheadSettingsFactoryService);

@@ -12,7 +12,7 @@ import {
 import {FormBuilder, FormControl, FormGroup, ReactiveFormsModule, Validators} from '@angular/forms';
 import {NgbActiveModal, NgbCollapse} from '@ng-bootstrap/ng-bootstrap';
 import {concat, delay, forkJoin, last, Observable, of, tap} from 'rxjs';
-import {map, switchMap} from 'rxjs/operators';
+import {map} from 'rxjs/operators';
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import {TypeaheadComponent} from "../../../typeahead/_components/typeahead.component";
 import {CoverImageChooserComponent} from "../../cover-image-chooser/cover-image-chooser.component";
@@ -60,7 +60,7 @@ import {LibraryService} from "../../../_services/library.service";
 import {UploadService} from "../../../_services/upload.service";
 import {MetadataService} from "../../../_services/metadata.service";
 import {Person, PersonRole} from "../../../_models/metadata/person";
-import {setupLanguageSettings, TypeaheadSettings} from "../../../typeahead/_models/typeahead-settings";
+import {TypeaheadSettings} from "../../../typeahead/_models/typeahead-settings";
 import {Genre} from "../../../_models/metadata/genre";
 import {AgeRatingDto} from "../../../_models/metadata/age-rating-dto";
 import {PublicationStatusDto} from "../../../_models/metadata/publication-status-dto";
@@ -153,7 +153,7 @@ export class EditSeriesModalComponent implements OnInit {
 
   // Typeaheads
   tagsSettings: TypeaheadSettings<Tag> = new TypeaheadSettings();
-  languageSettings: TypeaheadSettings<Language> | null = null;
+  languageSettings = signal<TypeaheadSettings<Language> | null>(null);
   peopleSettings: {[PersonRole: string]: TypeaheadSettings<Person>} = {};
   genreSettings: TypeaheadSettings<Genre> = new TypeaheadSettings();
 
@@ -321,11 +321,13 @@ export class EditSeriesModalComponent implements OnInit {
 
 
   setupTypeaheads() {
+
+    this.languageSettings.set(this.typeaheadSettingsFactory.forLanguage({id: 'language', currentSelectedLanguage: this.metadata.language}));
+
     forkJoin([
       this.setupTagSettings(),
       this.setupGenreTypeahead(),
       this.setupPersonTypeahead(),
-      this.setupLanguageTypeahead()
     ]).subscribe(results => {
       this.cdRef.markForCheck();
     });
@@ -411,19 +413,6 @@ export class EditSeriesModalComponent implements OnInit {
       this.peopleSettings[role] = personSettings;
       return of(true);
     }
-  }
-
-  setupLanguageTypeahead() {
-
-
-    return this.metadataService.getAllValidLanguages()
-      .pipe(
-        tap(validLanguages => {
-          this.languageSettings = setupLanguageSettings(true, this.utilityService, validLanguages, this.metadata.language);
-          this.cdRef.markForCheck();
-        }),
-        switchMap(_ => of(true))
-    );
   }
 
   setupPersonTypeahead() {

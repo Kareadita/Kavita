@@ -1,13 +1,15 @@
-import {inject, Injectable} from '@angular/core';
+import {DestroyRef, inject, Injectable} from '@angular/core';
 import {TypeaheadSettings} from "./typeahead/_models/typeahead-settings";
 import {Person, PersonRole} from "./_models/metadata/person";
-import {map} from "rxjs/operators";
+import {map, shareReplay} from "rxjs/operators";
 import {UtilityService} from "./shared/_services/utility.service";
 import {MetadataService} from "./_services/metadata.service";
 import {Chapter} from "./_models/chapter";
 import {Library} from "./_models/library/library";
 import {of} from "rxjs";
 import {AccountService} from "./_services/account.service";
+import {Language} from "./_models/metadata/language";
+import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 
 /**
  * Partial configuration for overrides. All properties optional.
@@ -50,12 +52,25 @@ export interface TypeaheadFactoryLibraryParameters extends TypeaheadFactoryParam
   libraries: Library[]
 }
 
+export interface TypeaheadFactoryLanguageParameters extends TypeaheadFactoryParameters<Language> {
+  currentSelectedLanguage?: string | Array<string> | undefined;
+}
+
 @Injectable({providedIn: 'root'})
 export class TypeaheadSettingsFactoryService {
 
   private readonly utilityService = inject(UtilityService);
   private readonly metadataService = inject(MetadataService);
   private readonly accountService = inject(AccountService);
+  private readonly destroyRef = inject(DestroyRef);
+
+
+  private readonly allLanguages$ = this.metadataService.getAllValidLanguages()
+    .pipe(shareReplay({bufferSize: 1, refCount: false}), takeUntilDestroyed(this.destroyRef));
+
+  constructor() {
+    this.allLanguages$.subscribe(); // pre-cache the language for the session
+  }
 
   forLibraries(params: TypeaheadFactoryLibraryParameters) {
     const {libraries, savedData, overrides} = params;
@@ -115,6 +130,49 @@ export class TypeaheadSettingsFactoryService {
     return this.applyOverrides(settings, overrides);
 
   }
+
+
+  forLanguage(params: TypeaheadFactoryLanguageParameters) {
+    const {id, currentSelectedLanguage, savedData, overrides} = params;
+    const settings = new TypeaheadSettings<Language>();
+
+
+    settings.minCharacters = 0;
+    settings.multiple = false;
+    settings.id = id;
+    settings.unique = true;
+    settings.showLocked = true;
+    settings.addIfNonExisting = false;
+    settings.compareFn = (options: Language[], filter: string) => {
+      return options.filter(m => this.utilityService.filter(m.title, filter));
+    }
+    settings.compareFnForAdd = (options: Language[], filter: string) => {
+      return options.filter(m => this.utilityService.filterMatches(m.title, filter));
+    }
+    settings.fetchFn = (filter: string) => this.allLanguages$
+      .pipe(map(items => settings.compareFn(items, filter)));
+
+    settings.selectionCompareFn = (a: Language, b: Language) => {
+      return a.isoCode === b.isoCode;
+    }
+
+    settings.trackByIdentityFn = (_, value) => value.isoCode;
+
+    // Language works differently, savedData isn't passed but currentSelectedLanguage is
+    if (currentSelectedLanguage) {
+      // We pre-call this so it's already cached in memory
+      this.allLanguages$.subscribe(languages => {
+        settings.savedData = languages.find(l => l.isoCode === currentSelectedLanguage) ?? [];
+      });
+    } else if (savedData) {
+      settings.savedData = savedData;
+    }
+
+    return this.applyOverrides(settings, overrides);
+  }
+
+
+
 
   /**
    * Applies overrides onto the settings instance. Mutates rather than spreading so that
