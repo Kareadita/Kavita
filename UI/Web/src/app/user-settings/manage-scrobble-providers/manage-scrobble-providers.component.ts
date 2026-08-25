@@ -41,7 +41,7 @@ import {ToastrService} from '@openng/ngx-toastr';
 import {AccordionComponent} from "../../shared/accordion/accordion.component";
 import {LoadingComponent} from "../../shared/loading/loading.component";
 import {ProviderImagePipe} from "../../_pipes/provider-image.pipe";
-import {ScrobbleProviderDescriptionPipe} from "../manga-user-preferences/scrobble-provider-description.pipe";
+import {ScrobbleProviderDescriptionPipe} from "../../_pipes/scrobble-provider-description.pipe";
 import {TagBadgeComponent} from "../../shared/tag-badge/tag-badge.component";
 import {UtcToLocalDatePipe} from "../../_pipes/utc-to-locale-date.pipe";
 import {DefaultValuePipe} from "../../_pipes/default-value.pipe";

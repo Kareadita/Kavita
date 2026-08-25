@@ -5,6 +5,9 @@ import {map} from "rxjs/operators";
 import {UtilityService} from "./shared/_services/utility.service";
 import {MetadataService} from "./_services/metadata.service";
 import {Chapter} from "./_models/chapter";
+import {Library} from "./_models/library/library";
+import {of} from "rxjs";
+import {AccountService} from "./_services/account.service";
 
 /**
  * Partial configuration for overrides. All properties optional.
@@ -43,14 +46,43 @@ export interface TypeaheadFactoryChapterParameters extends TypeaheadFactoryParam
   seriesId: number;
 }
 
+export interface TypeaheadFactoryLibraryParameters extends TypeaheadFactoryParameters<Library> {
+  libraries: Library[]
+}
+
 @Injectable({providedIn: 'root'})
 export class TypeaheadSettingsFactoryService {
 
   private readonly utilityService = inject(UtilityService);
   private readonly metadataService = inject(MetadataService);
+  private readonly accountService = inject(AccountService);
 
+  forLibraries(params: TypeaheadFactoryLibraryParameters) {
+    const {libraries, savedData, overrides} = params;
 
-  // Custom items: fetchFn, role, addIfNonExisting, multiple
+    const selectedLibs = this.accountService.userPreferences()!.socialPreferences.socialLibraries;
+
+    const settings = new TypeaheadSettings<Library>();
+    settings.multiple = true;
+    settings.unique = true;
+    settings.minCharacters = 0;
+    settings.addIfNonExisting = false;
+    settings.savedData = libraries.filter(l => selectedLibs.includes(l.id));
+    settings.compareFn = (libs, filter) => libs.filter(l => l.name.toLowerCase().includes(filter.toLowerCase()));
+    settings.compareFnForAdd = (options: Library[], filter: string) => {
+      return options.filter(l => this.utilityService.filterMatches(l.name, filter));
+    }
+    settings.trackByIdentityFn = (idx, l) => `${l.id}`;
+    settings.fetchFn = (filter) => of(settings.compareFn(libraries, filter));
+    settings.selectionCompareFn = (a: Library, b: Library) => {
+      return a.id === b.id;
+    }
+
+    if (savedData !== undefined) settings.savedData = savedData;
+
+    return this.applyOverrides(settings, overrides);
+  }
+
   forPerson(params: TypeaheadFactoryPersonParameters) {
     const {id, role, addIfNonExisting = true, savedData, overrides} = params;
 

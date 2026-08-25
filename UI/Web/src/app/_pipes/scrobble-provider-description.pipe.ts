@@ -1,5 +1,5 @@
 import {Pipe, PipeTransform} from '@angular/core';
-import {ScrobbleProvider} from "../../_services/scrobbling.service";
+import {ScrobbleProvider} from "../_services/scrobbling.service";
 import {translate} from "@jsverse/transloco";
 
 @Pipe({

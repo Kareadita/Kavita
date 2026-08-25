@@ -186,7 +186,7 @@
               [showEdit]="false" [canEdit]="false"
             >
               <ng-template #view>
-                <app-typeahead [settings]="libraryTypeAheadSettings()" (selectedData)="syncFormWithTypeahead($event)" [disabled]="isReadOnly()">
+                <app-typeahead [settings]="socialLibrariesTypeaheadSettings()" (selectedData)="syncFormWithTypeahead($event)" [disabled]="isReadOnly()">
                   <ng-template #optionItem let-lib>
                     {{lib.name}}
                   </ng-template>
