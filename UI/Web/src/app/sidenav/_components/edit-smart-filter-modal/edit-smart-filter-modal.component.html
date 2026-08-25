@@ -2,7 +2,7 @@
 
   <div class="modal-header">
     <h4 class="modal-title" id="modal-basic-title">
-      {{t('edit-smart-filter', {name: smartFilter.name | sentenceCase})}}
+      {{t('edit-smart-filter', {name: smartFilter().name | sentenceCase})}}
     </h4>
 
     <button type="button" class="btn-close" [attr.aria-label]="t('close')" (click)="close()"></button>

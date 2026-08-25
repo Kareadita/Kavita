@@ -88,7 +88,7 @@ export class ManageSmartFiltersComponent implements OnInit {
     'entityType': new FormControl<FilterEntityType>(FilterEntityType.Series, []),
   });
   protected readonly filterApiMap = signal<{ [key: number]: Observable<any> }>({});
-  protected readonly actions = computed(() => this.actionFactoryService.getSmartFilterActions(this.filters(), this.shouldRenderFunc.bind(this)));
+  protected readonly actions = computed(() => this.actionFactoryService.getSmartFilterActions(this.shouldRenderFunc.bind(this)));
   protected readonly filterQuery = signal<string>('');
   protected readonly filterEntityType = signal<FilterEntityType>(FilterEntityType.Series);
   private readonly dashboardFilters = signal<Set<number>>(new Set<number>());

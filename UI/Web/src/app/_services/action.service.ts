@@ -825,7 +825,7 @@ export class ActionService {
    * Centralized handler for all smart filter actions.
    * Returns Observable<ActionResult<SmartFilter>> so the caller can react to effects.
    */
-  handleSmartFilterAction(action: ActionItem<SmartFilter>, smartFilter: SmartFilter, allFilters: SmartFilter[]) {
+  handleSmartFilterAction(action: ActionItem<SmartFilter>, smartFilter: SmartFilter) {
     switch (action.action) {
       case Action.AddToDashboard:
         return this.dashboardService.createDashboardStream(smartFilter.id).pipe(
@@ -837,8 +837,8 @@ export class ActionService {
         );
       case Action.Edit:
         const ref = this.modalService.open(EditSmartFilterModalComponent, editModal());
-        ref.componentInstance.smartFilter = smartFilter;
-        ref.componentInstance.allFilters = allFilters;
+        ref.setInput('smartFilter', smartFilter);
+
         return this.handleEditModal(ref, action, smartFilter);
       case Action.Delete:
       return from(this.confirmService.confirm(translate('toasts.confirm-delete-smart-filter'))).pipe(
