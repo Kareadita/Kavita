@@ -43,6 +43,7 @@ export class SettingItemComponent implements OnInit {
   showEdit = input(true);
   isEditMode = model(false);
   subtitle = input<string | undefined>();
+  /* Required for accessibility, esp validations */
   labelId = input<string | undefined>();
   toggleOnViewClick = input(true);
   /**
@@ -97,6 +98,7 @@ export class SettingItemComponent implements OnInit {
             return !this.elementRef.nativeElement.contains(mouseEvent.target) && hasSelection;
           }),
           tap(() => {
+            if (!this.showEdit()) return;
             this.isEditMode.set(false);
           })
         )
@@ -118,13 +120,13 @@ export class SettingItemComponent implements OnInit {
     const control = this.control();
     if (!control) return;
 
-    if (control.invalid) {
+    if (control.invalid && this.showEdit() && this.valueEditRef() != null) {
       this.isEditMode.set(true);
     }
 
     control.valueChanges.pipe(
       takeUntilDestroyed(this.destroyRef),
-      filter(() => control.invalid),
+      filter(() => control.invalid && this.showEdit() && this.valueEditRef() != null),
       tap(() => this.isEditMode.set(true)),
     ).subscribe();
   }

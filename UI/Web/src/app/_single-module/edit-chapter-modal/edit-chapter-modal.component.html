@@ -43,24 +43,20 @@
           </div>
 
           <div class="col-md-3 col-sm-12 mb-3">
-            <app-setting-item [title]="t('sort-order-label')" [showEdit]="false" [toggleOnViewClick]="false">
-              <ng-template #view>
-                @if (editForm.get('sortOrder'); as formControl) {
-                  <div class="input-group" [ngClass]="{'lock-active': chapter.sortOrderLocked}">
-                    <ng-container [ngTemplateOutlet]="lock" [ngTemplateOutletContext]="{ item: chapter, field: 'sortOrderLocked' }" />
-                    <input class="form-control" formControlName="sortOrder" type="number" min="0" step="0.1" inputmode="numeric"
-                           [class.is-invalid]="formControl.invalid && !formControl.untouched">
-                    @if (formControl.errors; as errors) {
-                      <div class="invalid-feedback">
-                        @if (errors.required) {
-                          <div>{{t('required-field')}}</div>
-                        }
-                      </div>
-                    }
-                  </div>
-                }
-              </ng-template>
-            </app-setting-item>
+            @if (editForm.get('sortOrder'); as formControl) {
+              <app-setting-item [title]="t('sort-order-label')" [showEdit]="false" [toggleOnViewClick]="false" [control]="formControl" labelId="sort-order">
+                <ng-template #view>
+
+                    <div class="input-group" [ngClass]="{'lock-active': chapter.sortOrderLocked}">
+                      <ng-container [ngTemplateOutlet]="lock" [ngTemplateOutletContext]="{ item: chapter, field: 'sortOrderLocked' }" />
+                      <input class="form-control" formControlName="sortOrder"  type="number" min="0" step="0.1" inputmode="numeric"
+                             id="sort-order" aria-describedby="sort-order-validations"
+                             [class.is-invalid]="formControl.invalid && !formControl.untouched">
+
+                    </div>
+                </ng-template>
+              </app-setting-item>
+            }
           </div>
         </div>
 

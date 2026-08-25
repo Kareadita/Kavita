@@ -169,7 +169,10 @@ export class EditChapterModalComponent implements OnInit {
     this.chooserConfig.set(this.coverChooserConfigFactory.forChapter(this.chapter, this.libraryType, this.seriesId));
 
     this.editForm.addControl('titleName', new FormControl(this.chapter.titleName, []));
-    this.editForm.addControl('sortOrder', new FormControl(Math.max(0, this.chapter.sortOrder), [Validators.required, Validators.min(0)]));
+    this.editForm.addControl('sortOrder', new FormControl(Math.max(0, this.chapter.sortOrder), {
+      nonNullable: true,
+      validators: [Validators.required, Validators.min(0)],
+    }));
     this.editForm.addControl('summary', new FormControl(this.chapter.summary || '', []));
     this.editForm.addControl('language', new FormControl(this.chapter.language, []));
     this.editForm.addControl('isbn', new FormControl(this.chapter.isbn, []));

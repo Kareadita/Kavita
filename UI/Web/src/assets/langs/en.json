@@ -4737,7 +4737,9 @@
         "valid-email": "This must be a valid email",
         "password-validation": "Password must be between 6 and 256 characters in length",
         "year-validation": "This must be a valid year greater than 1000 and 4 characters long",
-        "invalid-uri": "The provided uri is invalid"
+        "invalid-uri": "The provided uri is invalid",
+        "min": "Value must be greater than {{min}}",
+        "max": "Value must be less than {{max}}"
     },
 
     "entity-type": {

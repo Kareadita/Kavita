@@ -1,4 +1,7 @@
 <ng-container *transloco="let t;">
+
+  @let formCtrl = control();
+
   <div>
     <div class="settings-row g-0 row">
       <div class="col-auto {{fixedExtras() ? 'setting-title no-anim edit' : 'setting-title edit'}}">
@@ -25,19 +28,19 @@
       </div>
     </div>
 
-    @if (isEditMode()) {
+    @if (isEditMode() && valueEditRef()) {
       <ng-container [ngTemplateOutlet]="valueEditRef()" />
-
-      @let c = control();
-      @if (c) {
-        <app-validation-errors [id]="labelId() ?? title()" [control]="c" [messages]="validations()" />
-      }
-
     } @else {
       <span class="view-value" [class.non-selectable]="!canEdit() || !showEdit()" (click)="toggleEditMode()">
         <ng-container [ngTemplateOutlet]="valueViewRef()" />
       </span>
     }
+
+    <!--Some view only setups have inputs, so we need this to always render -->
+    @if (formCtrl) {
+      <app-validation-errors [id]="labelId() ?? title()" [control]="formCtrl" [messages]="validations()" />
+    }
+
 
     @if (subtitle()) {
       <div class="text-muted mt-2" [innerHTML]="subtitle()! | safeHtml"></div>

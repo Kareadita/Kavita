@@ -15,6 +15,8 @@ const DEFAULT_MESSAGES: Record<string, string> = {
   passwordValidation: 'password-validation',
   yearValidation: 'year-validation',
   invalidUri: 'invalid-uri',
+  min: 'min',
+  'max': 'max',
 };
 
 @Component({
