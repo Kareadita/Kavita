@@ -11,7 +11,7 @@ import {Member} from "../../../_models/auth/member";
   selector: 'app-reset-password-modal',
   templateUrl: './reset-password-modal.component.html',
   styleUrls: ['./reset-password-modal.component.scss'],
-  changeDetection: ChangeDetectionStrategy.Eager,
+  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [ReactiveFormsModule, SentenceCasePipe, TranslocoDirective]
 })
 export class ResetPasswordModalComponent {

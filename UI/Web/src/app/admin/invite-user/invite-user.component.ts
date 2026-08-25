@@ -1,13 +1,4 @@
-import {
-  ChangeDetectionStrategy,
-  ChangeDetectorRef,
-  Component,
-  computed,
-  DestroyRef,
-  inject,
-  OnInit,
-  signal
-} from '@angular/core';
+import {ChangeDetectionStrategy, Component, computed, DestroyRef, inject, OnInit, signal} from '@angular/core';
 import {FormControl, FormGroup, ReactiveFormsModule} from '@angular/forms';
 import {NgbActiveModal} from '@ng-bootstrap/ng-bootstrap';
 import {ToastrService} from '@openng/ngx-toastr';
@@ -34,13 +25,12 @@ import {InviteUserResponse} from "../../_models/auth/invite-user-response";
     selector: 'app-invite-user',
     templateUrl: './invite-user.component.html',
     styleUrls: ['./invite-user.component.scss'],
-  changeDetection: ChangeDetectionStrategy.Eager,
+  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [ReactiveFormsModule, RestrictionSelectorComponent,
     ApiKeyComponent, TranslocoDirective, SafeHtmlPipe, SettingMultiCheckBox, AsyncPipe]
 })
 export class InviteUserComponent implements OnInit {
 
-  private readonly cdRef = inject(ChangeDetectorRef);
   private readonly accountService = inject(AccountService);
   private readonly toastr = inject(ToastrService);
   protected readonly modal = inject(NgbActiveModal);
@@ -50,7 +40,7 @@ export class InviteUserComponent implements OnInit {
   /**
    * Maintains if the backend is sending an email
    */
-  isSending: boolean = false;
+  isSending = signal<boolean>(false);
   inviteForm: FormGroup<{
     email: FormControl<string>,
     libraries: FormControl<number[]>,
@@ -61,9 +51,9 @@ export class InviteUserComponent implements OnInit {
     roles: new FormControl<Role[]>([Role.Login]),
   }) as any;
   selectedRestriction: AgeRestriction = {ageRating: AgeRating.NotApplicable, includeUnknowns: false};
-  emailLink: string = '';
-  invited: boolean = false;
-  inviteError: boolean = false;
+  emailLink = signal<string>('');
+  invited = signal<boolean>(false);
+  inviteError = signal<boolean>(false);
 
   libraries = signal<Library[]>([]);
   libraryOptions = computed<MultiCheckBoxItem<number>[]>(() => this.libraries().map(l => {
@@ -78,10 +68,7 @@ export class InviteUserComponent implements OnInit {
   readOnlyWarning$!: Observable<string | undefined>;
 
 
-  makeLink: (val: string) => string = (_: string) => {return this.emailLink};
-
   get hasAdminRoleSelected() { return this.inviteForm.get('roles')!.value.includes(Role.Admin); };
-
   get email() { return this.inviteForm.get('email'); }
 
 
@@ -103,7 +90,7 @@ export class InviteUserComponent implements OnInit {
   }
 
   invite() {
-    this.isSending = true;
+    this.isSending.set(true);
 
     const email = this.inviteForm.get('email')!.value;
 
@@ -111,15 +98,13 @@ export class InviteUserComponent implements OnInit {
       ...this.inviteForm.getRawValue(),
       ageRestriction: this.selectedRestriction
     }).subscribe((data: InviteUserResponse) => {
-      this.emailLink = data.emailLink;
-      this.isSending = false;
-      this.invited = true;
-      this.cdRef.markForCheck();
+      this.emailLink.set(data.emailLink);
+      this.isSending.set(false);
+      this.invited.set(true);
 
       if (data.invalidEmail) {
         this.toastr.info(translate('toasts.email-not-sent'));
-        this.inviteError = true;
-        this.cdRef.markForCheck();
+        this.inviteError.set(true);
         return;
       }
 
@@ -130,14 +115,12 @@ export class InviteUserComponent implements OnInit {
 
     }, err => {
       // Note to self: If you need to catch an error, do it, but don't toast because interceptor handles that
-      this.isSending = false;
-      this.cdRef.markForCheck();
+      this.isSending.set(false);
     });
   }
 
   updateRestrictionSelection(restriction: AgeRestriction) {
     this.selectedRestriction = restriction;
-    this.cdRef.markForCheck();
   }
 
 }
