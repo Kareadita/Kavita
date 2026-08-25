@@ -48,6 +48,7 @@ import {SlicePipe} from "@angular/common";
 import {NgbTooltip} from "@ng-bootstrap/ng-bootstrap";
 import {ConfirmService} from "../../shared/confirm.service";
 import {AuthorityValidationResultPipe} from "./authority-validation-result.pipe";
+import {ValidationErrorsComponent} from "../../shared/_components/validation-errors/validation-errors.component";
 
 type OidcFormGroup = FormGroup<{
   autoLogin: FormControl<boolean>;
@@ -82,7 +83,8 @@ type OidcFormGroup = FormGroup<{
     SettingMultiTextFieldComponent,
     SlicePipe,
     NgbTooltip,
-    AuthorityValidationResultPipe
+    AuthorityValidationResultPipe,
+    ValidationErrorsComponent
   ],
   templateUrl: './manage-open-idconnect.component.html',
   styleUrl: './manage-open-idconnect.component.scss',

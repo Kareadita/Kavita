@@ -62,24 +62,17 @@
 
         <div class="row">
           <div class="col-md-9 col-sm-12 mb-3">
-            <app-setting-item [title]="t('isbn-label')" [showEdit]="false" [toggleOnViewClick]="false">
-              <ng-template #view>
-                @if (editForm.get('isbn'); as formControl) {
-                  <div class="input-group"  [ngClass]="{'lock-active': chapter.isbnLocked}">
-                    <ng-container [ngTemplateOutlet]="lock" [ngTemplateOutletContext]="{ item: chapter, field: 'isbnLocked' }" />
-                    <input class="form-control" formControlName="isbn" type="text"
-                           [class.is-invalid]="formControl.invalid && !formControl.untouched">
-                    @if (formControl.errors; as errors) {
-                      <div class="invalid-feedback">
-                        @if (errors.required) {
-                          <div>{{t('required-field')}}</div>
-                        }
-                      </div>
-                    }
-                  </div>
-                }
-              </ng-template>
-            </app-setting-item>
+            @if (editForm.get('isbn'); as formControl) {
+              <app-setting-item [title]="t('isbn-label')" [showEdit]="false" [toggleOnViewClick]="false" [control]="formControl" labelId="isbn">
+                <ng-template #view>
+                    <div class="input-group"  [ngClass]="{'lock-active': chapter.isbnLocked}">
+                      <ng-container [ngTemplateOutlet]="lock" [ngTemplateOutletContext]="{ item: chapter, field: 'isbnLocked' }" />
+                      <input class="form-control" formControlName="isbn" type="text" id="isbn" aria-describedby="isbn-validations"
+                             [class.is-invalid]="formControl.invalid && !formControl.untouched">
+                    </div>
+                </ng-template>
+              </app-setting-item>
+            }
           </div>
 
           <div class="col-md-3 col-sm-12 mb-3">

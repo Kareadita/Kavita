@@ -30,6 +30,7 @@ import {AccountService, allRoles, Role} from "../../_services/account.service";
 import {Member} from "../../_models/auth/member";
 import {Library} from "../../_models/library/library";
 import {AgeRestriction} from "../../_models/metadata/age-restriction";
+import {ValidationErrorsComponent} from "../../shared/_components/validation-errors/validation-errors.component";
 
 const AllowedUsernameCharacters = /^[a-zA-Z0-9\-._@+/]*$/;
 const EmailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -38,7 +39,7 @@ const EmailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     selector: 'app-edit-user',
     templateUrl: './edit-user.component.html',
     styleUrls: ['./edit-user.component.scss'],
-  imports: [ReactiveFormsModule, RestrictionSelectorComponent, SentenceCasePipe, TranslocoDirective, AsyncPipe, IdentityProviderPipePipe, SettingMultiCheckBox],
+  imports: [ReactiveFormsModule, RestrictionSelectorComponent, SentenceCasePipe, TranslocoDirective, AsyncPipe, IdentityProviderPipePipe, SettingMultiCheckBox, ValidationErrorsComponent],
     changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class EditUserComponent implements OnInit {
@@ -72,7 +73,6 @@ export class EditUserComponent implements OnInit {
   isSaving: boolean = false;
 
   userForm: FormGroup = new FormGroup({});
-  isEmailInvalid$!: Observable<boolean>;
   readOnlyWarning$!: Observable<string | undefined>;
 
   allowedCharacters = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-._@+/';
@@ -87,7 +87,7 @@ export class EditUserComponent implements OnInit {
   ngOnInit(): void {
     this.libraryService.getLibraries().subscribe(libraries => this.libraries.set(libraries));
 
-    this.userForm.addControl('email', new FormControl(this.member().email, [Validators.required]));
+    this.userForm.addControl('email', new FormControl(this.member().email, [Validators.required, Validators.pattern(EmailRegex)]));
     this.userForm.addControl('username', new FormControl(this.member().username, [Validators.required, Validators.pattern(AllowedUsernameCharacters)]));
     this.userForm.addControl('identityProvider', new FormControl(this.member().identityProvider, [Validators.required]));
     this.userForm.addControl('roles', new FormControl(this.member().roles));
@@ -103,13 +103,6 @@ export class EditUserComponent implements OnInit {
         })
       })).subscribe();
 
-    this.isEmailInvalid$ = this.userForm.get('email')!.valueChanges.pipe(
-      startWith(this.member().email),
-      distinctUntilChanged(),
-      debounceTime(10),
-      map(value => !EmailRegex.test(value)),
-      takeUntilDestroyed(this.destroyRef)
-    );
     this.readOnlyWarning$ = this.userForm.get('roles')!.valueChanges.pipe(
       startWith(this.member().roles),
       takeUntilDestroyed(this.destroyRef),

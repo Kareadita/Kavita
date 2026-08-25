@@ -7,8 +7,6 @@ import {startWith, switchMap} from "rxjs";
 
 const DEFAULT_MESSAGES: Record<string, string> = {
   required: 'required-field',
-  requiredIf: 'other-field-required',
-  requiredIfOtherInvalid: 'other-field-invalid',
   email: 'email-invalid',
   minlength: 'min-length',
   validEmail: 'valid-email',

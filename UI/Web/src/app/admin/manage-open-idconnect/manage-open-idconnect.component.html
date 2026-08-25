@@ -23,19 +23,16 @@
               <ng-template #edit>
                 <input id="oid-authority" class="form-control"
                        formControlName="authority" type="text"
+                       aria-describedby="oid-authority-validations"
                        [class.is-invalid]="formControl.invalid && !formControl.untouched">
+
+                <app-validation-errors [control]="formControl" id="oid-authority" [messages]="{
+                  backendFailure: formControl.errors!.backendFailure.result | authorityValidationResult,
+                  requireTls: t('tls-required')
+                }" />
 
                 @if (settingsForm.dirty || !settingsForm.untouched) {
                   <div id="invalid-uri-validation" class="invalid-feedback">
-                    @if (formControl.errors?.invalidUri) {
-                      <div>{{t('invalid-uri')}}</div>
-                    }
-                    @if (formControl.errors?.requireTls) {
-                      <div>{{t('tls-required')}}</div>
-                    }
-                    @if (formControl.errors?.backendFailure) {
-                      <div>{{formControl.errors!.backendFailure.result | authorityValidationResult}}</div>
-                    }
                     @if (formControl.pending) {
                       <div>{{t('checking-authority')}}</div>
                     }
@@ -57,17 +54,10 @@
                        formControlName="clientId" type="text"
                        [class.is-invalid]="formControl.invalid && !formControl.untouched">
 
-                @if (settingsForm.dirty || !settingsForm.untouched) {
-                  <div id="oidc-client-id-validations" class="invalid-feedback">
-                    @if (formControl.errors && formControl.errors.requiredIf) {
-                      <div>{{t('other-field-required', {name: 'clientId', other: formControl.errors.requiredIf.other})}}</div>
-                    }
-                    @if (formControl.errors && formControl.errors.requiredIfOtherInvalid) {
-                      <div>{{t('other-field-invalid', {other: formControl.errors.requiredIfOtherInvalid.other})}}</div>
-                    }
-                  </div>
-                }
-
+                <app-validation-errors [control]="formControl" id="oid-client-id" [messages]="{
+                  requiredIf: t('other-field-required', {name: 'clientId', other: formControl.errors!.requiredIf.other}),
+                  requiredIfOtherInvalid: t('other-field-invalid', {other: formControl.errors!.requiredIfOtherInvalid.other})
+                }" />
               </ng-template>
             </app-setting-item>
           }
@@ -84,17 +74,10 @@
                        formControlName="secret" type="text"
                        [class.is-invalid]="formControl.invalid && !formControl.untouched">
 
-                @if (settingsForm.dirty || !settingsForm.untouched) {
-                  <div id="oidc-secret-validations" class="invalid-feedback">
-                    @if (formControl.errors && formControl.errors.requiredIf) {
-                      <div>{{t('other-field-required', {name: 'secret', other: formControl.errors.requiredIf.other})}}</div>
-                    }
-                    @if (formControl.errors && formControl.errors.requiredIfOtherInvalid) {
-                      <div>{{t('other-field-invalid', {other: formControl.errors.requiredIfOtherInvalid.other})}}</div>
-                    }
-                  </div>
-                }
-
+                <app-validation-errors [control]="formControl" id="oid-secret" [messages]="{
+                  requiredIf: t('other-field-required', {name: 'secret', other: formControl.errors!.requiredIf.other}),
+                  requiredIfOtherInvalid: t('other-field-invalid', {other: formControl.errors!.requiredIfOtherInvalid.other})
+                }" />
               </ng-template>
             </app-setting-item>
           }
