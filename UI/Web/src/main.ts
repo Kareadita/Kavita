@@ -5,7 +5,6 @@ import {
   provideAppInitializer,
   provideZoneChangeDetection,
 } from '@angular/core';
-import {NgCircleProgressModule} from 'ng-circle-progress';
 import {routes} from './app/app-routing.module';
 import {bootstrapApplication, BrowserModule, Title} from '@angular/platform-browser';
 import {jwtInterceptor} from './app/_interceptors/jwt.interceptor';
@@ -171,8 +170,7 @@ bootstrapApplication(AppComponent, {
             timeOut: 6000,
             countDuplicates: true,
             autoDismiss: true
-          }),
-          NgCircleProgressModule.forRoot()
+          })
         ),
         provideRouter(routes,
           withComponentInputBinding(),

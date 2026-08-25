@@ -18,17 +18,15 @@
     </div>
   </form>
 
-  @for(externalSource of externalSources | filter: filterList; track externalSource; let idx = $index) {
+  @for(externalSource of filteredExternalSources(); track externalSource; let idx = $index) {
     <app-edit-external-source-item [source]="externalSource"
                                    (sourceUpdate)="updateSource(idx, $event)"
                                    (sourceDelete)="deleteSource(idx, $event)"
                                    [isViewMode]="externalSource.id !== 0" />
   } @empty {
-    <ul>
-      <li class="list-group-item">
-        {{t('no-data')}}
-      </li>
-    </ul>
+    <app-empty-state titleKey="no-data"  [i18nPrefix]="'manage-external-sources'">
+      <i icon class="fa-solid fa-magnifying-glass" aria-hidden="true"></i>
+    </app-empty-state>
   }
 
 </ng-container>

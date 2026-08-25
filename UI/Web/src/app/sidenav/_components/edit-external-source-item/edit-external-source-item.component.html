@@ -3,10 +3,10 @@
     <div class="card-body">
       <div class="card-title">
         <div class="container-fluid row mb-2">
-          <div class="col-9 col-sm-9"><h4 id="anilist-token-header">{{source.name || t('title')}}</h4></div>
+          <div class="col-9 col-sm-9"><h4 id="anilist-token-header">{{source().name || t('title')}}</h4></div>
           <div class="col-3 text-end">
             <button class="btn btn-primary btn-sm me-1" (click)="toggleViewMode()">
-              @if (isViewMode) {
+              @if (isViewMode()) {
                 <i class="fa-solid fa-pen" aria-hidden="true"></i>
                 <span class="visually-hidden">
                   {{t('edit')}}
@@ -24,7 +24,7 @@
       </div>
 
 
-      <div #collapse="ngbCollapse" [(ngbCollapse)]="isViewMode">
+      <div #collapse="ngbCollapse" [ngbCollapse]="isViewMode()" (ngbCollapseChange)="isViewMode.set($event)">
         <form [formGroup]="formGroup">
           <div class="form-group mb-3">
             <label for="host">{{t('name-label')}}</label>
