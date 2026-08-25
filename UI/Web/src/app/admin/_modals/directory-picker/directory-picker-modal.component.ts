@@ -40,39 +40,37 @@ export interface DirectoryPickerResult {
 }
 
 @Component({
-    selector: 'app-directory-picker',
-    templateUrl: './directory-picker.component.html',
-    styleUrls: ['./directory-picker.component.scss'],
-    changeDetection: ChangeDetectionStrategy.Eager,
+    selector: 'app-directory-picker-modal',
+    templateUrl: './directory-picker-modal.component.html',
+    styleUrls: ['./directory-picker-modal.component.scss'],
+    changeDetection: ChangeDetectionStrategy.OnPush,
     imports: [ReactiveFormsModule, NgbTypeahead, NgbHighlight, NgClass, TranslocoDirective]
 })
-export class DirectoryPickerComponent implements OnInit {
+export class DirectoryPickerModalComponent implements OnInit {
   protected readonly modal = inject(NgbActiveModal);
   private readonly libraryService = inject(LibraryService);
   private readonly destroyRef = inject(DestroyRef);
 
   startingFolder = input<string>('');
-  /**
-   * Url to give more information about selecting directories. Passing nothing will suppress.
-   */
+  /** Url to give more information about selecting directories. Passing nothing will suppress. */
   helpUrl = input<string>(WikiLink.Library);
+  protected readonly instance = viewChild<NgbTypeahead>('instance');
+
 
   currentRoot = signal('');
   folders = signal<DirectoryDto[]>([]);
-  routeStack = new Stack<string>();
+  searching = signal(false);
+  searchFailed = signal(false);
   routeItems = signal<string[]>([]);
   routeStackPeek = computed(() => {
     const items = this.routeItems();
     return items.length > 0 ? items[items.length - 1] : undefined;
   });
 
+  routeStack = new Stack<string>();
   pathControl = new FormControl('', {nonNullable: true});
-  instance = viewChild<NgbTypeahead>('instance');
   focus$ = new Subject<string>();
   click$ = new Subject<string>();
-  searching = signal(false);
-  searchFailed = signal(false);
-
 
   search: OperatorFunction<string, readonly string[]> = (text$: Observable<string>) => {
     const debouncedText$ = text$.pipe(debounceTime(200), distinctUntilChanged());

@@ -75,7 +75,7 @@
         {{invited() ? t('cancel') : t('close')}}
       </button>
 
-      @if (!invited) {
+      @if (!invited()) {
         <button type="button" class="btn btn-primary" (click)="invite()" [disabled]="isSending() || !inviteForm.valid  || emailLink() !== ''">
           @if (isSending()) {
             <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>

@@ -4,7 +4,10 @@ import {ToastrService} from '@openng/ngx-toastr';
 import {catchError, debounceTime, distinctUntilChanged, filter, of, switchMap, tap} from 'rxjs';
 import {SettingsService} from '../settings.service';
 import {ServerSettings} from '../_models/server-settings';
-import {DirectoryPickerComponent, DirectoryPickerResult} from '../_modals/directory-picker/directory-picker.component';
+import {
+  DirectoryPickerModalComponent,
+  DirectoryPickerResult
+} from '../_modals/directory-picker/directory-picker-modal.component';
 import {allEncodeFormats} from '../_models/encode-format';
 import {translate, TranslocoDirective, TranslocoService} from "@jsverse/transloco";
 import {allCoverImageSizes, CoverImageSize} from '../_models/cover-image-size';
@@ -122,7 +125,7 @@ export class ManageMediaSettingsComponent implements OnInit {
   }
 
   openDirectoryChooser(existingDirectory: string, formControl: string) {
-    const modalRef = this.modalService.open(DirectoryPickerComponent);
+    const modalRef = this.modalService.open(DirectoryPickerModalComponent);
     modalRef.setInput('startingFolder', existingDirectory || '');
     modalRef.setInput('helpUrl', '');
     modalRef.closed.subscribe((closeResult: DirectoryPickerResult) => {

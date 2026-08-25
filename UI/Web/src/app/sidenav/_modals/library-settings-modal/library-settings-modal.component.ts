@@ -64,9 +64,9 @@ import {ConfirmService} from "../../../shared/confirm.service";
 import {LibraryService} from "../../../_services/library.service";
 import {allLibraryTypes, Library, LibraryType} from "../../../_models/library/library";
 import {
-  DirectoryPickerComponent,
+  DirectoryPickerModalComponent,
   DirectoryPickerResult
-} from "../../../admin/_modals/directory-picker/directory-picker.component";
+} from "../../../admin/_modals/directory-picker/directory-picker-modal.component";
 import {TypeaheadSettingsFactoryService} from "../../../typeahead-settings-factory.service";
 
 enum StepID {
@@ -445,7 +445,7 @@ export class LibrarySettingsModalComponent implements OnInit {
   }
 
   openDirectoryPicker() {
-    const modalRef = this.modalService.open(DirectoryPickerComponent);
+    const modalRef = this.modalService.open(DirectoryPickerModalComponent);
     modalRef.closed.subscribe((closeResult: DirectoryPickerResult) => {
       if (closeResult.success) {
         if (!this.selectedFolders.includes(closeResult.folderPath)) {
