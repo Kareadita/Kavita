@@ -39,7 +39,6 @@ public class LicenseService(
     : ILicenseService
 {
     private readonly TimeSpan _licenseCacheTimeout = TimeSpan.FromHours(8);
-    public const string Cron = "0 */9 * * *";
     /// <summary>
     /// Cache key for if license is valid or not
     /// </summary>
