@@ -1,4 +1,4 @@
-﻿# [<img src="/Logo/kavita.svg" width="32" alt="">]() Kavita
+# [<img src="/Logo/kavita.svg" width="32" alt="">]() Kavita
 <div align="center">
 
 ![new_github_preview_stills](https://github.com/user-attachments/assets/f016b34f-3c4c-4f07-8e72-12cd6f4e71ea)
@@ -82,6 +82,8 @@ Thank you to [Weblate](https://hosted.weblate.org/engage/kavita/) who hosts our 
 If you want to take a stab at self-hosting, but don't have a PC, you can use either [Zenith](https://zenith.hosting/host/kavita) or [PikaPods](https://www.pikapods.com/pods?run=kavita). 
 Both these companies offer a simple interface to self-hosting and contribute back to Kavita via OpenCollective.
 
+You can also deploy Kavita with one click on [RepoCloud](https://repocloud.io/details/Kavita/).
+
 ## Contributors
 
 This project exists thanks to all the people who contribute and upstream library maintainers. [Contribute](CONTRIBUTING.md).
@@ -111,4 +113,3 @@ Support this project by becoming a sponsor. Your logo will show up here with a l
 ### License
 * [GNU GPL v3](http://www.gnu.org/licenses/gpl.html)
 * Copyright 2020-2026
-
