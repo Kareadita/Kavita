@@ -12,21 +12,13 @@
 
     <div class="row g-0 mt-2">
       @if (settingsForm.get('hostName'); as formControl) {
-        <app-setting-item [title]="t('host-name-label')" [subtitle]="t('host-name-tooltip')" [control]="formControl">
+        <app-setting-item [title]="t('host-name-label')" [subtitle]="t('host-name-tooltip')" [control]="formControl" [validations]="{pattern: t('host-name-validation')}">
           <ng-template #view>
             {{formControl.value | defaultValue}}
           </ng-template>
           <ng-template #edit>
             <input id="settings-hostname" aria-describedby="hostname-validations" class="form-control" formControlName="hostName" type="text"
                    [class.is-invalid]="formControl.invalid && !formControl.untouched" appEnterBlur>
-
-            @if (formControl.errors; as errors) {
-              <div id="hostname-validations" class="invalid-feedback" style="display: inline-block">
-                @if (errors.pattern) {
-                  <div>{{t('host-name-validation')}}</div>
-                }
-              </div>
-            }
           </ng-template>
 
 

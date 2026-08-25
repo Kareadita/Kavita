@@ -8,7 +8,8 @@ import {
   HostListener,
   inject,
   input,
-  model, OnInit,
+  model,
+  OnInit,
   TemplateRef
 } from '@angular/core';
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
@@ -17,13 +18,15 @@ import {NgTemplateOutlet} from "@angular/common";
 import {SafeHtmlPipe} from "../../../_pipes/safe-html.pipe";
 import {filter, fromEvent, tap} from "rxjs";
 import {AbstractControl} from "@angular/forms";
+import {ValidationErrorsComponent} from "../../../shared/_components/validation-errors/validation-errors.component";
 
 @Component({
   selector: 'app-setting-item',
   imports: [
-      TranslocoDirective,
-      NgTemplateOutlet,
-      SafeHtmlPipe
+    TranslocoDirective,
+    NgTemplateOutlet,
+    SafeHtmlPipe,
+    ValidationErrorsComponent
   ],
   templateUrl: './setting-item.component.html',
   styleUrl: './setting-item.component.scss',
@@ -46,7 +49,9 @@ export class SettingItemComponent implements OnInit {
    * When true, the hover animation will not be present and the titleExtras will be always visible
    */
   fixedExtras = input(false);
-  control = input<AbstractControl<any> | null>(null);
+  control = input<AbstractControl | null>(null);
+  /** Custom validation messages */
+  validations = input<Record<string, string>>({});
 
   /**
    * When true, allows click events to bubble up to components within

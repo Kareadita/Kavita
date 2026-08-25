@@ -27,6 +27,12 @@
 
     @if (isEditMode()) {
       <ng-container [ngTemplateOutlet]="valueEditRef()" />
+
+      @let c = control();
+      @if (c) {
+        <app-validation-errors [id]="labelId() ?? title()" [control]="c" [messages]="validations()" />
+      }
+
     } @else {
       <span class="view-value" [class.non-selectable]="!canEdit() || !showEdit()" (click)="toggleEditMode()">
         <ng-container [ngTemplateOutlet]="valueViewRef()" />

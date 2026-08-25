@@ -11,6 +11,7 @@ import {DefaultValuePipe} from "../../_pipes/default-value.pipe";
 import {BytesPipe} from "../../_pipes/bytes.pipe";
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import {EnterBlurDirective} from "../../_directives/enter-blur.directive";
+import {pattern} from "@angular/forms/signals";
 
 @Component({
     selector: 'app-manage-email-settings',
@@ -134,4 +135,6 @@ export class ManageEmailSettingsComponent implements OnInit {
       }
     });
   }
+
+  protected readonly pattern = pattern;
 }

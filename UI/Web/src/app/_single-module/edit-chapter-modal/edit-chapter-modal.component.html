@@ -18,24 +18,28 @@
       @if (accountService.hasAdminRole()) {
         <div class="row">
           <div class="col-md-9 col-sm-12 mb-3">
-            <app-setting-item [title]="t('title-label')" [showEdit]="false" [toggleOnViewClick]="false">
-              <ng-template #view>
-                @if (editForm.get('titleName'); as formControl) {
-                  <div class="input-group" [ngClass]="{'lock-active': chapter.titleNameLocked}">
-                    <ng-container [ngTemplateOutlet]="lock" [ngTemplateOutletContext]="{ item: chapter, field: 'titleNameLocked' }" />
-                    <input class="form-control" formControlName="titleName" type="text"
-                           [class.is-invalid]="formControl.invalid && !formControl.untouched">
-                    @if (formControl.errors; as errors) {
-                      <div class="invalid-feedback">
-                        @if (errors.required) {
-                          <div>{{t('required-field')}}</div>
-                        }
-                      </div>
-                    }
-                  </div>
-                }
-              </ng-template>
-            </app-setting-item>
+            @if (editForm.get('titleName'); as formControl) {
+              <app-setting-item [title]="t('title-label')" [showEdit]="false" [toggleOnViewClick]="false" [control]="formControl">
+                <ng-template #view>
+                  @if (editForm.get('titleName'); as formControl) {
+                    <div class="input-group" [ngClass]="{'lock-active': chapter.titleNameLocked}">
+                      <ng-container [ngTemplateOutlet]="lock" [ngTemplateOutletContext]="{ item: chapter, field: 'titleNameLocked' }" />
+                      <input class="form-control" formControlName="titleName" type="text"
+                             [class.is-invalid]="formControl.invalid && !formControl.untouched">
+
+                      @if (formControl.errors; as errors) {
+                        <div class="invalid-feedback">
+                          @if (errors.required) {
+                            <div>{{t('required-field')}}</div>
+                          }
+                        </div>
+                      }
+                    </div>
+                  }
+                </ng-template>
+              </app-setting-item>
+            }
+
           </div>
 
           <div class="col-md-3 col-sm-12 mb-3">
