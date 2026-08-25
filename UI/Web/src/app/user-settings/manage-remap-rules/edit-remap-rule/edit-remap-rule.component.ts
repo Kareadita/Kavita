@@ -1,7 +1,6 @@
 import {ChangeDetectionStrategy, Component, inject, input, OnInit, output, signal} from '@angular/core';
 import {NonNullableFormBuilder, ReactiveFormsModule} from '@angular/forms';
 import {ReplaySubject} from 'rxjs';
-import {map} from 'rxjs/operators';
 import {TranslocoDirective} from '@jsverse/transloco';
 import {CblService} from '../../../_services/cbl.service';
 import {SearchService} from '../../../_services/search.service';
@@ -135,37 +134,6 @@ export class EditRemapRuleComponent implements OnInit {
   }
 
   private createChapterTypeahead(seriesId: number): TypeaheadSettings<Chapter> {
-    const settings = new TypeaheadSettings<Chapter>();
-    settings.minCharacters = 0;
-    settings.multiple = false;
-    settings.id = 'remap-chapter-' + seriesId;
-    settings.unique = true;
-    settings.addIfNonExisting = false;
-    settings.fetchFn = (searchFilter: string) => this.searchService.getChaptersBySeries(seriesId).pipe(
-      map(chapters => {
-        if (!searchFilter) return chapters;
-        const lower = searchFilter.toLowerCase().trim();
-        return chapters.filter(c =>
-          c.title?.toLowerCase().includes(lower) ||
-          c.range?.toLowerCase().includes(lower) ||
-          c.titleName?.toLowerCase().includes(lower)
-        );
-      })
-    );
-    settings.trackByIdentityFn = (_idx, item) => item.id + '';
-    settings.compareFn = (options: Chapter[], filter: string) => {
-      if (!filter) return options;
-      const lower = filter.toLowerCase().trim();
-      return options.filter(c =>
-        c.title?.toLowerCase().includes(lower) ||
-        c.range?.toLowerCase().includes(lower) ||
-        c.titleName?.toLowerCase().includes(lower)
-      );
-    };
-    settings.selectionCompareFn = (a: Chapter, b: Chapter) => {
-      return a.id === b.id;
-    };
-
-    return settings;
+    return this.typeaheadSettingsFactory.forChapter({id: `remap-chapter-${seriesId}`, seriesId});
   }
 }

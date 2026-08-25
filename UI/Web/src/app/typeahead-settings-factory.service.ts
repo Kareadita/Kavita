@@ -36,17 +36,11 @@ export interface TypeaheadFactoryParameters<T> {
 }
 
 export interface TypeaheadFactoryPersonParameters extends TypeaheadFactoryParameters<Person> {
-  /**
-   * Captured by addTransformFn to stamp the role onto newly-added people.
-   */
   role?: PersonRole;
   addIfNonExisting?: boolean;
 }
 
 export interface TypeaheadFactoryChapterParameters extends TypeaheadFactoryParameters<Chapter> {
-  /**
-   * Captured by fetchFn and by the generated id suffix.
-   */
   seriesId: number;
 }
 
@@ -209,7 +203,44 @@ export class TypeaheadSettingsFactoryService {
     return this.applyOverrides(settings, overrides);
   }
 
+  forChapter(params: TypeaheadFactoryChapterParameters) {
+    const {id, savedData, seriesId, overrides} = params;
 
+    const settings = new TypeaheadSettings<Chapter>();
+    settings.minCharacters = 0;
+    settings.multiple = false;
+    settings.id = id;
+    settings.unique = true;
+    settings.addIfNonExisting = false;
+    settings.fetchFn = (searchFilter: string) => this.searchService.getChaptersBySeries(seriesId).pipe(
+      map(chapters => {
+        if (!searchFilter) return chapters;
+        const lower = searchFilter.toLowerCase().trim();
+        return chapters.filter(c =>
+          c.title?.toLowerCase().includes(lower) ||
+          c.range?.toLowerCase().includes(lower) ||
+          c.titleName?.toLowerCase().includes(lower)
+        );
+      })
+    );
+    settings.trackByIdentityFn = (_idx, item) => item.id + '';
+    settings.compareFn = (options: Chapter[], filter: string) => {
+      if (!filter) return options;
+      const lower = filter.toLowerCase().trim();
+      return options.filter(c =>
+        c.title?.toLowerCase().includes(lower) ||
+        c.range?.toLowerCase().includes(lower) ||
+        c.titleName?.toLowerCase().includes(lower)
+      );
+    };
+    settings.selectionCompareFn = (a: Chapter, b: Chapter) => {
+      return a.id === b.id;
+    };
+
+    if (savedData !== undefined) settings.savedData = savedData;
+
+    return this.applyOverrides(settings, overrides);
+  }
 
   /**
    * Applies overrides onto the settings instance. Mutates rather than spreading so that

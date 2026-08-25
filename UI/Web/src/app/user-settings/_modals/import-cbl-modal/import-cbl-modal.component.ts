@@ -22,7 +22,6 @@ import {CblImportReasonPipe} from '../../../_pipes/cbl-import-reason.pipe';
 import {ManageRemapRulesModalComponent} from '../manage-remap-rules-modal/manage-remap-rules-modal.component';
 import {ImageComponent} from '../../../shared/image/image.component';
 import {ImageService} from '../../../_services/image.service';
-import {map} from 'rxjs';
 import {LibraryService} from '../../../_services/library.service';
 import {
   DataTableColumnCellDirective,
@@ -467,40 +466,11 @@ export class ImportCblModalComponent implements OnInit {
 
 
   private createChapterTypeahead(seriesId: number): TypeaheadSettings<Chapter> {
-    const settings = new TypeaheadSettings<Chapter>();
-    settings.minCharacters = 0;
-    settings.multiple = false;
-    settings.id = 'cbl-chapter-' + seriesId;
-    settings.unique = true;
-    settings.addIfNonExisting = false;
-    settings.fetchFn = (searchFilter: string) => this.searchService.getChaptersBySeries(seriesId).pipe(
-      map(chapters => {
-        if (!searchFilter) return chapters;
-        const lower = searchFilter.toLowerCase().trim();
-        return chapters.filter(c =>
-          c.title?.toLowerCase().includes(lower) ||
-          c.range?.toLowerCase().includes(lower) ||
-          c.titleName?.toLowerCase().includes(lower)
-        );
-      })
-    );
-    settings.trackByIdentityFn = (idx, item) => item.id + '';
-    settings.compareFn = (options: Chapter[], filter: string) => {
-      if (!filter) return options;
-      const lower = filter.toLowerCase().trim();
-      return options.filter(c =>
-        c.title?.toLowerCase().includes(lower) ||
-        c.range?.toLowerCase().includes(lower) ||
-        c.titleName?.toLowerCase().includes(lower)
-      );
-    };
-    settings.selectionCompareFn = (a: Chapter, b: Chapter) => {
-      return a.id === b.id;
-    };
-    settings.dropdownPosition = 'body';
-    settings.overlayMinWidth = 280;
-
-    return settings;
+    return this.typeaheadSettingsFactory.forChapter({id: `cbl-chapter-${seriesId}`, seriesId, overrides: {
+        dropdownPosition: 'body',
+        overlayMinWidth: 280
+      }
+    });
   }
 
   protected readonly CblImportReason = CblImportReason;
