@@ -14,14 +14,17 @@
 
           <app-setting-item [title]="t('src')" [subtitle]="t('merge-warning')" [toggleOnViewClick]="false" [showEdit]="false">
             <ng-template #view>
-              <app-typeahead [settings]="typeAheadSettings" (selectedData)="updatePerson($event)" [unFocus]="typeAheadUnfocus">
-                <ng-template #badgeItem let-item let-position="idx">
-                  {{item.name}}
-                </ng-template>
-                <ng-template #optionItem let-item let-position="idx">
-                  {{item.name}}
-                </ng-template>
-              </app-typeahead>
+              @let config = typeAheadSettings();
+              @if (config) {
+                <app-typeahead [settings]="config" (selectedData)="updatePerson($event)" [unFocus]="typeAheadUnfocus">
+                  <ng-template #badgeItem let-item let-position="idx">
+                    {{item.name}}
+                  </ng-template>
+                  <ng-template #optionItem let-item let-position="idx">
+                    {{item.name}}
+                  </ng-template>
+                </app-typeahead>
+              }
             </ng-template>
           </app-setting-item>
         </div>

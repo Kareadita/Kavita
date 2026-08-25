@@ -1,6 +1,7 @@
 import {
   ChangeDetectionStrategy,
   Component,
+  computed,
   DestroyRef,
   EventEmitter,
   inject,
@@ -11,7 +12,6 @@ import {
 import {Person} from "../../../_models/metadata/person";
 import {PersonService} from "../../../_services/person.service";
 import {NgbActiveModal} from "@ng-bootstrap/ng-bootstrap";
-import {ToastrService} from '@openng/ngx-toastr';
 import {TranslocoDirective} from "@jsverse/transloco";
 import {TypeaheadComponent} from "../../../typeahead/_components/typeahead.component";
 import {TypeaheadSettings} from "../../../typeahead/_models/typeahead-settings";
@@ -37,25 +37,32 @@ import {TypeaheadSettingsFactoryService} from "../../../typeahead-settings-facto
     AsyncPipe
   ],
   templateUrl: './merge-person-modal.component.html',
-  changeDetection: ChangeDetectionStrategy.Eager,
+  changeDetection: ChangeDetectionStrategy.OnPush,
   styleUrl: './merge-person-modal.component.scss'
 })
 export class MergePersonModalComponent implements OnInit {
 
   private readonly personService = inject(PersonService);
-  public readonly utilityService = inject(UtilityService);
+  private readonly utilityService = inject(UtilityService);
   private readonly destroyRef = inject(DestroyRef);
   private readonly modal = inject(NgbActiveModal);
-  protected readonly toastr = inject(ToastrService);
   private readonly typeaheadSettingsFactory = inject(TypeaheadSettingsFactoryService);
 
-  typeAheadSettings!: TypeaheadSettings<Person>;
+  typeAheadSettings = signal<TypeaheadSettings<Person> | null>(null);
   typeAheadUnfocus = new EventEmitter<string>();
 
   person = input.required<Person>();
 
   mergee = signal<Person | null>(null);
   knownFor$: Observable<Series[]> | null = null;
+
+  readonly allNewAliases = computed(() => {
+    const mergee = this.mergee();
+    if (!mergee) return [];
+
+    return [mergee.name, ...mergee.aliases];
+  });
+
 
   save() {
     const mergee = this.mergee();
@@ -75,24 +82,23 @@ export class MergePersonModalComponent implements OnInit {
 
   ngOnInit(): void {
 
-
-    this.typeAheadSettings = this.typeaheadSettingsFactory.forPerson({id: 'merge-person-modal-typeahead', addIfNonExisting: false,
+    this.typeAheadSettings.set(this.typeaheadSettingsFactory.forPerson({id: 'merge-person-modal-typeahead', addIfNonExisting: false,
       overrides: {
-      fetchFn: (filter: string) => {
+        fetchFn: (filter: string) => {
           if (filter.length == 0) return of([]);
 
           return this.personService.searchPerson(filter).pipe(map(people => {
             return people.filter(p => this.utilityService.filter(p.name, filter) && p.id != this.person().id);
           }));
         },
-      multiple: false
-    }});
+        multiple: false
+      }}));
   }
 
   updatePerson(people: Person[]) {
     if (people.length == 0) return;
 
-    this.typeAheadUnfocus.emit(this.typeAheadSettings.id);
+    this.typeAheadUnfocus.emit(this.typeAheadSettings()!.id);
     this.mergee.set(people[0]);
 
     this.knownFor$ = this.personService.getSeriesMostKnownFor(this.mergee()!.id)
@@ -100,11 +106,4 @@ export class MergePersonModalComponent implements OnInit {
   }
 
   protected readonly FilterField = SeriesFilterField;
-
-  allNewAliases() {
-    const mergee = this.mergee();
-    if (!mergee) return [];
-
-    return [mergee.name, ...mergee.aliases]
-  }
 }
