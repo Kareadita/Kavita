@@ -214,6 +214,7 @@ public class SeriesController(
             series.SortName = series.Library is {RemovePrefixForSortName: true}
                 ? BookSortTitlePrefixHelper.GetSortTitle(series.Name)
                 : series.Name;
+            series.Metadata.KPlusOverrides.Remove(MetadataSettingField.SortName);
         }
         else if (!string.IsNullOrEmpty(updateSeries.SortName?.Trim()))
         {
