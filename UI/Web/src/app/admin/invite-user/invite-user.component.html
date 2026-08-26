@@ -13,17 +13,12 @@
         <form [formGroup]="inviteForm">
           <div class="row g-0">
             <div class="mb-3" style="width:100%">
-              <label for="email" class="form-label">{{t('email')}}</label>
-              <input class="form-control" type="email" inputmode="email" id="email" formControlName="email" required
-                     [class.is-invalid]="inviteForm.get('email')?.invalid && inviteForm.get('email')?.touched">
-              @if (inviteForm.dirty || !inviteForm.untouched) {
-                <div id="inviteForm-validations" class="invalid-feedback">
-                  @if (email?.errors?.required) {
-                    <div>
-                      {{t('required-field')}}
-                    </div>
-                  }
-                </div>
+              @if (inviteForm.get('email'); as formControl) {
+                <label for="email" class="form-label">{{t('email')}}</label>
+                <input class="form-control" type="email" inputmode="email" id="email" formControlName="email"
+                       [appFormField]="formControl" aria-describedby="email-validations">
+
+                <app-validation-errors id="email" [control]="formControl" />
               }
             </div>
           </div>

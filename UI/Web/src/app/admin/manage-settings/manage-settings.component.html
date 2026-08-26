@@ -78,14 +78,15 @@
 
       <div class="row g-0 mt-4 mb-4">
         @if (settingsForm.get('port'); as formControl) {
-          <app-setting-item [title]="t('port-label')" [subtitle]="t('port-tooltip')">
+          <app-setting-item [title]="t('port-label')" [subtitle]="t('port-tooltip')" [control]="formControl" labelId="settings-port">
             <ng-template #view>
               {{formControl.value}}
             </ng-template>
             <ng-template #edit>
               <input id="settings-port" aria-describedby="settings-port-help" class="form-control"
                      formControlName="port" type="number" step="1" min="1"
-                     onkeypress="return event.charCode >= 48 && event.charCode <= 57" appEnterBlur>
+                     onkeypress="return event.charCode >= 48 && event.charCode <= 57"
+                     [appFormField]="formControl" appEnterBlur>
             </ng-template>
           </app-setting-item>
         }

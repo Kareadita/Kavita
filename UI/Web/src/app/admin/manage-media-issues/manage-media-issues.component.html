@@ -3,13 +3,16 @@
 
   <form [formGroup]="formGroup">
     <div class="row g-0 mb-3">
-      <div class="col-md-12">
-        <label for="filter" class="visually-hidden">{{t('filter-label')}}</label>
-        <div class="input-group">
-          <input id="filter" type="text" class="form-control" [placeholder]="t('filter-label')" formControlName="filter" />
-          <button class="btn btn-primary" type="button" (click)="clear()">{{t('clear-alerts')}}</button>
+      @if (formGroup.get('filter'); as formControl) {
+        <div class="col-md-12">
+          <label for="filter" class="visually-hidden">{{t('filter-label')}}</label>
+          <div class="input-group">
+            <input id="filter" type="text" class="form-control" [placeholder]="t('filter-label')" formControlName="filter"
+                   [appFormField]="formControl" />
+            <button class="btn btn-primary" type="button" (click)="clear()">{{t('clear-alerts')}}</button>
+          </div>
         </div>
-      </div>
+      }
     </div>
   </form>
 

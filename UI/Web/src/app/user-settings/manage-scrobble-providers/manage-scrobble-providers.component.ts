@@ -51,6 +51,7 @@ import {TypeaheadComponent} from "../../typeahead/_components/typeahead.componen
 import {AgeRatingPipe} from "../../_pipes/age-rating.pipe";
 import {ActivatedRoute} from "@angular/router";
 import {TypeaheadSettingsFactoryService} from "../../typeahead-settings-factory.service";
+import {FormFieldDirective} from "../../_directives/form-field.directive";
 
 type ReadStatusTransitionRuleFromGroup = FormGroup<{
   enabled: FormControl<boolean>;
@@ -111,8 +112,7 @@ const ProvidersSupportLibraryTypes: Record<ScrobbleProvider, LibraryType[]> = {
     UtcToLocalTimePipe,
     TimeDifferencePipe,
     TypeaheadComponent,
-    AgeRatingPipe,
-  ],
+    AgeRatingPipe, FormFieldDirective],
   templateUrl: './manage-scrobble-providers.component.html',
   styleUrl: './manage-scrobble-providers.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

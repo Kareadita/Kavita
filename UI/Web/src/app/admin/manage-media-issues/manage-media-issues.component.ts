@@ -11,12 +11,13 @@ import {NgxDatatableModule} from "@siemens/ngx-datatable";
 import {ResponsiveTableComponent} from "../../shared/_components/responsive-table/responsive-table.component";
 import {ServerService} from "../../_services/server.service";
 import {EVENTS, MessageHubService} from "../../_services/message-hub.service";
+import {FormFieldDirective} from "../../_directives/form-field.directive";
 
 @Component({
   selector: 'app-manage-media-issues',
   templateUrl: './manage-media-issues.component.html',
   styleUrls: ['./manage-media-issues.component.scss'],
-  imports: [ReactiveFormsModule, TranslocoDirective, UtcToLocalTimePipe, DefaultDatePipe, NgxDatatableModule, ResponsiveTableComponent],
+  imports: [ReactiveFormsModule, TranslocoDirective, UtcToLocalTimePipe, DefaultDatePipe, NgxDatatableModule, ResponsiveTableComponent, FormFieldDirective],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ManageMediaIssuesComponent implements OnInit {

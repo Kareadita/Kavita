@@ -36,20 +36,26 @@
         }
         @case ('date') {
           <form class="px-3 py-2" [formGroup]="formGroup">
-            <div class="mb-2">
-              <input
-                type="date"
-                class="form-control form-control-sm"
-                formControlName="startDate"
-              >
-            </div>
-            <div class="mb-2">
-              <input
-                type="date"
-                class="form-control form-control-sm"
-                formControlName="endDate"
-              >
-            </div>
+            @if (formGroup.get('startDate'); as formControl) {
+              <div class="mb-2">
+                <input
+                  type="date"
+                  class="form-control form-control-sm"
+                  formControlName="startDate"
+                  [appFormField]="formControl"
+                >
+              </div>
+            }
+            @if (formGroup.get('endDate'); as formControl) {
+              <div class="mb-2">
+                <input
+                  type="date"
+                  class="form-control form-control-sm"
+                  formControlName="endDate"
+                  [appFormField]="formControl"
+                >
+              </div>
+            }
           </form>
           <button class="btn btn-icon btn-sm w-100 mx-auto" (click)="closeDropdown()">
             {{t('close')}}

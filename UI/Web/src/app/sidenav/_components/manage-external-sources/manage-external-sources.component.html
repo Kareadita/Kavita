@@ -6,13 +6,15 @@
 
 
   <form class="row g-0 justify-content-between mb-3" [formGroup]="listForm">
-    <div class="col-9">
-      <label for="filter" class="form-label">{{t('filter')}}</label>
-      <div class="input-group">
-        <input id="filter" autocomplete="off" class="form-control" formControlName="filterQuery" type="text" aria-describedby="reset-input">
-        <button class="btn btn-outline-secondary" type="button" id="reset-input" (click)="resetFilter()">{{t('clear')}}</button>
+    @if (listForm.get('filterQuery'); as formControl) {
+      <div class="col-9">
+        <label for="filter" class="form-label">{{t('filter')}}</label>
+        <div class="input-group">
+          <input id="filter" autocomplete="off" class="form-control" formControlName="filterQuery" type="text" aria-describedby="reset-input" [appFormField]="formControl">
+          <button class="btn btn-outline-secondary" type="button" id="reset-input" (click)="resetFilter()">{{t('clear')}}</button>
+        </div>
       </div>
-    </div>
+    }
     <div class="col-auto ms-2 float-end">
       <button class="btn btn-primary" style="margin-top: 1.875rem" (click)="addNewExternalSource()">{{t('add-source')}}</button>
     </div>

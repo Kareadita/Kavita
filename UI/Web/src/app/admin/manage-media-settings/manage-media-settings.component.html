@@ -63,13 +63,13 @@
 
         <div class="row g-0 mt-2">
           @if(settingsForm.get('bookmarksDirectory'); as formControl) {
-            <app-setting-item [title]="t('bookmark-dir-label')" [subtitle]="t('bookmark-dir-tooltip')">
+            <app-setting-item [title]="t('bookmark-dir-label')" [subtitle]="t('bookmark-dir-tooltip')" [control]="formControl" labelId="settings-bookmarksdir">
               <ng-template #view>
                 {{formControl!.value}}
               </ng-template>
               <ng-template #edit>
                 <div class="input-group">
-                  <input readonly id="settings-bookmarksdir" class="form-control" formControlName="bookmarksDirectory" type="text" aria-describedby="change-bookmarks-dir">
+                  <input readonly id="settings-bookmarksdir" class="form-control" formControlName="bookmarksDirectory" type="text" aria-describedby="change-bookmarks-dir" [appFormField]="formControl">
                   <button id="change-bookmarks-dir" class="btn btn-primary" (click)="openDirectoryChooser(formControl.value, 'bookmarksDirectory')">
                     {{t('change')}}
                   </button>

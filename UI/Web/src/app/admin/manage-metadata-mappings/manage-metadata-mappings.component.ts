@@ -19,6 +19,8 @@ import {
   buildAgeRatingMappingsArray,
   packAgeRatingMappings
 } from "../../shared/_components/age-rating-mapper/age-rating-mapper.component";
+import {FormFieldDirective} from "../../_directives/form-field.directive";
+import {ValidationErrorsComponent} from "../../shared/_components/validation-errors/validation-errors.component";
 
 export type MetadataMappingsExport = {
   ageRatingMappings: Record<string, AgeRating>,
@@ -40,8 +42,7 @@ export type MetadataMappingsExport = {
     NgbAccordionButton,
     NgbAccordionCollapse,
     NgbAccordionBody,
-    LoadingComponent,
-  ],
+    LoadingComponent, FormFieldDirective, ValidationErrorsComponent],
   templateUrl: './manage-metadata-mappings.component.html',
   styleUrl: './manage-metadata-mappings.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

@@ -44,16 +44,19 @@
             <form [formGroup]="readingProfileForm">
 
               <div class="mb-2 d-flex justify-content-between align-items-center">
-                <app-setting-item [title]="''" [showEdit]="false" [canEdit]="selectedProfile.kind !== ReadingProfileKind.Default">
-                  <ng-template #view>
-                    <span [class.clickable]="selectedProfile.kind !== ReadingProfileKind.Default">
-                      {{readingProfileForm.get('name')!.value}}
-                    </span>
-                  </ng-template>
-                  <ng-template #edit>
-                    <input class="form-control" type="text" formControlName="name" [disabled]="selectedProfile.kind === ReadingProfileKind.Default">
-                  </ng-template>
-                </app-setting-item>
+                @if (readingProfileForm.get('name'); as formControl) {
+                  <app-setting-item [title]="''" [showEdit]="false" [canEdit]="selectedProfile.kind !== ReadingProfileKind.Default" [control]="formControl">
+                    <ng-template #view>
+                      <span [class.clickable]="selectedProfile.kind !== ReadingProfileKind.Default">
+                        {{formControl.value}}
+                      </span>
+                    </ng-template>
+                    <ng-template #edit>
+                      <input class="form-control" type="text" formControlName="name" [disabled]="selectedProfile.kind === ReadingProfileKind.Default"
+                             [appFormField]="formControl">
+                    </ng-template>
+                  </app-setting-item>
+                }
 
                 @if (selectedProfile.id !== 0) {
                   <div class="d-flex justify-content-between">

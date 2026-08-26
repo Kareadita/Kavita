@@ -9,14 +9,15 @@ import {debounceTime, distinctUntilChanged, switchMap} from "rxjs/operators";
 import {of, tap} from "rxjs";
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import {modalSaved} from "../../../_models/modal/modal-result";
+import {FormFieldDirective} from "../../../_directives/form-field.directive";
+import {ValidationErrorsComponent} from "../../../shared/_components/validation-errors/validation-errors.component";
 
 @Component({
   selector: 'app-edit-smart-filter-modal',
   imports: [
     TranslocoDirective,
     SentenceCasePipe,
-    ReactiveFormsModule
-  ],
+    ReactiveFormsModule, FormFieldDirective, ValidationErrorsComponent],
   templateUrl: './edit-smart-filter-modal.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
   styleUrl: './edit-smart-filter-modal.component.scss'

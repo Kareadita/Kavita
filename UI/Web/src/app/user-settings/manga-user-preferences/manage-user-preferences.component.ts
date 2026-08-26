@@ -31,6 +31,7 @@ import {AgeRatingPipe} from "../../_pipes/age-rating.pipe";
 import {TypeaheadComponent} from "../../typeahead/_components/typeahead.component";
 import {TypeaheadSettings} from "../../typeahead/_models/typeahead-settings";
 import {TypeaheadSettingsFactoryService} from "../../typeahead-settings-factory.service";
+import {FormFieldDirective} from "../../_directives/form-field.directive";
 
 type UserPreferencesForm = FormGroup<{
   theme: FormControl<SiteTheme>,
@@ -75,8 +76,7 @@ type UserPreferencesForm = FormGroup<{
     DecimalPipe,
     HighlightBarComponent,
     AgeRatingPipe,
-    TypeaheadComponent,
-  ],
+    TypeaheadComponent, FormFieldDirective],
   templateUrl: './manage-user-preferences.component.html',
   styleUrl: './manage-user-preferences.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush

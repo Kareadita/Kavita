@@ -20,6 +20,8 @@ import {environment} from "../../../environments/environment";
 import {ImageComponent} from "../../shared/image/image.component";
 import {OidcPublicConfig} from "../../admin/_models/oidc-config";
 import {SettingsService} from "../../admin/settings.service";
+import {ValidationErrorsComponent} from "../../shared/_components/validation-errors/validation-errors.component";
+import {FormFieldDirective} from "../../_directives/form-field.directive";
 
 
 @Component({
@@ -27,7 +29,7 @@ import {SettingsService} from "../../admin/settings.service";
     templateUrl: './user-login.component.html',
     styleUrls: ['./user-login.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [SplashContainerComponent, ReactiveFormsModule, RouterLink, TranslocoDirective, ImageComponent]
+  imports: [SplashContainerComponent, ReactiveFormsModule, RouterLink, TranslocoDirective, ImageComponent, ValidationErrorsComponent, FormFieldDirective]
 })
 export class UserLoginComponent implements OnInit {
 

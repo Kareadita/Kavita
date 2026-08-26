@@ -6,13 +6,15 @@ import {SplashContainerComponent} from '../splash-container/splash-container.com
 import {TranslocoDirective} from "@jsverse/transloco";
 import {NavService} from "../../../_services/nav.service";
 import {AccountService} from "../../../_services/account.service";
+import {ValidationErrorsComponent} from "../../../shared/_components/validation-errors/validation-errors.component";
+import {FormFieldDirective} from "../../../_directives/form-field.directive";
 
 @Component({
     selector: 'app-reset-password',
     templateUrl: './reset-password.component.html',
     styleUrls: ['./reset-password.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush,
-    imports: [SplashContainerComponent, ReactiveFormsModule, TranslocoDirective]
+  imports: [SplashContainerComponent, ReactiveFormsModule, TranslocoDirective, ValidationErrorsComponent, FormFieldDirective]
 })
 export class ResetPasswordComponent {
 

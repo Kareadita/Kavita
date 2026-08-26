@@ -3,6 +3,7 @@ import {FormControl, FormGroup, ReactiveFormsModule} from "@angular/forms";
 import {tap} from "rxjs";
 import {toSignal} from "@angular/core/rxjs-interop";
 import {translate, TranslocoDirective} from "@jsverse/transloco";
+import {FormFieldDirective} from "../../_directives/form-field.directive";
 
 export type TimeRangeFormGroup = FormGroup<{
   startDate: FormControl<Date | null>,
@@ -17,7 +18,7 @@ export type TimeRange = {
 @Component({
   selector: 'app-smart-time-range-picker',
   standalone: true,
-  imports: [ReactiveFormsModule, TranslocoDirective],
+  imports: [ReactiveFormsModule, TranslocoDirective, FormFieldDirective],
   templateUrl: './smart-time-range-picker.component.html',
   styleUrl: './smart-time-range-picker.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

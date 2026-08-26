@@ -22,11 +22,12 @@ import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import {UtilityService} from "../../../shared/_services/utility.service";
 import {BreakpointService} from "../../../_services/breakpoint.service";
 import {ActionResult} from "../../../_models/actionables/action-result";
+import {FormFieldDirective} from "../../../_directives/form-field.directive";
 
 @Component({
   selector: 'app-customize-sidenav-streams',
   imports: [DraggableOrderedListComponent, TranslocoDirective, SidenavStreamListItemComponent, ReactiveFormsModule,
-    FilterPipe, BulkOperationsComponent],
+    FilterPipe, BulkOperationsComponent, FormFieldDirective],
   templateUrl: './customize-sidenav-streams.component.html',
   styleUrls: ['./customize-sidenav-streams.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush

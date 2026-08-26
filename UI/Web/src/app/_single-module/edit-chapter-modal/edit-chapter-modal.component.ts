@@ -95,6 +95,7 @@ const blackList = [Action.Edit, Action.IncognitoRead, Action.AddToReadingList];
     EditModalShellComponent,
     EditTabDirective,
     FormFieldDirective,
+
   ],
   templateUrl: './edit-chapter-modal.component.html',
   styleUrl: './edit-chapter-modal.component.scss',

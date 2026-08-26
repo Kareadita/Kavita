@@ -32,6 +32,7 @@ import {TranslocoDirective} from "@jsverse/transloco";
 import {WikiLink} from "../../../_models/wiki";
 import {DirectoryDto} from "../../../_models/system/directory-dto";
 import {Stack} from "../../../shared/data-structures/stack";
+import {FormFieldDirective} from "../../../_directives/form-field.directive";
 
 
 export interface DirectoryPickerResult {
@@ -44,7 +45,7 @@ export interface DirectoryPickerResult {
     templateUrl: './directory-picker-modal.component.html',
     styleUrls: ['./directory-picker-modal.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush,
-    imports: [ReactiveFormsModule, NgbTypeahead, NgbHighlight, NgClass, TranslocoDirective]
+    imports: [ReactiveFormsModule, NgbTypeahead, NgbHighlight, NgClass, TranslocoDirective, FormFieldDirective]
 })
 export class DirectoryPickerModalComponent implements OnInit {
   protected readonly modal = inject(NgbActiveModal);

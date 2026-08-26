@@ -8,13 +8,15 @@ import {SplashContainerComponent} from '../splash-container/splash-container.com
 import {translate, TranslocoDirective} from "@jsverse/transloco";
 import {AccountService} from "../../../_services/account.service";
 import {NavService} from "../../../_services/nav.service";
+import {FormFieldDirective} from "../../../_directives/form-field.directive";
+import {ValidationErrorsComponent} from "../../../shared/_components/validation-errors/validation-errors.component";
 
 @Component({
     selector: 'app-confirm-reset-password',
     templateUrl: './confirm-reset-password.component.html',
     styleUrls: ['./confirm-reset-password.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush,
-    imports: [SplashContainerComponent, ReactiveFormsModule, NgbTooltip, NgTemplateOutlet, TranslocoDirective]
+    imports: [SplashContainerComponent, ReactiveFormsModule, NgbTooltip, NgTemplateOutlet, TranslocoDirective, FormFieldDirective, ValidationErrorsComponent]
 })
 export class ConfirmResetPasswordComponent {
   private route = inject(ActivatedRoute);

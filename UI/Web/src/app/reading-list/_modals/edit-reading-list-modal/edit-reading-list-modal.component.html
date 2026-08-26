@@ -12,25 +12,16 @@
         <ng-template ngbNavContent>
           <form [formGroup]="reviewGroup">
             <div class="row g-0 mb-3">
-              <div class="col-md-8 col-sm-12 mt-2">
-                <label for="library-name" class="form-label">{{t('name-label')}}</label>
-                <input id="library-name" class="form-control" formControlName="title" type="text"
-                       [class.is-invalid]="reviewGroup.get('title')?.invalid && reviewGroup.get('title')?.touched">
-                @if (reviewGroup.dirty || reviewGroup.touched) {
-                  <div id="inviteForm-validations" class="invalid-feedback">
-                    @if (reviewGroup.get('title')?.errors?.required) {
-                      <div>
-                        {{ t('required-field') }}
-                      </div>
-                    }
-                    @if (reviewGroup.get('title')?.errors?.duplicateName) {
-                      <div>
-                        {{ t('name-unique-validation') }}
-                      </div>
-                    }
-                  </div>
-                }
-              </div>
+              @if (reviewGroup.get('title'); as formControl) {
+                <div class="col-md-8 col-sm-12 mt-2">
+                  <label for="library-name" class="form-label">{{t('name-label')}}</label>
+                  <input id="library-name" class="form-control" formControlName="title" type="text"
+                         [appFormField]="formControl" aria-describedby="library-name-validations">
+                  <app-validation-errors id="library-name" [control]="formControl" [messages]="{
+                    duplicateName: t('name-unique-validation')
+                  }" />
+                </div>
+              }
               @if (accountService.hasAdminRole()) {
                 <div class="col-md-3 col-sm-12 ms-2">
                   <div class="form-check form-switch">

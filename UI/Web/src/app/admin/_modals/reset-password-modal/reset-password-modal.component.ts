@@ -6,13 +6,15 @@ import {translate, TranslocoDirective} from "@jsverse/transloco";
 import {ToastrService} from '@openng/ngx-toastr';
 import {AccountService} from "../../../_services/account.service";
 import {Member} from "../../../_models/auth/member";
+import {FormFieldDirective} from "../../../_directives/form-field.directive";
+import {ValidationErrorsComponent} from "../../../shared/_components/validation-errors/validation-errors.component";
 
 @Component({
   selector: 'app-reset-password-modal',
   templateUrl: './reset-password-modal.component.html',
   styleUrls: ['./reset-password-modal.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [ReactiveFormsModule, SentenceCasePipe, TranslocoDirective]
+  imports: [ReactiveFormsModule, SentenceCasePipe, TranslocoDirective, FormFieldDirective, ValidationErrorsComponent]
 })
 export class ResetPasswordModalComponent {
 
@@ -23,7 +25,7 @@ export class ResetPasswordModalComponent {
   member = input.required<Member>();
 
   resetPasswordForm: FormGroup = new FormGroup({
-    password: new FormControl('', [Validators.required]),
+    password: new FormControl('', [Validators.required, Validators.minLength(4)]),
   });
 
 

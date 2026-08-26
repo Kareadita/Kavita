@@ -47,16 +47,17 @@
 
         <div class="row">
           <div class="mb-3" style="width: 100%">
-            <app-setting-item [title]="t('localized-name-label')" [toggleOnViewClick]="false" [showEdit]="false">
-              <ng-template #view>
-                @if (editSeriesForm.get('localizedName'); as formControl) {
+            @if (editSeriesForm.get('localizedName'); as formControl) {
+              <app-setting-item [title]="t('localized-name-label')" [toggleOnViewClick]="false" [showEdit]="false" [control]="formControl" labelId="localized-name">
+                <ng-template #view>
                   <div class="input-group {{series.localizedNameLocked ? 'lock-active' : ''}}">
                     <ng-container [ngTemplateOutlet]="lock" [ngTemplateOutletContext]="{ item: series, field: 'localizedNameLocked' }" />
-                    <input id="localized-name" class="form-control" formControlName="localizedName" type="text">
+                    <input id="localized-name" class="form-control" formControlName="localizedName" type="text"
+                           [appFormField]="formControl">
                   </div>
-                }
-              </ng-template>
-            </app-setting-item>
+                </ng-template>
+              </app-setting-item>
+            }
           </div>
         </div>
 
@@ -104,21 +105,22 @@
           </div>
           <div class="col-lg-4 col-md-12">
             <div class="mb-3" style="width: 100%">
-              <app-setting-item [title]="t('release-year-label')" [toggleOnViewClick]="false" [showEdit]="false">
-                <ng-template #view>
-                  <div class="input-group {{metadata.releaseYearLocked ? 'lock-active' : ''}}">
-                    <ng-container [ngTemplateOutlet]="lock" [ngTemplateOutletContext]="{ item: metadata, field: 'releaseYearLocked' }" />
-                    <input type="number" inputmode="numeric" class="form-control" id="release-year" formControlName="releaseYear"
-                           maxlength="4" minlength="4"
-                           [class.is-invalid]="editSeriesForm.get('releaseYear')?.invalid && editSeriesForm.get('releaseYear')?.touched">
-                    @if (editSeriesForm.get('releaseYear')?.errors; as errors) {
-                      @if (errors.pattern) {
-                        <p class="invalid-feedback">{{t('release-year-validation')}}</p>
-                      }
-                    }
-                  </div>
-                </ng-template>
-              </app-setting-item>
+              @if (editSeriesForm.get('releaseYear'); as formControl) {
+                <app-setting-item [title]="t('release-year-label')" [toggleOnViewClick]="false" [showEdit]="false"
+                                  [control]="formControl" labelId="release-year" [validations]="{
+                                    pattern: t('release-year-validation'),
+                                    minlength: t('release-year-validation'),
+                                    maxlength: t('release-year-validation')
+                                  }">
+                  <ng-template #view>
+                    <div class="input-group {{metadata.releaseYearLocked ? 'lock-active' : ''}}">
+                      <ng-container [ngTemplateOutlet]="lock" [ngTemplateOutletContext]="{ item: metadata, field: 'releaseYearLocked' }" />
+                      <input type="number" inputmode="numeric" class="form-control" id="release-year" formControlName="releaseYear"
+                             [appFormField]="formControl">
+                    </div>
+                  </ng-template>
+                </app-setting-item>
+              }
             </div>
           </div>
         </div>

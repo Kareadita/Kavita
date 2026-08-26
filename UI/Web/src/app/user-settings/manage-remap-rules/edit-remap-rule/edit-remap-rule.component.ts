@@ -12,13 +12,14 @@ import {TypeaheadSettings} from '../../../typeahead/_models/typeahead-settings';
 import {TypeaheadComponent} from '../../../typeahead/_components/typeahead.component';
 import {ImageComponent} from '../../../shared/image/image.component';
 import {TypeaheadSettingsFactoryService} from "../../../typeahead-settings-factory.service";
+import {FormFieldDirective} from "../../../_directives/form-field.directive";
 
 @Component({
   selector: 'app-edit-remap-rule',
   templateUrl: './edit-remap-rule.component.html',
   styleUrls: ['./edit-remap-rule.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [TranslocoDirective, ReactiveFormsModule, TypeaheadComponent, ImageComponent]
+  imports: [TranslocoDirective, ReactiveFormsModule, TypeaheadComponent, ImageComponent, FormFieldDirective]
 })
 export class EditRemapRuleComponent implements OnInit {
 

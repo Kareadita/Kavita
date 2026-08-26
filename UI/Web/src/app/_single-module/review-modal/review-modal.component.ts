@@ -7,6 +7,9 @@ import {ConfirmService} from "../../shared/confirm.service";
 import {ToastrService} from '@openng/ngx-toastr';
 import {NgxStarsModule} from "ngx-stars";
 import {ReviewService} from "../../_services/review.service";
+import {FormFieldDirective} from "../../_directives/form-field.directive";
+import {form} from "@angular/forms/signals";
+import {ValidationErrorsComponent} from "../../shared/_components/validation-errors/validation-errors.component";
 
 export enum ReviewModalCloseAction {
   Create,
@@ -21,7 +24,7 @@ export interface ReviewModalCloseEvent {
 
 @Component({
   selector: 'app-review-series-modal',
-  imports: [ReactiveFormsModule, TranslocoDirective, NgxStarsModule],
+  imports: [ReactiveFormsModule, TranslocoDirective, NgxStarsModule, FormFieldDirective, ValidationErrorsComponent],
   templateUrl: './review-modal.component.html',
   styleUrls: ['./review-modal.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
@@ -69,4 +72,6 @@ export class ReviewModalComponent implements OnInit {
     });
 
   }
+
+  protected readonly form = form;
 }

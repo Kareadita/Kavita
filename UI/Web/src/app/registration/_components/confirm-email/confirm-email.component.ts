@@ -9,13 +9,15 @@ import {translate, TranslocoDirective} from "@jsverse/transloco";
 import {AccountService} from "../../../_services/account.service";
 import {ThemeService} from "../../../_services/theme.service";
 import {NavService} from "../../../_services/nav.service";
+import {FormFieldDirective} from "../../../_directives/form-field.directive";
+import {ValidationErrorsComponent} from "../../../shared/_components/validation-errors/validation-errors.component";
 
 @Component({
     selector: 'app-confirm-email',
     templateUrl: './confirm-email.component.html',
     styleUrls: ['./confirm-email.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush,
-    imports: [SplashContainerComponent, ReactiveFormsModule, NgbTooltip, NgTemplateOutlet, TranslocoDirective]
+    imports: [SplashContainerComponent, ReactiveFormsModule, NgbTooltip, NgTemplateOutlet, TranslocoDirective, FormFieldDirective, ValidationErrorsComponent]
 })
 export class ConfirmEmailComponent implements OnDestroy {
   private route = inject(ActivatedRoute);

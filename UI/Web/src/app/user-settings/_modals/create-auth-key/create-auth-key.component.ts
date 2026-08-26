@@ -6,7 +6,7 @@ import {SettingItemComponent} from "../../../settings/_components/setting-item/s
 import {AccountService} from "../../../_services/account.service";
 import {AuthKey} from "../../../_models/user/auth-key";
 import {UtcToLocalTimePipe} from "../../../_pipes/utc-to-local-time.pipe";
-import {ValidationErrorsComponent} from "../../../shared/_components/validation-errors/validation-errors.component";
+import {FormFieldDirective} from "../../../_directives/form-field.directive";
 
 @Component({
   selector: 'app-create-auth-key',
@@ -15,8 +15,7 @@ import {ValidationErrorsComponent} from "../../../shared/_components/validation-
     ReactiveFormsModule,
     SettingItemComponent,
     UtcToLocalTimePipe,
-    ValidationErrorsComponent
-  ],
+    FormFieldDirective],
   templateUrl: './create-auth-key.component.html',
   styleUrl: './create-auth-key.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush

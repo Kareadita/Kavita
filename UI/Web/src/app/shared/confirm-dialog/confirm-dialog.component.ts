@@ -6,10 +6,11 @@ import {SafeHtmlPipe} from "../../_pipes/safe-html.pipe";
 import {TranslocoDirective} from "@jsverse/transloco";
 import {ConfirmTranslatePipe} from "../../_pipes/confirm-translate.pipe";
 import {FormControl, FormGroup, ReactiveFormsModule} from "@angular/forms";
+import {FormFieldDirective} from "../../_directives/form-field.directive";
 
 @Component({
     selector: 'app-confirm-dialog',
-  imports: [SafeHtmlPipe, TranslocoDirective, ConfirmTranslatePipe, ReactiveFormsModule],
+  imports: [SafeHtmlPipe, TranslocoDirective, ConfirmTranslatePipe, ReactiveFormsModule, FormFieldDirective],
     templateUrl: './confirm-dialog.component.html',
     styleUrls: ['./confirm-dialog.component.scss'],
     changeDetection: ChangeDetectionStrategy.Eager,

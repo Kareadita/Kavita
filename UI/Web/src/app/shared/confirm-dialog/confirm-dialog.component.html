@@ -13,7 +13,10 @@
     <div class="modal-body" style="overflow-x: auto" [class.book-reader]="config.bookReader">
       <form [formGroup]="formGroup">
         <div [innerHtml]="(config.content | confirmTranslate)! | safeHtml"></div>
-        <input type="text" class="form-control" aria-labelledby="modal-basic-title" formControlName="prompt" />
+        @if (formGroup.get('prompt'); as formControl) {
+          <input type="text" class="form-control" aria-labelledby="modal-basic-title" formControlName="prompt"
+                 [appFormField]="formControl" />
+        }
       </form>
     </div>
   } @else {

@@ -1,5 +1,5 @@
 import {ChangeDetectionStrategy, Component, computed, DestroyRef, inject, OnInit, signal} from '@angular/core';
-import {FormControl, FormGroup, ReactiveFormsModule} from '@angular/forms';
+import {FormControl, FormGroup, ReactiveFormsModule, Validators} from '@angular/forms';
 import {NgbActiveModal} from '@ng-bootstrap/ng-bootstrap';
 import {ToastrService} from '@openng/ngx-toastr';
 import {ApiKeyComponent} from '../../user-settings/api-key/api-key.component';
@@ -20,6 +20,8 @@ import {AgeRestriction} from "../../_models/metadata/age-restriction";
 import {AgeRating} from "../../_models/metadata/age-rating";
 import {Library} from "../../_models/library/library";
 import {InviteUserResponse} from "../../_models/auth/invite-user-response";
+import {FormFieldDirective} from "../../_directives/form-field.directive";
+import {ValidationErrorsComponent} from "../../shared/_components/validation-errors/validation-errors.component";
 
 @Component({
     selector: 'app-invite-user',
@@ -27,7 +29,7 @@ import {InviteUserResponse} from "../../_models/auth/invite-user-response";
     styleUrls: ['./invite-user.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [ReactiveFormsModule, RestrictionSelectorComponent,
-    ApiKeyComponent, TranslocoDirective, SafeHtmlPipe, SettingMultiCheckBox, AsyncPipe]
+    ApiKeyComponent, TranslocoDirective, SafeHtmlPipe, SettingMultiCheckBox, AsyncPipe, FormFieldDirective, ValidationErrorsComponent]
 })
 export class InviteUserComponent implements OnInit {
 
@@ -46,7 +48,7 @@ export class InviteUserComponent implements OnInit {
     libraries: FormControl<number[]>,
     roles: FormControl<Role[]>,
   }> = new FormGroup({
-    email: new FormControl<string>(''),
+    email: new FormControl<string>('', [Validators.required]),
     libraries: new FormControl<number[]>([]),
     roles: new FormControl<Role[]>([Role.Login]),
   }) as any;

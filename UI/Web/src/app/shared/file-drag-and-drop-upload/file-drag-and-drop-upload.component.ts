@@ -2,6 +2,8 @@ import {ChangeDetectionStrategy, Component, input, output, signal} from '@angula
 import {NgxFileDropEntry, NgxFileDropModule} from "ngx-file-drop";
 import {TranslocoDirective} from "@jsverse/transloco";
 import {FormControl, ReactiveFormsModule, Validators} from "@angular/forms";
+import {FormFieldDirective} from "../../_directives/form-field.directive";
+import {ValidationErrorsComponent} from "../_components/validation-errors/validation-errors.component";
 
 export enum UploadMode {
   All = 0,
@@ -14,8 +16,7 @@ export enum UploadMode {
   imports: [
     NgxFileDropModule,
     TranslocoDirective,
-    ReactiveFormsModule
-  ],
+    ReactiveFormsModule, FormFieldDirective, ValidationErrorsComponent],
   templateUrl: './file-drag-and-drop-upload.component.html',
   styleUrl: './file-drag-and-drop-upload.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

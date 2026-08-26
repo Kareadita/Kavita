@@ -16,7 +16,10 @@
       <ng-container>
         <div class="row g-0 mt-4 mb-4">
           @if (settingsForm.get('authority'); as formControl) {
-            <app-setting-item [title]="t('authority-label')" [subtitle]="t('authority-tooltip')" [control]="formControl">
+            <app-setting-item [title]="t('authority-label')" [subtitle]="t('authority-tooltip')" [control]="formControl" [validations]="{
+                  backendFailure: formControl.errors?.backendFailure?.result | authorityValidationResult,
+                  requireTls: t('tls-required')
+                }">
               <ng-template #view>
                 {{formControl.value | defaultValue}}
               </ng-template>
@@ -25,11 +28,6 @@
                        formControlName="authority" type="text"
                        aria-describedby="oid-authority-validations"
                        [appFormField]="formControl">
-
-                <app-validation-errors [control]="formControl" id="oid-authority" [messages]="{
-                  backendFailure: formControl.errors!.backendFailure.result | authorityValidationResult,
-                  requireTls: t('tls-required')
-                }" />
 
                 @if (settingsForm.dirty || !settingsForm.untouched) {
                   <div id="invalid-uri-validation" class="invalid-feedback">
@@ -45,7 +43,10 @@
 
         <div class="row g-0 mt-4 mb-4">
           @if (settingsForm.get('clientId'); as formControl) {
-            <app-setting-item [title]="t('client-id-label')" [subtitle]="t('client-id-tooltip')" [control]="formControl">
+            <app-setting-item [title]="t('client-id-label')" [subtitle]="t('client-id-tooltip')" [control]="formControl" [validations]="{
+              requiredIf: t('other-field-required', {name: 'clientId', other: formControl.errors?.requiredIf?.other}),
+              requiredIfOtherInvalid: t('other-field-invalid', {other: formControl.errors?.requiredIfOtherInvalid?.other})
+            }">
               <ng-template #view>
                 {{formControl.value}}
               </ng-template>
@@ -54,10 +55,6 @@
                        formControlName="clientId" type="text"
                        [appFormField]="formControl">
 
-                <app-validation-errors [control]="formControl" id="oid-client-id" [messages]="{
-                  requiredIf: t('other-field-required', {name: 'clientId', other: formControl.errors!.requiredIf.other}),
-                  requiredIfOtherInvalid: t('other-field-invalid', {other: formControl.errors!.requiredIfOtherInvalid.other})
-                }" />
               </ng-template>
             </app-setting-item>
           }
@@ -65,7 +62,10 @@
 
         <div class="row g-0 mt-4 mb-4">
           @if (settingsForm.get('secret'); as formControl) {
-            <app-setting-item [title]="t('secret-label')" [subtitle]="t('secret-tooltip')" [control]="formControl">
+            <app-setting-item [title]="t('secret-label')" [subtitle]="t('secret-tooltip')" [control]="formControl" [validations]="{
+              requiredIf: t('other-field-required', {name: 'secret', other: formControl.errors?.requiredIf?.other}),
+              requiredIfOtherInvalid: t('other-field-invalid', {other: formControl.errors?.requiredIfOtherInvalid?.other})
+            }">
               <ng-template #view>
                 {{formControl.value | slice:0:40 | defaultValue}}
               </ng-template>
@@ -73,11 +73,6 @@
                 <input id="oid-secret" aria-describedby="oidc-secret-validations" class="form-control"
                        formControlName="secret" type="text"
                        [appFormField]="formControl">
-
-                <app-validation-errors [control]="formControl" id="oid-secret" [messages]="{
-                  requiredIf: t('other-field-required', {name: 'secret', other: formControl.errors!.requiredIf.other}),
-                  requiredIfOtherInvalid: t('other-field-invalid', {other: formControl.errors!.requiredIfOtherInvalid.other})
-                }" />
               </ng-template>
             </app-setting-item>
           }
@@ -97,7 +92,7 @@
       <ng-container>
         <div class="row g-0 mt-4 mb-4">
           @if (settingsForm.get('providerName'); as formControl) {
-            <app-setting-item [title]="t('provider-name-label')" [subtitle]="t('provider-name-tooltip')">
+            <app-setting-item [title]="t('provider-name-label')" [subtitle]="t('provider-name-tooltip')" [control]="formControl">
               <ng-template #view>
                 {{formControl.value}}
               </ng-template>
@@ -179,7 +174,7 @@
 
         <div class="row g-0 mt-4 mb-4">
           @if(settingsForm.get('defaultAgeRestriction'); as formControl) {
-            <app-setting-item [title]="t('default-age-restriction-label')" [subtitle]="t('default-age-restriction-tooltip')">
+            <app-setting-item [title]="t('default-age-restriction-label')" [subtitle]="t('default-age-restriction-tooltip')" [control]="formControl">
               <ng-template #view>
                 <div>{{formControl.value | ageRating}}</div>
               </ng-template>
@@ -240,7 +235,7 @@
       <ng-container>
         <div class="row g-0 mt-4 mb-4">
           @if (settingsForm.get('rolesPrefix'); as formControl) {
-            <app-setting-item [title]="t('roles-prefix-label')" [subtitle]="t('roles-prefix-tooltip')">
+            <app-setting-item [title]="t('roles-prefix-label')" [subtitle]="t('roles-prefix-tooltip')" [control]="formControl">
               <ng-template #view>
                 {{formControl.value | defaultValue}}
               </ng-template>
@@ -255,7 +250,7 @@
 
         <div class="row g-0 mt-4 mb-4">
           @if (settingsForm.get('rolesClaim'); as formControl) {
-            <app-setting-item [title]="t('roles-claim-label')" [subtitle]="t('roles-claim-tooltip')">
+            <app-setting-item [title]="t('roles-claim-label')" [subtitle]="t('roles-claim-tooltip')" [control]="formControl">
               <ng-template #view>
                 {{formControl.value}}
               </ng-template>

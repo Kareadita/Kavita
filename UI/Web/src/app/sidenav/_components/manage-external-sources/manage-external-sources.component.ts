@@ -8,10 +8,11 @@ import {ExternalSourceService} from "../../../_services/external-source.service"
 import {WikiLink} from "../../../_models/wiki";
 import {EmptyStateComponent} from "../../../shared/_components/empty-state/empty-state.component";
 import {toSignal} from "@angular/core/rxjs-interop";
+import {FormFieldDirective} from "../../../_directives/form-field.directive";
 
 @Component({
     selector: 'app-manage-external-sources',
-  imports: [FormsModule, ReactiveFormsModule, TranslocoDirective, EditExternalSourceItemComponent, EmptyStateComponent],
+  imports: [FormsModule, ReactiveFormsModule, TranslocoDirective, EditExternalSourceItemComponent, EmptyStateComponent, FormFieldDirective],
     templateUrl: './manage-external-sources.component.html',
     styleUrls: ['./manage-external-sources.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush

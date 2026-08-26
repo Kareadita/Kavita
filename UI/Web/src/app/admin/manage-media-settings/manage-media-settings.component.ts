@@ -19,13 +19,14 @@ import {PdfRenderResolutionPipe} from "../../_pipes/pdf-render-resolution.pipe"
 import {ConfirmService} from "../../shared/confirm.service";
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import {ModalService} from "../../_services/modal.service";
+import {FormFieldDirective} from "../../_directives/form-field.directive";
 
 @Component({
   selector: 'app-manage-media-settings',
   templateUrl: './manage-media-settings.component.html',
   styleUrls: ['./manage-media-settings.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [ReactiveFormsModule, TranslocoDirective, SettingItemComponent, EncodeFormatPipe, CoverImageSizePipe, PdfRenderResolutionPipe]
+  imports: [ReactiveFormsModule, TranslocoDirective, SettingItemComponent, EncodeFormatPipe, CoverImageSizePipe, PdfRenderResolutionPipe, FormFieldDirective]
 })
 export class ManageMediaSettingsComponent implements OnInit {
 

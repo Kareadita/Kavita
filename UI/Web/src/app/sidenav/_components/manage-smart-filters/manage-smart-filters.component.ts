@@ -41,11 +41,12 @@ import {EVENTS, MessageHubService} from "../../../_services/message-hub.service"
 import {DashboardService} from "../../../_services/dashboard.service";
 import {NavService} from "../../../_services/nav.service";
 import {CardActionablesComponent} from "../../../_single-module/card-actionables/card-actionables.component";
+import {FormFieldDirective} from "../../../_directives/form-field.directive";
 
 @Component({
   selector: 'app-manage-smart-filters',
   imports: [ReactiveFormsModule, TranslocoDirective, CarouselReelComponent, SeriesCardComponent, AsyncPipe, CardActionablesComponent,
-    FilterEntityTypePipe, EntityCardComponent, PromotedIconComponent],
+    FilterEntityTypePipe, EntityCardComponent, PromotedIconComponent, FormFieldDirective],
   templateUrl: './manage-smart-filters.component.html',
   styleUrls: ['./manage-smart-filters.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush

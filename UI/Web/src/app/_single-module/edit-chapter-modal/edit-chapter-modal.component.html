@@ -27,13 +27,6 @@
                       <input class="form-control" formControlName="titleName" type="text"
                              [appFormField]="formControl">
 
-                      @if (formControl.errors; as errors) {
-                        <div class="invalid-feedback">
-                          @if (errors.required) {
-                            <div>{{t('required-field')}}</div>
-                          }
-                        </div>
-                      }
                     </div>
                   }
                 </ng-template>
@@ -118,18 +111,21 @@
 
           <div class="col-lg-3 col-md-12">
             <div class="mb-3">
-              <app-setting-item [title]="t('release-date-label')" [toggleOnViewClick]="false" [showEdit]="false">
-                <ng-template #view>
-                  <div class="input-group" [ngClass]="{'lock-active': chapter.releaseDateLocked}">
-                    <ng-container [ngTemplateOutlet]="lock" [ngTemplateOutletContext]="{ item: chapter, field: 'releaseDateLocked' }" />
-                    <input
-                      class="form-control"
-                      formControlName="releaseDate"
-                      type="date"
-                    />
-                  </div>
-                </ng-template>
-              </app-setting-item>
+              @if (editForm.get('releaseDate'); as formControl) {
+                <app-setting-item [title]="t('release-date-label')" [toggleOnViewClick]="false" [showEdit]="false" [control]="formControl">
+                  <ng-template #view>
+                    <div class="input-group" [ngClass]="{'lock-active': chapter.releaseDateLocked}">
+                      <ng-container [ngTemplateOutlet]="lock" [ngTemplateOutletContext]="{ item: chapter, field: 'releaseDateLocked' }" />
+                      <input
+                        class="form-control"
+                        formControlName="releaseDate"
+                        type="date"
+                        [appFormField]="formControl"
+                      />
+                    </div>
+                  </ng-template>
+                </app-setting-item>
+              }
             </div>
           </div>
         </div>

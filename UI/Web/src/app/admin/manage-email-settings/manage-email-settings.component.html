@@ -29,12 +29,12 @@
 
     <div class="row g-0 mt-2">
       @if (settingsForm.get('senderAddress'); as formControl) {
-        <app-setting-item [title]="t('sender-address-label')" [subtitle]="t('sender-address-tooltip')">
+        <app-setting-item [title]="t('sender-address-label')" [subtitle]="t('sender-address-tooltip')" [control]="formControl" labelId="settings-sender-address">
           <ng-template #view>
             {{formControl.value | defaultValue}}
           </ng-template>
           <ng-template #edit>
-            <input type="text" class="form-control" formControlName="senderAddress" id="settings-sender-address" appEnterBlur/>
+            <input type="text" class="form-control" formControlName="senderAddress" id="settings-sender-address" appEnterBlur [appFormField]="formControl" />
           </ng-template>
         </app-setting-item>
       }
@@ -42,12 +42,12 @@
 
     <div class="row g-0 mt-2">
       @if (settingsForm.get('senderDisplayName'); as formControl) {
-        <app-setting-item [title]="t('sender-displayname-label')" [subtitle]="t('sender-displayname-tooltip')">
+        <app-setting-item [title]="t('sender-displayname-label')" [subtitle]="t('sender-displayname-tooltip')" [control]="formControl" labelId="settings-sender-displayname">
           <ng-template #view>
             {{formControl.value | defaultValue}}
           </ng-template>
           <ng-template #edit>
-            <input type="text" class="form-control" formControlName="senderDisplayName" id="settings-sender-displayname" appEnterBlur />
+            <input type="text" class="form-control" formControlName="senderDisplayName" id="settings-sender-displayname" appEnterBlur [appFormField]="formControl" />
           </ng-template>
         </app-setting-item>
       }
@@ -55,13 +55,13 @@
 
     <div class="row g-0 mt-2">
       @if (settingsForm.get('host'); as formControl) {
-        <app-setting-item [title]="t('host-label')" [subtitle]="t('host-tooltip')">
+        <app-setting-item [title]="t('host-label')" [subtitle]="t('host-tooltip')" [control]="formControl" labelId="settings-host">
           <ng-template #view>
             {{formControl.value | defaultValue}}
           </ng-template>
           <ng-template #edit>
             <div class="input-group">
-              <input type="text" class="form-control" formControlName="host" id="settings-host" appEnterBlur />
+              <input type="text" class="form-control" formControlName="host" id="settings-host" appEnterBlur [appFormField]="formControl" />
               <button type="button" class="btn btn-outline-secondary" (click)="autofillGmail()">{{t('gmail-label')}}</button>
               <button type="button" class="btn btn-outline-secondary" (click)="autofillOutlook()">{{t('outlook-label')}}</button>
             </div>
@@ -72,12 +72,12 @@
 
     <div class="row g-0 mt-2">
       @if (settingsForm.get('port'); as formControl) {
-        <app-setting-item [title]="t('port-label')">
+        <app-setting-item [title]="t('port-label')" [control]="formControl" labelId="settings-port">
           <ng-template #view>
             {{formControl.value | defaultValue}}
           </ng-template>
           <ng-template #edit>
-            <input type="number" inputmode="numeric" min="1" class="form-control" formControlName="port" id="settings-port" appEnterBlur />
+            <input type="number" inputmode="numeric" min="1" class="form-control" formControlName="port" id="settings-port" appEnterBlur [appFormField]="formControl" />
           </ng-template>
         </app-setting-item>
       }
@@ -97,12 +97,12 @@
 
     <div class="row g-0 mt-2">
       @if (settingsForm.get('userName'); as formControl) {
-        <app-setting-item [title]="t('username-label')" [subtitle]="t('username-tooltip')">
+        <app-setting-item [title]="t('username-label')" [subtitle]="t('username-tooltip')" [control]="formControl" labelId="settings-username">
           <ng-template #view>
             {{formControl.value | defaultValue}}
           </ng-template>
           <ng-template #edit>
-            <input type="text" class="form-control" formControlName="userName" id="settings-username" appEnterBlur />
+            <input type="text" class="form-control" formControlName="userName" id="settings-username" appEnterBlur [appFormField]="formControl" />
           </ng-template>
         </app-setting-item>
       }
@@ -110,12 +110,12 @@
 
     <div class="row g-0 mt-2">
       @if (settingsForm.get('password'); as formControl) {
-        <app-setting-item [title]="t('password-label')">
+        <app-setting-item [title]="t('password-label')" [control]="formControl" labelId="settings-password">
           <ng-template #view>
             {{formControl.value ? '********' : null | defaultValue}}
           </ng-template>
           <ng-template #edit>
-            <input type="text" class="form-control" formControlName="password" id="settings-password" appEnterBlur />
+            <input type="text" class="form-control" formControlName="password" id="settings-password" appEnterBlur [appFormField]="formControl" />
           </ng-template>
         </app-setting-item>
       }
@@ -123,12 +123,12 @@
 
     <div class="row g-0 mt-2">
       @if (settingsForm.get('sizeLimit'); as formControl) {
-        <app-setting-item [title]="t('size-limit-label')" [subtitle]="t('size-limit-tooltip')">
+        <app-setting-item [title]="t('size-limit-label')" [subtitle]="t('size-limit-tooltip')" [control]="formControl" labelId="settings-size-limit">
           <ng-template #view>
             {{formControl.value | bytes}}
           </ng-template>
           <ng-template #edit>
-            <input type="number" inputmode="numeric" min="1" class="form-control" formControlName="sizeLimit" id="settings-size-limit" appEnterBlur />
+            <input type="number" inputmode="numeric" min="1" class="form-control" formControlName="sizeLimit" id="settings-size-limit" appEnterBlur [appFormField]="formControl" />
           </ng-template>
         </app-setting-item>
       }

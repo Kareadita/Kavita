@@ -41,8 +41,12 @@
                     </select>
                   </div>
                   <div class="col-md-2">
-                    <input id="field-mapping-{{i}}" type="text" class="form-control" formControlName="sourceValue"
-                           [placeholder]="t('source-genre-tags-placeholder')" />
+                    @if (mapping.get('sourceValue'); as formControl) {
+                      <input id="field-mapping-{{i}}" type="text" class="form-control" formControlName="sourceValue"
+                             [placeholder]="t('source-genre-tags-placeholder')"
+                             [appFormField]="formControl" [attr.aria-describedby]="'field-mapping-' + i + '-validations'" />
+                      <app-validation-errors [id]="'field-mapping-' + i" [control]="formControl" />
+                    }
                   </div>
                   <div class="col-md-2">
                     <select class="form-select" formControlName="destinationType">
@@ -51,8 +55,10 @@
                     </select>
                   </div>
                   <div class="col-md-2">
-                    <input type="text" class="form-control" formControlName="destinationValue"
-                           [placeholder]="t('dest-genre-tags-placeholder')" />
+                    @if (mapping.get('destinationValue'); as formControl) {
+                      <input type="text" class="form-control" formControlName="destinationValue"
+                             [placeholder]="t('dest-genre-tags-placeholder')" [appFormField]="formControl" />
+                    }
                   </div>
                   <div class="col-md-2">
                     <div class="form-check">

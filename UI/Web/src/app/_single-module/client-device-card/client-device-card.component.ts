@@ -22,6 +22,7 @@ import {ActionFactoryService} from "../../_services/action-factory.service";
 import {ActionItem} from "../../_models/actionables/action-item";
 import {ActionResult} from "../../_models/actionables/action-result";
 import {TimeDifferencePipe} from "../../_pipes/time-difference.pipe";
+import {FormFieldDirective} from "../../_directives/form-field.directive";
 
 @Component({
   selector: 'app-client-device-card',
@@ -37,8 +38,7 @@ import {TimeDifferencePipe} from "../../_pipes/time-difference.pipe";
     CardActionablesComponent,
     SentenceCasePipe,
     ReactiveFormsModule,
-    TimeDifferencePipe
-  ],
+    TimeDifferencePipe, FormFieldDirective],
   templateUrl: './client-device-card.component.html',
   styleUrl: './client-device-card.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush

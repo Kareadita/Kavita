@@ -1,4 +1,4 @@
-import {ChangeDetectionStrategy, Component, inject, Signal, output} from '@angular/core';
+import {ChangeDetectionStrategy, Component, inject, output, Signal} from '@angular/core';
 import {NgbActiveOffcanvas} from "@ng-bootstrap/ng-bootstrap";
 import {TranslocoDirective} from "@jsverse/transloco";
 import {AnnotationCardComponent} from "../../_annotations/annotation-card/annotation-card.component";
@@ -12,6 +12,7 @@ import {
 } from "../../../../shared/_components/off-canvas-resize/off-canvas-resize.component";
 import {AccountService} from "../../../../_services/account.service";
 import {VirtualScrollerModule} from "@iharbeck/ngx-virtual-scroller";
+import {FormFieldDirective} from "../../../../_directives/form-field.directive";
 
 @Component({
   selector: 'app-view-annotations-drawer',
@@ -21,7 +22,8 @@ import {VirtualScrollerModule} from "@iharbeck/ngx-virtual-scroller";
     FilterPipe,
     ReactiveFormsModule,
     OffCanvasResizeComponent,
-    VirtualScrollerModule
+    VirtualScrollerModule,
+    FormFieldDirective
   ],
   templateUrl: './view-annotations-drawer.component.html',
   styleUrl: './view-annotations-drawer.component.scss',
