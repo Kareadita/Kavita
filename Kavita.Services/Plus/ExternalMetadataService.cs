@@ -46,6 +46,7 @@ using Kavita.Models.Extensions;
 using Kavita.Services.Extensions;
 using Kavita.Services.Helpers;
 using Kavita.Services.Scanner;
+using Markdig;
 using Microsoft.Extensions.Logging;
 
 namespace Kavita.Services.Plus;
@@ -83,10 +84,10 @@ public class ExternalMetadataService : IExternalMetadataService
     };
 
     // Allow 50 requests per 24 hours
-    private static readonly RateLimiter RateLimiter = new RateLimiter(50, TimeSpan.FromHours(24), false);
+    private static readonly RateLimiter RateLimiter = new(50, TimeSpan.FromHours(24), false);
     private static readonly ConcurrentDictionary<int, SemaphoreSlim> SeriesWriteLocks = new();
     private static SemaphoreSlim GetSeriesWriteLock(int seriesId) => SeriesWriteLocks.GetOrAdd(seriesId, static _ => new SemaphoreSlim(1, 1));
-    private static bool IsRomanCharacters(string input) => Regex.IsMatch(input, @"^[\p{IsBasicLatin}\p{IsLatin-1Supplement}]+$");
+    private readonly MarkdownPipeline _markdownPipeline = new MarkdownPipelineBuilder().UseGithub().Build();
 
     public ExternalMetadataService(IUnitOfWork unitOfWork, ILogger<ExternalMetadataService> logger, IMapper mapper,
         ILicenseService licenseService, IScrobblingService scrobblingService, IEventHub eventHub, ICoverDbService coverDbService,
@@ -2596,7 +2597,7 @@ public class ExternalMetadataService : IExternalMetadataService
             .Any(segment => segment.ToNormalized() == dropped || Parser.CleanTitle(segment).ToNormalized() == dropped);
     }
 
-    private static (bool, MetadataFieldChangeDto?) UpdateSummary(Series series, MetadataSettingsDto settings, ExternalSeriesDetailDto externalMetadata)
+    private (bool, MetadataFieldChangeDto?) UpdateSummary(Series series, MetadataSettingsDto settings, ExternalSeriesDetailDto externalMetadata)
     {
         if (!settings.EnableSummary) return (false, null);
 
@@ -2613,7 +2614,9 @@ public class ExternalMetadataService : IExternalMetadataService
         }
 
         var from = series.Metadata.Summary;
-        series.Metadata.Summary = StringHelper.RemoveSourceInDescription(StringHelper.SquashBreaklines(externalMetadata.Summary));
+
+        // Mangabaka uses Markdown for Summaries, convert to Html to align with opf/comicinfo
+        series.Metadata.Summary = Markdown.ToHtml(StringHelper.RemoveSourceInDescription(StringHelper.SquashBreaklines(externalMetadata.Summary)) ?? string.Empty, _markdownPipeline);
         series.Metadata.AddKPlusOverride(MetadataSettingField.Summary);
         series.Metadata.SummaryLocked = true;
 
@@ -3074,7 +3077,7 @@ public class ExternalMetadataService : IExternalMetadataService
         var ageRating = DetermineAgeRating(extSeries.Tags.Select(t => t.Name).Concat(extSeries.Genres), settings.AgeRatingMappings);
 
         extSeries.AgeRating = ageRating;
-        extSeries.Summary = StringHelper.RemoveSourceInDescription(StringHelper.SquashBreaklines(extSeries.Summary));
+        extSeries.Summary = Markdown.ToHtml(StringHelper.RemoveSourceInDescription(StringHelper.SquashBreaklines(extSeries.Summary)) ?? string.Empty, _markdownPipeline);
 
         return extSeries;
     }
