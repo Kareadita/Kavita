@@ -10,13 +10,7 @@
         @if(settingsForm.get('name'); as formControl) {
           <label for="settings-name" class="form-label">{{t('device-name-label')}}</label>
           <input id="settings-name" class="form-control" formControlName="name" type="text" [appFormField]="formControl">
-          @if (formControl.errors; as errors) {
-            @if (errors.required) {
-              <p class="invalid-feedback">
-                {{t('required-field')}}
-              </p>
-            }
-          }
+          <app-validation-errors id="settings-name" [control]="formControl"/>
         }
       </div>
 

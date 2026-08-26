@@ -22,20 +22,11 @@
               <label for="library-name" class="form-label">{{t('name-label')}}</label>
               @if (libraryForm.get('name'); as formControl) {
                 <input id="library-name" class="form-control" formControlName="name" type="text" [appFormField]="formControl">
-                @if (libraryForm.dirty || !libraryForm.untouched) {
-                  <div id="inviteForm-validations" class="invalid-feedback">
-                    @if (formControl.errors?.required) {
-                      <div>{{t('required-field')}}</div>
-                    }
 
-                    @if (formControl.errors?.duplicateName) {
-                      <div>{{t('library-name-unique')}}</div>
-                    }
-                  </div>
-                }
-
+                <app-validation-errors id="library-name" [control]="formControl" [messages]="{
+                  duplicateName: t('library-name-unique')
+                }" />
               }
-
             </div>
 
             <div class="mb-3">

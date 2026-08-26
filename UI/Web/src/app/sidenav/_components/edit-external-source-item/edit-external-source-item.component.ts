@@ -6,10 +6,11 @@ import {translate, TranslocoDirective} from "@jsverse/transloco";
 import {ExternalSourceService} from "../../../_services/external-source.service";
 import {ToastrService} from '@openng/ngx-toastr';
 import {FormFieldDirective} from "../../../_directives/form-field.directive";
+import {ValidationErrorsComponent} from "../../../shared/_components/validation-errors/validation-errors.component";
 
 @Component({
     selector: 'app-edit-external-source-item',
-  imports: [NgbCollapse, ReactiveFormsModule, TranslocoDirective, FormFieldDirective],
+  imports: [NgbCollapse, ReactiveFormsModule, TranslocoDirective, FormFieldDirective, ValidationErrorsComponent],
     templateUrl: './edit-external-source-item.component.html',
     styleUrls: ['./edit-external-source-item.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush

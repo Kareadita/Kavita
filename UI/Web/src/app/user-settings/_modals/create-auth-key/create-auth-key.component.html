@@ -13,11 +13,9 @@
             <ng-template #edit>
               <input id="name" type="text" autocomplete="off" formControlName="name" class="form-control" />
 
-              @if (formControl.errors; as errors) {
-                @if (errors.required) {
-                  <p class="invalid-feedback">{{t('required-field')}}</p>
-                }
-              }
+              <app-validation-errors id="name" [control]="formControl" [messages]="{
+                  duplicateName: t('library-name-unique')
+                }" />
             </ng-template>
           </app-setting-item>
         </div>
@@ -32,11 +30,7 @@
               <input id="key-length" type="range" min="8" max="32" class="form-range" formControlName="keyLength">
               <span><output for="key-length">{{t('total-key-length', {length: formControl.value})}}</output></span>
 
-              @if (formControl.errors; as errors) {
-                @if (errors.required) {
-                  <p class="invalid-feedback">{{t('required-field')}}</p>
-                }
-              }
+              <app-validation-errors id="key-length" [control]="formControl"/>
 
             </ng-template>
           </app-setting-item>
@@ -57,11 +51,7 @@
             <ng-template #edit>
               <input id="expiration" type="date" class="form-control" formControlName="expiresUtc">
 
-              @if (formControl.errors; as errors) {
-                @if (errors.required) {
-                  <p class="invalid-feedback">{{t('required-field')}}</p>
-                }
-              }
+              <app-validation-errors id="expiration" [control]="formControl"/>
             </ng-template>
           </app-setting-item>
         </div>

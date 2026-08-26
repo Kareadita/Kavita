@@ -71,15 +71,12 @@
                            inputmode="numeric"
                            [appFormField]="formControl"
                            aria-describedby="starting-year-header">
-                    @if (reviewGroup.dirty || reviewGroup.touched) {
-                      <div class="invalid-feedback">
-                        @if (formControl.errors?.min || formControl.errors?.max) {
-                          <div>
-                            {{ t('year-validation') }}
-                          </div>
-                        }
-                      </div>
-                    }
+
+                    <app-validation-errors id="start-year" [control]="formControl" [messages]="{
+                      min: t('year-validation'),
+                      max: t('year-validation')
+                    }" />
+
                   </div>
                 }
               </div>
@@ -91,17 +88,13 @@
                     <label for="ending-month" class="form-label">{{ t('month-label') }}</label>
                     <input id="ending-month" class="form-control" formControlName="endingMonth" type="number"
                            inputmode="numeric"
-                           [appFormField]="formControl"
-                           aria-describedby="ending-year-header">
-                    @if (reviewGroup.dirty || reviewGroup.touched) {
-                      <div class="invalid-feedback">
-                        @if (formControl.errors?.min || formControl.errors?.max) {
-                          <div>
-                            {{ t('month-validation') }}
-                          </div>
-                        }
-                      </div>
-                    }
+                           [appFormField]="formControl">
+
+                    <app-validation-errors id="start-year" [control]="formControl" [messages]="{
+                      min: t('month-validation'),
+                      max: t('month-validation')
+                    }" />
+
                   </div>
                 }
                 @if (reviewGroup.get('endingYear'); as formControl) {
@@ -109,17 +102,11 @@
                     <label for="ending-year" class="form-label">{{ t('year-label') }}</label>
                     <input id="ending-year" class="form-control" formControlName="endingYear" type="number"
                            inputmode="numeric"
-                           [appFormField]="formControl"
-                           aria-describedby="ending-year-header">
-                    @if (reviewGroup.dirty || reviewGroup.touched) {
-                      <div class="invalid-feedback">
-                        @if (formControl.errors?.min || formControl.errors?.max) {
-                          <div>
-                            {{ t('year-validation') }}
-                          </div>
-                        }
-                      </div>
-                    }
+                           [appFormField]="formControl">
+                    <app-validation-errors id="ending-year" [control]="formControl" [messages]="{
+                      min: t('year-validation'),
+                      max: t('year-validation')
+                    }" />
                   </div>
                 }
               </div>

@@ -69,6 +69,7 @@ import {
 } from "../../../admin/_modals/directory-picker/directory-picker-modal.component";
 import {TypeaheadSettingsFactoryService} from "../../../typeahead-settings-factory.service";
 import {FormFieldDirective} from "../../../_directives/form-field.directive";
+import {ValidationErrorsComponent} from "../../../shared/_components/validation-errors/validation-errors.component";
 
 enum StepID {
   General = 0,
@@ -81,7 +82,7 @@ enum StepID {
   selector: 'app-library-settings-modal',
   imports: [NgbModalModule, NgbNavLink, NgbNavItem, NgbNavContent, ReactiveFormsModule, NgbTooltip,
     SentenceCasePipe, NgbNav, NgbNavOutlet, CoverImageChooserComponent, TranslocoModule, DefaultDatePipe,
-    FileTypeGroupPipe, EditListComponent, SettingItemComponent, SettingSwitchComponent, SettingButtonComponent, LibraryTypeSubtitlePipe, NgTemplateOutlet, TypeaheadComponent, TabTitlePipe, MetadataProviderTitlePipe, UtcToLocalTimePipe, FormFieldDirective],
+    FileTypeGroupPipe, EditListComponent, SettingItemComponent, SettingSwitchComponent, SettingButtonComponent, LibraryTypeSubtitlePipe, NgTemplateOutlet, TypeaheadComponent, TabTitlePipe, MetadataProviderTitlePipe, UtcToLocalTimePipe, FormFieldDirective, ValidationErrorsComponent],
   templateUrl: './library-settings-modal.component.html',
   styleUrls: ['./library-settings-modal.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush

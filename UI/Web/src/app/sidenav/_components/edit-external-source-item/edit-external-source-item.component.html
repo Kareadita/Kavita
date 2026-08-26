@@ -31,17 +31,10 @@
             @if (formGroup.get('name'); as formControl) {
               <input id="name" class="form-control" formControlName="name" type="text"
                      [appFormField]="formControl" aria-describedby="name-validations">
-              @if (formControl.errors; as errors) {
-                <div id="name-validations" class="invalid-feedback">
-                  @if (errors.required) {
-                    <div>{{t('required')}}</div>
-                  }
-                  @if (errors.notUnique) {
-                    <div>{{t('not-unique')}}</div>
-                  }
-                </div>
-              }
 
+              <app-validation-errors id="name" [control]="formControl" [messages]="{
+                notUnique: t('not-unique')
+              }" />
             }
 
           </div>
@@ -51,19 +44,12 @@
             @if(formGroup.get('host'); as formControl) {
               <input id="host" class="form-control" formControlName="host" type="url"
                      [appFormField]="formControl" aria-describedby="host-validations">
-              @if (formControl.errors; as errors) {
-                <div id="host-validations" class="invalid-feedback">
-                  @if (errors.required) {
-                    <div>{{t('required')}}</div>
-                  }
-                  @if (errors.notUnique) {
-                    <div>{{t('not-unique')}}</div>
-                  }
-                  @if (errors.pattern) {
-                    <div>{{t('pattern')}}</div>
-                  }
-                </div>
-              }
+
+
+              <app-validation-errors id="host" [control]="formControl" [messages]="{
+                notUnique: t('not-unique'),
+                pattern: t('pattern')
+              }" />
             }
 
 
@@ -73,13 +59,7 @@
             @if (formGroup.get('apiKey'); as formControl) {
               <input id="api-key" class="form-control" formControlName="apiKey" type="text"
                      [appFormField]="formControl" aria-describedby="api-key-validations">
-              @if (formControl.errors; as errors) {
-                <div id="api-key-validations" class="invalid-feedback">
-                  @if (errors.required) {
-                    <div>{{t('required')}}</div>
-                  }
-                </div>
-              }
+              <app-validation-errors id="api-key" [control]="formControl" />
             }
             <span class="text-muted">{{t('api-key-tooltip')}}</span>
 
