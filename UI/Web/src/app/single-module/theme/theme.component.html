@@ -375,9 +375,12 @@
   <div class="setting-section-break"></div>
 
   <h4>app-setting-multi-text-field</h4>
-  <app-setting-multi-text-field [title]="'Setting multi text-field'"
-                                [tooltip]="'Comma-separated values become tag badges.'" id="demo-multi-text">
-  </app-setting-multi-text-field>
+  <form [formGroup]="form">
+    <app-setting-multi-text-field [title]="'Setting multi text-field'"
+                                  [tooltip]="'Comma-separated values become tag badges.'" [control]="form.get('textArea')!">
+    </app-setting-multi-text-field>
+  </form>
+
 </app-accordion>
 
 

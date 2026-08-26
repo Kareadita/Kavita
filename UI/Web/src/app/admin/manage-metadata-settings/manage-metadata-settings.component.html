@@ -491,6 +491,7 @@
                     <app-setting-multi-text-field
                       [title]="t('blacklist-label')"
                       [tooltip]="t('blacklist-tooltip')"
+                      [control]="settingsForm.get('blacklist')!"
                       formControlName="blacklist"
                     />
                   </div>
@@ -500,6 +501,7 @@
                   <app-setting-multi-text-field
                     [title]="t('whitelist-label')"
                     [tooltip]="t('whitelist-tooltip')"
+                    [control]="settingsForm.get('whitelist')!"
                     formControlName="whitelist"
                   />
                 </div>

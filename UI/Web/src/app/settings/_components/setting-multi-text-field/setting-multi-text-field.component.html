@@ -1,5 +1,5 @@
 <ng-container>
-  <app-setting-item [title]="title()" [subtitle]="tooltip()">
+  <app-setting-item [title]="title()" [subtitle]="tooltip()" [control]="control()">
     <ng-template #view>
       @for(opt of selectedValues(); track opt) {
         <app-tag-badge>{{opt}}</app-tag-badge>
@@ -9,7 +9,8 @@
     </ng-template>
 
     <ng-template #edit>
-      <textarea rows="3" [id]="id()" class="form-control"
+      <textarea rows="3" class="form-control"
+                [appFormField]="control()"
                 [value]="textFieldValue()"
                 (change)="onTextFieldChange($event)" [disabled]="disabled()">
       </textarea>

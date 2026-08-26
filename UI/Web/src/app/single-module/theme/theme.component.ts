@@ -20,6 +20,7 @@ import {PlusMediaFormat} from "../../_models/series-detail/external-series-detai
 import {ScrobbleProvider} from "../../_services/scrobbling.service";
 import {ConfirmService} from "../../shared/confirm.service";
 import {ConfirmConfig} from "../../shared/confirm-dialog/_models/confirm-config";
+import {FormControl, FormGroup, ReactiveFormsModule, Validators} from "@angular/forms";
 
 /**
  * Developer-only, unlocalized style guide. Renders the app's common UI primitives and raw theme
@@ -39,6 +40,7 @@ import {ConfirmConfig} from "../../shared/confirm-dialog/_models/confirm-config"
     SettingSwitchComponent,
     SettingMultiTextFieldComponent,
     SettingMultiCheckBox,
+    ReactiveFormsModule,
   ],
   templateUrl: './theme.component.html',
   styleUrl: './theme.component.scss',
@@ -51,6 +53,10 @@ export class ThemeComponent {
   protected readonly TagBadgeCursor = TagBadgeCursor;
   protected readonly PlusMediaFormat = PlusMediaFormat;
   protected readonly ScrobbleProvider = ScrobbleProvider;
+
+  form = new FormGroup({
+    textArea: new FormControl('', [Validators.required]),
+  })
 
   protected readonly select2Demo: Select2Data = [
     {value: 1, label: 'Option A'},
@@ -90,5 +96,4 @@ export class ThemeComponent {
     ];
     this.confirmService.confirm(undefined, config);
   }
-
 }
