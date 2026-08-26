@@ -25,7 +25,7 @@
                     <div class="input-group" [ngClass]="{'lock-active': chapter.titleNameLocked}">
                       <ng-container [ngTemplateOutlet]="lock" [ngTemplateOutletContext]="{ item: chapter, field: 'titleNameLocked' }" />
                       <input class="form-control" formControlName="titleName" type="text"
-                             [class.is-invalid]="formControl.invalid && !formControl.untouched">
+                             [appFormField]="formControl">
 
                       @if (formControl.errors; as errors) {
                         <div class="invalid-feedback">
@@ -51,7 +51,7 @@
                       <ng-container [ngTemplateOutlet]="lock" [ngTemplateOutletContext]="{ item: chapter, field: 'sortOrderLocked' }" />
                       <input class="form-control" formControlName="sortOrder"  type="number" min="0" step="0.1" inputmode="numeric"
                              id="sort-order" aria-describedby="sort-order-validations"
-                             [class.is-invalid]="formControl.invalid && !formControl.untouched">
+                             [appFormField]="formControl">
 
                     </div>
                 </ng-template>
@@ -68,7 +68,7 @@
                     <div class="input-group"  [ngClass]="{'lock-active': chapter.isbnLocked}">
                       <ng-container [ngTemplateOutlet]="lock" [ngTemplateOutletContext]="{ item: chapter, field: 'isbnLocked' }" />
                       <input class="form-control" formControlName="isbn" type="text" id="isbn" aria-describedby="isbn-validations"
-                             [class.is-invalid]="formControl.invalid && !formControl.untouched">
+                             [appFormField]="formControl">
                     </div>
                 </ng-template>
               </app-setting-item>

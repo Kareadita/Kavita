@@ -65,6 +65,7 @@ import {DownloadEntityType} from "../../shared/_models/download-queue-item";
 import {EditModalShellComponent} from "../../shared/edit-modal-shell/edit-modal-shell.component";
 import {EditTabDirective} from "../../shared/_directive/edit-tab.directive";
 import {TypeaheadSettingsFactoryService} from "../../typeahead-settings-factory.service";
+import {FormFieldDirective} from "../../_directives/form-field.directive";
 
 
 const blackList = [Action.Edit, Action.IncognitoRead, Action.AddToReadingList];
@@ -93,6 +94,7 @@ const blackList = [Action.Edit, Action.IncognitoRead, Action.AddToReadingList];
     EditExternalMetadataFormComponent,
     EditModalShellComponent,
     EditTabDirective,
+    FormFieldDirective,
   ],
   templateUrl: './edit-chapter-modal.component.html',
   styleUrl: './edit-chapter-modal.component.scss',

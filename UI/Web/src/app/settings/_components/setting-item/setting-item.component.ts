@@ -1,4 +1,5 @@
 import {
+  afterRenderEffect,
   ChangeDetectionStrategy,
   Component,
   contentChild,
@@ -84,6 +85,11 @@ export class SettingItemComponent implements OnInit {
   }
 
   constructor() {
+
+    afterRenderEffect(() => {
+      
+    });
+
     if (this.toggleOnViewClick()) {
       fromEvent(window, 'click')
         .pipe(

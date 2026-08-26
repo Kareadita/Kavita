@@ -6,7 +6,7 @@
           <label for="license-key">{{t('activate-license-label')}}</label>
           <input id="license-key" type="text" class="form-control" formControlName="licenseKey" autocomplete="off"
                  placeholder="XXXX-XXXX-XXXX-XXXX" aria-describedby="license-key-validations" aria-details="license-help-block"
-                 [class.is-invalid]="formControl.invalid && !formControl.untouched" />
+                 [appFormField]="formControl" />
 
           @if (hasLicense()) {
             <div id="license-help-block" class="form-text">
@@ -28,7 +28,7 @@
           <label for="email">{{t('activate-email-label')}}</label>
           <input id="email" type="email" class="form-control" formControlName="email" autocomplete="off"
                  placeholder="you@domain.com" aria-describedby="email-validations" aria-details="email-help-block"
-                 [class.is-invalid]="formControl.invalid && !formControl.untouched" />
+                 [appFormField]="formControl" />
           <div id="email-help-block" class="form-text">
             {{t('email-help')}}
           </div>

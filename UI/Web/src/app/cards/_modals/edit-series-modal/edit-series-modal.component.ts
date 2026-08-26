@@ -72,6 +72,7 @@ import {Tag} from "../../../_models/tag";
 import {AllMetadataProviders, MetadataProvider} from "../../../_models/kavitaplus/metadata-provider.enum";
 import {TimeDifferencePipe} from "../../../_pipes/time-difference.pipe";
 import {TypeaheadSettingsFactoryService} from "../../../typeahead-settings-factory.service";
+import {FormFieldDirective} from "../../../_directives/form-field.directive";
 
 
 @Component({
@@ -101,7 +102,8 @@ import {TypeaheadSettingsFactoryService} from "../../../typeahead-settings-facto
     EditTabDirective,
     MetadataProviderTitlePipe,
     TitleCasePipe,
-    TimeDifferencePipe
+    TimeDifferencePipe,
+    FormFieldDirective
   ],
   templateUrl: './edit-series-modal.component.html',
   styleUrls: ['./edit-series-modal.component.scss'],

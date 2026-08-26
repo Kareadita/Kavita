@@ -14,22 +14,19 @@
       <ng-template [appEditTab]="Tabs.General">
         <div class="row">
           <div class="mb-3" style="width: 100%">
-            <app-setting-item [title]="t('name-label')" [toggleOnViewClick]="false" [showEdit]="false">
-              <ng-template #view>
-                @if (editSeriesForm.get('name'); as formControl) {
-                  <div class="input-group {{series.nameLocked ? 'lock-active' : ''}}">
-                    <ng-container [ngTemplateOutlet]="lock" [ngTemplateOutletContext]="{ item: series, field: 'nameLocked' }" />
-                    <input id="name" class="form-control" formControlName="name" type="text"
-                           [class.is-invalid]="formControl.invalid && !formControl.untouched">
-                    @if (formControl.errors) {
-                      @if (formControl.errors.required) {
-                        <div class="invalid-feedback">{{t('required-field')}}</div>
-                      }
-                    }
-                  </div>
-                }
-              </ng-template>
-            </app-setting-item>
+            @if (editSeriesForm.get('name'); as formControl) {
+              <app-setting-item [title]="t('name-label')" [toggleOnViewClick]="false" [showEdit]="false" [control]="formControl" labelid="name">
+                <ng-template #view>
+
+                    <div class="input-group {{series.nameLocked ? 'lock-active' : ''}}">
+                      <ng-container [ngTemplateOutlet]="lock" [ngTemplateOutletContext]="{ item: series, field: 'nameLocked' }" />
+                      <input id="name" class="form-control" aria-describedby="name-validations" formControlName="name" type="text"
+                             [appFormField]="formControl">
+                    </div>
+
+                </ng-template>
+              </app-setting-item>
+            }
           </div>
         </div>
 
@@ -40,7 +37,7 @@
                 <ng-template #view>
                   <div class="input-group {{series.sortNameLocked ? 'lock-active' : ''}}">
                     <ng-container [ngTemplateOutlet]="lock" [ngTemplateOutletContext]="{ item: series, field: 'sortNameLocked' }" />
-                    <input id="sort-name" class="form-control" formControlName="sortName" type="text" [class.is-invalid]="formControl.invalid && !formControl.untouched">
+                    <input id="sort-name" class="form-control" formControlName="sortName" type="text" [appFormField]="formControl">
                     @if (formControl.errors) {
                       @if (formControl.errors.required) {
                         <div class="invalid-feedback">{{t('required-field')}}</div>

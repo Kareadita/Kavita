@@ -24,7 +24,7 @@
                 <input id="oid-authority" class="form-control"
                        formControlName="authority" type="text"
                        aria-describedby="oid-authority-validations"
-                       [class.is-invalid]="formControl.invalid && !formControl.untouched">
+                       [appFormField]="formControl">
 
                 <app-validation-errors [control]="formControl" id="oid-authority" [messages]="{
                   backendFailure: formControl.errors!.backendFailure.result | authorityValidationResult,
@@ -72,7 +72,7 @@
               <ng-template #edit>
                 <input id="oid-secret" aria-describedby="oidc-secret-validations" class="form-control"
                        formControlName="secret" type="text"
-                       [class.is-invalid]="formControl.invalid && !formControl.untouched">
+                       [appFormField]="formControl">
 
                 <app-validation-errors [control]="formControl" id="oid-secret" [messages]="{
                   requiredIf: t('other-field-required', {name: 'secret', other: formControl.errors!.requiredIf.other}),
@@ -104,7 +104,7 @@
               <ng-template #edit>
                 <input id="oid-provider-name" aria-describedby="oidc-provider-name-validations" class="form-control"
                        formControlName="providerName" type="text"
-                       [class.is-invalid]="formControl.invalid && !formControl.untouched">
+                       [appFormField]="formControl">
               </ng-template>
             </app-setting-item>
           }
@@ -247,7 +247,7 @@
               <ng-template #edit>
                 <input id="oidc-roles-prefix" class="form-control"
                        formControlName="rolesPrefix" type="text"
-                       [class.is-invalid]="formControl.invalid && !formControl.untouched">
+                       [appFormField]="formControl">
               </ng-template>
             </app-setting-item>
           }
@@ -262,7 +262,7 @@
               <ng-template #edit>
                 <input id="oidc-roles-claim" class="form-control"
                        formControlName="rolesClaim" type="text"
-                       [class.is-invalid]="formControl.invalid && !formControl.untouched">
+                       [appFormField]="formControl">
               </ng-template>
             </app-setting-item>
           }

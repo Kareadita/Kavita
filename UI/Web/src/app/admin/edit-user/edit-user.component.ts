@@ -31,6 +31,7 @@ import {Member} from "../../_models/auth/member";
 import {Library} from "../../_models/library/library";
 import {AgeRestriction} from "../../_models/metadata/age-restriction";
 import {ValidationErrorsComponent} from "../../shared/_components/validation-errors/validation-errors.component";
+import {FormFieldDirective} from "../../_directives/form-field.directive";
 
 const AllowedUsernameCharacters = /^[a-zA-Z0-9\-._@+/]*$/;
 const EmailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -39,7 +40,7 @@ const EmailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     selector: 'app-edit-user',
     templateUrl: './edit-user.component.html',
     styleUrls: ['./edit-user.component.scss'],
-  imports: [ReactiveFormsModule, RestrictionSelectorComponent, SentenceCasePipe, TranslocoDirective, AsyncPipe, IdentityProviderPipePipe, SettingMultiCheckBox, ValidationErrorsComponent],
+  imports: [ReactiveFormsModule, RestrictionSelectorComponent, SentenceCasePipe, TranslocoDirective, AsyncPipe, IdentityProviderPipePipe, SettingMultiCheckBox, ValidationErrorsComponent, FormFieldDirective],
     changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class EditUserComponent implements OnInit {
