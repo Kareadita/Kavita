@@ -219,10 +219,12 @@ public class SeriesController(
         else if (!string.IsNullOrEmpty(updateSeries.SortName?.Trim()))
         {
             series.SortName = updateSeries.SortName.Trim();
+            series.Metadata.KPlusOverrides.Remove(MetadataSettingField.SortName);
         }
 
         var newLocalizedName = updateSeries.LocalizedName?.Trim();
         var newNormalizedLocalizedName = newLocalizedName.ToNormalized();
+        // BUG: This prevents us from changing the case of the localized Name
         if (series.NormalizedLocalizedName != newNormalizedLocalizedName)
         {
             // A localized name that collides (normalized) with another series' name in the library+format breaks the scanner
