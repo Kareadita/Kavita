@@ -17,6 +17,10 @@ const DEFAULT_MESSAGES: Record<string, string> = {
   'max': 'max',
 };
 
+/** postfix for aria-describedby */
+export const idPostfix = '-validations';
+
+
 @Component({
   imports: [
     TranslocoDirective
@@ -30,10 +34,15 @@ export class ValidationErrorsComponent {
   private readonly destroyRef = inject(DestroyRef);
   private readonly translocoService = inject(TranslocoService);
 
+
   control = input.required<AbstractControl>();
   id = input.required<string>();
   /** Overrides for validation error messaging. Map validation -> value. This assumes the value is already localized. */
   messages = input<Record<string, string>>({});
+
+  protected readonly validationId = computed(() => {
+    return `${this.id()}${idPostfix}`
+  })
 
   private events = toSignal(
     toObservable(this.control).pipe(

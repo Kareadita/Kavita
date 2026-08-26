@@ -1,5 +1,5 @@
 <ng-container *transloco="let t; prefix: 'validation'">
-  <div [id]="id() + '-validations'" class="invalid-feedback d-block" role="alert">
+  <div [id]="validationId()" class="invalid-feedback d-block" role="alert">
     @for (error of visibleErrors(); track error.key) {
       <div>{{ error.title }}</div>
     }

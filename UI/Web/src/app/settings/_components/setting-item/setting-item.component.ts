@@ -2,6 +2,7 @@ import {
   afterRenderEffect,
   ChangeDetectionStrategy,
   Component,
+  computed,
   contentChild,
   DestroyRef,
   effect,
@@ -9,9 +10,13 @@ import {
   HostListener,
   inject,
   input,
+  isDevMode,
   model,
   OnInit,
-  TemplateRef
+  Renderer2,
+  signal,
+  TemplateRef,
+  viewChild
 } from '@angular/core';
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import {TranslocoDirective} from "@jsverse/transloco";
@@ -19,7 +24,11 @@ import {NgTemplateOutlet} from "@angular/common";
 import {SafeHtmlPipe} from "../../../_pipes/safe-html.pipe";
 import {filter, fromEvent, tap} from "rxjs";
 import {AbstractControl} from "@angular/forms";
-import {ValidationErrorsComponent} from "../../../shared/_components/validation-errors/validation-errors.component";
+import {
+  idPostfix,
+  ValidationErrorsComponent
+} from "../../../shared/_components/validation-errors/validation-errors.component";
+import {generateUniqueId} from "../../../_helpers/random";
 
 @Component({
   selector: 'app-setting-item',
@@ -37,6 +46,7 @@ export class SettingItemComponent implements OnInit {
 
   private readonly elementRef = inject(ElementRef);
   private readonly destroyRef = inject(DestroyRef);
+  private readonly renderer = inject(Renderer2);
 
   title = input.required<string>();
   editLabel = input<string | undefined>();
@@ -77,6 +87,22 @@ export class SettingItemComponent implements OnInit {
    */
   titleActionsRef = contentChild<TemplateRef<any>>('titleActions');
 
+  private readonly editWrapper = viewChild<ElementRef<HTMLElement>>('editWrapper');
+  private readonly viewWrapper = viewChild<ElementRef<HTMLElement>>('viewWrapper');
+
+
+  private readonly generatedId = signal<string>(generateUniqueId());
+  /** A unique id to wire id up */
+  readonly elementId = computed(() => {
+    return this.labelId() || this.generatedId();
+  });
+  /** Where we search for inputs from **/
+  private readonly wrapperScope = computed(() =>
+    this.editWrapper()?.nativeElement ?? this.viewWrapper()?.nativeElement ?? null
+  );
+  protected readonly hasControl = signal<boolean>(false);
+
+
   @HostListener('click', ['$event'])
   onClickInside(event: MouseEvent) {
     if (this.allowClickEvents()) return;
@@ -87,7 +113,28 @@ export class SettingItemComponent implements OnInit {
   constructor() {
 
     afterRenderEffect(() => {
-      
+      const scope = this.wrapperScope();
+      const elementId = this.elementId();
+      if (!scope) return;
+
+      const control = this.findFirstControl(scope);
+      const hasControl = control != null;
+      this.hasControl.set(hasControl);
+      if (!control) return;
+
+
+      if (control.id !== elementId) {
+        this.renderer.setAttribute(control, 'id', elementId);
+      }
+
+      // Only point at the validation container when this component is the one rendering it
+      if (this.control() != null) {
+        this.addDescribedBy(control, `${elementId}${idPostfix}`);
+      }
+
+      if (isDevMode()) {
+        this.warnOnMultipleControls(scope);
+      }
     });
 
     if (this.toggleOnViewClick()) {
@@ -147,20 +194,30 @@ export class SettingItemComponent implements OnInit {
   }
 
   focusInput() {
-    if (this.isEditMode()) {
-      setTimeout(() => {
-        const inputElem = this.findFirstInput();
-        if (inputElem) {
-          inputElem.focus();
-        }
-      }, 10);
-    }
+    if (!this.isEditMode()) return;
+
+    setTimeout(() => this.findFirstControl(this.wrapperScope())?.focus(), 10);
   }
 
-  private findFirstInput(): HTMLInputElement | null {
-    const nativeInputs = [...this.elementRef.nativeElement.querySelectorAll('input'), ...this.elementRef.nativeElement.querySelectorAll('select'), ...this.elementRef.nativeElement.querySelectorAll('textarea')];
-    if (nativeInputs.length === 0) return null;
+  private findFirstControl(scope: HTMLElement | null): HTMLElement | null {
+    if (!scope) return null;
 
-    return nativeInputs[0];
+    return scope.querySelector<HTMLElement>('input:not([type=hidden]), select, textarea');
+  }
+
+  private addDescribedBy(element: HTMLElement, token: string) {
+    const tokens = (element.getAttribute('aria-describedby') || '').split(/\s+/).filter(t => t.length > 0);
+    if (tokens.includes(token)) return;
+
+    tokens.push(token);
+    this.renderer.setAttribute(element, 'aria-describedby', tokens.join(' '));
+  }
+
+  private warnOnMultipleControls(scope: HTMLElement) {
+    const bound = scope.querySelectorAll('[formControlName]');
+    if (bound.length <= 1) return;
+
+    console.warn(`[app-setting-item] "${this.title()}" projects ${bound.length} form controls. `
+      + `Only the first is wired to the label and aria-describedby, wire the others up manually.`);
   }
 }

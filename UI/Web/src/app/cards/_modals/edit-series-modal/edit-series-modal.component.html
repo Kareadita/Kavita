@@ -33,16 +33,11 @@
         <div class="row">
           <div class="mb-3" style="width: 100%">
             @if (editSeriesForm.get('sortName'); as formControl) {
-              <app-setting-item [title]="t('sort-name-label')" [toggleOnViewClick]="false" [showEdit]="false">
+              <app-setting-item [title]="t('sort-name-label')" [toggleOnViewClick]="false" [showEdit]="false" [control]="formControl">
                 <ng-template #view>
                   <div class="input-group {{series.sortNameLocked ? 'lock-active' : ''}}">
                     <ng-container [ngTemplateOutlet]="lock" [ngTemplateOutletContext]="{ item: series, field: 'sortNameLocked' }" />
                     <input id="sort-name" class="form-control" formControlName="sortName" type="text" [appFormField]="formControl">
-                    @if (formControl.errors) {
-                      @if (formControl.errors.required) {
-                        <div class="invalid-feedback">{{t('required-field')}}</div>
-                      }
-                    }
                   </div>
                 </ng-template>
               </app-setting-item>

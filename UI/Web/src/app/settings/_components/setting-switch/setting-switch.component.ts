@@ -12,6 +12,7 @@ import {
 import {NgTemplateOutlet} from "@angular/common";
 import {TranslocoDirective} from "@jsverse/transloco";
 import {SafeHtmlPipe} from "../../../_pipes/safe-html.pipe";
+import {generateUniqueId} from "../../../_helpers/random";
 
 @Component({
     selector: 'app-setting-switch',
@@ -46,7 +47,7 @@ export class SettingSwitchComponent implements AfterContentInit {
       const inputElement = element.querySelector('input');
 
       // If no id, generate a random id and assign it to the input
-      inputElement.id = this.generateId();
+      inputElement.id = generateUniqueId();
 
       if (inputElement && inputElement.id) {
         this.labelId.set(inputElement.id);
@@ -55,14 +56,4 @@ export class SettingSwitchComponent implements AfterContentInit {
       }
     });
   }
-
-  private generateId(): string {
-    if (crypto && crypto.randomUUID) {
-      return crypto.randomUUID();
-    }
-
-    // Fallback for browsers without crypto.randomUUID (which has happened multiple times in my user base)
-    return 'id-' + Math.random().toString(36).substr(2, 9) + '-' + Date.now().toString(36);
-  }
-
 }

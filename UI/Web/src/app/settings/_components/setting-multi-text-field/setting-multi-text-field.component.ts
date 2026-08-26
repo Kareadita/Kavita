@@ -5,7 +5,7 @@ import {SettingItemComponent} from "../setting-item/setting-item.component";
 import {TagBadgeComponent} from "../../../shared/tag-badge/tag-badge.component";
 
 /**
- * SettingMultiTextFieldComponent should be used when using a text area to input several comma seperated values.
+ * SettingMultiTextFieldComponent should be used when using a text area to input several comma separated values.
  * The component should have a formControlName bound to it of type FormControl<T[]>.
  * By default, T is assumed to be a string
  *
