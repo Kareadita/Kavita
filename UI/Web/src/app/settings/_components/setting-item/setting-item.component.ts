@@ -1,5 +1,4 @@
 import {
-  afterRenderEffect,
   ChangeDetectionStrategy,
   Component,
   computed,
@@ -10,7 +9,6 @@ import {
   HostListener,
   inject,
   input,
-  isDevMode,
   model,
   OnInit,
   Renderer2,
@@ -24,11 +22,10 @@ import {NgTemplateOutlet} from "@angular/common";
 import {SafeHtmlPipe} from "../../../_pipes/safe-html.pipe";
 import {filter, fromEvent, tap} from "rxjs";
 import {AbstractControl} from "@angular/forms";
-import {
-  idPostfix,
-  ValidationErrorsComponent
-} from "../../../shared/_components/validation-errors/validation-errors.component";
+import {ValidationErrorsComponent} from "../../../shared/_components/validation-errors/validation-errors.component";
 import {generateUniqueId} from "../../../_helpers/random";
+import {wireSettingControl} from "../../../_helpers/setting-item";
+
 
 @Component({
   selector: 'app-setting-item',
@@ -90,17 +87,24 @@ export class SettingItemComponent implements OnInit {
   private readonly editWrapper = viewChild<ElementRef<HTMLElement>>('editWrapper');
   private readonly viewWrapper = viewChild<ElementRef<HTMLElement>>('viewWrapper');
 
-
+  /** Where we search for inputs from **/
+  private readonly wrapperScope = computed(() =>
+    this.editWrapper()?.nativeElement ?? this.viewWrapper()?.nativeElement ?? null
+  );
   private readonly generatedId = signal<string>(generateUniqueId());
   /** A unique id to wire id up */
   readonly elementId = computed(() => {
     return this.labelId() || this.generatedId();
   });
-  /** Where we search for inputs from **/
-  private readonly wrapperScope = computed(() =>
-    this.editWrapper()?.nativeElement ?? this.viewWrapper()?.nativeElement ?? null
-  );
-  protected readonly hasControl = signal<boolean>(false);
+
+  protected readonly hasControl = wireSettingControl({
+    scope: this.wrapperScope,
+    elementId: this.elementId,
+    describeValidation: computed(() => this.control() !== null),
+    label: this.title,
+  }).hasControl;
+
+
 
 
   @HostListener('click', ['$event'])
@@ -112,30 +116,6 @@ export class SettingItemComponent implements OnInit {
 
   constructor() {
 
-    afterRenderEffect(() => {
-      const scope = this.wrapperScope();
-      const elementId = this.elementId();
-      if (!scope) return;
-
-      const control = this.findFirstControl(scope);
-      const hasControl = control != null;
-      this.hasControl.set(hasControl);
-      if (!control) return;
-
-
-      if (control.id !== elementId) {
-        this.renderer.setAttribute(control, 'id', elementId);
-      }
-
-      // Only point at the validation container when this component is the one rendering it
-      if (this.control() != null) {
-        this.addDescribedBy(control, `${elementId}${idPostfix}`);
-      }
-
-      if (isDevMode()) {
-        this.warnOnMultipleControls(scope);
-      }
-    });
 
     if (this.toggleOnViewClick()) {
       fromEvent(window, 'click')
@@ -205,19 +185,4 @@ export class SettingItemComponent implements OnInit {
     return scope.querySelector<HTMLElement>('input:not([type=hidden]), select, textarea');
   }
 
-  private addDescribedBy(element: HTMLElement, token: string) {
-    const tokens = (element.getAttribute('aria-describedby') || '').split(/\s+/).filter(t => t.length > 0);
-    if (tokens.includes(token)) return;
-
-    tokens.push(token);
-    this.renderer.setAttribute(element, 'aria-describedby', tokens.join(' '));
-  }
-
-  private warnOnMultipleControls(scope: HTMLElement) {
-    const bound = scope.querySelectorAll('[formControlName]');
-    if (bound.length <= 1) return;
-
-    console.warn(`[app-setting-item] "${this.title()}" projects ${bound.length} form controls. `
-      + `Only the first is wired to the label and aria-describedby, wire the others up manually.`);
-  }
 }

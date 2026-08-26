@@ -14,7 +14,9 @@ const DEFAULT_MESSAGES: Record<string, string> = {
   yearValidation: 'year-validation',
   invalidUri: 'invalid-uri',
   min: 'min',
-  'max': 'max',
+  max: 'max',
+  invalidAsin: 'invalid-asin',
+  invalidAmazonCode: 'invalid-amazon-code',
 };
 
 /** postfix for aria-describedby */

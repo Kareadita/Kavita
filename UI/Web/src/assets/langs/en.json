@@ -3652,7 +3652,6 @@
         "hardcover-tooltip": "https://hardcover.app/authors/{HardcoverId}",
         "asin-label": "ASIN",
         "asin-tooltip": "https://www.amazon.com/stores/J.K.-Rowling/author/{ASIN}",
-        "invalid-amazon-code": "ASIN should start with B0 or BT",
         "description-label": "Description",
         "required-field": "{{validation.required-field}}",
         "cover-image-description": "{{edit-series-modal.cover-image-description}}",
@@ -4739,7 +4738,9 @@
         "year-validation": "This must be a valid year greater than 1000 and 4 characters long",
         "invalid-uri": "The provided uri is invalid",
         "min": "Value must be greater than {{min}}",
-        "max": "Value must be less than {{max}}"
+        "max": "Value must be less than {{max}}",
+        "invalid-amazon-code": "ASIN should start with B0 or BT",
+        "invalid-asin": "This isn't a valid ASIN"
     },
 
     "entity-type": {

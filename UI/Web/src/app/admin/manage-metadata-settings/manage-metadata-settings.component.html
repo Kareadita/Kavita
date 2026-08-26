@@ -20,9 +20,9 @@
         <div class="col-md-6 col-sm-12">
           @if(settingsForm.get('enabled'); as formControl) {
             <app-setting-switch [title]="t('enabled-label')" [subtitle]="t('enabled-tooltip')">
-              <ng-template #switch>
+              <ng-template>
                 <div class="form-check form-switch float-end">
-                  <input id="enabled" type="checkbox" class="form-check-input" formControlName="enabled">
+                  <input type="checkbox" class="form-check-input" formControlName="enabled">
                 </div>
               </ng-template>
             </app-setting-switch>

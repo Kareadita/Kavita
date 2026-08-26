@@ -56,17 +56,12 @@
                     <label for="start-month" class="form-label">{{ t('month-label') }}</label>
                     <input id="start-month" class="form-control" formControlName="startingMonth"
                            type="number" inputmode="numeric"
-                           [appFormField]="formControl"
-                           aria-describedby="starting-year-header">
-                    @if (reviewGroup.dirty || reviewGroup.touched) {
-                      <div class="invalid-feedback">
-                        @if (formControl.errors?.min || formControl.errors?.max) {
-                          <div>
-                            {{ t('month-validation') }}
-                          </div>
-                        }
-                      </div>
-                    }
+                           [appFormField]="formControl">
+
+                    <app-validation-errors id="start-month" [control]="formControl" [messages]="{
+                      min: t('month-validation'),
+                      max: t('month-validation')
+                    }" />
                   </div>
                 }
                 @if (reviewGroup.get('startingYear'); as formControl) {
