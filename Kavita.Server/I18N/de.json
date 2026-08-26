@@ -281,5 +281,11 @@
     "scrobble-provider-not-setup": "Der Scrobble-Anbieter {0} ist nicht eingerichtet",
     "unable-to-cancel-k+": "Das Kavita+-Abonnement konnte aufgrund eines Fehlers nicht gekündigt werden. Wenden Sie sich bitte an den Kavita+-Support",
     "unable-to-renew-k+": "Das Kavita+-Abonnement konnte aufgrund eines Fehlers nicht verlängert werden. Wenden Sie sich bitte an den Kavita+-Support",
-    "series-name-exists": "Eine Serie mit diesem Namen existiert bereits in dieser Bibliothek"
+    "series-name-exists": "Eine Serie mit diesem Namen existiert bereits in dieser Bibliothek",
+    "series-name-orphans-files": "Eine Änderung dieses Namens würde dazu führen, dass Dateien, die derzeit in dieser Serie zusammengefasst sind, aufgeteilt würden",
+    "series-localized-name-exists": "Eine andere Reihe in dieser Bibliothek trägt diesen Namen bereits",
+    "series-localized-name-orphans-files": "Eine Änderung dieses lokalisierten Namens würde dazu führen, dass Dateien, die derzeit in dieser Serie zusammengefasst sind, aufgeteilt würden",
+    "mappings-re-run-in-progress": "Eine Anforderung zur erneuten Ausführung von Metadaten-Zuordnungen wird derzeit bearbeitet. Warten Sie, bis der Vorgang abgeschlossen ist, bevor Sie die Anforderung erneut in die Warteschlange stellen",
+    "mappings-re-run-no-libraries-selected": "Ihre Anfrage muss mindestens eine Bibliothek enthalten",
+    "mappings-re-run-libraries-overlap": "„ExcludedLibraries“ und „IncludedLibraries“ dürfen nicht dieselben Bibliotheken enthalten"
 }
