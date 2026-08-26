@@ -86,7 +86,7 @@
     <div class="row g-0 mt-2">
       @if(settingsForm.get('enableSsl'); as formControl) {
         <app-setting-switch [title]="t('enable-ssl-label')">
-          <ng-template #switch>
+          <ng-template>
             <div class="form-check form-switch float-end">
               <input type="checkbox" class="form-check-input" formControlName="enableSsl">
             </div>
@@ -137,7 +137,7 @@
     <div class="row g-0 mt-2">
       @if(settingsForm.get('customizedTemplates'); as formControl) {
         <app-setting-switch [title]="t('customized-templates-label')" [subtitle]="t('customized-templates-tooltip')">
-          <ng-template #switch>
+          <ng-template>
             <div class="form-check form-switch float-end">
               <input type="checkbox" class="form-check-input" formControlName="customizedTemplates">
             </div>

@@ -33,9 +33,6 @@ export class SettingSwitchComponent {
 
   title = input.required<string>();
   subtitle = input<string | undefined>();
-  id = input<string | undefined>();
-  /** For wiring up with a real label */
-  labelId = signal('');
   switchRef = contentChild(TemplateRef);
 
   switchWrapper = viewChild<ElementRef<HTMLElement>>('switchWrapper');
@@ -45,7 +42,7 @@ export class SettingSwitchComponent {
   private readonly generatedId = signal<string>(generateUniqueId());
   /** A unique id to wire id up */
   readonly elementId = computed(() => {
-    return this.labelId() || this.generatedId();
+    return this.generatedId();
   });
 
   protected readonly hasControl = wireSettingControl({

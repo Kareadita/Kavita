@@ -54,7 +54,7 @@
               <div class="col-md-6 col-sm-12 pt-4">
                 @if (importSettingsForm.get('whitelist');as formControl) {
                   <app-setting-switch [title]="t('whitelist-label')">
-                    <ng-template #switch>
+                    <ng-template>
                       <div class="form-check form-switch">
                         <input type="checkbox" class="form-check-input" formControlName="whitelist">
                       </div>
@@ -66,7 +66,7 @@
               <div class="col-md-6 col-sm-12 pt-4">
                 @if (importSettingsForm.get('blacklist');as formControl) {
                   <app-setting-switch [title]="t('blacklist-label')">
-                    <ng-template #switch>
+                    <ng-template>
                       <div class="form-check form-switch">
                         <input type="checkbox" class="form-check-input" formControlName="blacklist">
                       </div>
@@ -78,7 +78,7 @@
               <div class="col-md-6 col-sm-12 pt-4">
                 @if (importSettingsForm.get('ageRatings');as formControl) {
                   <app-setting-switch [title]="t('age-ratings-label')">
-                    <ng-template #switch>
+                    <ng-template>
                       <div class="form-check form-switch">
                         <input type="checkbox" class="form-check-input" formControlName="ageRatings">
                       </div>
@@ -90,7 +90,7 @@
               <div class="col-md-6 col-sm-12 pt-4">
                 @if (importSettingsForm.get('fieldMappings');as formControl) {
                   <app-setting-switch [title]="t('field-mappings-label')">
-                    <ng-template #switch>
+                    <ng-template>
                       <div class="form-check form-switch">
                         <input type="checkbox" class="form-check-input" formControlName="fieldMappings">
                       </div>

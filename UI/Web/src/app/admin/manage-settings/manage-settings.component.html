@@ -186,9 +186,9 @@
       <div class="row g-0 mt-4 mb-4">
         @if(settingsForm.get('enableOpds'); as formControl) {
           <app-setting-switch [title]="t('opds-label')" [subtitle]="t('opds-tooltip')">
-            <ng-template #switch>
+            <ng-template>
               <div class="form-check form-switch float-end">
-                <input id="opds" type="checkbox" [attr.aria-label]="t('opds-label')" class="form-check-input" formControlName="enableOpds">
+                <input type="checkbox" class="form-check-input" formControlName="enableOpds">
               </div>
             </ng-template>
           </app-setting-switch>
@@ -198,9 +198,9 @@
       <div class="row g-0 mt-4 mb-4">
         @if(settingsForm.get('enableFolderWatching'); as formControl) {
           <app-setting-switch [title]="t('folder-watching-label')" [subtitle]="t('folder-watching-tooltip')">
-            <ng-template #switch>
+            <ng-template>
               <div class="form-check form-switch float-end">
-                <input id="folder-watching" type="checkbox" class="form-check-input" formControlName="enableFolderWatching" role="switch">
+                <input type="checkbox" class="form-check-input" formControlName="enableFolderWatching" role="switch">
               </div>
             </ng-template>
           </app-setting-switch>
@@ -210,9 +210,9 @@
       <div class="row g-0 mt-4 mb-4">
         @if(settingsForm.get('allowStatCollection'); as formControl) {
           <app-setting-switch [title]="t('allow-stats-label')" [subtitle]="allowStatsTooltip">
-            <ng-template #switch>
+            <ng-template>
               <div class="form-check form-switch float-end">
-                <input id="stat-collection" type="checkbox" class="form-check-input" formControlName="allowStatCollection" role="switch">
+                <input type="checkbox" class="form-check-input" formControlName="allowStatCollection" role="switch">
               </div>
             </ng-template>
           </app-setting-switch>
