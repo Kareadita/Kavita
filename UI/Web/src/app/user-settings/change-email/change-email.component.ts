@@ -8,13 +8,14 @@ import {SettingItemComponent} from "../../settings/_components/setting-item/sett
 import {DefaultValuePipe} from "../../_pipes/default-value.pipe";
 import {AccountService} from "../../_services/account.service";
 import {FormFieldDirective} from "../../_directives/form-field.directive";
+import {ValidationErrorsComponent} from "../../shared/_components/validation-errors/validation-errors.component";
 
 @Component({
   selector: 'app-change-email',
   templateUrl: './change-email.component.html',
   styleUrls: ['./change-email.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [NgbTooltip, ReactiveFormsModule, ApiKeyComponent, TranslocoDirective, SettingItemComponent, DefaultValuePipe, FormFieldDirective]
+  imports: [NgbTooltip, ReactiveFormsModule, ApiKeyComponent, TranslocoDirective, SettingItemComponent, DefaultValuePipe, FormFieldDirective, ValidationErrorsComponent]
 })
 export class ChangeEmailComponent {
 

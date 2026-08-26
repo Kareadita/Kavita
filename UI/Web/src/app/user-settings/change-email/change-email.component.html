@@ -30,16 +30,8 @@
           @if(form.get('email'); as formControl) {
             <input class="form-control custom-input" type="email" id="email" formControlName="email"
                    [appFormField]="formControl">
-            @if (formControl.errors) {
-              <div id="email-validations" class="invalid-feedback">
-                @if (formControl.errors.required) {
-                  <div>{{t('required-field')}}</div>
-                }
-                @if (formControl.errors.email) {
-                  <div>{{t('valid-email')}}</div>
-                }
-              </div>
-            }
+            <app-validation-errors id="email" [control]="formControl" />
+
           }
         </div>
 
@@ -48,13 +40,7 @@
           @if (form.get('password'); as formControl) {
             <input class="form-control custom-input" type="password" id="password" formControlName="password"
                    [appFormField]="formControl">
-            @if (formControl.errors) {
-              <div id="password-validations" class="invalid-feedback">
-                @if (formControl.errors.required) {
-                  <div>{{t('required-field')}}</div>
-                }
-              </div>
-            }
+            <app-validation-errors id="password" [control]="formControl" />
           }
         </div>
 

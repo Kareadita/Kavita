@@ -27,14 +27,8 @@
             <input id="email" aria-describedby="email-help"
                    class="form-control" formControlName="email" type="email" inputmode="email"
                    placeholder="id@kindle.com" [appFormField]="formControl">
-            @if (formControl.errors; as errors) {
-              @if (errors.required) {
-                <p class="invalid-feedback">{{t('required-field')}}</p>
-              }
-              @if (errors.email) {
-                <p class="invalid-feedback">{{t('valid-email')}}</p>
-              }
-            }
+
+            <app-validation-errors id="email" [control]="formControl" />
           }
       </div>
 
@@ -47,14 +41,7 @@
               <option [value]="platform">{{platform | devicePlatform}}</option>
             }
           </select>
-          @if (formControl.errors; as errors) {
-            @if (errors.required) {
-              <p class="invalid-feedback">{{t('required-field')}}</p>
-            }
-            @if (errors.email) {
-              <p class="invalid-feedback">{{t('valid-email')}}</p>
-            }
-          }
+          <app-validation-errors id="device-platform" [control]="formControl" />
         }
 
       </div>
