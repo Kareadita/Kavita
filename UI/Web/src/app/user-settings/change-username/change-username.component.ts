@@ -4,13 +4,15 @@ import {AccountService} from "../../_services/account.service";
 import {ToastrService} from '@openng/ngx-toastr';
 import {FormControl, FormGroup, ReactiveFormsModule, Validators} from "@angular/forms";
 import {translate, TranslocoDirective} from "@jsverse/transloco";
+import {FormFieldDirective} from "../../_directives/form-field.directive";
 
 @Component({
   selector: 'app-change-username',
   imports: [
     SettingItemComponent,
     ReactiveFormsModule,
-    TranslocoDirective
+    TranslocoDirective,
+    FormFieldDirective
   ],
   templateUrl: './change-username.component.html',
   styleUrl: './change-username.component.scss',

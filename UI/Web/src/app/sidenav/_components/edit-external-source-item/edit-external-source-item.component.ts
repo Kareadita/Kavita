@@ -5,10 +5,11 @@ import {NgbCollapse} from "@ng-bootstrap/ng-bootstrap";
 import {translate, TranslocoDirective} from "@jsverse/transloco";
 import {ExternalSourceService} from "../../../_services/external-source.service";
 import {ToastrService} from '@openng/ngx-toastr';
+import {FormFieldDirective} from "../../../_directives/form-field.directive";
 
 @Component({
     selector: 'app-edit-external-source-item',
-    imports: [NgbCollapse, ReactiveFormsModule, TranslocoDirective],
+  imports: [NgbCollapse, ReactiveFormsModule, TranslocoDirective, FormFieldDirective],
     templateUrl: './edit-external-source-item.component.html',
     styleUrls: ['./edit-external-source-item.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush

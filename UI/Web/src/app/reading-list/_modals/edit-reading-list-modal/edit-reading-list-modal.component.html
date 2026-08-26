@@ -56,7 +56,7 @@
                     <label for="start-month" class="form-label">{{ t('month-label') }}</label>
                     <input id="start-month" class="form-control" formControlName="startingMonth"
                            type="number" inputmode="numeric"
-                           [class.is-invalid]="formControl?.invalid && formControl?.touched"
+                           [appFormField]="formControl"
                            aria-describedby="starting-year-header">
                     @if (reviewGroup.dirty || reviewGroup.touched) {
                       <div class="invalid-feedback">
@@ -74,7 +74,7 @@
                     <label for="start-year" class="form-label">{{ t('year-label') }}</label>
                     <input id="start-year" class="form-control" formControlName="startingYear" type="number"
                            inputmode="numeric"
-                           [class.is-invalid]="formControl.invalid && formControl.touched"
+                           [appFormField]="formControl"
                            aria-describedby="starting-year-header">
                     @if (reviewGroup.dirty || reviewGroup.touched) {
                       <div class="invalid-feedback">
@@ -96,7 +96,7 @@
                     <label for="ending-month" class="form-label">{{ t('month-label') }}</label>
                     <input id="ending-month" class="form-control" formControlName="endingMonth" type="number"
                            inputmode="numeric"
-                           [class.is-invalid]="formControl?.invalid && formControl?.touched"
+                           [appFormField]="formControl"
                            aria-describedby="ending-year-header">
                     @if (reviewGroup.dirty || reviewGroup.touched) {
                       <div class="invalid-feedback">
@@ -114,7 +114,7 @@
                     <label for="ending-year" class="form-label">{{ t('year-label') }}</label>
                     <input id="ending-year" class="form-control" formControlName="endingYear" type="number"
                            inputmode="numeric"
-                           [class.is-invalid]="formControl?.invalid && formControl?.touched"
+                           [appFormField]="formControl"
                            aria-describedby="ending-year-header">
                     @if (reviewGroup.dirty || reviewGroup.touched) {
                       <div class="invalid-feedback">

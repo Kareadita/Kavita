@@ -53,13 +53,14 @@ import {Pagination} from "../../../_models/pagination";
 import {ImageService} from "../../../_services/image.service";
 import {Series} from "../../../_models/series";
 import {ValidationErrorsComponent} from "../../../shared/_components/validation-errors/validation-errors.component";
+import {FormFieldDirective} from "../../../_directives/form-field.directive";
 
 
 @Component({
   selector: 'app-edit-collection-tags',
   imports: [NgbNav, NgbNavItem, NgbNavLink, NgbNavContent, ReactiveFormsModule, FormsModule, NgbPagination,
     CoverImageChooserComponent, NgbNavOutlet, NgbTooltip, TranslocoDirective, NgTemplateOutlet, FilterPipe, DefaultDatePipe,
-    SafeHtmlPipe, SafeUrlPipe, DecimalPipe, UtcToLocalTimePipe, TabTitlePipe, ValidationErrorsComponent],
+    SafeHtmlPipe, SafeUrlPipe, DecimalPipe, UtcToLocalTimePipe, TabTitlePipe, ValidationErrorsComponent, FormFieldDirective],
   templateUrl: './edit-collection-tags-modal.component.html',
   styleUrls: ['./edit-collection-tags-modal.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush

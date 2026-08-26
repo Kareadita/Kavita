@@ -9,6 +9,7 @@ import {translate, TranslocoDirective} from "@jsverse/transloco";
 import {NgbActiveModal, NgbTooltip} from "@ng-bootstrap/ng-bootstrap";
 import {DevicePlatformPipe} from "../../../_pipes/device-platform.pipe";
 import {modalSaved} from "../../../_models/modal/modal-result";
+import {FormFieldDirective} from "../../../_directives/form-field.directive";
 
 @Component({
   selector: 'app-edit-device-modal',
@@ -16,7 +17,8 @@ import {modalSaved} from "../../../_models/modal/modal-result";
     TranslocoDirective,
     DevicePlatformPipe,
     ReactiveFormsModule,
-    NgbTooltip
+    NgbTooltip,
+    FormFieldDirective
   ],
   templateUrl: './edit-device-modal.component.html',
   styleUrl: './edit-device-modal.component.scss',

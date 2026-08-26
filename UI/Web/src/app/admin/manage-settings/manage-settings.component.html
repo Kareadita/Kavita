@@ -41,7 +41,7 @@
             <ng-template #edit>
               <div class="input-group">
                 <input id="settings-baseurl" aria-describedby="settings-baseurl-validations" class="form-control" formControlName="baseUrl" type="text"
-                       [class.is-invalid]="formControl.invalid && !formControl.untouched" appEnterBlur>
+                       [appFormField]="formControl" appEnterBlur>
                 <button type="button" class="btn btn-outline-secondary" (click)="resetBaseUrl()">{{t('reset')}}</button>
               </div>
 
@@ -107,7 +107,7 @@
               <input id="total-backups" aria-describedby="total-backups-validations" class="form-control"
                      formControlName="totalBackups" type="number" inputmode="numeric" step="1" min="1" max="30"
                      onkeypress="return event.charCode >= 48 && event.charCode <= 57"
-                     [class.is-invalid]="formControl.invalid && !formControl.untouched" appEnterBlur>
+                     [appFormField]="formControl" appEnterBlur>
 
               <app-validation-errors [control]="formControl" id="total-backups" [messages]="{
                 max: t('max-backup-validation', {num: formControl.errors?.max?.max}),

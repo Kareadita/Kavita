@@ -7,13 +7,14 @@ import {translate, TranslocoDirective} from "@jsverse/transloco";
 import {SettingItemComponent} from "../../settings/_components/setting-item/setting-item.component";
 import {DefaultValuePipe} from "../../_pipes/default-value.pipe";
 import {AccountService} from "../../_services/account.service";
+import {FormFieldDirective} from "../../_directives/form-field.directive";
 
 @Component({
   selector: 'app-change-email',
   templateUrl: './change-email.component.html',
   styleUrls: ['./change-email.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [NgbTooltip, ReactiveFormsModule, ApiKeyComponent, TranslocoDirective, SettingItemComponent, DefaultValuePipe]
+  imports: [NgbTooltip, ReactiveFormsModule, ApiKeyComponent, TranslocoDirective, SettingItemComponent, DefaultValuePipe, FormFieldDirective]
 })
 export class ChangeEmailComponent {
 

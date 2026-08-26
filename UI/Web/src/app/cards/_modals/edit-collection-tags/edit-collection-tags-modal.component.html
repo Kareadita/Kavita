@@ -15,8 +15,8 @@
               <div class="col-md-8 col-sm-12">
                 @if (collectionTagForm.get('title'); as formControl) {
                   <label for="library-name" class="form-label">{{t('name-label')}}</label>
-                  <input id="library-name" class="form-control" formControlName="title" type="text"
-                         [class.is-invalid]="formControl.invalid && formControl.touched" aria-describedby="library-name-validations">
+                  <input id="library-name" class="form-control" formControlName="title" type="text" 
+                         [appFormField]="formControl" aria-describedby="library-name-validations">
 
                   <app-validation-errors [control]="formControl" id="library-name" [messages]="{duplicateName: t('name-validation')}" />
                 }

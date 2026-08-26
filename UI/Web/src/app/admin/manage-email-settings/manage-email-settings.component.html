@@ -19,7 +19,7 @@
           </ng-template>
           <ng-template #edit>
             <input id="settings-hostname" aria-describedby="settings-hostname-validations" class="form-control" formControlName="hostName" type="text"
-                   [class.is-invalid]="formControl.invalid && !formControl.untouched" appEnterBlur>
+                   [appFormField]="formControl" appEnterBlur>
           </ng-template>
 
 

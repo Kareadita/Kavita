@@ -52,7 +52,7 @@
               <ng-template #edit>
                 <input id="oid-client-id" aria-describedby="oidc-client-id-validations" class="form-control"
                        formControlName="clientId" type="text"
-                       [class.is-invalid]="formControl.invalid && !formControl.untouched">
+                       [appFormField]="formControl">
 
                 <app-validation-errors [control]="formControl" id="oid-client-id" [messages]="{
                   requiredIf: t('other-field-required', {name: 'clientId', other: formControl.errors!.requiredIf.other}),

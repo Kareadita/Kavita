@@ -12,13 +12,14 @@ import {BytesPipe} from "../../_pipes/bytes.pipe";
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import {EnterBlurDirective} from "../../_directives/enter-blur.directive";
 import {pattern} from "@angular/forms/signals";
+import {FormFieldDirective} from "../../_directives/form-field.directive";
 
 @Component({
     selector: 'app-manage-email-settings',
     templateUrl: './manage-email-settings.component.html',
     styleUrls: ['./manage-email-settings.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush,
-    imports: [ReactiveFormsModule, TranslocoModule, SettingItemComponent, SettingSwitchComponent, DefaultValuePipe, BytesPipe, EnterBlurDirective]
+  imports: [ReactiveFormsModule, TranslocoModule, SettingItemComponent, SettingSwitchComponent, DefaultValuePipe, BytesPipe, EnterBlurDirective, FormFieldDirective]
 })
 export class ManageEmailSettingsComponent implements OnInit {
 

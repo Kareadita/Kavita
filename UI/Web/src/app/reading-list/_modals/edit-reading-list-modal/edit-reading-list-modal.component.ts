@@ -45,6 +45,7 @@ import {ReadingListService} from "../../../_services/reading-list.service";
 import {UploadService} from "../../../_services/upload.service";
 import {AccountService} from "../../../_services/account.service";
 import {ReadingList} from "../../../_models/reading-list/reading-list";
+import {FormFieldDirective} from "../../../_directives/form-field.directive";
 
 
 @Component({
@@ -53,7 +54,7 @@ import {ReadingList} from "../../../_models/reading-list/reading-list";
     styleUrls: ['./edit-reading-list-modal.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [NgbNav, NgbNavItem, NgbNavItemRole, NgbNavLink, NgbNavContent, ReactiveFormsModule, NgbTooltip,
-    NgTemplateOutlet, CoverImageChooserComponent, NgbNavOutlet, TranslocoDirective, TabTitlePipe, SettingItemComponent, TypeaheadComponent]
+    NgTemplateOutlet, CoverImageChooserComponent, NgbNavOutlet, TranslocoDirective, TabTitlePipe, SettingItemComponent, TypeaheadComponent, FormFieldDirective]
 })
 export class EditReadingListModalComponent implements OnInit {
   private readonly ngModal = inject(NgbActiveModal);

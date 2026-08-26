@@ -37,7 +37,7 @@
                       <app-setting-item [title]="t('mal-id-label')" [toggleOnViewClick]="false" [showEdit]="false" [subtitle]="t('mal-tooltip'+tooltip)">
                         <ng-template #view>
                           <input id="mal-id" class="form-control" formControlName="malId" type="number"
-                                 [class.is-invalid]="formControl.invalid && !formControl.untouched">
+                                 [appFormField]="formControl">
                         </ng-template>
                       </app-setting-item>
                     }

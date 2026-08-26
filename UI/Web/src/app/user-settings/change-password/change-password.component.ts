@@ -12,13 +12,14 @@ import {ToastrService} from '@openng/ngx-toastr';
 import {translate, TranslocoDirective} from "@jsverse/transloco";
 import {SettingItemComponent} from "../../settings/_components/setting-item/setting-item.component";
 import {AccountService} from "../../_services/account.service";
+import {FormFieldDirective} from "../../_directives/form-field.directive";
 
 @Component({
     selector: 'app-change-password',
     templateUrl: './change-password.component.html',
     styleUrls: ['./change-password.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [ReactiveFormsModule, TranslocoDirective, SettingItemComponent]
+  imports: [ReactiveFormsModule, TranslocoDirective, SettingItemComponent, FormFieldDirective]
 })
 export class ChangePasswordComponent implements OnInit, OnDestroy {
 
