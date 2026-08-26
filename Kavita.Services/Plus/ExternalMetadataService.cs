@@ -2464,6 +2464,7 @@ public class ExternalMetadataService : IExternalMetadataService
         }
 
         var from = series.Name;
+        var fromSortName = series.SortName;
         series.Name = chosen;
         series.NormalizedName = chosen.ToNormalized();
         series.SortName = series.Library is {RemovePrefixForSortName: true}
@@ -2471,7 +2472,9 @@ public class ExternalMetadataService : IExternalMetadataService
             : series.Name;
 
         series.NameLocked = true;
+        series.SortNameLocked = fromSortName != series.SortName;
         series.Metadata.AddKPlusOverride(MetadataSettingField.Name);
+        series.Metadata.AddKPlusOverride(MetadataSettingField.SortName);
 
         return (true, new MetadataFieldChangeDto(MetadataFieldChangeKind.Name, from, series.Name, chosenLanguageCode));
     }
