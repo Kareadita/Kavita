@@ -16,7 +16,6 @@ import {FormControl, FormGroup, ReactiveFormsModule} from "@angular/forms";
 import {NgbActiveModal, NgbTooltip} from "@ng-bootstrap/ng-bootstrap";
 import {TranslocoDirective} from "@jsverse/transloco";
 import {ExternalSeriesMatch} from "../../_models/series-detail/external-series-match";
-import {ToastrService} from "ngx-toastr";
 import {catchError, filter, of, pairwise, skip, startWith, tap} from "rxjs";
 import {takeUntilDestroyed, toSignal} from "@angular/core/rxjs-interop";
 import {EmptyStateComponent} from "../../shared/_components/empty-state/empty-state.component";
@@ -33,7 +32,7 @@ import {MatchSeriesInfo} from "../../_models/kavitaplus/match-series-info";
 import {AllMetadataProviders, MetadataProvider} from "../../_models/kavitaplus/metadata-provider.enum";
 import {ScrobbleProvider} from "../../_services/scrobbling.service";
 import {MetadataProviderTitlePipe} from "../../_pipes/metadata-provider-title.pipe";
-import {ExternalEditionDto, PlusMediaFormat} from "../../_models/series-detail/external-series-detail";
+import {ExternalEditionDto} from "../../_models/series-detail/external-series-detail";
 import {SeriesFormatComponent} from "../../shared/series-format/series-format.component";
 import {LibraryTypePipe} from "../../_pipes/library-type.pipe";
 import {SeriesMetadata} from "../../_models/metadata/series-metadata";
@@ -61,7 +60,6 @@ export class MatchSeriesModalComponent implements OnInit {
 
   private readonly seriesService = inject(SeriesService);
   private readonly modalService = inject(NgbActiveModal);
-  private readonly toastr = inject(ToastrService);
   private readonly imageService = inject(ImageService);
 
   series = input.required<Series>();
@@ -190,9 +188,7 @@ export class MatchSeriesModalComponent implements OnInit {
         this.seriesDetail.set(detail)
 
         const isStandAlone = detail.chapters.length + detail.specials.length == 1;
-        this.formGroup.get('isStandAlone')?.setValue(isStandAlone);
-
-        this.search();
+        this.formGroup.get('isStandAlone')?.setValue(isStandAlone); // This will trigger the initial search
       }),
     ).subscribe();
 
@@ -332,6 +328,5 @@ export class MatchSeriesModalComponent implements OnInit {
 
   protected readonly MetadataProvider = MetadataProvider;
   protected readonly ScrobbleProvider = ScrobbleProvider;
-  protected readonly PlusMediaFormat = PlusMediaFormat;
   protected readonly allMetadataProviders = AllMetadataProviders;
 }

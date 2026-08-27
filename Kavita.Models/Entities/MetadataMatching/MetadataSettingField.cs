@@ -16,6 +16,7 @@ public enum MetadataSettingField
     AgeRating = 8,
     People = 9,
     Name = 10,
+    SortName = 11,
     #endregion
 
     #region Chapter Metadata

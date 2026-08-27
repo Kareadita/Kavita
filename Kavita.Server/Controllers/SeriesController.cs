@@ -214,14 +214,23 @@ public class SeriesController(
             series.SortName = series.Library is {RemovePrefixForSortName: true}
                 ? BookSortTitlePrefixHelper.GetSortTitle(series.Name)
                 : series.Name;
+            series.Metadata.KPlusOverrides.Remove(MetadataSettingField.SortName);
         }
         else if (!string.IsNullOrEmpty(updateSeries.SortName?.Trim()))
         {
             series.SortName = updateSeries.SortName.Trim();
+            series.Metadata.KPlusOverrides.Remove(MetadataSettingField.SortName);
         }
 
         var newLocalizedName = updateSeries.LocalizedName?.Trim();
         var newNormalizedLocalizedName = newLocalizedName.ToNormalized();
+        if (series.LocalizedName != newLocalizedName)
+        {
+            series.LocalizedName = newLocalizedName;
+            series.Metadata.KPlusOverrides.Remove(MetadataSettingField.LocalizedName);
+        }
+
+        // Only run expensive check if the name has changed after normalisation
         if (series.NormalizedLocalizedName != newNormalizedLocalizedName)
         {
             // A localized name that collides (normalized) with another series' name in the library+format breaks the scanner
@@ -238,10 +247,8 @@ public class SeriesController(
                 return BadRequest(await localizationService.TranslateAsync(UserId, "series-localized-name-orphans-files"));
             }
 
-            series.LocalizedName = newLocalizedName;
-            series.NormalizedLocalizedName = newNormalizedLocalizedName;
 
-            series.Metadata.KPlusOverrides.Remove(MetadataSettingField.LocalizedName);
+            series.NormalizedLocalizedName = newNormalizedLocalizedName;
         }
 
         series.NameLocked = updateSeries.NameLocked;

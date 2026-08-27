@@ -4468,7 +4468,8 @@
         "chapter-publisher": "{{person-role-pipe.publisher}} (Chapter)",
         "chapter-title": "Title (Chapter)",
         "chapter-age-rating": "Age Rating (Chapter)",
-        "volume-covers": "Covers (Volume)"
+        "volume-covers": "Covers (Volume)",
+        "sort-name": "{{sort-field-pipe.sort-name}}"
     },
 
 
