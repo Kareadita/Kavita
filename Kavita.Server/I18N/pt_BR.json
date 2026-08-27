@@ -135,7 +135,7 @@
     "bad-copy-files-for-download": "Não foi possível copiar os arquivos para o diretório temporário de download do arquivo compactado.",
     "generic-create-temp-archive": "Ocorreu um problema ao criar o arquivo compactado temporário",
     "epub-malformed": "O arquivo está corrompido! Não é possível realizar a leitura.",
-    "epub-html-missing": "Não foi possível encontrar o HTML adequado para essa página",
+    "epub-html-missing": "Não foi possível encontrar o HTML apropriado para essa página",
     "collection-tag-title-required": "O título da coleção não pode estar vazio",
     "reading-list-title-required": "O título da lista de leitura não pode estar vazio",
     "collection-tag-duplicate": "Já existe uma coleção com este nome",

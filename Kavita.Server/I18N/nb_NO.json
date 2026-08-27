@@ -1,3 +1,19 @@
 {
-    "bookmark-save": "Kunne ikke lagre bokmerke"
+    "bookmark-save": "Kunne ikke lagre bokmerke",
+    "confirm-email": "Du må bekrefte din e-post først",
+    "locked-out": "Du har blitt låst ute på grunn av for mange forsøk. Vennligst vent 10 minutter.",
+    "disabled-account": "Din konto har blitt deaktivert. Kontakt server administratoren.",
+    "password-authentication-disabled": "Passord-innlogging er deaktivert, logg inn med OpenID Connect",
+    "register-user": "Det oppstod en feil i forbindelse med brukerregistreringen",
+    "validate-email": "Der oppsto en feil i forbindelse med validering av e-posten: {0}",
+    "confirm-token-gen": "Der oppsto en feil i forbindelse med opprettelse av bekreftelsestoken",
+    "denied": "Ikke tillat",
+    "permission-denied": "Du har ikke tillatelse til å utføre denne operasjonen",
+    "password-required": "Du må angi ditt eksisterende passord for å kunne endre din konto om du ikke er administrator",
+    "invalid-password": "Ugyldig passord",
+    "invalid-token": "Ugyldig token",
+    "unable-to-reset-key": "Noe gikk gale, ikke mulig å tilbakestille nøkkel",
+    "invalid-payload": "Ugyldig payload",
+    "nothing-to-do": "Ingenting å gjøre",
+    "share-multiple-emails": "Du kan ikke dele e-post mellom flere kontoer"
 }
