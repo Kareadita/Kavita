@@ -37,8 +37,8 @@
                 {{ t('special-count', {num: kavitaSpecialCount()}) }}
               }
               <app-series-format [format]="series().format" [useTitle]="false" />
-              @if (matchInfo(); as matchInfo) {
-                {{matchInfo.libraryType | libraryType}}
+              @if (match) {
+                {{match.libraryType | libraryType}}
               }
             </div>
           </div>
