@@ -2706,7 +2706,8 @@
         "chapter-publisher": "{{person-role-pipe.publisher}} (Kapitel)",
         "name": "{{edit-series-modal.name-label}}",
         "chapter-age-rating": "Altersfreigabe (Kapitel)",
-        "volume-covers": "Covers (Bände)"
+        "volume-covers": "Covers (Bände)",
+        "sort-name": "{{sort-field-pipe.sort-name}}"
     },
     "role-localized-pipe": {
         "bookmark": "Lesezeichen",

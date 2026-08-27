@@ -2696,7 +2696,8 @@
         "chapter-title": "Titre (Chapitre)",
         "name": "{{edit-series-modal.name-label}}",
         "chapter-age-rating": "Classification d'âge (chapitre)",
-        "volume-covers": "Couvertures (Volume)"
+        "volume-covers": "Couvertures (Volume)",
+        "sort-name": "{{sort-field-pipe.sort-name}}"
     },
     "email-history": {
         "not-sent-tooltip": "Non envoyé",

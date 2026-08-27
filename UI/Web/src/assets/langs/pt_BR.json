@@ -2706,7 +2706,8 @@
         "chapter-release-date": "Data de Lançamento (Capítulo)",
         "name": "{{edit-series-modal.name-label}}",
         "chapter-age-rating": "Classificação Etária (Capítulo)",
-        "volume-covers": "Capas (Volume)"
+        "volume-covers": "Capas (Volume)",
+        "sort-name": "{{sort-field-pipe.sort-name}}"
     },
     "role-localized-pipe": {
         "admin": "Admin",
