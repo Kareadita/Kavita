@@ -1,11 +1,11 @@
 {
     "login": {
-        "title": "アカウントにサインイン",
+        "title": "アカウントにログインしてください",
         "username": "{{common.username}}",
         "password": "{{common.password}}",
         "password-validation": "{{validation.password-validation}}",
         "forgot-password": "パスワードをお忘れですか?",
-        "submit": "サインイン",
+        "submit": "ログイン",
         "oidc": "OpenID Connect"
     },
     "dashboard": {
@@ -429,16 +429,16 @@
         "adults-only": "18 歳以上の成人のみ",
         "everyone": "全年齢",
         "everyone-10-plus": "10 歳以上",
-        "g": "全年齢",
+        "g": "G（General audiences）",
         "kids-to-adults": "子供から大人まで",
         "mature": "成人",
-        "ma15-plus": "MA15+",
+        "ma15-plus": "MA15+（15 歳以上）",
         "mature-17-plus": "17 歳以上",
         "rating-pending": "審査予定",
         "teen": "ティーン",
         "x18-plus": "X18+",
         "not-applicable": "該当なし",
-        "pg": "PG (Parental guidance)",
+        "pg": "PG（Parental guidance）",
         "r18-plus": "R18+"
     },
     "reset-password": {
@@ -2467,7 +2467,7 @@
         "enable-genres-tooltip": "シリーズジャンルの書き込みを許可します。",
         "enable-tags-tooltip": "シリーズタグの書き込みを許可します。",
         "enable-extended-metadata-processing-label": "拡張メタデータ処理",
-        "enable-extended-metadata-processing-tooltip": "ComicInfo から取得された、または UI 経由で追加されたジャンルとタグは、ブラックリスト、ホワイトリスト、年齢評価マッピング、およびフィールドマッピングを使用して処理する必要があります。",
+        "enable-extended-metadata-processing-tooltip": "ComicInfo から取得された、または UI 経由で追加されたジャンルとタグは、ブラックリスト、ホワイトリスト、年齢制限マッピング、およびフィールドマッピングを使用して処理する必要があります。",
         "blacklist-label": "ブラックリストのジャンル / タグ",
         "remove-source-tag-label": "ソースタグを削除",
         "whitelist-label": "ホワイトリストのタグ",
@@ -2483,7 +2483,7 @@
         "enable-chapter-cover-tooltip": "章 / 号の表紙の設定を許可します",
         "overrides-label": "上書き",
         "overrides-description": "Kavita がロックされたフィールドに書き込むことを許可します。",
-        "age-rating-mapping-title": "年齢区分のマッピング",
+        "age-rating-mapping-title": "年齢制限のマッピング",
         "age-rating-mapping-description": "左側の文字列がジャンルまたはタグのいずれかに見つかった場合、そのシリーズの年齢制限が設定されます。マッチングは正規化され、大文字と小文字は区別されません。最も高い年齢制限が適用されます。",
         "add-field-mapping-label": "フィールドマッピングを追加",
         "chapter-header": "章フィールド",
@@ -2491,9 +2491,9 @@
         "first-last-name-tooltip": "人名は必ず名、姓の順に記入してください",
         "people-header": "人物",
         "source-genre-tags-placeholder": "ジャンル / タグのソース",
-        "add-age-rating-mapping-label": "年齢区分のマッピングを追加",
+        "add-age-rating-mapping-label": "年齢制限のマッピングを追加",
         "dest-genre-tags-placeholder": "ジャンル / タグを指定",
-        "remove-age-rating-mapping-label": "年齢区分のマッピングを削除",
+        "remove-age-rating-mapping-label": "年齢制限のマッピングを削除",
         "remove-field-mapping-label": "フィールドマッピングを削除",
         "field-mapping-title": "フィールドマッピング",
         "field-mapping-description": "ジャンル / タグフィールドで見つかった特定の文字列にルールを設定し、ジャンル / タグの新しい文字列にマッピングします。また、必要に応じてソースリストから削除することもできます。マッチングは正規化され、大文字と小文字は区別されません。最初に一致した値が使用されます。ジャンル / タグの書き込みが有効になっている場合にのみ適用されます。",
@@ -2873,7 +2873,7 @@
         "conflicts-step": "衝突を解決",
         "finalize-step": "確定",
         "finalize-title": "設定をプレビューし、保存を押してインポートを完了します",
-        "import-description": "自分または他のユーザーがエクスポートしたファイルをアップロードして、現在の設定を置き換えたり、現在の設定とマージしたりします。",
+        "import-description": "ご自身または他のユーザーがエクスポートしたファイルをアップロードして、現在の設定と置き換えるか、統合してください。",
         "merge": "マージ",
         "import-mode-tooltip": "置換は現在の設定を無視し、マージは設定した方法で競合を解決しようとします",
         "replace": "置換",
@@ -2882,9 +2882,9 @@
         "file-no-valid-content": "インポートしたファイルには処理を行うために必要なデータが含まれていません",
         "whitelist-label": "ホワイトリストタグ",
         "blacklist-label": "ブラックリストタグ",
-        "age-ratings-label": "年齢区分マッピング",
+        "age-ratings-label": "年齢制限マッピング",
         "field-mappings-label": "フィールドマッピング",
-        "age-ratings-conflicts-tooltip": "使用する年齢区分を決定します",
+        "age-ratings-conflicts-tooltip": "使用する年齢制限を決定します",
         "import-mode-label": "インポートモード",
         "resolution-label": "競合の解決",
         "resolution-tooltip": "Kavita が競合をどのように処理するかを決定します",
@@ -3097,7 +3097,7 @@
     "profile-overview": {
         "want-to-read": "{{side-nav.want-to-read}}",
         "currently-reading": "現在読書中",
-        "just-finished-reading": "読み終えた"
+        "just-finished-reading": "読み終えたばかり"
     },
     "server-devices": {
         "client-devices-header": "{{manage-devices.client-devices-header}}",
@@ -3271,7 +3271,7 @@
         "sub-title": "{{name}} が一番多く読んだジャンルは {{mostUsed}} です"
     },
     "reads-by-month": {
-        "sub-title": "{{username}} さんは、{{year}} {{month}} に最も多く読み、{{reads}} 章を読みました",
+        "sub-title": "{{username}} さんは、{{year}} 年 {{month}} 月に最も多く読み、{{reads}} 章を読みました",
         "no-data": "{{common.no-data}}",
         "title": "月別総読書数"
     },
@@ -3314,7 +3314,7 @@
     },
     "activity-graph": {
         "all-time": "{{time-periods.all-time}}",
-        "aggregated-count": "{{year}} に {{totalPages}} ページ、{{totalWords}} 文字を読みました",
+        "aggregated-count": "{{year}} 年に {{totalPages}} ページ、{{totalWords}} 文字を読みました",
         "no-activity-tooltip": "{{date}} に読書アクティビティはありませんでした。",
         "title": "読書活動",
         "day-of-week-alt": "曜日",
@@ -3331,11 +3331,11 @@
         "chapters": "読み終えた章"
     },
     "smart-time-picker": {
-        "during-year": "{{year}} の間に",
+        "during-year": "{{year}} 年の間",
         "during-from-to": "{{startYear}} から {{endYear}} まで",
         "close": "{{common.close}}",
         "during-select": "時間範囲を選択",
-        "forever": "永久",
+        "forever": "全期間",
         "select-year": "年を選択",
         "custom-range": "カスタム範囲",
         "during-entire-life-profile": "全期間",
