@@ -87,7 +87,7 @@ public class ExternalMetadataService : IExternalMetadataService
     private static readonly RateLimiter RateLimiter = new(50, TimeSpan.FromHours(24), false);
     private static readonly ConcurrentDictionary<int, SemaphoreSlim> SeriesWriteLocks = new();
     private static SemaphoreSlim GetSeriesWriteLock(int seriesId) => SeriesWriteLocks.GetOrAdd(seriesId, static _ => new SemaphoreSlim(1, 1));
-    private readonly MarkdownPipeline _markdownPipeline = new MarkdownPipelineBuilder().UseGithub().Build();
+    private static readonly MarkdownPipeline MarkdownPipeline = new MarkdownPipelineBuilder().UseGithub().Build();
 
     public ExternalMetadataService(IUnitOfWork unitOfWork, ILogger<ExternalMetadataService> logger, IMapper mapper,
         ILicenseService licenseService, IScrobblingService scrobblingService, IEventHub eventHub, ICoverDbService coverDbService,
@@ -2605,7 +2605,7 @@ public class ExternalMetadataService : IExternalMetadataService
             .Any(segment => segment.ToNormalized() == dropped || Parser.CleanTitle(segment).ToNormalized() == dropped);
     }
 
-    private (bool, MetadataFieldChangeDto?) UpdateSummary(Series series, MetadataSettingsDto settings, ExternalSeriesDetailDto externalMetadata)
+    private static (bool, MetadataFieldChangeDto?) UpdateSummary(Series series, MetadataSettingsDto settings, ExternalSeriesDetailDto externalMetadata)
     {
         if (!settings.EnableSummary) return (false, null);
 
@@ -2624,7 +2624,7 @@ public class ExternalMetadataService : IExternalMetadataService
         var from = series.Metadata.Summary;
 
         // Mangabaka uses Markdown for Summaries, convert to Html to align with opf/comicinfo
-        series.Metadata.Summary = Markdown.ToHtml(StringHelper.RemoveSourceInDescription(StringHelper.SquashBreaklines(externalMetadata.Summary)) ?? string.Empty, _markdownPipeline);
+        series.Metadata.Summary = Markdown.ToHtml(StringHelper.RemoveSourceInDescription(StringHelper.SquashBreaklines(externalMetadata.Summary)) ?? string.Empty, MarkdownPipeline);
         series.Metadata.AddKPlusOverride(MetadataSettingField.Summary);
         series.Metadata.SummaryLocked = true;
 
@@ -3022,8 +3022,6 @@ public class ExternalMetadataService : IExternalMetadataService
     /// <returns></returns>
     private async Task<ExternalSeriesDetailDto?> GetSeriesDetail(int? aniListId, long? malId, int? mangaBakaId, int? seriesId, CancellationToken ct = default)
     {
-        // TODO: This is the primary point where we need to integrate ExternalIds since weblink parsing is already handled
-        // TODO: Ensure when we set/update weblinks via API, we reparse and update external ids (if they are empty only)
         var payload = new SeriesDetailRequestV3Dto()
         {
             // We can hardcode this for now. But will need to load from Library setting once Hardcover providers
@@ -3085,7 +3083,7 @@ public class ExternalMetadataService : IExternalMetadataService
         var ageRating = DetermineAgeRating(extSeries.Tags.Select(t => t.Name).Concat(extSeries.Genres), settings.AgeRatingMappings);
 
         extSeries.AgeRating = ageRating;
-        extSeries.Summary = Markdown.ToHtml(StringHelper.RemoveSourceInDescription(StringHelper.SquashBreaklines(extSeries.Summary)) ?? string.Empty, _markdownPipeline);
+        extSeries.Summary = Markdown.ToHtml(StringHelper.RemoveSourceInDescription(StringHelper.SquashBreaklines(extSeries.Summary)) ?? string.Empty, MarkdownPipeline);
 
         return extSeries;
     }

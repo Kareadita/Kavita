@@ -266,7 +266,7 @@ public class TaskScheduler : ITaskScheduler
         // Get the License Info (and cache it) on first load. This will internally cache the Github releases for the Version Service
         BackgroundJob.Enqueue(() => _licenseService.GetLicenseInfo(true, CancellationToken.None));  // Kick this off first to cache it then let it refresh every 9 hours (8 hour cache)
 
-        // Spread out licence checks for the backend
+        // Spread out license checks for the backend
         var randomKPlusLicenseCheck = Rnd.Next(0, 60);
         RecurringJob.AddOrUpdate(LicenseCheckId, () => _licenseService.GetLicenseInfo(false, CancellationToken.None),
             $"{randomKPlusLicenseCheck} */9 * * *", RecurringJobOptions);

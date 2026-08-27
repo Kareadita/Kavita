@@ -11,4 +11,12 @@ public static class MarkdownExtensions
             .UseMathematics()
             .UseGenericAttributes(); // Always last!
     }
+
+    public static MarkdownPipelineBuilder UseKavitaPlus(this MarkdownPipelineBuilder pipeline)
+    {
+        return pipeline.UsePipeTables()
+            .UseFootnotes()
+            .UseMathematics()
+            .UseGenericAttributes(); // Always last!
+    }
 }
