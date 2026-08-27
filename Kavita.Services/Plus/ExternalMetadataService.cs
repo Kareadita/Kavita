@@ -2440,7 +2440,15 @@ public class ExternalMetadataService : IExternalMetadataService
 
             // The best candidate is already our Name. Stop rather than continue - sliding to a lower-priority
             // language here would rename the series away from a title it correctly holds.
-            if (normalized == series.NormalizedName) return (false, null);
+            if (normalized == series.NormalizedName)
+            {
+                if (string.Equals(title, series.Name, StringComparison.Ordinal)) return (false, null);
+
+                // If the case differs, we need to allow the change
+                chosen = title;
+                chosenLanguageCode = languageCode;
+                break;
+            }
 
             // Never create a normalized collision - it would make the scanner's SingleOrDefault lookup throw
             if (takenNames.Contains(normalized)) continue;

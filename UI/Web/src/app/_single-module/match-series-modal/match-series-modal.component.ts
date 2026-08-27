@@ -190,9 +190,7 @@ export class MatchSeriesModalComponent implements OnInit {
         this.seriesDetail.set(detail)
 
         const isStandAlone = detail.chapters.length + detail.specials.length == 1;
-        this.formGroup.get('isStandAlone')?.setValue(isStandAlone);
-
-        this.search();
+        this.formGroup.get('isStandAlone')?.setValue(isStandAlone); // This will trigger the initial search
       }),
     ).subscribe();
 
