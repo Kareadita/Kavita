@@ -1020,7 +1020,7 @@ public class ExternalMetadataService : IExternalMetadataService
             {
                 var (namePriority, localizedNamePriority) = ResolveTitleLanguagePriorities(settings, series.LibraryId);
 
-                // One query serves both writes. The set unions NormalizedName/NormalizedLocalizedName/NormalizedOriginalName
+                // The set unions NormalizedName/NormalizedLocalizedName/NormalizedOriginalName
                 // for every OTHER series in this library+format - a collision there makes the scanner's SingleOrDefault throw.
                 var takenNames = await _unitOfWork.SeriesRepository.GetTakenNormalizedNamesInLibraryAsync(
                     series.LibraryId, series.Format, series.Id, ct);
@@ -2535,7 +2535,7 @@ public class ExternalMetadataService : IExternalMetadataService
             // takenNames excludes this Series, so our own columns need checking separately. Dropping the language
             // code above is not enough - two languages can carry the same title text (en and ja-Latn "Bleach").
             // series.NormalizedName is already the post-UpdateName value here.
-            if (normalized == series.NormalizedName || normalized == series.NormalizedOriginalName) continue;
+            if (normalized == series.NormalizedName) continue;
 
             chosen = title;
             chosenLanguageCode = languageCode;
