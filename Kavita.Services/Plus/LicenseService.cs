@@ -55,6 +55,7 @@ public class LicenseService(
     private async Task<bool> IsLicenseValid(string license)
     {
         if (string.IsNullOrWhiteSpace(license)) return false;
+        var supportToken = HashUtil.ServerToken();
         try
         {
             var response = await (Configuration.KavitaPlusApiUrl + "/api/license/check")
@@ -62,14 +63,14 @@ public class LicenseService(
                 .PostJsonAsync(new LicenseValidDto()
                 {
                     License = license,
-                    InstallId = HashUtil.ServerToken()
+                    InstallId = supportToken
                 })
                 .ReceiveString();
             return bool.Parse(response);
         }
         catch (Exception e)
         {
-            logger.LogError(e, "An error happened during the request to Kavita+ API");
+            logger.LogError(e, "An error happened during the request to Kavita+ API. Support Token: {SupportToken}", supportToken);
             throw;
         }
     }
@@ -86,6 +87,8 @@ public class LicenseService(
             };
         }
 
+        var supportToken = HashUtil.ServerToken();
+
         try
         {
             var response = await (Configuration.KavitaPlusApiUrl + "/api/license/register")
@@ -93,7 +96,7 @@ public class LicenseService(
                 .PostJsonAsync(new EncryptLicenseDto()
                 {
                     License = license.Trim(),
-                    InstallId = HashUtil.ServerToken(),
+                    InstallId = supportToken,
                     EmailId = email.Trim(),
                     DiscordId = discordId?.Trim()
                 })
@@ -106,12 +109,12 @@ public class LicenseService(
                 return response;
             }
 
-            logger.LogError("Kavita+ registration failed. Code: {Code}, Message: {Message}", response.ErrorCode, response.ErrorMessage);
+            logger.LogError("Kavita+ registration failed. Code: {Code}, Message: {Message} - Support Token: {SupportToken}", response.ErrorCode, response.ErrorMessage, supportToken);
             return response;
         }
         catch (FlurlHttpException e)
         {
-            logger.LogError(e, "Network error reaching Kavita+ API");
+            logger.LogError(e, "Network error reaching Kavita+ API - Support Token: {SupportToken}", supportToken);
             return new RegisterLicenseResponseDto()
             {
                 EncryptedLicense = string.Empty,
@@ -145,7 +148,7 @@ public class LicenseService(
         }
         catch (Exception ex)
         {
-            logger.LogError(ex, "There was an issue connecting to Kavita+");
+            logger.LogError(ex, "There was an issue connecting to Kavita+ - Support Token: {SupportToken}", HashUtil.ServerToken());
         }
         finally
         {
@@ -165,6 +168,8 @@ public class LicenseService(
     public async Task<bool> HasActiveSubscription(string? license, CancellationToken ct = default)
     {
         if (string.IsNullOrWhiteSpace(license)) return false;
+        var supportToken = HashUtil.ServerToken();
+
         try
         {
             var response = await (Configuration.KavitaPlusApiUrl + "/api/license/check-sub")
@@ -172,7 +177,7 @@ public class LicenseService(
                 .PostJsonAsync(new LicenseValidDto()
                 {
                     License = license,
-                    InstallId = HashUtil.ServerToken()
+                    InstallId = supportToken
                 }, cancellationToken: ct)
                 .ReceiveString();
 
@@ -186,7 +191,7 @@ public class LicenseService(
         }
         catch (Exception e)
         {
-            logger.LogError(e, "An error happened during the request to Kavita+ API");
+            logger.LogError(e, "An error happened during the request to Kavita+ API - Support Token: {SupportToken}", supportToken);
             return false;
         }
     }
@@ -238,6 +243,7 @@ public class LicenseService(
     /// <exception cref="KavitaException"></exception>
     public async Task<bool> ResetLicense(string license, string email, CancellationToken ct = default)
     {
+        var supportToken = HashUtil.ServerToken();
         try
         {
             var encryptedLicense = await unitOfWork.SettingsRepository.GetSettingAsync(ServerSettingKey.LicenseKey, ct);
@@ -246,7 +252,7 @@ public class LicenseService(
                 .PostJsonAsync(new ResetLicenseDto()
                 {
                     License = license.Trim(),
-                    InstallId = HashUtil.ServerToken(),
+                    InstallId = supportToken,
                     EmailId = email
                 }, cancellationToken: ct)
                 .ReceiveString();
@@ -261,12 +267,12 @@ public class LicenseService(
                 return true;
             }
 
-            logger.LogError("An error happened during the request to Kavita+ API: {ErrorMessage}", response);
+            logger.LogError("An error happened during the request to Kavita+ API: {ErrorMessage} - Support Token: {SupportToken}", response, supportToken);
             throw new KavitaException(response);
         }
         catch (FlurlHttpException e)
         {
-            logger.LogError(e, "An error happened during the request to Kavita+ API");
+            logger.LogError(e, "An error happened during the request to Kavita+ API - Support Token: {SupportToken}", supportToken);
         }
 
         return false;
@@ -295,8 +301,6 @@ public class LicenseService(
             if (cacheValue.HasValue) return cacheValue.Value;
         }
 
-
-
         try
         {
             var response = await kavitaPlusApiService.GetLicenseInfo(ct);
@@ -319,7 +323,7 @@ public class LicenseService(
         }
         catch (FlurlHttpException e)
         {
-            logger.LogError(e, "An error happened during the request to Kavita+ API");
+            logger.LogError(e, "An error happened during the request to Kavita+ API - Support Token: {SupportToken}", HashUtil.ServerToken());
         }
 
         return null;
