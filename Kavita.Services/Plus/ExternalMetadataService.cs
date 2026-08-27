@@ -47,6 +47,7 @@ using Kavita.Services.Extensions;
 using Kavita.Services.Helpers;
 using Kavita.Services.Scanner;
 using Markdig;
+using Markdig.Renderers;
 using Microsoft.Extensions.Logging;
 
 namespace Kavita.Services.Plus;
@@ -87,7 +88,7 @@ public class ExternalMetadataService : IExternalMetadataService
     private static readonly RateLimiter RateLimiter = new(50, TimeSpan.FromHours(24), false);
     private static readonly ConcurrentDictionary<int, SemaphoreSlim> SeriesWriteLocks = new();
     private static SemaphoreSlim GetSeriesWriteLock(int seriesId) => SeriesWriteLocks.GetOrAdd(seriesId, static _ => new SemaphoreSlim(1, 1));
-    private static readonly MarkdownPipeline MarkdownPipeline = new MarkdownPipelineBuilder().UseGithub().Build();
+    private static readonly MarkdownPipeline MarkdownPipeline = new MarkdownPipelineBuilder().UseKavitaPlus().Build();
 
     public ExternalMetadataService(IUnitOfWork unitOfWork, ILogger<ExternalMetadataService> logger, IMapper mapper,
         ILicenseService licenseService, IScrobblingService scrobblingService, IEventHub eventHub, ICoverDbService coverDbService,
@@ -2624,7 +2625,7 @@ public class ExternalMetadataService : IExternalMetadataService
         var from = series.Metadata.Summary;
 
         // Mangabaka uses Markdown for Summaries, convert to Html to align with opf/comicinfo
-        series.Metadata.Summary = Markdown.ToHtml(StringHelper.RemoveSourceInDescription(StringHelper.SquashBreaklines(externalMetadata.Summary)) ?? string.Empty, MarkdownPipeline);
+        series.Metadata.Summary = ConvertMarkdownToHtml(externalMetadata.Summary);
         series.Metadata.AddKPlusOverride(MetadataSettingField.Summary);
         series.Metadata.SummaryLocked = true;
 
@@ -3083,9 +3084,20 @@ public class ExternalMetadataService : IExternalMetadataService
         var ageRating = DetermineAgeRating(extSeries.Tags.Select(t => t.Name).Concat(extSeries.Genres), settings.AgeRatingMappings);
 
         extSeries.AgeRating = ageRating;
-        extSeries.Summary = Markdown.ToHtml(StringHelper.RemoveSourceInDescription(StringHelper.SquashBreaklines(extSeries.Summary)) ?? string.Empty, MarkdownPipeline);
+        extSeries.Summary = ConvertMarkdownToHtml(extSeries.Summary);
 
         return extSeries;
+    }
+
+    private static string ConvertMarkdownToHtml(string? summary)
+    {
+        if (string.IsNullOrWhiteSpace(summary)) return string.Empty;
+
+        var ret = Markdown.ToHtml(StringHelper.RemoveSourceInDescription(StringHelper.SquashBreaklines(summary)) ?? string.Empty, MarkdownPipeline).Trim();
+
+        // Check if ret is a single paragraph tag, if so, remove it.
+
+        return ret;
     }
 
     private static bool HasForceOverride(MetadataSettingsDto settings, IHasKPlusMetadata kPlusMetadata,
