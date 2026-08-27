@@ -29,7 +29,7 @@ Fork the repository on GitHub, then clone your fork onto your local development 
 
 1. Install the required Node Packages
     - `cd Kavita/UI/Web`
-    - `npm install`
+    - `npm ci`
     - `npm install -g @angular/cli`
 2. Start the frontend 
     - `npm run start`
