@@ -55,6 +55,7 @@ public class LicenseService(
     private async Task<bool> IsLicenseValid(string license)
     {
         if (string.IsNullOrWhiteSpace(license)) return false;
+        var supportToken = HashUtil.ServerToken();
         try
         {
             var response = await (Configuration.KavitaPlusApiUrl + "/api/license/check")
@@ -62,14 +63,14 @@ public class LicenseService(
                 .PostJsonAsync(new LicenseValidDto()
                 {
                     License = license,
-                    InstallId = HashUtil.ServerToken()
+                    InstallId = supportToken
                 })
                 .ReceiveString();
             return bool.Parse(response);
         }
         catch (Exception e)
         {
-            logger.LogError(e, "An error happened during the request to Kavita+ API. Support Token: {SupportToken}", HashUtil.ServerToken());
+            logger.LogError(e, "An error happened during the request to Kavita+ API. Support Token: {SupportToken}", supportToken);
             throw;
         }
     }
@@ -167,6 +168,8 @@ public class LicenseService(
     public async Task<bool> HasActiveSubscription(string? license, CancellationToken ct = default)
     {
         if (string.IsNullOrWhiteSpace(license)) return false;
+        var supportToken = HashUtil.ServerToken();
+
         try
         {
             var response = await (Configuration.KavitaPlusApiUrl + "/api/license/check-sub")
@@ -174,7 +177,7 @@ public class LicenseService(
                 .PostJsonAsync(new LicenseValidDto()
                 {
                     License = license,
-                    InstallId = HashUtil.ServerToken()
+                    InstallId = supportToken
                 }, cancellationToken: ct)
                 .ReceiveString();
 
@@ -188,7 +191,7 @@ public class LicenseService(
         }
         catch (Exception e)
         {
-            logger.LogError(e, "An error happened during the request to Kavita+ API - Support Token: {SupportToken}", HashUtil.ServerToken());
+            logger.LogError(e, "An error happened during the request to Kavita+ API - Support Token: {SupportToken}", supportToken);
             return false;
         }
     }

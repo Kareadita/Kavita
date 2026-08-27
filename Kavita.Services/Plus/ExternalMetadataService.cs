@@ -2727,7 +2727,7 @@ public class ExternalMetadataService : IExternalMetadataService
             var maxVolume = (int)(realVolumes.Count != 0 ? realVolumes.Max(v => v.MaxNumber) : 0);
             var maxChapter = (int)chapters.Max(c => c.MaxNumber);
 
-            // TODO: When the underlying source is a Manwua, there can be 0 chapters counted in the count. We need to handle this edge case
+            // TODO: When the underlying source is a Manhua, there can be 0 chapters counted in the count. We need to handle this edge case
             var externalExpectedCount = isVolumeBased ? externalMetadata.Volumes : externalMetadata.Chapters;
 
             // TODO: If the series is not a comic AND has a Chapter 0 (not a special) AND !isVolumeBased, then we can take the total ChapterCount - 1 as the count, since we don't count 0-based chapters
