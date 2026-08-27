@@ -723,7 +723,10 @@
         "release-year-validation": "{{validation.year-validation}}",
         "volumes-title": "{{tab.volumes-tab}}",
         "no-data": "{{common.no-data}}",
-        "align-sort-name": "Alterou o nome desta série, mas o nome de ordenação está bloqueado. Pretende atualizá-lo para corresponder ao novo nome?"
+        "align-sort-name": "Alterou o nome desta série, mas o nome de ordenação está bloqueado. Pretende atualizá-lo para corresponder ao novo nome?",
+        "metadata-provider-override-label": "Sobreposição do provedor de metadados",
+        "metadata-provider-override-tooltip": "Use um provedor de metadados diferente do padrão da biblioteca para esta série",
+        "metadata-provider-override-default": "Use o padrão da biblioteca"
     },
     "edit-chapter-modal": {
         "external-ids-tab": "{{tabs.external-ids-tab}}",
@@ -2778,7 +2781,7 @@
     },
     "manage-scrobble-errors": {
         "title": "Erros de Scrobbling",
-        "description": "Esta tabela contém problemas encontrados durante o scrobbling. Pode-a limpar sempre que quiser e esperar pelo próximo scrobble para ver alterações. Se existir uma série desconhecida, o melhor é corrigir o nome da série, ou o nome localizado, ou adicionar um weblink para o fornecedor.",
+        "description": "Esta tabela contém questões encontradas durante a escrobação. Você pode limpá-lo a qualquer momento e esperar pelo próximo carregamento de scrobble para ver. Se houver uma série desconhecida, use o jogo para corrigir e enquear eventos novamente.",
         "filter-label": "{{common.filter}}",
         "clear-errors": "Limpar Erros",
         "series-header": "Séries",
@@ -3692,7 +3695,8 @@
         "chapter-title": "Título (Capítulo)",
         "name": "{{edit-series-modal.name-label}}",
         "chapter-age-rating": "Classificação etária (capítulo)",
-        "volume-covers": "Capas (Volume)"
+        "volume-covers": "Capas (Volume)",
+        "sort-name": "{{sort-field-pipe.sort-name}}"
     },
     "preferences": {
         "left-to-right": "Esquerda para Direita",

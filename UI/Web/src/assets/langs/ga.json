@@ -2706,7 +2706,8 @@
         "chapter-publisher": "{{person-role-pipe.publisher}} (Caibidil)",
         "name": "{{edit-series-modal.name-label}}",
         "chapter-age-rating": "Rátáil Aois (Caibidil)",
-        "volume-covers": "Clúdaigh (Imleabhar)"
+        "volume-covers": "Clúdaigh (Imleabhar)",
+        "sort-name": "{{sort-field-pipe.sort-name}}"
     },
     "role-localized-pipe": {
         "admin": "Riarachán",
