@@ -41,7 +41,7 @@
     "@ng-bootstrap/ng-bootstrap": "^21.0.0",
     "@openng/ngx-toastr": "^1.0.0",
     "@popperjs/core": "^2.11.7",
-    "@siemens/ngx-datatable": "^26.0.0",
+    "@siemens/ngx-datatable": "^27.0.3",
     "@tweenjs/tween.js": "^25.0.0",
     "@types/echarts": "^4.9.22",
     "afterframe": "^1.0.2",
