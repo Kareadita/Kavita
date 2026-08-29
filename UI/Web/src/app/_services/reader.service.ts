@@ -342,11 +342,13 @@ export class ReaderService {
   }
 
   toggleFullscreen() {
+    const curr = screenfull.isFullscreen;
     if (screenfull.isEnabled) {
       screenfull.toggle();
+      return !curr;
     }
 
-    return screenfull.isFullscreen;
+    return false;
   }
 
   exitFullscreen() {
