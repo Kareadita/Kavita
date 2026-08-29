@@ -90,6 +90,10 @@ public class AppUserReadingProfile
     /// Manga Reader Option: Disable the width override if the screen is past the breakpoint
     /// </summary>
     public BreakPoint DisableWidthOverride { get; set; } = BreakPoint.Never;
+    /// <summary>
+    /// Manga Reader Option: How much of the viewport to scroll per tap/key press in Webtoon mode (percentage, 10-100)
+    /// </summary>
+    public int WebtoonScrollAmount { get; set; } = 85;
 
     #endregion
 

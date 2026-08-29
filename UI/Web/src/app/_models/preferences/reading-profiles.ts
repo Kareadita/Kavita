@@ -40,6 +40,7 @@ export interface ReadingProfile {
   allowAutomaticWebtoonReaderDetection: boolean;
   widthOverride?: number;
   disableWidthOverride: Breakpoint;
+  webtoonScrollAmount: number;
 
   // Book Reader
   bookReaderMargin: number;
