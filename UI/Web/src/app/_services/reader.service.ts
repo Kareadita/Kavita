@@ -345,6 +345,8 @@ export class ReaderService {
     if (screenfull.isEnabled) {
       screenfull.toggle();
     }
+
+    return screenfull.isFullscreen;
   }
 
   exitFullscreen() {

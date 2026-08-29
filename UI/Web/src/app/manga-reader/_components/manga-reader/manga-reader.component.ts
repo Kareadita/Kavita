@@ -1801,7 +1801,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
 
   // This is menu only code
   toggleFullscreen() {
-    this.readerService.toggleFullscreen();
+    this.isFullscreen.set(this.readerService.toggleFullscreen());
   }
 
   togglePageOffset() {
