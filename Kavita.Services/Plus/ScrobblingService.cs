@@ -1894,17 +1894,20 @@ public class ScrobblingService : IScrobblingService
                 }, userId: userId, ct: ct);
         }
 
-        var tokenExpiry = await GetTokenExpiry(provider, userId, scrobbleProviderSettings.AuthenticationToken, ct);
-        if (tokenExpiry.HasValue)
+        // Hardcover is not JWT and has no introspection. However, the validity is in callback
+        if (provider is not ScrobbleProvider.Hardcover)
         {
-            scrobbleProviderSettings.ValidUntilUtc = tokenExpiry.Value;
+            var tokenExpiry = await GetTokenExpiry(provider, userId, scrobbleProviderSettings.AuthenticationToken, ct);
+            if (tokenExpiry.HasValue)
+            {
+                scrobbleProviderSettings.ValidUntilUtc = tokenExpiry.Value;
+            }
+            else
+            {
+                _logger.LogWarning("Failed to get token expiry for {UserId} for {Provider} assuming invalid", userId, provider);
+                scrobbleProviderSettings.ValidUntilUtc = DateTime.MinValue;
+            }
         }
-        else
-        {
-            _logger.LogWarning("Failed to get token expiry for {UserId} for {Provider} assuming invalid", userId, provider);
-            scrobbleProviderSettings.ValidUntilUtc = DateTime.MinValue;
-        }
-
 
         _unitOfWork.UserRepository.Update(user);
         await _unitOfWork.CommitAsync(ct);
@@ -1926,7 +1929,7 @@ public class ScrobblingService : IScrobblingService
     {
         var upstream = provider.ToOAuthUpstream();
         // All upstreams but MangaBaka use JWT tokens
-        if (upstream is not OAuthUpstream.MangaBaka)
+        if (upstream is not (OAuthUpstream.MangaBaka or OAuthUpstream.Hardcover))
         {
             try
             {

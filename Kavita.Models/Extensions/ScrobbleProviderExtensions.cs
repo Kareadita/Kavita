@@ -15,14 +15,14 @@ public static class ScrobbleProviderExtensions
             ScrobbleProvider.AniList => OAuthUpstream.AniList,
             ScrobbleProvider.Mal => OAuthUpstream.MyAnimeList,
             ScrobbleProvider.Cbr => null,
-            ScrobbleProvider.Hardcover => null,
+            ScrobbleProvider.Hardcover => OAuthUpstream.Hardcover,
             ScrobbleProvider.MangaBaka => OAuthUpstream.MangaBaka,
             _ => throw new ArgumentOutOfRangeException(nameof(scrobbleProvider), scrobbleProvider, null)
         };
 
         public bool SupportsOAuthTokenRefresh() => scrobbleProvider switch
         {
-            ScrobbleProvider.Mal or ScrobbleProvider.MangaBaka => true,
+            ScrobbleProvider.Mal or ScrobbleProvider.MangaBaka or ScrobbleProvider.Hardcover => true,
             _ => false
         };
     }
