@@ -113,7 +113,7 @@ public class ScrobblingController(
 
         // When adding a fresh token for hardcover; assume the K+ redirect wasn't useable
         // and set the default 7-day expiry
-        if (!string.IsNullOrEmpty(scrobbleProvider.AuthenticationToken) && !hadAuthToken &&
+        if (scrobbleProvider.AuthenticationToken.StartsWith("hc_at") && !hadAuthToken &&
             dto.Provider == ScrobbleProvider.Hardcover)
         {
             scrobbleProvider.ValidUntilUtc = DateTime.UtcNow.AddDays(7) - TimeSpan.FromMinutes(30);

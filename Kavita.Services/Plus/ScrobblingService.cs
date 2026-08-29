@@ -1908,6 +1908,12 @@ public class ScrobblingService : IScrobblingService
                 scrobbleProviderSettings.ValidUntilUtc = DateTime.MinValue;
             }
         }
+        else if (scrobbleProviderSettings.AuthenticationToken.StartsWith("hc_pat"))
+        {
+            // This may be wrong, as the user may pick an expiry date. But we cannot check this
+            scrobbleProviderSettings.ValidUntilUtc = DateTime.MaxValue;
+            scrobbleProviderSettings.RefreshToken = string.Empty;
+        }
 
         _unitOfWork.UserRepository.Update(user);
         await _unitOfWork.CommitAsync(ct);
