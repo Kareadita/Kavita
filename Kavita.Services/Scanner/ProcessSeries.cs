@@ -383,23 +383,6 @@ public class ProcessSeries(
             series.Metadata.ReleaseYear = chapters.MinimumReleaseYear();
         }
 
-        // Set the AgeRating as highest in all the comicInfos
-        if (!series.Metadata.AgeRatingLocked)
-        {
-            series.Metadata.AgeRating = chapters.Max(chapter => chapter.AgeRating);
-
-            if (settings.EnableExtendedMetadataProcessing)
-            {
-                var allTags = series.Metadata.Tags.Select(t => t.Title).Concat(series.Metadata.Genres.Select(g => g.Title));
-                var updatedRating = ExternalMetadataService.DetermineAgeRating(allTags, settings.AgeRatingMappings);
-                if (updatedRating > series.Metadata.AgeRating)
-                {
-                    series.Metadata.AgeRating = updatedRating;
-                }
-            }
-
-        }
-
         if (!series.Metadata.PublicationStatusLocked)
         {
             DeterminePublicationStatus(series, chapters);
@@ -479,6 +462,23 @@ public class ProcessSeries(
         }
 
         #endregion
+
+        // Set the AgeRating as highest in all the comicInfos
+        if (!series.Metadata.AgeRatingLocked)
+        {
+            series.Metadata.AgeRating = chapters.Max(chapter => chapter.AgeRating);
+
+            if (settings.EnableExtendedMetadataProcessing)
+            {
+                var allTags = series.Metadata.Tags.Select(t => t.Title).Concat(series.Metadata.Genres.Select(g => g.Title));
+                var updatedRating = ExternalMetadataService.DetermineAgeRating(allTags, settings.AgeRatingMappings);
+                if (updatedRating > series.Metadata.AgeRating)
+                {
+                    series.Metadata.AgeRating = updatedRating;
+                }
+            }
+
+        }
 
     }
 
