@@ -74,7 +74,7 @@ export class ManageKavitaplusActivityComponent implements OnInit {
   timeFrameFilter = signal<'all' | '24h' | '7d' | '30d'>('7d');
 
   members = signal<Member[]>([]);
-  currentPage = signal(0);
+  currentPage = signal(1);
   pagination = signal<Pagination | null>(null);
 
   nextScrobble = signal<string | null>(null);
@@ -87,7 +87,7 @@ export class ManageKavitaplusActivityComponent implements OnInit {
 
   hasMore = computed(() => {
     const p = this.pagination();
-    return p != null && p.currentPage < p.totalPages - 1;
+    return p != null && p.currentPage < p.totalPages;
   });
 
   ngOnInit() {
@@ -118,7 +118,7 @@ export class ManageKavitaplusActivityComponent implements OnInit {
 
   private loadEntries(reset = true) {
     if (reset) {
-      this.currentPage.set(0);
+      this.currentPage.set(1);
       this.entries.set([]);
       this.isLoading.set(true);
     } else {

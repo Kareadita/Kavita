@@ -148,14 +148,17 @@
         "add": "{{common.add}}",
         "delete": "{{common.delete}}",
         "edit": "{{common.edit}}",
-        "no-data": "{{typeahead.no-data}}",
+        "no-data": "{{common.no-data}}",
         "actions-header": "{{manage-users.actions-header}}",
-        "description": "Phần này dành cho bạn để thiết lập các thiết bị không thể kết nối với Kavita thông qua trình duyệt web và thay vào đó có địa chỉ email chấp nhận tệp.",
+        "description": "Phần này dành cho bạn để thiết lập các thiết bị không thể kết nối với Kavita, thay vào đó sử dụng địa chỉ email để nhận tệp.",
         "title": "Trình Quản Lý Thiết Bị",
         "platform-label": "Nền Tảng",
         "name-label": "Tên",
-        "email-setup-alert": "Bạn muốn gửi tệp đến thiết bị của mình? Hãy yêu cầu quản trị viên thiết lập cài đặt Email trước!",
-        "email-label": "Email"
+        "email-setup-alert": "Bạn muốn gửi tệp đến email của mình? Hãy yêu cầu quản trị viên thiết lập cài đặt Email trước!",
+        "email-label": "Email",
+        "no-data-description": "Bạn chưa thiết lập thiết bị nhận qua email nào.",
+        "warning": "Cảnh báo",
+        "client-devices-header": "Thiết bị kết nối"
     },
     "edit-device-modal": {
         "device-name-label": "{{manage-devices.name-label}}",
@@ -165,9 +168,9 @@
         "cancel": "{{common.cancel}}",
         "required-field": "{{validation.required-field}}",
         "valid-email": "{{validation.valid-email}}",
-        "title": "Sửa Đổi Thiết Bị",
+        "title": "chỉnh sửa Thiết Bị email",
         "email-tooltip": "Email này sẽ được sử dụng để chấp nhận tệp được Gửi đến",
-        "device-platform-label": "Nền Tảng Thiết Bị"
+        "device-platform-label": "{{manage-devices.platform-label}}"
     },
     "change-password": {
         "password-label": "{{common.password}}",
@@ -2288,6 +2291,26 @@
         "weight-axis-hint": "kéo để xem trước toàn bộ dải độ đậm",
         "weight-thin": "thin",
         "weight-black": "black",
-        "reading-sample": "Mẫu đọc thử"
+        "reading-sample": "Mẫu đọc thử",
+        "reading-sample-text": "Nàng chậm rãi lật từng trang sách, ánh đèn dầu soi rọi rõ từng nét chữ. Những câu chuyện thì thầm của mực và giấy khẽ lan tỏa từ gáy sách; bác tài xế xe buýt đã phóng vội qua ngã tư rợp bóng cây, và màn đêm cứ thế êm đềm trôi theo từng trang đọc.",
+        "provider-note-system": "Tích hợp sẵn, luôn khả dụng",
+        "provider-note-custom": "Tải lên bởi bạn"
+    },
+    "search-input": {
+        "clear": "Xoá"
+    },
+    "server-devices": {
+        "client-devices-header": "{{manage-devices.client-devices-header}}",
+        "client-devices-this-month-header": "Thiết bị kết nối trong tháng này",
+        "client-devices-mobile-vs-pc-header": "Di động so với PC tháng này",
+        "no-data": "{{common.no-data}}"
+    },
+    "client-device-card": {
+        "auth-type-label": "Phương thức xác thực",
+        "browser-label": "Trình duyệt",
+        "platform-label": "{{manage-devices.platform-label}}",
+        "screen-label": "Màn hình",
+        "version-label": "Phiên bản ứng dụng",
+        "first-seen-label": "Kết nối lần đầu"
     }
 }

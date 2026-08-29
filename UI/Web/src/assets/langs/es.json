@@ -2706,7 +2706,8 @@
         "chapter-title": "Título (Capítulo)",
         "name": "{{edit-series-modal.name-label}}",
         "volume-covers": "Portadas (Volumen)",
-        "chapter-age-rating": "Calificación por edades (Capítulo)"
+        "chapter-age-rating": "Calificación por edades (Capítulo)",
+        "sort-name": "{{sort-field-pipe.sort-name}}"
     },
     "oidc": {
         "title": "OIDC Callback",

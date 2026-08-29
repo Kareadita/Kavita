@@ -723,7 +723,10 @@
         "release-year-validation": "{{validation.year-validation}}",
         "volumes-title": "{{tab.volumes-tab}}",
         "no-data": "{{common.no-data}}",
-        "align-sort-name": "Alterou o nome desta série, mas o nome de ordenação está bloqueado. Pretende atualizá-lo para corresponder ao novo nome?"
+        "align-sort-name": "Alterou o nome desta série, mas o nome de ordenação está bloqueado. Pretende atualizá-lo para corresponder ao novo nome?",
+        "metadata-provider-override-label": "Sobreposição do provedor de metadados",
+        "metadata-provider-override-tooltip": "Use um provedor de metadados diferente do padrão da biblioteca para esta série",
+        "metadata-provider-override-default": "Use o padrão da biblioteca"
     },
     "edit-chapter-modal": {
         "external-ids-tab": "{{tabs.external-ids-tab}}",
@@ -2141,7 +2144,9 @@
         "all-status-label": "Todos",
         "dont-match-label": "Não Corresponde",
         "no-data": "{{common.no-data}}",
-        "match-alt": "Corresponder {{seriesName}}"
+        "match-alt": "Corresponder {{seriesName}}",
+        "total-matched-label": "Correspondências Totais",
+        "total-count": "Total: {{count}}"
     },
     "manage-user-tokens": {
         "description": "Os utilizadores que têm tokens de scrobbling, podem ter de os renovar ocasionalmente. O Kavita irá enviar um email automaticamente, se o email estiver configurado e for válido.",
@@ -2414,9 +2419,10 @@
         "matched-to": "Atualmente correspondido a",
         "searching-against": "A pesquisar em {{provider}}",
         "special-count": "{{match-series-result-item.special-count}}",
-        "change-provider-help": "Pode mudar que provedor deve ser utilizado nas definições da Biblioteca",
+        "change-provider-help": "Escolha um provedor diferente para pesquisar esta série",
         "is-standalone-label": "É uma obra independente",
-        "is-standalone-tooltip": "Ative esta opção se esta série representar um único livro e o Hardcover não tiver uma entrada de série para o mesmo"
+        "is-standalone-tooltip": "Ative esta opção se esta série representar um único livro e o Hardcover não tiver uma entrada de série para o mesmo",
+        "provider-switch-help": "Os resultados são do provedor {{provider}}. Ao aplicar uma correspondência, esta série irá mudar para {{provider}}"
     },
     "match-series-result-item": {
         "volume-count": "Vol {{num}}",
@@ -2775,7 +2781,7 @@
     },
     "manage-scrobble-errors": {
         "title": "Erros de Scrobbling",
-        "description": "Esta tabela contém problemas encontrados durante o scrobbling. Pode-a limpar sempre que quiser e esperar pelo próximo scrobble para ver alterações. Se existir uma série desconhecida, o melhor é corrigir o nome da série, ou o nome localizado, ou adicionar um weblink para o fornecedor.",
+        "description": "Esta tabela contém questões encontradas durante a escrobação. Você pode limpá-lo a qualquer momento e esperar pelo próximo carregamento de scrobble para ver. Se houver uma série desconhecida, use o jogo para corrigir e enquear eventos novamente.",
         "filter-label": "{{common.filter}}",
         "clear-errors": "Limpar Erros",
         "series-header": "Séries",
@@ -3689,7 +3695,8 @@
         "chapter-title": "Título (Capítulo)",
         "name": "{{edit-series-modal.name-label}}",
         "chapter-age-rating": "Classificação etária (capítulo)",
-        "volume-covers": "Capas (Volume)"
+        "volume-covers": "Capas (Volume)",
+        "sort-name": "{{sort-field-pipe.sort-name}}"
     },
     "preferences": {
         "left-to-right": "Esquerda para Direita",
@@ -4178,7 +4185,8 @@
     "kavita-plus-audit-entry": {
         "system": "{{manage-kavitaplus-activity.system}}",
         "retry": "Tentar Novamente",
-        "match": "Correspondência"
+        "match": "Correspondência",
+        "remove-error": "Remover Erro de Scrobble"
     },
     "metadata-fetch-trigger-title-pipe": {
         "series-added": "Ativar automaticamente ao adicionar",
@@ -4209,7 +4217,8 @@
         "chapter-cover-updated": "Capa atualizada: {{chapter}}",
         "volume-cover-updated": "Capa do Volume atualizada: {{volume}}",
         "series-cover-updated": "Capa da série atualizada",
-        "series-match-fixed": "Série correspondente a {{matchName}}"
+        "series-match-fixed": "Série correspondente a {{matchName}}",
+        "metadata-provider-changed": "O Provedor de Metadados mudou de {{previousProvider}} para {{newProvider}}"
     },
     "kavita-plus-event-type-pipe": {
         "system-provider-info-sync": "Sincronização de Informações do Provedor de Scrobble",
@@ -4239,7 +4248,8 @@
         "scrobble-hold-removed": "Pausa no Scrobble Removida",
         "sync-started": "Sincronização Iniciada",
         "sync-completed": "Sincronização Completada",
-        "sync-failed": "Sincronização Falhou"
+        "sync-failed": "Sincronização Falhou",
+        "series-metadata-provider-override-set": "Provedor de Metadados Alterado"
     },
     "metadata-provider-title-pipe": {
         "hardcover": "Hardcover",
@@ -4349,7 +4359,11 @@
     },
     "kavitaplus-activity": {
         "description": "Atividade de leitura do Kavita sincronizada com serviços externos automaticamente - progresso, avaliações e estado de leitura.",
-        "tab-select-label": "Filtrar atividade"
+        "tab-select-label": "Filtrar atividade",
+        "stats-queue-label": "{{manage-kavitaplus-activity.stats-queue-label}}",
+        "next-scrobble": "{{manage-kavitaplus-activity.next-scrobble}}",
+        "stats-events-label": "{{manage-kavitaplus-activity.stats-events-label}}",
+        "stats-failures-label": "{{manage-kavitaplus-activity.stats-failures-label}}"
     },
     "kavitaplus-diff": {
         "field-label": "Campo",

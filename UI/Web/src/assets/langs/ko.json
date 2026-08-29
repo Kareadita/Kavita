@@ -1032,7 +1032,7 @@
     },
     "manage-scrobble-errors": {
         "title": "독서 기록 동기화 오류",
-        "description": "읽기 동기화 중 발생한 문제가 이곳에 표시됩니다. 언제든 초기화할 수 있으며, 다음 기록 업로드 시 다시 확인할 수 있습니다. 알 수 없는 시리즈가 있다면 이름을 수정하거나 연동 서비스 링크를 추가하세요.",
+        "description": "읽기 동기화 중 발생한 문제가 이곳에 표시됩니다. 언제든 초기화할 수 있으며, 다음 기록 업로드 시 다시 확인할 수 있습니다. 알 수 없는 시리즈가 있다면 매칭을 사용해 수정 후 다시 큐에 추가하십시오.",
         "filter-label": "{{common.filter}}",
         "clear-errors": "오류 지우기",
         "series-header": "시리즈",
@@ -1718,7 +1718,10 @@
         "no-data": "{{common.no-data}}",
         "weblinks-tab": "{{tabs.weblink-tab}}",
         "external-ids-tab": "{{tabs.external-ids-tab}}",
-        "align-sort-name": "이 시리즈의 이름을 변경했지만 정렬 이름이 잠겨 있습니다. 정렬 이름을 새 이름에 맞게 변경하시겠습니까?"
+        "align-sort-name": "이 시리즈의 이름을 변경했지만 정렬 이름이 잠겨 있습니다. 정렬 이름을 새 이름에 맞게 변경하시겠습니까?",
+        "metadata-provider-override-label": "메타데이터 제공자 덮어쓰기",
+        "metadata-provider-override-tooltip": "이 시리즈에 라이브러리 기본값과 다른 메타데이터 제공자를 사용합니다",
+        "metadata-provider-override-default": "라이브러리 기본값 사용"
     },
     "edit-chapter-modal": {
         "title": "편집",
@@ -2517,7 +2520,9 @@
         "blacklist-status-label": "수동 매칭 필요",
         "all-status-label": "모두",
         "matched-state-label": "매칭 상태",
-        "library-type": "라이브러리 유형"
+        "library-type": "라이브러리 유형",
+        "total-matched-label": "총 일치",
+        "total-count": "합계: {{count}}"
     },
     "manage-user-tokens": {
         "username-header": "사용자 이름",
@@ -2655,9 +2660,10 @@
         "dont-match-active-description": "이 시리즈는 Kavita+ 매칭 및 스크로블링에서 제외되었습니다.",
         "matched-to": "현재 매칭된 항목",
         "searching-against": "{{provider}}에서 검색 중",
-        "change-provider-help": "라이브러리 설정에서 사용할 제공자를 변경할 수 있습니다",
+        "change-provider-help": "이 시리즈 검색에는 다른 제공자를 선택하십시오",
         "is-standalone-label": "단독 도서",
-        "is-standalone-tooltip": "이 시리즈가 단일 도서를 나타내며, 하드커버 버전에 해당 시리즈 항목이 없는 경우 이 옵션을 활성화하세요"
+        "is-standalone-tooltip": "이 시리즈가 단일 도서를 나타내며, 하드커버 버전에 해당 시리즈 항목이 없는 경우 이 옵션을 활성화하세요",
+        "provider-switch-help": "{{provider}} 결과 제공. 매칭 적용시 이 시리즈에 {{provider}} 전환"
     },
     "match-series-result-item": {
         "volume-count": "{{num}}권",
@@ -2700,7 +2706,8 @@
         "chapter-summary": "요약 (Chapter)",
         "name": "{{edit-series-modal.name-label}}",
         "chapter-age-rating": "연령 등급 (챕터)",
-        "volume-covers": "표지 (권)"
+        "volume-covers": "표지 (권)",
+        "sort-name": "{{sort-field-pipe.sort-name}}"
     },
     "role-localized-pipe": {
         "admin": "관리자",
@@ -4080,7 +4087,8 @@
     "kavita-plus-audit-entry": {
         "match": "매칭",
         "system": "{{manage-kavitaplus-activity.system}}",
-        "retry": "재시도"
+        "retry": "재시도",
+        "remove-error": "읽기 동기화 오류 삭제"
     },
     "audit-status-title-pipe": {
         "success": "성공",
@@ -4141,7 +4149,8 @@
         "system-token-refresh-success": "{{provider}}의 인증 토큰을 새로 고침하십시오. 유효 기간은 {{validUntil}}까지입니다",
         "system-token-refresh-failure": "{{provider}}의 인증 토큰 새로 고침에 실패했습니다",
         "system-provider-info-sync-success": "{{provider}} 정보가 성공적으로 동기화되었습니다. 계정 {{username}}에 연결되었습니다",
-        "system-provider-info-sync-failure": "{{provider}} 계정 정보 동기화에 실패했습니다"
+        "system-provider-info-sync-failure": "{{provider}} 계정 정보 동기화에 실패했습니다",
+        "metadata-provider-changed": "메타데이터 제공자 {{previousProvider}}에서 {{newProvider}}(으)로 변경"
     },
     "expired-license-info-card": {
         "status-label": "상태",
@@ -4258,7 +4267,11 @@
     },
     "kavitaplus-activity": {
         "description": "Kavita가 대신 외부 서비스에 동기화한 독서 활동입니다 – 진행 상황, 평점, 읽음 상태.",
-        "tab-select-label": "필터 활성화"
+        "tab-select-label": "필터 활성화",
+        "stats-queue-label": "{{manage-kavitaplus-activity.stats-queue-label}}",
+        "next-scrobble": "{{manage-kavitaplus-activity.next-scrobble}}",
+        "stats-events-label": "{{manage-kavitaplus-activity.stats-events-label}}",
+        "stats-failures-label": "{{manage-kavitaplus-activity.stats-failures-label}}"
     },
     "kavitaplus-timeline": {
         "today": "오늘",
@@ -4297,7 +4310,8 @@
         "volume-cover-updated": "권 표지가 업데이트되었습니다",
         "scrobble-rate-limit": "요청 제한 초과",
         "scrobble-hold-added": "독서 기록 동기화 일시 중지 추가",
-        "scrobble-hold-removed": "독서 기록 동기화 일시 중지 해제"
+        "scrobble-hold-removed": "독서 기록 동기화 일시 중지 해제",
+        "series-metadata-provider-override-set": "메타데이터 제공자 변경됨"
     },
     "audit-log-messages": {
         "invalid-token": "유효하지 않은 AniList 토큰",

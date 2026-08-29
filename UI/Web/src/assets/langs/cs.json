@@ -1002,7 +1002,7 @@
         "edit-header": "Upravit",
         "created-header": "Vytvořeno",
         "title": "Chyby scrobblingu",
-        "description": "Tato tabulka obsahuje problémy nalezené při procházení. Můžete ji kdykoli vymazat a počkat na další nahrání scrobblu. Pokud se jedná o neznámou sérii, nejlépe opravte název série nebo lokalizovaný název série nebo přidejte webový odkaz pro poskytovatele.",
+        "description": "Tato tabulka obsahuje problémy zjištěné během scrobblování. Můžete ji kdykoli vymazat a počkat na další odeslání scrobblů, abyste zjistili, zda se problém objeví znovu. Pokud se v seznamu objeví neznámá série, použijte funkci „spárovat“ k opravě a znovu zařaďte události do fronty.",
         "series-header": "Série",
         "edit-item-alt": "Upravit {{seriesName}}",
         "no-data": "Bez problémů",
@@ -1595,7 +1595,10 @@
         "no-data": "{{common.no-data}}",
         "weblinks-tab": "{{tabs.weblink-tab}}",
         "external-ids-tab": "{{tabs.external-ids-tab}}",
-        "align-sort-name": "Tuto sérii jste přejmenovali, ale její třídicí název je uzamčen. Chcete aktualizovat třídicí název tak, aby odpovídal novému názvu?"
+        "align-sort-name": "Tuto sérii jste přejmenovali, ale její třídicí název je uzamčen. Chcete aktualizovat třídicí název tak, aby odpovídal novému názvu?",
+        "metadata-provider-override-label": "Přepsání poskytovatele metadat",
+        "metadata-provider-override-tooltip": "Pro tuto sérii použijte jiného poskytovatele metadat, než je výchozí nastavení knihovny",
+        "metadata-provider-override-default": "Použít výchozí nastavení knihovny"
     },
     "edit-chapter-modal": {
         "close": "{{common.close}}",
@@ -1995,10 +1998,11 @@
         "chapter-count": "{{match-series-result-item.chapter-count}}",
         "matched-to": "V současné době se shoduje s",
         "searching-against": "Vyhledávání v databázi {{provider}}",
-        "change-provider-help": "V nastaveních knihovny můžete změnit, kterého poskytovatele chcete používat",
+        "change-provider-help": "Vyberte jiného poskytovatele, u kterého chcete pro tuto sérii provést vyhledávání",
         "is-standalone-label": "Je samostatná",
         "is-standalone-tooltip": "Tuto možnost zaškrtněte, pokud se jedná o samostatnou knihu v sérii a Hardcover pro ni nemá vytvořený záznam v rámci sérií",
-        "special-count": "{{match-series-result-item.special-count}}"
+        "special-count": "{{match-series-result-item.special-count}}",
+        "provider-switch-help": "Výsledky pocházejí z {{provider}}. Po provedení přiřazení se tato série přepne na {{provider}}"
     },
     "manage-system": {
         "first-install-version-title": "První verze instalace",
@@ -2047,7 +2051,9 @@
         "actions-header": "Akce",
         "library-name-header": "Knihovna",
         "library-type": "Typ knihovny",
-        "matched-state-label": "Stav shody"
+        "matched-state-label": "Stav shody",
+        "total-matched-label": "Celkem spárováno",
+        "total-count": "Celkem: {{count}}"
     },
     "match-series-result-item": {
         "volume-count": "{{num}} svaz",
@@ -2700,7 +2706,8 @@
         "chapter-publisher": "{{person-role-pipe.publisher}} (Kapitola)",
         "name": "{{edit-series-modal.name-label}}",
         "chapter-age-rating": "Věková kategorie (kapitola)",
-        "volume-covers": "Obálky (svazek)"
+        "volume-covers": "Obálky (svazek)",
+        "sort-name": "{{sort-field-pipe.sort-name}}"
     },
     "role-localized-pipe": {
         "download": "Stažené",
@@ -3796,7 +3803,11 @@
     },
     "kavitaplus-activity": {
         "description": "Aktivita čtení, kterou Kavita za vás synchronizovala s externími službami – pokrok, hodnocení a stav čtení.",
-        "tab-select-label": "Filtrovat aktivity"
+        "tab-select-label": "Filtrovat aktivity",
+        "stats-queue-label": "{{manage-kavitaplus-activity.stats-queue-label}}",
+        "next-scrobble": "{{manage-kavitaplus-activity.next-scrobble}}",
+        "stats-events-label": "{{manage-kavitaplus-activity.stats-events-label}}",
+        "stats-failures-label": "{{manage-kavitaplus-activity.stats-failures-label}}"
     },
     "manage-kavitaplus-activity": {
         "description": "90 dní událostí týkajících se metadat, přiřazování, scrobblování a synchronizace. Zde můžete provést třídění chyb a spustit ruční přiřazení.",
@@ -3909,7 +3920,8 @@
         "system-token-refresh-failure": "Nepodařilo se obnovit ověřovací tokeny pro {{provider}}",
         "system-provider-info-sync-success": "Informace pro {{provider}} byly úspěšně synchronizovány. Propojeno s účtem {{username}}",
         "system-provider-info-sync-failure": "Nepodařilo se synchronizovat údaje o účtu pro {{provider}}",
-        "volume-cover-updated": "Aktualizovaná obálka svazku: {{volume}}"
+        "volume-cover-updated": "Aktualizovaná obálka svazku: {{volume}}",
+        "metadata-provider-changed": "Poskytovatel metadat se změnil z {{previousProvider}} na {{newProvider}}"
     },
     "kavita-plus-event-type-pipe": {
         "series-matched": "Série přiřazena",
@@ -3939,7 +3951,8 @@
         "sync-failed": "Synchronizace se nezdařila",
         "system-provider-info-sync": "Synchronizace informací o poskytovateli scrobblování",
         "system-token-refresh": "Obnovení tokenu poskytovatele scrobblování",
-        "volume-cover-updated": "Obálka svazku aktualizována"
+        "volume-cover-updated": "Obálka svazku aktualizována",
+        "series-metadata-provider-override-set": "Změna poskytovatele metadat"
     },
     "audit-log-messages": {
         "rate-limit-hit": "Dosaženo limitu počtu požadavků",
@@ -4231,7 +4244,8 @@
     "kavita-plus-audit-entry": {
         "system": "{{manage-kavitaplus-activity.system}}",
         "retry": "Opakovat",
-        "match": "Sladit"
+        "match": "Sladit",
+        "remove-error": "Odstranit chybu scrobblování"
     },
     "metadata-fetch-trigger-title-pipe": {
         "series-added": "Automatické přidání",

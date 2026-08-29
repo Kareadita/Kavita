@@ -65,17 +65,29 @@ public class SeriesService(
             .OrderBy(v => v.MinNumber);
         var minVolumeNumber = sortedVolumes.MinBy(v => v.MinNumber);
 
-
         var allChapters = series.Volumes
             .SelectMany(v => v.Chapters.OrderBy(c => c.MinNumber, ChapterSortComparerDefaultLast.Default))
             .ToList();
-        var minChapter = allChapters
-            .FirstOrDefault();
+
+        var minChapter = allChapters.FirstOrDefault();
 
         if (minVolumeNumber != null && minChapter != null &&
             (minChapter.MinNumber >= minVolumeNumber.MinNumber || minChapter.MinNumber.Is(Parser.DefaultChapterNumber)))
         {
-            return minVolumeNumber.Chapters.MinBy(c => c.MinNumber, ChapterSortComparerDefaultLast.Default);
+            allChapters = minVolumeNumber.Chapters.OrderBy(c => c.MinNumber, ChapterSortComparerDefaultLast.Default).ToList();
+            minChapter = allChapters.FirstOrDefault();
+        }
+
+        var chapterOne = allChapters.OneOrDefault(c => c.MinNumber.Is(1));
+        if (chapterOne != null)
+        {
+            return chapterOne;
+        }
+
+        var nonPrequelChapter = allChapters.FirstOrDefault(c => c.MinNumber >= 1);
+        if (nonPrequelChapter != null)
+        {
+            return nonPrequelChapter;
         }
 
         return minChapter;

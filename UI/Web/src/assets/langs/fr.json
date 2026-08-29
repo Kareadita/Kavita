@@ -1032,7 +1032,7 @@
     },
     "manage-scrobble-errors": {
         "title": "Erreurs de suivi d'activité (Scrobbling)",
-        "description": "Ce tableau contient les problèmes détectés lors du suivi d'activité (Scrobbling). Vous pouvez l'effacer à tout moment et attendre la prochaine synchronisation du Scrobbling pour voir. S'il existe une série inconnue, il est préférable de corriger le nom de la série ou le nom de la série localisé ou d'ajouter un lien Web pour les fournisseurs.",
+        "description": "Ce tableau répertorie les problèmes rencontrés lors du scrobbling. Vous pouvez le vider à tout moment et attendre le prochain envoi de données pour voir si le problème persiste. En cas de série inconnue, utilisez la fonction de correspondance pour corriger l'erreur et replacer les événements dans la file d'attente.",
         "filter-label": "{{common.filter}}",
         "clear-errors": "Effacer les erreurs",
         "series-header": "Séries",
@@ -1718,7 +1718,10 @@
         "no-data": "{{common.no-data}}",
         "weblinks-tab": "{{tabs.weblink-tab}}",
         "external-ids-tab": "{{tabs.external-ids-tab}}",
-        "align-sort-name": "Vous avez renommé cette série, mais son nom de tri est verrouillé. Souhaitez-vous mettre à jour le nom de tri pour qu'il corresponde au nouveau nom ?"
+        "align-sort-name": "Vous avez renommé cette série, mais son nom de tri est verrouillé. Souhaitez-vous mettre à jour le nom de tri pour qu'il corresponde au nouveau nom ?",
+        "metadata-provider-override-label": "Remplacement du fournisseur de métadonnées",
+        "metadata-provider-override-tooltip": "Utiliser un fournisseur de métadonnées différent de celui par défaut de la bibliothèque pour cette série",
+        "metadata-provider-override-default": "Utiliser la valeur par défaut de la bibliothèque"
     },
     "edit-chapter-modal": {
         "title": "Modifier",
@@ -2527,9 +2530,10 @@
         "special-count": "{{match-series-result-item.special-count}}",
         "matched-to": "Actuellement associé à",
         "searching-against": "Recherche via {{provider}}",
-        "change-provider-help": "Vous pouvez modifier le fournisseur utilisé dans les paramètres de la bibliothèque",
+        "change-provider-help": "Choisissez un autre fournisseur pour effectuer la recherche pour cette série",
         "is-standalone-label": "Est autonome",
-        "is-standalone-tooltip": "Activez cette option si cette série correspond à un livre unique et que l'édition reliée ne comporte pas d'entrée de série pour celui-ci"
+        "is-standalone-tooltip": "Activez cette option si cette série correspond à un livre unique et que l'édition reliée ne comporte pas d'entrée de série pour celui-ci",
+        "provider-switch-help": "Les résultats proviennent de {{provider}}. L'application d'une correspondance fera basculer cette série vers {{provider}}"
     },
     "manage-user-tokens": {
         "expires-label": "Expiration : {{date}}",
@@ -2557,7 +2561,9 @@
         "actions-header": "Actions",
         "dont-match-status-label": "{{dont-match-label}}",
         "library-type": "Type de bibliothèque",
-        "matched-state-label": "État de correspondance"
+        "matched-state-label": "État de correspondance",
+        "total-count": "Total : {{count}}",
+        "total-matched-label": "Nombre total de correspondances"
     },
     "manage-metadata-settings": {
         "enable-relations-label": "Relations",
@@ -2690,7 +2696,8 @@
         "chapter-title": "Titre (Chapitre)",
         "name": "{{edit-series-modal.name-label}}",
         "chapter-age-rating": "Classification d'âge (chapitre)",
-        "volume-covers": "Couvertures (Volume)"
+        "volume-covers": "Couvertures (Volume)",
+        "sort-name": "{{sort-field-pipe.sort-name}}"
     },
     "email-history": {
         "not-sent-tooltip": "Non envoyé",
@@ -4148,7 +4155,11 @@
     },
     "kavitaplus-activity": {
         "description": "Activité de lecture que Kavita a synchronisée avec des services externes pour vous : progression, notes et statut de lecture.",
-        "tab-select-label": "Filtrer l'activité"
+        "tab-select-label": "Filtrer l'activité",
+        "stats-queue-label": "{{manage-kavitaplus-activity.stats-queue-label}}",
+        "next-scrobble": "{{manage-kavitaplus-activity.next-scrobble}}",
+        "stats-events-label": "{{manage-kavitaplus-activity.stats-events-label}}",
+        "stats-failures-label": "{{manage-kavitaplus-activity.stats-failures-label}}"
     },
     "manage-kavitaplus-activity": {
         "description": "90 jours d'événements liés aux métadonnées, aux correspondances, au scrobbling et à la synchronisation. Gérez les échecs et déclenchez une correspondance manuelle depuis cet emplacement.",
@@ -4211,7 +4222,8 @@
     "kavita-plus-audit-entry": {
         "system": "{{manage-kavitaplus-activity.system}}",
         "retry": "Réessayer",
-        "match": "Correspondre"
+        "match": "Correspondre",
+        "remove-error": "Supprimer l'erreur de scrobbling"
     },
     "audit-status-title-pipe": {
         "success": "Succès",
@@ -4272,7 +4284,8 @@
         "system-token-refresh-failure": "Échec du renouvellement des jetons d'authentification pour {{provider}}",
         "system-provider-info-sync-success": "Synchronisation réussie des informations pour {{provider}}. Associé au compte {{username}}",
         "system-provider-info-sync-failure": "Échec de la synchronisation des informations de compte pour {{provider}}",
-        "sync-completed-want-to-read": "{{seriesMatched}} séries trouvées pour {{userName}}"
+        "sync-completed-want-to-read": "{{seriesMatched}} séries trouvées pour {{userName}}",
+        "metadata-provider-changed": "Le fournisseur de métadonnées est passé de {{previousProvider}} à {{newProvider}}"
     },
     "kavita-plus-event-type-pipe": {
         "series-matched": "Série trouvée",
@@ -4302,7 +4315,8 @@
         "sync-completed": "Synchronisation terminée",
         "sync-failed": "Échec de la synchronisation",
         "system-provider-info-sync": "Synchronisation des informations du fournisseur de scrobbling",
-        "system-token-refresh": "Actualisation du jeton du fournisseur de scrobbling"
+        "system-token-refresh": "Actualisation du jeton du fournisseur de scrobbling",
+        "series-metadata-provider-override-set": "Le fournisseur de métadonnées a changé"
     },
     "audit-log-messages": {
         "rate-limit-hit": "Limite de débit atteinte",

@@ -138,7 +138,8 @@
         "no-data": "{{typeahead.no-data}}",
         "created-header": "{{manage-media-issues.created-header}}",
         "series-name-header": "{{manage-matched-metadata.series-name-header}}",
-        "delete-label": "{{common.remove}}"
+        "delete-label": "{{common.remove}}",
+        "no-data-description": "Sie haben derzeit keine Serien vorbestellt. Serien, die Sie vorbestellen, werden hier angezeigt."
     },
     "theme-manager": {
         "description": "Kavita ist in vielen Farben erhältlich. Finden Sie ein Farbschema, das Ihren Anforderungen entspricht, oder erstellen Sie selbst eines und teilen Sie es mit anderen. Themen können für Ihr Konto oder für alle Konten angewendet werden.",
@@ -187,11 +188,12 @@
         "add": "{{common.add}}",
         "delete": "{{common.delete}}",
         "edit": "{{common.edit}}",
-        "no-data": "{{typeahead.no-data}}",
+        "no-data": "{{common.no-data}}",
         "actions-header": "{{manage-users.actions-header}}",
         "warning": "Warnung",
         "client-devices-header": "Client-Geräte",
-        "sendto-device-header": "E-Mail-basierte Geräte"
+        "sendto-device-header": "E-Mail-basierte Geräte",
+        "no-data-description": "Sie haben noch keine E-Mail-Geräte eingerichtet."
     },
     "edit-device-modal": {
         "title": "E-Mail-Gerät bearbeiten",
@@ -1030,7 +1032,7 @@
     },
     "manage-scrobble-errors": {
         "title": "Scrobbling Fehler",
-        "description": "Diese Tabelle enthält Probleme, die beim Scrobbling gefunden wurden. Sie können sie jederzeit löschen und auf den nächsten Scrobble-Upload warten. Wenn es eine unbekannte Serie gibt, korrigieren Sie am besten den Seriennamen oder den lokalisierten Seriennamen oder fügen einen Weblink für die Anbieter hinzu.",
+        "description": "Diese Tabelle enthält Probleme, die beim Scrobbeln festgestellt wurden. Du kannst sie jederzeit löschen und abwarten, bis der nächste Scrobble-Upload erfolgt ist. Falls eine unbekannte Serie vorhanden ist, verwende die Übereinstimmungsfunktion, um die Ereignisse zu korrigieren und erneut in die Warteschlange zu stellen.",
         "filter-label": "{{common.filter}}",
         "clear-errors": "Fehler löschen",
         "series-header": "Serien",
@@ -1038,7 +1040,8 @@
         "comment-header": "Kommentar",
         "edit-header": "Bearbeiten",
         "edit-item-alt": "Bearbeiten {{SerienName}}",
-        "no-data": "Keine Probleme"
+        "no-data": "Keine Probleme",
+        "generic": "Es ist ein unbekannter Fehler aufgetreten"
     },
     "default-date-pipe": {
         "never": "Niemals"
@@ -1178,13 +1181,14 @@
         "online-now-tooltip": "Jetzt online",
         "too-many-libraries": "Eine Menge",
         "sharing-header": "Teilen",
-        "no-data": "Es gibt keine anderen Benutzer.",
+        "no-data": "{{common.no-data}}",
         "actions-header": "Aktionen",
         "pending-tooltip": "Dieser Benutzer hat seine E-Mail nicht bestätigt",
         "all-libraries": "Alle Bibliotheken",
         "identity-provider-native-tooltip": "Muttersprachler",
         "identity-provider-oidc-tooltip": "OIDC",
-        "profile-link-alt": "Profil"
+        "profile-link-alt": "Profil",
+        "no-data-description": "Es sind keine weiteren Benutzer anwesend."
     },
     "edit-collection-tags": {
         "title": "Sammlung {{collectionName}} bearbeiten",
@@ -1204,7 +1208,9 @@
         "source-url-title": "Quell-Url:",
         "total-series-title": "Totale Serie:",
         "missing-series-title": "Fehlende Serien:",
-        "last-sync-tooltip": "Kavita synchronisiert täglich mit dem vorgelagerten Sammlungs Anbieter."
+        "last-sync-tooltip": "Kavita synchronisiert täglich mit dem vorgelagerten Sammlungs Anbieter.",
+        "series-tab": "{{tabs.series-tab}}",
+        "matched-series": "Passende Serien:"
     },
     "library-recommended": {
         "no-data": "Hier gibt es nichts zu sehen. Fügen Sie Ihrer Bibliothek einige Metadaten hinzu, lesen oder bewerten Sie etwas. In dieser Bibliothek können auch die Empfehlungen ausgeschaltet sein.",
@@ -1242,14 +1248,14 @@
         "cbl-import": "Leseliste-Manager",
         "mal-stack-import": "MAL Stack",
         "admin-email-history": "E-Mail-Verlauf",
-        "admin-matched-metadata": "Passende Metadaten",
-        "admin-manage-tokens": "Verwalte Benutzertoken",
+        "admin-matched-metadata": "Passende Serie",
+        "admin-manage-tokens": "Benutzertoken",
         "scrobble-holds": "Scrobble-Holds",
-        "admin-metadata": "Verwalte Metadaten",
+        "admin-metadata": "Metadaten-Steuerelemente",
         "reading-profiles": "Leseprofile",
         "admin-oidc": "OpenID Connect",
-        "admin-mappings-import": "Metadaten-Einstellungen",
-        "admin-public-metadata": "Metadaten verwalten",
+        "admin-mappings-import": "Metadaten-Steuerelemente",
+        "admin-public-metadata": "Metadaten-Steuerelemente",
         "font": "Epub-Schriftarten",
         "custom-key-binds": "Tastaturbelegung",
         "insights-section-title": "Einblicke",
@@ -1257,7 +1263,7 @@
         "admin-device": "Geräte",
         "remap-rules": "Regeln neu zuordnen",
         "my-activity": "Meine Aktivitäten",
-        "admin-manage-kavitaplus-activity": "Kavita+ verwalten",
+        "admin-manage-kavitaplus-activity": "Kavita+ Aktivität",
         "scrobble-settings": "Verbindungen"
     },
     "collection-detail": {
@@ -1344,7 +1350,8 @@
         "left-to-process": "Noch zu bearbeiten: {{leftToProcess}} / {{totalToProcess}}",
         "download-in-queue": "{{num}} Downloads in der Warteschlange",
         "reading-now": "{{num}} wird gerade gelesen",
-        "downloads-active": "{{count}} Download(s) werden gerade durchgeführt"
+        "downloads-active": "{{count}} Download(s) werden gerade durchgeführt",
+        "not-connected": "Keine Verbindung, bitte aktualisieren"
     },
     "shortcuts-modal": {
         "title": "Tastaturkurzbefehle",
@@ -1357,7 +1364,11 @@
         "close-reader": "Reader schließen",
         "toggle-menu": "Menü umschalten",
         "offset-double-page": "{{keybind-setting-description-pipe.key-bind-title-offset-double-page}}",
-        "navigate-to-settings": "{{keybind-setting-description-pipe.key-bind-title-navigate-to-settings}}"
+        "navigate-to-settings": "{{keybind-setting-description-pipe.key-bind-title-navigate-to-settings}}",
+        "previous-chapter": "{{keybind-setting-description-pipe.key-bind-title-previous-chapter}}",
+        "next-chapter": "{{keybind-setting-description-pipe.key-bind-title-next-chapter}}",
+        "first-page": "{{keybind-setting-description-pipe.key-bind-title-first-page}}",
+        "last-page": "{{keybind-setting-description-pipe.key-bind-title-last-page}}"
     },
     "grouped-typeahead": {
         "files": "Dateien",
@@ -1607,7 +1618,7 @@
         "unit-average-rating": "Externes Rating von Kavita+, Prozent",
         "unit-reading-progress": "Prozentsatz",
         "unit-user-rating": "0.0 - 5.0 Sterne",
-        "unit-read-last": "Tage ab HEUTE",
+        "unit-read-last": "Vor einigen Tagen",
         "disclaimer-highlight-slots": "Bei Verwendung dieses Feldes werden nur Ihre eigenen Anmerkungen angezeigt",
         "unit-file-size": "GB, MB, KB, B",
         "disclaimer-file-size": "Die Dateigröße muss die Einheit enthalten"
@@ -1706,7 +1717,11 @@
         "volumes-title": "{{tab.volumes-tab}}",
         "no-data": "{{common.no-data}}",
         "weblinks-tab": "{{tabs.weblink-tab}}",
-        "external-ids-tab": "{{tabs.external-ids-tab}}"
+        "external-ids-tab": "{{tabs.external-ids-tab}}",
+        "align-sort-name": "Sie haben diese Serie umbenannt, aber ihr Sortiername ist gesperrt. Möchten Sie den Sortiernamen an den neuen Namen anpassen?",
+        "metadata-provider-override-label": "Überschreiben des Metadaten-Anbieters",
+        "metadata-provider-override-tooltip": "Verwenden Sie für diese Reihe einen anderen Metadaten-Anbieter als den Standard der Bibliothek",
+        "metadata-provider-override-default": "Bibliotheksstandard verwenden"
     },
     "edit-chapter-modal": {
         "title": "bearbeiten",
@@ -1773,7 +1788,7 @@
         "external-ids-tab": "{{tabs.external-ids-tab}}"
     },
     "day-breakdown": {
-        "title": "Tagesaufteilung",
+        "title": "Lesen am Tag",
         "no-data": "Kein Fortschritt, lesen Sie weiter"
     },
     "file-breakdown-stats": {
@@ -2022,7 +2037,8 @@
         "read-date": "Datum des Lesens",
         "average-rating": "Durchschnittliche Bewertung",
         "read-last": "Zuletzt gelesen",
-        "file-size": "Dateigröße"
+        "file-size": "Dateigröße",
+        "collapse-series-relationships": "{{user-preferences.collapse-series-relationships-label}}"
     },
     "filter-comparison-pipe": {
         "begins-with": "Beginnt mit",
@@ -2488,18 +2504,21 @@
         "known-issues": "Bekannte Probleme"
     },
     "match-series-result-item": {
-        "volume-count": "Band {{ num }}",
-        "chapter-count": "{{ num }} Kap",
-        "issue-count": "{{ num }} Ausgaben",
+        "volume-count": "Band {{num}}",
+        "chapter-count": "{{num}} Kap",
+        "issue-count": "{{num}} Ausgaben",
         "matched-alt": "Passende Alternative:",
         "more": "mehr",
         "matched-alt-count": "passende alternative Titel",
         "alt-titles": "Alternative Titel",
         "more-titles": "+{{count}} weitere",
-        "selected-alt": "Ausgewählt"
+        "selected-alt": "Ausgewählt",
+        "special-count": "{{num}} Spezial",
+        "edition-main-count": "{{num}} Hauptseite",
+        "edition-extra-count": "+{{num}} zusätzlich"
     },
     "match-series-modal": {
-        "description": "Wählen Sie eine Übereinstimmung aus, um die Metadaten von Kavita+ neu zu verknüpfen und die Scrobble-Ereignisse neu zu generieren.",
+        "description": "Wählen Sie einen Titel aus, um die Metadaten von „Kavita+“ neu zu verknüpfen und Scrobble-Ereignisse neu zu generieren. Klicken Sie auf eine Ausgabe, um Metadaten auf Album-/Kapitelebene abzurufen (sofern vorhanden).",
         "dont-match-label": "Keine übereinstimmung",
         "dont-match-tooltip": "Verhindern Sie, dass Kavita diese Serie automatisch zuordnet oder scrobbelt",
         "search": "Suche",
@@ -2524,9 +2543,11 @@
         "chapter-count": "{{match-series-result-item.chapter-count}}",
         "matched-to": "Derzeit zugeordnet zu",
         "searching-against": "Suche bei {{provider}}",
-        "change-provider-help": "In den Bibliothekseinstellungen kannst du festlegen, welcher Anbieter verwendet werden soll",
+        "change-provider-help": "Wählen Sie für diese Serie einen anderen Anbieter für die Suche aus",
         "is-standalone-label": "Ist eigenständig",
-        "is-standalone-tooltip": "Aktivieren Sie diese Option, wenn es sich bei dieser Reihe um ein einzelnes Buch handelt und es für das gebundene Buch keinen Eintrag in der Reihe gibt"
+        "is-standalone-tooltip": "Aktivieren Sie diese Option, wenn es sich bei dieser Reihe um ein einzelnes Buch handelt und es für das gebundene Buch keinen Eintrag in der Reihe gibt",
+        "special-count": "{{match-series-result-item.special-count}}",
+        "provider-switch-help": "Die Ergebnisse stammen von {{provider}}. Wenn Sie eine Übereinstimmung auswählen, wird diese Serie auf {{provider}} umgestellt"
     },
     "email-history": {
         "description": "Hier finden Sie alle E-Mails, die von Kavita gesendet wurden und an welchen Benutzer.",
@@ -2555,7 +2576,9 @@
         "dont-match-status-label": "{{dont-match-label}}",
         "no-data": "{{common.no-data}}",
         "matched-state-label": "Match-Status",
-        "library-type": "Bibliotheksart"
+        "library-type": "Bibliotheksart",
+        "total-matched-label": "Alle Übereinstimmungen",
+        "total-count": "Gesamt: {{count}}"
     },
     "manage-user-tokens": {
         "description": "Die Token von Benutzern, die Scrobbeln verwenden, müssen gelegentlich erneuert werden. Kavita sendet ihnen automatisch eine E-Mail, wenn eine E-Mail-Adresse eingerichtet ist und sie eine gültige E-Mail-Adresse haben.",
@@ -2615,12 +2638,12 @@
         "enable-chapter-publisher-tooltip": "Zulassen, dass der Herausgeber des Kapitels/der Ausgabe geschrieben wird",
         "enable-chapter-cover-label": "Kapitel-Cover",
         "enable-chapter-cover-tooltip": "Cover von Kapitel/Ausgabe festlegen",
-        "k+-warning": "Die folgenden Einstellungen werden mit denen auf der K+-Seite geteilt. Sie können sie an beiden Stellen ändern",
+        "k+-warning": "Die folgenden Einstellungen werden mit denen auf der K+-Seite geteilt. Sie können sie an beiden Stellen ändern.",
         "export-settings": "Export",
-        "export-tooltip": "Exportieren Sie Ihre Blacklist und Whitelist, Altersfreigabe und Feldzuordnungen",
+        "export-tooltip": "Exportieren Sie Ihre Blacklist und Whitelist, Altersfreigabe und Feldzuordnungen.",
         "export-file-name": "Kavita Metadaten-Einstellungen Export.json",
         "import-settings": "Import",
-        "import-tooltip": "Importieren Sie Ihre eigenen Einstellungen oder die Einstellungen anderer",
+        "import-tooltip": "Importieren Sie Ihre eigenen Einstellungen oder die eines anderen Benutzers.",
         "enable-extended-metadata-processing-label": "Erweiterte Metadatenverarbeitung",
         "enable-extended-metadata-processing-tooltip": "Sollen Genres und Tags, die aus ComicInfo stammen oder über die Benutzeroberfläche hinzugefügt wurden, unter Verwendung der Blacklist, Whitelist, Altersfreigabe-Zuordnungen und Feldzuordnungen verarbeitet werden.",
         "remove-age-rating-mapping-label": "Altersfreigabe-Zuordnung entfernen",
@@ -2631,7 +2654,40 @@
         "source-genre-tags-placeholder": "Quelle Genre/Tag",
         "dest-genre-tags-placeholder": "Ziel-Genre/Tag",
         "enable-chapter-summary-label": "{{manage-metadata-settings.summary-label}}",
-        "enable-chapter-summary-tooltip": "{{manage-metadata-settings.summary-tooltip}}"
+        "enable-chapter-summary-tooltip": "{{manage-metadata-settings.summary-tooltip}}",
+        "run-metadata-mappings": "Metadaten-Zuordnungen ausführen",
+        "run-metadata-mappings-tooltip": "Verarbeiten Sie die Serien anhand Ihrer Metadaten-Zuordnungen. Dies kann eine Weile dauern und mehr Ressourcen beanspruchen.",
+        "name-label": "Serienname",
+        "name-tooltip": "Erlaube das Eingeben des Seriennamens, wenn das Feld entsperrt ist. Der auf der Festplatte gespeicherte Name wird weiterhin verwendet, um die Zuordnung der Serien bei Scans sicherzustellen.",
+        "enable-age-rating-label": "Altersfreigabe",
+        "enable-age-rating-tooltip": "Die Altersfreigabe darf geschrieben werden, wenn das Feld entsperrt ist. Kavita übernimmt immer den höchsten Wert aus den Zuordnungssteuerelementen.",
+        "external-age-rating-header": "Zuordnung der Altersfreigaben der Anbieter",
+        "external-age-rating-description": "Ordnen Sie eine Rohdaten-Altersfreigabe-Zeichenkette eines Metadatenanbieters einer Altersfreigabe zu. Kavita+ übernimmt diese Zuordnung bereits für Sie. Dies ist additiv, wobei stets die höchste Altersfreigabe maßgeblich ist.",
+        "external-age-rating-label": "Anbieter-Inhaltsbewertung",
+        "volume-header": "Band",
+        "enable-volume-cover-label": "Cover des Bandes",
+        "enable-volume-cover-tooltip": "Erlaube Kavita, die Cover der Bände festzulegen",
+        "language-header": "Sprache",
+        "language-description": "Legen Sie die Prioritätsreihenfolge der Sprachen fest, die Kavita bei der Festlegung von „Series Name“ und „LocalizedName“ verwendet. Sie können Überschreibungen nur für bestimmte Bibliotheken hinzufügen. Beachten Sie, dass „Localized Name“ nicht immer geschrieben wird, wenn dies Auswirkungen auf Serien mit zwei unterschiedlichen Dateinamen hat.",
+        "global-series-name-language-label": "Name",
+        "global-series-name-language-tooltip": "Legt die Reihenfolge fest, in der die Serientitel priorisiert werden. Trennen Sie die BCP47-Sprachcodes durch ein Semikolon, z. B. en;ja-Latn;ja. Verwenden Sie {Native} für den Titel in der Originalschrift des Anbieters oder {Romaji} für den romanisierten Titel, unabhängig von der Sprache.",
+        "global-series-name-localized-language-label": "Lokalisierter Name",
+        "global-series-name-localized-language-tooltip": "Legt die Reihenfolge fest, in der die lokalisierten Namen der Serien priorisiert werden. Trennen Sie die BCP47-Sprachcodes durch ein Semikolon, z. B. en;ja-Latn;ja. Verwenden Sie {Native} für den Titel in der Originalschrift des Anbieters oder {Romaji} für den romanisierten Titel, unabhängig von der Sprache.",
+        "native-title-token-label": "Originaltitel (Originalskript)",
+        "romaji-title-token-label": "Romanisierter Titel",
+        "language-library-override-header": "Bibliotheks-Überschreibungen",
+        "language-library-override-description": "Eine Bibliotheksüberschreibung ersetzt die globale Reihenfolge für diese Bibliothek vollständig; sie wird nicht zusätzlich hinzugefügt.",
+        "language-library-override-empty": "Es gibt keine Bibliotheksüberschreibungen. Alle Bibliotheken verwenden die oben angegebene globale Reihenfolge.",
+        "language-override-library-label": "Bibliothek",
+        "language-override-library-placeholder": "Wählen Sie eine Bibliothek aus",
+        "language-override-remove": "Überschreibung aufheben",
+        "language-code-malformed": "Ungültiger Sprachcode: {{codes}}",
+        "language-code-unknown": "Unbekannter Sprachcode: {{codes}}. Überprüfen Sie die Schreibweise noch einmal; der Eintrag wird trotzdem gespeichert.",
+        "unsaved-changes-invalid": "Die Änderungen werden nicht gespeichert. Korrigieren Sie die markierten Felder, um den Speichervorgang fortzusetzen.",
+        "add": "{{common.add}}",
+        "tag-weight-label": "Tags über einem bestimmten Gewicht filtern (nur Mangabaka)",
+        "tag-weight-tooltip": "Wählen Sie eine Tag-Gewichtung aus, nach der nach der Tag-Zuordnung gefiltert werden soll. Beispielsweise filtert „Recurrent“ die Tags „Incidental“ und „Unweighted“ heraus.",
+        "tag-weight-disabled": "Tags nicht filtern"
     },
     "metadata-setting-field-pipe": {
         "covers": "Covers",
@@ -2647,7 +2703,11 @@
         "chapter-summary": "Zusammenfassung (Kapitel)",
         "chapter-covers": "Covers (Kapitel)",
         "chapter-title": "Titel (Kapitel)",
-        "chapter-publisher": "{{person-role-pipe.publisher}} (Kapitel)"
+        "chapter-publisher": "{{person-role-pipe.publisher}} (Kapitel)",
+        "name": "{{edit-series-modal.name-label}}",
+        "chapter-age-rating": "Altersfreigabe (Kapitel)",
+        "volume-covers": "Covers (Bände)",
+        "sort-name": "{{sort-field-pipe.sort-name}}"
     },
     "role-localized-pipe": {
         "bookmark": "Lesezeichen",
@@ -3111,7 +3171,9 @@
         "key-bind-title-first-page": "Erste Seite",
         "key-bind-tooltip-first-page": "Zur ersten Seite wechseln",
         "key-bind-title-last-page": "Letzte Seite",
-        "key-bind-tooltip-last-page": "Zur letzten Seite wechseln"
+        "key-bind-tooltip-last-page": "Zur letzten Seite wechseln",
+        "key-bind-title-navigate-home": "Zur Startseite navigieren",
+        "key-bind-tooltip-navigate-home": "Rufen Sie das Dashboard von jeder Stelle in Kavita aus auf"
     },
     "manage-auth-keys": {
         "auth-keys-title": "Autorisierungsschlüssel verwalten",
@@ -3131,7 +3193,9 @@
         "clients-opds-description": "{{user-preferences.clients-opds-description}}",
         "clients-opds-url-tooltip": "{{user-preferences.clients-opds-url-tooltip}}",
         "copy-key": "{{common.copy}}",
-        "clients-opds-error": "Das Laden der OPDS-URL für den Schlüssel: {{key}} ist fehlgeschlagen"
+        "clients-opds-error": "Das Laden der OPDS-URL für den Schlüssel: {{key}} ist fehlgeschlagen",
+        "no-data": "{{common.no-data}}",
+        "no-data-description": "Sie haben noch keine Autorisierungsschlüssel."
     },
     "create-auth-key": {
         "create-title": "Authentifizierungsschlüssel erstellen",
@@ -3648,7 +3712,9 @@
         "cbl-number-placeholder": "z. B. 1",
         "kavita-chapter-label": "Kapitel „Kavita“ (optional)",
         "edit": "{{common.edit}}",
-        "mapped-series-col": "Abgebildete Serie"
+        "mapped-series-col": "Abgebildete Serie",
+        "no-data": "{{common.no-data}}",
+        "no-data-description": "Es gibt noch keine Neuzuordnungsregeln, die hier angezeigt werden könnten."
     },
     "browse-cbl-repo-modal": {
         "title": "CBL-Repo-Browser",
@@ -4010,7 +4076,12 @@
         "linked-to": "Verlinkt zu"
     },
     "kavitaplus-activity": {
-        "description": "Leseaktivität: Kavita hat in Ihrem Namen Daten mit externen Diensten synchronisiert – Fortschritt, Bewertungen und Lesestatus."
+        "description": "Leseaktivität: Kavita hat in Ihrem Namen Daten mit externen Diensten synchronisiert – Fortschritt, Bewertungen und Lesestatus.",
+        "tab-select-label": "Filteraktivität",
+        "stats-queue-label": "{{manage-kavitaplus-activity.stats-queue-label}}",
+        "next-scrobble": "{{manage-kavitaplus-activity.next-scrobble}}",
+        "stats-events-label": "{{manage-kavitaplus-activity.stats-events-label}}",
+        "stats-failures-label": "{{manage-kavitaplus-activity.stats-failures-label}}"
     },
     "manage-kavitaplus-activity": {
         "description": "90 Tage an Metadaten, Abgleich-, Scrobble- und Synchronisierungsereignissen. Hier können Sie Fehler klassifizieren und einen manuellen Abgleich auslösen.",
@@ -4073,7 +4144,8 @@
     "kavita-plus-audit-entry": {
         "system": "{{manage-kavitaplus-activity.system}}",
         "retry": "Erneut versuchen",
-        "match": "Übereinstimmung"
+        "match": "Übereinstimmung",
+        "remove-error": "Scrobble-Fehler beheben"
     },
     "audit-status-title-pipe": {
         "success": "Erfolg",
@@ -4091,7 +4163,8 @@
         "person": "Person",
         "collection": "Sammlung",
         "chapter": "Kapitel",
-        "global": "Weltweit"
+        "global": "Weltweit",
+        "volume": "Band"
     },
     "metadata-field-change-kind-title-pipe": {
         "relationships": "Beziehungen",
@@ -4107,7 +4180,8 @@
         "release-date": "Erscheinungsdatum",
         "release-year": "Erscheinungsjahr",
         "localized-name": "Lokalisierter Name",
-        "tags": "Tags"
+        "tags": "Tags",
+        "name": "Serienname"
     },
     "kavita-plus-event-description-pipe": {
         "read-progress-sent": "{{chapter}}",
@@ -4131,7 +4205,9 @@
         "system-token-refresh-success": "Authentifizierungstoken für {{provider}} aktualisieren. Sie sind bis {{validUntil}} gültig",
         "system-token-refresh-failure": "Die Aktualisierung der Authentifizierungstoken für {{provider}} ist fehlgeschlagen",
         "system-provider-info-sync-success": "Informationen für {{provider}} wurden erfolgreich synchronisiert. Verknüpft mit dem Konto {{username}}",
-        "system-provider-info-sync-failure": "Die Synchronisierung der Kontoinformationen für {{provider}} ist fehlgeschlagen"
+        "system-provider-info-sync-failure": "Die Synchronisierung der Kontoinformationen für {{provider}} ist fehlgeschlagen",
+        "volume-cover-updated": "Bandcover aktualisiert: {{volume}}",
+        "metadata-provider-changed": "Der Metadatenanbieter wurde von {{previousProvider}} auf {{newProvider}} geändert"
     },
     "kavita-plus-event-type-pipe": {
         "series-matched": "Serie Übereinstimmend",
@@ -4160,7 +4236,9 @@
         "sync-completed": "Synchronisierung abgeschlossen",
         "sync-failed": "Synchronisierung fehlgeschlagen",
         "system-provider-info-sync": "Scrobble-Anbieter-Info-Synchronisierung",
-        "system-token-refresh": "Aktualisierung des Scrobble-Provider-Tokens"
+        "system-token-refresh": "Aktualisierung des Scrobble-Provider-Tokens",
+        "series-metadata-provider-override-set": "Metadatenanbieter geändert",
+        "volume-cover-updated": "Bandcover aktualisiert"
     },
     "audit-log-messages": {
         "rate-limit-hit": "Ratenbegrenzung erreicht",
@@ -4228,7 +4306,7 @@
         "dropped-series-rule-condition": "Wenn eine Serie/ein Kapitel seit",
         "all-libraries-label": "Alle Bibliotheken",
         "all-libraries-tooltip": "Wenn diese Option aktiviert ist, wird das Scrobbeln für alle entsprechenden Bibliotheken ausgeführt. Deaktivieren Sie diese Option, um es mithilfe der untenstehenden Auswahl auf bestimmte Bibliotheken zu beschränken.",
-        "confirm-delete": "Möchten Sie die Verbindung zu {{provider}} wirklich trennen",
+        "confirm-delete": "Möchten Sie die Verbindung zu {{provider}} wirklich trennen?",
         "inactive-series-rule-days-aria": "Schwellenwert für inaktive Serien in Tagen",
         "inactive-series-rule-status-aria": "Status des Übergangs einer inaktiven Serie",
         "inactive-series-rule-excluded-publication-aria": "Ausgeschlossene Veröffentlichungsstatus für die Regel zu inaktiven Reihen",
@@ -4269,8 +4347,8 @@
     },
     "scrobble-read-status-pipe": {
         "ignore": "Ignorieren",
-        "want-to-read": "Möchten Sie lesen",
-        "read": "Lesen",
+        "want-to-read": "Möchte ich lesen",
+        "read": "Gelesen",
         "unread": "Ungelesen",
         "dropped": "Ausgelassen",
         "on-hold": "Angehalten"
@@ -4347,5 +4425,33 @@
     },
     "epub-font-title-pipe": {
         "user-font-suffix": "(Benutzer)"
+    },
+    "register-license": {
+        "k+-already-registered-header": "Lizenz bereits registriert",
+        "k+-license-overwrite": "Diese Lizenz ist bereits auf einem anderen Server registriert. Möchten Sie sie wirklich überschreiben? Dadurch wird die Registrierung des anderen Servers aufgehoben.",
+        "overwrite": "Überschreiben",
+        "cancel": "{{common.cancel}}"
+    },
+    "tag-weight-title-pipe": {
+        "core": "Kern",
+        "defining": "Definition",
+        "recurrent": "Wiederkehrend",
+        "incidental": "Nebenbei",
+        "unweighted": "Ungewichtet"
+    },
+    "run-metadata-mappings-modal": {
+        "title": "Zuordnungen erneut ausführen",
+        "close": "{{common.close}}",
+        "cancel": "{{common.cancel}}",
+        "submit": "{{common.submit}}",
+        "saving": "{{common.saving}}",
+        "all-libraries-label": "Alle Bibliotheken",
+        "all-libraries-tooltip": "Wenn diese Option aktiviert ist, werden Metadaten-Zuordnungen für alle Bibliotheken durchgeführt. Deaktivieren Sie diese Option, um bestimmte Bibliotheken einzubeziehen oder auszuschließen.",
+        "included-libraries-title": "Enthaltene Bibliotheken",
+        "included-libraries-tooltip": "Zu verarbeitende Bibliotheken, wenn „Alle Bibliotheken“ nicht aktiviert ist",
+        "excluded-libraries-title": "Ausgeschlossene Bibliotheken",
+        "excluded-libraries-tooltip": "Zu überspringende Bibliotheken",
+        "queued-title": "Zur Wiederholung in die Warteschlange gestellt",
+        "queued-description": "Die Bearbeitung beginnt in Kürze, bitte haben Sie etwas Geduld."
     }
 }

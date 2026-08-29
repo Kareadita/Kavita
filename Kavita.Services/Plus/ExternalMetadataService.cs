@@ -46,6 +46,8 @@ using Kavita.Models.Extensions;
 using Kavita.Services.Extensions;
 using Kavita.Services.Helpers;
 using Kavita.Services.Scanner;
+using Markdig;
+using Markdig.Renderers;
 using Microsoft.Extensions.Logging;
 
 namespace Kavita.Services.Plus;
@@ -83,10 +85,10 @@ public class ExternalMetadataService : IExternalMetadataService
     };
 
     // Allow 50 requests per 24 hours
-    private static readonly RateLimiter RateLimiter = new RateLimiter(50, TimeSpan.FromHours(24), false);
+    private static readonly RateLimiter RateLimiter = new(50, TimeSpan.FromHours(24), false);
     private static readonly ConcurrentDictionary<int, SemaphoreSlim> SeriesWriteLocks = new();
     private static SemaphoreSlim GetSeriesWriteLock(int seriesId) => SeriesWriteLocks.GetOrAdd(seriesId, static _ => new SemaphoreSlim(1, 1));
-    private static bool IsRomanCharacters(string input) => Regex.IsMatch(input, @"^[\p{IsBasicLatin}\p{IsLatin-1Supplement}]+$");
+    private static readonly MarkdownPipeline MarkdownPipeline = new MarkdownPipelineBuilder().UseKavitaPlus().Build();
 
     public ExternalMetadataService(IUnitOfWork unitOfWork, ILogger<ExternalMetadataService> logger, IMapper mapper,
         ILicenseService licenseService, IScrobblingService scrobblingService, IEventHub eventHub, ICoverDbService coverDbService,
@@ -1019,7 +1021,7 @@ public class ExternalMetadataService : IExternalMetadataService
             {
                 var (namePriority, localizedNamePriority) = ResolveTitleLanguagePriorities(settings, series.LibraryId);
 
-                // One query serves both writes. The set unions NormalizedName/NormalizedLocalizedName/NormalizedOriginalName
+                // The set unions NormalizedName/NormalizedLocalizedName/NormalizedOriginalName
                 // for every OTHER series in this library+format - a collision there makes the scanner's SingleOrDefault throw.
                 var takenNames = await _unitOfWork.SeriesRepository.GetTakenNormalizedNamesInLibraryAsync(
                     series.LibraryId, series.Format, series.Id, ct);
@@ -2439,7 +2441,15 @@ public class ExternalMetadataService : IExternalMetadataService
 
             // The best candidate is already our Name. Stop rather than continue - sliding to a lower-priority
             // language here would rename the series away from a title it correctly holds.
-            if (normalized == series.NormalizedName) return (false, null);
+            if (normalized == series.NormalizedName)
+            {
+                if (string.Equals(title, series.Name, StringComparison.Ordinal)) return (false, null);
+
+                // If the case differs, we need to allow the change
+                chosen = title;
+                chosenLanguageCode = languageCode;
+                break;
+            }
 
             // Never create a normalized collision - it would make the scanner's SingleOrDefault lookup throw
             if (takenNames.Contains(normalized)) continue;
@@ -2464,6 +2474,7 @@ public class ExternalMetadataService : IExternalMetadataService
         }
 
         var from = series.Name;
+        var fromSortName = series.SortName;
         series.Name = chosen;
         series.NormalizedName = chosen.ToNormalized();
         series.SortName = series.Library is {RemovePrefixForSortName: true}
@@ -2471,7 +2482,9 @@ public class ExternalMetadataService : IExternalMetadataService
             : series.Name;
 
         series.NameLocked = true;
+        series.SortNameLocked = fromSortName != series.SortName;
         series.Metadata.AddKPlusOverride(MetadataSettingField.Name);
+        series.Metadata.AddKPlusOverride(MetadataSettingField.SortName);
 
         return (true, new MetadataFieldChangeDto(MetadataFieldChangeKind.Name, from, series.Name, chosenLanguageCode));
     }
@@ -2523,7 +2536,7 @@ public class ExternalMetadataService : IExternalMetadataService
             // takenNames excludes this Series, so our own columns need checking separately. Dropping the language
             // code above is not enough - two languages can carry the same title text (en and ja-Latn "Bleach").
             // series.NormalizedName is already the post-UpdateName value here.
-            if (normalized == series.NormalizedName || normalized == series.NormalizedOriginalName) continue;
+            if (normalized == series.NormalizedName) continue;
 
             chosen = title;
             chosenLanguageCode = languageCode;
@@ -2610,7 +2623,9 @@ public class ExternalMetadataService : IExternalMetadataService
         }
 
         var from = series.Metadata.Summary;
-        series.Metadata.Summary = StringHelper.RemoveSourceInDescription(StringHelper.SquashBreaklines(externalMetadata.Summary));
+
+        // Mangabaka uses Markdown for Summaries, convert to Html to align with opf/comicinfo
+        series.Metadata.Summary = ConvertMarkdownToHtml(externalMetadata.Summary);
         series.Metadata.AddKPlusOverride(MetadataSettingField.Summary);
         series.Metadata.SummaryLocked = true;
 
@@ -2712,7 +2727,11 @@ public class ExternalMetadataService : IExternalMetadataService
             var maxVolume = (int)(realVolumes.Count != 0 ? realVolumes.Max(v => v.MaxNumber) : 0);
             var maxChapter = (int)chapters.Max(c => c.MaxNumber);
 
+            // TODO: When the underlying source is a Manhua, there can be 0 chapters counted in the count. We need to handle this edge case
             var externalExpectedCount = isVolumeBased ? externalMetadata.Volumes : externalMetadata.Chapters;
+
+            // TODO: If the series is not a comic AND has a Chapter 0 (not a special) AND !isVolumeBased, then we can take the total ChapterCount - 1 as the count, since we don't count 0-based chapters
+            // This is because some series like https://mangabaka.org/86687 count 0 in the total count
 
             series.Metadata.TotalCount = Math.Max(
                 chapters.Max(chapter => chapter.TotalCount),
@@ -3008,8 +3027,6 @@ public class ExternalMetadataService : IExternalMetadataService
     /// <returns></returns>
     private async Task<ExternalSeriesDetailDto?> GetSeriesDetail(int? aniListId, long? malId, int? mangaBakaId, int? seriesId, CancellationToken ct = default)
     {
-        // TODO: This is the primary point where we need to integrate ExternalIds since weblink parsing is already handled
-        // TODO: Ensure when we set/update weblinks via API, we reparse and update external ids (if they are empty only)
         var payload = new SeriesDetailRequestV3Dto()
         {
             // We can hardcode this for now. But will need to load from Library setting once Hardcover providers
@@ -3071,9 +3088,20 @@ public class ExternalMetadataService : IExternalMetadataService
         var ageRating = DetermineAgeRating(extSeries.Tags.Select(t => t.Name).Concat(extSeries.Genres), settings.AgeRatingMappings);
 
         extSeries.AgeRating = ageRating;
-        extSeries.Summary = StringHelper.RemoveSourceInDescription(StringHelper.SquashBreaklines(extSeries.Summary));
+        extSeries.Summary = ConvertMarkdownToHtml(extSeries.Summary);
 
         return extSeries;
+    }
+
+    private static string ConvertMarkdownToHtml(string? summary)
+    {
+        if (string.IsNullOrWhiteSpace(summary)) return string.Empty;
+
+        var ret = Markdown.ToHtml(StringHelper.RemoveSourceInDescription(StringHelper.SquashBreaklines(summary)) ?? string.Empty, MarkdownPipeline).Trim();
+
+        // Check if ret is a single paragraph tag, if so, remove it.
+
+        return ret;
     }
 
     private static bool HasForceOverride(MetadataSettingsDto settings, IHasKPlusMetadata kPlusMetadata,

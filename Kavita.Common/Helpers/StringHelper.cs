@@ -6,7 +6,7 @@ namespace Kavita.Common.Helpers;
 public static partial class StringHelper
 {
     #region Regex Source Generators
-    [GeneratedRegex(@"\s?\(Source:\s*[^)]+\)")]
+    [GeneratedRegex(@"\s?(\s?\(Source:\s*[^)]+\)|\*?Source:\s*[^)]+\*?$)")]
     private static partial Regex SourceRegex();
     [GeneratedRegex(@"<br\s*/?>", RegexOptions.IgnoreCase | RegexOptions.Compiled, "en-US")]
     private static partial Regex BrStandardizeRegex();
@@ -44,7 +44,7 @@ public static partial class StringHelper
     }
 
     /// <summary>
-    /// Removes the (Source: MangaDex) type of tags at the end of descriptions from AL
+    /// Removes the (Source: MangaDex) or "Source: MANGA plus" type of tags at the end of descriptions from AL/MB
     /// </summary>
     /// <param name="description"></param>
     /// <returns></returns>
