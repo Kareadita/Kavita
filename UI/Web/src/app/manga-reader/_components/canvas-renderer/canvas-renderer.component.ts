@@ -20,6 +20,7 @@ import { ImageRenderer } from '../../_models/renderer';
 import { MangaReaderService } from '../../_service/manga-reader.service';
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import { SafeStylePipe } from '../../../_pipes/safe-style.pipe';
+import { ImageZoomDirective } from '../../../_directives/image-zoom.directive';
 import { NgClass, AsyncPipe } from '@angular/common';
 import {isSafari} from "../../../_helpers/browser";
 
@@ -30,7 +31,7 @@ const ValidSplits = [PageSplitOption.SplitLeftToRight, PageSplitOption.SplitRigh
     templateUrl: './canvas-renderer.component.html',
     styleUrls: ['./canvas-renderer.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush,
-    imports: [NgClass, AsyncPipe, SafeStylePipe]
+    imports: [NgClass, AsyncPipe, SafeStylePipe, ImageZoomDirective]
 })
 export class CanvasRendererComponent implements OnInit, AfterViewInit, ImageRenderer {
 

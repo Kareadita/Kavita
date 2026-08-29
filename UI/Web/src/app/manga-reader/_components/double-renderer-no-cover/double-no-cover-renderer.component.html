@@ -1,5 +1,5 @@
 @if (isValid()) {
-  <div class="image-container {{imageFitClass$ | async}} {{layoutClass$ | async}} {{emulateBookClass$ | async}}"
+  <div appImageZoom [zoomResetKey]="currentImage" class="image-container {{imageFitClass$ | async}} {{layoutClass$ | async}} {{emulateBookClass$ | async}}"
     [style.filter]="(darkness$ | async)  ?? '' | safeStyle"
     [ngClass]="{'center-double': (shouldRenderDouble$ | async)}">
     @if (currentImage) {

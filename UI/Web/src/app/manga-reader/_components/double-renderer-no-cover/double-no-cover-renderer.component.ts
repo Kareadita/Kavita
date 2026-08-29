@@ -21,6 +21,7 @@ import { DEBUG_MODES } from '../../_models/renderer';
 import { MangaReaderService } from '../../_service/manga-reader.service';
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import { SafeStylePipe } from '../../../_pipes/safe-style.pipe';
+import { ImageZoomDirective } from '../../../_directives/image-zoom.directive';
 
 /**
  * Renders 2 pages except on last page, and before a wide image
@@ -30,7 +31,7 @@ import { SafeStylePipe } from '../../../_pipes/safe-style.pipe';
     templateUrl: './double-no-cover-renderer.component.html',
     styleUrls: ['./double-no-cover-renderer.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush,
-    imports: [NgClass, AsyncPipe, SafeStylePipe]
+    imports: [NgClass, AsyncPipe, SafeStylePipe, ImageZoomDirective]
 })
 export class DoubleNoCoverRendererComponent implements OnInit {
   private readonly cdRef = inject(ChangeDetectorRef);
