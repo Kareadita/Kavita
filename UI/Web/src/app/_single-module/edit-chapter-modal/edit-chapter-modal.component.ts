@@ -132,7 +132,7 @@ export class EditChapterModalComponent implements OnInit {
   chooserConfig = signal<CoverImageChooserConfig>({});
 
 
-  tagsSettings: TypeaheadSettings<Tag> = new TypeaheadSettings();
+  tagsSettings = signal<TypeaheadSettings<Tag> | null>(null);
   languageSettings = signal<TypeaheadSettings<Language> | null>(null);
   peopleSettings: {[PersonRole: string]: TypeaheadSettings<Person>} = {};
   genreSettings: TypeaheadSettings<Genre> = new TypeaheadSettings();
@@ -318,45 +318,14 @@ export class EditChapterModalComponent implements OnInit {
   }
 
   setupTypeaheads() {
+    this.tagsSettings.set(this.typeaheadSettingsFactory.forTag({id: 'tags', savedData: this.chapter.tags ?? []}));
+
     forkJoin([
-      this.setupTagSettings(),
       this.setupGenreTypeahead(),
       this.setupPersonTypeahead(),
     ]).subscribe(results => {
       this.cdRef.markForCheck();
     });
-  }
-
-  setupTagSettings() {
-    this.tagsSettings.minCharacters = 0;
-    this.tagsSettings.multiple = true;
-    this.tagsSettings.id = 'tags';
-    this.tagsSettings.unique = true;
-    this.tagsSettings.showLocked = true;
-    this.tagsSettings.addIfNonExisting = true;
-
-
-    this.tagsSettings.compareFn = (options: Tag[], filter: string) => {
-      return options.filter(m => this.utilityService.filter(m.title, filter));
-    }
-    this.tagsSettings.fetchFn = (filter: string) => this.metadataService.getAllTags()
-      .pipe(map(items => this.tagsSettings.compareFn(items, filter)));
-
-    this.tagsSettings.addTransformFn = ((title: string) => {
-      return {id: 0, title: title };
-    });
-    this.tagsSettings.selectionCompareFn = (a: Tag, b: Tag) => {
-      return a.title.toLowerCase() == b.title.toLowerCase();
-    }
-    this.tagsSettings.compareFnForAdd = (options: Tag[], filter: string) => {
-      return options.filter(m => this.utilityService.filterMatches(m.title, filter));
-    }
-    this.tagsSettings.trackByIdentityFn = (index, value) => value.title + (value.id + '');
-
-    if (this.chapter.tags) {
-      this.tagsSettings.savedData = this.chapter.tags;
-    }
-    return of(true);
   }
 
   setupGenreTypeahead() {

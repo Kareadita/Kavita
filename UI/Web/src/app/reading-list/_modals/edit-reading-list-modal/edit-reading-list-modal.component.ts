@@ -20,7 +20,7 @@ import {
   NgbTooltip
 } from '@ng-bootstrap/ng-bootstrap';
 import {ToastrService} from '@openng/ngx-toastr';
-import {concat, debounceTime, delay, distinctUntilChanged, last, Observable, of, switchMap, tap} from 'rxjs';
+import {concat, debounceTime, delay, distinctUntilChanged, last, Observable, switchMap, tap} from 'rxjs';
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import {CoverImageChooserComponent} from '../../../cards/cover-image-chooser/cover-image-chooser.component';
 import {
@@ -36,9 +36,7 @@ import {TabTitlePipe} from "../../../_pipes/tab-title.pipe";
 import {ReadingListTag} from "../../../_models/reading-list/reading-list-tag";
 import {TypeaheadSettings} from "../../../typeahead/_models/typeahead-settings";
 import {Tag} from "../../../_models/tag";
-import {map} from "rxjs/operators";
-import {UtilityService} from "../../../shared/_services/utility.service";
-import {MetadataService} from "../../../_services/metadata.service";
+import {TypeaheadSettingsFactoryService} from "../../../typeahead-settings-factory.service";
 import {SettingItemComponent} from "../../../settings/_components/setting-item/setting-item.component";
 import {TypeaheadComponent} from "../../../typeahead/_components/typeahead.component";
 import {ReadingListService} from "../../../_services/reading-list.service";
@@ -66,8 +64,7 @@ export class EditReadingListModalComponent implements OnInit {
   private readonly cdRef = inject(ChangeDetectorRef);
   protected readonly accountService = inject(AccountService);
   private readonly destroyRef = inject(DestroyRef);
-  private readonly utilityService = inject(UtilityService);
-  private readonly metadataService = inject(MetadataService);
+  private readonly typeaheadSettingsFactory = inject(TypeaheadSettingsFactoryService);
   private readonly coverChooserConfigFactory = inject(CoverChooserConfigFactoryService);
 
   @Input({required: true}) readingList!: ReadingList;
@@ -80,7 +77,7 @@ export class EditReadingListModalComponent implements OnInit {
   chooserConfig = signal<CoverImageChooserConfig>({});
   active = Tabs.General;
   tags: ReadingListTag[] = [];
-  tagsSettings: TypeaheadSettings<Tag> = new TypeaheadSettings();
+  tagsSettings = signal<TypeaheadSettings<Tag> | null>(null);
 
   protected readonly Tabs = Tabs;
 
@@ -116,7 +113,8 @@ export class EditReadingListModalComponent implements OnInit {
       takeUntilDestroyed(this.destroyRef)
       ).subscribe();
 
-    this.setupTagSettings();
+    this.tagsSettings.set(this.typeaheadSettingsFactory.forTag({id: 'tags', source: 'readingList',
+      savedData: this.readingList.tags ?? []}));
   }
 
   close() {
@@ -125,38 +123,6 @@ export class EditReadingListModalComponent implements OnInit {
     } else {
       this.ngModal.dismiss();
     }
-  }
-
-  setupTagSettings() {
-    this.tagsSettings.minCharacters = 0;
-    this.tagsSettings.multiple = true;
-    this.tagsSettings.id = 'tags';
-    this.tagsSettings.unique = true;
-    this.tagsSettings.showLocked = true;
-    this.tagsSettings.addIfNonExisting = true;
-
-
-    this.tagsSettings.compareFn = (options: Tag[], filter: string) => {
-      return options.filter(m => this.utilityService.filter(m.title, filter));
-    }
-    this.tagsSettings.fetchFn = (filter: string) => this.metadataService.getAllReadingListTags()
-      .pipe(map(items => this.tagsSettings.compareFn(items, filter)));
-
-    this.tagsSettings.addTransformFn = ((title: string) => {
-      return {id: 0, title: title };
-    });
-    this.tagsSettings.selectionCompareFn = (a: Tag, b: Tag) => {
-      return a.title.toLowerCase() == b.title.toLowerCase();
-    }
-    this.tagsSettings.compareFnForAdd = (options: Tag[], filter: string) => {
-      return options.filter(m => this.utilityService.filterMatches(m.title, filter));
-    }
-    this.tagsSettings.trackByIdentityFn = (index, value) => value.title + (value.id + '');
-
-    if (this.readingList.tags) {
-      this.tagsSettings.savedData = this.readingList.tags;
-    }
-    return of(true);
   }
 
   save() {

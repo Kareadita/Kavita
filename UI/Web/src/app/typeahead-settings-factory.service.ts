@@ -12,6 +12,7 @@ import {Language} from "./_models/metadata/language";
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import {SearchResult} from "./_models/search/search-result";
 import {SearchService} from "./_services/search.service";
+import {Tag} from "./_models/tag";
 
 /**
  * Partial configuration for overrides. All properties optional.
@@ -54,6 +55,10 @@ export interface TypeaheadFactoryLanguageParameters extends TypeaheadFactoryPara
 
 export interface TypeaheadFactorySearchResultParameters extends TypeaheadFactoryParameters<SearchResult> {
   excludeSeriesId?: number;
+}
+
+export interface TypeaheadFactoryTagParameters extends TypeaheadFactoryParameters<Tag> {
+  source?: 'metadata' | 'readingList';
 }
 
 @Injectable({providedIn: 'root'})
@@ -197,6 +202,42 @@ export class TypeaheadSettingsFactoryService {
     };
     settings.dropdownPosition = 'body';
     settings.overlayMinWidth = 400;
+
+    if (savedData !== undefined) settings.savedData = savedData;
+
+    return this.applyOverrides(settings, overrides);
+  }
+
+  forTag(params: TypeaheadFactoryTagParameters) {
+    const {id, source = 'metadata', savedData, overrides} = params;
+
+    const settings = new TypeaheadSettings<Tag>();
+    settings.minCharacters = 0;
+    settings.multiple = true;
+    settings.id = id;
+    settings.unique = true;
+    settings.showLocked = true;
+    settings.addIfNonExisting = true;
+
+    settings.trackByIdentityFn = (_idx, item) => item.title + item.id;
+    settings.selectionCompareFn = (a: Tag, b: Tag) => {
+      return a.title.toLowerCase() == b.title.toLowerCase();
+    };
+    settings.compareFn = (options: Tag[], filter: string) => {
+      return options.filter(m => this.utilityService.filter(m.title, filter));
+    };
+    settings.compareFnForAdd = (options: Tag[], filter: string) => {
+      return options.filter(m => this.utilityService.filterMatches(m.title, filter));
+    };
+    settings.fetchFn = (filter: string) => {
+      const tags$ = source === 'readingList'
+        ? this.metadataService.getAllReadingListTags()
+        : this.metadataService.getAllTags();
+      return tags$.pipe(map(items => settings.compareFn(items, filter)));
+    };
+    settings.addTransformFn = ((title: string) => {
+      return {id: 0, title: title };
+    });
 
     if (savedData !== undefined) settings.savedData = savedData;
 

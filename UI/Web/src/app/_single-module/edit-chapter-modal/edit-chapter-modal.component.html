@@ -175,10 +175,11 @@
 
           <div class="col-lg-6 col-md-12 pe-2">
             <div class="mb-3">
-              @if (tagsSettings) {
+              @let tagsConf = tagsSettings();
+              @if (tagsConf) {
                 <app-setting-item [title]="t('tags-label')" [toggleOnViewClick]="false" [showEdit]="false">
                   <ng-template #view>
-                    <app-typeahead (selectedData)="updateTags($event);chapter.tagsLocked = true" [settings]="tagsSettings"
+                    <app-typeahead (selectedData)="updateTags($event);chapter.tagsLocked = true" [settings]="tagsConf"
                                    [(locked)]="chapter.tagsLocked" (onUnlock)="chapter.tagsLocked = false"
                                    (newItemAdded)="chapter.tagsLocked = true">
                       <ng-template #badgeItem let-item let-position="idx">
