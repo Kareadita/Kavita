@@ -17,6 +17,10 @@ public record LiteLibraryDto
     public string? Name { get; init; }
     [EnumDataType(typeof(LibraryType))]
     public LibraryType Type { get; init; }
+    /// <inheritdoc cref="Library.EnablePdfExternalLinks"/>
+    public bool EnablePdfExternalLinks { get; init; } = true;
+    /// <inheritdoc cref="Library.EnablePdfInternalLinks"/>
+    public bool EnablePdfInternalLinks { get; init; } = true;
 }
 
 public sealed record LibraryDto : LiteLibraryDto

@@ -62,6 +62,14 @@ public class Library : IEntityDate, IHasCoverImage
     /// </summary>
     public bool InheritWebLinksFromFirstChapter { get; set; } = false;
     /// <summary>
+    /// Allow external links in PDFs to open in the browser
+    /// </summary>
+    public bool EnablePdfExternalLinks { get; set; } = true;
+    /// <summary>
+    /// Allow internal links in PDFs to navigate within the document
+    /// </summary>
+    public bool EnablePdfInternalLinks { get; set; } = true;
+    /// <summary>
     /// Language to assign to series if none is set in the metadata
     /// </summary>
     public string DefaultLanguage { get; set; } = string.Empty;
