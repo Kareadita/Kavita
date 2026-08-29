@@ -70,10 +70,10 @@ export class TypeaheadSettings<T> {
      */
     trackByIdentityFn!: (index: number, value: T) => string;
     /**
-     * Where to render the dropdown. 'relative' (default) uses position: absolute within the form.
-     * 'body' renders via CDK overlay attached to the document body, avoiding overflow: hidden clipping.
+     * Where to render the dropdown. 'relative' uses position: absolute within the form.
+     * 'body' (default) renders via CDK overlay attached to the document body, avoiding overflow: hidden clipping.
      */
-    dropdownPosition: 'relative' | 'body' = 'relative';
+    dropdownPosition: 'relative' | 'body' = 'body';
     /**
      * Minimum width (px) for the CDK overlay dropdown when dropdownPosition is 'body'.
      * The overlay will be at least this wide, even if the trigger element is narrower.

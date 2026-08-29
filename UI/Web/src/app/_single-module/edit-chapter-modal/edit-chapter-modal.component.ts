@@ -9,7 +9,6 @@ import {
   OnInit,
   signal
 } from '@angular/core';
-import {UtilityService} from "../../shared/_services/utility.service";
 import {FormControl, FormGroup, FormsModule, ReactiveFormsModule, Validators} from "@angular/forms";
 import {NgClass, NgTemplateOutlet, TitleCasePipe} from "@angular/common";
 import {NgbActiveModal} from "@ng-bootstrap/ng-bootstrap";
@@ -30,8 +29,7 @@ import {ActionService} from "../../_services/action.service";
 import {DownloadService} from '../../shared/_services/download.service';
 import {SettingItemComponent} from "../../settings/_components/setting-item/setting-item.component";
 import {TypeaheadComponent} from "../../typeahead/_components/typeahead.component";
-import {concat, forkJoin, Observable, of} from "rxjs";
-import {map} from "rxjs/operators";
+import {concat} from "rxjs";
 import {EntityTitleComponent} from "../../cards/entity-title/entity-title.component";
 import {SettingButtonComponent} from "../../settings/_components/setting-button/setting-button.component";
 import {CoverImageChooserComponent} from "../../cards/cover-image-chooser/cover-image-chooser.component";
@@ -104,7 +102,6 @@ const blackList = [Action.Edit, Action.IncognitoRead, Action.AddToReadingList];
 export class EditChapterModalComponent implements OnInit {
 
   protected readonly modal = inject(NgbActiveModal);
-  public readonly utilityService = inject(UtilityService);
   public readonly imageService = inject(ImageService);
   private readonly uploadService = inject(UploadService);
   private readonly metadataService = inject(MetadataService);
@@ -134,8 +131,8 @@ export class EditChapterModalComponent implements OnInit {
 
   tagsSettings = signal<TypeaheadSettings<Tag> | null>(null);
   languageSettings = signal<TypeaheadSettings<Language> | null>(null);
-  peopleSettings: {[PersonRole: string]: TypeaheadSettings<Person>} = {};
-  genreSettings: TypeaheadSettings<Genre> = new TypeaheadSettings();
+  peopleSettings = signal<Partial<Record<PersonRole, TypeaheadSettings<Person>>>>({});
+  genreSettings = signal<TypeaheadSettings<Genre> | null>(null);
 
   tags: Tag[] = [];
   genres: Genre[] = [];
@@ -319,88 +316,46 @@ export class EditChapterModalComponent implements OnInit {
 
   setupTypeaheads() {
     this.tagsSettings.set(this.typeaheadSettingsFactory.forTag({id: 'tags', savedData: this.chapter.tags ?? []}));
+    this.genreSettings.set(this.typeaheadSettingsFactory.forGenre({id: 'genres', savedData: this.chapter.genres ?? []}));
 
-    forkJoin([
-      this.setupGenreTypeahead(),
-      this.setupPersonTypeahead(),
-    ]).subscribe(results => {
-      this.cdRef.markForCheck();
-    });
+    this.setupPersonTypeahead();
   }
 
-  setupGenreTypeahead() {
-    this.genreSettings.minCharacters = 0;
-    this.genreSettings.multiple = true;
-    this.genreSettings.id = 'genres';
-    this.genreSettings.unique = true;
-    this.genreSettings.showLocked = true;
-    this.genreSettings.addIfNonExisting = true;
-    this.genreSettings.fetchFn = (filter: string) => {
-      return this.metadataService.getAllGenres()
-        .pipe(map(items => this.genreSettings.compareFn(items, filter)));
-    };
-    this.genreSettings.compareFn = (options: Genre[], filter: string) => {
-      return options.filter(m => this.utilityService.filter(m.title, filter));
-    }
-    this.genreSettings.compareFnForAdd = (options: Genre[], filter: string) => {
-      return options.filter(m => this.utilityService.filterMatches(m.title, filter));
-    }
-    this.genreSettings.selectionCompareFn = (a: Genre, b: Genre) => {
-      return a.title.toLowerCase() == b.title.toLowerCase();
-    }
-
-    this.genreSettings.addTransformFn = ((title: string) => {
-      return {id: 0, title: title };
-    });
-    this.genreSettings.trackByIdentityFn = (index, value) => value.title + (value.id + '');
-
-    if (this.chapter.genres) {
-      this.genreSettings.savedData = this.chapter.genres;
-    }
-    return of(true);
-  }
-
-
-  updateFromPreset(id: string, presetField: Array<Person> | undefined, role: PersonRole) {
-    const personSettings = this.typeaheadSettingsFactory.forPerson({id, role})
-
-    if (presetField && presetField.length > 0) {
-      const fetch = personSettings.fetchFn as ((filter: string) => Observable<Person[]>);
-      return fetch('').pipe(map(people => {
-        const presetIds = presetField.map(p => p.id);
-        personSettings.savedData = people.filter(person => presetIds.includes(person.id));
-        this.peopleSettings[role] = personSettings;
-        this.metadataService.updatePerson(this.chapter, personSettings.savedData as Person[], role);
-        this.cdRef.markForCheck();
-        return true;
-      }));
-    }
-
-    this.peopleSettings[role] = personSettings;
-    return of(true);
-
-  }
 
   setupPersonTypeahead() {
-    this.peopleSettings = {};
+    const roles: ReadonlyArray<[string, PersonRole, Array<Person> | undefined]> = [
+      ['writer', PersonRole.Writer, this.chapter.writers],
+      ['character', PersonRole.Character, this.chapter.characters],
+      ['colorist', PersonRole.Colorist, this.chapter.colorists],
+      ['cover-artist', PersonRole.CoverArtist, this.chapter.coverArtists],
+      ['editor', PersonRole.Editor, this.chapter.editors],
+      ['inker', PersonRole.Inker, this.chapter.inkers],
+      ['letterer', PersonRole.Letterer, this.chapter.letterers],
+      ['penciller', PersonRole.Penciller, this.chapter.pencillers],
+      ['publisher', PersonRole.Publisher, this.chapter.publishers],
+      ['imprint', PersonRole.Imprint, this.chapter.imprints],
+      ['translator', PersonRole.Translator, this.chapter.translators],
+      ['teams', PersonRole.Team, this.chapter.teams],
+      ['locations', PersonRole.Location, this.chapter.locations],
+    ];
 
-    return forkJoin([
-      this.updateFromPreset('writer', this.chapter.writers, PersonRole.Writer),
-      this.updateFromPreset('character', this.chapter.characters, PersonRole.Character),
-      this.updateFromPreset('colorist', this.chapter.colorists, PersonRole.Colorist),
-      this.updateFromPreset('cover-artist', this.chapter.coverArtists, PersonRole.CoverArtist),
-      this.updateFromPreset('editor', this.chapter.editors, PersonRole.Editor),
-      this.updateFromPreset('inker', this.chapter.inkers, PersonRole.Inker),
-      this.updateFromPreset('letterer', this.chapter.letterers, PersonRole.Letterer),
-      this.updateFromPreset('penciller', this.chapter.pencillers, PersonRole.Penciller),
-      this.updateFromPreset('publisher', this.chapter.publishers, PersonRole.Publisher),
-      this.updateFromPreset('imprint', this.chapter.imprints, PersonRole.Imprint),
-      this.updateFromPreset('translator', this.chapter.translators, PersonRole.Translator),
-      this.updateFromPreset('teams', this.chapter.teams, PersonRole.Team),
-      this.updateFromPreset('locations', this.chapter.locations, PersonRole.Location),
-    ]).pipe(map(_ => {
-      return of(true);
-    }));
+    this.metadataService.getAllPeople().pipe(takeUntilDestroyed(this.destroyRef)).subscribe(people => {
+      const settings: Partial<Record<PersonRole, TypeaheadSettings<Person>>> = {};
+
+      for (const [id, role, preset] of roles) {
+        const personSettings = this.typeaheadSettingsFactory.forPerson({id, role});
+
+        if (preset && preset.length > 0) {
+          const presetIds = preset.map(p => p.id);
+          personSettings.savedData = people.filter(person => presetIds.includes(person.id));
+          this.metadataService.updatePerson(this.chapter, personSettings.savedData, role);
+        }
+
+        settings[role] = personSettings;
+      }
+
+      this.peopleSettings.set(settings);
+    });
   }
 
   updateTags(tags: Tag[]) {
@@ -444,7 +399,7 @@ export class EditChapterModalComponent implements OnInit {
   }
 
   getPersonsSettings(role: PersonRole) {
-    return this.peopleSettings[role];
+    return this.peopleSettings()[role];
   }
 
   changeTab(tab?: Tabs) {

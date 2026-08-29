@@ -128,10 +128,11 @@
         <div class="row">
           <div class="col-md-12">
             <div class="mb-3">
-              @if (genreSettings) {
+              @let genreConf = genreSettings();
+              @if (genreConf) {
                 <app-setting-item [title]="t('genres-label')" [toggleOnViewClick]="false" [showEdit]="false">
                   <ng-template #view>
-                    <app-typeahead (selectedData)="updateGenres($event);metadata.genresLocked = true" [settings]="genreSettings"
+                    <app-typeahead (selectedData)="updateGenres($event);metadata.genresLocked = true" [settings]="genreConf"
                                    [(locked)]="metadata.genresLocked" (onUnlock)="metadata.genresLocked = false"
                                    (newItemAdded)="metadata.genresLocked = true">
                       <ng-template #badgeItem let-item let-position="idx">

@@ -11,8 +11,7 @@ import {
 } from '@angular/core';
 import {FormBuilder, FormControl, FormGroup, ReactiveFormsModule, Validators} from '@angular/forms';
 import {NgbActiveModal, NgbCollapse} from '@ng-bootstrap/ng-bootstrap';
-import {concat, delay, forkJoin, last, Observable, of, tap} from 'rxjs';
-import {map} from 'rxjs/operators';
+import {concat, delay, forkJoin, last, tap} from 'rxjs';
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import {TypeaheadComponent} from "../../../typeahead/_components/typeahead.component";
 import {CoverImageChooserComponent} from "../../cover-image-chooser/cover-image-chooser.component";
@@ -54,7 +53,6 @@ import {EditModalShellComponent} from "../../../shared/edit-modal-shell/edit-mod
 import {EditTabDirective} from "../../../shared/_directive/edit-tab.directive";
 import {MetadataProviderTitlePipe} from "../../../_pipes/metadata-provider-title.pipe";
 import {SeriesService} from "../../../_services/series.service";
-import {UtilityService} from "../../../shared/_services/utility.service";
 import {ImageService} from "../../../_services/image.service";
 import {LibraryService} from "../../../_services/library.service";
 import {UploadService} from "../../../_services/upload.service";
@@ -113,7 +111,6 @@ export class EditSeriesModalComponent implements OnInit {
 
   protected readonly modal = inject(NgbActiveModal);
   private readonly seriesService = inject(SeriesService);
-  protected readonly utilityService = inject(UtilityService);
   private readonly fb = inject(FormBuilder);
   protected readonly imageService = inject(ImageService);
   private readonly libraryService = inject(LibraryService);
@@ -156,8 +153,8 @@ export class EditSeriesModalComponent implements OnInit {
   // Typeaheads
   tagsSettings = signal<TypeaheadSettings<Tag> | null>(null);
   languageSettings = signal<TypeaheadSettings<Language> | null>(null);
-  peopleSettings: {[PersonRole: string]: TypeaheadSettings<Person>} = {};
-  genreSettings: TypeaheadSettings<Genre> = new TypeaheadSettings();
+  peopleSettings = signal<Partial<Record<PersonRole, TypeaheadSettings<Person>>>>({});
+  genreSettings = signal<TypeaheadSettings<Genre> | null>(null);
 
   tags: Tag[] = [];
   genres: Genre[] = [];
@@ -183,7 +180,7 @@ export class EditSeriesModalComponent implements OnInit {
   }
 
   getPersonsSettings(role: PersonRole) {
-    return this.peopleSettings[role];
+    return this.peopleSettings()[role];
   }
 
   ngOnInit(): void {
@@ -326,85 +323,45 @@ export class EditSeriesModalComponent implements OnInit {
 
     this.languageSettings.set(this.typeaheadSettingsFactory.forLanguage({id: 'language', currentSelectedLanguage: this.metadata.language}));
     this.tagsSettings.set(this.typeaheadSettingsFactory.forTag({id: 'tags', savedData: this.metadata.tags ?? []}));
+    this.genreSettings.set(this.typeaheadSettingsFactory.forGenre({id: 'genres', savedData: this.metadata.genres ?? []}));
 
-    forkJoin([
-      this.setupGenreTypeahead(),
-      this.setupPersonTypeahead(),
-    ]).subscribe(results => {
-      this.cdRef.markForCheck();
-    });
-  }
-
-  setupGenreTypeahead() {
-    this.genreSettings.minCharacters = 0;
-    this.genreSettings.multiple = true;
-    this.genreSettings.id = 'genres';
-    this.genreSettings.unique = true;
-    this.genreSettings.showLocked = true;
-    this.genreSettings.addIfNonExisting = true;
-    this.genreSettings.fetchFn = (filter: string) => {
-      return this.metadataService.getAllGenres()
-      .pipe(map(items => this.genreSettings.compareFn(items, filter)));
-    };
-    this.genreSettings.compareFn = (options: Genre[], filter: string) => {
-      return options.filter(m => this.utilityService.filter(m.title, filter));
-    }
-    this.genreSettings.compareFnForAdd = (options: Genre[], filter: string) => {
-      return options.filter(m => this.utilityService.filterMatches(m.title, filter));
-    }
-    this.genreSettings.selectionCompareFn = (a: Genre, b: Genre) => {
-      return a.title.toLowerCase() == b.title.toLowerCase();
-    }
-
-    this.genreSettings.addTransformFn = ((title: string) => {
-      return {id: 0, title: title };
-    });
-    this.genreSettings.trackByIdentityFn = (index, value) => value.title + (value.id + '');
-
-    if (this.metadata.genres) {
-      this.genreSettings.savedData = this.metadata.genres;
-    }
-    return of(true);
-  }
-
-  updateFromPreset(id: string, presetField: Array<Person> | undefined, role: PersonRole) {
-    const personSettings = this.typeaheadSettingsFactory.forPerson({id, role})
-    if (presetField && presetField.length > 0) {
-      const fetch = personSettings.fetchFn as ((filter: string) => Observable<Person[]>);
-      return fetch('').pipe(map(people => {
-        const presetIds = presetField.map(p => p.id);
-        personSettings.savedData = people.filter(person => presetIds.includes(person.id));
-        this.peopleSettings[role] = personSettings;
-        this.metadataService.updatePerson(this.metadata, personSettings.savedData as Person[], role);
-        this.cdRef.markForCheck();
-        return true;
-      }));
-    } else {
-      this.peopleSettings[role] = personSettings;
-      return of(true);
-    }
+    this.setupPersonTypeahead();
   }
 
   setupPersonTypeahead() {
-    this.peopleSettings = {};
+    const roles: ReadonlyArray<[string, PersonRole, Array<Person> | undefined]> = [
+      ['writer', PersonRole.Writer, this.metadata.writers],
+      ['character', PersonRole.Character, this.metadata.characters],
+      ['colorist', PersonRole.Colorist, this.metadata.colorists],
+      ['cover-artist', PersonRole.CoverArtist, this.metadata.coverArtists],
+      ['editor', PersonRole.Editor, this.metadata.editors],
+      ['inker', PersonRole.Inker, this.metadata.inkers],
+      ['letterer', PersonRole.Letterer, this.metadata.letterers],
+      ['penciller', PersonRole.Penciller, this.metadata.pencillers],
+      ['publisher', PersonRole.Publisher, this.metadata.publishers],
+      ['imprint', PersonRole.Imprint, this.metadata.imprints],
+      ['translator', PersonRole.Translator, this.metadata.translators],
+      ['teams', PersonRole.Team, this.metadata.teams],
+      ['locations', PersonRole.Location, this.metadata.locations],
+    ];
 
-    return forkJoin([
-      this.updateFromPreset('writer', this.metadata.writers, PersonRole.Writer),
-      this.updateFromPreset('character', this.metadata.characters, PersonRole.Character),
-      this.updateFromPreset('colorist', this.metadata.colorists, PersonRole.Colorist),
-      this.updateFromPreset('cover-artist', this.metadata.coverArtists, PersonRole.CoverArtist),
-      this.updateFromPreset('editor', this.metadata.editors, PersonRole.Editor),
-      this.updateFromPreset('inker', this.metadata.inkers, PersonRole.Inker),
-      this.updateFromPreset('letterer', this.metadata.letterers, PersonRole.Letterer),
-      this.updateFromPreset('penciller', this.metadata.pencillers, PersonRole.Penciller),
-      this.updateFromPreset('publisher', this.metadata.publishers, PersonRole.Publisher),
-      this.updateFromPreset('imprint', this.metadata.imprints, PersonRole.Imprint),
-      this.updateFromPreset('translator', this.metadata.translators, PersonRole.Translator),
-      this.updateFromPreset('teams', this.metadata.teams, PersonRole.Team),
-      this.updateFromPreset('locations', this.metadata.locations, PersonRole.Location),
-    ]).pipe(map(results => {
-      return of(true);
-    }));
+    this.metadataService.getAllPeople().pipe(takeUntilDestroyed(this.destroyRef)).subscribe(people => {
+      const settings: Partial<Record<PersonRole, TypeaheadSettings<Person>>> = {};
+
+      for (const [id, role, preset] of roles) {
+        const personSettings = this.typeaheadSettingsFactory.forPerson({id, role});
+
+        if (preset && preset.length > 0) {
+          const presetIds = preset.map(p => p.id);
+          personSettings.savedData = people.filter(person => presetIds.includes(person.id));
+          this.metadataService.updatePerson(this.metadata, personSettings.savedData, role);
+        }
+
+        settings[role] = personSettings;
+      }
+
+      this.peopleSettings.set(settings);
+    });
   }
 
   close() {

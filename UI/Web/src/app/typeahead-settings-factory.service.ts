@@ -13,6 +13,7 @@ import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import {SearchResult} from "./_models/search/search-result";
 import {SearchService} from "./_services/search.service";
 import {Tag} from "./_models/tag";
+import {Genre} from "./_models/metadata/genre";
 
 /**
  * Partial configuration for overrides. All properties optional.
@@ -59,6 +60,9 @@ export interface TypeaheadFactorySearchResultParameters extends TypeaheadFactory
 
 export interface TypeaheadFactoryTagParameters extends TypeaheadFactoryParameters<Tag> {
   source?: 'metadata' | 'readingList';
+}
+
+export interface TypeaheadFactoryGenreParameters extends TypeaheadFactoryParameters<Genre> {
 }
 
 @Injectable({providedIn: 'root'})
@@ -235,6 +239,38 @@ export class TypeaheadSettingsFactoryService {
         : this.metadataService.getAllTags();
       return tags$.pipe(map(items => settings.compareFn(items, filter)));
     };
+    settings.addTransformFn = ((title: string) => {
+      return {id: 0, title: title };
+    });
+
+    if (savedData !== undefined) settings.savedData = savedData;
+
+    return this.applyOverrides(settings, overrides);
+  }
+
+  forGenre(params: TypeaheadFactoryGenreParameters) {
+    const {id, savedData, overrides} = params;
+
+    const settings = new TypeaheadSettings<Genre>();
+    settings.minCharacters = 0;
+    settings.multiple = true;
+    settings.id = id;
+    settings.unique = true;
+    settings.showLocked = true;
+    settings.addIfNonExisting = true;
+
+    settings.trackByIdentityFn = (_idx, item) => item.title + item.id;
+    settings.selectionCompareFn = (a: Genre, b: Genre) => {
+      return a.title.toLowerCase() == b.title.toLowerCase();
+    };
+    settings.compareFn = (options: Genre[], filter: string) => {
+      return options.filter(m => this.utilityService.filter(m.title, filter));
+    };
+    settings.compareFnForAdd = (options: Genre[], filter: string) => {
+      return options.filter(m => this.utilityService.filterMatches(m.title, filter));
+    };
+    settings.fetchFn = (filter: string) => this.metadataService.getAllGenres()
+      .pipe(map(items => settings.compareFn(items, filter)));
     settings.addTransformFn = ((title: string) => {
       return {id: 0, title: title };
     });
