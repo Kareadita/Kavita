@@ -164,6 +164,19 @@ public static class RestrictByAgeExtensions
         return q;
     }
 
+    public static IQueryable<ReadingListItem> RestrictAgainstAgeRestriction(this IQueryable<ReadingListItem> queryable, AgeRestriction restriction)
+    {
+        if (restriction.AgeRating == AgeRating.NotApplicable) return queryable;
+        var q = queryable.Where(rl => rl.Series.Metadata.AgeRating <= restriction.AgeRating);
+
+        if (!restriction.IncludeUnknowns)
+        {
+            return q.Where(rl => rl.Series.Metadata.AgeRating != AgeRating.Unknown);
+        }
+
+        return q;
+    }
+
     public static IQueryable<AppUserRating> RestrictAgainstAgeRestriction(this IQueryable<AppUserRating> queryable, AgeRestriction restriction, int userId)
     {
         if (restriction.AgeRating == AgeRating.NotApplicable) return queryable;
