@@ -1,5 +1,6 @@
 import { Pipe, PipeTransform } from '@angular/core';
 import {DateTime} from "luxon";
+import {translate} from "@jsverse/transloco";
 
 @Pipe({
   name: 'utcToLocalDate',
@@ -12,7 +13,7 @@ import {DateTime} from "luxon";
 export class UtcToLocalDatePipe implements PipeTransform {
 
   transform(utcDate: string | undefined | null): Date | null {
-    if (utcDate === '' || utcDate === null || utcDate === undefined || utcDate.split('T')[0] === '0001-01-01')  {
+    if (utcDate === '' || utcDate === null || utcDate === undefined || utcDate.split('T')[0] === '0001-01-01' || utcDate.split('T')[0] === '9999-12-31') {
       return null;
     }
 
