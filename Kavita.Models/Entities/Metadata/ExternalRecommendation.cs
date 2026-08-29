@@ -19,6 +19,7 @@ public class ExternalRecommendation
     public int? AniListId { get; set; }
     public long? MalId { get; set; }
     public int? MangaBakaId { get; set; }
+    /// <remarks>This ALWAYS points towards a book. Hardcover does not have series recommendations</remarks>
     public int? HardCoverId { get; set; }
     public MetadataProvider MetadataProvider { get; set; }
     [Obsolete("Use MetadataProvider instead")]

@@ -10,6 +10,7 @@ export interface ExternalSeries {
   aniListId?: number;
   malId?: number;
   mangaBakaId?: number;
+  hardcoverId?: number;
   /**
    * @deprecated Use metadataProvider instead
    */

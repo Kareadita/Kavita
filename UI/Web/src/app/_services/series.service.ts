@@ -240,8 +240,8 @@ export class SeriesService {
     return this.httpClient.post(this.baseUrl + 'series/remove-from-on-deck?seriesId=' + seriesId, {});
   }
 
-  getExternalSeriesDetails(aniListId?: number, malId?: number, mangaBakaId?: number, seriesId?: number) {
-    return this.httpClient.get<ExternalSeriesDetail>(this.baseUrl + 'series/external-series-detail?aniListId=' + (aniListId || 0) + '&malId=' + (malId || 0) + '&mangaBakaId=' + (mangaBakaId || 0) + '&seriesId=' + (seriesId || 0));
+  getExternalSeriesDetails(seriesId: number, aniListId?: number, malId?: number, mangaBakaId?: number, hardcoverId?: number, recommendedSeriesId?: number) {
+    return this.httpClient.get<ExternalSeriesDetail>(this.baseUrl + `series/external-series-detail?seriesId=${seriesId}&aniListId=` + (aniListId || 0) + '&malId=' + (malId || 0) + '&mangaBakaId=' + (mangaBakaId || 0) + '&hardcoverId=' + (hardcoverId || 0) + '&recommendedSeriesId=' + (recommendedSeriesId || 0));
   }
 
   getNextExpectedChapterDate(seriesId: number) {
