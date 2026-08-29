@@ -1,5 +1,5 @@
 <ng-container *transloco="let t; prefix: 'manga-reader'">
-  <div class="reader" #reader [ngStyle]="{overflow: (isFullscreen ? 'auto' : 'visible')}">
+  <div class="reader" #reader>
     @if(debugMode) {
       <div class="fixed-top overlay">
         @for(img of cachedImages; track img.src) {
@@ -49,7 +49,7 @@
     }
 
 
-    <app-loading [loading]="isLoading || (!(currentImage$ | async)?.complete && this.readerMode !== ReaderMode.Webtoon)" [absolute]="true" />
+    <app-loading [loading]="isLoading() || (!(currentImage$ | async)?.complete && this.readerMode !== ReaderMode.Webtoon)" [absolute]="true" />
     <div class="reading-area"
          ngSwipe (swipeEnd)="onSwipeEnd($event)" (swipeMove)="onSwipeMove($event)"
          [ngStyle]="{'background-color': backgroundColor, 'height': readerMode === ReaderMode.Webtoon ? 'inherit' : '100dvh'}" #readingArea>
@@ -116,7 +116,7 @@
                                         [getPage]="getPageFn" />
         </div>
       } @else {
-        @if (!isLoading && !inSetup) {
+        @if (!isLoading() && !inSetup) {
           <div class="webtoon-images" appDblClick (doubleClick)="bookmarkPage($event)" (singleClick)="toggleMenu()">
             <app-infinite-scroller [pageNum]="pageNum"
                                    [bufferPages]="5"
@@ -172,9 +172,9 @@
             </button>
           </div>
           <div class="col d-flex justify-content-center">
-            <button class="btn btn-icon" title="{{isFullscreen ? t('collapse') : t('fullscreen')}}" (click)="toggleFullscreen();resetMenuCloseTimer();">
-              <i class="fa {{isFullscreen | fullscreenIcon}}" aria-hidden="true"></i>
-              <span class="visually-hidden">{{isFullscreen ? t('collapse') : t('fullscreen')}}</span>
+            <button class="btn btn-icon" title="{{isFullscreen() ? t('collapse') : t('fullscreen')}}" (click)="toggleFullscreen();resetMenuCloseTimer();">
+              <i class="fa {{isFullscreen() | fullscreenIcon}}" aria-hidden="true"></i>
+              <span class="visually-hidden">{{isFullscreen() ? t('collapse') : t('fullscreen')}}</span>
             </button>
           </div>
           <div class="col d-flex justify-content-center">

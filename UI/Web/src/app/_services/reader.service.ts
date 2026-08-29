@@ -44,7 +44,6 @@ enum RereadPromptResult {
 export const CHAPTER_ID_DOESNT_EXIST = -1;
 export const CHAPTER_ID_NOT_FETCHED = -2;
 
-const MS_IN_DAY = 1000 * 60 * 60 * 24;
 
 @Injectable({
   providedIn: 'root'
