@@ -2800,7 +2800,7 @@ public class ExternalMetadataService : IExternalMetadataService
 
             var isVolumeBased = realVolumes.Count != 0;
 
-            var maxVolume = (int)(realVolumes.Count != 0 ? realVolumes.Max(v => v.MaxNumber) : 0);
+            var maxVolume = (int)(realVolumes.Count != 0 ? realVolumes.Max(v => v.MaxNumber) : Parser.DefaultChapterNumber);
             var maxChapter = (int)chapters.Max(c => c.MaxNumber);
 
             // TODO: When the underlying source is a Manhua, there can be 0 chapters counted in the count. We need to handle this edge case

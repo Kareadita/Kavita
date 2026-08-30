@@ -2113,6 +2113,7 @@ public class ExternalMetadataServiceTests: AbstractDbTest
     // Only loose chapters: use chapters
     [InlineData(0, 24, 0, 36, 36, 24, PublicationStatus.Ended)]
     [InlineData(0, 36, 0, 36, 36, 36, PublicationStatus.Completed)]
+    [InlineData(0, 7, 1, 27, 27, 7, PublicationStatus.Ended)]
     // Only volumes: use Volumes
     [InlineData(3, 0, 3, 0, 3, 3, PublicationStatus.Completed)]
     [InlineData(3, 0, 7, 0, 7, 3, PublicationStatus.Ended)]
