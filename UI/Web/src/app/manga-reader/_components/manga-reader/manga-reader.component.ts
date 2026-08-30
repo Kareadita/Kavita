@@ -1117,7 +1117,8 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       let page = results.progress.pageNum;
 
       // Handle an edge case where there is only 1 page, save progress instantly as progress saving is gated on pagination
-      if (direction !== 'Prev' && page === 0 && this.maxPages === 1) {
+      // Note: If this is a re-read, page will be 1 so we need to handle that
+      if (direction !== 'Prev' && (page === 0 || page === 1) && this.maxPages === 1) {
         if (!this.incognitoMode) {
           this.readerService.saveProgress(this.libraryId, this.seriesId, this.volumeId, this.chapterId, 1).subscribe();
         }
