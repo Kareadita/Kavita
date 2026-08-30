@@ -805,7 +805,12 @@ public class CoverDbService : ICoverDbService
                             if (choseNewImage)
                             {
                                 // This will fail if Cover gen is done just before this as there is a bug with files getting locked.
-                                _directoryService.DeleteFiles([existingPath]);
+                                // Only delete existing
+                                if (!ImageService.IsChapterFormatForVolume(existingPath, volume.Id))
+                                {
+                                    _directoryService.DeleteFiles([existingPath]);
+                                }
+
                                 _directoryService.CopyFile(tempFullPath, finalFullPath);
                                 _directoryService.DeleteFiles([tempFullPath]);
                             }

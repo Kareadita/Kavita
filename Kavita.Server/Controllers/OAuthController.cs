@@ -70,12 +70,13 @@ public class OAuthController(
     /// <param name="token"></param>
     /// <param name="apiKey">Encrypted ApiKey</param>
     /// <param name="refreshToken"></param>
+    /// <param name="expiresIn"></param>
     /// <returns></returns>
     [KPlus(true)]
     [AllowAnonymous]
     [HttpGet("callback")]
     public async Task<IActionResult> Callback([FromQuery] OAuthUpstream upstream, [FromQuery] string token,
-        [FromQuery] string apiKey, [FromQuery] string? refreshToken = null)
+        [FromQuery] string apiKey, [FromQuery] string? refreshToken = null, [FromQuery] int? expiresIn = null)
     {
         try
         {
@@ -93,7 +94,7 @@ public class OAuthController(
             return Unauthorized();
         }
 
-        await oAuthService.HandleCallback(user, upstream, token, refreshToken);
+        await oAuthService.HandleCallback(user, upstream, token, refreshToken, expiresIn);
 
         if (upstream == OAuthUpstream.Discord)
         {

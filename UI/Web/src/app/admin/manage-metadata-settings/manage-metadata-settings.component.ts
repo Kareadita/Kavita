@@ -44,9 +44,6 @@ import {
   NgbAccordionHeader,
   NgbAccordionItem
 } from "@ng-bootstrap/ng-bootstrap";
-import {
-  SettingMultiTextFieldComponent
-} from "../../settings/_components/setting-multi-text-field/setting-multi-text-field.component";
 import {MetadataService} from "../../_services/metadata.service";
 import {LibraryService} from "../../_services/library.service";
 import {Library} from "../../_models/library/library";
@@ -61,15 +58,8 @@ import {
   unknownScriptSubtags
 } from "../../shared/utils/language-code.util";
 import {
-  AgeRatingMapperComponent,
-  buildAgeRatingMappingsArray,
   packAgeRatingMappings
 } from "../../shared/_components/age-rating-mapper/age-rating-mapper.component";
-import {SettingItemComponent} from "../../settings/_components/setting-item/setting-item.component";
-import {TagWeightTitlePipe} from "../../_pipes/tag-weight-title.pipe";
-import {allTagWeights} from "../_models/tag-weight.enum";
-
-const MangaBakaAgeRatings = ['Safe', 'Suggestive', 'Erotica', 'Pornographic'];
 
 @Component({
   selector: 'app-manage-metadata-settings',
@@ -87,12 +77,7 @@ const MangaBakaAgeRatings = ['Safe', 'Suggestive', 'Erotica', 'Pornographic'];
     NgbAccordionButton,
     NgbAccordionCollapse,
     NgbAccordionBody,
-    SettingMultiTextFieldComponent,
     NgTemplateOutlet,
-    AgeRatingMapperComponent,
-    SettingItemComponent,
-    TagWeightTitlePipe,
-
   ],
   templateUrl: './manage-metadata-settings.component.html',
   styleUrl: './manage-metadata-settings.component.scss',
@@ -204,13 +189,7 @@ export class ManageMetadataSettingsComponent implements OnInit {
       this.settingsForm.addControl('enableChapterPublisher', new FormControl(settings.enableChapterPublisher, []));
       this.settingsForm.addControl('enableChapterCoverImage', new FormControl(settings.enableChapterCoverImage, []));
 
-
       this.settingsForm.addControl('enableVolumeCoverImage', new FormControl(settings.enableVolumeCoverImage, []));
-
-      this.settingsForm.addControl('blacklist', new FormControl(settings.blacklist, []));
-      this.settingsForm.addControl('whitelist', new FormControl(settings.whitelist, []));
-      this.settingsForm.addControl('filterAboveWeight', new FormControl(settings.filterAboveWeight, []));
-
 
       this.settingsForm.addControl('globalLanguageTitleSettings', this.fb.group({
         name: [settings.globalLanguageTitleSettings.name, [languageCodeListValidator()]],
@@ -221,10 +200,6 @@ export class ManageMetadataSettingsComponent implements OnInit {
       Object.entries(settings.libraryLanguageTitleOverrides || {}).forEach(([libraryId, override]) => {
         this.addLibraryLanguageOverride(parseInt(libraryId, 10), override);
       });
-
-
-      this.settingsForm.addControl('externalAgeRatingMappings',
-        buildAgeRatingMappingsArray(this.fb, settings.externalAgeRatingMappings));
 
       this.settingsForm.addControl('firstLastPeopleNaming', new FormControl((settings.firstLastPeopleNaming), []));
       this.settingsForm.addControl('personRoles', this.fb.group(
@@ -377,7 +352,5 @@ export class ManageMetadataSettingsComponent implements OnInit {
   }
 
   protected readonly allMetadataSettingFields = allMetadataSettingField;
-  protected readonly allTagWeights = allTagWeights;
   protected readonly SettingsTabId = SettingsTabId;
-  protected readonly MangaBakaAgeRatings = MangaBakaAgeRatings;
 }

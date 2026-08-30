@@ -16,6 +16,7 @@ public sealed record ExternalSeriesDto
     public int? AniListId { get; set; }
     public int? MangaBakaId { get; set; }
     public long? MalId { get; set; }
+    public int? HardcoverId { get; set; }
     [EnumDataType(typeof(ScrobbleProvider))]
     public ScrobbleProvider Provider { get; set; } = ScrobbleProvider.AniList;
     /// <summary>

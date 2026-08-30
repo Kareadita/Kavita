@@ -36,6 +36,8 @@ export class SeriesCardComponent {
   previewOnClick = input<boolean>(false);
   /** When set, renders a source badge over the cover (used in recommendations) */
   recommendationSource = input<RecommendationSource | undefined>(undefined);
+  /* Required to open external series drawer */
+  recommendedBySeriesId = input<number>(0);
   index = input<number>(0);
   maxIndex = input<number>(1);
 
@@ -95,7 +97,8 @@ export class SeriesCardComponent {
         panelClass: ''
       });
       ref.setInput('isExternalSeries', false);
-      ref.setInput('seriesId', series.id);
+      ref.setInput('seriesId', this.recommendedBySeriesId());
+      ref.setInput('recommendedSeriesId', series.id);
       ref.setInput('libraryId', series.libraryId);
       ref.setInput('name', series.name);
 

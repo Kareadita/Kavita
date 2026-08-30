@@ -9,6 +9,7 @@ export interface ExternalSeries {
   aniListId?: number;
   malId?: number;
   mangaBakaId?: number;
+  hardcoverId?: number;
   metadataProvider: MetadataProvider;
   recommendationSource: RecommendationSource;
 }

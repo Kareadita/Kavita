@@ -591,17 +591,19 @@ public class SeriesController(
     /// <summary>
     /// Returns external series metadata around a Given External Series
     /// </summary>
+    /// <param name="seriesId"></param>
     /// <param name="aniListId"></param>
     /// <param name="malId"></param>
     /// <param name="mangaBakaId"></param>
-    /// <param name="seriesId"></param>
+    /// <param name="hardcoverId"></param>
+    /// /// <param name="recommendedSeriesId"></param>
     /// <returns></returns>
     [KPlus]
     [HttpGet("external-series-detail")]
-    public async Task<ActionResult<ExternalSeriesDetailDto>> GetExternalSeriesInfo(int? aniListId, long? malId, int? mangaBakaId, int? seriesId)
+    public async Task<ActionResult<ExternalSeriesDetailDto>> GetExternalSeriesInfo(int seriesId, int? aniListId, long? malId, int? mangaBakaId, int? hardcoverId, int? recommendedSeriesId)
     {
         var ct = HttpContext.RequestAborted;
-        var cacheKey = $"{CacheKey}-{aniListId ?? 0}-{malId ?? 0}-{mangaBakaId ?? 0}-{seriesId ?? 0}";
+        var cacheKey = $"{CacheKey}-{aniListId ?? 0}-{malId ?? 0}-{mangaBakaId ?? 0}-{recommendedSeriesId ?? 0}-{hardcoverId ?? 0}";
 
         ExternalSeriesDetailDto? ret;
         var results = await _externalSeriesCacheProvider.GetAsync<ExternalSeriesDetailDto>(cacheKey, ct);
@@ -611,9 +613,18 @@ public class SeriesController(
         }
         else
         {
+            var request = new MetadataRequest
+            {
+                AniListId = aniListId,
+                MalId = malId,
+                MangabakaId = mangaBakaId,
+                HardcoverId = hardcoverId,
+                IsStandAlone = hardcoverId != null, // Hardcover recommendations are always books
+            };
+
             try
             {
-                ret = await externalMetadataService.GetExternalSeriesDetail(aniListId, malId, mangaBakaId, seriesId, ct);
+                ret = await externalMetadataService.GetExternalSeriesDetail(seriesId, request, recommendedSeriesId, ct);
                 await _externalSeriesCacheProvider.SetAsync(cacheKey, ret, TimeSpan.FromMinutes(15), ct);
             }
             catch (Exception)

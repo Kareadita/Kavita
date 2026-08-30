@@ -383,23 +383,6 @@ public class ProcessSeries(
             series.Metadata.ReleaseYear = chapters.MinimumReleaseYear();
         }
 
-        // Set the AgeRating as highest in all the comicInfos
-        if (!series.Metadata.AgeRatingLocked)
-        {
-            series.Metadata.AgeRating = chapters.Max(chapter => chapter.AgeRating);
-
-            if (settings.EnableExtendedMetadataProcessing)
-            {
-                var allTags = series.Metadata.Tags.Select(t => t.Title).Concat(series.Metadata.Genres.Select(g => g.Title));
-                var updatedRating = ExternalMetadataService.DetermineAgeRating(allTags, settings.AgeRatingMappings);
-                if (updatedRating > series.Metadata.AgeRating)
-                {
-                    series.Metadata.AgeRating = updatedRating;
-                }
-            }
-
-        }
-
         if (!series.Metadata.PublicationStatusLocked)
         {
             DeterminePublicationStatus(series, chapters);
@@ -479,6 +462,23 @@ public class ProcessSeries(
         }
 
         #endregion
+
+        // Set the AgeRating as highest in all the comicInfos
+        if (!series.Metadata.AgeRatingLocked)
+        {
+            series.Metadata.AgeRating = chapters.Max(chapter => chapter.AgeRating);
+
+            if (settings.EnableExtendedMetadataProcessing)
+            {
+                var allTags = series.Metadata.Tags.Select(t => t.Title).Concat(series.Metadata.Genres.Select(g => g.Title));
+                var updatedRating = ExternalMetadataService.DetermineAgeRating(allTags, settings.AgeRatingMappings);
+                if (updatedRating > series.Metadata.AgeRating)
+                {
+                    series.Metadata.AgeRating = updatedRating;
+                }
+            }
+
+        }
 
     }
 
@@ -960,10 +960,6 @@ public class ProcessSeries(
             cacheHelper.IsFileUnmodifiedSinceCreationOrLastScan(chapter, args.ForceUpdate, firstFile)) return;
 
         var sw = Stopwatch.StartNew();
-        if (!chapter.AgeRatingLocked)
-        {
-            chapter.AgeRating = ComicInfo.ConvertAgeRatingToEnum(comicInfo.AgeRating);
-        }
 
         if (!chapter.TitleNameLocked)
         {
@@ -1024,11 +1020,11 @@ public class ProcessSeries(
             PersonHelper.UpdateChapterPeople(args.DatabasePeople, chapter, comicInfoPeople, personRole);
         }
 
+        var genres = comicInfo.Genre.SplitBy(',');
+        var tags = comicInfo.Tags.SplitBy(',');
+
         if (!chapter.GenresLocked || !chapter.TagsLocked)
         {
-            var genres = comicInfo.Genre.SplitBy(',');
-            var tags = comicInfo.Tags.SplitBy(',');
-
             ExternalMetadataService.GenerateExternalGenreAndTagsList(genres, tags, args.Settings,
                 out var finalTags, out var finalGenres);
 
@@ -1042,7 +1038,21 @@ public class ProcessSeries(
                 await UpdateChapterTags(chapter, finalTags);
             }
 
+        }
 
+        if (!chapter.AgeRatingLocked)
+        {
+            chapter.AgeRating = ComicInfo.ConvertAgeRatingToEnum(comicInfo.AgeRating);
+
+            if (args.Settings.EnableExtendedMetadataProcessing)
+            {
+                var allTags = genres.Concat(tags).Distinct().ToList();
+                var updatedRating = ExternalMetadataService.DetermineAgeRating(allTags, args.Settings.AgeRatingMappings);
+                if (updatedRating > chapter.AgeRating)
+                {
+                    chapter.AgeRating = updatedRating;
+                }
+            }
         }
 
         logger.LogTrace("[TIME] Kavita took {Time} ms to create/update Chapter: {File}", sw.ElapsedMilliseconds, chapter.Files.First().FileName);
