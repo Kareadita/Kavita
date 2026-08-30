@@ -58,7 +58,7 @@ export class ValidationErrorsComponent {
     this.events();
     const control = this.control();
     const overrides = this.messages();
-    if (!control.errors || !control.dirty) return [];
+    if (!control.errors || !(control.dirty || control.touched)) return []; // Required and touched should show a message
 
     return Object.keys(control.errors).map(key => {
       const value = control.errors![key];
