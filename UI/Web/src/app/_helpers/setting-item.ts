@@ -36,7 +36,9 @@ export function wireSettingControl(opts: SettingControlOptions): {hasControl: Si
       addDescribedBy(control, `${elementId}${idPostfix}`);
     }
 
-    if (isDevMode()) warnOnMultipleControls(scope, opts.label?.() ?? elementId);
+    if (isDevMode()) {
+      warnOnMultipleControls(scope, opts.label?.() ?? elementId);
+    }
   });
 
   return {hasControl: hasControl.asReadonly()};
