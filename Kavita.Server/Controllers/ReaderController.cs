@@ -44,7 +44,8 @@ public class ReaderController(ICacheService cacheService,
     IReaderService readerService, IBookmarkService bookmarkService, IEventHub eventHub,
     IScrobblingService scrobblingService,
     ILocalizationService localizationService,
-    IBookService bookService) : BaseApiController
+    IBookService bookService,
+    IArchiveService archiveService) : BaseApiController
 {
 
     /// <summary>
@@ -105,6 +106,31 @@ public class ReaderController(ICacheService cacheService,
             cacheService.CleanupChapters([chapterId]);
             throw;
         }
+    }
+
+    /// <summary>
+    /// Returns the Mokuro OCR sidecar embedded in a chapter archive, when present.
+    /// </summary>
+    /// <param name="chapterId">Chapter Id</param>
+    /// <returns>The original Mokuro JSON document.</returns>
+    [ChapterAccess]
+    [SkipDeviceTracking]
+    [HttpGet("mokuro")]
+    [ResponseCache(CacheProfileName = ResponseCacheProfiles.Hour, VaryByQueryKeys = ["chapterId"])]
+    public async Task<ActionResult> GetMokuro(int chapterId)
+    {
+        if (chapterId <= 0) return NotFound();
+
+        var chapter = await unitOfWork.ChapterRepository.GetChapterAsync(chapterId);
+        if (chapter?.Files.Count != 1) return NotFound();
+
+        var mangaFile = chapter.Files.First();
+        if (mangaFile.Format != MangaFormat.Archive) return NotFound();
+
+        var mokuro = archiveService.GetMokuroFile(mangaFile.FilePath);
+        if (mokuro == null) return NotFound();
+
+        return File(mokuro, "application/json; charset=utf-8");
     }
 
     /// <summary>

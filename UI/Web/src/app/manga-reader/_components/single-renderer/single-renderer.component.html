@@ -1,14 +1,16 @@
 @if(isValid() && !mangaReaderService.shouldSplit(currentImage, pageSplit)) {
   <div class="image-container {{imageFitClass$ | async}} {{emulateBookClass$ | async}}"
-       [style.filter]="(darkness$ | async)  ?? '' | safeStyle" [style.height]="(imageContainerHeight$ | async)  ?? '' | safeStyle">
+       [style.height]="(imageContainerHeight$ | async)  ?? '' | safeStyle">
     @if(currentImage) {
       <img alt=" "
            tabindex="0" [style.outline]="'none'"
+           [style.filter]="(darkness$ | async)  ?? '' | safeStyle"
            [style.width]="widthOverride()"
            #image
            [src]="currentImage.src"
            id="image-1"
            class="{{imageFitClass$ | async}} {{readerModeClass$ | async}} {{showClickOverlayClass$ | async}}" />
+      <app-mokuro-overlay [page]="mokuroPages[pageNum]" [image]="imageElement()?.nativeElement" />
     }
   </div>
 }

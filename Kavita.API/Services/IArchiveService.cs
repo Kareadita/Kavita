@@ -12,6 +12,7 @@ namespace Kavita.API.Services;
 public interface IArchiveService
 {
     void ExtractArchive(string archivePath, string extractPath);
+    byte[]? GetMokuroFile(string archivePath);
     int GetNumberOfPagesFromArchive(string archivePath);
     string GetCoverImage(string archivePath, string fileName, string outputDirectory, EncodeFormat format, CoverImageSize size = CoverImageSize.Default);
     bool IsValidArchive(string archivePath);

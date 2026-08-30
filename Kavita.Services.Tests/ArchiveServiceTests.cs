@@ -77,6 +77,170 @@ public class ArchiveServiceTests
         _testOutputHelper.WriteLine($"Processed Original in {sw.ElapsedMilliseconds} ms");
     }
 
+    [Fact]
+    public void GetMokuroFileReturnsEmbeddedSidecar()
+    {
+        const string expected = "{\"version\":\"0.2.0\",\"pages\":[]}";
+        var archivePath = CreateArchive(("pages/001.jpg", "image"), ("book.mokuro", expected));
+
+        try
+        {
+            var result = _archiveService.GetMokuroFile(archivePath);
+
+            Assert.NotNull(result);
+            Assert.Equal(expected, System.Text.Encoding.UTF8.GetString(result));
+        }
+        finally
+        {
+            DeleteArchive(archivePath);
+        }
+    }
+
+    [Fact]
+    public void GetMokuroFilePrefersSidecarMatchingArchiveName()
+    {
+        const string expected = "{\"pages\":[{\"img_path\":\"001.jpg\"}]}";
+        var archivePath = CreateArchive([("other.mokuro", "{}"), ("book.mokuro", expected)], "book.cbz");
+
+        try
+        {
+            var result = _archiveService.GetMokuroFile(archivePath);
+
+            Assert.NotNull(result);
+            Assert.Equal(expected, System.Text.Encoding.UTF8.GetString(result));
+        }
+        finally
+        {
+            DeleteArchive(archivePath);
+        }
+    }
+
+    [Fact]
+    public void GetMokuroFileRejectsAmbiguousSidecars()
+    {
+        var archivePath = CreateArchive(("one.mokuro", "{}"), ("two.mokuro", "{}"));
+
+        try
+        {
+            Assert.Null(_archiveService.GetMokuroFile(archivePath));
+        }
+        finally
+        {
+            DeleteArchive(archivePath);
+        }
+    }
+
+    [Fact]
+    public void GetMokuroFileReturnsNullWhenSidecarIsMissing()
+    {
+        var archivePath = CreateArchive(("001.jpg", "image"));
+
+        try
+        {
+            Assert.Null(_archiveService.GetMokuroFile(archivePath));
+        }
+        finally
+        {
+            DeleteArchive(archivePath);
+        }
+    }
+
+    [Fact]
+    public void GetMokuroFileMatchesCaseInsensitively()
+    {
+        const string expected = "{\"pages\":[]}";
+        var archivePath = CreateArchive([("other.mokuro", "{}"), ("book.MOKURO", expected)], "Book.cbz");
+
+        try
+        {
+            var result = _archiveService.GetMokuroFile(archivePath);
+
+            Assert.NotNull(result);
+            Assert.Equal(expected, System.Text.Encoding.UTF8.GetString(result));
+        }
+        finally
+        {
+            DeleteArchive(archivePath);
+        }
+    }
+
+    [Fact]
+    public void GetMokuroFileIgnoresBlacklistedFolders()
+    {
+        var archivePath = CreateArchive(("__MACOSX/book.mokuro", "{}"));
+
+        try
+        {
+            Assert.Null(_archiveService.GetMokuroFile(archivePath));
+        }
+        finally
+        {
+            DeleteArchive(archivePath);
+        }
+    }
+
+    [Fact]
+    public void GetMokuroFileReturnsSoleNestedSidecar()
+    {
+        const string expected = "{\"pages\":[]}";
+        var archivePath = CreateArchive(("metadata/book.mokuro", expected));
+
+        try
+        {
+            var result = _archiveService.GetMokuroFile(archivePath);
+
+            Assert.NotNull(result);
+            Assert.Equal(expected, System.Text.Encoding.UTF8.GetString(result));
+        }
+        finally
+        {
+            DeleteArchive(archivePath);
+        }
+    }
+
+    [Fact]
+    public void GetMokuroFileRejectsMultipleMatchingSidecars()
+    {
+        var archivePath = CreateArchive([("book.mokuro", "{}"), ("metadata/book.mokuro", "{}")], "book.cbz");
+
+        try
+        {
+            Assert.Null(_archiveService.GetMokuroFile(archivePath));
+        }
+        finally
+        {
+            DeleteArchive(archivePath);
+        }
+    }
+
+    private static string CreateArchive(params (string Path, string Content)[] entries)
+    {
+        return CreateArchive(entries, $"{Guid.NewGuid():N}.cbz");
+    }
+
+    private static string CreateArchive((string Path, string Content)[] entries, string fileName)
+    {
+        var directory = Path.Join(Path.GetTempPath(), $"kavita-mokuro-{Guid.NewGuid():N}");
+        Directory.CreateDirectory(directory);
+        var archivePath = Path.Join(directory, fileName);
+
+        using var archive = ZipFile.Open(archivePath, ZipArchiveMode.Create);
+        foreach (var (path, content) in entries)
+        {
+            var entry = archive.CreateEntry(path);
+            using var writer = new StreamWriter(entry.Open());
+            writer.Write(content);
+        }
+
+        return archivePath;
+    }
+
+    private static void DeleteArchive(string archivePath)
+    {
+        var directory = Path.GetDirectoryName(archivePath);
+        if (directory != null) Directory.Delete(directory, true);
+    }
+
 
 
     [Theory]

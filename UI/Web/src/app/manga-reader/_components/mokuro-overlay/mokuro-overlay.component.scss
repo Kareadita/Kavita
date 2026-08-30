@@ -1,0 +1,68 @@
+:host {
+  position: absolute;
+  z-index: 101;
+  pointer-events: none;
+  transform-origin: top left;
+}
+
+.mokuro-text-box {
+  position: absolute;
+  box-sizing: border-box;
+  user-select: text;
+  -webkit-user-select: text;
+  pointer-events: auto;
+  outline: none;
+}
+
+.mokuro-text-content {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  pointer-events: auto;
+}
+
+.mokuro-text-content.vertical {
+  flex-direction: row-reverse;
+}
+
+.mokuro-text-box:hover .mokuro-line,
+.mokuro-text-box:focus .mokuro-line,
+.mokuro-text-box:focus-within .mokuro-line {
+  color: #000;
+  background: rgba(255, 255, 255, 0.96);
+}
+
+:host:has(.mokuro-text-box:hover) .mokuro-text-box:focus:not(:hover) .mokuro-line,
+:host:has(.mokuro-text-box:hover) .mokuro-text-box:focus-within:not(:hover) .mokuro-line {
+  color: transparent;
+  background: transparent;
+}
+
+.mokuro-line {
+  display: inline-flex;
+  flex: 0 0 auto;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  overflow: hidden;
+  color: transparent;
+  background: transparent;
+  pointer-events: auto;
+  font-family: 'Noto Sans JP', sans-serif;
+  line-height: 1;
+  letter-spacing: 0;
+  white-space: nowrap;
+  text-align: center;
+  text-orientation: mixed;
+}
+
+.mokuro-line.vertical {
+  justify-content: flex-start;
+}
+
+.mokuro-line::selection {
+  color: HighlightText;
+  background: Highlight;
+}

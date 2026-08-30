@@ -33,6 +33,82 @@ public class ArchiveService(
     : IArchiveService
 {
     private const string ComicInfoFilename = "ComicInfo.xml";
+    private const long MaxMokuroFileSize = 64L * 1024L * 1024L;
+
+    public byte[]? GetMokuroFile(string archivePath)
+    {
+        if (!IsValidArchive(archivePath)) return null;
+
+        try
+        {
+            switch (CanOpen(archivePath))
+            {
+                case ArchiveLibrary.Default:
+                {
+                    using var archive = ZipFile.OpenRead(archivePath);
+                    var entry = SelectMokuroEntry(archive.Entries, archivePath, e => e.FullName);
+                    if (entry == null || entry.Length > MaxMokuroFileSize) return null;
+
+                    using var stream = entry.Open();
+                    return ReadEntry(stream, entry.Length);
+                }
+                case ArchiveLibrary.SharpCompress:
+                {
+                    using var archive = ArchiveFactory.OpenArchive(archivePath);
+                    var entry = SelectMokuroEntry(archive.Entries.Where(e => !e.IsDirectory), archivePath,
+                        e => e.Key ?? string.Empty);
+                    if (entry == null || entry.Size > MaxMokuroFileSize) return null;
+
+                    using var stream = entry.OpenEntryStream();
+                    return ReadEntry(stream, entry.Size);
+                }
+                case ArchiveLibrary.NotSupported:
+                default:
+                    return null;
+            }
+        }
+        catch (Exception ex)
+        {
+            logger.LogWarning(ex, "Unable to read Mokuro data from archive {ArchivePath}", archivePath);
+            return null;
+        }
+    }
+
+    private T? SelectMokuroEntry<T>(IEnumerable<T> entries, string archivePath, Func<T, string> getPath)
+        where T : class
+    {
+        var candidates = entries
+            .Where(entry => IsMokuroArchiveEntry(getPath(entry)))
+            .ToList();
+
+        if (candidates.Count == 0) return null;
+        if (candidates.Count == 1) return candidates[0];
+
+        var archiveName = Path.GetFileNameWithoutExtension(archivePath);
+        var matchingEntries = candidates
+            .Where(entry => Path.GetFileNameWithoutExtension(getPath(entry))
+                .Equals(archiveName, StringComparison.OrdinalIgnoreCase))
+            .ToList();
+
+        if (matchingEntries.Count == 1) return matchingEntries[0];
+
+        logger.LogWarning("Archive {ArchivePath} contains multiple ambiguous Mokuro sidecars", archivePath);
+        return null;
+    }
+
+    private static bool IsMokuroArchiveEntry(string path)
+    {
+        return !string.IsNullOrWhiteSpace(path)
+               && !Parser.HasBlacklistedFolderInPath(Path.GetDirectoryName(path) ?? string.Empty)
+               && Path.GetExtension(path).Equals(".mokuro", StringComparison.OrdinalIgnoreCase);
+    }
+
+    private static byte[] ReadEntry(Stream stream, long length)
+    {
+        var output = new byte[checked((int) length)];
+        stream.ReadExactly(output);
+        return output;
+    }
 
     /// <summary>
     /// Checks if a File can be opened. Requires up to 2 opens of the filestream.
