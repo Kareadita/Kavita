@@ -9,20 +9,20 @@ import {
   signal
 } from '@angular/core';
 import {FileSystemFileEntry, NgxFileDropEntry} from 'ngx-file-drop';
-import {ToastrService} from 'ngx-toastr';
-import {ImageService} from 'src/app/_services/image.service';
-import {UploadService} from 'src/app/_services/upload.service';
+import {ToastrService} from '@openng/ngx-toastr';
 import {ImageComponent} from "../../shared/image/image.component";
 import {translate, TranslocoModule} from "@jsverse/transloco";
-import {
-  FileDragAndDropUploadComponent
-} from "src/app/shared/file-drag-and-drop-upload/file-drag-and-drop-upload.component";
 import {NgbNav, NgbNavContent, NgbNavItem, NgbNavLink, NgbNavOutlet} from "@ng-bootstrap/ng-bootstrap";
 import {TabTitlePipe} from "../../_pipes/tab-title.pipe";
 import {Tabs} from "../../_models/tabs";
 import {CoverImageChooserConfig, CoverImageOption} from "../../_services/cover-chooser-config-factory.service";
 import {NgTemplateOutlet} from "@angular/common";
 import {Observable} from "rxjs";
+import {
+  FileDragAndDropUploadComponent
+} from "../../shared/file-drag-and-drop-upload/file-drag-and-drop-upload.component";
+import {ImageService} from "../../_services/image.service";
+import {UploadService} from "../../_services/upload.service";
 
 
 @Component({

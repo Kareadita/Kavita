@@ -1,13 +1,9 @@
 import {ChangeDetectionStrategy, ChangeDetectorRef, Component, DestroyRef, inject, OnInit, signal} from '@angular/core';
-import {ToastrService} from 'ngx-toastr';
+import {ToastrService} from '@openng/ngx-toastr';
 import {SettingsService} from '../settings.service';
 import {ServerSettings} from '../_models/server-settings';
 import {shareReplay} from 'rxjs/operators';
 import {catchError, combineLatest, debounceTime, defer, Observable, of, skip, switchMap, tap} from 'rxjs';
-import {ServerService} from 'src/app/_services/server.service';
-import {Job} from 'src/app/_models/job/job';
-import {DownloadService} from 'src/app/shared/_services/download.service';
-import {DownloadEntityType} from 'src/app/shared/_models/download-queue-item';
 import {DefaultValuePipe} from '../../_pipes/default-value.pipe';
 import {AsyncPipe, TitleCasePipe} from '@angular/common';
 import {translate, TranslocoModule} from "@jsverse/transloco";
@@ -22,6 +18,10 @@ import {VersionService} from "../../_services/version.service";
 import {CronFrequency} from "../../shared/_models/cron-frequency";
 import {SettingCronItemComponent} from "../../settings/_components/setting-cron-item/setting-cron-item.component";
 import {clearTransloco} from "../../../libs/transloco-util";
+import {ServerService} from "../../_services/server.service";
+import {DownloadService} from "../../shared/_services/download.service";
+import {Job} from "../../_models/job/job";
+import {DownloadEntityType} from "../../shared/_models/download-queue-item";
 
 interface AdhocTask {
   name: string;

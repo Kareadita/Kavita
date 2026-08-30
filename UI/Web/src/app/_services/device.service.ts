@@ -1,7 +1,7 @@
 import {HttpClient} from '@angular/common/http';
 import {DestroyRef, inject, Injectable, signal} from '@angular/core';
 import {EMPTY, switchMap, tap} from 'rxjs';
-import {environment} from 'src/environments/environment';
+import {environment} from '../../environments/environment';
 import {Device} from '../_models/device/device';
 import {DevicePlatform} from '../_models/device/device-platform';
 import {TextResonse} from '../_types/text-response';

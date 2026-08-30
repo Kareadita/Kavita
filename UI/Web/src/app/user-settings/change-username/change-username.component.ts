@@ -1,16 +1,20 @@
 import {ChangeDetectionStrategy, Component, inject, signal} from '@angular/core';
 import {SettingItemComponent} from "../../settings/_components/setting-item/setting-item.component";
 import {AccountService} from "../../_services/account.service";
-import {ToastrService} from "ngx-toastr";
+import {ToastrService} from '@openng/ngx-toastr';
 import {FormControl, FormGroup, ReactiveFormsModule, Validators} from "@angular/forms";
 import {translate, TranslocoDirective} from "@jsverse/transloco";
+import {FormFieldDirective} from "../../_directives/form-field.directive";
+import {ValidationErrorsComponent} from "../../shared/_components/validation-errors/validation-errors.component";
 
 @Component({
   selector: 'app-change-username',
   imports: [
     SettingItemComponent,
     ReactiveFormsModule,
-    TranslocoDirective
+    TranslocoDirective,
+    FormFieldDirective,
+    ValidationErrorsComponent
   ],
   templateUrl: './change-username.component.html',
   styleUrl: './change-username.component.scss',

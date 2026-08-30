@@ -1,6 +1,6 @@
 import {HttpClient, HttpParams, httpResource} from '@angular/common/http';
 import {inject, Injectable} from '@angular/core';
-import {environment} from 'src/environments/environment';
+import {environment} from '../../environments/environment';
 import {UserReadStatistics} from '../statistics/_models/user-read-statistics';
 import {PublicationStatusPipe} from '../_pipes/publication-status.pipe';
 import {asyncScheduler, map} from 'rxjs';

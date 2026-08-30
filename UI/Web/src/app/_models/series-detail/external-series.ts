@@ -1,4 +1,3 @@
-import {ScrobbleProvider} from "../../_services/scrobbling.service";
 import {MetadataProvider} from "../kavitaplus/metadata-provider.enum";
 import {RecommendationSource} from "../kavitaplus/recommendation-source.enum";
 
@@ -11,10 +10,6 @@ export interface ExternalSeries {
   malId?: number;
   mangaBakaId?: number;
   hardcoverId?: number;
-  /**
-   * @deprecated Use metadataProvider instead
-   */
-  provider: ScrobbleProvider;
   metadataProvider: MetadataProvider;
   recommendationSource: RecommendationSource;
 }

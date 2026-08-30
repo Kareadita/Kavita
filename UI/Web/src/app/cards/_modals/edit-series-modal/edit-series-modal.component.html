@@ -14,38 +14,30 @@
       <ng-template [appEditTab]="Tabs.General">
         <div class="row">
           <div class="mb-3" style="width: 100%">
-            <app-setting-item [title]="t('name-label')" [toggleOnViewClick]="false" [showEdit]="false">
-              <ng-template #view>
-                @if (editSeriesForm.get('name'); as formControl) {
-                  <div class="input-group {{series.nameLocked ? 'lock-active' : ''}}">
-                    <ng-container [ngTemplateOutlet]="lock" [ngTemplateOutletContext]="{ item: series, field: 'nameLocked' }" />
-                    <input id="name" class="form-control" formControlName="name" type="text"
-                           [class.is-invalid]="formControl.invalid && !formControl.untouched">
-                    @if (formControl.errors) {
-                      @if (formControl.errors.required) {
-                        <div class="invalid-feedback">{{t('required-field')}}</div>
-                      }
-                    }
-                  </div>
-                }
-              </ng-template>
-            </app-setting-item>
+            @if (editSeriesForm.get('name'); as formControl) {
+              <app-setting-item [title]="t('name-label')" [toggleOnViewClick]="false" [showEdit]="false" [control]="formControl" labelid="name">
+                <ng-template #view>
+
+                    <div class="input-group {{series.nameLocked ? 'lock-active' : ''}}">
+                      <ng-container [ngTemplateOutlet]="lock" [ngTemplateOutletContext]="{ item: series, field: 'nameLocked' }" />
+                      <input id="name" class="form-control" aria-describedby="name-validations" formControlName="name" type="text"
+                             [appFormField]="formControl">
+                    </div>
+
+                </ng-template>
+              </app-setting-item>
+            }
           </div>
         </div>
 
         <div class="row">
           <div class="mb-3" style="width: 100%">
             @if (editSeriesForm.get('sortName'); as formControl) {
-              <app-setting-item [title]="t('sort-name-label')" [toggleOnViewClick]="false" [showEdit]="false">
+              <app-setting-item [title]="t('sort-name-label')" [toggleOnViewClick]="false" [showEdit]="false" [control]="formControl">
                 <ng-template #view>
                   <div class="input-group {{series.sortNameLocked ? 'lock-active' : ''}}">
                     <ng-container [ngTemplateOutlet]="lock" [ngTemplateOutletContext]="{ item: series, field: 'sortNameLocked' }" />
-                    <input id="sort-name" class="form-control" formControlName="sortName" type="text" [class.is-invalid]="formControl.invalid && !formControl.untouched">
-                    @if (formControl.errors) {
-                      @if (formControl.errors.required) {
-                        <div class="invalid-feedback">{{t('required-field')}}</div>
-                      }
-                    }
+                    <input id="sort-name" class="form-control" formControlName="sortName" type="text" [appFormField]="formControl">
                   </div>
                 </ng-template>
               </app-setting-item>
@@ -55,16 +47,17 @@
 
         <div class="row">
           <div class="mb-3" style="width: 100%">
-            <app-setting-item [title]="t('localized-name-label')" [toggleOnViewClick]="false" [showEdit]="false">
-              <ng-template #view>
-                @if (editSeriesForm.get('localizedName'); as formControl) {
+            @if (editSeriesForm.get('localizedName'); as formControl) {
+              <app-setting-item [title]="t('localized-name-label')" [toggleOnViewClick]="false" [showEdit]="false" [control]="formControl" labelId="localized-name">
+                <ng-template #view>
                   <div class="input-group {{series.localizedNameLocked ? 'lock-active' : ''}}">
                     <ng-container [ngTemplateOutlet]="lock" [ngTemplateOutletContext]="{ item: series, field: 'localizedNameLocked' }" />
-                    <input id="localized-name" class="form-control" formControlName="localizedName" type="text">
+                    <input id="localized-name" class="form-control" formControlName="localizedName" type="text"
+                           [appFormField]="formControl">
                   </div>
-                }
-              </ng-template>
-            </app-setting-item>
+                </ng-template>
+              </app-setting-item>
+            }
           </div>
         </div>
 
@@ -91,10 +84,11 @@
         <div class="row">
           <div class="col-lg-8 col-md-12 pe-2">
             <div class="mb-3">
-              @if (languageSettings) {
+              @let langConf = languageSettings();
+              @if (langConf) {
                 <app-setting-item [title]="t('language-label')" [toggleOnViewClick]="false" [showEdit]="false">
                   <ng-template #view>
-                    <app-typeahead (selectedData)="updateLanguage($event);metadata.languageLocked = true;" [settings]="languageSettings"
+                    <app-typeahead (selectedData)="updateLanguage($event);metadata.languageLocked = true;" [settings]="langConf"
                                    [(locked)]="metadata.languageLocked" (onUnlock)="metadata.languageLocked = false"
                                    (newItemAdded)="metadata.languageLocked = true">
                       <ng-template #badgeItem let-item let-position="idx">
@@ -111,21 +105,22 @@
           </div>
           <div class="col-lg-4 col-md-12">
             <div class="mb-3" style="width: 100%">
-              <app-setting-item [title]="t('release-year-label')" [toggleOnViewClick]="false" [showEdit]="false">
-                <ng-template #view>
-                  <div class="input-group {{metadata.releaseYearLocked ? 'lock-active' : ''}}">
-                    <ng-container [ngTemplateOutlet]="lock" [ngTemplateOutletContext]="{ item: metadata, field: 'releaseYearLocked' }" />
-                    <input type="number" inputmode="numeric" class="form-control" id="release-year" formControlName="releaseYear"
-                           maxlength="4" minlength="4"
-                           [class.is-invalid]="editSeriesForm.get('releaseYear')?.invalid && editSeriesForm.get('releaseYear')?.touched">
-                    @if (editSeriesForm.get('releaseYear')?.errors; as errors) {
-                      @if (errors.pattern) {
-                        <p class="invalid-feedback">{{t('release-year-validation')}}</p>
-                      }
-                    }
-                  </div>
-                </ng-template>
-              </app-setting-item>
+              @if (editSeriesForm.get('releaseYear'); as formControl) {
+                <app-setting-item [title]="t('release-year-label')" [toggleOnViewClick]="false" [showEdit]="false"
+                                  [control]="formControl" labelId="release-year" [validations]="{
+                                    pattern: t('release-year-validation'),
+                                    minlength: t('release-year-validation'),
+                                    maxlength: t('release-year-validation')
+                                  }">
+                  <ng-template #view>
+                    <div class="input-group {{metadata.releaseYearLocked ? 'lock-active' : ''}}">
+                      <ng-container [ngTemplateOutlet]="lock" [ngTemplateOutletContext]="{ item: metadata, field: 'releaseYearLocked' }" />
+                      <input type="number" inputmode="numeric" class="form-control" id="release-year" formControlName="releaseYear"
+                             [appFormField]="formControl">
+                    </div>
+                  </ng-template>
+                </app-setting-item>
+              }
             </div>
           </div>
         </div>
@@ -133,10 +128,11 @@
         <div class="row">
           <div class="col-md-12">
             <div class="mb-3">
-              @if (genreSettings) {
+              @let genreConf = genreSettings();
+              @if (genreConf) {
                 <app-setting-item [title]="t('genres-label')" [toggleOnViewClick]="false" [showEdit]="false">
                   <ng-template #view>
-                    <app-typeahead (selectedData)="updateGenres($event);metadata.genresLocked = true" [settings]="genreSettings"
+                    <app-typeahead (selectedData)="updateGenres($event);metadata.genresLocked = true" [settings]="genreConf"
                                    [(locked)]="metadata.genresLocked" (onUnlock)="metadata.genresLocked = false"
                                    (newItemAdded)="metadata.genresLocked = true">
                       <ng-template #badgeItem let-item let-position="idx">
@@ -156,10 +152,11 @@
         <div class="row">
           <div class="col-md-12">
             <div class="mb-3">
-              @if (tagsSettings) {
+              @let tagsConf = tagsSettings();
+              @if (tagsConf) {
                 <app-setting-item [title]="t('tags-label')" [toggleOnViewClick]="false" [showEdit]="false">
                   <ng-template #view>
-                    <app-typeahead (selectedData)="updateTags($event);metadata.tagsLocked = true" [settings]="tagsSettings"
+                    <app-typeahead (selectedData)="updateTags($event);metadata.tagsLocked = true" [settings]="tagsConf"
                                    [(locked)]="metadata.tagsLocked" (onUnlock)="metadata.tagsLocked = false"
                                    (newItemAdded)="metadata.tagsLocked = true">
                       <ng-template #badgeItem let-item let-position="idx">
@@ -640,7 +637,7 @@
            <div class="mb-3">
              <app-setting-item [title]="t('last-added-title')" [toggleOnViewClick]="false" [showEdit]="false">
                <ng-template #view>
-                 {{series.lastChapterAdded | defaultDate | timeAgo}}
+                 {{series.lastChapterAdded | defaultDate | timeDifference}}
                </ng-template>
              </app-setting-item>
            </div>
@@ -652,7 +649,7 @@
            <div class="mb-3">
              <app-setting-item [title]="t('last-scanned-title')" [toggleOnViewClick]="false" [showEdit]="false">
                <ng-template #view>
-                 {{series.lastFolderScanned | defaultDate | timeAgo}}
+                 {{series.lastFolderScanned | defaultDate | timeDifference}}
                </ng-template>
              </app-setting-item>
            </div>
@@ -661,7 +658,7 @@
            <div class="mb-3">
              <app-setting-item [title]="t('last-read-title')" [toggleOnViewClick]="false" [showEdit]="false">
                <ng-template #view>
-                 {{series.lastChapterAdded | defaultDate | timeAgo}}
+                 {{series.lastChapterAdded | defaultDate | timeDifference}}
                </ng-template>
              </app-setting-item>
            </div>

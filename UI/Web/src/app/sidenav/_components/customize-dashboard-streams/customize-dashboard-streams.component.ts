@@ -13,11 +13,12 @@ import {TranslocoDirective} from "@jsverse/transloco";
 import {FormControl, FormGroup, ReactiveFormsModule} from "@angular/forms";
 import {FilterPipe} from "../../../_pipes/filter.pipe";
 import {BreakpointService} from "../../../_services/breakpoint.service";
+import {FormFieldDirective} from "../../../_directives/form-field.directive";
 
 @Component({
     selector: 'app-customize-dashboard-streams',
     imports: [DraggableOrderedListComponent, DashboardStreamListItemComponent, TranslocoDirective,
-      ReactiveFormsModule, FilterPipe],
+      ReactiveFormsModule, FilterPipe, FormFieldDirective],
     templateUrl: './customize-dashboard-streams.component.html',
     styleUrls: ['./customize-dashboard-streams.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush

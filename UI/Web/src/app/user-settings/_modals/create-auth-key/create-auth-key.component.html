@@ -9,15 +9,12 @@
         <div class="row g-0 mb-2">
           <app-setting-item [title]="t('name-label')" [canEdit]="true" [toggleOnViewClick]="false"
                             [isEditMode]="true" [control]="formControl"
-                            [showEdit]="false" labelId="name">
+                            [showEdit]="false" labelId="name" [validations]="{
+                              duplicateName: t('library-name-unique')
+                            }">
             <ng-template #edit>
-              <input id="name" type="text" autocomplete="off" formControlName="name" class="form-control" />
-
-              @if (formControl.errors; as errors) {
-                @if (errors.required) {
-                  <p class="invalid-feedback">{{t('required-field')}}</p>
-                }
-              }
+              <input id="name" type="text" autocomplete="off" formControlName="name" class="form-control"
+                     [appFormField]="formControl" />
             </ng-template>
           </app-setting-item>
         </div>
@@ -29,15 +26,9 @@
                             [isEditMode]="true" [control]="formControl" [toggleOnViewClick]="false"
                             [showEdit]="false"  labelId="key-length">
             <ng-template #edit>
-              <input id="key-length" type="range" min="8" max="32" class="form-range" formControlName="keyLength">
+              <input id="key-length" type="range" min="8" max="32" class="form-range" formControlName="keyLength"
+                     [appFormField]="formControl">
               <span><output for="key-length">{{t('total-key-length', {length: formControl.value})}}</output></span>
-
-              @if (formControl.errors; as errors) {
-                @if (errors.required) {
-                  <p class="invalid-feedback">{{t('required-field')}}</p>
-                }
-              }
-
             </ng-template>
           </app-setting-item>
         </div>
@@ -55,13 +46,8 @@
               }
             </ng-template>
             <ng-template #edit>
-              <input id="expiration" type="date" class="form-control" formControlName="expiresUtc">
-
-              @if (formControl.errors; as errors) {
-                @if (errors.required) {
-                  <p class="invalid-feedback">{{t('required-field')}}</p>
-                }
-              }
+              <input id="expiration" type="date" class="form-control" formControlName="expiresUtc"
+                     [appFormField]="formControl">
             </ng-template>
           </app-setting-item>
         </div>

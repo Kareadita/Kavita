@@ -4,7 +4,8 @@ import {
   computed,
   DestroyRef,
   inject,
-  input, OnInit,
+  input,
+  OnInit,
   signal,
   TemplateRef,
   viewChild
@@ -17,14 +18,13 @@ import {APP_BASE_HREF, AsyncPipe} from "@angular/common";
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import {CarouselReelComponent} from "../../../carousel/_components/carousel-reel/carousel-reel.component";
 import {SeriesCardComponent} from "../../../cards/series-card/series-card.component";
-import {filter, Observable, switchMap, tap} from "rxjs";
+import {Observable, switchMap, tap} from "rxjs";
 import {SeriesService} from "../../../_services/series.service";
 import {QueryContext} from "../../../_models/metadata/v2/query-context";
 import {map, shareReplay} from "rxjs/operators";
 import {FilterUtilitiesService} from "../../../shared/_services/filter-utilities.service";
 import {ActionFactoryService} from "../../../_services/action-factory.service";
 import {ActionResult} from "../../../_models/actionables/action-result";
-import {CardActionablesComponent} from "src/app/_single-module/card-actionables/card-actionables.component";
 import {allFilterEntityTypes, FilterEntityType} from "../../../_models/metadata/v2/filter-entity-type";
 import {ReadingListService} from "../../../_services/reading-list.service";
 import {PersonService} from "../../../_services/person.service";
@@ -40,10 +40,13 @@ import {ActionItem} from "../../../_models/actionables/action-item";
 import {EVENTS, MessageHubService} from "../../../_services/message-hub.service";
 import {DashboardService} from "../../../_services/dashboard.service";
 import {NavService} from "../../../_services/nav.service";
+import {CardActionablesComponent} from "../../../_single-module/card-actionables/card-actionables.component";
+import {FormFieldDirective} from "../../../_directives/form-field.directive";
 
 @Component({
   selector: 'app-manage-smart-filters',
-  imports: [ReactiveFormsModule, TranslocoDirective, CarouselReelComponent, SeriesCardComponent, AsyncPipe, CardActionablesComponent, FilterEntityTypePipe, EntityCardComponent, PromotedIconComponent],
+  imports: [ReactiveFormsModule, TranslocoDirective, CarouselReelComponent, SeriesCardComponent, AsyncPipe, CardActionablesComponent,
+    FilterEntityTypePipe, EntityCardComponent, PromotedIconComponent, FormFieldDirective],
   templateUrl: './manage-smart-filters.component.html',
   styleUrls: ['./manage-smart-filters.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
@@ -86,7 +89,7 @@ export class ManageSmartFiltersComponent implements OnInit {
     'entityType': new FormControl<FilterEntityType>(FilterEntityType.Series, []),
   });
   protected readonly filterApiMap = signal<{ [key: number]: Observable<any> }>({});
-  protected readonly actions = computed(() => this.actionFactoryService.getSmartFilterActions(this.filters(), this.shouldRenderFunc.bind(this)));
+  protected readonly actions = computed(() => this.actionFactoryService.getSmartFilterActions(this.shouldRenderFunc.bind(this)));
   protected readonly filterQuery = signal<string>('');
   protected readonly filterEntityType = signal<FilterEntityType>(FilterEntityType.Series);
   private readonly dashboardFilters = signal<Set<number>>(new Set<number>());

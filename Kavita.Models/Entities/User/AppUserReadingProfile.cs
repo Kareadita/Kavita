@@ -10,11 +10,11 @@ public enum BreakPoint
     [Description("Never")]
     Never = 0,
     [Description("Mobile")]
-    Mobile = 1,
+    Mobile = 768,
     [Description("Tablet")]
-    Tablet = 2,
+    Tablet = 1280,
     [Description("Desktop")]
-    Desktop = 3,
+    Desktop = 1440,
 }
 
 public class AppUserReadingProfile

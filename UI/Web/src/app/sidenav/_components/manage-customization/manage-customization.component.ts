@@ -5,9 +5,9 @@ import {ManageExternalSourcesComponent} from "../manage-external-sources/manage-
 import {ManageSmartFiltersComponent} from "../manage-smart-filters/manage-smart-filters.component";
 import {NgbNav, NgbNavContent, NgbNavItem, NgbNavLink, NgbNavOutlet} from "@ng-bootstrap/ng-bootstrap";
 import {TranslocoDirective} from "@jsverse/transloco";
-import {WikiLink} from 'src/app/_models/wiki';
 import {Tabs} from "../../../_models/tabs";
 import {TabTitlePipe} from "../../../_pipes/tab-title.pipe";
+import {WikiLink} from "../../../_models/wiki";
 
 
 @Component({

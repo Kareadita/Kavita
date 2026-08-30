@@ -1,6 +1,6 @@
 import {inject, Pipe, PipeTransform} from '@angular/core';
-import { ThemeProvider } from 'src/app/_models/preferences/site-theme';
 import {TranslocoService} from "@jsverse/transloco";
+import {ThemeProvider} from "../_models/preferences/site-theme";
 
 
 @Pipe({
@@ -9,7 +9,7 @@ import {TranslocoService} from "@jsverse/transloco";
 })
 export class SiteThemeProviderPipe implements PipeTransform {
 
-  translocoService = inject(TranslocoService);
+  readonly translocoService = inject(TranslocoService);
 
   transform(provider: ThemeProvider | undefined | null): string {
     if (provider === null || provider === undefined) return '';

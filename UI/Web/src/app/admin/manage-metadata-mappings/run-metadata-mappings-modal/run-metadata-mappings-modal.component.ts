@@ -4,21 +4,23 @@ import {SettingsService} from "../../settings.service";
 import {LibraryService} from "../../../_services/library.service";
 import {
   AbstractControl,
-  FormArray,
   FormControl,
   FormGroup,
   FormsModule,
   NonNullableFormBuilder,
-  ReactiveFormsModule, ValidationErrors, ValidatorFn
+  ReactiveFormsModule,
+  ValidationErrors,
+  ValidatorFn
 } from "@angular/forms";
 import {Library} from "../../../_models/library/library";
-import {catchError, finalize, map, tap} from "rxjs/operators";
+import {finalize, tap} from "rxjs/operators";
 import {TypeaheadSettings} from "../../../typeahead/_models/typeahead-settings";
 import {translate, TranslocoDirective} from "@jsverse/transloco";
 import {TypeaheadComponent} from "../../../typeahead/_components/typeahead.component";
 import {of} from "rxjs";
 import {SettingItemComponent} from "../../../settings/_components/setting-item/setting-item.component";
-import {ToastrService} from "ngx-toastr";
+import {ToastrService} from '@openng/ngx-toastr';
+import {TypeaheadSettingsFactoryService} from "../../../typeahead-settings-factory.service";
 
 type RunMetadataMappingsRequestFormGroup = FormGroup<{
   allLibraries: FormControl<boolean>,
@@ -46,6 +48,7 @@ export class RunMetadataMappingsModalComponent implements OnInit {
   private readonly libraryService = inject(LibraryService);
   private readonly fb = inject(NonNullableFormBuilder);
   private readonly toastR = inject(ToastrService);
+  private readonly typeaheadSettingsFactory = inject(TypeaheadSettingsFactoryService);
 
   libraries = signal<Library[]>([]);
   requestForm!: RunMetadataMappingsRequestFormGroup;
@@ -68,37 +71,30 @@ export class RunMetadataMappingsModalComponent implements OnInit {
   }
 
   private setupTypeaheads() {
-    const includedSettings = new TypeaheadSettings<Library>();
-    includedSettings.id = 'included-libraries';
-    includedSettings.fetchFn = (query) => {
-      const excludedLibraries = this.requestForm.get('excludedLibraries')!.value;
 
-      return of(this.libraries()
-        .filter(l => !excludedLibraries.includes(l.id))
-        .filter(l => l.name.toLowerCase().includes(query.toLowerCase())));
-    };
-    includedSettings.compareFn = (libraries, query) => libraries.filter(l => l.name.toLowerCase().includes(query.toLowerCase()));
-    includedSettings.multiple = true;
-    includedSettings.trackByIdentityFn = (index, lib) => lib.id + '';
-    includedSettings.unique = true;
-    includedSettings.minCharacters = 0;
-    includedSettings.dropdownPosition = 'body';
+    const includedSettings = this.typeaheadSettingsFactory.forLibraries({id: 'included-libraries', libraries: this.libraries(), overrides: {
+        fetchFn: (query) => {
+          const excludedLibraries = this.requestForm.get('excludedLibraries')!.value;
 
-    const excludedSettings = new TypeaheadSettings<Library>();
-    excludedSettings.id = 'excluded-libraries';
-    excludedSettings.fetchFn = (query) => {
-      const includedLibraries = this.requestForm.get('includedLibraries')!.value;
+          return of(this.libraries()
+            .filter(l => !excludedLibraries.includes(l.id))
+            .filter(l => l.name.toLowerCase().includes(query.toLowerCase())));
+        },
+        dropdownPosition: 'body'
+      }
+    });
 
-      return of(this.libraries()
-        .filter(l => !includedLibraries.includes(l.id))
-        .filter(l => l.name.toLowerCase().includes(query.toLowerCase())));
-    };
-    excludedSettings.compareFn = (libraries, query) => libraries.filter(l => l.name.toLowerCase().includes(query.toLowerCase()));
-    excludedSettings.multiple = true;
-    excludedSettings.trackByIdentityFn = (index, lib) => lib.id + '';
-    excludedSettings.unique = true;
-    excludedSettings.minCharacters = 0;
-    excludedSettings.dropdownPosition = 'body';
+    const excludedSettings = this.typeaheadSettingsFactory.forLibraries({id: 'excluded-libraries', libraries: this.libraries(), overrides: {
+        fetchFn: (query) => {
+          const includedLibraries = this.requestForm.get('includedLibraries')!.value;
+
+          return of(this.libraries()
+            .filter(l => !includedLibraries.includes(l.id))
+            .filter(l => l.name.toLowerCase().includes(query.toLowerCase())));
+        },
+        dropdownPosition: 'body'
+      }
+    });
 
     this.includedLibrariesTypeaheadSettings.set(includedSettings);
     this.excludedLibrariesTypeaheadSettings.set(excludedSettings);

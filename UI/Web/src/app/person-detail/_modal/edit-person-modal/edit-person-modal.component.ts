@@ -40,12 +40,13 @@ import {UploadService} from "../../../_services/upload.service";
 import {ImageService} from "../../../_services/image.service";
 import {SettingItemComponent} from "../../../settings/_components/setting-item/setting-item.component";
 import {AccountService} from "../../../_services/account.service";
-import {ToastrService} from "ngx-toastr";
+import {ToastrService} from '@openng/ngx-toastr';
 import {EditListComponent} from "../../../shared/edit-list/edit-list.component";
 import {BreakpointService} from "../../../_services/breakpoint.service";
 import {modalSaved} from "../../../_models/modal/modal-result";
 import {Tabs} from "../../../_models/tabs";
 import {TabTitlePipe} from "../../../_pipes/tab-title.pipe";
+import {FormFieldDirective} from "../../../_directives/form-field.directive";
 
 @Component({
   selector: 'app-edit-person-modal',
@@ -61,7 +62,8 @@ import {TabTitlePipe} from "../../../_pipes/tab-title.pipe";
     SettingItemComponent,
     NgbNavLink,
     EditListComponent,
-    TabTitlePipe
+    TabTitlePipe,
+    FormFieldDirective
   ],
   templateUrl: './edit-person-modal.component.html',
   styleUrl: './edit-person-modal.component.scss',

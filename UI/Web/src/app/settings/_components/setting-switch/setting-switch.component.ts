@@ -1,68 +1,53 @@
 import {
-  AfterContentInit,
   ChangeDetectionStrategy,
   Component,
+  computed,
   contentChild,
   ElementRef,
-  inject,
   input,
   signal,
-  TemplateRef
+  TemplateRef,
+  viewChild
 } from '@angular/core';
-import {NgTemplateOutlet} from "@angular/common";
 import {TranslocoDirective} from "@jsverse/transloco";
 import {SafeHtmlPipe} from "../../../_pipes/safe-html.pipe";
+import {generateUniqueId} from "../../../_helpers/random";
+import {wireSettingControl} from "../../../_helpers/setting-item";
+import {NgTemplateOutlet} from "@angular/common";
 
+/**
+ * Provides the setting-item styling and accessibility (id generation) for switches
+ */
 @Component({
     selector: 'app-setting-switch',
-    imports: [
-        NgTemplateOutlet,
-        TranslocoDirective,
-        SafeHtmlPipe
-    ],
+  imports: [
+    TranslocoDirective,
+    SafeHtmlPipe,
+    NgTemplateOutlet
+  ],
     templateUrl: './setting-switch.component.html',
     styleUrl: './setting-switch.component.scss',
     changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class SettingSwitchComponent implements AfterContentInit {
-
-  private readonly elementRef = inject(ElementRef);
+export class SettingSwitchComponent {
 
   title = input.required<string>();
   subtitle = input<string | undefined>();
-  id = input<string | undefined>();
-  /** For wiring up with a real label */
-  labelId = signal('');
-  switchRef = contentChild<TemplateRef<any>>('switch');
+  switchRef = contentChild(TemplateRef);
 
-  ngAfterContentInit(): void {
-    setTimeout(() => {
-      if (this.id()) {
-        this.labelId.set(this.id()!);
-        return;
-      }
+  switchWrapper = viewChild<ElementRef<HTMLElement>>('switchWrapper');
+  private readonly wrapperScope = computed(() =>
+    this.switchWrapper()?.nativeElement ?? null
+  );
+  private readonly generatedId = signal<string>(generateUniqueId());
+  /** A unique id to wire id up */
+  readonly elementId = computed(() => {
+    return this.generatedId();
+  });
 
-      const element = this.elementRef.nativeElement;
-      const inputElement = element.querySelector('input');
-
-      // If no id, generate a random id and assign it to the input
-      inputElement.id = this.generateId();
-
-      if (inputElement && inputElement.id) {
-        this.labelId.set(inputElement.id);
-      } else {
-        console.warn('No input with ID found in app-setting-switch. For accessibility, please ensure the input has an ID.');
-      }
-    });
-  }
-
-  private generateId(): string {
-    if (crypto && crypto.randomUUID) {
-      return crypto.randomUUID();
-    }
-
-    // Fallback for browsers without crypto.randomUUID (which has happened multiple times in my user base)
-    return 'id-' + Math.random().toString(36).substr(2, 9) + '-' + Date.now().toString(36);
-  }
-
+  protected readonly hasControl = wireSettingControl({
+    scope: this.wrapperScope,
+    elementId: this.elementId,
+    label: this.title,
+  }).hasControl;
 }

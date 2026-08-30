@@ -37,11 +37,11 @@ import {EVENTS, MessageHubService} from "../../_services/message-hub.service";
 import {ScrobbleProviderUpdatedEvent} from "../../_models/events/scrobble-provider-updated-event";
 import {NgOptimizedImage} from "@angular/common";
 import {NgbTooltip} from "@ng-bootstrap/ng-bootstrap";
-import {ToastrService} from "ngx-toastr";
+import {ToastrService} from '@openng/ngx-toastr';
 import {AccordionComponent} from "../../shared/accordion/accordion.component";
 import {LoadingComponent} from "../../shared/loading/loading.component";
 import {ProviderImagePipe} from "../../_pipes/provider-image.pipe";
-import {ScrobbleProviderDescriptionPipe} from "../manga-user-preferences/scrobble-provider-description.pipe";
+import {ScrobbleProviderDescriptionPipe} from "../../_pipes/scrobble-provider-description.pipe";
 import {TagBadgeComponent} from "../../shared/tag-badge/tag-badge.component";
 import {UtcToLocalDatePipe} from "../../_pipes/utc-to-locale-date.pipe";
 import {DefaultValuePipe} from "../../_pipes/default-value.pipe";
@@ -50,6 +50,8 @@ import {TimeDifferencePipe} from "../../_pipes/time-difference.pipe";
 import {TypeaheadComponent} from "../../typeahead/_components/typeahead.component";
 import {AgeRatingPipe} from "../../_pipes/age-rating.pipe";
 import {ActivatedRoute} from "@angular/router";
+import {TypeaheadSettingsFactoryService} from "../../typeahead-settings-factory.service";
+import {FormFieldDirective} from "../../_directives/form-field.directive";
 
 type ReadStatusTransitionRuleFromGroup = FormGroup<{
   enabled: FormControl<boolean>;
@@ -110,8 +112,7 @@ const ProvidersSupportLibraryTypes: Record<ScrobbleProvider, LibraryType[]> = {
     UtcToLocalTimePipe,
     TimeDifferencePipe,
     TypeaheadComponent,
-    AgeRatingPipe,
-  ],
+    AgeRatingPipe, FormFieldDirective],
   templateUrl: './manage-scrobble-providers.component.html',
   styleUrl: './manage-scrobble-providers.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -128,6 +129,7 @@ export class ManageScrobbleProvidersComponent implements OnInit {
   private readonly scrobblingService = inject(ScrobblingService);
   private readonly toastr = inject(ToastrService);
   private readonly route = inject(ActivatedRoute);
+  private readonly typeaheadSettingsFactory = inject(TypeaheadSettingsFactoryService);
 
   formGroups = signal<Map<ScrobbleProvider, ScrobbleProviderSettingsFormGroup>>(new Map());
   userScrobbleProviders = signal<Map<ScrobbleProvider, UserScrobbleProvider>>(new Map());
@@ -254,16 +256,10 @@ export class ManageScrobbleProvidersComponent implements OnInit {
 
     const userScrobbleProvider = this.userScrobbleProviders().get(provider)!;
 
-    const settings = new TypeaheadSettings<Library>();
-    settings.id = "libraries-" + provider;
-    settings.multiple = true;
-    settings.fetchFn = () => of(libraries);
-    settings.compareFn = (optionList, filter) => optionList.filter(item => item.name.toLowerCase().includes(filter.toLowerCase()));
-    settings.savedData = libraries.filter(l => userScrobbleProvider.settings.libraries.includes(l.id));
-    settings.trackByIdentityFn = (index, value) => value.id + '';
-    settings.minCharacters = 0; // All preloaded
-
-    return settings;
+    return this.typeaheadSettingsFactory.forLibraries({id: `libraries-${provider}`, libraries, overrides: {
+        savedData: libraries.filter(l => userScrobbleProvider.settings.libraries.includes(l.id))
+      }
+    });
   }
 
   updateLibrarySelection(provider: ScrobbleProvider, libraries: Library[]) {

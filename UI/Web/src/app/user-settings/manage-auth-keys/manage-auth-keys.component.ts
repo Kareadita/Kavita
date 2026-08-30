@@ -11,7 +11,7 @@ import {ToggleVisibilityDirective} from "../../_directives/toggle-visibility.dir
 import {ConfirmService} from "../../shared/confirm.service";
 import {CreateAuthKeyComponent} from "../_modals/create-auth-key/create-auth-key.component";
 import {Clipboard} from "@angular/cdk/clipboard";
-import {ToastrService} from "ngx-toastr";
+import {ToastrService} from '@openng/ngx-toastr';
 import {ResponsiveTableComponent} from "../../shared/_components/responsive-table/responsive-table.component";
 import {LoadingComponent} from "../../shared/loading/loading.component";
 import {EmptyStateComponent} from "../../shared/_components/empty-state/empty-state.component";

@@ -13,7 +13,7 @@ import {
 } from "@angular/forms";
 import {KavitaLocale} from "../../_models/metadata/language";
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
-import {debounceTime, distinctUntilChanged, filter, forkJoin, of, switchMap} from "rxjs";
+import {debounceTime, distinctUntilChanged, filter, forkJoin, switchMap} from "rxjs";
 import {DecimalPipe, TitleCasePipe} from "@angular/common";
 import {SettingItemComponent} from "../../settings/_components/setting-item/setting-item.component";
 import {SettingSwitchComponent} from "../../settings/_components/setting-switch/setting-switch.component";
@@ -30,6 +30,8 @@ import {AgeRatingDto} from "../../_models/metadata/age-rating-dto";
 import {AgeRatingPipe} from "../../_pipes/age-rating.pipe";
 import {TypeaheadComponent} from "../../typeahead/_components/typeahead.component";
 import {TypeaheadSettings} from "../../typeahead/_models/typeahead-settings";
+import {TypeaheadSettingsFactoryService} from "../../typeahead-settings-factory.service";
+import {FormFieldDirective} from "../../_directives/form-field.directive";
 
 type UserPreferencesForm = FormGroup<{
   theme: FormControl<SiteTheme>,
@@ -74,8 +76,7 @@ type UserPreferencesForm = FormGroup<{
     DecimalPipe,
     HighlightBarComponent,
     AgeRatingPipe,
-    TypeaheadComponent,
-  ],
+    TypeaheadComponent, FormFieldDirective],
   templateUrl: './manage-user-preferences.component.html',
   styleUrl: './manage-user-preferences.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush
@@ -89,14 +90,13 @@ export class ManageUserPreferencesComponent implements OnInit {
   private readonly libraryService = inject(LibraryService);
   private readonly fb = inject(NonNullableFormBuilder);
   private readonly metadataService = inject(MetadataService);
+  private readonly typeaheadSettingFactory = inject(TypeaheadSettingsFactoryService);
+
   protected readonly isReadOnly = this.accountService.hasReadOnlyRole;
-
-
   loading = signal(true);
   ageRatings = signal<AgeRatingDto[]>([]);
-  libraries = signal<Library[]>([]);
   locales = signal<KavitaLocale[]>([]);
-  libraryTypeAheadSettings = signal(new TypeaheadSettings<Library>());
+  socialLibrariesTypeaheadSettings = signal<TypeaheadSettings<Library> | null>(null);
 
   settingsForm!: UserPreferencesForm;
 
@@ -126,13 +126,12 @@ export class ManageUserPreferencesComponent implements OnInit {
       ageRatings: this.metadataService.getAllAgeRatings(),
     }).subscribe(({pref, libraries, ageRatings}) => {
       this.loading.set(false);
-      this.libraries.set(libraries);
       this.ageRatings.set([{
         value: AgeRating.NotApplicable,
         title: '',
       }, ...ageRatings]);
 
-      this.setupLibraryTypeAheadSettings();
+      this.socialLibrariesTypeaheadSettings.set(this.typeaheadSettingFactory.forLibraries({id: 'social-libraries', libraries}));
 
       this.settingsForm = this.fb.group({
         theme: this.fb.control<SiteTheme>(pref.theme),
@@ -184,21 +183,6 @@ export class ManageUserPreferencesComponent implements OnInit {
         }),
       ).subscribe();
     });
-  }
-
-  private setupLibraryTypeAheadSettings() {
-    const libs = this.libraries();
-    const selectedLibs = this.accountService.userPreferences()!.socialPreferences.socialLibraries;
-
-    const settings = new TypeaheadSettings<Library>();
-    settings.multiple = true;
-    settings.minCharacters = 0;
-    settings.savedData = libs.filter(l => selectedLibs.includes(l.id));
-    settings.compareFn = (libs, filter) => libs.filter(l => l.name.toLowerCase().includes(filter.toLowerCase()));
-    settings.trackByIdentityFn = (idx, l) => `${l.id}`;
-    settings.fetchFn = (filter) => of(settings.compareFn(libs, filter));
-
-    this.libraryTypeAheadSettings.set(settings);
   }
 
   syncFormWithTypeahead(libs: Library[] | Library) {

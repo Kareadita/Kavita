@@ -2,7 +2,7 @@ import {ChangeDetectionStrategy, Component, inject, signal} from '@angular/core'
 import {EditLicenseKeyComponent, LicenseFormEvent} from "../../kavita-plus/edit-license-key/edit-license-key.component";
 import {LicenseService} from "../../../_services/license.service";
 import {ConfirmService} from "../../../shared/confirm.service";
-import {ToastrService} from "ngx-toastr";
+import {ToastrService} from '@openng/ngx-toastr';
 import {translate, TranslocoDirective} from "@jsverse/transloco";
 import {NgbActiveModal} from "@ng-bootstrap/ng-bootstrap";
 

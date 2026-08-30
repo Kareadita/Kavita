@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
+using System.Text.RegularExpressions;
 
 namespace Kavita.Common.Helpers;
 #nullable enable
@@ -14,11 +15,10 @@ public sealed record HardcoverUrlSlug(string Slug, bool IsStandAlone);
 /// <summary>
 /// Handles all things parsing of External Ids (weblinks, not set checks, anilist:X)
 /// </summary>
-public static class ExternalIdParser
+public static partial class ExternalIdParser
 {
     private const string AniListWeblinkWebsite = "https://anilist.co/manga/";
     private const string MalWeblinkWebsite = "https://myanimelist.net/manga/";
-    private const string GoogleBooksWeblinkWebsite = "https://books.google.com/books?id=";
     private const string MangaDexWeblinkWebsite = "https://mangadex.org/title/";
     private const string AniListStaffWebsite = "https://anilist.co/staff/";
     private const string AniListCharacterWebsite = "https://anilist.co/character/";
@@ -53,7 +53,6 @@ public static class ExternalIdParser
     {
         {AniListWeblinkWebsite, 0},
         {MalWeblinkWebsite, 0},
-        {GoogleBooksWeblinkWebsite, 0},
         {MangaDexWeblinkWebsite, 0},
         {AniListStaffWebsite, 0},
         {AniListCharacterWebsite, 0},
@@ -95,11 +94,6 @@ public static class ExternalIdParser
     public static int GetAniListStaffId(string? url)
     {
         return ExtractId<int?>(url, AniListStaffWebsite) ?? 0;
-    }
-
-    public static string? GetGoogleBooksId(string? weblinks)
-    {
-        return ExtractId<string?>(weblinks, GoogleBooksWeblinkWebsite);
     }
 
     public static string? GetMangaDexId(string? weblinks)
@@ -213,6 +207,13 @@ public static class ExternalIdParser
             var tokens = webLink.Split(website)[1].Split('/');
             var value = tokens[index];
 
+            // Clean any query params
+            if (QueryParamsRegex().IsMatch(value))
+            {
+                value = value.Split('?')[0];
+            }
+
+
             if (typeof(T) == typeof(int?))
             {
                 if (int.TryParse(value, CultureInfo.InvariantCulture, out var intValue)) return (T)(object)intValue;
@@ -264,4 +265,7 @@ public static class ExternalIdParser
 
         throw new ArgumentException("Unsupported ID type. Supported types are int, long, and string.", nameof(id));
     }
+
+    [GeneratedRegex(".*?\\D+=.*")]
+    private static partial Regex QueryParamsRegex();
 }

@@ -1,10 +1,13 @@
 import {ChangeDetectionStrategy, ChangeDetectorRef, Component, DestroyRef, inject, OnInit} from '@angular/core';
 import {FormControl, FormGroup, ReactiveFormsModule, Validators} from '@angular/forms';
-import {ToastrService} from 'ngx-toastr';
+import {ToastrService} from '@openng/ngx-toastr';
 import {catchError, debounceTime, distinctUntilChanged, filter, of, switchMap, tap} from 'rxjs';
 import {SettingsService} from '../settings.service';
 import {ServerSettings} from '../_models/server-settings';
-import {DirectoryPickerComponent, DirectoryPickerResult} from '../_modals/directory-picker/directory-picker.component';
+import {
+  DirectoryPickerModalComponent,
+  DirectoryPickerResult
+} from '../_modals/directory-picker/directory-picker-modal.component';
 import {allEncodeFormats} from '../_models/encode-format';
 import {translate, TranslocoDirective, TranslocoService} from "@jsverse/transloco";
 import {allCoverImageSizes, CoverImageSize} from '../_models/cover-image-size';
@@ -16,13 +19,14 @@ import {PdfRenderResolutionPipe} from "../../_pipes/pdf-render-resolution.pipe"
 import {ConfirmService} from "../../shared/confirm.service";
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import {ModalService} from "../../_services/modal.service";
+import {FormFieldDirective} from "../../_directives/form-field.directive";
 
 @Component({
   selector: 'app-manage-media-settings',
   templateUrl: './manage-media-settings.component.html',
   styleUrls: ['./manage-media-settings.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [ReactiveFormsModule, TranslocoDirective, SettingItemComponent, EncodeFormatPipe, CoverImageSizePipe, PdfRenderResolutionPipe]
+  imports: [ReactiveFormsModule, TranslocoDirective, SettingItemComponent, EncodeFormatPipe, CoverImageSizePipe, PdfRenderResolutionPipe, FormFieldDirective]
 })
 export class ManageMediaSettingsComponent implements OnInit {
 
@@ -122,7 +126,7 @@ export class ManageMediaSettingsComponent implements OnInit {
   }
 
   openDirectoryChooser(existingDirectory: string, formControl: string) {
-    const modalRef = this.modalService.open(DirectoryPickerComponent);
+    const modalRef = this.modalService.open(DirectoryPickerModalComponent);
     modalRef.setInput('startingFolder', existingDirectory || '');
     modalRef.setInput('helpUrl', '');
     modalRef.closed.subscribe((closeResult: DirectoryPickerResult) => {

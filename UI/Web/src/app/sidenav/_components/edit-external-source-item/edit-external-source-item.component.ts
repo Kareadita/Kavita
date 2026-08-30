@@ -1,34 +1,37 @@
-import {ChangeDetectorRef, Component, inject, Input, OnInit, output} from '@angular/core';
+import {ChangeDetectionStrategy, Component, inject, model, OnInit, output} from '@angular/core';
 import {FormControl, FormGroup, ReactiveFormsModule, Validators} from "@angular/forms";
 import {ExternalSource} from "../../../_models/sidenav/external-source";
 import {NgbCollapse} from "@ng-bootstrap/ng-bootstrap";
 import {translate, TranslocoDirective} from "@jsverse/transloco";
 import {ExternalSourceService} from "../../../_services/external-source.service";
-import {ToastrService} from "ngx-toastr";
+import {ToastrService} from '@openng/ngx-toastr';
+import {FormFieldDirective} from "../../../_directives/form-field.directive";
+import {ValidationErrorsComponent} from "../../../shared/_components/validation-errors/validation-errors.component";
 
 @Component({
     selector: 'app-edit-external-source-item',
-    imports: [NgbCollapse, ReactiveFormsModule, TranslocoDirective],
+  imports: [NgbCollapse, ReactiveFormsModule, TranslocoDirective, FormFieldDirective, ValidationErrorsComponent],
     templateUrl: './edit-external-source-item.component.html',
-    styleUrls: ['./edit-external-source-item.component.scss']
+    styleUrls: ['./edit-external-source-item.component.scss'],
+    changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class EditExternalSourceItemComponent implements OnInit {
-  private readonly cdRef = inject(ChangeDetectorRef);
   private readonly externalSourceService = inject(ExternalSourceService);
   private readonly toastr = inject(ToastrService);
 
-  @Input({required: true}) source!: ExternalSource;
-  @Input() isViewMode: boolean = true;
+  source = model.required<ExternalSource>();
+  isViewMode = model<boolean>(true);
+
+
   readonly sourceUpdate = output<ExternalSource>();
   readonly sourceDelete = output<ExternalSource>();
 
   formGroup: FormGroup = new FormGroup({});
 
   ngOnInit(): void {
-    this.formGroup.addControl('name', new FormControl(this.source.name, [Validators.required]));
-    this.formGroup.addControl('host', new FormControl(this.source.host, [Validators.required, Validators.pattern(/^(http:|https:)+[^\s]+[\w]\/?$/)]));
-    this.formGroup.addControl('apiKey', new FormControl(this.source.apiKey, []));
-    this.cdRef.markForCheck();
+    this.formGroup.addControl('name', new FormControl(this.source().name, [Validators.required]));
+    this.formGroup.addControl('host', new FormControl(this.source().host, [Validators.required, Validators.pattern(/^(http:|https:)+[^\s]+[\w]\/?$/)]));
+    this.formGroup.addControl('apiKey', new FormControl(this.source().apiKey, []));
   }
 
   hasErrors(controlName: string) {
@@ -37,14 +40,13 @@ export class EditExternalSourceItemComponent implements OnInit {
   }
 
   resetForm() {
-    this.formGroup.get('host')?.setValue(this.source.host);
-    this.formGroup.get('name')?.setValue(this.source.name);
-    this.formGroup.get('apiKey')?.setValue(this.source.apiKey);
-    this.cdRef.markForCheck();
+    this.formGroup.get('host')?.setValue(this.source().host);
+    this.formGroup.get('name')?.setValue(this.source().name);
+    this.formGroup.get('apiKey')?.setValue(this.source().apiKey);
   }
 
   saveForm() {
-    if (this.source === undefined) return;
+    if (this.source() === undefined) return;
 
     const model = this.formGroup.value;
     this.externalSourceService.sourceExists(model.host, model.name, model.apiKey).subscribe(exists => {
@@ -53,47 +55,47 @@ export class EditExternalSourceItemComponent implements OnInit {
           return;
       }
 
-      if (this.source.id === 0) {
+      if (this.source().id === 0) {
           // We need to create a new one
           this.externalSourceService.createSource({id: 0, ...this.formGroup.value}).subscribe((updatedSource) => {
-              this.source = {...updatedSource};
-              this.sourceUpdate.emit(this.source);
+              this.source.set({...updatedSource} as ExternalSource);
+              this.sourceUpdate.emit(this.source());
               this.toggleViewMode();
           });
           return;
       }
 
-      this.externalSourceService.updateSource({id: this.source.id, ...this.formGroup.value}).subscribe((updatedSource) => {
-          this.source!.host = this.formGroup.value.host;
-          this.source!.apiKey = this.formGroup.value.apiKey;
-          this.source!.name = this.formGroup.value.name;
+      this.externalSourceService.updateSource({id: this.source().id, ...this.formGroup.value}).subscribe((updatedSource) => {
+          this.source()!.host = this.formGroup.value.host;
+          this.source()!.apiKey = this.formGroup.value.apiKey;
+          this.source()!.name = this.formGroup.value.name;
 
-          this.sourceUpdate.emit(this.source);
+          this.sourceUpdate.emit(this.source());
           this.toggleViewMode();
       });
     });
   }
 
   delete() {
-    if (this.source.id === 0) {
-        this.sourceDelete.emit(this.source);
-        if (!this.isViewMode) {
+    if (this.source().id === 0) {
+        this.sourceDelete.emit(this.source());
+        if (!this.isViewMode()) {
             this.toggleViewMode();
         }
       return;
     }
 
-    this.externalSourceService.deleteSource(this.source.id).subscribe(() => {
-      this.sourceDelete.emit(this.source);
-      if (!this.isViewMode) {
+    this.externalSourceService.deleteSource(this.source().id).subscribe(() => {
+      this.sourceDelete.emit(this.source());
+      if (!this.isViewMode()) {
         this.toggleViewMode();
       }
     });
   }
 
   toggleViewMode() {
-    this.isViewMode = !this.isViewMode;
-    if (!this.isViewMode) {
+    this.isViewMode.update(x => !x);
+    if (!this.isViewMode()) {
       this.resetForm();
     }
   }

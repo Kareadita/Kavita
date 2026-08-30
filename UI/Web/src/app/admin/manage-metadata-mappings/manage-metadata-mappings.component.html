@@ -17,7 +17,7 @@
                 <div class="col-md-6">
                   @if(settingsForm().get('enableGenres'); as formControl) {
                     <app-setting-switch [title]="t('enable-genres-label')" [subtitle]="t('enable-genres-tooltip')">
-                      <ng-template #switch>
+                      <ng-template>
                         <div class="form-check form-switch float-end">
                           <input id="enable-genres-status" type="checkbox" class="form-check-input" formControlName="enableGenres">
                         </div>
@@ -28,7 +28,7 @@
                 <div class="col-md-6">
                   @if(settingsForm().get('enableTags'); as formControl) {
                     <app-setting-switch [title]="t('enable-tags-label')" [subtitle]="t('enable-tags-tooltip')">
-                      <ng-template #switch>
+                      <ng-template>
                         <div class="form-check form-switch float-end">
                           <input id="enable-tags-status" type="checkbox" class="form-check-input" formControlName="enableTags">
                         </div>
@@ -44,6 +44,7 @@
                 <app-setting-multi-text-field
                   [title]="t('blacklist-label')"
                   [tooltip]="t('blacklist-tooltip')"
+                  [control]="settingsForm().get('blacklist')!"
                   formControlName="blacklist"
                 />
               </div>
@@ -53,6 +54,7 @@
               <app-setting-multi-text-field
                 [title]="t('whitelist-label')"
                 [tooltip]="t('whitelist-tooltip')"
+                [control]="settingsForm().get('whitelist')!"
                 formControlName="whitelist"
               />
             </div>
@@ -147,8 +149,12 @@
                     </select>
                   </div>
                   <div class="col-md-2">
-                    <input id="field-mapping-{{i}}" type="text" class="form-control" formControlName="sourceValue"
-                           [placeholder]="t('source-genre-tags-placeholder')" />
+                    @if (mapping.get('sourceValue'); as formControl) {
+                      <input id="field-mapping-{{i}}" type="text" class="form-control" formControlName="sourceValue"
+                             [placeholder]="t('source-genre-tags-placeholder')"
+                             [appFormField]="formControl" [attr.aria-describedby]="'field-mapping-' + i + '-validations'" />
+                      <app-validation-errors [id]="'field-mapping-' + i" [control]="formControl" />
+                    }
                   </div>
                   <div class="col-md-2">
                     <select class="form-select" formControlName="destinationType">
@@ -157,8 +163,10 @@
                     </select>
                   </div>
                   <div class="col-md-2">
-                    <input type="text" class="form-control" formControlName="destinationValue"
-                           [placeholder]="t('dest-genre-tags-placeholder')" />
+                    @if (mapping.get('destinationValue'); as formControl) {
+                      <input type="text" class="form-control" formControlName="destinationValue"
+                             [placeholder]="t('dest-genre-tags-placeholder')" [appFormField]="formControl" />
+                    }
                   </div>
                   <div class="col-md-2">
                     <div class="form-check">

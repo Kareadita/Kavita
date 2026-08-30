@@ -19,6 +19,8 @@ import {
   buildAgeRatingMappingsArray,
   packAgeRatingMappings
 } from "../../shared/_components/age-rating-mapper/age-rating-mapper.component";
+import {FormFieldDirective} from "../../_directives/form-field.directive";
+import {ValidationErrorsComponent} from "../../shared/_components/validation-errors/validation-errors.component";
 import {SettingItemComponent} from "../../settings/_components/setting-item/setting-item.component";
 import {
   SettingMultiTextFieldComponent
@@ -26,9 +28,7 @@ import {
 import {SettingSwitchComponent} from "../../settings/_components/setting-switch/setting-switch.component";
 import {TagWeightTitlePipe} from "../../_pipes/tag-weight-title.pipe";
 import {allTagWeights} from "../_models/tag-weight.enum";
-import {AccountService} from "../../_services/account.service";
 import {LicenseService} from "../../_services/license.service";
-import {languageCodeListValidator} from "../../shared/utils/language-code.util";
 
 export type MetadataMappingsExport = {
   ageRatingMappings: Record<string, AgeRating>,
@@ -52,6 +52,9 @@ const MangaBakaAgeRatings = ['Safe', 'Suggestive', 'Erotica', 'Pornographic'];
     NgbAccordionButton,
     NgbAccordionCollapse,
     NgbAccordionBody,
+    LoadingComponent,
+    FormFieldDirective,
+    ValidationErrorsComponent,
     LoadingComponent,
     SettingItemComponent,
     SettingMultiTextFieldComponent,

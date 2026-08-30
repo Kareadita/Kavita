@@ -9,16 +9,6 @@ import {
 } from '@angular/core';
 import {ActivatedRoute, Router} from '@angular/router';
 import {debounceTime} from 'rxjs/operators';
-import {BulkSelectionService} from 'src/app/cards/bulk-selection.service';
-import {FilterUtilitiesService} from 'src/app/shared/_services/filter-utilities.service';
-import {UtilityService} from 'src/app/shared/_services/utility.service';
-import {JumpKey} from 'src/app/_models/jumpbar/jump-key';
-import {Pagination} from 'src/app/_models/pagination';
-import {Series} from 'src/app/_models/series';
-import {FilterEvent, SeriesSortField} from 'src/app/_models/metadata/series-filter';
-import {JumpbarService} from 'src/app/_services/jumpbar.service';
-import {EVENTS, Message, MessageHubService} from 'src/app/_services/message-hub.service';
-import {SeriesService} from 'src/app/_services/series.service';
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import {SeriesCardComponent} from '../../../cards/series-card/series-card.component';
 import {CardDetailLayoutComponent} from '../../../cards/card-detail-layout/card-detail-layout.component';
@@ -38,6 +28,16 @@ import {SeriesFilterSettings} from "../../../metadata-filter/filter-settings";
 import {FilterStatement} from "../../../_models/metadata/v2/filter-statement";
 import {Select2Option} from "ng-select2-component";
 import {KavitaTitleStrategy} from "../../../_services/kavita-title.strategy";
+import {SeriesService} from "../../../_services/series.service";
+import {EVENTS, Message, MessageHubService} from "../../../_services/message-hub.service";
+import {UtilityService} from "../../../shared/_services/utility.service";
+import {FilterUtilitiesService} from "../../../shared/_services/filter-utilities.service";
+import {BulkSelectionService} from "../../../cards/bulk-selection.service";
+import {Pagination} from "../../../_models/pagination";
+import {FilterEvent, SeriesSortField} from "../../../_models/metadata/series-filter";
+import {JumpbarService} from "../../../_services/jumpbar.service";
+import {Series} from "../../../_models/series";
+import {JumpKey} from "../../../_models/jumpbar/jump-key";
 
 
 @Component({

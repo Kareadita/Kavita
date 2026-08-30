@@ -1,21 +1,13 @@
-import {
-  ChangeDetectionStrategy,
-  Component,
-  computed,
-  DestroyRef,
-  inject,
-  input,
-  signal
-} from '@angular/core';
+import {ChangeDetectionStrategy, Component, computed, DestroyRef, inject, input, signal} from '@angular/core';
 import {NavigationEnd, Router, RouterLink} from '@angular/router';
 import {filter} from 'rxjs';
-import {NavService} from 'src/app/_services/nav.service';
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import {NgClass, NgTemplateOutlet} from "@angular/common";
 import {ImageComponent} from "../../../shared/image/image.component";
 import {UtilityService} from "../../../shared/_services/utility.service";
 import {BreakpointService} from "../../../_services/breakpoint.service";
 import {CompactNumberPipe} from "../../../_pipes/compact-number.pipe";
+import {NavService} from "../../../_services/nav.service";
 
 
 @Component({

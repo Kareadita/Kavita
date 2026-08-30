@@ -9,15 +9,6 @@ import {
   signal
 } from '@angular/core';
 import {ActivatedRoute} from '@angular/router';
-import {BulkSelectionService} from 'src/app/cards/bulk-selection.service';
-import {FilterUtilitiesService} from 'src/app/shared/_services/filter-utilities.service';
-import {PageBookmark} from 'src/app/_models/readers/page-bookmark';
-import {Pagination} from 'src/app/_models/pagination';
-import {Series} from 'src/app/_models/series';
-import {FilterEvent, SeriesSortField} from 'src/app/_models/metadata/series-filter';
-import {ImageService} from 'src/app/_services/image.service';
-import {JumpbarService} from 'src/app/_services/jumpbar.service';
-import {ReaderService} from 'src/app/_services/reader.service';
 import {DecimalPipe} from '@angular/common';
 import {CardDetailLayoutComponent} from '../../../cards/card-detail-layout/card-detail-layout.component';
 import {BulkOperationsComponent} from '../../../cards/bulk-operations/bulk-operations.component';
@@ -35,6 +26,15 @@ import {MetadataService} from "../../../_services/metadata.service";
 import {EntityCardComponent} from "../../../cards/entity-card/entity-card.component";
 import {CardConfigFactory} from "../../../_services/card-config-factory.service";
 import {BookmarkCardEntity, CardEntityFactory} from "../../../_models/card/card-entity";
+import {ReaderService} from "../../../_services/reader.service";
+import {FilterUtilitiesService} from "../../../shared/_services/filter-utilities.service";
+import {BulkSelectionService} from "../../../cards/bulk-selection.service";
+import {ImageService} from "../../../_services/image.service";
+import {PageBookmark} from "../../../_models/readers/page-bookmark";
+import {Pagination} from "../../../_models/pagination";
+import {FilterEvent, SeriesSortField} from "../../../_models/metadata/series-filter";
+import {JumpbarService} from "../../../_services/jumpbar.service";
+import {Series} from "../../../_models/series";
 
 @Component({
   selector: 'app-bookmarks',

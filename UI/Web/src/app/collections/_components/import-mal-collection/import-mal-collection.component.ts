@@ -1,7 +1,7 @@
 import {ChangeDetectionStrategy, Component, inject, signal} from '@angular/core';
 import {translate, TranslocoDirective} from "@jsverse/transloco";
 import {CollectionTagService} from "../../../_services/collection-tag.service";
-import {ToastrService} from "ngx-toastr";
+import {ToastrService} from '@openng/ngx-toastr';
 import {ScrobbleProvider, ScrobblingService} from "../../../_services/scrobbling.service";
 import {ConfirmService} from "../../../shared/confirm.service";
 import {MalStack} from "../../../_models/collection/mal-stack";

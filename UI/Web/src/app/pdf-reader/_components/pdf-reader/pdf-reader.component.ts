@@ -18,19 +18,10 @@ import {
   PageViewModeType,
   pdfDefaultOptions,
   ProgressBarEvent,
-  ScrollModeType
+  ScrollModeType, SpreadType
 } from 'ngx-extended-pdf-viewer';
-import {ToastrService} from 'ngx-toastr';
+import {ToastrService} from '@openng/ngx-toastr';
 import {take} from 'rxjs';
-import {BookService} from 'src/app/book-reader/_services/book.service';
-import {UtilityService} from 'src/app/shared/_services/utility.service';
-import {Chapter} from 'src/app/_models/chapter';
-import {User} from 'src/app/_models/user/user';
-import {AccountService} from 'src/app/_services/account.service';
-import {NavService} from 'src/app/_services/nav.service';
-import {CHAPTER_ID_DOESNT_EXIST, ReaderService} from 'src/app/_services/reader.service';
-import {SeriesService} from 'src/app/_services/series.service';
-import {ThemeService} from 'src/app/_services/theme.service';
 import {NgbTooltip} from '@ng-bootstrap/ng-bootstrap';
 import {DOCUMENT, NgStyle} from '@angular/common';
 import {translate, TranslocoDirective} from "@jsverse/transloco";
@@ -38,7 +29,6 @@ import {PdfLayoutMode} from "../../../_models/preferences/pdf-layout-mode";
 import {PdfScrollMode} from "../../../_models/preferences/pdf-scroll-mode";
 import {PdfTheme} from "../../../_models/preferences/pdf-theme";
 import {PdfSpreadMode} from "../../../_models/preferences/pdf-spread-mode";
-import {SpreadType} from "node_modules/ngx-extended-pdf-viewer/lib/options/spread-type";
 import {PdfScrollModeTypePipe} from "../../_pipe/pdf-scroll-mode.pipe";
 import {PdfSpreadTypePipe} from "../../_pipe/pdf-spread-mode.pipe";
 import {ReadingProfile} from "../../../_models/preferences/reading-profiles";
@@ -46,6 +36,15 @@ import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import {KeyBindService} from "../../../_services/key-bind.service";
 import {KeyBindTarget} from "../../../_models/preferences/preferences";
 import {Breakpoint, BreakpointService} from "../../../_services/breakpoint.service";
+import {SeriesService} from "../../../_services/series.service";
+import {NavService} from "../../../_services/nav.service";
+import {BookService} from "../../../book-reader/_services/book.service";
+import {ThemeService} from "../../../_services/theme.service";
+import {AccountService} from "../../../_services/account.service";
+import {CHAPTER_ID_DOESNT_EXIST, ReaderService} from "../../../_services/reader.service";
+import {UtilityService} from "../../../shared/_services/utility.service";
+import {Chapter} from "../../../_models/chapter";
+import {User} from "../../../_models/user/user";
 
 const KEYBIND_TARGETS = [
   {keyBindTarget: KeyBindTarget.OpenHelp},

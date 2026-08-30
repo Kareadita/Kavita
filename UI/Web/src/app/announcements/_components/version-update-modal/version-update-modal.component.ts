@@ -43,10 +43,10 @@ export class VersionUpdateModalComponent {
     const update = this.update();
     const mode = this.mode();
     if (mode === 'update-available' && update?.updateTitle != '') {
-        return update?.updateTitle ?? `${this.localePrefix[this.mode()]}.title`;
+        return update?.updateTitle ?? this.translocoService.translate(`${this.localePrefix[this.mode()]}.title`);
     }
 
-    return `${this.localePrefix[this.mode()]}.title`;
+    return this.translocoService.translate(`${this.localePrefix[this.mode()]}.title`);
 
   });
 

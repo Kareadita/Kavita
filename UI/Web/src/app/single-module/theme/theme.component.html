@@ -358,9 +358,9 @@
 
   <h4>app-setting-switch</h4>
   <app-setting-switch [title]="'Setting switch'" [subtitle]="'A labelled toggle row.'">
-    <ng-template #switch>
+    <ng-template>
       <div class="form-check form-switch">
-        <input type="checkbox" role="switch" id="demo-setting-switch" class="form-check-input" checked>
+        <input type="checkbox" role="switch" class="form-check-input" checked>
       </div>
     </ng-template>
   </app-setting-switch>
@@ -375,9 +375,12 @@
   <div class="setting-section-break"></div>
 
   <h4>app-setting-multi-text-field</h4>
-  <app-setting-multi-text-field [title]="'Setting multi text-field'"
-                                [tooltip]="'Comma-separated values become tag badges.'" id="demo-multi-text">
-  </app-setting-multi-text-field>
+  <form [formGroup]="form">
+    <app-setting-multi-text-field [title]="'Setting multi text-field'"
+                                  [tooltip]="'Comma-separated values become tag badges.'" [control]="form.get('textArea')!">
+    </app-setting-multi-text-field>
+  </form>
+
 </app-accordion>
 
 

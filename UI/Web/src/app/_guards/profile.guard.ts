@@ -2,7 +2,7 @@ import {CanActivateFn, RedirectCommand, Router} from '@angular/router';
 import {AccountService} from "../_services/account.service";
 import {inject} from "@angular/core";
 import {MemberService} from "../_services/member.service";
-import {ToastrService} from "ngx-toastr";
+import {ToastrService} from '@openng/ngx-toastr';
 import {translate} from "@jsverse/transloco";
 import {tap} from "rxjs";
 import {map} from "rxjs/operators";

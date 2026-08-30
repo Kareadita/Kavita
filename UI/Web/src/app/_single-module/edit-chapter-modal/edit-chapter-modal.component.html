@@ -18,68 +18,54 @@
       @if (accountService.hasAdminRole()) {
         <div class="row">
           <div class="col-md-9 col-sm-12 mb-3">
-            <app-setting-item [title]="t('title-label')" [showEdit]="false" [toggleOnViewClick]="false">
-              <ng-template #view>
-                @if (editForm.get('titleName'); as formControl) {
-                  <div class="input-group" [ngClass]="{'lock-active': chapter.titleNameLocked}">
-                    <ng-container [ngTemplateOutlet]="lock" [ngTemplateOutletContext]="{ item: chapter, field: 'titleNameLocked' }" />
-                    <input class="form-control" formControlName="titleName" type="text"
-                           [class.is-invalid]="formControl.invalid && !formControl.untouched">
-                    @if (formControl.errors; as errors) {
-                      <div class="invalid-feedback">
-                        @if (errors.required) {
-                          <div>{{t('required-field')}}</div>
-                        }
-                      </div>
-                    }
-                  </div>
-                }
-              </ng-template>
-            </app-setting-item>
+            @if (editForm.get('titleName'); as formControl) {
+              <app-setting-item [title]="t('title-label')" [showEdit]="false" [toggleOnViewClick]="false" [control]="formControl">
+                <ng-template #view>
+                  @if (editForm.get('titleName'); as formControl) {
+                    <div class="input-group" [ngClass]="{'lock-active': chapter.titleNameLocked}">
+                      <ng-container [ngTemplateOutlet]="lock" [ngTemplateOutletContext]="{ item: chapter, field: 'titleNameLocked' }" />
+                      <input class="form-control" formControlName="titleName" type="text"
+                             [appFormField]="formControl">
+
+                    </div>
+                  }
+                </ng-template>
+              </app-setting-item>
+            }
+
           </div>
 
           <div class="col-md-3 col-sm-12 mb-3">
-            <app-setting-item [title]="t('sort-order-label')" [showEdit]="false" [toggleOnViewClick]="false">
-              <ng-template #view>
-                @if (editForm.get('sortOrder'); as formControl) {
-                  <div class="input-group" [ngClass]="{'lock-active': chapter.sortOrderLocked}">
-                    <ng-container [ngTemplateOutlet]="lock" [ngTemplateOutletContext]="{ item: chapter, field: 'sortOrderLocked' }" />
-                    <input class="form-control" formControlName="sortOrder" type="number" min="0" step="0.1" inputmode="numeric"
-                           [class.is-invalid]="formControl.invalid && !formControl.untouched">
-                    @if (formControl.errors; as errors) {
-                      <div class="invalid-feedback">
-                        @if (errors.required) {
-                          <div>{{t('required-field')}}</div>
-                        }
-                      </div>
-                    }
-                  </div>
-                }
-              </ng-template>
-            </app-setting-item>
+            @if (editForm.get('sortOrder'); as formControl) {
+              <app-setting-item [title]="t('sort-order-label')" [showEdit]="false" [toggleOnViewClick]="false" [control]="formControl" labelId="sort-order">
+                <ng-template #view>
+
+                    <div class="input-group" [ngClass]="{'lock-active': chapter.sortOrderLocked}">
+                      <ng-container [ngTemplateOutlet]="lock" [ngTemplateOutletContext]="{ item: chapter, field: 'sortOrderLocked' }" />
+                      <input class="form-control" formControlName="sortOrder"  type="number" min="0" step="0.1" inputmode="numeric"
+                             id="sort-order" aria-describedby="sort-order-validations"
+                             [appFormField]="formControl">
+
+                    </div>
+                </ng-template>
+              </app-setting-item>
+            }
           </div>
         </div>
 
         <div class="row">
           <div class="col-md-9 col-sm-12 mb-3">
-            <app-setting-item [title]="t('isbn-label')" [showEdit]="false" [toggleOnViewClick]="false">
-              <ng-template #view>
-                @if (editForm.get('isbn'); as formControl) {
-                  <div class="input-group"  [ngClass]="{'lock-active': chapter.isbnLocked}">
-                    <ng-container [ngTemplateOutlet]="lock" [ngTemplateOutletContext]="{ item: chapter, field: 'isbnLocked' }" />
-                    <input class="form-control" formControlName="isbn" type="text"
-                           [class.is-invalid]="formControl.invalid && !formControl.untouched">
-                    @if (formControl.errors; as errors) {
-                      <div class="invalid-feedback">
-                        @if (errors.required) {
-                          <div>{{t('required-field')}}</div>
-                        }
-                      </div>
-                    }
-                  </div>
-                }
-              </ng-template>
-            </app-setting-item>
+            @if (editForm.get('isbn'); as formControl) {
+              <app-setting-item [title]="t('isbn-label')" [showEdit]="false" [toggleOnViewClick]="false" [control]="formControl" labelId="isbn">
+                <ng-template #view>
+                    <div class="input-group"  [ngClass]="{'lock-active': chapter.isbnLocked}">
+                      <ng-container [ngTemplateOutlet]="lock" [ngTemplateOutletContext]="{ item: chapter, field: 'isbnLocked' }" />
+                      <input class="form-control" formControlName="isbn" type="text" id="isbn" aria-describedby="isbn-validations"
+                             [appFormField]="formControl">
+                    </div>
+                </ng-template>
+              </app-setting-item>
+            }
           </div>
 
           <div class="col-md-3 col-sm-12 mb-3">
@@ -103,10 +89,11 @@
         <div class="row">
           <div class="col-lg-9 col-md-12">
             <div class="mb-3">
-              @if (languageSettings) {
+              @let langConfig = languageSettings();
+              @if (langConfig) {
                 <app-setting-item [title]="t('language-label')" [toggleOnViewClick]="false" [showEdit]="false">
                   <ng-template #view>
-                    <app-typeahead (selectedData)="updateLanguage($event)" [settings]="languageSettings"
+                    <app-typeahead (selectedData)="updateLanguage($event)" [settings]="langConfig"
                                    [(locked)]="chapter.languageLocked" (onUnlock)="chapter.languageLocked = false"
                                    (newItemAdded)="chapter.languageLocked = true">
                       <ng-template #badgeItem let-item let-position="idx">
@@ -124,18 +111,21 @@
 
           <div class="col-lg-3 col-md-12">
             <div class="mb-3">
-              <app-setting-item [title]="t('release-date-label')" [toggleOnViewClick]="false" [showEdit]="false">
-                <ng-template #view>
-                  <div class="input-group" [ngClass]="{'lock-active': chapter.releaseDateLocked}">
-                    <ng-container [ngTemplateOutlet]="lock" [ngTemplateOutletContext]="{ item: chapter, field: 'releaseDateLocked' }" />
-                    <input
-                      class="form-control"
-                      formControlName="releaseDate"
-                      type="date"
-                    />
-                  </div>
-                </ng-template>
-              </app-setting-item>
+              @if (editForm.get('releaseDate'); as formControl) {
+                <app-setting-item [title]="t('release-date-label')" [toggleOnViewClick]="false" [showEdit]="false" [control]="formControl">
+                  <ng-template #view>
+                    <div class="input-group" [ngClass]="{'lock-active': chapter.releaseDateLocked}">
+                      <ng-container [ngTemplateOutlet]="lock" [ngTemplateOutletContext]="{ item: chapter, field: 'releaseDateLocked' }" />
+                      <input
+                        class="form-control"
+                        formControlName="releaseDate"
+                        type="date"
+                        [appFormField]="formControl"
+                      />
+                    </div>
+                  </ng-template>
+                </app-setting-item>
+              }
             </div>
           </div>
         </div>
@@ -164,10 +154,11 @@
         <div class="row">
           <div class="col-lg-6 col-md-12 pe-2">
             <div class="mb-3">
-              @if (genreSettings) {
+              @let genreConf = genreSettings();
+              @if (genreConf) {
                 <app-setting-item [title]="t('genres-label')" [toggleOnViewClick]="false" [showEdit]="false">
                   <ng-template #view>
-                    <app-typeahead (selectedData)="updateGenres($event);chapter.genresLocked = true" [settings]="genreSettings"
+                    <app-typeahead (selectedData)="updateGenres($event);chapter.genresLocked = true" [settings]="genreConf"
                                    [(locked)]="chapter.genresLocked" (onUnlock)="chapter.genresLocked = false"
                                    (newItemAdded)="chapter.genresLocked = true">
                       <ng-template #badgeItem let-item let-position="idx">
@@ -185,10 +176,11 @@
 
           <div class="col-lg-6 col-md-12 pe-2">
             <div class="mb-3">
-              @if (tagsSettings) {
+              @let tagsConf = tagsSettings();
+              @if (tagsConf) {
                 <app-setting-item [title]="t('tags-label')" [toggleOnViewClick]="false" [showEdit]="false">
                   <ng-template #view>
-                    <app-typeahead (selectedData)="updateTags($event);chapter.tagsLocked = true" [settings]="tagsSettings"
+                    <app-typeahead (selectedData)="updateTags($event);chapter.tagsLocked = true" [settings]="tagsConf"
                                    [(locked)]="chapter.tagsLocked" (onUnlock)="chapter.tagsLocked = false"
                                    (newItemAdded)="chapter.tagsLocked = true">
                       <ng-template #badgeItem let-item let-position="idx">

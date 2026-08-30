@@ -1,14 +1,16 @@
 import {ChangeDetectionStrategy, Component, inject} from '@angular/core';
 import {FormControl, FormGroup, ReactiveFormsModule, Validators} from '@angular/forms';
 import {Router} from '@angular/router';
-import {ToastrService} from 'ngx-toastr';
-import {AccountService} from 'src/app/_services/account.service';
-import {MemberService} from 'src/app/_services/member.service';
+import {ToastrService} from '@openng/ngx-toastr';
 import {NgbTooltip} from '@ng-bootstrap/ng-bootstrap';
 import {NgTemplateOutlet} from '@angular/common';
 import {SplashContainerComponent} from '../splash-container/splash-container.component';
 import {translate, TranslocoDirective} from "@jsverse/transloco";
 import {NavService} from "../../../_services/nav.service";
+import {AccountService} from "../../../_services/account.service";
+import {MemberService} from "../../../_services/member.service";
+import {FormFieldDirective} from "../../../_directives/form-field.directive";
+import {ValidationErrorsComponent} from "../../../shared/_components/validation-errors/validation-errors.component";
 
 /**
  * This is exclusively used to register the first user on the server and nothing else
@@ -17,7 +19,7 @@ import {NavService} from "../../../_services/nav.service";
   selector: 'app-register',
   templateUrl: './register.component.html',
   styleUrls: ['./register.component.scss'],
-  imports: [SplashContainerComponent, ReactiveFormsModule, NgbTooltip, NgTemplateOutlet, TranslocoDirective],
+  imports: [SplashContainerComponent, ReactiveFormsModule, NgbTooltip, NgTemplateOutlet, TranslocoDirective, FormFieldDirective, ValidationErrorsComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class RegisterComponent {

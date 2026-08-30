@@ -14,24 +14,13 @@ import {
 } from '@angular/core';
 import {ActivatedRoute, Router, RouterLink} from '@angular/router';
 import {DecimalPipe, DOCUMENT, Location, NgClass, NgStyle} from '@angular/common';
-import {ToastrService} from 'ngx-toastr';
-import {UtilityService} from 'src/app/shared/_services/utility.service';
-import {LibraryType} from 'src/app/_models/library/library';
-import {MangaFormat} from 'src/app/_models/manga-format';
-import {ReadingList, ReadingListInfo, ReadingListItem} from 'src/app/_models/reading-list/reading-list';
-import {AccountService} from 'src/app/_services/account.service';
-import {ActionFactoryService} from 'src/app/_services/action-factory.service';
-import {ActionService} from 'src/app/_services/action.service';
-import {ImageService} from 'src/app/_services/image.service';
-import {ReadingListService} from 'src/app/_services/reading-list.service';
+import {ToastrService} from '@openng/ngx-toastr';
 import {
   DraggableOrderedListComponent,
   IndexUpdateEvent,
   ItemRemoveEvent
 } from '../draggable-ordered-list/draggable-ordered-list.component';
 import {startWith, tap} from 'rxjs';
-import {ReaderService} from 'src/app/_services/reader.service';
-import {LibraryService} from 'src/app/_services/library.service';
 import {ReadingListItemComponent} from '../reading-list-item/reading-list-item.component';
 import {LoadingComponent} from '../../../shared/loading/loading.component';
 import {BadgeExpanderComponent} from '../../../shared/badge-expander/badge-expander.component';
@@ -72,6 +61,17 @@ import {DateYearRangePipe} from "../../../_pipes/date-year-range.pipe";
 import {FilterComparison} from "../../../_models/metadata/v2/filter-comparison";
 import {FilterUtilitiesService} from "../../../shared/_services/filter-utilities.service";
 import {ReadingListFilterField} from "../../../_models/metadata/v2/reading-list-filter-field";
+import {ReadingList, ReadingListInfo, ReadingListItem} from "../../../_models/reading-list/reading-list";
+import {ReadingListService} from "../../../_services/reading-list.service";
+import {ActionService} from "../../../_services/action.service";
+import {ActionFactoryService} from "../../../_services/action-factory.service";
+import {UtilityService} from "../../../shared/_services/utility.service";
+import {ImageService} from "../../../_services/image.service";
+import {AccountService} from "../../../_services/account.service";
+import {MangaFormat} from "../../../_models/manga-format";
+import {LibraryType} from "../../../_models/library/library";
+import {LibraryService} from "../../../_services/library.service";
+import {ReaderService} from "../../../_services/reader.service";
 
 
 @Component({

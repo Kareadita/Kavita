@@ -1,8 +1,17 @@
-import {Component, DestroyRef, EventEmitter, inject, Input, OnInit} from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  computed,
+  DestroyRef,
+  EventEmitter,
+  inject,
+  input,
+  OnInit,
+  signal
+} from '@angular/core';
 import {Person} from "../../../_models/metadata/person";
 import {PersonService} from "../../../_services/person.service";
 import {NgbActiveModal} from "@ng-bootstrap/ng-bootstrap";
-import {ToastrService} from "ngx-toastr";
 import {TranslocoDirective} from "@jsverse/transloco";
 import {TypeaheadComponent} from "../../../typeahead/_components/typeahead.component";
 import {TypeaheadSettings} from "../../../typeahead/_models/typeahead-settings";
@@ -16,6 +25,7 @@ import {Series} from "../../../_models/series";
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import {AsyncPipe} from "@angular/common";
 import {modalSaved} from "../../../_models/modal/modal-result";
+import {TypeaheadSettingsFactoryService} from "../../../typeahead-settings-factory.service";
 
 @Component({
   selector: 'app-merge-person-modal',
@@ -27,31 +37,41 @@ import {modalSaved} from "../../../_models/modal/modal-result";
     AsyncPipe
   ],
   templateUrl: './merge-person-modal.component.html',
+  changeDetection: ChangeDetectionStrategy.OnPush,
   styleUrl: './merge-person-modal.component.scss'
 })
 export class MergePersonModalComponent implements OnInit {
 
   private readonly personService = inject(PersonService);
-  public readonly utilityService = inject(UtilityService);
+  private readonly utilityService = inject(UtilityService);
   private readonly destroyRef = inject(DestroyRef);
   private readonly modal = inject(NgbActiveModal);
-  protected readonly toastr = inject(ToastrService);
+  private readonly typeaheadSettingsFactory = inject(TypeaheadSettingsFactoryService);
 
-  typeAheadSettings!: TypeaheadSettings<Person>;
+  typeAheadSettings = signal<TypeaheadSettings<Person> | null>(null);
   typeAheadUnfocus = new EventEmitter<string>();
 
-  @Input({required: true}) person!: Person;
+  person = input.required<Person>();
 
-  mergee: Person | null = null;
+  mergee = signal<Person | null>(null);
   knownFor$: Observable<Series[]> | null = null;
 
+  readonly allNewAliases = computed(() => {
+    const mergee = this.mergee();
+    if (!mergee) return [];
+
+    return [mergee.name, ...mergee.aliases];
+  });
+
+
   save() {
-    if (!this.mergee) {
+    const mergee = this.mergee();
+    if (!mergee) {
       this.close();
       return;
     }
 
-    this.personService.mergePerson(this.person.id, this.mergee.id).subscribe(person => {
+    this.personService.mergePerson(this.person().id, mergee.id).subscribe(person => {
       this.modal.close(modalSaved(person));
     })
   }
@@ -61,42 +81,29 @@ export class MergePersonModalComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    this.typeAheadSettings = new TypeaheadSettings<Person>();
-    this.typeAheadSettings.minCharacters = 0;
-    this.typeAheadSettings.multiple = false;
-    this.typeAheadSettings.addIfNonExisting = false;
-    this.typeAheadSettings.id = "merge-person-modal-typeahead";
-    this.typeAheadSettings.compareFn = (options: Person[], filter: string) => {
-      return options.filter(m => this.utilityService.filter(m.name, filter));
-    }
-    this.typeAheadSettings.selectionCompareFn = (a: Person, b: Person) => {
-      return a.name == b.name;
-    }
-    this.typeAheadSettings.fetchFn = (filter: string) => {
-      if (filter.length == 0) return of([]);
 
-      return this.personService.searchPerson(filter).pipe(map(people => {
-        return people.filter(p => this.utilityService.filter(p.name, filter) && p.id != this.person.id);
-      }));
-    };
+    this.typeAheadSettings.set(this.typeaheadSettingsFactory.forPerson({id: 'merge-person-modal-typeahead', addIfNonExisting: false,
+      overrides: {
+        fetchFn: (filter: string) => {
+          if (filter.length == 0) return of([]);
 
-    this.typeAheadSettings.trackByIdentityFn = (index, value) => `${value.name}_${value.id}`;
+          return this.personService.searchPerson(filter).pipe(map(people => {
+            return people.filter(p => this.utilityService.filter(p.name, filter) && p.id != this.person().id);
+          }));
+        },
+        multiple: false
+      }}));
   }
 
   updatePerson(people: Person[]) {
     if (people.length == 0) return;
 
-    this.typeAheadUnfocus.emit(this.typeAheadSettings.id);
-    this.mergee = people[0];
-    this.knownFor$ = this.personService.getSeriesMostKnownFor(this.mergee.id)
+    this.typeAheadUnfocus.emit(this.typeAheadSettings()!.id);
+    this.mergee.set(people[0]);
+
+    this.knownFor$ = this.personService.getSeriesMostKnownFor(this.mergee()!.id)
         .pipe(takeUntilDestroyed(this.destroyRef));
   }
 
   protected readonly FilterField = SeriesFilterField;
-
-  allNewAliases() {
-    if (!this.mergee) return [];
-
-    return [this.mergee.name, ...this.mergee.aliases]
-  }
 }

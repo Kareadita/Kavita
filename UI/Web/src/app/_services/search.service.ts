@@ -1,10 +1,10 @@
-import { HttpClient } from '@angular/common/http';
-import { Injectable, inject } from '@angular/core';
-import { of } from 'rxjs';
-import { environment } from 'src/environments/environment';
-import { SearchResultGroup } from '../_models/search/search-result-group';
-import { Series } from '../_models/series';
-import { Chapter } from '../_models/chapter';
+import {HttpClient} from '@angular/common/http';
+import {inject, Injectable} from '@angular/core';
+import {of} from 'rxjs';
+import {environment} from '../../environments/environment';
+import {SearchResultGroup} from '../_models/search/search-result-group';
+import {Series} from '../_models/series';
+import {Chapter} from '../_models/chapter';
 
 @Injectable({
   providedIn: 'root'

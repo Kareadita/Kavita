@@ -1,7 +1,6 @@
 import {ChangeDetectionStrategy, Component, computed, HostListener, inject, input, model, output} from '@angular/core';
 import {ClientDevice} from "../../_models/client-device";
 import {translate, TranslocoDirective} from "@jsverse/transloco";
-import {TimeAgoPipe} from "../../_pipes/time-ago.pipe";
 import {ClientDeviceType, ClientInfoService} from "../../_services/client-info.service";
 import {ClientDeviceAuthTypePipe} from "../../_pipes/client-device-authtype.pipe";
 import {DefaultValuePipe} from "../../_pipes/default-value.pipe";
@@ -22,12 +21,13 @@ import {Breakpoint, BreakpointService} from "../../_services/breakpoint.service"
 import {ActionFactoryService} from "../../_services/action-factory.service";
 import {ActionItem} from "../../_models/actionables/action-item";
 import {ActionResult} from "../../_models/actionables/action-result";
+import {TimeDifferencePipe} from "../../_pipes/time-difference.pipe";
+import {FormFieldDirective} from "../../_directives/form-field.directive";
 
 @Component({
   selector: 'app-client-device-card',
   imports: [
     TranslocoDirective,
-    TimeAgoPipe,
     ClientDeviceAuthTypePipe,
     DefaultValuePipe,
     ClientDevicePlatformPipe,
@@ -37,8 +37,8 @@ import {ActionResult} from "../../_models/actionables/action-result";
     UtcToLocalTimePipe,
     CardActionablesComponent,
     SentenceCasePipe,
-    ReactiveFormsModule
-  ],
+    ReactiveFormsModule,
+    TimeDifferencePipe, FormFieldDirective],
   templateUrl: './client-device-card.component.html',
   styleUrl: './client-device-card.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush

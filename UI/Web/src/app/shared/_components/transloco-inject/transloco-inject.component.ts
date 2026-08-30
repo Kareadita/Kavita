@@ -7,7 +7,8 @@ import {
   input,
   QueryList,
   signal,
-  TemplateRef
+  TemplateRef,
+  ChangeDetectionStrategy
 } from '@angular/core';
 import {NgTemplateOutlet} from "@angular/common";
 import {TranslocoSlotDirective} from "../../../_directives/transloco-slot.directive";
@@ -39,6 +40,7 @@ type Part =
   imports: [NgTemplateOutlet],
   // Role="text" groups the inline fragments for screen readers
   host: { role: 'text' },
+  changeDetection: ChangeDetectionStrategy.Eager,
   template: `
     @for (part of parts(); track $index) {
       @if (part.type === 'text') {

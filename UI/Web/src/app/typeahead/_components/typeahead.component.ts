@@ -17,16 +17,22 @@ import {
   TemplateRef,
   viewChild
 } from '@angular/core';
-import {CdkConnectedOverlay, CdkOverlayOrigin, ConnectedPosition, ScrollStrategy, ScrollStrategyOptions} from '@angular/cdk/overlay';
+import {
+  CdkConnectedOverlay,
+  CdkOverlayOrigin,
+  ConnectedPosition,
+  ScrollStrategy,
+  ScrollStrategyOptions
+} from '@angular/cdk/overlay';
 import {FormControl, FormGroup, ReactiveFormsModule} from '@angular/forms';
 import {Observable, ReplaySubject} from 'rxjs';
 import {auditTime, filter, map, shareReplay, switchMap, take, tap} from 'rxjs/operators';
-import {KEY_CODES} from 'src/app/shared/_services/utility.service';
 import {TypeaheadSettings} from '../_models/typeahead-settings';
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import {TagBadgeComponent} from "../../shared/tag-badge/tag-badge.component";
 import {TranslocoDirective} from "@jsverse/transloco";
 import {SelectionModel} from "../_models/selection-model";
+import {KEY_CODES} from "../../shared/_services/utility.service";
 
 @Component({
   selector: 'app-typeahead',

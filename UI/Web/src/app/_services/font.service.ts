@@ -1,6 +1,6 @@
 import {effect, inject, Injectable} from "@angular/core";
 import {EpubFont, FontDeleteResult, FontProvider} from "../_models/preferences/epub-font";
-import {environment} from 'src/environments/environment';
+import {environment} from '../../environments/environment';
 import {HttpClient} from "@angular/common/http";
 import {NgxFileDropEntry} from "ngx-file-drop";
 import {AccountService} from "./account.service";

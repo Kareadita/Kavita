@@ -61,7 +61,7 @@
               @if ((messageHub.onlineUsersSignal() ?? []).includes(member.username)) {
                 {{t('online-now-tooltip')}}
               } @else {
-                {{member.lastActiveUtc | utcToLocalDate | timeAgo | sentenceCase | defaultDate}}
+                {{member.lastActiveUtc | utcToLocalDate | timeDifference | sentenceCase | defaultDate}}
               }
             </span>
           </ng-template>
@@ -117,7 +117,7 @@
                 @if ((messageHub.onlineUsers$ | async)?.includes(member.username)) {
                   {{t('online-now-tooltip')}}
                 } @else {
-                  {{member.lastActiveUtc | utcToLocalDate | timeAgo | sentenceCase | defaultDate}}
+                  {{member.lastActiveUtc | utcToLocalDate | timeDifference | sentenceCase | defaultDate}}
                 }
               </div>
             </div>

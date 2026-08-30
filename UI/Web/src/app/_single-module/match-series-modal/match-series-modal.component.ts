@@ -16,6 +16,7 @@ import {FormControl, FormGroup, ReactiveFormsModule} from "@angular/forms";
 import {NgbActiveModal, NgbTooltip} from "@ng-bootstrap/ng-bootstrap";
 import {TranslocoDirective} from "@jsverse/transloco";
 import {ExternalSeriesMatch} from "../../_models/series-detail/external-series-match";
+import {ToastrService} from '@openng/ngx-toastr';
 import {catchError, filter, of, pairwise, skip, startWith, tap} from "rxjs";
 import {takeUntilDestroyed, toSignal} from "@angular/core/rxjs-interop";
 import {EmptyStateComponent} from "../../shared/_components/empty-state/empty-state.component";

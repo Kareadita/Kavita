@@ -1,9 +1,9 @@
 import {HttpClient} from '@angular/common/http';
 import {inject, Injectable} from '@angular/core';
-import {TextResonse} from 'src/app/_types/text-response';
-import {environment} from 'src/environments/environment';
 import {BookChapterItem} from '../_models/book-chapter-item';
 import {BookInfo} from '../_models/book-info';
+import {TextResonse} from "../../_types/text-response";
+import {environment} from "../../../environments/environment";
 
 @Injectable({
   providedIn: 'root'

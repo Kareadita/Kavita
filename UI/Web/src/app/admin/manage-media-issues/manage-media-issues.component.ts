@@ -1,8 +1,6 @@
 import {ChangeDetectionStrategy, Component, computed, DestroyRef, inject, OnInit, output, signal} from '@angular/core';
 import {filter, shareReplay} from 'rxjs';
 import {KavitaMediaError} from '../_models/media-error';
-import {ServerService} from 'src/app/_services/server.service';
-import {EVENTS, MessageHubService} from 'src/app/_services/message-hub.service';
 import {FormControl, FormGroup, ReactiveFormsModule} from '@angular/forms';
 import {takeUntilDestroyed, toSignal} from "@angular/core/rxjs-interop";
 import {TranslocoDirective} from "@jsverse/transloco";
@@ -11,12 +9,15 @@ import {UtcToLocalTimePipe} from "../../_pipes/utc-to-local-time.pipe";
 import {DefaultDatePipe} from "../../_pipes/default-date.pipe";
 import {NgxDatatableModule} from "@siemens/ngx-datatable";
 import {ResponsiveTableComponent} from "../../shared/_components/responsive-table/responsive-table.component";
+import {ServerService} from "../../_services/server.service";
+import {EVENTS, MessageHubService} from "../../_services/message-hub.service";
+import {FormFieldDirective} from "../../_directives/form-field.directive";
 
 @Component({
   selector: 'app-manage-media-issues',
   templateUrl: './manage-media-issues.component.html',
   styleUrls: ['./manage-media-issues.component.scss'],
-  imports: [ReactiveFormsModule, TranslocoDirective, UtcToLocalTimePipe, DefaultDatePipe, NgxDatatableModule, ResponsiveTableComponent],
+  imports: [ReactiveFormsModule, TranslocoDirective, UtcToLocalTimePipe, DefaultDatePipe, NgxDatatableModule, ResponsiveTableComponent, FormFieldDirective],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ManageMediaIssuesComponent implements OnInit {

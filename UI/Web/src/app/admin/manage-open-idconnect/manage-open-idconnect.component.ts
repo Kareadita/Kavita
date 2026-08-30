@@ -33,7 +33,7 @@ import {AgeRatingDto} from "../../_models/metadata/age-rating-dto";
 import {AccountService, allRoles, Role} from "../../_services/account.service";
 import {Library} from "../../_models/library/library";
 import {LibraryService} from "../../_services/library.service";
-import {ToastrService} from "ngx-toastr";
+import {ToastrService} from '@openng/ngx-toastr';
 import {SafeHtmlPipe} from "../../_pipes/safe-html.pipe";
 import {DefaultValuePipe} from "../../_pipes/default-value.pipe";
 import {
@@ -47,7 +47,9 @@ import {environment} from "../../../environments/environment";
 import {SlicePipe} from "@angular/common";
 import {NgbTooltip} from "@ng-bootstrap/ng-bootstrap";
 import {ConfirmService} from "../../shared/confirm.service";
-import {AuthorityValidationResultPipe} from "./authority-validation-result.pipe";
+import {AuthorityValidationResultPipe} from "../../_pipes/authority-validation-result.pipe";
+import {ValidationErrorsComponent} from "../../shared/_components/validation-errors/validation-errors.component";
+import {FormFieldDirective} from "../../_directives/form-field.directive";
 
 type OidcFormGroup = FormGroup<{
   autoLogin: FormControl<boolean>;
@@ -82,7 +84,8 @@ type OidcFormGroup = FormGroup<{
     SettingMultiTextFieldComponent,
     SlicePipe,
     NgbTooltip,
-    AuthorityValidationResultPipe
+    AuthorityValidationResultPipe,
+    FormFieldDirective
   ],
   templateUrl: './manage-open-idconnect.component.html',
   styleUrl: './manage-open-idconnect.component.scss',

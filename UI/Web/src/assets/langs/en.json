@@ -17,7 +17,6 @@
         "title": "Sign in to your account",
         "username": "{{common.username}}",
         "password": "{{common.password}}",
-        "password-validation": "{{validation.password-validation}}",
         "forgot-password": "Forgot Password?",
         "submit": "Sign in",
         "oidc": "OpenID Connect"
@@ -53,7 +52,6 @@
         "behavior-title": "Behavior",
         "other-field-required": "{{validation.other-field-required}}",
         "other-field-invalid": "{{validation.other-field-invalid}}",
-        "invalid-uri": "{{validation.invalid-uri}}",
         "tls-required": "The OIDC provider must use tls (https)",
         "checking-authority": "Checking if the authority is valid, please be patient...",
         "manual-save-label": "Changing provider settings requires a manual save",
@@ -125,7 +123,6 @@
         "name-label": "Name",
         "key-length-label": "Key Length",
         "expiration-label": "Expiration",
-        "required-field": "{{validation.required-field}}",
         "total-key-length": "Total Key Length: {{length}}",
         "cancel": "{{common.cancel}}",
         "close": "{{common.close}}",
@@ -152,7 +149,6 @@
         "edit": "{{common.edit}}",
         "close": "{{common.close}}",
         "username": "{{common.username}}",
-        "required": "{{validation.required-field}}",
         "email": "{{common.email}}",
         "invalid-email-warning": "A non-valid email will block some functionalities of Kavita",
         "warning-read-only": "Read Only accounts have limited permissions",
@@ -192,8 +188,7 @@
         "close": "{{common.close}}",
         "save": "{{common.save}}",
         "delete": "{{common.delete}}",
-        "min-length": "Review must be at least {{count}} characters",
-        "required": "{{validation.required-field}}"
+        "min-length": "Review must be at least {{count}} characters"
     },
 
     "review-card-modal": {
@@ -452,9 +447,7 @@
         "email-tooltip": "This email will be used to accept the file via Send To",
         "save": "{{common.save}}",
         "close": "{{common.close}}",
-        "cancel": "{{common.cancel}}",
-        "required-field": "{{validation.required-field}}",
-        "valid-email": "{{validation.valid-email}}"
+        "cancel": "{{common.cancel}}"
     },
 
     "client-device-card": {
@@ -478,7 +471,6 @@
         "confirm-password-label": "Confirm Password",
         "reset": "{{common.reset}}",
         "save": "{{common.save}}",
-        "required-field": "{{validation.required-field}}",
         "passwords-must-match": "Passwords must match",
         "permission-error": "You do not have permission to change your password. Reach out to the admin of the server."
     },
@@ -487,8 +479,7 @@
         "username-label": "{{common.username}}",
         "new-username-label": "New Username",
         "reset": "{{common.reset}}",
-        "save": "{{common.save}}",
-        "required-field": "{{validation.required-field}}"
+        "save": "{{common.save}}"
     },
 
     "change-email": {
@@ -503,8 +494,6 @@
         "invite-url-label": "Invite Url",
         "invite-url-tooltip": "Copy this and paste in a new tab",
         "has-invalid-email": "It looks like you do not have a valid email set. Change email will require the admin to send you a link to complete this action.",
-        "required-field": "{{validation.required-field}}",
-        "valid-email": "{{validation.valid-email}}",
         "reset": "{{common.reset}}",
         "save": "{{common.save}}"
     },
@@ -849,8 +838,6 @@
         "title": "Password Reset",
         "description": "Enter the email of your account. Kavita will send you an email if a valid one is on file, otherwise ask the admin to reset your password.",
         "email-label": "{{common.email}}",
-        "required-field": "{{validation.required-field}}",
-        "valid-email": "{{validation.valid-email}}",
         "submit": "{{common.submit}}"
     },
 
@@ -928,7 +915,6 @@
         "close": "{{common.close}}",
         "description": "Invite a user to your server by entering their email. They'll receive an email to create an account. For this to work you must have the Host Name and Email setting fields set in the <a href=\"/settings#admin-email\" rel=\"noopener noreferrer\" target=\"_blank\">Email</a> tab, otherwise a link will be presented to you to setup on the user's behalf.<br/><br/>The email is not required to be valid.",
         "email": "{{common.email}}",
-        "required-field": "{{common.required-field}}",
         "setup-user-title": "User invited",
         "setup-user-description": "You can use the following link below to setup the account for your user or use the copy button. You may need to log out before using the link to register a new user.",
         "setup-user-account": "Setup user's account",
@@ -960,7 +946,6 @@
         "email-help": "This is the email registered with Stripe",
         "license-help": "For your security, the stored key is encrypted on disk, re-enter it to update.",
         "help-label": "{{common.help}}",
-        "required-field-validation": "{{validation.required-field}}",
         "license-length-validation": "License key is expected to be 19 characters long",
         "license-format-validation": "License is expected to be formatted as: XXXX-XXXX-XXXX-XXXX",
         "discord-format-validation": "Discord ID expected to be 19 number user id",
@@ -1386,7 +1371,6 @@
         "bookmark": "Bookmark",
         "annotate": "Annotate",
         "close": "{{common.close}}",
-        "required-field": "{{common.required-field}}",
         "bookmark-label": "Bookmark Name",
         "save": "{{common.save}}"
     },
@@ -1500,8 +1484,6 @@
         "username-label": "{{common.username}}",
         "password-label": "{{common.password}}",
         "email-label": "{{common.email}}",
-        "required-field": "{{common.required-field}}",
-        "valid-email": "{{common.valid-email}}",
         "password-validation": "{{validation.password-validation}}",
         "register": "Register",
         "error-label": "Error:"
@@ -1518,7 +1500,6 @@
         "title": "Password Reset",
         "description": "Enter the new password",
         "password-label": "{{common.password}}",
-        "required-field": "{{validation.required-field}}",
         "submit": "{{common.submit}}",
         "password-validation": "{{validation.password-validation}}"
     },
@@ -1530,8 +1511,6 @@
         "email-label": "{{common.email}}",
         "email-tooltip": "Email does not need to be a real address, but provides access to forgot password. It is not sent outside the server unless Kavita emails you.",
         "password-label": "{{common.password}}",
-        "required-field": "{{validation.required-field}}",
-        "valid-email": "{{validation.valid-email}}",
         "password-validation": "{{validation.password-validation}}",
         "register": "Register"
     },
@@ -2046,7 +2025,6 @@
         "cancel": "{{common.cancel}}",
         "next": "Next",
         "save": "{{common.save}}",
-        "required-field": "{{validation.required-field}}",
         "file-type-group-label": "File Types",
         "file-type-group-tooltip": "What types of files should Kavita scan for. For example, Archive will include all cb*, zip, rar, etc files.",
         "exclude-patterns-label": "Exclude Patterns",
@@ -2607,7 +2585,6 @@
 
     "edit-collection-tags": {
         "title": "Edit {{collectionName}} Collection",
-        "required-field": "{{validation.required-field}}",
         "save": "{{common.save}}",
         "close": "{{common.close}}",
         "cancel": "{{common.cancel}}",
@@ -3244,7 +3221,6 @@
         "year-validation": "Must be greater than 1000, 0 or blank",
         "month-validation": "Must be between 1 and 12 or blank",
         "name-unique-validation": "Name must be unique",
-        "required-field": "{{validation.required-field}}",
         "name-label": "{{edit-series-modal.name-label}}",
         "summary-label": "Summary",
         "year-label": "Year",
@@ -3520,7 +3496,6 @@
         "age-rating-label": "{{metadata-fields.age-rating-title}}",
 
         "publication-status-label": "Publication Status",
-        "required-field": "{{validation.required-field}}",
         "close": "{{common.close}}",
         "name-label": "Name",
         "align-sort-name": "You've renamed this series but its sort name is locked. Update the sort name to match the new name?",
@@ -3652,9 +3627,7 @@
         "hardcover-tooltip": "https://hardcover.app/authors/{HardcoverId}",
         "asin-label": "ASIN",
         "asin-tooltip": "https://www.amazon.com/stores/J.K.-Rowling/author/{ASIN}",
-        "invalid-amazon-code": "ASIN should start with B0 or BT",
         "description-label": "Description",
-        "required-field": "{{validation.required-field}}",
         "cover-image-description": "{{edit-series-modal.cover-image-description}}",
         "cover-image-description-extra": "Alternatively you can download a cover from CoversDB if available.",
         "save": "{{common.save}}",
@@ -4121,7 +4094,6 @@
         "edit-smart-filter": "Edit {{name}}",
         "name-label": "Name",
         "entity-type-label": "Entity Type",
-        "required-field": "Smart Filters need a name",
         "filter-name-unique": "Smart Filter names must be unique",
         "no-content": "This smart filter has no results on the dashboard"
     },
@@ -4137,8 +4109,7 @@
         "edit": "{{common.edit}}",
         "cancel": "{{common.cancel}}",
         "delete": "{{common.delete}}",
-        "pattern": "Host must be a valid http(s):// url",
-        "required": "{{validation.required-field}}"
+        "pattern": "Host must be a valid http(s):// url"
     },
 
     "stream-pipe": {
@@ -4736,9 +4707,15 @@
         "other-field-required": "{{name}} is required when {{other}} is set",
         "other-field-invalid": "Cannot check validity, {{other}} is invalid",
         "valid-email": "This must be a valid email",
+        "email-invalid": "This must be a valid email",
+        "min-length": "This must be at least {{requiredLength}} characters",
         "password-validation": "Password must be between 6 and 256 characters in length",
         "year-validation": "This must be a valid year greater than 1000 and 4 characters long",
-        "invalid-uri": "The provided uri is invalid"
+        "invalid-uri": "The provided uri is invalid",
+        "min": "Value must be greater than {{min}}",
+        "max": "Value must be less than {{max}}",
+        "invalid-amazon-code": "ASIN should start with B0 or BT",
+        "invalid-asin": "This isn't a valid ASIN"
     },
 
     "entity-type": {

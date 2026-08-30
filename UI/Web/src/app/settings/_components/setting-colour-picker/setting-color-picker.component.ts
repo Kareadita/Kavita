@@ -1,4 +1,5 @@
 import {
+  ChangeDetectionStrategy,
   Component,
   DestroyRef,
   ElementRef,
@@ -26,6 +27,7 @@ import {Breakpoint, BreakpointService} from "../../../_services/breakpoint.servi
   standalone: true,
   imports: [SlotColorPipe, LongClickDirective, ChromePickerComponent, NgClass, NgStyle],
   templateUrl: './setting-color-picker.component.html',
+  changeDetection: ChangeDetectionStrategy.OnPush,
   styleUrl: './setting-color-picker.component.scss'
 })
 export class SettingColorPickerComponent implements OnInit {
@@ -108,7 +110,7 @@ export class SettingColorPickerComponent implements OnInit {
       .pipe(
         takeUntilDestroyed(this.destroyRef),
         distinctUntilChanged(),
-        debounceTime(500), // TODO: Find a fitting time, or move to explicit save?
+        debounceTime(500),
         tap((color) => {
           const rgba: RgbaColor = {
             a: color.getRgba().alpha,

@@ -2,7 +2,7 @@ import {HttpClient} from '@angular/common/http';
 import {effect, inject, Injectable, signal} from '@angular/core';
 import {DOCUMENT, Location} from '@angular/common';
 import {Router} from '@angular/router';
-import {environment} from 'src/environments/environment';
+import {environment} from '../../environments/environment';
 import {ChapterInfo} from '../manga-reader/_models/chapter-info';
 import {Chapter} from '../_models/chapter';
 import {HourEstimateRange} from '../_models/series-detail/hour-estimate-range';
@@ -19,7 +19,7 @@ import {FilterV2} from "../_models/metadata/v2/filter-v2";
 import NoSleep from 'nosleep.js';
 import {Volume} from "../_models/volume";
 import {translate} from "@jsverse/transloco";
-import {ToastrService} from "ngx-toastr";
+import {ToastrService} from '@openng/ngx-toastr';
 import {SeriesFilterField} from "../_models/metadata/v2/series-filter-field";
 import {ModalService, TypedModalRef} from "./modal.service";
 import {catchError, map, merge, Observable, of, switchMap, tap} from "rxjs";
@@ -44,7 +44,6 @@ enum RereadPromptResult {
 export const CHAPTER_ID_DOESNT_EXIST = -1;
 export const CHAPTER_ID_NOT_FETCHED = -2;
 
-const MS_IN_DAY = 1000 * 60 * 60 * 24;
 
 @Injectable({
   providedIn: 'root'
@@ -343,9 +342,13 @@ export class ReaderService {
   }
 
   toggleFullscreen() {
+    const curr = screenfull.isFullscreen;
     if (screenfull.isEnabled) {
       screenfull.toggle();
+      return !curr;
     }
+
+    return false;
   }
 
   exitFullscreen() {

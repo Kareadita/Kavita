@@ -1,6 +1,6 @@
 import {ChangeDetectionStrategy, Component, computed, inject, OnInit, signal} from '@angular/core';
 import {AccountService} from '../../_services/account.service';
-import {ToastrService} from 'ngx-toastr';
+import {ToastrService} from '@openng/ngx-toastr';
 import {ConfirmService} from '../../shared/confirm.service';
 import {ModalService} from '../../_services/modal.service';
 import {NgTemplateOutlet} from '@angular/common';
@@ -24,15 +24,15 @@ import {ImageComponent} from '../../shared/image/image.component';
 import {RouterLink} from '@angular/router';
 import {fullscreenModal} from "../../_models/modal/modal-options";
 import {ModalResult} from "../../_models/modal/modal-result";
-import {
-  FileDragAndDropUploadComponent
-} from "src/app/shared/file-drag-and-drop-upload/file-drag-and-drop-upload.component";
 import {UtcToLocalDatePipe} from "../../_pipes/utc-to-locale-date.pipe";
-import {TimeAgoPipe} from "../../_pipes/time-ago.pipe";
 import {AgeRatingImageComponent} from "../../_single-module/age-rating-image/age-rating-image.component";
 import {DateYearRangePipe} from "../../_pipes/date-year-range.pipe";
 import {SafeUrlPipe} from "../../_pipes/safe-url.pipe";
 import {NgbDropdown, NgbDropdownItem, NgbDropdownMenu, NgbDropdownToggle, NgbTooltip} from "@ng-bootstrap/ng-bootstrap";
+import {TimeDifferencePipe} from "../../_pipes/time-difference.pipe";
+import {
+  FileDragAndDropUploadComponent
+} from "../../shared/file-drag-and-drop-upload/file-drag-and-drop-upload.component";
 
 @Component({
   selector: 'app-cbl-manager',
@@ -49,14 +49,14 @@ import {NgbDropdown, NgbDropdownItem, NgbDropdownMenu, NgbDropdownToggle, NgbToo
     RouterLink,
     FileDragAndDropUploadComponent,
     UtcToLocalDatePipe,
-    TimeAgoPipe,
     AgeRatingImageComponent,
     SafeUrlPipe,
     NgbTooltip,
     NgbDropdown,
     NgbDropdownItem,
     NgbDropdownMenu,
-    NgbDropdownToggle
+    NgbDropdownToggle,
+    TimeDifferencePipe
   ],
   templateUrl: './cbl-manager.component.html',
   styleUrl: './cbl-manager.component.scss',

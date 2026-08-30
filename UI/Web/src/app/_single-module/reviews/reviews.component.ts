@@ -12,8 +12,8 @@ import {Series} from "../../_models/series";
 import {Chapter} from "../../_models/chapter";
 import {ModalService} from "../../_services/modal.service";
 import {AccountService} from "../../_services/account.service";
-import {RatingAuthority} from "src/app/_models/rating";
-import {ScrobbleProvider} from "src/app/_services/scrobbling.service";
+import {ScrobbleProvider} from "../../_services/scrobbling.service";
+import {RatingAuthority} from "../../_models/rating";
 
 @Component({
   selector: 'app-reviews',

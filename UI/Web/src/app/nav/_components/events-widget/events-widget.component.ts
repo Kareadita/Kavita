@@ -1,21 +1,21 @@
 import {ChangeDetectionStrategy, Component, computed, DestroyRef, inject, input, OnInit, signal} from '@angular/core';
 import {NgbPopover} from '@ng-bootstrap/ng-bootstrap';
-import {ConfirmConfig} from 'src/app/shared/confirm-dialog/_models/confirm-config';
-import {ConfirmService} from 'src/app/shared/confirm.service';
-import {DownloadService} from 'src/app/shared/_services/download.service';
-import {ErrorEvent} from 'src/app/_models/events/error-event';
-import {InfoEvent} from 'src/app/_models/events/info-event';
-import {NotificationProgressEvent} from 'src/app/_models/events/notification-progress-event';
-import {UpdateVersionEvent} from 'src/app/_models/events/update-version-event';
-import {User} from 'src/app/_models/user/user';
-import {AccountService} from 'src/app/_services/account.service';
-import {EVENTS, Message, MessageHubService} from 'src/app/_services/message-hub.service';
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import {NgStyle} from '@angular/common';
 import {TranslocoDirective} from "@jsverse/transloco";
 import {RouterLink} from "@angular/router";
 import {ReadingSessionUpdateEvent} from "../../../_models/events/reading-session-close-event";
 import {VersionService} from "../../../_services/version.service";
+import {EVENTS, Message, MessageHubService} from "../../../_services/message-hub.service";
+import {DownloadService} from "../../../shared/_services/download.service";
+import {AccountService} from "../../../_services/account.service";
+import {ConfirmService} from "../../../shared/confirm.service";
+import {User} from "../../../_models/user/user";
+import {NotificationProgressEvent} from "../../../_models/events/notification-progress-event";
+import {InfoEvent} from "../../../_models/events/info-event";
+import {ErrorEvent} from "../../../_models/events/error-event";
+import {UpdateVersionEvent} from "../../../_models/events/update-version-event";
+import {ConfirmConfig} from "../../../shared/confirm-dialog/_models/confirm-config";
 
 @Component({
   selector: 'app-nav-events-toggle',

@@ -12,34 +12,29 @@
 
     <div class="row g-0 mt-2">
       @if (settingsForm.get('hostName'); as formControl) {
-        <app-setting-item [title]="t('host-name-label')" [subtitle]="t('host-name-tooltip')" [control]="formControl">
+        <app-setting-item [title]="t('host-name-label')" [subtitle]="t('host-name-tooltip')" [control]="formControl" labelId="settings-hostname"
+                          [validations]="{pattern: t('host-name-validation')}">
           <ng-template #view>
             {{formControl.value | defaultValue}}
           </ng-template>
           <ng-template #edit>
-            <input id="settings-hostname" aria-describedby="hostname-validations" class="form-control" formControlName="hostName" type="text"
-                   [class.is-invalid]="formControl.invalid && !formControl.untouched" appEnterBlur>
-
-            @if (formControl.errors; as errors) {
-              <div id="hostname-validations" class="invalid-feedback" style="display: inline-block">
-                @if (errors.pattern) {
-                  <div>{{t('host-name-validation')}}</div>
-                }
-              </div>
-            }
+            <input id="settings-hostname" aria-describedby="settings-hostname-validations" class="form-control" formControlName="hostName" type="text"
+                   [appFormField]="formControl" appEnterBlur>
           </ng-template>
+
+
         </app-setting-item>
       }
     </div>
 
     <div class="row g-0 mt-2">
       @if (settingsForm.get('senderAddress'); as formControl) {
-        <app-setting-item [title]="t('sender-address-label')" [subtitle]="t('sender-address-tooltip')">
+        <app-setting-item [title]="t('sender-address-label')" [subtitle]="t('sender-address-tooltip')" [control]="formControl" labelId="settings-sender-address">
           <ng-template #view>
             {{formControl.value | defaultValue}}
           </ng-template>
           <ng-template #edit>
-            <input type="text" class="form-control" formControlName="senderAddress" id="settings-sender-address" appEnterBlur/>
+            <input type="text" class="form-control" formControlName="senderAddress" id="settings-sender-address" appEnterBlur [appFormField]="formControl" />
           </ng-template>
         </app-setting-item>
       }
@@ -47,12 +42,12 @@
 
     <div class="row g-0 mt-2">
       @if (settingsForm.get('senderDisplayName'); as formControl) {
-        <app-setting-item [title]="t('sender-displayname-label')" [subtitle]="t('sender-displayname-tooltip')">
+        <app-setting-item [title]="t('sender-displayname-label')" [subtitle]="t('sender-displayname-tooltip')" [control]="formControl" labelId="settings-sender-displayname">
           <ng-template #view>
             {{formControl.value | defaultValue}}
           </ng-template>
           <ng-template #edit>
-            <input type="text" class="form-control" formControlName="senderDisplayName" id="settings-sender-displayname" appEnterBlur />
+            <input type="text" class="form-control" formControlName="senderDisplayName" id="settings-sender-displayname" appEnterBlur [appFormField]="formControl" />
           </ng-template>
         </app-setting-item>
       }
@@ -60,13 +55,13 @@
 
     <div class="row g-0 mt-2">
       @if (settingsForm.get('host'); as formControl) {
-        <app-setting-item [title]="t('host-label')" [subtitle]="t('host-tooltip')">
+        <app-setting-item [title]="t('host-label')" [subtitle]="t('host-tooltip')" [control]="formControl" labelId="settings-host">
           <ng-template #view>
             {{formControl.value | defaultValue}}
           </ng-template>
           <ng-template #edit>
             <div class="input-group">
-              <input type="text" class="form-control" formControlName="host" id="settings-host" appEnterBlur />
+              <input type="text" class="form-control" formControlName="host" id="settings-host" appEnterBlur [appFormField]="formControl" />
               <button type="button" class="btn btn-outline-secondary" (click)="autofillGmail()">{{t('gmail-label')}}</button>
               <button type="button" class="btn btn-outline-secondary" (click)="autofillOutlook()">{{t('outlook-label')}}</button>
             </div>
@@ -77,12 +72,12 @@
 
     <div class="row g-0 mt-2">
       @if (settingsForm.get('port'); as formControl) {
-        <app-setting-item [title]="t('port-label')">
+        <app-setting-item [title]="t('port-label')" [control]="formControl" labelId="settings-port">
           <ng-template #view>
             {{formControl.value | defaultValue}}
           </ng-template>
           <ng-template #edit>
-            <input type="number" inputmode="numeric" min="1" class="form-control" formControlName="port" id="settings-port" appEnterBlur />
+            <input type="number" inputmode="numeric" min="1" class="form-control" formControlName="port" id="settings-port" appEnterBlur [appFormField]="formControl" />
           </ng-template>
         </app-setting-item>
       }
@@ -90,10 +85,10 @@
 
     <div class="row g-0 mt-2">
       @if(settingsForm.get('enableSsl'); as formControl) {
-        <app-setting-switch labelId="setting-enable-ssl" [title]="t('enable-ssl-label')">
-          <ng-template #switch>
+        <app-setting-switch [title]="t('enable-ssl-label')">
+          <ng-template>
             <div class="form-check form-switch float-end">
-              <input id="setting-enable-ssl" type="checkbox" class="form-check-input" formControlName="enableSsl">
+              <input type="checkbox" class="form-check-input" formControlName="enableSsl">
             </div>
           </ng-template>
         </app-setting-switch>
@@ -102,12 +97,12 @@
 
     <div class="row g-0 mt-2">
       @if (settingsForm.get('userName'); as formControl) {
-        <app-setting-item [title]="t('username-label')" [subtitle]="t('username-tooltip')">
+        <app-setting-item [title]="t('username-label')" [subtitle]="t('username-tooltip')" [control]="formControl" labelId="settings-username">
           <ng-template #view>
             {{formControl.value | defaultValue}}
           </ng-template>
           <ng-template #edit>
-            <input type="text" class="form-control" formControlName="userName" id="settings-username" appEnterBlur />
+            <input type="text" class="form-control" formControlName="userName" id="settings-username" appEnterBlur [appFormField]="formControl" />
           </ng-template>
         </app-setting-item>
       }
@@ -115,12 +110,12 @@
 
     <div class="row g-0 mt-2">
       @if (settingsForm.get('password'); as formControl) {
-        <app-setting-item [title]="t('password-label')">
+        <app-setting-item [title]="t('password-label')" [control]="formControl" labelId="settings-password">
           <ng-template #view>
             {{formControl.value ? '********' : null | defaultValue}}
           </ng-template>
           <ng-template #edit>
-            <input type="text" class="form-control" formControlName="password" id="settings-password" appEnterBlur />
+            <input type="text" class="form-control" formControlName="password" id="settings-password" appEnterBlur [appFormField]="formControl" />
           </ng-template>
         </app-setting-item>
       }
@@ -128,12 +123,12 @@
 
     <div class="row g-0 mt-2">
       @if (settingsForm.get('sizeLimit'); as formControl) {
-        <app-setting-item [title]="t('size-limit-label')" [subtitle]="t('size-limit-tooltip')">
+        <app-setting-item [title]="t('size-limit-label')" [subtitle]="t('size-limit-tooltip')" [control]="formControl" labelId="settings-size-limit">
           <ng-template #view>
             {{formControl.value | bytes}}
           </ng-template>
           <ng-template #edit>
-            <input type="number" inputmode="numeric" min="1" class="form-control" formControlName="sizeLimit" id="settings-size-limit" appEnterBlur />
+            <input type="number" inputmode="numeric" min="1" class="form-control" formControlName="sizeLimit" id="settings-size-limit" appEnterBlur [appFormField]="formControl" />
           </ng-template>
         </app-setting-item>
       }
@@ -142,9 +137,9 @@
     <div class="row g-0 mt-2">
       @if(settingsForm.get('customizedTemplates'); as formControl) {
         <app-setting-switch [title]="t('customized-templates-label')" [subtitle]="t('customized-templates-tooltip')">
-          <ng-template #switch>
+          <ng-template>
             <div class="form-check form-switch float-end">
-              <input id="settings-customized-templates" type="checkbox" class="form-check-input" formControlName="customizedTemplates">
+              <input type="checkbox" class="form-check-input" formControlName="customizedTemplates">
             </div>
           </ng-template>
         </app-setting-switch>

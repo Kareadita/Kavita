@@ -169,8 +169,8 @@
             <div class="mt-1">
               @if (selectedItem.canSync) {
                 <div class="mt-3 text-muted" style="font-size: 0.8rem;">
-                  <div>{{t('last-synced', {date: (selectedItem.lastSyncedUtc | utcToLocalDate | timeAgo)})}}</div>
-                  <div>{{t('last-checked', {date: (selectedItem.lastSyncCheckUtc | utcToLocalDate | timeAgo)})}}</div>
+                  <div>{{t('last-synced', {date: (selectedItem.lastSyncedUtc | utcToLocalDate | timeDifference)})}}</div>
+                  <div>{{t('last-checked', {date: (selectedItem.lastSyncCheckUtc | utcToLocalDate | timeDifference)})}}</div>
                   @if (selectedItem.canSync) {
                     <div>
                       <a [href]="(selectedItem.downloadUrl ?? selectedItem.sourcePath) | safeUrl" target="_blank" rel="noopener noreferrer">{{t('source')}}</a>

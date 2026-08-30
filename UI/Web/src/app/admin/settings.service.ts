@@ -1,7 +1,7 @@
 import {HttpClient, httpResource} from '@angular/common/http';
 import {inject, Injectable} from '@angular/core';
 import {map, of} from 'rxjs';
-import {environment} from 'src/environments/environment';
+import {environment} from '../../environments/environment';
 import {TextResonse} from '../_types/text-response';
 import {ServerSettings} from './_models/server-settings';
 import {MetadataSettings} from "./_models/metadata-settings";

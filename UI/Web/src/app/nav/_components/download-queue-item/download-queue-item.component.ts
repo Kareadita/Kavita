@@ -5,16 +5,16 @@ import {TranslocoDirective} from "@jsverse/transloco";
 import {ImageComponent} from '../../../shared/image/image.component';
 import {ImageService} from '../../../_services/image.service';
 import {DownloadQueueStatusPipe} from "../../../_pipes/download-queue-status.pipe";
-import {TimeAgoPipe} from "../../../_pipes/time-ago.pipe";
 import {CompactEtaPipe} from "../../../_pipes/compact-eta.pipe";
 import {TagBadgeColor, TagBadgeComponent, TagBadgeCursor} from "../../../shared/tag-badge/tag-badge.component";
+import {TimeDifferencePipe} from "../../../_pipes/time-difference.pipe";
 
 @Component({
   selector: 'app-download-queue-item',
   templateUrl: './download-queue-item.component.html',
   styleUrls: ['./download-queue-item.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [BytesPipe, TranslocoDirective, ImageComponent, DownloadQueueStatusPipe, TimeAgoPipe, CompactEtaPipe, TagBadgeComponent]
+  imports: [BytesPipe, TranslocoDirective, ImageComponent, DownloadQueueStatusPipe, CompactEtaPipe, TagBadgeComponent, TimeDifferencePipe]
 })
 export class DownloadQueueItemComponent {
   private readonly imageService = inject(ImageService);
@@ -34,7 +34,6 @@ export class DownloadQueueItemComponent {
       case DownloadEntityType.Chapter: return this.imageService.getChapterCoverImage(item.entityId);
       case DownloadEntityType.ReadingListItem: return this.imageService.getChapterCoverImage(item.chapterId!);
     }
-    return '';
   });
 
   readonly statusBadgeColor = computed<TagBadgeColor>(() => {

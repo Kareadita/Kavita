@@ -20,6 +20,8 @@ import {LoadingComponent} from "../../loading/loading.component";
 import {VirtualScrollerModule} from "@iharbeck/ngx-virtual-scroller";
 import {Observable} from "rxjs";
 import {modalSaved} from "../../../_models/modal/modal-result";
+import {FormFieldDirective} from "../../../_directives/form-field.directive";
+import {ValidationErrorsComponent} from "../validation-errors/validation-errors.component";
 
 /**
  * A single selectable item in the list.
@@ -39,8 +41,7 @@ export type ListSelectionItem<T> = {
     SentenceCasePipe,
     NgTemplateOutlet,
     LoadingComponent,
-    VirtualScrollerModule
-  ],
+    VirtualScrollerModule, FormFieldDirective, ValidationErrorsComponent],
   templateUrl: './list-select-modal.component.html',
   styleUrl: './list-select-modal.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush

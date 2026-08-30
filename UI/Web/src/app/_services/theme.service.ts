@@ -11,9 +11,9 @@ import {
   SecurityContext
 } from '@angular/core';
 import {DomSanitizer} from '@angular/platform-browser';
-import {ToastrService} from 'ngx-toastr';
-import {EMPTY, map, of, ReplaySubject, take, tap} from 'rxjs';
-import {environment} from 'src/environments/environment';
+import {ToastrService} from '@openng/ngx-toastr';
+import {EMPTY, map, ReplaySubject, take, tap} from 'rxjs';
+import {environment} from '../../environments/environment';
 import {ConfirmService} from '../shared/confirm.service';
 import {NotificationProgressEvent} from '../_models/events/notification-progress-event';
 import {SiteTheme, ThemeProvider} from '../_models/preferences/site-theme';

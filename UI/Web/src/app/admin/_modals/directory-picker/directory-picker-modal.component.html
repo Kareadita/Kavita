@@ -5,13 +5,14 @@
   </div>
   <div class="modal-body">
 
+    @let formControl = pathControl;
     <div class="mb-3">
       <label for="typeahead-focus" class="form-label">{{t('path-label')}}</label>
       <div class="input-group">
-        <input id="typeahead-focus" type="text" class="form-control" style="width: 100%" [formControl]="pathControl" [ngbTypeahead]="search"
+        <input id="typeahead-focus" type="text" class="form-control" style="width: 100%" [formControl]="formControl" [ngbTypeahead]="search"
           (focus)="focus$.next($any($event).target.value)" (click)="click$.next($any($event).target.value)"
           #instance="ngbTypeahead" [placeholder]="t('path-placeholder')"
-          [resultTemplate]="rt" />
+          [resultTemplate]="rt" [appFormField]="formControl" />
         </div>
         <ng-template #rt let-r="result" let-t="term">
           <ngb-highlight [result]="r" [term]="t" />

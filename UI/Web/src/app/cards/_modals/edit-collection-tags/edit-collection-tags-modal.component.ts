@@ -20,18 +20,8 @@ import {
   NgbPagination,
   NgbTooltip
 } from '@ng-bootstrap/ng-bootstrap';
-import {ToastrService} from 'ngx-toastr';
+import {ToastrService} from '@openng/ngx-toastr';
 import {concat, debounceTime, delay, distinctUntilChanged, forkJoin, last, Observable, switchMap, tap} from 'rxjs';
-import {ConfirmService} from 'src/app/shared/confirm.service';
-import {UtilityService} from 'src/app/shared/_services/utility.service';
-import {UserCollection} from 'src/app/_models/collection-tag';
-import {Pagination} from 'src/app/_models/pagination';
-import {Series} from 'src/app/_models/series';
-import {CollectionTagService} from 'src/app/_services/collection-tag.service';
-import {ImageService} from 'src/app/_services/image.service';
-import {LibraryService} from 'src/app/_services/library.service';
-import {SeriesService} from 'src/app/_services/series.service';
-import {UploadService} from 'src/app/_services/upload.service';
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import {DecimalPipe, NgTemplateOutlet} from "@angular/common";
 import {CoverImageChooserComponent} from "../../cover-image-chooser/cover-image-chooser.component";
@@ -52,13 +42,25 @@ import {BreakpointService} from "../../../_services/breakpoint.service";
 import {modalSaved} from "../../../_models/modal/modal-result";
 import {Tabs} from "../../../_models/tabs";
 import {TabTitlePipe} from "../../../_pipes/tab-title.pipe";
+import {UtilityService} from "../../../shared/_services/utility.service";
+import {SeriesService} from "../../../_services/series.service";
+import {CollectionTagService} from "../../../_services/collection-tag.service";
+import {ConfirmService} from "../../../shared/confirm.service";
+import {LibraryService} from "../../../_services/library.service";
+import {UploadService} from "../../../_services/upload.service";
+import {UserCollection} from "../../../_models/collection-tag";
+import {Pagination} from "../../../_models/pagination";
+import {ImageService} from "../../../_services/image.service";
+import {Series} from "../../../_models/series";
+import {ValidationErrorsComponent} from "../../../shared/_components/validation-errors/validation-errors.component";
+import {FormFieldDirective} from "../../../_directives/form-field.directive";
 
 
 @Component({
   selector: 'app-edit-collection-tags',
   imports: [NgbNav, NgbNavItem, NgbNavLink, NgbNavContent, ReactiveFormsModule, FormsModule, NgbPagination,
     CoverImageChooserComponent, NgbNavOutlet, NgbTooltip, TranslocoDirective, NgTemplateOutlet, FilterPipe, DefaultDatePipe,
-    SafeHtmlPipe, SafeUrlPipe, DecimalPipe, UtcToLocalTimePipe, TabTitlePipe],
+    SafeHtmlPipe, SafeUrlPipe, DecimalPipe, UtcToLocalTimePipe, TabTitlePipe, ValidationErrorsComponent, FormFieldDirective],
   templateUrl: './edit-collection-tags-modal.component.html',
   styleUrls: ['./edit-collection-tags-modal.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush

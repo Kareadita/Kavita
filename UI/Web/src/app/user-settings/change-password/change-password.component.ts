@@ -7,18 +7,28 @@ import {
   OnDestroy,
   OnInit
 } from '@angular/core';
-import {FormControl, FormGroup, ReactiveFormsModule, Validators} from '@angular/forms';
-import {ToastrService} from 'ngx-toastr';
-import {AccountService} from 'src/app/_services/account.service';
+import {
+  AbstractControl,
+  FormControl,
+  FormGroup,
+  ReactiveFormsModule,
+  ValidationErrors,
+  ValidatorFn,
+  Validators
+} from '@angular/forms';
+import {ToastrService} from '@openng/ngx-toastr';
 import {translate, TranslocoDirective} from "@jsverse/transloco";
 import {SettingItemComponent} from "../../settings/_components/setting-item/setting-item.component";
+import {AccountService} from "../../_services/account.service";
+import {FormFieldDirective} from "../../_directives/form-field.directive";
+import {ValidationErrorsComponent} from "../../shared/_components/validation-errors/validation-errors.component";
 
 @Component({
     selector: 'app-change-password',
     templateUrl: './change-password.component.html',
     styleUrls: ['./change-password.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [ReactiveFormsModule, TranslocoDirective, SettingItemComponent]
+  imports: [ReactiveFormsModule, TranslocoDirective, SettingItemComponent, FormFieldDirective, ValidationErrorsComponent]
 })
 export class ChangePasswordComponent implements OnInit, OnDestroy {
 
@@ -34,7 +44,6 @@ export class ChangePasswordComponent implements OnInit, OnDestroy {
     return !readOnly && (isAdmin || changePassword);
   });
   observableHandles: Array<any> = [];
-  passwordsMatch = false;
   resetPasswordErrors: string[] = [];
   isEditMode: boolean = false;
 
@@ -45,14 +54,8 @@ export class ChangePasswordComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     this.passwordChangeForm.addControl('password', new FormControl('', [Validators.required]));
-    this.passwordChangeForm.addControl('confirmPassword', new FormControl('', [Validators.required]));
+    this.passwordChangeForm.addControl('confirmPassword', new FormControl('', [Validators.required, this.passwordMismatchValidator()]));
     this.passwordChangeForm.addControl('oldPassword', new FormControl('', [Validators.required]));
-
-    this.observableHandles.push(this.passwordChangeForm.valueChanges.subscribe(() => {
-      const values = this.passwordChangeForm.value;
-      this.passwordsMatch = values.password === values.confirmPassword;
-      this.cdRef.markForCheck();
-    }));
   }
 
   ngOnDestroy() {
@@ -84,5 +87,21 @@ export class ChangePasswordComponent implements OnInit, OnDestroy {
   updateEditMode(mode: boolean) {
     this.isEditMode = mode;
     this.cdRef.markForCheck();
+  }
+
+  passwordMismatchValidator(): ValidatorFn {
+    return (control: AbstractControl) => {
+      const currentPassword = control.value;
+      if (!currentPassword || currentPassword.trim().length === 0) {
+        return null;
+      }
+
+      const values = this.passwordChangeForm.value;
+      const passwordsMismatch = values.password !== currentPassword;
+      if (!passwordsMismatch) return null;
+      
+      return { 'passwordMismatch': passwordsMismatch } as ValidationErrors;
+
+    }
   }
 }

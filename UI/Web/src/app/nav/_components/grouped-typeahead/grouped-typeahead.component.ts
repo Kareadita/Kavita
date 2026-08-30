@@ -15,8 +15,6 @@ import {
 } from '@angular/core';
 import {FormControl, FormGroup, ReactiveFormsModule} from '@angular/forms';
 import {debounceTime, distinctUntilChanged} from 'rxjs/operators';
-import {KEY_CODES} from 'src/app/shared/_services/utility.service';
-import {SearchResultGroup} from 'src/app/_models/search/search-result-group';
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import {NgClass, NgTemplateOutlet} from '@angular/common';
 import {TranslocoDirective} from "@jsverse/transloco";
@@ -24,6 +22,7 @@ import {map, startWith, tap} from "rxjs";
 import {KeyBindEvent, KeyBindService} from "../../../_services/key-bind.service";
 import {KeyBindTarget} from "../../../_models/preferences/preferences";
 import {KeyBindPipe} from "../../../_pipes/key-bind.pipe";
+import {SearchResultGroup} from "../../../_models/search/search-result-group";
 
 export interface SearchEvent {
   value: string;

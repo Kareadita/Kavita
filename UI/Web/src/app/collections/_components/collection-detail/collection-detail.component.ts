@@ -15,20 +15,6 @@ import {
 import {ActivatedRoute, Router} from '@angular/router';
 import {NgbTooltip} from '@ng-bootstrap/ng-bootstrap';
 import {debounceTime} from 'rxjs/operators';
-import {BulkSelectionService} from 'src/app/cards/bulk-selection.service';
-import {FilterUtilitiesService} from 'src/app/shared/_services/filter-utilities.service';
-import {UtilityService} from 'src/app/shared/_services/utility.service';
-import {UserCollection} from 'src/app/_models/collection-tag';
-import {SeriesAddedToCollectionEvent} from 'src/app/_models/events/series-added-to-collection-event';
-import {Pagination} from 'src/app/_models/pagination';
-import {Series} from 'src/app/_models/series';
-import {FilterEvent, SeriesSortField} from 'src/app/_models/metadata/series-filter';
-import {CollectionTagService} from 'src/app/_services/collection-tag.service';
-import {ImageService} from 'src/app/_services/image.service';
-import {JumpbarService} from 'src/app/_services/jumpbar.service';
-import {EVENTS, MessageHubService} from 'src/app/_services/message-hub.service';
-import {ScrollService} from 'src/app/_services/scroll.service';
-import {SeriesService} from 'src/app/_services/series.service';
 import {SeriesCardComponent} from '../../../cards/series-card/series-card.component';
 import {CardDetailLayoutComponent} from '../../../cards/card-detail-layout/card-detail-layout.component';
 import {BulkOperationsComponent} from '../../../cards/bulk-operations/bulk-operations.component';
@@ -65,6 +51,20 @@ import {getWritableResolvedData} from "../../../../libs/route-util";
 import {User} from "../../../_models/user/user";
 import {DrawerService} from "../../../_services/drawer.service";
 import {UtcToLocalTimePipe} from "../../../_pipes/utc-to-local-time.pipe";
+import {ImageService} from "../../../_services/image.service";
+import {BulkSelectionService} from "../../../cards/bulk-selection.service";
+import {CollectionTagService} from "../../../_services/collection-tag.service";
+import {SeriesService} from "../../../_services/series.service";
+import {EVENTS, MessageHubService} from "../../../_services/message-hub.service";
+import {FilterUtilitiesService} from "../../../shared/_services/filter-utilities.service";
+import {UtilityService} from "../../../shared/_services/utility.service";
+import {ScrollService} from "../../../_services/scroll.service";
+import {FilterEvent, SeriesSortField} from "../../../_models/metadata/series-filter";
+import {SeriesAddedToCollectionEvent} from "../../../_models/events/series-added-to-collection-event";
+import {UserCollection} from "../../../_models/collection-tag";
+import {Series} from "../../../_models/series";
+import {Pagination} from "../../../_models/pagination";
+import {JumpbarService} from "../../../_services/jumpbar.service";
 
 @Component({
   selector: 'app-collection-detail',

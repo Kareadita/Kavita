@@ -1,6 +1,6 @@
 import {inject, Injectable} from '@angular/core';
 import {NgbModalRef} from '@ng-bootstrap/ng-bootstrap';
-import {ToastrService} from 'ngx-toastr';
+import {ToastrService} from '@openng/ngx-toastr';
 import {catchError, finalize, map, take} from 'rxjs/operators';
 import {ListSelectModalComponent} from '../shared/_components/list-select-modal/list-select-modal.component';
 import {ScrobbleProvider} from './scrobbling.service';
@@ -62,8 +62,8 @@ import {NavService} from "./nav.service";
 import {ModalResult} from "../_models/modal/modal-result";
 import {addToModal, editModal} from "../_models/modal/modal-options";
 import {ModalService, TypedModalRef} from "./modal.service";
-import {FilterService} from "src/app/_services/filter.service";
 import {DashboardService} from "./dashboard.service";
+import {FilterService} from "./filter.service";
 
 
 export type LibraryActionCallback = (library: Partial<Library>) => void;
@@ -808,7 +808,7 @@ export class ActionService {
 
       case Action.Merge:
         const ref2 = this.modalService.open(MergePersonModalComponent, editModal());
-        ref2.componentInstance.person = person;
+        ref2.setInput('person', person);
 
         return from(ref2.closed).pipe(
           filter((res: ModalResult<Person>) => res.success),
@@ -825,7 +825,7 @@ export class ActionService {
    * Centralized handler for all smart filter actions.
    * Returns Observable<ActionResult<SmartFilter>> so the caller can react to effects.
    */
-  handleSmartFilterAction(action: ActionItem<SmartFilter>, smartFilter: SmartFilter, allFilters: SmartFilter[]) {
+  handleSmartFilterAction(action: ActionItem<SmartFilter>, smartFilter: SmartFilter) {
     switch (action.action) {
       case Action.AddToDashboard:
         return this.dashboardService.createDashboardStream(smartFilter.id).pipe(
@@ -837,8 +837,8 @@ export class ActionService {
         );
       case Action.Edit:
         const ref = this.modalService.open(EditSmartFilterModalComponent, editModal());
-        ref.componentInstance.smartFilter = smartFilter;
-        ref.componentInstance.allFilters = allFilters;
+        ref.setInput('smartFilter', smartFilter);
+
         return this.handleEditModal(ref, action, smartFilter);
       case Action.Delete:
       return from(this.confirmService.confirm(translate('toasts.confirm-delete-smart-filter'))).pipe(

@@ -1,6 +1,6 @@
 import {HttpClient} from '@angular/common/http';
 import {inject, Injectable} from '@angular/core';
-import {environment} from 'src/environments/environment';
+import {environment} from '../../environments/environment';
 import {ServerInfoSlim} from '../admin/_models/server-info';
 import {UpdateVersionEvent} from '../_models/events/update-version-event';
 import {Job} from '../_models/job/job';

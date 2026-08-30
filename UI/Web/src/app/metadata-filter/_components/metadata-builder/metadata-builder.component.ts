@@ -9,9 +9,6 @@ import {
   OnInit,
   output
 } from '@angular/core';
-import {MetadataService} from 'src/app/_services/metadata.service';
-import {UtilityService} from 'src/app/shared/_services/utility.service';
-import {FilterV2} from 'src/app/_models/metadata/v2/filter-v2';
 import {MetadataFilterRowComponent} from "../metadata-filter-row/metadata-filter-row.component";
 import {FilterStatement} from "../../../_models/metadata/v2/filter-statement";
 import {FormControl, FormGroup, FormsModule, ReactiveFormsModule} from "@angular/forms";
@@ -23,6 +20,9 @@ import {distinctUntilChanged, tap} from "rxjs/operators";
 import {translate, TranslocoDirective} from "@jsverse/transloco";
 import {ValidFilterEntity} from "../../filter-settings";
 import {BreakpointService} from "../../../_services/breakpoint.service";
+import {FilterV2} from "../../../_models/metadata/v2/filter-v2";
+import {MetadataService} from "../../../_services/metadata.service";
+import {UtilityService} from "../../../shared/_services/utility.service";
 
 @Component({
   selector: 'app-metadata-builder',

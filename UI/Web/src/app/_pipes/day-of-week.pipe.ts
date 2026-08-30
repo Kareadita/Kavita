@@ -1,6 +1,6 @@
 import {Pipe, PipeTransform} from '@angular/core';
-import { DayOfWeek } from 'src/app/_services/statistics.service';
 import {translate} from "@jsverse/transloco";
+import {DayOfWeek} from "../_services/statistics.service";
 
 @Pipe({
   name: 'dayOfWeek',

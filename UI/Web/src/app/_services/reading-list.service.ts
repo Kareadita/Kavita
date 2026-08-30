@@ -1,7 +1,7 @@
 import {HttpClient, HttpParams} from '@angular/common/http';
 import {inject, Injectable} from '@angular/core';
 import {map} from 'rxjs/operators';
-import {environment} from 'src/environments/environment';
+import {environment} from '../../environments/environment';
 import {UtilityService} from '../shared/_services/utility.service';
 import {Person, PersonRole} from '../_models/metadata/person';
 import {PaginatedResult} from '../_models/pagination';

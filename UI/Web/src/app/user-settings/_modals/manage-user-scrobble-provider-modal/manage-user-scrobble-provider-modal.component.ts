@@ -1,4 +1,4 @@
-import {ChangeDetectionStrategy, Component, computed, inject, model, OnInit, signal} from '@angular/core';
+import {ChangeDetectionStrategy, Component, computed, inject, model, OnInit} from '@angular/core';
 import {UserScrobbleProvider} from "../../../_models/kavitaplus/scrobble-providers/user-scrobble-provider";
 import {ScrobbleProvider, ScrobblingService} from "../../../_services/scrobbling.service";
 import {NgbActiveModal, NgbTooltip} from "@ng-bootstrap/ng-bootstrap";
@@ -10,7 +10,7 @@ import {ScrobbleProviderNamePipe} from "../../../_pipes/scrobble-provider-name.p
 import {TruncatePipe} from "../../../_pipes/truncate.pipe";
 import {UtcToLocalTimePipe} from "../../../_pipes/utc-to-local-time.pipe";
 import {UtcToLocalDatePipe} from "../../../_pipes/utc-to-locale-date.pipe";
-import {ToastrService} from "ngx-toastr";
+import {ToastrService} from '@openng/ngx-toastr';
 import {
   ScrobbleProviderImageComponent
 } from "../../../shared/_components/scrobble-provider-image/scrobble-provider-image.component";
@@ -20,9 +20,6 @@ import {NULL_DATE} from "../../../_pipes/date-year-range.pipe";
 import {AccountService} from "../../../_services/account.service";
 import {SafeUrlPipe} from "../../../_pipes/safe-url.pipe";
 import {APP_BASE_HREF} from "@angular/common";
-import {ActivatedRoute} from "@angular/router";
-import {filter} from "rxjs";
-import {map, tap} from "rxjs/operators";
 
 @Component({
   selector: 'app-manage-user-scrobble-provider-modal-modal',

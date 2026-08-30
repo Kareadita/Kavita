@@ -6,29 +6,29 @@
 
 
   <form class="row g-0 justify-content-between mb-3" [formGroup]="listForm">
-    <div class="col-9">
-      <label for="filter" class="form-label">{{t('filter')}}</label>
-      <div class="input-group">
-        <input id="filter" autocomplete="off" class="form-control" formControlName="filterQuery" type="text" aria-describedby="reset-input">
-        <button class="btn btn-outline-secondary" type="button" id="reset-input" (click)="resetFilter()">{{t('clear')}}</button>
+    @if (listForm.get('filterQuery'); as formControl) {
+      <div class="col-9">
+        <label for="filter" class="form-label">{{t('filter')}}</label>
+        <div class="input-group">
+          <input id="filter" autocomplete="off" class="form-control" formControlName="filterQuery" type="text" aria-describedby="reset-input" [appFormField]="formControl">
+          <button class="btn btn-outline-secondary" type="button" id="reset-input" (click)="resetFilter()">{{t('clear')}}</button>
+        </div>
       </div>
-    </div>
+    }
     <div class="col-auto ms-2 float-end">
       <button class="btn btn-primary" style="margin-top: 1.875rem" (click)="addNewExternalSource()">{{t('add-source')}}</button>
     </div>
   </form>
 
-  @for(externalSource of externalSources | filter: filterList; track externalSource; let idx = $index) {
+  @for(externalSource of filteredExternalSources(); track externalSource; let idx = $index) {
     <app-edit-external-source-item [source]="externalSource"
                                    (sourceUpdate)="updateSource(idx, $event)"
                                    (sourceDelete)="deleteSource(idx, $event)"
                                    [isViewMode]="externalSource.id !== 0" />
   } @empty {
-    <ul>
-      <li class="list-group-item">
-        {{t('no-data')}}
-      </li>
-    </ul>
+    <app-empty-state titleKey="no-data"  [i18nPrefix]="'manage-external-sources'">
+      <i icon class="fa-solid fa-magnifying-glass" aria-hidden="true"></i>
+    </app-empty-state>
   }
 
 </ng-container>

@@ -1,17 +1,20 @@
-import {Component, inject, input} from '@angular/core';
+import {ChangeDetectionStrategy, Component, inject, input} from '@angular/core';
 import {FormControl, FormGroup, ReactiveFormsModule, Validators} from '@angular/forms';
 import {NgbActiveModal} from '@ng-bootstrap/ng-bootstrap';
-import {Member} from 'src/app/_models/auth/member';
-import {AccountService} from 'src/app/_services/account.service';
 import {SentenceCasePipe} from '../../../_pipes/sentence-case.pipe';
 import {translate, TranslocoDirective} from "@jsverse/transloco";
-import {ToastrService} from "ngx-toastr";
+import {ToastrService} from '@openng/ngx-toastr';
+import {AccountService} from "../../../_services/account.service";
+import {Member} from "../../../_models/auth/member";
+import {FormFieldDirective} from "../../../_directives/form-field.directive";
+import {ValidationErrorsComponent} from "../../../shared/_components/validation-errors/validation-errors.component";
 
 @Component({
   selector: 'app-reset-password-modal',
   templateUrl: './reset-password-modal.component.html',
   styleUrls: ['./reset-password-modal.component.scss'],
-  imports: [ReactiveFormsModule, SentenceCasePipe, TranslocoDirective]
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [ReactiveFormsModule, SentenceCasePipe, TranslocoDirective, FormFieldDirective, ValidationErrorsComponent]
 })
 export class ResetPasswordModalComponent {
 
@@ -21,9 +24,8 @@ export class ResetPasswordModalComponent {
 
   member = input.required<Member>();
 
-  errorMessage = '';
   resetPasswordForm: FormGroup = new FormGroup({
-    password: new FormControl('', [Validators.required]),
+    password: new FormControl('', [Validators.required, Validators.minLength(4)]),
   });
 
 

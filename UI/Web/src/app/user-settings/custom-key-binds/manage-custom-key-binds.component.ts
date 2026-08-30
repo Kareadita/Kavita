@@ -22,7 +22,7 @@ import {AccountService} from "../../_services/account.service";
 import {DefaultValuePipe} from "../../_pipes/default-value.pipe";
 import {LongClickDirective} from "../../_directives/long-click.directive";
 import {NgbTooltip} from "@ng-bootstrap/ng-bootstrap";
-import {ToastrService} from "ngx-toastr";
+import {ToastrService} from '@openng/ngx-toastr';
 import {LicenseService} from "../../_services/license.service";
 import {KeybindSettingDescriptionPipe} from "../../_pipes/keybind-setting-description.pipe";
 import {DOCUMENT} from "@angular/common";

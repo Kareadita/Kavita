@@ -1,7 +1,7 @@
 import {HttpClient, HttpParams} from '@angular/common/http';
 import {inject, Injectable} from '@angular/core';
 import {map} from 'rxjs/operators';
-import {environment} from 'src/environments/environment';
+import {environment} from '../../environments/environment';
 import {TextResonse} from '../_types/text-response';
 import {ScrobbleError} from "../_models/scrobbling/scrobble-error";
 import {ScrobbleEvent} from "../_models/scrobbling/scrobble-event";

@@ -2,7 +2,7 @@ import {HttpClient, HttpParams} from '@angular/common/http';
 import {computed, inject, Injectable} from '@angular/core';
 import {tap} from 'rxjs/operators';
 import {map, Observable, of} from 'rxjs';
-import {environment} from 'src/environments/environment';
+import {environment} from '../../environments/environment';
 import {Genre} from '../_models/metadata/genre';
 import {AgeRatingDto} from '../_models/metadata/age-rating-dto';
 import {Language} from '../_models/metadata/language';
@@ -148,7 +148,7 @@ export class MetadataService {
 
 
   /**
-   * All the potential language tags there can be
+   * All the potential language tags there can be. Cached in memory.
    */
   getAllValidLanguages() {
     if (this.validLanguages != undefined && this.validLanguages.length > 0) {

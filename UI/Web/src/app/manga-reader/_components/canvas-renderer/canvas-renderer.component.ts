@@ -2,7 +2,8 @@ import {
   AfterViewInit,
   ChangeDetectionStrategy,
   ChangeDetectorRef,
-  Component, DestroyRef,
+  Component,
+  DestroyRef,
   ElementRef,
   inject,
   Input,
@@ -10,18 +11,18 @@ import {
   output,
   viewChild
 } from '@angular/core';
-import { filter, map, Observable, of, tap } from 'rxjs';
-import { PageSplitOption } from 'src/app/_models/preferences/page-split-option';
-import { ReaderService } from 'src/app/_services/reader.service';
-import { LayoutMode } from '../../_models/layout-mode';
-import { FITTING_OPTION, PAGING_DIRECTION, SPLIT_PAGE_PART } from '../../_models/reader-enums';
-import { ReaderSetting } from '../../_models/reader-setting';
-import { ImageRenderer } from '../../_models/renderer';
-import { MangaReaderService } from '../../_service/manga-reader.service';
+import {filter, map, Observable, of, tap} from 'rxjs';
+import {LayoutMode} from '../../_models/layout-mode';
+import {FITTING_OPTION, PAGING_DIRECTION, SPLIT_PAGE_PART} from '../../_models/reader-enums';
+import {ReaderSetting} from '../../_models/reader-setting';
+import {ImageRenderer} from '../../_models/renderer';
+import {MangaReaderService} from '../../_service/manga-reader.service';
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
-import { SafeStylePipe } from '../../../_pipes/safe-style.pipe';
-import { NgClass, AsyncPipe } from '@angular/common';
+import {SafeStylePipe} from '../../../_pipes/safe-style.pipe';
+import {AsyncPipe, NgClass} from '@angular/common';
 import {isSafari} from "../../../_helpers/browser";
+import {PageSplitOption} from "../../../_models/preferences/page-split-option";
+import {ReaderService} from "../../../_services/reader.service";
 
 const ValidSplits = [PageSplitOption.SplitLeftToRight, PageSplitOption.SplitRightToLeft];
 

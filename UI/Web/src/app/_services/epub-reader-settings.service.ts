@@ -12,7 +12,7 @@ import {debounceTime, distinctUntilChanged, filter, tap} from "rxjs/operators";
 import {BookTheme} from "../_models/preferences/book-theme";
 import {DOCUMENT} from "@angular/common";
 import {translate} from "@jsverse/transloco";
-import {ToastrService} from "ngx-toastr";
+import {ToastrService} from '@openng/ngx-toastr';
 import {takeUntilDestroyed} from '@angular/core/rxjs-interop';
 import {UtilityService} from "../shared/_services/utility.service";
 import {environment} from "../../environments/environment";

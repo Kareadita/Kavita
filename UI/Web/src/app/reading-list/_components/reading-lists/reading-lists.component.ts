@@ -10,13 +10,6 @@ import {
   TemplateRef,
   viewChild,
 } from '@angular/core';
-import {JumpKey} from 'src/app/_models/jumpbar/jump-key';
-import {PaginatedResult, Pagination} from 'src/app/_models/pagination';
-import {ReadingList} from 'src/app/_models/reading-list/reading-list';
-import {AccountService} from 'src/app/_services/account.service';
-import {ActionService} from 'src/app/_services/action.service';
-import {JumpbarService} from 'src/app/_services/jumpbar.service';
-import {ReadingListService} from 'src/app/_services/reading-list.service';
 import {CardDetailLayoutComponent} from '../../../cards/card-detail-layout/card-detail-layout.component';
 import {DecimalPipe} from '@angular/common';
 import {
@@ -45,6 +38,13 @@ import {ActivatedRoute} from "@angular/router";
 import {MetadataService} from "../../../_services/metadata.service";
 import {UtilityService} from "../../../shared/_services/utility.service";
 import {ReadingListComponent} from "../reading-list/reading-list.component";
+import {ReadingListService} from "../../../_services/reading-list.service";
+import {AccountService} from "../../../_services/account.service";
+import {ActionService} from "../../../_services/action.service";
+import {ReadingList} from "../../../_models/reading-list/reading-list";
+import {PaginatedResult, Pagination} from "../../../_models/pagination";
+import {JumpbarService} from "../../../_services/jumpbar.service";
+import {JumpKey} from "../../../_models/jumpbar/jump-key";
 
 @Component({
   selector: 'app-reading-lists',

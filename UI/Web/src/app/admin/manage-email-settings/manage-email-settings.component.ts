@@ -1,6 +1,6 @@
 import {ChangeDetectionStrategy, ChangeDetectorRef, Component, DestroyRef, inject, OnInit} from '@angular/core';
 import {FormControl, FormGroup, ReactiveFormsModule, Validators} from '@angular/forms';
-import {ToastrService} from 'ngx-toastr';
+import {ToastrService} from '@openng/ngx-toastr';
 import {catchError, debounceTime, distinctUntilChanged, filter, of, switchMap, tap} from 'rxjs';
 import {SettingsService} from '../settings.service';
 import {ServerSettings} from '../_models/server-settings';
@@ -11,13 +11,15 @@ import {DefaultValuePipe} from "../../_pipes/default-value.pipe";
 import {BytesPipe} from "../../_pipes/bytes.pipe";
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import {EnterBlurDirective} from "../../_directives/enter-blur.directive";
+import {pattern} from "@angular/forms/signals";
+import {FormFieldDirective} from "../../_directives/form-field.directive";
 
 @Component({
     selector: 'app-manage-email-settings',
     templateUrl: './manage-email-settings.component.html',
     styleUrls: ['./manage-email-settings.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush,
-    imports: [ReactiveFormsModule, TranslocoModule, SettingItemComponent, SettingSwitchComponent, DefaultValuePipe, BytesPipe, EnterBlurDirective]
+  imports: [ReactiveFormsModule, TranslocoModule, SettingItemComponent, SettingSwitchComponent, DefaultValuePipe, BytesPipe, EnterBlurDirective, FormFieldDirective]
 })
 export class ManageEmailSettingsComponent implements OnInit {
 
@@ -134,4 +136,6 @@ export class ManageEmailSettingsComponent implements OnInit {
       }
     });
   }
+
+  protected readonly pattern = pattern;
 }

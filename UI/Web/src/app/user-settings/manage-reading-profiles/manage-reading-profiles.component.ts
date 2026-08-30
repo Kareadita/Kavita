@@ -53,7 +53,7 @@ import {NgbNav, NgbNavContent, NgbNavItem, NgbNavLinkBase, NgbNavOutlet, NgbTool
 import {catchError, filter, forkJoin, of, switchMap} from "rxjs";
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import {LoadingComponent} from "../../shared/loading/loading.component";
-import {ToastrService} from "ngx-toastr";
+import {ToastrService} from '@openng/ngx-toastr';
 import {ConfirmService} from "../../shared/confirm.service";
 import {WikiLink} from "../../_models/wiki";
 import {BreakpointPipe} from "../../_pipes/breakpoint.pipe";
@@ -71,6 +71,7 @@ import {ClientDevice} from "../../_models/client-device";
 import {TabTitlePipe} from "../../_pipes/tab-title.pipe";
 import {Tabs} from "../../_models/tabs";
 import {EpubFontTitlePipe} from "../../_pipes/epub-font-title.pipe";
+import {FormFieldDirective} from "../../_directives/form-field.directive";
 
 
 @Component({
@@ -106,8 +107,7 @@ import {EpubFontTitlePipe} from "../../_pipes/epub-font-title.pipe";
     BreakpointPipe,
     SettingColorPickerComponent,
     TabTitlePipe,
-    EpubFontTitlePipe
-  ],
+    EpubFontTitlePipe, FormFieldDirective],
   templateUrl: './manage-reading-profiles.component.html',
   styleUrl: './manage-reading-profiles.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

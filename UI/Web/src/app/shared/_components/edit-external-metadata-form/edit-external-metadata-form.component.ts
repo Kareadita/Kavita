@@ -3,6 +3,7 @@ import {FormControl, FormGroup, FormsModule, ReactiveFormsModule} from "@angular
 import {IHasMetadataIds} from "../../../_models/common/i-has-metadata-ids";
 import {TranslocoDirective} from "@jsverse/transloco";
 import {SettingItemComponent} from "../../../settings/_components/setting-item/setting-item.component";
+import {FormFieldDirective} from "../../../_directives/form-field.directive";
 
 export const HAS_METADATA_DEFAULTS: Required<IHasMetadataIds> = {
   aniListId: 0,
@@ -30,8 +31,7 @@ export function addMetadataIdControls(form: FormGroup, metadata: IHasMetadataIds
     TranslocoDirective,
     SettingItemComponent,
     FormsModule,
-    ReactiveFormsModule
-  ],
+    ReactiveFormsModule, FormFieldDirective],
   templateUrl: './edit-external-metadata-form.component.html',
   styleUrl: './edit-external-metadata-form.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

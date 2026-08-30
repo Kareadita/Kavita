@@ -1,14 +1,14 @@
 import {ChangeDetectionStrategy, Component, effect, inject, signal} from '@angular/core';
-import {ToastrService} from 'ngx-toastr';
-import {AgeRestriction} from 'src/app/_models/metadata/age-restriction';
-import {AgeRating} from 'src/app/_models/metadata/age-rating';
-import {AccountService} from 'src/app/_services/account.service';
+import {ToastrService} from '@openng/ngx-toastr';
 import {AgeRatingPipe} from '../../_pipes/age-rating.pipe';
 import {RestrictionSelectorComponent} from '../restriction-selector/restriction-selector.component';
 import {NgClass} from '@angular/common';
 import {translate, TranslocoDirective} from "@jsverse/transloco";
 import {ReactiveFormsModule} from "@angular/forms";
 import {SettingItemComponent} from "../../settings/_components/setting-item/setting-item.component";
+import {AccountService} from "../../_services/account.service";
+import {AgeRestriction} from "../../_models/metadata/age-restriction";
+import {AgeRating} from "../../_models/metadata/age-rating";
 
 @Component({
     selector: 'app-change-age-restriction',
