@@ -7,6 +7,9 @@ using Microsoft.Extensions.Logging;
 
 namespace Kavita.Server.ManualMigrations.v0._9._1;
 
+/// <summary>
+/// v0.9.1 we received reports of broken CoverImageSizes which broke saving some forms.
+/// </summary>
 public class ManualMigrateCoverImageSettings: ManualMigration
 {
     protected override string MigrationName => nameof(ManualMigrateCoverImageSettings);
