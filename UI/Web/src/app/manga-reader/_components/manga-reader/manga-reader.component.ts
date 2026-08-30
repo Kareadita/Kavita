@@ -29,7 +29,7 @@ import {
   merge,
   Observable,
   ReplaySubject,
-  Subject,
+  Subject, switchMap,
   tap
 } from 'rxjs';
 import {ChangeContext, LabelType, NgxSliderModule, Options} from '@angular-slider/ngx-slider';
@@ -410,6 +410,11 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
    * Has the user scrolled to the far bottom of the screen
    */
   hasHitBottomTopScroll: boolean = false;
+
+  /**
+   * Has the progress of the current chapter been forced to 0 because of paging into a completed chapter
+   */
+  isReRead: boolean = false;
 
   /**
    * Show and log debug information
@@ -1050,6 +1055,7 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
     this.nextChapterDisabled = false;
     this.prevChapterDisabled = false;
     this.nextChapterPrefetched = false;
+    this.isReRead = false;
     this.pageNum = 0;
     this.pagingDirectionSubject.next(PAGING_DIRECTION.FORWARD);
     this.inSetup = true;
@@ -1128,10 +1134,8 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
       // it re-counts on completion (via reading sessions) instead of resuming at the last page.
       // Partially-read next chapters still resume where you left off. See readChapter()'s reread flow.
       if (direction === 'Next' && page >= this.maxPages) {
-        if (!this.incognitoMode) {
-          this.readerService.saveProgress(this.libraryId, this.seriesId, this.volumeId, this.chapterId, 0).subscribe();
-        }
         page = 0;
+        this.isReRead = true;
       } else {
         // When a chapter is completed, we store the last page (maxPages - 1) as progress maxPages
         // We need to correct for this when using it pageNum again. See setPageNum method for the correction logic
@@ -1718,6 +1722,16 @@ export class MangaReaderComponent implements OnInit, AfterViewInit, OnDestroy {
         //console.log('Same page, dropping request: ', this.pageNum)
         return;
       }
+
+      // If the current read is a re-read, and we've paged to the first page. First set progress to 0, then to 1.
+      // This ensures the session has the correct page count
+      if (this.isReRead && tempPageNum == 1) {
+        this.readerService.saveProgress(this.libraryId, this.seriesId, this.volumeId, this.chapterId, 0).pipe(
+          switchMap(() => this.readerService.saveProgress(this.libraryId, this.seriesId, this.volumeId, this.chapterId, tempPageNum))
+        ).subscribe();
+        return;
+      }
+
       this.readerService.saveProgress(this.libraryId, this.seriesId, this.volumeId, this.chapterId, tempPageNum).subscribe();
     }
   }
