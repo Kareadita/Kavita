@@ -6,6 +6,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Kavita.API.Repositories;
 using Kavita.API.Services.Plus;
+using Kavita.Common.Extensions;
 using Kavita.Common.Helpers;
 using Kavita.Database.Extensions;
 using Kavita.Models.DTOs.KavitaPlus;
@@ -185,6 +186,8 @@ public class KavitaPlusAuditRepository(DataContext context) : IKavitaPlusAuditRe
 
     private IQueryable<KavitaPlusAuditLog> BuildBaseQuery(KavitaPlusAuditFilterDto filter)
     {
+        var normalizedSeriesName = filter.Search?.ToNormalized() ?? string.Empty;
+
         return context.KavitaPlusAuditLogs
             .AsNoTracking()
             .WhereIf(filter.Category.HasValue, e => e.Category == filter.Category!.Value)
@@ -200,9 +203,9 @@ public class KavitaPlusAuditRepository(DataContext context) : IKavitaPlusAuditRe
             .WhereIf(filter.FromUtc.HasValue, e => e.CreatedUtc >= filter.FromUtc!.Value)
             .WhereIf(filter.ToUtc.HasValue, e => e.CreatedUtc <= filter.ToUtc!.Value)
             .WhereIf(!string.IsNullOrEmpty(filter.Search), e =>
-                context.Series.Any(s => s.Id == e.SeriesId && s.Name.Contains(filter.Search!)) ||
-                (e.User != null && e.User.UserName!.Contains(filter.Search!)) ||
-                (e.ErrorMessage != null && e.ErrorMessage.Contains(filter.Search!)))
+                context.Series.Any(s => s.Id == e.SeriesId && (s.NormalizedName.Contains(normalizedSeriesName) || s.NormalizedLocalizedName.Contains(normalizedSeriesName))) ||
+                (e.User != null && e.User.UserName != null && EF.Functions.Like(e.User.UserName, $"%{filter.Search}%")) ||
+                (e.ErrorMessage != null && EF.Functions.Like(e.ErrorMessage, $"%{filter.Search}%")))
             .OrderByDescending(e => e.CreatedUtc);
     }
 
