@@ -198,7 +198,7 @@
           <app-empty-state [isError]="true"
                            [titleKey]="'no-results-title'"
                            [descriptionKey]="'no-results-description'"
-                           [descriptionParams]="{ query: lastQuery() }"
+                           [descriptionParams]="{ query: lastQuery() ?? series().name }"
                            [i18nPrefix]="'match-series-modal'">
             <i icon class="fa-solid fa-magnifying-glass-minus" aria-hidden="true"></i>
           </app-empty-state>
