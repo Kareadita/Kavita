@@ -203,9 +203,7 @@ export class ReaderService {
   }
 
   getMokuro(chapterId: number): Observable<MokuroVolume | null> {
-    return this.httpClient.get<MokuroVolume>(this.baseUrl + 'reader/mokuro?chapterId=' + chapterId).pipe(
-      catchError(() => of(null))
-    );
+    return this.httpClient.get<MokuroVolume | null>(this.baseUrl + 'reader/mokuro?chapterId=' + chapterId);
   }
 
   getFileDimensions(chapterId: number) {

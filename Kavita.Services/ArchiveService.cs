@@ -98,9 +98,11 @@ public class ArchiveService(
 
     private static bool IsMokuroArchiveEntry(string path)
     {
-        return !string.IsNullOrWhiteSpace(path)
-               && !Parser.HasBlacklistedFolderInPath(Path.GetDirectoryName(path) ?? string.Empty)
-               && Path.GetExtension(path).Equals(".mokuro", StringComparison.OrdinalIgnoreCase);
+        if (string.IsNullOrWhiteSpace(path)) return false;
+
+        var normalizedPath = path.Replace('\\', '/');
+        return !Parser.HasBlacklistedFolderInPath(normalizedPath)
+               && Path.GetExtension(normalizedPath).Equals(".mokuro", StringComparison.OrdinalIgnoreCase);
     }
 
     private static byte[] ReadEntry(Stream stream, long length)

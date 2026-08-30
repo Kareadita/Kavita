@@ -164,10 +164,12 @@ public class ArchiveServiceTests
         }
     }
 
-    [Fact]
-    public void GetMokuroFileIgnoresBlacklistedFolders()
+    [Theory]
+    [InlineData("__MACOSX/book.mokuro")]
+    [InlineData(@"__MACOSX\book.mokuro")]
+    public void GetMokuroFileIgnoresBlacklistedFolders(string sidecarPath)
     {
-        var archivePath = CreateArchive(("__MACOSX/book.mokuro", "{}"));
+        var archivePath = CreateArchive((sidecarPath, "{}"));
 
         try
         {

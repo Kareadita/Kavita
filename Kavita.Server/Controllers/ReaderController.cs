@@ -128,7 +128,7 @@ public class ReaderController(ICacheService cacheService,
         if (mangaFile.Format != MangaFormat.Archive) return NotFound();
 
         var mokuro = archiveService.GetMokuroFile(mangaFile.FilePath);
-        if (mokuro == null) return NotFound();
+        if (mokuro == null) return NoContent();
 
         return File(mokuro, "application/json; charset=utf-8");
     }
