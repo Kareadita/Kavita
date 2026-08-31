@@ -51,15 +51,17 @@ public class ArchiveService(
             using var a2 = ZipFile.OpenRead(archivePath);
             return ArchiveLibrary.Default;
         }
-        catch (Exception)
+        catch (Exception ex)
         {
+            logger.LogTrace(ex, "[CanOpen/ZipFile] This archive cannot be read: {ArchivePath}", archivePath);
             try
             {
                 using var a1 = ArchiveFactory.OpenArchive(archivePath);
                 return ArchiveLibrary.SharpCompress;
             }
-            catch (Exception)
+            catch (Exception ex2)
             {
+                logger.LogTrace(ex2, "[CanOpen/ArchiveFactory] This archive cannot be read: {ArchivePath}", archivePath);
                 return ArchiveLibrary.NotSupported;
             }
         }
