@@ -103,7 +103,7 @@ public static partial class ExternalIdParser
 
     public static int GetMangaBakaId(string? weblinks)
     {
-        return ExtractId<int?>(weblinks, MangaBakaWebsite) ?? 0;
+        return ExtractId<int?>(weblinks, MangaBakaWebsite) ?? ExtractId<int?>(weblinks, MangaBakaWebsite, 1) ?? 0;
     }
 
     #region Header-based Parsing
@@ -194,12 +194,13 @@ public static partial class ExternalIdParser
     /// </summary>
     /// <param name="webLinks"></param>
     /// <param name="website"></param>
+    /// <param name="indexOverride"></param>
     /// <returns></returns>
-    private static T? ExtractId<T>(string? webLinks, string website)
+    private static T? ExtractId<T>(string? webLinks, string website, int? indexOverride = null)
     {
         if (string.IsNullOrEmpty(webLinks)) return default;
 
-        var index = WeblinkExtractionMap[website];
+        var index = indexOverride ?? WeblinkExtractionMap[website];
         foreach (var webLink in webLinks.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries))
         {
             if (!webLink.StartsWith(website)) continue;
@@ -212,7 +213,6 @@ public static partial class ExternalIdParser
             {
                 value = value.Split('?')[0];
             }
-
 
             if (typeof(T) == typeof(int?))
             {

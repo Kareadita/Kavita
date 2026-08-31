@@ -65,7 +65,7 @@ public class ExternalMetadataService : IExternalMetadataService
     private readonly IFileCacheService _fileCacheService;
     private readonly IKavitaPlusAuditService _auditService;
 
-    private const int SeriesPerRefresh = 25;
+    private const int SeriesPerRefresh = 40; // 50 - overhead for scans
     private readonly TimeSpan _externalSeriesMetadataCache = TimeSpan.FromDays(30);
     private readonly string[] _artistRoleStrings = [
         "Art", "Story & Art",  // AniList
