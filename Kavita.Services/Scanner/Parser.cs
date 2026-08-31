@@ -631,7 +631,7 @@ public static partial class Parser
         // Trailing (?(Range)|(?![a-zA-Z])) keeps this from matching inside ripper/scanlator tags like "(c1fi7)"
         // (a bare short number glued to more letters) while still allowing ranges like c001-006x1.
         new Regex(
-            @"(\b|_)(c|ch)(\.?\s?)(?<Chapter>(\d+(\.\d)?)(?<Range>-c?\d+(\.\d)?)?)(?(Range)|(?![a-zA-Z]))",
+            @"(\b|_)(c|ch)(\.?\s?)(?<Chapter>(?>\d+(\.\d)?)(?<Range>-c?\d+(\.\d)?)?)(?(Range)|(?:x\d+)?(?![a-zA-Z]))",
             MatchOptions, RegexTimeout),
         // [Suihei Kiki]_Kasumi_Otoko_no_Ko_[Taruby]_v1.1.zip
         new Regex(
