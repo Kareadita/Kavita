@@ -13,7 +13,7 @@
                   <input class="form-control custom-input" formControlName="username" id="username" autocomplete="username"
                          type="text" autofocus [placeholder]="t('username')"
                          [appFormField]="formControl" aria-describedby="username-validations">
-                  <app-validation-errors id="username" [control]="formControl" />
+                  <app-validation-errors inputId="username" [control]="formControl" />
                 </div>
               }
 
@@ -23,7 +23,7 @@
                   <input class="form-control custom-input" formControlName="password" name="password" autocomplete="current-password"
                          id="password" type="password" [placeholder]="t('password')"
                          [appFormField]="formControl" aria-describedby="password-validations">
-                  <app-validation-errors id="password" [control]="formControl" />
+                  <app-validation-errors inputId="password" [control]="formControl" />
                 </div>
               }
 

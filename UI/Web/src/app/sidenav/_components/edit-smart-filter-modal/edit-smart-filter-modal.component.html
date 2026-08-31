@@ -15,7 +15,7 @@
       @if (smartFilterForm.get('name'); as formControl) {
         <input id="smart-filter-title" class="form-control" formControlName="name" type="text"
                [appFormField]="formControl" aria-describedby="smart-filter-title-validations">
-        <app-validation-errors id="smart-filter-title" [control]="formControl" [messages]="{
+        <app-validation-errors inputId="smart-filter-title" [control]="formControl" [messages]="{
           duplicateName: t('filter-name-unique')
         }" />
       }

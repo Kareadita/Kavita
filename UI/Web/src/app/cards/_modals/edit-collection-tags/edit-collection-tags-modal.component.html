@@ -15,10 +15,10 @@
               <div class="col-md-8 col-sm-12">
                 @if (collectionTagForm.get('title'); as formControl) {
                   <label for="library-name" class="form-label">{{t('name-label')}}</label>
-                  <input id="library-name" class="form-control" formControlName="title" type="text" 
+                  <input id="library-name" class="form-control" formControlName="title" type="text"
                          [appFormField]="formControl" aria-describedby="library-name-validations">
 
-                  <app-validation-errors [control]="formControl" id="library-name" [messages]="{duplicateName: t('name-validation')}" />
+                  <app-validation-errors [control]="formControl" inputId="library-name" [messages]="{duplicateName: t('name-validation')}" />
                 }
 
               </div>

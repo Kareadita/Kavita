@@ -32,7 +32,7 @@
               <input id="name" class="form-control" formControlName="name" type="text"
                      [appFormField]="formControl" aria-describedby="name-validations">
 
-              <app-validation-errors id="name" [control]="formControl" [messages]="{
+              <app-validation-errors inputId="name" [control]="formControl" [messages]="{
                 notUnique: t('not-unique')
               }" />
             }
@@ -46,7 +46,7 @@
                      [appFormField]="formControl" aria-describedby="host-validations">
 
 
-              <app-validation-errors id="host" [control]="formControl" [messages]="{
+              <app-validation-errors inputId="host" [control]="formControl" [messages]="{
                 notUnique: t('not-unique'),
                 pattern: t('pattern')
               }" />
@@ -59,7 +59,7 @@
             @if (formGroup.get('apiKey'); as formControl) {
               <input id="api-key" class="form-control" formControlName="apiKey" type="text"
                      [appFormField]="formControl" aria-describedby="api-key-validations">
-              <app-validation-errors id="api-key" [control]="formControl" />
+              <app-validation-errors inputId="api-key" [control]="formControl" />
             }
             <span class="text-muted">{{t('api-key-tooltip')}}</span>
 

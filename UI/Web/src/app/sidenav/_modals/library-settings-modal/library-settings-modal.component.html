@@ -23,7 +23,7 @@
               @if (libraryForm.get('name'); as formControl) {
                 <input id="library-name" class="form-control" formControlName="name" type="text" [appFormField]="formControl">
 
-                <app-validation-errors id="library-name" [control]="formControl" [messages]="{
+                <app-validation-errors inputId="library-name" [control]="formControl" [messages]="{
                   duplicateName: t('library-name-unique')
                 }" />
               }

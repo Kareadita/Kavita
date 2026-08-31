@@ -40,7 +40,7 @@
 
     <!--Some view only setups have inputs, so we need this to always render -->
     @if (formCtrl) {
-      <app-validation-errors [id]="elementId()" [control]="formCtrl" [messages]="validations()" />
+      <app-validation-errors [inputId]="elementId()" [control]="formCtrl" [messages]="validations()" />
     }
 
 

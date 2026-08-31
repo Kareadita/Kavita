@@ -38,12 +38,12 @@ export class ValidationErrorsComponent {
 
 
   control = input.required<AbstractControl>();
-  id = input.required<string>();
+  inputId = input.required<string>();
   /** Overrides for validation error messaging. Map validation -> value. This assumes the value is already localized. */
   messages = input<Record<string, string>>({});
 
   protected readonly validationId = computed(() => {
-    return `${this.id()}${idPostfix}`
+    return `${this.inputId()}${idPostfix}`
   })
 
   private events = toSignal(

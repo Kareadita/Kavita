@@ -495,7 +495,8 @@ public class ImageService(ILogger<ImageService> logger, IDirectoryService direct
 
     public static bool IsChapterFormatForVolume(string filePath, int volumeId)
     {
-        return filePath.StartsWith($"v{volumeId}_c");
+        var fileName = Path.GetFileNameWithoutExtension(filePath);
+        return fileName.StartsWith($"v{volumeId}_c", StringComparison.OrdinalIgnoreCase);
     }
 
     /// <summary>

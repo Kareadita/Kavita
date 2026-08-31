@@ -20,7 +20,7 @@
             <label for="username" class="form-label">{{t('username-label')}}</label>
             <input id="username" class="form-control" formControlName="username" type="text"
                    [appFormField]="formControl" aria-describedby="username-validations">
-            <app-validation-errors id="username" [control]="formControl" />
+            <app-validation-errors inputId="username" [control]="formControl" />
           </div>
         }
 
@@ -29,7 +29,7 @@
             <label for="email" class="form-label">{{t('email-label')}}</label>
             <input class="form-control" type="email" inputmode="email" id="email" formControlName="email" readonly
                    [appFormField]="formControl" aria-describedby="email-validations">
-            <app-validation-errors id="email" [control]="formControl" />
+            <app-validation-errors inputId="email" [control]="formControl" />
           </div>
         }
 
@@ -42,7 +42,7 @@
             <span class="visually-hidden" id="password-help"><ng-container [ngTemplateOutlet]="passwordTooltip" /></span>
             <input id="password" class="form-control" formControlName="password" type="password"
                    [appFormField]="formControl" aria-describedby="password-help password-validations">
-            <app-validation-errors id="password" [control]="formControl" [messages]="{
+            <app-validation-errors inputId="password" [control]="formControl" [messages]="{
               minlength: t('password-validation'),
               maxlength: t('password-validation'),
               pattern: t('password-validation')

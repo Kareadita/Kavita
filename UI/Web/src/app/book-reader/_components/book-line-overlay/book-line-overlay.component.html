@@ -48,7 +48,7 @@
                          [appFormField]="formControl" aria-describedby="bookmark-name-btn bookmark-name-validations">
                   <button class="btn btn-outline-primary" id="bookmark-name-btn" (click)="createPTOC()">{{t('save')}}</button>
                 </div>
-                <app-validation-errors id="bookmark-name" [control]="formControl" />
+                <app-validation-errors inputId="bookmark-name" [control]="formControl" />
               }
             </form>
           }

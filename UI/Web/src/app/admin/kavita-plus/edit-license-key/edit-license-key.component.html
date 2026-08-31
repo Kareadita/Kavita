@@ -14,7 +14,7 @@
             </div>
           }
 
-          <app-validation-errors [control]="formControl" id="license-key" [messages]="{
+          <app-validation-errors [control]="formControl" inputId="license-key" [messages]="{
             required: t('required-field-validation'),
             minlength: t('license-length-validation'),
             maxlength: t('license-length-validation'),
@@ -33,7 +33,7 @@
             {{t('email-help')}}
           </div>
 
-          <app-validation-errors [control]="formControl" id="email" [messages]="{
+          <app-validation-errors [control]="formControl" inputId="email" [messages]="{
             required: t('required-field-validation'),
             email: t('email-format-validation'),
           }" />

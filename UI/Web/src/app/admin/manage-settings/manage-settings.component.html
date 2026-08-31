@@ -23,7 +23,7 @@
               <input id="settings-hostname" aria-describedby="settings-hostname-validations" class="form-control" formControlName="hostName" type="text"
                      [appFormField]="formControl" appEnterBlur>
 
-              <app-validation-errors [control]="formControl" id="settings-hostname" [messages]="{
+              <app-validation-errors [control]="formControl" inputId="settings-hostname" [messages]="{
                 pattern: t('host-name-validation')
               }" />
 
@@ -45,7 +45,7 @@
                 <button type="button" class="btn btn-outline-secondary" (click)="resetBaseUrl()">{{t('reset')}}</button>
               </div>
 
-              <app-validation-errors [control]="formControl" id="settings-baseurl" [messages]="{
+              <app-validation-errors [control]="formControl" inputId="settings-baseurl" [messages]="{
                 pattern: t('base-url-validation')
               }" />
 
@@ -67,7 +67,7 @@
                 <button type="button" class="btn btn-outline-secondary" (click)="resetIPAddresses()">{{t('reset')}}</button>
               </div>
 
-              <app-validation-errors [control]="formControl" id="settings-ipaddresses" [messages]="{
+              <app-validation-errors [control]="formControl" inputId="settings-ipaddresses" [messages]="{
                 emptyOrPattern: t('ip-address-validation')
               }" />
 
@@ -110,7 +110,7 @@
                      onkeypress="return event.charCode >= 48 && event.charCode <= 57"
                      [appFormField]="formControl" appEnterBlur>
 
-              <app-validation-errors [control]="formControl" id="total-backups" [messages]="{
+              <app-validation-errors [control]="formControl" inputId="total-backups" [messages]="{
                 max: t('max-backup-validation', {num: formControl.errors?.max?.max}),
                 min: t('min-backup-validation')
               }" />
@@ -131,7 +131,7 @@
                      onkeypress="return event.charCode >= 48 && event.charCode <= 57"
                      [appFormField]="formControl" appEnterBlur>
 
-              <app-validation-errors [control]="formControl" id="settings-logs" [messages]="{
+              <app-validation-errors [control]="formControl" inputId="settings-logs" [messages]="{
                 max: t('max-logs-validation', {num: formControl.errors?.max?.max}),
                 min: t('min-log-validation')
               }" />
@@ -155,7 +155,7 @@
                 }
               </select>
 
-              <app-validation-errors [control]="formControl" id="logging-level" [messages]="{
+              <app-validation-errors [control]="formControl" inputId="logging-level" [messages]="{
                 pattern: t('host-name-validation')
               }" />
 
@@ -175,7 +175,7 @@
                      type="number" inputmode="numeric" step="5" min="50" onkeypress="return event.charCode >= 48 && event.charCode <= 57"
                      [appFormField]="formControl" appEnterBlur>
 
-              <app-validation-errors [control]="formControl" id="setting-cache-size" [messages]="{
+              <app-validation-errors [control]="formControl" inputId="setting-cache-size" [messages]="{
                 min: t('min-cache-validation')
               }" />
 
@@ -238,7 +238,7 @@
                      onkeypress="return event.charCode >= 48 && event.charCode <= 57"
                      [appFormField]="formControl" appEnterBlur>
 
-              <app-validation-errors [control]="formControl" id="setting-on-deck-progress-days" [messages]="{
+              <app-validation-errors [control]="formControl" inputId="setting-on-deck-progress-days" [messages]="{
                 min: t('min-days-validation')
               }" />
 

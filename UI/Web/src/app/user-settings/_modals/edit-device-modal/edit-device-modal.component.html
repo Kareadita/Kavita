@@ -10,7 +10,7 @@
         @if(settingsForm.get('name'); as formControl) {
           <label for="settings-name" class="form-label">{{t('device-name-label')}}</label>
           <input id="settings-name" class="form-control" formControlName="name" type="text" [appFormField]="formControl">
-          <app-validation-errors id="settings-name" [control]="formControl"/>
+          <app-validation-errors inputId="settings-name" [control]="formControl"/>
         }
       </div>
 
@@ -28,7 +28,7 @@
                    class="form-control" formControlName="email" type="email" inputmode="email"
                    placeholder="id@kindle.com" [appFormField]="formControl">
 
-            <app-validation-errors id="email" [control]="formControl" />
+            <app-validation-errors inputId="email" [control]="formControl" />
           }
       </div>
 
@@ -41,7 +41,7 @@
               <option [value]="platform">{{platform | devicePlatform}}</option>
             }
           </select>
-          <app-validation-errors id="device-platform" [control]="formControl" />
+          <app-validation-errors inputId="device-platform" [control]="formControl" />
         }
 
       </div>

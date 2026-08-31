@@ -30,7 +30,7 @@
           @if(form.get('email'); as formControl) {
             <input class="form-control custom-input" type="email" id="email" formControlName="email"
                    [appFormField]="formControl">
-            <app-validation-errors id="email" [control]="formControl" />
+            <app-validation-errors inputId="email" [control]="formControl" />
 
           }
         </div>
@@ -40,7 +40,7 @@
           @if (form.get('password'); as formControl) {
             <input class="form-control custom-input" type="password" id="password" formControlName="password"
                    [appFormField]="formControl">
-            <app-validation-errors id="password" [control]="formControl" />
+            <app-validation-errors inputId="password" [control]="formControl" />
           }
         </div>
 

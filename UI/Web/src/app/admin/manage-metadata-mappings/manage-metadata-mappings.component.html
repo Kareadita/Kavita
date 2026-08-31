@@ -153,7 +153,7 @@
                       <input id="field-mapping-{{i}}" type="text" class="form-control" formControlName="sourceValue"
                              [placeholder]="t('source-genre-tags-placeholder')"
                              [appFormField]="formControl" [attr.aria-describedby]="'field-mapping-' + i + '-validations'" />
-                      <app-validation-errors [id]="'field-mapping-' + i" [control]="formControl" />
+                      <app-validation-errors [inputId]="'field-mapping-' + i" [control]="formControl" />
                     }
                   </div>
                   <div class="col-md-2">

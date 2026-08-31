@@ -17,7 +17,7 @@
                   <label for="library-name" class="form-label">{{t('name-label')}}</label>
                   <input id="library-name" class="form-control" formControlName="title" type="text"
                          [appFormField]="formControl" aria-describedby="library-name-validations">
-                  <app-validation-errors id="library-name" [control]="formControl" [messages]="{
+                  <app-validation-errors inputId="library-name" [control]="formControl" [messages]="{
                     duplicateName: t('name-unique-validation')
                   }" />
                 </div>
@@ -49,7 +49,7 @@
                            type="number" inputmode="numeric"
                            [appFormField]="formControl">
 
-                    <app-validation-errors id="start-month" [control]="formControl" [messages]="{
+                    <app-validation-errors inputId="start-month" [control]="formControl" [messages]="{
                       min: t('month-validation'),
                       max: t('month-validation')
                     }" />
@@ -63,7 +63,7 @@
                            [appFormField]="formControl"
                            aria-describedby="starting-year-header">
 
-                    <app-validation-errors id="start-year" [control]="formControl" [messages]="{
+                    <app-validation-errors inputId="start-year" [control]="formControl" [messages]="{
                       min: t('year-validation'),
                       max: t('year-validation')
                     }" />
@@ -81,7 +81,7 @@
                            inputmode="numeric"
                            [appFormField]="formControl">
 
-                    <app-validation-errors id="start-year" [control]="formControl" [messages]="{
+                    <app-validation-errors inputId="start-year" [control]="formControl" [messages]="{
                       min: t('month-validation'),
                       max: t('month-validation')
                     }" />
@@ -94,7 +94,7 @@
                     <input id="ending-year" class="form-control" formControlName="endingYear" type="number"
                            inputmode="numeric"
                            [appFormField]="formControl">
-                    <app-validation-errors id="ending-year" [control]="formControl" [messages]="{
+                    <app-validation-errors inputId="ending-year" [control]="formControl" [messages]="{
                       min: t('year-validation'),
                       max: t('year-validation')
                     }" />

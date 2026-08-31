@@ -16,7 +16,7 @@
             <input [id]="idPrefix() + '-' + i" type="text" class="form-control" formControlName="str"
                    [placeholder]="sourceLabel()" autocomplete="off"
                    [appFormField]="formControl" [attr.aria-describedby]="idPrefix() + '-' + i + '-validations'" />
-            <app-validation-errors [id]="idPrefix() + '-' + i" [control]="formControl" />
+            <app-validation-errors [inputId]="idPrefix() + '-' + i" [control]="formControl" />
           }
         </div>
         <div class="col-md-2 d-flex align-items-center justify-content-center">
