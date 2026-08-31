@@ -75,8 +75,8 @@ export class SettingsService {
     return this.http.post<EmailTestResult>(this.baseUrl + 'settings/test-email-url', {});
   }
 
-  isEmailSetup() {
-    return this.http.get<string>(this.baseUrl + 'settings/is-email-setup', TextResonse).pipe(map(d => d == "true"));
+  isEmailSetup(forDevice: boolean = false) {
+    return this.http.get<string>(this.baseUrl + 'settings/is-email-setup?forDevice=' + forDevice, TextResonse).pipe(map(d => d == "true"));
   }
 
   getTaskFrequencies() {

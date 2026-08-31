@@ -280,7 +280,7 @@ export class ActionFactoryService {
   }
 
   private sendToChildren() {
-    return this.settingsService.isEmailSetup().pipe(
+    return this.settingsService.isEmailSetup(true).pipe(
       switchMap(isSetup => {
         if (!isSetup) return of([]);
 
