@@ -793,6 +793,8 @@ public class ParseScannedFilesTests: AbstractDbTest
 
         // Original: story A/B suffixes
         new object[] { new[] { "15", "15 (A Story)", "15 (B Story)" }, new[] { 15f, 15.1f, 15.2f } },
+        // Ensure "real" numbers are sorted first
+        new object[] { new[] { "01  (A Story)", "1", "01 (B Story)" }, new[] { 1.1f, 1f, 1.2f } },
 
         // Two different nonsense suffixes on the same base
         // BEY comes before UH

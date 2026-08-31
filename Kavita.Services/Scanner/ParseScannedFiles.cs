@@ -920,7 +920,10 @@ public partial class ParseScannedFiles
                 return val;
             }
 
-            return ParseLeadingFloat(info.Chapters) ?? float.MaxValue;
+            // Items parsed from leader should always be behind items without ('1' before '1 (A Story)').
+            // Offset them slightly
+            var leading = ParseLeadingFloat(info.Chapters);
+            return leading.HasValue ? leading.Value + 0.0001f : float.MaxValue;
         }
 
         float? ParseLeadingFloat(string input)
