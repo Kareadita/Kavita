@@ -18,8 +18,8 @@
           </button>
 
           <div>
-            <div style="font-weight: bold;">{{title}}
-              @if (incognitoMode) {
+            <div style="font-weight: bold;">{{title()}}
+              @if (incognitoMode()) {
                 <span class="clickable" (click)="turnOffIncognito()" role="button" [attr.aria-label]="t('incognito-alt')">(<i class="fa fa-glasses"  aria-hidden="true"></i><span class="visually-hidden">{{t('incognito-title')}}</span>)</span>
               }
             </div>
@@ -93,7 +93,7 @@
                                [bookmark$]="showBookmarkEffect$"
                                [pageNum$]="pageNum$"
                                [showClickOverlay$]="showClickOverlay$"
-                               [readingProfile]="readingProfile" />
+                               [readingProfile]="readingProfile()!" />
 
           <app-double-renderer [image$]="currentImage$"
                                [readerSettings$]="readerSettings$"
@@ -130,7 +130,7 @@
                                    [bookmarkPage]="showBookmarkEffectEvent"
                                    [fullscreenToggled]="fullscreenEvent"
                                    [readerSettings$]="readerSettings$"
-                                   [readingProfile]="readingProfile"
+                                   [readingProfile]="readingProfile()!"
                                    [chapterId]="chapterId"/>
           </div>
         }
@@ -310,13 +310,13 @@
 
                 <div class="d-flex flex-column flex-sm-row gap-2">
                   <button class="btn btn-primary"
-                          [disabled]="readingProfile.kind !== ReadingProfileKind.Implicit || !parentReadingProfile"
+                          [disabled]="readingProfile()?.kind !== ReadingProfileKind.Implicit || !parentReadingProfile()"
                           (click)="updateParentPref()">
                     {{ t('update-parent', {name: parentReadingProfile?.name || t('loading')}) }}
                   </button>
                   <button class="btn btn-primary ms-sm-2"
                           [ngbTooltip]="t('create-new-tooltip')"
-                          [disabled]="readingProfile.kind !== ReadingProfileKind.Implicit"
+                          [disabled]="readingProfile()?.kind !== ReadingProfileKind.Implicit"
                           (click)="createNewProfileFromImplicit()">
                     {{ t('create-new') }}
                   </button>
