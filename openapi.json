@@ -2,12 +2,12 @@
   "openapi": "3.0.4",
   "info": {
     "title": "Kavita",
-    "description": "Kavita provides a set of APIs authenticated via an Auth Key passed in the `x-api-key` header. Generate an Auth Key under User Settings → Manage Auth Keys, paste it into the Authorize panel, and all Try It requests will include it. Assume all fields of a payload are required unless marked optional. Built against v0.9.1.0",
+    "description": "Kavita provides a set of APIs authenticated via an Auth Key passed in the `x-api-key` header. Generate an Auth Key under User Settings → Manage Auth Keys, paste it into the Authorize panel, and all Try It requests will include it. Assume all fields of a payload are required unless marked optional. Built against v0.9.1.1",
     "license": {
       "name": "GPL-3.0",
       "url": "https://github.com/Kareadita/Kavita/blob/develop/LICENSE"
     },
-    "version": "0.9.1.0"
+    "version": "0.9.1.1"
   },
   "servers": [
     {
@@ -8304,6 +8304,15 @@
             "schema": {
               "type": "string"
             }
+          },
+          {
+            "name": "expiresIn",
+            "in": "query",
+            "description": "",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
           }
         ],
         "responses": {
@@ -16143,6 +16152,15 @@
         "summary": "Returns external series metadata around a Given External Series",
         "parameters": [
           {
+            "name": "seriesId",
+            "in": "query",
+            "description": "",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
             "name": "aniListId",
             "in": "query",
             "description": "",
@@ -16170,7 +16188,16 @@
             }
           },
           {
-            "name": "seriesId",
+            "name": "hardcoverId",
+            "in": "query",
+            "description": "",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "recommendedSeriesId",
             "in": "query",
             "description": "",
             "schema": {
@@ -17087,6 +17114,17 @@
           "Settings"
         ],
         "summary": "Is the minimum information setup for Email to work",
+        "parameters": [
+          {
+            "name": "forDevice",
+            "in": "query",
+            "description": "Device send-to doesn't need full email setup (hostname)",
+            "schema": {
+              "type": "boolean",
+              "default": false
+            }
+          }
+        ],
         "responses": {
           "200": {
             "description": "OK",
@@ -22691,12 +22729,12 @@
       "BreakPoint": {
         "enum": [
           0,
-          1,
-          2,
-          3
+          768,
+          1280,
+          1440
         ],
         "type": "integer",
-        "description": "Members:\n- `0` — Never\n- `1` — Mobile\n- `2` — Tablet\n- `3` — Desktop",
+        "description": "Members:\n- `0` — Never\n- `768` — Mobile\n- `1280` — Tablet\n- `1440` — Desktop",
         "format": "int32",
         "x-enum-varnames": [
           "Never",
@@ -25289,6 +25327,11 @@
           "malId": {
             "type": "integer",
             "format": "int64",
+            "nullable": true
+          },
+          "hardcoverId": {
+            "type": "integer",
+            "format": "int32",
             "nullable": true
           },
           "provider": {
@@ -28119,22 +28162,25 @@
           0,
           1,
           2,
-          3
+          3,
+          4
         ],
         "type": "integer",
-        "description": "Members:\n- `0` — Discord\n- `1` — MangaBaka\n- `2` — AniList\n- `3` — MyAnimeList",
+        "description": "Members:\n- `0` — Discord\n- `1` — MangaBaka\n- `2` — AniList\n- `3` — MyAnimeList\n- `4` — Hardcover",
         "format": "int32",
         "x-enum-varnames": [
           "Discord",
           "MangaBaka",
           "AniList",
-          "MyAnimeList"
+          "MyAnimeList",
+          "Hardcover"
         ],
         "x-enum-descriptions": [
           "Discord",
           "MangaBaka",
           "AniList",
-          "MyAnimeList"
+          "MyAnimeList",
+          "Hardcover"
         ]
       },
       "OidcConfigDto": {
