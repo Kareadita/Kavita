@@ -12,10 +12,9 @@ import {CblSeriesCandidate} from '../../../_models/reading-list/cbl/cbl-series-c
 import {Chapter} from '../../../_models/chapter';
 import {CblService} from '../../../_services/cbl.service';
 import {SearchService} from '../../../_services/search.service';
-import {ToastrService} from 'ngx-toastr';
+import {ToastrService} from '@openng/ngx-toastr';
 import {TypeaheadSettings} from '../../../typeahead/_models/typeahead-settings';
 import {SearchResult} from '../../../_models/search/search-result';
-import {UtilityService} from '../../../shared/_services/utility.service';
 import {TypeaheadComponent} from '../../../typeahead/_components/typeahead.component';
 import {LoadingComponent} from '../../../shared/loading/loading.component';
 import {CblMatchTierPipe} from '../../../_pipes/cbl-match-tier.pipe';
@@ -23,7 +22,6 @@ import {CblImportReasonPipe} from '../../../_pipes/cbl-import-reason.pipe';
 import {ManageRemapRulesModalComponent} from '../manage-remap-rules-modal/manage-remap-rules-modal.component';
 import {ImageComponent} from '../../../shared/image/image.component';
 import {ImageService} from '../../../_services/image.service';
-import {map} from 'rxjs';
 import {LibraryService} from '../../../_services/library.service';
 import {
   DataTableColumnCellDirective,
@@ -37,6 +35,7 @@ import {EntityTitleComponent} from '../../../cards/entity-title/entity-title.com
 import {modalSaved} from "../../../_models/modal/modal-result";
 import {WikiLink} from "../../../_models/wiki";
 import {AccountService} from "../../../_services/account.service";
+import {TypeaheadSettingsFactoryService} from "../../../typeahead-settings-factory.service";
 
 export interface CblIssueRow {
   result: CblBookResult;
@@ -72,9 +71,9 @@ export class ImportCblModalComponent implements OnInit {
   private readonly cblService = inject(CblService);
   private readonly searchService = inject(SearchService);
   private readonly toastr = inject(ToastrService);
-  private readonly utilityService = inject(UtilityService);
   private readonly libraryService = inject(LibraryService);
   private readonly accountService = inject(AccountService);
+  private readonly typeaheadSettingsFactory = inject(TypeaheadSettingsFactoryService);
   protected readonly imageService = inject(ImageService);
 
   savedFiles = input.required<CblSavedFile[]>();
@@ -269,7 +268,7 @@ export class ImportCblModalComponent implements OnInit {
     }
     this.clearActiveState();
     this.activeRow.set(row);
-    this.activeSeriesTypeahead.set(this.createSeriesTypeahead(row.result));
+    this.activeSeriesTypeahead.set(this.typeaheadSettingsFactory.forSearchResult({id: `cbl-series-${row.result.order}`, overrides: {minCharacters: 0}}));
     this.allRows.set([...this.allRows()]);
   }
 
@@ -465,67 +464,13 @@ export class ImportCblModalComponent implements OnInit {
     });
   }
 
-  private createSeriesTypeahead(result: CblBookResult): TypeaheadSettings<SearchResult> {
-    const settings = new TypeaheadSettings<SearchResult>();
-    settings.minCharacters = 0;
-    settings.multiple = false;
-    settings.id = 'cbl-series-' + result.order;
-    settings.unique = true;
-    settings.addIfNonExisting = false;
-    settings.fetchFn = (searchFilter: string) => this.searchService.search(searchFilter).pipe(
-      map(group => group.series),
-      map(items => settings.compareFn(items, searchFilter))
-    );
-    settings.trackByIdentityFn = (idx, item) => item.seriesId + '';
-    settings.compareFn = (options: SearchResult[], filter: string) => {
-      return options.filter(m => {
-        return this.utilityService.filter(m.name, filter) || this.utilityService.filter(m.localizedName, filter);
-      });
-    };
-    settings.selectionCompareFn = (a: SearchResult, b: SearchResult) => {
-      return a.seriesId === b.seriesId;
-    };
-    settings.dropdownPosition = 'body';
-    settings.overlayMinWidth = 400;
-
-    return settings;
-  }
 
   private createChapterTypeahead(seriesId: number): TypeaheadSettings<Chapter> {
-    const settings = new TypeaheadSettings<Chapter>();
-    settings.minCharacters = 0;
-    settings.multiple = false;
-    settings.id = 'cbl-chapter-' + seriesId;
-    settings.unique = true;
-    settings.addIfNonExisting = false;
-    settings.fetchFn = (searchFilter: string) => this.searchService.getChaptersBySeries(seriesId).pipe(
-      map(chapters => {
-        if (!searchFilter) return chapters;
-        const lower = searchFilter.toLowerCase().trim();
-        return chapters.filter(c =>
-          c.title?.toLowerCase().includes(lower) ||
-          c.range?.toLowerCase().includes(lower) ||
-          c.titleName?.toLowerCase().includes(lower)
-        );
-      })
-    );
-    settings.trackByIdentityFn = (idx, item) => item.id + '';
-    settings.compareFn = (options: Chapter[], filter: string) => {
-      if (!filter) return options;
-      const lower = filter.toLowerCase().trim();
-      return options.filter(c =>
-        c.title?.toLowerCase().includes(lower) ||
-        c.range?.toLowerCase().includes(lower) ||
-        c.titleName?.toLowerCase().includes(lower)
-      );
-    };
-    settings.selectionCompareFn = (a: Chapter, b: Chapter) => {
-      return a.id === b.id;
-    };
-    settings.dropdownPosition = 'body';
-    settings.overlayMinWidth = 280;
-
-    return settings;
+    return this.typeaheadSettingsFactory.forChapter({id: `cbl-chapter-${seriesId}`, seriesId, overrides: {
+        dropdownPosition: 'body',
+        overlayMinWidth: 280
+      }
+    });
   }
 
   protected readonly CblImportReason = CblImportReason;

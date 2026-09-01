@@ -444,11 +444,14 @@ public class LicenseService(
     {
         // Ensure that current version is within the 3 version limit. Don't count Nightly releases or Hotfixes
         var releases = await versionUpdaterService.GetAllReleases(ct: ct);
-        licenseInfo.IsValidVersion = releases
+        var lastSupportedVersion = releases
             .Where(r => !r.UpdateTitle.Contains("Hotfix")) // We don't care about Hotfix releases
             .Where(r => !r.IsPrerelease) // Ensure we don't take current nightlies within the current/last stable
             .Take(3)
-            .All(r => new Version(r.UpdateVersion) <= BuildInfo.Version);
+            .LastOrDefault()
+            ?.UpdateVersion;
+
+        licenseInfo.IsValidVersion = !string.IsNullOrEmpty(lastSupportedVersion) && new Version(lastSupportedVersion) <= BuildInfo.Version;
 
         licenseInfo.HasLicense = hasLicense;
         licenseInfo.InstallId = HashUtil.ServerToken();

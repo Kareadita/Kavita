@@ -10,20 +10,10 @@ import {
   TrackByFunction
 } from '@angular/core';
 import {NgbTooltip} from '@ng-bootstrap/ng-bootstrap';
-import {ToastrService} from 'ngx-toastr';
+import {ToastrService} from '@openng/ngx-toastr';
 import {distinctUntilChanged, filter, finalize, take} from 'rxjs/operators';
-import {ConfirmService} from 'src/app/shared/confirm.service';
-import {
-  LibrarySettingsModalComponent
-} from 'src/app/sidenav/_modals/library-settings-modal/library-settings-modal.component';
-import {NotificationProgressEvent} from 'src/app/_models/events/notification-progress-event';
-import {ScanSeriesEvent} from 'src/app/_models/events/scan-series-event';
-import {Library} from 'src/app/_models/library/library';
-import {LibraryService} from 'src/app/_services/library.service';
-import {EVENTS, Message, MessageHubService} from 'src/app/_services/message-hub.service';
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import {SentenceCasePipe} from '../../_pipes/sentence-case.pipe';
-import {TimeAgoPipe} from '../../_pipes/time-ago.pipe';
 import {LibraryTypePipe} from '../../_pipes/library-type.pipe';
 import {RouterLink} from '@angular/router';
 import {translate, TranslocoModule} from "@jsverse/transloco";
@@ -53,14 +43,26 @@ import {ActionResult} from "../../_models/actionables/action-result";
 import {ModalResult} from "../../_models/modal/modal-result";
 import {editModal} from "../../_models/modal/modal-options";
 import {ModalService} from "../../_services/modal.service";
+import {ConfirmService} from "../../shared/confirm.service";
+import {LibraryService} from "../../_services/library.service";
+import {EVENTS, Message, MessageHubService} from "../../_services/message-hub.service";
+import {Library} from "../../_models/library/library";
+import {ScanSeriesEvent} from "../../_models/events/scan-series-event";
+import {NotificationProgressEvent} from "../../_models/events/notification-progress-event";
+import {
+  LibrarySettingsModalComponent
+} from "../../sidenav/_modals/library-settings-modal/library-settings-modal.component";
+import {TimeDifferencePipe} from "../../_pipes/time-difference.pipe";
 
 @Component({
   selector: 'app-manage-library',
   templateUrl: './manage-library.component.html',
   styleUrls: ['./manage-library.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [RouterLink, NgbTooltip, LibraryTypePipe, TimeAgoPipe, SentenceCasePipe, TranslocoModule, DefaultDatePipe,
-    LoadingComponent, CardActionablesComponent, NgTemplateOutlet, ReactiveFormsModule, FormsModule, ResponsiveTableComponent, DatatableComponent, DataTableColumnHeaderDirective, DataTableColumnDirective, DataTableColumnCellDirective]
+  imports: [RouterLink, NgbTooltip, LibraryTypePipe, SentenceCasePipe, TranslocoModule, DefaultDatePipe,
+    LoadingComponent, CardActionablesComponent, NgTemplateOutlet, ReactiveFormsModule, FormsModule,
+    ResponsiveTableComponent, DatatableComponent, DataTableColumnHeaderDirective, DataTableColumnDirective,
+    DataTableColumnCellDirective, TimeDifferencePipe]
 })
 export class ManageLibraryComponent implements OnInit {
 

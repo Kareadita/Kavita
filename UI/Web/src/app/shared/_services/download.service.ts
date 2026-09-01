@@ -1,16 +1,9 @@
 import {HttpClient} from '@angular/common/http';
 import {computed, DestroyRef, effect, inject, Injectable, signal} from '@angular/core';
-import {Series} from 'src/app/_models/series';
-import {environment} from 'src/environments/environment';
 import {ConfirmService} from '../confirm.service';
-import {Chapter} from 'src/app/_models/chapter';
-import {Volume} from 'src/app/_models/volume';
 import {asyncScheduler, filter, firstValueFrom, forkJoin, of, tap} from 'rxjs';
 import {download, parseContentDisposition} from '../_models/download';
-import {PageBookmark} from 'src/app/_models/readers/page-bookmark';
 import {map, switchMap, throttleTime} from 'rxjs/operators';
-import {AccountService} from 'src/app/_services/account.service';
-import {BytesPipe} from 'src/app/_pipes/bytes.pipe';
 import {translate, TranslocoService} from "@jsverse/transloco";
 import {takeUntilDestroyed, toObservable} from "@angular/core/rxjs-interop";
 import {SAVER} from "../../_providers/saver.provider";
@@ -38,6 +31,13 @@ import {EntityTitleService} from "../../_services/entity-title.service";
 import {LibraryService} from "../../_services/library.service";
 import NoSleep from "nosleep.js";
 import {FilterEntityType} from "../../_models/metadata/v2/filter-entity-type";
+import {Chapter} from "../../_models/chapter";
+import {BytesPipe} from "../../_pipes/bytes.pipe";
+import {AccountService} from "../../_services/account.service";
+import {Volume} from "../../_models/volume";
+import {PageBookmark} from "../../_models/readers/page-bookmark";
+import {Series} from "../../_models/series";
+import {environment} from "../../../environments/environment";
 
 export const DEBOUNCE_TIME = 100;
 

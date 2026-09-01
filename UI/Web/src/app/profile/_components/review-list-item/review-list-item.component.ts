@@ -1,6 +1,5 @@
 import {ChangeDetectionStrategy, Component, computed, inject, input} from '@angular/core';
 import {TranslocoDirective} from "@jsverse/transloco";
-import {DatePipe} from "@angular/common";
 import {ImageComponent} from "../../../shared/image/image.component";
 import {ReadMoreComponent} from "../../../shared/read-more/read-more.component";
 import {UserReviewExtended} from "../../../_models/user-review";
@@ -9,19 +8,16 @@ import {NgbTooltip} from "@ng-bootstrap/ng-bootstrap";
 import {NgxStarsModule} from "ngx-stars";
 import {ThemeService} from "../../../_services/theme.service";
 import {NULL_DATE} from "../../../_pipes/date-year-range.pipe";
-import {UtcToLocalDatePipe} from "../../../_pipes/utc-to-locale-date.pipe";
 import {UtcToLocalTimePipe} from "../../../_pipes/utc-to-local-time.pipe";
 
 @Component({
   selector: 'app-review-list-item',
   imports: [
     TranslocoDirective,
-    DatePipe,
     ImageComponent,
     ReadMoreComponent,
     NgbTooltip,
     NgxStarsModule,
-    UtcToLocalDatePipe,
     UtcToLocalTimePipe
   ],
   templateUrl: './review-list-item.component.html',

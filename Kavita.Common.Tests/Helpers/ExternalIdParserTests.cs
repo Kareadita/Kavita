@@ -29,6 +29,10 @@ public class ExternalIdParserTests
 
     [Theory]
     [InlineData("https://mangabaka.org/3391", 3391)]
+    [InlineData("https://mangabaka.org/3391/Some-Slug/", 3391)]
+    [InlineData("https://mangabaka.org/3391?q=Something+Something", 3391)]
+    [InlineData("https://mangabaka.org/novel/84752/Spice-Wolf", 84752)]
+    [InlineData("https://mangabaka.org/manga/10803/Spice-Wolf", 10803)]
     public void CanParseWeblink_MangaBaka(string link, long expectedId)
     {
         Assert.Equal(ExternalIdParser.GetMangaBakaId(link), expectedId);

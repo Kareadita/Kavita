@@ -1,6 +1,5 @@
 import {inject, Injectable, PipeTransform} from '@angular/core';
 import {Params, Router} from '@angular/router';
-import {allSeriesSortFields, SeriesSortField} from 'src/app/_models/metadata/series-filter';
 import {MetadataService} from "../../_services/metadata.service";
 import {FilterV2} from "../../_models/metadata/v2/filter-v2";
 import {FilterCombination} from "../../_models/metadata/v2/filter-combination";
@@ -31,6 +30,7 @@ import {
 import {allReadingListFilterFields, ReadingListFilterField} from "../../_models/metadata/v2/reading-list-filter-field";
 import {allReadingListSortFields, ReadingListSortField} from "../../_models/metadata/v2/reading-list-sort-field";
 import {FilterEntityType} from "../../_models/metadata/v2/filter-entity-type";
+import {allSeriesSortFields, SeriesSortField} from "../../_models/metadata/series-filter";
 
 export interface FieldOption<T extends number> {
   title: string,

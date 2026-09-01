@@ -1,11 +1,11 @@
 import {ChangeDetectionStrategy, Component, computed, inject, input} from '@angular/core';
-import {UtilityService} from 'src/app/shared/_services/utility.service';
-import {Chapter, LooseLeafOrDefaultNumber} from 'src/app/_models/chapter';
-import {LibraryType} from 'src/app/_models/library/library';
-import {Volume} from 'src/app/_models/volume';
 import {TranslocoModule} from "@jsverse/transloco";
 import {DefaultValuePipe} from "../../_pipes/default-value.pipe";
 import {EntityTitleService} from "../../_services/entity-title.service";
+import {Chapter, LooseLeafOrDefaultNumber} from "../../_models/chapter";
+import {UtilityService} from "../../shared/_services/utility.service";
+import {LibraryType} from "../../_models/library/library";
+import {Volume} from "../../_models/volume";
 
 /**
  * This is primarily used for list item
@@ -25,7 +25,7 @@ export class EntityTitleComponent {
   private readonly utilityService = inject(UtilityService);
   private readonly entityTitleService = inject(EntityTitleService);
 
-  protected readonly LooseLeafOrSpecial = LooseLeafOrDefaultNumber + "";
+  protected readonly LooseLeafOrSpecial = LooseLeafOrDefaultNumber + '';
   protected readonly LibraryType = LibraryType;
 
   /**

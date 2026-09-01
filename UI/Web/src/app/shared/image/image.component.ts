@@ -12,11 +12,11 @@ import {
   RendererStyleFlags2,
   viewChild
 } from '@angular/core';
-import {CoverUpdateEvent} from 'src/app/_models/events/cover-update-event';
-import {ImageService} from 'src/app/_services/image.service';
-import {EVENTS, MessageHubService} from 'src/app/_services/message-hub.service';
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import {LazyLoadImageModule, StateChange} from "ng-lazyload-image";
+import {ImageService} from "../../_services/image.service";
+import {EVENTS, MessageHubService} from "../../_services/message-hub.service";
+import {CoverUpdateEvent} from "../../_models/events/cover-update-event";
 
 /**
  * This is used for images with placeholder fallback.

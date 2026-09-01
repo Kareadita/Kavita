@@ -145,10 +145,10 @@ export class ActionFactoryService {
     );
   }
 
-  getSmartFilterActions(allFilters: SmartFilter[], shouldRenderFunc: ActionShouldRenderFunc<SmartFilter> = this.basicReadRender) {
+  getSmartFilterActions(shouldRenderFunc: ActionShouldRenderFunc<SmartFilter> = this.basicReadRender) {
     return this.applyCallbackToList(
       this.smartFilterActions,
-      (action, entity) => this.actionService.handleSmartFilterAction(action, entity, allFilters),
+      (action, entity) => this.actionService.handleSmartFilterAction(action, entity),
       shouldRenderFunc
     );
   }
@@ -280,7 +280,7 @@ export class ActionFactoryService {
   }
 
   private sendToChildren() {
-    return this.settingsService.isEmailSetup().pipe(
+    return this.settingsService.isEmailSetup(true).pipe(
       switchMap(isSetup => {
         if (!isSetup) return of([]);
 

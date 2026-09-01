@@ -42,21 +42,14 @@
 
           @case (BookLineOverlayMode.Bookmark) {
             <form [formGroup]="bookmarkForm">
-              <div class="input-group">
-                <input id="bookmark-name" class="form-control" formControlName="name" type="text" [placeholder]="t('bookmark-label')"
-                       [class.is-invalid]="bookmarkForm.get('name')?.invalid && bookmarkForm.get('name')?.touched" aria-describedby="bookmark-name-btn">
-                <button class="btn btn-outline-primary" id="bookmark-name-btn" (click)="createPTOC()">{{t('save')}}</button>
-                @if (bookmarkForm.dirty || bookmarkForm.touched) {
-                  <div id="bookmark-name-validations" class="invalid-feedback">
-                    @if (bookmarkForm.get('name')?.errors?.required) {
-                      <div role="status">
-                        {{t('required-field')}}
-                      </div>
-                    }
-                  </div>
-                }
-
-              </div>
+              @if (bookmarkForm.get('name'); as formControl) {
+                <div class="input-group">
+                  <input id="bookmark-name" class="form-control" formControlName="name" type="text" [placeholder]="t('bookmark-label')"
+                         [appFormField]="formControl" aria-describedby="bookmark-name-btn bookmark-name-validations">
+                  <button class="btn btn-outline-primary" id="bookmark-name-btn" (click)="createPTOC()">{{t('save')}}</button>
+                </div>
+                <app-validation-errors inputId="bookmark-name" [control]="formControl" />
+              }
             </form>
           }
         }

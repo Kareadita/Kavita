@@ -3,7 +3,7 @@ import {takeUntilDestroyed} from '@angular/core/rxjs-interop';
 import {CblService} from '../../_services/cbl.service';
 import {AccountService} from '../../_services/account.service';
 import {ConfirmService} from '../../shared/confirm.service';
-import {ToastrService} from 'ngx-toastr';
+import {ToastrService} from '@openng/ngx-toastr';
 import {RemapRule} from '../../_models/reading-list/cbl/remap-rule';
 import {translate, TranslocoDirective} from '@jsverse/transloco';
 import {NgxDatatableModule} from '@siemens/ngx-datatable';

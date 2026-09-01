@@ -45,7 +45,7 @@
           <app-label-card [label]="t('pages-label')" [value]="bm.pages != null ? t('pages-count', {num: bm.pages | compactNumber}) : (null | defaultValue)" />
           <app-label-card [label]="t('words-label')" [value]="bm.words != null ? t('words-count', {num: bm.words | compactNumber}) : (null | defaultValue)" />
           <app-label-card [label]="t('added-label')" [value]="bm.addedAt | utcToLocalTime:'shortDate'| defaultDate" />
-          <app-label-card [label]="t('updated-label')" [value]="(bm.updatedAt ?? null) | timeAgo | defaultValue" />
+          <app-label-card [label]="t('updated-label')" [value]="(bm.updatedAt ?? null) | timeDifference | defaultValue" />
           <app-label-card [label]="t('kavita-id-label')" [value]="bm.kavitaId | defaultValue" />
           @if (bm.sortOrder != null) {
             <app-label-card [label]="t('sort-order-label')" [value]="bm.sortOrder | defaultValue" />

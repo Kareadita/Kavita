@@ -23,10 +23,11 @@ import {EVENTS, MessageHubService} from "../../../_services/message-hub.service"
 import {SeriesService} from "../../../_services/series.service";
 import {ActionService} from "../../../_services/action.service";
 import {ScrobbleError} from "../../../_models/scrobbling/scrobble-error";
+import {FormFieldDirective} from "../../../_directives/form-field.directive";
 
 @Component({
     selector: 'app-manage-scrobble-errors',
-  imports: [ReactiveFormsModule, FilterPipe, TranslocoModule, DefaultValuePipe, TranslocoLocaleModule, UtcToLocalTimePipe, NgxDatatableModule, ResponsiveTableComponent],
+  imports: [ReactiveFormsModule, FilterPipe, TranslocoModule, DefaultValuePipe, TranslocoLocaleModule, UtcToLocalTimePipe, NgxDatatableModule, ResponsiveTableComponent, FormFieldDirective],
     templateUrl: './manage-scrobble-errors.component.html',
     styleUrls: ['./manage-scrobble-errors.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush

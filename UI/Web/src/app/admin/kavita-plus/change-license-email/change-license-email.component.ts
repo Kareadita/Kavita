@@ -3,11 +3,13 @@ import {FormControl, FormGroup, ReactiveFormsModule, Validators} from '@angular/
 import {translate, TranslocoDirective} from '@jsverse/transloco';
 import {LicenseService} from '../../../_services/license.service';
 import {ManageLicenseModalScreen} from '../_modals/manage-license-modal/manage-license-modal-screen';
-import {ToastrService} from "ngx-toastr";
+import {ToastrService} from '@openng/ngx-toastr';
+import {FormFieldDirective} from "../../../_directives/form-field.directive";
+import {ValidationErrorsComponent} from "../../../shared/_components/validation-errors/validation-errors.component";
 
 @Component({
   selector: 'app-change-license-email',
-  imports: [ReactiveFormsModule, TranslocoDirective],
+  imports: [ReactiveFormsModule, TranslocoDirective, FormFieldDirective, ValidationErrorsComponent],
   templateUrl: './change-license-email.component.html',
   styleUrl: './change-license-email.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

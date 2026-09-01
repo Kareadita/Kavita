@@ -6,12 +6,10 @@ import {BreakpointService} from '../../../_services/breakpoint.service';
 import {OAuthUpstream} from "../../../_models/kavitaplus/oauth-upstream";
 import {APP_BASE_HREF} from "@angular/common";
 import {AccountService} from "../../../_services/account.service";
-import {SafeUrlPipe} from "../../../_pipes/safe-url.pipe";
-import {NgbTooltip} from "@ng-bootstrap/ng-bootstrap";
 
 @Component({
   selector: 'app-discord-connect-card',
-  imports: [TranslocoDirective, DiscordButtonComponent, SafeUrlPipe, NgbTooltip],
+  imports: [TranslocoDirective, DiscordButtonComponent],
   templateUrl: './discord-connect-card.component.html',
   styleUrl: './discord-connect-card.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

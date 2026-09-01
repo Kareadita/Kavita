@@ -357,9 +357,9 @@
                     <div class="card-container row g-0" #container>
                       @for(item of scroll.viewPortItems; let idx = $index; track idx) {
                         @if (asRecommendedSeries(item); as owned) {
-                          <app-series-card class="col-auto mt-2 mb-2" [series]="owned.series" [recommendationSource]="owned.source" [previewOnClick]="true" />
+                          <app-series-card class="col-auto mt-2 mb-2" [series]="owned.series" [recommendationSource]="owned.source" [previewOnClick]="true" [recommendedBySeriesId]="seriesId()" />
                         } @else {
-                          <app-external-series-card class="col-auto mt-2 mb-2" [previewOnClick]="true" [data]="asExternalSeries(item)" />
+                          <app-external-series-card class="col-auto mt-2 mb-2" [previewOnClick]="true" [data]="asExternalSeries(item)" [seriesId]="seriesId()" />
                         }
                       }
                     </div>

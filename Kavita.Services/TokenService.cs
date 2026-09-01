@@ -90,21 +90,22 @@ public class TokenService(
                 IssuerSigningKey = _key,
                 ValidateIssuer = false,
                 ValidateAudience = false,
+                ValidateLifetime = false, // JWT may be expired
                 ValidIssuer = "Kavita",
                 NameClaimType = JwtRegisteredClaimNames.Name,
-                RoleClaimType = "role",
+                RoleClaimType = "role"
             };
 
-            var principal = tokenHandler.ValidateToken(request.Token, tokenValidationParams, out var tokenContent);
-            var username = principal.Claims.FirstOrDefault(q => q.Type == JwtRegisteredClaimNames.Name)?.Value;
+            var principal = tokenHandler.ValidateToken(request.Token, tokenValidationParams, out _);
+            var userId = principal.Claims.FirstOrDefault(q => q.Type == NameIdentifier)?.Value;
 
-            if (string.IsNullOrEmpty(username))
+            if (string.IsNullOrEmpty(userId))
             {
-                logger.LogDebug("[RefreshToken] failed to validate due to not finding user in RefreshToken");
+                logger.LogDebug("[RefreshToken] JWT did not include a valid userId");
                 return null;
             }
 
-            var user = await userManager.FindByNameAsync(username);
+            var user = await userManager.FindByIdAsync(userId);
             if (user == null)
             {
                 logger.LogDebug("[RefreshToken] failed to validate due to not finding user in DB");
@@ -116,11 +117,6 @@ public class TokenService(
             if (!validated)
             {
                 logger.LogDebug("[RefreshToken] failed to validate due to invalid refresh token");
-                return null;
-            }
-
-            if (tokenContent.ValidTo <= DateTime.UtcNow.Add(TimeSpan.FromHours(1)))
-            {
                 return null;
             }
 

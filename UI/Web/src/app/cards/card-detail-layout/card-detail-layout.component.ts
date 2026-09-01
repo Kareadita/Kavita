@@ -19,10 +19,6 @@ import {
 } from '@angular/core';
 import {NavigationStart, Router} from '@angular/router';
 import {VirtualScrollerComponent, VirtualScrollerModule} from '@iharbeck/ngx-virtual-scroller';
-import {JumpKey} from 'src/app/_models/jumpbar/jump-key';
-import {Pagination} from 'src/app/_models/pagination';
-import {FilterEvent, SeriesSortField} from 'src/app/_models/metadata/series-filter';
-import {JumpbarService} from 'src/app/_services/jumpbar.service';
 import {LoadingComponent} from "../../shared/loading/loading.component";
 import {MetadataFilterComponent} from "../../metadata-filter/metadata-filter.component";
 import {TranslocoDirective} from "@jsverse/transloco";
@@ -35,6 +31,10 @@ import {FilterSettingsBase, ValidFilterEntity} from "../../metadata-filter/filte
 import {ActionItem} from "../../_models/actionables/action-item";
 import {ActionResult} from "../../_models/actionables/action-result";
 import {MetadataService} from "../../_services/metadata.service";
+import {JumpbarService} from "../../_services/jumpbar.service";
+import {Pagination} from "../../_models/pagination";
+import {JumpKey} from "../../_models/jumpbar/jump-key";
+import {FilterEvent, SeriesSortField} from "../../_models/metadata/series-filter";
 
 
 const ANIMATION_TIME_MS = 0;

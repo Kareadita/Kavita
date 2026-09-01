@@ -29,7 +29,8 @@ public class OAuthService(
 {
     private const string DiscordMeApiUrl = "https://discord.com/api/users/@me";
 
-    public async Task HandleCallback(AppUser user, OAuthUpstream upstream, string token, string? refreshToken = null)
+    public async Task HandleCallback(AppUser user, OAuthUpstream upstream, string token, string? refreshToken = null,
+        int? expiresIn = null)
     {
         logger.LogDebug("Handling callback {Callback}, HasToken: {HasToken}, HasRefreshToken: {HasRefreshToken}",
             upstream.ToString(), !string.IsNullOrEmpty(token), !string.IsNullOrEmpty(refreshToken));
@@ -46,6 +47,9 @@ public class OAuthService(
                 return;
             case OAuthUpstream.MyAnimeList:
                 await SetScrobbleProviderToken(user, ScrobbleProvider.Mal, token, refreshToken);
+                break;
+            case OAuthUpstream.Hardcover:
+                await SetScrobbleProviderToken(user, ScrobbleProvider.Hardcover, token, refreshToken, expiresIn);
                 break;
             default:
                 throw new ArgumentOutOfRangeException(nameof(upstream), upstream, null);
@@ -85,7 +89,7 @@ public class OAuthService(
         }
     }
 
-    private async Task SetScrobbleProviderToken(AppUser user, ScrobbleProvider provider, string token, string? refreshToken = null)
+    private async Task SetScrobbleProviderToken(AppUser user, ScrobbleProvider provider, string token, string? refreshToken = null, int? expiresIn = null)
     {
         var scrobbleSettings = user.ScrobbleProviders[provider];
 
@@ -101,6 +105,9 @@ public class OAuthService(
 
         user.ScrobbleProviders[provider].AuthenticationToken = token;
         user.ScrobbleProviders[provider].RefreshToken = refreshToken ?? string.Empty;
+        user.ScrobbleProviders[provider].ValidUntilUtc = expiresIn.HasValue
+            ? DateTime.UtcNow + TimeSpan.FromSeconds(expiresIn.Value) - TimeSpan.FromSeconds(30)
+            : DateTime.MaxValue;
         unitOfWork.UserRepository.Update(user);
 
         await unitOfWork.CommitAsync();

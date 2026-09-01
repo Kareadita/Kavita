@@ -37,6 +37,7 @@ using Kavita.Server.ManualMigrations.v0._8._8;
 using Kavita.Server.ManualMigrations.v0._8._9;
 using Kavita.Server.ManualMigrations.v0._9._0;
 using Kavita.Server.ManualMigrations.v0._9._1;
+using Kavita.Server.ManualMigrations.v0._9._1.x;
 using Kavita.Server.Middleware;
 using Kavita.Server.Swagger;
 using Kavita.Services.SignalR;
@@ -540,6 +541,9 @@ public class Startup
                     await new ManualMigrateVersionCacheFiles(directoryService).RunAsync(dataContext, logger);
                     await new ManualMigrationExternalSeriesMetadataIds().RunAsync(dataContext, logger);
                     await new ManualMigrationCorrectAuditStatus().RunAsync(dataContext, logger);
+                    await new ManualMigrateCoverImageSettings().RunAsync(dataContext, logger);
+
+                    await new ManualMigrateBreakpointMapping().RunAsync(dataContext, logger);
 
                     #endregion
 

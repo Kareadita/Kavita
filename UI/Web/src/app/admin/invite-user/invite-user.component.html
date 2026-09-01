@@ -5,25 +5,20 @@
       <button type="button" class="btn-close" [attr.aria-label]="t('close')" (click)="close()"></button>
     </div>
     <div class="modal-body scrollable-modal">
-      @if (!invited) {
+      @if (!invited()) {
         <p [innerHTML]="t('description') | safeHtml"></p>
       }
 
-      @if (emailLink === '') {
+      @if (emailLink() === '') {
         <form [formGroup]="inviteForm">
           <div class="row g-0">
             <div class="mb-3" style="width:100%">
-              <label for="email" class="form-label">{{t('email')}}</label>
-              <input class="form-control" type="email" inputmode="email" id="email" formControlName="email" required
-                     [class.is-invalid]="inviteForm.get('email')?.invalid && inviteForm.get('email')?.touched">
-              @if (inviteForm.dirty || !inviteForm.untouched) {
-                <div id="inviteForm-validations" class="invalid-feedback">
-                  @if (email?.errors?.required) {
-                    <div>
-                      {{t('required-field')}}
-                    </div>
-                  }
-                </div>
+              @if (inviteForm.get('email'); as formControl) {
+                <label for="email" class="form-label">{{t('email')}}</label>
+                <input class="form-control" type="email" inputmode="email" id="email" formControlName="email"
+                       [appFormField]="formControl" aria-describedby="email-validations">
+
+                <app-validation-errors inputId="email" [control]="formControl" />
               }
             </div>
           </div>
@@ -57,30 +52,30 @@
         </form>
       }
 
-      @if (emailLink !== '') {
+      @if (emailLink() !== '') {
         <h4>{{t('setup-user-title')}}</h4>
         <p>{{t('setup-user-description')}}</p>
-        @if (inviteError) {
+        @if (inviteError()) {
           <div class="alert alert-warning" role="alert">
             <strong>{{t('notice')}}</strong> {{t('email-not-sent')}}
           </div>
         }
-        <a class="email-link" href="{{emailLink}}" target="_blank" rel="noopener noreferrer">{{t('setup-user-account')}}</a>
-        <app-api-key [title]="t('invite-url-label')" [tooltipText]="t('setup-user-account-tooltip')" [hideData]="false" [key]="emailLink" />
+        <a class="email-link" href="{{emailLink()}}" target="_blank" rel="noopener noreferrer">{{t('setup-user-account')}}</a>
+        <app-api-key [title]="t('invite-url-label')" [tooltipText]="t('setup-user-account-tooltip')" [hideData]="false" [key]="emailLink()" />
       }
 
     </div>
     <div class="modal-footer">
-      <button type="button" class="btn btn-{{invited ? 'primary' : 'secondary'}}" (click)="close()">
-        {{invited ? t('cancel') : t('close')}}
+      <button type="button" class="btn btn-{{invited() ? 'primary' : 'secondary'}}" (click)="close()">
+        {{invited() ? t('cancel') : t('close')}}
       </button>
 
-      @if (!invited) {
-        <button type="button" class="btn btn-primary" (click)="invite()" [disabled]="isSending || !inviteForm.valid  || emailLink !== ''">
-          @if (isSending) {
+      @if (!invited()) {
+        <button type="button" class="btn btn-primary" (click)="invite()" [disabled]="isSending() || !inviteForm.valid  || emailLink() !== ''">
+          @if (isSending()) {
             <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
           }
-          <span>{{isSending ? t('inviting') : t('invite')}}</span>
+          <span>{{isSending() ? t('inviting') : t('invite')}}</span>
         </button>
       }
 

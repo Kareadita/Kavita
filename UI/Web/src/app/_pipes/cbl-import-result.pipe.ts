@@ -1,6 +1,6 @@
 import {inject, Pipe, PipeTransform} from '@angular/core';
-import { CblImportResult } from 'src/app/_models/reading-list/cbl/cbl-import-result.enum';
 import {TranslocoService} from "@jsverse/transloco";
+import {CblImportResult} from "../_models/reading-list/cbl/cbl-import-result.enum";
 
 @Pipe({
   name: 'cblImportResult',

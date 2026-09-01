@@ -1,5 +1,5 @@
 import {ChangeDetectionStrategy, Component, computed, inject, output, signal} from '@angular/core';
-import {ToastrService} from 'ngx-toastr';
+import {ToastrService} from '@openng/ngx-toastr';
 import {TranslocoDirective, TranslocoService} from '@jsverse/transloco';
 import {LicenseService} from '../../../_services/license.service';
 import {KavitaPlusBillingInterval} from '../../../_models/kavitaplus/license-info';

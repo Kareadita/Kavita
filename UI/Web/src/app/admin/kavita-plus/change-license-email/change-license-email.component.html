@@ -25,12 +25,15 @@
         </div>
       </section>
 
-      <section>
-        <label class="form-label" for="new-email">{{t('new-email-label')}}</label>
-        <input id="new-email" type="email" class="form-control" formControlName="newEmail"
-               [placeholder]="t('new-email-placeholder')"
-               [class.is-invalid]="form.controls.newEmail.invalid && form.controls.newEmail.touched" />
-      </section>
+      @if (form.get('newEmail'); as formControl) {
+        <section>
+          <label class="form-label" for="new-email">{{t('new-email-label')}}</label>
+          <input id="new-email" type="email" class="form-control" formControlName="newEmail"
+                 [placeholder]="t('new-email-placeholder')"
+                 [appFormField]="formControl" aria-describedby="new-email-validations" />
+          <app-validation-errors inputId="new-email" [control]="formControl" />
+        </section>
+      }
 
       <p class="confirm-help d-flex align-items-start gap-2 m-0">
         <i class="fa-solid fa-shield-halved flex-shrink-0" aria-hidden="true"></i>

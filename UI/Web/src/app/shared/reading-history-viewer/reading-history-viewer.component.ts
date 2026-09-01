@@ -3,28 +3,28 @@ import {
   Component,
   computed,
   inject,
-  input, output,
-  signal,
+  input,
+  output,
   TemplateRef,
   viewChild
 } from '@angular/core';
-import {CompactNumberPipe} from "src/app/_pipes/compact-number.pipe";
-import {DurationPipe} from "src/app/_pipes/duration.pipe";
-import {ImageComponent} from "src/app/shared/image/image.component";
 import {translate, TranslocoDirective} from "@jsverse/transloco";
-import {UtcToLocalTimePipe} from "src/app/_pipes/utc-to-local-time.pipe";
 import {RouterLink} from "@angular/router";
 import {NgTemplateOutlet} from "@angular/common";
-import {LoadingComponent} from "src/app/shared/loading/loading.component";
-import {MangaFormatPipe} from "src/app/_pipes/manga-format.pipe";
 import {NgbPagination, NgbTooltip} from "@ng-bootstrap/ng-bootstrap";
-import {StatsNoDataComponent} from "src/app/common/stats-no-data/stats-no-data.component";
-import {TagBadgeComponent} from "src/app/shared/tag-badge/tag-badge.component";
-import {ImageService} from "src/app/_services/image.service";
-import {ReadingHistoryChapterItem, ReadingHistoryItem} from "src/app/_models/stats/reading-history-item";
-import {ListSelectModalComponent} from "src/app/shared/_components/list-select-modal/list-select-modal.component";
-import {ModalService} from "src/app/_services/modal.service";
-import {Pagination} from "src/app/_models/pagination";
+import {ListSelectModalComponent} from "../_components/list-select-modal/list-select-modal.component";
+import {LoadingComponent} from "../loading/loading.component";
+import {MangaFormatPipe} from "../../_pipes/manga-format.pipe";
+import {StatsNoDataComponent} from "../../common/stats-no-data/stats-no-data.component";
+import {TagBadgeComponent} from "../tag-badge/tag-badge.component";
+import {ImageService} from "../../_services/image.service";
+import {ModalService} from "../../_services/modal.service";
+import {ReadingHistoryChapterItem, ReadingHistoryItem} from "../../_models/stats/reading-history-item";
+import {Pagination} from "../../_models/pagination";
+import {CompactNumberPipe} from "../../_pipes/compact-number.pipe";
+import {DurationPipe} from "../../_pipes/duration.pipe";
+import {ImageComponent} from "../image/image.component";
+import {UtcToLocalTimePipe} from "../../_pipes/utc-to-local-time.pipe";
 
 @Component({
   selector: 'app-reading-history-viewer',

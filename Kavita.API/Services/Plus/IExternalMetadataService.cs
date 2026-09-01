@@ -19,14 +19,13 @@ public interface IExternalMetadataService
     /// <summary>
     /// Retrieves Metadata about a Recommended External Series
     /// </summary>
-    /// <param name="aniListId"></param>
-    /// <param name="malId"></param>
-    /// <param name="mangaBakaId"></param>
     /// <param name="seriesId"></param>
+    /// <param name="request"></param>
+    /// /// <param name="recommendedSeriesId"></param>
     /// <param name="ct"></param>
     /// <returns></returns>
     /// <exception cref="KavitaException"></exception>
-    Task<ExternalSeriesDetailDto?> GetExternalSeriesDetail(int? aniListId, long? malId, int? mangaBakaId, int? seriesId, CancellationToken ct = default);
+    Task<ExternalSeriesDetailDto?> GetExternalSeriesDetail(int seriesId, MetadataRequest request, int? recommendedSeriesId, CancellationToken ct = default);
 
     /// <summary>
     /// This is a task that runs on a schedule and slowly fetches data from Kavita+ to keep

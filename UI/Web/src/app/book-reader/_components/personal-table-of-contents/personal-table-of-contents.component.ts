@@ -16,6 +16,7 @@ import {translate, TranslocoDirective} from "@jsverse/transloco";
 import {TextBookmarkItemComponent} from "../text-bookmark-item/text-bookmark-item.component";
 import {ConfirmService} from "../../../shared/confirm.service";
 import {FormControl, FormGroup, FormsModule, ReactiveFormsModule} from "@angular/forms";
+import {FormFieldDirective} from "../../../_directives/form-field.directive";
 
 export interface PersonalToCEvent {
   pageNum: number;
@@ -24,7 +25,7 @@ export interface PersonalToCEvent {
 
 @Component({
   selector: 'app-personal-table-of-contents',
-  imports: [TranslocoDirective, TextBookmarkItemComponent, FormsModule, ReactiveFormsModule],
+  imports: [TranslocoDirective, TextBookmarkItemComponent, FormsModule, ReactiveFormsModule, FormFieldDirective],
   templateUrl: './personal-table-of-contents.component.html',
   styleUrls: ['./personal-table-of-contents.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush

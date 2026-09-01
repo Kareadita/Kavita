@@ -8,9 +8,9 @@
     <div class="col-md-6 col-sm-12">
       @if (settingsForm.get('enableExtendedMetadataProcessing'); as control) {
         <app-setting-switch [title]="t('enable-extended-metadata-processing-label')" [subtitle]="t('enable-extended-metadata-processing-tooltip')">
-          <ng-template #switch>
+          <ng-template>
             <div class="form-check form-switch float-end">
-              <input id="enable-extended-metadata-processing" type="checkbox" class="form-check-input" formControlName="enableExtendedMetadataProcessing">
+              <input type="checkbox" class="form-check-input" formControlName="enableExtendedMetadataProcessing">
             </div>
           </ng-template>
         </app-setting-switch>

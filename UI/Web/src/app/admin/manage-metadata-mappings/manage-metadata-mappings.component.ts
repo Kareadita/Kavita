@@ -19,6 +19,16 @@ import {
   buildAgeRatingMappingsArray,
   packAgeRatingMappings
 } from "../../shared/_components/age-rating-mapper/age-rating-mapper.component";
+import {FormFieldDirective} from "../../_directives/form-field.directive";
+import {ValidationErrorsComponent} from "../../shared/_components/validation-errors/validation-errors.component";
+import {SettingItemComponent} from "../../settings/_components/setting-item/setting-item.component";
+import {
+  SettingMultiTextFieldComponent
+} from "../../settings/_components/setting-multi-text-field/setting-multi-text-field.component";
+import {SettingSwitchComponent} from "../../settings/_components/setting-switch/setting-switch.component";
+import {TagWeightTitlePipe} from "../../_pipes/tag-weight-title.pipe";
+import {allTagWeights} from "../_models/tag-weight.enum";
+import {LicenseService} from "../../_services/license.service";
 
 export type MetadataMappingsExport = {
   ageRatingMappings: Record<string, AgeRating>,
@@ -26,6 +36,8 @@ export type MetadataMappingsExport = {
   blacklist: Array<string>,
   whitelist: Array<string>,
 }
+
+const MangaBakaAgeRatings = ['Safe', 'Suggestive', 'Erotica', 'Pornographic'];
 
 @Component({
   selector: 'app-manage-metadata-mappings',
@@ -41,6 +53,13 @@ export type MetadataMappingsExport = {
     NgbAccordionCollapse,
     NgbAccordionBody,
     LoadingComponent,
+    FormFieldDirective,
+    ValidationErrorsComponent,
+    LoadingComponent,
+    SettingItemComponent,
+    SettingMultiTextFieldComponent,
+    SettingSwitchComponent,
+    TagWeightTitlePipe,
   ],
   templateUrl: './manage-metadata-mappings.component.html',
   styleUrl: './manage-metadata-mappings.component.scss',
@@ -48,6 +67,7 @@ export type MetadataMappingsExport = {
 })
 export class ManageMetadataMappingsComponent implements OnInit {
 
+  protected readonly licenseService = inject(LicenseService);
   private readonly downloadService = inject(DownloadService);
   private readonly cdRef = inject(ChangeDetectorRef);
   private readonly fb = inject(FormBuilder);
@@ -87,6 +107,11 @@ export class ManageMetadataMappingsComponent implements OnInit {
     this.ageRatingMappings = buildAgeRatingMappingsArray(this.fb, settings.ageRatingMappings);
     settingsForm.addControl('ageRatingMappings', this.ageRatingMappings);
     settingsForm.addControl('fieldMappings', this.fieldMappings);
+
+    settingsForm.addControl('blacklist', new FormControl(settings.blacklist, []));
+    settingsForm.addControl('whitelist', new FormControl(settings.whitelist, []));
+    settingsForm.addControl('filterAboveWeight', new FormControl(settings.filterAboveWeight, []));
+    settingsForm.addControl('externalAgeRatingMappings', buildAgeRatingMappingsArray(this.fb, settings.externalAgeRatingMappings));
 
     if (settings.fieldMappings) {
       settings.fieldMappings.forEach(mapping => {
@@ -137,4 +162,6 @@ export class ManageMetadataMappingsComponent implements OnInit {
   }
 
   protected readonly MetadataFieldType = MetadataFieldType;
+  protected readonly allTagWeights = allTagWeights;
+  protected readonly MangaBakaAgeRatings = MangaBakaAgeRatings;
 }

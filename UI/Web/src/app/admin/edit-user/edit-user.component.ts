@@ -11,10 +11,6 @@ import {
 } from '@angular/core';
 import {FormControl, FormGroup, ReactiveFormsModule, Validators} from '@angular/forms';
 import {NgbActiveModal} from '@ng-bootstrap/ng-bootstrap';
-import {AgeRestriction} from 'src/app/_models/metadata/age-restriction';
-import {Library} from 'src/app/_models/library/library';
-import {Member} from 'src/app/_models/auth/member';
-import {AccountService, allRoles, Role} from 'src/app/_services/account.service';
 import {SentenceCasePipe} from '../../_pipes/sentence-case.pipe';
 import {RestrictionSelectorComponent} from '../../user-settings/restriction-selector/restriction-selector.component';
 import {AsyncPipe} from '@angular/common';
@@ -30,6 +26,12 @@ import {
   SettingMultiCheckBox
 } from "../../settings/_components/setting-multi-check-box/setting-multi-check-box.component";
 import {LibraryService} from "../../_services/library.service";
+import {AccountService, allRoles, Role} from "../../_services/account.service";
+import {Member} from "../../_models/auth/member";
+import {Library} from "../../_models/library/library";
+import {AgeRestriction} from "../../_models/metadata/age-restriction";
+import {ValidationErrorsComponent} from "../../shared/_components/validation-errors/validation-errors.component";
+import {FormFieldDirective} from "../../_directives/form-field.directive";
 
 const AllowedUsernameCharacters = /^[a-zA-Z0-9\-._@+/]*$/;
 const EmailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -38,7 +40,7 @@ const EmailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     selector: 'app-edit-user',
     templateUrl: './edit-user.component.html',
     styleUrls: ['./edit-user.component.scss'],
-  imports: [ReactiveFormsModule, RestrictionSelectorComponent, SentenceCasePipe, TranslocoDirective, AsyncPipe, IdentityProviderPipePipe, SettingMultiCheckBox],
+  imports: [ReactiveFormsModule, RestrictionSelectorComponent, SentenceCasePipe, TranslocoDirective, AsyncPipe, IdentityProviderPipePipe, SettingMultiCheckBox, ValidationErrorsComponent, FormFieldDirective],
     changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class EditUserComponent implements OnInit {
@@ -72,7 +74,6 @@ export class EditUserComponent implements OnInit {
   isSaving: boolean = false;
 
   userForm: FormGroup = new FormGroup({});
-  isEmailInvalid$!: Observable<boolean>;
   readOnlyWarning$!: Observable<string | undefined>;
 
   allowedCharacters = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-._@+/';
@@ -87,7 +88,7 @@ export class EditUserComponent implements OnInit {
   ngOnInit(): void {
     this.libraryService.getLibraries().subscribe(libraries => this.libraries.set(libraries));
 
-    this.userForm.addControl('email', new FormControl(this.member().email, [Validators.required]));
+    this.userForm.addControl('email', new FormControl(this.member().email, [Validators.required, Validators.pattern(EmailRegex)]));
     this.userForm.addControl('username', new FormControl(this.member().username, [Validators.required, Validators.pattern(AllowedUsernameCharacters)]));
     this.userForm.addControl('identityProvider', new FormControl(this.member().identityProvider, [Validators.required]));
     this.userForm.addControl('roles', new FormControl(this.member().roles));
@@ -103,13 +104,6 @@ export class EditUserComponent implements OnInit {
         })
       })).subscribe();
 
-    this.isEmailInvalid$ = this.userForm.get('email')!.valueChanges.pipe(
-      startWith(this.member().email),
-      distinctUntilChanged(),
-      debounceTime(10),
-      map(value => !EmailRegex.test(value)),
-      takeUntilDestroyed(this.destroyRef)
-    );
     this.readOnlyWarning$ = this.userForm.get('roles')!.valueChanges.pipe(
       startWith(this.member().roles),
       takeUntilDestroyed(this.destroyRef),

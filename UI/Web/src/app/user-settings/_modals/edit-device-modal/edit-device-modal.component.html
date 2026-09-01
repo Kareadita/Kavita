@@ -9,14 +9,8 @@
       <div class="row g-0 mb-2">
         @if(settingsForm.get('name'); as formControl) {
           <label for="settings-name" class="form-label">{{t('device-name-label')}}</label>
-          <input id="settings-name" class="form-control" formControlName="name" type="text" [class.is-invalid]="formControl.invalid && formControl.touched">
-          @if (formControl.errors; as errors) {
-            @if (errors.required) {
-              <p class="invalid-feedback">
-                {{t('required-field')}}
-              </p>
-            }
-          }
+          <input id="settings-name" class="form-control" formControlName="name" type="text" [appFormField]="formControl">
+          <app-validation-errors inputId="settings-name" [control]="formControl"/>
         }
       </div>
 
@@ -32,15 +26,9 @@
           @if (settingsForm.get('email'); as formControl) {
             <input id="email" aria-describedby="email-help"
                    class="form-control" formControlName="email" type="email" inputmode="email"
-                   placeholder="id@kindle.com" [class.is-invalid]="formControl.invalid && formControl.touched">
-            @if (formControl.errors; as errors) {
-              @if (errors.required) {
-                <p class="invalid-feedback">{{t('required-field')}}</p>
-              }
-              @if (errors.email) {
-                <p class="invalid-feedback">{{t('valid-email')}}</p>
-              }
-            }
+                   placeholder="id@kindle.com" [appFormField]="formControl">
+
+            <app-validation-errors inputId="email" [control]="formControl" />
           }
       </div>
 
@@ -48,19 +36,12 @@
         <label for="device-platform" class="form-label">{{t('device-platform-label')}}</label>
         @if(settingsForm.get('platform'); as formControl) {
           <select id="device-platform" aria-describedby="device-platform-help" class="form-select" formControlName="platform"
-                  [class.is-invalid]="formControl.invalid && formControl.touched">
+                  [appFormField]="formControl">
             @for(platform of devicePlatforms; track platform) {
               <option [value]="platform">{{platform | devicePlatform}}</option>
             }
           </select>
-          @if (formControl.errors; as errors) {
-            @if (errors.required) {
-              <p class="invalid-feedback">{{t('required-field')}}</p>
-            }
-            @if (errors.email) {
-              <p class="invalid-feedback">{{t('valid-email')}}</p>
-            }
-          }
+          <app-validation-errors inputId="device-platform" [control]="formControl" />
         }
 
       </div>

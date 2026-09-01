@@ -1,6 +1,5 @@
 import {ChangeDetectionStrategy, Component, inject, signal} from '@angular/core';
 import {FormControl, ReactiveFormsModule} from '@angular/forms';
-import {StatisticsService} from 'src/app/_services/statistics.service';
 import {PieDataItem} from '../../_models/pie-data-item';
 import {DecimalPipe} from '@angular/common';
 import {TranslocoDirective} from "@jsverse/transloco";
@@ -12,6 +11,7 @@ import {
   DatatableComponent
 } from "@siemens/ngx-datatable";
 import {StatsNoDataComponent} from "../../../common/stats-no-data/stats-no-data.component";
+import {StatisticsService} from "../../../_services/statistics.service";
 
 @Component({
     selector: 'app-publication-status-stats',

@@ -7,8 +7,9 @@
           <div class="flex-grow-1">
             <h5 class="card-title d-flex align-items-center mb-1">
               <i [class]="deviceIcon()"></i>
-              @if (isEditMode()) {
-                <input [id]="'client-device-' + clientDevice().id" class="form-control flex-grow-1 ms-2" style="width: 80%" type="text" formControlName="name" />
+              @if (isEditMode() && deviceForm.get('name'); as formControl) {
+                <input [id]="'client-device-' + clientDevice().id" class="form-control flex-grow-1 ms-2" style="width: 80%" type="text" formControlName="name"
+                       [appFormField]="formControl" />
                 <button class="btn btn-sm btn-primary ms-1" (click)="saveName()">{{t('save')}}</button>
               } @else {
                 <span class="ms-2">
@@ -79,7 +80,7 @@
             <div class="col-sm-6">
               <i class="fa-regular fa-clock me-1" aria-hidden="true"></i>
               <span>{{ t('last-seen-label') }}:</span>
-              <span class="ms-1">{{clientDevice().lastSeenUtc | utcToLocalDate | timeAgo | sentenceCase}}</span>
+              <span class="ms-1">{{clientDevice().lastSeenUtc | utcToLocalDate | timeDifference | sentenceCase}}</span>
             </div>
           </div>
         </div>

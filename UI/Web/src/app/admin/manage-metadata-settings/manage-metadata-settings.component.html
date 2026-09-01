@@ -20,9 +20,9 @@
         <div class="col-md-6 col-sm-12">
           @if(settingsForm.get('enabled'); as formControl) {
             <app-setting-switch [title]="t('enabled-label')" [subtitle]="t('enabled-tooltip')">
-              <ng-template #switch>
+              <ng-template>
                 <div class="form-check form-switch float-end">
-                  <input id="enabled" type="checkbox" class="form-check-input" formControlName="enabled">
+                  <input type="checkbox" class="form-check-input" formControlName="enabled">
                 </div>
               </ng-template>
             </app-setting-switch>
@@ -32,9 +32,9 @@
         <div class="col-md-6 col-sm-12">
           @if (settingsForm.get('enableExtendedMetadataProcessing'); as control) {
             <app-setting-switch [title]="t('enable-extended-metadata-processing-label')" [subtitle]="t('enable-extended-metadata-processing-tooltip')">
-              <ng-template #switch>
+              <ng-template>
                 <div class="form-check form-switch float-end">
-                  <input id="enable-extended-metadata-processing" type="checkbox" class="form-check-input" formControlName="enableExtendedMetadataProcessing">
+                  <input type="checkbox" class="form-check-input" formControlName="enableExtendedMetadataProcessing">
                 </div>
               </ng-template>
             </app-setting-switch>
@@ -200,9 +200,9 @@
                 <div class="row g-0 mt-4 mb-4">
                   @if(settingsForm.get('enableName'); as formControl) {
                     <app-setting-switch [title]="t('name-label')" [subtitle]="t('name-tooltip')">
-                      <ng-template #switch>
+                      <ng-template>
                         <div class="form-check form-switch float-end">
-                          <input id="name" type="checkbox" class="form-check-input" formControlName="enableName">
+                          <input type="checkbox" class="form-check-input" formControlName="enableName">
                         </div>
                       </ng-template>
                     </app-setting-switch>
@@ -212,9 +212,9 @@
                 <div class="row g-0 mt-4 mb-4">
                   @if(settingsForm.get('enableLocalizedName'); as formControl) {
                     <app-setting-switch [title]="t('localized-name-label')" [subtitle]="t('localized-name-tooltip')">
-                      <ng-template #switch>
+                      <ng-template>
                         <div class="form-check form-switch float-end">
-                          <input id="localized-name" type="checkbox" class="form-check-input" formControlName="enableLocalizedName">
+                          <input type="checkbox" class="form-check-input" formControlName="enableLocalizedName">
                         </div>
                       </ng-template>
                     </app-setting-switch>
@@ -224,9 +224,9 @@
                 <div class="row g-0 mt-4 mb-4">
                   @if(settingsForm.get('enableSummary'); as formControl) {
                     <app-setting-switch [title]="t('summary-label')" [subtitle]="t('summary-tooltip')">
-                      <ng-template #switch>
+                      <ng-template>
                         <div class="form-check form-switch float-end">
-                          <input id="summary" type="checkbox" class="form-check-input" formControlName="enableSummary">
+                          <input type="checkbox" class="form-check-input" formControlName="enableSummary">
                         </div>
                       </ng-template>
                     </app-setting-switch>
@@ -236,9 +236,9 @@
                 <div class="row g-0 mt-4 mb-4">
                   @if(settingsForm.get('enableAgeRating'); as formControl) {
                     <app-setting-switch [title]="t('enable-age-rating-label')" [subtitle]="t('enable-age-rating-tooltip')">
-                      <ng-template #switch>
+                      <ng-template>
                         <div class="form-check form-switch float-end">
-                          <input id="enable-age-rating" type="checkbox" class="form-check-input" formControlName="enableAgeRating">
+                          <input type="checkbox" class="form-check-input" formControlName="enableAgeRating">
                         </div>
                       </ng-template>
                     </app-setting-switch>
@@ -248,9 +248,9 @@
                 <div class="row g-0 mt-4 mb-4">
                   @if(settingsForm.get('enablePublicationStatus'); as formControl) {
                     <app-setting-switch [title]="t('derive-publication-status-label')" [subtitle]="t('derive-publication-status-tooltip')">
-                      <ng-template #switch>
+                      <ng-template>
                         <div class="form-check form-switch float-end">
-                          <input id="derive-publication-status" type="checkbox" class="form-check-input" formControlName="enablePublicationStatus">
+                          <input type="checkbox" class="form-check-input" formControlName="enablePublicationStatus">
                         </div>
                       </ng-template>
                     </app-setting-switch>
@@ -260,9 +260,9 @@
                 <div class="row g-0 mt-4 mb-4">
                   @if(settingsForm.get('enableRelationships'); as formControl) {
                     <app-setting-switch [title]="t('enable-relations-label')" [subtitle]="t('enable-relations-tooltip')">
-                      <ng-template #switch>
+                      <ng-template>
                         <div class="form-check form-switch float-end">
-                          <input id="enable-relations-status" type="checkbox" class="form-check-input" formControlName="enableRelationships">
+                          <input type="checkbox" class="form-check-input" formControlName="enableRelationships">
                         </div>
                       </ng-template>
                     </app-setting-switch>
@@ -272,9 +272,9 @@
                 <div class="row g-0 mt-4 mb-4">
                   @if(settingsForm.get('enableStartDate'); as formControl) {
                     <app-setting-switch [title]="t('enable-start-date-label')" [subtitle]="t('enable-start-date-tooltip')">
-                      <ng-template #switch>
+                      <ng-template>
                         <div class="form-check form-switch float-end">
-                          <input id="enable-start-date-status" type="checkbox" class="form-check-input" formControlName="enableStartDate">
+                          <input type="checkbox" class="form-check-input" formControlName="enableStartDate">
                         </div>
                       </ng-template>
                     </app-setting-switch>
@@ -284,9 +284,9 @@
                 <div class="row g-0 mt-4 mb-4">
                   @if(settingsForm.get('enableCoverImage'); as formControl) {
                     <app-setting-switch [title]="t('enable-cover-image-label')" [subtitle]="t('enable-cover-image-tooltip')">
-                      <ng-template #switch>
+                      <ng-template>
                         <div class="form-check form-switch float-end">
-                          <input id="enable-cover-image" type="checkbox" class="form-check-input" formControlName="enableCoverImage">
+                          <input type="checkbox" class="form-check-input" formControlName="enableCoverImage">
                         </div>
                       </ng-template>
                     </app-setting-switch>
@@ -310,9 +310,9 @@
                 <div class="row g-0 mt-4 mb-4">
                   @if(settingsForm.get('enableChapterTitle'); as formControl) {
                     <app-setting-switch [title]="t('enable-chapter-title-label')" [subtitle]="t('enable-chapter-title-tooltip')">
-                      <ng-template #switch>
+                      <ng-template>
                         <div class="form-check form-switch float-end">
-                          <input id="enable-chapter-title" type="checkbox" class="form-check-input" formControlName="enableChapterTitle">
+                          <input type="checkbox" class="form-check-input" formControlName="enableChapterTitle">
                         </div>
                       </ng-template>
                     </app-setting-switch>
@@ -322,9 +322,9 @@
                 <div class="row g-0 mt-4 mb-4">
                   @if(settingsForm.get('enableChapterSummary'); as formControl) {
                     <app-setting-switch [title]="t('enable-chapter-summary-label')" [subtitle]="t('enable-chapter-summary-tooltip')">
-                      <ng-template #switch>
+                      <ng-template>
                         <div class="form-check form-switch float-end">
-                          <input id="enable-chapter-summary" type="checkbox" class="form-check-input" formControlName="enableChapterSummary">
+                          <input type="checkbox" class="form-check-input" formControlName="enableChapterSummary">
                         </div>
                       </ng-template>
                     </app-setting-switch>
@@ -334,9 +334,9 @@
                 <div class="row g-0 mt-4 mb-4">
                   @if(settingsForm.get('enableChapterReleaseDate'); as formControl) {
                     <app-setting-switch [title]="t('enable-chapter-release-date-label')" [subtitle]="t('enable-chapter-release-date-tooltip')">
-                      <ng-template #switch>
+                      <ng-template>
                         <div class="form-check form-switch float-end">
-                          <input id="enable-chapter-release-date" type="checkbox" class="form-check-input" formControlName="enableChapterReleaseDate">
+                          <input type="checkbox" class="form-check-input" formControlName="enableChapterReleaseDate">
                         </div>
                       </ng-template>
                     </app-setting-switch>
@@ -346,9 +346,9 @@
                 <div class="row g-0 mt-4 mb-4">
                   @if(settingsForm.get('enableChapterPublisher'); as formControl) {
                     <app-setting-switch [title]="t('enable-chapter-publisher-label')" [subtitle]="t('enable-chapter-publisher-tooltip')">
-                      <ng-template #switch>
+                      <ng-template>
                         <div class="form-check form-switch float-end">
-                          <input id="enable-chapter-publisher" type="checkbox" class="form-check-input" formControlName="enableChapterPublisher">
+                          <input type="checkbox" class="form-check-input" formControlName="enableChapterPublisher">
                         </div>
                       </ng-template>
                     </app-setting-switch>
@@ -358,9 +358,9 @@
                 <div class="row g-0 mt-4 mb-4">
                   @if(settingsForm.get('enableChapterCoverImage'); as formControl) {
                     <app-setting-switch [title]="t('enable-chapter-cover-label')" [subtitle]="t('enable-chapter-cover-tooltip')">
-                      <ng-template #switch>
+                      <ng-template>
                         <div class="form-check form-switch float-end">
-                          <input id="enable-chapter-cover" type="checkbox" class="form-check-input" formControlName="enableChapterCoverImage">
+                          <input type="checkbox" class="form-check-input" formControlName="enableChapterCoverImage">
                         </div>
                       </ng-template>
                     </app-setting-switch>
@@ -384,9 +384,9 @@
                 <div class="row g-0 mt-4 mb-4">
                   @if(settingsForm.get('enableVolumeCoverImage'); as formControl) {
                     <app-setting-switch [title]="t('enable-volume-cover-label')" [subtitle]="t('enable-volume-cover-tooltip')">
-                      <ng-template #switch>
+                      <ng-template>
                         <div class="form-check form-switch float-end">
-                          <input id="enable-volume-cover" type="checkbox" class="form-check-input" formControlName="enableVolumeCoverImage">
+                          <input type="checkbox" class="form-check-input" formControlName="enableVolumeCoverImage">
                         </div>
                       </ng-template>
                     </app-setting-switch>
@@ -412,9 +412,9 @@
 
                     <div class="col-6">
                       <app-setting-switch [title]="t('enable-people-label')" [subtitle]="t('enable-people-tooltip')">
-                        <ng-template #switch>
+                        <ng-template>
                           <div class="form-check form-switch float-end">
-                            <input id="enable-people-status" type="checkbox" class="form-check-input" formControlName="enablePeople">
+                            <input type="checkbox" class="form-check-input" formControlName="enablePeople">
                           </div>
                         </ng-template>
                       </app-setting-switch>
@@ -422,9 +422,9 @@
 
                     <div class="col-6">
                       <app-setting-switch [title]="t('first-last-name-label')" [subtitle]="t('first-last-name-tooltip')">
-                        <ng-template #switch>
+                        <ng-template>
                           <div class="form-check form-switch float-end">
-                            <input id="enable-first-last-name" type="checkbox" class="form-check-input" formControlName="firstLastPeopleNaming">
+                            <input type="checkbox" class="form-check-input" formControlName="firstLastPeopleNaming">
                           </div>
                         </ng-template>
                       </app-setting-switch>
@@ -450,108 +450,6 @@
             </div>
           </div>
         }
-
-        <!--Tags-->
-        <div ngbAccordionItem="tags-panel" [collapsed]="false">
-          <h2 class="accordion-header" ngbAccordionHeader>
-            <button ngbAccordionButton class="accordion-button" type="button">
-              {{t('tags-header')}}
-            </button>
-          </h2>
-          <div ngbAccordionCollapse>
-            <div ngbAccordionBody>
-              <ng-template>
-                <div class="row mt-4 mb-4">
-                  <div class="col-md-6">
-                    @if(settingsForm.get('enableGenres'); as formControl) {
-                      <app-setting-switch [title]="t('enable-genres-label')" [subtitle]="t('enable-genres-tooltip')">
-                        <ng-template #switch>
-                          <div class="form-check form-switch float-end">
-                            <input id="enable-genres-status" type="checkbox" class="form-check-input" formControlName="enableGenres">
-                          </div>
-                        </ng-template>
-                      </app-setting-switch>
-                    }
-                  </div>
-                  <div class="col-md-6">
-                    @if(settingsForm.get('enableTags'); as formControl) {
-                      <app-setting-switch [title]="t('enable-tags-label')" [subtitle]="t('enable-tags-tooltip')">
-                        <ng-template #switch>
-                          <div class="form-check form-switch float-end">
-                            <input id="enable-tags-status" type="checkbox" class="form-check-input" formControlName="enableTags">
-                          </div>
-                        </ng-template>
-                      </app-setting-switch>
-                    }
-                  </div>
-                </div>
-
-                <div class="row g-0 align-items-start mb-4">
-                  <div class="col">
-                    <app-setting-multi-text-field
-                      [title]="t('blacklist-label')"
-                      [tooltip]="t('blacklist-tooltip')"
-                      formControlName="blacklist"
-                    />
-                  </div>
-                </div>
-
-                <div class="row g-0 mt-4 mb-4">
-                  <app-setting-multi-text-field
-                    [title]="t('whitelist-label')"
-                    [tooltip]="t('whitelist-tooltip')"
-                    formControlName="whitelist"
-                  />
-                </div>
-
-
-                <div class="row g-0 mt-4 mb-4">
-                  <app-setting-item [title]="t('tag-weight-label')" [subtitle]="t('tag-weight-tooltip')" [labelId]="'filter-above-weight'">
-                    <ng-template #view>
-                      @if (settingsForm.get('filterAboveWeight')?.value == null) {
-                        {{t('tag-weight-disabled')}}
-                      } @else {
-                        {{settingsForm.get('filterAboveWeight')?.value | tagWeightTitle}}
-                      }
-
-                    </ng-template>
-                    <ng-template #edit>
-                      <select class="form-select" formControlName="filterAboveWeight" [id]="'filter-above-weight'">
-                        <option [ngValue]="null">{{t('tag-weight-disabled')}}</option>
-                        @for(weight of allTagWeights; track weight) {
-                          <option [ngValue]="weight">{{weight | tagWeightTitle}}</option>
-                        }
-                      </select>
-                    </ng-template>
-                  </app-setting-item>
-                </div>
-
-              </ng-template>
-            </div>
-          </div>
-        </div>
-
-        <!--Base Age Rating Mappings-->
-        <div ngbAccordionItem="external-age-rating-panel" [collapsed]="false">
-          <h2 class="accordion-header" ngbAccordionHeader>
-            <button ngbAccordionButton class="accordion-button" type="button">
-              {{t('external-age-rating-header')}}
-            </button>
-          </h2>
-          <div ngbAccordionCollapse>
-            <div ngbAccordionBody>
-              <ng-template>
-                <p>{{t('external-age-rating-description')}}</p>
-                <app-age-rating-mapper [form]="settingsForm" controlName="externalAgeRatingMappings"
-                                       [sourceLabel]="t('external-age-rating-label')"
-                                       [addLabel]="t('add-age-rating-mapping-label')"
-                                       [removeLabel]="t('remove-age-rating-mapping-label')"
-                                       [strValues]="MangaBakaAgeRatings"
-                />
-              </ng-template>
-            </div>
-          </div>
-        </div>
       </div>
 
       @if (settings(); as s) {

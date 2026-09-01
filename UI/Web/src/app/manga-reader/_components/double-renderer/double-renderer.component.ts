@@ -1,26 +1,27 @@
-import { DOCUMENT, NgClass, AsyncPipe } from '@angular/common';
+import {AsyncPipe, DOCUMENT, NgClass} from '@angular/common';
 import {
   ChangeDetectionStrategy,
   ChangeDetectorRef,
   Component,
-  DestroyRef, ElementRef,
+  DestroyRef,
+  ElementRef,
   inject,
   Input,
   OnInit,
   output,
   viewChild
 } from '@angular/core';
-import { Observable, of, map, tap, shareReplay, filter, combineLatest } from 'rxjs';
-import { PageSplitOption } from 'src/app/_models/preferences/page-split-option';
-import { ReaderMode } from 'src/app/_models/preferences/reader-mode';
-import { ReaderService } from 'src/app/_services/reader.service';
-import { LayoutMode } from '../../_models/layout-mode';
-import { FITTING_OPTION, PAGING_DIRECTION } from '../../_models/reader-enums';
-import { ReaderSetting } from '../../_models/reader-setting';
-import { DEBUG_MODES, ImageRenderer } from '../../_models/renderer';
-import { MangaReaderService } from '../../_service/manga-reader.service';
+import {combineLatest, filter, map, Observable, of, shareReplay, tap} from 'rxjs';
+import {LayoutMode} from '../../_models/layout-mode';
+import {FITTING_OPTION, PAGING_DIRECTION} from '../../_models/reader-enums';
+import {ReaderSetting} from '../../_models/reader-setting';
+import {DEBUG_MODES, ImageRenderer} from '../../_models/renderer';
+import {MangaReaderService} from '../../_service/manga-reader.service';
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
-import { SafeStylePipe } from '../../../_pipes/safe-style.pipe';
+import {SafeStylePipe} from '../../../_pipes/safe-style.pipe';
+import {ReaderService} from "../../../_services/reader.service";
+import {PageSplitOption} from "../../../_models/preferences/page-split-option";
+import {ReaderMode} from "../../../_models/preferences/reader-mode";
 
 /**
  * Renders 2 pages except on first page, last page, and before a wide image

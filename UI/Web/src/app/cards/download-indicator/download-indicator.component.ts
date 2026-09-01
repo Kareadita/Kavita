@@ -1,6 +1,6 @@
 import {ChangeDetectionStrategy, Component, computed, input} from '@angular/core';
-import {DownloadQueueItem} from 'src/app/shared/_models/download-queue-item';
 import {TranslocoDirective} from "@jsverse/transloco";
+import {DownloadQueueItem} from "../../shared/_models/download-queue-item";
 
 @Component({
   selector: 'app-download-indicator',

@@ -4,28 +4,40 @@
       <h5 class="card-title">{{rule() ? t('edit-rule-title') : t('new-rule-title')}}</h5>
       <form [formGroup]="form">
         <div class="row g-3 align-items-end">
-          <div class="col-md-4">
-            <label class="form-label">{{t('cbl-series-name-label')}}</label>
-            <input type="text" class="form-control" formControlName="cblSeriesName" [placeholder]="t('cbl-series-name-placeholder')">
-          </div>
-          <div class="col-md-2">
-            <label class="form-label">{{t('cbl-volume-label')}}</label>
-            <input type="text" class="form-control" formControlName="cblVolume" [placeholder]="t('cbl-volume-placeholder')">
-          </div>
-          <div class="col-md-2">
-            <label class="form-label">{{t('cbl-number-label')}}</label>
-            <input type="text" class="form-control" formControlName="cblNumber" [placeholder]="t('cbl-number-placeholder')">
-          </div>
+          @if (form.get('cblSeriesName'); as formControl) {
+            <div class="col-md-4">
+              <label class="form-label">{{t('cbl-series-name-label')}}</label>
+              <input type="text" class="form-control" formControlName="cblSeriesName" [placeholder]="t('cbl-series-name-placeholder')"
+                     [appFormField]="formControl">
+            </div>
+          }
+          @if (form.get('cblVolume'); as formControl) {
+            <div class="col-md-2">
+              <label class="form-label">{{t('cbl-volume-label')}}</label>
+              <input type="text" class="form-control" formControlName="cblVolume" [placeholder]="t('cbl-volume-placeholder')"
+                     [appFormField]="formControl">
+            </div>
+          }
+          @if (form.get('cblNumber'); as formControl) {
+            <div class="col-md-2">
+              <label class="form-label">{{t('cbl-number-label')}}</label>
+              <input type="text" class="form-control" formControlName="cblNumber" [placeholder]="t('cbl-number-placeholder')"
+                     [appFormField]="formControl">
+            </div>
+          }
           <div class="col-md-4">
             <label class="form-label">{{t('kavita-series-label')}}</label>
-            <app-typeahead [settings]="seriesSettings" [reset]="seriesReset" (selectedData)="onSeriesSelected($event)" id="remap-series">
-              <ng-template #optionItem let-item let-position="idx" let-value="value">
-                {{item.name}}
-              </ng-template>
-              <ng-template #badgeItem let-item let-position="idx">
-                {{item.name}}
-              </ng-template>
-            </app-typeahead>
+            @let seriesConfig = seriesSettings();
+            @if (seriesConfig) {
+              <app-typeahead [settings]="seriesConfig" [reset]="seriesReset" (selectedData)="onSeriesSelected($event)" id="remap-series">
+                <ng-template #optionItem let-item let-position="idx" let-value="value">
+                  {{item.name}}
+                </ng-template>
+                <ng-template #badgeItem let-item let-position="idx">
+                  {{item.name}}
+                </ng-template>
+              </app-typeahead>
+            }
           </div>
         </div>
 

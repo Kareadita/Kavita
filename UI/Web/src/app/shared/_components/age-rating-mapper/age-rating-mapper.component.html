@@ -12,9 +12,11 @@
                 <option [value]="str">{{str}}</option>
               }
             </select>
-          } @else {
+          } @else if (mapping.get('str'); as formControl) {
             <input [id]="idPrefix() + '-' + i" type="text" class="form-control" formControlName="str"
-                   [placeholder]="sourceLabel()" autocomplete="off" />
+                   [placeholder]="sourceLabel()" autocomplete="off"
+                   [appFormField]="formControl" [attr.aria-describedby]="idPrefix() + '-' + i + '-validations'" />
+            <app-validation-errors [inputId]="idPrefix() + '-' + i" [control]="formControl" />
           }
         </div>
         <div class="col-md-2 d-flex align-items-center justify-content-center">

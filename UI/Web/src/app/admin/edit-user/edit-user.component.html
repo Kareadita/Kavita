@@ -40,20 +40,9 @@
                 <div class="mb-3">
                   <label for="username" class="form-label">{{t('username')}}</label>
                   <input id="username" class="form-control" formControlName="username" type="text"
-                      [class.is-invalid]="formControl.invalid && !formControl.untouched" aria-describedby="username-validations">
-                  @if(formControl.dirty || !formControl.untouched) {
-                    <div id="username-validations" class="invalid-feedback">
-                      @if (formControl.errors; as errors) {
-                        <div>
-                          @if (errors.required) {
-                            {{t('required')}}
-                          } @else if (errors.pattern) {
-                            {{t('username-pattern', {characters: allowedCharacters})}}
-                          }
-                        </div>
-                      }
-                    </div>
-                  }
+                      [appFormField]="formControl" aria-describedby="username-validations">
+
+                  <app-validation-errors [control]="formControl" inputId="username" [messages]="{'pattern': t('username-pattern', {characters: allowedCharacters})}" />
                 </div>
               }
             </div>
@@ -62,24 +51,9 @@
                 <div class="mb-3" style="width:100%">
                   <label for="email" class="form-label">{{t('email')}}</label>
                   <input id="email" class="form-control" formControlName="email" type="text"
-                         [class.is-invalid]="formControl.invalid && !formControl.untouched" aria-describedby="email-validations">
-                  @if(formControl.dirty || !formControl.untouched) {
-                    <div id="email-validations" class="invalid-feedback">
-                      @if (formControl.errors; as errors) {
-                        <div>
-                          @if (errors.required) {
-                            {{t('required')}}
-                          } @else if (errors.email) {
-                            {{t('not-valid-email')}}
-                          }
-                        </div>
-                      }
+                         [appFormField]="formControl" aria-describedby="email-validations">
 
-                    </div>
-                  }
-                  @if (isEmailInvalid$ | async) {
-                    <div class="invalid-feedback" style="display: block"><div>{{t('invalid-email-warning')}}</div></div>
-                  }
+                  <app-validation-errors [control]="formControl" inputId="email" [messages]="{pattern: t('invalid-email-warning')}" />
                 </div>
               }
             </div>

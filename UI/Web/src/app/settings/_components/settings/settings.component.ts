@@ -50,7 +50,6 @@ import {FontManagerComponent} from "../../../user-settings/font-manager/font-man
 import {ServerActivityComponent} from "../../../admin/server-activity/server-activity.component";
 import {ServerDevicesComponent} from "../../../admin/server-devices/server-devices.component";
 import {ManageCustomKeyBindsComponent} from "../../../user-settings/custom-key-binds/manage-custom-key-binds.component";
-import {AccountSettingsComponent} from "src/app/user-settings/account-settings/account-settings.component";
 import {CblManagerComponent} from "../../../user-settings/cbl-manager/cbl-manager.component";
 import {ManageRemapRulesComponent} from "../../../user-settings/manage-remap-rules/manage-remap-rules.component";
 import {KavitaplusActivityComponent} from "../../../user-settings/kavitaplus-activity/kavitaplus-activity.component";
@@ -65,6 +64,7 @@ import {LicenseComponent} from "../../../admin/kavita-plus/license/license.compo
 import {
   ManageScrobbleProvidersComponent
 } from "../../../user-settings/manage-scrobble-providers/manage-scrobble-providers.component";
+import {AccountSettingsComponent} from "../../../user-settings/account-settings/account-settings.component";
 
 @Component({
   selector: 'app-settings',

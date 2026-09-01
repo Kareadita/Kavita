@@ -1,19 +1,21 @@
 import {ChangeDetectionStrategy, ChangeDetectorRef, Component, computed, effect, inject} from '@angular/core';
 import {FormControl, FormGroup, ReactiveFormsModule, Validators} from '@angular/forms';
-import {ToastrService} from 'ngx-toastr';
-import {AccountService} from 'src/app/_services/account.service';
+import {ToastrService} from '@openng/ngx-toastr';
 import {ApiKeyComponent} from '../api-key/api-key.component';
 import {NgbTooltip} from '@ng-bootstrap/ng-bootstrap';
 import {translate, TranslocoDirective} from "@jsverse/transloco";
 import {SettingItemComponent} from "../../settings/_components/setting-item/setting-item.component";
 import {DefaultValuePipe} from "../../_pipes/default-value.pipe";
+import {AccountService} from "../../_services/account.service";
+import {FormFieldDirective} from "../../_directives/form-field.directive";
+import {ValidationErrorsComponent} from "../../shared/_components/validation-errors/validation-errors.component";
 
 @Component({
   selector: 'app-change-email',
   templateUrl: './change-email.component.html',
   styleUrls: ['./change-email.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [NgbTooltip, ReactiveFormsModule, ApiKeyComponent, TranslocoDirective, SettingItemComponent, DefaultValuePipe]
+  imports: [NgbTooltip, ReactiveFormsModule, ApiKeyComponent, TranslocoDirective, SettingItemComponent, DefaultValuePipe, FormFieldDirective, ValidationErrorsComponent]
 })
 export class ChangeEmailComponent {
 

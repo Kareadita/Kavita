@@ -2,7 +2,7 @@ import {HttpClient, httpResource} from '@angular/common/http';
 import {computed, DestroyRef, inject, Injectable, signal} from '@angular/core';
 import {Observable, of} from 'rxjs';
 import {filter, map, switchMap, tap} from 'rxjs/operators';
-import {environment} from 'src/environments/environment';
+import {environment} from '../../environments/environment';
 import {Preferences} from '../_models/preferences/preferences';
 import {User} from '../_models/user/user';
 import {Router} from '@angular/router';

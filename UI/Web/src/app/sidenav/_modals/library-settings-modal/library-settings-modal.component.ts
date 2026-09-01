@@ -21,18 +21,8 @@ import {
   NgbNavOutlet,
   NgbTooltip
 } from '@ng-bootstrap/ng-bootstrap';
-import {ToastrService} from 'ngx-toastr';
-import {debounceTime, distinctUntilChanged, of, switchMap, tap} from 'rxjs';
-import {
-  DirectoryPickerComponent,
-  DirectoryPickerResult
-} from 'src/app/admin/_modals/directory-picker/directory-picker.component';
-import {ConfirmService} from 'src/app/shared/confirm.service';
-import {UtilityService} from 'src/app/shared/_services/utility.service';
-import {allLibraryTypes, Library, LibraryType} from 'src/app/_models/library/library';
-import {ImageService} from 'src/app/_services/image.service';
-import {LibraryService} from 'src/app/_services/library.service';
-import {UploadService} from 'src/app/_services/upload.service';
+import {ToastrService} from '@openng/ngx-toastr';
+import {debounceTime, distinctUntilChanged, switchMap, tap} from 'rxjs';
 import {takeUntilDestroyed, toSignal} from "@angular/core/rxjs-interop";
 import {NgTemplateOutlet} from "@angular/common";
 import {SentenceCasePipe} from "../../../_pipes/sentence-case.pipe";
@@ -53,7 +43,7 @@ import {SettingButtonComponent} from "../../../settings/_components/setting-butt
 import {LibraryTypePipe} from "../../../_pipes/library-type.pipe";
 import {LibraryTypeSubtitlePipe} from "../../../_pipes/library-type-subtitle.pipe";
 import {TypeaheadComponent} from "../../../typeahead/_components/typeahead.component";
-import {setupLanguageSettings, TypeaheadSettings} from "../../../typeahead/_models/typeahead-settings";
+import {TypeaheadSettings} from "../../../typeahead/_models/typeahead-settings";
 import {Language} from "../../../_models/metadata/language";
 import {MetadataService} from "../../../_services/metadata.service";
 import {BreakpointService} from "../../../_services/breakpoint.service";
@@ -68,6 +58,18 @@ import {MetadataProvider} from "../../../_models/kavitaplus/metadata-provider.en
 import {map} from "rxjs/operators";
 import {MetadataProviderTitlePipe} from "../../../_pipes/metadata-provider-title.pipe";
 import {UtcToLocalTimePipe} from "../../../_pipes/utc-to-local-time.pipe";
+import {UtilityService} from "../../../shared/_services/utility.service";
+import {UploadService} from "../../../_services/upload.service";
+import {ConfirmService} from "../../../shared/confirm.service";
+import {LibraryService} from "../../../_services/library.service";
+import {allLibraryTypes, Library, LibraryType} from "../../../_models/library/library";
+import {
+  DirectoryPickerModalComponent,
+  DirectoryPickerResult
+} from "../../../admin/_modals/directory-picker/directory-picker-modal.component";
+import {TypeaheadSettingsFactoryService} from "../../../typeahead-settings-factory.service";
+import {FormFieldDirective} from "../../../_directives/form-field.directive";
+import {ValidationErrorsComponent} from "../../../shared/_components/validation-errors/validation-errors.component";
 
 enum StepID {
   General = 0,
@@ -80,7 +82,7 @@ enum StepID {
   selector: 'app-library-settings-modal',
   imports: [NgbModalModule, NgbNavLink, NgbNavItem, NgbNavContent, ReactiveFormsModule, NgbTooltip,
     SentenceCasePipe, NgbNav, NgbNavOutlet, CoverImageChooserComponent, TranslocoModule, DefaultDatePipe,
-    FileTypeGroupPipe, EditListComponent, SettingItemComponent, SettingSwitchComponent, SettingButtonComponent, LibraryTypeSubtitlePipe, NgTemplateOutlet, TypeaheadComponent, TabTitlePipe, MetadataProviderTitlePipe, UtcToLocalTimePipe],
+    FileTypeGroupPipe, EditListComponent, SettingItemComponent, SettingSwitchComponent, SettingButtonComponent, LibraryTypeSubtitlePipe, NgTemplateOutlet, TypeaheadComponent, TabTitlePipe, MetadataProviderTitlePipe, UtcToLocalTimePipe, FormFieldDirective, ValidationErrorsComponent],
   templateUrl: './library-settings-modal.component.html',
   styleUrls: ['./library-settings-modal.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
@@ -96,11 +98,11 @@ export class LibrarySettingsModalComponent implements OnInit {
   private readonly libraryService = inject(LibraryService);
   private readonly toastr = inject(ToastrService);
   private readonly cdRef = inject(ChangeDetectorRef);
-  private readonly imageService = inject(ImageService);
   private readonly actionFactoryService = inject(ActionFactoryService);
   private readonly metadataService = inject(MetadataService);
   protected readonly breakpointService = inject(BreakpointService);
   private readonly coverChooserConfigFactory = inject(CoverChooserConfigFactoryService);
+  private readonly typeaheadSettingFactoryService = inject(TypeaheadSettingsFactoryService);
 
   protected readonly LibraryType = LibraryType;
   protected readonly Tabs = Tabs;
@@ -157,7 +159,7 @@ export class LibrarySettingsModalComponent implements OnInit {
     return {title: this.libraryTypePipe.transform(f), value: f};
   }).sort((a, b) => a.title.localeCompare(b.title));
 
-  languageSettings: TypeaheadSettings<Language> | null = null;
+  languageSettings = signal<TypeaheadSettings<Language> | null>(null);
 
   isAddLibrary= signal<boolean>(false);
   setupStep = StepID.General;
@@ -222,7 +224,11 @@ export class LibrarySettingsModalComponent implements OnInit {
       ).subscribe();
 
 
-    this.setupLanguageTypeahead().subscribe();
+    this.languageSettings.set(this.typeaheadSettingFactoryService.forLanguage({id: 'language', currentSelectedLanguage: this.library?.defaultLanguage,
+      overrides: {
+        showLocked: false
+      }
+    }));
 
     // Turn on/off manage collections/rl
     this.libraryForm.get('enableMetadata')?.valueChanges.pipe(
@@ -340,17 +346,6 @@ export class LibrarySettingsModalComponent implements OnInit {
     this.cdRef.markForCheck();
   }
 
-  setupLanguageTypeahead() {
-    return this.metadataService.getAllValidLanguages()
-      .pipe(
-        tap(validLanguages => {
-          this.languageSettings = setupLanguageSettings(false, this.utilityService, validLanguages, this.library?.defaultLanguage)
-          this.cdRef.markForCheck();
-        }),
-        switchMap(_ => of(true))
-      );
-  }
-
   updateLanguage(languages: Array<Language>) {
     this.libraryForm.get("defaultLanguage")!.setValue(languages.at(0)?.isoCode ?? '');
   }
@@ -452,7 +447,7 @@ export class LibrarySettingsModalComponent implements OnInit {
   }
 
   openDirectoryPicker() {
-    const modalRef = this.modalService.open(DirectoryPickerComponent);
+    const modalRef = this.modalService.open(DirectoryPickerModalComponent);
     modalRef.closed.subscribe((closeResult: DirectoryPickerResult) => {
       if (closeResult.success) {
         if (!this.selectedFolders.includes(closeResult.folderPath)) {

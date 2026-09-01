@@ -19,8 +19,8 @@
         @case (Step.Configure) {
           <form class="row" [formGroup]="importSettingsForm">
             <div class="col-md-6 col-sm-12">
-              @if (importSettingsForm.get('importMode'); as control) {
-                <app-setting-item [control]="control" [canEdit]="false" [showEdit]="false" [title]="t('import-mode-label')" [subtitle]="t('import-mode-tooltip')">
+              @if (importSettingsForm.get('importMode');as formControl) {
+                <app-setting-item [control]="formControl" [canEdit]="false" [showEdit]="false" [title]="t('import-mode-label')" [subtitle]="t('import-mode-tooltip')">
                   <ng-template #view>
                     <select formControlName="importMode" class="form-control">
                       @for (mode of ImportModes; track mode) {
@@ -33,8 +33,8 @@
             </div>
 
             <div class="col-md-6 col-sm-12">
-              @if (importSettingsForm.get('resolution'); as control) {
-                <app-setting-item [control]="control" [canEdit]="false" [showEdit]="false" [title]="t('resolution-label')" [subtitle]="t('resolution-tooltip')">
+              @if (importSettingsForm.get('resolution');as formControl) {
+                <app-setting-item [control]="formControl" [canEdit]="false" [showEdit]="false" [title]="t('resolution-label')" [subtitle]="t('resolution-tooltip')">
                   <ng-template #view>
                     <select formControlName="resolution" class="form-control">
                       @for (resolution of ConflictResolutions; track resolution) {
@@ -52,11 +52,11 @@
               <div class="text-muted">{{t('fields-to-import-tooltip')}}</div>
 
               <div class="col-md-6 col-sm-12 pt-4">
-                @if (importSettingsForm.get('whitelist'); as control) {
+                @if (importSettingsForm.get('whitelist');as formControl) {
                   <app-setting-switch [title]="t('whitelist-label')">
-                    <ng-template #switch>
+                    <ng-template>
                       <div class="form-check form-switch">
-                        <input id="whitelist-enabled" type="checkbox" class="form-check-input" formControlName="whitelist">
+                        <input type="checkbox" class="form-check-input" formControlName="whitelist">
                       </div>
                     </ng-template>
                   </app-setting-switch>
@@ -64,11 +64,11 @@
               </div>
 
               <div class="col-md-6 col-sm-12 pt-4">
-                @if (importSettingsForm.get('blacklist'); as control) {
+                @if (importSettingsForm.get('blacklist');as formControl) {
                   <app-setting-switch [title]="t('blacklist-label')">
-                    <ng-template #switch>
+                    <ng-template>
                       <div class="form-check form-switch">
-                        <input id="blacklist-enabled" type="checkbox" class="form-check-input" formControlName="blacklist">
+                        <input type="checkbox" class="form-check-input" formControlName="blacklist">
                       </div>
                     </ng-template>
                   </app-setting-switch>
@@ -76,11 +76,11 @@
               </div>
 
               <div class="col-md-6 col-sm-12 pt-4">
-                @if (importSettingsForm.get('ageRatings'); as control) {
+                @if (importSettingsForm.get('ageRatings');as formControl) {
                   <app-setting-switch [title]="t('age-ratings-label')">
-                    <ng-template #switch>
+                    <ng-template>
                       <div class="form-check form-switch">
-                        <input id="age-ratings-enabled" type="checkbox" class="form-check-input" formControlName="ageRatings">
+                        <input type="checkbox" class="form-check-input" formControlName="ageRatings">
                       </div>
                     </ng-template>
                   </app-setting-switch>
@@ -88,11 +88,11 @@
               </div>
 
               <div class="col-md-6 col-sm-12 pt-4">
-                @if (importSettingsForm.get('fieldMappings'); as control) {
+                @if (importSettingsForm.get('fieldMappings');as formControl) {
                   <app-setting-switch [title]="t('field-mappings-label')">
-                    <ng-template #switch>
+                    <ng-template>
                       <div class="form-check form-switch">
-                        <input id="field-mappings-enabled" type="checkbox" class="form-check-input" formControlName="fieldMappings">
+                        <input type="checkbox" class="form-check-input" formControlName="fieldMappings">
                       </div>
                     </ng-template>
                   </app-setting-switch>
@@ -114,7 +114,7 @@
 
               @for (arm of res.ageRatingConflicts; track arm) {
                 <div class="col-md-6 col-sm-12 pt-4">
-                  @if (importSettingsForm.get('ageRatingConflictResolutions.' + arm); as control) {
+                  @if (importSettingsForm.get('ageRatingConflictResolutions.' + arm);as formControl) {
                     <div formGroupName="ageRatingConflictResolutions">
                       <span class="conflict-title">{{arm}}</span>
                       <select [formControlName]="arm" class="form-control mt-2">

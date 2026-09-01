@@ -1,5 +1,5 @@
-import { Pipe, PipeTransform } from '@angular/core';
-import { ReaderMode } from 'src/app/_models/preferences/reader-mode';
+import {Pipe, PipeTransform} from '@angular/core';
+import {ReaderMode} from "../_models/preferences/reader-mode";
 
 @Pipe({
   name: 'readerModeIcon',

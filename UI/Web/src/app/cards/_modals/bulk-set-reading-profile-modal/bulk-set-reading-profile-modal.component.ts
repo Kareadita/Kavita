@@ -1,6 +1,6 @@
-import {Component, computed, inject, input, OnInit, signal, TemplateRef, viewChild} from '@angular/core';
+import {Component, computed, inject, input, OnInit, signal, TemplateRef, viewChild, ChangeDetectionStrategy} from '@angular/core';
 import {NgbActiveModal} from "@ng-bootstrap/ng-bootstrap";
-import {ToastrService} from "ngx-toastr";
+import {ToastrService} from '@openng/ngx-toastr';
 import {ReactiveFormsModule} from "@angular/forms";
 import {translate, TranslocoDirective} from "@jsverse/transloco";
 import {ReadingProfileService} from "../../../_services/reading-profile.service";
@@ -20,6 +20,7 @@ import {forkJoin} from "rxjs";
     SentenceCasePipe
   ],
   templateUrl: './bulk-set-reading-profile-modal.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrl: './bulk-set-reading-profile-modal.component.scss'
 })
 export class BulkSetReadingProfileModalComponent implements OnInit {

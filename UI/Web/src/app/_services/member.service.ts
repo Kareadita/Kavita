@@ -1,6 +1,6 @@
 import {HttpClient} from '@angular/common/http';
 import {inject, Injectable} from '@angular/core';
-import {environment} from 'src/environments/environment';
+import {environment} from '../../environments/environment';
 import {Member} from '../_models/auth/member';
 import {UserTokenInfo} from "../_models/kavitaplus/user-token-info";
 import {MemberInfo} from "../_models/user/member-info";

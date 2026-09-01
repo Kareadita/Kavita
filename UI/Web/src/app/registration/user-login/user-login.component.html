@@ -7,17 +7,25 @@
         @if (showPasswordLogin()) {
           <form [formGroup]="loginForm" (ngSubmit)="login()" novalidate class="needs-validation">
             <div class="card-text">
-              <div class="mb-3">
-                <label for="username" class="form-label visually-hidden">{{t('username')}}</label>
-                <input class="form-control custom-input" formControlName="username" id="username" autocomplete="username"
-                       type="text" autofocus [placeholder]="t('username')">
-              </div>
+              @if (loginForm.get('username'); as formControl) {
+                <div class="mb-3">
+                  <label for="username" class="form-label visually-hidden">{{t('username')}}</label>
+                  <input class="form-control custom-input" formControlName="username" id="username" autocomplete="username"
+                         type="text" autofocus [placeholder]="t('username')"
+                         [appFormField]="formControl" aria-describedby="username-validations">
+                  <app-validation-errors inputId="username" [control]="formControl" />
+                </div>
+              }
 
-              <div class="mb-2">
-                <label for="password" class="form-label visually-hidden">{{t('password')}}</label>
-                <input class="form-control custom-input" formControlName="password" name="password" autocomplete="current-password"
-                       id="password" type="password" [placeholder]="t('password')">
-              </div>
+              @if (loginForm.get('password'); as formControl) {
+                <div class="mb-2">
+                  <label for="password" class="form-label visually-hidden">{{t('password')}}</label>
+                  <input class="form-control custom-input" formControlName="password" name="password" autocomplete="current-password"
+                         id="password" type="password" [placeholder]="t('password')"
+                         [appFormField]="formControl" aria-describedby="password-validations">
+                  <app-validation-errors inputId="password" [control]="formControl" />
+                </div>
+              }
 
               <div class="mb-3 forgot-password">
                 <a routerLink="/registration/reset-password">{{t('forgot-password')}}</a>

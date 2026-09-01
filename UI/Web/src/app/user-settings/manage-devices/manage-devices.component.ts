@@ -1,6 +1,4 @@
 import {ChangeDetectionStrategy, Component, DestroyRef, inject, OnInit, signal} from '@angular/core';
-import {Device} from 'src/app/_models/device/device';
-import {DeviceService} from 'src/app/_services/device.service';
 import {DevicePlatformPipe} from '../../_pipes/device-platform.pipe';
 import {translate, TranslocoDirective} from "@jsverse/transloco";
 import {SettingsService} from "../../admin/settings.service";
@@ -17,6 +15,8 @@ import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import {ModalService} from "../../_services/modal.service";
 import {ModalResult} from "../../_models/modal/modal-result";
 import {patchSignalArray} from "../../../libs/patch";
+import {Device} from "../../_models/device/device";
+import {DeviceService} from "../../_services/device.service";
 
 @Component({
   selector: 'app-manage-devices',

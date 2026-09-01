@@ -1,6 +1,6 @@
 import {HttpClient} from '@angular/common/http';
 import {inject, Injectable} from '@angular/core';
-import {environment} from 'src/environments/environment';
+import {environment} from '../../environments/environment';
 import {UserCollection} from '../_models/collection-tag';
 import {TextResonse} from '../_types/text-response';
 import {MalStack} from "../_models/collection/mal-stack";

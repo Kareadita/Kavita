@@ -13,19 +13,6 @@ import {
 } from '@angular/core';
 import {ActivatedRoute, Router} from '@angular/router';
 import {debounceTime} from 'rxjs';
-import {BulkSelectionService} from 'src/app/cards/bulk-selection.service';
-import {FilterUtilitiesService} from 'src/app/shared/_services/filter-utilities.service';
-import {UtilityService} from 'src/app/shared/_services/utility.service';
-import {SeriesRemovedEvent} from 'src/app/_models/events/series-removed-event';
-import {JumpKey} from 'src/app/_models/jumpbar/jump-key';
-import {Pagination} from 'src/app/_models/pagination';
-import {Series} from 'src/app/_models/series';
-import {FilterEvent, SeriesSortField} from 'src/app/_models/metadata/series-filter';
-import {ImageService} from 'src/app/_services/image.service';
-import {JumpbarService} from 'src/app/_services/jumpbar.service';
-import {EVENTS, MessageHubService} from 'src/app/_services/message-hub.service';
-import {ScrollService} from 'src/app/_services/scroll.service';
-import {SeriesService} from 'src/app/_services/series.service';
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import {SeriesCardComponent} from '../../../cards/series-card/series-card.component';
 import {CardDetailLayoutComponent} from '../../../cards/card-detail-layout/card-detail-layout.component';
@@ -41,6 +28,19 @@ import {MetadataService} from "../../../_services/metadata.service";
 import {FilterStatement} from "../../../_models/metadata/v2/filter-statement";
 import {FilterComparison} from "../../../_models/metadata/v2/filter-comparison";
 import {ActionResult} from "../../../_models/actionables/action-result";
+import {BulkSelectionService} from "../../../cards/bulk-selection.service";
+import {JumpbarService} from "../../../_services/jumpbar.service";
+import {JumpKey} from "../../../_models/jumpbar/jump-key";
+import {ImageService} from "../../../_services/image.service";
+import {SeriesService} from "../../../_services/series.service";
+import {EVENTS, MessageHubService} from "../../../_services/message-hub.service";
+import {FilterUtilitiesService} from "../../../shared/_services/filter-utilities.service";
+import {UtilityService} from "../../../shared/_services/utility.service";
+import {ScrollService} from "../../../_services/scroll.service";
+import {Pagination} from "../../../_models/pagination";
+import {FilterEvent, SeriesSortField} from "../../../_models/metadata/series-filter";
+import {SeriesRemovedEvent} from "../../../_models/events/series-removed-event";
+import {Series} from "../../../_models/series";
 
 
 @Component({

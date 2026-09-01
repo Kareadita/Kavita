@@ -120,11 +120,17 @@ public class SettingsController(
     /// <summary>
     /// Is the minimum information setup for Email to work
     /// </summary>
+    /// <param name="forDevice">Device send-to doesn't need full email setup (hostname)</param>
     /// <returns></returns>
     [HttpGet("is-email-setup")]
-    public async Task<ActionResult<bool>> IsEmailSetup()
+    public async Task<ActionResult<bool>> IsEmailSetup(bool forDevice = false)
     {
         var settings = await unitOfWork.SettingsRepository.GetSettingsDtoAsync();
+        if (forDevice)
+        {
+            return Ok(settings.IsEmailSetupForSendToDevice());
+        }
+
         return Ok(settings.IsEmailSetup());
     }
 

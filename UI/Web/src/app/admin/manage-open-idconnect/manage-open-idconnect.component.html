@@ -16,26 +16,21 @@
       <ng-container>
         <div class="row g-0 mt-4 mb-4">
           @if (settingsForm.get('authority'); as formControl) {
-            <app-setting-item [title]="t('authority-label')" [subtitle]="t('authority-tooltip')" [control]="formControl">
+            <app-setting-item [title]="t('authority-label')" [subtitle]="t('authority-tooltip')" [control]="formControl" [validations]="{
+                  backendFailure: formControl.errors?.backendFailure?.result | authorityValidationResult,
+                  requireTls: t('tls-required')
+                }">
               <ng-template #view>
                 {{formControl.value | defaultValue}}
               </ng-template>
               <ng-template #edit>
                 <input id="oid-authority" class="form-control"
                        formControlName="authority" type="text"
-                       [class.is-invalid]="formControl.invalid && !formControl.untouched">
+                       aria-describedby="oid-authority-validations"
+                       [appFormField]="formControl">
 
                 @if (settingsForm.dirty || !settingsForm.untouched) {
                   <div id="invalid-uri-validation" class="invalid-feedback">
-                    @if (formControl.errors?.invalidUri) {
-                      <div>{{t('invalid-uri')}}</div>
-                    }
-                    @if (formControl.errors?.requireTls) {
-                      <div>{{t('tls-required')}}</div>
-                    }
-                    @if (formControl.errors?.backendFailure) {
-                      <div>{{formControl.errors!.backendFailure.result | authorityValidationResult}}</div>
-                    }
                     @if (formControl.pending) {
                       <div>{{t('checking-authority')}}</div>
                     }
@@ -48,25 +43,17 @@
 
         <div class="row g-0 mt-4 mb-4">
           @if (settingsForm.get('clientId'); as formControl) {
-            <app-setting-item [title]="t('client-id-label')" [subtitle]="t('client-id-tooltip')" [control]="formControl">
+            <app-setting-item [title]="t('client-id-label')" [subtitle]="t('client-id-tooltip')" [control]="formControl" [validations]="{
+              requiredIf: t('other-field-required', {name: 'clientId', other: formControl.errors?.requiredIf?.other}),
+              requiredIfOtherInvalid: t('other-field-invalid', {other: formControl.errors?.requiredIfOtherInvalid?.other})
+            }">
               <ng-template #view>
                 {{formControl.value}}
               </ng-template>
               <ng-template #edit>
                 <input id="oid-client-id" aria-describedby="oidc-client-id-validations" class="form-control"
                        formControlName="clientId" type="text"
-                       [class.is-invalid]="formControl.invalid && !formControl.untouched">
-
-                @if (settingsForm.dirty || !settingsForm.untouched) {
-                  <div id="oidc-client-id-validations" class="invalid-feedback">
-                    @if (formControl.errors && formControl.errors.requiredIf) {
-                      <div>{{t('other-field-required', {name: 'clientId', other: formControl.errors.requiredIf.other})}}</div>
-                    }
-                    @if (formControl.errors && formControl.errors.requiredIfOtherInvalid) {
-                      <div>{{t('other-field-invalid', {other: formControl.errors.requiredIfOtherInvalid.other})}}</div>
-                    }
-                  </div>
-                }
+                       [appFormField]="formControl">
 
               </ng-template>
             </app-setting-item>
@@ -75,26 +62,17 @@
 
         <div class="row g-0 mt-4 mb-4">
           @if (settingsForm.get('secret'); as formControl) {
-            <app-setting-item [title]="t('secret-label')" [subtitle]="t('secret-tooltip')" [control]="formControl">
+            <app-setting-item [title]="t('secret-label')" [subtitle]="t('secret-tooltip')" [control]="formControl" [validations]="{
+              requiredIf: t('other-field-required', {name: 'secret', other: formControl.errors?.requiredIf?.other}),
+              requiredIfOtherInvalid: t('other-field-invalid', {other: formControl.errors?.requiredIfOtherInvalid?.other})
+            }">
               <ng-template #view>
                 {{formControl.value | slice:0:40 | defaultValue}}
               </ng-template>
               <ng-template #edit>
                 <input id="oid-secret" aria-describedby="oidc-secret-validations" class="form-control"
                        formControlName="secret" type="text"
-                       [class.is-invalid]="formControl.invalid && !formControl.untouched">
-
-                @if (settingsForm.dirty || !settingsForm.untouched) {
-                  <div id="oidc-secret-validations" class="invalid-feedback">
-                    @if (formControl.errors && formControl.errors.requiredIf) {
-                      <div>{{t('other-field-required', {name: 'secret', other: formControl.errors.requiredIf.other})}}</div>
-                    }
-                    @if (formControl.errors && formControl.errors.requiredIfOtherInvalid) {
-                      <div>{{t('other-field-invalid', {other: formControl.errors.requiredIfOtherInvalid.other})}}</div>
-                    }
-                  </div>
-                }
-
+                       [appFormField]="formControl">
               </ng-template>
             </app-setting-item>
           }
@@ -114,14 +92,14 @@
       <ng-container>
         <div class="row g-0 mt-4 mb-4">
           @if (settingsForm.get('providerName'); as formControl) {
-            <app-setting-item [title]="t('provider-name-label')" [subtitle]="t('provider-name-tooltip')">
+            <app-setting-item [title]="t('provider-name-label')" [subtitle]="t('provider-name-tooltip')" [control]="formControl">
               <ng-template #view>
                 {{formControl.value}}
               </ng-template>
               <ng-template #edit>
                 <input id="oid-provider-name" aria-describedby="oidc-provider-name-validations" class="form-control"
                        formControlName="providerName" type="text"
-                       [class.is-invalid]="formControl.invalid && !formControl.untouched">
+                       [appFormField]="formControl">
               </ng-template>
             </app-setting-item>
           }
@@ -130,9 +108,9 @@
         <div class="row g-0 mt-4 mb-4">
           @if(settingsForm.get('provisionAccounts'); as formControl) {
             <app-setting-switch [title]="t('provision-accounts-label')" [subtitle]="t('provision-accounts-tooltip')">
-              <ng-template #switch>
+              <ng-template>
                 <div class="form-check form-switch float-end">
-                  <input id="provision-accounts" type="checkbox" class="form-check-input" formControlName="provisionAccounts">
+                  <input type="checkbox" class="form-check-input" formControlName="provisionAccounts">
                 </div>
               </ng-template>
             </app-setting-switch>
@@ -142,9 +120,9 @@
         <div class="row g-0 mt-4 mb-4">
           @if(settingsForm.get('requireVerifiedEmail'); as formControl) {
             <app-setting-switch [title]="t('require-verified-email-label')" [subtitle]="t('require-verified-email-tooltip')">
-              <ng-template #switch>
+              <ng-template>
                 <div class="form-check form-switch float-end">
-                  <input id="require-verified-email" type="checkbox" class="form-check-input" formControlName="requireVerifiedEmail">
+                  <input type="checkbox" class="form-check-input" formControlName="requireVerifiedEmail">
                 </div>
               </ng-template>
             </app-setting-switch>
@@ -154,9 +132,9 @@
         <div class="row g-0 mt-4 mb-4">
           @if(settingsForm.get('syncUserSettings'); as formControl) {
             <app-setting-switch [title]="t('sync-user-settings-label')" [subtitle]="t('sync-user-settings-tooltip')">
-              <ng-template #switch>
+              <ng-template>
                 <div class="form-check form-switch float-end">
-                  <input id="sync-user-settings" type="checkbox" class="form-check-input" formControlName="syncUserSettings">
+                  <input type="checkbox" class="form-check-input" formControlName="syncUserSettings">
                 </div>
               </ng-template>
             </app-setting-switch>
@@ -166,9 +144,9 @@
         <div class="row g-0 mt-4 mb-4">
           @if(settingsForm.get('autoLogin'); as formControl) {
             <app-setting-switch [title]="t('auto-login-label')" [subtitle]="t('auto-login-tooltip')">
-              <ng-template #switch>
+              <ng-template>
                 <div class="form-check form-switch float-end">
-                  <input id="auto-login" type="checkbox" class="form-check-input" formControlName="autoLogin">
+                  <input type="checkbox" class="form-check-input" formControlName="autoLogin">
                 </div>
               </ng-template>
             </app-setting-switch>
@@ -178,9 +156,9 @@
         <div class="row g-0 mt-4 mb-4">
           @if(settingsForm.get('disablePasswordAuthentication'); as formControl) {
             <app-setting-switch [title]="t('disable-password-authentication-label')">
-              <ng-template #switch>
+              <ng-template>
                 <div class="form-check form-switch float-end">
-                  <input id="disable-password-authentication" type="checkbox" class="form-check-input" formControlName="disablePasswordAuthentication">
+                  <input type="checkbox" class="form-check-input" formControlName="disablePasswordAuthentication">
                 </div>
               </ng-template>
             </app-setting-switch>
@@ -196,7 +174,7 @@
 
         <div class="row g-0 mt-4 mb-4">
           @if(settingsForm.get('defaultAgeRestriction'); as formControl) {
-            <app-setting-item [title]="t('default-age-restriction-label')" [subtitle]="t('default-age-restriction-tooltip')">
+            <app-setting-item [title]="t('default-age-restriction-label')" [subtitle]="t('default-age-restriction-tooltip')" [control]="formControl">
               <ng-template #view>
                 <div>{{formControl.value | ageRating}}</div>
               </ng-template>
@@ -215,9 +193,9 @@
         <div class="row g-0 mt-4 mb-4">
           @if(settingsForm.get('defaultIncludeUnknowns'); as formControl) {
             <app-setting-switch [title]="t('default-include-unknowns-label')" [subtitle]="t('default-include-unknowns-tooltip')">
-              <ng-template #switch>
+              <ng-template>
                 <div class="form-check form-switch float-end">
-                  <input id="default-include-unknowns" type="checkbox" class="form-check-input" formControlName="defaultIncludeUnknowns">
+                  <input type="checkbox" class="form-check-input" formControlName="defaultIncludeUnknowns">
                 </div>
               </ng-template>
             </app-setting-switch>
@@ -257,14 +235,14 @@
       <ng-container>
         <div class="row g-0 mt-4 mb-4">
           @if (settingsForm.get('rolesPrefix'); as formControl) {
-            <app-setting-item [title]="t('roles-prefix-label')" [subtitle]="t('roles-prefix-tooltip')">
+            <app-setting-item [title]="t('roles-prefix-label')" [subtitle]="t('roles-prefix-tooltip')" [control]="formControl">
               <ng-template #view>
                 {{formControl.value | defaultValue}}
               </ng-template>
               <ng-template #edit>
                 <input id="oidc-roles-prefix" class="form-control"
                        formControlName="rolesPrefix" type="text"
-                       [class.is-invalid]="formControl.invalid && !formControl.untouched">
+                       [appFormField]="formControl">
               </ng-template>
             </app-setting-item>
           }
@@ -272,14 +250,14 @@
 
         <div class="row g-0 mt-4 mb-4">
           @if (settingsForm.get('rolesClaim'); as formControl) {
-            <app-setting-item [title]="t('roles-claim-label')" [subtitle]="t('roles-claim-tooltip')">
+            <app-setting-item [title]="t('roles-claim-label')" [subtitle]="t('roles-claim-tooltip')" [control]="formControl">
               <ng-template #view>
                 {{formControl.value}}
               </ng-template>
               <ng-template #edit>
                 <input id="oidc-roles-claim" class="form-control"
                        formControlName="rolesClaim" type="text"
-                       [class.is-invalid]="formControl.invalid && !formControl.untouched">
+                       [appFormField]="formControl">
               </ng-template>
             </app-setting-item>
           }
@@ -290,6 +268,7 @@
             [title]="t('custom-scopes-label')"
             [tooltip]="t('custom-scopes-tooltip')"
             [loading]="loading()"
+            [control]="settingsForm.get('customScopes')!"
             formControlName="customScopes"
           />
         </div>

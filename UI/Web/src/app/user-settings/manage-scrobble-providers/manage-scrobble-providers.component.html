@@ -247,7 +247,9 @@
                       <div class="d-flex align-items-center flex-wrap gap-2 small text-muted mt-1">
                         <span>{{t('inactive-series-rule-condition')}}</span>
 
-                        <input type="number" class="form-control form-control-sm" style="width: 70px;" formControlName="days" [attr.aria-label]="t('inactive-series-rule-days-aria')"/>
+                        @if (inactiveSeriesRuleGroup.get('days'); as formControl) {
+                          <input type="number" class="form-control form-control-sm" style="width: 70px;" formControlName="days" [attr.aria-label]="t('inactive-series-rule-days-aria')" [appFormField]="formControl"/>
+                        }
 
                         <span>{{t('rule-days-mark')}}</span>
 
@@ -275,7 +277,9 @@
                       <div class="d-flex align-items-center flex-wrap gap-2 small text-muted mt-1">
                         <span>{{t('dropped-series-rule-condition')}}</span>
 
-                        <input type="number" class="form-control form-control-sm" style="width: 70px;" formControlName="days" [attr.aria-label]="t('dropped-series-rule-days-aria')"/>
+                        @if (droppedSeriesRuleGroup.get('days'); as formControl) {
+                          <input type="number" class="form-control form-control-sm" style="width: 70px;" formControlName="days" [attr.aria-label]="t('dropped-series-rule-days-aria')" [appFormField]="formControl"/>
+                        }
 
                         <span>{{t('rule-days-mark')}}</span>
 

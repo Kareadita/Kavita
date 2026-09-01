@@ -1,6 +1,6 @@
 import {ChangeDetectionStrategy, ChangeDetectorRef, Component, DestroyRef, inject, input, OnInit,} from '@angular/core';
 import {DeviceService} from "../../../_services/device.service";
-import {ToastrService} from "ngx-toastr";
+import {ToastrService} from '@openng/ngx-toastr';
 import {Device} from "../../../_models/device/device";
 import {FormControl, FormGroup, ReactiveFormsModule, Validators} from "@angular/forms";
 import {DevicePlatform, devicePlatforms} from "../../../_models/device/device-platform";
@@ -9,6 +9,8 @@ import {translate, TranslocoDirective} from "@jsverse/transloco";
 import {NgbActiveModal, NgbTooltip} from "@ng-bootstrap/ng-bootstrap";
 import {DevicePlatformPipe} from "../../../_pipes/device-platform.pipe";
 import {modalSaved} from "../../../_models/modal/modal-result";
+import {FormFieldDirective} from "../../../_directives/form-field.directive";
+import {ValidationErrorsComponent} from "../../../shared/_components/validation-errors/validation-errors.component";
 
 @Component({
   selector: 'app-edit-device-modal',
@@ -16,7 +18,9 @@ import {modalSaved} from "../../../_models/modal/modal-result";
     TranslocoDirective,
     DevicePlatformPipe,
     ReactiveFormsModule,
-    NgbTooltip
+    NgbTooltip,
+    FormFieldDirective,
+    ValidationErrorsComponent
   ],
   templateUrl: './edit-device-modal.component.html',
   styleUrl: './edit-device-modal.component.scss',

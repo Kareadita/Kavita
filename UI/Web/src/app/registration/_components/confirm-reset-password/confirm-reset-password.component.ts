@@ -1,20 +1,22 @@
-import { ChangeDetectionStrategy, ChangeDetectorRef, Component, inject } from '@angular/core';
-import { FormGroup, FormControl, Validators, ReactiveFormsModule } from '@angular/forms';
-import { ActivatedRoute, Router } from '@angular/router';
-import { ToastrService } from 'ngx-toastr';
-import { AccountService } from 'src/app/_services/account.service';
-import { NavService } from 'src/app/_services/nav.service';
-import { NgTemplateOutlet } from '@angular/common';
-import { NgbTooltip } from '@ng-bootstrap/ng-bootstrap';
-import { SplashContainerComponent } from '../splash-container/splash-container.component';
+import {ChangeDetectionStrategy, ChangeDetectorRef, Component, inject} from '@angular/core';
+import {FormControl, FormGroup, ReactiveFormsModule, Validators} from '@angular/forms';
+import {ActivatedRoute, Router} from '@angular/router';
+import {ToastrService} from '@openng/ngx-toastr';
+import {NgTemplateOutlet} from '@angular/common';
+import {NgbTooltip} from '@ng-bootstrap/ng-bootstrap';
+import {SplashContainerComponent} from '../splash-container/splash-container.component';
 import {translate, TranslocoDirective} from "@jsverse/transloco";
+import {AccountService} from "../../../_services/account.service";
+import {NavService} from "../../../_services/nav.service";
+import {FormFieldDirective} from "../../../_directives/form-field.directive";
+import {ValidationErrorsComponent} from "../../../shared/_components/validation-errors/validation-errors.component";
 
 @Component({
     selector: 'app-confirm-reset-password',
     templateUrl: './confirm-reset-password.component.html',
     styleUrls: ['./confirm-reset-password.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush,
-    imports: [SplashContainerComponent, ReactiveFormsModule, NgbTooltip, NgTemplateOutlet, TranslocoDirective]
+    imports: [SplashContainerComponent, ReactiveFormsModule, NgbTooltip, NgTemplateOutlet, TranslocoDirective, FormFieldDirective, ValidationErrorsComponent]
 })
 export class ConfirmResetPasswordComponent {
   private route = inject(ActivatedRoute);

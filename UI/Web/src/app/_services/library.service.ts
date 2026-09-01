@@ -2,14 +2,13 @@ import {HttpClient, httpResource} from '@angular/common/http';
 import {DestroyRef, inject, Injectable} from '@angular/core';
 import {of} from 'rxjs';
 import {filter, map, tap} from 'rxjs/operators';
-import {environment} from 'src/environments/environment';
+import {environment} from '../../environments/environment';
 import {JumpKey} from '../_models/jumpbar/jump-key';
 import {Library, LibraryType} from '../_models/library/library';
 import {DirectoryDto} from '../_models/system/directory-dto';
 import {EVENTS, MessageHubService} from "./message-hub.service";
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import {MetadataProvider} from "../_models/kavitaplus/metadata-provider.enum";
-import {ScrobbleProvider} from "./scrobbling.service";
 
 
 @Injectable({

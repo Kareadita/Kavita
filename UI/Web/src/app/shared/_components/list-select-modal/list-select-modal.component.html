@@ -30,13 +30,16 @@
     <form [formGroup]="filterForm">
 
       @if (itemsValue.length > itemsBeforeFilter()) {
-        <div class="mb-3">
-          <label for="filter" class="form-label">{{t('common.filter')}}</label>
-          <div class="input-group">
-            <input id="filter" autocomplete="off" class="form-control" formControlName="query" type="text" aria-describedby="reset-input">
-            <button class="btn btn-outline-secondary" type="button" id="reset-input" (click)="clear()">{{t('common.clear')}}</button>
+        @if (filterForm.get('query'); as formControl) {
+          <div class="mb-3">
+            <label for="filter" class="form-label">{{t('common.filter')}}</label>
+            <div class="input-group">
+              <input id="filter" autocomplete="off" class="form-control" formControlName="query" type="text" aria-describedby="reset-input"
+                     [appFormField]="formControl">
+              <button class="btn btn-outline-secondary" type="button" id="reset-input" (click)="clear()">{{t('common.clear')}}</button>
+            </div>
           </div>
-        </div>
+        }
       }
     </form>
 
@@ -87,14 +90,17 @@
   @if (showFooter()) {
     <div class="modal-footer">
       @if (showCreate()) {
+        @let formControl = createControl;
         <div class="input-group">
           <label class="form-label visually-hidden" for="create-input">{{createLabel() ?? ''}}</label>
           <input id="create-input" type="text" class="form-control"
-                 [formControl]="createControl" [placeholder]="createLabel() ?? ''">
-          <button type="button" class="btn btn-primary" [disabled]="isCreating() || createControl.invalid" (click)="create()">
+                 [formControl]="formControl" [placeholder]="createLabel() ?? ''"
+                 [appFormField]="formControl" aria-describedby="create-input-validations">
+          <button type="button" class="btn btn-primary" [disabled]="isCreating() || formControl.invalid" (click)="create()">
             {{createButtonLabel() ?? t('common.create')}}
           </button>
         </div>
+        <app-validation-errors inputId="create-input" [control]="formControl" />
       } @else {
         <button type="button" class="btn btn-secondary" (click)="close()">{{t('common.close')}}</button>
 

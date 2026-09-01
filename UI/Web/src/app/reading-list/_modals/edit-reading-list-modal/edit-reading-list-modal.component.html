@@ -12,25 +12,16 @@
         <ng-template ngbNavContent>
           <form [formGroup]="reviewGroup">
             <div class="row g-0 mb-3">
-              <div class="col-md-8 col-sm-12 mt-2">
-                <label for="library-name" class="form-label">{{t('name-label')}}</label>
-                <input id="library-name" class="form-control" formControlName="title" type="text"
-                       [class.is-invalid]="reviewGroup.get('title')?.invalid && reviewGroup.get('title')?.touched">
-                @if (reviewGroup.dirty || reviewGroup.touched) {
-                  <div id="inviteForm-validations" class="invalid-feedback">
-                    @if (reviewGroup.get('title')?.errors?.required) {
-                      <div>
-                        {{ t('required-field') }}
-                      </div>
-                    }
-                    @if (reviewGroup.get('title')?.errors?.duplicateName) {
-                      <div>
-                        {{ t('name-unique-validation') }}
-                      </div>
-                    }
-                  </div>
-                }
-              </div>
+              @if (reviewGroup.get('title'); as formControl) {
+                <div class="col-md-8 col-sm-12 mt-2">
+                  <label for="library-name" class="form-label">{{t('name-label')}}</label>
+                  <input id="library-name" class="form-control" formControlName="title" type="text"
+                         [appFormField]="formControl" aria-describedby="library-name-validations">
+                  <app-validation-errors inputId="library-name" [control]="formControl" [messages]="{
+                    duplicateName: t('name-unique-validation')
+                  }" />
+                </div>
+              }
               @if (accountService.hasAdminRole()) {
                 <div class="col-md-3 col-sm-12 ms-2">
                   <div class="form-check form-switch">
@@ -56,17 +47,12 @@
                     <label for="start-month" class="form-label">{{ t('month-label') }}</label>
                     <input id="start-month" class="form-control" formControlName="startingMonth"
                            type="number" inputmode="numeric"
-                           [class.is-invalid]="formControl?.invalid && formControl?.touched"
-                           aria-describedby="starting-year-header">
-                    @if (reviewGroup.dirty || reviewGroup.touched) {
-                      <div class="invalid-feedback">
-                        @if (formControl.errors?.min || formControl.errors?.max) {
-                          <div>
-                            {{ t('month-validation') }}
-                          </div>
-                        }
-                      </div>
-                    }
+                           [appFormField]="formControl">
+
+                    <app-validation-errors inputId="start-month" [control]="formControl" [messages]="{
+                      min: t('month-validation'),
+                      max: t('month-validation')
+                    }" />
                   </div>
                 }
                 @if (reviewGroup.get('startingYear'); as formControl) {
@@ -74,17 +60,14 @@
                     <label for="start-year" class="form-label">{{ t('year-label') }}</label>
                     <input id="start-year" class="form-control" formControlName="startingYear" type="number"
                            inputmode="numeric"
-                           [class.is-invalid]="formControl.invalid && formControl.touched"
+                           [appFormField]="formControl"
                            aria-describedby="starting-year-header">
-                    @if (reviewGroup.dirty || reviewGroup.touched) {
-                      <div class="invalid-feedback">
-                        @if (formControl.errors?.min || formControl.errors?.max) {
-                          <div>
-                            {{ t('year-validation') }}
-                          </div>
-                        }
-                      </div>
-                    }
+
+                    <app-validation-errors inputId="start-year" [control]="formControl" [messages]="{
+                      min: t('year-validation'),
+                      max: t('year-validation')
+                    }" />
+
                   </div>
                 }
               </div>
@@ -96,17 +79,13 @@
                     <label for="ending-month" class="form-label">{{ t('month-label') }}</label>
                     <input id="ending-month" class="form-control" formControlName="endingMonth" type="number"
                            inputmode="numeric"
-                           [class.is-invalid]="formControl?.invalid && formControl?.touched"
-                           aria-describedby="ending-year-header">
-                    @if (reviewGroup.dirty || reviewGroup.touched) {
-                      <div class="invalid-feedback">
-                        @if (formControl.errors?.min || formControl.errors?.max) {
-                          <div>
-                            {{ t('month-validation') }}
-                          </div>
-                        }
-                      </div>
-                    }
+                           [appFormField]="formControl">
+
+                    <app-validation-errors inputId="start-year" [control]="formControl" [messages]="{
+                      min: t('month-validation'),
+                      max: t('month-validation')
+                    }" />
+
                   </div>
                 }
                 @if (reviewGroup.get('endingYear'); as formControl) {
@@ -114,17 +93,11 @@
                     <label for="ending-year" class="form-label">{{ t('year-label') }}</label>
                     <input id="ending-year" class="form-control" formControlName="endingYear" type="number"
                            inputmode="numeric"
-                           [class.is-invalid]="formControl?.invalid && formControl?.touched"
-                           aria-describedby="ending-year-header">
-                    @if (reviewGroup.dirty || reviewGroup.touched) {
-                      <div class="invalid-feedback">
-                        @if (formControl.errors?.min || formControl.errors?.max) {
-                          <div>
-                            {{ t('year-validation') }}
-                          </div>
-                        }
-                      </div>
-                    }
+                           [appFormField]="formControl">
+                    <app-validation-errors inputId="ending-year" [control]="formControl" [messages]="{
+                      min: t('year-validation'),
+                      max: t('year-validation')
+                    }" />
                   </div>
                 }
               </div>
@@ -143,12 +116,13 @@
         <a ngbNavLink>{{ Tabs.Tags | tabTitle }}</a>
         <ng-template ngbNavContent>
           <div class="row">
-            <div class="col-lg-6 col-md-12 pe-2">
+            <div class="col-12 pe-2">
               <div class="mb-3">
-                @if (tagsSettings) {
+                @let tagsConf = tagsSettings();
+                @if (tagsConf) {
                   <app-setting-item [title]="t('tags-label')" [toggleOnViewClick]="false" [showEdit]="false">
                     <ng-template #view>
-                      <app-typeahead (selectedData)="updateTags($event)" [settings]="tagsSettings">
+                      <app-typeahead (selectedData)="updateTags($event)" [settings]="tagsConf">
                         <ng-template #badgeItem let-item let-position="idx">
                           {{item.title}}
                         </ng-template>

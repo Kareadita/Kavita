@@ -12,13 +12,15 @@
   <h5>{{t('smart-filter-title')}}</h5>
   <form [formGroup]="listForm">
     @if (smartFilters.length >= 3) {
-      <div class="mb-3">
-        <label for="filter" class="form-label">{{t('filter')}}</label>
-        <div class="input-group">
-          <input id="filter" autocomplete="off" class="form-control" formControlName="filterQuery" type="text" aria-describedby="reset-input">
-          <button class="btn btn-outline-secondary" type="button" id="reset-input" (click)="resetFilter()">{{t('clear')}}</button>
+      @if (listForm.get('filterQuery'); as formControl) {
+        <div class="mb-3">
+          <label for="filter" class="form-label">{{t('filter')}}</label>
+          <div class="input-group">
+            <input id="filter" autocomplete="off" class="form-control" formControlName="filterQuery" type="text" aria-describedby="reset-input" [appFormField]="formControl">
+            <button class="btn btn-outline-secondary" type="button" id="reset-input" (click)="resetFilter()">{{t('clear')}}</button>
+          </div>
         </div>
-      </div>
+      }
     }
   </form>
   <ul class="list-group filter-list">

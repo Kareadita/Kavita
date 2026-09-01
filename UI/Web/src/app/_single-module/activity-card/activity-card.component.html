@@ -24,7 +24,7 @@
         <div class="session-metadata">
           <div class="metadata-row">
             <span class="label text-uppercase">{{t('started-label')}}</span>
-            <span class="value">{{activeData.startTimeUtc | utcToLocalDate | timeAgo}}</span>
+            <span class="value">{{activeData.startTimeUtc | utcToLocalDate | timeDifference}}</span>
           </div>
 
           <div class="metadata-row">

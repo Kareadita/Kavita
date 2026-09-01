@@ -5,6 +5,8 @@ import {WikiLink} from "../../../_models/wiki";
 import {AccountService} from "../../../_services/account.service";
 import {LicenseService} from "../../../_services/license.service";
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
+import {ValidationErrorsComponent} from "../../../shared/_components/validation-errors/validation-errors.component";
+import {FormFieldDirective} from "../../../_directives/form-field.directive";
 
 
 export interface LicenseFormEvent {
@@ -22,7 +24,9 @@ export interface LicenseFormEvent {
   imports: [
     TranslocoDirective,
     FormsModule,
-    ReactiveFormsModule
+    ReactiveFormsModule,
+    ValidationErrorsComponent,
+    FormFieldDirective
   ],
   templateUrl: './edit-license-key.component.html',
   styleUrl: './edit-license-key.component.scss',

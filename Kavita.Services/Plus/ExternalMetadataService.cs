@@ -65,7 +65,7 @@ public class ExternalMetadataService : IExternalMetadataService
     private readonly IFileCacheService _fileCacheService;
     private readonly IKavitaPlusAuditService _auditService;
 
-    private const int SeriesPerRefresh = 25;
+    private const int SeriesPerRefresh = 40; // 50 - overhead for scans
     private readonly TimeSpan _externalSeriesMetadataCache = TimeSpan.FromDays(30);
     private readonly string[] _artistRoleStrings = [
         "Art", "Story & Art",  // AniList
@@ -544,21 +544,97 @@ public class ExternalMetadataService : IExternalMetadataService
     /// <summary>
     /// Fetches metadata about an external Series
     /// </summary>
-    /// <param name="aniListId"></param>
-    /// <param name="malId"></param>
     /// <param name="seriesId"></param>
+    /// <param name="request"></param>
+    /// /// <param name="recommendedSeriesId"></param>
     /// <param name="ct"></param>
     /// <returns></returns>
     /// <exception cref="KavitaException"></exception>
-    public async Task<ExternalSeriesDetailDto?> GetExternalSeriesDetail(int? aniListId, long? malId, int? mangaBakaId, int? seriesId, CancellationToken ct = default)
+    public async Task<ExternalSeriesDetailDto?> GetExternalSeriesDetail(int seriesId, MetadataRequest request, int? recommendedSeriesId, CancellationToken ct = default)
     {
-        if (!aniListId.HasValue && !malId.HasValue && !mangaBakaId.HasValue && !seriesId.HasValue)
+        if (!request.HasAnyIdsSet() && !recommendedSeriesId.HasValue)
         {
             throw new KavitaException("Unable to find valid information from url for External Load");
         }
 
         // This is for the Series drawer. We can get this extra information during the initial SeriesDetail call so it's all coming from the DB
-        return await GetSeriesDetail(aniListId, malId, mangaBakaId, seriesId, ct);
+        var metadataProvider = await _unitOfWork.SeriesRepository.GetEffectiveMetadataProviderAsync(seriesId, ct);
+        if (metadataProvider is null) return null;
+
+        var payload = new SeriesDetailRequestV3Dto
+        {
+            Provider = metadataProvider.Value,
+            AniListId = request.AniListId,
+            MalId = request.MalId,
+            MangabakaId = request.MangabakaId,
+            HardcoverId = request.HardcoverId,
+            IsStandAlone = request.IsStandAlone,
+            SeriesName = string.Empty,
+            AlternativeNames = [],
+            IncludeRecommendations = false,
+            IncludeReviews = false,
+            IncludeRelationships = false
+        };
+
+        if (recommendedSeriesId is > 0)
+        {
+            var series = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(recommendedSeriesId.Value,
+                SeriesIncludes.Metadata | SeriesIncludes.Library | SeriesIncludes.ExternalReviews, ct);
+            if (series != null)
+            {
+                if (payload.AniListId <= 0)
+                {
+                    payload.AniListId = series.AniListId;
+                }
+                if (payload.MalId <= 0)
+                {
+                    payload.MalId = series.MalId;
+                }
+
+                if (payload.MangabakaId <= 0)
+                {
+                    payload.MangabakaId = series.MangaBakaId;
+                }
+
+                if (payload.HardcoverId <= 0)
+                {
+                    payload.HardcoverId = series.HardcoverId;
+                }
+                payload.SeriesName = series.Name;
+                payload.AlternativeNames = [series.LocalizedName];
+                payload.Format = series.Library.Type.ConvertToPlusMediaFormat(series.Format);
+            }
+        }
+
+        var result =  await _kavitaPlusApiService.GetSeriesDetailV3Async(payload, ct);
+        if (!result.IsSuccess)
+        {
+            _logger.LogError("Failed to retrieve series detail from Kavita Plus API: {ErrorMessage}", result.ErrorMessage);
+            return null;
+        }
+
+        var extSeries = result.Data.Series;
+        if (extSeries == null) return null;
+
+        var settings = await _unitOfWork.SettingsRepository.GetMetadataSettingDto(ct);
+
+        var genres = new List<string>();
+        var tags = new List<string>();
+        GenerateGenreAndTagLists(extSeries, settings, ref tags, ref genres);
+
+        var tagsToRemove = GetTagsToRemove(extSeries, settings);
+        var finalTags = tags.Except(tagsToRemove).ToHashSet();
+
+        extSeries.Genres = genres;
+        extSeries.Tags = extSeries.Tags.Where(t => finalTags.Contains(t.Name)).ToList();
+
+        var ageRating = DetermineAgeRating(extSeries.Tags.Select(t => t.Name).Concat(extSeries.Genres), settings.AgeRatingMappings);
+
+        extSeries.AgeRating = ageRating;
+        extSeries.Summary = metadataProvider == MetadataProvider.Mangabaka
+            ? ConvertMarkdownToHtml(extSeries.Summary) : StringHelper.SquashBreaklines(extSeries.Summary);
+
+        return extSeries;
     }
 
     private async Task<SeriesDetailPlusDto?> GetSeriesDetailPlus(int seriesId, LibraryType libraryType,
@@ -2724,7 +2800,7 @@ public class ExternalMetadataService : IExternalMetadataService
 
             var isVolumeBased = realVolumes.Count != 0;
 
-            var maxVolume = (int)(realVolumes.Count != 0 ? realVolumes.Max(v => v.MaxNumber) : 0);
+            var maxVolume = (int)(realVolumes.Count != 0 ? realVolumes.Max(v => v.MaxNumber) : Parser.DefaultChapterNumber);
             var maxChapter = (int)chapters.Max(c => c.MaxNumber);
 
             // TODO: When the underlying source is a Manhua, there can be 0 chapters counted in the count. We need to handle this edge case
@@ -2974,6 +3050,7 @@ public class ExternalMetadataService : IExternalMetadataService
                 AniListId = rec.AniListId,
                 MalId = rec.MalId,
                 MangaBakaId = (int?) rec.MangabakaId,
+                HardcoverId = rec.HardcoverId,
                 MetadataProvider = provider,
                 RecommendationSource = source,
                 AgeRating = ageRating
@@ -2988,6 +3065,7 @@ public class ExternalMetadataService : IExternalMetadataService
                 CoverUrl = rec.CoverUrl,
                 Summary = rec.Summary,
                 MangaBakaId = (int?) rec.MangabakaId,
+                HardCoverId = rec.HardcoverId,
                 MetadataProvider = provider,
                 RecommendationSource = source,
                 AgeRating = ageRating
@@ -3012,85 +3090,6 @@ public class ExternalMetadataService : IExternalMetadataService
 
         var name = string.IsNullOrEmpty(rec.Name) ? rec.RecommendationNames.FirstOrDefault() : rec.Name;
         return $"name:{(name ?? string.Empty).ToNormalized()}";
-    }
-
-
-    /// <summary>
-    /// This is to get series information for the recommendation drawer on Kavita
-    /// </summary>
-    /// <remarks>This uses a different API that series detail</remarks>
-    /// <param name="aniListId"></param>
-    /// <param name="malId"></param>
-    /// <param name="mangaBakaId"></param>
-    /// <param name="seriesId"></param>
-    /// <param name="ct"></param>
-    /// <returns></returns>
-    private async Task<ExternalSeriesDetailDto?> GetSeriesDetail(int? aniListId, long? malId, int? mangaBakaId, int? seriesId, CancellationToken ct = default)
-    {
-        var payload = new SeriesDetailRequestV3Dto()
-        {
-            // We can hardcode this for now. But will need to load from Library setting once Hardcover providers
-            // recommendations too
-            Provider = MetadataProvider.Mangabaka,
-            AniListId = aniListId,
-            MalId = malId,
-            MangabakaId = mangaBakaId,
-            SeriesName = string.Empty,
-            AlternativeNames = [],
-            IncludeRecommendations = false,
-            IncludeReviews = false,
-            IncludeRelationships = false
-        };
-
-        if (seriesId is > 0)
-        {
-            var series = await _unitOfWork.SeriesRepository.GetSeriesByIdAsync(seriesId.Value,
-                SeriesIncludes.Metadata | SeriesIncludes.Library | SeriesIncludes.ExternalReviews, ct);
-            if (series != null)
-            {
-                if (payload.AniListId <= 0)
-                {
-                    payload.AniListId = ExternalIdParser.GetAniListId(series.Metadata.WebLinks);
-                }
-                if (payload.MalId <= 0)
-                {
-                    payload.MalId = ExternalIdParser.GetMalId(series.Metadata.WebLinks);
-                }
-                payload.SeriesName = series.Name;
-                payload.AlternativeNames = [series.LocalizedName];
-                payload.Format = series.Library.Type.ConvertToPlusMediaFormat(series.Format);
-            }
-        }
-
-
-        var result =  await _kavitaPlusApiService.GetSeriesDetailV3Async(payload, ct);
-        if (!result.IsSuccess)
-        {
-            _logger.LogError("Failed to retrieve series detail from Kavita Plus API: {ErrorMessage}", result.ErrorMessage);
-            return null;
-        }
-
-        var extSeries = result.Data.Series;
-        if (extSeries == null) return null;
-
-        var settings = await _unitOfWork.SettingsRepository.GetMetadataSettingDto(ct);
-
-        var genres = new List<string>();
-        var tags = new List<string>();
-        GenerateGenreAndTagLists(extSeries, settings, ref tags, ref genres);
-
-        var tagsToRemove = GetTagsToRemove(extSeries, settings);
-        var finalTags = tags.Except(tagsToRemove).ToHashSet();
-
-        extSeries.Genres = genres;
-        extSeries.Tags = extSeries.Tags.Where(t => finalTags.Contains(t.Name)).ToList();
-
-        var ageRating = DetermineAgeRating(extSeries.Tags.Select(t => t.Name).Concat(extSeries.Genres), settings.AgeRatingMappings);
-
-        extSeries.AgeRating = ageRating;
-        extSeries.Summary = ConvertMarkdownToHtml(extSeries.Summary);
-
-        return extSeries;
     }
 
     private static string ConvertMarkdownToHtml(string? summary)

@@ -1,6 +1,7 @@
 import {
   ChangeDetectionStrategy,
   Component,
+  computed,
   contentChild,
   DestroyRef,
   effect,
@@ -8,8 +9,12 @@ import {
   HostListener,
   inject,
   input,
-  model, OnInit,
-  TemplateRef
+  model,
+  OnInit,
+  Renderer2,
+  signal,
+  TemplateRef,
+  viewChild
 } from '@angular/core';
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import {TranslocoDirective} from "@jsverse/transloco";
@@ -17,13 +22,18 @@ import {NgTemplateOutlet} from "@angular/common";
 import {SafeHtmlPipe} from "../../../_pipes/safe-html.pipe";
 import {filter, fromEvent, tap} from "rxjs";
 import {AbstractControl} from "@angular/forms";
+import {ValidationErrorsComponent} from "../../../shared/_components/validation-errors/validation-errors.component";
+import {generateUniqueId} from "../../../_helpers/random";
+import {wireSettingControl} from "../../../_helpers/setting-item";
+
 
 @Component({
   selector: 'app-setting-item',
   imports: [
-      TranslocoDirective,
-      NgTemplateOutlet,
-      SafeHtmlPipe
+    TranslocoDirective,
+    NgTemplateOutlet,
+    SafeHtmlPipe,
+    ValidationErrorsComponent
   ],
   templateUrl: './setting-item.component.html',
   styleUrl: './setting-item.component.scss',
@@ -33,6 +43,7 @@ export class SettingItemComponent implements OnInit {
 
   private readonly elementRef = inject(ElementRef);
   private readonly destroyRef = inject(DestroyRef);
+  private readonly renderer = inject(Renderer2);
 
   title = input.required<string>();
   editLabel = input<string | undefined>();
@@ -40,13 +51,16 @@ export class SettingItemComponent implements OnInit {
   showEdit = input(true);
   isEditMode = model(false);
   subtitle = input<string | undefined>();
+  /* Required for accessibility, esp validations */
   labelId = input<string | undefined>();
   toggleOnViewClick = input(true);
   /**
    * When true, the hover animation will not be present and the titleExtras will be always visible
    */
   fixedExtras = input(false);
-  control = input<AbstractControl<any> | null>(null);
+  control = input<AbstractControl | null>(null);
+  /** Custom validation messages */
+  validations = input<Record<string, string>>({});
 
   /**
    * When true, allows click events to bubble up to components within
@@ -70,6 +84,29 @@ export class SettingItemComponent implements OnInit {
    */
   titleActionsRef = contentChild<TemplateRef<any>>('titleActions');
 
+  private readonly editWrapper = viewChild<ElementRef<HTMLElement>>('editWrapper');
+  private readonly viewWrapper = viewChild<ElementRef<HTMLElement>>('viewWrapper');
+
+  /** Where we search for inputs from **/
+  private readonly wrapperScope = computed(() =>
+    this.editWrapper()?.nativeElement ?? this.viewWrapper()?.nativeElement ?? null
+  );
+  private readonly generatedId = signal<string>(generateUniqueId());
+  /** A unique id to wire id up */
+  readonly elementId = computed(() => {
+    return this.labelId() || this.generatedId();
+  });
+
+  protected readonly hasControl = wireSettingControl({
+    scope: this.wrapperScope,
+    elementId: this.elementId,
+    describeValidation: computed(() => this.control() !== null),
+    label: this.title,
+  }).hasControl;
+
+
+
+
   @HostListener('click', ['$event'])
   onClickInside(event: MouseEvent) {
     if (this.allowClickEvents()) return;
@@ -78,6 +115,8 @@ export class SettingItemComponent implements OnInit {
   }
 
   constructor() {
+
+
     if (this.toggleOnViewClick()) {
       fromEvent(window, 'click')
         .pipe(
@@ -92,6 +131,7 @@ export class SettingItemComponent implements OnInit {
             return !this.elementRef.nativeElement.contains(mouseEvent.target) && hasSelection;
           }),
           tap(() => {
+            if (!this.showEdit()) return;
             this.isEditMode.set(false);
           })
         )
@@ -113,13 +153,13 @@ export class SettingItemComponent implements OnInit {
     const control = this.control();
     if (!control) return;
 
-    if (control.invalid) {
+    if (control.invalid && this.showEdit() && this.valueEditRef() != null) {
       this.isEditMode.set(true);
     }
 
     control.valueChanges.pipe(
       takeUntilDestroyed(this.destroyRef),
-      filter(() => control.invalid),
+      filter(() => control.invalid && this.showEdit() && this.valueEditRef() != null),
       tap(() => this.isEditMode.set(true)),
     ).subscribe();
   }
@@ -134,20 +174,15 @@ export class SettingItemComponent implements OnInit {
   }
 
   focusInput() {
-    if (this.isEditMode()) {
-      setTimeout(() => {
-        const inputElem = this.findFirstInput();
-        if (inputElem) {
-          inputElem.focus();
-        }
-      }, 10);
-    }
+    if (!this.isEditMode()) return;
+
+    setTimeout(() => this.findFirstControl(this.wrapperScope())?.focus(), 10);
   }
 
-  private findFirstInput(): HTMLInputElement | null {
-    const nativeInputs = [...this.elementRef.nativeElement.querySelectorAll('input'), ...this.elementRef.nativeElement.querySelectorAll('select'), ...this.elementRef.nativeElement.querySelectorAll('textarea')];
-    if (nativeInputs.length === 0) return null;
+  private findFirstControl(scope: HTMLElement | null): HTMLElement | null {
+    if (!scope) return null;
 
-    return nativeInputs[0];
+    return scope.querySelector<HTMLElement>('input:not([type=hidden]), select, textarea');
   }
+
 }

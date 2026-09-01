@@ -106,9 +106,18 @@ public class ScrobblingController(
         if (user == null) return Unauthorized();
 
         var scrobbleProvider = user.ScrobbleProviders[dto.Provider];
+        var hadAuthToken = !string.IsNullOrEmpty(scrobbleProvider.AuthenticationToken);
 
-        scrobbleProvider.AuthenticationToken = dto.AuthenticationToken.TrimPrefix("Bearer").Trim();
-        scrobbleProvider.RefreshToken = dto.RefreshToken.TrimPrefix("Bearer").Trim();
+        scrobbleProvider.AuthenticationToken = (dto.AuthenticationToken ?? string.Empty).TrimPrefix("Bearer").Trim();
+        scrobbleProvider.RefreshToken = (dto.RefreshToken ?? string.Empty).TrimPrefix("Bearer").Trim();
+
+        // When adding a fresh token for hardcover; assume the K+ redirect wasn't usable
+        // and set the default 7-day expiry
+        if (scrobbleProvider.AuthenticationToken.StartsWith("hc_at") && !hadAuthToken &&
+            dto.Provider == ScrobbleProvider.Hardcover)
+        {
+            scrobbleProvider.ValidUntilUtc = DateTime.UtcNow.AddDays(7) - TimeSpan.FromMinutes(30);
+        }
 
         unitOfWork.UserRepository.Update(user);
         await unitOfWork.CommitAsync(HttpContext.RequestAborted);

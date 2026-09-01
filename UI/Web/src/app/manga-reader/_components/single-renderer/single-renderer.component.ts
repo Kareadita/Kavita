@@ -5,16 +5,16 @@ import {
   Component,
   computed,
   DestroyRef,
+  ElementRef,
   inject,
   Injector,
   Input,
   OnInit,
+  output,
   Signal,
-  output, viewChild, ElementRef, effect
+  viewChild
 } from '@angular/core';
 import {combineLatest, filter, map, Observable, of, shareReplay, switchMap, tap} from 'rxjs';
-import {PageSplitOption} from 'src/app/_models/preferences/page-split-option';
-import {ReaderMode} from 'src/app/_models/preferences/reader-mode';
 import {LayoutMode} from '../../_models/layout-mode';
 import {FITTING_OPTION, PAGING_DIRECTION} from '../../_models/reader-enums';
 import {ReaderSetting} from '../../_models/reader-setting';
@@ -24,6 +24,8 @@ import {takeUntilDestroyed, toSignal} from "@angular/core/rxjs-interop";
 import {SafeStylePipe} from '../../../_pipes/safe-style.pipe';
 import {ReadingProfile} from "../../../_models/preferences/reading-profiles";
 import {BreakpointService} from "../../../_services/breakpoint.service";
+import {PageSplitOption} from "../../../_models/preferences/page-split-option";
+import {ReaderMode} from "../../../_models/preferences/reader-mode";
 
 @Component({
     selector: 'app-single-renderer',

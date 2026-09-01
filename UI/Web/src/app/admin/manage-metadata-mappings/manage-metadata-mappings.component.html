@@ -2,6 +2,114 @@
 
   <app-loading [loading]="isLoading()" />
   <div ngbAccordion [closeOthers]="false">
+
+    <div ngbAccordionItem="tags-panel" [collapsed]="false">
+      <h2 class="accordion-header" ngbAccordionHeader>
+        <button ngbAccordionButton class="accordion-button" type="button">
+          {{t('tags-header')}}
+        </button>
+      </h2>
+      <div ngbAccordionCollapse>
+        <div ngbAccordionBody>
+          <ng-template>
+            @if (licenseService.hasActiveLicense()) {
+              <div class="row mt-4 mb-4">
+                <div class="col-md-6">
+                  @if(settingsForm().get('enableGenres'); as formControl) {
+                    <app-setting-switch [title]="t('enable-genres-label')" [subtitle]="t('enable-genres-tooltip')">
+                      <ng-template>
+                        <div class="form-check form-switch float-end">
+                          <input id="enable-genres-status" type="checkbox" class="form-check-input" formControlName="enableGenres">
+                        </div>
+                      </ng-template>
+                    </app-setting-switch>
+                  }
+                </div>
+                <div class="col-md-6">
+                  @if(settingsForm().get('enableTags'); as formControl) {
+                    <app-setting-switch [title]="t('enable-tags-label')" [subtitle]="t('enable-tags-tooltip')">
+                      <ng-template>
+                        <div class="form-check form-switch float-end">
+                          <input id="enable-tags-status" type="checkbox" class="form-check-input" formControlName="enableTags">
+                        </div>
+                      </ng-template>
+                    </app-setting-switch>
+                  }
+                </div>
+              </div>
+            }
+
+            <div class="row g-0 align-items-start mb-4">
+              <div class="col">
+                <app-setting-multi-text-field
+                  [title]="t('blacklist-label')"
+                  [tooltip]="t('blacklist-tooltip')"
+                  [control]="settingsForm().get('blacklist')!"
+                  formControlName="blacklist"
+                />
+              </div>
+            </div>
+
+            <div class="row g-0 mt-4 mb-4">
+              <app-setting-multi-text-field
+                [title]="t('whitelist-label')"
+                [tooltip]="t('whitelist-tooltip')"
+                [control]="settingsForm().get('whitelist')!"
+                formControlName="whitelist"
+              />
+            </div>
+
+            @if (licenseService.hasActiveLicense()) {
+              <div class="row g-0 mt-4 mb-4">
+                <app-setting-item [title]="t('tag-weight-label')" [subtitle]="t('tag-weight-tooltip')" [labelId]="'filter-above-weight'">
+                  <ng-template #view>
+                    @if (settingsForm().get('filterAboveWeight')?.value == null) {
+                      {{t('tag-weight-disabled')}}
+                    } @else {
+                      {{settingsForm().get('filterAboveWeight')?.value | tagWeightTitle}}
+                    }
+
+                  </ng-template>
+                  <ng-template #edit>
+                    <select class="form-select" formControlName="filterAboveWeight" [id]="'filter-above-weight'">
+                      <option [ngValue]="null">{{t('tag-weight-disabled')}}</option>
+                      @for(weight of allTagWeights; track weight) {
+                        <option [ngValue]="weight">{{weight | tagWeightTitle}}</option>
+                      }
+                    </select>
+                  </ng-template>
+                </app-setting-item>
+              </div>
+            }
+
+          </ng-template>
+        </div>
+      </div>
+    </div>
+
+    @if (licenseService.hasActiveLicense()) {
+      <div ngbAccordionItem="external-age-rating-panel" [collapsed]="false">
+        <h2 class="accordion-header" ngbAccordionHeader>
+          <button ngbAccordionButton class="accordion-button" type="button">
+            {{t('external-age-rating-header')}}
+          </button>
+        </h2>
+        <div ngbAccordionCollapse>
+          <div ngbAccordionBody>
+            <ng-template>
+              <p>{{t('external-age-rating-description')}}</p>
+              <app-age-rating-mapper [form]="settingsForm()" controlName="externalAgeRatingMappings"
+                                     [sourceLabel]="t('external-age-rating-label')"
+                                     [addLabel]="t('add-age-rating-mapping-label')"
+                                     [removeLabel]="t('remove-age-rating-mapping-label')"
+                                     [strValues]="MangaBakaAgeRatings"
+              />
+            </ng-template>
+          </div>
+        </div>
+      </div>
+    }
+
     <div ngbAccordionItem="age-rating-panel" [collapsed]="ageRatingCollapsed()">
       <h2 class="accordion-header" ngbAccordionHeader>
         <button ngbAccordionButton class="accordion-button" type="button">
@@ -41,8 +149,12 @@
                     </select>
                   </div>
                   <div class="col-md-2">
-                    <input id="field-mapping-{{i}}" type="text" class="form-control" formControlName="sourceValue"
-                           [placeholder]="t('source-genre-tags-placeholder')" />
+                    @if (mapping.get('sourceValue'); as formControl) {
+                      <input id="field-mapping-{{i}}" type="text" class="form-control" formControlName="sourceValue"
+                             [placeholder]="t('source-genre-tags-placeholder')"
+                             [appFormField]="formControl" [attr.aria-describedby]="'field-mapping-' + i + '-validations'" />
+                      <app-validation-errors [inputId]="'field-mapping-' + i" [control]="formControl" />
+                    }
                   </div>
                   <div class="col-md-2">
                     <select class="form-select" formControlName="destinationType">
@@ -51,8 +163,10 @@
                     </select>
                   </div>
                   <div class="col-md-2">
-                    <input type="text" class="form-control" formControlName="destinationValue"
-                           [placeholder]="t('dest-genre-tags-placeholder')" />
+                    @if (mapping.get('destinationValue'); as formControl) {
+                      <input type="text" class="form-control" formControlName="destinationValue"
+                             [placeholder]="t('dest-genre-tags-placeholder')" [appFormField]="formControl" />
+                    }
                   </div>
                   <div class="col-md-2">
                     <div class="form-check">

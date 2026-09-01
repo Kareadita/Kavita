@@ -1,5 +1,5 @@
 import {computed, DestroyRef, inject, Injectable} from '@angular/core';
-import {environment} from 'src/environments/environment';
+import {environment} from '../../environments/environment';
 import {ThemeService} from './theme.service';
 import {AccountService} from './account.service';
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";

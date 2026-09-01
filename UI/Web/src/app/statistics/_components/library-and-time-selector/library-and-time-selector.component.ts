@@ -18,14 +18,13 @@ import {
 import {TypeaheadComponent} from "../../../typeahead/_components/typeahead.component";
 import {Library} from "../../../_models/library/library";
 import {TypeaheadSettings} from "../../../typeahead/_models/typeahead-settings";
-import {map} from "rxjs/operators";
 import {StatsFilter} from "../../_models/stats-filter";
-import {of, tap} from "rxjs";
+import {tap} from "rxjs";
 import {LibraryService} from "../../../_services/library.service";
 import {TranslocoDirective} from "@jsverse/transloco";
-import {UtilityService} from "../../../shared/_services/utility.service";
 import {ReaderService} from "../../../_services/reader.service";
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
+import {TypeaheadSettingsFactoryService} from "../../../typeahead-settings-factory.service";
 
 export interface LibraryAndTimeFilterGroup {
   timeFilter: FormGroup<{
@@ -50,9 +49,9 @@ export interface LibraryAndTimeFilterGroup {
 export class LibraryAndTimeSelectorComponent implements OnInit {
 
   private readonly libraryService = inject(LibraryService);
-  private readonly utilityService = inject(UtilityService);
   private readonly readerService = inject(ReaderService);
   private readonly elementRef = inject(ElementRef);
+  private readonly typeaheadSettingFactoryService = inject(TypeaheadSettingsFactoryService);
 
   label = input.required<string>();
   userId = input.required<number>();
@@ -124,7 +123,7 @@ export class LibraryAndTimeSelectorComponent implements OnInit {
     ).subscribe(value => {
       const filter = value as StatsFilter;
       filter.timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
-      
+
       this.filterChange.emit(filter);
       this.yearChange.emit(filter.timeFilter?.endDate?.getFullYear() ?? new Date().getFullYear());
     });
@@ -148,35 +147,12 @@ export class LibraryAndTimeSelectorComponent implements OnInit {
     allLibraries: Array<Library>,
     currentSelectedLibraries: Array<Library> | undefined,
   ): TypeaheadSettings<Library> {
-    const settings = new TypeaheadSettings<Library>();
-
-    settings.minCharacters = 0;
-    settings.multiple = true;
-    settings.id = 'libraries';
-    settings.unique = true;
-    settings.showLocked = false;
-    settings.addIfNonExisting = false;
-    settings.compareFn = (options: Library[], filter: string) => {
-      return options.filter(l => this.utilityService.filter(l.name, filter));
-    }
-    settings.compareFnForAdd = (options: Library[], filter: string) => {
-      return options.filter(l => this.utilityService.filterMatches(l.name, filter));
-    }
-    settings.fetchFn = (filter: string) => of(allLibraries)
-      .pipe(map(items => settings.compareFn(items, filter)));
-
-    settings.selectionCompareFn = (a: Library, b: Library) => {
-      return a.id === b.id;
-    }
-
-    settings.trackByIdentityFn = (_, value) => value.id + '';
-
-    const savedData = currentSelectedLibraries?.filter(l => allLibraries.indexOf(l) >= 0);
-    if (savedData) {
-      settings.savedData = savedData;
-    }
-
-    return settings;
+    return this.typeaheadSettingFactoryService.forLibraries({id: 'libraries', libraries: allLibraries,
+      overrides: {
+      showLocked: false,
+        savedData: currentSelectedLibraries?.filter(l => allLibraries.indexOf(l) >= 0)
+      }
+    });
   }
 
   updateSelectedLibraries(libs: Library[]) {

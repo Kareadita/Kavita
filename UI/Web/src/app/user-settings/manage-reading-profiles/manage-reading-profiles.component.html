@@ -44,16 +44,19 @@
             <form [formGroup]="readingProfileForm">
 
               <div class="mb-2 d-flex justify-content-between align-items-center">
-                <app-setting-item [title]="''" [showEdit]="false" [canEdit]="selectedProfile.kind !== ReadingProfileKind.Default">
-                  <ng-template #view>
-                    <span [class.clickable]="selectedProfile.kind !== ReadingProfileKind.Default">
-                      {{readingProfileForm.get('name')!.value}}
-                    </span>
-                  </ng-template>
-                  <ng-template #edit>
-                    <input class="form-control" type="text" formControlName="name" [disabled]="selectedProfile.kind === ReadingProfileKind.Default">
-                  </ng-template>
-                </app-setting-item>
+                @if (readingProfileForm.get('name'); as formControl) {
+                  <app-setting-item [title]="''" [showEdit]="false" [canEdit]="selectedProfile.kind !== ReadingProfileKind.Default" [control]="formControl">
+                    <ng-template #view>
+                      <span [class.clickable]="selectedProfile.kind !== ReadingProfileKind.Default">
+                        {{formControl.value}}
+                      </span>
+                    </ng-template>
+                    <ng-template #edit>
+                      <input class="form-control" type="text" formControlName="name" [disabled]="selectedProfile.kind === ReadingProfileKind.Default"
+                             [appFormField]="formControl">
+                    </ng-template>
+                  </app-setting-item>
+                }
 
                 @if (selectedProfile.id !== 0) {
                   <div class="d-flex justify-content-between">
@@ -181,7 +184,7 @@
 
                           <div class="row g-0 mt-4 mb-4">
                             <app-setting-switch [title]="t('auto-close-menu-label')" [subtitle]="t('auto-close-menu-tooltip')">
-                              <ng-template #switch>
+                              <ng-template>
                                 <div class="form-check form-switch float-end">
                                   <input type="checkbox" role="switch"
                                          formControlName="autoCloseMenu" class="form-check-input"
@@ -193,7 +196,7 @@
 
                           <div class="row g-0 mt-4 mb-4">
                             <app-setting-switch [title]="t('show-screen-hints-label')" [subtitle]="t('show-screen-hints-tooltip')">
-                              <ng-template #switch>
+                              <ng-template>
                                 <div class="form-check form-switch float-end">
                                   <input type="checkbox" role="switch"
                                          formControlName="showScreenHints" class="form-check-input"
@@ -205,9 +208,9 @@
 
                           <div class="row g-0 mt-4 mb-4">
                             <app-setting-switch [title]="t('emulate-comic-book-label')" [subtitle]="t('emulate-comic-book-tooltip')">
-                              <ng-template #switch>
+                              <ng-template>
                                 <div class="form-check form-switch float-end">
-                                  <input type="checkbox" role="switch" id="emulate-comic-book"
+                                  <input type="checkbox" role="switch"
                                          formControlName="emulateBook" class="form-check-input"
                                          aria-labelledby="auto-close-label">
                                 </div>
@@ -217,9 +220,9 @@
 
                           <div class="row g-0 mt-4 mb-4">
                             <app-setting-switch [title]="t('swipe-to-paginate-label')" [subtitle]="t('swipe-to-paginate-tooltip')">
-                              <ng-template #switch>
+                              <ng-template>
                                 <div class="form-check form-switch float-end">
-                                  <input type="checkbox" role="switch" id="swipe-to-paginate"
+                                  <input type="checkbox" role="switch"
                                          formControlName="swipeToPaginate" class="form-check-input"
                                          aria-labelledby="auto-close-label">
                                 </div>
@@ -229,9 +232,9 @@
 
                           <div class="row g-0 mt-4 mb-4">
                             <app-setting-switch [title]="t('allow-auto-webtoon-reader-label')" [subtitle]="t('allow-auto-webtoon-reader-tooltip')">
-                              <ng-template #switch>
+                              <ng-template>
                                 <div class="form-check form-switch float-end">
-                                  <input type="checkbox" role="switch" id="allow-auto-webtoon-reader"
+                                  <input type="checkbox" role="switch"
                                          formControlName="allowAutomaticWebtoonReaderDetection" class="form-check-input"
                                          aria-labelledby="auto-close-label">
                                 </div>
@@ -290,9 +293,9 @@
                           <div>
                             <div class="row g-0 mt-4 mb-4">
                               <app-setting-switch [title]="t('tap-to-paginate-label')" [subtitle]="t('tap-to-paginate-tooltip')">
-                                <ng-template #switch>
+                                <ng-template>
                                   <div class="form-check form-switch float-end">
-                                    <input type="checkbox" role="switch" id="tap-to-paginate"
+                                    <input type="checkbox" role="switch"
                                            formControlName="bookReaderTapToPaginate" class="form-check-input"
                                            aria-labelledby="auto-close-label">
                                   </div>
@@ -302,7 +305,7 @@
 
                             <div class="row g-0 mt-4 mb-4">
                               <app-setting-switch [title]="t('immersive-mode-label')" [subtitle]="t('immersive-mode-tooltip')">
-                                <ng-template #switch>
+                                <ng-template>
                                   <div class="form-check form-switch float-end">
                                     <input type="checkbox" role="switch"
                                            formControlName="bookReaderImmersiveMode" class="form-check-input"
@@ -448,7 +451,7 @@
 
                             <div class="row g-0 mt-4 mb-4">
                               <app-setting-switch [title]="t('disable-bookmark-icon-label')" [subtitle]="t('disable-bookmark-icon-tooltip')">
-                                <ng-template #switch>
+                                <ng-template>
                                   <div class="form-check form-switch float-end">
                                     <input type="checkbox" role="switch"
                                            formControlName="bookReaderDisableBookmarkIcon" class="form-check-input"

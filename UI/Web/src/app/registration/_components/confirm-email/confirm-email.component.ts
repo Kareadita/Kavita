@@ -1,21 +1,23 @@
 import {ChangeDetectionStrategy, ChangeDetectorRef, Component, inject, OnDestroy} from '@angular/core';
 import {FormControl, FormGroup, ReactiveFormsModule, Validators} from '@angular/forms';
 import {ActivatedRoute, Router} from '@angular/router';
-import {ToastrService} from 'ngx-toastr';
-import {ThemeService} from 'src/app/_services/theme.service';
-import {AccountService} from 'src/app/_services/account.service';
-import {NavService} from 'src/app/_services/nav.service';
+import {ToastrService} from '@openng/ngx-toastr';
 import {NgbTooltip} from '@ng-bootstrap/ng-bootstrap';
 import {NgTemplateOutlet} from '@angular/common';
 import {SplashContainerComponent} from '../splash-container/splash-container.component';
 import {translate, TranslocoDirective} from "@jsverse/transloco";
+import {AccountService} from "../../../_services/account.service";
+import {ThemeService} from "../../../_services/theme.service";
+import {NavService} from "../../../_services/nav.service";
+import {FormFieldDirective} from "../../../_directives/form-field.directive";
+import {ValidationErrorsComponent} from "../../../shared/_components/validation-errors/validation-errors.component";
 
 @Component({
     selector: 'app-confirm-email',
     templateUrl: './confirm-email.component.html',
     styleUrls: ['./confirm-email.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush,
-    imports: [SplashContainerComponent, ReactiveFormsModule, NgbTooltip, NgTemplateOutlet, TranslocoDirective]
+    imports: [SplashContainerComponent, ReactiveFormsModule, NgbTooltip, NgTemplateOutlet, TranslocoDirective, FormFieldDirective, ValidationErrorsComponent]
 })
 export class ConfirmEmailComponent implements OnDestroy {
   private route = inject(ActivatedRoute);

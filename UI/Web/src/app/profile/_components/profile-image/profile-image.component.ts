@@ -5,7 +5,6 @@ import {
   ElementRef,
   inject,
   input,
-  model,
   signal,
   viewChild
 } from '@angular/core';
@@ -14,7 +13,7 @@ import {AccountService} from "../../../_services/account.service";
 import {TranslocoDirective} from "@jsverse/transloco";
 import {ImageComponent} from "../../../shared/image/image.component";
 import {UploadService} from "../../../_services/upload.service";
-import {ToastrService} from "ngx-toastr";
+import {ToastrService} from '@openng/ngx-toastr';
 
 interface ImageUploadResult {
   file: File;

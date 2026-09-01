@@ -12,7 +12,6 @@ import {Location, TitleCasePipe} from '@angular/common';
 import {MemberInfo} from "../../../_models/user/member-info";
 import {TranslocoDirective} from "@jsverse/transloco";
 import {ImageService} from "../../../_services/image.service";
-import {TimeAgoPipe} from "../../../_pipes/time-ago.pipe";
 import {NgbNav, NgbNavContent, NgbNavItem, NgbNavLink, NgbNavOutlet} from "@ng-bootstrap/ng-bootstrap";
 import {tap} from "rxjs";
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
@@ -37,6 +36,7 @@ import {ProfileActivityComponent} from "../profile-activity/profile-activity.com
 import {KavitaTitleStrategy} from "../../../_services/kavita-title.strategy";
 import {Tabs} from "../../../_models/tabs";
 import {TabTitlePipe} from "../../../_pipes/tab-title.pipe";
+import {TimeDifferencePipe} from "../../../_pipes/time-difference.pipe";
 
 
 @Component({
@@ -44,7 +44,6 @@ import {TabTitlePipe} from "../../../_pipes/tab-title.pipe";
   standalone: true,
   imports: [
     TranslocoDirective,
-    TimeAgoPipe,
     NgbNav,
     NgbNavContent,
     NgbNavLink,
@@ -66,6 +65,7 @@ import {TabTitlePipe} from "../../../_pipes/tab-title.pipe";
     NavTabUrlDirective,
     ProfileActivityComponent,
     TabTitlePipe,
+    TimeDifferencePipe,
   ],
   templateUrl: './profile.component.html',
   styleUrl: './profile.component.scss',

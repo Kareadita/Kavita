@@ -1,19 +1,20 @@
 import {ChangeDetectionStrategy, Component, inject} from '@angular/core';
-import { Validators, FormGroup, FormControl, ReactiveFormsModule } from '@angular/forms';
-import { Router } from '@angular/router';
-import { ToastrService } from 'ngx-toastr';
-import { AccountService } from 'src/app/_services/account.service';
-
-import { SplashContainerComponent } from '../splash-container/splash-container.component';
+import {FormControl, FormGroup, ReactiveFormsModule, Validators} from '@angular/forms';
+import {Router} from '@angular/router';
+import {ToastrService} from '@openng/ngx-toastr';
+import {SplashContainerComponent} from '../splash-container/splash-container.component';
 import {TranslocoDirective} from "@jsverse/transloco";
 import {NavService} from "../../../_services/nav.service";
+import {AccountService} from "../../../_services/account.service";
+import {ValidationErrorsComponent} from "../../../shared/_components/validation-errors/validation-errors.component";
+import {FormFieldDirective} from "../../../_directives/form-field.directive";
 
 @Component({
     selector: 'app-reset-password',
     templateUrl: './reset-password.component.html',
     styleUrls: ['./reset-password.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush,
-    imports: [SplashContainerComponent, ReactiveFormsModule, TranslocoDirective]
+  imports: [SplashContainerComponent, ReactiveFormsModule, TranslocoDirective, ValidationErrorsComponent, FormFieldDirective]
 })
 export class ResetPasswordComponent {
 

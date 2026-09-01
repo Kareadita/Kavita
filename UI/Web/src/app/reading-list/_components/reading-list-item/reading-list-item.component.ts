@@ -1,6 +1,4 @@
 import {ChangeDetectionStrategy, Component, computed, inject, input, output} from '@angular/core';
-import {ReadingListItem} from 'src/app/_models/reading-list/reading-list';
-import {ImageService} from 'src/app/_services/image.service';
 import {NgbProgressbar} from '@ng-bootstrap/ng-bootstrap';
 import {ImageComponent} from '../../../shared/image/image.component';
 import {translate, TranslocoDirective} from "@jsverse/transloco";
@@ -12,6 +10,8 @@ import {LooseLeafOrDefaultNumber} from "../../../_models/chapter";
 import {DateYearRangePipe, NULL_DATE} from "../../../_pipes/date-year-range.pipe";
 import {DefaultValuePipe} from "../../../_pipes/default-value.pipe";
 import {SafeHtmlPipe} from "../../../_pipes/safe-html.pipe";
+import {ImageService} from "../../../_services/image.service";
+import {ReadingListItem} from "../../../_models/reading-list/reading-list";
 
 @Component({
   selector: 'app-reading-list-item',

@@ -2,7 +2,7 @@ import {inject} from '@angular/core';
 import {HttpInterceptorFn, HttpRequest} from '@angular/common/http';
 import {throwError} from 'rxjs';
 import {Router} from '@angular/router';
-import {ToastrService} from 'ngx-toastr';
+import {ToastrService} from '@openng/ngx-toastr';
 import {catchError} from 'rxjs/operators';
 import {AccountService} from '../_services/account.service';
 import {translate, TranslocoService} from "@jsverse/transloco";

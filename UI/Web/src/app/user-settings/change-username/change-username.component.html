@@ -12,14 +12,8 @@
           <div class="mb-3">
             <label for="username" class="form-label">{{t('new-username-label')}}</label>
             <input class="form-control custom-input" type="text" id="username" formControlName="username" autocomplete="current-password"
-                   [class.is-invalid]="formControl.invalid && formControl.touched" aria-describedby="username-validations">
-            @if (usernameChangeForm.dirty || usernameChangeForm.touched) {
-              <div id="username-validations" class="invalid-feedback">
-                @if (formControl.errors?.required) {
-                  <div>{{t('required-field')}}</div>
-                }
-              </div>
-            }
+                   [appFormField]="formControl" aria-describedby="username-validations">
+            <app-validation-errors inputId="username" [control]="formControl" />
           </div>
         }
         <div class="col-auto d-flex d-md-block justify-content-sm-center text-md-end mb-3">

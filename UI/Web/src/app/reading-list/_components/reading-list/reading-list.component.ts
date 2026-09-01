@@ -2,19 +2,19 @@ import {ChangeDetectionStrategy, ChangeDetectorRef, Component, computed, inject,
 import {RouterLink} from '@angular/router';
 import {FormsModule} from '@angular/forms';
 import {TranslocoDirective} from '@jsverse/transloco';
-import {ReadingList} from 'src/app/_models/reading-list/reading-list';
-import {ReadingListCardEntity} from 'src/app/_models/card/card-entity';
-import {ActionableCardConfiguration, hasActionables} from 'src/app/_models/card/card-configuration';
-import {ActionItem} from 'src/app/_models/actionables/action-item';
-import {ActionResult} from 'src/app/_models/actionables/action-result';
-import {ActionableEntity} from 'src/app/_services/action-factory.service';
-import {BulkSelectionService} from 'src/app/cards/bulk-selection.service';
-import {BreakpointService} from 'src/app/_services/breakpoint.service';
-import {ImageComponent} from 'src/app/shared/image/image.component';
-import {PromotedIconComponent} from 'src/app/shared/_components/promoted-icon/promoted-icon.component';
-import {CardActionablesComponent} from 'src/app/_single-module/card-actionables/card-actionables.component';
-import {DateYearRangePipe} from 'src/app/_pipes/date-year-range.pipe';
-import {ScrollService} from 'src/app/_services/scroll.service';
+import {ImageComponent} from "../../../shared/image/image.component";
+import {PromotedIconComponent} from "../../../shared/_components/promoted-icon/promoted-icon.component";
+import {CardActionablesComponent} from "../../../_single-module/card-actionables/card-actionables.component";
+import {DateYearRangePipe} from "../../../_pipes/date-year-range.pipe";
+import {ScrollService} from "../../../_services/scroll.service";
+import {BulkSelectionService} from "../../../cards/bulk-selection.service";
+import {BreakpointService} from "../../../_services/breakpoint.service";
+import {ReadingListCardEntity} from "../../../_models/card/card-entity";
+import {ActionableCardConfiguration, hasActionables} from "../../../_models/card/card-configuration";
+import {ReadingList} from "../../../_models/reading-list/reading-list";
+import {ActionableEntity} from "../../../_services/action-factory.service";
+import {ActionItem} from "../../../_models/actionables/action-item";
+import {ActionResult} from "../../../_models/actionables/action-result";
 
 @Component({
   selector: 'app-reading-list',

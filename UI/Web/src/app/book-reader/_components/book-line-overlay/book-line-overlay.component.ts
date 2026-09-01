@@ -15,7 +15,7 @@ import {fromEvent, merge, of} from "rxjs";
 import {catchError, debounceTime, tap} from "rxjs/operators";
 import {FormControl, FormGroup, ReactiveFormsModule, Validators} from "@angular/forms";
 import {ReaderService} from "../../../_services/reader.service";
-import {ToastrService} from "ngx-toastr";
+import {ToastrService} from '@openng/ngx-toastr';
 import {translate, TranslocoDirective} from "@jsverse/transloco";
 import {EpubReaderMenuService} from "../../../_services/epub-reader-menu.service";
 import {Annotation} from "../../_models/annotations/annotation";
@@ -23,6 +23,8 @@ import {isMobileChromium} from "../../../_helpers/browser";
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import {KeyBindService} from "../../../_services/key-bind.service";
 import {KeyBindTarget} from "../../../_models/preferences/preferences";
+import {FormFieldDirective} from "../../../_directives/form-field.directive";
+import {ValidationErrorsComponent} from "../../../shared/_components/validation-errors/validation-errors.component";
 
 enum BookLineOverlayMode {
   None = 0,
@@ -32,7 +34,7 @@ enum BookLineOverlayMode {
 
 @Component({
     selector: 'app-book-line-overlay',
-    imports: [ReactiveFormsModule, TranslocoDirective],
+  imports: [ReactiveFormsModule, TranslocoDirective, FormFieldDirective, ValidationErrorsComponent],
     templateUrl: './book-line-overlay.component.html',
     styleUrls: ['./book-line-overlay.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush

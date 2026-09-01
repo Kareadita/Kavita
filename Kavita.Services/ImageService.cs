@@ -493,6 +493,12 @@ public class ImageService(ILogger<ImageService> logger, IDirectoryService direct
         return $"v{volumeId}";
     }
 
+    public static bool IsChapterFormatForVolume(string filePath, int volumeId)
+    {
+        var fileName = Path.GetFileNameWithoutExtension(filePath);
+        return fileName.StartsWith($"v{volumeId}_c", StringComparison.OrdinalIgnoreCase);
+    }
+
     /// <summary>
     /// Returns the name format for a library cover image
     /// </summary>

@@ -29,17 +29,9 @@
           <label for="email" class="form-label">{{t('email-label')}}</label>
           @if(form.get('email'); as formControl) {
             <input class="form-control custom-input" type="email" id="email" formControlName="email"
-                   [class.is-invalid]="formControl.invalid && formControl.touched">
-            @if (formControl.errors) {
-              <div id="email-validations" class="invalid-feedback">
-                @if (formControl.errors.required) {
-                  <div>{{t('required-field')}}</div>
-                }
-                @if (formControl.errors.email) {
-                  <div>{{t('valid-email')}}</div>
-                }
-              </div>
-            }
+                   [appFormField]="formControl">
+            <app-validation-errors inputId="email" [control]="formControl" />
+
           }
         </div>
 
@@ -47,14 +39,8 @@
           <label for="password" class="form-label">{{t('current-password-label')}}</label>
           @if (form.get('password'); as formControl) {
             <input class="form-control custom-input" type="password" id="password" formControlName="password"
-                   [class.is-invalid]="formControl.invalid && formControl.touched">
-            @if (formControl.errors) {
-              <div id="password-validations" class="invalid-feedback">
-                @if (formControl.errors.required) {
-                  <div>{{t('required-field')}}</div>
-                }
-              </div>
-            }
+                   [appFormField]="formControl">
+            <app-validation-errors inputId="password" [control]="formControl" />
           }
         </div>
 

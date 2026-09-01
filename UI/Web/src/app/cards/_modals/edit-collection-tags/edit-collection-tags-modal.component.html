@@ -13,19 +13,14 @@
           <form [formGroup]="collectionTagForm">
             <div class="row g-0 mb-3">
               <div class="col-md-8 col-sm-12">
-                <label for="library-name" class="form-label">{{t('name-label')}}</label>
-                <input id="library-name" class="form-control" formControlName="title" type="text"
-                       [class.is-invalid]="collectionTagForm.get('title')?.invalid && collectionTagForm.get('title')?.touched">
-                @if (collectionTagForm.dirty || !collectionTagForm.untouched) {
-                  <div id="inviteForm-validations" class="invalid-feedback">
-                    @if (collectionTagForm.get('title')?.errors?.required) {
-                      <div>{{t('required-field')}}</div>
-                    }
-                    @if (collectionTagForm.get('title')?.errors?.duplicateName) {
-                      <div>{{t('name-validation')}}</div>
-                    }
-                  </div>
+                @if (collectionTagForm.get('title'); as formControl) {
+                  <label for="library-name" class="form-label">{{t('name-label')}}</label>
+                  <input id="library-name" class="form-control" formControlName="title" type="text"
+                         [appFormField]="formControl" aria-describedby="library-name-validations">
+
+                  <app-validation-errors [control]="formControl" inputId="library-name" [messages]="{duplicateName: t('name-validation')}" />
                 }
+
               </div>
               <div class="col-md-3 col-sm-12 ms-2">
                 <div class="form-check form-switch">
@@ -56,12 +51,15 @@
               <div class="list-group">
                 <form [formGroup]="formGroup">
                   <div class="row g-0 mb-3">
-                    <div class="col-md-12">
-                      <label for="filter" class="visually-hidden">{{t('filter-label')}}</label>
-                      <div class="input-group">
-                        <input id="filter" type="text" class="form-control" [placeholder]="t('filter-label')" formControlName="filter" />
+                    @if (formGroup.get('filter'); as formControl) {
+                      <div class="col-md-12">
+                        <label for="filter" class="visually-hidden">{{t('filter-label')}}</label>
+                        <div class="input-group">
+                          <input id="filter" type="text" class="form-control" [placeholder]="t('filter-label')" formControlName="filter"
+                                 [appFormField]="formControl" />
+                        </div>
                       </div>
-                    </div>
+                    }
                   </div>
                 </form>
                 <div class="form-check">

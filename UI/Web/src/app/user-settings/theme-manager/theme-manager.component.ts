@@ -1,10 +1,6 @@
 import {ChangeDetectionStrategy, ChangeDetectorRef, Component, computed, DestroyRef, inject,} from '@angular/core';
-import {ToastrService} from 'ngx-toastr';
+import {ToastrService} from '@openng/ngx-toastr';
 import {distinctUntilChanged, tap} from 'rxjs';
-import {ThemeService} from 'src/app/_services/theme.service';
-import {SiteTheme, ThemeProvider} from 'src/app/_models/preferences/site-theme';
-import {User} from 'src/app/_models/user/user';
-import {AccountService} from 'src/app/_services/account.service';
 import {takeUntilDestroyed} from "@angular/core/rxjs-interop";
 import {SentenceCasePipe} from '../../_pipes/sentence-case.pipe';
 import {NgTemplateOutlet} from '@angular/common';
@@ -20,9 +16,13 @@ import {ReactiveFormsModule} from "@angular/forms";
 import {LoadingComponent} from "../../shared/loading/loading.component";
 import {PreviewImageModalComponent} from "../../shared/_components/carousel-modal/preview-image-modal.component";
 import {ModalService} from "../../_services/modal.service";
+import {SiteTheme, ThemeProvider} from "../../_models/preferences/site-theme";
+import {ThemeService} from "../../_services/theme.service";
+import {AccountService} from "../../_services/account.service";
+import {User} from "../../_models/user/user";
 import {
   FileDragAndDropUploadComponent
-} from "src/app/shared/file-drag-and-drop-upload/file-drag-and-drop-upload.component";
+} from "../../shared/file-drag-and-drop-upload/file-drag-and-drop-upload.component";
 
 interface ThemeContainer {
   downloadable?: DownloadableSiteTheme;

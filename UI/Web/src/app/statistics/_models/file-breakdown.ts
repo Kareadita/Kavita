@@ -1,4 +1,4 @@
-import { MangaFormat } from "src/app/_models/manga-format";
+import {MangaFormat} from "../../_models/manga-format";
 
 export interface FileExtension {
     extension: string;

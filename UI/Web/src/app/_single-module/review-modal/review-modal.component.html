@@ -8,25 +8,14 @@
       </div>
       <div class="modal-body">
           <form [formGroup]="reviewGroup">
-
-            <!--Not in sync with one at the top of the detail page, bad UX for now -->
-            <!--<ngx-stars [initialStars]="review.rating" (ratingOutput)="updateRating($event)" [size]="2"
-                       [maxStars]="5" [color]="starColor"></ngx-stars>-->
-
               <div class="row g-0 mt-2">
+                @if (reviewGroup.get('reviewBody'); as formControl) {
                   <label for="review" class="form-label">{{t('review-label')}}</label>
-                  <textarea id="review" class="form-control" formControlName="reviewBody" rows="3" [minlength]="minLength"
-                            [class.is-invalid]="reviewGroup.get('reviewBody')?.invalid && reviewGroup.get('reviewBody')?.touched" aria-describedby="body-validations"
+                  <textarea id="review" class="form-control" formControlName="reviewBody" rows="3" [minlength]="minLength" [appFormField]="formControl"
+                            aria-describedby="review-validations"
                   ></textarea>
-                @if (reviewGroup.dirty || reviewGroup.touched) {
-                  <div id="body-validations" class="invalid-feedback">
-                    @if (reviewGroup.get('reviewBody')?.errors?.required) {
-                      <div>{{t('required')}}</div>
-                    }
-                    @if (reviewGroup.get('reviewBody')?.errors?.minlength) {
-                      <div>{{t('min-length', {count: minLength})}}</div>
-                    }
-                  </div>
+
+                  <app-validation-errors inputId="review" [control]="formControl" />
                 }
               </div>
           </form>

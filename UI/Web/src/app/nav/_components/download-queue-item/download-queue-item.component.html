@@ -11,7 +11,7 @@
           {{ item().status | downloadQueueStatus }}
         </app-tag-badge>
         <span class="ps-1 pe-1">&bull;</span>
-        <span>{{ timeDisplay() | timeAgo }}</span>
+        <span>{{ timeDisplay() | timeDifference }}</span>
       </div>
 
       @if (showSize()) {

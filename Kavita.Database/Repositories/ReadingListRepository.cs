@@ -466,10 +466,12 @@ public class ReadingListRepository(DataContext context, IMapper mapper) : IReadi
         UserParams? userParams = null, CancellationToken ct = default)
     {
         var userLibraries = context.Library.GetUserLibraries(userId);
+        var ageRating = await context.AppUser.GetUserAgeRestriction(userId, ct);
 
         var query = context.ReadingListItem
             .Where(rli => rli.ReadingListId == readingListId)
             .Where(rli => userLibraries.Contains(rli.Series.LibraryId))
+            .RestrictAgainstAgeRestriction(ageRating)
             .OrderBy(rli => rli.Order)
             .ProjectToWithProgress<ReadingListItem, ReadingListItemDto>(mapper, userId)
             .AsSplitQuery();

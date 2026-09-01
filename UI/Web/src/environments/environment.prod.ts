@@ -1,4 +1,4 @@
-import {getBaseUrl} from "src/app/_providers/base-url.provider";
+import {getBaseUrl} from "../app/_providers/base-url.provider";
 
 const BASE_URL = getBaseUrl();
 

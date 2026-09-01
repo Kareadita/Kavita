@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
+using System.Text.RegularExpressions;
 
 namespace Kavita.Common.Helpers;
 #nullable enable
@@ -14,11 +15,10 @@ public sealed record HardcoverUrlSlug(string Slug, bool IsStandAlone);
 /// <summary>
 /// Handles all things parsing of External Ids (weblinks, not set checks, anilist:X)
 /// </summary>
-public static class ExternalIdParser
+public static partial class ExternalIdParser
 {
     private const string AniListWeblinkWebsite = "https://anilist.co/manga/";
     private const string MalWeblinkWebsite = "https://myanimelist.net/manga/";
-    private const string GoogleBooksWeblinkWebsite = "https://books.google.com/books?id=";
     private const string MangaDexWeblinkWebsite = "https://mangadex.org/title/";
     private const string AniListStaffWebsite = "https://anilist.co/staff/";
     private const string AniListCharacterWebsite = "https://anilist.co/character/";
@@ -53,7 +53,6 @@ public static class ExternalIdParser
     {
         {AniListWeblinkWebsite, 0},
         {MalWeblinkWebsite, 0},
-        {GoogleBooksWeblinkWebsite, 0},
         {MangaDexWeblinkWebsite, 0},
         {AniListStaffWebsite, 0},
         {AniListCharacterWebsite, 0},
@@ -97,11 +96,6 @@ public static class ExternalIdParser
         return ExtractId<int?>(url, AniListStaffWebsite) ?? 0;
     }
 
-    public static string? GetGoogleBooksId(string? weblinks)
-    {
-        return ExtractId<string?>(weblinks, GoogleBooksWeblinkWebsite);
-    }
-
     public static string? GetMangaDexId(string? weblinks)
     {
         return ExtractId<string?>(weblinks, MangaDexWeblinkWebsite);
@@ -109,7 +103,7 @@ public static class ExternalIdParser
 
     public static int GetMangaBakaId(string? weblinks)
     {
-        return ExtractId<int?>(weblinks, MangaBakaWebsite) ?? 0;
+        return ExtractId<int?>(weblinks, MangaBakaWebsite) ?? ExtractId<int?>(weblinks, MangaBakaWebsite, 1) ?? 0;
     }
 
     #region Header-based Parsing
@@ -200,18 +194,25 @@ public static class ExternalIdParser
     /// </summary>
     /// <param name="webLinks"></param>
     /// <param name="website"></param>
+    /// <param name="indexOverride"></param>
     /// <returns></returns>
-    private static T? ExtractId<T>(string? webLinks, string website)
+    private static T? ExtractId<T>(string? webLinks, string website, int? indexOverride = null)
     {
         if (string.IsNullOrEmpty(webLinks)) return default;
 
-        var index = WeblinkExtractionMap[website];
+        var index = indexOverride ?? WeblinkExtractionMap[website];
         foreach (var webLink in webLinks.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries))
         {
             if (!webLink.StartsWith(website)) continue;
 
             var tokens = webLink.Split(website)[1].Split('/');
             var value = tokens[index];
+
+            // Clean any query params
+            if (QueryParamsRegex().IsMatch(value))
+            {
+                value = value.Split('?')[0];
+            }
 
             if (typeof(T) == typeof(int?))
             {
@@ -264,4 +265,7 @@ public static class ExternalIdParser
 
         throw new ArgumentException("Unsupported ID type. Supported types are int, long, and string.", nameof(id));
     }
+
+    [GeneratedRegex(".*?\\D+=.*")]
+    private static partial Regex QueryParamsRegex();
 }

@@ -1,4 +1,4 @@
-import { EVENTS } from "src/app/_services/message-hub.service";
+import {EVENTS} from "../../_services/message-hub.service";
 
 export interface ErrorEvent {
     /**

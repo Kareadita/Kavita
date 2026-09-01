@@ -13,7 +13,6 @@ import {
   TemplateRef
 } from '@angular/core';
 import {Swiper} from 'swiper/types';
-import {register} from 'swiper/element/bundle';
 import {NgClass, NgTemplateOutlet} from '@angular/common';
 import {TranslocoDirective} from "@jsverse/transloco";
 import {CardActionablesComponent} from "../../../_single-module/card-actionables/card-actionables.component";
@@ -23,6 +22,7 @@ import {PaginatedResult} from "../../../_models/pagination";
 import {ActionItem} from "../../../_models/actionables/action-item";
 import {ActionResult} from "../../../_models/actionables/action-result";
 import {ActionableEntity} from "../../../_services/action-factory.service";
+import {register} from "swiper/element";
 
 register();
 

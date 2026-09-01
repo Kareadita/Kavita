@@ -12,7 +12,7 @@ import {
 import {Clipboard} from '@angular/cdk/clipboard';
 import {translate, TranslocoDirective} from "@jsverse/transloco";
 import {SettingItemComponent} from "../../settings/_components/setting-item/setting-item.component";
-import {ToastrService} from "ngx-toastr";
+import {ToastrService} from '@openng/ngx-toastr';
 
 @Component({
   selector: 'app-api-key',

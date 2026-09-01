@@ -15,9 +15,6 @@ import {
 import {FormControl, FormGroup, ReactiveFormsModule} from '@angular/forms';
 import {FilterStatement} from '../../../_models/metadata/v2/filter-statement';
 import {BehaviorSubject, distinctUntilChanged, filter, map, Observable, of, startWith, switchMap, tap} from 'rxjs';
-import {MetadataService} from 'src/app/_services/metadata.service';
-import {FilterComparison} from 'src/app/_models/metadata/v2/filter-comparison';
-import {SeriesFilterField} from 'src/app/_models/metadata/v2/series-filter-field';
 import {AsyncPipe, NgStyle} from "@angular/common";
 import {FilterComparisonPipe} from "../../../_pipes/filter-comparison.pipe";
 import {takeUntilDestroyed, toSignal} from "@angular/core/rxjs-interop";
@@ -28,6 +25,9 @@ import {ValidFilterEntity} from "../../filter-settings";
 import {FilterUtilitiesService} from "../../../shared/_services/filter-utilities.service";
 import {AnnotationsFilterField} from "../../../_models/metadata/v2/annotations-filter";
 import {RgbaColor} from "../../../book-reader/_models/annotations/highlight-slot";
+import {FilterComparison} from "../../../_models/metadata/v2/filter-comparison";
+import {SeriesFilterField} from "../../../_models/metadata/v2/series-filter-field";
+import {MetadataService} from "../../../_services/metadata.service";
 
 interface FieldConfig {
   type: PredicateType;

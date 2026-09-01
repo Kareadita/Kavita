@@ -1,7 +1,7 @@
 import {HttpClient, httpResource} from '@angular/common/http';
 import {inject, Injectable} from '@angular/core';
 import {map, of} from 'rxjs';
-import {environment} from 'src/environments/environment';
+import {environment} from '../../environments/environment';
 import {TextResonse} from '../_types/text-response';
 import {ServerSettings} from './_models/server-settings';
 import {MetadataSettings} from "./_models/metadata-settings";
@@ -75,8 +75,8 @@ export class SettingsService {
     return this.http.post<EmailTestResult>(this.baseUrl + 'settings/test-email-url', {});
   }
 
-  isEmailSetup() {
-    return this.http.get<string>(this.baseUrl + 'settings/is-email-setup', TextResonse).pipe(map(d => d == "true"));
+  isEmailSetup(forDevice: boolean = false) {
+    return this.http.get<string>(this.baseUrl + 'settings/is-email-setup?forDevice=' + forDevice, TextResonse).pipe(map(d => d == "true"));
   }
 
   getTaskFrequencies() {

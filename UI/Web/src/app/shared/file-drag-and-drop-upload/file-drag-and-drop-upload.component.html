@@ -10,15 +10,17 @@
 
       @switch (uploadMode()) {
         @case (UploadMode.Url) {
+          @let formControl = urlControl;
           <div class="row g-0 mt-3 pb-3 px-3 w-100 align-items-center">
             <div class="input-group col">
               <label class="input-group-text" for="load-url">{{t('url-label')}}</label>
-              <input type="text" [formControl]="urlControl" autofocus autocomplete="off"
+              <input type="text" [formControl]="formControl" autofocus autocomplete="off"
                      class="form-control" placeholder="https://" id="load-url"
+                     [appFormField]="formControl" aria-describedby="load-url-validations"
                      (keyup.enter)="handleUrlUpload()">
               <button class="btn btn-outline-secondary" type="button"
                       (click)="handleUrlUpload()"
-                      [disabled]="urlControl.invalid">
+                      [disabled]="formControl.invalid">
                 {{t('load')}}
               </button>
             </div>
@@ -28,6 +30,9 @@
                 <span class="phone-hidden ms-1">{{t('back')}}</span>
               </button>
             </div>
+          </div>
+          <div class="px-3">
+            <app-validation-errors inputId="load-url" [control]="formControl" />
           </div>
         }
         @default {

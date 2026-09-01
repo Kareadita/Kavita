@@ -1,4 +1,14 @@
-import {Component, computed, DestroyRef, inject, input, OnInit, signal, viewChild} from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  computed,
+  DestroyRef,
+  inject,
+  input,
+  OnInit,
+  signal,
+  viewChild
+} from '@angular/core';
 import {NgbActiveModal, NgbHighlight, NgbTypeahead} from '@ng-bootstrap/ng-bootstrap';
 import {
   catchError,
@@ -15,13 +25,14 @@ import {
   tap
 } from 'rxjs';
 import {takeUntilDestroyed} from '@angular/core/rxjs-interop';
-import {Stack} from 'src/app/shared/data-structures/stack';
-import {DirectoryDto} from 'src/app/_models/system/directory-dto';
 import {LibraryService} from '../../../_services/library.service';
 import {NgClass} from '@angular/common';
 import {FormControl, ReactiveFormsModule} from '@angular/forms';
 import {TranslocoDirective} from "@jsverse/transloco";
 import {WikiLink} from "../../../_models/wiki";
+import {DirectoryDto} from "../../../_models/system/directory-dto";
+import {Stack} from "../../../shared/data-structures/stack";
+import {FormFieldDirective} from "../../../_directives/form-field.directive";
 
 
 export interface DirectoryPickerResult {
@@ -30,38 +41,37 @@ export interface DirectoryPickerResult {
 }
 
 @Component({
-    selector: 'app-directory-picker',
-    templateUrl: './directory-picker.component.html',
-    styleUrls: ['./directory-picker.component.scss'],
-    imports: [ReactiveFormsModule, NgbTypeahead, NgbHighlight, NgClass, TranslocoDirective]
+    selector: 'app-directory-picker-modal',
+    templateUrl: './directory-picker-modal.component.html',
+    styleUrls: ['./directory-picker-modal.component.scss'],
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    imports: [ReactiveFormsModule, NgbTypeahead, NgbHighlight, NgClass, TranslocoDirective, FormFieldDirective]
 })
-export class DirectoryPickerComponent implements OnInit {
+export class DirectoryPickerModalComponent implements OnInit {
   protected readonly modal = inject(NgbActiveModal);
   private readonly libraryService = inject(LibraryService);
   private readonly destroyRef = inject(DestroyRef);
 
   startingFolder = input<string>('');
-  /**
-   * Url to give more information about selecting directories. Passing nothing will suppress.
-   */
+  /** Url to give more information about selecting directories. Passing nothing will suppress. */
   helpUrl = input<string>(WikiLink.Library);
+  protected readonly instance = viewChild<NgbTypeahead>('instance');
+
 
   currentRoot = signal('');
   folders = signal<DirectoryDto[]>([]);
-  routeStack = new Stack<string>();
+  searching = signal(false);
+  searchFailed = signal(false);
   routeItems = signal<string[]>([]);
   routeStackPeek = computed(() => {
     const items = this.routeItems();
     return items.length > 0 ? items[items.length - 1] : undefined;
   });
 
+  routeStack = new Stack<string>();
   pathControl = new FormControl('', {nonNullable: true});
-  instance = viewChild<NgbTypeahead>('instance');
   focus$ = new Subject<string>();
   click$ = new Subject<string>();
-  searching = signal(false);
-  searchFailed = signal(false);
-
 
   search: OperatorFunction<string, readonly string[]> = (text$: Observable<string>) => {
     const debouncedText$ = text$.pipe(debounceTime(200), distinctUntilChanged());

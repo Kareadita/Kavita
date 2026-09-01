@@ -1,8 +1,8 @@
 import {inject, Pipe, PipeTransform} from '@angular/core';
-import {CblBookResult} from 'src/app/_models/reading-list/cbl/cbl-book-result';
-import {CblImportReason} from 'src/app/_models/reading-list/cbl/cbl-import-reason.enum';
 import {TranslocoService} from "@jsverse/transloco";
 import {APP_BASE_HREF} from "@angular/common";
+import {CblBookResult} from "../_models/reading-list/cbl/cbl-book-result";
+import {CblImportReason} from "../_models/reading-list/cbl/cbl-import-reason.enum";
 
 const failIcon = '<i aria-hidden="true" class="reading-list-fail--item fa-solid fa-circle-xmark me-1"></i>';
 const successIcon = '<i aria-hidden="true" class="reading-list-success--item fa-solid fa-circle-check me-1"></i>';

@@ -1,11 +1,4 @@
-import {
-  ChangeDetectionStrategy,
-  Component,
-  DestroyRef,
-  inject,
-  input,
-  signal
-} from '@angular/core';
+import {ChangeDetectionStrategy, Component, DestroyRef, inject, input, signal} from '@angular/core';
 import {takeUntilDestroyed, toObservable} from '@angular/core/rxjs-interop';
 import {combineLatest, distinctUntilChanged, filter, tap} from 'rxjs';
 import {MemberInfo} from '../../../_models/user/member-info';
@@ -19,7 +12,7 @@ import {
 } from '../../../statistics/_components/library-and-time-selector/library-and-time-selector.component';
 import {ImageService} from '../../../_services/image.service';
 import {Pagination} from '../../../_models/pagination';
-import {ReadingHistoryViewerComponent} from "src/app/shared/reading-history-viewer/reading-history-viewer.component";
+import {ReadingHistoryViewerComponent} from "../../../shared/reading-history-viewer/reading-history-viewer.component";
 
 
 @Component({

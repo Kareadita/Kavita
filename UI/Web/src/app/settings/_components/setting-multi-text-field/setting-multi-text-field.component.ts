@@ -1,11 +1,18 @@
 import {ChangeDetectionStrategy, Component, computed, effect, forwardRef, input, signal} from '@angular/core';
-import {ControlValueAccessor, FormsModule, NG_VALUE_ACCESSOR, ReactiveFormsModule} from "@angular/forms";
+import {
+  AbstractControl,
+  ControlValueAccessor,
+  FormsModule,
+  NG_VALUE_ACCESSOR,
+  ReactiveFormsModule
+} from "@angular/forms";
 import {DefaultValuePipe} from "../../../_pipes/default-value.pipe";
 import {SettingItemComponent} from "../setting-item/setting-item.component";
 import {TagBadgeComponent} from "../../../shared/tag-badge/tag-badge.component";
+import {FormFieldDirective} from "../../../_directives/form-field.directive";
 
 /**
- * SettingMultiTextFieldComponent should be used when using a text area to input several comma seperated values.
+ * SettingMultiTextFieldComponent should be used when using a text area to input several comma separated values.
  * The component should have a formControlName bound to it of type FormControl<T[]>.
  * By default, T is assumed to be a string
  *
@@ -18,7 +25,8 @@ import {TagBadgeComponent} from "../../../shared/tag-badge/tag-badge.component";
     FormsModule,
     ReactiveFormsModule,
     SettingItemComponent,
-    TagBadgeComponent
+    TagBadgeComponent,
+    FormFieldDirective
   ],
   templateUrl: './setting-multi-text-field.component.html',
   styleUrl: './setting-multi-text-field.component.scss',
@@ -62,10 +70,9 @@ export class SettingMultiTextFieldComponent<T> implements ControlValueAccessor {
    */
   loading = input<boolean | undefined>(undefined);
   /**
-   * id for the textarea input
-   * @optional
+   * Form control
    */
-  id = input<string>('');
+  control = input.required<AbstractControl>();
 
   isLoading = computed(() => {
     const loading = this.loading();
@@ -74,6 +81,8 @@ export class SettingMultiTextFieldComponent<T> implements ControlValueAccessor {
   textFieldValue = computed(() => this.selectedValues().map(this.stringConvertor()).join(','))
   selectedValues = signal<T[]>([]);
   disabled = signal(false);
+
+
 
   private _onChange: (value: T[]) => void = () => {};
   private _onTouched: () => void = () => {};

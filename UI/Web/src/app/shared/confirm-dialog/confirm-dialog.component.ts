@@ -1,4 +1,4 @@
-import {Component, inject, OnInit} from '@angular/core';
+import {Component, inject, OnInit, ChangeDetectionStrategy} from '@angular/core';
 import {NgbActiveModal} from '@ng-bootstrap/ng-bootstrap';
 import {ConfirmButton} from './_models/confirm-button';
 import {ConfirmConfig} from './_models/confirm-config';
@@ -6,12 +6,14 @@ import {SafeHtmlPipe} from "../../_pipes/safe-html.pipe";
 import {TranslocoDirective} from "@jsverse/transloco";
 import {ConfirmTranslatePipe} from "../../_pipes/confirm-translate.pipe";
 import {FormControl, FormGroup, ReactiveFormsModule} from "@angular/forms";
+import {FormFieldDirective} from "../../_directives/form-field.directive";
 
 @Component({
     selector: 'app-confirm-dialog',
-  imports: [SafeHtmlPipe, TranslocoDirective, ConfirmTranslatePipe, ReactiveFormsModule],
+  imports: [SafeHtmlPipe, TranslocoDirective, ConfirmTranslatePipe, ReactiveFormsModule, FormFieldDirective],
     templateUrl: './confirm-dialog.component.html',
     styleUrls: ['./confirm-dialog.component.scss'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     host: {
       '[class]': 'hostClass',
     }

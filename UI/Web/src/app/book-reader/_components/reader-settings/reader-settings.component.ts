@@ -1,11 +1,6 @@
-import {NgClass, NgStyle, NgTemplateOutlet, TitleCasePipe} from '@angular/common';
+import {NgClass, NgStyle, NgTemplateOutlet, PercentPipe} from '@angular/common';
 import {ChangeDetectionStrategy, ChangeDetectorRef, Component, inject, Input, OnInit, Signal} from '@angular/core';
 import {ReactiveFormsModule} from '@angular/forms';
-import {BookPageLayoutMode} from 'src/app/_models/readers/book-page-layout-mode';
-import {BookTheme} from 'src/app/_models/preferences/book-theme';
-import {ReadingDirection} from 'src/app/_models/preferences/reading-direction';
-import {WritingStyle} from 'src/app/_models/preferences/writing-style';
-import {ThemeProvider} from 'src/app/_models/preferences/site-theme';
 import {BookBlackTheme} from '../../_models/book-black-theme';
 import {BookDarkTheme} from '../../_models/book-dark-theme';
 import {BookWhiteTheme} from '../../_models/book-white-theme';
@@ -24,6 +19,11 @@ import {ReadingProfile, ReadingProfileKind} from "../../../_models/preferences/r
 import {BookReadingProfileFormGroup, EpubReaderSettingsService} from "../../../_services/epub-reader-settings.service";
 import {EpubFont, FontProvider} from "../../../_models/preferences/epub-font";
 import {EpubFontTitlePipe} from "../../../_pipes/epub-font-title.pipe";
+import {ThemeProvider} from "../../../_models/preferences/site-theme";
+import {BookTheme} from "../../../_models/preferences/book-theme";
+import {ReadingDirection} from "../../../_models/preferences/reading-direction";
+import {WritingStyle} from "../../../_models/preferences/writing-style";
+import {BookPageLayoutMode} from "../../../_models/readers/book-page-layout-mode";
 
 /**
  * Used for book reader. Do not use for other components
@@ -86,7 +86,7 @@ export const bookColorThemes = [
     changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [ReactiveFormsModule, NgbAccordionDirective, NgbAccordionItem, NgbAccordionHeader, NgbAccordionButton,
     NgbAccordionCollapse, NgbAccordionBody, NgbTooltip, NgTemplateOutlet, NgClass, NgStyle,
-    TitleCasePipe, TranslocoDirective, EpubFontTitlePipe]
+    TranslocoDirective, EpubFontTitlePipe, PercentPipe]
 })
 export class ReaderSettingsComponent implements OnInit {
 
